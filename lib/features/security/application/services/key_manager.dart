@@ -98,6 +98,44 @@ class KeyManager {
 
     return await _ed25519.verify(data, signature: signature);
   }
+
+  /// 从种子恢复密钥对
+  Future<DeviceKeyPair> recoverFromSeed(List<int> seed) async {
+    if (seed.length != 32) {
+      throw InvalidMnemonicException('种子长度必须为32字节');
+    }
+
+    // 1. 从种子生成密钥对
+    final keyPair = await _ed25519.newKeyPairFromSeed(seed);
+    final publicKey = await keyPair.extractPublicKey();
+    final privateKeyBytes = await keyPair.extractPrivateKeyBytes();
+
+    // 2. 存储到安全存储
+    await _secureStorage.write(
+      key: 'device_private_key',
+      value: base64Encode(privateKeyBytes),
+      iOptions: const IOSOptions(
+        accessibility: KeychainAccessibility.unlocked_this_device,
+      ),
+      aOptions: const AndroidOptions(
+        encryptedSharedPreferences: true,
+      ),
+    );
+
+    await _secureStorage.write(
+      key: 'device_public_key',
+      value: base64Encode(publicKey.bytes),
+    );
+
+    final deviceId = _generateDeviceId(publicKey.bytes);
+    await _secureStorage.write(key: 'device_id', value: deviceId);
+
+    return DeviceKeyPair(
+      publicKey: base64Encode(publicKey.bytes),
+      deviceId: deviceId,
+      createdAt: DateTime.now(),
+    );
+  }
 }
 
 // 异常类
