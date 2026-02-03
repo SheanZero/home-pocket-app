@@ -126,6 +126,9 @@ lib/generated/
 .temp/
 scratchpad/
 
+# Git worktrees
+.worktrees/
+
 # OS
 .DS_Store
 
