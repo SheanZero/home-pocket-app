@@ -800,11 +800,37 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+  /// 数据库密钥缓存（避免重复派生）
+  ///
+  /// 安全说明：
+  /// 1. 数据库密钥是从主密钥确定性派生的，每次派生结果相同
+  /// 2. 使用缓存避免不必要的HKDF计算，提升性能
+  /// 3. 缓存存储在内存中，应用关闭后自动清除
+  /// 4. 密钥轮换时需要调用clearKeyCache()清除缓存
+  static String? _cachedDbKey;
+
   /// 获取数据库密钥
   static Future<String> _getDatabaseKey() async {
+    // ✅ 使用缓存，避免每次都派生密钥
+    // 数据库密钥是确定性的，从主密钥+固定salt派生，结果不变
+    if (_cachedDbKey != null) return _cachedDbKey!;
+
     final keyManager = KeyManager.instance;
     final key = await keyManager.getDatabaseKey();
+
+    // 缓存密钥（应用运行期间有效）
+    _cachedDbKey = key;
     return key;
+  }
+
+  /// 清除密钥缓存（用于密钥轮换）
+  ///
+  /// 使用场景：
+  /// 1. 密钥轮换操作后
+  /// 2. 用户重新登录后
+  /// 3. Recovery Kit恢复后
+  static void clearKeyCache() {
+    _cachedDbKey = null;
   }
 }
 ```

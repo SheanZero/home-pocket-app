@@ -39,12 +39,13 @@
 
 | ADR | 文件名 | 决策内容 | 状态 |
 |-----|--------|---------|------|
-| ADR-001 | [14_ADR_State_Management.md](./14_ADR_State_Management.md) | 选择Riverpod作为状态管理方案 | ✅ 完成 |
-| ADR-002 | [15_ADR_Database.md](./15_ADR_Database.md) | 选择Drift+SQLCipher作为数据库 | ✅ 完成 |
-| ADR-003 | [16_ADR_Encryption.md](./16_ADR_Encryption.md) | 多层加密策略设计 | ✅ 完成 |
-| ADR-004 | [17_ADR_CRDT.md](./17_ADR_CRDT.md) | CRDT同步协议选型 | ✅ 完成 |
-| ADR-005 | [18_ADR_OCR_ML.md](./18_ADR_OCR_ML.md) | OCR和ML技术选型 | ✅ 完成 |
-| ADR-006 | [ADR-006_Layer_Responsibilities.md](./ADR-006_Layer_Responsibilities.md) | Clean Architecture层次职责划分 | ✅ 完成 |
+| ADR-001 | [ADR-001_State_Management.md](./ADR-001_State_Management.md) | 选择Riverpod作为状态管理方案 | ✅ 已接受 |
+| ADR-002 | [ADR-002_Database_Solution.md](./ADR-002_Database_Solution.md) | 选择Drift+SQLCipher作为数据库 | ✅ 已接受 |
+| ADR-003 | [ADR-003_Multi_Layer_Encryption.md](./ADR-003_Multi_Layer_Encryption.md) | 多层加密策略设计 | ✅ 已接受 |
+| ADR-004 | [ADR-004_CRDT_Sync.md](./ADR-004_CRDT_Sync.md) | CRDT同步协议选型 | ✅ 已接受 |
+| ADR-005 | [ADR-005_OCR_ML_Tech.md](./ADR-005_OCR_ML_Tech.md) | OCR和ML技术选型 | ✅ 已接受 |
+| ADR-006 | [ADR-006_Key_Derivation_Security.md](./ADR-006_Key_Derivation_Security.md) | 密钥派生安全修复 (HKDF+缓存) | ✅ 已实施 |
+| ADR-INDEX | [ADR-INDEX.md](./ADR-INDEX.md) | 所有ADR的完整索引 | ✅ 完成 |
 
 ---
 
