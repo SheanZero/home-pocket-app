@@ -9,7 +9,7 @@ class AppConstants {
 
   // Storage Keys
   static const String currentBookIdKey = 'current_book_id';
-  static const String themeM Mode key = 'theme_mode';
+  static const String themeModeKey = 'theme_mode';
   static const String localeKey = 'locale';
 
   // Default Values
