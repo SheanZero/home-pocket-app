@@ -1,11 +1,37 @@
 # Claude Code Rules for Home Pocket Project
 
-## 架构文档管理规则 (arch2/)
+## 开发前必读规则 (CRITICAL)
+
+**在开始任何功能开发之前，MUST 遵循以下步骤：**
+
+1. **Review 架构文档 (doc/arch/)**
+   - 阅读相关的 ARCH 文档（整体架构）
+   - 阅读相关的 MOD 文档（模块规范）
+   - 阅读相关的 ADR 文档（架构决策）
+
+2. **Review 需求文档**
+   - 检查 PRD (Product Requirements Document)
+   - 检查 BRD (Business Requirements Document)
+   - 检查开发计划 (PROJECT_DEVELOPMENT_PLAN.md)
+
+3. **确认理解后再开始编码**
+   - 确保理解架构约束和设计模式
+   - 确保理解模块接口和依赖关系
+   - 确保理解技术决策的上下文和后果
+
+**违反此规则的后果：**
+- 可能违反架构设计原则
+- 可能引入不一致的实现
+- 可能需要大量返工
+
+---
+
+## 架构文档管理规则 (doc/arch/)
 
 ### 目录结构
 
 ```
-arch2/
+doc/arch/
 ├── 01-core-architecture/    # 整体架构文档
 ├── 02-module-specs/          # 模块功能架构文档
 ├── 03-adr/                   # 架构决策记录 (ADR)
@@ -61,13 +87,13 @@ arch2/
 
 ```bash
 # 检查整体架构文档的最大编号
-ls -1 arch2/01-core-architecture/ARCH-*.md | sort | tail -1
+ls -1 doc/arch/01-core-architecture/ARCH-*.md | sort | tail -1
 
 # 检查模块功能文档的最大编号
-ls -1 arch2/02-module-specs/MOD-*.md | sort | tail -1
+ls -1 doc/arch/02-module-specs/MOD-*.md | sort | tail -1
 
 # 检查 ADR 文档的最大编号
-ls -1 arch2/03-adr/ADR-*.md | sort | tail -1
+ls -1 doc/arch/03-adr/ADR-*.md | sort | tail -1
 ```
 
 #### Step 3: 分配新编号
@@ -158,13 +184,13 @@ ls -1 arch2/03-adr/ADR-*.md | sort | tail -1
 # 示例：添加新的 ADR 文档
 
 # Step 1: 检查现有 ADR 文档
-ls -1 arch2/03-adr/ADR-*.md
+ls -1 doc/arch/03-adr/ADR-*.md
 
 # 输出:
-# arch2/03-adr/ADR-000_INDEX.md
-# arch2/03-adr/ADR-001_State_Management.md
+# doc/arch/03-adr/ADR-000_INDEX.md
+# doc/arch/03-adr/ADR-001_State_Management.md
 # ...
-# arch2/03-adr/ADR-007_Layer_Responsibilities.md
+# doc/arch/03-adr/ADR-007_Layer_Responsibilities.md
 
 # Step 2: 确定最大编号是 007
 # Step 3: 新文档使用编号 008
@@ -172,19 +198,23 @@ ls -1 arch2/03-adr/ADR-*.md
 # Step 5: 更新 ADR-000_INDEX.md
 
 # Step 6: 验证
-ls -1 arch2/03-adr/ADR-*.md
+ls -1 doc/arch/03-adr/ADR-*.md
 ```
 
 ### 版本控制
 
 - 所有架构文档变更必须通过 Git 进行版本控制
-- 提交信息格式：`docs(arch2): 简短描述`
-  - 示例: `docs(arch2): add ADR-008 for authentication strategy`
-  - 示例: `docs(arch2): update ARCH-002 data architecture`
-  - 示例: `docs(arch2): deprecate ADR-003 in favor of ADR-010`
+- 提交信息格式：`docs(arch): 简短描述`
+  - 示例: `docs(arch): add ADR-008 for authentication strategy`
+  - 示例: `docs(arch): update ARCH-002 data architecture`
+  - 示例: `docs(arch): deprecate ADR-003 in favor of ADR-010`
 
 ---
 
-**规则版本:** 1.0
+**规则版本:** 2.0
 **创建日期:** 2026-02-03
-**适用范围:** arch2/ 目录下的所有架构文档
+**最后更新:** 2026-02-03
+**更新内容:**
+- 迁移架构文档目录从 arch2/ 到 doc/arch/
+- 添加开发前必读规则（CRITICAL）
+**适用范围:** doc/arch/ 目录下的所有架构文档

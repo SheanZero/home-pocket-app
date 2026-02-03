@@ -176,11 +176,11 @@ Follow the development plan in `worklog/PROJECT_DEVELOPMENT_PLAN.md`:
 
 ## Architecture Documentation
 
-**IMPORTANT:** All architecture decisions are documented in `arch2/`:
+**IMPORTANT:** All architecture decisions are documented in `doc/arch/`:
 
 ### Directory Structure
 ```
-arch2/
+doc/arch/
 ├── 01-core-architecture/    # ARCH-000 to ARCH-009 (10 docs)
 ├── 02-module-specs/          # MOD-001 to MOD-009 (9 module specs)
 └── 03-adr/                   # Architecture Decision Records
@@ -192,9 +192,9 @@ arch2/
 
 1. **Check existing files** to find max number:
    ```bash
-   ls -1 arch2/01-core-architecture/ARCH-*.md | sort | tail -1
-   ls -1 arch2/02-module-specs/MOD-*.md | sort | tail -1
-   ls -1 arch2/03-adr/ADR-*.md | sort | tail -1
+   ls -1 doc/arch/01-core-architecture/ARCH-*.md | sort | tail -1
+   ls -1 doc/arch/02-module-specs/MOD-*.md | sort | tail -1
+   ls -1 doc/arch/03-adr/ADR-*.md | sort | tail -1
    ```
 
 2. **Use next sequential number** (e.g., if max is ARCH-009, use ARCH-010)
@@ -332,10 +332,10 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 
 ## Key References
 
-- **Architecture Guide:** `arch2/01-core-architecture/ARCH-001_Complete_Guide.md`
-- **Data Architecture:** `arch2/01-core-architecture/ARCH-002_Data_Architecture.md`
-- **Security Architecture:** `arch2/01-core-architecture/ARCH-003_Security_Architecture.md`
-- **State Management:** `arch2/01-core-architecture/ARCH-004_State_Management.md`
+- **Architecture Guide:** `doc/arch/01-core-architecture/ARCH-001_Complete_Guide.md`
+- **Data Architecture:** `doc/arch/01-core-architecture/ARCH-002_Data_Architecture.md`
+- **Security Architecture:** `doc/arch/01-core-architecture/ARCH-003_Security_Architecture.md`
+- **State Management:** `doc/arch/01-core-architecture/ARCH-004_State_Management.md`
 - **Development Plan:** `worklog/PROJECT_DEVELOPMENT_PLAN.md`
 - **Project Structure:** `FLUTTER_PROJECT_STRUCTURE.md`
 - **Quick Start:** `QUICKSTART.md`
