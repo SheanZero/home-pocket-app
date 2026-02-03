@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/warm_japanese_theme.dart';
-import 'generated/l10n.dart';
+import 'generated/app_localizations.dart';
 
 class HomePocketApp extends ConsumerWidget {
   const HomePocketApp({super.key});
@@ -29,7 +29,7 @@ class HomePocketApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: S.delegate.supportedLocales,
+      supportedLocales: S.supportedLocales,
       locale: const Locale('ja'), // Default to Japanese
 
       // Router
