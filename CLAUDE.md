@@ -153,7 +153,7 @@ Generated files (`.g.dart`, `.freezed.dart`) are gitignored.
 
 ## Module Development Priority
 
-Follow the development plan in `worklog/PROJECT_DEVELOPMENT_PLAN.md`:
+Follow the development plan in `doc/worklog/PROJECT_DEVELOPMENT_PLAN.md`:
 
 **Phase 1 (Weeks 1-2): Infrastructure**
 - MOD-006: Security & Privacy (10 days) - **START HERE**
@@ -336,7 +336,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 - **Data Architecture:** `doc/arch/01-core-architecture/ARCH-002_Data_Architecture.md`
 - **Security Architecture:** `doc/arch/01-core-architecture/ARCH-003_Security_Architecture.md`
 - **State Management:** `doc/arch/01-core-architecture/ARCH-004_State_Management.md`
-- **Development Plan:** `worklog/PROJECT_DEVELOPMENT_PLAN.md`
+- **Development Plan:** `doc/worklog/PROJECT_DEVELOPMENT_PLAN.md`
 - **Project Structure:** `FLUTTER_PROJECT_STRUCTURE.md`
 - **Quick Start:** `QUICKSTART.md`
 
