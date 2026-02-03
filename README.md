@@ -1,11 +1,11 @@
 # Home Pocket (まもる家計簿)
 
-**[中文](README.md) | [English](README_en.md) | [日本語](README_ja.md)**
+**[English](README.md) | [中文](README_zh.md) | [日本語](README_ja.md)**
 
-> 把为钱吵架变成一起玩游戏 | Turn money arguments into family games
+> Turn money arguments into family games | 把为钱吵架变成一起玩游戏
 
-**隐私优先、防篡改、趣味化的日本家庭记账应用**
-*Privacy-first, tamper-proof, gamified family accounting app for Japanese households*
+**Privacy-first, tamper-proof, gamified family accounting app for Japanese households**
+*隐私优先、防篡改、趣味化的日本家庭记账应用*
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Flutter](https://img.shields.io/badge/Flutter-3.16+-02569B?logo=flutter)](https://flutter.dev)
@@ -13,360 +13,360 @@
 
 ---
 
-## 📖 目录 | Table of Contents
+## 📖 Table of Contents
 
-- [产品愿景](#-产品愿景)
-- [核心差异化](#-核心差异化)
-- [目标用户](#-目标用户)
-- [核心特性](#-核心特性)
-- [技术架构](#️-技术架构)
-- [快速开始](#-快速开始)
-- [项目文档](#-项目文档)
-- [开源策略](#-开源策略)
+- [Product Vision](#-product-vision)
+- [Core Differentiation](#-core-differentiation)
+- [Target Users](#-target-users)
+- [Core Features](#-core-features)
+- [Technical Architecture](#️-technical-architecture)
+- [Quick Start](#-quick-start)
+- [Project Documentation](#-project-documentation)
+- [Open Source Strategy](#-open-source-strategy)
 
 ---
 
-## 🎯 产品愿景
+## 🎯 Product Vision
 
-成为家庭财务信任与欢乐的守护者，让每一次记账都成为家庭互动的美好瞬间。
+To become the guardian of family financial trust and joy, transforming every accounting moment into a beautiful family interaction.
 
 
-### 产品原则
+### Product Principles
 
-| 原则 | 说明 | 体现 |
+| Principle | Description | Implementation |
 |------|------|------|
-| **隐私至上** | 用户数据只属于用户 | E2EE、本地优先、无账号体系 |
-| **诚实透明** | 家庭成员间无法隐藏交易 | 区块链风格哈希链防篡改 |
-| **温暖有趣** | 记账是快乐的事 | 游戏化 |
-| **尊重空间** | 个人需要私密领域 | 灵魂账户、互不侵犯条约 |
-| **开源开放** | 代码完全透明可审计 | Apache 2.0开源许可 |
+| **Privacy First** | User data belongs only to users | E2EE, local-first, no account system |
+| **Honesty & Transparency** | Family members cannot hide transactions | Blockchain-style hash chain for tamper-proofing |
+| **Warmth & Fun** | Accounting should be enjoyable | Gamification |
+| **Respect for Space** | Individuals need private domains | Soul accounts, mutual non-aggression treaty |
+| **Open & Transparent** | Code is fully transparent and auditable | Apache 2.0 open source license |
 
 ---
 
-## 🌟 核心差异化
+## 🌟 Core Differentiation
 
-### 市场定位
-**Home Pocket 的位置：** 高隐私 + 适度自动化 + 趣味化
+### Market Positioning
+**Home Pocket's Position:** High Privacy + Moderate Automation + Gamification
 
-| 维度 | 竞品现状 | Home Pocket 差异化 |
+| Dimension | Competitor Status | Home Pocket Differentiation |
 |------|---------|-------------------|
-| **信任** | 云端存储，公司可见数据 | E2EE加密，防篡改哈希链 |
-| **体验** | 功能导向，枯燥记账 | 游戏化，社交货币式反馈 |
-| **关系** | 监控式共享 | 尊重隐私的家庭协作 |
-| **文化** | 通用设计 | 深度融入日本文化（Kakeibo、Omikuji、推し活） |
+| **Trust** | Cloud storage, companies can access data | E2EE encryption, tamper-proof hash chain |
+| **Experience** | Feature-oriented, tedious accounting | Gamification, social currency-style feedback |
+| **Relationships** | Surveillance-style sharing | Privacy-respecting family collaboration |
+| **Culture** | Generic design | Deep integration with Japanese culture (Kakeibo, Omikuji, Oshikatsu) |
 
 ---
 
-## 👥 目标用户
+## 👥 Target Users
 
-### 主要用户画像 A：夫妻用户 "关系守护者" (Primary Target)
-| 属性 | 描述 |
+### Primary User Persona A: Couple Users "Relationship Guardians" (Primary Target)
+| Attribute | Description |
 |------|------|
-| **人口统计** | 25-50岁，已婚或同居伴侣 |
-| **痛点** | 经济问题易引发矛盾，缺乏财务透明但又需要个人空间 |
-| **动机** | 维持关系稳定，相互理解，在夫妻生活中保持私人空间 |
+| **Demographics** | 25-50 years old, married or cohabiting partners |
+| **Pain Points** | Financial issues easily trigger conflicts, lack financial transparency but need personal space |
+| **Motivation** | Maintain relationship stability, mutual understanding, preserve private space in married life |
 
-**典型场景：**
-> 田中夫妇（35岁+32岁）：结婚3年，都有全职工作。两人希望共同管理家庭开支，但也想保留各自的"小金库"用于个人爱好。曾因为不了解对方的消费习惯产生过小摩擦，希望找到透明与隐私的平衡。
+**Typical Scenario:**
+> The Tanaka couple (35+32 years old): Married for 3 years, both with full-time jobs. They want to jointly manage household expenses but also want to keep their own "small treasury" for personal hobbies. They've had minor friction due to not understanding each other's spending habits and hope to find a balance between transparency and privacy.
 
-### 用户画像 B：单人用户 "爱好经营者"
-| 属性 | 描述 |
+### User Persona B: Single Users "Hobby Managers"
+| Attribute | Description |
 |------|------|
-| **人口统计** | 25-45岁，单身或暂未共同理财 |
-| **痛点** | 爱好消费缺乏规划，容易冲动消费导致月底紧张 |
-| **动机** | 通过记账让自己的爱好持续健康发展，平衡生存与灵魂 |
+| **Demographics** | 25-45 years old, single or not yet managing finances jointly |
+| **Pain Points** | Hobby spending lacks planning, prone to impulse purchases leading to end-of-month stress |
+| **Motivation** | Use accounting to sustain hobbies healthily, balance survival and soul |
 
 
 ---
 
-## ✨ 核心特性
+## ✨ Core Features
 
-### 🔐 多层加密防护
+### 🔐 Multi-Layer Encryption Protection
 
-**4层安全架构:**
-1. **Layer 1: 生物识别锁** - Face ID / Touch ID / 指纹 / PIN码
-2. **Layer 2: 字段加密** - ChaCha20-Poly1305 (AEAD) 加密敏感字段
-3. **Layer 3: 数据库加密** - SQLCipher AES-256-CBC，256,000次PBKDF2
-4. **Layer 4: 传输加密** - TLS 1.3 + Ed25519端到端加密同步
+**4-Layer Security Architecture:**
+1. **Layer 1: Biometric Lock** - Face ID / Touch ID / Fingerprint / PIN Code
+2. **Layer 2: Field Encryption** - ChaCha20-Poly1305 (AEAD) encrypts sensitive fields
+3. **Layer 3: Database Encryption** - SQLCipher AES-256-CBC, 256,000 PBKDF2 iterations
+4. **Layer 4: Transport Encryption** - TLS 1.3 + Ed25519 end-to-end encrypted sync
 
-**密钥管理:**
-- Ed25519 设备密钥对
-- BIP39 24词恢复助记词（Recovery Kit）
-- HKDF 密钥派生与缓存
-- 可选的密钥导出与跨设备导入
+**Key Management:**
+- Ed25519 device key pairs
+- BIP39 24-word recovery mnemonic (Recovery Kit)
+- HKDF key derivation and caching
+- Optional key export and cross-device import
 
-### 📊 双轨账本系统
+### 📊 Dual Ledger System
 
-**核心概念：区分"生存"与"灵魂"**
+**Core Concept: Distinguishing "Survival" and "Soul"**
 
-- **生存账本 (Survival Ledger)** 🟢
-  - 日常必需开支（食物、住房、交通、医疗）
-  - 分类：食品、住房、交通、水电、通讯、日用品
-  - 主题：和风治愈风格（温暖米色+绿色）
+- **Survival Ledger** 🟢
+  - Daily necessities (food, housing, transportation, healthcare)
+  - Categories: Food, Housing, Transportation, Utilities, Communication, Daily Goods
+  - Theme: Healing Japanese style (warm beige + green)
 
-- **灵魂账本 (Soul Ledger)** 🟣
-  - 自我投资与享乐消费（兴趣、娱乐、学习、社交）
-  - 分类：兴趣爱好、娱乐、学习、社交、旅行、推し活
-  - 主题：赛博可爱风格（渐变紫+粒子特效）
-  - **特殊功能：** 灵魂消费庆祝动画（粒子爆发+正向文案）
+- **Soul Ledger** 🟣
+  - Self-investment and pleasure spending (hobbies, entertainment, learning, social)
+  - Categories: Hobbies, Entertainment, Learning, Social, Travel, Oshikatsu
+  - Theme: Cyber-cute style (gradient purple + particle effects)
+  - **Special Feature:** Soul spending celebration animations (particle burst + positive messages)
 
-**3层智能分类引擎:**
-1. **规则引擎** - 关键词匹配（准确率 ~70%）
-2. **商户数据库** - 500+ 日本商户映射（准确率 ~85%）
-3. **ML分类器** - TensorFlow Lite模型（准确率 ~85%+）
+**3-Layer Intelligent Classification Engine:**
+1. **Rule Engine** - Keyword matching (~70% accuracy)
+2. **Merchant Database** - 500+ Japanese merchant mappings (~85% accuracy)
+3. **ML Classifier** - TensorFlow Lite model (~85%+ accuracy)
 
-### 🔄 P2P家庭同步
+### 🔄 P2P Family Sync
 
-**无需中心服务器的设备间同步:**
-- **配对方式：** QR码面对面扫描（MVP）/ 远程短码配对（V1.0）
-- **同步协议：** 蓝牙 / NFC / 本地WiFi Direct
-- **冲突解决：** CRDT (Yjs) 自动合并 + 用户干预
-- **家庭内部转账：** 2阶段提交（2PC）确保原子性
-- **离线支持：** 离线队列，网络恢复后自动同步
+**Device-to-device sync without central server:**
+- **Pairing Methods:** QR code face-to-face scanning (MVP) / Remote short-code pairing (V1.0)
+- **Sync Protocol:** Bluetooth / NFC / Local WiFi Direct
+- **Conflict Resolution:** CRDT (Yjs) automatic merge + user intervention
+- **Intra-family Transfers:** 2-Phase Commit (2PC) ensures atomicity
+- **Offline Support:** Offline queue, automatic sync after network recovery
 
-### 📸 OCR智能扫描
+### 📸 OCR Intelligent Scanning
 
-**本地隐私OCR（无需联网）:**
-- **引擎：** ML Kit (Android) / Vision Framework (iOS)
-- **识别目标：** 金额 >90%、日期 >85%、商户 >80%
-- **流程：** 图像预处理 → OCR识别 → 信息提取 → 自动分类 → AES-GCM加密存储
-- **商户自动分类：** 基于500+日本商户数据库
-- **用户确认界面：** 可编辑的OCR结果
+**Local Privacy OCR (No Internet Required):**
+- **Engine:** ML Kit (Android) / Vision Framework (iOS)
+- **Recognition Targets:** Amount >90%, Date >85%, Merchant >80%
+- **Workflow:** Image preprocessing → OCR recognition → Information extraction → Auto-classification → AES-GCM encrypted storage
+- **Merchant Auto-classification:** Based on 500+ Japanese merchant database
+- **User Confirmation Interface:** Editable OCR results
 
-### 🎮 趣味化功能 (Gamification)
+### 🎮 Gamification Features
 
-**C01: 趣味换算器 (Ohtani Converter)**
-- 将任意金额转换为趣味单位（如"东京到大阪 5%新干线费用"、"3.5份拉面"）
-- OTA热更新单位库（紧跟时事热点）
-- 社交分享功能
+**C01: Fun Converter (Ohtani Converter)**
+- Convert any amount into fun units (e.g., "5% of Tokyo-Osaka Shinkansen fare", "3.5 bowls of ramen")
+- OTA hot-update unit library (follow current events)
+- Social sharing functionality
 
 
-### ⛓️ 哈希链完整性验证
+### ⛓️ Hash Chain Integrity Verification
 
-**区块链风格防篡改保护:**
-- 每笔交易包含前一笔交易的哈希值
-- 增量验证算法（100-2000x性能提升 vs 全链验证）
-- 可视化审计报告（显示哈希链完整性）
-- PDF导出审计日志
+**Blockchain-style Tamper-proof Protection:**
+- Each transaction contains the hash of the previous transaction
+- Incremental verification algorithm (100-2000x performance improvement vs. full chain verification)
+- Visual audit report (displays hash chain integrity)
+- PDF export audit log
 
-### 🌐 完全离线可用
+### 🌐 Fully Offline Capable
 
-- 零依赖云服务
-- 完整的本地数据存储（SQLCipher加密数据库）
-- P2P设备间直接同步（无需中间服务器）
-- 所有ML模型本地化（TensorFlow Lite）
+- Zero dependency on cloud services
+- Complete local data storage (SQLCipher encrypted database)
+- P2P direct device sync (no intermediary server needed)
+- All ML models localized (TensorFlow Lite)
 
 ---
 
-## 🏗️ 技术架构
+## 🏗️ Technical Architecture
 
 
-### 项目结构
+### Project Structure
 
 ```
 lib/
-├── core/                      # 核心配置
-│   ├── config/               # 应用配置
-│   ├── constants/            # 常量定义
-│   ├── router/               # GoRouter路由配置
-│   └── theme/                # 双主题系统
+├── core/                      # Core configuration
+│   ├── config/               # App configuration
+│   ├── constants/            # Constants definition
+│   ├── router/               # GoRouter routing configuration
+│   └── theme/                # Dual theme system
 │
-├── features/                  # 功能模块 (Clean Architecture)
-│   ├── accounting/           # MOD-001: 基础记账
-│   │   ├── presentation/     # UI层 (screens, widgets, providers)
-│   │   ├── application/      # 业务逻辑层 (use cases, services)
-│   │   ├── domain/           # 领域层 (models, repository interfaces)
-│   │   └── data/             # 数据层 (repository impl, DAOs, DTOs)
-│   ├── dual_ledger/          # MOD-003: 双轨账本
-│   ├── family_sync/          # MOD-004: 家庭同步
-│   ├── security/             # MOD-006: 安全模块
-│   ├── analytics/            # MOD-007: 数据分析
-│   ├── settings/             # MOD-008: 设置管理
-│   └── ocr/                  # MOD-005: OCR扫描
+├── features/                  # Feature modules (Clean Architecture)
+│   ├── accounting/           # MOD-001: Basic Accounting
+│   │   ├── presentation/     # UI layer (screens, widgets, providers)
+│   │   ├── application/      # Business logic layer (use cases, services)
+│   │   ├── domain/           # Domain layer (models, repository interfaces)
+│   │   └── data/             # Data layer (repository impl, DAOs, DTOs)
+│   ├── dual_ledger/          # MOD-003: Dual Ledger
+│   ├── family_sync/          # MOD-004: Family Sync
+│   ├── security/             # MOD-006: Security Module
+│   ├── analytics/            # MOD-007: Data Analytics
+│   ├── settings/             # MOD-008: Settings Management
+│   └── ocr/                  # MOD-005: OCR Scanning
 │
-├── shared/                    # 共享组件
-│   ├── widgets/              # 可复用UI组件
-│   ├── extensions/           # Dart扩展方法
-│   └── utils/                # 工具函数
+├── shared/                    # Shared components
+│   ├── widgets/              # Reusable UI components
+│   ├── extensions/           # Dart extension methods
+│   └── utils/                # Utility functions
 │
-└── l10n/                     # 国际化 (ja, zh, en)
+└── l10n/                     # Internationalization (ja, zh, en)
 ```
 
-### 技术栈
+### Technology Stack
 
-| 技术 | 版本 | 用途 |
+| Technology | Version | Purpose |
 |------|------|------|
-| **Flutter** | 3.16+ | 跨平台UI框架 |
-| **Dart** | 3.2+ | 编程语言 |
-| **Riverpod** | 2.4+ | 状态管理 + 依赖注入 |
-| **Drift** | 2.14+ | 类型安全的数据库ORM |
-| **SQLCipher** | 0.6+ | AES-256数据库加密 |
-| **Freezed** | 2.4+ | 不可变数据模型 |
-| **GoRouter** | 13.0+ | 声明式路由导航 |
-| **Cryptography** | 2.5+ | ChaCha20-Poly1305加密 |
-| **PointyCastle** | 3.7+ | Ed25519密钥对 |
-| **ML Kit** | - | OCR文本识别 (Android) |
-| **Vision** | - | OCR文本识别 (iOS) |
-| **TFLite** | 0.10+ | ML分类模型 |
-| **Yjs** | - | CRDT同步协议 |
-| **fl_chart** | 0.65+ | 数据可视化图表 |
-| **Lottie** | 3.0+ | 动画效果 |
+| **Flutter** | 3.16+ | Cross-platform UI framework |
+| **Dart** | 3.2+ | Programming language |
+| **Riverpod** | 2.4+ | State management + dependency injection |
+| **Drift** | 2.14+ | Type-safe database ORM |
+| **SQLCipher** | 0.6+ | AES-256 database encryption |
+| **Freezed** | 2.4+ | Immutable data models |
+| **GoRouter** | 13.0+ | Declarative routing navigation |
+| **Cryptography** | 2.5+ | ChaCha20-Poly1305 encryption |
+| **PointyCastle** | 3.7+ | Ed25519 key pairs |
+| **ML Kit** | - | OCR text recognition (Android) |
+| **Vision** | - | OCR text recognition (iOS) |
+| **TFLite** | 0.10+ | ML classification model |
+| **Yjs** | - | CRDT sync protocol |
+| **fl_chart** | 0.65+ | Data visualization charts |
+| **Lottie** | 3.0+ | Animation effects |
 
-### 性能优化目标
+### Performance Optimization Goals
 
-- **增量余额更新:** 40-400x 性能提升 vs 全量重算
-- **增量哈希链验证:** 100-2000x 性能提升 vs 全链验证
-- **快速记账:** < 3秒完成交易录入
-- **UI流畅度:** 60 FPS 滚动
-- **分页加载:** 50-100 项/页
+- **Incremental Balance Updates:** 40-400x performance improvement vs. full recalculation
+- **Incremental Hash Chain Verification:** 100-2000x performance improvement vs. full chain verification
+- **Fast Accounting:** < 3 seconds to complete transaction entry
+- **UI Smoothness:** 60 FPS scrolling
+- **Pagination Loading:** 50-100 items/page
 
 ---
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 环境要求
+### Environment Requirements
 
 - Flutter 3.16.0+
 - Dart 3.2.0+
 - iOS 14+ / Android 7+ (API 24+)
 - Xcode 15+ (for iOS) / Android Studio (for Android)
 
-### 安装步骤
+### Installation Steps
 
 ```bash
-# 1. 克隆仓库
+# 1. Clone repository
 git clone https://github.com/your-org/home-pocket-app.git
 cd home-pocket-app
 
-# 2. 安装Flutter依赖
+# 2. Install Flutter dependencies
 flutter pub get
 
-# 3. 代码生成 (Riverpod, Freezed, Drift)
+# 3. Code generation (Riverpod, Freezed, Drift)
 flutter pub run build_runner build --delete-conflicting-outputs
 
-# 4. 生成多语言文件
+# 4. Generate localization files
 flutter gen-l10n
 
-# 5. 运行应用
+# 5. Run application
 flutter run
 
-# (可选) 持续监听代码变化
+# (Optional) Continuous watch for code changes
 flutter pub run build_runner watch
 ```
 
-### 开发命令
+### Development Commands
 
 ```bash
-# 代码分析
+# Code analysis
 flutter analyze
 
-# 格式化代码
+# Format code
 dart format .
 
-# 运行所有测试
+# Run all tests
 flutter test
 
-# 生成测试覆盖率报告
+# Generate test coverage report
 flutter test --coverage
 
-# 运行集成测试
+# Run integration tests
 flutter test integration_test/
 
-# 列出可用设备
+# List available devices
 flutter devices
 
-# 在特定设备运行
+# Run on specific device
 flutter run -d <device_id>
 ```
 
-**测试覆盖率要求:** ≥80%
+**Test Coverage Requirement:** ≥80%
 
-### iOS构建注意事项
+### iOS Build Notes
 
-如遇到SQLCipher冲突或ML Kit构建错误，请查看 [CLAUDE.md](CLAUDE.md) 的 iOS Build Configuration 章节。
+If you encounter SQLCipher conflicts or ML Kit build errors, please refer to the iOS Build Configuration section in [CLAUDE.md](CLAUDE.md).
 
 ---
 
-## 📖 项目文档
+## 📖 Project Documentation
 
-### 需求文档 (doc/requirement/)
-- **[BRD_Home_Pocket_Complete.md](doc/requirement/BRD_Home_Pocket_Complete.md)** - 商业需求文档
-- **[PRD_Index.md](doc/requirement/PRD_Index.md)** - PRD文档体系索引
-- **[PRD_MVP_Global.md](doc/requirement/PRD_MVP_Global.md)** - MVP全局产品需求
-- **[PRD_MVP_App.md](doc/requirement/PRD_MVP_App.md)** - App端总体PRD
-- **[PRD_Module_BasicAccounting.md](doc/requirement/PRD_Module_BasicAccounting.md)** - 基础记账模块详细设计
-- **[PRD_Modules_Summary.md](doc/requirement/PRD_Modules_Summary.md)** - 其他模块PRD框架
+### Requirements Documentation (doc/requirement/)
+- **[BRD_Home_Pocket_Complete.md](doc/requirement/BRD_Home_Pocket_Complete.md)** - Business Requirements Document
+- **[PRD_Index.md](doc/requirement/PRD_Index.md)** - PRD Document System Index
+- **[PRD_MVP_Global.md](doc/requirement/PRD_MVP_Global.md)** - MVP Global Product Requirements
+- **[PRD_MVP_App.md](doc/requirement/PRD_MVP_App.md)** - App-side Overall PRD
+- **[PRD_Module_BasicAccounting.md](doc/requirement/PRD_Module_BasicAccounting.md)** - Basic Accounting Module Detailed Design
+- **[PRD_Modules_Summary.md](doc/requirement/PRD_Modules_Summary.md)** - Other Module PRD Framework
 
-### 架构文档 (arch2/)
-- **[ARCH-001_Complete_Guide.md](arch2/01-core-architecture/ARCH-001_Complete_Guide.md)** - 完整技术指南
-- **[ARCH-002_Data_Architecture.md](arch2/01-core-architecture/ARCH-002_Data_Architecture.md)** - 数据库设计、加密策略
-- **[ARCH-003_Security_Architecture.md](arch2/01-core-architecture/ARCH-003_Security_Architecture.md)** - 多层加密、密钥管理
-- **[ARCH-004_State_Management.md](arch2/01-core-architecture/ARCH-004_State_Management.md)** - Riverpod最佳实践
-- **[ARCH-008_Layer_Clarification.md](arch2/01-core-architecture/ARCH-008_Layer_Clarification.md)** - Clean Architecture详解
-- **[模块规范](arch2/02-module-specs/)** - 各功能模块详细设计 (MOD-001 到 MOD-009)
-- **[ADR决策记录](arch2/03-adr/)** - 架构决策文档
+### Architecture Documentation (arch2/)
+- **[ARCH-001_Complete_Guide.md](arch2/01-core-architecture/ARCH-001_Complete_Guide.md)** - Complete Technical Guide
+- **[ARCH-002_Data_Architecture.md](arch2/01-core-architecture/ARCH-002_Data_Architecture.md)** - Database Design, Encryption Strategy
+- **[ARCH-003_Security_Architecture.md](arch2/01-core-architecture/ARCH-003_Security_Architecture.md)** - Multi-layer Encryption, Key Management
+- **[ARCH-004_State_Management.md](arch2/01-core-architecture/ARCH-004_State_Management.md)** - Riverpod Best Practices
+- **[ARCH-008_Layer_Clarification.md](arch2/01-core-architecture/ARCH-008_Layer_Clarification.md)** - Clean Architecture Explained
+- **[Module Specifications](arch2/02-module-specs/)** - Detailed design for each feature module (MOD-001 to MOD-009)
+- **[ADR Decision Records](arch2/03-adr/)** - Architecture Decision Records
 
-### 开发文档
-- **[PROJECT_DEVELOPMENT_PLAN.md](worklog/PROJECT_DEVELOPMENT_PLAN.md)** - 完整12周开发路线图
-- **[FLUTTER_PROJECT_STRUCTURE.md](FLUTTER_PROJECT_STRUCTURE.md)** - Flutter项目结构详解
-- **[QUICKSTART.md](QUICKSTART.md)** - 5分钟快速开始指南
-- **[CLAUDE.md](CLAUDE.md)** - Claude Code工作指南
+### Development Documentation
+- **[PROJECT_DEVELOPMENT_PLAN.md](worklog/PROJECT_DEVELOPMENT_PLAN.md)** - Complete 12-week Development Roadmap
+- **[FLUTTER_PROJECT_STRUCTURE.md](FLUTTER_PROJECT_STRUCTURE.md)** - Flutter Project Structure Explained
+- **[QUICKSTART.md](QUICKSTART.md)** - 5-minute Quick Start Guide
+- **[CLAUDE.md](CLAUDE.md)** - Claude Code Working Guide
 ---
 
-## 🌐 开源策略
+## 🌐 Open Source Strategy
 
-### 完全开源承诺
+### Fully Open Source Commitment
 
-**Home Pocket 采用完全开源模式：**
+**Home Pocket adopts a fully open source model:**
 
-- **许可证：** Apache License 2.0
-- **代码仓库：** GitHub公开仓库
-- **核心代码：** 客户端完全开源
-- **V1.0 Server：** Relay组件开源
-- **商业模式：** 通过增值服务（云同步、LLM增强）获取收入，而非代码闭源
+- **License:** Apache License 2.0
+- **Code Repository:** Public GitHub repository
+- **Core Code:** Client fully open source
+- **V1.0 Server:** Relay components open source
+- **Business Model:** Generate revenue through value-added services (cloud sync, LLM enhancement), not closed-source code
 
-### 开源的好处
+### Benefits of Open Source
 
-1. **增强信任：** 代码可审计，用户对隐私保护的信任
-2. **社区贡献：** 吸引开发者参与，加速功能迭代
-3. **技术品牌：** 建立技术口碑，提升市场认知
-4. **降低顾虑：** 消除用户对数据安全的担忧
+1. **Enhanced Trust:** Auditable code builds user trust in privacy protection
+2. **Community Contributions:** Attract developers to participate, accelerate feature iteration
+3. **Technical Brand:** Establish technical reputation, enhance market awareness
+4. **Reduce Concerns:** Eliminate user worries about data security
 
-### 社区参与
+### Community Participation
 
-我们欢迎所有形式的贡献：
-- 🐛 Bug报告
-- 💡 功能建议
-- 📝 文档改进
-- 🌐 多语言翻译
-- 🔧 代码贡献
+We welcome all forms of contributions:
+- 🐛 Bug reports
+- 💡 Feature suggestions
+- 📝 Documentation improvements
+- 🌐 Multi-language translations
+- 🔧 Code contributions
 ---
 
-## 📊 项目状态
+## 📊 Project Status
 
-**当前版本：** v0.1.0
-**开发阶段：** 🟡 Phase 1 - 基础设施层开发中
-**最后更新：** 2026-02-03
+**Current Version:** v0.1.0
+**Development Stage:** 🟡 Phase 1 - Infrastructure Layer in Development
+**Last Updated:** 2026-02-03
 
-### 开发进度
+### Development Progress
 
-- [x] 项目框架搭建
-- [x] Clean Architecture 5层结构
-- [x] 技术栈配置完成
-- [x] 代码生成配置
-- [x] 国际化配置
-- [x] iOS/Android平台支持
-- [ ] MOD-006: 安全模块（进行中）
-- [ ] MOD-001: 基础记账
-- [ ] MOD-003: 双轨账本
-- [ ] MOD-004: 家庭同步
+- [x] Project framework setup
+- [x] Clean Architecture 5-layer structure
+- [x] Technology stack configuration complete
+- [x] Code generation configuration
+- [x] Internationalization configuration
+- [x] iOS/Android platform support
+- [ ] MOD-006: Security Module (in progress)
+- [ ] MOD-001: Basic Accounting
+- [ ] MOD-003: Dual Ledger
+- [ ] MOD-004: Family Sync
 ---
 
-## 📜 许可证
+## 📜 License
 
-本项目采用 **Apache License 2.0** 开源许可证。
+This project is licensed under the **Apache License 2.0**.
 
-详情请查看 [LICENSE](LICENSE) 文件。
+For details, please see the [LICENSE](LICENSE) file.
 
 ```
 Copyright 2026 Home Pocket Team
@@ -386,33 +386,33 @@ limitations under the License.
 
 ---
 
-## 📞 联系方式
+## 📞 Contact
 
-- **项目仓库：** [GitHub](https://github.com/your-org/home-pocket-app)
-- **问题反馈：** [Issues](https://github.com/your-org/home-pocket-app/issues)
-- **讨论社区：** [Discussions](https://github.com/your-org/home-pocket-app/discussions)
-- **文档反馈：** 欢迎提交PR改进文档
-
----
-
-## 🙏 致谢
-
-特别感谢以下开源项目：
-
-- [Flutter](https://flutter.dev/) - Google的跨平台UI框架
-- [Riverpod](https://riverpod.dev/) - Remi Rousselet的状态管理方案
-- [Drift](https://drift.simonbinder.eu/) - Simon Binder的类型安全数据库
-- [SQLCipher](https://www.zetetic.net/sqlcipher/) - Zetetic的数据库加密
-- [Yjs](https://yjs.dev/) - Kevin Jahns的CRDT库
-- 所有贡献者和支持者 ❤️
+- **Project Repository:** [GitHub](https://github.com/your-org/home-pocket-app)
+- **Issue Feedback:** [Issues](https://github.com/your-org/home-pocket-app/issues)
+- **Discussion Community:** [Discussions](https://github.com/your-org/home-pocket-app/discussions)
+- **Documentation Feedback:** Welcome to submit PRs to improve documentation
 
 ---
 
-**让记账变得有趣，让家庭更加温暖！** 🏠💰✨
+## 🙏 Acknowledgments
+
+Special thanks to the following open source projects:
+
+- [Flutter](https://flutter.dev/) - Google's cross-platform UI framework
+- [Riverpod](https://riverpod.dev/) - Remi Rousselet's state management solution
+- [Drift](https://drift.simonbinder.eu/) - Simon Binder's type-safe database
+- [SQLCipher](https://www.zetetic.net/sqlcipher/) - Zetetic's database encryption
+- [Yjs](https://yjs.dev/) - Kevin Jahns' CRDT library
+- All contributors and supporters ❤️
+
+---
 
 **Make accounting fun, make families warmer!** 🏠💰✨
 
+**让记账变得有趣,让家庭更加温暖!** 🏠💰✨
+
 ---
 
-**更新日期：** 2026-02-03
-**文档版本：** 2.0
+**Updated:** 2026-02-03
+**Document Version:** 2.0

@@ -1,6 +1,6 @@
 # Home Pocket (まもる家計簿)
 
-**[中文](README.md) | [English](README_en.md) | [日本語](README_ja.md)**
+**[English](README.md) | [中文](README_zh.md) | [日本語](README_ja.md)**
 
 > お金の喧嘩を家族のゲームに変える | Turn money arguments into family games
 
