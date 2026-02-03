@@ -342,6 +342,46 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 
 ---
 
+## iOS Build Configuration
+
+**IMPORTANT:** The project uses SQLCipher for encryption, not regular SQLite3.
+
+**Dependencies:**
+- ✅ `sqlcipher_flutter_libs` (for encrypted database)
+- ❌ `sqlite3_flutter_libs` (DO NOT use - conflicts with SQLCipher)
+
+**Podfile Configuration:**
+The `ios/Podfile` includes a fix for ML Kit simulator builds:
+
+```ruby
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+
+    # Fix for ML Kit simulator build issue
+    target.build_configurations.each do |config|
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+    end
+  end
+end
+```
+
+**Troubleshooting iOS Build:**
+
+If you encounter "different definitions in different modules" error:
+```bash
+flutter clean
+cd ios && rm -rf Pods Podfile.lock .symlinks
+cd .. && flutter pub get
+cd ios && pod install
+```
+
+If you encounter "linking in object file built for iOS" (simulator issue):
+- Verify `ios/Podfile` has EXCLUDED_ARCHS fix (see above)
+- Run `cd ios && pod install && cd ..`
+
+---
+
 ## Common Pitfalls
 
 1. **Don't modify generated files** (`.g.dart`, `.freezed.dart`)
@@ -351,6 +391,8 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 5. **Don't add architecture docs without checking max number first**
 6. **Don't forget to update INDEX.md** when adding new architecture docs
 7. **Don't use `intl` version other than 0.20.2** (pinned by flutter_localizations)
+8. **Don't add `sqlite3_flutter_libs`** - use only `sqlcipher_flutter_libs` (conflicts!)
+9. **Don't modify `ios/Podfile` post_install** without preserving EXCLUDED_ARCHS fix
 
 ---
 
