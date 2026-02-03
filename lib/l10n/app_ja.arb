@@ -1,0 +1,21 @@
+{
+  "@@locale": "ja",
+  "appName": "Home Pocket",
+  "@appName": {
+    "description": "The application name"
+  },
+  "home": "ホーム",
+  "transactions": "取引",
+  "analytics": "分析",
+  "settings": "設定",
+  "newTransaction": "新しい取引",
+  "amount": "金額",
+  "category": "カテゴリー",
+  "note": "メモ",
+  "save": "保存",
+  "cancel": "キャンセル",
+  "delete": "削除",
+  "edit": "編集",
+  "survivalLedger": "生存帳簿",
+  "soulLedger": "魂の帳簿"
+}

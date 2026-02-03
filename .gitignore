@@ -106,9 +106,28 @@ unlinked_spec.ds
 
 # Coverage
 coverage/
+*.lcov
 
 # Symbols
 app.*.symbols
+
+# Generated code
+*.g.dart
+*.freezed.dart
+lib/generated/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Temporary files
+*.tmp
+.temp/
+scratchpad/
+
+# OS
+.DS_Store
 
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3

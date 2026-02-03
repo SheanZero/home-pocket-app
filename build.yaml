@@ -1,0 +1,47 @@
+targets:
+  $default:
+    builders:
+      riverpod_generator:
+        generate_for:
+          - lib/**/*.dart
+        options:
+          # Riverpod code generation options
+          riverpod_generator:
+            # Generate .g.dart files
+            output_extension: .g.dart
+
+      freezed:
+        generate_for:
+          - lib/**/*.dart
+        options:
+          # Freezed code generation options
+          freezed:
+            # Generate .freezed.dart files
+            output_extension: .freezed.dart
+
+      json_serializable:
+        generate_for:
+          - lib/**/*.dart
+        options:
+          # JSON serialization options
+          json_serializable:
+            output_extension: .g.dart
+            any_map: false
+            checked: false
+            create_factory: true
+            create_to_json: true
+            disallow_unrecognized_keys: false
+            explicit_to_json: false
+            field_rename: none
+            generic_argument_factories: false
+            ignore_unannotated: false
+            include_if_null: true
+
+      drift_dev:
+        generate_for:
+          - lib/data/datasources/local/**/*.dart
+        options:
+          # Drift code generation options
+          drift_dev:
+            output_extension: .g.dart
+            store_date_time_values_as_text: false

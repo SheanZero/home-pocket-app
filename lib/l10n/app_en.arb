@@ -1,0 +1,21 @@
+{
+  "@@locale": "en",
+  "appName": "Home Pocket",
+  "@appName": {
+    "description": "The application name"
+  },
+  "home": "Home",
+  "transactions": "Transactions",
+  "analytics": "Analytics",
+  "settings": "Settings",
+  "newTransaction": "New Transaction",
+  "amount": "Amount",
+  "category": "Category",
+  "note": "Note",
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "survivalLedger": "Survival Ledger",
+  "soulLedger": "Soul Ledger"
+}

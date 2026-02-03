@@ -1,0 +1,21 @@
+{
+  "@@locale": "zh",
+  "appName": "Home Pocket",
+  "@appName": {
+    "description": "The application name"
+  },
+  "home": "首页",
+  "transactions": "交易",
+  "analytics": "分析",
+  "settings": "设置",
+  "newTransaction": "新增交易",
+  "amount": "金额",
+  "category": "分类",
+  "note": "备注",
+  "save": "保存",
+  "cancel": "取消",
+  "delete": "删除",
+  "edit": "编辑",
+  "survivalLedger": "生存账本",
+  "soulLedger": "灵魂账本"
+}
