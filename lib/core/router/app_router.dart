@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/accounting/presentation/screens/transaction_list_screen.dart';
 import '../../features/accounting/presentation/screens/transaction_form_screen.dart';
+import '../../features/security/presentation/screens/security_test_screen.dart';
 import '../constants/app_constants.dart';
 
 part 'app_router.g.dart';
@@ -44,6 +45,15 @@ GoRouter appRouter(AppRouterRef ref) {
         name: 'settings',
         pageBuilder: (context, state) => const MaterialPage(
           child: Placeholder(), // TODO: Settings Screen
+        ),
+      ),
+
+      // 安全模块测试屏幕
+      GoRoute(
+        path: '/security-test',
+        name: 'security_test',
+        pageBuilder: (context, state) => const MaterialPage(
+          child: SecurityTestScreen(),
         ),
       ),
     ],
