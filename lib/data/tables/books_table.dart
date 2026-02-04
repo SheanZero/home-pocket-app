@@ -18,7 +18,12 @@ class Books extends Table {
   @override
   Set<Column> get primaryKey => {id};
 
-  // TODO: Add indexes after fixing syntax
-  // @override
-  // List<Index> get customIndexes => [...];
+  @override
+  List<TableIndex> get customIndices => [
+        // Index for finding active books
+        TableIndex(name: 'idx_books_archived', columns: {#isArchived}),
+
+        // Index for book name search
+        TableIndex(name: 'idx_books_name', columns: {#name}),
+      ];
 }
