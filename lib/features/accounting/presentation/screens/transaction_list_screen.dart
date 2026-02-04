@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 /// Transaction List Screen
 /// Displays list of transactions with filters
@@ -49,6 +50,20 @@ class TransactionListScreen extends ConsumerWidget {
             const Text(
               'TODO: Implement transaction list',
               style: TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton.icon(
+              onPressed: () {
+                context.push('/security-test');
+              },
+              icon: const Icon(Icons.security),
+              label: const Text('Security Test'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+              ),
             ),
           ],
         ),
