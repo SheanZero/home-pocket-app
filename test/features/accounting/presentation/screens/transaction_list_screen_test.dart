@@ -1,14 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/application/use_cases/get_transactions_use_case.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/transaction_list_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/transaction_form_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/transaction_providers.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/current_book_provider.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/current_device_provider.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:home_pocket/shared/utils/result.dart';
+import 'package:home_pocket/generated/app_localizations.dart';
+
+/// Helper to wrap widget with localization support for testing
+Widget wrapWithLocalizations(Widget child, {List<Override> overrides = const []}) {
+  return ProviderScope(
+    overrides: overrides,
+    child: MaterialApp(
+      locale: const Locale('en'),
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ja'),
+        Locale('en'),
+        Locale('zh'),
+      ],
+      home: child,
+    ),
+  );
+}
+
+/// Default provider overrides for TransactionFormScreen tests
+final defaultTestOverrides = [
+  currentBookIdProvider.overrideWith((_) async => 'test_book_id'),
+  currentDeviceIdProvider.overrideWith((_) async => 'test_device_id'),
+];
 
 void main() {
   group('TransactionListScreen', () {
@@ -123,15 +155,14 @@ void main() {
     testWidgets('should navigate to form when FAB tapped',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        ProviderScope(
+        wrapWithLocalizations(
+          const TransactionListScreen(bookId: 'book_001'),
           overrides: [
             getTransactionsUseCaseProvider.overrideWithValue(
               _MockGetTransactionsUseCase(<Transaction>[]),
             ),
+            ...defaultTestOverrides,
           ],
-          child: const MaterialApp(
-            home: TransactionListScreen(bookId: 'book_001'),
-          ),
         ),
       );
       await tester.pumpAndSettle();
