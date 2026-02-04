@@ -28,6 +28,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
       );
 
       await dao.insertTransaction(transaction);
@@ -46,6 +47,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
       );
 
       final tx2 = Transaction.create(
@@ -55,6 +57,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_transport',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
       );
 
       await dao.insertTransaction(tx1);
@@ -72,6 +75,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
         timestamp: DateTime(2026, 1, 1),
       );
 
@@ -82,6 +86,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_transport',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
         timestamp: DateTime(2026, 2, 1),
       );
 
@@ -105,6 +110,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
       );
 
       await dao.insertTransaction(transaction);
@@ -129,6 +135,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
       );
 
       await dao.insertTransaction(transaction);
@@ -146,6 +153,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
       );
 
       await dao.insertTransaction(tx1);

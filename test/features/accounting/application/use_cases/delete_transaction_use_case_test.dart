@@ -32,6 +32,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
       );
 
       when(mockTransactionRepo.findById(existingTransaction.id))
@@ -78,6 +79,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
       );
 
       when(mockTransactionRepo.findById(existingTransaction.id))

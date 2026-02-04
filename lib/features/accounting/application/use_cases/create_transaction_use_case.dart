@@ -1,8 +1,8 @@
+import 'package:uuid/uuid.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
-import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 
 /// Use case for creating a new transaction
@@ -10,19 +10,18 @@ import 'package:home_pocket/shared/utils/result.dart';
 /// Handles:
 /// - Category validation
 /// - Hash chain calculation
-/// - Field encryption (note, merchant)
 /// - Transaction persistence
+///
+/// Note: Field encryption is handled by Repository layer
 class CreateTransactionUseCase {
   final TransactionRepository transactionRepository;
   final CategoryRepository categoryRepository;
   final HashChainService hashChainService;
-  final FieldEncryptionService fieldEncryptionService;
 
   CreateTransactionUseCase({
     required this.transactionRepository,
     required this.categoryRepository,
     required this.hashChainService,
-    required this.fieldEncryptionService,
   });
 
   /// Execute the use case
@@ -48,54 +47,45 @@ class CreateTransactionUseCase {
         return Result.error('Category not found: $categoryId');
       }
 
-      // 2. Encrypt sensitive fields if provided
-      String? encryptedNote;
-      String? encryptedMerchant;
-
-      if (note != null && note.isNotEmpty) {
-        encryptedNote = await fieldEncryptionService.encryptField(note);
-      }
-
-      if (merchant != null && merchant.isNotEmpty) {
-        encryptedMerchant = await fieldEncryptionService.encryptField(merchant);
-      }
-
-      // 3. Get latest hash for hash chain
+      // 2. Get latest hash for hash chain
       final previousHash = await transactionRepository.getLatestHash(bookId);
 
-      // 4. Create transaction (which calculates its own hash)
-      final transaction = Transaction.create(
+      // 3. Generate transaction ID (needed for hash calculation)
+      final transactionId = const Uuid().v4();
+      final txTimestamp = timestamp ?? DateTime.now();
+
+      // 4. Calculate hash using HashChainService (BEFORE creating transaction)
+      final currentHash = hashChainService.calculateTransactionHash(
+        transactionId: transactionId,
+        amount: amount / 100.0, // Convert cents to dollars
+        timestamp: txTimestamp.millisecondsSinceEpoch,
+        previousHash: previousHash ?? 'genesis',
+      );
+
+      // 5. Create transaction with plaintext fields
+      // Repository will handle encryption during persistence
+      final transaction = Transaction(
+        id: transactionId,
         bookId: bookId,
         deviceId: deviceId,
         amount: amount,
         type: type,
         categoryId: categoryId,
         ledgerType: ledgerType,
-        note: encryptedNote,
-        merchant: encryptedMerchant,
+        currentHash: currentHash,
+        timestamp: txTimestamp,
+        note: note, // ✅ Pass plaintext - Repository will encrypt
+        merchant: merchant, // ✅ Pass plaintext - Repository will encrypt
         photoHash: photoHash,
         metadata: metadata,
-        timestamp: timestamp,
         prevHash: previousHash,
+        createdAt: DateTime.now(),
       );
 
-      // 5. Verify hash is correct (using HashChainService)
-      final calculatedHash = hashChainService.calculateTransactionHash(
-        transactionId: transaction.id,
-        amount: transaction.amount / 100.0, // Convert cents to dollars
-        timestamp: transaction.timestamp.millisecondsSinceEpoch,
-        previousHash: previousHash ?? 'genesis',
-      );
+      // 6. Persist transaction (Repository handles encryption)
+      await transactionRepository.insert(transaction);
 
-      // Update transaction with verified hash
-      final verifiedTransaction = transaction.copyWith(
-        currentHash: calculatedHash,
-      );
-
-      // 6. Persist transaction
-      await transactionRepository.insert(verifiedTransaction);
-
-      return Result.success(verifiedTransaction);
+      return Result.success(transaction);
     } catch (e) {
       return Result.error('Failed to create transaction: ${e.toString()}');
     }

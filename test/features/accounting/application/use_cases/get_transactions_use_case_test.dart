@@ -38,6 +38,7 @@ void main() {
           type: TransactionType.expense,
           categoryId: 'cat_food',
           ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
         ),
         Transaction.create(
           bookId: 'book_001',
@@ -46,6 +47,7 @@ void main() {
           type: TransactionType.expense,
           categoryId: 'cat_transport',
           ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
         ),
       ];
 
@@ -80,6 +82,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
         timestamp: DateTime(2026, 1, 15),
       );
 
@@ -115,6 +118,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
         note: 'encrypted_note',
       );
 
@@ -149,6 +153,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
       );
 
       when(mockTransactionRepo.findByBook(
@@ -181,6 +186,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
       );
 
       when(mockTransactionRepo.findByBook(
@@ -216,6 +222,7 @@ void main() {
           type: TransactionType.expense,
           categoryId: 'cat_food',
           ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
         ),
       );
 

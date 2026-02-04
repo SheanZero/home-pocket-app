@@ -64,6 +64,7 @@ void main() {
           type: TransactionType.expense,
           categoryId: 'cat_food',
           ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
           note: 'Test note',
         ),
         Transaction.create(
@@ -73,6 +74,7 @@ void main() {
           type: TransactionType.income,
           categoryId: 'cat_salary',
           ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
         ),
       ];
 

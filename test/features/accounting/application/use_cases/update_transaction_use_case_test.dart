@@ -4,7 +4,6 @@ import 'package:mockito/annotations.dart';
 import 'package:home_pocket/features/accounting/application/use_cases/update_transaction_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
-import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 
@@ -13,23 +12,19 @@ import 'update_transaction_use_case_test.mocks.dart';
 @GenerateMocks([
   TransactionRepository,
   CategoryRepository,
-  FieldEncryptionService,
 ])
 void main() {
   late UpdateTransactionUseCase useCase;
   late MockTransactionRepository mockTransactionRepo;
   late MockCategoryRepository mockCategoryRepo;
-  late MockFieldEncryptionService mockFieldEncryption;
 
   setUp(() {
     mockTransactionRepo = MockTransactionRepository();
     mockCategoryRepo = MockCategoryRepository();
-    mockFieldEncryption = MockFieldEncryptionService();
 
     useCase = UpdateTransactionUseCase(
       transactionRepository: mockTransactionRepo,
       categoryRepository: mockCategoryRepo,
-      fieldEncryptionService: mockFieldEncryption,
     );
   });
 
@@ -43,6 +38,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
       );
 
       final category = Category(
@@ -90,6 +86,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
       );
 
       final category = Category(
@@ -110,9 +107,6 @@ void main() {
       when(mockCategoryRepo.findById('cat_food'))
           .thenAnswer((_) async => category);
 
-      when(mockFieldEncryption.encryptField('Updated note'))
-          .thenAnswer((_) async => 'encrypted_updated_note');
-
       when(mockTransactionRepo.update(any)).thenAnswer((_) async => {});
 
       // Act
@@ -123,7 +117,7 @@ void main() {
 
       // Assert
       expect(result.isSuccess, isTrue);
-      verify(mockFieldEncryption.encryptField('Updated note')).called(1);
+      // Note: Encryption is now handled by Repository layer, not Use Case
     });
 
     test('should return error if transaction not found', () async {
@@ -152,6 +146,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
       );
 
       when(mockTransactionRepo.findById(existingTransaction.id))
@@ -181,6 +176,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
         note: 'Original note',
       );
 

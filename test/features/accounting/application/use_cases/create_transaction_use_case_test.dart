@@ -5,7 +5,6 @@ import 'package:home_pocket/features/accounting/application/use_cases/create_tra
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
-import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 
@@ -15,26 +14,22 @@ import 'create_transaction_use_case_test.mocks.dart';
   TransactionRepository,
   CategoryRepository,
   HashChainService,
-  FieldEncryptionService,
 ])
 void main() {
   late CreateTransactionUseCase useCase;
   late MockTransactionRepository mockTransactionRepo;
   late MockCategoryRepository mockCategoryRepo;
   late MockHashChainService mockHashChainService;
-  late MockFieldEncryptionService mockFieldEncryption;
 
   setUp(() {
     mockTransactionRepo = MockTransactionRepository();
     mockCategoryRepo = MockCategoryRepository();
     mockHashChainService = MockHashChainService();
-    mockFieldEncryption = MockFieldEncryptionService();
 
     useCase = CreateTransactionUseCase(
       transactionRepository: mockTransactionRepo,
       categoryRepository: mockCategoryRepo,
       hashChainService: mockHashChainService,
-      fieldEncryptionService: mockFieldEncryption,
     );
   });
 
@@ -86,7 +81,7 @@ void main() {
       verify(mockTransactionRepo.insert(any)).called(1);
     });
 
-    test('should encrypt note if provided', () async {
+    test('should create transaction with note', () async {
       // Arrange
       final category = Category(
         id: 'cat_food',
@@ -113,9 +108,6 @@ void main() {
       when(mockTransactionRepo.getLatestHash('book_001'))
           .thenAnswer((_) async => null);
 
-      when(mockFieldEncryption.encryptField('Test note'))
-          .thenAnswer((_) async => 'encrypted_note');
-
       when(mockTransactionRepo.insert(any)).thenAnswer((_) async => {});
 
       // Act
@@ -131,7 +123,8 @@ void main() {
 
       // Assert
       expect(result.isSuccess, isTrue);
-      verify(mockFieldEncryption.encryptField('Test note')).called(1);
+      expect(result.data!.note, 'Test note');
+      // Note: Encryption is handled by Repository layer during insert
     });
 
     test('should return error if category not found', () async {

@@ -1,7 +1,6 @@
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
-import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 
 /// Use case for updating an existing transaction
@@ -9,18 +8,17 @@ import 'package:home_pocket/shared/utils/result.dart';
 /// Handles:
 /// - Transaction validation (exists)
 /// - Category validation (if changing)
-/// - Field encryption (note, merchant) for new values
 /// - Selective field updates (only update provided fields)
 /// - Updated timestamp
+///
+/// Note: Field encryption is handled by Repository layer
 class UpdateTransactionUseCase {
   final TransactionRepository transactionRepository;
   final CategoryRepository categoryRepository;
-  final FieldEncryptionService fieldEncryptionService;
 
   UpdateTransactionUseCase({
     required this.transactionRepository,
     required this.categoryRepository,
-    required this.fieldEncryptionService,
   });
 
   /// Execute the use case
@@ -55,30 +53,21 @@ class UpdateTransactionUseCase {
         }
       }
 
-      // 3. Encrypt new sensitive fields if provided
-      String? encryptedNote = note != null && note.isNotEmpty
-          ? await fieldEncryptionService.encryptField(note)
-          : (note == null ? existingTransaction.note : null);
-
-      String? encryptedMerchant = merchant != null && merchant.isNotEmpty
-          ? await fieldEncryptionService.encryptField(merchant)
-          : (merchant == null ? existingTransaction.merchant : null);
-
-      // 4. Create updated transaction with selective updates
+      // 3. Create updated transaction with selective updates
+      // Repository will handle encryption for note and merchant
       final updatedTransaction = existingTransaction.copyWith(
         amount: amount ?? existingTransaction.amount,
         type: type ?? existingTransaction.type,
         categoryId: categoryId ?? existingTransaction.categoryId,
         ledgerType: ledgerType ?? existingTransaction.ledgerType,
-        note: note != null ? encryptedNote : existingTransaction.note,
-        merchant:
-            merchant != null ? encryptedMerchant : existingTransaction.merchant,
+        note: note ?? existingTransaction.note, // ✅ Pass plaintext - Repository will encrypt
+        merchant: merchant ?? existingTransaction.merchant, // ✅ Pass plaintext - Repository will encrypt
         photoHash: photoHash ?? existingTransaction.photoHash,
         metadata: metadata ?? existingTransaction.metadata,
         updatedAt: DateTime.now(),
       );
 
-      // 5. Persist updated transaction
+      // 4. Persist updated transaction (Repository handles encryption)
       await transactionRepository.update(updatedTransaction);
 
       return Result.success(updatedTransaction);

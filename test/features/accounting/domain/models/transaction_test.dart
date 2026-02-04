@@ -23,7 +23,7 @@ void main() {
       expect(transaction.ledgerType, LedgerType.survival);
     });
 
-    test('should calculate hash correctly', () {
+    test('should accept externally calculated hash', () {
       final transaction = Transaction.create(
         bookId: 'book_001',
         deviceId: 'device_001',
@@ -31,26 +31,12 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'externally_calculated_hash',
         prevHash: 'prev_hash',
       );
 
-      expect(transaction.currentHash, isNotEmpty);
-      expect(transaction.verifyHash(), isTrue);
-    });
-
-    test('should detect hash tampering', () {
-      final transaction = Transaction.create(
-        bookId: 'book_001',
-        deviceId: 'device_001',
-        amount: 10000,
-        type: TransactionType.expense,
-        categoryId: 'cat_food',
-        ledgerType: LedgerType.survival,
-      );
-
-      final tamperedTransaction = transaction.copyWith(amount: 20000);
-
-      expect(tamperedTransaction.verifyHash(), isFalse);
+      expect(transaction.currentHash, 'externally_calculated_hash');
+      expect(transaction.prevHash, 'prev_hash');
     });
 
     test('should support optional fields', () {
@@ -61,6 +47,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
         note: 'Lunch at restaurant',
         merchant: 'Family Mart',
       );
@@ -77,6 +64,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'hash_1',
       );
 
       final tx2 = Transaction.create(
@@ -86,6 +74,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_food',
         ledgerType: LedgerType.survival,
+        currentHash: 'hash_2',
       );
 
       expect(tx1.id, isNot(tx2.id));
