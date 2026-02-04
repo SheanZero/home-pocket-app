@@ -148,6 +148,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat-001',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
         note: 'Sensitive note content',
         merchant: 'Secret Merchant Name',
       );
@@ -198,6 +199,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat-001',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
         note: 'Transaction 1',
         timestamp: baseTimestamp,
       );
@@ -215,6 +217,7 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat-002',
         ledgerType: LedgerType.soul,
+        currentHash: 'test_hash',
         note: 'Transaction 2',
         timestamp: baseTimestamp.add(const Duration(seconds: 1)),
       );
@@ -232,6 +235,7 @@ void main() {
         type: TransactionType.income,
         categoryId: 'cat-003',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash',
         note: 'Transaction 3',
         timestamp: baseTimestamp.add(const Duration(seconds: 2)),
       );

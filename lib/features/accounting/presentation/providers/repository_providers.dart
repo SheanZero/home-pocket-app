@@ -7,7 +7,7 @@ import 'package:home_pocket/data/daos/book_dao.dart';
 import 'package:home_pocket/data/daos/category_dao.dart';
 import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
 import 'package:home_pocket/data/repositories/book_repository_impl.dart';
-import 'package:home_pocket/features/accounting/data/repositories/category_repository_impl.dart';
+import 'package:home_pocket/data/repositories/category_repository_impl.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart';

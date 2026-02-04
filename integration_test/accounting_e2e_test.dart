@@ -12,7 +12,7 @@ import 'package:home_pocket/features/accounting/presentation/screens/transaction
 import 'package:home_pocket/features/accounting/presentation/screens/transaction_form_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/transaction_providers.dart';
 import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
-import 'package:home_pocket/features/accounting/data/repositories/category_repository_impl.dart';
+import 'package:home_pocket/data/repositories/category_repository_impl.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';

@@ -2,7 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/data/daos/category_dao.dart';
-import 'package:home_pocket/features/accounting/data/repositories/category_repository_impl.dart';
+import 'package:home_pocket/data/repositories/category_repository_impl.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:matcher/matcher.dart' as matcher;
