@@ -1,4 +1,5 @@
 import 'package:drift/native.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/data/daos/transaction_dao.dart';
@@ -29,14 +30,12 @@ part 'repository_providers.g.dart';
 ///
 /// For now, using in-memory database for development and testing.
 @Riverpod(keepAlive: true)
-AppDatabase appDatabase(AppDatabaseRef ref) {
+AppDatabase appDatabase(Ref ref) {
   final executor = NativeDatabase.memory();
   final database = AppDatabase(executor);
 
   // Dispose database connection when provider is disposed
-  ref.onDispose(() {
-    database.close();
-  });
+  ref.onDispose(database.close);
 
   return database;
 }
@@ -49,7 +48,7 @@ AppDatabase appDatabase(AppDatabaseRef ref) {
 /// - FieldEncryptionService for sensitive field encryption
 /// - HashChainService for transaction integrity
 @riverpod
-TransactionRepository transactionRepository(TransactionRepositoryRef ref) {
+TransactionRepository transactionRepository(Ref ref) {
   final database = ref.watch(appDatabaseProvider);
   final dao = TransactionDao(database);
   final encryptionService = ref.watch(fieldEncryptionServiceProvider);
@@ -69,7 +68,7 @@ TransactionRepository transactionRepository(TransactionRepositoryRef ref) {
 /// - AppDatabase for data access
 /// - CategoryDao for database operations
 @riverpod
-CategoryRepository categoryRepository(CategoryRepositoryRef ref) {
+CategoryRepository categoryRepository(Ref ref) {
   final database = ref.watch(appDatabaseProvider);
   final dao = CategoryDao(database);
 
@@ -82,7 +81,7 @@ CategoryRepository categoryRepository(CategoryRepositoryRef ref) {
 /// - AppDatabase for data access
 /// - BookDao for database operations
 @riverpod
-BookRepository bookRepository(BookRepositoryRef ref) {
+BookRepository bookRepository(Ref ref) {
   final database = ref.watch(appDatabaseProvider);
   final dao = BookDao(database);
 

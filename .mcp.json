@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "dart": {
+      "command": "node",
+      "args": [
+        "/Users/xinz/.claude/mcp-servers/dart-server/index.js"
+      ],
+      "env": {
+        "PATH": "/Users/xinz/flutter/bin:/Users/xinz/.nvm/versions/node/v22.18.0/bin:/usr/local/bin:/usr/bin:/bin"
+      }
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "description": "Persistent memory across sessions"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "description": "Chain-of-thought reasoning"
+    }
+  }
+}

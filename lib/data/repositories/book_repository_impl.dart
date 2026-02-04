@@ -21,9 +21,9 @@ import 'package:home_pocket/features/accounting/domain/repositories/book_reposit
 /// - Update denormalized statistics (transactionCount, balances)
 /// - Filter by device
 class BookRepositoryImpl implements BookRepository {
-  final BookDao _bookDao;
-
   BookRepositoryImpl(this._bookDao);
+
+  final BookDao _bookDao;
 
   @override
   Future<void> insert(Book book) async {

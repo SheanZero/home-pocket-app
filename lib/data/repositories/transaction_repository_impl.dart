@@ -37,7 +37,8 @@ class TransactionRepositoryImpl implements TransactionRepository {
   @override
   Future<void> insert(Transaction transaction) async {
     // 1. Get previous hash from DAO (or 'GENESIS' if first transaction)
-    final previousHash = await dao.getLatestHash(transaction.bookId) ?? 'GENESIS';
+    final previousHash =
+        await dao.getLatestHash(transaction.bookId) ?? 'GENESIS';
 
     // 2. Calculate current hash using HashChainService
     final currentHash = hashChainService.calculateTransactionHash(
@@ -55,7 +56,8 @@ class TransactionRepositoryImpl implements TransactionRepository {
 
     String? encryptedMerchant;
     if (transaction.merchant != null) {
-      encryptedMerchant = await encryptionService.encryptField(transaction.merchant!);
+      encryptedMerchant =
+          await encryptionService.encryptField(transaction.merchant!);
     }
 
     // 4. Create transaction with hash and encrypted data
@@ -80,7 +82,8 @@ class TransactionRepositoryImpl implements TransactionRepository {
 
     String? encryptedMerchant;
     if (transaction.merchant != null) {
-      encryptedMerchant = await encryptionService.encryptField(transaction.merchant!);
+      encryptedMerchant =
+          await encryptionService.encryptField(transaction.merchant!);
     }
 
     // 2. Set updatedAt to current time
@@ -158,13 +161,13 @@ class TransactionRepositoryImpl implements TransactionRepository {
   @override
   Future<String?> getLatestHash(String bookId) async {
     // Delegate to DAO
-    return await dao.getLatestHash(bookId);
+    return dao.getLatestHash(bookId);
   }
 
   @override
   Future<int> count(String bookId) async {
     // Delegate to DAO
-    return await dao.countTransactions(bookId);
+    return dao.countTransactions(bookId);
   }
 
   @override
@@ -208,7 +211,8 @@ class TransactionRepositoryImpl implements TransactionRepository {
         transactionId: tx.id,
         amount: tx.amount.toDouble(),
         timestamp: tx.timestamp.millisecondsSinceEpoch,
-        previousHash: tx.prevHash ?? 'GENESIS', // Use GENESIS if null (shouldn't happen)
+        previousHash:
+            tx.prevHash ?? 'GENESIS', // Use GENESIS if null (shouldn't happen)
       );
 
       // Verify currentHash matches calculated hash
@@ -230,7 +234,8 @@ class TransactionRepositoryImpl implements TransactionRepository {
 
     String? decryptedMerchant;
     if (transaction.merchant != null) {
-      decryptedMerchant = await encryptionService.decryptField(transaction.merchant!);
+      decryptedMerchant =
+          await encryptionService.decryptField(transaction.merchant!);
     }
 
     return transaction.copyWith(

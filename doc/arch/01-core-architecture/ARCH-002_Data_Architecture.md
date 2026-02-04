@@ -10,13 +10,14 @@
 ## 📋 目录
 
 1. [概述](#概述)
-2. [数据模型设计](#数据模型设计)
-3. [数据库架构](#数据库架构)
-4. [加密策略](#加密策略)
-5. [数据流设计](#数据流设计)
-6. [数据同步](#数据同步)
-7. [数据备份与恢复](#数据备份与恢复)
-8. [性能优化](#性能优化)
+2. [Repository模式](#repository模式)
+3. [数据模型设计](#数据模型设计)
+4. [数据库架构](#数据库架构)
+5. [加密策略](#加密策略)
+6. [数据流设计](#数据流设计)
+7. [数据同步](#数据同步)
+8. [数据备份与恢复](#数据备份与恢复)
+9. [性能优化](#性能优化)
 
 ---
 
@@ -54,6 +55,142 @@ Home Pocket的数据架构遵循以下核心原则：
 | 加密 | SQLCipher | 4.5+ | 透明数据库级加密、行业标准 |
 | ORM | Drift | 2.14+ | 编译时类型安全、代码生成、SQL支持 |
 | 序列化 | Freezed | 2.4+ | 不可变模型、代码生成、性能好 |
+
+---
+
+## Repository模式
+
+### 架构设计原则
+
+Home Pocket 采用 Clean Architecture 的 Repository 模式，**接口与实现分离**：
+
+> **核心规则:**
+> - **Repository 接口** 定义在 **Domain 层**（`lib/features/*/domain/repositories/`）
+> - **Repository 实现** 位于 **Data 层**（`lib/data/repositories/`）
+
+这种分离确保了：
+1. **依赖倒置** - 上层业务逻辑只依赖接口，不依赖具体实现
+2. **可测试性** - 可以轻松 mock Repository 进行单元测试
+3. **可替换性** - 可以切换不同的数据源实现（本地/远程）
+
+### 目录结构
+
+```
+lib/
+├── features/
+│   └── accounting/
+│       └── domain/
+│           └── repositories/           # ✅ Repository 接口
+│               ├── transaction_repository.dart
+│               ├── category_repository.dart
+│               └── book_repository.dart
+│
+└── data/
+    └── repositories/                   # ✅ Repository 实现
+        ├── transaction_repository_impl.dart
+        ├── category_repository_impl.dart
+        └── book_repository_impl.dart
+```
+
+### 接口定义示例
+
+```dart
+// lib/features/accounting/domain/repositories/transaction_repository.dart
+
+/// 交易数据仓库接口
+///
+/// 定义所有交易数据访问操作的契约。
+/// 具体实现在 data 层的 TransactionRepositoryImpl。
+abstract class TransactionRepository {
+  /// 创建交易
+  Future<void> insert(Transaction transaction);
+
+  /// 根据ID查询交易
+  Future<Transaction?> findById(String id);
+
+  /// 获取账本的所有交易
+  Future<List<Transaction>> findByBookId(String bookId);
+
+  /// 更新交易
+  Future<void> update(Transaction transaction);
+
+  /// 软删除交易
+  Future<void> softDelete(String id);
+}
+```
+
+### 实现示例
+
+```dart
+// lib/data/repositories/transaction_repository_impl.dart
+
+/// 交易仓库实现
+///
+/// 实现 TransactionRepository 接口，负责：
+/// - 数据库 CRUD 操作
+/// - 字段加密/解密
+/// - 哈希链计算
+class TransactionRepositoryImpl implements TransactionRepository {
+  final AppDatabase _database;
+  final TransactionDao _dao;
+  final FieldEncryptionService _encryptionService;
+  final HashChainService _hashChainService;
+
+  TransactionRepositoryImpl({
+    required AppDatabase database,
+    required TransactionDao dao,
+    required FieldEncryptionService encryptionService,
+    required HashChainService hashChainService,
+  }) : _database = database,
+       _dao = dao,
+       _encryptionService = encryptionService,
+       _hashChainService = hashChainService;
+
+  @override
+  Future<void> insert(Transaction transaction) async {
+    // 1. 计算哈希链
+    final currentHash = _hashChainService.calculateTransactionHash(...);
+
+    // 2. 加密敏感字段
+    final encryptedNote = await _encryptionService.encrypt(transaction.note);
+
+    // 3. 持久化到数据库
+    await _dao.insert(...);
+  }
+
+  // ... 其他方法实现
+}
+```
+
+### Provider 配置
+
+```dart
+// lib/features/accounting/presentation/providers/repository_providers.dart
+
+/// TransactionRepository Provider
+///
+/// 返回类型是接口 TransactionRepository，而非实现类。
+/// 这样上层代码只依赖接口，可以轻松替换实现。
+@riverpod
+TransactionRepository transactionRepository(TransactionRepositoryRef ref) {
+  final database = ref.watch(appDatabaseProvider);
+  final dao = TransactionDao(database);
+  final encryptionService = ref.watch(fieldEncryptionServiceProvider);
+  final hashChainService = ref.watch(hashChainServiceProvider);
+
+  return TransactionRepositoryImpl(
+    database: database,
+    dao: dao,
+    encryptionService: encryptionService,
+    hashChainService: hashChainService,
+  );
+}
+```
+
+### 相关文档
+
+详细的层次职责划分请参阅：
+- [ADR-007: Clean Architecture 层次职责划分](../03-adr/ADR-007_Layer_Responsibilities.md)
 
 ---
 

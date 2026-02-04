@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'repository_providers.dart';
 
@@ -10,7 +11,7 @@ part 'current_book_provider.g.dart';
 ///
 /// TODO: Replace with user-selectable book when multi-book UI is implemented
 @riverpod
-Future<String?> currentBookId(CurrentBookIdRef ref) async {
+Future<String?> currentBookId(Ref ref) async {
   final bookRepo = ref.watch(bookRepositoryProvider);
   final books = await bookRepo.findAll();
 

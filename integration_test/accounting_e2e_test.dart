@@ -10,7 +10,7 @@ import 'package:home_pocket/data/daos/category_dao.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/transaction_list_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/transaction_form_screen.dart';
-import 'package:home_pocket/features/accounting/presentation/providers/transaction_providers.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
 import 'package:home_pocket/data/repositories/category_repository_impl.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
@@ -46,7 +46,8 @@ class _MockSecureStorage implements FlutterSecureStorage {
     WebOptions? webOptions,
     MacOsOptions? mOptions,
     WindowsOptions? wOptions,
-  }) async => _storage[key];
+  }) async =>
+      _storage[key];
 
   @override
   Future<void> delete({
@@ -57,7 +58,8 @@ class _MockSecureStorage implements FlutterSecureStorage {
     WebOptions? webOptions,
     MacOsOptions? mOptions,
     WindowsOptions? wOptions,
-  }) async => _storage.remove(key);
+  }) async =>
+      _storage.remove(key);
 
   @override
   Future<Map<String, String>> readAll({
@@ -67,7 +69,8 @@ class _MockSecureStorage implements FlutterSecureStorage {
     WebOptions? webOptions,
     MacOsOptions? mOptions,
     WindowsOptions? wOptions,
-  }) async => Map.from(_storage);
+  }) async =>
+      Map.from(_storage);
 
   @override
   Future<void> deleteAll({
@@ -77,7 +80,8 @@ class _MockSecureStorage implements FlutterSecureStorage {
     WebOptions? webOptions,
     MacOsOptions? mOptions,
     WindowsOptions? wOptions,
-  }) async => _storage.clear();
+  }) async =>
+      _storage.clear();
 
   @override
   Future<bool> containsKey({
@@ -88,7 +92,8 @@ class _MockSecureStorage implements FlutterSecureStorage {
     WebOptions? webOptions,
     MacOsOptions? mOptions,
     WindowsOptions? wOptions,
-  }) async => _storage.containsKey(key);
+  }) async =>
+      _storage.containsKey(key);
 
   @override
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -119,10 +124,12 @@ void main() {
       // Setup REAL crypto services
       final secureStorage = _MockSecureStorage();
       final keyRepository = KeyRepositoryImpl(secureStorage: secureStorage);
-      final encryptionRepository = EncryptionRepositoryImpl(keyRepository: keyRepository);
+      final encryptionRepository =
+          EncryptionRepositoryImpl(keyRepository: keyRepository);
 
       keyManager = KeyManager(repository: keyRepository);
-      final fieldEncryptionService = FieldEncryptionService(repository: encryptionRepository);
+      final fieldEncryptionService =
+          FieldEncryptionService(repository: encryptionRepository);
       final hashChainService = HashChainService();
 
       // Generate real device key pair
@@ -148,7 +155,8 @@ void main() {
           transactionRepositoryProvider.overrideWithValue(transactionRepo),
           categoryRepositoryProvider.overrideWithValue(categoryRepo),
           hashChainServiceProvider.overrideWithValue(hashChainService),
-          fieldEncryptionServiceProvider.overrideWithValue(fieldEncryptionService),
+          fieldEncryptionServiceProvider
+              .overrideWithValue(fieldEncryptionService),
         ],
       );
     });
@@ -296,12 +304,14 @@ void main() {
         type: TransactionType.expense,
         categoryId: 'cat_test',
         ledgerType: LedgerType.survival,
+        currentHash: 'test_hash_placeholder',
         note: 'Sensitive note data',
         merchant: 'Secret merchant',
       );
 
       // Encrypt fields manually
-      final encryptedNote = await fieldEncryption.encryptField(transaction.note!);
+      final encryptedNote =
+          await fieldEncryption.encryptField(transaction.note!);
       final encryptedMerchant =
           await fieldEncryption.encryptField(transaction.merchant!);
 

@@ -12,9 +12,8 @@ import 'package:home_pocket/features/accounting/domain/repositories/category_rep
 /// - System category protection (prevents deletion)
 /// - Idempotent system category seeding
 class CategoryRepositoryImpl implements CategoryRepository {
-  final CategoryDao _categoryDao;
-
   CategoryRepositoryImpl(this._categoryDao);
+  final CategoryDao _categoryDao;
 
   @override
   Future<void> insert(Category category) async {
@@ -56,8 +55,9 @@ class CategoryRepositoryImpl implements CategoryRepository {
   Future<bool> delete(String id) async {
     // Check if category is system category
     final category = await findById(id);
-    if (category == null) return false;
-    if (category.isSystem) return false; // Cannot delete system categories
+    if (category == null || category.isSystem) {
+      return false; // Cannot delete system categories
+    }
 
     // Delete category
     final deletedRows = await (_categoryDao.delete(_categoryDao.categories)
