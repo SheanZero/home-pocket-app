@@ -72,6 +72,13 @@ The codebase follows strict Clean Architecture with dependency rules:
 
 ```
 lib/
+├── infrastructure/       # Project-wide infrastructure
+│   └── crypto/          # Cryptographic primitives (MANDATORY)
+│       ├── services/    # Key management, encryption, hash chain
+│       ├── repositories/ # Crypto repository interfaces & implementations
+│       ├── models/      # Crypto domain models
+│       └── database/    # Database encryption setup
+│
 ├── features/              # Feature modules (domain-driven)
 │   └── {feature}/
 │       ├── presentation/  # UI layer (screens, widgets, providers)
@@ -148,6 +155,95 @@ Generated files (`.g.dart`, `.freezed.dart`) are gitignored.
 - Blockchain-style hash chain
 - Incremental verification (100-2000x performance improvement)
 - Tamper detection
+
+---
+
+## Crypto Infrastructure Usage Rules (MANDATORY)
+
+**CRITICAL:** All cryptographic operations MUST use the centralized infrastructure in `lib/infrastructure/crypto/`. DO NOT implement custom crypto solutions.
+
+### Mandatory Usage Rules
+
+1. **Key Management:**
+   - ✅ MUST use `lib/infrastructure/crypto/services/key_manager.dart`
+   - ❌ NEVER implement custom key generation or storage
+   - ❌ NEVER access flutter_secure_storage directly for keys
+
+2. **Field Encryption:**
+   - ✅ MUST use `lib/infrastructure/crypto/services/field_encryption_service.dart`
+   - ❌ NEVER use cryptography packages directly
+   - ✅ MUST encrypt all sensitive fields: amounts, notes, merchant names
+
+3. **Transaction Integrity:**
+   - ✅ MUST use `lib/infrastructure/crypto/services/hash_chain_service.dart`
+   - ❌ NEVER implement custom hash chain logic
+   - ✅ MUST include hash in all transaction records
+
+4. **Database Encryption:**
+   - ✅ MUST use `lib/infrastructure/crypto/database/createEncryptedExecutor`
+   - ❌ NEVER create database connections without encryption
+
+5. **Security Principles:**
+   - ❌ NEVER store encryption keys in plain text
+   - ❌ NEVER log sensitive data (keys, plaintext amounts)
+   - ❌ NEVER bypass encryption for "convenience"
+   - ✅ ALWAYS clear crypto caches on logout
+
+### Usage Examples
+
+**Key Management:**
+```dart
+@riverpod
+Future<void> initializeApp(InitializeAppRef ref) async {
+  final keyManager = ref.read(keyManagerProvider);
+
+  if (!await keyManager.hasKeyPair()) {
+    await keyManager.generateDeviceKeyPair();
+  }
+}
+```
+
+**Field Encryption:**
+```dart
+@riverpod
+class TransactionRepository {
+  Future<void> saveTransaction(Transaction tx) async {
+    final encryptionService = ref.read(fieldEncryptionServiceProvider);
+
+    final encryptedAmount = await encryptionService.encryptAmount(tx.amount);
+    final encryptedNote = await encryptionService.encryptField(tx.note);
+
+    // Save encrypted data...
+  }
+}
+```
+
+**Hash Chain:**
+```dart
+@riverpod
+class TransactionService {
+  Future<String> calculateHash(Transaction tx, String prevHash) async {
+    final hashChain = ref.read(hashChainServiceProvider);
+
+    return hashChain.calculateTransactionHash(
+      transactionId: tx.id,
+      amount: tx.amount,
+      timestamp: tx.timestamp,
+      previousHash: prevHash,
+    );
+  }
+}
+```
+
+**Database Encryption:**
+```dart
+@riverpod
+Future<AppDatabase> appDatabase(AppDatabaseRef ref) async {
+  final keyManager = ref.watch(keyManagerProvider);
+  final executor = await createEncryptedExecutor(keyManager);
+  return AppDatabase(executor);
+}
+```
 
 ---
 

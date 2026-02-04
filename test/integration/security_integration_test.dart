@@ -1,10 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:home_pocket/features/security/application/services/key_manager.dart';
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/features/security/application/services/recovery_kit_service.dart';
 import 'package:home_pocket/features/security/application/services/pin_manager.dart';
-import 'package:home_pocket/features/security/application/services/field_encryption_service.dart';
-import 'package:home_pocket/features/security/application/services/hash_chain_service.dart';
+import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
+import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/key_repository_impl.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/encryption_repository_impl.dart';
 import 'package:bip39/bip39.dart' as bip39;
 
 // Mock secure storage for integration tests
@@ -106,13 +108,19 @@ void main() {
     setUp(() {
       // Use mock secure storage for tests
       secureStorage = MockSecureStorage();
-      keyManager = KeyManager(secureStorage: secureStorage);
+
+      // Create repository instances
+      final keyRepository = KeyRepositoryImpl(secureStorage: secureStorage);
+      final encryptionRepository = EncryptionRepositoryImpl(keyRepository: keyRepository);
+
+      // Create service instances
+      keyManager = KeyManager(repository: keyRepository);
       recoveryKitService = RecoveryKitService(
         secureStorage: secureStorage,
         keyManager: keyManager,
       );
       pinManager = PINManager(secureStorage: secureStorage);
-      fieldEncryptionService = FieldEncryptionService(keyManager: keyManager);
+      fieldEncryptionService = FieldEncryptionService(repository: encryptionRepository);
       hashChainService = HashChainService();
     });
 
@@ -149,7 +157,8 @@ void main() {
 
       // Step 2: Simulate device loss - create new KeyManager
       final newSecureStorage = MockSecureStorage();
-      final newKeyManager = KeyManager(secureStorage: newSecureStorage);
+      final newKeyRepository = KeyRepositoryImpl(secureStorage: newSecureStorage);
+      final newKeyManager = KeyManager(repository: newKeyRepository);
 
       // Step 3: Recover device key from mnemonic
       final fullSeed = bip39.mnemonicToSeed(mnemonic);
@@ -163,7 +172,8 @@ void main() {
 
       // Step 5: Verify same seed produces same keys (deterministic)
       final newSecureStorage2 = MockSecureStorage();
-      final newKeyManager2 = KeyManager(secureStorage: newSecureStorage2);
+      final newKeyRepository2 = KeyRepositoryImpl(secureStorage: newSecureStorage2);
+      final newKeyManager2 = KeyManager(repository: newKeyRepository2);
       final recoveredKeyPair2 = await newKeyManager2.recoverFromSeed(seed);
 
       expect(recoveredKeyPair2.deviceId, equals(recoveredKeyPair.deviceId));

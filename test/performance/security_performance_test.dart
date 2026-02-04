@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/features/security/application/services/field_encryption_service.dart';
-import 'package:home_pocket/features/security/application/services/hash_chain_service.dart';
-import 'package:home_pocket/features/security/application/services/key_manager.dart';
+import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
+import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/key_repository_impl.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/encryption_repository_impl.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Mock secure storage for performance tests
@@ -99,12 +101,18 @@ void main() {
 
     setUp(() async {
       final secureStorage = MockSecureStorage();
-      keyManager = KeyManager(secureStorage: secureStorage);
+
+      // Create repository instances
+      final keyRepository = KeyRepositoryImpl(secureStorage: secureStorage);
+      final encryptionRepository = EncryptionRepositoryImpl(keyRepository: keyRepository);
+
+      // Create service instances
+      keyManager = KeyManager(repository: keyRepository);
 
       // Generate device key for encryption
       await keyManager.generateDeviceKeyPair();
 
-      encryptionService = FieldEncryptionService(keyManager: keyManager);
+      encryptionService = FieldEncryptionService(repository: encryptionRepository);
       hashChainService = HashChainService();
     });
 
