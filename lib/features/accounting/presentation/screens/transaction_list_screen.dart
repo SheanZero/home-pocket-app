@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/transaction_form_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/transaction_list_provider.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/current_book_provider.dart';
+import 'package:home_pocket/generated/app_localizations.dart';
 
 /// Transaction List Screen
 ///
@@ -12,18 +14,30 @@ import 'package:home_pocket/features/accounting/presentation/providers/transacti
 /// - Empty state when no transactions
 /// - Swipe actions for edit/delete
 class TransactionListScreen extends ConsumerWidget {
-  final String bookId;
+  final String? bookId;
 
   const TransactionListScreen({
     super.key,
-    this.bookId = 'book_001', // TODO: Get from app state
+    this.bookId,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = S.of(context);
+
+    // Use provided bookId or fetch from currentBookIdProvider
+    final effectiveBookId = bookId ?? ref.watch(currentBookIdProvider).value;
+
+    if (effectiveBookId == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n?.appName ?? 'Home Pocket')),
+        body: const Center(child: Text('Please create a book first')),
+      );
+    }
+
     // Watch the transaction list provider
     final transactionListAsync = ref.watch(
-      transactionListProvider(bookId: bookId),
+      transactionListProvider(bookId: effectiveBookId),
     );
 
     return Scaffold(
@@ -44,7 +58,7 @@ class TransactionListScreen extends ConsumerWidget {
       body: transactionListAsync.when(
         data: (transactions) => transactions.isEmpty
             ? _buildEmptyState(context)
-            : _buildTransactionList(context, ref, transactions),
+            : _buildTransactionList(context, ref, transactions, effectiveBookId),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => _buildErrorState(context, error.toString()),
       ),
@@ -58,7 +72,7 @@ class TransactionListScreen extends ConsumerWidget {
             ),
           );
           // Refresh list after adding transaction
-          ref.invalidate(transactionListProvider(bookId: bookId));
+          ref.invalidate(transactionListProvider(bookId: effectiveBookId));
         },
         icon: const Icon(Icons.add),
         label: const Text('Add Transaction'),
@@ -130,12 +144,13 @@ class TransactionListScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     List<Transaction> transactions,
+    String effectiveBookId,
   ) {
     return RefreshIndicator(
       onRefresh: () async {
         // Refresh the list
-        ref.invalidate(transactionListProvider(bookId: bookId));
-        await ref.read(transactionListProvider(bookId: bookId).future);
+        ref.invalidate(transactionListProvider(bookId: effectiveBookId));
+        await ref.read(transactionListProvider(bookId: effectiveBookId).future);
       },
       child: ListView.builder(
         itemCount: transactions.length,
@@ -157,7 +172,7 @@ class TransactionListScreen extends ConsumerWidget {
                 SnackBar(content: Text('Edit: ${transaction.id}')),
               );
             },
-            onDelete: () => _showDeleteConfirmation(context, ref, transaction),
+            onDelete: () => _showDeleteConfirmation(context, ref, transaction, effectiveBookId),
           );
         },
       ),
@@ -168,6 +183,7 @@ class TransactionListScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     Transaction transaction,
+    String effectiveBookId,
   ) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -198,7 +214,7 @@ class TransactionListScreen extends ConsumerWidget {
       try {
         // Delete via provider
         await ref
-            .read(transactionListProvider(bookId: bookId).notifier)
+            .read(transactionListProvider(bookId: effectiveBookId).notifier)
             .deleteTransaction(transaction.id);
 
         if (context.mounted) {
