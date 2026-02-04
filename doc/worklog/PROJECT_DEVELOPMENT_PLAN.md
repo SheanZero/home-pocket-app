@@ -289,7 +289,7 @@ lib/l10n/
 
 **优先级:** P0 (MVP核心)
 **依赖:** MOD-006 (安全)
-**文档:** arch2/02-module-specs/MOD-001_BasicAccounting.md
+**文档:** doc/arch/02-module-specs/MOD-001_BasicAccounting.md
 
 **关键交付物:**
 
