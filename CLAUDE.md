@@ -79,12 +79,17 @@ lib/
 │       ├── models/      # Crypto domain models
 │       └── database/    # Database encryption setup
 │
+├── data/                 # Shared data layer (CROSS-FEATURE)
+│   ├── app_database.dart # Main Drift database definition
+│   ├── tables/          # Drift table definitions (all features)
+│   └── daos/            # Drift data access objects (all features)
+│
 ├── features/              # Feature modules (domain-driven)
 │   └── {feature}/
 │       ├── presentation/  # UI layer (screens, widgets, providers)
 │       ├── application/   # Business logic (use cases, services)
 │       ├── domain/        # Core entities & repository interfaces
-│       └── data/          # Data access (repositories, DAOs, DTOs)
+│       └── data/          # Data access (repositories only - use lib/data/ DAOs)
 │
 ├── core/                  # Cross-cutting concerns
 │   ├── config/           # App configuration
@@ -99,6 +104,52 @@ lib/
 │
 └── l10n/                # Internationalization (ja, zh, en)
 ```
+
+### Capability Classification Rule (CRITICAL)
+
+**Before creating any new functionality, MUST classify it as:**
+
+#### 🔵 Feature-Specific Capability (Feature Closure)
+**Characteristics:**
+- Used ONLY by the current feature
+- No other features need access
+- Feature-specific business logic
+
+**Placement:** `lib/features/{feature}/`
+
+**Examples:**
+- Feature-specific UI screens/widgets
+- Feature-specific use cases
+- Feature-specific domain models (if truly isolated)
+- Feature-specific repository implementations
+
+#### 🟢 Shared Capability (Cross-Feature)
+**Characteristics:**
+- Used by MULTIPLE features
+- Infrastructure or foundation for other features
+- System-level concerns
+
+**Placement:** `lib/` (infrastructure, data, core, shared)
+
+**Examples:**
+- ✅ **Database (lib/data/)**: All features need data access
+- ✅ **Crypto (lib/infrastructure/crypto/)**: Encryption used everywhere
+- ✅ **Router (lib/core/router/)**: Navigation shared across features
+- ✅ **Common widgets (lib/shared/widgets/)**: Reusable UI components
+
+#### Decision Rule
+
+**Ask yourself:**
+1. "Will other features need this?" → YES → `lib/`
+2. "Is this feature-specific only?" → YES → `lib/features/{feature}/`
+3. "Not sure?" → Default to `lib/` (safer, easier to refactor later)
+
+**Common Mistakes:**
+- ❌ Putting database in feature folder (blocks other features)
+- ❌ Putting shared models in feature folder
+- ❌ Creating feature-specific versions of infrastructure
+
+**When in doubt:** Place in `lib/` at appropriate level (infrastructure, data, core, shared)
 
 ### Dependency Rules
 

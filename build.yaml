@@ -25,9 +25,5 @@ targets:
           ignore_unannotated: false
           include_if_null: true
 
-      drift_dev:
-        generate_for:
-          - lib/data/datasources/local/**/*.dart
-        options:
-          # Drift code generation options
-          store_date_time_values_as_text: false
+      # drift_dev: Use default configuration (generates for all lib/**/*.dart)
+      # Explicit configuration was preventing generation
