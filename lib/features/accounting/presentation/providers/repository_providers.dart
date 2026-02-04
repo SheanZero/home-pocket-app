@@ -17,6 +17,9 @@ part 'repository_providers.g.dart';
 
 /// Provides the main AppDatabase instance
 ///
+/// IMPORTANT: keepAlive: true ensures single instance across app lifecycle
+/// to prevent "database created multiple times" race condition warning.
+///
 /// TODO: In production, replace with encrypted executor:
 /// ```dart
 /// final keyManager = ref.watch(keyManagerProvider);
@@ -25,10 +28,17 @@ part 'repository_providers.g.dart';
 /// ```
 ///
 /// For now, using in-memory database for development and testing.
-@riverpod
+@Riverpod(keepAlive: true)
 AppDatabase appDatabase(AppDatabaseRef ref) {
   final executor = NativeDatabase.memory();
-  return AppDatabase(executor);
+  final database = AppDatabase(executor);
+
+  // Dispose database connection when provider is disposed
+  ref.onDispose(() {
+    database.close();
+  });
+
+  return database;
 }
 
 /// Provides TransactionRepository implementation
