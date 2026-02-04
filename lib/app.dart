@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/warm_japanese_theme.dart';
+import 'features/settings/presentation/providers/locale_provider.dart';
 import 'generated/app_localizations.dart';
 
 class HomePocketApp extends ConsumerWidget {
@@ -12,6 +13,7 @@ class HomePocketApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
+    final currentLocale = ref.watch(currentLocaleProvider);
 
     return MaterialApp.router(
       title: 'Home Pocket',
@@ -30,7 +32,7 @@ class HomePocketApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: S.supportedLocales,
-      locale: const Locale('ja'), // Default to Japanese
+      locale: currentLocale, // Watch locale provider for runtime switching
 
       // Router
       routerConfig: router,
