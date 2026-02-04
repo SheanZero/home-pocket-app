@@ -174,6 +174,57 @@ Presentation → Application → Domain ← Data
 4. **Routing:** GoRouter with declarative routes
 5. **Localization:** flutter_localizations with ARB files
 
+### Riverpod Provider Organization Rules (CRITICAL)
+
+**Repository Provider Management:**
+
+**MUST follow Single Source of Truth pattern:**
+
+1. **Repository Providers** MUST be defined in `repository_providers.dart`:
+   ```dart
+   // lib/features/{feature}/presentation/providers/repository_providers.dart
+
+   @riverpod
+   TransactionRepository transactionRepository(TransactionRepositoryRef ref) {
+     final database = ref.watch(appDatabaseProvider);
+     final dao = TransactionDao(database);
+     // ... dependencies
+     return TransactionRepositoryImpl(...);
+   }
+   ```
+
+2. **Use Case Providers** MUST reference repository providers via `ref.watch()`:
+   ```dart
+   // lib/features/{feature}/presentation/providers/transaction_providers.dart
+
+   import 'repository_providers.dart';  // Import from single source
+
+   @riverpod
+   CreateTransactionUseCase createTransactionUseCase(CreateTransactionUseCaseRef ref) {
+     return CreateTransactionUseCase(
+       transactionRepository: ref.watch(transactionRepositoryProvider),  // Reuse!
+       categoryRepository: ref.watch(categoryRepositoryProvider),
+     );
+   }
+   ```
+
+**Rules:**
+- ✅ **ONE** repository_providers.dart file per feature
+- ✅ ALL repository providers defined in repository_providers.dart
+- ✅ Use case providers reference via `ref.watch()`
+- ❌ NEVER duplicate repository provider definitions
+- ❌ NEVER define repository providers in use case provider files
+- ❌ NEVER throw `UnimplementedError` in provider definitions
+
+**File Structure:**
+```
+lib/features/accounting/presentation/providers/
+├── repository_providers.dart     # Single source for all repository providers
+├── transaction_providers.dart    # Use case providers (reference repository_providers)
+├── category_providers.dart       # Use case providers
+└── book_providers.dart           # Use case providers
+```
+
 ---
 
 ## Code Generation
@@ -185,6 +236,130 @@ This project heavily uses code generation. **Always run build_runner after:**
 - Adding new ARB localization strings
 
 Generated files (`.g.dart`, `.freezed.dart`) are gitignored.
+
+**Critical Workflow:**
+```bash
+# After modifying annotated code
+flutter pub run build_runner build --delete-conflicting-outputs
+
+# After merging branches (regenerate to sync with main)
+flutter pub run build_runner build --delete-conflicting-outputs
+
+# Watch mode for continuous development
+flutter pub run build_runner watch
+```
+
+**Common Issues:**
+- ❌ **Type not found errors** after merge → Run build_runner to regenerate
+- ❌ **Tests fail with compilation errors** → Generated files out of sync
+- ✅ **Always regenerate after:**
+  - Git merge/rebase
+  - Switching branches
+  - Pulling from remote
+
+---
+
+## Drift Database Index Guidelines (MANDATORY)
+
+**CRITICAL:** Use correct Drift TableIndex syntax for database performance optimization.
+
+### Index Syntax Rules
+
+**CORRECT Syntax:**
+```dart
+import 'package:drift/drift.dart';
+
+class Transactions extends Table {
+  TextColumn get id => text()();
+  TextColumn get bookId => text()();
+  DateTimeColumn get timestamp => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  // ✅ CORRECT: Use TableIndex with Symbol syntax
+  List<TableIndex> get customIndices => [
+    // Single column index
+    TableIndex(name: 'idx_transactions_book_id', columns: {#bookId}),
+
+    // Compound index
+    TableIndex(
+      name: 'idx_transactions_book_timestamp',
+      columns: {#bookId, #timestamp},
+    ),
+  ];
+}
+```
+
+**WRONG Syntax:**
+```dart
+// ❌ WRONG: Using Index() constructor
+List<Index> get customIndices => [
+  Index('idx_name', [bookId]),  // Compilation error!
+];
+
+// ❌ WRONG: Using @override on customIndices
+@override  // customIndices is NOT overriding a parent method
+List<TableIndex> get customIndices => [...];
+
+// ❌ WRONG: Using column references instead of Symbols
+List<TableIndex> get customIndices => [
+  TableIndex(name: 'idx_name', columns: {bookId}),  // Error!
+];
+```
+
+**Key Points:**
+- ✅ Use `TableIndex` class (not `Index`)
+- ✅ Use Symbol syntax: `{#columnName}` (with `#` prefix)
+- ✅ DO NOT add `@override` annotation to `customIndices`
+- ✅ Return `List<TableIndex>` (not `List<Index>`)
+- ✅ Use `Set<Symbol>` for columns parameter
+
+### Index Naming Convention
+
+```dart
+// Pattern: idx_{table}_{columns}
+TableIndex(name: 'idx_transactions_book_id', columns: {#bookId})
+TableIndex(name: 'idx_transactions_timestamp', columns: {#timestamp})
+TableIndex(name: 'idx_transactions_book_timestamp', columns: {#bookId, #timestamp})
+TableIndex(name: 'idx_books_archived', columns: {#isArchived})
+TableIndex(name: 'idx_categories_type', columns: {#type})
+```
+
+### Performance Optimization Strategy
+
+**Query Patterns → Index Strategy:**
+
+1. **Single column filters** (WHERE bookId = ?)
+   ```dart
+   TableIndex(name: 'idx_transactions_book_id', columns: {#bookId})
+   ```
+
+2. **Compound queries** (WHERE bookId = ? ORDER BY timestamp)
+   ```dart
+   TableIndex(
+     name: 'idx_transactions_book_timestamp',
+     columns: {#bookId, #timestamp},  // Order matters!
+   )
+   ```
+
+3. **Boolean flags** (WHERE isArchived = false)
+   ```dart
+   TableIndex(name: 'idx_books_archived', columns: {#isArchived})
+   ```
+
+4. **Text search** (WHERE name LIKE ?)
+   ```dart
+   TableIndex(name: 'idx_books_name', columns: {#name})
+   ```
+
+**Index Selection Guidelines:**
+- ✅ Index columns used in WHERE clauses
+- ✅ Index columns used in JOIN conditions
+- ✅ Index columns used in ORDER BY
+- ✅ Use compound indexes for multi-column queries (most selective column first)
+- ❌ Don't over-index (impacts write performance)
+- ❌ Don't duplicate coverage (single-column index redundant if compound index exists)
 
 ---
 
@@ -206,6 +381,147 @@ Generated files (`.g.dart`, `.freezed.dart`) are gitignored.
 - Blockchain-style hash chain
 - Incremental verification (100-2000x performance improvement)
 - Tamper detection
+
+---
+
+## Application Initialization Pattern (MANDATORY)
+
+**CRITICAL:** Core services MUST be initialized before `runApp()` using the `AppInitializer` pattern.
+
+### Architecture
+
+**File Location:** `lib/core/initialization/app_initializer.dart`
+
+**Pattern:**
+```dart
+// main.dart
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Create provider container for initialization
+  final container = ProviderContainer();
+
+  try {
+    // Initialize core services BEFORE runApp
+    await AppInitializer.initialize(container);
+
+    // Run app with initialized container
+    runApp(
+      UncontrolledProviderScope(
+        container: container,
+        child: const HomePocketApp(),
+      ),
+    );
+  } catch (e) {
+    // Show error screen if initialization fails
+    runApp(_buildErrorScreen(e));
+  }
+}
+```
+
+### AppInitializer Implementation
+
+```dart
+// lib/core/initialization/app_initializer.dart
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
+
+class AppInitializer {
+  /// Initialize all required services
+  ///
+  /// This must be called before runApp() to ensure:
+  /// - Database is ready
+  /// - Encryption keys are loaded
+  /// - Secure storage is initialized
+  static Future<void> initialize(ProviderContainer container) async {
+    try {
+      // 1. Initialize key manager (loads or generates device keys)
+      final keyManager = container.read(keyManagerProvider);
+      final hasKeys = await keyManager.hasKeyPair();
+
+      if (!hasKeys) {
+        await keyManager.generateDeviceKeyPair();
+      }
+
+      // 2. Initialize database (ensures schema is up to date)
+      final database = container.read(appDatabaseProvider);
+      await database.customSelect('SELECT 1').get();
+
+      print('✅ App initialization complete');
+    } catch (e, stackTrace) {
+      print('❌ App initialization failed: $e');
+      print(stackTrace);
+      rethrow;
+    }
+  }
+}
+```
+
+### Initialization Order (CRITICAL)
+
+**MUST follow this order:**
+1. **Key Manager** - Load or generate device encryption keys
+2. **Database** - Initialize database with encryption
+3. **Other Services** - Additional services as needed
+
+**Why this order matters:**
+- Database initialization requires encryption keys
+- Many services depend on database being ready
+- Key manager has no dependencies (can be initialized first)
+
+### Error Handling
+
+**Graceful Degradation:**
+```dart
+try {
+  await AppInitializer.initialize(container);
+  runApp(UncontrolledProviderScope(
+    container: container,
+    child: const HomePocketApp(),
+  ));
+} catch (e) {
+  // Show user-friendly error screen
+  runApp(MaterialApp(
+    home: Scaffold(
+      appBar: AppBar(title: Text('Initialization Error')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: Colors.red),
+            SizedBox(height: 16),
+            Text('Failed to initialize app'),
+            SizedBox(height: 8),
+            // Don't expose raw exception to user in production
+            if (kDebugMode) Text(e.toString()),
+          ],
+        ),
+      ),
+    ),
+  ));
+}
+```
+
+### Testing Considerations
+
+**Unit Testing AppInitializer:**
+- ❌ **DON'T** test in pure unit tests (requires platform channels)
+- ✅ **DO** test via integration tests
+- ✅ **DO** verify initialization via app runtime testing
+
+**Reason:** KeyManager uses `flutter_secure_storage` which requires platform channels, unavailable in unit test environment.
+
+### Rules
+
+- ✅ MUST call `WidgetsFlutterBinding.ensureInitialized()` first
+- ✅ MUST create `ProviderContainer` before initialization
+- ✅ MUST initialize services in correct order (KeyManager → Database → Others)
+- ✅ MUST use `UncontrolledProviderScope` to provide container
+- ✅ MUST provide error screen fallback
+- ❌ NEVER skip initialization and hope services lazy-load correctly
+- ❌ NEVER initialize inside widgets (too late!)
+- ❌ NEVER expose raw exceptions to users in production
 
 ---
 
@@ -718,6 +1034,143 @@ Use Freezed's `copyWith` for all state updates.
 
 ---
 
+## Widget Parameter Patterns (BEST PRACTICES)
+
+### Nullable Parameters with Provider Fallback
+
+**Pattern:** Use nullable widget parameters with runtime provider fallback for dynamic values.
+
+**Problem:** Hardcoded values prevent runtime configuration
+```dart
+// ❌ WRONG: Hardcoded default value
+class TransactionListScreen extends ConsumerWidget {
+  final String bookId;
+
+  const TransactionListScreen({
+    super.key,
+    this.bookId = 'book_001',  // HARDCODED!
+  });
+}
+```
+
+**Solution:** Nullable parameter + provider fallback
+```dart
+// ✅ CORRECT: Nullable with runtime fallback
+class TransactionListScreen extends ConsumerWidget {
+  final String? bookId;  // Nullable
+
+  const TransactionListScreen({
+    super.key,
+    this.bookId,  // No default value
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Fallback to provider if not provided
+    final effectiveBookId = bookId ?? ref.watch(currentBookIdProvider).value;
+
+    if (effectiveBookId == null) {
+      // Handle case where no book is available
+      return Scaffold(
+        appBar: AppBar(title: Text(S.of(context).appName)),
+        body: Center(child: Text(S.of(context).pleaseCreateBookFirst)),
+      );
+    }
+
+    // Use effectiveBookId throughout the widget
+    return _buildContent(effectiveBookId);
+  }
+}
+```
+
+**Benefits:**
+- ✅ Allows explicit passing for testing
+- ✅ Falls back to runtime provider for normal use
+- ✅ No hardcoded values
+- ✅ Single source of truth (provider)
+
+### Provider Selection Pattern
+
+**Multiple Provider Options:**
+```dart
+@override
+Widget build(BuildContext context, WidgetRef ref) {
+  // Priority: explicit parameter > current selection > user's default > null
+  final value = widget.explicitValue
+    ?? ref.watch(currentSelectionProvider).value
+    ?? ref.watch(userDefaultProvider).value;
+
+  if (value == null) {
+    return _buildEmptyState();
+  }
+
+  return _buildContent(value);
+}
+```
+
+### Common Patterns
+
+**1. Optional ID Parameter (Most Common):**
+```dart
+class DetailScreen extends ConsumerWidget {
+  final String? itemId;
+
+  const DetailScreen({super.key, this.itemId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final id = itemId ?? ref.watch(currentItemIdProvider).value;
+    if (id == null) return EmptyState();
+    return Content(id);
+  }
+}
+```
+
+**2. Optional Configuration:**
+```dart
+class CustomWidget extends ConsumerWidget {
+  final ThemeMode? themeMode;
+
+  const CustomWidget({super.key, this.themeMode});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = themeMode ?? ref.watch(themeModeProvider);
+    return ThemedContent(mode: mode);
+  }
+}
+```
+
+**3. Optional Data with Fetch:**
+```dart
+class DataDisplay extends ConsumerWidget {
+  final Data? data;
+
+  const DataDisplay({super.key, this.data});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final effectiveData = data ?? ref.watch(dataProvider).value;
+    if (effectiveData == null) {
+      return LoadingIndicator();
+    }
+    return DataView(effectiveData);
+  }
+}
+```
+
+### Rules
+
+- ✅ Use nullable parameters for values that can be provided OR derived
+- ✅ Provide fallback via provider for runtime configuration
+- ✅ Always handle null case explicitly
+- ✅ Use descriptive variable names (e.g., `effectiveBookId`)
+- ❌ NEVER hardcode default values in widget parameters
+- ❌ NEVER assume parameter is always provided
+- ❌ NEVER use magic strings or numbers as defaults
+
+---
+
 ## Git Workflow
 
 **Commit Format:**
@@ -789,6 +1242,114 @@ If you encounter "linking in object file built for iOS" (simulator issue):
 
 ---
 
+## Code Quality Standards (MANDATORY)
+
+### Analyzer Warnings - Zero Tolerance Policy
+
+**CRITICAL:** All code MUST pass `flutter analyze` with ZERO warnings before commit.
+
+**Common Warnings to Fix:**
+
+1. **Unused Imports:**
+   ```dart
+   // ❌ WRONG: Unused import
+   import 'package:home_pocket/domain/repositories/transaction_repository.dart';
+
+   // ✅ CORRECT: Remove if not used
+   // (delete the import line)
+   ```
+
+2. **Unused Variables:**
+   ```dart
+   // ❌ WRONG: Declared but never used
+   test('should work', () {
+     final unused = 'value';
+     expect(true, true);
+   });
+
+   // ✅ CORRECT: Remove unused variable
+   test('should work', () {
+     expect(true, true);
+   });
+   ```
+
+3. **Incorrect @override Annotations:**
+   ```dart
+   // ❌ WRONG: Not actually overriding
+   class MyTable extends Table {
+     @override
+     List<TableIndex> get customIndices => [...];  // Not overriding parent!
+   }
+
+   // ✅ CORRECT: Remove @override when not overriding
+   class MyTable extends Table {
+     List<TableIndex> get customIndices => [...];
+   }
+   ```
+
+4. **Unused Local Variables in Tests:**
+   ```dart
+   // ❌ WRONG: Mock created but never verified
+   test('test case', () {
+     final mockRepo = MockRepository();
+     // ... test code that doesn't use mockRepo
+   });
+
+   // ✅ CORRECT: Remove or use the mock
+   test('test case', () {
+     // Just remove it if not needed
+   });
+   ```
+
+### Pre-Commit Checklist
+
+**Before every commit, MUST verify:**
+
+```bash
+# 1. Run analyzer (MUST be 0 issues)
+flutter analyze
+
+# 2. Run formatter
+dart format .
+
+# 3. Run all tests
+flutter test
+
+# 4. Check for uncommitted generated files
+git status
+```
+
+**Expected Output:**
+```bash
+# flutter analyze should show:
+Analyzing home_pocket...
+No issues found!
+
+# flutter test should show:
+00:XX +NNN: All tests passed!
+```
+
+### Automated Cleanup Rules
+
+**When cleaning up warnings:**
+1. ✅ Remove unused imports at the top of files
+2. ✅ Remove unused variables in function bodies
+3. ✅ Remove incorrect @override annotations
+4. ✅ Keep necessary imports even if analyzer suggests removal (may be used in generated code)
+5. ❌ Don't remove imports needed by generated `.g.dart` files
+6. ❌ Don't suppress warnings with `// ignore:` comments (fix the root cause)
+
+### Production Code vs Test Code
+
+**Both must be clean:**
+- Production code: `lib/`
+- Test code: `test/`
+- Integration tests: `integration_test/`
+
+**No exceptions for test code** - tests are first-class code.
+
+---
+
 ## Common Pitfalls
 
 1. **Don't modify generated files** (`.g.dart`, `.freezed.dart`)
@@ -800,6 +1361,12 @@ If you encounter "linking in object file built for iOS" (simulator issue):
 7. **Don't use `intl` version other than 0.20.2** (pinned by flutter_localizations)
 8. **Don't add `sqlite3_flutter_libs`** - use only `sqlcipher_flutter_libs` (conflicts!)
 9. **Don't modify `ios/Podfile` post_install** without preserving EXCLUDED_ARCHS fix
+10. **Don't commit code with analyzer warnings** - fix ALL warnings before commit
+11. **Don't hardcode widget parameter defaults** - use nullable + provider fallback pattern
+12. **Don't duplicate repository provider definitions** - use single source in repository_providers.dart
+13. **Don't use wrong Drift index syntax** - use `TableIndex` with Symbol syntax `{#columnName}`
+14. **Don't skip AppInitializer** - initialize core services before runApp()
+15. **Don't forget to regenerate code after merge** - run build_runner after git operations
 
 ---
 
