@@ -13,10 +13,7 @@ import 'package:home_pocket/features/accounting/domain/repositories/category_rep
     as _i5;
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart'
     as _i2;
-import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart'
-    as _i7;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i8;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -244,81 +241,6 @@ class MockCategoryRepository extends _i1.Mock
   _i3.Future<void> seedSystemCategories() => (super.noSuchMethod(
         Invocation.method(
           #seedSystemCategories,
-          [],
-        ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
-}
-
-/// A class which mocks [FieldEncryptionService].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockFieldEncryptionService extends _i1.Mock
-    implements _i7.FieldEncryptionService {
-  MockFieldEncryptionService() {
-    _i1.throwOnMissingStub(this);
-  }
-
-  @override
-  _i3.Future<String> encryptField(String? plaintext) => (super.noSuchMethod(
-        Invocation.method(
-          #encryptField,
-          [plaintext],
-        ),
-        returnValue: _i3.Future<String>.value(_i8.dummyValue<String>(
-          this,
-          Invocation.method(
-            #encryptField,
-            [plaintext],
-          ),
-        )),
-      ) as _i3.Future<String>);
-
-  @override
-  _i3.Future<String> decryptField(String? ciphertext) => (super.noSuchMethod(
-        Invocation.method(
-          #decryptField,
-          [ciphertext],
-        ),
-        returnValue: _i3.Future<String>.value(_i8.dummyValue<String>(
-          this,
-          Invocation.method(
-            #decryptField,
-            [ciphertext],
-          ),
-        )),
-      ) as _i3.Future<String>);
-
-  @override
-  _i3.Future<String> encryptAmount(double? amount) => (super.noSuchMethod(
-        Invocation.method(
-          #encryptAmount,
-          [amount],
-        ),
-        returnValue: _i3.Future<String>.value(_i8.dummyValue<String>(
-          this,
-          Invocation.method(
-            #encryptAmount,
-            [amount],
-          ),
-        )),
-      ) as _i3.Future<String>);
-
-  @override
-  _i3.Future<double> decryptAmount(String? encryptedAmount) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #decryptAmount,
-          [encryptedAmount],
-        ),
-        returnValue: _i3.Future<double>.value(0.0),
-      ) as _i3.Future<double>);
-
-  @override
-  _i3.Future<void> clearCache() => (super.noSuchMethod(
-        Invocation.method(
-          #clearCache,
           [],
         ),
         returnValue: _i3.Future<void>.value(),
