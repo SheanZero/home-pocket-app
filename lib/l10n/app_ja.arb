@@ -329,5 +329,69 @@
   "yesterday": "昨日",
   "@yesterday": {
     "description": "Yesterday label"
+  },
+  "transactionTypeExpense": "支出",
+  "@transactionTypeExpense": {
+    "description": "Expense transaction type"
+  },
+  "transactionTypeIncome": "収入",
+  "@transactionTypeIncome": {
+    "description": "Income transaction type"
+  },
+  "merchant": "店舗",
+  "@merchant": {
+    "description": "Merchant field label"
+  },
+  "merchantPlaceholder": "どこで支払いましたか？",
+  "@merchantPlaceholder": {
+    "description": "Merchant field placeholder"
+  },
+  "notePlaceholder": "この取引についてメモを追加",
+  "@notePlaceholder": {
+    "description": "Note field placeholder"
+  },
+  "createTransaction": "取引を作成",
+  "@createTransaction": {
+    "description": "Create transaction button"
+  },
+  "creatingTransaction": "作成中...",
+  "@creatingTransaction": {
+    "description": "Creating transaction indicator"
+  },
+  "pleaseEnterAmount": "金額を入力してください",
+  "@pleaseEnterAmount": {
+    "description": "Amount required validation message"
+  },
+  "amountMustBeGreaterThanZero": "金額は0より大きい必要があります",
+  "@amountMustBeGreaterThanZero": {
+    "description": "Amount validation message"
+  },
+  "pleaseSelectCategory": "カテゴリーを選択してください",
+  "@pleaseSelectCategory": {
+    "description": "Category required validation message"
+  },
+  "transactionCreatedSuccessfully": "取引を作成しました",
+  "@transactionCreatedSuccessfully": {
+    "description": "Transaction creation success message"
+  },
+  "noteOptional": "メモ（任意）",
+  "@noteOptional": {
+    "description": "Optional note label"
+  },
+  "merchantOptional": "店舗（任意）",
+  "@merchantOptional": {
+    "description": "Optional merchant label"
+  },
+  "pleaseCreateBookFirst": "まず帳簿を作成してください",
+  "@pleaseCreateBookFirst": {
+    "description": "Message when no books exist"
+  },
+  "errorLoadingBook": "帳簿の読み込みエラー",
+  "@errorLoadingBook": {
+    "description": "Error loading book message"
+  },
+  "errorLoadingDevice": "デバイスの読み込みエラー",
+  "@errorLoadingDevice": {
+    "description": "Error loading device message"
   }
 }

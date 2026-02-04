@@ -7,6 +7,7 @@ import 'package:home_pocket/features/accounting/presentation/providers/transacti
 import 'package:home_pocket/features/accounting/presentation/providers/transaction_form_state.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/current_book_provider.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/current_device_provider.dart';
+import 'package:home_pocket/generated/app_localizations.dart';
 
 /// Transaction Form Screen
 ///
@@ -52,8 +53,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       transactionFormNotifierProvider.select((state) => state.submitSuccess),
       (_, submitSuccess) {
         if (submitSuccess) {
+          final l10n = S.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Transaction created successfully')),
+            SnackBar(content: Text(l10n.transactionCreatedSuccessfully)),
           );
           Navigator.of(context).pop();
         }
@@ -61,13 +63,15 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     );
 
     // Handle loading/error states for book and device
+    final l10n = S.of(context)!;
+
     return currentBookAsync.when(
       data: (bookId) {
         if (bookId == null) {
           return Scaffold(
-            appBar: AppBar(title: const Text('New Transaction')),
-            body: const Center(
-              child: Text('Please create a book first'),
+            appBar: AppBar(title: Text(l10n.newTransaction)),
+            body: Center(
+              child: Text(l10n.pleaseCreateBookFirst),
             ),
           );
         }
@@ -84,8 +88,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             body: Center(child: CircularProgressIndicator()),
           ),
           error: (error, _) => Scaffold(
-            appBar: AppBar(title: const Text('New Transaction')),
-            body: Center(child: Text('Error loading device: $error')),
+            appBar: AppBar(title: Text(l10n.newTransaction)),
+            body: Center(child: Text('${l10n.errorLoadingDevice}: $error')),
           ),
         );
       },
@@ -93,8 +97,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         body: Center(child: CircularProgressIndicator()),
       ),
       error: (error, _) => Scaffold(
-        appBar: AppBar(title: const Text('New Transaction')),
-        body: Center(child: Text('Error loading book: $error')),
+        appBar: AppBar(title: Text(l10n.newTransaction)),
+        body: Center(child: Text('${l10n.errorLoadingBook}: $error')),
       ),
     );
   }
@@ -106,10 +110,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     String bookId,
     String deviceId,
   ) {
+    final l10n = S.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Transaction'),
+        title: Text(l10n.newTransaction),
         actions: [
           if (formState.isSubmitting)
             const Center(
@@ -134,7 +139,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               key: const Key('amount_field'),
               controller: _amountController,
               decoration: InputDecoration(
-                labelText: 'Amount',
+                labelText: l10n.amount,
                 prefixText: '¥ ',
                 errorText: formState.errors['amount'],
                 border: const OutlineInputBorder(),
@@ -150,11 +155,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter an amount';
+                  return l10n.pleaseEnterAmount;
                 }
                 final amount = double.tryParse(value);
                 if (amount == null || amount <= 0) {
-                  return 'Amount must be greater than 0';
+                  return l10n.amountMustBeGreaterThanZero;
                 }
                 return null;
               },
@@ -164,16 +169,16 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
             // Transaction Type Selection
             SegmentedButton<TransactionType>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: TransactionType.expense,
-                  label: Text('Expense'),
-                  icon: Icon(Icons.remove_circle_outline),
+                  label: Text(l10n.transactionTypeExpense),
+                  icon: const Icon(Icons.remove_circle_outline),
                 ),
                 ButtonSegment(
                   value: TransactionType.income,
-                  label: Text('Income'),
-                  icon: Icon(Icons.add_circle_outline),
+                  label: Text(l10n.transactionTypeIncome),
+                  icon: const Icon(Icons.add_circle_outline),
                 ),
               ],
               selected: {formState.type},
@@ -188,7 +193,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             DropdownButtonFormField<String>(
               value: formState.categoryId,
               decoration: InputDecoration(
-                labelText: 'Category',
+                labelText: l10n.category,
                 errorText: formState.errors['category'],
                 border: const OutlineInputBorder(),
               ),
@@ -217,7 +222,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please select a category';
+                  return l10n.pleaseSelectCategory;
                 }
                 return null;
               },
@@ -227,16 +232,16 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
             // Ledger Type Selection
             SegmentedButton<LedgerType>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: LedgerType.survival,
-                  label: Text('Survival'),
-                  icon: Icon(Icons.restaurant),
+                  label: Text(l10n.survivalLedger),
+                  icon: const Icon(Icons.restaurant),
                 ),
                 ButtonSegment(
                   value: LedgerType.soul,
-                  label: Text('Soul'),
-                  icon: Icon(Icons.self_improvement),
+                  label: Text(l10n.soulLedger),
+                  icon: const Icon(Icons.self_improvement),
                 ),
               ],
               selected: {formState.ledgerType},
@@ -251,10 +256,10 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             TextFormField(
               key: const Key('note_field'),
               controller: _noteController,
-              decoration: const InputDecoration(
-                labelText: 'Note (Optional)',
-                border: OutlineInputBorder(),
-                hintText: 'Add a note about this transaction',
+              decoration: InputDecoration(
+                labelText: l10n.noteOptional,
+                border: const OutlineInputBorder(),
+                hintText: l10n.notePlaceholder,
               ),
               maxLines: 3,
               onChanged: (value) {
@@ -268,10 +273,10 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             TextFormField(
               key: const Key('merchant_field'),
               controller: _merchantController,
-              decoration: const InputDecoration(
-                labelText: 'Merchant (Optional)',
-                border: OutlineInputBorder(),
-                hintText: 'Where did you make this transaction?',
+              decoration: InputDecoration(
+                labelText: l10n.merchantOptional,
+                border: const OutlineInputBorder(),
+                hintText: l10n.merchantPlaceholder,
               ),
               onChanged: (value) {
                 formNotifier.updateMerchant(value.isEmpty ? null : value);
@@ -329,7 +334,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       ),
                     )
                   : const Icon(Icons.check),
-              label: Text(formState.isSubmitting ? 'Creating...' : 'Create Transaction'),
+              label: Text(formState.isSubmitting ? l10n.creatingTransaction : l10n.createTransaction),
             ),
 
             const SizedBox(height: 8),
@@ -341,7 +346,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                   : () {
                       Navigator.of(context).pop();
                     },
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
           ],
         ),

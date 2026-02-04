@@ -329,5 +329,69 @@
   "yesterday": "Yesterday",
   "@yesterday": {
     "description": "Yesterday label"
+  },
+  "transactionTypeExpense": "Expense",
+  "@transactionTypeExpense": {
+    "description": "Expense transaction type"
+  },
+  "transactionTypeIncome": "Income",
+  "@transactionTypeIncome": {
+    "description": "Income transaction type"
+  },
+  "merchant": "Merchant",
+  "@merchant": {
+    "description": "Merchant field label"
+  },
+  "merchantPlaceholder": "Where did you make this transaction?",
+  "@merchantPlaceholder": {
+    "description": "Merchant field placeholder"
+  },
+  "notePlaceholder": "Add a note about this transaction",
+  "@notePlaceholder": {
+    "description": "Note field placeholder"
+  },
+  "createTransaction": "Create Transaction",
+  "@createTransaction": {
+    "description": "Create transaction button"
+  },
+  "creatingTransaction": "Creating...",
+  "@creatingTransaction": {
+    "description": "Creating transaction indicator"
+  },
+  "pleaseEnterAmount": "Please enter an amount",
+  "@pleaseEnterAmount": {
+    "description": "Amount required validation message"
+  },
+  "amountMustBeGreaterThanZero": "Amount must be greater than 0",
+  "@amountMustBeGreaterThanZero": {
+    "description": "Amount validation message"
+  },
+  "pleaseSelectCategory": "Please select a category",
+  "@pleaseSelectCategory": {
+    "description": "Category required validation message"
+  },
+  "transactionCreatedSuccessfully": "Transaction created successfully",
+  "@transactionCreatedSuccessfully": {
+    "description": "Transaction creation success message"
+  },
+  "noteOptional": "Note (Optional)",
+  "@noteOptional": {
+    "description": "Optional note label"
+  },
+  "merchantOptional": "Merchant (Optional)",
+  "@merchantOptional": {
+    "description": "Optional merchant label"
+  },
+  "pleaseCreateBookFirst": "Please create a book first",
+  "@pleaseCreateBookFirst": {
+    "description": "Message when no books exist"
+  },
+  "errorLoadingBook": "Error loading book",
+  "@errorLoadingBook": {
+    "description": "Error loading book message"
+  },
+  "errorLoadingDevice": "Error loading device",
+  "@errorLoadingDevice": {
+    "description": "Error loading device message"
   }
 }

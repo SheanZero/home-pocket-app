@@ -329,5 +329,69 @@
   "yesterday": "昨天",
   "@yesterday": {
     "description": "Yesterday label"
+  },
+  "transactionTypeExpense": "支出",
+  "@transactionTypeExpense": {
+    "description": "Expense transaction type"
+  },
+  "transactionTypeIncome": "收入",
+  "@transactionTypeIncome": {
+    "description": "Income transaction type"
+  },
+  "merchant": "商户",
+  "@merchant": {
+    "description": "Merchant field label"
+  },
+  "merchantPlaceholder": "在哪里支付的？",
+  "@merchantPlaceholder": {
+    "description": "Merchant field placeholder"
+  },
+  "notePlaceholder": "添加关于此交易的备注",
+  "@notePlaceholder": {
+    "description": "Note field placeholder"
+  },
+  "createTransaction": "创建交易",
+  "@createTransaction": {
+    "description": "Create transaction button"
+  },
+  "creatingTransaction": "创建中...",
+  "@creatingTransaction": {
+    "description": "Creating transaction indicator"
+  },
+  "pleaseEnterAmount": "请输入金额",
+  "@pleaseEnterAmount": {
+    "description": "Amount required validation message"
+  },
+  "amountMustBeGreaterThanZero": "金额必须大于0",
+  "@amountMustBeGreaterThanZero": {
+    "description": "Amount validation message"
+  },
+  "pleaseSelectCategory": "请选择类别",
+  "@pleaseSelectCategory": {
+    "description": "Category required validation message"
+  },
+  "transactionCreatedSuccessfully": "交易创建成功",
+  "@transactionCreatedSuccessfully": {
+    "description": "Transaction creation success message"
+  },
+  "noteOptional": "备注（可选）",
+  "@noteOptional": {
+    "description": "Optional note label"
+  },
+  "merchantOptional": "商户（可选）",
+  "@merchantOptional": {
+    "description": "Optional merchant label"
+  },
+  "pleaseCreateBookFirst": "请先创建账本",
+  "@pleaseCreateBookFirst": {
+    "description": "Message when no books exist"
+  },
+  "errorLoadingBook": "加载账本出错",
+  "@errorLoadingBook": {
+    "description": "Error loading book message"
+  },
+  "errorLoadingDevice": "加载设备出错",
+  "@errorLoadingDevice": {
+    "description": "Error loading device message"
   }
 }
