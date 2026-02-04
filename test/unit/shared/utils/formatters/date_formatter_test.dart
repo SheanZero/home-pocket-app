@@ -58,7 +58,6 @@ void main() {
       // Arrange
       final now = DateTime.now();
       final yesterday = now.subtract(const Duration(days: 1));
-      final lastWeek = now.subtract(const Duration(days: 7));
 
       // Act & Assert (relative times in Japanese)
       expect(

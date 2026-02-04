@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
-import 'package:home_pocket/infrastructure/crypto/models/chain_verification_result.dart';
 
 void main() {
   group('HashChainService', () {

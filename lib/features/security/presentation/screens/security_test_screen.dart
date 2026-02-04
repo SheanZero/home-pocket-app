@@ -194,7 +194,7 @@ class _SecurityTestScreenState extends ConsumerState<SecurityTestScreen> {
                   Icons.fingerprint,
                   () async {
                     try {
-                      final biometric = ref.read(biometricLockProvider);
+                      ref.read(biometricLockProvider); // Check availability
                       final availability =
                           await ref.read(biometricAvailabilityProvider.future);
                       final availabilityText = {

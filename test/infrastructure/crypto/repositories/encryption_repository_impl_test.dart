@@ -316,7 +316,7 @@ void main() {
         await repository.encryptField(plaintext);
 
         // Verify first call
-        final firstCallCount = verify(mockKeyRepository.getPublicKey()).called(1);
+        verify(mockKeyRepository.getPublicKey()).called(1);
 
         // Act
         await repository.clearCache();
@@ -371,7 +371,7 @@ void main() {
         await repository.clearCache();
 
         // Encrypt with second key
-        final encrypted2 = await repository.encryptField(plaintext);
+        await repository.encryptField(plaintext);
 
         // Assert - should not be able to decrypt with wrong key
         expect(

@@ -15,11 +15,3 @@ void main() async {
     ),
   );
 }
-
-/// Initialize core services before app starts
-Future<void> _initializeServices() async {
-  // TODO: Initialize database
-  // TODO: Initialize encryption
-  // TODO: Initialize secure storage
-  // TODO: Initialize device manager
-}

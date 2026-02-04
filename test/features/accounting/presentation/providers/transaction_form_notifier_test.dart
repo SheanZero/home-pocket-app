@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/transaction_form_notifier.dart';
-import 'package:home_pocket/features/accounting/presentation/providers/transaction_form_state.dart';
 
 void main() {
   group('TransactionFormNotifier', () {
@@ -17,7 +16,6 @@ void main() {
     });
 
     test('should initialize with default state', () {
-      final notifier = container.read(transactionFormNotifierProvider.notifier);
       final state = container.read(transactionFormNotifierProvider);
 
       expect(state.amount, 0);

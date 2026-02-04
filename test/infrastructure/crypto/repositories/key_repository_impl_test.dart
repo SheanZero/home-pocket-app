@@ -221,7 +221,7 @@ void main() {
         mockNoExistingKeys();
         mockWriteOperations();
 
-        final keyPair = await repository.generateKeyPair();
+        await repository.generateKeyPair();
 
         // Get the stored private key
         final capturedPrivateKey = verify(mockSecureStorage.write(
@@ -352,7 +352,7 @@ void main() {
         mockNoExistingKeys();
         mockWriteOperations();
 
-        final keyPair1 = await repository.generateKeyPair();
+        await repository.generateKeyPair();
 
         final capturedPrivateKey = verify(mockSecureStorage.write(
           key: 'device_private_key',

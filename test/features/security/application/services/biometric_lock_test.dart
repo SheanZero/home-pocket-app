@@ -5,7 +5,6 @@ import 'package:local_auth/local_auth.dart';
 import 'package:local_auth/error_codes.dart' as auth_error;
 import 'package:flutter/services.dart';
 import 'package:home_pocket/features/security/application/services/biometric_lock.dart';
-import 'package:home_pocket/features/security/domain/models/auth_result.dart';
 
 @GenerateMocks([LocalAuthentication])
 import 'biometric_lock_test.mocks.dart';

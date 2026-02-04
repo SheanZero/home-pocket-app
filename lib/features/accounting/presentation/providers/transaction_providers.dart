@@ -1,6 +1,4 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
-import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/application/use_cases/create_transaction_use_case.dart';
 import 'package:home_pocket/features/accounting/application/use_cases/get_transactions_use_case.dart';
 import 'package:home_pocket/features/accounting/application/use_cases/update_transaction_use_case.dart';
