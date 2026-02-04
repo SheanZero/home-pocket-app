@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_pocket/features/security/application/services/biometric_lock.dart';
@@ -373,7 +375,7 @@ class _SecurityTestScreenState extends ConsumerState<SecurityTestScreen> {
                           ),
                           const SizedBox(height: 4),
                           SelectableText(
-                            '密文: ${_encryptedData!.substring(0, 50)}...',
+                            '密文: ${_encryptedData!.substring(0, min(50, _encryptedData!.length))}${_encryptedData!.length > 50 ? '...' : ''}',
                             style: const TextStyle(fontSize: 10),
                           ),
                           if (_decryptedData != null) ...[
