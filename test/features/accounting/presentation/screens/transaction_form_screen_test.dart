@@ -1,18 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/transaction_form_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/transaction_form_notifier.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/current_book_provider.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/current_device_provider.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
+import 'package:home_pocket/generated/app_localizations.dart';
+
+/// Helper to wrap widget with localization support and provider overrides for testing
+Widget wrapWithLocalizations(Widget child, {List<Override> overrides = const []}) {
+  return ProviderScope(
+    overrides: overrides,
+    child: MaterialApp(
+      locale: const Locale('en'), // Use English for tests
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ja'),
+        Locale('en'),
+        Locale('zh'),
+      ],
+      home: child,
+    ),
+  );
+}
+
+/// Default provider overrides for TransactionFormScreen tests
+final defaultTestOverrides = [
+  currentBookIdProvider.overrideWith((_) async => 'test_book_id'),
+  currentDeviceIdProvider.overrideWith((_) async => 'test_device_id'),
+];
 
 void main() {
   group('TransactionFormScreen', () {
     testWidgets('should render all form fields', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: TransactionFormScreen(),
-          ),
+        wrapWithLocalizations(
+          const TransactionFormScreen(),
+          overrides: defaultTestOverrides,
         ),
       );
       await tester.pumpAndSettle();
@@ -44,17 +75,16 @@ void main() {
 
     testWidgets('should update amount when text changes',
         (WidgetTester tester) async {
-      final container = ProviderContainer();
+      final container = ProviderContainer(overrides: defaultTestOverrides);
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: const MaterialApp(
-            home: TransactionFormScreen(),
-          ),
+          child: wrapWithLocalizations(const TransactionFormScreen()),
         ),
       );
+      await tester.pumpAndSettle();
 
       // Find amount field
       final amountField = find.byKey(const Key('amount_field'));
@@ -70,17 +100,16 @@ void main() {
 
     testWidgets('should switch transaction type',
         (WidgetTester tester) async {
-      final container = ProviderContainer();
+      final container = ProviderContainer(overrides: defaultTestOverrides);
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: const MaterialApp(
-            home: TransactionFormScreen(),
-          ),
+          child: wrapWithLocalizations(const TransactionFormScreen()),
         ),
       );
+      await tester.pumpAndSettle();
 
       // Initially expense
       var state = container.read(transactionFormNotifierProvider);
@@ -96,24 +125,23 @@ void main() {
     });
 
     testWidgets('should switch ledger type', (WidgetTester tester) async {
-      final container = ProviderContainer();
+      final container = ProviderContainer(overrides: defaultTestOverrides);
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: const MaterialApp(
-            home: TransactionFormScreen(),
-          ),
+          child: wrapWithLocalizations(const TransactionFormScreen()),
         ),
       );
+      await tester.pumpAndSettle();
 
       // Initially survival
       var state = container.read(transactionFormNotifierProvider);
       expect(state.ledgerType, LedgerType.survival);
 
       // Tap soul button
-      await tester.tap(find.text('Soul'));
+      await tester.tap(find.text('Soul Ledger'));
       await tester.pump();
 
       // Verify state updated
@@ -123,17 +151,16 @@ void main() {
 
     testWidgets('should update note and merchant',
         (WidgetTester tester) async {
-      final container = ProviderContainer();
+      final container = ProviderContainer(overrides: defaultTestOverrides);
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: const MaterialApp(
-            home: TransactionFormScreen(),
-          ),
+          child: wrapWithLocalizations(const TransactionFormScreen()),
         ),
       );
+      await tester.pumpAndSettle();
 
       // Find note field
       final noteField = find.byKey(const Key('note_field'));
@@ -158,10 +185,9 @@ void main() {
     testWidgets('should show validation errors when submitting invalid form',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: TransactionFormScreen(),
-          ),
+        wrapWithLocalizations(
+          const TransactionFormScreen(),
+          overrides: defaultTestOverrides,
         ),
       );
       await tester.pumpAndSettle();
@@ -177,17 +203,16 @@ void main() {
 
     testWidgets('should enable submit button when form valid',
         (WidgetTester tester) async {
-      final container = ProviderContainer();
+      final container = ProviderContainer(overrides: defaultTestOverrides);
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: const MaterialApp(
-            home: TransactionFormScreen(),
-          ),
+          child: wrapWithLocalizations(const TransactionFormScreen()),
         ),
       );
+      await tester.pumpAndSettle();
 
       // Fill amount
       final amountField = find.byKey(const Key('amount_field'));
@@ -198,8 +223,8 @@ void main() {
       await tester.tap(find.byType(DropdownButtonFormField<String>));
       await tester.pumpAndSettle();
 
-      // Select first category
-      await tester.tap(find.text('餐饮').last);
+      // Select first category from dropdown menu
+      await tester.tap(find.byType(DropdownMenuItem<String>).first);
       await tester.pumpAndSettle();
 
       // Verify submit button enabled
@@ -210,10 +235,9 @@ void main() {
     testWidgets('should show validation error for empty amount',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: TransactionFormScreen(),
-          ),
+        wrapWithLocalizations(
+          const TransactionFormScreen(),
+          overrides: defaultTestOverrides,
         ),
       );
       await tester.pumpAndSettle();
@@ -229,12 +253,12 @@ void main() {
     testWidgets('should show validation error for empty category',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: TransactionFormScreen(),
-          ),
+        wrapWithLocalizations(
+          const TransactionFormScreen(),
+          overrides: defaultTestOverrides,
         ),
       );
+      await tester.pumpAndSettle();
 
       // Fill only amount
       final amountField = find.byKey(const Key('amount_field'));
@@ -253,7 +277,20 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
+          overrides: defaultTestOverrides,
           child: MaterialApp(
+            locale: const Locale('en'), // Use English for tests
+            localizationsDelegates: const [
+              S.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('ja'),
+              Locale('en'),
+              Locale('zh'),
+            ],
             home: Scaffold(
               body: Builder(
                 builder: (context) => ElevatedButton(
