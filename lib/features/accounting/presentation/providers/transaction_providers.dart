@@ -42,7 +42,6 @@ CreateTransactionUseCase createTransactionUseCase(
     transactionRepository: ref.watch(transactionRepositoryProvider),
     categoryRepository: ref.watch(categoryRepositoryProvider),
     hashChainService: ref.watch(hashChainServiceProvider),
-    fieldEncryptionService: ref.watch(fieldEncryptionServiceProvider),
   );
 }
 
@@ -65,7 +64,6 @@ UpdateTransactionUseCase updateTransactionUseCase(
   return UpdateTransactionUseCase(
     transactionRepository: ref.watch(transactionRepositoryProvider),
     categoryRepository: ref.watch(categoryRepositoryProvider),
-    fieldEncryptionService: ref.watch(fieldEncryptionServiceProvider),
   );
 }
 

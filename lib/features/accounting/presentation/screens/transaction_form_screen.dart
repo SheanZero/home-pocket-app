@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/transaction_form_notifier.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/transaction_form_state.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/current_book_provider.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/current_device_provider.dart';
 
 /// Transaction Form Screen
 ///
@@ -40,6 +43,10 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     final formState = ref.watch(transactionFormNotifierProvider);
     final formNotifier = ref.read(transactionFormNotifierProvider.notifier);
 
+    // Watch current book and device ID
+    final currentBookAsync = ref.watch(currentBookIdProvider);
+    final currentDeviceAsync = ref.watch(currentDeviceIdProvider);
+
     // Listen for submit success
     ref.listen<bool>(
       transactionFormNotifierProvider.select((state) => state.submitSuccess),
@@ -52,6 +59,53 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         }
       },
     );
+
+    // Handle loading/error states for book and device
+    return currentBookAsync.when(
+      data: (bookId) {
+        if (bookId == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('New Transaction')),
+            body: const Center(
+              child: Text('Please create a book first'),
+            ),
+          );
+        }
+
+        return currentDeviceAsync.when(
+          data: (deviceId) => _buildFormScaffold(
+            context,
+            formState,
+            formNotifier,
+            bookId,
+            deviceId,
+          ),
+          loading: () => const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          ),
+          error: (error, _) => Scaffold(
+            appBar: AppBar(title: const Text('New Transaction')),
+            body: Center(child: Text('Error loading device: $error')),
+          ),
+        );
+      },
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, _) => Scaffold(
+        appBar: AppBar(title: const Text('New Transaction')),
+        body: Center(child: Text('Error loading book: $error')),
+      ),
+    );
+  }
+
+  Widget _buildFormScaffold(
+    BuildContext context,
+    TransactionFormState formState,
+    TransactionFormNotifier formNotifier,
+    String bookId,
+    String deviceId,
+  ) {
 
     return Scaffold(
       appBar: AppBar(
@@ -260,8 +314,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       if (_formKey.currentState!.validate()) {
                         // Only submit if form validation passes
                         await formNotifier.submit(
-                          bookId: 'book_001',
-                          deviceId: 'device_001',
+                          bookId: bookId,
+                          deviceId: deviceId,
                         );
                       }
                     },
