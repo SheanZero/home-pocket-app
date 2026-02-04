@@ -3,7 +3,7 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:home_pocket/features/security/application/services/recovery_kit_service.dart';
-import 'package:home_pocket/features/security/application/services/key_manager.dart';
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 
 @GenerateMocks([FlutterSecureStorage, KeyManager])
 import 'recovery_kit_service_test.mocks.dart';

@@ -8,10 +8,10 @@ import 'dart:async' as _i6;
 import 'package:cryptography/cryptography.dart' as _i4;
 import 'package:flutter/foundation.dart' as _i5;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i2;
-import 'package:home_pocket/features/security/application/services/key_manager.dart'
-    as _i7;
-import 'package:home_pocket/features/security/domain/models/device_key_pair.dart'
+import 'package:home_pocket/infrastructure/crypto/models/device_key_pair.dart'
     as _i3;
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart'
+    as _i7;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -499,4 +499,14 @@ class MockKeyManager extends _i1.Mock implements _i7.KeyManager {
           ),
         )),
       ) as _i6.Future<_i3.DeviceKeyPair>);
+
+  @override
+  _i6.Future<void> clearKeys() => (super.noSuchMethod(
+        Invocation.method(
+          #clearKeys,
+          [],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 }

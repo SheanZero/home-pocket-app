@@ -3,11 +3,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_pocket/features/security/application/services/biometric_lock.dart';
-import 'package:home_pocket/features/security/application/services/field_encryption_service.dart';
-import 'package:home_pocket/features/security/application/services/hash_chain_service.dart';
-import 'package:home_pocket/features/security/application/services/key_manager.dart';
 import 'package:home_pocket/features/security/application/services/pin_manager.dart';
 import 'package:home_pocket/features/security/application/services/recovery_kit_service.dart';
+import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
+import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 
 /// 安全模块测试屏幕
 ///

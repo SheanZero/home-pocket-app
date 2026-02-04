@@ -4,7 +4,8 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'key_manager.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/key_repository.dart';
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 
 part 'recovery_kit_service.g.dart';
 
@@ -55,7 +56,7 @@ class RecoveryKitService {
   Future<void> recoverFromMnemonic(String mnemonic) async {
     // 1. 验证助记词格式
     if (!bip39.validateMnemonic(mnemonic)) {
-      throw InvalidMnemonicException('助记词格式错误');
+      throw InvalidSeedException('助记词格式错误');
     }
 
     // 2. 从助记词派生种子（512位）
