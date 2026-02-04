@@ -16,7 +16,6 @@ class Categories extends Table {
   @override
   Set<Column> get primaryKey => {id};
 
-  @override
   List<TableIndex> get customIndices => [
         // Index for querying by transaction type
         TableIndex(name: 'idx_categories_type', columns: {#type}),

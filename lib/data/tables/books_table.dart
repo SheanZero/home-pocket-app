@@ -18,7 +18,6 @@ class Books extends Table {
   @override
   Set<Column> get primaryKey => {id};
 
-  @override
   List<TableIndex> get customIndices => [
         // Index for finding active books
         TableIndex(name: 'idx_books_archived', columns: {#isArchived}),

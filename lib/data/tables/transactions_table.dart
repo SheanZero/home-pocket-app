@@ -34,7 +34,6 @@ class Transactions extends Table {
   @override
   Set<Column> get primaryKey => {id};
 
-  @override
   List<TableIndex> get customIndices => [
         // Index for querying transactions by book (most common query)
         TableIndex(name: 'idx_transactions_book_id', columns: {#bookId}),
