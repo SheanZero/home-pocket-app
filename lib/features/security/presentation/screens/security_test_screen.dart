@@ -222,7 +222,7 @@ class _SecurityTestScreenState extends ConsumerState<SecurityTestScreen> {
 
                       final resultText = result.when(
                         success: () => '✅ 认证成功',
-                        failed: (attempts) => '❌ 认证失败 (尝试次数: $attempts)',
+                        failed: (failedAttempts) => '❌ 认证失败 (尝试次数: $failedAttempts)',
                         fallbackToPIN: () => '⚠️ 需要使用PIN码',
                         tooManyAttempts: () => '❌ 尝试次数过多',
                         lockedOut: () => '❌ 已锁定',

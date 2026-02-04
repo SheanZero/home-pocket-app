@@ -2,44 +2,28 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'auth_result.freezed.dart';
 
-enum AuthStatus {
-  success,
-  failed,
-  fallbackToPIN,
-  tooManyAttempts,
-  lockedOut,
-  error,
-}
-
+/// Authentication result with multiple variants using Freezed union type
 @freezed
 class AuthResult with _$AuthResult {
-  const factory AuthResult({
-    required AuthStatus status,
-    String? message,
-    int? failedAttempts,
-  }) = _AuthResult;
+  /// Authentication succeeded
+  const factory AuthResult.success() = AuthSuccess;
 
-  factory AuthResult.success() => const AuthResult(status: AuthStatus.success);
+  /// Authentication failed with number of attempts
+  const factory AuthResult.failed({
+    required int failedAttempts,
+  }) = AuthFailed;
 
-  factory AuthResult.failed(int attempts) => AuthResult(
-        status: AuthStatus.failed,
-        failedAttempts: attempts,
-      );
+  /// Device does not support biometric authentication, fallback to PIN required
+  const factory AuthResult.fallbackToPIN() = AuthFallbackToPIN;
 
-  factory AuthResult.fallbackToPIN() => const AuthResult(
-        status: AuthStatus.fallbackToPIN,
-      );
+  /// Too many failed attempts, temporarily locked
+  const factory AuthResult.tooManyAttempts() = AuthTooManyAttempts;
 
-  factory AuthResult.tooManyAttempts() => const AuthResult(
-        status: AuthStatus.tooManyAttempts,
-      );
+  /// Account locked out due to security policy
+  const factory AuthResult.lockedOut() = AuthLockedOut;
 
-  factory AuthResult.lockedOut() => const AuthResult(
-        status: AuthStatus.lockedOut,
-      );
-
-  factory AuthResult.error(String message) => AuthResult(
-        status: AuthStatus.error,
-        message: message,
-      );
+  /// Authentication error occurred
+  const factory AuthResult.error({
+    required String message,
+  }) = AuthError;
 }

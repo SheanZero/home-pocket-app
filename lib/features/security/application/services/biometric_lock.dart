@@ -105,7 +105,7 @@ class BiometricLock {
         return AuthResult.success();
       } else {
         _failedAttempts++;
-        return AuthResult.failed(_failedAttempts);
+        return AuthResult.failed(failedAttempts: _failedAttempts);
       }
     } on PlatformException catch (e) {
       if (e.code == auth_error.lockedOut ||
@@ -116,11 +116,11 @@ class BiometricLock {
         return AuthResult.fallbackToPIN();
       } else {
         _failedAttempts++;
-        return AuthResult.error(e.message ?? '認証失敗');
+        return AuthResult.error(message: e.message ?? '認証失敗');
       }
     } catch (e) {
       _failedAttempts++;
-      return AuthResult.error(e.toString());
+      return AuthResult.error(message: e.toString());
     }
   }
 

@@ -95,7 +95,17 @@ void main() {
         );
 
         // Assert
-        expect(result.status, AuthStatus.success);
+        expect(
+          result.when(
+            success: () => true,
+            failed: (_) => false,
+            fallbackToPIN: () => false,
+            tooManyAttempts: () => false,
+            lockedOut: () => false,
+            error: (_) => false,
+          ),
+          isTrue,
+        );
       });
 
       test('should return failed and increment counter when auth fails', () async {
@@ -116,8 +126,24 @@ void main() {
         );
 
         // Assert
-        expect(result.status, AuthStatus.failed);
-        expect(result.failedAttempts, 1);
+        final isFailed = result.when(
+          success: () => false,
+          failed: (_) => true,
+          fallbackToPIN: () => false,
+          tooManyAttempts: () => false,
+          lockedOut: () => false,
+          error: (_) => false,
+        );
+        final attemptCount = result.when(
+          success: () => null,
+          failed: (failedAttempts) => failedAttempts,
+          fallbackToPIN: () => null,
+          tooManyAttempts: () => null,
+          lockedOut: () => null,
+          error: (_) => null,
+        );
+        expect(isFailed, isTrue);
+        expect(attemptCount, 1);
       });
 
       test('should return tooManyAttempts after 3 failures', () async {
@@ -139,7 +165,17 @@ void main() {
         final result = await biometricLock.authenticate(reason: 'Test'); // 4th attempt - blocked
 
         // Assert
-        expect(result.status, AuthStatus.tooManyAttempts);
+        expect(
+          result.when(
+            success: () => false,
+            failed: (_) => false,
+            fallbackToPIN: () => false,
+            tooManyAttempts: () => true,
+            lockedOut: () => false,
+            error: (_) => false,
+          ),
+          isTrue,
+        );
       });
 
       test('should return lockedOut when PlatformException LockedOut', () async {
@@ -160,7 +196,17 @@ void main() {
         );
 
         // Assert
-        expect(result.status, AuthStatus.lockedOut);
+        expect(
+          result.when(
+            success: () => false,
+            failed: (_) => false,
+            fallbackToPIN: () => false,
+            tooManyAttempts: () => false,
+            lockedOut: () => true,
+            error: (_) => false,
+          ),
+          isTrue,
+        );
       });
 
       test('should return fallbackToPIN when biometric not available', () async {
@@ -174,7 +220,17 @@ void main() {
         );
 
         // Assert
-        expect(result.status, AuthStatus.fallbackToPIN);
+        expect(
+          result.when(
+            success: () => false,
+            failed: (_) => false,
+            fallbackToPIN: () => true,
+            tooManyAttempts: () => false,
+            lockedOut: () => false,
+            error: (_) => false,
+          ),
+          isTrue,
+        );
       });
     });
 
@@ -201,7 +257,15 @@ void main() {
         final result = await biometricLock.authenticate(reason: 'Test');
 
         // Assert: Should be first failure again
-        expect(result.failedAttempts, 1);
+        final attemptCount = result.when(
+          success: () => null,
+          failed: (failedAttempts) => failedAttempts,
+          fallbackToPIN: () => null,
+          tooManyAttempts: () => null,
+          lockedOut: () => null,
+          error: (_) => null,
+        );
+        expect(attemptCount, 1);
       });
     });
   });
