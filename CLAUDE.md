@@ -354,22 +354,282 @@ integration_test/   # E2E tests
 
 ---
 
-## Localization
+## Internationalization (i18n) Guidelines (MANDATORY)
 
-**Supported Languages:** Japanese (default), Chinese, English
+**CRITICAL:** All user-facing text and formatting MUST use the centralized i18n infrastructure. DO NOT hardcode strings or use raw formatters.
 
-**ARB Files:** `lib/l10n/app_{ja,zh,en}.arb`
+### Supported Languages
 
-**Generated Class:** `S` (from `lib/generated/app_localizations.dart`)
+- **Japanese (ja)** - Default locale
+- **Chinese (zh)** - Simplified Chinese
+- **English (en)** - International English
 
-**Usage:**
+### Mandatory i18n Rules
+
+1. **Localized Strings:**
+   - ✅ MUST use `S.of(context)` for all user-facing text
+   - ❌ NEVER hardcode UI strings in widgets
+   - ❌ NEVER use string literals for labels, messages, or error text
+   - ✅ ALWAYS add translations to all 3 ARB files (ja, zh, en)
+
+2. **Date Formatting:**
+   - ✅ MUST use `DateFormatter` from `lib/shared/utils/formatters/date_formatter.dart`
+   - ❌ NEVER use raw `DateFormat` or `toString()` on DateTime objects
+   - ✅ ALWAYS pass current locale from `currentLocaleProvider`
+   - Formats: `formatDate()`, `formatDateTime()`, `formatRelative()`, `formatMonthYear()`
+
+3. **Number & Currency Formatting:**
+   - ✅ MUST use `NumberFormatter` from `lib/shared/utils/formatters/number_formatter.dart`
+   - ❌ NEVER display raw numbers for amounts or currencies
+   - ✅ ALWAYS use `formatCurrency()` for transaction amounts
+   - ✅ MUST pass correct currency code (JPY, USD, CNY, EUR, GBP)
+
+4. **Locale Management:**
+   - ✅ MUST use `LocaleNotifierProvider` for runtime locale switching
+   - ✅ MUST watch `currentLocaleProvider` when formatting dates/numbers
+   - ❌ NEVER assume a specific locale in business logic
+   - ✅ ALWAYS respect user's locale preference
+
+5. **ARB File Management:**
+   - ✅ MUST update ALL 3 ARB files when adding new translations
+   - ✅ MUST add @metadata for each translation key
+   - ✅ MUST run `flutter gen-l10n` after ARB changes
+   - ❌ NEVER commit without regenerating localization files
+
+### Usage Examples
+
+**Localized Strings:**
 ```dart
 import 'package:home_pocket/generated/app_localizations.dart';
 
-Text(S.of(context).appName)
+@override
+Widget build(BuildContext context) {
+  final l10n = S.of(context);
+
+  return AppBar(
+    title: Text(l10n.appName),
+    actions: [
+      IconButton(
+        icon: Icon(Icons.settings),
+        tooltip: l10n.settings,
+        onPressed: () {},
+      ),
+    ],
+  );
+}
 ```
 
-**After modifying ARB files:** Run `flutter gen-l10n`
+**Date Formatting:**
+```dart
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:home_pocket/shared/utils/formatters/date_formatter.dart';
+import 'package:home_pocket/features/settings/presentation/providers/locale_provider.dart';
+
+@override
+Widget build(BuildContext context, WidgetRef ref) {
+  final locale = ref.watch(currentLocaleProvider);
+  final transaction = ref.watch(transactionProvider);
+
+  return Column(
+    children: [
+      Text(DateFormatter.formatDate(transaction.timestamp, locale)),
+      Text(DateFormatter.formatRelative(transaction.timestamp, locale)),
+    ],
+  );
+}
+```
+
+**Currency Formatting:**
+```dart
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:home_pocket/shared/utils/formatters/number_formatter.dart';
+import 'package:home_pocket/features/settings/presentation/providers/locale_provider.dart';
+
+@override
+Widget build(BuildContext context, WidgetRef ref) {
+  final locale = ref.watch(currentLocaleProvider);
+  final amount = transaction.amount;
+
+  return Text(
+    NumberFormatter.formatCurrency(amount, 'JPY', locale),
+    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+  );
+}
+```
+
+**Runtime Locale Switching:**
+```dart
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:home_pocket/features/settings/presentation/providers/locale_provider.dart';
+
+@override
+Widget build(BuildContext context, WidgetRef ref) {
+  final localeNotifier = ref.read(localeNotifierProvider.notifier);
+  final currentLocale = ref.watch(currentLocaleProvider);
+
+  return DropdownButton<Locale>(
+    value: currentLocale,
+    items: [
+      DropdownMenuItem(value: Locale('ja'), child: Text('日本語')),
+      DropdownMenuItem(value: Locale('en'), child: Text('English')),
+      DropdownMenuItem(value: Locale('zh'), child: Text('中文')),
+    ],
+    onChanged: (locale) {
+      if (locale != null) {
+        localeNotifier.setLocale(locale);
+      }
+    },
+  );
+}
+```
+
+**Parameterized Error Messages:**
+```dart
+import 'package:home_pocket/generated/app_localizations.dart';
+
+String validateAmount(double amount, BuildContext context) {
+  final l10n = S.of(context);
+
+  if (amount < 0.01) {
+    return l10n.errorMinAmount(0.01);
+  }
+
+  if (amount > 999999.99) {
+    return l10n.errorMaxAmount(999999.99);
+  }
+
+  return '';
+}
+```
+
+### Adding New Translations
+
+**Workflow:**
+1. Add key to **all 3 ARB files**: `lib/l10n/app_{ja,zh,en}.arb`
+2. Add @metadata entry for each key
+3. Run: `flutter gen-l10n`
+4. Use via: `S.of(context).yourNewKey`
+5. Write unit test to verify translations exist
+
+**Example:**
+```json
+// app_ja.arb
+{
+  "newFeature": "新機能",
+  "@newFeature": {
+    "description": "新機能のラベル"
+  }
+}
+
+// app_en.arb
+{
+  "newFeature": "New Feature",
+  "@newFeature": {
+    "description": "Label for new feature"
+  }
+}
+
+// app_zh.arb
+{
+  "newFeature": "新功能",
+  "@newFeature": {
+    "description": "新功能的标签"
+  }
+}
+```
+
+### Locale-Specific Formatting Rules
+
+**Date Formats:**
+- Japanese: `2026/02/04` (YYYY/MM/DD)
+- English: `02/04/2026` (MM/DD/YYYY)
+- Chinese: `2026年02月04日` (YYYY年MM月DD日)
+
+**Currency Rules:**
+- JPY: ¥1,235 (0 decimals)
+- USD/CNY/EUR/GBP: $1,234.56 (2 decimals)
+
+**Compact Numbers:**
+- Japanese/Chinese: 123万 (uses 万 for 10,000)
+- English: 1.23M (uses K/M/B)
+
+### Common Pitfalls
+
+❌ **WRONG: Hardcoded strings**
+```dart
+Text('Settings')  // NEVER do this
+```
+
+✅ **CORRECT: Localized strings**
+```dart
+Text(S.of(context).settings)
+```
+
+❌ **WRONG: Raw DateTime toString()**
+```dart
+Text(transaction.timestamp.toString())
+```
+
+✅ **CORRECT: DateFormatter with locale**
+```dart
+final locale = ref.watch(currentLocaleProvider);
+Text(DateFormatter.formatDate(transaction.timestamp, locale))
+```
+
+❌ **WRONG: Hardcoded currency symbol**
+```dart
+Text('¥${amount.toStringAsFixed(0)}')
+```
+
+✅ **CORRECT: NumberFormatter with currency code**
+```dart
+final locale = ref.watch(currentLocaleProvider);
+Text(NumberFormatter.formatCurrency(amount, 'JPY', locale))
+```
+
+❌ **WRONG: Adding translation to only one ARB file**
+```dart
+// Only added to app_ja.arb - WRONG!
+```
+
+✅ **CORRECT: Add to all 3 ARB files**
+```dart
+// Added to app_ja.arb, app_en.arb, app_zh.arb
+```
+
+### Testing Requirements
+
+When adding i18n features, you MUST:
+- [ ] Add unit tests for all 3 locales
+- [ ] Test date formatting across all locales
+- [ ] Test currency formatting for all supported currencies
+- [ ] Test locale switching doesn't break UI
+- [ ] Verify ARB files have no missing keys
+- [ ] Run `flutter gen-l10n` and commit generated files to gitignore check
+
+### Configuration Files
+
+**l10n.yaml:**
+```yaml
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: S
+output-dir: lib/generated
+```
+
+**After ARB changes, always run:**
+```bash
+flutter gen-l10n
+```
+
+### References
+
+- **MOD-014 Specification:** `doc/arch/02-module-specs/MOD-014_i18n.md`
+- **ARB Files:** `lib/l10n/app_{ja,zh,en}.arb`
+- **DateFormatter:** `lib/shared/utils/formatters/date_formatter.dart`
+- **NumberFormatter:** `lib/shared/utils/formatters/number_formatter.dart`
+- **LocaleProvider:** `lib/features/settings/presentation/providers/locale_provider.dart`
 
 ---
 
