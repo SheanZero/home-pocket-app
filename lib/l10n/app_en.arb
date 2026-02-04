@@ -5,17 +5,329 @@
     "description": "The application name"
   },
   "home": "Home",
+  "@home": {
+    "description": "Home screen title"
+  },
   "transactions": "Transactions",
+  "@transactions": {
+    "description": "Transactions screen title"
+  },
   "analytics": "Analytics",
+  "@analytics": {
+    "description": "Analytics screen title"
+  },
   "settings": "Settings",
+  "@settings": {
+    "description": "Settings screen title"
+  },
   "newTransaction": "New Transaction",
+  "@newTransaction": {
+    "description": "New transaction button"
+  },
   "amount": "Amount",
+  "@amount": {
+    "description": "Amount field label"
+  },
   "category": "Category",
+  "@category": {
+    "description": "Category field label"
+  },
   "note": "Note",
+  "@note": {
+    "description": "Note field label"
+  },
   "save": "Save",
+  "@save": {
+    "description": "Save button"
+  },
   "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button"
+  },
   "delete": "Delete",
+  "@delete": {
+    "description": "Delete button"
+  },
   "edit": "Edit",
+  "@edit": {
+    "description": "Edit button"
+  },
   "survivalLedger": "Survival Ledger",
-  "soulLedger": "Soul Ledger"
+  "@survivalLedger": {
+    "description": "Survival ledger label"
+  },
+  "soulLedger": "Soul Ledger",
+  "@soulLedger": {
+    "description": "Soul ledger label"
+  },
+  "dashboard": "Dashboard",
+  "@dashboard": {
+    "description": "Dashboard screen title"
+  },
+  "reports": "Reports",
+  "@reports": {
+    "description": "Reports screen title"
+  },
+  "sync": "Sync",
+  "@sync": {
+    "description": "Sync screen title"
+  },
+  "backup": "Backup",
+  "@backup": {
+    "description": "Backup screen title"
+  },
+  "security": "Security",
+  "@security": {
+    "description": "Security screen title"
+  },
+  "about": "About",
+  "@about": {
+    "description": "About screen title"
+  },
+  "help": "Help",
+  "@help": {
+    "description": "Help screen title"
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile screen title"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Language selection"
+  },
+  "theme": "Theme",
+  "@theme": {
+    "description": "Theme selection"
+  },
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Notifications screen"
+  },
+  "privacy": "Privacy",
+  "@privacy": {
+    "description": "Privacy screen"
+  },
+  "export": "Export",
+  "@export": {
+    "description": "Export data"
+  },
+  "import": "Import",
+  "@import": {
+    "description": "Import data"
+  },
+  "categories": "Categories",
+  "@categories": {
+    "description": "Categories screen"
+  },
+  "categoryFood": "Food",
+  "@categoryFood": {
+    "description": "Food category"
+  },
+  "categoryHousing": "Housing",
+  "@categoryHousing": {
+    "description": "Housing category"
+  },
+  "categoryTransport": "Transportation",
+  "@categoryTransport": {
+    "description": "Transportation category"
+  },
+  "categoryUtilities": "Utilities",
+  "@categoryUtilities": {
+    "description": "Utilities category"
+  },
+  "categoryHealthcare": "Healthcare",
+  "@categoryHealthcare": {
+    "description": "Healthcare category"
+  },
+  "categoryEducation": "Education",
+  "@categoryEducation": {
+    "description": "Education category"
+  },
+  "categoryClothing": "Clothing",
+  "@categoryClothing": {
+    "description": "Clothing category"
+  },
+  "categoryInsurance": "Insurance",
+  "@categoryInsurance": {
+    "description": "Insurance category"
+  },
+  "categoryTaxes": "Taxes",
+  "@categoryTaxes": {
+    "description": "Taxes category"
+  },
+  "categoryOther": "Other",
+  "@categoryOther": {
+    "description": "Other category"
+  },
+  "categoryEntertainment": "Entertainment",
+  "@categoryEntertainment": {
+    "description": "Entertainment category"
+  },
+  "categoryHobbies": "Hobbies",
+  "@categoryHobbies": {
+    "description": "Hobbies category"
+  },
+  "categorySelfImprovement": "Self-Improvement",
+  "@categorySelfImprovement": {
+    "description": "Self-improvement category"
+  },
+  "categoryTravel": "Travel",
+  "@categoryTravel": {
+    "description": "Travel category"
+  },
+  "categoryDining": "Dining Out",
+  "@categoryDining": {
+    "description": "Dining out category"
+  },
+  "categoryCafe": "Cafe",
+  "@categoryCafe": {
+    "description": "Cafe category"
+  },
+  "categoryGifts": "Gifts",
+  "@categoryGifts": {
+    "description": "Gifts category"
+  },
+  "categoryBeauty": "Beauty",
+  "@categoryBeauty": {
+    "description": "Beauty category"
+  },
+  "categoryFitness": "Fitness",
+  "@categoryFitness": {
+    "description": "Fitness category"
+  },
+  "categoryBooks": "Books",
+  "@categoryBooks": {
+    "description": "Books category"
+  },
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Confirm action"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry action"
+  },
+  "search": "Search",
+  "@search": {
+    "description": "Search action"
+  },
+  "filter": "Filter",
+  "@filter": {
+    "description": "Filter action"
+  },
+  "sort": "Sort",
+  "@sort": {
+    "description": "Sort action"
+  },
+  "refresh": "Refresh",
+  "@refresh": {
+    "description": "Refresh action"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Close action"
+  },
+  "ok": "OK",
+  "@ok": {
+    "description": "OK button"
+  },
+  "yes": "Yes",
+  "@yes": {
+    "description": "Yes button"
+  },
+  "no": "No",
+  "@no": {
+    "description": "No button"
+  },
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Loading indicator"
+  },
+  "noData": "No data available",
+  "@noData": {
+    "description": "No data message"
+  },
+  "errorNetwork": "Network error occurred",
+  "@errorNetwork": {
+    "description": "Network error message"
+  },
+  "errorUnknown": "An unexpected error occurred",
+  "@errorUnknown": {
+    "description": "Unknown error message"
+  },
+  "errorInvalidAmount": "Invalid amount",
+  "@errorInvalidAmount": {
+    "description": "Invalid amount error"
+  },
+  "errorRequired": "This field is required",
+  "@errorRequired": {
+    "description": "Required field error"
+  },
+  "errorMinAmount": "Amount must be at least {min}",
+  "@errorMinAmount": {
+    "description": "Minimum amount error",
+    "placeholders": {
+      "min": {
+        "type": "double"
+      }
+    }
+  },
+  "errorMaxAmount": "Amount must not exceed {max}",
+  "@errorMaxAmount": {
+    "description": "Maximum amount error",
+    "placeholders": {
+      "max": {
+        "type": "double"
+      }
+    }
+  },
+  "errorInvalidDate": "Invalid date",
+  "@errorInvalidDate": {
+    "description": "Invalid date error"
+  },
+  "errorDatabaseWrite": "Failed to save data",
+  "@errorDatabaseWrite": {
+    "description": "Database write error"
+  },
+  "errorDatabaseRead": "Failed to load data",
+  "@errorDatabaseRead": {
+    "description": "Database read error"
+  },
+  "errorEncryption": "Encryption error occurred",
+  "@errorEncryption": {
+    "description": "Encryption error"
+  },
+  "errorSync": "Synchronization failed",
+  "@errorSync": {
+    "description": "Sync error"
+  },
+  "errorBiometric": "Biometric authentication failed",
+  "@errorBiometric": {
+    "description": "Biometric authentication error"
+  },
+  "errorPermission": "Insufficient permissions",
+  "@errorPermission": {
+    "description": "Permission error"
+  },
+  "successSaved": "Saved successfully",
+  "@successSaved": {
+    "description": "Save success message"
+  },
+  "successDeleted": "Deleted successfully",
+  "@successDeleted": {
+    "description": "Delete success message"
+  },
+  "successSynced": "Synced successfully",
+  "@successSynced": {
+    "description": "Sync success message"
+  },
+  "today": "Today",
+  "@today": {
+    "description": "Today label"
+  },
+  "yesterday": "Yesterday",
+  "@yesterday": {
+    "description": "Yesterday label"
+  }
 }

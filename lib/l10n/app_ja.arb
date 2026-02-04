@@ -5,17 +5,329 @@
     "description": "The application name"
   },
   "home": "ホーム",
+  "@home": {
+    "description": "Home screen title"
+  },
   "transactions": "取引",
+  "@transactions": {
+    "description": "Transactions screen title"
+  },
   "analytics": "分析",
+  "@analytics": {
+    "description": "Analytics screen title"
+  },
   "settings": "設定",
+  "@settings": {
+    "description": "Settings screen title"
+  },
   "newTransaction": "新しい取引",
+  "@newTransaction": {
+    "description": "New transaction button"
+  },
   "amount": "金額",
+  "@amount": {
+    "description": "Amount field label"
+  },
   "category": "カテゴリー",
+  "@category": {
+    "description": "Category field label"
+  },
   "note": "メモ",
+  "@note": {
+    "description": "Note field label"
+  },
   "save": "保存",
+  "@save": {
+    "description": "Save button"
+  },
   "cancel": "キャンセル",
+  "@cancel": {
+    "description": "Cancel button"
+  },
   "delete": "削除",
+  "@delete": {
+    "description": "Delete button"
+  },
   "edit": "編集",
+  "@edit": {
+    "description": "Edit button"
+  },
   "survivalLedger": "生存帳簿",
-  "soulLedger": "魂の帳簿"
+  "@survivalLedger": {
+    "description": "Survival ledger label"
+  },
+  "soulLedger": "魂の帳簿",
+  "@soulLedger": {
+    "description": "Soul ledger label"
+  },
+  "dashboard": "ダッシュボード",
+  "@dashboard": {
+    "description": "Dashboard screen title"
+  },
+  "reports": "レポート",
+  "@reports": {
+    "description": "Reports screen title"
+  },
+  "sync": "同期",
+  "@sync": {
+    "description": "Sync screen title"
+  },
+  "backup": "バックアップ",
+  "@backup": {
+    "description": "Backup screen title"
+  },
+  "security": "セキュリティ",
+  "@security": {
+    "description": "Security screen title"
+  },
+  "about": "アプリについて",
+  "@about": {
+    "description": "About screen title"
+  },
+  "help": "ヘルプ",
+  "@help": {
+    "description": "Help screen title"
+  },
+  "profile": "プロフィール",
+  "@profile": {
+    "description": "Profile screen title"
+  },
+  "language": "言語",
+  "@language": {
+    "description": "Language selection"
+  },
+  "theme": "テーマ",
+  "@theme": {
+    "description": "Theme selection"
+  },
+  "notifications": "通知",
+  "@notifications": {
+    "description": "Notifications screen"
+  },
+  "privacy": "プライバシー",
+  "@privacy": {
+    "description": "Privacy screen"
+  },
+  "export": "エクスポート",
+  "@export": {
+    "description": "Export data"
+  },
+  "import": "インポート",
+  "@import": {
+    "description": "Import data"
+  },
+  "categories": "カテゴリー",
+  "@categories": {
+    "description": "Categories screen"
+  },
+  "categoryFood": "食費",
+  "@categoryFood": {
+    "description": "Food category"
+  },
+  "categoryHousing": "住居費",
+  "@categoryHousing": {
+    "description": "Housing category"
+  },
+  "categoryTransport": "交通費",
+  "@categoryTransport": {
+    "description": "Transportation category"
+  },
+  "categoryUtilities": "光熱費",
+  "@categoryUtilities": {
+    "description": "Utilities category"
+  },
+  "categoryHealthcare": "医療費",
+  "@categoryHealthcare": {
+    "description": "Healthcare category"
+  },
+  "categoryEducation": "教育費",
+  "@categoryEducation": {
+    "description": "Education category"
+  },
+  "categoryClothing": "被服費",
+  "@categoryClothing": {
+    "description": "Clothing category"
+  },
+  "categoryInsurance": "保険料",
+  "@categoryInsurance": {
+    "description": "Insurance category"
+  },
+  "categoryTaxes": "税金",
+  "@categoryTaxes": {
+    "description": "Taxes category"
+  },
+  "categoryOther": "その他",
+  "@categoryOther": {
+    "description": "Other category"
+  },
+  "categoryEntertainment": "娯楽費",
+  "@categoryEntertainment": {
+    "description": "Entertainment category"
+  },
+  "categoryHobbies": "趣味",
+  "@categoryHobbies": {
+    "description": "Hobbies category"
+  },
+  "categorySelfImprovement": "自己投資",
+  "@categorySelfImprovement": {
+    "description": "Self-improvement category"
+  },
+  "categoryTravel": "旅行",
+  "@categoryTravel": {
+    "description": "Travel category"
+  },
+  "categoryDining": "外食",
+  "@categoryDining": {
+    "description": "Dining out category"
+  },
+  "categoryCafe": "カフェ",
+  "@categoryCafe": {
+    "description": "Cafe category"
+  },
+  "categoryGifts": "贈り物",
+  "@categoryGifts": {
+    "description": "Gifts category"
+  },
+  "categoryBeauty": "美容",
+  "@categoryBeauty": {
+    "description": "Beauty category"
+  },
+  "categoryFitness": "フィットネス",
+  "@categoryFitness": {
+    "description": "Fitness category"
+  },
+  "categoryBooks": "書籍",
+  "@categoryBooks": {
+    "description": "Books category"
+  },
+  "confirm": "確認",
+  "@confirm": {
+    "description": "Confirm action"
+  },
+  "retry": "再試行",
+  "@retry": {
+    "description": "Retry action"
+  },
+  "search": "検索",
+  "@search": {
+    "description": "Search action"
+  },
+  "filter": "フィルター",
+  "@filter": {
+    "description": "Filter action"
+  },
+  "sort": "並び替え",
+  "@sort": {
+    "description": "Sort action"
+  },
+  "refresh": "更新",
+  "@refresh": {
+    "description": "Refresh action"
+  },
+  "close": "閉じる",
+  "@close": {
+    "description": "Close action"
+  },
+  "ok": "OK",
+  "@ok": {
+    "description": "OK button"
+  },
+  "yes": "はい",
+  "@yes": {
+    "description": "Yes button"
+  },
+  "no": "いいえ",
+  "@no": {
+    "description": "No button"
+  },
+  "loading": "読み込み中...",
+  "@loading": {
+    "description": "Loading indicator"
+  },
+  "noData": "データがありません",
+  "@noData": {
+    "description": "No data message"
+  },
+  "errorNetwork": "ネットワークエラーが発生しました",
+  "@errorNetwork": {
+    "description": "Network error message"
+  },
+  "errorUnknown": "予期しないエラーが発生しました",
+  "@errorUnknown": {
+    "description": "Unknown error message"
+  },
+  "errorInvalidAmount": "金額が無効です",
+  "@errorInvalidAmount": {
+    "description": "Invalid amount error"
+  },
+  "errorRequired": "この項目は必須です",
+  "@errorRequired": {
+    "description": "Required field error"
+  },
+  "errorMinAmount": "{min}以上の金額を入力してください",
+  "@errorMinAmount": {
+    "description": "Minimum amount error",
+    "placeholders": {
+      "min": {
+        "type": "double"
+      }
+    }
+  },
+  "errorMaxAmount": "{max}以下の金額を入力してください",
+  "@errorMaxAmount": {
+    "description": "Maximum amount error",
+    "placeholders": {
+      "max": {
+        "type": "double"
+      }
+    }
+  },
+  "errorInvalidDate": "日付が無効です",
+  "@errorInvalidDate": {
+    "description": "Invalid date error"
+  },
+  "errorDatabaseWrite": "データの保存に失敗しました",
+  "@errorDatabaseWrite": {
+    "description": "Database write error"
+  },
+  "errorDatabaseRead": "データの読み込みに失敗しました",
+  "@errorDatabaseRead": {
+    "description": "Database read error"
+  },
+  "errorEncryption": "暗号化エラーが発生しました",
+  "@errorEncryption": {
+    "description": "Encryption error"
+  },
+  "errorSync": "同期に失敗しました",
+  "@errorSync": {
+    "description": "Sync error"
+  },
+  "errorBiometric": "生体認証に失敗しました",
+  "@errorBiometric": {
+    "description": "Biometric authentication error"
+  },
+  "errorPermission": "権限が不足しています",
+  "@errorPermission": {
+    "description": "Permission error"
+  },
+  "successSaved": "保存しました",
+  "@successSaved": {
+    "description": "Save success message"
+  },
+  "successDeleted": "削除しました",
+  "@successDeleted": {
+    "description": "Delete success message"
+  },
+  "successSynced": "同期が完了しました",
+  "@successSynced": {
+    "description": "Sync success message"
+  },
+  "today": "今日",
+  "@today": {
+    "description": "Today label"
+  },
+  "yesterday": "昨日",
+  "@yesterday": {
+    "description": "Yesterday label"
+  }
 }

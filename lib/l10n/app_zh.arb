@@ -5,17 +5,329 @@
     "description": "The application name"
   },
   "home": "首页",
+  "@home": {
+    "description": "Home screen title"
+  },
   "transactions": "交易",
+  "@transactions": {
+    "description": "Transactions screen title"
+  },
   "analytics": "分析",
+  "@analytics": {
+    "description": "Analytics screen title"
+  },
   "settings": "设置",
+  "@settings": {
+    "description": "Settings screen title"
+  },
   "newTransaction": "新增交易",
+  "@newTransaction": {
+    "description": "New transaction button"
+  },
   "amount": "金额",
+  "@amount": {
+    "description": "Amount field label"
+  },
   "category": "分类",
+  "@category": {
+    "description": "Category field label"
+  },
   "note": "备注",
+  "@note": {
+    "description": "Note field label"
+  },
   "save": "保存",
+  "@save": {
+    "description": "Save button"
+  },
   "cancel": "取消",
+  "@cancel": {
+    "description": "Cancel button"
+  },
   "delete": "删除",
+  "@delete": {
+    "description": "Delete button"
+  },
   "edit": "编辑",
+  "@edit": {
+    "description": "Edit button"
+  },
   "survivalLedger": "生存账本",
-  "soulLedger": "灵魂账本"
+  "@survivalLedger": {
+    "description": "Survival ledger label"
+  },
+  "soulLedger": "灵魂账本",
+  "@soulLedger": {
+    "description": "Soul ledger label"
+  },
+  "dashboard": "仪表盘",
+  "@dashboard": {
+    "description": "Dashboard screen title"
+  },
+  "reports": "报表",
+  "@reports": {
+    "description": "Reports screen title"
+  },
+  "sync": "同步",
+  "@sync": {
+    "description": "Sync screen title"
+  },
+  "backup": "备份",
+  "@backup": {
+    "description": "Backup screen title"
+  },
+  "security": "安全",
+  "@security": {
+    "description": "Security screen title"
+  },
+  "about": "关于",
+  "@about": {
+    "description": "About screen title"
+  },
+  "help": "帮助",
+  "@help": {
+    "description": "Help screen title"
+  },
+  "profile": "个人资料",
+  "@profile": {
+    "description": "Profile screen title"
+  },
+  "language": "语言",
+  "@language": {
+    "description": "Language selection"
+  },
+  "theme": "主题",
+  "@theme": {
+    "description": "Theme selection"
+  },
+  "notifications": "通知",
+  "@notifications": {
+    "description": "Notifications screen"
+  },
+  "privacy": "隐私",
+  "@privacy": {
+    "description": "Privacy screen"
+  },
+  "export": "导出",
+  "@export": {
+    "description": "Export data"
+  },
+  "import": "导入",
+  "@import": {
+    "description": "Import data"
+  },
+  "categories": "分类",
+  "@categories": {
+    "description": "Categories screen"
+  },
+  "categoryFood": "食品",
+  "@categoryFood": {
+    "description": "Food category"
+  },
+  "categoryHousing": "住房",
+  "@categoryHousing": {
+    "description": "Housing category"
+  },
+  "categoryTransport": "交通",
+  "@categoryTransport": {
+    "description": "Transportation category"
+  },
+  "categoryUtilities": "水电煤",
+  "@categoryUtilities": {
+    "description": "Utilities category"
+  },
+  "categoryHealthcare": "医疗",
+  "@categoryHealthcare": {
+    "description": "Healthcare category"
+  },
+  "categoryEducation": "教育",
+  "@categoryEducation": {
+    "description": "Education category"
+  },
+  "categoryClothing": "服装",
+  "@categoryClothing": {
+    "description": "Clothing category"
+  },
+  "categoryInsurance": "保险",
+  "@categoryInsurance": {
+    "description": "Insurance category"
+  },
+  "categoryTaxes": "税费",
+  "@categoryTaxes": {
+    "description": "Taxes category"
+  },
+  "categoryOther": "其他",
+  "@categoryOther": {
+    "description": "Other category"
+  },
+  "categoryEntertainment": "娱乐",
+  "@categoryEntertainment": {
+    "description": "Entertainment category"
+  },
+  "categoryHobbies": "爱好",
+  "@categoryHobbies": {
+    "description": "Hobbies category"
+  },
+  "categorySelfImprovement": "自我提升",
+  "@categorySelfImprovement": {
+    "description": "Self-improvement category"
+  },
+  "categoryTravel": "旅行",
+  "@categoryTravel": {
+    "description": "Travel category"
+  },
+  "categoryDining": "外出就餐",
+  "@categoryDining": {
+    "description": "Dining out category"
+  },
+  "categoryCafe": "咖啡厅",
+  "@categoryCafe": {
+    "description": "Cafe category"
+  },
+  "categoryGifts": "礼品",
+  "@categoryGifts": {
+    "description": "Gifts category"
+  },
+  "categoryBeauty": "美容",
+  "@categoryBeauty": {
+    "description": "Beauty category"
+  },
+  "categoryFitness": "健身",
+  "@categoryFitness": {
+    "description": "Fitness category"
+  },
+  "categoryBooks": "书籍",
+  "@categoryBooks": {
+    "description": "Books category"
+  },
+  "confirm": "确认",
+  "@confirm": {
+    "description": "Confirm action"
+  },
+  "retry": "重试",
+  "@retry": {
+    "description": "Retry action"
+  },
+  "search": "搜索",
+  "@search": {
+    "description": "Search action"
+  },
+  "filter": "筛选",
+  "@filter": {
+    "description": "Filter action"
+  },
+  "sort": "排序",
+  "@sort": {
+    "description": "Sort action"
+  },
+  "refresh": "刷新",
+  "@refresh": {
+    "description": "Refresh action"
+  },
+  "close": "关闭",
+  "@close": {
+    "description": "Close action"
+  },
+  "ok": "确定",
+  "@ok": {
+    "description": "OK button"
+  },
+  "yes": "是",
+  "@yes": {
+    "description": "Yes button"
+  },
+  "no": "否",
+  "@no": {
+    "description": "No button"
+  },
+  "loading": "加载中...",
+  "@loading": {
+    "description": "Loading indicator"
+  },
+  "noData": "暂无数据",
+  "@noData": {
+    "description": "No data message"
+  },
+  "errorNetwork": "网络错误",
+  "@errorNetwork": {
+    "description": "Network error message"
+  },
+  "errorUnknown": "发生未知错误",
+  "@errorUnknown": {
+    "description": "Unknown error message"
+  },
+  "errorInvalidAmount": "金额无效",
+  "@errorInvalidAmount": {
+    "description": "Invalid amount error"
+  },
+  "errorRequired": "此项为必填项",
+  "@errorRequired": {
+    "description": "Required field error"
+  },
+  "errorMinAmount": "金额必须至少为 {min}",
+  "@errorMinAmount": {
+    "description": "Minimum amount error",
+    "placeholders": {
+      "min": {
+        "type": "double"
+      }
+    }
+  },
+  "errorMaxAmount": "金额不能超过 {max}",
+  "@errorMaxAmount": {
+    "description": "Maximum amount error",
+    "placeholders": {
+      "max": {
+        "type": "double"
+      }
+    }
+  },
+  "errorInvalidDate": "日期无效",
+  "@errorInvalidDate": {
+    "description": "Invalid date error"
+  },
+  "errorDatabaseWrite": "保存数据失败",
+  "@errorDatabaseWrite": {
+    "description": "Database write error"
+  },
+  "errorDatabaseRead": "读取数据失败",
+  "@errorDatabaseRead": {
+    "description": "Database read error"
+  },
+  "errorEncryption": "加密错误",
+  "@errorEncryption": {
+    "description": "Encryption error"
+  },
+  "errorSync": "同步失败",
+  "@errorSync": {
+    "description": "Sync error"
+  },
+  "errorBiometric": "生物识别认证失败",
+  "@errorBiometric": {
+    "description": "Biometric authentication error"
+  },
+  "errorPermission": "权限不足",
+  "@errorPermission": {
+    "description": "Permission error"
+  },
+  "successSaved": "保存成功",
+  "@successSaved": {
+    "description": "Save success message"
+  },
+  "successDeleted": "删除成功",
+  "@successDeleted": {
+    "description": "Delete success message"
+  },
+  "successSynced": "同步成功",
+  "@successSynced": {
+    "description": "Sync success message"
+  },
+  "today": "今天",
+  "@today": {
+    "description": "Today label"
+  },
+  "yesterday": "昨天",
+  "@yesterday": {
+    "description": "Yesterday label"
+  }
 }
