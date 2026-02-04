@@ -7,31 +7,9 @@ import 'package:home_pocket/features/accounting/application/use_cases/update_tra
 import 'package:home_pocket/features/accounting/application/use_cases/delete_transaction_use_case.dart';
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 
 part 'transaction_providers.g.dart';
-
-/// Mock Transaction Repository Provider
-///
-/// TODO: Replace with actual implementation once Data Layer is complete
-@riverpod
-TransactionRepository transactionRepository(TransactionRepositoryRef ref) {
-  // This will be replaced with actual implementation
-  // For now, return a mock or throw unimplemented
-  throw UnimplementedError(
-    'TransactionRepository implementation pending Data Layer completion',
-  );
-}
-
-/// Mock Category Repository Provider
-///
-/// TODO: Replace with actual implementation once Data Layer is complete
-@riverpod
-CategoryRepository categoryRepository(CategoryRepositoryRef ref) {
-  // This will be replaced with actual implementation
-  throw UnimplementedError(
-    'CategoryRepository implementation pending Data Layer completion',
-  );
-}
 
 /// Create Transaction Use Case Provider
 @riverpod
