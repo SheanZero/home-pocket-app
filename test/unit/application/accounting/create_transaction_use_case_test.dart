@@ -43,16 +43,20 @@ void main() {
     );
 
     test('successfully creates a transaction with hash chain', () async {
-      when(mockCategoryRepo.findById('cat_food'))
-          .thenAnswer((_) async => testCategory);
-      when(mockTransactionRepo.getLatestHash('book_001'))
-          .thenAnswer((_) async => 'prev_hash_abc');
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: anyNamed('transactionId'),
-        amount: anyNamed('amount'),
-        timestamp: anyNamed('timestamp'),
-        previousHash: anyNamed('previousHash'),
-      )).thenReturn('computed_hash_xyz');
+      when(
+        mockCategoryRepo.findById('cat_food'),
+      ).thenAnswer((_) async => testCategory);
+      when(
+        mockTransactionRepo.getLatestHash('book_001'),
+      ).thenAnswer((_) async => 'prev_hash_abc');
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: anyNamed('transactionId'),
+          amount: anyNamed('amount'),
+          timestamp: anyNamed('timestamp'),
+          previousHash: anyNamed('previousHash'),
+        ),
+      ).thenReturn('computed_hash_xyz');
       when(mockTransactionRepo.insert(any)).thenAnswer((_) async {});
 
       final result = await useCase.execute(
@@ -74,16 +78,20 @@ void main() {
     });
 
     test('uses genesis hash when no previous transactions', () async {
-      when(mockCategoryRepo.findById('cat_food'))
-          .thenAnswer((_) async => testCategory);
-      when(mockTransactionRepo.getLatestHash('book_001'))
-          .thenAnswer((_) async => null);
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: anyNamed('transactionId'),
-        amount: anyNamed('amount'),
-        timestamp: anyNamed('timestamp'),
-        previousHash: anyNamed('previousHash'),
-      )).thenReturn('genesis_hash');
+      when(
+        mockCategoryRepo.findById('cat_food'),
+      ).thenAnswer((_) async => testCategory);
+      when(
+        mockTransactionRepo.getLatestHash('book_001'),
+      ).thenAnswer((_) async => null);
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: anyNamed('transactionId'),
+          amount: anyNamed('amount'),
+          timestamp: anyNamed('timestamp'),
+          previousHash: anyNamed('previousHash'),
+        ),
+      ).thenReturn('genesis_hash');
       when(mockTransactionRepo.insert(any)).thenAnswer((_) async {});
 
       final result = await useCase.execute(
@@ -96,12 +104,14 @@ void main() {
       );
 
       expect(result.isSuccess, isTrue);
-      verify(mockHashChainService.calculateTransactionHash(
-        transactionId: anyNamed('transactionId'),
-        amount: anyNamed('amount'),
-        timestamp: anyNamed('timestamp'),
-        previousHash: '0' * 64,
-      )).called(1);
+      verify(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: anyNamed('transactionId'),
+          amount: anyNamed('amount'),
+          timestamp: anyNamed('timestamp'),
+          previousHash: '0' * 64,
+        ),
+      ).called(1);
     });
 
     test('returns error when amount is zero', () async {
@@ -120,8 +130,9 @@ void main() {
     });
 
     test('returns error when category does not exist', () async {
-      when(mockCategoryRepo.findById('invalid_cat'))
-          .thenAnswer((_) async => null);
+      when(
+        mockCategoryRepo.findById('invalid_cat'),
+      ).thenAnswer((_) async => null);
 
       final result = await useCase.execute(
         CreateTransactionParams(

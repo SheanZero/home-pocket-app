@@ -34,9 +34,9 @@ class CreateTransactionUseCase {
     required TransactionRepository transactionRepository,
     required CategoryRepository categoryRepository,
     required HashChainService hashChainService,
-  })  : _transactionRepo = transactionRepository,
-        _categoryRepo = categoryRepository,
-        _hashChainService = hashChainService;
+  }) : _transactionRepo = transactionRepository,
+       _categoryRepo = categoryRepository,
+       _hashChainService = hashChainService;
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;

@@ -19,8 +19,11 @@ void main() {
       final level1 = DefaultCategories.all.where((c) => c.level == 1);
       expect(level1.length, greaterThanOrEqualTo(7));
       for (final cat in level1) {
-        expect(cat.parentId, isNull,
-            reason: '${cat.id} level-1 should have no parent');
+        expect(
+          cat.parentId,
+          isNull,
+          reason: '${cat.id} level-1 should have no parent',
+        );
       }
     });
 
@@ -31,8 +34,11 @@ void main() {
           .toSet();
       final level2 = DefaultCategories.all.where((c) => c.level == 2);
       for (final cat in level2) {
-        expect(level1Ids.contains(cat.parentId), isTrue,
-            reason: '${cat.id} parent ${cat.parentId} not found in level 1');
+        expect(
+          level1Ids.contains(cat.parentId),
+          isTrue,
+          reason: '${cat.id} parent ${cat.parentId} not found in level 1',
+        );
       }
     });
 

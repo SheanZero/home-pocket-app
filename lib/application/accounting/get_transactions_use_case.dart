@@ -25,14 +25,14 @@ class GetTransactionsParams {
 
 /// Fetches transactions for a book with optional filters.
 class GetTransactionsUseCase {
-  GetTransactionsUseCase({
-    required TransactionRepository transactionRepository,
-  }) : _transactionRepo = transactionRepository;
+  GetTransactionsUseCase({required TransactionRepository transactionRepository})
+    : _transactionRepo = transactionRepository;
 
   final TransactionRepository _transactionRepo;
 
   Future<Result<List<Transaction>>> execute(
-      GetTransactionsParams params) async {
+    GetTransactionsParams params,
+  ) async {
     if (params.bookId.isEmpty) {
       return Result.error('bookId must not be empty');
     }

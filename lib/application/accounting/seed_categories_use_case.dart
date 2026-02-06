@@ -7,9 +7,8 @@ import '../../shared/utils/result.dart';
 /// Called during app initialization. Idempotent — does nothing
 /// if categories are already present.
 class SeedCategoriesUseCase {
-  SeedCategoriesUseCase({
-    required CategoryRepository categoryRepository,
-  }) : _categoryRepo = categoryRepository;
+  SeedCategoriesUseCase({required CategoryRepository categoryRepository})
+    : _categoryRepo = categoryRepository;
 
   final CategoryRepository _categoryRepo;
 

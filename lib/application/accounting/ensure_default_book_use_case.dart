@@ -9,9 +9,8 @@ import '../../shared/utils/result.dart';
 /// Returns the existing book if one is found, otherwise creates
 /// a default "My Book" with JPY currency.
 class EnsureDefaultBookUseCase {
-  EnsureDefaultBookUseCase({
-    required BookRepository bookRepository,
-  }) : _bookRepo = bookRepository;
+  EnsureDefaultBookUseCase({required BookRepository bookRepository})
+    : _bookRepo = bookRepository;
 
   final BookRepository _bookRepo;
 

@@ -35,11 +35,13 @@ void main() {
   group('GetTransactionsUseCase', () {
     test('returns transactions for a book', () async {
       final txList = [makeTransaction('tx1', 100), makeTransaction('tx2', 200)];
-      when(mockRepo.findByBookId(
-        'book_001',
-        limit: anyNamed('limit'),
-        offset: anyNamed('offset'),
-      )).thenAnswer((_) async => txList);
+      when(
+        mockRepo.findByBookId(
+          'book_001',
+          limit: anyNamed('limit'),
+          offset: anyNamed('offset'),
+        ),
+      ).thenAnswer((_) async => txList);
 
       final result = await useCase.execute(
         GetTransactionsParams(bookId: 'book_001'),
@@ -50,15 +52,17 @@ void main() {
     });
 
     test('passes filter parameters to repository', () async {
-      when(mockRepo.findByBookId(
-        'book_001',
-        ledgerType: LedgerType.survival,
-        categoryId: 'cat_food',
-        startDate: anyNamed('startDate'),
-        endDate: anyNamed('endDate'),
-        limit: 50,
-        offset: 10,
-      )).thenAnswer((_) async => []);
+      when(
+        mockRepo.findByBookId(
+          'book_001',
+          ledgerType: LedgerType.survival,
+          categoryId: 'cat_food',
+          startDate: anyNamed('startDate'),
+          endDate: anyNamed('endDate'),
+          limit: 50,
+          offset: 10,
+        ),
+      ).thenAnswer((_) async => []);
 
       await useCase.execute(
         GetTransactionsParams(
@@ -72,21 +76,21 @@ void main() {
         ),
       );
 
-      verify(mockRepo.findByBookId(
-        'book_001',
-        ledgerType: LedgerType.survival,
-        categoryId: 'cat_food',
-        startDate: DateTime(2026, 1, 1),
-        endDate: DateTime(2026, 2, 1),
-        limit: 50,
-        offset: 10,
-      )).called(1);
+      verify(
+        mockRepo.findByBookId(
+          'book_001',
+          ledgerType: LedgerType.survival,
+          categoryId: 'cat_food',
+          startDate: DateTime(2026, 1, 1),
+          endDate: DateTime(2026, 2, 1),
+          limit: 50,
+          offset: 10,
+        ),
+      ).called(1);
     });
 
     test('returns error when bookId is empty', () async {
-      final result = await useCase.execute(
-        GetTransactionsParams(bookId: ''),
-      );
+      final result = await useCase.execute(GetTransactionsParams(bookId: ''));
 
       expect(result.isError, isTrue);
       verifyNever(mockRepo.findByBookId(any));

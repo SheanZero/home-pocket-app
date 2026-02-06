@@ -23,8 +23,7 @@ class TransactionListScreen extends ConsumerStatefulWidget {
       _TransactionListScreenState();
 }
 
-class _TransactionListScreenState
-    extends ConsumerState<TransactionListScreen> {
+class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
   List<Transaction> _transactions = [];
   Map<String, Category> _categoryMap = {};
   bool _isLoading = true;
@@ -82,44 +81,45 @@ class _TransactionListScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Transactions'),
-      ),
+      appBar: AppBar(title: const Text('Transactions')),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _transactions.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.receipt_long,
-                          size: 64, color: Colors.grey.shade400),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No transactions yet',
-                        style: TextStyle(color: Colors.grey.shade600),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text('Tap + to add your first transaction'),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.receipt_long,
+                    size: 64,
+                    color: Colors.grey.shade400,
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _loadData,
-                  child: ListView.separated(
-                    itemCount: _transactions.length,
-                    separatorBuilder: (_, _) => const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      final tx = _transactions[index];
-                      final cat = _categoryMap[tx.categoryId];
-                      return TransactionListTile(
-                        transaction: tx,
-                        categoryName: cat?.name,
-                        onDelete: () => _deleteTransaction(tx.id),
-                      );
-                    },
+                  const SizedBox(height: 16),
+                  Text(
+                    'No transactions yet',
+                    style: TextStyle(color: Colors.grey.shade600),
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  const Text('Tap + to add your first transaction'),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _loadData,
+              child: ListView.separated(
+                itemCount: _transactions.length,
+                separatorBuilder: (_, _) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final tx = _transactions[index];
+                  final cat = _categoryMap[tx.categoryId];
+                  return TransactionListTile(
+                    transaction: tx,
+                    categoryName: cat?.name,
+                    onDelete: () => _deleteTransaction(tx.id),
+                  );
+                },
+              ),
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToForm,
         child: const Icon(Icons.add),

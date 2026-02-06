@@ -19,18 +19,20 @@ void main() {
 
   group('DeleteTransactionUseCase', () {
     test('soft-deletes an existing transaction', () async {
-      when(mockRepo.findById('tx_001')).thenAnswer((_) async => Transaction(
-            id: 'tx_001',
-            bookId: 'book_001',
-            deviceId: 'dev_local',
-            amount: 1000,
-            type: TransactionType.expense,
-            categoryId: 'cat_food',
-            ledgerType: LedgerType.survival,
-            timestamp: DateTime(2026, 2, 6),
-            currentHash: 'hash_001',
-            createdAt: DateTime(2026, 2, 6),
-          ));
+      when(mockRepo.findById('tx_001')).thenAnswer(
+        (_) async => Transaction(
+          id: 'tx_001',
+          bookId: 'book_001',
+          deviceId: 'dev_local',
+          amount: 1000,
+          type: TransactionType.expense,
+          categoryId: 'cat_food',
+          ledgerType: LedgerType.survival,
+          timestamp: DateTime(2026, 2, 6),
+          currentHash: 'hash_001',
+          createdAt: DateTime(2026, 2, 6),
+        ),
+      );
       when(mockRepo.softDelete('tx_001')).thenAnswer((_) async {});
 
       final result = await useCase.execute('tx_001');

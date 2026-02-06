@@ -56,8 +56,9 @@ class TransactionListTile extends StatelessWidget {
       child: ListTile(
         onTap: onTap,
         leading: CircleAvatar(
-          backgroundColor:
-              isExpense ? Colors.red.shade100 : Colors.green.shade100,
+          backgroundColor: isExpense
+              ? Colors.red.shade100
+              : Colors.green.shade100,
           child: Icon(
             isExpense ? Icons.remove : Icons.add,
             color: isExpense ? Colors.red : Colors.green,
