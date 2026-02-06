@@ -2,15 +2,17 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 
 import 'tables/audit_logs_table.dart';
+import 'tables/books_table.dart';
+import 'tables/categories_table.dart';
+import 'tables/transactions_table.dart';
 
 part 'app_database.g.dart';
 
 /// Main application database.
 ///
-/// Currently contains only the audit_logs table.
-/// Will be expanded with transaction, category, and book tables
-/// in Phase 2 (MOD-001 Basic Accounting).
-@DriftDatabase(tables: [AuditLogs])
+/// Contains all Drift tables for the app.
+/// Schema version incremented when tables are added/modified.
+@DriftDatabase(tables: [AuditLogs, Books, Categories, Transactions])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
@@ -18,5 +20,5 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 }
