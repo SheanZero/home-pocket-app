@@ -91,7 +91,7 @@ class NumberFormatter {
       case 'CNY':
         return '¥';
       case 'USD':
-        return '\$';
+        return r'$';
       case 'EUR':
         return '€';
       case 'GBP':

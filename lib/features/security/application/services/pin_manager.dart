@@ -6,10 +6,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'pin_manager.g.dart';
 
 class PINManager {
-  final FlutterSecureStorage _secureStorage;
-
   PINManager({required FlutterSecureStorage secureStorage})
       : _secureStorage = secureStorage;
+  final FlutterSecureStorage _secureStorage;
 
   /// 检查是否已设置PIN
   Future<bool> isPINSet() async {
@@ -95,5 +94,5 @@ PINManager pinManager(PinManagerRef ref) {
 @riverpod
 Future<bool> isPINSet(IsPINSetRef ref) async {
   final pinManager = ref.watch(pinManagerProvider);
-  return await pinManager.isPINSet();
+  return pinManager.isPINSet();
 }

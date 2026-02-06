@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
 import 'package:home_pocket/features/accounting/application/use_cases/get_transactions_use_case.dart';
+import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
-import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
 import 'get_transactions_use_case_test.mocks.dart';
 
@@ -38,7 +38,7 @@ void main() {
           type: TransactionType.expense,
           categoryId: 'cat_food',
           ledgerType: LedgerType.survival,
-        currentHash: 'test_hash',
+          currentHash: 'test_hash',
         ),
         Transaction.create(
           bookId: 'book_001',
@@ -47,19 +47,21 @@ void main() {
           type: TransactionType.expense,
           categoryId: 'cat_transport',
           ledgerType: LedgerType.survival,
-        currentHash: 'test_hash',
+          currentHash: 'test_hash',
         ),
       ];
 
-      when(mockTransactionRepo.findByBook(
-        bookId: 'book_001',
-        startDate: null,
-        endDate: null,
-        categoryIds: null,
-        ledgerType: null,
-        limit: 100,
-        offset: 0,
-      )).thenAnswer((_) async => transactions);
+      when(
+        mockTransactionRepo.findByBook(
+          bookId: 'book_001',
+          startDate: null,
+          endDate: null,
+          categoryIds: null,
+          ledgerType: null,
+          limit: 100,
+          offset: 0,
+        ),
+      ).thenAnswer((_) async => transactions);
 
       // Act
       final result = await useCase.execute(bookId: 'book_001');
@@ -86,15 +88,17 @@ void main() {
         timestamp: DateTime(2026, 1, 15),
       );
 
-      when(mockTransactionRepo.findByBook(
-        bookId: 'book_001',
-        startDate: startDate,
-        endDate: endDate,
-        categoryIds: null,
-        ledgerType: null,
-        limit: 100,
-        offset: 0,
-      )).thenAnswer((_) async => [transaction]);
+      when(
+        mockTransactionRepo.findByBook(
+          bookId: 'book_001',
+          startDate: startDate,
+          endDate: endDate,
+          categoryIds: null,
+          ledgerType: null,
+          limit: 100,
+          offset: 0,
+        ),
+      ).thenAnswer((_) async => [transaction]);
 
       // Act
       final result = await useCase.execute(
@@ -122,15 +126,17 @@ void main() {
         note: 'encrypted_note',
       );
 
-      when(mockTransactionRepo.findByBook(
-        bookId: 'book_001',
-        startDate: null,
-        endDate: null,
-        categoryIds: null,
-        ledgerType: null,
-        limit: 100,
-        offset: 0,
-      )).thenAnswer((_) async => [transaction]);
+      when(
+        mockTransactionRepo.findByBook(
+          bookId: 'book_001',
+          startDate: null,
+          endDate: null,
+          categoryIds: null,
+          ledgerType: null,
+          limit: 100,
+          offset: 0,
+        ),
+      ).thenAnswer((_) async => [transaction]);
 
       when(mockFieldEncryption.decryptField('encrypted_note'))
           .thenAnswer((_) async => 'Decrypted note');
@@ -156,15 +162,17 @@ void main() {
         currentHash: 'test_hash',
       );
 
-      when(mockTransactionRepo.findByBook(
-        bookId: 'book_001',
-        startDate: null,
-        endDate: null,
-        categoryIds: ['cat_food'],
-        ledgerType: null,
-        limit: 100,
-        offset: 0,
-      )).thenAnswer((_) async => [transaction]);
+      when(
+        mockTransactionRepo.findByBook(
+          bookId: 'book_001',
+          startDate: null,
+          endDate: null,
+          categoryIds: ['cat_food'],
+          ledgerType: null,
+          limit: 100,
+          offset: 0,
+        ),
+      ).thenAnswer((_) async => [transaction]);
 
       // Act
       final result = await useCase.execute(
@@ -189,15 +197,17 @@ void main() {
         currentHash: 'test_hash',
       );
 
-      when(mockTransactionRepo.findByBook(
-        bookId: 'book_001',
-        startDate: null,
-        endDate: null,
-        categoryIds: null,
-        ledgerType: LedgerType.survival,
-        limit: 100,
-        offset: 0,
-      )).thenAnswer((_) async => [transaction]);
+      when(
+        mockTransactionRepo.findByBook(
+          bookId: 'book_001',
+          startDate: null,
+          endDate: null,
+          categoryIds: null,
+          ledgerType: LedgerType.survival,
+          limit: 100,
+          offset: 0,
+        ),
+      ).thenAnswer((_) async => [transaction]);
 
       // Act
       final result = await useCase.execute(
@@ -222,19 +232,21 @@ void main() {
           type: TransactionType.expense,
           categoryId: 'cat_food',
           ledgerType: LedgerType.survival,
-        currentHash: 'test_hash',
+          currentHash: 'test_hash',
         ),
       );
 
-      when(mockTransactionRepo.findByBook(
-        bookId: 'book_001',
-        startDate: null,
-        endDate: null,
-        categoryIds: null,
-        ledgerType: null,
-        limit: 10,
-        offset: 20,
-      )).thenAnswer((_) async => transactions);
+      when(
+        mockTransactionRepo.findByBook(
+          bookId: 'book_001',
+          startDate: null,
+          endDate: null,
+          categoryIds: null,
+          ledgerType: null,
+          limit: 10,
+          offset: 20,
+        ),
+      ).thenAnswer((_) async => transactions);
 
       // Act
       final result = await useCase.execute(

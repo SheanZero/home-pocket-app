@@ -16,8 +16,7 @@ class SecurityTestScreen extends ConsumerStatefulWidget {
   const SecurityTestScreen({super.key});
 
   @override
-  ConsumerState<SecurityTestScreen> createState() =>
-      _SecurityTestScreenState();
+  ConsumerState<SecurityTestScreen> createState() => _SecurityTestScreenState();
 }
 
 class _SecurityTestScreenState extends ConsumerState<SecurityTestScreen> {
@@ -90,8 +89,7 @@ class _SecurityTestScreenState extends ConsumerState<SecurityTestScreen> {
                   () async {
                     try {
                       final keyManager = ref.read(keyManagerProvider);
-                      final keyPair =
-                          await keyManager.generateDeviceKeyPair();
+                      final keyPair = await keyManager.generateDeviceKeyPair();
                       _showResult(
                         '✅ 密钥对生成成功!\n'
                         '设备ID: ${keyPair.deviceId}\n'
@@ -150,8 +148,8 @@ class _SecurityTestScreenState extends ConsumerState<SecurityTestScreen> {
                     () async {
                       try {
                         final service = ref.read(recoveryKitServiceProvider);
-                        final isValid =
-                            await service.verifyRecoveryKit(_generatedMnemonic!);
+                        final isValid = await service
+                            .verifyRecoveryKit(_generatedMnemonic!);
                         _showResult(
                           isValid ? '✅ 助记词验证通过' : '❌ 助记词验证失败',
                           isError: !isValid,
@@ -224,7 +222,8 @@ class _SecurityTestScreenState extends ConsumerState<SecurityTestScreen> {
 
                       final resultText = result.when(
                         success: () => '✅ 认证成功',
-                        failed: (failedAttempts) => '❌ 认证失败 (尝试次数: $failedAttempts)',
+                        failed: (failedAttempts) =>
+                            '❌ 认证失败 (尝试次数: $failedAttempts)',
                         fallbackToPIN: () => '⚠️ 需要使用PIN码',
                         tooManyAttempts: () => '❌ 尝试次数过多',
                         lockedOut: () => '❌ 已锁定',
@@ -403,9 +402,8 @@ class _SecurityTestScreenState extends ConsumerState<SecurityTestScreen> {
                       // 创建5笔交易
                       final transactions = <Map<String, dynamic>>[];
                       for (int i = 0; i < 5; i++) {
-                        final prevHash = i == 0
-                            ? ''
-                            : transactions[i - 1]['hash'] as String;
+                        final prevHash =
+                            i == 0 ? '' : transactions[i - 1]['hash'] as String;
                         final hash = service.calculateTransactionHash(
                           transactionId: 'tx-${i + 1}',
                           amount: (i + 1) * 100.0,
@@ -445,9 +443,8 @@ class _SecurityTestScreenState extends ConsumerState<SecurityTestScreen> {
                       // 创建交易链
                       final transactions = <Map<String, dynamic>>[];
                       for (int i = 0; i < 3; i++) {
-                        final prevHash = i == 0
-                            ? ''
-                            : transactions[i - 1]['hash'] as String;
+                        final prevHash =
+                            i == 0 ? '' : transactions[i - 1]['hash'] as String;
                         final hash = service.calculateTransactionHash(
                           transactionId: 'tx-${i + 1}',
                           amount: (i + 1) * 100.0,

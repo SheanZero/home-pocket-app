@@ -5,31 +5,29 @@ part 'transaction.freezed.dart';
 part 'transaction.g.dart';
 
 enum TransactionType {
-  expense,   // 支出
-  income,    // 收入
-  transfer;  // 转账（未来扩展）
+  expense, // 支出
+  income, // 收入
+  transfer; // 转账（未来扩展）
 }
 
 enum LedgerType {
-  survival,  // 生存账本
-  soul;      // 灵魂账本
+  survival, // 生存账本
+  soul; // 灵魂账本
 }
 
 @freezed
 class Transaction with _$Transaction {
-  const Transaction._();
-
   const factory Transaction({
     required String id,
     required String bookId,
     required String deviceId,
-    required int amount,       // 金额（分）
+    required int amount, // 金额（分）
     required TransactionType type,
     required String categoryId,
     required LedgerType ledgerType,
     required DateTime timestamp,
-
-    // Optional fields
+    required String currentHash, // Timestamps
+    required DateTime createdAt, // Optional fields
     String? note,
     String? photoHash,
     String? merchant,
@@ -37,10 +35,6 @@ class Transaction with _$Transaction {
 
     // Hash chain
     String? prevHash,
-    required String currentHash,
-
-    // Timestamps
-    required DateTime createdAt,
     DateTime? updatedAt,
 
     // Flags
@@ -48,6 +42,7 @@ class Transaction with _$Transaction {
     @Default(false) bool isSynced,
     @Default(false) bool isDeleted,
   }) = _Transaction;
+  const Transaction._();
 
   factory Transaction.fromJson(Map<String, dynamic> json) =>
       _$TransactionFromJson(json);
@@ -61,7 +56,7 @@ class Transaction with _$Transaction {
     required TransactionType type,
     required String categoryId,
     required LedgerType ledgerType,
-    required String currentHash,  // ✅ Hash provided externally
+    required String currentHash, // ✅ Hash provided externally
     DateTime? timestamp,
     String? note,
     String? photoHash,
@@ -85,7 +80,7 @@ class Transaction with _$Transaction {
       merchant: merchant,
       metadata: metadata,
       prevHash: prevHash,
-      currentHash: currentHash,  // ✅ Use externally calculated hash
+      currentHash: currentHash, // ✅ Use externally calculated hash
       createdAt: now,
       isPrivate: isPrivate,
     );

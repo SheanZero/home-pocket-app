@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:home_pocket/features/settings/domain/entities/locale_settings.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'locale_provider.g.dart';
 

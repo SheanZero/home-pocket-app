@@ -55,6 +55,9 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
+  local_auth_android: any
+  local_auth_darwin: any
+  sqlite3: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -74,6 +77,10 @@ dev_dependencies:
   # Linting
   flutter_lints: ^3.0.1
 
+  local_auth_android: any
+  local_auth_darwin: any
+  local_auth_windows: any
+  matcher: any
 flutter:
   uses-material-design: true
 

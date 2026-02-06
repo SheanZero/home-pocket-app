@@ -261,7 +261,9 @@ class I18nTestScreen extends ConsumerWidget {
                       context,
                       'formatDate',
                       DateFormatter.formatDate(
-                          DateTime(2026, 2, 4), currentLocale),
+                        DateTime(2026, 2, 4),
+                        currentLocale,
+                      ),
                     ),
                     const Divider(height: 16),
                     _buildFormattingRow(
@@ -277,7 +279,9 @@ class I18nTestScreen extends ConsumerWidget {
                       context,
                       'formatRelative (today)',
                       DateFormatter.formatRelative(
-                          DateTime.now(), currentLocale),
+                        DateTime.now(),
+                        currentLocale,
+                      ),
                     ),
                     const Divider(height: 16),
                     _buildFormattingRow(
@@ -293,7 +297,9 @@ class I18nTestScreen extends ConsumerWidget {
                       context,
                       'formatMonthYear',
                       DateFormatter.formatMonthYear(
-                          DateTime(2026, 2, 4), currentLocale),
+                        DateTime(2026, 2, 4),
+                        currentLocale,
+                      ),
                     ),
                   ],
                 ),
@@ -346,35 +352,50 @@ class I18nTestScreen extends ConsumerWidget {
                       context,
                       'JPY (1234.56)',
                       NumberFormatter.formatCurrency(
-                          1234.56, 'JPY', currentLocale),
+                        1234.56,
+                        'JPY',
+                        currentLocale,
+                      ),
                     ),
                     const Divider(height: 16),
                     _buildFormattingRow(
                       context,
                       'USD (1234.56)',
                       NumberFormatter.formatCurrency(
-                          1234.56, 'USD', currentLocale),
+                        1234.56,
+                        'USD',
+                        currentLocale,
+                      ),
                     ),
                     const Divider(height: 16),
                     _buildFormattingRow(
                       context,
                       'CNY (1234.56)',
                       NumberFormatter.formatCurrency(
-                          1234.56, 'CNY', currentLocale),
+                        1234.56,
+                        'CNY',
+                        currentLocale,
+                      ),
                     ),
                     const Divider(height: 16),
                     _buildFormattingRow(
                       context,
                       'EUR (1234.56)',
                       NumberFormatter.formatCurrency(
-                          1234.56, 'EUR', currentLocale),
+                        1234.56,
+                        'EUR',
+                        currentLocale,
+                      ),
                     ),
                     const Divider(height: 16),
                     _buildFormattingRow(
                       context,
                       'GBP (1234.56)',
                       NumberFormatter.formatCurrency(
-                          1234.56, 'GBP', currentLocale),
+                        1234.56,
+                        'GBP',
+                        currentLocale,
+                      ),
                     ),
                   ],
                 ),
@@ -409,7 +430,9 @@ class I18nTestScreen extends ConsumerWidget {
   }
 
   Widget _buildTranslationCard(
-      BuildContext context, Map<String, String> translations) {
+    BuildContext context,
+    Map<String, String> translations,
+  ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),

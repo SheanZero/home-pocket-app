@@ -1,10 +1,11 @@
 import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/encryption_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/repositories/encryption_repository_impl.dart';
 import 'package:home_pocket/infrastructure/crypto/repositories/key_repository.dart';
-import 'package:home_pocket/infrastructure/crypto/repositories/encryption_repository.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
 @GenerateMocks([KeyRepository])
 import 'encryption_repository_impl_test.mocks.dart';
@@ -26,7 +27,8 @@ void main() {
     });
 
     group('encryptField', () {
-      test('should encrypt plaintext and return base64 encoded string', () async {
+      test('should encrypt plaintext and return base64 encoded string',
+          () async {
         // Arrange
         const plaintext = 'Secret data 12345';
 
@@ -44,7 +46,9 @@ void main() {
         verify(mockKeyRepository.getPublicKey()).called(1);
       });
 
-      test('should produce different ciphertext for same plaintext due to random nonce', () async {
+      test(
+          'should produce different ciphertext for same plaintext due to random nonce',
+          () async {
         // Arrange
         const plaintext = 'Same data';
 
@@ -68,7 +72,8 @@ void main() {
 
         // Should contain nonce + MAC even for empty plaintext
         final decoded = base64Decode(encrypted);
-        expect(decoded.length, greaterThanOrEqualTo(28)); // 12 (nonce) + 16 (MAC)
+        expect(
+            decoded.length, greaterThanOrEqualTo(28)); // 12 (nonce) + 16 (MAC)
       });
 
       test('should encrypt Unicode characters correctly', () async {
@@ -169,7 +174,8 @@ void main() {
         );
       });
 
-      test('should throw MacValidationException for tampered ciphertext', () async {
+      test('should throw MacValidationException for tampered ciphertext',
+          () async {
         // Arrange
         const plaintext = 'Secret data';
         final encrypted = await repository.encryptField(plaintext);
@@ -335,7 +341,8 @@ void main() {
     });
 
     group('HKDF key derivation', () {
-      test('should derive consistent encryption key from same public key', () async {
+      test('should derive consistent encryption key from same public key',
+          () async {
         // Arrange
         const plaintext = 'Test data';
 
@@ -356,7 +363,8 @@ void main() {
         expect(decrypted2, equals(plaintext));
       });
 
-      test('should derive different encryption keys for different public keys', () async {
+      test('should derive different encryption keys for different public keys',
+          () async {
         // Arrange
         const plaintext = 'Test data';
 
@@ -382,7 +390,9 @@ void main() {
     });
 
     group('ChaCha20-Poly1305 encryption format', () {
-      test('should produce ciphertext with correct structure: nonce + ciphertext + MAC', () async {
+      test(
+          'should produce ciphertext with correct structure: nonce + ciphertext + MAC',
+          () async {
         // Arrange
         const plaintext = 'Test';
 

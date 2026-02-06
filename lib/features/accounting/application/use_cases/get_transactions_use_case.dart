@@ -10,13 +10,12 @@ import 'package:home_pocket/shared/utils/result.dart';
 /// - Field decryption (note, merchant)
 /// - Pagination support
 class GetTransactionsUseCase {
-  final TransactionRepository transactionRepository;
-  final FieldEncryptionService fieldEncryptionService;
-
   GetTransactionsUseCase({
     required this.transactionRepository,
     required this.fieldEncryptionService,
   });
+  final TransactionRepository transactionRepository;
+  final FieldEncryptionService fieldEncryptionService;
 
   /// Execute the use case
   ///
@@ -61,8 +60,7 @@ class GetTransactionsUseCase {
         }
 
         // Decrypt merchant if present
-        if (transaction.merchant != null &&
-            transaction.merchant!.isNotEmpty) {
+        if (transaction.merchant != null && transaction.merchant!.isNotEmpty) {
           try {
             decryptedMerchant = await fieldEncryptionService
                 .decryptField(transaction.merchant!);

@@ -21,8 +21,7 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
 
   /// Get transaction by ID
   Future<domain.Transaction?> getTransactionById(String id) async {
-    final entity = await (select(transactions)
-          ..where((t) => t.id.equals(id)))
+    final entity = await (select(transactions)..where((t) => t.id.equals(id)))
         .getSingleOrNull();
 
     return entity != null ? _toDomain(entity) : null;
@@ -38,7 +37,7 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
     int limit = 100,
     int offset = 0,
   }) async {
-    var query = select(transactions)
+    final query = select(transactions)
       ..where((t) => t.bookId.equals(bookId) & t.isDeleted.equals(false));
 
     if (startDate != null) {
@@ -97,10 +96,12 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
     final count = countAll();
     final query = selectOnly(transactions)
       ..addColumns([count])
-      ..where(transactions.bookId.equals(bookId) &
-          transactions.isDeleted.equals(false));
+      ..where(
+        transactions.bookId.equals(bookId) &
+            transactions.isDeleted.equals(false),
+      );
 
-    return await query.map((row) => row.read(count)!).getSingle();
+    return query.map((row) => row.read(count)!).getSingle();
   }
 
   /// Convert domain model to entity

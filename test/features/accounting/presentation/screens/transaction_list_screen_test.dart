@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/features/accounting/application/use_cases/get_transactions_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
-import 'package:home_pocket/features/accounting/application/use_cases/get_transactions_use_case.dart';
-import 'package:home_pocket/features/accounting/presentation/screens/transaction_list_screen.dart';
-import 'package:home_pocket/features/accounting/presentation/screens/transaction_form_screen.dart';
-import 'package:home_pocket/features/accounting/presentation/providers/transaction_providers.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/current_book_provider.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/current_device_provider.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/transaction_providers.dart';
+import 'package:home_pocket/features/accounting/presentation/screens/transaction_form_screen.dart';
+import 'package:home_pocket/features/accounting/presentation/screens/transaction_list_screen.dart';
+import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:home_pocket/shared/utils/result.dart';
-import 'package:home_pocket/generated/app_localizations.dart';
 
 /// Helper to wrap widget with localization support for testing
-Widget wrapWithLocalizations(Widget child, {List<Override> overrides = const []}) {
+Widget wrapWithLocalizations(Widget child,
+    {List<Override> overrides = const []}) {
   return ProviderScope(
     overrides: overrides,
     child: MaterialApp(
@@ -44,7 +45,8 @@ final defaultTestOverrides = [
 
 void main() {
   group('TransactionListScreen', () {
-    testWidgets('should render app bar with title', (WidgetTester tester) async {
+    testWidgets('should render app bar with title',
+        (WidgetTester tester) async {
       // Mock get transactions use case to return empty list
       await tester.pumpWidget(
         ProviderScope(
@@ -81,8 +83,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('No transactions yet'), findsOneWidget);
-      expect(find.text('Tap the + button to add your first transaction'),
-          findsOneWidget);
+      expect(
+        find.text('Tap the + button to add your first transaction'),
+        findsOneWidget,
+      );
       expect(find.byIcon(Icons.receipt_long_outlined), findsOneWidget);
     });
 
@@ -96,7 +100,7 @@ void main() {
           type: TransactionType.expense,
           categoryId: 'cat_food',
           ledgerType: LedgerType.survival,
-        currentHash: 'test_hash',
+          currentHash: 'test_hash',
           note: 'Test note',
         ),
         Transaction.create(
@@ -106,7 +110,7 @@ void main() {
           type: TransactionType.income,
           categoryId: 'cat_salary',
           ledgerType: LedgerType.survival,
-        currentHash: 'test_hash',
+          currentHash: 'test_hash',
         ),
       ];
 
@@ -180,13 +184,12 @@ void main() {
 
 /// Mock GetTransactionsUseCase for testing
 class _MockGetTransactionsUseCase extends GetTransactionsUseCase {
-  final List<Transaction> _transactions;
-
   _MockGetTransactionsUseCase(this._transactions)
       : super(
           transactionRepository: _MockTransactionRepository(),
           fieldEncryptionService: _MockFieldEncryptionService(),
         );
+  final List<Transaction> _transactions;
 
   @override
   Future<Result<List<Transaction>>> execute({

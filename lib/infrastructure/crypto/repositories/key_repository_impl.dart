@@ -11,6 +11,8 @@ import 'key_repository.dart';
 /// - iOS: Keychain with kSecAttrAccessibleWhenUnlockedThisDeviceOnly
 /// - Android: EncryptedSharedPreferences backed by Android Keystore
 class KeyRepositoryImpl implements KeyRepository {
+  KeyRepositoryImpl({required FlutterSecureStorage secureStorage})
+      : _secureStorage = secureStorage;
   final FlutterSecureStorage _secureStorage;
   final Ed25519 _ed25519 = Ed25519();
 
@@ -19,14 +21,12 @@ class KeyRepositoryImpl implements KeyRepository {
   static const String _publicKeyKey = 'device_public_key';
   static const String _deviceIdKey = 'device_id';
 
-  KeyRepositoryImpl({required FlutterSecureStorage secureStorage})
-      : _secureStorage = secureStorage;
-
   @override
   Future<DeviceKeyPair> generateKeyPair() async {
     // Check if keys already exist
     if (await hasKeyPair()) {
-      throw StateError('Key pair already exists. Use recoverFromSeed to replace.');
+      throw StateError(
+          'Key pair already exists. Use recoverFromSeed to replace.');
     }
 
     // 1. Generate Ed25519 key pair
@@ -67,7 +67,8 @@ class KeyRepositoryImpl implements KeyRepository {
   @override
   Future<DeviceKeyPair> recoverFromSeed(List<int> seed) async {
     if (seed.length != 32) {
-      throw InvalidSeedException('Seed must be exactly 32 bytes, got ${seed.length}');
+      throw InvalidSeedException(
+          'Seed must be exactly 32 bytes, got ${seed.length}');
     }
 
     // 1. Generate key pair from seed
@@ -107,12 +108,12 @@ class KeyRepositoryImpl implements KeyRepository {
 
   @override
   Future<String?> getPublicKey() async {
-    return await _secureStorage.read(key: _publicKeyKey);
+    return _secureStorage.read(key: _publicKeyKey);
   }
 
   @override
   Future<String?> getDeviceId() async {
-    return await _secureStorage.read(key: _deviceIdKey);
+    return _secureStorage.read(key: _deviceIdKey);
   }
 
   @override
@@ -131,7 +132,7 @@ class KeyRepositoryImpl implements KeyRepository {
     final privateKeyBytes = base64Decode(privateKeyBase64);
     final keyPair = await _ed25519.newKeyPairFromSeed(privateKeyBytes);
 
-    return await _ed25519.sign(data, keyPair: keyPair);
+    return _ed25519.sign(data, keyPair: keyPair);
   }
 
   @override
@@ -144,7 +145,7 @@ class KeyRepositoryImpl implements KeyRepository {
     // Ed25519.verify() uses the public key from the Signature object
     // The publicKeyBase64 parameter is kept for API compatibility but verification
     // relies on the public key embedded in the signature
-    return await _ed25519.verify(data, signature: signature);
+    return _ed25519.verify(data, signature: signature);
   }
 
   @override

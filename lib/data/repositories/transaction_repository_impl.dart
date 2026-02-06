@@ -22,17 +22,16 @@ import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.da
 /// - Field encryption/decryption for sensitive data
 /// - Hash chain management for integrity
 class TransactionRepositoryImpl implements TransactionRepository {
-  final AppDatabase database;
-  final TransactionDao dao;
-  final FieldEncryptionService encryptionService;
-  final HashChainService hashChainService;
-
   TransactionRepositoryImpl({
     required this.database,
     required this.dao,
     required this.encryptionService,
     required this.hashChainService,
   });
+  final AppDatabase database;
+  final TransactionDao dao;
+  final FieldEncryptionService encryptionService;
+  final HashChainService hashChainService;
 
   @override
   Future<void> insert(Transaction transaction) async {

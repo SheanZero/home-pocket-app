@@ -253,13 +253,16 @@ void main() {
     group('incremental verification', () {
       test('should verify chain incrementally from last verified position', () {
         // Arrange: Create a chain of 1000 transactions
-        final transactions = List.generate(1000, (i) => {
-          'id': 'tx-${i.toString().padLeft(4, '0')}',
-          'amount': (i + 1) * 100.0,
-          'timestamp': 1704067200000 + (i * 1000),
-          'previousHash': '',
-          'hash': '',
-        });
+        final transactions = List.generate(
+          1000,
+          (i) => {
+            'id': 'tx-${i.toString().padLeft(4, '0')}',
+            'amount': (i + 1) * 100.0,
+            'timestamp': 1704067200000 + (i * 1000),
+            'previousHash': '',
+            'hash': '',
+          },
+        );
 
         // Build valid chain
         for (int i = 0; i < transactions.length; i++) {
@@ -291,13 +294,16 @@ void main() {
 
       test('should only verify new transactions after last verified index', () {
         // This test verifies performance optimization by only checking new transactions
-        final transactions = List.generate(100, (i) => {
-          'id': 'tx-${i.toString().padLeft(3, '0')}',
-          'amount': (i + 1) * 10.0,
-          'timestamp': 1704067200000 + (i * 1000),
-          'previousHash': '',
-          'hash': '',
-        });
+        final transactions = List.generate(
+          100,
+          (i) => {
+            'id': 'tx-${i.toString().padLeft(3, '0')}',
+            'amount': (i + 1) * 10.0,
+            'timestamp': 1704067200000 + (i * 1000),
+            'previousHash': '',
+            'hash': '',
+          },
+        );
 
         // Build chain
         for (int i = 0; i < transactions.length; i++) {

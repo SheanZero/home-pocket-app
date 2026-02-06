@@ -14,7 +14,8 @@ Future<String> currentDeviceId(Ref ref) async {
   final deviceId = await keyManager.getDeviceId();
 
   if (deviceId == null) {
-    throw Exception('Device ID not found. Please initialize device key pair first.');
+    throw Exception(
+        'Device ID not found. Please initialize device key pair first.');
   }
 
   return deviceId;

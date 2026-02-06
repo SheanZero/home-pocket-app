@@ -4,7 +4,7 @@ import 'package:home_pocket/features/security/domain/models/auth_result.dart';
 void main() {
   group('AuthResult', () {
     test('should create success result', () {
-      final result = AuthResult.success();
+      const result = AuthResult.success();
 
       expect(
         result.when(
@@ -20,7 +20,7 @@ void main() {
     });
 
     test('should create failed result with attempt count', () {
-      final result = AuthResult.failed(failedAttempts: 2);
+      const result = AuthResult.failed(failedAttempts: 2);
 
       final attempts = result.when(
         success: () => null,
@@ -35,7 +35,7 @@ void main() {
     });
 
     test('should create fallback to PIN result', () {
-      final result = AuthResult.fallbackToPIN();
+      const result = AuthResult.fallbackToPIN();
 
       expect(
         result.when(
@@ -51,7 +51,7 @@ void main() {
     });
 
     test('should create too many attempts result', () {
-      final result = AuthResult.tooManyAttempts();
+      const result = AuthResult.tooManyAttempts();
 
       expect(
         result.when(
@@ -67,7 +67,7 @@ void main() {
     });
 
     test('should create locked out result', () {
-      final result = AuthResult.lockedOut();
+      const result = AuthResult.lockedOut();
 
       expect(
         result.when(
@@ -83,7 +83,7 @@ void main() {
     });
 
     test('should create error result with message', () {
-      final result = AuthResult.error(message: 'Test error');
+      const result = AuthResult.error(message: 'Test error');
 
       final message = result.when(
         success: () => null,
@@ -98,7 +98,7 @@ void main() {
     });
 
     test('maybeWhen should work with orElse', () {
-      final result = AuthResult.success();
+      const result = AuthResult.success();
 
       final isSuccess = result.maybeWhen(
         success: () => true,
@@ -109,7 +109,7 @@ void main() {
     });
 
     test('maybeWhen should use orElse for unhandled variants', () {
-      final result = AuthResult.error(message: 'Test error');
+      const result = AuthResult.error(message: 'Test error');
 
       final isSuccess = result.maybeWhen(
         success: () => true,

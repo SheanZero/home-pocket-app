@@ -188,8 +188,10 @@ void main() {
 
       // Assert
       expect(allCategories.length, 22); // Should have 22 system categories
-      expect(allCategories.every((c) => c.isSystem),
-          true); // All should be system categories
+      expect(
+        allCategories.every((c) => c.isSystem),
+        true,
+      ); // All should be system categories
     });
 
     test('should be idempotent (no duplicates on re-seed)', () async {

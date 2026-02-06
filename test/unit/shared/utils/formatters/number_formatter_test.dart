@@ -14,7 +14,8 @@ void main() {
   group('NumberFormatter', () {
     test('should format number with thousand separators for Japanese', () {
       // Act
-      final result = NumberFormatter.formatNumber(1234567.89, const Locale('ja'));
+      final result =
+          NumberFormatter.formatNumber(1234567.89, const Locale('ja'));
 
       // Assert
       expect(result, '1,234,567.89');
@@ -22,7 +23,8 @@ void main() {
 
     test('should format number with thousand separators for English', () {
       // Act
-      final result = NumberFormatter.formatNumber(1234567.89, const Locale('en'));
+      final result =
+          NumberFormatter.formatNumber(1234567.89, const Locale('en'));
 
       // Assert
       expect(result, '1,234,567.89');
@@ -30,7 +32,8 @@ void main() {
 
     test('should format number with thousand separators for Chinese', () {
       // Act
-      final result = NumberFormatter.formatNumber(1234567.89, const Locale('zh'));
+      final result =
+          NumberFormatter.formatNumber(1234567.89, const Locale('zh'));
 
       // Assert
       expect(result, '1,234,567.89');
@@ -38,8 +41,10 @@ void main() {
 
     test('should format integer without decimals', () {
       // Act
-      final resultJa = NumberFormatter.formatNumber(1234, const Locale('ja'), decimals: 0);
-      final resultEn = NumberFormatter.formatNumber(1234, const Locale('en'), decimals: 0);
+      final resultJa =
+          NumberFormatter.formatNumber(1234, const Locale('ja'), decimals: 0);
+      final resultEn =
+          NumberFormatter.formatNumber(1234, const Locale('en'), decimals: 0);
 
       // Assert
       expect(resultJa, '1,234');
@@ -48,7 +53,8 @@ void main() {
 
     test('should format currency in JPY', () {
       // Act
-      final result = NumberFormatter.formatCurrency(1234.5, 'JPY', const Locale('ja'));
+      final result =
+          NumberFormatter.formatCurrency(1234.5, 'JPY', const Locale('ja'));
 
       // Assert
       expect(result, '¥1,235'); // JPY rounds to integer
@@ -56,7 +62,8 @@ void main() {
 
     test('should format currency in CNY', () {
       // Act
-      final result = NumberFormatter.formatCurrency(1234.56, 'CNY', const Locale('zh'));
+      final result =
+          NumberFormatter.formatCurrency(1234.56, 'CNY', const Locale('zh'));
 
       // Assert
       expect(result, '¥1,234.56');
@@ -64,16 +71,19 @@ void main() {
 
     test('should format currency in USD', () {
       // Act
-      final result = NumberFormatter.formatCurrency(1234.56, 'USD', const Locale('en'));
+      final result =
+          NumberFormatter.formatCurrency(1234.56, 'USD', const Locale('en'));
 
       // Assert
-      expect(result, '\$1,234.56');
+      expect(result, r'$1,234.56');
     });
 
     test('should format percentage', () {
       // Act
-      final resultJa = NumberFormatter.formatPercentage(0.8523, const Locale('ja'));
-      final resultEn = NumberFormatter.formatPercentage(0.8523, const Locale('en'));
+      final resultJa =
+          NumberFormatter.formatPercentage(0.8523, const Locale('ja'));
+      final resultEn =
+          NumberFormatter.formatPercentage(0.8523, const Locale('en'));
 
       // Assert
       expect(resultJa, '85.23%');
@@ -82,8 +92,10 @@ void main() {
 
     test('should format compact numbers', () {
       // Act
-      final resultJa = NumberFormatter.formatCompact(1234567, const Locale('ja'));
-      final resultEn = NumberFormatter.formatCompact(1234567, const Locale('en'));
+      final resultJa =
+          NumberFormatter.formatCompact(1234567, const Locale('ja'));
+      final resultEn =
+          NumberFormatter.formatCompact(1234567, const Locale('en'));
 
       // Assert
       expect(resultJa, '123万'); // Japanese uses 万 (10,000)

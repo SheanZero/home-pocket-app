@@ -87,9 +87,8 @@ abstract class KeyRepository {
 
 /// Exception thrown when key operations fail due to missing keys
 class KeyNotFoundException implements Exception {
-  final String message;
-
   KeyNotFoundException(this.message);
+  final String message;
 
   @override
   String toString() => 'KeyNotFoundException: $message';
@@ -97,9 +96,8 @@ class KeyNotFoundException implements Exception {
 
 /// Exception thrown when recovery seed is invalid
 class InvalidSeedException implements Exception {
-  final String message;
-
   InvalidSeedException(this.message);
+  final String message;
 
   @override
   String toString() => 'InvalidSeedException: $message';

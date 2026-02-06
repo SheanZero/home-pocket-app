@@ -1,16 +1,16 @@
 import 'package:drift/native.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:integration_test/integration_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/data/daos/transaction_dao.dart';
-import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
-import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
-import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
-import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
-import 'package:home_pocket/infrastructure/crypto/repositories/key_repository_impl.dart';
+import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/infrastructure/crypto/repositories/encryption_repository_impl.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/key_repository_impl.dart';
+import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
+import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
+import 'package:integration_test/integration_test.dart';
 
 // Mock secure storage for integration tests
 class _MockSecureStorage implements FlutterSecureStorage {
@@ -39,7 +39,8 @@ class _MockSecureStorage implements FlutterSecureStorage {
     WebOptions? webOptions,
     MacOsOptions? mOptions,
     WindowsOptions? wOptions,
-  }) async => _storage[key];
+  }) async =>
+      _storage[key];
 
   @override
   Future<void> delete({
@@ -50,7 +51,8 @@ class _MockSecureStorage implements FlutterSecureStorage {
     WebOptions? webOptions,
     MacOsOptions? mOptions,
     WindowsOptions? wOptions,
-  }) async => _storage.remove(key);
+  }) async =>
+      _storage.remove(key);
 
   @override
   Future<Map<String, String>> readAll({
@@ -60,7 +62,8 @@ class _MockSecureStorage implements FlutterSecureStorage {
     WebOptions? webOptions,
     MacOsOptions? mOptions,
     WindowsOptions? wOptions,
-  }) async => Map.from(_storage);
+  }) async =>
+      Map.from(_storage);
 
   @override
   Future<void> deleteAll({
@@ -70,7 +73,8 @@ class _MockSecureStorage implements FlutterSecureStorage {
     WebOptions? webOptions,
     MacOsOptions? mOptions,
     WindowsOptions? wOptions,
-  }) async => _storage.clear();
+  }) async =>
+      _storage.clear();
 
   @override
   Future<bool> containsKey({
@@ -81,10 +85,11 @@ class _MockSecureStorage implements FlutterSecureStorage {
     WebOptions? webOptions,
     MacOsOptions? mOptions,
     WindowsOptions? wOptions,
-  }) async => _storage.containsKey(key);
+  }) async =>
+      _storage.containsKey(key);
 
   @override
-  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// Integration test for accounting performance
@@ -110,10 +115,12 @@ void main() {
       // Setup REAL crypto services
       final secureStorage = _MockSecureStorage();
       final keyRepository = KeyRepositoryImpl(secureStorage: secureStorage);
-      final encryptionRepository = EncryptionRepositoryImpl(keyRepository: keyRepository);
+      final encryptionRepository =
+          EncryptionRepositoryImpl(keyRepository: keyRepository);
 
       keyManager = KeyManager(repository: keyRepository);
-      fieldEncryptionService = FieldEncryptionService(repository: encryptionRepository);
+      fieldEncryptionService =
+          FieldEncryptionService(repository: encryptionRepository);
       hashChainService = HashChainService();
 
       // Generate real device key pair
@@ -158,7 +165,8 @@ void main() {
       }
 
       final insertDuration = DateTime.now().difference(insertStartTime);
-      print('✅ Inserted $transactionCount transactions in ${insertDuration.inMilliseconds}ms');
+      print(
+          '✅ Inserted $transactionCount transactions in ${insertDuration.inMilliseconds}ms');
 
       // ASSERT: Insertion should be reasonably fast (< 30 seconds for 1000 items)
       expect(insertDuration.inSeconds, lessThan(30));
@@ -173,7 +181,8 @@ void main() {
       );
 
       final queryDuration = DateTime.now().difference(queryStartTime);
-      print('✅ Queried $transactionCount transactions in ${queryDuration.inMilliseconds}ms');
+      print(
+          '✅ Queried $transactionCount transactions in ${queryDuration.inMilliseconds}ms');
 
       // ASSERT: All transactions retrieved
       expect(transactions.length, transactionCount);
@@ -222,9 +231,9 @@ void main() {
         offset: totalTransactions - pageSize,
       );
 
-      final paginationDuration =
-          DateTime.now().difference(paginationStartTime);
-      print('✅ Paginated queries (3 pages) completed in ${paginationDuration.inMilliseconds}ms');
+      final paginationDuration = DateTime.now().difference(paginationStartTime);
+      print(
+          '✅ Paginated queries (3 pages) completed in ${paginationDuration.inMilliseconds}ms');
 
       // ASSERT: Each page has correct size
       expect(firstPage.length, pageSize);
@@ -273,7 +282,8 @@ void main() {
       final isValid = await transactionRepo.verifyHashChain(bookId);
 
       final verifyDuration = DateTime.now().difference(verifyStartTime);
-      print('✅ Hash chain verification completed in ${verifyDuration.inMilliseconds}ms');
+      print(
+          '✅ Hash chain verification completed in ${verifyDuration.inMilliseconds}ms');
 
       // ASSERT: Chain is valid
       expect(isValid, isTrue);
@@ -357,7 +367,8 @@ void main() {
       final categoryFilterDuration =
           DateTime.now().difference(categoryFilterStart);
 
-      print('✅ Category filter query: ${filteredByCategory.length} results in ${categoryFilterDuration.inMilliseconds}ms');
+      print(
+          '✅ Category filter query: ${filteredByCategory.length} results in ${categoryFilterDuration.inMilliseconds}ms');
 
       // ACT: Query with ledger type filter
       final ledgerFilterStart = DateTime.now();
@@ -370,7 +381,8 @@ void main() {
 
       final ledgerFilterDuration = DateTime.now().difference(ledgerFilterStart);
 
-      print('✅ Ledger type filter query: ${filteredByLedger.length} results in ${ledgerFilterDuration.inMilliseconds}ms');
+      print(
+          '✅ Ledger type filter query: ${filteredByLedger.length} results in ${ledgerFilterDuration.inMilliseconds}ms');
 
       // ACT: Query with date range filter
       final dateFilterStart = DateTime.now();
@@ -387,7 +399,8 @@ void main() {
 
       final dateFilterDuration = DateTime.now().difference(dateFilterStart);
 
-      print('✅ Date range filter query: ${filteredByDate.length} results in ${dateFilterDuration.inMilliseconds}ms');
+      print(
+          '✅ Date range filter query: ${filteredByDate.length} results in ${dateFilterDuration.inMilliseconds}ms');
 
       // ASSERT: All filter queries should be fast (< 500ms each)
       expect(categoryFilterDuration.inMilliseconds, lessThan(500));
@@ -442,7 +455,8 @@ void main() {
 
       final concurrentDuration = DateTime.now().difference(concurrentStartTime);
 
-      print('✅ 10 concurrent queries completed in ${concurrentDuration.inMilliseconds}ms');
+      print(
+          '✅ 10 concurrent queries completed in ${concurrentDuration.inMilliseconds}ms');
 
       // ASSERT: All queries returned results
       expect(results.length, 10);

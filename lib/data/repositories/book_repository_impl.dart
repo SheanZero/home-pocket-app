@@ -46,22 +46,22 @@ class BookRepositoryImpl implements BookRepository {
 
   @override
   Future<Book?> findById(String id) async {
-    return await _bookDao.getBookById(id);
+    return _bookDao.getBookById(id);
   }
 
   @override
   Future<List<Book>> findAll() async {
-    return await _bookDao.getAllBooks();
+    return _bookDao.getAllBooks();
   }
 
   @override
   Future<List<Book>> findActive() async {
-    return await _bookDao.getActiveBooks();
+    return _bookDao.getActiveBooks();
   }
 
   @override
   Future<List<Book>> findByDevice(String deviceId) async {
-    return await _bookDao.getBooksByDevice(deviceId);
+    return _bookDao.getBooksByDevice(deviceId);
   }
 
   @override

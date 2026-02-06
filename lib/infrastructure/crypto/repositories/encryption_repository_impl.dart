@@ -9,19 +9,19 @@ import 'key_repository.dart';
 /// Uses HKDF (HMAC-based Key Derivation Function) to derive encryption keys
 /// from the device master key. Keys are cached in memory for performance.
 class EncryptionRepositoryImpl implements EncryptionRepository {
+  EncryptionRepositoryImpl({required KeyRepository keyRepository})
+      : _keyRepository = keyRepository;
   final KeyRepository _keyRepository;
   final _chacha20 = Chacha20.poly1305Aead();
   final _random = Random.secure();
 
   // Key derivation configuration
   static const String _keyDerivationVersion = 'v1';
-  static const String _keyDerivationInfo = 'homepocket_field_encryption_$_keyDerivationVersion';
+  static const String _keyDerivationInfo =
+      'homepocket_field_encryption_$_keyDerivationVersion';
 
   // Cached encryption key (cleared on logout/background)
   SecretKey? _cachedEncryptionKey;
-
-  EncryptionRepositoryImpl({required KeyRepository keyRepository})
-      : _keyRepository = keyRepository;
 
   @override
   Future<String> encryptField(String plaintext) async {
@@ -60,7 +60,8 @@ class EncryptionRepositoryImpl implements EncryptionRepository {
 
       if (combined.length < 28) {
         // Minimum: 12-byte nonce + 16-byte MAC
-        throw FormatException('Invalid ciphertext: too short (${combined.length} bytes)');
+        throw FormatException(
+            'Invalid ciphertext: too short (${combined.length} bytes)');
       }
 
       // 2. Extract nonce (first 12 bytes)
@@ -103,7 +104,7 @@ class EncryptionRepositoryImpl implements EncryptionRepository {
 
   @override
   Future<String> encryptAmount(double amount) async {
-    return await encryptField(amount.toString());
+    return encryptField(amount.toString());
   }
 
   @override

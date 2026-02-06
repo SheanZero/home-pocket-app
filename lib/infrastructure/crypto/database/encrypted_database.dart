@@ -25,7 +25,8 @@ Future<QueryExecutor> createEncryptedExecutor(
   // 1. Get encryption key from KeyManager
   final publicKeyBase64 = await keyManager.getPublicKey();
   if (publicKeyBase64 == null) {
-    throw StateError('Device key not initialized. Please generate device key first.');
+    throw StateError(
+        'Device key not initialized. Please generate device key first.');
   }
 
   // 2. Derive database encryption key from device key

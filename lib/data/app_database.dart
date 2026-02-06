@@ -1,10 +1,10 @@
 import 'package:drift/drift.dart';
+import 'package:home_pocket/data/daos/book_dao.dart';
+import 'package:home_pocket/data/daos/category_dao.dart';
+import 'package:home_pocket/data/daos/transaction_dao.dart';
 import 'package:home_pocket/data/tables/books_table.dart';
 import 'package:home_pocket/data/tables/categories_table.dart';
 import 'package:home_pocket/data/tables/transactions_table.dart';
-import 'package:home_pocket/data/daos/transaction_dao.dart';
-import 'package:home_pocket/data/daos/category_dao.dart';
-import 'package:home_pocket/data/daos/book_dao.dart';
 
 part 'app_database.g.dart';
 
@@ -21,7 +21,7 @@ part 'app_database.g.dart';
   daos: [TransactionDao, CategoryDao, BookDao],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase(QueryExecutor e) : super(e);
+  AppDatabase(super.e);
 
   @override
   int get schemaVersion => 1;

@@ -1,11 +1,12 @@
 import 'dart:convert';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import 'package:cryptography/cryptography.dart';
-import 'package:home_pocket/infrastructure/crypto/repositories/key_repository_impl.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/infrastructure/crypto/repositories/key_repository.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/key_repository_impl.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
 @GenerateMocks([FlutterSecureStorage])
 import 'key_repository_impl_test.mocks.dart';
@@ -28,17 +29,21 @@ void main() {
 
     /// Helper to mock write operations
     void mockWriteOperations() {
-      when(mockSecureStorage.write(
-        key: anyNamed('key'),
-        value: anyNamed('value'),
-        iOptions: anyNamed('iOptions'),
-        aOptions: anyNamed('aOptions'),
-      )).thenAnswer((_) async {});
+      when(
+        mockSecureStorage.write(
+          key: anyNamed('key'),
+          value: anyNamed('value'),
+          iOptions: anyNamed('iOptions'),
+          aOptions: anyNamed('aOptions'),
+        ),
+      ).thenAnswer((_) async {});
 
-      when(mockSecureStorage.write(
-        key: anyNamed('key'),
-        value: anyNamed('value'),
-      )).thenAnswer((_) async {});
+      when(
+        mockSecureStorage.write(
+          key: anyNamed('key'),
+          value: anyNamed('value'),
+        ),
+      ).thenAnswer((_) async {});
     }
 
     group('generateKeyPair', () {
@@ -56,22 +61,28 @@ void main() {
         expect(keyPair.createdAt, isNotNull);
 
         // Verify keys were stored
-        verify(mockSecureStorage.write(
-          key: 'device_public_key',
-          value: anyNamed('value'),
-        )).called(1);
+        verify(
+          mockSecureStorage.write(
+            key: 'device_public_key',
+            value: anyNamed('value'),
+          ),
+        ).called(1);
 
-        verify(mockSecureStorage.write(
-          key: 'device_private_key',
-          value: anyNamed('value'),
-          iOptions: anyNamed('iOptions'),
-          aOptions: anyNamed('aOptions'),
-        )).called(1);
+        verify(
+          mockSecureStorage.write(
+            key: 'device_private_key',
+            value: anyNamed('value'),
+            iOptions: anyNamed('iOptions'),
+            aOptions: anyNamed('aOptions'),
+          ),
+        ).called(1);
 
-        verify(mockSecureStorage.write(
-          key: 'device_id',
-          value: keyPair.deviceId,
-        )).called(1);
+        verify(
+          mockSecureStorage.write(
+            key: 'device_id',
+            value: keyPair.deviceId,
+          ),
+        ).called(1);
       });
 
       test('should generate different key pairs on each call', () async {
@@ -107,7 +118,8 @@ void main() {
         expect(publicKeyBytes.length, equals(32)); // Ed25519 public key size
       });
 
-      test('should generate device ID as base64url from SHA-256 of public key', () async {
+      test('should generate device ID as base64url from SHA-256 of public key',
+          () async {
         // Arrange
         mockNoExistingKeys();
         mockWriteOperations();
@@ -117,7 +129,8 @@ void main() {
 
         // Assert
         expect(keyPair.deviceId, hasLength(16)); // Truncated to 16 chars
-        expect(keyPair.deviceId, matches(RegExp(r'^[A-Za-z0-9_-]{16}$'))); // Base64url
+        expect(keyPair.deviceId,
+            matches(RegExp(r'^[A-Za-z0-9_-]{16}$'))); // Base64url
       });
 
       test('should throw StateError if key pair already exists', () async {
@@ -224,12 +237,14 @@ void main() {
         await repository.generateKeyPair();
 
         // Get the stored private key
-        final capturedPrivateKey = verify(mockSecureStorage.write(
-          key: 'device_private_key',
-          value: captureAnyNamed('value'),
-          iOptions: anyNamed('iOptions'),
-          aOptions: anyNamed('aOptions'),
-        )).captured.first as String;
+        final capturedPrivateKey = verify(
+          mockSecureStorage.write(
+            key: 'device_private_key',
+            value: captureAnyNamed('value'),
+            iOptions: anyNamed('iOptions'),
+            aOptions: anyNamed('aOptions'),
+          ),
+        ).captured.first as String;
 
         // Mock reading the private key
         when(mockSecureStorage.read(key: 'device_private_key'))
@@ -245,7 +260,8 @@ void main() {
         expect(signature.bytes.length, equals(64)); // Ed25519 signature size
       });
 
-      test('should throw KeyNotFoundException when no private key stored', () async {
+      test('should throw KeyNotFoundException when no private key stored',
+          () async {
         // Arrange
         when(mockSecureStorage.read(key: 'device_private_key'))
             .thenAnswer((_) async => null);
@@ -265,12 +281,14 @@ void main() {
 
         await repository.generateKeyPair();
 
-        final capturedPrivateKey = verify(mockSecureStorage.write(
-          key: 'device_private_key',
-          value: captureAnyNamed('value'),
-          iOptions: anyNamed('iOptions'),
-          aOptions: anyNamed('aOptions'),
-        )).captured.first as String;
+        final capturedPrivateKey = verify(
+          mockSecureStorage.write(
+            key: 'device_private_key',
+            value: captureAnyNamed('value'),
+            iOptions: anyNamed('iOptions'),
+            aOptions: anyNamed('aOptions'),
+          ),
+        ).captured.first as String;
 
         when(mockSecureStorage.read(key: 'device_private_key'))
             .thenAnswer((_) async => capturedPrivateKey);
@@ -295,12 +313,14 @@ void main() {
 
         final keyPair = await repository.generateKeyPair();
 
-        final capturedPrivateKey = verify(mockSecureStorage.write(
-          key: 'device_private_key',
-          value: captureAnyNamed('value'),
-          iOptions: anyNamed('iOptions'),
-          aOptions: anyNamed('aOptions'),
-        )).captured.first as String;
+        final capturedPrivateKey = verify(
+          mockSecureStorage.write(
+            key: 'device_private_key',
+            value: captureAnyNamed('value'),
+            iOptions: anyNamed('iOptions'),
+            aOptions: anyNamed('aOptions'),
+          ),
+        ).captured.first as String;
 
         when(mockSecureStorage.read(key: 'device_private_key'))
             .thenAnswer((_) async => capturedPrivateKey);
@@ -347,19 +367,22 @@ void main() {
         expect(isValid, isFalse);
       });
 
-      test('signature verification uses embedded public key from signature', () async {
+      test('signature verification uses embedded public key from signature',
+          () async {
         // Arrange
         mockNoExistingKeys();
         mockWriteOperations();
 
         await repository.generateKeyPair();
 
-        final capturedPrivateKey = verify(mockSecureStorage.write(
-          key: 'device_private_key',
-          value: captureAnyNamed('value'),
-          iOptions: anyNamed('iOptions'),
-          aOptions: anyNamed('aOptions'),
-        )).captured.first as String;
+        final capturedPrivateKey = verify(
+          mockSecureStorage.write(
+            key: 'device_private_key',
+            value: captureAnyNamed('value'),
+            iOptions: anyNamed('iOptions'),
+            aOptions: anyNamed('aOptions'),
+          ),
+        ).captured.first as String;
 
         when(mockSecureStorage.read(key: 'device_private_key'))
             .thenAnswer((_) async => capturedPrivateKey);
@@ -379,7 +402,8 @@ void main() {
         final isValid = await repository.verifySignature(
           data: data,
           signature: signature,
-          publicKeyBase64: keyPair2.publicKey, // Different key but verification still uses signature's embedded key
+          publicKeyBase64: keyPair2
+              .publicKey, // Different key but verification still uses signature's embedded key
         );
 
         // Assert - verification succeeds because it uses the public key from signature, not the parameter
@@ -393,12 +417,14 @@ void main() {
 
         final keyPair = await repository.generateKeyPair();
 
-        final capturedPrivateKey = verify(mockSecureStorage.write(
-          key: 'device_private_key',
-          value: captureAnyNamed('value'),
-          iOptions: anyNamed('iOptions'),
-          aOptions: anyNamed('aOptions'),
-        )).captured.first as String;
+        final capturedPrivateKey = verify(
+          mockSecureStorage.write(
+            key: 'device_private_key',
+            value: captureAnyNamed('value'),
+            iOptions: anyNamed('iOptions'),
+            aOptions: anyNamed('aOptions'),
+          ),
+        ).captured.first as String;
 
         when(mockSecureStorage.read(key: 'device_private_key'))
             .thenAnswer((_) async => capturedPrivateKey);
@@ -433,17 +459,21 @@ void main() {
         expect(keyPair.deviceId, isNotEmpty);
         expect(keyPair.createdAt, isNotNull);
 
-        verify(mockSecureStorage.write(
-          key: 'device_public_key',
-          value: anyNamed('value'),
-        )).called(1);
+        verify(
+          mockSecureStorage.write(
+            key: 'device_public_key',
+            value: anyNamed('value'),
+          ),
+        ).called(1);
 
-        verify(mockSecureStorage.write(
-          key: 'device_private_key',
-          value: anyNamed('value'),
-          iOptions: anyNamed('iOptions'),
-          aOptions: anyNamed('aOptions'),
-        )).called(1);
+        verify(
+          mockSecureStorage.write(
+            key: 'device_private_key',
+            value: anyNamed('value'),
+            iOptions: anyNamed('iOptions'),
+            aOptions: anyNamed('aOptions'),
+          ),
+        ).called(1);
       });
 
       test('should generate same key pair from same seed', () async {
@@ -464,7 +494,8 @@ void main() {
         expect(keyPair1.deviceId, equals(keyPair2.deviceId));
       });
 
-      test('should generate different key pairs from different seeds', () async {
+      test('should generate different key pairs from different seeds',
+          () async {
         // Arrange
         final seed1 = List<int>.generate(32, (i) => i);
         final seed2 = List<int>.generate(32, (i) => i + 1);
@@ -483,7 +514,8 @@ void main() {
         expect(keyPair1.deviceId, isNot(equals(keyPair2.deviceId)));
       });
 
-      test('should throw InvalidSeedException for invalid seed length', () async {
+      test('should throw InvalidSeedException for invalid seed length',
+          () async {
         // Arrange
         final invalidSeed = List<int>.generate(16, (i) => i);
 
@@ -553,12 +585,14 @@ void main() {
 
         final keyPair = await repository.generateKeyPair();
 
-        final capturedPrivateKey = verify(mockSecureStorage.write(
-          key: 'device_private_key',
-          value: captureAnyNamed('value'),
-          iOptions: anyNamed('iOptions'),
-          aOptions: anyNamed('aOptions'),
-        )).captured.first as String;
+        final capturedPrivateKey = verify(
+          mockSecureStorage.write(
+            key: 'device_private_key',
+            value: captureAnyNamed('value'),
+            iOptions: anyNamed('iOptions'),
+            aOptions: anyNamed('aOptions'),
+          ),
+        ).captured.first as String;
 
         when(mockSecureStorage.read(key: 'device_private_key'))
             .thenAnswer((_) async => capturedPrivateKey);

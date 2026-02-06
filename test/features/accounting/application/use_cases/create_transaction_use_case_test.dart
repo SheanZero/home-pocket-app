@@ -1,12 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
 import 'package:home_pocket/features/accounting/application/use_cases/create_transaction_use_case.dart';
-import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
-import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
-import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
-import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
+import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
+import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
+import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
+import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
 import 'create_transaction_use_case_test.mocks.dart';
 
@@ -51,12 +51,14 @@ void main() {
       when(mockCategoryRepo.findById('cat_food'))
           .thenAnswer((_) async => category);
 
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: anyNamed('transactionId'),
-        amount: anyNamed('amount'),
-        timestamp: anyNamed('timestamp'),
-        previousHash: anyNamed('previousHash'),
-      )).thenReturn('calculated_hash');
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: anyNamed('transactionId'),
+          amount: anyNamed('amount'),
+          timestamp: anyNamed('timestamp'),
+          previousHash: anyNamed('previousHash'),
+        ),
+      ).thenReturn('calculated_hash');
 
       when(mockTransactionRepo.getLatestHash('book_001'))
           .thenAnswer((_) async => 'prev_hash');
@@ -98,12 +100,14 @@ void main() {
       when(mockCategoryRepo.findById('cat_food'))
           .thenAnswer((_) async => category);
 
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: anyNamed('transactionId'),
-        amount: anyNamed('amount'),
-        timestamp: anyNamed('timestamp'),
-        previousHash: anyNamed('previousHash'),
-      )).thenReturn('calculated_hash');
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: anyNamed('transactionId'),
+          amount: anyNamed('amount'),
+          timestamp: anyNamed('timestamp'),
+          previousHash: anyNamed('previousHash'),
+        ),
+      ).thenReturn('calculated_hash');
 
       when(mockTransactionRepo.getLatestHash('book_001'))
           .thenAnswer((_) async => null);

@@ -2,11 +2,10 @@
 ///
 /// Represents either a successful result with data or an error with message.
 class Result<T> {
-  final T? data;
-  final String? error;
-
   const Result.success(this.data) : error = null;
   const Result.error(this.error) : data = null;
+  final T? data;
+  final String? error;
 
   bool get isSuccess => data != null && error == null;
   bool get isError => error != null;

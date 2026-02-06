@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
-import 'package:home_pocket/features/accounting/presentation/providers/transaction_form_notifier.dart';
-import 'package:home_pocket/features/accounting/presentation/providers/transaction_form_state.dart';
+import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/current_book_provider.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/current_device_provider.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/transaction_form_notifier.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/transaction_form_state.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
 /// Transaction Form Screen
@@ -191,7 +191,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
             // Category Selection
             DropdownButtonFormField<String>(
-              value: formState.categoryId,
+              initialValue: formState.categoryId,
               decoration: InputDecoration(
                 labelText: l10n.category,
                 errorText: formState.errors['category'],
@@ -199,21 +199,25 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               ),
               items: Category.systemCategories
                   .where((cat) => cat.type == formState.type)
-                  .map((category) => DropdownMenuItem(
-                        value: category.id,
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.category,
-                              color: Color(
-                                  int.parse(category.color.substring(1), radix: 16) +
-                                      0xFF000000),
+                  .map(
+                    (category) => DropdownMenuItem(
+                      value: category.id,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.category,
+                            color: Color(
+                              int.parse(category.color.substring(1),
+                                      radix: 16) +
+                                  0xFF000000,
                             ),
-                            const SizedBox(width: 8),
-                            Text(category.name),
-                          ],
-                        ),
-                      ))
+                          ),
+                          const SizedBox(width: 8),
+                          Text(category.name),
+                        ],
+                      ),
+                    ),
+                  )
                   .toList(),
               onChanged: (value) {
                 if (value != null) {
@@ -334,7 +338,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       ),
                     )
                   : const Icon(Icons.check),
-              label: Text(formState.isSubmitting ? l10n.creatingTransaction : l10n.createTransaction),
+              label: Text(formState.isSubmitting
+                  ? l10n.creatingTransaction
+                  : l10n.createTransaction),
             ),
 
             const SizedBox(height: 8),

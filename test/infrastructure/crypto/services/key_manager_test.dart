@@ -1,10 +1,10 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
 import 'package:cryptography/cryptography.dart';
-import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
-import 'package:home_pocket/infrastructure/crypto/repositories/key_repository.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/infrastructure/crypto/models/device_key_pair.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/key_repository.dart';
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
 @GenerateMocks([KeyRepository])
 import 'key_manager_test.mocks.dart';
@@ -103,7 +103,8 @@ void main() {
           List.generate(32, (i) => i),
           type: KeyPairType.ed25519,
         );
-        final mockSignature = Signature([6, 7, 8, 9, 10], publicKey: mockPublicKey);
+        final mockSignature =
+            Signature([6, 7, 8, 9, 10], publicKey: mockPublicKey);
         when(mockRepository.signData(data))
             .thenAnswer((_) async => mockSignature);
 
@@ -127,11 +128,13 @@ void main() {
         final signature = Signature([6, 7, 8, 9, 10], publicKey: mockPublicKey);
         const publicKey = 'mockPublicKey';
 
-        when(mockRepository.verifySignature(
-          data: data,
-          signature: signature,
-          publicKeyBase64: publicKey,
-        )).thenAnswer((_) async => true);
+        when(
+          mockRepository.verifySignature(
+            data: data,
+            signature: signature,
+            publicKeyBase64: publicKey,
+          ),
+        ).thenAnswer((_) async => true);
 
         // Act
         final result = await keyManager.verifySignature(
@@ -142,11 +145,13 @@ void main() {
 
         // Assert
         expect(result, true);
-        verify(mockRepository.verifySignature(
-          data: data,
-          signature: signature,
-          publicKeyBase64: publicKey,
-        )).called(1);
+        verify(
+          mockRepository.verifySignature(
+            data: data,
+            signature: signature,
+            publicKeyBase64: publicKey,
+          ),
+        ).called(1);
       });
     });
 

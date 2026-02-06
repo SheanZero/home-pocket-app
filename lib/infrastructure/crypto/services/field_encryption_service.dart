@@ -11,34 +11,33 @@ part 'field_encryption_service.g.dart';
 /// a backward-compatible interface. All encryption operations are delegated
 /// to the repository layer, following Clean Architecture principles.
 class FieldEncryptionService {
-  final EncryptionRepository _repository;
-
   FieldEncryptionService({required EncryptionRepository repository})
       : _repository = repository;
+  final EncryptionRepository _repository;
 
   /// Encrypt a plaintext string
   Future<String> encryptField(String plaintext) async {
-    return await _repository.encryptField(plaintext);
+    return _repository.encryptField(plaintext);
   }
 
   /// Decrypt a ciphertext string
   Future<String> decryptField(String ciphertext) async {
-    return await _repository.decryptField(ciphertext);
+    return _repository.decryptField(ciphertext);
   }
 
   /// Encrypt an amount (double) as string
   Future<String> encryptAmount(double amount) async {
-    return await _repository.encryptAmount(amount);
+    return _repository.encryptAmount(amount);
   }
 
   /// Decrypt and parse amount back to double
   Future<double> decryptAmount(String encryptedAmount) async {
-    return await _repository.decryptAmount(encryptedAmount);
+    return _repository.decryptAmount(encryptedAmount);
   }
 
   /// Clear any cached encryption keys from memory
   Future<void> clearCache() async {
-    return await _repository.clearCache();
+    return _repository.clearCache();
   }
 }
 

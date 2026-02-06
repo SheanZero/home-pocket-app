@@ -13,34 +13,32 @@ part 'key_manager.g.dart';
 /// a backward-compatible interface. All key operations are delegated
 /// to the repository layer, following Clean Architecture principles.
 class KeyManager {
+  KeyManager({required KeyRepository repository}) : _repository = repository;
   final KeyRepository _repository;
-
-  KeyManager({required KeyRepository repository})
-      : _repository = repository;
 
   /// Generate device master key pair (called on first launch)
   Future<DeviceKeyPair> generateDeviceKeyPair() async {
-    return await _repository.generateKeyPair();
+    return _repository.generateKeyPair();
   }
 
   /// Get current device's public key
   Future<String?> getPublicKey() async {
-    return await _repository.getPublicKey();
+    return _repository.getPublicKey();
   }
 
   /// Get current device ID
   Future<String?> getDeviceId() async {
-    return await _repository.getDeviceId();
+    return _repository.getDeviceId();
   }
 
   /// Check if key pair has been generated
   Future<bool> hasKeyPair() async {
-    return await _repository.hasKeyPair();
+    return _repository.hasKeyPair();
   }
 
   /// Sign data (used for hash chain)
   Future<Signature> signData(List<int> data) async {
-    return await _repository.signData(data);
+    return _repository.signData(data);
   }
 
   /// Verify signature
@@ -49,7 +47,7 @@ class KeyManager {
     required Signature signature,
     required String publicKeyBase64,
   }) async {
-    return await _repository.verifySignature(
+    return _repository.verifySignature(
       data: data,
       signature: signature,
       publicKeyBase64: publicKeyBase64,
@@ -58,12 +56,12 @@ class KeyManager {
 
   /// Recover key pair from seed
   Future<DeviceKeyPair> recoverFromSeed(List<int> seed) async {
-    return await _repository.recoverFromSeed(seed);
+    return _repository.recoverFromSeed(seed);
   }
 
   /// Clear all keys (destructive operation)
   Future<void> clearKeys() async {
-    return await _repository.clearKeys();
+    return _repository.clearKeys();
   }
 }
 
@@ -84,5 +82,5 @@ KeyManager keyManager(KeyManagerRef ref) {
 @riverpod
 Future<bool> hasKeyPair(HasKeyPairRef ref) async {
   final keyManager = ref.watch(keyManagerProvider);
-  return await keyManager.hasKeyPair();
+  return keyManager.hasKeyPair();
 }

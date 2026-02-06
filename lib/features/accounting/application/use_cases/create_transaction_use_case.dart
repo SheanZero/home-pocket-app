@@ -1,9 +1,9 @@
-import 'package:uuid/uuid.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
-import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
+import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
 import 'package:home_pocket/shared/utils/result.dart';
+import 'package:uuid/uuid.dart';
 
 /// Use case for creating a new transaction
 ///
@@ -14,15 +14,14 @@ import 'package:home_pocket/shared/utils/result.dart';
 ///
 /// Note: Field encryption is handled by Repository layer
 class CreateTransactionUseCase {
-  final TransactionRepository transactionRepository;
-  final CategoryRepository categoryRepository;
-  final HashChainService hashChainService;
-
   CreateTransactionUseCase({
     required this.transactionRepository,
     required this.categoryRepository,
     required this.hashChainService,
   });
+  final TransactionRepository transactionRepository;
+  final CategoryRepository categoryRepository;
+  final HashChainService hashChainService;
 
   /// Execute the use case
   ///

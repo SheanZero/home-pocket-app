@@ -41,9 +41,8 @@ class BookDao extends DatabaseAccessor<AppDatabase> with _$BookDaoMixin {
 
   /// Get books by device
   Future<List<domain.Book>> getBooksByDevice(String deviceId) async {
-    final entities = await (select(books)
-          ..where((b) => b.deviceId.equals(deviceId)))
-        .get();
+    final entities =
+        await (select(books)..where((b) => b.deviceId.equals(deviceId))).get();
     return entities.map(_toDomain).toList();
   }
 

@@ -1,10 +1,10 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/encryption_repository_impl.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/key_repository_impl.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
-import 'package:home_pocket/infrastructure/crypto/repositories/key_repository_impl.dart';
-import 'package:home_pocket/infrastructure/crypto/repositories/encryption_repository_impl.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Mock secure storage for performance tests
 class MockSecureStorage implements FlutterSecureStorage {
@@ -90,7 +90,7 @@ class MockSecureStorage implements FlutterSecureStorage {
   }
 
   @override
-  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {
@@ -104,7 +104,8 @@ void main() {
 
       // Create repository instances
       final keyRepository = KeyRepositoryImpl(secureStorage: secureStorage);
-      final encryptionRepository = EncryptionRepositoryImpl(keyRepository: keyRepository);
+      final encryptionRepository =
+          EncryptionRepositoryImpl(keyRepository: keyRepository);
 
       // Create service instances
       keyManager = KeyManager(repository: keyRepository);
@@ -112,7 +113,8 @@ void main() {
       // Generate device key for encryption
       await keyManager.generateDeviceKeyPair();
 
-      encryptionService = FieldEncryptionService(repository: encryptionRepository);
+      encryptionService =
+          FieldEncryptionService(repository: encryptionRepository);
       hashChainService = HashChainService();
     });
 
@@ -180,7 +182,8 @@ void main() {
         final transactionId = 'tx-${i.toString().padLeft(4, '0')}';
         final amount = (i + 1) * 10.0;
         final timestamp = 1704067200000 + (i * 1000);
-        final previousHash = i == 0 ? '' : transactions[i - 1]['hash'] as String;
+        final previousHash =
+            i == 0 ? '' : transactions[i - 1]['hash'] as String;
 
         final hash = hashChainService.calculateTransactionHash(
           transactionId: transactionId,
@@ -222,7 +225,8 @@ void main() {
         final transactionId = 'tx-${i.toString().padLeft(4, '0')}';
         final amount = (i + 1) * 10.0;
         final timestamp = 1704067200000 + (i * 1000);
-        final previousHash = i == 0 ? '' : transactions[i - 1]['hash'] as String;
+        final previousHash =
+            i == 0 ? '' : transactions[i - 1]['hash'] as String;
 
         final hash = hashChainService.calculateTransactionHash(
           transactionId: transactionId,
@@ -255,9 +259,12 @@ void main() {
 
       // Assert
       expect(incrementalResult.isValid, true);
-      expect(stopwatch2.elapsedMilliseconds, lessThan(stopwatch1.elapsedMilliseconds));
+      expect(stopwatch2.elapsedMilliseconds,
+          lessThan(stopwatch1.elapsedMilliseconds));
 
-      final speedup = (stopwatch1.elapsedMilliseconds / stopwatch2.elapsedMilliseconds).toStringAsFixed(1);
+      final speedup =
+          (stopwatch1.elapsedMilliseconds / stopwatch2.elapsedMilliseconds)
+              .toStringAsFixed(1);
       print(
         '✅ Incremental verification speedup: ${speedup}x faster (${stopwatch2.elapsedMilliseconds}ms vs ${stopwatch1.elapsedMilliseconds}ms)',
       );

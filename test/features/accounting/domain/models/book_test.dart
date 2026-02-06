@@ -59,11 +59,11 @@ void main() {
         currency: 'CNY',
         deviceId: 'device_001',
       ).copyWith(
-        survivalBalance: 50000,  // ¥500.00
-        soulBalance: 10000,      // ¥100.00
+        survivalBalance: 50000, // ¥500.00
+        soulBalance: 10000, // ¥100.00
       );
 
-      expect(book.totalBalance, 60000);  // ¥600.00
+      expect(book.totalBalance, 60000); // ¥600.00
     });
 
     test('should generate unique IDs', () {

@@ -35,7 +35,9 @@ void main() {
       );
 
       // Act
-      container.read(localeNotifierProvider.notifier).setLocale(const Locale('en'));
+      container
+          .read(localeNotifierProvider.notifier)
+          .setLocale(const Locale('en'));
       await tester.pumpAndSettle();
 
       // Assert
@@ -55,17 +57,23 @@ void main() {
       );
 
       // Test Japanese
-      container.read(localeNotifierProvider.notifier).setLocale(const Locale('ja'));
+      container
+          .read(localeNotifierProvider.notifier)
+          .setLocale(const Locale('ja'));
       await tester.pumpAndSettle();
       expect(container.read(currentLocaleProvider).languageCode, 'ja');
 
       // Test Chinese
-      container.read(localeNotifierProvider.notifier).setLocale(const Locale('zh'));
+      container
+          .read(localeNotifierProvider.notifier)
+          .setLocale(const Locale('zh'));
       await tester.pumpAndSettle();
       expect(container.read(currentLocaleProvider).languageCode, 'zh');
 
       // Test English
-      container.read(localeNotifierProvider.notifier).setLocale(const Locale('en'));
+      container
+          .read(localeNotifierProvider.notifier)
+          .setLocale(const Locale('en'));
       await tester.pumpAndSettle();
       expect(container.read(currentLocaleProvider).languageCode, 'en');
     });

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 
 /// Initializes core app services before the app starts
 class AppInitializer {

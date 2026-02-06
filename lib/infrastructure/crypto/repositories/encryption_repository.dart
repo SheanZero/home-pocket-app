@@ -79,9 +79,8 @@ abstract class EncryptionRepository {
 /// This indicates that the encrypted data has been tampered with
 /// or corrupted. The data should not be trusted.
 class MacValidationException implements Exception {
-  final String message;
-
   MacValidationException(this.message);
+  final String message;
 
   @override
   String toString() => 'MacValidationException: $message';

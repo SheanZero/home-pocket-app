@@ -36,19 +36,21 @@ class Transactions extends Table {
 
   List<TableIndex> get customIndices => [
         // Index for querying transactions by book (most common query)
-        TableIndex(name: 'idx_transactions_book_id', columns: {#bookId}),
+        const TableIndex(name: 'idx_transactions_book_id', columns: {#bookId}),
 
         // Index for querying by timestamp (for date-based filtering)
-        TableIndex(name: 'idx_transactions_timestamp', columns: {#timestamp}),
+        const TableIndex(
+            name: 'idx_transactions_timestamp', columns: {#timestamp}),
 
         // Compound index for book + timestamp (optimizes list views)
-        TableIndex(
+        const TableIndex(
           name: 'idx_transactions_book_timestamp',
           columns: {#bookId, #timestamp},
         ),
 
         // Index for category-based filtering
-        TableIndex(name: 'idx_transactions_category', columns: {#categoryId}),
+        const TableIndex(
+            name: 'idx_transactions_category', columns: {#categoryId}),
       ];
 }
 

@@ -1,9 +1,9 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/security/application/services/recovery_kit_service.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
 @GenerateMocks([FlutterSecureStorage, KeyManager])
 import 'recovery_kit_service_test.mocks.dart';
@@ -26,10 +26,12 @@ void main() {
     group('generateRecoveryKit', () {
       test('should generate 24-word mnemonic', () async {
         // Arrange
-        when(mockSecureStorage.write(
-          key: anyNamed('key'),
-          value: anyNamed('value'),
-        )).thenAnswer((_) async => null);
+        when(
+          mockSecureStorage.write(
+            key: anyNamed('key'),
+            value: anyNamed('value'),
+          ),
+        ).thenAnswer((_) async {});
 
         // Act
         final mnemonic = await service.generateRecoveryKit();
@@ -40,18 +42,22 @@ void main() {
         expect(words.every((word) => word.isNotEmpty), true);
 
         // Verify hash stored
-        verify(mockSecureStorage.write(
-          key: 'recovery_kit_hash',
-          value: anyNamed('value'),
-        )).called(1);
+        verify(
+          mockSecureStorage.write(
+            key: 'recovery_kit_hash',
+            value: anyNamed('value'),
+          ),
+        ).called(1);
       });
 
       test('should generate different mnemonics on each call', () async {
         // Arrange
-        when(mockSecureStorage.write(
-          key: anyNamed('key'),
-          value: anyNamed('value'),
-        )).thenAnswer((_) async => null);
+        when(
+          mockSecureStorage.write(
+            key: anyNamed('key'),
+            value: anyNamed('value'),
+          ),
+        ).thenAnswer((_) async {});
 
         // Act
         final mnemonic1 = await service.generateRecoveryKit();
@@ -65,7 +71,8 @@ void main() {
     group('verifyRecoveryKit', () {
       test('should return true for correct mnemonic', () async {
         // Arrange
-        const testMnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art';
+        const testMnemonic =
+            'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art';
         final hash = service.hashMnemonic(testMnemonic);
 
         when(mockSecureStorage.read(key: 'recovery_kit_hash'))
@@ -80,8 +87,10 @@ void main() {
 
       test('should return false for incorrect mnemonic', () async {
         // Arrange
-        const storedMnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art';
-        const inputMnemonic = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong';
+        const storedMnemonic =
+            'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art';
+        const inputMnemonic =
+            'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong';
 
         final storedHash = service.hashMnemonic(storedMnemonic);
         when(mockSecureStorage.read(key: 'recovery_kit_hash'))

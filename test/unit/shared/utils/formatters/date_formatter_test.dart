@@ -72,9 +72,12 @@ void main() {
 
     test('should format month and year', () {
       // Act
-      final resultJa = DateFormatter.formatMonthYear(testDate, const Locale('ja'));
-      final resultEn = DateFormatter.formatMonthYear(testDate, const Locale('en'));
-      final resultZh = DateFormatter.formatMonthYear(testDate, const Locale('zh'));
+      final resultJa =
+          DateFormatter.formatMonthYear(testDate, const Locale('ja'));
+      final resultEn =
+          DateFormatter.formatMonthYear(testDate, const Locale('en'));
+      final resultZh =
+          DateFormatter.formatMonthYear(testDate, const Locale('zh'));
 
       // Assert
       expect(resultJa, '2026年2月');

@@ -1,9 +1,10 @@
+import 'package:flutter/services.dart';
+import 'package:local_auth/error_codes.dart' as auth_error;
 import 'package:local_auth/local_auth.dart';
 import 'package:local_auth_android/local_auth_android.dart';
 import 'package:local_auth_darwin/local_auth_darwin.dart';
-import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:local_auth/error_codes.dart' as auth_error;
+
 import '../../domain/models/auth_result.dart';
 
 part 'biometric_lock.g.dart';
@@ -17,12 +18,11 @@ enum BiometricAvailability {
 }
 
 class BiometricLock {
+  BiometricLock({LocalAuthentication? localAuth})
+      : _localAuth = localAuth ?? LocalAuthentication();
   final LocalAuthentication _localAuth;
   int _failedAttempts = 0;
   static const int maxFailedAttempts = 3;
-
-  BiometricLock({LocalAuthentication? localAuth})
-      : _localAuth = localAuth ?? LocalAuthentication();
 
   /// 检查设备是否支持生物识别
   Future<BiometricAvailability> checkAvailability() async {
@@ -68,24 +68,24 @@ class BiometricLock {
       final availability = await checkAvailability();
       if (availability == BiometricAvailability.notSupported ||
           availability == BiometricAvailability.notEnrolled) {
-        return AuthResult.fallbackToPIN();
+        return const AuthResult.fallbackToPIN();
       }
 
       // 2. 检查失败次数
       if (_failedAttempts >= maxFailedAttempts) {
-        return AuthResult.tooManyAttempts();
+        return const AuthResult.tooManyAttempts();
       }
 
       // 3. 执行认证
       final didAuthenticate = await _localAuth.authenticate(
         localizedReason: reason,
         authMessages: [
-          AndroidAuthMessages(
+          const AndroidAuthMessages(
             signInTitle: 'Home Pocket 認証',
             cancelButton: 'キャンセル',
             biometricHint: '指紋または顔で認証',
           ),
-          IOSAuthMessages(
+          const IOSAuthMessages(
             cancelButton: 'キャンセル',
             goToSettingsButton: '設定',
             goToSettingsDescription: '生体認証を設定してください',
@@ -102,7 +102,7 @@ class BiometricLock {
 
       if (didAuthenticate) {
         _failedAttempts = 0;
-        return AuthResult.success();
+        return const AuthResult.success();
       } else {
         _failedAttempts++;
         return AuthResult.failed(failedAttempts: _failedAttempts);
@@ -110,10 +110,10 @@ class BiometricLock {
     } on PlatformException catch (e) {
       if (e.code == auth_error.lockedOut ||
           e.code == auth_error.permanentlyLockedOut) {
-        return AuthResult.lockedOut();
+        return const AuthResult.lockedOut();
       } else if (e.code == auth_error.notAvailable ||
           e.code == auth_error.notEnrolled) {
-        return AuthResult.fallbackToPIN();
+        return const AuthResult.fallbackToPIN();
       } else {
         _failedAttempts++;
         return AuthResult.error(message: e.message ?? '認証失敗');
@@ -143,5 +143,5 @@ Future<BiometricAvailability> biometricAvailability(
   BiometricAvailabilityRef ref,
 ) async {
   final biometricLock = ref.watch(biometricLockProvider);
-  return await biometricLock.checkAvailability();
+  return biometricLock.checkAvailability();
 }

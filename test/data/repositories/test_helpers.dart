@@ -54,24 +54,28 @@ MockHashChainService setupMockHashChain() {
   final mock = MockHashChainService();
 
   // Mock calculateTransactionHash: returns "hash_<id>"
-  when(mock.calculateTransactionHash(
-    transactionId: anyNamed('transactionId'),
-    amount: anyNamed('amount'),
-    timestamp: anyNamed('timestamp'),
-    previousHash: anyNamed('previousHash'),
-  )).thenAnswer((invocation) async {
+  when(
+    mock.calculateTransactionHash(
+      transactionId: anyNamed('transactionId'),
+      amount: anyNamed('amount'),
+      timestamp: anyNamed('timestamp'),
+      previousHash: anyNamed('previousHash'),
+    ),
+  ).thenAnswer((invocation) async {
     final id = invocation.namedArguments[#transactionId] as String;
     return 'hash_$id';
   });
 
   // Mock verifyTransactionHash: always returns true by default
-  when(mock.verifyTransactionHash(
-    transactionId: anyNamed('transactionId'),
-    amount: anyNamed('amount'),
-    timestamp: anyNamed('timestamp'),
-    previousHash: anyNamed('previousHash'),
-    currentHash: anyNamed('currentHash'),
-  )).thenAnswer((_) async => true);
+  when(
+    mock.verifyTransactionHash(
+      transactionId: anyNamed('transactionId'),
+      amount: anyNamed('amount'),
+      timestamp: anyNamed('timestamp'),
+      previousHash: anyNamed('previousHash'),
+      currentHash: anyNamed('currentHash'),
+    ),
+  ).thenAnswer((_) async => true);
 
   // Mock getLastHash: returns empty string by default
   when(mock.getLastHash()).thenAnswer((_) async => '');

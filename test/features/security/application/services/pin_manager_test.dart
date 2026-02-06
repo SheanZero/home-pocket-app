@@ -1,8 +1,8 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/security/application/services/pin_manager.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
 @GenerateMocks([FlutterSecureStorage])
 import 'pin_manager_test.mocks.dart';
@@ -48,19 +48,23 @@ void main() {
         // Arrange
         const pin = '123456';
 
-        when(mockSecureStorage.write(
-          key: anyNamed('key'),
-          value: anyNamed('value'),
-        )).thenAnswer((_) async => null);
+        when(
+          mockSecureStorage.write(
+            key: anyNamed('key'),
+            value: anyNamed('value'),
+          ),
+        ).thenAnswer((_) async {});
 
         // Act
         await pinManager.setPIN(pin);
 
         // Assert
-        verify(mockSecureStorage.write(
-          key: 'pin_hash',
-          value: anyNamed('value'),
-        )).called(1);
+        verify(
+          mockSecureStorage.write(
+            key: 'pin_hash',
+            value: anyNamed('value'),
+          ),
+        ).called(1);
       });
 
       test('should store different hashes for different PINs', () async {
@@ -71,11 +75,14 @@ void main() {
         String? storedHash1;
         String? storedHash2;
 
-        when(mockSecureStorage.write(
-          key: anyNamed('key'),
-          value: anyNamed('value'),
-        )).thenAnswer((invocation) async {
-          final value = invocation.namedArguments[const Symbol('value')] as String;
+        when(
+          mockSecureStorage.write(
+            key: anyNamed('key'),
+            value: anyNamed('value'),
+          ),
+        ).thenAnswer((invocation) async {
+          final value =
+              invocation.namedArguments[const Symbol('value')] as String;
           if (storedHash1 == null) {
             storedHash1 = value;
           } else {
@@ -156,20 +163,24 @@ void main() {
 
         when(mockSecureStorage.read(key: 'pin_hash'))
             .thenAnswer((_) async => oldHash);
-        when(mockSecureStorage.write(
-          key: anyNamed('key'),
-          value: anyNamed('value'),
-        )).thenAnswer((_) async => null);
+        when(
+          mockSecureStorage.write(
+            key: anyNamed('key'),
+            value: anyNamed('value'),
+          ),
+        ).thenAnswer((_) async {});
 
         // Act
         final success = await pinManager.changePIN(oldPIN, newPIN);
 
         // Assert
         expect(success, true);
-        verify(mockSecureStorage.write(
-          key: 'pin_hash',
-          value: anyNamed('value'),
-        )).called(1);
+        verify(
+          mockSecureStorage.write(
+            key: 'pin_hash',
+            value: anyNamed('value'),
+          ),
+        ).called(1);
       });
 
       test('should fail when old PIN is incorrect', () async {
@@ -187,10 +198,12 @@ void main() {
 
         // Assert
         expect(success, false);
-        verifyNever(mockSecureStorage.write(
-          key: anyNamed('key'),
-          value: anyNamed('value'),
-        ));
+        verifyNever(
+          mockSecureStorage.write(
+            key: anyNamed('key'),
+            value: anyNamed('value'),
+          ),
+        );
       });
     });
 
@@ -203,7 +216,7 @@ void main() {
         when(mockSecureStorage.read(key: 'pin_hash'))
             .thenAnswer((_) async => hash);
         when(mockSecureStorage.delete(key: anyNamed('key')))
-            .thenAnswer((_) async => null);
+            .thenAnswer((_) async {});
 
         // Act
         final success = await pinManager.deletePIN(pin);

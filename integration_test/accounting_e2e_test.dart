@@ -1,23 +1,23 @@
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:integration_test/integration_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
-import 'package:home_pocket/data/daos/transaction_dao.dart';
 import 'package:home_pocket/data/daos/category_dao.dart';
-import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
-import 'package:home_pocket/features/accounting/presentation/screens/transaction_list_screen.dart';
-import 'package:home_pocket/features/accounting/presentation/screens/transaction_form_screen.dart';
-import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
-import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
+import 'package:home_pocket/data/daos/transaction_dao.dart';
 import 'package:home_pocket/data/repositories/category_repository_impl.dart';
-import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
-import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
-import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
-import 'package:home_pocket/infrastructure/crypto/repositories/key_repository_impl.dart';
+import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
+import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/accounting/presentation/screens/transaction_form_screen.dart';
+import 'package:home_pocket/features/accounting/presentation/screens/transaction_list_screen.dart';
 import 'package:home_pocket/infrastructure/crypto/repositories/encryption_repository_impl.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/key_repository_impl.dart';
+import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
+import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
+import 'package:integration_test/integration_test.dart';
 
 // Mock secure storage for integration tests
 class _MockSecureStorage implements FlutterSecureStorage {
@@ -96,7 +96,7 @@ class _MockSecureStorage implements FlutterSecureStorage {
       _storage.containsKey(key);
 
   @override
-  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// Integration test for E2E transaction flow
@@ -182,8 +182,10 @@ void main() {
 
       // ASSERT: Initially empty list
       expect(find.text('No transactions yet'), findsOneWidget);
-      expect(find.text('Tap the + button to add your first transaction'),
-          findsOneWidget);
+      expect(
+        find.text('Tap the + button to add your first transaction'),
+        findsOneWidget,
+      );
 
       // ACT: Tap FAB to open form
       await tester.tap(find.byKey(const Key('add_transaction_fab')));
@@ -239,8 +241,10 @@ void main() {
 
       // ASSERT: Delete confirmation dialog appears
       expect(find.text('Delete Transaction'), findsOneWidget);
-      expect(find.text('Are you sure you want to delete this transaction?'),
-          findsOneWidget);
+      expect(
+        find.text('Are you sure you want to delete this transaction?'),
+        findsOneWidget,
+      );
 
       // ACT: Confirm deletion
       await tester.tap(find.text('Delete'));

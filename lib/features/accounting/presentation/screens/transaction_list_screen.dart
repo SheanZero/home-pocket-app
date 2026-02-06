@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
-import 'package:home_pocket/features/accounting/presentation/screens/transaction_form_screen.dart';
-import 'package:home_pocket/features/accounting/presentation/providers/transaction_list_provider.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/current_book_provider.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/transaction_list_provider.dart';
+import 'package:home_pocket/features/accounting/presentation/screens/transaction_form_screen.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
 /// Transaction List Screen
@@ -14,12 +14,11 @@ import 'package:home_pocket/generated/app_localizations.dart';
 /// - Empty state when no transactions
 /// - Swipe actions for edit/delete
 class TransactionListScreen extends ConsumerWidget {
-  final String? bookId;
-
   const TransactionListScreen({
     super.key,
     this.bookId,
   });
+  final String? bookId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -58,7 +57,8 @@ class TransactionListScreen extends ConsumerWidget {
       body: transactionListAsync.when(
         data: (transactions) => transactions.isEmpty
             ? _buildEmptyState(context)
-            : _buildTransactionList(context, ref, transactions, effectiveBookId),
+            : _buildTransactionList(
+                context, ref, transactions, effectiveBookId),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => _buildErrorState(context, error.toString()),
       ),
@@ -172,7 +172,8 @@ class TransactionListScreen extends ConsumerWidget {
                 SnackBar(content: Text('Edit: ${transaction.id}')),
               );
             },
-            onDelete: () => _showDeleteConfirmation(context, ref, transaction, effectiveBookId),
+            onDelete: () => _showDeleteConfirmation(
+                context, ref, transaction, effectiveBookId),
           );
         },
       ),
@@ -234,18 +235,17 @@ class TransactionListScreen extends ConsumerWidget {
 }
 
 class _TransactionCard extends StatelessWidget {
-  final Transaction transaction;
-  final VoidCallback onTap;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
   const _TransactionCard({
-    super.key,
     required this.transaction,
     required this.onTap,
     required this.onEdit,
     required this.onDelete,
+    super.key,
   });
+  final Transaction transaction;
+  final VoidCallback onTap;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -291,9 +291,8 @@ class _TransactionCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: isExpense
-                        ? Colors.red.shade50
-                        : Colors.green.shade50,
+                    color:
+                        isExpense ? Colors.red.shade50 : Colors.green.shade50,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(

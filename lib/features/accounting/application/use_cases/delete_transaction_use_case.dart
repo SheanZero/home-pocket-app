@@ -8,11 +8,10 @@ import 'package:home_pocket/shared/utils/result.dart';
 /// - Hard delete from repository
 /// - Error handling
 class DeleteTransactionUseCase {
-  final TransactionRepository transactionRepository;
-
   DeleteTransactionUseCase({
     required this.transactionRepository,
   });
+  final TransactionRepository transactionRepository;
 
   /// Execute the use case
   ///
@@ -32,7 +31,7 @@ class DeleteTransactionUseCase {
       // 2. Delete transaction
       await transactionRepository.delete(transactionId);
 
-      return Result.success(true);
+      return const Result.success(true);
     } catch (e) {
       return Result.error('Failed to delete transaction: ${e.toString()}');
     }

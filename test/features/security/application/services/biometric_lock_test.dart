@@ -1,10 +1,10 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
-import 'package:local_auth/local_auth.dart';
-import 'package:local_auth/error_codes.dart' as auth_error;
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/security/application/services/biometric_lock.dart';
+import 'package:local_auth/error_codes.dart' as auth_error;
+import 'package:local_auth/local_auth.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
 @GenerateMocks([LocalAuthentication])
 import 'biometric_lock_test.mocks.dart';
@@ -82,11 +82,13 @@ void main() {
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
         when(mockLocalAuth.getAvailableBiometrics())
             .thenAnswer((_) async => [BiometricType.face]);
-        when(mockLocalAuth.authenticate(
-          localizedReason: anyNamed('localizedReason'),
-          authMessages: anyNamed('authMessages'),
-          options: anyNamed('options'),
-        )).thenAnswer((_) async => true);
+        when(
+          mockLocalAuth.authenticate(
+            localizedReason: anyNamed('localizedReason'),
+            authMessages: anyNamed('authMessages'),
+            options: anyNamed('options'),
+          ),
+        ).thenAnswer((_) async => true);
 
         // Act
         final result = await biometricLock.authenticate(
@@ -107,17 +109,20 @@ void main() {
         );
       });
 
-      test('should return failed and increment counter when auth fails', () async {
+      test('should return failed and increment counter when auth fails',
+          () async {
         // Arrange
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
         when(mockLocalAuth.getAvailableBiometrics())
             .thenAnswer((_) async => [BiometricType.face]);
-        when(mockLocalAuth.authenticate(
-          localizedReason: anyNamed('localizedReason'),
-          authMessages: anyNamed('authMessages'),
-          options: anyNamed('options'),
-        )).thenAnswer((_) async => false);
+        when(
+          mockLocalAuth.authenticate(
+            localizedReason: anyNamed('localizedReason'),
+            authMessages: anyNamed('authMessages'),
+            options: anyNamed('options'),
+          ),
+        ).thenAnswer((_) async => false);
 
         // Act
         final result = await biometricLock.authenticate(
@@ -151,17 +156,20 @@ void main() {
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
         when(mockLocalAuth.getAvailableBiometrics())
             .thenAnswer((_) async => [BiometricType.face]);
-        when(mockLocalAuth.authenticate(
-          localizedReason: anyNamed('localizedReason'),
-          authMessages: anyNamed('authMessages'),
-          options: anyNamed('options'),
-        )).thenAnswer((_) async => false);
+        when(
+          mockLocalAuth.authenticate(
+            localizedReason: anyNamed('localizedReason'),
+            authMessages: anyNamed('authMessages'),
+            options: anyNamed('options'),
+          ),
+        ).thenAnswer((_) async => false);
 
         // Act: Fail 3 times, then 4th attempt should be blocked
         await biometricLock.authenticate(reason: 'Test'); // failure 1
         await biometricLock.authenticate(reason: 'Test'); // failure 2
         await biometricLock.authenticate(reason: 'Test'); // failure 3
-        final result = await biometricLock.authenticate(reason: 'Test'); // 4th attempt - blocked
+        final result = await biometricLock.authenticate(
+            reason: 'Test'); // 4th attempt - blocked
 
         // Assert
         expect(
@@ -177,17 +185,20 @@ void main() {
         );
       });
 
-      test('should return lockedOut when PlatformException LockedOut', () async {
+      test('should return lockedOut when PlatformException LockedOut',
+          () async {
         // Arrange
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
         when(mockLocalAuth.getAvailableBiometrics())
             .thenAnswer((_) async => [BiometricType.face]);
-        when(mockLocalAuth.authenticate(
-          localizedReason: anyNamed('localizedReason'),
-          authMessages: anyNamed('authMessages'),
-          options: anyNamed('options'),
-        )).thenThrow(PlatformException(code: auth_error.lockedOut));
+        when(
+          mockLocalAuth.authenticate(
+            localizedReason: anyNamed('localizedReason'),
+            authMessages: anyNamed('authMessages'),
+            options: anyNamed('options'),
+          ),
+        ).thenThrow(PlatformException(code: auth_error.lockedOut));
 
         // Act
         final result = await biometricLock.authenticate(
@@ -208,7 +219,8 @@ void main() {
         );
       });
 
-      test('should return fallbackToPIN when biometric not available', () async {
+      test('should return fallbackToPIN when biometric not available',
+          () async {
         // Arrange
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => false);
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => false);
@@ -240,11 +252,13 @@ void main() {
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
         when(mockLocalAuth.getAvailableBiometrics())
             .thenAnswer((_) async => [BiometricType.face]);
-        when(mockLocalAuth.authenticate(
-          localizedReason: anyNamed('localizedReason'),
-          authMessages: anyNamed('authMessages'),
-          options: anyNamed('options'),
-        )).thenAnswer((_) async => false);
+        when(
+          mockLocalAuth.authenticate(
+            localizedReason: anyNamed('localizedReason'),
+            authMessages: anyNamed('authMessages'),
+            options: anyNamed('options'),
+          ),
+        ).thenAnswer((_) async => false);
 
         // Act: Fail once
         await biometricLock.authenticate(reason: 'Test');

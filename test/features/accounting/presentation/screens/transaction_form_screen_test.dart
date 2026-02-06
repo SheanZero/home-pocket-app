@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:home_pocket/features/accounting/presentation/screens/transaction_form_screen.dart';
-import 'package:home_pocket/features/accounting/presentation/providers/transaction_form_notifier.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/current_book_provider.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/current_device_provider.dart';
-import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/transaction_form_notifier.dart';
+import 'package:home_pocket/features/accounting/presentation/screens/transaction_form_screen.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
 /// Helper to wrap widget with localization support and provider overrides for testing
-Widget wrapWithLocalizations(Widget child, {List<Override> overrides = const []}) {
+Widget wrapWithLocalizations(Widget child,
+    {List<Override> overrides = const []}) {
   return ProviderScope(
     overrides: overrides,
     child: MaterialApp(
@@ -52,7 +53,8 @@ void main() {
       expect(find.text('New Transaction'), findsOneWidget);
 
       // Verify form fields
-      expect(find.byType(TextFormField), findsNWidgets(3)); // Amount, Note, Merchant
+      expect(find.byType(TextFormField),
+          findsNWidgets(3)); // Amount, Note, Merchant
       expect(find.text('Amount'), findsOneWidget);
       expect(find.text('Note (Optional)'), findsOneWidget);
       expect(find.text('Merchant (Optional)'), findsOneWidget);
@@ -98,8 +100,7 @@ void main() {
       expect(state.amount, 10050);
     });
 
-    testWidgets('should switch transaction type',
-        (WidgetTester tester) async {
+    testWidgets('should switch transaction type', (WidgetTester tester) async {
       final container = ProviderContainer(overrides: defaultTestOverrides);
       addTearDown(container.dispose);
 
@@ -149,8 +150,7 @@ void main() {
       expect(state.ledgerType, LedgerType.soul);
     });
 
-    testWidgets('should update note and merchant',
-        (WidgetTester tester) async {
+    testWidgets('should update note and merchant', (WidgetTester tester) async {
       final container = ProviderContainer(overrides: defaultTestOverrides);
       addTearDown(container.dispose);
 

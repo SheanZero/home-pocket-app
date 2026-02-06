@@ -1,15 +1,15 @@
 import 'package:drift/native.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/data/daos/transaction_dao.dart';
 import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
-import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/encryption_repository_impl.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/key_repository_impl.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
-import 'package:home_pocket/infrastructure/crypto/repositories/key_repository_impl.dart';
-import 'package:home_pocket/infrastructure/crypto/repositories/encryption_repository_impl.dart';
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 
 // Mock secure storage for integration tests
 class MockSecureStorage implements FlutterSecureStorage {
@@ -95,7 +95,7 @@ class MockSecureStorage implements FlutterSecureStorage {
   }
 
   @override
-  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {
@@ -115,10 +115,12 @@ void main() {
       // Setup REAL crypto services
       final secureStorage = MockSecureStorage();
       final keyRepository = KeyRepositoryImpl(secureStorage: secureStorage);
-      final encryptionRepository = EncryptionRepositoryImpl(keyRepository: keyRepository);
+      final encryptionRepository =
+          EncryptionRepositoryImpl(keyRepository: keyRepository);
 
       keyManager = KeyManager(repository: keyRepository);
-      fieldEncryptionService = FieldEncryptionService(repository: encryptionRepository);
+      fieldEncryptionService =
+          FieldEncryptionService(repository: encryptionRepository);
       hashChainService = HashChainService();
 
       // Generate real device key pair (CRITICAL: not mocked)
@@ -163,7 +165,8 @@ void main() {
       // CRITICAL: Verify note is encrypted (not plain text)
       expect(storedTransaction!.note, isNotNull);
       expect(storedTransaction.note, isNot(equals('Sensitive note content')));
-      expect(storedTransaction.note!.length, greaterThan(20)); // Encrypted data is longer
+      expect(storedTransaction.note!.length,
+          greaterThan(20)); // Encrypted data is longer
 
       // CRITICAL: Verify merchant is encrypted (not plain text)
       expect(storedTransaction.merchant, isNotNull);
@@ -256,7 +259,8 @@ void main() {
       expect(allTransactions.length, equals(3));
 
       // CRITICAL: Verify first transaction uses GENESIS
-      final firstTx = allTransactions.last; // List is newest first, so last = oldest
+      final firstTx =
+          allTransactions.last; // List is newest first, so last = oldest
       expect(firstTx.prevHash, equals('GENESIS'));
       expect(firstTx.currentHash, isNotEmpty);
 

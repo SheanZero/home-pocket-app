@@ -6,12 +6,10 @@ part 'book.g.dart';
 
 @freezed
 class Book with _$Book {
-  const Book._();
-
   const factory Book({
     required String id,
     required String name,
-    required String currency,  // ISO 4217: "CNY", "USD", "JPY"
+    required String currency, // ISO 4217: "CNY", "USD", "JPY"
     required String deviceId,
     required DateTime createdAt,
     DateTime? updatedAt,
@@ -19,9 +17,10 @@ class Book with _$Book {
 
     // Statistics (denormalized for performance)
     @Default(0) int transactionCount,
-    @Default(0) int survivalBalance,  // Balance in cents
-    @Default(0) int soulBalance,      // Balance in cents
+    @Default(0) int survivalBalance, // Balance in cents
+    @Default(0) int soulBalance, // Balance in cents
   }) = _Book;
+  const Book._();
 
   factory Book.fromJson(Map<String, dynamic> json) => _$BookFromJson(json);
 

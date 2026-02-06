@@ -18,9 +18,10 @@ class Categories extends Table {
 
   List<TableIndex> get customIndices => [
         // Index for querying by transaction type
-        TableIndex(name: 'idx_categories_type', columns: {#type}),
+        const TableIndex(name: 'idx_categories_type', columns: {#type}),
 
         // Index for system vs custom categories
-        TableIndex(name: 'idx_categories_is_system', columns: {#isSystem}),
+        const TableIndex(
+            name: 'idx_categories_is_system', columns: {#isSystem}),
       ];
 }

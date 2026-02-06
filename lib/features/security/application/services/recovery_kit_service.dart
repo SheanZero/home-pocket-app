@@ -1,23 +1,23 @@
 import 'dart:convert';
 import 'dart:math';
+
+import 'package:bip39/bip39.dart' as bip39;
 import 'package:crypto/crypto.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:bip39/bip39.dart' as bip39;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:home_pocket/infrastructure/crypto/repositories/key_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'recovery_kit_service.g.dart';
 
 class RecoveryKitService {
-  final FlutterSecureStorage _secureStorage;
-  final KeyManager _keyManager;
-
   RecoveryKitService({
     required FlutterSecureStorage secureStorage,
     required KeyManager keyManager,
   })  : _secureStorage = secureStorage,
         _keyManager = keyManager;
+  final FlutterSecureStorage _secureStorage;
+  final KeyManager _keyManager;
 
   /// 生成Recovery Kit（24个助记词）
   Future<String> generateRecoveryKit() async {

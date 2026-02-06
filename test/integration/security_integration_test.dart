@@ -1,13 +1,13 @@
-import 'package:flutter_test/flutter_test.dart';
+import 'package:bip39/bip39.dart' as bip39;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
-import 'package:home_pocket/features/security/application/services/recovery_kit_service.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/security/application/services/pin_manager.dart';
+import 'package:home_pocket/features/security/application/services/recovery_kit_service.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/encryption_repository_impl.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/key_repository_impl.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
-import 'package:home_pocket/infrastructure/crypto/repositories/key_repository_impl.dart';
-import 'package:home_pocket/infrastructure/crypto/repositories/encryption_repository_impl.dart';
-import 'package:bip39/bip39.dart' as bip39;
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 
 // Mock secure storage for integration tests
 class MockSecureStorage implements FlutterSecureStorage {
@@ -93,7 +93,7 @@ class MockSecureStorage implements FlutterSecureStorage {
   }
 
   @override
-  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {
@@ -111,7 +111,8 @@ void main() {
 
       // Create repository instances
       final keyRepository = KeyRepositoryImpl(secureStorage: secureStorage);
-      final encryptionRepository = EncryptionRepositoryImpl(keyRepository: keyRepository);
+      final encryptionRepository =
+          EncryptionRepositoryImpl(keyRepository: keyRepository);
 
       // Create service instances
       keyManager = KeyManager(repository: keyRepository);
@@ -120,7 +121,8 @@ void main() {
         keyManager: keyManager,
       );
       pinManager = PINManager(secureStorage: secureStorage);
-      fieldEncryptionService = FieldEncryptionService(repository: encryptionRepository);
+      fieldEncryptionService =
+          FieldEncryptionService(repository: encryptionRepository);
       hashChainService = HashChainService();
     });
 
@@ -141,12 +143,14 @@ void main() {
 
       // Step 4: Encrypt sensitive data
       const sensitiveAmount = 12345.67;
-      final encryptedAmount = await fieldEncryptionService.encryptAmount(sensitiveAmount);
+      final encryptedAmount =
+          await fieldEncryptionService.encryptAmount(sensitiveAmount);
       expect(encryptedAmount, isNotEmpty);
       expect(encryptedAmount, isNot(contains('12345')));
 
       // Step 5: Decrypt and verify
-      final decryptedAmount = await fieldEncryptionService.decryptAmount(encryptedAmount);
+      final decryptedAmount =
+          await fieldEncryptionService.decryptAmount(encryptedAmount);
       expect(decryptedAmount, equals(sensitiveAmount));
     });
 
@@ -157,7 +161,8 @@ void main() {
 
       // Step 2: Simulate device loss - create new KeyManager
       final newSecureStorage = MockSecureStorage();
-      final newKeyRepository = KeyRepositoryImpl(secureStorage: newSecureStorage);
+      final newKeyRepository =
+          KeyRepositoryImpl(secureStorage: newSecureStorage);
       final newKeyManager = KeyManager(repository: newKeyRepository);
 
       // Step 3: Recover device key from mnemonic
@@ -172,7 +177,8 @@ void main() {
 
       // Step 5: Verify same seed produces same keys (deterministic)
       final newSecureStorage2 = MockSecureStorage();
-      final newKeyRepository2 = KeyRepositoryImpl(secureStorage: newSecureStorage2);
+      final newKeyRepository2 =
+          KeyRepositoryImpl(secureStorage: newSecureStorage2);
       final newKeyManager2 = KeyManager(repository: newKeyRepository2);
       final recoveredKeyPair2 = await newKeyManager2.recoverFromSeed(seed);
 
@@ -224,10 +230,12 @@ void main() {
         final timestamp = DateTime.now().millisecondsSinceEpoch + (i * 1000);
 
         // Encrypt sensitive data
-        final encryptedAmount = await fieldEncryptionService.encryptAmount(amount);
+        final encryptedAmount =
+            await fieldEncryptionService.encryptAmount(amount);
 
         // Calculate hash for integrity
-        final previousHash = i == 0 ? '' : transactions[i - 1]['hash'] as String;
+        final previousHash =
+            i == 0 ? '' : transactions[i - 1]['hash'] as String;
         final hash = hashChainService.calculateTransactionHash(
           transactionId: transactionId,
           amount: amount,
@@ -254,7 +262,8 @@ void main() {
       for (final tx in transactions) {
         final encryptedAmount = tx['encryptedAmount'] as String;
         final originalAmount = tx['amount'] as double;
-        final decryptedAmount = await fieldEncryptionService.decryptAmount(encryptedAmount);
+        final decryptedAmount =
+            await fieldEncryptionService.decryptAmount(encryptedAmount);
         expect(decryptedAmount, equals(originalAmount));
       }
 
@@ -285,7 +294,8 @@ void main() {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
 
       // Encrypt amount
-      final encryptedAmount = await fieldEncryptionService.encryptAmount(amount);
+      final encryptedAmount =
+          await fieldEncryptionService.encryptAmount(amount);
 
       // Calculate hash
       final hash = hashChainService.calculateTransactionHash(
@@ -300,7 +310,8 @@ void main() {
       expect(await pinManager.verifyPIN(userPin), true);
 
       // Layer 2: Encryption/Decryption
-      final decryptedAmount = await fieldEncryptionService.decryptAmount(encryptedAmount);
+      final decryptedAmount =
+          await fieldEncryptionService.decryptAmount(encryptedAmount);
       expect(decryptedAmount, equals(amount));
 
       // Layer 3: Hash integrity
@@ -337,13 +348,16 @@ void main() {
 
     test('Incremental hash chain verification performance', () async {
       // Create a large chain
-      final transactions = List.generate(100, (i) => {
-        'id': 'tx-${i.toString().padLeft(3, '0')}',
-        'amount': (i + 1) * 10.0,
-        'timestamp': 1704067200000 + (i * 1000),
-        'previousHash': '',
-        'hash': '',
-      });
+      final transactions = List.generate(
+        100,
+        (i) => {
+          'id': 'tx-${i.toString().padLeft(3, '0')}',
+          'amount': (i + 1) * 10.0,
+          'timestamp': 1704067200000 + (i * 1000),
+          'previousHash': '',
+          'hash': '',
+        },
+      );
 
       // Build chain
       for (int i = 0; i < transactions.length; i++) {

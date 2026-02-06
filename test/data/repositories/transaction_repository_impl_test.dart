@@ -61,12 +61,14 @@ void main() {
       );
 
       // Mock hash calculation
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: 'tx1',
-        amount: 100000.0, // Convert int to double for hash
-        timestamp: transaction.timestamp.millisecondsSinceEpoch,
-        previousHash: 'GENESIS',
-      )).thenReturn('hash123');
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: 'tx1',
+          amount: 100000.0, // Convert int to double for hash
+          timestamp: transaction.timestamp.millisecondsSinceEpoch,
+          previousHash: 'GENESIS',
+        ),
+      ).thenReturn('hash123');
 
       // Mock encryption
       when(mockEncryptionService.encryptField('Test note'))
@@ -82,12 +84,14 @@ void main() {
       verify(mockEncryptionService.encryptField('Test merchant')).called(1);
 
       // Assert: Verify hash calculation was called with correct parameters
-      verify(mockHashChainService.calculateTransactionHash(
-        transactionId: 'tx1',
-        amount: 100000.0, // Convert int to double for hash
-        timestamp: transaction.timestamp.millisecondsSinceEpoch,
-        previousHash: 'GENESIS',
-      )).called(1);
+      verify(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: 'tx1',
+          amount: 100000.0, // Convert int to double for hash
+          timestamp: transaction.timestamp.millisecondsSinceEpoch,
+          previousHash: 'GENESIS',
+        ),
+      ).called(1);
 
       // Assert: Verify transaction stored in database with encrypted data and hash
       final storedTx = await dao.getTransactionById('tx1');
@@ -120,12 +124,14 @@ void main() {
       );
 
       // Mock hash calculation for insert
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: 'tx1',
-        amount: 100000.0,
-        timestamp: transaction.timestamp.millisecondsSinceEpoch,
-        previousHash: 'GENESIS',
-      )).thenReturn('hash123');
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: 'tx1',
+          amount: 100000.0,
+          timestamp: transaction.timestamp.millisecondsSinceEpoch,
+          previousHash: 'GENESIS',
+        ),
+      ).thenReturn('hash123');
 
       // Mock encryption for insert
       when(mockEncryptionService.encryptField('Test note'))
@@ -154,7 +160,8 @@ void main() {
 
       // Verify decryption was called with encrypted values
       verify(mockEncryptionService.decryptField('encrypted_note')).called(1);
-      verify(mockEncryptionService.decryptField('encrypted_merchant')).called(1);
+      verify(mockEncryptionService.decryptField('encrypted_merchant'))
+          .called(1);
     });
 
     test('should return null for non-existent transaction', () async {
@@ -218,26 +225,32 @@ void main() {
       );
 
       // Mock hash calculation for all inserts
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: 'tx_find_1',
-        amount: 50000.0,
-        timestamp: tx1.timestamp.millisecondsSinceEpoch,
-        previousHash: 'GENESIS',
-      )).thenReturn('hash_tx_find_1');
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: 'tx_find_1',
+          amount: 50000.0,
+          timestamp: tx1.timestamp.millisecondsSinceEpoch,
+          previousHash: 'GENESIS',
+        ),
+      ).thenReturn('hash_tx_find_1');
 
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: 'tx_find_2',
-        amount: 60000.0,
-        timestamp: tx2.timestamp.millisecondsSinceEpoch,
-        previousHash: 'hash_tx_find_1',
-      )).thenReturn('hash_tx_find_2');
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: 'tx_find_2',
+          amount: 60000.0,
+          timestamp: tx2.timestamp.millisecondsSinceEpoch,
+          previousHash: 'hash_tx_find_1',
+        ),
+      ).thenReturn('hash_tx_find_2');
 
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: 'tx_find_3',
-        amount: 70000.0,
-        timestamp: tx3.timestamp.millisecondsSinceEpoch,
-        previousHash: 'hash_tx_find_2',
-      )).thenReturn('hash_tx_find_3');
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: 'tx_find_3',
+          amount: 70000.0,
+          timestamp: tx3.timestamp.millisecondsSinceEpoch,
+          previousHash: 'hash_tx_find_2',
+        ),
+      ).thenReturn('hash_tx_find_3');
 
       when(mockEncryptionService.encryptField('Note 1'))
           .thenAnswer((_) async => 'encrypted_note_1');
@@ -326,19 +339,23 @@ void main() {
       );
 
       // Mock hash calculation for both inserts
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: 'tx_jan',
-        amount: 50000.0,
-        timestamp: txJan.timestamp.millisecondsSinceEpoch,
-        previousHash: 'GENESIS',
-      )).thenReturn('hash_tx_jan');
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: 'tx_jan',
+          amount: 50000.0,
+          timestamp: txJan.timestamp.millisecondsSinceEpoch,
+          previousHash: 'GENESIS',
+        ),
+      ).thenReturn('hash_tx_jan');
 
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: 'tx_feb',
-        amount: 60000.0,
-        timestamp: txFeb.timestamp.millisecondsSinceEpoch,
-        previousHash: 'hash_tx_jan',
-      )).thenReturn('hash_tx_feb');
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: 'tx_feb',
+          amount: 60000.0,
+          timestamp: txFeb.timestamp.millisecondsSinceEpoch,
+          previousHash: 'hash_tx_jan',
+        ),
+      ).thenReturn('hash_tx_feb');
 
       when(mockEncryptionService.encryptField('January transaction'))
           .thenAnswer((_) async => 'encrypted_jan');
@@ -394,12 +411,14 @@ void main() {
       );
 
       // Mock hash calculation for insert
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: 'tx_update',
-        amount: 100000.0,
-        timestamp: transaction.timestamp.millisecondsSinceEpoch,
-        previousHash: 'GENESIS',
-      )).thenReturn('hash_update');
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: 'tx_update',
+          amount: 100000.0,
+          timestamp: transaction.timestamp.millisecondsSinceEpoch,
+          previousHash: 'GENESIS',
+        ),
+      ).thenReturn('hash_update');
 
       // Mock encryption for insert
       when(mockEncryptionService.encryptField('Original note'))
@@ -464,12 +483,14 @@ void main() {
       );
 
       // Mock hash and encryption for insert
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: 'tx_delete',
-        amount: 100000.0,
-        timestamp: transaction.timestamp.millisecondsSinceEpoch,
-        previousHash: 'GENESIS',
-      )).thenReturn('hash_delete');
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: 'tx_delete',
+          amount: 100000.0,
+          timestamp: transaction.timestamp.millisecondsSinceEpoch,
+          previousHash: 'GENESIS',
+        ),
+      ).thenReturn('hash_delete');
 
       when(mockEncryptionService.encryptField('Delete test'))
           .thenAnswer((_) async => 'encrypted_delete_test');
@@ -506,12 +527,14 @@ void main() {
       );
 
       // Mock hash and encryption for insert
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: 'tx_soft_delete',
-        amount: 100000.0,
-        timestamp: transaction.timestamp.millisecondsSinceEpoch,
-        previousHash: 'GENESIS',
-      )).thenReturn('hash_soft_delete');
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: 'tx_soft_delete',
+          amount: 100000.0,
+          timestamp: transaction.timestamp.millisecondsSinceEpoch,
+          previousHash: 'GENESIS',
+        ),
+      ).thenReturn('hash_soft_delete');
 
       when(mockEncryptionService.encryptField('Soft delete test'))
           .thenAnswer((_) async => 'encrypted_soft_delete_test');
@@ -550,12 +573,14 @@ void main() {
       );
 
       // Mock hash and encryption for insert
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: 'tx_hash',
-        amount: 100000.0,
-        timestamp: transaction.timestamp.millisecondsSinceEpoch,
-        previousHash: 'GENESIS',
-      )).thenReturn('hash_tx_hash');
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: 'tx_hash',
+          amount: 100000.0,
+          timestamp: transaction.timestamp.millisecondsSinceEpoch,
+          previousHash: 'GENESIS',
+        ),
+      ).thenReturn('hash_tx_hash');
 
       when(mockEncryptionService.encryptField('Hash test'))
           .thenAnswer((_) async => 'encrypted_hash_test');
@@ -594,12 +619,14 @@ void main() {
 
         // Mock hash calculation (chain each transaction)
         final prevHash = i == 1 ? 'GENESIS' : 'hash_tx_count_${i - 1}';
-        when(mockHashChainService.calculateTransactionHash(
-          transactionId: 'tx_count_$i',
-          amount: (i * 10000).toDouble(),
-          timestamp: tx.timestamp.millisecondsSinceEpoch,
-          previousHash: prevHash,
-        )).thenReturn('hash_tx_count_$i');
+        when(
+          mockHashChainService.calculateTransactionHash(
+            transactionId: 'tx_count_$i',
+            amount: (i * 10000).toDouble(),
+            timestamp: tx.timestamp.millisecondsSinceEpoch,
+            previousHash: prevHash,
+          ),
+        ).thenReturn('hash_tx_count_$i');
 
         // Mock encryption
         when(mockEncryptionService.encryptField('Count test $i'))
@@ -668,26 +695,32 @@ void main() {
       );
 
       // Mock hash calculation for chain (tx1 -> tx2 -> tx3)
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: 'tx_chain_1',
-        amount: 10000.0,
-        timestamp: tx1.timestamp.millisecondsSinceEpoch,
-        previousHash: 'GENESIS',
-      )).thenReturn('hash_chain_1');
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: 'tx_chain_1',
+          amount: 10000.0,
+          timestamp: tx1.timestamp.millisecondsSinceEpoch,
+          previousHash: 'GENESIS',
+        ),
+      ).thenReturn('hash_chain_1');
 
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: 'tx_chain_2',
-        amount: 20000.0,
-        timestamp: tx2.timestamp.millisecondsSinceEpoch,
-        previousHash: 'hash_chain_1',
-      )).thenReturn('hash_chain_2');
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: 'tx_chain_2',
+          amount: 20000.0,
+          timestamp: tx2.timestamp.millisecondsSinceEpoch,
+          previousHash: 'hash_chain_1',
+        ),
+      ).thenReturn('hash_chain_2');
 
-      when(mockHashChainService.calculateTransactionHash(
-        transactionId: 'tx_chain_3',
-        amount: 30000.0,
-        timestamp: tx3.timestamp.millisecondsSinceEpoch,
-        previousHash: 'hash_chain_2',
-      )).thenReturn('hash_chain_3');
+      when(
+        mockHashChainService.calculateTransactionHash(
+          transactionId: 'tx_chain_3',
+          amount: 30000.0,
+          timestamp: tx3.timestamp.millisecondsSinceEpoch,
+          previousHash: 'hash_chain_2',
+        ),
+      ).thenReturn('hash_chain_3');
 
       // Mock encryption for all
       when(mockEncryptionService.encryptField('Chain 1'))

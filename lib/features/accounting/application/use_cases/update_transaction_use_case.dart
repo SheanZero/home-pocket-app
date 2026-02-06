@@ -1,6 +1,6 @@
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
-import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
+import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 
 /// Use case for updating an existing transaction
@@ -13,13 +13,12 @@ import 'package:home_pocket/shared/utils/result.dart';
 ///
 /// Note: Field encryption is handled by Repository layer
 class UpdateTransactionUseCase {
-  final TransactionRepository transactionRepository;
-  final CategoryRepository categoryRepository;
-
   UpdateTransactionUseCase({
     required this.transactionRepository,
     required this.categoryRepository,
   });
+  final TransactionRepository transactionRepository;
+  final CategoryRepository categoryRepository;
 
   /// Execute the use case
   ///
@@ -60,8 +59,12 @@ class UpdateTransactionUseCase {
         type: type ?? existingTransaction.type,
         categoryId: categoryId ?? existingTransaction.categoryId,
         ledgerType: ledgerType ?? existingTransaction.ledgerType,
-        note: note ?? existingTransaction.note, // ✅ Pass plaintext - Repository will encrypt
-        merchant: merchant ?? existingTransaction.merchant, // ✅ Pass plaintext - Repository will encrypt
+        note: note ??
+            existingTransaction
+                .note, // ✅ Pass plaintext - Repository will encrypt
+        merchant: merchant ??
+            existingTransaction
+                .merchant, // ✅ Pass plaintext - Repository will encrypt
         photoHash: photoHash ?? existingTransaction.photoHash,
         metadata: metadata ?? existingTransaction.metadata,
         updatedAt: DateTime.now(),

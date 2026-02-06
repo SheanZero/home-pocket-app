@@ -20,9 +20,9 @@ class Books extends Table {
 
   List<TableIndex> get customIndices => [
         // Index for finding active books
-        TableIndex(name: 'idx_books_archived', columns: {#isArchived}),
+        const TableIndex(name: 'idx_books_archived', columns: {#isArchived}),
 
         // Index for book name search
-        TableIndex(name: 'idx_books_name', columns: {#name}),
+        const TableIndex(name: 'idx_books_name', columns: {#name}),
       ];
 }
