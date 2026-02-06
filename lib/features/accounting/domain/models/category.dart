@@ -11,8 +11,9 @@ class Category with _$Category {
     required String name,
     required String icon, // Material Icon name or emoji
     required String color,
-    required int
-        level, // 1, 2, or 3, required TransactionType type,  // expense or income, required DateTime createdAt, // Hex color value
+    required int level, // 1, 2, or 3
+    required TransactionType type, // expense or income
+    required DateTime createdAt, // Hex color value
     String? parentId, // Parent category ID (3-level support)
     @Default(false) bool isSystem, // System categories cannot be deleted
     @Default(0) int sortOrder,
