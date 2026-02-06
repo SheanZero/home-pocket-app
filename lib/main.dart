@@ -1,3 +1,5 @@
+import 'dart:developer' as dev;
+
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'data/app_database.dart';
 import 'features/accounting/presentation/providers/use_case_providers.dart';
 import 'features/accounting/presentation/screens/transaction_list_screen.dart';
+import 'infrastructure/crypto/providers.dart';
 import 'infrastructure/security/providers.dart';
 
 void main() async {
@@ -14,11 +17,25 @@ void main() async {
   // Production will use encrypted SQLCipher executor.
   final database = AppDatabase(NativeDatabase.memory());
 
+  // Initialize master key for field encryption.
+  // ProviderContainer is used to eagerly initialize before runApp.
+  final container = ProviderContainer(
+    overrides: [
+      appDatabaseProvider.overrideWithValue(database),
+    ],
+  );
+
+  final masterKeyRepo = container.read(masterKeyRepositoryProvider);
+  if (!await masterKeyRepo.hasMasterKey()) {
+    await masterKeyRepo.initializeMasterKey();
+    dev.log('Master key initialized', name: 'AppInit');
+  } else {
+    dev.log('Master key already exists', name: 'AppInit');
+  }
+
   runApp(
-    ProviderScope(
-      overrides: [
-        appDatabaseProvider.overrideWithValue(database),
-      ],
+    UncontrolledProviderScope(
+      container: container,
       child: const HomePocketApp(),
     ),
   );

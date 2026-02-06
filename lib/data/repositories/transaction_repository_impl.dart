@@ -1,8 +1,14 @@
+import 'dart:developer' as dev;
+import 'dart:math' as math;
+
 import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
 import '../../infrastructure/crypto/services/field_encryption_service.dart';
 import '../app_database.dart';
 import '../daos/transaction_dao.dart';
+
+String _trunc(String s, [int len = 16]) =>
+    s.length <= len ? s : '${s.substring(0, math.min(len, s.length))}...';
 
 /// Concrete implementation of [TransactionRepository].
 ///
@@ -19,10 +25,29 @@ class TransactionRepositoryImpl implements TransactionRepository {
 
   @override
   Future<void> insert(Transaction transaction) async {
+    dev.log(
+      '[4/7 Repo Insert] amount=${transaction.amount} (int), '
+      'note(plain)="${transaction.note}"',
+      name: 'DataFlow',
+    );
+
     String? encryptedNote;
     if (transaction.note != null && transaction.note!.isNotEmpty) {
       encryptedNote = await _encryptionService.encryptField(transaction.note!);
+      dev.log(
+        '[5/7 Note Encrypted] plain="${transaction.note}" → '
+        'cipher="${_trunc(encryptedNote, 20)}" '
+        '(len=${encryptedNote.length})',
+        name: 'DataFlow',
+      );
     }
+
+    dev.log(
+      '[6/7 DAO Insert] amount=${transaction.amount} (int, stored as-is), '
+      'note(cipher)="${encryptedNote ?? "null"}", '
+      'hash=${_trunc(transaction.currentHash)}',
+      name: 'DataFlow',
+    );
 
     await _dao.insertTransaction(
       id: transaction.id,
@@ -89,9 +114,19 @@ class TransactionRepositoryImpl implements TransactionRepository {
   Future<int> countByBookId(String bookId) => _dao.countByBookId(bookId);
 
   Future<Transaction> _toModel(TransactionRow row) async {
+    dev.log(
+      '[Read DB] id=${row.id}, amount=${row.amount} (int from DB), '
+      'note(cipher)="${row.note != null ? _trunc(row.note!, 20) : "null"}"',
+      name: 'DataFlow',
+    );
+
     String? decryptedNote;
     if (row.note != null && row.note!.isNotEmpty) {
       decryptedNote = await _encryptionService.decryptField(row.note!);
+      dev.log(
+        '[Read Decrypt] cipher → plain="$decryptedNote"',
+        name: 'DataFlow',
+      );
     }
 
     return Transaction(
