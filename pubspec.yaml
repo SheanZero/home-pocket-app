@@ -26,6 +26,12 @@ dependencies:
   # Secure Storage
   flutter_secure_storage: ^9.2.4
 
+  # Biometric Authentication
+  local_auth: ^2.3.0
+
+  # Unique ID Generation
+  ulid: ^2.0.0
+
   # Database
   drift: ^2.25.0
   sqlcipher_flutter_libs: ^0.6.7
