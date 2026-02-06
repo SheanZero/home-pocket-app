@@ -72,56 +72,97 @@ The codebase follows strict Clean Architecture with dependency rules:
 
 ```
 lib/
-├── infrastructure/       # Project-wide infrastructure
-│   └── crypto/          # Cryptographic primitives (MANDATORY)
-│       ├── services/    # Key management, encryption, hash chain
-│       ├── repositories/ # Crypto repository interfaces & implementations
-│       ├── models/      # Crypto domain models
-│       └── database/    # Database encryption setup
+├── infrastructure/       # Project-wide infrastructure (NEVER in features/)
+│   ├── crypto/          # Cryptographic primitives (MANDATORY)
+│   │   ├── services/    # key_manager, field_encryption, hash_chain, photo_encryption, recovery_kit
+│   │   ├── models/      # device_key_pair, chain_verification_result (唯一定义)
+│   │   ├── repositories/ # Crypto repository interfaces & implementations
+│   │   └── database/    # Database encryption setup
+│   ├── ml/              # ML/OCR technology
+│   │   ├── ocr/         # mlkit_ocr_service, vision_ocr_service
+│   │   ├── tflite_classifier.dart
+│   │   ├── merchant_database.dart
+│   │   └── image_preprocessor.dart
+│   ├── i18n/            # Internationalization infrastructure
+│   │   ├── formatters/  # date_formatter, number_formatter
+│   │   ├── models/      # locale_settings
+│   │   └── supported_locales.dart
+│   ├── sync/            # Sync technology (crdt, bluetooth, nfc, wifi)
+│   ├── security/        # biometric_service, secure_storage, audit_logger
+│   └── platform/        # Platform-specific wrappers (ios/, android/)
+│
+├── application/          # Global business logic (Use Cases + Services)
+│   ├── accounting/      # create/update/delete/get transaction use cases
+│   ├── dual_ledger/     # classification_service, rule_engine
+│   ├── ocr/             # scan_receipt, receipt_parser, save_receipt_photo
+│   ├── security/        # verify_hash_chain, generate_recovery_kit
+│   ├── analytics/       # generate_monthly_report, calculate_budget
+│   └── settings/        # export/import backup
 │
 ├── data/                 # Shared data layer (CROSS-FEATURE)
 │   ├── app_database.dart # Main Drift database definition
-│   ├── tables/          # Drift table definitions (all features)
-│   └── daos/            # Drift data access objects (all features)
+│   ├── tables/          # ALL Drift table definitions (all features)
+│   ├── daos/            # ALL Drift data access objects (all features)
+│   └── repositories/    # ALL repository implementations
 │
-├── features/              # Feature modules (domain-driven)
+├── features/             # Feature modules ("thin Feature" pattern)
 │   └── {feature}/
-│       ├── presentation/  # UI layer (screens, widgets, providers)
-│       ├── application/   # Business logic (use cases, services)
-│       ├── domain/        # Core entities & repository interfaces
-│       └── data/          # Data access (repositories only - use lib/data/ DAOs)
+│       ├── domain/       # ONLY: models + repository interfaces
+│       │   ├── models/
+│       │   └── repositories/  # abstract interfaces only
+│       └── presentation/ # UI layer (screens, widgets, providers)
 │
 ├── core/                  # Cross-cutting concerns
 │   ├── config/           # App configuration
 │   ├── constants/        # Global constants
+│   ├── initialization/   # AppInitializer
 │   ├── router/           # GoRouter navigation
 │   └── theme/            # Material 3 theme
 │
 ├── shared/               # Reusable components
 │   ├── widgets/         # Common UI components
 │   ├── extensions/      # Dart extensions
-│   └── utils/           # Utility functions
+│   └── utils/           # Utility functions (result.dart)
 │
 └── l10n/                # Internationalization (ja, zh, en)
 ```
+
+**"Thin Feature" Rule:** Features NEVER contain `application/`, `infrastructure/`, `data/tables/`, or `data/daos/` directories. Business logic lives in `lib/application/`, data access in `lib/data/`, and infrastructure in `lib/infrastructure/`.
 
 ### Capability Classification Rule (CRITICAL)
 
 **Before creating any new functionality, MUST classify it as:**
 
-#### 🔵 Feature-Specific Capability (Feature Closure)
+#### 🔵 Feature-Specific Capability (Thin Feature)
 **Characteristics:**
-- Used ONLY by the current feature
-- No other features need access
-- Feature-specific business logic
+- Domain models used primarily by this feature
+- Repository interfaces (abstract) for this feature
+- Presentation (screens, widgets, providers)
 
 **Placement:** `lib/features/{feature}/`
 
 **Examples:**
-- Feature-specific UI screens/widgets
-- Feature-specific use cases
-- Feature-specific domain models (if truly isolated)
-- Feature-specific repository implementations
+- Feature-specific UI screens/widgets/providers
+- Feature-specific domain models (Transaction, Category, Book)
+- Feature-specific repository interfaces (abstract only)
+
+**Feature NEVER contains:**
+- ❌ `application/` → Use `lib/application/{domain}/`
+- ❌ `infrastructure/` → Use `lib/infrastructure/`
+- ❌ `data/tables/` or `data/daos/` → Use `lib/data/`
+
+#### 🟡 Application Layer Capability (Business Logic)
+**Characteristics:**
+- Use Cases orchestrating business operations
+- Services combining multiple repositories/infrastructure
+- Domain-specific business rules
+
+**Placement:** `lib/application/{domain}/`
+
+**Examples:**
+- ✅ **Use Cases (lib/application/accounting/)**: CreateTransactionUseCase
+- ✅ **Classification (lib/application/dual_ledger/)**: ClassificationService, RuleEngine
+- ✅ **OCR Logic (lib/application/ocr/)**: ReceiptParser, ScanReceiptUseCase
 
 #### 🟢 Shared Capability (Cross-Feature)
 **Characteristics:**
@@ -132,38 +173,51 @@ lib/
 **Placement:** `lib/` (infrastructure, data, core, shared)
 
 **Examples:**
-- ✅ **Database (lib/data/)**: All features need data access
+- ✅ **Database (lib/data/)**: All tables, DAOs, repository implementations
 - ✅ **Crypto (lib/infrastructure/crypto/)**: Encryption used everywhere
+- ✅ **ML (lib/infrastructure/ml/)**: OCR, TFLite, MerchantDatabase
+- ✅ **i18n (lib/infrastructure/i18n/)**: DateFormatter, NumberFormatter, LocaleSettings
 - ✅ **Router (lib/core/router/)**: Navigation shared across features
 - ✅ **Common widgets (lib/shared/widgets/)**: Reusable UI components
 
 #### Decision Rule
 
 **Ask yourself:**
-1. "Will other features need this?" → YES → `lib/`
-2. "Is this feature-specific only?" → YES → `lib/features/{feature}/`
-3. "Not sure?" → Default to `lib/` (safer, easier to refactor later)
+1. "Is this a technology/platform capability?" → YES → `lib/infrastructure/`
+2. "Is this business logic / a Use Case?" → YES → `lib/application/{domain}/`
+3. "Is this data access (tables, DAOs, repo impl)?" → YES → `lib/data/`
+4. "Is this a domain model or repo interface?" → YES → `lib/features/{feature}/domain/`
+5. "Is this UI?" → YES → `lib/features/{feature}/presentation/`
+6. "Not sure?" → Default to `lib/` (safer, easier to refactor later)
 
 **Common Mistakes:**
-- ❌ Putting database in feature folder (blocks other features)
-- ❌ Putting shared models in feature folder
-- ❌ Creating feature-specific versions of infrastructure
+- ❌ Putting Use Cases inside feature's domain/ (belongs in `lib/application/`)
+- ❌ Putting infrastructure in feature folder (belongs in `lib/infrastructure/`)
+- ❌ Putting Drift tables in feature folder (belongs in `lib/data/tables/`)
+- ❌ Duplicating capabilities across features (define once in `lib/infrastructure/`)
 
-**When in doubt:** Place in `lib/` at appropriate level (infrastructure, data, core, shared)
+**When in doubt:** Place in `lib/` at appropriate level (infrastructure, application, data, core, shared)
 
 ### Dependency Rules
 
 **CRITICAL:** Outer layers depend on inner layers, never the reverse:
 
 ```
-Presentation → Application → Domain ← Data
-                                      ↓
-                              Infrastructure
+Presentation (lib/features/{f}/presentation/)
+      ↓
+Application (lib/application/{domain}/)
+      ↓
+Domain (lib/features/{f}/domain/)
+      ↑ implements
+Data (lib/data/)
+      ↑ uses
+Infrastructure (lib/infrastructure/)
 ```
 
-- **Domain layer** is completely independent (no external dependencies)
-- **Data layer** implements domain repository interfaces
-- **Application layer** orchestrates business logic using domain entities
+- **Domain layer** is completely independent (no external dependencies) - ONLY models + repo interfaces
+- **Data layer** (`lib/data/`) implements domain repository interfaces using DAOs and tables
+- **Application layer** (`lib/application/`) orchestrates business logic using domain entities
+- **Infrastructure layer** (`lib/infrastructure/`) provides technology capabilities (crypto, ML, sync)
 - **Presentation layer** consumes application providers, no direct data access
 
 ### Key Architectural Patterns
@@ -199,9 +253,12 @@ Presentation → Application → Domain ← Data
 
    import 'repository_providers.dart';  // Import from single source
 
+   // NOTE: Use Cases live in lib/application/{domain}/ but providers
+   // that wire them up live in the feature's presentation/providers/
    @riverpod
    CreateTransactionUseCase createTransactionUseCase(CreateTransactionUseCaseRef ref) {
      return CreateTransactionUseCase(
+       // Use Case class: lib/application/accounting/create_transaction_use_case.dart
        transactionRepository: ref.watch(transactionRepositoryProvider),  // Reuse!
        categoryRepository: ref.watch(categoryRepositoryProvider),
      );
@@ -740,13 +797,13 @@ integration_test/   # E2E tests
    - ✅ ALWAYS add translations to all 3 ARB files (ja, zh, en)
 
 2. **Date Formatting:**
-   - ✅ MUST use `DateFormatter` from `lib/shared/utils/formatters/date_formatter.dart`
+   - ✅ MUST use `DateFormatter` from `lib/infrastructure/i18n/formatters/date_formatter.dart`
    - ❌ NEVER use raw `DateFormat` or `toString()` on DateTime objects
    - ✅ ALWAYS pass current locale from `currentLocaleProvider`
    - Formats: `formatDate()`, `formatDateTime()`, `formatRelative()`, `formatMonthYear()`
 
 3. **Number & Currency Formatting:**
-   - ✅ MUST use `NumberFormatter` from `lib/shared/utils/formatters/number_formatter.dart`
+   - ✅ MUST use `NumberFormatter` from `lib/infrastructure/i18n/formatters/number_formatter.dart`
    - ❌ NEVER display raw numbers for amounts or currencies
    - ✅ ALWAYS use `formatCurrency()` for transaction amounts
    - ✅ MUST pass correct currency code (JPY, USD, CNY, EUR, GBP)
@@ -789,7 +846,7 @@ Widget build(BuildContext context) {
 **Date Formatting:**
 ```dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:home_pocket/shared/utils/formatters/date_formatter.dart';
+import 'package:home_pocket/infrastructure/i18n/formatters/date_formatter.dart';
 import 'package:home_pocket/features/settings/presentation/providers/locale_provider.dart';
 
 @override
@@ -809,7 +866,7 @@ Widget build(BuildContext context, WidgetRef ref) {
 **Currency Formatting:**
 ```dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:home_pocket/shared/utils/formatters/number_formatter.dart';
+import 'package:home_pocket/infrastructure/i18n/formatters/number_formatter.dart';
 import 'package:home_pocket/features/settings/presentation/providers/locale_provider.dart';
 
 @override
@@ -994,8 +1051,8 @@ flutter gen-l10n
 
 - **MOD-014 Specification:** `doc/arch/02-module-specs/MOD-014_i18n.md`
 - **ARB Files:** `lib/l10n/app_{ja,zh,en}.arb`
-- **DateFormatter:** `lib/shared/utils/formatters/date_formatter.dart`
-- **NumberFormatter:** `lib/shared/utils/formatters/number_formatter.dart`
+- **DateFormatter:** `lib/infrastructure/i18n/formatters/date_formatter.dart`
+- **NumberFormatter:** `lib/infrastructure/i18n/formatters/number_formatter.dart`
 - **LocaleProvider:** `lib/features/settings/presentation/providers/locale_provider.dart`
 
 ---
