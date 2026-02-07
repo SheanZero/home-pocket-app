@@ -22,23 +22,27 @@ class DualLedgerScreen extends ConsumerWidget {
           title: const Text('Home Pocket'),
           bottom: TabBar(
             onTap: (index) {
-              ref.read(ledgerViewProvider.notifier).switchTo(
-                    index == 0 ? LedgerType.survival : LedgerType.soul,
-                  );
+              ref
+                  .read(ledgerViewProvider.notifier)
+                  .switchTo(index == 0 ? LedgerType.survival : LedgerType.soul);
             },
             tabs: [
               Tab(
-                icon: Icon(Icons.shield,
-                    color: currentLedger == LedgerType.survival
-                        ? Colors.blue
-                        : null),
+                icon: Icon(
+                  Icons.shield,
+                  color: currentLedger == LedgerType.survival
+                      ? Colors.blue
+                      : null,
+                ),
                 text: 'Survival',
               ),
               Tab(
-                icon: Icon(Icons.auto_awesome,
-                    color: currentLedger == LedgerType.soul
-                        ? Colors.purple
-                        : null),
+                icon: Icon(
+                  Icons.auto_awesome,
+                  color: currentLedger == LedgerType.soul
+                      ? Colors.purple
+                      : null,
+                ),
                 text: 'Soul',
               ),
             ],

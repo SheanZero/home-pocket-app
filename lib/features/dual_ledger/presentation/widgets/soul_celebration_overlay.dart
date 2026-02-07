@@ -12,8 +12,7 @@ class SoulCelebrationOverlay extends StatefulWidget {
   final VoidCallback? onDismissed;
 
   @override
-  State<SoulCelebrationOverlay> createState() =>
-      _SoulCelebrationOverlayState();
+  State<SoulCelebrationOverlay> createState() => _SoulCelebrationOverlayState();
 }
 
 class _SoulCelebrationOverlayState extends State<SoulCelebrationOverlay>
@@ -32,9 +31,10 @@ class _SoulCelebrationOverlayState extends State<SoulCelebrationOverlay>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.5).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.5,
+      end: 1.5,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
@@ -92,9 +92,11 @@ class _SoulCelebrationOverlayState extends State<SoulCelebrationOverlay>
               // Sparkle icons
               ..._sparkles.map((sparkle) {
                 return Positioned(
-                  left: MediaQuery.of(context).size.width * sparkle.dx -
+                  left:
+                      MediaQuery.of(context).size.width * sparkle.dx -
                       sparkle.size / 2,
-                  top: MediaQuery.of(context).size.height * sparkle.dy -
+                  top:
+                      MediaQuery.of(context).size.height * sparkle.dy -
                       sparkle.size / 2,
                   child: Transform.scale(
                     scale: _scaleAnimation.value,
@@ -113,11 +115,7 @@ class _SoulCelebrationOverlayState extends State<SoulCelebrationOverlay>
                   child: const Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.auto_awesome,
-                        size: 48,
-                        color: Colors.purple,
-                      ),
+                      Icon(Icons.auto_awesome, size: 48, color: Colors.purple),
                       SizedBox(height: 8),
                       Text(
                         'Soul!',
@@ -144,9 +142,5 @@ class _SparkleData {
   final double dy;
   final double size;
 
-  const _SparkleData({
-    required this.dx,
-    required this.dy,
-    required this.size,
-  });
+  const _SparkleData({required this.dx, required this.dy, required this.size});
 }

@@ -8,7 +8,7 @@ import 'rule_engine.dart';
 /// Layers 2 and 3 are stubbed for MVP.
 class ClassificationService {
   ClassificationService({required RuleEngine ruleEngine})
-      : _ruleEngine = ruleEngine;
+    : _ruleEngine = ruleEngine;
 
   final RuleEngine _ruleEngine;
 

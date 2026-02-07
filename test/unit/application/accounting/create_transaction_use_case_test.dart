@@ -203,9 +203,7 @@ void main() {
           reason: 'Entertainment category',
         ),
       );
-      when(
-        mockCategoryRepo.findById('cat_entertainment'),
-      ).thenAnswer(
+      when(mockCategoryRepo.findById('cat_entertainment')).thenAnswer(
         (_) async => Category(
           id: 'cat_entertainment',
           name: 'Entertainment',

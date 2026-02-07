@@ -6,9 +6,7 @@ void main() {
   group('SoulCelebrationOverlay', () {
     testWidgets('renders without error', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: SoulCelebrationOverlay()),
-        ),
+        const MaterialApp(home: Scaffold(body: SoulCelebrationOverlay())),
       );
 
       expect(find.byType(SoulCelebrationOverlay), findsOneWidget);
@@ -16,9 +14,7 @@ void main() {
 
     testWidgets('shows sparkle icons', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: SoulCelebrationOverlay()),
-        ),
+        const MaterialApp(home: Scaffold(body: SoulCelebrationOverlay())),
       );
 
       // Pump a few frames to let animation start
@@ -33,9 +29,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: SoulCelebrationOverlay(
-              onDismissed: () => dismissed = true,
-            ),
+            body: SoulCelebrationOverlay(onDismissed: () => dismissed = true),
           ),
         ),
       );

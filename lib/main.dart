@@ -20,9 +20,7 @@ void main() async {
   // Initialize master key for field encryption.
   // ProviderContainer is used to eagerly initialize before runApp.
   final container = ProviderContainer(
-    overrides: [
-      appDatabaseProvider.overrideWithValue(database),
-    ],
+    overrides: [appDatabaseProvider.overrideWithValue(database)],
   );
 
   final masterKeyRepo = container.read(masterKeyRepositoryProvider);
@@ -103,9 +101,7 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
     }
 
     if (!_initialized) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return DualLedgerScreen(bookId: _bookId!);

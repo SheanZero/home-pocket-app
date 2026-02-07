@@ -15,9 +15,7 @@ void main() {
 
   group('ClassificationService', () {
     test('uses rule engine when category has a rule (survival)', () async {
-      final result = await service.classify(
-        categoryId: 'cat_food',
-      );
+      final result = await service.classify(categoryId: 'cat_food');
 
       expect(result.ledgerType, LedgerType.survival);
       expect(result.method, ClassificationMethod.rule);
@@ -25,9 +23,7 @@ void main() {
     });
 
     test('uses rule engine when category has a rule (soul)', () async {
-      final result = await service.classify(
-        categoryId: 'cat_entertainment',
-      );
+      final result = await service.classify(categoryId: 'cat_entertainment');
 
       expect(result.ledgerType, LedgerType.soul);
       expect(result.method, ClassificationMethod.rule);
@@ -35,9 +31,7 @@ void main() {
     });
 
     test('falls back to default survival for unknown category', () async {
-      final result = await service.classify(
-        categoryId: 'cat_unknown_xyz',
-      );
+      final result = await service.classify(categoryId: 'cat_unknown_xyz');
 
       expect(result.ledgerType, LedgerType.survival);
       expect(result.confidence, lessThan(1.0));
@@ -45,12 +39,22 @@ void main() {
 
     test('classifies all default expense categories without error', () async {
       final expenseCategoryIds = [
-        'cat_food', 'cat_food_breakfast', 'cat_food_lunch',
-        'cat_food_dinner', 'cat_food_snack',
-        'cat_transport', 'cat_transport_public', 'cat_transport_taxi',
-        'cat_shopping', 'cat_entertainment', 'cat_housing',
-        'cat_medical', 'cat_education', 'cat_daily',
-        'cat_social', 'cat_other_expense',
+        'cat_food',
+        'cat_food_breakfast',
+        'cat_food_lunch',
+        'cat_food_dinner',
+        'cat_food_snack',
+        'cat_transport',
+        'cat_transport_public',
+        'cat_transport_taxi',
+        'cat_shopping',
+        'cat_entertainment',
+        'cat_housing',
+        'cat_medical',
+        'cat_education',
+        'cat_daily',
+        'cat_social',
+        'cat_other_expense',
       ];
 
       for (final id in expenseCategoryIds) {
