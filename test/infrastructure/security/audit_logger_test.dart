@@ -16,8 +16,9 @@ void main() {
   setUp(() {
     db = AppDatabase(NativeDatabase.memory());
     mockStorage = MockSecureStorageService();
-    when(() => mockStorage.getDeviceId())
-        .thenAnswer((_) async => 'test_device_id');
+    when(
+      () => mockStorage.getDeviceId(),
+    ).thenAnswer((_) async => 'test_device_id');
     logger = AuditLogger(database: db, storageService: mockStorage);
   });
 
@@ -73,27 +74,33 @@ void main() {
   });
 
   group('getLogs', () {
-    test('returns logs in descending insertion order (ULID tiebreaker)',
-        () async {
-      // Drift stores DateTime as integer seconds, so sub-second entries
-      // share the same timestamp. ULID secondary sort ensures correct order.
-      await logger.log(event: AuditEvent.appLaunched);
-      await logger.log(event: AuditEvent.databaseOpened);
+    test(
+      'returns logs in descending insertion order (ULID tiebreaker)',
+      () async {
+        // Drift stores DateTime as integer seconds, so sub-second entries
+        // share the same timestamp. ULID secondary sort ensures correct order.
+        await logger.log(event: AuditEvent.appLaunched);
+        await logger.log(event: AuditEvent.databaseOpened);
 
-      final logs = await logger.getLogs();
+        final logs = await logger.getLogs();
 
-      expect(logs.length, 2);
-      expect(logs.first.event, AuditEvent.databaseOpened); // newest ULID first
-      expect(logs.last.event, AuditEvent.appLaunched);
-    });
+        expect(logs.length, 2);
+        expect(
+          logs.first.event,
+          AuditEvent.databaseOpened,
+        ); // newest ULID first
+        expect(logs.last.event, AuditEvent.appLaunched);
+      },
+    );
 
     test('filters by eventType', () async {
       await logger.log(event: AuditEvent.biometricAuthSuccess);
       await logger.log(event: AuditEvent.biometricAuthFailed);
       await logger.log(event: AuditEvent.pinAuthSuccess);
 
-      final logs =
-          await logger.getLogs(eventType: AuditEvent.biometricAuthFailed);
+      final logs = await logger.getLogs(
+        eventType: AuditEvent.biometricAuthFailed,
+      );
 
       expect(logs.length, 1);
       expect(logs.first.event, AuditEvent.biometricAuthFailed);
@@ -181,9 +188,9 @@ void main() {
       final csv = await logger.exportToCSV();
 
       expect(
-          csv,
-          contains(
-              'id,event,deviceId,bookId,transactionId,details,timestamp'));
+        csv,
+        contains('id,event,deviceId,bookId,transactionId,details,timestamp'),
+      );
       expect(csv, contains('keyGenerated'));
       expect(csv, contains('test_device_id'));
       expect(csv, contains('Ed25519'));

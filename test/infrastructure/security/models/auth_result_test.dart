@@ -81,10 +81,7 @@ void main() {
         const AuthResult.failed(failedAttempts: 1),
         const AuthResult.failed(failedAttempts: 1),
       );
-      expect(
-        const AuthResult.success(),
-        isNot(const AuthResult.lockedOut()),
-      );
+      expect(const AuthResult.success(), isNot(const AuthResult.lockedOut()));
     });
   });
 }

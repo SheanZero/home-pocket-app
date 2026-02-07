@@ -170,16 +170,16 @@ FILENAME="${DATE}_${TASK}.md"
 #### Step 4: 保存到 worklog 目录
 ```bash
 # 保存到正确的位置
-doc/worklog/${FILENAME}
+docs/worklog/${FILENAME}
 ```
 
 #### Step 5: 验证日志文件
 ```bash
 # 检查文件是否创建成功
-ls -la doc/worklog/${FILENAME}
+ls -la docs/worklog/${FILENAME}
 
 # 快速查看文件内容
-head -30 doc/worklog/${FILENAME}
+head -30 docs/worklog/${FILENAME}
 ```
 
 ---
@@ -205,7 +205,7 @@ head -30 doc/worklog/${FILENAME}
    - 记录 git 提交信息
 
 4. ✅ **保存到正确位置**
-   - 文件路径：`doc/worklog/{filename}.md`
+   - 文件路径：`docs/worklog/{filename}.md`
    - 验证文件创建成功
 
 5. ✅ **在响应中告知用户**
@@ -238,13 +238,13 @@ doc/worklog/
 
 ```bash
 # 按日期查找
-ls doc/worklog/20260203_*.md
+ls docs/worklog/20260203_*.md
 
 # 按任务名称查找
-ls doc/worklog/*_migration_*.md
+ls docs/worklog/*_migration_*.md
 
 # 搜索日志内容
-grep -r "encryption" doc/worklog/
+grep -r "encryption" docs/worklog/
 ```
 
 ---
@@ -287,7 +287,7 @@ grep -r "encryption" doc/worklog/
 
 ## 示例日志
 
-参考 `doc/worklog/20260203_1435_migrate_arch_to_doc.md` 作为日志模板示例。
+参考 `docs/worklog/20260203_1435_migrate_arch_to_doc.md` 作为日志模板示例。
 
 ---
 

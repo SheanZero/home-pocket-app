@@ -21,82 +21,98 @@ void main() {
   });
 
   group('checkAvailability', () {
-    test('returns notSupported when canCheck and isSupported are both false',
-        () async {
-      when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => false);
-      when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => false);
+    test(
+      'returns notSupported when canCheck and isSupported are both false',
+      () async {
+        when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => false);
+        when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => false);
 
-      final result = await service.checkAvailability();
+        final result = await service.checkAvailability();
 
-      expect(result, BiometricAvailability.notSupported);
-    });
+        expect(result, BiometricAvailability.notSupported);
+      },
+    );
 
-    test('returns notEnrolled when supported but no biometrics enrolled',
-        () async {
-      when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
-      when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
-      when(() => mockAuth.getAvailableBiometrics())
-          .thenAnswer((_) async => []);
+    test(
+      'returns notEnrolled when supported but no biometrics enrolled',
+      () async {
+        when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
+        when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
+        when(
+          () => mockAuth.getAvailableBiometrics(),
+        ).thenAnswer((_) async => []);
 
-      final result = await service.checkAvailability();
+        final result = await service.checkAvailability();
 
-      expect(result, BiometricAvailability.notEnrolled);
-    });
+        expect(result, BiometricAvailability.notEnrolled);
+      },
+    );
 
     test('returns faceId when face biometric is available', () async {
       when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
       when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
-      when(() => mockAuth.getAvailableBiometrics())
-          .thenAnswer((_) async => [BiometricType.face]);
+      when(
+        () => mockAuth.getAvailableBiometrics(),
+      ).thenAnswer((_) async => [BiometricType.face]);
 
       final result = await service.checkAvailability();
 
       expect(result, BiometricAvailability.faceId);
     });
 
-    test('returns fingerprint when fingerprint biometric is available',
-        () async {
-      when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
-      when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
-      when(() => mockAuth.getAvailableBiometrics())
-          .thenAnswer((_) async => [BiometricType.fingerprint]);
+    test(
+      'returns fingerprint when fingerprint biometric is available',
+      () async {
+        when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
+        when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
+        when(
+          () => mockAuth.getAvailableBiometrics(),
+        ).thenAnswer((_) async => [BiometricType.fingerprint]);
 
-      final result = await service.checkAvailability();
+        final result = await service.checkAvailability();
 
-      expect(result, BiometricAvailability.fingerprint);
-    });
+        expect(result, BiometricAvailability.fingerprint);
+      },
+    );
 
-    test('returns generic when only iris or other biometric is available',
-        () async {
-      when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
-      when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
-      when(() => mockAuth.getAvailableBiometrics())
-          .thenAnswer((_) async => [BiometricType.iris]);
+    test(
+      'returns generic when only iris or other biometric is available',
+      () async {
+        when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
+        when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
+        when(
+          () => mockAuth.getAvailableBiometrics(),
+        ).thenAnswer((_) async => [BiometricType.iris]);
 
-      final result = await service.checkAvailability();
+        final result = await service.checkAvailability();
 
-      expect(result, BiometricAvailability.generic);
-    });
+        expect(result, BiometricAvailability.generic);
+      },
+    );
 
-    test('prioritizes faceId when both face and fingerprint are available',
-        () async {
-      when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
-      when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
-      when(() => mockAuth.getAvailableBiometrics()).thenAnswer(
-          (_) async => [BiometricType.face, BiometricType.fingerprint]);
+    test(
+      'prioritizes faceId when both face and fingerprint are available',
+      () async {
+        when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
+        when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
+        when(() => mockAuth.getAvailableBiometrics()).thenAnswer(
+          (_) async => [BiometricType.face, BiometricType.fingerprint],
+        );
 
-      final result = await service.checkAvailability();
+        final result = await service.checkAvailability();
 
-      expect(result, BiometricAvailability.faceId);
-    });
+        expect(result, BiometricAvailability.faceId);
+      },
+    );
   });
 
   group('authenticate', () {
     void setupAvailableBiometrics() {
       when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
       when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
-      when(() => mockAuth.getAvailableBiometrics())
-          .thenAnswer((_) async => [BiometricType.fingerprint]);
+      when(
+        () => mockAuth.getAvailableBiometrics(),
+      ).thenAnswer((_) async => [BiometricType.fingerprint]);
     }
 
     test('returns success when biometric passes', () async {
@@ -195,28 +211,29 @@ void main() {
     test('returns fallbackToPIN when biometrics not enrolled', () async {
       when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
       when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
-      when(() => mockAuth.getAvailableBiometrics())
-          .thenAnswer((_) async => []);
+      when(() => mockAuth.getAvailableBiometrics()).thenAnswer((_) async => []);
 
       final result = await service.authenticate(reason: 'test');
 
       expect(result, const AuthResult.fallbackToPIN());
     });
 
-    test('returns lockedOut on PlatformException with lockedOut code',
-        () async {
-      setupAvailableBiometrics();
-      when(
-        () => mockAuth.authenticate(
-          localizedReason: any(named: 'localizedReason'),
-          options: any(named: 'options'),
-        ),
-      ).thenThrow(PlatformException(code: 'LockedOut'));
+    test(
+      'returns lockedOut on PlatformException with lockedOut code',
+      () async {
+        setupAvailableBiometrics();
+        when(
+          () => mockAuth.authenticate(
+            localizedReason: any(named: 'localizedReason'),
+            options: any(named: 'options'),
+          ),
+        ).thenThrow(PlatformException(code: 'LockedOut'));
 
-      final result = await service.authenticate(reason: 'test');
+        final result = await service.authenticate(reason: 'test');
 
-      expect(result, const AuthResult.lockedOut());
-    });
+        expect(result, const AuthResult.lockedOut());
+      },
+    );
 
     test('returns lockedOut on permanentlyLockedOut', () async {
       setupAvailableBiometrics();
@@ -254,7 +271,8 @@ void main() {
           options: any(named: 'options'),
         ),
       ).thenThrow(
-          PlatformException(code: 'UnknownError', message: 'something broke'));
+        PlatformException(code: 'UnknownError', message: 'something broke'),
+      );
 
       final result = await service.authenticate(reason: 'test');
 
@@ -266,8 +284,9 @@ void main() {
     test('allows biometric retry after manual reset', () async {
       when(() => mockAuth.canCheckBiometrics).thenAnswer((_) async => true);
       when(() => mockAuth.isDeviceSupported()).thenAnswer((_) async => true);
-      when(() => mockAuth.getAvailableBiometrics())
-          .thenAnswer((_) async => [BiometricType.fingerprint]);
+      when(
+        () => mockAuth.getAvailableBiometrics(),
+      ).thenAnswer((_) async => [BiometricType.fingerprint]);
 
       // Fail 3 times
       when(
