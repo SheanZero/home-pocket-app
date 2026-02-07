@@ -14,9 +14,16 @@ import 'transaction_form_screen.dart';
 /// Displays all transactions for the current book, with a FAB
 /// to add new transactions. Supports swipe-to-delete.
 class TransactionListScreen extends ConsumerStatefulWidget {
-  const TransactionListScreen({super.key, required this.bookId});
+  const TransactionListScreen({
+    super.key,
+    required this.bookId,
+    this.ledgerType,
+    this.embedded = false,
+  });
 
   final String bookId;
+  final LedgerType? ledgerType;
+  final bool embedded;
 
   @override
   ConsumerState<TransactionListScreen> createState() =>
@@ -41,7 +48,10 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
     final categoryRepo = ref.read(categoryRepositoryProvider);
 
     final result = await getTransactions.execute(
-      GetTransactionsParams(bookId: widget.bookId),
+      GetTransactionsParams(
+        bookId: widget.bookId,
+        ledgerType: widget.ledgerType,
+      ),
     );
 
     final categories = await categoryRepo.findAll();
@@ -80,9 +90,7 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Transactions')),
-      body: _isLoading
+    final body = _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _transactions.isEmpty
           ? Center(
@@ -119,11 +127,30 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
                   );
                 },
               ),
-            ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToForm,
-        child: const Icon(Icons.add),
-      ),
+            );
+
+    final fab = FloatingActionButton(
+      onPressed: _navigateToForm,
+      child: const Icon(Icons.add),
+    );
+
+    if (widget.embedded) {
+      return Stack(
+        children: [
+          body,
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: fab,
+          ),
+        ],
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Transactions')),
+      body: body,
+      floatingActionButton: fab,
     );
   }
 }
