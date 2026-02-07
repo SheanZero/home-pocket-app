@@ -1,5 +1,6 @@
 import 'dart:developer' as dev;
 
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,6 +10,10 @@ import 'features/dual_ledger/presentation/screens/dual_ledger_screen.dart';
 import 'infrastructure/crypto/database/encrypted_database.dart';
 import 'infrastructure/crypto/providers.dart';
 import 'infrastructure/security/providers.dart';
+
+/// Set to `true` for in-memory database (dev/debugging, data lost on restart).
+/// Set to `false` (default) for persistent encrypted SQLCipher database.
+const _useInMemoryDatabase = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,10 +28,16 @@ void main() async {
     dev.log('Master key already exists', name: 'AppInit');
   }
 
-  // 2. Create persistent encrypted database
-  final executor = await createEncryptedExecutor(masterKeyRepo);
-  final database = AppDatabase(executor);
-  dev.log('Encrypted database opened', name: 'AppInit');
+  // 2. Create database
+  final AppDatabase database;
+  if (_useInMemoryDatabase) {
+    database = AppDatabase(NativeDatabase.memory());
+    dev.log('Using IN-MEMORY database (dev mode)', name: 'AppInit');
+  } else {
+    final executor = await createEncryptedExecutor(masterKeyRepo);
+    database = AppDatabase(executor);
+    dev.log('Encrypted database opened', name: 'AppInit');
+  }
 
   // 3. Dispose init container, create final container with database
   initContainer.dispose();
