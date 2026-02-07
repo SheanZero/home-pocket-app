@@ -11,4 +11,7 @@ abstract class CategoryRepository {
   Future<List<Category>> findByType(TransactionType type);
   Future<List<Category>> findWithBudget();
   Future<void> insertBatch(List<Category> categories);
+
+  /// Delete all categories (for backup restore).
+  Future<void> deleteAll();
 }

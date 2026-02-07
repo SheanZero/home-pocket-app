@@ -117,6 +117,22 @@ class TransactionDao {
     );
   }
 
+  /// Get all non-deleted transactions in a book (unpaginated, for backup).
+  Future<List<TransactionRow>> findAllByBook(String bookId) async {
+    final query = _db.select(_db.transactions)
+      ..where((t) => t.bookId.equals(bookId))
+      ..where((t) => t.isDeleted.equals(false))
+      ..orderBy([(t) => OrderingTerm.asc(t.timestamp)]);
+    return query.get();
+  }
+
+  /// Delete all transactions for a book (hard delete, for backup restore).
+  Future<void> deleteAllByBook(String bookId) async {
+    await (_db.delete(_db.transactions)
+          ..where((t) => t.bookId.equals(bookId)))
+        .go();
+  }
+
   /// Count non-deleted transactions in a book.
   Future<int> countByBookId(String bookId) async {
     final countExp = _db.transactions.id.count();

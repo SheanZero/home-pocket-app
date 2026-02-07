@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../analytics/presentation/screens/analytics_screen.dart';
 import '../../../dual_ledger/presentation/screens/dual_ledger_screen.dart';
+import '../../../settings/presentation/screens/settings_screen.dart';
 
 /// Main navigation shell with BottomNavigationBar.
 ///
@@ -26,7 +27,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
         children: [
           DualLedgerScreen(bookId: widget.bookId),
           AnalyticsScreen(bookId: widget.bookId),
-          _SettingsPlaceholder(),
+          SettingsScreen(bookId: widget.bookId),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -47,16 +48,6 @@ class _MainShellScreenState extends State<MainShellScreen> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _SettingsPlaceholder extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: const Center(child: Text('Settings (coming soon)')),
     );
   }
 }

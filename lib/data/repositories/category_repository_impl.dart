@@ -65,6 +65,9 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
+  Future<void> deleteAll() => _dao.deleteAll();
+
+  @override
   Future<void> insertBatch(List<Category> categories) async {
     await _dao.insertBatch(
       categories

@@ -51,6 +51,9 @@ class BookRepositoryImpl implements BookRepository {
   }
 
   @override
+  Future<void> deleteAll() => _dao.deleteAll();
+
+  @override
   Future<void> updateBalances({
     required String bookId,
     required int transactionCount,

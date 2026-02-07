@@ -113,6 +113,15 @@ class TransactionRepositoryImpl implements TransactionRepository {
   @override
   Future<int> countByBookId(String bookId) => _dao.countByBookId(bookId);
 
+  @override
+  Future<List<Transaction>> findAllByBook(String bookId) async {
+    final rows = await _dao.findAllByBook(bookId);
+    return Future.wait(rows.map(_toModel));
+  }
+
+  @override
+  Future<void> deleteAllByBook(String bookId) => _dao.deleteAllByBook(bookId);
+
   Future<Transaction> _toModel(TransactionRow row) async {
     dev.log(
       '[Read DB] id=${row.id}, amount=${row.amount} (int from DB), '

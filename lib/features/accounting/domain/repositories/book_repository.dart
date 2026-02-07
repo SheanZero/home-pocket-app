@@ -13,4 +13,7 @@ abstract class BookRepository {
     required int survivalBalance,
     required int soulBalance,
   });
+
+  /// Delete all books (for backup restore).
+  Future<void> deleteAll();
 }

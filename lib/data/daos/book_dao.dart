@@ -68,6 +68,11 @@ class BookDao {
     await updateBook(id: id, isArchived: true, updatedAt: DateTime.now());
   }
 
+  /// Delete all books (hard delete, for backup restore).
+  Future<void> deleteAll() async {
+    await _db.delete(_db.books).go();
+  }
+
   Future<void> updateBalances({
     required String bookId,
     required int transactionCount,

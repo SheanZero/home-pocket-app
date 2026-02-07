@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'data/app_database.dart';
 import 'features/accounting/presentation/providers/use_case_providers.dart';
 import 'features/home/presentation/screens/main_shell_screen.dart';
+import 'features/settings/domain/models/app_settings.dart';
+import 'features/settings/presentation/providers/settings_providers.dart';
 import 'infrastructure/crypto/database/encrypted_database.dart';
 import 'infrastructure/crypto/providers.dart';
 import 'infrastructure/security/providers.dart';
@@ -97,14 +99,40 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsAsync = ref.watch(appSettingsProvider);
+    final themeMode =
+        settingsAsync.whenOrNull(
+          data: (s) => _toFlutterThemeMode(s.themeMode),
+        ) ??
+        ThemeMode.system;
+
     return MaterialApp(
       title: 'Home Pocket',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+      ),
+      themeMode: themeMode,
       home: _buildHome(),
     );
+  }
+
+  ThemeMode _toFlutterThemeMode(AppThemeMode mode) {
+    switch (mode) {
+      case AppThemeMode.system:
+        return ThemeMode.system;
+      case AppThemeMode.light:
+        return ThemeMode.light;
+      case AppThemeMode.dark:
+        return ThemeMode.dark;
+    }
   }
 
   Widget _buildHome() {

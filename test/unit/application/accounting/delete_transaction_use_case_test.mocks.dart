@@ -113,4 +113,23 @@ class MockTransactionRepository extends _i1.Mock
             returnValue: _i3.Future<int>.value(0),
           )
           as _i3.Future<int>);
+
+  @override
+  _i3.Future<List<_i4.Transaction>> findAllByBook(String? bookId) =>
+      (super.noSuchMethod(
+            Invocation.method(#findAllByBook, [bookId]),
+            returnValue: _i3.Future<List<_i4.Transaction>>.value(
+              <_i4.Transaction>[],
+            ),
+          )
+          as _i3.Future<List<_i4.Transaction>>);
+
+  @override
+  _i3.Future<void> deleteAllByBook(String? bookId) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteAllByBook, [bookId]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
 }

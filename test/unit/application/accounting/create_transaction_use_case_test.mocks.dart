@@ -138,6 +138,25 @@ class MockTransactionRepository extends _i1.Mock
             returnValue: _i5.Future<int>.value(0),
           )
           as _i5.Future<int>);
+
+  @override
+  _i5.Future<List<_i6.Transaction>> findAllByBook(String? bookId) =>
+      (super.noSuchMethod(
+            Invocation.method(#findAllByBook, [bookId]),
+            returnValue: _i5.Future<List<_i6.Transaction>>.value(
+              <_i6.Transaction>[],
+            ),
+          )
+          as _i5.Future<List<_i6.Transaction>>);
+
+  @override
+  _i5.Future<void> deleteAllByBook(String? bookId) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteAllByBook, [bookId]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
 }
 
 /// A class which mocks [CategoryRepository].
@@ -210,6 +229,15 @@ class MockCategoryRepository extends _i1.Mock
   _i5.Future<void> insertBatch(List<_i8.Category>? categories) =>
       (super.noSuchMethod(
             Invocation.method(#insertBatch, [categories]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> deleteAll() =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteAll, []),
             returnValue: _i5.Future<void>.value(),
             returnValueForMissingStub: _i5.Future<void>.value(),
           )

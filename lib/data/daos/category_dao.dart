@@ -110,6 +110,11 @@ class CategoryDao {
         .get();
   }
 
+  /// Delete all categories (hard delete, for backup restore).
+  Future<void> deleteAll() async {
+    await _db.delete(_db.categories).go();
+  }
+
   Future<void> insertBatch(List<CategoryInsertData> categories) async {
     await _db.batch((batch) {
       for (final cat in categories) {

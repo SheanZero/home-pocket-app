@@ -17,4 +17,10 @@ abstract class TransactionRepository {
   Future<void> softDelete(String id);
   Future<String?> getLatestHash(String bookId);
   Future<int> countByBookId(String bookId);
+
+  /// Get all transactions for a book (unpaginated, for backup).
+  Future<List<Transaction>> findAllByBook(String bookId);
+
+  /// Delete all transactions for a book (for backup restore).
+  Future<void> deleteAllByBook(String bookId);
 }
