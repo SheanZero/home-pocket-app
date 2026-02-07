@@ -6,6 +6,7 @@ import '../../../../application/accounting/delete_transaction_use_case.dart';
 import '../../../../application/accounting/ensure_default_book_use_case.dart';
 import '../../../../application/accounting/get_transactions_use_case.dart';
 import '../../../../application/accounting/seed_categories_use_case.dart';
+import '../../../../application/dual_ledger/providers.dart';
 import '../../../../infrastructure/crypto/providers.dart';
 import 'repository_providers.dart';
 
@@ -17,6 +18,7 @@ CreateTransactionUseCase createTransactionUseCase(Ref ref) {
     transactionRepository: ref.watch(transactionRepositoryProvider),
     categoryRepository: ref.watch(categoryRepositoryProvider),
     hashChainService: ref.watch(hashChainServiceProvider),
+    classificationService: ref.watch(classificationServiceProvider),
   );
 }
 
