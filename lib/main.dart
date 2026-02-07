@@ -1,35 +1,39 @@
 import 'dart:developer' as dev;
 
-import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'data/app_database.dart';
 import 'features/accounting/presentation/providers/use_case_providers.dart';
 import 'features/dual_ledger/presentation/screens/dual_ledger_screen.dart';
+import 'infrastructure/crypto/database/encrypted_database.dart';
 import 'infrastructure/crypto/providers.dart';
 import 'infrastructure/security/providers.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // In-memory database for development.
-  // Production will use encrypted SQLCipher executor.
-  final database = AppDatabase(NativeDatabase.memory());
-
-  // Initialize master key for field encryption.
-  // ProviderContainer is used to eagerly initialize before runApp.
-  final container = ProviderContainer(
-    overrides: [appDatabaseProvider.overrideWithValue(database)],
-  );
-
-  final masterKeyRepo = container.read(masterKeyRepositoryProvider);
+  // 1. Initialize master key (first launch only)
+  final initContainer = ProviderContainer();
+  final masterKeyRepo = initContainer.read(masterKeyRepositoryProvider);
   if (!await masterKeyRepo.hasMasterKey()) {
     await masterKeyRepo.initializeMasterKey();
     dev.log('Master key initialized', name: 'AppInit');
   } else {
     dev.log('Master key already exists', name: 'AppInit');
   }
+
+  // 2. Create persistent encrypted database
+  final executor = await createEncryptedExecutor(masterKeyRepo);
+  final database = AppDatabase(executor);
+  dev.log('Encrypted database opened', name: 'AppInit');
+
+  // 3. Dispose init container, create final container with database
+  initContainer.dispose();
+
+  final container = ProviderContainer(
+    overrides: [appDatabaseProvider.overrideWithValue(database)],
+  );
 
   runApp(
     UncontrolledProviderScope(
