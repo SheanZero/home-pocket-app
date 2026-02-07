@@ -55,14 +55,35 @@ class TransactionListTile extends StatelessWidget {
       onDismissed: (_) => onDelete?.call(),
       child: ListTile(
         onTap: onTap,
-        leading: CircleAvatar(
-          backgroundColor: isExpense
-              ? Colors.red.shade100
-              : Colors.green.shade100,
-          child: Icon(
-            isExpense ? Icons.remove : Icons.add,
-            color: isExpense ? Colors.red : Colors.green,
-          ),
+        leading: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            CircleAvatar(
+              backgroundColor: isExpense
+                  ? Colors.red.shade100
+                  : Colors.green.shade100,
+              child: Icon(
+                isExpense ? Icons.remove : Icons.add,
+                color: isExpense ? Colors.red : Colors.green,
+              ),
+            ),
+            Positioned(
+              right: -2,
+              top: -2,
+              child: Container(
+                key: const Key('ledger_indicator'),
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: transaction.ledgerType == LedgerType.soul
+                      ? Colors.purple
+                      : Colors.blue,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 1.5),
+                ),
+              ),
+            ),
+          ],
         ),
         title: Text(categoryName ?? transaction.categoryId),
         subtitle: transaction.note != null && transaction.note!.isNotEmpty
