@@ -12,6 +12,7 @@ class Categories extends Table {
   TextColumn get type => text()();
   BoolColumn get isSystem => boolean().withDefault(const Constant(false))();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  IntColumn get budgetAmount => integer().nullable()();
   DateTimeColumn get createdAt => dateTime()();
 
   @override

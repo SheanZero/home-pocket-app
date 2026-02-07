@@ -1214,6 +1214,17 @@ class $CategoriesTable extends Categories
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _budgetAmountMeta = const VerificationMeta(
+    'budgetAmount',
+  );
+  @override
+  late final GeneratedColumn<int> budgetAmount = GeneratedColumn<int>(
+    'budget_amount',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -1236,6 +1247,7 @@ class $CategoriesTable extends Categories
     type,
     isSystem,
     sortOrder,
+    budgetAmount,
     createdAt,
   ];
   @override
@@ -1313,6 +1325,15 @@ class $CategoriesTable extends Categories
         sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
       );
     }
+    if (data.containsKey('budget_amount')) {
+      context.handle(
+        _budgetAmountMeta,
+        budgetAmount.isAcceptableOrUnknown(
+          data['budget_amount']!,
+          _budgetAmountMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -1366,6 +1387,10 @@ class $CategoriesTable extends Categories
         DriftSqlType.int,
         data['${effectivePrefix}sort_order'],
       )!,
+      budgetAmount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}budget_amount'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -1389,6 +1414,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
   final String type;
   final bool isSystem;
   final int sortOrder;
+  final int? budgetAmount;
   final DateTime createdAt;
   const CategoryRow({
     required this.id,
@@ -1400,6 +1426,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     required this.type,
     required this.isSystem,
     required this.sortOrder,
+    this.budgetAmount,
     required this.createdAt,
   });
   @override
@@ -1416,6 +1443,9 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     map['type'] = Variable<String>(type);
     map['is_system'] = Variable<bool>(isSystem);
     map['sort_order'] = Variable<int>(sortOrder);
+    if (!nullToAbsent || budgetAmount != null) {
+      map['budget_amount'] = Variable<int>(budgetAmount);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -1433,6 +1463,9 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       type: Value(type),
       isSystem: Value(isSystem),
       sortOrder: Value(sortOrder),
+      budgetAmount: budgetAmount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(budgetAmount),
       createdAt: Value(createdAt),
     );
   }
@@ -1452,6 +1485,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       type: serializer.fromJson<String>(json['type']),
       isSystem: serializer.fromJson<bool>(json['isSystem']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      budgetAmount: serializer.fromJson<int?>(json['budgetAmount']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -1468,6 +1502,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       'type': serializer.toJson<String>(type),
       'isSystem': serializer.toJson<bool>(isSystem),
       'sortOrder': serializer.toJson<int>(sortOrder),
+      'budgetAmount': serializer.toJson<int?>(budgetAmount),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -1482,6 +1517,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     String? type,
     bool? isSystem,
     int? sortOrder,
+    Value<int?> budgetAmount = const Value.absent(),
     DateTime? createdAt,
   }) => CategoryRow(
     id: id ?? this.id,
@@ -1493,6 +1529,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     type: type ?? this.type,
     isSystem: isSystem ?? this.isSystem,
     sortOrder: sortOrder ?? this.sortOrder,
+    budgetAmount: budgetAmount.present ? budgetAmount.value : this.budgetAmount,
     createdAt: createdAt ?? this.createdAt,
   );
   CategoryRow copyWithCompanion(CategoriesCompanion data) {
@@ -1506,6 +1543,9 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       type: data.type.present ? data.type.value : this.type,
       isSystem: data.isSystem.present ? data.isSystem.value : this.isSystem,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      budgetAmount: data.budgetAmount.present
+          ? data.budgetAmount.value
+          : this.budgetAmount,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -1522,6 +1562,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           ..write('type: $type, ')
           ..write('isSystem: $isSystem, ')
           ..write('sortOrder: $sortOrder, ')
+          ..write('budgetAmount: $budgetAmount, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -1538,6 +1579,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     type,
     isSystem,
     sortOrder,
+    budgetAmount,
     createdAt,
   );
   @override
@@ -1553,6 +1595,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           other.type == this.type &&
           other.isSystem == this.isSystem &&
           other.sortOrder == this.sortOrder &&
+          other.budgetAmount == this.budgetAmount &&
           other.createdAt == this.createdAt);
 }
 
@@ -1566,6 +1609,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
   final Value<String> type;
   final Value<bool> isSystem;
   final Value<int> sortOrder;
+  final Value<int?> budgetAmount;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
   const CategoriesCompanion({
@@ -1578,6 +1622,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     this.type = const Value.absent(),
     this.isSystem = const Value.absent(),
     this.sortOrder = const Value.absent(),
+    this.budgetAmount = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1591,6 +1636,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     required String type,
     this.isSystem = const Value.absent(),
     this.sortOrder = const Value.absent(),
+    this.budgetAmount = const Value.absent(),
     required DateTime createdAt,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -1610,6 +1656,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     Expression<String>? type,
     Expression<bool>? isSystem,
     Expression<int>? sortOrder,
+    Expression<int>? budgetAmount,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -1623,6 +1670,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
       if (type != null) 'type': type,
       if (isSystem != null) 'is_system': isSystem,
       if (sortOrder != null) 'sort_order': sortOrder,
+      if (budgetAmount != null) 'budget_amount': budgetAmount,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1638,6 +1686,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     Value<String>? type,
     Value<bool>? isSystem,
     Value<int>? sortOrder,
+    Value<int?>? budgetAmount,
     Value<DateTime>? createdAt,
     Value<int>? rowid,
   }) {
@@ -1651,6 +1700,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
       type: type ?? this.type,
       isSystem: isSystem ?? this.isSystem,
       sortOrder: sortOrder ?? this.sortOrder,
+      budgetAmount: budgetAmount ?? this.budgetAmount,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -1686,6 +1736,9 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     if (sortOrder.present) {
       map['sort_order'] = Variable<int>(sortOrder.value);
     }
+    if (budgetAmount.present) {
+      map['budget_amount'] = Variable<int>(budgetAmount.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -1707,6 +1760,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
           ..write('type: $type, ')
           ..write('isSystem: $isSystem, ')
           ..write('sortOrder: $sortOrder, ')
+          ..write('budgetAmount: $budgetAmount, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -3322,6 +3376,7 @@ typedef $$CategoriesTableCreateCompanionBuilder =
       required String type,
       Value<bool> isSystem,
       Value<int> sortOrder,
+      Value<int?> budgetAmount,
       required DateTime createdAt,
       Value<int> rowid,
     });
@@ -3336,6 +3391,7 @@ typedef $$CategoriesTableUpdateCompanionBuilder =
       Value<String> type,
       Value<bool> isSystem,
       Value<int> sortOrder,
+      Value<int?> budgetAmount,
       Value<DateTime> createdAt,
       Value<int> rowid,
     });
@@ -3391,6 +3447,11 @@ class $$CategoriesTableFilterComposer
 
   ColumnFilters<int> get sortOrder => $composableBuilder(
     column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get budgetAmount => $composableBuilder(
+    column: $table.budgetAmount,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3454,6 +3515,11 @@ class $$CategoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get budgetAmount => $composableBuilder(
+    column: $table.budgetAmount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -3495,6 +3561,11 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumn<int> get sortOrder =>
       $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<int> get budgetAmount => $composableBuilder(
+    column: $table.budgetAmount,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -3540,6 +3611,7 @@ class $$CategoriesTableTableManager
                 Value<String> type = const Value.absent(),
                 Value<bool> isSystem = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
+                Value<int?> budgetAmount = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion(
@@ -3552,6 +3624,7 @@ class $$CategoriesTableTableManager
                 type: type,
                 isSystem: isSystem,
                 sortOrder: sortOrder,
+                budgetAmount: budgetAmount,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -3566,6 +3639,7 @@ class $$CategoriesTableTableManager
                 required String type,
                 Value<bool> isSystem = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
+                Value<int?> budgetAmount = const Value.absent(),
                 required DateTime createdAt,
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion.insert(
@@ -3578,6 +3652,7 @@ class $$CategoriesTableTableManager
                 type: type,
                 isSystem: isSystem,
                 sortOrder: sortOrder,
+                budgetAmount: budgetAmount,
                 createdAt: createdAt,
                 rowid: rowid,
               ),

@@ -9,5 +9,6 @@ abstract class CategoryRepository {
   Future<List<Category>> findByLevel(int level);
   Future<List<Category>> findByParent(String parentId);
   Future<List<Category>> findByType(TransactionType type);
+  Future<List<Category>> findWithBudget();
   Future<void> insertBatch(List<Category> categories);
 }

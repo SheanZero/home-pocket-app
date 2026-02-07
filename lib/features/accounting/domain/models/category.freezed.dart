@@ -28,6 +28,7 @@ mixin _$Category {
   TransactionType get type;
   bool get isSystem;
   int get sortOrder;
+  int? get budgetAmount;
   DateTime get createdAt;
 
   /// Create a copy of Category
@@ -57,6 +58,8 @@ mixin _$Category {
                 other.isSystem == isSystem) &&
             (identical(other.sortOrder, sortOrder) ||
                 other.sortOrder == sortOrder) &&
+            (identical(other.budgetAmount, budgetAmount) ||
+                other.budgetAmount == budgetAmount) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
   }
@@ -74,12 +77,13 @@ mixin _$Category {
     type,
     isSystem,
     sortOrder,
+    budgetAmount,
     createdAt,
   );
 
   @override
   String toString() {
-    return 'Category(id: $id, name: $name, icon: $icon, color: $color, parentId: $parentId, level: $level, type: $type, isSystem: $isSystem, sortOrder: $sortOrder, createdAt: $createdAt)';
+    return 'Category(id: $id, name: $name, icon: $icon, color: $color, parentId: $parentId, level: $level, type: $type, isSystem: $isSystem, sortOrder: $sortOrder, budgetAmount: $budgetAmount, createdAt: $createdAt)';
   }
 }
 
@@ -98,6 +102,7 @@ abstract mixin class $CategoryCopyWith<$Res> {
     TransactionType type,
     bool isSystem,
     int sortOrder,
+    int? budgetAmount,
     DateTime createdAt,
   });
 }
@@ -123,6 +128,7 @@ class _$CategoryCopyWithImpl<$Res> implements $CategoryCopyWith<$Res> {
     Object? type = null,
     Object? isSystem = null,
     Object? sortOrder = null,
+    Object? budgetAmount = freezed,
     Object? createdAt = null,
   }) {
     return _then(
@@ -163,6 +169,10 @@ class _$CategoryCopyWithImpl<$Res> implements $CategoryCopyWith<$Res> {
             ? _self.sortOrder
             : sortOrder // ignore: cast_nullable_to_non_nullable
                   as int,
+        budgetAmount: freezed == budgetAmount
+            ? _self.budgetAmount
+            : budgetAmount // ignore: cast_nullable_to_non_nullable
+                  as int?,
         createdAt: null == createdAt
             ? _self.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -275,6 +285,7 @@ extension CategoryPatterns on Category {
       TransactionType type,
       bool isSystem,
       int sortOrder,
+      int? budgetAmount,
       DateTime createdAt,
     )?
     $default, {
@@ -293,6 +304,7 @@ extension CategoryPatterns on Category {
           _that.type,
           _that.isSystem,
           _that.sortOrder,
+          _that.budgetAmount,
           _that.createdAt,
         );
       case _:
@@ -325,6 +337,7 @@ extension CategoryPatterns on Category {
       TransactionType type,
       bool isSystem,
       int sortOrder,
+      int? budgetAmount,
       DateTime createdAt,
     )
     $default,
@@ -342,6 +355,7 @@ extension CategoryPatterns on Category {
           _that.type,
           _that.isSystem,
           _that.sortOrder,
+          _that.budgetAmount,
           _that.createdAt,
         );
       case _:
@@ -373,6 +387,7 @@ extension CategoryPatterns on Category {
       TransactionType type,
       bool isSystem,
       int sortOrder,
+      int? budgetAmount,
       DateTime createdAt,
     )?
     $default,
@@ -390,6 +405,7 @@ extension CategoryPatterns on Category {
           _that.type,
           _that.isSystem,
           _that.sortOrder,
+          _that.budgetAmount,
           _that.createdAt,
         );
       case _:
@@ -411,6 +427,7 @@ class _Category implements Category {
     required this.type,
     this.isSystem = false,
     this.sortOrder = 0,
+    this.budgetAmount,
     required this.createdAt,
   });
   factory _Category.fromJson(Map<String, dynamic> json) =>
@@ -442,6 +459,8 @@ class _Category implements Category {
   @override
   @JsonKey()
   final int sortOrder;
+  @override
+  final int? budgetAmount;
   @override
   final DateTime createdAt;
 
@@ -475,6 +494,8 @@ class _Category implements Category {
                 other.isSystem == isSystem) &&
             (identical(other.sortOrder, sortOrder) ||
                 other.sortOrder == sortOrder) &&
+            (identical(other.budgetAmount, budgetAmount) ||
+                other.budgetAmount == budgetAmount) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
   }
@@ -492,12 +513,13 @@ class _Category implements Category {
     type,
     isSystem,
     sortOrder,
+    budgetAmount,
     createdAt,
   );
 
   @override
   String toString() {
-    return 'Category(id: $id, name: $name, icon: $icon, color: $color, parentId: $parentId, level: $level, type: $type, isSystem: $isSystem, sortOrder: $sortOrder, createdAt: $createdAt)';
+    return 'Category(id: $id, name: $name, icon: $icon, color: $color, parentId: $parentId, level: $level, type: $type, isSystem: $isSystem, sortOrder: $sortOrder, budgetAmount: $budgetAmount, createdAt: $createdAt)';
   }
 }
 
@@ -518,6 +540,7 @@ abstract mixin class _$CategoryCopyWith<$Res>
     TransactionType type,
     bool isSystem,
     int sortOrder,
+    int? budgetAmount,
     DateTime createdAt,
   });
 }
@@ -543,6 +566,7 @@ class __$CategoryCopyWithImpl<$Res> implements _$CategoryCopyWith<$Res> {
     Object? type = null,
     Object? isSystem = null,
     Object? sortOrder = null,
+    Object? budgetAmount = freezed,
     Object? createdAt = null,
   }) {
     return _then(
@@ -583,6 +607,10 @@ class __$CategoryCopyWithImpl<$Res> implements _$CategoryCopyWith<$Res> {
             ? _self.sortOrder
             : sortOrder // ignore: cast_nullable_to_non_nullable
                   as int,
+        budgetAmount: freezed == budgetAmount
+            ? _self.budgetAmount
+            : budgetAmount // ignore: cast_nullable_to_non_nullable
+                  as int?,
         createdAt: null == createdAt
             ? _self.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable

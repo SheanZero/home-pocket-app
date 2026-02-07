@@ -199,6 +199,14 @@ class MockCategoryRepository extends _i1.Mock
           as _i5.Future<List<_i8.Category>>);
 
   @override
+  _i5.Future<List<_i8.Category>> findWithBudget() =>
+      (super.noSuchMethod(
+            Invocation.method(#findWithBudget, []),
+            returnValue: _i5.Future<List<_i8.Category>>.value(<_i8.Category>[]),
+          )
+          as _i5.Future<List<_i8.Category>>);
+
+  @override
   _i5.Future<void> insertBatch(List<_i8.Category>? categories) =>
       (super.noSuchMethod(
             Invocation.method(#insertBatch, [categories]),

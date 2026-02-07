@@ -23,6 +23,7 @@ abstract class Category with _$Category {
     required TransactionType type,
     @Default(false) bool isSystem,
     @Default(0) int sortOrder,
+    int? budgetAmount,
     required DateTime createdAt,
   }) = _Category;
 

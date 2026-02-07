@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'data/app_database.dart';
 import 'features/accounting/presentation/providers/use_case_providers.dart';
-import 'features/dual_ledger/presentation/screens/dual_ledger_screen.dart';
+import 'features/home/presentation/screens/main_shell_screen.dart';
 import 'infrastructure/crypto/database/encrypted_database.dart';
 import 'infrastructure/crypto/providers.dart';
 import 'infrastructure/security/providers.dart';
@@ -119,6 +119,6 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return DualLedgerScreen(bookId: _bookId!);
+    return MainShellScreen(bookId: _bookId!);
   }
 }

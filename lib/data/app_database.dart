@@ -20,5 +20,16 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
+
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      onUpgrade: (migrator, from, to) async {
+        if (from < 3) {
+          await migrator.addColumn(categories, categories.budgetAmount);
+        }
+      },
+    );
+  }
 }

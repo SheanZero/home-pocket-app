@@ -32,6 +32,9 @@ dependencies:
   # Unique ID Generation
   ulid: ^2.0.0
 
+  # Charts
+  fl_chart: ^0.69.0
+
   # Database
   drift: ^2.25.0
   sqlcipher_flutter_libs: ^0.6.7

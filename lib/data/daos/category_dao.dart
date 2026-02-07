@@ -13,6 +13,7 @@ class CategoryInsertData {
   final String type;
   final bool isSystem;
   final int sortOrder;
+  final int? budgetAmount;
   final DateTime createdAt;
 
   const CategoryInsertData({
@@ -25,6 +26,7 @@ class CategoryInsertData {
     required this.type,
     this.isSystem = false,
     this.sortOrder = 0,
+    this.budgetAmount,
     required this.createdAt,
   });
 }
@@ -45,6 +47,7 @@ class CategoryDao {
     required String type,
     bool isSystem = false,
     int sortOrder = 0,
+    int? budgetAmount,
     required DateTime createdAt,
   }) async {
     await _db
@@ -60,6 +63,7 @@ class CategoryDao {
             type: type,
             isSystem: Value(isSystem),
             sortOrder: Value(sortOrder),
+            budgetAmount: Value(budgetAmount),
             createdAt: createdAt,
           ),
         );
@@ -98,6 +102,14 @@ class CategoryDao {
         .get();
   }
 
+  /// Find categories that have a non-null budget amount.
+  Future<List<CategoryRow>> findWithBudget() async {
+    return (_db.select(_db.categories)
+          ..where((t) => t.budgetAmount.isNotNull())
+          ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+        .get();
+  }
+
   Future<void> insertBatch(List<CategoryInsertData> categories) async {
     await _db.batch((batch) {
       for (final cat in categories) {
@@ -113,6 +125,7 @@ class CategoryDao {
             type: cat.type,
             isSystem: Value(cat.isSystem),
             sortOrder: Value(cat.sortOrder),
+            budgetAmount: Value(cat.budgetAmount),
             createdAt: cat.createdAt,
           ),
         );

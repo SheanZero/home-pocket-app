@@ -22,6 +22,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
       type: category.type.name,
       isSystem: category.isSystem,
       sortOrder: category.sortOrder,
+      budgetAmount: category.budgetAmount,
       createdAt: category.createdAt,
     );
   }
@@ -58,6 +59,12 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
+  Future<List<Category>> findWithBudget() async {
+    final rows = await _dao.findWithBudget();
+    return rows.map(_toModel).toList();
+  }
+
+  @override
   Future<void> insertBatch(List<Category> categories) async {
     await _dao.insertBatch(
       categories
@@ -72,6 +79,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
               type: c.type.name,
               isSystem: c.isSystem,
               sortOrder: c.sortOrder,
+              budgetAmount: c.budgetAmount,
               createdAt: c.createdAt,
             ),
           )
@@ -90,6 +98,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
       type: TransactionType.values.firstWhere((e) => e.name == row.type),
       isSystem: row.isSystem,
       sortOrder: row.sortOrder,
+      budgetAmount: row.budgetAmount,
       createdAt: row.createdAt,
     );
   }
