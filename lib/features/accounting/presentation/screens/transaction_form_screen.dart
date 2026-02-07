@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/accounting/create_transaction_use_case.dart';
+import '../../../../features/dual_ledger/presentation/widgets/soul_celebration_overlay.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/transaction.dart';
 import '../providers/repository_providers.dart';
@@ -99,6 +102,12 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     setState(() => _isSubmitting = false);
 
     if (result.isSuccess) {
+      final tx = result.data!;
+      if (tx.ledgerType == LedgerType.soul) {
+        // Show soul celebration overlay before popping
+        await _showSoulCelebration();
+      }
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Transaction saved')));
@@ -108,6 +117,22 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         context,
       ).showSnackBar(SnackBar(content: Text(result.error ?? 'Failed to save')));
     }
+  }
+
+  Future<void> _showSoulCelebration() async {
+    final completer = Completer<void>();
+
+    final overlay = OverlayEntry(
+      builder: (_) => SoulCelebrationOverlay(
+        onDismissed: () {
+          if (!completer.isCompleted) completer.complete();
+        },
+      ),
+    );
+
+    Overlay.of(context).insert(overlay);
+    await completer.future;
+    overlay.remove();
   }
 
   @override
