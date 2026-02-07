@@ -8,6 +8,7 @@ import '../../features/accounting/domain/repositories/category_repository.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
 import '../../infrastructure/crypto/services/hash_chain_service.dart';
 import '../../shared/utils/result.dart';
+import '../dual_ledger/classification_service.dart';
 
 String _trunc(String s, [int len = 16]) =>
     s.length <= len ? s : '${s.substring(0, math.min(len, s.length))}...';
@@ -20,6 +21,7 @@ class CreateTransactionParams {
   final String categoryId;
   final DateTime? timestamp;
   final String? note;
+  final String? merchant;
 
   const CreateTransactionParams({
     required this.bookId,
@@ -28,6 +30,7 @@ class CreateTransactionParams {
     required this.categoryId,
     this.timestamp,
     this.note,
+    this.merchant,
   });
 }
 
@@ -40,13 +43,16 @@ class CreateTransactionUseCase {
     required TransactionRepository transactionRepository,
     required CategoryRepository categoryRepository,
     required HashChainService hashChainService,
+    required ClassificationService classificationService,
   }) : _transactionRepo = transactionRepository,
        _categoryRepo = categoryRepository,
-       _hashChainService = hashChainService;
+       _hashChainService = hashChainService,
+       _classificationService = classificationService;
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;
   final HashChainService _hashChainService;
+  final ClassificationService _classificationService;
 
   /// Genesis hash: 64 zero characters (no previous transaction).
   static const _genesisHash =
@@ -77,16 +83,23 @@ class CreateTransactionUseCase {
       return Result.error('category not found');
     }
 
-    // 3. Get previous hash for chain
+    // 3. Classify transaction (dual ledger)
+    final classification = await _classificationService.classify(
+      categoryId: params.categoryId,
+      merchant: params.merchant,
+      note: params.note,
+    );
+
+    // 4. Get previous hash for chain
     final prevHash =
         await _transactionRepo.getLatestHash(params.bookId) ?? _genesisHash;
 
-    // 4. Build transaction
+    // 5. Build transaction
     final id = Ulid().toString();
     final now = DateTime.now();
     final timestamp = params.timestamp ?? now;
 
-    // 5. Compute hash chain
+    // 6. Compute hash chain
     final hashAmount = params.amount.toDouble();
     final hashTimestamp = timestamp.millisecondsSinceEpoch ~/ 1000;
     dev.log(
@@ -102,7 +115,7 @@ class CreateTransactionUseCase {
       previousHash: prevHash,
     );
 
-    // 6. Create domain object
+    // 7. Create domain object
     final transaction = Transaction(
       id: id,
       bookId: params.bookId,
@@ -110,12 +123,13 @@ class CreateTransactionUseCase {
       amount: params.amount,
       type: params.type,
       categoryId: params.categoryId,
-      ledgerType: LedgerType.survival,
+      ledgerType: classification.ledgerType,
       timestamp: timestamp,
       prevHash: prevHash,
       currentHash: currentHash,
       createdAt: now,
       note: params.note,
+      merchant: params.merchant,
     );
 
     dev.log(
@@ -124,7 +138,7 @@ class CreateTransactionUseCase {
       name: 'DataFlow',
     );
 
-    // 7. Persist
+    // 8. Persist
     await _transactionRepo.insert(transaction);
 
     dev.log('[7/7 UseCase Done] Transaction $id persisted', name: 'DataFlow');

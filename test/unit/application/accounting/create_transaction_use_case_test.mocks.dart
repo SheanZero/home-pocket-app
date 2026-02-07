@@ -3,22 +3,26 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i4;
+import 'dart:async' as _i5;
 
-import 'package:home_pocket/features/accounting/domain/models/category.dart'
-    as _i7;
-import 'package:home_pocket/features/accounting/domain/models/transaction.dart'
-    as _i5;
-import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart'
-    as _i6;
-import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart'
+import 'package:home_pocket/application/dual_ledger/classification_result.dart'
     as _i3;
+import 'package:home_pocket/application/dual_ledger/classification_service.dart'
+    as _i11;
+import 'package:home_pocket/features/accounting/domain/models/category.dart'
+    as _i8;
+import 'package:home_pocket/features/accounting/domain/models/transaction.dart'
+    as _i6;
+import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart'
+    as _i7;
+import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart'
+    as _i4;
 import 'package:home_pocket/infrastructure/crypto/models/chain_verification_result.dart'
     as _i2;
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart'
-    as _i8;
+    as _i9;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i9;
+import 'package:mockito/src/dummies.dart' as _i10;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -40,36 +44,42 @@ class _FakeChainVerificationResult_0 extends _i1.SmartFake
     : super(parent, parentInvocation);
 }
 
+class _FakeClassificationResult_1 extends _i1.SmartFake
+    implements _i3.ClassificationResult {
+  _FakeClassificationResult_1(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
 /// A class which mocks [TransactionRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockTransactionRepository extends _i1.Mock
-    implements _i3.TransactionRepository {
+    implements _i4.TransactionRepository {
   MockTransactionRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Future<void> insert(_i5.Transaction? transaction) =>
+  _i5.Future<void> insert(_i6.Transaction? transaction) =>
       (super.noSuchMethod(
             Invocation.method(#insert, [transaction]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i5.Future<void>);
 
   @override
-  _i4.Future<_i5.Transaction?> findById(String? id) =>
+  _i5.Future<_i6.Transaction?> findById(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#findById, [id]),
-            returnValue: _i4.Future<_i5.Transaction?>.value(),
+            returnValue: _i5.Future<_i6.Transaction?>.value(),
           )
-          as _i4.Future<_i5.Transaction?>);
+          as _i5.Future<_i6.Transaction?>);
 
   @override
-  _i4.Future<List<_i5.Transaction>> findByBookId(
+  _i5.Future<List<_i6.Transaction>> findByBookId(
     String? bookId, {
-    _i5.LedgerType? ledgerType,
+    _i6.LedgerType? ledgerType,
     String? categoryId,
     DateTime? startDate,
     DateTime? endDate,
@@ -89,119 +99,119 @@ class MockTransactionRepository extends _i1.Mock
                 #offset: offset,
               },
             ),
-            returnValue: _i4.Future<List<_i5.Transaction>>.value(
-              <_i5.Transaction>[],
+            returnValue: _i5.Future<List<_i6.Transaction>>.value(
+              <_i6.Transaction>[],
             ),
           )
-          as _i4.Future<List<_i5.Transaction>>);
+          as _i5.Future<List<_i6.Transaction>>);
 
   @override
-  _i4.Future<void> update(_i5.Transaction? transaction) =>
+  _i5.Future<void> update(_i6.Transaction? transaction) =>
       (super.noSuchMethod(
             Invocation.method(#update, [transaction]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i5.Future<void>);
 
   @override
-  _i4.Future<void> softDelete(String? id) =>
+  _i5.Future<void> softDelete(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#softDelete, [id]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i5.Future<void>);
 
   @override
-  _i4.Future<String?> getLatestHash(String? bookId) =>
+  _i5.Future<String?> getLatestHash(String? bookId) =>
       (super.noSuchMethod(
             Invocation.method(#getLatestHash, [bookId]),
-            returnValue: _i4.Future<String?>.value(),
+            returnValue: _i5.Future<String?>.value(),
           )
-          as _i4.Future<String?>);
+          as _i5.Future<String?>);
 
   @override
-  _i4.Future<int> countByBookId(String? bookId) =>
+  _i5.Future<int> countByBookId(String? bookId) =>
       (super.noSuchMethod(
             Invocation.method(#countByBookId, [bookId]),
-            returnValue: _i4.Future<int>.value(0),
+            returnValue: _i5.Future<int>.value(0),
           )
-          as _i4.Future<int>);
+          as _i5.Future<int>);
 }
 
 /// A class which mocks [CategoryRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockCategoryRepository extends _i1.Mock
-    implements _i6.CategoryRepository {
+    implements _i7.CategoryRepository {
   MockCategoryRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Future<void> insert(_i7.Category? category) =>
+  _i5.Future<void> insert(_i8.Category? category) =>
       (super.noSuchMethod(
             Invocation.method(#insert, [category]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i5.Future<void>);
 
   @override
-  _i4.Future<_i7.Category?> findById(String? id) =>
+  _i5.Future<_i8.Category?> findById(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#findById, [id]),
-            returnValue: _i4.Future<_i7.Category?>.value(),
+            returnValue: _i5.Future<_i8.Category?>.value(),
           )
-          as _i4.Future<_i7.Category?>);
+          as _i5.Future<_i8.Category?>);
 
   @override
-  _i4.Future<List<_i7.Category>> findAll() =>
+  _i5.Future<List<_i8.Category>> findAll() =>
       (super.noSuchMethod(
             Invocation.method(#findAll, []),
-            returnValue: _i4.Future<List<_i7.Category>>.value(<_i7.Category>[]),
+            returnValue: _i5.Future<List<_i8.Category>>.value(<_i8.Category>[]),
           )
-          as _i4.Future<List<_i7.Category>>);
+          as _i5.Future<List<_i8.Category>>);
 
   @override
-  _i4.Future<List<_i7.Category>> findByLevel(int? level) =>
+  _i5.Future<List<_i8.Category>> findByLevel(int? level) =>
       (super.noSuchMethod(
             Invocation.method(#findByLevel, [level]),
-            returnValue: _i4.Future<List<_i7.Category>>.value(<_i7.Category>[]),
+            returnValue: _i5.Future<List<_i8.Category>>.value(<_i8.Category>[]),
           )
-          as _i4.Future<List<_i7.Category>>);
+          as _i5.Future<List<_i8.Category>>);
 
   @override
-  _i4.Future<List<_i7.Category>> findByParent(String? parentId) =>
+  _i5.Future<List<_i8.Category>> findByParent(String? parentId) =>
       (super.noSuchMethod(
             Invocation.method(#findByParent, [parentId]),
-            returnValue: _i4.Future<List<_i7.Category>>.value(<_i7.Category>[]),
+            returnValue: _i5.Future<List<_i8.Category>>.value(<_i8.Category>[]),
           )
-          as _i4.Future<List<_i7.Category>>);
+          as _i5.Future<List<_i8.Category>>);
 
   @override
-  _i4.Future<List<_i7.Category>> findByType(_i5.TransactionType? type) =>
+  _i5.Future<List<_i8.Category>> findByType(_i6.TransactionType? type) =>
       (super.noSuchMethod(
             Invocation.method(#findByType, [type]),
-            returnValue: _i4.Future<List<_i7.Category>>.value(<_i7.Category>[]),
+            returnValue: _i5.Future<List<_i8.Category>>.value(<_i8.Category>[]),
           )
-          as _i4.Future<List<_i7.Category>>);
+          as _i5.Future<List<_i8.Category>>);
 
   @override
-  _i4.Future<void> insertBatch(List<_i7.Category>? categories) =>
+  _i5.Future<void> insertBatch(List<_i8.Category>? categories) =>
       (super.noSuchMethod(
             Invocation.method(#insertBatch, [categories]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i5.Future<void>);
 }
 
 /// A class which mocks [HashChainService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockHashChainService extends _i1.Mock implements _i8.HashChainService {
+class MockHashChainService extends _i1.Mock implements _i9.HashChainService {
   MockHashChainService() {
     _i1.throwOnMissingStub(this);
   }
@@ -220,7 +230,7 @@ class MockHashChainService extends _i1.Mock implements _i8.HashChainService {
               #timestamp: timestamp,
               #previousHash: previousHash,
             }),
-            returnValue: _i9.dummyValue<String>(
+            returnValue: _i10.dummyValue<String>(
               this,
               Invocation.method(#calculateTransactionHash, [], {
                 #transactionId: transactionId,
@@ -286,4 +296,39 @@ class MockHashChainService extends _i1.Mock implements _i8.HashChainService {
             ),
           )
           as _i2.ChainVerificationResult);
+}
+
+/// A class which mocks [ClassificationService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockClassificationService extends _i1.Mock
+    implements _i11.ClassificationService {
+  MockClassificationService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i5.Future<_i3.ClassificationResult> classify({
+    required String? categoryId,
+    String? merchant,
+    String? note,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#classify, [], {
+              #categoryId: categoryId,
+              #merchant: merchant,
+              #note: note,
+            }),
+            returnValue: _i5.Future<_i3.ClassificationResult>.value(
+              _FakeClassificationResult_1(
+                this,
+                Invocation.method(#classify, [], {
+                  #categoryId: categoryId,
+                  #merchant: merchant,
+                  #note: note,
+                }),
+              ),
+            ),
+          )
+          as _i5.Future<_i3.ClassificationResult>);
 }
