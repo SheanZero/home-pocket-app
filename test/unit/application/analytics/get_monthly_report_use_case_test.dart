@@ -4,11 +4,13 @@ import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/data/daos/analytics_dao.dart';
 import 'package:home_pocket/data/daos/category_dao.dart';
 import 'package:home_pocket/data/daos/transaction_dao.dart';
+import 'package:home_pocket/data/repositories/analytics_repository_impl.dart';
 import 'package:home_pocket/data/repositories/category_repository_impl.dart';
 
 void main() {
   late AppDatabase database;
   late AnalyticsDao analyticsDao;
+  late AnalyticsRepositoryImpl analyticsRepository;
   late CategoryDao categoryDao;
   late TransactionDao transactionDao;
   late CategoryRepositoryImpl categoryRepo;
@@ -17,12 +19,13 @@ void main() {
   setUp(() async {
     database = AppDatabase.forTesting();
     analyticsDao = AnalyticsDao(database);
+    analyticsRepository = AnalyticsRepositoryImpl(dao: analyticsDao);
     categoryDao = CategoryDao(database);
     transactionDao = TransactionDao(database);
     categoryRepo = CategoryRepositoryImpl(dao: categoryDao);
 
     useCase = GetMonthlyReportUseCase(
-      analyticsDao: analyticsDao,
+      analyticsRepository: analyticsRepository,
       categoryRepository: categoryRepo,
     );
 

@@ -8,21 +8,23 @@ import 'dart:async' as _i5;
 import 'package:home_pocket/application/dual_ledger/classification_result.dart'
     as _i3;
 import 'package:home_pocket/application/dual_ledger/classification_service.dart'
-    as _i11;
+    as _i12;
 import 'package:home_pocket/features/accounting/domain/models/category.dart'
     as _i8;
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart'
     as _i6;
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart'
     as _i7;
+import 'package:home_pocket/features/accounting/domain/repositories/device_identity_repository.dart'
+    as _i9;
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart'
     as _i4;
 import 'package:home_pocket/infrastructure/crypto/models/chain_verification_result.dart'
     as _i2;
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart'
-    as _i9;
+    as _i10;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i10;
+import 'package:mockito/src/dummies.dart' as _i11;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -244,10 +246,28 @@ class MockCategoryRepository extends _i1.Mock
           as _i5.Future<void>);
 }
 
+/// A class which mocks [DeviceIdentityRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockDeviceIdentityRepository extends _i1.Mock
+    implements _i9.DeviceIdentityRepository {
+  MockDeviceIdentityRepository() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i5.Future<String?> getDeviceId() =>
+      (super.noSuchMethod(
+            Invocation.method(#getDeviceId, []),
+            returnValue: _i5.Future<String?>.value(),
+          )
+          as _i5.Future<String?>);
+}
+
 /// A class which mocks [HashChainService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockHashChainService extends _i1.Mock implements _i9.HashChainService {
+class MockHashChainService extends _i1.Mock implements _i10.HashChainService {
   MockHashChainService() {
     _i1.throwOnMissingStub(this);
   }
@@ -266,7 +286,7 @@ class MockHashChainService extends _i1.Mock implements _i9.HashChainService {
               #timestamp: timestamp,
               #previousHash: previousHash,
             }),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.method(#calculateTransactionHash, [], {
                 #transactionId: transactionId,
@@ -338,7 +358,7 @@ class MockHashChainService extends _i1.Mock implements _i9.HashChainService {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockClassificationService extends _i1.Mock
-    implements _i11.ClassificationService {
+    implements _i12.ClassificationService {
   MockClassificationService() {
     _i1.throwOnMissingStub(this);
   }

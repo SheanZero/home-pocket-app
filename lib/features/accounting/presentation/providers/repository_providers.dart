@@ -6,11 +6,13 @@ import '../../../../data/daos/category_dao.dart';
 import '../../../../data/daos/transaction_dao.dart';
 import '../../../../data/repositories/book_repository_impl.dart';
 import '../../../../data/repositories/category_repository_impl.dart';
+import '../../../../data/repositories/device_identity_repository_impl.dart';
 import '../../../../data/repositories/transaction_repository_impl.dart';
 import '../../../../infrastructure/crypto/providers.dart';
 import '../../../../infrastructure/security/providers.dart';
 import '../../domain/repositories/book_repository.dart';
 import '../../domain/repositories/category_repository.dart';
+import '../../domain/repositories/device_identity_repository.dart';
 import '../../domain/repositories/transaction_repository.dart';
 
 part 'repository_providers.g.dart';
@@ -43,3 +45,11 @@ TransactionRepository transactionRepository(Ref ref) {
     encryptionService: encryptionService,
   );
 }
+
+/// DeviceIdentityRepository provider.
+final deviceIdentityRepositoryProvider = Provider<DeviceIdentityRepository>((
+  ref,
+) {
+  final keyManager = ref.watch(keyManagerProvider);
+  return DeviceIdentityRepositoryImpl(keyManager: keyManager);
+});

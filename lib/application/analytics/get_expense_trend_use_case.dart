@@ -1,12 +1,12 @@
-import '../../data/daos/analytics_dao.dart';
 import '../../features/analytics/domain/models/expense_trend.dart';
+import '../../features/analytics/domain/repositories/analytics_repository.dart';
 
 /// Fetches multi-month expense/income trend data.
 class GetExpenseTrendUseCase {
-  GetExpenseTrendUseCase({required AnalyticsDao analyticsDao})
-    : _analyticsDao = analyticsDao;
+  GetExpenseTrendUseCase({required AnalyticsRepository analyticsRepository})
+    : _analyticsRepository = analyticsRepository;
 
-  final AnalyticsDao _analyticsDao;
+  final AnalyticsRepository _analyticsRepository;
 
   Future<ExpenseTrendData> execute({
     required String bookId,
@@ -23,7 +23,7 @@ class GetExpenseTrendUseCase {
       final startDate = DateTime(year, month, 1);
       final endDate = DateTime(year, month + 1, 0, 23, 59, 59);
 
-      final totals = await _analyticsDao.getMonthlyTotals(
+      final totals = await _analyticsRepository.getMonthlyTotals(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,

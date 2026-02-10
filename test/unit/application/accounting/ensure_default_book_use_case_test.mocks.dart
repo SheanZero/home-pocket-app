@@ -8,6 +8,8 @@ import 'dart:async' as _i3;
 import 'package:home_pocket/features/accounting/domain/models/book.dart' as _i4;
 import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart'
     as _i2;
+import 'package:home_pocket/features/accounting/domain/repositories/device_identity_repository.dart'
+    as _i5;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -104,4 +106,22 @@ class MockBookRepository extends _i1.Mock implements _i2.BookRepository {
             returnValueForMissingStub: _i3.Future<void>.value(),
           )
           as _i3.Future<void>);
+}
+
+/// A class which mocks [DeviceIdentityRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockDeviceIdentityRepository extends _i1.Mock
+    implements _i5.DeviceIdentityRepository {
+  MockDeviceIdentityRepository() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.Future<String?> getDeviceId() =>
+      (super.noSuchMethod(
+            Invocation.method(#getDeviceId, []),
+            returnValue: _i3.Future<String?>.value(),
+          )
+          as _i3.Future<String?>);
 }

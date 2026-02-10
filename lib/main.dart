@@ -30,7 +30,22 @@ void main() async {
     dev.log('Master key already exists', name: 'AppInit');
   }
 
-  // 2. Create database
+  // 2. Initialize device key pair / device ID
+  final keyManager = initContainer.read(keyManagerProvider);
+  if (!await keyManager.hasKeyPair()) {
+    await keyManager.generateDeviceKeyPair();
+    dev.log('Device key pair initialized', name: 'AppInit');
+  } else {
+    dev.log('Device key pair already exists', name: 'AppInit');
+  }
+
+  final deviceId = await keyManager.getDeviceId();
+  if (deviceId == null || deviceId.isEmpty) {
+    throw StateError('Device ID is not available after key initialization.');
+  }
+  dev.log('Device identity ready: $deviceId', name: 'AppInit');
+
+  // 3. Create database
   final AppDatabase database;
   if (_useInMemoryDatabase) {
     database = AppDatabase(NativeDatabase.memory());
@@ -41,7 +56,7 @@ void main() async {
     dev.log('Encrypted database opened', name: 'AppInit');
   }
 
-  // 3. Dispose init container, create final container with database
+  // 4. Dispose init container, create final container with database
   initContainer.dispose();
 
   final container = ProviderContainer(

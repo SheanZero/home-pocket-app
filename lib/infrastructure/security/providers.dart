@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/app_database.dart';
@@ -7,6 +8,16 @@ import 'biometric_service.dart';
 import 'secure_storage_service.dart';
 
 part 'providers.g.dart';
+
+/// Single source of truth for secure storage instance + platform options.
+final flutterSecureStorageProvider = Provider<FlutterSecureStorage>((ref) {
+  return const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    iOptions: IOSOptions(
+      accessibility: KeychainAccessibility.unlocked_this_device,
+    ),
+  );
+});
 
 /// Biometric authentication service.
 ///
@@ -27,7 +38,8 @@ Future<BiometricAvailability> biometricAvailability(Ref ref) async {
 /// Secure storage service — iOS Keychain / Android Keystore wrapper.
 @riverpod
 SecureStorageService secureStorageService(Ref ref) {
-  return SecureStorageService();
+  final storage = ref.watch(flutterSecureStorageProvider);
+  return SecureStorageService(storage: storage);
 }
 
 /// Audit logger — depends on AppDatabase and SecureStorageService.
