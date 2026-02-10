@@ -1,9 +1,10 @@
-import '../../data/daos/analytics_dao.dart';
 import '../../features/accounting/domain/models/category.dart';
 import '../../features/accounting/domain/repositories/category_repository.dart';
+import '../../features/analytics/domain/models/analytics_aggregate.dart';
 import '../../features/analytics/domain/models/daily_expense.dart';
 import '../../features/analytics/domain/models/month_comparison.dart';
 import '../../features/analytics/domain/models/monthly_report.dart';
+import '../../features/analytics/domain/repositories/analytics_repository.dart';
 
 /// Generates a comprehensive monthly financial report.
 ///
@@ -11,12 +12,12 @@ import '../../features/analytics/domain/models/monthly_report.dart';
 /// daily spending patterns, ledger type splits, and month-over-month comparison.
 class GetMonthlyReportUseCase {
   GetMonthlyReportUseCase({
-    required AnalyticsDao analyticsDao,
+    required AnalyticsRepository analyticsRepository,
     required CategoryRepository categoryRepository,
-  }) : _analyticsDao = analyticsDao,
+  }) : _analyticsRepository = analyticsRepository,
        _categoryRepo = categoryRepository;
 
-  final AnalyticsDao _analyticsDao;
+  final AnalyticsRepository _analyticsRepository;
   final CategoryRepository _categoryRepo;
 
   Future<MonthlyReport> execute({
@@ -29,22 +30,22 @@ class GetMonthlyReportUseCase {
 
     // Run independent queries in parallel
     final results = await Future.wait([
-      _analyticsDao.getMonthlyTotals(
+      _analyticsRepository.getMonthlyTotals(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
       ),
-      _analyticsDao.getCategoryTotals(
+      _analyticsRepository.getCategoryTotals(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
       ),
-      _analyticsDao.getDailyTotals(
+      _analyticsRepository.getDailyTotals(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
       ),
-      _analyticsDao.getLedgerTotals(
+      _analyticsRepository.getLedgerTotals(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
@@ -52,10 +53,10 @@ class GetMonthlyReportUseCase {
       _categoryRepo.findAll(),
     ]);
 
-    final totals = results[0] as MonthlyTotalsResult;
-    final categoryTotals = results[1] as List<CategoryTotalResult>;
-    final dailyTotals = results[2] as List<DailyTotalResult>;
-    final ledgerTotals = results[3] as List<LedgerTotalResult>;
+    final totals = results[0] as MonthlyTotals;
+    final categoryTotals = results[1] as List<CategoryTotal>;
+    final dailyTotals = results[2] as List<DailyTotal>;
+    final ledgerTotals = results[3] as List<LedgerTotal>;
     final categories = results[4] as List<Category>;
 
     final categoryMap = <String, Category>{};
@@ -121,7 +122,7 @@ class GetMonthlyReportUseCase {
   }
 
   List<CategoryBreakdown> _buildCategoryBreakdowns({
-    required List<CategoryTotalResult> categoryTotals,
+    required List<CategoryTotal> categoryTotals,
     required Map<String, Category> categoryMap,
     required int totalExpenses,
   }) {
@@ -148,7 +149,7 @@ class GetMonthlyReportUseCase {
   }
 
   List<DailyExpense> _buildDailyExpenses({
-    required List<DailyTotalResult> dailyTotals,
+    required List<DailyTotal> dailyTotals,
     required int year,
     required int month,
     required int daysInMonth,
@@ -184,7 +185,7 @@ class GetMonthlyReportUseCase {
     final prevStart = DateTime(prevYear, prevMonth, 1);
     final prevEnd = DateTime(prevYear, prevMonth + 1, 0, 23, 59, 59);
 
-    final prevTotals = await _analyticsDao.getMonthlyTotals(
+    final prevTotals = await _analyticsRepository.getMonthlyTotals(
       bookId: bookId,
       startDate: prevStart,
       endDate: prevEnd,

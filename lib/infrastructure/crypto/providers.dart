@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../security/providers.dart';
 import 'repositories/master_key_repository.dart';
 import 'repositories/master_key_repository_impl.dart';
 import 'repositories/key_repository.dart';
@@ -14,24 +14,18 @@ import 'services/hash_chain_service.dart';
 
 part 'providers.g.dart';
 
-// FlutterSecureStorage configuration
-const _secureStorage = FlutterSecureStorage(
-  aOptions: AndroidOptions(encryptedSharedPreferences: true),
-  iOptions: IOSOptions(
-    accessibility: KeychainAccessibility.unlocked_this_device,
-  ),
-);
-
 /// Master key repository - manages 256-bit master key and HKDF derivation
 @riverpod
 MasterKeyRepository masterKeyRepository(Ref ref) {
-  return MasterKeyRepositoryImpl(secureStorage: _secureStorage);
+  final storage = ref.watch(flutterSecureStorageProvider);
+  return MasterKeyRepositoryImpl(secureStorage: storage);
 }
 
 /// Key repository - manages Ed25519 key pairs
 @riverpod
 KeyRepository keyRepository(Ref ref) {
-  return KeyRepositoryImpl(secureStorage: _secureStorage);
+  final storage = ref.watch(flutterSecureStorageProvider);
+  return KeyRepositoryImpl(secureStorage: storage);
 }
 
 /// Key manager - high-level key operations

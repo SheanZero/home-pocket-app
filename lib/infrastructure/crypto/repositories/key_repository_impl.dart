@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart' as hash_lib;
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../security/secure_storage_service.dart';
 import '../models/device_key_pair.dart';
 import 'key_repository.dart';
 
@@ -13,13 +14,9 @@ class KeyRepositoryImpl implements KeyRepository {
   final FlutterSecureStorage _secureStorage;
   final _ed25519 = Ed25519();
 
-  static const _privateKeyKey = 'device_private_key';
-  static const _publicKeyKey = 'device_public_key';
-  static const _deviceIdKey = 'device_id';
-
   @override
   Future<bool> hasKeyPair() async {
-    final key = await _secureStorage.read(key: _privateKeyKey);
+    final key = await _secureStorage.read(key: StorageKeys.devicePrivateKey);
     return key != null;
   }
 
@@ -36,11 +33,14 @@ class KeyRepositoryImpl implements KeyRepository {
     final deviceId = _generateDeviceId(publicKey.bytes);
 
     await _secureStorage.write(
-      key: _privateKeyKey,
+      key: StorageKeys.devicePrivateKey,
       value: base64Encode(privateKeyBytes),
     );
-    await _secureStorage.write(key: _publicKeyKey, value: publicKeyBase64);
-    await _secureStorage.write(key: _deviceIdKey, value: deviceId);
+    await _secureStorage.write(
+      key: StorageKeys.devicePublicKey,
+      value: publicKeyBase64,
+    );
+    await _secureStorage.write(key: StorageKeys.deviceId, value: deviceId);
 
     return DeviceKeyPair(
       publicKey: publicKeyBase64,
@@ -62,11 +62,14 @@ class KeyRepositoryImpl implements KeyRepository {
     final deviceId = _generateDeviceId(publicKey.bytes);
 
     await _secureStorage.write(
-      key: _privateKeyKey,
+      key: StorageKeys.devicePrivateKey,
       value: base64Encode(privateKeyBytes),
     );
-    await _secureStorage.write(key: _publicKeyKey, value: publicKeyBase64);
-    await _secureStorage.write(key: _deviceIdKey, value: deviceId);
+    await _secureStorage.write(
+      key: StorageKeys.devicePublicKey,
+      value: publicKeyBase64,
+    );
+    await _secureStorage.write(key: StorageKeys.deviceId, value: deviceId);
 
     return DeviceKeyPair(
       publicKey: publicKeyBase64,
@@ -77,17 +80,19 @@ class KeyRepositoryImpl implements KeyRepository {
 
   @override
   Future<String?> getPublicKey() async {
-    return _secureStorage.read(key: _publicKeyKey);
+    return _secureStorage.read(key: StorageKeys.devicePublicKey);
   }
 
   @override
   Future<String?> getDeviceId() async {
-    return _secureStorage.read(key: _deviceIdKey);
+    return _secureStorage.read(key: StorageKeys.deviceId);
   }
 
   @override
   Future<Signature> signData(List<int> data) async {
-    final privateKeyStr = await _secureStorage.read(key: _privateKeyKey);
+    final privateKeyStr = await _secureStorage.read(
+      key: StorageKeys.devicePrivateKey,
+    );
     if (privateKeyStr == null) {
       throw KeyNotFoundException('Private key not found in secure storage');
     }
@@ -118,9 +123,9 @@ class KeyRepositoryImpl implements KeyRepository {
 
   @override
   Future<void> clearKeys() async {
-    await _secureStorage.delete(key: _privateKeyKey);
-    await _secureStorage.delete(key: _publicKeyKey);
-    await _secureStorage.delete(key: _deviceIdKey);
+    await _secureStorage.delete(key: StorageKeys.devicePrivateKey);
+    await _secureStorage.delete(key: StorageKeys.devicePublicKey);
+    await _secureStorage.delete(key: StorageKeys.deviceId);
   }
 
   /// Base64URL(SHA-256(publicKey))[0:16]

@@ -17,6 +17,7 @@ CreateTransactionUseCase createTransactionUseCase(Ref ref) {
   return CreateTransactionUseCase(
     transactionRepository: ref.watch(transactionRepositoryProvider),
     categoryRepository: ref.watch(categoryRepositoryProvider),
+    deviceIdentityRepository: ref.watch(deviceIdentityRepositoryProvider),
     hashChainService: ref.watch(hashChainServiceProvider),
     classificationService: ref.watch(classificationServiceProvider),
   );
@@ -47,5 +48,6 @@ SeedCategoriesUseCase seedCategoriesUseCase(Ref ref) {
 EnsureDefaultBookUseCase ensureDefaultBookUseCase(Ref ref) {
   return EnsureDefaultBookUseCase(
     bookRepository: ref.watch(bookRepositoryProvider),
+    deviceIdentityRepository: ref.watch(deviceIdentityRepositoryProvider),
   );
 }

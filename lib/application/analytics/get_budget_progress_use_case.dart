@@ -1,16 +1,16 @@
-import '../../data/daos/analytics_dao.dart';
 import '../../features/accounting/domain/repositories/category_repository.dart';
 import '../../features/analytics/domain/models/budget_progress.dart';
+import '../../features/analytics/domain/repositories/analytics_repository.dart';
 
 /// Calculates budget progress for all budgeted categories in a given month.
 class GetBudgetProgressUseCase {
   GetBudgetProgressUseCase({
-    required AnalyticsDao analyticsDao,
+    required AnalyticsRepository analyticsRepository,
     required CategoryRepository categoryRepository,
-  }) : _analyticsDao = analyticsDao,
+  }) : _analyticsRepository = analyticsRepository,
        _categoryRepo = categoryRepository;
 
-  final AnalyticsDao _analyticsDao;
+  final AnalyticsRepository _analyticsRepository;
   final CategoryRepository _categoryRepo;
 
   Future<List<BudgetProgress>> execute({
@@ -24,7 +24,7 @@ class GetBudgetProgressUseCase {
     final startDate = DateTime(year, month, 1);
     final endDate = DateTime(year, month + 1, 0, 23, 59, 59);
 
-    final categoryTotals = await _analyticsDao.getCategoryTotals(
+    final categoryTotals = await _analyticsRepository.getCategoryTotals(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,

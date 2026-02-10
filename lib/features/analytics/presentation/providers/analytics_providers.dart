@@ -35,7 +35,7 @@ class SelectedMonth extends _$SelectedMonth {
 @riverpod
 GetMonthlyReportUseCase getMonthlyReportUseCase(Ref ref) {
   return GetMonthlyReportUseCase(
-    analyticsDao: ref.watch(analyticsDaoProvider),
+    analyticsRepository: ref.watch(analyticsRepositoryProvider),
     categoryRepository: ref.watch(categoryRepositoryProvider),
   );
 }
@@ -44,7 +44,7 @@ GetMonthlyReportUseCase getMonthlyReportUseCase(Ref ref) {
 @riverpod
 GetBudgetProgressUseCase getBudgetProgressUseCase(Ref ref) {
   return GetBudgetProgressUseCase(
-    analyticsDao: ref.watch(analyticsDaoProvider),
+    analyticsRepository: ref.watch(analyticsRepositoryProvider),
     categoryRepository: ref.watch(categoryRepositoryProvider),
   );
 }
@@ -52,7 +52,9 @@ GetBudgetProgressUseCase getBudgetProgressUseCase(Ref ref) {
 /// GetExpenseTrendUseCase provider.
 @riverpod
 GetExpenseTrendUseCase getExpenseTrendUseCase(Ref ref) {
-  return GetExpenseTrendUseCase(analyticsDao: ref.watch(analyticsDaoProvider));
+  return GetExpenseTrendUseCase(
+    analyticsRepository: ref.watch(analyticsRepositoryProvider),
+  );
 }
 
 /// Monthly report for the selected month.

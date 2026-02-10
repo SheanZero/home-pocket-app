@@ -5,6 +5,7 @@ import 'package:ulid/ulid.dart';
 
 import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/repositories/category_repository.dart';
+import '../../features/accounting/domain/repositories/device_identity_repository.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
 import '../../infrastructure/crypto/services/hash_chain_service.dart';
 import '../../shared/utils/result.dart';
@@ -42,15 +43,18 @@ class CreateTransactionUseCase {
   CreateTransactionUseCase({
     required TransactionRepository transactionRepository,
     required CategoryRepository categoryRepository,
+    required DeviceIdentityRepository deviceIdentityRepository,
     required HashChainService hashChainService,
     required ClassificationService classificationService,
   }) : _transactionRepo = transactionRepository,
        _categoryRepo = categoryRepository,
+       _deviceIdentityRepo = deviceIdentityRepository,
        _hashChainService = hashChainService,
        _classificationService = classificationService;
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;
+  final DeviceIdentityRepository _deviceIdentityRepo;
   final HashChainService _hashChainService;
   final ClassificationService _classificationService;
 
@@ -83,23 +87,29 @@ class CreateTransactionUseCase {
       return Result.error('category not found');
     }
 
-    // 3. Classify transaction (dual ledger)
+    // 3. Resolve device identity
+    final deviceId = await _deviceIdentityRepo.getDeviceId();
+    if (deviceId == null || deviceId.isEmpty) {
+      return Result.error('deviceId is not available');
+    }
+
+    // 4. Classify transaction (dual ledger)
     final classification = await _classificationService.classify(
       categoryId: params.categoryId,
       merchant: params.merchant,
       note: params.note,
     );
 
-    // 4. Get previous hash for chain
+    // 5. Get previous hash for chain
     final prevHash =
         await _transactionRepo.getLatestHash(params.bookId) ?? _genesisHash;
 
-    // 5. Build transaction
+    // 6. Build transaction
     final id = Ulid().toString();
     final now = DateTime.now();
     final timestamp = params.timestamp ?? now;
 
-    // 6. Compute hash chain
+    // 7. Compute hash chain
     final hashAmount = params.amount.toDouble();
     final hashTimestamp = timestamp.millisecondsSinceEpoch ~/ 1000;
     dev.log(
@@ -115,11 +125,11 @@ class CreateTransactionUseCase {
       previousHash: prevHash,
     );
 
-    // 7. Create domain object
+    // 8. Create domain object
     final transaction = Transaction(
       id: id,
       bookId: params.bookId,
-      deviceId: 'dev_local',
+      deviceId: deviceId,
       amount: params.amount,
       type: params.type,
       categoryId: params.categoryId,
@@ -138,7 +148,7 @@ class CreateTransactionUseCase {
       name: 'DataFlow',
     );
 
-    // 8. Persist
+    // 9. Persist
     await _transactionRepo.insert(transaction);
 
     dev.log('[7/7 UseCase Done] Transaction $id persisted', name: 'DataFlow');

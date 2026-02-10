@@ -4,9 +4,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 ///
 /// All secure storage keys MUST be defined here.
 /// Using hardcoded key strings anywhere else is prohibited.
-///
-/// NOTE: These keys must stay synchronized with:
-/// - `MasterKeyRepositoryImpl._masterKeyStorageKey` (crypto infrastructure)
 abstract final class StorageKeys {
   /// Ed25519 private key (Base64).
   static const String devicePrivateKey = 'device_private_key';
@@ -25,9 +22,7 @@ abstract final class StorageKeys {
 
   /// Master encryption key (256-bit).
   ///
-  /// IMPORTANT: This key name MUST match `MasterKeyRepositoryImpl._masterKeyStorageKey`
-  /// from `lib/infrastructure/crypto/repositories/master_key_repository_impl.dart`.
-  /// Both use 'master_key' as the storage key.
+  /// IMPORTANT: This key is consumed by crypto master-key repository logic.
   static const String masterKey = 'master_key';
 
   /// All known keys (used by [SecureStorageService.clearAll]).
@@ -68,8 +63,8 @@ class SecureStorageException implements Exception {
 ///
 /// All methods may throw [SecureStorageException] on platform errors.
 class SecureStorageService {
-  SecureStorageService({FlutterSecureStorage? storage})
-    : _storage = storage ?? const FlutterSecureStorage();
+  SecureStorageService({required FlutterSecureStorage storage})
+    : _storage = storage;
 
   final FlutterSecureStorage _storage;
 

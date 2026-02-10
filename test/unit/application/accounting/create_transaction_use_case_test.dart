@@ -5,6 +5,7 @@ import 'package:home_pocket/application/dual_ledger/classification_service.dart'
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
+import 'package:home_pocket/features/accounting/domain/repositories/device_identity_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
 import 'package:mockito/annotations.dart';
@@ -13,6 +14,7 @@ import 'package:mockito/mockito.dart';
 @GenerateMocks([
   TransactionRepository,
   CategoryRepository,
+  DeviceIdentityRepository,
   HashChainService,
   ClassificationService,
 ])
@@ -21,6 +23,7 @@ import 'create_transaction_use_case_test.mocks.dart';
 void main() {
   late MockTransactionRepository mockTransactionRepo;
   late MockCategoryRepository mockCategoryRepo;
+  late MockDeviceIdentityRepository mockDeviceIdentityRepo;
   late MockHashChainService mockHashChainService;
   late MockClassificationService mockClassificationService;
   late CreateTransactionUseCase useCase;
@@ -28,15 +31,21 @@ void main() {
   setUp(() {
     mockTransactionRepo = MockTransactionRepository();
     mockCategoryRepo = MockCategoryRepository();
+    mockDeviceIdentityRepo = MockDeviceIdentityRepository();
     mockHashChainService = MockHashChainService();
     mockClassificationService = MockClassificationService();
 
     useCase = CreateTransactionUseCase(
       transactionRepository: mockTransactionRepo,
       categoryRepository: mockCategoryRepo,
+      deviceIdentityRepository: mockDeviceIdentityRepo,
       hashChainService: mockHashChainService,
       classificationService: mockClassificationService,
     );
+
+    when(
+      mockDeviceIdentityRepo.getDeviceId(),
+    ).thenAnswer((_) async => 'device_test_001');
 
     // Default classification stub: survival
     when(
@@ -98,6 +107,7 @@ void main() {
       expect(result.data, isNotNull);
       expect(result.data!.amount, 1500);
       expect(result.data!.categoryId, 'cat_food');
+      expect(result.data!.deviceId, 'device_test_001');
       expect(result.data!.currentHash, 'computed_hash_xyz');
       expect(result.data!.prevHash, 'prev_hash_abc');
       verify(mockTransactionRepo.insert(any)).called(1);
@@ -171,6 +181,26 @@ void main() {
 
       expect(result.isError, isTrue);
       expect(result.error, contains('category'));
+      verifyNever(mockTransactionRepo.insert(any));
+    });
+
+    test('returns error when deviceId is unavailable', () async {
+      when(
+        mockCategoryRepo.findById('cat_food'),
+      ).thenAnswer((_) async => testCategory);
+      when(mockDeviceIdentityRepo.getDeviceId()).thenAnswer((_) async => null);
+
+      final result = await useCase.execute(
+        CreateTransactionParams(
+          bookId: 'book_001',
+          amount: 1000,
+          type: TransactionType.expense,
+          categoryId: 'cat_food',
+        ),
+      );
+
+      expect(result.isError, isTrue);
+      expect(result.error, contains('deviceId'));
       verifyNever(mockTransactionRepo.insert(any));
     });
 

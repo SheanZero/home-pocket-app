@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../security/secure_storage_service.dart';
 import 'master_key_repository.dart';
 
 /// Implementation of [MasterKeyRepository] using FlutterSecureStorage.
@@ -15,7 +16,6 @@ class MasterKeyRepositoryImpl implements MasterKeyRepository {
 
   final FlutterSecureStorage _secureStorage;
 
-  static const String _masterKeyStorageKey = 'master_key';
   static const String _hkdfSalt = 'homepocket-v1-2026';
 
   /// Cache for derived keys to avoid repeated HKDF operations.
@@ -33,20 +33,20 @@ class MasterKeyRepositoryImpl implements MasterKeyRepository {
 
     // Store in secure storage
     await _secureStorage.write(
-      key: _masterKeyStorageKey,
+      key: StorageKeys.masterKey,
       value: base64Encode(masterKeyBytes),
     );
   }
 
   @override
   Future<bool> hasMasterKey() async {
-    final value = await _secureStorage.read(key: _masterKeyStorageKey);
+    final value = await _secureStorage.read(key: StorageKeys.masterKey);
     return value != null && value.isNotEmpty;
   }
 
   @override
   Future<List<int>> getMasterKey() async {
-    final value = await _secureStorage.read(key: _masterKeyStorageKey);
+    final value = await _secureStorage.read(key: StorageKeys.masterKey);
     if (value == null || value.isEmpty) {
       throw MasterKeyNotInitializedException();
     }
@@ -79,6 +79,6 @@ class MasterKeyRepositoryImpl implements MasterKeyRepository {
   @override
   Future<void> clearMasterKey() async {
     _derivedKeyCache.clear();
-    await _secureStorage.delete(key: _masterKeyStorageKey);
+    await _secureStorage.delete(key: StorageKeys.masterKey);
   }
 }
