@@ -33,6 +33,9 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Localization generated files
+lib/generated/
+
 # Symbolication related
 app.*.symbols
 

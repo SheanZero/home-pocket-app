@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/accounting/create_transaction_use_case.dart';
 import '../../../../features/dual_ledger/presentation/widgets/soul_celebration_overlay.dart';
+import '../../../../generated/app_localizations.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/transaction.dart';
 import '../providers/repository_providers.dart';
@@ -63,14 +64,14 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     final amountText = _amountController.text.trim();
     final amount = int.tryParse(amountText);
     if (amountText.isEmpty || amount == null || amount <= 0) {
-      setState(() => _amountError = 'Enter a valid amount > 0');
+      setState(() => _amountError = S.of(context).amountMustBeGreaterThanZero);
       valid = false;
     } else {
       setState(() => _amountError = null);
     }
 
     if (_selectedCategoryId == null) {
-      setState(() => _categoryError = 'Select a category');
+      setState(() => _categoryError = S.of(context).pleaseSelectCategory);
       valid = false;
     } else {
       setState(() => _categoryError = null);
@@ -110,12 +111,12 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Transaction saved')));
+      ).showSnackBar(SnackBar(content: Text(S.of(context).transactionSaved)));
       Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(result.error ?? 'Failed to save')));
+      ).showSnackBar(SnackBar(content: Text(result.error ?? S.of(context).failedToSave)));
     }
   }
 
@@ -138,7 +139,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('New Transaction')),
+      appBar: AppBar(title: Text(S.of(context).newTransaction)),
       body: SafeArea(
         child: Column(
           children: [
@@ -154,7 +155,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: InputDecoration(
-                        labelText: 'Amount',
+                        labelText: S.of(context).amount,
                         prefixIcon: const Icon(Icons.attach_money),
                         border: const OutlineInputBorder(),
                         errorText: _amountError,
@@ -166,16 +167,16 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
                     // Type toggle
                     SegmentedButton<TransactionType>(
-                      segments: const [
+                      segments: [
                         ButtonSegment(
                           value: TransactionType.expense,
-                          label: Text('Expense'),
-                          icon: Icon(Icons.remove_circle_outline),
+                          label: Text(S.of(context).transactionTypeExpense),
+                          icon: const Icon(Icons.remove_circle_outline),
                         ),
                         ButtonSegment(
                           value: TransactionType.income,
-                          label: Text('Income'),
-                          icon: Icon(Icons.add_circle_outline),
+                          label: Text(S.of(context).transactionTypeIncome),
+                          icon: const Icon(Icons.add_circle_outline),
                         ),
                       ],
                       selected: {_type},
@@ -227,10 +228,10 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                     // Note input
                     TextField(
                       controller: _noteController,
-                      decoration: const InputDecoration(
-                        labelText: 'Note (optional)',
-                        prefixIcon: Icon(Icons.note),
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: S.of(context).noteOptional,
+                        prefixIcon: const Icon(Icons.note),
+                        border: const OutlineInputBorder(),
                       ),
                       maxLines: 2,
                     ),
@@ -252,7 +253,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Save'),
+                      : Text(S.of(context).save),
                 ),
               ),
             ),

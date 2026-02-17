@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../generated/app_localizations.dart';
 import '../providers/settings_providers.dart';
 import '../widgets/about_section.dart';
 import '../widgets/appearance_section.dart';
@@ -18,7 +19,7 @@ class SettingsScreen extends ConsumerWidget {
     final settingsAsync = ref.watch(appSettingsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(S.of(context).settings)),
       body: settingsAsync.when(
         data: (settings) => ListView(
           children: [

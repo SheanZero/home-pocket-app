@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/analytics/demo_data_service.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart';
+import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/security/providers.dart';
 import '../../domain/models/budget_progress.dart';
 import '../../domain/models/expense_trend.dart';
@@ -39,11 +41,11 @@ class AnalyticsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Analytics'),
+        title: Text(S.of(context).analytics),
         actions: [
           IconButton(
             icon: const Icon(Icons.auto_fix_high),
-            tooltip: 'Generate Demo Data',
+            tooltip: S.of(context).generateDemoData,
             onPressed: () => _generateDemoData(context, ref),
           ),
         ],
@@ -151,19 +153,18 @@ class AnalyticsScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Generate Demo Data'),
-        content: const Text(
-          'This will create sample transactions for the last 3 months '
-          'to showcase analytics features.',
+        title: Text(S.of(context).generateDemoData),
+        content: Text(
+          S.of(context).generateDemoDataDescription,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(S.of(context).cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Generate'),
+            child: Text(S.of(context).generate),
           ),
         ],
       ),
@@ -183,7 +184,7 @@ class AnalyticsScreen extends ConsumerWidget {
       await service.generateDemoData(bookId: bookId);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Demo data generated! Pull to refresh.')),
+        SnackBar(content: Text(S.of(context).demoDataGenerated)),
       );
       // Invalidate all providers to reload
       final selectedMonth = ref.read(selectedMonthProvider);
@@ -204,9 +205,9 @@ class AnalyticsScreen extends ConsumerWidget {
       ref.invalidate(expenseTrendProvider(bookId: bookId));
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -260,7 +261,10 @@ class _MonthSelector extends StatelessWidget {
             onPressed: onPrevious,
           ),
           Text(
-            '$year/$month',
+            DateFormatter.formatMonthYear(
+              DateTime(year, month),
+              Localizations.localeOf(context),
+            ),
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           IconButton(icon: const Icon(Icons.chevron_right), onPressed: onNext),

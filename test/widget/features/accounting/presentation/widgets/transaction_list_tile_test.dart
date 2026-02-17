@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/transaction_list_tile.dart';
+import 'package:home_pocket/generated/app_localizations.dart';
 
 void main() {
   final testTransaction = Transaction(
@@ -18,18 +20,31 @@ void main() {
     note: 'Lunch at cafe',
   );
 
+  Widget buildTestApp(Widget child) {
+    return MaterialApp(
+      locale: const Locale('en'),
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: S.supportedLocales,
+      home: Scaffold(body: child),
+    );
+  }
+
   group('TransactionListTile', () {
     testWidgets('displays amount with minus sign for expense', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: TransactionListTile(
-              transaction: testTransaction,
-              categoryName: 'Food',
-            ),
+        buildTestApp(
+          TransactionListTile(
+            transaction: testTransaction,
+            categoryName: 'Food',
           ),
         ),
       );
+      await tester.pumpAndSettle();
 
       expect(find.text('-1500'), findsOneWidget);
       expect(find.text('Food'), findsOneWidget);
@@ -51,15 +66,14 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: TransactionListTile(
-              transaction: incomeTx,
-              categoryName: 'Salary',
-            ),
+        buildTestApp(
+          TransactionListTile(
+            transaction: incomeTx,
+            categoryName: 'Salary',
           ),
         ),
       );
+      await tester.pumpAndSettle();
 
       expect(find.text('+50000'), findsOneWidget);
       expect(find.text('Salary'), findsOneWidget);
@@ -67,27 +81,25 @@ void main() {
 
     testWidgets('shows category ID when categoryName is null', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: TransactionListTile(transaction: testTransaction),
-          ),
+        buildTestApp(
+          TransactionListTile(transaction: testTransaction),
         ),
       );
+      await tester.pumpAndSettle();
 
       expect(find.text('cat_food'), findsOneWidget);
     });
 
     testWidgets('shows blue dot for survival transaction', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: TransactionListTile(
-              transaction: testTransaction,
-              categoryName: 'Food',
-            ),
+        buildTestApp(
+          TransactionListTile(
+            transaction: testTransaction,
+            categoryName: 'Food',
           ),
         ),
       );
+      await tester.pumpAndSettle();
 
       final dot = find.byKey(const Key('ledger_indicator'));
       expect(dot, findsOneWidget);
@@ -112,15 +124,14 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: TransactionListTile(
-              transaction: soulTx,
-              categoryName: 'Entertainment',
-            ),
+        buildTestApp(
+          TransactionListTile(
+            transaction: soulTx,
+            categoryName: 'Entertainment',
           ),
         ),
       );
+      await tester.pumpAndSettle();
 
       final dot = find.byKey(const Key('ledger_indicator'));
       expect(dot, findsOneWidget);

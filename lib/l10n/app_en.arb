@@ -1,0 +1,351 @@
+{
+  "@@locale": "en",
+
+  "appName": "Home Pocket",
+  "@appName": { "description": "App title" },
+
+  "home": "Home",
+  "@home": { "description": "Home tab label" },
+
+  "transactions": "Transactions",
+  "@transactions": { "description": "Transactions tab/screen label" },
+
+  "analytics": "Analytics",
+  "@analytics": { "description": "Analytics tab/screen label" },
+
+  "settings": "Settings",
+  "@settings": { "description": "Settings tab/screen label" },
+
+  "ledger": "Ledger",
+  "@ledger": { "description": "Ledger tab label" },
+
+  "newTransaction": "New Transaction",
+  "@newTransaction": { "description": "New transaction screen title" },
+
+  "amount": "Amount",
+  "@amount": { "description": "Amount field label" },
+
+  "category": "Category",
+  "@category": { "description": "Category field label" },
+
+  "note": "Note",
+  "@note": { "description": "Note field label" },
+
+  "merchant": "Merchant",
+  "@merchant": { "description": "Merchant field label" },
+
+  "date": "Date",
+  "@date": { "description": "Date field label" },
+
+  "transactionTypeExpense": "Expense",
+  "@transactionTypeExpense": { "description": "Expense transaction type" },
+
+  "transactionTypeIncome": "Income",
+  "@transactionTypeIncome": { "description": "Income transaction type" },
+
+  "categoryFood": "Food",
+  "@categoryFood": { "description": "Food category" },
+
+  "categoryHousing": "Housing",
+  "@categoryHousing": { "description": "Housing category" },
+
+  "categoryTransport": "Transport",
+  "@categoryTransport": { "description": "Transport category" },
+
+  "categoryUtilities": "Utilities",
+  "@categoryUtilities": { "description": "Utilities category" },
+
+  "categoryEntertainment": "Entertainment",
+  "@categoryEntertainment": { "description": "Entertainment category" },
+
+  "categoryEducation": "Education",
+  "@categoryEducation": { "description": "Education category" },
+
+  "categoryHealth": "Health",
+  "@categoryHealth": { "description": "Health category" },
+
+  "categoryShopping": "Shopping",
+  "@categoryShopping": { "description": "Shopping category" },
+
+  "categoryOther": "Other",
+  "@categoryOther": { "description": "Other category" },
+
+  "survivalLedger": "Survival Ledger",
+  "@survivalLedger": { "description": "Survival ledger label" },
+
+  "soulLedger": "Soul Ledger",
+  "@soulLedger": { "description": "Soul ledger label" },
+
+  "survival": "Survival",
+  "@survival": { "description": "Short survival label" },
+
+  "soul": "Soul",
+  "@soul": { "description": "Short soul label" },
+
+  "save": "Save",
+  "@save": { "description": "Save action" },
+
+  "cancel": "Cancel",
+  "@cancel": { "description": "Cancel action" },
+
+  "delete": "Delete",
+  "@delete": { "description": "Delete action" },
+
+  "edit": "Edit",
+  "@edit": { "description": "Edit action" },
+
+  "confirm": "Confirm",
+  "@confirm": { "description": "Confirm action" },
+
+  "ok": "OK",
+  "@ok": { "description": "OK action" },
+
+  "retry": "Retry",
+  "@retry": { "description": "Retry action" },
+
+  "search": "Search",
+  "@search": { "description": "Search action" },
+
+  "filter": "Filter",
+  "@filter": { "description": "Filter action" },
+
+  "sort": "Sort",
+  "@sort": { "description": "Sort action" },
+
+  "refresh": "Refresh",
+  "@refresh": { "description": "Refresh action" },
+
+  "loading": "Loading...",
+  "@loading": { "description": "Loading state text" },
+
+  "noData": "No data available",
+  "@noData": { "description": "Empty state text" },
+
+  "today": "Today",
+  "@today": { "description": "Today label" },
+
+  "yesterday": "Yesterday",
+  "@yesterday": { "description": "Yesterday label" },
+
+  "daysAgo": "{count} days ago",
+  "@daysAgo": { "description": "N days ago relative date", "placeholders": { "count": { "type": "int" } } },
+
+  "errorNetwork": "Network error",
+  "@errorNetwork": { "description": "Network error" },
+
+  "errorUnknown": "An unknown error occurred",
+  "@errorUnknown": { "description": "Unknown error" },
+
+  "errorInvalidAmount": "Invalid amount",
+  "@errorInvalidAmount": { "description": "Invalid amount error" },
+
+  "errorRequired": "This field is required",
+  "@errorRequired": { "description": "Required field error" },
+
+  "errorInvalidDate": "Invalid date",
+  "@errorInvalidDate": { "description": "Invalid date error" },
+
+  "errorDatabaseWrite": "Database write error",
+  "@errorDatabaseWrite": { "description": "Database write error" },
+
+  "errorDatabaseRead": "Database read error",
+  "@errorDatabaseRead": { "description": "Database read error" },
+
+  "errorEncryption": "Encryption error",
+  "@errorEncryption": { "description": "Encryption error" },
+
+  "errorSync": "Sync error",
+  "@errorSync": { "description": "Sync error" },
+
+  "errorBiometric": "Biometric error",
+  "@errorBiometric": { "description": "Biometric error" },
+
+  "errorPermission": "Permission error",
+  "@errorPermission": { "description": "Permission error" },
+
+  "errorMinAmount": "Please enter an amount of at least {min}",
+  "@errorMinAmount": { "description": "Minimum amount error", "placeholders": { "min": { "type": "double" } } },
+
+  "errorMaxAmount": "Please enter an amount no greater than {max}",
+  "@errorMaxAmount": { "description": "Maximum amount error", "placeholders": { "max": { "type": "double" } } },
+
+  "successSaved": "Saved successfully",
+  "@successSaved": { "description": "Save success" },
+
+  "successDeleted": "Deleted successfully",
+  "@successDeleted": { "description": "Delete success" },
+
+  "successSynced": "Synced successfully",
+  "@successSynced": { "description": "Sync success" },
+
+  "merchantPlaceholder": "Enter merchant name",
+  "@merchantPlaceholder": { "description": "Merchant placeholder" },
+
+  "notePlaceholder": "Enter a note",
+  "@notePlaceholder": { "description": "Note placeholder" },
+
+  "noteOptional": "Note (optional)",
+  "@noteOptional": { "description": "Optional note label" },
+
+  "pleaseEnterAmount": "Please enter an amount",
+  "@pleaseEnterAmount": { "description": "Amount prompt" },
+
+  "amountMustBeGreaterThanZero": "Amount must be greater than zero",
+  "@amountMustBeGreaterThanZero": { "description": "Amount validation" },
+
+  "pleaseSelectCategory": "Please select a category",
+  "@pleaseSelectCategory": { "description": "Category prompt" },
+
+  "noTransactionsYet": "No transactions yet",
+  "@noTransactionsYet": { "description": "Empty transaction list" },
+
+  "tapToAddFirstTransaction": "Tap + to add your first transaction",
+  "@tapToAddFirstTransaction": { "description": "Empty state hint" },
+
+  "transactionSaved": "Transaction saved",
+  "@transactionSaved": { "description": "Transaction save success" },
+
+  "failedToSave": "Failed to save",
+  "@failedToSave": { "description": "Save failure" },
+
+  "appearance": "Appearance",
+  "@appearance": { "description": "Appearance section title" },
+
+  "theme": "Theme",
+  "@theme": { "description": "Theme setting label" },
+
+  "selectTheme": "Select Theme",
+  "@selectTheme": { "description": "Theme dialog title" },
+
+  "themeSystem": "System",
+  "@themeSystem": { "description": "System theme" },
+
+  "themeLight": "Light",
+  "@themeLight": { "description": "Light theme" },
+
+  "themeDark": "Dark",
+  "@themeDark": { "description": "Dark theme" },
+
+  "security": "Security",
+  "@security": { "description": "Security section title" },
+
+  "biometricLock": "Biometric Lock",
+  "@biometricLock": { "description": "Biometric lock setting" },
+
+  "biometricLockDescription": "Use Face ID / fingerprint to unlock",
+  "@biometricLockDescription": { "description": "Biometric lock subtitle" },
+
+  "notifications": "Notifications",
+  "@notifications": { "description": "Notifications setting" },
+
+  "notificationsDescription": "Budget alerts and sync notifications",
+  "@notificationsDescription": { "description": "Notifications subtitle" },
+
+  "dataManagement": "Data Management",
+  "@dataManagement": { "description": "Data management section" },
+
+  "exportBackup": "Export Backup",
+  "@exportBackup": { "description": "Export backup action" },
+
+  "exportBackupDescription": "Create encrypted backup file",
+  "@exportBackupDescription": { "description": "Export subtitle" },
+
+  "importBackup": "Import Backup",
+  "@importBackup": { "description": "Import backup action" },
+
+  "importBackupDescription": "Restore from backup file",
+  "@importBackupDescription": { "description": "Import subtitle" },
+
+  "deleteAllData": "Delete All Data",
+  "@deleteAllData": { "description": "Delete all data action" },
+
+  "deleteAllDataDescription": "Permanently delete all records",
+  "@deleteAllDataDescription": { "description": "Delete all subtitle" },
+
+  "deleteAllDataConfirmation": "This action cannot be undone. Are you sure you want to delete all data?",
+  "@deleteAllDataConfirmation": { "description": "Delete all confirmation" },
+
+  "allDataDeleted": "All data deleted",
+  "@allDataDeleted": { "description": "Delete all success" },
+
+  "deleteFailed": "Delete failed",
+  "@deleteFailed": { "description": "Delete failure" },
+
+  "backupExportedSuccessfully": "Backup exported successfully",
+  "@backupExportedSuccessfully": { "description": "Export success" },
+
+  "exportFailed": "Export failed",
+  "@exportFailed": { "description": "Export failure" },
+
+  "backupImportedSuccessfully": "Backup imported successfully",
+  "@backupImportedSuccessfully": { "description": "Import success" },
+
+  "importFailed": "Import failed",
+  "@importFailed": { "description": "Import failure" },
+
+  "setBackupPassword": "Set Backup Password",
+  "@setBackupPassword": { "description": "Export password dialog title" },
+
+  "enterBackupPassword": "Enter Backup Password",
+  "@enterBackupPassword": { "description": "Import password dialog title" },
+
+  "enterPassword": "Enter password",
+  "@enterPassword": { "description": "Password hint" },
+
+  "confirmPassword": "Confirm password",
+  "@confirmPassword": { "description": "Confirm password hint" },
+
+  "passwordMinLength": "Password must be at least 8 characters",
+  "@passwordMinLength": { "description": "Password validation" },
+
+  "passwordsDoNotMatch": "Passwords do not match",
+  "@passwordsDoNotMatch": { "description": "Password mismatch" },
+
+  "about": "About",
+  "@about": { "description": "About section title" },
+
+  "version": "Version",
+  "@version": { "description": "Version label" },
+
+  "privacyPolicy": "Privacy Policy",
+  "@privacyPolicy": { "description": "Privacy policy link" },
+
+  "openSourceLicenses": "Open Source Licenses",
+  "@openSourceLicenses": { "description": "Licenses link" },
+
+  "generateDemoData": "Generate Demo Data",
+  "@generateDemoData": { "description": "Demo data action" },
+
+  "generateDemoDataDescription": "This will create sample transactions for the last 3 months to showcase analytics features.",
+  "@generateDemoDataDescription": { "description": "Demo data dialog text" },
+
+  "generate": "Generate",
+  "@generate": { "description": "Generate action" },
+
+  "demoDataGenerated": "Demo data generated! Pull to refresh.",
+  "@demoDataGenerated": { "description": "Demo data success" },
+
+  "language": "Language",
+  "@language": { "description": "Language setting label" },
+
+  "languageJapanese": "Japanese",
+  "@languageJapanese": { "description": "Japanese language option" },
+
+  "languageEnglish": "English",
+  "@languageEnglish": { "description": "English language option" },
+
+  "languageChinese": "Chinese",
+  "@languageChinese": { "description": "Chinese language option" },
+
+  "confirmDelete": "Confirm Delete",
+  "@confirmDelete": { "description": "Confirm delete dialog title" },
+
+  "deleteTransactionConfirmation": "Delete this transaction?",
+  "@deleteTransactionConfirmation": { "description": "Delete transaction confirmation message" },
+
+  "error": "Error",
+  "@error": { "description": "Error title" },
+
+  "initializationError": "Failed to initialize app",
+  "@initializationError": { "description": "Init error message" }
+}

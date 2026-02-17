@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../generated/app_localizations.dart';
 import '../../domain/models/app_settings.dart';
 import '../providers/repository_providers.dart';
 import '../providers/settings_providers.dart';
@@ -15,29 +16,27 @@ class SecuritySection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.all(16),
+        Padding(
+          padding: const EdgeInsets.all(16),
           child: Text(
-            'Security',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            S.of(context).security,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
         SwitchListTile(
           secondary: const Icon(Icons.fingerprint),
-          title: const Text('Biometric Lock'),
-          subtitle: const Text('Use Face ID / fingerprint to unlock'),
+          title: Text(S.of(context).biometricLock),
+          subtitle: Text(S.of(context).biometricLockDescription),
           value: settings.biometricLockEnabled,
           onChanged: (value) async {
-            await ref
-                .read(settingsRepositoryProvider)
-                .setBiometricLock(value);
+            await ref.read(settingsRepositoryProvider).setBiometricLock(value);
             ref.invalidate(appSettingsProvider);
           },
         ),
         SwitchListTile(
           secondary: const Icon(Icons.notifications),
-          title: const Text('Notifications'),
-          subtitle: const Text('Budget alerts and sync notifications'),
+          title: Text(S.of(context).notifications),
+          subtitle: Text(S.of(context).notificationsDescription),
           value: settings.notificationsEnabled,
           onChanged: (value) async {
             await ref

@@ -2,13 +2,16 @@ import 'dart:developer' as dev;
 
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'data/app_database.dart';
 import 'features/accounting/presentation/providers/use_case_providers.dart';
 import 'features/home/presentation/screens/main_shell_screen.dart';
 import 'features/settings/domain/models/app_settings.dart';
+import 'features/settings/presentation/providers/locale_provider.dart';
 import 'features/settings/presentation/providers/settings_providers.dart';
+import 'generated/app_localizations.dart';
 import 'infrastructure/crypto/database/encrypted_database.dart';
 import 'infrastructure/crypto/providers.dart';
 import 'infrastructure/security/providers.dart';
@@ -120,9 +123,18 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
           data: (s) => _toFlutterThemeMode(s.themeMode),
         ) ??
         ThemeMode.system;
+    final locale = ref.watch(currentLocaleProvider);
 
     return MaterialApp(
-      title: 'Home Pocket',
+      onGenerateTitle: (context) => S.of(context).appName,
+      locale: locale,
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: S.supportedLocales,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,

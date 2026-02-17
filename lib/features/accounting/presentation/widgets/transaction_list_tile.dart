@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../domain/models/transaction.dart';
 
 /// Displays a single transaction as a list tile.
@@ -23,6 +25,7 @@ class TransactionListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isExpense = transaction.type == TransactionType.expense;
+    final l10n = S.of(context);
 
     return Dismissible(
       key: Key(transaction.id),
@@ -37,16 +40,16 @@ class TransactionListTile extends StatelessWidget {
         return await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('Confirm Delete'),
-            content: const Text('Delete this transaction?'),
+            title: Text(l10n.confirmDelete),
+            content: Text(l10n.deleteTransactionConfirmation),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancel'),
+                child: Text(l10n.cancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Delete'),
+                child: Text(l10n.delete),
               ),
             ],
           ),
@@ -106,7 +109,7 @@ class TransactionListTile extends StatelessWidget {
               ),
             ),
             Text(
-              _formatTime(transaction.timestamp),
+              _formatTime(context, transaction.timestamp),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -115,14 +118,15 @@ class TransactionListTile extends StatelessWidget {
     );
   }
 
-  String _formatTime(DateTime dt) {
+  String _formatTime(BuildContext context, DateTime dt) {
+    final locale = Localizations.localeOf(context);
     final now = DateTime.now();
     final diff = now.difference(dt);
     if (diff.inDays == 0) {
       return '${dt.hour.toString().padLeft(2, "0")}:${dt.minute.toString().padLeft(2, "0")}';
     } else if (diff.inDays == 1) {
-      return 'Yesterday';
+      return S.of(context).yesterday;
     }
-    return '${dt.month}/${dt.day}';
+    return DateFormatter.formatDate(dt, locale);
   }
 }
