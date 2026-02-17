@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../generated/app_localizations.dart';
 import '../../domain/models/app_settings.dart';
 import '../providers/repository_providers.dart';
 import '../providers/settings_providers.dart';
@@ -15,17 +16,17 @@ class AppearanceSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.all(16),
+        Padding(
+          padding: const EdgeInsets.all(16),
           child: Text(
-            'Appearance',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            S.of(context).appearance,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
         ListTile(
           leading: const Icon(Icons.palette),
-          title: const Text('Theme'),
-          subtitle: Text(_getThemeModeLabel(settings.themeMode)),
+          title: Text(S.of(context).theme),
+          subtitle: Text(_getThemeModeLabel(settings.themeMode, context)),
           onTap: () => _showThemeModeDialog(context, ref),
         ),
       ],
@@ -35,24 +36,22 @@ class AppearanceSection extends ConsumerWidget {
   void _showThemeModeDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Select Theme'),
+      builder: (dialogContext) => AlertDialog(
+        title: Text(S.of(context).selectTheme),
         content: RadioGroup<AppThemeMode>(
           groupValue: settings.themeMode,
           onChanged: (value) async {
             if (value != null) {
-              await ref
-                  .read(settingsRepositoryProvider)
-                  .setThemeMode(value);
+              await ref.read(settingsRepositoryProvider).setThemeMode(value);
               ref.invalidate(appSettingsProvider);
-              if (context.mounted) Navigator.pop(context);
+              if (dialogContext.mounted) Navigator.pop(dialogContext);
             }
           },
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: AppThemeMode.values.map((mode) {
               return RadioListTile<AppThemeMode>(
-                title: Text(_getThemeModeLabel(mode)),
+                title: Text(_getThemeModeLabel(mode, context)),
                 value: mode,
               );
             }).toList(),
@@ -62,14 +61,14 @@ class AppearanceSection extends ConsumerWidget {
     );
   }
 
-  String _getThemeModeLabel(AppThemeMode mode) {
+  String _getThemeModeLabel(AppThemeMode mode, BuildContext context) {
     switch (mode) {
       case AppThemeMode.system:
-        return 'System';
+        return S.of(context).themeSystem;
       case AppThemeMode.light:
-        return 'Light';
+        return S.of(context).themeLight;
       case AppThemeMode.dark:
-        return 'Dark';
+        return S.of(context).themeDark;
     }
   }
 }

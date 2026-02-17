@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../generated/app_localizations.dart';
+
 class AboutSection extends StatelessWidget {
   const AboutSection({super.key});
 
@@ -8,32 +10,32 @@ class AboutSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.all(16),
+        Padding(
+          padding: const EdgeInsets.all(16),
           child: Text(
-            'About',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            S.of(context).about,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
-        const ListTile(
-          leading: Icon(Icons.info),
-          title: Text('Version'),
-          subtitle: Text('0.1.0'),
+        ListTile(
+          leading: const Icon(Icons.info),
+          title: Text(S.of(context).version),
+          subtitle: const Text('0.1.0'),
         ),
         ListTile(
           leading: const Icon(Icons.privacy_tip),
-          title: const Text('Privacy Policy'),
+          title: Text(S.of(context).privacyPolicy),
           onTap: () {
             // TODO: Navigate to privacy policy
           },
         ),
         ListTile(
           leading: const Icon(Icons.description),
-          title: const Text('Open Source Licenses'),
+          title: Text(S.of(context).openSourceLicenses),
           onTap: () {
             showLicensePage(
               context: context,
-              applicationName: 'Home Pocket',
+              applicationName: S.of(context).appName,
               applicationVersion: '0.1.0',
             );
           },

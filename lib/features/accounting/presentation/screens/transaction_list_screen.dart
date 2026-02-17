@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/accounting/get_transactions_use_case.dart';
+import '../../../../generated/app_localizations.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/transaction.dart';
 import '../providers/repository_providers.dart';
@@ -100,11 +101,11 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
                 Icon(Icons.receipt_long, size: 64, color: Colors.grey.shade400),
                 const SizedBox(height: 16),
                 Text(
-                  'No transactions yet',
+                  S.of(context).noTransactionsYet,
                   style: TextStyle(color: Colors.grey.shade600),
                 ),
                 const SizedBox(height: 8),
-                const Text('Tap + to add your first transaction'),
+                Text(S.of(context).tapToAddFirstTransaction),
               ],
             ),
           )
@@ -140,7 +141,7 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Transactions')),
+      appBar: AppBar(title: Text(S.of(context).transactions)),
       body: body,
       floatingActionButton: fab,
     );

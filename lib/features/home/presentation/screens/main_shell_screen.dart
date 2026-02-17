@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../generated/app_localizations.dart';
 import '../../../analytics/presentation/screens/analytics_screen.dart';
 import '../../../dual_ledger/presentation/screens/dual_ledger_screen.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
@@ -33,18 +34,18 @@ class _MainShellScreenState extends State<MainShellScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet),
-            label: 'Ledger',
+            icon: const Icon(Icons.account_balance_wallet),
+            label: S.of(context).ledger,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Analytics',
+            icon: const Icon(Icons.bar_chart),
+            label: S.of(context).analytics,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: const Icon(Icons.settings),
+            label: S.of(context).settings,
           ),
         ],
       ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../generated/app_localizations.dart';
+
 /// Shows a dialog to enter a backup password.
 ///
 /// [isExport] true for export (requires confirm), false for import (single field).
@@ -41,12 +43,12 @@ class _PasswordDialogState extends State<_PasswordDialog> {
     final password = _passwordController.text;
 
     if (password.length < 8) {
-      setState(() => _errorText = 'Password must be at least 8 characters');
+      setState(() => _errorText = S.of(context).passwordMinLength);
       return;
     }
 
     if (widget.isExport && password != _confirmController.text) {
-      setState(() => _errorText = 'Passwords do not match');
+      setState(() => _errorText = S.of(context).passwordsDoNotMatch);
       return;
     }
 
@@ -64,7 +66,7 @@ class _PasswordDialogState extends State<_PasswordDialog> {
             controller: _passwordController,
             obscureText: true,
             decoration: InputDecoration(
-              hintText: 'Enter password',
+              hintText: S.of(context).enterPassword,
               errorText: _errorText,
             ),
             onSubmitted: widget.isExport ? null : (_) => _submit(),
@@ -74,9 +76,7 @@ class _PasswordDialogState extends State<_PasswordDialog> {
             TextField(
               controller: _confirmController,
               obscureText: true,
-              decoration: const InputDecoration(
-                hintText: 'Confirm password',
-              ),
+              decoration: InputDecoration(hintText: S.of(context).confirmPassword),
               onSubmitted: (_) => _submit(),
             ),
           ],
@@ -85,12 +85,9 @@ class _PasswordDialogState extends State<_PasswordDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(S.of(context).cancel),
         ),
-        TextButton(
-          onPressed: _submit,
-          child: const Text('OK'),
-        ),
+        TextButton(onPressed: _submit, child: Text(S.of(context).ok)),
       ],
     );
   }

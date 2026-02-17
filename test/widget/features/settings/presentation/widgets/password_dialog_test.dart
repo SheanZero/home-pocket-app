@@ -1,22 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/settings/presentation/widgets/password_dialog.dart';
+import 'package:home_pocket/generated/app_localizations.dart';
 
 void main() {
   Widget buildApp({required Widget child}) {
-    return MaterialApp(home: child);
+    return MaterialApp(
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: S.supportedLocales,
+      locale: const Locale('en'),
+      home: child,
+    );
   }
 
   group('PasswordDialog', () {
     testWidgets('shows title and password field', (tester) async {
-      await tester.pumpWidget(buildApp(
-        child: Builder(
-          builder: (context) => ElevatedButton(
-            onPressed: () => showPasswordDialog(context, title: 'Test'),
-            child: const Text('Open'),
+      await tester.pumpWidget(
+        buildApp(
+          child: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => showPasswordDialog(context, title: 'Test'),
+              child: const Text('Open'),
+            ),
           ),
         ),
-      ));
+      );
 
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
@@ -28,18 +42,17 @@ void main() {
     });
 
     testWidgets('shows confirm field for export', (tester) async {
-      await tester.pumpWidget(buildApp(
-        child: Builder(
-          builder: (context) => ElevatedButton(
-            onPressed: () => showPasswordDialog(
-              context,
-              title: 'Export',
-              isExport: true,
+      await tester.pumpWidget(
+        buildApp(
+          child: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () =>
+                  showPasswordDialog(context, title: 'Export', isExport: true),
+              child: const Text('Open'),
             ),
-            child: const Text('Open'),
           ),
         ),
-      ));
+      );
 
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
@@ -48,14 +61,16 @@ void main() {
     });
 
     testWidgets('validates minimum password length', (tester) async {
-      await tester.pumpWidget(buildApp(
-        child: Builder(
-          builder: (context) => ElevatedButton(
-            onPressed: () => showPasswordDialog(context, title: 'Test'),
-            child: const Text('Open'),
+      await tester.pumpWidget(
+        buildApp(
+          child: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => showPasswordDialog(context, title: 'Test'),
+              child: const Text('Open'),
+            ),
           ),
         ),
-      ));
+      );
 
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
@@ -65,22 +80,27 @@ void main() {
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Password must be at least 8 characters'), findsOneWidget);
+      expect(
+        find.text('Password must be at least 8 characters'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('cancel returns null', (tester) async {
       String? result = 'not-null';
 
-      await tester.pumpWidget(buildApp(
-        child: Builder(
-          builder: (context) => ElevatedButton(
-            onPressed: () async {
-              result = await showPasswordDialog(context, title: 'Test');
-            },
-            child: const Text('Open'),
+      await tester.pumpWidget(
+        buildApp(
+          child: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () async {
+                result = await showPasswordDialog(context, title: 'Test');
+              },
+              child: const Text('Open'),
+            ),
           ),
         ),
-      ));
+      );
 
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../features/accounting/presentation/screens/transaction_list_screen.dart';
+import '../../../../generated/app_localizations.dart';
 import '../providers/ledger_providers.dart';
 
 class DualLedgerScreen extends ConsumerWidget {
@@ -19,7 +20,7 @@ class DualLedgerScreen extends ConsumerWidget {
       initialIndex: currentLedger == LedgerType.survival ? 0 : 1,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Home Pocket'),
+          title: Text(S.of(context).appName),
           bottom: TabBar(
             onTap: (index) {
               ref
@@ -34,7 +35,7 @@ class DualLedgerScreen extends ConsumerWidget {
                       ? Colors.blue
                       : null,
                 ),
-                text: 'Survival',
+                text: S.of(context).survival,
               ),
               Tab(
                 icon: Icon(
@@ -43,7 +44,7 @@ class DualLedgerScreen extends ConsumerWidget {
                       ? Colors.purple
                       : null,
                 ),
-                text: 'Soul',
+                text: S.of(context).soul,
               ),
             ],
           ),

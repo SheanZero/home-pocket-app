@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/settings/presentation/providers/locale_provider.dart';
-import 'package:home_pocket/infrastructure/i18n/models/locale_settings.dart';
 
 void main() {
   group('LocaleNotifier', () {
