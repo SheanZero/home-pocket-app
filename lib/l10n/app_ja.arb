@@ -112,6 +112,8 @@
   "languageJapanese": "日本語",
   "languageEnglish": "English",
   "languageChinese": "中文",
+  "confirmDelete": "削除の確認",
+  "deleteTransactionConfirmation": "この取引を削除しますか？",
   "error": "エラー",
   "initializationError": "アプリの初期化に失敗しました"
 }

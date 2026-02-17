@@ -112,6 +112,8 @@
   "languageJapanese": "日本語",
   "languageEnglish": "English",
   "languageChinese": "中文",
+  "confirmDelete": "确认删除",
+  "deleteTransactionConfirmation": "删除此交易？",
   "error": "错误",
   "initializationError": "应用初始化失败"
 }

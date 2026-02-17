@@ -337,6 +337,12 @@
   "languageChinese": "Chinese",
   "@languageChinese": { "description": "Chinese language option" },
 
+  "confirmDelete": "Confirm Delete",
+  "@confirmDelete": { "description": "Confirm delete dialog title" },
+
+  "deleteTransactionConfirmation": "Delete this transaction?",
+  "@deleteTransactionConfirmation": { "description": "Delete transaction confirmation message" },
+
   "error": "Error",
   "@error": { "description": "Error title" },
 

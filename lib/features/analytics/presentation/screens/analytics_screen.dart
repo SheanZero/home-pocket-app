@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../application/analytics/demo_data_service.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/security/providers.dart';
 import '../../domain/models/budget_progress.dart';
 import '../../domain/models/expense_trend.dart';
@@ -260,7 +261,10 @@ class _MonthSelector extends StatelessWidget {
             onPressed: onPrevious,
           ),
           Text(
-            '$year/$month',
+            DateFormatter.formatMonthYear(
+              DateTime(year, month),
+              Localizations.localeOf(context),
+            ),
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           IconButton(icon: const Icon(Icons.chevron_right), onPressed: onNext),

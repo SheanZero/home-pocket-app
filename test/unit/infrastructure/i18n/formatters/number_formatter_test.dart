@@ -62,6 +62,14 @@ void main() {
       test('formats zero percent', () {
         expect(NumberFormatter.formatPercentage(0.0, en), '0.00%');
       });
+
+      test('respects locale decimal separator', () {
+        const de = Locale('de');
+        final result = NumberFormatter.formatPercentage(0.156, de);
+        // German uses comma as decimal separator
+        expect(result, contains(','));
+        expect(result, '15,60%');
+      });
     });
 
     group('formatCompact', () {

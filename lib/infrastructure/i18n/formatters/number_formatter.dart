@@ -26,7 +26,11 @@ class NumberFormatter {
   static String formatPercentage(double value, Locale locale,
       {int decimals = 2}) {
     final percentage = value * 100;
-    return '${percentage.toStringAsFixed(decimals)}%';
+    final formatter = NumberFormat.decimalPatternDigits(
+      locale: locale.toString(),
+      decimalDigits: decimals,
+    );
+    return '${formatter.format(percentage)}%';
   }
 
   static String formatCompact(num number, Locale locale) {

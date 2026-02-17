@@ -126,7 +126,7 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
     final locale = ref.watch(currentLocaleProvider);
 
     return MaterialApp(
-      title: 'Home Pocket',
+      onGenerateTitle: (context) => S.of(context).appName,
       locale: locale,
       localizationsDelegates: const [
         S.delegate,
