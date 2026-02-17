@@ -134,20 +134,14 @@ void main() {
 
   group('DailyExpense', () {
     test('creates with required fields', () {
-      final expense = DailyExpense(
-        date: DateTime(2026, 2, 1),
-        amount: 5000,
-      );
+      final expense = DailyExpense(date: DateTime(2026, 2, 1), amount: 5000);
 
       expect(expense.date, DateTime(2026, 2, 1));
       expect(expense.amount, 5000);
     });
 
     test('toJson and fromJson roundtrip', () {
-      final original = DailyExpense(
-        date: DateTime(2026, 2, 1),
-        amount: 5000,
-      );
+      final original = DailyExpense(date: DateTime(2026, 2, 1), amount: 5000);
 
       final json = original.toJson();
       final restored = DailyExpense.fromJson(json);

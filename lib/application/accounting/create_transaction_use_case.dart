@@ -23,6 +23,7 @@ class CreateTransactionParams {
   final DateTime? timestamp;
   final String? note;
   final String? merchant;
+  final int? soulSatisfaction; // null = use default 5
 
   const CreateTransactionParams({
     required this.bookId,
@@ -32,6 +33,7 @@ class CreateTransactionParams {
     this.timestamp,
     this.note,
     this.merchant,
+    this.soulSatisfaction,
   });
 }
 
@@ -100,6 +102,20 @@ class CreateTransactionUseCase {
       note: params.note,
     );
 
+    // 4.5 Resolve & validate soul satisfaction
+    final int soulSatisfaction;
+    if (classification.ledgerType == LedgerType.soul) {
+      soulSatisfaction = params.soulSatisfaction ?? 5;
+      if (soulSatisfaction < 1 || soulSatisfaction > 10) {
+        return Result.error(
+          'soulSatisfaction must be between 1 and 10, got $soulSatisfaction',
+        );
+      }
+    } else {
+      // Non-soul transactions always get default
+      soulSatisfaction = 5;
+    }
+
     // 5. Get previous hash for chain
     final prevHash =
         await _transactionRepo.getLatestHash(params.bookId) ?? _genesisHash;
@@ -140,6 +156,7 @@ class CreateTransactionUseCase {
       createdAt: now,
       note: params.note,
       merchant: params.merchant,
+      soulSatisfaction: soulSatisfaction,
     );
 
     dev.log(

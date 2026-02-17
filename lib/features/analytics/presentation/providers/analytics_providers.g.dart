@@ -7,7 +7,7 @@ part of 'analytics_providers.dart';
 // **************************************************************************
 
 String _$getMonthlyReportUseCaseHash() =>
-    r'28052e90439a1b2a9fab25d45e1a9c8fad67be2d';
+    r'ba1bdbe33efe416704852d870225a34fc24cde98';
 
 /// GetMonthlyReportUseCase provider.
 ///
@@ -29,7 +29,7 @@ final getMonthlyReportUseCaseProvider =
 typedef GetMonthlyReportUseCaseRef =
     AutoDisposeProviderRef<GetMonthlyReportUseCase>;
 String _$getBudgetProgressUseCaseHash() =>
-    r'adcc578f40dacc8626c2e7de00830c71786a1c47';
+    r'44ee40f9374353b4f05af2927913d4299ad7c9c8';
 
 /// GetBudgetProgressUseCase provider.
 ///
@@ -51,7 +51,7 @@ final getBudgetProgressUseCaseProvider =
 typedef GetBudgetProgressUseCaseRef =
     AutoDisposeProviderRef<GetBudgetProgressUseCase>;
 String _$getExpenseTrendUseCaseHash() =>
-    r'4592f073cd9f53d28ecb9eed5a7189ffdc25e567';
+    r'dfd62efcd364189bcdaa5d2b36b4dad57edb476d';
 
 /// GetExpenseTrendUseCase provider.
 ///

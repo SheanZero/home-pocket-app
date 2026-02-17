@@ -9,8 +9,7 @@ import 'package:home_pocket/features/accounting/domain/repositories/category_rep
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
 
-class MockTransactionRepository extends Mock
-    implements TransactionRepository {}
+class MockTransactionRepository extends Mock implements TransactionRepository {}
 
 class MockCategoryRepository extends Mock implements CategoryRepository {}
 
@@ -61,14 +60,15 @@ void main() {
       ),
     ];
 
-    when(() => mockBookRepo.findAll(includeArchived: true))
-        .thenAnswer((_) async => books);
-    when(() => mockTransactionRepo.deleteAllByBook(any()))
-        .thenAnswer((_) async {});
+    when(
+      () => mockBookRepo.findAll(includeArchived: true),
+    ).thenAnswer((_) async => books);
+    when(
+      () => mockTransactionRepo.deleteAllByBook(any()),
+    ).thenAnswer((_) async {});
     when(() => mockCategoryRepo.deleteAll()).thenAnswer((_) async {});
     when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});
-    when(() => mockSettingsRepo.updateSettings(any()))
-        .thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateSettings(any())).thenAnswer((_) async {});
 
     // Act
     final result = await useCase.execute();
@@ -85,13 +85,15 @@ void main() {
     verify(() => mockBookRepo.deleteAll()).called(1);
 
     // Verify settings reset to defaults
-    verify(() => mockSettingsRepo.updateSettings(const AppSettings()))
-        .called(1);
+    verify(
+      () => mockSettingsRepo.updateSettings(const AppSettings()),
+    ).called(1);
   });
 
   test('returns error on failure', () async {
-    when(() => mockBookRepo.findAll(includeArchived: true))
-        .thenThrow(Exception('DB error'));
+    when(
+      () => mockBookRepo.findAll(includeArchived: true),
+    ).thenThrow(Exception('DB error'));
 
     final result = await useCase.execute();
 

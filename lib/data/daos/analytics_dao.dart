@@ -45,6 +45,41 @@ class LedgerTotalResult {
   });
 }
 
+/// Aggregate result for soul satisfaction overview.
+class SatisfactionOverviewResult {
+  final double avgSatisfaction;
+  final int count;
+
+  const SatisfactionOverviewResult({
+    required this.avgSatisfaction,
+    required this.count,
+  });
+}
+
+/// Aggregate result for satisfaction score distribution.
+class SatisfactionDistributionResult {
+  final int score;
+  final int count;
+
+  const SatisfactionDistributionResult({
+    required this.score,
+    required this.count,
+  });
+}
+
+/// Aggregate result for daily satisfaction trend.
+class DailySatisfactionResult {
+  final DateTime date;
+  final double avgSatisfaction;
+  final int count;
+
+  const DailySatisfactionResult({
+    required this.date,
+    required this.avgSatisfaction,
+    required this.count,
+  });
+}
+
 /// Data access object for analytics aggregate queries.
 ///
 /// Uses database-level SUM/GROUP BY for performance (<2s target).
@@ -186,6 +221,106 @@ class AnalyticsDao {
           (row) => LedgerTotalResult(
             ledgerType: row.read<String>('ledger_type'),
             totalAmount: row.read<int>('total'),
+          ),
+        )
+        .toList();
+  }
+
+  /// Get average satisfaction and count for soul transactions in a date range.
+  Future<SatisfactionOverviewResult> getSoulSatisfactionOverview({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final results = await _db
+        .customSelect(
+          'SELECT AVG(soul_satisfaction) as avg_sat, COUNT(*) as cnt '
+          'FROM transactions '
+          'WHERE book_id = ? AND ledger_type = \'soul\' AND type = \'expense\' '
+          'AND is_deleted = 0 '
+          'AND timestamp >= ? AND timestamp <= ?',
+          variables: [
+            Variable.withString(bookId),
+            Variable.withDateTime(startDate),
+            Variable.withDateTime(endDate),
+          ],
+        )
+        .get();
+
+    if (results.isEmpty) {
+      return const SatisfactionOverviewResult(avgSatisfaction: 0, count: 0);
+    }
+
+    final row = results.first;
+    return SatisfactionOverviewResult(
+      avgSatisfaction: (row.read<double?>('avg_sat') ?? 0),
+      count: row.read<int>('cnt'),
+    );
+  }
+
+  /// Get satisfaction score distribution for soul transactions.
+  Future<List<SatisfactionDistributionResult>> getSatisfactionDistribution({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final results = await _db
+        .customSelect(
+          'SELECT soul_satisfaction as score, COUNT(*) as cnt '
+          'FROM transactions '
+          'WHERE book_id = ? AND ledger_type = \'soul\' AND type = \'expense\' '
+          'AND is_deleted = 0 '
+          'AND timestamp >= ? AND timestamp <= ? '
+          'GROUP BY soul_satisfaction '
+          'ORDER BY soul_satisfaction ASC',
+          variables: [
+            Variable.withString(bookId),
+            Variable.withDateTime(startDate),
+            Variable.withDateTime(endDate),
+          ],
+        )
+        .get();
+
+    return results
+        .map(
+          (row) => SatisfactionDistributionResult(
+            score: row.read<int>('score'),
+            count: row.read<int>('cnt'),
+          ),
+        )
+        .toList();
+  }
+
+  /// Get daily average satisfaction trend for soul transactions.
+  Future<List<DailySatisfactionResult>> getDailySatisfactionTrend({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final results = await _db
+        .customSelect(
+          'SELECT DATE(timestamp, \'unixepoch\', \'localtime\') as day, '
+          'AVG(soul_satisfaction) as avg_sat, COUNT(*) as cnt '
+          'FROM transactions '
+          'WHERE book_id = ? AND ledger_type = \'soul\' AND type = \'expense\' '
+          'AND is_deleted = 0 '
+          'AND timestamp >= ? AND timestamp <= ? '
+          'GROUP BY day '
+          'ORDER BY day ASC',
+          variables: [
+            Variable.withString(bookId),
+            Variable.withDateTime(startDate),
+            Variable.withDateTime(endDate),
+          ],
+        )
+        .get();
+
+    return results
+        .map(
+          (row) => DailySatisfactionResult(
+            date: DateTime.parse(row.read<String>('day')),
+            avgSatisfaction: row.read<double?>('avg_sat') ?? 0,
+            count: row.read<int>('cnt'),
           ),
         )
         .toList();

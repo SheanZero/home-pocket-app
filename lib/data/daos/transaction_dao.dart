@@ -25,6 +25,7 @@ class TransactionDao {
     String? metadata,
     String? prevHash,
     bool isPrivate = false,
+    int soulSatisfaction = 5,
   }) async {
     await _db
         .into(_db.transactions)
@@ -46,6 +47,7 @@ class TransactionDao {
             metadata: Value(metadata),
             prevHash: Value(prevHash),
             isPrivate: Value(isPrivate),
+            soulSatisfaction: Value(soulSatisfaction),
           ),
         );
   }
@@ -128,9 +130,9 @@ class TransactionDao {
 
   /// Delete all transactions for a book (hard delete, for backup restore).
   Future<void> deleteAllByBook(String bookId) async {
-    await (_db.delete(_db.transactions)
-          ..where((t) => t.bookId.equals(bookId)))
-        .go();
+    await (_db.delete(
+      _db.transactions,
+    )..where((t) => t.bookId.equals(bookId))).go();
   }
 
   /// Count non-deleted transactions in a book.

@@ -18,8 +18,7 @@ import 'package:home_pocket/features/accounting/domain/repositories/category_rep
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
 
-class MockTransactionRepository extends Mock
-    implements TransactionRepository {}
+class MockTransactionRepository extends Mock implements TransactionRepository {}
 
 class MockCategoryRepository extends Mock implements CategoryRepository {}
 
@@ -260,15 +259,15 @@ void main() {
     );
 
     // Mock existing data
-    when(() => mockBookRepo.findAll(includeArchived: true))
-        .thenAnswer((_) async => []);
+    when(
+      () => mockBookRepo.findAll(includeArchived: true),
+    ).thenAnswer((_) async => []);
     when(() => mockCategoryRepo.deleteAll()).thenAnswer((_) async {});
     when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});
     when(() => mockBookRepo.insert(any())).thenAnswer((_) async {});
     when(() => mockCategoryRepo.insert(any())).thenAnswer((_) async {});
     when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
-    when(() => mockSettingsRepo.updateSettings(any()))
-        .thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateSettings(any())).thenAnswer((_) async {});
 
     // Act
     final result = await useCase.execute(

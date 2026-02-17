@@ -12,10 +12,10 @@ class ClearAllDataUseCase {
     required CategoryRepository categoryRepo,
     required BookRepository bookRepo,
     required SettingsRepository settingsRepo,
-  })  : _transactionRepo = transactionRepo,
-        _categoryRepo = categoryRepo,
-        _bookRepo = bookRepo,
-        _settingsRepo = settingsRepo;
+  }) : _transactionRepo = transactionRepo,
+       _categoryRepo = categoryRepo,
+       _bookRepo = bookRepo,
+       _settingsRepo = settingsRepo;
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;

@@ -24,10 +24,10 @@ class ImportBackupUseCase {
     required CategoryRepository categoryRepo,
     required BookRepository bookRepo,
     required SettingsRepository settingsRepo,
-  })  : _transactionRepo = transactionRepo,
-        _categoryRepo = categoryRepo,
-        _bookRepo = bookRepo,
-        _settingsRepo = settingsRepo;
+  }) : _transactionRepo = transactionRepo,
+       _categoryRepo = categoryRepo,
+       _bookRepo = bookRepo,
+       _settingsRepo = settingsRepo;
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;
@@ -92,8 +92,7 @@ class ImportBackupUseCase {
     // Extract components: salt(16) + nonce(12) + ciphertext + mac(16)
     final salt = encryptedData.sublist(0, 16);
     final nonce = encryptedData.sublist(16, 28);
-    final cipherText =
-        encryptedData.sublist(28, encryptedData.length - 16);
+    final cipherText = encryptedData.sublist(28, encryptedData.length - 16);
     final mac = Mac(encryptedData.sublist(encryptedData.length - 16));
 
     // Derive key from password

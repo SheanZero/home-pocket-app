@@ -65,6 +65,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
       merchant: transaction.merchant,
       prevHash: transaction.prevHash,
       isPrivate: transaction.isPrivate,
+      soulSatisfaction: transaction.soulSatisfaction,
     );
   }
 
@@ -157,6 +158,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
       isPrivate: row.isPrivate,
       isSynced: row.isSynced,
       isDeleted: row.isDeleted,
+      soulSatisfaction: row.soulSatisfaction,
     );
   }
 }

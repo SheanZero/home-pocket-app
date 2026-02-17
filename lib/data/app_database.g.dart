@@ -1985,6 +1985,18 @@ class $TransactionsTable extends Transactions
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _soulSatisfactionMeta = const VerificationMeta(
+    'soulSatisfaction',
+  );
+  @override
+  late final GeneratedColumn<int> soulSatisfaction = GeneratedColumn<int>(
+    'soul_satisfaction',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(5),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2006,6 +2018,7 @@ class $TransactionsTable extends Transactions
     isPrivate,
     isSynced,
     isDeleted,
+    soulSatisfaction,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2153,6 +2166,15 @@ class $TransactionsTable extends Transactions
         isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
       );
     }
+    if (data.containsKey('soul_satisfaction')) {
+      context.handle(
+        _soulSatisfactionMeta,
+        soulSatisfaction.isAcceptableOrUnknown(
+          data['soul_satisfaction']!,
+          _soulSatisfactionMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2238,6 +2260,10 @@ class $TransactionsTable extends Transactions
         DriftSqlType.bool,
         data['${effectivePrefix}is_deleted'],
       )!,
+      soulSatisfaction: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}soul_satisfaction'],
+      )!,
     );
   }
 
@@ -2267,6 +2293,7 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
   final bool isPrivate;
   final bool isSynced;
   final bool isDeleted;
+  final int soulSatisfaction;
   const TransactionRow({
     required this.id,
     required this.bookId,
@@ -2287,6 +2314,7 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     required this.isPrivate,
     required this.isSynced,
     required this.isDeleted,
+    required this.soulSatisfaction,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2322,6 +2350,7 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     map['is_private'] = Variable<bool>(isPrivate);
     map['is_synced'] = Variable<bool>(isSynced);
     map['is_deleted'] = Variable<bool>(isDeleted);
+    map['soul_satisfaction'] = Variable<int>(soulSatisfaction);
     return map;
   }
 
@@ -2356,6 +2385,7 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       isPrivate: Value(isPrivate),
       isSynced: Value(isSynced),
       isDeleted: Value(isDeleted),
+      soulSatisfaction: Value(soulSatisfaction),
     );
   }
 
@@ -2384,6 +2414,7 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       isPrivate: serializer.fromJson<bool>(json['isPrivate']),
       isSynced: serializer.fromJson<bool>(json['isSynced']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      soulSatisfaction: serializer.fromJson<int>(json['soulSatisfaction']),
     );
   }
   @override
@@ -2409,6 +2440,7 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       'isPrivate': serializer.toJson<bool>(isPrivate),
       'isSynced': serializer.toJson<bool>(isSynced),
       'isDeleted': serializer.toJson<bool>(isDeleted),
+      'soulSatisfaction': serializer.toJson<int>(soulSatisfaction),
     };
   }
 
@@ -2432,6 +2464,7 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     bool? isPrivate,
     bool? isSynced,
     bool? isDeleted,
+    int? soulSatisfaction,
   }) => TransactionRow(
     id: id ?? this.id,
     bookId: bookId ?? this.bookId,
@@ -2452,6 +2485,7 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     isPrivate: isPrivate ?? this.isPrivate,
     isSynced: isSynced ?? this.isSynced,
     isDeleted: isDeleted ?? this.isDeleted,
+    soulSatisfaction: soulSatisfaction ?? this.soulSatisfaction,
   );
   TransactionRow copyWithCompanion(TransactionsCompanion data) {
     return TransactionRow(
@@ -2480,6 +2514,9 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       isPrivate: data.isPrivate.present ? data.isPrivate.value : this.isPrivate,
       isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
       isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      soulSatisfaction: data.soulSatisfaction.present
+          ? data.soulSatisfaction.value
+          : this.soulSatisfaction,
     );
   }
 
@@ -2504,7 +2541,8 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
           ..write('updatedAt: $updatedAt, ')
           ..write('isPrivate: $isPrivate, ')
           ..write('isSynced: $isSynced, ')
-          ..write('isDeleted: $isDeleted')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('soulSatisfaction: $soulSatisfaction')
           ..write(')'))
         .toString();
   }
@@ -2530,6 +2568,7 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     isPrivate,
     isSynced,
     isDeleted,
+    soulSatisfaction,
   );
   @override
   bool operator ==(Object other) =>
@@ -2553,7 +2592,8 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
           other.updatedAt == this.updatedAt &&
           other.isPrivate == this.isPrivate &&
           other.isSynced == this.isSynced &&
-          other.isDeleted == this.isDeleted);
+          other.isDeleted == this.isDeleted &&
+          other.soulSatisfaction == this.soulSatisfaction);
 }
 
 class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
@@ -2576,6 +2616,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
   final Value<bool> isPrivate;
   final Value<bool> isSynced;
   final Value<bool> isDeleted;
+  final Value<int> soulSatisfaction;
   final Value<int> rowid;
   const TransactionsCompanion({
     this.id = const Value.absent(),
@@ -2597,6 +2638,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     this.isPrivate = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.isDeleted = const Value.absent(),
+    this.soulSatisfaction = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TransactionsCompanion.insert({
@@ -2619,6 +2661,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     this.isPrivate = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.isDeleted = const Value.absent(),
+    this.soulSatisfaction = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        bookId = Value(bookId),
@@ -2650,6 +2693,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     Expression<bool>? isPrivate,
     Expression<bool>? isSynced,
     Expression<bool>? isDeleted,
+    Expression<int>? soulSatisfaction,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2672,6 +2716,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
       if (isPrivate != null) 'is_private': isPrivate,
       if (isSynced != null) 'is_synced': isSynced,
       if (isDeleted != null) 'is_deleted': isDeleted,
+      if (soulSatisfaction != null) 'soul_satisfaction': soulSatisfaction,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2696,6 +2741,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     Value<bool>? isPrivate,
     Value<bool>? isSynced,
     Value<bool>? isDeleted,
+    Value<int>? soulSatisfaction,
     Value<int>? rowid,
   }) {
     return TransactionsCompanion(
@@ -2718,6 +2764,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
       isPrivate: isPrivate ?? this.isPrivate,
       isSynced: isSynced ?? this.isSynced,
       isDeleted: isDeleted ?? this.isDeleted,
+      soulSatisfaction: soulSatisfaction ?? this.soulSatisfaction,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2782,6 +2829,9 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     if (isDeleted.present) {
       map['is_deleted'] = Variable<bool>(isDeleted.value);
     }
+    if (soulSatisfaction.present) {
+      map['soul_satisfaction'] = Variable<int>(soulSatisfaction.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2810,6 +2860,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
           ..write('isPrivate: $isPrivate, ')
           ..write('isSynced: $isSynced, ')
           ..write('isDeleted: $isDeleted, ')
+          ..write('soulSatisfaction: $soulSatisfaction, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3702,6 +3753,7 @@ typedef $$TransactionsTableCreateCompanionBuilder =
       Value<bool> isPrivate,
       Value<bool> isSynced,
       Value<bool> isDeleted,
+      Value<int> soulSatisfaction,
       Value<int> rowid,
     });
 typedef $$TransactionsTableUpdateCompanionBuilder =
@@ -3725,6 +3777,7 @@ typedef $$TransactionsTableUpdateCompanionBuilder =
       Value<bool> isPrivate,
       Value<bool> isSynced,
       Value<bool> isDeleted,
+      Value<int> soulSatisfaction,
       Value<int> rowid,
     });
 
@@ -3829,6 +3882,11 @@ class $$TransactionsTableFilterComposer
 
   ColumnFilters<bool> get isDeleted => $composableBuilder(
     column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get soulSatisfaction => $composableBuilder(
+    column: $table.soulSatisfaction,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3936,6 +3994,11 @@ class $$TransactionsTableOrderingComposer
     column: $table.isDeleted,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get soulSatisfaction => $composableBuilder(
+    column: $table.soulSatisfaction,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TransactionsTableAnnotationComposer
@@ -4009,6 +4072,11 @@ class $$TransactionsTableAnnotationComposer
 
   GeneratedColumn<bool> get isDeleted =>
       $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  GeneratedColumn<int> get soulSatisfaction => $composableBuilder(
+    column: $table.soulSatisfaction,
+    builder: (column) => column,
+  );
 }
 
 class $$TransactionsTableTableManager
@@ -4061,6 +4129,7 @@ class $$TransactionsTableTableManager
                 Value<bool> isPrivate = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
+                Value<int> soulSatisfaction = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsCompanion(
                 id: id,
@@ -4082,6 +4151,7 @@ class $$TransactionsTableTableManager
                 isPrivate: isPrivate,
                 isSynced: isSynced,
                 isDeleted: isDeleted,
+                soulSatisfaction: soulSatisfaction,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4105,6 +4175,7 @@ class $$TransactionsTableTableManager
                 Value<bool> isPrivate = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
+                Value<int> soulSatisfaction = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsCompanion.insert(
                 id: id,
@@ -4126,6 +4197,7 @@ class $$TransactionsTableTableManager
                 isPrivate: isPrivate,
                 isSynced: isSynced,
                 isDeleted: isDeleted,
+                soulSatisfaction: soulSatisfaction,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

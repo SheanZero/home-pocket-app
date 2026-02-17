@@ -51,7 +51,7 @@ final biometricAvailabilityProvider =
 typedef BiometricAvailabilityRef =
     AutoDisposeFutureProviderRef<BiometricAvailability>;
 String _$secureStorageServiceHash() =>
-    r'0295e42b0c2763787b4b230961936eabcd0d0877';
+    r'f44bb5666baebf64786c7d88095a3ba1b215b1d2';
 
 /// Secure storage service — iOS Keychain / Android Keystore wrapper.
 ///

@@ -7,7 +7,7 @@ part of 'use_case_providers.dart';
 // **************************************************************************
 
 String _$createTransactionUseCaseHash() =>
-    r'4a2d7ec03bd8f84a6c59d7971b44c99e8067c161';
+    r'8dfd208b158959c70c310162d11cecfe608c13bf';
 
 /// See also [createTransactionUseCase].
 @ProviderFor(createTransactionUseCase)
@@ -87,7 +87,7 @@ final seedCategoriesUseCaseProvider =
 typedef SeedCategoriesUseCaseRef =
     AutoDisposeProviderRef<SeedCategoriesUseCase>;
 String _$ensureDefaultBookUseCaseHash() =>
-    r'2c2e49b7323ba16c657e9d936085c7110c906d06';
+    r'37e41e1327696132edf238d026cdfcb9f86ba297';
 
 /// See also [ensureDefaultBookUseCase].
 @ProviderFor(ensureDefaultBookUseCase)

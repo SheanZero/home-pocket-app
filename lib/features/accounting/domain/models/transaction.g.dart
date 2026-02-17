@@ -27,6 +27,7 @@ _Transaction _$TransactionFromJson(Map<String, dynamic> json) => _Transaction(
   isPrivate: json['isPrivate'] as bool? ?? false,
   isSynced: json['isSynced'] as bool? ?? false,
   isDeleted: json['isDeleted'] as bool? ?? false,
+  soulSatisfaction: (json['soulSatisfaction'] as num?)?.toInt() ?? 5,
 );
 
 Map<String, dynamic> _$TransactionToJson(_Transaction instance) =>
@@ -49,6 +50,7 @@ Map<String, dynamic> _$TransactionToJson(_Transaction instance) =>
       'isPrivate': instance.isPrivate,
       'isSynced': instance.isSynced,
       'isDeleted': instance.isDeleted,
+      'soulSatisfaction': instance.soulSatisfaction,
     };
 
 const _$TransactionTypeEnumMap = {

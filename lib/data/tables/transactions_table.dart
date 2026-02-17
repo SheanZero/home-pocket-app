@@ -31,8 +31,16 @@ class Transactions extends Table {
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
 
+  // Soul ledger satisfaction (1-10, default 5)
+  IntColumn get soulSatisfaction => integer().withDefault(const Constant(5))();
+
   @override
   Set<Column> get primaryKey => {id};
+
+  @override
+  List<String> get customConstraints => [
+    'CHECK(soul_satisfaction BETWEEN 1 AND 10)',
+  ];
 
   List<TableIndex> get customIndices => [
     TableIndex(name: 'idx_tx_book_id', columns: {#bookId}),

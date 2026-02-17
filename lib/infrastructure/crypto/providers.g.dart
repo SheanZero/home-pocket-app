@@ -7,7 +7,7 @@ part of 'providers.dart';
 // **************************************************************************
 
 String _$masterKeyRepositoryHash() =>
-    r'fa8fd4236336467b4f56630e11f02ed51f222a4b';
+    r'4c3ad8f67393d7368904e1c501d396690b6b672a';
 
 /// Master key repository - manages 256-bit master key and HKDF derivation
 ///
@@ -27,7 +27,7 @@ final masterKeyRepositoryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef MasterKeyRepositoryRef = AutoDisposeProviderRef<MasterKeyRepository>;
-String _$keyRepositoryHash() => r'48172eafc30c40274c17a541b37cd4ce28ce1370';
+String _$keyRepositoryHash() => r'6ad4d390457589e7474880eba16e6dd7d8e8e02b';
 
 /// Key repository - manages Ed25519 key pairs
 ///

@@ -30,7 +30,8 @@ mixin _$Transaction {
   DateTime? get updatedAt; // Flags
   bool get isPrivate;
   bool get isSynced;
-  bool get isDeleted;
+  bool get isDeleted; // Soul ledger satisfaction score (1-10, default 5)
+  int get soulSatisfaction;
 
   /// Create a copy of Transaction
   /// with the given fields replaced by the non-null parameter values.
@@ -77,12 +78,14 @@ mixin _$Transaction {
             (identical(other.isSynced, isSynced) ||
                 other.isSynced == isSynced) &&
             (identical(other.isDeleted, isDeleted) ||
-                other.isDeleted == isDeleted));
+                other.isDeleted == isDeleted) &&
+            (identical(other.soulSatisfaction, soulSatisfaction) ||
+                other.soulSatisfaction == soulSatisfaction));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     bookId,
@@ -102,11 +105,12 @@ mixin _$Transaction {
     isPrivate,
     isSynced,
     isDeleted,
-  );
+    soulSatisfaction,
+  ]);
 
   @override
   String toString() {
-    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted)';
+    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, soulSatisfaction: $soulSatisfaction)';
   }
 }
 
@@ -136,6 +140,7 @@ abstract mixin class $TransactionCopyWith<$Res> {
     bool isPrivate,
     bool isSynced,
     bool isDeleted,
+    int soulSatisfaction,
   });
 }
 
@@ -169,6 +174,7 @@ class _$TransactionCopyWithImpl<$Res> implements $TransactionCopyWith<$Res> {
     Object? isPrivate = null,
     Object? isSynced = null,
     Object? isDeleted = null,
+    Object? soulSatisfaction = null,
   }) {
     return _then(
       _self.copyWith(
@@ -244,6 +250,10 @@ class _$TransactionCopyWithImpl<$Res> implements $TransactionCopyWith<$Res> {
             ? _self.isDeleted
             : isDeleted // ignore: cast_nullable_to_non_nullable
                   as bool,
+        soulSatisfaction: null == soulSatisfaction
+            ? _self.soulSatisfaction
+            : soulSatisfaction // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -361,6 +371,7 @@ extension TransactionPatterns on Transaction {
       bool isPrivate,
       bool isSynced,
       bool isDeleted,
+      int soulSatisfaction,
     )?
     $default, {
     required TResult orElse(),
@@ -387,6 +398,7 @@ extension TransactionPatterns on Transaction {
           _that.isPrivate,
           _that.isSynced,
           _that.isDeleted,
+          _that.soulSatisfaction,
         );
       case _:
         return orElse();
@@ -427,6 +439,7 @@ extension TransactionPatterns on Transaction {
       bool isPrivate,
       bool isSynced,
       bool isDeleted,
+      int soulSatisfaction,
     )
     $default,
   ) {
@@ -452,6 +465,7 @@ extension TransactionPatterns on Transaction {
           _that.isPrivate,
           _that.isSynced,
           _that.isDeleted,
+          _that.soulSatisfaction,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -491,6 +505,7 @@ extension TransactionPatterns on Transaction {
       bool isPrivate,
       bool isSynced,
       bool isDeleted,
+      int soulSatisfaction,
     )?
     $default,
   ) {
@@ -516,6 +531,7 @@ extension TransactionPatterns on Transaction {
           _that.isPrivate,
           _that.isSynced,
           _that.isDeleted,
+          _that.soulSatisfaction,
         );
       case _:
         return null;
@@ -545,6 +561,7 @@ class _Transaction implements Transaction {
     this.isPrivate = false,
     this.isSynced = false,
     this.isDeleted = false,
+    this.soulSatisfaction = 5,
   });
   factory _Transaction.fromJson(Map<String, dynamic> json) =>
       _$TransactionFromJson(json);
@@ -592,6 +609,10 @@ class _Transaction implements Transaction {
   @override
   @JsonKey()
   final bool isDeleted;
+  // Soul ledger satisfaction score (1-10, default 5)
+  @override
+  @JsonKey()
+  final int soulSatisfaction;
 
   /// Create a copy of Transaction
   /// with the given fields replaced by the non-null parameter values.
@@ -641,12 +662,14 @@ class _Transaction implements Transaction {
             (identical(other.isSynced, isSynced) ||
                 other.isSynced == isSynced) &&
             (identical(other.isDeleted, isDeleted) ||
-                other.isDeleted == isDeleted));
+                other.isDeleted == isDeleted) &&
+            (identical(other.soulSatisfaction, soulSatisfaction) ||
+                other.soulSatisfaction == soulSatisfaction));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     bookId,
@@ -666,11 +689,12 @@ class _Transaction implements Transaction {
     isPrivate,
     isSynced,
     isDeleted,
-  );
+    soulSatisfaction,
+  ]);
 
   @override
   String toString() {
-    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted)';
+    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, soulSatisfaction: $soulSatisfaction)';
   }
 }
 
@@ -702,6 +726,7 @@ abstract mixin class _$TransactionCopyWith<$Res>
     bool isPrivate,
     bool isSynced,
     bool isDeleted,
+    int soulSatisfaction,
   });
 }
 
@@ -735,6 +760,7 @@ class __$TransactionCopyWithImpl<$Res> implements _$TransactionCopyWith<$Res> {
     Object? isPrivate = null,
     Object? isSynced = null,
     Object? isDeleted = null,
+    Object? soulSatisfaction = null,
   }) {
     return _then(
       _Transaction(
@@ -810,6 +836,10 @@ class __$TransactionCopyWithImpl<$Res> implements _$TransactionCopyWith<$Res> {
             ? _self.isDeleted
             : isDeleted // ignore: cast_nullable_to_non_nullable
                   as bool,
+        soulSatisfaction: null == soulSatisfaction
+            ? _self.soulSatisfaction
+            : soulSatisfaction // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }

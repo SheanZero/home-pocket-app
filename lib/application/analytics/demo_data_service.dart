@@ -127,6 +127,12 @@ class DemoDataService {
           // Classify as survival or soul
           final ledgerType = _classifyLedger(pattern.categoryId);
 
+          // Soul transactions get random satisfaction (1-10), survival gets default 5
+          final satisfaction = ledgerType == 'soul'
+              ? 1 +
+                    _random.nextInt(10) // 1..10
+              : 5;
+
           final hash = 'demo_hash_${year}_${month}_$txCount';
           await transactionDao.insertTransaction(
             id: 'demo_tx_${year}_${month}_$txCount',
@@ -136,6 +142,7 @@ class DemoDataService {
             type: 'expense',
             categoryId: pattern.categoryId,
             ledgerType: ledgerType,
+            soulSatisfaction: satisfaction,
             timestamp: DateTime(
               year,
               month,

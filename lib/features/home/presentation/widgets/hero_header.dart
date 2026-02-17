@@ -7,6 +7,8 @@ import '../../../../generated/app_localizations.dart';
 /// Blue top header with month display and settings button.
 ///
 /// Pure UI component -- no providers, no navigation.
+/// [bottomOverlap] adds extra blue space below the header row so that the
+/// card beneath can visually overlap into the blue area via a Stack.
 class HeroHeader extends StatelessWidget {
   const HeroHeader({
     super.key,
@@ -14,12 +16,16 @@ class HeroHeader extends StatelessWidget {
     required this.month,
     required this.onSettingsTap,
     required this.onDateTap,
+    this.bottomOverlap = 0,
   });
 
   final int year;
   final int month;
   final VoidCallback onSettingsTap;
   final VoidCallback onDateTap;
+
+  /// Extra blue height below the header content for card overlap.
+  final double bottomOverlap;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +41,7 @@ class HeroHeader extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: EdgeInsets.only(left: 24, right: 24, bottom: bottomOverlap),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,

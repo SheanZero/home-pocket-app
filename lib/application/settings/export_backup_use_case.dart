@@ -23,10 +23,10 @@ class ExportBackupUseCase {
     required CategoryRepository categoryRepo,
     required BookRepository bookRepo,
     required SettingsRepository settingsRepo,
-  })  : _transactionRepo = transactionRepo,
-        _categoryRepo = categoryRepo,
-        _bookRepo = bookRepo,
-        _settingsRepo = settingsRepo;
+  }) : _transactionRepo = transactionRepo,
+       _categoryRepo = categoryRepo,
+       _bookRepo = bookRepo,
+       _settingsRepo = settingsRepo;
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;
@@ -81,8 +81,7 @@ class ExportBackupUseCase {
       final directory =
           outputDirectory ?? await getApplicationDocumentsDirectory();
       final timestamp = DateTime.now().toIso8601String().substring(0, 10);
-      final file =
-          File('${directory.path}/homepocket_backup_$timestamp.hpb');
+      final file = File('${directory.path}/homepocket_backup_$timestamp.hpb');
       await file.writeAsBytes(encryptedData);
 
       return Result.success(file);
