@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../features/analytics/presentation/providers/analytics_providers.dart';
 import '../../../../generated/app_localizations.dart';
@@ -41,85 +42,9 @@ class HomeScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Hero header
-          HeroHeader(
-            year: year,
-            month: month,
-            onSettingsTap: onSettingsTap ?? () {},
-            onDateTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Date picker coming soon'),
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // Month overview card
-          reportAsync.when(
-            data: (report) {
-              final previousTotal =
-                  report.previousMonthComparison?.previousExpenses ?? 0;
-              final previousMonth =
-                  report.previousMonthComparison?.previousMonth ??
-                  (month == 1 ? 12 : month - 1);
-
-              return MonthOverviewCard(
-                totalExpense: report.totalExpenses,
-                survivalExpense: report.survivalTotal,
-                soulExpense: report.soulTotal,
-                previousMonthTotal: previousTotal,
-                currentMonthNumber: month,
-                previousMonthNumber: previousMonth,
-                modeBadgeText: l10n.homePersonalMode,
-              );
-            },
-            loading: () => const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24),
-              child: SizedBox(
-                height: 200,
-                child: Center(child: CircularProgressIndicator()),
-              ),
-            ),
-            error: (error, _) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text('Error: $error'),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Soul fullness card
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: reportAsync.when(
-              data: (report) {
-                final totalExpense = report.totalExpenses;
-                final soulPercent = totalExpense > 0
-                    ? (report.soulTotal * 100 ~/ totalExpense)
-                    : 0;
-                final happinessROI = totalExpense > 0
-                    ? report.soulTotal / totalExpense * 10
-                    : 0.0;
-                final fullness = soulPercent.clamp(0, 100);
-
-                return SoulFullnessCard(
-                  soulPercentage: soulPercent,
-                  happinessROI: double.parse(happinessROI.toStringAsFixed(1)),
-                  fullnessLevel: fullness,
-                  recentMerchant: '-',
-                  recentAmount: 0,
-                  recentQuote: '',
-                );
-              },
-              loading: () => const SizedBox(
-                height: 160,
-                child: Center(child: CircularProgressIndicator()),
-              ),
-              error: (error, _) => Text('Error: $error'),
-            ),
-          ),
+          // Hero header + Month overview card with blue background overlap
+          _buildHeroWithCard(
+              context, l10n, year, month, reportAsync, todayTxAsync),
           const SizedBox(height: 16),
 
           // Family invite banner
@@ -229,6 +154,123 @@ class HomeScreen extends ConsumerWidget {
           const SizedBox(height: 100),
         ],
       ),
+    );
+  }
+
+  /// Builds the blue hero header with the MonthOverviewCard overlapping into it.
+  ///
+  /// Uses a Stack where a blue Container sets the background height, and a
+  /// Column (HeroHeader + card) determines the overall layout height. The blue
+  /// extends ~60px below the header content, creating the overlap effect with
+  /// the card's top portion sitting inside the blue zone.
+  Widget _buildHeroWithCard(
+    BuildContext context,
+    S l10n,
+    int year,
+    int month,
+    AsyncValue reportAsync,
+    AsyncValue<List<Transaction>> todayTxAsync,
+  ) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return Stack(
+      children: [
+        // Blue background (square: height == screen width)
+        Container(
+          height: screenWidth,
+          decoration: const BoxDecoration(
+            color: AppColors.heroBackground,
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+          ),
+        ),
+        // Content: header + gap + card (the card overlaps the blue area)
+        Column(
+          children: [
+            HeroHeader(
+              year: year,
+              month: month,
+              onSettingsTap: onSettingsTap ?? () {},
+              onDateTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Date picker coming soon'),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            reportAsync.when(
+              data: (report) {
+                final previousTotal =
+                    report.previousMonthComparison?.previousExpenses ?? 0;
+                final previousMonth =
+                    report.previousMonthComparison?.previousMonth ??
+                    (month == 1 ? 12 : month - 1);
+
+                final totalExpense = report.totalExpenses;
+                final soulPercent = totalExpense > 0
+                    ? (report.soulTotal * 100 ~/ totalExpense)
+                    : 0;
+                final happinessROI = totalExpense > 0
+                    ? report.soulTotal / totalExpense * 10
+                    : 0.0;
+                final fullness = soulPercent.clamp(0, 100);
+
+                // Find most recent soul transaction from today
+                final recentSoulTx = todayTxAsync.whenOrNull(
+                  data: (txs) {
+                    final soulTxs = txs
+                        .where((tx) =>
+                            tx.ledgerType == LedgerType.soul &&
+                            tx.type == TransactionType.expense)
+                        .toList();
+                    if (soulTxs.isEmpty) return null;
+                    soulTxs.sort(
+                        (a, b) => b.timestamp.compareTo(a.timestamp));
+                    return soulTxs.first;
+                  },
+                );
+
+                return MonthOverviewCard(
+                  totalExpense: totalExpense,
+                  survivalExpense: report.survivalTotal,
+                  soulExpense: report.soulTotal,
+                  previousMonthTotal: previousTotal,
+                  currentMonthNumber: month,
+                  previousMonthNumber: previousMonth,
+                  modeBadgeText: l10n.homePersonalMode,
+                  child: SoulFullnessCard(
+                    soulPercentage: soulPercent,
+                    happinessROI:
+                        double.parse(happinessROI.toStringAsFixed(1)),
+                    fullnessLevel: fullness,
+                    recentMerchant: recentSoulTx?.merchant ??
+                        recentSoulTx?.categoryId ??
+                        '',
+                    recentAmount: recentSoulTx?.amount ?? 0,
+                    recentQuote: recentSoulTx?.note ?? '',
+                  ),
+                );
+              },
+              loading: () => const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: SizedBox(
+                  height: 200,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              ),
+              error: (error, _) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text('Error: $error'),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

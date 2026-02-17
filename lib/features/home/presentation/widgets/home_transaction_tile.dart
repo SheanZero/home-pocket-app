@@ -66,7 +66,7 @@ class HomeTransactionTile extends StatelessWidget {
               ),
             ),
             // Amount
-            Text(formattedAmount, style: AppTextStyles.titleMedium),
+            Text(formattedAmount, style: AppTextStyles.amountMedium),
           ],
         ),
       ),

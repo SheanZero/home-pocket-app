@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../accounting/presentation/screens/transaction_form_screen.dart';
+import '../../../analytics/presentation/providers/analytics_providers.dart';
 import '../../../analytics/presentation/screens/analytics_screen.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
 import '../providers/home_providers.dart';
+import '../providers/today_transactions_provider.dart';
 import '../widgets/home_bottom_nav_bar.dart';
 import 'home_screen.dart';
 
@@ -46,12 +48,21 @@ class MainShellScreen extends ConsumerWidget {
         currentIndex: currentIndex,
         onTap: (index) =>
             ref.read(selectedTabIndexProvider.notifier).select(index),
-        onFabTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
+        onFabTap: () async {
+          final saved = await Navigator.of(context).push<bool>(
+            MaterialPageRoute<bool>(
               builder: (_) => TransactionFormScreen(bookId: bookId),
             ),
           );
+          if (saved == true) {
+            final now = DateTime.now();
+            ref.invalidate(monthlyReportProvider(
+              bookId: bookId,
+              year: now.year,
+              month: now.month,
+            ));
+            ref.invalidate(todayTransactionsProvider(bookId: bookId));
+          }
         },
       ),
     );

@@ -19,6 +19,7 @@ class MonthOverviewCard extends StatelessWidget {
     required this.currentMonthNumber,
     required this.previousMonthNumber,
     required this.modeBadgeText,
+    this.child,
   });
 
   final int totalExpense;
@@ -28,6 +29,9 @@ class MonthOverviewCard extends StatelessWidget {
   final int currentMonthNumber;
   final int previousMonthNumber;
   final String modeBadgeText;
+
+  /// Optional child widget rendered below the comparison section (e.g. SoulFullnessCard).
+  final Widget? child;
 
   String _formatCurrency(int amount) {
     return NumberFormat.currency(
@@ -62,6 +66,10 @@ class MonthOverviewCard extends StatelessWidget {
             _buildMetrics(l10n),
             const SizedBox(height: 8),
             _buildComparison(l10n),
+            if (child != null) ...[
+              const SizedBox(height: 12),
+              child!,
+            ],
           ],
         ),
       ),
@@ -96,7 +104,7 @@ class MonthOverviewCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(_formatCurrency(totalExpense), style: AppTextStyles.headlineLarge),
+        Text(_formatCurrency(totalExpense), style: AppTextStyles.amountLarge),
         const SizedBox(height: 6),
         _buildMetricRow(l10n.homeSurvivalExpense, survivalExpense),
         const SizedBox(height: 6),
@@ -112,10 +120,8 @@ class MonthOverviewCard extends StatelessWidget {
         Text(label, style: AppTextStyles.bodySmall),
         Text(
           _formatCurrency(amount),
-          style: AppTextStyles.bodyMedium.copyWith(
+          style: AppTextStyles.amountMedium.copyWith(
             color: AppColors.textMuted,
-            fontSize: 14,
-            letterSpacing: -0.5,
           ),
         ),
       ],
@@ -148,7 +154,12 @@ class MonthOverviewCard extends StatelessWidget {
                   color: AppColors.comparisonPositive,
                 ),
                 const SizedBox(width: 4),
-                Text(deltaStr, style: AppTextStyles.comparisonDelta),
+                Text(
+                  deltaStr,
+                  style: AppTextStyles.comparisonDelta.copyWith(
+                    fontFeatures: AppTextStyles.amountLarge.fontFeatures,
+                  ),
+                ),
               ],
             ),
           ],
@@ -246,11 +257,11 @@ class MonthOverviewCard extends StatelessWidget {
         Text(
           _formatCurrency(total),
           style: isCurrent
-              ? AppTextStyles.labelSmall.copyWith(
+              ? AppTextStyles.amountSmall.copyWith(
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w600,
                 )
-              : AppTextStyles.labelSmall,
+              : AppTextStyles.amountSmall,
         ),
       ],
     );

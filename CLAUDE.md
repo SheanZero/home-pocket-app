@@ -1091,6 +1091,47 @@ Use Freezed's `copyWith` for all state updates.
 
 ---
 
+## Amount Display Style (MANDATORY)
+
+**CRITICAL:** All monetary amounts and numeric values (currency, percentages, ROI) MUST use tabular-figure (equal-width digit) text styles for proper visual alignment.
+
+### Rules
+
+- ✅ MUST use `AppTextStyles.amountLarge / amountMedium / amountSmall` for all amount displays
+- ✅ These styles include `FontFeature.tabularFigures()` for equal-width digits
+- ❌ NEVER use `headlineLarge`, `titleMedium`, `bodyMedium` etc. for monetary amounts
+- ❌ NEVER display raw numbers without tabular figures
+
+### Available Amount Styles
+
+| Style | Size | Use Case |
+|-------|------|----------|
+| `amountLarge` | 24px, w600 | Hero total expense |
+| `amountMedium` | 14px, w600 | Breakdown rows, transaction tiles, metric values |
+| `amountSmall` | 10px, w500 | Bar chart labels, small inline amounts |
+
+### Usage Examples
+
+```dart
+// ✅ CORRECT: Use amount styles for currency
+Text(_formatCurrency(totalExpense), style: AppTextStyles.amountLarge)
+
+// ✅ CORRECT: Customize color while keeping tabular figures
+Text(
+  _formatCurrency(amount),
+  style: AppTextStyles.amountMedium.copyWith(color: AppColors.soul),
+)
+
+// ❌ WRONG: Using non-amount style for currency
+Text(_formatCurrency(totalExpense), style: AppTextStyles.headlineLarge)
+```
+
+### Defined In
+
+`lib/core/theme/app_text_styles.dart`
+
+---
+
 ## Widget Parameter Patterns (BEST PRACTICES)
 
 ### Nullable Parameters with Provider Fallback

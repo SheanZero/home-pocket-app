@@ -94,4 +94,36 @@ abstract final class AppTextStyles {
     fontWeight: FontWeight.w500,
     color: AppColors.textSecondary,
   );
+
+  // ── Amount styles (tabular figures for numeric alignment) ──
+
+  static const _tabularFigures = [FontFeature.tabularFigures()];
+
+  /// Hero total expense (¥123,456)
+  static const amountLarge = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 24,
+    fontWeight: FontWeight.w600,
+    letterSpacing: -0.5,
+    color: AppColors.textPrimary,
+    fontFeatures: _tabularFigures,
+  );
+
+  /// Breakdown row amounts & transaction tile amounts
+  static const amountMedium = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+    fontFeatures: _tabularFigures,
+  );
+
+  /// Bar chart labels & small inline amounts
+  static const amountSmall = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 10,
+    fontWeight: FontWeight.w500,
+    color: AppColors.textSecondary,
+    fontFeatures: _tabularFigures,
+  );
 }

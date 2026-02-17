@@ -33,13 +33,6 @@ class SoulFullnessCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.soulCardBg,
         borderRadius: BorderRadius.circular(10),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 14,
-            offset: Offset(0, 4),
-          ),
-        ],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Column(
@@ -50,8 +43,10 @@ class SoulFullnessCard extends StatelessWidget {
           _buildChargeCard(l10n),
           const SizedBox(height: 6),
           _buildMetricRow(l10n),
-          const SizedBox(height: 6),
-          _buildRecentTransaction(l10n),
+          if (recentMerchant.isNotEmpty || recentAmount > 0) ...[
+            const SizedBox(height: 6),
+            _buildRecentTransaction(l10n),
+          ],
         ],
       ),
     );
@@ -170,7 +165,9 @@ class SoulFullnessCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '$soulPercentage%',
-                  style: AppTextStyles.titleLarge.copyWith(
+                  style: AppTextStyles.amountMedium.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.soul,
                   ),
                 ),
@@ -198,7 +195,9 @@ class SoulFullnessCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '${happinessROI}x',
-                  style: AppTextStyles.titleLarge.copyWith(
+                  style: AppTextStyles.amountMedium.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.soul,
                   ),
                 ),
@@ -212,6 +211,7 @@ class SoulFullnessCard extends StatelessWidget {
 
   Widget _buildRecentTransaction(S l10n) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.card,
@@ -222,18 +222,20 @@ class SoulFullnessCard extends StatelessWidget {
         children: [
           Text(
             l10n.homeRecentSoulTransaction(recentMerchant, recentAmount),
-            style: AppTextStyles.bodySmall.copyWith(
+            style: AppTextStyles.amountMedium.copyWith(
+              fontSize: 12,
               color: AppColors.soulTextDark,
-              fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            '"$recentQuote"',
-            style: AppTextStyles.labelSmall.copyWith(
-              color: AppColors.soulQuoteText,
+          if (recentQuote.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              '"$recentQuote"',
+              style: AppTextStyles.labelSmall.copyWith(
+                color: AppColors.soulQuoteText,
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
