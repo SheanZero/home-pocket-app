@@ -115,5 +115,27 @@
   "confirmDelete": "削除の確認",
   "deleteTransactionConfirmation": "この取引を削除しますか？",
   "error": "エラー",
-  "initializationError": "アプリの初期化に失敗しました"
+  "initializationError": "アプリの初期化に失敗しました",
+
+  "homeMonthlyExpense": "今月の出費",
+  "homeSurvivalExpense": "暮らしの支出",
+  "homeSoulExpense": "ときめき支出",
+  "homeMonthComparison": "先月比",
+  "homeSoulFullness": "魂の充実度",
+  "homeSoulPercentLabel": "今月の魂支出の割合",
+  "homeHappinessROI": "幸せROI",
+  "homeFamilyInviteTitle": "家族を招待する",
+  "homeFamilyInviteDesc": "パートナーと家計簿を共有しよう",
+  "homeTodayTitle": "今日の記録",
+  "homeTodayCount": "{count}件",
+  "homePersonalMode": "個人モード",
+  "homeTabHome": "ホーム",
+  "homeTabList": "一覧",
+  "homeTabChart": "チャート",
+  "homeTabTodo": "やること",
+  "homeMonthFormat": "{year}年{month}月",
+  "homeMonthLabel": "{month}月",
+  "homeRecentSoulTransaction": "直近: {merchant} \u00a5{amount}",
+  "homeSoulChargeStatus": "魂の充実度 {fullness}% \u00b7 幸せROI {roi}x",
+  "homeMonthBadge": "今月 {percent}%"
 }

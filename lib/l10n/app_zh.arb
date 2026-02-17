@@ -115,5 +115,27 @@
   "confirmDelete": "确认删除",
   "deleteTransactionConfirmation": "删除此交易？",
   "error": "错误",
-  "initializationError": "应用初始化失败"
+  "initializationError": "应用初始化失败",
+
+  "homeMonthlyExpense": "本月支出",
+  "homeSurvivalExpense": "生存支出",
+  "homeSoulExpense": "灵魂支出",
+  "homeMonthComparison": "较上月",
+  "homeSoulFullness": "灵魂充盈度",
+  "homeSoulPercentLabel": "本月灵魂支出占比",
+  "homeHappinessROI": "快乐 ROI",
+  "homeFamilyInviteTitle": "邀请家人",
+  "homeFamilyInviteDesc": "与伴侣共享家计簿",
+  "homeTodayTitle": "今日记录",
+  "homeTodayCount": "{count}条",
+  "homePersonalMode": "个人模式",
+  "homeTabHome": "主页",
+  "homeTabList": "列表",
+  "homeTabChart": "图表",
+  "homeTabTodo": "待办事项",
+  "homeMonthFormat": "{year}年{month}月",
+  "homeMonthLabel": "{month}月",
+  "homeRecentSoulTransaction": "最近一笔: {merchant} \u00a5{amount}",
+  "homeSoulChargeStatus": "灵魂充盈度 {fullness}% \u00b7 快乐ROI {roi}x",
+  "homeMonthBadge": "本月 {percent}%"
 }

@@ -347,5 +347,68 @@
   "@error": { "description": "Error title" },
 
   "initializationError": "Failed to initialize app",
-  "@initializationError": { "description": "Init error message" }
+  "@initializationError": { "description": "Init error message" },
+
+  "homeMonthlyExpense": "Monthly Expenses",
+  "@homeMonthlyExpense": { "description": "Home card title for monthly expense overview" },
+
+  "homeSurvivalExpense": "Living Expenses",
+  "@homeSurvivalExpense": { "description": "Survival ledger expense label" },
+
+  "homeSoulExpense": "Joy Expenses",
+  "@homeSoulExpense": { "description": "Soul ledger expense label" },
+
+  "homeMonthComparison": "vs Last Month",
+  "@homeMonthComparison": { "description": "Month-over-month comparison header" },
+
+  "homeSoulFullness": "Soul Fullness",
+  "@homeSoulFullness": { "description": "Soul fullness section title" },
+
+  "homeSoulPercentLabel": "Soul spending ratio",
+  "@homeSoulPercentLabel": { "description": "Soul spending percentage metric label" },
+
+  "homeHappinessROI": "Happiness ROI",
+  "@homeHappinessROI": { "description": "Happiness ROI metric label" },
+
+  "homeFamilyInviteTitle": "Invite Family",
+  "@homeFamilyInviteTitle": { "description": "Family invite banner title" },
+
+  "homeFamilyInviteDesc": "Share your ledger with your partner",
+  "@homeFamilyInviteDesc": { "description": "Family invite banner description" },
+
+  "homeTodayTitle": "Today's Records",
+  "@homeTodayTitle": { "description": "Today's transaction section title" },
+
+  "homeTodayCount": "{count} items",
+  "@homeTodayCount": { "description": "Transaction count for today", "placeholders": { "count": { "type": "int" } } },
+
+  "homePersonalMode": "Personal Mode",
+  "@homePersonalMode": { "description": "Mode badge for personal/solo mode" },
+
+  "homeTabHome": "Home",
+  "@homeTabHome": { "description": "Bottom nav home tab label" },
+
+  "homeTabList": "List",
+  "@homeTabList": { "description": "Bottom nav list tab label" },
+
+  "homeTabChart": "Charts",
+  "@homeTabChart": { "description": "Bottom nav charts tab label" },
+
+  "homeTabTodo": "Todo",
+  "@homeTabTodo": { "description": "Bottom nav todo tab label" },
+
+  "homeMonthFormat": "{year}/{month}",
+  "@homeMonthFormat": { "description": "Year and month display format", "placeholders": { "year": { "type": "int" }, "month": { "type": "int" } } },
+
+  "homeMonthLabel": "M{month}",
+  "@homeMonthLabel": { "description": "Short month label for bar chart", "placeholders": { "month": { "type": "int" } } },
+
+  "homeRecentSoulTransaction": "Recent: {merchant} \u00a5{amount}",
+  "@homeRecentSoulTransaction": { "description": "Recent soul transaction summary", "placeholders": { "merchant": { "type": "String" }, "amount": { "type": "int" } } },
+
+  "homeSoulChargeStatus": "Soul Fullness {fullness}% \u00b7 Happiness ROI {roi}x",
+  "@homeSoulChargeStatus": { "description": "Soul charge card status line", "placeholders": { "fullness": { "type": "int" }, "roi": { "type": "double" } } },
+
+  "homeMonthBadge": "This month {percent}%",
+  "@homeMonthBadge": { "description": "Soul fullness month badge", "placeholders": { "percent": { "type": "int" } } }
 }
