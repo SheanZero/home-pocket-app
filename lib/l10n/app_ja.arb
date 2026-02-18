@@ -137,5 +137,27 @@
   "homeMonthLabel": "{month}月",
   "homeRecentSoulTransaction": "直近: {merchant} \u00a5{amount}",
   "homeSoulChargeStatus": "魂の充実度 {fullness}% \u00b7 幸せROI {roi}x",
-  "homeMonthBadge": "今月 {percent}%"
+  "homeMonthBadge": "今月 {percent}%",
+
+  "addTransaction": "添加账目",
+  "manualInput": "手動入力",
+  "ocrScan": "OCR",
+  "voiceInput": "音声",
+  "selectCategory": "分類を選択",
+  "searchCategory": "分類を検索...",
+  "expenseDetail": "支出の詳細",
+  "back": "戻る",
+  "record": "記録する",
+  "enterStore": "お店を入力",
+  "enterMemo": "メモを入力...",
+  "expenseClassification": "支出分類",
+  "survivalExpense": "生存支出",
+  "soulExpense": "魂支出",
+  "soulSatisfaction": "魂の充盈度",
+  "addPhoto": "写真を追加",
+  "ocrScanTitle": "OCRスキャン入力",
+  "ocrHint": "レシートを枠内に収めてください",
+  "tapToRecord": "タップして録音開始",
+  "todayDate": "今日",
+  "next": "Next"
 }

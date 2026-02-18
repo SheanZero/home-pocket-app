@@ -1,5 +1,4 @@
 import '../../features/accounting/domain/models/category.dart';
-import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/repositories/category_repository.dart';
 import '../app_database.dart';
 import '../daos/category_dao.dart';
@@ -19,11 +18,31 @@ class CategoryRepositoryImpl implements CategoryRepository {
       color: category.color,
       parentId: category.parentId,
       level: category.level,
-      type: category.type.name,
       isSystem: category.isSystem,
+      isArchived: category.isArchived,
       sortOrder: category.sortOrder,
-      budgetAmount: category.budgetAmount,
       createdAt: category.createdAt,
+      updatedAt: category.updatedAt,
+    );
+  }
+
+  @override
+  Future<void> update({
+    required String id,
+    String? name,
+    String? icon,
+    String? color,
+    bool? isArchived,
+    int? sortOrder,
+  }) async {
+    await _dao.updateCategory(
+      id: id,
+      name: name,
+      icon: icon,
+      color: color,
+      isArchived: isArchived,
+      sortOrder: sortOrder,
+      updatedAt: DateTime.now(),
     );
   }
 
@@ -41,6 +60,12 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
+  Future<List<Category>> findActive() async {
+    final rows = await _dao.findActive();
+    return rows.map(_toModel).toList();
+  }
+
+  @override
   Future<List<Category>> findByLevel(int level) async {
     final rows = await _dao.findByLevel(level);
     return rows.map(_toModel).toList();
@@ -49,18 +74,6 @@ class CategoryRepositoryImpl implements CategoryRepository {
   @override
   Future<List<Category>> findByParent(String parentId) async {
     final rows = await _dao.findByParent(parentId);
-    return rows.map(_toModel).toList();
-  }
-
-  @override
-  Future<List<Category>> findByType(TransactionType type) async {
-    final rows = await _dao.findByType(type.name);
-    return rows.map(_toModel).toList();
-  }
-
-  @override
-  Future<List<Category>> findWithBudget() async {
-    final rows = await _dao.findWithBudget();
     return rows.map(_toModel).toList();
   }
 
@@ -79,11 +92,11 @@ class CategoryRepositoryImpl implements CategoryRepository {
               color: c.color,
               parentId: c.parentId,
               level: c.level,
-              type: c.type.name,
               isSystem: c.isSystem,
+              isArchived: c.isArchived,
               sortOrder: c.sortOrder,
-              budgetAmount: c.budgetAmount,
               createdAt: c.createdAt,
+              updatedAt: c.updatedAt,
             ),
           )
           .toList(),
@@ -98,11 +111,11 @@ class CategoryRepositoryImpl implements CategoryRepository {
       color: row.color,
       parentId: row.parentId,
       level: row.level,
-      type: TransactionType.values.firstWhere((e) => e.name == row.type),
       isSystem: row.isSystem,
+      isArchived: row.isArchived,
       sortOrder: row.sortOrder,
-      budgetAmount: row.budgetAmount,
       createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     );
   }
 }

@@ -36,6 +36,15 @@
 | 🔹 MOD-009 趣味功能 | [13_MOD_Gamification.md](./13_MOD_Gamification.md) | PRD_Module_Gamification.md | 7天 | ✅ 完成 |
 | 🔹 MOD-014 国际化多语言 | [MOD-014_i18n.md](../02-module-specs/MOD-014_i18n.md) | 架构增强（规范文档） | 4天 | ✅ 完成 |
 
+### 基础能力 PRD 文档（04-basic）
+
+| 文档 | 文件名 | 内容概要 | 状态 |
+|------|--------|---------|------|
+| BASIC-001 加密基础设施 | [BASIC-001_Crypto_Infrastructure.md](../04-basic/BASIC-001_Crypto_Infrastructure.md) | Crypto 基础设施 API 与实现规范 | ✅ 已有 |
+| BASIC-002 安全基础设施 | [BASIC-002_Security_Infrastructure.md](../04-basic/BASIC-002_Security_Infrastructure.md) | Security 平台服务设计 | ✅ 已有 |
+| BASIC-003 I18N 基础设施 | [BASIC-003_I18N_Infrastructure.md](../04-basic/BASIC-003_I18N_Infrastructure.md) | 国际化基础设施实现规范 | ✅ 已有 |
+| BASIC-004 Category 双层分类 PRD | [BASIC-004_Category_PRD.md](../04-basic/BASIC-004_Category_PRD.md) | 双层分类、统计聚合、家庭同步合并与个人类型配置 | 🆕 新增 |
+
 ### 架构决策记录 (ADRs)
 
 | ADR | 文件名 | 决策内容 | 状态 |

@@ -86,7 +86,6 @@ void main() {
           icon: 'food',
           color: '#FF0000',
           level: 1,
-          type: TransactionType.expense,
           createdAt: now,
         ),
       ],

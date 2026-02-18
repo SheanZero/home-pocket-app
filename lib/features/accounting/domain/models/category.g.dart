@@ -13,11 +13,13 @@ _Category _$CategoryFromJson(Map<String, dynamic> json) => _Category(
   color: json['color'] as String,
   parentId: json['parentId'] as String?,
   level: (json['level'] as num).toInt(),
-  type: $enumDecode(_$TransactionTypeEnumMap, json['type']),
   isSystem: json['isSystem'] as bool? ?? false,
+  isArchived: json['isArchived'] as bool? ?? false,
   sortOrder: (json['sortOrder'] as num?)?.toInt() ?? 0,
-  budgetAmount: (json['budgetAmount'] as num?)?.toInt(),
   createdAt: DateTime.parse(json['createdAt'] as String),
+  updatedAt: json['updatedAt'] == null
+      ? null
+      : DateTime.parse(json['updatedAt'] as String),
 );
 
 Map<String, dynamic> _$CategoryToJson(_Category instance) => <String, dynamic>{
@@ -27,15 +29,9 @@ Map<String, dynamic> _$CategoryToJson(_Category instance) => <String, dynamic>{
   'color': instance.color,
   'parentId': instance.parentId,
   'level': instance.level,
-  'type': _$TransactionTypeEnumMap[instance.type]!,
   'isSystem': instance.isSystem,
+  'isArchived': instance.isArchived,
   'sortOrder': instance.sortOrder,
-  'budgetAmount': instance.budgetAmount,
   'createdAt': instance.createdAt.toIso8601String(),
-};
-
-const _$TransactionTypeEnumMap = {
-  TransactionType.expense: 'expense',
-  TransactionType.income: 'income',
-  TransactionType.transfer: 'transfer',
+  'updatedAt': instance.updatedAt?.toIso8601String(),
 };

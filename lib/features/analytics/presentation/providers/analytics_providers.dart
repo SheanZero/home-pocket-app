@@ -43,10 +43,7 @@ GetMonthlyReportUseCase getMonthlyReportUseCase(Ref ref) {
 /// GetBudgetProgressUseCase provider.
 @riverpod
 GetBudgetProgressUseCase getBudgetProgressUseCase(Ref ref) {
-  return GetBudgetProgressUseCase(
-    analyticsRepository: ref.watch(analyticsRepositoryProvider),
-    categoryRepository: ref.watch(categoryRepositoryProvider),
-  );
+  return GetBudgetProgressUseCase();
 }
 
 /// GetExpenseTrendUseCase provider.

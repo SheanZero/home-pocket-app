@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'transaction.dart';
 
 part 'category.freezed.dart';
 part 'category.g.dart';
@@ -20,11 +19,11 @@ abstract class Category with _$Category {
     required String color,
     String? parentId,
     required int level,
-    required TransactionType type,
     @Default(false) bool isSystem,
+    @Default(false) bool isArchived,
     @Default(0) int sortOrder,
-    int? budgetAmount,
     required DateTime createdAt,
+    DateTime? updatedAt,
   }) = _Category;
 
   factory Category.fromJson(Map<String, dynamic> json) =>

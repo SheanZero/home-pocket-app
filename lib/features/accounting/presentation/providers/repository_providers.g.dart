@@ -46,6 +46,28 @@ final categoryRepositoryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef CategoryRepositoryRef = AutoDisposeProviderRef<CategoryRepository>;
+String _$categoryLedgerConfigRepositoryHash() =>
+    r'a6111f1996acc53b5a15a4df2846fb4eb4ce243d';
+
+/// CategoryLedgerConfigRepository provider.
+///
+/// Copied from [categoryLedgerConfigRepository].
+@ProviderFor(categoryLedgerConfigRepository)
+final categoryLedgerConfigRepositoryProvider =
+    AutoDisposeProvider<CategoryLedgerConfigRepository>.internal(
+      categoryLedgerConfigRepository,
+      name: r'categoryLedgerConfigRepositoryProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$categoryLedgerConfigRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef CategoryLedgerConfigRepositoryRef =
+    AutoDisposeProviderRef<CategoryLedgerConfigRepository>;
 String _$transactionRepositoryHash() =>
     r'1a0b33f2298cd32dc9ce1e360fd82a9418b078c5';
 

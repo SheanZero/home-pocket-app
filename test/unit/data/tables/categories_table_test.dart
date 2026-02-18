@@ -26,7 +26,6 @@ void main() {
               icon: 'restaurant',
               color: '#FF5722',
               level: 1,
-              type: 'expense',
               createdAt: now,
             ),
           );
@@ -52,7 +51,6 @@ void main() {
               icon: 'restaurant',
               color: '#FF5722',
               level: 1,
-              type: 'expense',
               createdAt: now,
             ),
           );
@@ -67,7 +65,6 @@ void main() {
               color: '#FF5722',
               parentId: const Value('cat_food'),
               level: 2,
-              type: 'expense',
               createdAt: now,
             ),
           );
@@ -92,7 +89,6 @@ void main() {
               icon: 'restaurant',
               color: '#FF5722',
               level: 1,
-              type: 'expense',
               createdAt: now,
             ),
           );
@@ -107,7 +103,6 @@ void main() {
               color: '#FF5722',
               parentId: const Value('cat_food'),
               level: 2,
-              type: 'expense',
               createdAt: now,
             ),
           );

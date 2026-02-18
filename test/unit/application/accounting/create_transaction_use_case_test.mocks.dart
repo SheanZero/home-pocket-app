@@ -180,6 +180,29 @@ class MockCategoryRepository extends _i1.Mock
           as _i5.Future<void>);
 
   @override
+  _i5.Future<void> update({
+    required String? id,
+    String? name,
+    String? icon,
+    String? color,
+    bool? isArchived,
+    int? sortOrder,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#update, [], {
+              #id: id,
+              #name: name,
+              #icon: icon,
+              #color: color,
+              #isArchived: isArchived,
+              #sortOrder: sortOrder,
+            }),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
   _i5.Future<_i8.Category?> findById(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#findById, [id]),
@@ -196,6 +219,14 @@ class MockCategoryRepository extends _i1.Mock
           as _i5.Future<List<_i8.Category>>);
 
   @override
+  _i5.Future<List<_i8.Category>> findActive() =>
+      (super.noSuchMethod(
+            Invocation.method(#findActive, []),
+            returnValue: _i5.Future<List<_i8.Category>>.value(<_i8.Category>[]),
+          )
+          as _i5.Future<List<_i8.Category>>);
+
+  @override
   _i5.Future<List<_i8.Category>> findByLevel(int? level) =>
       (super.noSuchMethod(
             Invocation.method(#findByLevel, [level]),
@@ -207,22 +238,6 @@ class MockCategoryRepository extends _i1.Mock
   _i5.Future<List<_i8.Category>> findByParent(String? parentId) =>
       (super.noSuchMethod(
             Invocation.method(#findByParent, [parentId]),
-            returnValue: _i5.Future<List<_i8.Category>>.value(<_i8.Category>[]),
-          )
-          as _i5.Future<List<_i8.Category>>);
-
-  @override
-  _i5.Future<List<_i8.Category>> findByType(_i6.TransactionType? type) =>
-      (super.noSuchMethod(
-            Invocation.method(#findByType, [type]),
-            returnValue: _i5.Future<List<_i8.Category>>.value(<_i8.Category>[]),
-          )
-          as _i5.Future<List<_i8.Category>>);
-
-  @override
-  _i5.Future<List<_i8.Category>> findWithBudget() =>
-      (super.noSuchMethod(
-            Invocation.method(#findWithBudget, []),
             returnValue: _i5.Future<List<_i8.Category>>.value(<_i8.Category>[]),
           )
           as _i5.Future<List<_i8.Category>>);

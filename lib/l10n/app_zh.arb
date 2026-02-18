@@ -137,5 +137,27 @@
   "homeMonthLabel": "{month}月",
   "homeRecentSoulTransaction": "最近一笔: {merchant} \u00a5{amount}",
   "homeSoulChargeStatus": "灵魂充盈度 {fullness}% \u00b7 快乐ROI {roi}x",
-  "homeMonthBadge": "本月 {percent}%"
+  "homeMonthBadge": "本月 {percent}%",
+
+  "addTransaction": "添加账目",
+  "manualInput": "手动输入",
+  "ocrScan": "OCR",
+  "voiceInput": "语音",
+  "selectCategory": "选择分类",
+  "searchCategory": "搜索分类...",
+  "expenseDetail": "支出详情",
+  "back": "返回",
+  "record": "记录",
+  "enterStore": "输入店铺",
+  "enterMemo": "输入备注...",
+  "expenseClassification": "支出分类",
+  "survivalExpense": "生存支出",
+  "soulExpense": "灵魂支出",
+  "soulSatisfaction": "灵魂充盈度",
+  "addPhoto": "添加照片",
+  "ocrScanTitle": "OCR扫描录入",
+  "ocrHint": "将票据完整放入框内",
+  "tapToRecord": "点击开始录音",
+  "todayDate": "今天",
+  "next": "Next"
 }

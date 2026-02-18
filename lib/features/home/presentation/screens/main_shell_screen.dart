@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../accounting/presentation/screens/transaction_form_screen.dart';
+import '../../../accounting/presentation/screens/transaction_entry_screen.dart';
 import '../../../analytics/presentation/providers/analytics_providers.dart';
 import '../../../analytics/presentation/screens/analytics_screen.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
@@ -49,20 +49,19 @@ class MainShellScreen extends ConsumerWidget {
         onTap: (index) =>
             ref.read(selectedTabIndexProvider.notifier).select(index),
         onFabTap: () async {
-          final saved = await Navigator.of(context).push<bool>(
-            MaterialPageRoute<bool>(
-              builder: (_) => TransactionFormScreen(bookId: bookId),
+          await Navigator.of(context).push<void>(
+            MaterialPageRoute<void>(
+              builder: (_) => TransactionEntryScreen(bookId: bookId),
             ),
           );
-          if (saved == true) {
-            final now = DateTime.now();
-            ref.invalidate(monthlyReportProvider(
-              bookId: bookId,
-              year: now.year,
-              month: now.month,
-            ));
-            ref.invalidate(todayTransactionsProvider(bookId: bookId));
-          }
+          // Refresh data after returning from entry flow
+          final now = DateTime.now();
+          ref.invalidate(monthlyReportProvider(
+            bookId: bookId,
+            year: now.year,
+            month: now.month,
+          ));
+          ref.invalidate(todayTransactionsProvider(bookId: bookId));
         },
       ),
     );

@@ -10,11 +10,11 @@ class CategoryInsertData {
   final String color;
   final String? parentId;
   final int level;
-  final String type;
   final bool isSystem;
+  final bool isArchived;
   final int sortOrder;
-  final int? budgetAmount;
   final DateTime createdAt;
+  final DateTime? updatedAt;
 
   const CategoryInsertData({
     required this.id,
@@ -23,11 +23,11 @@ class CategoryInsertData {
     required this.color,
     this.parentId,
     required this.level,
-    required this.type,
     this.isSystem = false,
+    this.isArchived = false,
     this.sortOrder = 0,
-    this.budgetAmount,
     required this.createdAt,
+    this.updatedAt,
   });
 }
 
@@ -44,41 +44,73 @@ class CategoryDao {
     required String color,
     String? parentId,
     required int level,
-    required String type,
     bool isSystem = false,
+    bool isArchived = false,
     int sortOrder = 0,
-    int? budgetAmount,
     required DateTime createdAt,
+    DateTime? updatedAt,
   }) async {
-    await _db
-        .into(_db.categories)
-        .insert(
-          CategoriesCompanion.insert(
-            id: id,
-            name: name,
-            icon: icon,
-            color: color,
-            parentId: Value(parentId),
-            level: level,
-            type: type,
-            isSystem: Value(isSystem),
-            sortOrder: Value(sortOrder),
-            budgetAmount: Value(budgetAmount),
-            createdAt: createdAt,
-          ),
-        );
+    assert(level == 1 || level == 2, 'level must be 1 or 2');
+    assert(level != 1 || parentId == null, 'L1 must have parentId == null');
+    assert(level != 2 || parentId != null, 'L2 must have parentId != null');
+
+    await _db.into(_db.categories).insert(
+      CategoriesCompanion.insert(
+        id: id,
+        name: name,
+        icon: icon,
+        color: color,
+        parentId: Value(parentId),
+        level: level,
+        isSystem: Value(isSystem),
+        isArchived: Value(isArchived),
+        sortOrder: Value(sortOrder),
+        createdAt: createdAt,
+        updatedAt: Value(updatedAt),
+      ),
+    );
+  }
+
+  Future<void> updateCategory({
+    required String id,
+    String? name,
+    String? icon,
+    String? color,
+    bool? isArchived,
+    int? sortOrder,
+    required DateTime updatedAt,
+  }) async {
+    await (_db.update(_db.categories)..where((t) => t.id.equals(id))).write(
+      CategoriesCompanion(
+        name: name != null ? Value(name) : const Value.absent(),
+        icon: icon != null ? Value(icon) : const Value.absent(),
+        color: color != null ? Value(color) : const Value.absent(),
+        isArchived:
+            isArchived != null ? Value(isArchived) : const Value.absent(),
+        sortOrder:
+            sortOrder != null ? Value(sortOrder) : const Value.absent(),
+        updatedAt: Value(updatedAt),
+      ),
+    );
   }
 
   Future<CategoryRow?> findById(String id) async {
-    return (_db.select(
-      _db.categories,
-    )..where((t) => t.id.equals(id))).getSingleOrNull();
+    return (_db.select(_db.categories)
+          ..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
   }
 
   Future<List<CategoryRow>> findAll() async {
-    return (_db.select(
-      _db.categories,
-    )..orderBy([(t) => OrderingTerm.asc(t.sortOrder)])).get();
+    return (_db.select(_db.categories)
+          ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+        .get();
+  }
+
+  Future<List<CategoryRow>> findActive() async {
+    return (_db.select(_db.categories)
+          ..where((t) => t.isArchived.equals(false))
+          ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+        .get();
   }
 
   Future<List<CategoryRow>> findByLevel(int level) async {
@@ -95,27 +127,20 @@ class CategoryDao {
         .get();
   }
 
-  Future<List<CategoryRow>> findByType(String type) async {
-    return (_db.select(_db.categories)
-          ..where((t) => t.type.equals(type))
-          ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
-        .get();
-  }
-
-  /// Find categories that have a non-null budget amount.
-  Future<List<CategoryRow>> findWithBudget() async {
-    return (_db.select(_db.categories)
-          ..where((t) => t.budgetAmount.isNotNull())
-          ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
-        .get();
-  }
-
   /// Delete all categories (hard delete, for backup restore).
   Future<void> deleteAll() async {
     await _db.delete(_db.categories).go();
   }
 
   Future<void> insertBatch(List<CategoryInsertData> categories) async {
+    for (final cat in categories) {
+      assert(cat.level == 1 || cat.level == 2, 'level must be 1 or 2');
+      assert(cat.level != 1 || cat.parentId == null,
+          'L1 "${cat.id}" must have parentId == null');
+      assert(cat.level != 2 || cat.parentId != null,
+          'L2 "${cat.id}" must have parentId != null');
+    }
+
     await _db.batch((batch) {
       for (final cat in categories) {
         batch.insert(
@@ -127,11 +152,11 @@ class CategoryDao {
             color: cat.color,
             parentId: Value(cat.parentId),
             level: cat.level,
-            type: cat.type,
             isSystem: Value(cat.isSystem),
+            isArchived: Value(cat.isArchived),
             sortOrder: Value(cat.sortOrder),
-            budgetAmount: Value(cat.budgetAmount),
             createdAt: cat.createdAt,
+            updatedAt: Value(cat.updatedAt),
           ),
         );
       }

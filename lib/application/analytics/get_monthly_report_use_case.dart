@@ -140,10 +140,6 @@ class GetMonthlyReportUseCase {
         amount: ct.totalAmount,
         percentage: percentage,
         transactionCount: ct.transactionCount,
-        budgetAmount: cat?.budgetAmount,
-        budgetProgress: cat?.budgetAmount != null && cat!.budgetAmount! > 0
-            ? (ct.totalAmount / cat.budgetAmount! * 100)
-            : null,
       );
     }).toList();
   }

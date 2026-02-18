@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
-import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 
 void main() {
   group('Category', () {
@@ -12,7 +11,6 @@ void main() {
         icon: 'restaurant',
         color: '#FF5722',
         level: 1,
-        type: TransactionType.expense,
         createdAt: now,
       );
 
@@ -32,7 +30,7 @@ void main() {
         icon: 'restaurant',
         color: '#FF5722',
         level: 1,
-        type: TransactionType.expense,
+
         isSystem: true,
         createdAt: now,
       );
@@ -50,7 +48,7 @@ void main() {
         color: '#FF5722',
         parentId: 'cat_food',
         level: 2,
-        type: TransactionType.expense,
+
         createdAt: now,
       );
 
@@ -66,7 +64,7 @@ void main() {
         icon: 'restaurant',
         color: '#FF5722',
         level: 1,
-        type: TransactionType.expense,
+
         isSystem: true,
         sortOrder: 1,
         createdAt: now,
@@ -86,7 +84,6 @@ void main() {
         icon: 'restaurant',
         color: '#FF5722',
         level: 1,
-        type: TransactionType.expense,
         createdAt: now,
       );
 

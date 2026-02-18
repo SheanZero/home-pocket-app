@@ -410,5 +410,68 @@
   "@homeSoulChargeStatus": { "description": "Soul charge card status line", "placeholders": { "fullness": { "type": "int" }, "roi": { "type": "double" } } },
 
   "homeMonthBadge": "This month {percent}%",
-  "@homeMonthBadge": { "description": "Soul fullness month badge", "placeholders": { "percent": { "type": "int" } } }
+  "@homeMonthBadge": { "description": "Soul fullness month badge", "placeholders": { "percent": { "type": "int" } } },
+
+  "addTransaction": "Add Transaction",
+  "@addTransaction": { "description": "Transaction entry screen title" },
+
+  "manualInput": "Manual",
+  "@manualInput": { "description": "Manual input mode tab label" },
+
+  "ocrScan": "OCR",
+  "@ocrScan": { "description": "OCR scan mode tab label" },
+
+  "voiceInput": "Voice",
+  "@voiceInput": { "description": "Voice input mode tab label" },
+
+  "selectCategory": "Select Category",
+  "@selectCategory": { "description": "Category selection screen title" },
+
+  "searchCategory": "Search categories...",
+  "@searchCategory": { "description": "Category search placeholder" },
+
+  "expenseDetail": "Expense Detail",
+  "@expenseDetail": { "description": "Confirm screen title" },
+
+  "back": "Back",
+  "@back": { "description": "Back navigation label" },
+
+  "record": "Record",
+  "@record": { "description": "Save/record transaction button" },
+
+  "enterStore": "Enter store",
+  "@enterStore": { "description": "Store input placeholder" },
+
+  "enterMemo": "Enter memo...",
+  "@enterMemo": { "description": "Memo input placeholder" },
+
+  "expenseClassification": "Expense Type",
+  "@expenseClassification": { "description": "Ledger type section title" },
+
+  "survivalExpense": "Survival",
+  "@survivalExpense": { "description": "Survival ledger chip label" },
+
+  "soulExpense": "Soul",
+  "@soulExpense": { "description": "Soul ledger chip label" },
+
+  "soulSatisfaction": "Soul Fullness",
+  "@soulSatisfaction": { "description": "Soul satisfaction slider label" },
+
+  "addPhoto": "Add photo",
+  "@addPhoto": { "description": "Add photo button label" },
+
+  "ocrScanTitle": "OCR Scan",
+  "@ocrScanTitle": { "description": "OCR scanner screen title" },
+
+  "ocrHint": "Place receipt in frame",
+  "@ocrHint": { "description": "OCR scanner hint text" },
+
+  "tapToRecord": "Tap to start recording",
+  "@tapToRecord": { "description": "Voice input hint" },
+
+  "todayDate": "Today",
+  "@todayDate": { "description": "Today date chip label" },
+
+  "next": "Next",
+  "@next": { "description": "Next button label" }
 }

@@ -29,7 +29,7 @@ final getMonthlyReportUseCaseProvider =
 typedef GetMonthlyReportUseCaseRef =
     AutoDisposeProviderRef<GetMonthlyReportUseCase>;
 String _$getBudgetProgressUseCaseHash() =>
-    r'44ee40f9374353b4f05af2927913d4299ad7c9c8';
+    r'dec07f59ecb73ca73f6ee2b53912485c78ed23e1';
 
 /// GetBudgetProgressUseCase provider.
 ///

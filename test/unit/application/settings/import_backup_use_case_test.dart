@@ -116,7 +116,6 @@ void main() {
         icon: '',
         color: '',
         level: 0,
-        type: TransactionType.expense,
         createdAt: DateTime(2026),
       ),
     );
@@ -223,7 +222,6 @@ void main() {
       icon: 'food',
       color: '#FF0000',
       level: 1,
-      type: TransactionType.expense,
       createdAt: now,
     );
     final transaction = Transaction(

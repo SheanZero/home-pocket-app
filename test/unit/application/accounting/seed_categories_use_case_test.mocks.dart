@@ -7,7 +7,9 @@ import 'dart:async' as _i3;
 
 import 'package:home_pocket/features/accounting/domain/models/category.dart'
     as _i4;
-import 'package:home_pocket/features/accounting/domain/models/transaction.dart'
+import 'package:home_pocket/features/accounting/domain/models/category_ledger_config.dart'
+    as _i6;
+import 'package:home_pocket/features/accounting/domain/repositories/category_ledger_config_repository.dart'
     as _i5;
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart'
     as _i2;
@@ -46,6 +48,29 @@ class MockCategoryRepository extends _i1.Mock
           as _i3.Future<void>);
 
   @override
+  _i3.Future<void> update({
+    required String? id,
+    String? name,
+    String? icon,
+    String? color,
+    bool? isArchived,
+    int? sortOrder,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#update, [], {
+              #id: id,
+              #name: name,
+              #icon: icon,
+              #color: color,
+              #isArchived: isArchived,
+              #sortOrder: sortOrder,
+            }),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
   _i3.Future<_i4.Category?> findById(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#findById, [id]),
@@ -57,6 +82,14 @@ class MockCategoryRepository extends _i1.Mock
   _i3.Future<List<_i4.Category>> findAll() =>
       (super.noSuchMethod(
             Invocation.method(#findAll, []),
+            returnValue: _i3.Future<List<_i4.Category>>.value(<_i4.Category>[]),
+          )
+          as _i3.Future<List<_i4.Category>>);
+
+  @override
+  _i3.Future<List<_i4.Category>> findActive() =>
+      (super.noSuchMethod(
+            Invocation.method(#findActive, []),
             returnValue: _i3.Future<List<_i4.Category>>.value(<_i4.Category>[]),
           )
           as _i3.Future<List<_i4.Category>>);
@@ -78,22 +111,6 @@ class MockCategoryRepository extends _i1.Mock
           as _i3.Future<List<_i4.Category>>);
 
   @override
-  _i3.Future<List<_i4.Category>> findByType(_i5.TransactionType? type) =>
-      (super.noSuchMethod(
-            Invocation.method(#findByType, [type]),
-            returnValue: _i3.Future<List<_i4.Category>>.value(<_i4.Category>[]),
-          )
-          as _i3.Future<List<_i4.Category>>);
-
-  @override
-  _i3.Future<List<_i4.Category>> findWithBudget() =>
-      (super.noSuchMethod(
-            Invocation.method(#findWithBudget, []),
-            returnValue: _i3.Future<List<_i4.Category>>.value(<_i4.Category>[]),
-          )
-          as _i3.Future<List<_i4.Category>>);
-
-  @override
   _i3.Future<void> insertBatch(List<_i4.Category>? categories) =>
       (super.noSuchMethod(
             Invocation.method(#insertBatch, [categories]),
@@ -106,6 +123,70 @@ class MockCategoryRepository extends _i1.Mock
   _i3.Future<void> deleteAll() =>
       (super.noSuchMethod(
             Invocation.method(#deleteAll, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+}
+
+/// A class which mocks [CategoryLedgerConfigRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockCategoryLedgerConfigRepository extends _i1.Mock
+    implements _i5.CategoryLedgerConfigRepository {
+  MockCategoryLedgerConfigRepository() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.Future<void> upsert(_i6.CategoryLedgerConfig? config) =>
+      (super.noSuchMethod(
+            Invocation.method(#upsert, [config]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<_i6.CategoryLedgerConfig?> findById(String? categoryId) =>
+      (super.noSuchMethod(
+            Invocation.method(#findById, [categoryId]),
+            returnValue: _i3.Future<_i6.CategoryLedgerConfig?>.value(),
+          )
+          as _i3.Future<_i6.CategoryLedgerConfig?>);
+
+  @override
+  _i3.Future<List<_i6.CategoryLedgerConfig>> findAll() =>
+      (super.noSuchMethod(
+            Invocation.method(#findAll, []),
+            returnValue: _i3.Future<List<_i6.CategoryLedgerConfig>>.value(
+              <_i6.CategoryLedgerConfig>[],
+            ),
+          )
+          as _i3.Future<List<_i6.CategoryLedgerConfig>>);
+
+  @override
+  _i3.Future<void> delete(String? categoryId) =>
+      (super.noSuchMethod(
+            Invocation.method(#delete, [categoryId]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> deleteAll() =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteAll, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> upsertBatch(List<_i6.CategoryLedgerConfig>? configs) =>
+      (super.noSuchMethod(
+            Invocation.method(#upsertBatch, [configs]),
             returnValue: _i3.Future<void>.value(),
             returnValueForMissingStub: _i3.Future<void>.value(),
           )

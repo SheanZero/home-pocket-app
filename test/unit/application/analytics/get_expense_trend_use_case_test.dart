@@ -30,7 +30,6 @@ void main() {
       icon: '🍕',
       color: '#FF0000',
       level: 1,
-      type: 'expense',
       isSystem: true,
       createdAt: DateTime(2026, 1, 1),
     );
@@ -40,7 +39,6 @@ void main() {
       icon: '💰',
       color: '#00FF00',
       level: 1,
-      type: 'income',
       isSystem: true,
       createdAt: DateTime(2026, 1, 1),
     );

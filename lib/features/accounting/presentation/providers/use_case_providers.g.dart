@@ -67,7 +67,7 @@ final deleteTransactionUseCaseProvider =
 typedef DeleteTransactionUseCaseRef =
     AutoDisposeProviderRef<DeleteTransactionUseCase>;
 String _$seedCategoriesUseCaseHash() =>
-    r'5cc204a1d654cb37a673763252173295aaac29aa';
+    r'a4caa1f0c963fd92d35540d8de28751995f2020f';
 
 /// See also [seedCategoriesUseCase].
 @ProviderFor(seedCategoriesUseCase)
@@ -86,6 +86,26 @@ final seedCategoriesUseCaseProvider =
 // ignore: unused_element
 typedef SeedCategoriesUseCaseRef =
     AutoDisposeProviderRef<SeedCategoriesUseCase>;
+String _$resolveLedgerTypeServiceHash() =>
+    r'50f825aaa049bc5ba94fc90deae373cfe412d914';
+
+/// See also [resolveLedgerTypeService].
+@ProviderFor(resolveLedgerTypeService)
+final resolveLedgerTypeServiceProvider =
+    AutoDisposeProvider<ResolveLedgerTypeService>.internal(
+      resolveLedgerTypeService,
+      name: r'resolveLedgerTypeServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$resolveLedgerTypeServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ResolveLedgerTypeServiceRef =
+    AutoDisposeProviderRef<ResolveLedgerTypeService>;
 String _$ensureDefaultBookUseCaseHash() =>
     r'37e41e1327696132edf238d026cdfcb9f86ba297';
 

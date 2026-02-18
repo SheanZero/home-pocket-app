@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../application/accounting/create_transaction_use_case.dart';
 import '../../../../features/dual_ledger/presentation/widgets/soul_celebration_overlay.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/category/category_service.dart';
+import '../../../settings/presentation/providers/locale_provider.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/transaction.dart';
 import '../providers/repository_providers.dart';
@@ -46,7 +48,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
   Future<void> _loadCategories() async {
     final repo = ref.read(categoryRepositoryProvider);
-    final cats = await repo.findByType(_type);
+    final cats = await repo.findActive();
     if (mounted) {
       setState(() {
         _categories = cats.where((c) => c.level == 1).toList();
@@ -138,6 +140,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = ref.watch(currentLocaleProvider);
+
     return Scaffold(
       appBar: AppBar(title: Text(S.of(context).newTransaction)),
       body: SafeArea(
@@ -211,7 +215,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       children: _categories.map((cat) {
                         final selected = _selectedCategoryId == cat.id;
                         return ChoiceChip(
-                          label: Text(cat.name),
+                          label: Text(
+                            CategoryService.resolve(cat.name, locale),
+                          ),
                           selected: selected,
                           onSelected: (_) {
                             setState(() {

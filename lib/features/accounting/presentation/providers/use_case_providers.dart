@@ -7,6 +7,7 @@ import '../../../../application/accounting/ensure_default_book_use_case.dart';
 import '../../../../application/accounting/get_transactions_use_case.dart';
 import '../../../../application/accounting/seed_categories_use_case.dart';
 import '../../../../application/dual_ledger/providers.dart';
+import '../../../../application/dual_ledger/resolve_ledger_type_service.dart';
 import '../../../../infrastructure/crypto/providers.dart';
 import 'repository_providers.dart';
 
@@ -41,6 +42,15 @@ DeleteTransactionUseCase deleteTransactionUseCase(Ref ref) {
 SeedCategoriesUseCase seedCategoriesUseCase(Ref ref) {
   return SeedCategoriesUseCase(
     categoryRepository: ref.watch(categoryRepositoryProvider),
+    ledgerConfigRepository: ref.watch(categoryLedgerConfigRepositoryProvider),
+  );
+}
+
+@riverpod
+ResolveLedgerTypeService resolveLedgerTypeService(Ref ref) {
+  return ResolveLedgerTypeService(
+    categoryRepository: ref.watch(categoryRepositoryProvider),
+    ledgerConfigRepository: ref.watch(categoryLedgerConfigRepositoryProvider),
   );
 }
 

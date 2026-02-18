@@ -1168,6 +1168,9 @@ class $CategoriesTable extends Categories
     true,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES categories (id)',
+    ),
   );
   static const VerificationMeta _levelMeta = const VerificationMeta('level');
   @override
@@ -1175,16 +1178,8 @@ class $CategoriesTable extends Categories
     'level',
     aliasedName,
     false,
+    check: () => level.isIn([1, 2]),
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _typeMeta = const VerificationMeta('type');
-  @override
-  late final GeneratedColumn<String> type = GeneratedColumn<String>(
-    'type',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _isSystemMeta = const VerificationMeta(
@@ -1202,6 +1197,21 @@ class $CategoriesTable extends Categories
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _isArchivedMeta = const VerificationMeta(
+    'isArchived',
+  );
+  @override
+  late final GeneratedColumn<bool> isArchived = GeneratedColumn<bool>(
+    'is_archived',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_archived" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _sortOrderMeta = const VerificationMeta(
     'sortOrder',
   );
@@ -1214,17 +1224,6 @@ class $CategoriesTable extends Categories
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
-  static const VerificationMeta _budgetAmountMeta = const VerificationMeta(
-    'budgetAmount',
-  );
-  @override
-  late final GeneratedColumn<int> budgetAmount = GeneratedColumn<int>(
-    'budget_amount',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -1236,6 +1235,17 @@ class $CategoriesTable extends Categories
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1244,11 +1254,11 @@ class $CategoriesTable extends Categories
     color,
     parentId,
     level,
-    type,
     isSystem,
+    isArchived,
     sortOrder,
-    budgetAmount,
     createdAt,
+    updatedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1305,33 +1315,22 @@ class $CategoriesTable extends Categories
     } else if (isInserting) {
       context.missing(_levelMeta);
     }
-    if (data.containsKey('type')) {
-      context.handle(
-        _typeMeta,
-        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_typeMeta);
-    }
     if (data.containsKey('is_system')) {
       context.handle(
         _isSystemMeta,
         isSystem.isAcceptableOrUnknown(data['is_system']!, _isSystemMeta),
       );
     }
+    if (data.containsKey('is_archived')) {
+      context.handle(
+        _isArchivedMeta,
+        isArchived.isAcceptableOrUnknown(data['is_archived']!, _isArchivedMeta),
+      );
+    }
     if (data.containsKey('sort_order')) {
       context.handle(
         _sortOrderMeta,
         sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
-      );
-    }
-    if (data.containsKey('budget_amount')) {
-      context.handle(
-        _budgetAmountMeta,
-        budgetAmount.isAcceptableOrUnknown(
-          data['budget_amount']!,
-          _budgetAmountMeta,
-        ),
       );
     }
     if (data.containsKey('created_at')) {
@@ -1341,6 +1340,12 @@ class $CategoriesTable extends Categories
       );
     } else if (isInserting) {
       context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
     }
     return context;
   }
@@ -1375,26 +1380,26 @@ class $CategoriesTable extends Categories
         DriftSqlType.int,
         data['${effectivePrefix}level'],
       )!,
-      type: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}type'],
-      )!,
       isSystem: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_system'],
+      )!,
+      isArchived: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_archived'],
       )!,
       sortOrder: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}sort_order'],
       )!,
-      budgetAmount: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}budget_amount'],
-      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
     );
   }
 
@@ -1411,11 +1416,11 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
   final String color;
   final String? parentId;
   final int level;
-  final String type;
   final bool isSystem;
+  final bool isArchived;
   final int sortOrder;
-  final int? budgetAmount;
   final DateTime createdAt;
+  final DateTime? updatedAt;
   const CategoryRow({
     required this.id,
     required this.name,
@@ -1423,11 +1428,11 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     required this.color,
     this.parentId,
     required this.level,
-    required this.type,
     required this.isSystem,
+    required this.isArchived,
     required this.sortOrder,
-    this.budgetAmount,
     required this.createdAt,
+    this.updatedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1440,13 +1445,13 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       map['parent_id'] = Variable<String>(parentId);
     }
     map['level'] = Variable<int>(level);
-    map['type'] = Variable<String>(type);
     map['is_system'] = Variable<bool>(isSystem);
+    map['is_archived'] = Variable<bool>(isArchived);
     map['sort_order'] = Variable<int>(sortOrder);
-    if (!nullToAbsent || budgetAmount != null) {
-      map['budget_amount'] = Variable<int>(budgetAmount);
-    }
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
     return map;
   }
 
@@ -1460,13 +1465,13 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           ? const Value.absent()
           : Value(parentId),
       level: Value(level),
-      type: Value(type),
       isSystem: Value(isSystem),
+      isArchived: Value(isArchived),
       sortOrder: Value(sortOrder),
-      budgetAmount: budgetAmount == null && nullToAbsent
-          ? const Value.absent()
-          : Value(budgetAmount),
       createdAt: Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
     );
   }
 
@@ -1482,11 +1487,11 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       color: serializer.fromJson<String>(json['color']),
       parentId: serializer.fromJson<String?>(json['parentId']),
       level: serializer.fromJson<int>(json['level']),
-      type: serializer.fromJson<String>(json['type']),
       isSystem: serializer.fromJson<bool>(json['isSystem']),
+      isArchived: serializer.fromJson<bool>(json['isArchived']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
-      budgetAmount: serializer.fromJson<int?>(json['budgetAmount']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
     );
   }
   @override
@@ -1499,11 +1504,11 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       'color': serializer.toJson<String>(color),
       'parentId': serializer.toJson<String?>(parentId),
       'level': serializer.toJson<int>(level),
-      'type': serializer.toJson<String>(type),
       'isSystem': serializer.toJson<bool>(isSystem),
+      'isArchived': serializer.toJson<bool>(isArchived),
       'sortOrder': serializer.toJson<int>(sortOrder),
-      'budgetAmount': serializer.toJson<int?>(budgetAmount),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
     };
   }
 
@@ -1514,11 +1519,11 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     String? color,
     Value<String?> parentId = const Value.absent(),
     int? level,
-    String? type,
     bool? isSystem,
+    bool? isArchived,
     int? sortOrder,
-    Value<int?> budgetAmount = const Value.absent(),
     DateTime? createdAt,
+    Value<DateTime?> updatedAt = const Value.absent(),
   }) => CategoryRow(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -1526,11 +1531,11 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     color: color ?? this.color,
     parentId: parentId.present ? parentId.value : this.parentId,
     level: level ?? this.level,
-    type: type ?? this.type,
     isSystem: isSystem ?? this.isSystem,
+    isArchived: isArchived ?? this.isArchived,
     sortOrder: sortOrder ?? this.sortOrder,
-    budgetAmount: budgetAmount.present ? budgetAmount.value : this.budgetAmount,
     createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
   );
   CategoryRow copyWithCompanion(CategoriesCompanion data) {
     return CategoryRow(
@@ -1540,13 +1545,13 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       color: data.color.present ? data.color.value : this.color,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
       level: data.level.present ? data.level.value : this.level,
-      type: data.type.present ? data.type.value : this.type,
       isSystem: data.isSystem.present ? data.isSystem.value : this.isSystem,
+      isArchived: data.isArchived.present
+          ? data.isArchived.value
+          : this.isArchived,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
-      budgetAmount: data.budgetAmount.present
-          ? data.budgetAmount.value
-          : this.budgetAmount,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
 
@@ -1559,11 +1564,11 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           ..write('color: $color, ')
           ..write('parentId: $parentId, ')
           ..write('level: $level, ')
-          ..write('type: $type, ')
           ..write('isSystem: $isSystem, ')
+          ..write('isArchived: $isArchived, ')
           ..write('sortOrder: $sortOrder, ')
-          ..write('budgetAmount: $budgetAmount, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
@@ -1576,11 +1581,11 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     color,
     parentId,
     level,
-    type,
     isSystem,
+    isArchived,
     sortOrder,
-    budgetAmount,
     createdAt,
+    updatedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -1592,11 +1597,11 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           other.color == this.color &&
           other.parentId == this.parentId &&
           other.level == this.level &&
-          other.type == this.type &&
           other.isSystem == this.isSystem &&
+          other.isArchived == this.isArchived &&
           other.sortOrder == this.sortOrder &&
-          other.budgetAmount == this.budgetAmount &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
 }
 
 class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
@@ -1606,11 +1611,11 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
   final Value<String> color;
   final Value<String?> parentId;
   final Value<int> level;
-  final Value<String> type;
   final Value<bool> isSystem;
+  final Value<bool> isArchived;
   final Value<int> sortOrder;
-  final Value<int?> budgetAmount;
   final Value<DateTime> createdAt;
+  final Value<DateTime?> updatedAt;
   final Value<int> rowid;
   const CategoriesCompanion({
     this.id = const Value.absent(),
@@ -1619,11 +1624,11 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     this.color = const Value.absent(),
     this.parentId = const Value.absent(),
     this.level = const Value.absent(),
-    this.type = const Value.absent(),
     this.isSystem = const Value.absent(),
+    this.isArchived = const Value.absent(),
     this.sortOrder = const Value.absent(),
-    this.budgetAmount = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CategoriesCompanion.insert({
@@ -1633,18 +1638,17 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     required String color,
     this.parentId = const Value.absent(),
     required int level,
-    required String type,
     this.isSystem = const Value.absent(),
+    this.isArchived = const Value.absent(),
     this.sortOrder = const Value.absent(),
-    this.budgetAmount = const Value.absent(),
     required DateTime createdAt,
+    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
        icon = Value(icon),
        color = Value(color),
        level = Value(level),
-       type = Value(type),
        createdAt = Value(createdAt);
   static Insertable<CategoryRow> custom({
     Expression<String>? id,
@@ -1653,11 +1657,11 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     Expression<String>? color,
     Expression<String>? parentId,
     Expression<int>? level,
-    Expression<String>? type,
     Expression<bool>? isSystem,
+    Expression<bool>? isArchived,
     Expression<int>? sortOrder,
-    Expression<int>? budgetAmount,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1667,11 +1671,11 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
       if (color != null) 'color': color,
       if (parentId != null) 'parent_id': parentId,
       if (level != null) 'level': level,
-      if (type != null) 'type': type,
       if (isSystem != null) 'is_system': isSystem,
+      if (isArchived != null) 'is_archived': isArchived,
       if (sortOrder != null) 'sort_order': sortOrder,
-      if (budgetAmount != null) 'budget_amount': budgetAmount,
       if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1683,11 +1687,11 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     Value<String>? color,
     Value<String?>? parentId,
     Value<int>? level,
-    Value<String>? type,
     Value<bool>? isSystem,
+    Value<bool>? isArchived,
     Value<int>? sortOrder,
-    Value<int?>? budgetAmount,
     Value<DateTime>? createdAt,
+    Value<DateTime?>? updatedAt,
     Value<int>? rowid,
   }) {
     return CategoriesCompanion(
@@ -1697,11 +1701,11 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
       color: color ?? this.color,
       parentId: parentId ?? this.parentId,
       level: level ?? this.level,
-      type: type ?? this.type,
       isSystem: isSystem ?? this.isSystem,
+      isArchived: isArchived ?? this.isArchived,
       sortOrder: sortOrder ?? this.sortOrder,
-      budgetAmount: budgetAmount ?? this.budgetAmount,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1727,20 +1731,20 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     if (level.present) {
       map['level'] = Variable<int>(level.value);
     }
-    if (type.present) {
-      map['type'] = Variable<String>(type.value);
-    }
     if (isSystem.present) {
       map['is_system'] = Variable<bool>(isSystem.value);
+    }
+    if (isArchived.present) {
+      map['is_archived'] = Variable<bool>(isArchived.value);
     }
     if (sortOrder.present) {
       map['sort_order'] = Variable<int>(sortOrder.value);
     }
-    if (budgetAmount.present) {
-      map['budget_amount'] = Variable<int>(budgetAmount.value);
-    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1757,11 +1761,295 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
           ..write('color: $color, ')
           ..write('parentId: $parentId, ')
           ..write('level: $level, ')
-          ..write('type: $type, ')
           ..write('isSystem: $isSystem, ')
+          ..write('isArchived: $isArchived, ')
           ..write('sortOrder: $sortOrder, ')
-          ..write('budgetAmount: $budgetAmount, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CategoryLedgerConfigsTable extends CategoryLedgerConfigs
+    with TableInfo<$CategoryLedgerConfigsTable, CategoryLedgerConfigRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CategoryLedgerConfigsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES categories (id)',
+    ),
+  );
+  static const VerificationMeta _ledgerTypeMeta = const VerificationMeta(
+    'ledgerType',
+  );
+  @override
+  late final GeneratedColumn<String> ledgerType = GeneratedColumn<String>(
+    'ledger_type',
+    aliasedName,
+    false,
+    check: () => ledgerType.isIn(['survival', 'soul']),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [categoryId, ledgerType, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'category_ledger_configs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CategoryLedgerConfigRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryIdMeta);
+    }
+    if (data.containsKey('ledger_type')) {
+      context.handle(
+        _ledgerTypeMeta,
+        ledgerType.isAcceptableOrUnknown(data['ledger_type']!, _ledgerTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ledgerTypeMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {categoryId};
+  @override
+  CategoryLedgerConfigRow map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CategoryLedgerConfigRow(
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_id'],
+      )!,
+      ledgerType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ledger_type'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CategoryLedgerConfigsTable createAlias(String alias) {
+    return $CategoryLedgerConfigsTable(attachedDatabase, alias);
+  }
+}
+
+class CategoryLedgerConfigRow extends DataClass
+    implements Insertable<CategoryLedgerConfigRow> {
+  final String categoryId;
+  final String ledgerType;
+  final DateTime updatedAt;
+  const CategoryLedgerConfigRow({
+    required this.categoryId,
+    required this.ledgerType,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['category_id'] = Variable<String>(categoryId);
+    map['ledger_type'] = Variable<String>(ledgerType);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  CategoryLedgerConfigsCompanion toCompanion(bool nullToAbsent) {
+    return CategoryLedgerConfigsCompanion(
+      categoryId: Value(categoryId),
+      ledgerType: Value(ledgerType),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory CategoryLedgerConfigRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CategoryLedgerConfigRow(
+      categoryId: serializer.fromJson<String>(json['categoryId']),
+      ledgerType: serializer.fromJson<String>(json['ledgerType']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'categoryId': serializer.toJson<String>(categoryId),
+      'ledgerType': serializer.toJson<String>(ledgerType),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  CategoryLedgerConfigRow copyWith({
+    String? categoryId,
+    String? ledgerType,
+    DateTime? updatedAt,
+  }) => CategoryLedgerConfigRow(
+    categoryId: categoryId ?? this.categoryId,
+    ledgerType: ledgerType ?? this.ledgerType,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  CategoryLedgerConfigRow copyWithCompanion(
+    CategoryLedgerConfigsCompanion data,
+  ) {
+    return CategoryLedgerConfigRow(
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      ledgerType: data.ledgerType.present
+          ? data.ledgerType.value
+          : this.ledgerType,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CategoryLedgerConfigRow(')
+          ..write('categoryId: $categoryId, ')
+          ..write('ledgerType: $ledgerType, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(categoryId, ledgerType, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CategoryLedgerConfigRow &&
+          other.categoryId == this.categoryId &&
+          other.ledgerType == this.ledgerType &&
+          other.updatedAt == this.updatedAt);
+}
+
+class CategoryLedgerConfigsCompanion
+    extends UpdateCompanion<CategoryLedgerConfigRow> {
+  final Value<String> categoryId;
+  final Value<String> ledgerType;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const CategoryLedgerConfigsCompanion({
+    this.categoryId = const Value.absent(),
+    this.ledgerType = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CategoryLedgerConfigsCompanion.insert({
+    required String categoryId,
+    required String ledgerType,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : categoryId = Value(categoryId),
+       ledgerType = Value(ledgerType),
+       updatedAt = Value(updatedAt);
+  static Insertable<CategoryLedgerConfigRow> custom({
+    Expression<String>? categoryId,
+    Expression<String>? ledgerType,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (categoryId != null) 'category_id': categoryId,
+      if (ledgerType != null) 'ledger_type': ledgerType,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CategoryLedgerConfigsCompanion copyWith({
+    Value<String>? categoryId,
+    Value<String>? ledgerType,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return CategoryLedgerConfigsCompanion(
+      categoryId: categoryId ?? this.categoryId,
+      ledgerType: ledgerType ?? this.ledgerType,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (categoryId.present) {
+      map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (ledgerType.present) {
+      map['ledger_type'] = Variable<String>(ledgerType.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CategoryLedgerConfigsCompanion(')
+          ..write('categoryId: $categoryId, ')
+          ..write('ledgerType: $ledgerType, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2873,6 +3161,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AuditLogsTable auditLogs = $AuditLogsTable(this);
   late final $BooksTable books = $BooksTable(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
+  late final $CategoryLedgerConfigsTable categoryLedgerConfigs =
+      $CategoryLedgerConfigsTable(this);
   late final $TransactionsTable transactions = $TransactionsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -2882,6 +3172,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     auditLogs,
     books,
     categories,
+    categoryLedgerConfigs,
     transactions,
   ];
 }
@@ -3424,11 +3715,11 @@ typedef $$CategoriesTableCreateCompanionBuilder =
       required String color,
       Value<String?> parentId,
       required int level,
-      required String type,
       Value<bool> isSystem,
+      Value<bool> isArchived,
       Value<int> sortOrder,
-      Value<int?> budgetAmount,
       required DateTime createdAt,
+      Value<DateTime?> updatedAt,
       Value<int> rowid,
     });
 typedef $$CategoriesTableUpdateCompanionBuilder =
@@ -3439,13 +3730,65 @@ typedef $$CategoriesTableUpdateCompanionBuilder =
       Value<String> color,
       Value<String?> parentId,
       Value<int> level,
-      Value<String> type,
       Value<bool> isSystem,
+      Value<bool> isArchived,
       Value<int> sortOrder,
-      Value<int?> budgetAmount,
       Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
       Value<int> rowid,
     });
+
+final class $$CategoriesTableReferences
+    extends BaseReferences<_$AppDatabase, $CategoriesTable, CategoryRow> {
+  $$CategoriesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $CategoriesTable _parentIdTable(_$AppDatabase db) =>
+      db.categories.createAlias(
+        $_aliasNameGenerator(db.categories.parentId, db.categories.id),
+      );
+
+  $$CategoriesTableProcessedTableManager? get parentId {
+    final $_column = $_itemColumn<String>('parent_id');
+    if ($_column == null) return null;
+    final manager = $$CategoriesTableTableManager(
+      $_db,
+      $_db.categories,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_parentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $CategoryLedgerConfigsTable,
+    List<CategoryLedgerConfigRow>
+  >
+  _categoryLedgerConfigsRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.categoryLedgerConfigs,
+        aliasName: $_aliasNameGenerator(
+          db.categories.id,
+          db.categoryLedgerConfigs.categoryId,
+        ),
+      );
+
+  $$CategoryLedgerConfigsTableProcessedTableManager
+  get categoryLedgerConfigsRefs {
+    final manager = $$CategoryLedgerConfigsTableTableManager(
+      $_db,
+      $_db.categoryLedgerConfigs,
+    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _categoryLedgerConfigsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$CategoriesTableFilterComposer
     extends Composer<_$AppDatabase, $CategoriesTable> {
@@ -3476,18 +3819,8 @@ class $$CategoriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get parentId => $composableBuilder(
-    column: $table.parentId,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<int> get level => $composableBuilder(
     column: $table.level,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get type => $composableBuilder(
-    column: $table.type,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3496,13 +3829,13 @@ class $$CategoriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get sortOrder => $composableBuilder(
-    column: $table.sortOrder,
+  ColumnFilters<bool> get isArchived => $composableBuilder(
+    column: $table.isArchived,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get budgetAmount => $composableBuilder(
-    column: $table.budgetAmount,
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3510,6 +3843,60 @@ class $$CategoriesTableFilterComposer
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CategoriesTableFilterComposer get parentId {
+    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.parentId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableFilterComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> categoryLedgerConfigsRefs(
+    Expression<bool> Function($$CategoryLedgerConfigsTableFilterComposer f) f,
+  ) {
+    final $$CategoryLedgerConfigsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.categoryLedgerConfigs,
+          getReferencedColumn: (t) => t.categoryId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CategoryLedgerConfigsTableFilterComposer(
+                $db: $db,
+                $table: $db.categoryLedgerConfigs,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$CategoriesTableOrderingComposer
@@ -3541,18 +3928,8 @@ class $$CategoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get parentId => $composableBuilder(
-    column: $table.parentId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<int> get level => $composableBuilder(
     column: $table.level,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get type => $composableBuilder(
-    column: $table.type,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -3561,13 +3938,13 @@ class $$CategoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get sortOrder => $composableBuilder(
-    column: $table.sortOrder,
+  ColumnOrderings<bool> get isArchived => $composableBuilder(
+    column: $table.isArchived,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get budgetAmount => $composableBuilder(
-    column: $table.budgetAmount,
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -3575,6 +3952,34 @@ class $$CategoriesTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CategoriesTableOrderingComposer get parentId {
+    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.parentId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$CategoriesTableAnnotationComposer
@@ -3598,28 +4003,74 @@ class $$CategoriesTableAnnotationComposer
   GeneratedColumn<String> get color =>
       $composableBuilder(column: $table.color, builder: (column) => column);
 
-  GeneratedColumn<String> get parentId =>
-      $composableBuilder(column: $table.parentId, builder: (column) => column);
-
   GeneratedColumn<int> get level =>
       $composableBuilder(column: $table.level, builder: (column) => column);
-
-  GeneratedColumn<String> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
 
   GeneratedColumn<bool> get isSystem =>
       $composableBuilder(column: $table.isSystem, builder: (column) => column);
 
-  GeneratedColumn<int> get sortOrder =>
-      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
-
-  GeneratedColumn<int> get budgetAmount => $composableBuilder(
-    column: $table.budgetAmount,
+  GeneratedColumn<bool> get isArchived => $composableBuilder(
+    column: $table.isArchived,
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$CategoriesTableAnnotationComposer get parentId {
+    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.parentId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> categoryLedgerConfigsRefs<T extends Object>(
+    Expression<T> Function($$CategoryLedgerConfigsTableAnnotationComposer a) f,
+  ) {
+    final $$CategoryLedgerConfigsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.categoryLedgerConfigs,
+          getReferencedColumn: (t) => t.categoryId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CategoryLedgerConfigsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.categoryLedgerConfigs,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$CategoriesTableTableManager
@@ -3633,12 +4084,12 @@ class $$CategoriesTableTableManager
           $$CategoriesTableAnnotationComposer,
           $$CategoriesTableCreateCompanionBuilder,
           $$CategoriesTableUpdateCompanionBuilder,
-          (
-            CategoryRow,
-            BaseReferences<_$AppDatabase, $CategoriesTable, CategoryRow>,
-          ),
+          (CategoryRow, $$CategoriesTableReferences),
           CategoryRow,
-          PrefetchHooks Function()
+          PrefetchHooks Function({
+            bool parentId,
+            bool categoryLedgerConfigsRefs,
+          })
         > {
   $$CategoriesTableTableManager(_$AppDatabase db, $CategoriesTable table)
     : super(
@@ -3659,11 +4110,11 @@ class $$CategoriesTableTableManager
                 Value<String> color = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
                 Value<int> level = const Value.absent(),
-                Value<String> type = const Value.absent(),
                 Value<bool> isSystem = const Value.absent(),
+                Value<bool> isArchived = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
-                Value<int?> budgetAmount = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion(
                 id: id,
@@ -3672,11 +4123,11 @@ class $$CategoriesTableTableManager
                 color: color,
                 parentId: parentId,
                 level: level,
-                type: type,
                 isSystem: isSystem,
+                isArchived: isArchived,
                 sortOrder: sortOrder,
-                budgetAmount: budgetAmount,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3687,11 +4138,11 @@ class $$CategoriesTableTableManager
                 required String color,
                 Value<String?> parentId = const Value.absent(),
                 required int level,
-                required String type,
                 Value<bool> isSystem = const Value.absent(),
+                Value<bool> isArchived = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
-                Value<int?> budgetAmount = const Value.absent(),
                 required DateTime createdAt,
+                Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion.insert(
                 id: id,
@@ -3700,17 +4151,88 @@ class $$CategoriesTableTableManager
                 color: color,
                 parentId: parentId,
                 level: level,
-                type: type,
                 isSystem: isSystem,
+                isArchived: isArchived,
                 sortOrder: sortOrder,
-                budgetAmount: budgetAmount,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CategoriesTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback:
+              ({parentId = false, categoryLedgerConfigsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (categoryLedgerConfigsRefs) db.categoryLedgerConfigs,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (parentId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.parentId,
+                                    referencedTable: $$CategoriesTableReferences
+                                        ._parentIdTable(db),
+                                    referencedColumn:
+                                        $$CategoriesTableReferences
+                                            ._parentIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (categoryLedgerConfigsRefs)
+                        await $_getPrefetchedData<
+                          CategoryRow,
+                          $CategoriesTable,
+                          CategoryLedgerConfigRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CategoriesTableReferences
+                              ._categoryLedgerConfigsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CategoriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).categoryLedgerConfigsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.categoryId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
         ),
       );
 }
@@ -3725,12 +4247,317 @@ typedef $$CategoriesTableProcessedTableManager =
       $$CategoriesTableAnnotationComposer,
       $$CategoriesTableCreateCompanionBuilder,
       $$CategoriesTableUpdateCompanionBuilder,
-      (
-        CategoryRow,
-        BaseReferences<_$AppDatabase, $CategoriesTable, CategoryRow>,
-      ),
+      (CategoryRow, $$CategoriesTableReferences),
       CategoryRow,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool parentId, bool categoryLedgerConfigsRefs})
+    >;
+typedef $$CategoryLedgerConfigsTableCreateCompanionBuilder =
+    CategoryLedgerConfigsCompanion Function({
+      required String categoryId,
+      required String ledgerType,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$CategoryLedgerConfigsTableUpdateCompanionBuilder =
+    CategoryLedgerConfigsCompanion Function({
+      Value<String> categoryId,
+      Value<String> ledgerType,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+final class $$CategoryLedgerConfigsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $CategoryLedgerConfigsTable,
+          CategoryLedgerConfigRow
+        > {
+  $$CategoryLedgerConfigsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
+      db.categories.createAlias(
+        $_aliasNameGenerator(
+          db.categoryLedgerConfigs.categoryId,
+          db.categories.id,
+        ),
+      );
+
+  $$CategoriesTableProcessedTableManager get categoryId {
+    final $_column = $_itemColumn<String>('category_id')!;
+
+    final manager = $$CategoriesTableTableManager(
+      $_db,
+      $_db.categories,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$CategoryLedgerConfigsTableFilterComposer
+    extends Composer<_$AppDatabase, $CategoryLedgerConfigsTable> {
+  $$CategoryLedgerConfigsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get ledgerType => $composableBuilder(
+    column: $table.ledgerType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CategoriesTableFilterComposer get categoryId {
+    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableFilterComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CategoryLedgerConfigsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CategoryLedgerConfigsTable> {
+  $$CategoryLedgerConfigsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get ledgerType => $composableBuilder(
+    column: $table.ledgerType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CategoriesTableOrderingComposer get categoryId {
+    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CategoryLedgerConfigsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CategoryLedgerConfigsTable> {
+  $$CategoryLedgerConfigsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get ledgerType => $composableBuilder(
+    column: $table.ledgerType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$CategoriesTableAnnotationComposer get categoryId {
+    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CategoryLedgerConfigsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CategoryLedgerConfigsTable,
+          CategoryLedgerConfigRow,
+          $$CategoryLedgerConfigsTableFilterComposer,
+          $$CategoryLedgerConfigsTableOrderingComposer,
+          $$CategoryLedgerConfigsTableAnnotationComposer,
+          $$CategoryLedgerConfigsTableCreateCompanionBuilder,
+          $$CategoryLedgerConfigsTableUpdateCompanionBuilder,
+          (CategoryLedgerConfigRow, $$CategoryLedgerConfigsTableReferences),
+          CategoryLedgerConfigRow,
+          PrefetchHooks Function({bool categoryId})
+        > {
+  $$CategoryLedgerConfigsTableTableManager(
+    _$AppDatabase db,
+    $CategoryLedgerConfigsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CategoryLedgerConfigsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$CategoryLedgerConfigsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$CategoryLedgerConfigsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> categoryId = const Value.absent(),
+                Value<String> ledgerType = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CategoryLedgerConfigsCompanion(
+                categoryId: categoryId,
+                ledgerType: ledgerType,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String categoryId,
+                required String ledgerType,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => CategoryLedgerConfigsCompanion.insert(
+                categoryId: categoryId,
+                ledgerType: ledgerType,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CategoryLedgerConfigsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({categoryId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (categoryId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.categoryId,
+                                referencedTable:
+                                    $$CategoryLedgerConfigsTableReferences
+                                        ._categoryIdTable(db),
+                                referencedColumn:
+                                    $$CategoryLedgerConfigsTableReferences
+                                        ._categoryIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CategoryLedgerConfigsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CategoryLedgerConfigsTable,
+      CategoryLedgerConfigRow,
+      $$CategoryLedgerConfigsTableFilterComposer,
+      $$CategoryLedgerConfigsTableOrderingComposer,
+      $$CategoryLedgerConfigsTableAnnotationComposer,
+      $$CategoryLedgerConfigsTableCreateCompanionBuilder,
+      $$CategoryLedgerConfigsTableUpdateCompanionBuilder,
+      (CategoryLedgerConfigRow, $$CategoryLedgerConfigsTableReferences),
+      CategoryLedgerConfigRow,
+      PrefetchHooks Function({bool categoryId})
     >;
 typedef $$TransactionsTableCreateCompanionBuilder =
     TransactionsCompanion Function({
@@ -4235,6 +5062,8 @@ class $AppDatabaseManager {
       $$BooksTableTableManager(_db, _db.books);
   $$CategoriesTableTableManager get categories =>
       $$CategoriesTableTableManager(_db, _db.categories);
+  $$CategoryLedgerConfigsTableTableManager get categoryLedgerConfigs =>
+      $$CategoryLedgerConfigsTableTableManager(_db, _db.categoryLedgerConfigs);
   $$TransactionsTableTableManager get transactions =>
       $$TransactionsTableTableManager(_db, _db.transactions);
 }

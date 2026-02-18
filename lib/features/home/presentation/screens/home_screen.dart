@@ -6,6 +6,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../features/analytics/presentation/providers/analytics_providers.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/category/category_service.dart';
+import '../../../settings/presentation/providers/locale_provider.dart';
 import '../providers/home_providers.dart';
 import '../providers/today_transactions_provider.dart';
 import '../widgets/family_invite_banner.dart';
@@ -28,6 +30,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
+    final locale = ref.watch(currentLocaleProvider);
     final now = DateTime.now();
     final year = now.year;
     final month = now.month;
@@ -44,7 +47,7 @@ class HomeScreen extends ConsumerWidget {
         children: [
           // Hero header + Month overview card with blue background overlap
           _buildHeroWithCard(
-              context, l10n, year, month, reportAsync, todayTxAsync),
+              context, l10n, locale, year, month, reportAsync, todayTxAsync),
           const SizedBox(height: 16),
 
           // Family invite banner
@@ -108,8 +111,15 @@ class HomeScreen extends ConsumerWidget {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: HomeTransactionTile(
-                      merchant: tx.merchant ?? tx.categoryId,
-                      categoryLabel: tx.categoryId,
+                      merchant: tx.merchant ??
+                          CategoryService.resolveFromId(
+                            tx.categoryId,
+                            locale,
+                          ),
+                      categoryLabel: CategoryService.resolveFromId(
+                        tx.categoryId,
+                        locale,
+                      ),
                       formattedAmount: _formatAmount(tx),
                       ledgerType: tx.ledgerType,
                       iconData: _iconForCategory(tx.categoryId),
@@ -166,6 +176,7 @@ class HomeScreen extends ConsumerWidget {
   Widget _buildHeroWithCard(
     BuildContext context,
     S l10n,
+    Locale locale,
     int year,
     int month,
     AsyncValue reportAsync,
@@ -249,8 +260,12 @@ class HomeScreen extends ConsumerWidget {
                         double.parse(happinessROI.toStringAsFixed(1)),
                     fullnessLevel: fullness,
                     recentMerchant: recentSoulTx?.merchant ??
-                        recentSoulTx?.categoryId ??
-                        '',
+                        (recentSoulTx != null
+                            ? CategoryService.resolveFromId(
+                                recentSoulTx.categoryId,
+                                locale,
+                              )
+                            : ''),
                     recentAmount: recentSoulTx?.amount ?? 0,
                     recentQuote: recentSoulTx?.note ?? '',
                   ),
