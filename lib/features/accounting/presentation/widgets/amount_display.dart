@@ -86,14 +86,21 @@ class AmountDisplay extends StatelessWidget {
               ],
             ),
           ),
-          const Spacer(),
-          // Amount value
-          Text(
-            _formatted,
-            style: AppTextStyles.amountLarge.copyWith(
-              fontSize: 32,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+          const SizedBox(width: 12),
+          // Amount value — shrinks to fit when digits exceed 7
+          Expanded(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Text(
+                _formatted,
+                style: AppTextStyles.amountLarge.copyWith(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+                maxLines: 1,
+              ),
             ),
           ),
           // Clear button
