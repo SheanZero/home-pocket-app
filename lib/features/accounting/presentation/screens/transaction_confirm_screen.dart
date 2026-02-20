@@ -8,13 +8,13 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/dual_ledger/presentation/widgets/soul_celebration_overlay.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/category/category_service.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../settings/presentation/providers/locale_provider.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/transaction.dart';
 import '../providers/use_case_providers.dart';
+import '../utils/category_display_utils.dart';
 import '../widgets/ledger_type_selector.dart';
 import '../widgets/soul_satisfaction_slider.dart';
 
@@ -28,12 +28,14 @@ class TransactionConfirmScreen extends ConsumerStatefulWidget {
     required this.bookId,
     required this.amount,
     required this.category,
+    this.parentCategory,
     required this.date,
   });
 
   final String bookId;
   final int amount;
   final Category category;
+  final Category? parentCategory;
   final DateTime date;
 
   @override
@@ -78,8 +80,9 @@ class _TransactionConfirmScreenState
         merchant: _storeController.text.trim().isEmpty
             ? null
             : _storeController.text.trim(),
-        soulSatisfaction:
-            _ledgerType == LedgerType.soul ? _soulSatisfaction : null,
+        soulSatisfaction: _ledgerType == LedgerType.soul
+            ? _soulSatisfaction
+            : null,
       ),
     );
 
@@ -92,16 +95,14 @@ class _TransactionConfirmScreenState
         await _showSoulCelebration();
       }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.of(context).transactionSaved)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(S.of(context).transactionSaved)));
       // Pop all the way back to main shell
       Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result.error ?? S.of(context).failedToSave),
-        ),
+        SnackBar(content: Text(result.error ?? S.of(context).failedToSave)),
       );
     }
   }
@@ -122,31 +123,6 @@ class _TransactionConfirmScreenState
     overlay.remove();
   }
 
-  IconData _resolveIcon(String iconName) {
-    const iconMap = <String, IconData>{
-      'restaurant': Icons.restaurant,
-      'local_mall': Icons.local_mall,
-      'directions_bus': Icons.directions_bus,
-      'sports_esports': Icons.sports_esports,
-      'checkroom': Icons.checkroom,
-      'people': Icons.people,
-      'local_hospital': Icons.local_hospital,
-      'school': Icons.school,
-      'credit_card': Icons.credit_card,
-      'flash_on': Icons.flash_on,
-      'phone_iphone': Icons.phone_iphone,
-      'home': Icons.home,
-      'directions_car': Icons.directions_car,
-      'account_balance': Icons.account_balance,
-      'security': Icons.security,
-      'star': Icons.star,
-      'savings': Icons.savings,
-      'more_horiz': Icons.more_horiz,
-      'help_outline': Icons.help_outline,
-    };
-    return iconMap[iconName] ?? Icons.help_outline;
-  }
-
   Color _parseColor(String colorHex) {
     final hex = colorHex.replaceFirst('#', '');
     return Color(int.parse('FF$hex', radix: 16));
@@ -156,7 +132,8 @@ class _TransactionConfirmScreenState
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final locale = ref.watch(currentLocaleProvider);
-    final catColor = _parseColor(widget.category.color);
+    final displayCategory = widget.parentCategory ?? widget.category;
+    final catColor = _parseColor(displayCategory.color);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F9FD),
@@ -175,10 +152,7 @@ class _TransactionConfirmScreenState
           ),
         ),
         leadingWidth: 100,
-        title: Text(
-          l10n.expenseDetail,
-          style: AppTextStyles.headlineMedium,
-        ),
+        title: Text(l10n.expenseDetail, style: AppTextStyles.headlineMedium),
         centerTitle: true,
       ),
       body: Column(
@@ -212,13 +186,14 @@ class _TransactionConfirmScreenState
                         const _Divider(),
                         // Category row
                         _DetailRow(
-                          icon: _resolveIcon(widget.category.icon),
+                          icon: resolveCategoryIcon(displayCategory.icon),
                           iconColor: catColor,
                           label: l10n.category,
                           trailing: Text(
-                            CategoryService.resolve(
-                              widget.category.name,
-                              locale,
+                            formatCategoryPath(
+                              category: widget.category,
+                              parentCategory: widget.parentCategory,
+                              locale: locale,
                             ),
                             style: AppTextStyles.bodyMedium,
                           ),

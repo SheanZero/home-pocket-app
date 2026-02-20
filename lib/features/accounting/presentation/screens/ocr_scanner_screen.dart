@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
+import '../widgets/entry_mode_switcher.dart';
 import '../widgets/input_mode_tabs.dart';
 
 /// Stub OCR scanner screen with dark camera-style UI.
@@ -11,7 +12,9 @@ import '../widgets/input_mode_tabs.dart';
 /// gallery/shutter/flash controls, and a status pill.
 /// Shutter button currently just pops back.
 class OcrScannerScreen extends StatelessWidget {
-  const OcrScannerScreen({super.key});
+  const OcrScannerScreen({super.key, required this.bookId});
+
+  final String bookId;
 
   @override
   Widget build(BuildContext context) {
@@ -52,17 +55,7 @@ class OcrScannerScreen extends StatelessWidget {
             const SizedBox(height: 8),
 
             // Input mode tabs (OCR active)
-            InputModeTabs(
-              selected: InputMode.ocr,
-              onChanged: (mode) {
-                if (mode != InputMode.ocr) {
-                  Navigator.pop(context);
-                }
-              },
-              manualLabel: l10n.manualInput,
-              ocrLabel: l10n.ocrScan,
-              voiceLabel: l10n.voiceInput,
-            ),
+            EntryModeSwitcher(selectedMode: InputMode.ocr, bookId: bookId),
 
             const SizedBox(height: 24),
 
@@ -139,10 +132,7 @@ class OcrScannerScreen extends StatelessWidget {
                       height: 72,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 4,
-                        ),
+                        border: Border.all(color: Colors.white, width: 4),
                       ),
                       child: Container(
                         margin: const EdgeInsets.all(4),
@@ -154,10 +144,7 @@ class OcrScannerScreen extends StatelessWidget {
                     ),
                   ),
                   // Flash
-                  _CircleButton(
-                    icon: Icons.flash_off_outlined,
-                    onTap: () {},
-                  ),
+                  _CircleButton(icon: Icons.flash_off_outlined, onTap: () {}),
                 ],
               ),
             ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
+import '../widgets/entry_mode_switcher.dart';
 import '../widgets/input_mode_tabs.dart';
 
 /// Stub voice input screen with recording UI.
@@ -10,7 +11,9 @@ import '../widgets/input_mode_tabs.dart';
 /// Shows a transcript card, animated waveform bars, microphone button,
 /// and a "Next" action. Currently only static UI.
 class VoiceInputScreen extends StatefulWidget {
-  const VoiceInputScreen({super.key});
+  const VoiceInputScreen({super.key, required this.bookId});
+
+  final String bookId;
 
   @override
   State<VoiceInputScreen> createState() => _VoiceInputScreenState();
@@ -54,10 +57,7 @@ class _VoiceInputScreenState extends State<VoiceInputScreen>
           icon: const Icon(Icons.close, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          l10n.addTransaction,
-          style: AppTextStyles.headlineMedium,
-        ),
+        title: Text(l10n.addTransaction, style: AppTextStyles.headlineMedium),
         centerTitle: true,
       ),
       body: Column(
@@ -65,16 +65,9 @@ class _VoiceInputScreenState extends State<VoiceInputScreen>
           const SizedBox(height: 8),
 
           // Input mode tabs (Voice active)
-          InputModeTabs(
-            selected: InputMode.voice,
-            onChanged: (mode) {
-              if (mode != InputMode.voice) {
-                Navigator.pop(context);
-              }
-            },
-            manualLabel: l10n.manualInput,
-            ocrLabel: l10n.ocrScan,
-            voiceLabel: l10n.voiceInput,
+          EntryModeSwitcher(
+            selectedMode: InputMode.voice,
+            bookId: widget.bookId,
           ),
 
           const SizedBox(height: 32),
@@ -140,9 +133,8 @@ class _VoiceInputScreenState extends State<VoiceInputScreen>
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(12, (i) {
-                    final scale = 0.3 +
-                        0.7 *
-                            ((_pulseController.value + i * 0.08) % 1.0);
+                    final scale =
+                        0.3 + 0.7 * ((_pulseController.value + i * 0.08) % 1.0);
                     return Container(
                       width: 3,
                       height: 24 * scale,

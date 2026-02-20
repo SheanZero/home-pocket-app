@@ -4,17 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/category/category_service.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../settings/presentation/providers/locale_provider.dart';
 import '../../domain/models/category.dart';
+import '../providers/repository_providers.dart';
+import '../utils/category_display_utils.dart';
 import '../widgets/amount_display.dart';
+import '../widgets/entry_mode_switcher.dart';
 import '../widgets/input_mode_tabs.dart';
 import '../widgets/smart_keyboard.dart';
 import 'category_selection_screen.dart';
-import 'ocr_scanner_screen.dart';
 import 'transaction_confirm_screen.dart';
-import 'voice_input_screen.dart';
 
 /// Main transaction entry screen with custom numpad.
 ///
@@ -35,7 +35,47 @@ class _TransactionEntryScreenState
     extends ConsumerState<TransactionEntryScreen> {
   String _amount = '';
   Category? _selectedCategory;
+  Category? _selectedParentCategory;
+  Map<String, Category> _categoryById = {};
   DateTime _selectedDate = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeDefaultCategory();
+  }
+
+  Future<void> _initializeDefaultCategory() async {
+    final repo = ref.read(categoryRepositoryProvider);
+    final allCategories = await repo.findActive();
+
+    final categoryById = <String, Category>{
+      for (final category in allCategories) category.id: category,
+    };
+
+    final l1Categories = allCategories.where((c) => c.level == 1).toList()
+      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    final defaultL1 = l1Categories.isNotEmpty ? l1Categories.first : null;
+
+    Category? defaultL2;
+    if (defaultL1 != null) {
+      final l2UnderSelectedL1 =
+          allCategories
+              .where((c) => c.level == 2 && c.parentId == defaultL1.id)
+              .toList()
+            ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+      if (l2UnderSelectedL1.isNotEmpty) {
+        defaultL2 = l2UnderSelectedL1.first;
+      }
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _categoryById = categoryById;
+      _selectedParentCategory = defaultL1;
+      _selectedCategory = defaultL2;
+    });
+  }
 
   void _onDigit(String digit) {
     // Max 7 digits (9,999,999)
@@ -64,9 +104,9 @@ class _TransactionEntryScreenState
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: AppColors.survival,
-                ),
+            colorScheme: Theme.of(
+              context,
+            ).colorScheme.copyWith(primary: AppColors.survival),
           ),
           child: child!,
         );
@@ -80,23 +120,50 @@ class _TransactionEntryScreenState
   Future<void> _selectCategory() async {
     final result = await Navigator.of(context).push<Category>(
       MaterialPageRoute<Category>(
-        builder: (_) => CategorySelectionScreen(
-          selectedCategoryId: _selectedCategory?.id,
-        ),
+        builder: (_) =>
+            CategorySelectionScreen(selectedCategoryId: _selectedCategory?.id),
       ),
     );
-    if (result != null && mounted) {
-      setState(() => _selectedCategory = result);
+    if (result == null || !mounted) return;
+
+    var parent = resolveParentCategory(result, _categoryById);
+    if (parent == null && result.parentId != null) {
+      final repo = ref.read(categoryRepositoryProvider);
+      parent = await repo.findById(result.parentId!);
     }
+
+    if (!mounted) return;
+    setState(() {
+      _categoryById[result.id] = result;
+      if (parent != null) {
+        _categoryById[parent.id] = parent;
+      }
+      _selectedCategory = result;
+      _selectedParentCategory = parent;
+    });
+  }
+
+  IconData _categoryChipIcon() {
+    final parent = _selectedParentCategory;
+    if (parent == null) return Icons.grid_view_rounded;
+    return resolveCategoryIcon(parent.icon);
+  }
+
+  String _categoryChipLabel(Locale locale, String placeholder) {
+    final selected = _selectedCategory;
+    if (selected == null) return placeholder;
+    return formatCategoryPath(
+      category: selected,
+      parentCategory: _selectedParentCategory,
+      locale: locale,
+    );
   }
 
   void _onNext() {
     final amount = int.tryParse(_amount);
     if (amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(S.of(context).amountMustBeGreaterThanZero),
-        ),
+        SnackBar(content: Text(S.of(context).amountMustBeGreaterThanZero)),
       );
       return;
     }
@@ -113,29 +180,11 @@ class _TransactionEntryScreenState
           bookId: widget.bookId,
           amount: amount,
           category: _selectedCategory!,
+          parentCategory: _selectedParentCategory,
           date: _selectedDate,
         ),
       ),
     );
-  }
-
-  void _onModeChanged(InputMode mode) {
-    switch (mode) {
-      case InputMode.manual:
-        break; // already here
-      case InputMode.ocr:
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => const OcrScannerScreen(),
-          ),
-        );
-      case InputMode.voice:
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => const VoiceInputScreen(),
-          ),
-        );
-    }
   }
 
   bool get _isToday {
@@ -160,10 +209,7 @@ class _TransactionEntryScreenState
           icon: const Icon(Icons.close, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          l10n.addTransaction,
-          style: AppTextStyles.headlineMedium,
-        ),
+        title: Text(l10n.addTransaction, style: AppTextStyles.headlineMedium),
         centerTitle: true,
       ),
       body: Column(
@@ -171,21 +217,15 @@ class _TransactionEntryScreenState
           const SizedBox(height: 8),
 
           // Mode tabs
-          InputModeTabs(
-            selected: InputMode.manual,
-            onChanged: _onModeChanged,
-            manualLabel: l10n.manualInput,
-            ocrLabel: l10n.ocrScan,
-            voiceLabel: l10n.voiceInput,
+          EntryModeSwitcher(
+            selectedMode: InputMode.manual,
+            bookId: widget.bookId,
           ),
 
           const SizedBox(height: 16),
 
           // Amount display
-          AmountDisplay(
-            amount: _amount,
-            onClear: _onClear,
-          ),
+          AmountDisplay(amount: _amount, onClear: _onClear),
 
           // Selector chips
           Padding(
@@ -204,13 +244,8 @@ class _TransactionEntryScreenState
                 // Category chip
                 Expanded(
                   child: _SelectorChip(
-                    icon: Icons.grid_view_rounded,
-                    label: _selectedCategory != null
-                        ? CategoryService.resolve(
-                            _selectedCategory!.name,
-                            locale,
-                          )
-                        : l10n.selectCategory,
+                    icon: _categoryChipIcon(),
+                    label: _categoryChipLabel(locale, l10n.selectCategory),
                     isPlaceholder: _selectedCategory == null,
                     onTap: _selectCategory,
                   ),
@@ -261,11 +296,7 @@ class _SelectorChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 16,
-              color: AppColors.survival,
-            ),
+            Icon(icon, size: 16, color: AppColors.survival),
             const SizedBox(width: 6),
             Flexible(
               child: Text(
