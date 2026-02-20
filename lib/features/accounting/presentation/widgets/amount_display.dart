@@ -44,31 +44,31 @@ class AmountDisplay extends StatelessWidget {
         children: [
           // Currency badge
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: const Color(0xFFEEF4FA),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   '¥',
-                  style: AppTextStyles.titleMedium.copyWith(
+                  style: AppTextStyles.headlineMedium.copyWith(
                     color: AppColors.survival,
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 6),
                 Text(
                   'JPY',
-                  style: AppTextStyles.labelMedium.copyWith(
+                  style: AppTextStyles.titleMedium.copyWith(
                     color: AppColors.survival,
                   ),
                 ),
                 const SizedBox(width: 2),
                 Icon(
                   Icons.expand_more,
-                  size: 16,
+                  size: 20,
                   color: AppColors.survival,
                 ),
               ],
@@ -77,7 +77,7 @@ class AmountDisplay extends StatelessWidget {
           const Spacer(),
           // Amount value
           Text(
-            '¥$_formatted',
+            _formatted,
             style: AppTextStyles.amountLarge.copyWith(
               fontSize: 32,
               fontWeight: FontWeight.w700,
