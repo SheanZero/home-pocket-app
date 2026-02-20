@@ -78,11 +78,48 @@ class _TransactionEntryScreenState
   }
 
   void _onDigit(String digit) {
-    // Max 7 digits (9,999,999)
-    if (_amount.length >= 7) return;
-    // Don't allow leading zeros
+    final dotIndex = _amount.indexOf('.');
+    if (dotIndex >= 0) {
+      // Has decimal point — max 2 decimal places
+      final decimals = _amount.length - dotIndex - 1;
+      if (decimals >= 2) return;
+    } else {
+      // No decimal point — max 7 integer digits
+      if (_amount.replaceAll('.', '').length >= 7) return;
+    }
+    // Don't allow leading zeros (except "0.")
     if (_amount.isEmpty && digit == '0') return;
     setState(() => _amount += digit);
+  }
+
+  void _onDoubleZero() {
+    // Only append "00" if current amount > 0
+    if (_amount.isEmpty) return;
+
+    final dotIndex = _amount.indexOf('.');
+    if (dotIndex >= 0) {
+      final decimals = _amount.length - dotIndex - 1;
+      if (decimals >= 2) return;
+      // Append only as many zeros as decimal places allow
+      final zerosToAdd = (2 - decimals).clamp(0, 2);
+      setState(() => _amount += '0' * zerosToAdd);
+    } else {
+      // No decimal — check integer digit limit (max 7)
+      final intDigits = _amount.length;
+      if (intDigits >= 7) return;
+      final zerosToAdd = (7 - intDigits).clamp(0, 2);
+      setState(() => _amount += '0' * zerosToAdd);
+    }
+  }
+
+  void _onDot() {
+    // Only one decimal point allowed
+    if (_amount.contains('.')) return;
+    if (_amount.isEmpty) {
+      setState(() => _amount = '0.');
+    } else {
+      setState(() => _amount += '.');
+    }
   }
 
   void _onDelete() {
@@ -160,8 +197,12 @@ class _TransactionEntryScreenState
   }
 
   void _onNext() {
-    final amount = int.tryParse(_amount);
-    if (amount == null || amount <= 0) {
+    // Strip trailing dot (e.g. "320." → "320")
+    final cleaned = _amount.endsWith('.')
+        ? _amount.substring(0, _amount.length - 1)
+        : _amount;
+    final parsed = double.tryParse(cleaned);
+    if (parsed == null || parsed <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(S.of(context).amountMustBeGreaterThanZero)),
       );
@@ -173,6 +214,9 @@ class _TransactionEntryScreenState
       );
       return;
     }
+
+    // For JPY (0 decimals), round to int
+    final amount = parsed.round();
 
     Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -259,6 +303,8 @@ class _TransactionEntryScreenState
           // Keyboard
           SmartKeyboard(
             onDigit: _onDigit,
+            onDoubleZero: _onDoubleZero,
+            onDot: _onDot,
             onDelete: _onDelete,
             onNext: _onNext,
             nextLabel: l10n.next,

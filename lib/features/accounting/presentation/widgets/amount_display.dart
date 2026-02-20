@@ -22,9 +22,14 @@ class AmountDisplay extends StatelessWidget {
 
   String get _formatted {
     if (amount.isEmpty) return '0';
-    final value = int.tryParse(amount);
+
+    // Split integer and decimal parts
+    final parts = amount.split('.');
+    final intPart = parts[0].isEmpty ? '0' : parts[0];
+    final value = int.tryParse(intPart);
     if (value == null) return amount;
-    // Format with comma separators
+
+    // Format integer part with comma separators
     final str = value.toString();
     final buffer = StringBuffer();
     for (var i = 0; i < str.length; i++) {
@@ -33,6 +38,13 @@ class AmountDisplay extends StatelessWidget {
       }
       buffer.write(str[i]);
     }
+
+    // Append decimal part if present
+    if (parts.length > 1) {
+      buffer.write('.');
+      buffer.write(parts[1]);
+    }
+
     return buffer.toString();
   }
 
