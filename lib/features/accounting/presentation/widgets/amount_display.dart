@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
-/// Displays the current amount with currency badge and clear button.
+/// Displays the current amount with currency label and clear button.
 ///
-/// Shows "¥ JPY" badge on the left, the formatted amount in the center,
+/// Shows "¥ JPY" as plain text on the left, the formatted amount in the center,
 /// and an "x" clear button on the right when amount is non-empty.
 class AmountDisplay extends StatelessWidget {
   const AmountDisplay({
     super.key,
     required this.amount,
     this.onClear,
+    this.currencySymbol = '¥',
+    this.currencyLabel = 'JPY',
   });
 
   /// Raw amount string (digits only, e.g. "3280").
@@ -19,6 +21,12 @@ class AmountDisplay extends StatelessWidget {
 
   /// Called when the clear button is tapped.
   final VoidCallback? onClear;
+
+  /// Currency symbol (e.g. "¥", "$", "€").
+  final String currencySymbol;
+
+  /// Currency code label (e.g. "JPY", "USD", "CNY").
+  final String currencyLabel;
 
   String get _formatted {
     if (amount.isEmpty) return '0';
@@ -54,36 +62,11 @@ class AmountDisplay extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          // Currency badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEEF4FA),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '¥',
-                  style: AppTextStyles.headlineMedium.copyWith(
-                    color: AppColors.survival,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  'JPY',
-                  style: AppTextStyles.titleMedium.copyWith(
-                    color: AppColors.survival,
-                  ),
-                ),
-                const SizedBox(width: 2),
-                Icon(
-                  Icons.expand_more,
-                  size: 20,
-                  color: AppColors.survival,
-                ),
-              ],
+          // Currency label (plain text)
+          Text(
+            '$currencySymbol $currencyLabel',
+            style: AppTextStyles.headlineMedium.copyWith(
+              color: AppColors.survival,
             ),
           ),
           const SizedBox(width: 12),

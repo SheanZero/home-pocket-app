@@ -13,10 +13,14 @@ import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../settings/presentation/providers/locale_provider.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/transaction.dart';
+import '../providers/repository_providers.dart';
 import '../providers/use_case_providers.dart';
 import '../utils/category_display_utils.dart';
+import '../widgets/amount_display.dart';
 import '../widgets/ledger_type_selector.dart';
+import '../widgets/smart_keyboard.dart';
 import '../widgets/soul_satisfaction_slider.dart';
+import 'category_selection_screen.dart';
 
 /// Confirmation / review screen before saving a transaction.
 ///
@@ -48,6 +52,12 @@ class _TransactionConfirmScreenState
   final _storeController = TextEditingController();
   final _memoController = TextEditingController();
 
+  late int _amount;
+  late Category _category;
+  Category? _parentCategory;
+  late DateTime _date;
+  final Map<String, Category> _categoryById = {};
+
   LedgerType _ledgerType = LedgerType.survival;
   int _soulSatisfaction = 5;
   bool _isSubmitting = false;
@@ -55,12 +65,179 @@ class _TransactionConfirmScreenState
   @override
   void initState() {
     super.initState();
-    // Default ledger type could be resolved from category, but let user choose
+    _amount = widget.amount;
+    _category = widget.category;
+    _parentCategory = widget.parentCategory;
+    _date = widget.date;
     _ledgerType = LedgerType.survival;
   }
 
   String _formatAmount(int amount, Locale locale) {
     return NumberFormatter.formatCurrency(amount.toDouble(), 'JPY', locale);
+  }
+
+  // ── Amount editing via bottom sheet ──
+
+  void _editAmount() {
+    var editStr = _amount.toString();
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            void onDigit(String digit) {
+              final dotIndex = editStr.indexOf('.');
+              if (dotIndex >= 0) {
+                final decimals = editStr.length - dotIndex - 1;
+                if (decimals >= 4) return;
+              }
+              if (editStr == '0' && digit != '0') {
+                setSheetState(() => editStr = digit);
+              } else if (editStr == '0' && digit == '0') {
+                return;
+              } else {
+                setSheetState(() => editStr += digit);
+              }
+            }
+
+            void onDoubleZero() {
+              if (editStr.isEmpty || editStr == '0') return;
+              final dotIndex = editStr.indexOf('.');
+              if (dotIndex >= 0) {
+                final decimals = editStr.length - dotIndex - 1;
+                if (decimals >= 4) return;
+                final zerosToAdd = (4 - decimals).clamp(0, 2);
+                setSheetState(() => editStr += '0' * zerosToAdd);
+              } else {
+                setSheetState(() => editStr += '00');
+              }
+            }
+
+            void onDot() {
+              if (editStr.contains('.')) return;
+              if (editStr.isEmpty) {
+                setSheetState(() => editStr = '0.');
+              } else {
+                setSheetState(() => editStr += '.');
+              }
+            }
+
+            void onDelete() {
+              if (editStr.isNotEmpty) {
+                setSheetState(
+                  () => editStr = editStr.substring(0, editStr.length - 1),
+                );
+              }
+            }
+
+            void onClear() {
+              setSheetState(() => editStr = '');
+            }
+
+            void onConfirm() {
+              final cleaned = editStr.endsWith('.')
+                  ? editStr.substring(0, editStr.length - 1)
+                  : editStr;
+              final parsed = double.tryParse(cleaned);
+              if (parsed != null && parsed > 0) {
+                setState(() => _amount = parsed.round());
+              }
+              Navigator.pop(context);
+            }
+
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Drag handle
+                    const SizedBox(height: 8),
+                    Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD0D8E0),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    AmountDisplay(
+                      amount: editStr,
+                      onClear: onClear,
+                    ),
+                    SmartKeyboard(
+                      onDigit: onDigit,
+                      onDoubleZero: onDoubleZero,
+                      onDot: onDot,
+                      onDelete: onDelete,
+                      onNext: onConfirm,
+                      nextLabel: S.of(context).record,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // ── Category editing via navigation ──
+
+  Future<void> _editCategory() async {
+    final result = await Navigator.of(context).push<Category>(
+      MaterialPageRoute<Category>(
+        builder: (_) =>
+            CategorySelectionScreen(selectedCategoryId: _category.id),
+      ),
+    );
+    if (result == null || !mounted) return;
+
+    var parent = resolveParentCategory(result, _categoryById);
+    if (parent == null && result.parentId != null) {
+      final repo = ref.read(categoryRepositoryProvider);
+      parent = await repo.findById(result.parentId!);
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _categoryById[result.id] = result;
+      if (parent != null) {
+        _categoryById[parent.id] = parent;
+      }
+      _category = result;
+      _parentCategory = parent;
+    });
+  }
+
+  // ── Date editing via date picker ──
+
+  Future<void> _editDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: AppColors.survival,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && mounted) {
+      setState(() => _date = picked);
+    }
   }
 
   Future<void> _save() async {
@@ -70,10 +247,10 @@ class _TransactionConfirmScreenState
     final result = await createUseCase.execute(
       CreateTransactionParams(
         bookId: widget.bookId,
-        amount: widget.amount,
+        amount: _amount,
         type: TransactionType.expense,
-        categoryId: widget.category.id,
-        timestamp: widget.date,
+        categoryId: _category.id,
+        timestamp: _date,
         note: _memoController.text.trim().isEmpty
             ? null
             : _memoController.text.trim(),
@@ -132,7 +309,7 @@ class _TransactionConfirmScreenState
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final locale = ref.watch(currentLocaleProvider);
-    final displayCategory = widget.parentCategory ?? widget.category;
+    final displayCategory = _parentCategory ?? _category;
     final catColor = _parseColor(displayCategory.color);
 
     return Scaffold(
@@ -176,8 +353,9 @@ class _TransactionConfirmScreenState
                           icon: Icons.payments_outlined,
                           iconColor: AppColors.survival,
                           label: l10n.amount,
+                          onTap: _editAmount,
                           trailing: Text(
-                            _formatAmount(widget.amount, locale),
+                            _formatAmount(_amount, locale),
                             style: AppTextStyles.amountMedium.copyWith(
                               fontSize: 18,
                             ),
@@ -189,10 +367,11 @@ class _TransactionConfirmScreenState
                           icon: resolveCategoryIcon(displayCategory.icon),
                           iconColor: catColor,
                           label: l10n.category,
+                          onTap: _editCategory,
                           trailing: Text(
                             formatCategoryPath(
-                              category: widget.category,
-                              parentCategory: widget.parentCategory,
+                              category: _category,
+                              parentCategory: _parentCategory,
                               locale: locale,
                             ),
                             style: AppTextStyles.bodyMedium,
@@ -204,8 +383,9 @@ class _TransactionConfirmScreenState
                           icon: Icons.calendar_today_outlined,
                           iconColor: AppColors.survival,
                           label: l10n.date,
+                          onTap: _editDate,
                           trailing: Text(
-                            DateFormatter.formatDate(widget.date, locale),
+                            DateFormatter.formatDate(_date, locale),
                             style: AppTextStyles.bodyMedium,
                           ),
                         ),
@@ -425,16 +605,18 @@ class _DetailRow extends StatelessWidget {
     required this.iconColor,
     required this.label,
     required this.trailing,
+    this.onTap,
   });
 
   final IconData icon;
   final Color iconColor;
   final String label;
   final Widget trailing;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    final content = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
@@ -452,6 +634,11 @@ class _DetailRow extends StatelessWidget {
         ],
       ),
     );
+
+    if (onTap != null) {
+      return InkWell(onTap: onTap, child: content);
+    }
+    return content;
   }
 }
 

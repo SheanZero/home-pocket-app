@@ -13,6 +13,7 @@ import '../widgets/amount_display.dart';
 import '../widgets/entry_mode_switcher.dart';
 import '../widgets/input_mode_tabs.dart';
 import '../widgets/smart_keyboard.dart';
+import '../widgets/soft_toast.dart';
 import 'category_selection_screen.dart';
 import 'transaction_confirm_screen.dart';
 
@@ -38,6 +39,7 @@ class _TransactionEntryScreenState
   Category? _selectedParentCategory;
   Map<String, Category> _categoryById = {};
   DateTime _selectedDate = DateTime.now();
+  String? _toastMessage;
 
   @override
   void initState() {
@@ -78,6 +80,7 @@ class _TransactionEntryScreenState
   }
 
   void _onDigit(String digit) {
+    _dismissToast();
     final dotIndex = _amount.indexOf('.');
     if (dotIndex >= 0) {
       // Has decimal point — max 4 decimal places
@@ -188,6 +191,16 @@ class _TransactionEntryScreenState
     );
   }
 
+  void _showToast(String message) {
+    setState(() => _toastMessage = message);
+  }
+
+  void _dismissToast() {
+    if (mounted) {
+      setState(() => _toastMessage = null);
+    }
+  }
+
   void _onNext() {
     // Strip trailing dot (e.g. "320." → "320")
     final cleaned = _amount.endsWith('.')
@@ -195,15 +208,11 @@ class _TransactionEntryScreenState
         : _amount;
     final parsed = double.tryParse(cleaned);
     if (parsed == null || parsed <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.of(context).amountMustBeGreaterThanZero)),
-      );
+      _showToast(S.of(context).amountMustBeGreaterThanZero);
       return;
     }
     if (_selectedCategory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.of(context).pleaseSelectCategory)),
-      );
+      _showToast(S.of(context).pleaseSelectCategory);
       return;
     }
 
@@ -289,6 +298,17 @@ class _TransactionEntryScreenState
               ],
             ),
           ),
+
+          // Inline floating toast
+          if (_toastMessage != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: SoftToast(
+                key: ValueKey(_toastMessage),
+                message: _toastMessage!,
+                onDismissed: _dismissToast,
+              ),
+            ),
 
           const Spacer(),
 
