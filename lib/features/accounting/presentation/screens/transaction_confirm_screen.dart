@@ -69,7 +69,15 @@ class _TransactionConfirmScreenState
     _category = widget.category;
     _parentCategory = widget.parentCategory;
     _date = widget.date;
-    _ledgerType = LedgerType.survival;
+    _resolveLedgerType(_category.id);
+  }
+
+  Future<void> _resolveLedgerType(String categoryId) async {
+    final service = ref.read(categoryServiceProvider);
+    final resolved = await service.resolveLedgerType(categoryId);
+    if (mounted && resolved != null) {
+      setState(() => _ledgerType = resolved);
+    }
   }
 
   String _formatAmount(int amount, Locale locale) {
@@ -214,6 +222,7 @@ class _TransactionConfirmScreenState
       _category = result;
       _parentCategory = parent;
     });
+    _resolveLedgerType(result.id);
   }
 
   // ── Date editing via date picker ──
@@ -260,6 +269,7 @@ class _TransactionConfirmScreenState
         soulSatisfaction: _ledgerType == LedgerType.soul
             ? _soulSatisfaction
             : null,
+        ledgerType: _ledgerType,
       ),
     );
 

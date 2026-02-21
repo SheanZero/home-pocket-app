@@ -86,6 +86,23 @@ final seedCategoriesUseCaseProvider =
 // ignore: unused_element
 typedef SeedCategoriesUseCaseRef =
     AutoDisposeProviderRef<SeedCategoriesUseCase>;
+String _$categoryServiceHash() => r'0a0159aff6dd29a6c973915fe8a31e02b5d4beb7';
+
+/// See also [categoryService].
+@ProviderFor(categoryService)
+final categoryServiceProvider = AutoDisposeProvider<CategoryService>.internal(
+  categoryService,
+  name: r'categoryServiceProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$categoryServiceHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef CategoryServiceRef = AutoDisposeProviderRef<CategoryService>;
 String _$resolveLedgerTypeServiceHash() =>
     r'50f825aaa049bc5ba94fc90deae373cfe412d914';
 

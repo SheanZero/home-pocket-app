@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../application/accounting/category_service.dart';
 import '../../../../application/accounting/create_transaction_use_case.dart';
 import '../../../../application/accounting/delete_transaction_use_case.dart';
 import '../../../../application/accounting/ensure_default_book_use_case.dart';
 import '../../../../application/accounting/get_transactions_use_case.dart';
 import '../../../../application/accounting/seed_categories_use_case.dart';
 import '../../../../application/dual_ledger/providers.dart';
+// ignore: deprecated_member_use_from_same_package
 import '../../../../application/dual_ledger/resolve_ledger_type_service.dart';
 import '../../../../infrastructure/crypto/providers.dart';
 import 'repository_providers.dart';
@@ -47,7 +49,17 @@ SeedCategoriesUseCase seedCategoriesUseCase(Ref ref) {
 }
 
 @riverpod
+CategoryService categoryService(Ref ref) {
+  return CategoryService(
+    categoryRepository: ref.watch(categoryRepositoryProvider),
+    ledgerConfigRepository: ref.watch(categoryLedgerConfigRepositoryProvider),
+  );
+}
+
+// ignore: deprecated_member_use_from_same_package
+@riverpod
 ResolveLedgerTypeService resolveLedgerTypeService(Ref ref) {
+  // ignore: deprecated_member_use_from_same_package
   return ResolveLedgerTypeService(
     categoryRepository: ref.watch(categoryRepositoryProvider),
     ledgerConfigRepository: ref.watch(categoryLedgerConfigRepositoryProvider),

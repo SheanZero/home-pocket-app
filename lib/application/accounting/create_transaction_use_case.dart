@@ -24,6 +24,7 @@ class CreateTransactionParams {
   final String? note;
   final String? merchant;
   final int? soulSatisfaction; // null = use default 5
+  final LedgerType? ledgerType; // null = auto-classify
 
   const CreateTransactionParams({
     required this.bookId,
@@ -34,6 +35,7 @@ class CreateTransactionParams {
     this.note,
     this.merchant,
     this.soulSatisfaction,
+    this.ledgerType,
   });
 }
 
@@ -95,16 +97,22 @@ class CreateTransactionUseCase {
       return Result.error('deviceId is not available');
     }
 
-    // 4. Classify transaction (dual ledger)
-    final classification = await _classificationService.classify(
-      categoryId: params.categoryId,
-      merchant: params.merchant,
-      note: params.note,
-    );
+    // 4. Determine ledger type: user override > auto-classification
+    final LedgerType resolvedLedgerType;
+    if (params.ledgerType != null) {
+      resolvedLedgerType = params.ledgerType!;
+    } else {
+      final classification = await _classificationService.classify(
+        categoryId: params.categoryId,
+        merchant: params.merchant,
+        note: params.note,
+      );
+      resolvedLedgerType = classification.ledgerType;
+    }
 
     // 4.5 Resolve & validate soul satisfaction
     final int soulSatisfaction;
-    if (classification.ledgerType == LedgerType.soul) {
+    if (resolvedLedgerType == LedgerType.soul) {
       soulSatisfaction = params.soulSatisfaction ?? 5;
       if (soulSatisfaction < 1 || soulSatisfaction > 10) {
         return Result.error(
@@ -149,7 +157,7 @@ class CreateTransactionUseCase {
       amount: params.amount,
       type: params.type,
       categoryId: params.categoryId,
-      ledgerType: classification.ledgerType,
+      ledgerType: resolvedLedgerType,
       timestamp: timestamp,
       prevHash: prevHash,
       currentHash: currentHash,
