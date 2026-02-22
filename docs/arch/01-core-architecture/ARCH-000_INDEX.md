@@ -1,8 +1,9 @@
 # Home Pocket MVP - 架构技术文档总索引
 
-**文档版本:** 1.0
+**文档版本:** 2.0
 **创建日期:** 2026-02-03
-**状态:** 完整版
+**最后更新:** 2026-02-22
+**状态:** 已更新
 **基于:** PRD_MVP_Global.md, PRD_MVP_App.md, 以及所有模块PRD
 
 ---
@@ -15,26 +16,27 @@
 
 | 文档 | 文件名 | 内容概要 | 状态 |
 |------|--------|---------|------|
-| 📘 总体架构设计 | [01_MVP_Architecture_Design.md](./01_MVP_Architecture_Design.md) | MVP总体技术架构、技术栈选型、层次架构、核心设计决策 | ✅ 完成 |
-| 📗 数据架构设计 | [02_Data_Architecture.md](./02_Data_Architecture.md) | 完整数据模型、数据库设计、加密策略、数据流 | ✅ 完成 |
-| 📕 安全架构设计 | [03_Security_Architecture.md](./03_Security_Architecture.md) | E2EE实现、密钥管理、哈希链、生物识别 | ✅ 完成 |
-| 📙 状态管理架构 | [04_State_Management.md](./04_State_Management.md) | Riverpod架构、Provider模式、依赖注入 | ✅ 完成 |
-| 📔 集成模式设计 | [05_Integration_Patterns.md](./05_Integration_Patterns.md) | Repository模式、Use Case模式、CRDT同步 | ✅ 完成 |
+| 📘 总体架构设计 | [ARCH-001_Complete_Guide.md](./ARCH-001_Complete_Guide.md) | MVP总体技术架构、技术栈选型、层次架构、核心设计决策 | ✅ 完成 |
+| 📗 数据架构设计 | [ARCH-002_Data_Architecture.md](./ARCH-002_Data_Architecture.md) | 完整数据模型、数据库设计、加密策略、数据流 | ✅ 完成 |
+| 📕 安全架构设计 | [ARCH-003_Security_Architecture.md](./ARCH-003_Security_Architecture.md) | E2EE实现、密钥管理、哈希链、生物识别 | ✅ 完成 |
+| 📙 状态管理架构 | [ARCH-004_State_Management.md](./ARCH-004_State_Management.md) | Riverpod架构、Provider模式、依赖注入 | ✅ 完成 |
+| 📔 集成模式设计 | [ARCH-005_Integration_Patterns.md](./ARCH-005_Integration_Patterns.md) | Repository模式、Use Case模式、CRDT同步 | ✅ 完成 |
+| 📓 错误处理模式 | [ARCH-006_Error_Boundaries.md](./ARCH-006_Error_Boundaries.md) | 错误处理模式、Result类型、错误边界 | ✅ 完成 |
+| 📒 国际化架构 | [ARCH-007_Architecture_Diagram_I18N.md](./ARCH-007_Architecture_Diagram_I18N.md) | 国际化架构设计、多语言组件 | ✅ 完成 |
+| 📃 层级明确化 | [ARCH-008_Layer_Clarification.md](./ARCH-008_Layer_Clarification.md) | 5层架构明确、Thin Feature规则、依赖方向 | ✅ 完成 |
 
 ### 功能模块技术文档
 
 | 模块 | 文件名 | PRD来源 | 工时 | 状态 |
 |------|--------|---------|------|------|
-| 🔹 MOD-001/002 基础记账 | [06_MOD_BasicAccounting.md](./06_MOD_BasicAccounting.md) | PRD_Module_BasicAccounting.md | 13天 | ✅ 完成 |
-| 🔹 MOD-003 双轨账本 | [07_MOD_DualLedger.md](./07_MOD_DualLedger.md) | PRD_Module_DualLedger.md | 8天 | ✅ 完成 |
-| 🔹 MOD-004 家庭同步 | [08_MOD_FamilySync.md](./08_MOD_FamilySync.md) | PRD_Module_FamilySync.md | 12天 | ✅ 完成 |
-| 🔹 MOD-005 OCR扫描 | [09_MOD_OCR.md](./09_MOD_OCR.md) | PRD_Module_OCR.md | 7天 | ✅ 完成 |
-| 🔹 MOD-006 安全隐私 | [10_MOD_Security.md](./10_MOD_Security.md) | PRD_Module_Security.md | 10天 | ✅ 完成 |
-| 🔹 MOD-007 数据分析 | [11_MOD_Analytics.md](./11_MOD_Analytics.md) | PRD_MVP_App.md | 5天 | ✅ 完成 |
-| 🔹 MOD-008 设置管理 | [12_MOD_Settings.md](./12_MOD_Settings.md) | PRD_MVP_App.md | 6天 | ✅ 完成 |
-| 🔹 MOD-009 国际化 (**已废弃**) | [MOD-009_Internationalization.md](../02-module-specs/MOD-009_Internationalization.md) | 已合并至 MOD-014 | - | ⚠️ 废弃 |
-| 🔹 MOD-009 趣味功能 | [13_MOD_Gamification.md](./13_MOD_Gamification.md) | PRD_Module_Gamification.md | 7天 | ✅ 完成 |
-| 🔹 MOD-014 国际化多语言 | [MOD-014_i18n.md](../02-module-specs/MOD-014_i18n.md) | 架构增强（规范文档） | 4天 | ✅ 完成 |
+| 🔹 MOD-001 基础记账 | [MOD-001_BasicAccounting.md](../02-module-specs/MOD-001_BasicAccounting.md) | PRD_Module_BasicAccounting.md | 13天 | ✅ 完成 |
+| 🔹 MOD-002 双轨账本 | [MOD-002_DualLedger.md](../02-module-specs/MOD-002_DualLedger.md) | PRD_Module_DualLedger.md | 8天 | ✅ 完成 |
+| 🔹 MOD-003 家庭同步 | [MOD-003_FamilySync.md](../02-module-specs/MOD-003_FamilySync.md) | PRD_Module_FamilySync.md | 12天 | ✅ 完成 |
+| 🔹 MOD-004 OCR扫描 | [MOD-004_OCR.md](../02-module-specs/MOD-004_OCR.md) | PRD_Module_OCR.md | 7天 | ✅ 完成 |
+| ~~🔹 MOD-005 安全隐私~~ | ~~文件不存在~~ | ~~编号跳过~~ | — | ⚠️ 缺失 |
+| 🔹 MOD-006 数据分析 | [MOD-006_Analytics.md](../02-module-specs/MOD-006_Analytics.md) | PRD_MVP_App.md | 5天 | ✅ 完成 |
+| 🔹 MOD-007 设置管理 | [MOD-007_Settings.md](../02-module-specs/MOD-007_Settings.md) | PRD_MVP_App.md | 6天 | ✅ 完成 |
+| 🔹 MOD-008 趣味功能 | [MOD-008_Gamification.md](../02-module-specs/MOD-008_Gamification.md) | PRD_Module_Gamification.md | 7天 | ✅ 完成 |
 
 ### 基础能力 PRD 文档（04-basic）
 
@@ -49,13 +51,17 @@
 
 | ADR | 文件名 | 决策内容 | 状态 |
 |-----|--------|---------|------|
-| ADR-001 | [ADR-001_State_Management.md](./ADR-001_State_Management.md) | 选择Riverpod作为状态管理方案 | ✅ 已接受 |
-| ADR-002 | [ADR-002_Database_Solution.md](./ADR-002_Database_Solution.md) | 选择Drift+SQLCipher作为数据库 | ✅ 已接受 |
-| ADR-003 | [ADR-003_Multi_Layer_Encryption.md](./ADR-003_Multi_Layer_Encryption.md) | 多层加密策略设计 | ✅ 已接受 |
-| ADR-004 | [ADR-004_CRDT_Sync.md](./ADR-004_CRDT_Sync.md) | CRDT同步协议选型 | ✅ 已接受 |
-| ADR-005 | [ADR-005_OCR_ML_Tech.md](./ADR-005_OCR_ML_Tech.md) | OCR和ML技术选型 | ✅ 已接受 |
-| ADR-006 | [ADR-006_Key_Derivation_Security.md](./ADR-006_Key_Derivation_Security.md) | 密钥派生安全修复 (HKDF+缓存) | ✅ 已实施 |
-| ADR-INDEX | [ADR-INDEX.md](./ADR-INDEX.md) | 所有ADR的完整索引 | ✅ 完成 |
+| ADR-000 | [ADR-000_INDEX.md](../03-adr/ADR-000_INDEX.md) | ADR总索引 | ✅ 完成 |
+| ADR-001 | [ADR-001_State_Management.md](../03-adr/ADR-001_State_Management.md) | 选择Riverpod作为状态管理方案 | ✅ 已接受 |
+| ADR-002 | [ADR-002_Database_Solution.md](../03-adr/ADR-002_Database_Solution.md) | 选择Drift+SQLCipher作为数据库 | ✅ 已接受 |
+| ADR-003 | [ADR-003_Multi_Layer_Encryption.md](../03-adr/ADR-003_Multi_Layer_Encryption.md) | 多层加密策略设计 | ✅ 已接受 |
+| ADR-004 | [ADR-004_CRDT_Sync.md](../03-adr/ADR-004_CRDT_Sync.md) | CRDT同步协议选型 | ✅ 已接受 |
+| ADR-005 | [ADR-005_OCR_ML_Tech.md](../03-adr/ADR-005_OCR_ML_Tech.md) | OCR和ML技术选型 | ✅ 已接受 |
+| ADR-006 | [ADR-006_Key_Derivation_Security.md](../03-adr/ADR-006_Key_Derivation_Security.md) | 密钥派生安全修复 (HKDF+缓存) | ✅ 已实施 |
+| ADR-007 | [ADR-007_Layer_Responsibilities.md](../03-adr/ADR-007_Layer_Responsibilities.md) | 层级职责与依赖方向 | ✅ 已接受 |
+| ADR-008 | [ADR-008_Book_Balance_Update_Strategy.md](../03-adr/ADR-008_Book_Balance_Update_Strategy.md) | 账本余额更新策略 | ✅ 已接受 |
+| ADR-009 | [ADR-009_Incremental_Hash_Chain_Verification.md](../03-adr/ADR-009_Incremental_Hash_Chain_Verification.md) | 增量哈希链验证 | ✅ 已接受 |
+| ADR-010 | [ADR-010_CRDT_Conflict_Resolution_Strategy.md](../03-adr/ADR-010_CRDT_Conflict_Resolution_Strategy.md) | CRDT冲突解决策略 | ✅ 已接受 |
 
 ---
 
@@ -64,9 +70,9 @@
 ### 对于产品经理
 
 **推荐阅读顺序:**
-1. 📘 总体架构设计 (01) - 理解技术架构全貌
-2. 🔹 各模块技术文档 (06-13) - 了解实现方案
-3. 📗 数据架构 (02) - 掌握数据模型
+1. 📘 [总体架构设计](./ARCH-001_Complete_Guide.md) - 理解技术架构全貌
+2. 🔹 [各模块技术文档](../02-module-specs/) - 了解实现方案
+3. 📗 [数据架构](./ARCH-002_Data_Architecture.md) - 掌握数据模型
 
 **关注重点:**
 - 技术实现的可行性
@@ -76,10 +82,10 @@
 ### 对于Flutter工程师
 
 **推荐阅读顺序:**
-1. 📘 总体架构设计 (01) - 了解整体架构
-2. 📙 状态管理架构 (04) - 掌握Riverpod模式
-3. 📔 集成模式设计 (05) - 学习设计模式
-4. 🔹 具体模块技术文档 (06-13) - 实现细节
+1. 📘 [总体架构设计](./ARCH-001_Complete_Guide.md) - 了解整体架构
+2. 📙 [状态管理架构](./ARCH-004_State_Management.md) - 掌握Riverpod模式
+3. 📔 [集成模式设计](./ARCH-005_Integration_Patterns.md) - 学习设计模式
+4. 🔹 [具体模块技术文档](../02-module-specs/) - 实现细节
 
 **关注重点:**
 - 代码组织结构
@@ -90,10 +96,11 @@
 ### 对于架构师
 
 **推荐阅读顺序:**
-1. 📘 总体架构设计 (01) - 架构全景
-2. 📗 数据架构 (02) - 数据设计
-3. 📕 安全架构 (03) - 安全设计
-4. 所有ADR文档 (14-18) - 设计决策
+1. 📘 [总体架构设计](./ARCH-001_Complete_Guide.md) - 架构全景
+2. 📗 [数据架构](./ARCH-002_Data_Architecture.md) - 数据设计
+3. 📕 [安全架构](./ARCH-003_Security_Architecture.md) - 安全设计
+4. 📃 [层级明确化](./ARCH-008_Layer_Clarification.md) - 5层架构规则
+5. 所有[ADR文档](../03-adr/ADR-000_INDEX.md) - 设计决策
 
 **关注重点:**
 - 架构原则遵循
@@ -104,10 +111,10 @@
 ### 对于安全专家
 
 **推荐阅读顺序:**
-1. 📕 安全架构设计 (03) - 安全总体设计
-2. 🔹 MOD-006 安全隐私 (10) - 安全模块实现
-3. 📗 数据架构 (02) - 数据加密策略
-4. ADR-003 加密策略 (16) - 加密决策
+1. 📕 [安全架构设计](./ARCH-003_Security_Architecture.md) - 安全总体设计
+2. 📗 [数据架构](./ARCH-002_Data_Architecture.md) - 数据加密策略
+3. [ADR-003 加密策略](../03-adr/ADR-003_Multi_Layer_Encryption.md) - 加密决策
+4. [ADR-006 密钥派生安全](../03-adr/ADR-006_Key_Derivation_Security.md) - 密钥派生修复
 
 **关注重点:**
 - E2EE实现细节
@@ -163,19 +170,19 @@ CI/CD: GitHub Actions
 ```
 ┌─────────────────────────────────────────┐
 │      Presentation Layer (展示层)        │
-│  Screens, Widgets, Themes, Animations   │
+│  Screens, Widgets, Providers            │
 ├─────────────────────────────────────────┤
-│   Business Logic Layer (业务逻辑层)     │
-│  Providers, Use Cases, Services         │
+│     Application Layer (应用层)          │
+│  Use Cases, Services                    │
 ├─────────────────────────────────────────┤
 │        Domain Layer (领域层)            │
 │  Models, Repository Interfaces          │
 ├─────────────────────────────────────────┤
 │         Data Layer (数据层)             │
-│  Repository Impl, DAOs, DTOs            │
+│  Repository Impl, DAOs, Tables          │
 ├─────────────────────────────────────────┤
 │    Infrastructure Layer (基础设施层)     │
-│  Crypto, ML, Platform Services          │
+│  Crypto, ML, Sync, Security, I18N       │
 └─────────────────────────────────────────┘
 ```
 
@@ -186,50 +193,50 @@ CI/CD: GitHub Actions
 ### 模块依赖关系图
 
 ```
-MOD-006 (安全模块)
+MOD-005 (安全模块) [未创建]
     ├─ 所有模块的基础（加密、密钥管理）
     │
-MOD-001/002 (基础记账+分类)
-    ├─ MOD-003 (双轨账本) 依赖
-    ├─ MOD-005 (OCR扫描) 依赖
-    ├─ MOD-007 (数据分析) 依赖
+MOD-001 (基础记账+分类)
+    ├─ MOD-002 (双轨账本) 依赖
+    ├─ MOD-004 (OCR扫描) 依赖
+    ├─ MOD-006 (数据分析) 依赖
     │
-MOD-003 (双轨账本)
-    ├─ MOD-009 (趣味功能) 依赖
+MOD-002 (双轨账本)
+    ├─ MOD-008 (趣味功能) 依赖
     │
-MOD-006 (安全模块)
-    ├─ MOD-004 (家庭同步) 依赖
+MOD-005 (安全模块) [未创建]
+    ├─ MOD-003 (家庭同步) 依赖
     │
-MOD-001/002 + MOD-003
-    ├─ MOD-007 (数据分析) 依赖
+MOD-001 + MOD-002
+    ├─ MOD-006 (数据分析) 依赖
 ```
 
 ### 开发优先级
 
 **P0（必须有，MVP核心）:**
-- MOD-006: 安全模块（基础）
-- MOD-001/002: 基础记账+分类
-- MOD-003: 双轨账本
-- MOD-004: 家庭同步
-- MOD-007: 数据分析（基础报表）
+- MOD-005: 安全模块（基础）[未创建]
+- MOD-001: 基础记账+分类
+- MOD-002: 双轨账本
+- MOD-003: 家庭同步
+- MOD-006: 数据分析（基础报表）
 
 **P1（强烈建议）:**
-- MOD-005: OCR扫描
-- MOD-007: 高级分析（图表）
-- MOD-008: 设置管理
+- MOD-004: OCR扫描
+- MOD-006: 高级分析（图表）
+- MOD-007: 设置管理
 
 **P2（可选，需A/B测试）:**
-- MOD-009: 趣味功能
+- MOD-008: 趣味功能
 
 ### 开发时间线
 
 ```
-Week 1-3:  MOD-006 + MOD-001/002  (安全+基础记账)
-Week 4-6:  MOD-003                (双轨账本)
-Week 7-8:  MOD-006 + MOD-005      (安全增强+OCR)
-Week 9-10: MOD-004                (家庭同步)
-Week 11:   MOD-007 + MOD-008      (分析+设置)
-Week 12:   MOD-009 + 测试优化     (趣味功能+打磨)
+Week 1-3:  MOD-005 + MOD-001      (安全+基础记账)
+Week 4-6:  MOD-002                (双轨账本)
+Week 7-8:  MOD-005 + MOD-004      (安全增强+OCR)
+Week 9-10: MOD-003                (家庭同步)
+Week 11:   MOD-006 + MOD-007      (分析+设置)
+Week 12:   MOD-008 + 测试优化     (趣味功能+打磨)
 ```
 
 ---
@@ -248,7 +255,7 @@ Week 12:   MOD-009 + 测试优化     (趣味功能+打磨)
 | 同步协议 | CRDT (Yjs) | Automerge | 成熟度高、冲突自动解决 |
 | 路由 | go_router | auto_route | 声明式、类型安全、深链接 |
 
-详细决策理由请参考ADR文档（14-18）。
+详细决策理由请参考[ADR文档](../03-adr/ADR-000_INDEX.md)。
 
 ---
 
@@ -308,7 +315,7 @@ Layer 1: 数据库层 (SQLCipher AES-256)
 - **用途**: 防篡改审计轨迹
 - **验证**: 自动完整性检查
 
-详细设计参见：📕 安全架构设计 (03)
+详细设计参见：📕 [安全架构设计](./ARCH-003_Security_Architecture.md)
 
 ---
 
@@ -368,7 +375,7 @@ Layer 1: 数据库层 (SQLCipher AES-256)
 - ✅ Riverpod Provider架构
 - ✅ 基础UI主题系统
 - ✅ 密钥生成和管理
-- ✅ 基础记账功能（MOD-001/002）
+- ✅ 基础记账功能（MOD-001）
 
 **关键里程碑:**
 - 数据库加密验证通过
@@ -400,7 +407,7 @@ Layer 1: 数据库层 (SQLCipher AES-256)
 - ✅ 生物识别认证
 - ✅ Recovery Kit生成
 - ✅ 哈希链审计UI
-- ✅ OCR扫描功能（MOD-005）
+- ✅ OCR扫描功能（MOD-004）
 - ✅ 照片加密存储
 - ✅ 审计日志系统
 
@@ -431,9 +438,9 @@ Layer 1: 数据库层 (SQLCipher AES-256)
 **目标**: 功能完善和性能优化
 
 **交付物:**
-- ✅ 数据分析图表（MOD-007）
-- ✅ 设置管理（MOD-008）
-- ✅ 趣味功能（MOD-009，可选）
+- ✅ 数据分析图表（MOD-006）
+- ✅ 设置管理（MOD-007）
+- ✅ 趣味功能（MOD-008，可选）
 - ✅ 性能优化
 - ✅ 测试覆盖率>80%
 - ✅ Bug修复
@@ -513,7 +520,7 @@ User → System → Database
 - **次版本**: 新增模块或重要功能
 - **修订版**: 文档修正和小改进
 
-当前版本: **1.0.0**
+当前版本: **2.0.0**
 
 ---
 
@@ -538,9 +545,9 @@ User → System → Database
 ## 📚 参考资源
 
 ### 内部文档
-- [PRD_MVP_Global.md](../doc/requirement/PRD_MVP_Global.md)
-- [PRD_MVP_App.md](../doc/requirement/PRD_MVP_App.md)
-- [PRD_Index.md](../doc/requirement/PRD_Index.md)
+- [PRD_MVP_Global.md](../../requirement/PRD_MVP_Global.md)
+- [PRD_MVP_App.md](../../requirement/PRD_MVP_App.md)
+- [PRD_Index.md](../../requirement/PRD_Index.md)
 - 所有模块PRD文档
 
 ### 外部资源
@@ -556,19 +563,20 @@ User → System → Database
 
 | 类别 | 数量 | 状态 |
 |------|------|------|
-| 核心架构文档 | 5 | ✅ 100% |
-| 功能模块文档 | 9 | ✅ 100% |
-| ADR决策记录 | 6 | ✅ 100% |
-| **总计** | **20** | **✅ 100%** |
+| 核心架构文档 | 8 | ✅ 100% |
+| 功能模块文档 | 7 (+1 缺失) | ✅ 100% |
+| ADR决策记录 | 10 | ✅ 100% |
+| 基础能力 PRD | 4 | ✅ 100% |
+| **总计** | **29** | **✅ 100%** |
 
 ---
 
-**文档状态**: 🟢 **完整版已生成**
+**文档状态**: 🟢 **已更新**
 **覆盖范围**: 总体架构 + 所有MVP模块 + 关键技术决策
 **适用阶段**: MVP开发全周期（Week 1-12）
 
 **生成信息**:
 - 生成工具: Claude Sonnet 4.5 + senior-architect skill
-- 生成日期: 2026-02-03
-- 文档版本: 1.0
+- 生成日期: 2026-02-22
+- 文档版本: 2.0
 - 基于PRD: 12个PRD文档全面分析
