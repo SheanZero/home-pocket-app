@@ -6,6 +6,7 @@ import '../../../../application/accounting/create_transaction_use_case.dart';
 import '../../../../application/accounting/delete_transaction_use_case.dart';
 import '../../../../application/accounting/ensure_default_book_use_case.dart';
 import '../../../../application/accounting/get_transactions_use_case.dart';
+import '../../../../application/accounting/merchant_category_learning_service.dart';
 import '../../../../application/accounting/seed_categories_use_case.dart';
 import '../../../../application/dual_ledger/providers.dart';
 // ignore: deprecated_member_use_from_same_package
@@ -71,5 +72,13 @@ EnsureDefaultBookUseCase ensureDefaultBookUseCase(Ref ref) {
   return EnsureDefaultBookUseCase(
     bookRepository: ref.watch(bookRepositoryProvider),
     deviceIdentityRepository: ref.watch(deviceIdentityRepositoryProvider),
+  );
+}
+
+@riverpod
+MerchantCategoryLearningService merchantCategoryLearningService(Ref ref) {
+  return MerchantCategoryLearningService(
+    repository: ref.watch(merchantCategoryPreferenceRepositoryProvider),
+    categoryRepository: ref.watch(categoryRepositoryProvider),
   );
 }

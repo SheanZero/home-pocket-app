@@ -5,18 +5,35 @@ import 'package:home_pocket/features/home/presentation/widgets/hero_header.dart'
 import '../../helpers/test_localizations.dart';
 
 void main() {
+  Widget buildTestWidget({
+    required int year,
+    required int month,
+    required VoidCallback onSettingsTap,
+    required VoidCallback onDateTap,
+  }) {
+    return testLocalizedApp(
+      child: Theme(
+        data: ThemeData(splashFactory: NoSplash.splashFactory),
+        child: Scaffold(
+          body: HeroHeader(
+            year: year,
+            month: month,
+            onSettingsTap: onSettingsTap,
+            onDateTap: onDateTap,
+          ),
+        ),
+      ),
+    );
+  }
+
   group('HeroHeader', () {
     testWidgets('displays year and month', (tester) async {
       await tester.pumpWidget(
-        testLocalizedApp(
-          child: Scaffold(
-            body: HeroHeader(
-              year: 2026,
-              month: 2,
-              onSettingsTap: () {},
-              onDateTap: () {},
-            ),
-          ),
+        buildTestWidget(
+          year: 2026,
+          month: 2,
+          onSettingsTap: () {},
+          onDateTap: () {},
         ),
       );
 
@@ -27,15 +44,11 @@ void main() {
     testWidgets('settings icon triggers callback', (tester) async {
       bool tapped = false;
       await tester.pumpWidget(
-        testLocalizedApp(
-          child: Scaffold(
-            body: HeroHeader(
-              year: 2026,
-              month: 2,
-              onSettingsTap: () => tapped = true,
-              onDateTap: () {},
-            ),
-          ),
+        buildTestWidget(
+          year: 2026,
+          month: 2,
+          onSettingsTap: () => tapped = true,
+          onDateTap: () {},
         ),
       );
 
@@ -46,15 +59,11 @@ void main() {
     testWidgets('date tap triggers callback', (tester) async {
       bool tapped = false;
       await tester.pumpWidget(
-        testLocalizedApp(
-          child: Scaffold(
-            body: HeroHeader(
-              year: 2026,
-              month: 2,
-              onSettingsTap: () {},
-              onDateTap: () => tapped = true,
-            ),
-          ),
+        buildTestWidget(
+          year: 2026,
+          month: 2,
+          onSettingsTap: () {},
+          onDateTap: () => tapped = true,
         ),
       );
 
@@ -64,15 +73,11 @@ void main() {
 
     testWidgets('shows dropdown arrow icon', (tester) async {
       await tester.pumpWidget(
-        testLocalizedApp(
-          child: Scaffold(
-            body: HeroHeader(
-              year: 2026,
-              month: 2,
-              onSettingsTap: () {},
-              onDateTap: () {},
-            ),
-          ),
+        buildTestWidget(
+          year: 2026,
+          month: 2,
+          onSettingsTap: () {},
+          onDateTap: () {},
         ),
       );
 

@@ -30,7 +30,6 @@ arch2/
 │   ├── MOD-002_DualLedger.md
 │   ├── MOD-003_FamilySync.md
 │   ├── MOD-004_OCR.md
-│   ├── MOD-005_Security.md
 │   ├── MOD-006_Analytics.md
 │   ├── MOD-007_Settings.md
 │   ├── MOD-008_Gamification.md
@@ -77,7 +76,6 @@ arch2/
 - `MOD-002` - 双轨账本
 - `MOD-003` - 家庭同步
 - `MOD-004` - OCR扫描
-- `MOD-005` - 安全模块
 - `MOD-006` - 数据分析
 - `MOD-007` - 设置管理
 - `MOD-008` - 趣味功能

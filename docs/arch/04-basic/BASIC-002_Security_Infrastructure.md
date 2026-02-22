@@ -3,7 +3,7 @@
 **文档编号:** BASIC-002
 **文档版本:** 1.0
 **创建日期:** 2026-02-06
-**最后更新:** 2026-02-06
+**最后更新:** 2026-02-22
 **状态:** 待实施
 **作者:** Claude Opus 4.6
 
@@ -37,7 +37,7 @@
 | **本文档 (BASIC-002)** | Security Infrastructure 层 API 设计与实现规范 |
 | [BASIC-001](./BASIC-001_Crypto_Infrastructure.md) | Crypto Infrastructure 层实现参考 |
 | [ARCH-003](../01-core-architecture/ARCH-003_Security_Architecture.md) | 安全架构顶层设计（威胁模型、原则） |
-| [MOD-005](../02-module-specs/MOD-005_Security.md) (MOD-006) | 安全模块业务需求、UI、用户流程 |
+| [PRD_Module_Security](../../requirement/PRD_Module_Security.md) | 安全模块业务需求、UI、用户流程 |
 
 ### 设计来源
 
@@ -318,6 +318,7 @@ final result = await biometric.authenticate(
   reason: '取引を確認するために認証してください',
 );
 
+// AuthResult 定义于 Feature Domain，Infrastructure 仅消费该模型
 result.when(
   success: () => proceedWithTransaction(),
   failed: (attempts) => showRetryDialog(remaining: 3 - attempts),
@@ -341,7 +342,66 @@ result.when(
 
 ---
 
-### 3.2 SecureStorageService（安全存储服务）
+### 3.2 AuthResult（认证结果模型）
+
+**定义位置:** `lib/features/security/domain/models/auth_result.dart`
+
+> **层次约束:** `AuthResult`/`AuthStatus` 属于 Feature Domain 模型。
+> `BiometricService` 等 Infrastructure 服务返回该模型，但不在 Infrastructure 层重复定义。
+
+#### 枚举定义
+
+```dart
+enum AuthStatus {
+  success,
+  failed,
+  fallbackToPIN,
+  tooManyAttempts,
+  lockedOut,
+  error,
+}
+```
+
+#### 联合类型定义
+
+```dart
+@freezed
+class AuthResult with _$AuthResult {
+  const factory AuthResult({
+    required AuthStatus status,
+    String? message,
+    int? failedAttempts,
+  }) = _AuthResult;
+
+  factory AuthResult.success() = _SuccessAuthResult;
+  factory AuthResult.failed({required int failedAttempts}) = _FailedAuthResult;
+  factory AuthResult.fallbackToPIN() = _FallbackAuthResult;
+  factory AuthResult.tooManyAttempts() = _TooManyAttemptsAuthResult;
+  factory AuthResult.lockedOut() = _LockedOutAuthResult;
+  factory AuthResult.error({required String message}) = _ErrorAuthResult;
+}
+```
+
+#### 状态语义与触发条件
+
+| 状态 | 触发条件 | 调用方动作建议 |
+|------|----------|---------------|
+| `success` | 生物识别通过 | 继续目标业务操作 |
+| `failed` | 生物识别失败且次数 `< maxFailedAttempts` | 提示剩余次数并允许重试 |
+| `fallbackToPIN` | 设备不支持/未录入/暂不可用 | 跳转 PIN 流程 |
+| `tooManyAttempts` | 本地失败计数达到阈值 | 强制 PIN 二级认证 |
+| `lockedOut` | 系统返回锁定（`lockedOut/permanentlyLockedOut`） | 提示冷却时间或系统设置解锁 |
+| `error` | 其他平台异常 | 记录审计日志并展示错误信息 |
+
+#### 与 BiometricService 的契约
+
+- `authenticate` 必须穷举返回上述状态之一，不得抛出未处理平台异常到 UI 层
+- PIN 成功后应调用 `resetFailedAttempts()`，避免永久停留在 `tooManyAttempts`
+- UI 层必须使用 `when`/`map` 穷举处理，不得只判断布尔值
+
+---
+
+### 3.3 SecureStorageService（安全存储服务）
 
 **文件:** `lib/infrastructure/security/secure_storage_service.dart`
 
@@ -649,7 +709,7 @@ class KeyRepositoryImpl implements KeyRepository {
 
 ---
 
-### 3.3 AuditLogger（审计日志服务）
+### 3.4 AuditLogger（审计日志服务）
 
 **文件:** `lib/infrastructure/security/audit_logger.dart`
 
@@ -1257,7 +1317,7 @@ test('exportToCSV generates valid format', () async {
 |------|------|------|
 | 加密基础设施 | [BASIC-001](./BASIC-001_Crypto_Infrastructure.md) | Crypto Infrastructure 层实现参考 |
 | 安全架构 | [ARCH-003](../01-core-architecture/ARCH-003_Security_Architecture.md) | 安全架构顶层设计 |
-| 安全模块规格 | [MOD-005](../02-module-specs/MOD-005_Security.md) (MOD-006) | 安全模块业务需求与 UI |
+| 安全模块规格 | [PRD_Module_Security](../../requirement/PRD_Module_Security.md) | 安全模块业务需求与 UI |
 | 多层加密决策 | [ADR-003](../03-adr/ADR-003_Multi_Layer_Encryption.md) | 加密方案决策 |
 | 密钥派生决策 | [ADR-006](../03-adr/ADR-006_Key_Derivation_Security.md) | HKDF 方案设计 |
 
@@ -1266,4 +1326,5 @@ test('exportToCSV generates valid format', () async {
 **文档状态:** 完成
 **审核状态:** 待审核
 **变更日志:**
+- 2026-02-22: v1.1 新增 AuthResult/AuthStatus 模型专节并明确层次边界
 - 2026-02-06: v1.0 创建安全基础设施技术设计文档（BiometricService、SecureStorageService、AuditLogger）

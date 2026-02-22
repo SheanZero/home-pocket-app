@@ -7,10 +7,9 @@ class Categories extends Table {
   TextColumn get name => text().withLength(min: 1, max: 50)();
   TextColumn get icon => text()();
   TextColumn get color => text()();
-  TextColumn get parentId => text()
-      .nullable()
-      .references(Categories, #id)();
-  IntColumn get level => integer().check(level.isIn([1, 2]))();
+  TextColumn get parentId => text().nullable().references(Categories, #id)();
+  IntColumn get level =>
+      integer().customConstraint('NOT NULL CHECK(level IN (1, 2))')();
   BoolColumn get isSystem => boolean().withDefault(const Constant(false))();
   BoolColumn get isArchived => boolean().withDefault(const Constant(false))();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();

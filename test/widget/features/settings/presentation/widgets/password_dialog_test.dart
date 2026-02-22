@@ -7,6 +7,7 @@ import 'package:home_pocket/generated/app_localizations.dart';
 void main() {
   Widget buildApp({required Widget child}) {
     return MaterialApp(
+      theme: ThemeData(splashFactory: NoSplash.splashFactory),
       localizationsDelegates: const [
         S.delegate,
         GlobalMaterialLocalizations.delegate,

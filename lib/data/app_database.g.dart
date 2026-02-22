@@ -1178,9 +1178,9 @@ class $CategoriesTable extends Categories
     'level',
     aliasedName,
     false,
-    check: () => level.isIn([1, 2]),
     type: DriftSqlType.int,
     requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL CHECK(level IN (1, 2))',
   );
   static const VerificationMeta _isSystemMeta = const VerificationMeta(
     'isSystem',
@@ -1800,9 +1800,10 @@ class $CategoryLedgerConfigsTable extends CategoryLedgerConfigs
     'ledger_type',
     aliasedName,
     false,
-    check: () => ledgerType.isIn(['survival', 'soul']),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+    $customConstraints:
+        'NOT NULL CHECK(ledger_type IN (\'survival\', \'soul\'))',
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -2049,6 +2050,426 @@ class CategoryLedgerConfigsCompanion
     return (StringBuffer('CategoryLedgerConfigsCompanion(')
           ..write('categoryId: $categoryId, ')
           ..write('ledgerType: $ledgerType, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MerchantCategoryPreferencesTable extends MerchantCategoryPreferences
+    with
+        TableInfo<
+          $MerchantCategoryPreferencesTable,
+          MerchantCategoryPreferenceRow
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MerchantCategoryPreferencesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _merchantKeyMeta = const VerificationMeta(
+    'merchantKey',
+  );
+  @override
+  late final GeneratedColumn<String> merchantKey = GeneratedColumn<String>(
+    'merchant_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _preferredCategoryIdMeta =
+      const VerificationMeta('preferredCategoryId');
+  @override
+  late final GeneratedColumn<String> preferredCategoryId =
+      GeneratedColumn<String>(
+        'preferred_category_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _lastOverrideCategoryIdMeta =
+      const VerificationMeta('lastOverrideCategoryId');
+  @override
+  late final GeneratedColumn<String> lastOverrideCategoryId =
+      GeneratedColumn<String>(
+        'last_override_category_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _overrideStreakMeta = const VerificationMeta(
+    'overrideStreak',
+  );
+  @override
+  late final GeneratedColumn<int> overrideStreak = GeneratedColumn<int>(
+    'override_streak',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    merchantKey,
+    preferredCategoryId,
+    lastOverrideCategoryId,
+    overrideStreak,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'merchant_category_preferences';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MerchantCategoryPreferenceRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('merchant_key')) {
+      context.handle(
+        _merchantKeyMeta,
+        merchantKey.isAcceptableOrUnknown(
+          data['merchant_key']!,
+          _merchantKeyMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_merchantKeyMeta);
+    }
+    if (data.containsKey('preferred_category_id')) {
+      context.handle(
+        _preferredCategoryIdMeta,
+        preferredCategoryId.isAcceptableOrUnknown(
+          data['preferred_category_id']!,
+          _preferredCategoryIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_preferredCategoryIdMeta);
+    }
+    if (data.containsKey('last_override_category_id')) {
+      context.handle(
+        _lastOverrideCategoryIdMeta,
+        lastOverrideCategoryId.isAcceptableOrUnknown(
+          data['last_override_category_id']!,
+          _lastOverrideCategoryIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('override_streak')) {
+      context.handle(
+        _overrideStreakMeta,
+        overrideStreak.isAcceptableOrUnknown(
+          data['override_streak']!,
+          _overrideStreakMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {merchantKey};
+  @override
+  MerchantCategoryPreferenceRow map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MerchantCategoryPreferenceRow(
+      merchantKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}merchant_key'],
+      )!,
+      preferredCategoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}preferred_category_id'],
+      )!,
+      lastOverrideCategoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_override_category_id'],
+      ),
+      overrideStreak: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}override_streak'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $MerchantCategoryPreferencesTable createAlias(String alias) {
+    return $MerchantCategoryPreferencesTable(attachedDatabase, alias);
+  }
+}
+
+class MerchantCategoryPreferenceRow extends DataClass
+    implements Insertable<MerchantCategoryPreferenceRow> {
+  final String merchantKey;
+  final String preferredCategoryId;
+  final String? lastOverrideCategoryId;
+  final int overrideStreak;
+  final DateTime updatedAt;
+  const MerchantCategoryPreferenceRow({
+    required this.merchantKey,
+    required this.preferredCategoryId,
+    this.lastOverrideCategoryId,
+    required this.overrideStreak,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['merchant_key'] = Variable<String>(merchantKey);
+    map['preferred_category_id'] = Variable<String>(preferredCategoryId);
+    if (!nullToAbsent || lastOverrideCategoryId != null) {
+      map['last_override_category_id'] = Variable<String>(
+        lastOverrideCategoryId,
+      );
+    }
+    map['override_streak'] = Variable<int>(overrideStreak);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  MerchantCategoryPreferencesCompanion toCompanion(bool nullToAbsent) {
+    return MerchantCategoryPreferencesCompanion(
+      merchantKey: Value(merchantKey),
+      preferredCategoryId: Value(preferredCategoryId),
+      lastOverrideCategoryId: lastOverrideCategoryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastOverrideCategoryId),
+      overrideStreak: Value(overrideStreak),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory MerchantCategoryPreferenceRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MerchantCategoryPreferenceRow(
+      merchantKey: serializer.fromJson<String>(json['merchantKey']),
+      preferredCategoryId: serializer.fromJson<String>(
+        json['preferredCategoryId'],
+      ),
+      lastOverrideCategoryId: serializer.fromJson<String?>(
+        json['lastOverrideCategoryId'],
+      ),
+      overrideStreak: serializer.fromJson<int>(json['overrideStreak']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'merchantKey': serializer.toJson<String>(merchantKey),
+      'preferredCategoryId': serializer.toJson<String>(preferredCategoryId),
+      'lastOverrideCategoryId': serializer.toJson<String?>(
+        lastOverrideCategoryId,
+      ),
+      'overrideStreak': serializer.toJson<int>(overrideStreak),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  MerchantCategoryPreferenceRow copyWith({
+    String? merchantKey,
+    String? preferredCategoryId,
+    Value<String?> lastOverrideCategoryId = const Value.absent(),
+    int? overrideStreak,
+    DateTime? updatedAt,
+  }) => MerchantCategoryPreferenceRow(
+    merchantKey: merchantKey ?? this.merchantKey,
+    preferredCategoryId: preferredCategoryId ?? this.preferredCategoryId,
+    lastOverrideCategoryId: lastOverrideCategoryId.present
+        ? lastOverrideCategoryId.value
+        : this.lastOverrideCategoryId,
+    overrideStreak: overrideStreak ?? this.overrideStreak,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  MerchantCategoryPreferenceRow copyWithCompanion(
+    MerchantCategoryPreferencesCompanion data,
+  ) {
+    return MerchantCategoryPreferenceRow(
+      merchantKey: data.merchantKey.present
+          ? data.merchantKey.value
+          : this.merchantKey,
+      preferredCategoryId: data.preferredCategoryId.present
+          ? data.preferredCategoryId.value
+          : this.preferredCategoryId,
+      lastOverrideCategoryId: data.lastOverrideCategoryId.present
+          ? data.lastOverrideCategoryId.value
+          : this.lastOverrideCategoryId,
+      overrideStreak: data.overrideStreak.present
+          ? data.overrideStreak.value
+          : this.overrideStreak,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MerchantCategoryPreferenceRow(')
+          ..write('merchantKey: $merchantKey, ')
+          ..write('preferredCategoryId: $preferredCategoryId, ')
+          ..write('lastOverrideCategoryId: $lastOverrideCategoryId, ')
+          ..write('overrideStreak: $overrideStreak, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    merchantKey,
+    preferredCategoryId,
+    lastOverrideCategoryId,
+    overrideStreak,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MerchantCategoryPreferenceRow &&
+          other.merchantKey == this.merchantKey &&
+          other.preferredCategoryId == this.preferredCategoryId &&
+          other.lastOverrideCategoryId == this.lastOverrideCategoryId &&
+          other.overrideStreak == this.overrideStreak &&
+          other.updatedAt == this.updatedAt);
+}
+
+class MerchantCategoryPreferencesCompanion
+    extends UpdateCompanion<MerchantCategoryPreferenceRow> {
+  final Value<String> merchantKey;
+  final Value<String> preferredCategoryId;
+  final Value<String?> lastOverrideCategoryId;
+  final Value<int> overrideStreak;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const MerchantCategoryPreferencesCompanion({
+    this.merchantKey = const Value.absent(),
+    this.preferredCategoryId = const Value.absent(),
+    this.lastOverrideCategoryId = const Value.absent(),
+    this.overrideStreak = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MerchantCategoryPreferencesCompanion.insert({
+    required String merchantKey,
+    required String preferredCategoryId,
+    this.lastOverrideCategoryId = const Value.absent(),
+    this.overrideStreak = const Value.absent(),
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : merchantKey = Value(merchantKey),
+       preferredCategoryId = Value(preferredCategoryId),
+       updatedAt = Value(updatedAt);
+  static Insertable<MerchantCategoryPreferenceRow> custom({
+    Expression<String>? merchantKey,
+    Expression<String>? preferredCategoryId,
+    Expression<String>? lastOverrideCategoryId,
+    Expression<int>? overrideStreak,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (merchantKey != null) 'merchant_key': merchantKey,
+      if (preferredCategoryId != null)
+        'preferred_category_id': preferredCategoryId,
+      if (lastOverrideCategoryId != null)
+        'last_override_category_id': lastOverrideCategoryId,
+      if (overrideStreak != null) 'override_streak': overrideStreak,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MerchantCategoryPreferencesCompanion copyWith({
+    Value<String>? merchantKey,
+    Value<String>? preferredCategoryId,
+    Value<String?>? lastOverrideCategoryId,
+    Value<int>? overrideStreak,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return MerchantCategoryPreferencesCompanion(
+      merchantKey: merchantKey ?? this.merchantKey,
+      preferredCategoryId: preferredCategoryId ?? this.preferredCategoryId,
+      lastOverrideCategoryId:
+          lastOverrideCategoryId ?? this.lastOverrideCategoryId,
+      overrideStreak: overrideStreak ?? this.overrideStreak,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (merchantKey.present) {
+      map['merchant_key'] = Variable<String>(merchantKey.value);
+    }
+    if (preferredCategoryId.present) {
+      map['preferred_category_id'] = Variable<String>(
+        preferredCategoryId.value,
+      );
+    }
+    if (lastOverrideCategoryId.present) {
+      map['last_override_category_id'] = Variable<String>(
+        lastOverrideCategoryId.value,
+      );
+    }
+    if (overrideStreak.present) {
+      map['override_streak'] = Variable<int>(overrideStreak.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MerchantCategoryPreferencesCompanion(')
+          ..write('merchantKey: $merchantKey, ')
+          ..write('preferredCategoryId: $preferredCategoryId, ')
+          ..write('lastOverrideCategoryId: $lastOverrideCategoryId, ')
+          ..write('overrideStreak: $overrideStreak, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -3163,6 +3584,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $CategoryLedgerConfigsTable categoryLedgerConfigs =
       $CategoryLedgerConfigsTable(this);
+  late final $MerchantCategoryPreferencesTable merchantCategoryPreferences =
+      $MerchantCategoryPreferencesTable(this);
   late final $TransactionsTable transactions = $TransactionsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -3173,6 +3596,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     books,
     categories,
     categoryLedgerConfigs,
+    merchantCategoryPreferences,
     transactions,
   ];
 }
@@ -4559,6 +4983,233 @@ typedef $$CategoryLedgerConfigsTableProcessedTableManager =
       CategoryLedgerConfigRow,
       PrefetchHooks Function({bool categoryId})
     >;
+typedef $$MerchantCategoryPreferencesTableCreateCompanionBuilder =
+    MerchantCategoryPreferencesCompanion Function({
+      required String merchantKey,
+      required String preferredCategoryId,
+      Value<String?> lastOverrideCategoryId,
+      Value<int> overrideStreak,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$MerchantCategoryPreferencesTableUpdateCompanionBuilder =
+    MerchantCategoryPreferencesCompanion Function({
+      Value<String> merchantKey,
+      Value<String> preferredCategoryId,
+      Value<String?> lastOverrideCategoryId,
+      Value<int> overrideStreak,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$MerchantCategoryPreferencesTableFilterComposer
+    extends Composer<_$AppDatabase, $MerchantCategoryPreferencesTable> {
+  $$MerchantCategoryPreferencesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get merchantKey => $composableBuilder(
+    column: $table.merchantKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get preferredCategoryId => $composableBuilder(
+    column: $table.preferredCategoryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastOverrideCategoryId => $composableBuilder(
+    column: $table.lastOverrideCategoryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get overrideStreak => $composableBuilder(
+    column: $table.overrideStreak,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MerchantCategoryPreferencesTableOrderingComposer
+    extends Composer<_$AppDatabase, $MerchantCategoryPreferencesTable> {
+  $$MerchantCategoryPreferencesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get merchantKey => $composableBuilder(
+    column: $table.merchantKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get preferredCategoryId => $composableBuilder(
+    column: $table.preferredCategoryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastOverrideCategoryId => $composableBuilder(
+    column: $table.lastOverrideCategoryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get overrideStreak => $composableBuilder(
+    column: $table.overrideStreak,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MerchantCategoryPreferencesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MerchantCategoryPreferencesTable> {
+  $$MerchantCategoryPreferencesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get merchantKey => $composableBuilder(
+    column: $table.merchantKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get preferredCategoryId => $composableBuilder(
+    column: $table.preferredCategoryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastOverrideCategoryId => $composableBuilder(
+    column: $table.lastOverrideCategoryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get overrideStreak => $composableBuilder(
+    column: $table.overrideStreak,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$MerchantCategoryPreferencesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MerchantCategoryPreferencesTable,
+          MerchantCategoryPreferenceRow,
+          $$MerchantCategoryPreferencesTableFilterComposer,
+          $$MerchantCategoryPreferencesTableOrderingComposer,
+          $$MerchantCategoryPreferencesTableAnnotationComposer,
+          $$MerchantCategoryPreferencesTableCreateCompanionBuilder,
+          $$MerchantCategoryPreferencesTableUpdateCompanionBuilder,
+          (
+            MerchantCategoryPreferenceRow,
+            BaseReferences<
+              _$AppDatabase,
+              $MerchantCategoryPreferencesTable,
+              MerchantCategoryPreferenceRow
+            >,
+          ),
+          MerchantCategoryPreferenceRow,
+          PrefetchHooks Function()
+        > {
+  $$MerchantCategoryPreferencesTableTableManager(
+    _$AppDatabase db,
+    $MerchantCategoryPreferencesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MerchantCategoryPreferencesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$MerchantCategoryPreferencesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$MerchantCategoryPreferencesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> merchantKey = const Value.absent(),
+                Value<String> preferredCategoryId = const Value.absent(),
+                Value<String?> lastOverrideCategoryId = const Value.absent(),
+                Value<int> overrideStreak = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MerchantCategoryPreferencesCompanion(
+                merchantKey: merchantKey,
+                preferredCategoryId: preferredCategoryId,
+                lastOverrideCategoryId: lastOverrideCategoryId,
+                overrideStreak: overrideStreak,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String merchantKey,
+                required String preferredCategoryId,
+                Value<String?> lastOverrideCategoryId = const Value.absent(),
+                Value<int> overrideStreak = const Value.absent(),
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => MerchantCategoryPreferencesCompanion.insert(
+                merchantKey: merchantKey,
+                preferredCategoryId: preferredCategoryId,
+                lastOverrideCategoryId: lastOverrideCategoryId,
+                overrideStreak: overrideStreak,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MerchantCategoryPreferencesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MerchantCategoryPreferencesTable,
+      MerchantCategoryPreferenceRow,
+      $$MerchantCategoryPreferencesTableFilterComposer,
+      $$MerchantCategoryPreferencesTableOrderingComposer,
+      $$MerchantCategoryPreferencesTableAnnotationComposer,
+      $$MerchantCategoryPreferencesTableCreateCompanionBuilder,
+      $$MerchantCategoryPreferencesTableUpdateCompanionBuilder,
+      (
+        MerchantCategoryPreferenceRow,
+        BaseReferences<
+          _$AppDatabase,
+          $MerchantCategoryPreferencesTable,
+          MerchantCategoryPreferenceRow
+        >,
+      ),
+      MerchantCategoryPreferenceRow,
+      PrefetchHooks Function()
+    >;
 typedef $$TransactionsTableCreateCompanionBuilder =
     TransactionsCompanion Function({
       required String id,
@@ -5064,6 +5715,12 @@ class $AppDatabaseManager {
       $$CategoriesTableTableManager(_db, _db.categories);
   $$CategoryLedgerConfigsTableTableManager get categoryLedgerConfigs =>
       $$CategoryLedgerConfigsTableTableManager(_db, _db.categoryLedgerConfigs);
+  $$MerchantCategoryPreferencesTableTableManager
+  get merchantCategoryPreferences =>
+      $$MerchantCategoryPreferencesTableTableManager(
+        _db,
+        _db.merchantCategoryPreferences,
+      );
   $$TransactionsTableTableManager get transactions =>
       $$TransactionsTableTableManager(_db, _db.transactions);
 }

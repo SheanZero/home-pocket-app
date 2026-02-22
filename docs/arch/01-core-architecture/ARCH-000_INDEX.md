@@ -37,6 +37,7 @@
 | 🔹 MOD-006 数据分析 | [MOD-006_Analytics.md](../02-module-specs/MOD-006_Analytics.md) | PRD_MVP_App.md | 5天 | ✅ 完成 |
 | 🔹 MOD-007 设置管理 | [MOD-007_Settings.md](../02-module-specs/MOD-007_Settings.md) | PRD_MVP_App.md | 6天 | ✅ 完成 |
 | 🔹 MOD-008 趣味功能 | [MOD-008_Gamification.md](../02-module-specs/MOD-008_Gamification.md) | PRD_Module_Gamification.md | 7天 | ✅ 完成 |
+| 🔹 MOD-009 语音记账 | [MOD-009_VoiceInput.md](../02-module-specs/MOD-009_VoiceInput.md) | — | 8天 | ✅ 完成 |
 
 ### 基础能力 PRD 文档（04-basic）
 
@@ -564,10 +565,10 @@ User → System → Database
 | 类别 | 数量 | 状态 |
 |------|------|------|
 | 核心架构文档 | 8 | ✅ 100% |
-| 功能模块文档 | 7 (+1 缺失) | ✅ 100% |
+| 功能模块文档 | 8 (+1 缺失) | ✅ 100% |
 | ADR决策记录 | 10 | ✅ 100% |
 | 基础能力 PRD | 4 | ✅ 100% |
-| **总计** | **29** | **✅ 100%** |
+| **总计** | **30** | **✅ 100%** |
 
 ---
 

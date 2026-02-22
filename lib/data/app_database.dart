@@ -5,6 +5,7 @@ import 'tables/audit_logs_table.dart';
 import 'tables/books_table.dart';
 import 'tables/categories_table.dart';
 import 'tables/category_ledger_configs_table.dart';
+import 'tables/merchant_category_preferences_table.dart';
 import 'tables/transactions_table.dart';
 
 part 'app_database.g.dart';
@@ -13,7 +14,16 @@ part 'app_database.g.dart';
 ///
 /// Contains all Drift tables for the app.
 /// Schema version incremented when tables are added/modified.
-@DriftDatabase(tables: [AuditLogs, Books, Categories, CategoryLedgerConfigs, Transactions])
+@DriftDatabase(
+  tables: [
+    AuditLogs,
+    Books,
+    Categories,
+    CategoryLedgerConfigs,
+    MerchantCategoryPreferences,
+    Transactions,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
@@ -21,7 +31,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration {
@@ -59,6 +69,9 @@ class AppDatabase extends _$AppDatabase {
             UPDATE categories SET is_archived = 1
             WHERE level = 2 AND parent_id IS NULL
           ''');
+        }
+        if (from < 6) {
+          await migrator.createTable(merchantCategoryPreferences);
         }
       },
     );

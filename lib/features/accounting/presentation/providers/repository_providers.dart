@@ -4,11 +4,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../data/daos/book_dao.dart';
 import '../../../../data/daos/category_dao.dart';
 import '../../../../data/daos/category_ledger_config_dao.dart';
+import '../../../../data/daos/merchant_category_preference_dao.dart';
 import '../../../../data/daos/transaction_dao.dart';
 import '../../../../data/repositories/book_repository_impl.dart';
 import '../../../../data/repositories/category_ledger_config_repository_impl.dart';
 import '../../../../data/repositories/category_repository_impl.dart';
 import '../../../../data/repositories/device_identity_repository_impl.dart';
+import '../../../../data/repositories/merchant_category_preference_repository_impl.dart';
 import '../../../../data/repositories/transaction_repository_impl.dart';
 import '../../../../infrastructure/crypto/providers.dart';
 import '../../../../infrastructure/security/providers.dart';
@@ -16,6 +18,7 @@ import '../../domain/repositories/book_repository.dart';
 import '../../domain/repositories/category_ledger_config_repository.dart';
 import '../../domain/repositories/category_repository.dart';
 import '../../domain/repositories/device_identity_repository.dart';
+import '../../domain/repositories/merchant_category_preference_repository.dart';
 import '../../domain/repositories/transaction_repository.dart';
 
 part 'repository_providers.g.dart';
@@ -55,6 +58,16 @@ TransactionRepository transactionRepository(Ref ref) {
     dao: dao,
     encryptionService: encryptionService,
   );
+}
+
+/// MerchantCategoryPreferenceRepository provider.
+@riverpod
+MerchantCategoryPreferenceRepository merchantCategoryPreferenceRepository(
+  Ref ref,
+) {
+  final database = ref.watch(appDatabaseProvider);
+  final dao = MerchantCategoryPreferenceDao(database);
+  return MerchantCategoryPreferenceRepositoryImpl(dao: dao);
 }
 
 /// DeviceIdentityRepository provider.

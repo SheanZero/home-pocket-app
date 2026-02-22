@@ -3,7 +3,7 @@
 **文档编号:** BASIC-001
 **文档版本:** 1.0
 **创建日期:** 2026-02-06
-**最后更新:** 2026-02-06
+**最后更新:** 2026-02-22
 **状态:** 已实施
 **作者:** Claude Opus 4.6
 
@@ -63,6 +63,13 @@ lib/infrastructure/crypto/
 
 **技术栈:** `cryptography` + `flutter_secure_storage`
 
+#### 选型依据（Ed25519）
+
+- **性能:** 在移动端签名/验签吞吐高于 RSA-2048，适合高频本地校验场景
+- **密钥尺寸:** 32-byte 公钥与 64-byte 私钥，存储与传输开销更小
+- **安全级别:** 提供约 128-bit 安全强度，满足当前阶段威胁模型
+- **Flutter 支持:** `cryptography` 包原生支持 Ed25519，便于统一跨平台实现
+
 #### 类签名
 
 ```dart
@@ -82,8 +89,12 @@ class KeyManager {
 | `hasKeyPair()` | `Future<bool>` | 检查密钥对是否存在 |
 | `signData(List<int> data)` | `Future<Signature>` | Ed25519 数字签名 |
 | `verifySignature(...)` | `Future<bool>` | 验证 Ed25519 签名 |
+| `recoverFromMnemonic(String mnemonic)` | `Future<DeviceKeyPair>` | 从 24 词助记词恢复密钥（用户恢复流程入口） |
 | `recoverFromSeed(List<int> seed)` | `Future<DeviceKeyPair>` | 从 BIP39 种子恢复密钥 |
 | `clearKeys()` | `Future<void>` | 删除所有密钥（不可逆） |
+
+> `recoverFromMnemonic` 面向用户输入流程，内部包含助记词格式校验与种子转换；
+> `recoverFromSeed` 面向底层密码学流程，接受已验证种子字节。
 
 #### 密钥层次结构
 
@@ -293,7 +304,9 @@ class HashChainService {
 | `calculateTransactionHash(...)` | `String` | 计算交易哈希 |
 | `verifyTransactionIntegrity(...)` | `bool` | 验证单笔交易 |
 | `verifyChain(List<Map<String, dynamic>>)` | `ChainVerificationResult` | 完整链验证 |
+| `verifyChainByBook(String bookId)` | `Future<ChainVerificationResult>` | 按账本读取交易后执行链验证 |
 | `verifyChainIncremental(...)` | `ChainVerificationResult` | 增量验证（推荐） |
+| `appendToChain({tx, bookId})` | `Future<Transaction>` | 读取账本最后一条交易并补齐 `prevHash/currentHash` |
 
 #### 哈希计算公式
 
@@ -353,6 +366,18 @@ HashChainService hashChainService(HashChainServiceRef ref) {
 }
 ```
 
+```dart
+/// MOD-005 对齐：按账本验证入口
+@riverpod
+Future<ChainVerificationResult> chainVerification(
+  ChainVerificationRef ref,
+  String bookId,
+) async {
+  final hashChain = ref.watch(hashChainServiceProvider);
+  return hashChain.verifyChainByBook(bookId);
+}
+```
+
 #### 使用示例
 
 ```dart
@@ -386,6 +411,20 @@ if (!result.isValid) {
 }
 ```
 
+```dart
+// 新增交易时，按 bookId 自动接链
+final chained = await hashService.appendToChain(
+  tx: draftTx,
+  bookId: 'book_001',
+);
+await txRepository.save(chained);
+
+// 通过 provider 验证指定账本
+final verification = await ref.read(
+  chainVerificationProvider('book_001').future,
+);
+```
+
 ---
 
 ### 3.4 PhotoEncryptionService（照片加密服务）- 规划中
@@ -415,9 +454,10 @@ if (!result.isValid) {
 
 ### 3.5 RecoveryKitService（恢复套件服务）
 
-> **注意:** 当前实现位于 `lib/features/security/application/services/recovery_kit_service.dart`，
-> 架构规划将其迁移至 `lib/infrastructure/crypto/services/`。
-> 详细 API 文档见 [BASIC-002_Security_Infrastructure.md](./BASIC-002_Security_Infrastructure.md) 第 3.3 节。
+**文件:** `lib/infrastructure/crypto/services/recovery_kit_service.dart`
+
+> **状态说明:** 当前实现仍在 `lib/features/security/application/services/recovery_kit_service.dart`，
+> 本节定义 Infrastructure 目标 API，用于与 MOD-005 技术设计对齐。
 
 **职责:**
 - BIP39 24 词助记词生成（256-bit 熵）
@@ -425,10 +465,57 @@ if (!result.isValid) {
 - 密钥恢复（助记词 → 种子 → Ed25519 密钥对）
 - 验证词选择（随机 3 个位置用于 UX 确认）
 
+#### 类签名
+
+```dart
+class RecoveryKitService {
+  RecoveryKitService({
+    required SecureStorageService storageService,
+    required KeyManager keyManager,
+  });
+}
+```
+
+#### 核心方法
+
+| 方法 | 返回类型 | 说明 |
+|------|---------|------|
+| `generateRecoveryKit()` | `Future<String>` | 生成 24 词助记词并保存哈希 |
+| `verifyRecoveryKit(String userInput)` | `Future<bool>` | 比对用户输入助记词哈希 |
+| `exportToPDF(String mnemonic)` | `Future<File>` | 导出离线恢复 PDF（本地文件） |
+| `pickVerificationWords()` | `List<int>` | 生成随机 3 个词位用于引导校验 |
+
+#### 恢复验证流程
+
+```
+生成 256-bit entropy
+    ↓
+BIP39 转 24 词 mnemonic
+    ↓
+仅存储 SHA-256(mnemonic)
+    ↓
+随机抽取 3 个词位进行用户确认
+    ↓
+用户恢复时输入 24 词并哈希比对
+```
+
 **安全规则:**
 - 仅存储助记词的 SHA-256 哈希
 - 绝不明文存储助记词
 - 助记词仅在用户界面短暂显示
+- PDF 导出仅允许本地落盘，不允许自动上传或网络传输
+
+#### Provider 定义
+
+```dart
+@riverpod
+RecoveryKitService recoveryKitService(RecoveryKitServiceRef ref) {
+  return RecoveryKitService(
+    storageService: ref.watch(secureStorageServiceProvider),
+    keyManager: ref.watch(keyManagerProvider),
+  );
+}
+```
 
 ---
 
@@ -501,6 +588,51 @@ class ChainVerificationResult with _$ChainVerificationResult {
 | `.empty()` | 无交易数据 | `true` | `[]` |
 
 > **重要:** 此模型在整个项目中有且仅有一个定义。
+
+---
+
+### 4.3 Devices（设备表）
+
+**定义位置:** `lib/data/tables/devices_table.dart`
+
+```dart
+@DataClassName('DeviceData')
+class Devices extends Table {
+  TextColumn get id => text()(); // 设备 ID
+  TextColumn get publicKey => text()(); // Ed25519 公钥(Base64)
+  TextColumn get name => text()(); // 设备昵称
+  IntColumn get createdAt => integer()();
+  IntColumn get lastSeenAt => integer()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+```
+
+该表用于设备身份与公钥映射，是密钥恢复与多设备同步的根表。
+
+---
+
+### 4.4 RecoveryKits（恢复套件表）
+
+**定义位置:** `lib/data/tables/recovery_kits_table.dart`
+
+```dart
+@DataClassName('RecoveryKitData')
+class RecoveryKits extends Table {
+  TextColumn get id => text()();
+  TextColumn get deviceId => text().references(Devices, #id)();
+  TextColumn get mnemonicHash => text()(); // 仅哈希，禁止明文
+  BoolColumn get isVerified => boolean().withDefault(const Constant(false))();
+  IntColumn get createdAt => integer()();
+  IntColumn get verifiedAt => integer().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+```
+
+该表用于记录恢复套件生成/验证状态，与 `RecoveryKitService` 的校验流程一一对应。
 
 ---
 
@@ -741,6 +873,9 @@ String _deriveDatabaseKey(String publicKeyBase64) {
 FlutterSecureStorage
     │
     ▼
+SecureStorageService (infrastructure/security)
+    │
+    ▼
 KeyRepositoryImpl (implements KeyRepository)
     │
     ├──▶ KeyManager
@@ -753,18 +888,21 @@ KeyRepositoryImpl (implements KeyRepository)
             ▼
          FieldEncryptionService
 
-HashChainService (无依赖, 无状态)
+TransactionRepository
+    │
+    ▼
+HashChainService (账本集成模式)
 ```
 
 ### 初始化顺序
 
 ```
-1. FlutterSecureStorage    ← 平台提供
-2. KeyRepository           ← 依赖 SecureStorage
+1. SecureStorageService    ← 平台提供存储封装
+2. KeyRepository           ← 依赖 SecureStorageService
 3. KeyManager              ← 依赖 KeyRepository
 4. EncryptedDatabase       ← 依赖 KeyManager (获取加密密钥)
 5. FieldEncryptionService  ← 依赖 EncryptionRepository
-6. HashChainService        ← 无依赖 (可随时创建)
+6. HashChainService        ← 依赖 TransactionRepository（按账本验证模式）
 ```
 
 > **关键:** `AppInitializer` 必须在 `runApp()` 之前完成步骤 1-4。
@@ -810,7 +948,7 @@ HashChainService (无依赖, 无状态)
 | 多层加密决策 | [ADR-003](../arch/03-adr/ADR-003_Multi_Layer_Encryption.md) | ChaCha20-Poly1305 选型依据 |
 | 密钥派生决策 | [ADR-006](../arch/03-adr/ADR-006_Key_Derivation_Security.md) | HKDF 方案与缓存策略 |
 | 增量验证决策 | [ADR-009](../arch/03-adr/ADR-009_Incremental_Hash_Chain_Verification.md) | 哈希链增量验证设计 |
-| 安全模块规格 | [MOD-005](../arch/02-module-specs/MOD-005_Security.md) | 安全模块业务需求与 UI 设计 |
+| 安全模块规格 | [PRD_Module_Security](../../requirement/PRD_Module_Security.md) | 安全模块业务需求与 UI 设计 |
 | 安全基础设施 | [BASIC-002](./BASIC-002_Security_Infrastructure.md) | 安全平台服务（生物识别、PIN、审计） |
 
 ---
@@ -818,4 +956,5 @@ HashChainService (无依赖, 无状态)
 **文档状态:** 完成
 **审核状态:** 待审核
 **变更日志:**
+- 2026-02-22: v1.1 对齐 MOD-005，补充 RecoveryKit/API、HashChain 接链入口与 Drift 表设计
 - 2026-02-06: v1.0 创建完整加密基础设施技术文档

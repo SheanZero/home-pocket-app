@@ -6,8 +6,9 @@ import 'categories_table.dart';
 @DataClassName('CategoryLedgerConfigRow')
 class CategoryLedgerConfigs extends Table {
   TextColumn get categoryId => text().references(Categories, #id)();
-  TextColumn get ledgerType => text()
-      .check(ledgerType.isIn(['survival', 'soul']))();
+  TextColumn get ledgerType => text().customConstraint(
+    "NOT NULL CHECK(ledger_type IN ('survival', 'soul'))",
+  )();
   DateTimeColumn get updatedAt => dateTime()();
 
   @override

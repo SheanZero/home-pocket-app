@@ -1236,7 +1236,7 @@ abstract class TransactionRepository {
 **修改文档:**
 1. `ARCH-003_Security_Architecture.md` - 更新哈希链验证实现
 2. `ADR-000_INDEX.md` - 添加 ADR-009 索引
-3. `MOD-005_Security.md` - 更新安全模块实现
+3. `BASIC-001_Crypto_Infrastructure.md` / `BASIC-002_Security_Infrastructure.md` - 更新安全与加密基础设施实现说明
 4. 开发文档 - 添加增量验证使用指南
 
 **验收标准:**
@@ -1412,7 +1412,8 @@ static Stream<VerificationProgress> verifyStream({
 
 - [ARCH-003: Security Architecture](../01-core-architecture/ARCH-003_Security_Architecture.md)
 - [ADR-008: Book Balance Update Strategy](./ADR-008_Book_Balance_Update_Strategy.md)
-- [MOD-005: Security Module](../02-module-specs/MOD-005_Security.md)
+- [BASIC-001: Crypto Infrastructure](../04-basic/BASIC-001_Crypto_Infrastructure.md)
+- [BASIC-002: Security Infrastructure](../04-basic/BASIC-002_Security_Infrastructure.md)
 
 ---
 

@@ -1,9 +1,9 @@
 # BASIC-003: 国際化基盤 (I18N Infrastructure)
 
 **文档編号:** BASIC-003
-**文档版本:** 1.0
+**文档版本:** 1.1
 **創建日期:** 2026-02-06
-**最後更新:** 2026-02-06
+**最後更新:** 2026-02-22
 **状態:** 已実施
 **作者:** Claude Opus 4.6
 
@@ -18,7 +18,7 @@
 | 文档 | 定位 | 関注点 |
 |------|------|--------|
 | **本文档 (BASIC-003)** | 基盤技術実装文書 | 全 i18n コンポーネントの API・アルゴリズム・コード例 |
-| [MOD-014](../02-module-specs/MOD-014_i18n.md) | モジュール機能設計文書 | i18n モジュールのビジネス要件・テスト戦略・受入基準 |
+| MOD-014（已合并） | モジュール機能設計文書 | ビジネス要件・テスト戦略・受入基準は本文档に統合済み |
 | [CLAUDE.md](../../../CLAUDE.md) | 開発ガイドライン | i18n 必須ルールとコーディング規約 |
 
 ---
@@ -826,19 +826,228 @@ class TransactionCard extends ConsumerWidget {
 
 ---
 
-## 8. 参考文档
+## 8. モジュール概要（整合自 MOD-014）
+
+### 8.1 目的
+
+ランタイム言語切替、ロケール対応フォーマット、3 言語翻訳（ja/zh/en）を提供し、Home Pocket の多言語 UX を一貫して保証する。
+
+### 8.2 スコープ
+
+**In Scope**
+- ランタイム locale 切替（ja/zh/en）
+- locale-aware 日付フォーマット
+- locale-aware 数値/通貨フォーマット
+- ARB ベース翻訳管理
+- システム locale 検出
+- 不変 LocaleSettings 管理
+
+**Out of Scope**
+- RTL 言語の本格対応（将来対応）
+- サーバーからの動的翻訳配信
+- locale 別画像アセット
+- 複数形/性別対応 ICU メッセージ
+
+### 8.3 依存関係
+
+**External**
+- flutter_localizations (SDK)
+- intl 0.20.2（flutter_localizations 要求バージョン）
+- flutter_riverpod 2.6.1
+- freezed_annotation 2.5.8
+- riverpod_annotation 2.6.1
+
+**Internal**
+- なし（独立モジュール）
+
+**Future**
+- MOD-008 Settings Management（locale 永続化）
+- MOD-004 Family Sync（locale 同期）
+
+---
+
+## 9. Locale 別フォーマット規約
+
+### 9.1 Date
+
+| Locale | Format | Example |
+|--------|--------|---------|
+| ja | YYYY/MM/DD | 2026/02/04 |
+| en | MM/DD/YYYY | 02/04/2026 |
+| zh | YYYY年MM月DD日 | 2026年02月04日 |
+
+### 9.2 DateTime
+
+| Locale | Format | Example |
+|--------|--------|---------|
+| ja | YYYY/MM/DD HH:mm | 2026/02/04 14:30 |
+| en | MM/DD/YYYY h:mm a | 02/04/2026 2:30 PM |
+| zh | YYYY年MM月DD日 HH:mm | 2026年02月04日 14:30 |
+
+### 9.3 Number / Currency
+
+| 通貨 | 記号 | 小数桁 | 例 |
+|------|------|--------|----|
+| JPY | ¥ | 0 | ¥1,235 |
+| USD | $ | 2 | $1,234.56 |
+| CNY | ¥ | 2 | ¥1,234.56 |
+| EUR | € | 2 | €1,234.56 |
+| GBP | £ | 2 | £1,234.56 |
+
+### 9.4 Compact Number
+
+| Locale | Unit | Example |
+|--------|------|---------|
+| ja/zh | 万 | 123万 |
+| en | K / M / B | 1.23M |
+
+---
+
+## 10. テスト戦略
+
+### 10.1 カバレッジ
+
+| コンポーネント | Coverage | 備考 |
+|---------------|----------|------|
+| LocaleSettings | 100% | Unit |
+| LocaleNotifierProvider | 100% | Unit |
+| DateFormatter | 100% | Unit |
+| NumberFormatter | 100% | Unit |
+| ARB Validation | 100% | Unit |
+| Integration Flow | Partial | `integration_test/i18n_integration_test.dart` |
+
+- Unit tests: 40 件（全件 pass）
+- 目標基準: 80%以上（i18n 範囲は 100% 達成）
+
+### 10.2 テストファイル
+
+```text
+test/
+├── unit/
+│   ├── infrastructure/i18n/
+│   │   ├── models/locale_settings_test.dart
+│   │   └── formatters/{date_formatter_test.dart, number_formatter_test.dart}
+│   ├── features/settings/presentation/providers/locale_provider_test.dart
+│   └── l10n/arb_validation_test.dart
+└── integration_test/i18n_integration_test.dart
+```
+
+### 10.3 TDD プロセス
+
+1. RED: failing test を先に書く
+2. GREEN: 最小実装で pass
+3. REFACTOR: 重複除去と可読性改善
+4. VERIFY: coverage と回帰を確認
+
+---
+
+## 11. 開発ワークフロー
+
+### 11.1 翻訳追加
+
+1. `app_en.arb` / `app_ja.arb` / `app_zh.arb` に同一キーを追加
+2. `app_en.arb` に `@metadata` と placeholders 型を記述
+3. `flutter gen-l10n` を実行
+4. `S.of(context).yourNewKey` で参照
+5. ARB 検証テストを更新
+
+### 11.2 既存翻訳更新
+
+1. ARB の値を更新
+2. `flutter gen-l10n` 実行
+3. 関連する widget/unit test を実行
+
+### 11.3 コード生成
+
+```bash
+# ARB 変更後
+flutter gen-l10n
+
+# Riverpod / Freezed 変更後
+flutter pub run build_runner build --delete-conflicting-outputs
+```
+
+---
+
+## 12. パフォーマンス考慮
+
+### 12.1 Localization
+
+- 生成済み `S` クラスはコンパイル時解決（ランタイム解析コストなし）
+- locale 切替は Riverpod state 更新のみ（O(1)）
+- 文字列取得はプロパティアクセス（reflection なし）
+
+**参考値（MOD-014 記載値）**
+- locale switch latency: `< 10ms`
+- string lookup latency: `< 0.01ms`
+
+### 12.2 Formatter
+
+- `intl` の DateFormat / NumberFormat の内部キャッシュを活用
+- 単発フォーマット処理は通常 `< 1ms` 程度
+- アプリ側で追加キャッシュは原則不要
+
+---
+
+## 13. 受入基準（Acceptance Criteria）
+
+- [x] ランタイム locale 切替（ja/zh/en）
+- [x] システム locale 検出対応
+- [x] locale-aware 日付フォーマット（4 メソッド）
+- [x] locale-aware 数値/通貨フォーマット（5 通貨）
+- [x] ARB 翻訳と検証テスト整備
+- [x] Unit test 実装（40 tests）
+- [x] Integration flow テストコード整備
+- [x] ドキュメント統合（BASIC-003 へ一本化）
+
+---
+
+## 14. 実装タイムライン（履歴）
+
+| Day | 実施内容 | 状態 |
+|-----|----------|------|
+| Day 1 | LocaleSettings / LocaleProvider / App 統合 | ✅ |
+| Day 2 | DateFormatter / NumberFormatter / Navigation 翻訳 | ✅ |
+| Day 3 | Category + Error/UI 翻訳 / Integration Test | ✅ |
+| Day 4 | ARB Validation / 全体テスト / 文書化 | ✅ |
+
+- 実装完了日: 2026-02-04
+
+---
+
+## 15. 制約と今後の拡張
+
+### 15.1 現在の制約
+
+1. Locale 永続化未対応
+2. セキュリティモジュール由来の iOS ビルド課題により、統合検証に制約あり
+3. RTL 言語未対応
+
+### 15.2 拡張計画
+
+- v1.1+: locale 永続化（起動時復元）
+- v1.1+: RTL 言語（he/ar）対応
+- v1.2+: 動的翻訳配信（OTA）
+- v1.2+: ICU plural / gender 対応
+- v1.3+: locale-specific assets（画像/アイコン/フォント）
+
+---
+
+## 16. 参考文档
 
 | 文档 | 編号 | 説明 |
 |------|------|------|
-| i18n モジュール仕様 | [MOD-014](../02-module-specs/MOD-014_i18n.md) | ビジネス要件・テスト戦略・受入基準 |
 | 開発ガイドライン | [CLAUDE.md](../../../CLAUDE.md) | i18n 必須ルール・コーディング規約 |
 | Flutter i18n 公式 | [flutter.dev](https://docs.flutter.dev/ui/accessibility-and-localization/internationalization) | 公式ドキュメント |
 | intl パッケージ | [pub.dev](https://pub.dev/packages/intl) | DateFormat / NumberFormat |
 | ARB 仕様 | [GitHub](https://github.com/google/app-resource-bundle/wiki/ApplicationResourceBundleSpecification) | ARB ファイル形式 |
+| Riverpod | [riverpod.dev](https://riverpod.dev) | 状態管理 |
+| Freezed | [pub.dev](https://pub.dev/packages/freezed) | 不変モデル |
 
 ---
 
 **文档状態:** 完了
 **審核状態:** 待審核
 **変更ログ:**
+- 2026-02-22: v1.1 MOD-014 内容（要件、测试、验收、路线图）を BASIC-003 に統合、MOD-014 を廃止
 - 2026-02-06: v1.0 i18n 基盤技術文書を作成（ARB・DateFormatter・NumberFormatter・LocaleProvider・LocaleSettings）
