@@ -14,6 +14,7 @@ abstract class AppSettings with _$AppSettings {
     @Default('ja') String language,
     @Default(true) bool notificationsEnabled,
     @Default(true) bool biometricLockEnabled,
+    @Default('zh') String voiceLanguage,
   }) = _AppSettings;
 
   factory AppSettings.fromJson(Map<String, dynamic> json) =>

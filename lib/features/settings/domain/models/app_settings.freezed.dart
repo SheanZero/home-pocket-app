@@ -17,6 +17,7 @@ mixin _$AppSettings {
   String get language;
   bool get notificationsEnabled;
   bool get biometricLockEnabled;
+  String get voiceLanguage;
 
   /// Create a copy of AppSettings
   /// with the given fields replaced by the non-null parameter values.
@@ -40,7 +41,9 @@ mixin _$AppSettings {
             (identical(other.notificationsEnabled, notificationsEnabled) ||
                 other.notificationsEnabled == notificationsEnabled) &&
             (identical(other.biometricLockEnabled, biometricLockEnabled) ||
-                other.biometricLockEnabled == biometricLockEnabled));
+                other.biometricLockEnabled == biometricLockEnabled) &&
+            (identical(other.voiceLanguage, voiceLanguage) ||
+                other.voiceLanguage == voiceLanguage));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -51,11 +54,12 @@ mixin _$AppSettings {
     language,
     notificationsEnabled,
     biometricLockEnabled,
+    voiceLanguage,
   );
 
   @override
   String toString() {
-    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled)';
+    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled, voiceLanguage: $voiceLanguage)';
   }
 }
 
@@ -71,6 +75,7 @@ abstract mixin class $AppSettingsCopyWith<$Res> {
     String language,
     bool notificationsEnabled,
     bool biometricLockEnabled,
+    String voiceLanguage,
   });
 }
 
@@ -90,6 +95,7 @@ class _$AppSettingsCopyWithImpl<$Res> implements $AppSettingsCopyWith<$Res> {
     Object? language = null,
     Object? notificationsEnabled = null,
     Object? biometricLockEnabled = null,
+    Object? voiceLanguage = null,
   }) {
     return _then(
       _self.copyWith(
@@ -109,6 +115,10 @@ class _$AppSettingsCopyWithImpl<$Res> implements $AppSettingsCopyWith<$Res> {
             ? _self.biometricLockEnabled
             : biometricLockEnabled // ignore: cast_nullable_to_non_nullable
                   as bool,
+        voiceLanguage: null == voiceLanguage
+            ? _self.voiceLanguage
+            : voiceLanguage // ignore: cast_nullable_to_non_nullable
+                  as String,
       ),
     );
   }
@@ -212,6 +222,7 @@ extension AppSettingsPatterns on AppSettings {
       String language,
       bool notificationsEnabled,
       bool biometricLockEnabled,
+      String voiceLanguage,
     )?
     $default, {
     required TResult orElse(),
@@ -224,6 +235,7 @@ extension AppSettingsPatterns on AppSettings {
           _that.language,
           _that.notificationsEnabled,
           _that.biometricLockEnabled,
+          _that.voiceLanguage,
         );
       case _:
         return orElse();
@@ -250,6 +262,7 @@ extension AppSettingsPatterns on AppSettings {
       String language,
       bool notificationsEnabled,
       bool biometricLockEnabled,
+      String voiceLanguage,
     )
     $default,
   ) {
@@ -261,6 +274,7 @@ extension AppSettingsPatterns on AppSettings {
           _that.language,
           _that.notificationsEnabled,
           _that.biometricLockEnabled,
+          _that.voiceLanguage,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -286,6 +300,7 @@ extension AppSettingsPatterns on AppSettings {
       String language,
       bool notificationsEnabled,
       bool biometricLockEnabled,
+      String voiceLanguage,
     )?
     $default,
   ) {
@@ -297,6 +312,7 @@ extension AppSettingsPatterns on AppSettings {
           _that.language,
           _that.notificationsEnabled,
           _that.biometricLockEnabled,
+          _that.voiceLanguage,
         );
       case _:
         return null;
@@ -312,6 +328,7 @@ class _AppSettings implements AppSettings {
     this.language = 'ja',
     this.notificationsEnabled = true,
     this.biometricLockEnabled = true,
+    this.voiceLanguage = 'zh',
   });
   factory _AppSettings.fromJson(Map<String, dynamic> json) =>
       _$AppSettingsFromJson(json);
@@ -328,6 +345,9 @@ class _AppSettings implements AppSettings {
   @override
   @JsonKey()
   final bool biometricLockEnabled;
+  @override
+  @JsonKey()
+  final String voiceLanguage;
 
   /// Create a copy of AppSettings
   /// with the given fields replaced by the non-null parameter values.
@@ -354,7 +374,9 @@ class _AppSettings implements AppSettings {
             (identical(other.notificationsEnabled, notificationsEnabled) ||
                 other.notificationsEnabled == notificationsEnabled) &&
             (identical(other.biometricLockEnabled, biometricLockEnabled) ||
-                other.biometricLockEnabled == biometricLockEnabled));
+                other.biometricLockEnabled == biometricLockEnabled) &&
+            (identical(other.voiceLanguage, voiceLanguage) ||
+                other.voiceLanguage == voiceLanguage));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -365,11 +387,12 @@ class _AppSettings implements AppSettings {
     language,
     notificationsEnabled,
     biometricLockEnabled,
+    voiceLanguage,
   );
 
   @override
   String toString() {
-    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled)';
+    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled, voiceLanguage: $voiceLanguage)';
   }
 }
 
@@ -387,6 +410,7 @@ abstract mixin class _$AppSettingsCopyWith<$Res>
     String language,
     bool notificationsEnabled,
     bool biometricLockEnabled,
+    String voiceLanguage,
   });
 }
 
@@ -406,6 +430,7 @@ class __$AppSettingsCopyWithImpl<$Res> implements _$AppSettingsCopyWith<$Res> {
     Object? language = null,
     Object? notificationsEnabled = null,
     Object? biometricLockEnabled = null,
+    Object? voiceLanguage = null,
   }) {
     return _then(
       _AppSettings(
@@ -425,6 +450,10 @@ class __$AppSettingsCopyWithImpl<$Res> implements _$AppSettingsCopyWith<$Res> {
             ? _self.biometricLockEnabled
             : biometricLockEnabled // ignore: cast_nullable_to_non_nullable
                   as bool,
+        voiceLanguage: null == voiceLanguage
+            ? _self.voiceLanguage
+            : voiceLanguage // ignore: cast_nullable_to_non_nullable
+                  as String,
       ),
     );
   }

@@ -67,6 +67,26 @@ void main() {
     });
   });
 
+  group('AppSettings.voiceLanguage', () {
+    test('default voiceLanguage is zh', () {
+      const settings = AppSettings();
+      expect(settings.voiceLanguage, 'zh');
+    });
+
+    test('copyWith preserves voiceLanguage', () {
+      const settings = AppSettings(voiceLanguage: 'ja');
+      final updated = settings.copyWith(themeMode: AppThemeMode.dark);
+      expect(updated.voiceLanguage, 'ja');
+    });
+
+    test('fromJson/toJson round-trips voiceLanguage', () {
+      const settings = AppSettings(voiceLanguage: 'en');
+      final json = settings.toJson();
+      final restored = AppSettings.fromJson(json);
+      expect(restored.voiceLanguage, 'en');
+    });
+  });
+
   group('AppThemeMode', () {
     test('has all expected values', () {
       expect(AppThemeMode.values, hasLength(3));

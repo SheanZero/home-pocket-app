@@ -13,6 +13,7 @@ _AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => _AppSettings(
   language: json['language'] as String? ?? 'ja',
   notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
   biometricLockEnabled: json['biometricLockEnabled'] as bool? ?? true,
+  voiceLanguage: json['voiceLanguage'] as String? ?? 'zh',
 );
 
 Map<String, dynamic> _$AppSettingsToJson(_AppSettings instance) =>
@@ -21,6 +22,7 @@ Map<String, dynamic> _$AppSettingsToJson(_AppSettings instance) =>
       'language': instance.language,
       'notificationsEnabled': instance.notificationsEnabled,
       'biometricLockEnabled': instance.biometricLockEnabled,
+      'voiceLanguage': instance.voiceLanguage,
     };
 
 const _$AppThemeModeEnumMap = {
