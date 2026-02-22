@@ -171,5 +171,9 @@
   "voiceLanguageSubtitle": "语音转文字所使用的语言",
   "@voiceLanguageSubtitle": {
     "description": "Subtitle for voice language setting"
+  },
+  "pleaseSelectCategory": "请选择类别",
+  "@pleaseSelectCategory": {
+    "description": "Placeholder shown when no category is selected in confirm screen"
   }
 }

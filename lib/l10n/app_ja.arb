@@ -171,5 +171,9 @@
   "voiceLanguageSubtitle": "音声入力に使用する言語",
   "@voiceLanguageSubtitle": {
     "description": "Subtitle for voice language setting"
+  },
+  "pleaseSelectCategory": "カテゴリを選択してください",
+  "@pleaseSelectCategory": {
+    "description": "Placeholder shown when no category is selected in confirm screen"
   }
 }

@@ -31,7 +31,7 @@ class TransactionConfirmScreen extends ConsumerStatefulWidget {
     super.key,
     required this.bookId,
     required this.amount,
-    required this.category,
+    this.category,
     this.parentCategory,
     required this.date,
     this.initialMerchant,
@@ -40,7 +40,7 @@ class TransactionConfirmScreen extends ConsumerStatefulWidget {
 
   final String bookId;
   final int amount;
-  final Category category;
+  final Category? category;
   final Category? parentCategory;
   final DateTime date;
 
@@ -61,7 +61,7 @@ class _TransactionConfirmScreenState
   final _memoController = TextEditingController();
 
   late int _amount;
-  late Category _category;
+  Category? _category;
   Category? _parentCategory;
   late DateTime _date;
   final Map<String, Category> _categoryById = {};
@@ -78,6 +78,9 @@ class _TransactionConfirmScreenState
     _parentCategory = widget.parentCategory;
     _date = widget.date;
 
+    if (_category != null) {
+      _resolveLedgerType(_category!.id);
+    }
     // Pre-fill optional voice input fields
     if (widget.initialMerchant != null) {
       _storeController.text = widget.initialMerchant!;
@@ -85,8 +88,6 @@ class _TransactionConfirmScreenState
     if (widget.initialSatisfaction != null) {
       _soulSatisfaction = widget.initialSatisfaction!.clamp(1, 10);
     }
-
-    _resolveLedgerType(_category.id);
   }
 
   Future<void> _resolveLedgerType(String categoryId) async {
@@ -219,7 +220,7 @@ class _TransactionConfirmScreenState
     final result = await Navigator.of(context).push<Category>(
       MaterialPageRoute<Category>(
         builder: (_) =>
-            CategorySelectionScreen(selectedCategoryId: _category.id),
+            CategorySelectionScreen(selectedCategoryId: _category?.id),
       ),
     );
     if (result == null || !mounted) return;
@@ -267,6 +268,12 @@ class _TransactionConfirmScreenState
   }
 
   Future<void> _save() async {
+    if (_category == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(S.of(context).pleaseSelectCategory)),
+      );
+      return;
+    }
     setState(() => _isSubmitting = true);
 
     final createUseCase = ref.read(createTransactionUseCaseProvider);
@@ -275,7 +282,7 @@ class _TransactionConfirmScreenState
         bookId: widget.bookId,
         amount: _amount,
         type: TransactionType.expense,
-        categoryId: _category.id,
+        categoryId: _category!.id,
         timestamp: _date,
         note: _memoController.text.trim().isEmpty
             ? null
@@ -302,7 +309,7 @@ class _TransactionConfirmScreenState
         );
         await learningService.recordSelection(
           merchantRaw: merchant,
-          selectedCategoryId: _category.id,
+          selectedCategoryId: _category!.id,
         );
       }
       if (tx.ledgerType == LedgerType.soul) {
@@ -347,7 +354,9 @@ class _TransactionConfirmScreenState
     final l10n = S.of(context);
     final locale = ref.watch(currentLocaleProvider);
     final displayCategory = _parentCategory ?? _category;
-    final catColor = _parseColor(displayCategory.color);
+    final catColor = displayCategory != null
+        ? _parseColor(displayCategory.color)
+        : AppColors.survival;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F9FD),
@@ -401,18 +410,29 @@ class _TransactionConfirmScreenState
                         const _Divider(),
                         // Category row
                         _DetailRow(
-                          icon: resolveCategoryIcon(displayCategory.icon),
-                          iconColor: catColor,
+                          icon: displayCategory != null
+                              ? resolveCategoryIcon(displayCategory.icon)
+                              : Icons.folder_open_outlined,
+                          iconColor: _category == null
+                              ? AppColors.textSecondary
+                              : catColor,
                           label: l10n.category,
                           onTap: _editCategory,
-                          trailing: Text(
-                            formatCategoryPath(
-                              category: _category,
-                              parentCategory: _parentCategory,
-                              locale: locale,
-                            ),
-                            style: AppTextStyles.bodyMedium,
-                          ),
+                          trailing: _category == null
+                              ? Text(
+                                  l10n.pleaseSelectCategory,
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                )
+                              : Text(
+                                  formatCategoryPath(
+                                    category: _category!,
+                                    parentCategory: _parentCategory,
+                                    locale: locale,
+                                  ),
+                                  style: AppTextStyles.bodyMedium,
+                                ),
                         ),
                         const _Divider(),
                         // Date row

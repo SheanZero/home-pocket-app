@@ -486,5 +486,9 @@
   "voiceLanguageSubtitle": "Language used for speech-to-text",
   "@voiceLanguageSubtitle": {
     "description": "Subtitle for voice language setting"
+  },
+  "pleaseSelectCategory": "Please select a category",
+  "@pleaseSelectCategory": {
+    "description": "Placeholder shown when no category is selected in confirm screen"
   }
 }

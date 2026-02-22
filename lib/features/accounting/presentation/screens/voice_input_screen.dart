@@ -53,6 +53,9 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   // Parse result
   VoiceParseResult? _parseResult;
 
+  // Effective voice locale (updated reactively from voiceLocaleIdProvider)
+  String _voiceLocaleId = 'zh-CN';
+
   // Audio features collection
   final List<double> _soundLevels = [];
   final List<DateTime> _timestamps = [];
@@ -136,8 +139,8 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   }
 
   Future<void> _startRecording() async {
-    // Read the user's persisted voice language setting (async provider, use valueOrNull fallback)
-    final localeId = ref.read(voiceLocaleIdProvider).valueOrNull ?? 'zh-CN';
+    // Use the locale pre-warmed and kept current by ref.watch in build().
+    final localeId = _voiceLocaleId;
 
     // Reset state
     setState(() {
@@ -283,55 +286,15 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
     final categoryId =
         result.categoryMatch?.categoryId ?? result.merchantCategoryId;
 
-    if (categoryId == null) {
-      // No category matched — show error
-      if (!mounted) return;
-      final overlay = Overlay.of(context);
-      late OverlayEntry entry;
-      entry = OverlayEntry(
-        builder: (_) => Positioned(
-          top: MediaQuery.of(context).padding.top + 16,
-          left: 0,
-          right: 0,
-          child: SoftToast(
-            message: 'カテゴリが認識できませんでした',
-            icon: Icons.folder_off_outlined,
-            onDismissed: () => entry.remove(),
-          ),
-        ),
-      );
-      overlay.insert(entry);
-      return;
-    }
-
-    // Look up the Category object
+    // Look up the Category object (may be null if not recognized)
     final categoryRepo = ref.read(categoryRepositoryProvider);
-    final category = await categoryRepo.findById(categoryId);
-
-    if (!mounted) return;
-
-    if (category == null) {
-      final overlay = Overlay.of(context);
-      late OverlayEntry entry;
-      entry = OverlayEntry(
-        builder: (_) => Positioned(
-          top: MediaQuery.of(context).padding.top + 16,
-          left: 0,
-          right: 0,
-          child: SoftToast(
-            message: 'カテゴリが見つかりません',
-            icon: Icons.folder_off_outlined,
-            onDismissed: () => entry.remove(),
-          ),
-        ),
-      );
-      overlay.insert(entry);
-      return;
-    }
+    final category = categoryId != null
+        ? await categoryRepo.findById(categoryId)
+        : null;
 
     // Look up parent category if the matched category has a parentId
-    final parentCategory = category.parentId != null
-        ? await categoryRepo.findById(category.parentId!)
+    final parentCategory = category?.parentId != null
+        ? await categoryRepo.findById(category!.parentId!)
         : null;
 
     if (!mounted) return;
@@ -358,6 +321,14 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
     final l10n = S.of(context);
     final hasResult = _parseResult != null;
     final hasText = _finalText.isNotEmpty || _partialText.isNotEmpty;
+
+    // Watch voiceLocaleIdProvider so the screen rebuilds when the user changes
+    // the voice language in Settings. The current value is stored in
+    // _voiceLocaleId for synchronous use in _startRecording().
+    final voiceLocaleAsync = ref.watch(voiceLocaleIdProvider);
+    if (voiceLocaleAsync case AsyncData(:final value)) {
+      _voiceLocaleId = value;
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F9FD),
