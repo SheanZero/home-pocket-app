@@ -9,7 +9,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/speech/speech_recognition_service.dart';
-import '../../../settings/presentation/providers/locale_provider.dart';
+import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/models/voice_parse_result.dart';
 import '../providers/repository_providers.dart';
 import '../providers/voice_providers.dart';
@@ -136,8 +136,8 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   }
 
   Future<void> _startRecording() async {
-    final locale = ref.read(currentLocaleProvider);
-    final localeId = _localeIdFromLocale(locale);
+    // Read the user's persisted voice language setting (async provider, use valueOrNull fallback)
+    final localeId = ref.read(voiceLocaleIdProvider).valueOrNull ?? 'zh-CN';
 
     // Reset state
     setState(() {
@@ -274,19 +274,6 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
       return text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
     }
     return (text.replaceAll(RegExp(r'\s'), '').length / 2).ceil();
-  }
-
-  String _localeIdFromLocale(Locale locale) {
-    switch (locale.languageCode) {
-      case 'ja':
-        return 'ja-JP';
-      case 'zh':
-        return 'zh-CN';
-      case 'en':
-        return 'en-US';
-      default:
-        return 'ja-JP';
-    }
   }
 
   Future<void> _navigateToConfirm() async {
