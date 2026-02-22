@@ -8,4 +8,5 @@ abstract class SettingsRepository {
   Future<void> setLanguage(String language);
   Future<void> setBiometricLock(bool enabled);
   Future<void> setNotificationsEnabled(bool enabled);
+  Future<void> setVoiceLanguage(String languageCode);
 }

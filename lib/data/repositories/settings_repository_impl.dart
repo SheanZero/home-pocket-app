@@ -13,6 +13,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   static const String _languageKey = 'language';
   static const String _notificationsKey = 'notifications_enabled';
   static const String _biometricLockKey = 'biometric_lock_enabled';
+  static const String _voiceLanguageKey = 'voice_language';
 
   @override
   Future<AppSettings> getSettings() async {
@@ -21,6 +22,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       language: _prefs.getString(_languageKey) ?? 'ja',
       notificationsEnabled: _prefs.getBool(_notificationsKey) ?? true,
       biometricLockEnabled: _prefs.getBool(_biometricLockKey) ?? true,
+      voiceLanguage: _prefs.getString(_voiceLanguageKey) ?? 'zh',
     );
   }
 
@@ -30,6 +32,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
     await _prefs.setString(_languageKey, settings.language);
     await _prefs.setBool(_notificationsKey, settings.notificationsEnabled);
     await _prefs.setBool(_biometricLockKey, settings.biometricLockEnabled);
+    await _prefs.setString(_voiceLanguageKey, settings.voiceLanguage);
   }
 
   @override
@@ -50,6 +53,11 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<void> setNotificationsEnabled(bool enabled) async {
     await _prefs.setBool(_notificationsKey, enabled);
+  }
+
+  @override
+  Future<void> setVoiceLanguage(String languageCode) async {
+    await _prefs.setString(_voiceLanguageKey, languageCode);
   }
 
   AppThemeMode _getThemeMode() {
