@@ -159,5 +159,17 @@
   "ocrHint": "将票据完整放入框内",
   "tapToRecord": "点击开始录音",
   "todayDate": "今天",
-  "next": "Next"
+  "next": "Next",
+  "voiceInputSettings": "语音识别",
+  "@voiceInputSettings": {
+    "description": "Voice input settings section title"
+  },
+  "voiceLanguage": "识别语言",
+  "@voiceLanguage": {
+    "description": "Voice recognition language setting label"
+  },
+  "voiceLanguageSubtitle": "语音转文字所使用的语言",
+  "@voiceLanguageSubtitle": {
+    "description": "Subtitle for voice language setting"
+  }
 }

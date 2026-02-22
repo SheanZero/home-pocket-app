@@ -473,5 +473,18 @@
   "@todayDate": { "description": "Today date chip label" },
 
   "next": "Next",
-  "@next": { "description": "Next button label" }
+  "@next": { "description": "Next button label" },
+
+  "voiceInputSettings": "Voice Recognition",
+  "@voiceInputSettings": {
+    "description": "Voice input settings section title"
+  },
+  "voiceLanguage": "Recognition Language",
+  "@voiceLanguage": {
+    "description": "Voice recognition language setting label"
+  },
+  "voiceLanguageSubtitle": "Language used for speech-to-text",
+  "@voiceLanguageSubtitle": {
+    "description": "Subtitle for voice language setting"
+  }
 }
