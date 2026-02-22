@@ -14,6 +14,8 @@ abstract class VoiceParseResult with _$VoiceParseResult {
   const factory VoiceParseResult({
     required String rawText,
     int? amount,
+    // Parsed date from voice text (null = not mentioned, default to today)
+    DateTime? parsedDate,
     // Merchant fields stored as primitives (no MerchantMatch reference)
     String? merchantName,
     String? merchantCategoryId,

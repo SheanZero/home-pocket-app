@@ -16,7 +16,6 @@ import '../providers/voice_providers.dart';
 import '../widgets/entry_mode_switcher.dart';
 import '../widgets/input_mode_tabs.dart';
 import '../widgets/soft_toast.dart';
-import '../widgets/voice_parse_preview.dart';
 import '../widgets/voice_transcript_card.dart';
 import '../widgets/voice_waveform.dart';
 import 'transaction_confirm_screen.dart';
@@ -306,7 +305,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
           amount: result.amount ?? 0,
           category: category,
           parentCategory: parentCategory,
-          date: DateTime.now(),
+          date: result.parsedDate ?? DateTime.now(),
           initialMerchant: result.merchantName,
           initialSatisfaction: result.ledgerType == LedgerType.soul
               ? result.estimatedSatisfaction
@@ -320,7 +319,6 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final hasResult = _parseResult != null;
-    final hasText = _finalText.isNotEmpty || _partialText.isNotEmpty;
 
     // Watch voiceLocaleIdProvider so the screen rebuilds when the user changes
     // the voice language in Settings. The current value is stored in
@@ -360,18 +358,13 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 children: [
-                  // Transcript card
+                  // Transcript card with inline parse result chips
                   VoiceTranscriptCard(
                     isRecording: _isRecording,
                     partialText: _partialText,
                     finalText: _finalText,
+                    parseResult: _parseResult,
                   ),
-
-                  if (hasResult || hasText) const SizedBox(height: 16),
-
-                  // Parse result preview
-                  if (hasResult)
-                    VoiceParsePreview(parseResult: _parseResult),
                 ],
               ),
             ),

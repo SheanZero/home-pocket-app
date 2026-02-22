@@ -15,7 +15,9 @@ T _$identity<T>(T value) => value;
 mixin _$VoiceParseResult {
   String get rawText;
   int?
-  get amount; // Merchant fields stored as primitives (no MerchantMatch reference)
+  get amount; // Parsed date from voice text (null = not mentioned, default to today)
+  DateTime?
+  get parsedDate; // Merchant fields stored as primitives (no MerchantMatch reference)
   String? get merchantName;
   String? get merchantCategoryId;
   LedgerType? get merchantLedgerType; // Category keyword match
@@ -41,6 +43,8 @@ mixin _$VoiceParseResult {
             other is VoiceParseResult &&
             (identical(other.rawText, rawText) || other.rawText == rawText) &&
             (identical(other.amount, amount) || other.amount == amount) &&
+            (identical(other.parsedDate, parsedDate) ||
+                other.parsedDate == parsedDate) &&
             (identical(other.merchantName, merchantName) ||
                 other.merchantName == merchantName) &&
             (identical(other.merchantCategoryId, merchantCategoryId) ||
@@ -60,6 +64,7 @@ mixin _$VoiceParseResult {
     runtimeType,
     rawText,
     amount,
+    parsedDate,
     merchantName,
     merchantCategoryId,
     merchantLedgerType,
@@ -70,7 +75,7 @@ mixin _$VoiceParseResult {
 
   @override
   String toString() {
-    return 'VoiceParseResult(rawText: $rawText, amount: $amount, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, estimatedSatisfaction: $estimatedSatisfaction)';
+    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, estimatedSatisfaction: $estimatedSatisfaction)';
   }
 }
 
@@ -84,6 +89,7 @@ abstract mixin class $VoiceParseResultCopyWith<$Res> {
   $Res call({
     String rawText,
     int? amount,
+    DateTime? parsedDate,
     String? merchantName,
     String? merchantCategoryId,
     LedgerType? merchantLedgerType,
@@ -110,6 +116,7 @@ class _$VoiceParseResultCopyWithImpl<$Res>
   $Res call({
     Object? rawText = null,
     Object? amount = freezed,
+    Object? parsedDate = freezed,
     Object? merchantName = freezed,
     Object? merchantCategoryId = freezed,
     Object? merchantLedgerType = freezed,
@@ -127,6 +134,10 @@ class _$VoiceParseResultCopyWithImpl<$Res>
             ? _self.amount
             : amount // ignore: cast_nullable_to_non_nullable
                   as int?,
+        parsedDate: freezed == parsedDate
+            ? _self.parsedDate
+            : parsedDate // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         merchantName: freezed == merchantName
             ? _self.merchantName
             : merchantName // ignore: cast_nullable_to_non_nullable
@@ -266,6 +277,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
     TResult Function(
       String rawText,
       int? amount,
+      DateTime? parsedDate,
       String? merchantName,
       String? merchantCategoryId,
       LedgerType? merchantLedgerType,
@@ -282,6 +294,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
         return $default(
           _that.rawText,
           _that.amount,
+          _that.parsedDate,
           _that.merchantName,
           _that.merchantCategoryId,
           _that.merchantLedgerType,
@@ -312,6 +325,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
     TResult Function(
       String rawText,
       int? amount,
+      DateTime? parsedDate,
       String? merchantName,
       String? merchantCategoryId,
       LedgerType? merchantLedgerType,
@@ -327,6 +341,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
         return $default(
           _that.rawText,
           _that.amount,
+          _that.parsedDate,
           _that.merchantName,
           _that.merchantCategoryId,
           _that.merchantLedgerType,
@@ -356,6 +371,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
     TResult? Function(
       String rawText,
       int? amount,
+      DateTime? parsedDate,
       String? merchantName,
       String? merchantCategoryId,
       LedgerType? merchantLedgerType,
@@ -371,6 +387,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
         return $default(
           _that.rawText,
           _that.amount,
+          _that.parsedDate,
           _that.merchantName,
           _that.merchantCategoryId,
           _that.merchantLedgerType,
@@ -390,6 +407,7 @@ class _VoiceParseResult implements VoiceParseResult {
   const _VoiceParseResult({
     required this.rawText,
     this.amount,
+    this.parsedDate,
     this.merchantName,
     this.merchantCategoryId,
     this.merchantLedgerType,
@@ -402,6 +420,9 @@ class _VoiceParseResult implements VoiceParseResult {
   final String rawText;
   @override
   final int? amount;
+  // Parsed date from voice text (null = not mentioned, default to today)
+  @override
+  final DateTime? parsedDate;
   // Merchant fields stored as primitives (no MerchantMatch reference)
   @override
   final String? merchantName;
@@ -434,6 +455,8 @@ class _VoiceParseResult implements VoiceParseResult {
             other is _VoiceParseResult &&
             (identical(other.rawText, rawText) || other.rawText == rawText) &&
             (identical(other.amount, amount) || other.amount == amount) &&
+            (identical(other.parsedDate, parsedDate) ||
+                other.parsedDate == parsedDate) &&
             (identical(other.merchantName, merchantName) ||
                 other.merchantName == merchantName) &&
             (identical(other.merchantCategoryId, merchantCategoryId) ||
@@ -453,6 +476,7 @@ class _VoiceParseResult implements VoiceParseResult {
     runtimeType,
     rawText,
     amount,
+    parsedDate,
     merchantName,
     merchantCategoryId,
     merchantLedgerType,
@@ -463,7 +487,7 @@ class _VoiceParseResult implements VoiceParseResult {
 
   @override
   String toString() {
-    return 'VoiceParseResult(rawText: $rawText, amount: $amount, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, estimatedSatisfaction: $estimatedSatisfaction)';
+    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, estimatedSatisfaction: $estimatedSatisfaction)';
   }
 }
 
@@ -479,6 +503,7 @@ abstract mixin class _$VoiceParseResultCopyWith<$Res>
   $Res call({
     String rawText,
     int? amount,
+    DateTime? parsedDate,
     String? merchantName,
     String? merchantCategoryId,
     LedgerType? merchantLedgerType,
@@ -506,6 +531,7 @@ class __$VoiceParseResultCopyWithImpl<$Res>
   $Res call({
     Object? rawText = null,
     Object? amount = freezed,
+    Object? parsedDate = freezed,
     Object? merchantName = freezed,
     Object? merchantCategoryId = freezed,
     Object? merchantLedgerType = freezed,
@@ -523,6 +549,10 @@ class __$VoiceParseResultCopyWithImpl<$Res>
             ? _self.amount
             : amount // ignore: cast_nullable_to_non_nullable
                   as int?,
+        parsedDate: freezed == parsedDate
+            ? _self.parsedDate
+            : parsedDate // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         merchantName: freezed == merchantName
             ? _self.merchantName
             : merchantName // ignore: cast_nullable_to_non_nullable

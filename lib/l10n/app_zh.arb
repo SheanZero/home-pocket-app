@@ -157,6 +157,10 @@
   "addPhoto": "添加照片",
   "ocrScanTitle": "OCR扫描录入",
   "ocrHint": "将票据完整放入框内",
+  "voiceRecognitionResult": "识别结果",
+  "@voiceRecognitionResult": {
+    "description": "Label shown above the recognized voice transcript"
+  },
   "tapToRecord": "点击开始录音",
   "todayDate": "今天",
   "next": "Next",

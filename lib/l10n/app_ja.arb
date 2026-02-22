@@ -157,6 +157,10 @@
   "addPhoto": "写真を追加",
   "ocrScanTitle": "OCRスキャン入力",
   "ocrHint": "レシートを枠内に収めてください",
+  "voiceRecognitionResult": "認識結果",
+  "@voiceRecognitionResult": {
+    "description": "Label shown above the recognized voice transcript"
+  },
   "tapToRecord": "タップして録音開始",
   "todayDate": "今日",
   "next": "Next",

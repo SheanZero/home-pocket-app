@@ -32,7 +32,10 @@ class ParseVoiceInputUseCase {
       // 1. Extract amount
       final amount = _textParser.extractAmount(recognizedText);
 
-      // 2. Match merchant (higher priority than keyword category)
+      // 2. Extract date
+      final parsedDate = _textParser.extractDate(recognizedText);
+
+      // 3. Match merchant (higher priority than keyword category)
       final merchantMatch = _textParser.extractAndMatchMerchant(
         recognizedText,
         _merchantDatabase,
@@ -65,6 +68,7 @@ class ParseVoiceInputUseCase {
         VoiceParseResult(
           rawText: recognizedText,
           amount: amount,
+          parsedDate: parsedDate,
           merchantName: merchantMatch?.merchantName,
           merchantCategoryId: merchantMatch?.categoryId,
           merchantLedgerType: merchantMatch?.ledgerType,

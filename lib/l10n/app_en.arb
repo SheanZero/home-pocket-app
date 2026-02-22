@@ -466,6 +466,10 @@
   "ocrHint": "Place receipt in frame",
   "@ocrHint": { "description": "OCR scanner hint text" },
 
+  "voiceRecognitionResult": "Recognition Result",
+  "@voiceRecognitionResult": {
+    "description": "Label shown above the recognized voice transcript"
+  },
   "tapToRecord": "Tap to start recording",
   "@tapToRecord": { "description": "Voice input hint" },
 
