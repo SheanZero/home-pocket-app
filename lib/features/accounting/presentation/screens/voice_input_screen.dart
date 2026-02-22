@@ -1,51 +1,376 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/speech/speech_recognition_service.dart';
+import '../../../settings/presentation/providers/locale_provider.dart';
+import '../../domain/models/voice_parse_result.dart';
+import '../providers/repository_providers.dart';
+import '../providers/voice_providers.dart';
 import '../widgets/entry_mode_switcher.dart';
 import '../widgets/input_mode_tabs.dart';
+import '../widgets/soft_toast.dart';
+import '../widgets/voice_parse_preview.dart';
+import '../widgets/voice_transcript_card.dart';
+import '../widgets/voice_waveform.dart';
+import 'transaction_confirm_screen.dart';
 
-/// Stub voice input screen with recording UI.
+/// Voice input screen for creating transactions through natural language speech.
 ///
-/// Shows a transcript card, animated waveform bars, microphone button,
-/// and a "Next" action. Currently only static UI.
-class VoiceInputScreen extends StatefulWidget {
+/// Replaces the previous static stub with a full [ConsumerStatefulWidget]
+/// implementation. Manages [SpeechRecognitionService] lifecycle directly
+/// (not from provider) for correct stateful lifecycle binding.
+class VoiceInputScreen extends ConsumerStatefulWidget {
   const VoiceInputScreen({super.key, required this.bookId});
 
   final String bookId;
 
   @override
-  State<VoiceInputScreen> createState() => _VoiceInputScreenState();
+  ConsumerState<VoiceInputScreen> createState() => _VoiceInputScreenState();
 }
 
-class _VoiceInputScreenState extends State<VoiceInputScreen>
-    with SingleTickerProviderStateMixin {
+class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
+  // Speech recognition service — managed directly (stateful lifecycle)
+  final SpeechRecognitionService _speechService = SpeechRecognitionService();
+
+  // Recording state
   bool _isRecording = false;
-  late final AnimationController _pulseController;
+  bool _isInitialized = false;
+
+  // Transcript state
+  String _partialText = '';
+  String _finalText = '';
+
+  // Sound level state (normalized 0.0–1.0)
+  double _soundLevel = 0.0;
+
+  // Parse result
+  VoiceParseResult? _parseResult;
+
+  // Audio features collection
+  final List<double> _soundLevels = [];
+  final List<DateTime> _timestamps = [];
+  DateTime? _startTime;
+  int _partialResultCount = 0;
+  int _lastWordCount = 0;
+
+  // Debounce timer for partial result parsing
+  Timer? _parseDebounce;
+
+  // Sound level sampling throttle
+  DateTime? _lastSampleTime;
 
   @override
   void initState() {
     super.initState();
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
-      vsync: this,
+    _initSpeechService();
+  }
+
+  Future<void> _initSpeechService() async {
+    final available = await _speechService.initialize(
+      onStatus: _onStatus,
+      onError: _onError,
+    );
+
+    if (mounted) {
+      setState(() => _isInitialized = available);
+
+      if (!available) {
+        _showPermissionError();
+      }
+    }
+  }
+
+  void _onStatus(String status) {
+    if (!mounted) return;
+    // When speech service reports "done" or "notListening" after recording
+    if ((status == 'done' || status == 'notListening') && _isRecording) {
+      setState(() {
+        _isRecording = false;
+        _soundLevel = 0.0;
+      });
+    }
+  }
+
+  void _onError(String errorMsg, bool permanent) {
+    if (!mounted) return;
+    setState(() {
+      _isRecording = false;
+      _soundLevel = 0.0;
+    });
+  }
+
+  void _showPermissionError() {
+    // Insert a SoftToast overlay for permission error feedback
+    final overlay = Overlay.of(context);
+    late OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (_) => Positioned(
+        top: MediaQuery.of(context).padding.top + 16,
+        left: 0,
+        right: 0,
+        child: SoftToast(
+          message: 'マイクへのアクセスを許可してください',
+          icon: Icons.mic_off,
+          onDismissed: () => entry.remove(),
+        ),
+      ),
+    );
+    overlay.insert(entry);
+  }
+
+  Future<void> _toggleRecording() async {
+    if (!_isInitialized) return;
+
+    if (_isRecording) {
+      await _stopRecording();
+    } else {
+      await _startRecording();
+    }
+  }
+
+  Future<void> _startRecording() async {
+    final locale = ref.read(currentLocaleProvider);
+    final localeId = _localeIdFromLocale(locale);
+
+    // Reset state
+    setState(() {
+      _isRecording = true;
+      _partialText = '';
+      _finalText = '';
+      _soundLevel = 0.0;
+      _parseResult = null;
+    });
+    _soundLevels.clear();
+    _timestamps.clear();
+    _startTime = DateTime.now();
+    _partialResultCount = 0;
+    _lastWordCount = 0;
+
+    await _speechService.startListening(
+      onResult: _onResult,
+      onSoundLevel: _onSoundLevel,
+      localeId: localeId,
+      listenFor: const Duration(seconds: 30),
+      pauseFor: const Duration(seconds: 3),
     );
   }
 
-  void _toggleRecording() {
-    setState(() => _isRecording = !_isRecording);
-    if (_isRecording) {
-      _pulseController.repeat(reverse: true);
-    } else {
-      _pulseController.stop();
-      _pulseController.reset();
+  Future<void> _stopRecording() async {
+    await _speechService.stopListening();
+    setState(() {
+      _isRecording = false;
+      _soundLevel = 0.0;
+    });
+  }
+
+  void _onSoundLevel(double level) {
+    if (!mounted) return;
+
+    // Throttle sound level sampling to 100ms
+    final now = DateTime.now();
+    if (_lastSampleTime != null &&
+        now.difference(_lastSampleTime!).inMilliseconds < 100) {
+      // Update UI only
+      setState(() => _soundLevel = level);
+      return;
     }
+    _lastSampleTime = now;
+    _soundLevels.add(level);
+    _timestamps.add(now);
+
+    setState(() => _soundLevel = level);
+  }
+
+  void _onResult(SpeechRecognitionResult result) {
+    if (!mounted) return;
+
+    if (!result.finalResult) {
+      _partialResultCount++;
+      _lastWordCount = _countWords(result.recognizedWords);
+
+      setState(() => _partialText = result.recognizedWords);
+
+      // Debounce parsing for partial results (300ms)
+      _parseDebounce?.cancel();
+      _parseDebounce = Timer(const Duration(milliseconds: 300), () {
+        if (result.recognizedWords.isNotEmpty) {
+          _parseVoiceInput(result.recognizedWords);
+        }
+      });
+    } else {
+      // Final result
+      final text = result.recognizedWords;
+      setState(() {
+        _finalText = text;
+        _partialText = '';
+        _isRecording = false;
+        _soundLevel = 0.0;
+      });
+
+      _parseDebounce?.cancel();
+      if (text.isNotEmpty) {
+        _parseFinalResult(text);
+      }
+    }
+  }
+
+  Future<void> _parseVoiceInput(String text) async {
+    if (!mounted) return;
+    final useCase = ref.read(parseVoiceInputUseCaseProvider);
+    final result = await useCase.execute(text);
+    if (mounted && result.isSuccess) {
+      setState(() => _parseResult = result.data);
+    }
+  }
+
+  Future<void> _parseFinalResult(String text) async {
+    if (!mounted) return;
+    final useCase = ref.read(parseVoiceInputUseCaseProvider);
+    final result = await useCase.execute(text);
+
+    if (!mounted || !result.isSuccess) return;
+
+    var parseResult = result.data!;
+
+    // For soul ledger transactions, estimate satisfaction from audio features
+    if (parseResult.ledgerType == LedgerType.soul) {
+      final features = _buildAudioFeatures();
+      final estimator = ref.read(voiceSatisfactionEstimatorProvider);
+      final satisfaction = estimator.estimate(
+        audioFeatures: features,
+        recognizedText: text,
+      );
+      parseResult = parseResult.copyWith(estimatedSatisfaction: satisfaction);
+    }
+
+    setState(() => _parseResult = parseResult);
+  }
+
+  VoiceAudioFeatures _buildAudioFeatures() {
+    final now = DateTime.now();
+    return VoiceAudioFeatures(
+      soundLevels: List.unmodifiable(_soundLevels),
+      timestamps: List.unmodifiable(_timestamps),
+      startTime: _startTime ?? now,
+      endTime: now,
+      partialResultCount: _partialResultCount,
+      wordCount: _lastWordCount,
+    );
+  }
+
+  int _countWords(String text) {
+    if (text.isEmpty) return 0;
+    // Japanese/Chinese: estimate by character count (2 chars ≈ 1 word)
+    // English: split by whitespace
+    final hasLatin = RegExp(r'[a-zA-Z]').hasMatch(text);
+    if (hasLatin) {
+      return text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+    }
+    return (text.replaceAll(RegExp(r'\s'), '').length / 2).ceil();
+  }
+
+  String _localeIdFromLocale(Locale locale) {
+    switch (locale.languageCode) {
+      case 'ja':
+        return 'ja-JP';
+      case 'zh':
+        return 'zh-CN';
+      case 'en':
+        return 'en-US';
+      default:
+        return 'ja-JP';
+    }
+  }
+
+  Future<void> _navigateToConfirm() async {
+    final result = _parseResult;
+    if (result == null) return;
+
+    final categoryId =
+        result.categoryMatch?.categoryId ?? result.merchantCategoryId;
+
+    if (categoryId == null) {
+      // No category matched — show error
+      if (!mounted) return;
+      final overlay = Overlay.of(context);
+      late OverlayEntry entry;
+      entry = OverlayEntry(
+        builder: (_) => Positioned(
+          top: MediaQuery.of(context).padding.top + 16,
+          left: 0,
+          right: 0,
+          child: SoftToast(
+            message: 'カテゴリが認識できませんでした',
+            icon: Icons.folder_off_outlined,
+            onDismissed: () => entry.remove(),
+          ),
+        ),
+      );
+      overlay.insert(entry);
+      return;
+    }
+
+    // Look up the Category object
+    final categoryRepo = ref.read(categoryRepositoryProvider);
+    final category = await categoryRepo.findById(categoryId);
+
+    if (!mounted) return;
+
+    if (category == null) {
+      final overlay = Overlay.of(context);
+      late OverlayEntry entry;
+      entry = OverlayEntry(
+        builder: (_) => Positioned(
+          top: MediaQuery.of(context).padding.top + 16,
+          left: 0,
+          right: 0,
+          child: SoftToast(
+            message: 'カテゴリが見つかりません',
+            icon: Icons.folder_off_outlined,
+            onDismissed: () => entry.remove(),
+          ),
+        ),
+      );
+      overlay.insert(entry);
+      return;
+    }
+
+    // Look up parent category if the matched category has a parentId
+    final parentCategory = category.parentId != null
+        ? await categoryRepo.findById(category.parentId!)
+        : null;
+
+    if (!mounted) return;
+
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => TransactionConfirmScreen(
+          bookId: widget.bookId,
+          amount: result.amount ?? 0,
+          category: category,
+          parentCategory: parentCategory,
+          date: DateTime.now(),
+          initialMerchant: result.merchantName,
+          initialSatisfaction: result.ledgerType == LedgerType.soul
+              ? result.estimatedSatisfaction
+              : null,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
+    final hasResult = _parseResult != null;
+    final hasText = _finalText.isNotEmpty || _partialText.isNotEmpty;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F9FD),
@@ -70,92 +395,43 @@ class _VoiceInputScreenState extends State<VoiceInputScreen>
             bookId: widget.bookId,
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
 
-          // Transcript card
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.mic,
-                        size: 16,
-                        color: _isRecording
-                            ? Colors.red
-                            : AppColors.textSecondary,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        _isRecording ? '...' : l10n.tapToRecord,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
+                  // Transcript card
+                  VoiceTranscriptCard(
+                    isRecording: _isRecording,
+                    partialText: _partialText,
+                    finalText: _finalText,
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    _isRecording ? '...' : '',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textPrimary,
-                      height: 1.5,
-                    ),
-                  ),
+
+                  if (hasResult || hasText) const SizedBox(height: 16),
+
+                  // Parse result preview
+                  if (hasResult)
+                    VoiceParsePreview(parseResult: _parseResult),
                 ],
               ),
             ),
           ),
 
-          const Spacer(),
-
-          // Waveform bars
-          if (_isRecording)
-            AnimatedBuilder(
-              animation: _pulseController,
-              builder: (context, _) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(12, (i) {
-                    final scale =
-                        0.3 + 0.7 * ((_pulseController.value + i * 0.08) % 1.0);
-                    return Container(
-                      width: 3,
-                      height: 24 * scale,
-                      margin: const EdgeInsets.symmetric(horizontal: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.survival.withValues(
-                          alpha: 0.4 + 0.6 * scale,
-                        ),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    );
-                  }),
-                );
-              },
+          // Waveform
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: VoiceWaveform(
+              soundLevel: _soundLevel,
+              isActive: _isRecording,
+              color: AppColors.survival,
             ),
-
-          const SizedBox(height: 24),
+          ),
 
           // Mic button
           GestureDetector(
-            onTap: _toggleRecording,
+            onTap: _isInitialized ? _toggleRecording : null,
             child: Container(
               width: 72,
               height: 72,
@@ -196,7 +472,7 @@ class _VoiceInputScreenState extends State<VoiceInputScreen>
 
           const SizedBox(height: 24),
 
-          // Next button
+          // Next button — enabled only when parse result is ready
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
             child: SizedBox(
@@ -204,23 +480,27 @@ class _VoiceInputScreenState extends State<VoiceInputScreen>
               height: 52,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      AppColors.fabGradientStart,
-                      AppColors.fabGradientEnd,
-                    ],
-                  ),
+                  gradient: hasResult
+                      ? const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            AppColors.fabGradientStart,
+                            AppColors.fabGradientEnd,
+                          ],
+                        )
+                      : LinearGradient(
+                          colors: [
+                            AppColors.fabGradientStart.withValues(alpha: 0.4),
+                            AppColors.fabGradientEnd.withValues(alpha: 0.4),
+                          ],
+                        ),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: () {
-                      // Stub: just pop back for now
-                      Navigator.pop(context);
-                    },
+                    onTap: hasResult ? _navigateToConfirm : null,
                     borderRadius: BorderRadius.circular(14),
                     child: Center(
                       child: Text(
@@ -243,7 +523,8 @@ class _VoiceInputScreenState extends State<VoiceInputScreen>
 
   @override
   void dispose() {
-    _pulseController.dispose();
+    _parseDebounce?.cancel();
+    _speechService.cancelListening();
     super.dispose();
   }
 }

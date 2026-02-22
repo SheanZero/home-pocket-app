@@ -34,6 +34,8 @@ class TransactionConfirmScreen extends ConsumerStatefulWidget {
     required this.category,
     this.parentCategory,
     required this.date,
+    this.initialMerchant,
+    this.initialSatisfaction,
   });
 
   final String bookId;
@@ -41,6 +43,12 @@ class TransactionConfirmScreen extends ConsumerStatefulWidget {
   final Category category;
   final Category? parentCategory;
   final DateTime date;
+
+  /// Optional pre-filled merchant name from voice input.
+  final String? initialMerchant;
+
+  /// Optional pre-filled soul satisfaction score (1–10) from voice input.
+  final int? initialSatisfaction;
 
   @override
   ConsumerState<TransactionConfirmScreen> createState() =>
@@ -69,6 +77,15 @@ class _TransactionConfirmScreenState
     _category = widget.category;
     _parentCategory = widget.parentCategory;
     _date = widget.date;
+
+    // Pre-fill optional voice input fields
+    if (widget.initialMerchant != null) {
+      _storeController.text = widget.initialMerchant!;
+    }
+    if (widget.initialSatisfaction != null) {
+      _soulSatisfaction = widget.initialSatisfaction!.clamp(1, 10);
+    }
+
     _resolveLedgerType(_category.id);
   }
 
@@ -278,6 +295,16 @@ class _TransactionConfirmScreenState
 
     if (result.isSuccess) {
       final tx = result.data!;
+      final merchant = _storeController.text.trim();
+      if (merchant.isNotEmpty) {
+        final learningService = ref.read(
+          merchantCategoryLearningServiceProvider,
+        );
+        await learningService.recordSelection(
+          merchantRaw: merchant,
+          selectedCategoryId: _category.id,
+        );
+      }
       if (tx.ledgerType == LedgerType.soul) {
         await _showSoulCelebration();
       }

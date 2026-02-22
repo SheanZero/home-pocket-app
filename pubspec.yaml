@@ -37,6 +37,9 @@ dependencies:
   # Unique ID Generation
   ulid: ^2.0.0
 
+  # Voice Input
+  speech_to_text: ^7.0.0
+
   # Charts
   fl_chart: ^0.69.0
 
