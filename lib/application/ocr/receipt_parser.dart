@@ -18,7 +18,7 @@ class ReceiptParser {
     return ParsedReceiptData(
       amount: _extractAmount(text),
       date: _extractDate(text),
-      merchant: null, // Task 4
+      merchant: _extractMerchant(text)
     );
   }
 
@@ -88,6 +88,29 @@ class ReceiptParser {
           continue;
         }
       }
+    }
+    return null;
+  }
+
+  String? _extractMerchant(String text) {
+    if (text.isEmpty) return null;
+
+    final lines =
+        text.split('\n').map((l) => l.trim()).where((l) => l.isNotEmpty);
+    final datePattern = RegExp(r'^\d{2,4}[/\-.]?\d{1,2}[/\-.]?\d{1,2}');
+    final amountPattern = RegExp(r'^[¥￥]?\s*[\d,]+\s*(円)?$');
+    final keywordPattern = RegExp(
+      r'^(合[計计]|小[計计]|TOTAL|税込|お釣り|内税|外税)',
+      caseSensitive: false,
+    );
+
+    for (final line in lines) {
+      if (line.length < 2) continue;
+      if (datePattern.hasMatch(line)) continue;
+      if (amountPattern.hasMatch(line)) continue;
+      if (keywordPattern.hasMatch(line)) continue;
+      if (RegExp(r'^[\d,.\s]+$').hasMatch(line)) continue;
+      return line;
     }
     return null;
   }

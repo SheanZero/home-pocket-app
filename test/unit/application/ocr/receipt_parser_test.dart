@@ -95,4 +95,36 @@ void main() {
       expect(result.date, isNull);
     });
   });
+
+  group('extractMerchant', () {
+    test('extracts first non-numeric line as merchant', () {
+      final result = parser.parse('セブンイレブン\n2026/01/15\n合計 ¥580');
+      expect(result.merchant, 'セブンイレブン');
+    });
+
+    test('skips date-only lines', () {
+      final result = parser.parse('2026/01/15 12:30\nマクドナルド\n合計 ¥680');
+      expect(result.merchant, 'マクドナルド');
+    });
+
+    test('skips amount-only lines', () {
+      final result = parser.parse('¥580\nスターバックス\n合計 ¥580');
+      expect(result.merchant, 'スターバックス');
+    });
+
+    test('returns null for empty text', () {
+      final result = parser.parse('');
+      expect(result.merchant, isNull);
+    });
+
+    test('trims whitespace from merchant name', () {
+      final result = parser.parse('  ファミリーマート  \n合計 ¥300');
+      expect(result.merchant, 'ファミリーマート');
+    });
+
+    test('skips very short lines (< 2 chars)', () {
+      final result = parser.parse('A\nローソン\n合計 ¥200');
+      expect(result.merchant, 'ローソン');
+    });
+  });
 }
