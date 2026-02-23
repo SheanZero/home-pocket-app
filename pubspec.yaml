@@ -46,6 +46,11 @@ dependencies:
   # Settings & Preferences
   shared_preferences: ^2.3.4
 
+  # OCR & Image
+  image_picker: ^1.1.2
+  google_mlkit_text_recognition: ^0.14.0
+  image: ^4.5.3
+
   # File Operations
   file_picker: ^8.1.6
   share_plus: ^10.1.4

@@ -47,6 +47,10 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera access is required to scan receipts</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Photo library access is required to select receipt images</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>音声で金額や取引内容を入力するために使用します</string>
 	<key>NSMicrophoneUsageDescription</key>

@@ -179,5 +179,15 @@
   "pleaseSelectCategory": "カテゴリを選択してください",
   "@pleaseSelectCategory": {
     "description": "Placeholder shown when no category is selected in confirm screen"
-  }
+  },
+  "ocrNoImageSelected": "画像が選択されていません",
+  "@ocrNoImageSelected": { "description": "OCR: user cancelled image picker" },
+  "ocrPreprocessingFailed": "画像の処理に失敗しました",
+  "@ocrPreprocessingFailed": { "description": "OCR: image preprocessing failed" },
+  "ocrNoTextRecognized": "テキストを認識できませんでした",
+  "@ocrNoTextRecognized": { "description": "OCR: no text found in image" },
+  "ocrScanFailed": "スキャンに失敗しました",
+  "@ocrScanFailed": { "description": "OCR: generic scan failure" },
+  "ocrProcessing": "認識中...",
+  "@ocrProcessing": { "description": "OCR: processing overlay text" }
 }

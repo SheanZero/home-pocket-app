@@ -179,5 +179,15 @@
   "pleaseSelectCategory": "请选择类别",
   "@pleaseSelectCategory": {
     "description": "Placeholder shown when no category is selected in confirm screen"
-  }
+  },
+  "ocrNoImageSelected": "未选择图片",
+  "@ocrNoImageSelected": { "description": "OCR: user cancelled image picker" },
+  "ocrPreprocessingFailed": "图片处理失败",
+  "@ocrPreprocessingFailed": { "description": "OCR: image preprocessing failed" },
+  "ocrNoTextRecognized": "未能识别文字",
+  "@ocrNoTextRecognized": { "description": "OCR: no text found in image" },
+  "ocrScanFailed": "扫描失败",
+  "@ocrScanFailed": { "description": "OCR: generic scan failure" },
+  "ocrProcessing": "识别中...",
+  "@ocrProcessing": { "description": "OCR: processing overlay text" }
 }

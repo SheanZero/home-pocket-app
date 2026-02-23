@@ -494,5 +494,15 @@
   "pleaseSelectCategory": "Please select a category",
   "@pleaseSelectCategory": {
     "description": "Placeholder shown when no category is selected in confirm screen"
-  }
+  },
+  "ocrNoImageSelected": "No image selected",
+  "@ocrNoImageSelected": { "description": "OCR: user cancelled image picker" },
+  "ocrPreprocessingFailed": "Image processing failed",
+  "@ocrPreprocessingFailed": { "description": "OCR: image preprocessing failed" },
+  "ocrNoTextRecognized": "No text recognized in image",
+  "@ocrNoTextRecognized": { "description": "OCR: no text found in image" },
+  "ocrScanFailed": "Scan failed",
+  "@ocrScanFailed": { "description": "OCR: generic scan failure" },
+  "ocrProcessing": "Recognizing...",
+  "@ocrProcessing": { "description": "OCR: processing overlay text" }
 }
