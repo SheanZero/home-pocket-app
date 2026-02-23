@@ -1772,6 +1772,344 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
   }
 }
 
+class $CategoryKeywordPreferencesTable extends CategoryKeywordPreferences
+    with
+        TableInfo<
+          $CategoryKeywordPreferencesTable,
+          CategoryKeywordPreferenceRow
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CategoryKeywordPreferencesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _keywordMeta = const VerificationMeta(
+    'keyword',
+  );
+  @override
+  late final GeneratedColumn<String> keyword = GeneratedColumn<String>(
+    'keyword',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hitCountMeta = const VerificationMeta(
+    'hitCount',
+  );
+  @override
+  late final GeneratedColumn<int> hitCount = GeneratedColumn<int>(
+    'hit_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _lastUsedMeta = const VerificationMeta(
+    'lastUsed',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastUsed = GeneratedColumn<DateTime>(
+    'last_used',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    keyword,
+    categoryId,
+    hitCount,
+    lastUsed,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'category_keyword_preferences';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CategoryKeywordPreferenceRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('keyword')) {
+      context.handle(
+        _keywordMeta,
+        keyword.isAcceptableOrUnknown(data['keyword']!, _keywordMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_keywordMeta);
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryIdMeta);
+    }
+    if (data.containsKey('hit_count')) {
+      context.handle(
+        _hitCountMeta,
+        hitCount.isAcceptableOrUnknown(data['hit_count']!, _hitCountMeta),
+      );
+    }
+    if (data.containsKey('last_used')) {
+      context.handle(
+        _lastUsedMeta,
+        lastUsed.isAcceptableOrUnknown(data['last_used']!, _lastUsedMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lastUsedMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {keyword, categoryId};
+  @override
+  CategoryKeywordPreferenceRow map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CategoryKeywordPreferenceRow(
+      keyword: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}keyword'],
+      )!,
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_id'],
+      )!,
+      hitCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}hit_count'],
+      )!,
+      lastUsed: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_used'],
+      )!,
+    );
+  }
+
+  @override
+  $CategoryKeywordPreferencesTable createAlias(String alias) {
+    return $CategoryKeywordPreferencesTable(attachedDatabase, alias);
+  }
+}
+
+class CategoryKeywordPreferenceRow extends DataClass
+    implements Insertable<CategoryKeywordPreferenceRow> {
+  /// Normalized keyword extracted from voice input.
+  final String keyword;
+
+  /// The category ID the user corrected to.
+  final String categoryId;
+
+  /// Number of times the user selected this mapping.
+  final int hitCount;
+
+  /// When this mapping was last used/updated.
+  final DateTime lastUsed;
+  const CategoryKeywordPreferenceRow({
+    required this.keyword,
+    required this.categoryId,
+    required this.hitCount,
+    required this.lastUsed,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['keyword'] = Variable<String>(keyword);
+    map['category_id'] = Variable<String>(categoryId);
+    map['hit_count'] = Variable<int>(hitCount);
+    map['last_used'] = Variable<DateTime>(lastUsed);
+    return map;
+  }
+
+  CategoryKeywordPreferencesCompanion toCompanion(bool nullToAbsent) {
+    return CategoryKeywordPreferencesCompanion(
+      keyword: Value(keyword),
+      categoryId: Value(categoryId),
+      hitCount: Value(hitCount),
+      lastUsed: Value(lastUsed),
+    );
+  }
+
+  factory CategoryKeywordPreferenceRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CategoryKeywordPreferenceRow(
+      keyword: serializer.fromJson<String>(json['keyword']),
+      categoryId: serializer.fromJson<String>(json['categoryId']),
+      hitCount: serializer.fromJson<int>(json['hitCount']),
+      lastUsed: serializer.fromJson<DateTime>(json['lastUsed']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'keyword': serializer.toJson<String>(keyword),
+      'categoryId': serializer.toJson<String>(categoryId),
+      'hitCount': serializer.toJson<int>(hitCount),
+      'lastUsed': serializer.toJson<DateTime>(lastUsed),
+    };
+  }
+
+  CategoryKeywordPreferenceRow copyWith({
+    String? keyword,
+    String? categoryId,
+    int? hitCount,
+    DateTime? lastUsed,
+  }) => CategoryKeywordPreferenceRow(
+    keyword: keyword ?? this.keyword,
+    categoryId: categoryId ?? this.categoryId,
+    hitCount: hitCount ?? this.hitCount,
+    lastUsed: lastUsed ?? this.lastUsed,
+  );
+  CategoryKeywordPreferenceRow copyWithCompanion(
+    CategoryKeywordPreferencesCompanion data,
+  ) {
+    return CategoryKeywordPreferenceRow(
+      keyword: data.keyword.present ? data.keyword.value : this.keyword,
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      hitCount: data.hitCount.present ? data.hitCount.value : this.hitCount,
+      lastUsed: data.lastUsed.present ? data.lastUsed.value : this.lastUsed,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CategoryKeywordPreferenceRow(')
+          ..write('keyword: $keyword, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('hitCount: $hitCount, ')
+          ..write('lastUsed: $lastUsed')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(keyword, categoryId, hitCount, lastUsed);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CategoryKeywordPreferenceRow &&
+          other.keyword == this.keyword &&
+          other.categoryId == this.categoryId &&
+          other.hitCount == this.hitCount &&
+          other.lastUsed == this.lastUsed);
+}
+
+class CategoryKeywordPreferencesCompanion
+    extends UpdateCompanion<CategoryKeywordPreferenceRow> {
+  final Value<String> keyword;
+  final Value<String> categoryId;
+  final Value<int> hitCount;
+  final Value<DateTime> lastUsed;
+  final Value<int> rowid;
+  const CategoryKeywordPreferencesCompanion({
+    this.keyword = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.hitCount = const Value.absent(),
+    this.lastUsed = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CategoryKeywordPreferencesCompanion.insert({
+    required String keyword,
+    required String categoryId,
+    this.hitCount = const Value.absent(),
+    required DateTime lastUsed,
+    this.rowid = const Value.absent(),
+  }) : keyword = Value(keyword),
+       categoryId = Value(categoryId),
+       lastUsed = Value(lastUsed);
+  static Insertable<CategoryKeywordPreferenceRow> custom({
+    Expression<String>? keyword,
+    Expression<String>? categoryId,
+    Expression<int>? hitCount,
+    Expression<DateTime>? lastUsed,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (keyword != null) 'keyword': keyword,
+      if (categoryId != null) 'category_id': categoryId,
+      if (hitCount != null) 'hit_count': hitCount,
+      if (lastUsed != null) 'last_used': lastUsed,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CategoryKeywordPreferencesCompanion copyWith({
+    Value<String>? keyword,
+    Value<String>? categoryId,
+    Value<int>? hitCount,
+    Value<DateTime>? lastUsed,
+    Value<int>? rowid,
+  }) {
+    return CategoryKeywordPreferencesCompanion(
+      keyword: keyword ?? this.keyword,
+      categoryId: categoryId ?? this.categoryId,
+      hitCount: hitCount ?? this.hitCount,
+      lastUsed: lastUsed ?? this.lastUsed,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (keyword.present) {
+      map['keyword'] = Variable<String>(keyword.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (hitCount.present) {
+      map['hit_count'] = Variable<int>(hitCount.value);
+    }
+    if (lastUsed.present) {
+      map['last_used'] = Variable<DateTime>(lastUsed.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CategoryKeywordPreferencesCompanion(')
+          ..write('keyword: $keyword, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('hitCount: $hitCount, ')
+          ..write('lastUsed: $lastUsed, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $CategoryLedgerConfigsTable extends CategoryLedgerConfigs
     with TableInfo<$CategoryLedgerConfigsTable, CategoryLedgerConfigRow> {
   @override
@@ -3582,6 +3920,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AuditLogsTable auditLogs = $AuditLogsTable(this);
   late final $BooksTable books = $BooksTable(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
+  late final $CategoryKeywordPreferencesTable categoryKeywordPreferences =
+      $CategoryKeywordPreferencesTable(this);
   late final $CategoryLedgerConfigsTable categoryLedgerConfigs =
       $CategoryLedgerConfigsTable(this);
   late final $MerchantCategoryPreferencesTable merchantCategoryPreferences =
@@ -3595,6 +3935,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     auditLogs,
     books,
     categories,
+    categoryKeywordPreferences,
     categoryLedgerConfigs,
     merchantCategoryPreferences,
     transactions,
@@ -4675,6 +5016,208 @@ typedef $$CategoriesTableProcessedTableManager =
       CategoryRow,
       PrefetchHooks Function({bool parentId, bool categoryLedgerConfigsRefs})
     >;
+typedef $$CategoryKeywordPreferencesTableCreateCompanionBuilder =
+    CategoryKeywordPreferencesCompanion Function({
+      required String keyword,
+      required String categoryId,
+      Value<int> hitCount,
+      required DateTime lastUsed,
+      Value<int> rowid,
+    });
+typedef $$CategoryKeywordPreferencesTableUpdateCompanionBuilder =
+    CategoryKeywordPreferencesCompanion Function({
+      Value<String> keyword,
+      Value<String> categoryId,
+      Value<int> hitCount,
+      Value<DateTime> lastUsed,
+      Value<int> rowid,
+    });
+
+class $$CategoryKeywordPreferencesTableFilterComposer
+    extends Composer<_$AppDatabase, $CategoryKeywordPreferencesTable> {
+  $$CategoryKeywordPreferencesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get keyword => $composableBuilder(
+    column: $table.keyword,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get hitCount => $composableBuilder(
+    column: $table.hitCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastUsed => $composableBuilder(
+    column: $table.lastUsed,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CategoryKeywordPreferencesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CategoryKeywordPreferencesTable> {
+  $$CategoryKeywordPreferencesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get keyword => $composableBuilder(
+    column: $table.keyword,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get hitCount => $composableBuilder(
+    column: $table.hitCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastUsed => $composableBuilder(
+    column: $table.lastUsed,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CategoryKeywordPreferencesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CategoryKeywordPreferencesTable> {
+  $$CategoryKeywordPreferencesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get keyword =>
+      $composableBuilder(column: $table.keyword, builder: (column) => column);
+
+  GeneratedColumn<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get hitCount =>
+      $composableBuilder(column: $table.hitCount, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastUsed =>
+      $composableBuilder(column: $table.lastUsed, builder: (column) => column);
+}
+
+class $$CategoryKeywordPreferencesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CategoryKeywordPreferencesTable,
+          CategoryKeywordPreferenceRow,
+          $$CategoryKeywordPreferencesTableFilterComposer,
+          $$CategoryKeywordPreferencesTableOrderingComposer,
+          $$CategoryKeywordPreferencesTableAnnotationComposer,
+          $$CategoryKeywordPreferencesTableCreateCompanionBuilder,
+          $$CategoryKeywordPreferencesTableUpdateCompanionBuilder,
+          (
+            CategoryKeywordPreferenceRow,
+            BaseReferences<
+              _$AppDatabase,
+              $CategoryKeywordPreferencesTable,
+              CategoryKeywordPreferenceRow
+            >,
+          ),
+          CategoryKeywordPreferenceRow,
+          PrefetchHooks Function()
+        > {
+  $$CategoryKeywordPreferencesTableTableManager(
+    _$AppDatabase db,
+    $CategoryKeywordPreferencesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CategoryKeywordPreferencesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$CategoryKeywordPreferencesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$CategoryKeywordPreferencesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> keyword = const Value.absent(),
+                Value<String> categoryId = const Value.absent(),
+                Value<int> hitCount = const Value.absent(),
+                Value<DateTime> lastUsed = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CategoryKeywordPreferencesCompanion(
+                keyword: keyword,
+                categoryId: categoryId,
+                hitCount: hitCount,
+                lastUsed: lastUsed,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String keyword,
+                required String categoryId,
+                Value<int> hitCount = const Value.absent(),
+                required DateTime lastUsed,
+                Value<int> rowid = const Value.absent(),
+              }) => CategoryKeywordPreferencesCompanion.insert(
+                keyword: keyword,
+                categoryId: categoryId,
+                hitCount: hitCount,
+                lastUsed: lastUsed,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CategoryKeywordPreferencesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CategoryKeywordPreferencesTable,
+      CategoryKeywordPreferenceRow,
+      $$CategoryKeywordPreferencesTableFilterComposer,
+      $$CategoryKeywordPreferencesTableOrderingComposer,
+      $$CategoryKeywordPreferencesTableAnnotationComposer,
+      $$CategoryKeywordPreferencesTableCreateCompanionBuilder,
+      $$CategoryKeywordPreferencesTableUpdateCompanionBuilder,
+      (
+        CategoryKeywordPreferenceRow,
+        BaseReferences<
+          _$AppDatabase,
+          $CategoryKeywordPreferencesTable,
+          CategoryKeywordPreferenceRow
+        >,
+      ),
+      CategoryKeywordPreferenceRow,
+      PrefetchHooks Function()
+    >;
 typedef $$CategoryLedgerConfigsTableCreateCompanionBuilder =
     CategoryLedgerConfigsCompanion Function({
       required String categoryId,
@@ -5713,6 +6256,12 @@ class $AppDatabaseManager {
       $$BooksTableTableManager(_db, _db.books);
   $$CategoriesTableTableManager get categories =>
       $$CategoriesTableTableManager(_db, _db.categories);
+  $$CategoryKeywordPreferencesTableTableManager
+  get categoryKeywordPreferences =>
+      $$CategoryKeywordPreferencesTableTableManager(
+        _db,
+        _db.categoryKeywordPreferences,
+      );
   $$CategoryLedgerConfigsTableTableManager get categoryLedgerConfigs =>
       $$CategoryLedgerConfigsTableTableManager(_db, _db.categoryLedgerConfigs);
   $$MerchantCategoryPreferencesTableTableManager
