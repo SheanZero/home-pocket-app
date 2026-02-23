@@ -7,7 +7,9 @@ import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../settings/presentation/providers/locale_provider.dart';
+import '../../domain/models/category.dart';
 import '../../domain/models/voice_parse_result.dart';
+import '../utils/category_display_utils.dart';
 
 /// Card that displays the voice transcript and parsed result chips.
 ///
@@ -28,12 +30,20 @@ class VoiceTranscriptCard extends ConsumerWidget {
   /// Chips are only rendered when this is non-null.
   final VoiceParseResult? parseResult;
 
+  /// Resolved category object for display (looked up from categoryId).
+  final Category? category;
+
+  /// Parent category for L2 categories (used for "Parent > Child" display).
+  final Category? parentCategory;
+
   const VoiceTranscriptCard({
     super.key,
     required this.isRecording,
     required this.partialText,
     required this.finalText,
     this.parseResult,
+    this.category,
+    this.parentCategory,
   });
 
   @override
@@ -109,8 +119,17 @@ class VoiceTranscriptCard extends ConsumerWidget {
                   ),
                 if (result.categoryMatch != null)
                   _ParseChip(
-                    icon: Icons.folder_outlined,
-                    label: result.categoryMatch!.categoryId,
+                    icon: category != null
+                        ? resolveCategoryIcon(
+                            (parentCategory ?? category)!.icon)
+                        : Icons.folder_outlined,
+                    label: category != null
+                        ? formatCategoryPath(
+                            category: category!,
+                            parentCategory: parentCategory,
+                            locale: locale,
+                          )
+                        : result.categoryMatch!.categoryId,
                     isPrimary: true,
                   ),
                 if (result.merchantName != null)

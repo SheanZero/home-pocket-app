@@ -10,6 +10,7 @@ import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/speech/speech_recognition_service.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
+import '../../domain/models/category.dart';
 import '../../domain/models/voice_parse_result.dart';
 import '../providers/repository_providers.dart';
 import '../providers/voice_providers.dart';
@@ -51,6 +52,10 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
 
   // Parse result
   VoiceParseResult? _parseResult;
+
+  // Resolved category objects for display
+  Category? _resolvedCategory;
+  Category? _resolvedParentCategory;
 
   // Effective voice locale (updated reactively from voiceLocaleIdProvider)
   String _voiceLocaleId = 'zh-CN';
@@ -148,6 +153,8 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
       _finalText = '';
       _soundLevel = 0.0;
       _parseResult = null;
+      _resolvedCategory = null;
+      _resolvedParentCategory = null;
     });
     _soundLevels.clear();
     _timestamps.clear();
@@ -229,6 +236,8 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
     final result = await useCase.execute(text);
     if (mounted && result.isSuccess) {
       setState(() => _parseResult = result.data);
+      await _resolveCategory(result.data?.categoryMatch?.categoryId ??
+          result.data?.merchantCategoryId);
     }
   }
 
@@ -253,6 +262,31 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
     }
 
     setState(() => _parseResult = parseResult);
+    await _resolveCategory(
+        parseResult.categoryMatch?.categoryId ?? parseResult.merchantCategoryId);
+  }
+
+  Future<void> _resolveCategory(String? categoryId) async {
+    if (categoryId == null) {
+      if (mounted) {
+        setState(() {
+          _resolvedCategory = null;
+          _resolvedParentCategory = null;
+        });
+      }
+      return;
+    }
+    final categoryRepo = ref.read(categoryRepositoryProvider);
+    final category = await categoryRepo.findById(categoryId);
+    final parentCategory = category?.parentId != null
+        ? await categoryRepo.findById(category!.parentId!)
+        : null;
+    if (mounted) {
+      setState(() {
+        _resolvedCategory = category;
+        _resolvedParentCategory = parentCategory;
+      });
+    }
   }
 
   VoiceAudioFeatures _buildAudioFeatures() {
@@ -391,6 +425,8 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
                     partialText: _partialText,
                     finalText: _finalText,
                     parseResult: _parseResult,
+                    category: _resolvedCategory,
+                    parentCategory: _resolvedParentCategory,
                   ),
                 ],
               ),
