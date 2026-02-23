@@ -42,6 +42,7 @@ abstract class CategoryMatchResult with _$CategoryMatchResult {
 enum MatchSource {
   merchant, // matched via MerchantDatabase
   keyword, // matched via keyword map
+  learning, // matched via user correction history
   fallback, // default fallback
 }
 
