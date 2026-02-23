@@ -298,6 +298,9 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
 
     if (!mounted) return;
 
+    // Extract keyword for voice learning
+    final keyword = _extractVoiceKeyword(result);
+
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => TransactionConfirmScreen(
@@ -310,9 +313,33 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
           initialSatisfaction: result.ledgerType == LedgerType.soul
               ? result.estimatedSatisfaction
               : null,
+          voiceKeyword: keyword,
         ),
       ),
     );
+  }
+
+  String _extractVoiceKeyword(VoiceParseResult result) {
+    var remaining = result.rawText;
+
+    // Remove amount patterns
+    remaining = remaining.replaceAll(
+      RegExp(r'[¥￥]?\s*[\d,]+\.?\d*\s*(円|元|ドル)?'),
+      '',
+    );
+
+    // Remove merchant name if matched
+    if (result.merchantName != null) {
+      remaining = remaining.replaceFirst(result.merchantName!, '');
+    }
+
+    // Remove Japanese particles
+    remaining = remaining.replaceAll(RegExp(r'[のにでをはがもへとや]'), '');
+
+    // Remove Chinese particles
+    remaining = remaining.replaceAll(RegExp(r'[的了吗呢吧啊呀哦]'), '');
+
+    return remaining.trim();
   }
 
   @override

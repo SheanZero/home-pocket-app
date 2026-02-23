@@ -36,6 +36,7 @@ class TransactionConfirmScreen extends ConsumerStatefulWidget {
     required this.date,
     this.initialMerchant,
     this.initialSatisfaction,
+    this.voiceKeyword,
   });
 
   final String bookId;
@@ -49,6 +50,9 @@ class TransactionConfirmScreen extends ConsumerStatefulWidget {
 
   /// Optional pre-filled soul satisfaction score (1–10) from voice input.
   final int? initialSatisfaction;
+
+  /// Extracted keyword from voice input for learning corrections.
+  final String? voiceKeyword;
 
   @override
   ConsumerState<TransactionConfirmScreen> createState() =>
@@ -65,6 +69,7 @@ class _TransactionConfirmScreenState
   Category? _parentCategory;
   late DateTime _date;
   final Map<String, Category> _categoryById = {};
+  String? _initialCategoryId;
 
   LedgerType _ledgerType = LedgerType.survival;
   int _soulSatisfaction = 5;
@@ -77,6 +82,7 @@ class _TransactionConfirmScreenState
     _category = widget.category;
     _parentCategory = widget.parentCategory;
     _date = widget.date;
+    _initialCategoryId = widget.category?.id;
 
     if (_category != null) {
       _resolveLedgerType(_category!.id);
@@ -241,6 +247,18 @@ class _TransactionConfirmScreenState
       _parentCategory = parent;
     });
     _resolveLedgerType(result.id);
+
+    // Record voice learning correction if category changed
+    if (widget.voiceKeyword != null &&
+        widget.voiceKeyword!.isNotEmpty &&
+        result.id != _initialCategoryId) {
+      final correctionUseCase =
+          ref.read(recordCategoryCorrectionUseCaseProvider);
+      await correctionUseCase.execute(
+        keyword: widget.voiceKeyword!,
+        correctedCategoryId: result.id,
+      );
+    }
   }
 
   // ── Date editing via date picker ──
