@@ -52,8 +52,8 @@ class ScanReceiptUseCase {
   ScanReceiptUseCase({
     required OCRService ocrService,
     required ImagePreprocessor preprocessor,
-  })  : _ocrService = ocrService,
-        _preprocessor = preprocessor;
+  }) : _ocrService = ocrService,
+       _preprocessor = preprocessor;
 
   /// Execute scan from raw image bytes.
   Future<OcrScanResult> executeFromBytes(Uint8List imageBytes) async {
@@ -79,11 +79,13 @@ class ScanReceiptUseCase {
       // 4. Parse receipt data
       final parsed = _parser.parse(ocrResult.text);
 
-      return OcrScanResult.success(OcrScanData(
-        amount: parsed.amount,
-        date: parsed.date,
-        merchantName: parsed.merchant,
-      ));
+      return OcrScanResult.success(
+        OcrScanData(
+          amount: parsed.amount,
+          date: parsed.date,
+          merchantName: parsed.merchant,
+        ),
+      );
     } catch (_) {
       return OcrScanResult.failure(OcrError.scanFailed);
     } finally {

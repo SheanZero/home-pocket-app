@@ -16,7 +16,8 @@ class ImagePreprocessor {
     var image = decoded;
 
     if (image.width > _maxDimension || image.height > _maxDimension) {
-      final scale = _maxDimension /
+      final scale =
+          _maxDimension /
           (image.width > image.height ? image.width : image.height);
       image = img.copyResize(
         image,

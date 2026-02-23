@@ -10,15 +10,13 @@ class ParsedReceiptData {
 /// Extracts structured data (amount, date, merchant) from raw OCR text.
 class ReceiptParser {
   // Lines containing these keywords are excluded from yen-amount fallback.
-  static final _excludedAmountKeywords = RegExp(
-    r'(お釣り|釣銭|税\s|消費税|内税|外税)',
-  );
+  static final _excludedAmountKeywords = RegExp(r'(お釣り|釣銭|税\s|消費税|内税|外税)');
 
   ParsedReceiptData parse(String text) {
     return ParsedReceiptData(
       amount: _extractAmount(text),
       date: _extractDate(text),
-      merchant: _extractMerchant(text)
+      merchant: _extractMerchant(text),
     );
   }
 
@@ -95,8 +93,10 @@ class ReceiptParser {
   String? _extractMerchant(String text) {
     if (text.isEmpty) return null;
 
-    final lines =
-        text.split('\n').map((l) => l.trim()).where((l) => l.isNotEmpty);
+    final lines = text
+        .split('\n')
+        .map((l) => l.trim())
+        .where((l) => l.isNotEmpty);
     final datePattern = RegExp(r'^\d{2,4}[/\-.]?\d{1,2}[/\-.]?\d{1,2}');
     final amountPattern = RegExp(r'^[¥￥]?\s*[\d,]+\s*(円)?$');
     final keywordPattern = RegExp(

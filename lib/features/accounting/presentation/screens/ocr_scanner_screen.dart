@@ -107,9 +107,9 @@ class _OcrScannerScreenState extends ConsumerState<OcrScannerScreen> {
       OcrError.scanFailed => l10n.ocrScanFailed,
     };
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -125,8 +125,10 @@ class _OcrScannerScreenState extends ConsumerState<OcrScannerScreen> {
               children: [
                 // Header
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 8,
+                  ),
                   child: Row(
                     children: [
                       IconButton(
@@ -200,8 +202,10 @@ class _OcrScannerScreenState extends ConsumerState<OcrScannerScreen> {
 
                 // Status pill
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
@@ -239,8 +243,7 @@ class _OcrScannerScreenState extends ConsumerState<OcrScannerScreen> {
                           height: 72,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border:
-                                Border.all(color: Colors.white, width: 4),
+                            border: Border.all(color: Colors.white, width: 4),
                           ),
                           child: Container(
                             margin: const EdgeInsets.all(4),

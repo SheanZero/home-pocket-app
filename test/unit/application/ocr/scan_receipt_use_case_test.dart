@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -55,10 +54,12 @@ void main() {
   });
 
   test('returns error when OCR returns empty text', () async {
-    when(mockPreprocessor.processBytes(any))
-        .thenReturn(Uint8List.fromList([1]));
-    when(mockOcrService.recognizeText(any))
-        .thenAnswer((_) async => OCRResult.empty);
+    when(
+      mockPreprocessor.processBytes(any),
+    ).thenReturn(Uint8List.fromList([1]));
+    when(
+      mockOcrService.recognizeText(any),
+    ).thenAnswer((_) async => OCRResult.empty);
 
     final result = await useCase.executeFromBytes(Uint8List.fromList([1]));
 
@@ -67,8 +68,9 @@ void main() {
   });
 
   test('cleans up temp file even when OCR throws', () async {
-    when(mockPreprocessor.processBytes(any))
-        .thenReturn(Uint8List.fromList([1]));
+    when(
+      mockPreprocessor.processBytes(any),
+    ).thenReturn(Uint8List.fromList([1]));
     when(mockOcrService.recognizeText(any)).thenThrow(Exception('OCR crash'));
 
     final result = await useCase.executeFromBytes(Uint8List.fromList([1]));
