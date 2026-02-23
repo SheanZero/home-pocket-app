@@ -17,7 +17,7 @@ class ReceiptParser {
   ParsedReceiptData parse(String text) {
     return ParsedReceiptData(
       amount: _extractAmount(text),
-      date: null, // Task 3
+      date: _extractDate(text),
       merchant: null, // Task 4
     );
   }
@@ -59,6 +59,37 @@ class ReceiptParser {
     }
 
     return largest;
+  }
+
+  DateTime? _extractDate(String text) {
+    final patterns = [
+      RegExp(r'(\d{4})年(\d{1,2})月(\d{1,2})日'),
+      RegExp(r'(\d{4})[/\-.](\d{1,2})[/\-.](\d{1,2})'),
+      RegExp(r'(\d{2})[/\-.](\d{1,2})[/\-.](\d{1,2})'),
+    ];
+
+    for (final pattern in patterns) {
+      final match = pattern.firstMatch(text);
+      if (match != null) {
+        var year = int.parse(match.group(1)!);
+        final month = int.parse(match.group(2)!);
+        final day = int.parse(match.group(3)!);
+
+        if (year < 100) year += 2000;
+        if (month < 1 || month > 12 || day < 1 || day > 31) continue;
+
+        try {
+          final date = DateTime(year, month, day);
+          // DateTime auto-rolls invalid dates (e.g. Feb 30 → Mar 2);
+          // reject if month/day changed.
+          if (date.month != month || date.day != day) continue;
+          return date;
+        } catch (_) {
+          continue;
+        }
+      }
+    }
+    return null;
   }
 
   int? _parseNumber(String raw) {

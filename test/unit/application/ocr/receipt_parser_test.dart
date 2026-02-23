@@ -58,4 +58,41 @@ void main() {
       expect(result.amount, 1100);
     });
   });
+
+  group('extractDate', () {
+    test('extracts YYYY年MM月DD日 format', () {
+      final result = parser.parse('2026年02月15日\n合計 ¥1,000');
+      expect(result.date, DateTime(2026, 2, 15));
+    });
+
+    test('extracts YYYY/MM/DD format', () {
+      final result = parser.parse('2026/01/23 12:30\n合計 ¥500');
+      expect(result.date, DateTime(2026, 1, 23));
+    });
+
+    test('extracts YYYY-MM-DD format', () {
+      final result = parser.parse('Date: 2026-03-01\nTOTAL ¥800');
+      expect(result.date, DateTime(2026, 3, 1));
+    });
+
+    test('extracts YY/MM/DD with century completion', () {
+      final result = parser.parse('26/02/15\n合計 ¥300');
+      expect(result.date, DateTime(2026, 2, 15));
+    });
+
+    test('extracts YYYY.MM.DD format', () {
+      final result = parser.parse('2026.12.25\n合計 ¥1,500');
+      expect(result.date, DateTime(2026, 12, 25));
+    });
+
+    test('returns null when no date found', () {
+      final result = parser.parse('合計 ¥1,000');
+      expect(result.date, isNull);
+    });
+
+    test('ignores invalid dates', () {
+      final result = parser.parse('2026/13/32\n合計 ¥100');
+      expect(result.date, isNull);
+    });
+  });
 }
