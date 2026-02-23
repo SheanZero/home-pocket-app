@@ -45,30 +45,29 @@ final voiceTextParserProvider = AutoDisposeProvider<VoiceTextParser>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef VoiceTextParserRef = AutoDisposeProviderRef<VoiceTextParser>;
-String _$categoryMatcherHash() => r'9c3f48b4d90fbf37c4a17e8a8a5c0d9b16a9acc8';
+String _$fuzzyCategoryMatcherHash() =>
+    r'83fb7164cd9431ee973c6158d5a7757e27581259';
 
-/// CategoryMatcher — wired to existing categoryRepository and categoryService.
+/// FuzzyCategoryMatcher — multi-signal category matcher with learning.
 ///
-/// Uses existing providers from repository_providers.dart and
-/// use_case_providers.dart. Does NOT redefine categoryServiceProvider.
-///
-/// Copied from [categoryMatcher].
-@ProviderFor(categoryMatcher)
-final categoryMatcherProvider = AutoDisposeProvider<CategoryMatcher>.internal(
-  categoryMatcher,
-  name: r'categoryMatcherProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$categoryMatcherHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+/// Copied from [fuzzyCategoryMatcher].
+@ProviderFor(fuzzyCategoryMatcher)
+final fuzzyCategoryMatcherProvider =
+    AutoDisposeProvider<FuzzyCategoryMatcher>.internal(
+      fuzzyCategoryMatcher,
+      name: r'fuzzyCategoryMatcherProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$fuzzyCategoryMatcherHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef CategoryMatcherRef = AutoDisposeProviderRef<CategoryMatcher>;
+typedef FuzzyCategoryMatcherRef = AutoDisposeProviderRef<FuzzyCategoryMatcher>;
 String _$parseVoiceInputUseCaseHash() =>
-    r'535bbe5ad584ac13ec2cc72ae17ce36026cb46bb';
+    r'5e8be2e65e1ac635cc3ab6cacae57dafae4a3374';
 
 /// ParseVoiceInputUseCase — wired to all voice application services.
 ///

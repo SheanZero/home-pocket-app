@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../application/voice/category_matcher.dart';
+import '../../../../application/voice/fuzzy_category_matcher.dart';
 import '../../../../application/voice/parse_voice_input_use_case.dart';
 import '../../../../application/voice/voice_satisfaction_estimator.dart';
 import '../../../../application/voice/voice_text_parser.dart';
@@ -24,16 +24,13 @@ VoiceTextParser voiceTextParser(Ref ref) {
   return VoiceTextParser();
 }
 
-/// CategoryMatcher — wired to existing categoryRepository and categoryService.
-///
-/// Uses existing providers from repository_providers.dart and
-/// use_case_providers.dart. Does NOT redefine categoryServiceProvider.
+/// FuzzyCategoryMatcher — multi-signal category matcher with learning.
 @riverpod
-CategoryMatcher categoryMatcher(Ref ref) {
-  return CategoryMatcher(
+FuzzyCategoryMatcher fuzzyCategoryMatcher(Ref ref) {
+  return FuzzyCategoryMatcher(
     categoryRepository: ref.watch(categoryRepositoryProvider),
-    // CORRECT: use the existing categoryServiceProvider from use_case_providers.dart
-    // Single source of truth — do NOT define a new CategoryService provider here.
+    preferenceRepository:
+        ref.watch(categoryKeywordPreferenceRepositoryProvider),
     categoryService: ref.watch(categoryServiceProvider),
   );
 }
@@ -43,7 +40,7 @@ CategoryMatcher categoryMatcher(Ref ref) {
 ParseVoiceInputUseCase parseVoiceInputUseCase(Ref ref) {
   return ParseVoiceInputUseCase(
     textParser: ref.watch(voiceTextParserProvider),
-    categoryMatcher: ref.watch(categoryMatcherProvider),
+    fuzzyCategoryMatcher: ref.watch(fuzzyCategoryMatcherProvider),
     merchantDatabase: ref.watch(merchantDatabaseProvider),
   );
 }

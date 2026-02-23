@@ -2,7 +2,7 @@ import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/models/voice_parse_result.dart';
 import '../../infrastructure/ml/merchant_database.dart';
 import '../../shared/utils/result.dart';
-import 'category_matcher.dart';
+import 'fuzzy_category_matcher.dart';
 import 'voice_text_parser.dart';
 
 /// Use case for parsing voice-recognized text into structured transaction data.
@@ -13,15 +13,15 @@ import 'voice_text_parser.dart';
 /// Merchant matching has higher priority than keyword category matching.
 class ParseVoiceInputUseCase {
   final VoiceTextParser _textParser;
-  final CategoryMatcher _categoryMatcher;
+  final FuzzyCategoryMatcher _fuzzyCategoryMatcher;
   final MerchantDatabase _merchantDatabase;
 
   ParseVoiceInputUseCase({
     required VoiceTextParser textParser,
-    required CategoryMatcher categoryMatcher,
+    required FuzzyCategoryMatcher fuzzyCategoryMatcher,
     required MerchantDatabase merchantDatabase,
   })  : _textParser = textParser,
-        _categoryMatcher = categoryMatcher,
+        _fuzzyCategoryMatcher = fuzzyCategoryMatcher,
         _merchantDatabase = merchantDatabase;
 
   /// Parses [recognizedText] into a [VoiceParseResult].
@@ -41,13 +41,11 @@ class ParseVoiceInputUseCase {
         _merchantDatabase,
       );
 
-      // 3. Match category and resolve ledger type
+      // 4. Match category and resolve ledger type
       CategoryMatchResult? categoryMatch;
       LedgerType? ledgerType;
 
       if (merchantMatch != null) {
-        // Merchant found: derive category from merchant data
-        // Map MerchantMatch (infrastructure) to CategoryMatchResult (domain)
         categoryMatch = CategoryMatchResult(
           categoryId: merchantMatch.categoryId,
           confidence: merchantMatch.confidence,
@@ -55,15 +53,18 @@ class ParseVoiceInputUseCase {
         );
         ledgerType = merchantMatch.ledgerType;
       } else {
-        // No merchant: fall back to keyword-based category matching
-        categoryMatch = await _categoryMatcher.matchFromText(recognizedText);
+        // Extract keyword: remove amount/date/merchant text from input
+        final keyword = _extractKeyword(recognizedText);
+        categoryMatch = await _fuzzyCategoryMatcher.match(
+          recognizedText,
+          keyword,
+        );
         if (categoryMatch != null) {
-          ledgerType =
-              await _categoryMatcher.resolveLedgerType(categoryMatch.categoryId);
+          ledgerType = await _fuzzyCategoryMatcher
+              .resolveLedgerType(categoryMatch.categoryId);
         }
       }
 
-      // Build result with primitives only (no MerchantMatch reference in domain)
       return Result.success(
         VoiceParseResult(
           rawText: recognizedText,
@@ -79,5 +80,33 @@ class ParseVoiceInputUseCase {
     } catch (e) {
       return Result.error('Voice parse failed: $e');
     }
+  }
+
+  /// Extracts the category-relevant keyword from voice input.
+  ///
+  /// Strips away recognized amount, date, and common particles,
+  /// leaving only the word(s) that describe the expense category.
+  String _extractKeyword(String text) {
+    var remaining = text;
+
+    // Remove amount patterns (numbers with currency markers)
+    remaining = remaining.replaceAll(
+      RegExp(r'[¥￥]?\s*[\d,]+\.?\d*\s*(円|元|ドル)?'),
+      '',
+    );
+
+    // Remove common Japanese particles
+    remaining = remaining.replaceAll(
+      RegExp(r'[のにでをはがもへとや]'),
+      '',
+    );
+
+    // Remove common Chinese particles
+    remaining = remaining.replaceAll(
+      RegExp(r'[的了吗呢吧啊呀哦]'),
+      '',
+    );
+
+    return remaining.trim();
   }
 }

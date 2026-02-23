@@ -1,4 +1,3 @@
-import '../../features/accounting/domain/models/category.dart';
 import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/models/voice_parse_result.dart';
 import '../../features/accounting/domain/repositories/category_keyword_preference_repository.dart';
@@ -319,13 +318,12 @@ class _ScoredCandidate {
   final String categoryId;
   final double baseScore;
   MatchSource source;
-  double learningBonus;
+  double learningBonus = 0.0;
 
   _ScoredCandidate({
     required this.categoryId,
     required this.baseScore,
     required this.source,
-    this.learningBonus = 0.0,
   });
 
   double get finalScore => baseScore + learningBonus;

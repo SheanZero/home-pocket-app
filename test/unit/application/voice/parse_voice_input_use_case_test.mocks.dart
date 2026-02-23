@@ -5,7 +5,8 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i3;
 
-import 'package:home_pocket/application/voice/category_matcher.dart' as _i2;
+import 'package:home_pocket/application/voice/fuzzy_category_matcher.dart'
+    as _i2;
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart'
     as _i5;
 import 'package:home_pocket/features/accounting/domain/models/voice_parse_result.dart'
@@ -27,18 +28,22 @@ import 'package:mockito/mockito.dart' as _i1;
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
-/// A class which mocks [CategoryMatcher].
+/// A class which mocks [FuzzyCategoryMatcher].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockCategoryMatcher extends _i1.Mock implements _i2.CategoryMatcher {
-  MockCategoryMatcher() {
+class MockFuzzyCategoryMatcher extends _i1.Mock
+    implements _i2.FuzzyCategoryMatcher {
+  MockFuzzyCategoryMatcher() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.CategoryMatchResult?> matchFromText(String? text) =>
+  _i3.Future<_i4.CategoryMatchResult?> match(
+    String? inputText,
+    String? extractedKeyword,
+  ) =>
       (super.noSuchMethod(
-            Invocation.method(#matchFromText, [text]),
+            Invocation.method(#match, [inputText, extractedKeyword]),
             returnValue: _i3.Future<_i4.CategoryMatchResult?>.value(),
           )
           as _i3.Future<_i4.CategoryMatchResult?>);

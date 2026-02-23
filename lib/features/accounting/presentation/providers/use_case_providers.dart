@@ -9,6 +9,7 @@ import '../../../../application/accounting/get_transactions_use_case.dart';
 import '../../../../application/accounting/merchant_category_learning_service.dart';
 import '../../../../application/accounting/seed_categories_use_case.dart';
 import '../../../../application/dual_ledger/providers.dart';
+import '../../../../application/voice/record_category_correction_use_case.dart';
 // ignore: deprecated_member_use_from_same_package
 import '../../../../application/dual_ledger/resolve_ledger_type_service.dart';
 import '../../../../infrastructure/crypto/providers.dart';
@@ -80,5 +81,13 @@ MerchantCategoryLearningService merchantCategoryLearningService(Ref ref) {
   return MerchantCategoryLearningService(
     repository: ref.watch(merchantCategoryPreferenceRepositoryProvider),
     categoryRepository: ref.watch(categoryRepositoryProvider),
+  );
+}
+
+@riverpod
+RecordCategoryCorrectionUseCase recordCategoryCorrectionUseCase(Ref ref) {
+  return RecordCategoryCorrectionUseCase(
+    preferenceRepository:
+        ref.watch(categoryKeywordPreferenceRepositoryProvider),
   );
 }

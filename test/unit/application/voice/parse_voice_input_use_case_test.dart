@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/application/voice/category_matcher.dart';
+import 'package:home_pocket/application/voice/fuzzy_category_matcher.dart';
 import 'package:home_pocket/application/voice/parse_voice_input_use_case.dart';
 import 'package:home_pocket/application/voice/voice_text_parser.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
@@ -8,23 +8,23 @@ import 'package:home_pocket/infrastructure/ml/merchant_database.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-@GenerateMocks([CategoryMatcher, MerchantDatabase])
+@GenerateMocks([FuzzyCategoryMatcher, MerchantDatabase])
 import 'parse_voice_input_use_case_test.mocks.dart';
 
 void main() {
-  late MockCategoryMatcher mockCategoryMatcher;
+  late MockFuzzyCategoryMatcher mockFuzzyCategoryMatcher;
   late MockMerchantDatabase mockMerchantDatabase;
   late VoiceTextParser parser;
   late ParseVoiceInputUseCase useCase;
 
   setUp(() {
-    mockCategoryMatcher = MockCategoryMatcher();
+    mockFuzzyCategoryMatcher = MockFuzzyCategoryMatcher();
     mockMerchantDatabase = MockMerchantDatabase();
     parser = VoiceTextParser();
 
     useCase = ParseVoiceInputUseCase(
       textParser: parser,
-      categoryMatcher: mockCategoryMatcher,
+      fuzzyCategoryMatcher: mockFuzzyCategoryMatcher,
       merchantDatabase: mockMerchantDatabase,
     );
   });
@@ -32,13 +32,13 @@ void main() {
   group('ParseVoiceInputUseCase', () {
     test('parses amount correctly from text with 円', () async {
       when(mockMerchantDatabase.findMerchant(any)).thenReturn(null);
-      when(mockCategoryMatcher.matchFromText(any))
+      when(mockFuzzyCategoryMatcher.match(any, any))
           .thenAnswer((_) async => const CategoryMatchResult(
                 categoryId: 'cat_food',
                 confidence: 0.9,
                 source: MatchSource.keyword,
               ));
-      when(mockCategoryMatcher.resolveLedgerType(any))
+      when(mockFuzzyCategoryMatcher.resolveLedgerType(any))
           .thenAnswer((_) async => LedgerType.survival);
 
       final result = await useCase.execute('昼ごはんに680円');
@@ -62,19 +62,19 @@ void main() {
       expect(result.isSuccess, isTrue);
       expect(result.data!.merchantName, equals('マクドナルド'));
       expect(result.data!.categoryMatch!.source, equals(MatchSource.merchant));
-      // CategoryMatcher.matchFromText should NOT be called when merchant found
-      verifyNever(mockCategoryMatcher.matchFromText(any));
+      // FuzzyCategoryMatcher.match should NOT be called when merchant found
+      verifyNever(mockFuzzyCategoryMatcher.match(any, any));
     });
 
-    test('falls back to keyword match when no merchant found', () async {
+    test('falls back to fuzzy match when no merchant found', () async {
       when(mockMerchantDatabase.findMerchant(any)).thenReturn(null);
-      when(mockCategoryMatcher.matchFromText(any))
+      when(mockFuzzyCategoryMatcher.match(any, any))
           .thenAnswer((_) async => const CategoryMatchResult(
                 categoryId: 'cat_transport',
                 confidence: 0.95,
                 source: MatchSource.keyword,
               ));
-      when(mockCategoryMatcher.resolveLedgerType(any))
+      when(mockFuzzyCategoryMatcher.resolveLedgerType(any))
           .thenAnswer((_) async => LedgerType.survival);
 
       final result = await useCase.execute('電車代320円');
@@ -83,9 +83,11 @@ void main() {
       expect(result.data!.categoryMatch!.source, equals(MatchSource.keyword));
     });
 
-    test('returns success with nulls when text has no recognizable content', () async {
+    test('returns success with nulls when text has no recognizable content',
+        () async {
       when(mockMerchantDatabase.findMerchant(any)).thenReturn(null);
-      when(mockCategoryMatcher.matchFromText(any)).thenAnswer((_) async => null);
+      when(mockFuzzyCategoryMatcher.match(any, any))
+          .thenAnswer((_) async => null);
 
       final result = await useCase.execute('test');
 
