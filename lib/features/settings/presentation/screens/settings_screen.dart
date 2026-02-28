@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../generated/app_localizations.dart';
+import '../../../family_sync/presentation/widgets/family_sync_settings_section.dart';
 import '../providers/settings_providers.dart';
 import '../widgets/about_section.dart';
 import '../widgets/appearance_section.dart';
@@ -29,6 +30,8 @@ class SettingsScreen extends ConsumerWidget {
             VoiceSection(settings: settings),
             const Divider(),
             DataManagementSection(bookId: bookId),
+            const Divider(),
+            FamilySyncSettingsSection(bookId: bookId),
             const Divider(),
             SecuritySection(settings: settings),
             const Divider(),

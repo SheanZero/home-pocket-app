@@ -29,6 +29,7 @@ abstract class KeyRepository {
   Future<String?> getPublicKey();
   Future<String?> getDeviceId();
   Future<bool> hasKeyPair();
+  Future<String?> getPrivateKey();
   Future<Signature> signData(List<int> data);
   Future<bool> verifySignature({
     required List<int> data,

@@ -20,6 +20,8 @@ class KeyManager {
 
   Future<bool> hasKeyPair() => _repository.hasKeyPair();
 
+  Future<String?> getPrivateKey() => _repository.getPrivateKey();
+
   Future<Signature> signData(List<int> data) => _repository.signData(data);
 
   Future<bool> verifySignature({

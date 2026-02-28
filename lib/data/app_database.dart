@@ -6,6 +6,8 @@ import 'tables/books_table.dart';
 import 'tables/categories_table.dart';
 import 'tables/category_ledger_configs_table.dart';
 import 'tables/merchant_category_preferences_table.dart';
+import 'tables/paired_devices_table.dart';
+import 'tables/sync_queue_table.dart';
 import 'tables/transactions_table.dart';
 
 part 'app_database.g.dart';
@@ -21,6 +23,8 @@ part 'app_database.g.dart';
     Categories,
     CategoryLedgerConfigs,
     MerchantCategoryPreferences,
+    PairedDevices,
+    SyncQueue,
     Transactions,
   ],
 )
@@ -31,7 +35,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration {
@@ -72,6 +76,10 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 6) {
           await migrator.createTable(merchantCategoryPreferences);
+        }
+        if (from < 7) {
+          await migrator.createTable(pairedDevices);
+          await migrator.createTable(syncQueue);
         }
       },
     );

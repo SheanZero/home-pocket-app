@@ -179,5 +179,150 @@
   "pleaseSelectCategory": "请选择类别",
   "@pleaseSelectCategory": {
     "description": "Placeholder shown when no category is selected in confirm screen"
+  },
+
+  "familySync": "家庭同步",
+  "@familySync": {
+    "description": "Title for the family sync feature"
+  },
+  "familySyncShowMyCode": "显示我的码",
+  "@familySyncShowMyCode": {
+    "description": "Tab label to show pairing code"
+  },
+  "familySyncEnterPartnerCode": "输入配对码",
+  "@familySyncEnterPartnerCode": {
+    "description": "Tab label to enter partner's pairing code"
+  },
+  "familySyncPairCode": "配对码",
+  "@familySyncPairCode": {
+    "description": "Label for the pairing code"
+  },
+  "familySyncScanOrEnter": "在伴侣设备上扫描二维码或输入以下配对码",
+  "@familySyncScanOrEnter": {
+    "description": "Instructions for sharing the pairing code"
+  },
+  "familySyncCodeExpired": "配对码已过期",
+  "@familySyncCodeExpired": {
+    "description": "Shown when pairing code has expired"
+  },
+  "familySyncRegenerate": "重新生成",
+  "@familySyncRegenerate": {
+    "description": "Button to regenerate pairing code"
+  },
+  "familySyncEnterDigitCode": "输入6位配对码",
+  "@familySyncEnterDigitCode": {
+    "description": "Placeholder for pairing code input field"
+  },
+  "familySyncSubmit": "提交",
+  "@familySyncSubmit": {
+    "description": "Submit button for pairing code"
+  },
+  "familySyncPairedDevice": "已配对设备",
+  "@familySyncPairedDevice": {
+    "description": "Section title for paired device info"
+  },
+  "familySyncPairInfo": "配对信息",
+  "@familySyncPairInfo": {
+    "description": "Section title for pair details"
+  },
+  "familySyncPairId": "配对ID",
+  "@familySyncPairId": {
+    "description": "Label for pair ID"
+  },
+  "familySyncPairedSince": "配对时间",
+  "@familySyncPairedSince": {
+    "description": "Label for paired date"
+  },
+  "familySyncBookId": "账本ID",
+  "@familySyncBookId": {
+    "description": "Label for associated book ID"
+  },
+  "familySyncUnpair": "解除配对",
+  "@familySyncUnpair": {
+    "description": "Button to unpair devices"
+  },
+  "familySyncUnpairDevice": "解除设备配对",
+  "@familySyncUnpairDevice": {
+    "description": "Title for unpair confirmation dialog"
+  },
+  "familySyncUnpairConfirm": "确定要与{deviceName}解除配对吗？解除后将停止同步，直到重新配对。",
+  "@familySyncUnpairConfirm": {
+    "description": "Confirmation message for unpair action",
+    "placeholders": {
+      "deviceName": {
+        "type": "String",
+        "example": "iPhone"
+      }
+    }
+  },
+  "familySyncUnpairFailed": "解除配对失败: {message}",
+  "@familySyncUnpairFailed": {
+    "description": "Error message when unpair fails",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "网络错误"
+      }
+    }
+  },
+  "familySyncNoDevicePaired": "未配对任何设备",
+  "@familySyncNoDevicePaired": {
+    "description": "Shown when no device is paired"
+  },
+  "familySyncPairPrompt": "与家人配对以同步交易记录",
+  "@familySyncPairPrompt": {
+    "description": "Prompt to pair with a family member"
+  },
+  "familySyncStatusSynced": "已连接，数据已同步",
+  "@familySyncStatusSynced": {
+    "description": "Sync status description when synced"
+  },
+  "familySyncStatusSyncing": "正在与伴侣同步...",
+  "@familySyncStatusSyncing": {
+    "description": "Sync status description when syncing"
+  },
+  "familySyncStatusOffline": "离线中 - 连接后将自动同步",
+  "@familySyncStatusOffline": {
+    "description": "Sync status description when offline"
+  },
+  "familySyncStatusError": "同步发生错误",
+  "@familySyncStatusError": {
+    "description": "Sync status description when error"
+  },
+  "familySyncStatusPairing": "配对中...",
+  "@familySyncStatusPairing": {
+    "description": "Sync status description when pairing"
+  },
+  "familySyncStatusUnpaired": "点击与家人配对",
+  "@familySyncStatusUnpaired": {
+    "description": "Sync status description when unpaired"
+  },
+  "familySyncBadgeSynced": "已同步",
+  "@familySyncBadgeSynced": {
+    "description": "Badge label for synced status"
+  },
+  "familySyncBadgeSyncing": "同步中",
+  "@familySyncBadgeSyncing": {
+    "description": "Badge label for syncing status"
+  },
+  "familySyncBadgeOffline": "离线",
+  "@familySyncBadgeOffline": {
+    "description": "Badge label for offline status"
+  },
+  "familySyncBadgeError": "错误",
+  "@familySyncBadgeError": {
+    "description": "Badge label for error status"
+  },
+  "familySyncBadgePairing": "配对中",
+  "@familySyncBadgePairing": {
+    "description": "Badge label for pairing status"
+  },
+  "familySyncBadgeUnpaired": "未配对",
+  "@familySyncBadgeUnpaired": {
+    "description": "Badge label for unpaired status"
+  },
+  "cancel": "取消",
+  "@cancel": {
+    "description": "Generic cancel button label"
   }
 }
