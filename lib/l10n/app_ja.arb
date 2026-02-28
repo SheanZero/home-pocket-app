@@ -179,5 +179,150 @@
   "pleaseSelectCategory": "カテゴリを選択してください",
   "@pleaseSelectCategory": {
     "description": "Placeholder shown when no category is selected in confirm screen"
+  },
+
+  "familySync": "ファミリー同期",
+  "@familySync": {
+    "description": "Title for the family sync feature"
+  },
+  "familySyncShowMyCode": "コードを表示",
+  "@familySyncShowMyCode": {
+    "description": "Tab label to show pairing code"
+  },
+  "familySyncEnterPartnerCode": "コードを入力",
+  "@familySyncEnterPartnerCode": {
+    "description": "Tab label to enter partner's pairing code"
+  },
+  "familySyncPairCode": "ペアリングコード",
+  "@familySyncPairCode": {
+    "description": "Label for the pairing code"
+  },
+  "familySyncScanOrEnter": "パートナーのデバイスでQRコードをスキャンするか、以下のコードを入力してください",
+  "@familySyncScanOrEnter": {
+    "description": "Instructions for sharing the pairing code"
+  },
+  "familySyncCodeExpired": "コードの有効期限が切れました",
+  "@familySyncCodeExpired": {
+    "description": "Shown when pairing code has expired"
+  },
+  "familySyncRegenerate": "再生成",
+  "@familySyncRegenerate": {
+    "description": "Button to regenerate pairing code"
+  },
+  "familySyncEnterDigitCode": "6桁のコードを入力",
+  "@familySyncEnterDigitCode": {
+    "description": "Placeholder for pairing code input field"
+  },
+  "familySyncSubmit": "送信",
+  "@familySyncSubmit": {
+    "description": "Submit button for pairing code"
+  },
+  "familySyncPairedDevice": "ペアリング済みデバイス",
+  "@familySyncPairedDevice": {
+    "description": "Section title for paired device info"
+  },
+  "familySyncPairInfo": "ペアリング情報",
+  "@familySyncPairInfo": {
+    "description": "Section title for pair details"
+  },
+  "familySyncPairId": "ペアID",
+  "@familySyncPairId": {
+    "description": "Label for pair ID"
+  },
+  "familySyncPairedSince": "ペアリング日",
+  "@familySyncPairedSince": {
+    "description": "Label for paired date"
+  },
+  "familySyncBookId": "帳簿ID",
+  "@familySyncBookId": {
+    "description": "Label for associated book ID"
+  },
+  "familySyncUnpair": "ペアリング解除",
+  "@familySyncUnpair": {
+    "description": "Button to unpair devices"
+  },
+  "familySyncUnpairDevice": "デバイスのペアリング解除",
+  "@familySyncUnpairDevice": {
+    "description": "Title for unpair confirmation dialog"
+  },
+  "familySyncUnpairConfirm": "{deviceName}とのペアリングを解除しますか？再度ペアリングするまで同期は停止します。",
+  "@familySyncUnpairConfirm": {
+    "description": "Confirmation message for unpair action",
+    "placeholders": {
+      "deviceName": {
+        "type": "String",
+        "example": "iPhone"
+      }
+    }
+  },
+  "familySyncUnpairFailed": "ペアリング解除に失敗: {message}",
+  "@familySyncUnpairFailed": {
+    "description": "Error message when unpair fails",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "ネットワークエラー"
+      }
+    }
+  },
+  "familySyncNoDevicePaired": "ペアリング済みデバイスなし",
+  "@familySyncNoDevicePaired": {
+    "description": "Shown when no device is paired"
+  },
+  "familySyncPairPrompt": "家族とペアリングして取引を同期しましょう",
+  "@familySyncPairPrompt": {
+    "description": "Prompt to pair with a family member"
+  },
+  "familySyncStatusSynced": "接続済み・最新",
+  "@familySyncStatusSynced": {
+    "description": "Sync status description when synced"
+  },
+  "familySyncStatusSyncing": "パートナーと同期中...",
+  "@familySyncStatusSyncing": {
+    "description": "Sync status description when syncing"
+  },
+  "familySyncStatusOffline": "オフライン - 接続時に同期します",
+  "@familySyncStatusOffline": {
+    "description": "Sync status description when offline"
+  },
+  "familySyncStatusError": "同期エラーが発生しました",
+  "@familySyncStatusError": {
+    "description": "Sync status description when error"
+  },
+  "familySyncStatusPairing": "ペアリング中...",
+  "@familySyncStatusPairing": {
+    "description": "Sync status description when pairing"
+  },
+  "familySyncStatusUnpaired": "タップして家族とペアリング",
+  "@familySyncStatusUnpaired": {
+    "description": "Sync status description when unpaired"
+  },
+  "familySyncBadgeSynced": "同期済み",
+  "@familySyncBadgeSynced": {
+    "description": "Badge label for synced status"
+  },
+  "familySyncBadgeSyncing": "同期中",
+  "@familySyncBadgeSyncing": {
+    "description": "Badge label for syncing status"
+  },
+  "familySyncBadgeOffline": "オフライン",
+  "@familySyncBadgeOffline": {
+    "description": "Badge label for offline status"
+  },
+  "familySyncBadgeError": "エラー",
+  "@familySyncBadgeError": {
+    "description": "Badge label for error status"
+  },
+  "familySyncBadgePairing": "ペアリング中",
+  "@familySyncBadgePairing": {
+    "description": "Badge label for pairing status"
+  },
+  "familySyncBadgeUnpaired": "未ペアリング",
+  "@familySyncBadgeUnpaired": {
+    "description": "Badge label for unpaired status"
+  },
+  "cancel": "キャンセル",
+  "@cancel": {
+    "description": "Generic cancel button label"
   }
 }

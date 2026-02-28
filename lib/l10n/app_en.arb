@@ -494,5 +494,150 @@
   "pleaseSelectCategory": "Please select a category",
   "@pleaseSelectCategory": {
     "description": "Placeholder shown when no category is selected in confirm screen"
+  },
+
+  "familySync": "Family Sync",
+  "@familySync": {
+    "description": "Title for the family sync feature"
+  },
+  "familySyncShowMyCode": "Show My Code",
+  "@familySyncShowMyCode": {
+    "description": "Tab label to show pairing code"
+  },
+  "familySyncEnterPartnerCode": "Enter Partner Code",
+  "@familySyncEnterPartnerCode": {
+    "description": "Tab label to enter partner's pairing code"
+  },
+  "familySyncPairCode": "Pair Code",
+  "@familySyncPairCode": {
+    "description": "Label for the pairing code"
+  },
+  "familySyncScanOrEnter": "Scan the QR code or enter the code below on your partner's device",
+  "@familySyncScanOrEnter": {
+    "description": "Instructions for sharing the pairing code"
+  },
+  "familySyncCodeExpired": "Code expired",
+  "@familySyncCodeExpired": {
+    "description": "Shown when pairing code has expired"
+  },
+  "familySyncRegenerate": "Regenerate",
+  "@familySyncRegenerate": {
+    "description": "Button to regenerate pairing code"
+  },
+  "familySyncEnterDigitCode": "Enter 6-digit code",
+  "@familySyncEnterDigitCode": {
+    "description": "Placeholder for pairing code input field"
+  },
+  "familySyncSubmit": "Submit",
+  "@familySyncSubmit": {
+    "description": "Submit button for pairing code"
+  },
+  "familySyncPairedDevice": "Paired Device",
+  "@familySyncPairedDevice": {
+    "description": "Section title for paired device info"
+  },
+  "familySyncPairInfo": "Pair Info",
+  "@familySyncPairInfo": {
+    "description": "Section title for pair details"
+  },
+  "familySyncPairId": "Pair ID",
+  "@familySyncPairId": {
+    "description": "Label for pair ID"
+  },
+  "familySyncPairedSince": "Paired since",
+  "@familySyncPairedSince": {
+    "description": "Label for paired date"
+  },
+  "familySyncBookId": "Book ID",
+  "@familySyncBookId": {
+    "description": "Label for associated book ID"
+  },
+  "familySyncUnpair": "Unpair",
+  "@familySyncUnpair": {
+    "description": "Button to unpair devices"
+  },
+  "familySyncUnpairDevice": "Unpair Device",
+  "@familySyncUnpairDevice": {
+    "description": "Title for unpair confirmation dialog"
+  },
+  "familySyncUnpairConfirm": "Are you sure you want to unpair from {deviceName}? Sync will stop until you pair again.",
+  "@familySyncUnpairConfirm": {
+    "description": "Confirmation message for unpair action",
+    "placeholders": {
+      "deviceName": {
+        "type": "String",
+        "example": "iPhone"
+      }
+    }
+  },
+  "familySyncUnpairFailed": "Unpair failed: {message}",
+  "@familySyncUnpairFailed": {
+    "description": "Error message when unpair fails",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "familySyncNoDevicePaired": "No device paired",
+  "@familySyncNoDevicePaired": {
+    "description": "Shown when no device is paired"
+  },
+  "familySyncPairPrompt": "Pair with a family member to sync transactions",
+  "@familySyncPairPrompt": {
+    "description": "Prompt to pair with a family member"
+  },
+  "familySyncStatusSynced": "Connected and up to date",
+  "@familySyncStatusSynced": {
+    "description": "Sync status description when synced"
+  },
+  "familySyncStatusSyncing": "Syncing with partner...",
+  "@familySyncStatusSyncing": {
+    "description": "Sync status description when syncing"
+  },
+  "familySyncStatusOffline": "Offline - will sync when connected",
+  "@familySyncStatusOffline": {
+    "description": "Sync status description when offline"
+  },
+  "familySyncStatusError": "Sync error occurred",
+  "@familySyncStatusError": {
+    "description": "Sync status description when error"
+  },
+  "familySyncStatusPairing": "Pairing in progress...",
+  "@familySyncStatusPairing": {
+    "description": "Sync status description when pairing"
+  },
+  "familySyncStatusUnpaired": "Tap to pair with a family member",
+  "@familySyncStatusUnpaired": {
+    "description": "Sync status description when unpaired"
+  },
+  "familySyncBadgeSynced": "Synced",
+  "@familySyncBadgeSynced": {
+    "description": "Badge label for synced status"
+  },
+  "familySyncBadgeSyncing": "Syncing",
+  "@familySyncBadgeSyncing": {
+    "description": "Badge label for syncing status"
+  },
+  "familySyncBadgeOffline": "Offline",
+  "@familySyncBadgeOffline": {
+    "description": "Badge label for offline status"
+  },
+  "familySyncBadgeError": "Error",
+  "@familySyncBadgeError": {
+    "description": "Badge label for error status"
+  },
+  "familySyncBadgePairing": "Pairing",
+  "@familySyncBadgePairing": {
+    "description": "Badge label for pairing status"
+  },
+  "familySyncBadgeUnpaired": "Unpaired",
+  "@familySyncBadgeUnpaired": {
+    "description": "Badge label for unpaired status"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Generic cancel button label"
   }
 }

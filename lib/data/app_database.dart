@@ -7,6 +7,8 @@ import 'tables/categories_table.dart';
 import 'tables/category_keyword_preferences_table.dart';
 import 'tables/category_ledger_configs_table.dart';
 import 'tables/merchant_category_preferences_table.dart';
+import 'tables/paired_devices_table.dart';
+import 'tables/sync_queue_table.dart';
 import 'tables/transactions_table.dart';
 
 part 'app_database.g.dart';
@@ -23,6 +25,8 @@ part 'app_database.g.dart';
     CategoryKeywordPreferences,
     CategoryLedgerConfigs,
     MerchantCategoryPreferences,
+    PairedDevices,
+    SyncQueue,
     Transactions,
   ],
 )
@@ -77,6 +81,8 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 7) {
           await migrator.createTable(categoryKeywordPreferences);
+          await migrator.createTable(pairedDevices);
+          await migrator.createTable(syncQueue);
         }
       },
     );

@@ -89,6 +89,11 @@ class KeyRepositoryImpl implements KeyRepository {
   }
 
   @override
+  Future<String?> getPrivateKey() async {
+    return _secureStorage.read(key: StorageKeys.devicePrivateKey);
+  }
+
+  @override
   Future<Signature> signData(List<int> data) async {
     final privateKeyStr = await _secureStorage.read(
       key: StorageKeys.devicePrivateKey,

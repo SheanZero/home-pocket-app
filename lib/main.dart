@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'data/app_database.dart';
 import 'features/accounting/presentation/providers/use_case_providers.dart';
+import 'features/family_sync/presentation/providers/sync_providers.dart';
 import 'features/home/presentation/screens/main_shell_screen.dart';
 import 'features/settings/domain/models/app_settings.dart';
 import 'features/settings/presentation/providers/locale_provider.dart';
@@ -103,6 +104,10 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
       final bookResult = await ensureBook.execute();
 
       if (bookResult.isSuccess && bookResult.data != null) {
+        // Initialize sync triggers (lifecycle observer + push notification handlers)
+        final syncTrigger = ref.read(syncTriggerServiceProvider);
+        syncTrigger.initialize();
+
         setState(() {
           _bookId = bookResult.data!.id;
           _initialized = true;

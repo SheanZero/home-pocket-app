@@ -2815,6 +2815,1233 @@ class MerchantCategoryPreferencesCompanion
   }
 }
 
+class $PairedDevicesTable extends PairedDevices
+    with TableInfo<$PairedDevicesTable, PairedDeviceData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PairedDevicesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _pairIdMeta = const VerificationMeta('pairId');
+  @override
+  late final GeneratedColumn<String> pairId = GeneratedColumn<String>(
+    'pair_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bookIdMeta = const VerificationMeta('bookId');
+  @override
+  late final GeneratedColumn<String> bookId = GeneratedColumn<String>(
+    'book_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _partnerDeviceIdMeta = const VerificationMeta(
+    'partnerDeviceId',
+  );
+  @override
+  late final GeneratedColumn<String> partnerDeviceId = GeneratedColumn<String>(
+    'partner_device_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _partnerPublicKeyMeta = const VerificationMeta(
+    'partnerPublicKey',
+  );
+  @override
+  late final GeneratedColumn<String> partnerPublicKey = GeneratedColumn<String>(
+    'partner_public_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _partnerDeviceNameMeta = const VerificationMeta(
+    'partnerDeviceName',
+  );
+  @override
+  late final GeneratedColumn<String> partnerDeviceName =
+      GeneratedColumn<String>(
+        'partner_device_name',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pairCodeMeta = const VerificationMeta(
+    'pairCode',
+  );
+  @override
+  late final GeneratedColumn<String> pairCode = GeneratedColumn<String>(
+    'pair_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _expiresAtMeta = const VerificationMeta(
+    'expiresAt',
+  );
+  @override
+  late final GeneratedColumn<int> expiresAt = GeneratedColumn<int>(
+    'expires_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _confirmedAtMeta = const VerificationMeta(
+    'confirmedAt',
+  );
+  @override
+  late final GeneratedColumn<int> confirmedAt = GeneratedColumn<int>(
+    'confirmed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastSyncAtMeta = const VerificationMeta(
+    'lastSyncAt',
+  );
+  @override
+  late final GeneratedColumn<int> lastSyncAt = GeneratedColumn<int>(
+    'last_sync_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    pairId,
+    bookId,
+    partnerDeviceId,
+    partnerPublicKey,
+    partnerDeviceName,
+    status,
+    pairCode,
+    expiresAt,
+    createdAt,
+    confirmedAt,
+    lastSyncAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'paired_devices';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PairedDeviceData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('pair_id')) {
+      context.handle(
+        _pairIdMeta,
+        pairId.isAcceptableOrUnknown(data['pair_id']!, _pairIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pairIdMeta);
+    }
+    if (data.containsKey('book_id')) {
+      context.handle(
+        _bookIdMeta,
+        bookId.isAcceptableOrUnknown(data['book_id']!, _bookIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bookIdMeta);
+    }
+    if (data.containsKey('partner_device_id')) {
+      context.handle(
+        _partnerDeviceIdMeta,
+        partnerDeviceId.isAcceptableOrUnknown(
+          data['partner_device_id']!,
+          _partnerDeviceIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('partner_public_key')) {
+      context.handle(
+        _partnerPublicKeyMeta,
+        partnerPublicKey.isAcceptableOrUnknown(
+          data['partner_public_key']!,
+          _partnerPublicKeyMeta,
+        ),
+      );
+    }
+    if (data.containsKey('partner_device_name')) {
+      context.handle(
+        _partnerDeviceNameMeta,
+        partnerDeviceName.isAcceptableOrUnknown(
+          data['partner_device_name']!,
+          _partnerDeviceNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('pair_code')) {
+      context.handle(
+        _pairCodeMeta,
+        pairCode.isAcceptableOrUnknown(data['pair_code']!, _pairCodeMeta),
+      );
+    }
+    if (data.containsKey('expires_at')) {
+      context.handle(
+        _expiresAtMeta,
+        expiresAt.isAcceptableOrUnknown(data['expires_at']!, _expiresAtMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('confirmed_at')) {
+      context.handle(
+        _confirmedAtMeta,
+        confirmedAt.isAcceptableOrUnknown(
+          data['confirmed_at']!,
+          _confirmedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_sync_at')) {
+      context.handle(
+        _lastSyncAtMeta,
+        lastSyncAt.isAcceptableOrUnknown(
+          data['last_sync_at']!,
+          _lastSyncAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {pairId};
+  @override
+  PairedDeviceData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PairedDeviceData(
+      pairId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pair_id'],
+      )!,
+      bookId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}book_id'],
+      )!,
+      partnerDeviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}partner_device_id'],
+      ),
+      partnerPublicKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}partner_public_key'],
+      ),
+      partnerDeviceName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}partner_device_name'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      pairCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pair_code'],
+      ),
+      expiresAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}expires_at'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      confirmedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}confirmed_at'],
+      ),
+      lastSyncAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_sync_at'],
+      ),
+    );
+  }
+
+  @override
+  $PairedDevicesTable createAlias(String alias) {
+    return $PairedDevicesTable(attachedDatabase, alias);
+  }
+}
+
+class PairedDeviceData extends DataClass
+    implements Insertable<PairedDeviceData> {
+  final String pairId;
+  final String bookId;
+  final String? partnerDeviceId;
+  final String? partnerPublicKey;
+  final String? partnerDeviceName;
+  final String status;
+  final String? pairCode;
+  final int? expiresAt;
+  final int createdAt;
+  final int? confirmedAt;
+  final int? lastSyncAt;
+  const PairedDeviceData({
+    required this.pairId,
+    required this.bookId,
+    this.partnerDeviceId,
+    this.partnerPublicKey,
+    this.partnerDeviceName,
+    required this.status,
+    this.pairCode,
+    this.expiresAt,
+    required this.createdAt,
+    this.confirmedAt,
+    this.lastSyncAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['pair_id'] = Variable<String>(pairId);
+    map['book_id'] = Variable<String>(bookId);
+    if (!nullToAbsent || partnerDeviceId != null) {
+      map['partner_device_id'] = Variable<String>(partnerDeviceId);
+    }
+    if (!nullToAbsent || partnerPublicKey != null) {
+      map['partner_public_key'] = Variable<String>(partnerPublicKey);
+    }
+    if (!nullToAbsent || partnerDeviceName != null) {
+      map['partner_device_name'] = Variable<String>(partnerDeviceName);
+    }
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || pairCode != null) {
+      map['pair_code'] = Variable<String>(pairCode);
+    }
+    if (!nullToAbsent || expiresAt != null) {
+      map['expires_at'] = Variable<int>(expiresAt);
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    if (!nullToAbsent || confirmedAt != null) {
+      map['confirmed_at'] = Variable<int>(confirmedAt);
+    }
+    if (!nullToAbsent || lastSyncAt != null) {
+      map['last_sync_at'] = Variable<int>(lastSyncAt);
+    }
+    return map;
+  }
+
+  PairedDevicesCompanion toCompanion(bool nullToAbsent) {
+    return PairedDevicesCompanion(
+      pairId: Value(pairId),
+      bookId: Value(bookId),
+      partnerDeviceId: partnerDeviceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(partnerDeviceId),
+      partnerPublicKey: partnerPublicKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(partnerPublicKey),
+      partnerDeviceName: partnerDeviceName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(partnerDeviceName),
+      status: Value(status),
+      pairCode: pairCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pairCode),
+      expiresAt: expiresAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expiresAt),
+      createdAt: Value(createdAt),
+      confirmedAt: confirmedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(confirmedAt),
+      lastSyncAt: lastSyncAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSyncAt),
+    );
+  }
+
+  factory PairedDeviceData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PairedDeviceData(
+      pairId: serializer.fromJson<String>(json['pairId']),
+      bookId: serializer.fromJson<String>(json['bookId']),
+      partnerDeviceId: serializer.fromJson<String?>(json['partnerDeviceId']),
+      partnerPublicKey: serializer.fromJson<String?>(json['partnerPublicKey']),
+      partnerDeviceName: serializer.fromJson<String?>(
+        json['partnerDeviceName'],
+      ),
+      status: serializer.fromJson<String>(json['status']),
+      pairCode: serializer.fromJson<String?>(json['pairCode']),
+      expiresAt: serializer.fromJson<int?>(json['expiresAt']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      confirmedAt: serializer.fromJson<int?>(json['confirmedAt']),
+      lastSyncAt: serializer.fromJson<int?>(json['lastSyncAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'pairId': serializer.toJson<String>(pairId),
+      'bookId': serializer.toJson<String>(bookId),
+      'partnerDeviceId': serializer.toJson<String?>(partnerDeviceId),
+      'partnerPublicKey': serializer.toJson<String?>(partnerPublicKey),
+      'partnerDeviceName': serializer.toJson<String?>(partnerDeviceName),
+      'status': serializer.toJson<String>(status),
+      'pairCode': serializer.toJson<String?>(pairCode),
+      'expiresAt': serializer.toJson<int?>(expiresAt),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'confirmedAt': serializer.toJson<int?>(confirmedAt),
+      'lastSyncAt': serializer.toJson<int?>(lastSyncAt),
+    };
+  }
+
+  PairedDeviceData copyWith({
+    String? pairId,
+    String? bookId,
+    Value<String?> partnerDeviceId = const Value.absent(),
+    Value<String?> partnerPublicKey = const Value.absent(),
+    Value<String?> partnerDeviceName = const Value.absent(),
+    String? status,
+    Value<String?> pairCode = const Value.absent(),
+    Value<int?> expiresAt = const Value.absent(),
+    int? createdAt,
+    Value<int?> confirmedAt = const Value.absent(),
+    Value<int?> lastSyncAt = const Value.absent(),
+  }) => PairedDeviceData(
+    pairId: pairId ?? this.pairId,
+    bookId: bookId ?? this.bookId,
+    partnerDeviceId: partnerDeviceId.present
+        ? partnerDeviceId.value
+        : this.partnerDeviceId,
+    partnerPublicKey: partnerPublicKey.present
+        ? partnerPublicKey.value
+        : this.partnerPublicKey,
+    partnerDeviceName: partnerDeviceName.present
+        ? partnerDeviceName.value
+        : this.partnerDeviceName,
+    status: status ?? this.status,
+    pairCode: pairCode.present ? pairCode.value : this.pairCode,
+    expiresAt: expiresAt.present ? expiresAt.value : this.expiresAt,
+    createdAt: createdAt ?? this.createdAt,
+    confirmedAt: confirmedAt.present ? confirmedAt.value : this.confirmedAt,
+    lastSyncAt: lastSyncAt.present ? lastSyncAt.value : this.lastSyncAt,
+  );
+  PairedDeviceData copyWithCompanion(PairedDevicesCompanion data) {
+    return PairedDeviceData(
+      pairId: data.pairId.present ? data.pairId.value : this.pairId,
+      bookId: data.bookId.present ? data.bookId.value : this.bookId,
+      partnerDeviceId: data.partnerDeviceId.present
+          ? data.partnerDeviceId.value
+          : this.partnerDeviceId,
+      partnerPublicKey: data.partnerPublicKey.present
+          ? data.partnerPublicKey.value
+          : this.partnerPublicKey,
+      partnerDeviceName: data.partnerDeviceName.present
+          ? data.partnerDeviceName.value
+          : this.partnerDeviceName,
+      status: data.status.present ? data.status.value : this.status,
+      pairCode: data.pairCode.present ? data.pairCode.value : this.pairCode,
+      expiresAt: data.expiresAt.present ? data.expiresAt.value : this.expiresAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      confirmedAt: data.confirmedAt.present
+          ? data.confirmedAt.value
+          : this.confirmedAt,
+      lastSyncAt: data.lastSyncAt.present
+          ? data.lastSyncAt.value
+          : this.lastSyncAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PairedDeviceData(')
+          ..write('pairId: $pairId, ')
+          ..write('bookId: $bookId, ')
+          ..write('partnerDeviceId: $partnerDeviceId, ')
+          ..write('partnerPublicKey: $partnerPublicKey, ')
+          ..write('partnerDeviceName: $partnerDeviceName, ')
+          ..write('status: $status, ')
+          ..write('pairCode: $pairCode, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('confirmedAt: $confirmedAt, ')
+          ..write('lastSyncAt: $lastSyncAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    pairId,
+    bookId,
+    partnerDeviceId,
+    partnerPublicKey,
+    partnerDeviceName,
+    status,
+    pairCode,
+    expiresAt,
+    createdAt,
+    confirmedAt,
+    lastSyncAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PairedDeviceData &&
+          other.pairId == this.pairId &&
+          other.bookId == this.bookId &&
+          other.partnerDeviceId == this.partnerDeviceId &&
+          other.partnerPublicKey == this.partnerPublicKey &&
+          other.partnerDeviceName == this.partnerDeviceName &&
+          other.status == this.status &&
+          other.pairCode == this.pairCode &&
+          other.expiresAt == this.expiresAt &&
+          other.createdAt == this.createdAt &&
+          other.confirmedAt == this.confirmedAt &&
+          other.lastSyncAt == this.lastSyncAt);
+}
+
+class PairedDevicesCompanion extends UpdateCompanion<PairedDeviceData> {
+  final Value<String> pairId;
+  final Value<String> bookId;
+  final Value<String?> partnerDeviceId;
+  final Value<String?> partnerPublicKey;
+  final Value<String?> partnerDeviceName;
+  final Value<String> status;
+  final Value<String?> pairCode;
+  final Value<int?> expiresAt;
+  final Value<int> createdAt;
+  final Value<int?> confirmedAt;
+  final Value<int?> lastSyncAt;
+  final Value<int> rowid;
+  const PairedDevicesCompanion({
+    this.pairId = const Value.absent(),
+    this.bookId = const Value.absent(),
+    this.partnerDeviceId = const Value.absent(),
+    this.partnerPublicKey = const Value.absent(),
+    this.partnerDeviceName = const Value.absent(),
+    this.status = const Value.absent(),
+    this.pairCode = const Value.absent(),
+    this.expiresAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.confirmedAt = const Value.absent(),
+    this.lastSyncAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PairedDevicesCompanion.insert({
+    required String pairId,
+    required String bookId,
+    this.partnerDeviceId = const Value.absent(),
+    this.partnerPublicKey = const Value.absent(),
+    this.partnerDeviceName = const Value.absent(),
+    required String status,
+    this.pairCode = const Value.absent(),
+    this.expiresAt = const Value.absent(),
+    required int createdAt,
+    this.confirmedAt = const Value.absent(),
+    this.lastSyncAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : pairId = Value(pairId),
+       bookId = Value(bookId),
+       status = Value(status),
+       createdAt = Value(createdAt);
+  static Insertable<PairedDeviceData> custom({
+    Expression<String>? pairId,
+    Expression<String>? bookId,
+    Expression<String>? partnerDeviceId,
+    Expression<String>? partnerPublicKey,
+    Expression<String>? partnerDeviceName,
+    Expression<String>? status,
+    Expression<String>? pairCode,
+    Expression<int>? expiresAt,
+    Expression<int>? createdAt,
+    Expression<int>? confirmedAt,
+    Expression<int>? lastSyncAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (pairId != null) 'pair_id': pairId,
+      if (bookId != null) 'book_id': bookId,
+      if (partnerDeviceId != null) 'partner_device_id': partnerDeviceId,
+      if (partnerPublicKey != null) 'partner_public_key': partnerPublicKey,
+      if (partnerDeviceName != null) 'partner_device_name': partnerDeviceName,
+      if (status != null) 'status': status,
+      if (pairCode != null) 'pair_code': pairCode,
+      if (expiresAt != null) 'expires_at': expiresAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (confirmedAt != null) 'confirmed_at': confirmedAt,
+      if (lastSyncAt != null) 'last_sync_at': lastSyncAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PairedDevicesCompanion copyWith({
+    Value<String>? pairId,
+    Value<String>? bookId,
+    Value<String?>? partnerDeviceId,
+    Value<String?>? partnerPublicKey,
+    Value<String?>? partnerDeviceName,
+    Value<String>? status,
+    Value<String?>? pairCode,
+    Value<int?>? expiresAt,
+    Value<int>? createdAt,
+    Value<int?>? confirmedAt,
+    Value<int?>? lastSyncAt,
+    Value<int>? rowid,
+  }) {
+    return PairedDevicesCompanion(
+      pairId: pairId ?? this.pairId,
+      bookId: bookId ?? this.bookId,
+      partnerDeviceId: partnerDeviceId ?? this.partnerDeviceId,
+      partnerPublicKey: partnerPublicKey ?? this.partnerPublicKey,
+      partnerDeviceName: partnerDeviceName ?? this.partnerDeviceName,
+      status: status ?? this.status,
+      pairCode: pairCode ?? this.pairCode,
+      expiresAt: expiresAt ?? this.expiresAt,
+      createdAt: createdAt ?? this.createdAt,
+      confirmedAt: confirmedAt ?? this.confirmedAt,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (pairId.present) {
+      map['pair_id'] = Variable<String>(pairId.value);
+    }
+    if (bookId.present) {
+      map['book_id'] = Variable<String>(bookId.value);
+    }
+    if (partnerDeviceId.present) {
+      map['partner_device_id'] = Variable<String>(partnerDeviceId.value);
+    }
+    if (partnerPublicKey.present) {
+      map['partner_public_key'] = Variable<String>(partnerPublicKey.value);
+    }
+    if (partnerDeviceName.present) {
+      map['partner_device_name'] = Variable<String>(partnerDeviceName.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (pairCode.present) {
+      map['pair_code'] = Variable<String>(pairCode.value);
+    }
+    if (expiresAt.present) {
+      map['expires_at'] = Variable<int>(expiresAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (confirmedAt.present) {
+      map['confirmed_at'] = Variable<int>(confirmedAt.value);
+    }
+    if (lastSyncAt.present) {
+      map['last_sync_at'] = Variable<int>(lastSyncAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PairedDevicesCompanion(')
+          ..write('pairId: $pairId, ')
+          ..write('bookId: $bookId, ')
+          ..write('partnerDeviceId: $partnerDeviceId, ')
+          ..write('partnerPublicKey: $partnerPublicKey, ')
+          ..write('partnerDeviceName: $partnerDeviceName, ')
+          ..write('status: $status, ')
+          ..write('pairCode: $pairCode, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('confirmedAt: $confirmedAt, ')
+          ..write('lastSyncAt: $lastSyncAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SyncQueueTable extends SyncQueue
+    with TableInfo<$SyncQueueTable, SyncQueueData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncQueueTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pairIdMeta = const VerificationMeta('pairId');
+  @override
+  late final GeneratedColumn<String> pairId = GeneratedColumn<String>(
+    'pair_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _targetDeviceIdMeta = const VerificationMeta(
+    'targetDeviceId',
+  );
+  @override
+  late final GeneratedColumn<String> targetDeviceId = GeneratedColumn<String>(
+    'target_device_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _encryptedPayloadMeta = const VerificationMeta(
+    'encryptedPayload',
+  );
+  @override
+  late final GeneratedColumn<String> encryptedPayload = GeneratedColumn<String>(
+    'encrypted_payload',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _vectorClockMeta = const VerificationMeta(
+    'vectorClock',
+  );
+  @override
+  late final GeneratedColumn<String> vectorClock = GeneratedColumn<String>(
+    'vector_clock',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _operationCountMeta = const VerificationMeta(
+    'operationCount',
+  );
+  @override
+  late final GeneratedColumn<int> operationCount = GeneratedColumn<int>(
+    'operation_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _retryCountMeta = const VerificationMeta(
+    'retryCount',
+  );
+  @override
+  late final GeneratedColumn<int> retryCount = GeneratedColumn<int>(
+    'retry_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    pairId,
+    targetDeviceId,
+    encryptedPayload,
+    vectorClock,
+    operationCount,
+    retryCount,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_queue';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SyncQueueData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('pair_id')) {
+      context.handle(
+        _pairIdMeta,
+        pairId.isAcceptableOrUnknown(data['pair_id']!, _pairIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pairIdMeta);
+    }
+    if (data.containsKey('target_device_id')) {
+      context.handle(
+        _targetDeviceIdMeta,
+        targetDeviceId.isAcceptableOrUnknown(
+          data['target_device_id']!,
+          _targetDeviceIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_targetDeviceIdMeta);
+    }
+    if (data.containsKey('encrypted_payload')) {
+      context.handle(
+        _encryptedPayloadMeta,
+        encryptedPayload.isAcceptableOrUnknown(
+          data['encrypted_payload']!,
+          _encryptedPayloadMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_encryptedPayloadMeta);
+    }
+    if (data.containsKey('vector_clock')) {
+      context.handle(
+        _vectorClockMeta,
+        vectorClock.isAcceptableOrUnknown(
+          data['vector_clock']!,
+          _vectorClockMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_vectorClockMeta);
+    }
+    if (data.containsKey('operation_count')) {
+      context.handle(
+        _operationCountMeta,
+        operationCount.isAcceptableOrUnknown(
+          data['operation_count']!,
+          _operationCountMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_operationCountMeta);
+    }
+    if (data.containsKey('retry_count')) {
+      context.handle(
+        _retryCountMeta,
+        retryCount.isAcceptableOrUnknown(data['retry_count']!, _retryCountMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SyncQueueData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncQueueData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      pairId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pair_id'],
+      )!,
+      targetDeviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_device_id'],
+      )!,
+      encryptedPayload: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}encrypted_payload'],
+      )!,
+      vectorClock: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}vector_clock'],
+      )!,
+      operationCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}operation_count'],
+      )!,
+      retryCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}retry_count'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SyncQueueTable createAlias(String alias) {
+    return $SyncQueueTable(attachedDatabase, alias);
+  }
+}
+
+class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
+  final String id;
+  final String pairId;
+  final String targetDeviceId;
+  final String encryptedPayload;
+  final String vectorClock;
+  final int operationCount;
+  final int retryCount;
+  final int createdAt;
+  const SyncQueueData({
+    required this.id,
+    required this.pairId,
+    required this.targetDeviceId,
+    required this.encryptedPayload,
+    required this.vectorClock,
+    required this.operationCount,
+    required this.retryCount,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['pair_id'] = Variable<String>(pairId);
+    map['target_device_id'] = Variable<String>(targetDeviceId);
+    map['encrypted_payload'] = Variable<String>(encryptedPayload);
+    map['vector_clock'] = Variable<String>(vectorClock);
+    map['operation_count'] = Variable<int>(operationCount);
+    map['retry_count'] = Variable<int>(retryCount);
+    map['created_at'] = Variable<int>(createdAt);
+    return map;
+  }
+
+  SyncQueueCompanion toCompanion(bool nullToAbsent) {
+    return SyncQueueCompanion(
+      id: Value(id),
+      pairId: Value(pairId),
+      targetDeviceId: Value(targetDeviceId),
+      encryptedPayload: Value(encryptedPayload),
+      vectorClock: Value(vectorClock),
+      operationCount: Value(operationCount),
+      retryCount: Value(retryCount),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory SyncQueueData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncQueueData(
+      id: serializer.fromJson<String>(json['id']),
+      pairId: serializer.fromJson<String>(json['pairId']),
+      targetDeviceId: serializer.fromJson<String>(json['targetDeviceId']),
+      encryptedPayload: serializer.fromJson<String>(json['encryptedPayload']),
+      vectorClock: serializer.fromJson<String>(json['vectorClock']),
+      operationCount: serializer.fromJson<int>(json['operationCount']),
+      retryCount: serializer.fromJson<int>(json['retryCount']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'pairId': serializer.toJson<String>(pairId),
+      'targetDeviceId': serializer.toJson<String>(targetDeviceId),
+      'encryptedPayload': serializer.toJson<String>(encryptedPayload),
+      'vectorClock': serializer.toJson<String>(vectorClock),
+      'operationCount': serializer.toJson<int>(operationCount),
+      'retryCount': serializer.toJson<int>(retryCount),
+      'createdAt': serializer.toJson<int>(createdAt),
+    };
+  }
+
+  SyncQueueData copyWith({
+    String? id,
+    String? pairId,
+    String? targetDeviceId,
+    String? encryptedPayload,
+    String? vectorClock,
+    int? operationCount,
+    int? retryCount,
+    int? createdAt,
+  }) => SyncQueueData(
+    id: id ?? this.id,
+    pairId: pairId ?? this.pairId,
+    targetDeviceId: targetDeviceId ?? this.targetDeviceId,
+    encryptedPayload: encryptedPayload ?? this.encryptedPayload,
+    vectorClock: vectorClock ?? this.vectorClock,
+    operationCount: operationCount ?? this.operationCount,
+    retryCount: retryCount ?? this.retryCount,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  SyncQueueData copyWithCompanion(SyncQueueCompanion data) {
+    return SyncQueueData(
+      id: data.id.present ? data.id.value : this.id,
+      pairId: data.pairId.present ? data.pairId.value : this.pairId,
+      targetDeviceId: data.targetDeviceId.present
+          ? data.targetDeviceId.value
+          : this.targetDeviceId,
+      encryptedPayload: data.encryptedPayload.present
+          ? data.encryptedPayload.value
+          : this.encryptedPayload,
+      vectorClock: data.vectorClock.present
+          ? data.vectorClock.value
+          : this.vectorClock,
+      operationCount: data.operationCount.present
+          ? data.operationCount.value
+          : this.operationCount,
+      retryCount: data.retryCount.present
+          ? data.retryCount.value
+          : this.retryCount,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncQueueData(')
+          ..write('id: $id, ')
+          ..write('pairId: $pairId, ')
+          ..write('targetDeviceId: $targetDeviceId, ')
+          ..write('encryptedPayload: $encryptedPayload, ')
+          ..write('vectorClock: $vectorClock, ')
+          ..write('operationCount: $operationCount, ')
+          ..write('retryCount: $retryCount, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    pairId,
+    targetDeviceId,
+    encryptedPayload,
+    vectorClock,
+    operationCount,
+    retryCount,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncQueueData &&
+          other.id == this.id &&
+          other.pairId == this.pairId &&
+          other.targetDeviceId == this.targetDeviceId &&
+          other.encryptedPayload == this.encryptedPayload &&
+          other.vectorClock == this.vectorClock &&
+          other.operationCount == this.operationCount &&
+          other.retryCount == this.retryCount &&
+          other.createdAt == this.createdAt);
+}
+
+class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
+  final Value<String> id;
+  final Value<String> pairId;
+  final Value<String> targetDeviceId;
+  final Value<String> encryptedPayload;
+  final Value<String> vectorClock;
+  final Value<int> operationCount;
+  final Value<int> retryCount;
+  final Value<int> createdAt;
+  final Value<int> rowid;
+  const SyncQueueCompanion({
+    this.id = const Value.absent(),
+    this.pairId = const Value.absent(),
+    this.targetDeviceId = const Value.absent(),
+    this.encryptedPayload = const Value.absent(),
+    this.vectorClock = const Value.absent(),
+    this.operationCount = const Value.absent(),
+    this.retryCount = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncQueueCompanion.insert({
+    required String id,
+    required String pairId,
+    required String targetDeviceId,
+    required String encryptedPayload,
+    required String vectorClock,
+    required int operationCount,
+    this.retryCount = const Value.absent(),
+    required int createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       pairId = Value(pairId),
+       targetDeviceId = Value(targetDeviceId),
+       encryptedPayload = Value(encryptedPayload),
+       vectorClock = Value(vectorClock),
+       operationCount = Value(operationCount),
+       createdAt = Value(createdAt);
+  static Insertable<SyncQueueData> custom({
+    Expression<String>? id,
+    Expression<String>? pairId,
+    Expression<String>? targetDeviceId,
+    Expression<String>? encryptedPayload,
+    Expression<String>? vectorClock,
+    Expression<int>? operationCount,
+    Expression<int>? retryCount,
+    Expression<int>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (pairId != null) 'pair_id': pairId,
+      if (targetDeviceId != null) 'target_device_id': targetDeviceId,
+      if (encryptedPayload != null) 'encrypted_payload': encryptedPayload,
+      if (vectorClock != null) 'vector_clock': vectorClock,
+      if (operationCount != null) 'operation_count': operationCount,
+      if (retryCount != null) 'retry_count': retryCount,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncQueueCompanion copyWith({
+    Value<String>? id,
+    Value<String>? pairId,
+    Value<String>? targetDeviceId,
+    Value<String>? encryptedPayload,
+    Value<String>? vectorClock,
+    Value<int>? operationCount,
+    Value<int>? retryCount,
+    Value<int>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return SyncQueueCompanion(
+      id: id ?? this.id,
+      pairId: pairId ?? this.pairId,
+      targetDeviceId: targetDeviceId ?? this.targetDeviceId,
+      encryptedPayload: encryptedPayload ?? this.encryptedPayload,
+      vectorClock: vectorClock ?? this.vectorClock,
+      operationCount: operationCount ?? this.operationCount,
+      retryCount: retryCount ?? this.retryCount,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (pairId.present) {
+      map['pair_id'] = Variable<String>(pairId.value);
+    }
+    if (targetDeviceId.present) {
+      map['target_device_id'] = Variable<String>(targetDeviceId.value);
+    }
+    if (encryptedPayload.present) {
+      map['encrypted_payload'] = Variable<String>(encryptedPayload.value);
+    }
+    if (vectorClock.present) {
+      map['vector_clock'] = Variable<String>(vectorClock.value);
+    }
+    if (operationCount.present) {
+      map['operation_count'] = Variable<int>(operationCount.value);
+    }
+    if (retryCount.present) {
+      map['retry_count'] = Variable<int>(retryCount.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncQueueCompanion(')
+          ..write('id: $id, ')
+          ..write('pairId: $pairId, ')
+          ..write('targetDeviceId: $targetDeviceId, ')
+          ..write('encryptedPayload: $encryptedPayload, ')
+          ..write('vectorClock: $vectorClock, ')
+          ..write('operationCount: $operationCount, ')
+          ..write('retryCount: $retryCount, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $TransactionsTable extends Transactions
     with TableInfo<$TransactionsTable, TransactionRow> {
   @override
@@ -3926,6 +5153,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $CategoryLedgerConfigsTable(this);
   late final $MerchantCategoryPreferencesTable merchantCategoryPreferences =
       $MerchantCategoryPreferencesTable(this);
+  late final $PairedDevicesTable pairedDevices = $PairedDevicesTable(this);
+  late final $SyncQueueTable syncQueue = $SyncQueueTable(this);
   late final $TransactionsTable transactions = $TransactionsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -3938,6 +5167,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     categoryKeywordPreferences,
     categoryLedgerConfigs,
     merchantCategoryPreferences,
+    pairedDevices,
+    syncQueue,
     transactions,
   ];
 }
@@ -5753,6 +6984,601 @@ typedef $$MerchantCategoryPreferencesTableProcessedTableManager =
       MerchantCategoryPreferenceRow,
       PrefetchHooks Function()
     >;
+typedef $$PairedDevicesTableCreateCompanionBuilder =
+    PairedDevicesCompanion Function({
+      required String pairId,
+      required String bookId,
+      Value<String?> partnerDeviceId,
+      Value<String?> partnerPublicKey,
+      Value<String?> partnerDeviceName,
+      required String status,
+      Value<String?> pairCode,
+      Value<int?> expiresAt,
+      required int createdAt,
+      Value<int?> confirmedAt,
+      Value<int?> lastSyncAt,
+      Value<int> rowid,
+    });
+typedef $$PairedDevicesTableUpdateCompanionBuilder =
+    PairedDevicesCompanion Function({
+      Value<String> pairId,
+      Value<String> bookId,
+      Value<String?> partnerDeviceId,
+      Value<String?> partnerPublicKey,
+      Value<String?> partnerDeviceName,
+      Value<String> status,
+      Value<String?> pairCode,
+      Value<int?> expiresAt,
+      Value<int> createdAt,
+      Value<int?> confirmedAt,
+      Value<int?> lastSyncAt,
+      Value<int> rowid,
+    });
+
+class $$PairedDevicesTableFilterComposer
+    extends Composer<_$AppDatabase, $PairedDevicesTable> {
+  $$PairedDevicesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get pairId => $composableBuilder(
+    column: $table.pairId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bookId => $composableBuilder(
+    column: $table.bookId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get partnerDeviceId => $composableBuilder(
+    column: $table.partnerDeviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get partnerPublicKey => $composableBuilder(
+    column: $table.partnerPublicKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get partnerDeviceName => $composableBuilder(
+    column: $table.partnerDeviceName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pairCode => $composableBuilder(
+    column: $table.pairCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get expiresAt => $composableBuilder(
+    column: $table.expiresAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get confirmedAt => $composableBuilder(
+    column: $table.confirmedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastSyncAt => $composableBuilder(
+    column: $table.lastSyncAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PairedDevicesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PairedDevicesTable> {
+  $$PairedDevicesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get pairId => $composableBuilder(
+    column: $table.pairId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bookId => $composableBuilder(
+    column: $table.bookId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get partnerDeviceId => $composableBuilder(
+    column: $table.partnerDeviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get partnerPublicKey => $composableBuilder(
+    column: $table.partnerPublicKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get partnerDeviceName => $composableBuilder(
+    column: $table.partnerDeviceName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pairCode => $composableBuilder(
+    column: $table.pairCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get expiresAt => $composableBuilder(
+    column: $table.expiresAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get confirmedAt => $composableBuilder(
+    column: $table.confirmedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastSyncAt => $composableBuilder(
+    column: $table.lastSyncAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PairedDevicesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PairedDevicesTable> {
+  $$PairedDevicesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get pairId =>
+      $composableBuilder(column: $table.pairId, builder: (column) => column);
+
+  GeneratedColumn<String> get bookId =>
+      $composableBuilder(column: $table.bookId, builder: (column) => column);
+
+  GeneratedColumn<String> get partnerDeviceId => $composableBuilder(
+    column: $table.partnerDeviceId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get partnerPublicKey => $composableBuilder(
+    column: $table.partnerPublicKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get partnerDeviceName => $composableBuilder(
+    column: $table.partnerDeviceName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get pairCode =>
+      $composableBuilder(column: $table.pairCode, builder: (column) => column);
+
+  GeneratedColumn<int> get expiresAt =>
+      $composableBuilder(column: $table.expiresAt, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get confirmedAt => $composableBuilder(
+    column: $table.confirmedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get lastSyncAt => $composableBuilder(
+    column: $table.lastSyncAt,
+    builder: (column) => column,
+  );
+}
+
+class $$PairedDevicesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PairedDevicesTable,
+          PairedDeviceData,
+          $$PairedDevicesTableFilterComposer,
+          $$PairedDevicesTableOrderingComposer,
+          $$PairedDevicesTableAnnotationComposer,
+          $$PairedDevicesTableCreateCompanionBuilder,
+          $$PairedDevicesTableUpdateCompanionBuilder,
+          (
+            PairedDeviceData,
+            BaseReferences<
+              _$AppDatabase,
+              $PairedDevicesTable,
+              PairedDeviceData
+            >,
+          ),
+          PairedDeviceData,
+          PrefetchHooks Function()
+        > {
+  $$PairedDevicesTableTableManager(_$AppDatabase db, $PairedDevicesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PairedDevicesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PairedDevicesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PairedDevicesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> pairId = const Value.absent(),
+                Value<String> bookId = const Value.absent(),
+                Value<String?> partnerDeviceId = const Value.absent(),
+                Value<String?> partnerPublicKey = const Value.absent(),
+                Value<String?> partnerDeviceName = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> pairCode = const Value.absent(),
+                Value<int?> expiresAt = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int?> confirmedAt = const Value.absent(),
+                Value<int?> lastSyncAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PairedDevicesCompanion(
+                pairId: pairId,
+                bookId: bookId,
+                partnerDeviceId: partnerDeviceId,
+                partnerPublicKey: partnerPublicKey,
+                partnerDeviceName: partnerDeviceName,
+                status: status,
+                pairCode: pairCode,
+                expiresAt: expiresAt,
+                createdAt: createdAt,
+                confirmedAt: confirmedAt,
+                lastSyncAt: lastSyncAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String pairId,
+                required String bookId,
+                Value<String?> partnerDeviceId = const Value.absent(),
+                Value<String?> partnerPublicKey = const Value.absent(),
+                Value<String?> partnerDeviceName = const Value.absent(),
+                required String status,
+                Value<String?> pairCode = const Value.absent(),
+                Value<int?> expiresAt = const Value.absent(),
+                required int createdAt,
+                Value<int?> confirmedAt = const Value.absent(),
+                Value<int?> lastSyncAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PairedDevicesCompanion.insert(
+                pairId: pairId,
+                bookId: bookId,
+                partnerDeviceId: partnerDeviceId,
+                partnerPublicKey: partnerPublicKey,
+                partnerDeviceName: partnerDeviceName,
+                status: status,
+                pairCode: pairCode,
+                expiresAt: expiresAt,
+                createdAt: createdAt,
+                confirmedAt: confirmedAt,
+                lastSyncAt: lastSyncAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PairedDevicesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PairedDevicesTable,
+      PairedDeviceData,
+      $$PairedDevicesTableFilterComposer,
+      $$PairedDevicesTableOrderingComposer,
+      $$PairedDevicesTableAnnotationComposer,
+      $$PairedDevicesTableCreateCompanionBuilder,
+      $$PairedDevicesTableUpdateCompanionBuilder,
+      (
+        PairedDeviceData,
+        BaseReferences<_$AppDatabase, $PairedDevicesTable, PairedDeviceData>,
+      ),
+      PairedDeviceData,
+      PrefetchHooks Function()
+    >;
+typedef $$SyncQueueTableCreateCompanionBuilder =
+    SyncQueueCompanion Function({
+      required String id,
+      required String pairId,
+      required String targetDeviceId,
+      required String encryptedPayload,
+      required String vectorClock,
+      required int operationCount,
+      Value<int> retryCount,
+      required int createdAt,
+      Value<int> rowid,
+    });
+typedef $$SyncQueueTableUpdateCompanionBuilder =
+    SyncQueueCompanion Function({
+      Value<String> id,
+      Value<String> pairId,
+      Value<String> targetDeviceId,
+      Value<String> encryptedPayload,
+      Value<String> vectorClock,
+      Value<int> operationCount,
+      Value<int> retryCount,
+      Value<int> createdAt,
+      Value<int> rowid,
+    });
+
+class $$SyncQueueTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncQueueTable> {
+  $$SyncQueueTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pairId => $composableBuilder(
+    column: $table.pairId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get targetDeviceId => $composableBuilder(
+    column: $table.targetDeviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get encryptedPayload => $composableBuilder(
+    column: $table.encryptedPayload,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get vectorClock => $composableBuilder(
+    column: $table.vectorClock,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get operationCount => $composableBuilder(
+    column: $table.operationCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SyncQueueTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncQueueTable> {
+  $$SyncQueueTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pairId => $composableBuilder(
+    column: $table.pairId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get targetDeviceId => $composableBuilder(
+    column: $table.targetDeviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get encryptedPayload => $composableBuilder(
+    column: $table.encryptedPayload,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get vectorClock => $composableBuilder(
+    column: $table.vectorClock,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get operationCount => $composableBuilder(
+    column: $table.operationCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SyncQueueTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncQueueTable> {
+  $$SyncQueueTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get pairId =>
+      $composableBuilder(column: $table.pairId, builder: (column) => column);
+
+  GeneratedColumn<String> get targetDeviceId => $composableBuilder(
+    column: $table.targetDeviceId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get encryptedPayload => $composableBuilder(
+    column: $table.encryptedPayload,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get vectorClock => $composableBuilder(
+    column: $table.vectorClock,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get operationCount => $composableBuilder(
+    column: $table.operationCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$SyncQueueTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SyncQueueTable,
+          SyncQueueData,
+          $$SyncQueueTableFilterComposer,
+          $$SyncQueueTableOrderingComposer,
+          $$SyncQueueTableAnnotationComposer,
+          $$SyncQueueTableCreateCompanionBuilder,
+          $$SyncQueueTableUpdateCompanionBuilder,
+          (
+            SyncQueueData,
+            BaseReferences<_$AppDatabase, $SyncQueueTable, SyncQueueData>,
+          ),
+          SyncQueueData,
+          PrefetchHooks Function()
+        > {
+  $$SyncQueueTableTableManager(_$AppDatabase db, $SyncQueueTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncQueueTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncQueueTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncQueueTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> pairId = const Value.absent(),
+                Value<String> targetDeviceId = const Value.absent(),
+                Value<String> encryptedPayload = const Value.absent(),
+                Value<String> vectorClock = const Value.absent(),
+                Value<int> operationCount = const Value.absent(),
+                Value<int> retryCount = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SyncQueueCompanion(
+                id: id,
+                pairId: pairId,
+                targetDeviceId: targetDeviceId,
+                encryptedPayload: encryptedPayload,
+                vectorClock: vectorClock,
+                operationCount: operationCount,
+                retryCount: retryCount,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String pairId,
+                required String targetDeviceId,
+                required String encryptedPayload,
+                required String vectorClock,
+                required int operationCount,
+                Value<int> retryCount = const Value.absent(),
+                required int createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => SyncQueueCompanion.insert(
+                id: id,
+                pairId: pairId,
+                targetDeviceId: targetDeviceId,
+                encryptedPayload: encryptedPayload,
+                vectorClock: vectorClock,
+                operationCount: operationCount,
+                retryCount: retryCount,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SyncQueueTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SyncQueueTable,
+      SyncQueueData,
+      $$SyncQueueTableFilterComposer,
+      $$SyncQueueTableOrderingComposer,
+      $$SyncQueueTableAnnotationComposer,
+      $$SyncQueueTableCreateCompanionBuilder,
+      $$SyncQueueTableUpdateCompanionBuilder,
+      (
+        SyncQueueData,
+        BaseReferences<_$AppDatabase, $SyncQueueTable, SyncQueueData>,
+      ),
+      SyncQueueData,
+      PrefetchHooks Function()
+    >;
 typedef $$TransactionsTableCreateCompanionBuilder =
     TransactionsCompanion Function({
       required String id,
@@ -6270,6 +8096,10 @@ class $AppDatabaseManager {
         _db,
         _db.merchantCategoryPreferences,
       );
+  $$PairedDevicesTableTableManager get pairedDevices =>
+      $$PairedDevicesTableTableManager(_db, _db.pairedDevices);
+  $$SyncQueueTableTableManager get syncQueue =>
+      $$SyncQueueTableTableManager(_db, _db.syncQueue);
   $$TransactionsTableTableManager get transactions =>
       $$TransactionsTableTableManager(_db, _db.transactions);
 }
