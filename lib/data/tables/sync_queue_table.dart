@@ -4,8 +4,7 @@ import 'package:drift/drift.dart';
 @DataClassName('SyncQueueData')
 class SyncQueue extends Table {
   TextColumn get id => text()();
-  TextColumn get pairId => text()();
-  TextColumn get targetDeviceId => text()();
+  TextColumn get groupId => text()();
   TextColumn get encryptedPayload => text()(); // base64 encoded
   TextColumn get vectorClock => text()(); // JSON encoded
   IntColumn get operationCount => integer()();

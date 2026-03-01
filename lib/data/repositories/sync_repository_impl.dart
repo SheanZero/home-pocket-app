@@ -11,8 +11,7 @@ class SyncRepositoryImpl implements SyncRepository {
   @override
   Future<void> enqueue({
     required String id,
-    required String pairId,
-    required String targetDeviceId,
+    required String groupId,
     required String encryptedPayload,
     required String vectorClock,
     required int operationCount,
@@ -20,8 +19,7 @@ class SyncRepositoryImpl implements SyncRepository {
     await _dao.insert(
       SyncQueueCompanion.insert(
         id: id,
-        pairId: pairId,
-        targetDeviceId: targetDeviceId,
+        groupId: groupId,
         encryptedPayload: encryptedPayload,
         vectorClock: vectorClock,
         operationCount: operationCount,
@@ -54,8 +52,7 @@ class SyncRepositoryImpl implements SyncRepository {
   SyncQueueEntry _toEntry(SyncQueueData data) {
     return SyncQueueEntry(
       id: data.id,
-      pairId: data.pairId,
-      targetDeviceId: data.targetDeviceId,
+      groupId: data.groupId,
       encryptedPayload: data.encryptedPayload,
       vectorClock: data.vectorClock,
       operationCount: data.operationCount,

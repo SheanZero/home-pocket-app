@@ -6,6 +6,8 @@ import 'tables/books_table.dart';
 import 'tables/categories_table.dart';
 import 'tables/category_keyword_preferences_table.dart';
 import 'tables/category_ledger_configs_table.dart';
+import 'tables/group_members_table.dart';
+import 'tables/groups_table.dart';
 import 'tables/merchant_category_preferences_table.dart';
 import 'tables/paired_devices_table.dart';
 import 'tables/sync_queue_table.dart';
@@ -24,6 +26,8 @@ part 'app_database.g.dart';
     Categories,
     CategoryKeywordPreferences,
     CategoryLedgerConfigs,
+    GroupMembers,
+    Groups,
     MerchantCategoryPreferences,
     PairedDevices,
     SyncQueue,
@@ -37,7 +41,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration {
@@ -83,6 +87,36 @@ class AppDatabase extends _$AppDatabase {
           await migrator.createTable(categoryKeywordPreferences);
           await migrator.createTable(pairedDevices);
           await migrator.createTable(syncQueue);
+        }
+        if (from < 8) {
+          await migrator.createTable(groups);
+          await migrator.createTable(groupMembers);
+
+          await customStatement(
+            'ALTER TABLE sync_queue RENAME TO sync_queue_old',
+          );
+          await migrator.createTable(syncQueue);
+          await customStatement('''
+            INSERT INTO sync_queue (
+              id,
+              group_id,
+              encrypted_payload,
+              vector_clock,
+              operation_count,
+              retry_count,
+              created_at
+            )
+            SELECT
+              id,
+              pair_id,
+              encrypted_payload,
+              vector_clock,
+              operation_count,
+              retry_count,
+              created_at
+            FROM sync_queue_old
+          ''');
+          await customStatement('DROP TABLE sync_queue_old');
         }
       },
     );

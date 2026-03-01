@@ -2395,6 +2395,1049 @@ class CategoryLedgerConfigsCompanion
   }
 }
 
+class $GroupMembersTable extends GroupMembers
+    with TableInfo<$GroupMembersTable, GroupMemberData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GroupMembersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _groupIdMeta = const VerificationMeta(
+    'groupId',
+  );
+  @override
+  late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
+    'group_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deviceIdMeta = const VerificationMeta(
+    'deviceId',
+  );
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+    'device_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _publicKeyMeta = const VerificationMeta(
+    'publicKey',
+  );
+  @override
+  late final GeneratedColumn<String> publicKey = GeneratedColumn<String>(
+    'public_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deviceNameMeta = const VerificationMeta(
+    'deviceName',
+  );
+  @override
+  late final GeneratedColumn<String> deviceName = GeneratedColumn<String>(
+    'device_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _roleMeta = const VerificationMeta('role');
+  @override
+  late final GeneratedColumn<String> role = GeneratedColumn<String>(
+    'role',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    groupId,
+    deviceId,
+    publicKey,
+    deviceName,
+    role,
+    status,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'group_members';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<GroupMemberData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('group_id')) {
+      context.handle(
+        _groupIdMeta,
+        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_groupIdMeta);
+    }
+    if (data.containsKey('device_id')) {
+      context.handle(
+        _deviceIdMeta,
+        deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_deviceIdMeta);
+    }
+    if (data.containsKey('public_key')) {
+      context.handle(
+        _publicKeyMeta,
+        publicKey.isAcceptableOrUnknown(data['public_key']!, _publicKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_publicKeyMeta);
+    }
+    if (data.containsKey('device_name')) {
+      context.handle(
+        _deviceNameMeta,
+        deviceName.isAcceptableOrUnknown(data['device_name']!, _deviceNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_deviceNameMeta);
+    }
+    if (data.containsKey('role')) {
+      context.handle(
+        _roleMeta,
+        role.isAcceptableOrUnknown(data['role']!, _roleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_roleMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {groupId, deviceId};
+  @override
+  GroupMemberData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return GroupMemberData(
+      groupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_id'],
+      )!,
+      deviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_id'],
+      )!,
+      publicKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}public_key'],
+      )!,
+      deviceName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_name'],
+      )!,
+      role: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}role'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+    );
+  }
+
+  @override
+  $GroupMembersTable createAlias(String alias) {
+    return $GroupMembersTable(attachedDatabase, alias);
+  }
+}
+
+class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
+  final String groupId;
+  final String deviceId;
+  final String publicKey;
+  final String deviceName;
+  final String role;
+  final String status;
+  const GroupMemberData({
+    required this.groupId,
+    required this.deviceId,
+    required this.publicKey,
+    required this.deviceName,
+    required this.role,
+    required this.status,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['group_id'] = Variable<String>(groupId);
+    map['device_id'] = Variable<String>(deviceId);
+    map['public_key'] = Variable<String>(publicKey);
+    map['device_name'] = Variable<String>(deviceName);
+    map['role'] = Variable<String>(role);
+    map['status'] = Variable<String>(status);
+    return map;
+  }
+
+  GroupMembersCompanion toCompanion(bool nullToAbsent) {
+    return GroupMembersCompanion(
+      groupId: Value(groupId),
+      deviceId: Value(deviceId),
+      publicKey: Value(publicKey),
+      deviceName: Value(deviceName),
+      role: Value(role),
+      status: Value(status),
+    );
+  }
+
+  factory GroupMemberData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return GroupMemberData(
+      groupId: serializer.fromJson<String>(json['groupId']),
+      deviceId: serializer.fromJson<String>(json['deviceId']),
+      publicKey: serializer.fromJson<String>(json['publicKey']),
+      deviceName: serializer.fromJson<String>(json['deviceName']),
+      role: serializer.fromJson<String>(json['role']),
+      status: serializer.fromJson<String>(json['status']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'groupId': serializer.toJson<String>(groupId),
+      'deviceId': serializer.toJson<String>(deviceId),
+      'publicKey': serializer.toJson<String>(publicKey),
+      'deviceName': serializer.toJson<String>(deviceName),
+      'role': serializer.toJson<String>(role),
+      'status': serializer.toJson<String>(status),
+    };
+  }
+
+  GroupMemberData copyWith({
+    String? groupId,
+    String? deviceId,
+    String? publicKey,
+    String? deviceName,
+    String? role,
+    String? status,
+  }) => GroupMemberData(
+    groupId: groupId ?? this.groupId,
+    deviceId: deviceId ?? this.deviceId,
+    publicKey: publicKey ?? this.publicKey,
+    deviceName: deviceName ?? this.deviceName,
+    role: role ?? this.role,
+    status: status ?? this.status,
+  );
+  GroupMemberData copyWithCompanion(GroupMembersCompanion data) {
+    return GroupMemberData(
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+      publicKey: data.publicKey.present ? data.publicKey.value : this.publicKey,
+      deviceName: data.deviceName.present
+          ? data.deviceName.value
+          : this.deviceName,
+      role: data.role.present ? data.role.value : this.role,
+      status: data.status.present ? data.status.value : this.status,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GroupMemberData(')
+          ..write('groupId: $groupId, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('publicKey: $publicKey, ')
+          ..write('deviceName: $deviceName, ')
+          ..write('role: $role, ')
+          ..write('status: $status')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(groupId, deviceId, publicKey, deviceName, role, status);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is GroupMemberData &&
+          other.groupId == this.groupId &&
+          other.deviceId == this.deviceId &&
+          other.publicKey == this.publicKey &&
+          other.deviceName == this.deviceName &&
+          other.role == this.role &&
+          other.status == this.status);
+}
+
+class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
+  final Value<String> groupId;
+  final Value<String> deviceId;
+  final Value<String> publicKey;
+  final Value<String> deviceName;
+  final Value<String> role;
+  final Value<String> status;
+  final Value<int> rowid;
+  const GroupMembersCompanion({
+    this.groupId = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.publicKey = const Value.absent(),
+    this.deviceName = const Value.absent(),
+    this.role = const Value.absent(),
+    this.status = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  GroupMembersCompanion.insert({
+    required String groupId,
+    required String deviceId,
+    required String publicKey,
+    required String deviceName,
+    required String role,
+    required String status,
+    this.rowid = const Value.absent(),
+  }) : groupId = Value(groupId),
+       deviceId = Value(deviceId),
+       publicKey = Value(publicKey),
+       deviceName = Value(deviceName),
+       role = Value(role),
+       status = Value(status);
+  static Insertable<GroupMemberData> custom({
+    Expression<String>? groupId,
+    Expression<String>? deviceId,
+    Expression<String>? publicKey,
+    Expression<String>? deviceName,
+    Expression<String>? role,
+    Expression<String>? status,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (groupId != null) 'group_id': groupId,
+      if (deviceId != null) 'device_id': deviceId,
+      if (publicKey != null) 'public_key': publicKey,
+      if (deviceName != null) 'device_name': deviceName,
+      if (role != null) 'role': role,
+      if (status != null) 'status': status,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  GroupMembersCompanion copyWith({
+    Value<String>? groupId,
+    Value<String>? deviceId,
+    Value<String>? publicKey,
+    Value<String>? deviceName,
+    Value<String>? role,
+    Value<String>? status,
+    Value<int>? rowid,
+  }) {
+    return GroupMembersCompanion(
+      groupId: groupId ?? this.groupId,
+      deviceId: deviceId ?? this.deviceId,
+      publicKey: publicKey ?? this.publicKey,
+      deviceName: deviceName ?? this.deviceName,
+      role: role ?? this.role,
+      status: status ?? this.status,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (groupId.present) {
+      map['group_id'] = Variable<String>(groupId.value);
+    }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
+    if (publicKey.present) {
+      map['public_key'] = Variable<String>(publicKey.value);
+    }
+    if (deviceName.present) {
+      map['device_name'] = Variable<String>(deviceName.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GroupMembersCompanion(')
+          ..write('groupId: $groupId, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('publicKey: $publicKey, ')
+          ..write('deviceName: $deviceName, ')
+          ..write('role: $role, ')
+          ..write('status: $status, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $GroupsTable extends Groups with TableInfo<$GroupsTable, GroupData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GroupsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _groupIdMeta = const VerificationMeta(
+    'groupId',
+  );
+  @override
+  late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
+    'group_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bookIdMeta = const VerificationMeta('bookId');
+  @override
+  late final GeneratedColumn<String> bookId = GeneratedColumn<String>(
+    'book_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _roleMeta = const VerificationMeta('role');
+  @override
+  late final GeneratedColumn<String> role = GeneratedColumn<String>(
+    'role',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _inviteCodeMeta = const VerificationMeta(
+    'inviteCode',
+  );
+  @override
+  late final GeneratedColumn<String> inviteCode = GeneratedColumn<String>(
+    'invite_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _inviteExpiresAtMeta = const VerificationMeta(
+    'inviteExpiresAt',
+  );
+  @override
+  late final GeneratedColumn<int> inviteExpiresAt = GeneratedColumn<int>(
+    'invite_expires_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _groupKeyMeta = const VerificationMeta(
+    'groupKey',
+  );
+  @override
+  late final GeneratedColumn<String> groupKey = GeneratedColumn<String>(
+    'group_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _confirmedAtMeta = const VerificationMeta(
+    'confirmedAt',
+  );
+  @override
+  late final GeneratedColumn<int> confirmedAt = GeneratedColumn<int>(
+    'confirmed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastSyncAtMeta = const VerificationMeta(
+    'lastSyncAt',
+  );
+  @override
+  late final GeneratedColumn<int> lastSyncAt = GeneratedColumn<int>(
+    'last_sync_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    groupId,
+    bookId,
+    status,
+    role,
+    inviteCode,
+    inviteExpiresAt,
+    groupKey,
+    createdAt,
+    confirmedAt,
+    lastSyncAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'groups';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<GroupData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('group_id')) {
+      context.handle(
+        _groupIdMeta,
+        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_groupIdMeta);
+    }
+    if (data.containsKey('book_id')) {
+      context.handle(
+        _bookIdMeta,
+        bookId.isAcceptableOrUnknown(data['book_id']!, _bookIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bookIdMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('role')) {
+      context.handle(
+        _roleMeta,
+        role.isAcceptableOrUnknown(data['role']!, _roleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_roleMeta);
+    }
+    if (data.containsKey('invite_code')) {
+      context.handle(
+        _inviteCodeMeta,
+        inviteCode.isAcceptableOrUnknown(data['invite_code']!, _inviteCodeMeta),
+      );
+    }
+    if (data.containsKey('invite_expires_at')) {
+      context.handle(
+        _inviteExpiresAtMeta,
+        inviteExpiresAt.isAcceptableOrUnknown(
+          data['invite_expires_at']!,
+          _inviteExpiresAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('group_key')) {
+      context.handle(
+        _groupKeyMeta,
+        groupKey.isAcceptableOrUnknown(data['group_key']!, _groupKeyMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('confirmed_at')) {
+      context.handle(
+        _confirmedAtMeta,
+        confirmedAt.isAcceptableOrUnknown(
+          data['confirmed_at']!,
+          _confirmedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_sync_at')) {
+      context.handle(
+        _lastSyncAtMeta,
+        lastSyncAt.isAcceptableOrUnknown(
+          data['last_sync_at']!,
+          _lastSyncAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {groupId};
+  @override
+  GroupData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return GroupData(
+      groupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_id'],
+      )!,
+      bookId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}book_id'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      role: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}role'],
+      )!,
+      inviteCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}invite_code'],
+      ),
+      inviteExpiresAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}invite_expires_at'],
+      ),
+      groupKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_key'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      confirmedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}confirmed_at'],
+      ),
+      lastSyncAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_sync_at'],
+      ),
+    );
+  }
+
+  @override
+  $GroupsTable createAlias(String alias) {
+    return $GroupsTable(attachedDatabase, alias);
+  }
+}
+
+class GroupData extends DataClass implements Insertable<GroupData> {
+  final String groupId;
+  final String bookId;
+  final String status;
+  final String role;
+  final String? inviteCode;
+  final int? inviteExpiresAt;
+  final String? groupKey;
+  final int createdAt;
+  final int? confirmedAt;
+  final int? lastSyncAt;
+  const GroupData({
+    required this.groupId,
+    required this.bookId,
+    required this.status,
+    required this.role,
+    this.inviteCode,
+    this.inviteExpiresAt,
+    this.groupKey,
+    required this.createdAt,
+    this.confirmedAt,
+    this.lastSyncAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['group_id'] = Variable<String>(groupId);
+    map['book_id'] = Variable<String>(bookId);
+    map['status'] = Variable<String>(status);
+    map['role'] = Variable<String>(role);
+    if (!nullToAbsent || inviteCode != null) {
+      map['invite_code'] = Variable<String>(inviteCode);
+    }
+    if (!nullToAbsent || inviteExpiresAt != null) {
+      map['invite_expires_at'] = Variable<int>(inviteExpiresAt);
+    }
+    if (!nullToAbsent || groupKey != null) {
+      map['group_key'] = Variable<String>(groupKey);
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    if (!nullToAbsent || confirmedAt != null) {
+      map['confirmed_at'] = Variable<int>(confirmedAt);
+    }
+    if (!nullToAbsent || lastSyncAt != null) {
+      map['last_sync_at'] = Variable<int>(lastSyncAt);
+    }
+    return map;
+  }
+
+  GroupsCompanion toCompanion(bool nullToAbsent) {
+    return GroupsCompanion(
+      groupId: Value(groupId),
+      bookId: Value(bookId),
+      status: Value(status),
+      role: Value(role),
+      inviteCode: inviteCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(inviteCode),
+      inviteExpiresAt: inviteExpiresAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(inviteExpiresAt),
+      groupKey: groupKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupKey),
+      createdAt: Value(createdAt),
+      confirmedAt: confirmedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(confirmedAt),
+      lastSyncAt: lastSyncAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSyncAt),
+    );
+  }
+
+  factory GroupData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return GroupData(
+      groupId: serializer.fromJson<String>(json['groupId']),
+      bookId: serializer.fromJson<String>(json['bookId']),
+      status: serializer.fromJson<String>(json['status']),
+      role: serializer.fromJson<String>(json['role']),
+      inviteCode: serializer.fromJson<String?>(json['inviteCode']),
+      inviteExpiresAt: serializer.fromJson<int?>(json['inviteExpiresAt']),
+      groupKey: serializer.fromJson<String?>(json['groupKey']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      confirmedAt: serializer.fromJson<int?>(json['confirmedAt']),
+      lastSyncAt: serializer.fromJson<int?>(json['lastSyncAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'groupId': serializer.toJson<String>(groupId),
+      'bookId': serializer.toJson<String>(bookId),
+      'status': serializer.toJson<String>(status),
+      'role': serializer.toJson<String>(role),
+      'inviteCode': serializer.toJson<String?>(inviteCode),
+      'inviteExpiresAt': serializer.toJson<int?>(inviteExpiresAt),
+      'groupKey': serializer.toJson<String?>(groupKey),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'confirmedAt': serializer.toJson<int?>(confirmedAt),
+      'lastSyncAt': serializer.toJson<int?>(lastSyncAt),
+    };
+  }
+
+  GroupData copyWith({
+    String? groupId,
+    String? bookId,
+    String? status,
+    String? role,
+    Value<String?> inviteCode = const Value.absent(),
+    Value<int?> inviteExpiresAt = const Value.absent(),
+    Value<String?> groupKey = const Value.absent(),
+    int? createdAt,
+    Value<int?> confirmedAt = const Value.absent(),
+    Value<int?> lastSyncAt = const Value.absent(),
+  }) => GroupData(
+    groupId: groupId ?? this.groupId,
+    bookId: bookId ?? this.bookId,
+    status: status ?? this.status,
+    role: role ?? this.role,
+    inviteCode: inviteCode.present ? inviteCode.value : this.inviteCode,
+    inviteExpiresAt: inviteExpiresAt.present
+        ? inviteExpiresAt.value
+        : this.inviteExpiresAt,
+    groupKey: groupKey.present ? groupKey.value : this.groupKey,
+    createdAt: createdAt ?? this.createdAt,
+    confirmedAt: confirmedAt.present ? confirmedAt.value : this.confirmedAt,
+    lastSyncAt: lastSyncAt.present ? lastSyncAt.value : this.lastSyncAt,
+  );
+  GroupData copyWithCompanion(GroupsCompanion data) {
+    return GroupData(
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
+      bookId: data.bookId.present ? data.bookId.value : this.bookId,
+      status: data.status.present ? data.status.value : this.status,
+      role: data.role.present ? data.role.value : this.role,
+      inviteCode: data.inviteCode.present
+          ? data.inviteCode.value
+          : this.inviteCode,
+      inviteExpiresAt: data.inviteExpiresAt.present
+          ? data.inviteExpiresAt.value
+          : this.inviteExpiresAt,
+      groupKey: data.groupKey.present ? data.groupKey.value : this.groupKey,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      confirmedAt: data.confirmedAt.present
+          ? data.confirmedAt.value
+          : this.confirmedAt,
+      lastSyncAt: data.lastSyncAt.present
+          ? data.lastSyncAt.value
+          : this.lastSyncAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GroupData(')
+          ..write('groupId: $groupId, ')
+          ..write('bookId: $bookId, ')
+          ..write('status: $status, ')
+          ..write('role: $role, ')
+          ..write('inviteCode: $inviteCode, ')
+          ..write('inviteExpiresAt: $inviteExpiresAt, ')
+          ..write('groupKey: $groupKey, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('confirmedAt: $confirmedAt, ')
+          ..write('lastSyncAt: $lastSyncAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    groupId,
+    bookId,
+    status,
+    role,
+    inviteCode,
+    inviteExpiresAt,
+    groupKey,
+    createdAt,
+    confirmedAt,
+    lastSyncAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is GroupData &&
+          other.groupId == this.groupId &&
+          other.bookId == this.bookId &&
+          other.status == this.status &&
+          other.role == this.role &&
+          other.inviteCode == this.inviteCode &&
+          other.inviteExpiresAt == this.inviteExpiresAt &&
+          other.groupKey == this.groupKey &&
+          other.createdAt == this.createdAt &&
+          other.confirmedAt == this.confirmedAt &&
+          other.lastSyncAt == this.lastSyncAt);
+}
+
+class GroupsCompanion extends UpdateCompanion<GroupData> {
+  final Value<String> groupId;
+  final Value<String> bookId;
+  final Value<String> status;
+  final Value<String> role;
+  final Value<String?> inviteCode;
+  final Value<int?> inviteExpiresAt;
+  final Value<String?> groupKey;
+  final Value<int> createdAt;
+  final Value<int?> confirmedAt;
+  final Value<int?> lastSyncAt;
+  final Value<int> rowid;
+  const GroupsCompanion({
+    this.groupId = const Value.absent(),
+    this.bookId = const Value.absent(),
+    this.status = const Value.absent(),
+    this.role = const Value.absent(),
+    this.inviteCode = const Value.absent(),
+    this.inviteExpiresAt = const Value.absent(),
+    this.groupKey = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.confirmedAt = const Value.absent(),
+    this.lastSyncAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  GroupsCompanion.insert({
+    required String groupId,
+    required String bookId,
+    required String status,
+    required String role,
+    this.inviteCode = const Value.absent(),
+    this.inviteExpiresAt = const Value.absent(),
+    this.groupKey = const Value.absent(),
+    required int createdAt,
+    this.confirmedAt = const Value.absent(),
+    this.lastSyncAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : groupId = Value(groupId),
+       bookId = Value(bookId),
+       status = Value(status),
+       role = Value(role),
+       createdAt = Value(createdAt);
+  static Insertable<GroupData> custom({
+    Expression<String>? groupId,
+    Expression<String>? bookId,
+    Expression<String>? status,
+    Expression<String>? role,
+    Expression<String>? inviteCode,
+    Expression<int>? inviteExpiresAt,
+    Expression<String>? groupKey,
+    Expression<int>? createdAt,
+    Expression<int>? confirmedAt,
+    Expression<int>? lastSyncAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (groupId != null) 'group_id': groupId,
+      if (bookId != null) 'book_id': bookId,
+      if (status != null) 'status': status,
+      if (role != null) 'role': role,
+      if (inviteCode != null) 'invite_code': inviteCode,
+      if (inviteExpiresAt != null) 'invite_expires_at': inviteExpiresAt,
+      if (groupKey != null) 'group_key': groupKey,
+      if (createdAt != null) 'created_at': createdAt,
+      if (confirmedAt != null) 'confirmed_at': confirmedAt,
+      if (lastSyncAt != null) 'last_sync_at': lastSyncAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  GroupsCompanion copyWith({
+    Value<String>? groupId,
+    Value<String>? bookId,
+    Value<String>? status,
+    Value<String>? role,
+    Value<String?>? inviteCode,
+    Value<int?>? inviteExpiresAt,
+    Value<String?>? groupKey,
+    Value<int>? createdAt,
+    Value<int?>? confirmedAt,
+    Value<int?>? lastSyncAt,
+    Value<int>? rowid,
+  }) {
+    return GroupsCompanion(
+      groupId: groupId ?? this.groupId,
+      bookId: bookId ?? this.bookId,
+      status: status ?? this.status,
+      role: role ?? this.role,
+      inviteCode: inviteCode ?? this.inviteCode,
+      inviteExpiresAt: inviteExpiresAt ?? this.inviteExpiresAt,
+      groupKey: groupKey ?? this.groupKey,
+      createdAt: createdAt ?? this.createdAt,
+      confirmedAt: confirmedAt ?? this.confirmedAt,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (groupId.present) {
+      map['group_id'] = Variable<String>(groupId.value);
+    }
+    if (bookId.present) {
+      map['book_id'] = Variable<String>(bookId.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
+    if (inviteCode.present) {
+      map['invite_code'] = Variable<String>(inviteCode.value);
+    }
+    if (inviteExpiresAt.present) {
+      map['invite_expires_at'] = Variable<int>(inviteExpiresAt.value);
+    }
+    if (groupKey.present) {
+      map['group_key'] = Variable<String>(groupKey.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (confirmedAt.present) {
+      map['confirmed_at'] = Variable<int>(confirmedAt.value);
+    }
+    if (lastSyncAt.present) {
+      map['last_sync_at'] = Variable<int>(lastSyncAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GroupsCompanion(')
+          ..write('groupId: $groupId, ')
+          ..write('bookId: $bookId, ')
+          ..write('status: $status, ')
+          ..write('role: $role, ')
+          ..write('inviteCode: $inviteCode, ')
+          ..write('inviteExpiresAt: $inviteExpiresAt, ')
+          ..write('groupKey: $groupKey, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('confirmedAt: $confirmedAt, ')
+          ..write('lastSyncAt: $lastSyncAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $MerchantCategoryPreferencesTable extends MerchantCategoryPreferences
     with
         TableInfo<
@@ -3527,21 +4570,12 @@ class $SyncQueueTable extends SyncQueue
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _pairIdMeta = const VerificationMeta('pairId');
-  @override
-  late final GeneratedColumn<String> pairId = GeneratedColumn<String>(
-    'pair_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _targetDeviceIdMeta = const VerificationMeta(
-    'targetDeviceId',
+  static const VerificationMeta _groupIdMeta = const VerificationMeta(
+    'groupId',
   );
   @override
-  late final GeneratedColumn<String> targetDeviceId = GeneratedColumn<String>(
-    'target_device_id',
+  late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
+    'group_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -3606,8 +4640,7 @@ class $SyncQueueTable extends SyncQueue
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    pairId,
-    targetDeviceId,
+    groupId,
     encryptedPayload,
     vectorClock,
     operationCount,
@@ -3631,24 +4664,13 @@ class $SyncQueueTable extends SyncQueue
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (data.containsKey('pair_id')) {
+    if (data.containsKey('group_id')) {
       context.handle(
-        _pairIdMeta,
-        pairId.isAcceptableOrUnknown(data['pair_id']!, _pairIdMeta),
+        _groupIdMeta,
+        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
       );
     } else if (isInserting) {
-      context.missing(_pairIdMeta);
-    }
-    if (data.containsKey('target_device_id')) {
-      context.handle(
-        _targetDeviceIdMeta,
-        targetDeviceId.isAcceptableOrUnknown(
-          data['target_device_id']!,
-          _targetDeviceIdMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_targetDeviceIdMeta);
+      context.missing(_groupIdMeta);
     }
     if (data.containsKey('encrypted_payload')) {
       context.handle(
@@ -3710,13 +4732,9 @@ class $SyncQueueTable extends SyncQueue
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
-      pairId: attachedDatabase.typeMapping.read(
+      groupId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}pair_id'],
-      )!,
-      targetDeviceId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}target_device_id'],
+        data['${effectivePrefix}group_id'],
       )!,
       encryptedPayload: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -3749,8 +4767,7 @@ class $SyncQueueTable extends SyncQueue
 
 class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
   final String id;
-  final String pairId;
-  final String targetDeviceId;
+  final String groupId;
   final String encryptedPayload;
   final String vectorClock;
   final int operationCount;
@@ -3758,8 +4775,7 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
   final int createdAt;
   const SyncQueueData({
     required this.id,
-    required this.pairId,
-    required this.targetDeviceId,
+    required this.groupId,
     required this.encryptedPayload,
     required this.vectorClock,
     required this.operationCount,
@@ -3770,8 +4786,7 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['pair_id'] = Variable<String>(pairId);
-    map['target_device_id'] = Variable<String>(targetDeviceId);
+    map['group_id'] = Variable<String>(groupId);
     map['encrypted_payload'] = Variable<String>(encryptedPayload);
     map['vector_clock'] = Variable<String>(vectorClock);
     map['operation_count'] = Variable<int>(operationCount);
@@ -3783,8 +4798,7 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
   SyncQueueCompanion toCompanion(bool nullToAbsent) {
     return SyncQueueCompanion(
       id: Value(id),
-      pairId: Value(pairId),
-      targetDeviceId: Value(targetDeviceId),
+      groupId: Value(groupId),
       encryptedPayload: Value(encryptedPayload),
       vectorClock: Value(vectorClock),
       operationCount: Value(operationCount),
@@ -3800,8 +4814,7 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SyncQueueData(
       id: serializer.fromJson<String>(json['id']),
-      pairId: serializer.fromJson<String>(json['pairId']),
-      targetDeviceId: serializer.fromJson<String>(json['targetDeviceId']),
+      groupId: serializer.fromJson<String>(json['groupId']),
       encryptedPayload: serializer.fromJson<String>(json['encryptedPayload']),
       vectorClock: serializer.fromJson<String>(json['vectorClock']),
       operationCount: serializer.fromJson<int>(json['operationCount']),
@@ -3814,8 +4827,7 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'pairId': serializer.toJson<String>(pairId),
-      'targetDeviceId': serializer.toJson<String>(targetDeviceId),
+      'groupId': serializer.toJson<String>(groupId),
       'encryptedPayload': serializer.toJson<String>(encryptedPayload),
       'vectorClock': serializer.toJson<String>(vectorClock),
       'operationCount': serializer.toJson<int>(operationCount),
@@ -3826,8 +4838,7 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
 
   SyncQueueData copyWith({
     String? id,
-    String? pairId,
-    String? targetDeviceId,
+    String? groupId,
     String? encryptedPayload,
     String? vectorClock,
     int? operationCount,
@@ -3835,8 +4846,7 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
     int? createdAt,
   }) => SyncQueueData(
     id: id ?? this.id,
-    pairId: pairId ?? this.pairId,
-    targetDeviceId: targetDeviceId ?? this.targetDeviceId,
+    groupId: groupId ?? this.groupId,
     encryptedPayload: encryptedPayload ?? this.encryptedPayload,
     vectorClock: vectorClock ?? this.vectorClock,
     operationCount: operationCount ?? this.operationCount,
@@ -3846,10 +4856,7 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
   SyncQueueData copyWithCompanion(SyncQueueCompanion data) {
     return SyncQueueData(
       id: data.id.present ? data.id.value : this.id,
-      pairId: data.pairId.present ? data.pairId.value : this.pairId,
-      targetDeviceId: data.targetDeviceId.present
-          ? data.targetDeviceId.value
-          : this.targetDeviceId,
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
       encryptedPayload: data.encryptedPayload.present
           ? data.encryptedPayload.value
           : this.encryptedPayload,
@@ -3870,8 +4877,7 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
   String toString() {
     return (StringBuffer('SyncQueueData(')
           ..write('id: $id, ')
-          ..write('pairId: $pairId, ')
-          ..write('targetDeviceId: $targetDeviceId, ')
+          ..write('groupId: $groupId, ')
           ..write('encryptedPayload: $encryptedPayload, ')
           ..write('vectorClock: $vectorClock, ')
           ..write('operationCount: $operationCount, ')
@@ -3884,8 +4890,7 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
   @override
   int get hashCode => Object.hash(
     id,
-    pairId,
-    targetDeviceId,
+    groupId,
     encryptedPayload,
     vectorClock,
     operationCount,
@@ -3897,8 +4902,7 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
       identical(this, other) ||
       (other is SyncQueueData &&
           other.id == this.id &&
-          other.pairId == this.pairId &&
-          other.targetDeviceId == this.targetDeviceId &&
+          other.groupId == this.groupId &&
           other.encryptedPayload == this.encryptedPayload &&
           other.vectorClock == this.vectorClock &&
           other.operationCount == this.operationCount &&
@@ -3908,8 +4912,7 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
 
 class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
   final Value<String> id;
-  final Value<String> pairId;
-  final Value<String> targetDeviceId;
+  final Value<String> groupId;
   final Value<String> encryptedPayload;
   final Value<String> vectorClock;
   final Value<int> operationCount;
@@ -3918,8 +4921,7 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
   final Value<int> rowid;
   const SyncQueueCompanion({
     this.id = const Value.absent(),
-    this.pairId = const Value.absent(),
-    this.targetDeviceId = const Value.absent(),
+    this.groupId = const Value.absent(),
     this.encryptedPayload = const Value.absent(),
     this.vectorClock = const Value.absent(),
     this.operationCount = const Value.absent(),
@@ -3929,8 +4931,7 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
   });
   SyncQueueCompanion.insert({
     required String id,
-    required String pairId,
-    required String targetDeviceId,
+    required String groupId,
     required String encryptedPayload,
     required String vectorClock,
     required int operationCount,
@@ -3938,16 +4939,14 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
     required int createdAt,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
-       pairId = Value(pairId),
-       targetDeviceId = Value(targetDeviceId),
+       groupId = Value(groupId),
        encryptedPayload = Value(encryptedPayload),
        vectorClock = Value(vectorClock),
        operationCount = Value(operationCount),
        createdAt = Value(createdAt);
   static Insertable<SyncQueueData> custom({
     Expression<String>? id,
-    Expression<String>? pairId,
-    Expression<String>? targetDeviceId,
+    Expression<String>? groupId,
     Expression<String>? encryptedPayload,
     Expression<String>? vectorClock,
     Expression<int>? operationCount,
@@ -3957,8 +4956,7 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (pairId != null) 'pair_id': pairId,
-      if (targetDeviceId != null) 'target_device_id': targetDeviceId,
+      if (groupId != null) 'group_id': groupId,
       if (encryptedPayload != null) 'encrypted_payload': encryptedPayload,
       if (vectorClock != null) 'vector_clock': vectorClock,
       if (operationCount != null) 'operation_count': operationCount,
@@ -3970,8 +4968,7 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
 
   SyncQueueCompanion copyWith({
     Value<String>? id,
-    Value<String>? pairId,
-    Value<String>? targetDeviceId,
+    Value<String>? groupId,
     Value<String>? encryptedPayload,
     Value<String>? vectorClock,
     Value<int>? operationCount,
@@ -3981,8 +4978,7 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
   }) {
     return SyncQueueCompanion(
       id: id ?? this.id,
-      pairId: pairId ?? this.pairId,
-      targetDeviceId: targetDeviceId ?? this.targetDeviceId,
+      groupId: groupId ?? this.groupId,
       encryptedPayload: encryptedPayload ?? this.encryptedPayload,
       vectorClock: vectorClock ?? this.vectorClock,
       operationCount: operationCount ?? this.operationCount,
@@ -3998,11 +4994,8 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
-    if (pairId.present) {
-      map['pair_id'] = Variable<String>(pairId.value);
-    }
-    if (targetDeviceId.present) {
-      map['target_device_id'] = Variable<String>(targetDeviceId.value);
+    if (groupId.present) {
+      map['group_id'] = Variable<String>(groupId.value);
     }
     if (encryptedPayload.present) {
       map['encrypted_payload'] = Variable<String>(encryptedPayload.value);
@@ -4029,8 +5022,7 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
   String toString() {
     return (StringBuffer('SyncQueueCompanion(')
           ..write('id: $id, ')
-          ..write('pairId: $pairId, ')
-          ..write('targetDeviceId: $targetDeviceId, ')
+          ..write('groupId: $groupId, ')
           ..write('encryptedPayload: $encryptedPayload, ')
           ..write('vectorClock: $vectorClock, ')
           ..write('operationCount: $operationCount, ')
@@ -5151,6 +6143,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $CategoryKeywordPreferencesTable(this);
   late final $CategoryLedgerConfigsTable categoryLedgerConfigs =
       $CategoryLedgerConfigsTable(this);
+  late final $GroupMembersTable groupMembers = $GroupMembersTable(this);
+  late final $GroupsTable groups = $GroupsTable(this);
   late final $MerchantCategoryPreferencesTable merchantCategoryPreferences =
       $MerchantCategoryPreferencesTable(this);
   late final $PairedDevicesTable pairedDevices = $PairedDevicesTable(this);
@@ -5166,6 +6160,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     categories,
     categoryKeywordPreferences,
     categoryLedgerConfigs,
+    groupMembers,
+    groups,
     merchantCategoryPreferences,
     pairedDevices,
     syncQueue,
@@ -6757,6 +7753,524 @@ typedef $$CategoryLedgerConfigsTableProcessedTableManager =
       CategoryLedgerConfigRow,
       PrefetchHooks Function({bool categoryId})
     >;
+typedef $$GroupMembersTableCreateCompanionBuilder =
+    GroupMembersCompanion Function({
+      required String groupId,
+      required String deviceId,
+      required String publicKey,
+      required String deviceName,
+      required String role,
+      required String status,
+      Value<int> rowid,
+    });
+typedef $$GroupMembersTableUpdateCompanionBuilder =
+    GroupMembersCompanion Function({
+      Value<String> groupId,
+      Value<String> deviceId,
+      Value<String> publicKey,
+      Value<String> deviceName,
+      Value<String> role,
+      Value<String> status,
+      Value<int> rowid,
+    });
+
+class $$GroupMembersTableFilterComposer
+    extends Composer<_$AppDatabase, $GroupMembersTable> {
+  $$GroupMembersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get publicKey => $composableBuilder(
+    column: $table.publicKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deviceName => $composableBuilder(
+    column: $table.deviceName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$GroupMembersTableOrderingComposer
+    extends Composer<_$AppDatabase, $GroupMembersTable> {
+  $$GroupMembersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get publicKey => $composableBuilder(
+    column: $table.publicKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deviceName => $composableBuilder(
+    column: $table.deviceName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$GroupMembersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $GroupMembersTable> {
+  $$GroupMembersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get groupId =>
+      $composableBuilder(column: $table.groupId, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
+
+  GeneratedColumn<String> get publicKey =>
+      $composableBuilder(column: $table.publicKey, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceName => $composableBuilder(
+    column: $table.deviceName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+}
+
+class $$GroupMembersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $GroupMembersTable,
+          GroupMemberData,
+          $$GroupMembersTableFilterComposer,
+          $$GroupMembersTableOrderingComposer,
+          $$GroupMembersTableAnnotationComposer,
+          $$GroupMembersTableCreateCompanionBuilder,
+          $$GroupMembersTableUpdateCompanionBuilder,
+          (
+            GroupMemberData,
+            BaseReferences<_$AppDatabase, $GroupMembersTable, GroupMemberData>,
+          ),
+          GroupMemberData,
+          PrefetchHooks Function()
+        > {
+  $$GroupMembersTableTableManager(_$AppDatabase db, $GroupMembersTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$GroupMembersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$GroupMembersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$GroupMembersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> groupId = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                Value<String> publicKey = const Value.absent(),
+                Value<String> deviceName = const Value.absent(),
+                Value<String> role = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => GroupMembersCompanion(
+                groupId: groupId,
+                deviceId: deviceId,
+                publicKey: publicKey,
+                deviceName: deviceName,
+                role: role,
+                status: status,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String groupId,
+                required String deviceId,
+                required String publicKey,
+                required String deviceName,
+                required String role,
+                required String status,
+                Value<int> rowid = const Value.absent(),
+              }) => GroupMembersCompanion.insert(
+                groupId: groupId,
+                deviceId: deviceId,
+                publicKey: publicKey,
+                deviceName: deviceName,
+                role: role,
+                status: status,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$GroupMembersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $GroupMembersTable,
+      GroupMemberData,
+      $$GroupMembersTableFilterComposer,
+      $$GroupMembersTableOrderingComposer,
+      $$GroupMembersTableAnnotationComposer,
+      $$GroupMembersTableCreateCompanionBuilder,
+      $$GroupMembersTableUpdateCompanionBuilder,
+      (
+        GroupMemberData,
+        BaseReferences<_$AppDatabase, $GroupMembersTable, GroupMemberData>,
+      ),
+      GroupMemberData,
+      PrefetchHooks Function()
+    >;
+typedef $$GroupsTableCreateCompanionBuilder =
+    GroupsCompanion Function({
+      required String groupId,
+      required String bookId,
+      required String status,
+      required String role,
+      Value<String?> inviteCode,
+      Value<int?> inviteExpiresAt,
+      Value<String?> groupKey,
+      required int createdAt,
+      Value<int?> confirmedAt,
+      Value<int?> lastSyncAt,
+      Value<int> rowid,
+    });
+typedef $$GroupsTableUpdateCompanionBuilder =
+    GroupsCompanion Function({
+      Value<String> groupId,
+      Value<String> bookId,
+      Value<String> status,
+      Value<String> role,
+      Value<String?> inviteCode,
+      Value<int?> inviteExpiresAt,
+      Value<String?> groupKey,
+      Value<int> createdAt,
+      Value<int?> confirmedAt,
+      Value<int?> lastSyncAt,
+      Value<int> rowid,
+    });
+
+class $$GroupsTableFilterComposer
+    extends Composer<_$AppDatabase, $GroupsTable> {
+  $$GroupsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bookId => $composableBuilder(
+    column: $table.bookId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get inviteCode => $composableBuilder(
+    column: $table.inviteCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get inviteExpiresAt => $composableBuilder(
+    column: $table.inviteExpiresAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get groupKey => $composableBuilder(
+    column: $table.groupKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get confirmedAt => $composableBuilder(
+    column: $table.confirmedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastSyncAt => $composableBuilder(
+    column: $table.lastSyncAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$GroupsTableOrderingComposer
+    extends Composer<_$AppDatabase, $GroupsTable> {
+  $$GroupsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bookId => $composableBuilder(
+    column: $table.bookId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get inviteCode => $composableBuilder(
+    column: $table.inviteCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get inviteExpiresAt => $composableBuilder(
+    column: $table.inviteExpiresAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get groupKey => $composableBuilder(
+    column: $table.groupKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get confirmedAt => $composableBuilder(
+    column: $table.confirmedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastSyncAt => $composableBuilder(
+    column: $table.lastSyncAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$GroupsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $GroupsTable> {
+  $$GroupsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get groupId =>
+      $composableBuilder(column: $table.groupId, builder: (column) => column);
+
+  GeneratedColumn<String> get bookId =>
+      $composableBuilder(column: $table.bookId, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<String> get inviteCode => $composableBuilder(
+    column: $table.inviteCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get inviteExpiresAt => $composableBuilder(
+    column: $table.inviteExpiresAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get groupKey =>
+      $composableBuilder(column: $table.groupKey, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get confirmedAt => $composableBuilder(
+    column: $table.confirmedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get lastSyncAt => $composableBuilder(
+    column: $table.lastSyncAt,
+    builder: (column) => column,
+  );
+}
+
+class $$GroupsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $GroupsTable,
+          GroupData,
+          $$GroupsTableFilterComposer,
+          $$GroupsTableOrderingComposer,
+          $$GroupsTableAnnotationComposer,
+          $$GroupsTableCreateCompanionBuilder,
+          $$GroupsTableUpdateCompanionBuilder,
+          (GroupData, BaseReferences<_$AppDatabase, $GroupsTable, GroupData>),
+          GroupData,
+          PrefetchHooks Function()
+        > {
+  $$GroupsTableTableManager(_$AppDatabase db, $GroupsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$GroupsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$GroupsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$GroupsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> groupId = const Value.absent(),
+                Value<String> bookId = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> role = const Value.absent(),
+                Value<String?> inviteCode = const Value.absent(),
+                Value<int?> inviteExpiresAt = const Value.absent(),
+                Value<String?> groupKey = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int?> confirmedAt = const Value.absent(),
+                Value<int?> lastSyncAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => GroupsCompanion(
+                groupId: groupId,
+                bookId: bookId,
+                status: status,
+                role: role,
+                inviteCode: inviteCode,
+                inviteExpiresAt: inviteExpiresAt,
+                groupKey: groupKey,
+                createdAt: createdAt,
+                confirmedAt: confirmedAt,
+                lastSyncAt: lastSyncAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String groupId,
+                required String bookId,
+                required String status,
+                required String role,
+                Value<String?> inviteCode = const Value.absent(),
+                Value<int?> inviteExpiresAt = const Value.absent(),
+                Value<String?> groupKey = const Value.absent(),
+                required int createdAt,
+                Value<int?> confirmedAt = const Value.absent(),
+                Value<int?> lastSyncAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => GroupsCompanion.insert(
+                groupId: groupId,
+                bookId: bookId,
+                status: status,
+                role: role,
+                inviteCode: inviteCode,
+                inviteExpiresAt: inviteExpiresAt,
+                groupKey: groupKey,
+                createdAt: createdAt,
+                confirmedAt: confirmedAt,
+                lastSyncAt: lastSyncAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$GroupsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $GroupsTable,
+      GroupData,
+      $$GroupsTableFilterComposer,
+      $$GroupsTableOrderingComposer,
+      $$GroupsTableAnnotationComposer,
+      $$GroupsTableCreateCompanionBuilder,
+      $$GroupsTableUpdateCompanionBuilder,
+      (GroupData, BaseReferences<_$AppDatabase, $GroupsTable, GroupData>),
+      GroupData,
+      PrefetchHooks Function()
+    >;
 typedef $$MerchantCategoryPreferencesTableCreateCompanionBuilder =
     MerchantCategoryPreferencesCompanion Function({
       required String merchantKey,
@@ -7315,8 +8829,7 @@ typedef $$PairedDevicesTableProcessedTableManager =
 typedef $$SyncQueueTableCreateCompanionBuilder =
     SyncQueueCompanion Function({
       required String id,
-      required String pairId,
-      required String targetDeviceId,
+      required String groupId,
       required String encryptedPayload,
       required String vectorClock,
       required int operationCount,
@@ -7327,8 +8840,7 @@ typedef $$SyncQueueTableCreateCompanionBuilder =
 typedef $$SyncQueueTableUpdateCompanionBuilder =
     SyncQueueCompanion Function({
       Value<String> id,
-      Value<String> pairId,
-      Value<String> targetDeviceId,
+      Value<String> groupId,
       Value<String> encryptedPayload,
       Value<String> vectorClock,
       Value<int> operationCount,
@@ -7351,13 +8863,8 @@ class $$SyncQueueTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get pairId => $composableBuilder(
-    column: $table.pairId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get targetDeviceId => $composableBuilder(
-    column: $table.targetDeviceId,
+  ColumnFilters<String> get groupId => $composableBuilder(
+    column: $table.groupId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7401,13 +8908,8 @@ class $$SyncQueueTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get pairId => $composableBuilder(
-    column: $table.pairId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get targetDeviceId => $composableBuilder(
-    column: $table.targetDeviceId,
+  ColumnOrderings<String> get groupId => $composableBuilder(
+    column: $table.groupId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -7449,13 +8951,8 @@ class $$SyncQueueTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get pairId =>
-      $composableBuilder(column: $table.pairId, builder: (column) => column);
-
-  GeneratedColumn<String> get targetDeviceId => $composableBuilder(
-    column: $table.targetDeviceId,
-    builder: (column) => column,
-  );
+  GeneratedColumn<String> get groupId =>
+      $composableBuilder(column: $table.groupId, builder: (column) => column);
 
   GeneratedColumn<String> get encryptedPayload => $composableBuilder(
     column: $table.encryptedPayload,
@@ -7513,8 +9010,7 @@ class $$SyncQueueTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> pairId = const Value.absent(),
-                Value<String> targetDeviceId = const Value.absent(),
+                Value<String> groupId = const Value.absent(),
                 Value<String> encryptedPayload = const Value.absent(),
                 Value<String> vectorClock = const Value.absent(),
                 Value<int> operationCount = const Value.absent(),
@@ -7523,8 +9019,7 @@ class $$SyncQueueTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => SyncQueueCompanion(
                 id: id,
-                pairId: pairId,
-                targetDeviceId: targetDeviceId,
+                groupId: groupId,
                 encryptedPayload: encryptedPayload,
                 vectorClock: vectorClock,
                 operationCount: operationCount,
@@ -7535,8 +9030,7 @@ class $$SyncQueueTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String pairId,
-                required String targetDeviceId,
+                required String groupId,
                 required String encryptedPayload,
                 required String vectorClock,
                 required int operationCount,
@@ -7545,8 +9039,7 @@ class $$SyncQueueTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => SyncQueueCompanion.insert(
                 id: id,
-                pairId: pairId,
-                targetDeviceId: targetDeviceId,
+                groupId: groupId,
                 encryptedPayload: encryptedPayload,
                 vectorClock: vectorClock,
                 operationCount: operationCount,
@@ -8090,6 +9583,10 @@ class $AppDatabaseManager {
       );
   $$CategoryLedgerConfigsTableTableManager get categoryLedgerConfigs =>
       $$CategoryLedgerConfigsTableTableManager(_db, _db.categoryLedgerConfigs);
+  $$GroupMembersTableTableManager get groupMembers =>
+      $$GroupMembersTableTableManager(_db, _db.groupMembers);
+  $$GroupsTableTableManager get groups =>
+      $$GroupsTableTableManager(_db, _db.groups);
   $$MerchantCategoryPreferencesTableTableManager
   get merchantCategoryPreferences =>
       $$MerchantCategoryPreferencesTableTableManager(

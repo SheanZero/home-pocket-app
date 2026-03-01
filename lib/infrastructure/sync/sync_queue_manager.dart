@@ -11,8 +11,8 @@ class SyncQueueManager {
   SyncQueueManager({
     required SyncRepository syncRepository,
     required RelayApiClient apiClient,
-  })  : _syncRepository = syncRepository,
-        _apiClient = apiClient;
+  }) : _syncRepository = syncRepository,
+       _apiClient = apiClient;
 
   final SyncRepository _syncRepository;
   final RelayApiClient _apiClient;
@@ -31,8 +31,7 @@ class SyncQueueManager {
   }) async {
     await _syncRepository.enqueue(
       id: id,
-      pairId: pairId,
-      targetDeviceId: targetDeviceId,
+      groupId: pairId,
       encryptedPayload: encryptedPayload,
       vectorClock: jsonEncode(vectorClock),
       operationCount: operationCount,
@@ -54,8 +53,9 @@ class SyncQueueManager {
 
       try {
         final vectorClock =
-            (jsonDecode(entry.vectorClock) as Map<String, dynamic>)
-                .map((k, v) => MapEntry(k, v as int));
+            (jsonDecode(entry.vectorClock) as Map<String, dynamic>).map(
+              (k, v) => MapEntry(k, v as int),
+            );
 
         await _apiClient.pushSync(
           pairId: entry.pairId,
