@@ -4,7 +4,7 @@ part 'group_member.freezed.dart';
 part 'group_member.g.dart';
 
 @freezed
-class GroupMember with _$GroupMember {
+abstract class GroupMember with _$GroupMember {
   const factory GroupMember({
     required String deviceId,
     required String publicKey,

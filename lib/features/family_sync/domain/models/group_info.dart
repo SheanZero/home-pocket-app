@@ -8,7 +8,7 @@ part 'group_info.g.dart';
 enum GroupStatus { pending, confirming, active, inactive }
 
 @freezed
-class GroupInfo with _$GroupInfo {
+abstract class GroupInfo with _$GroupInfo {
   const factory GroupInfo({
     required String groupId,
     required String bookId,
