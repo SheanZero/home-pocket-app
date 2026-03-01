@@ -3,8 +3,7 @@ abstract class SyncRepository {
   /// Add an entry to the offline sync queue.
   Future<void> enqueue({
     required String id,
-    required String pairId,
-    required String targetDeviceId,
+    required String groupId,
     required String encryptedPayload,
     required String vectorClock,
     required int operationCount,
@@ -27,8 +26,7 @@ abstract class SyncRepository {
 class SyncQueueEntry {
   SyncQueueEntry({
     required this.id,
-    required this.pairId,
-    required this.targetDeviceId,
+    required this.groupId,
     required this.encryptedPayload,
     required this.vectorClock,
     required this.operationCount,
@@ -37,11 +35,16 @@ class SyncQueueEntry {
   });
 
   final String id;
-  final String pairId;
-  final String targetDeviceId;
+  final String groupId;
   final String encryptedPayload;
   final String vectorClock;
   final int operationCount;
   final int retryCount;
   final DateTime createdAt;
+
+  @Deprecated('Use groupId instead.')
+  String get pairId => groupId;
+
+  @Deprecated('targetDeviceId is removed for group fan-out.')
+  String get targetDeviceId => '';
 }
