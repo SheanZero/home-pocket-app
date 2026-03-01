@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../application/family_sync/unpair_use_case.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../settings/presentation/providers/locale_provider.dart';
-import '../../domain/models/paired_device.dart';
+import '../../domain/models/group_info.dart';
 import '../../domain/models/sync_status.dart';
-import '../providers/pair_providers.dart';
+import '../../use_cases/deactivate_group_use_case.dart';
+import '../../use_cases/leave_group_use_case.dart';
+import '../../use_cases/regenerate_invite_use_case.dart';
+import '../providers/group_providers.dart';
 import '../providers/repository_providers.dart';
 import '../providers/sync_providers.dart';
 import '../widgets/partner_device_tile.dart';
 import '../widgets/sync_status_badge.dart';
 
-/// Screen for managing the current device pairing.
-///
-/// Shows current pair info, sync status, and unpair action.
 class PairManagementScreen extends ConsumerStatefulWidget {
   const PairManagementScreen({super.key});
 
@@ -25,51 +24,57 @@ class PairManagementScreen extends ConsumerStatefulWidget {
 }
 
 class _PairManagementScreenState extends ConsumerState<PairManagementScreen> {
-  PairedDevice? _activePair;
+  GroupInfo? _activeGroup;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadPair();
+    _loadGroup();
   }
 
-  Future<void> _loadPair() async {
+  Future<void> _loadGroup() async {
     setState(() => _isLoading = true);
-    final pairRepo = ref.read(pairRepositoryProvider);
-    final pair = await pairRepo.getActivePair();
-    if (mounted) {
-      setState(() {
-        _activePair = pair;
-        _isLoading = false;
-      });
-    }
+    final group = await ref.read(groupRepositoryProvider).getActiveGroup();
+    if (!mounted) return;
+    setState(() {
+      _activeGroup = group;
+      _isLoading = false;
+    });
   }
 
-  Future<void> _handleUnpair() async {
-    final pair = _activePair;
-    if (pair == null) return;
+  Future<void> _handleLeaveOrDeactivate() async {
+    final group = _activeGroup;
+    if (group == null) return;
 
+    final l10n = S.of(context);
+    final isOwner = group.role == 'owner';
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(S.of(context).familySyncUnpairDevice),
+        title: Text(
+          isOwner ? l10n.familySyncDeactivateGroup : l10n.familySyncLeaveGroup,
+        ),
         content: Text(
-          S.of(context).familySyncUnpairConfirm(
-                pair.partnerDeviceName ?? 'this device',
-              ),
+          isOwner
+              ? l10n.familySyncDeactivateGroupConfirm
+              : l10n.familySyncLeaveGroupConfirm,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(S.of(context).cancel),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: Text(S.of(context).familySyncUnpair),
+            child: Text(
+              isOwner
+                  ? l10n.familySyncDeactivateGroup
+                  : l10n.familySyncLeaveGroup,
+            ),
           ),
         ],
       ),
@@ -77,20 +82,53 @@ class _PairManagementScreenState extends ConsumerState<PairManagementScreen> {
 
     if (confirmed != true || !mounted) return;
 
-    final useCase = ref.read(unpairUseCaseProvider);
-    final result = await useCase.execute(pair.pairId);
+    final result = isOwner
+        ? await ref.read(deactivateGroupUseCaseProvider).execute(group.groupId)
+        : await ref.read(leaveGroupUseCaseProvider).execute(group.groupId);
 
     if (!mounted) return;
 
-    if (result is UnpairSuccess) {
-      ref.read(syncStatusNotifierProvider.notifier).updateStatus(
-            SyncStatus.unpaired,
-          );
+    if (result is DeactivateGroupSuccess || result is LeaveGroupSuccess) {
+      ref
+          .read(syncStatusNotifierProvider.notifier)
+          .updateStatus(SyncStatus.unpaired);
       Navigator.of(context).pop();
-    } else if (result is UnpairError) {
+      return;
+    }
+
+    final message = switch (result) {
+      DeactivateGroupError(:final message) =>
+        l10n.familySyncDeactivateGroupFailed(message),
+      LeaveGroupError(:final message) => l10n.familySyncLeaveGroupFailed(
+        message,
+      ),
+      _ => l10n.familySyncStatusError,
+    };
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _handleRegenerateInvite() async {
+    final group = _activeGroup;
+    if (group == null) return;
+
+    final result = await ref
+        .read(regenerateInviteUseCaseProvider)
+        .execute(group.groupId);
+    if (!mounted) return;
+
+    if (result is RegenerateInviteSuccess) {
+      await _loadGroup();
+      return;
+    }
+
+    if (result is RegenerateInviteError) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(S.of(context).familySyncUnpairFailed(result.message)),
+          content: Text(
+            S.of(context).familySyncRegenerateInviteFailed(result.message),
+          ),
         ),
       );
     }
@@ -110,16 +148,17 @@ class _PairManagementScreenState extends ConsumerState<PairManagementScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _activePair != null
-              ? _buildPairedContent(syncStatus)
-              : _buildUnpairedContent(),
+          : _activeGroup != null
+          ? _buildGroupContent()
+          : _buildEmptyState(),
     );
   }
 
-  Widget _buildPairedContent(SyncStatus syncStatus) {
-    final pair = _activePair!;
+  Widget _buildGroupContent() {
+    final group = _activeGroup!;
     final l10n = S.of(context);
     final locale = ref.watch(currentLocaleProvider);
+    final isOwner = group.role == 'owner';
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -135,17 +174,17 @@ class _PairManagementScreenState extends ConsumerState<PairManagementScreen> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
-                PartnerDeviceTile(
-                  device: pair,
-                  syncStatus: syncStatus,
+                Text(
+                  l10n.familySyncMemberCount(group.members.length),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
           ),
         ),
         const SizedBox(height: 16),
-
-        // Pair info
         Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -157,44 +196,100 @@ class _PairManagementScreenState extends ConsumerState<PairManagementScreen> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
-                _buildInfoRow(l10n.familySyncPairId, pair.pairId.substring(0, 8)),
+                _buildInfoRow(
+                  l10n.familySyncPairId,
+                  group.groupId.length > 8
+                      ? group.groupId.substring(0, 8)
+                      : group.groupId,
+                ),
                 _buildInfoRow(
                   l10n.familySyncPairedSince,
-                  pair.confirmedAt != null
-                      ? DateFormatter.formatDate(pair.confirmedAt!, locale)
+                  group.confirmedAt != null
+                      ? DateFormatter.formatDate(group.confirmedAt!, locale)
                       : '-',
                 ),
-                _buildInfoRow(l10n.familySyncBookId, pair.bookId),
+                _buildInfoRow(l10n.familySyncBookId, group.bookId),
+                _buildInfoRow(
+                  l10n.familySyncMembers,
+                  group.members.length.toString(),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (isOwner && group.inviteCode != null) ...[
+          const SizedBox(height: 16),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.familySyncPairCode,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    group.inviteCode!,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: _handleRegenerateInvite,
+                    icon: const Icon(Icons.refresh),
+                    label: Text(l10n.familySyncRegenerateInvite),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: 16),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.familySyncMembers,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                ...group.members.map(
+                  (member) => PartnerDeviceTile(device: member),
+                ),
               ],
             ),
           ),
         ),
         const SizedBox(height: 24),
-
-        // Unpair button
         OutlinedButton.icon(
-          onPressed: _handleUnpair,
-          icon: const Icon(Icons.link_off),
-          label: Text(l10n.familySyncUnpair),
+          onPressed: _handleLeaveOrDeactivate,
+          icon: Icon(isOwner ? Icons.group_off : Icons.logout),
+          label: Text(
+            isOwner
+                ? l10n.familySyncDeactivateGroup
+                : l10n.familySyncLeaveGroup,
+          ),
           style: OutlinedButton.styleFrom(
             foregroundColor: Theme.of(context).colorScheme.error,
-            side: BorderSide(
-              color: Theme.of(context).colorScheme.error,
-            ),
+            side: BorderSide(color: Theme.of(context).colorScheme.error),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildUnpairedContent() {
+  Widget _buildEmptyState() {
     final l10n = S.of(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.devices,
+            Icons.groups_2_outlined,
             size: 64,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
@@ -207,8 +302,8 @@ class _PairManagementScreenState extends ConsumerState<PairManagementScreen> {
           Text(
             l10n.familySyncPairPrompt,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -224,13 +319,10 @@ class _PairManagementScreenState extends ConsumerState<PairManagementScreen> {
           Text(
             label,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          Text(value, style: Theme.of(context).textTheme.bodyMedium),
         ],
       ),
     );

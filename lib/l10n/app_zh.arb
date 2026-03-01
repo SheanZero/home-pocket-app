@@ -185,19 +185,19 @@
   "@familySync": {
     "description": "Title for the family sync feature"
   },
-  "familySyncShowMyCode": "显示我的码",
+  "familySyncShowMyCode": "创建分组",
   "@familySyncShowMyCode": {
     "description": "Tab label to show pairing code"
   },
-  "familySyncEnterPartnerCode": "输入配对码",
+  "familySyncEnterPartnerCode": "加入分组",
   "@familySyncEnterPartnerCode": {
     "description": "Tab label to enter partner's pairing code"
   },
-  "familySyncPairCode": "配对码",
+  "familySyncPairCode": "邀请码",
   "@familySyncPairCode": {
     "description": "Label for the pairing code"
   },
-  "familySyncScanOrEnter": "在伴侣设备上扫描二维码或输入以下配对码",
+  "familySyncScanOrEnter": "将此邀请码或二维码分享给家人，让他们加入你的分组",
   "@familySyncScanOrEnter": {
     "description": "Instructions for sharing the pairing code"
   },
@@ -209,7 +209,7 @@
   "@familySyncRegenerate": {
     "description": "Button to regenerate pairing code"
   },
-  "familySyncEnterDigitCode": "输入6位配对码",
+  "familySyncEnterDigitCode": "输入6位邀请码",
   "@familySyncEnterDigitCode": {
     "description": "Placeholder for pairing code input field"
   },
@@ -217,15 +217,15 @@
   "@familySyncSubmit": {
     "description": "Submit button for pairing code"
   },
-  "familySyncPairedDevice": "已配对设备",
+  "familySyncPairedDevice": "家庭分组",
   "@familySyncPairedDevice": {
     "description": "Section title for paired device info"
   },
-  "familySyncPairInfo": "配对信息",
+  "familySyncPairInfo": "分组信息",
   "@familySyncPairInfo": {
     "description": "Section title for pair details"
   },
-  "familySyncPairId": "配对ID",
+  "familySyncPairId": "分组ID",
   "@familySyncPairId": {
     "description": "Label for pair ID"
   },
@@ -265,11 +265,11 @@
       }
     }
   },
-  "familySyncNoDevicePaired": "未配对任何设备",
+  "familySyncNoDevicePaired": "尚未加入任何家庭分组",
   "@familySyncNoDevicePaired": {
     "description": "Shown when no device is paired"
   },
-  "familySyncPairPrompt": "与家人配对以同步交易记录",
+  "familySyncPairPrompt": "创建或加入家庭分组以同步交易记录",
   "@familySyncPairPrompt": {
     "description": "Prompt to pair with a family member"
   },
@@ -277,7 +277,7 @@
   "@familySyncStatusSynced": {
     "description": "Sync status description when synced"
   },
-  "familySyncStatusSyncing": "正在与伴侣同步...",
+  "familySyncStatusSyncing": "正在与分组同步...",
   "@familySyncStatusSyncing": {
     "description": "Sync status description when syncing"
   },
@@ -289,11 +289,11 @@
   "@familySyncStatusError": {
     "description": "Sync status description when error"
   },
-  "familySyncStatusPairing": "配对中...",
+  "familySyncStatusPairing": "分组设置中...",
   "@familySyncStatusPairing": {
     "description": "Sync status description when pairing"
   },
-  "familySyncStatusUnpaired": "点击与家人配对",
+  "familySyncStatusUnpaired": "点击创建或加入家庭分组",
   "@familySyncStatusUnpaired": {
     "description": "Sync status description when unpaired"
   },
@@ -313,9 +313,101 @@
   "@familySyncBadgeError": {
     "description": "Badge label for error status"
   },
-  "familySyncBadgePairing": "配对中",
+  "familySyncBadgePairing": "设置中",
   "@familySyncBadgePairing": {
     "description": "Badge label for pairing status"
+  },
+  "familySyncCreatingGroup": "正在创建分组...",
+  "@familySyncCreatingGroup": {
+    "description": "Loading text while creating a group"
+  },
+  "familySyncJoinGroup": "加入分组",
+  "@familySyncJoinGroup": {
+    "description": "Button label for joining a group"
+  },
+  "familySyncJoinSuccess": "已加入分组，正在等待所有者确认...",
+  "@familySyncJoinSuccess": {
+    "description": "Snackbar text shown after joining a group"
+  },
+  "familySyncLeaveGroup": "退出分组",
+  "@familySyncLeaveGroup": {
+    "description": "Button label to leave a group"
+  },
+  "familySyncDeactivateGroup": "停用分组",
+  "@familySyncDeactivateGroup": {
+    "description": "Button label to deactivate a group"
+  },
+  "familySyncLeaveGroupConfirm": "确定要退出这个家庭分组吗？此设备将停止同步，直到再次加入。",
+  "@familySyncLeaveGroupConfirm": {
+    "description": "Confirmation message for leaving a group"
+  },
+  "familySyncDeactivateGroupConfirm": "确定要为所有成员停用这个家庭分组吗？在创建新分组前，同步将全部停止。",
+  "@familySyncDeactivateGroupConfirm": {
+    "description": "Confirmation message for deactivating a group"
+  },
+  "familySyncLeaveGroupFailed": "退出分组失败: {message}",
+  "@familySyncLeaveGroupFailed": {
+    "description": "Error message when leaving a group fails",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "网络错误"
+      }
+    }
+  },
+  "familySyncDeactivateGroupFailed": "停用分组失败: {message}",
+  "@familySyncDeactivateGroupFailed": {
+    "description": "Error message when deactivating a group fails",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "网络错误"
+      }
+    }
+  },
+  "familySyncRegenerateInvite": "重新生成邀请码",
+  "@familySyncRegenerateInvite": {
+    "description": "Button label to regenerate the group invite code"
+  },
+  "familySyncRegenerateInviteFailed": "重新生成邀请码失败: {message}",
+  "@familySyncRegenerateInviteFailed": {
+    "description": "Error message when regenerating an invite fails",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "网络错误"
+      }
+    }
+  },
+  "familySyncMembers": "成员",
+  "@familySyncMembers": {
+    "description": "Section title for group members"
+  },
+  "familySyncMemberCount": "{count} 位成员",
+  "@familySyncMemberCount": {
+    "description": "Label showing the number of group members",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "familySyncRoleOwner": "所有者",
+  "@familySyncRoleOwner": {
+    "description": "Role label for the group owner"
+  },
+  "familySyncRoleMember": "成员",
+  "@familySyncRoleMember": {
+    "description": "Role label for a regular group member"
+  },
+  "familySyncMemberStatusActive": "已激活",
+  "@familySyncMemberStatusActive": {
+    "description": "Status label for an active group member"
+  },
+  "familySyncMemberStatusPending": "待确认",
+  "@familySyncMemberStatusPending": {
+    "description": "Status label for a pending group member"
   },
   "familySyncBadgeUnpaired": "未配对",
   "@familySyncBadgeUnpaired": {

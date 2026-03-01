@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../application/family_sync/create_pair_use_case.dart';
-import '../../../../application/family_sync/join_pair_use_case.dart';
 import '../../../../generated/app_localizations.dart';
-import '../providers/pair_providers.dart';
+import '../../use_cases/create_group_use_case.dart';
+import '../../use_cases/join_group_use_case.dart';
+import '../providers/group_providers.dart';
 import '../widgets/pair_code_display.dart';
 import '../widgets/pair_code_input.dart';
 
@@ -21,20 +21,20 @@ class PairingScreen extends ConsumerStatefulWidget {
 }
 
 class _PairingScreenState extends ConsumerState<PairingScreen> {
-  CreatePairResult? _createResult;
-  JoinPairResult? _joinResult;
+  CreateGroupResult? _createResult;
+  JoinGroupResult? _joinResult;
   bool _isCreating = false;
   bool _isJoining = false;
 
   @override
   void initState() {
     super.initState();
-    _createPair();
+    _createGroup();
   }
 
-  Future<void> _createPair() async {
+  Future<void> _createGroup() async {
     setState(() => _isCreating = true);
-    final useCase = ref.read(createPairUseCaseProvider);
+    final useCase = ref.read(createGroupUseCaseProvider);
     final result = await useCase.execute(widget.bookId);
     if (mounted) {
       setState(() {
@@ -44,12 +44,12 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
     }
   }
 
-  Future<void> _joinPair(String code) async {
+  Future<void> _joinGroup(String code) async {
     setState(() {
       _isJoining = true;
       _joinResult = null;
     });
-    final useCase = ref.read(joinPairUseCaseProvider);
+    final useCase = ref.read(joinGroupUseCaseProvider);
     final result = await useCase.execute(code);
     if (mounted) {
       setState(() {
@@ -57,18 +57,11 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
         _isJoining = false;
       });
 
-      if (result is JoinPairSuccess) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Paired with ${result.partnerDeviceName}. '
-                'Waiting for confirmation...',
-              ),
-            ),
-          );
-          Navigator.of(context).pop();
-        }
+      if (result is JoinGroupSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(S.of(context).familySyncJoinSuccess)),
+        );
+        Navigator.of(context).pop();
       }
     }
   }
@@ -87,12 +80,7 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            _buildShowCodeTab(),
-            _buildEnterCodeTab(),
-          ],
-        ),
+        body: TabBarView(children: [_buildShowCodeTab(), _buildEnterCodeTab()]),
       ),
     );
   }
@@ -104,52 +92,53 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
 
     final result = _createResult;
     if (result == null) {
-      return const Center(child: Text('Creating pair code...'));
+      return Center(child: Text(S.of(context).familySyncCreatingGroup));
     }
 
     return switch (result) {
-      CreatePairSuccess(:final pairCode, :final qrData, :final expiresAt) =>
-        Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: PairCodeDisplay(
-              pairCode: pairCode,
-              qrData: qrData,
-              expiresAt:
-                  DateTime.fromMillisecondsSinceEpoch(expiresAt * 1000),
-              onRegenerate: _createPair,
+      CreateGroupSuccess(:final inviteCode, :final expiresAt) => Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: PairCodeDisplay(
+            inviteCode: inviteCode,
+            qrData: inviteCode,
+            expiresAt: DateTime.fromMillisecondsSinceEpoch(expiresAt * 1000),
+            onRegenerate: _createGroup,
+          ),
+        ),
+      ),
+      CreateGroupError(:final message) => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Theme.of(context).colorScheme.error,
             ),
-          ),
+            const SizedBox(height: 16),
+            Text(message),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: _createGroup,
+              child: Text(S.of(context).retry),
+            ),
+          ],
         ),
-      CreatePairError(:final message) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.error_outline,
-                  size: 48, color: Theme.of(context).colorScheme.error),
-              const SizedBox(height: 16),
-              Text(message),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: _createPair,
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
+      ),
     };
   }
 
   Widget _buildEnterCodeTab() {
-    final errorMessage = _joinResult is JoinPairError
-        ? (_joinResult as JoinPairError).message
+    final errorMessage = _joinResult is JoinGroupError
+        ? (_joinResult as JoinGroupError).message
         : null;
 
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: PairCodeInput(
-          onSubmit: _joinPair,
+          onSubmit: _joinGroup,
           isLoading: _isJoining,
           errorMessage: errorMessage,
         ),

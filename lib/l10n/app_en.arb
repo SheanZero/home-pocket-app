@@ -500,19 +500,19 @@
   "@familySync": {
     "description": "Title for the family sync feature"
   },
-  "familySyncShowMyCode": "Show My Code",
+  "familySyncShowMyCode": "Create Group",
   "@familySyncShowMyCode": {
     "description": "Tab label to show pairing code"
   },
-  "familySyncEnterPartnerCode": "Enter Partner Code",
+  "familySyncEnterPartnerCode": "Join Group",
   "@familySyncEnterPartnerCode": {
     "description": "Tab label to enter partner's pairing code"
   },
-  "familySyncPairCode": "Pair Code",
+  "familySyncPairCode": "Invite Code",
   "@familySyncPairCode": {
     "description": "Label for the pairing code"
   },
-  "familySyncScanOrEnter": "Scan the QR code or enter the code below on your partner's device",
+  "familySyncScanOrEnter": "Share this invite code or QR with a family member to let them join your group",
   "@familySyncScanOrEnter": {
     "description": "Instructions for sharing the pairing code"
   },
@@ -524,7 +524,7 @@
   "@familySyncRegenerate": {
     "description": "Button to regenerate pairing code"
   },
-  "familySyncEnterDigitCode": "Enter 6-digit code",
+  "familySyncEnterDigitCode": "Enter 6-digit invite code",
   "@familySyncEnterDigitCode": {
     "description": "Placeholder for pairing code input field"
   },
@@ -532,15 +532,15 @@
   "@familySyncSubmit": {
     "description": "Submit button for pairing code"
   },
-  "familySyncPairedDevice": "Paired Device",
+  "familySyncPairedDevice": "Family Group",
   "@familySyncPairedDevice": {
     "description": "Section title for paired device info"
   },
-  "familySyncPairInfo": "Pair Info",
+  "familySyncPairInfo": "Group Info",
   "@familySyncPairInfo": {
     "description": "Section title for pair details"
   },
-  "familySyncPairId": "Pair ID",
+  "familySyncPairId": "Group ID",
   "@familySyncPairId": {
     "description": "Label for pair ID"
   },
@@ -580,11 +580,11 @@
       }
     }
   },
-  "familySyncNoDevicePaired": "No device paired",
+  "familySyncNoDevicePaired": "No family group",
   "@familySyncNoDevicePaired": {
     "description": "Shown when no device is paired"
   },
-  "familySyncPairPrompt": "Pair with a family member to sync transactions",
+  "familySyncPairPrompt": "Create or join a family group to sync transactions",
   "@familySyncPairPrompt": {
     "description": "Prompt to pair with a family member"
   },
@@ -592,7 +592,7 @@
   "@familySyncStatusSynced": {
     "description": "Sync status description when synced"
   },
-  "familySyncStatusSyncing": "Syncing with partner...",
+  "familySyncStatusSyncing": "Syncing with group...",
   "@familySyncStatusSyncing": {
     "description": "Sync status description when syncing"
   },
@@ -604,11 +604,11 @@
   "@familySyncStatusError": {
     "description": "Sync status description when error"
   },
-  "familySyncStatusPairing": "Pairing in progress...",
+  "familySyncStatusPairing": "Group setup in progress...",
   "@familySyncStatusPairing": {
     "description": "Sync status description when pairing"
   },
-  "familySyncStatusUnpaired": "Tap to pair with a family member",
+  "familySyncStatusUnpaired": "Tap to create or join a family group",
   "@familySyncStatusUnpaired": {
     "description": "Sync status description when unpaired"
   },
@@ -628,9 +628,101 @@
   "@familySyncBadgeError": {
     "description": "Badge label for error status"
   },
-  "familySyncBadgePairing": "Pairing",
+  "familySyncBadgePairing": "Setup",
   "@familySyncBadgePairing": {
     "description": "Badge label for pairing status"
+  },
+  "familySyncCreatingGroup": "Creating group...",
+  "@familySyncCreatingGroup": {
+    "description": "Loading text while creating a group"
+  },
+  "familySyncJoinGroup": "Join Group",
+  "@familySyncJoinGroup": {
+    "description": "Button label for joining a group"
+  },
+  "familySyncJoinSuccess": "Joined the group. Waiting for owner confirmation...",
+  "@familySyncJoinSuccess": {
+    "description": "Snackbar text shown after joining a group"
+  },
+  "familySyncLeaveGroup": "Leave Group",
+  "@familySyncLeaveGroup": {
+    "description": "Button label to leave a group"
+  },
+  "familySyncDeactivateGroup": "Deactivate Group",
+  "@familySyncDeactivateGroup": {
+    "description": "Button label to deactivate a group"
+  },
+  "familySyncLeaveGroupConfirm": "Leave this family group? Sync will stop on this device until you join again.",
+  "@familySyncLeaveGroupConfirm": {
+    "description": "Confirmation message for leaving a group"
+  },
+  "familySyncDeactivateGroupConfirm": "Deactivate this family group for everyone? Sync will stop for all members until a new group is created.",
+  "@familySyncDeactivateGroupConfirm": {
+    "description": "Confirmation message for deactivating a group"
+  },
+  "familySyncLeaveGroupFailed": "Leave group failed: {message}",
+  "@familySyncLeaveGroupFailed": {
+    "description": "Error message when leaving a group fails",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "familySyncDeactivateGroupFailed": "Deactivate group failed: {message}",
+  "@familySyncDeactivateGroupFailed": {
+    "description": "Error message when deactivating a group fails",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "familySyncRegenerateInvite": "Regenerate Invite",
+  "@familySyncRegenerateInvite": {
+    "description": "Button label to regenerate the group invite code"
+  },
+  "familySyncRegenerateInviteFailed": "Regenerate invite failed: {message}",
+  "@familySyncRegenerateInviteFailed": {
+    "description": "Error message when regenerating an invite fails",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "familySyncMembers": "Members",
+  "@familySyncMembers": {
+    "description": "Section title for group members"
+  },
+  "familySyncMemberCount": "{count} members",
+  "@familySyncMemberCount": {
+    "description": "Label showing the number of group members",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "familySyncRoleOwner": "Owner",
+  "@familySyncRoleOwner": {
+    "description": "Role label for the group owner"
+  },
+  "familySyncRoleMember": "Member",
+  "@familySyncRoleMember": {
+    "description": "Role label for a regular group member"
+  },
+  "familySyncMemberStatusActive": "Active",
+  "@familySyncMemberStatusActive": {
+    "description": "Status label for an active group member"
+  },
+  "familySyncMemberStatusPending": "Pending",
+  "@familySyncMemberStatusPending": {
+    "description": "Status label for a pending group member"
   },
   "familySyncBadgeUnpaired": "Unpaired",
   "@familySyncBadgeUnpaired": {

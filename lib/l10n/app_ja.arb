@@ -185,19 +185,19 @@
   "@familySync": {
     "description": "Title for the family sync feature"
   },
-  "familySyncShowMyCode": "コードを表示",
+  "familySyncShowMyCode": "グループを作成",
   "@familySyncShowMyCode": {
     "description": "Tab label to show pairing code"
   },
-  "familySyncEnterPartnerCode": "コードを入力",
+  "familySyncEnterPartnerCode": "グループに参加",
   "@familySyncEnterPartnerCode": {
     "description": "Tab label to enter partner's pairing code"
   },
-  "familySyncPairCode": "ペアリングコード",
+  "familySyncPairCode": "招待コード",
   "@familySyncPairCode": {
     "description": "Label for the pairing code"
   },
-  "familySyncScanOrEnter": "パートナーのデバイスでQRコードをスキャンするか、以下のコードを入力してください",
+  "familySyncScanOrEnter": "この招待コードまたはQRを家族に共有して、グループに参加してもらいましょう",
   "@familySyncScanOrEnter": {
     "description": "Instructions for sharing the pairing code"
   },
@@ -209,7 +209,7 @@
   "@familySyncRegenerate": {
     "description": "Button to regenerate pairing code"
   },
-  "familySyncEnterDigitCode": "6桁のコードを入力",
+  "familySyncEnterDigitCode": "6桁の招待コードを入力",
   "@familySyncEnterDigitCode": {
     "description": "Placeholder for pairing code input field"
   },
@@ -217,15 +217,15 @@
   "@familySyncSubmit": {
     "description": "Submit button for pairing code"
   },
-  "familySyncPairedDevice": "ペアリング済みデバイス",
+  "familySyncPairedDevice": "ファミリーグループ",
   "@familySyncPairedDevice": {
     "description": "Section title for paired device info"
   },
-  "familySyncPairInfo": "ペアリング情報",
+  "familySyncPairInfo": "グループ情報",
   "@familySyncPairInfo": {
     "description": "Section title for pair details"
   },
-  "familySyncPairId": "ペアID",
+  "familySyncPairId": "グループID",
   "@familySyncPairId": {
     "description": "Label for pair ID"
   },
@@ -265,11 +265,11 @@
       }
     }
   },
-  "familySyncNoDevicePaired": "ペアリング済みデバイスなし",
+  "familySyncNoDevicePaired": "参加中のファミリーグループはありません",
   "@familySyncNoDevicePaired": {
     "description": "Shown when no device is paired"
   },
-  "familySyncPairPrompt": "家族とペアリングして取引を同期しましょう",
+  "familySyncPairPrompt": "ファミリーグループを作成または参加して取引を同期しましょう",
   "@familySyncPairPrompt": {
     "description": "Prompt to pair with a family member"
   },
@@ -277,7 +277,7 @@
   "@familySyncStatusSynced": {
     "description": "Sync status description when synced"
   },
-  "familySyncStatusSyncing": "パートナーと同期中...",
+  "familySyncStatusSyncing": "グループと同期中...",
   "@familySyncStatusSyncing": {
     "description": "Sync status description when syncing"
   },
@@ -289,11 +289,11 @@
   "@familySyncStatusError": {
     "description": "Sync status description when error"
   },
-  "familySyncStatusPairing": "ペアリング中...",
+  "familySyncStatusPairing": "グループ設定中...",
   "@familySyncStatusPairing": {
     "description": "Sync status description when pairing"
   },
-  "familySyncStatusUnpaired": "タップして家族とペアリング",
+  "familySyncStatusUnpaired": "タップしてファミリーグループを作成または参加",
   "@familySyncStatusUnpaired": {
     "description": "Sync status description when unpaired"
   },
@@ -313,9 +313,101 @@
   "@familySyncBadgeError": {
     "description": "Badge label for error status"
   },
-  "familySyncBadgePairing": "ペアリング中",
+  "familySyncBadgePairing": "設定中",
   "@familySyncBadgePairing": {
     "description": "Badge label for pairing status"
+  },
+  "familySyncCreatingGroup": "グループを作成しています...",
+  "@familySyncCreatingGroup": {
+    "description": "Loading text while creating a group"
+  },
+  "familySyncJoinGroup": "グループに参加",
+  "@familySyncJoinGroup": {
+    "description": "Button label for joining a group"
+  },
+  "familySyncJoinSuccess": "グループに参加しました。オーナーの承認を待っています...",
+  "@familySyncJoinSuccess": {
+    "description": "Snackbar text shown after joining a group"
+  },
+  "familySyncLeaveGroup": "グループを退出",
+  "@familySyncLeaveGroup": {
+    "description": "Button label to leave a group"
+  },
+  "familySyncDeactivateGroup": "グループを無効化",
+  "@familySyncDeactivateGroup": {
+    "description": "Button label to deactivate a group"
+  },
+  "familySyncLeaveGroupConfirm": "このファミリーグループを退出しますか？再参加するまでこの端末での同期は停止します。",
+  "@familySyncLeaveGroupConfirm": {
+    "description": "Confirmation message for leaving a group"
+  },
+  "familySyncDeactivateGroupConfirm": "このファミリーグループを全員に対して無効化しますか？新しいグループを作成するまで同期は停止します。",
+  "@familySyncDeactivateGroupConfirm": {
+    "description": "Confirmation message for deactivating a group"
+  },
+  "familySyncLeaveGroupFailed": "グループ退出に失敗: {message}",
+  "@familySyncLeaveGroupFailed": {
+    "description": "Error message when leaving a group fails",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "ネットワークエラー"
+      }
+    }
+  },
+  "familySyncDeactivateGroupFailed": "グループ無効化に失敗: {message}",
+  "@familySyncDeactivateGroupFailed": {
+    "description": "Error message when deactivating a group fails",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "ネットワークエラー"
+      }
+    }
+  },
+  "familySyncRegenerateInvite": "招待コードを再生成",
+  "@familySyncRegenerateInvite": {
+    "description": "Button label to regenerate the group invite code"
+  },
+  "familySyncRegenerateInviteFailed": "招待コードの再生成に失敗: {message}",
+  "@familySyncRegenerateInviteFailed": {
+    "description": "Error message when regenerating an invite fails",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "ネットワークエラー"
+      }
+    }
+  },
+  "familySyncMembers": "メンバー",
+  "@familySyncMembers": {
+    "description": "Section title for group members"
+  },
+  "familySyncMemberCount": "{count}人のメンバー",
+  "@familySyncMemberCount": {
+    "description": "Label showing the number of group members",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "familySyncRoleOwner": "オーナー",
+  "@familySyncRoleOwner": {
+    "description": "Role label for the group owner"
+  },
+  "familySyncRoleMember": "メンバー",
+  "@familySyncRoleMember": {
+    "description": "Role label for a regular group member"
+  },
+  "familySyncMemberStatusActive": "有効",
+  "@familySyncMemberStatusActive": {
+    "description": "Status label for an active group member"
+  },
+  "familySyncMemberStatusPending": "承認待ち",
+  "@familySyncMemberStatusPending": {
+    "description": "Status label for a pending group member"
   },
   "familySyncBadgeUnpaired": "未ペアリング",
   "@familySyncBadgeUnpaired": {

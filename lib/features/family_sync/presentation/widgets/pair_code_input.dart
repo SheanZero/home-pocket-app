@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../generated/app_localizations.dart';
+
 /// Input widget for entering a 6-digit pair code.
 class PairCodeInput extends StatefulWidget {
   const PairCodeInput({
@@ -39,10 +41,13 @@ class _PairCodeInputState extends State<PairCodeInput> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = S.of(context);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        Text(l10n.familySyncPairCode, style: theme.textTheme.titleMedium),
+        const SizedBox(height: 12),
         TextField(
           controller: _controller,
           focusNode: _focusNode,
@@ -58,14 +63,11 @@ class _PairCodeInputState extends State<PairCodeInput> {
             LengthLimitingTextInputFormatter(6),
           ],
           decoration: InputDecoration(
-            hintText: '000 000',
+            hintText: l10n.familySyncEnterDigitCode,
             hintStyle: theme.textTheme.headlineLarge?.copyWith(
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
-              letterSpacing: 8,
             ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 24,
               vertical: 16,
@@ -80,7 +82,8 @@ class _PairCodeInputState extends State<PairCodeInput> {
         SizedBox(
           width: double.infinity,
           child: FilledButton(
-            onPressed: _controller.text.replaceAll(' ', '').length == 6 &&
+            onPressed:
+                _controller.text.replaceAll(' ', '').length == 6 &&
                     !widget.isLoading
                 ? _handleSubmit
                 : null,
@@ -90,7 +93,7 @@ class _PairCodeInputState extends State<PairCodeInput> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Join'),
+                : Text(l10n.familySyncJoinGroup),
           ),
         ),
       ],
