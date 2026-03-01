@@ -241,7 +241,7 @@ void main() {
       // Create a date that is always in the future
       final now = DateTime.now();
       final futureMonth = now.month == 12 ? 1 : now.month + 1;
-      final result = parser.extractDate('${futureMonth}月15日のランチ');
+      final result = parser.extractDate('$futureMonth月15日のランチ');
       if (futureMonth > now.month) {
         // Only applies if month is actually in the future of current year
         expect(result?.year, equals(now.year - 1));
@@ -410,10 +410,15 @@ void main() {
       expect(result?.day, equals(expected.day));
     });
 
-    test('extracts date from mixed en input: yesterday spent 680 yen at McDonalds', () {
-      final result = parser.extractDate('yesterday spent 680 yen at McDonalds');
-      final expected = DateTime.now().subtract(const Duration(days: 1));
-      expect(result?.day, equals(expected.day));
-    });
+    test(
+      'extracts date from mixed en input: yesterday spent 680 yen at McDonalds',
+      () {
+        final result = parser.extractDate(
+          'yesterday spent 680 yen at McDonalds',
+        );
+        final expected = DateTime.now().subtract(const Duration(days: 1));
+        expect(result?.day, equals(expected.day));
+      },
+    );
   });
 }

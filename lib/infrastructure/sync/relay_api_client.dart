@@ -54,8 +54,8 @@ class RelayApiClient {
     required this.baseUrl,
     required RequestSigner signer,
     http.Client? httpClient,
-  })  : _signer = signer,
-        _httpClient = httpClient ?? http.Client();
+  }) : _signer = signer,
+       _httpClient = httpClient ?? http.Client();
 
   final String baseUrl;
   final RequestSigner _signer;
@@ -84,7 +84,7 @@ class RelayApiClient {
       'publicKey': publicKey,
       'deviceName': deviceName,
       'platform': platform,
-      if (pushToken != null) 'pushToken': pushToken,
+      ...?pushToken == null ? null : {'pushToken': pushToken},
     });
 
     final response = await _post(
@@ -129,6 +129,66 @@ class RelayApiClient {
     return _parseResponse(response);
   }
 
+  // ── Groups ──
+
+  Future<Map<String, dynamic>> createGroup({required String bookId}) async {
+    final response = await _post(
+      '/group/create',
+      jsonEncode({'bookId': bookId}),
+    );
+    return _parseResponse(response);
+  }
+
+  Future<Map<String, dynamic>> joinGroup({required String inviteCode}) async {
+    final response = await _post(
+      '/group/join',
+      jsonEncode({'inviteCode': inviteCode}),
+    );
+    return _parseResponse(response);
+  }
+
+  Future<Map<String, dynamic>> confirmMember({
+    required String groupId,
+    required String deviceId,
+  }) async {
+    final response = await _post(
+      '/group/confirm',
+      jsonEncode({'groupId': groupId, 'deviceId': deviceId}),
+    );
+    return _parseResponse(response);
+  }
+
+  Future<Map<String, dynamic>> getGroupStatus(String groupId) async {
+    final response = await _get('/group/$groupId/status');
+    return _parseResponse(response);
+  }
+
+  Future<void> deactivateGroup(String groupId) async {
+    final response = await _delete('/group/$groupId');
+    _parseResponse(response);
+  }
+
+  Future<void> leaveGroup(String groupId) async {
+    final response = await _post('/group/$groupId/leave', '{}');
+    _parseResponse(response);
+  }
+
+  Future<Map<String, dynamic>> removeMember({
+    required String groupId,
+    required String deviceId,
+  }) async {
+    final response = await _post(
+      '/group/$groupId/remove',
+      jsonEncode({'deviceId': deviceId}),
+    );
+    return _parseResponse(response);
+  }
+
+  Future<Map<String, dynamic>> regenerateInvite(String groupId) async {
+    final response = await _post('/group/$groupId/invite', '{}');
+    return _parseResponse(response);
+  }
+
   /// Join an existing pair with a short code.
   ///
   /// Returns: {pairId, partnerDeviceId, partnerPublicKey, partnerDeviceName, status}
@@ -154,10 +214,7 @@ class RelayApiClient {
     required String pairId,
     required bool accept,
   }) async {
-    final body = jsonEncode({
-      'pairId': pairId,
-      'accept': accept,
-    });
+    final body = jsonEncode({'pairId': pairId, 'accept': accept});
 
     final response = await _post('/pair/confirm', body);
     return _parseResponse(response);
@@ -203,6 +260,30 @@ class RelayApiClient {
     return _parseResponse(response);
   }
 
+  /// Push encrypted sync data to a group.
+  ///
+  /// Returns: {recipientCount}
+  Future<Map<String, dynamic>> pushGroupSync({
+    required String groupId,
+    required String payload,
+    required Map<String, int> vectorClock,
+    required int operationCount,
+    int chunkIndex = 0,
+    int totalChunks = 1,
+  }) async {
+    final body = jsonEncode({
+      'groupId': groupId,
+      'payload': payload,
+      'vectorClock': vectorClock,
+      'operationCount': operationCount,
+      'chunkIndex': chunkIndex,
+      'totalChunks': totalChunks,
+    });
+
+    final response = await _post('/sync/push', body);
+    return _parseResponse(response);
+  }
+
   /// Pull pending sync messages since cursor.
   ///
   /// Returns: {messages: [...], hasMore: bool}
@@ -223,14 +304,9 @@ class RelayApiClient {
 
   // ── Private HTTP helpers ──
 
-  Future<http.Response> _get(
-    String path, {
-    bool authenticated = true,
-  }) async {
+  Future<http.Response> _get(String path, {bool authenticated = true}) async {
     final url = Uri.parse('$baseUrl$path');
-    final headers = <String, String>{
-      'Content-Type': 'application/json',
-    };
+    final headers = <String, String>{'Content-Type': 'application/json'};
 
     if (authenticated) {
       headers['Authorization'] = await _signer.signRequest(
@@ -249,9 +325,7 @@ class RelayApiClient {
     bool authenticated = true,
   }) async {
     final url = Uri.parse('$baseUrl$path');
-    final headers = <String, String>{
-      'Content-Type': 'application/json',
-    };
+    final headers = <String, String>{'Content-Type': 'application/json'};
 
     if (authenticated) {
       headers['Authorization'] = await _signer.signRequest(
@@ -270,9 +344,7 @@ class RelayApiClient {
     bool authenticated = true,
   }) async {
     final url = Uri.parse('$baseUrl$path');
-    final headers = <String, String>{
-      'Content-Type': 'application/json',
-    };
+    final headers = <String, String>{'Content-Type': 'application/json'};
 
     if (authenticated) {
       headers['Authorization'] = await _signer.signRequest(
@@ -290,9 +362,7 @@ class RelayApiClient {
     bool authenticated = true,
   }) async {
     final url = Uri.parse('$baseUrl$path');
-    final headers = <String, String>{
-      'Content-Type': 'application/json',
-    };
+    final headers = <String, String>{'Content-Type': 'application/json'};
 
     if (authenticated) {
       headers['Authorization'] = await _signer.signRequest(
