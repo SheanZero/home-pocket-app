@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:pinenacl/tweetnacl.dart';
 import 'package:pinenacl/x25519.dart';
@@ -17,6 +18,15 @@ class E2EEService {
 
   final KeyManager _keyManager;
 
+  String generateGroupKey() {
+    final random = Random.secure();
+    final key = Uint8List(32);
+    for (var index = 0; index < key.length; index++) {
+      key[index] = random.nextInt(256);
+    }
+    return base64Encode(key);
+  }
+
   /// Encrypt plaintext for the paired partner.
   ///
   /// Returns base64(nonce_24bytes + ciphertext).
@@ -34,8 +44,7 @@ class E2EEService {
 
     // Convert Ed25519 keys to X25519
     final myX25519Sk = _ed25519SeedToX25519Private(myEd25519Seed);
-    final recipientX25519Pk =
-        _ed25519PublicToX25519Public(recipientEd25519Pub);
+    final recipientX25519Pk = _ed25519PublicToX25519Public(recipientEd25519Pub);
 
     // Create NaCl Box and encrypt
     final box = Box(
@@ -83,6 +92,77 @@ class E2EEService {
     final encryptedMessage = EncryptedMessage.fromList(Uint8List.fromList(raw));
     final plainBytes = box.decrypt(encryptedMessage);
     return utf8.decode(plainBytes);
+  }
+
+  String encryptForGroup({
+    required String plaintext,
+    required String groupKeyBase64,
+  }) {
+    final groupKey = base64Decode(groupKeyBase64);
+    final box = SecretBox(Uint8List.fromList(groupKey));
+    final encrypted = box.encrypt(Uint8List.fromList(utf8.encode(plaintext)));
+    final combined =
+        Uint8List(encrypted.nonce.length + encrypted.cipherText.length)
+          ..setAll(0, encrypted.nonce)
+          ..setAll(encrypted.nonce.length, encrypted.cipherText);
+
+    return jsonEncode({'v': 2, 't': 'D', 'p': base64Encode(combined)});
+  }
+
+  String decryptFromGroup({
+    required String encryptedPayload,
+    required String groupKeyBase64,
+  }) {
+    final envelope = jsonDecode(encryptedPayload) as Map<String, dynamic>;
+    final raw = base64Decode(envelope['p'] as String);
+    final nonce = Uint8List.fromList(raw.sublist(0, 24));
+    final cipherText = Uint8List.fromList(raw.sublist(24));
+    final groupKey = base64Decode(groupKeyBase64);
+    final box = SecretBox(Uint8List.fromList(groupKey));
+    final decrypted = box.decrypt(ByteList(cipherText), nonce: nonce);
+    return utf8.decode(decrypted);
+  }
+
+  Future<String> encryptGroupKeyForMember({
+    required String groupKeyBase64,
+    required String memberDeviceId,
+    required String memberPublicKey,
+  }) async {
+    final encrypted = await encrypt(
+      plaintext: groupKeyBase64,
+      recipientPublicKey: memberPublicKey,
+    );
+    return jsonEncode({
+      'v': 2,
+      't': 'K',
+      'toDeviceId': memberDeviceId,
+      'p': encrypted,
+    });
+  }
+
+  Future<String> decryptGroupKeyFromOwner({
+    required String encryptedPayload,
+    required String ownerPublicKey,
+  }) async {
+    final envelope = jsonDecode(encryptedPayload) as Map<String, dynamic>;
+    return decrypt(
+      ciphertext: envelope['p'] as String,
+      senderPublicKey: ownerPublicKey,
+    );
+  }
+
+  static String detectPayloadType(String payload) {
+    if (payload.startsWith('{')) {
+      try {
+        final envelope = jsonDecode(payload) as Map<String, dynamic>;
+        if (envelope['v'] == 2) {
+          return envelope['t'] == 'K' ? 'v2_key' : 'v2_data';
+        }
+      } catch (_) {
+        return 'v1';
+      }
+    }
+    return 'v1';
   }
 
   /// Convert Ed25519 seed (32 bytes) to X25519 private key (32 bytes).
