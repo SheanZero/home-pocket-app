@@ -12,29 +12,28 @@ typedef PushMessageHandler = Future<void> Function(Map<String, dynamic> data);
 /// Handles:
 /// - Registering/refreshing FCM/APNs push tokens with the relay server
 /// - Dispatching incoming push messages by type:
-///   - `pair_confirmed` -> confirm local pair and pull sync
+///   - `member_confirmed` -> confirm local group membership and pull sync
 ///   - `sync_available` -> pull sync
-///   - `pair_request` -> foreground notification only
+///   - `join_request` -> foreground notification only
 ///
 /// NOTE: Firebase must be configured (GoogleService-Info.plist / google-services.json)
 /// before this service can be used. During development without Firebase,
 /// sync can be triggered manually via pull-on-resume.
 class PushNotificationService {
-  PushNotificationService({
-    required RelayApiClient apiClient,
-  }) : _apiClient = apiClient;
+  PushNotificationService({required RelayApiClient apiClient})
+    : _apiClient = apiClient;
 
   final RelayApiClient _apiClient;
 
-  PushMessageHandler? _onPairConfirmed;
+  PushMessageHandler? _onMemberConfirmed;
   PushMessageHandler? _onSyncAvailable;
 
   /// Register handlers for push notification types.
   void registerHandlers({
-    PushMessageHandler? onPairConfirmed,
+    PushMessageHandler? onMemberConfirmed,
     PushMessageHandler? onSyncAvailable,
   }) {
-    _onPairConfirmed = onPairConfirmed;
+    _onMemberConfirmed = onMemberConfirmed;
     _onSyncAvailable = onSyncAvailable;
   }
 
@@ -68,10 +67,7 @@ class PushNotificationService {
   /// Register push token with the relay server.
   Future<void> registerToken(String token) async {
     final platform = Platform.isIOS ? 'apns' : 'fcm';
-    await _apiClient.updatePushToken(
-      pushToken: token,
-      pushPlatform: platform,
-    );
+    await _apiClient.updatePushToken(pushToken: token, pushPlatform: platform);
   }
 
   /// Handle incoming push notification data.
@@ -81,10 +77,17 @@ class PushNotificationService {
     final type = data['type'] as String?;
 
     switch (type) {
+      case 'member_confirmed':
+        await _onMemberConfirmed?.call(data);
+        break;
       case 'pair_confirmed':
-        await _onPairConfirmed?.call(data);
+        await _onMemberConfirmed?.call(data);
+        break;
       case 'sync_available':
         await _onSyncAvailable?.call(data);
+        break;
+      case 'join_request':
+        break;
       case 'pair_request':
         // Handled by system notification display, no code action needed
         break;

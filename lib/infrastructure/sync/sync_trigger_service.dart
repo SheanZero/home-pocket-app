@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../application/family_sync/pull_sync_use_case.dart';
 import '../../application/family_sync/push_sync_use_case.dart';
-import '../../features/family_sync/domain/repositories/pair_repository.dart';
+import '../../features/family_sync/domain/repositories/group_repository.dart';
 import 'push_notification_service.dart';
 import 'sync_lifecycle_observer.dart';
 import 'sync_queue_manager.dart';
@@ -10,21 +10,21 @@ import 'sync_queue_manager.dart';
 /// Coordinates sync triggers from various sources:
 /// - App lifecycle (resume -> pull)
 /// - Transaction changes (create/update/delete -> push)
-/// - Push notifications (pair_confirmed -> confirm local + pull, sync_available -> pull)
+/// - Push notifications (member_confirmed -> confirm local + pull, sync_available -> pull)
 class SyncTriggerService {
   SyncTriggerService({
-    required PairRepository pairRepo,
+    required GroupRepository groupRepo,
     required PullSyncUseCase pullSync,
     required PushSyncUseCase pushSync,
     required SyncQueueManager queueManager,
     required PushNotificationService pushNotificationService,
-  })  : _pairRepo = pairRepo,
-        _pullSync = pullSync,
-        _pushSync = pushSync,
-        _queueManager = queueManager,
-        _pushNotificationService = pushNotificationService;
+  }) : _groupRepo = groupRepo,
+       _pullSync = pullSync,
+       _pushSync = pushSync,
+       _queueManager = queueManager,
+       _pushNotificationService = pushNotificationService;
 
-  final PairRepository _pairRepo;
+  final GroupRepository _groupRepo;
   final PullSyncUseCase _pullSync;
   final PushSyncUseCase _pushSync;
   final SyncQueueManager _queueManager;
@@ -37,14 +37,12 @@ class SyncTriggerService {
   /// Sets up lifecycle observer and push notification handlers.
   void initialize() {
     // Set up lifecycle observer
-    _lifecycleObserver = SyncLifecycleObserver(
-      onResume: _handleAppResume,
-    );
+    _lifecycleObserver = SyncLifecycleObserver(onResume: _handleAppResume);
     _lifecycleObserver!.start();
 
     // Register push notification handlers
     _pushNotificationService.registerHandlers(
-      onPairConfirmed: _handlePairConfirmed,
+      onMemberConfirmed: _handleMemberConfirmed,
       onSyncAvailable: _handleSyncAvailable,
     );
   }
@@ -57,10 +55,10 @@ class SyncTriggerService {
 
   /// Called when app resumes from background.
   ///
-  /// If paired, pulls pending sync messages and drains offline queue.
+  /// If a group is active, pulls pending sync messages and drains offline queue.
   Future<void> _handleAppResume() async {
-    final pair = await _pairRepo.getActivePair();
-    if (pair == null) return;
+    final group = await _groupRepo.getActiveGroup();
+    if (group == null) return;
 
     if (kDebugMode) {
       debugPrint('SyncTrigger: app resumed, pulling sync data');
@@ -72,7 +70,7 @@ class SyncTriggerService {
 
   /// Called after a transaction is created, updated, or deleted.
   ///
-  /// If paired, pushes the CRDT operations to the partner.
+  /// If a group is active, pushes the CRDT operations to the relay server.
   /// Operations format:
   /// ```json
   /// [{"op": "insert", "table": "transactions", "data": {...}}]
@@ -84,8 +82,8 @@ class SyncTriggerService {
     required List<Map<String, dynamic>> operations,
     Map<String, int> vectorClock = const {},
   }) async {
-    final pair = await _pairRepo.getActivePair();
-    if (pair == null) return;
+    final group = await _groupRepo.getActiveGroup();
+    if (group == null) return;
 
     if (kDebugMode) {
       debugPrint(
@@ -93,14 +91,13 @@ class SyncTriggerService {
       );
     }
 
-    await _pushSync.execute(
-      operations: operations,
-      vectorClock: vectorClock,
-    );
+    await _pushSync.execute(operations: operations, vectorClock: vectorClock);
   }
 
   /// Convenience method for pushing a single create operation.
-  Future<void> onTransactionCreated(Map<String, dynamic> transactionData) async {
+  Future<void> onTransactionCreated(
+    Map<String, dynamic> transactionData,
+  ) async {
     await onTransactionChanged(
       operations: [
         {'op': 'insert', 'table': 'transactions', 'data': transactionData},
@@ -109,7 +106,9 @@ class SyncTriggerService {
   }
 
   /// Convenience method for pushing a single update operation.
-  Future<void> onTransactionUpdated(Map<String, dynamic> transactionData) async {
+  Future<void> onTransactionUpdated(
+    Map<String, dynamic> transactionData,
+  ) async {
     await onTransactionChanged(
       operations: [
         {'op': 'update', 'table': 'transactions', 'data': transactionData},
@@ -126,47 +125,42 @@ class SyncTriggerService {
     );
   }
 
-  /// Handle push notification: pair confirmed.
+  /// Handle push notification: member confirmed.
   ///
-  /// Device B receives this after Device A confirms the pair.
-  /// We transition Device B's pair from `confirming` -> `active` locally,
+  /// Device B receives this after Device A confirms the membership.
+  /// We transition Device B's group from `confirming` -> `active` locally,
   /// then pull initial sync data from the server.
-  ///
-  /// IMPORTANT: This must NOT call ConfirmPairUseCase (which hits the server).
-  /// The server-side confirmation was already done by Device A. This handler
-  /// only transitions the local pair status.
-  Future<void> _handlePairConfirmed(Map<String, dynamic> data) async {
+  Future<void> _handleMemberConfirmed(Map<String, dynamic> data) async {
     if (kDebugMode) {
-      debugPrint('SyncTrigger: pair confirmed notification received');
+      debugPrint('SyncTrigger: member confirmed notification received');
     }
 
-    final pairId = data['pairId'] as String?;
-    if (pairId == null) return;
+    final groupId = data['groupId'] as String?;
+    if (groupId == null) return;
 
     try {
-      // Get pending/confirming pair
-      final pair = await _pairRepo.getPendingPair();
-      if (pair == null || pair.pairId != pairId) {
+      final group = await _groupRepo.getPendingGroup();
+      if (group == null || group.groupId != groupId) {
         if (kDebugMode) {
           debugPrint(
-            'SyncTrigger: no matching confirming pair found for $pairId',
+            'SyncTrigger: no matching confirming group found for $groupId',
           );
         }
         return;
       }
 
-      // Transition confirming -> active locally
-      await _pairRepo.confirmLocalPair(pairId);
+      await _groupRepo.confirmLocalGroup(groupId);
 
       if (kDebugMode) {
-        debugPrint('SyncTrigger: pair $pairId confirmed locally, pulling sync');
+        debugPrint(
+          'SyncTrigger: group $groupId confirmed locally, pulling sync',
+        );
       }
 
-      // Pull initial sync data
       await _pullSync.execute();
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('SyncTrigger: pair confirmation failed: $e');
+        debugPrint('SyncTrigger: member confirmation failed: $e');
       }
     }
   }

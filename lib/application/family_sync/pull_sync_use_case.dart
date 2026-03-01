@@ -1,6 +1,9 @@
 import 'dart:convert';
 
-import '../../features/family_sync/domain/repositories/pair_repository.dart';
+import '../../features/family_sync/domain/models/group_info.dart';
+import '../../features/family_sync/domain/models/group_member.dart';
+import '../../features/family_sync/domain/repositories/group_repository.dart';
+import '../../infrastructure/crypto/services/key_manager.dart';
 import '../../infrastructure/sync/e2ee_service.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
 import '../../infrastructure/sync/sync_queue_manager.dart';
@@ -34,8 +37,8 @@ class PullSyncError extends PullSyncResult {
 }
 
 /// Callback for applying decrypted sync operations.
-typedef ApplyOperationsCallback = Future<void> Function(
-    List<Map<String, dynamic>> operations);
+typedef ApplyOperationsCallback =
+    Future<void> Function(List<Map<String, dynamic>> operations);
 
 /// Pulls pending sync messages from the relay server and applies them.
 ///
@@ -51,34 +54,38 @@ class PullSyncUseCase {
   PullSyncUseCase({
     required RelayApiClient apiClient,
     required E2EEService e2eeService,
-    required PairRepository pairRepo,
+    required GroupRepository groupRepo,
     required SyncQueueManager queueManager,
+    required KeyManager keyManager,
     required ApplyOperationsCallback applyOperations,
-  })  : _apiClient = apiClient,
-        _e2eeService = e2eeService,
-        _pairRepo = pairRepo,
-        _queueManager = queueManager,
-        _applyOperations = applyOperations;
+  }) : _apiClient = apiClient,
+       _e2eeService = e2eeService,
+       _groupRepo = groupRepo,
+       _queueManager = queueManager,
+       _keyManager = keyManager,
+       _applyOperations = applyOperations;
 
   final RelayApiClient _apiClient;
   final E2EEService _e2eeService;
-  final PairRepository _pairRepo;
+  final GroupRepository _groupRepo;
   final SyncQueueManager _queueManager;
+  final KeyManager _keyManager;
   final ApplyOperationsCallback _applyOperations;
 
   Future<PullSyncResult> execute() async {
     try {
-      final pair = await _pairRepo.getActivePair();
-      if (pair == null) return const PullSyncResult.noPair();
-
-      if (pair.partnerPublicKey == null) {
-        return const PullSyncResult.error('Partner public key missing');
-      }
+      final activeGroup = await _groupRepo.getActiveGroup();
+      final pendingGroup = activeGroup == null
+          ? await _groupRepo.getPendingGroup()
+          : null;
+      final group = activeGroup ?? pendingGroup;
+      if (group == null) return const PullSyncResult.noPair();
 
       // Use server timestamp as cursor (not client clock)
-      final lastSyncCursor = pair.lastSyncAt?.millisecondsSinceEpoch;
-      final sinceSeconds =
-          lastSyncCursor != null ? lastSyncCursor ~/ 1000 : null;
+      final lastSyncCursor = group.lastSyncAt?.millisecondsSinceEpoch;
+      final sinceSeconds = lastSyncCursor != null
+          ? lastSyncCursor ~/ 1000
+          : null;
 
       // Pull messages from server
       final response = await _apiClient.pullSync(since: sinceSeconds);
@@ -89,33 +96,60 @@ class PullSyncUseCase {
 
       var appliedCount = 0;
       int? lastServerTimestamp;
+      final ackedMessageIds = <String>[];
+      final deviceId = await _keyManager.getDeviceId();
 
-      // Decrypt and apply each message
       for (final msg in messages) {
+        final messageId = msg['messageId'] as String;
+        final fromDeviceId = msg['fromDeviceId'] as String?;
         final payload = msg['payload'] as String;
         final createdAt = msg['createdAt'] as int;
+        final payloadType = E2EEService.detectPayloadType(payload);
 
-        final plaintext = await _e2eeService.decrypt(
-          ciphertext: payload,
-          senderPublicKey: pair.partnerPublicKey!,
-        );
+        switch (payloadType) {
+          case 'v2_key':
+            final processed = await _handleGroupKeyMessage(
+              group: group,
+              payload: payload,
+              fromDeviceId: fromDeviceId,
+              localDeviceId: deviceId,
+            );
+            if (processed) {
+              ackedMessageIds.add(messageId);
+            }
+            break;
+          case 'v2_data':
+            if (group.groupKey == null) {
+              continue;
+            }
 
-        final operations =
-            (jsonDecode(plaintext) as List).cast<Map<String, dynamic>>();
-        await _applyOperations(operations);
-        appliedCount += operations.length;
-        lastServerTimestamp = createdAt;
+            final plaintext = _e2eeService.decryptFromGroup(
+              encryptedPayload: payload,
+              groupKeyBase64: group.groupKey!,
+            );
+            final operations = (jsonDecode(plaintext) as List)
+                .map((operation) => operation as Map<String, dynamic>)
+                .toList();
+            await _applyOperations(operations);
+            appliedCount += operations.length;
+            ackedMessageIds.add(messageId);
+            lastServerTimestamp = createdAt;
+            break;
+          case 'v1':
+            continue;
+        }
       }
 
-      // ACK messages (server physically deletes them)
-      final messageIds =
-          messages.map((m) => m['messageId'] as String).toList();
-      await _apiClient.ackSync(messageIds: messageIds);
+      if (ackedMessageIds.isEmpty) {
+        return const PullSyncResult.noNewData();
+      }
+
+      await _apiClient.ackSync(messageIds: ackedMessageIds);
 
       // Update sync cursor using SERVER's createdAt, NOT DateTime.now()
       // This avoids clock skew causing missed messages.
       if (lastServerTimestamp != null) {
-        await _pairRepo.updateLastSyncTime(
+        await _groupRepo.updateLastSyncTime(
           DateTime.fromMillisecondsSinceEpoch(lastServerTimestamp * 1000),
         );
       }
@@ -129,5 +163,48 @@ class PullSyncUseCase {
     } catch (e) {
       return PullSyncResult.error(e.toString());
     }
+  }
+
+  Future<bool> _handleGroupKeyMessage({
+    required GroupInfo group,
+    required String payload,
+    required String? fromDeviceId,
+    required String? localDeviceId,
+  }) async {
+    final envelope = jsonDecode(payload) as Map<String, dynamic>;
+    final targetDeviceId = envelope['toDeviceId'] as String?;
+    if (targetDeviceId == null) {
+      return false;
+    }
+
+    if (targetDeviceId != localDeviceId) {
+      return true;
+    }
+
+    final owner = _findGroupMember(group.members, fromDeviceId);
+    if (owner == null) {
+      return false;
+    }
+
+    try {
+      final groupKey = await _e2eeService.decryptGroupKeyFromOwner(
+        encryptedPayload: payload,
+        ownerPublicKey: owner.publicKey,
+      );
+      await _groupRepo.storeGroupKey(group.groupId, groupKey);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  GroupMember? _findGroupMember(List<GroupMember> members, String? deviceId) {
+    if (deviceId == null) return null;
+    for (final member in members) {
+      if (member.deviceId == deviceId) {
+        return member;
+      }
+    }
+    return null;
   }
 }

@@ -23,15 +23,14 @@ class SyncQueueManager {
   /// Add an entry to the offline queue.
   Future<void> enqueue({
     required String id,
-    required String pairId,
-    required String targetDeviceId,
+    required String groupId,
     required String encryptedPayload,
     required Map<String, int> vectorClock,
     required int operationCount,
   }) async {
     await _syncRepository.enqueue(
       id: id,
-      groupId: pairId,
+      groupId: groupId,
       encryptedPayload: encryptedPayload,
       vectorClock: jsonEncode(vectorClock),
       operationCount: operationCount,
@@ -57,9 +56,8 @@ class SyncQueueManager {
               (k, v) => MapEntry(k, v as int),
             );
 
-        await _apiClient.pushSync(
-          pairId: entry.pairId,
-          targetDeviceId: entry.targetDeviceId,
+        await _apiClient.pushGroupSync(
+          groupId: entry.groupId,
           payload: entry.encryptedPayload,
           vectorClock: vectorClock,
           operationCount: entry.operationCount,

@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:uuid/uuid.dart';
 
-import '../../features/family_sync/domain/repositories/pair_repository.dart';
+import '../../features/family_sync/domain/repositories/group_repository.dart';
 import '../../infrastructure/sync/e2ee_service.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
 import '../../infrastructure/sync/sync_queue_manager.dart';
@@ -47,16 +47,16 @@ class PushSyncUseCase {
   PushSyncUseCase({
     required RelayApiClient apiClient,
     required E2EEService e2eeService,
-    required PairRepository pairRepo,
+    required GroupRepository groupRepo,
     required SyncQueueManager queueManager,
-  })  : _apiClient = apiClient,
-        _e2eeService = e2eeService,
-        _pairRepo = pairRepo,
-        _queueManager = queueManager;
+  }) : _apiClient = apiClient,
+       _e2eeService = e2eeService,
+       _groupRepo = groupRepo,
+       _queueManager = queueManager;
 
   final RelayApiClient _apiClient;
   final E2EEService _e2eeService;
-  final PairRepository _pairRepo;
+  final GroupRepository _groupRepo;
   final SyncQueueManager _queueManager;
 
   static const _uuid = Uuid();
@@ -67,27 +67,25 @@ class PushSyncUseCase {
     required Map<String, int> vectorClock,
   }) async {
     try {
-      final pair = await _pairRepo.getActivePair();
-      if (pair == null) return const PushSyncResult.noPair();
-
-      if (pair.partnerPublicKey == null || pair.partnerDeviceId == null) {
-        return const PushSyncResult.error('Partner info incomplete');
+      final group = await _groupRepo.getActiveGroup();
+      if (group == null) return const PushSyncResult.noPair();
+      if (group.groupKey == null) {
+        return const PushSyncResult.error('Group key missing');
       }
 
       // Serialize operations
       final payload = jsonEncode(operations);
 
       // E2EE encrypt
-      final encryptedPayload = await _e2eeService.encrypt(
+      final encryptedPayload = _e2eeService.encryptForGroup(
         plaintext: payload,
-        recipientPublicKey: pair.partnerPublicKey!,
+        groupKeyBase64: group.groupKey!,
       );
 
       // Try push to server
       try {
-        await _apiClient.pushSync(
-          pairId: pair.pairId,
-          targetDeviceId: pair.partnerDeviceId!,
+        await _apiClient.pushGroupSync(
+          groupId: group.groupId,
           payload: encryptedPayload,
           vectorClock: vectorClock,
           operationCount: operations.length,
@@ -97,8 +95,7 @@ class PushSyncUseCase {
         // Network failure: queue offline
         await _queueManager.enqueue(
           id: _uuid.v4(),
-          pairId: pair.pairId,
-          targetDeviceId: pair.partnerDeviceId!,
+          groupId: group.groupId,
           encryptedPayload: encryptedPayload,
           vectorClock: vectorClock,
           operationCount: operations.length,

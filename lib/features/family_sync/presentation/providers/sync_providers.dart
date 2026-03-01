@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../application/family_sync/full_sync_use_case.dart';
 import '../../../../application/family_sync/pull_sync_use_case.dart';
 import '../../../../application/family_sync/push_sync_use_case.dart';
+import '../../../../infrastructure/crypto/providers.dart';
 import '../../../../infrastructure/sync/sync_trigger_service.dart';
 import '../../domain/models/sync_status.dart';
 import 'repository_providers.dart';
@@ -16,7 +17,7 @@ PushSyncUseCase pushSyncUseCase(Ref ref) {
   return PushSyncUseCase(
     apiClient: ref.watch(relayApiClientProvider),
     e2eeService: ref.watch(e2eeServiceProvider),
-    pairRepo: ref.watch(pairRepositoryProvider),
+    groupRepo: ref.watch(groupRepositoryProvider),
     queueManager: ref.watch(syncQueueManagerProvider),
   );
 }
@@ -27,8 +28,9 @@ PullSyncUseCase pullSyncUseCase(Ref ref) {
   return PullSyncUseCase(
     apiClient: ref.watch(relayApiClientProvider),
     e2eeService: ref.watch(e2eeServiceProvider),
-    pairRepo: ref.watch(pairRepositoryProvider),
+    groupRepo: ref.watch(groupRepositoryProvider),
     queueManager: ref.watch(syncQueueManagerProvider),
+    keyManager: ref.watch(keyManagerProvider),
     applyOperations: (operations) async {
       // TODO: Wire up to CRDT apply logic when available
     },
@@ -54,7 +56,7 @@ FullSyncUseCase fullSyncUseCase(Ref ref) {
 @riverpod
 SyncTriggerService syncTriggerService(Ref ref) {
   final service = SyncTriggerService(
-    pairRepo: ref.watch(pairRepositoryProvider),
+    groupRepo: ref.watch(groupRepositoryProvider),
     pullSync: ref.watch(pullSyncUseCaseProvider),
     pushSync: ref.watch(pushSyncUseCaseProvider),
     queueManager: ref.watch(syncQueueManagerProvider),
