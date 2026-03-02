@@ -2,6 +2,16 @@
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:d197for5662m48.cloudfront.net)",
+      "WebFetch(domain:www.techrxiv.org)",
+      "WebFetch(domain:www.philschmid.de)"
+    ],
+    "additionalDirectories": [
+      "/Users/xinz/Development/home-pocket-app/docs/arch"
+    ]
+  },
   "enabledPlugins": {
     "everything-claude-code@everything-claude-code": true,
     "superpowers@claude-plugins-official": true,

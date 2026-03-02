@@ -38,6 +38,7 @@ flutter pub get                                              # 安装依赖
 flutter pub run build_runner build --delete-conflicting-outputs  # 代码生成
 flutter pub run build_runner watch                           # 持续生成
 flutter gen-l10n                                             # 国际化
+flutter devices                                              # 列出设备
 flutter run [-d <device_id>]                                 # 运行
 flutter analyze                                              # 静态分析 (必须 0 warnings)
 dart format .                                                # 格式化
@@ -47,8 +48,11 @@ flutter test integration_test/                               # 集成测试
 ```
 
 **代码生成触发时机 / Code generation triggers:**
-修改 `@riverpod`/`@freezed`/Drift tables/ARB 文件后必须运行 build_runner。
-After modifying @riverpod/@freezed/Drift tables/ARB files, MUST run build_runner.
+修改 `@riverpod`/`@freezed`/Drift tables/包含 `part '*.g.dart'` 的模型后必须运行 build_runner。
+After modifying @riverpod/@freezed/Drift tables/or models with `part '*.g.dart'`, MUST run build_runner.
+
+修改 ARB 文件后必须运行 `flutter gen-l10n`。
+After modifying ARB files, MUST run `flutter gen-l10n`.
 
 **Git 操作后 / After git operations** (merge/rebase/switch branch) 也必须重新生成。
 MUST regenerate after merge/rebase/branch switch.
@@ -172,17 +176,18 @@ Branches: `main` (stable), `feature/MOD-XXX-description`, `codex-dev` (Codex exc
 - [ ] `flutter analyze` → 0 issues
 - [ ] `dart format .`
 - [ ] `flutter test` → all pass
-- [ ] 不提交生成文件 / Don't commit generated files (`.g.dart`, `.freezed.dart`)
+- [ ] 不要手动编辑生成文件；源文件变更后重新生成并提交 repo 中已跟踪的输出
+  Don't hand-edit generated files; regenerate and commit tracked outputs when source files change
 - [ ] 不使用 `// ignore:` 压制警告 / Don't suppress warnings with // ignore:
 
 ---
 
 ## Architecture Docs / 架构文档
 
-路径 / Path: `doc/arch/` (01-core-architecture, 02-module-specs, 03-adr)
+路径 / Path: `docs/arch/` (01-core-architecture, 02-module-specs, 03-adr, 04-basic, 05-UI)
 
-添加新文档前必须检查最大编号，使用下一个序号，更新 INDEX.md。
-Before adding new docs, check max number, use next sequential, update INDEX.md.
+添加新文档前必须检查最大编号，使用下一个序号，并更新 `docs/arch/01-core-architecture/ARCH-000_INDEX.md`。
+Before adding new docs, check max number, use the next sequential number, and update `docs/arch/01-core-architecture/ARCH-000_INDEX.md`.
 
 ---
 
@@ -200,4 +205,5 @@ Before adding new docs, check max number, use next sequential, update INDEX.md.
 **当前 / Current: Phase 1 Infrastructure (v0.1.0)**
 - MOD-006 Security & Privacy → MOD-014 i18n → MOD-001 Basic Accounting → ...
 
-详见 / See: `doc/worklog/PROJECT_DEVELOPMENT_PLAN.md`
+详见 / See: `docs/plans/`, `docs/worklog/`
+TODO: `docs/worklog/PROJECT_DEVELOPMENT_PLAN.md` is referenced elsewhere but does not exist in the repo; verify the canonical roadmap file before adding a direct link.
