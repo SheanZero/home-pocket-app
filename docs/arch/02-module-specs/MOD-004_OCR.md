@@ -1,26 +1,30 @@
 # MOD-004: OCR扫描模块 - 技术设计文档
 
 **模块编号:** MOD-004
-**文档版本:** 3.0
+**文档版本:** 4.0
 **创建日期:** 2026-02-03
-**最后更新:** 2026-02-22
-**预估工时:** 7天（后端实现）
+**最后更新:** 2026-02-25
+**预估工时:** 10天（后端实现）
 **优先级:** P1（强烈建议）
 **状态:** 前端 UI Stub 已实现，后端 OCR 管道待实现
 
 ---
 
-## 📋 目录
+## 目录
 
 1. [模块概述](#模块概述)
 2. [当前实现状态](#当前实现状态)
-3. [功能需求](#功能需求)
-4. [架构设计](#架构设计)
-5. [实际导航流程](#实际导航流程)
-6. [UI组件设计（已实现）](#ui组件设计已实现)
-7. [后端实现计划](#后端实现计划)
-8. [测试策略](#测试策略)
-9. [性能优化](#性能优化)
+3. [四模块管道架构](#四模块管道架构)
+4. [模块 A：图像预处理](#模块-a图像预处理-image-preprocessing)
+5. [模块 B：文字识别引擎](#模块-b文字识别引擎-ocr-engine)
+6. [模块 C：结构化提取](#模块-c结构化提取-information-extraction)
+7. [模块 D：数据纠错与校验](#模块-d数据纠错与校验-validation)
+8. [层次结构与目录](#层次结构与目录)
+9. [导航流程](#导航流程)
+10. [Provider 装配](#provider-装配)
+11. [测试策略](#测试策略)
+12. [性能优化](#性能优化)
+13. [未来演进路线](#未来演进路线)
 
 ---
 
@@ -30,38 +34,40 @@
 
 OCR扫描模块通过相机扫描纸质收据，自动识别金额、日期、商家信息，将纸质收据数字化，显著提升记账效率。
 
-### 核心功能
+### 核心管道
 
-| 功能 | 说明 | 优先级 | 状态 |
-|------|------|--------|------|
-| 扫描入口 UI | 相机取景器 stub，含相册/快门/闪光灯控件 | P0 | ✅ Stub 已实现 |
-| 帐单确认页 | 与手动录入共用 TransactionConfirmScreen | P0 | ✅ 已实现 |
-| 拍照/相册选择 | image_picker 接入 | P0 | ⏳ 待实现 |
-| OCR文字识别 | 识别金额、日期、商家 | P0 | ⏳ 待实现 |
-| 图像预处理 | 灰度化、二值化、对比度增强 | P0 | ⏳ 待实现 |
-| 商家自动分类 | 根据商家匹配分类和账本类型 | P0 | ⏳ 待实现 |
-| 照片加密存储 | AES-GCM 端到端加密保存收据照片 | P1 | ⏳ 待实现 |
+```
+拍照/选图 → [A]图像预处理 → [B]OCR识别 → [C]结构化提取 → [D]数据校验 → 确认页
+```
+
+四模块各自独立、可单独测试，通过 `ScanReceiptUseCase` 编排串联。
 
 ### 技术栈
 
 ```yaml
+图像预处理: opencv_dart ^2.2.x        # OpenCV 全功能（边缘检测、透视矫正、自适应二值化）
 OCR引擎:
-  Android: ML Kit Text Recognition v2 (google_mlkit_text_recognition)
-  iOS: Vision Framework (Native via MethodChannel)
-图像处理: image ^4.x
-相机/相册: image_picker ^1.0.x
-加密: 复用 lib/infrastructure/crypto/services/photo_encryption_service.dart
+  iOS: Apple Vision Framework         # VNRecognizeTextRequest via MethodChannel
+  Android: ML Kit Text Recognition v2  # 原生 Kotlin 集成 via MethodChannel
+相机/相册: image_picker ^1.1.x
 状态管理: Riverpod 2.4+ (riverpod_annotation)
-路由: 复用 EntryModeNavigationConfig (pushReplacement 模式切换)
+加密: 复用 lib/infrastructure/crypto/services/photo_encryption_service.dart
 ```
+
+> **关键决策：不使用 Flutter OCR 插件包**
+>
+> `google_mlkit_text_recognition` 等 Flutter 插件在 Apple Silicon 模拟器上 [无法构建](https://github.com/googlesamples/mlkit/issues/810)，
+> 会阻塞整个应用在模拟器上的开发。
+> 本方案改用 **MethodChannel + 原生代码** 直接调用平台 OCR API，
+> 既保证模拟器兼容性，又获得最佳日语识别效果。
 
 ### 准确率目标
 
-| 字段 | 目标准确率 | 备注 |
-|------|-----------|------|
-| 金额 | >90% | 清晰收据可达95%+ |
-| 日期 | >85% | 多种格式支持 |
-| 商家 | >80% | 依赖商家数据库 |
+| 字段 | MVP 目标 | 正式版目标 | 备注 |
+|------|----------|-----------|------|
+| 金额 | >90% | >98% | 启发式规则 → CORD 模型 |
+| 日期 | >85% | >95% | 正则匹配 → 模型辅助 |
+| 商家 | >80% | >90% | 首行提取 → NER 模型 |
 
 ---
 
@@ -69,551 +75,908 @@ OCR引擎:
 
 ### 已实现（Phase 1 - UI Stub）
 
-#### OcrScannerScreen（lib/features/accounting/presentation/screens/ocr_scanner_screen.dart）
+| 组件 | 文件 | 状态 |
+|------|------|------|
+| OcrScannerScreen | `lib/features/accounting/presentation/screens/ocr_scanner_screen.dart` | ✅ Stub UI |
+| TransactionConfirmScreen | `lib/features/accounting/presentation/screens/transaction_confirm_screen.dart` | ✅ 已实现 |
+| EntryModeSwitcher | `lib/features/accounting/presentation/widgets/entry_mode_switcher.dart` | ✅ 已实现 |
+| MerchantDatabase | `lib/infrastructure/ml/merchant_database.dart` | ✅ 已实现 |
+| l10n 基础 keys | `lib/l10n/app_{ja,zh,en}.arb` | ✅ ocrScanTitle, ocrHint |
 
-```
-实现内容:
-- 深色相机风格 UI（背景色 #1A2530）
-- 取景框占位符（带 scan guide 边框）
-- 相册/快门/闪光灯三按钮控件（全部 stub，onTap: () {}）
-- 快门按钮当前仅执行 Navigator.pop(context)
-- EntryModeSwitcher 集成（InputMode.ocr 高亮）
-- 多语言支持（ocrScanTitle, ocrHint）
+### 待实现（Phase 2 - 后端管道）
 
-缺失内容（待实现）:
-- 实际相机预览（camera / CameraController）
-- 图像捕获和 OCR 处理
-- 导航至 TransactionConfirmScreen（带识别结果）
-```
-
-#### TransactionConfirmScreen（lib/features/accounting/presentation/screens/transaction_confirm_screen.dart）
-
-```
-实现内容（手动和 OCR 共用）:
-- 金额（可编辑：底部弹窗 + SmartKeyboard）
-- 分类（可编辑：跳转 CategorySelectionScreen）
-- 日期（可编辑：DatePicker，首次为今天）
-- 商家名称（TextEditingController，可编辑）
-- 备注（TextEditingController，多行）
-- 账本类型选择（LedgerTypeSelector：生存/灵魂）
-- 灵魂满足感滑条（仅灵魂账本时显示）
-- 添加照片按钮（stub，尚未接入 OCR 图片）
-- 保存：CreateTransactionUseCase.execute()
-- 保存成功：灵魂账本显示 SoulCelebrationOverlay，然后 popUntil(first)
-
-参数（构造函数）:
-  String bookId
-  int amount
-  Category category
-  Category? parentCategory
-  DateTime date
-```
+| 模块 | 层次 | 组件 |
+|------|------|------|
+| A 图像预处理 | Infrastructure | `ImagePreprocessor` (opencv_dart) |
+| B OCR 引擎 | Infrastructure | `OCRService` 抽象 + iOS/Android 原生实现 |
+| C 结构化提取 | Application | `ReceiptParser` (启发式规则) |
+| D 数据校验 | Application | `ReceiptValidator` (财务逻辑) |
+| 编排 | Application | `ScanReceiptUseCase` |
+| 照片加密 | Application | `SaveReceiptPhotoUseCase` |
+| 数据持久化 | Data | `receipt_photos` 表 + DAO + Repository |
 
 ---
 
-## 功能需求
-
-### FR-001: 收据拍照与选择
-
-**用户故事**: 作为用户，我希望能通过相机拍摄收据或从相册选择照片，快速开始 OCR 识别。
-
-**验收标准**:
-- ✅ 支持相机拍照
-- ✅ 支持从相册选择
-- ✅ 拍照界面提供取景辅助框
-- ✅ 支持闪光灯开关
-- ✅ 快门捕获后，UI 显示处理中状态
-
-**技术要求**:
-- 使用 `image_picker` 插件
-- 图片格式：JPG、PNG
-- 最大分辨率：4K（3840×2160）
-
-### FR-002: OCR文字识别
-
-**用户故事**: 作为用户，我希望系统能自动识别收据上的金额、日期和商家，无需手动输入。
-
-**验收标准**:
-- ✅ 金额识别准确率 >90%
-- ✅ 日期识别准确率 >85%
-- ✅ 商家识别准确率 >80%
-- ✅ 识别速度 <2秒
-- ✅ 支持日语和英语混合文本
-- ✅ 支持多种金额格式（¥1,280、1280円等）
-
-**技术要求**:
-- Android：ML Kit Text Recognition v2（支持 Japanese 脚本）
-- iOS：Vision Framework（`recognizeTextRequest`，accuracy=accurate）
-- 支持离线识别，无数据上传
-
-### FR-003: 图像预处理
-
-**验收标准**:
-- ✅ 自动灰度化
-- ✅ 自动对比度增强
-- ✅ 自动二值化（Otsu 算法）
-- ✅ 支持倾斜校正
-
-**处理流程**:
-```
-原始图像 → 灰度化 → 对比度增强 → 二值化 → OCR识别
-```
-
-### FR-004: 商家自动分类
-
-**验收标准**:
-- ✅ 内置 500+ 日本常见商家数据库
-- ✅ 精确匹配 + 别名匹配 + 模糊匹配
-- ✅ 显示匹配置信度
-- ✅ 自动预填账本类型（生存/灵魂）
-- ✅ 用户可在 TransactionConfirmScreen 修改
-
-### FR-005: 照片加密存储
-
-**验收标准**:
-- ✅ 照片使用 AES-256-GCM 加密
-- ✅ 密钥派生自设备密钥（HKDF）
-- ✅ SHA-256 哈希作为文件名
-- ✅ 加密文件存储在应用私有目录
-- ✅ 支持照片解密查看
-- ✅ photoHash 关联到 Transaction 记录
-
----
-
-## 架构设计
-
-### 层次结构
-
-按照 5 层 Clean Architecture 严格分层：
+## 四模块管道架构
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│  Presentation                                                     │
-│  lib/features/accounting/presentation/                            │
-│  ├── screens/                                                     │
-│  │   ├── ocr_scanner_screen.dart       ← OCR 入口（已实现 stub） │
-│  │   └── transaction_confirm_screen.dart ← 确认保存（已实现）    │
-│  ├── widgets/                                                     │
-│  │   ├── entry_mode_switcher.dart      ← 3模式标签切换           │
-│  │   └── input_mode_tabs.dart          ← Manual/OCR/Voice tabs   │
-│  ├── navigation/                                                  │
-│  │   └── entry_mode_navigation_config.dart ← 模式路由配置        │
-│  └── providers/                                                   │
-│      ├── repository_providers.dart                                │
-│      └── use_case_providers.dart                                  │
-└─────────────────────────────┬────────────────────────────────────┘
-                              │ ref.read()
-┌─────────────────────────────▼────────────────────────────────────┐
-│  Application  lib/application/                                    │
-│  ├── accounting/                                                  │
-│  │   └── create_transaction_use_case.dart  ← 保存交易（已实现）  │
-│  └── ocr/                                  ← 待实现              │
-│      ├── scan_receipt_use_case.dart                               │
-│      ├── receipt_parser.dart                                      │
-│      └── save_receipt_photo_use_case.dart                         │
-└─────────────────────────────┬────────────────────────────────────┘
-                              │
-┌─────────────────────────────▼────────────────────────────────────┐
-│  Domain  lib/features/accounting/domain/                          │
-│  ├── models/                                                      │
-│  │   ├── transaction.dart              ← 含 photoHash 字段        │
-│  │   └── category.dart                                            │
-│  └── repositories/                    ← 接口定义                  │
-└─────────────────────────────┬────────────────────────────────────┘
-                              │
-┌─────────────────────────────▼────────────────────────────────────┐
-│  Infrastructure  lib/infrastructure/                               │
-│  ├── ml/                               ← 待实现                   │
-│  │   ├── ocr/                                                     │
-│  │   │   ├── ocr_service.dart          ← 抽象接口                 │
-│  │   │   ├── mlkit_ocr_service.dart    ← Android ML Kit           │
-│  │   │   └── vision_ocr_service.dart  ← iOS Vision Framework      │
-│  │   ├── image_preprocessor.dart                                  │
-│  │   ├── merchant_database.dart        ← 唯一定义（与 MOD-002 共享）│
-│  │   └── tflite_classifier.dart                                   │
-│  └── crypto/services/                                             │
-│      └── photo_encryption_service.dart ← 已实现                  │
-└─────────────────────────────┬────────────────────────────────────┘
-                              │
-┌─────────────────────────────▼────────────────────────────────────┐
-│  Data  lib/data/                                                  │
-│  ├── tables/                                                      │
-│  │   └── receipt_photos_table.dart     ← 待实现                   │
-│  ├── daos/                                                        │
-│  │   └── receipt_photo_dao.dart        ← 待实现                   │
-│  └── repositories/                                                │
-│      └── receipt_photo_repository_impl.dart ← 待实现             │
-└──────────────────────────────────────────────────────────────────┘
+                          ScanReceiptUseCase（编排层）
+                    ┌──────────────────────────────────────┐
+                    │                                      │
+ image_picker       │  ┌──────────┐    ┌──────────┐       │
+ ─────────────►     │  │  模块 A  │    │  模块 B  │       │
+ Uint8List          │  │ 图像预处理│───►│ OCR 引擎 │       │
+                    │  └──────────┘    └────┬─────┘       │
+                    │                       │              │
+                    │                       ▼              │
+                    │  ┌──────────┐    ┌──────────┐       │
+                    │  │  模块 D  │◄───│  模块 C  │       │
+                    │  │ 数据校验  │    │ 结构化提取│       │
+                    │  └────┬─────┘    └──────────┘       │
+                    │       │                              │
+                    └───────┼──────────────────────────────┘
+                            ▼
+                    OcrScanResult
+                            │
+              ┌─────────────┼─────────────┐
+              ▼             ▼             ▼
+        MerchantDB    SavePhoto    TransactionConfirmScreen
+        商家匹配      照片加密           确认页
 ```
 
-### 目录结构（目标状态）
-
-```
-# 已实现（accounting feature 的 presentation 层）
-lib/features/accounting/presentation/
-├── screens/
-│   ├── ocr_scanner_screen.dart          # OCR 扫描入口（当前 stub）
-│   ├── transaction_confirm_screen.dart  # 手动 + OCR 共用确认页（已实现）
-│   ├── transaction_entry_screen.dart    # 手动录入（已实现）
-│   └── ...
-├── navigation/
-│   └── entry_mode_navigation_config.dart  # 3模式路由（已实现）
-└── widgets/
-    ├── entry_mode_switcher.dart           # 模式切换标签栏（已实现）
-    └── input_mode_tabs.dart               # Manual/OCR/Voice（已实现）
-
-# 待实现（全局 Application 层）
-lib/application/ocr/
-├── scan_receipt_use_case.dart
-├── receipt_parser.dart
-└── save_receipt_photo_use_case.dart
-
-# 待实现（全局 Infrastructure 层）
-lib/infrastructure/ml/
-├── ocr/
-│   ├── ocr_service.dart
-│   ├── mlkit_ocr_service.dart
-│   └── vision_ocr_service.dart
-├── image_preprocessor.dart
-├── tflite_classifier.dart               # 唯一定义
-└── merchant_database.dart               # 唯一定义（与 MOD-002 共享）
-
-# 待实现（全局 Data 层）
-lib/data/
-├── tables/
-│   └── receipt_photos_table.dart
-├── daos/
-│   └── receipt_photo_dao.dart
-└── repositories/
-    └── receipt_photo_repository_impl.dart
-```
-
-> **注意：** OCR 扫描 UI 不使用单独的 `lib/features/ocr/` feature，而是直接集成在 `lib/features/accounting/` 的 Presentation 层中，与手动录入共用确认流程。这遵循"thin feature"模式，避免不必要的 feature 分裂。
-
----
-
-## 实际导航流程
-
-### 入口路由（EntryModeNavigationConfig）
+### 数据流类型
 
 ```dart
-// lib/features/accounting/presentation/navigation/entry_mode_navigation_config.dart
+// 模块 A 输出
+typedef PreprocessedImage = File; // 矫正后的二值化图像临时文件
 
-final _entryModeRouteConfigs = <InputMode, EntryModeRouteConfig>{
-  InputMode.manual: EntryModeRouteConfig(
-    mode: InputMode.manual,
-    builder: (bookId) => TransactionEntryScreen(bookId: bookId),
-  ),
-  InputMode.ocr: EntryModeRouteConfig(
-    mode: InputMode.ocr,
-    builder: (bookId) => OcrScannerScreen(bookId: bookId),
-  ),
-  InputMode.voice: EntryModeRouteConfig(
-    mode: InputMode.voice,
-    builder: (bookId) => VoiceInputScreen(bookId: bookId),
-  ),
-};
-```
+// 模块 B 输出
+class OCRResult {
+  final String text;                    // 全文
+  final List<OCRLine> lines;            // 带位置信息的行
+}
 
-模式切换使用 `Navigator.pushReplacement`，保持相同 back stack 层级。
+class OCRLine {
+  final String text;
+  final Rect boundingBox;               // 行在图像中的位置 (归一化 0.0~1.0)
+  final double confidence;
+}
 
-### 完整用户流程（目标状态）
+// 模块 C 输出
+class ParsedReceiptData {
+  final int? amount;                    // 总金额（日元整数）
+  final DateTime? date;
+  final String? merchant;
+  final List<ReceiptLineItem>? items;   // 明细行（可选，用于模块 D 校验）
+}
 
-```
-Home Screen
-    │
-    ▼  [+ 记账 按钮]
-TransactionEntryScreen (InputMode.manual)
-    │
-    │  EntryModeSwitcher → tap OCR tab
-    │  (pushReplacement)
-    ▼
-OcrScannerScreen (InputMode.ocr)
-    │
-    │  [快门] → 调用 ScanReceiptUseCase
-    │  ┌─────────────────────────────────┐
-    │  │ 1. image_picker 获取图像        │
-    │  │ 2. ImagePreprocessor 预处理     │
-    │  │ 3. OCRService 识别文字          │
-    │  │ 4. ReceiptParser 解析结构化数据 │
-    │  │ 5. MerchantDatabase 商家匹配    │
-    │  │ 6. SaveReceiptPhotoUseCase 加密存储 │
-    │  └─────────────────────────────────┘
-    │  识别成功 → Navigator.push
-    ▼
-TransactionConfirmScreen(
-  bookId: bookId,
-  amount: parsedAmount,           // 来自 OCR 识别（可编辑）
-  category: suggestedCategory,    // 来自商家匹配（可编辑）
-  parentCategory: parentCategory, // 来自商家匹配
-  date: parsedDate,               // 来自 OCR 识别（可编辑）
-  // 以下字段在 confirm screen 内填写:
-  // merchant: merchantName (TextField)
-  // memo: note (TextField)
-  // ledgerType: auto from category (可切换)
-  // photoHash: 已加密存储的图片哈希
-)
-    │
-    │  [确认记录] → CreateTransactionUseCase.execute()
-    ▼
-Navigator.popUntil(isFirst)       // 返回首页
-```
+class ReceiptLineItem {
+  final String name;
+  final int unitPrice;
+  final int quantity;
+  final int subtotal;
+}
 
-### 手动录入流程对比
-
-```
-TransactionEntryScreen → [下一步] → TransactionConfirmScreen
-    (手动输入 amount/category/date)     (同一个 screen，复用)
-```
-
-> **关键设计决策：** OCR 和手动录入共用同一个 `TransactionConfirmScreen`。OCR 流程将识别结果作为构造函数参数传入，用户在确认页可以修正任意字段后保存。
-
----
-
-## UI组件设计（已实现）
-
-### OcrScannerScreen
-
-```dart
-// lib/features/accounting/presentation/screens/ocr_scanner_screen.dart
-
-class OcrScannerScreen extends StatelessWidget {
-  const OcrScannerScreen({super.key, required this.bookId});
-
-  final String bookId;
-
-  // 布局:
-  // - Header: 返回按钮 + 标题（l10n.ocrScanTitle）
-  // - EntryModeSwitcher（InputMode.ocr 高亮）
-  // - Expanded: 取景框容器（Border + rounded corners）
-  //   └── 占位图标 + l10n.ocrHint 文字
-  // - 状态胶囊（status pill）
-  // - 底部控件行:
-  //   ├── _CircleButton(icon: gallery)    → 待实现
-  //   ├── 快门按钮（72px 圆形白色）      → 当前: Navigator.pop()
-  //   └── _CircleButton(icon: flash_off)  → 待实现
+// 模块 D 输出
+class ValidatedReceiptData {
+  final int? amount;
+  final DateTime? date;
+  final String? merchant;
+  final double confidence;              // 整体置信度 0.0~1.0
+  final List<ValidationWarning> warnings;
 }
 ```
 
-**后续实现要点：**
-- 集成 `CameraController`（camera 包）或 `image_picker` 启动相机
-- 快门按钮触发 `ScanReceiptUseCase.execute(source: camera)`
-- 相册按钮触发 `ScanReceiptUseCase.execute(source: gallery)`
-- 闪光灯按钮切换 `CameraController.setFlashMode()`
-- 处理中时显示遮罩 + 进度动画
-
-### TransactionConfirmScreen
-
-```dart
-// lib/features/accounting/presentation/screens/transaction_confirm_screen.dart
-
-class TransactionConfirmScreen extends ConsumerStatefulWidget {
-  // 参数（构造函数传入，手动录入 and OCR 共用）:
-  final String bookId;
-  final int amount;           // 整数金额（JPY: 四舍五入）
-  final Category category;    // 叶级分类
-  final Category? parentCategory; // 父级分类
-  final DateTime date;        // 交易日期
-
-  // 内部状态（可编辑）:
-  // _amount (int), _category, _parentCategory, _date
-  // _storeController (TextEditingController) → merchant
-  // _memoController (TextEditingController)  → note
-  // _ledgerType (LedgerType)                → soul/survival
-  // _soulSatisfaction (int 1-10)            → 灵魂满足感
-
-  // 金额编辑: showModalBottomSheet + AmountDisplay + SmartKeyboard
-  // 分类编辑: Navigator.push → CategorySelectionScreen
-  // 日期编辑: showDatePicker (theme: AppColors.survival)
-  // 账本类型: LedgerTypeSelector 切换，初始由 _resolveLedgerType() 自动填充
-  // 灵魂满足: SoulSatisfactionSlider（仅 LedgerType.soul 时显示）
-
-  // 保存流程:
-  // createTransactionUseCase.execute(CreateTransactionParams(
-  //   bookId, amount, type: expense, categoryId, timestamp,
-  //   note, merchant, soulSatisfaction, ledgerType
-  // ))
-  // isSuccess → 灵魂账本显示 SoulCelebrationOverlay
-  //           → SnackBar "保存成功"
-  //           → Navigator.popUntil(isFirst)
-  // isError   → SnackBar 错误信息
-}
-```
-
-**待接入（OCR 阶段）：**
-- "添加照片"按钮目前是 stub，需接入 `ReceiptPhotoRepository` 展示已加密的收据照片
-- 将 `photoHash` 传入 `CreateTransactionParams`（当前 model 需扩展该字段）
-
 ---
 
-## 后端实现计划
+## 模块 A：图像预处理 (Image Preprocessing)
 
-### Phase 2: OCR 后端管道
+### 目标
 
-#### Step 1: 图像获取与预处理
+将手机拍摄的"烂图"变成"标准图"——矫正倾斜、消除阴影、突出文字。
+
+### 技术方案：opencv_dart
+
+使用 [opencv_dart](https://pub.dev/packages/opencv_dart) v2.2.x，纯 Dart FFI 调用 OpenCV C++ 库。
+支持 iOS 模拟器 (arm64 + x64)、Android、桌面。
+
+### 处理流程
+
+```
+原始图像 (Uint8List)
+    │
+    ▼  Step 1: 解码
+    Mat (BGR)
+    │
+    ▼  Step 2: 缩放（长边 ≤ 2048px）
+    Mat (resized)
+    │
+    ▼  Step 3: 边缘检测与透视矫正
+    │  3a. 灰度化 → cvtColor(COLOR_BGR2GRAY)
+    │  3b. 高斯模糊 → GaussianBlur(ksize: 5)
+    │  3c. Canny 边缘检测 → Canny(threshold1: 50, threshold2: 150)
+    │  3d. 轮廓检测 → findContours → 找最大四边形
+    │  3e. 四点透视变换 → getPerspectiveTransform + warpPerspective
+    Mat (矫正后)
+    │
+    ▼  Step 4: 光线补偿与去噪
+    │  4a. 转灰度 → cvtColor(COLOR_BGR2GRAY)
+    │  4b. 自适应二值化 → adaptiveThreshold(
+    │       maxValue: 255,
+    │       adaptiveMethod: ADAPTIVE_THRESH_GAUSSIAN_C,
+    │       thresholdType: THRESH_BINARY,
+    │       blockSize: 15,
+    │       C: 10
+    │      )
+    Mat (二值化)
+    │
+    ▼  Step 5: 锐化（增强褪色热敏纸文字）
+    │  unsharpMask: GaussianBlur → addWeighted(src, 1.5, blur, -0.5)
+    Mat (最终)
+    │
+    ▼  Step 6: 编码输出
+    File (PNG 临时文件)
+```
+
+### 实现
 
 ```dart
 // lib/infrastructure/ml/image_preprocessor.dart
 
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:opencv_dart/opencv_dart.dart' as cv;
+
 class ImagePreprocessor {
-  Future<File> process(XFile image) async {
-    // 1. 读取图像字节
-    // 2. 调整大小（最大 2048px）
-    // 3. 灰度化：img.grayscale()
-    // 4. 对比度增强：img.contrast(contrast: 120)
-    // 5. Otsu 二值化
-    // 6. 保存到临时文件
-    // 注：使用 compute() 在 Isolate 执行，避免阻塞 UI
+  static const int _maxDimension = 2048;
+
+  /// 完整预处理管道。在 Isolate 中执行。
+  /// 返回矫正后的二值化图像临时文件路径，失败返回 null。
+  Future<File?> process(Uint8List imageBytes) async {
+    return Isolate.run(() => _processSync(imageBytes));
+  }
+
+  static File? _processSync(Uint8List bytes) {
+    // 1. 解码
+    final mat = cv.imdecode(bytes, cv.IMREAD_COLOR);
+    if (mat.isEmpty) return null;
+
+    // 2. 缩放
+    final resized = _resize(mat);
+
+    // 3. 边缘检测 + 透视矫正
+    final corrected = _perspectiveCorrect(resized) ?? resized;
+
+    // 4. 灰度化 + 自适应二值化
+    final gray = cv.cvtColor(corrected, cv.COLOR_BGR2GRAY);
+    final binary = cv.adaptiveThreshold(
+      gray, 255,
+      cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+      cv.THRESH_BINARY,
+      blockSize: 15, C: 10,
+    );
+
+    // 5. 锐化
+    final sharpened = _sharpen(binary);
+
+    // 6. 编码输出
+    final tempDir = Directory.systemTemp.createTempSync('ocr_');
+    final outFile = File('${tempDir.path}/processed.png');
+    cv.imwrite(outFile.path, sharpened);
+
+    return outFile;
+  }
+
+  static cv.Mat _resize(cv.Mat src) {
+    final maxDim = src.width > src.height ? src.width : src.height;
+    if (maxDim <= _maxDimension) return src;
+    final scale = _maxDimension / maxDim;
+    return cv.resize(src, (src.width * scale).round(), (src.height * scale).round());
+  }
+
+  static cv.Mat? _perspectiveCorrect(cv.Mat src) {
+    // 3a-3c: 灰度 → 模糊 → Canny
+    final gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY);
+    final blurred = cv.gaussianBlur(gray, (5, 5), 0);
+    final edges = cv.canny(blurred, 50, 150);
+
+    // 3d: 找最大四边形轮廓
+    final contours = cv.findContours(edges, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    // 按面积排序，找最大近似四边形
+    // ...（详细实现：approxPolyDP，筛选4点凸包）
+
+    // 3e: 四点透视变换
+    // final M = cv.getPerspectiveTransform(srcPoints, dstPoints);
+    // return cv.warpPerspective(src, M, dstSize);
+
+    return null; // 未找到有效四边形时返回 null，跳过矫正
+  }
+
+  static cv.Mat _sharpen(cv.Mat src) {
+    final blurred = cv.gaussianBlur(src, (0, 0), sigmaX: 3);
+    return cv.addWeighted(src, 1.5, blurred, -0.5, 0);
   }
 }
 ```
 
-#### Step 2: OCR 服务（双平台）
+### 降级策略
+
+当透视矫正失败（无法检测到有效四边形）时，跳过 Step 3，直接执行 Step 4-5。
+这确保即使拍摄角度不理想，仍能输出可用图像。
+
+---
+
+## 模块 B：文字识别引擎 (OCR Engine)
+
+### 目标
+
+提取图片中的文字及其位置信息（Bounding Box），支持日语、中文、英语。
+
+### 技术方案：MethodChannel + 原生 API
+
+**为什么不用 Flutter OCR 插件：**
+
+| 方案 | iOS 模拟器 | 日语支持 | 控制力 | 风险 |
+|------|-----------|----------|--------|------|
+| `google_mlkit_text_recognition` | ❌ 无法构建 | ✅ | 中 | **阻塞所有开发** |
+| `flutter_native_ocr` (v0.1.0) | ⚠️ 未验证 | ✅ | 低 | 版本过早 |
+| **MethodChannel + 原生代码** | ✅ | ✅ | **高** | 需写原生代码 |
+
+选择 MethodChannel 方案：一次写好，永久可控。
+
+### 抽象接口
 
 ```dart
 // lib/infrastructure/ml/ocr/ocr_service.dart
+
+import 'dart:io';
+
+class OCRLine {
+  final String text;
+  final double x, y, width, height;  // 归一化坐标 (0.0~1.0)
+  final double confidence;
+
+  const OCRLine({
+    required this.text,
+    required this.x, required this.y,
+    required this.width, required this.height,
+    this.confidence = 1.0,
+  });
+
+  /// 行中心点 Y 坐标（用于位置权重判断）
+  double get centerY => y + height / 2;
+}
+
+class OCRResult {
+  final String text;
+  final List<OCRLine> lines;
+
+  const OCRResult({required this.text, required this.lines});
+  static const empty = OCRResult(text: '', lines: []);
+
+  bool get isEmpty => text.isEmpty;
+}
+
 abstract class OCRService {
   Future<OCRResult> recognizeText(File imageFile);
   void dispose();
 }
-
-// lib/infrastructure/ml/ocr/mlkit_ocr_service.dart (Android)
-// 使用 google_mlkit_text_recognition，script: Japanese
-
-// lib/infrastructure/ml/ocr/vision_ocr_service.dart (iOS)
-// 使用 MethodChannel('com.homepocket.ocr')
-// 调用 VNRecognizeTextRequest，recognitionLevel: accurate
-// 支持语言: ja, en
 ```
 
-#### Step 3: 收据解析器
+### iOS 实现（Apple Vision Framework）
+
+```swift
+// ios/Runner/OcrChannel.swift
+
+import Flutter
+import Vision
+
+class OcrChannel {
+    static let channelName = "com.homepocket/ocr"
+
+    static func register(with messenger: FlutterBinaryMessenger) {
+        let channel = FlutterMethodChannel(name: channelName, binaryMessenger: messenger)
+        channel.setMethodCallHandler { call, result in
+            guard call.method == "recognizeText",
+                  let args = call.arguments as? [String: Any],
+                  let path = args["path"] as? String else {
+                result(FlutterMethodNotImplemented)
+                return
+            }
+            recognizeText(path: path, result: result)
+        }
+    }
+
+    private static func recognizeText(path: String, result: @escaping FlutterResult) {
+        guard let image = CGImage.load(from: URL(fileURLWithPath: path)) else {
+            result(FlutterError(code: "LOAD_FAILED", message: "Cannot load image", details: nil))
+            return
+        }
+
+        let request = VNRecognizeTextRequest { request, error in
+            if let error = error {
+                result(FlutterError(code: "OCR_ERROR", message: error.localizedDescription, details: nil))
+                return
+            }
+
+            guard let observations = request.results as? [VNRecognizedTextObservation] else {
+                result(["text": "", "lines": [[String: Any]]()])
+                return
+            }
+
+            var lines = [[String: Any]]()
+            var fullText = [String]()
+
+            for obs in observations {
+                guard let candidate = obs.topCandidates(1).first else { continue }
+                let box = obs.boundingBox  // Vision: 左下角原点，归一化
+                lines.append([
+                    "text": candidate.string,
+                    "x": box.origin.x,
+                    "y": 1.0 - box.origin.y - box.height,  // 转换为左上角原点
+                    "width": box.width,
+                    "height": box.height,
+                    "confidence": candidate.confidence,
+                ])
+                fullText.append(candidate.string)
+            }
+
+            result(["text": fullText.joined(separator: "\n"), "lines": lines])
+        }
+
+        request.recognitionLevel = .accurate
+        request.recognitionLanguages = ["ja", "zh-Hans", "zh-Hant", "en"]
+        request.usesLanguageCorrection = true
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            let handler = VNImageRequestHandler(cgImage: image, options: [:])
+            do { try handler.perform([request]) }
+            catch { DispatchQueue.main.async {
+                result(FlutterError(code: "OCR_ERROR", message: error.localizedDescription, details: nil))
+            }}
+        }
+    }
+}
+```
+
+### Android 实现（ML Kit Text Recognition v2）
+
+```kotlin
+// android/app/src/main/kotlin/.../OcrChannel.kt
+
+class OcrChannel(private val messenger: BinaryMessenger) : MethodChannel.MethodCallHandler {
+    companion object {
+        const val CHANNEL = "com.homepocket/ocr"
+
+        fun register(messenger: BinaryMessenger) {
+            val channel = MethodChannel(messenger, CHANNEL)
+            channel.setMethodCallHandler(OcrChannel(messenger))
+        }
+    }
+
+    private val recognizer = TextRecognition.getClient(
+        JapaneseTextRecognizerOptions.Builder().build()
+    )
+
+    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        if (call.method != "recognizeText") {
+            result.notImplemented()
+            return
+        }
+
+        val path = call.argument<String>("path") ?: run {
+            result.error("INVALID_ARGS", "Missing 'path'", null)
+            return
+        }
+
+        val image = InputImage.fromFilePath(context, Uri.fromFile(File(path)))
+        recognizer.process(image)
+            .addOnSuccessListener { visionText ->
+                val lines = mutableListOf<Map<String, Any>>()
+                val imageWidth = visionText.width.toDouble()
+                val imageHeight = visionText.height.toDouble()
+
+                for (block in visionText.textBlocks) {
+                    for (line in block.lines) {
+                        val box = line.boundingBox ?: continue
+                        lines.add(mapOf(
+                            "text" to line.text,
+                            "x" to box.left / imageWidth,
+                            "y" to box.top / imageHeight,
+                            "width" to box.width() / imageWidth,
+                            "height" to box.height() / imageHeight,
+                            "confidence" to (line.confidence ?: 1.0),
+                        ))
+                    }
+                }
+
+                result.success(mapOf(
+                    "text" to visionText.text,
+                    "lines" to lines,
+                ))
+            }
+            .addOnFailureListener { e ->
+                result.error("OCR_ERROR", e.localizedDescription, null)
+            }
+    }
+}
+```
+
+### Dart 端统一封装
+
+```dart
+// lib/infrastructure/ml/ocr/platform_ocr_service.dart
+
+import 'dart:io';
+import 'package:flutter/services.dart';
+import 'ocr_service.dart';
+
+/// 通过 MethodChannel 调用平台原生 OCR。
+/// iOS: Apple Vision Framework
+/// Android: ML Kit Text Recognition v2 (Japanese)
+class PlatformOcrService implements OCRService {
+  static const _channel = MethodChannel('com.homepocket/ocr');
+
+  @override
+  Future<OCRResult> recognizeText(File imageFile) async {
+    final result = await _channel.invokeMapMethod<String, dynamic>(
+      'recognizeText',
+      {'path': imageFile.path},
+    );
+
+    if (result == null) return OCRResult.empty;
+
+    final text = result['text'] as String? ?? '';
+    final rawLines = result['lines'] as List? ?? [];
+
+    final lines = rawLines.cast<Map>().map((m) => OCRLine(
+      text: m['text'] as String,
+      x: (m['x'] as num).toDouble(),
+      y: (m['y'] as num).toDouble(),
+      width: (m['width'] as num).toDouble(),
+      height: (m['height'] as num).toDouble(),
+      confidence: (m['confidence'] as num?)?.toDouble() ?? 1.0,
+    )).toList();
+
+    return OCRResult(text: text, lines: lines);
+  }
+
+  @override
+  void dispose() {}
+}
+```
+
+---
+
+## 模块 C：结构化提取 (Information Extraction)
+
+### 目标
+
+从 OCR 结果中提取总金额、日期、商家名称。MVP 使用启发式规则（95% 收据遵循固定格式），
+正式版演进为 CORD 训练模型。
+
+### 提取策略概览
+
+```
+OCRResult (text + lines with positions)
+    │
+    ├─► _extractAmount()    → int?       关键词优先 + 位置权重 + 最大值兜底
+    ├─► _extractDate()      → DateTime?  正则暴力匹配，取最上面的
+    ├─► _extractMerchant()  → String?    首个非噪声行
+    └─► _extractLineItems() → List?      可选，用于模块 D 校验
+```
+
+### 金额提取（最关键）
+
+**三层优先级策略：**
+
+```
+Phase 1: 关键词邻近匹配（最可靠）
+    税込合計 > 合計 > 小計 > TOTAL > 円 suffix
+    ↓ 未命中
+
+Phase 2: 位置权重 + 最大值原则
+    ① 筛选包含 ¥/￥ 或纯数字的行
+    ② 排除噪声行（お釣り、釣銭、税、消費税、内税、外税）
+    ③ 位置权重：Y > 50%（下半部分）的行权重 ×1.5
+    ④ 在高权重行的上下 2 行内，取最大数字
+    ↓ 未命中
+
+Phase 3: 全文最大 ¥ 金额兜底
+    扫描全文所有 ¥/￥ 后的数字，取最大值
+```
 
 ```dart
 // lib/application/ocr/receipt_parser.dart
 
 class ReceiptParser {
-  ParsedReceiptData parse(String text) {
-    return ParsedReceiptData(
-      amount: _extractAmount(text),   // 优先合計 > 小計 > TOTAL > ¥金额
-      date: _extractDate(text),       // 多种格式：年月日/YYYY/MM/DD/YY/MM/DD
-      merchant: _extractMerchant(lines), // 第一个非数字/非日期/非金额行
+  // Phase 1: 关键词邻近
+  static final _keywordPatterns = [
+    RegExp(r'税込\s*合[計计]\s*[¥￥]?\s*([\d,]+)'),
+    RegExp(r'合[計计]\s*[¥￥]?\s*([\d,]+)'),
+    RegExp(r'小[計计]\s*[¥￥]?\s*([\d,]+)'),
+    RegExp(r'TOTAL\s*[¥￥]?\s*([\d,]+)', caseSensitive: false),
+    RegExp(r'([\d,]+)\s*円'),
+  ];
+
+  // Phase 2: 噪声排除
+  static final _excludedKeywords = RegExp(r'(お釣り|釣銭|税\s|消費税|内税|外税)');
+
+  int? _extractAmount(List<OCRLine> lines) {
+    final fullText = lines.map((l) => l.text).join('\n');
+
+    // Phase 1: 关键词邻近
+    for (final pattern in _keywordPatterns) {
+      final match = pattern.firstMatch(fullText);
+      if (match != null) {
+        final parsed = _parseNumber(match.group(1)!);
+        if (parsed != null && parsed > 0) return parsed;
+      }
+    }
+
+    // Phase 2: 位置权重 + 最大值
+    int? best;
+    double bestScore = 0;
+    final yenPattern = RegExp(r'[¥￥]\s*([\d,]+)');
+
+    for (var i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      if (_excludedKeywords.hasMatch(line.text)) continue;
+
+      for (final match in yenPattern.allMatches(line.text)) {
+        final parsed = _parseNumber(match.group(1)!);
+        if (parsed == null || parsed <= 0) continue;
+
+        // 位置权重：下半部分 ×1.5
+        final posWeight = line.centerY > 0.5 ? 1.5 : 1.0;
+        final score = parsed * posWeight;
+
+        if (score > bestScore) {
+          bestScore = score;
+          best = parsed;
+        }
+      }
+    }
+
+    return best;
+  }
+}
+```
+
+### 日期提取
+
+```dart
+DateTime? _extractDate(List<OCRLine> lines) {
+  final patterns = [
+    // 日本語
+    RegExp(r'(\d{4})年(\d{1,2})月(\d{1,2})日'),
+    // ISO / 日本标准
+    RegExp(r'(\d{4})[/\-.](\d{1,2})[/\-.](\d{1,2})'),
+    // 短年份
+    RegExp(r'(\d{2})[/\-.](\d{1,2})[/\-.](\d{1,2})'),
+    // 英文月份 (15-Feb-2026)
+    RegExp(r'(\d{1,2})-(\w{3})-(\d{4})'),
+  ];
+
+  // 优先取最上面的匹配（打印时间通常在头部）
+  for (final line in lines) {
+    for (final pattern in patterns) {
+      final match = pattern.firstMatch(line.text);
+      if (match != null) {
+        final date = _parseDate(match, pattern);
+        if (date != null) return date;
+      }
+    }
+  }
+  return null;
+}
+```
+
+### 商家提取
+
+```dart
+String? _extractMerchant(List<OCRLine> lines) {
+  // 第一个非噪声行通常是店名
+  final datePattern = RegExp(r'^\d{2,4}[/\-.]?\d{1,2}[/\-.]?\d{1,2}');
+  final amountPattern = RegExp(r'^[¥￥]?\s*[\d,]+\s*(円)?$');
+  final keywordPattern = RegExp(
+    r'^(合[計计]|小[計计]|TOTAL|税込|お釣り|内税|外税|消費税|No\.|TEL)',
+    caseSensitive: false,
+  );
+
+  for (final line in lines) {
+    final text = line.text.trim();
+    if (text.length < 2) continue;
+    if (datePattern.hasMatch(text)) continue;
+    if (amountPattern.hasMatch(text)) continue;
+    if (keywordPattern.hasMatch(text)) continue;
+    if (RegExp(r'^[\d,.\s]+$').hasMatch(text)) continue;
+    return text;
+  }
+  return null;
+}
+```
+
+### 明细行提取（可选，供模块 D 使用）
+
+```dart
+/// 尝试提取商品明细（品名 + 金额）
+/// 格式示例: "コカ・コーラ    ¥150" 或 "コーラ 3x50  150"
+List<ReceiptLineItem> _extractLineItems(List<OCRLine> lines) {
+  final itemPattern = RegExp(r'(.+?)\s+[¥￥]?\s*([\d,]+)\s*$');
+  final items = <ReceiptLineItem>[];
+
+  for (final line in lines) {
+    // 跳过关键词行
+    if (_isKeywordLine(line.text)) continue;
+    final match = itemPattern.firstMatch(line.text);
+    if (match != null) {
+      final name = match.group(1)!.trim();
+      final price = _parseNumber(match.group(2)!);
+      if (price != null && price > 0 && name.isNotEmpty) {
+        items.add(ReceiptLineItem(name: name, unitPrice: price, quantity: 1, subtotal: price));
+      }
+    }
+  }
+
+  return items;
+}
+```
+
+---
+
+## 模块 D：数据纠错与校验 (Validation)
+
+### 目标
+
+利用财务逻辑修正 OCR 错误，提供置信度评分。
+
+### 校验规则
+
+```dart
+// lib/application/ocr/receipt_validator.dart
+
+class ReceiptValidator {
+  ValidatedReceiptData validate(ParsedReceiptData parsed) {
+    final warnings = <ValidationWarning>[];
+    double confidence = 1.0;
+
+    // Rule 1: 金额合理性检查
+    if (parsed.amount != null) {
+      if (parsed.amount! <= 0) {
+        warnings.add(ValidationWarning.negativeAmount);
+        confidence *= 0.3;
+      } else if (parsed.amount! > 1000000) {
+        // 超过 100万円 → 可能是 OCR 错误（多读了一位）
+        warnings.add(ValidationWarning.unusuallyLargeAmount);
+        confidence *= 0.5;
+      }
+    } else {
+      confidence *= 0.4;  // 未提取到金额
+    }
+
+    // Rule 2: 日期合理性检查
+    if (parsed.date != null) {
+      final now = DateTime.now();
+      if (parsed.date!.isAfter(now.add(const Duration(days: 1)))) {
+        warnings.add(ValidationWarning.futureDate);
+        confidence *= 0.5;
+      } else if (parsed.date!.isBefore(DateTime(2000))) {
+        warnings.add(ValidationWarning.ancientDate);
+        confidence *= 0.5;
+      }
+    } else {
+      confidence *= 0.8;  // 日期缺失但不严重
+    }
+
+    // Rule 3: 明细交叉校验（当有明细时）
+    if (parsed.items != null && parsed.items!.isNotEmpty && parsed.amount != null) {
+      final itemsTotal = parsed.items!.fold<int>(0, (sum, i) => sum + i.subtotal);
+      // 允许 ±10% 误差（税费可能未被提取）
+      final ratio = itemsTotal / parsed.amount!;
+      if (ratio < 0.7 || ratio > 1.3) {
+        warnings.add(ValidationWarning.itemsTotalMismatch);
+        confidence *= 0.6;
+      } else if (ratio > 0.9 && ratio < 1.1) {
+        confidence *= 1.1;  // 明细与合计吻合 → 提升置信度
+      }
+    }
+
+    return ValidatedReceiptData(
+      amount: parsed.amount,
+      date: parsed.date,
+      merchant: parsed.merchant,
+      confidence: confidence.clamp(0.0, 1.0),
+      warnings: warnings,
     );
   }
 }
-```
 
-**金额提取优先级：**
-1. 合計/小計/TOTAL 关键字后的数字
-2. 行尾的 ¥数字 或 数字円
-3. 所有数字中取最大值（兜底）
-
-**日期支持格式：**
-- `YYYY年MM月DD日`
-- `YYYY/MM/DD`、`YYYY-MM-DD`、`YYYY.MM.DD`
-- `YY/MM/DD`（自动补全世纪）
-
-#### Step 4: 商家数据库
-
-```dart
-// lib/infrastructure/ml/merchant_database.dart（唯一定义，与 MOD-002 共享）
-
-class MerchantDatabase {
-  // 500+ 日本常见商家（便利店/超市/餐饮/交通/购物/药妆）
-  // 匹配策略（优先级）:
-  //   1. 精确匹配 → confidence * 1.0
-  //   2. 别名匹配 → confidence * 1.0
-  //   3. 模糊匹配（contains）→ confidence * 0.8
-  //   4. 别名模糊匹配 → confidence * 0.75
+enum ValidationWarning {
+  negativeAmount,
+  unusuallyLargeAmount,
+  futureDate,
+  ancientDate,
+  itemsTotalMismatch,
 }
 ```
 
-#### Step 5: ScanReceiptUseCase
+---
 
-```dart
-// lib/application/ocr/scan_receipt_use_case.dart
+## 层次结构与目录
 
-class ScanReceiptUseCase {
-  final OCRService _ocrService;
-  final ImagePreprocessor _preprocessor;
-  final ReceiptParser _parser;
-  final MerchantDatabase _merchantDB;
-  final SaveReceiptPhotoUseCase _savePhotoUseCase;
+### 5 层 Clean Architecture 分层
 
-  Future<Result<ScannedReceiptResult>> execute({
-    required ImageSource source,
-  }) async {
-    // 1. image_picker 获取图像
-    // 2. ImagePreprocessor.process()（Isolate）
-    // 3. OCRService.recognizeText()
-    // 4. ReceiptParser.parse()
-    // 5. MerchantDatabase.findMerchant()
-    // 6. SaveReceiptPhotoUseCase.execute() → photoHash
-    // 7. 返回 ScannedReceiptResult（供 OcrScannerScreen 传给 TransactionConfirmScreen）
-  }
-}
-
-// 返回结果用于构造 TransactionConfirmScreen 参数
-class ScannedReceiptResult {
-  final int? amount;
-  final DateTime? date;
-  final String? merchantName;
-  final Category? suggestedCategory;
-  final Category? suggestedParentCategory;
-  final LedgerType? suggestedLedgerType;
-  final String? photoHash;
-  final double confidence;       // 整体置信度 0.0~1.0
-}
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│  Presentation  lib/features/accounting/presentation/                  │
+│  ├── screens/ocr_scanner_screen.dart          ← 已实现 stub          │
+│  ├── screens/transaction_confirm_screen.dart  ← 已实现               │
+│  ├── widgets/entry_mode_switcher.dart         ← 已实现               │
+│  └── providers/ocr_providers.dart             ← 待实现               │
+├──────────────────────────────────────────────────────────────────────┤
+│  Application  lib/application/ocr/              ← 待实现              │
+│  ├── scan_receipt_use_case.dart                                       │
+│  ├── receipt_parser.dart                       ← 模块 C              │
+│  ├── receipt_validator.dart                    ← 模块 D              │
+│  └── save_receipt_photo_use_case.dart                                 │
+├──────────────────────────────────────────────────────────────────────┤
+│  Domain  lib/features/accounting/domain/                              │
+│  ├── models/transaction.dart                  ← 含 photoHash 字段    │
+│  └── models/category.dart                                            │
+├──────────────────────────────────────────────────────────────────────┤
+│  Infrastructure  lib/infrastructure/ml/         ← 待实现              │
+│  ├── ocr/                                                            │
+│  │   ├── ocr_service.dart                     ← 抽象接口（含 OCRLine）│
+│  │   └── platform_ocr_service.dart            ← MethodChannel 封装   │
+│  ├── image_preprocessor.dart                  ← 模块 A (opencv_dart) │
+│  └── merchant_database.dart                   ← 已实现               │
+├──────────────────────────────────────────────────────────────────────┤
+│  Native                                                              │
+│  ├── ios/Runner/OcrChannel.swift              ← Vision Framework     │
+│  └── android/.../OcrChannel.kt                ← ML Kit               │
+├──────────────────────────────────────────────────────────────────────┤
+│  Data  lib/data/                               ← 待实现              │
+│  ├── tables/receipt_photos_table.dart                                 │
+│  ├── daos/receipt_photo_dao.dart                                      │
+│  └── repositories/receipt_photo_repository_impl.dart                  │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
-#### Step 6: 照片加密存储
+### 目标目录结构
 
-```dart
-// lib/application/ocr/save_receipt_photo_use_case.dart
+```
+# 新增依赖 (pubspec.yaml)
+opencv_dart: ^2.2.0
+image_picker: ^1.1.2
 
-class SaveReceiptPhotoUseCase {
-  // 1. 读取图像字节
-  // 2. SHA-256 哈希 → 文件名
-  // 3. 查重（已存在则复用）
-  // 4. PhotoEncryptionService.encrypt() → AES-256-GCM
-  // 5. 写入 {appDir}/receipts/{hash}.enc
-  // 6. 元数据存入 receipt_photos 表
-}
+# Infrastructure 层
+lib/infrastructure/ml/
+├── ocr/
+│   ├── ocr_service.dart           # 抽象 OCRService + OCRLine + OCRResult
+│   └── platform_ocr_service.dart  # MethodChannel 调用原生 OCR
+├── image_preprocessor.dart        # opencv_dart 预处理管道
+├── merchant_database.dart         # 已实现（与 MOD-002 共享）
+└── tflite_classifier.dart         # 未来 CORD 模型推理
 
-// 复用已实现的:
-// lib/infrastructure/crypto/services/photo_encryption_service.dart
+# Application 层
+lib/application/ocr/
+├── scan_receipt_use_case.dart     # 编排：预处理 → OCR → 解析 → 校验
+├── receipt_parser.dart            # 模块 C：启发式结构化提取
+├── receipt_validator.dart         # 模块 D：财务逻辑校验
+└── save_receipt_photo_use_case.dart
+
+# Presentation 层（Provider）
+lib/features/accounting/presentation/providers/
+└── ocr_providers.dart             # Riverpod provider 装配
+
+# Native 代码
+ios/Runner/OcrChannel.swift        # iOS Vision Framework
+android/app/.../OcrChannel.kt     # Android ML Kit
+
+# Data 层
+lib/data/tables/receipt_photos_table.dart
+lib/data/daos/receipt_photo_dao.dart
+lib/data/repositories/receipt_photo_repository_impl.dart
 ```
 
-#### Step 7: OcrScannerScreen 接入
+---
+
+## 导航流程
+
+### 完整用户流程
+
+```
+Home Screen
+    │
+    ▼  [+ 记账]
+TransactionEntryScreen (Manual)
+    │
+    │  EntryModeSwitcher → tap OCR tab (pushReplacement)
+    ▼
+OcrScannerScreen
+    │
+    │  [快门/相册] → ScanReceiptUseCase
+    │  ┌────────────────────────────────────────────┐
+    │  │ 1. image_picker 获取图像 (Uint8List)       │
+    │  │ 2. 模块 A: ImagePreprocessor.process()     │
+    │  │    → 边缘检测 → 透视矫正 → 二值化 → 锐化  │
+    │  │ 3. 模块 B: OCRService.recognizeText()      │
+    │  │    → 文字 + 位置 (OCRLine[])                │
+    │  │ 4. 模块 C: ReceiptParser.parse()           │
+    │  │    → 金额/日期/商家 (启发式规则)           │
+    │  │ 5. 模块 D: ReceiptValidator.validate()     │
+    │  │    → 置信度 + 警告                          │
+    │  │ 6. MerchantDatabase.findMerchant()         │
+    │  │    → 分类匹配                               │
+    │  │ 7. SaveReceiptPhotoUseCase.execute()        │
+    │  │    → 加密存储 → photoHash                   │
+    │  └────────────────────────────────────────────┘
+    │
+    │  识别成功 → Navigator.push
+    ▼
+TransactionConfirmScreen(
+  bookId: bookId,
+  amount: validatedAmount,           // 可编辑
+  category: matchedCategory,         // 可编辑
+  parentCategory: parentCategory,
+  date: validatedDate,               // 可编辑
+  initialMerchant: merchantName,     // 可编辑
+  // photoHash, confidence, warnings
+)
+    │
+    │  [确认记录] → CreateTransactionUseCase.execute()
+    ▼
+Navigator.popUntil(isFirst)
+```
+
+---
+
+## Provider 装配
 
 ```dart
-// 在 OcrScannerScreen 中:
-Future<void> _onShutter() async {
-  setState(() => _isProcessing = true);
-  try {
-    final useCase = ref.read(scanReceiptUseCaseProvider);
-    final result = await useCase.execute(source: ImageSource.camera);
+// lib/features/accounting/presentation/providers/ocr_providers.dart
 
-    if (result.isSuccess && mounted) {
-      final data = result.data!;
-      Navigator.push(
-        context,
-        MaterialPageRoute<void>(
-          builder: (_) => TransactionConfirmScreen(
-            bookId: widget.bookId,
-            amount: data.amount ?? 0,
-            category: data.suggestedCategory ?? _defaultCategory,
-            parentCategory: data.suggestedParentCategory,
-            date: data.date ?? DateTime.now(),
-          ),
-        ),
-      );
-    } else if (result.isError && mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(result.error!)));
-    }
-  } finally {
-    if (mounted) setState(() => _isProcessing = false);
-  }
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'ocr_providers.g.dart';
+
+/// OCRService — keepAlive，MethodChannel 无需反复创建
+@Riverpod(keepAlive: true)
+OCRService ocrService(Ref ref) {
+  final service = PlatformOcrService();
+  ref.onDispose(() => service.dispose());
+  return service;
+}
+
+/// ImagePreprocessor — 无状态
+@riverpod
+ImagePreprocessor imagePreprocessor(Ref ref) {
+  return ImagePreprocessor();
+}
+
+/// ReceiptParser — 无状态
+@riverpod
+ReceiptParser receiptParser(Ref ref) {
+  return ReceiptParser();
+}
+
+/// ReceiptValidator — 无状态
+@riverpod
+ReceiptValidator receiptValidator(Ref ref) {
+  return ReceiptValidator();
+}
+
+/// ScanReceiptUseCase — 编排所有模块
+@riverpod
+ScanReceiptUseCase scanReceiptUseCase(Ref ref) {
+  return ScanReceiptUseCase(
+    ocrService: ref.watch(ocrServiceProvider),
+    preprocessor: ref.watch(imagePreprocessorProvider),
+    parser: ref.watch(receiptParserProvider),
+    validator: ref.watch(receiptValidatorProvider),
+  );
 }
 ```
 
@@ -621,112 +984,188 @@ Future<void> _onShutter() async {
 
 ## 测试策略
 
-### 单元测试
+### 单元测试（TDD，模块隔离）
+
+```
+test/unit/application/ocr/
+├── receipt_parser_test.dart        # 模块 C: 金额/日期/商家提取
+├── receipt_validator_test.dart     # 模块 D: 校验逻辑
+└── scan_receipt_use_case_test.dart  # 编排层（Mock A/B/C/D）
+
+test/unit/infrastructure/ml/
+├── image_preprocessor_test.dart    # 模块 A: 预处理输出验证
+└── platform_ocr_service_test.dart  # 模块 B: MethodChannel Mock
+```
+
+#### 模块 C 测试重点（ReceiptParser）
 
 ```dart
-// test/unit/application/ocr/receipt_parser_test.dart
-group('ReceiptParser', () {
-  test('提取合計金額（日語）', () { ... });
-  test('提取合計金額（英語 TOTAL）', () { ... });
-  test('提取带逗号的金额', () { ... });
-  test('未找到金额时返回null', () { ... });
-  test('提取日期 YYYY年MM月DD日', () { ... });
-  test('提取日期 YYYY/MM/DD', () { ... });
-  test('提取日期 YY/MM/DD（补全世纪）', () { ... });
-  test('提取商家名称', () { ... });
+group('extractAmount', () {
+  // 关键词匹配
+  test('提取 合計 ¥580',         ...);
+  test('提取 税込合計 1,280',     ...);
+  test('提取 小計 when no 合計', ...);
+  test('提取 TOTAL $12.50',      ...);
+  test('提取 580円',              ...);
+  test('提取带逗号 ¥1,234,567',  ...);
+
+  // 位置权重
+  test('下半部分金额优先于上半部分', ...);
+  test('关键词行附近的最大数字',    ...);
+
+  // 噪声排除
+  test('排除 お釣り 行',          ...);
+  test('排除 消費税 行',          ...);
+
+  // 兜底
+  test('无关键词时取最大 ¥ 金额', ...);
+  test('无金额时返回 null',       ...);
 });
 
-// test/unit/infrastructure/ml/merchant_database_test.dart
-group('MerchantDatabase', () {
-  test('精确匹配返回 exact matchType', () { ... });
-  test('别名匹配返回 alias matchType', () { ... });
-  test('模糊匹配置信度降低', () { ... });
-  test('未知商家返回 null', () { ... });
+group('extractDate', () {
+  test('YYYY年MM月DD日',          ...);
+  test('YYYY/MM/DD',              ...);
+  test('YYYY-MM-DD',              ...);
+  test('YY/MM/DD 补全世纪',      ...);
+  test('DD-MMM-YYYY (15-Feb-2026)', ...);
+  test('多个日期取最上面的',       ...);
+  test('拒绝无效日期 (2月30日)',   ...);
+});
+
+group('extractMerchant', () {
+  test('第一个非噪声行',           ...);
+  test('跳过日期行',               ...);
+  test('跳过金额行',               ...);
+  test('跳过关键词行',             ...);
+  test('去除空白',                 ...);
 });
 ```
 
-### Widget 测试
+#### 模块 D 测试重点（ReceiptValidator）
 
 ```dart
-// test/widget/ocr_scanner_screen_test.dart
-testWidgets('OcrScannerScreen 显示正确 UI 元素', (tester) async {
-  // 验证: ocrScanTitle 文字, 取景框, 相册/快门/闪光灯按钮
-});
-```
-
-### 集成测试
-
-```dart
-// integration_test/ocr_flow_test.dart
-testWidgets('完整 OCR 流程：扫描 → 确认 → 保存', (tester) async {
-  // 1. 启动应用
-  // 2. 切换到 OCR 模式（EntryModeSwitcher）
-  // 3. 模拟选择测试收据照片（gallery）
-  // 4. 验证 TransactionConfirmScreen 预填数据
-  // 5. 点击确认记录
-  // 6. 验证交易已创建
+group('validate', () {
+  test('正常数据 → 高置信度',            ...);
+  test('金额为 0 → 警告 + 低置信度',     ...);
+  test('金额超 100万 → 警告',            ...);
+  test('未来日期 → 警告',                ...);
+  test('2000年前日期 → 警告',            ...);
+  test('明细合计与总额不符 → 警告',      ...);
+  test('明细合计与总额吻合 → 提升置信度', ...);
 });
 ```
 
 ### 覆盖率要求
 
-- 目标 ≥80%（含 ReceiptParser、MerchantDatabase 的全路径）
+- 目标 ≥80%
+- 模块 C (ReceiptParser) 要求 ≥90%（核心业务逻辑）
 
 ---
 
 ## 性能优化
 
-### 图像处理（Isolate）
+### 图像预处理（Isolate）
 
 ```dart
-// 使用 Flutter compute() 在独立 Isolate 执行图像处理，避免阻塞 UI 线程
-Future<File> processImageInBackground(XFile image) async {
-  return await compute(_processImageSync, image.path);
+// opencv_dart 操作在 Isolate 中执行，避免阻塞 UI
+Future<File?> process(Uint8List bytes) async {
+  return Isolate.run(() => _processSync(bytes));
 }
 ```
 
-### OCR识别优化
+### 性能预算
 
-- **分辨率控制**: 最大 2048px，减少处理时间
-- **识别区域**: 优先识别收据关键区域（金额区、日期区）
-- **超时机制**: OCR 超时 5 秒，返回空结果，引导手动录入
+| 阶段 | 预算 | 优化手段 |
+|------|------|----------|
+| 图像预处理 (A) | <1s | Isolate 并行，缩放至 2048px |
+| OCR 识别 (B) | <2s | 原生 API，accuracy 模式 |
+| 结构化提取 (C) | <50ms | 纯 Dart 正则，无 I/O |
+| 数据校验 (D) | <10ms | 纯逻辑计算 |
+| **总计** | **<3s** | |
 
 ### 照片存储优化
 
 ```dart
-// 压缩后再加密（节省存储空间）
+// 压缩后再加密
 final compressed = img.encodeJpg(decoded, quality: 85);
 final encrypted = await photoEncryptionService.encrypt(compressed);
 ```
 
 ### 缓存策略
 
-- **商家数据库**: 进程内单例，预加载到内存，`O(1)` 查找
-- **分类数据**: Riverpod provider 缓存
-- **收据缩略图**: 解密后生成 256px 缩略图，缓存于内存
+- **商家数据库**: 进程内单例，预加载到内存
+- **OCRService**: keepAlive，MethodChannel 复用
+- **OpenCV**: opencv_dart 通过 FFI 直接调用，零开销
+
+---
+
+## 未来演进路线
+
+### Phase 1: MVP（当前计划）
+
+```
+启发式规则提取 → 准确率 80-90%
+├── 关键词匹配 + 正则
+├── 位置权重
+└── 财务逻辑校验
+```
+
+### Phase 2: CORD 模型集成
+
+```
+Key Information Extraction (KIE) 模型
+├── 训练数据: CORD dataset (Consolidated Receipt Dataset)
+│   └── 11,000+ 带标注收据图像
+├── 模型: LayoutLMv3 或 Donut (document understanding transformer)
+├── 推理: TFLite 量化模型，设备端运行
+└── 目标准确率: >98% 金额，>95% 日期
+```
+
+```dart
+// 未来 lib/infrastructure/ml/tflite_classifier.dart
+class ReceiptKIEModel {
+  /// CORD 训练的 KIE 模型，直接从图像提取结构化数据
+  /// 不依赖 OCR 文字识别，端到端抽取
+  Future<ParsedReceiptData> extract(File image) async {
+    final interpreter = await Interpreter.fromAsset('receipt_kie.tflite');
+    // ...
+  }
+}
+```
+
+### Phase 3: 用户反馈闭环
+
+```
+用户修正 → 记录到本地训练集 → 模型微调 → 提升准确率
+├── RecordCorrectionUseCase（已有类似 voice 模块实现）
+└── 增量学习或规则优化
+```
 
 ---
 
 ## 总结
 
-MOD-004 OCR扫描模块：
+| 维度 | 设计决策 |
+|------|----------|
+| **预处理** | opencv_dart (边缘检测 → 透视矫正 → 自适应二值化 → 锐化) |
+| **OCR 引擎** | MethodChannel: iOS Vision + Android ML Kit（不用 Flutter 插件） |
+| **提取** | 启发式规则 (关键词 → 位置权重 → 最大值兜底 → 正则) |
+| **校验** | 财务逻辑 (金额范围 → 日期合理性 → 明细交叉验证) |
+| **架构** | 4 模块管道，模块间通过类型化数据流连接 |
+| **模拟器** | ✅ 全部兼容（opencv_dart + Vision Framework 均支持模拟器） |
+| **未来** | CORD 训练模型替换模块 C，端到端 KIE |
 
-1. **当前状态**: 前端 UI Stub 已集成至 accounting feature 的 presentation 层
-2. **共用确认页**: OCR 和手动录入共用 `TransactionConfirmScreen`，识别结果作为参数传入
-3. **导航模式**: 通过 `EntryModeNavigationConfig` + `pushReplacement` 在三种录入模式间切换
-4. **待实现**: 后端 OCR 管道（`lib/application/ocr/`、`lib/infrastructure/ml/`、`lib/data/` 相关表）
-5. **安全**: 照片 AES-256-GCM 加密，复用已实现的 `PhotoEncryptionService`
-
-**开发优先级**: P1，预计 7 天完成后端实现。
+**开发优先级**: P1，预计 10 天完成后端实现。
 
 **依赖模块**:
-- ✅ MOD-001（基础记账）— 交易创建（已实现）
-- ✅ MOD-002（双轨账本）— 商家数据库分类（MerchantDatabase 唯一定义）
-- ✅ MOD-006（安全模块）— 照片加密（PhotoEncryptionService 已实现）
+- ✅ MOD-001（基础记账）— CreateTransactionUseCase
+- ✅ MOD-002（双轨账本）— MerchantDatabase
+- ✅ MOD-006（安全模块）— PhotoEncryptionService
 
 ---
 
 **文档维护**:
 - v1.0: 2026-02-03 — 初始版本
-- v2.0: 2026-02-06 — 架构重构（ARCH-008），移除 features/ocr/ 分层
-- v3.0: 2026-02-22 — 基于实际代码更新，反映 stub 现状，更正模块编号为 MOD-004，明确 TransactionConfirmScreen 共用设计
+- v2.0: 2026-02-06 — ARCH-008 重构
+- v3.0: 2026-02-22 — 基于实际代码更新
+- v4.0: 2026-02-25 — 重新设计：四模块管道架构，opencv_dart 预处理，MethodChannel OCR，启发式提取 + 财务校验，CORD 演进路线
