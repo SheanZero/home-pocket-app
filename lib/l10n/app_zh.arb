@@ -409,6 +409,30 @@
   "@familySyncMemberStatusPending": {
     "description": "Status label for a pending group member"
   },
+  "familySyncRemoveMember": "移除成员",
+  "@familySyncRemoveMember": {
+    "description": "Button label to remove a member from the group"
+  },
+  "familySyncRemoveMemberConfirm": "确定要将 {deviceName} 移出这个家庭分组吗？",
+  "@familySyncRemoveMemberConfirm": {
+    "description": "Confirmation message for removing a member",
+    "placeholders": {
+      "deviceName": {
+        "type": "String",
+        "example": "厨房平板"
+      }
+    }
+  },
+  "familySyncRemoveMemberFailed": "移除成员失败: {message}",
+  "@familySyncRemoveMemberFailed": {
+    "description": "Error message when removing a member fails",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "网络错误"
+      }
+    }
+  },
   "familySyncBadgeUnpaired": "未配对",
   "@familySyncBadgeUnpaired": {
     "description": "Badge label for unpaired status"

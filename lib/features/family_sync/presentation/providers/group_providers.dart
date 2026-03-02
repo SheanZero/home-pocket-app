@@ -6,6 +6,7 @@ import '../../use_cases/create_group_use_case.dart';
 import '../../use_cases/deactivate_group_use_case.dart';
 import '../../use_cases/join_group_use_case.dart';
 import '../../use_cases/leave_group_use_case.dart';
+import '../../use_cases/remove_member_use_case.dart';
 import '../../use_cases/regenerate_invite_use_case.dart';
 import 'repository_providers.dart';
 import 'sync_providers.dart';
@@ -57,6 +58,13 @@ final regenerateInviteUseCaseProvider = Provider<RegenerateInviteUseCase>((
   ref,
 ) {
   return RegenerateInviteUseCase(
+    apiClient: ref.watch(relayApiClientProvider),
+    groupRepository: ref.watch(groupRepositoryProvider),
+  );
+});
+
+final removeMemberUseCaseProvider = Provider<RemoveMemberUseCase>((ref) {
+  return RemoveMemberUseCase(
     apiClient: ref.watch(relayApiClientProvider),
     groupRepository: ref.watch(groupRepositoryProvider),
   );

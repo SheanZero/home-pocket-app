@@ -6,7 +6,7 @@ part of 'sync_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$pushSyncUseCaseHash() => r'096b20929e070054c2bc9b07b4777d80c7c62e91';
+String _$pushSyncUseCaseHash() => r'c3687aa735b9f850948af61f5615365e2832041d';
 
 /// PushSyncUseCase provider.
 ///
@@ -25,7 +25,7 @@ final pushSyncUseCaseProvider = AutoDisposeProvider<PushSyncUseCase>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef PushSyncUseCaseRef = AutoDisposeProviderRef<PushSyncUseCase>;
-String _$pullSyncUseCaseHash() => r'f3d04071b177d4ea3ea1707ab38b0f1a8b54020d';
+String _$pullSyncUseCaseHash() => r'839de0977ac2954306fffb937000ac74d6a79b1a';
 
 /// PullSyncUseCase provider.
 ///
@@ -64,7 +64,7 @@ final fullSyncUseCaseProvider = AutoDisposeProvider<FullSyncUseCase>.internal(
 // ignore: unused_element
 typedef FullSyncUseCaseRef = AutoDisposeProviderRef<FullSyncUseCase>;
 String _$syncTriggerServiceHash() =>
-    r'419c9f7b105269ccf86b01c21a948e75358b0620';
+    r'842082669630dd38f21d25d2af465f0b76a512f8';
 
 /// SyncTriggerService provider.
 ///

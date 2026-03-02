@@ -84,7 +84,7 @@ class PushSyncUseCase {
 
       // Try push to server
       try {
-        await _apiClient.pushGroupSync(
+        await _apiClient.pushSync(
           groupId: group.groupId,
           payload: encryptedPayload,
           vectorClock: vectorClock,

@@ -47,16 +47,20 @@ void main() {
         createdAt: DateTime(2026),
       ),
     );
-    when(() => e2eeService.encryptForGroup(
-      plaintext: any(named: 'plaintext'),
-      groupKeyBase64: any(named: 'groupKeyBase64'),
-    )).thenReturn('encrypted-payload');
-    when(() => apiClient.pushGroupSync(
-      groupId: any(named: 'groupId'),
-      payload: any(named: 'payload'),
-      vectorClock: any(named: 'vectorClock'),
-      operationCount: any(named: 'operationCount'),
-    )).thenAnswer((_) async => {'recipientCount': 2});
+    when(
+      () => e2eeService.encryptForGroup(
+        plaintext: any(named: 'plaintext'),
+        groupKeyBase64: any(named: 'groupKeyBase64'),
+      ),
+    ).thenReturn('encrypted-payload');
+    when(
+      () => apiClient.pushSync(
+        groupId: any(named: 'groupId'),
+        payload: any(named: 'payload'),
+        vectorClock: any(named: 'vectorClock'),
+        operationCount: any(named: 'operationCount'),
+      ),
+    ).thenAnswer((_) async => {'recipientCount': 2});
 
     final result = await useCase.execute(
       operations: [
@@ -66,12 +70,14 @@ void main() {
     );
 
     expect(result, isA<PushSyncSuccess>());
-    verify(() => apiClient.pushGroupSync(
-      groupId: 'group-1',
-      payload: 'encrypted-payload',
-      vectorClock: const {'device-1': 1},
-      operationCount: 1,
-    )).called(1);
+    verify(
+      () => apiClient.pushSync(
+        groupId: 'group-1',
+        payload: 'encrypted-payload',
+        vectorClock: const {'device-1': 1},
+        operationCount: 1,
+      ),
+    ).called(1);
   });
 
   test('queues the payload when the push fails', () async {
@@ -86,23 +92,29 @@ void main() {
         createdAt: DateTime(2026),
       ),
     );
-    when(() => e2eeService.encryptForGroup(
-      plaintext: any(named: 'plaintext'),
-      groupKeyBase64: any(named: 'groupKeyBase64'),
-    )).thenReturn('encrypted-payload');
-    when(() => apiClient.pushGroupSync(
-      groupId: any(named: 'groupId'),
-      payload: any(named: 'payload'),
-      vectorClock: any(named: 'vectorClock'),
-      operationCount: any(named: 'operationCount'),
-    )).thenThrow(Exception('offline'));
-    when(() => queueManager.enqueue(
-      id: any(named: 'id'),
-      groupId: any(named: 'groupId'),
-      encryptedPayload: any(named: 'encryptedPayload'),
-      vectorClock: any(named: 'vectorClock'),
-      operationCount: any(named: 'operationCount'),
-    )).thenAnswer((_) async {});
+    when(
+      () => e2eeService.encryptForGroup(
+        plaintext: any(named: 'plaintext'),
+        groupKeyBase64: any(named: 'groupKeyBase64'),
+      ),
+    ).thenReturn('encrypted-payload');
+    when(
+      () => apiClient.pushSync(
+        groupId: any(named: 'groupId'),
+        payload: any(named: 'payload'),
+        vectorClock: any(named: 'vectorClock'),
+        operationCount: any(named: 'operationCount'),
+      ),
+    ).thenThrow(Exception('offline'));
+    when(
+      () => queueManager.enqueue(
+        id: any(named: 'id'),
+        groupId: any(named: 'groupId'),
+        encryptedPayload: any(named: 'encryptedPayload'),
+        vectorClock: any(named: 'vectorClock'),
+        operationCount: any(named: 'operationCount'),
+      ),
+    ).thenAnswer((_) async {});
 
     final result = await useCase.execute(
       operations: [
@@ -112,12 +124,14 @@ void main() {
     );
 
     expect(result, isA<PushSyncQueued>());
-    verify(() => queueManager.enqueue(
-      id: any(named: 'id'),
-      groupId: 'group-1',
-      encryptedPayload: 'encrypted-payload',
-      vectorClock: const {'device-1': 1},
-      operationCount: 1,
-    )).called(1);
+    verify(
+      () => queueManager.enqueue(
+        id: any(named: 'id'),
+        groupId: 'group-1',
+        encryptedPayload: 'encrypted-payload',
+        vectorClock: const {'device-1': 1},
+        operationCount: 1,
+      ),
+    ).called(1);
   });
 }

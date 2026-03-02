@@ -5,10 +5,16 @@ import '../../domain/models/group_member.dart';
 
 /// Displays partner device information with sync status.
 class PartnerDeviceTile extends StatelessWidget {
-  const PartnerDeviceTile({super.key, required this.device, this.onTap});
+  const PartnerDeviceTile({
+    super.key,
+    required this.device,
+    this.onTap,
+    this.trailing,
+  });
 
   final GroupMember device;
   final VoidCallback? onTap;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +40,7 @@ class PartnerDeviceTile extends StatelessWidget {
           color: theme.colorScheme.onSurfaceVariant,
         ),
       ),
+      trailing: trailing,
     );
   }
 }

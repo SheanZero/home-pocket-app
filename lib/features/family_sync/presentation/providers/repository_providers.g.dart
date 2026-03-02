@@ -6,25 +6,25 @@ part of 'repository_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$pairRepositoryHash() => r'20de489f507965a411030663f08a5d98aaadc291';
+String _$groupRepositoryHash() => r'd4a3761633cebcd22979e5b60d213e12121b2b5e';
 
-/// PairRepository provider.
+/// GroupRepository provider.
 ///
-/// Copied from [pairRepository].
-@ProviderFor(pairRepository)
-final pairRepositoryProvider = AutoDisposeProvider<PairRepository>.internal(
-  pairRepository,
-  name: r'pairRepositoryProvider',
+/// Copied from [groupRepository].
+@ProviderFor(groupRepository)
+final groupRepositoryProvider = AutoDisposeProvider<GroupRepository>.internal(
+  groupRepository,
+  name: r'groupRepositoryProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$pairRepositoryHash,
+      : _$groupRepositoryHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef PairRepositoryRef = AutoDisposeProviderRef<PairRepository>;
+typedef GroupRepositoryRef = AutoDisposeProviderRef<GroupRepository>;
 String _$syncRepositoryHash() => r'83cd8f4fca69aef833456ebdda512f197785c186';
 
 /// SyncRepository provider.

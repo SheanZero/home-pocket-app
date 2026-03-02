@@ -724,6 +724,30 @@
   "@familySyncMemberStatusPending": {
     "description": "Status label for a pending group member"
   },
+  "familySyncRemoveMember": "Remove Member",
+  "@familySyncRemoveMember": {
+    "description": "Button label to remove a member from the group"
+  },
+  "familySyncRemoveMemberConfirm": "Remove {deviceName} from this family group?",
+  "@familySyncRemoveMemberConfirm": {
+    "description": "Confirmation message for removing a member",
+    "placeholders": {
+      "deviceName": {
+        "type": "String",
+        "example": "Kitchen tablet"
+      }
+    }
+  },
+  "familySyncRemoveMemberFailed": "Remove member failed: {message}",
+  "@familySyncRemoveMemberFailed": {
+    "description": "Error message when removing a member fails",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "familySyncBadgeUnpaired": "Unpaired",
   "@familySyncBadgeUnpaired": {
     "description": "Badge label for unpaired status"

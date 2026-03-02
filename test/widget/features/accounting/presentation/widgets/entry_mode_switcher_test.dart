@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/ocr_scanner_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/voice_input_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/entry_mode_switcher.dart';
@@ -13,11 +14,13 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        testLocalizedApp(
-          child: const Scaffold(
-            body: EntryModeSwitcher(
-              selectedMode: InputMode.manual,
-              bookId: 'book_test',
+        ProviderScope(
+          child: testLocalizedApp(
+            child: const Scaffold(
+              body: EntryModeSwitcher(
+                selectedMode: InputMode.manual,
+                bookId: 'book_test',
+              ),
             ),
           ),
         ),
@@ -33,11 +36,13 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        testLocalizedApp(
-          child: const Scaffold(
-            body: EntryModeSwitcher(
-              selectedMode: InputMode.manual,
-              bookId: 'book_test',
+        ProviderScope(
+          child: testLocalizedApp(
+            child: const Scaffold(
+              body: EntryModeSwitcher(
+                selectedMode: InputMode.manual,
+                bookId: 'book_test',
+              ),
             ),
           ),
         ),

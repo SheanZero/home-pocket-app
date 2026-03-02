@@ -8,6 +8,7 @@ import 'package:home_pocket/features/family_sync/presentation/providers/reposito
 import 'package:home_pocket/features/family_sync/presentation/screens/pair_management_screen.dart';
 import 'package:home_pocket/features/family_sync/use_cases/deactivate_group_use_case.dart';
 import 'package:home_pocket/features/family_sync/use_cases/leave_group_use_case.dart';
+import 'package:home_pocket/features/family_sync/use_cases/remove_member_use_case.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../../helpers/test_localizations.dart';
@@ -19,15 +20,19 @@ class MockLeaveGroupUseCase extends Mock implements LeaveGroupUseCase {}
 class MockDeactivateGroupUseCase extends Mock
     implements DeactivateGroupUseCase {}
 
+class MockRemoveMemberUseCase extends Mock implements RemoveMemberUseCase {}
+
 void main() {
   late MockGroupRepository groupRepository;
   late MockLeaveGroupUseCase leaveGroupUseCase;
   late MockDeactivateGroupUseCase deactivateGroupUseCase;
+  late MockRemoveMemberUseCase removeMemberUseCase;
 
   setUp(() {
     groupRepository = MockGroupRepository();
     leaveGroupUseCase = MockLeaveGroupUseCase();
     deactivateGroupUseCase = MockDeactivateGroupUseCase();
+    removeMemberUseCase = MockRemoveMemberUseCase();
 
     when(
       () => leaveGroupUseCase.execute(any()),
@@ -35,6 +40,12 @@ void main() {
     when(
       () => deactivateGroupUseCase.execute(any()),
     ).thenAnswer((_) async => const DeactivateGroupSuccess());
+    when(
+      () => removeMemberUseCase.execute(
+        groupId: any(named: 'groupId'),
+        deviceId: any(named: 'deviceId'),
+      ),
+    ).thenAnswer((_) async => const RemoveMemberSuccess());
   });
 
   testWidgets('shows owner actions and all group members', (tester) async {
@@ -76,6 +87,7 @@ void main() {
           deactivateGroupUseCaseProvider.overrideWithValue(
             deactivateGroupUseCase,
           ),
+          removeMemberUseCaseProvider.overrideWithValue(removeMemberUseCase),
         ],
       ),
     );
@@ -90,6 +102,7 @@ void main() {
     expect(find.text('Kitchen tablet'), findsOneWidget);
     expect(find.text('Deactivate Group'), findsOneWidget);
     expect(find.text('Regenerate Invite'), findsOneWidget);
+    expect(find.text('Remove Member'), findsOneWidget);
   });
 
   testWidgets('shows leave action for non-owner members', (tester) async {
@@ -122,6 +135,7 @@ void main() {
           deactivateGroupUseCaseProvider.overrideWithValue(
             deactivateGroupUseCase,
           ),
+          removeMemberUseCaseProvider.overrideWithValue(removeMemberUseCase),
         ],
       ),
     );

@@ -45,7 +45,7 @@ void main() {
       () => groupRepository.activateMember(any(), any()),
     ).thenAnswer((_) async {});
     when(
-      () => apiClient.pushGroupSync(
+      () => apiClient.pushSync(
         groupId: any(named: 'groupId'),
         payload: any(named: 'payload'),
         vectorClock: any(named: 'vectorClock'),
@@ -93,7 +93,7 @@ void main() {
       () => groupRepository.activateMember('group-1', 'member-1'),
     ).called(1);
     verify(
-      () => apiClient.pushGroupSync(
+      () => apiClient.pushSync(
         groupId: 'group-1',
         payload: 'encrypted-key',
         vectorClock: const {},
@@ -124,7 +124,7 @@ void main() {
 
     expect(result, isA<ConfirmMemberSuccess>());
     verifyNever(
-      () => apiClient.pushGroupSync(
+      () => apiClient.pushSync(
         groupId: any(named: 'groupId'),
         payload: any(named: 'payload'),
         vectorClock: any(named: 'vectorClock'),

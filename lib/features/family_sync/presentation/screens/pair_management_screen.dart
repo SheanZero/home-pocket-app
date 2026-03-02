@@ -5,9 +5,11 @@ import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../settings/presentation/providers/locale_provider.dart';
 import '../../domain/models/group_info.dart';
+import '../../domain/models/group_member.dart';
 import '../../domain/models/sync_status.dart';
 import '../../use_cases/deactivate_group_use_case.dart';
 import '../../use_cases/leave_group_use_case.dart';
+import '../../use_cases/remove_member_use_case.dart';
 import '../../use_cases/regenerate_invite_use_case.dart';
 import '../providers/group_providers.dart';
 import '../providers/repository_providers.dart';
@@ -128,6 +130,55 @@ class _PairManagementScreenState extends ConsumerState<PairManagementScreen> {
         SnackBar(
           content: Text(
             S.of(context).familySyncRegenerateInviteFailed(result.message),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleRemoveMember(GroupMember member) async {
+    final group = _activeGroup;
+    if (group == null) return;
+    final l10n = S.of(context);
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.familySyncRemoveMember),
+        content: Text(l10n.familySyncRemoveMemberConfirm(member.deviceName)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: Text(l10n.familySyncRemoveMember),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final result = await ref
+        .read(removeMemberUseCaseProvider)
+        .execute(groupId: group.groupId, deviceId: member.deviceId);
+    if (!mounted) return;
+
+    if (result is RemoveMemberSuccess) {
+      await _loadGroup();
+      return;
+    }
+
+    if (result is RemoveMemberError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            S.of(context).familySyncRemoveMemberFailed(result.message),
           ),
         ),
       );
@@ -258,7 +309,15 @@ class _PairManagementScreenState extends ConsumerState<PairManagementScreen> {
                 ),
                 const SizedBox(height: 8),
                 ...group.members.map(
-                  (member) => PartnerDeviceTile(device: member),
+                  (member) => PartnerDeviceTile(
+                    device: member,
+                    trailing: isOwner && member.role != 'owner'
+                        ? TextButton(
+                            onPressed: () => _handleRemoveMember(member),
+                            child: Text(l10n.familySyncRemoveMember),
+                          )
+                        : null,
+                  ),
                 ),
               ],
             ),

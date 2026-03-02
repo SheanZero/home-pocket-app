@@ -59,7 +59,7 @@ class ConfirmMemberUseCase {
           memberPublicKey: member.publicKey,
         );
 
-        await _apiClient.pushGroupSync(
+        await _apiClient.pushSync(
           groupId: groupId,
           payload: keyExchangePayload,
           vectorClock: const {},

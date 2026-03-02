@@ -56,7 +56,7 @@ class SyncQueueManager {
               (k, v) => MapEntry(k, v as int),
             );
 
-        await _apiClient.pushGroupSync(
+        await _apiClient.pushSync(
           groupId: entry.groupId,
           payload: entry.encryptedPayload,
           vectorClock: vectorClock,

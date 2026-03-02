@@ -62,7 +62,7 @@ void main() {
     ).called(1);
   });
 
-  test('pushGroupSync sends group payload without targetDeviceId', () async {
+  test('pushSync sends group payload without targetDeviceId', () async {
     when(
       () => httpClient.post(
         Uri.parse('https://example.com/api/v1/sync/push'),
@@ -73,7 +73,7 @@ void main() {
       (_) async => http.Response(jsonEncode({'recipientCount': 2}), 200),
     );
 
-    final response = await apiClient.pushGroupSync(
+    final response = await apiClient.pushSync(
       groupId: 'group-1',
       payload: 'encrypted',
       vectorClock: const {'device-a': 3},

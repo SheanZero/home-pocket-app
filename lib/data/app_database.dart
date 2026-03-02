@@ -9,7 +9,6 @@ import 'tables/category_ledger_configs_table.dart';
 import 'tables/group_members_table.dart';
 import 'tables/groups_table.dart';
 import 'tables/merchant_category_preferences_table.dart';
-import 'tables/paired_devices_table.dart';
 import 'tables/sync_queue_table.dart';
 import 'tables/transactions_table.dart';
 
@@ -29,7 +28,6 @@ part 'app_database.g.dart';
     GroupMembers,
     Groups,
     MerchantCategoryPreferences,
-    PairedDevices,
     SyncQueue,
     Transactions,
   ],
@@ -41,7 +39,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration {
@@ -85,10 +83,9 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 7) {
           await migrator.createTable(categoryKeywordPreferences);
-          await migrator.createTable(pairedDevices);
           await migrator.createTable(syncQueue);
         }
-        if (from < 8) {
+        if (from >= 7 && from < 8) {
           await migrator.createTable(groups);
           await migrator.createTable(groupMembers);
 
@@ -117,6 +114,9 @@ class AppDatabase extends _$AppDatabase {
             FROM sync_queue_old
           ''');
           await customStatement('DROP TABLE sync_queue_old');
+        }
+        if (from < 9) {
+          await customStatement('DROP TABLE IF EXISTS paired_devices');
         }
       },
     );

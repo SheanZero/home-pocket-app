@@ -109,26 +109,6 @@ class RelayApiClient {
     _parseResponse(response);
   }
 
-  // ── Pairing ──
-
-  /// Create a new pairing request.
-  ///
-  /// Returns: {pairId, pairCode, qrData, expiresAt}
-  Future<Map<String, dynamic>> createPair({
-    required String bookId,
-    required String publicKey,
-    required String deviceName,
-  }) async {
-    final body = jsonEncode({
-      'bookId': bookId,
-      'publicKey': publicKey,
-      'deviceName': deviceName,
-    });
-
-    final response = await _post('/pair/create', body);
-    return _parseResponse(response);
-  }
-
   // ── Groups ──
 
   Future<Map<String, dynamic>> createGroup({required String bookId}) async {
@@ -189,81 +169,12 @@ class RelayApiClient {
     return _parseResponse(response);
   }
 
-  /// Join an existing pair with a short code.
-  ///
-  /// Returns: {pairId, partnerDeviceId, partnerPublicKey, partnerDeviceName, status}
-  Future<Map<String, dynamic>> joinPair({
-    required String pairCode,
-    required String publicKey,
-    required String deviceName,
-  }) async {
-    final body = jsonEncode({
-      'pairCode': pairCode,
-      'publicKey': publicKey,
-      'deviceName': deviceName,
-    });
-
-    final response = await _post('/pair/join', body);
-    return _parseResponse(response);
-  }
-
-  /// Confirm or reject a pairing.
-  ///
-  /// Returns: {status, partnerDeviceId?, partnerPublicKey?, partnerDeviceName?}
-  Future<Map<String, dynamic>> confirmPair({
-    required String pairId,
-    required bool accept,
-  }) async {
-    final body = jsonEncode({'pairId': pairId, 'accept': accept});
-
-    final response = await _post('/pair/confirm', body);
-    return _parseResponse(response);
-  }
-
-  /// Get pairing status by pairId.
-  Future<Map<String, dynamic>> getPairStatus(String pairId) async {
-    final response = await _get('/pair/status/$pairId');
-    return _parseResponse(response);
-  }
-
-  /// Unpair (deactivate) a pairing.
-  Future<void> unpair(String pairId) async {
-    final response = await _delete('/pair/$pairId');
-    _parseResponse(response);
-  }
-
   // ── Sync ──
-
-  /// Push encrypted sync data to partner.
-  ///
-  /// Returns: {messageId, pushed, pushNotificationSent}
-  Future<Map<String, dynamic>> pushSync({
-    required String pairId,
-    required String targetDeviceId,
-    required String payload,
-    required Map<String, int> vectorClock,
-    required int operationCount,
-    int chunkIndex = 0,
-    int totalChunks = 1,
-  }) async {
-    final body = jsonEncode({
-      'pairId': pairId,
-      'targetDeviceId': targetDeviceId,
-      'payload': payload,
-      'vectorClock': vectorClock,
-      'operationCount': operationCount,
-      'chunkIndex': chunkIndex,
-      'totalChunks': totalChunks,
-    });
-
-    final response = await _post('/sync/push', body);
-    return _parseResponse(response);
-  }
 
   /// Push encrypted sync data to a group.
   ///
   /// Returns: {recipientCount}
-  Future<Map<String, dynamic>> pushGroupSync({
+  Future<Map<String, dynamic>> pushSync({
     required String groupId,
     required String payload,
     required Map<String, int> vectorClock,
