@@ -13,6 +13,9 @@ import '../crypto/services/key_manager.dart';
 ///
 /// Signature message format:
 /// `<method>:<path>:<timestamp>:<SHA256(body)>`
+///
+/// **IMPORTANT:** `path` must be the full URL path including the API version
+/// prefix (e.g., `/api/v1/group/create`), not just the relative path.
 class RequestSigner {
   RequestSigner({required KeyManager keyManager}) : _keyManager = keyManager;
 
@@ -31,9 +34,13 @@ class RequestSigner {
 
     final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
-    // SHA-256 hash of request body
+    // SHA-256 hash of request body (lowercase hex)
     final bodyHash = hash_lib.sha256.convert(utf8.encode(body));
     final message = '$method:$path:$timestamp:$bodyHash';
+
+    if (kDebugMode) {
+      debugPrint('[RequestSigner] message=$message');
+    }
 
     // Ed25519 sign
     final signature = await _keyManager.signData(utf8.encode(message));
@@ -46,8 +53,7 @@ class RequestSigner {
 ///
 /// Wraps all server API calls with Ed25519 authentication.
 /// Server URL selection:
-/// - Release: https://sync.happypocket.app/api/v1
-/// - Debug: https://dev-sync.happypocket.app/api/v1
+/// - Default: https://sync.happypocket.app/api/v1
 /// - Override: `--dart-define=SYNC_SERVER_URL=...`
 class RelayApiClient {
   RelayApiClient({
@@ -64,9 +70,7 @@ class RelayApiClient {
   static String get defaultBaseUrl {
     const url = String.fromEnvironment('SYNC_SERVER_URL', defaultValue: '');
     if (url.isNotEmpty) return url;
-    return kReleaseMode
-        ? 'https://sync.happypocket.app/api/v1'
-        : 'https://dev-sync.happypocket.app/api/v1';
+    return 'https://sync.happypocket.app/api/v1';
   }
 
   // ── Device ──
@@ -215,19 +219,47 @@ class RelayApiClient {
 
   // ── Private HTTP helpers ──
 
+  /// Build the full URL path for signing (includes /api/v1 prefix).
+  String _signingPath(String path) {
+    final uri = Uri.parse(baseUrl);
+    return '${uri.path}$path';
+  }
+
+  void _logRequest(String method, String path, String body) {
+    if (kDebugMode) {
+      debugPrint('[RelayAPI] → $method $baseUrl$path');
+      if (body.isNotEmpty && body != '{}') {
+        debugPrint('[RelayAPI]   body: $body');
+      }
+    }
+  }
+
+  void _logResponse(String method, String path, http.Response response) {
+    if (kDebugMode) {
+      debugPrint(
+        '[RelayAPI] ← $method $path '
+        'status=${response.statusCode} '
+        'body=${response.body}',
+      );
+    }
+  }
+
   Future<http.Response> _get(String path, {bool authenticated = true}) async {
+    _logRequest('GET', path, '');
     final url = Uri.parse('$baseUrl$path');
     final headers = <String, String>{'Content-Type': 'application/json'};
 
     if (authenticated) {
       headers['Authorization'] = await _signer.signRequest(
         method: 'GET',
-        path: path,
+        path: _signingPath(path),
         body: '',
       );
     }
 
-    return _httpClient.get(url, headers: headers);
+    final response = await _httpClient.get(url, headers: headers);
+    _logResponse('GET', path, response);
+    return response;
   }
 
   Future<http.Response> _post(
@@ -235,18 +267,21 @@ class RelayApiClient {
     String body, {
     bool authenticated = true,
   }) async {
+    _logRequest('POST', path, body);
     final url = Uri.parse('$baseUrl$path');
     final headers = <String, String>{'Content-Type': 'application/json'};
 
     if (authenticated) {
       headers['Authorization'] = await _signer.signRequest(
         method: 'POST',
-        path: path,
+        path: _signingPath(path),
         body: body,
       );
     }
 
-    return _httpClient.post(url, headers: headers, body: body);
+    final response = await _httpClient.post(url, headers: headers, body: body);
+    _logResponse('POST', path, response);
+    return response;
   }
 
   Future<http.Response> _put(
@@ -254,36 +289,42 @@ class RelayApiClient {
     String body, {
     bool authenticated = true,
   }) async {
+    _logRequest('PUT', path, body);
     final url = Uri.parse('$baseUrl$path');
     final headers = <String, String>{'Content-Type': 'application/json'};
 
     if (authenticated) {
       headers['Authorization'] = await _signer.signRequest(
         method: 'PUT',
-        path: path,
+        path: _signingPath(path),
         body: body,
       );
     }
 
-    return _httpClient.put(url, headers: headers, body: body);
+    final response = await _httpClient.put(url, headers: headers, body: body);
+    _logResponse('PUT', path, response);
+    return response;
   }
 
   Future<http.Response> _delete(
     String path, {
     bool authenticated = true,
   }) async {
+    _logRequest('DELETE', path, '');
     final url = Uri.parse('$baseUrl$path');
     final headers = <String, String>{'Content-Type': 'application/json'};
 
     if (authenticated) {
       headers['Authorization'] = await _signer.signRequest(
         method: 'DELETE',
-        path: path,
+        path: _signingPath(path),
         body: '',
       );
     }
 
-    return _httpClient.delete(url, headers: headers);
+    final response = await _httpClient.delete(url, headers: headers);
+    _logResponse('DELETE', path, response);
+    return response;
   }
 
   Map<String, dynamic> _parseResponse(http.Response response) {
@@ -292,14 +333,23 @@ class RelayApiClient {
       return jsonDecode(response.body) as Map<String, dynamic>;
     }
 
-    final errorBody = response.body.isNotEmpty
-        ? jsonDecode(response.body) as Map<String, dynamic>
-        : <String, dynamic>{};
+    Map<String, dynamic> errorBody;
+    try {
+      errorBody = response.body.isNotEmpty
+          ? jsonDecode(response.body) as Map<String, dynamic>
+          : <String, dynamic>{};
+    } catch (_) {
+      errorBody = <String, dynamic>{};
+    }
+
+    // Server may use "error" or "message" key for the error description.
+    final errorMessage = (errorBody['error'] ?? errorBody['message'])
+        ?.toString() ?? 'HTTP ${response.statusCode}';
 
     throw RelayApiException(
       statusCode: response.statusCode,
-      message: errorBody['error'] as String? ?? 'Unknown error',
-      code: errorBody['code'] as String?,
+      message: errorMessage,
+      code: errorBody['code']?.toString(),
     );
   }
 }

@@ -67,9 +67,17 @@ class CreateGroupUseCase {
       );
 
       final response = await _apiClient.createGroup(bookId: bookId);
-      final groupId = response['groupId'] as String;
-      final inviteCode = response['inviteCode'] as String;
-      final expiresAt = response['expiresAt'] as int;
+
+      final groupId = response['groupId'] as String?;
+      final inviteCode = response['inviteCode'] as String?;
+      final expiresAt = response['expiresAt'] as int?;
+
+      if (groupId == null || inviteCode == null || expiresAt == null) {
+        return CreateGroupResult.error(
+          'Server returned incomplete response: '
+          'groupId=$groupId, inviteCode=$inviteCode, expiresAt=$expiresAt',
+        );
+      }
       final groupKey = _e2eeService.generateGroupKey();
 
       await _groupRepository.savePendingGroup(
