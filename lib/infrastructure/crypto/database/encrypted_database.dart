@@ -32,10 +32,9 @@ Future<QueryExecutor> createEncryptedExecutor(
     return NativeDatabase.memory(setup: (db) => _setupEncryption(db, dbKey));
   }
 
-  await _ensureNativeLibrary();
   final file = await _getDatabaseFile();
 
-  return NativeDatabase.createInBackground(
+  return NativeDatabase(
     file,
     setup: (db) => _setupEncryption(db, dbKey),
   );
@@ -75,8 +74,13 @@ Future<File> _getDatabaseFile() async {
 }
 
 /// Load SQLCipher native library for the current platform.
-Future<void> _ensureNativeLibrary() async {
+///
+/// Must be called before any database operations. On Android, this applies
+/// a workaround for older versions and overrides the default sqlite3 loader
+/// to use SQLCipher instead.
+Future<void> ensureNativeLibrary() async {
   if (Platform.isAndroid) {
+    await applyWorkaroundToOpenSqlCipherOnOldAndroidVersions();
     open.overrideFor(OperatingSystem.android, openCipherOnAndroid);
   }
 }

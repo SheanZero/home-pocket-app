@@ -24,6 +24,9 @@ const _useInMemoryDatabase = false;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // 0. Load SQLCipher native library (must be before any database operations)
+  await ensureNativeLibrary();
+
   // 1. Initialize master key (first launch only)
   final initContainer = ProviderContainer();
   final masterKeyRepo = initContainer.read(masterKeyRepositoryProvider);
