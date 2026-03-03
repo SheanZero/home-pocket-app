@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../generated/app_localizations.dart';
 import '../../use_cases/create_group_use_case.dart';
@@ -66,6 +67,19 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
     }
   }
 
+  Future<void> _shareInviteCode(String inviteCode) async {
+    final l10n = S.of(context);
+    await Share.share(
+      '${l10n.familySyncPairCode}\n$inviteCode\n\n${l10n.familySyncScanOrEnter}',
+    );
+  }
+
+  void _handleScanQr() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(S.of(context).familySyncJoinDescription)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -101,9 +115,10 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
           padding: const EdgeInsets.all(24),
           child: PairCodeDisplay(
             inviteCode: inviteCode,
-            qrData: inviteCode,
+            qrData: 'hp://join/$inviteCode',
             expiresAt: DateTime.fromMillisecondsSinceEpoch(expiresAt * 1000),
             onRegenerate: _createGroup,
+            onShare: () => _shareInviteCode(inviteCode),
           ),
         ),
       ),
@@ -139,6 +154,7 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
         padding: const EdgeInsets.all(24),
         child: PairCodeInput(
           onSubmit: _joinGroup,
+          onScanQr: _handleScanQr,
           isLoading: _isJoining,
           errorMessage: errorMessage,
         ),

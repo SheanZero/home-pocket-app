@@ -35,7 +35,7 @@ void main() {
     ).thenAnswer((_) async => const JoinGroupError('Invalid invite code'));
   });
 
-  testWidgets('shows group-oriented tabs and invite code copy', (tester) async {
+  testWidgets('shows redesigned create and join group tabs', (tester) async {
     await tester.pumpWidget(
       createLocalizedWidget(
         const PairingScreen(bookId: 'book-1'),
@@ -50,6 +50,19 @@ void main() {
     expect(find.text('Create Group'), findsOneWidget);
     expect(find.text('Join Group'), findsOneWidget);
     expect(find.text('Invite Code'), findsOneWidget);
-    expect(find.text('654 321'), findsOneWidget);
+    expect(find.text('6'), findsOneWidget);
+    expect(find.text('5'), findsOneWidget);
+    expect(find.text('4'), findsOneWidget);
+    expect(find.text('3'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Share'), findsOneWidget);
+
+    await tester.tap(find.text('Join Group'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Join Family'), findsOneWidget);
+    expect(find.text('Join Group'), findsAtLeastNWidgets(1));
+    expect(find.text('Scan QR Code'), findsOneWidget);
   });
 }
