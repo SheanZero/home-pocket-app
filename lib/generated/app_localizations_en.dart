@@ -732,6 +732,17 @@ class SEn extends S {
   String get familySyncNewRequest => 'New Join Request';
 
   @override
+  String get familySyncJoinRequestNotificationBody =>
+      'A family member wants to join your group. Review the request to continue.';
+
+  @override
+  String get familySyncMemberConfirmedNotificationTitle => 'Group Ready';
+
+  @override
+  String get familySyncMemberConfirmedNotificationBody =>
+      'Your family sync group is ready. Open group management to review the latest status.';
+
+  @override
   String get familySyncJustNow => 'Requested just now';
 
   @override

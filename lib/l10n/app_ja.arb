@@ -491,6 +491,18 @@
   "@familySyncNewRequest": {
     "description": "Heading for a new join request card"
   },
+  "familySyncJoinRequestNotificationBody": "家族メンバーがグループ参加を希望しています。続行するにはリクエストを確認してください。",
+  "@familySyncJoinRequestNotificationBody": {
+    "description": "Body text for a foreground notification about a new join request"
+  },
+  "familySyncMemberConfirmedNotificationTitle": "グループの準備ができました",
+  "@familySyncMemberConfirmedNotificationTitle": {
+    "description": "Title for a foreground notification after a member is confirmed"
+  },
+  "familySyncMemberConfirmedNotificationBody": "ファミリー同期グループの準備ができました。最新の状態を確認するにはグループ管理を開いてください。",
+  "@familySyncMemberConfirmedNotificationBody": {
+    "description": "Body text for a foreground notification after a member is confirmed"
+  },
   "familySyncJustNow": "たった今リクエスト",
   "@familySyncJustNow": {
     "description": "Text indicating a request was received just now"

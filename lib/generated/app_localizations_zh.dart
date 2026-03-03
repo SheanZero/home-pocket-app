@@ -724,6 +724,16 @@ class SZh extends S {
   String get familySyncNewRequest => '新的加入请求';
 
   @override
+  String get familySyncJoinRequestNotificationBody => '有家庭成员想加入你的分组。请查看请求后继续。';
+
+  @override
+  String get familySyncMemberConfirmedNotificationTitle => '分组已就绪';
+
+  @override
+  String get familySyncMemberConfirmedNotificationBody =>
+      '家庭同步分组已经准备好。打开分组管理查看最新状态。';
+
+  @override
   String get familySyncJustNow => '刚刚发出请求';
 
   @override

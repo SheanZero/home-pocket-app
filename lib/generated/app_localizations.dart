@@ -1455,6 +1455,24 @@ abstract class S {
   /// **'New Join Request'**
   String get familySyncNewRequest;
 
+  /// Body text for a foreground notification about a new join request
+  ///
+  /// In en, this message translates to:
+  /// **'A family member wants to join your group. Review the request to continue.'**
+  String get familySyncJoinRequestNotificationBody;
+
+  /// Title for a foreground notification after a member is confirmed
+  ///
+  /// In en, this message translates to:
+  /// **'Group Ready'**
+  String get familySyncMemberConfirmedNotificationTitle;
+
+  /// Body text for a foreground notification after a member is confirmed
+  ///
+  /// In en, this message translates to:
+  /// **'Your family sync group is ready. Open group management to review the latest status.'**
+  String get familySyncMemberConfirmedNotificationBody;
+
   /// Text indicating a request was received just now
   ///
   /// In en, this message translates to:

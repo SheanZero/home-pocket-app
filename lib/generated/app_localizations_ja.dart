@@ -726,6 +726,17 @@ class SJa extends S {
   String get familySyncNewRequest => '新しい参加リクエスト';
 
   @override
+  String get familySyncJoinRequestNotificationBody =>
+      '家族メンバーがグループ参加を希望しています。続行するにはリクエストを確認してください。';
+
+  @override
+  String get familySyncMemberConfirmedNotificationTitle => 'グループの準備ができました';
+
+  @override
+  String get familySyncMemberConfirmedNotificationBody =>
+      'ファミリー同期グループの準備ができました。最新の状態を確認するにはグループ管理を開いてください。';
+
+  @override
   String get familySyncJustNow => 'たった今リクエスト';
 
   @override

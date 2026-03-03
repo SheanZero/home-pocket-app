@@ -806,6 +806,18 @@
   "@familySyncNewRequest": {
     "description": "Heading for a new join request card"
   },
+  "familySyncJoinRequestNotificationBody": "A family member wants to join your group. Review the request to continue.",
+  "@familySyncJoinRequestNotificationBody": {
+    "description": "Body text for a foreground notification about a new join request"
+  },
+  "familySyncMemberConfirmedNotificationTitle": "Group Ready",
+  "@familySyncMemberConfirmedNotificationTitle": {
+    "description": "Title for a foreground notification after a member is confirmed"
+  },
+  "familySyncMemberConfirmedNotificationBody": "Your family sync group is ready. Open group management to review the latest status.",
+  "@familySyncMemberConfirmedNotificationBody": {
+    "description": "Body text for a foreground notification after a member is confirmed"
+  },
   "familySyncJustNow": "Requested just now",
   "@familySyncJustNow": {
     "description": "Text indicating a request was received just now"

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../../application/family_sync/pull_sync_use_case.dart';
@@ -6,6 +8,31 @@ import '../../features/family_sync/domain/repositories/group_repository.dart';
 import 'push_notification_service.dart';
 import 'sync_lifecycle_observer.dart';
 import 'sync_queue_manager.dart';
+
+enum SyncTriggerEventType { joinRequest, memberConfirmed }
+
+class SyncTriggerEvent {
+  const SyncTriggerEvent._({required this.type, this.groupId});
+
+  const SyncTriggerEvent.joinRequest({String? groupId})
+    : this._(type: SyncTriggerEventType.joinRequest, groupId: groupId);
+
+  const SyncTriggerEvent.memberConfirmed({String? groupId})
+    : this._(type: SyncTriggerEventType.memberConfirmed, groupId: groupId);
+
+  final SyncTriggerEventType type;
+  final String? groupId;
+
+  @override
+  bool operator ==(Object other) {
+    return other is SyncTriggerEvent &&
+        other.type == type &&
+        other.groupId == groupId;
+  }
+
+  @override
+  int get hashCode => Object.hash(type, groupId);
+}
 
 /// Coordinates sync triggers from various sources:
 /// - App lifecycle (resume -> pull)
@@ -29,13 +56,17 @@ class SyncTriggerService {
   final PushSyncUseCase _pushSync;
   final SyncQueueManager _queueManager;
   final PushNotificationService _pushNotificationService;
+  final _eventsController = StreamController<SyncTriggerEvent>.broadcast();
 
   SyncLifecycleObserver? _lifecycleObserver;
+  SyncTriggerEvent? _pendingEvent;
+
+  Stream<SyncTriggerEvent> get events => _eventsController.stream;
 
   /// Initialize sync triggers.
   ///
   /// Sets up lifecycle observer and push notification handlers.
-  void initialize() {
+  Future<void> initialize() async {
     // Set up lifecycle observer
     _lifecycleObserver = SyncLifecycleObserver(onResume: _handleAppResume);
     _lifecycleObserver!.start();
@@ -44,13 +75,22 @@ class SyncTriggerService {
     _pushNotificationService.registerHandlers(
       onMemberConfirmed: _handleMemberConfirmed,
       onSyncAvailable: _handleSyncAvailable,
+      onJoinRequest: _handleJoinRequest,
     );
+    await _pushNotificationService.initialize();
   }
 
   /// Dispose sync triggers.
   void dispose() {
     _lifecycleObserver?.dispose();
     _lifecycleObserver = null;
+    unawaited(_eventsController.close());
+  }
+
+  SyncTriggerEvent? takePendingEvent() {
+    final event = _pendingEvent;
+    _pendingEvent = null;
+    return event;
   }
 
   /// Called when app resumes from background.
@@ -158,6 +198,7 @@ class SyncTriggerService {
       }
 
       await _pullSync.execute();
+      _publishEvent(SyncTriggerEvent.memberConfirmed(groupId: groupId));
     } catch (e) {
       if (kDebugMode) {
         debugPrint('SyncTrigger: member confirmation failed: $e');
@@ -174,5 +215,17 @@ class SyncTriggerService {
     }
 
     await _pullSync.execute();
+  }
+
+  Future<void> _handleJoinRequest(Map<String, dynamic> data) async {
+    final groupId = data['groupId'] as String?;
+    _publishEvent(SyncTriggerEvent.joinRequest(groupId: groupId));
+  }
+
+  void _publishEvent(SyncTriggerEvent event) {
+    _pendingEvent = event;
+    if (!_eventsController.isClosed) {
+      _eventsController.add(event);
+    }
   }
 }

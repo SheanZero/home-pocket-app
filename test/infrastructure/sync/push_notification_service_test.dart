@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
@@ -5,37 +8,218 @@ import 'package:mocktail/mocktail.dart';
 
 class MockRelayApiClient extends Mock implements RelayApiClient {}
 
+class FakePushMessagingClient implements PushMessagingClient {
+  FakePushMessagingClient({this.initialToken, this.initialMessage});
+
+  final String? initialToken;
+  final Map<String, dynamic>? initialMessage;
+  bool permissionRequested = false;
+
+  final _tokenRefreshController = StreamController<String>.broadcast();
+  final _foregroundController =
+      StreamController<Map<String, dynamic>>.broadcast();
+  final _openedController = StreamController<Map<String, dynamic>>.broadcast();
+
+  @override
+  Future<String?> getToken() async => initialToken;
+
+  @override
+  Future<Map<String, dynamic>?> getInitialMessage() async => initialMessage;
+
+  @override
+  Stream<Map<String, dynamic>> get onForegroundMessage =>
+      _foregroundController.stream;
+
+  @override
+  Stream<Map<String, dynamic>> get onMessageOpenedApp =>
+      _openedController.stream;
+
+  @override
+  Stream<String> get onTokenRefresh => _tokenRefreshController.stream;
+
+  @override
+  Future<void> requestPermission() async {
+    permissionRequested = true;
+  }
+
+  Future<void> emitTokenRefresh(String token) async {
+    _tokenRefreshController.add(token);
+    await Future<void>.delayed(Duration.zero);
+  }
+
+  Future<void> emitForegroundMessage(Map<String, dynamic> data) async {
+    _foregroundController.add(data);
+    await Future<void>.delayed(Duration.zero);
+  }
+
+  Future<void> emitOpenedMessage(Map<String, dynamic> data) async {
+    _openedController.add(data);
+    await Future<void>.delayed(Duration.zero);
+  }
+
+  Future<void> dispose() async {
+    await _tokenRefreshController.close();
+    await _foregroundController.close();
+    await _openedController.close();
+  }
+}
+
+class FakeLocalNotificationClient implements LocalNotificationClient {
+  Future<void> Function(Map<String, dynamic> data)? _onTap;
+  final shownNotifications = <ShownLocalNotification>[];
+
+  @override
+  Future<void> initialize(
+    Future<void> Function(Map<String, dynamic> data) onTap,
+  ) async {
+    _onTap = onTap;
+  }
+
+  @override
+  Future<void> show({
+    required int id,
+    required String title,
+    required String body,
+    required Map<String, dynamic> payload,
+  }) async {
+    shownNotifications.add(
+      ShownLocalNotification(
+        id: id,
+        title: title,
+        body: body,
+        payload: payload,
+      ),
+    );
+  }
+
+  Future<void> tapLastNotification() async {
+    final last = shownNotifications.last;
+    await _onTap?.call(last.payload);
+  }
+}
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  late MockRelayApiClient apiClient;
+  late FakePushMessagingClient messagingClient;
+  late FakeLocalNotificationClient localNotificationClient;
   late PushNotificationService service;
   late int memberConfirmedCalls;
-  late int syncAvailableCalls;
+  late int joinRequestCalls;
 
   setUp(() {
-    service = PushNotificationService(apiClient: MockRelayApiClient());
+    apiClient = MockRelayApiClient();
+    messagingClient = FakePushMessagingClient(initialToken: 'token-1');
+    localNotificationClient = FakeLocalNotificationClient();
     memberConfirmedCalls = 0;
-    syncAvailableCalls = 0;
+    joinRequestCalls = 0;
+
+    when(
+      () => apiClient.updatePushToken(
+        pushToken: any(named: 'pushToken'),
+        pushPlatform: any(named: 'pushPlatform'),
+      ),
+    ).thenAnswer((_) async {});
+
+    service = PushNotificationService(
+      apiClient: apiClient,
+      messagingClient: messagingClient,
+      localNotificationClient: localNotificationClient,
+      firebaseInitializer: () async {},
+      localeProvider: () => const Locale('en'),
+    );
     service.registerHandlers(
       onMemberConfirmed: (_) async {
         memberConfirmedCalls++;
       },
-      onSyncAvailable: (_) async {
-        syncAvailableCalls++;
+      onSyncAvailable: (_) async {},
+      onJoinRequest: (_) async {
+        joinRequestCalls++;
       },
     );
   });
 
-  test('dispatches member_confirmed and sync_available', () async {
-    await service.handleMessage({'type': 'member_confirmed'});
-    await service.handleMessage({'type': 'sync_available'});
-
-    expect(memberConfirmedCalls, 1);
-    expect(syncAvailableCalls, 1);
+  tearDown(() async {
+    await service.dispose();
+    await messagingClient.dispose();
   });
 
-  test('ignores join_request without invoking handlers', () async {
-    await service.handleMessage({'type': 'join_request'});
+  test(
+    'initialize requests permission and registers current and refreshed token',
+    () async {
+      await service.initialize();
 
-    expect(memberConfirmedCalls, 0);
-    expect(syncAvailableCalls, 0);
-  });
+      expect(messagingClient.permissionRequested, isTrue);
+      verify(
+        () => apiClient.updatePushToken(
+          pushToken: 'token-1',
+          pushPlatform: any(named: 'pushPlatform'),
+        ),
+      ).called(1);
+
+      await messagingClient.emitTokenRefresh('token-2');
+
+      verify(
+        () => apiClient.updatePushToken(
+          pushToken: 'token-2',
+          pushPlatform: any(named: 'pushPlatform'),
+        ),
+      ).called(1);
+    },
+  );
+
+  test(
+    'foreground join_request shows a local notification without navigation',
+    () async {
+      await service.initialize();
+
+      await messagingClient.emitForegroundMessage({
+        'type': 'join_request',
+        'groupId': 'group-1',
+      });
+
+      expect(joinRequestCalls, 1);
+      expect(localNotificationClient.shownNotifications, hasLength(1));
+      expect(
+        localNotificationClient.shownNotifications.single.title,
+        'New Join Request',
+      );
+      expect(service.takePendingNavigationIntent(), isNull);
+    },
+  );
+
+  test(
+    'initial member_confirmed message publishes pending group management navigation intent',
+    () async {
+      messagingClient = FakePushMessagingClient(
+        initialToken: 'token-1',
+        initialMessage: {'type': 'member_confirmed', 'groupId': 'group-1'},
+      );
+      service = PushNotificationService(
+        apiClient: apiClient,
+        messagingClient: messagingClient,
+        localNotificationClient: localNotificationClient,
+        firebaseInitializer: () async {},
+        localeProvider: () => const Locale('en'),
+      );
+      service.registerHandlers(
+        onMemberConfirmed: (_) async {
+          memberConfirmedCalls++;
+        },
+        onSyncAvailable: (_) async {},
+        onJoinRequest: (_) async {
+          joinRequestCalls++;
+        },
+      );
+
+      await service.initialize();
+
+      expect(memberConfirmedCalls, 1);
+      expect(
+        service.takePendingNavigationIntent(),
+        const PushNavigationIntent.groupManagement(groupId: 'group-1'),
+      );
+    },
+  );
 }

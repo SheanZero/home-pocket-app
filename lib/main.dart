@@ -109,7 +109,7 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
       if (bookResult.isSuccess && bookResult.data != null) {
         // Initialize sync triggers (lifecycle observer + push notification handlers)
         final syncTrigger = ref.read(syncTriggerServiceProvider);
-        syncTrigger.initialize();
+        await syncTrigger.initialize();
 
         setState(() {
           _bookId = bookResult.data!.id;

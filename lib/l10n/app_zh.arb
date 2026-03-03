@@ -491,6 +491,18 @@
   "@familySyncNewRequest": {
     "description": "Heading for a new join request card"
   },
+  "familySyncJoinRequestNotificationBody": "有家庭成员想加入你的分组。请查看请求后继续。",
+  "@familySyncJoinRequestNotificationBody": {
+    "description": "Body text for a foreground notification about a new join request"
+  },
+  "familySyncMemberConfirmedNotificationTitle": "分组已就绪",
+  "@familySyncMemberConfirmedNotificationTitle": {
+    "description": "Title for a foreground notification after a member is confirmed"
+  },
+  "familySyncMemberConfirmedNotificationBody": "家庭同步分组已经准备好。打开分组管理查看最新状态。",
+  "@familySyncMemberConfirmedNotificationBody": {
+    "description": "Body text for a foreground notification after a member is confirmed"
+  },
   "familySyncJustNow": "刚刚发出请求",
   "@familySyncJustNow": {
     "description": "Text indicating a request was received just now"

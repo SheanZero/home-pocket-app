@@ -68,5 +68,7 @@ SyncQueueManager syncQueueManager(Ref ref) {
 @riverpod
 PushNotificationService pushNotificationService(Ref ref) {
   final apiClient = ref.watch(relayApiClientProvider);
-  return PushNotificationService(apiClient: apiClient);
+  final service = PushNotificationService(apiClient: apiClient);
+  ref.onDispose(service.dispose);
+  return service;
 }
