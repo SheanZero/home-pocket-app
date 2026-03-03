@@ -121,7 +121,7 @@ final syncQueueManagerProvider = AutoDisposeProvider<SyncQueueManager>.internal(
 // ignore: unused_element
 typedef SyncQueueManagerRef = AutoDisposeProviderRef<SyncQueueManager>;
 String _$pushNotificationServiceHash() =>
-    r'be929d19451fd2bf64c291b0c4aad7a52868b2f3';
+    r'db4df39a047e46a0bef6f31f19741e03bb41d61b';
 
 /// PushNotificationService provider.
 ///
