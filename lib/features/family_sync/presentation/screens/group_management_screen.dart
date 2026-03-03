@@ -14,18 +14,19 @@ import '../../use_cases/regenerate_invite_use_case.dart';
 import '../providers/group_providers.dart';
 import '../providers/repository_providers.dart';
 import '../providers/sync_providers.dart';
+import 'member_approval_screen.dart';
 import '../widgets/partner_device_tile.dart';
 import '../widgets/sync_status_badge.dart';
 
-class PairManagementScreen extends ConsumerStatefulWidget {
-  const PairManagementScreen({super.key});
+class GroupManagementScreen extends ConsumerStatefulWidget {
+  const GroupManagementScreen({super.key});
 
   @override
-  ConsumerState<PairManagementScreen> createState() =>
-      _PairManagementScreenState();
+  ConsumerState<GroupManagementScreen> createState() =>
+      _GroupManagementScreenState();
 }
 
-class _PairManagementScreenState extends ConsumerState<PairManagementScreen> {
+class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
   GroupInfo? _activeGroup;
   bool _isLoading = true;
 
@@ -191,7 +192,7 @@ class _PairManagementScreenState extends ConsumerState<PairManagementScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(S.of(context).familySync),
+        title: Text(S.of(context).familySyncGroupManagement),
         actions: [
           SyncStatusBadge(status: syncStatus),
           const SizedBox(width: 16),
@@ -210,6 +211,9 @@ class _PairManagementScreenState extends ConsumerState<PairManagementScreen> {
     final l10n = S.of(context);
     final locale = ref.watch(currentLocaleProvider);
     final isOwner = group.role == 'owner';
+    final hasPendingMembers = group.members.any(
+      (member) => member.status == 'pending',
+    );
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -231,6 +235,20 @@ class _PairManagementScreenState extends ConsumerState<PairManagementScreen> {
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
+                if (isOwner && hasPendingMembers) ...[
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const MemberApprovalScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.verified_user_outlined),
+                    label: Text(l10n.familySyncApprovalTitle),
+                  ),
+                ],
               ],
             ),
           ),

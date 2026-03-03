@@ -5,7 +5,7 @@ import '../../../../generated/app_localizations.dart';
 import '../providers/repository_providers.dart';
 import '../../domain/models/sync_status.dart';
 import '../providers/sync_providers.dart';
-import '../screens/pair_management_screen.dart';
+import '../screens/group_management_screen.dart';
 import '../screens/pairing_screen.dart';
 import 'sync_status_badge.dart';
 
@@ -68,7 +68,7 @@ class FamilySyncSettingsSection extends ConsumerWidget {
     if (status == SyncStatus.unpaired) {
       screen = PairingScreen(bookId: bookId);
     } else {
-      screen = const PairManagementScreen();
+      screen = const GroupManagementScreen();
     }
 
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
