@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/infrastructure/sync/apns_push_messaging_client.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
 import 'package:mocktail/mocktail.dart';
@@ -95,6 +96,38 @@ class FakeLocalNotificationClient implements LocalNotificationClient {
   Future<void> tapLastNotification() async {
     final last = shownNotifications.last;
     await _onTap?.call(last.payload);
+  }
+}
+
+class FakeApnsPushBridge implements ApnsPushBridge {
+  FakeApnsPushBridge({this.initialToken});
+
+  final String? initialToken;
+  bool permissionRequested = false;
+  final _tokenRefreshController = StreamController<String>.broadcast();
+
+  @override
+  Future<String?> getToken() async => initialToken;
+
+  @override
+  Future<Map<String, dynamic>?> getInitialMessage() async => null;
+
+  @override
+  Stream<Map<String, dynamic>> get onForegroundMessage => const Stream.empty();
+
+  @override
+  Stream<Map<String, dynamic>> get onMessageOpenedApp => const Stream.empty();
+
+  @override
+  Stream<String> get onTokenRefresh => _tokenRefreshController.stream;
+
+  @override
+  Future<void> requestPermission() async {
+    permissionRequested = true;
+  }
+
+  Future<void> dispose() async {
+    await _tokenRefreshController.close();
   }
 }
 
@@ -220,6 +253,38 @@ void main() {
         service.takePendingNavigationIntent(),
         const PushNavigationIntent.groupManagement(groupId: 'group-1'),
       );
+    },
+  );
+
+  test(
+    'initialize supports native APNs messaging without Firebase bootstrap',
+    () async {
+      final bridge = FakeApnsPushBridge(initialToken: 'apns-token-1');
+      service = PushNotificationService(
+        apiClient: apiClient,
+        messagingClient: ApnsPushMessagingClient(bridge: bridge),
+        localNotificationClient: localNotificationClient,
+        firebaseInitializer: null,
+        localeProvider: () => const Locale('en'),
+        pushPlatform: 'apns',
+      );
+      service.registerHandlers(
+        onMemberConfirmed: (_) async {},
+        onSyncAvailable: (_) async {},
+        onJoinRequest: (_) async {},
+      );
+
+      await service.initialize();
+
+      expect(bridge.permissionRequested, isTrue);
+      verify(
+        () => apiClient.updatePushToken(
+          pushToken: 'apns-token-1',
+          pushPlatform: 'apns',
+        ),
+      ).called(1);
+
+      await bridge.dispose();
     },
   );
 }

@@ -88,20 +88,22 @@ abstract class LocalNotificationClient {
 
 class FirebasePushMessagingClient implements PushMessagingClient {
   FirebasePushMessagingClient({FirebaseMessaging? messaging})
-    : _messaging = messaging ?? FirebaseMessaging.instance;
+    : _messaging = messaging;
 
-  final FirebaseMessaging _messaging;
+  final FirebaseMessaging? _messaging;
+
+  FirebaseMessaging get _instance => _messaging ?? FirebaseMessaging.instance;
 
   @override
   Future<void> requestPermission() async {
-    await _messaging.requestPermission();
+    await _instance.requestPermission();
   }
 
   @override
-  Future<String?> getToken() => _messaging.getToken();
+  Future<String?> getToken() => _instance.getToken();
 
   @override
-  Stream<String> get onTokenRefresh => _messaging.onTokenRefresh;
+  Stream<String> get onTokenRefresh => _instance.onTokenRefresh;
 
   @override
   Stream<Map<String, dynamic>> get onForegroundMessage =>
@@ -113,7 +115,7 @@ class FirebasePushMessagingClient implements PushMessagingClient {
 
   @override
   Future<Map<String, dynamic>?> getInitialMessage() async {
-    final message = await _messaging.getInitialMessage();
+    final message = await _instance.getInitialMessage();
     return message?.data;
   }
 }
@@ -175,20 +177,25 @@ class PushNotificationService {
     LocalNotificationClient? localNotificationClient,
     FirebaseInitializer? firebaseInitializer,
     Locale Function()? localeProvider,
+    String? pushPlatform,
   }) : _apiClient = apiClient,
        _messagingClient = messagingClient ?? FirebasePushMessagingClient(),
        _localNotificationClient =
            localNotificationClient ?? FlutterLocalNotificationClient(),
-       _firebaseInitializer = firebaseInitializer ?? Firebase.initializeApp,
+       _firebaseInitializer =
+           firebaseInitializer ??
+           (Platform.isAndroid ? Firebase.initializeApp : null),
        _localeProvider =
            localeProvider ??
-           (() => WidgetsBinding.instance.platformDispatcher.locale);
+           (() => WidgetsBinding.instance.platformDispatcher.locale),
+       _pushPlatform = pushPlatform;
 
   final RelayApiClient _apiClient;
   final PushMessagingClient _messagingClient;
   final LocalNotificationClient _localNotificationClient;
-  final FirebaseInitializer _firebaseInitializer;
+  final FirebaseInitializer? _firebaseInitializer;
   final Locale Function() _localeProvider;
+  final String? _pushPlatform;
 
   final _navigationController =
       StreamController<PushNavigationIntent>.broadcast();
@@ -223,11 +230,22 @@ class PushNotificationService {
     }
 
     try {
-      await _firebaseInitializer();
+      if (kDebugMode) {
+        debugPrint('PushNotificationService: initializing');
+      }
+      if (_firebaseInitializer != null) {
+        await _firebaseInitializer();
+      }
       await _localNotificationClient.initialize(handleNotificationTap);
       await _messagingClient.requestPermission();
 
       final token = await _messagingClient.getToken();
+      if (kDebugMode) {
+        debugPrint(
+          'PushNotificationService: initial token '
+          '${token == null || token.isEmpty ? '<empty>' : token}',
+        );
+      }
       if (token != null && token.isNotEmpty) {
         await registerToken(token);
       }
@@ -235,6 +253,9 @@ class PushNotificationService {
       _tokenRefreshSubscription = _messagingClient.onTokenRefresh.listen((
         token,
       ) {
+        if (kDebugMode) {
+          debugPrint('PushNotificationService: token refreshed $token');
+        }
         unawaited(registerToken(token));
       });
 
@@ -263,6 +284,9 @@ class PushNotificationService {
       }
 
       _initialized = true;
+      if (kDebugMode) {
+        debugPrint('PushNotificationService: initialized');
+      }
       return token;
     } catch (e) {
       if (kDebugMode) {
@@ -272,9 +296,20 @@ class PushNotificationService {
     }
   }
 
+  Future<String?> getToken() => _messagingClient.getToken();
+
   Future<void> registerToken(String token) async {
-    final platform = Platform.isIOS ? 'apns' : 'fcm';
+    final platform = _pushPlatform ?? (Platform.isIOS ? 'apns' : 'fcm');
+    if (kDebugMode) {
+      debugPrint(
+        'PushNotificationService: registering token for $platform '
+        '(${token.length} chars)',
+      );
+    }
     await _apiClient.updatePushToken(pushToken: token, pushPlatform: platform);
+    if (kDebugMode) {
+      debugPrint('PushNotificationService: token registered');
+    }
   }
 
   Future<void> handleMessage(Map<String, dynamic> data) async {

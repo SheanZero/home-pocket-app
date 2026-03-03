@@ -35,13 +35,16 @@ class JoinGroupUseCase {
     required RelayApiClient apiClient,
     required KeyManager keyManager,
     required GroupRepository groupRepository,
+    Future<String?> Function()? getPushToken,
   }) : _apiClient = apiClient,
        _keyManager = keyManager,
-       _groupRepository = groupRepository;
+       _groupRepository = groupRepository,
+       _getPushToken = getPushToken;
 
   final RelayApiClient _apiClient;
   final KeyManager _keyManager;
   final GroupRepository _groupRepository;
+  final Future<String?> Function()? _getPushToken;
 
   Future<JoinGroupResult> execute(String inviteCode) async {
     try {
@@ -55,6 +58,7 @@ class JoinGroupUseCase {
         publicKey: identity.publicKey,
         deviceName: Platform.localHostname,
         platform: Platform.isIOS ? 'ios' : 'android',
+        pushToken: await _getPushToken?.call(),
       );
 
       final response = await _apiClient.joinGroup(inviteCode: inviteCode);

@@ -42,15 +42,18 @@ class CreateGroupUseCase {
     required KeyManager keyManager,
     required GroupRepository groupRepository,
     required E2EEService e2eeService,
+    Future<String?> Function()? getPushToken,
   }) : _apiClient = apiClient,
        _keyManager = keyManager,
        _groupRepository = groupRepository,
-       _e2eeService = e2eeService;
+       _e2eeService = e2eeService,
+       _getPushToken = getPushToken;
 
   final RelayApiClient _apiClient;
   final KeyManager _keyManager;
   final GroupRepository _groupRepository;
   final E2EEService _e2eeService;
+  final Future<String?> Function()? _getPushToken;
 
   Future<CreateGroupResult> execute(String bookId) async {
     try {
@@ -64,6 +67,7 @@ class CreateGroupUseCase {
         publicKey: identity.publicKey,
         deviceName: Platform.localHostname,
         platform: Platform.isIOS ? 'ios' : 'android',
+        pushToken: await _getPushToken?.call(),
       );
 
       final response = await _apiClient.createGroup(bookId: bookId);

@@ -11,7 +11,9 @@ Implement the Family Sync UI flow for:
 - owner approval
 - group management
 
-and keep Firebase-based push notifications, including iOS real-device support, in scope.
+and keep real-device push notifications in scope:
+- Android via Firebase Cloud Messaging (FCM)
+- iOS via native Apple Push Notification service (APNs)
 
 ## Repository Constraints
 
@@ -41,18 +43,18 @@ and keep Firebase-based push notifications, including iOS real-device support, i
   - `SyncTriggerService` with `member_confirmed` and `sync_available`
 - Existing Android Firebase config:
   - `android/app/google-services.json`
-- Missing iOS Firebase config in repo:
-  - `ios/Runner/GoogleService-Info.plist`
+- iOS native push still requires Runner target capability wiring and APNs real-device validation
 
 ## iOS Push Prerequisites
 
 The implementation keeps iOS real-device push in scope, but the following are required for full end-to-end verification:
 
-1. `ios/Runner/GoogleService-Info.plist` must be present.
+1. Apple Developer signing/capability setup must match the Runner target bundle id.
 2. Runner target must enable:
    - Push Notifications
    - Background Modes / Remote notifications
-3. APNs key/certificate must already be linked in Firebase Console.
+3. Server must accept the raw APNs device token with `pushPlatform=apns`.
+4. Real-device verification must be done on an iPhone signed with the same Apple Developer team/capabilities.
 
 Code implementation proceeds without blocking on these assets, but final iOS push validation depends on them.
 
@@ -126,8 +128,8 @@ Code implementation proceeds without blocking on these assets, but final iOS pus
 ### Batch 5: Push integration
 
 19. Add Firebase messaging dependencies
-20. Initialize Firebase in app startup
-21. Implement Firebase Messaging in `PushNotificationService`
+20. Initialize Firebase in app startup for Android only
+21. Implement platform-specific push messaging in `PushNotificationService`
 22. Add local notification support for foreground messages
 23. Extend `SyncTriggerService` for join-request/member-confirmed streams
 24. Add presentation-side notification navigation provider
@@ -138,6 +140,38 @@ Code implementation proceeds without blocking on these assets, but final iOS pus
 
 27. Run quality checks
 28. Run build/codegen verification
+
+## Execution Status
+
+As of March 3, 2026, Batches 1-6 are implemented in the `codex-dev` worktree.
+
+- Batch 1 completed:
+  - localization updates
+  - `MemberAvatar`
+  - `GradientActionButton`
+- Batch 2 completed:
+  - additional Family Sync shared widgets
+- Batch 3 completed:
+  - redesigned pairing flow
+  - waiting approval screen
+- Batch 4 completed:
+  - owner approval flow
+  - group management flow
+- Batch 5 completed:
+  - Android FCM push registration and routing
+  - iOS native APNs bridge and routing
+  - foreground local notifications
+  - notification-driven navigation intents
+- Batch 6 completed:
+  - `flutter analyze`
+  - `flutter test`
+  - `flutter build ios --debug --no-codesign`
+
+## Remaining Manual Validation
+
+- Android real-device push acceptance still requires end-to-end server-triggered FCM delivery validation.
+- iOS real-device push acceptance still requires end-to-end APNs delivery validation on a signed iPhone.
+- These manual validations are intentionally deferred until the final combined verification pass.
 
 ## Implementation Notes
 

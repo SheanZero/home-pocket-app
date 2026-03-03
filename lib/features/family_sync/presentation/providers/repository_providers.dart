@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -8,6 +11,7 @@ import '../../../../data/repositories/group_repository_impl.dart';
 import '../../../../data/repositories/sync_repository_impl.dart';
 import '../../../../infrastructure/crypto/providers.dart';
 import '../../../../infrastructure/security/providers.dart';
+import '../../../../infrastructure/sync/apns_push_messaging_client.dart';
 import '../../../../infrastructure/sync/e2ee_service.dart';
 import '../../../../infrastructure/sync/push_notification_service.dart';
 import '../../../../infrastructure/sync/relay_api_client.dart';
@@ -68,7 +72,14 @@ SyncQueueManager syncQueueManager(Ref ref) {
 @riverpod
 PushNotificationService pushNotificationService(Ref ref) {
   final apiClient = ref.watch(relayApiClientProvider);
-  final service = PushNotificationService(apiClient: apiClient);
+  final service = PushNotificationService(
+    apiClient: apiClient,
+    messagingClient: Platform.isIOS
+        ? ApnsPushMessagingClient()
+        : FirebasePushMessagingClient(),
+    firebaseInitializer: Platform.isIOS ? null : Firebase.initializeApp,
+    pushPlatform: Platform.isIOS ? 'apns' : 'fcm',
+  );
   ref.onDispose(service.dispose);
   return service;
 }
