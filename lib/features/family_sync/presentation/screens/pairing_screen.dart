@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../generated/app_localizations.dart';
+import '../../domain/models/sync_status.dart';
 import '../../use_cases/create_group_use_case.dart';
 import '../../use_cases/join_group_use_case.dart';
 import '../providers/group_providers.dart';
+import '../providers/sync_providers.dart';
+import 'waiting_approval_screen.dart';
 import '../widgets/pair_code_display.dart';
 import '../widgets/pair_code_input.dart';
 
@@ -59,10 +62,17 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
       });
 
       if (result is JoinGroupSuccess) {
+        ref
+            .read(syncStatusNotifierProvider.notifier)
+            .updateStatus(SyncStatus.pairing);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(S.of(context).familySyncJoinSuccess)),
         );
-        Navigator.of(context).pop();
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute<void>(
+            builder: (_) => WaitingApprovalScreen(groupId: result.groupId),
+          ),
+        );
       }
     }
   }
