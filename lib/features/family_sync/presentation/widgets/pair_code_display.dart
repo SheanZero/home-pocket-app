@@ -3,7 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
+import 'digit_code_display.dart';
+import 'info_hint_box.dart';
+import 'outline_action_button.dart';
 
 /// Displays the QR code and 6-digit pair code for device pairing.
 ///
@@ -19,12 +23,14 @@ class PairCodeDisplay extends StatefulWidget {
     required this.qrData,
     required this.expiresAt,
     required this.onRegenerate,
+    required this.onShare,
   });
 
   final String inviteCode;
   final String qrData;
   final DateTime expiresAt;
   final VoidCallback onRegenerate;
+  final VoidCallback onShare;
 
   @override
   State<PairCodeDisplay> createState() => _PairCodeDisplayState();
@@ -59,14 +65,6 @@ class _PairCodeDisplayState extends State<PairCodeDisplay> {
     });
   }
 
-  String get _formattedCode {
-    final code = widget.inviteCode;
-    if (code.length == 6) {
-      return '${code.substring(0, 3)} ${code.substring(3)}';
-    }
-    return code;
-  }
-
   String get _formattedTime {
     final minutes = _remaining.inMinutes;
     final seconds = _remaining.inSeconds % 60;
@@ -77,79 +75,112 @@ class _PairCodeDisplayState extends State<PairCodeDisplay> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = S.of(context);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(l10n.familySyncPairCode, style: theme.textTheme.titleMedium),
-        const SizedBox(height: 8),
-        Text(
-          l10n.familySyncScanOrEnter,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 24),
-        // QR Code
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x145A9CC8),
+                blurRadius: 24,
+                offset: Offset(0, 12),
+              ),
+            ],
           ),
-          child: QrImageView(
-            data: widget.qrData,
-            version: QrVersions.auto,
-            size: 250,
-            gapless: true,
+          child: Center(
+            child: Container(
+              width: 180,
+              height: 180,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: QrImageView(
+                data: widget.qrData,
+                version: QrVersions.auto,
+                gapless: true,
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 24),
-
-        // 6-digit code
         Text(
-          _formattedCode,
-          style: theme.textTheme.headlineLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            letterSpacing: 8,
+          l10n.familySyncPairCode,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontFamily: 'IBM Plex Sans',
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textSecondary,
           ),
         ),
-        const SizedBox(height: 8),
-
-        // Expiry timer
+        const SizedBox(height: 12),
+        DigitCodeDisplay(code: widget.inviteCode),
+        const SizedBox(height: 12),
         Row(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               _isExpired ? Icons.timer_off : Icons.timer_outlined,
               size: 16,
-              color: _isExpired
-                  ? theme.colorScheme.error
-                  : theme.colorScheme.onSurfaceVariant,
+              color: _isExpired ? Colors.redAccent : AppColors.textSecondary,
             ),
             const SizedBox(width: 4),
             Text(
-              _isExpired ? l10n.familySyncCodeExpired : _formattedTime,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: _isExpired
-                    ? theme.colorScheme.error
-                    : theme.colorScheme.onSurfaceVariant,
+              _isExpired
+                  ? l10n.familySyncCodeExpired
+                  : l10n.familySyncExpiryLabel(_formattedTime),
+              style: const TextStyle(
+                fontFamily: 'IBM Plex Sans',
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            Expanded(
+              child: OutlineActionButton(
+                icon: Icons.share_outlined,
+                label: l10n.familySyncShare,
+                onPressed: widget.onShare,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlineActionButton(
+                icon: Icons.refresh,
+                label: l10n.refresh,
+                onPressed: widget.onRegenerate,
               ),
             ),
           ],
         ),
         const SizedBox(height: 16),
-
-        // Regenerate button
-        if (_isExpired)
-          FilledButton.icon(
-            onPressed: widget.onRegenerate,
-            icon: const Icon(Icons.refresh),
-            label: Text(l10n.familySyncRegenerate),
+        InfoHintBox(message: l10n.familySyncScanOrEnter),
+        if (_isExpired) ...[
+          const SizedBox(height: 12),
+          Text(
+            l10n.familySyncCodeExpired,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontFamily: 'IBM Plex Sans',
+              fontSize: 12,
+              color: Colors.redAccent,
+            ),
           ),
+        ],
       ],
     );
   }
