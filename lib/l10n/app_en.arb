@@ -752,6 +752,118 @@
   "@familySyncBadgeUnpaired": {
     "description": "Badge label for unpaired status"
   },
+  "familySyncShare": "Share",
+  "@familySyncShare": {
+    "description": "Button label to share an invite code"
+  },
+  "familySyncExpiryLabel": "Expires: {time}",
+  "@familySyncExpiryLabel": {
+    "description": "Label for invite code expiry time",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "08:42"
+      }
+    }
+  },
+  "familySyncJoinTitle": "Join Family",
+  "@familySyncJoinTitle": {
+    "description": "Title for the join group panel"
+  },
+  "familySyncJoinDescription": "Enter the 6-digit invite code you received from a family member.",
+  "@familySyncJoinDescription": {
+    "description": "Description shown on the join group panel"
+  },
+  "familySyncOrDivider": "or",
+  "@familySyncOrDivider": {
+    "description": "Divider text between join actions"
+  },
+  "familySyncScanQr": "Scan QR Code",
+  "@familySyncScanQr": {
+    "description": "Button label to scan a QR code"
+  },
+  "familySyncWaitingTitle": "Waiting for Approval...",
+  "@familySyncWaitingTitle": {
+    "description": "Title shown while waiting for owner approval"
+  },
+  "familySyncWaitingDescription": "The group owner is reviewing your join request. Please wait until approval is complete.",
+  "@familySyncWaitingDescription": {
+    "description": "Description shown while waiting for owner approval"
+  },
+  "familySyncGroupLabel": "Group",
+  "@familySyncGroupLabel": {
+    "description": "Label for the group name row"
+  },
+  "familySyncStatusLabel": "Status",
+  "@familySyncStatusLabel": {
+    "description": "Label for the status row"
+  },
+  "familySyncApprovalTitle": "Member Approval",
+  "@familySyncApprovalTitle": {
+    "description": "Title for the member approval screen"
+  },
+  "familySyncNewRequest": "New Join Request",
+  "@familySyncNewRequest": {
+    "description": "Heading for a new join request card"
+  },
+  "familySyncJustNow": "Requested just now",
+  "@familySyncJustNow": {
+    "description": "Text indicating a request was received just now"
+  },
+  "familySyncSecurityVerified": "This device public key has been verified.",
+  "@familySyncSecurityVerified": {
+    "description": "Security verification helper text for approval screen"
+  },
+  "familySyncReject": "Reject",
+  "@familySyncReject": {
+    "description": "Reject button label on the approval screen"
+  },
+  "familySyncApprove": "Approve",
+  "@familySyncApprove": {
+    "description": "Approve button label on the approval screen"
+  },
+  "familySyncCurrentMembers": "Current Members",
+  "@familySyncCurrentMembers": {
+    "description": "Section title for the current members list"
+  },
+  "familySyncApprovalTip": "Approving this request will sync the device and data with encryption enabled.",
+  "@familySyncApprovalTip": {
+    "description": "Informational tip shown on the approval screen"
+  },
+  "familySyncGroupManagement": "Group Management",
+  "@familySyncGroupManagement": {
+    "description": "Title for the group management screen"
+  },
+  "familySyncSynced": "Synced",
+  "@familySyncSynced": {
+    "description": "Short status label indicating the group is synced"
+  },
+  "familySyncSyncedEntries": "Synced Entries",
+  "@familySyncSyncedEntries": {
+    "description": "Label for the synced entries statistic"
+  },
+  "familySyncLastSync": "Last Sync",
+  "@familySyncLastSync": {
+    "description": "Label for the last sync statistic"
+  },
+  "familySyncYouSuffix": " (You)",
+  "@familySyncYouSuffix": {
+    "description": "Suffix appended to the current user's device name"
+  },
+  "familySyncDissolveGroup": "Dissolve Group",
+  "@familySyncDissolveGroup": {
+    "description": "Button label to dissolve the family group"
+  },
+  "familySyncMinutesAgo": "{minutes} min ago",
+  "@familySyncMinutesAgo": {
+    "description": "Relative time label in minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "cancel": "Cancel",
   "@cancel": {
     "description": "Generic cancel button label"

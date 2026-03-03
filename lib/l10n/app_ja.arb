@@ -437,6 +437,118 @@
   "@familySyncBadgeUnpaired": {
     "description": "Badge label for unpaired status"
   },
+  "familySyncShare": "シェア",
+  "@familySyncShare": {
+    "description": "Button label to share an invite code"
+  },
+  "familySyncExpiryLabel": "有効期限: {time}",
+  "@familySyncExpiryLabel": {
+    "description": "Label for invite code expiry time",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "08:42"
+      }
+    }
+  },
+  "familySyncJoinTitle": "家族に参加する",
+  "@familySyncJoinTitle": {
+    "description": "Title for the join group panel"
+  },
+  "familySyncJoinDescription": "家族から受け取った6桁の招待コードを入力してください",
+  "@familySyncJoinDescription": {
+    "description": "Description shown on the join group panel"
+  },
+  "familySyncOrDivider": "または",
+  "@familySyncOrDivider": {
+    "description": "Divider text between join actions"
+  },
+  "familySyncScanQr": "QRコードをスキャン",
+  "@familySyncScanQr": {
+    "description": "Button label to scan a QR code"
+  },
+  "familySyncWaitingTitle": "承認を待っています...",
+  "@familySyncWaitingTitle": {
+    "description": "Title shown while waiting for owner approval"
+  },
+  "familySyncWaitingDescription": "グループオーナーがあなたの参加リクエストを確認中です。確認されるまでお待ちください。",
+  "@familySyncWaitingDescription": {
+    "description": "Description shown while waiting for owner approval"
+  },
+  "familySyncGroupLabel": "グループ",
+  "@familySyncGroupLabel": {
+    "description": "Label for the group name row"
+  },
+  "familySyncStatusLabel": "ステータス",
+  "@familySyncStatusLabel": {
+    "description": "Label for the status row"
+  },
+  "familySyncApprovalTitle": "メンバー承認",
+  "@familySyncApprovalTitle": {
+    "description": "Title for the member approval screen"
+  },
+  "familySyncNewRequest": "新しい参加リクエスト",
+  "@familySyncNewRequest": {
+    "description": "Heading for a new join request card"
+  },
+  "familySyncJustNow": "たった今リクエスト",
+  "@familySyncJustNow": {
+    "description": "Text indicating a request was received just now"
+  },
+  "familySyncSecurityVerified": "デバイスの公開鍵が検証済みです",
+  "@familySyncSecurityVerified": {
+    "description": "Security verification helper text for approval screen"
+  },
+  "familySyncReject": "拒否",
+  "@familySyncReject": {
+    "description": "Reject button label on the approval screen"
+  },
+  "familySyncApprove": "承認する",
+  "@familySyncApprove": {
+    "description": "Approve button label on the approval screen"
+  },
+  "familySyncCurrentMembers": "現在のメンバー",
+  "@familySyncCurrentMembers": {
+    "description": "Section title for the current members list"
+  },
+  "familySyncApprovalTip": "承認すると、このデバイスとデータが暗号化して同期されます。",
+  "@familySyncApprovalTip": {
+    "description": "Informational tip shown on the approval screen"
+  },
+  "familySyncGroupManagement": "グループ管理",
+  "@familySyncGroupManagement": {
+    "description": "Title for the group management screen"
+  },
+  "familySyncSynced": "同期済",
+  "@familySyncSynced": {
+    "description": "Short status label indicating the group is synced"
+  },
+  "familySyncSyncedEntries": "同期済帳票",
+  "@familySyncSyncedEntries": {
+    "description": "Label for the synced entries statistic"
+  },
+  "familySyncLastSync": "最終同期",
+  "@familySyncLastSync": {
+    "description": "Label for the last sync statistic"
+  },
+  "familySyncYouSuffix": " (あなた)",
+  "@familySyncYouSuffix": {
+    "description": "Suffix appended to the current user's device name"
+  },
+  "familySyncDissolveGroup": "グループを解散",
+  "@familySyncDissolveGroup": {
+    "description": "Button label to dissolve the family group"
+  },
+  "familySyncMinutesAgo": "{minutes}分前",
+  "@familySyncMinutesAgo": {
+    "description": "Relative time label in minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "cancel": "キャンセル",
   "@cancel": {
     "description": "Generic cancel button label"

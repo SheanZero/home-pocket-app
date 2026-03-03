@@ -437,6 +437,118 @@
   "@familySyncBadgeUnpaired": {
     "description": "Badge label for unpaired status"
   },
+  "familySyncShare": "分享",
+  "@familySyncShare": {
+    "description": "Button label to share an invite code"
+  },
+  "familySyncExpiryLabel": "有效期: {time}",
+  "@familySyncExpiryLabel": {
+    "description": "Label for invite code expiry time",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "08:42"
+      }
+    }
+  },
+  "familySyncJoinTitle": "加入家庭",
+  "@familySyncJoinTitle": {
+    "description": "Title for the join group panel"
+  },
+  "familySyncJoinDescription": "请输入从家人那里收到的 6 位邀请码",
+  "@familySyncJoinDescription": {
+    "description": "Description shown on the join group panel"
+  },
+  "familySyncOrDivider": "或",
+  "@familySyncOrDivider": {
+    "description": "Divider text between join actions"
+  },
+  "familySyncScanQr": "扫描二维码",
+  "@familySyncScanQr": {
+    "description": "Button label to scan a QR code"
+  },
+  "familySyncWaitingTitle": "等待批准...",
+  "@familySyncWaitingTitle": {
+    "description": "Title shown while waiting for owner approval"
+  },
+  "familySyncWaitingDescription": "分组所有者正在确认你的加入请求。请等待对方完成确认。",
+  "@familySyncWaitingDescription": {
+    "description": "Description shown while waiting for owner approval"
+  },
+  "familySyncGroupLabel": "分组",
+  "@familySyncGroupLabel": {
+    "description": "Label for the group name row"
+  },
+  "familySyncStatusLabel": "状态",
+  "@familySyncStatusLabel": {
+    "description": "Label for the status row"
+  },
+  "familySyncApprovalTitle": "成员审批",
+  "@familySyncApprovalTitle": {
+    "description": "Title for the member approval screen"
+  },
+  "familySyncNewRequest": "新的加入请求",
+  "@familySyncNewRequest": {
+    "description": "Heading for a new join request card"
+  },
+  "familySyncJustNow": "刚刚发出请求",
+  "@familySyncJustNow": {
+    "description": "Text indicating a request was received just now"
+  },
+  "familySyncSecurityVerified": "该设备的公钥已完成校验",
+  "@familySyncSecurityVerified": {
+    "description": "Security verification helper text for approval screen"
+  },
+  "familySyncReject": "拒绝",
+  "@familySyncReject": {
+    "description": "Reject button label on the approval screen"
+  },
+  "familySyncApprove": "批准",
+  "@familySyncApprove": {
+    "description": "Approve button label on the approval screen"
+  },
+  "familySyncCurrentMembers": "当前成员",
+  "@familySyncCurrentMembers": {
+    "description": "Section title for the current members list"
+  },
+  "familySyncApprovalTip": "批准后，这台设备与相关数据将以加密方式同步。",
+  "@familySyncApprovalTip": {
+    "description": "Informational tip shown on the approval screen"
+  },
+  "familySyncGroupManagement": "分组管理",
+  "@familySyncGroupManagement": {
+    "description": "Title for the group management screen"
+  },
+  "familySyncSynced": "已同步",
+  "@familySyncSynced": {
+    "description": "Short status label indicating the group is synced"
+  },
+  "familySyncSyncedEntries": "已同步条目",
+  "@familySyncSyncedEntries": {
+    "description": "Label for the synced entries statistic"
+  },
+  "familySyncLastSync": "上次同步",
+  "@familySyncLastSync": {
+    "description": "Label for the last sync statistic"
+  },
+  "familySyncYouSuffix": "（你）",
+  "@familySyncYouSuffix": {
+    "description": "Suffix appended to the current user's device name"
+  },
+  "familySyncDissolveGroup": "解散分组",
+  "@familySyncDissolveGroup": {
+    "description": "Button label to dissolve the family group"
+  },
+  "familySyncMinutesAgo": "{minutes} 分钟前",
+  "@familySyncMinutesAgo": {
+    "description": "Relative time label in minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "cancel": "取消",
   "@cancel": {
     "description": "Generic cancel button label"
