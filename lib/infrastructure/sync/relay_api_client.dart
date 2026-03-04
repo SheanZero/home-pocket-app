@@ -81,14 +81,12 @@ class RelayApiClient {
     required String publicKey,
     required String deviceName,
     required String platform,
-    String? pushToken,
   }) async {
     final body = jsonEncode({
       'deviceId': deviceId,
       'publicKey': publicKey,
       'deviceName': deviceName,
       'platform': platform,
-      ...?pushToken == null ? null : {'pushToken': pushToken},
     });
 
     final response = await _post(
@@ -201,8 +199,8 @@ class RelayApiClient {
 
   /// Pull pending sync messages since cursor.
   ///
-  /// Returns: {messages: [...], hasMore: bool}
-  Future<Map<String, dynamic>> pullSync({int? since}) async {
+  /// Returns: {messages: SyncMessage[]}
+  Future<Map<String, dynamic>> pullSync({String? since}) async {
     final query = since != null ? '?since=$since' : '';
     final response = await _get('/sync/pull$query');
     return _parseResponse(response);

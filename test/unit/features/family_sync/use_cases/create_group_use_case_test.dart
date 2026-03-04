@@ -21,20 +21,17 @@ void main() {
   late MockGroupRepository groupRepository;
   late MockE2EEService e2eeService;
   late CreateGroupUseCase useCase;
-  late Future<String?> Function() getPushToken;
 
   setUp(() {
     apiClient = MockRelayApiClient();
     keyManager = MockKeyManager();
     groupRepository = MockGroupRepository();
     e2eeService = MockE2EEService();
-    getPushToken = () async => 'push-token-1';
     useCase = CreateGroupUseCase(
       apiClient: apiClient,
       keyManager: keyManager,
       groupRepository: groupRepository,
       e2eeService: e2eeService,
-      getPushToken: getPushToken,
     );
 
     when(
@@ -43,7 +40,6 @@ void main() {
         publicKey: any(named: 'publicKey'),
         deviceName: any(named: 'deviceName'),
         platform: any(named: 'platform'),
-        pushToken: any(named: 'pushToken'),
       ),
     ).thenAnswer((_) async => <String, dynamic>{});
     when(() => apiClient.createGroup(bookId: any(named: 'bookId'))).thenAnswer(
@@ -106,7 +102,6 @@ void main() {
         publicKey: 'generated-public-key',
         deviceName: any(named: 'deviceName'),
         platform: any(named: 'platform'),
-        pushToken: 'push-token-1',
       ),
     ).called(1);
   });

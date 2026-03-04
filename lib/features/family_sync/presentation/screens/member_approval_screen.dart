@@ -1,13 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/sync/sync_trigger_service.dart';
 import '../../domain/models/group_info.dart';
 import '../../domain/models/group_member.dart';
 import '../../use_cases/confirm_member_use_case.dart';
 import '../providers/group_providers.dart';
 import '../providers/repository_providers.dart';
+import '../providers/sync_providers.dart';
 import '../widgets/info_hint_box.dart';
 import '../widgets/member_list_tile.dart';
 
@@ -25,11 +29,33 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
   GroupInfo? _group;
   bool _isLoading = true;
   String? _approvingMemberId;
+  StreamSubscription<SyncTriggerEvent>? _eventSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadGroup();
+    _listenForSyncEvents();
+  }
+
+  void _listenForSyncEvents() {
+    final syncTrigger = ref.read(syncTriggerServiceProvider);
+    _eventSubscription = syncTrigger.events.listen((event) {
+      if (!mounted) return;
+      if (event.type != SyncTriggerEventType.joinRequest) return;
+      if (event.groupId != null &&
+          widget.groupId != null &&
+          event.groupId != widget.groupId) {
+        return;
+      }
+      _loadGroup();
+    });
+  }
+
+  @override
+  void dispose() {
+    unawaited(_eventSubscription?.cancel());
+    super.dispose();
   }
 
   Future<void> _loadGroup() async {

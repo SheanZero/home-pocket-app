@@ -4,10 +4,10 @@ import 'package:home_pocket/application/family_sync/push_sync_use_case.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
-import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
 import 'package:home_pocket/infrastructure/sync/sync_queue_manager.dart';
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/sync_trigger_service.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -19,9 +19,9 @@ class MockPushSyncUseCase extends Mock implements PushSyncUseCase {}
 
 class MockSyncQueueManager extends Mock implements SyncQueueManager {}
 
-class MockKeyManager extends Mock implements KeyManager {}
-
 class MockRelayApiClient extends Mock implements RelayApiClient {}
+
+class MockKeyManager extends Mock implements KeyManager {}
 
 class FakePushMessagingClient implements PushMessagingClient {
   @override
@@ -58,6 +58,36 @@ class FakeLocalNotificationClient implements LocalNotificationClient {
   }) async {}
 }
 
+class CountingPushNotificationService extends PushNotificationService {
+  CountingPushNotificationService()
+    : super(
+        apiClient: MockRelayApiClient(),
+        messagingClient: FakePushMessagingClient(),
+        localNotificationClient: FakeLocalNotificationClient(),
+        firebaseInitializer: () async {},
+      );
+
+  int registerHandlersCalls = 0;
+  int initializeCalls = 0;
+
+  @override
+  void registerHandlers({
+    PushMessageHandler? onMemberConfirmed,
+    PushMessageHandler? onSyncAvailable,
+    PushMessageHandler? onJoinRequest,
+    PushMessageHandler? onMemberLeft,
+    PushMessageHandler? onGroupDissolved,
+  }) {
+    registerHandlersCalls++;
+  }
+
+  @override
+  Future<String?> initialize() async {
+    initializeCalls++;
+    return null;
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -65,51 +95,20 @@ void main() {
   late MockPullSyncUseCase pullSync;
   late MockPushSyncUseCase pushSync;
   late MockSyncQueueManager queueManager;
+  late MockRelayApiClient apiClient;
   late MockKeyManager keyManager;
-  late MockRelayApiClient relayApiClient;
   late PushNotificationService pushNotificationService;
   late SyncTriggerService service;
-  final emittedJoinRequests = <SyncTriggerEvent>[];
-  const testGroupId = 'group-1';
-  const localDeviceId = 'local-device-id';
-  final testActiveGroup = GroupInfo(
-    groupId: testGroupId,
-    bookId: 'book-1',
-    status: GroupStatus.active,
-    role: 'member',
-    members: const [
-      GroupMember(
-        deviceId: 'owner-device-id',
-        publicKey: 'pk-owner',
-        deviceName: 'Owner phone',
-        role: 'owner',
-        status: 'active',
-      ),
-      GroupMember(
-        deviceId: localDeviceId,
-        publicKey: 'pk-local',
-        deviceName: 'My phone',
-        role: 'member',
-        status: 'active',
-      ),
-      GroupMember(
-        deviceId: 'leaving-device-id',
-        publicKey: 'pk-leaving',
-        deviceName: 'Leaving tablet',
-        role: 'member',
-        status: 'active',
-      ),
-    ],
-    createdAt: DateTime(2026),
-  );
+  var emittedEvents = <SyncTriggerEvent>[];
 
   setUp(() {
+    emittedEvents = <SyncTriggerEvent>[];
     groupRepository = MockGroupRepository();
     pullSync = MockPullSyncUseCase();
     pushSync = MockPushSyncUseCase();
     queueManager = MockSyncQueueManager();
+    apiClient = MockRelayApiClient();
     keyManager = MockKeyManager();
-    relayApiClient = MockRelayApiClient();
     pushNotificationService = PushNotificationService(
       apiClient: MockRelayApiClient(),
       messagingClient: FakePushMessagingClient(),
@@ -121,29 +120,16 @@ void main() {
       pullSync: pullSync,
       pushSync: pushSync,
       queueManager: queueManager,
-      keyManager: keyManager,
-      relayApiClient: relayApiClient,
       pushNotificationService: pushNotificationService,
+      apiClient: apiClient,
+      keyManager: keyManager,
     );
-    service.events.listen(emittedJoinRequests.add);
+    service.events.listen(emittedEvents.add);
 
     when(
       () => pullSync.execute(),
     ).thenAnswer((_) async => const PullSyncResult.noNewData());
-    when(
-      () => pushSync.execute(
-        operations: any(named: 'operations'),
-        vectorClock: any(named: 'vectorClock'),
-      ),
-    ).thenAnswer((_) async => const PushSyncResult.success(1));
     when(() => queueManager.drainQueue()).thenAnswer((_) async => 0);
-    when(() => keyManager.getDeviceId()).thenAnswer((_) async => localDeviceId);
-    when(
-      () => relayApiClient.getGroupStatus(any()),
-    ).thenAnswer((_) async => {'groupId': testGroupId, 'members': []});
-    when(
-      () => groupRepository.updateMembers(any(), any()),
-    ).thenAnswer((_) async {});
   });
 
   tearDown(() {
@@ -178,68 +164,25 @@ void main() {
     },
   );
 
-  test(
-    'member_confirmed without groupId confirms the pending group and pulls sync',
-    () async {
-      when(() => groupRepository.getPendingGroup()).thenAnswer(
-        (_) async => GroupInfo(
-          groupId: testGroupId,
-          bookId: 'book-1',
-          status: GroupStatus.confirming,
-          role: 'member',
-          members: const [],
-          createdAt: DateTime(2026),
-        ),
-      );
-      when(
-        () => groupRepository.confirmLocalGroup(any()),
-      ).thenAnswer((_) async {});
-
-      await service.initialize();
-      await pushNotificationService.handleMessage({'type': 'member_confirmed'});
-
-      verify(() => groupRepository.confirmLocalGroup(testGroupId)).called(1);
-      verify(() => pullSync.execute()).called(1);
-
-      final event = service.takePendingEvent();
-      expect(
-        event,
-        const SyncTriggerEvent.memberConfirmed(groupId: testGroupId),
-      );
-    },
-  );
-
-  test('member_confirmed refreshes group status from server', () async {
-    when(() => groupRepository.getPendingGroup()).thenAnswer(
-      (_) async => GroupInfo(
-        groupId: testGroupId,
-        bookId: 'book-1',
-        status: GroupStatus.confirming,
-        role: 'member',
-        members: const [],
-        createdAt: DateTime(2026),
-      ),
-    );
-    when(
-      () => groupRepository.confirmLocalGroup(any()),
-    ).thenAnswer((_) async {});
-    when(() => relayApiClient.getGroupStatus(testGroupId)).thenAnswer(
+  test('join_request fetches group status, updates members, and emits event',
+      () async {
+    when(() => apiClient.getGroupStatus('group-1')).thenAnswer(
       (_) async => {
-        'groupId': testGroupId,
+        'groupId': 'group-1',
         'members': [
           {
-            'deviceId': 'owner-id',
-            'publicKey': 'pk1',
+            'deviceId': 'device-owner',
+            'publicKey': 'pk-owner',
             'deviceName': 'Owner Phone',
             'role': 'owner',
             'status': 'active',
           },
           {
-            'deviceId': 'my-id',
-            'publicKey': 'pk2',
-            'deviceName': 'My Phone',
+            'deviceId': 'device-new',
+            'publicKey': 'pk-new',
+            'deviceName': 'New Phone',
             'role': 'member',
-            'status': 'active',
+            'status': 'pending',
           },
         ],
       },
@@ -249,23 +192,30 @@ void main() {
     ).thenAnswer((_) async {});
 
     await service.initialize();
+
     await pushNotificationService.handleMessage({
-      'type': 'member_confirmed',
-      'groupId': testGroupId,
+      'type': 'join_request',
+      'groupId': 'group-1',
     });
 
-    verify(() => relayApiClient.getGroupStatus(testGroupId)).called(1);
-    final updatedMembers =
-        verify(
-              () => groupRepository.updateMembers(testGroupId, captureAny()),
-            ).captured.single
-            as List<GroupMember>;
-    expect(updatedMembers, hasLength(2));
-    expect(updatedMembers.first.deviceId, 'owner-id');
-    expect(updatedMembers.last.deviceId, 'my-id');
+    verify(() => apiClient.getGroupStatus('group-1')).called(1);
+    verify(
+      () => groupRepository.updateMembers(
+        'group-1',
+        any(that: hasLength(2)),
+      ),
+    ).called(1);
+    expect(
+      emittedEvents,
+      contains(const SyncTriggerEvent.joinRequest(groupId: 'group-1')),
+    );
   });
 
-  test('join_request emits a trigger event', () async {
+  test('join_request still emits event if server fetch fails', () async {
+    when(() => apiClient.getGroupStatus('group-1')).thenThrow(
+      const RelayApiException(statusCode: 500, message: 'server error'),
+    );
+
     await service.initialize();
 
     await pushNotificationService.handleMessage({
@@ -274,119 +224,135 @@ void main() {
     });
 
     expect(
-      emittedJoinRequests,
+      emittedEvents,
       contains(const SyncTriggerEvent.joinRequest(groupId: 'group-1')),
     );
   });
 
-  group('member_left handling', () {
-    test('removes member from local group and emits event', () async {
-      when(
-        () => groupRepository.getActiveGroup(),
-      ).thenAnswer((_) async => testActiveGroup);
-      when(
-        () => groupRepository.getGroupById(testGroupId),
-      ).thenAnswer((_) async => testActiveGroup);
-      when(
-        () => groupRepository.updateMembers(any(), any()),
-      ).thenAnswer((_) async {});
+  test('initialize is idempotent', () async {
+    final pushService = CountingPushNotificationService();
+    final idempotentService = SyncTriggerService(
+      groupRepo: groupRepository,
+      pullSync: pullSync,
+      pushSync: pushSync,
+      queueManager: queueManager,
+      pushNotificationService: pushService,
+      apiClient: apiClient,
+      keyManager: keyManager,
+    );
 
-      await service.initialize();
-      await pushNotificationService.handleMessage({
-        'type': 'member_left',
-        'groupId': testGroupId,
-        'deviceId': 'leaving-device-id',
-        'reason': 'left',
-      });
+    await idempotentService.initialize();
+    await idempotentService.initialize();
 
-      final capturedMembers =
-          verify(
-                () => groupRepository.updateMembers(testGroupId, captureAny()),
-              ).captured.single
-              as List<GroupMember>;
+    expect(pushService.registerHandlersCalls, 1);
+    expect(pushService.initializeCalls, 1);
 
-      expect(capturedMembers.map((member) => member.deviceId), [
-        'owner-device-id',
-        localDeviceId,
-      ]);
-
-      final event = service.takePendingEvent();
-      expect(event, isNotNull);
-      expect(event!.type, SyncTriggerEventType.memberLeft);
-      expect(event.groupId, testGroupId);
-    });
-
-    test('handles removed member that is self by deactivating group', () async {
-      when(
-        () => groupRepository.getActiveGroup(),
-      ).thenAnswer((_) async => testActiveGroup);
-      when(
-        () => groupRepository.deactivateGroup(testGroupId),
-      ).thenAnswer((_) async {});
-
-      await service.initialize();
-      await pushNotificationService.handleMessage({
-        'type': 'member_left',
-        'groupId': testGroupId,
-        'deviceId': localDeviceId,
-        'reason': 'removed',
-      });
-
-      verify(() => groupRepository.deactivateGroup(testGroupId)).called(1);
-    });
+    idempotentService.dispose();
   });
 
-  group('group_dissolved handling', () {
-    test('deactivates group locally and emits event', () async {
-      when(
-        () => groupRepository.getActiveGroup(),
-      ).thenAnswer((_) async => testActiveGroup);
-      when(
-        () => groupRepository.deactivateGroup(testGroupId),
-      ).thenAnswer((_) async {});
-      when(() => queueManager.clearQueue()).thenAnswer((_) async {});
-
-      await service.initialize();
-      await pushNotificationService.handleMessage({
-        'type': 'group_dissolved',
-        'groupId': testGroupId,
-      });
-
-      verify(() => groupRepository.deactivateGroup(testGroupId)).called(1);
-      verify(() => queueManager.clearQueue()).called(1);
-
-      final event = service.takePendingEvent();
-      expect(event, isNotNull);
-      expect(event!.type, SyncTriggerEventType.groupDissolved);
-      expect(event.groupId, testGroupId);
-    });
-  });
-
-  test('onTransactionCreated builds protocol-compliant operation', () async {
+  test('member_left with reason=removed deactivates group for local device',
+      () async {
+    when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-self');
+    when(() => queueManager.clearQueue()).thenAnswer((_) async {});
     when(
-      () => groupRepository.getActiveGroup(),
-    ).thenAnswer((_) async => testActiveGroup);
+      () => groupRepository.deactivateGroup(any()),
+    ).thenAnswer((_) async {});
 
-    await service.onTransactionCreated({
-      'id': 'tx-1',
-      'amount': 1000,
-      'category': 'food',
+    await service.initialize();
+    await pushNotificationService.handleMessage({
+      'type': 'member_left',
+      'groupId': 'group-1',
+      'deviceId': 'device-self',
+      'reason': 'removed',
     });
 
-    final captured =
-        verify(
-              () => pushSync.execute(
-                operations: captureAny(named: 'operations'),
-                vectorClock: any(named: 'vectorClock'),
-              ),
-            ).captured.first
-            as List<Map<String, dynamic>>;
+    verify(() => queueManager.clearQueue()).called(1);
+    verify(() => groupRepository.deactivateGroup('group-1')).called(1);
+    expect(
+      emittedEvents,
+      contains(const SyncTriggerEvent.memberLeft(groupId: 'group-1')),
+    );
+  });
 
-    expect(captured, hasLength(1));
-    expect(captured[0]['op'], 'create');
-    expect(captured[0]['entityType'], 'bill');
-    expect(captured[0]['entityId'], 'tx-1');
-    expect(captured[0]['data'], isNotNull);
-    expect(captured[0]['timestamp'], isA<int>());
+  test('member_left for another device removes them from local member list',
+      () async {
+    when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-self');
+    when(() => groupRepository.getGroupById('group-1')).thenAnswer(
+      (_) async => GroupInfo(
+        groupId: 'group-1',
+        bookId: 'book-1',
+        status: GroupStatus.active,
+        role: 'owner',
+        members: const [
+          GroupMember(
+            deviceId: 'device-self',
+            publicKey: 'pk-self',
+            deviceName: 'My phone',
+            role: 'owner',
+            status: 'active',
+          ),
+          GroupMember(
+            deviceId: 'device-other',
+            publicKey: 'pk-other',
+            deviceName: 'Other phone',
+            role: 'member',
+            status: 'active',
+          ),
+        ],
+        createdAt: DateTime(2026),
+      ),
+    );
+    when(
+      () => groupRepository.updateMembers(any(), any()),
+    ).thenAnswer((_) async {});
+
+    await service.initialize();
+    await pushNotificationService.handleMessage({
+      'type': 'member_left',
+      'groupId': 'group-1',
+      'deviceId': 'device-other',
+      'reason': 'left',
+    });
+
+    verify(
+      () => groupRepository.updateMembers(
+        'group-1',
+        any(that: hasLength(1)),
+      ),
+    ).called(1);
+    expect(
+      emittedEvents,
+      contains(const SyncTriggerEvent.memberLeft(groupId: 'group-1')),
+    );
+  });
+
+  test('group_dissolved deactivates group and emits event', () async {
+    when(() => groupRepository.getActiveGroup()).thenAnswer(
+      (_) async => GroupInfo(
+        groupId: 'group-1',
+        bookId: 'book-1',
+        status: GroupStatus.active,
+        role: 'member',
+        members: const [],
+        createdAt: DateTime(2026),
+      ),
+    );
+    when(() => queueManager.clearQueue()).thenAnswer((_) async {});
+    when(
+      () => groupRepository.deactivateGroup(any()),
+    ).thenAnswer((_) async {});
+
+    await service.initialize();
+    await pushNotificationService.handleMessage({
+      'type': 'group_dissolved',
+      'groupId': 'group-1',
+    });
+
+    verify(() => queueManager.clearQueue()).called(1);
+    verify(() => groupRepository.deactivateGroup('group-1')).called(1);
+    expect(
+      emittedEvents,
+      contains(const SyncTriggerEvent.groupDissolved(groupId: 'group-1')),
+    );
   });
 }

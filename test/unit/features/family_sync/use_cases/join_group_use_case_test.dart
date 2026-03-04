@@ -18,18 +18,15 @@ void main() {
   late MockKeyManager keyManager;
   late MockGroupRepository groupRepository;
   late JoinGroupUseCase useCase;
-  late Future<String?> Function() getPushToken;
 
   setUp(() {
     apiClient = MockRelayApiClient();
     keyManager = MockKeyManager();
     groupRepository = MockGroupRepository();
-    getPushToken = () async => 'push-token-1';
     useCase = JoinGroupUseCase(
       apiClient: apiClient,
       keyManager: keyManager,
       groupRepository: groupRepository,
-      getPushToken: getPushToken,
     );
 
     when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
@@ -40,7 +37,6 @@ void main() {
         publicKey: any(named: 'publicKey'),
         deviceName: any(named: 'deviceName'),
         platform: any(named: 'platform'),
-        pushToken: any(named: 'pushToken'),
       ),
     ).thenAnswer((_) async => <String, dynamic>{});
     when(
@@ -121,7 +117,6 @@ void main() {
         publicKey: 'generated-public-key',
         deviceName: any(named: 'deviceName'),
         platform: any(named: 'platform'),
-        pushToken: 'push-token-1',
       ),
     ).called(1);
   });

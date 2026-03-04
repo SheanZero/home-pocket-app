@@ -18,6 +18,8 @@ mixin _$SyncMessage {
   String get payload; // encrypted base64
   Map<String, int> get vectorClock;
   int get operationCount;
+  int get chunkIndex;
+  int get totalChunks;
   DateTime get createdAt;
 
   /// Create a copy of SyncMessage
@@ -46,6 +48,10 @@ mixin _$SyncMessage {
             ) &&
             (identical(other.operationCount, operationCount) ||
                 other.operationCount == operationCount) &&
+            (identical(other.chunkIndex, chunkIndex) ||
+                other.chunkIndex == chunkIndex) &&
+            (identical(other.totalChunks, totalChunks) ||
+                other.totalChunks == totalChunks) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
   }
@@ -59,12 +65,14 @@ mixin _$SyncMessage {
     payload,
     const DeepCollectionEquality().hash(vectorClock),
     operationCount,
+    chunkIndex,
+    totalChunks,
     createdAt,
   );
 
   @override
   String toString() {
-    return 'SyncMessage(messageId: $messageId, fromDeviceId: $fromDeviceId, payload: $payload, vectorClock: $vectorClock, operationCount: $operationCount, createdAt: $createdAt)';
+    return 'SyncMessage(messageId: $messageId, fromDeviceId: $fromDeviceId, payload: $payload, vectorClock: $vectorClock, operationCount: $operationCount, chunkIndex: $chunkIndex, totalChunks: $totalChunks, createdAt: $createdAt)';
   }
 }
 
@@ -81,6 +89,8 @@ abstract mixin class $SyncMessageCopyWith<$Res> {
     String payload,
     Map<String, int> vectorClock,
     int operationCount,
+    int chunkIndex,
+    int totalChunks,
     DateTime createdAt,
   });
 }
@@ -102,6 +112,8 @@ class _$SyncMessageCopyWithImpl<$Res> implements $SyncMessageCopyWith<$Res> {
     Object? payload = null,
     Object? vectorClock = null,
     Object? operationCount = null,
+    Object? chunkIndex = null,
+    Object? totalChunks = null,
     Object? createdAt = null,
   }) {
     return _then(
@@ -125,6 +137,14 @@ class _$SyncMessageCopyWithImpl<$Res> implements $SyncMessageCopyWith<$Res> {
         operationCount: null == operationCount
             ? _self.operationCount
             : operationCount // ignore: cast_nullable_to_non_nullable
+                  as int,
+        chunkIndex: null == chunkIndex
+            ? _self.chunkIndex
+            : chunkIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        totalChunks: null == totalChunks
+            ? _self.totalChunks
+            : totalChunks // ignore: cast_nullable_to_non_nullable
                   as int,
         createdAt: null == createdAt
             ? _self.createdAt
@@ -234,6 +254,8 @@ extension SyncMessagePatterns on SyncMessage {
       String payload,
       Map<String, int> vectorClock,
       int operationCount,
+      int chunkIndex,
+      int totalChunks,
       DateTime createdAt,
     )?
     $default, {
@@ -248,6 +270,8 @@ extension SyncMessagePatterns on SyncMessage {
           _that.payload,
           _that.vectorClock,
           _that.operationCount,
+          _that.chunkIndex,
+          _that.totalChunks,
           _that.createdAt,
         );
       case _:
@@ -276,6 +300,8 @@ extension SyncMessagePatterns on SyncMessage {
       String payload,
       Map<String, int> vectorClock,
       int operationCount,
+      int chunkIndex,
+      int totalChunks,
       DateTime createdAt,
     )
     $default,
@@ -289,6 +315,8 @@ extension SyncMessagePatterns on SyncMessage {
           _that.payload,
           _that.vectorClock,
           _that.operationCount,
+          _that.chunkIndex,
+          _that.totalChunks,
           _that.createdAt,
         );
       case _:
@@ -316,6 +344,8 @@ extension SyncMessagePatterns on SyncMessage {
       String payload,
       Map<String, int> vectorClock,
       int operationCount,
+      int chunkIndex,
+      int totalChunks,
       DateTime createdAt,
     )?
     $default,
@@ -329,6 +359,8 @@ extension SyncMessagePatterns on SyncMessage {
           _that.payload,
           _that.vectorClock,
           _that.operationCount,
+          _that.chunkIndex,
+          _that.totalChunks,
           _that.createdAt,
         );
       case _:
@@ -346,6 +378,8 @@ class _SyncMessage implements SyncMessage {
     required this.payload,
     required final Map<String, int> vectorClock,
     required this.operationCount,
+    required this.chunkIndex,
+    required this.totalChunks,
     required this.createdAt,
   }) : _vectorClock = vectorClock;
   factory _SyncMessage.fromJson(Map<String, dynamic> json) =>
@@ -369,6 +403,10 @@ class _SyncMessage implements SyncMessage {
 
   @override
   final int operationCount;
+  @override
+  final int chunkIndex;
+  @override
+  final int totalChunks;
   @override
   final DateTime createdAt;
 
@@ -401,6 +439,10 @@ class _SyncMessage implements SyncMessage {
             ) &&
             (identical(other.operationCount, operationCount) ||
                 other.operationCount == operationCount) &&
+            (identical(other.chunkIndex, chunkIndex) ||
+                other.chunkIndex == chunkIndex) &&
+            (identical(other.totalChunks, totalChunks) ||
+                other.totalChunks == totalChunks) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
   }
@@ -414,12 +456,14 @@ class _SyncMessage implements SyncMessage {
     payload,
     const DeepCollectionEquality().hash(_vectorClock),
     operationCount,
+    chunkIndex,
+    totalChunks,
     createdAt,
   );
 
   @override
   String toString() {
-    return 'SyncMessage(messageId: $messageId, fromDeviceId: $fromDeviceId, payload: $payload, vectorClock: $vectorClock, operationCount: $operationCount, createdAt: $createdAt)';
+    return 'SyncMessage(messageId: $messageId, fromDeviceId: $fromDeviceId, payload: $payload, vectorClock: $vectorClock, operationCount: $operationCount, chunkIndex: $chunkIndex, totalChunks: $totalChunks, createdAt: $createdAt)';
   }
 }
 
@@ -438,6 +482,8 @@ abstract mixin class _$SyncMessageCopyWith<$Res>
     String payload,
     Map<String, int> vectorClock,
     int operationCount,
+    int chunkIndex,
+    int totalChunks,
     DateTime createdAt,
   });
 }
@@ -459,6 +505,8 @@ class __$SyncMessageCopyWithImpl<$Res> implements _$SyncMessageCopyWith<$Res> {
     Object? payload = null,
     Object? vectorClock = null,
     Object? operationCount = null,
+    Object? chunkIndex = null,
+    Object? totalChunks = null,
     Object? createdAt = null,
   }) {
     return _then(
@@ -482,6 +530,14 @@ class __$SyncMessageCopyWithImpl<$Res> implements _$SyncMessageCopyWith<$Res> {
         operationCount: null == operationCount
             ? _self.operationCount
             : operationCount // ignore: cast_nullable_to_non_nullable
+                  as int,
+        chunkIndex: null == chunkIndex
+            ? _self.chunkIndex
+            : chunkIndex // ignore: cast_nullable_to_non_nullable
+                  as int,
+        totalChunks: null == totalChunks
+            ? _self.totalChunks
+            : totalChunks // ignore: cast_nullable_to_non_nullable
                   as int,
         createdAt: null == createdAt
             ? _self.createdAt

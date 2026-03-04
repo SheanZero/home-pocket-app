@@ -11,6 +11,8 @@ abstract class SyncMessage with _$SyncMessage {
     required String payload, // encrypted base64
     required Map<String, int> vectorClock,
     required int operationCount,
+    required int chunkIndex,
+    required int totalChunks,
     required DateTime createdAt,
   }) = _SyncMessage;
 

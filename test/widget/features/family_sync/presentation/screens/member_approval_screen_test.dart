@@ -4,8 +4,10 @@ import 'package:home_pocket/features/family_sync/domain/models/group_member.dart
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/group_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/family_sync/presentation/providers/sync_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/member_approval_screen.dart';
 import 'package:home_pocket/features/family_sync/use_cases/confirm_member_use_case.dart';
+import 'package:home_pocket/infrastructure/sync/sync_trigger_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../../helpers/test_localizations.dart';
@@ -14,13 +16,20 @@ class MockGroupRepository extends Mock implements GroupRepository {}
 
 class MockConfirmMemberUseCase extends Mock implements ConfirmMemberUseCase {}
 
+class MockSyncTriggerService extends Mock implements SyncTriggerService {}
+
 void main() {
   late MockGroupRepository groupRepository;
   late MockConfirmMemberUseCase confirmMemberUseCase;
+  late MockSyncTriggerService syncTriggerService;
 
   setUp(() {
     groupRepository = MockGroupRepository();
     confirmMemberUseCase = MockConfirmMemberUseCase();
+    syncTriggerService = MockSyncTriggerService();
+    when(() => syncTriggerService.events).thenAnswer(
+      (_) => const Stream<SyncTriggerEvent>.empty(),
+    );
 
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
@@ -65,6 +74,7 @@ void main() {
         overrides: [
           groupRepositoryProvider.overrideWithValue(groupRepository),
           confirmMemberUseCaseProvider.overrideWithValue(confirmMemberUseCase),
+          syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
         ],
       ),
     );
@@ -114,6 +124,7 @@ void main() {
         overrides: [
           groupRepositoryProvider.overrideWithValue(groupRepository),
           confirmMemberUseCaseProvider.overrideWithValue(confirmMemberUseCase),
+          syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
         ],
       ),
     );

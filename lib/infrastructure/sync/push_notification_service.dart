@@ -13,7 +13,6 @@ import 'relay_api_client.dart';
 
 typedef PushMessageHandler = Future<void> Function(Map<String, dynamic> data);
 typedef FirebaseInitializer = Future<void> Function();
-typedef CurrentDeviceIdLoader = Future<String?> Function();
 
 enum PushNavigationDestination {
   memberApproval,
@@ -196,7 +195,6 @@ class PushNotificationService {
     FirebaseInitializer? firebaseInitializer,
     Locale Function()? localeProvider,
     String? pushPlatform,
-    CurrentDeviceIdLoader? currentDeviceIdLoader,
   }) : _apiClient = apiClient,
        _messagingClient = messagingClient ?? FirebasePushMessagingClient(),
        _localNotificationClient =
@@ -207,8 +205,7 @@ class PushNotificationService {
        _localeProvider =
            localeProvider ??
            (() => WidgetsBinding.instance.platformDispatcher.locale),
-       _pushPlatform = pushPlatform,
-       _currentDeviceIdLoader = currentDeviceIdLoader;
+       _pushPlatform = pushPlatform;
 
   final RelayApiClient _apiClient;
   final PushMessagingClient _messagingClient;
@@ -216,7 +213,6 @@ class PushNotificationService {
   final FirebaseInitializer? _firebaseInitializer;
   final Locale Function() _localeProvider;
   final String? _pushPlatform;
-  final CurrentDeviceIdLoader? _currentDeviceIdLoader;
 
   final _navigationController =
       StreamController<PushNavigationIntent>.broadcast();
@@ -232,7 +228,6 @@ class PushNotificationService {
   StreamSubscription<Map<String, dynamic>>? _openedAppSubscription;
 
   PushNavigationIntent? _pendingNavigationIntent;
-  String? _currentDeviceId;
   bool _initialized = false;
 
   Stream<PushNavigationIntent> get navigationIntents =>
@@ -264,9 +259,6 @@ class PushNotificationService {
       if (_firebaseInitializer != null) {
         await _firebaseInitializer();
       }
-      if (_currentDeviceIdLoader != null) {
-        _currentDeviceId = await _currentDeviceIdLoader();
-      }
       await _localNotificationClient.initialize(handleNotificationTap);
       await _messagingClient.requestPermission();
 
@@ -293,6 +285,11 @@ class PushNotificationService {
       _foregroundSubscription = _messagingClient.onForegroundMessage.listen((
         data,
       ) {
+        if (kDebugMode) {
+          debugPrint(
+            'PushNotificationService: foreground message received: $data',
+          );
+        }
         unawaited(
           _handleIncomingMessage(data, source: _PushMessageSource.foreground),
         );
@@ -301,12 +298,20 @@ class PushNotificationService {
       _openedAppSubscription = _messagingClient.onMessageOpenedApp.listen((
         data,
       ) {
+        if (kDebugMode) {
+          debugPrint(
+            'PushNotificationService: app opened message received: $data',
+          );
+        }
         unawaited(
           _handleIncomingMessage(data, source: _PushMessageSource.appOpened),
         );
       });
 
       final initialMessage = await _messagingClient.getInitialMessage();
+      if (kDebugMode) {
+        debugPrint('PushNotificationService: initial message: $initialMessage');
+      }
       if (initialMessage != null) {
         await _handleIncomingMessage(
           initialMessage,
@@ -375,6 +380,11 @@ class PushNotificationService {
     required _PushMessageSource source,
   }) async {
     final type = data['type'] as String?;
+    if (kDebugMode) {
+      debugPrint(
+        'PushNotificationService: _handleIncomingMessage type=$type source=$source data=$data',
+      );
+    }
 
     switch (type) {
       case 'member_confirmed':
@@ -401,6 +411,9 @@ class PushNotificationService {
         break;
       case 'group_dissolved':
         await _onGroupDissolved?.call(data);
+        if (source != _PushMessageSource.direct) {
+          await handleNotificationTap(data);
+        }
         break;
       default:
         if (kDebugMode) {
@@ -410,68 +423,42 @@ class PushNotificationService {
   }
 
   Future<void> _showForegroundNotification(Map<String, dynamic> data) async {
-    final notification = previewForegroundNotification(data);
-    if (notification == null) return;
-
-    await _localNotificationClient.show(
-      id: notification.id,
-      title: notification.title,
-      body: notification.body,
-      payload: notification.payload,
-    );
-  }
-
-  @visibleForTesting
-  ShownLocalNotification? previewForegroundNotification(
-    Map<String, dynamic> data,
-  ) {
     final l10n = lookupS(_localeProvider());
     final type = data['type'] as String?;
 
     switch (type) {
       case 'join_request':
       case 'pair_request':
-        final deviceName = data['deviceName'] as String?;
-        return ShownLocalNotification(
+        await _localNotificationClient.show(
           id: 1001,
           title: l10n.familySyncNewRequest,
-          body: deviceName != null && deviceName.isNotEmpty
-              ? l10n.familySyncJoinRequestWithName(deviceName)
-              : l10n.familySyncJoinRequestNotificationBody,
+          body: l10n.familySyncJoinRequestNotificationBody,
           payload: data,
         );
+        break;
       case 'member_confirmed':
       case 'pair_confirmed':
-        return ShownLocalNotification(
+        await _localNotificationClient.show(
           id: 1002,
           title: l10n.familySyncMemberConfirmedNotificationTitle,
           body: l10n.familySyncMemberConfirmedNotificationBody,
           payload: data,
         );
-      default:
-        return null;
+        break;
     }
   }
 
   PushNavigationIntent? _intentForMessage(Map<String, dynamic> data) {
     final type = data['type'] as String?;
     final groupId = data['groupId'] as String?;
-    final deviceId = data['deviceId'] as String?;
-    final reason = data['reason'] as String?;
 
     return switch (type) {
       'join_request' ||
       'pair_request' => PushNavigationIntent.memberApproval(groupId: groupId),
       'member_confirmed' || 'pair_confirmed' =>
         PushNavigationIntent.groupManagement(groupId: groupId),
-      'member_left'
-          when deviceId != null &&
-              deviceId == _currentDeviceId &&
-              reason == 'removed' =>
-        PushNavigationIntent.memberRemoved(groupId: groupId),
-      'group_dissolved' => PushNavigationIntent.groupDissolved(
-        groupId: groupId,
-      ),
+      'group_dissolved' =>
+        PushNavigationIntent.groupDissolved(groupId: groupId),
       _ => null,
     };
   }

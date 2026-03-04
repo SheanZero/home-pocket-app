@@ -121,11 +121,20 @@ private extension Data {
     willPresent notification: UNNotification,
     withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
   ) {
-    let payload = normalize(userInfo: notification.request.content.userInfo)
-    if !payload.isEmpty {
-      foregroundStreamHandler.emit(payload)
+    if notification.request.trigger is UNPushNotificationTrigger {
+      let payload = normalize(userInfo: notification.request.content.userInfo)
+      if !payload.isEmpty {
+        foregroundStreamHandler.emit(payload)
+      }
+      completionHandler([])
+      return
     }
-    completionHandler([])
+
+    super.userNotificationCenter(
+      center,
+      willPresent: notification,
+      withCompletionHandler: completionHandler
+    )
   }
 
   override func userNotificationCenter(

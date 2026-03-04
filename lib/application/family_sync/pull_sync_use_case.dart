@@ -81,21 +81,18 @@ class PullSyncUseCase {
       final group = activeGroup ?? pendingGroup;
       if (group == null) return const PullSyncResult.noPair();
 
-      // Use server timestamp as cursor (not client clock)
-      final lastSyncCursor = group.lastSyncAt?.millisecondsSinceEpoch;
-      final sinceSeconds = lastSyncCursor != null
-          ? lastSyncCursor ~/ 1000
-          : null;
+      // Use server timestamp as cursor (ISO 8601, not client clock)
+      final sinceIso = group.lastSyncAt?.toUtc().toIso8601String();
 
       // Pull messages from server
-      final response = await _apiClient.pullSync(since: sinceSeconds);
+      final response = await _apiClient.pullSync(since: sinceIso);
       final messages =
           (response['messages'] as List?)?.cast<Map<String, dynamic>>() ?? [];
 
       if (messages.isEmpty) return const PullSyncResult.noNewData();
 
       var appliedCount = 0;
-      int? lastServerTimestamp;
+      DateTime? lastServerTimestamp;
       final ackedMessageIds = <String>[];
       final deviceId = await _keyManager.getDeviceId();
 
@@ -103,7 +100,7 @@ class PullSyncUseCase {
         final messageId = msg['messageId'] as String;
         final fromDeviceId = msg['fromDeviceId'] as String?;
         final payload = msg['payload'] as String;
-        final createdAt = msg['createdAt'] as int;
+        final createdAt = DateTime.parse(msg['createdAt'] as String);
         final payloadType = E2EEService.detectPayloadType(payload);
 
         switch (payloadType) {
@@ -156,9 +153,7 @@ class PullSyncUseCase {
       // Update sync cursor using SERVER's createdAt, NOT DateTime.now()
       // This avoids clock skew causing missed messages.
       if (lastServerTimestamp != null) {
-        await _groupRepo.updateLastSyncTime(
-          DateTime.fromMillisecondsSinceEpoch(lastServerTimestamp * 1000),
-        );
+        await _groupRepo.updateLastSyncTime(lastServerTimestamp);
       }
 
       // Drain offline queue

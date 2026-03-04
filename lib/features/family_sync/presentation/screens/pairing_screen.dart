@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
@@ -7,6 +9,7 @@ import '../../domain/models/sync_status.dart';
 import '../../use_cases/create_group_use_case.dart';
 import '../../use_cases/join_group_use_case.dart';
 import '../providers/group_providers.dart';
+import '../providers/repository_providers.dart';
 import '../providers/sync_providers.dart';
 import 'waiting_approval_screen.dart';
 import '../widgets/pair_code_display.dart';
@@ -33,7 +36,19 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
   @override
   void initState() {
     super.initState();
+    unawaited(_ensureSyncNotificationsReady());
     _createGroup();
+  }
+
+  Future<void> _ensureSyncNotificationsReady() async {
+    try {
+      await ref.read(syncTriggerServiceProvider).initialize();
+    } catch (error) {
+      if (!mounted) return;
+      debugPrint(
+        'PairingScreen: failed to initialize sync notifications: $error',
+      );
+    }
   }
 
   Future<void> _createGroup() async {
@@ -92,6 +107,10 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Keep sync and push services alive while the pairing flow is visible.
+    ref.watch(syncTriggerServiceProvider);
+    ref.watch(pushNotificationServiceProvider);
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(

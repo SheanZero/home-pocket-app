@@ -42,18 +42,15 @@ class CreateGroupUseCase {
     required KeyManager keyManager,
     required GroupRepository groupRepository,
     required E2EEService e2eeService,
-    Future<String?> Function()? getPushToken,
   }) : _apiClient = apiClient,
        _keyManager = keyManager,
        _groupRepository = groupRepository,
-       _e2eeService = e2eeService,
-       _getPushToken = getPushToken;
+       _e2eeService = e2eeService;
 
   final RelayApiClient _apiClient;
   final KeyManager _keyManager;
   final GroupRepository _groupRepository;
   final E2EEService _e2eeService;
-  final Future<String?> Function()? _getPushToken;
 
   Future<CreateGroupResult> execute(String bookId) async {
     try {
@@ -67,7 +64,6 @@ class CreateGroupUseCase {
         publicKey: identity.publicKey,
         deviceName: Platform.localHostname,
         platform: Platform.isIOS ? 'ios' : 'android',
-        pushToken: await _getPushToken?.call(),
       );
 
       final response = await _apiClient.createGroup(bookId: bookId);
@@ -75,11 +71,18 @@ class CreateGroupUseCase {
       final groupId = response['groupId'] as String?;
       final inviteCode = response['inviteCode'] as String?;
       final expiresAt = response['expiresAt'] as int?;
+      final responseBookId = response['bookId'] as String?;
 
       if (groupId == null || inviteCode == null || expiresAt == null) {
         return CreateGroupResult.error(
           'Server returned incomplete response: '
           'groupId=$groupId, inviteCode=$inviteCode, expiresAt=$expiresAt',
+        );
+      }
+
+      if (responseBookId != null && responseBookId != bookId) {
+        return CreateGroupResult.error(
+          'Server bookId mismatch: expected $bookId, got $responseBookId',
         );
       }
       final groupKey = _e2eeService.generateGroupKey();

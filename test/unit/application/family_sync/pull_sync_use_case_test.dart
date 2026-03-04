@@ -91,7 +91,7 @@ void main() {
                 'toDeviceId': 'member-1',
                 'p': 'encrypted-box',
               }),
-              'createdAt': 1,
+              'createdAt': '2026-01-01T00:00:01.000Z',
             },
           ],
         },
@@ -139,7 +139,7 @@ void main() {
               't': 'D',
               'p': 'encrypted-secretbox',
             }),
-            'createdAt': 2,
+            'createdAt': '2026-01-01T00:00:02.000Z',
           },
         ],
       },
@@ -164,7 +164,7 @@ void main() {
     expect(appliedOperations, hasLength(1));
     verify(
       () => groupRepository.updateLastSyncTime(
-        DateTime.fromMillisecondsSinceEpoch(2000),
+        DateTime.parse('2026-01-01T00:00:02.000Z'),
       ),
     ).called(1);
     verify(() => apiClient.ackSync(messageIds: ['msg-2'])).called(1);
@@ -193,7 +193,7 @@ void main() {
               't': 'D',
               'p': 'encrypted-secretbox',
             }),
-            'createdAt': 3,
+            'createdAt': '2026-01-01T00:00:03.000Z',
           },
         ],
       },
@@ -253,7 +253,7 @@ void main() {
               't': 'D',
               'p': 'encrypted-secretbox',
             }),
-            'createdAt': 4,
+            'createdAt': '2026-01-01T00:00:04.000Z',
           },
         ],
       },

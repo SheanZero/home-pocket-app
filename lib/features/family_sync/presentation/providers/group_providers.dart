@@ -12,23 +12,19 @@ import 'repository_providers.dart';
 import 'sync_providers.dart';
 
 final createGroupUseCaseProvider = Provider<CreateGroupUseCase>((ref) {
-  final pushNotificationService = ref.watch(pushNotificationServiceProvider);
   return CreateGroupUseCase(
     apiClient: ref.watch(relayApiClientProvider),
     keyManager: ref.watch(keyManagerProvider),
     groupRepository: ref.watch(groupRepositoryProvider),
     e2eeService: ref.watch(e2eeServiceProvider),
-    getPushToken: pushNotificationService.getToken,
   );
 });
 
 final joinGroupUseCaseProvider = Provider<JoinGroupUseCase>((ref) {
-  final pushNotificationService = ref.watch(pushNotificationServiceProvider);
   return JoinGroupUseCase(
     apiClient: ref.watch(relayApiClientProvider),
     keyManager: ref.watch(keyManagerProvider),
     groupRepository: ref.watch(groupRepositoryProvider),
-    getPushToken: pushNotificationService.getToken,
   );
 });
 

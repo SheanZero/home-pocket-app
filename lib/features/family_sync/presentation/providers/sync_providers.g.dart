@@ -64,7 +64,7 @@ final fullSyncUseCaseProvider = AutoDisposeProvider<FullSyncUseCase>.internal(
 // ignore: unused_element
 typedef FullSyncUseCaseRef = AutoDisposeProviderRef<FullSyncUseCase>;
 String _$syncTriggerServiceHash() =>
-    r'842082669630dd38f21d25d2af465f0b76a512f8';
+    r'66d1aaacf0ccd8a323a83f794b72eed422139225';
 
 /// SyncTriggerService provider.
 ///

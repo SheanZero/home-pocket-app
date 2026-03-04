@@ -12,6 +12,8 @@ _SyncMessage _$SyncMessageFromJson(Map<String, dynamic> json) => _SyncMessage(
   payload: json['payload'] as String,
   vectorClock: Map<String, int>.from(json['vectorClock'] as Map),
   operationCount: (json['operationCount'] as num).toInt(),
+  chunkIndex: (json['chunkIndex'] as num).toInt(),
+  totalChunks: (json['totalChunks'] as num).toInt(),
   createdAt: DateTime.parse(json['createdAt'] as String),
 );
 
@@ -22,5 +24,7 @@ Map<String, dynamic> _$SyncMessageToJson(_SyncMessage instance) =>
       'payload': instance.payload,
       'vectorClock': instance.vectorClock,
       'operationCount': instance.operationCount,
+      'chunkIndex': instance.chunkIndex,
+      'totalChunks': instance.totalChunks,
       'createdAt': instance.createdAt.toIso8601String(),
     };
