@@ -60,6 +60,8 @@ SyncTriggerService syncTriggerService(Ref ref) {
     pullSync: ref.watch(pullSyncUseCaseProvider),
     pushSync: ref.watch(pushSyncUseCaseProvider),
     queueManager: ref.watch(syncQueueManagerProvider),
+    keyManager: ref.watch(keyManagerProvider),
+    relayApiClient: ref.watch(relayApiClientProvider),
     pushNotificationService: ref.watch(pushNotificationServiceProvider),
   );
 

@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../generated/app_localizations.dart';
+import '../../domain/models/sync_status.dart';
 import '../../../../infrastructure/sync/push_notification_service.dart';
 import '../providers/notification_navigation_provider.dart';
+import '../providers/sync_providers.dart';
 import '../screens/group_management_screen.dart';
 import '../screens/member_approval_screen.dart';
+
+typedef NotificationRouteBuilder =
+    Widget Function(BuildContext context, String? groupId);
 
 class FamilySyncNotificationRouteListener extends ConsumerStatefulWidget {
   const FamilySyncNotificationRouteListener({
@@ -15,8 +21,8 @@ class FamilySyncNotificationRouteListener extends ConsumerStatefulWidget {
   });
 
   final Widget child;
-  final WidgetBuilder? buildMemberApprovalScreen;
-  final WidgetBuilder? buildGroupManagementScreen;
+  final NotificationRouteBuilder? buildMemberApprovalScreen;
+  final NotificationRouteBuilder? buildGroupManagementScreen;
 
   @override
   ConsumerState<FamilySyncNotificationRouteListener> createState() =>
@@ -44,18 +50,41 @@ class _FamilySyncNotificationRouteListenerState
   }
 
   void _scheduleNavigation(PushNavigationIntent intent) {
-    final builder = switch (intent.destination) {
-      PushNavigationDestination.memberApproval =>
-        widget.buildMemberApprovalScreen ?? (_) => const MemberApprovalScreen(),
-      PushNavigationDestination.groupManagement =>
-        widget.buildGroupManagementScreen ??
-            (_) => const GroupManagementScreen(),
-    };
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.mounted) return;
       ref.read(familySyncNotificationNavigationProvider.notifier).clear();
-      Navigator.of(context).push(MaterialPageRoute<void>(builder: builder));
+      switch (intent.destination) {
+        case PushNavigationDestination.memberApproval:
+          final builder =
+              widget.buildMemberApprovalScreen ??
+              (context, groupId) => MemberApprovalScreen(groupId: groupId);
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (context) => builder(context, intent.groupId),
+            ),
+          );
+          break;
+        case PushNavigationDestination.groupManagement:
+          final builder =
+              widget.buildGroupManagementScreen ??
+              (context, groupId) => GroupManagementScreen(groupId: groupId);
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (context) => builder(context, intent.groupId),
+            ),
+          );
+          break;
+        case PushNavigationDestination.memberRemoved:
+        case PushNavigationDestination.groupDissolved:
+          ref
+              .read(syncStatusNotifierProvider.notifier)
+              .updateStatus(SyncStatus.unpaired);
+          Navigator.of(context).popUntil((route) => route.isFirst);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(S.of(context).familySyncStatusUnpaired)),
+          );
+          break;
+      }
     });
   }
 }

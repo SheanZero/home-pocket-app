@@ -730,6 +730,11 @@ class SJa extends S {
       '家族メンバーがグループ参加を希望しています。続行するにはリクエストを確認してください。';
 
   @override
+  String familySyncJoinRequestWithName(String deviceName) {
+    return '$deviceName があなたの家計簿に参加したいです';
+  }
+
+  @override
   String get familySyncMemberConfirmedNotificationTitle => 'グループの準備ができました';
 
   @override

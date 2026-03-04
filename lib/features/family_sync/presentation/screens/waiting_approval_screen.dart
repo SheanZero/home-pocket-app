@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/sync/sync_trigger_service.dart';
 import '../../domain/models/group_info.dart';
 import '../providers/repository_providers.dart';
+import '../providers/sync_providers.dart';
+import 'group_management_screen.dart';
 import '../widgets/member_list_tile.dart';
 import '../widgets/status_badge.dart';
 
@@ -21,11 +26,28 @@ class WaitingApprovalScreen extends ConsumerStatefulWidget {
 class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
   GroupInfo? _group;
   bool _isLoading = true;
+  StreamSubscription<SyncTriggerEvent>? _eventSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadGroup();
+    _listenForSyncEvents();
+  }
+
+  void _listenForSyncEvents() {
+    final syncTrigger = ref.read(syncTriggerServiceProvider);
+    _eventSubscription = syncTrigger.events.listen((event) {
+      if (!mounted) return;
+      if (event.type != SyncTriggerEventType.memberConfirmed) return;
+      if (event.groupId != null && event.groupId != widget.groupId) return;
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => GroupManagementScreen(groupId: widget.groupId),
+        ),
+      );
+    });
   }
 
   Future<void> _loadGroup() async {
@@ -38,6 +60,12 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
       _group = group;
       _isLoading = false;
     });
+  }
+
+  @override
+  void dispose() {
+    unawaited(_eventSubscription?.cancel());
+    super.dispose();
   }
 
   @override

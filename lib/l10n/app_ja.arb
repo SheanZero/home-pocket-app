@@ -495,6 +495,15 @@
   "@familySyncJoinRequestNotificationBody": {
     "description": "Body text for a foreground notification about a new join request"
   },
+  "familySyncJoinRequestWithName": "{deviceName} があなたの家計簿に参加したいです",
+  "@familySyncJoinRequestWithName": {
+    "description": "Body text for a foreground notification about a new join request with device name",
+    "placeholders": {
+      "deviceName": {
+        "type": "String"
+      }
+    }
+  },
   "familySyncMemberConfirmedNotificationTitle": "グループの準備ができました",
   "@familySyncMemberConfirmedNotificationTitle": {
     "description": "Title for a foreground notification after a member is confirmed"

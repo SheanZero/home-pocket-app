@@ -140,6 +140,7 @@ void main() {
   late PushNotificationService service;
   late int memberConfirmedCalls;
   late int joinRequestCalls;
+  const localDeviceId = 'local-device-id';
 
   setUp(() {
     apiClient = MockRelayApiClient();
@@ -161,6 +162,7 @@ void main() {
       localNotificationClient: localNotificationClient,
       firebaseInitializer: () async {},
       localeProvider: () => const Locale('en'),
+      currentDeviceIdLoader: () async => localDeviceId,
     );
     service.registerHandlers(
       onMemberConfirmed: (_) async {
@@ -203,9 +205,12 @@ void main() {
   );
 
   test(
-    'foreground join_request shows a local notification without navigation',
+    'foreground join_request emits navigation intent for member approval',
     () async {
       await service.initialize();
+
+      final intents = <PushNavigationIntent>[];
+      service.navigationIntents.listen(intents.add);
 
       await messagingClient.emitForegroundMessage({
         'type': 'join_request',
@@ -213,12 +218,10 @@ void main() {
       });
 
       expect(joinRequestCalls, 1);
-      expect(localNotificationClient.shownNotifications, hasLength(1));
-      expect(
-        localNotificationClient.shownNotifications.single.title,
-        'New Join Request',
-      );
-      expect(service.takePendingNavigationIntent(), isNull);
+      expect(localNotificationClient.shownNotifications, isEmpty);
+      expect(intents, [
+        const PushNavigationIntent.memberApproval(groupId: 'group-1'),
+      ]);
     },
   );
 
@@ -256,6 +259,119 @@ void main() {
     },
   );
 
+  test('routes member_left to onMemberLeft handler', () async {
+    await service.dispose();
+    await messagingClient.dispose();
+
+    messagingClient = FakePushMessagingClient(initialToken: 'token-1');
+    service = PushNotificationService(
+      apiClient: apiClient,
+      messagingClient: messagingClient,
+      localNotificationClient: localNotificationClient,
+      firebaseInitializer: () async {},
+      localeProvider: () => const Locale('en'),
+    );
+
+    final completer = Completer<Map<String, dynamic>>();
+    service.registerHandlers(
+      onMemberConfirmed: (_) async {},
+      onSyncAvailable: (_) async {},
+      onJoinRequest: (_) async {},
+      onMemberLeft: (data) async {
+        completer.complete(data);
+      },
+    );
+
+    await service.handleMessage({
+      'type': 'member_left',
+      'groupId': 'group-1',
+      'deviceId': 'device-1',
+      'reason': 'left',
+    });
+
+    final data = await completer.future.timeout(const Duration(seconds: 1));
+    expect(data['type'], 'member_left');
+    expect(data['groupId'], 'group-1');
+  });
+
+  test('routes group_dissolved to onGroupDissolved handler', () async {
+    await service.dispose();
+    await messagingClient.dispose();
+
+    messagingClient = FakePushMessagingClient(initialToken: 'token-1');
+    service = PushNotificationService(
+      apiClient: apiClient,
+      messagingClient: messagingClient,
+      localNotificationClient: localNotificationClient,
+      firebaseInitializer: () async {},
+      localeProvider: () => const Locale('en'),
+    );
+
+    final completer = Completer<Map<String, dynamic>>();
+    service.registerHandlers(
+      onMemberConfirmed: (_) async {},
+      onSyncAvailable: (_) async {},
+      onJoinRequest: (_) async {},
+      onGroupDissolved: (data) async {
+        completer.complete(data);
+      },
+    );
+
+    await service.handleMessage({
+      'type': 'group_dissolved',
+      'groupId': 'group-1',
+    });
+
+    final data = await completer.future.timeout(const Duration(seconds: 1));
+    expect(data['type'], 'group_dissolved');
+    expect(data['groupId'], 'group-1');
+  });
+
+  test('member_left for self removal publishes memberRemoved intent', () async {
+    await service.initialize();
+
+    await service.handleNotificationTap({
+      'type': 'member_left',
+      'groupId': 'group-1',
+      'deviceId': localDeviceId,
+      'reason': 'removed',
+    });
+
+    expect(
+      service.takePendingNavigationIntent(),
+      const PushNavigationIntent.memberRemoved(groupId: 'group-1'),
+    );
+  });
+
+  test('group_dissolved publishes groupDissolved intent', () async {
+    await service.initialize();
+
+    await service.handleNotificationTap({
+      'type': 'group_dissolved',
+      'groupId': 'group-1',
+    });
+
+    expect(
+      service.takePendingNavigationIntent(),
+      const PushNavigationIntent.groupDissolved(groupId: 'group-1'),
+    );
+  });
+
+  test(
+    'previewForegroundNotification uses deviceName for join request body',
+    () {
+      final preview = service.previewForegroundNotification({
+        'type': 'join_request',
+        'groupId': 'group-1',
+        'deviceName': 'Alice iPhone',
+      });
+
+      expect(preview, isNotNull);
+      expect(preview!.title, 'New Join Request');
+      expect(preview.body, contains('Alice iPhone'));
+    },
+  );
+
   test(
     'initialize supports native APNs messaging without Firebase bootstrap',
     () async {
@@ -267,6 +383,7 @@ void main() {
         firebaseInitializer: null,
         localeProvider: () => const Locale('en'),
         pushPlatform: 'apns',
+        currentDeviceIdLoader: () async => localDeviceId,
       );
       service.registerHandlers(
         onMemberConfirmed: (_) async {},

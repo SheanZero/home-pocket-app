@@ -1461,6 +1461,12 @@ abstract class S {
   /// **'A family member wants to join your group. Review the request to continue.'**
   String get familySyncJoinRequestNotificationBody;
 
+  /// Body text for a foreground notification about a new join request with device name
+  ///
+  /// In en, this message translates to:
+  /// **'{deviceName} wants to join your family ledger'**
+  String familySyncJoinRequestWithName(String deviceName);
+
   /// Title for a foreground notification after a member is confirmed
   ///
   /// In en, this message translates to:

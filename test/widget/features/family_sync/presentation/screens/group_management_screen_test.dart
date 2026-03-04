@@ -106,4 +106,47 @@ void main() {
     );
     expect(find.text('Deactivate Group'), findsOneWidget);
   });
+
+  testWidgets('uses explicit groupId to load the target group', (tester) async {
+    when(() => groupRepository.getGroupById('group-42')).thenAnswer(
+      (_) async => GroupInfo(
+        groupId: 'group-42',
+        bookId: 'book-42',
+        status: GroupStatus.active,
+        inviteCode: 'INV999',
+        role: 'owner',
+        groupKey: 'group-key',
+        members: const [
+          GroupMember(
+            deviceId: 'owner-1',
+            publicKey: 'pk-owner',
+            deviceName: 'Owner phone',
+            role: 'owner',
+            status: 'active',
+          ),
+        ],
+        createdAt: DateTime(2026, 3, 1),
+        confirmedAt: DateTime(2026, 3, 1),
+      ),
+    );
+
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        const GroupManagementScreen(groupId: 'group-42'),
+        overrides: [
+          groupRepositoryProvider.overrideWithValue(groupRepository),
+          leaveGroupUseCaseProvider.overrideWithValue(leaveGroupUseCase),
+          deactivateGroupUseCaseProvider.overrideWithValue(
+            deactivateGroupUseCase,
+          ),
+          removeMemberUseCaseProvider.overrideWithValue(removeMemberUseCase),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    verify(() => groupRepository.getGroupById('group-42')).called(1);
+    verifyNever(() => groupRepository.getActiveGroup());
+    expect(find.text('Owner phone', skipOffstage: false), findsOneWidget);
+  });
 }

@@ -127,8 +127,15 @@ class PullSyncUseCase {
               encryptedPayload: payload,
               groupKeyBase64: group.groupKey!,
             );
-            final operations = (jsonDecode(plaintext) as List)
-                .map((operation) => operation as Map<String, dynamic>)
+            final decoded = jsonDecode(plaintext);
+            final rawOperations = decoded is Map<String, dynamic>
+                ? (decoded['operations'] as List? ?? const [])
+                : decoded as List;
+            final operations = rawOperations
+                .map(
+                  (operation) =>
+                      _normalizeOperation(operation as Map<String, dynamic>),
+                )
                 .toList();
             await _applyOperations(operations);
             appliedCount += operations.length;
@@ -206,5 +213,35 @@ class PullSyncUseCase {
       }
     }
     return null;
+  }
+
+  Map<String, dynamic> _normalizeOperation(Map<String, dynamic> operation) {
+    final normalized = Map<String, dynamic>.from(operation);
+    final op = normalized['op'] as String?;
+    if (op == 'insert') {
+      normalized['op'] = 'create';
+    }
+
+    final entityType = normalized['entityType'] as String?;
+    final table = normalized['table'] as String?;
+    if (entityType == null && table != null) {
+      normalized['entityType'] = switch (table) {
+        'transactions' => 'bill',
+        _ => table,
+      };
+      normalized.remove('table');
+    }
+
+    if (!normalized.containsKey('entityId')) {
+      final data = normalized['data'];
+      if (data is Map<String, dynamic> && data['id'] is String) {
+        normalized['entityId'] = data['id'];
+      } else if (normalized['id'] is String) {
+        normalized['entityId'] = normalized['id'];
+      }
+    }
+    normalized.remove('id');
+
+    return normalized;
   }
 }

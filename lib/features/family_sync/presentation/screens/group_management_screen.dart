@@ -19,7 +19,9 @@ import '../widgets/partner_device_tile.dart';
 import '../widgets/sync_status_badge.dart';
 
 class GroupManagementScreen extends ConsumerStatefulWidget {
-  const GroupManagementScreen({super.key});
+  const GroupManagementScreen({super.key, this.groupId});
+
+  final String? groupId;
 
   @override
   ConsumerState<GroupManagementScreen> createState() =>
@@ -38,7 +40,9 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
 
   Future<void> _loadGroup() async {
     setState(() => _isLoading = true);
-    final group = await ref.read(groupRepositoryProvider).getActiveGroup();
+    final group = widget.groupId != null
+        ? await ref.read(groupRepositoryProvider).getGroupById(widget.groupId!)
+        : await ref.read(groupRepositoryProvider).getActiveGroup();
     if (!mounted) return;
     setState(() {
       _activeGroup = group;
@@ -241,7 +245,8 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
-                          builder: (_) => const MemberApprovalScreen(),
+                          builder: (_) =>
+                              MemberApprovalScreen(groupId: group.groupId),
                         ),
                       );
                     },

@@ -13,8 +13,14 @@ import 'relay_api_client.dart';
 
 typedef PushMessageHandler = Future<void> Function(Map<String, dynamic> data);
 typedef FirebaseInitializer = Future<void> Function();
+typedef CurrentDeviceIdLoader = Future<String?> Function();
 
-enum PushNavigationDestination { memberApproval, groupManagement }
+enum PushNavigationDestination {
+  memberApproval,
+  groupManagement,
+  memberRemoved,
+  groupDissolved,
+}
 
 class PushNavigationIntent {
   const PushNavigationIntent._({required this.destination, this.groupId});
@@ -28,6 +34,18 @@ class PushNavigationIntent {
   const PushNavigationIntent.groupManagement({String? groupId})
     : this._(
         destination: PushNavigationDestination.groupManagement,
+        groupId: groupId,
+      );
+
+  const PushNavigationIntent.memberRemoved({String? groupId})
+    : this._(
+        destination: PushNavigationDestination.memberRemoved,
+        groupId: groupId,
+      );
+
+  const PushNavigationIntent.groupDissolved({String? groupId})
+    : this._(
+        destination: PushNavigationDestination.groupDissolved,
         groupId: groupId,
       );
 
@@ -178,6 +196,7 @@ class PushNotificationService {
     FirebaseInitializer? firebaseInitializer,
     Locale Function()? localeProvider,
     String? pushPlatform,
+    CurrentDeviceIdLoader? currentDeviceIdLoader,
   }) : _apiClient = apiClient,
        _messagingClient = messagingClient ?? FirebasePushMessagingClient(),
        _localNotificationClient =
@@ -188,7 +207,8 @@ class PushNotificationService {
        _localeProvider =
            localeProvider ??
            (() => WidgetsBinding.instance.platformDispatcher.locale),
-       _pushPlatform = pushPlatform;
+       _pushPlatform = pushPlatform,
+       _currentDeviceIdLoader = currentDeviceIdLoader;
 
   final RelayApiClient _apiClient;
   final PushMessagingClient _messagingClient;
@@ -196,6 +216,7 @@ class PushNotificationService {
   final FirebaseInitializer? _firebaseInitializer;
   final Locale Function() _localeProvider;
   final String? _pushPlatform;
+  final CurrentDeviceIdLoader? _currentDeviceIdLoader;
 
   final _navigationController =
       StreamController<PushNavigationIntent>.broadcast();
@@ -203,12 +224,15 @@ class PushNotificationService {
   PushMessageHandler? _onMemberConfirmed;
   PushMessageHandler? _onSyncAvailable;
   PushMessageHandler? _onJoinRequest;
+  PushMessageHandler? _onMemberLeft;
+  PushMessageHandler? _onGroupDissolved;
 
   StreamSubscription<String>? _tokenRefreshSubscription;
   StreamSubscription<Map<String, dynamic>>? _foregroundSubscription;
   StreamSubscription<Map<String, dynamic>>? _openedAppSubscription;
 
   PushNavigationIntent? _pendingNavigationIntent;
+  String? _currentDeviceId;
   bool _initialized = false;
 
   Stream<PushNavigationIntent> get navigationIntents =>
@@ -218,10 +242,14 @@ class PushNotificationService {
     PushMessageHandler? onMemberConfirmed,
     PushMessageHandler? onSyncAvailable,
     PushMessageHandler? onJoinRequest,
+    PushMessageHandler? onMemberLeft,
+    PushMessageHandler? onGroupDissolved,
   }) {
     _onMemberConfirmed = onMemberConfirmed;
     _onSyncAvailable = onSyncAvailable;
     _onJoinRequest = onJoinRequest;
+    _onMemberLeft = onMemberLeft;
+    _onGroupDissolved = onGroupDissolved;
   }
 
   Future<String?> initialize() async {
@@ -235,6 +263,9 @@ class PushNotificationService {
       }
       if (_firebaseInitializer != null) {
         await _firebaseInitializer();
+      }
+      if (_currentDeviceIdLoader != null) {
+        _currentDeviceId = await _currentDeviceIdLoader();
       }
       await _localNotificationClient.initialize(handleNotificationTap);
       await _messagingClient.requestPermission();
@@ -361,11 +392,15 @@ class PushNotificationService {
       case 'join_request':
       case 'pair_request':
         await _onJoinRequest?.call(data);
-        if (source == _PushMessageSource.foreground) {
-          await _showForegroundNotification(data);
-        } else if (source != _PushMessageSource.direct) {
+        if (source != _PushMessageSource.direct) {
           await handleNotificationTap(data);
         }
+        break;
+      case 'member_left':
+        await _onMemberLeft?.call(data);
+        break;
+      case 'group_dissolved':
+        await _onGroupDissolved?.call(data);
         break;
       default:
         if (kDebugMode) {
@@ -375,40 +410,68 @@ class PushNotificationService {
   }
 
   Future<void> _showForegroundNotification(Map<String, dynamic> data) async {
+    final notification = previewForegroundNotification(data);
+    if (notification == null) return;
+
+    await _localNotificationClient.show(
+      id: notification.id,
+      title: notification.title,
+      body: notification.body,
+      payload: notification.payload,
+    );
+  }
+
+  @visibleForTesting
+  ShownLocalNotification? previewForegroundNotification(
+    Map<String, dynamic> data,
+  ) {
     final l10n = lookupS(_localeProvider());
     final type = data['type'] as String?;
 
     switch (type) {
       case 'join_request':
       case 'pair_request':
-        await _localNotificationClient.show(
+        final deviceName = data['deviceName'] as String?;
+        return ShownLocalNotification(
           id: 1001,
           title: l10n.familySyncNewRequest,
-          body: l10n.familySyncJoinRequestNotificationBody,
+          body: deviceName != null && deviceName.isNotEmpty
+              ? l10n.familySyncJoinRequestWithName(deviceName)
+              : l10n.familySyncJoinRequestNotificationBody,
           payload: data,
         );
-        break;
       case 'member_confirmed':
       case 'pair_confirmed':
-        await _localNotificationClient.show(
+        return ShownLocalNotification(
           id: 1002,
           title: l10n.familySyncMemberConfirmedNotificationTitle,
           body: l10n.familySyncMemberConfirmedNotificationBody,
           payload: data,
         );
-        break;
+      default:
+        return null;
     }
   }
 
   PushNavigationIntent? _intentForMessage(Map<String, dynamic> data) {
     final type = data['type'] as String?;
     final groupId = data['groupId'] as String?;
+    final deviceId = data['deviceId'] as String?;
+    final reason = data['reason'] as String?;
 
     return switch (type) {
       'join_request' ||
       'pair_request' => PushNavigationIntent.memberApproval(groupId: groupId),
       'member_confirmed' || 'pair_confirmed' =>
         PushNavigationIntent.groupManagement(groupId: groupId),
+      'member_left'
+          when deviceId != null &&
+              deviceId == _currentDeviceId &&
+              reason == 'removed' =>
+        PushNavigationIntent.memberRemoved(groupId: groupId),
+      'group_dissolved' => PushNavigationIntent.groupDissolved(
+        groupId: groupId,
+      ),
       _ => null,
     };
   }

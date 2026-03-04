@@ -65,6 +65,7 @@ class PushSyncUseCase {
   Future<PushSyncResult> execute({
     required List<Map<String, dynamic>> operations,
     required Map<String, int> vectorClock,
+    String syncType = 'incremental',
   }) async {
     try {
       final group = await _groupRepo.getActiveGroup();
@@ -73,8 +74,12 @@ class PushSyncUseCase {
         return const PushSyncResult.error('Group key missing');
       }
 
-      // Serialize operations
-      final payload = jsonEncode(operations);
+      final payload = jsonEncode({
+        'syncType': syncType,
+        'syncId': _uuid.v4(),
+        'operations': operations,
+        'vectorClock': vectorClock,
+      });
 
       // E2EE encrypt
       final encryptedPayload = _e2eeService.encryptForGroup(

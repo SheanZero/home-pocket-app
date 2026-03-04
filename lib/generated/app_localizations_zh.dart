@@ -727,6 +727,11 @@ class SZh extends S {
   String get familySyncJoinRequestNotificationBody => '有家庭成员想加入你的分组。请查看请求后继续。';
 
   @override
+  String familySyncJoinRequestWithName(String deviceName) {
+    return '$deviceName 想要加入你的家庭账本';
+  }
+
+  @override
   String get familySyncMemberConfirmedNotificationTitle => '分组已就绪';
 
   @override

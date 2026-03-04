@@ -810,6 +810,15 @@
   "@familySyncJoinRequestNotificationBody": {
     "description": "Body text for a foreground notification about a new join request"
   },
+  "familySyncJoinRequestWithName": "{deviceName} wants to join your family ledger",
+  "@familySyncJoinRequestWithName": {
+    "description": "Body text for a foreground notification about a new join request with device name",
+    "placeholders": {
+      "deviceName": {
+        "type": "String"
+      }
+    }
+  },
   "familySyncMemberConfirmedNotificationTitle": "Group Ready",
   "@familySyncMemberConfirmedNotificationTitle": {
     "description": "Title for a foreground notification after a member is confirmed"

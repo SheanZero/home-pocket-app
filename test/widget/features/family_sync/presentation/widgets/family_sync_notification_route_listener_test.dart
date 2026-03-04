@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:home_pocket/features/family_sync/domain/models/sync_status.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/family_sync/presentation/providers/sync_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/widgets/family_sync_notification_route_listener.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
@@ -9,6 +12,15 @@ import 'package:mocktail/mocktail.dart';
 import '../../../../../helpers/test_localizations.dart';
 
 class MockRelayApiClient extends Mock implements RelayApiClient {}
+
+class TestSyncStatusNotifier extends SyncStatusNotifier {
+  TestSyncStatusNotifier(this.initialState);
+
+  final SyncStatus initialState;
+
+  @override
+  SyncStatus build() => initialState;
+}
 
 class FakePushMessagingClient implements PushMessagingClient {
   @override
@@ -60,9 +72,9 @@ void main() {
     await tester.pumpWidget(
       createLocalizedWidget(
         FamilySyncNotificationRouteListener(
-          buildMemberApprovalScreen: (_) =>
+          buildMemberApprovalScreen: (context, groupId) =>
               const Scaffold(body: Text('approval-screen')),
-          buildGroupManagementScreen: (_) =>
+          buildGroupManagementScreen: (context, groupId) =>
               const Scaffold(body: Text('group-management-screen')),
           child: const Scaffold(body: Text('home')),
         ),
@@ -77,5 +89,141 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('approval-screen'), findsOneWidget);
+  });
+
+  testWidgets('passes groupId from push intent to member approval builder', (
+    tester,
+  ) async {
+    final service = PushNotificationService(
+      apiClient: MockRelayApiClient(),
+      messagingClient: FakePushMessagingClient(),
+      localNotificationClient: FakeLocalNotificationClient(),
+      firebaseInitializer: () async {},
+      localeProvider: () => const Locale('en'),
+    );
+    String? capturedGroupId;
+
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        FamilySyncNotificationRouteListener(
+          buildMemberApprovalScreen: (context, groupId) {
+            capturedGroupId = groupId;
+            return const Scaffold(body: Text('approval-screen'));
+          },
+          buildGroupManagementScreen: (context, groupId) =>
+              const Scaffold(body: Text('group-management-screen')),
+          child: const Scaffold(body: Text('home')),
+        ),
+        overrides: [pushNotificationServiceProvider.overrideWithValue(service)],
+      ),
+    );
+
+    await service.handleNotificationTap({
+      'type': 'join_request',
+      'groupId': 'group-123',
+    });
+    await tester.pumpAndSettle();
+
+    expect(capturedGroupId, 'group-123');
+    expect(find.text('approval-screen'), findsOneWidget);
+  });
+
+  testWidgets('passes groupId from push intent to group management builder', (
+    tester,
+  ) async {
+    final service = PushNotificationService(
+      apiClient: MockRelayApiClient(),
+      messagingClient: FakePushMessagingClient(),
+      localNotificationClient: FakeLocalNotificationClient(),
+      firebaseInitializer: () async {},
+      localeProvider: () => const Locale('en'),
+    );
+    String? capturedGroupId;
+
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        FamilySyncNotificationRouteListener(
+          buildMemberApprovalScreen: (context, groupId) =>
+              const Scaffold(body: Text('approval-screen')),
+          buildGroupManagementScreen: (context, groupId) {
+            capturedGroupId = groupId;
+            return const Scaffold(body: Text('group-management-screen'));
+          },
+          child: const Scaffold(body: Text('home')),
+        ),
+        overrides: [pushNotificationServiceProvider.overrideWithValue(service)],
+      ),
+    );
+
+    await service.handleNotificationTap({
+      'type': 'member_confirmed',
+      'groupId': 'group-456',
+    });
+    await tester.pumpAndSettle();
+
+    expect(capturedGroupId, 'group-456');
+    expect(find.text('group-management-screen'), findsOneWidget);
+  });
+
+  testWidgets('pops to root and resets status on groupDissolved intent', (
+    tester,
+  ) async {
+    final service = PushNotificationService(
+      apiClient: MockRelayApiClient(),
+      messagingClient: FakePushMessagingClient(),
+      localNotificationClient: FakeLocalNotificationClient(),
+      firebaseInitializer: () async {},
+      localeProvider: () => const Locale('en'),
+    );
+
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        FamilySyncNotificationRouteListener(
+          child: Scaffold(
+            body: Column(
+              children: [
+                Consumer(
+                  builder: (context, ref, _) =>
+                      Text(ref.watch(syncStatusNotifierProvider).name),
+                ),
+                Builder(
+                  builder: (context) => ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) =>
+                              const Scaffold(body: Text('details-screen')),
+                        ),
+                      );
+                    },
+                    child: const Text('open-details'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        overrides: [
+          pushNotificationServiceProvider.overrideWithValue(service),
+          syncStatusNotifierProvider.overrideWith(
+            () => TestSyncStatusNotifier(SyncStatus.synced),
+          ),
+        ],
+      ),
+    );
+
+    await tester.tap(find.text('open-details'));
+    await tester.pumpAndSettle();
+    expect(find.text('details-screen'), findsOneWidget);
+
+    await service.handleNotificationTap({
+      'type': 'group_dissolved',
+      'groupId': 'group-1',
+    });
+    await tester.pumpAndSettle();
+
+    expect(find.text('details-screen'), findsNothing);
+    expect(find.text('synced'), findsNothing);
+    expect(find.text('unpaired'), findsOneWidget);
   });
 }

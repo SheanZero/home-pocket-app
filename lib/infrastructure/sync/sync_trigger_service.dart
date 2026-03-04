@@ -4,12 +4,20 @@ import 'package:flutter/foundation.dart';
 
 import '../../application/family_sync/pull_sync_use_case.dart';
 import '../../application/family_sync/push_sync_use_case.dart';
+import '../../features/family_sync/domain/models/group_member.dart';
 import '../../features/family_sync/domain/repositories/group_repository.dart';
+import '../crypto/services/key_manager.dart';
 import 'push_notification_service.dart';
+import 'relay_api_client.dart';
 import 'sync_lifecycle_observer.dart';
 import 'sync_queue_manager.dart';
 
-enum SyncTriggerEventType { joinRequest, memberConfirmed }
+enum SyncTriggerEventType {
+  joinRequest,
+  memberConfirmed,
+  memberLeft,
+  groupDissolved,
+}
 
 class SyncTriggerEvent {
   const SyncTriggerEvent._({required this.type, this.groupId});
@@ -19,6 +27,12 @@ class SyncTriggerEvent {
 
   const SyncTriggerEvent.memberConfirmed({String? groupId})
     : this._(type: SyncTriggerEventType.memberConfirmed, groupId: groupId);
+
+  const SyncTriggerEvent.memberLeft({String? groupId})
+    : this._(type: SyncTriggerEventType.memberLeft, groupId: groupId);
+
+  const SyncTriggerEvent.groupDissolved({String? groupId})
+    : this._(type: SyncTriggerEventType.groupDissolved, groupId: groupId);
 
   final SyncTriggerEventType type;
   final String? groupId;
@@ -44,17 +58,23 @@ class SyncTriggerService {
     required PullSyncUseCase pullSync,
     required PushSyncUseCase pushSync,
     required SyncQueueManager queueManager,
+    required KeyManager keyManager,
+    required RelayApiClient relayApiClient,
     required PushNotificationService pushNotificationService,
   }) : _groupRepo = groupRepo,
        _pullSync = pullSync,
        _pushSync = pushSync,
        _queueManager = queueManager,
+       _keyManager = keyManager,
+       _relayApiClient = relayApiClient,
        _pushNotificationService = pushNotificationService;
 
   final GroupRepository _groupRepo;
   final PullSyncUseCase _pullSync;
   final PushSyncUseCase _pushSync;
   final SyncQueueManager _queueManager;
+  final KeyManager _keyManager;
+  final RelayApiClient _relayApiClient;
   final PushNotificationService _pushNotificationService;
   final _eventsController = StreamController<SyncTriggerEvent>.broadcast();
 
@@ -76,6 +96,8 @@ class SyncTriggerService {
       onMemberConfirmed: _handleMemberConfirmed,
       onSyncAvailable: _handleSyncAvailable,
       onJoinRequest: _handleJoinRequest,
+      onMemberLeft: _handleMemberLeft,
+      onGroupDissolved: _handleGroupDissolved,
     );
     await _pushNotificationService.initialize();
   }
@@ -140,7 +162,13 @@ class SyncTriggerService {
   ) async {
     await onTransactionChanged(
       operations: [
-        {'op': 'insert', 'table': 'transactions', 'data': transactionData},
+        {
+          'op': 'create',
+          'entityType': 'bill',
+          'entityId': transactionData['id'] as String,
+          'data': transactionData,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        },
       ],
     );
   }
@@ -151,7 +179,13 @@ class SyncTriggerService {
   ) async {
     await onTransactionChanged(
       operations: [
-        {'op': 'update', 'table': 'transactions', 'data': transactionData},
+        {
+          'op': 'update',
+          'entityType': 'bill',
+          'entityId': transactionData['id'] as String,
+          'data': transactionData,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        },
       ],
     );
   }
@@ -160,7 +194,12 @@ class SyncTriggerService {
   Future<void> onTransactionDeleted(String transactionId) async {
     await onTransactionChanged(
       operations: [
-        {'op': 'delete', 'table': 'transactions', 'id': transactionId},
+        {
+          'op': 'delete',
+          'entityType': 'bill',
+          'entityId': transactionId,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        },
       ],
     );
   }
@@ -176,11 +215,14 @@ class SyncTriggerService {
     }
 
     final groupId = data['groupId'] as String?;
-    if (groupId == null) return;
 
     try {
       final group = await _groupRepo.getPendingGroup();
-      if (group == null || group.groupId != groupId) {
+      if (group == null) {
+        return;
+      }
+
+      if (groupId != null && group.groupId != groupId) {
         if (kDebugMode) {
           debugPrint(
             'SyncTrigger: no matching confirming group found for $groupId',
@@ -189,19 +231,49 @@ class SyncTriggerService {
         return;
       }
 
-      await _groupRepo.confirmLocalGroup(groupId);
+      final effectiveGroupId = groupId ?? group.groupId;
+      await _groupRepo.confirmLocalGroup(effectiveGroupId);
+      await _refreshGroupStatus(effectiveGroupId);
 
       if (kDebugMode) {
         debugPrint(
-          'SyncTrigger: group $groupId confirmed locally, pulling sync',
+          'SyncTrigger: group $effectiveGroupId confirmed locally, pulling sync',
         );
       }
 
       await _pullSync.execute();
-      _publishEvent(SyncTriggerEvent.memberConfirmed(groupId: groupId));
+      _publishEvent(
+        SyncTriggerEvent.memberConfirmed(groupId: effectiveGroupId),
+      );
     } catch (e) {
       if (kDebugMode) {
         debugPrint('SyncTrigger: member confirmation failed: $e');
+      }
+    }
+  }
+
+  Future<void> _refreshGroupStatus(String groupId) async {
+    try {
+      final status = await _relayApiClient.getGroupStatus(groupId);
+      final rawMembers = status['members'] as List?;
+      if (rawMembers == null) return;
+
+      final members = rawMembers
+          .whereType<Map<String, dynamic>>()
+          .map(
+            (member) => GroupMember(
+              deviceId: member['deviceId'] as String,
+              publicKey: member['publicKey'] as String,
+              deviceName: member['deviceName'] as String,
+              role: member['role'] as String,
+              status: member['status'] as String,
+            ),
+          )
+          .toList();
+      await _groupRepo.updateMembers(groupId, members);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('SyncTrigger: group status refresh failed: $e');
       }
     }
   }
@@ -220,6 +292,45 @@ class SyncTriggerService {
   Future<void> _handleJoinRequest(Map<String, dynamic> data) async {
     final groupId = data['groupId'] as String?;
     _publishEvent(SyncTriggerEvent.joinRequest(groupId: groupId));
+  }
+
+  Future<void> _handleMemberLeft(Map<String, dynamic> data) async {
+    final groupId = data['groupId'] as String?;
+    final deviceId = data['deviceId'] as String?;
+    final reason = data['reason'] as String?;
+    if (groupId == null || deviceId == null) return;
+
+    final localDeviceId = await _keyManager.getDeviceId();
+    if (localDeviceId != null &&
+        deviceId == localDeviceId &&
+        reason == 'removed') {
+      await _groupRepo.deactivateGroup(groupId);
+      _publishEvent(SyncTriggerEvent.memberLeft(groupId: groupId));
+      return;
+    }
+
+    final group =
+        await _groupRepo.getGroupById(groupId) ??
+        await _groupRepo.getActiveGroup();
+    if (group == null || group.groupId != groupId) return;
+
+    final updatedMembers = group.members
+        .where((member) => member.deviceId != deviceId)
+        .toList();
+    await _groupRepo.updateMembers(groupId, updatedMembers);
+    _publishEvent(SyncTriggerEvent.memberLeft(groupId: groupId));
+  }
+
+  Future<void> _handleGroupDissolved(Map<String, dynamic> data) async {
+    final groupId = data['groupId'] as String?;
+    if (groupId == null) return;
+
+    final activeGroup = await _groupRepo.getActiveGroup();
+    if (activeGroup == null || activeGroup.groupId != groupId) return;
+
+    await _queueManager.clearQueue();
+    await _groupRepo.deactivateGroup(groupId);
+    _publishEvent(SyncTriggerEvent.groupDissolved(groupId: groupId));
   }
 
   void _publishEvent(SyncTriggerEvent event) {

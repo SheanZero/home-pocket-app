@@ -49,60 +49,72 @@ void main() {
     );
 
     when(() => queueManager.drainQueue()).thenAnswer((_) async => 0);
-    when(() => apiClient.ackSync(messageIds: any(named: 'messageIds')))
-        .thenAnswer((_) async => {'acked': 1});
+    when(
+      () => apiClient.ackSync(messageIds: any(named: 'messageIds')),
+    ).thenAnswer((_) async => {'acked': 1});
     when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'member-1');
   });
 
-  test('stores and ACKs a key-exchange payload for the target device', () async {
-    when(() => groupRepository.getActiveGroup()).thenAnswer((_) async => null);
-    when(() => groupRepository.getPendingGroup()).thenAnswer(
-      (_) async => GroupInfo(
-        groupId: 'group-1',
-        bookId: 'book-1',
-        status: GroupStatus.confirming,
-        role: 'member',
-        members: const [
-          GroupMember(
-            deviceId: 'owner-1',
-            publicKey: 'owner-public-key',
-            deviceName: 'Owner phone',
-            role: 'owner',
-            status: 'active',
-          ),
-        ],
-        createdAt: DateTime(2026),
-      ),
-    );
-    when(() => apiClient.pullSync(since: any(named: 'since'))).thenAnswer(
-      (_) async => {
-        'messages': [
-          {
-            'messageId': 'msg-1',
-            'fromDeviceId': 'owner-1',
-            'payload': jsonEncode({
-              'v': 2,
-              't': 'K',
-              'toDeviceId': 'member-1',
-              'p': 'encrypted-box',
-            }),
-            'createdAt': 1,
-          },
-        ],
-      },
-    );
-    when(() => e2eeService.decryptGroupKeyFromOwner(
-      encryptedPayload: any(named: 'encryptedPayload'),
-      ownerPublicKey: any(named: 'ownerPublicKey'),
-    )).thenAnswer((_) async => 'group-key');
-    when(() => groupRepository.storeGroupKey(any(), any())).thenAnswer((_) async {});
+  test(
+    'stores and ACKs a key-exchange payload for the target device',
+    () async {
+      when(
+        () => groupRepository.getActiveGroup(),
+      ).thenAnswer((_) async => null);
+      when(() => groupRepository.getPendingGroup()).thenAnswer(
+        (_) async => GroupInfo(
+          groupId: 'group-1',
+          bookId: 'book-1',
+          status: GroupStatus.confirming,
+          role: 'member',
+          members: const [
+            GroupMember(
+              deviceId: 'owner-1',
+              publicKey: 'owner-public-key',
+              deviceName: 'Owner phone',
+              role: 'owner',
+              status: 'active',
+            ),
+          ],
+          createdAt: DateTime(2026),
+        ),
+      );
+      when(() => apiClient.pullSync(since: any(named: 'since'))).thenAnswer(
+        (_) async => {
+          'messages': [
+            {
+              'messageId': 'msg-1',
+              'fromDeviceId': 'owner-1',
+              'payload': jsonEncode({
+                'v': 2,
+                't': 'K',
+                'toDeviceId': 'member-1',
+                'p': 'encrypted-box',
+              }),
+              'createdAt': 1,
+            },
+          ],
+        },
+      );
+      when(
+        () => e2eeService.decryptGroupKeyFromOwner(
+          encryptedPayload: any(named: 'encryptedPayload'),
+          ownerPublicKey: any(named: 'ownerPublicKey'),
+        ),
+      ).thenAnswer((_) async => 'group-key');
+      when(
+        () => groupRepository.storeGroupKey(any(), any()),
+      ).thenAnswer((_) async {});
 
-    final result = await useCase.execute();
+      final result = await useCase.execute();
 
-    expect(result, isA<PullSyncSuccess>());
-    verify(() => groupRepository.storeGroupKey('group-1', 'group-key')).called(1);
-    verify(() => apiClient.ackSync(messageIds: ['msg-1'])).called(1);
-  });
+      expect(result, isA<PullSyncSuccess>());
+      verify(
+        () => groupRepository.storeGroupKey('group-1', 'group-key'),
+      ).called(1);
+      verify(() => apiClient.ackSync(messageIds: ['msg-1'])).called(1);
+    },
+  );
 
   test('applies v2 data payloads using the stored group key', () async {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
@@ -132,21 +144,157 @@ void main() {
         ],
       },
     );
-    when(() => e2eeService.decryptFromGroup(
-      encryptedPayload: any(named: 'encryptedPayload'),
-      groupKeyBase64: any(named: 'groupKeyBase64'),
-    )).thenReturn(jsonEncode([
-      {'op': 'insert', 'table': 'transactions'},
-    ]));
-    when(() => groupRepository.updateLastSyncTime(any())).thenAnswer((_) async {});
+    when(
+      () => e2eeService.decryptFromGroup(
+        encryptedPayload: any(named: 'encryptedPayload'),
+        groupKeyBase64: any(named: 'groupKeyBase64'),
+      ),
+    ).thenReturn(
+      jsonEncode([
+        {'op': 'insert', 'table': 'transactions'},
+      ]),
+    );
+    when(
+      () => groupRepository.updateLastSyncTime(any()),
+    ).thenAnswer((_) async {});
 
     final result = await useCase.execute();
 
     expect(result, isA<PullSyncSuccess>());
     expect(appliedOperations, hasLength(1));
-    verify(() => groupRepository.updateLastSyncTime(
-      DateTime.fromMillisecondsSinceEpoch(2000),
-    )).called(1);
+    verify(
+      () => groupRepository.updateLastSyncTime(
+        DateTime.fromMillisecondsSinceEpoch(2000),
+      ),
+    ).called(1);
     verify(() => apiClient.ackSync(messageIds: ['msg-2'])).called(1);
+  });
+
+  test('normalizes legacy sync operations to protocol format', () async {
+    when(() => groupRepository.getActiveGroup()).thenAnswer(
+      (_) async => GroupInfo(
+        groupId: 'group-1',
+        bookId: 'book-1',
+        status: GroupStatus.active,
+        role: 'owner',
+        groupKey: 'group-key',
+        members: const [],
+        createdAt: DateTime(2026),
+      ),
+    );
+    when(() => apiClient.pullSync(since: any(named: 'since'))).thenAnswer(
+      (_) async => {
+        'messages': [
+          {
+            'messageId': 'msg-legacy',
+            'fromDeviceId': 'owner-1',
+            'payload': jsonEncode({
+              'v': 2,
+              't': 'D',
+              'p': 'encrypted-secretbox',
+            }),
+            'createdAt': 3,
+          },
+        ],
+      },
+    );
+    when(
+      () => e2eeService.decryptFromGroup(
+        encryptedPayload: any(named: 'encryptedPayload'),
+        groupKeyBase64: any(named: 'groupKeyBase64'),
+      ),
+    ).thenReturn(
+      jsonEncode([
+        {
+          'op': 'insert',
+          'table': 'transactions',
+          'data': {'id': 'tx-1', 'amount': 1000},
+        },
+      ]),
+    );
+    when(
+      () => groupRepository.updateLastSyncTime(any()),
+    ).thenAnswer((_) async {});
+
+    final result = await useCase.execute();
+
+    expect(result, isA<PullSyncSuccess>());
+    expect(appliedOperations, hasLength(1));
+    expect(appliedOperations.single, [
+      {
+        'op': 'create',
+        'entityType': 'bill',
+        'entityId': 'tx-1',
+        'data': {'id': 'tx-1', 'amount': 1000},
+      },
+    ]);
+  });
+
+  test('unwraps protocol sync envelope before applying operations', () async {
+    when(() => groupRepository.getActiveGroup()).thenAnswer(
+      (_) async => GroupInfo(
+        groupId: 'group-1',
+        bookId: 'book-1',
+        status: GroupStatus.active,
+        role: 'owner',
+        groupKey: 'group-key',
+        members: const [],
+        createdAt: DateTime(2026),
+      ),
+    );
+    when(() => apiClient.pullSync(since: any(named: 'since'))).thenAnswer(
+      (_) async => {
+        'messages': [
+          {
+            'messageId': 'msg-envelope',
+            'fromDeviceId': 'owner-1',
+            'payload': jsonEncode({
+              'v': 2,
+              't': 'D',
+              'p': 'encrypted-secretbox',
+            }),
+            'createdAt': 4,
+          },
+        ],
+      },
+    );
+    when(
+      () => e2eeService.decryptFromGroup(
+        encryptedPayload: any(named: 'encryptedPayload'),
+        groupKeyBase64: any(named: 'groupKeyBase64'),
+      ),
+    ).thenReturn(
+      jsonEncode({
+        'syncType': 'incremental',
+        'syncId': 'sync-1',
+        'operations': [
+          {
+            'op': 'create',
+            'entityType': 'bill',
+            'entityId': 'tx-1',
+            'data': {'id': 'tx-1', 'amount': 1000},
+            'timestamp': 123,
+          },
+        ],
+        'vectorClock': {'device-a': 1},
+      }),
+    );
+    when(
+      () => groupRepository.updateLastSyncTime(any()),
+    ).thenAnswer((_) async {});
+
+    final result = await useCase.execute();
+
+    expect(result, isA<PullSyncSuccess>());
+    expect(appliedOperations, hasLength(1));
+    expect(appliedOperations.single, [
+      {
+        'op': 'create',
+        'entityType': 'bill',
+        'entityId': 'tx-1',
+        'data': {'id': 'tx-1', 'amount': 1000},
+        'timestamp': 123,
+      },
+    ]);
   });
 }

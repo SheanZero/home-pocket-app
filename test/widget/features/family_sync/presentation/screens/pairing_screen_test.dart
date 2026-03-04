@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
@@ -5,8 +7,10 @@ import 'package:home_pocket/features/family_sync/domain/models/group_member.dart
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/group_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/family_sync/presentation/providers/sync_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/pairing_screen.dart';
 import 'package:home_pocket/features/family_sync/presentation/widgets/gradient_action_button.dart';
+import 'package:home_pocket/infrastructure/sync/sync_trigger_service.dart';
 import 'package:home_pocket/features/family_sync/use_cases/create_group_use_case.dart';
 import 'package:home_pocket/features/family_sync/use_cases/join_group_use_case.dart';
 import 'package:mocktail/mocktail.dart';
@@ -19,15 +23,23 @@ class MockJoinGroupUseCase extends Mock implements JoinGroupUseCase {}
 
 class MockGroupRepository extends Mock implements GroupRepository {}
 
+class MockSyncTriggerService extends Mock implements SyncTriggerService {}
+
 void main() {
   late MockCreateGroupUseCase createGroupUseCase;
   late MockJoinGroupUseCase joinGroupUseCase;
   late MockGroupRepository groupRepository;
+  late MockSyncTriggerService syncTriggerService;
+  late StreamController<SyncTriggerEvent> syncEvents;
 
   setUp(() {
     createGroupUseCase = MockCreateGroupUseCase();
     joinGroupUseCase = MockJoinGroupUseCase();
     groupRepository = MockGroupRepository();
+    syncTriggerService = MockSyncTriggerService();
+    syncEvents = StreamController<SyncTriggerEvent>.broadcast();
+    when(() => syncTriggerService.events).thenAnswer((_) => syncEvents.stream);
+    when(() => syncTriggerService.dispose()).thenReturn(null);
 
     when(() => createGroupUseCase.execute(any())).thenAnswer(
       (_) async => CreateGroupSuccess(
@@ -63,6 +75,10 @@ void main() {
     );
   });
 
+  tearDown(() async {
+    await syncEvents.close();
+  });
+
   testWidgets('shows redesigned create and join group tabs', (tester) async {
     await tester.pumpWidget(
       createLocalizedWidget(
@@ -71,6 +87,7 @@ void main() {
           createGroupUseCaseProvider.overrideWithValue(createGroupUseCase),
           joinGroupUseCaseProvider.overrideWithValue(joinGroupUseCase),
           groupRepositoryProvider.overrideWithValue(groupRepository),
+          syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
         ],
       ),
     );
@@ -120,6 +137,7 @@ void main() {
           createGroupUseCaseProvider.overrideWithValue(createGroupUseCase),
           joinGroupUseCaseProvider.overrideWithValue(joinGroupUseCase),
           groupRepositoryProvider.overrideWithValue(groupRepository),
+          syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
         ],
       ),
     );

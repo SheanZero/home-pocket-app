@@ -736,6 +736,11 @@ class SEn extends S {
       'A family member wants to join your group. Review the request to continue.';
 
   @override
+  String familySyncJoinRequestWithName(String deviceName) {
+    return '$deviceName wants to join your family ledger';
+  }
+
+  @override
   String get familySyncMemberConfirmedNotificationTitle => 'Group Ready';
 
   @override

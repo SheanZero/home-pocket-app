@@ -86,4 +86,41 @@ void main() {
       ),
     ).called(1);
   });
+
+  testWidgets('uses explicit groupId to load the target group', (tester) async {
+    when(() => groupRepository.getGroupById('group-42')).thenAnswer(
+      (_) async => GroupInfo(
+        groupId: 'group-42',
+        bookId: 'book-42',
+        status: GroupStatus.active,
+        role: 'owner',
+        groupKey: 'group-key',
+        members: const [
+          GroupMember(
+            deviceId: 'owner-1',
+            publicKey: 'pk-owner',
+            deviceName: 'Owner phone',
+            role: 'owner',
+            status: 'active',
+          ),
+        ],
+        createdAt: DateTime(2026, 3, 1),
+      ),
+    );
+
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        const MemberApprovalScreen(groupId: 'group-42'),
+        overrides: [
+          groupRepositoryProvider.overrideWithValue(groupRepository),
+          confirmMemberUseCaseProvider.overrideWithValue(confirmMemberUseCase),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    verify(() => groupRepository.getGroupById('group-42')).called(1);
+    verifyNever(() => groupRepository.getActiveGroup());
+    expect(find.text('Owner phone'), findsOneWidget);
+  });
 }

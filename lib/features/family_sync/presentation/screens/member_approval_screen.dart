@@ -12,7 +12,9 @@ import '../widgets/info_hint_box.dart';
 import '../widgets/member_list_tile.dart';
 
 class MemberApprovalScreen extends ConsumerStatefulWidget {
-  const MemberApprovalScreen({super.key});
+  const MemberApprovalScreen({super.key, this.groupId});
+
+  final String? groupId;
 
   @override
   ConsumerState<MemberApprovalScreen> createState() =>
@@ -31,7 +33,9 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
   }
 
   Future<void> _loadGroup() async {
-    final group = await ref.read(groupRepositoryProvider).getActiveGroup();
+    final group = widget.groupId != null
+        ? await ref.read(groupRepositoryProvider).getGroupById(widget.groupId!)
+        : await ref.read(groupRepositoryProvider).getActiveGroup();
     if (!mounted) return;
 
     setState(() {

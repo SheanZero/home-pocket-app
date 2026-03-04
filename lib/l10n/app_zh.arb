@@ -495,6 +495,15 @@
   "@familySyncJoinRequestNotificationBody": {
     "description": "Body text for a foreground notification about a new join request"
   },
+  "familySyncJoinRequestWithName": "{deviceName} 想要加入你的家庭账本",
+  "@familySyncJoinRequestWithName": {
+    "description": "Body text for a foreground notification about a new join request with device name",
+    "placeholders": {
+      "deviceName": {
+        "type": "String"
+      }
+    }
+  },
   "familySyncMemberConfirmedNotificationTitle": "分组已就绪",
   "@familySyncMemberConfirmedNotificationTitle": {
     "description": "Title for a foreground notification after a member is confirmed"
