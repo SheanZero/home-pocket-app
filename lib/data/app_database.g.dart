@@ -2824,15 +2824,6 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, GroupData> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _bookIdMeta = const VerificationMeta('bookId');
-  @override
-  late final GeneratedColumn<String> bookId = GeneratedColumn<String>(
-    'book_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
@@ -2920,7 +2911,6 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, GroupData> {
   @override
   List<GeneratedColumn> get $columns => [
     groupId,
-    bookId,
     status,
     role,
     inviteCode,
@@ -2949,14 +2939,6 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, GroupData> {
       );
     } else if (isInserting) {
       context.missing(_groupIdMeta);
-    }
-    if (data.containsKey('book_id')) {
-      context.handle(
-        _bookIdMeta,
-        bookId.isAcceptableOrUnknown(data['book_id']!, _bookIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_bookIdMeta);
     }
     if (data.containsKey('status')) {
       context.handle(
@@ -3034,10 +3016,6 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, GroupData> {
         DriftSqlType.string,
         data['${effectivePrefix}group_id'],
       )!,
-      bookId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}book_id'],
-      )!,
       status: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}status'],
@@ -3081,7 +3059,6 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, GroupData> {
 
 class GroupData extends DataClass implements Insertable<GroupData> {
   final String groupId;
-  final String bookId;
   final String status;
   final String role;
   final String? inviteCode;
@@ -3092,7 +3069,6 @@ class GroupData extends DataClass implements Insertable<GroupData> {
   final int? lastSyncAt;
   const GroupData({
     required this.groupId,
-    required this.bookId,
     required this.status,
     required this.role,
     this.inviteCode,
@@ -3106,7 +3082,6 @@ class GroupData extends DataClass implements Insertable<GroupData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['group_id'] = Variable<String>(groupId);
-    map['book_id'] = Variable<String>(bookId);
     map['status'] = Variable<String>(status);
     map['role'] = Variable<String>(role);
     if (!nullToAbsent || inviteCode != null) {
@@ -3131,7 +3106,6 @@ class GroupData extends DataClass implements Insertable<GroupData> {
   GroupsCompanion toCompanion(bool nullToAbsent) {
     return GroupsCompanion(
       groupId: Value(groupId),
-      bookId: Value(bookId),
       status: Value(status),
       role: Value(role),
       inviteCode: inviteCode == null && nullToAbsent
@@ -3160,7 +3134,6 @@ class GroupData extends DataClass implements Insertable<GroupData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return GroupData(
       groupId: serializer.fromJson<String>(json['groupId']),
-      bookId: serializer.fromJson<String>(json['bookId']),
       status: serializer.fromJson<String>(json['status']),
       role: serializer.fromJson<String>(json['role']),
       inviteCode: serializer.fromJson<String?>(json['inviteCode']),
@@ -3176,7 +3149,6 @@ class GroupData extends DataClass implements Insertable<GroupData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'groupId': serializer.toJson<String>(groupId),
-      'bookId': serializer.toJson<String>(bookId),
       'status': serializer.toJson<String>(status),
       'role': serializer.toJson<String>(role),
       'inviteCode': serializer.toJson<String?>(inviteCode),
@@ -3190,7 +3162,6 @@ class GroupData extends DataClass implements Insertable<GroupData> {
 
   GroupData copyWith({
     String? groupId,
-    String? bookId,
     String? status,
     String? role,
     Value<String?> inviteCode = const Value.absent(),
@@ -3201,7 +3172,6 @@ class GroupData extends DataClass implements Insertable<GroupData> {
     Value<int?> lastSyncAt = const Value.absent(),
   }) => GroupData(
     groupId: groupId ?? this.groupId,
-    bookId: bookId ?? this.bookId,
     status: status ?? this.status,
     role: role ?? this.role,
     inviteCode: inviteCode.present ? inviteCode.value : this.inviteCode,
@@ -3216,7 +3186,6 @@ class GroupData extends DataClass implements Insertable<GroupData> {
   GroupData copyWithCompanion(GroupsCompanion data) {
     return GroupData(
       groupId: data.groupId.present ? data.groupId.value : this.groupId,
-      bookId: data.bookId.present ? data.bookId.value : this.bookId,
       status: data.status.present ? data.status.value : this.status,
       role: data.role.present ? data.role.value : this.role,
       inviteCode: data.inviteCode.present
@@ -3240,7 +3209,6 @@ class GroupData extends DataClass implements Insertable<GroupData> {
   String toString() {
     return (StringBuffer('GroupData(')
           ..write('groupId: $groupId, ')
-          ..write('bookId: $bookId, ')
           ..write('status: $status, ')
           ..write('role: $role, ')
           ..write('inviteCode: $inviteCode, ')
@@ -3256,7 +3224,6 @@ class GroupData extends DataClass implements Insertable<GroupData> {
   @override
   int get hashCode => Object.hash(
     groupId,
-    bookId,
     status,
     role,
     inviteCode,
@@ -3271,7 +3238,6 @@ class GroupData extends DataClass implements Insertable<GroupData> {
       identical(this, other) ||
       (other is GroupData &&
           other.groupId == this.groupId &&
-          other.bookId == this.bookId &&
           other.status == this.status &&
           other.role == this.role &&
           other.inviteCode == this.inviteCode &&
@@ -3284,7 +3250,6 @@ class GroupData extends DataClass implements Insertable<GroupData> {
 
 class GroupsCompanion extends UpdateCompanion<GroupData> {
   final Value<String> groupId;
-  final Value<String> bookId;
   final Value<String> status;
   final Value<String> role;
   final Value<String?> inviteCode;
@@ -3296,7 +3261,6 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
   final Value<int> rowid;
   const GroupsCompanion({
     this.groupId = const Value.absent(),
-    this.bookId = const Value.absent(),
     this.status = const Value.absent(),
     this.role = const Value.absent(),
     this.inviteCode = const Value.absent(),
@@ -3309,7 +3273,6 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
   });
   GroupsCompanion.insert({
     required String groupId,
-    required String bookId,
     required String status,
     required String role,
     this.inviteCode = const Value.absent(),
@@ -3320,13 +3283,11 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
     this.lastSyncAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : groupId = Value(groupId),
-       bookId = Value(bookId),
        status = Value(status),
        role = Value(role),
        createdAt = Value(createdAt);
   static Insertable<GroupData> custom({
     Expression<String>? groupId,
-    Expression<String>? bookId,
     Expression<String>? status,
     Expression<String>? role,
     Expression<String>? inviteCode,
@@ -3339,7 +3300,6 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
   }) {
     return RawValuesInsertable({
       if (groupId != null) 'group_id': groupId,
-      if (bookId != null) 'book_id': bookId,
       if (status != null) 'status': status,
       if (role != null) 'role': role,
       if (inviteCode != null) 'invite_code': inviteCode,
@@ -3354,7 +3314,6 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
 
   GroupsCompanion copyWith({
     Value<String>? groupId,
-    Value<String>? bookId,
     Value<String>? status,
     Value<String>? role,
     Value<String?>? inviteCode,
@@ -3367,7 +3326,6 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
   }) {
     return GroupsCompanion(
       groupId: groupId ?? this.groupId,
-      bookId: bookId ?? this.bookId,
       status: status ?? this.status,
       role: role ?? this.role,
       inviteCode: inviteCode ?? this.inviteCode,
@@ -3385,9 +3343,6 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
     final map = <String, Expression>{};
     if (groupId.present) {
       map['group_id'] = Variable<String>(groupId.value);
-    }
-    if (bookId.present) {
-      map['book_id'] = Variable<String>(bookId.value);
     }
     if (status.present) {
       map['status'] = Variable<String>(status.value);
@@ -3423,7 +3378,6 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
   String toString() {
     return (StringBuffer('GroupsCompanion(')
           ..write('groupId: $groupId, ')
-          ..write('bookId: $bookId, ')
           ..write('status: $status, ')
           ..write('role: $role, ')
           ..write('inviteCode: $inviteCode, ')
@@ -7278,7 +7232,6 @@ typedef $$GroupMembersTableProcessedTableManager =
 typedef $$GroupsTableCreateCompanionBuilder =
     GroupsCompanion Function({
       required String groupId,
-      required String bookId,
       required String status,
       required String role,
       Value<String?> inviteCode,
@@ -7292,7 +7245,6 @@ typedef $$GroupsTableCreateCompanionBuilder =
 typedef $$GroupsTableUpdateCompanionBuilder =
     GroupsCompanion Function({
       Value<String> groupId,
-      Value<String> bookId,
       Value<String> status,
       Value<String> role,
       Value<String?> inviteCode,
@@ -7315,11 +7267,6 @@ class $$GroupsTableFilterComposer
   });
   ColumnFilters<String> get groupId => $composableBuilder(
     column: $table.groupId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get bookId => $composableBuilder(
-    column: $table.bookId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7378,11 +7325,6 @@ class $$GroupsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get bookId => $composableBuilder(
-    column: $table.bookId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get status => $composableBuilder(
     column: $table.status,
     builder: (column) => ColumnOrderings(column),
@@ -7435,9 +7377,6 @@ class $$GroupsTableAnnotationComposer
   });
   GeneratedColumn<String> get groupId =>
       $composableBuilder(column: $table.groupId, builder: (column) => column);
-
-  GeneratedColumn<String> get bookId =>
-      $composableBuilder(column: $table.bookId, builder: (column) => column);
 
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
@@ -7501,7 +7440,6 @@ class $$GroupsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> groupId = const Value.absent(),
-                Value<String> bookId = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<String> role = const Value.absent(),
                 Value<String?> inviteCode = const Value.absent(),
@@ -7513,7 +7451,6 @@ class $$GroupsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => GroupsCompanion(
                 groupId: groupId,
-                bookId: bookId,
                 status: status,
                 role: role,
                 inviteCode: inviteCode,
@@ -7527,7 +7464,6 @@ class $$GroupsTableTableManager
           createCompanionCallback:
               ({
                 required String groupId,
-                required String bookId,
                 required String status,
                 required String role,
                 Value<String?> inviteCode = const Value.absent(),
@@ -7539,7 +7475,6 @@ class $$GroupsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => GroupsCompanion.insert(
                 groupId: groupId,
-                bookId: bookId,
                 status: status,
                 role: role,
                 inviteCode: inviteCode,

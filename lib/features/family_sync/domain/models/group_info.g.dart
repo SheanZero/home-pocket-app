@@ -8,7 +8,6 @@ part of 'group_info.dart';
 
 _GroupInfo _$GroupInfoFromJson(Map<String, dynamic> json) => _GroupInfo(
   groupId: json['groupId'] as String,
-  bookId: json['bookId'] as String,
   status: $enumDecode(_$GroupStatusEnumMap, json['status']),
   inviteCode: json['inviteCode'] as String?,
   inviteExpiresAt: json['inviteExpiresAt'] == null
@@ -31,7 +30,6 @@ _GroupInfo _$GroupInfoFromJson(Map<String, dynamic> json) => _GroupInfo(
 Map<String, dynamic> _$GroupInfoToJson(_GroupInfo instance) =>
     <String, dynamic>{
       'groupId': instance.groupId,
-      'bookId': instance.bookId,
       'status': _$GroupStatusEnumMap[instance.status]!,
       'inviteCode': instance.inviteCode,
       'inviteExpiresAt': instance.inviteExpiresAt?.toIso8601String(),

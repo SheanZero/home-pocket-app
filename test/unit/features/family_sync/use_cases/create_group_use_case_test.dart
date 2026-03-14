@@ -42,7 +42,7 @@ void main() {
         platform: any(named: 'platform'),
       ),
     ).thenAnswer((_) async => <String, dynamic>{});
-    when(() => apiClient.createGroup(bookId: any(named: 'bookId'))).thenAnswer(
+    when(() => apiClient.createGroup()).thenAnswer(
       (_) async => {
         'groupId': 'group-1',
         'inviteCode': 'INV123',
@@ -53,7 +53,6 @@ void main() {
     when(
       () => groupRepository.savePendingGroup(
         groupId: any(named: 'groupId'),
-        bookId: any(named: 'bookId'),
         inviteCode: any(named: 'inviteCode'),
         inviteExpiresAt: any(named: 'inviteExpiresAt'),
         groupKey: any(named: 'groupKey'),
@@ -65,14 +64,13 @@ void main() {
     when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
     when(() => keyManager.getPublicKey()).thenAnswer((_) async => 'public-key');
 
-    final result = await useCase.execute('book-1');
+    final result = await useCase.execute();
 
     expect(result, isA<CreateGroupSuccess>());
-    verify(() => apiClient.createGroup(bookId: 'book-1')).called(1);
+    verify(() => apiClient.createGroup()).called(1);
     verify(
       () => groupRepository.savePendingGroup(
         groupId: 'group-1',
-        bookId: 'book-1',
         inviteCode: 'INV123',
         inviteExpiresAt: DateTime.fromMillisecondsSinceEpoch(1000),
         groupKey: 'group-key',
@@ -92,7 +90,7 @@ void main() {
       ),
     );
 
-    final result = await useCase.execute('book-1');
+    final result = await useCase.execute();
 
     expect(result, isA<CreateGroupSuccess>());
     verify(() => keyManager.generateDeviceKeyPair()).called(1);
@@ -109,11 +107,11 @@ void main() {
   test('returns API errors from the relay client', () async {
     when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
     when(() => keyManager.getPublicKey()).thenAnswer((_) async => 'public-key');
-    when(() => apiClient.createGroup(bookId: any(named: 'bookId'))).thenThrow(
+    when(() => apiClient.createGroup()).thenThrow(
       const RelayApiException(statusCode: 409, message: 'Already grouped'),
     );
 
-    final result = await useCase.execute('book-1');
+    final result = await useCase.execute();
 
     expect(result, isA<CreateGroupError>());
     expect((result as CreateGroupError).message, 'Already grouped');

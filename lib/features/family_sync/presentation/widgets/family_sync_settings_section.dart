@@ -13,9 +13,7 @@ import 'sync_status_badge.dart';
 ///
 /// Shows current sync status and navigates to pairing or management screens.
 class FamilySyncSettingsSection extends ConsumerWidget {
-  const FamilySyncSettingsSection({super.key, required this.bookId});
-
-  final String bookId;
+  const FamilySyncSettingsSection({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -66,7 +64,7 @@ class FamilySyncSettingsSection extends ConsumerWidget {
   void _navigate(BuildContext context, WidgetRef ref, SyncStatus status) {
     final Widget screen;
     if (status == SyncStatus.unpaired) {
-      screen = PairingScreen(bookId: bookId);
+      screen = const PairingScreen();
     } else {
       screen = const GroupManagementScreen();
     }

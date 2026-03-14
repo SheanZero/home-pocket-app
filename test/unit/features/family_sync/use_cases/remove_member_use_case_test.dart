@@ -31,7 +31,7 @@ void main() {
     when(() => groupRepository.getGroupById('group-1')).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-        bookId: 'book-1',
+
         status: GroupStatus.active,
         role: 'owner',
         groupKey: 'group-key',

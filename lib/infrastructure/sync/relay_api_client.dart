@@ -113,11 +113,8 @@ class RelayApiClient {
 
   // ── Groups ──
 
-  Future<Map<String, dynamic>> createGroup({required String bookId}) async {
-    final response = await _post(
-      '/group/create',
-      jsonEncode({'bookId': bookId}),
-    );
+  Future<Map<String, dynamic>> createGroup() async {
+    final response = await _post('/group/create', '{}');
     return _parseResponse(response);
   }
 

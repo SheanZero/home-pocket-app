@@ -39,7 +39,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration {
@@ -117,6 +117,16 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 9) {
           await customStatement('DROP TABLE IF EXISTS paired_devices');
+        }
+        if (from >= 8 && from < 10) {
+          // Only drop book_id from groups if table was created in v8
+          // (fresh installs from < 8 create groups without book_id)
+          await customStatement(
+            'ALTER TABLE groups DROP COLUMN book_id',
+          );
+          await customStatement(
+            'DROP INDEX IF EXISTS idx_groups_book_id',
+          );
         }
       },
     );

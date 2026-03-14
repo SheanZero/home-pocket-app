@@ -3,7 +3,6 @@ import 'package:drift/drift.dart';
 @DataClassName('GroupData')
 class Groups extends Table {
   TextColumn get groupId => text()();
-  TextColumn get bookId => text()();
   TextColumn get status => text()();
   TextColumn get role => text()();
   TextColumn get inviteCode => text().nullable()();
@@ -18,6 +17,5 @@ class Groups extends Table {
 
   List<TableIndex> get customIndices => [
     TableIndex(name: 'idx_groups_status', columns: {#status}),
-    TableIndex(name: 'idx_groups_book_id', columns: {#bookId}),
   ];
 }

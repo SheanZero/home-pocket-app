@@ -52,7 +52,7 @@ class CreateGroupUseCase {
   final GroupRepository _groupRepository;
   final E2EEService _e2eeService;
 
-  Future<CreateGroupResult> execute(String bookId) async {
+  Future<CreateGroupResult> execute() async {
     try {
       final identity = await _ensureDeviceIdentity();
       if (identity == null) {
@@ -66,12 +66,11 @@ class CreateGroupUseCase {
         platform: Platform.isIOS ? 'ios' : 'android',
       );
 
-      final response = await _apiClient.createGroup(bookId: bookId);
+      final response = await _apiClient.createGroup();
 
       final groupId = response['groupId'] as String?;
       final inviteCode = response['inviteCode'] as String?;
       final expiresAt = response['expiresAt'] as int?;
-      final responseBookId = response['bookId'] as String?;
 
       if (groupId == null || inviteCode == null || expiresAt == null) {
         return CreateGroupResult.error(
@@ -80,16 +79,10 @@ class CreateGroupUseCase {
         );
       }
 
-      if (responseBookId != null && responseBookId != bookId) {
-        return CreateGroupResult.error(
-          'Server bookId mismatch: expected $bookId, got $responseBookId',
-        );
-      }
       final groupKey = _e2eeService.generateGroupKey();
 
       await _groupRepository.savePendingGroup(
         groupId: groupId,
-        bookId: bookId,
         inviteCode: inviteCode,
         inviteExpiresAt: DateTime.fromMillisecondsSinceEpoch(expiresAt * 1000),
         groupKey: groupKey,

@@ -42,7 +42,6 @@ void main() {
     when(
       () => groupRepository.saveConfirmingGroup(
         groupId: any(named: 'groupId'),
-        bookId: any(named: 'bookId'),
         members: any(named: 'members'),
       ),
     ).thenAnswer((_) async {});
@@ -73,7 +72,6 @@ void main() {
     verify(
       () => groupRepository.saveConfirmingGroup(
         groupId: 'group-1',
-        bookId: 'book-1',
         members: [
           const GroupMember(
             deviceId: 'owner-device',

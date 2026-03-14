@@ -31,7 +31,7 @@ void main() {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-        bookId: 'book-1',
+
         status: GroupStatus.active,
         role: 'owner',
         members: const [
@@ -53,7 +53,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       createLocalizedWidget(
-        Scaffold(body: FamilySyncSettingsSection(bookId: 'book-1')),
+        const Scaffold(body: FamilySyncSettingsSection()),
         overrides: [
           groupRepositoryProvider.overrideWithValue(groupRepository),
           syncStatusNotifierProvider.overrideWith(

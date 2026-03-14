@@ -52,7 +52,7 @@ void main() {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-        bookId: 'book-1',
+
         status: GroupStatus.active,
         inviteCode: 'INV123',
         role: 'owner',
@@ -111,7 +111,7 @@ void main() {
     when(() => groupRepository.getGroupById('group-42')).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-42',
-        bookId: 'book-42',
+
         status: GroupStatus.active,
         inviteCode: 'INV999',
         role: 'owner',

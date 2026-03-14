@@ -19,9 +19,7 @@ import '../widgets/pair_code_input.dart';
 /// 1. "Show My Code" - displays QR + 6-digit code for partner to scan/enter
 /// 2. "Enter Partner Code" - input field for 6-digit code
 class PairingScreen extends ConsumerStatefulWidget {
-  const PairingScreen({super.key, required this.bookId});
-
-  final String bookId;
+  const PairingScreen({super.key});
 
   @override
   ConsumerState<PairingScreen> createState() => _PairingScreenState();
@@ -54,7 +52,7 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
   Future<void> _createGroup() async {
     setState(() => _isCreating = true);
     final useCase = ref.read(createGroupUseCaseProvider);
-    final result = await useCase.execute(widget.bookId);
+    final result = await useCase.execute();
     if (mounted) {
       setState(() {
         _createResult = result;

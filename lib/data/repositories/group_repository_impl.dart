@@ -20,7 +20,6 @@ class GroupRepositoryImpl implements GroupRepository {
   @override
   Future<void> savePendingGroup({
     required String groupId,
-    required String bookId,
     required String inviteCode,
     required DateTime inviteExpiresAt,
     required String groupKey,
@@ -28,7 +27,6 @@ class GroupRepositoryImpl implements GroupRepository {
     await _groupDao.insert(
       GroupsCompanion.insert(
         groupId: groupId,
-        bookId: bookId,
         status: 'pending',
         role: 'owner',
         inviteCode: Value(inviteCode),
@@ -42,13 +40,11 @@ class GroupRepositoryImpl implements GroupRepository {
   @override
   Future<void> saveConfirmingGroup({
     required String groupId,
-    required String bookId,
     required List<GroupMember> members,
   }) async {
     await _groupDao.insert(
       GroupsCompanion.insert(
         groupId: groupId,
-        bookId: bookId,
         status: 'confirming',
         role: 'member',
         createdAt: DateTime.now().millisecondsSinceEpoch,
@@ -143,7 +139,6 @@ class GroupRepositoryImpl implements GroupRepository {
     final members = await _memberDao.findByGroupId(group.groupId);
     return GroupInfo(
       groupId: group.groupId,
-      bookId: group.bookId,
       status: GroupStatus.values.byName(group.status),
       role: group.role,
       inviteCode: group.inviteCode,

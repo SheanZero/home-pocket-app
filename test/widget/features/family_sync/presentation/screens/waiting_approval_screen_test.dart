@@ -23,7 +23,7 @@ void main() {
 
   GroupInfo buildConfirmingGroup() => GroupInfo(
     groupId: 'group-1',
-    bookId: 'book-1',
+
     status: GroupStatus.confirming,
     role: 'member',
     members: const [
@@ -47,7 +47,7 @@ void main() {
 
   GroupInfo buildActiveGroup() => GroupInfo(
     groupId: 'group-1',
-    bookId: 'book-1',
+
     status: GroupStatus.active,
     role: 'member',
     members: const [

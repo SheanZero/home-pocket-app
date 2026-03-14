@@ -18,21 +18,15 @@ void main() {
   late MockGroupRepository groupRepository;
   late MockE2EEService e2eeService;
   late ConfirmMemberUseCase useCase;
-  late int fullSyncCalls;
 
   setUp(() {
     apiClient = MockRelayApiClient();
     groupRepository = MockGroupRepository();
     e2eeService = MockE2EEService();
-    fullSyncCalls = 0;
     useCase = ConfirmMemberUseCase(
       apiClient: apiClient,
       groupRepository: groupRepository,
       e2eeService: e2eeService,
-      executeFullSync: (bookId) async {
-        fullSyncCalls++;
-        return 10;
-      },
     );
 
     when(
@@ -58,7 +52,7 @@ void main() {
     when(() => groupRepository.getGroupById(any())).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-        bookId: 'book-1',
+
         status: GroupStatus.pending,
         role: 'owner',
         groupKey: 'group-key',
@@ -85,7 +79,6 @@ void main() {
     final result = await useCase.execute(
       groupId: 'group-1',
       deviceId: 'member-1',
-      bookId: 'book-1',
     );
 
     expect(result, isA<ConfirmMemberSuccess>());
@@ -100,14 +93,14 @@ void main() {
         operationCount: 0,
       ),
     ).called(1);
-    expect(fullSyncCalls, 1);
+
   });
 
   test('skips key exchange when the group key is not available', () async {
     when(() => groupRepository.getGroupById(any())).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-        bookId: 'book-1',
+
         status: GroupStatus.pending,
         role: 'owner',
         groupKey: null,
@@ -119,7 +112,6 @@ void main() {
     final result = await useCase.execute(
       groupId: 'group-1',
       deviceId: 'member-1',
-      bookId: 'book-1',
     );
 
     expect(result, isA<ConfirmMemberSuccess>());
@@ -131,7 +123,7 @@ void main() {
         operationCount: any(named: 'operationCount'),
       ),
     );
-    expect(fullSyncCalls, 1);
+
   });
 
   test('returns API errors from confirmMember', () async {
@@ -145,7 +137,6 @@ void main() {
     final result = await useCase.execute(
       groupId: 'group-1',
       deviceId: 'member-1',
-      bookId: 'book-1',
     );
 
     expect(result, isA<ConfirmMemberError>());

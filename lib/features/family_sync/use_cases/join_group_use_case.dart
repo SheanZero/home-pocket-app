@@ -59,16 +59,12 @@ class JoinGroupUseCase {
 
       final response = await _apiClient.joinGroup(inviteCode: inviteCode);
       final groupId = response['groupId'] as String;
-      final bookId = response['bookId'] as String;
-      // Protocol also returns deviceName for the joining device.
-      final _ = response['deviceName'] as String?;
       final members = (response['members'] as List<dynamic>)
           .map((member) => GroupMember.fromJson(member as Map<String, dynamic>))
           .toList();
 
       await _groupRepository.saveConfirmingGroup(
         groupId: groupId,
-        bookId: bookId,
         members: members,
       );
 

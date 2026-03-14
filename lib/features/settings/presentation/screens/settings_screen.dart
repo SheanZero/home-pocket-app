@@ -31,7 +31,7 @@ class SettingsScreen extends ConsumerWidget {
             const Divider(),
             DataManagementSection(bookId: bookId),
             const Divider(),
-            FamilySyncSettingsSection(bookId: bookId),
+            const FamilySyncSettingsSection(),
             const Divider(),
             SecuritySection(settings: settings),
             const Divider(),

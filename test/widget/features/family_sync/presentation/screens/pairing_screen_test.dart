@@ -82,7 +82,7 @@ void main() {
       localeProvider: () => const Locale('en'),
     );
 
-    when(() => createGroupUseCase.execute(any())).thenAnswer(
+    when(() => createGroupUseCase.execute()).thenAnswer(
       (_) async => CreateGroupSuccess(
         groupId: 'group-1',
         inviteCode: '654321',
@@ -99,7 +99,7 @@ void main() {
     when(() => groupRepository.getGroupById('group-1')).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-        bookId: 'book-1',
+
         status: GroupStatus.confirming,
         role: 'member',
         members: const [
@@ -123,7 +123,7 @@ void main() {
   testWidgets('shows redesigned create and join group tabs', (tester) async {
     await tester.pumpWidget(
       createLocalizedWidget(
-        const PairingScreen(bookId: 'book-1'),
+        const PairingScreen(),
         overrides: [
           createGroupUseCaseProvider.overrideWithValue(createGroupUseCase),
           joinGroupUseCaseProvider.overrideWithValue(joinGroupUseCase),
@@ -176,7 +176,7 @@ void main() {
 
     await tester.pumpWidget(
       createLocalizedWidget(
-        const PairingScreen(bookId: 'book-1'),
+        const PairingScreen(),
         overrides: [
           createGroupUseCaseProvider.overrideWithValue(createGroupUseCase),
           joinGroupUseCaseProvider.overrideWithValue(joinGroupUseCase),
@@ -207,7 +207,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       createLocalizedWidget(
-        const PairingScreen(bookId: 'book-1'),
+        const PairingScreen(),
         overrides: [
           createGroupUseCaseProvider.overrideWithValue(createGroupUseCase),
           joinGroupUseCaseProvider.overrideWithValue(joinGroupUseCase),

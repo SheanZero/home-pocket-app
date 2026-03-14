@@ -80,7 +80,6 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
         .execute(
           groupId: group.groupId,
           deviceId: member.deviceId,
-          bookId: group.bookId,
         );
 
     if (!mounted) return;

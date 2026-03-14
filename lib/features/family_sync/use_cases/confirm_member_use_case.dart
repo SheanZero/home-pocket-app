@@ -2,8 +2,6 @@ import '../../../infrastructure/sync/e2ee_service.dart';
 import '../../../infrastructure/sync/relay_api_client.dart';
 import '../domain/repositories/group_repository.dart';
 
-typedef ExecuteFullSyncCallback = Future<int> Function(String bookId);
-
 sealed class ConfirmMemberResult {
   const ConfirmMemberResult();
 
@@ -27,21 +25,17 @@ class ConfirmMemberUseCase {
     required RelayApiClient apiClient,
     required GroupRepository groupRepository,
     required E2EEService e2eeService,
-    required ExecuteFullSyncCallback executeFullSync,
   }) : _apiClient = apiClient,
        _groupRepository = groupRepository,
-       _e2eeService = e2eeService,
-       _executeFullSync = executeFullSync;
+       _e2eeService = e2eeService;
 
   final RelayApiClient _apiClient;
   final GroupRepository _groupRepository;
   final E2EEService _e2eeService;
-  final ExecuteFullSyncCallback _executeFullSync;
 
   Future<ConfirmMemberResult> execute({
     required String groupId,
     required String deviceId,
-    required String bookId,
   }) async {
     try {
       await _apiClient.confirmMember(groupId: groupId, deviceId: deviceId);
@@ -67,7 +61,6 @@ class ConfirmMemberUseCase {
         );
       }
 
-      await _executeFullSync(bookId);
       return const ConfirmMemberResult.success();
     } on RelayApiException catch (error) {
       return ConfirmMemberResult.error(error.message);

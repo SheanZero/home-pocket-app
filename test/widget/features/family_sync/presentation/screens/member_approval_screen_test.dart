@@ -34,7 +34,7 @@ void main() {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-        bookId: 'book-1',
+
         status: GroupStatus.active,
         role: 'owner',
         groupKey: 'group-key',
@@ -62,7 +62,6 @@ void main() {
       () => confirmMemberUseCase.execute(
         groupId: any(named: 'groupId'),
         deviceId: any(named: 'deviceId'),
-        bookId: any(named: 'bookId'),
       ),
     ).thenAnswer((_) async => const ConfirmMemberSuccess());
   });
@@ -92,7 +91,7 @@ void main() {
       () => confirmMemberUseCase.execute(
         groupId: 'group-1',
         deviceId: 'member-1',
-        bookId: 'book-1',
+
       ),
     ).called(1);
   });
@@ -101,7 +100,7 @@ void main() {
     when(() => groupRepository.getGroupById('group-42')).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-42',
-        bookId: 'book-42',
+
         status: GroupStatus.active,
         role: 'owner',
         groupKey: 'group-key',

@@ -42,7 +42,7 @@ PullSyncUseCase pullSyncUseCase(Ref ref) {
 FullSyncUseCase fullSyncUseCase(Ref ref) {
   return FullSyncUseCase(
     pushSync: ref.watch(pushSyncUseCaseProvider),
-    fetchAllTransactions: (bookId) async {
+    fetchAllTransactions: () async {
       // TODO: Wire up to transaction repository when available
       return [];
     },

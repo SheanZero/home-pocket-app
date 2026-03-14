@@ -13,7 +13,7 @@ void main() {
     pushSync = MockPushSyncUseCase();
     useCase = FullSyncUseCase(
       pushSync: pushSync,
-      fetchAllTransactions: (_) async => [
+      fetchAllTransactions: () async => [
         {
           'op': 'create',
           'entityType': 'bill',
@@ -33,7 +33,7 @@ void main() {
   });
 
   test('passes syncType full when pushing full sync chunks', () async {
-    final total = await useCase.execute('book-1');
+    final total = await useCase.execute();
 
     expect(total, 1);
     verify(

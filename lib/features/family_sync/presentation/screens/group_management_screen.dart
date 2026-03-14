@@ -282,7 +282,6 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
                       ? DateFormatter.formatDate(group.confirmedAt!, locale)
                       : '-',
                 ),
-                _buildInfoRow(l10n.familySyncBookId, group.bookId),
                 _buildInfoRow(
                   l10n.familySyncMembers,
                   group.members.length.toString(),

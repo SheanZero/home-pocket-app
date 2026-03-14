@@ -44,7 +44,7 @@ final pullSyncUseCaseProvider = AutoDisposeProvider<PullSyncUseCase>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef PullSyncUseCaseRef = AutoDisposeProviderRef<PullSyncUseCase>;
-String _$fullSyncUseCaseHash() => r'c34dc65ade4dbe98339406724eb14d928f6cf0be';
+String _$fullSyncUseCaseHash() => r'4642d48219c5e3d262f14f84cb3218abe26d0b50';
 
 /// FullSyncUseCase provider.
 ///

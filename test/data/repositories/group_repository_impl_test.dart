@@ -27,7 +27,6 @@ void main() {
 
     await repository.savePendingGroup(
       groupId: 'group-1',
-      bookId: 'book-1',
       inviteCode: 'ABC123',
       inviteExpiresAt: expiresAt,
       groupKey: 'group-key-base64',
@@ -37,7 +36,6 @@ void main() {
 
     expect(pending, isNotNull);
     expect(pending!.groupId, 'group-1');
-    expect(pending.bookId, 'book-1');
     expect(pending.status, GroupStatus.pending);
     expect(pending.role, 'owner');
     expect(pending.inviteCode, 'ABC123');
@@ -66,7 +64,6 @@ void main() {
 
     await repository.saveConfirmingGroup(
       groupId: 'group-2',
-      bookId: 'book-2',
       members: members,
     );
 

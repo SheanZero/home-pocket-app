@@ -9,7 +9,6 @@ import '../../use_cases/leave_group_use_case.dart';
 import '../../use_cases/remove_member_use_case.dart';
 import '../../use_cases/regenerate_invite_use_case.dart';
 import 'repository_providers.dart';
-import 'sync_providers.dart';
 
 final createGroupUseCaseProvider = Provider<CreateGroupUseCase>((ref) {
   return CreateGroupUseCase(
@@ -29,12 +28,10 @@ final joinGroupUseCaseProvider = Provider<JoinGroupUseCase>((ref) {
 });
 
 final confirmMemberUseCaseProvider = Provider<ConfirmMemberUseCase>((ref) {
-  final fullSync = ref.watch(fullSyncUseCaseProvider);
   return ConfirmMemberUseCase(
     apiClient: ref.watch(relayApiClientProvider),
     groupRepository: ref.watch(groupRepositoryProvider),
     e2eeService: ref.watch(e2eeServiceProvider),
-    executeFullSync: fullSync.execute,
   );
 });
 

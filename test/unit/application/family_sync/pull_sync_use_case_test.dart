@@ -64,7 +64,7 @@ void main() {
       when(() => groupRepository.getPendingGroup()).thenAnswer(
         (_) async => GroupInfo(
           groupId: 'group-1',
-          bookId: 'book-1',
+
           status: GroupStatus.confirming,
           role: 'member',
           members: const [
@@ -120,7 +120,7 @@ void main() {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-        bookId: 'book-1',
+
         status: GroupStatus.active,
         role: 'owner',
         groupKey: 'group-key',
@@ -174,7 +174,7 @@ void main() {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-        bookId: 'book-1',
+
         status: GroupStatus.active,
         role: 'owner',
         groupKey: 'group-key',
@@ -234,7 +234,7 @@ void main() {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-        bookId: 'book-1',
+
         status: GroupStatus.active,
         role: 'owner',
         groupKey: 'group-key',

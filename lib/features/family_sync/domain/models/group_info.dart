@@ -11,7 +11,6 @@ enum GroupStatus { pending, confirming, active, inactive }
 abstract class GroupInfo with _$GroupInfo {
   const factory GroupInfo({
     required String groupId,
-    required String bookId,
     required GroupStatus status,
     String? inviteCode,
     DateTime? inviteExpiresAt,

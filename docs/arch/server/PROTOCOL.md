@@ -452,7 +452,8 @@ Member                   Server                   Other Members
 
 | Method | Path | Auth | 说明 |
 |--------|------|------|------|
-| POST | `/api/v1/group/create` | Ed25519 | 创建群组 |
+| GET | `/api/v1/group/check` | Ed25519 | 检查设备是否在有效群组中 |
+| POST | `/api/v1/group/create` | Ed25519 | 创建群组（幂等：已有活跃群组则返回） |
 | POST | `/api/v1/group/join` | Ed25519 | 加入群组 |
 | POST | `/api/v1/group/confirm` | Ed25519 | 确认成员（Owner） |
 | GET | `/api/v1/group/{groupId}/status` | Ed25519 | 查询群组状态 |
@@ -660,37 +661,65 @@ type PushRequest struct {
 
 ### 7.2 群组管理
 
+#### `GET /api/v1/group/check` — 检查设备群组归属
+
+检查当前设备是否已归属一个有效群组（活跃且成员 ≥ 2 人）。客户端可用此端点决定 UI 展示逻辑。
+
+**Auth**: Ed25519
+
+**Request Body**: 无
+
+**Response (200 OK)**:
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `groupExisted` | boolean | 是否存在有效群组 |
+| `groupId` | string (UUID)? | 群组 ID（仅 `groupExisted` 为 `true` 时返回） |
+
+```json
+{
+  "groupExisted": true,
+  "groupId": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+无有效群组时：
+```json
+{
+  "groupExisted": false
+}
+```
+
+**Error Responses**:
+
+| Status | 条件 |
+|--------|------|
+| 401 | 签名验证失败 |
+
+---
+
 #### `POST /api/v1/group/create` — 创建群组
 
 创建一个新群组，调用者自动成为 Owner。同时生成一个 6 位数邀请码。
 
+**幂等语义**: 若设备已在任一活跃群组中，不会创建新群组，而是返回已有群组信息（200 OK）。`inviteCode` 可能为空字符串（如果邀请码已过期）。
+
 **Auth**: Ed25519
 
-**Request Body**:
+**Request Body**: 无（空 JSON `{}` 或省略）
 
-| 字段 | 类型 | 必须 | 说明 |
-|------|------|------|------|
-| `bookId` | string | Yes | 关联的账本 ID |
-
-```json
-{
-  "bookId": "book-xyz-789"
-}
-```
-
-**Response (201 Created)**:
+**Response (201 Created)** — 新群组创建成功:
+**Response (200 OK)** — 已有活跃群组（幂等返回）:
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `groupId` | string (UUID) | 群组 ID |
-| `bookId` | string | 账本 ID |
-| `inviteCode` | string | 6 位数邀请码 |
-| `expiresAt` | number (Unix timestamp) | 邀请码过期时间 |
+| `inviteCode` | string | 6 位数邀请码（幂等返回时可能为空） |
+| `expiresAt` | number (Unix timestamp) | 邀请码过期时间（幂等返回时可能为 0） |
 
 ```json
 {
   "groupId": "550e8400-e29b-41d4-a716-446655440000",
-  "bookId": "book-xyz-789",
   "inviteCode": "123456",
   "expiresAt": 1709654400
 }
@@ -700,7 +729,6 @@ type PushRequest struct {
 
 | Status | 条件 |
 |--------|------|
-| 400 | 缺少 `bookId` |
 | 401 | 签名验证失败 |
 
 ---
@@ -728,14 +756,12 @@ type PushRequest struct {
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `groupId` | string (UUID) | 群组 ID |
-| `bookId` | string | 账本 ID |
 | `deviceName` | string | 加入者自己的设备名称 |
 | `members` | MemberInfo[] | 当前活跃成员列表 |
 
 ```json
 {
   "groupId": "550e8400-e29b-41d4-a716-446655440000",
-  "bookId": "book-xyz-789",
   "deviceName": "iPhone 15",
   "members": [
     {
@@ -831,7 +857,6 @@ Owner 批准一个 pending 状态的成员加入群组。
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `groupId` | string (UUID) | 群组 ID |
-| `bookId` | string | 账本 ID |
 | `status` | string | 群组状态（`"active"` / `"inactive"`） |
 | `inviteCode` | string? | 当前邀请码（仅群组活跃时返回） |
 | `inviteExpiresAt` | number? | 邀请码过期时间（Unix timestamp） |
@@ -840,7 +865,6 @@ Owner 批准一个 pending 状态的成员加入群组。
 ```json
 {
   "groupId": "550e8400-e29b-41d4-a716-446655440000",
-  "bookId": "book-xyz-789",
   "status": "active",
   "inviteCode": "123456",
   "inviteExpiresAt": 1709654400,

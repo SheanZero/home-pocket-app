@@ -1,8 +1,8 @@
 import 'push_sync_use_case.dart';
 
-/// Callback to fetch all local transactions for a book.
+/// Callback to fetch all local transactions.
 typedef FetchAllTransactionsCallback =
-    Future<List<Map<String, dynamic>>> Function(String bookId);
+    Future<List<Map<String, dynamic>>> Function();
 
 /// Performs a full sync by pushing all local transactions to the partner.
 ///
@@ -20,11 +20,11 @@ class FullSyncUseCase {
 
   static const _chunkSize = 50;
 
-  /// Execute full sync for a book.
+  /// Execute full sync.
   ///
   /// Returns the total number of operations pushed.
-  Future<int> execute(String bookId) async {
-    final allTransactions = await _fetchAllTransactions(bookId);
+  Future<int> execute() async {
+    final allTransactions = await _fetchAllTransactions();
 
     if (allTransactions.isEmpty) return 0;
 

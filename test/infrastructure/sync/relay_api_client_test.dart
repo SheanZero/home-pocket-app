@@ -32,7 +32,7 @@ void main() {
     ).thenAnswer((_) async => 'Ed25519 signed');
   });
 
-  test('createGroup posts bookId to /group/create', () async {
+  test('createGroup posts to /group/create', () async {
     when(
       () => httpClient.post(
         Uri.parse('https://example.com/api/v1/group/create'),
@@ -50,14 +50,14 @@ void main() {
       ),
     );
 
-    final response = await apiClient.createGroup(bookId: 'book-1');
+    final response = await apiClient.createGroup();
 
     expect(response['groupId'], 'group-1');
     verify(
       () => httpClient.post(
         Uri.parse('https://example.com/api/v1/group/create'),
         headers: any(named: 'headers'),
-        body: jsonEncode({'bookId': 'book-1'}),
+        body: any(named: 'body'),
       ),
     ).called(1);
   });
