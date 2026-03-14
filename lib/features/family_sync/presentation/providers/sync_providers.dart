@@ -6,7 +6,9 @@ import '../../../../application/family_sync/pull_sync_use_case.dart';
 import '../../../../application/family_sync/push_sync_use_case.dart';
 import '../../../../infrastructure/crypto/providers.dart';
 import '../../../../infrastructure/sync/sync_trigger_service.dart';
+import '../../domain/models/group_info.dart';
 import '../../domain/models/sync_status.dart';
+import 'active_group_provider.dart';
 import 'repository_providers.dart';
 
 part 'sync_providers.g.dart';
@@ -74,7 +76,24 @@ SyncTriggerService syncTriggerService(Ref ref) {
 @riverpod
 class SyncStatusNotifier extends _$SyncStatusNotifier {
   @override
-  SyncStatus build() => SyncStatus.unpaired;
+  SyncStatus build() {
+    final subscription = ref.container.listen<AsyncValue<GroupInfo?>>(
+      activeGroupProvider,
+      (previous, next) {
+        final hadActiveGroup = previous?.valueOrNull != null;
+        final hasActiveGroup = next.valueOrNull != null;
+        if (hadActiveGroup == hasActiveGroup) {
+          return;
+        }
+
+        state = hasActiveGroup ? SyncStatus.synced : SyncStatus.unpaired;
+      },
+    );
+    ref.onDispose(subscription.close);
+
+    final hasActiveGroup = ref.read(activeGroupProvider).valueOrNull != null;
+    return hasActiveGroup ? SyncStatus.synced : SyncStatus.unpaired;
+  }
 
   void updateStatus(SyncStatus status) {
     state = status;

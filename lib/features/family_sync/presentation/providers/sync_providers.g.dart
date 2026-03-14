@@ -88,7 +88,7 @@ final syncTriggerServiceProvider =
 // ignore: unused_element
 typedef SyncTriggerServiceRef = AutoDisposeProviderRef<SyncTriggerService>;
 String _$syncStatusNotifierHash() =>
-    r'7afaab30ee70136d89abdcc8e4a4a20caaaaa7e9';
+    r'c29fe5885a9a8544c419b3fc63bb1df78b75c08d';
 
 /// Current sync status state notifier.
 ///

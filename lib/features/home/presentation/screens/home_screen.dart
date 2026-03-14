@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../features/analytics/presentation/providers/analytics_providers.dart';
+import '../../../../features/family_sync/presentation/providers/active_group_provider.dart';
+import '../../../../features/family_sync/presentation/screens/pairing_screen.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/category/category_service.dart';
 import '../../../settings/presentation/providers/locale_provider.dart';
@@ -40,6 +42,7 @@ class HomeScreen extends ConsumerWidget {
     );
     final todayTxAsync = ref.watch(todayTransactionsProvider(bookId: bookId));
     final ohtaniVisible = ref.watch(ohtaniConverterVisibleProvider);
+    final isGroupMode = ref.watch(isGroupModeProvider);
 
     return SingleChildScrollView(
       child: Column(
@@ -47,15 +50,32 @@ class HomeScreen extends ConsumerWidget {
         children: [
           // Hero header + Month overview card with blue background overlap
           _buildHeroWithCard(
-              context, l10n, locale, year, month, reportAsync, todayTxAsync),
-          const SizedBox(height: 16),
-
-          // Family invite banner
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: FamilyInviteBanner(onTap: () {}),
+            context,
+            l10n,
+            locale,
+            year,
+            month,
+            reportAsync,
+            todayTxAsync,
+            isGroupMode,
           ),
           const SizedBox(height: 16),
+
+          if (!isGroupMode) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: FamilyInviteBanner(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const PairingScreen(),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
 
           // Today's transactions header
           Padding(
@@ -111,11 +131,9 @@ class HomeScreen extends ConsumerWidget {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: HomeTransactionTile(
-                      merchant: tx.merchant ??
-                          CategoryService.resolveFromId(
-                            tx.categoryId,
-                            locale,
-                          ),
+                      merchant:
+                          tx.merchant ??
+                          CategoryService.resolveFromId(tx.categoryId, locale),
                       categoryLabel: CategoryService.resolveFromId(
                         tx.categoryId,
                         locale,
@@ -181,6 +199,7 @@ class HomeScreen extends ConsumerWidget {
     int month,
     AsyncValue reportAsync,
     AsyncValue<List<Transaction>> todayTxAsync,
+    bool isGroupMode,
   ) {
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -235,13 +254,14 @@ class HomeScreen extends ConsumerWidget {
                 final recentSoulTx = todayTxAsync.whenOrNull(
                   data: (txs) {
                     final soulTxs = txs
-                        .where((tx) =>
-                            tx.ledgerType == LedgerType.soul &&
-                            tx.type == TransactionType.expense)
+                        .where(
+                          (tx) =>
+                              tx.ledgerType == LedgerType.soul &&
+                              tx.type == TransactionType.expense,
+                        )
                         .toList();
                     if (soulTxs.isEmpty) return null;
-                    soulTxs.sort(
-                        (a, b) => b.timestamp.compareTo(a.timestamp));
+                    soulTxs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
                     return soulTxs.first;
                   },
                 );
@@ -253,13 +273,15 @@ class HomeScreen extends ConsumerWidget {
                   previousMonthTotal: previousTotal,
                   currentMonthNumber: month,
                   previousMonthNumber: previousMonth,
-                  modeBadgeText: l10n.homePersonalMode,
+                  modeBadgeText: isGroupMode
+                      ? l10n.homeFamilyMode
+                      : l10n.homePersonalMode,
                   child: SoulFullnessCard(
                     soulPercentage: soulPercent,
-                    happinessROI:
-                        double.parse(happinessROI.toStringAsFixed(1)),
+                    happinessROI: double.parse(happinessROI.toStringAsFixed(1)),
                     fullnessLevel: fullness,
-                    recentMerchant: recentSoulTx?.merchant ??
+                    recentMerchant:
+                        recentSoulTx?.merchant ??
                         (recentSoulTx != null
                             ? CategoryService.resolveFromId(
                                 recentSoulTx.categoryId,

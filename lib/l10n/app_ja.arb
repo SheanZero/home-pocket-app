@@ -129,6 +129,7 @@
   "homeTodayTitle": "今日の記録",
   "homeTodayCount": "{count}件",
   "homePersonalMode": "個人モード",
+  "homeFamilyMode": "家族モード",
   "homeTabHome": "ホーム",
   "homeTabList": "一覧",
   "homeTabChart": "チャート",

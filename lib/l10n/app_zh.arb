@@ -129,6 +129,7 @@
   "homeTodayTitle": "今日记录",
   "homeTodayCount": "{count}条",
   "homePersonalMode": "个人模式",
+  "homeFamilyMode": "家庭模式",
   "homeTabHome": "主页",
   "homeTabList": "列表",
   "homeTabChart": "图表",

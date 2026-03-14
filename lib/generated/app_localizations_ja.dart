@@ -401,6 +401,9 @@ class SJa extends S {
   String get homePersonalMode => '個人モード';
 
   @override
+  String get homeFamilyMode => '家族モード';
+
+  @override
   String get homeTabHome => 'ホーム';
 
   @override

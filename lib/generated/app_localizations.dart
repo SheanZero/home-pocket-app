@@ -867,6 +867,12 @@ abstract class S {
   /// **'Personal Mode'**
   String get homePersonalMode;
 
+  /// Mode badge for family/group mode
+  ///
+  /// In en, this message translates to:
+  /// **'Family Mode'**
+  String get homeFamilyMode;
+
   /// Bottom nav home tab label
   ///
   /// In en, this message translates to:

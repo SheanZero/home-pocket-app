@@ -103,6 +103,16 @@ class GroupRepositoryImpl implements GroupRepository {
   }
 
   @override
+  Stream<GroupInfo?> watchActiveGroup() {
+    return _groupDao.watchActiveGroup().asyncMap((group) async {
+      if (group == null) {
+        return null;
+      }
+      return _toGroupInfo(group);
+    });
+  }
+
+  @override
   Future<GroupInfo?> getPendingGroup() async {
     final group = await _groupDao.findPending();
     if (group == null) return null;

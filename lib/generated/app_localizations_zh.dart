@@ -401,6 +401,9 @@ class SZh extends S {
   String get homePersonalMode => '个人模式';
 
   @override
+  String get homeFamilyMode => '家庭模式';
+
+  @override
   String get homeTabHome => '主页';
 
   @override

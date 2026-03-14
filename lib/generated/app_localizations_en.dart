@@ -403,6 +403,9 @@ class SEn extends S {
   String get homePersonalMode => 'Personal Mode';
 
   @override
+  String get homeFamilyMode => 'Family Mode';
+
+  @override
   String get homeTabHome => 'Home';
 
   @override

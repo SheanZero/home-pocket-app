@@ -73,8 +73,8 @@ void main() {
     syncTriggerService = MockSyncTriggerService();
     pushNotificationService = MockPushNotificationService();
     when(
-      () => groupRepository.getActiveGroup(),
-    ).thenAnswer((_) async => buildActiveGroup());
+      () => groupRepository.watchActiveGroup(),
+    ).thenAnswer((_) => Stream.value(buildActiveGroup()));
     when(() => groupRepository.getGroupById(any())).thenAnswer((
       invocation,
     ) async {
@@ -162,8 +162,8 @@ void main() {
     'checks server before showing pairing when unpaired and no local group exists',
     (tester) async {
       when(
-        () => groupRepository.getActiveGroup(),
-      ).thenAnswer((_) async => null);
+        () => groupRepository.watchActiveGroup(),
+      ).thenAnswer((_) => Stream.value(null));
       when(
         () => checkGroupUseCase.execute(),
       ).thenAnswer((_) async => const CheckGroupInGroup(groupId: 'group-123'));
@@ -201,8 +201,8 @@ void main() {
     'shows pairing screen when server check reports device is not in a group',
     (tester) async {
       when(
-        () => groupRepository.getActiveGroup(),
-      ).thenAnswer((_) async => null);
+        () => groupRepository.watchActiveGroup(),
+      ).thenAnswer((_) => Stream.value(null));
       when(
         () => checkGroupUseCase.execute(),
       ).thenAnswer((_) async => const CheckGroupNotInGroup());
@@ -240,8 +240,8 @@ void main() {
     'shows error snackbar and falls back to pairing when server check fails',
     (tester) async {
       when(
-        () => groupRepository.getActiveGroup(),
-      ).thenAnswer((_) async => null);
+        () => groupRepository.watchActiveGroup(),
+      ).thenAnswer((_) => Stream.value(null));
       when(
         () => checkGroupUseCase.execute(),
       ).thenAnswer((_) async => const CheckGroupError('Network error'));

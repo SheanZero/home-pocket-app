@@ -385,6 +385,9 @@
   "homePersonalMode": "Personal Mode",
   "@homePersonalMode": { "description": "Mode badge for personal/solo mode" },
 
+  "homeFamilyMode": "Family Mode",
+  "@homeFamilyMode": { "description": "Mode badge for family/group mode" },
+
   "homeTabHome": "Home",
   "@homeTabHome": { "description": "Bottom nav home tab label" },
 

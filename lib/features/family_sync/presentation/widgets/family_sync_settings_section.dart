@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../generated/app_localizations.dart';
-import '../providers/repository_providers.dart';
 import '../../domain/models/sync_status.dart';
 import '../../use_cases/check_group_use_case.dart';
+import '../providers/active_group_provider.dart';
 import '../providers/group_providers.dart';
 import '../providers/sync_providers.dart';
 import '../screens/group_management_screen.dart';
@@ -21,45 +21,38 @@ class FamilySyncSettingsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final syncStatus = ref.watch(syncStatusNotifierProvider);
     final l10n = S.of(context);
-    final groupFuture = ref.read(groupRepositoryProvider).getActiveGroup();
+    final activeGroup = ref.watch(activeGroupProvider).valueOrNull;
+    final subtitle = activeGroup != null
+        ? l10n.familySyncMemberCount(activeGroup.members.length)
+        : _statusDescription(l10n, syncStatus);
 
-    return FutureBuilder(
-      future: groupFuture,
-      builder: (context, snapshot) {
-        final group = snapshot.data;
-        final subtitle = group != null
-            ? l10n.familySyncMemberCount(group.members.length)
-            : _statusDescription(l10n, syncStatus);
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Text(
-                l10n.familySync,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Text(
+            l10n.familySync,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
             ),
-            ListTile(
-              leading: const Icon(Icons.sync),
-              title: Text(l10n.familySync),
-              subtitle: Text(subtitle),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SyncStatusBadge(status: syncStatus, compact: true),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.chevron_right),
-                ],
-              ),
-              onTap: () => _navigate(context, ref, syncStatus),
-            ),
-          ],
-        );
-      },
+          ),
+        ),
+        ListTile(
+          leading: const Icon(Icons.sync),
+          title: Text(l10n.familySync),
+          subtitle: Text(subtitle),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SyncStatusBadge(status: syncStatus, compact: true),
+              const SizedBox(width: 8),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+          onTap: () => _navigate(context, ref, syncStatus),
+        ),
+      ],
     );
   }
 
@@ -68,7 +61,7 @@ class FamilySyncSettingsSection extends ConsumerWidget {
     WidgetRef ref,
     SyncStatus status,
   ) async {
-    final localGroup = await ref.read(groupRepositoryProvider).getActiveGroup();
+    final localGroup = ref.read(activeGroupProvider).valueOrNull;
     if (!context.mounted) return;
 
     if (localGroup != null || status != SyncStatus.unpaired) {

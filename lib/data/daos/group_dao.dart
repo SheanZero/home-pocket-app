@@ -19,6 +19,10 @@ class GroupDao extends DatabaseAccessor<AppDatabase> with _$GroupDaoMixin {
     groups,
   )..where((table) => table.status.equals('active'))).getSingleOrNull();
 
+  Stream<GroupData?> watchActiveGroup() => (select(
+    groups,
+  )..where((table) => table.status.equals('active'))).watchSingleOrNull();
+
   Future<GroupData?> findPending() =>
       (select(groups)..where(
             (table) =>

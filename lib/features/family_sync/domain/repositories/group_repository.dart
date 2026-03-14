@@ -30,6 +30,7 @@ abstract class GroupRepository {
   Future<void> storeGroupKey(String groupId, String groupKeyBase64);
 
   Future<GroupInfo?> getActiveGroup();
+  Stream<GroupInfo?> watchActiveGroup();
 
   Future<GroupInfo?> getPendingGroup();
 
