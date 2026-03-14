@@ -7,6 +7,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/sync/sync_trigger_service.dart';
 import '../../domain/models/group_info.dart';
+import '../../domain/models/sync_status.dart';
+import '../../use_cases/check_group_use_case.dart';
+import '../providers/group_providers.dart';
 import '../providers/repository_providers.dart';
 import '../providers/sync_providers.dart';
 import 'group_management_screen.dart';
@@ -41,13 +44,47 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
       if (!mounted) return;
       if (event.type != SyncTriggerEventType.memberConfirmed) return;
       if (event.groupId != null && event.groupId != widget.groupId) return;
-
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(
-          builder: (_) => GroupManagementScreen(groupId: widget.groupId),
-        ),
-      );
+      unawaited(_verifyGroupAndNavigate());
     });
+  }
+
+  Future<void> _verifyGroupAndNavigate() async {
+    if (mounted) {
+      setState(() => _isLoading = true);
+    }
+
+    final result = await ref.read(checkGroupUseCaseProvider).execute();
+    if (!mounted) return;
+
+    switch (result) {
+      case CheckGroupInGroup(:final groupId):
+        ref
+            .read(syncStatusNotifierProvider.notifier)
+            .updateStatus(SyncStatus.synced);
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute<void>(
+            builder: (_) => GroupManagementScreen(groupId: groupId),
+          ),
+        );
+      case CheckGroupNotInGroup():
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              S
+                  .of(context)
+                  .familySyncCheckFailed(
+                    S.of(context).familySyncStatusUnpaired,
+                  ),
+            ),
+          ),
+        );
+      case CheckGroupError(:final message):
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(S.of(context).familySyncCheckFailed(message))),
+        );
+    }
   }
 
   Future<void> _loadGroup() async {
@@ -78,7 +115,11 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
         title: Text(l10n.familySyncWaitingTitle),
         actions: [
           IconButton(
-            onPressed: _loadGroup,
+            onPressed: () async {
+              await _loadGroup();
+              if (!mounted) return;
+              await _verifyGroupAndNavigate();
+            },
             icon: const Icon(Icons.refresh),
             tooltip: l10n.refresh,
           ),

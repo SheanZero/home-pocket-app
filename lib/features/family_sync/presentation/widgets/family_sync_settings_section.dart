@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../generated/app_localizations.dart';
 import '../providers/repository_providers.dart';
 import '../../domain/models/sync_status.dart';
+import '../../use_cases/check_group_use_case.dart';
+import '../providers/group_providers.dart';
 import '../providers/sync_providers.dart';
 import '../screens/group_management_screen.dart';
 import '../screens/pairing_screen.dart';
@@ -61,15 +63,73 @@ class FamilySyncSettingsSection extends ConsumerWidget {
     );
   }
 
-  void _navigate(BuildContext context, WidgetRef ref, SyncStatus status) {
-    final Widget screen;
-    if (status == SyncStatus.unpaired) {
-      screen = const PairingScreen();
-    } else {
-      screen = const GroupManagementScreen();
+  Future<void> _navigate(
+    BuildContext context,
+    WidgetRef ref,
+    SyncStatus status,
+  ) async {
+    final localGroup = await ref.read(groupRepositoryProvider).getActiveGroup();
+    if (!context.mounted) return;
+
+    if (localGroup != null || status != SyncStatus.unpaired) {
+      if (localGroup != null) {
+        ref
+            .read(syncStatusNotifierProvider.notifier)
+            .updateStatus(SyncStatus.synced);
+      }
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => GroupManagementScreen(groupId: localGroup?.groupId),
+        ),
+      );
+      return;
     }
 
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
+    final l10n = S.of(context);
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          content: Row(
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(width: 16),
+              Expanded(child: Text(l10n.familySyncCheckingGroup)),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final result = await ref.read(checkGroupUseCaseProvider).execute();
+    if (!context.mounted) return;
+
+    Navigator.of(context).pop();
+
+    switch (result) {
+      case CheckGroupInGroup(:final groupId):
+        ref
+            .read(syncStatusNotifierProvider.notifier)
+            .updateStatus(SyncStatus.synced);
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => GroupManagementScreen(groupId: groupId),
+          ),
+        );
+      case CheckGroupNotInGroup():
+        await Navigator.of(
+          context,
+        ).push(MaterialPageRoute<void>(builder: (_) => const PairingScreen()));
+      case CheckGroupError(:final message):
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.familySyncCheckFailed(message))),
+        );
+        await Navigator.of(
+          context,
+        ).push(MaterialPageRoute<void>(builder: (_) => const PairingScreen()));
+    }
   }
 
   String _statusDescription(S l10n, SyncStatus status) {

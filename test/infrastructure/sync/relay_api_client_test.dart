@@ -62,6 +62,53 @@ void main() {
     ).called(1);
   });
 
+  test('checkGroup gets current group membership state', () async {
+    when(
+      () => httpClient.get(
+        Uri.parse('https://example.com/api/v1/group/check'),
+        headers: any(named: 'headers'),
+      ),
+    ).thenAnswer(
+      (_) async => http.Response(
+        jsonEncode({
+          'groupExisted': true,
+          'groupId': '550e8400-e29b-41d4-a716-446655440000',
+        }),
+        200,
+      ),
+    );
+
+    final response = await apiClient.checkGroup();
+
+    expect(response['groupExisted'], true);
+    expect(response['groupId'], '550e8400-e29b-41d4-a716-446655440000');
+    verify(
+      () => httpClient.get(
+        Uri.parse('https://example.com/api/v1/group/check'),
+        headers: any(named: 'headers'),
+      ),
+    ).called(1);
+  });
+
+  test(
+    'checkGroup returns false when server reports no active group',
+    () async {
+      when(
+        () => httpClient.get(
+          Uri.parse('https://example.com/api/v1/group/check'),
+          headers: any(named: 'headers'),
+        ),
+      ).thenAnswer(
+        (_) async => http.Response(jsonEncode({'groupExisted': false}), 200),
+      );
+
+      final response = await apiClient.checkGroup();
+
+      expect(response['groupExisted'], false);
+      expect(response['groupId'], isNull);
+    },
+  );
+
   test('pushSync sends group payload without targetDeviceId', () async {
     when(
       () => httpClient.post(

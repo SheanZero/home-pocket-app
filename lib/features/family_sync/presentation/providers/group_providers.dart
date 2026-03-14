@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../infrastructure/crypto/providers.dart';
+import '../../use_cases/check_group_use_case.dart';
 import '../../use_cases/confirm_member_use_case.dart';
 import '../../use_cases/create_group_use_case.dart';
 import '../../use_cases/deactivate_group_use_case.dart';
@@ -16,6 +17,14 @@ final createGroupUseCaseProvider = Provider<CreateGroupUseCase>((ref) {
     keyManager: ref.watch(keyManagerProvider),
     groupRepository: ref.watch(groupRepositoryProvider),
     e2eeService: ref.watch(e2eeServiceProvider),
+  );
+});
+
+final checkGroupUseCaseProvider = Provider<CheckGroupUseCase>((ref) {
+  return CheckGroupUseCase(
+    apiClient: ref.watch(relayApiClientProvider),
+    keyManager: ref.watch(keyManagerProvider),
+    groupRepository: ref.watch(groupRepositoryProvider),
   );
 });
 

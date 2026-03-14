@@ -293,6 +293,8 @@
   "@familySyncStatusPairing": {
     "description": "Sync status description when pairing"
   },
+  "familySyncCheckingGroup": "グループ状況を確認中...",
+  "familySyncCheckFailed": "グループ状況を確認できません: {message}",
   "familySyncStatusUnpaired": "タップしてファミリーグループを作成または参加",
   "@familySyncStatusUnpaired": {
     "description": "Sync status description when unpaired"

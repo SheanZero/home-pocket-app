@@ -608,6 +608,19 @@
   "@familySyncStatusPairing": {
     "description": "Sync status description when pairing"
   },
+  "familySyncCheckingGroup": "Checking group status...",
+  "@familySyncCheckingGroup": {
+    "description": "Loading text while checking whether the device is already in a group"
+  },
+  "familySyncCheckFailed": "Could not check group status: {message}",
+  "@familySyncCheckFailed": {
+    "description": "Error shown when verifying current group membership fails",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
   "familySyncStatusUnpaired": "Tap to create or join a family group",
   "@familySyncStatusUnpaired": {
     "description": "Sync status description when unpaired"

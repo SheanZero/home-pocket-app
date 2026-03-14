@@ -293,6 +293,8 @@
   "@familySyncStatusPairing": {
     "description": "Sync status description when pairing"
   },
+  "familySyncCheckingGroup": "正在检查群组状态...",
+  "familySyncCheckFailed": "无法检查群组状态: {message}",
   "familySyncStatusUnpaired": "点击创建或加入家庭分组",
   "@familySyncStatusUnpaired": {
     "description": "Sync status description when unpaired"

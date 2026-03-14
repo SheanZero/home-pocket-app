@@ -592,6 +592,14 @@ class SZh extends S {
   String get familySyncStatusPairing => '分组设置中...';
 
   @override
+  String get familySyncCheckingGroup => '正在检查群组状态...';
+
+  @override
+  String familySyncCheckFailed(String message) {
+    return '无法检查群组状态: $message';
+  }
+
+  @override
   String get familySyncStatusUnpaired => '点击创建或加入家庭分组';
 
   @override

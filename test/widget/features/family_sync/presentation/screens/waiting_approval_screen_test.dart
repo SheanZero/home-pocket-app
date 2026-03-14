@@ -4,9 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
+import 'package:home_pocket/features/family_sync/presentation/providers/group_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/sync_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/waiting_approval_screen.dart';
+import 'package:home_pocket/features/family_sync/use_cases/check_group_use_case.dart';
 import 'package:home_pocket/infrastructure/sync/sync_trigger_service.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -16,9 +18,12 @@ class MockGroupRepository extends Mock implements GroupRepository {}
 
 class MockSyncTriggerService extends Mock implements SyncTriggerService {}
 
+class MockCheckGroupUseCase extends Mock implements CheckGroupUseCase {}
+
 void main() {
   late MockGroupRepository groupRepository;
   late MockSyncTriggerService syncTriggerService;
+  late MockCheckGroupUseCase checkGroupUseCase;
   late StreamController<SyncTriggerEvent> eventsController;
 
   GroupInfo buildConfirmingGroup() => GroupInfo(
@@ -72,6 +77,7 @@ void main() {
   setUp(() {
     groupRepository = MockGroupRepository();
     syncTriggerService = MockSyncTriggerService();
+    checkGroupUseCase = MockCheckGroupUseCase();
     eventsController = StreamController<SyncTriggerEvent>.broadcast();
     when(
       () => syncTriggerService.events,
@@ -98,6 +104,7 @@ void main() {
         const WaitingApprovalScreen(groupId: 'group-1'),
         overrides: [
           groupRepositoryProvider.overrideWithValue(groupRepository),
+          checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
           syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
         ],
       ),
@@ -113,7 +120,7 @@ void main() {
   });
 
   testWidgets(
-    'auto-navigates to group management when memberConfirmed event is received',
+    'verifies group state before navigating when memberConfirmed event is received',
     (tester) async {
       when(
         () => groupRepository.getGroupById('group-1'),
@@ -121,12 +128,16 @@ void main() {
       when(
         () => groupRepository.getActiveGroup(),
       ).thenAnswer((_) async => buildActiveGroup());
+      when(
+        () => checkGroupUseCase.execute(),
+      ).thenAnswer((_) async => const CheckGroupInGroup(groupId: 'group-1'));
 
       await tester.pumpWidget(
         createLocalizedWidget(
           const WaitingApprovalScreen(groupId: 'group-1'),
           overrides: [
             groupRepositoryProvider.overrideWithValue(groupRepository),
+            checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
             syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
           ],
         ),
@@ -138,7 +149,42 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      verify(() => checkGroupUseCase.execute()).called(1);
       expect(find.text('Group Management'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'stays on waiting screen and shows snackbar when group verification fails',
+    (tester) async {
+      when(
+        () => groupRepository.getGroupById('group-1'),
+      ).thenAnswer((_) async => buildConfirmingGroup());
+      when(
+        () => checkGroupUseCase.execute(),
+      ).thenAnswer((_) async => const CheckGroupError('Network error'));
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const WaitingApprovalScreen(groupId: 'group-1'),
+          overrides: [
+            groupRepositoryProvider.overrideWithValue(groupRepository),
+            checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
+            syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      eventsController.add(
+        const SyncTriggerEvent.memberConfirmed(groupId: 'group-1'),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      verify(() => checkGroupUseCase.execute()).called(1);
+      expect(find.byType(WaitingApprovalScreen), findsOneWidget);
+      expect(find.textContaining('Network error'), findsOneWidget);
     },
   );
 }

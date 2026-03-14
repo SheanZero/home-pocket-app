@@ -14,6 +14,15 @@ abstract class GroupRepository {
     required List<GroupMember> members,
   });
 
+  Future<void> restoreActiveGroup({
+    required String groupId,
+    required String role,
+    String? inviteCode,
+    DateTime? inviteExpiresAt,
+    String? groupKey,
+    required List<GroupMember> members,
+  });
+
   Future<void> activateMember(String groupId, String deviceId);
 
   Future<void> confirmLocalGroup(String groupId);

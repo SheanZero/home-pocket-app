@@ -126,6 +126,11 @@ class RelayApiClient {
     return _parseResponse(response);
   }
 
+  Future<Map<String, dynamic>> checkGroup() async {
+    final response = await _get('/group/check');
+    return _parseResponse(response);
+  }
+
   Future<Map<String, dynamic>> confirmMember({
     required String groupId,
     required String deviceId,
@@ -338,8 +343,9 @@ class RelayApiClient {
     }
 
     // Server may use "error" or "message" key for the error description.
-    final errorMessage = (errorBody['error'] ?? errorBody['message'])
-        ?.toString() ?? 'HTTP ${response.statusCode}';
+    final errorMessage =
+        (errorBody['error'] ?? errorBody['message'])?.toString() ??
+        'HTTP ${response.statusCode}';
 
     throw RelayApiException(
       statusCode: response.statusCode,

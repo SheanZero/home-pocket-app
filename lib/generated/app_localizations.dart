@@ -1221,6 +1221,18 @@ abstract class S {
   /// **'Group setup in progress...'**
   String get familySyncStatusPairing;
 
+  /// Loading text while checking whether the device is already in a group
+  ///
+  /// In en, this message translates to:
+  /// **'Checking group status...'**
+  String get familySyncCheckingGroup;
+
+  /// Error shown when verifying current group membership fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not check group status: {message}'**
+  String familySyncCheckFailed(String message);
+
   /// Sync status description when unpaired
   ///
   /// In en, this message translates to:

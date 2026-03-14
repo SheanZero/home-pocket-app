@@ -62,10 +62,7 @@ void main() {
       ),
     ];
 
-    await repository.saveConfirmingGroup(
-      groupId: 'group-2',
-      members: members,
-    );
+    await repository.saveConfirmingGroup(groupId: 'group-2', members: members);
 
     final pending = await repository.getPendingGroup();
 
@@ -79,4 +76,47 @@ void main() {
       containsAll(<String>['owner-device', 'joiner-device']),
     );
   });
+
+  test(
+    'restoreActiveGroup persists an active snapshot recovered from server',
+    () async {
+      final members = [
+        const GroupMember(
+          deviceId: 'owner-device',
+          publicKey: 'owner-public-key',
+          deviceName: 'Owner phone',
+          role: 'owner',
+          status: 'active',
+        ),
+        const GroupMember(
+          deviceId: 'member-device',
+          publicKey: 'member-public-key',
+          deviceName: 'Member phone',
+          role: 'member',
+          status: 'active',
+        ),
+      ];
+
+      await repository.restoreActiveGroup(
+        groupId: 'group-3',
+        role: 'member',
+        inviteCode: 'ZXCVBN',
+        inviteExpiresAt: DateTime(2026, 3, 5),
+        groupKey: null,
+        members: members,
+      );
+
+      final active = await repository.getActiveGroup();
+
+      expect(active, isNotNull);
+      expect(active!.groupId, 'group-3');
+      expect(active.status, GroupStatus.active);
+      expect(active.role, 'member');
+      expect(active.inviteCode, 'ZXCVBN');
+      expect(active.inviteExpiresAt, DateTime(2026, 3, 5));
+      expect(active.groupKey, isNull);
+      expect(active.members, unorderedEquals(members));
+      expect(active.confirmedAt, isNotNull);
+    },
+  );
 }

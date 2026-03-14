@@ -54,6 +54,34 @@ class GroupRepositoryImpl implements GroupRepository {
   }
 
   @override
+  Future<void> restoreActiveGroup({
+    required String groupId,
+    required String role,
+    String? inviteCode,
+    DateTime? inviteExpiresAt,
+    String? groupKey,
+    required List<GroupMember> members,
+  }) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    await _groupDao.attachedDatabase.transaction(() async {
+      await _groupDao.insert(
+        GroupsCompanion.insert(
+          groupId: groupId,
+          status: 'active',
+          role: role,
+          inviteCode: Value(inviteCode),
+          inviteExpiresAt: Value(inviteExpiresAt?.millisecondsSinceEpoch),
+          groupKey: Value(groupKey),
+          createdAt: now,
+          confirmedAt: Value(now),
+        ),
+      );
+      await _memberDao.replaceAll(groupId, _toCompanions(groupId, members));
+    });
+  }
+
+  @override
   Future<void> activateMember(String groupId, String deviceId) =>
       _memberDao.updateStatus(groupId, deviceId, 'active');
 

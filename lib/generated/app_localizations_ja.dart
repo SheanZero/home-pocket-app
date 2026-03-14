@@ -592,6 +592,14 @@ class SJa extends S {
   String get familySyncStatusPairing => 'グループ設定中...';
 
   @override
+  String get familySyncCheckingGroup => 'グループ状況を確認中...';
+
+  @override
+  String familySyncCheckFailed(String message) {
+    return 'グループ状況を確認できません: $message';
+  }
+
+  @override
   String get familySyncStatusUnpaired => 'タップしてファミリーグループを作成または参加';
 
   @override

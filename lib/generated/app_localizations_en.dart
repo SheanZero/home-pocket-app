@@ -596,6 +596,14 @@ class SEn extends S {
   String get familySyncStatusPairing => 'Group setup in progress...';
 
   @override
+  String get familySyncCheckingGroup => 'Checking group status...';
+
+  @override
+  String familySyncCheckFailed(String message) {
+    return 'Could not check group status: $message';
+  }
+
+  @override
   String get familySyncStatusUnpaired => 'Tap to create or join a family group';
 
   @override
