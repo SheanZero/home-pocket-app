@@ -50,3 +50,19 @@ google-services.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Scratch / temporary files
+*.py
+*.patch
+/all_imports.txt
+/minimal.dart
+/run_gen.sh
+/runner.sh
+/test.sh
+/test_count.py
+/gen_canvas.dart
+/docs/canvas/
+/voice_providers.patch
+lib/features/accounting/presentation/providers/voice_providers_clean*
+lib/features/accounting/presentation/providers/voice_providers_final*
+lib/features/accounting/presentation/providers/voice_providers_part*
