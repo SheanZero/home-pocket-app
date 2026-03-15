@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../application/family_sync/check_group_validity_use_case.dart';
 import '../../../../application/family_sync/full_sync_use_case.dart';
 import '../../../../application/family_sync/apply_sync_operations_use_case.dart';
 import '../../../../application/family_sync/shadow_book_service.dart';
@@ -60,6 +61,15 @@ ApplySyncOperationsUseCase applySyncOperationsUseCase(Ref ref) {
   );
 }
 
+@riverpod
+CheckGroupValidityUseCase checkGroupValidityUseCase(Ref ref) {
+  return CheckGroupValidityUseCase(
+    groupRepo: ref.watch(groupRepositoryProvider),
+    apiClient: ref.watch(relayApiClientProvider),
+    shadowBookService: ref.watch(shadowBookServiceProvider),
+  );
+}
+
 /// FullSyncUseCase provider.
 @riverpod
 FullSyncUseCase fullSyncUseCase(Ref ref) {
@@ -69,8 +79,7 @@ FullSyncUseCase fullSyncUseCase(Ref ref) {
   return FullSyncUseCase(
     pushSync: ref.watch(pushSyncUseCaseProvider),
     fetchAllTransactions: () async {
-      final allBooks = await bookRepo.findAll();
-      final localBooks = allBooks.where((book) => !book.isShadow).toList();
+      final localBooks = await bookRepo.findAll();
       final operations = <Map<String, dynamic>>[];
 
       for (final book in localBooks) {

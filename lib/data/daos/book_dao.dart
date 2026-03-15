@@ -83,10 +83,16 @@ class BookDao {
     return query.get();
   }
 
-  Future<List<BookRow>> findAll({bool includeArchived = false}) async {
+  Future<List<BookRow>> findAll({
+    bool includeArchived = false,
+    bool includeShadow = false,
+  }) async {
     final query = _db.select(_db.books);
     if (!includeArchived) {
       query.where((t) => t.isArchived.equals(false));
+    }
+    if (!includeShadow) {
+      query.where((t) => t.isShadow.equals(false));
     }
     query.orderBy([(t) => OrderingTerm.desc(t.createdAt)]);
     return query.get();

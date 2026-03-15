@@ -6,7 +6,7 @@ abstract class BookRepository {
   Future<Book?> findById(String id);
   Future<Book?> findShadowBookByDeviceId(String ownerDeviceId);
   Future<List<Book>> findShadowBooksByGroupId(String groupId);
-  Future<List<Book>> findAll({bool includeArchived});
+  Future<List<Book>> findAll({bool includeArchived, bool includeShadow});
   Future<void> update(Book book);
   Future<void> archive(String id);
   Future<void> delete(String id);

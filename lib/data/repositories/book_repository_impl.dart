@@ -46,8 +46,14 @@ class BookRepositoryImpl implements BookRepository {
   }
 
   @override
-  Future<List<Book>> findAll({bool includeArchived = false}) async {
-    final rows = await _dao.findAll(includeArchived: includeArchived);
+  Future<List<Book>> findAll({
+    bool includeArchived = false,
+    bool includeShadow = false,
+  }) async {
+    final rows = await _dao.findAll(
+      includeArchived: includeArchived,
+      includeShadow: includeShadow,
+    );
     return rows.map(_toModel).toList();
   }
 

@@ -48,7 +48,10 @@ class ExportBackupUseCase {
       // 1. Collect all data
       final transactions = await _transactionRepo.findAllByBook(bookId);
       final categories = await _categoryRepo.findAll();
-      final books = await _bookRepo.findAll(includeArchived: true);
+      final books = await _bookRepo.findAll(
+        includeArchived: true,
+        includeShadow: true,
+      );
       final settings = await _settingsRepo.getSettings();
 
       // 2. Build backup data structure

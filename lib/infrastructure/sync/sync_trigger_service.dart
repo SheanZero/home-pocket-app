@@ -181,7 +181,12 @@ class SyncTriggerService {
   ) async {
     await onTransactionChanged(
       operations: [
-        {'op': 'insert', 'table': 'transactions', 'data': transactionData},
+        {
+          'op': 'create',
+          'entityType': 'bill',
+          'entityId': transactionData['id'],
+          'data': transactionData,
+        },
       ],
     );
   }
@@ -192,7 +197,12 @@ class SyncTriggerService {
   ) async {
     await onTransactionChanged(
       operations: [
-        {'op': 'update', 'table': 'transactions', 'data': transactionData},
+        {
+          'op': 'update',
+          'entityType': 'bill',
+          'entityId': transactionData['id'],
+          'data': transactionData,
+        },
       ],
     );
   }
@@ -201,7 +211,11 @@ class SyncTriggerService {
   Future<void> onTransactionDeleted(String transactionId) async {
     await onTransactionChanged(
       operations: [
-        {'op': 'delete', 'table': 'transactions', 'id': transactionId},
+        {
+          'op': 'delete',
+          'entityType': 'bill',
+          'entityId': transactionId,
+        },
       ],
     );
   }

@@ -82,7 +82,27 @@ final applySyncOperationsUseCaseProvider =
 // ignore: unused_element
 typedef ApplySyncOperationsUseCaseRef =
     AutoDisposeProviderRef<ApplySyncOperationsUseCase>;
-String _$fullSyncUseCaseHash() => r'841ff684603ff1684b3317f1a24b543fbbc12a31';
+String _$checkGroupValidityUseCaseHash() =>
+    r'32e79f4bdac976f47d84c288953ae3d3e2f145df';
+
+/// See also [checkGroupValidityUseCase].
+@ProviderFor(checkGroupValidityUseCase)
+final checkGroupValidityUseCaseProvider =
+    AutoDisposeProvider<CheckGroupValidityUseCase>.internal(
+      checkGroupValidityUseCase,
+      name: r'checkGroupValidityUseCaseProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$checkGroupValidityUseCaseHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef CheckGroupValidityUseCaseRef =
+    AutoDisposeProviderRef<CheckGroupValidityUseCase>;
+String _$fullSyncUseCaseHash() => r'ed156bd13ad45bcaddbcc586a60f12ca1555d13a';
 
 /// FullSyncUseCase provider.
 ///
