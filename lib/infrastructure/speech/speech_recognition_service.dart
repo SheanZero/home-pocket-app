@@ -95,7 +95,10 @@ class SpeechRecognitionService {
   /// Tests cannot call [_normalizeSoundLevel] directly (it uses Platform).
   /// This method accepts an explicit [isAndroid] flag for test isolation.
   @visibleForTesting
-  double normalizeSoundLevelForTest(double rawLevel, {required bool isAndroid}) {
+  double normalizeSoundLevelForTest(
+    double rawLevel, {
+    required bool isAndroid,
+  }) {
     if (isAndroid) {
       return (rawLevel / 10.0).clamp(0.0, 1.0);
     } else {

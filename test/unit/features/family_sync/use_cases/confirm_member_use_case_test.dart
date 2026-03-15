@@ -93,7 +93,6 @@ void main() {
         operationCount: 0,
       ),
     ).called(1);
-
   });
 
   test('skips key exchange when the group key is not available', () async {
@@ -123,7 +122,6 @@ void main() {
         operationCount: any(named: 'operationCount'),
       ),
     );
-
   });
 
   test('returns API errors from confirmMember', () async {

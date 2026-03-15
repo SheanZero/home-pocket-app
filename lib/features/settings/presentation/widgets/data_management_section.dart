@@ -132,7 +132,9 @@ class DataManagementSection extends ConsumerWidget {
     } else {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(importResult.error ?? S.of(context).importFailed)),
+          SnackBar(
+            content: Text(importResult.error ?? S.of(context).importFailed),
+          ),
         );
       }
     }
@@ -143,9 +145,7 @@ class DataManagementSection extends ConsumerWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(S.of(context).deleteAllData),
-        content: Text(
-          S.of(context).deleteAllDataConfirmation,
-        ),
+        content: Text(S.of(context).deleteAllDataConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),

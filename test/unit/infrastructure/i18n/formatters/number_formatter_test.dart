@@ -88,7 +88,9 @@ void main() {
 
       test('does not use wan below 10000 for Japanese', () {
         expect(
-            NumberFormatter.formatCompact(9999, ja), isNot(contains('\u4e07')));
+          NumberFormatter.formatCompact(9999, ja),
+          isNot(contains('\u4e07')),
+        );
       });
     });
   });

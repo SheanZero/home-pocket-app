@@ -43,12 +43,13 @@ void main() {
 
       test('formats English datetime with 12h AM/PM', () {
         expect(
-            DateFormatter.formatDateTime(testDate, en), '02/06/2026 2:30 PM');
+          DateFormatter.formatDateTime(testDate, en),
+          '02/06/2026 2:30 PM',
+        );
       });
 
       test('formats Chinese datetime with 24h time', () {
-        expect(
-            DateFormatter.formatDateTime(testDate, zh), '2026年02月06日 14:30');
+        expect(DateFormatter.formatDateTime(testDate, zh), '2026年02月06日 14:30');
       });
     });
 

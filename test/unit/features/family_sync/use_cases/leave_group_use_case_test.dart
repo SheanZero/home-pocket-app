@@ -42,9 +42,9 @@ void main() {
   });
 
   test('returns relay API errors', () async {
-    when(() => apiClient.leaveGroup(any())).thenThrow(
-      const RelayApiException(statusCode: 403, message: 'Forbidden'),
-    );
+    when(
+      () => apiClient.leaveGroup(any()),
+    ).thenThrow(const RelayApiException(statusCode: 403, message: 'Forbidden'));
 
     final result = await useCase.execute('group-1');
 

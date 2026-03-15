@@ -55,9 +55,7 @@ void main() {
 
       final useCase = GetTransactionsUseCase(transactionRepository: mockRepo);
       final container = ProviderContainer(
-        overrides: [
-          getTransactionsUseCaseProvider.overrideWithValue(useCase),
-        ],
+        overrides: [getTransactionsUseCaseProvider.overrideWithValue(useCase)],
       );
       addTearDown(container.dispose);
 
@@ -86,9 +84,7 @@ void main() {
 
       final useCase = GetTransactionsUseCase(transactionRepository: mockRepo);
       final container = ProviderContainer(
-        overrides: [
-          getTransactionsUseCaseProvider.overrideWithValue(useCase),
-        ],
+        overrides: [getTransactionsUseCaseProvider.overrideWithValue(useCase)],
       );
       addTearDown(container.dispose);
 
@@ -120,9 +116,7 @@ void main() {
 
       final useCase = GetTransactionsUseCase(transactionRepository: mockRepo);
       final container = ProviderContainer(
-        overrides: [
-          getTransactionsUseCaseProvider.overrideWithValue(useCase),
-        ],
+        overrides: [getTransactionsUseCaseProvider.overrideWithValue(useCase)],
       );
       addTearDown(container.dispose);
 
@@ -149,9 +143,7 @@ void main() {
 
       final useCase = GetTransactionsUseCase(transactionRepository: mockRepo);
       final container = ProviderContainer(
-        overrides: [
-          getTransactionsUseCaseProvider.overrideWithValue(useCase),
-        ],
+        overrides: [getTransactionsUseCaseProvider.overrideWithValue(useCase)],
       );
       addTearDown(container.dispose);
 
@@ -210,17 +202,13 @@ void main() {
 
       final useCase = GetTransactionsUseCase(transactionRepository: mockRepo);
       final container = ProviderContainer(
-        overrides: [
-          getTransactionsUseCaseProvider.overrideWithValue(useCase),
-        ],
+        overrides: [getTransactionsUseCaseProvider.overrideWithValue(useCase)],
       );
       addTearDown(container.dispose);
 
       // Empty bookId triggers error in GetTransactionsUseCase
       expect(
-        () => container.read(
-          todayTransactionsProvider(bookId: '').future,
-        ),
+        () => container.read(todayTransactionsProvider(bookId: '').future),
         throwsA(isA<Exception>()),
       );
     });

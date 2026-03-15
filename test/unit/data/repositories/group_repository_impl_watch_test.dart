@@ -35,15 +35,18 @@ void main() {
           await repo.confirmLocalGroup('group-1');
         });
 
-        final emissions = await repo.watchActiveGroup().take(3).toList();
-
-        expect(emissions.first, isNull);
-        expect(emissions[1], isNull);
-        expect(
-          emissions.last,
-          isA<GroupInfo>()
-              .having((group) => group.groupId, 'groupId', 'group-1')
-              .having((group) => group.status, 'status', GroupStatus.active),
+        await expectLater(
+          repo.watchActiveGroup(),
+          emitsInOrder([
+            // Initial: no active group in DB
+            isNull,
+            // After savePendingGroup: still null (status is 'pending', not 'active')
+            isNull,
+            // After confirmLocalGroup: status becomes 'active', group emitted
+            isA<GroupInfo>()
+                .having((g) => g.groupId, 'groupId', 'group-1')
+                .having((g) => g.status, 'status', GroupStatus.active),
+          ]),
         );
       },
     );

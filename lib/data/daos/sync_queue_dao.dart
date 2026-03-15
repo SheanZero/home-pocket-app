@@ -25,9 +25,9 @@ class SyncQueueDao {
   }
 
   Future<void> incrementRetry(String id) async {
-    final entry = await (_db.select(_db.syncQueue)
-          ..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final entry = await (_db.select(
+      _db.syncQueue,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     if (entry != null) {
       await (_db.update(_db.syncQueue)..where((t) => t.id.equals(id))).write(
         SyncQueueCompanion(retryCount: Value(entry.retryCount + 1)),

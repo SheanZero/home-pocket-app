@@ -457,8 +457,9 @@ class PushNotificationService {
       'pair_request' => PushNavigationIntent.memberApproval(groupId: groupId),
       'member_confirmed' || 'pair_confirmed' =>
         PushNavigationIntent.groupManagement(groupId: groupId),
-      'group_dissolved' =>
-        PushNavigationIntent.groupDissolved(groupId: groupId),
+      'group_dissolved' => PushNavigationIntent.groupDissolved(
+        groupId: groupId,
+      ),
       _ => null,
     };
   }

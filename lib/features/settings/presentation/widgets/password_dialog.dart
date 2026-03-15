@@ -76,7 +76,9 @@ class _PasswordDialogState extends State<_PasswordDialog> {
             TextField(
               controller: _confirmController,
               obscureText: true,
-              decoration: InputDecoration(hintText: S.of(context).confirmPassword),
+              decoration: InputDecoration(
+                hintText: S.of(context).confirmPassword,
+              ),
               onSubmitted: (_) => _submit(),
             ),
           ],

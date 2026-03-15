@@ -43,7 +43,9 @@ class VoiceSection extends ConsumerWidget {
           groupValue: settings.voiceLanguage,
           onChanged: (value) async {
             if (value != null) {
-              await ref.read(settingsRepositoryProvider).setVoiceLanguage(value);
+              await ref
+                  .read(settingsRepositoryProvider)
+                  .setVoiceLanguage(value);
               ref.invalidate(appSettingsProvider);
               if (dialogContext.mounted) Navigator.pop(dialogContext);
             }

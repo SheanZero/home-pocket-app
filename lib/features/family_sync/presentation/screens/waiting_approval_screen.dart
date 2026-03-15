@@ -29,35 +29,52 @@ class WaitingApprovalScreen extends ConsumerStatefulWidget {
 class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
   GroupInfo? _group;
   bool _isLoading = true;
+  bool _hasNavigated = false;
   StreamSubscription<SyncTriggerEvent>? _eventSubscription;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     _loadGroup();
     _listenForSyncEvents();
+    _startPollingTimer();
   }
 
   void _listenForSyncEvents() {
     final syncTrigger = ref.read(syncTriggerServiceProvider);
     _eventSubscription = syncTrigger.events.listen((event) {
-      if (!mounted) return;
+      if (!mounted || _hasNavigated) return;
       if (event.type != SyncTriggerEventType.memberConfirmed) return;
       if (event.groupId != null && event.groupId != widget.groupId) return;
       unawaited(_verifyGroupAndNavigate());
     });
   }
 
+  void _startPollingTimer() {
+    _pollingTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) {
+        if (!mounted || _hasNavigated) return;
+        unawaited(_verifyGroupAndNavigate());
+      },
+    );
+  }
+
   Future<void> _verifyGroupAndNavigate() async {
+    if (_hasNavigated) return;
+
     if (mounted) {
       setState(() => _isLoading = true);
     }
 
     final result = await ref.read(checkGroupUseCaseProvider).execute();
-    if (!mounted) return;
+    if (!mounted || _hasNavigated) return;
 
     switch (result) {
       case CheckGroupInGroup(:final groupId):
+        _hasNavigated = true;
+        _pollingTimer?.cancel();
         ref
             .read(syncStatusNotifierProvider.notifier)
             .updateStatus(SyncStatus.synced);
@@ -101,6 +118,7 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
 
   @override
   void dispose() {
+    _pollingTimer?.cancel();
     unawaited(_eventSubscription?.cancel());
     super.dispose();
   }

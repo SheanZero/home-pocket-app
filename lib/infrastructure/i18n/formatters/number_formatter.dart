@@ -13,8 +13,7 @@ class NumberFormatter {
     return formatter.format(number);
   }
 
-  static String formatCurrency(
-      num amount, String currencyCode, Locale locale) {
+  static String formatCurrency(num amount, String currencyCode, Locale locale) {
     final formatter = NumberFormat.currency(
       locale: locale.toString(),
       symbol: _getCurrencySymbol(currencyCode),
@@ -23,8 +22,11 @@ class NumberFormatter {
     return formatter.format(amount);
   }
 
-  static String formatPercentage(double value, Locale locale,
-      {int decimals = 2}) {
+  static String formatPercentage(
+    double value,
+    Locale locale, {
+    int decimals = 2,
+  }) {
     final percentage = value * 100;
     final formatter = NumberFormat.decimalPatternDigits(
       locale: locale.toString(),
@@ -37,8 +39,11 @@ class NumberFormatter {
     if (locale.languageCode == 'ja' || locale.languageCode == 'zh') {
       if (number >= 10000) {
         final manValue = number / 10000;
-        final formatted =
-            formatNumber(manValue, locale, decimals: manValue >= 100 ? 0 : 1);
+        final formatted = formatNumber(
+          manValue,
+          locale,
+          decimals: manValue >= 100 ? 0 : 1,
+        );
         return '$formatted\u4e07';
       }
     }

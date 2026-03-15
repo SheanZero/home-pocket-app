@@ -73,6 +73,11 @@ SyncTriggerService syncTriggerService(Ref ref) {
 }
 
 /// Current sync status state notifier.
+///
+/// Uses [ref.container.listen] instead of [ref.watch] on [activeGroupProvider]
+/// to avoid full rebuild on every stream emission, which would reset transient
+/// states (syncing, offline, syncError) back to synced/unpaired. We only react
+/// to membership transitions (null <-> non-null).
 @riverpod
 class SyncStatusNotifier extends _$SyncStatusNotifier {
   @override

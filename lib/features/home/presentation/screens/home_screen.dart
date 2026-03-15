@@ -33,13 +33,6 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
     final locale = ref.watch(currentLocaleProvider);
-    final now = DateTime.now();
-    final year = now.year;
-    final month = now.month;
-
-    final reportAsync = ref.watch(
-      monthlyReportProvider(bookId: bookId, year: year, month: month),
-    );
     final todayTxAsync = ref.watch(todayTransactionsProvider(bookId: bookId));
     final ohtaniVisible = ref.watch(ohtaniConverterVisibleProvider);
     final isGroupMode = ref.watch(isGroupModeProvider);
@@ -49,16 +42,7 @@ class HomeScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Hero header + Month overview card with blue background overlap
-          _buildHeroWithCard(
-            context,
-            l10n,
-            locale,
-            year,
-            month,
-            reportAsync,
-            todayTxAsync,
-            isGroupMode,
-          ),
+          _HeroWithCard(bookId: bookId, onSettingsTap: onSettingsTap ?? () {}),
           const SizedBox(height: 16),
 
           if (!isGroupMode) ...[
@@ -185,22 +169,60 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  /// Builds the blue hero header with the MonthOverviewCard overlapping into it.
-  ///
-  /// Uses a Stack where a blue Container sets the background height, and a
-  /// Column (HeroHeader + card) determines the overall layout height. The blue
-  /// extends ~60px below the header content, creating the overlap effect with
-  /// the card's top portion sitting inside the blue zone.
-  Widget _buildHeroWithCard(
-    BuildContext context,
-    S l10n,
-    Locale locale,
-    int year,
-    int month,
-    AsyncValue reportAsync,
-    AsyncValue<List<Transaction>> todayTxAsync,
-    bool isGroupMode,
-  ) {
+  String _formatAmount(Transaction tx) {
+    final formatted = NumberFormat.currency(
+      symbol: '\u00a5',
+      decimalDigits: 0,
+    ).format(tx.amount);
+    return tx.type == TransactionType.expense ? '-$formatted' : formatted;
+  }
+
+  IconData _iconForCategory(String categoryId) {
+    switch (categoryId) {
+      case 'cat_food':
+        return Icons.restaurant;
+      case 'cat_housing':
+        return Icons.home_outlined;
+      case 'cat_transport':
+        return Icons.train;
+      case 'cat_utilities':
+        return Icons.bolt;
+      case 'cat_entertainment':
+        return Icons.movie;
+      case 'cat_education':
+        return Icons.school;
+      case 'cat_health':
+        return Icons.medical_services;
+      case 'cat_shopping':
+        return Icons.shopping_bag;
+      default:
+        return Icons.receipt_long;
+    }
+  }
+}
+
+/// Blue hero header with MonthOverviewCard overlapping into it.
+///
+/// Extracted as a ConsumerWidget to read its own providers instead of
+/// receiving 8+ parameters from the parent.
+class _HeroWithCard extends ConsumerWidget {
+  const _HeroWithCard({required this.bookId, required this.onSettingsTap});
+
+  final String bookId;
+  final VoidCallback onSettingsTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = S.of(context);
+    final locale = ref.watch(currentLocaleProvider);
+    final now = DateTime.now();
+    final year = now.year;
+    final month = now.month;
+    final reportAsync = ref.watch(
+      monthlyReportProvider(bookId: bookId, year: year, month: month),
+    );
+    final todayTxAsync = ref.watch(todayTransactionsProvider(bookId: bookId));
+    final isGroupMode = ref.watch(isGroupModeProvider);
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Stack(
@@ -222,7 +244,7 @@ class HomeScreen extends ConsumerWidget {
             HeroHeader(
               year: year,
               month: month,
-              onSettingsTap: onSettingsTap ?? () {},
+              onSettingsTap: onSettingsTap,
               onDateTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -309,36 +331,5 @@ class HomeScreen extends ConsumerWidget {
         ),
       ],
     );
-  }
-
-  String _formatAmount(Transaction tx) {
-    final formatted = NumberFormat.currency(
-      symbol: '\u00a5',
-      decimalDigits: 0,
-    ).format(tx.amount);
-    return tx.type == TransactionType.expense ? '-$formatted' : formatted;
-  }
-
-  IconData _iconForCategory(String categoryId) {
-    switch (categoryId) {
-      case 'cat_food':
-        return Icons.restaurant;
-      case 'cat_housing':
-        return Icons.home_outlined;
-      case 'cat_transport':
-        return Icons.train;
-      case 'cat_utilities':
-        return Icons.bolt;
-      case 'cat_entertainment':
-        return Icons.movie;
-      case 'cat_education':
-        return Icons.school;
-      case 'cat_health':
-        return Icons.medical_services;
-      case 'cat_shopping':
-        return Icons.shopping_bag;
-      default:
-        return Icons.receipt_long;
-    }
   }
 }

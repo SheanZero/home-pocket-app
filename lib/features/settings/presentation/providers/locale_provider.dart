@@ -20,10 +20,7 @@ class LocaleNotifier extends _$LocaleNotifier {
 
   /// Set the locale explicitly (not system default).
   void setLocale(Locale locale) {
-    state = LocaleSettings(
-      locale: locale,
-      isSystemDefault: false,
-    );
+    state = LocaleSettings(locale: locale, isSystemDefault: false);
   }
 
   /// Use the system locale, falling back to Japanese if unsupported.

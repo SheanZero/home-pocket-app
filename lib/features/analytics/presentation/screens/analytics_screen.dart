@@ -154,9 +154,7 @@ class AnalyticsScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(S.of(context).generateDemoData),
-        content: Text(
-          S.of(context).generateDemoDataDescription,
-        ),
+        content: Text(S.of(context).generateDemoDataDescription),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -183,9 +181,9 @@ class AnalyticsScreen extends ConsumerWidget {
     try {
       await service.generateDemoData(bookId: bookId);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.of(context).demoDataGenerated)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(S.of(context).demoDataGenerated)));
       // Invalidate all providers to reload
       final selectedMonth = ref.read(selectedMonthProvider);
       ref.invalidate(

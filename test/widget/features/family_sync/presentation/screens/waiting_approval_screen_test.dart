@@ -187,4 +187,73 @@ void main() {
       expect(find.textContaining('Network error'), findsOneWidget);
     },
   );
+
+  testWidgets('polls server every 30 seconds', (tester) async {
+    when(
+      () => groupRepository.getGroupById('group-1'),
+    ).thenAnswer((_) async => buildConfirmingGroup());
+    when(
+      () => checkGroupUseCase.execute(),
+    ).thenAnswer((_) async => const CheckGroupNotInGroup());
+
+    await tester.runAsync(() async {
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const WaitingApprovalScreen(groupId: 'group-1'),
+          overrides: [
+            groupRepositoryProvider.overrideWithValue(groupRepository),
+            checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
+            syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      verifyNever(() => checkGroupUseCase.execute());
+
+      // Wait for the 30-second timer to fire
+      await Future<void>.delayed(const Duration(seconds: 31));
+      await tester.pump();
+
+      verify(() => checkGroupUseCase.execute()).called(1);
+    });
+  });
+
+  testWidgets('stops polling after successful navigation', (tester) async {
+    when(
+      () => groupRepository.getGroupById('group-1'),
+    ).thenAnswer((_) async => buildConfirmingGroup());
+    when(
+      () => groupRepository.getActiveGroup(),
+    ).thenAnswer((_) async => buildActiveGroup());
+    when(
+      () => checkGroupUseCase.execute(),
+    ).thenAnswer((_) async => const CheckGroupInGroup(groupId: 'group-1'));
+
+    await tester.runAsync(() async {
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const WaitingApprovalScreen(groupId: 'group-1'),
+          overrides: [
+            groupRepositoryProvider.overrideWithValue(groupRepository),
+            checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
+            syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Wait for first poll to fire and navigate
+      await Future<void>.delayed(const Duration(seconds: 31));
+      await tester.pump();
+
+      verify(() => checkGroupUseCase.execute()).called(1);
+
+      // Wait for another poll cycle — should not call again
+      await Future<void>.delayed(const Duration(seconds: 31));
+      await tester.pump();
+
+      verifyNever(() => checkGroupUseCase.execute());
+    });
+  });
 }

@@ -35,9 +35,9 @@ class SyncStatusBadge extends StatelessWidget {
           Text(
             config.label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: config.color,
-                  fontWeight: FontWeight.w500,
-                ),
+              color: config.color,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
@@ -47,35 +47,35 @@ class SyncStatusBadge extends StatelessWidget {
   _StatusConfig _statusConfig(SyncStatus status) {
     return switch (status) {
       SyncStatus.unpaired => const _StatusConfig(
-          icon: Icons.link_off,
-          color: Colors.grey,
-          label: 'Unpaired',
-        ),
+        icon: Icons.link_off,
+        color: Colors.grey,
+        label: 'Unpaired',
+      ),
       SyncStatus.pairing => const _StatusConfig(
-          icon: Icons.link,
-          color: Colors.orange,
-          label: 'Pairing',
-        ),
+        icon: Icons.link,
+        color: Colors.orange,
+        label: 'Pairing',
+      ),
       SyncStatus.synced => const _StatusConfig(
-          icon: Icons.check_circle,
-          color: Colors.green,
-          label: 'Synced',
-        ),
+        icon: Icons.check_circle,
+        color: Colors.green,
+        label: 'Synced',
+      ),
       SyncStatus.syncing => const _StatusConfig(
-          icon: Icons.sync,
-          color: Colors.blue,
-          label: 'Syncing',
-        ),
+        icon: Icons.sync,
+        color: Colors.blue,
+        label: 'Syncing',
+      ),
       SyncStatus.syncError => const _StatusConfig(
-          icon: Icons.error,
-          color: Colors.red,
-          label: 'Error',
-        ),
+        icon: Icons.error,
+        color: Colors.red,
+        label: 'Error',
+      ),
       SyncStatus.offline => const _StatusConfig(
-          icon: Icons.cloud_off,
-          color: Colors.orange,
-          label: 'Offline',
-        ),
+        icon: Icons.cloud_off,
+        color: Colors.orange,
+        label: 'Offline',
+      ),
     };
   }
 }

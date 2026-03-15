@@ -307,21 +307,18 @@ void main() {
     },
   );
 
-  test(
-    'foreground member_left message invokes handler',
-    () async {
-      await service.initialize();
+  test('foreground member_left message invokes handler', () async {
+    await service.initialize();
 
-      await messagingClient.emitForegroundMessage({
-        'type': 'member_left',
-        'groupId': 'group-1',
-        'deviceId': 'device-2',
-        'reason': 'left',
-      });
+    await messagingClient.emitForegroundMessage({
+      'type': 'member_left',
+      'groupId': 'group-1',
+      'deviceId': 'device-2',
+      'reason': 'left',
+    });
 
-      expect(memberLeftCalls, 1);
-    },
-  );
+    expect(memberLeftCalls, 1);
+  });
 
   test(
     'foreground group_dissolved message invokes handler and emits navigation intent',

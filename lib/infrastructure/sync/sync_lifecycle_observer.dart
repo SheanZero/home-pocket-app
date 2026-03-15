@@ -10,7 +10,7 @@ typedef SyncResumeCallback = Future<void> Function();
 /// callback which should pull pending sync messages and drain the offline queue.
 class SyncLifecycleObserver with WidgetsBindingObserver {
   SyncLifecycleObserver({required SyncResumeCallback onResume})
-      : _onResume = onResume;
+    : _onResume = onResume;
 
   final SyncResumeCallback _onResume;
   bool _isActive = false;

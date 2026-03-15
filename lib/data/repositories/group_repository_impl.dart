@@ -24,17 +24,20 @@ class GroupRepositoryImpl implements GroupRepository {
     required DateTime inviteExpiresAt,
     required String groupKey,
   }) async {
-    await _groupDao.insert(
-      GroupsCompanion.insert(
-        groupId: groupId,
-        status: 'pending',
-        role: 'owner',
-        inviteCode: Value(inviteCode),
-        inviteExpiresAt: Value(inviteExpiresAt.millisecondsSinceEpoch),
-        groupKey: Value(groupKey),
-        createdAt: DateTime.now().millisecondsSinceEpoch,
-      ),
-    );
+    await _groupDao.attachedDatabase.transaction(() async {
+      await _groupDao.deletePendingGroups();
+      await _groupDao.insert(
+        GroupsCompanion.insert(
+          groupId: groupId,
+          status: 'pending',
+          role: 'owner',
+          inviteCode: Value(inviteCode),
+          inviteExpiresAt: Value(inviteExpiresAt.millisecondsSinceEpoch),
+          groupKey: Value(groupKey),
+          createdAt: DateTime.now().millisecondsSinceEpoch,
+        ),
+      );
+    });
   }
 
   @override

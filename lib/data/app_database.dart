@@ -121,12 +121,8 @@ class AppDatabase extends _$AppDatabase {
         if (from >= 8 && from < 10) {
           // Only drop book_id from groups if table was created in v8
           // (fresh installs from < 8 create groups without book_id)
-          await customStatement(
-            'ALTER TABLE groups DROP COLUMN book_id',
-          );
-          await customStatement(
-            'DROP INDEX IF EXISTS idx_groups_book_id',
-          );
+          await customStatement('ALTER TABLE groups DROP COLUMN book_id');
+          await customStatement('DROP INDEX IF EXISTS idx_groups_book_id');
         }
       },
     );

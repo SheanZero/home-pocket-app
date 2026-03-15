@@ -66,10 +66,7 @@ class MonthOverviewCard extends StatelessWidget {
             _buildMetrics(l10n),
             const SizedBox(height: 8),
             _buildComparison(l10n),
-            if (child != null) ...[
-              const SizedBox(height: 12),
-              child!,
-            ],
+            if (child != null) ...[const SizedBox(height: 12), child!],
           ],
         ),
       ),

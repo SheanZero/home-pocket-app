@@ -32,12 +32,15 @@ void main() {
     when(() => groupRepository.deactivateGroup(any())).thenAnswer((_) async {});
   });
 
-  test('deactivates the group, clears queue, and deactivates locally', () async {
-    final result = await useCase.execute('group-1');
+  test(
+    'deactivates the group, clears queue, and deactivates locally',
+    () async {
+      final result = await useCase.execute('group-1');
 
-    expect(result, isA<DeactivateGroupSuccess>());
-    verify(() => apiClient.deactivateGroup('group-1')).called(1);
-    verify(() => queueManager.clearQueue()).called(1);
-    verify(() => groupRepository.deactivateGroup('group-1')).called(1);
-  });
+      expect(result, isA<DeactivateGroupSuccess>());
+      verify(() => apiClient.deactivateGroup('group-1')).called(1);
+      verify(() => queueManager.clearQueue()).called(1);
+      verify(() => groupRepository.deactivateGroup('group-1')).called(1);
+    },
+  );
 }

@@ -11,10 +11,8 @@ abstract class LocaleSettings with _$LocaleSettings {
     required bool isSystemDefault,
   }) = _LocaleSettings;
 
-  factory LocaleSettings.defaultSettings() => const LocaleSettings(
-        locale: Locale('ja'),
-        isSystemDefault: false,
-      );
+  factory LocaleSettings.defaultSettings() =>
+      const LocaleSettings(locale: Locale('ja'), isSystemDefault: false);
 
   factory LocaleSettings.fromSystem(Locale systemLocale) {
     const supportedCodes = ['ja', 'zh', 'en'];

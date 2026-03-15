@@ -46,9 +46,15 @@ class FamilyInviteBanner extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.homeFamilyInviteTitle, style: AppTextStyles.titleMedium),
+                  Text(
+                    l10n.homeFamilyInviteTitle,
+                    style: AppTextStyles.titleMedium,
+                  ),
                   const SizedBox(height: 2),
-                  Text(l10n.homeFamilyInviteDesc, style: AppTextStyles.bodySmall),
+                  Text(
+                    l10n.homeFamilyInviteDesc,
+                    style: AppTextStyles.bodySmall,
+                  ),
                 ],
               ),
             ),

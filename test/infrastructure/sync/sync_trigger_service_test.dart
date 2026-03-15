@@ -164,52 +164,51 @@ void main() {
     },
   );
 
-  test('join_request fetches group status, updates members, and emits event',
-      () async {
-    when(() => apiClient.getGroupStatus('group-1')).thenAnswer(
-      (_) async => {
+  test(
+    'join_request fetches group status, updates members, and emits event',
+    () async {
+      when(() => apiClient.getGroupStatus('group-1')).thenAnswer(
+        (_) async => {
+          'groupId': 'group-1',
+          'members': [
+            {
+              'deviceId': 'device-owner',
+              'publicKey': 'pk-owner',
+              'deviceName': 'Owner Phone',
+              'role': 'owner',
+              'status': 'active',
+            },
+            {
+              'deviceId': 'device-new',
+              'publicKey': 'pk-new',
+              'deviceName': 'New Phone',
+              'role': 'member',
+              'status': 'pending',
+            },
+          ],
+        },
+      );
+      when(
+        () => groupRepository.updateMembers(any(), any()),
+      ).thenAnswer((_) async {});
+
+      await service.initialize();
+
+      await pushNotificationService.handleMessage({
+        'type': 'join_request',
         'groupId': 'group-1',
-        'members': [
-          {
-            'deviceId': 'device-owner',
-            'publicKey': 'pk-owner',
-            'deviceName': 'Owner Phone',
-            'role': 'owner',
-            'status': 'active',
-          },
-          {
-            'deviceId': 'device-new',
-            'publicKey': 'pk-new',
-            'deviceName': 'New Phone',
-            'role': 'member',
-            'status': 'pending',
-          },
-        ],
-      },
-    );
-    when(
-      () => groupRepository.updateMembers(any(), any()),
-    ).thenAnswer((_) async {});
+      });
 
-    await service.initialize();
-
-    await pushNotificationService.handleMessage({
-      'type': 'join_request',
-      'groupId': 'group-1',
-    });
-
-    verify(() => apiClient.getGroupStatus('group-1')).called(1);
-    verify(
-      () => groupRepository.updateMembers(
-        'group-1',
-        any(that: hasLength(2)),
-      ),
-    ).called(1);
-    expect(
-      emittedEvents,
-      contains(const SyncTriggerEvent.joinRequest(groupId: 'group-1')),
-    );
-  });
+      verify(() => apiClient.getGroupStatus('group-1')).called(1);
+      verify(
+        () => groupRepository.updateMembers('group-1', any(that: hasLength(2))),
+      ).called(1);
+      expect(
+        emittedEvents,
+        contains(const SyncTriggerEvent.joinRequest(groupId: 'group-1')),
+      );
+    },
+  );
 
   test('join_request still emits event if server fetch fails', () async {
     when(() => apiClient.getGroupStatus('group-1')).thenThrow(
@@ -250,81 +249,86 @@ void main() {
     idempotentService.dispose();
   });
 
-  test('member_left with reason=removed deactivates group for local device',
-      () async {
-    when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-self');
-    when(() => queueManager.clearQueue()).thenAnswer((_) async {});
-    when(
-      () => groupRepository.deactivateGroup(any()),
-    ).thenAnswer((_) async {});
+  test(
+    'member_left with reason=removed deactivates group for local device',
+    () async {
+      when(
+        () => keyManager.getDeviceId(),
+      ).thenAnswer((_) async => 'device-self');
+      when(() => queueManager.clearQueue()).thenAnswer((_) async {});
+      when(
+        () => groupRepository.deactivateGroup(any()),
+      ).thenAnswer((_) async {});
 
-    await service.initialize();
-    await pushNotificationService.handleMessage({
-      'type': 'member_left',
-      'groupId': 'group-1',
-      'deviceId': 'device-self',
-      'reason': 'removed',
-    });
+      await service.initialize();
+      await pushNotificationService.handleMessage({
+        'type': 'member_left',
+        'groupId': 'group-1',
+        'deviceId': 'device-self',
+        'reason': 'removed',
+      });
 
-    verify(() => queueManager.clearQueue()).called(1);
-    verify(() => groupRepository.deactivateGroup('group-1')).called(1);
-    expect(
-      emittedEvents,
-      contains(const SyncTriggerEvent.memberLeft(groupId: 'group-1')),
-    );
-  });
+      verify(() => queueManager.clearQueue()).called(1);
+      verify(() => groupRepository.deactivateGroup('group-1')).called(1);
+      expect(
+        emittedEvents,
+        contains(const SyncTriggerEvent.memberLeft(groupId: 'group-1')),
+      );
+    },
+  );
 
-  test('member_left for another device removes them from local member list',
-      () async {
-    when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-self');
-    when(() => groupRepository.getGroupById('group-1')).thenAnswer(
-      (_) async => GroupInfo(
-        groupId: 'group-1',
+  test(
+    'member_left for another device removes them from local member list',
+    () async {
+      when(
+        () => keyManager.getDeviceId(),
+      ).thenAnswer((_) async => 'device-self');
+      when(() => groupRepository.getGroupById('group-1')).thenAnswer(
+        (_) async => GroupInfo(
+          groupId: 'group-1',
 
-        status: GroupStatus.active,
-        role: 'owner',
-        members: const [
-          GroupMember(
-            deviceId: 'device-self',
-            publicKey: 'pk-self',
-            deviceName: 'My phone',
-            role: 'owner',
-            status: 'active',
-          ),
-          GroupMember(
-            deviceId: 'device-other',
-            publicKey: 'pk-other',
-            deviceName: 'Other phone',
-            role: 'member',
-            status: 'active',
-          ),
-        ],
-        createdAt: DateTime(2026),
-      ),
-    );
-    when(
-      () => groupRepository.updateMembers(any(), any()),
-    ).thenAnswer((_) async {});
+          status: GroupStatus.active,
+          role: 'owner',
+          members: const [
+            GroupMember(
+              deviceId: 'device-self',
+              publicKey: 'pk-self',
+              deviceName: 'My phone',
+              role: 'owner',
+              status: 'active',
+            ),
+            GroupMember(
+              deviceId: 'device-other',
+              publicKey: 'pk-other',
+              deviceName: 'Other phone',
+              role: 'member',
+              status: 'active',
+            ),
+          ],
+          createdAt: DateTime(2026),
+        ),
+      );
+      when(
+        () => groupRepository.updateMembers(any(), any()),
+      ).thenAnswer((_) async {});
 
-    await service.initialize();
-    await pushNotificationService.handleMessage({
-      'type': 'member_left',
-      'groupId': 'group-1',
-      'deviceId': 'device-other',
-      'reason': 'left',
-    });
+      await service.initialize();
+      await pushNotificationService.handleMessage({
+        'type': 'member_left',
+        'groupId': 'group-1',
+        'deviceId': 'device-other',
+        'reason': 'left',
+      });
 
-    verify(
-      () => groupRepository.updateMembers(
-        'group-1',
-        any(that: hasLength(1)),
-      ),
-    ).called(1);
-    expect(
-      emittedEvents,
-      contains(const SyncTriggerEvent.memberLeft(groupId: 'group-1')),
-    );
-  });
+      verify(
+        () => groupRepository.updateMembers('group-1', any(that: hasLength(1))),
+      ).called(1);
+      expect(
+        emittedEvents,
+        contains(const SyncTriggerEvent.memberLeft(groupId: 'group-1')),
+      );
+    },
+  );
 
   test('group_dissolved deactivates group and emits event', () async {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
@@ -338,9 +342,7 @@ void main() {
       ),
     );
     when(() => queueManager.clearQueue()).thenAnswer((_) async {});
-    when(
-      () => groupRepository.deactivateGroup(any()),
-    ).thenAnswer((_) async {});
+    when(() => groupRepository.deactivateGroup(any())).thenAnswer((_) async {});
 
     await service.initialize();
     await pushNotificationService.handleMessage({

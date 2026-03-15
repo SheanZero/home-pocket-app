@@ -11,6 +11,14 @@ class GroupDao extends DatabaseAccessor<AppDatabase> with _$GroupDaoMixin {
 
   Future<void> insert(GroupsCompanion entry) => into(groups).insert(entry);
 
+  Future<void> deletePendingGroups() => (delete(groups)
+        ..where(
+          (table) =>
+              table.status.equals('pending') |
+              table.status.equals('confirming'),
+        ))
+      .go();
+
   Future<GroupData?> findByGroupId(String groupId) => (select(
     groups,
   )..where((table) => table.groupId.equals(groupId))).getSingleOrNull();

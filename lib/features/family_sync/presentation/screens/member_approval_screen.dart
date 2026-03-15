@@ -9,9 +9,11 @@ import '../../../../infrastructure/sync/sync_trigger_service.dart';
 import '../../domain/models/group_info.dart';
 import '../../domain/models/group_member.dart';
 import '../../use_cases/confirm_member_use_case.dart';
+import '../../use_cases/remove_member_use_case.dart';
 import '../providers/group_providers.dart';
 import '../providers/repository_providers.dart';
 import '../providers/sync_providers.dart';
+import 'group_management_screen.dart';
 import '../widgets/info_hint_box.dart';
 import '../widgets/member_list_tile.dart';
 
@@ -29,6 +31,7 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
   GroupInfo? _group;
   bool _isLoading = true;
   String? _approvingMemberId;
+  String? _rejectingMemberId;
   StreamSubscription<SyncTriggerEvent>? _eventSubscription;
 
   @override
@@ -77,17 +80,18 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
     setState(() => _approvingMemberId = member.deviceId);
     final result = await ref
         .read(confirmMemberUseCaseProvider)
-        .execute(
-          groupId: group.groupId,
-          deviceId: member.deviceId,
-        );
+        .execute(groupId: group.groupId, deviceId: member.deviceId);
 
     if (!mounted) return;
 
     setState(() => _approvingMemberId = null);
 
     if (result is ConfirmMemberSuccess) {
-      await _loadGroup();
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => GroupManagementScreen(groupId: group.groupId),
+        ),
+      );
       return;
     }
 
@@ -95,6 +99,35 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(result.message)));
+    }
+  }
+
+  Future<void> _reject(GroupMember member) async {
+    final group = _group;
+    if (group == null) return;
+
+    setState(() => _rejectingMemberId = member.deviceId);
+    final result = await ref
+        .read(removeMemberUseCaseProvider)
+        .execute(groupId: group.groupId, deviceId: member.deviceId);
+
+    if (!mounted) return;
+
+    setState(() => _rejectingMemberId = null);
+
+    if (result is RemoveMemberSuccess) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    if (result is RemoveMemberError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            S.of(context).familySyncRemoveMemberFailed(result.message),
+          ),
+        ),
+      );
     }
   }
 
@@ -121,7 +154,9 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
                       child: _PendingApprovalCard(
                         member: member,
                         isApproving: _approvingMemberId == member.deviceId,
+                        isRejecting: _rejectingMemberId == member.deviceId,
                         onApprove: () => _approve(member),
+                        onReject: () => _reject(member),
                       ),
                     ),
                   )
@@ -199,12 +234,20 @@ class _PendingApprovalCard extends StatelessWidget {
   const _PendingApprovalCard({
     required this.member,
     required this.isApproving,
+    required this.isRejecting,
     required this.onApprove,
+    required this.onReject,
   });
 
   final GroupMember member;
   final bool isApproving;
+  final bool isRejecting;
   final VoidCallback onApprove;
+  final VoidCallback onReject;
+
+  static const _coralColor = Color(0xFFE08870);
+
+  bool get _isBusy => isApproving || isRejecting;
 
   @override
   Widget build(BuildContext context) {
@@ -250,18 +293,85 @@ class _PendingApprovalCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: isApproving ? null : onApprove,
-              child: isApproving
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(l10n.familySyncApprove),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _isBusy ? null : onReject,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: _coralColor,
+                    side: const BorderSide(color: _coralColor),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: isRejecting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: _coralColor,
+                          ),
+                        )
+                      : Text(
+                          l10n.familySyncReject,
+                          style: const TextStyle(
+                            fontFamily: 'IBM Plex Sans',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        AppColors.fabGradientStart,
+                        AppColors.fabGradientEnd,
+                      ],
+                    ),
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _isBusy ? null : onApprove,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        child: Center(
+                          child: isApproving
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  l10n.familySyncApprove,
+                                  style: const TextStyle(
+                                    fontFamily: 'IBM Plex Sans',
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

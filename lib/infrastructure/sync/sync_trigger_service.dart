@@ -80,8 +80,9 @@ class SyncTriggerService {
   final PushNotificationService _pushNotificationService;
   final RelayApiClient _apiClient;
   final KeyManager _keyManager;
-  final _eventsController =
-      StreamController<SyncTriggerEvent>.broadcast(sync: true);
+  final _eventsController = StreamController<SyncTriggerEvent>.broadcast(
+    sync: true,
+  );
 
   SyncLifecycleObserver? _lifecycleObserver;
   SyncTriggerEvent? _pendingEvent;
@@ -278,7 +279,9 @@ class SyncTriggerService {
         }
       } catch (e) {
         if (kDebugMode) {
-          debugPrint('SyncTrigger: failed to refresh group on join request: $e');
+          debugPrint(
+            'SyncTrigger: failed to refresh group on join request: $e',
+          );
         }
       }
     }
@@ -321,8 +324,9 @@ class SyncTriggerService {
         await _groupRepo.getActiveGroup();
     if (group == null || group.groupId != groupId) return;
 
-    final updatedMembers =
-        group.members.where((m) => m.deviceId != deviceId).toList();
+    final updatedMembers = group.members
+        .where((m) => m.deviceId != deviceId)
+        .toList();
     await _groupRepo.updateMembers(groupId, updatedMembers);
     _publishEvent(SyncTriggerEvent.memberLeft(groupId: groupId));
   }

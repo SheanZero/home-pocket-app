@@ -115,9 +115,9 @@ void main() {
       ),
     );
     when(() => syncTriggerService.initialize()).thenAnswer((_) async {});
-    when(() => syncTriggerService.events).thenAnswer(
-      (_) => const Stream<SyncTriggerEvent>.empty(),
-    );
+    when(
+      () => syncTriggerService.events,
+    ).thenAnswer((_) => const Stream<SyncTriggerEvent>.empty());
   });
 
   testWidgets('shows redesigned create and join group tabs', (tester) async {

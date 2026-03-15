@@ -34,10 +34,7 @@ Future<QueryExecutor> createEncryptedExecutor(
 
   final file = await _getDatabaseFile();
 
-  return NativeDatabase(
-    file,
-    setup: (db) => _setupEncryption(db, dbKey),
-  );
+  return NativeDatabase(file, setup: (db) => _setupEncryption(db, dbKey));
 }
 
 void _setupEncryption(sqlite3.Database db, String dbKey) {
