@@ -2,9 +2,9 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Enable family members to sync bills bidirectionally using the Shadow Book storage model — each remote member's data lives in an isolated "shadow book".
+**Goal:** Enable family members to sync bills bidirectionally using the Shadow Book storage model — each remote member's data lives in one isolated "shadow book", while each synced transaction preserves its source book identity in metadata.
 
-**Architecture:** Extend the existing Books table with shadow-book fields (`isShadow`, `groupId`, `ownerDeviceId`, `ownerDeviceName`). When a pull sync receives operations from `fromDeviceId`, route them to that device's shadow book. On group exit, delete shadow books and their transactions. Fire-and-forget push on local transaction creation.
+**Architecture:** Extend the existing Books table with shadow-book fields (`isShadow`, `groupId`, `ownerDeviceId`, `ownerDeviceName`). When a pull sync receives operations from `fromDeviceId`, route them to that device's shadow book. Preserve the remote source book on each synced transaction via `metadata.sourceBookId`, `metadata.sourceBookName`, and `metadata.sourceBookType`. On group exit, delete shadow books and their transactions. Fire-and-forget push on local transaction creation.
 
 **Tech Stack:** Flutter, Drift (SQLCipher), Riverpod, Freezed, E2EE (NaCl), Relay Server API
 
@@ -721,7 +721,12 @@ void main() {
     );
 
     test('toSyncMap excludes bookId, hash chain, and deviceId', () {
-      final map = TransactionSyncMapper.toSyncMap(sampleTransaction);
+      final map = TransactionSyncMapper.toSyncMap(
+        sampleTransaction,
+        sourceBookId: 'book-1',
+        sourceBookName: 'Main Book',
+        sourceBookType: 'remote_book:book-1',
+      );
 
       expect(map['id'], 'tx-123');
       expect(map['amount'], 1500);
@@ -731,6 +736,11 @@ void main() {
       expect(map['note'], 'Lunch');
       expect(map['merchant'], 'Cafe');
       expect(map['soulSatisfaction'], 7);
+      expect(map['metadata'], {
+        'sourceBookId': 'book-1',
+        'sourceBookName': 'Main Book',
+        'sourceBookType': 'remote_book:book-1',
+      });
       expect(map['timestamp'], isNotNull);
       expect(map['createdAt'], isNotNull);
 
@@ -744,7 +754,12 @@ void main() {
     });
 
     test('fromSyncMap creates Transaction with correct bookId', () {
-      final map = TransactionSyncMapper.toSyncMap(sampleTransaction);
+      final map = TransactionSyncMapper.toSyncMap(
+        sampleTransaction,
+        sourceBookId: 'book-1',
+        sourceBookName: 'Main Book',
+        sourceBookType: 'remote_book:book-1',
+      );
 
       final restored = TransactionSyncMapper.fromSyncMap(
         map,
@@ -759,6 +774,7 @@ void main() {
       expect(restored.note, 'Lunch');
       expect(restored.isSynced, true);
       expect(restored.currentHash, ''); // shadow books skip hash chain
+      expect(restored.metadata?['sourceBookId'], 'book-1');
     });
 
     test('fromSyncMap handles missing optional fields', () {
@@ -784,7 +800,12 @@ void main() {
     });
 
     test('toSyncOperation wraps in sync protocol format', () {
-      final op = TransactionSyncMapper.toCreateOperation(sampleTransaction);
+      final op = TransactionSyncMapper.toCreateOperation(
+        sampleTransaction,
+        sourceBookId: 'book-1',
+        sourceBookName: 'Main Book',
+        sourceBookType: 'remote_book:book-1',
+      );
 
       expect(op['op'], 'create');
       expect(op['entityType'], 'bill');
@@ -809,13 +830,18 @@ import 'transaction.dart';
 
 /// Maps [Transaction] to/from sync protocol format.
 ///
-/// Excludes bookId (receiver uses their shadow book), hash chain fields
-/// (per-book), and deviceId (from sync message envelope).
+/// Excludes bookId (receiver uses their shadow book) and hash chain fields
+/// (per-book). Source book identity is carried in metadata.
 class TransactionSyncMapper {
   TransactionSyncMapper._();
 
   /// Serialize a transaction for sync push.
-  static Map<String, dynamic> toSyncMap(Transaction tx) {
+  static Map<String, dynamic> toSyncMap(
+    Transaction tx, {
+    required String sourceBookId,
+    required String sourceBookName,
+    required String sourceBookType,
+  }) {
     return {
       'id': tx.id,
       'amount': tx.amount,
@@ -827,6 +853,11 @@ class TransactionSyncMapper {
       if (tx.note != null) 'note': tx.note,
       if (tx.merchant != null) 'merchant': tx.merchant,
       if (tx.photoHash != null) 'photoHash': tx.photoHash,
+      'metadata': {
+        'sourceBookId': sourceBookId,
+        'sourceBookName': sourceBookName,
+        'sourceBookType': sourceBookType,
+      },
       'soulSatisfaction': tx.soulSatisfaction,
       'isPrivate': tx.isPrivate,
     };
@@ -854,6 +885,7 @@ class TransactionSyncMapper {
       note: data['note'] as String?,
       merchant: data['merchant'] as String?,
       photoHash: data['photoHash'] as String?,
+      metadata: data['metadata'] as Map<String, dynamic>?,
       soulSatisfaction: data['soulSatisfaction'] as int? ?? 5,
       isPrivate: data['isPrivate'] as bool? ?? false,
       isSynced: true,
@@ -906,8 +938,8 @@ git add lib/features/accounting/domain/models/transaction_sync_mapper.dart
 git add test/unit/features/accounting/domain/models/transaction_sync_mapper_test.dart
 git commit -m "feat(sync): add TransactionSyncMapper for sync serialization
 
-Converts Transaction to/from sync protocol format, excluding bookId
-and hash chain fields."
+Converts Transaction to/from sync protocol format and preserves
+source book metadata."
 ```
 
 ---
@@ -1336,7 +1368,14 @@ FullSyncUseCase fullSyncUseCase(Ref ref) {
       for (final book in localBooks) {
         final transactions = await transactionRepo.findAllByBook(book.id);
         allOps.addAll(
-          transactions.map(TransactionSyncMapper.toCreateOperation),
+          transactions.map(
+            (tx) => TransactionSyncMapper.toCreateOperation(
+              tx,
+              sourceBookId: book.id,
+              sourceBookName: book.name,
+              sourceBookType: 'remote_book:${book.id}',
+            ),
+          ),
         );
       }
       return allOps;

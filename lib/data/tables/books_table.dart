@@ -10,6 +10,10 @@ class Books extends Table {
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime().nullable()();
   BoolColumn get isArchived => boolean().withDefault(const Constant(false))();
+  BoolColumn get isShadow => boolean().withDefault(const Constant(false))();
+  TextColumn get groupId => text().nullable()();
+  TextColumn get ownerDeviceId => text().nullable()();
+  TextColumn get ownerDeviceName => text().nullable()();
 
   // Denormalized stats
   IntColumn get transactionCount => integer().withDefault(const Constant(0))();
@@ -22,5 +26,7 @@ class Books extends Table {
   List<TableIndex> get customIndices => [
     TableIndex(name: 'idx_books_device_id', columns: {#deviceId}),
     TableIndex(name: 'idx_books_archived', columns: {#isArchived}),
+    TableIndex(name: 'idx_books_group_id', columns: {#groupId}),
+    TableIndex(name: 'idx_books_is_shadow', columns: {#isShadow}),
   ];
 }

@@ -2,19 +2,25 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/accounting/delete_transaction_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
+import 'package:home_pocket/infrastructure/sync/sync_trigger_service.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-@GenerateMocks([TransactionRepository])
+@GenerateMocks([TransactionRepository, SyncTriggerService])
 import 'delete_transaction_use_case_test.mocks.dart';
 
 void main() {
   late MockTransactionRepository mockRepo;
+  late MockSyncTriggerService mockSyncTriggerService;
   late DeleteTransactionUseCase useCase;
 
   setUp(() {
     mockRepo = MockTransactionRepository();
-    useCase = DeleteTransactionUseCase(transactionRepository: mockRepo);
+    mockSyncTriggerService = MockSyncTriggerService();
+    useCase = DeleteTransactionUseCase(
+      transactionRepository: mockRepo,
+      syncTriggerService: mockSyncTriggerService,
+    );
   });
 
   group('DeleteTransactionUseCase', () {
@@ -56,6 +62,33 @@ void main() {
 
       expect(result.isError, isTrue);
       verifyNever(mockRepo.findById(any));
+    });
+
+    test('pushes delete sync after successful soft delete', () async {
+      when(mockRepo.findById('tx_002')).thenAnswer(
+        (_) async => Transaction(
+          id: 'tx_002',
+          bookId: 'book_001',
+          deviceId: 'dev_local',
+          amount: 500,
+          type: TransactionType.expense,
+          categoryId: 'cat_food',
+          ledgerType: LedgerType.survival,
+          timestamp: DateTime(2026, 3, 15),
+          currentHash: 'hash_002',
+          createdAt: DateTime(2026, 3, 15),
+        ),
+      );
+      when(mockRepo.softDelete('tx_002')).thenAnswer((_) async {});
+      when(mockSyncTriggerService.onTransactionDeleted('tx_002')).thenAnswer(
+        (_) async {},
+      );
+
+      final result = await useCase.execute('tx_002');
+
+      expect(result.isSuccess, isTrue);
+      verify(mockRepo.softDelete('tx_002')).called(1);
+      verify(mockSyncTriggerService.onTransactionDeleted('tx_002')).called(1);
     });
   });
 }

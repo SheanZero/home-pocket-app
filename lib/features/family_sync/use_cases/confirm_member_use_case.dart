@@ -1,3 +1,4 @@
+import '../../../application/family_sync/full_sync_use_case.dart';
 import '../../../infrastructure/sync/e2ee_service.dart';
 import '../../../infrastructure/sync/relay_api_client.dart';
 import '../domain/repositories/group_repository.dart';
@@ -25,13 +26,16 @@ class ConfirmMemberUseCase {
     required RelayApiClient apiClient,
     required GroupRepository groupRepository,
     required E2EEService e2eeService,
+    FullSyncUseCase? fullSync,
   }) : _apiClient = apiClient,
        _groupRepository = groupRepository,
-       _e2eeService = e2eeService;
+       _e2eeService = e2eeService,
+       _fullSync = fullSync;
 
   final RelayApiClient _apiClient;
   final GroupRepository _groupRepository;
   final E2EEService _e2eeService;
+  final FullSyncUseCase? _fullSync;
 
   Future<ConfirmMemberResult> execute({
     required String groupId,
@@ -60,6 +64,8 @@ class ConfirmMemberUseCase {
           operationCount: 0,
         );
       }
+
+      await _fullSync?.execute();
 
       return const ConfirmMemberResult.success();
     } on RelayApiException catch (error) {

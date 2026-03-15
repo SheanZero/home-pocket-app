@@ -576,6 +576,54 @@ class $BooksTable extends Books with TableInfo<$BooksTable, BookRow> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _isShadowMeta = const VerificationMeta(
+    'isShadow',
+  );
+  @override
+  late final GeneratedColumn<bool> isShadow = GeneratedColumn<bool>(
+    'is_shadow',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_shadow" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _groupIdMeta = const VerificationMeta(
+    'groupId',
+  );
+  @override
+  late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
+    'group_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ownerDeviceIdMeta = const VerificationMeta(
+    'ownerDeviceId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerDeviceId = GeneratedColumn<String>(
+    'owner_device_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ownerDeviceNameMeta = const VerificationMeta(
+    'ownerDeviceName',
+  );
+  @override
+  late final GeneratedColumn<String> ownerDeviceName = GeneratedColumn<String>(
+    'owner_device_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _transactionCountMeta = const VerificationMeta(
     'transactionCount',
   );
@@ -621,6 +669,10 @@ class $BooksTable extends Books with TableInfo<$BooksTable, BookRow> {
     createdAt,
     updatedAt,
     isArchived,
+    isShadow,
+    groupId,
+    ownerDeviceId,
+    ownerDeviceName,
     transactionCount,
     survivalBalance,
     soulBalance,
@@ -684,6 +736,36 @@ class $BooksTable extends Books with TableInfo<$BooksTable, BookRow> {
       context.handle(
         _isArchivedMeta,
         isArchived.isAcceptableOrUnknown(data['is_archived']!, _isArchivedMeta),
+      );
+    }
+    if (data.containsKey('is_shadow')) {
+      context.handle(
+        _isShadowMeta,
+        isShadow.isAcceptableOrUnknown(data['is_shadow']!, _isShadowMeta),
+      );
+    }
+    if (data.containsKey('group_id')) {
+      context.handle(
+        _groupIdMeta,
+        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
+      );
+    }
+    if (data.containsKey('owner_device_id')) {
+      context.handle(
+        _ownerDeviceIdMeta,
+        ownerDeviceId.isAcceptableOrUnknown(
+          data['owner_device_id']!,
+          _ownerDeviceIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('owner_device_name')) {
+      context.handle(
+        _ownerDeviceNameMeta,
+        ownerDeviceName.isAcceptableOrUnknown(
+          data['owner_device_name']!,
+          _ownerDeviceNameMeta,
+        ),
       );
     }
     if (data.containsKey('transaction_count')) {
@@ -750,6 +832,22 @@ class $BooksTable extends Books with TableInfo<$BooksTable, BookRow> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_archived'],
       )!,
+      isShadow: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_shadow'],
+      )!,
+      groupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_id'],
+      ),
+      ownerDeviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_device_id'],
+      ),
+      ownerDeviceName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_device_name'],
+      ),
       transactionCount: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}transaction_count'],
@@ -779,6 +877,10 @@ class BookRow extends DataClass implements Insertable<BookRow> {
   final DateTime createdAt;
   final DateTime? updatedAt;
   final bool isArchived;
+  final bool isShadow;
+  final String? groupId;
+  final String? ownerDeviceId;
+  final String? ownerDeviceName;
   final int transactionCount;
   final int survivalBalance;
   final int soulBalance;
@@ -790,6 +892,10 @@ class BookRow extends DataClass implements Insertable<BookRow> {
     required this.createdAt,
     this.updatedAt,
     required this.isArchived,
+    required this.isShadow,
+    this.groupId,
+    this.ownerDeviceId,
+    this.ownerDeviceName,
     required this.transactionCount,
     required this.survivalBalance,
     required this.soulBalance,
@@ -806,6 +912,16 @@ class BookRow extends DataClass implements Insertable<BookRow> {
       map['updated_at'] = Variable<DateTime>(updatedAt);
     }
     map['is_archived'] = Variable<bool>(isArchived);
+    map['is_shadow'] = Variable<bool>(isShadow);
+    if (!nullToAbsent || groupId != null) {
+      map['group_id'] = Variable<String>(groupId);
+    }
+    if (!nullToAbsent || ownerDeviceId != null) {
+      map['owner_device_id'] = Variable<String>(ownerDeviceId);
+    }
+    if (!nullToAbsent || ownerDeviceName != null) {
+      map['owner_device_name'] = Variable<String>(ownerDeviceName);
+    }
     map['transaction_count'] = Variable<int>(transactionCount);
     map['survival_balance'] = Variable<int>(survivalBalance);
     map['soul_balance'] = Variable<int>(soulBalance);
@@ -823,6 +939,16 @@ class BookRow extends DataClass implements Insertable<BookRow> {
           ? const Value.absent()
           : Value(updatedAt),
       isArchived: Value(isArchived),
+      isShadow: Value(isShadow),
+      groupId: groupId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupId),
+      ownerDeviceId: ownerDeviceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ownerDeviceId),
+      ownerDeviceName: ownerDeviceName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ownerDeviceName),
       transactionCount: Value(transactionCount),
       survivalBalance: Value(survivalBalance),
       soulBalance: Value(soulBalance),
@@ -842,6 +968,10 @@ class BookRow extends DataClass implements Insertable<BookRow> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
       isArchived: serializer.fromJson<bool>(json['isArchived']),
+      isShadow: serializer.fromJson<bool>(json['isShadow']),
+      groupId: serializer.fromJson<String?>(json['groupId']),
+      ownerDeviceId: serializer.fromJson<String?>(json['ownerDeviceId']),
+      ownerDeviceName: serializer.fromJson<String?>(json['ownerDeviceName']),
       transactionCount: serializer.fromJson<int>(json['transactionCount']),
       survivalBalance: serializer.fromJson<int>(json['survivalBalance']),
       soulBalance: serializer.fromJson<int>(json['soulBalance']),
@@ -858,6 +988,10 @@ class BookRow extends DataClass implements Insertable<BookRow> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
       'isArchived': serializer.toJson<bool>(isArchived),
+      'isShadow': serializer.toJson<bool>(isShadow),
+      'groupId': serializer.toJson<String?>(groupId),
+      'ownerDeviceId': serializer.toJson<String?>(ownerDeviceId),
+      'ownerDeviceName': serializer.toJson<String?>(ownerDeviceName),
       'transactionCount': serializer.toJson<int>(transactionCount),
       'survivalBalance': serializer.toJson<int>(survivalBalance),
       'soulBalance': serializer.toJson<int>(soulBalance),
@@ -872,6 +1006,10 @@ class BookRow extends DataClass implements Insertable<BookRow> {
     DateTime? createdAt,
     Value<DateTime?> updatedAt = const Value.absent(),
     bool? isArchived,
+    bool? isShadow,
+    Value<String?> groupId = const Value.absent(),
+    Value<String?> ownerDeviceId = const Value.absent(),
+    Value<String?> ownerDeviceName = const Value.absent(),
     int? transactionCount,
     int? survivalBalance,
     int? soulBalance,
@@ -883,6 +1021,14 @@ class BookRow extends DataClass implements Insertable<BookRow> {
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
     isArchived: isArchived ?? this.isArchived,
+    isShadow: isShadow ?? this.isShadow,
+    groupId: groupId.present ? groupId.value : this.groupId,
+    ownerDeviceId: ownerDeviceId.present
+        ? ownerDeviceId.value
+        : this.ownerDeviceId,
+    ownerDeviceName: ownerDeviceName.present
+        ? ownerDeviceName.value
+        : this.ownerDeviceName,
     transactionCount: transactionCount ?? this.transactionCount,
     survivalBalance: survivalBalance ?? this.survivalBalance,
     soulBalance: soulBalance ?? this.soulBalance,
@@ -898,6 +1044,14 @@ class BookRow extends DataClass implements Insertable<BookRow> {
       isArchived: data.isArchived.present
           ? data.isArchived.value
           : this.isArchived,
+      isShadow: data.isShadow.present ? data.isShadow.value : this.isShadow,
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
+      ownerDeviceId: data.ownerDeviceId.present
+          ? data.ownerDeviceId.value
+          : this.ownerDeviceId,
+      ownerDeviceName: data.ownerDeviceName.present
+          ? data.ownerDeviceName.value
+          : this.ownerDeviceName,
       transactionCount: data.transactionCount.present
           ? data.transactionCount.value
           : this.transactionCount,
@@ -920,6 +1074,10 @@ class BookRow extends DataClass implements Insertable<BookRow> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('isArchived: $isArchived, ')
+          ..write('isShadow: $isShadow, ')
+          ..write('groupId: $groupId, ')
+          ..write('ownerDeviceId: $ownerDeviceId, ')
+          ..write('ownerDeviceName: $ownerDeviceName, ')
           ..write('transactionCount: $transactionCount, ')
           ..write('survivalBalance: $survivalBalance, ')
           ..write('soulBalance: $soulBalance')
@@ -936,6 +1094,10 @@ class BookRow extends DataClass implements Insertable<BookRow> {
     createdAt,
     updatedAt,
     isArchived,
+    isShadow,
+    groupId,
+    ownerDeviceId,
+    ownerDeviceName,
     transactionCount,
     survivalBalance,
     soulBalance,
@@ -951,6 +1113,10 @@ class BookRow extends DataClass implements Insertable<BookRow> {
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.isArchived == this.isArchived &&
+          other.isShadow == this.isShadow &&
+          other.groupId == this.groupId &&
+          other.ownerDeviceId == this.ownerDeviceId &&
+          other.ownerDeviceName == this.ownerDeviceName &&
           other.transactionCount == this.transactionCount &&
           other.survivalBalance == this.survivalBalance &&
           other.soulBalance == this.soulBalance);
@@ -964,6 +1130,10 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
   final Value<DateTime> createdAt;
   final Value<DateTime?> updatedAt;
   final Value<bool> isArchived;
+  final Value<bool> isShadow;
+  final Value<String?> groupId;
+  final Value<String?> ownerDeviceId;
+  final Value<String?> ownerDeviceName;
   final Value<int> transactionCount;
   final Value<int> survivalBalance;
   final Value<int> soulBalance;
@@ -976,6 +1146,10 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.isArchived = const Value.absent(),
+    this.isShadow = const Value.absent(),
+    this.groupId = const Value.absent(),
+    this.ownerDeviceId = const Value.absent(),
+    this.ownerDeviceName = const Value.absent(),
     this.transactionCount = const Value.absent(),
     this.survivalBalance = const Value.absent(),
     this.soulBalance = const Value.absent(),
@@ -989,6 +1163,10 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
     required DateTime createdAt,
     this.updatedAt = const Value.absent(),
     this.isArchived = const Value.absent(),
+    this.isShadow = const Value.absent(),
+    this.groupId = const Value.absent(),
+    this.ownerDeviceId = const Value.absent(),
+    this.ownerDeviceName = const Value.absent(),
     this.transactionCount = const Value.absent(),
     this.survivalBalance = const Value.absent(),
     this.soulBalance = const Value.absent(),
@@ -1006,6 +1184,10 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<bool>? isArchived,
+    Expression<bool>? isShadow,
+    Expression<String>? groupId,
+    Expression<String>? ownerDeviceId,
+    Expression<String>? ownerDeviceName,
     Expression<int>? transactionCount,
     Expression<int>? survivalBalance,
     Expression<int>? soulBalance,
@@ -1019,6 +1201,10 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (isArchived != null) 'is_archived': isArchived,
+      if (isShadow != null) 'is_shadow': isShadow,
+      if (groupId != null) 'group_id': groupId,
+      if (ownerDeviceId != null) 'owner_device_id': ownerDeviceId,
+      if (ownerDeviceName != null) 'owner_device_name': ownerDeviceName,
       if (transactionCount != null) 'transaction_count': transactionCount,
       if (survivalBalance != null) 'survival_balance': survivalBalance,
       if (soulBalance != null) 'soul_balance': soulBalance,
@@ -1034,6 +1220,10 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
     Value<DateTime>? createdAt,
     Value<DateTime?>? updatedAt,
     Value<bool>? isArchived,
+    Value<bool>? isShadow,
+    Value<String?>? groupId,
+    Value<String?>? ownerDeviceId,
+    Value<String?>? ownerDeviceName,
     Value<int>? transactionCount,
     Value<int>? survivalBalance,
     Value<int>? soulBalance,
@@ -1047,6 +1237,10 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isArchived: isArchived ?? this.isArchived,
+      isShadow: isShadow ?? this.isShadow,
+      groupId: groupId ?? this.groupId,
+      ownerDeviceId: ownerDeviceId ?? this.ownerDeviceId,
+      ownerDeviceName: ownerDeviceName ?? this.ownerDeviceName,
       transactionCount: transactionCount ?? this.transactionCount,
       survivalBalance: survivalBalance ?? this.survivalBalance,
       soulBalance: soulBalance ?? this.soulBalance,
@@ -1078,6 +1272,18 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
     if (isArchived.present) {
       map['is_archived'] = Variable<bool>(isArchived.value);
     }
+    if (isShadow.present) {
+      map['is_shadow'] = Variable<bool>(isShadow.value);
+    }
+    if (groupId.present) {
+      map['group_id'] = Variable<String>(groupId.value);
+    }
+    if (ownerDeviceId.present) {
+      map['owner_device_id'] = Variable<String>(ownerDeviceId.value);
+    }
+    if (ownerDeviceName.present) {
+      map['owner_device_name'] = Variable<String>(ownerDeviceName.value);
+    }
     if (transactionCount.present) {
       map['transaction_count'] = Variable<int>(transactionCount.value);
     }
@@ -1103,6 +1309,10 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('isArchived: $isArchived, ')
+          ..write('isShadow: $isShadow, ')
+          ..write('groupId: $groupId, ')
+          ..write('ownerDeviceId: $ownerDeviceId, ')
+          ..write('ownerDeviceName: $ownerDeviceName, ')
           ..write('transactionCount: $transactionCount, ')
           ..write('survivalBalance: $survivalBalance, ')
           ..write('soulBalance: $soulBalance, ')
@@ -5667,6 +5877,10 @@ typedef $$BooksTableCreateCompanionBuilder =
       required DateTime createdAt,
       Value<DateTime?> updatedAt,
       Value<bool> isArchived,
+      Value<bool> isShadow,
+      Value<String?> groupId,
+      Value<String?> ownerDeviceId,
+      Value<String?> ownerDeviceName,
       Value<int> transactionCount,
       Value<int> survivalBalance,
       Value<int> soulBalance,
@@ -5681,6 +5895,10 @@ typedef $$BooksTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
       Value<bool> isArchived,
+      Value<bool> isShadow,
+      Value<String?> groupId,
+      Value<String?> ownerDeviceId,
+      Value<String?> ownerDeviceName,
       Value<int> transactionCount,
       Value<int> survivalBalance,
       Value<int> soulBalance,
@@ -5727,6 +5945,26 @@ class $$BooksTableFilterComposer extends Composer<_$AppDatabase, $BooksTable> {
 
   ColumnFilters<bool> get isArchived => $composableBuilder(
     column: $table.isArchived,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isShadow => $composableBuilder(
+    column: $table.isShadow,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerDeviceId => $composableBuilder(
+    column: $table.ownerDeviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerDeviceName => $composableBuilder(
+    column: $table.ownerDeviceName,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5790,6 +6028,26 @@ class $$BooksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isShadow => $composableBuilder(
+    column: $table.isShadow,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerDeviceId => $composableBuilder(
+    column: $table.ownerDeviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerDeviceName => $composableBuilder(
+    column: $table.ownerDeviceName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get transactionCount => $composableBuilder(
     column: $table.transactionCount,
     builder: (column) => ColumnOrderings(column),
@@ -5835,6 +6093,22 @@ class $$BooksTableAnnotationComposer
 
   GeneratedColumn<bool> get isArchived => $composableBuilder(
     column: $table.isArchived,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isShadow =>
+      $composableBuilder(column: $table.isShadow, builder: (column) => column);
+
+  GeneratedColumn<String> get groupId =>
+      $composableBuilder(column: $table.groupId, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerDeviceId => $composableBuilder(
+    column: $table.ownerDeviceId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ownerDeviceName => $composableBuilder(
+    column: $table.ownerDeviceName,
     builder: (column) => column,
   );
 
@@ -5889,6 +6163,10 @@ class $$BooksTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<bool> isArchived = const Value.absent(),
+                Value<bool> isShadow = const Value.absent(),
+                Value<String?> groupId = const Value.absent(),
+                Value<String?> ownerDeviceId = const Value.absent(),
+                Value<String?> ownerDeviceName = const Value.absent(),
                 Value<int> transactionCount = const Value.absent(),
                 Value<int> survivalBalance = const Value.absent(),
                 Value<int> soulBalance = const Value.absent(),
@@ -5901,6 +6179,10 @@ class $$BooksTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 isArchived: isArchived,
+                isShadow: isShadow,
+                groupId: groupId,
+                ownerDeviceId: ownerDeviceId,
+                ownerDeviceName: ownerDeviceName,
                 transactionCount: transactionCount,
                 survivalBalance: survivalBalance,
                 soulBalance: soulBalance,
@@ -5915,6 +6197,10 @@ class $$BooksTableTableManager
                 required DateTime createdAt,
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<bool> isArchived = const Value.absent(),
+                Value<bool> isShadow = const Value.absent(),
+                Value<String?> groupId = const Value.absent(),
+                Value<String?> ownerDeviceId = const Value.absent(),
+                Value<String?> ownerDeviceName = const Value.absent(),
                 Value<int> transactionCount = const Value.absent(),
                 Value<int> survivalBalance = const Value.absent(),
                 Value<int> soulBalance = const Value.absent(),
@@ -5927,6 +6213,10 @@ class $$BooksTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 isArchived: isArchived,
+                isShadow: isShadow,
+                groupId: groupId,
+                ownerDeviceId: ownerDeviceId,
+                ownerDeviceName: ownerDeviceName,
                 transactionCount: transactionCount,
                 survivalBalance: survivalBalance,
                 soulBalance: soulBalance,

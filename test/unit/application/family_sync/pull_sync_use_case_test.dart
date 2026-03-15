@@ -162,6 +162,7 @@ void main() {
 
     expect(result, isA<PullSyncSuccess>());
     expect(appliedOperations, hasLength(1));
+    expect(appliedOperations.single.first['fromDeviceId'], 'owner-1');
     verify(
       () => groupRepository.updateLastSyncTime(
         DateTime.parse('2026-01-01T00:00:02.000Z'),
@@ -226,6 +227,7 @@ void main() {
         'entityType': 'bill',
         'entityId': 'tx-1',
         'data': {'id': 'tx-1', 'amount': 1000},
+        'fromDeviceId': 'owner-1',
       },
     ]);
   });
@@ -294,6 +296,7 @@ void main() {
         'entityId': 'tx-1',
         'data': {'id': 'tx-1', 'amount': 1000},
         'timestamp': 123,
+        'fromDeviceId': 'owner-1',
       },
     ]);
   });

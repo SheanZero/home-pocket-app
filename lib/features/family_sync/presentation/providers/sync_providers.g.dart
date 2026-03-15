@@ -25,7 +25,7 @@ final pushSyncUseCaseProvider = AutoDisposeProvider<PushSyncUseCase>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef PushSyncUseCaseRef = AutoDisposeProviderRef<PushSyncUseCase>;
-String _$pullSyncUseCaseHash() => r'839de0977ac2954306fffb937000ac74d6a79b1a';
+String _$pullSyncUseCaseHash() => r'340b68e055287df5a271a943bb2d722077e76769';
 
 /// PullSyncUseCase provider.
 ///
@@ -44,7 +44,45 @@ final pullSyncUseCaseProvider = AutoDisposeProvider<PullSyncUseCase>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef PullSyncUseCaseRef = AutoDisposeProviderRef<PullSyncUseCase>;
-String _$fullSyncUseCaseHash() => r'4642d48219c5e3d262f14f84cb3218abe26d0b50';
+String _$shadowBookServiceHash() => r'1005597152b5fd1c45b2443aed006e95f24ee3db';
+
+/// See also [shadowBookService].
+@ProviderFor(shadowBookService)
+final shadowBookServiceProvider =
+    AutoDisposeProvider<ShadowBookService>.internal(
+      shadowBookService,
+      name: r'shadowBookServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$shadowBookServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ShadowBookServiceRef = AutoDisposeProviderRef<ShadowBookService>;
+String _$applySyncOperationsUseCaseHash() =>
+    r'c61325a3aa42d96bd201567629d381bdec8df779';
+
+/// See also [applySyncOperationsUseCase].
+@ProviderFor(applySyncOperationsUseCase)
+final applySyncOperationsUseCaseProvider =
+    AutoDisposeProvider<ApplySyncOperationsUseCase>.internal(
+      applySyncOperationsUseCase,
+      name: r'applySyncOperationsUseCaseProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$applySyncOperationsUseCaseHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ApplySyncOperationsUseCaseRef =
+    AutoDisposeProviderRef<ApplySyncOperationsUseCase>;
+String _$fullSyncUseCaseHash() => r'841ff684603ff1684b3317f1a24b543fbbc12a31';
 
 /// FullSyncUseCase provider.
 ///
@@ -64,7 +102,7 @@ final fullSyncUseCaseProvider = AutoDisposeProvider<FullSyncUseCase>.internal(
 // ignore: unused_element
 typedef FullSyncUseCaseRef = AutoDisposeProviderRef<FullSyncUseCase>;
 String _$syncTriggerServiceHash() =>
-    r'66d1aaacf0ccd8a323a83f794b72eed422139225';
+    r'bf36a16f7ee9020257c6895165630b9819c0edf2';
 
 /// SyncTriggerService provider.
 ///

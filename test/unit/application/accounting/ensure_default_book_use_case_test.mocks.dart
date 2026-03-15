@@ -52,6 +52,22 @@ class MockBookRepository extends _i1.Mock implements _i2.BookRepository {
           as _i3.Future<_i4.Book?>);
 
   @override
+  _i3.Future<_i4.Book?> findShadowBookByDeviceId(String? ownerDeviceId) =>
+      (super.noSuchMethod(
+            Invocation.method(#findShadowBookByDeviceId, [ownerDeviceId]),
+            returnValue: _i3.Future<_i4.Book?>.value(),
+          )
+          as _i3.Future<_i4.Book?>);
+
+  @override
+  _i3.Future<List<_i4.Book>> findShadowBooksByGroupId(String? groupId) =>
+      (super.noSuchMethod(
+            Invocation.method(#findShadowBooksByGroupId, [groupId]),
+            returnValue: _i3.Future<List<_i4.Book>>.value(<_i4.Book>[]),
+          )
+          as _i3.Future<List<_i4.Book>>);
+
+  @override
   _i3.Future<List<_i4.Book>> findAll({bool? includeArchived}) =>
       (super.noSuchMethod(
             Invocation.method(#findAll, [], {
@@ -74,6 +90,15 @@ class MockBookRepository extends _i1.Mock implements _i2.BookRepository {
   _i3.Future<void> archive(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#archive, [id]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> delete(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#delete, [id]),
             returnValue: _i3.Future<void>.value(),
             returnValueForMissingStub: _i3.Future<void>.value(),
           )

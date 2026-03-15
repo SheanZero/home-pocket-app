@@ -3,44 +3,55 @@ import 'package:home_pocket/application/accounting/create_transaction_use_case.d
 import 'package:home_pocket/application/dual_ledger/classification_result.dart';
 import 'package:home_pocket/application/dual_ledger/classification_service.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
+import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
+import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/device_identity_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
+import 'package:home_pocket/infrastructure/sync/sync_trigger_service.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 @GenerateMocks([
   TransactionRepository,
+  BookRepository,
   CategoryRepository,
   DeviceIdentityRepository,
   HashChainService,
   ClassificationService,
+  SyncTriggerService,
 ])
 import 'create_transaction_use_case_test.mocks.dart';
 
 void main() {
   late MockTransactionRepository mockTransactionRepo;
+  late MockBookRepository mockBookRepo;
   late MockCategoryRepository mockCategoryRepo;
   late MockDeviceIdentityRepository mockDeviceIdentityRepo;
   late MockHashChainService mockHashChainService;
   late MockClassificationService mockClassificationService;
+  late MockSyncTriggerService mockSyncTriggerService;
   late CreateTransactionUseCase useCase;
 
   setUp(() {
     mockTransactionRepo = MockTransactionRepository();
+    mockBookRepo = MockBookRepository();
     mockCategoryRepo = MockCategoryRepository();
     mockDeviceIdentityRepo = MockDeviceIdentityRepository();
     mockHashChainService = MockHashChainService();
     mockClassificationService = MockClassificationService();
+    mockSyncTriggerService = MockSyncTriggerService();
 
     useCase = CreateTransactionUseCase(
       transactionRepository: mockTransactionRepo,
+      bookRepository: mockBookRepo,
       categoryRepository: mockCategoryRepo,
       deviceIdentityRepository: mockDeviceIdentityRepo,
       hashChainService: mockHashChainService,
       classificationService: mockClassificationService,
+      syncTriggerService: mockSyncTriggerService,
     );
 
     when(
@@ -60,6 +71,18 @@ void main() {
         confidence: 1.0,
         method: ClassificationMethod.rule,
         reason: 'Default stub',
+      ),
+    );
+    when(
+      mockSyncTriggerService.onTransactionCreated(any),
+    ).thenAnswer((_) async {});
+    when(mockBookRepo.findById(any)).thenAnswer(
+      (_) async => Book(
+        id: 'book_001',
+        name: 'Main Book',
+        currency: 'JPY',
+        deviceId: 'device_test_001',
+        createdAt: DateTime(2026, 1, 1),
       ),
     );
   });
@@ -110,7 +133,49 @@ void main() {
       expect(result.data!.currentHash, 'computed_hash_xyz');
       expect(result.data!.prevHash, 'prev_hash_abc');
       verify(mockTransactionRepo.insert(any)).called(1);
+      verify(mockSyncTriggerService.onTransactionCreated(any)).called(1);
     });
+
+    test(
+      'pushes sync payload with source book metadata after successful create',
+      () async {
+        when(
+          mockCategoryRepo.findById('cat_food'),
+        ).thenAnswer((_) async => testCategory);
+        when(
+          mockTransactionRepo.getLatestHash('book_001'),
+        ).thenAnswer((_) async => 'prev_hash_abc');
+        when(
+          mockHashChainService.calculateTransactionHash(
+            transactionId: anyNamed('transactionId'),
+            amount: anyNamed('amount'),
+            timestamp: anyNamed('timestamp'),
+            previousHash: anyNamed('previousHash'),
+          ),
+        ).thenReturn('computed_hash_xyz');
+        when(mockTransactionRepo.insert(any)).thenAnswer((_) async {});
+
+        await useCase.execute(
+          CreateTransactionParams(
+            bookId: 'book_001',
+            amount: 1500,
+            type: TransactionType.expense,
+            categoryId: 'cat_food',
+          ),
+        );
+
+        final captured =
+            verify(
+                  mockSyncTriggerService.onTransactionCreated(captureAny),
+                ).captured.single
+                as Map<String, dynamic>;
+        expect(captured['metadata'], {
+          'sourceBookId': 'book_001',
+          'sourceBookName': 'Main Book',
+          'sourceBookType': 'remote_book:book_001',
+        });
+      },
+    );
 
     test('uses genesis hash when no previous transactions', () async {
       when(

@@ -25,6 +25,7 @@ class TransactionDao {
     String? metadata,
     String? prevHash,
     bool isPrivate = false,
+    bool isSynced = false,
     int soulSatisfaction = 5,
   }) async {
     await _db
@@ -47,6 +48,7 @@ class TransactionDao {
             metadata: Value(metadata),
             prevHash: Value(prevHash),
             isPrivate: Value(isPrivate),
+            isSynced: Value(isSynced),
             soulSatisfaction: Value(soulSatisfaction),
           ),
         );

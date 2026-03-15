@@ -4,10 +4,13 @@ import 'dart:math' as math;
 import 'package:ulid/ulid.dart';
 
 import '../../features/accounting/domain/models/transaction.dart';
+import '../../features/accounting/domain/models/transaction_sync_mapper.dart';
+import '../../features/accounting/domain/repositories/book_repository.dart';
 import '../../features/accounting/domain/repositories/category_repository.dart';
 import '../../features/accounting/domain/repositories/device_identity_repository.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
 import '../../infrastructure/crypto/services/hash_chain_service.dart';
+import '../../infrastructure/sync/sync_trigger_service.dart';
 import '../../shared/utils/result.dart';
 import '../dual_ledger/classification_service.dart';
 
@@ -46,21 +49,27 @@ class CreateTransactionParams {
 class CreateTransactionUseCase {
   CreateTransactionUseCase({
     required TransactionRepository transactionRepository,
+    required BookRepository bookRepository,
     required CategoryRepository categoryRepository,
     required DeviceIdentityRepository deviceIdentityRepository,
     required HashChainService hashChainService,
     required ClassificationService classificationService,
+    SyncTriggerService? syncTriggerService,
   }) : _transactionRepo = transactionRepository,
+       _bookRepo = bookRepository,
        _categoryRepo = categoryRepository,
        _deviceIdentityRepo = deviceIdentityRepository,
        _hashChainService = hashChainService,
-       _classificationService = classificationService;
+       _classificationService = classificationService,
+       _syncTriggerService = syncTriggerService;
 
   final TransactionRepository _transactionRepo;
+  final BookRepository _bookRepo;
   final CategoryRepository _categoryRepo;
   final DeviceIdentityRepository _deviceIdentityRepo;
   final HashChainService _hashChainService;
   final ClassificationService _classificationService;
+  final SyncTriggerService? _syncTriggerService;
 
   /// Genesis hash: 64 zero characters (no previous transaction).
   static const _genesisHash =
@@ -175,6 +184,23 @@ class CreateTransactionUseCase {
 
     // 9. Persist
     await _transactionRepo.insert(transaction);
+
+    final syncService = _syncTriggerService;
+    if (syncService != null) {
+      try {
+        final book = await _bookRepo.findById(params.bookId);
+        await syncService.onTransactionCreated(
+          TransactionSyncMapper.toSyncMap(
+            transaction,
+            sourceBookId: params.bookId,
+            sourceBookName: book?.name ?? params.bookId,
+            sourceBookType: 'remote_book:${params.bookId}',
+          ),
+        );
+      } catch (_) {
+        // Keep local transaction creation successful even if sync enqueue fails.
+      }
+    }
 
     dev.log('[7/7 UseCase Done] Transaction $id persisted', name: 'DataFlow');
     return Result.success(transaction);

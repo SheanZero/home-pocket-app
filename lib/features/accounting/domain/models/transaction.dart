@@ -23,6 +23,7 @@ abstract class Transaction with _$Transaction {
     String? note,
     String? photoHash,
     String? merchant,
+    Map<String, dynamic>? metadata,
 
     // Hash chain
     String? prevHash,

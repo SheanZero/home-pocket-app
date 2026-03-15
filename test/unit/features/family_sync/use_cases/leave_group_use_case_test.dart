@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/family_sync/shadow_book_service.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/use_cases/leave_group_use_case.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
@@ -11,25 +12,31 @@ class MockGroupRepository extends Mock implements GroupRepository {}
 
 class MockSyncQueueManager extends Mock implements SyncQueueManager {}
 
+class MockShadowBookService extends Mock implements ShadowBookService {}
+
 void main() {
   late MockRelayApiClient apiClient;
   late MockGroupRepository groupRepository;
   late MockSyncQueueManager queueManager;
+  late MockShadowBookService shadowBookService;
   late LeaveGroupUseCase useCase;
 
   setUp(() {
     apiClient = MockRelayApiClient();
     groupRepository = MockGroupRepository();
     queueManager = MockSyncQueueManager();
+    shadowBookService = MockShadowBookService();
     useCase = LeaveGroupUseCase(
       apiClient: apiClient,
       groupRepository: groupRepository,
       queueManager: queueManager,
+      shadowBookService: shadowBookService,
     );
 
     when(() => apiClient.leaveGroup(any())).thenAnswer((_) async {});
     when(() => queueManager.clearQueue()).thenAnswer((_) async {});
     when(() => groupRepository.deactivateGroup(any())).thenAnswer((_) async {});
+    when(() => shadowBookService.cleanSyncData(any())).thenAnswer((_) async {});
   });
 
   test('leaves the group, clears queue, and deactivates locally', () async {
@@ -38,6 +45,7 @@ void main() {
     expect(result, isA<LeaveGroupSuccess>());
     verify(() => apiClient.leaveGroup('group-1')).called(1);
     verify(() => queueManager.clearQueue()).called(1);
+    verify(() => shadowBookService.cleanSyncData('group-1')).called(1);
     verify(() => groupRepository.deactivateGroup('group-1')).called(1);
   });
 

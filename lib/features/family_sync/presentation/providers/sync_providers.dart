@@ -2,8 +2,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/family_sync/full_sync_use_case.dart';
+import '../../../../application/family_sync/apply_sync_operations_use_case.dart';
+import '../../../../application/family_sync/shadow_book_service.dart';
 import '../../../../application/family_sync/pull_sync_use_case.dart';
 import '../../../../application/family_sync/push_sync_use_case.dart';
+import '../../../../features/accounting/domain/models/transaction_sync_mapper.dart';
+import '../../../accounting/presentation/providers/repository_providers.dart'
+    as accounting;
 import '../../../../infrastructure/crypto/providers.dart';
 import '../../../../infrastructure/sync/sync_trigger_service.dart';
 import '../../domain/models/group_info.dart';
@@ -27,26 +32,62 @@ PushSyncUseCase pushSyncUseCase(Ref ref) {
 /// PullSyncUseCase provider.
 @riverpod
 PullSyncUseCase pullSyncUseCase(Ref ref) {
+  final applyOps = ref.watch(applySyncOperationsUseCaseProvider);
   return PullSyncUseCase(
     apiClient: ref.watch(relayApiClientProvider),
     e2eeService: ref.watch(e2eeServiceProvider),
     groupRepo: ref.watch(groupRepositoryProvider),
     queueManager: ref.watch(syncQueueManagerProvider),
     keyManager: ref.watch(keyManagerProvider),
-    applyOperations: (operations) async {
-      // TODO: Wire up to CRDT apply logic when available
-    },
+    applyOperations: applyOps.execute,
+  );
+}
+
+@riverpod
+ShadowBookService shadowBookService(Ref ref) {
+  return ShadowBookService(
+    bookRepository: ref.watch(accounting.bookRepositoryProvider),
+    transactionRepository: ref.watch(accounting.transactionRepositoryProvider),
+  );
+}
+
+@riverpod
+ApplySyncOperationsUseCase applySyncOperationsUseCase(Ref ref) {
+  return ApplySyncOperationsUseCase(
+    transactionRepository: ref.watch(accounting.transactionRepositoryProvider),
+    shadowBookService: ref.watch(shadowBookServiceProvider),
+    groupRepository: ref.watch(groupRepositoryProvider),
   );
 }
 
 /// FullSyncUseCase provider.
 @riverpod
 FullSyncUseCase fullSyncUseCase(Ref ref) {
+  final transactionRepo = ref.watch(accounting.transactionRepositoryProvider);
+  final bookRepo = ref.watch(accounting.bookRepositoryProvider);
+
   return FullSyncUseCase(
     pushSync: ref.watch(pushSyncUseCaseProvider),
     fetchAllTransactions: () async {
-      // TODO: Wire up to transaction repository when available
-      return [];
+      final allBooks = await bookRepo.findAll();
+      final localBooks = allBooks.where((book) => !book.isShadow).toList();
+      final operations = <Map<String, dynamic>>[];
+
+      for (final book in localBooks) {
+        final transactions = await transactionRepo.findAllByBook(book.id);
+        operations.addAll(
+          transactions.map(
+            (tx) => TransactionSyncMapper.toCreateOperation(
+              tx,
+              sourceBookId: book.id,
+              sourceBookName: book.name,
+              sourceBookType: 'remote_book:${book.id}',
+            ),
+          ),
+        );
+      }
+
+      return operations;
     },
   );
 }
@@ -61,6 +102,8 @@ SyncTriggerService syncTriggerService(Ref ref) {
     groupRepo: ref.watch(groupRepositoryProvider),
     pullSync: ref.watch(pullSyncUseCaseProvider),
     pushSync: ref.watch(pushSyncUseCaseProvider),
+    fullSync: ref.watch(fullSyncUseCaseProvider),
+    shadowBookService: ref.watch(shadowBookServiceProvider),
     queueManager: ref.watch(syncQueueManagerProvider),
     pushNotificationService: ref.watch(pushNotificationServiceProvider),
     apiClient: ref.watch(relayApiClientProvider),

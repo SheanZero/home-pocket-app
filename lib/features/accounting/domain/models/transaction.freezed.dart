@@ -23,7 +23,8 @@ mixin _$Transaction {
   DateTime get timestamp; // Optional fields
   String? get note;
   String? get photoHash;
-  String? get merchant; // Hash chain
+  String? get merchant;
+  Map<String, dynamic>? get metadata; // Hash chain
   String? get prevHash;
   String get currentHash; // Timestamps
   DateTime get createdAt;
@@ -65,6 +66,7 @@ mixin _$Transaction {
                 other.photoHash == photoHash) &&
             (identical(other.merchant, merchant) ||
                 other.merchant == merchant) &&
+            const DeepCollectionEquality().equals(other.metadata, metadata) &&
             (identical(other.prevHash, prevHash) ||
                 other.prevHash == prevHash) &&
             (identical(other.currentHash, currentHash) ||
@@ -98,6 +100,7 @@ mixin _$Transaction {
     note,
     photoHash,
     merchant,
+    const DeepCollectionEquality().hash(metadata),
     prevHash,
     currentHash,
     createdAt,
@@ -110,7 +113,7 @@ mixin _$Transaction {
 
   @override
   String toString() {
-    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, soulSatisfaction: $soulSatisfaction)';
+    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, metadata: $metadata, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, soulSatisfaction: $soulSatisfaction)';
   }
 }
 
@@ -133,6 +136,7 @@ abstract mixin class $TransactionCopyWith<$Res> {
     String? note,
     String? photoHash,
     String? merchant,
+    Map<String, dynamic>? metadata,
     String? prevHash,
     String currentHash,
     DateTime createdAt,
@@ -167,6 +171,7 @@ class _$TransactionCopyWithImpl<$Res> implements $TransactionCopyWith<$Res> {
     Object? note = freezed,
     Object? photoHash = freezed,
     Object? merchant = freezed,
+    Object? metadata = freezed,
     Object? prevHash = freezed,
     Object? currentHash = null,
     Object? createdAt = null,
@@ -222,6 +227,10 @@ class _$TransactionCopyWithImpl<$Res> implements $TransactionCopyWith<$Res> {
             ? _self.merchant
             : merchant // ignore: cast_nullable_to_non_nullable
                   as String?,
+        metadata: freezed == metadata
+            ? _self.metadata
+            : metadata // ignore: cast_nullable_to_non_nullable
+                  as Map<String, dynamic>?,
         prevHash: freezed == prevHash
             ? _self.prevHash
             : prevHash // ignore: cast_nullable_to_non_nullable
@@ -364,6 +373,7 @@ extension TransactionPatterns on Transaction {
       String? note,
       String? photoHash,
       String? merchant,
+      Map<String, dynamic>? metadata,
       String? prevHash,
       String currentHash,
       DateTime createdAt,
@@ -391,6 +401,7 @@ extension TransactionPatterns on Transaction {
           _that.note,
           _that.photoHash,
           _that.merchant,
+          _that.metadata,
           _that.prevHash,
           _that.currentHash,
           _that.createdAt,
@@ -432,6 +443,7 @@ extension TransactionPatterns on Transaction {
       String? note,
       String? photoHash,
       String? merchant,
+      Map<String, dynamic>? metadata,
       String? prevHash,
       String currentHash,
       DateTime createdAt,
@@ -458,6 +470,7 @@ extension TransactionPatterns on Transaction {
           _that.note,
           _that.photoHash,
           _that.merchant,
+          _that.metadata,
           _that.prevHash,
           _that.currentHash,
           _that.createdAt,
@@ -498,6 +511,7 @@ extension TransactionPatterns on Transaction {
       String? note,
       String? photoHash,
       String? merchant,
+      Map<String, dynamic>? metadata,
       String? prevHash,
       String currentHash,
       DateTime createdAt,
@@ -524,6 +538,7 @@ extension TransactionPatterns on Transaction {
           _that.note,
           _that.photoHash,
           _that.merchant,
+          _that.metadata,
           _that.prevHash,
           _that.currentHash,
           _that.createdAt,
@@ -554,6 +569,7 @@ class _Transaction implements Transaction {
     this.note,
     this.photoHash,
     this.merchant,
+    final Map<String, dynamic>? metadata,
     this.prevHash,
     required this.currentHash,
     required this.createdAt,
@@ -562,7 +578,7 @@ class _Transaction implements Transaction {
     this.isSynced = false,
     this.isDeleted = false,
     this.soulSatisfaction = 5,
-  });
+  }) : _metadata = metadata;
   factory _Transaction.fromJson(Map<String, dynamic> json) =>
       _$TransactionFromJson(json);
 
@@ -589,6 +605,16 @@ class _Transaction implements Transaction {
   final String? photoHash;
   @override
   final String? merchant;
+  final Map<String, dynamic>? _metadata;
+  @override
+  Map<String, dynamic>? get metadata {
+    final value = _metadata;
+    if (value == null) return null;
+    if (_metadata is EqualUnmodifiableMapView) return _metadata;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(value);
+  }
+
   // Hash chain
   @override
   final String? prevHash;
@@ -649,6 +675,7 @@ class _Transaction implements Transaction {
                 other.photoHash == photoHash) &&
             (identical(other.merchant, merchant) ||
                 other.merchant == merchant) &&
+            const DeepCollectionEquality().equals(other._metadata, _metadata) &&
             (identical(other.prevHash, prevHash) ||
                 other.prevHash == prevHash) &&
             (identical(other.currentHash, currentHash) ||
@@ -682,6 +709,7 @@ class _Transaction implements Transaction {
     note,
     photoHash,
     merchant,
+    const DeepCollectionEquality().hash(_metadata),
     prevHash,
     currentHash,
     createdAt,
@@ -694,7 +722,7 @@ class _Transaction implements Transaction {
 
   @override
   String toString() {
-    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, soulSatisfaction: $soulSatisfaction)';
+    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, metadata: $metadata, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, soulSatisfaction: $soulSatisfaction)';
   }
 }
 
@@ -719,6 +747,7 @@ abstract mixin class _$TransactionCopyWith<$Res>
     String? note,
     String? photoHash,
     String? merchant,
+    Map<String, dynamic>? metadata,
     String? prevHash,
     String currentHash,
     DateTime createdAt,
@@ -753,6 +782,7 @@ class __$TransactionCopyWithImpl<$Res> implements _$TransactionCopyWith<$Res> {
     Object? note = freezed,
     Object? photoHash = freezed,
     Object? merchant = freezed,
+    Object? metadata = freezed,
     Object? prevHash = freezed,
     Object? currentHash = null,
     Object? createdAt = null,
@@ -808,6 +838,10 @@ class __$TransactionCopyWithImpl<$Res> implements _$TransactionCopyWith<$Res> {
             ? _self.merchant
             : merchant // ignore: cast_nullable_to_non_nullable
                   as String?,
+        metadata: freezed == metadata
+            ? _self._metadata
+            : metadata // ignore: cast_nullable_to_non_nullable
+                  as Map<String, dynamic>?,
         prevHash: freezed == prevHash
             ? _self.prevHash
             : prevHash // ignore: cast_nullable_to_non_nullable

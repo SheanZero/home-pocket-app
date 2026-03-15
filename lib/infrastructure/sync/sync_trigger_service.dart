@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../../application/family_sync/full_sync_use_case.dart';
 import '../../application/family_sync/pull_sync_use_case.dart';
 import '../../application/family_sync/push_sync_use_case.dart';
+import '../../application/family_sync/shadow_book_service.dart';
 import '../../features/family_sync/domain/models/group_member.dart';
 import '../../features/family_sync/domain/repositories/group_repository.dart';
 import '../../infrastructure/crypto/services/key_manager.dart';
@@ -61,6 +63,8 @@ class SyncTriggerService {
     required GroupRepository groupRepo,
     required PullSyncUseCase pullSync,
     required PushSyncUseCase pushSync,
+    FullSyncUseCase? fullSync,
+    ShadowBookService? shadowBookService,
     required SyncQueueManager queueManager,
     required PushNotificationService pushNotificationService,
     required RelayApiClient apiClient,
@@ -68,6 +72,8 @@ class SyncTriggerService {
   }) : _groupRepo = groupRepo,
        _pullSync = pullSync,
        _pushSync = pushSync,
+       _fullSync = fullSync,
+       _shadowBookService = shadowBookService,
        _queueManager = queueManager,
        _pushNotificationService = pushNotificationService,
        _apiClient = apiClient,
@@ -76,6 +82,8 @@ class SyncTriggerService {
   final GroupRepository _groupRepo;
   final PullSyncUseCase _pullSync;
   final PushSyncUseCase _pushSync;
+  final FullSyncUseCase? _fullSync;
+  final ShadowBookService? _shadowBookService;
   final SyncQueueManager _queueManager;
   final PushNotificationService _pushNotificationService;
   final RelayApiClient _apiClient;
@@ -230,6 +238,7 @@ class SyncTriggerService {
         );
       }
 
+      await _fullSync?.execute();
       await _pullSync.execute();
       _publishEvent(SyncTriggerEvent.memberConfirmed(groupId: groupId));
     } catch (e) {
@@ -313,6 +322,7 @@ class SyncTriggerService {
         reason == 'removed') {
       // This device was removed by the owner
       await _queueManager.clearQueue();
+      await _shadowBookService?.cleanSyncData(groupId);
       await _groupRepo.deactivateGroup(groupId);
       _publishEvent(SyncTriggerEvent.memberLeft(groupId: groupId));
       return;
@@ -347,6 +357,7 @@ class SyncTriggerService {
     if (activeGroup == null || activeGroup.groupId != groupId) return;
 
     await _queueManager.clearQueue();
+    await _shadowBookService?.cleanSyncData(groupId);
     await _groupRepo.deactivateGroup(groupId);
     _publishEvent(SyncTriggerEvent.groupDissolved(groupId: groupId));
   }

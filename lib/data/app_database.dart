@@ -39,7 +39,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration {
@@ -123,6 +123,12 @@ class AppDatabase extends _$AppDatabase {
           // (fresh installs from < 8 create groups without book_id)
           await customStatement('ALTER TABLE groups DROP COLUMN book_id');
           await customStatement('DROP INDEX IF EXISTS idx_groups_book_id');
+        }
+        if (from < 11) {
+          await migrator.addColumn(books, books.isShadow);
+          await migrator.addColumn(books, books.groupId);
+          await migrator.addColumn(books, books.ownerDeviceId);
+          await migrator.addColumn(books, books.ownerDeviceName);
         }
       },
     );

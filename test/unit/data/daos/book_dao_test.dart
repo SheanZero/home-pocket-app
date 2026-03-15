@@ -128,5 +128,26 @@ void main() {
       expect(book.survivalBalance, 50000);
       expect(book.soulBalance, 20000);
     });
+
+    test('insertShadowBook and findShadowBookByDeviceId', () async {
+      final now = DateTime(2026, 2, 6);
+
+      await dao.insertShadowBook(
+        id: 'shadow_001',
+        name: 'Partner Records',
+        currency: 'JPY',
+        deviceId: 'partner-device',
+        createdAt: now,
+        groupId: 'group-1',
+        ownerDeviceId: 'partner-device',
+        ownerDeviceName: 'Partner Phone',
+      );
+
+      final book = await dao.findShadowBookByOwnerDeviceId('partner-device');
+      expect(book, isNotNull);
+      expect(book!.isShadow, true);
+      expect(book.groupId, 'group-1');
+      expect(book.ownerDeviceName, 'Partner Phone');
+    });
   });
 }

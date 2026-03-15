@@ -51,6 +51,7 @@ void main() {
         ledgerType: LedgerType.survival,
         timestamp: DateTime(2026, 2, 6, 10, 0),
         note: 'Lunch at cafe',
+        metadata: const {'sourceBookId': 'remote-book-1'},
         currentHash: 'hash_abc',
         createdAt: DateTime(2026, 2, 6, 10, 0),
       );
@@ -62,6 +63,7 @@ void main() {
       final row = await dao.findById('tx_001');
       expect(row, isNotNull);
       expect(row!.note, 'enc_Lunch at cafe');
+      expect(row.metadata, '{"sourceBookId":"remote-book-1"}');
     });
 
     test('insert without note skips encryption', () async {
@@ -93,6 +95,7 @@ void main() {
         ledgerType: LedgerType.survival,
         timestamp: DateTime(2026, 2, 6, 10, 0),
         note: 'Lunch at cafe',
+        metadata: const {'sourceBookId': 'remote-book-1'},
         currentHash: 'hash_abc',
         createdAt: DateTime(2026, 2, 6, 10, 0),
       );
@@ -102,6 +105,7 @@ void main() {
       final found = await repo.findById('tx_001');
       expect(found, isNotNull);
       expect(found!.note, 'Lunch at cafe');
+      expect(found.metadata?['sourceBookId'], 'remote-book-1');
       verify(mockEncryption.decryptField('enc_Lunch at cafe')).called(1);
     });
 

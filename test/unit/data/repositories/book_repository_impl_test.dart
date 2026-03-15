@@ -125,5 +125,26 @@ void main() {
       expect(book.survivalBalance, 100000);
       expect(book.soulBalance, 50000);
     });
+
+    test('findShadowBookByDeviceId returns shadow book', () async {
+      await repo.insert(
+        Book(
+          id: 'shadow_001',
+          name: 'Partner Records',
+          currency: 'JPY',
+          deviceId: 'partner-device',
+          createdAt: DateTime(2026, 2, 6),
+          isShadow: true,
+          groupId: 'group-1',
+          ownerDeviceId: 'partner-device',
+          ownerDeviceName: 'Partner Phone',
+        ),
+      );
+
+      final found = await repo.findShadowBookByDeviceId('partner-device');
+      expect(found, isNotNull);
+      expect(found!.groupId, 'group-1');
+      expect(found.ownerDeviceName, 'Partner Phone');
+    });
   });
 }

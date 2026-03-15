@@ -13,6 +13,10 @@ abstract class Book with _$Book {
     required DateTime createdAt,
     DateTime? updatedAt,
     @Default(false) bool isArchived,
+    @Default(false) bool isShadow,
+    String? groupId,
+    String? ownerDeviceId,
+    String? ownerDeviceName,
 
     // Denormalized stats for performance
     @Default(0) int transactionCount,

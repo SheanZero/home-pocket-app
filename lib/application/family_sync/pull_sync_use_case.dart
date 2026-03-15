@@ -130,8 +130,10 @@ class PullSyncUseCase {
                 : decoded as List;
             final operations = rawOperations
                 .map(
-                  (operation) =>
-                      _normalizeOperation(operation as Map<String, dynamic>),
+                  (operation) => _normalizeOperation(
+                    operation as Map<String, dynamic>,
+                    fromDeviceId: fromDeviceId,
+                  ),
                 )
                 .toList();
             await _applyOperations(operations);
@@ -210,7 +212,10 @@ class PullSyncUseCase {
     return null;
   }
 
-  Map<String, dynamic> _normalizeOperation(Map<String, dynamic> operation) {
+  Map<String, dynamic> _normalizeOperation(
+    Map<String, dynamic> operation, {
+    String? fromDeviceId,
+  }) {
     final normalized = Map<String, dynamic>.from(operation);
     final op = normalized['op'] as String?;
     if (op == 'insert') {
@@ -236,6 +241,9 @@ class PullSyncUseCase {
       }
     }
     normalized.remove('id');
+    if (fromDeviceId != null && !normalized.containsKey('fromDeviceId')) {
+      normalized['fromDeviceId'] = fromDeviceId;
+    }
 
     return normalized;
   }

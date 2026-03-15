@@ -1,5 +1,6 @@
 import 'dart:developer' as dev;
 import 'dart:math' as math;
+import 'dart:convert';
 
 import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
@@ -63,8 +64,12 @@ class TransactionRepositoryImpl implements TransactionRepository {
       note: encryptedNote,
       photoHash: transaction.photoHash,
       merchant: transaction.merchant,
+      metadata: transaction.metadata != null
+          ? jsonEncode(transaction.metadata)
+          : null,
       prevHash: transaction.prevHash,
       isPrivate: transaction.isPrivate,
+      isSynced: transaction.isSynced,
       soulSatisfaction: transaction.soulSatisfaction,
     );
   }
@@ -151,6 +156,9 @@ class TransactionRepositoryImpl implements TransactionRepository {
       note: decryptedNote,
       photoHash: row.photoHash,
       merchant: row.merchant,
+      metadata: row.metadata != null
+          ? jsonDecode(row.metadata!) as Map<String, dynamic>
+          : null,
       prevHash: row.prevHash,
       currentHash: row.currentHash,
       createdAt: row.createdAt,

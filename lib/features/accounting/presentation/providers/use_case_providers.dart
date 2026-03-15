@@ -12,6 +12,7 @@ import '../../../../application/dual_ledger/providers.dart';
 import '../../../../application/voice/record_category_correction_use_case.dart';
 // ignore: deprecated_member_use_from_same_package
 import '../../../../application/dual_ledger/resolve_ledger_type_service.dart';
+import '../../../../features/family_sync/presentation/providers/sync_providers.dart';
 import '../../../../infrastructure/crypto/providers.dart';
 import 'repository_providers.dart';
 
@@ -21,10 +22,12 @@ part 'use_case_providers.g.dart';
 CreateTransactionUseCase createTransactionUseCase(Ref ref) {
   return CreateTransactionUseCase(
     transactionRepository: ref.watch(transactionRepositoryProvider),
+    bookRepository: ref.watch(bookRepositoryProvider),
     categoryRepository: ref.watch(categoryRepositoryProvider),
     deviceIdentityRepository: ref.watch(deviceIdentityRepositoryProvider),
     hashChainService: ref.watch(hashChainServiceProvider),
     classificationService: ref.watch(classificationServiceProvider),
+    syncTriggerService: ref.watch(syncTriggerServiceProvider),
   );
 }
 
@@ -39,6 +42,7 @@ GetTransactionsUseCase getTransactionsUseCase(Ref ref) {
 DeleteTransactionUseCase deleteTransactionUseCase(Ref ref) {
   return DeleteTransactionUseCase(
     transactionRepository: ref.watch(transactionRepositoryProvider),
+    syncTriggerService: ref.watch(syncTriggerServiceProvider),
   );
 }
 

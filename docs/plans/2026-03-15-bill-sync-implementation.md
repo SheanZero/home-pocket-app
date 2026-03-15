@@ -59,7 +59,11 @@ transactions 表
 
 ### 方案 B: 同表独立 Book — Shadow Book 模式（推荐）
 
-为每个远端成员创建一个 **"Shadow Book"（影子账本）**，对方的账单存入该 Shadow Book。家庭分析通过聚合多个 bookId 实现。
+为每个远端成员创建一个 **"Shadow Book"（影子账本）**，该成员同步过来的所有账单都写入这个 shadow book。若对方设备本身有多个 source book，不再在本机为 source book 再建子账本，而是在每条 transaction 的 `metadata` 中记录来源：
+
+- `sourceBookId`
+- `sourceBookName`
+- `sourceBookType`
 
 ```
 books 表
@@ -74,19 +78,21 @@ transactions 表
 ```
 
 **优势:**
-- 数据天然隔离 — 每个成员的数据在各自 book 中
+- 数据天然隔离 — 每个成员的数据在各自 shadow book 中
 - 现有 bookId 查询无需改动（"我的账单" = 我的 bookId）
 - Hash Chain 保持 per-book 完整性，无交错
 - 退出 Group 批量删除简单：`deleteAllByBook(shadowBookId)` + 删除 Shadow Book
 - 反规范化余额 per-book 正确
+- 保留来源账本维度 — source book 信息写入 `metadata`，后续仍可做 UI 分组或迁移
 - 自然支持 3+ 成员（每人一个 Shadow Book）
 - 双轨账本（生存/灵魂）per-person 正确运作
 
 **劣势:**
 - 需要在建立 Group 后创建/管理 Shadow Book
 - 家庭聚合查询需要 `WHERE bookId IN (...)`
-- UI 需要"家庭视图"切换
-- Shadow Book 的 currency 必须与本地 book 一致（需校验）
+- UI 需要"家庭视图"切换，且远端 source book 视图要读 `metadata`
+- 远端多账本不会直接映射成多个本地 book；若未来要精确镜像，需要迁移
+- Shadow Book 的 currency 仅用于满足当前 book schema，不能单独代表远端每个 source book
 - Book 生命周期与 Group 生命周期耦合
 
 **适用场景:** 本项目的最佳选择。充分利用现有 Book 抽象，天然隔离，易于扩展。
@@ -138,14 +144,14 @@ synced_transactions 表 (仅远端数据)
 | 实现复杂度 | 低 | 中 | 高 |
 | 维护成本 | 低 | 低 | 高 |
 
-### 决策：采用方案 B — Shadow Book 模式
+### 决策：采用方案 B 的变体 — 单成员 Shadow Book + 来源账本元数据
 
 理由：
 1. 充分利用现有 `bookId` 抽象，架构变更最小
 2. 数据隔离清晰，退出 Group 时清理简洁
 3. Hash chain per-book 完整性不受影响
 4. 天然支持未来多成员扩展
-5. 双轨账本系统 per-person 正确运作
+5. 通过 `metadata.sourceBookId/sourceBookName/sourceBookType` 保留远端来源账本维度
 
 ---
 
@@ -174,6 +180,7 @@ synced_transactions 表 (仅远端数据)
 │         │                                                │
 │         └─→ applyOperations()                            │
 │             └─→ 写入 Shadow Book                         │
+│                 └─→ metadata 记录 source book            │
 └──────────────────────────┬──────────────────────────────┘
                            │ HTTPS + E2EE
                     ┌──────┴──────┐
@@ -256,14 +263,13 @@ List<TableIndex> get customIndices => [
 class ShadowBookService {
   final BookRepository _bookRepo;
   final TransactionRepository _transactionRepo;
-  final GroupRepository _groupRepo;
 
   /// 为远端成员创建 Shadow Book
   Future<String> createShadowBook({
     required String groupId,
     required String memberDeviceId,
     required String memberDeviceName,
-    required String currency,  // 必须与本地 book 一致
+    required String currency,
   }) async {
     final shadowBookId = Ulid().toString();
     await _bookRepo.createShadowBook(
@@ -317,7 +323,7 @@ class InitialSyncUseCase {
     final group = await _groupRepo.getActiveGroup();
     if (group == null) return Result.failure('No active group');
 
-    // 2. 获取本地 book 的 currency（用于创建 Shadow Book）
+    // 2. 获取任一本地非 shadow book 的 currency（用于创建 Shadow Book）
     final localBook = await _bookRepo.getDefaultBook();
     if (localBook == null) return Result.failure('No local book');
 
@@ -361,15 +367,26 @@ FullSyncUseCase fullSyncUseCase(Ref ref) {
     fetchAllTransactions: () async {
       final defaultBook = await bookRepo.getDefaultBook();
       if (defaultBook == null) return [];
-      // 只推送本地 book 的数据，不推送 Shadow Book 数据
-      final transactions = await transactionRepo.findAllByBook(defaultBook.id);
-      return transactions.map((tx) => {
-        'op': 'create',
-        'entityType': 'bill',
-        'entityId': tx.id,
-        'data': tx.toSyncMap(),  // 序列化为 Map
-        'timestamp': tx.createdAt.toIso8601String(),
-      }).toList();
+      // 仅推送本地非 shadow books 的数据，并在 metadata 中附带来源 book 信息
+      final allBooks = await bookRepo.findAll();
+      final localBooks = allBooks.where((book) => !book.isShadow).toList();
+      final operations = <Map<String, dynamic>>[];
+
+      for (final book in localBooks) {
+        final transactions = await transactionRepo.findAllByBook(book.id);
+        operations.addAll(
+          transactions.map(
+            (tx) => TransactionSyncMapper.toCreateOperation(
+              tx,
+              sourceBookId: book.id,
+              sourceBookName: book.name,
+              sourceBookType: 'remote_book:${book.id}',
+            ),
+          ),
+        );
+      }
+
+      return operations;
     },
   );
 }
@@ -454,7 +471,7 @@ class ApplySyncOperationsUseCase {
       return;
     }
 
-    // 构建 Transaction，bookId 指向 Shadow Book
+    // 构建 Transaction，bookId 指向 Shadow Book，并保留来源 book 维度
     final transaction = Transaction.fromSyncMap(
       data,
       bookId: shadowBook.id,     // 写入 Shadow Book
@@ -655,7 +672,11 @@ Future<GroupValidityResult> execute({bool forceCheck = false}) async {
 
 extension TransactionSyncExtension on Transaction {
   /// 序列化为同步 payload
-  Map<String, dynamic> toSyncMap() {
+  Map<String, dynamic> toSyncMap({
+    required String sourceBookId,
+    required String sourceBookName,
+    required String sourceBookType,
+  }) {
     return {
       'id': id,
       'amount': amount,
@@ -665,7 +686,12 @@ extension TransactionSyncExtension on Transaction {
       'timestamp': timestamp.toIso8601String(),
       'note': note,
       'merchant': merchant,
-      'metadata': metadata,
+      'metadata': {
+        ...?metadata,
+        'sourceBookId': sourceBookId,
+        'sourceBookName': sourceBookName,
+        'sourceBookType': sourceBookType,
+      },
       'soulSatisfaction': soulSatisfaction,
       'isPrivate': isPrivate,
       'createdAt': createdAt.toIso8601String(),
@@ -696,6 +722,7 @@ extension TransactionSyncExtension on Transaction {
       isPrivate: data['isPrivate'] as bool? ?? false,
       isSynced: isSynced,
       currentHash: '',  // Shadow Book 不维护 hash chain
+      metadata: data['metadata'] as Map<String, dynamic>?,
       createdAt: DateTime.parse(
         data['createdAt'] as String? ?? DateTime.now().toIso8601String(),
       ),
@@ -781,7 +808,7 @@ Future<List<Transaction>> familyTransactions(
 
 ### Phase 4: 全量同步 (约 1 天)
 
-- [ ] FullSyncUseCase 连接 fetchAllTransactions
+- [ ] FullSyncUseCase 连接 fetchAllTransactions，并附带来源 book metadata
 - [ ] InitialSyncUseCase 实现
 - [ ] ConfirmMemberUseCase 中触发 InitialSync
 - [ ] member_confirmed 推送处理中触发 InitialSync
@@ -838,7 +865,7 @@ Future<List<Transaction>> familyTransactions(
 
 | 风险 | 影响 | 缓解措施 |
 |------|------|----------|
-| Shadow Book currency 不匹配 | 聚合数据不准确 | 创建时校验，不匹配则警告用户 |
+| Shadow Book currency 与远端 source book 不一致 | 仅影响展示语义 | 统一以本地非 shadow book currency 建 shadow book，来源账本信息放 metadata |
 | 全量同步数据量大 | 同步超时 | 已有 chunk 机制（50条/批） |
 | 对方删除账单后再同步 | 数据不一致 | soft delete + LWW |
 | 多设备同时创建 Shadow Book | 重复 Shadow Book | 用 deviceId 做唯一约束 |

@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/family_sync/full_sync_use_case.dart';
 import 'package:home_pocket/application/family_sync/pull_sync_use_case.dart';
 import 'package:home_pocket/application/family_sync/push_sync_use_case.dart';
+import 'package:home_pocket/application/family_sync/shadow_book_service.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
@@ -16,6 +18,10 @@ class MockGroupRepository extends Mock implements GroupRepository {}
 class MockPullSyncUseCase extends Mock implements PullSyncUseCase {}
 
 class MockPushSyncUseCase extends Mock implements PushSyncUseCase {}
+
+class MockFullSyncUseCase extends Mock implements FullSyncUseCase {}
+
+class MockShadowBookService extends Mock implements ShadowBookService {}
 
 class MockSyncQueueManager extends Mock implements SyncQueueManager {}
 
@@ -94,6 +100,8 @@ void main() {
   late MockGroupRepository groupRepository;
   late MockPullSyncUseCase pullSync;
   late MockPushSyncUseCase pushSync;
+  late MockFullSyncUseCase fullSync;
+  late MockShadowBookService shadowBookService;
   late MockSyncQueueManager queueManager;
   late MockRelayApiClient apiClient;
   late MockKeyManager keyManager;
@@ -106,6 +114,8 @@ void main() {
     groupRepository = MockGroupRepository();
     pullSync = MockPullSyncUseCase();
     pushSync = MockPushSyncUseCase();
+    fullSync = MockFullSyncUseCase();
+    shadowBookService = MockShadowBookService();
     queueManager = MockSyncQueueManager();
     apiClient = MockRelayApiClient();
     keyManager = MockKeyManager();
@@ -119,6 +129,8 @@ void main() {
       groupRepo: groupRepository,
       pullSync: pullSync,
       pushSync: pushSync,
+      fullSync: fullSync,
+      shadowBookService: shadowBookService,
       queueManager: queueManager,
       pushNotificationService: pushNotificationService,
       apiClient: apiClient,
@@ -129,6 +141,8 @@ void main() {
     when(
       () => pullSync.execute(),
     ).thenAnswer((_) async => const PullSyncResult.noNewData());
+    when(() => fullSync.execute()).thenAnswer((_) async => 0);
+    when(() => shadowBookService.cleanSyncData(any())).thenAnswer((_) async {});
     when(() => queueManager.drainQueue()).thenAnswer((_) async => 0);
   });
 
@@ -160,6 +174,7 @@ void main() {
       });
 
       verify(() => groupRepository.confirmLocalGroup('group-1')).called(1);
+      verify(() => fullSync.execute()).called(1);
       verify(() => pullSync.execute()).called(1);
     },
   );
@@ -234,6 +249,8 @@ void main() {
       groupRepo: groupRepository,
       pullSync: pullSync,
       pushSync: pushSync,
+      fullSync: fullSync,
+      shadowBookService: shadowBookService,
       queueManager: queueManager,
       pushNotificationService: pushService,
       apiClient: apiClient,
@@ -269,6 +286,7 @@ void main() {
       });
 
       verify(() => queueManager.clearQueue()).called(1);
+      verify(() => shadowBookService.cleanSyncData('group-1')).called(1);
       verify(() => groupRepository.deactivateGroup('group-1')).called(1);
       expect(
         emittedEvents,
@@ -351,6 +369,7 @@ void main() {
     });
 
     verify(() => queueManager.clearQueue()).called(1);
+    verify(() => shadowBookService.cleanSyncData('group-1')).called(1);
     verify(() => groupRepository.deactivateGroup('group-1')).called(1);
     expect(
       emittedEvents,

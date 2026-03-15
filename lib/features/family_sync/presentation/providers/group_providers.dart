@@ -10,6 +10,7 @@ import '../../use_cases/leave_group_use_case.dart';
 import '../../use_cases/remove_member_use_case.dart';
 import '../../use_cases/regenerate_invite_use_case.dart';
 import 'repository_providers.dart';
+import 'sync_providers.dart';
 
 final createGroupUseCaseProvider = Provider<CreateGroupUseCase>((ref) {
   return CreateGroupUseCase(
@@ -41,6 +42,7 @@ final confirmMemberUseCaseProvider = Provider<ConfirmMemberUseCase>((ref) {
     apiClient: ref.watch(relayApiClientProvider),
     groupRepository: ref.watch(groupRepositoryProvider),
     e2eeService: ref.watch(e2eeServiceProvider),
+    fullSync: ref.watch(fullSyncUseCaseProvider),
   );
 });
 
@@ -49,6 +51,7 @@ final leaveGroupUseCaseProvider = Provider<LeaveGroupUseCase>((ref) {
     apiClient: ref.watch(relayApiClientProvider),
     groupRepository: ref.watch(groupRepositoryProvider),
     queueManager: ref.watch(syncQueueManagerProvider),
+    shadowBookService: ref.watch(shadowBookServiceProvider),
   );
 });
 
@@ -57,6 +60,7 @@ final deactivateGroupUseCaseProvider = Provider<DeactivateGroupUseCase>((ref) {
     apiClient: ref.watch(relayApiClientProvider),
     groupRepository: ref.watch(groupRepositoryProvider),
     queueManager: ref.watch(syncQueueManagerProvider),
+    shadowBookService: ref.watch(shadowBookServiceProvider),
   );
 });
 

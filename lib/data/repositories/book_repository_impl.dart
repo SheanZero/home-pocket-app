@@ -18,6 +18,10 @@ class BookRepositoryImpl implements BookRepository {
       deviceId: book.deviceId,
       createdAt: book.createdAt,
       isArchived: book.isArchived,
+      isShadow: book.isShadow,
+      groupId: book.groupId,
+      ownerDeviceId: book.ownerDeviceId,
+      ownerDeviceName: book.ownerDeviceName,
     );
   }
 
@@ -26,6 +30,19 @@ class BookRepositoryImpl implements BookRepository {
     final row = await _dao.findById(id);
     if (row == null) return null;
     return _toModel(row);
+  }
+
+  @override
+  Future<Book?> findShadowBookByDeviceId(String ownerDeviceId) async {
+    final row = await _dao.findShadowBookByOwnerDeviceId(ownerDeviceId);
+    if (row == null) return null;
+    return _toModel(row);
+  }
+
+  @override
+  Future<List<Book>> findShadowBooksByGroupId(String groupId) async {
+    final rows = await _dao.findShadowBooksByGroupId(groupId);
+    return rows.map(_toModel).toList();
   }
 
   @override
@@ -49,6 +66,9 @@ class BookRepositoryImpl implements BookRepository {
   Future<void> archive(String id) async {
     await _dao.archiveBook(id);
   }
+
+  @override
+  Future<void> delete(String id) => _dao.deleteBook(id);
 
   @override
   Future<void> deleteAll() => _dao.deleteAll();
@@ -77,6 +97,10 @@ class BookRepositoryImpl implements BookRepository {
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
       isArchived: row.isArchived,
+      isShadow: row.isShadow,
+      groupId: row.groupId,
+      ownerDeviceId: row.ownerDeviceId,
+      ownerDeviceName: row.ownerDeviceName,
       transactionCount: row.transactionCount,
       survivalBalance: row.survivalBalance,
       soulBalance: row.soulBalance,

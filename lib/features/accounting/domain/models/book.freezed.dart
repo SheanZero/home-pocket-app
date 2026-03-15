@@ -19,7 +19,11 @@ mixin _$Book {
   String get deviceId;
   DateTime get createdAt;
   DateTime? get updatedAt;
-  bool get isArchived; // Denormalized stats for performance
+  bool get isArchived;
+  bool get isShadow;
+  String? get groupId;
+  String? get ownerDeviceId;
+  String? get ownerDeviceName; // Denormalized stats for performance
   int get transactionCount;
   int get survivalBalance;
   int get soulBalance;
@@ -51,6 +55,13 @@ mixin _$Book {
                 other.updatedAt == updatedAt) &&
             (identical(other.isArchived, isArchived) ||
                 other.isArchived == isArchived) &&
+            (identical(other.isShadow, isShadow) ||
+                other.isShadow == isShadow) &&
+            (identical(other.groupId, groupId) || other.groupId == groupId) &&
+            (identical(other.ownerDeviceId, ownerDeviceId) ||
+                other.ownerDeviceId == ownerDeviceId) &&
+            (identical(other.ownerDeviceName, ownerDeviceName) ||
+                other.ownerDeviceName == ownerDeviceName) &&
             (identical(other.transactionCount, transactionCount) ||
                 other.transactionCount == transactionCount) &&
             (identical(other.survivalBalance, survivalBalance) ||
@@ -70,6 +81,10 @@ mixin _$Book {
     createdAt,
     updatedAt,
     isArchived,
+    isShadow,
+    groupId,
+    ownerDeviceId,
+    ownerDeviceName,
     transactionCount,
     survivalBalance,
     soulBalance,
@@ -77,7 +92,7 @@ mixin _$Book {
 
   @override
   String toString() {
-    return 'Book(id: $id, name: $name, currency: $currency, deviceId: $deviceId, createdAt: $createdAt, updatedAt: $updatedAt, isArchived: $isArchived, transactionCount: $transactionCount, survivalBalance: $survivalBalance, soulBalance: $soulBalance)';
+    return 'Book(id: $id, name: $name, currency: $currency, deviceId: $deviceId, createdAt: $createdAt, updatedAt: $updatedAt, isArchived: $isArchived, isShadow: $isShadow, groupId: $groupId, ownerDeviceId: $ownerDeviceId, ownerDeviceName: $ownerDeviceName, transactionCount: $transactionCount, survivalBalance: $survivalBalance, soulBalance: $soulBalance)';
   }
 }
 
@@ -94,6 +109,10 @@ abstract mixin class $BookCopyWith<$Res> {
     DateTime createdAt,
     DateTime? updatedAt,
     bool isArchived,
+    bool isShadow,
+    String? groupId,
+    String? ownerDeviceId,
+    String? ownerDeviceName,
     int transactionCount,
     int survivalBalance,
     int soulBalance,
@@ -119,6 +138,10 @@ class _$BookCopyWithImpl<$Res> implements $BookCopyWith<$Res> {
     Object? createdAt = null,
     Object? updatedAt = freezed,
     Object? isArchived = null,
+    Object? isShadow = null,
+    Object? groupId = freezed,
+    Object? ownerDeviceId = freezed,
+    Object? ownerDeviceName = freezed,
     Object? transactionCount = null,
     Object? survivalBalance = null,
     Object? soulBalance = null,
@@ -153,6 +176,22 @@ class _$BookCopyWithImpl<$Res> implements $BookCopyWith<$Res> {
             ? _self.isArchived
             : isArchived // ignore: cast_nullable_to_non_nullable
                   as bool,
+        isShadow: null == isShadow
+            ? _self.isShadow
+            : isShadow // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        groupId: freezed == groupId
+            ? _self.groupId
+            : groupId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        ownerDeviceId: freezed == ownerDeviceId
+            ? _self.ownerDeviceId
+            : ownerDeviceId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        ownerDeviceName: freezed == ownerDeviceName
+            ? _self.ownerDeviceName
+            : ownerDeviceName // ignore: cast_nullable_to_non_nullable
+                  as String?,
         transactionCount: null == transactionCount
             ? _self.transactionCount
             : transactionCount // ignore: cast_nullable_to_non_nullable
@@ -269,6 +308,10 @@ extension BookPatterns on Book {
       DateTime createdAt,
       DateTime? updatedAt,
       bool isArchived,
+      bool isShadow,
+      String? groupId,
+      String? ownerDeviceId,
+      String? ownerDeviceName,
       int transactionCount,
       int survivalBalance,
       int soulBalance,
@@ -287,6 +330,10 @@ extension BookPatterns on Book {
           _that.createdAt,
           _that.updatedAt,
           _that.isArchived,
+          _that.isShadow,
+          _that.groupId,
+          _that.ownerDeviceId,
+          _that.ownerDeviceName,
           _that.transactionCount,
           _that.survivalBalance,
           _that.soulBalance,
@@ -319,6 +366,10 @@ extension BookPatterns on Book {
       DateTime createdAt,
       DateTime? updatedAt,
       bool isArchived,
+      bool isShadow,
+      String? groupId,
+      String? ownerDeviceId,
+      String? ownerDeviceName,
       int transactionCount,
       int survivalBalance,
       int soulBalance,
@@ -336,6 +387,10 @@ extension BookPatterns on Book {
           _that.createdAt,
           _that.updatedAt,
           _that.isArchived,
+          _that.isShadow,
+          _that.groupId,
+          _that.ownerDeviceId,
+          _that.ownerDeviceName,
           _that.transactionCount,
           _that.survivalBalance,
           _that.soulBalance,
@@ -367,6 +422,10 @@ extension BookPatterns on Book {
       DateTime createdAt,
       DateTime? updatedAt,
       bool isArchived,
+      bool isShadow,
+      String? groupId,
+      String? ownerDeviceId,
+      String? ownerDeviceName,
       int transactionCount,
       int survivalBalance,
       int soulBalance,
@@ -384,6 +443,10 @@ extension BookPatterns on Book {
           _that.createdAt,
           _that.updatedAt,
           _that.isArchived,
+          _that.isShadow,
+          _that.groupId,
+          _that.ownerDeviceId,
+          _that.ownerDeviceName,
           _that.transactionCount,
           _that.survivalBalance,
           _that.soulBalance,
@@ -405,6 +468,10 @@ class _Book implements Book {
     required this.createdAt,
     this.updatedAt,
     this.isArchived = false,
+    this.isShadow = false,
+    this.groupId,
+    this.ownerDeviceId,
+    this.ownerDeviceName,
     this.transactionCount = 0,
     this.survivalBalance = 0,
     this.soulBalance = 0,
@@ -426,6 +493,15 @@ class _Book implements Book {
   @override
   @JsonKey()
   final bool isArchived;
+  @override
+  @JsonKey()
+  final bool isShadow;
+  @override
+  final String? groupId;
+  @override
+  final String? ownerDeviceId;
+  @override
+  final String? ownerDeviceName;
   // Denormalized stats for performance
   @override
   @JsonKey()
@@ -467,6 +543,13 @@ class _Book implements Book {
                 other.updatedAt == updatedAt) &&
             (identical(other.isArchived, isArchived) ||
                 other.isArchived == isArchived) &&
+            (identical(other.isShadow, isShadow) ||
+                other.isShadow == isShadow) &&
+            (identical(other.groupId, groupId) || other.groupId == groupId) &&
+            (identical(other.ownerDeviceId, ownerDeviceId) ||
+                other.ownerDeviceId == ownerDeviceId) &&
+            (identical(other.ownerDeviceName, ownerDeviceName) ||
+                other.ownerDeviceName == ownerDeviceName) &&
             (identical(other.transactionCount, transactionCount) ||
                 other.transactionCount == transactionCount) &&
             (identical(other.survivalBalance, survivalBalance) ||
@@ -486,6 +569,10 @@ class _Book implements Book {
     createdAt,
     updatedAt,
     isArchived,
+    isShadow,
+    groupId,
+    ownerDeviceId,
+    ownerDeviceName,
     transactionCount,
     survivalBalance,
     soulBalance,
@@ -493,7 +580,7 @@ class _Book implements Book {
 
   @override
   String toString() {
-    return 'Book(id: $id, name: $name, currency: $currency, deviceId: $deviceId, createdAt: $createdAt, updatedAt: $updatedAt, isArchived: $isArchived, transactionCount: $transactionCount, survivalBalance: $survivalBalance, soulBalance: $soulBalance)';
+    return 'Book(id: $id, name: $name, currency: $currency, deviceId: $deviceId, createdAt: $createdAt, updatedAt: $updatedAt, isArchived: $isArchived, isShadow: $isShadow, groupId: $groupId, ownerDeviceId: $ownerDeviceId, ownerDeviceName: $ownerDeviceName, transactionCount: $transactionCount, survivalBalance: $survivalBalance, soulBalance: $soulBalance)';
   }
 }
 
@@ -511,6 +598,10 @@ abstract mixin class _$BookCopyWith<$Res> implements $BookCopyWith<$Res> {
     DateTime createdAt,
     DateTime? updatedAt,
     bool isArchived,
+    bool isShadow,
+    String? groupId,
+    String? ownerDeviceId,
+    String? ownerDeviceName,
     int transactionCount,
     int survivalBalance,
     int soulBalance,
@@ -536,6 +627,10 @@ class __$BookCopyWithImpl<$Res> implements _$BookCopyWith<$Res> {
     Object? createdAt = null,
     Object? updatedAt = freezed,
     Object? isArchived = null,
+    Object? isShadow = null,
+    Object? groupId = freezed,
+    Object? ownerDeviceId = freezed,
+    Object? ownerDeviceName = freezed,
     Object? transactionCount = null,
     Object? survivalBalance = null,
     Object? soulBalance = null,
@@ -570,6 +665,22 @@ class __$BookCopyWithImpl<$Res> implements _$BookCopyWith<$Res> {
             ? _self.isArchived
             : isArchived // ignore: cast_nullable_to_non_nullable
                   as bool,
+        isShadow: null == isShadow
+            ? _self.isShadow
+            : isShadow // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        groupId: freezed == groupId
+            ? _self.groupId
+            : groupId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        ownerDeviceId: freezed == ownerDeviceId
+            ? _self.ownerDeviceId
+            : ownerDeviceId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        ownerDeviceName: freezed == ownerDeviceName
+            ? _self.ownerDeviceName
+            : ownerDeviceName // ignore: cast_nullable_to_non_nullable
+                  as String?,
         transactionCount: null == transactionCount
             ? _self.transactionCount
             : transactionCount // ignore: cast_nullable_to_non_nullable

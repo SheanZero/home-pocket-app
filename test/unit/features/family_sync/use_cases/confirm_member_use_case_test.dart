@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/family_sync/full_sync_use_case.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
@@ -13,20 +14,25 @@ class MockGroupRepository extends Mock implements GroupRepository {}
 
 class MockE2EEService extends Mock implements E2EEService {}
 
+class MockFullSyncUseCase extends Mock implements FullSyncUseCase {}
+
 void main() {
   late MockRelayApiClient apiClient;
   late MockGroupRepository groupRepository;
   late MockE2EEService e2eeService;
+  late MockFullSyncUseCase fullSyncUseCase;
   late ConfirmMemberUseCase useCase;
 
   setUp(() {
     apiClient = MockRelayApiClient();
     groupRepository = MockGroupRepository();
     e2eeService = MockE2EEService();
+    fullSyncUseCase = MockFullSyncUseCase();
     useCase = ConfirmMemberUseCase(
       apiClient: apiClient,
       groupRepository: groupRepository,
       e2eeService: e2eeService,
+      fullSync: fullSyncUseCase,
     );
 
     when(
@@ -46,6 +52,7 @@ void main() {
         operationCount: any(named: 'operationCount'),
       ),
     ).thenAnswer((_) async => {'recipientCount': 1});
+    when(() => fullSyncUseCase.execute()).thenAnswer((_) async => 3);
   });
 
   test('confirms member, exchanges key, and triggers full sync', () async {
@@ -93,6 +100,7 @@ void main() {
         operationCount: 0,
       ),
     ).called(1);
+    verify(() => fullSyncUseCase.execute()).called(1);
   });
 
   test('skips key exchange when the group key is not available', () async {
