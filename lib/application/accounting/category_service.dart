@@ -9,8 +9,8 @@ class CategoryService {
   CategoryService({
     required CategoryRepository categoryRepository,
     required CategoryLedgerConfigRepository ledgerConfigRepository,
-  })  : _categoryRepo = categoryRepository,
-        _configRepo = ledgerConfigRepository;
+  }) : _categoryRepo = categoryRepository,
+       _configRepo = ledgerConfigRepository;
 
   final CategoryRepository _categoryRepo;
   final CategoryLedgerConfigRepository _configRepo;

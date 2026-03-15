@@ -57,9 +57,7 @@ class SoulSatisfactionSlider extends StatelessWidget {
             const Spacer(),
             Text(
               '$percent%',
-              style: AppTextStyles.amountMedium.copyWith(
-                color: AppColors.soul,
-              ),
+              style: AppTextStyles.amountMedium.copyWith(color: AppColors.soul),
             ),
           ],
         ),
@@ -81,16 +79,10 @@ class SoulSatisfactionSlider extends StatelessWidget {
                     right: isLast ? 0 : 1.5,
                   ),
                   decoration: BoxDecoration(
-                    color: isActive
-                        ? _segmentColors[index]
-                        : _inactiveColor,
+                    color: isActive ? _segmentColors[index] : _inactiveColor,
                     borderRadius: BorderRadius.horizontal(
-                      left: isFirst
-                          ? const Radius.circular(5)
-                          : Radius.zero,
-                      right: isLast
-                          ? const Radius.circular(5)
-                          : Radius.zero,
+                      left: isFirst ? const Radius.circular(5) : Radius.zero,
+                      right: isLast ? const Radius.circular(5) : Radius.zero,
                     ),
                   ),
                 ),

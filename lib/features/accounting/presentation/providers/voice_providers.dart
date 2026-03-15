@@ -29,8 +29,9 @@ VoiceTextParser voiceTextParser(Ref ref) {
 FuzzyCategoryMatcher fuzzyCategoryMatcher(Ref ref) {
   return FuzzyCategoryMatcher(
     categoryRepository: ref.watch(categoryRepositoryProvider),
-    preferenceRepository:
-        ref.watch(categoryKeywordPreferenceRepositoryProvider),
+    preferenceRepository: ref.watch(
+      categoryKeywordPreferenceRepositoryProvider,
+    ),
     categoryService: ref.watch(categoryServiceProvider),
   );
 }
@@ -50,3 +51,4 @@ ParseVoiceInputUseCase parseVoiceInputUseCase(Ref ref) {
 VoiceSatisfactionEstimator voiceSatisfactionEstimator(Ref ref) {
   return VoiceSatisfactionEstimator();
 }
+

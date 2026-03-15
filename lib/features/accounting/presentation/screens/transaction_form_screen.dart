@@ -116,9 +116,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       ).showSnackBar(SnackBar(content: Text(S.of(context).transactionSaved)));
       Navigator.pop(context, true);
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(result.error ?? S.of(context).failedToSave)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result.error ?? S.of(context).failedToSave)),
+      );
     }
   }
 

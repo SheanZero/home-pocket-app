@@ -67,10 +67,7 @@ void main() {
 
       await tester.pumpWidget(
         buildTestApp(
-          TransactionListTile(
-            transaction: incomeTx,
-            categoryName: 'Salary',
-          ),
+          TransactionListTile(transaction: incomeTx, categoryName: 'Salary'),
         ),
       );
       await tester.pumpAndSettle();
@@ -81,9 +78,7 @@ void main() {
 
     testWidgets('shows category ID when categoryName is null', (tester) async {
       await tester.pumpWidget(
-        buildTestApp(
-          TransactionListTile(transaction: testTransaction),
-        ),
+        buildTestApp(TransactionListTile(transaction: testTransaction)),
       );
       await tester.pumpAndSettle();
 

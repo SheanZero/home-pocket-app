@@ -54,21 +54,23 @@ class CategoryDao {
     assert(level != 1 || parentId == null, 'L1 must have parentId == null');
     assert(level != 2 || parentId != null, 'L2 must have parentId != null');
 
-    await _db.into(_db.categories).insert(
-      CategoriesCompanion.insert(
-        id: id,
-        name: name,
-        icon: icon,
-        color: color,
-        parentId: Value(parentId),
-        level: level,
-        isSystem: Value(isSystem),
-        isArchived: Value(isArchived),
-        sortOrder: Value(sortOrder),
-        createdAt: createdAt,
-        updatedAt: Value(updatedAt),
-      ),
-    );
+    await _db
+        .into(_db.categories)
+        .insert(
+          CategoriesCompanion.insert(
+            id: id,
+            name: name,
+            icon: icon,
+            color: color,
+            parentId: Value(parentId),
+            level: level,
+            isSystem: Value(isSystem),
+            isArchived: Value(isArchived),
+            sortOrder: Value(sortOrder),
+            createdAt: createdAt,
+            updatedAt: Value(updatedAt),
+          ),
+        );
   }
 
   Future<void> updateCategory({
@@ -85,25 +87,25 @@ class CategoryDao {
         name: name != null ? Value(name) : const Value.absent(),
         icon: icon != null ? Value(icon) : const Value.absent(),
         color: color != null ? Value(color) : const Value.absent(),
-        isArchived:
-            isArchived != null ? Value(isArchived) : const Value.absent(),
-        sortOrder:
-            sortOrder != null ? Value(sortOrder) : const Value.absent(),
+        isArchived: isArchived != null
+            ? Value(isArchived)
+            : const Value.absent(),
+        sortOrder: sortOrder != null ? Value(sortOrder) : const Value.absent(),
         updatedAt: Value(updatedAt),
       ),
     );
   }
 
   Future<CategoryRow?> findById(String id) async {
-    return (_db.select(_db.categories)
-          ..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    return (_db.select(
+      _db.categories,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
   Future<List<CategoryRow>> findAll() async {
-    return (_db.select(_db.categories)
-          ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
-        .get();
+    return (_db.select(
+      _db.categories,
+    )..orderBy([(t) => OrderingTerm.asc(t.sortOrder)])).get();
   }
 
   Future<List<CategoryRow>> findActive() async {
@@ -135,10 +137,14 @@ class CategoryDao {
   Future<void> insertBatch(List<CategoryInsertData> categories) async {
     for (final cat in categories) {
       assert(cat.level == 1 || cat.level == 2, 'level must be 1 or 2');
-      assert(cat.level != 1 || cat.parentId == null,
-          'L1 "${cat.id}" must have parentId == null');
-      assert(cat.level != 2 || cat.parentId != null,
-          'L2 "${cat.id}" must have parentId != null');
+      assert(
+        cat.level != 1 || cat.parentId == null,
+        'L1 "${cat.id}" must have parentId == null',
+      );
+      assert(
+        cat.level != 2 || cat.parentId != null,
+        'L2 "${cat.id}" must have parentId != null',
+      );
     }
 
     await _db.batch((batch) {

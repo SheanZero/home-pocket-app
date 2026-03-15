@@ -25,9 +25,7 @@ void main() {
     });
 
     test('updateSettings persists voiceLanguage', () async {
-      await repo.updateSettings(
-        const AppSettings(voiceLanguage: 'en'),
-      );
+      await repo.updateSettings(const AppSettings(voiceLanguage: 'en'));
       final settings = await repo.getSettings();
       expect(settings.voiceLanguage, 'en');
     });

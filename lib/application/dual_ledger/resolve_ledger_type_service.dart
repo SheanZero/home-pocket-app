@@ -13,9 +13,9 @@ class ResolveLedgerTypeService {
     required CategoryRepository categoryRepository,
     required CategoryLedgerConfigRepository ledgerConfigRepository,
   }) : _delegate = CategoryService(
-          categoryRepository: categoryRepository,
-          ledgerConfigRepository: ledgerConfigRepository,
-        );
+         categoryRepository: categoryRepository,
+         ledgerConfigRepository: ledgerConfigRepository,
+       );
 
   final CategoryService _delegate;
 

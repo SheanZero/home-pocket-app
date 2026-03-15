@@ -38,25 +38,33 @@ void main() {
 
     test('findAll returns all configs', () async {
       final now = DateTime(2026, 2, 18);
-      await repo.upsert(CategoryLedgerConfig(
+      await repo.upsert(
+        CategoryLedgerConfig(
           categoryId: 'cat_food',
           ledgerType: LedgerType.survival,
-          updatedAt: now));
-      await repo.upsert(CategoryLedgerConfig(
+          updatedAt: now,
+        ),
+      );
+      await repo.upsert(
+        CategoryLedgerConfig(
           categoryId: 'cat_fun',
           ledgerType: LedgerType.soul,
-          updatedAt: now));
+          updatedAt: now,
+        ),
+      );
 
       final all = await repo.findAll();
       expect(all.length, 2);
     });
 
     test('delete removes config', () async {
-      await repo.upsert(CategoryLedgerConfig(
-        categoryId: 'cat_food',
-        ledgerType: LedgerType.survival,
-        updatedAt: DateTime(2026, 2, 18),
-      ));
+      await repo.upsert(
+        CategoryLedgerConfig(
+          categoryId: 'cat_food',
+          ledgerType: LedgerType.survival,
+          updatedAt: DateTime(2026, 2, 18),
+        ),
+      );
 
       await repo.delete('cat_food');
       final result = await repo.findById('cat_food');
@@ -67,13 +75,15 @@ void main() {
       final now = DateTime(2026, 2, 18);
       await repo.upsertBatch([
         CategoryLedgerConfig(
-            categoryId: 'cat_food',
-            ledgerType: LedgerType.survival,
-            updatedAt: now),
+          categoryId: 'cat_food',
+          ledgerType: LedgerType.survival,
+          updatedAt: now,
+        ),
         CategoryLedgerConfig(
-            categoryId: 'cat_fun',
-            ledgerType: LedgerType.soul,
-            updatedAt: now),
+          categoryId: 'cat_fun',
+          ledgerType: LedgerType.soul,
+          updatedAt: now,
+        ),
       ]);
 
       final all = await repo.findAll();
@@ -82,14 +92,20 @@ void main() {
 
     test('deleteAll removes all configs', () async {
       final now = DateTime(2026, 2, 18);
-      await repo.upsert(CategoryLedgerConfig(
+      await repo.upsert(
+        CategoryLedgerConfig(
           categoryId: 'cat_food',
           ledgerType: LedgerType.survival,
-          updatedAt: now));
-      await repo.upsert(CategoryLedgerConfig(
+          updatedAt: now,
+        ),
+      );
+      await repo.upsert(
+        CategoryLedgerConfig(
           categoryId: 'cat_fun',
           ledgerType: LedgerType.soul,
-          updatedAt: now));
+          updatedAt: now,
+        ),
+      );
 
       await repo.deleteAll();
       final all = await repo.findAll();

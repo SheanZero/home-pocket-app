@@ -114,9 +114,7 @@ class _InfoRow extends StatelessWidget {
         children: [
           Icon(icon, size: 18, color: iconColor),
           const SizedBox(width: 8),
-          Expanded(
-            child: Text(label, style: AppTextStyles.bodyMedium),
-          ),
+          Expanded(child: Text(label, style: AppTextStyles.bodyMedium)),
         ],
       ),
     );

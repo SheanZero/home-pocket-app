@@ -24,10 +24,7 @@ int levenshteinDistance(String a, String b) {
     curr[0] = j;
     for (var i = 1; i <= aLen; i++) {
       final cost = a[i - 1] == b[j - 1] ? 0 : 1;
-      curr[i] = min(
-        min(curr[i - 1] + 1, prev[i] + 1),
-        prev[i - 1] + cost,
-      );
+      curr[i] = min(min(curr[i - 1] + 1, prev[i] + 1), prev[i - 1] + cost);
     }
     final tmp = prev;
     prev = curr;

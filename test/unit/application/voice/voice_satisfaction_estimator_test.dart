@@ -3,7 +3,9 @@ import 'package:home_pocket/application/voice/voice_satisfaction_estimator.dart'
 import 'package:home_pocket/features/accounting/domain/models/voice_parse_result.dart';
 
 List<DateTime> _generateTimestamps(int count, {int intervalMs = 200}) {
-  final start = DateTime.now().subtract(Duration(milliseconds: count * intervalMs));
+  final start = DateTime.now().subtract(
+    Duration(milliseconds: count * intervalMs),
+  );
   return List.generate(
     count,
     (i) => start.add(Duration(milliseconds: i * intervalMs)),

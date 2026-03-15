@@ -32,14 +32,16 @@ void main() {
   group('ParseVoiceInputUseCase', () {
     test('parses amount correctly from text with 円', () async {
       when(mockMerchantDatabase.findMerchant(any)).thenReturn(null);
-      when(mockFuzzyCategoryMatcher.match(any, any))
-          .thenAnswer((_) async => const CategoryMatchResult(
-                categoryId: 'cat_food',
-                confidence: 0.9,
-                source: MatchSource.keyword,
-              ));
-      when(mockFuzzyCategoryMatcher.resolveLedgerType(any))
-          .thenAnswer((_) async => LedgerType.survival);
+      when(mockFuzzyCategoryMatcher.match(any, any)).thenAnswer(
+        (_) async => const CategoryMatchResult(
+          categoryId: 'cat_food',
+          confidence: 0.9,
+          source: MatchSource.keyword,
+        ),
+      );
+      when(
+        mockFuzzyCategoryMatcher.resolveLedgerType(any),
+      ).thenAnswer((_) async => LedgerType.survival);
 
       final result = await useCase.execute('昼ごはんに680円');
 
@@ -68,14 +70,16 @@ void main() {
 
     test('falls back to fuzzy match when no merchant found', () async {
       when(mockMerchantDatabase.findMerchant(any)).thenReturn(null);
-      when(mockFuzzyCategoryMatcher.match(any, any))
-          .thenAnswer((_) async => const CategoryMatchResult(
-                categoryId: 'cat_transport',
-                confidence: 0.95,
-                source: MatchSource.keyword,
-              ));
-      when(mockFuzzyCategoryMatcher.resolveLedgerType(any))
-          .thenAnswer((_) async => LedgerType.survival);
+      when(mockFuzzyCategoryMatcher.match(any, any)).thenAnswer(
+        (_) async => const CategoryMatchResult(
+          categoryId: 'cat_transport',
+          confidence: 0.95,
+          source: MatchSource.keyword,
+        ),
+      );
+      when(
+        mockFuzzyCategoryMatcher.resolveLedgerType(any),
+      ).thenAnswer((_) async => LedgerType.survival);
 
       final result = await useCase.execute('電車代320円');
 
@@ -83,18 +87,21 @@ void main() {
       expect(result.data!.categoryMatch!.source, equals(MatchSource.keyword));
     });
 
-    test('returns success with nulls when text has no recognizable content',
-        () async {
-      when(mockMerchantDatabase.findMerchant(any)).thenReturn(null);
-      when(mockFuzzyCategoryMatcher.match(any, any))
-          .thenAnswer((_) async => null);
+    test(
+      'returns success with nulls when text has no recognizable content',
+      () async {
+        when(mockMerchantDatabase.findMerchant(any)).thenReturn(null);
+        when(
+          mockFuzzyCategoryMatcher.match(any, any),
+        ).thenAnswer((_) async => null);
 
-      final result = await useCase.execute('test');
+        final result = await useCase.execute('test');
 
-      expect(result.isSuccess, isTrue);
-      expect(result.data!.amount, isNull);
-      expect(result.data!.merchantName, isNull);
-      expect(result.data!.categoryMatch, isNull);
-    });
+        expect(result.isSuccess, isTrue);
+        expect(result.data!.amount, isNull);
+        expect(result.data!.merchantName, isNull);
+        expect(result.data!.categoryMatch, isNull);
+      },
+    );
   });
 }

@@ -24,23 +24,27 @@ void main() {
   });
 
   group('SeedCategoriesUseCase', () {
-    test('inserts all default categories and ledger configs when db is empty',
-        () async {
-      when(mockCategoryRepo.findAll()).thenAnswer((_) async => []);
-      when(mockCategoryRepo.insertBatch(any)).thenAnswer((_) async {});
-      when(mockConfigRepo.upsertBatch(any)).thenAnswer((_) async {});
+    test(
+      'inserts all default categories and ledger configs when db is empty',
+      () async {
+        when(mockCategoryRepo.findAll()).thenAnswer((_) async => []);
+        when(mockCategoryRepo.insertBatch(any)).thenAnswer((_) async {});
+        when(mockConfigRepo.upsertBatch(any)).thenAnswer((_) async {});
 
-      final result = await useCase.execute();
+        final result = await useCase.execute();
 
-      expect(result.isSuccess, isTrue);
-      verify(mockCategoryRepo.insertBatch(DefaultCategories.all)).called(1);
-      verify(mockConfigRepo.upsertBatch(DefaultCategories.defaultLedgerConfigs))
-          .called(1);
-    });
+        expect(result.isSuccess, isTrue);
+        verify(mockCategoryRepo.insertBatch(DefaultCategories.all)).called(1);
+        verify(
+          mockConfigRepo.upsertBatch(DefaultCategories.defaultLedgerConfigs),
+        ).called(1);
+      },
+    );
 
     test('skips seeding when categories already exist', () async {
-      when(mockCategoryRepo.findAll())
-          .thenAnswer((_) async => DefaultCategories.all);
+      when(
+        mockCategoryRepo.findAll(),
+      ).thenAnswer((_) async => DefaultCategories.all);
 
       final result = await useCase.execute();
 

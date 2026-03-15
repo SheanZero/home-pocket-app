@@ -70,9 +70,7 @@ class InputModeTabs extends StatelessWidget {
               Icon(
                 icon,
                 size: 16,
-                color: isActive
-                    ? AppColors.survival
-                    : AppColors.textSecondary,
+                color: isActive ? AppColors.survival : AppColors.textSecondary,
               ),
               const SizedBox(width: 4),
               Text(

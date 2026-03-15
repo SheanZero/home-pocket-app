@@ -54,7 +54,8 @@ class VoiceTranscriptCard extends ConsumerWidget {
     final isFinal = finalText.isNotEmpty;
 
     final result = parseResult;
-    final hasChips = result != null &&
+    final hasChips =
+        result != null &&
         (result.amount != null ||
             result.parsedDate != null ||
             result.merchantName != null ||
@@ -71,27 +72,19 @@ class VoiceTranscriptCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            l10n.voiceRecognitionResult,
-            style: AppTextStyles.labelMedium,
-          ),
+          Text(l10n.voiceRecognitionResult, style: AppTextStyles.labelMedium),
           const SizedBox(height: 12),
           Text(
             displayText,
             style: AppTextStyles.headlineMedium.copyWith(
-              color:
-                  isFinal ? AppColors.textPrimary : AppColors.textSecondary,
+              color: isFinal ? AppColors.textPrimary : AppColors.textSecondary,
               height: 1.4,
             ),
             textAlign: TextAlign.center,
           ),
           if (hasChips) ...[
             const SizedBox(height: 12),
-            const Divider(
-              color: AppColors.divider,
-              thickness: 1,
-              height: 1,
-            ),
+            const Divider(color: AppColors.divider, thickness: 1, height: 1),
             const SizedBox(height: 12),
             Wrap(
               alignment: WrapAlignment.center,
@@ -121,7 +114,8 @@ class VoiceTranscriptCard extends ConsumerWidget {
                   _ParseChip(
                     icon: category != null
                         ? resolveCategoryIcon(
-                            (parentCategory ?? category)!.icon)
+                            (parentCategory ?? category)!.icon,
+                          )
                         : Icons.folder_outlined,
                     label: category != null
                         ? formatCategoryPath(
@@ -164,8 +158,9 @@ class _ParseChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isPrimary ? AppColors.survival : AppColors.textSecondary;
-    final bgColor =
-        isPrimary ? AppColors.survivalLight : AppColors.tabBarBackground;
+    final bgColor = isPrimary
+        ? AppColors.survivalLight
+        : AppColors.tabBarBackground;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

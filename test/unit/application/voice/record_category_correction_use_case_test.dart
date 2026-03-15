@@ -13,37 +13,38 @@ void main() {
 
   setUp(() {
     mockRepo = MockCategoryKeywordPreferenceRepository();
-    useCase = RecordCategoryCorrectionUseCase(
-      preferenceRepository: mockRepo,
-    );
+    useCase = RecordCategoryCorrectionUseCase(preferenceRepository: mockRepo);
   });
 
   test('execute calls recordCorrection on repository', () async {
-    when(mockRepo.recordCorrection(
-      keyword: anyNamed('keyword'),
-      categoryId: anyNamed('categoryId'),
-    )).thenAnswer((_) async {});
+    when(
+      mockRepo.recordCorrection(
+        keyword: anyNamed('keyword'),
+        categoryId: anyNamed('categoryId'),
+      ),
+    ).thenAnswer((_) async {});
 
     await useCase.execute(
       keyword: '咖啡',
       correctedCategoryId: 'cat_entertainment_cafe',
     );
 
-    verify(mockRepo.recordCorrection(
-      keyword: '咖啡',
-      categoryId: 'cat_entertainment_cafe',
-    )).called(1);
+    verify(
+      mockRepo.recordCorrection(
+        keyword: '咖啡',
+        categoryId: 'cat_entertainment_cafe',
+      ),
+    ).called(1);
   });
 
   test('execute does nothing for empty keyword', () async {
-    await useCase.execute(
-      keyword: '',
-      correctedCategoryId: 'cat_food',
-    );
+    await useCase.execute(keyword: '', correctedCategoryId: 'cat_food');
 
-    verifyNever(mockRepo.recordCorrection(
-      keyword: anyNamed('keyword'),
-      categoryId: anyNamed('categoryId'),
-    ));
+    verifyNever(
+      mockRepo.recordCorrection(
+        keyword: anyNamed('keyword'),
+        categoryId: anyNamed('categoryId'),
+      ),
+    );
   });
 }

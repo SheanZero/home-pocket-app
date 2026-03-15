@@ -96,15 +96,15 @@ class VoiceTextParser {
     final match = amountPattern.firstMatch(text);
     if (match == null) return null;
 
-    final kanjiText =
-        match.group(0)!.replaceAll(RegExp(r'[\s円えんyen元块塊]'), '');
+    final kanjiText = match.group(0)!.replaceAll(RegExp(r'[\s円えんyen元块塊]'), '');
 
     if (kanjiText.isEmpty) return null;
 
     // Parse kanji numbers
     var result = 0;
     var currentSection = 0;
-    var currentDigit = 1; // default multiplier for units without preceding digit
+    var currentDigit =
+        1; // default multiplier for units without preceding digit
 
     for (var i = 0; i < kanjiText.length; i++) {
       final char = kanjiText[i];
@@ -115,8 +115,9 @@ class VoiceTextParser {
         final unit = kanjiUnits[char]!;
         if (unit == 10000) {
           // 「万」: multiply current section by 10000
-          final sectionValue =
-              currentSection == 0 ? currentDigit : currentSection + currentDigit;
+          final sectionValue = currentSection == 0
+              ? currentDigit
+              : currentSection + currentDigit;
           result += sectionValue * 10000;
           currentSection = 0;
           currentDigit = 1;
@@ -330,8 +331,10 @@ class VoiceTextParser {
     }
 
     // English: last month + D(st|nd|rd|th)
-    final enLastMonthDay =
-        RegExp(r'last\s+month\s+(\d{1,2})\s*(?:st|nd|rd|th)?', caseSensitive: false);
+    final enLastMonthDay = RegExp(
+      r'last\s+month\s+(\d{1,2})\s*(?:st|nd|rd|th)?',
+      caseSensitive: false,
+    );
     final enLastMatch = enLastMonthDay.firstMatch(lowerText);
     if (enLastMatch != null) {
       final day = int.tryParse(enLastMatch.group(1)!);
@@ -359,8 +362,10 @@ class VoiceTextParser {
     }
 
     // English: this month + D(st|nd|rd|th)
-    final enThisMonthDay =
-        RegExp(r'this\s+month\s+(\d{1,2})\s*(?:st|nd|rd|th)?', caseSensitive: false);
+    final enThisMonthDay = RegExp(
+      r'this\s+month\s+(\d{1,2})\s*(?:st|nd|rd|th)?',
+      caseSensitive: false,
+    );
     final enThisMatch = enThisMonthDay.firstMatch(lowerText);
     if (enThisMatch != null) {
       final day = int.tryParse(enThisMatch.group(1)!);
@@ -477,10 +482,7 @@ class VoiceTextParser {
     var cleaned = text
         .replaceAll(RegExp(r'[¥￥]\s*\d[\d,.]*'), '')
         .replaceAll(RegExp(r'\d[\d,.]*\s*(?:円|元|块|yen)'), '')
-        .replaceAll(
-          RegExp(r'[でにをがはのとへからまで]|した|って|ました|だった|です'),
-          ' ',
-        )
+        .replaceAll(RegExp(r'[でにをがはのとへからまで]|した|って|ました|だった|です'), ' ')
         .replaceAll(RegExp(r'[在了花买吃用去到]'), ' ')
         .replaceAll(RegExp(r'\b(?:at|for|in|on|spent|paid|bought)\b'), ' ')
         .trim();

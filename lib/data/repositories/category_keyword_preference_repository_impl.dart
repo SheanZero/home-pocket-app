@@ -12,9 +12,7 @@ class CategoryKeywordPreferenceRepositoryImpl
   final CategoryKeywordPreferenceDao _dao;
 
   @override
-  Future<List<CategoryKeywordPreference>> findByKeyword(
-    String keyword,
-  ) async {
+  Future<List<CategoryKeywordPreference>> findByKeyword(String keyword) async {
     final rows = await _dao.findByKeyword(keyword);
     return rows.map(_toModel).toList();
   }
@@ -28,9 +26,7 @@ class CategoryKeywordPreferenceRepositoryImpl
   }
 
   @override
-  Future<CategoryKeywordPreference?> suggestForKeyword(
-    String keyword,
-  ) async {
+  Future<CategoryKeywordPreference?> suggestForKeyword(String keyword) async {
     final rows = await _dao.findByKeyword(keyword);
     if (rows.isEmpty) return null;
     // Return highest hitCount entry (already ordered by DAO)

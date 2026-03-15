@@ -27,20 +27,22 @@ class CategoryLedgerConfigDao {
     required String ledgerType,
     required DateTime updatedAt,
   }) async {
-    await _db.into(_db.categoryLedgerConfigs).insertOnConflictUpdate(
-      CategoryLedgerConfigsCompanion.insert(
-        categoryId: categoryId,
-        ledgerType: ledgerType,
-        updatedAt: updatedAt,
-      ),
-    );
+    await _db
+        .into(_db.categoryLedgerConfigs)
+        .insertOnConflictUpdate(
+          CategoryLedgerConfigsCompanion.insert(
+            categoryId: categoryId,
+            ledgerType: ledgerType,
+            updatedAt: updatedAt,
+          ),
+        );
   }
 
   /// Find a ledger config by category ID.
   Future<CategoryLedgerConfigRow?> findById(String categoryId) async {
-    return (_db.select(_db.categoryLedgerConfigs)
-          ..where((t) => t.categoryId.equals(categoryId)))
-        .getSingleOrNull();
+    return (_db.select(
+      _db.categoryLedgerConfigs,
+    )..where((t) => t.categoryId.equals(categoryId))).getSingleOrNull();
   }
 
   /// Return all ledger configs.
@@ -50,9 +52,9 @@ class CategoryLedgerConfigDao {
 
   /// Delete a ledger config by category ID.
   Future<void> delete(String categoryId) async {
-    await (_db.delete(_db.categoryLedgerConfigs)
-          ..where((t) => t.categoryId.equals(categoryId)))
-        .go();
+    await (_db.delete(
+      _db.categoryLedgerConfigs,
+    )..where((t) => t.categoryId.equals(categoryId))).go();
   }
 
   /// Delete all ledger configs (hard delete, for backup restore).

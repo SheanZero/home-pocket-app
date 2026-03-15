@@ -40,9 +40,7 @@ void main() {
     });
 
     test('has 103 expense L2 categories (PRD \u00a710.1\u201310.16)', () {
-      final l2s = DefaultCategories.all
-          .where((c) => c.level == 2)
-          .toList();
+      final l2s = DefaultCategories.all.where((c) => c.level == 2).toList();
       expect(l2s.length, 103);
       expect(l2s.every((c) => c.parentId != null), isTrue);
     });
@@ -54,8 +52,11 @@ void main() {
           .toSet();
       final l2s = DefaultCategories.all.where((c) => c.level == 2);
       for (final l2 in l2s) {
-        expect(l1Ids.contains(l2.parentId), isTrue,
-            reason: '${l2.id} parentId=${l2.parentId} not in L1 set');
+        expect(
+          l1Ids.contains(l2.parentId),
+          isTrue,
+          reason: '${l2.id} parentId=${l2.parentId} not in L1 set',
+        );
       }
     });
 
@@ -69,10 +70,10 @@ void main() {
     });
 
     test('defaultLedgerConfigs covers all expense L1 categories', () {
-      final configIds =
-          DefaultCategories.defaultLedgerConfigs.map((c) => c.categoryId).toSet();
-      final expenseL1Ids =
-          DefaultCategories.expenseL1.map((c) => c.id).toSet();
+      final configIds = DefaultCategories.defaultLedgerConfigs
+          .map((c) => c.categoryId)
+          .toSet();
+      final expenseL1Ids = DefaultCategories.expenseL1.map((c) => c.id).toSet();
       expect(configIds.containsAll(expenseL1Ids), isTrue);
     });
   });

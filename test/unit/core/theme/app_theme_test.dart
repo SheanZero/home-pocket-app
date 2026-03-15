@@ -16,10 +16,7 @@ void main() {
 
     test('text theme uses IBM Plex Sans via default body style', () {
       final theme = AppTheme.light;
-      expect(
-        theme.textTheme.bodyMedium?.fontFamily,
-        contains('IBM Plex Sans'),
-      );
+      expect(theme.textTheme.bodyMedium?.fontFamily, contains('IBM Plex Sans'));
     });
   });
 }

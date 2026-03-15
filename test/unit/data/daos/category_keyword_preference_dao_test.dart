@@ -61,13 +61,11 @@ void main() {
     test('findByKeywordAndCategory returns specific entry', () async {
       await dao.upsert(keyword: '咖啡', categoryId: 'cat_food');
 
-      final result =
-          await dao.findByKeywordAndCategory('咖啡', 'cat_food');
+      final result = await dao.findByKeywordAndCategory('咖啡', 'cat_food');
       expect(result, isNotNull);
       expect(result!.hitCount, 1);
 
-      final missing =
-          await dao.findByKeywordAndCategory('咖啡', 'cat_nope');
+      final missing = await dao.findByKeywordAndCategory('咖啡', 'cat_nope');
       expect(missing, isNull);
     });
 

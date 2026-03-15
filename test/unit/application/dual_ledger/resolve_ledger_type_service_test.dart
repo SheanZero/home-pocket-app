@@ -87,8 +87,9 @@ void main() {
           createdAt: epoch,
         ),
       );
-      when(mockConfigRepo.findById('cat_food_lunch'))
-          .thenAnswer((_) async => null);
+      when(
+        mockConfigRepo.findById('cat_food_lunch'),
+      ).thenAnswer((_) async => null);
       when(mockConfigRepo.findById('cat_food')).thenAnswer(
         (_) async => CategoryLedgerConfig(
           categoryId: 'cat_food',
@@ -102,8 +103,9 @@ void main() {
     });
 
     test('returns null when category not found', () async {
-      when(mockCategoryRepo.findById('nonexistent'))
-          .thenAnswer((_) async => null);
+      when(
+        mockCategoryRepo.findById('nonexistent'),
+      ).thenAnswer((_) async => null);
 
       final result = await service.resolve('nonexistent');
       expect(result, isNull);

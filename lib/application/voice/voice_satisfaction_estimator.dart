@@ -30,7 +30,8 @@ class VoiceSatisfactionEstimator {
     final durationScore = _analyzeDuration(audioFeatures);
 
     // Weighted average
-    final weightedScore = volumeScore * 0.25 +
+    final weightedScore =
+        volumeScore * 0.25 +
         varianceScore * 0.25 +
         speechRateScore * 0.20 +
         sentimentScore * 0.20 +
@@ -67,7 +68,8 @@ class VoiceSatisfactionEstimator {
     if (activeLevels.length < 3) return 0.3;
 
     final mean = activeLevels.reduce((a, b) => a + b) / activeLevels.length;
-    final variance = activeLevels
+    final variance =
+        activeLevels
             .map((l) => (l - mean) * (l - mean))
             .reduce((a, b) => a + b) /
         activeLevels.length;
@@ -123,8 +125,18 @@ class VoiceSatisfactionEstimator {
     ];
 
     const intensifiers = [
-      'めっちゃ', 'すごく', 'とても', 'マジ', 'ほんと',
-      '超', '非常', '特别', '太', 'really', 'very', 'so',
+      'めっちゃ',
+      'すごく',
+      'とても',
+      'マジ',
+      'ほんと',
+      '超',
+      '非常',
+      '特别',
+      '太',
+      'really',
+      'very',
+      'so',
     ];
 
     final lowerText = text.toLowerCase();
@@ -156,8 +168,9 @@ class VoiceSatisfactionEstimator {
   ///
   /// Longer speech → more to say → deeper feeling.
   double _analyzeDuration(VoiceAudioFeatures features) {
-    final durationSecs =
-        features.endTime.difference(features.startTime).inSeconds;
+    final durationSecs = features.endTime
+        .difference(features.startTime)
+        .inSeconds;
 
     if (durationSecs < 3) return 0.2;
     if (durationSecs < 5) return 0.4;

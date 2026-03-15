@@ -15,10 +15,8 @@ class CategoryKeywordPreferenceDao {
     return (_db.select(_db.categoryKeywordPreferences)
           ..where((t) => t.keyword.equals(keyword))
           ..orderBy([
-            (t) => OrderingTerm(
-                  expression: t.hitCount,
-                  mode: OrderingMode.desc,
-                ),
+            (t) =>
+                OrderingTerm(expression: t.hitCount, mode: OrderingMode.desc),
           ]))
         .get();
   }
@@ -28,11 +26,9 @@ class CategoryKeywordPreferenceDao {
     String keyword,
     String categoryId,
   ) async {
-    return (_db.select(_db.categoryKeywordPreferences)
-          ..where(
-            (t) =>
-                t.keyword.equals(keyword) & t.categoryId.equals(categoryId),
-          ))
+    return (_db.select(_db.categoryKeywordPreferences)..where(
+          (t) => t.keyword.equals(keyword) & t.categoryId.equals(categoryId),
+        ))
         .getSingleOrNull();
   }
 
@@ -48,19 +44,19 @@ class CategoryKeywordPreferenceDao {
     final now = DateTime.now();
 
     if (existing != null) {
-      await (_db.update(_db.categoryKeywordPreferences)
-            ..where(
-              (t) =>
-                  t.keyword.equals(keyword) & t.categoryId.equals(categoryId),
-            ))
+      await (_db.update(_db.categoryKeywordPreferences)..where(
+            (t) => t.keyword.equals(keyword) & t.categoryId.equals(categoryId),
+          ))
           .write(
-        CategoryKeywordPreferencesCompanion(
-          hitCount: Value(existing.hitCount + 1),
-          lastUsed: Value(now),
-        ),
-      );
+            CategoryKeywordPreferencesCompanion(
+              hitCount: Value(existing.hitCount + 1),
+              lastUsed: Value(now),
+            ),
+          );
     } else {
-      await _db.into(_db.categoryKeywordPreferences).insert(
+      await _db
+          .into(_db.categoryKeywordPreferences)
+          .insert(
             CategoryKeywordPreferencesCompanion.insert(
               keyword: keyword,
               categoryId: categoryId,
@@ -76,12 +72,11 @@ class CategoryKeywordPreferenceDao {
     final cutoff = DateTime.now().subtract(staleDuration);
 
     // Delete entries with hitCount <= 1 that are stale
-    await (_db.delete(_db.categoryKeywordPreferences)
-          ..where(
-            (t) =>
-                t.lastUsed.isSmallerThan(Variable(cutoff)) &
-                t.hitCount.isSmallerOrEqual(const Variable(1)),
-          ))
+    await (_db.delete(_db.categoryKeywordPreferences)..where(
+          (t) =>
+              t.lastUsed.isSmallerThan(Variable(cutoff)) &
+              t.hitCount.isSmallerOrEqual(const Variable(1)),
+        ))
         .go();
 
     // Decrement hitCount for remaining stale entries
@@ -95,6 +90,5 @@ class CategoryKeywordPreferenceDao {
   }
 
   /// Delete all preferences (for testing/reset).
-  Future<void> deleteAll() =>
-      _db.delete(_db.categoryKeywordPreferences).go();
+  Future<void> deleteAll() => _db.delete(_db.categoryKeywordPreferences).go();
 }

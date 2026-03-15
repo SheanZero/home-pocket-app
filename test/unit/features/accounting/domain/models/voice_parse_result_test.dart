@@ -54,11 +54,14 @@ void main() {
 
   group('MatchSource', () {
     test('has all three values', () {
-      expect(MatchSource.values, containsAll([
-        MatchSource.merchant,
-        MatchSource.keyword,
-        MatchSource.fallback,
-      ]));
+      expect(
+        MatchSource.values,
+        containsAll([
+          MatchSource.merchant,
+          MatchSource.keyword,
+          MatchSource.fallback,
+        ]),
+      );
     });
   });
 }

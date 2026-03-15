@@ -16,8 +16,12 @@ import 'package:mockito/mockito.dart';
 ])
 import 'fuzzy_category_matcher_test.mocks.dart';
 
-Category _makeCategory(String id, String name,
-    {int level = 2, String? parentId}) {
+Category _makeCategory(
+  String id,
+  String name, {
+  int level = 2,
+  String? parentId,
+}) {
   return Category(
     id: id,
     name: name,
@@ -47,14 +51,13 @@ void main() {
   });
 
   group('Signal 1: Seed keyword match', () {
-    test('exact keyword match returns category with high confidence',
-        () async {
-      when(mockCategoryRepo.findById('cat_food_breakfast')).thenAnswer(
-          (_) async => _makeCategory('cat_food_breakfast', '朝食'));
+    test('exact keyword match returns category with high confidence', () async {
+      when(
+        mockCategoryRepo.findById('cat_food_breakfast'),
+      ).thenAnswer((_) async => _makeCategory('cat_food_breakfast', '朝食'));
       when(mockCategoryRepo.findAll()).thenAnswer((_) async => []);
       when(mockPrefRepo.findByKeyword(any)).thenAnswer((_) async => []);
-      when(mockPrefRepo.suggestForKeyword(any))
-          .thenAnswer((_) async => null);
+      when(mockPrefRepo.suggestForKeyword(any)).thenAnswer((_) async => null);
 
       final result = await matcher.match('朝ごはん500円', '朝ごはん');
       expect(result, isNotNull);
@@ -65,13 +68,14 @@ void main() {
 
   group('Signal 2: Edit distance match', () {
     test('fuzzy match against DB category name', () async {
-      when(mockCategoryRepo.findAll()).thenAnswer((_) async => [
-            _makeCategory('cat_custom_cafe', '咖啡厅', parentId: 'cat_food'),
-          ]);
+      when(mockCategoryRepo.findAll()).thenAnswer(
+        (_) async => [
+          _makeCategory('cat_custom_cafe', '咖啡厅', parentId: 'cat_food'),
+        ],
+      );
       when(mockCategoryRepo.findById(any)).thenAnswer((_) async => null);
       when(mockPrefRepo.findByKeyword(any)).thenAnswer((_) async => []);
-      when(mockPrefRepo.suggestForKeyword(any))
-          .thenAnswer((_) async => null);
+      when(mockPrefRepo.suggestForKeyword(any)).thenAnswer((_) async => null);
 
       final result = await matcher.match('咖啡500円', '咖啡');
       expect(result, isNotNull);
@@ -81,27 +85,35 @@ void main() {
 
   group('Signal 3: Learned mapping', () {
     test('learned mapping boosts score to override seed keyword', () async {
-      when(mockCategoryRepo.findById('cat_food')).thenAnswer((_) async =>
-          _makeCategory('cat_food', '食費', level: 1));
+      when(
+        mockCategoryRepo.findById('cat_food'),
+      ).thenAnswer((_) async => _makeCategory('cat_food', '食費', level: 1));
       when(mockCategoryRepo.findById('cat_entertainment_cafe')).thenAnswer(
-          (_) async => _makeCategory('cat_entertainment_cafe', 'カフェ',
-              parentId: 'cat_entertainment'));
+        (_) async => _makeCategory(
+          'cat_entertainment_cafe',
+          'カフェ',
+          parentId: 'cat_entertainment',
+        ),
+      );
       when(mockCategoryRepo.findAll()).thenAnswer((_) async => []);
-      when(mockPrefRepo.findByKeyword('咖啡')).thenAnswer((_) async => [
-            CategoryKeywordPreference(
-              keyword: '咖啡',
-              categoryId: 'cat_entertainment_cafe',
-              hitCount: 2,
-              lastUsed: DateTime.now(),
-            ),
-          ]);
-      when(mockPrefRepo.suggestForKeyword('咖啡')).thenAnswer((_) async =>
+      when(mockPrefRepo.findByKeyword('咖啡')).thenAnswer(
+        (_) async => [
           CategoryKeywordPreference(
             keyword: '咖啡',
             categoryId: 'cat_entertainment_cafe',
             hitCount: 2,
             lastUsed: DateTime.now(),
-          ));
+          ),
+        ],
+      );
+      when(mockPrefRepo.suggestForKeyword('咖啡')).thenAnswer(
+        (_) async => CategoryKeywordPreference(
+          keyword: '咖啡',
+          categoryId: 'cat_entertainment_cafe',
+          hitCount: 2,
+          lastUsed: DateTime.now(),
+        ),
+      );
 
       final result = await matcher.match('咖啡500円', '咖啡');
       expect(result, isNotNull);
@@ -114,8 +126,7 @@ void main() {
     test('empty keyword returns null', () async {
       when(mockCategoryRepo.findAll()).thenAnswer((_) async => []);
       when(mockPrefRepo.findByKeyword(any)).thenAnswer((_) async => []);
-      when(mockPrefRepo.suggestForKeyword(any))
-          .thenAnswer((_) async => null);
+      when(mockPrefRepo.suggestForKeyword(any)).thenAnswer((_) async => null);
 
       final result = await matcher.match('500円', '');
       expect(result, isNull);
@@ -125,8 +136,7 @@ void main() {
       when(mockCategoryRepo.findAll()).thenAnswer((_) async => []);
       when(mockCategoryRepo.findById(any)).thenAnswer((_) async => null);
       when(mockPrefRepo.findByKeyword(any)).thenAnswer((_) async => []);
-      when(mockPrefRepo.suggestForKeyword(any))
-          .thenAnswer((_) async => null);
+      when(mockPrefRepo.suggestForKeyword(any)).thenAnswer((_) async => null);
 
       final result = await matcher.match('xyzzyx', 'xyzzyx');
       expect(result, isNull);

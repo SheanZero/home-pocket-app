@@ -20,9 +20,9 @@ class ParseVoiceInputUseCase {
     required VoiceTextParser textParser,
     required FuzzyCategoryMatcher fuzzyCategoryMatcher,
     required MerchantDatabase merchantDatabase,
-  })  : _textParser = textParser,
-        _fuzzyCategoryMatcher = fuzzyCategoryMatcher,
-        _merchantDatabase = merchantDatabase;
+  }) : _textParser = textParser,
+       _fuzzyCategoryMatcher = fuzzyCategoryMatcher,
+       _merchantDatabase = merchantDatabase;
 
   /// Parses [recognizedText] into a [VoiceParseResult].
   ///
@@ -60,8 +60,9 @@ class ParseVoiceInputUseCase {
           keyword,
         );
         if (categoryMatch != null) {
-          ledgerType = await _fuzzyCategoryMatcher
-              .resolveLedgerType(categoryMatch.categoryId);
+          ledgerType = await _fuzzyCategoryMatcher.resolveLedgerType(
+            categoryMatch.categoryId,
+          );
         }
       }
 
@@ -96,16 +97,10 @@ class ParseVoiceInputUseCase {
     );
 
     // Remove common Japanese particles
-    remaining = remaining.replaceAll(
-      RegExp(r'[のにでをはがもへとや]'),
-      '',
-    );
+    remaining = remaining.replaceAll(RegExp(r'[のにでをはがもへとや]'), '');
 
     // Remove common Chinese particles
-    remaining = remaining.replaceAll(
-      RegExp(r'[的了吗呢吧啊呀哦]'),
-      '',
-    );
+    remaining = remaining.replaceAll(RegExp(r'[的了吗呢吧啊呀哦]'), '');
 
     return remaining.trim();
   }

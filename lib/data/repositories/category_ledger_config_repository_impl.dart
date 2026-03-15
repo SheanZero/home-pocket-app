@@ -8,7 +8,7 @@ import '../daos/category_ledger_config_dao.dart';
 class CategoryLedgerConfigRepositoryImpl
     implements CategoryLedgerConfigRepository {
   CategoryLedgerConfigRepositoryImpl({required CategoryLedgerConfigDao dao})
-      : _dao = dao;
+    : _dao = dao;
 
   final CategoryLedgerConfigDao _dao;
 
@@ -48,11 +48,13 @@ class CategoryLedgerConfigRepositoryImpl
   Future<void> upsertBatch(List<CategoryLedgerConfig> configs) async {
     await _dao.upsertBatch(
       configs
-          .map((c) => LedgerConfigInsertData(
-                categoryId: c.categoryId,
-                ledgerType: c.ledgerType.name,
-                updatedAt: c.updatedAt,
-              ))
+          .map(
+            (c) => LedgerConfigInsertData(
+              categoryId: c.categoryId,
+              ledgerType: c.ledgerType.name,
+              updatedAt: c.updatedAt,
+            ),
+          )
           .toList(),
     );
   }

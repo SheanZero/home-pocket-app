@@ -38,9 +38,7 @@ class SmartKeyboard extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.card,
-        border: Border(
-          top: BorderSide(color: Color(0xFFE0E8EF)),
-        ),
+        border: Border(top: BorderSide(color: Color(0xFFE0E8EF))),
       ),
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
       child: Column(
@@ -63,15 +61,14 @@ class SmartKeyboard extends StatelessWidget {
   Widget _buildDigitRow(List<String> keys) {
     return Row(
       children: keys
-          .map((key) => Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: _DigitKey(
-                    label: key,
-                    onTap: () => onDigit(key),
-                  ),
-                ),
-              ))
+          .map(
+            (key) => Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: _DigitKey(label: key, onTap: () => onDigit(key)),
+              ),
+            ),
+          )
           .toList(),
     );
   }
@@ -83,28 +80,19 @@ class SmartKeyboard extends StatelessWidget {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: _DigitKey(
-              label: '00',
-              onTap: () => onDoubleZero?.call(),
-            ),
+            child: _DigitKey(label: '00', onTap: () => onDoubleZero?.call()),
           ),
         ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: _DigitKey(
-              label: '0',
-              onTap: () => onDigit('0'),
-            ),
+            child: _DigitKey(label: '0', onTap: () => onDigit('0')),
           ),
         ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: _DigitKey(
-              label: '.',
-              onTap: () => onDot?.call(),
-            ),
+            child: _DigitKey(label: '.', onTap: () => onDot?.call()),
           ),
         ),
       ],
@@ -135,20 +123,14 @@ class SmartKeyboard extends StatelessWidget {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: _CurrencyKey(
-              symbol: currencySymbol,
-              label: currencyLabel,
-            ),
+            child: _CurrencyKey(symbol: currencySymbol, label: currencyLabel),
           ),
         ),
         // Next key
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: _GradientKey(
-              label: nextLabel,
-              onTap: onNext,
-            ),
+            child: _GradientKey(label: nextLabel, onTap: onNext),
           ),
         ),
       ],
@@ -218,10 +200,7 @@ class _ActionKey extends StatelessWidget {
 }
 
 class _CurrencyKey extends StatelessWidget {
-  const _CurrencyKey({
-    required this.symbol,
-    required this.label,
-  });
+  const _CurrencyKey({required this.symbol, required this.label});
 
   final String symbol;
   final String label;

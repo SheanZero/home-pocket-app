@@ -198,10 +198,7 @@ class _TransactionConfirmScreenState
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-                    AmountDisplay(
-                      amount: editStr,
-                      onClear: onClear,
-                    ),
+                    AmountDisplay(amount: editStr, onClear: onClear),
                     SmartKeyboard(
                       onDigit: onDigit,
                       onDoubleZero: onDoubleZero,
@@ -252,8 +249,9 @@ class _TransactionConfirmScreenState
     if (widget.voiceKeyword != null &&
         widget.voiceKeyword!.isNotEmpty &&
         result.id != _initialCategoryId) {
-      final correctionUseCase =
-          ref.read(recordCategoryCorrectionUseCaseProvider);
+      final correctionUseCase = ref.read(
+        recordCategoryCorrectionUseCaseProvider,
+      );
       await correctionUseCase.execute(
         keyword: widget.voiceKeyword!,
         correctedCategoryId: result.id,
@@ -272,9 +270,9 @@ class _TransactionConfirmScreenState
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: AppColors.survival,
-            ),
+            colorScheme: Theme.of(
+              context,
+            ).colorScheme.copyWith(primary: AppColors.survival),
           ),
           child: child!,
         );

@@ -236,8 +236,10 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
     final result = await useCase.execute(text);
     if (mounted && result.isSuccess) {
       setState(() => _parseResult = result.data);
-      await _resolveCategory(result.data?.categoryMatch?.categoryId ??
-          result.data?.merchantCategoryId);
+      await _resolveCategory(
+        result.data?.categoryMatch?.categoryId ??
+            result.data?.merchantCategoryId,
+      );
     }
   }
 
@@ -263,7 +265,8 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
 
     setState(() => _parseResult = parseResult);
     await _resolveCategory(
-        parseResult.categoryMatch?.categoryId ?? parseResult.merchantCategoryId);
+      parseResult.categoryMatch?.categoryId ?? parseResult.merchantCategoryId,
+    );
   }
 
   Future<void> _resolveCategory(String? categoryId) async {

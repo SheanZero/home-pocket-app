@@ -20,9 +20,9 @@ class FuzzyCategoryMatcher {
     required CategoryRepository categoryRepository,
     required CategoryKeywordPreferenceRepository preferenceRepository,
     required CategoryService categoryService,
-  })  : _categoryRepository = categoryRepository,
-        _preferenceRepository = preferenceRepository,
-        _categoryService = categoryService;
+  }) : _categoryRepository = categoryRepository,
+       _preferenceRepository = preferenceRepository,
+       _categoryService = categoryService;
 
   /// Matches [inputText] to a category using multi-signal scoring.
   ///
@@ -35,8 +35,7 @@ class FuzzyCategoryMatcher {
   ) async {
     if (extractedKeyword.isEmpty && inputText.isEmpty) return null;
 
-    final keyword =
-        extractedKeyword.isNotEmpty ? extractedKeyword : inputText;
+    final keyword = extractedKeyword.isNotEmpty ? extractedKeyword : inputText;
 
     // Run all three signals
     final seedResult = await _matchSeedKeywords(inputText);
@@ -47,27 +46,33 @@ class FuzzyCategoryMatcher {
     final candidates = <_ScoredCandidate>[];
 
     if (seedResult != null) {
-      candidates.add(_ScoredCandidate(
-        categoryId: seedResult.categoryId,
-        baseScore: seedResult.confidence,
-        source: MatchSource.keyword,
-      ));
+      candidates.add(
+        _ScoredCandidate(
+          categoryId: seedResult.categoryId,
+          baseScore: seedResult.confidence,
+          source: MatchSource.keyword,
+        ),
+      );
     }
 
     if (editDistResult != null) {
-      candidates.add(_ScoredCandidate(
-        categoryId: editDistResult.categoryId,
-        baseScore: editDistResult.confidence,
-        source: MatchSource.keyword,
-      ));
+      candidates.add(
+        _ScoredCandidate(
+          categoryId: editDistResult.categoryId,
+          baseScore: editDistResult.confidence,
+          source: MatchSource.keyword,
+        ),
+      );
     }
 
     if (learnedResult != null) {
-      candidates.add(_ScoredCandidate(
-        categoryId: learnedResult.categoryId,
-        baseScore: learnedResult.confidence,
-        source: MatchSource.learning,
-      ));
+      candidates.add(
+        _ScoredCandidate(
+          categoryId: learnedResult.categoryId,
+          baseScore: learnedResult.confidence,
+          source: MatchSource.learning,
+        ),
+      );
     }
 
     if (candidates.isEmpty) return null;
@@ -125,8 +130,9 @@ class FuzzyCategoryMatcher {
             effectiveId = subId;
           }
         } else {
-          final category =
-              await _categoryRepository.findById(mapping.categoryId);
+          final category = await _categoryRepository.findById(
+            mapping.categoryId,
+          );
           if (category == null) continue;
         }
 
@@ -239,26 +245,23 @@ class FuzzyCategoryMatcher {
 
     // ===== Transport =====
     '電車': _KeywordMapping('cat_transport', 0.95, sub: 'cat_transport_commute'),
-    '電車代':
-        _KeywordMapping('cat_transport', 0.95, sub: 'cat_transport_commute'),
+    '電車代': _KeywordMapping('cat_transport', 0.95, sub: 'cat_transport_commute'),
     'バス': _KeywordMapping('cat_transport', 0.90, sub: 'cat_transport_commute'),
-    'バス代':
-        _KeywordMapping('cat_transport', 0.90, sub: 'cat_transport_commute'),
-    'タクシー':
-        _KeywordMapping('cat_transport', 0.95, sub: 'cat_transport_taxi'),
+    'バス代': _KeywordMapping('cat_transport', 0.90, sub: 'cat_transport_commute'),
+    'タクシー': _KeywordMapping('cat_transport', 0.95, sub: 'cat_transport_taxi'),
     '交通費': _KeywordMapping('cat_transport', 0.95),
     '定期': _KeywordMapping('cat_transport', 0.85),
     'Suica': _KeywordMapping('cat_transport', 0.85),
     'PASMO': _KeywordMapping('cat_transport', 0.85),
-    '地铁':
-        _KeywordMapping('cat_transport', 0.95, sub: 'cat_transport_commute'),
-    '公交':
-        _KeywordMapping('cat_transport', 0.90, sub: 'cat_transport_commute'),
+    '地铁': _KeywordMapping('cat_transport', 0.95, sub: 'cat_transport_commute'),
+    '公交': _KeywordMapping('cat_transport', 0.90, sub: 'cat_transport_commute'),
     '打车': _KeywordMapping('cat_transport', 0.95, sub: 'cat_transport_taxi'),
-    'train':
-        _KeywordMapping('cat_transport', 0.95, sub: 'cat_transport_commute'),
-    'bus':
-        _KeywordMapping('cat_transport', 0.90, sub: 'cat_transport_commute'),
+    'train': _KeywordMapping(
+      'cat_transport',
+      0.95,
+      sub: 'cat_transport_commute',
+    ),
+    'bus': _KeywordMapping('cat_transport', 0.90, sub: 'cat_transport_commute'),
     'taxi': _KeywordMapping('cat_transport', 0.95, sub: 'cat_transport_taxi'),
 
     // ===== Shopping =====

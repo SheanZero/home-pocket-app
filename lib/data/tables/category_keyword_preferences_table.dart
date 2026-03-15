@@ -23,9 +23,6 @@ class CategoryKeywordPreferences extends Table {
   Set<Column> get primaryKey => {keyword, categoryId};
 
   List<TableIndex> get customIndices => [
-        TableIndex(
-          name: 'idx_keyword_prefs_keyword',
-          columns: {#keyword},
-        ),
-      ];
+    TableIndex(name: 'idx_keyword_prefs_keyword', columns: {#keyword}),
+  ];
 }

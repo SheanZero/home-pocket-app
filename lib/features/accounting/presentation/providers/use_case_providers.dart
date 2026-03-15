@@ -87,7 +87,8 @@ MerchantCategoryLearningService merchantCategoryLearningService(Ref ref) {
 @riverpod
 RecordCategoryCorrectionUseCase recordCategoryCorrectionUseCase(Ref ref) {
   return RecordCategoryCorrectionUseCase(
-    preferenceRepository:
-        ref.watch(categoryKeywordPreferenceRepositoryProvider),
+    preferenceRepository: ref.watch(
+      categoryKeywordPreferenceRepositoryProvider,
+    ),
   );
 }
