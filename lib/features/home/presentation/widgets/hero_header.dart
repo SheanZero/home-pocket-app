@@ -28,9 +28,7 @@ class HeroHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Row(
+    return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Left: month picker
@@ -68,8 +66,7 @@ class HeroHeader extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
+      );
   }
 }
 
