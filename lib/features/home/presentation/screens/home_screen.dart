@@ -3,25 +3,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
+import '../../../../features/analytics/domain/models/monthly_report.dart';
 import '../../../../features/analytics/presentation/providers/analytics_providers.dart';
 import '../../../../features/family_sync/presentation/providers/active_group_provider.dart';
 import '../../../../features/family_sync/presentation/screens/pairing_screen.dart';
-import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/category/category_service.dart';
 import '../../../settings/presentation/providers/locale_provider.dart';
-import '../providers/home_providers.dart';
+import '../../domain/models/ledger_row_data.dart';
 import '../providers/today_transactions_provider.dart';
 import '../widgets/family_invite_banner.dart';
 import '../widgets/hero_header.dart';
 import '../widgets/home_transaction_tile.dart';
+import '../widgets/ledger_comparison_section.dart';
 import '../widgets/month_overview_card.dart';
-import '../widgets/ohtani_converter.dart';
+import '../widgets/section_divider.dart';
+import '../widgets/soul_fullness_card.dart';
+import '../widgets/transaction_list_card.dart';
 
 /// Home tab content (Tab 0 inside MainShellScreen).
 ///
-/// Scrollable content only -- no Scaffold, no bottom nav.
-/// Wires providers to pure UI widgets.
+/// Flat vertical scroll layout with section dividers.
+/// Wires providers to pure UI widgets. No Scaffold, no bottom nav.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key, required this.bookId, this.onSettingsTap});
 
@@ -30,148 +34,254 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = S.of(context);
     final locale = ref.watch(currentLocaleProvider);
-    final todayTxAsync = ref.watch(todayTransactionsProvider(bookId: bookId));
-    final ohtaniVisible = ref.watch(ohtaniConverterVisibleProvider);
     final isGroupMode = ref.watch(isGroupModeProvider);
+    final now = DateTime.now();
+    final year = now.year;
+    final month = now.month;
+
+    final reportAsync = ref.watch(
+      monthlyReportProvider(bookId: bookId, year: year, month: month),
+    );
+    final todayTxAsync = ref.watch(
+      todayTransactionsProvider(bookId: bookId),
+    );
 
     return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Hero header + Month overview card with blue background overlap
-          _HeroWithCard(bookId: bookId, onSettingsTap: onSettingsTap ?? () {}),
-          const SizedBox(height: 16),
-
-          if (!isGroupMode) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: FamilyInviteBanner(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const PairingScreen(),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(28, 4, 28, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Hero header ──
+              HeroHeader(
+                year: year,
+                month: month,
+                isGroupMode: isGroupMode,
+                onSettingsTap: onSettingsTap ?? () {},
+                onDateTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Date picker coming soon'),
+                      duration: Duration(seconds: 1),
                     ),
                   );
                 },
               ),
-            ),
-            const SizedBox(height: 16),
-          ],
+              const SizedBox(height: 16),
 
-          // Today's transactions header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: todayTxAsync.when(
-              data: (transactions) => Row(
+              // ── Section: Monthly expenses ──
+              const SectionDivider(label: '今月の支出'),
+              const SizedBox(height: 16),
+
+              // ── Month overview card ──
+              reportAsync.when(
+                data: (report) => MonthOverviewCard(
+                  totalExpense: report.totalExpenses,
+                  previousMonthTotal:
+                      report.previousMonthComparison?.previousExpenses ?? 0,
+                ),
+                loading: () => const SizedBox(
+                  height: 120,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (error, _) => _ErrorText(message: '$error'),
+              ),
+              const SizedBox(height: 16),
+
+              // ── Section: Ledgers ──
+              const SectionDivider(label: '帳 本'),
+              const SizedBox(height: 16),
+
+              // ── Ledger comparison rows ──
+              reportAsync.when(
+                data: (report) => LedgerComparisonSection(
+                  rows: _buildLedgerRows(report, isGroupMode),
+                ),
+                loading: () => const SizedBox(
+                  height: 80,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (error, _) => _ErrorText(message: '$error'),
+              ),
+              const SizedBox(height: 16),
+
+              // ── Soul fullness card ──
+              reportAsync.when(
+                data: (report) => SoulFullnessCard(
+                  satisfactionPercent: _computeSatisfaction(todayTxAsync),
+                  happinessROI: _computeHappinessROI(report),
+                  recentSoulAmount: report.soulTotal,
+                ),
+                loading: () => const SizedBox(
+                  height: 120,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (error, _) => _ErrorText(message: '$error'),
+              ),
+              const SizedBox(height: 16),
+
+              // ── Group bar or Family invite banner ──
+              if (isGroupMode) ...[
+                // TODO: Wire GroupBar with actual group data when available
+                const SizedBox.shrink(),
+                const SizedBox(height: 16),
+              ],
+              if (!isGroupMode) ...[
+                FamilyInviteBanner(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const PairingScreen(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // ── Transactions header row ──
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    l10n.homeTodayTitle,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    '最近の取引',
+                    style: AppTextStyles.titleSmall,
                   ),
-                  Text(
-                    l10n.homeTodayCount(transactions.length),
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  GestureDetector(
+                    onTap: () {
+                      // TODO: Navigate to full transaction list
+                    },
+                    child: Text(
+                      'すべて見る',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.accentPrimary,
+                      ),
+                    ),
                   ),
                 ],
               ),
-              loading: () => Text(
-                l10n.homeTodayTitle,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              error: (_, _) => Text(l10n.homeTodayTitle),
-            ),
-          ),
-          const SizedBox(height: 8),
+              const SizedBox(height: 12),
 
-          // Today's transaction list
-          todayTxAsync.when(
-            data: (transactions) {
-              if (transactions.isEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
-                  child: Center(
-                    child: Text(
-                      l10n.noTransactionsYet,
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                  ),
-                );
-              }
-              return Column(
-                children: transactions.map((tx) {
-                  final isSoul = tx.ledgerType == LedgerType.soul;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: HomeTransactionTile(
-                      tagText: isSoul ? '\u9b42' : '\u751f',
-                      tagBgColor:
-                          isSoul ? AppColors.soulLight : AppColors.survivalLight,
-                      tagTextColor:
-                          isSoul ? AppColors.soul : AppColors.survival,
-                      merchant:
-                          tx.merchant ??
-                          CategoryService.resolveFromId(tx.categoryId, locale),
-                      category: CategoryService.resolveFromId(
-                        tx.categoryId,
-                        locale,
+              // ── Transaction list card ──
+              todayTxAsync.when(
+                data: (transactions) {
+                  if (transactions.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: Text(
+                          '取引がまだありません',
+                          style: AppTextStyles.bodySmall,
+                        ),
                       ),
-                      categoryColor: AppColors.textSecondary,
-                      formattedAmount: _formatAmount(tx),
-                      amountColor: AppColors.textPrimary,
-                    ),
+                    );
+                  }
+                  return TransactionListCard(
+                    children: transactions.map((tx) {
+                      final isSoul = tx.ledgerType == LedgerType.soul;
+                      return HomeTransactionTile(
+                        tagText: isGroupMode
+                            ? _memberInitial(tx)
+                            : (isSoul ? '\u9b42' : '\u751f'),
+                        tagBgColor: isSoul
+                            ? AppColors.soulLight
+                            : AppColors.survivalLight,
+                        tagTextColor:
+                            isSoul ? AppColors.soul : AppColors.survival,
+                        merchant: tx.merchant ??
+                            CategoryService.resolveFromId(
+                              tx.categoryId,
+                              locale,
+                            ),
+                        category: CategoryService.resolveFromId(
+                          tx.categoryId,
+                          locale,
+                        ),
+                        categoryColor: isSoul
+                            ? AppColors.accentPrimary
+                            : AppColors.textSecondary,
+                        formattedAmount: _formatAmount(tx),
+                        amountColor: isSoul
+                            ? AppColors.accentPrimary
+                            : AppColors.textPrimary,
+                      );
+                    }).toList(),
                   );
-                }).toList(),
-              );
-            },
-            loading: () => const Padding(
-              padding: EdgeInsets.all(24),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            error: (error, _) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text('Error: $error'),
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // Ohtani converter
-          if (ohtaniVisible)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: OhtaniConverter(
-                emoji: '\u{1F35A}',
-                text:
-                    todayTxAsync.whenOrNull(
-                      data: (txs) {
-                        final total = txs.fold<int>(
-                          0,
-                          (sum, tx) => sum + tx.amount,
-                        );
-                        final bowls = (total / 500).toStringAsFixed(1);
-                        return '$bowls bowls of gyudon';
-                      },
-                    ) ??
-                    '',
-                onDismiss: () =>
-                    ref.read(ohtaniConverterVisibleProvider.notifier).dismiss(),
+                },
+                loading: () => const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (error, _) => _ErrorText(message: '$error'),
               ),
-            ),
-          const SizedBox(height: 100),
-        ],
+
+              // ── Bottom padding for pill nav ──
+              const SizedBox(height: 100),
+            ],
+          ),
+        ),
       ),
     );
+  }
+
+  // ── Data wiring helpers ──
+
+  List<LedgerRowData> _buildLedgerRows(
+    MonthlyReport report,
+    bool isGroupMode,
+  ) {
+    final rows = <LedgerRowData>[
+      LedgerRowData(
+        tagText: '生',
+        tagBgColor: AppColors.survivalLight,
+        tagTextColor: AppColors.survival,
+        title: '生存帳本',
+        titleColor: AppColors.textPrimary,
+        subtitle:
+            '先月 \u00a5${_formatInt(report.previousMonthComparison?.previousExpenses ?? 0)}',
+        formattedAmount: '\u00a5${_formatInt(report.survivalTotal)}',
+        amountColor: AppColors.survival,
+        chevronColor: AppColors.textTertiary,
+      ),
+      LedgerRowData(
+        tagText: '灵',
+        tagBgColor: AppColors.soulLight,
+        tagTextColor: AppColors.soul,
+        title: '灵魂帳本',
+        titleColor: AppColors.soul,
+        subtitle:
+            '先月 \u00a5${_formatInt(report.previousMonthComparison?.previousExpenses ?? 0)}',
+        formattedAmount: '\u00a5${_formatInt(report.soulTotal)}',
+        amountColor: AppColors.soul,
+        chevronColor: AppColors.textTertiary,
+      ),
+    ];
+
+    if (isGroupMode) {
+      rows.add(
+        LedgerRowData(
+          tagText: '共',
+          tagBgColor: AppColors.sharedLight,
+          tagTextColor: AppColors.shared,
+          title: '共有帳本',
+          titleColor: AppColors.shared,
+          subtitle: '',
+          formattedAmount: '\u00a50',
+          amountColor: AppColors.shared,
+          chevronColor: AppColors.sharedChevron,
+          borderColor: AppColors.sharedBorder,
+        ),
+      );
+    }
+
+    return rows;
+  }
+
+  String _formatInt(int value) {
+    return NumberFormat('#,##0').format(value);
   }
 
   String _formatAmount(Transaction tx) {
@@ -182,88 +292,49 @@ class HomeScreen extends ConsumerWidget {
     return tx.type == TransactionType.expense ? '-$formatted' : formatted;
   }
 
+  /// Extracts the first character of a member identifier for group mode.
+  String _memberInitial(Transaction tx) {
+    // Use device ID first character as fallback; real member data TBD
+    return tx.deviceId.isNotEmpty ? tx.deviceId[0].toUpperCase() : '?';
+  }
+
+  /// Computes average satisfaction from today's soul transactions.
+  int _computeSatisfaction(AsyncValue<List<Transaction>> txAsync) {
+    final transactions = txAsync.valueOrNull;
+    if (transactions == null || transactions.isEmpty) return 0;
+
+    final soulTxs =
+        transactions.where((tx) => tx.ledgerType == LedgerType.soul).toList();
+    if (soulTxs.isEmpty) return 0;
+
+    final totalSatisfaction =
+        soulTxs.fold<int>(0, (sum, tx) => sum + tx.soulSatisfaction);
+    return (totalSatisfaction / soulTxs.length * 10).round();
+  }
+
+  /// Computes happiness ROI: soul total / total expenses ratio.
+  double _computeHappinessROI(MonthlyReport report) {
+    if (report.totalExpenses == 0) return 0;
+    return double.parse(
+      (report.soulTotal / report.totalExpenses).toStringAsFixed(1),
+    );
+  }
 }
 
-/// Blue hero header with MonthOverviewCard overlapping into it.
-///
-/// Extracted as a ConsumerWidget to read its own providers instead of
-/// receiving 8+ parameters from the parent.
-class _HeroWithCard extends ConsumerWidget {
-  const _HeroWithCard({required this.bookId, required this.onSettingsTap});
+/// Reusable error text widget for async error states.
+class _ErrorText extends StatelessWidget {
+  const _ErrorText({required this.message});
 
-  final String bookId;
-  final VoidCallback onSettingsTap;
+  final String message;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final now = DateTime.now();
-    final year = now.year;
-    final month = now.month;
-    final reportAsync = ref.watch(
-      monthlyReportProvider(bookId: bookId, year: year, month: month),
-    );
-    final isGroupMode = ref.watch(isGroupModeProvider);
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    return Stack(
-      children: [
-        // Blue background (square: height == screen width)
-        Container(
-          height: screenWidth,
-          decoration: const BoxDecoration(
-            color: AppColors.heroBackground,
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(24),
-              bottomRight: Radius.circular(24),
-            ),
-          ),
-        ),
-        // Content: header + gap + card (the card overlaps the blue area)
-        Column(
-          children: [
-            HeroHeader(
-              year: year,
-              month: month,
-              isGroupMode: isGroupMode,
-              onSettingsTap: onSettingsTap,
-              onDateTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Date picker coming soon'),
-                    duration: Duration(seconds: 1),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            reportAsync.when(
-              data: (report) {
-                final previousTotal =
-                    report.previousMonthComparison?.previousExpenses ?? 0;
-
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: MonthOverviewCard(
-                    totalExpense: report.totalExpenses,
-                    previousMonthTotal: previousTotal,
-                  ),
-                );
-              },
-              loading: () => const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: SizedBox(
-                  height: 200,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              ),
-              error: (error, _) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text('Error: $error'),
-              ),
-            ),
-          ],
-        ),
-      ],
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Text(
+        'Error: $message',
+        style: AppTextStyles.bodySmall.copyWith(color: Colors.red),
+      ),
     );
   }
 }

@@ -6,13 +6,16 @@ import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/analytics_providers.dart';
-import 'package:home_pocket/features/home/presentation/providers/home_providers.dart';
 import 'package:home_pocket/features/home/presentation/providers/today_transactions_provider.dart';
 import 'package:home_pocket/features/home/presentation/screens/home_screen.dart';
 import 'package:home_pocket/features/home/presentation/widgets/family_invite_banner.dart';
 import 'package:home_pocket/features/home/presentation/widgets/hero_header.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_bottom_nav_bar.dart';
+import 'package:home_pocket/features/home/presentation/widgets/ledger_comparison_section.dart';
 import 'package:home_pocket/features/home/presentation/widgets/month_overview_card.dart';
+import 'package:home_pocket/features/home/presentation/widgets/section_divider.dart';
+import 'package:home_pocket/features/home/presentation/widgets/soul_fullness_card.dart';
+import 'package:home_pocket/features/home/presentation/widgets/transaction_list_card.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../helpers/test_localizations.dart';
@@ -56,9 +59,6 @@ void main() {
           todayTransactionsProvider(
             bookId: 'book_001',
           ).overrideWith((ref) async => []),
-          ohtaniConverterVisibleProvider.overrideWith(
-            () => OhtaniConverterVisible(),
-          ),
           groupRepositoryProvider.overrideWithValue(groupRepository),
         ],
         child: testLocalizedApp(
@@ -72,7 +72,6 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(buildSubject());
-
       await tester.pumpAndSettle();
 
       expect(find.byType(HeroHeader), findsOneWidget);
@@ -81,11 +80,49 @@ void main() {
 
     testWidgets('does NOT contain BottomNavigationBar', (tester) async {
       await tester.pumpWidget(buildSubject());
-
       await tester.pumpAndSettle();
 
       expect(find.byType(BottomNavigationBar), findsNothing);
       expect(find.byType(HomeBottomNavBar), findsNothing);
+    });
+
+    testWidgets('renders section dividers', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SectionDivider), findsNWidgets(2));
+      expect(find.text('今月の支出'), findsOneWidget);
+      expect(find.text('帳 本'), findsOneWidget);
+    });
+
+    testWidgets('renders LedgerComparisonSection', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LedgerComparisonSection), findsOneWidget);
+    });
+
+    testWidgets('renders SoulFullnessCard', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SoulFullnessCard), findsOneWidget);
+    });
+
+    testWidgets('renders transactions header row', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('最近の取引'), findsOneWidget);
+      expect(find.text('すべて見る'), findsOneWidget);
+    });
+
+    testWidgets('shows empty state when no transactions', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('取引がまだありません'), findsOneWidget);
+      expect(find.byType(TransactionListCard), findsNothing);
     });
 
     testWidgets(
@@ -113,6 +150,35 @@ void main() {
         expect(find.text('Family Mode'), findsOneWidget);
       },
     );
+
+    testWidgets('uses flat layout without hero blue background', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // The old layout had a blue hero container background.
+      // Child widgets may still use Stack internally (e.g. avatar overlap),
+      // but the hero pattern is removed.
+      final blueContainerFinder = find.byWidgetPredicate(
+        (widget) =>
+            widget is Container &&
+            widget.decoration is BoxDecoration &&
+            (widget.decoration as BoxDecoration).color == const Color(0xFF8AB8DA),
+      );
+      expect(blueContainerFinder, findsNothing);
+    });
+
+    testWidgets('wraps content in SingleChildScrollView', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: find.byType(HomeScreen),
+          matching: find.byType(SingleChildScrollView),
+        ),
+        findsOneWidget,
+      );
+    });
   });
 }
 
