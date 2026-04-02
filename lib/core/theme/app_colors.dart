@@ -54,3 +54,40 @@ abstract final class AppColors {
   static const divider = borderDivider;
   static const tabBarBackground = card;
 }
+
+/// Dark theme colors (Wa-Modern)
+abstract final class AppColorsDark {
+  // ── Backgrounds ──
+  static const background = Color(0xFF1A1D27);
+  static const card = Color(0xFF252836);
+  static const backgroundMuted = Color(0xFF353845);
+  static const backgroundSubtle = Color(0xFF1E2130);
+  static const backgroundDivider = Color(0xFF353845);
+
+  // ── Text ──
+  static const textPrimary = Color(0xFFF0F0F2);
+  static const textSecondary = Color(0xFF6B6E7A);
+  static const textTertiary = Color(0xFF6B6E7A);
+
+  // ── Borders ──
+  static const borderDefault = Color(0xFF353845);
+  static const borderDivider = Color(0xFF353845);
+  static const borderList = Color(0xFF353845);
+
+  // ── Tag tints ──
+  static const tagBlue = Color(0xFF1E2D3D);
+  static const tagGreen = Color(0xFF1E3028);
+  static const tagOrange = Color(0xFF3D2D1E);
+
+  // ── Soul card ──
+  static const soulSatisfactionBg = Color(0xFF3D2525);
+  static const soulSatisfactionBorder = Color(0xFF5A3535);
+  static const soulRoiBg = Color(0xFF1E3028);
+  static const soulRoiBorder = Color(0xFF2D4D3A);
+
+  // ── Family badge ──
+  static const familyBadgeBg = Color(0xFF3D2525);
+
+  // ── Nav shadow ──
+  static const navShadow = Color(0x20000000);
+}

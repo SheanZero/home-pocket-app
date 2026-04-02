@@ -23,4 +23,25 @@ abstract final class AppTheme {
           ),
         ),
       );
+
+  static ThemeData get dark => ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: AppColors.accentPrimary,
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: AppColorsDark.background,
+        fontFamily: 'Outfit',
+        appBarTheme: AppBarTheme(
+          backgroundColor: AppColorsDark.background,
+          foregroundColor: AppColorsDark.textPrimary,
+          elevation: 0,
+        ),
+        cardTheme: CardThemeData(
+          color: AppColorsDark.card,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: const BorderRadius.all(Radius.circular(14)),
+            side: BorderSide(color: AppColorsDark.borderDefault),
+          ),
+        ),
+      );
 }

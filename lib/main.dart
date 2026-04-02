@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/theme/app_theme.dart';
 import 'data/app_database.dart';
 import 'features/accounting/presentation/providers/use_case_providers.dart';
 import 'features/family_sync/presentation/providers/sync_providers.dart';
@@ -143,17 +144,8 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: S.supportedLocales,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
       themeMode: themeMode,
       home: _buildHome(),
     );

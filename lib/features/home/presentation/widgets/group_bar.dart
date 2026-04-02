@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 import 'member_avatar.dart';
 
 /// Bar displaying a family/group name, overlapping member avatars,
@@ -30,19 +31,19 @@ class GroupBar extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.card,
+          color: context.wmCard,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.borderDefault),
+          border: Border.all(color: context.wmBorderDefault),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildLeft(),
+            _buildLeft(context),
             _buildAvatarStack(),
-            const Icon(
+            Icon(
               Icons.chevron_right,
               size: 16,
-              color: AppColors.textTertiary,
+              color: context.wmTextTertiary,
             ),
           ],
         ),
@@ -50,7 +51,7 @@ class GroupBar extends StatelessWidget {
     );
   }
 
-  Widget _buildLeft() {
+  Widget _buildLeft(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -60,7 +61,12 @@ class GroupBar extends StatelessWidget {
           color: AppColors.accentPrimary,
         ),
         const SizedBox(width: 10),
-        Text(familyName, style: AppTextStyles.titleSmall),
+        Text(
+          familyName,
+          style: AppTextStyles.titleSmall.copyWith(
+            color: context.wmTextPrimary,
+          ),
+        ),
       ],
     );
   }

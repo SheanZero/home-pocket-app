@@ -1,141 +1,114 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../generated/app_localizations.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 
-/// Displays the soul spending ratio, happiness ROI, progress bar,
-/// and recent soul transaction.
+/// Displays soul spending satisfaction, happiness ROI, and recent soul amount.
 ///
 /// Pure UI component -- no providers, no navigation.
 class SoulFullnessCard extends StatelessWidget {
   const SoulFullnessCard({
     super.key,
-    required this.soulPercentage,
+    required this.satisfactionPercent,
     required this.happinessROI,
-    required this.fullnessLevel,
-    required this.recentMerchant,
-    required this.recentAmount,
-    required this.recentQuote,
+    required this.recentSoulAmount,
+    this.onTap,
   });
 
-  final int soulPercentage;
+  final int satisfactionPercent;
   final double happinessROI;
-  final int fullnessLevel;
-  final String recentMerchant;
-  final int recentAmount;
-  final String recentQuote;
+  final int recentSoulAmount;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = S.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.soulCardBg,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(l10n),
-          const SizedBox(height: 6),
-          _buildChargeCard(l10n),
-          const SizedBox(height: 6),
-          _buildMetricRow(l10n),
-          if (recentMerchant.isNotEmpty || recentAmount > 0) ...[
-            const SizedBox(height: 6),
-            _buildRecentTransaction(l10n),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: context.wmCard,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: context.wmBorderDefault),
+        ),
+        child: Column(
+          children: [
+            _buildTitleRow(context),
+            const SizedBox(height: 12),
+            _buildMetricRow(context),
+            const SizedBox(height: 12),
+            Container(height: 1, color: context.wmBackgroundDivider),
+            const SizedBox(height: 12),
+            _buildRecentSpendingRow(context),
           ],
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildHeader(S l10n) {
+  Widget _buildTitleRow(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          l10n.homeSoulFullness,
-          style: AppTextStyles.titleLarge.copyWith(
-            color: AppColors.soulTextDark,
+          '灵魂の充実度',
+          style: AppTextStyles.bodyLarge.copyWith(
+            color: context.wmTextPrimary,
           ),
         ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: AppColors.soulBadgeBg,
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: Text(
-            l10n.homeMonthBadge(fullnessLevel),
-            style: TextStyle(
-              fontFamily: 'IBM Plex Sans',
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: AppColors.soulTextDark,
-            ),
-          ),
+        Icon(
+          Icons.chevron_right,
+          size: 14,
+          color: context.wmTextTertiary,
         ),
       ],
     );
   }
 
-  Widget _buildChargeCard(S l10n) {
+  Widget _buildMetricRow(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(child: _buildSatisfactionTile(context)),
+        const SizedBox(width: 8),
+        Expanded(child: _buildROITile(context)),
+      ],
+    );
+  }
+
+  Widget _buildSatisfactionTile(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 6),
       decoration: BoxDecoration(
+        color: context.wmSatisfactionBg,
         borderRadius: BorderRadius.circular(12),
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [AppColors.soulLight, AppColors.soulBadgeBg],
-        ),
+        border: Border.all(color: context.wmSatisfactionBorder),
       ),
-      child: Column(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
+          Column(
             children: [
               const Icon(
-                Icons.battery_charging_full,
-                size: 20,
-                color: AppColors.soul,
+                Icons.local_fire_department,
+                size: 14,
+                color: AppColors.accentPrimary,
               ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  l10n.homeSoulChargeStatus(fullnessLevel, happinessROI),
-                  style: TextStyle(
-                    fontFamily: 'IBM Plex Sans',
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.soulTextDark,
-                  ),
+              const SizedBox(height: 2),
+              Text(
+                '満足度',
+                style: AppTextStyles.micro.copyWith(
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.accentPrimary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          // Progress bar
-          Container(
-            height: 10,
-            decoration: BoxDecoration(
-              color: AppColors.soulProgressBg,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            clipBehavior: Clip.hardEdge,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: FractionallySizedBox(
-                widthFactor: (fullnessLevel / 100).clamp(0.0, 1.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.soul,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-              ),
+          Text(
+            '$satisfactionPercent%',
+            style: AppTextStyles.amountMedium.copyWith(
+              color: AppColors.accentPrimary,
             ),
           ),
         ],
@@ -143,101 +116,64 @@ class SoulFullnessCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricRow(S l10n) {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.soulMetricBg1,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.homeSoulPercentLabel,
-                  style: AppTextStyles.labelSmall.copyWith(
-                    color: AppColors.soulTextMuted,
-                  ),
+  Widget _buildROITile(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 6),
+      decoration: BoxDecoration(
+        color: context.wmRoiBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.wmRoiBorder),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            children: [
+              const Icon(
+                Icons.bolt,
+                size: 14,
+                color: AppColors.olive,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '幸福ROI',
+                style: AppTextStyles.micro.copyWith(
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.olive,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '$soulPercentage%',
-                  style: AppTextStyles.amountMedium.copyWith(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.soul,
-                  ),
-                ),
-              ],
+              ),
+            ],
+          ),
+          Text(
+            '${happinessROI}x',
+            style: AppTextStyles.amountMedium.copyWith(
+              color: AppColors.olive,
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecentSpendingRow(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(
+          '最近の灵魂支出',
+          style: AppTextStyles.caption.copyWith(
+            color: context.wmTextSecondary,
+          ),
         ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.soulMetricBg2,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.homeHappinessROI,
-                  style: AppTextStyles.labelSmall.copyWith(
-                    color: AppColors.soulTextMuted,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${happinessROI}x',
-                  style: AppTextStyles.amountMedium.copyWith(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.soul,
-                  ),
-                ),
-              ],
-            ),
+        Text(
+          NumberFormat.currency(symbol: '\u00a5', decimalDigits: 0)
+              .format(recentSoulAmount),
+          style: AppTextStyles.headlineSmall.copyWith(
+            color: AppColors.survival,
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildRecentTransaction(S l10n) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.homeRecentSoulTransaction(recentMerchant, recentAmount),
-            style: AppTextStyles.amountMedium.copyWith(
-              fontSize: 12,
-              color: AppColors.soulTextDark,
-            ),
-          ),
-          if (recentQuote.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Text(
-              '"$recentQuote"',
-              style: AppTextStyles.labelSmall.copyWith(
-                color: AppColors.soulQuoteText,
-              ),
-            ),
-          ],
-        ],
-      ),
     );
   }
 }

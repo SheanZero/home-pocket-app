@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 
 /// Displays the monthly expense total with a trend badge showing
 /// month-over-month change, and a last-month summary row.
@@ -41,25 +42,35 @@ class MonthOverviewCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.wmCard,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderDefault),
+        border: Border.all(color: context.wmBorderDefault),
       ),
       child: Column(
         children: [
-          _buildTopRow(formatted, trendText, trend),
+          _buildTopRow(context, formatted, trendText, trend),
           const SizedBox(height: 16),
-          _buildLastMonthRow(prevFormatted),
+          _buildLastMonthRow(context, prevFormatted),
         ],
       ),
     );
   }
 
-  Widget _buildTopRow(String formatted, String trendText, int trend) {
+  Widget _buildTopRow(
+    BuildContext context,
+    String formatted,
+    String trendText,
+    int trend,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(formatted, style: AppTextStyles.amountLarge),
+        Text(
+          formatted,
+          style: AppTextStyles.amountLarge.copyWith(
+            color: context.wmTextPrimary,
+          ),
+        ),
         _buildTrendBadge(trendText, trend),
       ],
     );
@@ -93,13 +104,13 @@ class MonthOverviewCard extends StatelessWidget {
     );
   }
 
-  Widget _buildLastMonthRow(String prevFormatted) {
+  Widget _buildLastMonthRow(BuildContext context, String prevFormatted) {
     return GestureDetector(
       onTap: onLastMonthTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: AppColors.backgroundSubtle,
+          color: context.wmBackgroundSubtle,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Padding(
@@ -109,24 +120,24 @@ class MonthOverviewCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.calendar_today,
                     size: 14,
-                    color: AppColors.textSecondary,
+                    color: context.wmTextSecondary,
                   ),
                   const SizedBox(width: 6),
                   Text(
                     '\u5148\u6708: $prevFormatted',
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
+                      color: context.wmTextSecondary,
                     ),
                   ),
                 ],
               ),
-              const Icon(
+              Icon(
                 Icons.chevron_right,
                 size: 14,
-                color: AppColors.textTertiary,
+                color: context.wmTextTertiary,
               ),
             ],
           ),

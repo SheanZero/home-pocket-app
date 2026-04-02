@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../features/analytics/domain/models/monthly_report.dart';
 import '../../../../features/analytics/presentation/providers/analytics_providers.dart';
@@ -98,7 +99,7 @@ class HomeScreen extends ConsumerWidget {
               // ── Ledger comparison rows ──
               reportAsync.when(
                 data: (report) => LedgerComparisonSection(
-                  rows: _buildLedgerRows(report, isGroupMode),
+                  rows: _buildLedgerRows(context, report, isGroupMode),
                 ),
                 loading: () => const SizedBox(
                   height: 80,
@@ -148,7 +149,9 @@ class HomeScreen extends ConsumerWidget {
                 children: [
                   Text(
                     '最近の取引',
-                    style: AppTextStyles.titleSmall,
+                    style: AppTextStyles.titleSmall.copyWith(
+                      color: context.wmTextPrimary,
+                    ),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -174,7 +177,9 @@ class HomeScreen extends ConsumerWidget {
                       child: Center(
                         child: Text(
                           '取引がまだありません',
-                          style: AppTextStyles.bodySmall,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: context.wmTextSecondary,
+                          ),
                         ),
                       ),
                     );
@@ -187,8 +192,8 @@ class HomeScreen extends ConsumerWidget {
                             ? _memberInitial(tx)
                             : (isSoul ? '\u9b42' : '\u751f'),
                         tagBgColor: isSoul
-                            ? AppColors.soulLight
-                            : AppColors.survivalLight,
+                            ? context.wmSoulTagBg
+                            : context.wmSurvivalTagBg,
                         tagTextColor:
                             isSoul ? AppColors.soul : AppColors.survival,
                         merchant: tx.merchant ??
@@ -202,11 +207,11 @@ class HomeScreen extends ConsumerWidget {
                         ),
                         categoryColor: isSoul
                             ? AppColors.accentPrimary
-                            : AppColors.textSecondary,
+                            : context.wmTextSecondary,
                         formattedAmount: _formatAmount(tx),
                         amountColor: isSoul
                             ? AppColors.accentPrimary
-                            : AppColors.textPrimary,
+                            : context.wmTextPrimary,
                       );
                     }).toList(),
                   );
@@ -230,32 +235,33 @@ class HomeScreen extends ConsumerWidget {
   // ── Data wiring helpers ──
 
   List<LedgerRowData> _buildLedgerRows(
+    BuildContext context,
     MonthlyReport report,
     bool isGroupMode,
   ) {
     final rows = <LedgerRowData>[
       LedgerRowData(
         tagText: '生',
-        tagBgColor: AppColors.survivalLight,
+        tagBgColor: context.wmSurvivalTagBg,
         tagTextColor: AppColors.survival,
         title: '生存帳本',
-        titleColor: AppColors.textPrimary,
+        titleColor: context.wmTextPrimary,
         subtitle:
             '先月 \u00a5${_formatInt(report.previousMonthComparison?.previousExpenses ?? 0)}',
         formattedAmount: '\u00a5${_formatInt(report.survivalTotal)}',
         amountColor: AppColors.survival,
-        chevronColor: AppColors.textTertiary,
+        chevronColor: context.wmTextTertiary,
       ),
       LedgerRowData(
         tagText: '灵',
-        tagBgColor: AppColors.soulLight,
+        tagBgColor: context.wmSoulTagBg,
         tagTextColor: AppColors.soul,
         title: '灵魂帳本',
         titleColor: AppColors.soul,
         subtitle: '',
         formattedAmount: '\u00a5${_formatInt(report.soulTotal)}',
         amountColor: AppColors.soul,
-        chevronColor: AppColors.textTertiary,
+        chevronColor: context.wmTextTertiary,
       ),
     ];
 
@@ -263,7 +269,7 @@ class HomeScreen extends ConsumerWidget {
       rows.add(
         LedgerRowData(
           tagText: '共',
-          tagBgColor: AppColors.sharedLight,
+          tagBgColor: context.wmSharedTagBg,
           tagTextColor: AppColors.shared,
           title: '共有帳本',
           titleColor: AppColors.shared,

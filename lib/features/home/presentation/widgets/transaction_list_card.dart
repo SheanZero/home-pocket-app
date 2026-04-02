@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 
 /// A rounded card container that wraps transaction rows with dividers.
 ///
@@ -17,21 +18,21 @@ class TransactionListCard extends StatelessWidget {
     return Container(
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.wmCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderList),
+        border: Border.all(color: context.wmBorderList),
       ),
-      child: Column(children: _intersperseDividers(children)),
+      child: Column(children: _intersperseDividers(context, children)),
     );
   }
 
-  List<Widget> _intersperseDividers(List<Widget> items) {
+  List<Widget> _intersperseDividers(BuildContext context, List<Widget> items) {
     if (items.isEmpty) return items;
     final result = <Widget>[];
     for (var i = 0; i < items.length; i++) {
       result.add(items[i]);
       if (i < items.length - 1) {
-        result.add(Container(height: 1, color: AppColors.backgroundDivider));
+        result.add(Container(height: 1, color: context.wmBackgroundDivider));
       }
     }
     return result;

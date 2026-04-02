@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 import '../../domain/models/ledger_row_data.dart';
 
 /// Displays a vertical list of ledger row cards.
@@ -40,8 +40,6 @@ class _LedgerRow extends StatelessWidget {
   final LedgerRowData data;
   final VoidCallback? onTap;
 
-  static const _defaultBorderColor = AppColors.borderDefault;
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -49,13 +47,15 @@ class _LedgerRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.wmCard,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: data.borderColor ?? _defaultBorderColor),
+          border: Border.all(
+            color: data.borderColor ?? context.wmBorderDefault,
+          ),
         ),
         child: Row(
           children: [
-            Expanded(child: _buildLeftInfo()),
+            Expanded(child: _buildLeftInfo(context)),
             const SizedBox(width: 8),
             Text(
               data.formattedAmount,
@@ -71,7 +71,7 @@ class _LedgerRow extends StatelessWidget {
     );
   }
 
-  Widget _buildLeftInfo() {
+  Widget _buildLeftInfo(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -95,7 +95,7 @@ class _LedgerRow extends StatelessWidget {
             data.subtitle,
             style: AppTextStyles.overline.copyWith(
               fontWeight: FontWeight.w400,
-              color: AppColors.textSecondary,
+              color: context.wmTextSecondary,
             ),
           ),
         ],

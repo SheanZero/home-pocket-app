@@ -71,7 +71,7 @@ abstract final class AppTextStyles {
 
   static const bodySmall = TextStyle(
     fontFamily: _fontFamily,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: FontWeight.w500,
     color: AppColors.textSecondary,
   );
@@ -80,21 +80,21 @@ abstract final class AppTextStyles {
 
   static const caption = TextStyle(
     fontFamily: _fontFamily,
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: FontWeight.w500,
     color: AppColors.textSecondary,
   );
 
   static const overline = TextStyle(
     fontFamily: _fontFamily,
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: FontWeight.w500,
     color: AppColors.textSecondary,
   );
 
   static const micro = TextStyle(
     fontFamily: _fontFamily,
-    fontSize: 8,
+    fontSize: 9,
     fontWeight: FontWeight.w700,
     color: AppColors.textPrimary,
   );
@@ -103,7 +103,7 @@ abstract final class AppTextStyles {
 
   static const dividerLabel = TextStyle(
     fontFamily: _fontFamily,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: FontWeight.w500,
     letterSpacing: 2,
     color: AppColors.textSecondary,
@@ -129,13 +129,13 @@ abstract final class AppTextStyles {
 
   static const navLabel = TextStyle(
     fontFamily: 'DM Sans',
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: FontWeight.w500,
   );
 
   static const navLabelActive = TextStyle(
     fontFamily: 'DM Sans',
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: FontWeight.w600,
     color: Colors.white,
   );
