@@ -111,19 +111,25 @@ class HomeScreen extends ConsumerWidget {
               }
               return Column(
                 children: transactions.map((tx) {
+                  final isSoul = tx.ledgerType == LedgerType.soul;
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: HomeTransactionTile(
+                      tagText: isSoul ? '\u9b42' : '\u751f',
+                      tagBgColor:
+                          isSoul ? AppColors.soulLight : AppColors.survivalLight,
+                      tagTextColor:
+                          isSoul ? AppColors.soul : AppColors.survival,
                       merchant:
                           tx.merchant ??
                           CategoryService.resolveFromId(tx.categoryId, locale),
-                      categoryLabel: CategoryService.resolveFromId(
+                      category: CategoryService.resolveFromId(
                         tx.categoryId,
                         locale,
                       ),
+                      categoryColor: AppColors.textSecondary,
                       formattedAmount: _formatAmount(tx),
-                      ledgerType: tx.ledgerType,
-                      iconData: _iconForCategory(tx.categoryId),
+                      amountColor: AppColors.textPrimary,
                     ),
                   );
                 }).toList(),
@@ -176,28 +182,6 @@ class HomeScreen extends ConsumerWidget {
     return tx.type == TransactionType.expense ? '-$formatted' : formatted;
   }
 
-  IconData _iconForCategory(String categoryId) {
-    switch (categoryId) {
-      case 'cat_food':
-        return Icons.restaurant;
-      case 'cat_housing':
-        return Icons.home_outlined;
-      case 'cat_transport':
-        return Icons.train;
-      case 'cat_utilities':
-        return Icons.bolt;
-      case 'cat_entertainment':
-        return Icons.movie;
-      case 'cat_education':
-        return Icons.school;
-      case 'cat_health':
-        return Icons.medical_services;
-      case 'cat_shopping':
-        return Icons.shopping_bag;
-      default:
-        return Icons.receipt_long;
-    }
-  }
 }
 
 /// Blue hero header with MonthOverviewCard overlapping into it.
