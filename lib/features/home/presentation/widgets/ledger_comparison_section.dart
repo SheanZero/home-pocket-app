@@ -54,18 +54,28 @@ class _LedgerRow extends StatelessWidget {
           ),
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(child: _buildLeftInfo(context)),
             const SizedBox(width: 8),
-            Text(
-              data.formattedAmount,
-              style: AppTextStyles.amountMedium.copyWith(
-                color: data.amountColor,
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                data.formattedAmount,
+                style: AppTextStyles.amountMedium.copyWith(
+                  color: data.amountColor,
+                ),
               ),
             ),
             const SizedBox(width: 8),
-            Icon(Icons.chevron_right, size: 14, color: data.chevronColor),
+            Padding(
+              padding: const EdgeInsets.only(top: 5),
+              child: Icon(
+                Icons.chevron_right,
+                size: 14,
+                color: data.chevronColor,
+              ),
+            ),
           ],
         ),
       ),

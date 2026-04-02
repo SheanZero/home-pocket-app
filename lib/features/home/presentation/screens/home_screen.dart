@@ -258,7 +258,8 @@ class HomeScreen extends ConsumerWidget {
         tagTextColor: AppColors.soul,
         title: '灵魂帳本',
         titleColor: AppColors.soul,
-        subtitle: '',
+        subtitle:
+            '先月 \u00a5${_formatInt(report.previousMonthComparison?.previousExpenses ?? 0)}',
         formattedAmount: '\u00a5${_formatInt(report.soulTotal)}',
         amountColor: AppColors.soul,
         chevronColor: context.wmTextTertiary,
