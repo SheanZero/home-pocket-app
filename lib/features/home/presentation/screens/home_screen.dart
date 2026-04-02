@@ -218,6 +218,7 @@ class _HeroWithCard extends ConsumerWidget {
     final reportAsync = ref.watch(
       monthlyReportProvider(bookId: bookId, year: year, month: month),
     );
+    final isGroupMode = ref.watch(isGroupModeProvider);
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Stack(
@@ -239,7 +240,7 @@ class _HeroWithCard extends ConsumerWidget {
             HeroHeader(
               year: year,
               month: month,
-              isGroupMode: false, // TODO: wire to actual mode provider
+              isGroupMode: isGroupMode,
               onSettingsTap: onSettingsTap,
               onDateTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
