@@ -51,40 +51,6 @@ abstract final class AppColors {
 
   // ── Compatibility aliases ──
   // TODO: Remove after all screens are migrated to Wa-Modern
-  static const primary = accentPrimary;
   static const divider = borderDivider;
   static const tabBarBackground = card;
-  static const textMuted = textSecondary;
-  static const inactiveTab = textTertiary;
-  static const comparisonPositive = olive;
-  static const survivalBorder = borderDefault;
-
-  // Home feature compat (hero_header, home_screen)
-  static const heroBackground = background;
-  static const textOnPrimary = Color(0xFFFFFFFF);
-
-  // Home feature compat (month_overview_card)
-  static const modeBadgeBg = accentPrimaryLight;
-  static const survivalBarBg = Color(0xFFD0DEE8);
-  static const previousBarSurvival = Color(0xFFB8CCDA);
-  static const previousBarSoul = Color(0xFFA0B8C8);
-  static const currentBarSoul = Color(0xFFB0D8F0);
-
-  // Home feature compat (family_invite_banner)
-  static const familyInviteBackground = card;
-
-  // Home feature compat (soul_fullness_card)
-  static const soulCardBg = Color(0xFFF4FCF8);
-  static const soulMetricBg1 = Color(0xFFE5F5ED);
-  static const soulMetricBg2 = Color(0xFFD9F0E5);
-  static const soulProgressBg = Color(0xFFD4EDDF);
-  static const soulBadgeBg = Color(0xFFD4F0E2);
-  static const soulTextDark = Color(0xFF2D8E68);
-  static const soulTextMuted = Color(0xFF5A7A64);
-  static const soulQuoteText = Color(0xFF7A9A84);
-
-  // Home feature compat (ohtani_converter)
-  static const ohtaniBackground = Color(0xFF2F5B78);
-  static const ohtaniText = Color(0xFFEAF6FF);
-  static const ohtaniClose = Color(0xFFB9CFDF);
 }

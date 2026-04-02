@@ -15,16 +15,3 @@ class SelectedTabIndex extends _$SelectedTabIndex {
     state = index;
   }
 }
-
-/// Controls visibility of the Ohtani converter banner on the home page.
-///
-/// Starts visible (true) and can be dismissed by the user.
-@Riverpod(keepAlive: true)
-class OhtaniConverterVisible extends _$OhtaniConverterVisible {
-  @override
-  bool build() => true;
-
-  void dismiss() {
-    state = false;
-  }
-}
