@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/models/ledger_row_data.dart';
 
@@ -39,7 +40,7 @@ class _LedgerRow extends StatelessWidget {
   final LedgerRowData data;
   final VoidCallback? onTap;
 
-  static const _defaultBorderColor = Color(0xFFEFEFEF);
+  static const _defaultBorderColor = AppColors.borderDefault;
 
   @override
   Widget build(BuildContext context) {
@@ -81,8 +82,7 @@ class _LedgerRow extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               data.title,
-              style: TextStyle(
-                fontSize: 11,
+              style: AppTextStyles.bodySmall.copyWith(
                 fontWeight: FontWeight.w600,
                 color: data.titleColor,
               ),
@@ -93,10 +93,9 @@ class _LedgerRow extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             data.subtitle,
-            style: const TextStyle(
-              fontSize: 9,
+            style: AppTextStyles.overline.copyWith(
               fontWeight: FontWeight.w400,
-              color: Color(0xFFABABAB),
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -113,9 +112,7 @@ class _LedgerRow extends StatelessWidget {
       ),
       child: Text(
         data.tagText,
-        style: TextStyle(
-          fontSize: 8,
-          fontWeight: FontWeight.w700,
+        style: AppTextStyles.micro.copyWith(
           color: data.tagTextColor,
         ),
       ),

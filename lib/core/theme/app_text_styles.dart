@@ -1,4 +1,4 @@
-import 'package:flutter/painting.dart';
+import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 
@@ -137,7 +137,7 @@ abstract final class AppTextStyles {
     fontFamily: 'DM Sans',
     fontSize: 9,
     fontWeight: FontWeight.w600,
-    color: Color(0xFFFFFFFF),
+    color: Colors.white,
   );
 
   // ── Amount styles (tabular figures for numeric alignment) ──
