@@ -45,7 +45,7 @@ class _LedgerRow extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: context.wmCard,
           borderRadius: BorderRadius.circular(12),
@@ -53,63 +53,51 @@ class _LedgerRow extends StatelessWidget {
             color: data.borderColor ?? context.wmBorderDefault,
           ),
         ),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(child: _buildLeftInfo(context)),
-            const SizedBox(width: 8),
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(
-                data.formattedAmount,
-                style: AppTextStyles.amountMedium.copyWith(
-                  color: data.amountColor,
+            // Line 1: tag + title | amount + chevron
+            Row(
+              children: [
+                _buildTag(),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    data.title,
+                    style: AppTextStyles.titleSmall.copyWith(
+                      color: data.titleColor,
+                    ),
+                  ),
+                ),
+                Text(
+                  data.formattedAmount,
+                  style: AppTextStyles.amountMedium.copyWith(
+                    color: data.amountColor,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.chevron_right,
+                  size: 14,
+                  color: data.chevronColor,
+                ),
+              ],
+            ),
+            // Line 2: subtitle
+            if (data.subtitle.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                data.subtitle,
+                style: AppTextStyles.overline.copyWith(
+                  fontWeight: FontWeight.w400,
+                  color: context.wmTextSecondary,
                 ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Padding(
-              padding: const EdgeInsets.only(top: 5),
-              child: Icon(
-                Icons.chevron_right,
-                size: 14,
-                color: data.chevronColor,
-              ),
-            ),
+            ],
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildLeftInfo(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          children: [
-            _buildTag(),
-            const SizedBox(width: 6),
-            Text(
-              data.title,
-              style: AppTextStyles.titleSmall.copyWith(
-                color: data.titleColor,
-              ),
-            ),
-          ],
-        ),
-        if (data.subtitle.isNotEmpty) ...[
-          const SizedBox(height: 2),
-          Text(
-            data.subtitle,
-            style: AppTextStyles.overline.copyWith(
-              fontWeight: FontWeight.w400,
-              color: context.wmTextSecondary,
-            ),
-          ),
-        ],
-      ],
     );
   }
 
