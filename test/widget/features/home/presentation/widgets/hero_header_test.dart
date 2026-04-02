@@ -10,6 +10,7 @@ void main() {
     required int month,
     required VoidCallback onSettingsTap,
     required VoidCallback onDateTap,
+    bool isGroupMode = false,
   }) {
     return testLocalizedApp(
       child: Theme(
@@ -18,6 +19,7 @@ void main() {
           body: HeroHeader(
             year: year,
             month: month,
+            isGroupMode: isGroupMode,
             onSettingsTap: onSettingsTap,
             onDateTap: onDateTap,
           ),

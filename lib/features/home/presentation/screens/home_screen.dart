@@ -17,7 +17,6 @@ import '../widgets/hero_header.dart';
 import '../widgets/home_transaction_tile.dart';
 import '../widgets/month_overview_card.dart';
 import '../widgets/ohtani_converter.dart';
-import '../widgets/soul_fullness_card.dart';
 
 /// Home tab content (Tab 0 inside MainShellScreen).
 ///
@@ -213,16 +212,12 @@ class _HeroWithCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = S.of(context);
-    final locale = ref.watch(currentLocaleProvider);
     final now = DateTime.now();
     final year = now.year;
     final month = now.month;
     final reportAsync = ref.watch(
       monthlyReportProvider(bookId: bookId, year: year, month: month),
     );
-    final todayTxAsync = ref.watch(todayTransactionsProvider(bookId: bookId));
-    final isGroupMode = ref.watch(isGroupModeProvider);
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Stack(
@@ -244,6 +239,7 @@ class _HeroWithCard extends ConsumerWidget {
             HeroHeader(
               year: year,
               month: month,
+              isGroupMode: false, // TODO: wire to actual mode provider
               onSettingsTap: onSettingsTap,
               onDateTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -259,59 +255,12 @@ class _HeroWithCard extends ConsumerWidget {
               data: (report) {
                 final previousTotal =
                     report.previousMonthComparison?.previousExpenses ?? 0;
-                final previousMonth =
-                    report.previousMonthComparison?.previousMonth ??
-                    (month == 1 ? 12 : month - 1);
 
-                final totalExpense = report.totalExpenses;
-                final soulPercent = totalExpense > 0
-                    ? (report.soulTotal * 100 ~/ totalExpense)
-                    : 0;
-                final happinessROI = totalExpense > 0
-                    ? report.soulTotal / totalExpense * 10
-                    : 0.0;
-                final fullness = soulPercent.clamp(0, 100);
-
-                // Find most recent soul transaction from today
-                final recentSoulTx = todayTxAsync.whenOrNull(
-                  data: (txs) {
-                    final soulTxs = txs
-                        .where(
-                          (tx) =>
-                              tx.ledgerType == LedgerType.soul &&
-                              tx.type == TransactionType.expense,
-                        )
-                        .toList();
-                    if (soulTxs.isEmpty) return null;
-                    soulTxs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-                    return soulTxs.first;
-                  },
-                );
-
-                return MonthOverviewCard(
-                  totalExpense: totalExpense,
-                  survivalExpense: report.survivalTotal,
-                  soulExpense: report.soulTotal,
-                  previousMonthTotal: previousTotal,
-                  currentMonthNumber: month,
-                  previousMonthNumber: previousMonth,
-                  modeBadgeText: isGroupMode
-                      ? l10n.homeFamilyMode
-                      : l10n.homePersonalMode,
-                  child: SoulFullnessCard(
-                    soulPercentage: soulPercent,
-                    happinessROI: double.parse(happinessROI.toStringAsFixed(1)),
-                    fullnessLevel: fullness,
-                    recentMerchant:
-                        recentSoulTx?.merchant ??
-                        (recentSoulTx != null
-                            ? CategoryService.resolveFromId(
-                                recentSoulTx.categoryId,
-                                locale,
-                              )
-                            : ''),
-                    recentAmount: recentSoulTx?.amount ?? 0,
-                    recentQuote: recentSoulTx?.note ?? '',
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: MonthOverviewCard(
+                    totalExpense: report.totalExpenses,
+                    previousMonthTotal: previousTotal,
                   ),
                 );
               },
