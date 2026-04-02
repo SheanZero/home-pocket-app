@@ -54,6 +54,7 @@ class _LedgerRow extends StatelessWidget {
           ),
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(child: _buildLeftInfo(context)),
             const SizedBox(width: 8),
@@ -64,7 +65,7 @@ class _LedgerRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Icon(Icons.chevron_right, size: 13, color: data.chevronColor),
+            Icon(Icons.chevron_right, size: 14, color: data.chevronColor),
           ],
         ),
       ),
@@ -82,8 +83,7 @@ class _LedgerRow extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               data.title,
-              style: AppTextStyles.bodySmall.copyWith(
-                fontWeight: FontWeight.w600,
+              style: AppTextStyles.titleSmall.copyWith(
                 color: data.titleColor,
               ),
             ),

@@ -57,21 +57,21 @@ abstract final class AppTextStyles {
 
   static const bodyLarge = TextStyle(
     fontFamily: _fontFamily,
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
   );
 
   static const bodyMedium = TextStyle(
     fontFamily: _fontFamily,
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: FontWeight.w500,
     color: AppColors.textPrimary,
   );
 
   static const bodySmall = TextStyle(
     fontFamily: _fontFamily,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: FontWeight.w500,
     color: AppColors.textSecondary,
   );
@@ -80,21 +80,21 @@ abstract final class AppTextStyles {
 
   static const caption = TextStyle(
     fontFamily: _fontFamily,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: FontWeight.w500,
     color: AppColors.textSecondary,
   );
 
   static const overline = TextStyle(
     fontFamily: _fontFamily,
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: FontWeight.w500,
     color: AppColors.textSecondary,
   );
 
   static const micro = TextStyle(
     fontFamily: _fontFamily,
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: FontWeight.w700,
     color: AppColors.textPrimary,
   );
@@ -103,7 +103,7 @@ abstract final class AppTextStyles {
 
   static const dividerLabel = TextStyle(
     fontFamily: _fontFamily,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: FontWeight.w500,
     letterSpacing: 2,
     color: AppColors.textSecondary,
@@ -153,7 +153,7 @@ abstract final class AppTextStyles {
 
   static const amountMedium = TextStyle(
     fontFamily: _fontFamily,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: FontWeight.w700,
     color: AppColors.textPrimary,
     fontFeatures: _tabularFigures,
@@ -161,7 +161,7 @@ abstract final class AppTextStyles {
 
   static const amountSmall = TextStyle(
     fontFamily: _fontFamily,
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: FontWeight.w700,
     color: AppColors.textPrimary,
     fontFeatures: _tabularFigures,
