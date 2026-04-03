@@ -66,3 +66,4 @@ google-services.json
 lib/features/accounting/presentation/providers/voice_providers_clean*
 lib/features/accounting/presentation/providers/voice_providers_final*
 lib/features/accounting/presentation/providers/voice_providers_part*
+.superpowers/

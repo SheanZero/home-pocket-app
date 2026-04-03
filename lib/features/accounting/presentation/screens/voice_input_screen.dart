@@ -667,6 +667,7 @@ class VoiceRecognitionResultCard extends StatelessWidget {
             icon: Icons.payments_outlined,
             label: amountLabel,
             value: amountValue,
+            valueStyle: AppTextStyles.amountMedium,
             isDark: isDark,
           ),
           _ParsedDivider(isDark: isDark),
@@ -695,12 +696,14 @@ class _ParsedInfoRow extends StatelessWidget {
     required this.label,
     required this.value,
     required this.isDark,
+    this.valueStyle,
   });
 
   final IconData icon;
   final String label;
   final String value;
   final bool isDark;
+  final TextStyle? valueStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -724,18 +727,17 @@ class _ParsedInfoRow extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const Spacer(),
-          Flexible(
+          Expanded(
             child: Text(
               value,
               textAlign: TextAlign.right,
               overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.bodyMedium.copyWith(
+              style: (valueStyle ?? AppTextStyles.bodyMedium).copyWith(
                 color: isDark
                     ? AppColorsDark.textPrimary
                     : AppColors.textPrimary,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+                fontSize: valueStyle?.fontSize ?? 14,
+                fontWeight: valueStyle?.fontWeight ?? FontWeight.w600,
               ),
             ),
           ),

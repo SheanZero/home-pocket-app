@@ -10,6 +10,7 @@ class DetailInfoRow {
     required this.value,
     this.showChevron = false,
     this.onTap,
+    this.valueStyle,
   });
 
   final IconData icon;
@@ -17,6 +18,7 @@ class DetailInfoRow {
   final String value;
   final bool showChevron;
   final VoidCallback? onTap;
+  final TextStyle? valueStyle;
 }
 
 class DetailInfoCard extends StatelessWidget {
@@ -101,9 +103,9 @@ class _DetailInfoCardRow extends StatelessWidget {
               color: labelColor,
             ),
           ),
-          const Spacer(),
-          Flexible(
+          Expanded(
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Flexible(
@@ -111,11 +113,12 @@ class _DetailInfoCardRow extends StatelessWidget {
                     row.value,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.right,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: valueColor,
-                    ),
+                    style: row.valueStyle?.copyWith(color: valueColor) ??
+                        AppTextStyles.bodyMedium.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: valueColor,
+                        ),
                   ),
                 ),
                 if (row.showChevron) ...[

@@ -591,6 +591,7 @@ class _TransactionConfirmScreenState
                         icon: Icons.payments_outlined,
                         label: l10n.amount,
                         value: _formatAmount(_amount, locale),
+                        valueStyle: AppTextStyles.amountMedium,
                         showChevron: true,
                         onTap: _editAmount,
                       ),

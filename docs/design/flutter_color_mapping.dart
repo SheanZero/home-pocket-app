@@ -1,8 +1,8 @@
-/// Home Pocket — Wa-Modern Design Token Mapping
-/// Generated from untitled.pen design file (2026-04-01)
-///
-/// This file maps design tokens to Flutter Color constants.
-/// Copy relevant values to lib/core/theme/app_colors.dart
+// Home Pocket — Wa-Modern Design Token Mapping
+// Generated from untitled.pen design file (2026-04-01)
+//
+// This file maps design tokens to Flutter Color constants.
+// Copy relevant values to lib/core/theme/app_colors.dart
 
 import 'package:flutter/material.dart';
 
