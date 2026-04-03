@@ -31,7 +31,7 @@ void main() {
 
     test('navLabel uses DM Sans', () {
       expect(AppTextStyles.navLabel.fontFamily, 'DM Sans');
-      expect(AppTextStyles.navLabel.fontSize, 9);
+      expect(AppTextStyles.navLabel.fontSize, 10);
     });
   });
 }
