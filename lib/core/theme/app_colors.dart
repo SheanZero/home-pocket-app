@@ -3,6 +3,7 @@ import 'dart:ui';
 abstract final class AppColors {
   // ── Backgrounds ──
   static const background = Color(0xFFFCFBF9); // warm ivory
+  static const backgroundWarm = background; // accounting entry screens
   static const card = Color(0xFFFFFFFF);
   static const backgroundMuted = Color(0xFFF5F4F2); // section divider lines
   static const backgroundSubtle = Color(0xFFFCFBF9); // nested card (last month)
@@ -21,10 +22,15 @@ abstract final class AppColors {
 
   // ── Accent — Primary (Coral) ──
   static const accentPrimary = Color(0xFFE85A4F);
-  static const accentPrimaryLight = Color(0xFFFEF5F4); // family badge, satisfaction
+  static const accentPrimaryLight = Color(
+    0xFFFEF5F4,
+  ); // family badge, satisfaction
   static const accentPrimaryBorder = Color(0xFFF5D5D2);
   static const fabGradientStart = Color(0xFFF08070);
   static const fabGradientEnd = Color(0xFFE85A4F);
+  static const actionGradientStart = fabGradientStart;
+  static const actionGradientEnd = fabGradientEnd;
+  static const actionShadow = Color(0x4DE85A4F);
 
   // ── Accent — Survival (Blue) ──
   static const survival = Color(0xFF5A9CC8);
@@ -33,6 +39,7 @@ abstract final class AppColors {
   // ── Accent — Soul (Green) ──
   static const soul = Color(0xFF47B88A);
   static const soulLight = Color(0xFFE5F5ED);
+  static const tagGreen = soulLight;
 
   // ── Accent — Olive (Trends) ──
   static const olive = Color(0xFF8A9178);

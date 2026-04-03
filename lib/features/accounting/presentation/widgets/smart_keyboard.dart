@@ -35,37 +35,52 @@ class SmartKeyboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.card,
-        border: Border(top: BorderSide(color: Color(0xFFE0E8EF))),
+      key: const ValueKey('smart_keyboard_root'),
+      decoration: BoxDecoration(
+        color: isDark ? AppColorsDark.card : AppColors.card,
+        border: Border(
+          top: BorderSide(
+            color: isDark
+                ? AppColorsDark.borderDefault
+                : AppColors.borderDefault,
+          ),
+        ),
       ),
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildDigitRow(['1', '2', '3']),
+          _buildDigitRow(context, ['1', '2', '3']),
           const SizedBox(height: 8),
-          _buildDigitRow(['4', '5', '6']),
+          _buildDigitRow(context, ['4', '5', '6']),
           const SizedBox(height: 8),
-          _buildDigitRow(['7', '8', '9']),
+          _buildDigitRow(context, ['7', '8', '9']),
           const SizedBox(height: 8),
-          _buildExtraRow(),
+          _buildExtraRow(context),
           const SizedBox(height: 8),
-          _buildActionRow(),
+          _buildActionRow(context),
         ],
       ),
     );
   }
 
-  Widget _buildDigitRow(List<String> keys) {
+  Widget _buildDigitRow(BuildContext context, List<String> keys) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Row(
       children: keys
           .map(
             (key) => Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: _DigitKey(label: key, onTap: () => onDigit(key)),
+                child: _DigitKey(
+                  label: key,
+                  onTap: () => onDigit(key),
+                  isDark: isDark,
+                ),
               ),
             ),
           )
@@ -74,25 +89,39 @@ class SmartKeyboard extends StatelessWidget {
   }
 
   /// Row 4: 00, 0, .
-  Widget _buildExtraRow() {
+  Widget _buildExtraRow(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Row(
       children: [
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: _DigitKey(label: '00', onTap: () => onDoubleZero?.call()),
+            child: _DigitKey(
+              label: '00',
+              onTap: () => onDoubleZero?.call(),
+              isDark: isDark,
+            ),
           ),
         ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: _DigitKey(label: '0', onTap: () => onDigit('0')),
+            child: _DigitKey(
+              label: '0',
+              onTap: () => onDigit('0'),
+              isDark: isDark,
+            ),
           ),
         ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: _DigitKey(label: '.', onTap: () => onDot?.call()),
+            child: _DigitKey(
+              label: '.',
+              onTap: () => onDot?.call(),
+              isDark: isDark,
+            ),
           ),
         ),
       ],
@@ -100,7 +129,9 @@ class SmartKeyboard extends StatelessWidget {
   }
 
   /// Action Row: ⌫ (delete), ¥JPY (currency), Next — all equal width
-  Widget _buildActionRow() {
+  Widget _buildActionRow(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Row(
       children: [
         // Delete key
@@ -108,10 +139,12 @@ class SmartKeyboard extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: _ActionKey(
-              color: const Color(0xFFEAF2F8),
+              color: isDark
+                  ? AppColorsDark.backgroundMuted
+                  : AppColors.backgroundMuted,
               height: 50,
               onTap: onDelete,
-              child: const Icon(
+              child: Icon(
                 Icons.backspace_outlined,
                 color: AppColors.survival,
                 size: 22,
@@ -123,7 +156,11 @@ class SmartKeyboard extends StatelessWidget {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: _CurrencyKey(symbol: currencySymbol, label: currencyLabel),
+            child: _CurrencyKey(
+              symbol: currencySymbol,
+              label: currencyLabel,
+              isDark: isDark,
+            ),
           ),
         ),
         // Next key
@@ -139,15 +176,20 @@ class SmartKeyboard extends StatelessWidget {
 }
 
 class _DigitKey extends StatelessWidget {
-  const _DigitKey({required this.label, required this.onTap});
+  const _DigitKey({
+    required this.label,
+    required this.onTap,
+    required this.isDark,
+  });
 
   final String label;
   final VoidCallback onTap;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFFF5F9FD),
+      color: isDark ? AppColorsDark.backgroundMuted : AppColors.backgroundMuted,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -160,6 +202,7 @@ class _DigitKey extends StatelessWidget {
             style: AppTextStyles.amountLarge.copyWith(
               fontSize: 20,
               fontWeight: FontWeight.w500,
+              color: isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
             ),
           ),
         ),
@@ -200,17 +243,25 @@ class _ActionKey extends StatelessWidget {
 }
 
 class _CurrencyKey extends StatelessWidget {
-  const _CurrencyKey({required this.symbol, required this.label});
+  const _CurrencyKey({
+    required this.symbol,
+    required this.label,
+    required this.isDark,
+  });
 
   final String symbol;
   final String label;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: const ValueKey('smart_keyboard_currency_key'),
       height: 50,
       decoration: BoxDecoration(
-        color: const Color(0xFFEAF2F8),
+        color: isDark
+            ? AppColorsDark.backgroundMuted
+            : AppColors.backgroundMuted,
         borderRadius: BorderRadius.circular(12),
       ),
       alignment: Alignment.center,
@@ -260,13 +311,16 @@ class _GradientKey extends StatelessWidget {
             gradient: const LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [AppColors.fabGradientStart, AppColors.fabGradientEnd],
+              colors: [
+                AppColors.actionGradientStart,
+                AppColors.actionGradientEnd,
+              ],
             ),
             borderRadius: BorderRadius.circular(14),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x405A9CC8),
-                blurRadius: 12,
+                color: AppColors.actionShadow,
+                blurRadius: 14,
                 offset: Offset(0, 4),
               ),
             ],

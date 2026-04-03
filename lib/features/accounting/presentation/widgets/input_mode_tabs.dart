@@ -25,25 +25,41 @@ class InputModeTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
+      key: const ValueKey('input_mode_tabs_root'),
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFFEEF4FA),
+        color: isDark
+            ? AppColorsDark.backgroundMuted
+            : AppColors.backgroundMuted,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          _tab(manualLabel, Icons.keyboard_outlined, InputMode.manual),
-          _tab(ocrLabel, Icons.document_scanner_outlined, InputMode.ocr),
-          _tab(voiceLabel, Icons.mic_outlined, InputMode.voice),
+          _tab(context, manualLabel, Icons.keyboard_outlined, InputMode.manual),
+          _tab(
+            context,
+            ocrLabel,
+            Icons.document_scanner_outlined,
+            InputMode.ocr,
+          ),
+          _tab(context, voiceLabel, Icons.mic_outlined, InputMode.voice),
         ],
       ),
     );
   }
 
-  Widget _tab(String label, IconData icon, InputMode mode) {
+  Widget _tab(
+    BuildContext context,
+    String label,
+    IconData icon,
+    InputMode mode,
+  ) {
     final isActive = selected == mode;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Expanded(
       child: GestureDetector(
@@ -52,7 +68,9 @@ class InputModeTabs extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: isActive ? AppColors.card : Colors.transparent,
+            color: isActive
+                ? (isDark ? AppColorsDark.card : AppColors.card)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
             boxShadow: isActive
                 ? [
@@ -70,15 +88,21 @@ class InputModeTabs extends StatelessWidget {
               Icon(
                 icon,
                 size: 16,
-                color: isActive ? AppColors.survival : AppColors.textSecondary,
+                color: isActive
+                    ? AppColors.accentPrimary
+                    : (isDark
+                          ? AppColorsDark.textSecondary
+                          : AppColors.textSecondary),
               ),
               const SizedBox(width: 4),
               Text(
                 label,
                 style: AppTextStyles.labelMedium.copyWith(
                   color: isActive
-                      ? AppColors.survival
-                      : AppColors.textSecondary,
+                      ? AppColors.accentPrimary
+                      : (isDark
+                            ? AppColorsDark.textSecondary
+                            : AppColors.textSecondary),
                   fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                 ),
               ),

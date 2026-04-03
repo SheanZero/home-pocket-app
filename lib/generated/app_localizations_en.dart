@@ -500,7 +500,37 @@ class SEn extends S {
   String get voiceRecognitionResult => 'Recognition Result';
 
   @override
-  String get tapToRecord => 'Tap to start recording';
+  String get recognitionResult => 'Recognition result';
+
+  @override
+  String get satisfactionLevel => 'Satisfaction';
+
+  @override
+  String get satisfactionBad => 'Bad';
+
+  @override
+  String get satisfactionSlightlyBad => 'Slightly bad';
+
+  @override
+  String get satisfactionNormal => 'Normal';
+
+  @override
+  String get satisfactionGood => 'Good';
+
+  @override
+  String get satisfactionVeryGood => 'Very good';
+
+  @override
+  String get satisfactionExcellent => 'Excellent!';
+
+  @override
+  String get addSubcategory => 'Add';
+
+  @override
+  String get addCategory => 'Add category';
+
+  @override
+  String get tapToRecord => 'Tap to record';
 
   @override
   String get todayDate => 'Today';

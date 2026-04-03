@@ -21,20 +21,26 @@ class LedgerTypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Row(
       children: [
         _chip(
           label: survivalLabel,
           icon: Icons.shield_outlined,
           type: LedgerType.survival,
+          key: const ValueKey('ledger_type_survival_chip'),
+          isDark: isDark,
           activeColor: AppColors.survival,
-          activeBg: const Color(0xFFEEF4FA),
+          activeBg: AppColors.survivalLight,
         ),
         const SizedBox(width: 10),
         _chip(
           label: soulLabel,
           icon: Icons.auto_awesome,
           type: LedgerType.soul,
+          key: const ValueKey('ledger_type_soul_chip'),
+          isDark: isDark,
           activeColor: AppColors.soul,
           activeBg: AppColors.soulLight,
         ),
@@ -46,6 +52,8 @@ class LedgerTypeSelector extends StatelessWidget {
     required String label,
     required IconData icon,
     required LedgerType type,
+    required Key key,
+    required bool isDark,
     required Color activeColor,
     required Color activeBg,
   }) {
@@ -54,13 +62,22 @@ class LedgerTypeSelector extends StatelessWidget {
     return GestureDetector(
       onTap: () => onChanged(type),
       child: AnimatedContainer(
+        key: key,
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isActive ? activeBg : const Color(0xFFF5F9FD),
+          color: isActive
+              ? activeBg
+              : (isDark
+                    ? AppColorsDark.backgroundMuted
+                    : AppColors.backgroundMuted),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? activeColor : const Color(0xFFE0E8EF),
+            color: isActive
+                ? activeColor
+                : (isDark
+                      ? AppColorsDark.borderDefault
+                      : AppColors.borderDefault),
             width: 1.5,
           ),
         ),
@@ -70,13 +87,21 @@ class LedgerTypeSelector extends StatelessWidget {
             Icon(
               icon,
               size: 16,
-              color: isActive ? activeColor : AppColors.textSecondary,
+              color: isActive
+                  ? activeColor
+                  : (isDark
+                        ? AppColorsDark.textSecondary
+                        : AppColors.textSecondary),
             ),
             const SizedBox(width: 6),
             Text(
               label,
               style: AppTextStyles.titleMedium.copyWith(
-                color: isActive ? activeColor : AppColors.textSecondary,
+                color: isActive
+                    ? activeColor
+                    : (isDark
+                          ? AppColorsDark.textSecondary
+                          : AppColors.textSecondary),
               ),
             ),
           ],

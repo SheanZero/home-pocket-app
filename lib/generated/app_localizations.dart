@@ -1041,10 +1041,70 @@ abstract class S {
   /// **'Recognition Result'**
   String get voiceRecognitionResult;
 
+  /// Section label shown above the parsed voice recognition card
+  ///
+  /// In en, this message translates to:
+  /// **'Recognition result'**
+  String get recognitionResult;
+
+  /// Header label for the emoji satisfaction picker
+  ///
+  /// In en, this message translates to:
+  /// **'Satisfaction'**
+  String get satisfactionLevel;
+
+  /// Lowest satisfaction label
+  ///
+  /// In en, this message translates to:
+  /// **'Bad'**
+  String get satisfactionBad;
+
+  /// Second lowest satisfaction label
+  ///
+  /// In en, this message translates to:
+  /// **'Slightly bad'**
+  String get satisfactionSlightlyBad;
+
+  /// Neutral satisfaction label
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get satisfactionNormal;
+
+  /// Positive satisfaction label
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get satisfactionGood;
+
+  /// High satisfaction label
+  ///
+  /// In en, this message translates to:
+  /// **'Very good'**
+  String get satisfactionVeryGood;
+
+  /// Highest satisfaction label
+  ///
+  /// In en, this message translates to:
+  /// **'Excellent!'**
+  String get satisfactionExcellent;
+
+  /// Action chip label to add a subcategory
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addSubcategory;
+
+  /// Bottom action button label to add a category
+  ///
+  /// In en, this message translates to:
+  /// **'Add category'**
+  String get addCategory;
+
   /// Voice input hint
   ///
   /// In en, this message translates to:
-  /// **'Tap to start recording'**
+  /// **'Tap to record'**
   String get tapToRecord;
 
   /// Today date chip label
