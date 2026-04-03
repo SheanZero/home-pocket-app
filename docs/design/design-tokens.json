@@ -1,0 +1,222 @@
+{
+  "version": "2.0",
+  "style": "wa-modern",
+  "date": "2026-04-01",
+  "source": "untitled.pen",
+  "colors": {
+    "light": {
+      "background": {
+        "primary": "#FCFBF9",
+        "card": "#FFFFFF",
+        "muted": "#F5F4F2",
+        "subtle": "#FCFBF9",
+        "divider": "#F0F0F0"
+      },
+      "text": {
+        "primary": "#1E2432",
+        "secondary": "#ABABAB",
+        "tertiary": "#C4C4C4"
+      },
+      "border": {
+        "default": "#EFEFEF",
+        "divider": "#F5F4F2",
+        "list": "#E8E8E8",
+        "inputActive": "#E85A4F"
+      },
+      "accent": {
+        "primary": "#E85A4F",
+        "primaryLight": "#FEF5F4",
+        "primaryBorder": "#F5D5D2",
+        "gradientStart": "#F08070",
+        "gradientEnd": "#E85A4F",
+        "survival": "#5A9CC8",
+        "survivalLight": "#E8F0F8",
+        "soul": "#47B88A",
+        "soulLight": "#E5F5ED",
+        "olive": "#8A9178",
+        "oliveLight": "#F0FAF4",
+        "oliveBorder": "#C8E6D5"
+      },
+      "shared": {
+        "primary": "#D4845A",
+        "light": "#FFF0E0",
+        "border": "#F0DCC8",
+        "chevron": "#D4B89A"
+      }
+    },
+    "dark": {
+      "background": {
+        "primary": "#1A1D27",
+        "card": "#252836",
+        "muted": "#353845",
+        "subtle": "#1E2130"
+      },
+      "text": {
+        "primary": "#F0F0F2",
+        "secondary": "#6B6E7A"
+      },
+      "border": {
+        "default": "#353845"
+      },
+      "tagTint": {
+        "blue": "#1E2D3D",
+        "green": "#1E3028",
+        "orange": "#3D2D1E",
+        "olive": "#2D3028"
+      },
+      "soulCard": {
+        "satisfactionBg": "#3D2525",
+        "satisfactionBorder": "#5A3535",
+        "roiBg": "#1E3028",
+        "roiBorder": "#2D4D3A"
+      },
+      "shared": {
+        "border": "#4D3D2D"
+      },
+      "familyBadge": {
+        "bg": "#3D2525"
+      },
+      "trendBadge": {
+        "bg": "#1E3028"
+      }
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "primary": "Outfit",
+      "navLabel": "DM Sans",
+      "fallback": "system-ui, sans-serif"
+    },
+    "scale": {
+      "headlineLg": { "size": 30, "weight": 700, "lineHeight": 0.9 },
+      "headlineMd": { "size": 24, "weight": 700 },
+      "headlineSm": { "size": 18, "weight": 700 },
+      "titleLg": { "size": 16, "weight": 700 },
+      "titleMd": { "size": 15, "weight": 600 },
+      "titleSm": { "size": 14, "weight": 600 },
+      "bodyLg": { "size": 13, "weight": 600 },
+      "bodyMd": { "size": 12, "weight": 500 },
+      "bodySm": { "size": 11, "weight": 500 },
+      "caption": { "size": 10, "weight": 500 },
+      "overline": { "size": 9, "weight": 500 },
+      "micro": { "size": 8, "weight": 700 }
+    },
+    "weights": {
+      "bold": 700,
+      "semibold": 600,
+      "medium": 500,
+      "regular": 400
+    }
+  },
+  "spacing": {
+    "gap": {
+      "xs": 2,
+      "sm": 4,
+      "md": 6,
+      "base": 8,
+      "lg": 10,
+      "xl": 12,
+      "2xl": 16
+    },
+    "padding": {
+      "screen": 28,
+      "contentTop": 4,
+      "cardLg": 18,
+      "cardMd": 16,
+      "cardSm": [10, 14],
+      "row": [10, 14],
+      "badge": [4, 10],
+      "tag": [1, 6],
+      "metric": [6, 30],
+      "status": [16, 28, 0, 28],
+      "nav": [16, 21, 21, 21],
+      "navPill": [0, 12],
+      "tab": [8, 14],
+      "groupBar": [12, 16]
+    }
+  },
+  "cornerRadius": {
+    "tag": 3,
+    "badge": 8,
+    "inner": 12,
+    "card": 14,
+    "nav": 32,
+    "fab": 31,
+    "pill": 999
+  },
+  "shadows": {
+    "nav": { "x": 0, "y": 4, "blur": 20, "color": "#00000008" },
+    "navDark": { "x": 0, "y": 4, "blur": 20, "color": "#00000020" },
+    "fab": { "x": 0, "y": 4, "blur": 14, "color": "#E85A4F35" }
+  },
+  "icons": {
+    "library": "lucide",
+    "sizes": {
+      "fab": 24,
+      "appBar": 22,
+      "nav": 20,
+      "groupBar": 18,
+      "statusBar": 16,
+      "metric": 14,
+      "ledgerChevron": 13,
+      "badge": 12
+    }
+  },
+  "components": {
+    "card": {
+      "radius": 14,
+      "padding": 18,
+      "borderWidth": 1,
+      "light": { "fill": "#FFFFFF", "stroke": "#EFEFEF" },
+      "dark": { "fill": "#252836", "stroke": "#353845" }
+    },
+    "bottomNav": {
+      "pillHeight": 62,
+      "pillRadius": 32,
+      "fabSize": 62,
+      "fabRadius": 31,
+      "gap": 12,
+      "activeTabFill": "#E85A4F",
+      "activeTabRadius": 14,
+      "inactiveColor": { "light": "#C4C4C4", "dark": "#6B6E7A" }
+    },
+    "ledgerRow": {
+      "radius": 12,
+      "padding": [10, 14],
+      "gap": 8,
+      "tagRadius": 3,
+      "tagPadding": [1, 6],
+      "survival": { "amount": "#5A9CC8", "tagBg": "#E8F0F8", "tagBgDark": "#1E2D3D" },
+      "soul": { "amount": "#47B88A", "tagBg": "#E5F5ED", "tagBgDark": "#1E3028" },
+      "shared": { "amount": "#D4845A", "tagBg": "#FFF0E0", "tagBgDark": "#3D2D1E" }
+    },
+    "transactionRow": {
+      "padding": [10, 14],
+      "gap": 8,
+      "dividerHeight": 1
+    },
+    "memberAvatar": {
+      "size": 24,
+      "radius": 12,
+      "strokeWidth": 2,
+      "overlap": -6,
+      "colors": ["#5A9CC8", "#E85A4F", "#8A9178"]
+    },
+    "familyBadge": {
+      "radius": 8,
+      "padding": [4, 10],
+      "gap": 4,
+      "fill": "#E85A4F",
+      "bgLight": "#FEF5F4",
+      "bgDark": "#3D2525"
+    }
+  },
+  "layout": {
+    "screenWidth": 402,
+    "groupHeight": 1015,
+    "soloHeight": 894,
+    "statusBarHeight": 54,
+    "contentPadding": 28,
+    "sectionGap": 16
+  }
+}

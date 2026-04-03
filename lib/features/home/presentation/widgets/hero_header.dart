@@ -29,7 +29,6 @@ class HeroHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Left: month picker
           GestureDetector(
@@ -53,10 +52,13 @@ class HeroHeader extends StatelessWidget {
             ),
           ),
 
-          // Center: mode badge
-          _ModeBadge(isGroupMode: isGroupMode, l10n: l10n),
+          const Spacer(),
 
-          // Right: settings icon
+          // Mode badge (near settings)
+          _ModeBadge(isGroupMode: isGroupMode, l10n: l10n),
+          const SizedBox(width: 8),
+
+          // Settings icon
           GestureDetector(
             onTap: onSettingsTap,
             child: Icon(
