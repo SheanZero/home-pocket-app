@@ -363,6 +363,69 @@ class SJa extends S {
   String get initializationError => 'アプリの初期化に失敗しました';
 
   @override
+  String get profileSetup => 'はじめまして！';
+
+  @override
+  String get profileSetupSubtitle => 'まもる家計簿へようこそ';
+
+  @override
+  String get profileNickname => 'あなたの呼び名';
+
+  @override
+  String get profileNicknamePlaceholder => 'ニックネームを入力';
+
+  @override
+  String get profileStart => 'はじめる';
+
+  @override
+  String get profileSelectAvatar => 'アバターを選択';
+
+  @override
+  String get profileEmojiTab => 'Emoji';
+
+  @override
+  String get profilePhotoTab => '写真';
+
+  @override
+  String get profileEdit => 'プロフィールを編集';
+
+  @override
+  String get profileCancel => 'キャンセル';
+
+  @override
+  String get profileDone => '完了';
+
+  @override
+  String get profilePreview => 'プレビュー';
+
+  @override
+  String get welcomeTo => 'まもる家計簿へようこそ';
+
+  @override
+  String get profileNameRequired => 'ニックネームを入力してください';
+
+  @override
+  String get profileSave => '保存';
+
+  @override
+  String get profileChangeAvatar => 'タップしてアバターを変更';
+
+  @override
+  String get profilePhotoPermissionDenied => '写真へのアクセスが拒否されました';
+
+  @override
+  String get profilePhotoFailed => '写真の読み込みに失敗しました';
+
+  @override
+  String get profileSaveFailed => '保存に失敗しました';
+
+  @override
+  String get profileNameTooLong => 'ニックネームは50文字以内で入力してください';
+
+  @override
+  String get profileUploadPhoto => '写真をアップロード';
+
+  @override
   String get homeMonthlyExpense => '今月の出費';
 
   @override

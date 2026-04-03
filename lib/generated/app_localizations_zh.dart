@@ -363,6 +363,69 @@ class SZh extends S {
   String get initializationError => '应用初始化失败';
 
   @override
+  String get profileSetup => '初次见面！';
+
+  @override
+  String get profileSetupSubtitle => '欢迎使用守护家计簿';
+
+  @override
+  String get profileNickname => '你的昵称';
+
+  @override
+  String get profileNicknamePlaceholder => '请输入昵称';
+
+  @override
+  String get profileStart => '开始';
+
+  @override
+  String get profileSelectAvatar => '选择头像';
+
+  @override
+  String get profileEmojiTab => '表情';
+
+  @override
+  String get profilePhotoTab => '照片';
+
+  @override
+  String get profileEdit => '编辑个人资料';
+
+  @override
+  String get profileCancel => '取消';
+
+  @override
+  String get profileDone => '完成';
+
+  @override
+  String get profilePreview => '预览';
+
+  @override
+  String get welcomeTo => '欢迎使用守护家计簿';
+
+  @override
+  String get profileNameRequired => '请输入昵称';
+
+  @override
+  String get profileSave => '保存';
+
+  @override
+  String get profileChangeAvatar => '点击更换头像';
+
+  @override
+  String get profilePhotoPermissionDenied => '照片访问被拒绝';
+
+  @override
+  String get profilePhotoFailed => '照片加载失败';
+
+  @override
+  String get profileSaveFailed => '保存失败';
+
+  @override
+  String get profileNameTooLong => '昵称不能超过50个字符';
+
+  @override
+  String get profileUploadPhoto => '上传照片';
+
+  @override
   String get homeMonthlyExpense => '本月支出';
 
   @override

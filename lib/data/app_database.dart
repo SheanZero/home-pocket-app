@@ -11,6 +11,7 @@ import 'tables/groups_table.dart';
 import 'tables/merchant_category_preferences_table.dart';
 import 'tables/sync_queue_table.dart';
 import 'tables/transactions_table.dart';
+import 'tables/user_profiles_table.dart';
 
 part 'app_database.g.dart';
 
@@ -30,6 +31,7 @@ part 'app_database.g.dart';
     MerchantCategoryPreferences,
     SyncQueue,
     Transactions,
+    UserProfiles,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -39,7 +41,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration {
@@ -129,6 +131,9 @@ class AppDatabase extends _$AppDatabase {
           await migrator.addColumn(books, books.groupId);
           await migrator.addColumn(books, books.ownerDeviceId);
           await migrator.addColumn(books, books.ownerDeviceName);
+        }
+        if (from < 12) {
+          await migrator.createTable(userProfiles);
         }
       },
     );

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../generated/app_localizations.dart';
 import '../../../family_sync/presentation/widgets/family_sync_settings_section.dart';
+import '../../../profile/presentation/widgets/profile_section_card.dart';
 import '../providers/settings_providers.dart';
 import '../widgets/about_section.dart';
 import '../widgets/appearance_section.dart';
@@ -25,6 +26,8 @@ class SettingsScreen extends ConsumerWidget {
       body: settingsAsync.when(
         data: (settings) => ListView(
           children: [
+            const ProfileSectionCard(),
+            const Divider(),
             AppearanceSection(settings: settings),
             const Divider(),
             VoiceSection(settings: settings),

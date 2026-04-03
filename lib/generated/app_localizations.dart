@@ -795,6 +795,132 @@ abstract class S {
   /// **'Failed to initialize app'**
   String get initializationError;
 
+  /// No description provided for @profileSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Nice to meet you!'**
+  String get profileSetup;
+
+  /// No description provided for @profileSetupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Home Pocket'**
+  String get profileSetupSubtitle;
+
+  /// No description provided for @profileNickname.
+  ///
+  /// In en, this message translates to:
+  /// **'Your nickname'**
+  String get profileNickname;
+
+  /// No description provided for @profileNicknamePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your nickname'**
+  String get profileNicknamePlaceholder;
+
+  /// No description provided for @profileStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Started'**
+  String get profileStart;
+
+  /// No description provided for @profileSelectAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Avatar'**
+  String get profileSelectAvatar;
+
+  /// No description provided for @profileEmojiTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Emoji'**
+  String get profileEmojiTab;
+
+  /// No description provided for @profilePhotoTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get profilePhotoTab;
+
+  /// No description provided for @profileEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get profileEdit;
+
+  /// No description provided for @profileCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get profileCancel;
+
+  /// No description provided for @profileDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get profileDone;
+
+  /// No description provided for @profilePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get profilePreview;
+
+  /// No description provided for @welcomeTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Home Pocket'**
+  String get welcomeTo;
+
+  /// No description provided for @profileNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a nickname'**
+  String get profileNameRequired;
+
+  /// No description provided for @profileSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get profileSave;
+
+  /// No description provided for @profileChangeAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to change avatar'**
+  String get profileChangeAvatar;
+
+  /// No description provided for @profilePhotoPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo access denied'**
+  String get profilePhotoPermissionDenied;
+
+  /// No description provided for @profilePhotoFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load photo'**
+  String get profilePhotoFailed;
+
+  /// No description provided for @profileSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save'**
+  String get profileSaveFailed;
+
+  /// No description provided for @profileNameTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname must be 50 characters or less'**
+  String get profileNameTooLong;
+
+  /// No description provided for @profileUploadPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Photo'**
+  String get profileUploadPhoto;
+
   /// Home card title for monthly expense overview
   ///
   /// In en, this message translates to:

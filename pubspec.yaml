@@ -48,6 +48,7 @@ dependencies:
 
   # File Operations
   file_picker: ^8.1.6
+  image_picker: ^1.1.2
   share_plus: ^10.1.4
   package_info_plus: ^8.1.3
 

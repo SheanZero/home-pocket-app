@@ -10,6 +10,8 @@ import 'data/app_database.dart';
 import 'features/accounting/presentation/providers/use_case_providers.dart';
 import 'features/family_sync/presentation/providers/sync_providers.dart';
 import 'features/home/presentation/screens/main_shell_screen.dart';
+import 'features/profile/presentation/providers/user_profile_providers.dart';
+import 'features/profile/presentation/screens/profile_onboarding_screen.dart';
 import 'features/settings/domain/models/app_settings.dart';
 import 'features/settings/presentation/providers/locale_provider.dart';
 import 'features/settings/presentation/providers/settings_providers.dart';
@@ -89,6 +91,7 @@ class HomePocketApp extends ConsumerStatefulWidget {
 class _HomePocketAppState extends ConsumerState<HomePocketApp> {
   String? _bookId;
   bool _initialized = false;
+  bool _needsProfileOnboarding = false;
   String? _error;
 
   @override
@@ -111,9 +114,13 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
         // Initialize sync triggers (lifecycle observer + push notification handlers)
         final syncTrigger = ref.read(syncTriggerServiceProvider);
         await syncTrigger.initialize();
+        final existingProfile = await ref
+            .read(getUserProfileUseCaseProvider)
+            .execute();
 
         setState(() {
           _bookId = bookResult.data!.id;
+          _needsProfileOnboarding = existingProfile == null;
           _initialized = true;
         });
       } else {
@@ -172,6 +179,10 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
 
     if (!_initialized) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (_needsProfileOnboarding) {
+      return ProfileOnboardingScreen(bookId: _bookId!);
     }
 
     return MainShellScreen(bookId: _bookId!);

@@ -365,6 +365,69 @@ class SEn extends S {
   String get initializationError => 'Failed to initialize app';
 
   @override
+  String get profileSetup => 'Nice to meet you!';
+
+  @override
+  String get profileSetupSubtitle => 'Welcome to Home Pocket';
+
+  @override
+  String get profileNickname => 'Your nickname';
+
+  @override
+  String get profileNicknamePlaceholder => 'Enter your nickname';
+
+  @override
+  String get profileStart => 'Get Started';
+
+  @override
+  String get profileSelectAvatar => 'Select Avatar';
+
+  @override
+  String get profileEmojiTab => 'Emoji';
+
+  @override
+  String get profilePhotoTab => 'Photo';
+
+  @override
+  String get profileEdit => 'Edit Profile';
+
+  @override
+  String get profileCancel => 'Cancel';
+
+  @override
+  String get profileDone => 'Done';
+
+  @override
+  String get profilePreview => 'Preview';
+
+  @override
+  String get welcomeTo => 'Welcome to Home Pocket';
+
+  @override
+  String get profileNameRequired => 'Please enter a nickname';
+
+  @override
+  String get profileSave => 'Save';
+
+  @override
+  String get profileChangeAvatar => 'Tap to change avatar';
+
+  @override
+  String get profilePhotoPermissionDenied => 'Photo access denied';
+
+  @override
+  String get profilePhotoFailed => 'Failed to load photo';
+
+  @override
+  String get profileSaveFailed => 'Failed to save';
+
+  @override
+  String get profileNameTooLong => 'Nickname must be 50 characters or less';
+
+  @override
+  String get profileUploadPhoto => 'Upload Photo';
+
+  @override
   String get homeMonthlyExpense => 'Monthly Expenses';
 
   @override
