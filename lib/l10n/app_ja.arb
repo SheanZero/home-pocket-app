@@ -162,7 +162,17 @@
   "@voiceRecognitionResult": {
     "description": "Label shown above the recognized voice transcript"
   },
-  "tapToRecord": "タップして録音開始",
+  "recognitionResult": "認識結果",
+  "satisfactionLevel": "満足度",
+  "satisfactionBad": "不満",
+  "satisfactionSlightlyBad": "やや不満",
+  "satisfactionNormal": "普通",
+  "satisfactionGood": "良い",
+  "satisfactionVeryGood": "とても良い",
+  "satisfactionExcellent": "最高！",
+  "addSubcategory": "追加",
+  "addCategory": "カテゴリを追加",
+  "tapToRecord": "タップして録音",
   "todayDate": "今日",
   "next": "Next",
   "voiceInputSettings": "音声認識",

@@ -162,7 +162,17 @@
   "@voiceRecognitionResult": {
     "description": "Label shown above the recognized voice transcript"
   },
-  "tapToRecord": "点击开始录音",
+  "recognitionResult": "识别结果",
+  "satisfactionLevel": "满足度",
+  "satisfactionBad": "不满",
+  "satisfactionSlightlyBad": "稍有不满",
+  "satisfactionNormal": "一般",
+  "satisfactionGood": "良好",
+  "satisfactionVeryGood": "非常好",
+  "satisfactionExcellent": "最好！",
+  "addSubcategory": "添加",
+  "addCategory": "添加分类",
+  "tapToRecord": "点击录音",
   "todayDate": "今天",
   "next": "Next",
   "voiceInputSettings": "语音识别",

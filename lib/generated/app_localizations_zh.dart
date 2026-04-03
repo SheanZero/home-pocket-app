@@ -498,7 +498,37 @@ class SZh extends S {
   String get voiceRecognitionResult => '识别结果';
 
   @override
-  String get tapToRecord => '点击开始录音';
+  String get recognitionResult => '识别结果';
+
+  @override
+  String get satisfactionLevel => '满足度';
+
+  @override
+  String get satisfactionBad => '不满';
+
+  @override
+  String get satisfactionSlightlyBad => '稍有不满';
+
+  @override
+  String get satisfactionNormal => '一般';
+
+  @override
+  String get satisfactionGood => '良好';
+
+  @override
+  String get satisfactionVeryGood => '非常好';
+
+  @override
+  String get satisfactionExcellent => '最好！';
+
+  @override
+  String get addSubcategory => '添加';
+
+  @override
+  String get addCategory => '添加分类';
+
+  @override
+  String get tapToRecord => '点击录音';
 
   @override
   String get todayDate => '今天';

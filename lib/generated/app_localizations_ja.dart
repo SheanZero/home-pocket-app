@@ -498,7 +498,37 @@ class SJa extends S {
   String get voiceRecognitionResult => '認識結果';
 
   @override
-  String get tapToRecord => 'タップして録音開始';
+  String get recognitionResult => '認識結果';
+
+  @override
+  String get satisfactionLevel => '満足度';
+
+  @override
+  String get satisfactionBad => '不満';
+
+  @override
+  String get satisfactionSlightlyBad => 'やや不満';
+
+  @override
+  String get satisfactionNormal => '普通';
+
+  @override
+  String get satisfactionGood => '良い';
+
+  @override
+  String get satisfactionVeryGood => 'とても良い';
+
+  @override
+  String get satisfactionExcellent => '最高！';
+
+  @override
+  String get addSubcategory => '追加';
+
+  @override
+  String get addCategory => 'カテゴリを追加';
+
+  @override
+  String get tapToRecord => 'タップして録音';
 
   @override
   String get todayDate => '今日';

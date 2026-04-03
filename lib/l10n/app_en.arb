@@ -473,7 +473,47 @@
   "@voiceRecognitionResult": {
     "description": "Label shown above the recognized voice transcript"
   },
-  "tapToRecord": "Tap to start recording",
+  "recognitionResult": "Recognition result",
+  "@recognitionResult": {
+    "description": "Section label shown above the parsed voice recognition card"
+  },
+  "satisfactionLevel": "Satisfaction",
+  "@satisfactionLevel": {
+    "description": "Header label for the emoji satisfaction picker"
+  },
+  "satisfactionBad": "Bad",
+  "@satisfactionBad": {
+    "description": "Lowest satisfaction label"
+  },
+  "satisfactionSlightlyBad": "Slightly bad",
+  "@satisfactionSlightlyBad": {
+    "description": "Second lowest satisfaction label"
+  },
+  "satisfactionNormal": "Normal",
+  "@satisfactionNormal": {
+    "description": "Neutral satisfaction label"
+  },
+  "satisfactionGood": "Good",
+  "@satisfactionGood": {
+    "description": "Positive satisfaction label"
+  },
+  "satisfactionVeryGood": "Very good",
+  "@satisfactionVeryGood": {
+    "description": "High satisfaction label"
+  },
+  "satisfactionExcellent": "Excellent!",
+  "@satisfactionExcellent": {
+    "description": "Highest satisfaction label"
+  },
+  "addSubcategory": "Add",
+  "@addSubcategory": {
+    "description": "Action chip label to add a subcategory"
+  },
+  "addCategory": "Add category",
+  "@addCategory": {
+    "description": "Bottom action button label to add a category"
+  },
+  "tapToRecord": "Tap to record",
   "@tapToRecord": { "description": "Voice input hint" },
 
   "todayDate": "Today",

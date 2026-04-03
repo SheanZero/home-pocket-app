@@ -8,6 +8,7 @@ import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/use_case_providers.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/transaction_confirm_screen.dart';
+import 'package:home_pocket/features/accounting/presentation/widgets/satisfaction_emoji_picker.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -108,6 +109,18 @@ void main() {
   }
 
   group('TransactionConfirmScreen merchant learning hook', () {
+    testWidgets('shows emoji picker for soul ledger transactions', (
+      tester,
+    ) async {
+      when(
+        () => mockCategoryService.resolveLedgerType(any()),
+      ).thenAnswer((_) async => LedgerType.soul);
+
+      await pumpScreen(tester);
+
+      expect(find.byType(SatisfactionEmojiPicker), findsOneWidget);
+    });
+
     testWidgets('calls recordSelection on successful save with merchant', (
       tester,
     ) async {

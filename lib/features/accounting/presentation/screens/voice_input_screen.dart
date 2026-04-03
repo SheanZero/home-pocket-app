@@ -8,16 +8,19 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
+import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../../infrastructure/speech/speech_recognition_service.dart';
+import '../../../settings/presentation/providers/locale_provider.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/voice_parse_result.dart';
 import '../providers/repository_providers.dart';
 import '../providers/voice_providers.dart';
+import '../utils/category_display_utils.dart';
 import '../widgets/entry_mode_switcher.dart';
 import '../widgets/input_mode_tabs.dart';
 import '../widgets/soft_toast.dart';
-import '../widgets/voice_transcript_card.dart';
 import '../widgets/voice_waveform.dart';
 import 'transaction_confirm_screen.dart';
 
@@ -27,9 +30,10 @@ import 'transaction_confirm_screen.dart';
 /// implementation. Manages [SpeechRecognitionService] lifecycle directly
 /// (not from provider) for correct stateful lifecycle binding.
 class VoiceInputScreen extends ConsumerStatefulWidget {
-  const VoiceInputScreen({super.key, required this.bookId});
+  const VoiceInputScreen({super.key, required this.bookId, this.speechService});
 
   final String bookId;
+  final SpeechRecognitionService? speechService;
 
   @override
   ConsumerState<VoiceInputScreen> createState() => _VoiceInputScreenState();
@@ -37,7 +41,8 @@ class VoiceInputScreen extends ConsumerStatefulWidget {
 
 class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   // Speech recognition service — managed directly (stateful lifecycle)
-  final SpeechRecognitionService _speechService = SpeechRecognitionService();
+  late final SpeechRecognitionService _speechService =
+      widget.speechService ?? SpeechRecognitionService();
 
   // Recording state
   bool _isRecording = false;
@@ -379,10 +384,38 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
     return remaining.trim();
   }
 
+  String _transcriptText() {
+    return _finalText.isNotEmpty ? _finalText : _partialText;
+  }
+
+  String _parsedAmountText(Locale locale) {
+    final amount = _parseResult?.amount;
+    if (amount == null) return '';
+    return NumberFormatter.formatCurrency(amount, 'JPY', locale);
+  }
+
+  String _parsedCategoryText(Locale locale) {
+    final category = _resolvedCategory;
+    if (category == null) return '';
+    return formatCategoryPath(
+      category: category,
+      parentCategory: _resolvedParentCategory,
+      locale: locale,
+    );
+  }
+
+  String _parsedDateText(Locale locale, S l10n) {
+    final date = _parseResult?.parsedDate;
+    if (date == null) return l10n.todayDate;
+    return DateFormatter.formatDate(date, locale);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final hasResult = _parseResult != null;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final locale = ref.watch(currentLocaleProvider);
 
     // Watch voiceLocaleIdProvider so the screen rebuilds when the user changes
     // the voice language in Settings. The current value is stored in
@@ -393,16 +426,26 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F9FD),
+      backgroundColor: isDark
+          ? AppColorsDark.background
+          : AppColors.backgroundWarm,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? AppColorsDark.card : AppColors.card,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: AppColors.textPrimary),
+          icon: Icon(
+            Icons.close,
+            color: isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(l10n.addTransaction, style: AppTextStyles.headlineMedium),
+        title: Text(
+          l10n.addTransaction,
+          style: AppTextStyles.headlineMedium.copyWith(
+            color: isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
+          ),
+        ),
         centerTitle: true,
       ),
       body: Column(
@@ -422,14 +465,16 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 children: [
-                  // Transcript card with inline parse result chips
-                  VoiceTranscriptCard(
-                    isRecording: _isRecording,
-                    partialText: _partialText,
-                    finalText: _finalText,
-                    parseResult: _parseResult,
-                    category: _resolvedCategory,
-                    parentCategory: _resolvedParentCategory,
+                  VoiceRecognitionResultCard(
+                    transcript: _transcriptText(),
+                    recognitionLabel: l10n.recognitionResult,
+                    amountLabel: l10n.amount,
+                    amountValue: _parsedAmountText(locale),
+                    categoryLabel: l10n.category,
+                    categoryValue: _parsedCategoryText(locale),
+                    dateLabel: l10n.date,
+                    dateValue: _parsedDateText(locale, l10n),
+                    isDark: isDark,
                   ),
                 ],
               ),
@@ -457,24 +502,20 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: _isRecording
-                      ? [Colors.red.shade300, Colors.red.shade500]
-                      : [AppColors.fabGradientStart, AppColors.fabGradientEnd],
+                  colors: const [
+                    AppColors.actionGradientStart,
+                    AppColors.actionGradientEnd,
+                  ],
                 ),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
-                    color: (_isRecording ? Colors.red : AppColors.survival)
-                        .withValues(alpha: 0.3),
+                    color: AppColors.actionShadow,
                     blurRadius: 16,
-                    offset: const Offset(0, 4),
+                    offset: Offset(0, 4),
                   ),
                 ],
               ),
-              child: Icon(
-                _isRecording ? Icons.stop : Icons.mic,
-                color: Colors.white,
-                size: 32,
-              ),
+              child: const Icon(Icons.mic, color: Colors.white, size: 32),
             ),
           ),
 
@@ -483,7 +524,9 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
           Text(
             l10n.tapToRecord,
             style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textSecondary,
+              color: isDark
+                  ? AppColorsDark.textTertiary
+                  : AppColors.textTertiary,
             ),
           ),
 
@@ -502,14 +545,16 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            AppColors.fabGradientStart,
-                            AppColors.fabGradientEnd,
+                            AppColors.actionGradientStart,
+                            AppColors.actionGradientEnd,
                           ],
                         )
                       : LinearGradient(
                           colors: [
-                            AppColors.fabGradientStart.withValues(alpha: 0.4),
-                            AppColors.fabGradientEnd.withValues(alpha: 0.4),
+                            AppColors.actionGradientStart.withValues(
+                              alpha: 0.4,
+                            ),
+                            AppColors.actionGradientEnd.withValues(alpha: 0.4),
                           ],
                         ),
                   borderRadius: BorderRadius.circular(14),
@@ -543,5 +588,175 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
     _parseDebounce?.cancel();
     _speechService.cancelListening();
     super.dispose();
+  }
+}
+
+class VoiceRecognitionResultCard extends StatelessWidget {
+  const VoiceRecognitionResultCard({
+    super.key,
+    required this.transcript,
+    required this.recognitionLabel,
+    required this.amountLabel,
+    required this.amountValue,
+    required this.categoryLabel,
+    required this.categoryValue,
+    required this.dateLabel,
+    required this.dateValue,
+    required this.isDark,
+  });
+
+  final String transcript;
+  final String recognitionLabel;
+  final String amountLabel;
+  final String amountValue;
+  final String categoryLabel;
+  final String categoryValue;
+  final String dateLabel;
+  final String dateValue;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final primaryColor = isDark
+        ? AppColorsDark.textPrimary
+        : AppColors.textPrimary;
+    final secondaryColor = isDark
+        ? AppColorsDark.textSecondary
+        : AppColors.textSecondary;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: isDark ? AppColorsDark.card : AppColors.card,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark ? AppColorsDark.borderDefault : AppColors.borderDefault,
+        ),
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          Text(
+            recognitionLabel,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: secondaryColor,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 2,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            transcript,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.titleLarge.copyWith(
+              color: primaryColor,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            height: 1,
+            color: isDark
+                ? AppColorsDark.backgroundDivider
+                : AppColors.backgroundDivider,
+          ),
+          _ParsedInfoRow(
+            icon: Icons.payments_outlined,
+            label: amountLabel,
+            value: amountValue,
+            isDark: isDark,
+          ),
+          _ParsedDivider(isDark: isDark),
+          _ParsedInfoRow(
+            icon: Icons.shopping_bag_outlined,
+            label: categoryLabel,
+            value: categoryValue,
+            isDark: isDark,
+          ),
+          _ParsedDivider(isDark: isDark),
+          _ParsedInfoRow(
+            icon: Icons.calendar_today_outlined,
+            label: dateLabel,
+            value: dateValue,
+            isDark: isDark,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ParsedInfoRow extends StatelessWidget {
+  const _ParsedInfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.isDark,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 16,
+            color: isDark ? AppColorsDark.textTertiary : AppColors.textTertiary,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: isDark
+                  ? AppColorsDark.textSecondary
+                  : AppColors.textSecondary,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const Spacer(),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: isDark
+                    ? AppColorsDark.textPrimary
+                    : AppColors.textPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ParsedDivider extends StatelessWidget {
+  const _ParsedDivider({required this.isDark});
+
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 1,
+      color: isDark
+          ? AppColorsDark.backgroundDivider
+          : AppColors.backgroundDivider,
+    );
   }
 }

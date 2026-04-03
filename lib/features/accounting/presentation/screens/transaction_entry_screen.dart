@@ -10,6 +10,7 @@ import '../../domain/models/category.dart';
 import '../providers/repository_providers.dart';
 import '../utils/category_display_utils.dart';
 import '../widgets/amount_display.dart';
+import '../widgets/detail_info_card.dart';
 import '../widgets/entry_mode_switcher.dart';
 import '../widgets/input_mode_tabs.dart';
 import '../widgets/smart_keyboard.dart';
@@ -243,18 +244,29 @@ class _TransactionEntryScreenState
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final locale = ref.watch(currentLocaleProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F9FD),
+      backgroundColor: isDark
+          ? AppColorsDark.background
+          : AppColors.backgroundWarm,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? AppColorsDark.card : AppColors.card,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: AppColors.textPrimary),
+          icon: Icon(
+            Icons.close,
+            color: isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(l10n.addTransaction, style: AppTextStyles.headlineMedium),
+        title: Text(
+          l10n.addTransaction,
+          style: AppTextStyles.headlineMedium.copyWith(
+            color: isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
+          ),
+        ),
         centerTitle: true,
       ),
       body: Column(
@@ -272,28 +284,26 @@ class _TransactionEntryScreenState
           // Amount display
           AmountDisplay(amount: _amount, onClear: _onClear),
 
-          // Selector chips
+          // Detail rows
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                // Date chip
-                _SelectorChip(
+            child: DetailInfoCard(
+              rows: [
+                DetailInfoRow(
                   icon: Icons.calendar_today_outlined,
-                  label: _isToday
+                  label: l10n.date,
+                  value: _isToday
                       ? l10n.todayDate
                       : DateFormatter.formatDate(_selectedDate, locale),
+                  showChevron: true,
                   onTap: _selectDate,
                 ),
-                const SizedBox(width: 10),
-                // Category chip
-                Expanded(
-                  child: _SelectorChip(
-                    icon: _categoryChipIcon(),
-                    label: _categoryChipLabel(locale, l10n.selectCategory),
-                    isPlaceholder: _selectedCategory == null,
-                    onTap: _selectCategory,
-                  ),
+                DetailInfoRow(
+                  icon: _categoryChipIcon(),
+                  label: l10n.category,
+                  value: _categoryChipLabel(locale, l10n.selectCategory),
+                  showChevron: true,
+                  onTap: _selectCategory,
                 ),
               ],
             ),
@@ -322,53 +332,6 @@ class _TransactionEntryScreenState
             nextLabel: l10n.next,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SelectorChip extends StatelessWidget {
-  const _SelectorChip({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.isPlaceholder = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool isPlaceholder;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE0E8EF)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 16, color: AppColors.survival),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                label,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: isPlaceholder
-                      ? AppColors.textSecondary
-                      : AppColors.textPrimary,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

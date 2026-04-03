@@ -58,15 +58,39 @@ class AmountDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          // Currency label (plain text)
-          Text(
-            '$currencySymbol $currencyLabel',
-            style: AppTextStyles.headlineMedium.copyWith(
-              color: AppColors.survival,
+          Container(
+            key: const ValueKey('amount_currency_badge'),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.survivalLight,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  currencySymbol,
+                  style: AppTextStyles.amountMedium.copyWith(
+                    color: AppColors.survival,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  currencyLabel,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.survival,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 12),
@@ -80,7 +104,9 @@ class AmountDisplay extends StatelessWidget {
                 style: AppTextStyles.amountLarge.copyWith(
                   fontSize: 32,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: isDark
+                      ? AppColorsDark.textPrimary
+                      : AppColors.textPrimary,
                 ),
                 maxLines: 1,
               ),
@@ -95,13 +121,17 @@ class AmountDisplay extends StatelessWidget {
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE0E8EF),
+                  color: isDark
+                      ? AppColorsDark.backgroundMuted
+                      : AppColors.backgroundMuted,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.close,
                   size: 14,
-                  color: AppColors.textSecondary,
+                  color: isDark
+                      ? AppColorsDark.textSecondary
+                      : AppColors.textSecondary,
                 ),
               ),
             ),

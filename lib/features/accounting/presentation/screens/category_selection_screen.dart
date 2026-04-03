@@ -122,18 +122,29 @@ class _CategorySelectionScreenState
     final l10n = S.of(context);
     final locale = ref.watch(currentLocaleProvider);
     final filteredL1 = _getFilteredL1(locale);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F9FD),
+      backgroundColor: isDark
+          ? AppColorsDark.background
+          : AppColors.backgroundWarm,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? AppColorsDark.card : AppColors.card,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: AppColors.textPrimary),
+          icon: Icon(
+            Icons.close,
+            color: isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(l10n.selectCategory, style: AppTextStyles.headlineMedium),
+        title: Text(
+          l10n.selectCategory,
+          style: AppTextStyles.headlineMedium.copyWith(
+            color: isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
+          ),
+        ),
         centerTitle: true,
       ),
       body: _isLoading
@@ -142,7 +153,7 @@ class _CategorySelectionScreenState
               children: [
                 // Search bar
                 Container(
-                  color: Colors.white,
+                  color: isDark ? AppColorsDark.card : AppColors.card,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 12,
@@ -160,7 +171,9 @@ class _CategorySelectionScreenState
                         color: AppColors.textSecondary,
                       ),
                       filled: true,
-                      fillColor: const Color(0xFFF5F9FD),
+                      fillColor: isDark
+                          ? AppColorsDark.backgroundMuted
+                          : AppColors.backgroundMuted,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -197,12 +210,55 @@ class _CategorySelectionScreenState
                         onChildSelected: (child) {
                           Navigator.pop(context, child);
                         },
+                        isDark: isDark,
+                        addSubcategoryLabel: l10n.addSubcategory,
                         resolveIcon: resolveCategoryIcon,
                         parseColor: _parseColor,
                         resolveName: (key) =>
                             CategoryService.resolve(key, locale),
                       );
                     },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColorsDark.card : AppColors.card,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isDark
+                              ? AppColorsDark.borderDefault
+                              : AppColors.borderDefault,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.add_circle_outline,
+                            size: 18,
+                            color: isDark
+                                ? AppColorsDark.textSecondary
+                                : AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            l10n.addCategory,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: isDark
+                                  ? AppColorsDark.textSecondary
+                                  : AppColors.textSecondary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -225,6 +281,8 @@ class _CategoryGroup extends StatelessWidget {
     required this.selectedCategoryId,
     required this.onToggle,
     required this.onChildSelected,
+    required this.isDark,
+    required this.addSubcategoryLabel,
     required this.resolveIcon,
     required this.parseColor,
     required this.resolveName,
@@ -236,6 +294,8 @@ class _CategoryGroup extends StatelessWidget {
   final String? selectedCategoryId;
   final VoidCallback onToggle;
   final ValueChanged<Category> onChildSelected;
+  final bool isDark;
+  final String addSubcategoryLabel;
   final IconData Function(String) resolveIcon;
   final Color Function(String) parseColor;
   final String Function(String) resolveName;
@@ -247,11 +307,16 @@ class _CategoryGroup extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: isExpanded
-            ? Border.all(color: AppColors.survival, width: 1.5)
-            : null,
+        color: isDark ? AppColorsDark.card : AppColors.card,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isExpanded
+              ? color
+              : (isDark
+                    ? AppColorsDark.borderDefault
+                    : AppColors.borderDefault),
+          width: isExpanded ? 1.5 : 1,
+        ),
       ),
       child: Column(
         children: [
@@ -280,12 +345,18 @@ class _CategoryGroup extends StatelessWidget {
                   Expanded(
                     child: Text(
                       resolveName(category.name),
-                      style: AppTextStyles.titleMedium,
+                      style: AppTextStyles.titleMedium.copyWith(
+                        color: isDark
+                            ? AppColorsDark.textPrimary
+                            : AppColors.textPrimary,
+                      ),
                     ),
                   ),
                   Icon(
                     isExpanded ? Icons.expand_less : Icons.chevron_right,
-                    color: AppColors.textSecondary,
+                    color: isDark
+                        ? AppColorsDark.textSecondary
+                        : AppColors.textSecondary,
                     size: 20,
                   ),
                 ],
@@ -293,37 +364,78 @@ class _CategoryGroup extends StatelessWidget {
             ),
           ),
           // L2 children (expanded)
-          if (isExpanded && children.isNotEmpty)
+          if (isExpanded)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
               child: Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: children.map((child) {
-                  final isSelected = selectedCategoryId == child.id;
-                  return GestureDetector(
-                    onTap: () => onChildSelected(child),
+                children: [
+                  ...children.map((child) {
+                    final isSelected = selectedCategoryId == child.id;
+                    return GestureDetector(
+                      onTap: () => onChildSelected(child),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? color
+                              : color.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          resolveName(child.name),
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: isSelected ? Colors.white : color,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                  GestureDetector(
+                    onTap: () {},
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.survival
-                            : const Color(0xFFEEF4FA),
                         borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        resolveName(child.name),
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: isSelected ? Colors.white : AppColors.survival,
-                          fontSize: 13,
+                        border: Border.all(
+                          color: isDark
+                              ? AppColorsDark.borderDefault
+                              : AppColors.borderDefault,
                         ),
                       ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.add,
+                            size: 14,
+                            color: isDark
+                                ? AppColorsDark.textSecondary
+                                : AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            addSubcategoryLabel,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: isDark
+                                  ? AppColorsDark.textSecondary
+                                  : AppColors.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  );
-                }).toList(),
+                  ),
+                ],
               ),
             ),
         ],

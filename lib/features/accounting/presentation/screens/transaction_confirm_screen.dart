@@ -17,9 +17,10 @@ import '../providers/repository_providers.dart';
 import '../providers/use_case_providers.dart';
 import '../utils/category_display_utils.dart';
 import '../widgets/amount_display.dart';
+import '../widgets/detail_info_card.dart';
 import '../widgets/ledger_type_selector.dart';
+import '../widgets/satisfaction_emoji_picker.dart';
 import '../widgets/smart_keyboard.dart';
-import '../widgets/soul_satisfaction_slider.dart';
 import 'category_selection_screen.dart';
 
 /// Confirmation / review screen before saving a transaction.
@@ -360,24 +361,201 @@ class _TransactionConfirmScreenState
     overlay.remove();
   }
 
-  Color _parseColor(String colorHex) {
-    final hex = colorHex.replaceFirst('#', '');
-    return Color(int.parse('FF$hex', radix: 16));
+  String _categoryLabel(Locale locale, S l10n) {
+    if (_category == null) {
+      return l10n.pleaseSelectCategory;
+    }
+    return formatCategoryPath(
+      category: _category!,
+      parentCategory: _parentCategory,
+      locale: locale,
+    );
+  }
+
+  Widget _buildStoreAndMemoSection(S l10n, bool isDark) {
+    final secondaryColor = isDark
+        ? AppColorsDark.textSecondary
+        : AppColors.textSecondary;
+    final tertiaryColor = isDark
+        ? AppColorsDark.textTertiary
+        : AppColors.textTertiary;
+    final primaryColor = isDark
+        ? AppColorsDark.textPrimary
+        : AppColors.textPrimary;
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Icon(Icons.store_outlined, size: 16, color: tertiaryColor),
+              const SizedBox(width: 8),
+              Text(
+                l10n.merchant,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: secondaryColor,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  controller: _storeController,
+                  textAlign: TextAlign.end,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                    hintText: l10n.enterStore,
+                    hintStyle: AppTextStyles.bodyMedium.copyWith(
+                      color: secondaryColor,
+                      fontSize: 14,
+                    ),
+                  ),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: primaryColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Container(
+            height: 1,
+            color: isDark
+                ? AppColorsDark.backgroundDivider
+                : AppColors.backgroundDivider,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.edit_outlined, size: 16, color: tertiaryColor),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.note,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: secondaryColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Container(
+                height: 72,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColorsDark.backgroundMuted
+                      : AppColors.backgroundMuted,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TextField(
+                  controller: _memoController,
+                  maxLines: null,
+                  expands: true,
+                  decoration: InputDecoration(
+                    isCollapsed: true,
+                    border: InputBorder.none,
+                    hintText: l10n.enterMemo,
+                    hintStyle: AppTextStyles.bodyMedium.copyWith(
+                      color: secondaryColor,
+                      fontSize: 13,
+                    ),
+                  ),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: primaryColor,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSaveButton(S l10n) {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.actionGradientStart,
+              AppColors.actionGradientEnd,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: const [
+            BoxShadow(
+              color: AppColors.actionShadow,
+              blurRadius: 14,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: _isSubmitting ? null : _save,
+            borderRadius: BorderRadius.circular(14),
+            child: Center(
+              child: _isSubmitting
+                  ? const SizedBox(
+                      height: 22,
+                      width: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(
+                      l10n.record,
+                      style: AppTextStyles.titleLarge.copyWith(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final locale = ref.watch(currentLocaleProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final displayCategory = _parentCategory ?? _category;
-    final catColor = displayCategory != null
-        ? _parseColor(displayCategory.color)
-        : AppColors.survival;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F9FD),
+      backgroundColor: isDark
+          ? AppColorsDark.background
+          : AppColors.backgroundWarm,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? AppColorsDark.card : AppColors.card,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: TextButton.icon(
@@ -391,7 +569,12 @@ class _TransactionConfirmScreenState
           ),
         ),
         leadingWidth: 100,
-        title: Text(l10n.expenseDetail, style: AppTextStyles.headlineMedium),
+        title: Text(
+          l10n.expenseDetail,
+          style: AppTextStyles.headlineMedium.copyWith(
+            color: isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
+          ),
+        ),
         centerTitle: true,
       ),
       body: Column(
@@ -402,153 +585,58 @@ class _TransactionConfirmScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Detail card
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      children: [
-                        // Amount row
-                        _DetailRow(
-                          icon: Icons.payments_outlined,
-                          iconColor: AppColors.survival,
-                          label: l10n.amount,
-                          onTap: _editAmount,
-                          trailing: Text(
-                            _formatAmount(_amount, locale),
-                            style: AppTextStyles.amountMedium.copyWith(
-                              fontSize: 18,
-                            ),
-                          ),
-                        ),
-                        const _Divider(),
-                        // Category row
-                        _DetailRow(
-                          icon: displayCategory != null
-                              ? resolveCategoryIcon(displayCategory.icon)
-                              : Icons.folder_open_outlined,
-                          iconColor: _category == null
-                              ? AppColors.textSecondary
-                              : catColor,
-                          label: l10n.category,
-                          onTap: _editCategory,
-                          trailing: _category == null
-                              ? Text(
-                                  l10n.pleaseSelectCategory,
-                                  style: AppTextStyles.bodyMedium.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
-                                )
-                              : Text(
-                                  formatCategoryPath(
-                                    category: _category!,
-                                    parentCategory: _parentCategory,
-                                    locale: locale,
-                                  ),
-                                  style: AppTextStyles.bodyMedium,
-                                ),
-                        ),
-                        const _Divider(),
-                        // Date row
-                        _DetailRow(
-                          icon: Icons.calendar_today_outlined,
-                          iconColor: AppColors.survival,
-                          label: l10n.date,
-                          onTap: _editDate,
-                          trailing: Text(
-                            DateFormatter.formatDate(_date, locale),
-                            style: AppTextStyles.bodyMedium,
-                          ),
-                        ),
-                        const _Divider(),
-                        // Store row
-                        _DetailRow(
-                          icon: Icons.store_outlined,
-                          iconColor: AppColors.survival,
-                          label: l10n.merchant,
-                          trailing: Expanded(
-                            child: TextField(
-                              controller: _storeController,
-                              textAlign: TextAlign.end,
-                              decoration: InputDecoration(
-                                hintText: l10n.enterStore,
-                                hintStyle: AppTextStyles.bodyMedium.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                                border: InputBorder.none,
-                                isDense: true,
-                                contentPadding: EdgeInsets.zero,
-                              ),
-                              style: AppTextStyles.bodyMedium,
-                            ),
-                          ),
-                        ),
-                        const _Divider(),
-                        // Memo section
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.edit_note,
-                                    size: 20,
-                                    color: AppColors.survival,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    l10n.note,
-                                    style: AppTextStyles.titleMedium.copyWith(
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              TextField(
-                                controller: _memoController,
-                                maxLines: 3,
-                                decoration: InputDecoration(
-                                  hintText: l10n.enterMemo,
-                                  hintStyle: AppTextStyles.bodyMedium.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  filled: true,
-                                  fillColor: const Color(0xFFF5F9FD),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  contentPadding: const EdgeInsets.all(12),
-                                ),
-                                style: AppTextStyles.bodyMedium,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                  DetailInfoCard(
+                    rows: [
+                      DetailInfoRow(
+                        icon: Icons.payments_outlined,
+                        label: l10n.amount,
+                        value: _formatAmount(_amount, locale),
+                        showChevron: true,
+                        onTap: _editAmount,
+                      ),
+                      DetailInfoRow(
+                        icon: displayCategory != null
+                            ? resolveCategoryIcon(displayCategory.icon)
+                            : Icons.shopping_bag_outlined,
+                        label: l10n.category,
+                        value: _categoryLabel(locale, l10n),
+                        showChevron: true,
+                        onTap: _editCategory,
+                      ),
+                      DetailInfoRow(
+                        icon: Icons.calendar_today_outlined,
+                        label: l10n.date,
+                        value: DateFormatter.formatDate(_date, locale),
+                        showChevron: true,
+                        onTap: _editDate,
+                      ),
+                    ],
+                    trailing: _buildStoreAndMemoSection(l10n, isDark),
                   ),
 
                   const SizedBox(height: 16),
 
-                  // Ledger & Satisfaction card
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      color: isDark ? AppColorsDark.card : AppColors.card,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: isDark
+                            ? AppColorsDark.borderDefault
+                            : AppColors.borderDefault,
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           l10n.expenseClassification,
-                          style: AppTextStyles.titleMedium,
+                          style: AppTextStyles.titleMedium.copyWith(
+                            color: isDark
+                                ? AppColorsDark.textPrimary
+                                : AppColors.textPrimary,
+                          ),
                         ),
                         const SizedBox(height: 12),
                         LedgerTypeSelector(
@@ -560,11 +648,23 @@ class _TransactionConfirmScreenState
                         ),
                         if (_ledgerType == LedgerType.soul) ...[
                           const SizedBox(height: 20),
-                          SoulSatisfactionSlider(
+                          SatisfactionEmojiPicker(
                             value: _soulSatisfaction,
                             onChanged: (v) =>
                                 setState(() => _soulSatisfaction = v),
-                            label: l10n.soulSatisfaction,
+                            title: l10n.satisfactionLevel,
+                            levelLabels: [
+                              l10n.satisfactionBad,
+                              l10n.satisfactionSlightlyBad,
+                              l10n.satisfactionNormal,
+                              l10n.satisfactionGood,
+                              l10n.satisfactionVeryGood,
+                            ],
+                            bottomLabels: [
+                              l10n.satisfactionBad,
+                              l10n.satisfactionNormal,
+                              l10n.satisfactionExcellent,
+                            ],
                           ),
                         ],
                       ],
@@ -573,13 +673,17 @@ class _TransactionConfirmScreenState
 
                   const SizedBox(height: 16),
 
-                  // Add photo button (stub)
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      color: isDark ? AppColorsDark.card : AppColors.card,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: isDark
+                            ? AppColorsDark.borderDefault
+                            : AppColors.borderDefault,
+                      ),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -593,7 +697,9 @@ class _TransactionConfirmScreenState
                         Text(
                           l10n.addPhoto,
                           style: AppTextStyles.titleMedium.copyWith(
-                            color: AppColors.survival,
+                            color: isDark
+                                ? AppColorsDark.textSecondary
+                                : AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -604,59 +710,10 @@ class _TransactionConfirmScreenState
             ),
           ),
 
-          // Save button
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-              child: SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        AppColors.fabGradientStart,
-                        AppColors.fabGradientEnd,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.fabShadow,
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: _isSubmitting ? null : _save,
-                      borderRadius: BorderRadius.circular(14),
-                      child: Center(
-                        child: _isSubmitting
-                            ? const SizedBox(
-                                height: 22,
-                                width: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Text(
-                                l10n.record,
-                                style: AppTextStyles.titleLarge.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              child: _buildSaveButton(l10n),
             ),
           ),
         ],
@@ -669,60 +726,5 @@ class _TransactionConfirmScreenState
     _storeController.dispose();
     _memoController.dispose();
     super.dispose();
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-    required this.trailing,
-    this.onTap,
-  });
-
-  final IconData icon;
-  final Color iconColor;
-  final String label;
-  final Widget trailing;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final content = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: iconColor),
-          const SizedBox(width: 10),
-          Text(
-            label,
-            style: AppTextStyles.titleMedium.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          trailing is Expanded ? trailing : const Spacer(),
-          if (trailing is! Expanded) trailing,
-        ],
-      ),
-    );
-
-    if (onTap != null) {
-      return InkWell(onTap: onTap, child: content);
-    }
-    return content;
-  }
-}
-
-class _Divider extends StatelessWidget {
-  const _Divider();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
-      child: Divider(height: 1, color: Color(0xFFE8EFF5)),
-    );
   }
 }
