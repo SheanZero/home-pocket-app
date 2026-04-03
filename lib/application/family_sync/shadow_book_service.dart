@@ -56,13 +56,10 @@ class ShadowBookService {
   }
 
   Future<String> _resolveShadowCurrency() async {
-    final books = await _bookRepository.findAll(includeArchived: true);
-    for (final book in books) {
-      if (!book.isShadow) {
-        return book.currency;
-      }
+    final books = await _bookRepository.findAll();
+    if (books.isNotEmpty) {
+      return books.first.currency;
     }
-
     return 'JPY';
   }
 }

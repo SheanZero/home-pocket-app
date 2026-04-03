@@ -14,9 +14,9 @@ void main() {
       expect(theme.scaffoldBackgroundColor, AppColors.background);
     });
 
-    test('text theme uses IBM Plex Sans via default body style', () {
+    test('text theme uses Outfit via default body style', () {
       final theme = AppTheme.light;
-      expect(theme.textTheme.bodyMedium?.fontFamily, contains('IBM Plex Sans'));
+      expect(theme.textTheme.bodyMedium?.fontFamily, contains('Outfit'));
     });
   });
 }

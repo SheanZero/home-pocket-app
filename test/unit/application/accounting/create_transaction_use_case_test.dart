@@ -133,6 +133,8 @@ void main() {
       expect(result.data!.currentHash, 'computed_hash_xyz');
       expect(result.data!.prevHash, 'prev_hash_abc');
       verify(mockTransactionRepo.insert(any)).called(1);
+      // Sync trigger is fire-and-forget — wait for microtask to complete.
+      await Future<void>.delayed(Duration.zero);
       verify(mockSyncTriggerService.onTransactionCreated(any)).called(1);
     });
 
@@ -163,6 +165,9 @@ void main() {
             categoryId: 'cat_food',
           ),
         );
+
+        // Sync trigger is fire-and-forget — wait for microtask to complete.
+        await Future<void>.delayed(Duration.zero);
 
         final captured =
             verify(

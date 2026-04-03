@@ -2,52 +2,49 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/home/presentation/widgets/family_invite_banner.dart';
 
-import '../../helpers/test_localizations.dart';
-
 void main() {
-  group('FamilyInviteBanner', () {
-    testWidgets('displays invite title and description', (tester) async {
-      await tester.pumpWidget(
-        testLocalizedApp(
-          child: Scaffold(body: FamilyInviteBanner(onTap: () {})),
-        ),
-      );
+  Widget buildSubject({VoidCallback? onTap}) {
+    return MaterialApp(
+      home: Scaffold(body: FamilyInviteBanner(onTap: onTap ?? () {})),
+    );
+  }
 
-      // ja locale
+  group('FamilyInviteBanner', () {
+    testWidgets('displays invite title and CTA text', (tester) async {
+      await tester.pumpWidget(buildSubject());
+
+      expect(find.text('家族と一緒に管理しよう'), findsOneWidget);
       expect(find.text('家族を招待する'), findsOneWidget);
-      expect(find.text('パートナーと家計簿を共有しよう'), findsOneWidget);
     });
 
-    testWidgets('triggers onTap callback', (tester) async {
-      bool tapped = false;
-      await tester.pumpWidget(
-        testLocalizedApp(
-          child: Scaffold(body: FamilyInviteBanner(onTap: () => tapped = true)),
-        ),
-      );
+    testWidgets('triggers onTap callback via CTA button', (tester) async {
+      var tapped = false;
+      await tester.pumpWidget(buildSubject(onTap: () => tapped = true));
 
-      await tester.tap(find.byType(FamilyInviteBanner));
+      await tester.tap(find.text('家族を招待する'));
       expect(tapped, isTrue);
     });
 
-    testWidgets('shows chevron right icon', (tester) async {
-      await tester.pumpWidget(
-        testLocalizedApp(
-          child: Scaffold(body: FamilyInviteBanner(onTap: () {})),
-        ),
-      );
+    testWidgets('shows two avatar circles with icons', (tester) async {
+      await tester.pumpWidget(buildSubject());
 
-      expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+      expect(find.byIcon(Icons.face), findsOneWidget);
+      expect(find.byIcon(Icons.face_2), findsOneWidget);
     });
 
-    testWidgets('shows people icon', (tester) async {
-      await tester.pumpWidget(
-        testLocalizedApp(
-          child: Scaffold(body: FamilyInviteBanner(onTap: () {})),
-        ),
-      );
+    testWidgets('displays subtitle text', (tester) async {
+      await tester.pumpWidget(buildSubject());
 
-      expect(find.byIcon(Icons.people_outline), findsOneWidget);
+      expect(
+        find.text('\u30D1\u30FC\u30C8\u30CA\u30FC\u3092\u62DB\u5F85\u3057\u3066\n\u5BB6\u8A08\u7C3F\u3092\u30EA\u30A2\u30EB\u30BF\u30A4\u30E0\u3067\u5171\u6709'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('CTA button includes heart icon', (tester) async {
+      await tester.pumpWidget(buildSubject());
+
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
     });
   });
 }

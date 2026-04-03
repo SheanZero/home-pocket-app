@@ -208,10 +208,14 @@ class MockBookRepository extends _i1.Mock implements _i7.BookRepository {
           as _i5.Future<List<_i8.Book>>);
 
   @override
-  _i5.Future<List<_i8.Book>> findAll({bool? includeArchived}) =>
+  _i5.Future<List<_i8.Book>> findAll({
+    bool? includeArchived,
+    bool? includeShadow,
+  }) =>
       (super.noSuchMethod(
             Invocation.method(#findAll, [], {
               #includeArchived: includeArchived,
+              #includeShadow: includeShadow,
             }),
             returnValue: _i5.Future<List<_i8.Book>>.value(<_i8.Book>[]),
           )

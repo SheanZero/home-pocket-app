@@ -93,7 +93,11 @@ class ApplySyncOperationsUseCase {
       data,
       bookId: existing.bookId,
       deviceId: fromDeviceId,
-    ).copyWith(updatedAt: DateTime.now());
+    ).copyWith(
+      updatedAt: data['updatedAt'] != null
+          ? DateTime.parse(data['updatedAt'] as String)
+          : DateTime.now(),
+    );
     await _transactionRepository.update(updated);
   }
 

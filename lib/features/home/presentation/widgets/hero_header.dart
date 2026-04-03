@@ -2,86 +2,110 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 
-/// Blue top header with month display and settings button.
+/// Flat header row with month picker, mode badge, and settings icon.
 ///
 /// Pure UI component -- no providers, no navigation.
-/// [bottomOverlap] adds extra blue space below the header row so that the
-/// card beneath can visually overlap into the blue area via a Stack.
+/// Sits on the warm ivory page background (no blue container, no SafeArea).
 class HeroHeader extends StatelessWidget {
   const HeroHeader({
     super.key,
     required this.year,
     required this.month,
+    required this.isGroupMode,
     required this.onSettingsTap,
     required this.onDateTap,
-    this.bottomOverlap = 0,
   });
 
   final int year;
   final int month;
+  final bool isGroupMode;
   final VoidCallback onSettingsTap;
   final VoidCallback onDateTap;
-
-  /// Extra blue height below the header content for card overlap.
-  final double bottomOverlap;
 
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.heroBackground,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.only(left: 24, right: 24, bottom: bottomOverlap),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GestureDetector(
-                    onTap: onDateTap,
-                    child: Row(
-                      children: [
-                        Text(
-                          l10n.homeMonthFormat(year, month),
-                          style: AppTextStyles.headlineMedium.copyWith(
-                            color: AppColors.textOnPrimary,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(
-                          Icons.keyboard_arrow_down,
-                          color: AppColors.textOnPrimary,
-                          size: 18,
-                        ),
-                      ],
-                    ),
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Left: month picker
+          GestureDetector(
+            onTap: onDateTap,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  l10n.homeMonthFormat(year, month),
+                  style: AppTextStyles.headlineMedium.copyWith(
+                    color: context.wmTextPrimary,
                   ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.settings_outlined,
-                      color: AppColors.textOnPrimary,
-                      size: 24,
-                    ),
-                    onPressed: onSettingsTap,
-                  ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(width: 6),
+                Icon(
+                  Icons.keyboard_arrow_down,
+                  size: 20,
+                  color: context.wmTextSecondary,
+                ),
+              ],
+            ),
           ),
-        ),
+
+          // Center: mode badge
+          _ModeBadge(isGroupMode: isGroupMode, l10n: l10n),
+
+          // Right: settings icon
+          GestureDetector(
+            onTap: onSettingsTap,
+            child: Icon(
+              Icons.settings_outlined,
+              size: 22,
+              color: context.wmTextPrimary,
+            ),
+          ),
+        ],
+      );
+  }
+}
+
+/// Badge showing either family mode (coral) or personal mode (blue).
+class _ModeBadge extends StatelessWidget {
+  const _ModeBadge({
+    required this.isGroupMode,
+    required this.l10n,
+  });
+
+  final bool isGroupMode;
+  final S l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final backgroundColor =
+        isGroupMode ? context.wmFamilyBadgeBg : context.wmSurvivalTagBg;
+    final foregroundColor =
+        isGroupMode ? AppColors.accentPrimary : AppColors.survival;
+    final label =
+        isGroupMode ? l10n.homeFamilyMode : l10n.homePersonalMode;
+    final icon = isGroupMode ? Icons.people : Icons.person;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: foregroundColor),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: AppTextStyles.bodySmall.copyWith(color: foregroundColor),
+          ),
+        ],
       ),
     );
   }

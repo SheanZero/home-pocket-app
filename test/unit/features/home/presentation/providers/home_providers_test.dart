@@ -37,30 +37,4 @@ void main() {
     });
   });
 
-  group('OhtaniConverterVisible', () {
-    late ProviderContainer container;
-
-    setUp(() {
-      container = ProviderContainer();
-    });
-
-    tearDown(() {
-      container.dispose();
-    });
-
-    test('initial value is true', () {
-      expect(container.read(ohtaniConverterVisibleProvider), isTrue);
-    });
-
-    test('dismiss sets value to false', () {
-      container.read(ohtaniConverterVisibleProvider.notifier).dismiss();
-      expect(container.read(ohtaniConverterVisibleProvider), isFalse);
-    });
-
-    test('dismiss is idempotent', () {
-      container.read(ohtaniConverterVisibleProvider.notifier).dismiss();
-      container.read(ohtaniConverterVisibleProvider.notifier).dismiss();
-      expect(container.read(ohtaniConverterVisibleProvider), isFalse);
-    });
-  });
 }

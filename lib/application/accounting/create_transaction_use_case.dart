@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:developer' as dev;
 import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart';
 
 import 'package:ulid/ulid.dart';
 
@@ -13,6 +16,7 @@ import '../../infrastructure/crypto/services/hash_chain_service.dart';
 import '../../infrastructure/sync/sync_trigger_service.dart';
 import '../../shared/utils/result.dart';
 import '../dual_ledger/classification_service.dart';
+import '../family_sync/check_group_validity_use_case.dart';
 
 String _trunc(String s, [int len = 16]) =>
     s.length <= len ? s : '${s.substring(0, math.min(len, s.length))}...';
@@ -55,13 +59,15 @@ class CreateTransactionUseCase {
     required HashChainService hashChainService,
     required ClassificationService classificationService,
     SyncTriggerService? syncTriggerService,
+    CheckGroupValidityUseCase? checkGroupValidity,
   }) : _transactionRepo = transactionRepository,
        _bookRepo = bookRepository,
        _categoryRepo = categoryRepository,
        _deviceIdentityRepo = deviceIdentityRepository,
        _hashChainService = hashChainService,
        _classificationService = classificationService,
-       _syncTriggerService = syncTriggerService;
+       _syncTriggerService = syncTriggerService,
+       _checkGroupValidity = checkGroupValidity;
 
   final TransactionRepository _transactionRepo;
   final BookRepository _bookRepo;
@@ -70,6 +76,7 @@ class CreateTransactionUseCase {
   final HashChainService _hashChainService;
   final ClassificationService _classificationService;
   final SyncTriggerService? _syncTriggerService;
+  final CheckGroupValidityUseCase? _checkGroupValidity;
 
   /// Genesis hash: 64 zero characters (no previous transaction).
   static const _genesisHash =
@@ -185,24 +192,40 @@ class CreateTransactionUseCase {
     // 9. Persist
     await _transactionRepo.insert(transaction);
 
-    final syncService = _syncTriggerService;
-    if (syncService != null) {
-      try {
-        final book = await _bookRepo.findById(params.bookId);
-        await syncService.onTransactionCreated(
-          TransactionSyncMapper.toSyncMap(
-            transaction,
-            sourceBookId: params.bookId,
-            sourceBookName: book?.name ?? params.bookId,
-            sourceBookType: 'remote_book:${params.bookId}',
-          ),
-        );
-      } catch (_) {
-        // Keep local transaction creation successful even if sync enqueue fails.
-      }
-    }
+    // Fire-and-forget sync trigger — does not affect local create result.
+    _triggerIncrementalSync(transaction, params.bookId);
 
     dev.log('[7/7 UseCase Done] Transaction $id persisted', name: 'DataFlow');
     return Result.success(transaction);
+  }
+
+  void _triggerIncrementalSync(Transaction transaction, String bookId) {
+    final syncService = _syncTriggerService;
+    if (syncService == null) return;
+
+    unawaited(
+      Future(() async {
+        // Check group validity (with 5-min cache) before pushing.
+        final groupCheck = _checkGroupValidity;
+        if (groupCheck != null) {
+          final validity = await groupCheck.execute();
+          if (validity is! GroupValid) return;
+        }
+
+        final book = await _bookRepo.findById(bookId);
+        await syncService.onTransactionCreated(
+          TransactionSyncMapper.toSyncMap(
+            transaction,
+            sourceBookId: bookId,
+            sourceBookName: book?.name ?? bookId,
+            sourceBookType: 'remote_book:$bookId',
+          ),
+        );
+      }).catchError((Object e) {
+        if (kDebugMode) {
+          debugPrint('Sync trigger failed (queued for retry): $e');
+        }
+      }),
+    );
   }
 }

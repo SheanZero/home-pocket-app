@@ -41,7 +41,7 @@ void main() {
       );
 
       final text = tester.widget<Text>(find.text('ホーム'));
-      expect(text.style?.color, AppColors.survival);
+      expect(text.style?.color, Colors.white); // Active tab text is white on coral
     });
 
     testWidgets('inactive tab uses inactive color', (tester) async {
@@ -58,7 +58,7 @@ void main() {
       );
 
       final text = tester.widget<Text>(find.text('一覧'));
-      expect(text.style?.color, AppColors.inactiveTab);
+      expect(text.style?.color, AppColors.textTertiary);
     });
 
     testWidgets('FAB calls onFabTap', (tester) async {
@@ -75,7 +75,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byIcon(Icons.edit));
+      await tester.tap(find.byIcon(Icons.add));
       expect(tapped, isTrue);
     });
 

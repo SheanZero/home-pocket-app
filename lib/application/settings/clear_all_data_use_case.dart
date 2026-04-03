@@ -25,7 +25,10 @@ class ClearAllDataUseCase {
   Future<Result<void>> execute() async {
     try {
       // Delete all transactions for all books
-      final books = await _bookRepo.findAll(includeArchived: true);
+      final books = await _bookRepo.findAll(
+        includeArchived: true,
+        includeShadow: true,
+      );
       for (final book in books) {
         await _transactionRepo.deleteAllByBook(book.id);
       }

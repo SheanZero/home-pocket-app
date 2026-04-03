@@ -18,11 +18,12 @@ class TransactionSyncMapper {
       'ledgerType': transaction.ledgerType.name,
       'timestamp': transaction.timestamp.toUtc().toIso8601String(),
       'createdAt': transaction.createdAt.toUtc().toIso8601String(),
+      if (transaction.updatedAt != null)
+        'updatedAt': transaction.updatedAt!.toUtc().toIso8601String(),
       if (transaction.note != null) 'note': transaction.note,
       if (transaction.merchant != null) 'merchant': transaction.merchant,
       if (transaction.photoHash != null) 'photoHash': transaction.photoHash,
       'metadata': {
-        ...?transaction.metadata,
         'sourceBookId': sourceBookId,
         'sourceBookName': sourceBookName,
         'sourceBookType': sourceBookType,
@@ -75,6 +76,37 @@ class TransactionSyncMapper {
         sourceBookType: sourceBookType,
       ),
       'timestamp': transaction.createdAt.toUtc().toIso8601String(),
+    };
+  }
+
+  static Map<String, dynamic> toUpdateOperation(
+    Transaction transaction, {
+    required String sourceBookId,
+    required String sourceBookName,
+    required String sourceBookType,
+  }) {
+    return {
+      'op': 'update',
+      'entityType': 'bill',
+      'entityId': transaction.id,
+      'data': toSyncMap(
+        transaction,
+        sourceBookId: sourceBookId,
+        sourceBookName: sourceBookName,
+        sourceBookType: sourceBookType,
+      ),
+      'timestamp':
+          (transaction.updatedAt ?? transaction.createdAt)
+              .toUtc()
+              .toIso8601String(),
+    };
+  }
+
+  static Map<String, dynamic> toDeleteOperation(String transactionId) {
+    return {
+      'op': 'delete',
+      'entityType': 'bill',
+      'entityId': transactionId,
     };
   }
 }

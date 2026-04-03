@@ -258,7 +258,7 @@ void main() {
 
     // Mock existing data
     when(
-      () => mockBookRepo.findAll(includeArchived: true),
+      () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
     ).thenAnswer((_) async => []);
     when(() => mockCategoryRepo.deleteAll()).thenAnswer((_) async {});
     when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});

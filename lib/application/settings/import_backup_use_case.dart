@@ -125,7 +125,10 @@ class ImportBackupUseCase {
   Future<void> _restoreData(BackupData backupData) async {
     // Delete existing data first
     // Get all books to delete their transactions
-    final existingBooks = await _bookRepo.findAll(includeArchived: true);
+    final existingBooks = await _bookRepo.findAll(
+      includeArchived: true,
+      includeShadow: true,
+    );
     for (final book in existingBooks) {
       await _transactionRepo.deleteAllByBook(book.id);
     }

@@ -61,7 +61,7 @@ void main() {
     ];
 
     when(
-      () => mockBookRepo.findAll(includeArchived: true),
+      () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
     ).thenAnswer((_) async => books);
     when(
       () => mockTransactionRepo.deleteAllByBook(any()),
@@ -92,7 +92,7 @@ void main() {
 
   test('returns error on failure', () async {
     when(
-      () => mockBookRepo.findAll(includeArchived: true),
+      () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
     ).thenThrow(Exception('DB error'));
 
     final result = await useCase.execute();

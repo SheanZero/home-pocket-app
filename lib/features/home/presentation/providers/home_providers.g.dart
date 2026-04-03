@@ -27,26 +27,5 @@ final selectedTabIndexProvider =
     );
 
 typedef _$SelectedTabIndex = Notifier<int>;
-String _$ohtaniConverterVisibleHash() =>
-    r'd5fc2b68070bbb6a54ce07d33ade4a25c334b58d';
-
-/// Controls visibility of the Ohtani converter banner on the home page.
-///
-/// Starts visible (true) and can be dismissed by the user.
-///
-/// Copied from [OhtaniConverterVisible].
-@ProviderFor(OhtaniConverterVisible)
-final ohtaniConverterVisibleProvider =
-    NotifierProvider<OhtaniConverterVisible, bool>.internal(
-      OhtaniConverterVisible.new,
-      name: r'ohtaniConverterVisibleProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$ohtaniConverterVisibleHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$OhtaniConverterVisible = Notifier<bool>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

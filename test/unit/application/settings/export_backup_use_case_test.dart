@@ -90,7 +90,7 @@ void main() {
         ),
       ],
     );
-    when(() => mockBookRepo.findAll(includeArchived: true)).thenAnswer(
+    when(() => mockBookRepo.findAll(includeArchived: true, includeShadow: true)).thenAnswer(
       (_) async => [
         Book(
           id: 'book-1',
