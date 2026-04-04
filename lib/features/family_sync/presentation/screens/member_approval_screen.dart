@@ -8,7 +8,7 @@ import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/sync/sync_trigger_service.dart';
 import '../../domain/models/group_info.dart';
 import '../../domain/models/group_member.dart';
-import '../../use_cases/confirm_member_use_case.dart';
+import '../../../../application/family_sync/confirm_member_use_case.dart';
 import '../../use_cases/remove_member_use_case.dart';
 import '../providers/group_providers.dart';
 import '../providers/repository_providers.dart';
@@ -202,13 +202,14 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
                         index++
                       ) ...[
                         MemberListTile(
-                          name: group!.members[index].deviceName,
+                          displayName: group!.members[index].displayName,
+                          avatarEmoji: group.members[index].avatarEmoji,
+                          avatarImagePath: group.members[index].avatarImagePath,
                           roleLabel: _roleLabel(
                             context,
                             group.members[index].role,
                           ),
                           isOwner: group.members[index].role == 'owner',
-                          ownerBadgeLabel: l10n.familySyncRoleOwner,
                         ),
                         if (index < group.members.length - 1)
                           const Divider(height: 1, color: AppColors.divider),
@@ -280,7 +281,9 @@ class _PendingApprovalCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           MemberListTile(
-            name: member.deviceName,
+            displayName: member.displayName,
+            avatarEmoji: member.avatarEmoji,
+            avatarImagePath: member.avatarImagePath,
             roleLabel: l10n.familySyncRoleMember,
           ),
           const SizedBox(height: 12),

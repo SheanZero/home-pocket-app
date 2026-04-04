@@ -10,7 +10,7 @@ import 'package:home_pocket/features/family_sync/presentation/providers/group_pr
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/sync_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/member_approval_screen.dart';
-import 'package:home_pocket/features/family_sync/use_cases/confirm_member_use_case.dart';
+import 'package:home_pocket/application/family_sync/confirm_member_use_case.dart';
 import 'package:home_pocket/features/family_sync/use_cases/remove_member_use_case.dart';
 import 'package:home_pocket/infrastructure/sync/sync_trigger_service.dart';
 import 'package:mocktail/mocktail.dart';

@@ -8,8 +8,8 @@ import 'package:home_pocket/features/family_sync/presentation/providers/reposito
 import 'package:home_pocket/features/family_sync/presentation/providers/sync_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/pairing_screen.dart';
 import 'package:home_pocket/features/family_sync/presentation/widgets/gradient_action_button.dart';
-import 'package:home_pocket/features/family_sync/use_cases/create_group_use_case.dart';
-import 'package:home_pocket/features/family_sync/use_cases/join_group_use_case.dart';
+import 'package:home_pocket/application/family_sync/create_group_use_case.dart';
+import 'package:home_pocket/application/family_sync/join_group_use_case.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
 import 'package:home_pocket/infrastructure/sync/sync_trigger_service.dart';
@@ -82,7 +82,14 @@ void main() {
       localeProvider: () => const Locale('en'),
     );
 
-    when(() => createGroupUseCase.execute()).thenAnswer(
+    when(
+      () => createGroupUseCase.execute(
+        displayName: any(named: 'displayName'),
+        avatarEmoji: any(named: 'avatarEmoji'),
+        groupName: any(named: 'groupName'),
+        avatarImageHash: any(named: 'avatarImageHash'),
+      ),
+    ).thenAnswer(
       (_) async => CreateGroupSuccess(
         groupId: 'group-1',
         inviteCode: '654321',
@@ -94,7 +101,12 @@ void main() {
       ),
     );
     when(
-      () => joinGroupUseCase.execute(any()),
+      () => joinGroupUseCase.execute(
+        inviteCode: any(named: 'inviteCode'),
+        displayName: any(named: 'displayName'),
+        avatarEmoji: any(named: 'avatarEmoji'),
+        avatarImageHash: any(named: 'avatarImageHash'),
+      ),
     ).thenAnswer((_) async => const JoinGroupError('Invalid invite code'));
     when(() => groupRepository.getGroupById('group-1')).thenAnswer(
       (_) async => GroupInfo(
@@ -161,20 +173,20 @@ void main() {
   testWidgets('navigates to waiting approval screen after join success', (
     tester,
   ) async {
-    when(() => joinGroupUseCase.execute(any())).thenAnswer(
-      (_) async => const JoinGroupSuccess(
+    when(
+      () => joinGroupUseCase.execute(
+        inviteCode: any(named: 'inviteCode'),
+        displayName: any(named: 'displayName'),
+        avatarEmoji: any(named: 'avatarEmoji'),
+        avatarImageHash: any(named: 'avatarImageHash'),
+      ),
+    ).thenAnswer(
+      (_) async => const JoinGroupVerified(
         groupId: 'group-1',
-        members: [
-          GroupMember(
-            deviceId: 'owner-1',
-            publicKey: 'pk-owner',
-            deviceName: 'Owner phone',
-            displayName: 'Owner phone',
-            avatarEmoji: '🏠',
-            role: 'owner',
-            status: 'active',
-          ),
-        ],
+        groupName: 'Test Family',
+        ownerDeviceId: 'owner-1',
+        ownerDisplayName: 'Owner phone',
+        ownerAvatarEmoji: '🏠',
       ),
     );
 
@@ -201,7 +213,14 @@ void main() {
     await tester.tap(find.byType(GradientActionButton));
     await tester.pumpAndSettle();
 
-    verify(() => joinGroupUseCase.execute('123456')).called(1);
+    verify(
+      () => joinGroupUseCase.execute(
+        inviteCode: '123456',
+        displayName: any(named: 'displayName'),
+        avatarEmoji: any(named: 'avatarEmoji'),
+        avatarImageHash: any(named: 'avatarImageHash'),
+      ),
+    ).called(1);
     expect(find.text('Waiting for Approval...'), findsAtLeastNWidgets(1));
     expect(find.text('Owner phone'), findsOneWidget);
   });

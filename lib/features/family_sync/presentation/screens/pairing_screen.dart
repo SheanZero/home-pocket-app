@@ -6,8 +6,8 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/sync_status.dart';
-import '../../use_cases/create_group_use_case.dart';
-import '../../use_cases/join_group_use_case.dart';
+import '../../../../application/family_sync/create_group_use_case.dart';
+import '../../../../application/family_sync/join_group_use_case.dart';
 import '../providers/group_providers.dart';
 import '../providers/repository_providers.dart';
 import '../providers/sync_providers.dart';
@@ -52,7 +52,12 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
   Future<void> _createGroup() async {
     setState(() => _isCreating = true);
     final useCase = ref.read(createGroupUseCaseProvider);
-    final result = await useCase.execute();
+    // TODO: Pass real profile data once pairing screen is redesigned.
+    final result = await useCase.execute(
+      displayName: '',
+      avatarEmoji: '',
+      groupName: '',
+    );
     if (mounted) {
       setState(() {
         _createResult = result;
@@ -67,14 +72,19 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
       _joinResult = null;
     });
     final useCase = ref.read(joinGroupUseCaseProvider);
-    final result = await useCase.execute(code);
+    // TODO: Pass real profile data once pairing screen is redesigned.
+    final result = await useCase.execute(
+      inviteCode: code,
+      displayName: '',
+      avatarEmoji: '',
+    );
     if (mounted) {
       setState(() {
         _joinResult = result;
         _isJoining = false;
       });
 
-      if (result is JoinGroupSuccess) {
+      if (result is JoinGroupVerified) {
         ref
             .read(syncStatusNotifierProvider.notifier)
             .updateStatus(SyncStatus.pairing);

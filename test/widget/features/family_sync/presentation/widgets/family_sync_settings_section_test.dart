@@ -9,8 +9,8 @@ import 'package:home_pocket/features/family_sync/presentation/providers/reposito
 import 'package:home_pocket/features/family_sync/presentation/providers/sync_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/group_management_screen.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/pairing_screen.dart';
-import 'package:home_pocket/features/family_sync/use_cases/create_group_use_case.dart';
-import 'package:home_pocket/features/family_sync/use_cases/join_group_use_case.dart';
+import 'package:home_pocket/application/family_sync/create_group_use_case.dart';
+import 'package:home_pocket/application/family_sync/join_group_use_case.dart';
 import 'package:home_pocket/features/family_sync/use_cases/check_group_use_case.dart';
 import 'package:home_pocket/features/family_sync/presentation/widgets/family_sync_settings_section.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
@@ -84,7 +84,14 @@ void main() {
       final groupId = invocation.positionalArguments.first as String;
       return buildActiveGroup().copyWith(groupId: groupId);
     });
-    when(() => createGroupUseCase.execute()).thenAnswer(
+    when(
+      () => createGroupUseCase.execute(
+        displayName: any(named: 'displayName'),
+        avatarEmoji: any(named: 'avatarEmoji'),
+        groupName: any(named: 'groupName'),
+        avatarImageHash: any(named: 'avatarImageHash'),
+      ),
+    ).thenAnswer(
       (_) async => CreateGroupSuccess(
         groupId: 'group-1',
         inviteCode: '654321',
@@ -92,7 +99,12 @@ void main() {
       ),
     );
     when(
-      () => joinGroupUseCase.execute(any()),
+      () => joinGroupUseCase.execute(
+        inviteCode: any(named: 'inviteCode'),
+        displayName: any(named: 'displayName'),
+        avatarEmoji: any(named: 'avatarEmoji'),
+        avatarImageHash: any(named: 'avatarImageHash'),
+      ),
     ).thenAnswer((_) async => const JoinGroupError('Invalid invite code'));
     when(() => syncTriggerService.initialize()).thenAnswer((_) async {});
     when(
