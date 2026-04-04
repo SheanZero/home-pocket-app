@@ -91,6 +91,8 @@ void main() {
               'deviceName': 'My Phone',
               'role': 'owner',
               'status': 'active',
+              'displayName': 'Owner',
+              'avatarEmoji': '🏠',
             },
             {
               'deviceId': 'device-2',
@@ -98,6 +100,8 @@ void main() {
               'deviceName': 'Partner Phone',
               'role': 'member',
               'status': 'active',
+              'displayName': 'Partner',
+              'avatarEmoji': '🏠',
             },
           ],
         },
@@ -126,6 +130,8 @@ void main() {
               deviceName: 'My Phone',
               role: 'owner',
               status: 'active',
+              displayName: 'Owner',
+              avatarEmoji: '🏠',
             ),
             GroupMember(
               deviceId: 'device-2',
@@ -133,6 +139,8 @@ void main() {
               deviceName: 'Partner Phone',
               role: 'member',
               status: 'active',
+              displayName: 'Partner',
+              avatarEmoji: '🏠',
             ),
           ],
         ),
@@ -159,6 +167,8 @@ void main() {
               'deviceName': 'My Phone',
               'role': 'member',
               'status': 'active',
+              'displayName': 'Me',
+              'avatarEmoji': '🏠',
             },
             {
               'deviceId': 'device-2',
@@ -166,6 +176,8 @@ void main() {
               'deviceName': 'Owner Phone',
               'role': 'owner',
               'status': 'active',
+              'displayName': 'Owner',
+              'avatarEmoji': '🏠',
             },
           ],
         },
@@ -173,6 +185,7 @@ void main() {
       when(() => groupRepository.getGroupById('group-123')).thenAnswer(
         (_) async => GroupInfo(
           groupId: 'group-123',
+          groupName: 'Test Family',
           status: GroupStatus.confirming,
           role: 'member',
           members: const [
@@ -182,6 +195,8 @@ void main() {
               deviceName: 'My Phone',
               role: 'member',
               status: 'pending',
+              displayName: 'Me',
+              avatarEmoji: '🏠',
             ),
           ],
           createdAt: DateTime(2026, 3, 14),
@@ -200,6 +215,8 @@ void main() {
             deviceName: 'My Phone',
             role: 'member',
             status: 'active',
+            displayName: 'Me',
+            avatarEmoji: '🏠',
           ),
           GroupMember(
             deviceId: 'device-2',
@@ -207,6 +224,8 @@ void main() {
             deviceName: 'Owner Phone',
             role: 'owner',
             status: 'active',
+            displayName: 'Owner',
+            avatarEmoji: '🏠',
           ),
         ]),
       ).called(1);

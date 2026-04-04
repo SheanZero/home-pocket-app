@@ -53,6 +53,7 @@ void main() {
     when(
       () => groupRepository.savePendingGroup(
         groupId: any(named: 'groupId'),
+        groupName: any(named: 'groupName'),
         inviteCode: any(named: 'inviteCode'),
         inviteExpiresAt: any(named: 'inviteExpiresAt'),
         groupKey: any(named: 'groupKey'),
@@ -71,6 +72,7 @@ void main() {
     verify(
       () => groupRepository.savePendingGroup(
         groupId: 'group-1',
+        groupName: any(named: 'groupName'),
         inviteCode: 'INV123',
         inviteExpiresAt: DateTime.fromMillisecondsSinceEpoch(1000),
         groupKey: 'group-key',

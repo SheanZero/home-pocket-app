@@ -41,7 +41,7 @@ void main() {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-
+        groupName: 'Test Family',
         status: GroupStatus.active,
         role: 'owner',
         groupKey: 'group-key',
@@ -86,7 +86,7 @@ void main() {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-
+        groupName: 'Test Family',
         status: GroupStatus.active,
         role: 'owner',
         groupKey: 'group-key',
@@ -141,7 +141,7 @@ void main() {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-
+        groupName: 'Test Family',
         status: GroupStatus.active,
         role: 'owner',
         groupKey: 'group-key',

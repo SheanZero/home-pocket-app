@@ -83,6 +83,7 @@ class CreateGroupUseCase {
 
       await _groupRepository.savePendingGroup(
         groupId: groupId,
+        groupName: '',
         inviteCode: inviteCode,
         inviteExpiresAt: DateTime.fromMillisecondsSinceEpoch(expiresAt * 1000),
         groupKey: groupKey,

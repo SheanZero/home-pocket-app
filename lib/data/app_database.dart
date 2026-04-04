@@ -135,7 +135,9 @@ class AppDatabase extends _$AppDatabase {
         if (from < 12) {
           await migrator.createTable(userProfiles);
         }
-        if (from < 13) {
+        if (from >= 8 && from < 13) {
+          // Groups/GroupMembers tables were introduced in v8; only add columns
+          // when upgrading from a schema that already contains them.
           await transaction(() async {
             await migrator.addColumn(groups, groups.groupName);
             await migrator.addColumn(groupMembers, groupMembers.displayName);

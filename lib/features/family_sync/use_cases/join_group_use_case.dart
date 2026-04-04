@@ -65,6 +65,7 @@ class JoinGroupUseCase {
 
       await _groupRepository.saveConfirmingGroup(
         groupId: groupId,
+        groupName: '',
         members: members,
       );
 

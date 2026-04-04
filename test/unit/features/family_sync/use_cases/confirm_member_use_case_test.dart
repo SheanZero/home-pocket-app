@@ -59,7 +59,7 @@ void main() {
     when(() => groupRepository.getGroupById(any())).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-
+        groupName: 'Test Family',
         status: GroupStatus.pending,
         role: 'owner',
         groupKey: 'group-key',
@@ -70,6 +70,8 @@ void main() {
             deviceName: 'Member phone',
             role: 'member',
             status: 'pending',
+            displayName: 'Member',
+            avatarEmoji: '🏠',
           ),
         ],
         createdAt: DateTime(2026),
@@ -107,7 +109,7 @@ void main() {
     when(() => groupRepository.getGroupById(any())).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-
+        groupName: 'Test Family',
         status: GroupStatus.pending,
         role: 'owner',
         groupKey: null,

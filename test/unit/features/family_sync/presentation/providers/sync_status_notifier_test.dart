@@ -94,6 +94,7 @@ void main() {
 GroupInfo _buildActiveGroup() {
   return GroupInfo(
     groupId: 'group-1',
+    groupName: 'Test Family',
     status: GroupStatus.active,
     role: 'owner',
     members: const [],

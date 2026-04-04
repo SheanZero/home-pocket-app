@@ -28,6 +28,7 @@ void main() {
         Future<void>.delayed(const Duration(milliseconds: 50), () async {
           await repo.savePendingGroup(
             groupId: 'group-1',
+            groupName: 'Test Family',
             inviteCode: 'ABC123',
             inviteExpiresAt: DateTime.now().add(const Duration(hours: 1)),
             groupKey: 'group-key',

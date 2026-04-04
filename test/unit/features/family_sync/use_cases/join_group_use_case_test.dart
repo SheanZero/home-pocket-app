@@ -42,6 +42,7 @@ void main() {
     when(
       () => groupRepository.saveConfirmingGroup(
         groupId: any(named: 'groupId'),
+        groupName: any(named: 'groupName'),
         members: any(named: 'members'),
       ),
     ).thenAnswer((_) async {});
@@ -61,6 +62,8 @@ void main() {
             'deviceName': 'Owner phone',
             'role': 'owner',
             'status': 'active',
+            'displayName': 'Owner',
+            'avatarEmoji': '🏠',
           },
         ],
       },
@@ -72,6 +75,7 @@ void main() {
     verify(
       () => groupRepository.saveConfirmingGroup(
         groupId: 'group-1',
+        groupName: '',
         members: [
           const GroupMember(
             deviceId: 'owner-device',
@@ -79,6 +83,8 @@ void main() {
             deviceName: 'Owner phone',
             role: 'owner',
             status: 'active',
+            displayName: 'Owner',
+            avatarEmoji: '🏠',
           ),
         ],
       ),
