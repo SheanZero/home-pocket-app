@@ -287,10 +287,11 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
         children: [
           for (var index = 0; index < members.length; index++) ...[
             MemberListTile(
-              name: members[index].deviceName,
+              displayName: members[index].displayName,
+              avatarEmoji: members[index].avatarEmoji,
+              avatarImagePath: members[index].avatarImagePath,
               roleLabel: _roleLabel(context, members[index].role),
               isOwner: members[index].role == 'owner',
-              ownerBadgeLabel: S.of(context).familySyncRoleOwner,
             ),
             if (index < members.length - 1)
               const Divider(height: 1, color: AppColors.divider),
