@@ -109,7 +109,7 @@ void main() {
 
     await tester.pumpWidget(
       createLocalizedWidget(
-        const WaitingApprovalScreen(groupId: 'group-1'),
+        const WaitingApprovalScreen(groupName: 'Test Family', ownerDisplayName: 'Owner phone'),
         overrides: [
           groupRepositoryProvider.overrideWithValue(groupRepository),
           checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
@@ -142,7 +142,7 @@ void main() {
 
       await tester.pumpWidget(
         createLocalizedWidget(
-          const WaitingApprovalScreen(groupId: 'group-1'),
+          const WaitingApprovalScreen(groupName: 'Test Family', ownerDisplayName: 'Owner phone'),
           overrides: [
             groupRepositoryProvider.overrideWithValue(groupRepository),
             checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
@@ -174,7 +174,7 @@ void main() {
 
       await tester.pumpWidget(
         createLocalizedWidget(
-          const WaitingApprovalScreen(groupId: 'group-1'),
+          const WaitingApprovalScreen(groupName: 'Test Family', ownerDisplayName: 'Owner phone'),
           overrides: [
             groupRepositoryProvider.overrideWithValue(groupRepository),
             checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
@@ -207,7 +207,7 @@ void main() {
     await tester.runAsync(() async {
       await tester.pumpWidget(
         createLocalizedWidget(
-          const WaitingApprovalScreen(groupId: 'group-1'),
+          const WaitingApprovalScreen(groupName: 'Test Family', ownerDisplayName: 'Owner phone'),
           overrides: [
             groupRepositoryProvider.overrideWithValue(groupRepository),
             checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
@@ -241,7 +241,7 @@ void main() {
     await tester.runAsync(() async {
       await tester.pumpWidget(
         createLocalizedWidget(
-          const WaitingApprovalScreen(groupId: 'group-1'),
+          const WaitingApprovalScreen(groupName: 'Test Family', ownerDisplayName: 'Owner phone'),
           overrides: [
             groupRepositoryProvider.overrideWithValue(groupRepository),
             checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),

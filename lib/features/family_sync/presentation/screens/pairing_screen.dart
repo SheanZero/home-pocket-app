@@ -93,7 +93,10 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
         );
         Navigator.of(context).pushReplacement(
           MaterialPageRoute<void>(
-            builder: (_) => WaitingApprovalScreen(groupId: result.groupId),
+            builder: (_) => WaitingApprovalScreen(
+              groupName: result.groupName,
+              ownerDisplayName: result.ownerDisplayName,
+            ),
           ),
         );
       }
