@@ -882,4 +882,126 @@ class SZh extends S {
   String familySyncMinutesAgo(int minutes) {
     return '$minutes 分钟前';
   }
+
+  @override
+  String groupDefaultName(String name) {
+    return '$name的家';
+  }
+
+  @override
+  String get groupCreate => '创建 Group';
+
+  @override
+  String get groupName => 'Group 名';
+
+  @override
+  String get groupOwner => 'Owner';
+
+  @override
+  String get groupMember => '成员';
+
+  @override
+  String get groupInviteCode => '邀请码';
+
+  @override
+  String groupInviteExpiry(int minutes) {
+    return '$minutes分钟内有效';
+  }
+
+  @override
+  String get groupShareCode => '分享邀请码';
+
+  @override
+  String get groupEnterCode => '输入邀请码';
+
+  @override
+  String get groupVerify => '验证';
+
+  @override
+  String get groupConfirmJoin => '确认加入';
+
+  @override
+  String get groupJoinTarget => '你要加入的 Group';
+
+  @override
+  String get groupWaitingApproval => '等待 Owner 审批...';
+
+  @override
+  String groupWaitingDesc(String name) {
+    return '$name 正在确认你的请求';
+  }
+
+  @override
+  String get groupJoinRequest => '收到加入请求';
+
+  @override
+  String groupJoinRequestDesc(String name) {
+    return '$name 申请加入';
+  }
+
+  @override
+  String get groupApprove => '批准';
+
+  @override
+  String get groupReject => '拒绝';
+
+  @override
+  String get groupJoinSuccess => '欢迎加入！';
+
+  @override
+  String get groupRename => '修改 Group 名';
+
+  @override
+  String get groupRenameFailed => '修改名称失败';
+
+  @override
+  String get groupSyncing => '同步中';
+
+  @override
+  String get groupInvalidCode => '邀请码无效';
+
+  @override
+  String get groupCodeExpired => '邀请码已过期';
+
+  @override
+  String get groupMyName => '我的名称';
+
+  @override
+  String get groupEnterGroup => '进入 Group';
+
+  @override
+  String get groupChoiceTitle => '与家人连接';
+
+  @override
+  String get groupChoiceSubtitle => '一起管理家庭账本';
+
+  @override
+  String get groupCreateDesc => '创建新的家庭群组，邀请家庭成员加入';
+
+  @override
+  String get groupJoinDesc => '输入邀请码，加入已有的家庭群组';
+
+  @override
+  String get groupE2eeHint => '端到端加密保护隐私';
+
+  @override
+  String get groupInviteMembers => '邀请新成员';
+
+  @override
+  String get groupDisband => '解散 Group';
+
+  @override
+  String get groupCancel => '取消';
+
+  @override
+  String get groupWaitingHint1 => '请等待通知';
+
+  @override
+  String get groupWaitingHint2 => '关闭应用也没有关系';
+
+  @override
+  String get groupCodeHint => '请向群组的 Owner 索取邀请码';
+
+  @override
+  String get groupBack => '返回';
 }
