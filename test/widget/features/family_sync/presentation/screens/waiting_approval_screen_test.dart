@@ -28,7 +28,7 @@ void main() {
 
   GroupInfo buildConfirmingGroup() => GroupInfo(
     groupId: 'group-1',
-
+    groupName: 'Test Family',
     status: GroupStatus.confirming,
     role: 'member',
     members: const [
@@ -36,6 +36,8 @@ void main() {
         deviceId: 'owner-1',
         publicKey: 'pk-owner',
         deviceName: 'Owner phone',
+        displayName: 'Owner phone',
+        avatarEmoji: '🏠',
         role: 'owner',
         status: 'active',
       ),
@@ -43,6 +45,8 @@ void main() {
         deviceId: 'member-1',
         publicKey: 'pk-member',
         deviceName: 'My iPhone',
+        displayName: 'My iPhone',
+        avatarEmoji: '🏠',
         role: 'member',
         status: 'pending',
       ),
@@ -52,7 +56,7 @@ void main() {
 
   GroupInfo buildActiveGroup() => GroupInfo(
     groupId: 'group-1',
-
+    groupName: 'Test Family',
     status: GroupStatus.active,
     role: 'member',
     members: const [
@@ -60,6 +64,8 @@ void main() {
         deviceId: 'owner-1',
         publicKey: 'pk-owner',
         deviceName: 'Owner phone',
+        displayName: 'Owner phone',
+        avatarEmoji: '🏠',
         role: 'owner',
         status: 'active',
       ),
@@ -67,6 +73,8 @@ void main() {
         deviceId: 'member-1',
         publicKey: 'pk-member',
         deviceName: 'My iPhone',
+        displayName: 'My iPhone',
+        avatarEmoji: '🏠',
         role: 'member',
         status: 'active',
       ),

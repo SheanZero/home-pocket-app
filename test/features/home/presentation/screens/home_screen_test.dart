@@ -114,6 +114,7 @@ void main() {
       ).thenAnswer((_) => Stream.value(
         GroupInfo(
           groupId: 'group-1',
+          groupName: 'Test Family',
           status: GroupStatus.active,
           role: 'owner',
           members: const [],

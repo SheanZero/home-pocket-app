@@ -51,6 +51,7 @@ void main() {
 
   GroupInfo buildActiveGroup() => GroupInfo(
     groupId: 'group-1',
+    groupName: 'Test Family',
     status: GroupStatus.active,
     role: 'owner',
     members: const [
@@ -58,6 +59,8 @@ void main() {
         deviceId: 'owner-1',
         publicKey: 'pk-owner',
         deviceName: 'Owner phone',
+        displayName: 'Owner phone',
+        avatarEmoji: '🏠',
         role: 'owner',
         status: 'active',
       ),

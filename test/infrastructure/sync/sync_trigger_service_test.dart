@@ -156,7 +156,7 @@ void main() {
       when(() => groupRepository.getPendingGroup()).thenAnswer(
         (_) async => GroupInfo(
           groupId: 'group-1',
-
+          groupName: 'Test Family',
           status: GroupStatus.confirming,
           role: 'member',
           members: const [],
@@ -190,6 +190,8 @@ void main() {
               'deviceId': 'device-owner',
               'publicKey': 'pk-owner',
               'deviceName': 'Owner Phone',
+              'displayName': 'Owner Phone',
+              'avatarEmoji': '🏠',
               'role': 'owner',
               'status': 'active',
             },
@@ -197,6 +199,8 @@ void main() {
               'deviceId': 'device-new',
               'publicKey': 'pk-new',
               'deviceName': 'New Phone',
+              'displayName': 'New Phone',
+              'avatarEmoji': '🏠',
               'role': 'member',
               'status': 'pending',
             },
@@ -304,7 +308,7 @@ void main() {
       when(() => groupRepository.getGroupById('group-1')).thenAnswer(
         (_) async => GroupInfo(
           groupId: 'group-1',
-
+          groupName: 'Test Family',
           status: GroupStatus.active,
           role: 'owner',
           members: const [
@@ -312,6 +316,8 @@ void main() {
               deviceId: 'device-self',
               publicKey: 'pk-self',
               deviceName: 'My phone',
+              displayName: 'My phone',
+              avatarEmoji: '🏠',
               role: 'owner',
               status: 'active',
             ),
@@ -319,6 +325,8 @@ void main() {
               deviceId: 'device-other',
               publicKey: 'pk-other',
               deviceName: 'Other phone',
+              displayName: 'Other phone',
+              avatarEmoji: '🏠',
               role: 'member',
               status: 'active',
             ),
@@ -352,7 +360,7 @@ void main() {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-
+        groupName: 'Test Family',
         status: GroupStatus.active,
         role: 'member',
         members: const [],

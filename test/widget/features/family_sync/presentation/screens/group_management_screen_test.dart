@@ -52,7 +52,7 @@ void main() {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-
+        groupName: 'Test Family',
         status: GroupStatus.active,
         inviteCode: 'INV123',
         role: 'owner',
@@ -62,6 +62,8 @@ void main() {
             deviceId: 'owner-1',
             publicKey: 'pk-owner',
             deviceName: 'Owner phone',
+            displayName: 'Owner phone',
+            avatarEmoji: '🏠',
             role: 'owner',
             status: 'active',
           ),
@@ -69,6 +71,8 @@ void main() {
             deviceId: 'member-1',
             publicKey: 'pk-member',
             deviceName: 'Kitchen tablet',
+            displayName: 'Kitchen tablet',
+            avatarEmoji: '🏠',
             role: 'member',
             status: 'pending',
           ),
@@ -111,7 +115,7 @@ void main() {
     when(() => groupRepository.getGroupById('group-42')).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-42',
-
+        groupName: 'Test Family',
         status: GroupStatus.active,
         inviteCode: 'INV999',
         role: 'owner',
@@ -121,6 +125,8 @@ void main() {
             deviceId: 'owner-1',
             publicKey: 'pk-owner',
             deviceName: 'Owner phone',
+            displayName: 'Owner phone',
+            avatarEmoji: '🏠',
             role: 'owner',
             status: 'active',
           ),
