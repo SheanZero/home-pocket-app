@@ -18,6 +18,10 @@ mixin _$GroupMember {
   String get deviceName;
   String get role;
   String get status;
+  String get displayName;
+  String get avatarEmoji;
+  String? get avatarImagePath;
+  String? get avatarImageHash;
 
   /// Create a copy of GroupMember
   /// with the given fields replaced by the non-null parameter values.
@@ -41,17 +45,35 @@ mixin _$GroupMember {
             (identical(other.deviceName, deviceName) ||
                 other.deviceName == deviceName) &&
             (identical(other.role, role) || other.role == role) &&
-            (identical(other.status, status) || other.status == status));
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.displayName, displayName) ||
+                other.displayName == displayName) &&
+            (identical(other.avatarEmoji, avatarEmoji) ||
+                other.avatarEmoji == avatarEmoji) &&
+            (identical(other.avatarImagePath, avatarImagePath) ||
+                other.avatarImagePath == avatarImagePath) &&
+            (identical(other.avatarImageHash, avatarImageHash) ||
+                other.avatarImageHash == avatarImageHash));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, deviceId, publicKey, deviceName, role, status);
+  int get hashCode => Object.hash(
+    runtimeType,
+    deviceId,
+    publicKey,
+    deviceName,
+    role,
+    status,
+    displayName,
+    avatarEmoji,
+    avatarImagePath,
+    avatarImageHash,
+  );
 
   @override
   String toString() {
-    return 'GroupMember(deviceId: $deviceId, publicKey: $publicKey, deviceName: $deviceName, role: $role, status: $status)';
+    return 'GroupMember(deviceId: $deviceId, publicKey: $publicKey, deviceName: $deviceName, role: $role, status: $status, displayName: $displayName, avatarEmoji: $avatarEmoji, avatarImagePath: $avatarImagePath, avatarImageHash: $avatarImageHash)';
   }
 }
 
@@ -68,6 +90,10 @@ abstract mixin class $GroupMemberCopyWith<$Res> {
     String deviceName,
     String role,
     String status,
+    String displayName,
+    String avatarEmoji,
+    String? avatarImagePath,
+    String? avatarImageHash,
   });
 }
 
@@ -88,6 +114,10 @@ class _$GroupMemberCopyWithImpl<$Res> implements $GroupMemberCopyWith<$Res> {
     Object? deviceName = null,
     Object? role = null,
     Object? status = null,
+    Object? displayName = null,
+    Object? avatarEmoji = null,
+    Object? avatarImagePath = freezed,
+    Object? avatarImageHash = freezed,
   }) {
     return _then(
       _self.copyWith(
@@ -111,6 +141,22 @@ class _$GroupMemberCopyWithImpl<$Res> implements $GroupMemberCopyWith<$Res> {
             ? _self.status
             : status // ignore: cast_nullable_to_non_nullable
                   as String,
+        displayName: null == displayName
+            ? _self.displayName
+            : displayName // ignore: cast_nullable_to_non_nullable
+                  as String,
+        avatarEmoji: null == avatarEmoji
+            ? _self.avatarEmoji
+            : avatarEmoji // ignore: cast_nullable_to_non_nullable
+                  as String,
+        avatarImagePath: freezed == avatarImagePath
+            ? _self.avatarImagePath
+            : avatarImagePath // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        avatarImageHash: freezed == avatarImageHash
+            ? _self.avatarImageHash
+            : avatarImageHash // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -215,6 +261,10 @@ extension GroupMemberPatterns on GroupMember {
       String deviceName,
       String role,
       String status,
+      String displayName,
+      String avatarEmoji,
+      String? avatarImagePath,
+      String? avatarImageHash,
     )?
     $default, {
     required TResult orElse(),
@@ -228,6 +278,10 @@ extension GroupMemberPatterns on GroupMember {
           _that.deviceName,
           _that.role,
           _that.status,
+          _that.displayName,
+          _that.avatarEmoji,
+          _that.avatarImagePath,
+          _that.avatarImageHash,
         );
       case _:
         return orElse();
@@ -255,6 +309,10 @@ extension GroupMemberPatterns on GroupMember {
       String deviceName,
       String role,
       String status,
+      String displayName,
+      String avatarEmoji,
+      String? avatarImagePath,
+      String? avatarImageHash,
     )
     $default,
   ) {
@@ -267,6 +325,10 @@ extension GroupMemberPatterns on GroupMember {
           _that.deviceName,
           _that.role,
           _that.status,
+          _that.displayName,
+          _that.avatarEmoji,
+          _that.avatarImagePath,
+          _that.avatarImageHash,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -293,6 +355,10 @@ extension GroupMemberPatterns on GroupMember {
       String deviceName,
       String role,
       String status,
+      String displayName,
+      String avatarEmoji,
+      String? avatarImagePath,
+      String? avatarImageHash,
     )?
     $default,
   ) {
@@ -305,6 +371,10 @@ extension GroupMemberPatterns on GroupMember {
           _that.deviceName,
           _that.role,
           _that.status,
+          _that.displayName,
+          _that.avatarEmoji,
+          _that.avatarImagePath,
+          _that.avatarImageHash,
         );
       case _:
         return null;
@@ -321,6 +391,10 @@ class _GroupMember implements GroupMember {
     required this.deviceName,
     required this.role,
     required this.status,
+    required this.displayName,
+    required this.avatarEmoji,
+    this.avatarImagePath,
+    this.avatarImageHash,
   });
   factory _GroupMember.fromJson(Map<String, dynamic> json) =>
       _$GroupMemberFromJson(json);
@@ -335,6 +409,14 @@ class _GroupMember implements GroupMember {
   final String role;
   @override
   final String status;
+  @override
+  final String displayName;
+  @override
+  final String avatarEmoji;
+  @override
+  final String? avatarImagePath;
+  @override
+  final String? avatarImageHash;
 
   /// Create a copy of GroupMember
   /// with the given fields replaced by the non-null parameter values.
@@ -361,17 +443,35 @@ class _GroupMember implements GroupMember {
             (identical(other.deviceName, deviceName) ||
                 other.deviceName == deviceName) &&
             (identical(other.role, role) || other.role == role) &&
-            (identical(other.status, status) || other.status == status));
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.displayName, displayName) ||
+                other.displayName == displayName) &&
+            (identical(other.avatarEmoji, avatarEmoji) ||
+                other.avatarEmoji == avatarEmoji) &&
+            (identical(other.avatarImagePath, avatarImagePath) ||
+                other.avatarImagePath == avatarImagePath) &&
+            (identical(other.avatarImageHash, avatarImageHash) ||
+                other.avatarImageHash == avatarImageHash));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, deviceId, publicKey, deviceName, role, status);
+  int get hashCode => Object.hash(
+    runtimeType,
+    deviceId,
+    publicKey,
+    deviceName,
+    role,
+    status,
+    displayName,
+    avatarEmoji,
+    avatarImagePath,
+    avatarImageHash,
+  );
 
   @override
   String toString() {
-    return 'GroupMember(deviceId: $deviceId, publicKey: $publicKey, deviceName: $deviceName, role: $role, status: $status)';
+    return 'GroupMember(deviceId: $deviceId, publicKey: $publicKey, deviceName: $deviceName, role: $role, status: $status, displayName: $displayName, avatarEmoji: $avatarEmoji, avatarImagePath: $avatarImagePath, avatarImageHash: $avatarImageHash)';
   }
 }
 
@@ -390,6 +490,10 @@ abstract mixin class _$GroupMemberCopyWith<$Res>
     String deviceName,
     String role,
     String status,
+    String displayName,
+    String avatarEmoji,
+    String? avatarImagePath,
+    String? avatarImageHash,
   });
 }
 
@@ -410,6 +514,10 @@ class __$GroupMemberCopyWithImpl<$Res> implements _$GroupMemberCopyWith<$Res> {
     Object? deviceName = null,
     Object? role = null,
     Object? status = null,
+    Object? displayName = null,
+    Object? avatarEmoji = null,
+    Object? avatarImagePath = freezed,
+    Object? avatarImageHash = freezed,
   }) {
     return _then(
       _GroupMember(
@@ -433,6 +541,22 @@ class __$GroupMemberCopyWithImpl<$Res> implements _$GroupMemberCopyWith<$Res> {
             ? _self.status
             : status // ignore: cast_nullable_to_non_nullable
                   as String,
+        displayName: null == displayName
+            ? _self.displayName
+            : displayName // ignore: cast_nullable_to_non_nullable
+                  as String,
+        avatarEmoji: null == avatarEmoji
+            ? _self.avatarEmoji
+            : avatarEmoji // ignore: cast_nullable_to_non_nullable
+                  as String,
+        avatarImagePath: freezed == avatarImagePath
+            ? _self.avatarImagePath
+            : avatarImagePath // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        avatarImageHash: freezed == avatarImageHash
+            ? _self.avatarImageHash
+            : avatarImageHash // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }

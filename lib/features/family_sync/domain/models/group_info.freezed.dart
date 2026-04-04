@@ -15,6 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$GroupInfo {
   String get groupId;
   GroupStatus get status;
+  String get groupName;
   String? get inviteCode;
   DateTime? get inviteExpiresAt;
   String get role;
@@ -41,6 +42,8 @@ mixin _$GroupInfo {
             other is GroupInfo &&
             (identical(other.groupId, groupId) || other.groupId == groupId) &&
             (identical(other.status, status) || other.status == status) &&
+            (identical(other.groupName, groupName) ||
+                other.groupName == groupName) &&
             (identical(other.inviteCode, inviteCode) ||
                 other.inviteCode == inviteCode) &&
             (identical(other.inviteExpiresAt, inviteExpiresAt) ||
@@ -63,6 +66,7 @@ mixin _$GroupInfo {
     runtimeType,
     groupId,
     status,
+    groupName,
     inviteCode,
     inviteExpiresAt,
     role,
@@ -75,7 +79,7 @@ mixin _$GroupInfo {
 
   @override
   String toString() {
-    return 'GroupInfo(groupId: $groupId, status: $status, inviteCode: $inviteCode, inviteExpiresAt: $inviteExpiresAt, role: $role, groupKey: $groupKey, members: $members, createdAt: $createdAt, confirmedAt: $confirmedAt, lastSyncAt: $lastSyncAt)';
+    return 'GroupInfo(groupId: $groupId, status: $status, groupName: $groupName, inviteCode: $inviteCode, inviteExpiresAt: $inviteExpiresAt, role: $role, groupKey: $groupKey, members: $members, createdAt: $createdAt, confirmedAt: $confirmedAt, lastSyncAt: $lastSyncAt)';
   }
 }
 
@@ -87,6 +91,7 @@ abstract mixin class $GroupInfoCopyWith<$Res> {
   $Res call({
     String groupId,
     GroupStatus status,
+    String groupName,
     String? inviteCode,
     DateTime? inviteExpiresAt,
     String role,
@@ -112,6 +117,7 @@ class _$GroupInfoCopyWithImpl<$Res> implements $GroupInfoCopyWith<$Res> {
   $Res call({
     Object? groupId = null,
     Object? status = null,
+    Object? groupName = null,
     Object? inviteCode = freezed,
     Object? inviteExpiresAt = freezed,
     Object? role = null,
@@ -131,6 +137,10 @@ class _$GroupInfoCopyWithImpl<$Res> implements $GroupInfoCopyWith<$Res> {
             ? _self.status
             : status // ignore: cast_nullable_to_non_nullable
                   as GroupStatus,
+        groupName: null == groupName
+            ? _self.groupName
+            : groupName // ignore: cast_nullable_to_non_nullable
+                  as String,
         inviteCode: freezed == inviteCode
             ? _self.inviteCode
             : inviteCode // ignore: cast_nullable_to_non_nullable
@@ -264,6 +274,7 @@ extension GroupInfoPatterns on GroupInfo {
     TResult Function(
       String groupId,
       GroupStatus status,
+      String groupName,
       String? inviteCode,
       DateTime? inviteExpiresAt,
       String role,
@@ -282,6 +293,7 @@ extension GroupInfoPatterns on GroupInfo {
         return $default(
           _that.groupId,
           _that.status,
+          _that.groupName,
           _that.inviteCode,
           _that.inviteExpiresAt,
           _that.role,
@@ -314,6 +326,7 @@ extension GroupInfoPatterns on GroupInfo {
     TResult Function(
       String groupId,
       GroupStatus status,
+      String groupName,
       String? inviteCode,
       DateTime? inviteExpiresAt,
       String role,
@@ -331,6 +344,7 @@ extension GroupInfoPatterns on GroupInfo {
         return $default(
           _that.groupId,
           _that.status,
+          _that.groupName,
           _that.inviteCode,
           _that.inviteExpiresAt,
           _that.role,
@@ -362,6 +376,7 @@ extension GroupInfoPatterns on GroupInfo {
     TResult? Function(
       String groupId,
       GroupStatus status,
+      String groupName,
       String? inviteCode,
       DateTime? inviteExpiresAt,
       String role,
@@ -379,6 +394,7 @@ extension GroupInfoPatterns on GroupInfo {
         return $default(
           _that.groupId,
           _that.status,
+          _that.groupName,
           _that.inviteCode,
           _that.inviteExpiresAt,
           _that.role,
@@ -400,6 +416,7 @@ class _GroupInfo implements GroupInfo {
   const _GroupInfo({
     required this.groupId,
     required this.status,
+    required this.groupName,
     this.inviteCode,
     this.inviteExpiresAt,
     required this.role,
@@ -416,6 +433,8 @@ class _GroupInfo implements GroupInfo {
   final String groupId;
   @override
   final GroupStatus status;
+  @override
+  final String groupName;
   @override
   final String? inviteCode;
   @override
@@ -459,6 +478,8 @@ class _GroupInfo implements GroupInfo {
             other is _GroupInfo &&
             (identical(other.groupId, groupId) || other.groupId == groupId) &&
             (identical(other.status, status) || other.status == status) &&
+            (identical(other.groupName, groupName) ||
+                other.groupName == groupName) &&
             (identical(other.inviteCode, inviteCode) ||
                 other.inviteCode == inviteCode) &&
             (identical(other.inviteExpiresAt, inviteExpiresAt) ||
@@ -481,6 +502,7 @@ class _GroupInfo implements GroupInfo {
     runtimeType,
     groupId,
     status,
+    groupName,
     inviteCode,
     inviteExpiresAt,
     role,
@@ -493,7 +515,7 @@ class _GroupInfo implements GroupInfo {
 
   @override
   String toString() {
-    return 'GroupInfo(groupId: $groupId, status: $status, inviteCode: $inviteCode, inviteExpiresAt: $inviteExpiresAt, role: $role, groupKey: $groupKey, members: $members, createdAt: $createdAt, confirmedAt: $confirmedAt, lastSyncAt: $lastSyncAt)';
+    return 'GroupInfo(groupId: $groupId, status: $status, groupName: $groupName, inviteCode: $inviteCode, inviteExpiresAt: $inviteExpiresAt, role: $role, groupKey: $groupKey, members: $members, createdAt: $createdAt, confirmedAt: $confirmedAt, lastSyncAt: $lastSyncAt)';
   }
 }
 
@@ -509,6 +531,7 @@ abstract mixin class _$GroupInfoCopyWith<$Res>
   $Res call({
     String groupId,
     GroupStatus status,
+    String groupName,
     String? inviteCode,
     DateTime? inviteExpiresAt,
     String role,
@@ -534,6 +557,7 @@ class __$GroupInfoCopyWithImpl<$Res> implements _$GroupInfoCopyWith<$Res> {
   $Res call({
     Object? groupId = null,
     Object? status = null,
+    Object? groupName = null,
     Object? inviteCode = freezed,
     Object? inviteExpiresAt = freezed,
     Object? role = null,
@@ -553,6 +577,10 @@ class __$GroupInfoCopyWithImpl<$Res> implements _$GroupInfoCopyWith<$Res> {
             ? _self.status
             : status // ignore: cast_nullable_to_non_nullable
                   as GroupStatus,
+        groupName: null == groupName
+            ? _self.groupName
+            : groupName // ignore: cast_nullable_to_non_nullable
+                  as String,
         inviteCode: freezed == inviteCode
             ? _self.inviteCode
             : inviteCode // ignore: cast_nullable_to_non_nullable

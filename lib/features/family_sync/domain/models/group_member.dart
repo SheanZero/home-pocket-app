@@ -11,6 +11,10 @@ abstract class GroupMember with _$GroupMember {
     required String deviceName,
     required String role,
     required String status,
+    required String displayName,
+    required String avatarEmoji,
+    String? avatarImagePath,
+    String? avatarImageHash,
   }) = _GroupMember;
 
   factory GroupMember.fromJson(Map<String, dynamic> json) =>
