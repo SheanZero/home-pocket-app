@@ -38,4 +38,23 @@ class GroupMemberDao extends DatabaseAccessor<AppDatabase>
       await insertAll(entries);
     });
   }
+
+  Future<void> updateMemberProfile({
+    required String groupId,
+    required String deviceId,
+    required String displayName,
+    required String avatarEmoji,
+    String? avatarImagePath,
+    String? avatarImageHash,
+  }) =>
+      (update(groupMembers)..where(
+            (table) =>
+                table.groupId.equals(groupId) & table.deviceId.equals(deviceId),
+          ))
+          .write(GroupMembersCompanion(
+            displayName: Value(displayName),
+            avatarEmoji: Value(avatarEmoji),
+            avatarImagePath: Value(avatarImagePath),
+            avatarImageHash: Value(avatarImageHash),
+          ));
 }

@@ -69,4 +69,9 @@ class GroupDao extends DatabaseAccessor<AppDatabase> with _$GroupDaoMixin {
           inviteExpiresAt: Value(expiresAt),
         ),
       );
+
+  Future<void> updateGroupName(String groupId, String groupName) =>
+      (update(groups)..where((table) => table.groupId.equals(groupId))).write(
+        GroupsCompanion(groupName: Value(groupName)),
+      );
 }
