@@ -2,20 +2,26 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/sync/sync_trigger_service.dart';
 import '../../domain/models/group_info.dart';
 import '../../domain/models/group_member.dart';
-import '../../use_cases/confirm_member_use_case.dart';
+import '../../../../application/family_sync/confirm_member_use_case.dart';
 import '../../use_cases/remove_member_use_case.dart';
+import '../../../profile/presentation/widgets/avatar_display.dart';
 import '../providers/group_providers.dart';
 import '../providers/repository_providers.dart';
 import '../providers/sync_providers.dart';
 import 'group_management_screen.dart';
-import '../widgets/info_hint_box.dart';
-import '../widgets/member_list_tile.dart';
+
+const _purpleGradient = [
+  Color(0xFFE8D5F5),
+  Color(0xFFF3EAF9),
+  Color(0xFFFAF5FD),
+];
 
 class MemberApprovalScreen extends ConsumerStatefulWidget {
   const MemberApprovalScreen({super.key, this.groupId});
@@ -134,247 +140,267 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
+
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final group = _group;
     final pendingMembers =
-        group?.members.where((member) => member.status == 'pending').toList() ??
-        const <GroupMember>[];
+        group?.members.where((m) => m.status == 'pending').toList() ??
+            const <GroupMember>[];
+
+    // Show the first pending member in the new centered design
+    final applicant = pendingMembers.isNotEmpty ? pendingMembers.first : null;
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text(l10n.familySyncApprovalTitle)),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(24),
-              children: [
-                if (pendingMembers.isNotEmpty)
-                  ...pendingMembers.map(
-                    (member) => Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: _PendingApprovalCard(
-                        member: member,
-                        isApproving: _approvingMemberId == member.deviceId,
-                        isRejecting: _rejectingMemberId == member.deviceId,
-                        onApprove: () => _approve(member),
-                        onReject: () => _reject(member),
-                      ),
-                    ),
-                  )
-                else
-                  Text(
-                    l10n.familySyncApprovalTip,
-                    style: const TextStyle(
-                      fontFamily: 'IBM Plex Sans',
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                const SizedBox(height: 8),
-                InfoHintBox(message: l10n.familySyncApprovalTip),
-                const SizedBox(height: 24),
-                Text(
-                  l10n.familySyncCurrentMembers,
-                  style: const TextStyle(
-                    fontFamily: 'IBM Plex Sans',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x145A9CC8),
-                        blurRadius: 24,
-                        offset: Offset(0, 12),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      for (
-                        var index = 0;
-                        index < (group?.members.length ?? 0);
-                        index++
-                      ) ...[
-                        MemberListTile(
-                          name: group!.members[index].deviceName,
-                          roleLabel: _roleLabel(
-                            context,
-                            group.members[index].role,
-                          ),
-                          isOwner: group.members[index].role == 'owner',
-                          ownerBadgeLabel: l10n.familySyncRoleOwner,
-                        ),
-                        if (index < group.members.length - 1)
-                          const Divider(height: 1, color: AppColors.divider),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 42),
+            child: applicant != null
+                ? _buildApplicantView(l10n, applicant, group!)
+                : _buildEmptyView(l10n),
+          ),
+        ),
+      ),
     );
   }
 
-  String _roleLabel(BuildContext context, String role) {
-    final l10n = S.of(context);
-    return switch (role) {
-      'owner' => l10n.familySyncRoleOwner,
-      _ => l10n.familySyncRoleMember,
-    };
-  }
-}
+  Widget _buildApplicantView(S l10n, GroupMember applicant, GroupInfo group) {
+    final isBusy = _approvingMemberId != null || _rejectingMemberId != null;
 
-class _PendingApprovalCard extends StatelessWidget {
-  const _PendingApprovalCard({
-    required this.member,
-    required this.isApproving,
-    required this.isRejecting,
-    required this.onApprove,
-    required this.onReject,
-  });
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Bell icon
+        Icon(
+          LucideIcons.bellRing,
+          size: 32,
+          color: AppColors.accentPrimary,
+        ),
+        const SizedBox(height: 16),
 
-  final GroupMember member;
-  final bool isApproving;
-  final bool isRejecting;
-  final VoidCallback onApprove;
-  final VoidCallback onReject;
-
-  static const _coralColor = Color(0xFFE08870);
-
-  bool get _isBusy => isApproving || isRejecting;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = S.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x145A9CC8),
-            blurRadius: 24,
-            offset: Offset(0, 12),
+        // Title
+        Text(
+          l10n.groupJoinRequest,
+          style: const TextStyle(
+            fontFamily: 'Outfit',
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.familySyncNewRequest,
-            style: const TextStyle(
-              fontFamily: 'IBM Plex Sans',
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
+        ),
+        const SizedBox(height: 24),
+
+        // Applicant card
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x14000000),
+                blurRadius: 24,
+                offset: Offset(0, 8),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          MemberListTile(
-            name: member.deviceName,
-            roleLabel: l10n.familySyncRoleMember,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            l10n.familySyncSecurityVerified,
-            style: const TextStyle(
-              fontFamily: 'IBM Plex Sans',
-              fontSize: 13,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
+          child: Column(
             children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: _isBusy ? null : onReject,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: _coralColor,
-                    side: const BorderSide(color: _coralColor),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: isRejecting
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: _coralColor,
-                          ),
-                        )
-                      : Text(
-                          l10n.familySyncReject,
-                          style: const TextStyle(
-                            fontFamily: 'IBM Plex Sans',
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+              AvatarDisplay(
+                emoji: applicant.avatarEmoji,
+                size: 80,
+                gradientColors: _purpleGradient,
+              ),
+              const SizedBox(height: 14),
+              Text(
+                applicant.displayName,
+                style: const TextStyle(
+                  fontFamily: 'Outfit',
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    gradient: const LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        AppColors.fabGradientStart,
-                        AppColors.fabGradientEnd,
-                      ],
+              const SizedBox(height: 8),
+              Text(
+                l10n.groupJoinRequestDesc(applicant.displayName),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Outfit',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Group name tag
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      '\u{1F3E0}',
+                      style: TextStyle(fontSize: 12),
                     ),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: _isBusy ? null : onApprove,
-                      borderRadius: BorderRadius.circular(12),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        child: Center(
-                          child: isApproving
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Text(
-                                  l10n.familySyncApprove,
-                                  style: const TextStyle(
-                                    fontFamily: 'IBM Plex Sans',
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                        ),
+                    const SizedBox(width: 4),
+                    Text(
+                      group.groupName,
+                      style: const TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ],
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 28),
+
+        // Button row: Reject + Approve
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: isBusy ? null : () => _reject(applicant),
+                child: Container(
+                  height: 52,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.borderDefault),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (_rejectingMemberId == applicant.deviceId)
+                        const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.textSecondary,
+                          ),
+                        )
+                      else ...[
+                        const Icon(
+                          LucideIcons.x,
+                          size: 16,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          l10n.groupReject,
+                          style: const TextStyle(
+                            fontFamily: 'Outfit',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: GestureDetector(
+                onTap: isBusy ? null : () => _approve(applicant),
+                child: Container(
+                  height: 52,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFE85A4F), Color(0xFFF08070)],
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x28E85A4F),
+                        blurRadius: 20,
+                        offset: Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (_approvingMemberId == applicant.deviceId)
+                        const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      else ...[
+                        const Icon(
+                          LucideIcons.check,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          l10n.groupApprove,
+                          style: const TextStyle(
+                            fontFamily: 'Outfit',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyView(S l10n) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          LucideIcons.bellRing,
+          size: 32,
+          color: AppColors.textTertiary,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          l10n.familySyncApprovalTip,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontFamily: 'Outfit',
+            fontSize: 14,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
     );
   }
 }

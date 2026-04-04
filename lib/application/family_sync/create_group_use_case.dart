@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import '../../../infrastructure/crypto/models/device_key_pair.dart';
-import '../../../infrastructure/crypto/services/key_manager.dart';
-import '../../../infrastructure/sync/e2ee_service.dart';
-import '../../../infrastructure/sync/relay_api_client.dart';
-import '../domain/repositories/group_repository.dart';
+import '../../features/family_sync/domain/repositories/group_repository.dart';
+import '../../infrastructure/crypto/models/device_key_pair.dart';
+import '../../infrastructure/crypto/services/key_manager.dart';
+import '../../infrastructure/sync/e2ee_service.dart';
+import '../../infrastructure/sync/relay_api_client.dart';
 
 sealed class CreateGroupResult {
   const CreateGroupResult();
@@ -36,6 +36,9 @@ class CreateGroupError extends CreateGroupResult {
   final String message;
 }
 
+/// Creates a new family group with profile information.
+///
+/// Migrated from `features/family_sync/use_cases/` with added profile fields.
 class CreateGroupUseCase {
   CreateGroupUseCase({
     required RelayApiClient apiClient,
@@ -52,7 +55,12 @@ class CreateGroupUseCase {
   final GroupRepository _groupRepository;
   final E2EEService _e2eeService;
 
-  Future<CreateGroupResult> execute() async {
+  Future<CreateGroupResult> execute({
+    required String displayName,
+    required String avatarEmoji,
+    required String groupName,
+    String? avatarImageHash,
+  }) async {
     try {
       final identity = await _ensureDeviceIdentity();
       if (identity == null) {
@@ -66,7 +74,12 @@ class CreateGroupUseCase {
         platform: Platform.isIOS ? 'ios' : 'android',
       );
 
-      final response = await _apiClient.createGroup();
+      final response = await _apiClient.createGroup(
+        groupName: groupName,
+        displayName: displayName,
+        avatarEmoji: avatarEmoji,
+        avatarImageHash: avatarImageHash,
+      );
 
       final groupId = response['groupId'] as String?;
       final inviteCode = response['inviteCode'] as String?;
@@ -83,6 +96,7 @@ class CreateGroupUseCase {
 
       await _groupRepository.savePendingGroup(
         groupId: groupId,
+        groupName: groupName,
         inviteCode: inviteCode,
         inviteExpiresAt: DateTime.fromMillisecondsSinceEpoch(expiresAt * 1000),
         groupKey: groupKey,

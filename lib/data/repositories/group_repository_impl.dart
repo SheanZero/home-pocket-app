@@ -20,6 +20,7 @@ class GroupRepositoryImpl implements GroupRepository {
   @override
   Future<void> savePendingGroup({
     required String groupId,
+    required String groupName,
     required String inviteCode,
     required DateTime inviteExpiresAt,
     required String groupKey,
@@ -31,6 +32,7 @@ class GroupRepositoryImpl implements GroupRepository {
           groupId: groupId,
           status: 'pending',
           role: 'owner',
+          groupName: Value(groupName),
           inviteCode: Value(inviteCode),
           inviteExpiresAt: Value(inviteExpiresAt.millisecondsSinceEpoch),
           groupKey: Value(groupKey),
@@ -43,6 +45,7 @@ class GroupRepositoryImpl implements GroupRepository {
   @override
   Future<void> saveConfirmingGroup({
     required String groupId,
+    required String groupName,
     required List<GroupMember> members,
   }) async {
     await _groupDao.insert(
@@ -50,6 +53,7 @@ class GroupRepositoryImpl implements GroupRepository {
         groupId: groupId,
         status: 'confirming',
         role: 'member',
+        groupName: Value(groupName),
         createdAt: DateTime.now().millisecondsSinceEpoch,
       ),
     );
@@ -158,6 +162,28 @@ class GroupRepositoryImpl implements GroupRepository {
   Future<void> deactivateGroup(String groupId) =>
       _groupDao.updateStatus(groupId, 'inactive');
 
+  @override
+  Future<void> updateGroupName(String groupId, String groupName) =>
+      _groupDao.updateGroupName(groupId, groupName);
+
+  @override
+  Future<void> updateMemberProfile({
+    required String groupId,
+    required String deviceId,
+    required String displayName,
+    required String avatarEmoji,
+    String? avatarImagePath,
+    String? avatarImageHash,
+  }) =>
+      _memberDao.updateMemberProfile(
+        groupId: groupId,
+        deviceId: deviceId,
+        displayName: displayName,
+        avatarEmoji: avatarEmoji,
+        avatarImagePath: avatarImagePath,
+        avatarImageHash: avatarImageHash,
+      );
+
   List<GroupMembersCompanion> _toCompanions(
     String groupId,
     List<GroupMember> members,
@@ -171,6 +197,10 @@ class GroupRepositoryImpl implements GroupRepository {
             deviceName: member.deviceName,
             role: member.role,
             status: member.status,
+            displayName: Value(member.displayName),
+            avatarEmoji: Value(member.avatarEmoji),
+            avatarImagePath: Value(member.avatarImagePath),
+            avatarImageHash: Value(member.avatarImageHash),
           ),
         )
         .toList();
@@ -181,6 +211,7 @@ class GroupRepositoryImpl implements GroupRepository {
     return GroupInfo(
       groupId: group.groupId,
       status: GroupStatus.values.byName(group.status),
+      groupName: group.groupName,
       role: group.role,
       inviteCode: group.inviteCode,
       inviteExpiresAt: group.inviteExpiresAt != null
@@ -195,6 +226,10 @@ class GroupRepositoryImpl implements GroupRepository {
               deviceName: member.deviceName,
               role: member.role,
               status: member.status,
+              displayName: member.displayName,
+              avatarEmoji: member.avatarEmoji,
+              avatarImagePath: member.avatarImagePath,
+              avatarImageHash: member.avatarImageHash,
             ),
           )
           .toList(),

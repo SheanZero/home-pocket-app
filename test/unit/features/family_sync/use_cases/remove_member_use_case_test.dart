@@ -31,7 +31,7 @@ void main() {
     when(() => groupRepository.getGroupById('group-1')).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-
+        groupName: 'Test Family',
         status: GroupStatus.active,
         role: 'owner',
         groupKey: 'group-key',
@@ -42,6 +42,8 @@ void main() {
             deviceName: 'Owner phone',
             role: 'owner',
             status: 'active',
+            displayName: 'Owner',
+            avatarEmoji: '🏠',
           ),
           GroupMember(
             deviceId: 'member-1',
@@ -49,6 +51,8 @@ void main() {
             deviceName: 'Kitchen tablet',
             role: 'member',
             status: 'active',
+            displayName: 'Member',
+            avatarEmoji: '🏠',
           ),
         ],
         createdAt: DateTime(2026),
@@ -72,6 +76,8 @@ void main() {
           deviceName: 'Owner phone',
           role: 'owner',
           status: 'active',
+          displayName: 'Owner',
+          avatarEmoji: '🏠',
         ),
       ]),
     ).called(1);

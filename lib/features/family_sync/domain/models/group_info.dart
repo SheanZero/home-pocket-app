@@ -12,6 +12,7 @@ abstract class GroupInfo with _$GroupInfo {
   const factory GroupInfo({
     required String groupId,
     required GroupStatus status,
+    required String groupName,
     String? inviteCode,
     DateTime? inviteExpiresAt,
     required String role,

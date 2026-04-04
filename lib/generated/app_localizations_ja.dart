@@ -885,4 +885,126 @@ class SJa extends S {
   String familySyncMinutesAgo(int minutes) {
     return '$minutes分前';
   }
+
+  @override
+  String groupDefaultName(String name) {
+    return '$nameの家庭';
+  }
+
+  @override
+  String get groupCreate => 'グループを作成';
+
+  @override
+  String get groupName => 'グループ名';
+
+  @override
+  String get groupOwner => 'オーナー';
+
+  @override
+  String get groupMember => 'メンバー';
+
+  @override
+  String get groupInviteCode => '招待コード';
+
+  @override
+  String groupInviteExpiry(int minutes) {
+    return '$minutes分以内に有効';
+  }
+
+  @override
+  String get groupShareCode => '招待コードを共有';
+
+  @override
+  String get groupEnterCode => '招待コードを入力';
+
+  @override
+  String get groupVerify => '検証';
+
+  @override
+  String get groupConfirmJoin => '参加を確認';
+
+  @override
+  String get groupJoinTarget => '参加するグループ';
+
+  @override
+  String get groupWaitingApproval => 'オーナーの承認を待っています...';
+
+  @override
+  String groupWaitingDesc(String name) {
+    return '$name があなたのリクエストを確認中';
+  }
+
+  @override
+  String get groupJoinRequest => '参加リクエストを受信';
+
+  @override
+  String groupJoinRequestDesc(String name) {
+    return '$name が参加を申請しています';
+  }
+
+  @override
+  String get groupApprove => '承認';
+
+  @override
+  String get groupReject => '拒否';
+
+  @override
+  String get groupJoinSuccess => 'ようこそ！';
+
+  @override
+  String get groupRename => 'グループ名を変更';
+
+  @override
+  String get groupRenameFailed => '名前の変更に失敗しました';
+
+  @override
+  String get groupSyncing => '同期中';
+
+  @override
+  String get groupInvalidCode => '無効な招待コードです';
+
+  @override
+  String get groupCodeExpired => '招待コードの有効期限が切れました';
+
+  @override
+  String get groupMyName => '自分の名前';
+
+  @override
+  String get groupEnterGroup => 'グループへ';
+
+  @override
+  String get groupChoiceTitle => '家族とつながろう';
+
+  @override
+  String get groupChoiceSubtitle => '家計簿を一緒に管理しましょう';
+
+  @override
+  String get groupCreateDesc => '新しい家族グループを作って、メンバーを招待しましょう';
+
+  @override
+  String get groupJoinDesc => '招待コードを入力して、既存のグループに参加しましょう';
+
+  @override
+  String get groupE2eeHint => 'E2E暗号化でプライバシーを保護';
+
+  @override
+  String get groupInviteMembers => '新しいメンバーを招待';
+
+  @override
+  String get groupDisband => 'グループを解散';
+
+  @override
+  String get groupCancel => 'キャンセル';
+
+  @override
+  String get groupWaitingHint1 => '通知が届くまでお待ちください';
+
+  @override
+  String get groupWaitingHint2 => 'アプリを閉じても大丈夫です';
+
+  @override
+  String get groupCodeHint => '招待コードはグループのオーナーに聞いてください';
+
+  @override
+  String get groupBack => '戻る';
 }

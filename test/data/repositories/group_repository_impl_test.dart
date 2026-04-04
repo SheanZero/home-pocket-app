@@ -27,6 +27,7 @@ void main() {
 
     await repository.savePendingGroup(
       groupId: 'group-1',
+      groupName: 'My Family',
       inviteCode: 'ABC123',
       inviteExpiresAt: expiresAt,
       groupKey: 'group-key-base64',
@@ -52,6 +53,8 @@ void main() {
         deviceName: 'Owner phone',
         role: 'owner',
         status: 'active',
+        displayName: 'Owner',
+        avatarEmoji: '🏠',
       ),
       const GroupMember(
         deviceId: 'joiner-device',
@@ -59,10 +62,16 @@ void main() {
         deviceName: 'Joiner phone',
         role: 'member',
         status: 'pending',
+        displayName: 'Joiner',
+        avatarEmoji: '🏠',
       ),
     ];
 
-    await repository.saveConfirmingGroup(groupId: 'group-2', members: members);
+    await repository.saveConfirmingGroup(
+      groupId: 'group-2',
+      groupName: 'Family Group',
+      members: members,
+    );
 
     final pending = await repository.getPendingGroup();
 
@@ -87,6 +96,8 @@ void main() {
           deviceName: 'Owner phone',
           role: 'owner',
           status: 'active',
+          displayName: 'Owner',
+          avatarEmoji: '🏠',
         ),
         const GroupMember(
           deviceId: 'member-device',
@@ -94,6 +105,8 @@ void main() {
           deviceName: 'Member phone',
           role: 'member',
           status: 'active',
+          displayName: 'Member',
+          avatarEmoji: '🏠',
         ),
       ];
 

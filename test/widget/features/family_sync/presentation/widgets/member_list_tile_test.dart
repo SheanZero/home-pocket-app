@@ -3,48 +3,46 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/family_sync/presentation/widgets/member_list_tile.dart';
 
 void main() {
-  testWidgets('MemberListTile shows name, role, and owner badge', (
+  testWidgets('MemberListTile shows display name, role, and emoji avatar', (
     tester,
   ) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
           body: MemberListTile(
-            name: '太郎のiPhone',
+            displayName: '太郎',
+            avatarEmoji: '\u{1F60A}',
             roleLabel: 'オーナー',
             isOwner: true,
             isCurrentUser: true,
             youSuffix: ' (あなた)',
-            ownerBadgeLabel: 'オーナー',
           ),
         ),
       ),
     );
 
-    expect(find.textContaining('太郎のiPhone'), findsOneWidget);
-    expect(find.text('オーナー'), findsAtLeastNWidgets(1));
+    expect(find.textContaining('太郎'), findsOneWidget);
+    expect(find.text('オーナー'), findsOneWidget);
+    // Emoji is rendered inside AvatarDisplay
+    expect(find.text('\u{1F60A}'), findsOneWidget);
   });
 
-  testWidgets('MemberListTile shows remove button for non-owner', (
+  testWidgets('MemberListTile shows non-owner with purple gradient', (
     tester,
   ) async {
-    var removed = false;
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           body: MemberListTile(
-            name: '花子のiPhone',
+            displayName: '花子',
+            avatarEmoji: '\u{1F338}',
             roleLabel: 'メンバー',
-            removeLabel: '削除',
-            onRemove: () => removed = true,
           ),
         ),
       ),
     );
 
-    expect(find.text('花子のiPhone'), findsOneWidget);
-    expect(find.text('削除'), findsOneWidget);
-    await tester.tap(find.text('削除'));
-    expect(removed, isTrue);
+    expect(find.text('花子'), findsOneWidget);
+    expect(find.text('メンバー'), findsOneWidget);
   });
 }

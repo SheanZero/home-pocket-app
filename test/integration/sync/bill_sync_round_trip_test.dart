@@ -44,6 +44,7 @@ void main() {
     when(mockGroupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
+        groupName: 'Test Family',
         status: GroupStatus.active,
         role: 'owner',
         members: const [
@@ -51,6 +52,8 @@ void main() {
             deviceId: 'partner-device',
             publicKey: 'pk-partner',
             deviceName: 'Partner Phone',
+            displayName: 'Partner Phone',
+            avatarEmoji: '🏠',
             role: 'member',
             status: 'active',
           ),

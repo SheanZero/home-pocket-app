@@ -893,4 +893,126 @@ class SEn extends S {
   String familySyncMinutesAgo(int minutes) {
     return '$minutes min ago';
   }
+
+  @override
+  String groupDefaultName(String name) {
+    return '$name\'s Family';
+  }
+
+  @override
+  String get groupCreate => 'Create Group';
+
+  @override
+  String get groupName => 'Group Name';
+
+  @override
+  String get groupOwner => 'Owner';
+
+  @override
+  String get groupMember => 'Member';
+
+  @override
+  String get groupInviteCode => 'Invite Code';
+
+  @override
+  String groupInviteExpiry(int minutes) {
+    return 'Valid for $minutes minutes';
+  }
+
+  @override
+  String get groupShareCode => 'Share Invite Code';
+
+  @override
+  String get groupEnterCode => 'Enter Invite Code';
+
+  @override
+  String get groupVerify => 'Verify';
+
+  @override
+  String get groupConfirmJoin => 'Confirm Join';
+
+  @override
+  String get groupJoinTarget => 'Group to Join';
+
+  @override
+  String get groupWaitingApproval => 'Waiting for Owner approval...';
+
+  @override
+  String groupWaitingDesc(String name) {
+    return '$name is reviewing your request';
+  }
+
+  @override
+  String get groupJoinRequest => 'Join request received';
+
+  @override
+  String groupJoinRequestDesc(String name) {
+    return '$name wants to join';
+  }
+
+  @override
+  String get groupApprove => 'Approve';
+
+  @override
+  String get groupReject => 'Reject';
+
+  @override
+  String get groupJoinSuccess => 'Welcome!';
+
+  @override
+  String get groupRename => 'Rename Group';
+
+  @override
+  String get groupRenameFailed => 'Failed to rename';
+
+  @override
+  String get groupSyncing => 'Syncing';
+
+  @override
+  String get groupInvalidCode => 'Invalid invite code';
+
+  @override
+  String get groupCodeExpired => 'Invite code expired';
+
+  @override
+  String get groupMyName => 'My Name';
+
+  @override
+  String get groupEnterGroup => 'Enter Group';
+
+  @override
+  String get groupChoiceTitle => 'Connect with family';
+
+  @override
+  String get groupChoiceSubtitle => 'Manage your household budget together';
+
+  @override
+  String get groupCreateDesc => 'Create a new family group and invite members';
+
+  @override
+  String get groupJoinDesc => 'Enter an invite code to join an existing group';
+
+  @override
+  String get groupE2eeHint => 'Privacy protected with E2E encryption';
+
+  @override
+  String get groupInviteMembers => 'Invite new member';
+
+  @override
+  String get groupDisband => 'Disband Group';
+
+  @override
+  String get groupCancel => 'Cancel';
+
+  @override
+  String get groupWaitingHint1 => 'Please wait for the notification';
+
+  @override
+  String get groupWaitingHint2 => 'It\'s safe to close the app';
+
+  @override
+  String get groupCodeHint => 'Ask the group owner for the invite code';
+
+  @override
+  String get groupBack => 'Back';
 }

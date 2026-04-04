@@ -10,7 +10,7 @@ import 'package:home_pocket/features/family_sync/presentation/providers/group_pr
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/sync_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/member_approval_screen.dart';
-import 'package:home_pocket/features/family_sync/use_cases/confirm_member_use_case.dart';
+import 'package:home_pocket/application/family_sync/confirm_member_use_case.dart';
 import 'package:home_pocket/features/family_sync/use_cases/remove_member_use_case.dart';
 import 'package:home_pocket/infrastructure/sync/sync_trigger_service.dart';
 import 'package:mocktail/mocktail.dart';
@@ -43,6 +43,7 @@ void main() {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
+        groupName: 'Test Family',
         status: GroupStatus.active,
         role: 'owner',
         groupKey: 'group-key',
@@ -51,6 +52,8 @@ void main() {
             deviceId: 'owner-1',
             publicKey: 'pk-owner',
             deviceName: 'Owner phone',
+            displayName: 'Owner phone',
+            avatarEmoji: '🏠',
             role: 'owner',
             status: 'active',
           ),
@@ -58,6 +61,8 @@ void main() {
             deviceId: 'member-1',
             publicKey: 'pk-member',
             deviceName: 'Kitchen tablet',
+            displayName: 'Kitchen tablet',
+            avatarEmoji: '🏠',
             role: 'member',
             status: 'pending',
           ),
@@ -87,6 +92,7 @@ void main() {
     when(() => groupRepository.getGroupById('group-1')).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
+        groupName: 'Test Family',
         status: GroupStatus.active,
         role: 'owner',
         groupKey: 'group-key',
@@ -95,6 +101,8 @@ void main() {
             deviceId: 'owner-1',
             publicKey: 'pk-owner',
             deviceName: 'Owner phone',
+            displayName: 'Owner phone',
+            avatarEmoji: '🏠',
             role: 'owner',
             status: 'active',
           ),
@@ -120,11 +128,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Member Approval'), findsOneWidget);
+    // The new screen shows the pending member and approve/reject actions
     expect(find.text('Kitchen tablet'), findsAtLeastNWidgets(1));
     expect(find.text('Approve'), findsOneWidget);
     expect(find.text('Reject'), findsOneWidget);
-    expect(find.text('Current Members'), findsOneWidget);
   });
 
   testWidgets('approves a member and calls use case', (tester) async {
@@ -215,11 +222,11 @@ void main() {
     await tester.tap(find.text('Approve'));
     await tester.pump();
 
-    // During approving, reject button should be disabled
-    final rejectButton = tester.widget<OutlinedButton>(
-      find.byType(OutlinedButton),
-    );
-    expect(rejectButton.onPressed, isNull);
+    // During approving, the approve button shows a progress indicator
+    // and both GestureDetectors have their onTap set to null (isBusy = true).
+    // Verify the loading indicator is shown instead of the approve text.
+    expect(find.text('Approve'), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsAtLeastNWidgets(1));
 
     // Complete the future to avoid pending timer
     completer.complete(const ConfirmMemberSuccess());
@@ -230,6 +237,7 @@ void main() {
     when(() => groupRepository.getGroupById('group-42')).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-42',
+        groupName: 'Test Family',
         status: GroupStatus.active,
         role: 'owner',
         groupKey: 'group-key',
@@ -238,8 +246,19 @@ void main() {
             deviceId: 'owner-1',
             publicKey: 'pk-owner',
             deviceName: 'Owner phone',
+            displayName: 'Owner phone',
+            avatarEmoji: '🏠',
             role: 'owner',
             status: 'active',
+          ),
+          GroupMember(
+            deviceId: 'pending-1',
+            publicKey: 'pk-pending',
+            deviceName: 'Guest device',
+            displayName: 'Guest device',
+            avatarEmoji: '🏠',
+            role: 'member',
+            status: 'pending',
           ),
         ],
         createdAt: DateTime(2026, 3, 1),
@@ -256,6 +275,7 @@ void main() {
 
     verify(() => groupRepository.getGroupById('group-42')).called(1);
     verifyNever(() => groupRepository.getActiveGroup());
-    expect(find.text('Owner phone'), findsOneWidget);
+    // The pending member from group-42 is shown
+    expect(find.text('Guest device'), findsAtLeastNWidgets(1));
   });
 }

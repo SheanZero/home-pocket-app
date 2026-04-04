@@ -1760,6 +1760,234 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{minutes} min ago'**
   String familySyncMinutesAgo(int minutes);
+
+  /// No description provided for @groupDefaultName.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s Family'**
+  String groupDefaultName(String name);
+
+  /// No description provided for @groupCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Group'**
+  String get groupCreate;
+
+  /// No description provided for @groupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Name'**
+  String get groupName;
+
+  /// No description provided for @groupOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get groupOwner;
+
+  /// No description provided for @groupMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get groupMember;
+
+  /// No description provided for @groupInviteCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite Code'**
+  String get groupInviteCode;
+
+  /// No description provided for @groupInviteExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid for {minutes} minutes'**
+  String groupInviteExpiry(int minutes);
+
+  /// No description provided for @groupShareCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Invite Code'**
+  String get groupShareCode;
+
+  /// No description provided for @groupEnterCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Invite Code'**
+  String get groupEnterCode;
+
+  /// No description provided for @groupVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get groupVerify;
+
+  /// No description provided for @groupConfirmJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Join'**
+  String get groupConfirmJoin;
+
+  /// No description provided for @groupJoinTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Group to Join'**
+  String get groupJoinTarget;
+
+  /// No description provided for @groupWaitingApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for Owner approval...'**
+  String get groupWaitingApproval;
+
+  /// No description provided for @groupWaitingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is reviewing your request'**
+  String groupWaitingDesc(String name);
+
+  /// No description provided for @groupJoinRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Join request received'**
+  String get groupJoinRequest;
+
+  /// No description provided for @groupJoinRequestDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} wants to join'**
+  String groupJoinRequestDesc(String name);
+
+  /// No description provided for @groupApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get groupApprove;
+
+  /// No description provided for @groupReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get groupReject;
+
+  /// No description provided for @groupJoinSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome!'**
+  String get groupJoinSuccess;
+
+  /// No description provided for @groupRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename Group'**
+  String get groupRename;
+
+  /// No description provided for @groupRenameFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to rename'**
+  String get groupRenameFailed;
+
+  /// No description provided for @groupSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing'**
+  String get groupSyncing;
+
+  /// No description provided for @groupInvalidCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid invite code'**
+  String get groupInvalidCode;
+
+  /// No description provided for @groupCodeExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code expired'**
+  String get groupCodeExpired;
+
+  /// No description provided for @groupMyName.
+  ///
+  /// In en, this message translates to:
+  /// **'My Name'**
+  String get groupMyName;
+
+  /// No description provided for @groupEnterGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Group'**
+  String get groupEnterGroup;
+
+  /// No description provided for @groupChoiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect with family'**
+  String get groupChoiceTitle;
+
+  /// No description provided for @groupChoiceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your household budget together'**
+  String get groupChoiceSubtitle;
+
+  /// No description provided for @groupCreateDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new family group and invite members'**
+  String get groupCreateDesc;
+
+  /// No description provided for @groupJoinDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an invite code to join an existing group'**
+  String get groupJoinDesc;
+
+  /// No description provided for @groupE2eeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy protected with E2E encryption'**
+  String get groupE2eeHint;
+
+  /// No description provided for @groupInviteMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite new member'**
+  String get groupInviteMembers;
+
+  /// No description provided for @groupDisband.
+  ///
+  /// In en, this message translates to:
+  /// **'Disband Group'**
+  String get groupDisband;
+
+  /// No description provided for @groupCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get groupCancel;
+
+  /// No description provided for @groupWaitingHint1.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait for the notification'**
+  String get groupWaitingHint1;
+
+  /// No description provided for @groupWaitingHint2.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s safe to close the app'**
+  String get groupWaitingHint2;
+
+  /// No description provided for @groupCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the group owner for the invite code'**
+  String get groupCodeHint;
+
+  /// No description provided for @groupBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get groupBack;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

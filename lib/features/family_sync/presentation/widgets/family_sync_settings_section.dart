@@ -8,7 +8,7 @@ import '../providers/active_group_provider.dart';
 import '../providers/group_providers.dart';
 import '../providers/sync_providers.dart';
 import '../screens/group_management_screen.dart';
-import '../screens/pairing_screen.dart';
+import '../screens/group_choice_screen.dart';
 import 'sync_status_badge.dart';
 
 /// Settings section for Family Sync.
@@ -114,14 +114,14 @@ class FamilySyncSettingsSection extends ConsumerWidget {
       case CheckGroupNotInGroup():
         await Navigator.of(
           context,
-        ).push(MaterialPageRoute<void>(builder: (_) => const PairingScreen()));
+        ).push(MaterialPageRoute<void>(builder: (_) => const GroupChoiceScreen()));
       case CheckGroupError(:final message):
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.familySyncCheckFailed(message))),
         );
         await Navigator.of(
           context,
-        ).push(MaterialPageRoute<void>(builder: (_) => const PairingScreen()));
+        ).push(MaterialPageRoute<void>(builder: (_) => const GroupChoiceScreen()));
     }
   }
 

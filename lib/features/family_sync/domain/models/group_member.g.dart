@@ -12,6 +12,10 @@ _GroupMember _$GroupMemberFromJson(Map<String, dynamic> json) => _GroupMember(
   deviceName: json['deviceName'] as String,
   role: json['role'] as String,
   status: json['status'] as String,
+  displayName: json['displayName'] as String,
+  avatarEmoji: json['avatarEmoji'] as String,
+  avatarImagePath: json['avatarImagePath'] as String?,
+  avatarImageHash: json['avatarImageHash'] as String?,
 );
 
 Map<String, dynamic> _$GroupMemberToJson(_GroupMember instance) =>
@@ -21,4 +25,8 @@ Map<String, dynamic> _$GroupMemberToJson(_GroupMember instance) =>
       'deviceName': instance.deviceName,
       'role': instance.role,
       'status': instance.status,
+      'displayName': instance.displayName,
+      'avatarEmoji': instance.avatarEmoji,
+      'avatarImagePath': instance.avatarImagePath,
+      'avatarImageHash': instance.avatarImageHash,
     };

@@ -41,7 +41,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration {
@@ -134,6 +134,20 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 12) {
           await migrator.createTable(userProfiles);
+        }
+        if (from >= 8 && from < 13) {
+          // Groups/GroupMembers tables were introduced in v8; only add columns
+          // when upgrading from a schema that already contains them.
+          await transaction(() async {
+            await migrator.addColumn(groups, groups.groupName);
+            await migrator.addColumn(groupMembers, groupMembers.displayName);
+            await migrator.addColumn(groupMembers, groupMembers.avatarEmoji);
+            await migrator.addColumn(groupMembers, groupMembers.avatarImagePath);
+            await migrator.addColumn(groupMembers, groupMembers.avatarImageHash);
+            await customStatement(
+              "UPDATE group_members SET display_name = device_name WHERE display_name = ''",
+            );
+          });
         }
       },
     );

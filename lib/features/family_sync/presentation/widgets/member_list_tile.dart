@@ -1,50 +1,60 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import 'member_avatar.dart';
-import 'status_badge.dart';
+import '../../../profile/presentation/widgets/avatar_display.dart';
+
+const _purpleGradient = [
+  Color(0xFFE8D5F5),
+  Color(0xFFF3EAF9),
+  Color(0xFFFAF5FD),
+];
 
 class MemberListTile extends StatelessWidget {
   const MemberListTile({
     super.key,
-    required this.name,
+    required this.displayName,
+    required this.avatarEmoji,
+    this.avatarImagePath,
     required this.roleLabel,
     this.isOwner = false,
     this.isCurrentUser = false,
     this.youSuffix = '',
-    this.ownerBadgeLabel,
-    this.removeLabel,
     this.onRemove,
   });
 
-  final String name;
+  final String displayName;
+  final String avatarEmoji;
+  final String? avatarImagePath;
   final String roleLabel;
   final bool isOwner;
   final bool isCurrentUser;
   final String youSuffix;
-  final String? ownerBadgeLabel;
-  final String? removeLabel;
   final VoidCallback? onRemove;
 
   @override
   Widget build(BuildContext context) {
-    final displayName = isCurrentUser ? '$name$youSuffix' : name;
+    final name = isCurrentUser ? '$displayName$youSuffix' : displayName;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
-          MemberAvatar(name: name, isOwner: isOwner),
+          AvatarDisplay(
+            emoji: avatarEmoji,
+            imagePath: avatarImagePath,
+            size: 44,
+            gradientColors: isOwner ? null : _purpleGradient,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  displayName,
+                  name,
                   style: const TextStyle(
-                    fontFamily: 'IBM Plex Sans',
-                    fontSize: 14,
+                    fontFamily: 'Outfit',
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                   ),
@@ -52,30 +62,18 @@ class MemberListTile extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   roleLabel,
-                  style: const TextStyle(
-                    fontFamily: 'IBM Plex Sans',
+                  style: TextStyle(
+                    fontFamily: 'Outfit',
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    fontWeight: isOwner ? FontWeight.w500 : FontWeight.w400,
+                    color: isOwner
+                        ? AppColors.accentPrimary
+                        : AppColors.textSecondary,
                   ),
                 ),
               ],
             ),
           ),
-          if (isOwner && isCurrentUser && ownerBadgeLabel != null)
-            StatusBadge.owner(label: ownerBadgeLabel!)
-          else if (onRemove != null && removeLabel != null)
-            GestureDetector(
-              onTap: onRemove,
-              child: Text(
-                removeLabel!,
-                style: const TextStyle(
-                  fontFamily: 'IBM Plex Sans',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFFE08870),
-                ),
-              ),
-            ),
         ],
       ),
     );

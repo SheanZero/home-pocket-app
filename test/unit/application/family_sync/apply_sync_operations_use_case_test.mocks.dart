@@ -107,6 +107,7 @@ class MockGroupRepository extends _i1.Mock implements _i5.GroupRepository {
   @override
   _i3.Future<void> savePendingGroup({
     required String? groupId,
+    required String? groupName,
     required String? inviteCode,
     required DateTime? inviteExpiresAt,
     required String? groupKey,
@@ -114,6 +115,7 @@ class MockGroupRepository extends _i1.Mock implements _i5.GroupRepository {
       (super.noSuchMethod(
             Invocation.method(#savePendingGroup, [], {
               #groupId: groupId,
+              #groupName: groupName,
               #inviteCode: inviteCode,
               #inviteExpiresAt: inviteExpiresAt,
               #groupKey: groupKey,
@@ -126,11 +128,13 @@ class MockGroupRepository extends _i1.Mock implements _i5.GroupRepository {
   @override
   _i3.Future<void> saveConfirmingGroup({
     required String? groupId,
+    required String? groupName,
     required List<_i6.GroupMember>? members,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#saveConfirmingGroup, [], {
               #groupId: groupId,
+              #groupName: groupName,
               #members: members,
             }),
             returnValue: _i3.Future<void>.value(),
@@ -262,6 +266,38 @@ class MockGroupRepository extends _i1.Mock implements _i5.GroupRepository {
   _i3.Future<void> deactivateGroup(String? groupId) =>
       (super.noSuchMethod(
             Invocation.method(#deactivateGroup, [groupId]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> updateGroupName(String? groupId, String? groupName) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateGroupName, [groupId, groupName]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> updateMemberProfile({
+    required String? groupId,
+    required String? deviceId,
+    required String? displayName,
+    required String? avatarEmoji,
+    String? avatarImagePath,
+    String? avatarImageHash,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateMemberProfile, [], {
+              #groupId: groupId,
+              #deviceId: deviceId,
+              #displayName: displayName,
+              #avatarEmoji: avatarEmoji,
+              #avatarImagePath: avatarImagePath,
+              #avatarImageHash: avatarImageHash,
+            }),
             returnValue: _i3.Future<void>.value(),
             returnValueForMissingStub: _i3.Future<void>.value(),
           )

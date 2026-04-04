@@ -10,12 +10,14 @@ class AvatarDisplay extends StatelessWidget {
     required this.emoji,
     this.imagePath,
     this.size = 110,
+    this.gradientColors,
     this.onTap,
   });
 
   final String emoji;
   final String? imagePath;
   final double size;
+  final List<Color>? gradientColors;
   final VoidCallback? onTap;
 
   static const _lightGradient = [
@@ -32,6 +34,7 @@ class AvatarDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = gradientColors ?? (isDark ? _darkGradient : _lightGradient);
     final borderColor = isDark
         ? const Color(0x26FFFFFF)
         : const Color(0x80FFFFFF);
@@ -46,7 +49,7 @@ class AvatarDisplay extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: isDark ? _darkGradient : _lightGradient,
+            colors: colors,
           ),
           border: Border.all(color: borderColor, width: 2),
           boxShadow: [

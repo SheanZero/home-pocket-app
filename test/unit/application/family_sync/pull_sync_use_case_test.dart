@@ -64,7 +64,7 @@ void main() {
       when(() => groupRepository.getPendingGroup()).thenAnswer(
         (_) async => GroupInfo(
           groupId: 'group-1',
-
+          groupName: 'Test Family',
           status: GroupStatus.confirming,
           role: 'member',
           members: const [
@@ -74,6 +74,8 @@ void main() {
               deviceName: 'Owner phone',
               role: 'owner',
               status: 'active',
+              displayName: 'Owner',
+              avatarEmoji: '🏠',
             ),
           ],
           createdAt: DateTime(2026),
@@ -120,7 +122,7 @@ void main() {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-
+        groupName: 'Test Family',
         status: GroupStatus.active,
         role: 'owner',
         groupKey: 'group-key',
@@ -175,7 +177,7 @@ void main() {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-
+        groupName: 'Test Family',
         status: GroupStatus.active,
         role: 'owner',
         groupKey: 'group-key',
@@ -236,7 +238,7 @@ void main() {
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
-
+        groupName: 'Test Family',
         status: GroupStatus.active,
         role: 'owner',
         groupKey: 'group-key',

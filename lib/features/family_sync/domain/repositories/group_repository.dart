@@ -4,6 +4,7 @@ import '../models/group_member.dart';
 abstract class GroupRepository {
   Future<void> savePendingGroup({
     required String groupId,
+    required String groupName,
     required String inviteCode,
     required DateTime inviteExpiresAt,
     required String groupKey,
@@ -11,6 +12,7 @@ abstract class GroupRepository {
 
   Future<void> saveConfirmingGroup({
     required String groupId,
+    required String groupName,
     required List<GroupMember> members,
   });
 
@@ -47,4 +49,15 @@ abstract class GroupRepository {
   );
 
   Future<void> deactivateGroup(String groupId);
+
+  Future<void> updateGroupName(String groupId, String groupName);
+
+  Future<void> updateMemberProfile({
+    required String groupId,
+    required String deviceId,
+    required String displayName,
+    required String avatarEmoji,
+    String? avatarImagePath,
+    String? avatarImageHash,
+  });
 }

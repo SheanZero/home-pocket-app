@@ -2673,6 +2673,52 @@ class $GroupMembersTable extends GroupMembers
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _displayNameMeta = const VerificationMeta(
+    'displayName',
+  );
+  @override
+  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
+    'display_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _avatarEmojiMeta = const VerificationMeta(
+    'avatarEmoji',
+  );
+  @override
+  late final GeneratedColumn<String> avatarEmoji = GeneratedColumn<String>(
+    'avatar_emoji',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('🏠'),
+  );
+  static const VerificationMeta _avatarImagePathMeta = const VerificationMeta(
+    'avatarImagePath',
+  );
+  @override
+  late final GeneratedColumn<String> avatarImagePath = GeneratedColumn<String>(
+    'avatar_image_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _avatarImageHashMeta = const VerificationMeta(
+    'avatarImageHash',
+  );
+  @override
+  late final GeneratedColumn<String> avatarImageHash = GeneratedColumn<String>(
+    'avatar_image_hash',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     groupId,
@@ -2681,6 +2727,10 @@ class $GroupMembersTable extends GroupMembers
     deviceName,
     role,
     status,
+    displayName,
+    avatarEmoji,
+    avatarImagePath,
+    avatarImageHash,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2742,6 +2792,42 @@ class $GroupMembersTable extends GroupMembers
     } else if (isInserting) {
       context.missing(_statusMeta);
     }
+    if (data.containsKey('display_name')) {
+      context.handle(
+        _displayNameMeta,
+        displayName.isAcceptableOrUnknown(
+          data['display_name']!,
+          _displayNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('avatar_emoji')) {
+      context.handle(
+        _avatarEmojiMeta,
+        avatarEmoji.isAcceptableOrUnknown(
+          data['avatar_emoji']!,
+          _avatarEmojiMeta,
+        ),
+      );
+    }
+    if (data.containsKey('avatar_image_path')) {
+      context.handle(
+        _avatarImagePathMeta,
+        avatarImagePath.isAcceptableOrUnknown(
+          data['avatar_image_path']!,
+          _avatarImagePathMeta,
+        ),
+      );
+    }
+    if (data.containsKey('avatar_image_hash')) {
+      context.handle(
+        _avatarImageHashMeta,
+        avatarImageHash.isAcceptableOrUnknown(
+          data['avatar_image_hash']!,
+          _avatarImageHashMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2775,6 +2861,22 @@ class $GroupMembersTable extends GroupMembers
         DriftSqlType.string,
         data['${effectivePrefix}status'],
       )!,
+      displayName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_name'],
+      )!,
+      avatarEmoji: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}avatar_emoji'],
+      )!,
+      avatarImagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}avatar_image_path'],
+      ),
+      avatarImageHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}avatar_image_hash'],
+      ),
     );
   }
 
@@ -2791,6 +2893,10 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
   final String deviceName;
   final String role;
   final String status;
+  final String displayName;
+  final String avatarEmoji;
+  final String? avatarImagePath;
+  final String? avatarImageHash;
   const GroupMemberData({
     required this.groupId,
     required this.deviceId,
@@ -2798,6 +2904,10 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
     required this.deviceName,
     required this.role,
     required this.status,
+    required this.displayName,
+    required this.avatarEmoji,
+    this.avatarImagePath,
+    this.avatarImageHash,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2808,6 +2918,14 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
     map['device_name'] = Variable<String>(deviceName);
     map['role'] = Variable<String>(role);
     map['status'] = Variable<String>(status);
+    map['display_name'] = Variable<String>(displayName);
+    map['avatar_emoji'] = Variable<String>(avatarEmoji);
+    if (!nullToAbsent || avatarImagePath != null) {
+      map['avatar_image_path'] = Variable<String>(avatarImagePath);
+    }
+    if (!nullToAbsent || avatarImageHash != null) {
+      map['avatar_image_hash'] = Variable<String>(avatarImageHash);
+    }
     return map;
   }
 
@@ -2819,6 +2937,14 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
       deviceName: Value(deviceName),
       role: Value(role),
       status: Value(status),
+      displayName: Value(displayName),
+      avatarEmoji: Value(avatarEmoji),
+      avatarImagePath: avatarImagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(avatarImagePath),
+      avatarImageHash: avatarImageHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(avatarImageHash),
     );
   }
 
@@ -2834,6 +2960,10 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
       deviceName: serializer.fromJson<String>(json['deviceName']),
       role: serializer.fromJson<String>(json['role']),
       status: serializer.fromJson<String>(json['status']),
+      displayName: serializer.fromJson<String>(json['displayName']),
+      avatarEmoji: serializer.fromJson<String>(json['avatarEmoji']),
+      avatarImagePath: serializer.fromJson<String?>(json['avatarImagePath']),
+      avatarImageHash: serializer.fromJson<String?>(json['avatarImageHash']),
     );
   }
   @override
@@ -2846,6 +2976,10 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
       'deviceName': serializer.toJson<String>(deviceName),
       'role': serializer.toJson<String>(role),
       'status': serializer.toJson<String>(status),
+      'displayName': serializer.toJson<String>(displayName),
+      'avatarEmoji': serializer.toJson<String>(avatarEmoji),
+      'avatarImagePath': serializer.toJson<String?>(avatarImagePath),
+      'avatarImageHash': serializer.toJson<String?>(avatarImageHash),
     };
   }
 
@@ -2856,6 +2990,10 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
     String? deviceName,
     String? role,
     String? status,
+    String? displayName,
+    String? avatarEmoji,
+    Value<String?> avatarImagePath = const Value.absent(),
+    Value<String?> avatarImageHash = const Value.absent(),
   }) => GroupMemberData(
     groupId: groupId ?? this.groupId,
     deviceId: deviceId ?? this.deviceId,
@@ -2863,6 +3001,14 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
     deviceName: deviceName ?? this.deviceName,
     role: role ?? this.role,
     status: status ?? this.status,
+    displayName: displayName ?? this.displayName,
+    avatarEmoji: avatarEmoji ?? this.avatarEmoji,
+    avatarImagePath: avatarImagePath.present
+        ? avatarImagePath.value
+        : this.avatarImagePath,
+    avatarImageHash: avatarImageHash.present
+        ? avatarImageHash.value
+        : this.avatarImageHash,
   );
   GroupMemberData copyWithCompanion(GroupMembersCompanion data) {
     return GroupMemberData(
@@ -2874,6 +3020,18 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
           : this.deviceName,
       role: data.role.present ? data.role.value : this.role,
       status: data.status.present ? data.status.value : this.status,
+      displayName: data.displayName.present
+          ? data.displayName.value
+          : this.displayName,
+      avatarEmoji: data.avatarEmoji.present
+          ? data.avatarEmoji.value
+          : this.avatarEmoji,
+      avatarImagePath: data.avatarImagePath.present
+          ? data.avatarImagePath.value
+          : this.avatarImagePath,
+      avatarImageHash: data.avatarImageHash.present
+          ? data.avatarImageHash.value
+          : this.avatarImageHash,
     );
   }
 
@@ -2885,14 +3043,28 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
           ..write('publicKey: $publicKey, ')
           ..write('deviceName: $deviceName, ')
           ..write('role: $role, ')
-          ..write('status: $status')
+          ..write('status: $status, ')
+          ..write('displayName: $displayName, ')
+          ..write('avatarEmoji: $avatarEmoji, ')
+          ..write('avatarImagePath: $avatarImagePath, ')
+          ..write('avatarImageHash: $avatarImageHash')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(groupId, deviceId, publicKey, deviceName, role, status);
+  int get hashCode => Object.hash(
+    groupId,
+    deviceId,
+    publicKey,
+    deviceName,
+    role,
+    status,
+    displayName,
+    avatarEmoji,
+    avatarImagePath,
+    avatarImageHash,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2902,7 +3074,11 @@ class GroupMemberData extends DataClass implements Insertable<GroupMemberData> {
           other.publicKey == this.publicKey &&
           other.deviceName == this.deviceName &&
           other.role == this.role &&
-          other.status == this.status);
+          other.status == this.status &&
+          other.displayName == this.displayName &&
+          other.avatarEmoji == this.avatarEmoji &&
+          other.avatarImagePath == this.avatarImagePath &&
+          other.avatarImageHash == this.avatarImageHash);
 }
 
 class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
@@ -2912,6 +3088,10 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
   final Value<String> deviceName;
   final Value<String> role;
   final Value<String> status;
+  final Value<String> displayName;
+  final Value<String> avatarEmoji;
+  final Value<String?> avatarImagePath;
+  final Value<String?> avatarImageHash;
   final Value<int> rowid;
   const GroupMembersCompanion({
     this.groupId = const Value.absent(),
@@ -2920,6 +3100,10 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
     this.deviceName = const Value.absent(),
     this.role = const Value.absent(),
     this.status = const Value.absent(),
+    this.displayName = const Value.absent(),
+    this.avatarEmoji = const Value.absent(),
+    this.avatarImagePath = const Value.absent(),
+    this.avatarImageHash = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   GroupMembersCompanion.insert({
@@ -2929,6 +3113,10 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
     required String deviceName,
     required String role,
     required String status,
+    this.displayName = const Value.absent(),
+    this.avatarEmoji = const Value.absent(),
+    this.avatarImagePath = const Value.absent(),
+    this.avatarImageHash = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : groupId = Value(groupId),
        deviceId = Value(deviceId),
@@ -2943,6 +3131,10 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
     Expression<String>? deviceName,
     Expression<String>? role,
     Expression<String>? status,
+    Expression<String>? displayName,
+    Expression<String>? avatarEmoji,
+    Expression<String>? avatarImagePath,
+    Expression<String>? avatarImageHash,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2952,6 +3144,10 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
       if (deviceName != null) 'device_name': deviceName,
       if (role != null) 'role': role,
       if (status != null) 'status': status,
+      if (displayName != null) 'display_name': displayName,
+      if (avatarEmoji != null) 'avatar_emoji': avatarEmoji,
+      if (avatarImagePath != null) 'avatar_image_path': avatarImagePath,
+      if (avatarImageHash != null) 'avatar_image_hash': avatarImageHash,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2963,6 +3159,10 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
     Value<String>? deviceName,
     Value<String>? role,
     Value<String>? status,
+    Value<String>? displayName,
+    Value<String>? avatarEmoji,
+    Value<String?>? avatarImagePath,
+    Value<String?>? avatarImageHash,
     Value<int>? rowid,
   }) {
     return GroupMembersCompanion(
@@ -2972,6 +3172,10 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
       deviceName: deviceName ?? this.deviceName,
       role: role ?? this.role,
       status: status ?? this.status,
+      displayName: displayName ?? this.displayName,
+      avatarEmoji: avatarEmoji ?? this.avatarEmoji,
+      avatarImagePath: avatarImagePath ?? this.avatarImagePath,
+      avatarImageHash: avatarImageHash ?? this.avatarImageHash,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2997,6 +3201,18 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
     if (status.present) {
       map['status'] = Variable<String>(status.value);
     }
+    if (displayName.present) {
+      map['display_name'] = Variable<String>(displayName.value);
+    }
+    if (avatarEmoji.present) {
+      map['avatar_emoji'] = Variable<String>(avatarEmoji.value);
+    }
+    if (avatarImagePath.present) {
+      map['avatar_image_path'] = Variable<String>(avatarImagePath.value);
+    }
+    if (avatarImageHash.present) {
+      map['avatar_image_hash'] = Variable<String>(avatarImageHash.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3012,6 +3228,10 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMemberData> {
           ..write('deviceName: $deviceName, ')
           ..write('role: $role, ')
           ..write('status: $status, ')
+          ..write('displayName: $displayName, ')
+          ..write('avatarEmoji: $avatarEmoji, ')
+          ..write('avatarImagePath: $avatarImagePath, ')
+          ..write('avatarImageHash: $avatarImageHash, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3051,6 +3271,18 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, GroupData> {
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _groupNameMeta = const VerificationMeta(
+    'groupName',
+  );
+  @override
+  late final GeneratedColumn<String> groupName = GeneratedColumn<String>(
+    'group_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
   );
   static const VerificationMeta _inviteCodeMeta = const VerificationMeta(
     'inviteCode',
@@ -3123,6 +3355,7 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, GroupData> {
     groupId,
     status,
     role,
+    groupName,
     inviteCode,
     inviteExpiresAt,
     groupKey,
@@ -3165,6 +3398,12 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, GroupData> {
       );
     } else if (isInserting) {
       context.missing(_roleMeta);
+    }
+    if (data.containsKey('group_name')) {
+      context.handle(
+        _groupNameMeta,
+        groupName.isAcceptableOrUnknown(data['group_name']!, _groupNameMeta),
+      );
     }
     if (data.containsKey('invite_code')) {
       context.handle(
@@ -3234,6 +3473,10 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, GroupData> {
         DriftSqlType.string,
         data['${effectivePrefix}role'],
       )!,
+      groupName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_name'],
+      )!,
       inviteCode: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}invite_code'],
@@ -3271,6 +3514,7 @@ class GroupData extends DataClass implements Insertable<GroupData> {
   final String groupId;
   final String status;
   final String role;
+  final String groupName;
   final String? inviteCode;
   final int? inviteExpiresAt;
   final String? groupKey;
@@ -3281,6 +3525,7 @@ class GroupData extends DataClass implements Insertable<GroupData> {
     required this.groupId,
     required this.status,
     required this.role,
+    required this.groupName,
     this.inviteCode,
     this.inviteExpiresAt,
     this.groupKey,
@@ -3294,6 +3539,7 @@ class GroupData extends DataClass implements Insertable<GroupData> {
     map['group_id'] = Variable<String>(groupId);
     map['status'] = Variable<String>(status);
     map['role'] = Variable<String>(role);
+    map['group_name'] = Variable<String>(groupName);
     if (!nullToAbsent || inviteCode != null) {
       map['invite_code'] = Variable<String>(inviteCode);
     }
@@ -3318,6 +3564,7 @@ class GroupData extends DataClass implements Insertable<GroupData> {
       groupId: Value(groupId),
       status: Value(status),
       role: Value(role),
+      groupName: Value(groupName),
       inviteCode: inviteCode == null && nullToAbsent
           ? const Value.absent()
           : Value(inviteCode),
@@ -3346,6 +3593,7 @@ class GroupData extends DataClass implements Insertable<GroupData> {
       groupId: serializer.fromJson<String>(json['groupId']),
       status: serializer.fromJson<String>(json['status']),
       role: serializer.fromJson<String>(json['role']),
+      groupName: serializer.fromJson<String>(json['groupName']),
       inviteCode: serializer.fromJson<String?>(json['inviteCode']),
       inviteExpiresAt: serializer.fromJson<int?>(json['inviteExpiresAt']),
       groupKey: serializer.fromJson<String?>(json['groupKey']),
@@ -3361,6 +3609,7 @@ class GroupData extends DataClass implements Insertable<GroupData> {
       'groupId': serializer.toJson<String>(groupId),
       'status': serializer.toJson<String>(status),
       'role': serializer.toJson<String>(role),
+      'groupName': serializer.toJson<String>(groupName),
       'inviteCode': serializer.toJson<String?>(inviteCode),
       'inviteExpiresAt': serializer.toJson<int?>(inviteExpiresAt),
       'groupKey': serializer.toJson<String?>(groupKey),
@@ -3374,6 +3623,7 @@ class GroupData extends DataClass implements Insertable<GroupData> {
     String? groupId,
     String? status,
     String? role,
+    String? groupName,
     Value<String?> inviteCode = const Value.absent(),
     Value<int?> inviteExpiresAt = const Value.absent(),
     Value<String?> groupKey = const Value.absent(),
@@ -3384,6 +3634,7 @@ class GroupData extends DataClass implements Insertable<GroupData> {
     groupId: groupId ?? this.groupId,
     status: status ?? this.status,
     role: role ?? this.role,
+    groupName: groupName ?? this.groupName,
     inviteCode: inviteCode.present ? inviteCode.value : this.inviteCode,
     inviteExpiresAt: inviteExpiresAt.present
         ? inviteExpiresAt.value
@@ -3398,6 +3649,7 @@ class GroupData extends DataClass implements Insertable<GroupData> {
       groupId: data.groupId.present ? data.groupId.value : this.groupId,
       status: data.status.present ? data.status.value : this.status,
       role: data.role.present ? data.role.value : this.role,
+      groupName: data.groupName.present ? data.groupName.value : this.groupName,
       inviteCode: data.inviteCode.present
           ? data.inviteCode.value
           : this.inviteCode,
@@ -3421,6 +3673,7 @@ class GroupData extends DataClass implements Insertable<GroupData> {
           ..write('groupId: $groupId, ')
           ..write('status: $status, ')
           ..write('role: $role, ')
+          ..write('groupName: $groupName, ')
           ..write('inviteCode: $inviteCode, ')
           ..write('inviteExpiresAt: $inviteExpiresAt, ')
           ..write('groupKey: $groupKey, ')
@@ -3436,6 +3689,7 @@ class GroupData extends DataClass implements Insertable<GroupData> {
     groupId,
     status,
     role,
+    groupName,
     inviteCode,
     inviteExpiresAt,
     groupKey,
@@ -3450,6 +3704,7 @@ class GroupData extends DataClass implements Insertable<GroupData> {
           other.groupId == this.groupId &&
           other.status == this.status &&
           other.role == this.role &&
+          other.groupName == this.groupName &&
           other.inviteCode == this.inviteCode &&
           other.inviteExpiresAt == this.inviteExpiresAt &&
           other.groupKey == this.groupKey &&
@@ -3462,6 +3717,7 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
   final Value<String> groupId;
   final Value<String> status;
   final Value<String> role;
+  final Value<String> groupName;
   final Value<String?> inviteCode;
   final Value<int?> inviteExpiresAt;
   final Value<String?> groupKey;
@@ -3473,6 +3729,7 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
     this.groupId = const Value.absent(),
     this.status = const Value.absent(),
     this.role = const Value.absent(),
+    this.groupName = const Value.absent(),
     this.inviteCode = const Value.absent(),
     this.inviteExpiresAt = const Value.absent(),
     this.groupKey = const Value.absent(),
@@ -3485,6 +3742,7 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
     required String groupId,
     required String status,
     required String role,
+    this.groupName = const Value.absent(),
     this.inviteCode = const Value.absent(),
     this.inviteExpiresAt = const Value.absent(),
     this.groupKey = const Value.absent(),
@@ -3500,6 +3758,7 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
     Expression<String>? groupId,
     Expression<String>? status,
     Expression<String>? role,
+    Expression<String>? groupName,
     Expression<String>? inviteCode,
     Expression<int>? inviteExpiresAt,
     Expression<String>? groupKey,
@@ -3512,6 +3771,7 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
       if (groupId != null) 'group_id': groupId,
       if (status != null) 'status': status,
       if (role != null) 'role': role,
+      if (groupName != null) 'group_name': groupName,
       if (inviteCode != null) 'invite_code': inviteCode,
       if (inviteExpiresAt != null) 'invite_expires_at': inviteExpiresAt,
       if (groupKey != null) 'group_key': groupKey,
@@ -3526,6 +3786,7 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
     Value<String>? groupId,
     Value<String>? status,
     Value<String>? role,
+    Value<String>? groupName,
     Value<String?>? inviteCode,
     Value<int?>? inviteExpiresAt,
     Value<String?>? groupKey,
@@ -3538,6 +3799,7 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
       groupId: groupId ?? this.groupId,
       status: status ?? this.status,
       role: role ?? this.role,
+      groupName: groupName ?? this.groupName,
       inviteCode: inviteCode ?? this.inviteCode,
       inviteExpiresAt: inviteExpiresAt ?? this.inviteExpiresAt,
       groupKey: groupKey ?? this.groupKey,
@@ -3559,6 +3821,9 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
     }
     if (role.present) {
       map['role'] = Variable<String>(role.value);
+    }
+    if (groupName.present) {
+      map['group_name'] = Variable<String>(groupName.value);
     }
     if (inviteCode.present) {
       map['invite_code'] = Variable<String>(inviteCode.value);
@@ -3590,6 +3855,7 @@ class GroupsCompanion extends UpdateCompanion<GroupData> {
           ..write('groupId: $groupId, ')
           ..write('status: $status, ')
           ..write('role: $role, ')
+          ..write('groupName: $groupName, ')
           ..write('inviteCode: $inviteCode, ')
           ..write('inviteExpiresAt: $inviteExpiresAt, ')
           ..write('groupKey: $groupKey, ')
@@ -7746,6 +8012,10 @@ typedef $$GroupMembersTableCreateCompanionBuilder =
       required String deviceName,
       required String role,
       required String status,
+      Value<String> displayName,
+      Value<String> avatarEmoji,
+      Value<String?> avatarImagePath,
+      Value<String?> avatarImageHash,
       Value<int> rowid,
     });
 typedef $$GroupMembersTableUpdateCompanionBuilder =
@@ -7756,6 +8026,10 @@ typedef $$GroupMembersTableUpdateCompanionBuilder =
       Value<String> deviceName,
       Value<String> role,
       Value<String> status,
+      Value<String> displayName,
+      Value<String> avatarEmoji,
+      Value<String?> avatarImagePath,
+      Value<String?> avatarImageHash,
       Value<int> rowid,
     });
 
@@ -7795,6 +8069,26 @@ class $$GroupMembersTableFilterComposer
 
   ColumnFilters<String> get status => $composableBuilder(
     column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get avatarEmoji => $composableBuilder(
+    column: $table.avatarEmoji,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get avatarImagePath => $composableBuilder(
+    column: $table.avatarImagePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get avatarImageHash => $composableBuilder(
+    column: $table.avatarImageHash,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -7837,6 +8131,26 @@ class $$GroupMembersTableOrderingComposer
     column: $table.status,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get avatarEmoji => $composableBuilder(
+    column: $table.avatarEmoji,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get avatarImagePath => $composableBuilder(
+    column: $table.avatarImagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get avatarImageHash => $composableBuilder(
+    column: $table.avatarImageHash,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$GroupMembersTableAnnotationComposer
@@ -7867,6 +8181,26 @@ class $$GroupMembersTableAnnotationComposer
 
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get avatarEmoji => $composableBuilder(
+    column: $table.avatarEmoji,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get avatarImagePath => $composableBuilder(
+    column: $table.avatarImagePath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get avatarImageHash => $composableBuilder(
+    column: $table.avatarImageHash,
+    builder: (column) => column,
+  );
 }
 
 class $$GroupMembersTableTableManager
@@ -7906,6 +8240,10 @@ class $$GroupMembersTableTableManager
                 Value<String> deviceName = const Value.absent(),
                 Value<String> role = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<String> displayName = const Value.absent(),
+                Value<String> avatarEmoji = const Value.absent(),
+                Value<String?> avatarImagePath = const Value.absent(),
+                Value<String?> avatarImageHash = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => GroupMembersCompanion(
                 groupId: groupId,
@@ -7914,6 +8252,10 @@ class $$GroupMembersTableTableManager
                 deviceName: deviceName,
                 role: role,
                 status: status,
+                displayName: displayName,
+                avatarEmoji: avatarEmoji,
+                avatarImagePath: avatarImagePath,
+                avatarImageHash: avatarImageHash,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -7924,6 +8266,10 @@ class $$GroupMembersTableTableManager
                 required String deviceName,
                 required String role,
                 required String status,
+                Value<String> displayName = const Value.absent(),
+                Value<String> avatarEmoji = const Value.absent(),
+                Value<String?> avatarImagePath = const Value.absent(),
+                Value<String?> avatarImageHash = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => GroupMembersCompanion.insert(
                 groupId: groupId,
@@ -7932,6 +8278,10 @@ class $$GroupMembersTableTableManager
                 deviceName: deviceName,
                 role: role,
                 status: status,
+                displayName: displayName,
+                avatarEmoji: avatarEmoji,
+                avatarImagePath: avatarImagePath,
+                avatarImageHash: avatarImageHash,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -7964,6 +8314,7 @@ typedef $$GroupsTableCreateCompanionBuilder =
       required String groupId,
       required String status,
       required String role,
+      Value<String> groupName,
       Value<String?> inviteCode,
       Value<int?> inviteExpiresAt,
       Value<String?> groupKey,
@@ -7977,6 +8328,7 @@ typedef $$GroupsTableUpdateCompanionBuilder =
       Value<String> groupId,
       Value<String> status,
       Value<String> role,
+      Value<String> groupName,
       Value<String?> inviteCode,
       Value<int?> inviteExpiresAt,
       Value<String?> groupKey,
@@ -8007,6 +8359,11 @@ class $$GroupsTableFilterComposer
 
   ColumnFilters<String> get role => $composableBuilder(
     column: $table.role,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get groupName => $composableBuilder(
+    column: $table.groupName,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8065,6 +8422,11 @@ class $$GroupsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get groupName => $composableBuilder(
+    column: $table.groupName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get inviteCode => $composableBuilder(
     column: $table.inviteCode,
     builder: (column) => ColumnOrderings(column),
@@ -8113,6 +8475,9 @@ class $$GroupsTableAnnotationComposer
 
   GeneratedColumn<String> get role =>
       $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<String> get groupName =>
+      $composableBuilder(column: $table.groupName, builder: (column) => column);
 
   GeneratedColumn<String> get inviteCode => $composableBuilder(
     column: $table.inviteCode,
@@ -8172,6 +8537,7 @@ class $$GroupsTableTableManager
                 Value<String> groupId = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<String> role = const Value.absent(),
+                Value<String> groupName = const Value.absent(),
                 Value<String?> inviteCode = const Value.absent(),
                 Value<int?> inviteExpiresAt = const Value.absent(),
                 Value<String?> groupKey = const Value.absent(),
@@ -8183,6 +8549,7 @@ class $$GroupsTableTableManager
                 groupId: groupId,
                 status: status,
                 role: role,
+                groupName: groupName,
                 inviteCode: inviteCode,
                 inviteExpiresAt: inviteExpiresAt,
                 groupKey: groupKey,
@@ -8196,6 +8563,7 @@ class $$GroupsTableTableManager
                 required String groupId,
                 required String status,
                 required String role,
+                Value<String> groupName = const Value.absent(),
                 Value<String?> inviteCode = const Value.absent(),
                 Value<int?> inviteExpiresAt = const Value.absent(),
                 Value<String?> groupKey = const Value.absent(),
@@ -8207,6 +8575,7 @@ class $$GroupsTableTableManager
                 groupId: groupId,
                 status: status,
                 role: role,
+                groupName: groupName,
                 inviteCode: inviteCode,
                 inviteExpiresAt: inviteExpiresAt,
                 groupKey: groupKey,
