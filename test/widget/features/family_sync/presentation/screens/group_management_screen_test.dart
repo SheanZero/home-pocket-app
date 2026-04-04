@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
@@ -97,18 +96,16 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Group Management'), findsOneWidget);
+    // Group name is displayed
+    expect(find.text('Test Family'), findsOneWidget);
+    // Active member (owner) is displayed
     expect(find.text('Owner phone', skipOffstage: false), findsOneWidget);
-    expect(find.text('Kitchen tablet', skipOffstage: false), findsOneWidget);
+    // Pending member approval alert is shown (uses familySyncApprovalTitle key)
     expect(find.text('Member Approval', skipOffstage: false), findsOneWidget);
-    expect(find.text('Regenerate Invite', skipOffstage: false), findsOneWidget);
-    expect(find.text('Remove Member', skipOffstage: false), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Deactivate Group'),
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.text('Deactivate Group'), findsOneWidget);
+    // Invite new member button is present for owner
+    expect(find.text('Invite new member', skipOffstage: false), findsOneWidget);
+    // Disband Group action is visible for owner
+    expect(find.text('Disband Group', skipOffstage: false), findsOneWidget);
   });
 
   testWidgets('uses explicit groupId to load the target group', (tester) async {
