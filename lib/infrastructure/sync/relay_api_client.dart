@@ -113,15 +113,61 @@ class RelayApiClient {
 
   // ── Groups ──
 
-  Future<Map<String, dynamic>> createGroup() async {
-    final response = await _post('/group/create', '{}');
+  Future<Map<String, dynamic>> createGroup({
+    String? groupName,
+    String? displayName,
+    String? avatarEmoji,
+    String? avatarImageHash,
+  }) async {
+    final body = jsonEncode({
+      'groupName': ?groupName,
+      'displayName': ?displayName,
+      'avatarEmoji': ?avatarEmoji,
+      'avatarImageHash': ?avatarImageHash,
+    });
+
+    final response = await _post('/group/create', body);
     return _parseResponse(response);
   }
 
-  Future<Map<String, dynamic>> joinGroup({required String inviteCode}) async {
+  Future<Map<String, dynamic>> joinGroup({
+    required String inviteCode,
+    String? displayName,
+    String? avatarEmoji,
+    String? avatarImageHash,
+  }) async {
     final response = await _post(
       '/group/join',
-      jsonEncode({'inviteCode': inviteCode}),
+      jsonEncode({
+        'inviteCode': inviteCode,
+        'displayName': ?displayName,
+        'avatarEmoji': ?avatarEmoji,
+        'avatarImageHash': ?avatarImageHash,
+      }),
+    );
+    return _parseResponse(response);
+  }
+
+  /// Joiner confirms join after previewing group info.
+  Future<Map<String, dynamic>> confirmJoin({
+    required String groupId,
+    required String deviceId,
+  }) async {
+    final response = await _post(
+      '/group/$groupId/confirm-join',
+      jsonEncode({'deviceId': deviceId, 'confirmed': true}),
+    );
+    return _parseResponse(response);
+  }
+
+  /// Owner renames group. Only owner-authenticated requests succeed.
+  Future<Map<String, dynamic>> renameGroup({
+    required String groupId,
+    required String groupName,
+  }) async {
+    final response = await _put(
+      '/group/$groupId/name',
+      jsonEncode({'groupName': groupName}),
     );
     return _parseResponse(response);
   }
