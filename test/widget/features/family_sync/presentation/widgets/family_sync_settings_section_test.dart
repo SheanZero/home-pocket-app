@@ -8,7 +8,7 @@ import 'package:home_pocket/features/family_sync/presentation/providers/group_pr
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/sync_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/group_management_screen.dart';
-import 'package:home_pocket/features/family_sync/presentation/screens/pairing_screen.dart';
+import 'package:home_pocket/features/family_sync/presentation/screens/group_choice_screen.dart';
 import 'package:home_pocket/application/family_sync/create_group_use_case.dart';
 import 'package:home_pocket/application/family_sync/join_group_use_case.dart';
 import 'package:home_pocket/features/family_sync/use_cases/check_group_use_case.dart';
@@ -246,7 +246,7 @@ void main() {
       await tester.pump();
       await tester.pumpAndSettle();
 
-      expect(find.byType(PairingScreen), findsOneWidget);
+      expect(find.byType(GroupChoiceScreen), findsOneWidget);
       verify(() => checkGroupUseCase.execute()).called(1);
     },
   );
@@ -285,7 +285,7 @@ void main() {
       await tester.pump();
       await tester.pumpAndSettle();
 
-      expect(find.byType(PairingScreen), findsOneWidget);
+      expect(find.byType(GroupChoiceScreen), findsOneWidget);
       expect(find.textContaining('Network error'), findsOneWidget);
       verify(() => checkGroupUseCase.execute()).called(1);
     },
