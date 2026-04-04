@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
-import '../../../settings/presentation/providers/locale_provider.dart';
 import '../../domain/models/group_info.dart';
 import '../../domain/models/group_member.dart';
 import '../../domain/models/sync_status.dart';
+import '../../../../application/family_sync/rename_group_use_case.dart';
 import '../../use_cases/deactivate_group_use_case.dart';
 import '../../use_cases/leave_group_use_case.dart';
 import '../../use_cases/remove_member_use_case.dart';
-import '../../use_cases/regenerate_invite_use_case.dart';
 import '../providers/group_providers.dart';
 import '../providers/repository_providers.dart';
 import '../providers/sync_providers.dart';
+import '../widgets/group_rename_dialog.dart';
+import '../widgets/member_list_tile.dart';
 import 'member_approval_screen.dart';
-import '../widgets/partner_device_tile.dart';
-import '../widgets/sync_status_badge.dart';
 
 class GroupManagementScreen extends ConsumerStatefulWidget {
   const GroupManagementScreen({super.key, this.groupId});
@@ -50,11 +50,36 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
     });
   }
 
+  Future<void> _handleRename() async {
+    final group = _activeGroup;
+    if (group == null) return;
+
+    final newName = await GroupRenameDialog.show(context, group.groupName);
+    if (newName == null || !mounted) return;
+
+    final result = await ref.read(renameGroupUseCaseProvider).execute(
+      groupId: group.groupId,
+      groupName: newName,
+    );
+
+    if (!mounted) return;
+
+    switch (result) {
+      case RenameGroupSuccess(:final groupName):
+        setState(() {
+          _activeGroup = group.copyWith(groupName: groupName);
+        });
+      case RenameGroupError():
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.groupRenameFailed)),
+        );
+    }
+  }
+
   Future<void> _handleLeaveOrDeactivate() async {
     final group = _activeGroup;
     if (group == null) return;
 
-    final l10n = S.of(context);
     final isOwner = group.role == 'owner';
     final confirmed = await showDialog<bool>(
       context: context,
@@ -106,45 +131,18 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
     final message = switch (result) {
       DeactivateGroupError(:final message) =>
         l10n.familySyncDeactivateGroupFailed(message),
-      LeaveGroupError(:final message) => l10n.familySyncLeaveGroupFailed(
-        message,
-      ),
+      LeaveGroupError(:final message) =>
+        l10n.familySyncLeaveGroupFailed(message),
       _ => l10n.familySyncStatusError,
     };
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  Future<void> _handleRegenerateInvite() async {
-    final group = _activeGroup;
-    if (group == null) return;
-
-    final result = await ref
-        .read(regenerateInviteUseCaseProvider)
-        .execute(group.groupId);
-    if (!mounted) return;
-
-    if (result is RegenerateInviteSuccess) {
-      await _loadGroup();
-      return;
-    }
-
-    if (result is RegenerateInviteError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            S.of(context).familySyncRegenerateInviteFailed(result.message),
-          ),
-        ),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   Future<void> _handleRemoveMember(GroupMember member) async {
     final group = _activeGroup;
     if (group == null) return;
-    final l10n = S.of(context);
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -182,208 +180,339 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
     if (result is RemoveMemberError) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            S.of(context).familySyncRemoveMemberFailed(result.message),
-          ),
+          content: Text(l10n.familySyncRemoveMemberFailed(result.message)),
         ),
       );
     }
   }
+
+  S get l10n => S.of(context);
 
   @override
   Widget build(BuildContext context) {
     final syncStatus = ref.watch(syncStatusNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(S.of(context).familySyncGroupManagement),
-        actions: [
-          SyncStatusBadge(status: syncStatus),
-          const SizedBox(width: 16),
-        ],
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _activeGroup != null
+                ? _buildGroupContent(syncStatus)
+                : _buildEmptyState(),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _activeGroup != null
-          ? _buildGroupContent()
-          : _buildEmptyState(),
     );
   }
 
-  Widget _buildGroupContent() {
+  Widget _buildGroupContent(SyncStatus syncStatus) {
     final group = _activeGroup!;
-    final l10n = S.of(context);
-    final locale = ref.watch(currentLocaleProvider);
     final isOwner = group.role == 'owner';
-    final hasPendingMembers = group.members.any(
-      (member) => member.status == 'pending',
-    );
+    final hasPendingMembers =
+        group.members.any((member) => member.status == 'pending');
+    final activeMembers =
+        group.members.where((m) => m.status != 'pending').toList();
 
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.familySyncPairedDevice,
-                  style: Theme.of(context).textTheme.titleMedium,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 42),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 12),
+
+          // Header: back button + sync badge
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.maybePop(context),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      LucideIcons.chevronLeft,
+                      size: 20,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      l10n.groupBack,
+                      style: const TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
+              ),
+              const Spacer(),
+              if (syncStatus == SyncStatus.synced) _buildSyncBadge(),
+            ],
+          ),
+          const SizedBox(height: 28),
+
+          // Group name with edit icon
+          GestureDetector(
+            onTap: isOwner ? _handleRename : null,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  '\u{1F3E0}',
+                  style: TextStyle(fontSize: 22),
+                ),
+                const SizedBox(width: 8),
                 Text(
-                  l10n.familySyncMemberCount(group.members.length),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  group.groupName,
+                  style: const TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                if (isOwner && hasPendingMembers) ...[
-                  const SizedBox(height: 12),
-                  FilledButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) =>
-                              MemberApprovalScreen(groupId: group.groupId),
+                if (isOwner) ...[
+                  const SizedBox(width: 8),
+                  const Icon(
+                    LucideIcons.pencil,
+                    size: 16,
+                    color: AppColors.textSecondary,
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 28),
+
+          // Pending approval alert
+          if (isOwner && hasPendingMembers) ...[
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) =>
+                        MemberApprovalScreen(groupId: group.groupId),
+                  ),
+                );
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.accentPrimaryLight,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.accentPrimaryBorder),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      LucideIcons.bellRing,
+                      size: 18,
+                      color: AppColors.accentPrimary,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        l10n.familySyncApprovalTitle,
+                        style: const TextStyle(
+                          fontFamily: 'Outfit',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.accentPrimary,
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.verified_user_outlined),
-                    label: Text(l10n.familySyncApprovalTitle),
-                  ),
-                ],
-              ],
+                      ),
+                    ),
+                    const Icon(
+                      LucideIcons.chevronRight,
+                      size: 16,
+                      color: AppColors.accentPrimary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+
+          // Member section label
+          Text(
+            l10n.familySyncMembers,
+            style: const TextStyle(
+              fontFamily: 'Outfit',
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+              color: AppColors.textSecondary,
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
+          const SizedBox(height: 12),
+
+          // Member card
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x0A000000),
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  l10n.familySyncPairInfo,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                _buildInfoRow(
-                  l10n.familySyncPairId,
-                  group.groupId.length > 8
-                      ? group.groupId.substring(0, 8)
-                      : group.groupId,
-                ),
-                _buildInfoRow(
-                  l10n.familySyncPairedSince,
-                  group.confirmedAt != null
-                      ? DateFormatter.formatDate(group.confirmedAt!, locale)
-                      : '-',
-                ),
-                _buildInfoRow(
-                  l10n.familySyncMembers,
-                  group.members.length.toString(),
-                ),
+                for (var index = 0; index < activeMembers.length; index++) ...[
+                  MemberListTile(
+                    displayName: activeMembers[index].displayName,
+                    avatarEmoji: activeMembers[index].avatarEmoji,
+                    avatarImagePath: activeMembers[index].avatarImagePath,
+                    roleLabel: _roleLabel(activeMembers[index].role),
+                    isOwner: activeMembers[index].role == 'owner',
+                    onRemove: isOwner && activeMembers[index].role != 'owner'
+                        ? () => _handleRemoveMember(activeMembers[index])
+                        : null,
+                  ),
+                  if (index < activeMembers.length - 1)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Divider(height: 1, color: AppColors.borderDivider),
+                    ),
+                ],
               ],
             ),
           ),
-        ),
-        if (isOwner && group.inviteCode != null) ...[
-          const SizedBox(height: 16),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.familySyncPairCode,
-                    style: Theme.of(context).textTheme.titleMedium,
+          const SizedBox(height: 28),
+
+          // Action section
+          if (isOwner) ...[
+            // Invite new member button (outline)
+            GestureDetector(
+              onTap: () {
+                // Navigate back to the create group / invite flow
+                // This can be handled by the parent or a new route
+              },
+              child: Container(
+                width: double.infinity,
+                height: 48,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.borderDefault),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      LucideIcons.userPlus,
+                      size: 16,
+                      color: AppColors.textPrimary,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.groupInviteMembers,
+                      style: const TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // Disband / leave group ghost button
+          Center(
+            child: GestureDetector(
+              onTap: _handleLeaveOrDeactivate,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(
+                  group.role == 'owner'
+                      ? l10n.groupDisband
+                      : l10n.familySyncLeaveGroup,
+                  style: const TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textSecondary,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    group.inviteCode!,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: _handleRegenerateInvite,
-                    icon: const Icon(Icons.refresh),
-                    label: Text(l10n.familySyncRegenerateInvite),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
+          const SizedBox(height: 32),
         ],
-        const SizedBox(height: 16),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.familySyncMembers,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                ...group.members.map(
-                  (member) => PartnerDeviceTile(
-                    device: member,
-                    trailing: isOwner && member.role != 'owner'
-                        ? TextButton(
-                            onPressed: () => _handleRemoveMember(member),
-                            child: Text(l10n.familySyncRemoveMember),
-                          )
-                        : null,
-                  ),
-                ),
-              ],
+      ),
+    );
+  }
+
+  Widget _buildSyncBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8F5E9),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: const BoxDecoration(
+              color: Color(0xFF4CAF50),
+              shape: BoxShape.circle,
             ),
           ),
-        ),
-        const SizedBox(height: 24),
-        OutlinedButton.icon(
-          onPressed: _handleLeaveOrDeactivate,
-          icon: Icon(isOwner ? Icons.group_off : Icons.logout),
-          label: Text(
-            isOwner
-                ? l10n.familySyncDeactivateGroup
-                : l10n.familySyncLeaveGroup,
+          const SizedBox(width: 6),
+          Text(
+            l10n.groupSyncing,
+            style: const TextStyle(
+              fontFamily: 'Outfit',
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF2E7D32),
+            ),
           ),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: Theme.of(context).colorScheme.error,
-            side: BorderSide(color: Theme.of(context).colorScheme.error),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildEmptyState() {
-    final l10n = S.of(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.groups_2_outlined,
+            LucideIcons.users,
             size: 64,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            color: AppColors.textTertiary,
           ),
           const SizedBox(height: 16),
           Text(
             l10n.familySyncNoDevicePaired,
-            style: Theme.of(context).textTheme.titleMedium,
+            style: const TextStyle(
+              fontFamily: 'Outfit',
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             l10n.familySyncPairPrompt,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            style: const TextStyle(
+              fontFamily: 'Outfit',
+              fontSize: 14,
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -391,21 +520,10 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          Text(value, style: Theme.of(context).textTheme.bodyMedium),
-        ],
-      ),
-    );
+  String _roleLabel(String role) {
+    return switch (role) {
+      'owner' => l10n.familySyncRoleOwner,
+      _ => l10n.familySyncRoleMember,
+    };
   }
 }
