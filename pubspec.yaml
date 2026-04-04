@@ -67,6 +67,7 @@ dependencies:
   http: ^1.6.0
   uuid: ^4.5.3
   qr_flutter: ^4.1.0
+  lucide_icons: ^0.257.0
 
 dev_dependencies:
   flutter_test:
