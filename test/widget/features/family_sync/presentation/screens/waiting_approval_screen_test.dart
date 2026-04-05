@@ -1,3 +1,4 @@
+import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/family_sync/sync_orchestrator.dart';
@@ -10,6 +11,10 @@ import 'package:home_pocket/features/family_sync/presentation/providers/reposito
 import 'package:home_pocket/features/family_sync/presentation/providers/sync_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/waiting_approval_screen.dart';
 import 'package:home_pocket/features/family_sync/use_cases/check_group_use_case.dart';
+import 'package:home_pocket/infrastructure/crypto/providers.dart';
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
+import 'package:home_pocket/infrastructure/sync/websocket_connection_state.dart';
+import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../../helpers/test_localizations.dart';
@@ -20,6 +25,10 @@ class MockCheckGroupUseCase extends Mock implements CheckGroupUseCase {}
 
 class MockSyncOrchestrator extends Mock implements SyncOrchestrator {}
 
+class MockWebSocketService extends Mock implements WebSocketService {}
+
+class MockKeyManager extends Mock implements KeyManager {}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(SyncMode.initialSync);
@@ -28,6 +37,8 @@ void main() {
   late MockCheckGroupUseCase checkGroupUseCase;
   late SyncEngine syncEngine;
   late MockSyncOrchestrator mockOrchestrator;
+  late MockWebSocketService webSocketService;
+  late MockKeyManager keyManager;
 
   GroupInfo buildConfirmingGroup() => GroupInfo(
     groupId: 'group-1',
@@ -104,6 +115,28 @@ void main() {
     when(
       () => checkGroupUseCase.execute(),
     ).thenAnswer((_) async => const CheckGroupNotInGroup());
+
+    webSocketService = MockWebSocketService();
+    keyManager = MockKeyManager();
+
+    when(() => webSocketService.connectionStateStream)
+        .thenAnswer((_) => const Stream.empty());
+    when(() => webSocketService.connectionState)
+        .thenReturn(WebSocketConnectionState.disconnected);
+    when(() => webSocketService.eventStream)
+        .thenAnswer((_) => const Stream.empty());
+    when(() => webSocketService.connect(
+          groupId: any(named: 'groupId'),
+          deviceId: any(named: 'deviceId'),
+          signMessage: any(named: 'signMessage'),
+        )).thenReturn(null);
+    when(() => webSocketService.disconnect()).thenReturn(null);
+    when(() => webSocketService.startLifecycleObservation()).thenReturn(null);
+    when(() => webSocketService.stopLifecycleObservation()).thenReturn(null);
+    when(() => keyManager.getDeviceId())
+        .thenAnswer((_) async => 'test-device');
+    when(() => keyManager.signData(any())).thenAnswer((_) async =>
+        Signature([], publicKey: SimplePublicKey([], type: KeyPairType.ed25519)));
   });
 
   tearDown(() {
@@ -131,6 +164,8 @@ void main() {
           groupRepositoryProvider.overrideWithValue(groupRepository),
           checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
           syncEngineProvider.overrideWithValue(syncEngine),
+          webSocketServiceProvider.overrideWithValue(webSocketService),
+          keyManagerProvider.overrideWithValue(keyManager),
         ],
       ),
     );
@@ -170,6 +205,8 @@ void main() {
             groupRepositoryProvider.overrideWithValue(groupRepository),
             checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
             syncEngineProvider.overrideWithValue(syncEngine),
+            webSocketServiceProvider.overrideWithValue(webSocketService),
+            keyManagerProvider.overrideWithValue(keyManager),
           ],
         ),
       );
@@ -213,6 +250,8 @@ void main() {
             groupRepositoryProvider.overrideWithValue(groupRepository),
             checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
             syncEngineProvider.overrideWithValue(syncEngine),
+            webSocketServiceProvider.overrideWithValue(webSocketService),
+            keyManagerProvider.overrideWithValue(keyManager),
           ],
         ),
       );
@@ -228,7 +267,7 @@ void main() {
     },
   );
 
-  testWidgets('polls server every 30 seconds', (tester) async {
+  testWidgets('polls server with adaptive backoff starting at 5s', (tester) async {
     when(
       () => groupRepository.getGroupById('group-1'),
     ).thenAnswer((_) async => buildConfirmingGroup());
@@ -248,6 +287,8 @@ void main() {
             groupRepositoryProvider.overrideWithValue(groupRepository),
             checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
             syncEngineProvider.overrideWithValue(syncEngine),
+            webSocketServiceProvider.overrideWithValue(webSocketService),
+            keyManagerProvider.overrideWithValue(keyManager),
           ],
         ),
       );
@@ -255,8 +296,8 @@ void main() {
 
       verifyNever(() => checkGroupUseCase.execute());
 
-      // Wait for the 30-second timer to fire
-      await Future<void>.delayed(const Duration(seconds: 31));
+      // Wait for the 5-second adaptive polling timer to fire
+      await Future<void>.delayed(const Duration(seconds: 6));
       await tester.pump(const Duration(milliseconds: 100));
 
       verify(() => checkGroupUseCase.execute()).called(1);
@@ -286,19 +327,21 @@ void main() {
             groupRepositoryProvider.overrideWithValue(groupRepository),
             checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
             syncEngineProvider.overrideWithValue(syncEngine),
+            webSocketServiceProvider.overrideWithValue(webSocketService),
+            keyManagerProvider.overrideWithValue(keyManager),
           ],
         ),
       );
       await tester.pump(const Duration(milliseconds: 100));
 
-      // Wait for first poll to fire and navigate
-      await Future<void>.delayed(const Duration(seconds: 31));
+      // Wait for first adaptive poll to fire and navigate (5s)
+      await Future<void>.delayed(const Duration(seconds: 6));
       await tester.pump(const Duration(milliseconds: 100));
 
       verify(() => checkGroupUseCase.execute()).called(1);
 
       // Wait for another poll cycle — should not call again after navigation
-      await Future<void>.delayed(const Duration(seconds: 31));
+      await Future<void>.delayed(const Duration(seconds: 11));
       await tester.pump(const Duration(milliseconds: 100));
 
       verifyNever(() => checkGroupUseCase.execute());
