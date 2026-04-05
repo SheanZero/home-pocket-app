@@ -3,16 +3,21 @@ import 'package:flutter/widgets.dart';
 
 /// Callback triggered on app lifecycle events relevant to sync.
 typedef SyncResumeCallback = Future<void> Function();
+typedef SyncPausedCallback = void Function();
 
-/// Observes app lifecycle to trigger sync on resume.
+/// Observes app lifecycle to trigger sync on resume and flush on pause.
 ///
-/// When the app returns to the foreground (resumed), calls the registered
-/// callback which should pull pending sync messages and drain the offline queue.
+/// When the app returns to the foreground (resumed), calls [onResume].
+/// When the app enters the background (paused), calls [onPaused].
 class SyncLifecycleObserver with WidgetsBindingObserver {
-  SyncLifecycleObserver({required SyncResumeCallback onResume})
-    : _onResume = onResume;
+  SyncLifecycleObserver({
+    required SyncResumeCallback onResume,
+    SyncPausedCallback? onPaused,
+  }) : _onResume = onResume,
+       _onPaused = onPaused;
 
   final SyncResumeCallback _onResume;
+  final SyncPausedCallback? _onPaused;
   bool _isActive = false;
 
   /// Start observing lifecycle events.
@@ -37,6 +42,8 @@ class SyncLifecycleObserver with WidgetsBindingObserver {
           debugPrint('SyncLifecycleObserver: resume sync failed: $e');
         }
       });
+    } else if (state == AppLifecycleState.paused) {
+      _onPaused?.call();
     }
   }
 }
