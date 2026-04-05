@@ -14,45 +14,8 @@ import 'relay_api_client.dart';
 import 'sync_lifecycle_observer.dart';
 import 'sync_queue_manager.dart';
 
-enum SyncTriggerEventType {
-  joinRequest,
-  memberConfirmed,
-  memberLeft,
-  groupDissolved,
-  syncAvailable,
-}
-
-class SyncTriggerEvent {
-  const SyncTriggerEvent._({required this.type, this.groupId});
-
-  const SyncTriggerEvent.joinRequest({String? groupId})
-    : this._(type: SyncTriggerEventType.joinRequest, groupId: groupId);
-
-  const SyncTriggerEvent.memberConfirmed({String? groupId})
-    : this._(type: SyncTriggerEventType.memberConfirmed, groupId: groupId);
-
-  const SyncTriggerEvent.memberLeft({String? groupId})
-    : this._(type: SyncTriggerEventType.memberLeft, groupId: groupId);
-
-  const SyncTriggerEvent.groupDissolved({String? groupId})
-    : this._(type: SyncTriggerEventType.groupDissolved, groupId: groupId);
-
-  const SyncTriggerEvent.syncAvailable({String? groupId})
-    : this._(type: SyncTriggerEventType.syncAvailable, groupId: groupId);
-
-  final SyncTriggerEventType type;
-  final String? groupId;
-
-  @override
-  bool operator ==(Object other) {
-    return other is SyncTriggerEvent &&
-        other.type == type &&
-        other.groupId == groupId;
-  }
-
-  @override
-  int get hashCode => Object.hash(type, groupId);
-}
+import '../../features/family_sync/domain/models/sync_trigger_event.dart';
+export '../../features/family_sync/domain/models/sync_trigger_event.dart';
 
 /// Coordinates sync triggers from various sources:
 /// - App lifecycle (resume -> pull)
