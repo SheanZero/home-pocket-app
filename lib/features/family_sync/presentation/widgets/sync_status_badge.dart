@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 
-import '../../domain/models/sync_status.dart';
+import '../../../../generated/app_localizations.dart';
+import '../../domain/models/sync_status_model.dart';
 
 /// Displays a colored badge with icon and label for sync status.
 class SyncStatusBadge extends StatelessWidget {
   const SyncStatusBadge({
     super.key,
-    required this.status,
+    required this.state,
     this.compact = false,
   });
 
-  final SyncStatus status;
+  final SyncState state;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    final config = _statusConfig(status);
+    final config = _stateConfig(state, context);
 
     if (compact) {
       return Icon(config.icon, size: 16, color: config.color);
@@ -44,37 +45,43 @@ class SyncStatusBadge extends StatelessWidget {
     );
   }
 
-  _StatusConfig _statusConfig(SyncStatus status) {
-    return switch (status) {
-      SyncStatus.unpaired => const _StatusConfig(
+  _StatusConfig _stateConfig(SyncState state, BuildContext context) {
+    final l10n = S.of(context);
+    return switch (state) {
+      SyncState.noGroup => _StatusConfig(
         icon: Icons.link_off,
         color: Colors.grey,
-        label: 'Unpaired',
+        label: l10n.familySyncBadgeUnpaired,
       ),
-      SyncStatus.pairing => const _StatusConfig(
-        icon: Icons.link,
-        color: Colors.orange,
-        label: 'Pairing',
+      SyncState.idle => _StatusConfig(
+        icon: Icons.check_circle_outline,
+        color: Colors.grey,
+        label: l10n.familySyncBadgeSynced,
       ),
-      SyncStatus.synced => const _StatusConfig(
-        icon: Icons.check_circle,
-        color: Colors.green,
-        label: 'Synced',
-      ),
-      SyncStatus.syncing => const _StatusConfig(
+      SyncState.initialSyncing => _StatusConfig(
         icon: Icons.sync,
         color: Colors.blue,
-        label: 'Syncing',
+        label: l10n.syncInitialProgress,
       ),
-      SyncStatus.syncError => const _StatusConfig(
+      SyncState.syncing => _StatusConfig(
+        icon: Icons.sync,
+        color: Colors.blue,
+        label: l10n.familySyncBadgeSyncing,
+      ),
+      SyncState.synced => _StatusConfig(
+        icon: Icons.check_circle,
+        color: Colors.green,
+        label: l10n.familySyncBadgeSynced,
+      ),
+      SyncState.error => _StatusConfig(
         icon: Icons.error,
         color: Colors.red,
-        label: 'Error',
+        label: l10n.familySyncBadgeError,
       ),
-      SyncStatus.offline => const _StatusConfig(
+      SyncState.queuedOffline => _StatusConfig(
         icon: Icons.cloud_off,
         color: Colors.orange,
-        label: 'Offline',
+        label: l10n.familySyncBadgeOffline,
       ),
     };
   }
