@@ -24,14 +24,21 @@ enum WebSocketEventType {
   joinRequest,
   memberLeft,
   groupDissolved,
+  groupStatus,
 }
 
 /// A parsed event received from the WebSocket relay server.
 class WebSocketEvent {
-  const WebSocketEvent({required this.type, this.groupId});
+  const WebSocketEvent({required this.type, this.groupId, this.data});
 
   final WebSocketEventType type;
   final String? groupId;
+
+  /// Optional payload delivered with the event.
+  ///
+  /// Currently populated for [WebSocketEventType.groupStatus] events,
+  /// which carry the full group status sent by the server after auth success.
+  final Map<String, dynamic>? data;
 
   @override
   bool operator ==(Object other) {
@@ -187,11 +194,13 @@ class WebSocketService with WidgetsBindingObserver {
 
   WebSocketEvent? _parseEvent(String type, Map<String, dynamic> data) {
     final groupId = data['groupId'] as String?;
+    final eventData = data['data'] as Map<String, dynamic>?;
     final eventType = switch (type) {
       'member_confirmed' => WebSocketEventType.memberConfirmed,
       'join_request' => WebSocketEventType.joinRequest,
       'member_left' => WebSocketEventType.memberLeft,
       'group_dissolved' => WebSocketEventType.groupDissolved,
+      'group_status' => WebSocketEventType.groupStatus,
       _ => null,
     };
 
@@ -202,7 +211,7 @@ class WebSocketService with WidgetsBindingObserver {
       return null;
     }
 
-    return WebSocketEvent(type: eventType, groupId: groupId);
+    return WebSocketEvent(type: eventType, groupId: groupId, data: eventData);
   }
 
   void _startHeartbeat() {

@@ -157,6 +157,66 @@ void main() {
       expect(events, isEmpty);
     });
 
+    test('parses group_status event with data payload', () async {
+      final events = <WebSocketEvent>[];
+      service.eventStream.listen(events.add);
+
+      service.connect(
+        groupId: 'group-1',
+        deviceId: 'device-1',
+        signMessage: (msg) async => 'mock-sig',
+      );
+      incomingController.add(
+        jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      incomingController.add(jsonEncode({
+        'type': 'group_status',
+        'groupId': 'group-1',
+        'data': {
+          'memberCount': 3,
+          'pendingRequests': 1,
+          'groupName': 'My Family',
+        },
+      }));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(events, hasLength(1));
+      expect(events.first.type, WebSocketEventType.groupStatus);
+      expect(events.first.groupId, 'group-1');
+      expect(events.first.data, isNotNull);
+      expect(events.first.data!['memberCount'], 3);
+      expect(events.first.data!['groupName'], 'My Family');
+    });
+
+    test('existing events carry null data when no data field present', () async {
+      final events = <WebSocketEvent>[];
+      service.eventStream.listen(events.add);
+
+      service.connect(
+        groupId: 'group-1',
+        deviceId: 'device-1',
+        signMessage: (msg) async => 'mock-sig',
+      );
+      incomingController.add(
+        jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      incomingController.add(jsonEncode({
+        'type': 'member_confirmed',
+        'groupId': 'group-1',
+        'deviceId': 'device-2',
+        'timestamp': '2026-04-04T12:00:00Z',
+      }));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(events, hasLength(1));
+      expect(events.first.type, WebSocketEventType.memberConfirmed);
+      expect(events.first.data, isNull);
+    });
+
     test('auth_error disconnects without reconnect', () async {
       service.connect(
         groupId: 'group-1',
