@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,13 +7,15 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/crypto/providers.dart';
+import '../../../../infrastructure/sync/websocket_service.dart';
 import '../../domain/models/group_info.dart';
 import '../../domain/models/group_member.dart';
 import '../../../../application/family_sync/confirm_member_use_case.dart';
 import '../../use_cases/remove_member_use_case.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
 import '../providers/group_providers.dart';
-import '../providers/repository_providers.dart';
+import '../providers/repository_providers.dart' show groupRepositoryProvider, webSocketServiceProvider;
 import 'group_management_screen.dart';
 
 const _purpleGradient = [
@@ -36,11 +39,59 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
   bool _isLoading = true;
   String? _approvingMemberId;
   String? _rejectingMemberId;
+  StreamSubscription<WebSocketEvent>? _wsEventSubscription;
+  WebSocketService? _webSocketService;
 
   @override
   void initState() {
     super.initState();
     _loadGroup();
+    _connectWebSocket();
+  }
+
+  Future<void> _connectWebSocket() async {
+    final ws = ref.read(webSocketServiceProvider);
+    _webSocketService = ws;
+    final keyManager = ref.read(keyManagerProvider);
+    final groupId = widget.groupId;
+
+    // Listen for join_request events to refresh the pending list
+    _wsEventSubscription = ws.eventStream.listen((event) {
+      if (!mounted) return;
+      if (event.type == WebSocketEventType.joinRequest) {
+        _loadGroup(); // Reload to pick up new pending member
+      }
+    });
+
+    // Determine groupId for WebSocket connection
+    String? wsGroupId = groupId;
+    if (wsGroupId == null) {
+      final group = await ref.read(groupRepositoryProvider).getActiveGroup();
+      wsGroupId = group?.groupId;
+    }
+    if (!mounted || wsGroupId == null) return;
+
+    final deviceId = await keyManager.getDeviceId();
+    if (!mounted || deviceId == null) return;
+
+    ws.connect(
+      groupId: wsGroupId,
+      deviceId: deviceId,
+      signMessage: (message) async {
+        final sig = await keyManager.signData(utf8.encode(message));
+        return base64Encode(sig.bytes);
+      },
+    );
+    ws.startLifecycleObservation();
+  }
+
+  @override
+  void dispose() {
+    unawaited(_wsEventSubscription?.cancel());
+    _webSocketService
+      ?..stopLifecycleObservation()
+      ..disconnect();
+    super.dispose();
   }
 
   Future<void> _loadGroup() async {
