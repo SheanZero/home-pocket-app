@@ -71,14 +71,12 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
     final keyManager = ref.read(keyManagerProvider);
 
     // Handle WebSocket events
-    final engine = ref.read(syncEngineProvider);
     _wsEventSubscription = ws.eventStream.listen((event) {
       if (!mounted || _hasNavigated) return;
       switch (event.type) {
         case WebSocketEventType.memberConfirmed:
-          // Navigate immediately + trigger initial data sync
-          unawaited(_verifyGroupAndNavigate());
-          engine.onMemberConfirmed();
+          // Activate group first, then trigger initial data sync
+          unawaited(_activateAndSync());
         case WebSocketEventType.joinRequest:
         case WebSocketEventType.memberLeft:
         case WebSocketEventType.groupDissolved:
@@ -142,6 +140,21 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
   void _stopPolling() {
     _pollingTimer?.cancel();
     _pollingTimer = null;
+  }
+
+  /// Activate group locally first, then trigger initial data sync and navigate.
+  ///
+  /// Must be sequential: [checkGroupUseCaseProvider] updates the local group
+  /// status from 'confirming' → 'active'. Only then can [SyncEngine] find
+  /// the active group for initialSync (which queries status='active').
+  Future<void> _activateAndSync() async {
+    // Step 1: Activate group locally (confirming → active)
+    await _verifyGroupAndNavigate();
+
+    // Step 2: Trigger full initial sync (group is now active)
+    if (_hasNavigated) {
+      ref.read(syncEngineProvider).onMemberConfirmed();
+    }
   }
 
   Future<void> _verifyGroupAndNavigate() async {
