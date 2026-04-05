@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
-import 'package:home_pocket/features/family_sync/domain/models/sync_status.dart';
+import 'package:home_pocket/features/family_sync/domain/models/sync_status_model.dart'
+    as model;
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/group_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
@@ -31,15 +32,6 @@ class MockSyncTriggerService extends Mock implements SyncTriggerService {}
 
 class MockPushNotificationService extends Mock
     implements PushNotificationService {}
-
-class TestSyncStatusNotifier extends SyncStatusNotifier {
-  TestSyncStatusNotifier(this.initialState);
-
-  final SyncStatus initialState;
-
-  @override
-  SyncStatus build() => initialState;
-}
 
 void main() {
   late MockGroupRepository groupRepository;
@@ -127,8 +119,10 @@ void main() {
           pushNotificationServiceProvider.overrideWithValue(
             pushNotificationService,
           ),
-          syncStatusNotifierProvider.overrideWith(
-            () => TestSyncStatusNotifier(SyncStatus.synced),
+          syncStatusStreamProvider.overrideWith(
+            (ref) => Stream.value(
+              const model.SyncStatus(state: model.SyncState.synced),
+            ),
           ),
         ],
       ),
@@ -157,8 +151,10 @@ void main() {
             pushNotificationServiceProvider.overrideWithValue(
               pushNotificationService,
             ),
-            syncStatusNotifierProvider.overrideWith(
-              () => TestSyncStatusNotifier(SyncStatus.unpaired),
+            syncStatusStreamProvider.overrideWith(
+              (ref) => Stream.value(
+                const model.SyncStatus(state: model.SyncState.noGroup),
+              ),
             ),
           ],
         ),
@@ -195,8 +191,10 @@ void main() {
             pushNotificationServiceProvider.overrideWithValue(
               pushNotificationService,
             ),
-            syncStatusNotifierProvider.overrideWith(
-              () => TestSyncStatusNotifier(SyncStatus.unpaired),
+            syncStatusStreamProvider.overrideWith(
+              (ref) => Stream.value(
+                const model.SyncStatus(state: model.SyncState.noGroup),
+              ),
             ),
           ],
         ),
@@ -234,8 +232,10 @@ void main() {
             pushNotificationServiceProvider.overrideWithValue(
               pushNotificationService,
             ),
-            syncStatusNotifierProvider.overrideWith(
-              () => TestSyncStatusNotifier(SyncStatus.unpaired),
+            syncStatusStreamProvider.overrideWith(
+              (ref) => Stream.value(
+                const model.SyncStatus(state: model.SyncState.noGroup),
+              ),
             ),
           ],
         ),
@@ -273,8 +273,10 @@ void main() {
             pushNotificationServiceProvider.overrideWithValue(
               pushNotificationService,
             ),
-            syncStatusNotifierProvider.overrideWith(
-              () => TestSyncStatusNotifier(SyncStatus.unpaired),
+            syncStatusStreamProvider.overrideWith(
+              (ref) => Stream.value(
+                const model.SyncStatus(state: model.SyncState.noGroup),
+              ),
             ),
           ],
         ),

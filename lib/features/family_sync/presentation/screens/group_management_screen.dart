@@ -6,7 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/group_info.dart';
 import '../../domain/models/group_member.dart';
-import '../../domain/models/sync_status.dart';
+import '../../domain/models/sync_status_model.dart';
 import '../../../../application/family_sync/rename_group_use_case.dart';
 import '../../use_cases/deactivate_group_use_case.dart';
 import '../../use_cases/leave_group_use_case.dart';
@@ -16,6 +16,7 @@ import '../providers/repository_providers.dart';
 import '../providers/sync_providers.dart';
 import '../widgets/group_rename_dialog.dart';
 import '../widgets/member_list_tile.dart';
+import '../widgets/sync_status_badge.dart';
 import 'member_approval_screen.dart';
 
 class GroupManagementScreen extends ConsumerStatefulWidget {
@@ -121,9 +122,6 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
     if (!mounted) return;
 
     if (result is DeactivateGroupSuccess || result is LeaveGroupSuccess) {
-      ref
-          .read(syncStatusNotifierProvider.notifier)
-          .updateStatus(SyncStatus.unpaired);
       Navigator.of(context).pop();
       return;
     }
@@ -190,7 +188,9 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final syncStatus = ref.watch(syncStatusNotifierProvider);
+    final syncStatusAsync = ref.watch(syncStatusStreamProvider);
+    final syncState =
+        syncStatusAsync.valueOrNull?.state ?? SyncState.noGroup;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -198,13 +198,13 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _activeGroup != null
-                ? _buildGroupContent(syncStatus)
+                ? _buildGroupContent(syncState)
                 : _buildEmptyState(),
       ),
     );
   }
 
-  Widget _buildGroupContent(SyncStatus syncStatus) {
+  Widget _buildGroupContent(SyncState syncState) {
     final group = _activeGroup!;
     final isOwner = group.role == 'owner';
     final hasPendingMembers =
@@ -246,7 +246,7 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
                 ),
               ),
               const Spacer(),
-              if (syncStatus == SyncStatus.synced) _buildSyncBadge(),
+              _buildSyncStatusRow(syncState),
             ],
           ),
           const SizedBox(height: 28),
@@ -453,36 +453,25 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
     );
   }
 
-  Widget _buildSyncBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE8F5E9),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: const BoxDecoration(
-              color: Color(0xFF4CAF50),
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            l10n.groupSyncing,
-            style: const TextStyle(
-              fontFamily: 'Outfit',
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF2E7D32),
+  Widget _buildSyncStatusRow(SyncState syncState) {
+    final isBusy = syncState == SyncState.syncing ||
+        syncState == SyncState.initialSyncing;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SyncStatusBadge(state: syncState),
+        if (!isBusy) ...[
+          const SizedBox(width: 4),
+          GestureDetector(
+            onTap: () => ref.read(syncEngineProvider).onManualSync(),
+            child: const Icon(
+              LucideIcons.refreshCw,
+              size: 16,
+              color: AppColors.textSecondary,
             ),
           ),
         ],
-      ),
+      ],
     );
   }
 

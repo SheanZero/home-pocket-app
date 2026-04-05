@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../generated/app_localizations.dart';
-import '../../domain/models/sync_status.dart';
+import '../../domain/models/sync_status_model.dart';
 import '../../use_cases/check_group_use_case.dart';
 import '../providers/active_group_provider.dart';
 import '../providers/group_providers.dart';
@@ -19,12 +19,14 @@ class FamilySyncSettingsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final syncStatus = ref.watch(syncStatusNotifierProvider);
+    final syncStatusAsync = ref.watch(syncStatusStreamProvider);
+    final syncState =
+        syncStatusAsync.valueOrNull?.state ?? SyncState.noGroup;
     final l10n = S.of(context);
     final activeGroup = ref.watch(activeGroupProvider).valueOrNull;
     final subtitle = activeGroup != null
         ? l10n.familySyncMemberCount(activeGroup.members.length)
-        : _statusDescription(l10n, syncStatus);
+        : _stateDescription(l10n, syncState);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,12 +47,12 @@ class FamilySyncSettingsSection extends ConsumerWidget {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SyncStatusBadge(status: syncStatus, compact: true),
+              SyncStatusBadge(state: syncState, compact: true),
               const SizedBox(width: 8),
               const Icon(Icons.chevron_right),
             ],
           ),
-          onTap: () => _navigate(context, ref, syncStatus),
+          onTap: () => _navigate(context, ref, syncState),
         ),
       ],
     );
@@ -59,17 +61,12 @@ class FamilySyncSettingsSection extends ConsumerWidget {
   Future<void> _navigate(
     BuildContext context,
     WidgetRef ref,
-    SyncStatus status,
+    SyncState state,
   ) async {
     final localGroup = ref.read(activeGroupProvider).valueOrNull;
     if (!context.mounted) return;
 
-    if (localGroup != null || status != SyncStatus.unpaired) {
-      if (localGroup != null) {
-        ref
-            .read(syncStatusNotifierProvider.notifier)
-            .updateStatus(SyncStatus.synced);
-      }
+    if (localGroup != null || state != SyncState.noGroup) {
       await Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (_) => GroupManagementScreen(groupId: localGroup?.groupId),
@@ -103,9 +100,6 @@ class FamilySyncSettingsSection extends ConsumerWidget {
 
     switch (result) {
       case CheckGroupInGroup(:final groupId):
-        ref
-            .read(syncStatusNotifierProvider.notifier)
-            .updateStatus(SyncStatus.synced);
         await Navigator.of(context).push(
           MaterialPageRoute<void>(
             builder: (_) => GroupManagementScreen(groupId: groupId),
@@ -125,20 +119,15 @@ class FamilySyncSettingsSection extends ConsumerWidget {
     }
   }
 
-  String _statusDescription(S l10n, SyncStatus status) {
-    switch (status) {
-      case SyncStatus.synced:
-        return l10n.familySyncStatusSynced;
-      case SyncStatus.syncing:
-        return l10n.familySyncStatusSyncing;
-      case SyncStatus.offline:
-        return l10n.familySyncStatusOffline;
-      case SyncStatus.syncError:
-        return l10n.familySyncStatusError;
-      case SyncStatus.pairing:
-        return l10n.familySyncStatusPairing;
-      case SyncStatus.unpaired:
-        return l10n.familySyncStatusUnpaired;
-    }
+  String _stateDescription(S l10n, SyncState state) {
+    return switch (state) {
+      SyncState.synced => l10n.familySyncStatusSynced,
+      SyncState.syncing => l10n.familySyncStatusSyncing,
+      SyncState.initialSyncing => l10n.syncInitialProgress,
+      SyncState.queuedOffline => l10n.familySyncStatusOffline,
+      SyncState.error => l10n.familySyncStatusError,
+      SyncState.idle => l10n.familySyncStatusSynced,
+      SyncState.noGroup => l10n.familySyncStatusUnpaired,
+    };
   }
 }
