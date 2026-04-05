@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/analytics_providers.dart';
+import 'package:home_pocket/features/home/presentation/providers/shadow_books_provider.dart';
 import 'package:home_pocket/features/home/presentation/providers/today_transactions_provider.dart';
 import 'package:home_pocket/features/home/presentation/screens/home_screen.dart';
 import 'package:home_pocket/features/home/presentation/widgets/family_invite_banner.dart';
@@ -22,6 +24,24 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockGroupRepository extends Mock implements GroupRepository {}
+
+final _shadowBook = Book(
+  id: 'shadow-book-1',
+  name: 'shadow',
+  currency: 'JPY',
+  deviceId: 'device-member',
+  createdAt: DateTime(2026, 3, 14),
+  isShadow: true,
+  groupId: 'group-1',
+  ownerDeviceId: 'device-member',
+  ownerDeviceName: '田中',
+);
+
+final _shadowBookInfo = ShadowBookInfo(
+  book: _shadowBook,
+  memberDisplayName: '田中',
+  memberAvatarEmoji: '🌸',
+);
 
 final _emptyReport = MonthlyReport(
   year: 2026,
@@ -107,6 +127,8 @@ void main() {
     List<Transaction>? transactions,
     bool groupMode = false,
     Locale locale = const Locale('ja'),
+    List<ShadowBookInfo>? shadowBooks,
+    ShadowAggregate? shadowAgg,
   }) {
     if (groupMode) {
       when(
@@ -134,6 +156,13 @@ void main() {
           bookId: 'book_001',
         ).overrideWith((ref) async => transactions ?? []),
         groupRepositoryProvider.overrideWithValue(groupRepository),
+        shadowBooksProvider.overrideWith(
+          (ref) async => shadowBooks ?? const [],
+        ),
+        shadowAggregateProvider(year: now.year, month: now.month).overrideWith(
+          (ref) async =>
+              shadowAgg ?? const ShadowAggregate.empty(),
+        ),
       ],
       child: _buildLocalizedApp(
         locale: locale,
@@ -346,15 +375,41 @@ void main() {
       expect(find.text('共有帳本'), findsNothing);
     });
 
-    testWidgets('group mode shows 3 ledger rows including shared', (tester) async {
-      await tester.pumpWidget(
-        buildSubject(report: _reportWithData, groupMode: true),
-      );
-      await tester.pumpAndSettle();
+    testWidgets(
+      'group mode shows shadow book ledger row named after member',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            report: _reportWithData,
+            groupMode: true,
+            shadowBooks: [_shadowBookInfo],
+            shadowAgg: ShadowAggregate(
+              totalExpenses: 12000,
+              prevTotalExpenses: 9000,
+              perBookReports: {
+                _shadowBook.id: MonthlyReport(
+                  year: now.year,
+                  month: now.month,
+                  totalIncome: 0,
+                  totalExpenses: 12000,
+                  savings: 0,
+                  savingsRate: 0,
+                  survivalTotal: 12000,
+                  soulTotal: 0,
+                  categoryBreakdowns: [],
+                  dailyExpenses: [],
+                ),
+              },
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('生存帳本'), findsOneWidget);
-      expect(find.text('灵魂帳本'), findsOneWidget);
-      expect(find.text('共有帳本'), findsOneWidget);
-    });
+        expect(find.text('生存帳本'), findsOneWidget);
+        expect(find.text('灵魂帳本'), findsOneWidget);
+        expect(find.text('田中の帳本'), findsOneWidget);
+        expect(find.text('共有帳本'), findsNothing);
+      },
+    );
   });
 }

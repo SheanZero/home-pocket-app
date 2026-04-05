@@ -13,6 +13,7 @@ import '../../../../features/family_sync/presentation/screens/group_choice_scree
 import '../../../../infrastructure/category/category_service.dart';
 import '../../../settings/presentation/providers/locale_provider.dart';
 import '../../domain/models/ledger_row_data.dart';
+import '../providers/shadow_books_provider.dart';
 import '../providers/today_transactions_provider.dart';
 import '../widgets/family_invite_banner.dart';
 import '../widgets/hero_header.dart';
@@ -44,6 +45,10 @@ class HomeScreen extends ConsumerWidget {
     final reportAsync = ref.watch(
       monthlyReportProvider(bookId: bookId, year: year, month: month),
     );
+    final shadowAsync = ref.watch(
+      shadowAggregateProvider(year: year, month: month),
+    );
+    final shadowBookList = ref.watch(shadowBooksProvider);
     final todayTxAsync = ref.watch(
       todayTransactionsProvider(bookId: bookId),
     );
@@ -79,11 +84,17 @@ class HomeScreen extends ConsumerWidget {
 
               // ── Month overview card ──
               reportAsync.when(
-                data: (report) => MonthOverviewCard(
-                  totalExpense: report.totalExpenses,
-                  previousMonthTotal:
-                      report.previousMonthComparison?.previousExpenses ?? 0,
-                ),
+                data: (report) {
+                  final shadowData = shadowAsync.valueOrNull;
+                  return MonthOverviewCard(
+                    totalExpense:
+                        report.totalExpenses + (shadowData?.totalExpenses ?? 0),
+                    previousMonthTotal:
+                        (report.previousMonthComparison?.previousExpenses ??
+                            0) +
+                        (shadowData?.prevTotalExpenses ?? 0),
+                  );
+                },
                 loading: () => const SizedBox(
                   height: 120,
                   child: Center(child: CircularProgressIndicator()),
@@ -99,7 +110,13 @@ class HomeScreen extends ConsumerWidget {
               // ── Ledger comparison rows ──
               reportAsync.when(
                 data: (report) => LedgerComparisonSection(
-                  rows: _buildLedgerRows(context, report, isGroupMode),
+                  rows: _buildLedgerRows(
+                    context,
+                    report,
+                    isGroupMode,
+                    shadowBooks: shadowBookList.valueOrNull,
+                    shadowAgg: shadowAsync.valueOrNull,
+                  ),
                 ),
                 loading: () => const SizedBox(
                   height: 80,
@@ -237,8 +254,10 @@ class HomeScreen extends ConsumerWidget {
   List<LedgerRowData> _buildLedgerRows(
     BuildContext context,
     MonthlyReport report,
-    bool isGroupMode,
-  ) {
+    bool isGroupMode, {
+    List<ShadowBookInfo>? shadowBooks,
+    ShadowAggregate? shadowAgg,
+  }) {
     final rows = <LedgerRowData>[
       LedgerRowData(
         tagText: '生',
@@ -266,21 +285,27 @@ class HomeScreen extends ConsumerWidget {
       ),
     ];
 
-    if (isGroupMode) {
-      rows.add(
-        LedgerRowData(
-          tagText: '共',
-          tagBgColor: context.wmSharedTagBg,
-          tagTextColor: AppColors.shared,
-          title: '共有帳本',
-          titleColor: AppColors.shared,
-          subtitle: '',
-          formattedAmount: '\u00a50',
-          amountColor: AppColors.shared,
-          chevronColor: AppColors.sharedChevron,
-          borderColor: AppColors.sharedBorder,
-        ),
-      );
+    if (isGroupMode && shadowBooks != null) {
+      for (final shadow in shadowBooks) {
+        final bookReport = shadowAgg?.perBookReports[shadow.book.id];
+        final total = bookReport?.totalExpenses ?? 0;
+        final prevTotal =
+            bookReport?.previousMonthComparison?.previousExpenses ?? 0;
+        rows.add(
+          LedgerRowData(
+            tagText: '共',
+            tagBgColor: context.wmSharedTagBg,
+            tagTextColor: AppColors.shared,
+            title: '${shadow.memberDisplayName}の帳本',
+            titleColor: AppColors.shared,
+            subtitle: '先月 \u00a5${_formatInt(prevTotal)}',
+            formattedAmount: '\u00a5${_formatInt(total)}',
+            amountColor: AppColors.shared,
+            chevronColor: AppColors.sharedChevron,
+            borderColor: AppColors.sharedBorder,
+          ),
+        );
+      }
     }
 
     return rows;
