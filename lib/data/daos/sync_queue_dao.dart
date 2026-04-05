@@ -38,4 +38,11 @@ class SyncQueueDao {
   Future<void> deleteAll() async {
     await _db.delete(_db.syncQueue).go();
   }
+
+  Future<int> countPending() async {
+    final countExpr = _db.syncQueue.id.count();
+    final query = _db.selectOnly(_db.syncQueue)..addColumns([countExpr]);
+    final result = await query.getSingle();
+    return result.read(countExpr) ?? 0;
+  }
 }

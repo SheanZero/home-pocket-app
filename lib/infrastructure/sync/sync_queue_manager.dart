@@ -79,4 +79,9 @@ class SyncQueueManager {
   Future<void> clearQueue() async {
     await _syncRepository.clearAll();
   }
+
+  /// Get number of pending entries in the queue.
+  Future<int> getPendingCount() async {
+    return _syncRepository.getPendingCount();
+  }
 }

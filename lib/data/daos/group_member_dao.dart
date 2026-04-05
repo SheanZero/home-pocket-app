@@ -18,6 +18,10 @@ class GroupMemberDao extends DatabaseAccessor<AppDatabase>
     groupMembers,
   )..where((table) => table.groupId.equals(groupId))).get();
 
+  Stream<List<GroupMemberData>> watchByGroupId(String groupId) => (select(
+    groupMembers,
+  )..where((table) => table.groupId.equals(groupId))).watch();
+
   Future<void> updateStatus(String groupId, String deviceId, String status) =>
       (update(groupMembers)..where(
             (table) =>

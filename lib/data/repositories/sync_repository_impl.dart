@@ -49,6 +49,11 @@ class SyncRepositoryImpl implements SyncRepository {
     await _dao.deleteAll();
   }
 
+  @override
+  Future<int> getPendingCount() async {
+    return _dao.countPending();
+  }
+
   SyncQueueEntry _toEntry(SyncQueueData data) {
     return SyncQueueEntry(
       id: data.id,

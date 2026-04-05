@@ -20,6 +20,9 @@ abstract class SyncRepository {
 
   /// Clear all queue entries (on unpair).
   Future<void> clearAll();
+
+  /// Get the number of pending queue entries.
+  Future<int> getPendingCount();
 }
 
 /// Represents a single entry in the sync queue.
