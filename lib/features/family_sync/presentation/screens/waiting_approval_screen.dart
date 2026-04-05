@@ -70,17 +70,17 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
     _webSocketService = ws;
     final keyManager = ref.read(keyManagerProvider);
 
-    // Route WebSocket events to SyncEngine
-    final engine = ref.read(syncEngineProvider);
+    // Handle WebSocket events directly
     _wsEventSubscription = ws.eventStream.listen((event) {
+      if (!mounted || _hasNavigated) return;
       switch (event.type) {
         case WebSocketEventType.memberConfirmed:
-          engine.onMemberConfirmed();
+          // Directly verify and navigate — don't route through SyncEngine
+          unawaited(_verifyGroupAndNavigate());
         case WebSocketEventType.joinRequest:
         case WebSocketEventType.memberLeft:
         case WebSocketEventType.groupDissolved:
         case WebSocketEventType.groupStatus:
-          // These are UI navigation events or status snapshots — handled elsewhere
           break;
       }
     });
