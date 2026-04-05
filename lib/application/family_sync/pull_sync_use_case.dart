@@ -50,7 +50,7 @@ typedef ApplyOperationsCallback =
 /// 3. Decrypt each message
 /// 4. Apply operations via callback
 /// 5. ACK messages on server (triggers deletion)
-/// 6. Update sync cursor using server's createdAt (NOT client clock)
+/// 6. Server physically deletes ACK'd messages (no cursor needed)
 /// 7. Drain offline queue
 class PullSyncUseCase {
   PullSyncUseCase({
@@ -83,15 +83,12 @@ class PullSyncUseCase {
       final group = activeGroup ?? pendingGroup;
       if (group == null) return const PullSyncResult.noPair();
 
-      // Use server timestamp as cursor (ISO 8601, not client clock)
-      final sinceIso = group.lastSyncAt?.toUtc().toIso8601String();
-
       if (kDebugMode) {
-        debugPrint('[PullSync] Pulling since ${sinceIso ?? 'beginning'}...');
+        debugPrint('[PullSync] Pulling all pending messages...');
       }
 
-      // Pull messages from server
-      final response = await _apiClient.pullSync(since: sinceIso);
+      // Pull all pending messages — server returns only un-ACK'd messages
+      final response = await _apiClient.pullSync();
       final messages =
           (response['messages'] as List?)?.cast<Map<String, dynamic>>() ?? [];
 
@@ -102,7 +99,6 @@ class PullSyncUseCase {
       if (messages.isEmpty) return const PullSyncResult.noNewData();
 
       var appliedCount = 0;
-      DateTime? lastServerTimestamp;
       final ackedMessageIds = <String>[];
       final deviceId = await _keyManager.getDeviceId();
 
@@ -110,7 +106,6 @@ class PullSyncUseCase {
         final messageId = msg['messageId'] as String;
         final fromDeviceId = msg['fromDeviceId'] as String?;
         final payload = msg['payload'] as String;
-        final createdAt = DateTime.parse(msg['createdAt'] as String);
         final payloadType = E2EEService.detectPayloadType(payload);
 
         if (kDebugMode) {
@@ -153,7 +148,6 @@ class PullSyncUseCase {
             await _applyOperations(operations);
             appliedCount += operations.length;
             ackedMessageIds.add(messageId);
-            lastServerTimestamp = createdAt;
             break;
           case 'v1':
             continue;
@@ -165,12 +159,6 @@ class PullSyncUseCase {
       }
 
       await _apiClient.ackSync(messageIds: ackedMessageIds);
-
-      // Update sync cursor using SERVER's createdAt, NOT DateTime.now()
-      // This avoids clock skew causing missed messages.
-      if (lastServerTimestamp != null) {
-        await _groupRepo.updateLastSyncTime(lastServerTimestamp);
-      }
 
       // Drain offline queue
       await _queueManager.drainQueue();

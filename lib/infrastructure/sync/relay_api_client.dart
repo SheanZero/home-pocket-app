@@ -265,9 +265,8 @@ class RelayApiClient {
   /// Pull pending sync messages since cursor.
   ///
   /// Returns: {messages: SyncMessage[]}
-  Future<Map<String, dynamic>> pullSync({String? since}) async {
-    final query = since != null ? '?since=$since' : '';
-    final response = await _get('/sync/pull$query');
+  Future<Map<String, dynamic>> pullSync() async {
+    final response = await _get('/sync/pull');
     return _parseResponse(response);
   }
 

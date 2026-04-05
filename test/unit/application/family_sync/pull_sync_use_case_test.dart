@@ -81,7 +81,7 @@ void main() {
           createdAt: DateTime(2026),
         ),
       );
-      when(() => apiClient.pullSync(since: any(named: 'since'))).thenAnswer(
+      when(() => apiClient.pullSync()).thenAnswer(
         (_) async => {
           'messages': [
             {
@@ -130,7 +130,7 @@ void main() {
         createdAt: DateTime(2026),
       ),
     );
-    when(() => apiClient.pullSync(since: any(named: 'since'))).thenAnswer(
+    when(() => apiClient.pullSync()).thenAnswer(
       (_) async => {
         'messages': [
           {
@@ -165,11 +165,7 @@ void main() {
     expect(result, isA<PullSyncSuccess>());
     expect(appliedOperations, hasLength(1));
     expect(appliedOperations.single.first['fromDeviceId'], 'owner-1');
-    verify(
-      () => groupRepository.updateLastSyncTime(
-        DateTime.parse('2026-01-01T00:00:02.000Z'),
-      ),
-    ).called(1);
+    verifyNever(() => groupRepository.updateLastSyncTime(any()));
     verify(() => apiClient.ackSync(messageIds: ['msg-2'])).called(1);
   });
 
@@ -185,7 +181,7 @@ void main() {
         createdAt: DateTime(2026),
       ),
     );
-    when(() => apiClient.pullSync(since: any(named: 'since'))).thenAnswer(
+    when(() => apiClient.pullSync()).thenAnswer(
       (_) async => {
         'messages': [
           {
@@ -246,7 +242,7 @@ void main() {
         createdAt: DateTime(2026),
       ),
     );
-    when(() => apiClient.pullSync(since: any(named: 'since'))).thenAnswer(
+    when(() => apiClient.pullSync()).thenAnswer(
       (_) async => {
         'messages': [
           {
