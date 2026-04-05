@@ -5,8 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/sync/sync_trigger_service.dart';
-import '../../domain/models/sync_status.dart';
+import '../../domain/models/sync_status_model.dart';
 import '../../use_cases/check_group_use_case.dart';
 import '../providers/group_providers.dart';
 import '../providers/sync_providers.dart';
@@ -34,22 +33,26 @@ class WaitingApprovalScreen extends ConsumerStatefulWidget {
 
 class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
   bool _hasNavigated = false;
-  StreamSubscription<SyncTriggerEvent>? _eventSubscription;
+  StreamSubscription<SyncStatus>? _syncSubscription;
   Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
-    _listenForSyncEvents();
+    _listenForSyncStatus();
     _startPollingTimer();
   }
 
-  void _listenForSyncEvents() {
-    final syncTrigger = ref.read(syncTriggerServiceProvider);
-    _eventSubscription = syncTrigger.events.listen((event) {
+  void _listenForSyncStatus() {
+    final engine = ref.read(syncEngineProvider);
+    _syncSubscription = engine.statusStream.listen((status) {
       if (!mounted || _hasNavigated) return;
-      if (event.type != SyncTriggerEventType.memberConfirmed) return;
-      unawaited(_verifyGroupAndNavigate());
+      // When SyncEngine detects memberConfirmed, it transitions to
+      // initialSyncing or synced — either means approval happened.
+      if (status.state == SyncState.initialSyncing ||
+          status.state == SyncState.synced) {
+        unawaited(_verifyGroupAndNavigate());
+      }
     });
   }
 
@@ -73,9 +76,6 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
       case CheckGroupInGroup(:final groupId):
         _hasNavigated = true;
         _pollingTimer?.cancel();
-        ref
-            .read(syncStatusNotifierProvider.notifier)
-            .updateStatus(SyncStatus.synced);
         Navigator.of(context).pushReplacement(
           MaterialPageRoute<void>(
             builder: (_) => GroupManagementScreen(groupId: groupId),
@@ -93,7 +93,7 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
   @override
   void dispose() {
     _pollingTimer?.cancel();
-    unawaited(_eventSubscription?.cancel());
+    unawaited(_syncSubscription?.cancel());
     super.dispose();
   }
 

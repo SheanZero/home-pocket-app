@@ -12,6 +12,10 @@
 
 **Spec:** `docs/superpowers/specs/2026-04-03-data-sync-engine-design.md`
 
+**Out of scope:**
+- `UpdateTransactionUseCase` does not exist yet — add sync trigger when that use case is created
+- `avatarImageHash` is NOT a field on `UserProfile` (only `avatarImagePath`) — the orchestrator computes hash from `displayName|avatarEmoji` only; avatar image hash is handled separately by `SyncAvatarUseCase`
+
 ---
 
 ## File Structure
@@ -392,10 +396,10 @@ In `lib/data/daos/sync_queue_dao.dart`, add:
 
 ```dart
   Future<int> countPending() async {
-    final count = countAll();
-    final query = selectOnly(_db.syncQueue)..addColumns([count]);
+    final countExpr = _db.syncQueue.id.count();
+    final query = _db.selectOnly(_db.syncQueue)..addColumns([countExpr]);
     final result = await query.getSingle();
-    return result.read(count) ?? 0;
+    return result.read(countExpr) ?? 0;
   }
 ```
 
@@ -731,21 +735,26 @@ SyncAvatarUseCase syncAvatarUseCase(Ref ref) {
 }
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [ ] **Step 5: Run build_runner (providers use @riverpod codegen)**
+
+Run: `flutter pub run build_runner build --delete-conflicting-outputs`
+
+- [ ] **Step 6: Run test to verify it passes**
 
 Run: `flutter test test/unit/application/family_sync/apply_sync_operations_use_case_test.dart`
 Expected: PASS
 
-- [ ] **Step 6: Run analyzer**
+- [ ] **Step 7: Run analyzer**
 
 Run: `flutter analyze`
 Expected: 0 issues
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
 git add lib/application/family_sync/apply_sync_operations_use_case.dart \
   lib/features/family_sync/presentation/providers/sync_providers.dart \
+  lib/features/family_sync/presentation/providers/sync_providers.g.dart \
   test/unit/application/family_sync/apply_sync_operations_use_case_test.dart
 git commit -m "feat(sync): extend ApplySyncOperationsUseCase for profile/avatar"
 ```
@@ -873,7 +882,6 @@ git commit -m "feat(sync): add onPaused callback to SyncLifecycleObserver"
 Create `test/unit/infrastructure/sync/sync_scheduler_test.dart`:
 
 ```dart
-import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/family_sync/domain/models/sync_status_model.dart';
 import 'package:home_pocket/infrastructure/sync/sync_scheduler.dart';
@@ -1003,6 +1011,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../features/family_sync/domain/models/sync_status_model.dart';
+
+// NOTE: dart:async is required for Timer and unawaited
 
 /// Callback invoked when the scheduler determines a sync should happen.
 typedef SyncRequestCallback = Future<void> Function(SyncMode mode);
@@ -1226,7 +1236,7 @@ void main() {
         (_) async => _activeGroup(),
       );
       when(() => mockPull.execute())
-          .thenAnswer((_) async => const PullSyncResult.success(5));
+          .thenAnswer((_) async => PullSyncResult.success(5));
       when(() => mockQueue.drainQueue()).thenAnswer((_) async => 0);
       when(() => mockQueue.getPendingCount()).thenAnswer((_) async => 0);
 
@@ -2110,13 +2120,25 @@ Stream<model.SyncStatus> syncStatusStream(Ref ref) {
   return ref.watch(syncEngineProvider).statusStream;
 }
 
-/// GroupMembers stream via Drift watch query.
+/// GroupMembers stream via Drift watch query, mapped to domain model.
 @riverpod
-Stream<List<GroupMemberData>> groupMembers(Ref ref) {
+Stream<List<GroupMember>> groupMembers(Ref ref) {
   final activeGroup = ref.watch(activeGroupProvider).valueOrNull;
   if (activeGroup == null) return Stream.value([]);
   final dao = ref.watch(groupMemberDaoProvider);
-  return dao.watchByGroupId(activeGroup.groupId);
+  return dao.watchByGroupId(activeGroup.groupId).map(
+    (rows) => rows.map((row) => GroupMember(
+      deviceId: row.deviceId,
+      publicKey: row.publicKey,
+      deviceName: row.deviceName,
+      role: row.role,
+      status: row.status,
+      displayName: row.displayName,
+      avatarEmoji: row.avatarEmoji,
+      avatarImagePath: row.avatarImagePath,
+      avatarImageHash: row.avatarImageHash,
+    )).toList(),
+  );
 }
 ```
 
@@ -2390,7 +2412,86 @@ git commit -m "refactor(sync): migrate app initialization to SyncEngine"
 
 ---
 
-## Task 14: SyncStatusBadge Migration
+## Task 14: i18n Additions
+
+**Files:**
+- Modify: `lib/l10n/app_ja.arb`
+- Modify: `lib/l10n/app_en.arb`
+- Modify: `lib/l10n/app_zh.arb`
+
+**Context:** Add the 9 new keys from spec §10. Must be done before UI migration tasks that reference these keys.
+
+- [ ] **Step 1: Add keys to all 3 ARB files**
+
+**English (`app_en.arb`):**
+```json
+"syncInProgress": "Syncing...",
+"@syncInProgress": { "description": "Sync in progress status" },
+"syncCompleted": "Sync complete",
+"@syncCompleted": { "description": "Sync completed status" },
+"syncFailed": "Sync failed",
+"@syncFailed": { "description": "Sync failed status" },
+"syncRetry": "Retry",
+"@syncRetry": { "description": "Retry sync button" },
+"syncManual": "Sync Now",
+"@syncManual": { "description": "Manual sync button" },
+"syncLastTime": "Last sync: {time}",
+"@syncLastTime": { "description": "Last sync time", "placeholders": { "time": { "type": "String" } } },
+"syncOfflineQueued": "{count} changes pending",
+"@syncOfflineQueued": { "description": "Offline queue count", "placeholders": { "count": { "type": "int" } } },
+"syncInitialProgress": "Initial sync...",
+"@syncInitialProgress": { "description": "Initial sync in progress" },
+"syncProfileUpdated": "{name} updated their profile",
+"@syncProfileUpdated": { "description": "Profile update notification", "placeholders": { "name": { "type": "String" } } }
+```
+
+**Japanese (`app_ja.arb`):**
+```json
+"syncInProgress": "同期中...",
+"syncCompleted": "同期完了",
+"syncFailed": "同期に失敗しました",
+"syncRetry": "再試行",
+"syncManual": "手動で同期",
+"syncLastTime": "最終同期: {time}",
+"syncOfflineQueued": "{count}件の変更が送信待ち",
+"syncInitialProgress": "初回同期中...",
+"syncProfileUpdated": "{name}がプロフィールを更新しました"
+```
+
+**Chinese (`app_zh.arb`):**
+```json
+"syncInProgress": "同步中...",
+"syncCompleted": "同步完成",
+"syncFailed": "同步失败",
+"syncRetry": "重试",
+"syncManual": "手动同步",
+"syncLastTime": "上次同步: {time}",
+"syncOfflineQueued": "{count}条变更待发送",
+"syncInitialProgress": "首次同步中...",
+"syncProfileUpdated": "{name}更新了个人资料"
+```
+
+- [ ] **Step 2: Run gen-l10n**
+
+Run: `flutter gen-l10n`
+Expected: Generated files updated
+
+- [ ] **Step 3: Run analyzer**
+
+Run: `flutter analyze`
+Expected: 0 issues
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add lib/l10n/app_en.arb lib/l10n/app_ja.arb lib/l10n/app_zh.arb \
+  lib/generated/
+git commit -m "feat(sync): add i18n keys for sync engine status"
+```
+
+---
+
+## Task 15: SyncStatusBadge Migration
 
 **Files:**
 - Modify: `lib/features/family_sync/presentation/widgets/sync_status_badge.dart`
@@ -2520,7 +2621,7 @@ git commit -m "refactor(sync): migrate SyncStatusBadge to new SyncState enum"
 
 ---
 
-## Task 15: FamilySyncSettingsSection + GroupManagement Update
+## Task 16: FamilySyncSettingsSection + GroupManagement Update
 
 **Files:**
 - Modify: `lib/features/family_sync/presentation/widgets/family_sync_settings_section.dart`
@@ -2594,92 +2695,13 @@ git commit -m "feat(sync): add manual sync button and new SyncStatus display"
 
 ---
 
-## Task 16: i18n Additions
-
-**Files:**
-- Modify: `lib/l10n/app_ja.arb`
-- Modify: `lib/l10n/app_en.arb`
-- Modify: `lib/l10n/app_zh.arb`
-
-**Context:** Add the 9 new keys from spec §10.
-
-- [ ] **Step 1: Add keys to all 3 ARB files**
-
-**English (`app_en.arb`):**
-```json
-"syncInProgress": "Syncing...",
-"@syncInProgress": { "description": "Sync in progress status" },
-"syncCompleted": "Sync complete",
-"@syncCompleted": { "description": "Sync completed status" },
-"syncFailed": "Sync failed",
-"@syncFailed": { "description": "Sync failed status" },
-"syncRetry": "Retry",
-"@syncRetry": { "description": "Retry sync button" },
-"syncManual": "Sync Now",
-"@syncManual": { "description": "Manual sync button" },
-"syncLastTime": "Last sync: {time}",
-"@syncLastTime": { "description": "Last sync time", "placeholders": { "time": { "type": "String" } } },
-"syncOfflineQueued": "{count} changes pending",
-"@syncOfflineQueued": { "description": "Offline queue count", "placeholders": { "count": { "type": "int" } } },
-"syncInitialProgress": "Initial sync...",
-"@syncInitialProgress": { "description": "Initial sync in progress" },
-"syncProfileUpdated": "{name} updated their profile",
-"@syncProfileUpdated": { "description": "Profile update notification", "placeholders": { "name": { "type": "String" } } }
-```
-
-**Japanese (`app_ja.arb`):**
-```json
-"syncInProgress": "同期中...",
-"syncCompleted": "同期完了",
-"syncFailed": "同期に失敗しました",
-"syncRetry": "再試行",
-"syncManual": "手動で同期",
-"syncLastTime": "最終同期: {time}",
-"syncOfflineQueued": "{count}件の変更が送信待ち",
-"syncInitialProgress": "初回同期中...",
-"syncProfileUpdated": "{name}がプロフィールを更新しました"
-```
-
-**Chinese (`app_zh.arb`):**
-```json
-"syncInProgress": "同步中...",
-"syncCompleted": "同步完成",
-"syncFailed": "同步失败",
-"syncRetry": "重试",
-"syncManual": "手动同步",
-"syncLastTime": "上次同步: {time}",
-"syncOfflineQueued": "{count}条变更待发送",
-"syncInitialProgress": "首次同步中...",
-"syncProfileUpdated": "{name}更新了个人资料"
-```
-
-- [ ] **Step 2: Run gen-l10n**
-
-Run: `flutter gen-l10n`
-Expected: Generated files updated
-
-- [ ] **Step 3: Run analyzer**
-
-Run: `flutter analyze`
-Expected: 0 issues
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add lib/l10n/app_en.arb lib/l10n/app_ja.arb lib/l10n/app_zh.arb \
-  lib/generated/
-git commit -m "feat(sync): add i18n keys for sync engine status"
-```
-
----
-
 ## Task 17: Delete SyncTriggerService + Cleanup
 
 **Files:**
 - Delete: `lib/infrastructure/sync/sync_trigger_service.dart`
 - Modify: any remaining references
 
-**Context:** With all consumers migrated, `SyncTriggerService` can be removed. The `SyncTriggerEvent` type was already extracted to domain in Task 2. The old `SyncStatus` enum in `sync_status.dart` can also be deleted.
+**Context:** With all consumers migrated, `SyncTriggerService` can be removed. The `SyncTriggerEvent` type was already extracted to domain in Task 2. The old `SyncStatus` enum in `sync_status.dart` can also be deleted. Additional consumers that need migration: `waiting_approval_screen.dart` and `family_sync_notification_route_listener.dart` (both use `syncStatusNotifierProvider`).
 
 - [ ] **Step 1: Delete SyncTriggerService**
 
@@ -2705,6 +2727,12 @@ grep -r "domain/models/sync_status.dart" lib/ test/
 Update each to import from the new locations:
 - `sync_trigger_service.dart` → `sync_trigger_event.dart` (for `SyncTriggerEvent`)
 - `domain/models/sync_status.dart` → `domain/models/sync_status_model.dart` (for `SyncState`/`SyncStatus`)
+
+Key files that also need migration (not yet updated):
+- `lib/features/family_sync/presentation/screens/waiting_approval_screen.dart` — uses `syncStatusNotifierProvider`
+- `lib/features/family_sync/presentation/widgets/family_sync_notification_route_listener.dart` — uses `syncStatusNotifierProvider`
+
+Update both to use `syncEngineProvider` or `syncStatusStreamProvider` instead.
 
 - [ ] **Step 4: Remove old SyncStatusNotifier from sync_providers.dart**
 

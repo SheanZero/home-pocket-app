@@ -121,30 +121,6 @@ final fullSyncUseCaseProvider = AutoDisposeProvider<FullSyncUseCase>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FullSyncUseCaseRef = AutoDisposeProviderRef<FullSyncUseCase>;
-String _$syncTriggerServiceHash() =>
-    r'bf36a16f7ee9020257c6895165630b9819c0edf2';
-
-/// SyncTriggerService provider.
-///
-/// Coordinates sync triggers from lifecycle, transaction changes,
-/// and push notifications. Call `initialize()` once at app startup.
-///
-/// Copied from [syncTriggerService].
-@ProviderFor(syncTriggerService)
-final syncTriggerServiceProvider =
-    AutoDisposeProvider<SyncTriggerService>.internal(
-      syncTriggerService,
-      name: r'syncTriggerServiceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$syncTriggerServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SyncTriggerServiceRef = AutoDisposeProviderRef<SyncTriggerService>;
 String _$syncOrchestratorHash() => r'94bc47a38402186d3777a4b461f06f2654480448';
 
 /// SyncOrchestrator provider.
@@ -267,29 +243,5 @@ final handleGroupDissolvedUseCaseProvider =
 // ignore: unused_element
 typedef HandleGroupDissolvedUseCaseRef =
     AutoDisposeProviderRef<HandleGroupDissolvedUseCase>;
-String _$syncStatusNotifierHash() =>
-    r'c29fe5885a9a8544c419b3fc63bb1df78b75c08d';
-
-/// Current sync status state notifier.
-///
-/// Uses [ref.container.listen] instead of [ref.watch] on [activeGroupProvider]
-/// to avoid full rebuild on every stream emission, which would reset transient
-/// states (syncing, offline, syncError) back to synced/unpaired. We only react
-/// to membership transitions (null <-> non-null).
-///
-/// Copied from [SyncStatusNotifier].
-@ProviderFor(SyncStatusNotifier)
-final syncStatusNotifierProvider =
-    AutoDisposeNotifierProvider<SyncStatusNotifier, SyncStatus>.internal(
-      SyncStatusNotifier.new,
-      name: r'syncStatusNotifierProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$syncStatusNotifierHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$SyncStatusNotifier = AutoDisposeNotifier<SyncStatus>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

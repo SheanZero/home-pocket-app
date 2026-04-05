@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:home_pocket/features/family_sync/domain/models/sync_status.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/sync_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/widgets/family_sync_notification_route_listener.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
@@ -12,15 +9,6 @@ import 'package:mocktail/mocktail.dart';
 import '../../../../../helpers/test_localizations.dart';
 
 class MockRelayApiClient extends Mock implements RelayApiClient {}
-
-class TestSyncStatusNotifier extends SyncStatusNotifier {
-  TestSyncStatusNotifier(this.initialState);
-
-  final SyncStatus initialState;
-
-  @override
-  SyncStatus build() => initialState;
-}
 
 class FakePushMessagingClient implements PushMessagingClient {
   @override
@@ -182,10 +170,7 @@ void main() {
           child: Scaffold(
             body: Column(
               children: [
-                Consumer(
-                  builder: (context, ref, _) =>
-                      Text(ref.watch(syncStatusNotifierProvider).name),
-                ),
+                const Text('sync-status-placeholder'),
                 Builder(
                   builder: (context) => ElevatedButton(
                     onPressed: () {
@@ -205,9 +190,6 @@ void main() {
         ),
         overrides: [
           pushNotificationServiceProvider.overrideWithValue(service),
-          syncStatusNotifierProvider.overrideWith(
-            () => TestSyncStatusNotifier(SyncStatus.synced),
-          ),
         ],
       ),
     );
@@ -222,8 +204,9 @@ void main() {
     });
     await tester.pumpAndSettle();
 
+    // After memberRemoved, should pop back to first route
     expect(find.text('details-screen'), findsNothing);
-    expect(find.text('synced'), findsNothing);
-    expect(find.text('unpaired'), findsOneWidget);
+    // Snackbar with "unpaired" message should be visible
+    expect(find.byType(SnackBar), findsOneWidget);
   });
 }

@@ -1,30 +1,33 @@
-import 'dart:async';
-
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/family_sync/sync_engine.dart';
+import 'package:home_pocket/application/family_sync/sync_orchestrator.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
+import 'package:home_pocket/features/family_sync/domain/models/sync_status_model.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/group_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/sync_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/waiting_approval_screen.dart';
 import 'package:home_pocket/features/family_sync/use_cases/check_group_use_case.dart';
-import 'package:home_pocket/infrastructure/sync/sync_trigger_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../../helpers/test_localizations.dart';
 
 class MockGroupRepository extends Mock implements GroupRepository {}
 
-class MockSyncTriggerService extends Mock implements SyncTriggerService {}
-
 class MockCheckGroupUseCase extends Mock implements CheckGroupUseCase {}
 
+class MockSyncOrchestrator extends Mock implements SyncOrchestrator {}
+
 void main() {
+  setUpAll(() {
+    registerFallbackValue(SyncMode.initialSync);
+  });
   late MockGroupRepository groupRepository;
-  late MockSyncTriggerService syncTriggerService;
   late MockCheckGroupUseCase checkGroupUseCase;
-  late StreamController<SyncTriggerEvent> eventsController;
+  late SyncEngine syncEngine;
+  late MockSyncOrchestrator mockOrchestrator;
 
   GroupInfo buildConfirmingGroup() => GroupInfo(
     groupId: 'group-1',
@@ -84,21 +87,27 @@ void main() {
 
   setUp(() {
     groupRepository = MockGroupRepository();
-    syncTriggerService = MockSyncTriggerService();
     checkGroupUseCase = MockCheckGroupUseCase();
-    eventsController = StreamController<SyncTriggerEvent>.broadcast();
-    when(
-      () => syncTriggerService.events,
-    ).thenAnswer((_) => eventsController.stream);
-    when(() => syncTriggerService.dispose()).thenReturn(null);
+    mockOrchestrator = MockSyncOrchestrator();
+    when(() => mockOrchestrator.needsFullPull()).thenAnswer((_) async => false);
+    when(() => mockOrchestrator.getPendingQueueCount())
+        .thenAnswer((_) async => 0);
+    when(() => mockOrchestrator.execute(any()))
+        .thenAnswer((_) async => const SyncOrchestratorSuccess());
+    when(() => groupRepository.getActiveGroup())
+        .thenAnswer((_) async => null);
+    syncEngine = SyncEngine(
+      orchestrator: mockOrchestrator,
+      groupRepo: groupRepository,
+    );
     // Default: still waiting
     when(
       () => checkGroupUseCase.execute(),
     ).thenAnswer((_) async => const CheckGroupNotInGroup());
   });
 
-  tearDown(() async {
-    await eventsController.close();
+  tearDown(() {
+    syncEngine.dispose();
   });
 
   testWidgets('shows waiting approval state using repository group data', (
@@ -120,7 +129,7 @@ void main() {
         overrides: [
           groupRepositoryProvider.overrideWithValue(groupRepository),
           checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
-          syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
+          syncEngineProvider.overrideWithValue(syncEngine),
         ],
       ),
     );
@@ -158,15 +167,14 @@ void main() {
           overrides: [
             groupRepositoryProvider.overrideWithValue(groupRepository),
             checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
-            syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
+            syncEngineProvider.overrideWithValue(syncEngine),
           ],
         ),
       );
       await tester.pump(const Duration(milliseconds: 100));
 
-      eventsController.add(
-        const SyncTriggerEvent.memberConfirmed(groupId: 'group-1'),
-      );
+      // Simulate SyncEngine receiving memberConfirmed → status changes
+      syncEngine.onMemberConfirmed();
       // Allow the async verification and navigation to complete
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
@@ -186,6 +194,9 @@ void main() {
         () => groupRepository.getGroupById('group-1'),
       ).thenAnswer((_) async => buildConfirmingGroup());
       when(
+        () => groupRepository.getActiveGroup(),
+      ).thenAnswer((_) async => buildActiveGroup());
+      when(
         () => checkGroupUseCase.execute(),
       ).thenAnswer((_) async => const CheckGroupNotInGroup());
 
@@ -198,19 +209,18 @@ void main() {
           overrides: [
             groupRepositoryProvider.overrideWithValue(groupRepository),
             checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
-            syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
+            syncEngineProvider.overrideWithValue(syncEngine),
           ],
         ),
       );
       await tester.pump(const Duration(milliseconds: 100));
 
-      eventsController.add(
-        const SyncTriggerEvent.memberConfirmed(groupId: 'group-1'),
-      );
+      // Simulate SyncEngine receiving memberConfirmed → emits initialSyncing then synced
+      syncEngine.onMemberConfirmed();
       await tester.pump(const Duration(milliseconds: 500));
 
-      verify(() => checkGroupUseCase.execute()).called(1);
-      // Screen should remain on the waiting screen
+      verify(() => checkGroupUseCase.execute()).called(greaterThan(0));
+      // Screen should remain since checkGroup returns not-in-group
       expect(find.byType(WaitingApprovalScreen), findsOneWidget);
     },
   );
@@ -233,7 +243,7 @@ void main() {
           overrides: [
             groupRepositoryProvider.overrideWithValue(groupRepository),
             checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
-            syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
+            syncEngineProvider.overrideWithValue(syncEngine),
           ],
         ),
       );
@@ -270,7 +280,7 @@ void main() {
           overrides: [
             groupRepositoryProvider.overrideWithValue(groupRepository),
             checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
-            syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
+            syncEngineProvider.overrideWithValue(syncEngine),
           ],
         ),
       );

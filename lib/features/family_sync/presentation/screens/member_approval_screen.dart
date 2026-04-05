@@ -6,7 +6,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/sync/sync_trigger_service.dart';
 import '../../domain/models/group_info.dart';
 import '../../domain/models/group_member.dart';
 import '../../../../application/family_sync/confirm_member_use_case.dart';
@@ -14,7 +13,6 @@ import '../../use_cases/remove_member_use_case.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
 import '../providers/group_providers.dart';
 import '../providers/repository_providers.dart';
-import '../providers/sync_providers.dart';
 import 'group_management_screen.dart';
 
 const _purpleGradient = [
@@ -38,33 +36,11 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
   bool _isLoading = true;
   String? _approvingMemberId;
   String? _rejectingMemberId;
-  StreamSubscription<SyncTriggerEvent>? _eventSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadGroup();
-    _listenForSyncEvents();
-  }
-
-  void _listenForSyncEvents() {
-    final syncTrigger = ref.read(syncTriggerServiceProvider);
-    _eventSubscription = syncTrigger.events.listen((event) {
-      if (!mounted) return;
-      if (event.type != SyncTriggerEventType.joinRequest) return;
-      if (event.groupId != null &&
-          widget.groupId != null &&
-          event.groupId != widget.groupId) {
-        return;
-      }
-      _loadGroup();
-    });
-  }
-
-  @override
-  void dispose() {
-    unawaited(_eventSubscription?.cancel());
-    super.dispose();
   }
 
   Future<void> _loadGroup() async {

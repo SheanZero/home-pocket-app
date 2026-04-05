@@ -17,11 +17,8 @@ import '../../../../features/profile/presentation/providers/user_profile_provide
 import '../../../accounting/presentation/providers/repository_providers.dart'
     as accounting;
 import '../../../../infrastructure/crypto/providers.dart';
-import '../../../../infrastructure/sync/sync_trigger_service.dart';
 import 'avatar_sync_providers.dart';
-import '../../domain/models/group_info.dart';
 import '../../domain/models/group_member.dart';
-import '../../domain/models/sync_status.dart';
 import '../../domain/models/sync_status_model.dart' as model;
 import 'active_group_provider.dart';
 import 'repository_providers.dart';
@@ -111,61 +108,8 @@ FullSyncUseCase fullSyncUseCase(Ref ref) {
   );
 }
 
-/// SyncTriggerService provider.
-///
-/// Coordinates sync triggers from lifecycle, transaction changes,
-/// and push notifications. Call `initialize()` once at app startup.
-@riverpod
-SyncTriggerService syncTriggerService(Ref ref) {
-  final service = SyncTriggerService(
-    groupRepo: ref.watch(groupRepositoryProvider),
-    pullSync: ref.watch(pullSyncUseCaseProvider),
-    pushSync: ref.watch(pushSyncUseCaseProvider),
-    fullSync: ref.watch(fullSyncUseCaseProvider),
-    shadowBookService: ref.watch(shadowBookServiceProvider),
-    queueManager: ref.watch(syncQueueManagerProvider),
-    pushNotificationService: ref.watch(pushNotificationServiceProvider),
-    apiClient: ref.watch(relayApiClientProvider),
-    keyManager: ref.watch(keyManagerProvider),
-  );
-
-  ref.onDispose(service.dispose);
-
-  return service;
-}
-
-/// Current sync status state notifier.
-///
-/// Uses [ref.container.listen] instead of [ref.watch] on [activeGroupProvider]
-/// to avoid full rebuild on every stream emission, which would reset transient
-/// states (syncing, offline, syncError) back to synced/unpaired. We only react
-/// to membership transitions (null <-> non-null).
-@riverpod
-class SyncStatusNotifier extends _$SyncStatusNotifier {
-  @override
-  SyncStatus build() {
-    final subscription = ref.container.listen<AsyncValue<GroupInfo?>>(
-      activeGroupProvider,
-      (previous, next) {
-        final hadActiveGroup = previous?.valueOrNull != null;
-        final hasActiveGroup = next.valueOrNull != null;
-        if (hadActiveGroup == hasActiveGroup) {
-          return;
-        }
-
-        state = hasActiveGroup ? SyncStatus.synced : SyncStatus.unpaired;
-      },
-    );
-    ref.onDispose(subscription.close);
-
-    final hasActiveGroup = ref.read(activeGroupProvider).valueOrNull != null;
-    return hasActiveGroup ? SyncStatus.synced : SyncStatus.unpaired;
-  }
-
-  void updateStatus(SyncStatus status) {
-    state = status;
-  }
-}
+// SyncTriggerService and SyncStatusNotifier have been removed.
+// Use syncEngineProvider and syncStatusStreamProvider instead.
 
 // --- New SyncEngine providers ---
 

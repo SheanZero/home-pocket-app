@@ -8,11 +8,9 @@ import 'package:home_pocket/features/family_sync/domain/models/group_member.dart
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/group_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/sync_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/member_approval_screen.dart';
 import 'package:home_pocket/application/family_sync/confirm_member_use_case.dart';
 import 'package:home_pocket/features/family_sync/use_cases/remove_member_use_case.dart';
-import 'package:home_pocket/infrastructure/sync/sync_trigger_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../../helpers/test_localizations.dart';
@@ -23,22 +21,15 @@ class MockConfirmMemberUseCase extends Mock implements ConfirmMemberUseCase {}
 
 class MockRemoveMemberUseCase extends Mock implements RemoveMemberUseCase {}
 
-class MockSyncTriggerService extends Mock implements SyncTriggerService {}
-
 void main() {
   late MockGroupRepository groupRepository;
   late MockConfirmMemberUseCase confirmMemberUseCase;
   late MockRemoveMemberUseCase removeMemberUseCase;
-  late MockSyncTriggerService syncTriggerService;
 
   setUp(() {
     groupRepository = MockGroupRepository();
     confirmMemberUseCase = MockConfirmMemberUseCase();
     removeMemberUseCase = MockRemoveMemberUseCase();
-    syncTriggerService = MockSyncTriggerService();
-    when(
-      () => syncTriggerService.events,
-    ).thenAnswer((_) => const Stream<SyncTriggerEvent>.empty());
 
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
@@ -116,7 +107,7 @@ void main() {
     groupRepositoryProvider.overrideWithValue(groupRepository),
     confirmMemberUseCaseProvider.overrideWithValue(confirmMemberUseCase),
     removeMemberUseCaseProvider.overrideWithValue(removeMemberUseCase),
-    syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
+
   ];
 
   testWidgets('shows both approve and reject buttons', (tester) async {

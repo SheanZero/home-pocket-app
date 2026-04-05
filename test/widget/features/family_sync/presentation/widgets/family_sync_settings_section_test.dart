@@ -14,8 +14,6 @@ import 'package:home_pocket/application/family_sync/create_group_use_case.dart';
 import 'package:home_pocket/application/family_sync/join_group_use_case.dart';
 import 'package:home_pocket/features/family_sync/use_cases/check_group_use_case.dart';
 import 'package:home_pocket/features/family_sync/presentation/widgets/family_sync_settings_section.dart';
-import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
-import 'package:home_pocket/infrastructure/sync/sync_trigger_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../../helpers/test_localizations.dart';
@@ -28,18 +26,11 @@ class MockCreateGroupUseCase extends Mock implements CreateGroupUseCase {}
 
 class MockJoinGroupUseCase extends Mock implements JoinGroupUseCase {}
 
-class MockSyncTriggerService extends Mock implements SyncTriggerService {}
-
-class MockPushNotificationService extends Mock
-    implements PushNotificationService {}
-
 void main() {
   late MockGroupRepository groupRepository;
   late MockCheckGroupUseCase checkGroupUseCase;
   late MockCreateGroupUseCase createGroupUseCase;
   late MockJoinGroupUseCase joinGroupUseCase;
-  late MockSyncTriggerService syncTriggerService;
-  late MockPushNotificationService pushNotificationService;
 
   GroupInfo buildActiveGroup() => GroupInfo(
     groupId: 'group-1',
@@ -65,8 +56,6 @@ void main() {
     checkGroupUseCase = MockCheckGroupUseCase();
     createGroupUseCase = MockCreateGroupUseCase();
     joinGroupUseCase = MockJoinGroupUseCase();
-    syncTriggerService = MockSyncTriggerService();
-    pushNotificationService = MockPushNotificationService();
     when(
       () => groupRepository.watchActiveGroup(),
     ).thenAnswer((_) => Stream.value(buildActiveGroup()));
@@ -98,10 +87,6 @@ void main() {
         avatarImageHash: any(named: 'avatarImageHash'),
       ),
     ).thenAnswer((_) async => const JoinGroupError('Invalid invite code'));
-    when(() => syncTriggerService.initialize()).thenAnswer((_) async {});
-    when(
-      () => syncTriggerService.events,
-    ).thenAnswer((_) => const Stream<SyncTriggerEvent>.empty());
   });
 
   testWidgets('navigates to GroupManagementScreen when already paired', (
@@ -115,10 +100,6 @@ void main() {
           checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
           createGroupUseCaseProvider.overrideWithValue(createGroupUseCase),
           joinGroupUseCaseProvider.overrideWithValue(joinGroupUseCase),
-          syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
-          pushNotificationServiceProvider.overrideWithValue(
-            pushNotificationService,
-          ),
           syncStatusStreamProvider.overrideWith(
             (ref) => Stream.value(
               const model.SyncStatus(state: model.SyncState.synced),
@@ -147,10 +128,6 @@ void main() {
             checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
             createGroupUseCaseProvider.overrideWithValue(createGroupUseCase),
             joinGroupUseCaseProvider.overrideWithValue(joinGroupUseCase),
-            syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
-            ),
             syncStatusStreamProvider.overrideWith(
               (ref) => Stream.value(
                 const model.SyncStatus(state: model.SyncState.noGroup),
@@ -187,10 +164,6 @@ void main() {
             checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
             createGroupUseCaseProvider.overrideWithValue(createGroupUseCase),
             joinGroupUseCaseProvider.overrideWithValue(joinGroupUseCase),
-            syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
-            ),
             syncStatusStreamProvider.overrideWith(
               (ref) => Stream.value(
                 const model.SyncStatus(state: model.SyncState.noGroup),
@@ -228,10 +201,6 @@ void main() {
             checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
             createGroupUseCaseProvider.overrideWithValue(createGroupUseCase),
             joinGroupUseCaseProvider.overrideWithValue(joinGroupUseCase),
-            syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
-            ),
             syncStatusStreamProvider.overrideWith(
               (ref) => Stream.value(
                 const model.SyncStatus(state: model.SyncState.noGroup),
@@ -269,10 +238,6 @@ void main() {
             checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
             createGroupUseCaseProvider.overrideWithValue(createGroupUseCase),
             joinGroupUseCaseProvider.overrideWithValue(joinGroupUseCase),
-            syncTriggerServiceProvider.overrideWithValue(syncTriggerService),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
-            ),
             syncStatusStreamProvider.overrideWith(
               (ref) => Stream.value(
                 const model.SyncStatus(state: model.SyncState.noGroup),
