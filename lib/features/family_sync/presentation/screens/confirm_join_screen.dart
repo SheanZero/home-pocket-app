@@ -8,6 +8,7 @@ import '../../../../application/family_sync/confirm_join_use_case.dart';
 import '../../../../application/family_sync/join_group_use_case.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../profile/presentation/providers/user_profile_providers.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
 import '../providers/group_providers.dart';
 import 'waiting_approval_screen.dart';
@@ -27,9 +28,14 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
   Future<void> _handleConfirm() async {
     setState(() => _isConfirming = true);
 
+    final profile = await ref.read(userProfileProvider.future);
+    if (!mounted) return;
+
     final result = await ref.read(confirmJoinUseCaseProvider).execute(
       groupId: widget.result.groupId,
       groupName: widget.result.groupName,
+      displayName: profile?.displayName ?? '',
+      avatarEmoji: profile?.avatarEmoji ?? '',
     );
 
     if (!mounted) return;

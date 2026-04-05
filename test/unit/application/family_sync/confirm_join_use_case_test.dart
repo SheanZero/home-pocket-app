@@ -35,6 +35,9 @@ void main() {
     when(
       () => apiClient.confirmJoin(
         groupId: any(named: 'groupId'),
+        displayName: any(named: 'displayName'),
+        avatarEmoji: any(named: 'avatarEmoji'),
+        avatarImageHash: any(named: 'avatarImageHash'),
       ),
     ).thenAnswer((_) async => <String, dynamic>{});
     when(
@@ -48,12 +51,16 @@ void main() {
     final result = await useCase.execute(
       groupId: 'group-1',
       groupName: 'Smith Family',
+      displayName: 'Mama',
+      avatarEmoji: '\u{1F469}',
     );
 
     expect(result, isA<ConfirmJoinSuccess>());
     verify(
       () => apiClient.confirmJoin(
         groupId: 'group-1',
+        displayName: 'Mama',
+        avatarEmoji: '\u{1F469}',
       ),
     ).called(1);
     verify(
@@ -71,6 +78,8 @@ void main() {
     final result = await useCase.execute(
       groupId: 'group-1',
       groupName: 'Smith Family',
+      displayName: 'Mama',
+      avatarEmoji: '\u{1F469}',
     );
 
     expect(result, isA<ConfirmJoinError>());
@@ -84,6 +93,9 @@ void main() {
     when(
       () => apiClient.confirmJoin(
         groupId: any(named: 'groupId'),
+        displayName: any(named: 'displayName'),
+        avatarEmoji: any(named: 'avatarEmoji'),
+        avatarImageHash: any(named: 'avatarImageHash'),
       ),
     ).thenThrow(
       const RelayApiException(
@@ -95,6 +107,8 @@ void main() {
     final result = await useCase.execute(
       groupId: 'group-1',
       groupName: 'Smith Family',
+      displayName: 'Mama',
+      avatarEmoji: '\u{1F469}',
     );
 
     expect(result, isA<ConfirmJoinError>());
@@ -108,12 +122,17 @@ void main() {
     when(
       () => apiClient.confirmJoin(
         groupId: any(named: 'groupId'),
+        displayName: any(named: 'displayName'),
+        avatarEmoji: any(named: 'avatarEmoji'),
+        avatarImageHash: any(named: 'avatarImageHash'),
       ),
     ).thenThrow(Exception('Network error'));
 
     final result = await useCase.execute(
       groupId: 'group-1',
       groupName: 'Smith Family',
+      displayName: 'Mama',
+      avatarEmoji: '\u{1F469}',
     );
 
     expect(result, isA<ConfirmJoinError>());

@@ -42,6 +42,9 @@ class ConfirmJoinUseCase {
   Future<ConfirmJoinResult> execute({
     required String groupId,
     required String groupName,
+    required String displayName,
+    required String avatarEmoji,
+    String? avatarImageHash,
   }) async {
     try {
       final deviceId = await _keyManager.getDeviceId();
@@ -51,6 +54,9 @@ class ConfirmJoinUseCase {
 
       await _apiClient.confirmJoin(
         groupId: groupId,
+        displayName: displayName,
+        avatarEmoji: avatarEmoji,
+        avatarImageHash: avatarImageHash,
       );
 
       await _groupRepository.saveConfirmingGroup(
