@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../features/family_sync/domain/models/sync_status_model.dart';
 import '../../features/family_sync/domain/repositories/group_repository.dart';
+import '../../infrastructure/sync/push_notification_service.dart';
 import '../../infrastructure/sync/sync_lifecycle_observer.dart';
 import '../../infrastructure/sync/sync_scheduler.dart';
 import 'sync_orchestrator.dart';
@@ -54,6 +55,17 @@ class SyncEngine {
 
     // Set initial status based on group presence
     unawaited(_refreshInitialStatus());
+  }
+
+  /// Wire push notification handlers to trigger sync operations.
+  ///
+  /// Call once after both SyncEngine.initialize() and
+  /// PushNotificationService.initialize() have completed.
+  void connectPushNotifications(PushNotificationService pushService) {
+    pushService.registerHandlers(
+      onSyncAvailable: (_) async => onSyncAvailable(),
+      onMemberConfirmed: (_) async => onMemberConfirmed(),
+    );
   }
 
   /// Dispose all timers and observers.

@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
 import 'data/app_database.dart';
 import 'features/accounting/presentation/providers/use_case_providers.dart';
+import 'features/family_sync/presentation/providers/repository_providers.dart';
 import 'features/family_sync/presentation/providers/sync_providers.dart';
 import 'features/home/presentation/screens/main_shell_screen.dart';
 import 'features/profile/presentation/providers/user_profile_providers.dart';
@@ -114,6 +115,10 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
         // Initialize SyncEngine (lifecycle observer + status stream)
         final syncEngine = ref.read(syncEngineProvider);
         syncEngine.initialize();
+
+        // Wire push notifications → sync engine
+        final pushService = ref.read(pushNotificationServiceProvider);
+        syncEngine.connectPushNotifications(pushService);
         final existingProfile = await ref
             .read(getUserProfileUseCaseProvider)
             .execute();
