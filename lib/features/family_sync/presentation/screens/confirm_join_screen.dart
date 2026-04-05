@@ -40,6 +40,7 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
           context,
           MaterialPageRoute<void>(
             builder: (_) => WaitingApprovalScreen(
+              groupId: widget.result.groupId,
               groupName: widget.result.groupName,
               ownerDisplayName: widget.result.ownerDisplayName,
             ),

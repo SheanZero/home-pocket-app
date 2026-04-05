@@ -123,6 +123,7 @@ void main() {
     await tester.pumpWidget(
       createLocalizedWidget(
         const WaitingApprovalScreen(
+          groupId: 'group-1',
           groupName: 'Test Family',
           ownerDisplayName: 'Owner phone',
         ),
@@ -161,6 +162,7 @@ void main() {
       await tester.pumpWidget(
         createLocalizedWidget(
           const WaitingApprovalScreen(
+            groupId: 'group-1',
             groupName: 'Test Family',
             ownerDisplayName: 'Owner phone',
           ),
@@ -203,6 +205,7 @@ void main() {
       await tester.pumpWidget(
         createLocalizedWidget(
           const WaitingApprovalScreen(
+            groupId: 'group-1',
             groupName: 'Test Family',
             ownerDisplayName: 'Owner phone',
           ),
@@ -237,6 +240,7 @@ void main() {
       await tester.pumpWidget(
         createLocalizedWidget(
           const WaitingApprovalScreen(
+            groupId: 'group-1',
             groupName: 'Test Family',
             ownerDisplayName: 'Owner phone',
           ),
@@ -274,6 +278,7 @@ void main() {
       await tester.pumpWidget(
         createLocalizedWidget(
           const WaitingApprovalScreen(
+            groupId: 'group-1',
             groupName: 'Test Family',
             ownerDisplayName: 'Owner phone',
           ),

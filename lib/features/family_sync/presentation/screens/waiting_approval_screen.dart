@@ -19,10 +19,12 @@ import 'group_management_screen.dart';
 class WaitingApprovalScreen extends ConsumerStatefulWidget {
   const WaitingApprovalScreen({
     super.key,
+    required this.groupId,
     required this.groupName,
     required this.ownerDisplayName,
   });
 
+  final String groupId;
   final String groupName;
   final String ownerDisplayName;
 
