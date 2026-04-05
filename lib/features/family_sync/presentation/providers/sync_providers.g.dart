@@ -63,7 +63,7 @@ final shadowBookServiceProvider =
 // ignore: unused_element
 typedef ShadowBookServiceRef = AutoDisposeProviderRef<ShadowBookService>;
 String _$applySyncOperationsUseCaseHash() =>
-    r'c61325a3aa42d96bd201567629d381bdec8df779';
+    r'29da0bc6a10c3bd6960c4eec6769cd0058052e57';
 
 /// See also [applySyncOperationsUseCase].
 @ProviderFor(applySyncOperationsUseCase)

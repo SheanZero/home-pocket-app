@@ -12,6 +12,7 @@ import '../../../accounting/presentation/providers/repository_providers.dart'
     as accounting;
 import '../../../../infrastructure/crypto/providers.dart';
 import '../../../../infrastructure/sync/sync_trigger_service.dart';
+import 'avatar_sync_providers.dart';
 import '../../domain/models/group_info.dart';
 import '../../domain/models/sync_status.dart';
 import 'active_group_provider.dart';
@@ -58,6 +59,7 @@ ApplySyncOperationsUseCase applySyncOperationsUseCase(Ref ref) {
     transactionRepository: ref.watch(accounting.transactionRepositoryProvider),
     shadowBookService: ref.watch(shadowBookServiceProvider),
     groupRepository: ref.watch(groupRepositoryProvider),
+    syncAvatarUseCase: ref.watch(syncAvatarUseCaseProvider),
   );
 }
 
