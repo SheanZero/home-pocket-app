@@ -14,6 +14,10 @@ When joining a group, both the applicant and the owner have waiting screens. The
 
 Add a WebSocket realtime channel as the primary notification mechanism for group status changes, with push notifications and HTTP polling as fallback layers.
 
+### Prerequisites
+
+- Add `web_socket_channel: ^3.0.0` to `pubspec.yaml`
+
 ---
 
 ## Architecture: Three-Layer Notification Strategy
@@ -64,11 +68,13 @@ Hub struct {
 
 ### Authentication Flow
 
-1. Client connects and sends first message: `{ deviceId, timestamp, signature }`
+1. Client connects and sends first message: `{ deviceId, timestamp, signature, protocolVersion: 1 }`
 2. Signature content: `"ws:connect:{groupId}:{deviceId}:{timestamp}"` signed with device Ed25519 private key
 3. Server verifies using registered public key, timestamp ±30s tolerance (replay prevention)
 4. Auth success → register to Hub, immediately push current group status snapshot
 5. Auth failure → close with code 4001, client does not retry (auth errors are non-recoverable)
+
+**Note on signature format:** The WebSocket auth uses a purpose-specific signature prefix (`ws:connect`) instead of the REST HTTP method-based format (`<method>:<path>:<timestamp>:<SHA256(body)>`) because WebSocket upgrade requests do not carry request bodies, and the connection is scoped to a specific groupId which must be part of the signed payload. The `protocolVersion` field enables future backwards-compatible protocol changes.
 
 ### Integration with Existing REST APIs
 
@@ -76,10 +82,10 @@ Existing status-change endpoints broadcast to Hub after database operations:
 
 | REST Endpoint | Hub Broadcast Event |
 |---|---|
-| `POST /group/member/confirm` | `member_confirmed` |
-| `POST /group/confirm` | `join_request` |
-| `POST /group/member/leave` | `member_left` |
-| `DELETE /group/{id}` | `group_dissolved` |
+| `POST /group/confirm` (owner confirms member) | `member_confirmed` |
+| `POST /group/{groupId}/confirm-join` (joiner confirms) | `join_request` |
+| `POST /group/{groupId}/leave` | `member_left` |
+| `DELETE /group/{groupId}` | `group_dissolved` |
 
 Push notifications (FCM/APNS) continue to fire simultaneously as backup. No existing logic is removed.
 
@@ -97,6 +103,8 @@ Push notifications (FCM/APNS) continue to fire simultaneously as backup. No exis
 
 Aligned with existing `SyncTriggerEvent` types so the client can process events through the same handler.
 
+**Scope note:** The `syncAvailable` event type is intentionally excluded from the WebSocket channel. WebSocket connections are only active during group join/approval flows (on-demand), so data sync notifications continue to use push notifications as their primary channel. If WebSocket is later extended to be persistent, `syncAvailable` can be added.
+
 ### Resource Cleanup
 
 - Connection closed → remove from Hub
@@ -109,6 +117,7 @@ Aligned with existing `SyncTriggerEvent` types so the client can process events 
 - Same `deviceId` + same `groupId` allows only one active connection (new connection kicks old)
 - Unauthenticated connection not sending auth message within 5s → server closes
 - Max 10 concurrent WebSocket connections per IP
+- Max message size: 4KB for both client-to-server and server-to-client frames
 
 ---
 
@@ -146,6 +155,14 @@ SyncTriggerService
 
 WebSocket events and push events flow through the same `_eventController`. Downstream (UI layer) is completely unaware.
 
+### Event Deduplication
+
+The same event (e.g., `member_confirmed`) may arrive via both WebSocket and push notification within seconds. `SyncTriggerService` deduplicates at the processing level:
+
+- Track last-processed event key as `(type, groupId)` with timestamp
+- If a duplicate arrives within 10 seconds of the first, skip processing (log only)
+- This prevents redundant `confirmLocalGroup()`, `fullSync()`, and `pullSync()` calls
+
 ### Three-Layer Degradation Logic in Waiting Screens
 
 `WaitingApprovalScreen` and `MemberApprovalScreen` updated:
@@ -172,7 +189,7 @@ App backgrounded → disconnect WebSocket after 60s (battery saving)
 App foregrounded → if on waiting screen, reconnect WebSocket + execute one proactive check (compensate for events missed while backgrounded)
 ```
 
-Coordinated through existing `SyncLifecycleObserver`, no new lifecycle listeners.
+`WebSocketService` internally observes `AppLifecycleState` for its own connection management (background timer, foreground reconnect). This is WebSocket-specific logic and does not modify the existing `SyncLifecycleObserver` which handles data sync on resume.
 
 ### New Provider
 
@@ -225,7 +242,7 @@ Injected through existing `syncTriggerServiceProvider`, no new UI-layer provider
 - Widget tests: `WaitingApprovalScreen` three-layer degradation (WebSocket connected → no polling, disconnected → polling active)
 - Widget tests: `MemberApprovalScreen` refreshes list on `join_request` event
 
-No new E2E tests needed — WebSocket is an infrastructure-layer change, existing group join E2E flow is unchanged.
+Integration test: simulate WebSocket disconnect mid-wait and verify the screen seamlessly falls back to polling and eventually receives the confirmation.
 
 ---
 
@@ -235,8 +252,12 @@ No new E2E tests needed — WebSocket is an infrastructure-layer change, existin
 - **New:** `WebSocketService` (infrastructure layer)
 - **Modified:** `SyncTriggerService` adds WebSocket event source
 - **Modified:** `WaitingApprovalScreen` / `MemberApprovalScreen` add three-layer degradation logic
-- **Modified:** Polling interval from 30s → 5s (only when WebSocket unavailable)
+- **Modified:** Polling interval from 30s → 5s with adaptive backoff (5s → 10s → 15s → 30s if no changes detected, only when WebSocket unavailable)
 - **New:** Go Relay Server WebSocket Hub + Handler
+
+### Architecture Note
+
+A pre-existing `lib/features/family_sync/use_cases/` directory exists (violates the "Thin Feature" rule). This design does not introduce new use cases there. No new use cases are needed for this feature — all changes are in infrastructure (`WebSocketService`) and presentation (screen degradation logic).
 
 ### Unchanged
 - `SyncTriggerEvent` types
