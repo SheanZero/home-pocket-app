@@ -75,6 +75,9 @@ class SyncOrchestrator {
 
   /// Execute a sync mode. Returns the result.
   Future<SyncOrchestratorResult> execute(SyncMode mode) async {
+    if (kDebugMode) {
+      debugPrint('[SyncOrchestrator] Executing $mode...');
+    }
     try {
       return switch (mode) {
         SyncMode.initialSync => await _executeInitialSync(),
@@ -109,31 +112,27 @@ class SyncOrchestrator {
     final group = await _groupRepo.getActiveGroup();
     if (group == null) return const SyncOrchestratorNoGroup();
 
-    final isOwner = group.role == 'owner';
+    if (kDebugMode) {
+      debugPrint('[SyncOrchestrator] initialSync for group ${group.groupId}');
+    }
 
-    if (isOwner) {
-      // Owner: push all → push avatar → pull
-      final pushed = await _fullSync.execute();
-      await _avatarSync.pushAvatarToMembers(groupId: group.groupId);
-      final pullResult = await _pullSync.execute();
-      final applied =
-          pullResult is PullSyncSuccess ? pullResult.appliedCount : 0;
-      return SyncOrchestratorSuccess(
-        pushedCount: pushed,
-        appliedCount: applied,
-      );
-    } else {
-      // Joiner: pull → push all → push avatar
-      final pullResult = await _pullSync.execute();
-      final applied =
-          pullResult is PullSyncSuccess ? pullResult.appliedCount : 0;
-      final pushed = await _fullSync.execute();
-      await _avatarSync.pushAvatarToMembers(groupId: group.groupId);
-      return SyncOrchestratorSuccess(
-        pushedCount: pushed,
-        appliedCount: applied,
+    // Always: push all → push avatar → pull
+    final pushed = await _fullSync.execute();
+    await _avatarSync.pushAvatarToMembers(groupId: group.groupId);
+    final pullResult = await _pullSync.execute();
+    final applied =
+        pullResult is PullSyncSuccess ? pullResult.appliedCount : 0;
+
+    if (kDebugMode) {
+      debugPrint(
+        '[SyncOrchestrator] initialSync complete: pushed=$pushed, applied=$applied',
       );
     }
+
+    return SyncOrchestratorSuccess(
+      pushedCount: pushed,
+      appliedCount: applied,
+    );
   }
 
   Future<SyncOrchestratorResult> _executeIncrementalPush() async {
@@ -159,6 +158,10 @@ class SyncOrchestrator {
       );
     }
 
+    if (kDebugMode) {
+      debugPrint('[SyncOrchestrator] incrementalPush: draining offline queue');
+    }
+
     // Drain offline queue
     await _queueManager.drainQueue();
 
@@ -172,6 +175,10 @@ class SyncOrchestrator {
     final pullResult = await _pullSync.execute();
     final applied =
         pullResult is PullSyncSuccess ? pullResult.appliedCount : 0;
+
+    if (kDebugMode) {
+      debugPrint('[SyncOrchestrator] incrementalPull: applied=$applied');
+    }
 
     return SyncOrchestratorSuccess(appliedCount: applied);
   }

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'push_sync_use_case.dart';
 
 /// Callback to fetch all local transactions.
@@ -26,9 +28,19 @@ class FullSyncUseCase {
   Future<int> execute() async {
     final allTransactions = await _fetchAllTransactions();
 
-    if (allTransactions.isEmpty) return 0;
+    if (kDebugMode) {
+      debugPrint('[FullSync] Found ${allTransactions.length} transactions');
+    }
+
+    if (allTransactions.isEmpty) {
+      if (kDebugMode) {
+        debugPrint('[FullSync] No transactions to push');
+      }
+      return 0;
+    }
 
     var totalPushed = 0;
+    final totalChunks = (allTransactions.length / _chunkSize).ceil();
 
     // Chunk and push
     for (var i = 0; i < allTransactions.length; i += _chunkSize) {
@@ -36,6 +48,13 @@ class FullSyncUseCase {
           ? i + _chunkSize
           : allTransactions.length;
       final chunk = allTransactions.sublist(i, end);
+      final chunkNumber = (i ~/ _chunkSize) + 1;
+
+      if (kDebugMode) {
+        debugPrint(
+          '[FullSync] Pushing chunk $chunkNumber/$totalChunks (${chunk.length} ops)',
+        );
+      }
 
       final result = await _pushSync.execute(
         operations: chunk,
@@ -48,6 +67,10 @@ class FullSyncUseCase {
       } else if (result is PushSyncQueued) {
         totalPushed += result.operationCount;
       }
+    }
+
+    if (kDebugMode) {
+      debugPrint('[FullSync] Complete: pushed $totalPushed operations');
     }
 
     return totalPushed;

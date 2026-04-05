@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 import '../../features/family_sync/domain/models/group_info.dart';
 import '../../features/family_sync/domain/models/group_member.dart';
 import '../../features/family_sync/domain/repositories/group_repository.dart';
@@ -84,10 +86,18 @@ class PullSyncUseCase {
       // Use server timestamp as cursor (ISO 8601, not client clock)
       final sinceIso = group.lastSyncAt?.toUtc().toIso8601String();
 
+      if (kDebugMode) {
+        debugPrint('[PullSync] Pulling since ${sinceIso ?? 'beginning'}...');
+      }
+
       // Pull messages from server
       final response = await _apiClient.pullSync(since: sinceIso);
       final messages =
           (response['messages'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+
+      if (kDebugMode) {
+        debugPrint('[PullSync] Received ${messages.length} messages');
+      }
 
       if (messages.isEmpty) return const PullSyncResult.noNewData();
 
@@ -102,6 +112,10 @@ class PullSyncUseCase {
         final payload = msg['payload'] as String;
         final createdAt = DateTime.parse(msg['createdAt'] as String);
         final payloadType = E2EEService.detectPayloadType(payload);
+
+        if (kDebugMode) {
+          debugPrint('[PullSync] Processing $payloadType from $fromDeviceId');
+        }
 
         switch (payloadType) {
           case 'v2_key':
@@ -160,6 +174,12 @@ class PullSyncUseCase {
 
       // Drain offline queue
       await _queueManager.drainQueue();
+
+      if (kDebugMode) {
+        debugPrint(
+          '[PullSync] Applied $appliedCount ops, ACK\'d ${ackedMessageIds.length} messages',
+        );
+      }
 
       return PullSyncResult.success(appliedCount);
     } on RelayApiException catch (e) {

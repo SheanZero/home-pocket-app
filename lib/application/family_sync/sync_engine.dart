@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import '../../features/family_sync/domain/models/sync_status_model.dart';
 import '../../features/family_sync/domain/repositories/group_repository.dart';
 import '../../infrastructure/sync/sync_lifecycle_observer.dart';
@@ -65,7 +67,12 @@ class SyncEngine {
   // --- Public API (called by transaction use cases, push handlers, etc.) ---
 
   /// Transaction created/updated/deleted.
-  void onTransactionChanged() => _scheduler.onTransactionChanged();
+  void onTransactionChanged() {
+    if (kDebugMode) {
+      debugPrint('[SyncEngine] onTransactionChanged');
+    }
+    _scheduler.onTransactionChanged();
+  }
 
   /// User modified profile (name/avatar).
   void onProfileChanged() => _scheduler.onProfileChanged();
@@ -79,11 +86,19 @@ class SyncEngine {
   /// Push notification or WebSocket: memberConfirmed (Group activated).
   void onMemberConfirmed() {
     if (_isDuplicate('memberConfirmed')) return;
+    if (kDebugMode) {
+      debugPrint('[SyncEngine] onMemberConfirmed');
+    }
     _scheduler.onMemberConfirmed();
   }
 
   /// Manual sync button pressed.
-  void onManualSync() => _scheduler.onManualSync();
+  void onManualSync() {
+    if (kDebugMode) {
+      debugPrint('[SyncEngine] onManualSync');
+    }
+    _scheduler.onManualSync();
+  }
 
   // --- Internal ---
 
@@ -102,6 +117,9 @@ class SyncEngine {
   }
 
   Future<void> _handleSyncRequest(SyncMode mode) async {
+    if (kDebugMode) {
+      debugPrint('[SyncEngine] Sync requested: $mode');
+    }
     final group = await _groupRepo.getActiveGroup();
     if (group == null) {
       _updateStatus(const SyncStatus(state: SyncState.noGroup));
@@ -141,6 +159,9 @@ class SyncEngine {
 
   void _updateStatus(SyncStatus status) {
     _currentStatus = status;
+    if (kDebugMode) {
+      debugPrint('[SyncEngine] Status: ${status.state}');
+    }
     if (!_statusController.isClosed) {
       _statusController.add(status);
     }
