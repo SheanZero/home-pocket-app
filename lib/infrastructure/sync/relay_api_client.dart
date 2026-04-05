@@ -313,9 +313,11 @@ class RelayApiClient {
     final headers = <String, String>{'Content-Type': 'application/json'};
 
     if (authenticated) {
+      // Sign with path only (no query string) — server uses r.URL.Path
+      final pathOnly = path.split('?').first;
       headers['Authorization'] = await _signer.signRequest(
         method: 'GET',
-        path: _signingPath(path),
+        path: _signingPath(pathOnly),
         body: '',
       );
     }
