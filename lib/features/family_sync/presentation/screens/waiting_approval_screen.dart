@@ -79,7 +79,8 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
         case WebSocketEventType.joinRequest:
         case WebSocketEventType.memberLeft:
         case WebSocketEventType.groupDissolved:
-          // These are UI navigation events — handled elsewhere
+        case WebSocketEventType.groupStatus:
+          // These are UI navigation events or status snapshots — handled elsewhere
           break;
       }
     });
