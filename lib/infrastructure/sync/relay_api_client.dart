@@ -161,11 +161,10 @@ class RelayApiClient {
   /// Joiner confirms join after previewing group info.
   Future<Map<String, dynamic>> confirmJoin({
     required String groupId,
-    required String deviceId,
   }) async {
     final response = await _post(
       '/group/$groupId/confirm-join',
-      jsonEncode({'deviceId': deviceId, 'confirmed': true}),
+      jsonEncode({'confirmed': true}),
     );
     return _parseResponse(response);
   }

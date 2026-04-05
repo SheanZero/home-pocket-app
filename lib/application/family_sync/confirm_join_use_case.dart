@@ -24,8 +24,8 @@ class ConfirmJoinError extends ConfirmJoinResult {
 /// Confirms a group join after the user previews group info.
 ///
 /// Called after [JoinGroupUseCase] returns verified group info.
-/// Sends confirmation to server, parses the members list,
-/// and saves the confirming group to local DB.
+/// Sends confirmation to server and saves the confirming group
+/// to local DB. Members are fetched later via group status polling.
 class ConfirmJoinUseCase {
   ConfirmJoinUseCase({
     required RelayApiClient apiClient,
@@ -49,22 +49,14 @@ class ConfirmJoinUseCase {
         return const ConfirmJoinResult.error('Device key not initialized');
       }
 
-      final response = await _apiClient.confirmJoin(
+      await _apiClient.confirmJoin(
         groupId: groupId,
-        deviceId: deviceId,
       );
-
-      final members = (response['members'] as List<dynamic>)
-          .map(
-            (member) =>
-                GroupMember.fromJson(member as Map<String, dynamic>),
-          )
-          .toList();
 
       await _groupRepository.saveConfirmingGroup(
         groupId: groupId,
         groupName: groupName,
-        members: members,
+        members: const <GroupMember>[],
       );
 
       return const ConfirmJoinResult.success();

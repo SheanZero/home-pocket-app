@@ -31,36 +31,12 @@ void main() {
     when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
   });
 
-  test('confirms join, parses members, and saves to local DB', () async {
+  test('confirms join and saves group with empty members', () async {
     when(
       () => apiClient.confirmJoin(
         groupId: any(named: 'groupId'),
-        deviceId: any(named: 'deviceId'),
       ),
-    ).thenAnswer(
-      (_) async => {
-        'members': [
-          {
-            'deviceId': 'owner-device',
-            'publicKey': 'owner-public-key',
-            'deviceName': 'Owner phone',
-            'role': 'owner',
-            'status': 'active',
-            'displayName': 'Papa',
-            'avatarEmoji': '\u{1F468}',
-          },
-          {
-            'deviceId': 'device-1',
-            'publicKey': 'my-public-key',
-            'deviceName': 'My phone',
-            'role': 'member',
-            'status': 'active',
-            'displayName': 'Mama',
-            'avatarEmoji': '\u{1F469}',
-          },
-        ],
-      },
-    );
+    ).thenAnswer((_) async => <String, dynamic>{});
     when(
       () => groupRepository.saveConfirmingGroup(
         groupId: any(named: 'groupId'),
@@ -78,33 +54,13 @@ void main() {
     verify(
       () => apiClient.confirmJoin(
         groupId: 'group-1',
-        deviceId: 'device-1',
       ),
     ).called(1);
     verify(
       () => groupRepository.saveConfirmingGroup(
         groupId: 'group-1',
         groupName: 'Smith Family',
-        members: [
-          const GroupMember(
-            deviceId: 'owner-device',
-            publicKey: 'owner-public-key',
-            deviceName: 'Owner phone',
-            role: 'owner',
-            status: 'active',
-            displayName: 'Papa',
-            avatarEmoji: '\u{1F468}',
-          ),
-          const GroupMember(
-            deviceId: 'device-1',
-            publicKey: 'my-public-key',
-            deviceName: 'My phone',
-            role: 'member',
-            status: 'active',
-            displayName: 'Mama',
-            avatarEmoji: '\u{1F469}',
-          ),
-        ],
+        members: const <GroupMember>[],
       ),
     ).called(1);
   });
@@ -128,7 +84,6 @@ void main() {
     when(
       () => apiClient.confirmJoin(
         groupId: any(named: 'groupId'),
-        deviceId: any(named: 'deviceId'),
       ),
     ).thenThrow(
       const RelayApiException(
@@ -153,7 +108,6 @@ void main() {
     when(
       () => apiClient.confirmJoin(
         groupId: any(named: 'groupId'),
-        deviceId: any(named: 'deviceId'),
       ),
     ).thenThrow(Exception('Network error'));
 
