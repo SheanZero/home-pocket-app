@@ -110,7 +110,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(ListTile));
+    await tester.tap(find.byType(ListTile).first);
     await tester.pumpAndSettle();
 
     expect(find.byType(GroupManagementScreen), findsOneWidget);
@@ -138,7 +138,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byType(ListTile));
+      await tester.tap(find.byType(ListTile).first);
       await tester.pumpAndSettle();
 
       expect(find.byType(GroupManagementScreen), findsOneWidget);

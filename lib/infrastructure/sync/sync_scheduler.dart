@@ -29,10 +29,10 @@ class SyncScheduler {
   bool _isSyncing = false;
   final Set<SyncMode> _pendingModes = {};
 
-  static const _debounceDuration = Duration(minutes: 1);
+  static const _debounceDuration = Duration(seconds: 10);
   static const _pollingInterval = Duration(minutes: 15);
 
-  /// Transaction changed — reset 1-minute debounce timer.
+  /// Transaction changed — reset 10-second debounce timer.
   void onTransactionChanged() {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(_debounceDuration, () {
