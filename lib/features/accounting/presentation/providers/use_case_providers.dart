@@ -27,6 +27,7 @@ CreateTransactionUseCase createTransactionUseCase(Ref ref) {
     hashChainService: ref.watch(hashChainServiceProvider),
     classificationService: ref.watch(classificationServiceProvider),
     syncEngine: ref.watch(syncEngineProvider),
+    changeTracker: ref.watch(transactionChangeTrackerProvider),
   );
 }
 
@@ -42,6 +43,7 @@ DeleteTransactionUseCase deleteTransactionUseCase(Ref ref) {
   return DeleteTransactionUseCase(
     transactionRepository: ref.watch(transactionRepositoryProvider),
     syncEngine: ref.watch(syncEngineProvider),
+    changeTracker: ref.watch(transactionChangeTrackerProvider),
   );
 }
 

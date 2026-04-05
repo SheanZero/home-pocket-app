@@ -11,6 +11,7 @@ import '../../../../application/family_sync/pull_sync_use_case.dart';
 import '../../../../application/family_sync/push_sync_use_case.dart';
 import '../../../../application/family_sync/sync_engine.dart';
 import '../../../../application/family_sync/sync_orchestrator.dart';
+import '../../../../application/family_sync/transaction_change_tracker.dart';
 import '../../../../features/accounting/domain/models/transaction_sync_mapper.dart';
 import '../../../../features/profile/presentation/providers/user_profile_providers.dart'
     as profile;
@@ -113,6 +114,12 @@ FullSyncUseCase fullSyncUseCase(Ref ref) {
 
 // --- New SyncEngine providers ---
 
+/// TransactionChangeTracker provider — keepAlive so tracker persists across screens.
+@Riverpod(keepAlive: true)
+TransactionChangeTracker transactionChangeTracker(Ref ref) {
+  return TransactionChangeTracker();
+}
+
 /// SyncOrchestrator provider.
 @riverpod
 SyncOrchestrator syncOrchestrator(Ref ref) {
@@ -126,6 +133,7 @@ SyncOrchestrator syncOrchestrator(Ref ref) {
     profileRepo: ref.watch(profile.userProfileRepositoryProvider),
     queueManager: ref.watch(syncQueueManagerProvider),
     keyManager: ref.watch(keyManagerProvider),
+    changeTracker: ref.watch(transactionChangeTrackerProvider),
   );
 }
 

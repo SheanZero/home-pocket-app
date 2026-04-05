@@ -11,6 +11,8 @@ import '../../infrastructure/crypto/services/hash_chain_service.dart';
 import '../../shared/utils/result.dart';
 import '../dual_ledger/classification_service.dart';
 import '../family_sync/sync_engine.dart';
+import '../family_sync/transaction_change_tracker.dart';
+import '../../features/accounting/domain/models/transaction_sync_mapper.dart';
 
 String _trunc(String s, [int len = 16]) =>
     s.length <= len ? s : '${s.substring(0, math.min(len, s.length))}...';
@@ -52,12 +54,14 @@ class CreateTransactionUseCase {
     required HashChainService hashChainService,
     required ClassificationService classificationService,
     SyncEngine? syncEngine,
+    TransactionChangeTracker? changeTracker,
   }) : _transactionRepo = transactionRepository,
        _categoryRepo = categoryRepository,
        _deviceIdentityRepo = deviceIdentityRepository,
        _hashChainService = hashChainService,
        _classificationService = classificationService,
-       _syncEngine = syncEngine;
+       _syncEngine = syncEngine,
+       _changeTracker = changeTracker;
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;
@@ -65,6 +69,7 @@ class CreateTransactionUseCase {
   final HashChainService _hashChainService;
   final ClassificationService _classificationService;
   final SyncEngine? _syncEngine;
+  final TransactionChangeTracker? _changeTracker;
 
   /// Genesis hash: 64 zero characters (no previous transaction).
   static const _genesisHash =
@@ -179,6 +184,16 @@ class CreateTransactionUseCase {
 
     // 9. Persist
     await _transactionRepo.insert(transaction);
+
+    // Track for incremental sync push
+    _changeTracker?.trackCreate(
+      TransactionSyncMapper.toCreateOperation(
+        transaction,
+        sourceBookId: params.bookId,
+        sourceBookName: params.bookId,
+        sourceBookType: 'remote_book:${params.bookId}',
+      ),
+    );
 
     // Fire-and-forget sync trigger — SyncEngine handles debounce and validity.
     _syncEngine?.onTransactionChanged();

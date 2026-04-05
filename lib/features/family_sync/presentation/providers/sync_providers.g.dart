@@ -121,7 +121,28 @@ final fullSyncUseCaseProvider = AutoDisposeProvider<FullSyncUseCase>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FullSyncUseCaseRef = AutoDisposeProviderRef<FullSyncUseCase>;
-String _$syncOrchestratorHash() => r'94bc47a38402186d3777a4b461f06f2654480448';
+String _$transactionChangeTrackerHash() =>
+    r'bb8c0d635d1ac2f56fb060cfe714b679d99b00dd';
+
+/// TransactionChangeTracker provider — keepAlive so tracker persists across screens.
+///
+/// Copied from [transactionChangeTracker].
+@ProviderFor(transactionChangeTracker)
+final transactionChangeTrackerProvider =
+    Provider<TransactionChangeTracker>.internal(
+      transactionChangeTracker,
+      name: r'transactionChangeTrackerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$transactionChangeTrackerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef TransactionChangeTrackerRef = ProviderRef<TransactionChangeTracker>;
+String _$syncOrchestratorHash() => r'756a454762bc84c10e125588156461d195c462a6';
 
 /// SyncOrchestrator provider.
 ///
@@ -140,7 +161,7 @@ final syncOrchestratorProvider = AutoDisposeProvider<SyncOrchestrator>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SyncOrchestratorRef = AutoDisposeProviderRef<SyncOrchestrator>;
-String _$syncEngineHash() => r'70e2b940ad5250a8e07d9a3da24863ec762cf924';
+String _$syncEngineHash() => r'78d7b9c1ee757d6bf61b8cd98725b8de6185b1de';
 
 /// SyncEngine provider — keepAlive because it manages timers and lifecycle.
 ///

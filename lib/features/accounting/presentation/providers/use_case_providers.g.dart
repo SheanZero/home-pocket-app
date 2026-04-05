@@ -7,7 +7,7 @@ part of 'use_case_providers.dart';
 // **************************************************************************
 
 String _$createTransactionUseCaseHash() =>
-    r'68023a2d46211526f8bd420e4b46b5a4ed0240c6';
+    r'8dd175550f142f2b09727060bcc5c77b21f6b602';
 
 /// See also [createTransactionUseCase].
 @ProviderFor(createTransactionUseCase)
@@ -47,7 +47,7 @@ final getTransactionsUseCaseProvider =
 typedef GetTransactionsUseCaseRef =
     AutoDisposeProviderRef<GetTransactionsUseCase>;
 String _$deleteTransactionUseCaseHash() =>
-    r'8feb39e3ef34a9740ab7f5105e1a7a9066466184';
+    r'4a3f0ac07e4bb9b95de0de888aa1f930cefc371c';
 
 /// See also [deleteTransactionUseCase].
 @ProviderFor(deleteTransactionUseCase)

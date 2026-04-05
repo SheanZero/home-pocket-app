@@ -14,6 +14,7 @@ import 'pull_sync_use_case.dart';
 import 'push_sync_use_case.dart';
 import 'shadow_book_service.dart';
 import 'sync_avatar_use_case.dart';
+import 'transaction_change_tracker.dart';
 
 /// Result of an orchestrated sync operation.
 sealed class SyncOrchestratorResult {
@@ -50,6 +51,7 @@ class SyncOrchestrator {
     required UserProfileRepository profileRepo,
     required SyncQueueManager queueManager,
     required KeyManager keyManager,
+    required TransactionChangeTracker changeTracker,
   }) : _pullSync = pullSync,
        _pushSync = pushSync,
        _fullSync = fullSync,
@@ -58,7 +60,8 @@ class SyncOrchestrator {
        _groupRepo = groupRepo,
        _profileRepo = profileRepo,
        _queueManager = queueManager,
-       _keyManager = keyManager;
+       _keyManager = keyManager,
+       _changeTracker = changeTracker;
 
   final PullSyncUseCase _pullSync;
   final PushSyncUseCase _pushSync;
@@ -69,6 +72,7 @@ class SyncOrchestrator {
   final UserProfileRepository _profileRepo;
   final SyncQueueManager _queueManager;
   final KeyManager _keyManager;
+  final TransactionChangeTracker _changeTracker;
 
   /// Tracks last pushed profile hash to avoid redundant profile operations.
   String? _lastPushedProfileHash;
@@ -148,6 +152,20 @@ class SyncOrchestrator {
       return const SyncOrchestratorNoGroup();
     }
 
+    // Flush pending transaction changes
+    final txnOps = _changeTracker.flush();
+    if (txnOps.isNotEmpty) {
+      if (kDebugMode) {
+        debugPrint(
+          '[SyncOrchestrator] incrementalPush: pushing ${txnOps.length} transaction ops',
+        );
+      }
+      await _pushSync.execute(
+        operations: txnOps,
+        vectorClock: const {},
+      );
+    }
+
     // Build profile operation if changed
     final profileOps = await _buildProfileOperationsIfChanged();
 
@@ -165,7 +183,7 @@ class SyncOrchestrator {
     // Drain offline queue
     await _queueManager.drainQueue();
 
-    return const SyncOrchestratorSuccess();
+    return SyncOrchestratorSuccess(pushedCount: txnOps.length);
   }
 
   Future<SyncOrchestratorResult> _executeIncrementalPull() async {
