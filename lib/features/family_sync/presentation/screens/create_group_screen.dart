@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,11 +10,16 @@ import '../../../../application/family_sync/create_group_use_case.dart';
 import '../../../../application/family_sync/rename_group_use_case.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/crypto/providers.dart';
+import '../../../../infrastructure/sync/websocket_service.dart';
 import '../../../profile/domain/models/user_profile.dart';
 import '../../../profile/presentation/providers/user_profile_providers.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
 import '../providers/group_providers.dart';
+import '../providers/repository_providers.dart' show webSocketServiceProvider;
 import '../widgets/group_rename_dialog.dart';
+import '../../use_cases/check_group_use_case.dart';
+import 'member_approval_screen.dart';
 
 class CreateGroupScreen extends ConsumerStatefulWidget {
   const CreateGroupScreen({super.key});
@@ -30,6 +36,9 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   int? _expiresAt;
   bool _isLoading = true;
   String? _errorMessage;
+  bool _hasNavigated = false;
+  StreamSubscription<WebSocketEvent>? _wsEventSubscription;
+  WebSocketService? _webSocketService;
 
   @override
   void initState() {
@@ -82,11 +91,70 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
           _expiresAt = expiresAt;
           _isLoading = false;
         });
+        unawaited(_connectWebSocket(groupId));
       case CreateGroupError(:final message):
         setState(() {
           _isLoading = false;
           _errorMessage = message;
         });
+    }
+  }
+
+  @override
+  void dispose() {
+    unawaited(_wsEventSubscription?.cancel());
+    _webSocketService
+      ?..stopLifecycleObservation()
+      ..disconnect();
+    super.dispose();
+  }
+
+  Future<void> _connectWebSocket(String groupId) async {
+    final ws = ref.read(webSocketServiceProvider);
+    _webSocketService = ws;
+    final keyManager = ref.read(keyManagerProvider);
+
+    _wsEventSubscription = ws.eventStream.listen((event) {
+      if (!mounted) return;
+      if (event.type == WebSocketEventType.joinRequest) {
+        unawaited(_handleJoinRequest());
+      }
+    });
+
+    final deviceId = await keyManager.getDeviceId();
+    if (!mounted || deviceId == null) return;
+
+    ws.connect(
+      groupId: groupId,
+      deviceId: deviceId,
+      signMessage: (message) async {
+        final sig = await keyManager.signData(utf8.encode(message));
+        return base64Encode(sig.bytes);
+      },
+    );
+    ws.startLifecycleObservation();
+  }
+
+  Future<void> _handleJoinRequest() async {
+    if (_hasNavigated) return;
+
+    final groupId = _groupId;
+    if (groupId == null) return;
+
+    final result = await ref.read(checkGroupUseCaseProvider).execute();
+    if (!mounted || _hasNavigated) return;
+
+    switch (result) {
+      case CheckGroupInGroup():
+        _hasNavigated = true;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute<void>(
+            builder: (_) => MemberApprovalScreen(groupId: groupId),
+          ),
+        );
+      case CheckGroupNotInGroup():
+      case CheckGroupError():
+        break;
     }
   }
 
