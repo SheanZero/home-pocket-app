@@ -1,13 +1,18 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/crypto/providers.dart';
+import '../../../../infrastructure/sync/websocket_connection_state.dart';
+import '../../../../infrastructure/sync/websocket_service.dart';
 import '../../domain/models/sync_status_model.dart';
 import '../../use_cases/check_group_use_case.dart';
 import '../providers/group_providers.dart';
+import '../providers/repository_providers.dart';
 import '../providers/sync_providers.dart';
 import 'group_management_screen.dart';
 
@@ -36,21 +41,23 @@ class WaitingApprovalScreen extends ConsumerStatefulWidget {
 class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
   bool _hasNavigated = false;
   StreamSubscription<SyncStatus>? _syncSubscription;
+  StreamSubscription<WebSocketConnectionState>? _wsStateSubscription;
+  StreamSubscription<WebSocketEvent>? _wsEventSubscription;
   Timer? _pollingTimer;
+  int _pollCount = 0;
+  WebSocketService? _webSocketService;
 
   @override
   void initState() {
     super.initState();
     _listenForSyncStatus();
-    _startPollingTimer();
+    _connectWebSocket();
   }
 
   void _listenForSyncStatus() {
     final engine = ref.read(syncEngineProvider);
     _syncSubscription = engine.statusStream.listen((status) {
       if (!mounted || _hasNavigated) return;
-      // When SyncEngine detects memberConfirmed, it transitions to
-      // initialSyncing or synced — either means approval happened.
       if (status.state == SyncState.initialSyncing ||
           status.state == SyncState.synced) {
         unawaited(_verifyGroupAndNavigate());
@@ -58,14 +65,80 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
     });
   }
 
-  void _startPollingTimer() {
-    _pollingTimer = Timer.periodic(
-      const Duration(seconds: 30),
-      (_) {
-        if (!mounted || _hasNavigated) return;
-        unawaited(_verifyGroupAndNavigate());
+  Future<void> _connectWebSocket() async {
+    final ws = ref.read(webSocketServiceProvider);
+    _webSocketService = ws;
+    final keyManager = ref.read(keyManagerProvider);
+
+    // Route WebSocket events to SyncEngine
+    final engine = ref.read(syncEngineProvider);
+    _wsEventSubscription = ws.eventStream.listen((event) {
+      switch (event.type) {
+        case WebSocketEventType.memberConfirmed:
+          engine.onMemberConfirmed();
+        case WebSocketEventType.joinRequest:
+        case WebSocketEventType.memberLeft:
+        case WebSocketEventType.groupDissolved:
+          // These are UI navigation events — handled elsewhere
+          break;
+      }
+    });
+
+    // Toggle polling based on WebSocket connection state
+    _wsStateSubscription = ws.connectionStateStream.listen((state) {
+      if (!mounted) return;
+      if (state == WebSocketConnectionState.connected) {
+        _stopPolling();
+      } else if (state == WebSocketConnectionState.disconnected) {
+        _startAdaptivePolling();
+      }
+    });
+
+    // Get device ID and connect
+    final deviceId = await keyManager.getDeviceId();
+    if (!mounted || deviceId == null) {
+      _startAdaptivePolling();
+      return;
+    }
+
+    ws.connect(
+      groupId: widget.groupId,
+      deviceId: deviceId,
+      signMessage: (message) async {
+        final sig = await keyManager.signData(utf8.encode(message));
+        return base64Encode(sig.bytes);
       },
     );
+
+    // Start polling as initial fallback until WebSocket connects
+    _startAdaptivePolling();
+    ws.startLifecycleObservation();
+  }
+
+  void _startAdaptivePolling() {
+    _pollingTimer?.cancel();
+    _pollCount = 0;
+    _scheduleNextPoll();
+  }
+
+  void _scheduleNextPoll() {
+    if (_hasNavigated) return;
+
+    // Adaptive backoff: 5s -> 10s -> 15s -> 30s, then stays at 30s
+    const delays = [5, 10, 15, 30];
+    final delaySeconds = delays[_pollCount.clamp(0, delays.length - 1)];
+
+    _pollingTimer = Timer(Duration(seconds: delaySeconds), () {
+      if (!mounted || _hasNavigated) return;
+      _pollCount++;
+      unawaited(_verifyGroupAndNavigate());
+      _scheduleNextPoll();
+    });
+  }
+
+  void _stopPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
   }
 
   Future<void> _verifyGroupAndNavigate() async {
@@ -77,25 +150,28 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
     switch (result) {
       case CheckGroupInGroup(:final groupId):
         _hasNavigated = true;
-        _pollingTimer?.cancel();
+        _stopPolling();
         Navigator.of(context).pushReplacement(
           MaterialPageRoute<void>(
             builder: (_) => GroupManagementScreen(groupId: groupId),
           ),
         );
       case CheckGroupNotInGroup():
-        // Still waiting for approval — nothing to do.
         break;
       case CheckGroupError():
-        // Silently ignore transient errors; polling will retry.
         break;
     }
   }
 
   @override
   void dispose() {
-    _pollingTimer?.cancel();
+    _stopPolling();
     unawaited(_syncSubscription?.cancel());
+    unawaited(_wsStateSubscription?.cancel());
+    unawaited(_wsEventSubscription?.cancel());
+    _webSocketService
+      ?..stopLifecycleObservation()
+      ..disconnect();
     super.dispose();
   }
 
