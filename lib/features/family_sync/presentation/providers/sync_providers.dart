@@ -135,6 +135,8 @@ SyncEngine syncEngine(Ref ref) {
   final engine = SyncEngine(
     orchestrator: ref.watch(syncOrchestratorProvider),
     groupRepo: ref.watch(groupRepositoryProvider),
+    webSocketService: ref.watch(webSocketServiceProvider),
+    keyManager: ref.watch(keyManagerProvider),
   );
   ref.onDispose(engine.dispose);
   return engine;

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/family_sync/sync_orchestrator.dart';
@@ -5,11 +7,45 @@ import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/models/sync_status_model.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
+import 'package:home_pocket/infrastructure/sync/websocket_connection_state.dart';
+import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockSyncOrchestrator extends Mock implements SyncOrchestrator {}
 
 class MockGroupRepository extends Mock implements GroupRepository {}
+
+class MockWebSocketService extends Mock implements WebSocketService {
+  final _eventController = StreamController<WebSocketEvent>.broadcast();
+  final _stateController =
+      StreamController<WebSocketConnectionState>.broadcast();
+
+  @override
+  Stream<WebSocketEvent> get eventStream => _eventController.stream;
+
+  @override
+  Stream<WebSocketConnectionState> get connectionStateStream =>
+      _stateController.stream;
+
+  @override
+  void connect({
+    required String groupId,
+    required String deviceId,
+    required SignMessageFn signMessage,
+  }) {}
+
+  @override
+  void disconnect() {}
+
+  @override
+  void startLifecycleObservation() {}
+
+  @override
+  void stopLifecycleObservation() {}
+}
+
+class MockKeyManager extends Mock implements KeyManager {}
 
 void main() {
   setUpAll(() {
@@ -20,6 +56,8 @@ void main() {
     late SyncEngine engine;
     late MockSyncOrchestrator orchestrator;
     late MockGroupRepository groupRepo;
+    late MockWebSocketService webSocketService;
+    late MockKeyManager keyManager;
 
     final activeGroup = GroupInfo(
       groupId: 'group-1',
@@ -43,6 +81,8 @@ void main() {
     setUp(() {
       orchestrator = MockSyncOrchestrator();
       groupRepo = MockGroupRepository();
+      webSocketService = MockWebSocketService();
+      keyManager = MockKeyManager();
       when(() => orchestrator.needsFullPull()).thenAnswer((_) async => false);
       when(() => orchestrator.getPendingQueueCount())
           .thenAnswer((_) async => 0);
@@ -50,10 +90,14 @@ void main() {
           .thenAnswer((_) async => const SyncOrchestratorSuccess());
       when(() => groupRepo.getActiveGroup())
           .thenAnswer((_) async => activeGroup);
+      when(() => keyManager.getDeviceId())
+          .thenAnswer((_) async => 'device-1');
 
       engine = SyncEngine(
         orchestrator: orchestrator,
         groupRepo: groupRepo,
+        webSocketService: webSocketService,
+        keyManager: keyManager,
       );
     });
 

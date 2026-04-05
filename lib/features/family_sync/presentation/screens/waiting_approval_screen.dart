@@ -1,18 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/crypto/providers.dart';
-import '../../../../infrastructure/sync/websocket_connection_state.dart';
-import '../../../../infrastructure/sync/websocket_service.dart';
 import '../../domain/models/sync_status_model.dart';
 import '../../use_cases/check_group_use_case.dart';
 import '../providers/group_providers.dart';
-import '../providers/repository_providers.dart';
 import '../providers/sync_providers.dart';
 import 'group_management_screen.dart';
 
@@ -41,17 +36,14 @@ class WaitingApprovalScreen extends ConsumerStatefulWidget {
 class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
   bool _hasNavigated = false;
   StreamSubscription<SyncStatus>? _syncSubscription;
-  StreamSubscription<WebSocketConnectionState>? _wsStateSubscription;
-  StreamSubscription<WebSocketEvent>? _wsEventSubscription;
   Timer? _pollingTimer;
   int _pollCount = 0;
-  WebSocketService? _webSocketService;
 
   @override
   void initState() {
     super.initState();
     _listenForSyncStatus();
-    _connectWebSocket();
+    _startAdaptivePolling();
   }
 
   void _listenForSyncStatus() {
@@ -63,58 +55,6 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
         unawaited(_verifyGroupAndNavigate());
       }
     });
-  }
-
-  Future<void> _connectWebSocket() async {
-    final ws = ref.read(webSocketServiceProvider);
-    _webSocketService = ws;
-    final keyManager = ref.read(keyManagerProvider);
-
-    // Handle WebSocket events
-    _wsEventSubscription = ws.eventStream.listen((event) {
-      if (!mounted || _hasNavigated) return;
-      switch (event.type) {
-        case WebSocketEventType.memberConfirmed:
-          // Activate group first, then trigger initial data sync
-          unawaited(_activateAndSync());
-        case WebSocketEventType.joinRequest:
-        case WebSocketEventType.memberLeft:
-        case WebSocketEventType.groupDissolved:
-        case WebSocketEventType.groupStatus:
-        case WebSocketEventType.syncAvailable:
-          break;
-      }
-    });
-
-    // Toggle polling based on WebSocket connection state
-    _wsStateSubscription = ws.connectionStateStream.listen((state) {
-      if (!mounted) return;
-      if (state == WebSocketConnectionState.connected) {
-        _stopPolling();
-      } else if (state == WebSocketConnectionState.disconnected) {
-        _startAdaptivePolling();
-      }
-    });
-
-    // Get device ID and connect
-    final deviceId = await keyManager.getDeviceId();
-    if (!mounted || deviceId == null) {
-      _startAdaptivePolling();
-      return;
-    }
-
-    ws.connect(
-      groupId: widget.groupId,
-      deviceId: deviceId,
-      signMessage: (message) async {
-        final sig = await keyManager.signData(utf8.encode(message));
-        return base64Encode(sig.bytes);
-      },
-    );
-
-    // Start polling as initial fallback until WebSocket connects
-    _startAdaptivePolling();
-    ws.startLifecycleObservation();
   }
 
   void _startAdaptivePolling() {
@@ -143,21 +83,6 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
     _pollingTimer = null;
   }
 
-  /// Activate group locally first, then trigger initial data sync and navigate.
-  ///
-  /// Must be sequential: [checkGroupUseCaseProvider] updates the local group
-  /// status from 'confirming' → 'active'. Only then can [SyncEngine] find
-  /// the active group for initialSync (which queries status='active').
-  Future<void> _activateAndSync() async {
-    // Step 1: Activate group locally (confirming → active)
-    await _verifyGroupAndNavigate();
-
-    // Step 2: Trigger full initial sync (group is now active)
-    if (_hasNavigated) {
-      ref.read(syncEngineProvider).onMemberConfirmed();
-    }
-  }
-
   Future<void> _verifyGroupAndNavigate() async {
     if (_hasNavigated) return;
 
@@ -184,11 +109,6 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
   void dispose() {
     _stopPolling();
     unawaited(_syncSubscription?.cancel());
-    unawaited(_wsStateSubscription?.cancel());
-    unawaited(_wsEventSubscription?.cancel());
-    _webSocketService
-      ?..stopLifecycleObservation()
-      ..disconnect();
     super.dispose();
   }
 

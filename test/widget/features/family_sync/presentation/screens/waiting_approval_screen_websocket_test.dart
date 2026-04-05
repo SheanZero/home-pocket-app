@@ -61,6 +61,8 @@ void main() {
     syncEngine = SyncEngine(
       orchestrator: mockOrchestrator,
       groupRepo: groupRepository,
+      webSocketService: webSocketService,
+      keyManager: keyManager,
     );
 
     when(() => checkGroupUseCase.execute())
@@ -103,36 +105,7 @@ void main() {
         keyManagerProvider.overrideWithValue(keyManager),
       ];
 
-  testWidgets('does not poll when WebSocket is connected', (tester) async {
-    when(() => webSocketService.connectionState)
-        .thenReturn(WebSocketConnectionState.connected);
-
-    await tester.runAsync(() async {
-      await tester.pumpWidget(
-        createLocalizedWidget(
-          const WaitingApprovalScreen(
-            groupId: 'group-1',
-            groupName: 'Test Family',
-            ownerDisplayName: 'Owner',
-          ),
-          overrides: buildOverrides(),
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // Simulate WebSocket connected
-      wsStateController.add(WebSocketConnectionState.connected);
-      await tester.pump();
-
-      // Wait past initial polling interval
-      await Future<void>.delayed(const Duration(seconds: 6));
-      await tester.pump();
-    });
-
-    verifyNever(() => checkGroupUseCase.execute());
-  });
-
-  testWidgets('starts adaptive polling when WebSocket disconnects',
+  testWidgets('always polls regardless of WebSocket connection state',
       (tester) async {
     when(() => checkGroupUseCase.execute())
         .thenAnswer((_) async => const CheckGroupNotInGroup());
@@ -150,7 +123,38 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 100));
 
-      // WebSocket disconnected -> polling should start with 5s interval
+      // WebSocket connection state events no longer affect polling in the screen;
+      // SyncEngine owns the WebSocket. Polling runs unconditionally as fallback.
+      wsStateController.add(WebSocketConnectionState.connected);
+      await tester.pump();
+
+      await Future<void>.delayed(const Duration(seconds: 6));
+      await tester.pump();
+    });
+
+    // Polling fires after 5s regardless of WebSocket state
+    verify(() => checkGroupUseCase.execute()).called(greaterThanOrEqualTo(1));
+  });
+
+  testWidgets('continues polling after WebSocket disconnects', (tester) async {
+    when(() => checkGroupUseCase.execute())
+        .thenAnswer((_) async => const CheckGroupNotInGroup());
+
+    await tester.runAsync(() async {
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const WaitingApprovalScreen(
+            groupId: 'group-1',
+            groupName: 'Test Family',
+            ownerDisplayName: 'Owner',
+          ),
+          overrides: buildOverrides(),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // WebSocket disconnect event does not restart polling in the screen;
+      // polling is already running as a constant fallback.
       wsStateController.add(WebSocketConnectionState.disconnected);
       await tester.pump();
 

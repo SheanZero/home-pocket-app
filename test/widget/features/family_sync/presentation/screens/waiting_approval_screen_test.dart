@@ -107,15 +107,6 @@ void main() {
         .thenAnswer((_) async => const SyncOrchestratorSuccess());
     when(() => groupRepository.getActiveGroup())
         .thenAnswer((_) async => null);
-    syncEngine = SyncEngine(
-      orchestrator: mockOrchestrator,
-      groupRepo: groupRepository,
-    );
-    // Default: still waiting
-    when(
-      () => checkGroupUseCase.execute(),
-    ).thenAnswer((_) async => const CheckGroupNotInGroup());
-
     webSocketService = MockWebSocketService();
     keyManager = MockKeyManager();
 
@@ -137,6 +128,17 @@ void main() {
         .thenAnswer((_) async => 'test-device');
     when(() => keyManager.signData(any())).thenAnswer((_) async =>
         Signature([], publicKey: SimplePublicKey([], type: KeyPairType.ed25519)));
+
+    syncEngine = SyncEngine(
+      orchestrator: mockOrchestrator,
+      groupRepo: groupRepository,
+      webSocketService: webSocketService,
+      keyManager: keyManager,
+    );
+    // Default: still waiting
+    when(
+      () => checkGroupUseCase.execute(),
+    ).thenAnswer((_) async => const CheckGroupNotInGroup());
   });
 
   tearDown(() {

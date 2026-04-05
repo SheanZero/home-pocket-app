@@ -1,12 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
 import '../../features/family_sync/domain/models/sync_status_model.dart';
 import '../../features/family_sync/domain/repositories/group_repository.dart';
+import '../../infrastructure/crypto/services/key_manager.dart';
 import '../../infrastructure/sync/push_notification_service.dart';
 import '../../infrastructure/sync/sync_lifecycle_observer.dart';
 import '../../infrastructure/sync/sync_scheduler.dart';
+import '../../infrastructure/sync/websocket_service.dart';
 import 'sync_orchestrator.dart';
 
 /// Unified sync entry point. Combines SyncScheduler + SyncOrchestrator
@@ -15,8 +18,12 @@ class SyncEngine {
   SyncEngine({
     required SyncOrchestrator orchestrator,
     required GroupRepository groupRepo,
+    required WebSocketService webSocketService,
+    required KeyManager keyManager,
   }) : _orchestrator = orchestrator,
-       _groupRepo = groupRepo {
+       _groupRepo = groupRepo,
+       _webSocketService = webSocketService,
+       _keyManager = keyManager {
     _scheduler = SyncScheduler(
       onSyncRequested: _handleSyncRequest,
       checkNeedsFullPull: _orchestrator.needsFullPull,
@@ -25,8 +32,11 @@ class SyncEngine {
 
   final SyncOrchestrator _orchestrator;
   final GroupRepository _groupRepo;
+  final WebSocketService _webSocketService;
+  final KeyManager _keyManager;
   late final SyncScheduler _scheduler;
   SyncLifecycleObserver? _lifecycleObserver;
+  StreamSubscription<WebSocketEvent>? _wsEventSubscription;
 
   final _statusController = StreamController<SyncStatus>.broadcast();
   SyncStatus _currentStatus = const SyncStatus(state: SyncState.noGroup);
@@ -43,18 +53,22 @@ class SyncEngine {
   /// Stream of sync status changes.
   Stream<SyncStatus> get statusStream => _statusController.stream;
 
-  /// Initialize the engine: set up lifecycle observer.
+  /// Initialize the engine: set up lifecycle observer and WebSocket.
   ///
   /// Call once at app startup after provider container is ready.
   void initialize() {
     _lifecycleObserver = SyncLifecycleObserver(
-      onResume: () async => _scheduler.onAppResumed(),
+      onResume: () async {
+        _scheduler.onAppResumed();
+        await _connectWebSocket();
+      },
       onPaused: () => _scheduler.onAppPaused(),
     );
     _lifecycleObserver!.start();
 
     // Set initial status based on group presence
     unawaited(_refreshInitialStatus());
+    unawaited(_connectWebSocket());
   }
 
   /// Wire push notification handlers to trigger sync operations.
@@ -68,11 +82,12 @@ class SyncEngine {
     );
   }
 
-  /// Dispose all timers and observers.
+  /// Dispose all timers, observers, and WebSocket connection.
   void dispose() {
     _scheduler.dispose();
     _lifecycleObserver?.dispose();
     _lifecycleObserver = null;
+    _disconnectWebSocket();
     unawaited(_statusController.close());
   }
 
@@ -110,6 +125,56 @@ class SyncEngine {
       debugPrint('[SyncEngine] onManualSync');
     }
     _scheduler.onManualSync();
+  }
+
+  // --- WebSocket ---
+
+  Future<void> _connectWebSocket() async {
+    final group = await _groupRepo.getActiveGroup();
+    if (group == null) return;
+
+    final deviceId = await _keyManager.getDeviceId();
+    if (deviceId == null) return;
+
+    // Subscribe to events (idempotent — only subscribe once)
+    _wsEventSubscription ??= _webSocketService.eventStream.listen(
+      _handleWebSocketEvent,
+    );
+
+    _webSocketService.connect(
+      groupId: group.groupId,
+      deviceId: deviceId,
+      signMessage: (message) async {
+        final sig = await _keyManager.signData(utf8.encode(message));
+        return base64Encode(sig.bytes);
+      },
+    );
+    _webSocketService.startLifecycleObservation();
+  }
+
+  void _disconnectWebSocket() {
+    unawaited(_wsEventSubscription?.cancel());
+    _wsEventSubscription = null;
+    _webSocketService
+      ..stopLifecycleObservation()
+      ..disconnect();
+  }
+
+  void _handleWebSocketEvent(WebSocketEvent event) {
+    if (kDebugMode) {
+      debugPrint('[SyncEngine] WebSocket event: ${event.type}');
+    }
+    switch (event.type) {
+      case WebSocketEventType.syncAvailable:
+        onSyncAvailable();
+      case WebSocketEventType.memberConfirmed:
+        onMemberConfirmed();
+      case WebSocketEventType.joinRequest:
+      case WebSocketEventType.memberLeft:
+      case WebSocketEventType.groupDissolved:
+      case WebSocketEventType.groupStatus:
+        break;
+    }
   }
 
   // --- Internal ---
