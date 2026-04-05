@@ -28,6 +28,12 @@ class SyncEngine {
   final _statusController = StreamController<SyncStatus>.broadcast();
   SyncStatus _currentStatus = const SyncStatus(state: SyncState.noGroup);
 
+  /// Tracks event key → timestamp for cross-source deduplication.
+  /// Prevents double-processing when the same event arrives via
+  /// both WebSocket and push notification.
+  final _recentEvents = <String, DateTime>{};
+  static const _deduplicationWindow = Duration(seconds: 10);
+
   /// Current sync status.
   SyncStatus get currentStatus => _currentStatus;
 
@@ -65,10 +71,16 @@ class SyncEngine {
   void onProfileChanged() => _scheduler.onProfileChanged();
 
   /// Push notification: syncAvailable.
-  void onSyncAvailable() => _scheduler.onSyncAvailable();
+  void onSyncAvailable() {
+    if (_isDuplicate('syncAvailable')) return;
+    _scheduler.onSyncAvailable();
+  }
 
-  /// Push notification: memberConfirmed (Group activated).
-  void onMemberConfirmed() => _scheduler.onMemberConfirmed();
+  /// Push notification or WebSocket: memberConfirmed (Group activated).
+  void onMemberConfirmed() {
+    if (_isDuplicate('memberConfirmed')) return;
+    _scheduler.onMemberConfirmed();
+  }
 
   /// Manual sync button pressed.
   void onManualSync() => _scheduler.onManualSync();
@@ -132,5 +144,22 @@ class SyncEngine {
     if (!_statusController.isClosed) {
       _statusController.add(status);
     }
+  }
+
+  /// Returns true if this event should be suppressed (duplicate).
+  bool _isDuplicate(String eventKey) {
+    final now = DateTime.now();
+
+    // Prune expired entries
+    _recentEvents.removeWhere(
+      (_, ts) => now.difference(ts) > _deduplicationWindow,
+    );
+
+    if (_recentEvents.containsKey(eventKey)) {
+      return true;
+    }
+
+    _recentEvents[eventKey] = now;
+    return false;
   }
 }
