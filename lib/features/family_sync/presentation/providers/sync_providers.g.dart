@@ -145,6 +145,128 @@ final syncTriggerServiceProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SyncTriggerServiceRef = AutoDisposeProviderRef<SyncTriggerService>;
+String _$syncOrchestratorHash() => r'94bc47a38402186d3777a4b461f06f2654480448';
+
+/// SyncOrchestrator provider.
+///
+/// Copied from [syncOrchestrator].
+@ProviderFor(syncOrchestrator)
+final syncOrchestratorProvider = AutoDisposeProvider<SyncOrchestrator>.internal(
+  syncOrchestrator,
+  name: r'syncOrchestratorProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$syncOrchestratorHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef SyncOrchestratorRef = AutoDisposeProviderRef<SyncOrchestrator>;
+String _$syncEngineHash() => r'70e2b940ad5250a8e07d9a3da24863ec762cf924';
+
+/// SyncEngine provider — keepAlive because it manages timers and lifecycle.
+///
+/// Copied from [syncEngine].
+@ProviderFor(syncEngine)
+final syncEngineProvider = Provider<SyncEngine>.internal(
+  syncEngine,
+  name: r'syncEngineProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$syncEngineHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef SyncEngineRef = ProviderRef<SyncEngine>;
+String _$syncStatusStreamHash() => r'945e9929ecb8b7ec953a4d79382645a9b8a19e4a';
+
+/// Reactive sync status stream from SyncEngine.
+///
+/// Copied from [syncStatusStream].
+@ProviderFor(syncStatusStream)
+final syncStatusStreamProvider =
+    AutoDisposeStreamProvider<model.SyncStatus>.internal(
+      syncStatusStream,
+      name: r'syncStatusStreamProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$syncStatusStreamHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef SyncStatusStreamRef = AutoDisposeStreamProviderRef<model.SyncStatus>;
+String _$groupMembersHash() => r'f4ebc572ef07242c5ac0c3f19527e2f9c67792e8';
+
+/// GroupMembers stream via Drift watch query, mapped to domain model.
+///
+/// Copied from [groupMembers].
+@ProviderFor(groupMembers)
+final groupMembersProvider =
+    AutoDisposeStreamProvider<List<GroupMember>>.internal(
+      groupMembers,
+      name: r'groupMembersProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$groupMembersHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef GroupMembersRef = AutoDisposeStreamProviderRef<List<GroupMember>>;
+String _$handleMemberLeftUseCaseHash() =>
+    r'f505f07a7e915fbac6cbabe178b71e7527147c58';
+
+/// HandleMemberLeftUseCase provider.
+///
+/// Copied from [handleMemberLeftUseCase].
+@ProviderFor(handleMemberLeftUseCase)
+final handleMemberLeftUseCaseProvider =
+    AutoDisposeProvider<HandleMemberLeftUseCase>.internal(
+      handleMemberLeftUseCase,
+      name: r'handleMemberLeftUseCaseProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$handleMemberLeftUseCaseHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef HandleMemberLeftUseCaseRef =
+    AutoDisposeProviderRef<HandleMemberLeftUseCase>;
+String _$handleGroupDissolvedUseCaseHash() =>
+    r'7e9bf7d7954934cd0d7949c1ec48c0fea232e627';
+
+/// HandleGroupDissolvedUseCase provider.
+///
+/// Copied from [handleGroupDissolvedUseCase].
+@ProviderFor(handleGroupDissolvedUseCase)
+final handleGroupDissolvedUseCaseProvider =
+    AutoDisposeProvider<HandleGroupDissolvedUseCase>.internal(
+      handleGroupDissolvedUseCase,
+      name: r'handleGroupDissolvedUseCaseProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$handleGroupDissolvedUseCaseHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef HandleGroupDissolvedUseCaseRef =
+    AutoDisposeProviderRef<HandleGroupDissolvedUseCase>;
 String _$syncStatusNotifierHash() =>
     r'c29fe5885a9a8544c419b3fc63bb1df78b75c08d';
 

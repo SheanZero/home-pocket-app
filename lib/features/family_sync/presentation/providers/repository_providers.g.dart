@@ -6,6 +6,25 @@ part of 'repository_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+String _$groupMemberDaoHash() => r'9da627a1b0e873e053f905c59c3534c7e119996d';
+
+/// GroupMemberDao provider (for watch queries).
+///
+/// Copied from [groupMemberDao].
+@ProviderFor(groupMemberDao)
+final groupMemberDaoProvider = AutoDisposeProvider<GroupMemberDao>.internal(
+  groupMemberDao,
+  name: r'groupMemberDaoProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$groupMemberDaoHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef GroupMemberDaoRef = AutoDisposeProviderRef<GroupMemberDao>;
 String _$groupRepositoryHash() => r'd4a3761633cebcd22979e5b60d213e12121b2b5e';
 
 /// GroupRepository provider.

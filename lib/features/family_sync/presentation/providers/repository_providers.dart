@@ -21,6 +21,13 @@ import '../../domain/repositories/sync_repository.dart';
 
 part 'repository_providers.g.dart';
 
+/// GroupMemberDao provider (for watch queries).
+@riverpod
+GroupMemberDao groupMemberDao(Ref ref) {
+  final database = ref.watch(appDatabaseProvider);
+  return GroupMemberDao(database);
+}
+
 /// GroupRepository provider.
 @riverpod
 GroupRepository groupRepository(Ref ref) {

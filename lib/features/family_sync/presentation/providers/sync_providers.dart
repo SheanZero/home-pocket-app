@@ -4,17 +4,25 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../application/family_sync/check_group_validity_use_case.dart';
 import '../../../../application/family_sync/full_sync_use_case.dart';
 import '../../../../application/family_sync/apply_sync_operations_use_case.dart';
+import '../../../../application/family_sync/handle_group_dissolved_use_case.dart';
+import '../../../../application/family_sync/handle_member_left_use_case.dart';
 import '../../../../application/family_sync/shadow_book_service.dart';
 import '../../../../application/family_sync/pull_sync_use_case.dart';
 import '../../../../application/family_sync/push_sync_use_case.dart';
+import '../../../../application/family_sync/sync_engine.dart';
+import '../../../../application/family_sync/sync_orchestrator.dart';
 import '../../../../features/accounting/domain/models/transaction_sync_mapper.dart';
+import '../../../../features/profile/presentation/providers/user_profile_providers.dart'
+    as profile;
 import '../../../accounting/presentation/providers/repository_providers.dart'
     as accounting;
 import '../../../../infrastructure/crypto/providers.dart';
 import '../../../../infrastructure/sync/sync_trigger_service.dart';
 import 'avatar_sync_providers.dart';
 import '../../domain/models/group_info.dart';
+import '../../domain/models/group_member.dart';
 import '../../domain/models/sync_status.dart';
+import '../../domain/models/sync_status_model.dart' as model;
 import 'active_group_provider.dart';
 import 'repository_providers.dart';
 
@@ -157,4 +165,85 @@ class SyncStatusNotifier extends _$SyncStatusNotifier {
   void updateStatus(SyncStatus status) {
     state = status;
   }
+}
+
+// --- New SyncEngine providers ---
+
+/// SyncOrchestrator provider.
+@riverpod
+SyncOrchestrator syncOrchestrator(Ref ref) {
+  return SyncOrchestrator(
+    pullSync: ref.watch(pullSyncUseCaseProvider),
+    pushSync: ref.watch(pushSyncUseCaseProvider),
+    fullSync: ref.watch(fullSyncUseCaseProvider),
+    avatarSync: ref.watch(syncAvatarUseCaseProvider),
+    checkValidity: ref.watch(checkGroupValidityUseCaseProvider),
+    groupRepo: ref.watch(groupRepositoryProvider),
+    profileRepo: ref.watch(profile.userProfileRepositoryProvider),
+    queueManager: ref.watch(syncQueueManagerProvider),
+    keyManager: ref.watch(keyManagerProvider),
+  );
+}
+
+/// SyncEngine provider — keepAlive because it manages timers and lifecycle.
+@Riverpod(keepAlive: true)
+SyncEngine syncEngine(Ref ref) {
+  final engine = SyncEngine(
+    orchestrator: ref.watch(syncOrchestratorProvider),
+    groupRepo: ref.watch(groupRepositoryProvider),
+  );
+  ref.onDispose(engine.dispose);
+  return engine;
+}
+
+/// Reactive sync status stream from SyncEngine.
+@riverpod
+Stream<model.SyncStatus> syncStatusStream(Ref ref) {
+  return ref.watch(syncEngineProvider).statusStream;
+}
+
+/// GroupMembers stream via Drift watch query, mapped to domain model.
+@riverpod
+Stream<List<GroupMember>> groupMembers(Ref ref) {
+  final activeGroup = ref.watch(activeGroupProvider).valueOrNull;
+  if (activeGroup == null) return Stream.value([]);
+  final dao = ref.watch(groupMemberDaoProvider);
+  return dao.watchByGroupId(activeGroup.groupId).map(
+    (rows) => rows
+        .map(
+          (row) => GroupMember(
+            deviceId: row.deviceId,
+            publicKey: row.publicKey,
+            deviceName: row.deviceName,
+            role: row.role,
+            status: row.status,
+            displayName: row.displayName,
+            avatarEmoji: row.avatarEmoji,
+            avatarImagePath: row.avatarImagePath,
+            avatarImageHash: row.avatarImageHash,
+          ),
+        )
+        .toList(),
+  );
+}
+
+/// HandleMemberLeftUseCase provider.
+@riverpod
+HandleMemberLeftUseCase handleMemberLeftUseCase(Ref ref) {
+  return HandleMemberLeftUseCase(
+    groupRepo: ref.watch(groupRepositoryProvider),
+    queueManager: ref.watch(syncQueueManagerProvider),
+    shadowBookService: ref.watch(shadowBookServiceProvider),
+    keyManager: ref.watch(keyManagerProvider),
+  );
+}
+
+/// HandleGroupDissolvedUseCase provider.
+@riverpod
+HandleGroupDissolvedUseCase handleGroupDissolvedUseCase(Ref ref) {
+  return HandleGroupDissolvedUseCase(
+    groupRepo: ref.watch(groupRepositoryProvider),
+    queueManager: ref.watch(syncQueueManagerProvider),
+    shadowBookService: ref.watch(shadowBookServiceProvider),
+  );
 }
