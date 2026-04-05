@@ -217,6 +217,33 @@ void main() {
       expect(events.first.data, isNull);
     });
 
+    test('parses sync_available event from WebSocket', () async {
+      final events = <WebSocketEvent>[];
+      service.eventStream.listen(events.add);
+
+      service.connect(
+        groupId: 'group-1',
+        deviceId: 'device-1',
+        signMessage: (msg) async => 'mock-sig',
+      );
+      incomingController.add(
+        jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      incomingController.add(jsonEncode({
+        'type': 'sync_available',
+        'groupId': 'group-1',
+        'deviceId': 'device-2',
+        'timestamp': '2026-04-05T12:00:00Z',
+      }));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(events, hasLength(1));
+      expect(events.first.type, WebSocketEventType.syncAvailable);
+      expect(events.first.groupId, 'group-1');
+    });
+
     test('auth_error disconnects without reconnect', () async {
       service.connect(
         groupId: 'group-1',

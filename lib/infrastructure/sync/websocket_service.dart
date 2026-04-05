@@ -16,15 +16,13 @@ typedef WebSocketChannelFactory = WebSocketChannel Function({
 typedef SignMessageFn = Future<String> Function(String message);
 
 /// Known event types from the WebSocket relay server.
-///
-/// Note: `syncAvailable` is intentionally excluded — per spec, it is
-/// only delivered via push notifications, not the WebSocket channel.
 enum WebSocketEventType {
   memberConfirmed,
   joinRequest,
   memberLeft,
   groupDissolved,
   groupStatus,
+  syncAvailable,
 }
 
 /// A parsed event received from the WebSocket relay server.
@@ -201,6 +199,7 @@ class WebSocketService with WidgetsBindingObserver {
       'member_left' => WebSocketEventType.memberLeft,
       'group_dissolved' => WebSocketEventType.groupDissolved,
       'group_status' => WebSocketEventType.groupStatus,
+      'sync_available' => WebSocketEventType.syncAvailable,
       _ => null,
     };
 
