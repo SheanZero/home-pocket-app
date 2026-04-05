@@ -1,17 +1,17 @@
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
-import '../../infrastructure/sync/sync_trigger_service.dart';
 import '../../shared/utils/result.dart';
+import '../family_sync/sync_engine.dart';
 
 /// Soft-deletes a transaction by ID.
 class DeleteTransactionUseCase {
   DeleteTransactionUseCase({
     required TransactionRepository transactionRepository,
-    SyncTriggerService? syncTriggerService,
+    SyncEngine? syncEngine,
   }) : _transactionRepo = transactionRepository,
-       _syncTriggerService = syncTriggerService;
+       _syncEngine = syncEngine;
 
   final TransactionRepository _transactionRepo;
-  final SyncTriggerService? _syncTriggerService;
+  final SyncEngine? _syncEngine;
 
   Future<Result<void>> execute(String transactionId) async {
     if (transactionId.isEmpty) {
@@ -24,11 +24,7 @@ class DeleteTransactionUseCase {
     }
 
     await _transactionRepo.softDelete(transactionId);
-    try {
-      await _syncTriggerService?.onTransactionDeleted(transactionId);
-    } catch (_) {
-      // Keep local deletion successful even if sync enqueue fails.
-    }
+    _syncEngine?.onTransactionChanged();
     return Result.success(null);
   }
 }

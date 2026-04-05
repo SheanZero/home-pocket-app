@@ -2,24 +2,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/accounting/delete_transaction_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
-import 'package:home_pocket/infrastructure/sync/sync_trigger_service.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-@GenerateMocks([TransactionRepository, SyncTriggerService])
+@GenerateMocks([TransactionRepository])
 import 'delete_transaction_use_case_test.mocks.dart';
 
 void main() {
   late MockTransactionRepository mockRepo;
-  late MockSyncTriggerService mockSyncTriggerService;
   late DeleteTransactionUseCase useCase;
 
   setUp(() {
     mockRepo = MockTransactionRepository();
-    mockSyncTriggerService = MockSyncTriggerService();
     useCase = DeleteTransactionUseCase(
       transactionRepository: mockRepo,
-      syncTriggerService: mockSyncTriggerService,
     );
   });
 
@@ -64,7 +60,7 @@ void main() {
       verifyNever(mockRepo.findById(any));
     });
 
-    test('pushes delete sync after successful soft delete', () async {
+    test('soft-deletes successfully without sync engine', () async {
       when(mockRepo.findById('tx_002')).thenAnswer(
         (_) async => Transaction(
           id: 'tx_002',
@@ -80,15 +76,11 @@ void main() {
         ),
       );
       when(mockRepo.softDelete('tx_002')).thenAnswer((_) async {});
-      when(mockSyncTriggerService.onTransactionDeleted('tx_002')).thenAnswer(
-        (_) async {},
-      );
 
       final result = await useCase.execute('tx_002');
 
       expect(result.isSuccess, isTrue);
       verify(mockRepo.softDelete('tx_002')).called(1);
-      verify(mockSyncTriggerService.onTransactionDeleted('tx_002')).called(1);
     });
   });
 }

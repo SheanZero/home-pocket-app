@@ -1,22 +1,16 @@
-import 'dart:async';
 import 'dart:developer' as dev;
 import 'dart:math' as math;
-
-import 'package:flutter/foundation.dart';
 
 import 'package:ulid/ulid.dart';
 
 import '../../features/accounting/domain/models/transaction.dart';
-import '../../features/accounting/domain/models/transaction_sync_mapper.dart';
-import '../../features/accounting/domain/repositories/book_repository.dart';
 import '../../features/accounting/domain/repositories/category_repository.dart';
 import '../../features/accounting/domain/repositories/device_identity_repository.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
 import '../../infrastructure/crypto/services/hash_chain_service.dart';
-import '../../infrastructure/sync/sync_trigger_service.dart';
 import '../../shared/utils/result.dart';
 import '../dual_ledger/classification_service.dart';
-import '../family_sync/check_group_validity_use_case.dart';
+import '../family_sync/sync_engine.dart';
 
 String _trunc(String s, [int len = 16]) =>
     s.length <= len ? s : '${s.substring(0, math.min(len, s.length))}...';
@@ -53,30 +47,24 @@ class CreateTransactionParams {
 class CreateTransactionUseCase {
   CreateTransactionUseCase({
     required TransactionRepository transactionRepository,
-    required BookRepository bookRepository,
     required CategoryRepository categoryRepository,
     required DeviceIdentityRepository deviceIdentityRepository,
     required HashChainService hashChainService,
     required ClassificationService classificationService,
-    SyncTriggerService? syncTriggerService,
-    CheckGroupValidityUseCase? checkGroupValidity,
+    SyncEngine? syncEngine,
   }) : _transactionRepo = transactionRepository,
-       _bookRepo = bookRepository,
        _categoryRepo = categoryRepository,
        _deviceIdentityRepo = deviceIdentityRepository,
        _hashChainService = hashChainService,
        _classificationService = classificationService,
-       _syncTriggerService = syncTriggerService,
-       _checkGroupValidity = checkGroupValidity;
+       _syncEngine = syncEngine;
 
   final TransactionRepository _transactionRepo;
-  final BookRepository _bookRepo;
   final CategoryRepository _categoryRepo;
   final DeviceIdentityRepository _deviceIdentityRepo;
   final HashChainService _hashChainService;
   final ClassificationService _classificationService;
-  final SyncTriggerService? _syncTriggerService;
-  final CheckGroupValidityUseCase? _checkGroupValidity;
+  final SyncEngine? _syncEngine;
 
   /// Genesis hash: 64 zero characters (no previous transaction).
   static const _genesisHash =
@@ -192,40 +180,10 @@ class CreateTransactionUseCase {
     // 9. Persist
     await _transactionRepo.insert(transaction);
 
-    // Fire-and-forget sync trigger — does not affect local create result.
-    _triggerIncrementalSync(transaction, params.bookId);
+    // Fire-and-forget sync trigger — SyncEngine handles debounce and validity.
+    _syncEngine?.onTransactionChanged();
 
     dev.log('[7/7 UseCase Done] Transaction $id persisted', name: 'DataFlow');
     return Result.success(transaction);
-  }
-
-  void _triggerIncrementalSync(Transaction transaction, String bookId) {
-    final syncService = _syncTriggerService;
-    if (syncService == null) return;
-
-    unawaited(
-      Future(() async {
-        // Check group validity (with 5-min cache) before pushing.
-        final groupCheck = _checkGroupValidity;
-        if (groupCheck != null) {
-          final validity = await groupCheck.execute();
-          if (validity is! GroupValid) return;
-        }
-
-        final book = await _bookRepo.findById(bookId);
-        await syncService.onTransactionCreated(
-          TransactionSyncMapper.toSyncMap(
-            transaction,
-            sourceBookId: bookId,
-            sourceBookName: book?.name ?? bookId,
-            sourceBookType: 'remote_book:$bookId',
-          ),
-        );
-      }).catchError((Object e) {
-        if (kDebugMode) {
-          debugPrint('Sync trigger failed (queued for retry): $e');
-        }
-      }),
-    );
   }
 }

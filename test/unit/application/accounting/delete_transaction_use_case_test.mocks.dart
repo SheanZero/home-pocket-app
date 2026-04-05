@@ -9,8 +9,6 @@ import 'package:home_pocket/features/accounting/domain/models/transaction.dart'
     as _i4;
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart'
     as _i2;
-import 'package:home_pocket/infrastructure/sync/sync_trigger_service.dart'
-    as _i5;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -130,85 +128,6 @@ class MockTransactionRepository extends _i1.Mock
   _i3.Future<void> deleteAllByBook(String? bookId) =>
       (super.noSuchMethod(
             Invocation.method(#deleteAllByBook, [bookId]),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
-          )
-          as _i3.Future<void>);
-}
-
-/// A class which mocks [SyncTriggerService].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockSyncTriggerService extends _i1.Mock
-    implements _i5.SyncTriggerService {
-  MockSyncTriggerService() {
-    _i1.throwOnMissingStub(this);
-  }
-
-  @override
-  _i3.Stream<_i5.SyncTriggerEvent> get events =>
-      (super.noSuchMethod(
-            Invocation.getter(#events),
-            returnValue: _i3.Stream<_i5.SyncTriggerEvent>.empty(),
-          )
-          as _i3.Stream<_i5.SyncTriggerEvent>);
-
-  @override
-  _i3.Future<void> initialize() =>
-      (super.noSuchMethod(
-            Invocation.method(#initialize, []),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
-          )
-          as _i3.Future<void>);
-
-  @override
-  void dispose() => super.noSuchMethod(
-    Invocation.method(#dispose, []),
-    returnValueForMissingStub: null,
-  );
-
-  @override
-  _i3.Future<void> onTransactionChanged({
-    required List<Map<String, dynamic>>? operations,
-    Map<String, int>? vectorClock = const {},
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(#onTransactionChanged, [], {
-              #operations: operations,
-              #vectorClock: vectorClock,
-            }),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
-          )
-          as _i3.Future<void>);
-
-  @override
-  _i3.Future<void> onTransactionCreated(
-    Map<String, dynamic>? transactionData,
-  ) =>
-      (super.noSuchMethod(
-            Invocation.method(#onTransactionCreated, [transactionData]),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
-          )
-          as _i3.Future<void>);
-
-  @override
-  _i3.Future<void> onTransactionUpdated(
-    Map<String, dynamic>? transactionData,
-  ) =>
-      (super.noSuchMethod(
-            Invocation.method(#onTransactionUpdated, [transactionData]),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
-          )
-          as _i3.Future<void>);
-
-  @override
-  _i3.Future<void> onTransactionDeleted(String? transactionId) =>
-      (super.noSuchMethod(
-            Invocation.method(#onTransactionDeleted, [transactionId]),
             returnValue: _i3.Future<void>.value(),
             returnValueForMissingStub: _i3.Future<void>.value(),
           )
