@@ -111,9 +111,9 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
       final bookResult = await ensureBook.execute();
 
       if (bookResult.isSuccess && bookResult.data != null) {
-        // Initialize sync triggers (lifecycle observer + push notification handlers)
-        final syncTrigger = ref.read(syncTriggerServiceProvider);
-        await syncTrigger.initialize();
+        // Initialize SyncEngine (lifecycle observer + status stream)
+        final syncEngine = ref.read(syncEngineProvider);
+        syncEngine.initialize();
         final existingProfile = await ref
             .read(getUserProfileUseCaseProvider)
             .execute();
