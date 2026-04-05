@@ -28,11 +28,8 @@ class JoinGroupScreen extends ConsumerStatefulWidget {
 }
 
 class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
-  final List<TextEditingController> _controllers = List.generate(
-    6,
-    (_) => TextEditingController(),
-  );
-  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
+  final _codeController = TextEditingController();
+  final _codeFocusNode = FocusNode();
 
   UserProfile? _profile;
   bool _isVerifying = false;
@@ -41,17 +38,14 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
   @override
   void initState() {
     super.initState();
+    _codeController.addListener(() => setState(() {}));
     unawaited(_loadProfile());
   }
 
   @override
   void dispose() {
-    for (final controller in _controllers) {
-      controller.dispose();
-    }
-    for (final node in _focusNodes) {
-      node.dispose();
-    }
+    _codeController.dispose();
+    _codeFocusNode.dispose();
     super.dispose();
   }
 
@@ -61,7 +55,7 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
     setState(() => _profile = profile);
   }
 
-  String get _code => _controllers.map((c) => c.text).join();
+  String get _code => _codeController.text;
 
   bool get _isCodeComplete => _code.length == 6;
 
@@ -97,24 +91,6 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
           _isVerifying = false;
           _errorMessage = message;
         });
-    }
-  }
-
-  void _onDigitChanged(int index, String value) {
-    if (value.length == 1 && index < 5) {
-      _focusNodes[index + 1].requestFocus();
-    }
-    setState(() {});
-  }
-
-  void _onDigitKeyDown(int index, KeyEvent event) {
-    if (event is KeyDownEvent &&
-        event.logicalKey == LogicalKeyboardKey.backspace &&
-        _controllers[index].text.isEmpty &&
-        index > 0) {
-      _controllers[index - 1].clear();
-      _focusNodes[index - 1].requestFocus();
-      setState(() {});
     }
   }
 
@@ -166,40 +142,68 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
               ],
               const SizedBox(height: 32),
 
-              // Code input
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  for (int i = 0; i < 3; i++) ...[
-                    if (i > 0) const SizedBox(width: 8),
-                    _DigitBox(
-                      controller: _controllers[i],
-                      focusNode: _focusNodes[i],
-                      onChanged: (value) => _onDigitChanged(i, value),
-                      onKeyEvent: (event) => _onDigitKeyDown(i, event),
-                    ),
-                  ],
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    child: Text(
-                      '\u{2022}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textTertiary,
+              // Code input — single hidden TextField + visual digit boxes
+              GestureDetector(
+                onTap: () => _codeFocusNode.requestFocus(),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Hidden TextField that captures all input
+                    Opacity(
+                      opacity: 0,
+                      child: SizedBox(
+                        width: 1,
+                        height: 1,
+                        child: TextField(
+                          controller: _codeController,
+                          focusNode: _codeFocusNode,
+                          keyboardType: TextInputType.number,
+                          maxLength: 6,
+                          autofocus: false,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          decoration: const InputDecoration(
+                            counterText: '',
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  for (int i = 3; i < 6; i++) ...[
-                    if (i > 3) const SizedBox(width: 8),
-                    _DigitBox(
-                      controller: _controllers[i],
-                      focusNode: _focusNodes[i],
-                      onChanged: (value) => _onDigitChanged(i, value),
-                      onKeyEvent: (event) => _onDigitKeyDown(i, event),
+                    // Visual digit boxes
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (int i = 0; i < 3; i++) ...[
+                          if (i > 0) const SizedBox(width: 8),
+                          _DigitDisplay(
+                            digit: i < _code.length ? _code[i] : '',
+                            isFocused: _codeFocusNode.hasFocus &&
+                                i == _code.length.clamp(0, 5),
+                          ),
+                        ],
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Text(
+                            '\u{2022}',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textTertiary,
+                            ),
+                          ),
+                        ),
+                        for (int i = 3; i < 6; i++) ...[
+                          if (i > 3) const SizedBox(width: 8),
+                          _DigitDisplay(
+                            digit: i < _code.length ? _code[i] : '',
+                            isFocused: _codeFocusNode.hasFocus &&
+                                i == _code.length.clamp(0, 5),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
-                ],
+                ),
               ),
               const SizedBox(height: 12),
 
@@ -296,71 +300,39 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _DigitBox extends StatelessWidget {
-  const _DigitBox({
-    required this.controller,
-    required this.focusNode,
-    required this.onChanged,
-    required this.onKeyEvent,
+class _DigitDisplay extends StatelessWidget {
+  const _DigitDisplay({
+    required this.digit,
+    required this.isFocused,
   });
 
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final ValueChanged<String> onChanged;
-  final ValueChanged<KeyEvent> onKeyEvent;
+  final String digit;
+  final bool isFocused;
 
   @override
   Widget build(BuildContext context) {
-    final hasText = controller.text.isNotEmpty;
-    final hasFocus = focusNode.hasFocus;
+    final hasText = digit.isNotEmpty;
 
-    return SizedBox(
+    return Container(
       width: 44,
       height: 56,
-      child: KeyboardListener(
-        focusNode: FocusNode(),
-        onKeyEvent: onKeyEvent,
-        child: TextField(
-          controller: controller,
-          focusNode: focusNode,
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.center,
-          maxLength: 1,
-          onChanged: onChanged,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          style: const TextStyle(
-            fontFamily: 'Outfit',
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
-          decoration: InputDecoration(
-            counterText: '',
-            contentPadding: const EdgeInsets.symmetric(vertical: 14),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(
-                color: hasText || hasFocus
-                    ? AppColors.accentPrimary
-                    : AppColors.borderDefault,
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(
-                color: hasText
-                    ? AppColors.accentPrimary
-                    : AppColors.borderDefault,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: AppColors.accentPrimary,
-                width: 2,
-              ),
-            ),
-          ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: hasText || isFocused
+              ? AppColors.accentPrimary
+              : AppColors.borderDefault,
+          width: isFocused ? 2 : 1,
+        ),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        digit,
+        style: const TextStyle(
+          fontFamily: 'Outfit',
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
         ),
       ),
     );
