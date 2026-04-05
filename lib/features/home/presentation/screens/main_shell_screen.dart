@@ -4,9 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../accounting/presentation/screens/transaction_entry_screen.dart';
 import '../../../analytics/presentation/providers/analytics_providers.dart';
 import '../../../analytics/presentation/screens/analytics_screen.dart';
+import '../../../family_sync/domain/models/sync_status_model.dart';
+import '../../../family_sync/presentation/providers/sync_providers.dart';
 import '../../../family_sync/presentation/widgets/family_sync_notification_route_listener.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
 import '../providers/home_providers.dart';
+import '../providers/shadow_books_provider.dart';
 import '../providers/today_transactions_provider.dart';
 import '../widgets/home_bottom_nav_bar.dart';
 import 'home_screen.dart';
@@ -23,6 +26,32 @@ class MainShellScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentIndex = ref.watch(selectedTabIndexProvider);
+
+    // Refresh home data when sync completes (syncing → synced)
+    ref.listen(syncStatusStreamProvider, (prev, next) {
+      final prevState = prev?.valueOrNull?.state;
+      final currState = next.valueOrNull?.state;
+      if (currState == null) return;
+
+      final wasSyncing = prevState == SyncState.syncing ||
+          prevState == SyncState.initialSyncing;
+      final nowDone =
+          currState == SyncState.synced || currState == SyncState.idle;
+
+      if (wasSyncing && nowDone) {
+        final now = DateTime.now();
+        ref.invalidate(todayTransactionsProvider(bookId: bookId));
+        ref.invalidate(monthlyReportProvider(
+          bookId: bookId,
+          year: now.year,
+          month: now.month,
+        ));
+        ref.invalidate(shadowBooksProvider);
+        ref.invalidate(
+          shadowAggregateProvider(year: now.year, month: now.month),
+        );
+      }
+    });
 
     return FamilySyncNotificationRouteListener(
       child: Scaffold(
