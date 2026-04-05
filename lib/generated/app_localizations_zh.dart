@@ -1004,4 +1004,37 @@ class SZh extends S {
 
   @override
   String get groupBack => '返回';
+
+  @override
+  String get syncInProgress => '同步中...';
+
+  @override
+  String get syncCompleted => '同步完成';
+
+  @override
+  String get syncFailed => '同步失败';
+
+  @override
+  String get syncRetry => '重试';
+
+  @override
+  String get syncManual => '手动同步';
+
+  @override
+  String syncLastTime(String time) {
+    return '上次同步: $time';
+  }
+
+  @override
+  String syncOfflineQueued(int count) {
+    return '$count条变更待发送';
+  }
+
+  @override
+  String get syncInitialProgress => '首次同步中...';
+
+  @override
+  String syncProfileUpdated(String name) {
+    return '$name更新了个人资料';
+  }
 }

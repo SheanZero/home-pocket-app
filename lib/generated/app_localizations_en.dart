@@ -1015,4 +1015,37 @@ class SEn extends S {
 
   @override
   String get groupBack => 'Back';
+
+  @override
+  String get syncInProgress => 'Syncing...';
+
+  @override
+  String get syncCompleted => 'Sync complete';
+
+  @override
+  String get syncFailed => 'Sync failed';
+
+  @override
+  String get syncRetry => 'Retry';
+
+  @override
+  String get syncManual => 'Sync Now';
+
+  @override
+  String syncLastTime(String time) {
+    return 'Last sync: $time';
+  }
+
+  @override
+  String syncOfflineQueued(int count) {
+    return '$count changes pending';
+  }
+
+  @override
+  String get syncInitialProgress => 'Initial sync...';
+
+  @override
+  String syncProfileUpdated(String name) {
+    return '$name updated their profile';
+  }
 }

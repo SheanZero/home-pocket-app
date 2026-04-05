@@ -650,5 +650,14 @@
   "groupWaitingHint1": "请等待通知",
   "groupWaitingHint2": "关闭应用也没有关系",
   "groupCodeHint": "请向群组的 Owner 索取邀请码",
-  "groupBack": "返回"
+  "groupBack": "返回",
+  "syncInProgress": "同步中...",
+  "syncCompleted": "同步完成",
+  "syncFailed": "同步失败",
+  "syncRetry": "重试",
+  "syncManual": "手动同步",
+  "syncLastTime": "上次同步: {time}",
+  "syncOfflineQueued": "{count}条变更待发送",
+  "syncInitialProgress": "首次同步中...",
+  "syncProfileUpdated": "{name}更新了个人资料"
 }

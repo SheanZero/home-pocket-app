@@ -1988,6 +1988,60 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Back'**
   String get groupBack;
+
+  /// Sync in progress status
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing...'**
+  String get syncInProgress;
+
+  /// Sync completed status
+  ///
+  /// In en, this message translates to:
+  /// **'Sync complete'**
+  String get syncCompleted;
+
+  /// Sync failed status
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed'**
+  String get syncFailed;
+
+  /// Retry sync button
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get syncRetry;
+
+  /// Manual sync button
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Now'**
+  String get syncManual;
+
+  /// Last sync time
+  ///
+  /// In en, this message translates to:
+  /// **'Last sync: {time}'**
+  String syncLastTime(String time);
+
+  /// Offline queue count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} changes pending'**
+  String syncOfflineQueued(int count);
+
+  /// Initial sync in progress
+  ///
+  /// In en, this message translates to:
+  /// **'Initial sync...'**
+  String get syncInitialProgress;
+
+  /// Profile update notification
+  ///
+  /// In en, this message translates to:
+  /// **'{name} updated their profile'**
+  String syncProfileUpdated(String name);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

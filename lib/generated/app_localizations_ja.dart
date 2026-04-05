@@ -1007,4 +1007,37 @@ class SJa extends S {
 
   @override
   String get groupBack => '戻る';
+
+  @override
+  String get syncInProgress => '同期中...';
+
+  @override
+  String get syncCompleted => '同期完了';
+
+  @override
+  String get syncFailed => '同期に失敗しました';
+
+  @override
+  String get syncRetry => '再試行';
+
+  @override
+  String get syncManual => '手動で同期';
+
+  @override
+  String syncLastTime(String time) {
+    return '最終同期: $time';
+  }
+
+  @override
+  String syncOfflineQueued(int count) {
+    return '$count件の変更が��信待ち';
+  }
+
+  @override
+  String get syncInitialProgress => '初回同期中...';
+
+  @override
+  String syncProfileUpdated(String name) {
+    return '$nameがプロフィール���更新しました';
+  }
 }
