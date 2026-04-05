@@ -659,5 +659,10 @@
   "syncLastTime": "最終同期: {time}",
   "syncOfflineQueued": "{count}件の変更が��信待ち",
   "syncInitialProgress": "初回同期中...",
-  "syncProfileUpdated": "{name}がプロフィール���更新しました"
+  "syncProfileUpdated": "{name}がプロフィール���更新しました",
+
+  "familySyncManualSync": "帳簿を同期",
+  "@familySyncManualSync": { "description": "Manual sync button label" },
+  "familySyncManualSyncDesc": "手動でデータを同期",
+  "@familySyncManualSyncDesc": { "description": "Manual sync button description" }
 }

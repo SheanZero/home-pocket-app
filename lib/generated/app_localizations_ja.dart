@@ -1040,4 +1040,10 @@ class SJa extends S {
   String syncProfileUpdated(String name) {
     return '$nameがプロフィール���更新しました';
   }
+
+  @override
+  String get familySyncManualSync => '帳簿を同期';
+
+  @override
+  String get familySyncManualSyncDesc => '手動でデータを同期';
 }

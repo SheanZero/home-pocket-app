@@ -54,6 +54,21 @@ class FamilySyncSettingsSection extends ConsumerWidget {
           ),
           onTap: () => _navigate(context, ref, syncState),
         ),
+        if (activeGroup != null)
+          ListTile(
+            leading: const Icon(Icons.cloud_sync),
+            title: Text(l10n.familySyncManualSync),
+            subtitle: Text(l10n.familySyncManualSyncDesc),
+            trailing: syncState == SyncState.syncing ||
+                    syncState == SyncState.initialSyncing
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.chevron_right),
+            onTap: () => ref.read(syncEngineProvider).onManualSync(),
+          ),
       ],
     );
   }

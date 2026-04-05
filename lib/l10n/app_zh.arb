@@ -659,5 +659,10 @@
   "syncLastTime": "上次同步: {time}",
   "syncOfflineQueued": "{count}条变更待发送",
   "syncInitialProgress": "首次同步中...",
-  "syncProfileUpdated": "{name}更新了个人资料"
+  "syncProfileUpdated": "{name}更新了个人资料",
+
+  "familySyncManualSync": "同步账本",
+  "@familySyncManualSync": { "description": "Manual sync button label" },
+  "familySyncManualSyncDesc": "手动同步数据",
+  "@familySyncManualSyncDesc": { "description": "Manual sync button description" }
 }

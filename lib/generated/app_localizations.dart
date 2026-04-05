@@ -2042,6 +2042,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{name} updated their profile'**
   String syncProfileUpdated(String name);
+
+  /// Manual sync button label
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Ledger'**
+  String get familySyncManualSync;
+
+  /// Manual sync button description
+  ///
+  /// In en, this message translates to:
+  /// **'Manually sync data'**
+  String get familySyncManualSyncDesc;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

@@ -1048,4 +1048,10 @@ class SEn extends S {
   String syncProfileUpdated(String name) {
     return '$name updated their profile';
   }
+
+  @override
+  String get familySyncManualSync => 'Sync Ledger';
+
+  @override
+  String get familySyncManualSyncDesc => 'Manually sync data';
 }

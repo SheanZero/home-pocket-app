@@ -1026,5 +1026,10 @@
   "syncInitialProgress": "Initial sync...",
   "@syncInitialProgress": { "description": "Initial sync in progress" },
   "syncProfileUpdated": "{name} updated their profile",
-  "@syncProfileUpdated": { "description": "Profile update notification", "placeholders": { "name": { "type": "String" } } }
+  "@syncProfileUpdated": { "description": "Profile update notification", "placeholders": { "name": { "type": "String" } } },
+
+  "familySyncManualSync": "Sync Ledger",
+  "@familySyncManualSync": { "description": "Manual sync button label" },
+  "familySyncManualSyncDesc": "Manually sync data",
+  "@familySyncManualSyncDesc": { "description": "Manual sync button description" }
 }

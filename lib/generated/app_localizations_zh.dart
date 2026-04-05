@@ -1037,4 +1037,10 @@ class SZh extends S {
   String syncProfileUpdated(String name) {
     return '$name更新了个人资料';
   }
+
+  @override
+  String get familySyncManualSync => '同步账本';
+
+  @override
+  String get familySyncManualSyncDesc => '手动同步数据';
 }
