@@ -16,6 +16,7 @@ import '../../../../infrastructure/sync/e2ee_service.dart';
 import '../../../../infrastructure/sync/push_notification_service.dart';
 import '../../../../infrastructure/sync/relay_api_client.dart';
 import '../../../../infrastructure/sync/sync_queue_manager.dart';
+import '../../../../infrastructure/sync/websocket_service.dart';
 import '../../domain/repositories/group_repository.dart';
 import '../../domain/repositories/sync_repository.dart';
 
@@ -90,3 +91,15 @@ PushNotificationService pushNotificationService(Ref ref) {
   ref.onDispose(service.dispose);
   return service;
 }
+
+/// WebSocketService provider for realtime group status notifications.
+///
+/// Defined manually (not @riverpod) to support .overrideWithValue() in tests.
+/// On-demand — screens connect/disconnect as needed.
+final webSocketServiceProvider = Provider<WebSocketService>((ref) {
+  final service = WebSocketService(
+    baseUrl: RelayApiClient.wsBaseUrl,
+  );
+  ref.onDispose(service.dispose);
+  return service;
+});

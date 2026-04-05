@@ -73,6 +73,16 @@ class RelayApiClient {
     return 'https://sync.happypocket.app/api/v1';
   }
 
+  /// WebSocket base URL derived from the REST base URL.
+  ///
+  /// Transforms `https://sync.happypocket.app/api/v1`
+  /// into `wss://sync.happypocket.app`.
+  static String get wsBaseUrl {
+    final uri = Uri.parse(defaultBaseUrl);
+    final wsScheme = uri.scheme == 'https' ? 'wss' : 'ws';
+    return '$wsScheme://${uri.host}${uri.hasPort ? ':${uri.port}' : ''}';
+  }
+
   // ── Device ──
 
   /// Register device with server (unauthenticated, idempotent).
