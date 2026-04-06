@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/i18n/models/locale_settings.dart';
 import '../../domain/models/app_settings.dart';
+import '../providers/locale_provider.dart';
 import '../providers/repository_providers.dart';
 import '../providers/settings_providers.dart';
+
+/// Hardcoded language names displayed in their own language.
+const _languageNames = {
+  'ja': '日本語',
+  'zh': '中文',
+  'en': 'English',
+};
 
 class AppearanceSection extends ConsumerWidget {
   const AppearanceSection({super.key, required this.settings});
@@ -29,6 +38,7 @@ class AppearanceSection extends ConsumerWidget {
           subtitle: Text(_getThemeModeLabel(settings.themeMode, context)),
           onTap: () => _showThemeModeDialog(context, ref),
         ),
+        _LanguageTile(settings: settings),
       ],
     );
   }
@@ -70,5 +80,92 @@ class AppearanceSection extends ConsumerWidget {
       case AppThemeMode.dark:
         return S.of(context).themeDark;
     }
+  }
+}
+
+/// Language picker tile that reads locale state from [localeNotifierProvider].
+class _LanguageTile extends ConsumerWidget {
+  const _LanguageTile({required this.settings});
+
+  final AppSettings settings;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final localeAsync = ref.watch(localeNotifierProvider);
+    final localeSettings = localeAsync.valueOrNull;
+
+    return ListTile(
+      leading: const Icon(Icons.language),
+      title: Text(S.of(context).language),
+      subtitle: Text(_buildSubtitle(localeSettings, context)),
+      onTap: () => _showLanguageDialog(context, ref, localeSettings),
+    );
+  }
+
+  String _buildSubtitle(
+    LocaleSettings? localeSettings,
+    BuildContext context,
+  ) {
+    if (localeSettings == null) {
+      return '';
+    }
+    final nativeName =
+        _languageNames[localeSettings.locale.languageCode] ?? '';
+    if (localeSettings.isSystemDefault) {
+      return '${S.of(context).languageSystem} ($nativeName)';
+    }
+    return nativeName;
+  }
+
+  void _showLanguageDialog(
+    BuildContext context,
+    WidgetRef ref,
+    LocaleSettings? localeSettings,
+  ) {
+    final currentCode = localeSettings?.locale.languageCode ?? 'ja';
+    final isSystem = localeSettings?.isSystemDefault ?? true;
+    // Use 'system' as the group value when system default is active,
+    // otherwise use the language code.
+    final groupValue = isSystem ? 'system' : currentCode;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(S.of(context).selectLanguage),
+        content: RadioGroup<String>(
+          groupValue: groupValue,
+          onChanged: (value) async {
+            if (value != null) {
+              if (value == 'system') {
+                await ref
+                    .read(localeNotifierProvider.notifier)
+                    .setSystemDefault();
+              } else {
+                await ref
+                    .read(localeNotifierProvider.notifier)
+                    .setLocale(Locale(value));
+              }
+              ref.invalidate(appSettingsProvider);
+              if (dialogContext.mounted) Navigator.pop(dialogContext);
+            }
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<String>(
+                title: Text(S.of(context).languageSystem),
+                value: 'system',
+              ),
+              ..._languageNames.entries.map((entry) {
+                return RadioListTile<String>(
+                  title: Text(entry.value),
+                  value: entry.key,
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
