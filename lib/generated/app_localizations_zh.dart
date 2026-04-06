@@ -360,7 +360,9 @@ class SZh extends S {
   String get error => '错误';
 
   @override
-  String get initializationError => '应用初始化失败';
+  String initializationError(String error) {
+    return '初始化失败: $error';
+  }
 
   @override
   String get profileSetup => '初次见面！';
@@ -597,7 +599,7 @@ class SZh extends S {
   String get todayDate => '今天';
 
   @override
-  String get next => 'Next';
+  String get next => '下一步';
 
   @override
   String get voiceInputSettings => '语音识别';
@@ -889,13 +891,13 @@ class SZh extends S {
   }
 
   @override
-  String get groupCreate => '创建 Group';
+  String get groupCreate => '创建群组';
 
   @override
-  String get groupName => 'Group 名';
+  String get groupName => '群组名称';
 
   @override
-  String get groupOwner => 'Owner';
+  String get groupOwner => '群主';
 
   @override
   String get groupMember => '成员';
@@ -921,10 +923,10 @@ class SZh extends S {
   String get groupConfirmJoin => '确认加入';
 
   @override
-  String get groupJoinTarget => '你要加入的 Group';
+  String get groupJoinTarget => '你要加入的群组';
 
   @override
-  String get groupWaitingApproval => '等待 Owner 审批...';
+  String get groupWaitingApproval => '等待群主审批...';
 
   @override
   String groupWaitingDesc(String name) {
@@ -949,7 +951,7 @@ class SZh extends S {
   String get groupJoinSuccess => '欢迎加入！';
 
   @override
-  String get groupRename => '修改 Group 名';
+  String get groupRename => '修改群组名称';
 
   @override
   String get groupRenameFailed => '修改名称失败';
@@ -967,7 +969,7 @@ class SZh extends S {
   String get groupMyName => '我的名称';
 
   @override
-  String get groupEnterGroup => '进入 Group';
+  String get groupEnterGroup => '进入群组';
 
   @override
   String get groupChoiceTitle => '与家人连接';
@@ -988,7 +990,7 @@ class SZh extends S {
   String get groupInviteMembers => '邀请新成员';
 
   @override
-  String get groupDisband => '解散 Group';
+  String get groupDisband => '解散群组';
 
   @override
   String get groupCancel => '取消';
@@ -1000,7 +1002,7 @@ class SZh extends S {
   String get groupWaitingHint2 => '关闭应用也没有关系';
 
   @override
-  String get groupCodeHint => '请向群组的 Owner 索取邀请码';
+  String get groupCodeHint => '请向群组的群主索取邀请码';
 
   @override
   String get groupBack => '返回';
@@ -1043,4 +1045,19 @@ class SZh extends S {
 
   @override
   String get familySyncManualSyncDesc => '手动同步数据';
+
+  @override
+  String get listTab => '列表';
+
+  @override
+  String get todoTab => '待办';
+
+  @override
+  String get datePickerComingSoon => '日期选择即将推出';
+
+  @override
+  String get selectLanguage => '选择语言';
+
+  @override
+  String get languageSystem => '跟随系统设置';
 }

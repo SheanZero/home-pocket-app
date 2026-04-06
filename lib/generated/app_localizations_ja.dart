@@ -360,7 +360,9 @@ class SJa extends S {
   String get error => 'エラー';
 
   @override
-  String get initializationError => 'アプリの初期化に失敗しました';
+  String initializationError(String error) {
+    return '初期化に失敗しました: $error';
+  }
 
   @override
   String get profileSetup => 'はじめまして！';
@@ -504,7 +506,7 @@ class SJa extends S {
   }
 
   @override
-  String get addTransaction => '添加账目';
+  String get addTransaction => '取引を追加';
 
   @override
   String get manualInput => '手動入力';
@@ -597,7 +599,7 @@ class SJa extends S {
   String get todayDate => '今日';
 
   @override
-  String get next => 'Next';
+  String get next => '次へ';
 
   @override
   String get voiceInputSettings => '音声認識';
@@ -1046,4 +1048,19 @@ class SJa extends S {
 
   @override
   String get familySyncManualSyncDesc => '手動でデータを同期';
+
+  @override
+  String get listTab => 'リスト';
+
+  @override
+  String get todoTab => 'やること';
+
+  @override
+  String get datePickerComingSoon => '日付選択は近日公開';
+
+  @override
+  String get selectLanguage => '言語を選択';
+
+  @override
+  String get languageSystem => 'システム設定に従う';
 }

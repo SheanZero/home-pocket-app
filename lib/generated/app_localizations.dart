@@ -783,17 +783,17 @@ abstract class S {
   /// **'Delete this transaction?'**
   String get deleteTransactionConfirmation;
 
-  /// Error title
+  /// Generic error title for error screens
   ///
   /// In en, this message translates to:
   /// **'Error'**
   String get error;
 
-  /// Init error message
+  /// Error message when app initialization fails
   ///
   /// In en, this message translates to:
-  /// **'Failed to initialize app'**
-  String get initializationError;
+  /// **'Initialization failed: {error}'**
+  String initializationError(String error);
 
   /// No description provided for @profileSetup.
   ///
@@ -2054,6 +2054,36 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Manually sync data'**
   String get familySyncManualSyncDesc;
+
+  /// List tab label in bottom navigation
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get listTab;
+
+  /// Todo tab label in bottom navigation
+  ///
+  /// In en, this message translates to:
+  /// **'Todo'**
+  String get todoTab;
+
+  /// Placeholder message for date picker feature
+  ///
+  /// In en, this message translates to:
+  /// **'Date picker coming soon'**
+  String get datePickerComingSoon;
+
+  /// Title of language selection dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Select Language'**
+  String get selectLanguage;
+
+  /// Option to follow system language setting
+  ///
+  /// In en, this message translates to:
+  /// **'Follow System'**
+  String get languageSystem;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

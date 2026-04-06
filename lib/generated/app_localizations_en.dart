@@ -362,7 +362,9 @@ class SEn extends S {
   String get error => 'Error';
 
   @override
-  String get initializationError => 'Failed to initialize app';
+  String initializationError(String error) {
+    return 'Initialization failed: $error';
+  }
 
   @override
   String get profileSetup => 'Nice to meet you!';
@@ -1054,4 +1056,19 @@ class SEn extends S {
 
   @override
   String get familySyncManualSyncDesc => 'Manually sync data';
+
+  @override
+  String get listTab => 'List';
+
+  @override
+  String get todoTab => 'Todo';
+
+  @override
+  String get datePickerComingSoon => 'Date picker coming soon';
+
+  @override
+  String get selectLanguage => 'Select Language';
+
+  @override
+  String get languageSystem => 'Follow System';
 }
