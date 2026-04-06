@@ -161,7 +161,7 @@
   "homeSoulChargeStatus": "魂の充実度 {fullness}% \u00b7 幸せROI {roi}x",
   "homeMonthBadge": "今月 {percent}%",
 
-  "addTransaction": "添加账目",
+  "addTransaction": "取引を追加",
   "manualInput": "手動入力",
   "ocrScan": "OCR",
   "voiceInput": "音声",
@@ -195,7 +195,7 @@
   "addCategory": "カテゴリを追加",
   "tapToRecord": "タップして録音",
   "todayDate": "今日",
-  "next": "Next",
+  "next": "次へ",
   "voiceInputSettings": "音声認識",
   "@voiceInputSettings": {
     "description": "Voice input settings section title"
