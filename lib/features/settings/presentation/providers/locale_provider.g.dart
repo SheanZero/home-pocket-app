@@ -6,13 +6,13 @@ part of 'locale_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$currentLocaleHash() => r'd8ff96e4cfbeab2f575af5fb54d6eb0e1c6f8776';
+String _$currentLocaleHash() => r'a12ccfd4e5abf45064f5b018daf044b6367e1ea0';
 
 /// Convenience provider that extracts just the [Locale] from [LocaleNotifier].
 ///
 /// Copied from [currentLocale].
 @ProviderFor(currentLocale)
-final currentLocaleProvider = AutoDisposeProvider<Locale>.internal(
+final currentLocaleProvider = AutoDisposeFutureProvider<Locale>.internal(
   currentLocale,
   name: r'currentLocaleProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -24,18 +24,18 @@ final currentLocaleProvider = AutoDisposeProvider<Locale>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef CurrentLocaleRef = AutoDisposeProviderRef<Locale>;
-String _$localeNotifierHash() => r'127c605be1aa5c1c44312f33138f484b4ed6eda7';
+typedef CurrentLocaleRef = AutoDisposeFutureProviderRef<Locale>;
+String _$localeNotifierHash() => r'72397db5879bab4bff692ee5e8d5e37294b8cbf2';
 
 /// Manages the current locale settings for the app.
 ///
-/// Supports explicit locale selection, system default detection with
-/// fallback, and reset to default (Japanese).
+/// Reads persisted language from [SettingsRepository] on startup.
+/// Persists changes via [SettingsRepository.setLanguage()].
 ///
 /// Copied from [LocaleNotifier].
 @ProviderFor(LocaleNotifier)
 final localeNotifierProvider =
-    AutoDisposeNotifierProvider<LocaleNotifier, LocaleSettings>.internal(
+    AutoDisposeAsyncNotifierProvider<LocaleNotifier, LocaleSettings>.internal(
       LocaleNotifier.new,
       name: r'localeNotifierProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -45,6 +45,6 @@ final localeNotifierProvider =
       allTransitiveDependencies: null,
     );
 
-typedef _$LocaleNotifier = AutoDisposeNotifier<LocaleSettings>;
+typedef _$LocaleNotifier = AutoDisposeAsyncNotifier<LocaleSettings>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

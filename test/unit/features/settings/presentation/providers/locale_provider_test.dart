@@ -3,81 +3,108 @@ import 'dart:ui';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/settings/presentation/providers/locale_provider.dart';
+import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/data/repositories/settings_repository_impl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// Helper to create a ProviderContainer with real SharedPreferences.
+Future<ProviderContainer> createTestContainer({
+  Map<String, Object> initialValues = const {},
+}) async {
+  SharedPreferences.setMockInitialValues(initialValues);
+  final prefs = await SharedPreferences.getInstance();
+  return ProviderContainer(
+    overrides: [
+      sharedPreferencesProvider.overrideWith((_) => Future.value(prefs)),
+      settingsRepositoryProvider.overrideWith(
+        (_) => SettingsRepositoryImpl(prefs: prefs),
+      ),
+    ],
+  );
+}
 
 void main() {
   group('LocaleNotifier', () {
-    late ProviderContainer container;
+    test('initial state reads persisted language from settings', () async {
+      final container = await createTestContainer(
+        initialValues: {'language': 'en'},
+      );
+      addTearDown(container.dispose);
 
-    setUp(() {
-      container = ProviderContainer();
-    });
-
-    tearDown(() {
-      container.dispose();
-    });
-
-    test('initial state is Japanese default', () {
-      final settings = container.read(localeNotifierProvider);
-      expect(settings.locale, const Locale('ja'));
-      expect(settings.isSystemDefault, isFalse);
-    });
-
-    test('setLocale changes to English', () {
-      container
-          .read(localeNotifierProvider.notifier)
-          .setLocale(const Locale('en'));
-      final settings = container.read(localeNotifierProvider);
+      final settings = await container.read(localeNotifierProvider.future);
       expect(settings.locale, const Locale('en'));
       expect(settings.isSystemDefault, isFalse);
     });
 
-    test('setLocale changes to Chinese', () {
-      container
+    test('initial state defaults to ja when no persisted value', () async {
+      final container = await createTestContainer();
+      addTearDown(container.dispose);
+
+      final settings = await container.read(localeNotifierProvider.future);
+      // Default is 'ja' (current AppSettings default)
+      expect(settings.locale, const Locale('ja'));
+      expect(settings.isSystemDefault, isFalse);
+    });
+
+    test('initial state handles system value', () async {
+      final container = await createTestContainer(
+        initialValues: {'language': 'system'},
+      );
+      addTearDown(container.dispose);
+
+      final settings = await container.read(localeNotifierProvider.future);
+      expect(settings.isSystemDefault, isTrue);
+    });
+
+    test('setLocale persists language and updates state', () async {
+      final container = await createTestContainer(
+        initialValues: {'language': 'ja'},
+      );
+      addTearDown(container.dispose);
+
+      await container.read(localeNotifierProvider.future);
+      await container
           .read(localeNotifierProvider.notifier)
           .setLocale(const Locale('zh'));
-      final settings = container.read(localeNotifierProvider);
+
+      final settings = await container.read(localeNotifierProvider.future);
       expect(settings.locale, const Locale('zh'));
+      expect(settings.isSystemDefault, isFalse);
+
+      // Verify persistence
+      final prefs = await container.read(sharedPreferencesProvider.future);
+      expect(prefs.getString('language'), 'zh');
     });
 
-    test('setSystemDefault uses system locale', () {
-      container
+    test('setSystemDefault persists system and updates state', () async {
+      final container = await createTestContainer(
+        initialValues: {'language': 'ja'},
+      );
+      addTearDown(container.dispose);
+
+      await container.read(localeNotifierProvider.future);
+      await container
           .read(localeNotifierProvider.notifier)
-          .setSystemDefault(const Locale('en'));
-      final settings = container.read(localeNotifierProvider);
-      expect(settings.locale, const Locale('en'));
+          .setSystemDefault();
+
+      final settings = await container.read(localeNotifierProvider.future);
       expect(settings.isSystemDefault, isTrue);
-    });
 
-    test('setSystemDefault falls back for unsupported locale', () {
-      container
-          .read(localeNotifierProvider.notifier)
-          .setSystemDefault(const Locale('ko'));
-      final settings = container.read(localeNotifierProvider);
-      expect(settings.locale, const Locale('ja'));
-      expect(settings.isSystemDefault, isTrue);
-    });
-
-    test('resetToDefault restores Japanese', () {
-      container
-          .read(localeNotifierProvider.notifier)
-          .setLocale(const Locale('en'));
-      container.read(localeNotifierProvider.notifier).resetToDefault();
-      final settings = container.read(localeNotifierProvider);
-      expect(settings.locale, const Locale('ja'));
+      // Verify persistence
+      final prefs = await container.read(sharedPreferencesProvider.future);
+      expect(prefs.getString('language'), 'system');
     });
   });
 
   group('currentLocaleProvider', () {
-    test('returns locale from LocaleNotifier', () {
-      final container = ProviderContainer();
+    test('returns locale from LocaleNotifier', () async {
+      final container = await createTestContainer(
+        initialValues: {'language': 'en'},
+      );
       addTearDown(container.dispose);
 
-      expect(container.read(currentLocaleProvider), const Locale('ja'));
-
-      container
-          .read(localeNotifierProvider.notifier)
-          .setLocale(const Locale('en'));
-      expect(container.read(currentLocaleProvider), const Locale('en'));
+      final locale = await container.read(currentLocaleProvider.future);
+      expect(locale, const Locale('en'));
     });
   });
 }
