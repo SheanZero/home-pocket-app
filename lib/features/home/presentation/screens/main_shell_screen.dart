@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../generated/app_localizations.dart';
+
 import '../../../accounting/presentation/screens/transaction_entry_screen.dart';
 import '../../../analytics/presentation/providers/analytics_providers.dart';
 import '../../../analytics/presentation/screens/analytics_screen.dart';
@@ -71,10 +73,10 @@ class MainShellScreen extends ConsumerWidget {
                   },
                 ),
                 // Placeholder for List tab
-                const Center(child: Text('List')),
+                Center(child: Text(S.of(context).listTab)),
                 AnalyticsScreen(bookId: bookId),
                 // Placeholder for Todo tab
-                const Center(child: Text('Todo')),
+                Center(child: Text(S.of(context).todoTab)),
               ],
             ),
             Positioned(

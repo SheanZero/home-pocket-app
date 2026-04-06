@@ -159,7 +159,7 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
-      home: _buildHome(),
+      home: Builder(builder: (context) => _buildHome(context)),
     );
   }
 
@@ -174,11 +174,11 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
     }
   }
 
-  Widget _buildHome() {
+  Widget _buildHome(BuildContext context) {
     if (_error != null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Error')),
-        body: Center(child: Text(_error!)),
+        appBar: AppBar(title: Text(S.of(context).error)),
+        body: Center(child: Text(S.of(context).initializationError(_error!))),
       );
     }
 
