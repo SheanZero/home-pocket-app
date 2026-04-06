@@ -11,7 +11,7 @@ enum AppThemeMode { system, light, dark }
 abstract class AppSettings with _$AppSettings {
   const factory AppSettings({
     @Default(AppThemeMode.system) AppThemeMode themeMode,
-    @Default('ja') String language,
+    @Default('system') String language,
     @Default(true) bool notificationsEnabled,
     @Default(true) bool biometricLockEnabled,
     @Default('zh') String voiceLanguage,

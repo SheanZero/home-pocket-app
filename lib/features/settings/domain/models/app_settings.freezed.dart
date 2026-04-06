@@ -325,7 +325,7 @@ extension AppSettingsPatterns on AppSettings {
 class _AppSettings implements AppSettings {
   const _AppSettings({
     this.themeMode = AppThemeMode.system,
-    this.language = 'ja',
+    this.language = 'system',
     this.notificationsEnabled = true,
     this.biometricLockEnabled = true,
     this.voiceLanguage = 'zh',

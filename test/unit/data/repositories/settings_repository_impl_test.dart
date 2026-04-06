@@ -17,7 +17,7 @@ void main() {
       final settings = await repository.getSettings();
 
       expect(settings.themeMode, AppThemeMode.system);
-      expect(settings.language, 'ja');
+      expect(settings.language, 'system');
       expect(settings.notificationsEnabled, true);
       expect(settings.biometricLockEnabled, true);
     });

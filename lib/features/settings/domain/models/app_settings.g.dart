@@ -10,7 +10,7 @@ _AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => _AppSettings(
   themeMode:
       $enumDecodeNullable(_$AppThemeModeEnumMap, json['themeMode']) ??
       AppThemeMode.system,
-  language: json['language'] as String? ?? 'ja',
+  language: json['language'] as String? ?? 'system',
   notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
   biometricLockEnabled: json['biometricLockEnabled'] as bool? ?? true,
   voiceLanguage: json['voiceLanguage'] as String? ?? 'zh',

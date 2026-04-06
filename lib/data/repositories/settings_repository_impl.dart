@@ -19,7 +19,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   Future<AppSettings> getSettings() async {
     return AppSettings(
       themeMode: _getThemeMode(),
-      language: _prefs.getString(_languageKey) ?? 'ja',
+      language: _prefs.getString(_languageKey) ?? 'system',
       notificationsEnabled: _prefs.getBool(_notificationsKey) ?? true,
       biometricLockEnabled: _prefs.getBool(_biometricLockKey) ?? true,
       voiceLanguage: _prefs.getString(_voiceLanguageKey) ?? 'zh',

@@ -7,7 +7,7 @@ void main() {
       const settings = AppSettings();
 
       expect(settings.themeMode, AppThemeMode.system);
-      expect(settings.language, 'ja');
+      expect(settings.language, 'system');
       expect(settings.notificationsEnabled, true);
       expect(settings.biometricLockEnabled, true);
     });
@@ -40,7 +40,7 @@ void main() {
       expect(updated.biometricLockEnabled, true);
       // Original is unchanged
       expect(original.themeMode, AppThemeMode.system);
-      expect(original.language, 'ja');
+      expect(original.language, 'system');
     });
 
     test('serializes to JSON and back', () {
