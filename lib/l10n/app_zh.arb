@@ -115,7 +115,7 @@
   "confirmDelete": "确认删除",
   "deleteTransactionConfirmation": "删除此交易？",
   "error": "错误",
-  "initializationError": "应用初始化失败",
+  "initializationError": "初始化失败: {error}",
   "profileSetup": "初次见面！",
   "profileSetupSubtitle": "欢迎使用守护家计簿",
   "profileNickname": "你的昵称",
@@ -664,5 +664,11 @@
   "familySyncManualSync": "同步账本",
   "@familySyncManualSync": { "description": "Manual sync button label" },
   "familySyncManualSyncDesc": "手动同步数据",
-  "@familySyncManualSyncDesc": { "description": "Manual sync button description" }
+  "@familySyncManualSyncDesc": { "description": "Manual sync button description" },
+
+  "listTab": "列表",
+  "todoTab": "待办",
+  "datePickerComingSoon": "日期选择即将推出",
+  "selectLanguage": "选择语言",
+  "languageSystem": "跟随系统设置"
 }

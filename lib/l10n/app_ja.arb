@@ -115,7 +115,7 @@
   "confirmDelete": "削除の確認",
   "deleteTransactionConfirmation": "この取引を削除しますか？",
   "error": "エラー",
-  "initializationError": "アプリの初期化に失敗しました",
+  "initializationError": "初期化に失敗しました: {error}",
   "profileSetup": "はじめまして！",
   "profileSetupSubtitle": "まもる家計簿へようこそ",
   "profileNickname": "あなたの呼び名",
@@ -664,5 +664,11 @@
   "familySyncManualSync": "帳簿を同期",
   "@familySyncManualSync": { "description": "Manual sync button label" },
   "familySyncManualSyncDesc": "手動でデータを同期",
-  "@familySyncManualSyncDesc": { "description": "Manual sync button description" }
+  "@familySyncManualSyncDesc": { "description": "Manual sync button description" },
+
+  "listTab": "リスト",
+  "todoTab": "やること",
+  "datePickerComingSoon": "日付選択は近日公開",
+  "selectLanguage": "言語を選択",
+  "languageSystem": "システム設定に従う"
 }

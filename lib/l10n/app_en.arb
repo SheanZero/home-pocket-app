@@ -344,10 +344,15 @@
   "@deleteTransactionConfirmation": { "description": "Delete transaction confirmation message" },
 
   "error": "Error",
-  "@error": { "description": "Error title" },
+  "@error": { "description": "Generic error title for error screens" },
 
-  "initializationError": "Failed to initialize app",
-  "@initializationError": { "description": "Init error message" },
+  "initializationError": "Initialization failed: {error}",
+  "@initializationError": {
+    "description": "Error message when app initialization fails",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
   "profileSetup": "Nice to meet you!",
   "profileSetupSubtitle": "Welcome to Home Pocket",
   "profileNickname": "Your nickname",
@@ -1031,5 +1036,20 @@
   "familySyncManualSync": "Sync Ledger",
   "@familySyncManualSync": { "description": "Manual sync button label" },
   "familySyncManualSyncDesc": "Manually sync data",
-  "@familySyncManualSyncDesc": { "description": "Manual sync button description" }
+  "@familySyncManualSyncDesc": { "description": "Manual sync button description" },
+
+  "listTab": "List",
+  "@listTab": { "description": "List tab label in bottom navigation" },
+
+  "todoTab": "Todo",
+  "@todoTab": { "description": "Todo tab label in bottom navigation" },
+
+  "datePickerComingSoon": "Date picker coming soon",
+  "@datePickerComingSoon": { "description": "Placeholder message for date picker feature" },
+
+  "selectLanguage": "Select Language",
+  "@selectLanguage": { "description": "Title of language selection dialog" },
+
+  "languageSystem": "Follow System",
+  "@languageSystem": { "description": "Option to follow system language setting" }
 }
