@@ -415,7 +415,8 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
     final l10n = S.of(context);
     final hasResult = _parseResult != null;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final locale = ref.watch(currentLocaleProvider);
+    final localeAsync = ref.watch(currentLocaleProvider);
+    final locale = localeAsync.valueOrNull ?? const Locale('ja');
 
     // Watch voiceLocaleIdProvider so the screen rebuilds when the user changes
     // the voice language in Settings. The current value is stored in

@@ -243,7 +243,8 @@ class _TransactionEntryScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
-    final locale = ref.watch(currentLocaleProvider);
+    final localeAsync = ref.watch(currentLocaleProvider);
+    final locale = localeAsync.valueOrNull ?? const Locale('ja');
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(

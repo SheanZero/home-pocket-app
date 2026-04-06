@@ -144,7 +144,8 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
           data: (s) => _toFlutterThemeMode(s.themeMode),
         ) ??
         ThemeMode.system;
-    final locale = ref.watch(currentLocaleProvider);
+    final localeAsync = ref.watch(currentLocaleProvider);
+    final locale = localeAsync.valueOrNull ?? const Locale('ja');
 
     return MaterialApp(
       onGenerateTitle: (context) => S.of(context).appName,

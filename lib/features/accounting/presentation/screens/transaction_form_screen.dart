@@ -140,7 +140,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final locale = ref.watch(currentLocaleProvider);
+    final localeAsync = ref.watch(currentLocaleProvider);
+    final locale = localeAsync.valueOrNull ?? const Locale('ja');
 
     return Scaffold(
       appBar: AppBar(title: Text(S.of(context).newTransaction)),

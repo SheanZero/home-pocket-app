@@ -38,7 +38,8 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locale = ref.watch(currentLocaleProvider);
+    final localeAsync = ref.watch(currentLocaleProvider);
+    final locale = localeAsync.valueOrNull ?? const Locale('ja');
     final isGroupMode = ref.watch(isGroupModeProvider);
     final now = DateTime.now();
     final year = now.year;

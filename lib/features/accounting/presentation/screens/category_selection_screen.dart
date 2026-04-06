@@ -120,7 +120,8 @@ class _CategorySelectionScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
-    final locale = ref.watch(currentLocaleProvider);
+    final localeAsync = ref.watch(currentLocaleProvider);
+    final locale = localeAsync.valueOrNull ?? const Locale('ja');
     final filteredL1 = _getFilteredL1(locale);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
