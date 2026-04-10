@@ -95,7 +95,7 @@ abstract final class CategoryService {
     'category_hobbies_events': 'イベント',
     'category_hobbies_movies': '映画・動画',
     'category_hobbies_games': '音楽・ゲーム・漫画',
-    'category_hobbies_books': '本',
+    'category_hobbies_books': '本・漫画',
     'category_hobbies_travel': '旅行',
     'category_hobbies_other': 'その他趣味・娯楽',
 
@@ -113,7 +113,7 @@ abstract final class CategoryService {
     'category_social_general': '交際費',
     'category_social_drinks': '飲み会',
     'category_social_gifts': 'プレゼント',
-    'category_social_ceremonial': '冠婚葬祭',
+    'category_social_ceremonial': '冠婚葬祭・ご祝儀・香典',
     'category_social_other': 'その他交際費',
 
     // L2 Health & Medical (§10.5)
@@ -198,6 +198,99 @@ abstract final class CategoryService {
     'category_other_misc': '雑費',
     'category_other_unclassified': '使途不明金',
     'category_other_other': 'その他',
+
+    // L1 New categories (v2)
+    'category_pet': 'ペット',
+    'category_allowance': 'お小遣い',
+
+    // L2 Food (v2 additions)
+    'category_food_delivery': 'デリバリー',
+    'category_food_drinks': '飲料・酒類',
+
+    // L2 Daily (v2 additions)
+    'category_daily_drugstore': 'ドラッグストア',
+    'category_daily_subscription': 'サブスク雑貨',
+
+    // L2 Transport (v2 additions)
+    'category_transport_shinkansen': '新幹線',
+    'category_transport_highway_bus': '高速バス',
+
+    // L2 Hobbies (v2 additions)
+    'category_hobbies_music': '音楽',
+    'category_hobbies_subscription': 'エンタメサブスク',
+    'category_hobbies_oshikatsu': '推し活・グッズ',
+
+    // L2 Clothing (v2 additions)
+    'category_clothing_shoes': '靴・履物',
+    'category_clothing_bags': 'カバン',
+
+    // L2 Social (v2 additions)
+    'category_social_fees': '会費・組合費',
+
+    // L2 Health (v2 additions)
+    'category_health_dental': '歯科',
+    'category_health_supplements': 'サプリメント',
+    'category_health_dock': '人間ドック',
+
+    // L2 Education (v2 additions)
+    'category_education_entrance_exam': '受験料',
+    'category_education_gakushi_hoken': '学資保険',
+    'category_education_seminar': 'セミナー・講座',
+
+    // L2 Utilities (v2 additions)
+    'category_utilities_kerosene': '灯油',
+
+    // L2 Communication (v2 additions)
+    'category_communication_nhk': 'NHK受信料',
+    'category_communication_postage': '切手・はがき',
+
+    // L2 Housing (v2 additions)
+    'category_housing_property_tax': '固定資産税',
+    'category_housing_utilities_setup': '引越し・初期設備',
+
+    // L2 Car (v2 additions)
+    'category_car_car_share': 'カーシェア',
+    'category_car_driving_school': '免許教習',
+
+    // L2 Tax (v2 additions)
+    'category_tax_furusato': 'ふるさと納税',
+    'category_tax_consumption': '消費税',
+    'category_tax_nursing_insurance': '介護保険',
+
+    // L2 Insurance (v2 additions)
+    'category_insurance_cancer': 'がん保険',
+    'category_insurance_income': '所得補償保険',
+
+    // L2 Special (v2 additions)
+    'category_special_funeral': '葬儀',
+    'category_special_life_event': '成人式・七五三・入学式',
+    'category_special_newyear': '初詣・お年玉・年末年始',
+    'category_special_movement': '引越し',
+
+    // L2 Allowance (all new)
+    'category_allowance_self': '本人お小遣い',
+    'category_allowance_spouse': '配偶者お小遣い',
+    'category_allowance_kids': '子どもお小遣い',
+    'category_allowance_other': 'その他お小遣い',
+
+    // L2 Asset (all new)
+    'category_asset_nisa': 'NISA',
+    'category_asset_ideco': 'iDeCo',
+    'category_asset_tsumitate': '積立投資',
+    'category_asset_savings': '貯蓄・定期預金',
+    'category_asset_stock': '株・投資信託',
+    'category_asset_fx': '外貨預金',
+    'category_asset_realestate': '不動産投資',
+    'category_asset_other': 'その他資産形成',
+
+    // L2 Pet (all new)
+    'category_pet_food': 'ペットフード',
+    'category_pet_supplies': 'ペット用品・おもちゃ',
+    'category_pet_medical': '病院・医療費',
+    'category_pet_grooming': 'トリミング',
+    'category_pet_insurance': 'ペット保険',
+    'category_pet_hotel': 'ペットホテル・預かり',
+    'category_pet_other': 'その他ペット',
   };
 
   // ─── Chinese ───
@@ -261,7 +354,7 @@ abstract final class CategoryService {
     'category_hobbies_events': '活动',
     'category_hobbies_movies': '电影/视频',
     'category_hobbies_games': '音乐/游戏/漫画',
-    'category_hobbies_books': '图书',
+    'category_hobbies_books': '书籍漫画',
     'category_hobbies_travel': '旅行',
     'category_hobbies_other': '其他兴趣娱乐',
 
@@ -279,7 +372,7 @@ abstract final class CategoryService {
     'category_social_general': '交际费',
     'category_social_drinks': '聚会饮酒',
     'category_social_gifts': '礼物',
-    'category_social_ceremonial': '红白喜丧',
+    'category_social_ceremonial': '红白喜丧/礼金',
     'category_social_other': '其他交际费',
 
     // L2 Health & Medical (§10.5)
@@ -364,6 +457,99 @@ abstract final class CategoryService {
     'category_other_misc': '杂费',
     'category_other_unclassified': '去向不明款',
     'category_other_other': '其他',
+
+    // L1 New categories (v2)
+    'category_pet': '宠物',
+    'category_allowance': '零花钱',
+
+    // L2 Food (v2 additions)
+    'category_food_delivery': '外卖',
+    'category_food_drinks': '饮料酒类',
+
+    // L2 Daily (v2 additions)
+    'category_daily_drugstore': '药妆店',
+    'category_daily_subscription': '日用品订阅',
+
+    // L2 Transport (v2 additions)
+    'category_transport_shinkansen': '新干线',
+    'category_transport_highway_bus': '高速巴士',
+
+    // L2 Hobbies (v2 additions)
+    'category_hobbies_music': '音乐',
+    'category_hobbies_subscription': '娱乐订阅',
+    'category_hobbies_oshikatsu': '粉丝活动/周边',
+
+    // L2 Clothing (v2 additions)
+    'category_clothing_shoes': '鞋履',
+    'category_clothing_bags': '包袋',
+
+    // L2 Social (v2 additions)
+    'category_social_fees': '会费/组合费',
+
+    // L2 Health (v2 additions)
+    'category_health_dental': '牙科',
+    'category_health_supplements': '保健品',
+    'category_health_dock': '体检',
+
+    // L2 Education (v2 additions)
+    'category_education_entrance_exam': '考试费',
+    'category_education_gakushi_hoken': '学资保险',
+    'category_education_seminar': '研讨会讲座',
+
+    // L2 Utilities (v2 additions)
+    'category_utilities_kerosene': '煤油',
+
+    // L2 Communication (v2 additions)
+    'category_communication_nhk': 'NHK 收视费',
+    'category_communication_postage': '邮票明信片',
+
+    // L2 Housing (v2 additions)
+    'category_housing_property_tax': '固定资产税',
+    'category_housing_utilities_setup': '搬家初期设置',
+
+    // L2 Car (v2 additions)
+    'category_car_car_share': '共享汽车',
+    'category_car_driving_school': '驾校',
+
+    // L2 Tax (v2 additions)
+    'category_tax_furusato': '故乡税',
+    'category_tax_consumption': '消费税',
+    'category_tax_nursing_insurance': '介护保险',
+
+    // L2 Insurance (v2 additions)
+    'category_insurance_cancer': '癌症保险',
+    'category_insurance_income': '所得补偿保险',
+
+    // L2 Special (v2 additions)
+    'category_special_funeral': '葬礼',
+    'category_special_life_event': '成人礼/七五三/入学式',
+    'category_special_newyear': '新年参拜/压岁钱',
+    'category_special_movement': '搬家',
+
+    // L2 Allowance (all new)
+    'category_allowance_self': '本人零花钱',
+    'category_allowance_spouse': '配偶零花钱',
+    'category_allowance_kids': '儿童零花钱',
+    'category_allowance_other': '其他零花钱',
+
+    // L2 Asset (all new)
+    'category_asset_nisa': 'NISA 账户',
+    'category_asset_ideco': 'iDeCo 年金',
+    'category_asset_tsumitate': '定期投资',
+    'category_asset_savings': '储蓄定期',
+    'category_asset_stock': '股票信托',
+    'category_asset_fx': '外汇存款',
+    'category_asset_realestate': '不动产投资',
+    'category_asset_other': '其他资产配置',
+
+    // L2 Pet (all new)
+    'category_pet_food': '宠物食品',
+    'category_pet_supplies': '宠物用品/玩具',
+    'category_pet_medical': '宠物医疗',
+    'category_pet_grooming': '美容护理',
+    'category_pet_insurance': '宠物保险',
+    'category_pet_hotel': '宠物寄养',
+    'category_pet_other': '其他宠物',
   };
 
   // ─── English ───
@@ -426,8 +612,8 @@ abstract final class CategoryService {
     'category_hobbies_leisure': 'Leisure & Sports',
     'category_hobbies_events': 'Events',
     'category_hobbies_movies': 'Movies & Videos',
-    'category_hobbies_games': 'Music, Games & Manga',
-    'category_hobbies_books': 'Books',
+    'category_hobbies_games': 'Games',
+    'category_hobbies_books': 'Books & Manga',
     'category_hobbies_travel': 'Travel',
     'category_hobbies_other': 'Other Hobbies & Entertainment',
 
@@ -530,5 +716,98 @@ abstract final class CategoryService {
     'category_other_misc': 'Miscellaneous',
     'category_other_unclassified': 'Unclassified Spending',
     'category_other_other': 'Other',
+
+    // L1 New categories (v2)
+    'category_pet': 'Pets',
+    'category_allowance': 'Allowance',
+
+    // L2 Food (v2 additions)
+    'category_food_delivery': 'Delivery',
+    'category_food_drinks': 'Drinks & Alcohol',
+
+    // L2 Daily (v2 additions)
+    'category_daily_drugstore': 'Drugstore',
+    'category_daily_subscription': 'Daily Subscriptions',
+
+    // L2 Transport (v2 additions)
+    'category_transport_shinkansen': 'Shinkansen',
+    'category_transport_highway_bus': 'Highway Bus',
+
+    // L2 Hobbies (v2 additions)
+    'category_hobbies_music': 'Music',
+    'category_hobbies_subscription': 'Entertainment Subs',
+    'category_hobbies_oshikatsu': 'Fan Activities & Goods',
+
+    // L2 Clothing (v2 additions)
+    'category_clothing_shoes': 'Shoes & Footwear',
+    'category_clothing_bags': 'Bags',
+
+    // L2 Social (v2 additions)
+    'category_social_fees': 'Membership Fees',
+
+    // L2 Health (v2 additions)
+    'category_health_dental': 'Dental',
+    'category_health_supplements': 'Supplements',
+    'category_health_dock': 'Health Check-up',
+
+    // L2 Education (v2 additions)
+    'category_education_entrance_exam': 'Entrance Exam Fees',
+    'category_education_gakushi_hoken': 'Education Insurance',
+    'category_education_seminar': 'Seminars & Workshops',
+
+    // L2 Utilities (v2 additions)
+    'category_utilities_kerosene': 'Kerosene',
+
+    // L2 Communication (v2 additions)
+    'category_communication_nhk': 'NHK Reception Fee',
+    'category_communication_postage': 'Postage & Stamps',
+
+    // L2 Housing (v2 additions)
+    'category_housing_property_tax': 'Property Tax',
+    'category_housing_utilities_setup': 'Moving & Initial Setup',
+
+    // L2 Car (v2 additions)
+    'category_car_car_share': 'Car Share',
+    'category_car_driving_school': 'Driving School',
+
+    // L2 Tax (v2 additions)
+    'category_tax_furusato': 'Furusato Nozei',
+    'category_tax_consumption': 'Consumption Tax',
+    'category_tax_nursing_insurance': 'Long-term Care Insurance',
+
+    // L2 Insurance (v2 additions)
+    'category_insurance_cancer': 'Cancer Insurance',
+    'category_insurance_income': 'Income Protection',
+
+    // L2 Special (v2 additions)
+    'category_special_funeral': 'Funeral',
+    'category_special_life_event': 'Life Events',
+    'category_special_newyear': 'New Year Traditions',
+    'category_special_movement': 'Moving',
+
+    // L2 Allowance (all new)
+    'category_allowance_self': 'Self Allowance',
+    'category_allowance_spouse': 'Spouse Allowance',
+    'category_allowance_kids': 'Kids Allowance',
+    'category_allowance_other': 'Other Allowance',
+
+    // L2 Asset (all new)
+    'category_asset_nisa': 'NISA',
+    'category_asset_ideco': 'iDeCo',
+    'category_asset_tsumitate': 'Regular Investment',
+    'category_asset_savings': 'Savings & Deposits',
+    'category_asset_stock': 'Stocks & Funds',
+    'category_asset_fx': 'Foreign Currency',
+    'category_asset_realestate': 'Real Estate Investment',
+    'category_asset_other': 'Other Asset Building',
+
+    // L2 Pet (all new)
+    'category_pet_food': 'Pet Food',
+    'category_pet_supplies': 'Supplies & Toys',
+    'category_pet_medical': 'Vet & Medical',
+    'category_pet_grooming': 'Grooming & Salon',
+    'category_pet_insurance': 'Pet Insurance',
+    'category_pet_hotel': 'Boarding & Pet Sitter',
+    'category_pet_other': 'Other Pet Expenses',
   };
 }
