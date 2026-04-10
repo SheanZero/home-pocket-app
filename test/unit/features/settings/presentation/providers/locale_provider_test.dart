@@ -36,14 +36,13 @@ void main() {
       expect(settings.isSystemDefault, isFalse);
     });
 
-    test('initial state defaults to ja when no persisted value', () async {
+    test('initial state defaults to system when no persisted value', () async {
       final container = await createTestContainer();
       addTearDown(container.dispose);
 
       final settings = await container.read(localeNotifierProvider.future);
-      // Default is 'ja' (current AppSettings default)
-      expect(settings.locale, const Locale('ja'));
-      expect(settings.isSystemDefault, isFalse);
+      // Default is 'system' (changed in commit 0d126bc to use system locale for new installs)
+      expect(settings.isSystemDefault, isTrue);
     });
 
     test('initial state handles system value', () async {
