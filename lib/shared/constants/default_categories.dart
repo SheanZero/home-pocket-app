@@ -18,13 +18,13 @@ abstract final class DefaultCategories {
   static final List<Category> _expenseL1 = [
     _l1('cat_food', 'category_food', 'restaurant', '#FF5722', 1),
     _l1('cat_daily', 'category_daily', 'local_mall', '#00BCD4', 2),
-    _l1('cat_transport', 'category_transport', 'directions_bus', '#2196F3', 3),
-    _l1('cat_hobbies', 'category_hobbies', 'sports_esports', '#9C27B0', 4),
-    _l1('cat_clothing', 'category_clothing', 'checkroom', '#E91E63', 5),
-    _l1('cat_social', 'category_social', 'people', '#FF9800', 6),
-    _l1('cat_health', 'category_health', 'local_hospital', '#F44336', 7),
-    _l1('cat_education', 'category_education', 'school', '#3F51B5', 8),
-    _l1('cat_cash_card', 'category_cash_card', 'credit_card', '#546E7A', 9),
+    _l1('cat_pet', 'category_pet', 'pets', '#7CB342', 3),
+    _l1('cat_transport', 'category_transport', 'directions_bus', '#2196F3', 4),
+    _l1('cat_hobbies', 'category_hobbies', 'sports_esports', '#9C27B0', 5),
+    _l1('cat_clothing', 'category_clothing', 'checkroom', '#E91E63', 6),
+    _l1('cat_social', 'category_social', 'people', '#FF9800', 7),
+    _l1('cat_health', 'category_health', 'local_hospital', '#F44336', 8),
+    _l1('cat_education', 'category_education', 'school', '#3F51B5', 9),
     _l1('cat_utilities', 'category_utilities', 'flash_on', '#FFC107', 10),
     _l1(
       'cat_communication',
@@ -38,19 +38,13 @@ abstract final class DefaultCategories {
     _l1('cat_tax', 'category_tax', 'account_balance', '#5D4037', 14),
     _l1('cat_insurance', 'category_insurance', 'security', '#827717', 15),
     _l1('cat_special', 'category_special', 'star', '#AD1457', 16),
-    _l1('cat_asset', 'category_asset', 'savings', '#1B5E20', 17),
+    _l1('cat_allowance', 'category_allowance', 'wallet', '#8D6E63', 17),
+    _l1('cat_asset', 'category_asset', 'savings', '#1B5E20', 18),
     _l1(
       'cat_other_expense',
       'category_other_expense',
       'more_horiz',
       '#607D8B',
-      18,
-    ),
-    _l1(
-      'cat_uncategorized',
-      'category_uncategorized',
-      'help_outline',
-      '#9E9E9E',
       19,
     ),
   ];
@@ -928,13 +922,13 @@ abstract final class DefaultCategories {
   static final List<CategoryLedgerConfig> _defaultLedgerConfigs = [
     _config('cat_food', LedgerType.survival),
     _config('cat_daily', LedgerType.survival),
+    _config('cat_pet', LedgerType.soul),
     _config('cat_transport', LedgerType.survival),
     _config('cat_hobbies', LedgerType.soul),
     _config('cat_clothing', LedgerType.soul),
     _config('cat_social', LedgerType.survival),
     _config('cat_health', LedgerType.survival),
     _config('cat_education', LedgerType.soul),
-    _config('cat_cash_card', LedgerType.survival),
     _config('cat_utilities', LedgerType.survival),
     _config('cat_communication', LedgerType.survival),
     _config('cat_housing', LedgerType.survival),
@@ -942,9 +936,9 @@ abstract final class DefaultCategories {
     _config('cat_tax', LedgerType.survival),
     _config('cat_insurance', LedgerType.survival),
     _config('cat_special', LedgerType.survival),
+    _config('cat_allowance', LedgerType.soul),
     _config('cat_asset', LedgerType.soul),
     _config('cat_other_expense', LedgerType.survival),
-    _config('cat_uncategorized', LedgerType.survival),
   ];
 
   // ─── Factory helpers ───
