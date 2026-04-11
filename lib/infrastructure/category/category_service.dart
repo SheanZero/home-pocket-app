@@ -46,7 +46,6 @@ abstract final class CategoryService {
     'category_social': '交際費',
     'category_health': '健康・医療',
     'category_education': '教育・教養',
-    'category_cash_card': '現金・カード',
     'category_utilities': '水道・光熱費',
     'category_communication': '通信費',
     'category_housing': '住宅',
@@ -56,7 +55,6 @@ abstract final class CategoryService {
     'category_special': '特別な支出',
     'category_asset': '資産形成',
     'category_other_expense': 'その他',
-    'category_uncategorized': '未分類',
 
     // L1 Income
     'category_salary': '給料',
@@ -65,25 +63,18 @@ abstract final class CategoryService {
     'category_other_income': 'その他収入',
 
     // L2 Food (§10.16)
-    'category_food_general': '食費',
     'category_food_groceries': '食料品',
     'category_food_dining_out': '外食',
-    'category_food_breakfast': '朝ご飯',
-    'category_food_lunch': '昼ご飯',
-    'category_food_dinner': '夜ご飯',
     'category_food_cafe': 'カフェ',
     'category_food_other': 'その他食費',
 
     // L2 Daily Necessities (§10.15)
-    'category_daily_general': '日用品',
     'category_daily_household': '生活雑貨',
     'category_daily_children': '子ども関連',
-    'category_daily_pets': 'ペット関連',
     'category_daily_tobacco': 'タバコ',
     'category_daily_other': 'その他日用品',
 
     // L2 Transport (§10.1)
-    'category_transport_general': '交通費',
     'category_transport_train': '電車',
     'category_transport_bus': 'バス',
     'category_transport_taxi': 'タクシー',
@@ -110,7 +101,6 @@ abstract final class CategoryService {
     'category_clothing_other': 'その他衣服・美容',
 
     // L2 Socializing (§10.7)
-    'category_social_general': '交際費',
     'category_social_drinks': '飲み会',
     'category_social_gifts': 'プレゼント',
     'category_social_ceremonial': '冠婚葬祭・ご祝儀・香典',
@@ -133,7 +123,6 @@ abstract final class CategoryService {
     'category_education_other': 'その他教育・教養',
 
     // L2 Utilities (§10.4)
-    'category_utilities_general': '光熱費',
     'category_utilities_electricity': '電気代',
     'category_utilities_water': '水道代',
     'category_utilities_gas': 'ガス・灯油代',
@@ -144,7 +133,6 @@ abstract final class CategoryService {
     'category_communication_landline': '固定電話',
     'category_communication_internet': 'インターネット',
     'category_communication_broadcast': '放送視聴料',
-    'category_communication_info': '情報サービス',
     'category_communication_delivery': '宅配便・運送',
     'category_communication_other': 'その他通信費',
 
@@ -175,26 +163,18 @@ abstract final class CategoryService {
     'category_tax_other': 'その他税・社会保障',
 
     // L2 Insurance (§10.2)
-    'category_insurance_general': '保険',
     'category_insurance_life': '生命保険',
     'category_insurance_medical': '医療保険',
     'category_insurance_other': 'その他保険',
 
     // L2 Special Expenses (§10.8)
-    'category_special_general': '特別な支出',
-    'category_special_furniture': '家具・家電',
-    'category_special_housing': '住宅・リフォーム',
     'category_special_wedding': '結婚',
     'category_special_fertility': '妊活・出産',
     'category_special_nursing': '介護',
     'category_special_other': 'その他特別な出費',
 
     // L2 Other (§10.11)
-    'category_other_advances': '立替金',
     'category_other_remittance': '仕送り',
-    'category_other_allowance': 'おこづかい',
-    'category_other_business': '事業費',
-    'category_other_debt': '返済',
     'category_other_misc': '雑費',
     'category_other_unclassified': '使途不明金',
     'category_other_other': 'その他',
@@ -305,7 +285,6 @@ abstract final class CategoryService {
     'category_social': '交际费',
     'category_health': '健康医疗',
     'category_education': '教育进修',
-    'category_cash_card': '现金与刷卡',
     'category_utilities': '水电燃气',
     'category_communication': '通讯费',
     'category_housing': '住宅',
@@ -315,7 +294,6 @@ abstract final class CategoryService {
     'category_special': '特别支出',
     'category_asset': '资产配置',
     'category_other_expense': '其他',
-    'category_uncategorized': '未分类',
 
     // L1 Income
     'category_salary': '工资',
@@ -324,25 +302,18 @@ abstract final class CategoryService {
     'category_other_income': '其他收入',
 
     // L2 Food (§10.16)
-    'category_food_general': '食费',
     'category_food_groceries': '食材杂货',
     'category_food_dining_out': '外出就餐',
-    'category_food_breakfast': '早餐',
-    'category_food_lunch': '午餐',
-    'category_food_dinner': '晚餐',
     'category_food_cafe': '咖啡馆',
     'category_food_other': '其他食费',
 
     // L2 Daily Necessities (§10.15)
-    'category_daily_general': '日用品',
     'category_daily_household': '生活杂货',
     'category_daily_children': '儿童相关',
-    'category_daily_pets': '宠物相关',
     'category_daily_tobacco': '烟草',
     'category_daily_other': '其他日用品',
 
     // L2 Transport (§10.1)
-    'category_transport_general': '交通费',
     'category_transport_train': '电车',
     'category_transport_bus': '公交',
     'category_transport_taxi': '出租车',
@@ -369,7 +340,6 @@ abstract final class CategoryService {
     'category_clothing_other': '其他衣服美容',
 
     // L2 Socializing (§10.7)
-    'category_social_general': '交际费',
     'category_social_drinks': '聚会饮酒',
     'category_social_gifts': '礼物',
     'category_social_ceremonial': '红白喜丧/礼金',
@@ -392,7 +362,6 @@ abstract final class CategoryService {
     'category_education_other': '其他教育进修',
 
     // L2 Utilities (§10.4)
-    'category_utilities_general': '水电燃气费',
     'category_utilities_electricity': '电费',
     'category_utilities_water': '水费',
     'category_utilities_gas': '燃气/煤油费',
@@ -403,7 +372,6 @@ abstract final class CategoryService {
     'category_communication_landline': '固话',
     'category_communication_internet': '网络',
     'category_communication_broadcast': '视听费',
-    'category_communication_info': '信息服务',
     'category_communication_delivery': '快递/运输',
     'category_communication_other': '其他通讯费',
 
@@ -434,26 +402,18 @@ abstract final class CategoryService {
     'category_tax_other': '其他税费与社会保障',
 
     // L2 Insurance (§10.2)
-    'category_insurance_general': '保险',
     'category_insurance_life': '人寿保险',
     'category_insurance_medical': '医疗保险',
     'category_insurance_other': '其他保险',
 
     // L2 Special Expenses (§10.8)
-    'category_special_general': '特别支出',
-    'category_special_furniture': '家具家电',
-    'category_special_housing': '住宅/装修',
     'category_special_wedding': '结婚',
     'category_special_fertility': '备孕与生产',
     'category_special_nursing': '护理',
     'category_special_other': '其他特别支出',
 
     // L2 Other (§10.11)
-    'category_other_advances': '垫付款',
     'category_other_remittance': '汇款/赡养',
-    'category_other_allowance': '零花钱',
-    'category_other_business': '经营费用',
-    'category_other_debt': '还款',
     'category_other_misc': '杂费',
     'category_other_unclassified': '去向不明款',
     'category_other_other': '其他',
@@ -564,7 +524,6 @@ abstract final class CategoryService {
     'category_social': 'Socializing',
     'category_health': 'Health & Medical',
     'category_education': 'Education',
-    'category_cash_card': 'Cash & Card',
     'category_utilities': 'Utilities',
     'category_communication': 'Communication',
     'category_housing': 'Housing',
@@ -574,7 +533,6 @@ abstract final class CategoryService {
     'category_special': 'Special Expenses',
     'category_asset': 'Asset Building',
     'category_other_expense': 'Other',
-    'category_uncategorized': 'Uncategorized',
 
     // L1 Income
     'category_salary': 'Salary',
@@ -583,25 +541,18 @@ abstract final class CategoryService {
     'category_other_income': 'Other Income',
 
     // L2 Food (§10.16)
-    'category_food_general': 'Food',
     'category_food_groceries': 'Groceries',
     'category_food_dining_out': 'Dining Out',
-    'category_food_breakfast': 'Breakfast',
-    'category_food_lunch': 'Lunch',
-    'category_food_dinner': 'Dinner',
     'category_food_cafe': 'Cafe',
     'category_food_other': 'Other Food',
 
     // L2 Daily Necessities (§10.15)
-    'category_daily_general': 'Daily Necessities',
     'category_daily_household': 'Household Goods',
     'category_daily_children': 'Child-related',
-    'category_daily_pets': 'Pet-related',
     'category_daily_tobacco': 'Tobacco',
     'category_daily_other': 'Other Daily Necessities',
 
     // L2 Transport (§10.1)
-    'category_transport_general': 'Transport',
     'category_transport_train': 'Train',
     'category_transport_bus': 'Bus',
     'category_transport_taxi': 'Taxi',
@@ -628,7 +579,6 @@ abstract final class CategoryService {
     'category_clothing_other': 'Other Clothing & Beauty',
 
     // L2 Socializing (§10.7)
-    'category_social_general': 'Socializing',
     'category_social_drinks': 'Drinks & Gatherings',
     'category_social_gifts': 'Gifts',
     'category_social_ceremonial': 'Ceremonial Occasions',
@@ -651,7 +601,6 @@ abstract final class CategoryService {
     'category_education_other': 'Other Education',
 
     // L2 Utilities (§10.4)
-    'category_utilities_general': 'Utilities',
     'category_utilities_electricity': 'Electricity',
     'category_utilities_water': 'Water',
     'category_utilities_gas': 'Gas & Kerosene',
@@ -662,7 +611,6 @@ abstract final class CategoryService {
     'category_communication_landline': 'Landline',
     'category_communication_internet': 'Internet',
     'category_communication_broadcast': 'Broadcasting Subscription',
-    'category_communication_info': 'Information Services',
     'category_communication_delivery': 'Delivery & Shipping',
     'category_communication_other': 'Other Communication',
 
@@ -693,26 +641,18 @@ abstract final class CategoryService {
     'category_tax_other': 'Other Taxes & Social Security',
 
     // L2 Insurance (§10.2)
-    'category_insurance_general': 'Insurance',
     'category_insurance_life': 'Life Insurance',
     'category_insurance_medical': 'Medical Insurance',
     'category_insurance_other': 'Other Insurance',
 
     // L2 Special Expenses (§10.8)
-    'category_special_general': 'Special Expenses',
-    'category_special_furniture': 'Furniture & Appliances',
-    'category_special_housing': 'Housing & Renovation',
     'category_special_wedding': 'Wedding',
     'category_special_fertility': 'Fertility & Childbirth',
     'category_special_nursing': 'Nursing Care',
     'category_special_other': 'Other Special Expenses',
 
     // L2 Other (§10.11)
-    'category_other_advances': 'Advances',
     'category_other_remittance': 'Remittance',
-    'category_other_allowance': 'Allowance',
-    'category_other_business': 'Business Expenses',
-    'category_other_debt': 'Debt Repayment',
     'category_other_misc': 'Miscellaneous',
     'category_other_unclassified': 'Unclassified Spending',
     'category_other_other': 'Other',
