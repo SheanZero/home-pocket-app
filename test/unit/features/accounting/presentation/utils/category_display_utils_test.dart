@@ -15,8 +15,8 @@ void main() {
       createdAt: DateTime(2026, 1, 1),
     );
     final l2Category = Category(
-      id: 'cat_food_general',
-      name: 'category_food_general',
+      id: 'cat_food_other',
+      name: 'category_food_other',
       icon: 'restaurant',
       color: '#FF5722',
       parentId: 'cat_food',
@@ -32,7 +32,7 @@ void main() {
         locale: const Locale('zh'),
       );
 
-      expect(label, '食费 > 食费');
+      expect(label, '食费 > 其他食费');
     });
 
     test('resolveParentCategory resolves parent from map', () {

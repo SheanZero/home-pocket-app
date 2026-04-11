@@ -40,9 +40,7 @@ void main() {
     test('classifies all default expense categories without error', () async {
       final expenseCategoryIds = [
         'cat_food',
-        'cat_food_breakfast',
-        'cat_food_lunch',
-        'cat_food_dinner',
+        'cat_food_dining_out',
         'cat_food_snack',
         'cat_transport',
         'cat_transport_public',

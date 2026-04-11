@@ -78,9 +78,9 @@ class DemoDataService {
     // Expense categories with weights (higher = more transactions)
     final expensePatterns = [
       _ExpensePattern('cat_food', 8, 500, 3000),
-      _ExpensePattern('cat_food_breakfast', 5, 300, 800),
-      _ExpensePattern('cat_food_lunch', 6, 600, 1500),
-      _ExpensePattern('cat_food_dinner', 5, 800, 2500),
+      _ExpensePattern('cat_food_dining_out', 5, 300, 800),
+      _ExpensePattern('cat_food_dining_out', 6, 600, 1500),
+      _ExpensePattern('cat_food_dining_out', 5, 800, 2500),
       _ExpensePattern('cat_transport', 4, 200, 1000),
       _ExpensePattern('cat_transport_public', 5, 150, 500),
       _ExpensePattern('cat_entertainment', 2, 1000, 5000),

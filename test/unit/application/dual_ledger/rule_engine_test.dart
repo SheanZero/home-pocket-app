@@ -13,9 +13,7 @@ void main() {
     group('default survival rules', () {
       test('classifies food categories as survival', () {
         expect(engine.classify('cat_food'), LedgerType.survival);
-        expect(engine.classify('cat_food_breakfast'), LedgerType.survival);
-        expect(engine.classify('cat_food_lunch'), LedgerType.survival);
-        expect(engine.classify('cat_food_dinner'), LedgerType.survival);
+        expect(engine.classify('cat_food_dining_out'), LedgerType.survival);
         expect(engine.classify('cat_food_snack'), LedgerType.survival);
       });
 

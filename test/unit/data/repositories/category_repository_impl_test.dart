@@ -55,7 +55,7 @@ void main() {
 
       await repo.insert(
         Category(
-          id: 'cat_food_breakfast',
+          id: 'cat_food_dining_out',
           name: 'Breakfast',
           icon: 'free_breakfast',
           color: '#FF5722',
@@ -84,7 +84,7 @@ void main() {
 
       await repo.insert(
         Category(
-          id: 'cat_food_breakfast',
+          id: 'cat_food_dining_out',
           name: 'Breakfast',
           icon: 'free_breakfast',
           color: '#FF5722',

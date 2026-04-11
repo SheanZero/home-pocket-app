@@ -42,9 +42,9 @@ void main() {
     test('supports parent-child hierarchy via parentId', () {
       final now = DateTime(2026, 2, 6);
       final child = Category(
-        id: 'cat_food_breakfast',
-        name: 'category_food_breakfast',
-        icon: 'free_breakfast',
+        id: 'cat_food_dining_out',
+        name: 'category_food_dining_out',
+        icon: 'restaurant_menu',
         color: '#FF5722',
         parentId: 'cat_food',
         level: 2,

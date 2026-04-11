@@ -109,9 +109,9 @@ void main() {
       );
 
       await dao.insertCategory(
-        id: 'cat_food_breakfast',
-        name: 'Breakfast',
-        icon: 'free_breakfast',
+        id: 'cat_food_dining_out',
+        name: 'Dining Out',
+        icon: 'restaurant_menu',
         color: '#FF5722',
         parentId: 'cat_food',
         level: 2,
@@ -124,7 +124,7 @@ void main() {
 
       final level2 = await dao.findByLevel(2);
       expect(level2.length, 1);
-      expect(level2.first.name, 'Breakfast');
+      expect(level2.first.name, 'Dining Out');
     });
 
     test('findByParent returns child categories', () async {
@@ -140,9 +140,9 @@ void main() {
       );
 
       await dao.insertCategory(
-        id: 'cat_food_breakfast',
-        name: 'Breakfast',
-        icon: 'free_breakfast',
+        id: 'cat_food_dining_out',
+        name: 'Dining Out',
+        icon: 'restaurant_menu',
         color: '#FF5722',
         parentId: 'cat_food',
         level: 2,
@@ -151,8 +151,8 @@ void main() {
       );
 
       await dao.insertCategory(
-        id: 'cat_food_lunch',
-        name: 'Lunch',
+        id: 'cat_food_snack',
+        name: 'Snack',
         icon: 'lunch_dining',
         color: '#FF5722',
         parentId: 'cat_food',
@@ -163,7 +163,7 @@ void main() {
 
       final children = await dao.findByParent('cat_food');
       expect(children.length, 2);
-      expect(children.first.name, 'Breakfast');
+      expect(children.first.name, 'Dining Out');
     });
 
     test('findAll returns all categories ordered by sortOrder', () async {
@@ -386,9 +386,9 @@ void main() {
             createdAt: now,
           ),
           CategoryInsertData(
-            id: 'cat_food_breakfast',
-            name: 'Breakfast',
-            icon: 'free_breakfast',
+            id: 'cat_food_dining_out',
+            name: 'Dining Out',
+            icon: 'restaurant_menu',
             color: '#FF5722',
             parentId: 'cat_food',
             level: 2,
@@ -399,7 +399,7 @@ void main() {
 
         final children = await dao.findByParent('cat_food');
         expect(children.length, 1);
-        expect(children.first.name, 'Breakfast');
+        expect(children.first.name, 'Dining Out');
       });
 
       test('L1 with parentId throws assertion error', () async {

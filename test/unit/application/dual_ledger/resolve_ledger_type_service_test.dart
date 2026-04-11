@@ -52,9 +52,9 @@ void main() {
     });
 
     test('L2 with override returns L2 config', () async {
-      when(mockCategoryRepo.findById('cat_food_lunch')).thenAnswer(
+      when(mockCategoryRepo.findById('cat_food_dining_out')).thenAnswer(
         (_) async => Category(
-          id: 'cat_food_lunch',
+          id: 'cat_food_dining_out',
           name: 'Lunch',
           icon: 'lunch',
           color: '#FF5722',
@@ -63,22 +63,22 @@ void main() {
           createdAt: epoch,
         ),
       );
-      when(mockConfigRepo.findById('cat_food_lunch')).thenAnswer(
+      when(mockConfigRepo.findById('cat_food_dining_out')).thenAnswer(
         (_) async => CategoryLedgerConfig(
-          categoryId: 'cat_food_lunch',
+          categoryId: 'cat_food_dining_out',
           ledgerType: LedgerType.soul,
           updatedAt: epoch,
         ),
       );
 
-      final result = await service.resolve('cat_food_lunch');
+      final result = await service.resolve('cat_food_dining_out');
       expect(result, LedgerType.soul);
     });
 
     test('L2 without override inherits from parent L1', () async {
-      when(mockCategoryRepo.findById('cat_food_lunch')).thenAnswer(
+      when(mockCategoryRepo.findById('cat_food_dining_out')).thenAnswer(
         (_) async => Category(
-          id: 'cat_food_lunch',
+          id: 'cat_food_dining_out',
           name: 'Lunch',
           icon: 'lunch',
           color: '#FF5722',
@@ -88,7 +88,7 @@ void main() {
         ),
       );
       when(
-        mockConfigRepo.findById('cat_food_lunch'),
+        mockConfigRepo.findById('cat_food_dining_out'),
       ).thenAnswer((_) async => null);
       when(mockConfigRepo.findById('cat_food')).thenAnswer(
         (_) async => CategoryLedgerConfig(
@@ -98,7 +98,7 @@ void main() {
         ),
       );
 
-      final result = await service.resolve('cat_food_lunch');
+      final result = await service.resolve('cat_food_dining_out');
       expect(result, LedgerType.survival);
     });
 
@@ -112,9 +112,9 @@ void main() {
     });
 
     test('resolveL1 returns parent L1 for L2 category', () async {
-      when(mockCategoryRepo.findById('cat_food_lunch')).thenAnswer(
+      when(mockCategoryRepo.findById('cat_food_dining_out')).thenAnswer(
         (_) async => Category(
-          id: 'cat_food_lunch',
+          id: 'cat_food_dining_out',
           name: 'Lunch',
           icon: 'lunch',
           color: '#FF5722',
@@ -124,7 +124,7 @@ void main() {
         ),
       );
 
-      final result = await service.resolveL1('cat_food_lunch');
+      final result = await service.resolveL1('cat_food_dining_out');
       expect(result, 'cat_food');
     });
 

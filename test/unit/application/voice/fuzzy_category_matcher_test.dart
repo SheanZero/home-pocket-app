@@ -53,15 +53,15 @@ void main() {
   group('Signal 1: Seed keyword match', () {
     test('exact keyword match returns category with high confidence', () async {
       when(
-        mockCategoryRepo.findById('cat_food_breakfast'),
-      ).thenAnswer((_) async => _makeCategory('cat_food_breakfast', '朝食'));
+        mockCategoryRepo.findById('cat_food_dining_out'),
+      ).thenAnswer((_) async => _makeCategory('cat_food_dining_out', '朝食'));
       when(mockCategoryRepo.findAll()).thenAnswer((_) async => []);
       when(mockPrefRepo.findByKeyword(any)).thenAnswer((_) async => []);
       when(mockPrefRepo.suggestForKeyword(any)).thenAnswer((_) async => null);
 
       final result = await matcher.match('朝ごはん500円', '朝ごはん');
       expect(result, isNotNull);
-      expect(result!.categoryId, 'cat_food_breakfast');
+      expect(result!.categoryId, 'cat_food_dining_out');
       expect(result.source, MatchSource.keyword);
     });
   });

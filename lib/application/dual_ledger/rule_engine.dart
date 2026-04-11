@@ -14,9 +14,7 @@ class RuleEngine {
   void _initializeDefaultRules() {
     // Survival (必要支出)
     _categoryRules['cat_food'] = LedgerType.survival;
-    _categoryRules['cat_food_breakfast'] = LedgerType.survival;
-    _categoryRules['cat_food_lunch'] = LedgerType.survival;
-    _categoryRules['cat_food_dinner'] = LedgerType.survival;
+    _categoryRules['cat_food_dining_out'] = LedgerType.survival;
     _categoryRules['cat_food_snack'] = LedgerType.survival;
     _categoryRules['cat_transport'] = LedgerType.survival;
     _categoryRules['cat_transport_public'] = LedgerType.survival;
