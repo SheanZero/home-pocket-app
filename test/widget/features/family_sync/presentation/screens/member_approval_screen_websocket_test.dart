@@ -75,40 +75,53 @@ void main() {
         createdAt: DateTime(2026, 3, 1),
       ),
     );
-    when(() => groupRepository.getGroupById(any()))
-        .thenAnswer((_) async => null);
+    when(
+      () => groupRepository.getGroupById(any()),
+    ).thenAnswer((_) async => null);
 
-    when(() => confirmMemberUseCase.execute(
-          groupId: any(named: 'groupId'),
-          deviceId: any(named: 'deviceId'),
-        )).thenAnswer((_) async => const ConfirmMemberSuccess());
+    when(
+      () => confirmMemberUseCase.execute(
+        groupId: any(named: 'groupId'),
+        deviceId: any(named: 'deviceId'),
+      ),
+    ).thenAnswer((_) async => const ConfirmMemberSuccess());
 
-    when(() => removeMemberUseCase.execute(
-          groupId: any(named: 'groupId'),
-          deviceId: any(named: 'deviceId'),
-        )).thenAnswer((_) async => const RemoveMemberResult.success());
+    when(
+      () => removeMemberUseCase.execute(
+        groupId: any(named: 'groupId'),
+        deviceId: any(named: 'deviceId'),
+      ),
+    ).thenAnswer((_) async => const RemoveMemberResult.success());
 
     // WebSocket mocks
-    when(() => webSocketService.connectionStateStream)
-        .thenAnswer((_) => const Stream.empty());
-    when(() => webSocketService.connectionState)
-        .thenReturn(WebSocketConnectionState.disconnected);
-    when(() => webSocketService.eventStream)
-        .thenAnswer((_) => wsEventController.stream);
-    when(() => webSocketService.connect(
-          groupId: any(named: 'groupId'),
-          deviceId: any(named: 'deviceId'),
-          signMessage: any(named: 'signMessage'),
-        )).thenReturn(null);
+    when(
+      () => webSocketService.connectionStateStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => webSocketService.connectionState,
+    ).thenReturn(WebSocketConnectionState.disconnected);
+    when(
+      () => webSocketService.eventStream,
+    ).thenAnswer((_) => wsEventController.stream);
+    when(
+      () => webSocketService.connect(
+        groupId: any(named: 'groupId'),
+        deviceId: any(named: 'deviceId'),
+        signMessage: any(named: 'signMessage'),
+      ),
+    ).thenReturn(null);
     when(() => webSocketService.disconnect()).thenReturn(null);
     when(() => webSocketService.startLifecycleObservation()).thenReturn(null);
     when(() => webSocketService.stopLifecycleObservation()).thenReturn(null);
 
     // KeyManager mock
-    when(() => keyManager.getDeviceId())
-        .thenAnswer((_) async => 'test-device');
+    when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'test-device');
     when(() => keyManager.signData(any())).thenAnswer(
-        (_) async => Signature([], publicKey: SimplePublicKey([], type: KeyPairType.ed25519)));
+      (_) async => Signature(
+        [],
+        publicKey: SimplePublicKey([], type: KeyPairType.ed25519),
+      ),
+    );
   });
 
   tearDown(() async {
@@ -116,12 +129,12 @@ void main() {
   });
 
   List<Override> buildOverrides() => [
-        groupRepositoryProvider.overrideWithValue(groupRepository),
-        confirmMemberUseCaseProvider.overrideWithValue(confirmMemberUseCase),
-        removeMemberUseCaseProvider.overrideWithValue(removeMemberUseCase),
-        webSocketServiceProvider.overrideWithValue(webSocketService),
-        keyManagerProvider.overrideWithValue(keyManager),
-      ];
+    groupRepositoryProvider.overrideWithValue(groupRepository),
+    confirmMemberUseCaseProvider.overrideWithValue(confirmMemberUseCase),
+    removeMemberUseCaseProvider.overrideWithValue(removeMemberUseCase),
+    webSocketServiceProvider.overrideWithValue(webSocketService),
+    keyManagerProvider.overrideWithValue(keyManager),
+  ];
 
   testWidgets('connects WebSocket on init', (tester) async {
     await tester.pumpWidget(

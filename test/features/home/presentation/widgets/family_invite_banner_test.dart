@@ -11,13 +11,18 @@ void main() {
 
   testWidgets('shows CTA button text', (tester) async {
     await tester.pumpWidget(buildSubject());
-    expect(find.text('\u5BB6\u65CF\u3092\u62DB\u5F85\u3059\u308B'), findsOneWidget);
+    expect(
+      find.text('\u5BB6\u65CF\u3092\u62DB\u5F85\u3059\u308B'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('shows title', (tester) async {
     await tester.pumpWidget(buildSubject());
     expect(
-      find.text('\u5BB6\u65CF\u3068\u4E00\u7DD2\u306B\u7BA1\u7406\u3057\u3088\u3046'),
+      find.text(
+        '\u5BB6\u65CF\u3068\u4E00\u7DD2\u306B\u7BA1\u7406\u3057\u3088\u3046',
+      ),
       findsOneWidget,
     );
   });
@@ -25,7 +30,9 @@ void main() {
   testWidgets('shows subtitle', (tester) async {
     await tester.pumpWidget(buildSubject());
     expect(
-      find.text('\u30D1\u30FC\u30C8\u30CA\u30FC\u3092\u62DB\u5F85\u3057\u3066\n\u5BB6\u8A08\u7C3F\u3092\u30EA\u30A2\u30EB\u30BF\u30A4\u30E0\u3067\u5171\u6709'),
+      find.text(
+        '\u30D1\u30FC\u30C8\u30CA\u30FC\u3092\u62DB\u5F85\u3057\u3066\n\u5BB6\u8A08\u7C3F\u3092\u30EA\u30A2\u30EB\u30BF\u30A4\u30E0\u3067\u5171\u6709',
+      ),
       findsOneWidget,
     );
   });
@@ -38,7 +45,9 @@ void main() {
     expect(tapped, isTrue);
   });
 
-  testWidgets('displays two avatar circles with material icons', (tester) async {
+  testWidgets('displays two avatar circles with material icons', (
+    tester,
+  ) async {
     await tester.pumpWidget(buildSubject());
     expect(find.byIcon(Icons.face), findsOneWidget);
     expect(find.byIcon(Icons.face_2), findsOneWidget);

@@ -74,9 +74,11 @@ void main() {
     });
 
     testWidgets('renders correctly with a single member', (tester) async {
-      await tester.pumpWidget(buildSubject(
-        memberList: const [(initial: 'A', color: Color(0xFF5A9CC8))],
-      ));
+      await tester.pumpWidget(
+        buildSubject(
+          memberList: const [(initial: 'A', color: Color(0xFF5A9CC8))],
+        ),
+      );
 
       expect(find.text('A'), findsOneWidget);
     });

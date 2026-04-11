@@ -58,10 +58,9 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
     final newName = await GroupRenameDialog.show(context, group.groupName);
     if (newName == null || !mounted) return;
 
-    final result = await ref.read(renameGroupUseCaseProvider).execute(
-      groupId: group.groupId,
-      groupName: newName,
-    );
+    final result = await ref
+        .read(renameGroupUseCaseProvider)
+        .execute(groupId: group.groupId, groupName: newName);
 
     if (!mounted) return;
 
@@ -71,9 +70,9 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
           _activeGroup = group.copyWith(groupName: groupName);
         });
       case RenameGroupError():
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.groupRenameFailed)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.groupRenameFailed)));
     }
   }
 
@@ -129,13 +128,14 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
     final message = switch (result) {
       DeactivateGroupError(:final message) =>
         l10n.familySyncDeactivateGroupFailed(message),
-      LeaveGroupError(:final message) =>
-        l10n.familySyncLeaveGroupFailed(message),
+      LeaveGroupError(:final message) => l10n.familySyncLeaveGroupFailed(
+        message,
+      ),
       _ => l10n.familySyncStatusError,
     };
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _handleRemoveMember(GroupMember member) async {
@@ -189,8 +189,7 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
   @override
   Widget build(BuildContext context) {
     final syncStatusAsync = ref.watch(syncStatusStreamProvider);
-    final syncState =
-        syncStatusAsync.valueOrNull?.state ?? SyncState.noGroup;
+    final syncState = syncStatusAsync.valueOrNull?.state ?? SyncState.noGroup;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -198,8 +197,8 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _activeGroup != null
-                ? _buildGroupContent(syncState)
-                : _buildEmptyState(),
+            ? _buildGroupContent(syncState)
+            : _buildEmptyState(),
       ),
     );
   }
@@ -207,10 +206,12 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
   Widget _buildGroupContent(SyncState syncState) {
     final group = _activeGroup!;
     final isOwner = group.role == 'owner';
-    final hasPendingMembers =
-        group.members.any((member) => member.status == 'pending');
-    final activeMembers =
-        group.members.where((m) => m.status != 'pending').toList();
+    final hasPendingMembers = group.members.any(
+      (member) => member.status == 'pending',
+    );
+    final activeMembers = group.members
+        .where((m) => m.status != 'pending')
+        .toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 42),
@@ -257,10 +258,7 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  '\u{1F3E0}',
-                  style: TextStyle(fontSize: 22),
-                ),
+                const Text('\u{1F3E0}', style: TextStyle(fontSize: 22)),
                 const SizedBox(width: 8),
                 Text(
                   group.groupName,
@@ -454,8 +452,8 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
   }
 
   Widget _buildSyncStatusRow(SyncState syncState) {
-    final isBusy = syncState == SyncState.syncing ||
-        syncState == SyncState.initialSyncing;
+    final isBusy =
+        syncState == SyncState.syncing || syncState == SyncState.initialSyncing;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -480,11 +478,7 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            LucideIcons.users,
-            size: 64,
-            color: AppColors.textTertiary,
-          ),
+          Icon(LucideIcons.users, size: 64, color: AppColors.textTertiary),
           const SizedBox(height: 16),
           Text(
             l10n.familySyncNoDevicePaired,

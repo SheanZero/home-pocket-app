@@ -65,10 +65,8 @@ class AvatarDisplay extends StatelessWidget {
               ? Image.file(
                   File(imagePath!),
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => _EmojiContent(
-                    emoji: emoji,
-                    size: size,
-                  ),
+                  errorBuilder: (context, error, stackTrace) =>
+                      _EmojiContent(emoji: emoji, size: size),
                 )
               : _EmojiContent(emoji: emoji, size: size),
         ),
@@ -86,13 +84,7 @@ class _EmojiContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(
-        emoji,
-        style: TextStyle(
-          fontSize: size * 0.47,
-          height: 1,
-        ),
-      ),
+      child: Text(emoji, style: TextStyle(fontSize: size * 0.47, height: 1)),
     );
   }
 }

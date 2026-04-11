@@ -40,11 +40,7 @@ class GroupBar extends StatelessWidget {
           children: [
             _buildLeft(context),
             _buildAvatarStack(),
-            Icon(
-              Icons.chevron_right,
-              size: 16,
-              color: context.wmTextTertiary,
-            ),
+            Icon(Icons.chevron_right, size: 16, color: context.wmTextTertiary),
           ],
         ),
       ),
@@ -55,11 +51,7 @@ class GroupBar extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(
-          Icons.people,
-          size: 18,
-          color: AppColors.accentPrimary,
-        ),
+        const Icon(Icons.people, size: 18, color: AppColors.accentPrimary),
         const SizedBox(width: 10),
         Text(
           familyName,

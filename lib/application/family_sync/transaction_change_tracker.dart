@@ -21,10 +21,7 @@ class TransactionChangeTracker {
   }
 
   /// Record a delete operation for sync.
-  void trackDelete({
-    required String transactionId,
-    required String bookId,
-  }) {
+  void trackDelete({required String transactionId, required String bookId}) {
     _pendingOps.add({
       'op': 'delete',
       'entityType': 'bill',

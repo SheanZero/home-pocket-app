@@ -25,19 +25,14 @@ class LocaleNotifier extends _$LocaleNotifier {
       return LocaleSettings.fromSystem(systemLocale);
     }
 
-    return LocaleSettings(
-      locale: Locale(language),
-      isSystemDefault: false,
-    );
+    return LocaleSettings(locale: Locale(language), isSystemDefault: false);
   }
 
   /// Set the locale explicitly (not system default). Persists the choice.
   Future<void> setLocale(Locale locale) async {
     final repo = ref.read(settingsRepositoryProvider);
     await repo.setLanguage(locale.languageCode);
-    state = AsyncData(
-      LocaleSettings(locale: locale, isSystemDefault: false),
-    );
+    state = AsyncData(LocaleSettings(locale: locale, isSystemDefault: false));
   }
 
   /// Use the system locale. Persists 'system' as the language value.

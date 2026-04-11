@@ -12,7 +12,6 @@ void main() {
         expect(l1s.every((c) => c.level == 1), isTrue);
         expect(l1s.every((c) => c.parentId == null), isTrue);
       });
-
     });
 
     // ─── L1 presence & absence ───
@@ -32,10 +31,22 @@ void main() {
       test('retains all 17 preserved baseline L1s', () {
         final ids = DefaultCategories.expenseL1.map((c) => c.id).toSet();
         const kept = {
-          'cat_food', 'cat_daily', 'cat_transport', 'cat_hobbies',
-          'cat_clothing', 'cat_social', 'cat_health', 'cat_education',
-          'cat_utilities', 'cat_communication', 'cat_housing', 'cat_car',
-          'cat_tax', 'cat_insurance', 'cat_special', 'cat_asset',
+          'cat_food',
+          'cat_daily',
+          'cat_transport',
+          'cat_hobbies',
+          'cat_clothing',
+          'cat_social',
+          'cat_health',
+          'cat_education',
+          'cat_utilities',
+          'cat_communication',
+          'cat_housing',
+          'cat_car',
+          'cat_tax',
+          'cat_insurance',
+          'cat_special',
+          'cat_asset',
           'cat_other_expense',
         };
         for (final id in kept) {
@@ -90,7 +101,11 @@ void main() {
         final orphans = DefaultCategories.all
             .where((c) => c.level == 2 && !l1Ids.contains(c.parentId))
             .toList();
-        expect(orphans, isEmpty, reason: 'Found L2 categories with orphaned parentId');
+        expect(
+          orphans,
+          isEmpty,
+          reason: 'Found L2 categories with orphaned parentId',
+        );
       });
 
       test('no duplicate IDs across L1+L2', () {
@@ -99,10 +114,7 @@ void main() {
       });
 
       test('all system categories have isSystem=true', () {
-        expect(
-          DefaultCategories.all.every((c) => c.isSystem),
-          isTrue,
-        );
+        expect(DefaultCategories.all.every((c) => c.isSystem), isTrue);
       });
     });
 
@@ -113,8 +125,11 @@ void main() {
             .map((c) => c.categoryId)
             .toSet();
         for (final l1 in DefaultCategories.expenseL1) {
-          expect(configuredIds, contains(l1.id),
-              reason: 'L1 ${l1.id} should have a ledger config');
+          expect(
+            configuredIds,
+            contains(l1.id),
+            reason: 'L1 ${l1.id} should have a ledger config',
+          );
         }
       });
 
@@ -143,8 +158,11 @@ void main() {
             (x) => x.categoryId == id,
             orElse: () => throw StateError('Missing ledger override for $id'),
           );
-          expect(c.ledgerType, LedgerType.survival,
-              reason: '$id should override to survival');
+          expect(
+            c.ledgerType,
+            LedgerType.survival,
+            reason: '$id should override to survival',
+          );
         }
       });
 

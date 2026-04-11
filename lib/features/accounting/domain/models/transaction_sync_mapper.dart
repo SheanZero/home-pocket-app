@@ -95,18 +95,13 @@ class TransactionSyncMapper {
         sourceBookName: sourceBookName,
         sourceBookType: sourceBookType,
       ),
-      'timestamp':
-          (transaction.updatedAt ?? transaction.createdAt)
-              .toUtc()
-              .toIso8601String(),
+      'timestamp': (transaction.updatedAt ?? transaction.createdAt)
+          .toUtc()
+          .toIso8601String(),
     };
   }
 
   static Map<String, dynamic> toDeleteOperation(String transactionId) {
-    return {
-      'op': 'delete',
-      'entityType': 'bill',
-      'entityId': transactionId,
-    };
+    return {'op': 'delete', 'entityType': 'bill', 'entityId': transactionId};
   }
 }

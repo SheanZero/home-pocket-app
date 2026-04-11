@@ -55,10 +55,7 @@ class RenameGroupUseCase {
     }
 
     try {
-      await _apiClient.renameGroup(
-        groupId: groupId,
-        groupName: trimmedName,
-      );
+      await _apiClient.renameGroup(groupId: groupId, groupName: trimmedName);
 
       await _groupRepository.updateGroupName(groupId, trimmedName);
 

@@ -106,14 +106,10 @@ class JoinGroupUseCase {
       );
     } on RelayApiException catch (error) {
       if (error.isNotFound) {
-        return const JoinGroupResult.error(
-          'Invite code not found or expired',
-        );
+        return const JoinGroupResult.error('Invite code not found or expired');
       }
       if (error.isConflict) {
-        return const JoinGroupResult.error(
-          'Already a member of this group',
-        );
+        return const JoinGroupResult.error('Already a member of this group');
       }
       return JoinGroupResult.error(error.message);
     } catch (error) {

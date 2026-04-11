@@ -54,15 +54,9 @@ class SoulFullnessCard extends StatelessWidget {
       children: [
         Text(
           '灵魂の充実度',
-          style: AppTextStyles.bodyLarge.copyWith(
-            color: context.wmTextPrimary,
-          ),
+          style: AppTextStyles.bodyLarge.copyWith(color: context.wmTextPrimary),
         ),
-        Icon(
-          Icons.chevron_right,
-          size: 14,
-          color: context.wmTextTertiary,
-        ),
+        Icon(Icons.chevron_right, size: 14, color: context.wmTextTertiary),
       ],
     );
   }
@@ -129,11 +123,7 @@ class SoulFullnessCard extends StatelessWidget {
         children: [
           Column(
             children: [
-              const Icon(
-                Icons.bolt,
-                size: 14,
-                color: AppColors.olive,
-              ),
+              const Icon(Icons.bolt, size: 14, color: AppColors.olive),
               const SizedBox(height: 2),
               Text(
                 '幸福ROI',
@@ -146,9 +136,7 @@ class SoulFullnessCard extends StatelessWidget {
           ),
           Text(
             '${happinessROI}x',
-            style: AppTextStyles.amountMedium.copyWith(
-              color: AppColors.olive,
-            ),
+            style: AppTextStyles.amountMedium.copyWith(color: AppColors.olive),
           ),
         ],
       ),
@@ -162,13 +150,13 @@ class SoulFullnessCard extends StatelessWidget {
       children: [
         Text(
           '最近の灵魂支出',
-          style: AppTextStyles.caption.copyWith(
-            color: context.wmTextSecondary,
-          ),
+          style: AppTextStyles.caption.copyWith(color: context.wmTextSecondary),
         ),
         Text(
-          NumberFormat.currency(symbol: '\u00a5', decimalDigits: 0)
-              .format(recentSoulAmount),
+          NumberFormat.currency(
+            symbol: '\u00a5',
+            decimalDigits: 0,
+          ).format(recentSoulAmount),
           style: AppTextStyles.headlineSmall.copyWith(
             color: AppColors.survival,
           ),

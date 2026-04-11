@@ -151,7 +151,9 @@ void main() {
       },
     );
 
-    testWidgets('uses flat layout without hero blue background', (tester) async {
+    testWidgets('uses flat layout without hero blue background', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
@@ -162,7 +164,8 @@ void main() {
         (widget) =>
             widget is Container &&
             widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).color == const Color(0xFF8AB8DA),
+            (widget.decoration as BoxDecoration).color ==
+                const Color(0xFF8AB8DA),
       );
       expect(blueContainerFinder, findsNothing);
     });

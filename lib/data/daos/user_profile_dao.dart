@@ -21,16 +21,18 @@ class UserProfileDao {
     required DateTime createdAt,
     required DateTime updatedAt,
   }) async {
-    await _db.into(_db.userProfiles).insertOnConflictUpdate(
-      UserProfilesCompanion.insert(
-        id: id,
-        displayName: displayName,
-        avatarEmoji: avatarEmoji,
-        avatarImagePath: Value(avatarImagePath),
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-      ),
-    );
+    await _db
+        .into(_db.userProfiles)
+        .insertOnConflictUpdate(
+          UserProfilesCompanion.insert(
+            id: id,
+            displayName: displayName,
+            avatarEmoji: avatarEmoji,
+            avatarImagePath: Value(avatarImagePath),
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+          ),
+        );
   }
 
   Future<void> delete(String id) async {

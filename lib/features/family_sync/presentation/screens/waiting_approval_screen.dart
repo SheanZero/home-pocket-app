@@ -129,10 +129,7 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      '\u{1F3E0}',
-                      style: TextStyle(fontSize: 18),
-                    ),
+                    const Text('\u{1F3E0}', style: TextStyle(fontSize: 18)),
                     const SizedBox(width: 8),
                     Text(
                       widget.groupName,

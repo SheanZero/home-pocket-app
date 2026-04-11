@@ -70,11 +70,13 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
       _errorMessage = null;
     });
 
-    final result = await ref.read(joinGroupUseCaseProvider).execute(
-      inviteCode: _code,
-      displayName: profile.displayName,
-      avatarEmoji: profile.avatarEmoji,
-    );
+    final result = await ref
+        .read(joinGroupUseCaseProvider)
+        .execute(
+          inviteCode: _code,
+          displayName: profile.displayName,
+          avatarEmoji: profile.avatarEmoji,
+        );
 
     if (!mounted) return;
 
@@ -163,9 +165,7 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
                           ],
-                          decoration: const InputDecoration(
-                            counterText: '',
-                          ),
+                          decoration: const InputDecoration(counterText: ''),
                         ),
                       ),
                     ),
@@ -177,7 +177,8 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
                           if (i > 0) const SizedBox(width: 8),
                           _DigitDisplay(
                             digit: i < _code.length ? _code[i] : '',
-                            isFocused: _codeFocusNode.hasFocus &&
+                            isFocused:
+                                _codeFocusNode.hasFocus &&
                                 i == _code.length.clamp(0, 5),
                           ),
                         ],
@@ -196,7 +197,8 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
                           if (i > 3) const SizedBox(width: 8),
                           _DigitDisplay(
                             digit: i < _code.length ? _code[i] : '',
-                            isFocused: _codeFocusNode.hasFocus &&
+                            isFocused:
+                                _codeFocusNode.hasFocus &&
                                 i == _code.length.clamp(0, 5),
                           ),
                         ],
@@ -301,10 +303,7 @@ class _Header extends StatelessWidget {
 }
 
 class _DigitDisplay extends StatelessWidget {
-  const _DigitDisplay({
-    required this.digit,
-    required this.isFocused,
-  });
+  const _DigitDisplay({required this.digit, required this.isFocused});
 
   final String digit;
   final bool isFocused;

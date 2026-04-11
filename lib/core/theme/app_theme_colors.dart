@@ -47,8 +47,7 @@ extension AppThemeColors on BuildContext {
   Color get wmSatisfactionBorder => _isDark
       ? AppColorsDark.soulSatisfactionBorder
       : AppColors.accentPrimaryBorder;
-  Color get wmRoiBg =>
-      _isDark ? AppColorsDark.soulRoiBg : AppColors.oliveLight;
+  Color get wmRoiBg => _isDark ? AppColorsDark.soulRoiBg : AppColors.oliveLight;
   Color get wmRoiBorder =>
       _isDark ? AppColorsDark.soulRoiBorder : AppColors.oliveBorder;
 

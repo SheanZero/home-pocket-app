@@ -22,9 +22,7 @@ class SectionDivider extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        Expanded(
-          child: Container(height: 1, color: context.wmBorderDivider),
-        ),
+        Expanded(child: Container(height: 1, color: context.wmBorderDivider)),
       ],
     );
   }

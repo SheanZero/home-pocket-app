@@ -16,8 +16,7 @@ class MockRelayApiClient extends Mock implements RelayApiClient {}
 
 class MockGroupRepository extends Mock implements GroupRepository {}
 
-class MockUserProfileRepository extends Mock
-    implements UserProfileRepository {}
+class MockUserProfileRepository extends Mock implements UserProfileRepository {}
 
 class MockE2EEService extends Mock implements E2EEService {}
 
@@ -187,8 +186,7 @@ void main() {
   group('handleAvatarSync', () {
     test('verifies SHA-256, saves file, and updates member profile', () async {
       final avatarBytes = utf8.encode('avatar-image-bytes');
-      final expectedHash =
-          hash_lib.sha256.convert(avatarBytes).toString();
+      final expectedHash = hash_lib.sha256.convert(avatarBytes).toString();
       final avatarBase64 = base64Encode(avatarBytes);
 
       when(
@@ -249,39 +247,38 @@ void main() {
       );
     });
 
-    test('updates profile without image when avatarImageBase64 is absent',
-        () async {
-      when(
-        () => groupRepository.updateMemberProfile(
-          groupId: any(named: 'groupId'),
-          deviceId: any(named: 'deviceId'),
-          displayName: any(named: 'displayName'),
-          avatarEmoji: any(named: 'avatarEmoji'),
-          avatarImagePath: any(named: 'avatarImagePath'),
-          avatarImageHash: any(named: 'avatarImageHash'),
-        ),
-      ).thenAnswer((_) async {});
+    test(
+      'updates profile without image when avatarImageBase64 is absent',
+      () async {
+        when(
+          () => groupRepository.updateMemberProfile(
+            groupId: any(named: 'groupId'),
+            deviceId: any(named: 'deviceId'),
+            displayName: any(named: 'displayName'),
+            avatarEmoji: any(named: 'avatarEmoji'),
+            avatarImagePath: any(named: 'avatarImagePath'),
+            avatarImageHash: any(named: 'avatarImageHash'),
+          ),
+        ).thenAnswer((_) async {});
 
-      await useCase.handleAvatarSync(
-        groupId: 'group-1',
-        senderDeviceId: 'sender-device',
-        payload: {
-          'displayName': 'Papa',
-          'avatarEmoji': '\u{1F468}',
-        },
-        appDirectory: tempDir.path,
-      );
-
-      verify(
-        () => groupRepository.updateMemberProfile(
+        await useCase.handleAvatarSync(
           groupId: 'group-1',
-          deviceId: 'sender-device',
-          displayName: 'Papa',
-          avatarEmoji: '\u{1F468}',
-          avatarImagePath: null,
-          avatarImageHash: null,
-        ),
-      ).called(1);
-    });
+          senderDeviceId: 'sender-device',
+          payload: {'displayName': 'Papa', 'avatarEmoji': '\u{1F468}'},
+          appDirectory: tempDir.path,
+        );
+
+        verify(
+          () => groupRepository.updateMemberProfile(
+            groupId: 'group-1',
+            deviceId: 'sender-device',
+            displayName: 'Papa',
+            avatarEmoji: '\u{1F468}',
+            avatarImagePath: null,
+            avatarImageHash: null,
+          ),
+        ).called(1);
+      },
+    );
   });
 }

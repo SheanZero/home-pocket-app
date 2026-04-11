@@ -8,9 +8,8 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'websocket_connection_state.dart';
 
 /// Factory for creating WebSocket channels (injectable for testing).
-typedef WebSocketChannelFactory = WebSocketChannel Function({
-  required String url,
-});
+typedef WebSocketChannelFactory =
+    WebSocketChannel Function({required String url});
 
 /// Signature function for Ed25519 signing.
 typedef SignMessageFn = Future<String> Function(String message);
@@ -62,8 +61,8 @@ class WebSocketService with WidgetsBindingObserver {
   WebSocketService({
     required String baseUrl,
     WebSocketChannelFactory? channelFactory,
-  })  : _baseUrl = baseUrl,
-        _channelFactory = channelFactory ?? _defaultChannelFactory;
+  }) : _baseUrl = baseUrl,
+       _channelFactory = channelFactory ?? _defaultChannelFactory;
 
   final String _baseUrl;
   final WebSocketChannelFactory _channelFactory;
@@ -254,8 +253,10 @@ class WebSocketService with WidgetsBindingObserver {
 
   void _scheduleReconnect() {
     final delay = Duration(
-      milliseconds: (1000 * (1 << _reconnectAttempts))
-          .clamp(1000, _maxReconnectDelay.inMilliseconds),
+      milliseconds: (1000 * (1 << _reconnectAttempts)).clamp(
+        1000,
+        _maxReconnectDelay.inMilliseconds,
+      ),
     );
     _reconnectAttempts++;
 

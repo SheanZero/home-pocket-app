@@ -20,8 +20,7 @@ class FamilySyncSettingsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final syncStatusAsync = ref.watch(syncStatusStreamProvider);
-    final syncState =
-        syncStatusAsync.valueOrNull?.state ?? SyncState.noGroup;
+    final syncState = syncStatusAsync.valueOrNull?.state ?? SyncState.noGroup;
     final l10n = S.of(context);
     final activeGroup = ref.watch(activeGroupProvider).valueOrNull;
     final subtitle = activeGroup != null
@@ -59,7 +58,8 @@ class FamilySyncSettingsSection extends ConsumerWidget {
             leading: const Icon(Icons.cloud_sync),
             title: Text(l10n.familySyncManualSync),
             subtitle: Text(l10n.familySyncManualSyncDesc),
-            trailing: syncState == SyncState.syncing ||
+            trailing:
+                syncState == SyncState.syncing ||
                     syncState == SyncState.initialSyncing
                 ? const SizedBox(
                     width: 20,
@@ -121,16 +121,16 @@ class FamilySyncSettingsSection extends ConsumerWidget {
           ),
         );
       case CheckGroupNotInGroup():
-        await Navigator.of(
-          context,
-        ).push(MaterialPageRoute<void>(builder: (_) => const GroupChoiceScreen()));
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const GroupChoiceScreen()),
+        );
       case CheckGroupError(:final message):
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.familySyncCheckFailed(message))),
         );
-        await Navigator.of(
-          context,
-        ).push(MaterialPageRoute<void>(builder: (_) => const GroupChoiceScreen()));
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const GroupChoiceScreen()),
+        );
     }
   }
 

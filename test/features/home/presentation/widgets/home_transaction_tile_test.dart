@@ -12,7 +12,8 @@ void main() {
               tagText: '\u592a',
               tagBgColor: Color(0xFFE8F0F8),
               tagTextColor: Color(0xFF5A9CC8),
-              merchant: '\u30b9\u30fc\u30d1\u30fc\u30de\u30fc\u30b1\u30c3\u30c8',
+              merchant:
+                  '\u30b9\u30fc\u30d1\u30fc\u30de\u30fc\u30b1\u30c3\u30c8',
               category: '\u98df\u8cbb',
               categoryColor: Color(0xFFABABAB),
               formattedAmount: '-\u00a53,480',
@@ -82,10 +83,9 @@ void main() {
 
       // Verify tag container has the correct background
       final container = tester.widget<Container>(
-        find.ancestor(
-          of: find.text('\u9b42'),
-          matching: find.byType(Container),
-        ).first,
+        find
+            .ancestor(of: find.text('\u9b42'), matching: find.byType(Container))
+            .first,
       );
       final decoration = container.decoration! as BoxDecoration;
       expect(decoration.color, bgColor);

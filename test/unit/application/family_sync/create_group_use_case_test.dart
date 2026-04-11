@@ -68,41 +68,45 @@ void main() {
     ).thenAnswer((_) async {});
   });
 
-  test('creates group with profile fields using existing device keys',
-      () async {
-    when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
-    when(() => keyManager.getPublicKey()).thenAnswer((_) async => 'public-key');
+  test(
+    'creates group with profile fields using existing device keys',
+    () async {
+      when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
+      when(
+        () => keyManager.getPublicKey(),
+      ).thenAnswer((_) async => 'public-key');
 
-    final result = await useCase.execute(
-      displayName: 'Papa',
-      avatarEmoji: '\u{1F468}',
-      groupName: 'Smith Family',
-    );
-
-    expect(result, isA<CreateGroupSuccess>());
-    final success = result as CreateGroupSuccess;
-    expect(success.groupId, 'group-1');
-    expect(success.inviteCode, 'INV123');
-    expect(success.expiresAt, 1);
-
-    verify(
-      () => apiClient.createGroup(
-        groupName: 'Smith Family',
+      final result = await useCase.execute(
         displayName: 'Papa',
         avatarEmoji: '\u{1F468}',
-        avatarImageHash: null,
-      ),
-    ).called(1);
-    verify(
-      () => groupRepository.savePendingGroup(
-        groupId: 'group-1',
         groupName: 'Smith Family',
-        inviteCode: 'INV123',
-        inviteExpiresAt: DateTime.fromMillisecondsSinceEpoch(1000),
-        groupKey: 'group-key',
-      ),
-    ).called(1);
-  });
+      );
+
+      expect(result, isA<CreateGroupSuccess>());
+      final success = result as CreateGroupSuccess;
+      expect(success.groupId, 'group-1');
+      expect(success.inviteCode, 'INV123');
+      expect(success.expiresAt, 1);
+
+      verify(
+        () => apiClient.createGroup(
+          groupName: 'Smith Family',
+          displayName: 'Papa',
+          avatarEmoji: '\u{1F468}',
+          avatarImageHash: null,
+        ),
+      ).called(1);
+      verify(
+        () => groupRepository.savePendingGroup(
+          groupId: 'group-1',
+          groupName: 'Smith Family',
+          inviteCode: 'INV123',
+          inviteExpiresAt: DateTime.fromMillisecondsSinceEpoch(1000),
+          groupKey: 'group-key',
+        ),
+      ).called(1);
+    },
+  );
 
   test('passes optional avatarImageHash to API', () async {
     when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
@@ -167,10 +171,7 @@ void main() {
     );
 
     expect(result, isA<CreateGroupError>());
-    expect(
-      (result as CreateGroupError).message,
-      'Device key not initialized',
-    );
+    expect((result as CreateGroupError).message, 'Device key not initialized');
   });
 
   test('returns error on incomplete server response', () async {

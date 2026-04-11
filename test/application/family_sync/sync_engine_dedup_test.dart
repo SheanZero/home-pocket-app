@@ -84,14 +84,16 @@ void main() {
       webSocketService = MockWebSocketService();
       keyManager = MockKeyManager();
       when(() => orchestrator.needsFullPull()).thenAnswer((_) async => false);
-      when(() => orchestrator.getPendingQueueCount())
-          .thenAnswer((_) async => 0);
-      when(() => orchestrator.execute(any()))
-          .thenAnswer((_) async => const SyncOrchestratorSuccess());
-      when(() => groupRepo.getActiveGroup())
-          .thenAnswer((_) async => activeGroup);
-      when(() => keyManager.getDeviceId())
-          .thenAnswer((_) async => 'device-1');
+      when(
+        () => orchestrator.getPendingQueueCount(),
+      ).thenAnswer((_) async => 0);
+      when(
+        () => orchestrator.execute(any()),
+      ).thenAnswer((_) async => const SyncOrchestratorSuccess());
+      when(
+        () => groupRepo.getActiveGroup(),
+      ).thenAnswer((_) async => activeGroup);
+      when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
 
       engine = SyncEngine(
         orchestrator: orchestrator,
@@ -116,8 +118,9 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 100));
 
       // Only one initialSyncing emission (not two)
-      final syncingCount =
-          statuses.where((s) => s.state == SyncState.initialSyncing).length;
+      final syncingCount = statuses
+          .where((s) => s.state == SyncState.initialSyncing)
+          .length;
       expect(syncingCount, 1);
     });
 
@@ -130,8 +133,9 @@ void main() {
 
       await Future<void>.delayed(const Duration(milliseconds: 100));
 
-      final syncingCount =
-          statuses.where((s) => s.state == SyncState.syncing).length;
+      final syncingCount = statuses
+          .where((s) => s.state == SyncState.syncing)
+          .length;
       expect(syncingCount, 1);
     });
 
@@ -148,9 +152,11 @@ void main() {
 
       // Both should trigger sync status changes
       final allSyncing = statuses
-          .where((s) =>
-              s.state == SyncState.syncing ||
-              s.state == SyncState.initialSyncing)
+          .where(
+            (s) =>
+                s.state == SyncState.syncing ||
+                s.state == SyncState.initialSyncing,
+          )
           .length;
       expect(allSyncing, greaterThanOrEqualTo(2));
     });

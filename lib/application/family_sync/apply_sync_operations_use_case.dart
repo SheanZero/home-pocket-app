@@ -86,7 +86,9 @@ class ApplySyncOperationsUseCase {
     Map<String, dynamic> operation, {
     String? groupId,
   }) async {
-    if (groupId == null || _syncAvatarUseCase == null || _appDirectory == null) {
+    if (groupId == null ||
+        _syncAvatarUseCase == null ||
+        _appDirectory == null) {
       return;
     }
     final fromDeviceId = operation['fromDeviceId'] as String?;
@@ -137,15 +139,16 @@ class ApplySyncOperationsUseCase {
       return;
     }
 
-    final updated = TransactionSyncMapper.fromSyncMap(
-      data,
-      bookId: existing.bookId,
-      deviceId: fromDeviceId,
-    ).copyWith(
-      updatedAt: data['updatedAt'] != null
-          ? DateTime.parse(data['updatedAt'] as String)
-          : DateTime.now(),
-    );
+    final updated =
+        TransactionSyncMapper.fromSyncMap(
+          data,
+          bookId: existing.bookId,
+          deviceId: fromDeviceId,
+        ).copyWith(
+          updatedAt: data['updatedAt'] != null
+              ? DateTime.parse(data['updatedAt'] as String)
+              : DateTime.now(),
+        );
     await _transactionRepository.update(updated);
   }
 

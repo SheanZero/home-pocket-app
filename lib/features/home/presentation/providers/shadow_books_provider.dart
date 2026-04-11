@@ -54,9 +54,9 @@ class ShadowAggregate {
   });
 
   const ShadowAggregate.empty()
-      : totalExpenses = 0,
-        prevTotalExpenses = 0,
-        perBookReports = const {};
+    : totalExpenses = 0,
+      prevTotalExpenses = 0,
+      perBookReports = const {};
 
   final int totalExpenses;
   final int prevTotalExpenses;
@@ -85,8 +85,7 @@ Future<ShadowAggregate> shadowAggregate(
       month: month,
     );
     totalExpenses += report.totalExpenses;
-    prevTotalExpenses +=
-        report.previousMonthComparison?.previousExpenses ?? 0;
+    prevTotalExpenses += report.previousMonthComparison?.previousExpenses ?? 0;
     perBookReports[shadow.book.id] = report;
   }
 

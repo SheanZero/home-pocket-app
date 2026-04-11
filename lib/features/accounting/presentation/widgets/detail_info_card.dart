@@ -113,7 +113,8 @@ class _DetailInfoCardRow extends StatelessWidget {
                     row.value,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.right,
-                    style: row.valueStyle?.copyWith(color: valueColor) ??
+                    style:
+                        row.valueStyle?.copyWith(color: valueColor) ??
                         AppTextStyles.bodyMedium.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,

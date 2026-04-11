@@ -101,33 +101,42 @@ void main() {
     checkGroupUseCase = MockCheckGroupUseCase();
     mockOrchestrator = MockSyncOrchestrator();
     when(() => mockOrchestrator.needsFullPull()).thenAnswer((_) async => false);
-    when(() => mockOrchestrator.getPendingQueueCount())
-        .thenAnswer((_) async => 0);
-    when(() => mockOrchestrator.execute(any()))
-        .thenAnswer((_) async => const SyncOrchestratorSuccess());
-    when(() => groupRepository.getActiveGroup())
-        .thenAnswer((_) async => null);
+    when(
+      () => mockOrchestrator.getPendingQueueCount(),
+    ).thenAnswer((_) async => 0);
+    when(
+      () => mockOrchestrator.execute(any()),
+    ).thenAnswer((_) async => const SyncOrchestratorSuccess());
+    when(() => groupRepository.getActiveGroup()).thenAnswer((_) async => null);
     webSocketService = MockWebSocketService();
     keyManager = MockKeyManager();
 
-    when(() => webSocketService.connectionStateStream)
-        .thenAnswer((_) => const Stream.empty());
-    when(() => webSocketService.connectionState)
-        .thenReturn(WebSocketConnectionState.disconnected);
-    when(() => webSocketService.eventStream)
-        .thenAnswer((_) => const Stream.empty());
-    when(() => webSocketService.connect(
-          groupId: any(named: 'groupId'),
-          deviceId: any(named: 'deviceId'),
-          signMessage: any(named: 'signMessage'),
-        )).thenReturn(null);
+    when(
+      () => webSocketService.connectionStateStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => webSocketService.connectionState,
+    ).thenReturn(WebSocketConnectionState.disconnected);
+    when(
+      () => webSocketService.eventStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => webSocketService.connect(
+        groupId: any(named: 'groupId'),
+        deviceId: any(named: 'deviceId'),
+        signMessage: any(named: 'signMessage'),
+      ),
+    ).thenReturn(null);
     when(() => webSocketService.disconnect()).thenReturn(null);
     when(() => webSocketService.startLifecycleObservation()).thenReturn(null);
     when(() => webSocketService.stopLifecycleObservation()).thenReturn(null);
-    when(() => keyManager.getDeviceId())
-        .thenAnswer((_) async => 'test-device');
-    when(() => keyManager.signData(any())).thenAnswer((_) async =>
-        Signature([], publicKey: SimplePublicKey([], type: KeyPairType.ed25519)));
+    when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'test-device');
+    when(() => keyManager.signData(any())).thenAnswer(
+      (_) async => Signature(
+        [],
+        publicKey: SimplePublicKey([], type: KeyPairType.ed25519),
+      ),
+    );
 
     syncEngine = SyncEngine(
       orchestrator: mockOrchestrator,
@@ -269,7 +278,9 @@ void main() {
     },
   );
 
-  testWidgets('polls server with adaptive backoff starting at 5s', (tester) async {
+  testWidgets('polls server with adaptive backoff starting at 5s', (
+    tester,
+  ) async {
     when(
       () => groupRepository.getGroupById('group-1'),
     ).thenAnswer((_) async => buildConfirmingGroup());

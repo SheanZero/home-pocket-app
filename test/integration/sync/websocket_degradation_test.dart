@@ -12,49 +12,52 @@ class MockWebSocketChannel extends Mock implements WebSocketChannel {}
 class MockWebSocketSink extends Mock implements WebSocketSink {}
 
 void main() {
-  test('WebSocket disconnect triggers state change for polling fallback',
-      () async {
-    final incomingController = StreamController<dynamic>.broadcast();
-    final sink = MockWebSocketSink();
-    when(() => sink.close(any(), any())).thenAnswer((_) async {});
-    when(() => sink.add(any())).thenReturn(null);
+  test(
+    'WebSocket disconnect triggers state change for polling fallback',
+    () async {
+      final incomingController = StreamController<dynamic>.broadcast();
+      final sink = MockWebSocketSink();
+      when(() => sink.close(any(), any())).thenAnswer((_) async {});
+      when(() => sink.add(any())).thenReturn(null);
 
-    final service = WebSocketService(
-      baseUrl: 'wss://test.example.com',
-      channelFactory: ({required String url}) {
-        final channel = MockWebSocketChannel();
-        when(() => channel.stream)
-            .thenAnswer((_) => incomingController.stream);
-        when(() => channel.sink).thenReturn(sink);
-        return channel;
-      },
-    );
+      final service = WebSocketService(
+        baseUrl: 'wss://test.example.com',
+        channelFactory: ({required String url}) {
+          final channel = MockWebSocketChannel();
+          when(
+            () => channel.stream,
+          ).thenAnswer((_) => incomingController.stream);
+          when(() => channel.sink).thenReturn(sink);
+          return channel;
+        },
+      );
 
-    final states = <WebSocketConnectionState>[];
-    service.connectionStateStream.listen(states.add);
+      final states = <WebSocketConnectionState>[];
+      service.connectionStateStream.listen(states.add);
 
-    // Connect and authenticate
-    service.connect(
-      groupId: 'group-1',
-      deviceId: 'device-1',
-      signMessage: (msg) async => 'sig',
-    );
-    incomingController.add(
-      jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
-    );
-    await Future<void>.delayed(Duration.zero);
+      // Connect and authenticate
+      service.connect(
+        groupId: 'group-1',
+        deviceId: 'device-1',
+        signMessage: (msg) async => 'sig',
+      );
+      incomingController.add(
+        jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
+      );
+      await Future<void>.delayed(Duration.zero);
 
-    expect(service.connectionState, WebSocketConnectionState.connected);
+      expect(service.connectionState, WebSocketConnectionState.connected);
 
-    // Simulate disconnect
-    await incomingController.close();
-    await Future<void>.delayed(Duration.zero);
+      // Simulate disconnect
+      await incomingController.close();
+      await Future<void>.delayed(Duration.zero);
 
-    expect(service.connectionState, WebSocketConnectionState.disconnected);
-    expect(states, contains(WebSocketConnectionState.disconnected));
+      expect(service.connectionState, WebSocketConnectionState.disconnected);
+      expect(states, contains(WebSocketConnectionState.disconnected));
 
-    service.dispose();
-  });
+      service.dispose();
+    },
+  );
 
   test('WebSocket event is forwarded to eventStream', () async {
     final incomingController = StreamController<dynamic>.broadcast();
@@ -66,8 +69,7 @@ void main() {
       baseUrl: 'wss://test.example.com',
       channelFactory: ({required String url}) {
         final channel = MockWebSocketChannel();
-        when(() => channel.stream)
-            .thenAnswer((_) => incomingController.stream);
+        when(() => channel.stream).thenAnswer((_) => incomingController.stream);
         when(() => channel.sink).thenReturn(sink);
         return channel;
       },
@@ -86,10 +88,9 @@ void main() {
     );
     await Future<void>.delayed(Duration.zero);
 
-    incomingController.add(jsonEncode({
-      'type': 'member_confirmed',
-      'groupId': 'group-1',
-    }));
+    incomingController.add(
+      jsonEncode({'type': 'member_confirmed', 'groupId': 'group-1'}),
+    );
     await Future<void>.delayed(Duration.zero);
 
     expect(events, hasLength(1));

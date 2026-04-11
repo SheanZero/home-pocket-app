@@ -106,10 +106,7 @@ class _AvatarPickerScreenState extends State<AvatarPickerScreen>
 
   void _submit() {
     Navigator.of(context).pop(
-      AvatarPickerResult(
-        emoji: _selectedEmoji,
-        imagePath: _selectedImagePath,
-      ),
+      AvatarPickerResult(emoji: _selectedEmoji, imagePath: _selectedImagePath),
     );
   }
 
@@ -117,7 +114,9 @@ class _AvatarPickerScreenState extends State<AvatarPickerScreen>
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary = isDark ? _profileDarkTextPrimary : AppColors.textPrimary;
+    final textPrimary = isDark
+        ? _profileDarkTextPrimary
+        : AppColors.textPrimary;
     final textSecondary = isDark
         ? _profileDarkTextSecondary
         : AppColors.textSecondary;
@@ -130,7 +129,10 @@ class _AvatarPickerScreenState extends State<AvatarPickerScreen>
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 8,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -310,11 +312,7 @@ class _EmojiGrid extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               emoji,
-              style: TextStyle(
-                fontSize: 28,
-                height: 1,
-                color: tileText,
-              ),
+              style: TextStyle(fontSize: 28, height: 1, color: tileText),
             ),
           ),
         );

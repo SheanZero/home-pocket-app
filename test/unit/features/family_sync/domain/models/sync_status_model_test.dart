@@ -4,24 +4,39 @@ import 'package:home_pocket/features/family_sync/domain/models/sync_status_model
 void main() {
   group('SyncState', () {
     test('has all required values', () {
-      expect(SyncState.values, containsAll([
-        SyncState.noGroup,
-        SyncState.idle,
-        SyncState.initialSyncing,
-        SyncState.syncing,
-        SyncState.synced,
-        SyncState.error,
-        SyncState.queuedOffline,
-      ]));
+      expect(
+        SyncState.values,
+        containsAll([
+          SyncState.noGroup,
+          SyncState.idle,
+          SyncState.initialSyncing,
+          SyncState.syncing,
+          SyncState.synced,
+          SyncState.error,
+          SyncState.queuedOffline,
+        ]),
+      );
     });
   });
 
   group('SyncMode', () {
     test('has correct priority ordering', () {
-      expect(SyncMode.initialSync.priority, lessThan(SyncMode.fullPull.priority));
-      expect(SyncMode.fullPull.priority, lessThan(SyncMode.incrementalPush.priority));
-      expect(SyncMode.incrementalPush.priority, equals(SyncMode.incrementalPull.priority));
-      expect(SyncMode.incrementalPull.priority, lessThan(SyncMode.profileSync.priority));
+      expect(
+        SyncMode.initialSync.priority,
+        lessThan(SyncMode.fullPull.priority),
+      );
+      expect(
+        SyncMode.fullPull.priority,
+        lessThan(SyncMode.incrementalPush.priority),
+      );
+      expect(
+        SyncMode.incrementalPush.priority,
+        equals(SyncMode.incrementalPull.priority),
+      );
+      expect(
+        SyncMode.incrementalPull.priority,
+        lessThan(SyncMode.profileSync.priority),
+      );
     });
   });
 

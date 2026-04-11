@@ -85,9 +85,7 @@ class HomeTransactionTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     category,
-                    style: AppTextStyles.caption.copyWith(
-                      color: categoryColor,
-                    ),
+                    style: AppTextStyles.caption.copyWith(color: categoryColor),
                   ),
                 ],
               ),

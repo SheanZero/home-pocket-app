@@ -27,8 +27,9 @@ void main() {
         baseUrl: 'wss://sync.happypocket.app',
         channelFactory: ({required String url}) {
           final channel = MockWebSocketChannel();
-          when(() => channel.stream)
-              .thenAnswer((_) => incomingController.stream);
+          when(
+            () => channel.stream,
+          ).thenAnswer((_) => incomingController.stream);
           when(() => channel.sink).thenReturn(sink);
           return channel;
         },
@@ -54,10 +55,9 @@ void main() {
         signMessage: (msg) async => 'mock-signature',
       );
 
-      incomingController.add(jsonEncode({
-        'type': 'auth_success',
-        'groupId': 'group-1',
-      }));
+      incomingController.add(
+        jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
+      );
 
       await Future<void>.delayed(Duration.zero);
       await Future<void>.delayed(Duration.zero);
@@ -97,12 +97,14 @@ void main() {
       );
       await Future<void>.delayed(Duration.zero);
 
-      incomingController.add(jsonEncode({
-        'type': 'member_confirmed',
-        'groupId': 'group-1',
-        'deviceId': 'device-2',
-        'timestamp': '2026-04-04T12:00:00Z',
-      }));
+      incomingController.add(
+        jsonEncode({
+          'type': 'member_confirmed',
+          'groupId': 'group-1',
+          'deviceId': 'device-2',
+          'timestamp': '2026-04-04T12:00:00Z',
+        }),
+      );
       await Future<void>.delayed(Duration.zero);
 
       expect(events, hasLength(1));
@@ -124,12 +126,14 @@ void main() {
       );
       await Future<void>.delayed(Duration.zero);
 
-      incomingController.add(jsonEncode({
-        'type': 'join_request',
-        'groupId': 'group-1',
-        'deviceId': 'device-3',
-        'timestamp': '2026-04-04T12:00:00Z',
-      }));
+      incomingController.add(
+        jsonEncode({
+          'type': 'join_request',
+          'groupId': 'group-1',
+          'deviceId': 'device-3',
+          'timestamp': '2026-04-04T12:00:00Z',
+        }),
+      );
       await Future<void>.delayed(Duration.zero);
 
       expect(events, hasLength(1));
@@ -150,8 +154,9 @@ void main() {
       );
       await Future<void>.delayed(Duration.zero);
 
-      incomingController
-          .add(jsonEncode({'type': 'unknown_event', 'groupId': 'group-1'}));
+      incomingController.add(
+        jsonEncode({'type': 'unknown_event', 'groupId': 'group-1'}),
+      );
       await Future<void>.delayed(Duration.zero);
 
       expect(events, isEmpty);
@@ -171,15 +176,17 @@ void main() {
       );
       await Future<void>.delayed(Duration.zero);
 
-      incomingController.add(jsonEncode({
-        'type': 'group_status',
-        'groupId': 'group-1',
-        'data': {
-          'memberCount': 3,
-          'pendingRequests': 1,
-          'groupName': 'My Family',
-        },
-      }));
+      incomingController.add(
+        jsonEncode({
+          'type': 'group_status',
+          'groupId': 'group-1',
+          'data': {
+            'memberCount': 3,
+            'pendingRequests': 1,
+            'groupName': 'My Family',
+          },
+        }),
+      );
       await Future<void>.delayed(Duration.zero);
 
       expect(events, hasLength(1));
@@ -190,32 +197,37 @@ void main() {
       expect(events.first.data!['groupName'], 'My Family');
     });
 
-    test('existing events carry null data when no data field present', () async {
-      final events = <WebSocketEvent>[];
-      service.eventStream.listen(events.add);
+    test(
+      'existing events carry null data when no data field present',
+      () async {
+        final events = <WebSocketEvent>[];
+        service.eventStream.listen(events.add);
 
-      service.connect(
-        groupId: 'group-1',
-        deviceId: 'device-1',
-        signMessage: (msg) async => 'mock-sig',
-      );
-      incomingController.add(
-        jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
-      );
-      await Future<void>.delayed(Duration.zero);
+        service.connect(
+          groupId: 'group-1',
+          deviceId: 'device-1',
+          signMessage: (msg) async => 'mock-sig',
+        );
+        incomingController.add(
+          jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
+        );
+        await Future<void>.delayed(Duration.zero);
 
-      incomingController.add(jsonEncode({
-        'type': 'member_confirmed',
-        'groupId': 'group-1',
-        'deviceId': 'device-2',
-        'timestamp': '2026-04-04T12:00:00Z',
-      }));
-      await Future<void>.delayed(Duration.zero);
+        incomingController.add(
+          jsonEncode({
+            'type': 'member_confirmed',
+            'groupId': 'group-1',
+            'deviceId': 'device-2',
+            'timestamp': '2026-04-04T12:00:00Z',
+          }),
+        );
+        await Future<void>.delayed(Duration.zero);
 
-      expect(events, hasLength(1));
-      expect(events.first.type, WebSocketEventType.memberConfirmed);
-      expect(events.first.data, isNull);
-    });
+        expect(events, hasLength(1));
+        expect(events.first.type, WebSocketEventType.memberConfirmed);
+        expect(events.first.data, isNull);
+      },
+    );
 
     test('parses sync_available event from WebSocket', () async {
       final events = <WebSocketEvent>[];
@@ -231,12 +243,14 @@ void main() {
       );
       await Future<void>.delayed(Duration.zero);
 
-      incomingController.add(jsonEncode({
-        'type': 'sync_available',
-        'groupId': 'group-1',
-        'deviceId': 'device-2',
-        'timestamp': '2026-04-05T12:00:00Z',
-      }));
+      incomingController.add(
+        jsonEncode({
+          'type': 'sync_available',
+          'groupId': 'group-1',
+          'deviceId': 'device-2',
+          'timestamp': '2026-04-05T12:00:00Z',
+        }),
+      );
       await Future<void>.delayed(Duration.zero);
 
       expect(events, hasLength(1));

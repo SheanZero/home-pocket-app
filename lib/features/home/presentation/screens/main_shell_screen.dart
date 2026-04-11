@@ -35,7 +35,8 @@ class MainShellScreen extends ConsumerWidget {
       final currState = next.valueOrNull?.state;
       if (currState == null) return;
 
-      final wasSyncing = prevState == SyncState.syncing ||
+      final wasSyncing =
+          prevState == SyncState.syncing ||
           prevState == SyncState.initialSyncing;
       final nowDone =
           currState == SyncState.synced || currState == SyncState.idle;
@@ -43,11 +44,13 @@ class MainShellScreen extends ConsumerWidget {
       if (wasSyncing && nowDone) {
         final now = DateTime.now();
         ref.invalidate(todayTransactionsProvider(bookId: bookId));
-        ref.invalidate(monthlyReportProvider(
-          bookId: bookId,
-          year: now.year,
-          month: now.month,
-        ));
+        ref.invalidate(
+          monthlyReportProvider(
+            bookId: bookId,
+            year: now.year,
+            month: now.month,
+          ),
+        );
         ref.invalidate(shadowBooksProvider);
         ref.invalidate(
           shadowAggregateProvider(year: now.year, month: now.month),

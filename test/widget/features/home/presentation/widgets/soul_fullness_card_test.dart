@@ -73,8 +73,7 @@ void main() {
         ),
       );
 
-      expect(find.text('\u7075\u9b42\u306e\u5145\u5b9f\u5ea6'),
-          findsOneWidget);
+      expect(find.text('\u7075\u9b42\u306e\u5145\u5b9f\u5ea6'), findsOneWidget);
     });
 
     testWidgets('invokes onTap callback', (tester) async {

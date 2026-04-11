@@ -62,9 +62,7 @@ void main() {
         reason: 'Default stub',
       ),
     );
-    when(mockTransactionRepo.getLatestHash(any)).thenAnswer(
-      (_) async => null,
-    );
+    when(mockTransactionRepo.getLatestHash(any)).thenAnswer((_) async => null);
   });
 
   group('CreateTransactionUseCase', () {

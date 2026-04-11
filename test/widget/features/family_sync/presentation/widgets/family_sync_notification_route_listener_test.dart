@@ -188,9 +188,7 @@ void main() {
             ),
           ),
         ),
-        overrides: [
-          pushNotificationServiceProvider.overrideWithValue(service),
-        ],
+        overrides: [pushNotificationServiceProvider.overrideWithValue(service)],
       ),
     );
 

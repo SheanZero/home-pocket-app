@@ -183,11 +183,13 @@ class SyncEngine {
     final group = await _groupRepo.getActiveGroup();
     if (group != null) {
       final pendingCount = await _orchestrator.getPendingQueueCount();
-      _updateStatus(SyncStatus(
-        state: pendingCount > 0 ? SyncState.queuedOffline : SyncState.idle,
-        lastSyncAt: group.lastSyncAt,
-        pendingQueueCount: pendingCount,
-      ));
+      _updateStatus(
+        SyncStatus(
+          state: pendingCount > 0 ? SyncState.queuedOffline : SyncState.idle,
+          lastSyncAt: group.lastSyncAt,
+          pendingQueueCount: pendingCount,
+        ),
+      );
     } else {
       _updateStatus(const SyncStatus(state: SyncState.noGroup));
     }
@@ -216,21 +218,27 @@ class SyncEngine {
       case SyncOrchestratorSuccess():
         final pendingCount = await _orchestrator.getPendingQueueCount();
         final refreshedGroup = await _groupRepo.getActiveGroup();
-        _updateStatus(SyncStatus(
-          state: pendingCount > 0 ? SyncState.queuedOffline : SyncState.synced,
-          lastSyncAt: refreshedGroup?.lastSyncAt,
-          pendingQueueCount: pendingCount,
-        ));
+        _updateStatus(
+          SyncStatus(
+            state: pendingCount > 0
+                ? SyncState.queuedOffline
+                : SyncState.synced,
+            lastSyncAt: refreshedGroup?.lastSyncAt,
+            pendingQueueCount: pendingCount,
+          ),
+        );
       case SyncOrchestratorNoGroup():
         _updateStatus(const SyncStatus(state: SyncState.noGroup));
       case SyncOrchestratorError(:final message):
         final pendingCount = await _orchestrator.getPendingQueueCount();
-        _updateStatus(SyncStatus(
-          state: SyncState.error,
-          lastSyncAt: _currentStatus.lastSyncAt,
-          pendingQueueCount: pendingCount,
-          errorMessage: message,
-        ));
+        _updateStatus(
+          SyncStatus(
+            state: SyncState.error,
+            lastSyncAt: _currentStatus.lastSyncAt,
+            pendingQueueCount: pendingCount,
+            errorMessage: message,
+          ),
+        );
     }
   }
 

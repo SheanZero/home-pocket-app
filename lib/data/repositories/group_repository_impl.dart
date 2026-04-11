@@ -174,15 +174,14 @@ class GroupRepositoryImpl implements GroupRepository {
     required String avatarEmoji,
     String? avatarImagePath,
     String? avatarImageHash,
-  }) =>
-      _memberDao.updateMemberProfile(
-        groupId: groupId,
-        deviceId: deviceId,
-        displayName: displayName,
-        avatarEmoji: avatarEmoji,
-        avatarImagePath: avatarImagePath,
-        avatarImageHash: avatarImageHash,
-      );
+  }) => _memberDao.updateMemberProfile(
+    groupId: groupId,
+    deviceId: deviceId,
+    displayName: displayName,
+    avatarEmoji: avatarEmoji,
+    avatarImagePath: avatarImagePath,
+    avatarImageHash: avatarImageHash,
+  );
 
   List<GroupMembersCompanion> _toCompanions(
     String groupId,

@@ -122,10 +122,9 @@ class _CategorySelectionScreenState
   }
 
   void _onEnterReorderMode() {
-    ref.read(categoryReorderNotifierProvider.notifier).enterEditing(
-          l1: _l1Categories,
-          l2ByParent: _l2ByParent,
-        );
+    ref
+        .read(categoryReorderNotifierProvider.notifier)
+        .enterEditing(l1: _l1Categories, l2ByParent: _l2ByParent);
     _searchController.clear();
     setState(() => _searchQuery = '');
   }
@@ -147,9 +146,9 @@ class _CategorySelectionScreenState
       await ref.read(categoryReorderNotifierProvider.notifier).save();
       await _loadCategories();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.of(context).orderUpdated)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(S.of(context).orderUpdated)));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -339,10 +338,7 @@ class _CategorySelectionScreenState
     S l10n,
   ) {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 12,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       itemCount: filteredL1.length,
       itemBuilder: (context, index) {
         final l1 = filteredL1[index];
@@ -400,8 +396,9 @@ class _CategorySelectionScreenState
                     l2Colors: {
                       for (final c in children) c.id: _parseColor(c.color),
                     },
-                    onToggle: () => setState(() =>
-                        _expandedL1IdInEdit = expanded ? null : l1.id),
+                    onToggle: () => setState(
+                      () => _expandedL1IdInEdit = expanded ? null : l1.id,
+                    ),
                     onReorderChild: (o, n) => ref
                         .read(categoryReorderNotifierProvider.notifier)
                         .reorderL2(l1.id, o, n),
@@ -501,8 +498,7 @@ class _L1ReorderTile extends StatelessWidget {
             onReorder: onReorderChild,
             itemBuilder: (ctx, i) {
               final child = children[i];
-              final childColor = l2Colors[child.id] ??
-                  const Color(0xFFABABAB);
+              final childColor = l2Colors[child.id] ?? const Color(0xFFABABAB);
               return Padding(
                 key: ValueKey('l2_${child.id}'),
                 padding: const EdgeInsets.only(left: 24, bottom: 4),

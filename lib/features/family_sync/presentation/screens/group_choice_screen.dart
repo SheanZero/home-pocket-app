@@ -14,10 +14,7 @@ const _purpleGradient = [
   Color(0xFFFAF5FD),
 ];
 
-const _greenGradient = [
-  Color(0xFFD4E8CC),
-  Color(0xFFF0F8EC),
-];
+const _greenGradient = [Color(0xFFD4E8CC), Color(0xFFF0F8EC)];
 
 class GroupChoiceScreen extends ConsumerWidget {
   const GroupChoiceScreen({super.key});
@@ -162,10 +159,7 @@ class _HeroAvatars extends StatelessWidget {
         children: [
           Positioned(
             left: 0,
-            child: _BorderedAvatar(
-              emoji: '\u{1F431}',
-              size: 56,
-            ),
+            child: _BorderedAvatar(emoji: '\u{1F431}', size: 56),
           ),
           Positioned(
             child: _BorderedAvatar(

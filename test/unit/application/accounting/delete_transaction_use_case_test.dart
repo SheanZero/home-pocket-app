@@ -14,9 +14,7 @@ void main() {
 
   setUp(() {
     mockRepo = MockTransactionRepository();
-    useCase = DeleteTransactionUseCase(
-      transactionRepository: mockRepo,
-    );
+    useCase = DeleteTransactionUseCase(transactionRepository: mockRepo);
   });
 
   group('DeleteTransactionUseCase', () {

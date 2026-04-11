@@ -143,8 +143,14 @@ class AppDatabase extends _$AppDatabase {
             await migrator.addColumn(groups, groups.groupName);
             await migrator.addColumn(groupMembers, groupMembers.displayName);
             await migrator.addColumn(groupMembers, groupMembers.avatarEmoji);
-            await migrator.addColumn(groupMembers, groupMembers.avatarImagePath);
-            await migrator.addColumn(groupMembers, groupMembers.avatarImageHash);
+            await migrator.addColumn(
+              groupMembers,
+              groupMembers.avatarImagePath,
+            );
+            await migrator.addColumn(
+              groupMembers,
+              groupMembers.avatarImageHash,
+            );
             await customStatement(
               "UPDATE group_members SET display_name = device_name WHERE display_name = ''",
             );
@@ -206,8 +212,9 @@ class AppDatabase extends _$AppDatabase {
             // Step 4: upsert all v14 system categories
             final nowMs = DateTime.now().millisecondsSinceEpoch;
             for (final cat in DefaultCategories.all) {
-              final parentVal =
-                  cat.parentId == null ? 'NULL' : "'${cat.parentId}'";
+              final parentVal = cat.parentId == null
+                  ? 'NULL'
+                  : "'${cat.parentId}'";
               final isSystemVal = cat.isSystem ? 1 : 0;
               final isArchivedVal = cat.isArchived ? 1 : 0;
               await customStatement('''

@@ -60,65 +60,66 @@ void main() {
     ).thenAnswer((_) async => {'recipientCount': 1});
     when(() => fullSyncUseCase.execute()).thenAnswer((_) async => 3);
     when(
-      () => syncAvatarUseCase.pushAvatarToMembers(
-        groupId: any(named: 'groupId'),
-      ),
+      () =>
+          syncAvatarUseCase.pushAvatarToMembers(groupId: any(named: 'groupId')),
     ).thenAnswer((_) async {});
   });
 
-  test('confirms member, exchanges key, triggers sync and avatar push',
-      () async {
-    when(() => groupRepository.getGroupById(any())).thenAnswer(
-      (_) async => GroupInfo(
-        groupId: 'group-1',
-        groupName: 'Test Family',
-        status: GroupStatus.pending,
-        role: 'owner',
-        groupKey: 'group-key',
-        members: const [
-          GroupMember(
-            deviceId: 'member-1',
-            publicKey: 'member-public-key',
-            deviceName: 'Member phone',
-            role: 'member',
-            status: 'pending',
-            displayName: 'Member',
-            avatarEmoji: '\u{1F3E0}',
-          ),
-        ],
-        createdAt: DateTime(2026),
-      ),
-    );
-    when(
-      () => e2eeService.encryptGroupKeyForMember(
-        groupKeyBase64: any(named: 'groupKeyBase64'),
-        memberDeviceId: any(named: 'memberDeviceId'),
-        memberPublicKey: any(named: 'memberPublicKey'),
-      ),
-    ).thenAnswer((_) async => 'encrypted-key');
+  test(
+    'confirms member, exchanges key, triggers sync and avatar push',
+    () async {
+      when(() => groupRepository.getGroupById(any())).thenAnswer(
+        (_) async => GroupInfo(
+          groupId: 'group-1',
+          groupName: 'Test Family',
+          status: GroupStatus.pending,
+          role: 'owner',
+          groupKey: 'group-key',
+          members: const [
+            GroupMember(
+              deviceId: 'member-1',
+              publicKey: 'member-public-key',
+              deviceName: 'Member phone',
+              role: 'member',
+              status: 'pending',
+              displayName: 'Member',
+              avatarEmoji: '\u{1F3E0}',
+            ),
+          ],
+          createdAt: DateTime(2026),
+        ),
+      );
+      when(
+        () => e2eeService.encryptGroupKeyForMember(
+          groupKeyBase64: any(named: 'groupKeyBase64'),
+          memberDeviceId: any(named: 'memberDeviceId'),
+          memberPublicKey: any(named: 'memberPublicKey'),
+        ),
+      ).thenAnswer((_) async => 'encrypted-key');
 
-    final result = await useCase.execute(
-      groupId: 'group-1',
-      deviceId: 'member-1',
-    );
-
-    expect(result, isA<ConfirmMemberSuccess>());
-    verify(
-      () => groupRepository.activateMember('group-1', 'member-1'),
-    ).called(1);
-    verify(
-      () => apiClient.pushSync(
+      final result = await useCase.execute(
         groupId: 'group-1',
-        payload: 'encrypted-key',
-        vectorClock: const {},
-        operationCount: 0,
-      ),
-    ).called(1);
-    verify(() => fullSyncUseCase.execute()).called(1);
-    verify(
-      () => syncAvatarUseCase.pushAvatarToMembers(groupId: 'group-1'),
-    ).called(1);
-  });
+        deviceId: 'member-1',
+      );
+
+      expect(result, isA<ConfirmMemberSuccess>());
+      verify(
+        () => groupRepository.activateMember('group-1', 'member-1'),
+      ).called(1);
+      verify(
+        () => apiClient.pushSync(
+          groupId: 'group-1',
+          payload: 'encrypted-key',
+          vectorClock: const {},
+          operationCount: 0,
+        ),
+      ).called(1);
+      verify(() => fullSyncUseCase.execute()).called(1);
+      verify(
+        () => syncAvatarUseCase.pushAvatarToMembers(groupId: 'group-1'),
+      ).called(1);
+    },
+  );
 
   test('skips key exchange when group key is not available', () async {
     when(() => groupRepository.getGroupById(any())).thenAnswer(
@@ -183,9 +184,7 @@ void main() {
         groupId: any(named: 'groupId'),
         deviceId: any(named: 'deviceId'),
       ),
-    ).thenThrow(
-      const RelayApiException(statusCode: 403, message: 'Forbidden'),
-    );
+    ).thenThrow(const RelayApiException(statusCode: 403, message: 'Forbidden'));
 
     final result = await useCase.execute(
       groupId: 'group-1',

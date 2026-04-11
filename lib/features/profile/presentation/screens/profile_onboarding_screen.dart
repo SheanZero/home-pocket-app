@@ -45,7 +45,8 @@ class _ProfileOnboardingScreenState
     super.dispose();
   }
 
-  bool get _canSubmit => _nicknameController.text.trim().isNotEmpty && !_isSaving;
+  bool get _canSubmit =>
+      _nicknameController.text.trim().isNotEmpty && !_isSaving;
 
   Future<void> _openAvatarPicker() async {
     final result = await Navigator.of(context).push<AvatarPickerResult>(
@@ -75,11 +76,13 @@ class _ProfileOnboardingScreenState
     final l10n = S.of(context);
     setState(() => _isSaving = true);
 
-    final result = await ref.read(saveUserProfileUseCaseProvider).execute(
-      displayName: _nicknameController.text,
-      avatarEmoji: _selectedEmoji,
-      avatarImagePath: _selectedImagePath,
-    );
+    final result = await ref
+        .read(saveUserProfileUseCaseProvider)
+        .execute(
+          displayName: _nicknameController.text,
+          avatarEmoji: _selectedEmoji,
+          avatarImagePath: _selectedImagePath,
+        );
 
     if (!mounted) {
       return;
@@ -119,7 +122,9 @@ class _ProfileOnboardingScreenState
         : AppColors.borderDefault;
 
     return Scaffold(
-      backgroundColor: isDark ? _onboardingDarkBackground : AppColors.background,
+      backgroundColor: isDark
+          ? _onboardingDarkBackground
+          : AppColors.background,
       body: ScatteredEmojiBackground(
         pattern: ScatteredEmojiPattern.onboarding,
         child: SafeArea(
@@ -328,7 +333,9 @@ class _ProfileGradientButton extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.accentPrimary.withValues(alpha: enabled ? 0.16 : 0.08),
+            color: AppColors.accentPrimary.withValues(
+              alpha: enabled ? 0.16 : 0.08,
+            ),
             blurRadius: 20,
             offset: const Offset(0, 6),
           ),

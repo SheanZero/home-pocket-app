@@ -168,11 +168,7 @@ void main() {
 
       // 5. Simulate pull: delete operation
       await applyOps.execute([
-        {
-          'op': 'delete',
-          'entityType': 'bill',
-          'entityId': 'tx-2',
-        },
+        {'op': 'delete', 'entityType': 'bill', 'entityId': 'tx-2'},
       ]);
 
       final tx2After = await txDao.findById('tx-2');

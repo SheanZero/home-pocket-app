@@ -20,8 +20,7 @@ class CategoryReorderNotifier extends _$CategoryReorderNotifier {
       mode: CategoryReorderMode.editing,
       l1: List.of(l1),
       l2ByParent: {
-        for (final entry in l2ByParent.entries)
-          entry.key: List.of(entry.value),
+        for (final entry in l2ByParent.entries) entry.key: List.of(entry.value),
       },
       isDirty: false,
     );

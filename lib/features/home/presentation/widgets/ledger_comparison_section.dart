@@ -77,11 +77,7 @@ class _LedgerRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Icon(
-                  Icons.chevron_right,
-                  size: 14,
-                  color: data.chevronColor,
-                ),
+                Icon(Icons.chevron_right, size: 14, color: data.chevronColor),
               ],
             ),
             // Line 2: subtitle
@@ -110,9 +106,7 @@ class _LedgerRow extends StatelessWidget {
       ),
       child: Text(
         data.tagText,
-        style: AppTextStyles.micro.copyWith(
-          color: data.tagTextColor,
-        ),
+        style: AppTextStyles.micro.copyWith(color: data.tagTextColor),
       ),
     );
   }

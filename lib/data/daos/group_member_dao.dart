@@ -55,10 +55,12 @@ class GroupMemberDao extends DatabaseAccessor<AppDatabase>
             (table) =>
                 table.groupId.equals(groupId) & table.deviceId.equals(deviceId),
           ))
-          .write(GroupMembersCompanion(
-            displayName: Value(displayName),
-            avatarEmoji: Value(avatarEmoji),
-            avatarImagePath: Value(avatarImagePath),
-            avatarImageHash: Value(avatarImageHash),
-          ));
+          .write(
+            GroupMembersCompanion(
+              displayName: Value(displayName),
+              avatarEmoji: Value(avatarEmoji),
+              avatarImagePath: Value(avatarImagePath),
+              avatarImageHash: Value(avatarImageHash),
+            ),
+          );
 }

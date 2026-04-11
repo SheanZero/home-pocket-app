@@ -46,8 +46,9 @@ class CategoryReorderRow extends StatelessWidget {
           Icon(
             Icons.drag_indicator,
             size: 22,
-            color:
-                isDark ? AppColorsDark.textSecondary : AppColors.textSecondary,
+            color: isDark
+                ? AppColorsDark.textSecondary
+                : AppColors.textSecondary,
           ),
           const SizedBox(width: 10),
           if (isL1) ...[
@@ -69,8 +70,9 @@ class CategoryReorderRow extends StatelessWidget {
               style: AppTextStyles.titleMedium.copyWith(
                 fontSize: labelSize,
                 fontWeight: FontWeight.w600,
-                color:
-                    isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
+                color: isDark
+                    ? AppColorsDark.textPrimary
+                    : AppColors.textPrimary,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

@@ -162,23 +162,25 @@ Stream<List<GroupMember>> groupMembers(Ref ref) {
   final activeGroup = ref.watch(activeGroupProvider).valueOrNull;
   if (activeGroup == null) return Stream.value([]);
   final dao = ref.watch(groupMemberDaoProvider);
-  return dao.watchByGroupId(activeGroup.groupId).map(
-    (rows) => rows
-        .map(
-          (row) => GroupMember(
-            deviceId: row.deviceId,
-            publicKey: row.publicKey,
-            deviceName: row.deviceName,
-            role: row.role,
-            status: row.status,
-            displayName: row.displayName,
-            avatarEmoji: row.avatarEmoji,
-            avatarImagePath: row.avatarImagePath,
-            avatarImageHash: row.avatarImageHash,
-          ),
-        )
-        .toList(),
-  );
+  return dao
+      .watchByGroupId(activeGroup.groupId)
+      .map(
+        (rows) => rows
+            .map(
+              (row) => GroupMember(
+                deviceId: row.deviceId,
+                publicKey: row.publicKey,
+                deviceName: row.deviceName,
+                role: row.role,
+                status: row.status,
+                displayName: row.displayName,
+                avatarEmoji: row.avatarEmoji,
+                avatarImagePath: row.avatarImagePath,
+                avatarImageHash: row.avatarImageHash,
+              ),
+            )
+            .toList(),
+      );
 }
 
 /// HandleMemberLeftUseCase provider.

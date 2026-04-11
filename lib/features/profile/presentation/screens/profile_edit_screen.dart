@@ -76,13 +76,15 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     final l10n = S.of(context);
     setState(() => _isSaving = true);
 
-    final result = await ref.read(saveUserProfileUseCaseProvider).execute(
-      id: widget.profile.id,
-      displayName: _nicknameController.text,
-      avatarEmoji: _selectedEmoji,
-      avatarImagePath: _selectedImagePath,
-      oldAvatarImagePath: widget.profile.avatarImagePath,
-    );
+    final result = await ref
+        .read(saveUserProfileUseCaseProvider)
+        .execute(
+          id: widget.profile.id,
+          displayName: _nicknameController.text,
+          avatarEmoji: _selectedEmoji,
+          avatarImagePath: _selectedImagePath,
+          oldAvatarImagePath: widget.profile.avatarImagePath,
+        );
 
     if (!mounted) {
       return;
@@ -121,7 +123,10 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     GestureDetector(
@@ -302,7 +307,9 @@ class _ProfileEditButton extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.accentPrimary.withValues(alpha: enabled ? 0.16 : 0.08),
+            color: AppColors.accentPrimary.withValues(
+              alpha: enabled ? 0.16 : 0.08,
+            ),
             blurRadius: 20,
             offset: const Offset(0, 6),
           ),

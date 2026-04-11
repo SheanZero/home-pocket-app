@@ -41,8 +41,9 @@ class HandleMemberLeftUseCase {
     final group = await _groupRepo.getGroupById(groupId);
     if (group == null) return;
 
-    final updatedMembers =
-        group.members.where((m) => m.deviceId != deviceId).toList();
+    final updatedMembers = group.members
+        .where((m) => m.deviceId != deviceId)
+        .toList();
     await _groupRepo.updateMembers(groupId, updatedMembers);
   }
 }

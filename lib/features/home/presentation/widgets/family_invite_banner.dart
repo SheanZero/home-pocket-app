@@ -40,11 +40,7 @@ class FamilyInviteBanner extends StatelessWidget {
                 ),
                 Positioned(
                   left: 36, // 46 - 10
-                  child: _avatarCircle(
-                    context,
-                    AppColors.olive,
-                    Icons.face_2,
-                  ),
+                  child: _avatarCircle(context, AppColors.olive, Icons.face_2),
                 ),
               ],
             ),

@@ -57,8 +57,7 @@ void main() {
       expect(find.byIcon(Icons.language), findsOneWidget);
     });
 
-    testWidgets('tapping language tile opens selection dialog',
-        (tester) async {
+    testWidgets('tapping language tile opens selection dialog', (tester) async {
       await tester.pumpWidget(
         buildTestWidget(
           overrides: overrides,

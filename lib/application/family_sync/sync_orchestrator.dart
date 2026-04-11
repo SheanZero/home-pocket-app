@@ -124,8 +124,7 @@ class SyncOrchestrator {
     final pushed = await _fullSync.execute();
     await _avatarSync.pushAvatarToMembers(groupId: group.groupId);
     final pullResult = await _pullSync.execute();
-    final applied =
-        pullResult is PullSyncSuccess ? pullResult.appliedCount : 0;
+    final applied = pullResult is PullSyncSuccess ? pullResult.appliedCount : 0;
 
     if (kDebugMode) {
       debugPrint(
@@ -133,10 +132,7 @@ class SyncOrchestrator {
       );
     }
 
-    return SyncOrchestratorSuccess(
-      pushedCount: pushed,
-      appliedCount: applied,
-    );
+    return SyncOrchestratorSuccess(pushedCount: pushed, appliedCount: applied);
   }
 
   Future<SyncOrchestratorResult> _executeIncrementalPush() async {
@@ -160,20 +156,14 @@ class SyncOrchestrator {
           '[SyncOrchestrator] incrementalPush: pushing ${txnOps.length} transaction ops',
         );
       }
-      await _pushSync.execute(
-        operations: txnOps,
-        vectorClock: const {},
-      );
+      await _pushSync.execute(operations: txnOps, vectorClock: const {});
     }
 
     // Build profile operation if changed
     final profileOps = await _buildProfileOperationsIfChanged();
 
     if (profileOps.isNotEmpty) {
-      await _pushSync.execute(
-        operations: profileOps,
-        vectorClock: const {},
-      );
+      await _pushSync.execute(operations: profileOps, vectorClock: const {});
     }
 
     if (kDebugMode) {
@@ -191,8 +181,7 @@ class SyncOrchestrator {
     if (group == null) return const SyncOrchestratorNoGroup();
 
     final pullResult = await _pullSync.execute();
-    final applied =
-        pullResult is PullSyncSuccess ? pullResult.appliedCount : 0;
+    final applied = pullResult is PullSyncSuccess ? pullResult.appliedCount : 0;
 
     if (kDebugMode) {
       debugPrint('[SyncOrchestrator] incrementalPull: applied=$applied');
@@ -244,8 +233,7 @@ class SyncOrchestrator {
     if (group == null) return const SyncOrchestratorNoGroup();
 
     final pullResult = await _pullSync.execute();
-    final applied =
-        pullResult is PullSyncSuccess ? pullResult.appliedCount : 0;
+    final applied = pullResult is PullSyncSuccess ? pullResult.appliedCount : 0;
 
     return SyncOrchestratorSuccess(appliedCount: applied);
   }

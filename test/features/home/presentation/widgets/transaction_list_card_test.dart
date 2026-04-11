@@ -40,9 +40,7 @@ void main() {
     testWidgets('renders empty children without error', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: TransactionListCard(children: []),
-          ),
+          home: Scaffold(body: TransactionListCard(children: [])),
         ),
       );
 
@@ -52,11 +50,7 @@ void main() {
     testWidgets('single child has no dividers', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: TransactionListCard(
-              children: [Text('Only')],
-            ),
-          ),
+          home: Scaffold(body: TransactionListCard(children: [Text('Only')])),
         ),
       );
 
@@ -67,19 +61,17 @@ void main() {
     testWidgets('outer container has correct decoration', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: TransactionListCard(
-              children: [Text('Item')],
-            ),
-          ),
+          home: Scaffold(body: TransactionListCard(children: [Text('Item')])),
         ),
       );
 
       final container = tester.widget<Container>(
-        find.descendant(
-          of: find.byType(TransactionListCard),
-          matching: find.byType(Container),
-        ).first,
+        find
+            .descendant(
+              of: find.byType(TransactionListCard),
+              matching: find.byType(Container),
+            )
+            .first,
       );
 
       expect(container.clipBehavior, Clip.hardEdge);

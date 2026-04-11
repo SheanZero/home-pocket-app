@@ -82,9 +82,7 @@ void main() {
       addTearDown(container.dispose);
 
       await container.read(localeNotifierProvider.future);
-      await container
-          .read(localeNotifierProvider.notifier)
-          .setSystemDefault();
+      await container.read(localeNotifierProvider.notifier).setSystemDefault();
 
       final settings = await container.read(localeNotifierProvider.future);
       expect(settings.isSystemDefault, isTrue);

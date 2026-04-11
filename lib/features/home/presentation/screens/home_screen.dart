@@ -52,9 +52,7 @@ class HomeScreen extends ConsumerWidget {
       shadowAggregateProvider(year: year, month: month),
     );
     final shadowBookList = ref.watch(shadowBooksProvider);
-    final todayTxAsync = ref.watch(
-      todayTransactionsProvider(bookId: bookId),
-    );
+    final todayTxAsync = ref.watch(todayTransactionsProvider(bookId: bookId));
 
     return SingleChildScrollView(
       child: SafeArea(
@@ -214,9 +212,11 @@ class HomeScreen extends ConsumerWidget {
                         tagBgColor: isSoul
                             ? context.wmSoulTagBg
                             : context.wmSurvivalTagBg,
-                        tagTextColor:
-                            isSoul ? AppColors.soul : AppColors.survival,
-                        merchant: tx.merchant ??
+                        tagTextColor: isSoul
+                            ? AppColors.soul
+                            : AppColors.survival,
+                        merchant:
+                            tx.merchant ??
                             CategoryService.resolveFromId(
                               tx.categoryId,
                               locale,
@@ -337,12 +337,15 @@ class HomeScreen extends ConsumerWidget {
     final transactions = txAsync.valueOrNull;
     if (transactions == null || transactions.isEmpty) return 0;
 
-    final soulTxs =
-        transactions.where((tx) => tx.ledgerType == LedgerType.soul).toList();
+    final soulTxs = transactions
+        .where((tx) => tx.ledgerType == LedgerType.soul)
+        .toList();
     if (soulTxs.isEmpty) return 0;
 
-    final totalSatisfaction =
-        soulTxs.fold<int>(0, (sum, tx) => sum + tx.soulSatisfaction);
+    final totalSatisfaction = soulTxs.fold<int>(
+      0,
+      (sum, tx) => sum + tx.soulSatisfaction,
+    );
     return (totalSatisfaction / soulTxs.length * 10).round();
   }
 

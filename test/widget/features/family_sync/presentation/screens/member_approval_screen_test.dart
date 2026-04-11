@@ -90,26 +90,34 @@ void main() {
     ).thenAnswer((_) async => const RemoveMemberResult.success());
 
     // WebSocket mocks
-    when(() => webSocketService.connectionStateStream)
-        .thenAnswer((_) => const Stream.empty());
-    when(() => webSocketService.connectionState)
-        .thenReturn(WebSocketConnectionState.disconnected);
-    when(() => webSocketService.eventStream)
-        .thenAnswer((_) => const Stream.empty());
-    when(() => webSocketService.connect(
-          groupId: any(named: 'groupId'),
-          deviceId: any(named: 'deviceId'),
-          signMessage: any(named: 'signMessage'),
-        )).thenReturn(null);
+    when(
+      () => webSocketService.connectionStateStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => webSocketService.connectionState,
+    ).thenReturn(WebSocketConnectionState.disconnected);
+    when(
+      () => webSocketService.eventStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => webSocketService.connect(
+        groupId: any(named: 'groupId'),
+        deviceId: any(named: 'deviceId'),
+        signMessage: any(named: 'signMessage'),
+      ),
+    ).thenReturn(null);
     when(() => webSocketService.disconnect()).thenReturn(null);
     when(() => webSocketService.startLifecycleObservation()).thenReturn(null);
     when(() => webSocketService.stopLifecycleObservation()).thenReturn(null);
 
     // KeyManager mock
-    when(() => keyManager.getDeviceId())
-        .thenAnswer((_) async => 'test-device');
-    when(() => keyManager.signData(any())).thenAnswer((_) async =>
-        Signature([], publicKey: SimplePublicKey([], type: KeyPairType.ed25519)));
+    when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'test-device');
+    when(() => keyManager.signData(any())).thenAnswer(
+      (_) async => Signature(
+        [],
+        publicKey: SimplePublicKey([], type: KeyPairType.ed25519),
+      ),
+    );
 
     // Mock getGroupById for navigation to GroupManagementScreen after approve
     when(
@@ -198,10 +206,8 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(
-      () => removeMemberUseCase.execute(
-        groupId: 'group-1',
-        deviceId: 'member-1',
-      ),
+      () =>
+          removeMemberUseCase.execute(groupId: 'group-1', deviceId: 'member-1'),
     ).called(1);
   });
 
@@ -211,9 +217,7 @@ void main() {
         groupId: any(named: 'groupId'),
         deviceId: any(named: 'deviceId'),
       ),
-    ).thenAnswer(
-      (_) async => const RemoveMemberResult.error('Server error'),
-    );
+    ).thenAnswer((_) async => const RemoveMemberResult.error('Server error'));
 
     await tester.pumpWidget(
       createLocalizedWidget(

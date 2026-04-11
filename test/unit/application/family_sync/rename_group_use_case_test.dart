@@ -70,24 +70,16 @@ void main() {
     expect(result, isA<RenameGroupSuccess>());
     expect((result as RenameGroupSuccess).groupName, 'Trimmed Name');
     verify(
-      () => apiClient.renameGroup(
-        groupId: 'group-1',
-        groupName: 'Trimmed Name',
-      ),
+      () =>
+          apiClient.renameGroup(groupId: 'group-1', groupName: 'Trimmed Name'),
     ).called(1);
   });
 
   test('returns error for empty name', () async {
-    final result = await useCase.execute(
-      groupId: 'group-1',
-      groupName: '',
-    );
+    final result = await useCase.execute(groupId: 'group-1', groupName: '');
 
     expect(result, isA<RenameGroupError>());
-    expect(
-      (result as RenameGroupError).message,
-      'Group name cannot be empty',
-    );
+    expect((result as RenameGroupError).message, 'Group name cannot be empty');
     verifyNever(
       () => apiClient.renameGroup(
         groupId: any(named: 'groupId'),
@@ -97,16 +89,10 @@ void main() {
   });
 
   test('returns error for whitespace-only name', () async {
-    final result = await useCase.execute(
-      groupId: 'group-1',
-      groupName: '   ',
-    );
+    final result = await useCase.execute(groupId: 'group-1', groupName: '   ');
 
     expect(result, isA<RenameGroupError>());
-    expect(
-      (result as RenameGroupError).message,
-      'Group name cannot be empty',
-    );
+    expect((result as RenameGroupError).message, 'Group name cannot be empty');
   });
 
   test('returns error for name exceeding 50 characters', () async {
@@ -131,7 +117,10 @@ void main() {
         groupName: any(named: 'groupName'),
       ),
     ).thenThrow(
-      const RelayApiException(statusCode: 403, message: 'Only owner can rename'),
+      const RelayApiException(
+        statusCode: 403,
+        message: 'Only owner can rename',
+      ),
     );
 
     final result = await useCase.execute(
@@ -140,10 +129,7 @@ void main() {
     );
 
     expect(result, isA<RenameGroupError>());
-    expect(
-      (result as RenameGroupError).message,
-      'Only owner can rename',
-    );
+    expect((result as RenameGroupError).message, 'Only owner can rename');
     verifyNever(() => groupRepository.updateGroupName(any(), any()));
   });
 

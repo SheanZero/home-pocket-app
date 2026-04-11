@@ -1187,7 +1187,6 @@ abstract final class DefaultCategories {
     ),
   ];
 
-
   // ─── Default Ledger Configs ───
 
   static final List<CategoryLedgerConfig> _defaultLedgerConfigs = [

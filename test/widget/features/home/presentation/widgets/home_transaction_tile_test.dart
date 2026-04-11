@@ -28,10 +28,7 @@ void main() {
         find.text('\u30a4\u30aa\u30f3\u30b9\u30fc\u30d1\u30fc'),
         findsOneWidget,
       );
-      expect(
-        find.text('\u98df\u8cbb \u00b7 \u751f\u5b58'),
-        findsOneWidget,
-      );
+      expect(find.text('\u98df\u8cbb \u00b7 \u751f\u5b58'), findsOneWidget);
       expect(find.text('-\u00a53,280'), findsOneWidget);
     });
 

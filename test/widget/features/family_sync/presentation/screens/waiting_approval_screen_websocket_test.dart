@@ -52,10 +52,12 @@ void main() {
     wsStateController = StreamController<WebSocketConnectionState>.broadcast();
 
     when(() => mockOrchestrator.needsFullPull()).thenAnswer((_) async => false);
-    when(() => mockOrchestrator.getPendingQueueCount())
-        .thenAnswer((_) async => 0);
-    when(() => mockOrchestrator.execute(any()))
-        .thenAnswer((_) async => const SyncOrchestratorSuccess());
+    when(
+      () => mockOrchestrator.getPendingQueueCount(),
+    ).thenAnswer((_) async => 0);
+    when(
+      () => mockOrchestrator.execute(any()),
+    ).thenAnswer((_) async => const SyncOrchestratorSuccess());
     when(() => groupRepository.getActiveGroup()).thenAnswer((_) async => null);
 
     syncEngine = SyncEngine(
@@ -65,31 +67,41 @@ void main() {
       keyManager: keyManager,
     );
 
-    when(() => checkGroupUseCase.execute())
-        .thenAnswer((_) async => const CheckGroupNotInGroup());
+    when(
+      () => checkGroupUseCase.execute(),
+    ).thenAnswer((_) async => const CheckGroupNotInGroup());
 
     // WebSocket mocks
-    when(() => webSocketService.connectionStateStream)
-        .thenAnswer((_) => wsStateController.stream);
-    when(() => webSocketService.connectionState)
-        .thenReturn(WebSocketConnectionState.disconnected);
-    when(() => webSocketService.connect(
-          groupId: any(named: 'groupId'),
-          deviceId: any(named: 'deviceId'),
-          signMessage: any(named: 'signMessage'),
-        )).thenReturn(null);
+    when(
+      () => webSocketService.connectionStateStream,
+    ).thenAnswer((_) => wsStateController.stream);
+    when(
+      () => webSocketService.connectionState,
+    ).thenReturn(WebSocketConnectionState.disconnected);
+    when(
+      () => webSocketService.connect(
+        groupId: any(named: 'groupId'),
+        deviceId: any(named: 'deviceId'),
+        signMessage: any(named: 'signMessage'),
+      ),
+    ).thenReturn(null);
     when(() => webSocketService.disconnect()).thenReturn(null);
     when(() => webSocketService.startLifecycleObservation()).thenReturn(null);
     when(() => webSocketService.stopLifecycleObservation()).thenReturn(null);
-    when(() => webSocketService.eventStream)
-        .thenAnswer((_) => const Stream.empty());
+    when(
+      () => webSocketService.eventStream,
+    ).thenAnswer((_) => const Stream.empty());
 
     // KeyManager mock
-    when(() => keyManager.getDeviceId())
-        .thenAnswer((_) async => 'test-device-id');
-    when(() => keyManager.signData(any()))
-        .thenAnswer((_) async =>
-            Signature([], publicKey: SimplePublicKey([], type: KeyPairType.ed25519)));
+    when(
+      () => keyManager.getDeviceId(),
+    ).thenAnswer((_) async => 'test-device-id');
+    when(() => keyManager.signData(any())).thenAnswer(
+      (_) async => Signature(
+        [],
+        publicKey: SimplePublicKey([], type: KeyPairType.ed25519),
+      ),
+    );
   });
 
   tearDown(() async {
@@ -98,17 +110,19 @@ void main() {
   });
 
   List<Override> buildOverrides() => [
-        groupRepositoryProvider.overrideWithValue(groupRepository),
-        checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
-        syncEngineProvider.overrideWithValue(syncEngine),
-        webSocketServiceProvider.overrideWithValue(webSocketService),
-        keyManagerProvider.overrideWithValue(keyManager),
-      ];
+    groupRepositoryProvider.overrideWithValue(groupRepository),
+    checkGroupUseCaseProvider.overrideWithValue(checkGroupUseCase),
+    syncEngineProvider.overrideWithValue(syncEngine),
+    webSocketServiceProvider.overrideWithValue(webSocketService),
+    keyManagerProvider.overrideWithValue(keyManager),
+  ];
 
-  testWidgets('always polls regardless of WebSocket connection state',
-      (tester) async {
-    when(() => checkGroupUseCase.execute())
-        .thenAnswer((_) async => const CheckGroupNotInGroup());
+  testWidgets('always polls regardless of WebSocket connection state', (
+    tester,
+  ) async {
+    when(
+      () => checkGroupUseCase.execute(),
+    ).thenAnswer((_) async => const CheckGroupNotInGroup());
 
     await tester.runAsync(() async {
       await tester.pumpWidget(
@@ -137,8 +151,9 @@ void main() {
   });
 
   testWidgets('continues polling after WebSocket disconnects', (tester) async {
-    when(() => checkGroupUseCase.execute())
-        .thenAnswer((_) async => const CheckGroupNotInGroup());
+    when(
+      () => checkGroupUseCase.execute(),
+    ).thenAnswer((_) async => const CheckGroupNotInGroup());
 
     await tester.runAsync(() async {
       await tester.pumpWidget(

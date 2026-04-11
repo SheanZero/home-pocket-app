@@ -36,5 +36,4 @@ void main() {
       expect(container.read(selectedTabIndexProvider), 0);
     });
   });
-
 }

@@ -29,67 +29,65 @@ class HeroHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     return Row(
-        children: [
-          // Left: month picker
-          GestureDetector(
-            onTap: onDateTap,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  l10n.homeMonthFormat(year, month),
-                  style: AppTextStyles.headlineMedium.copyWith(
-                    color: context.wmTextPrimary,
-                  ),
+      children: [
+        // Left: month picker
+        GestureDetector(
+          onTap: onDateTap,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.homeMonthFormat(year, month),
+                style: AppTextStyles.headlineMedium.copyWith(
+                  color: context.wmTextPrimary,
                 ),
-                const SizedBox(width: 6),
-                Icon(
-                  Icons.keyboard_arrow_down,
-                  size: 20,
-                  color: context.wmTextSecondary,
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 6),
+              Icon(
+                Icons.keyboard_arrow_down,
+                size: 20,
+                color: context.wmTextSecondary,
+              ),
+            ],
           ),
+        ),
 
-          const Spacer(),
+        const Spacer(),
 
-          // Mode badge (near settings)
-          _ModeBadge(isGroupMode: isGroupMode, l10n: l10n),
-          const SizedBox(width: 8),
+        // Mode badge (near settings)
+        _ModeBadge(isGroupMode: isGroupMode, l10n: l10n),
+        const SizedBox(width: 8),
 
-          // Settings icon
-          GestureDetector(
-            onTap: onSettingsTap,
-            child: Icon(
-              Icons.settings_outlined,
-              size: 22,
-              color: context.wmTextPrimary,
-            ),
+        // Settings icon
+        GestureDetector(
+          onTap: onSettingsTap,
+          child: Icon(
+            Icons.settings_outlined,
+            size: 22,
+            color: context.wmTextPrimary,
           ),
-        ],
-      );
+        ),
+      ],
+    );
   }
 }
 
 /// Badge showing either family mode (coral) or personal mode (blue).
 class _ModeBadge extends StatelessWidget {
-  const _ModeBadge({
-    required this.isGroupMode,
-    required this.l10n,
-  });
+  const _ModeBadge({required this.isGroupMode, required this.l10n});
 
   final bool isGroupMode;
   final S l10n;
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor =
-        isGroupMode ? context.wmFamilyBadgeBg : context.wmSurvivalTagBg;
-    final foregroundColor =
-        isGroupMode ? AppColors.accentPrimary : AppColors.survival;
-    final label =
-        isGroupMode ? l10n.homeFamilyMode : l10n.homePersonalMode;
+    final backgroundColor = isGroupMode
+        ? context.wmFamilyBadgeBg
+        : context.wmSurvivalTagBg;
+    final foregroundColor = isGroupMode
+        ? AppColors.accentPrimary
+        : AppColors.survival;
+    final label = isGroupMode ? l10n.homeFamilyMode : l10n.homePersonalMode;
     final icon = isGroupMode ? Icons.people : Icons.person;
 
     return Container(

@@ -63,9 +63,9 @@ void main() {
 
   setUp(() {
     repo = _FakeRepo();
-    container = ProviderContainer(overrides: [
-      categoryRepositoryProvider.overrideWithValue(repo),
-    ]);
+    container = ProviderContainer(
+      overrides: [categoryRepositoryProvider.overrideWithValue(repo)],
+    );
   });
 
   tearDown(() => container.dispose());
@@ -85,7 +85,9 @@ void main() {
     test('enterEditing switches to editing mode with isDirty=false', () {
       notifier().enterEditing(
         l1: [_cat('a'), _cat('b')],
-        l2ByParent: {'a': [_cat('a1', parent: 'a', level: 2)]},
+        l2ByParent: {
+          'a': [_cat('a1', parent: 'a', level: 2)],
+        },
       );
       final s = state();
       expect(s.mode, CategoryReorderMode.editing);
@@ -99,7 +101,10 @@ void main() {
         l1: [_cat('a'), _cat('b'), _cat('c')],
         l2ByParent: const {},
       );
-      notifier().reorderL1(0, 3); // move a to end (ReorderableListView semantics)
+      notifier().reorderL1(
+        0,
+        3,
+      ); // move a to end (ReorderableListView semantics)
       final s = state();
       expect(s.l1.map((c) => c.id), ['b', 'c', 'a']);
       expect(s.isDirty, isTrue);
@@ -109,7 +114,10 @@ void main() {
       notifier().enterEditing(
         l1: [_cat('food')],
         l2ByParent: {
-          'food': [_cat('x', parent: 'food', level: 2), _cat('y', parent: 'food', level: 2)],
+          'food': [
+            _cat('x', parent: 'food', level: 2),
+            _cat('y', parent: 'food', level: 2),
+          ],
         },
       );
       notifier().reorderL2('food', 0, 2); // x → end
@@ -122,18 +130,16 @@ void main() {
       notifier().enterEditing(
         l1: [_cat('a'), _cat('b')],
         l2ByParent: {
-          'a': [_cat('a1', parent: 'a', level: 2), _cat('a2', parent: 'a', level: 2)],
+          'a': [
+            _cat('a1', parent: 'a', level: 2),
+            _cat('a2', parent: 'a', level: 2),
+          ],
         },
       );
       notifier().reorderL1(1, 0); // b → front
       await notifier().save();
 
-      expect(repo.lastSaved, {
-        'b': 0,
-        'a': 1,
-        'a1': 0,
-        'a2': 1,
-      });
+      expect(repo.lastSaved, {'b': 0, 'a': 1, 'a1': 0, 'a2': 1});
       expect(state().mode, CategoryReorderMode.idle);
     });
 
@@ -152,10 +158,7 @@ void main() {
     });
 
     test('cancel returns to idle even when dirty', () {
-      notifier().enterEditing(
-        l1: [_cat('a'), _cat('b')],
-        l2ByParent: const {},
-      );
+      notifier().enterEditing(l1: [_cat('a'), _cat('b')], l2ByParent: const {});
       notifier().reorderL1(0, 2);
       notifier().cancel();
       expect(state().mode, CategoryReorderMode.idle);

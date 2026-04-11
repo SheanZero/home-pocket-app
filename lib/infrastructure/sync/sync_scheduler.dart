@@ -97,9 +97,11 @@ class SyncScheduler {
 
   void _check24HourThreshold() {
     unawaited(
-      _checkNeedsFullPull().then((needs) {
-        if (needs) _enqueueSync(SyncMode.fullPull);
-      }).catchError((_) {}),
+      _checkNeedsFullPull()
+          .then((needs) {
+            if (needs) _enqueueSync(SyncMode.fullPull);
+          })
+          .catchError((_) {}),
     );
   }
 

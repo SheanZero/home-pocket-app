@@ -97,9 +97,7 @@ PushNotificationService pushNotificationService(Ref ref) {
 /// Defined manually (not @riverpod) to support .overrideWithValue() in tests.
 /// On-demand — screens connect/disconnect as needed.
 final webSocketServiceProvider = Provider<WebSocketService>((ref) {
-  final service = WebSocketService(
-    baseUrl: RelayApiClient.wsBaseUrl,
-  );
+  final service = WebSocketService(baseUrl: RelayApiClient.wsBaseUrl);
   ref.onDispose(service.dispose);
   return service;
 });

@@ -96,7 +96,10 @@ final _soulTransaction = Transaction(
   soulSatisfaction: 8,
 );
 
-Widget _buildLocalizedApp({required Widget child, Locale locale = const Locale('ja')}) {
+Widget _buildLocalizedApp({
+  required Widget child,
+  Locale locale = const Locale('ja'),
+}) {
   return MaterialApp(
     locale: locale,
     localizationsDelegates: const [
@@ -131,18 +134,18 @@ void main() {
     ShadowAggregate? shadowAgg,
   }) {
     if (groupMode) {
-      when(
-        () => groupRepository.watchActiveGroup(),
-      ).thenAnswer((_) => Stream.value(
-        GroupInfo(
-          groupId: 'group-1',
-          groupName: 'Test Family',
-          status: GroupStatus.active,
-          role: 'owner',
-          members: const [],
-          createdAt: DateTime(2026, 3, 14),
+      when(() => groupRepository.watchActiveGroup()).thenAnswer(
+        (_) => Stream.value(
+          GroupInfo(
+            groupId: 'group-1',
+            groupName: 'Test Family',
+            status: GroupStatus.active,
+            role: 'owner',
+            members: const [],
+            createdAt: DateTime(2026, 3, 14),
+          ),
         ),
-      ));
+      );
     }
 
     return ProviderScope(
@@ -160,8 +163,7 @@ void main() {
           (ref) async => shadowBooks ?? const [],
         ),
         shadowAggregateProvider(year: now.year, month: now.month).overrideWith(
-          (ref) async =>
-              shadowAgg ?? const ShadowAggregate.empty(),
+          (ref) async => shadowAgg ?? const ShadowAggregate.empty(),
         ),
       ],
       child: _buildLocalizedApp(
@@ -185,7 +187,9 @@ void main() {
       );
     });
 
-    testWidgets('does not use hero Stack pattern with blue background', (tester) async {
+    testWidgets('does not use hero Stack pattern with blue background', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
@@ -199,7 +203,8 @@ void main() {
         (widget) =>
             widget is Container &&
             widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).color == const Color(0xFF8AB8DA),
+            (widget.decoration as BoxDecoration).color ==
+                const Color(0xFF8AB8DA),
       );
       expect(blueContainerFinder, findsNothing);
     });
@@ -259,7 +264,9 @@ void main() {
       expect(find.byType(TransactionListCard), findsNothing);
     });
 
-    testWidgets('shows transactions inside TransactionListCard', (tester) async {
+    testWidgets('shows transactions inside TransactionListCard', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         buildSubject(
           report: _reportWithData,
@@ -292,10 +299,7 @@ void main() {
 
     testWidgets('soul transaction shows 魂 tag', (tester) async {
       await tester.pumpWidget(
-        buildSubject(
-          report: _reportWithData,
-          transactions: [_soulTransaction],
-        ),
+        buildSubject(report: _reportWithData, transactions: [_soulTransaction]),
       );
       await tester.pumpAndSettle();
 
@@ -303,7 +307,9 @@ void main() {
       expect(find.text('\u9b42'), findsOneWidget);
     });
 
-    testWidgets('displays formatted expense amount with minus sign', (tester) async {
+    testWidgets('displays formatted expense amount with minus sign', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         buildSubject(
           report: _reportWithData,
@@ -348,7 +354,9 @@ void main() {
       expect(find.text('Family Mode'), findsOneWidget);
     });
 
-    testWidgets('group mode shows member initial in transaction tag', (tester) async {
+    testWidgets('group mode shows member initial in transaction tag', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         buildSubject(
           groupMode: true,
@@ -364,10 +372,10 @@ void main() {
   });
 
   group('HomeScreen ledger rows', () {
-    testWidgets('solo mode shows 2 ledger rows (survival + soul)', (tester) async {
-      await tester.pumpWidget(
-        buildSubject(report: _reportWithData),
-      );
+    testWidgets('solo mode shows 2 ledger rows (survival + soul)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject(report: _reportWithData));
       await tester.pumpAndSettle();
 
       expect(find.text('生存帳本'), findsOneWidget);
@@ -375,41 +383,40 @@ void main() {
       expect(find.text('共有帳本'), findsNothing);
     });
 
-    testWidgets(
-      'group mode shows shadow book ledger row named after member',
-      (tester) async {
-        await tester.pumpWidget(
-          buildSubject(
-            report: _reportWithData,
-            groupMode: true,
-            shadowBooks: [_shadowBookInfo],
-            shadowAgg: ShadowAggregate(
-              totalExpenses: 12000,
-              prevTotalExpenses: 9000,
-              perBookReports: {
-                _shadowBook.id: MonthlyReport(
-                  year: now.year,
-                  month: now.month,
-                  totalIncome: 0,
-                  totalExpenses: 12000,
-                  savings: 0,
-                  savingsRate: 0,
-                  survivalTotal: 12000,
-                  soulTotal: 0,
-                  categoryBreakdowns: [],
-                  dailyExpenses: [],
-                ),
-              },
-            ),
+    testWidgets('group mode shows shadow book ledger row named after member', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildSubject(
+          report: _reportWithData,
+          groupMode: true,
+          shadowBooks: [_shadowBookInfo],
+          shadowAgg: ShadowAggregate(
+            totalExpenses: 12000,
+            prevTotalExpenses: 9000,
+            perBookReports: {
+              _shadowBook.id: MonthlyReport(
+                year: now.year,
+                month: now.month,
+                totalIncome: 0,
+                totalExpenses: 12000,
+                savings: 0,
+                savingsRate: 0,
+                survivalTotal: 12000,
+                soulTotal: 0,
+                categoryBreakdowns: [],
+                dailyExpenses: [],
+              ),
+            },
           ),
-        );
-        await tester.pumpAndSettle();
+        ),
+      );
+      await tester.pumpAndSettle();
 
-        expect(find.text('生存帳本'), findsOneWidget);
-        expect(find.text('灵魂帳本'), findsOneWidget);
-        expect(find.text('田中の帳本'), findsOneWidget);
-        expect(find.text('共有帳本'), findsNothing);
-      },
-    );
+      expect(find.text('生存帳本'), findsOneWidget);
+      expect(find.text('灵魂帳本'), findsOneWidget);
+      expect(find.text('田中の帳本'), findsOneWidget);
+      expect(find.text('共有帳本'), findsNothing);
+    });
   });
 }

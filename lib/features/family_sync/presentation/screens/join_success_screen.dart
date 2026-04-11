@@ -45,10 +45,7 @@ class JoinSuccessScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Celebration emoji
-                const Text(
-                  '\u{1F389}',
-                  style: TextStyle(fontSize: 48),
-                ),
+                const Text('\u{1F389}', style: TextStyle(fontSize: 48)),
                 const SizedBox(height: 20),
 
                 // Welcome title
@@ -87,10 +84,7 @@ class JoinSuccessScreen extends ConsumerWidget {
                         child: Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 3,
-                            ),
+                            border: Border.all(color: Colors.white, width: 3),
                           ),
                           child: AvatarDisplay(
                             emoji: ownerAvatarEmoji,
@@ -103,10 +97,7 @@ class JoinSuccessScreen extends ConsumerWidget {
                         child: Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 3,
-                            ),
+                            border: Border.all(color: Colors.white, width: 3),
                           ),
                           child: AvatarDisplay(
                             emoji: myAvatarEmoji,

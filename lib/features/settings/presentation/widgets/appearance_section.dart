@@ -9,11 +9,7 @@ import '../providers/repository_providers.dart';
 import '../providers/settings_providers.dart';
 
 /// Hardcoded language names displayed in their own language.
-const _languageNames = {
-  'ja': '日本語',
-  'zh': '中文',
-  'en': 'English',
-};
+const _languageNames = {'ja': '日本語', 'zh': '中文', 'en': 'English'};
 
 class AppearanceSection extends ConsumerWidget {
   const AppearanceSection({super.key, required this.settings});
@@ -102,15 +98,11 @@ class _LanguageTile extends ConsumerWidget {
     );
   }
 
-  String _buildSubtitle(
-    LocaleSettings? localeSettings,
-    BuildContext context,
-  ) {
+  String _buildSubtitle(LocaleSettings? localeSettings, BuildContext context) {
     if (localeSettings == null) {
       return '';
     }
-    final nativeName =
-        _languageNames[localeSettings.locale.languageCode] ?? '';
+    final nativeName = _languageNames[localeSettings.locale.languageCode] ?? '';
     if (localeSettings.isSystemDefault) {
       return '${S.of(context).languageSystem} ($nativeName)';
     }

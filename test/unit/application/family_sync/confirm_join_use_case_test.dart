@@ -83,10 +83,7 @@ void main() {
     );
 
     expect(result, isA<ConfirmJoinError>());
-    expect(
-      (result as ConfirmJoinError).message,
-      'Device key not initialized',
-    );
+    expect((result as ConfirmJoinError).message, 'Device key not initialized');
   });
 
   test('returns error on RelayApiException', () async {
@@ -112,10 +109,7 @@ void main() {
     );
 
     expect(result, isA<ConfirmJoinError>());
-    expect(
-      (result as ConfirmJoinError).message,
-      'Not authorized to join',
-    );
+    expect((result as ConfirmJoinError).message, 'Not authorized to join');
   });
 
   test('returns error on unexpected exception', () async {

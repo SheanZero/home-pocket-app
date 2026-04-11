@@ -31,12 +31,14 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
     final profile = await ref.read(userProfileProvider.future);
     if (!mounted) return;
 
-    final result = await ref.read(confirmJoinUseCaseProvider).execute(
-      groupId: widget.result.groupId,
-      groupName: widget.result.groupName,
-      displayName: profile?.displayName ?? '',
-      avatarEmoji: profile?.avatarEmoji ?? '',
-    );
+    final result = await ref
+        .read(confirmJoinUseCaseProvider)
+        .execute(
+          groupId: widget.result.groupId,
+          groupName: widget.result.groupName,
+          displayName: profile?.displayName ?? '',
+          avatarEmoji: profile?.avatarEmoji ?? '',
+        );
 
     if (!mounted) return;
 
@@ -54,9 +56,9 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
         );
       case ConfirmJoinError(:final message):
         setState(() => _isConfirming = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
     }
   }
 
@@ -119,10 +121,7 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    '\u{1F3E0}',
-                    style: TextStyle(fontSize: 20),
-                  ),
+                  const Text('\u{1F3E0}', style: TextStyle(fontSize: 20)),
                   const SizedBox(width: 8),
                   Text(
                     r.groupName,
@@ -191,10 +190,7 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                     const SizedBox(height: 16),
 
                     // Owner avatar
-                    AvatarDisplay(
-                      emoji: r.ownerAvatarEmoji,
-                      size: 80,
-                    ),
+                    AvatarDisplay(emoji: r.ownerAvatarEmoji, size: 80),
                     const SizedBox(height: 12),
 
                     // Owner name

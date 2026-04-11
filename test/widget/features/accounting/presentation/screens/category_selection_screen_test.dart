@@ -133,22 +133,30 @@ void main() {
   });
 
   group('reorder entry', () {
-    testWidgets('AppBar shows Icons.reorder button in read mode', (tester) async {
+    testWidgets('AppBar shows Icons.reorder button in read mode', (
+      tester,
+    ) async {
       final repo = FakeCategoryRepository(categories);
-      await tester.pumpWidget(createLocalizedWidget(
-        const CategorySelectionScreen(),
-        overrides: [categoryRepositoryProvider.overrideWithValue(repo)],
-      ));
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const CategorySelectionScreen(),
+          overrides: [categoryRepositoryProvider.overrideWithValue(repo)],
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.byIcon(Icons.reorder), findsOneWidget);
     });
 
-    testWidgets('tapping reorder button switches AppBar to edit title', (tester) async {
+    testWidgets('tapping reorder button switches AppBar to edit title', (
+      tester,
+    ) async {
       final repo = FakeCategoryRepository(categories);
-      await tester.pumpWidget(createLocalizedWidget(
-        const CategorySelectionScreen(),
-        overrides: [categoryRepositoryProvider.overrideWithValue(repo)],
-      ));
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const CategorySelectionScreen(),
+          overrides: [categoryRepositoryProvider.overrideWithValue(repo)],
+        ),
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.reorder));
       await tester.pumpAndSettle();
@@ -161,13 +169,16 @@ void main() {
       expect(find.byType(TextField), findsNothing);
     });
 
-    testWidgets('save after L1 reorder writes the new order to the repo',
-        (tester) async {
+    testWidgets('save after L1 reorder writes the new order to the repo', (
+      tester,
+    ) async {
       final repo = FakeCategoryRepository(categories);
-      await tester.pumpWidget(createLocalizedWidget(
-        const CategorySelectionScreen(),
-        overrides: [categoryRepositoryProvider.overrideWithValue(repo)],
-      ));
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const CategorySelectionScreen(),
+          overrides: [categoryRepositoryProvider.overrideWithValue(repo)],
+        ),
+      );
       await tester.pumpAndSettle();
 
       await tester.tap(find.byIcon(Icons.reorder));
@@ -176,9 +187,7 @@ void main() {
       final container = ProviderScope.containerOf(
         tester.element(find.byType(CategorySelectionScreen)),
       );
-      container
-          .read(categoryReorderNotifierProvider.notifier)
-          .reorderL1(0, 2);
+      container.read(categoryReorderNotifierProvider.notifier).reorderL1(0, 2);
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Save'));
@@ -191,21 +200,23 @@ void main() {
 
     testWidgets('edit mode renders in dark theme (AC-13)', (tester) async {
       final repo = FakeCategoryRepository(categories);
-      await tester.pumpWidget(ProviderScope(
-        overrides: [categoryRepositoryProvider.overrideWithValue(repo)],
-        child: MaterialApp(
-          theme: ThemeData.dark(),
-          locale: const Locale('en'),
-          localizationsDelegates: const [
-            S.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: S.supportedLocales,
-          home: const CategorySelectionScreen(),
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [categoryRepositoryProvider.overrideWithValue(repo)],
+          child: MaterialApp(
+            theme: ThemeData.dark(),
+            locale: const Locale('en'),
+            localizationsDelegates: const [
+              S.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: S.supportedLocales,
+            home: const CategorySelectionScreen(),
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.reorder));
       await tester.pumpAndSettle();
@@ -218,10 +229,12 @@ void main() {
 
     testWidgets('cancel after dragging shows discard dialog', (tester) async {
       final repo = FakeCategoryRepository(categories);
-      await tester.pumpWidget(createLocalizedWidget(
-        const CategorySelectionScreen(),
-        overrides: [categoryRepositoryProvider.overrideWithValue(repo)],
-      ));
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const CategorySelectionScreen(),
+          overrides: [categoryRepositoryProvider.overrideWithValue(repo)],
+        ),
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.reorder));
       await tester.pumpAndSettle();
@@ -234,17 +247,26 @@ void main() {
       expect(find.text('Select Category'), findsOneWidget);
     });
 
-    testWidgets('discard dialog offers keep editing and discard', (tester) async {
+    testWidgets('discard dialog offers keep editing and discard', (
+      tester,
+    ) async {
       final repo = FakeCategoryRepository(categories);
-      await tester.pumpWidget(createLocalizedWidget(
-        const CategorySelectionScreen(),
-        overrides: [categoryRepositoryProvider.overrideWithValue(repo)],
-      ));
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const CategorySelectionScreen(),
+          overrides: [categoryRepositoryProvider.overrideWithValue(repo)],
+        ),
+      );
       await tester.pumpAndSettle();
 
-      final container = ProviderScope.containerOf(tester.element(find.byType(CategorySelectionScreen)));
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(CategorySelectionScreen)),
+      );
       final notifier = container.read(categoryReorderNotifierProvider.notifier);
-      notifier.enterEditing(l1: categories.where((c) => c.level == 1).toList(), l2ByParent: const {});
+      notifier.enterEditing(
+        l1: categories.where((c) => c.level == 1).toList(),
+        l2ByParent: const {},
+      );
       notifier.reorderL1(0, 1);
       await tester.pumpAndSettle();
 

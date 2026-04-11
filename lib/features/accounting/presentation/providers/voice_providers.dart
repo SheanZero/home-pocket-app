@@ -51,4 +51,3 @@ ParseVoiceInputUseCase parseVoiceInputUseCase(Ref ref) {
 VoiceSatisfactionEstimator voiceSatisfactionEstimator(Ref ref) {
   return VoiceSatisfactionEstimator();
 }
-

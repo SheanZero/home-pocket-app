@@ -75,16 +75,22 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
       _errorMessage = null;
     });
 
-    final result = await ref.read(createGroupUseCaseProvider).execute(
-      displayName: profile.displayName,
-      avatarEmoji: profile.avatarEmoji,
-      groupName: groupName,
-    );
+    final result = await ref
+        .read(createGroupUseCaseProvider)
+        .execute(
+          displayName: profile.displayName,
+          avatarEmoji: profile.avatarEmoji,
+          groupName: groupName,
+        );
 
     if (!mounted) return;
 
     switch (result) {
-      case CreateGroupSuccess(:final groupId, :final inviteCode, :final expiresAt):
+      case CreateGroupSuccess(
+        :final groupId,
+        :final inviteCode,
+        :final expiresAt,
+      ):
         setState(() {
           _groupId = groupId;
           _inviteCode = inviteCode;
@@ -165,10 +171,9 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
     final groupId = _groupId;
     if (groupId == null) return;
 
-    final result = await ref.read(renameGroupUseCaseProvider).execute(
-      groupId: groupId,
-      groupName: newName,
-    );
+    final result = await ref
+        .read(renameGroupUseCaseProvider)
+        .execute(groupId: groupId, groupName: newName);
 
     if (!mounted) return;
 
@@ -176,9 +181,9 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
       case RenameGroupSuccess(:final groupName):
         setState(() => _groupName = groupName);
       case RenameGroupError(:final message):
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
     }
   }
 
@@ -198,8 +203,8 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _errorMessage != null
-                ? _buildError(l10n)
-                : _buildContent(l10n),
+            ? _buildError(l10n)
+            : _buildContent(l10n),
       ),
     );
   }
@@ -283,10 +288,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  '\u{1F3E0}',
-                  style: TextStyle(fontSize: 20),
-                ),
+                const Text('\u{1F3E0}', style: TextStyle(fontSize: 20)),
                 const SizedBox(width: 8),
                 Text(
                   _groupName,
@@ -444,18 +446,16 @@ class _TimerRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
-    final expiresDateTime = DateTime.fromMillisecondsSinceEpoch(expiresAt * 1000);
+    final expiresDateTime = DateTime.fromMillisecondsSinceEpoch(
+      expiresAt * 1000,
+    );
     final remaining = expiresDateTime.difference(DateTime.now());
     final minutes = remaining.inMinutes.clamp(0, 999);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
-          LucideIcons.clock,
-          size: 14,
-          color: AppColors.textSecondary,
-        ),
+        Icon(LucideIcons.clock, size: 14, color: AppColors.textSecondary),
         const SizedBox(width: 6),
         Text(
           l10n.groupInviteExpiry(minutes),

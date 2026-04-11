@@ -5,11 +5,7 @@ import '../../domain/models/sync_status_model.dart';
 
 /// Displays a colored badge with icon and label for sync status.
 class SyncStatusBadge extends StatelessWidget {
-  const SyncStatusBadge({
-    super.key,
-    required this.state,
-    this.compact = false,
-  });
+  const SyncStatusBadge({super.key, required this.state, this.compact = false});
 
   final SyncState state;
   final bool compact;

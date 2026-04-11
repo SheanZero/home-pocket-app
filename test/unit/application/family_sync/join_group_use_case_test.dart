@@ -17,10 +17,7 @@ void main() {
   setUp(() {
     apiClient = MockRelayApiClient();
     keyManager = MockKeyManager();
-    useCase = JoinGroupUseCase(
-      apiClient: apiClient,
-      keyManager: keyManager,
-    );
+    useCase = JoinGroupUseCase(apiClient: apiClient, keyManager: keyManager);
 
     when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
     when(() => keyManager.getPublicKey()).thenAnswer((_) async => 'public-key');
@@ -205,9 +202,7 @@ void main() {
         avatarEmoji: any(named: 'avatarEmoji'),
         avatarImageHash: any(named: 'avatarImageHash'),
       ),
-    ).thenThrow(
-      const RelayApiException(statusCode: 409, message: 'Conflict'),
-    );
+    ).thenThrow(const RelayApiException(statusCode: 409, message: 'Conflict'));
 
     final result = await useCase.execute(
       inviteCode: 'INV123',
@@ -234,9 +229,6 @@ void main() {
     );
 
     expect(result, isA<JoinGroupError>());
-    expect(
-      (result as JoinGroupError).message,
-      'Device key not initialized',
-    );
+    expect((result as JoinGroupError).message, 'Device key not initialized');
   });
 }

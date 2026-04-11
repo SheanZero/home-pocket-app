@@ -15,7 +15,8 @@ import '../../../../application/family_sync/confirm_member_use_case.dart';
 import '../../use_cases/remove_member_use_case.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
 import '../providers/group_providers.dart';
-import '../providers/repository_providers.dart' show groupRepositoryProvider, webSocketServiceProvider;
+import '../providers/repository_providers.dart'
+    show groupRepositoryProvider, webSocketServiceProvider;
 import 'group_management_screen.dart';
 
 const _purpleGradient = [
@@ -178,7 +179,7 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
     final group = _group;
     final pendingMembers =
         group?.members.where((m) => m.status == 'pending').toList() ??
-            const <GroupMember>[];
+        const <GroupMember>[];
 
     // Show the first pending member in the new centered design
     final applicant = pendingMembers.isNotEmpty ? pendingMembers.first : null;
@@ -205,11 +206,7 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         // Bell icon
-        Icon(
-          LucideIcons.bellRing,
-          size: 32,
-          color: AppColors.accentPrimary,
-        ),
+        Icon(LucideIcons.bellRing, size: 32, color: AppColors.accentPrimary),
         const SizedBox(height: 16),
 
         // Title
@@ -281,10 +278,7 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      '\u{1F3E0}',
-                      style: TextStyle(fontSize: 12),
-                    ),
+                    const Text('\u{1F3E0}', style: TextStyle(fontSize: 12)),
                     const SizedBox(width: 4),
                     Text(
                       group.groupName,
@@ -412,11 +406,7 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          LucideIcons.bellRing,
-          size: 32,
-          color: AppColors.textTertiary,
-        ),
+        Icon(LucideIcons.bellRing, size: 32, color: AppColors.textTertiary),
         const SizedBox(height: 16),
         Text(
           l10n.familySyncApprovalTip,

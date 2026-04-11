@@ -252,6 +252,15 @@ class MockCategoryRepository extends _i1.Mock
           as _i5.Future<void>);
 
   @override
+  _i5.Future<void> updateSortOrders(Map<String, int>? idToSortOrder) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateSortOrders, [idToSortOrder]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
   _i5.Future<void> deleteAll() =>
       (super.noSuchMethod(
             Invocation.method(#deleteAll, []),
