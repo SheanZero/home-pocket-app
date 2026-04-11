@@ -1227,6 +1227,48 @@ abstract class S {
   /// **'Add category'**
   String get addCategory;
 
+  /// AppBar title during category reorder edit mode
+  ///
+  /// In en, this message translates to:
+  /// **'Edit category order'**
+  String get editCategoryOrder;
+
+  /// Hint banner shown in category reorder edit mode
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to reorder'**
+  String get dragToReorder;
+
+  /// SnackBar shown after successfully saving category reorder
+  ///
+  /// In en, this message translates to:
+  /// **'Order updated'**
+  String get orderUpdated;
+
+  /// SnackBar shown when saving category reorder fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save order. Please retry'**
+  String get orderSaveFailed;
+
+  /// Dialog title when cancelling reorder with unsaved changes
+  ///
+  /// In en, this message translates to:
+  /// **'Discard unsaved changes?'**
+  String get discardUnsavedChanges;
+
+  /// Dialog cancel button: keep editing
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get keepEditing;
+
+  /// Dialog confirm button: discard unsaved changes
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discard;
+
   /// Voice input hint
   ///
   /// In en, this message translates to:

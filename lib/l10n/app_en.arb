@@ -539,6 +539,20 @@
   "@addCategory": {
     "description": "Bottom action button label to add a category"
   },
+  "editCategoryOrder": "Edit category order",
+  "@editCategoryOrder": { "description": "AppBar title during category reorder edit mode" },
+  "dragToReorder": "Drag to reorder",
+  "@dragToReorder": { "description": "Hint banner shown in category reorder edit mode" },
+  "orderUpdated": "Order updated",
+  "@orderUpdated": { "description": "SnackBar shown after successfully saving category reorder" },
+  "orderSaveFailed": "Failed to save order. Please retry",
+  "@orderSaveFailed": { "description": "SnackBar shown when saving category reorder fails" },
+  "discardUnsavedChanges": "Discard unsaved changes?",
+  "@discardUnsavedChanges": { "description": "Dialog title when cancelling reorder with unsaved changes" },
+  "keepEditing": "Keep editing",
+  "@keepEditing": { "description": "Dialog cancel button: keep editing" },
+  "discard": "Discard",
+  "@discard": { "description": "Dialog confirm button: discard unsaved changes" },
   "tapToRecord": "Tap to record",
   "@tapToRecord": { "description": "Voice input hint" },
 

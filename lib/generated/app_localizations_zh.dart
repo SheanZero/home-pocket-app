@@ -593,6 +593,27 @@ class SZh extends S {
   String get addCategory => '添加分类';
 
   @override
+  String get editCategoryOrder => '编辑分类顺序';
+
+  @override
+  String get dragToReorder => '拖拽重排';
+
+  @override
+  String get orderUpdated => '顺序已更新';
+
+  @override
+  String get orderSaveFailed => '保存失败，请重试';
+
+  @override
+  String get discardUnsavedChanges => '放弃未保存的修改？';
+
+  @override
+  String get keepEditing => '继续编辑';
+
+  @override
+  String get discard => '放弃';
+
+  @override
   String get tapToRecord => '点击录音';
 
   @override

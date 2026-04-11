@@ -595,6 +595,27 @@ class SEn extends S {
   String get addCategory => 'Add category';
 
   @override
+  String get editCategoryOrder => 'Edit category order';
+
+  @override
+  String get dragToReorder => 'Drag to reorder';
+
+  @override
+  String get orderUpdated => 'Order updated';
+
+  @override
+  String get orderSaveFailed => 'Failed to save order. Please retry';
+
+  @override
+  String get discardUnsavedChanges => 'Discard unsaved changes?';
+
+  @override
+  String get keepEditing => 'Keep editing';
+
+  @override
+  String get discard => 'Discard';
+
+  @override
   String get tapToRecord => 'Tap to record';
 
   @override

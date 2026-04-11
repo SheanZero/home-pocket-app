@@ -593,6 +593,27 @@ class SJa extends S {
   String get addCategory => 'カテゴリを追加';
 
   @override
+  String get editCategoryOrder => '順序を編集';
+
+  @override
+  String get dragToReorder => 'ドラッグして並べ替え';
+
+  @override
+  String get orderUpdated => '順序を更新しました';
+
+  @override
+  String get orderSaveFailed => '保存に失敗しました。再試行してください';
+
+  @override
+  String get discardUnsavedChanges => '未保存の変更を破棄しますか？';
+
+  @override
+  String get keepEditing => '編集を続ける';
+
+  @override
+  String get discard => '破棄';
+
+  @override
   String get tapToRecord => 'タップして録音';
 
   @override
