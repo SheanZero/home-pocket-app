@@ -357,16 +357,24 @@ abstract final class DefaultCategories {
       'cat_clothing',
       99,
     ),
+    _l2(
+      'cat_clothing_shoes',
+      'category_clothing_shoes',
+      'directions_walk',
+      '#E91E63',
+      'cat_clothing',
+      9,
+    ),
+    _l2(
+      'cat_clothing_bags',
+      'category_clothing_bags',
+      'shopping_bag',
+      '#E91E63',
+      'cat_clothing',
+      10,
+    ),
 
     // \u00a710.7 Socializing (5 L2s)
-    _l2(
-      'cat_social_general',
-      'category_social_general',
-      'people',
-      '#FF9800',
-      'cat_social',
-      0,
-    ),
     _l2(
       'cat_social_drinks',
       'category_social_drinks',
@@ -397,7 +405,15 @@ abstract final class DefaultCategories {
       'more_horiz',
       '#FF9800',
       'cat_social',
-      99,
+      4,
+    ),
+    _l2(
+      'cat_social_fees',
+      'category_social_fees',
+      'groups',
+      '#FF9800',
+      'cat_social',
+      5,
     ),
 
     // \u00a710.5 Health & Medical (5 L2s)
@@ -440,6 +456,30 @@ abstract final class DefaultCategories {
       '#F44336',
       'cat_health',
       99,
+    ),
+    _l2(
+      'cat_health_dental',
+      'category_health_dental',
+      'medical_services',
+      '#F44336',
+      'cat_health',
+      6,
+    ),
+    _l2(
+      'cat_health_supplements',
+      'category_health_supplements',
+      'health_and_safety',
+      '#F44336',
+      'cat_health',
+      7,
+    ),
+    _l2(
+      'cat_health_dock',
+      'category_health_dock',
+      'fact_check',
+      '#F44336',
+      'cat_health',
+      8,
     ),
 
     // \u00a710.6 Education & Self-Improvement (7 L2s)
@@ -498,6 +538,30 @@ abstract final class DefaultCategories {
       '#3F51B5',
       'cat_education',
       99,
+    ),
+    _l2(
+      'cat_education_entrance_exam',
+      'category_education_entrance_exam',
+      'quiz',
+      '#3F51B5',
+      'cat_education',
+      8,
+    ),
+    _l2(
+      'cat_education_gakushi_hoken',
+      'category_education_gakushi_hoken',
+      'card_membership',
+      '#3F51B5',
+      'cat_education',
+      9,
+    ),
+    _l2(
+      'cat_education_seminar',
+      'category_education_seminar',
+      'co_present',
+      '#3F51B5',
+      'cat_education',
+      10,
     ),
 
     // \u00a710.4 Utilities (5 L2s)
