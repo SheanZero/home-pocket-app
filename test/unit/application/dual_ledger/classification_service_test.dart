@@ -62,9 +62,5 @@ void main() {
       }
     });
 
-    test('income categories fall back to survival', () async {
-      final result = await service.classify(categoryId: 'cat_salary');
-      expect(result.ledgerType, LedgerType.survival);
-    });
   });
 }

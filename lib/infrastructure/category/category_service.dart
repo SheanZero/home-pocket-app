@@ -56,12 +56,6 @@ abstract final class CategoryService {
     'category_asset': '資産形成',
     'category_other_expense': 'その他',
 
-    // L1 Income
-    'category_salary': '給料',
-    'category_bonus': '賞与',
-    'category_investment': '投資収益',
-    'category_other_income': 'その他収入',
-
     // L2 Food (§10.16)
     'category_food_groceries': '食料品',
     'category_food_dining_out': '外食',
@@ -295,12 +289,6 @@ abstract final class CategoryService {
     'category_asset': '资产配置',
     'category_other_expense': '其他',
 
-    // L1 Income
-    'category_salary': '工资',
-    'category_bonus': '奖金',
-    'category_investment': '投资收益',
-    'category_other_income': '其他收入',
-
     // L2 Food (§10.16)
     'category_food_groceries': '食材杂货',
     'category_food_dining_out': '外出就餐',
@@ -533,12 +521,6 @@ abstract final class CategoryService {
     'category_special': 'Special Expenses',
     'category_asset': 'Asset Building',
     'category_other_expense': 'Other',
-
-    // L1 Income
-    'category_salary': 'Salary',
-    'category_bonus': 'Bonus',
-    'category_investment': 'Investment Returns',
-    'category_other_income': 'Other Income',
 
     // L2 Food (§10.16)
     'category_food_groceries': 'Groceries',

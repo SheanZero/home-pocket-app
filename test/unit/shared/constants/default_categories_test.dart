@@ -13,9 +13,6 @@ void main() {
         expect(l1s.every((c) => c.parentId == null), isTrue);
       });
 
-      test('has 4 income L1 categories', () {
-        expect(DefaultCategories.incomeL1.length, 4);
-      });
     });
 
     // ─── L1 presence & absence ───
@@ -89,10 +86,7 @@ void main() {
     // ─── L2 integrity ───
     group('L2 integrity', () {
       test('every L2 has a parentId pointing to an existing L1', () {
-        final l1Ids = DefaultCategories.expenseL1
-            .map((c) => c.id)
-            .toSet()
-            .union(DefaultCategories.incomeL1.map((c) => c.id).toSet());
+        final l1Ids = DefaultCategories.expenseL1.map((c) => c.id).toSet();
         final orphans = DefaultCategories.all
             .where((c) => c.level == 2 && !l1Ids.contains(c.parentId))
             .toList();

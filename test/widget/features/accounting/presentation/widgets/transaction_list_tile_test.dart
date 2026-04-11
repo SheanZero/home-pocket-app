@@ -58,7 +58,7 @@ void main() {
         deviceId: 'dev_local',
         amount: 50000,
         type: TransactionType.income,
-        categoryId: 'cat_salary',
+        categoryId: 'cat_food_dining_out',
         ledgerType: LedgerType.survival,
         timestamp: DateTime.now(),
         currentHash: 'hash_002',

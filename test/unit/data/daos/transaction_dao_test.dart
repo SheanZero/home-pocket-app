@@ -63,7 +63,7 @@ void main() {
           deviceId: 'dev_001',
           amount: 2000,
           type: 'income',
-          categoryId: 'cat_salary',
+          categoryId: 'cat_food_dining_out',
           ledgerType: 'survival',
           timestamp: t2,
           currentHash: 'h2',

@@ -6,10 +6,9 @@ import '../../features/accounting/domain/models/transaction.dart';
 abstract final class DefaultCategories {
   static final DateTime _epoch = DateTime(2026, 1, 1);
 
-  static List<Category> get all => [...expenseL1, ..._expenseL2, ...incomeL1];
+  static List<Category> get all => [...expenseL1, ..._expenseL2];
 
   static List<Category> get expenseL1 => _expenseL1;
-  static List<Category> get incomeL1 => _incomeL1;
   static List<CategoryLedgerConfig> get defaultLedgerConfigs =>
       _defaultLedgerConfigs;
 
@@ -1188,20 +1187,6 @@ abstract final class DefaultCategories {
     ),
   ];
 
-  // ─── Income L1 ───
-
-  static final List<Category> _incomeL1 = [
-    _l1('cat_salary', 'category_salary', 'account_balance', '#4CAF50', 1),
-    _l1('cat_bonus', 'category_bonus', 'stars', '#FFC107', 2),
-    _l1('cat_investment', 'category_investment', 'trending_up', '#009688', 3),
-    _l1(
-      'cat_other_income',
-      'category_other_income',
-      'attach_money',
-      '#8BC34A',
-      99,
-    ),
-  ];
 
   // ─── Default Ledger Configs ───
 
