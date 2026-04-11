@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 
+import '../shared/constants/default_categories.dart';
 import 'tables/audit_logs_table.dart';
 import 'tables/books_table.dart';
 import 'tables/categories_table.dart';
@@ -41,7 +42,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration {
@@ -147,6 +148,89 @@ class AppDatabase extends _$AppDatabase {
             await customStatement(
               "UPDATE group_members SET display_name = device_name WHERE display_name = ''",
             );
+          });
+        }
+        if (from < 14) {
+          // v14: Category taxonomy upgrade — remap removed IDs, delete orphans,
+          // then upsert the full v14 system category set.
+          await transaction(() async {
+            const remaps = <String, String>{
+              'cat_cash_card': 'cat_other_unclassified',
+              'cat_uncategorized': 'cat_other_unclassified',
+              'cat_daily_pets': 'cat_pet_other',
+              'cat_other_allowance': 'cat_allowance_self',
+              'cat_other_advances': 'cat_other_misc',
+              'cat_other_business': 'cat_other_misc',
+              'cat_other_debt': 'cat_other_misc',
+              'cat_food_general': 'cat_food_other',
+              'cat_food_breakfast': 'cat_food_dining_out',
+              'cat_food_lunch': 'cat_food_dining_out',
+              'cat_food_dinner': 'cat_food_dining_out',
+              'cat_daily_general': 'cat_daily_other',
+              'cat_transport_general': 'cat_transport_other',
+              'cat_social_general': 'cat_social_other',
+              'cat_utilities_general': 'cat_utilities_other',
+              'cat_communication_info': 'cat_communication_other',
+              'cat_insurance_general': 'cat_insurance_other',
+              'cat_special_general': 'cat_special_other',
+              'cat_special_furniture': 'cat_housing_furniture',
+              'cat_special_housing': 'cat_housing_renovation',
+            };
+
+            // Step 1: remap removed/renamed category IDs in transactions
+            for (final entry in remaps.entries) {
+              await customStatement(
+                'UPDATE transactions SET category_id = ? WHERE category_id = ?',
+                [entry.value, entry.key],
+              );
+            }
+
+            const removedIds = ['cat_cash_card', 'cat_uncategorized'];
+
+            // Step 2: delete orphan ledger configs for removed L1 categories
+            for (final id in removedIds) {
+              await customStatement(
+                'DELETE FROM category_ledger_configs WHERE category_id = ?',
+                [id],
+              );
+            }
+
+            // Step 3: delete removed system category rows
+            for (final id in removedIds) {
+              await customStatement(
+                'DELETE FROM categories WHERE id = ? AND is_system = 1',
+                [id],
+              );
+            }
+
+            // Step 4: upsert all v14 system categories
+            final nowMs = DateTime.now().millisecondsSinceEpoch;
+            for (final cat in DefaultCategories.all) {
+              final parentVal =
+                  cat.parentId == null ? 'NULL' : "'${cat.parentId}'";
+              final isSystemVal = cat.isSystem ? 1 : 0;
+              final isArchivedVal = cat.isArchived ? 1 : 0;
+              await customStatement('''
+                INSERT OR REPLACE INTO categories
+                  (id, name, icon, color, parent_id, level,
+                   is_system, is_archived, sort_order, created_at)
+                VALUES
+                  ('${cat.id}', '${cat.name}', '${cat.icon}', '${cat.color}',
+                   $parentVal, ${cat.level},
+                   $isSystemVal, $isArchivedVal, ${cat.sortOrder}, $nowMs)
+              ''');
+            }
+
+            // Step 5: upsert ledger configs for v14 L1 categories
+            for (final cfg in DefaultCategories.defaultLedgerConfigs) {
+              final ledgerTypeStr = cfg.ledgerType.name;
+              await customStatement('''
+                INSERT OR REPLACE INTO category_ledger_configs
+                  (category_id, ledger_type, updated_at)
+                VALUES
+                  ('${cfg.categoryId}', '$ledgerTypeStr', $nowMs)
+              ''');
+            }
           });
         }
       },
