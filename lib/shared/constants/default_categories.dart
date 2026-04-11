@@ -566,14 +566,6 @@ abstract final class DefaultCategories {
 
     // \u00a710.4 Utilities (5 L2s)
     _l2(
-      'cat_utilities_general',
-      'category_utilities_general',
-      'flash_on',
-      '#FFC107',
-      'cat_utilities',
-      0,
-    ),
-    _l2(
       'cat_utilities_electricity',
       'category_utilities_electricity',
       'bolt',
@@ -582,17 +574,17 @@ abstract final class DefaultCategories {
       1,
     ),
     _l2(
-      'cat_utilities_water',
-      'category_utilities_water',
-      'water_drop',
+      'cat_utilities_gas',
+      'category_utilities_gas',
+      'local_fire_department',
       '#FFC107',
       'cat_utilities',
       2,
     ),
     _l2(
-      'cat_utilities_gas',
-      'category_utilities_gas',
-      'local_fire_department',
+      'cat_utilities_water',
+      'category_utilities_water',
+      'water_drop',
       '#FFC107',
       'cat_utilities',
       3,
@@ -603,10 +595,18 @@ abstract final class DefaultCategories {
       'more_horiz',
       '#FFC107',
       'cat_utilities',
-      99,
+      4,
+    ),
+    _l2(
+      'cat_utilities_kerosene',
+      'category_utilities_kerosene',
+      'propane_tank',
+      '#FFC107',
+      'cat_utilities',
+      5,
     ),
 
-    // \u00a710.13 Communication (7 L2s)
+    // \u00a710.13 Communication (8 L2s)
     _l2(
       'cat_communication_mobile',
       'category_communication_mobile',
@@ -640,20 +640,12 @@ abstract final class DefaultCategories {
       4,
     ),
     _l2(
-      'cat_communication_info',
-      'category_communication_info',
-      'info',
-      '#00ACC1',
-      'cat_communication',
-      5,
-    ),
-    _l2(
       'cat_communication_delivery',
       'category_communication_delivery',
       'local_shipping',
       '#00ACC1',
       'cat_communication',
-      6,
+      5,
     ),
     _l2(
       'cat_communication_other',
@@ -661,10 +653,26 @@ abstract final class DefaultCategories {
       'more_horiz',
       '#00ACC1',
       'cat_communication',
-      99,
+      6,
+    ),
+    _l2(
+      'cat_communication_nhk',
+      'category_communication_nhk',
+      'live_tv',
+      '#00ACC1',
+      'cat_communication',
+      7,
+    ),
+    _l2(
+      'cat_communication_postage',
+      'category_communication_postage',
+      'mail',
+      '#00ACC1',
+      'cat_communication',
+      8,
     ),
 
-    // \u00a710.14 Housing (8 L2s)
+    // \u00a710.14 Housing (10 L2s)
     _l2(
       'cat_housing_rent',
       'category_housing_rent',
@@ -729,8 +737,24 @@ abstract final class DefaultCategories {
       'cat_housing',
       99,
     ),
+    _l2(
+      'cat_housing_property_tax',
+      'category_housing_property_tax',
+      'receipt_long',
+      '#795548',
+      'cat_housing',
+      9,
+    ),
+    _l2(
+      'cat_housing_utilities_setup',
+      'category_housing_utilities_setup',
+      'luggage',
+      '#795548',
+      'cat_housing',
+      10,
+    ),
 
-    // \u00a710.9 Car & Motorcycle (8 L2s)
+    // \u00a710.9 Car & Motorcycle (10 L2s)
     _l2(
       'cat_car_fuel',
       'category_car_fuel',
@@ -787,6 +811,22 @@ abstract final class DefaultCategories {
       '#455A64',
       'cat_car',
       99,
+    ),
+    _l2(
+      'cat_car_car_share',
+      'category_car_car_share',
+      'car_rental',
+      '#455A64',
+      'cat_car',
+      9,
+    ),
+    _l2(
+      'cat_car_driving_school',
+      'category_car_driving_school',
+      'drive_eta',
+      '#455A64',
+      'cat_car',
+      10,
     ),
 
     // \u00a710.3 Taxes & Social Security (4 L2s)
