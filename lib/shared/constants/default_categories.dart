@@ -52,15 +52,7 @@ abstract final class DefaultCategories {
   // ─── Expense L2 (PRD \u00a710.1\u201310.16, 103 items) ───
 
   static final List<Category> _expenseL2 = [
-    // \u00a710.16 Food (8 L2s)
-    _l2(
-      'cat_food_general',
-      'category_food_general',
-      'restaurant',
-      '#FF5722',
-      'cat_food',
-      0,
-    ),
+    // \u00a710.16 Food (6 L2s)
     _l2(
       'cat_food_groceries',
       'category_food_groceries',
@@ -78,36 +70,12 @@ abstract final class DefaultCategories {
       2,
     ),
     _l2(
-      'cat_food_breakfast',
-      'category_food_breakfast',
-      'free_breakfast',
-      '#FF5722',
-      'cat_food',
-      3,
-    ),
-    _l2(
-      'cat_food_lunch',
-      'category_food_lunch',
-      'lunch_dining',
-      '#FF5722',
-      'cat_food',
-      4,
-    ),
-    _l2(
-      'cat_food_dinner',
-      'category_food_dinner',
-      'dinner_dining',
-      '#FF5722',
-      'cat_food',
-      5,
-    ),
-    _l2(
       'cat_food_cafe',
       'category_food_cafe',
       'local_cafe',
       '#FF5722',
       'cat_food',
-      6,
+      3,
     ),
     _l2(
       'cat_food_other',
@@ -115,18 +83,26 @@ abstract final class DefaultCategories {
       'more_horiz',
       '#FF5722',
       'cat_food',
-      99,
+      4,
+    ),
+    _l2(
+      'cat_food_delivery',
+      'category_food_delivery',
+      'delivery_dining',
+      '#FF5722',
+      'cat_food',
+      5,
+    ),
+    _l2(
+      'cat_food_drinks',
+      'category_food_drinks',
+      'local_bar',
+      '#FF5722',
+      'cat_food',
+      6,
     ),
 
     // \u00a710.15 Daily Necessities (6 L2s)
-    _l2(
-      'cat_daily_general',
-      'category_daily_general',
-      'local_mall',
-      '#00BCD4',
-      'cat_daily',
-      0,
-    ),
     _l2(
       'cat_daily_household',
       'category_daily_household',
@@ -144,20 +120,12 @@ abstract final class DefaultCategories {
       2,
     ),
     _l2(
-      'cat_daily_pets',
-      'category_daily_pets',
-      'pets',
-      '#00BCD4',
-      'cat_daily',
-      3,
-    ),
-    _l2(
       'cat_daily_tobacco',
       'category_daily_tobacco',
       'smoking_rooms',
       '#00BCD4',
       'cat_daily',
-      4,
+      3,
     ),
     _l2(
       'cat_daily_other',
@@ -165,18 +133,26 @@ abstract final class DefaultCategories {
       'more_horiz',
       '#00BCD4',
       'cat_daily',
-      99,
+      4,
+    ),
+    _l2(
+      'cat_daily_drugstore',
+      'category_daily_drugstore',
+      'local_pharmacy',
+      '#00BCD4',
+      'cat_daily',
+      5,
+    ),
+    _l2(
+      'cat_daily_subscription',
+      'category_daily_subscription',
+      'subscriptions',
+      '#00BCD4',
+      'cat_daily',
+      6,
     ),
 
-    // \u00a710.1 Transport (6 L2s)
-    _l2(
-      'cat_transport_general',
-      'category_transport_general',
-      'directions_bus',
-      '#2196F3',
-      'cat_transport',
-      0,
-    ),
+    // \u00a710.1 Transport (7 L2s)
     _l2(
       'cat_transport_train',
       'category_transport_train',
@@ -215,10 +191,26 @@ abstract final class DefaultCategories {
       'more_horiz',
       '#2196F3',
       'cat_transport',
-      99,
+      5,
+    ),
+    _l2(
+      'cat_transport_shinkansen',
+      'category_transport_shinkansen',
+      'directions_railway',
+      '#2196F3',
+      'cat_transport',
+      6,
+    ),
+    _l2(
+      'cat_transport_highway_bus',
+      'category_transport_highway_bus',
+      'airport_shuttle',
+      '#2196F3',
+      'cat_transport',
+      7,
     ),
 
-    // \u00a710.12 Hobbies & Entertainment (7 L2s)
+    // \u00a710.12 Hobbies & Entertainment (10 L2s)
     _l2(
       'cat_hobbies_leisure',
       'category_hobbies_leisure',
@@ -274,6 +266,30 @@ abstract final class DefaultCategories {
       '#9C27B0',
       'cat_hobbies',
       99,
+    ),
+    _l2(
+      'cat_hobbies_music',
+      'category_hobbies_music',
+      'music_note',
+      '#9C27B0',
+      'cat_hobbies',
+      8,
+    ),
+    _l2(
+      'cat_hobbies_subscription',
+      'category_hobbies_subscription',
+      'subscriptions',
+      '#9C27B0',
+      'cat_hobbies',
+      9,
+    ),
+    _l2(
+      'cat_hobbies_oshikatsu',
+      'category_hobbies_oshikatsu',
+      'favorite',
+      '#9C27B0',
+      'cat_hobbies',
+      10,
     ),
 
     // \u00a710.10 Clothing & Beauty (8 L2s)
