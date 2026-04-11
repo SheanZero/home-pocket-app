@@ -53,6 +53,13 @@ class FakeCategoryRepository implements CategoryRepository {
 
   @override
   Future<void> deleteAll() async {}
+
+  Map<String, int>? lastSortOrders;
+
+  @override
+  Future<void> updateSortOrders(Map<String, int> idToSortOrder) async {
+    lastSortOrders = Map.of(idToSortOrder);
+  }
 }
 
 void main() {

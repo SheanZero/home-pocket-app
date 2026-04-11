@@ -78,6 +78,10 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
+  Future<void> updateSortOrders(Map<String, int> idToSortOrder) =>
+      _dao.updateSortOrders(idToSortOrder);
+
+  @override
   Future<void> deleteAll() => _dao.deleteAll();
 
   @override

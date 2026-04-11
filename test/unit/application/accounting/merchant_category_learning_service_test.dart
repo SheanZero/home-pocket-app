@@ -122,6 +122,9 @@ class _InMemoryCategoryRepository implements CategoryRepository {
     bool? isArchived,
     int? sortOrder,
   }) async {}
+
+  @override
+  Future<void> updateSortOrders(Map<String, int> idToSortOrder) async {}
 }
 
 void main() {
