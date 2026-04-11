@@ -109,6 +109,19 @@ class CategoryDao {
     );
   }
 
+  /// Batch-update `sortOrder` for many categories in one atomic transaction.
+  ///
+  /// Called by [CategoryRepository.updateSortOrders] when the user saves
+  /// a drag-reorder. Empty map is a no-op.
+  Future<void> updateSortOrders(Map<String, int> idToSortOrder) async {
+    if (idToSortOrder.isEmpty) return;
+    await _db.transaction(() async {
+      for (final entry in idToSortOrder.entries) {
+        await updateSortOrder(entry.key, entry.value);
+      }
+    });
+  }
+
   Future<CategoryRow?> findById(String id) async {
     return (_db.select(
       _db.categories,
