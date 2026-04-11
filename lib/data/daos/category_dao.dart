@@ -96,6 +96,19 @@ class CategoryDao {
     );
   }
 
+  /// Update only the [sortOrder] column for a single row.
+  ///
+  /// Dedicated hot-path helper for drag-reorder; avoids the many-optional-
+  /// field signature of [updateCategory]. Stamps [updatedAt] to now.
+  Future<void> updateSortOrder(String id, int sortOrder) async {
+    await (_db.update(_db.categories)..where((t) => t.id.equals(id))).write(
+      CategoriesCompanion(
+        sortOrder: Value(sortOrder),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   Future<CategoryRow?> findById(String id) async {
     return (_db.select(
       _db.categories,
