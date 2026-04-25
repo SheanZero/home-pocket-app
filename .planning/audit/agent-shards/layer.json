@@ -1,0 +1,71 @@
+{
+  "tool_source": "agent:layer",
+  "generated_at": "2026-04-25T13:50:00.000Z",
+  "findings": [
+    {
+      "category": "layer_violation",
+      "severity": "CRITICAL",
+      "file_path": "lib/features/family_sync/use_cases/check_group_use_case.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "use_cases/ inside features/ violates Thin Feature rule (CLAUDE.md)",
+      "rationale": "Features must not contain application/use_cases per CLAUDE.md 'Thin Feature' rule (CRIT-02 territory in CONCERNS.md).",
+      "suggested_fix": "Move to lib/application/family_sync/. Phase 3 fix.",
+      "tool_source": "agent:layer",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "category": "layer_violation",
+      "severity": "CRITICAL",
+      "file_path": "lib/features/family_sync/use_cases/deactivate_group_use_case.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "use_cases/ inside features/ violates Thin Feature rule (CLAUDE.md)",
+      "rationale": "Features must not contain application/use_cases per CLAUDE.md 'Thin Feature' rule (CRIT-02 territory in CONCERNS.md).",
+      "suggested_fix": "Move to lib/application/family_sync/. Phase 3 fix.",
+      "tool_source": "agent:layer",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "category": "layer_violation",
+      "severity": "CRITICAL",
+      "file_path": "lib/features/family_sync/use_cases/leave_group_use_case.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "use_cases/ inside features/ violates Thin Feature rule (CLAUDE.md)",
+      "rationale": "Features must not contain application/use_cases per CLAUDE.md 'Thin Feature' rule (CRIT-02 territory in CONCERNS.md).",
+      "suggested_fix": "Move to lib/application/family_sync/. Phase 3 fix.",
+      "tool_source": "agent:layer",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "category": "layer_violation",
+      "severity": "CRITICAL",
+      "file_path": "lib/features/family_sync/use_cases/regenerate_invite_use_case.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "use_cases/ inside features/ violates Thin Feature rule (CLAUDE.md)",
+      "rationale": "Features must not contain application/use_cases per CLAUDE.md 'Thin Feature' rule (CRIT-02 territory in CONCERNS.md).",
+      "suggested_fix": "Move to lib/application/family_sync/. Phase 3 fix.",
+      "tool_source": "agent:layer",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "category": "layer_violation",
+      "severity": "CRITICAL",
+      "file_path": "lib/features/family_sync/use_cases/remove_member_use_case.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "use_cases/ inside features/ violates Thin Feature rule (CLAUDE.md)",
+      "rationale": "Features must not contain application/use_cases per CLAUDE.md 'Thin Feature' rule (CRIT-02 territory in CONCERNS.md).",
+      "suggested_fix": "Move to lib/application/family_sync/. Phase 3 fix.",
+      "tool_source": "agent:layer",
+      "confidence": "high",
+      "status": "open"
+    }
+  ]
+}
