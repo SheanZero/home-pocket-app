@@ -39,9 +39,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [x] 01-01-tooling-registration-PLAN.md — Register custom_lint plugin host + analyzer-7-compatible audit deps
   - [x] 01-02-layer-rules-PLAN.md — Place 18 import_guard.yaml files encoding the 5-layer Clean Architecture
   - [x] 01-03-schema-and-catalogue-layout-PLAN.md — Lock SCHEMA.md + scripts/audit/finding.dart canonical model
-  - [ ] 01-04-tooling-scanners-PLAN.md — 4 audit_*.sh wrappers + Dart cores producing JSON shards
+  - [x] 01-04-tooling-scanners-PLAN.md — 4 audit_*.sh wrappers + Dart cores producing JSON shards
   - [ ] 01-05-merger-and-id-stamping-PLAN.md — Merger with stable IDs + idempotency TDD test + reaudit_diff stub
-  - [ ] 01-06-ai-semantic-scan-PLAN.md — /gsd-audit-semantic slash command + 4 locked subagent prompts
+  - [x] 01-06-ai-semantic-scan-PLAN.md — /gsd-audit-semantic slash command + 4 locked subagent prompts
   - [ ] 01-07-ci-workflow-PLAN.md — .github/workflows/audit.yml (3 jobs, staged enablement, AUDIT-09+10 blocking)
   - [ ] 01-08-end-to-end-pipeline-run-PLAN.md — Full pipeline dry-run + owner sanity-check checkpoint
 
