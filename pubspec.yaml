@@ -89,6 +89,10 @@ dev_dependencies:
   mockito: ^5.4.6
   mocktail: ^1.0.4
 
+  # Audit Tooling
+  import_guard_custom_lint: ^1.0.0
+  dart_code_linter: ^3.0.0
+
 flutter:
   uses-material-design: true
   generate: true
