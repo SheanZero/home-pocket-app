@@ -1,0 +1,8 @@
+# lib/import_guard.yaml — project-wide rules
+# Defense-in-depth: also denies sqlite3_flutter_libs (CI gate AUDIT-09 in Plan 07 is the
+# primary enforcement; this rule catches it earlier in dev workflow).
+deny:
+  - dart:mirrors
+  - package:sqlite3_flutter_libs/**
+
+inherit: true
