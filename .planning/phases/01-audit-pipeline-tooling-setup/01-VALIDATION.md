@@ -2,8 +2,8 @@
 phase: 1
 slug: audit-pipeline-tooling-setup
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-25
 ---
 
@@ -85,11 +85,11 @@ created: 2026-04-25
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references (`scripts/test_audit_pipeline.sh`, `scripts/test_idempotency.sh`, `test/scripts/merge_findings_test.dart`)
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 90s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references (`scripts/test_audit_pipeline.sh`, `scripts/test_idempotency.sh`, `test/scripts/merge_findings_test.dart`)
+- [x] No watch-mode flags
+- [x] Feedback latency < 90s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** approved 2026-04-25 (planner — all tasks have automated verify, Wave 0 covered by Plans 05 + 07)

@@ -2,7 +2,7 @@
 phase: 01-audit-pipeline-tooling-setup
 plan: 05
 type: execute
-wave: 3
+wave: 4
 depends_on: [03, 04]
 files_modified:
   - scripts/merge_findings.dart

@@ -2,7 +2,7 @@
 phase: 01-audit-pipeline-tooling-setup
 plan: 07
 type: execute
-wave: 4
+wave: 5
 depends_on: [04, 05, 06]
 files_modified:
   - .github/workflows/audit.yml

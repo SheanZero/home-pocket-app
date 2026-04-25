@@ -2,7 +2,7 @@
 phase: 01-audit-pipeline-tooling-setup
 plan: 08
 type: execute
-wave: 4
+wave: 6
 depends_on: [04, 05, 06, 07]
 files_modified:
   - .planning/audit/issues.json

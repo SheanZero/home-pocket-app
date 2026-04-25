@@ -2,7 +2,7 @@
 phase: 01-audit-pipeline-tooling-setup
 plan: 04
 type: execute
-wave: 2
+wave: 3
 depends_on: [01, 03]
 files_modified:
   - scripts/audit/layer.dart
