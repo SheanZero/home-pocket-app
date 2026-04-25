@@ -36,7 +36,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Two CI guardrails are active: (a) `grep sqlite3_flutter_libs pubspec.lock` exits non-zero (rejects SQLCipher conflict); (b) `build_runner build --delete-conflicting-outputs && git diff --exit-code lib/` exits non-zero on stale generated files
   5. No code files are modified during this phase — audit is discovery-only
 **Plans**: 8 plans
-  - [ ] 01-01-tooling-registration-PLAN.md — Register custom_lint plugin host + analyzer-7-compatible audit deps
+  - [x] 01-01-tooling-registration-PLAN.md — Register custom_lint plugin host + analyzer-7-compatible audit deps
   - [ ] 01-02-layer-rules-PLAN.md — Place 18 import_guard.yaml files encoding the 5-layer Clean Architecture
   - [ ] 01-03-schema-and-catalogue-layout-PLAN.md — Lock SCHEMA.md + scripts/audit/finding.dart canonical model
   - [ ] 01-04-tooling-scanners-PLAN.md — 4 audit_*.sh wrappers + Dart cores producing JSON shards
