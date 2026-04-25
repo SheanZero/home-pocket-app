@@ -127,20 +127,66 @@ Phase mapping populated by `gsd-roadmapper` during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIT-01..10 | TBD | Pending |
-| BASE-01..06 | TBD | Pending |
-| CRIT-01..06 | TBD | Pending |
-| HIGH-01..08 | TBD | Pending |
-| MED-01..08 | TBD | Pending |
-| LOW-01..07 | TBD | Pending |
-| DOCS-01..04 | TBD | Pending |
-| EXIT-01..05 | TBD | Pending |
+| AUDIT-01 | Phase 1 | Pending |
+| AUDIT-02 | Phase 1 | Pending |
+| AUDIT-03 | Phase 1 | Pending |
+| AUDIT-04 | Phase 1 | Pending |
+| AUDIT-05 | Phase 1 | Pending |
+| AUDIT-06 | Phase 1 | Pending |
+| AUDIT-07 | Phase 1 | Pending |
+| AUDIT-08 | Phase 1 | Pending |
+| AUDIT-09 | Phase 1 | Pending |
+| AUDIT-10 | Phase 1 | Pending |
+| BASE-01 | Phase 2 | Pending |
+| BASE-02 | Phase 2 | Pending |
+| BASE-03 | Phase 2 | Pending |
+| BASE-04 | Phase 2 | Pending |
+| BASE-05 | Phase 2 | Pending |
+| BASE-06 | Phase 2 | Pending |
+| CRIT-01 | Phase 3 | Pending |
+| CRIT-02 | Phase 3 | Pending |
+| CRIT-03 | Phase 3 | Pending |
+| CRIT-04 | Phase 3 | Pending |
+| CRIT-05 | Phase 3 | Pending |
+| CRIT-06 | Phase 3 | Pending |
+| HIGH-01 | Phase 4 | Pending |
+| HIGH-02 | Phase 4 | Pending |
+| HIGH-03 | Phase 4 | Pending |
+| HIGH-04 | Phase 4 | Pending |
+| HIGH-05 | Phase 4 | Pending |
+| HIGH-06 | Phase 4 | Pending |
+| HIGH-07 | Phase 4 | Pending |
+| HIGH-08 | Phase 4 | Pending |
+| MED-01 | Phase 5 | Pending |
+| MED-02 | Phase 5 | Pending |
+| MED-03 | Phase 5 | Pending |
+| MED-04 | Phase 5 | Pending |
+| MED-05 | Phase 5 | Pending |
+| MED-06 | Phase 5 | Pending |
+| MED-07 | Phase 5 | Pending |
+| MED-08 | Phase 5 | Pending |
+| LOW-01 | Phase 6 | Pending |
+| LOW-02 | Phase 6 | Pending |
+| LOW-03 | Phase 6 | Pending |
+| LOW-04 | Phase 6 | Pending |
+| LOW-05 | Phase 6 | Pending |
+| LOW-06 | Phase 6 | Pending |
+| LOW-07 | Phase 6 | Pending |
+| DOCS-01 | Phase 7 | Pending |
+| DOCS-02 | Phase 7 | Pending |
+| DOCS-03 | Phase 7 | Pending |
+| DOCS-04 | Phase 7 | Pending |
+| EXIT-01 | Phase 8 | Pending |
+| EXIT-02 | Phase 8 | Pending |
+| EXIT-03 | Phase 8 | Pending |
+| EXIT-04 | Phase 8 | Pending |
+| EXIT-05 | Phase 8 | Pending |
 
 **Coverage:**
 - v1 requirements: 54 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 54 ⚠️ (will be 0 after roadmap creation)
+- Mapped to phases: 54 ✓
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-25*
-*Last updated: 2026-04-25 after initial definition*
+*Last updated: 2026-04-25 — traceability populated by gsd-roadmapper*
