@@ -43,7 +43,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [x] 01-05-merger-and-id-stamping-PLAN.md — Merger with stable IDs + idempotency TDD test + reaudit_diff stub
   - [x] 01-06-ai-semantic-scan-PLAN.md — /gsd-audit-semantic slash command + 4 locked subagent prompts
   - [x] 01-07-ci-workflow-PLAN.md — .github/workflows/audit.yml (3 jobs, staged enablement, AUDIT-09+10 blocking)
-  - [ ] 01-08-end-to-end-pipeline-run-PLAN.md — Full pipeline dry-run + owner sanity-check checkpoint
+  - [x] 01-08-end-to-end-pipeline-run-PLAN.md — Full pipeline dry-run + owner sanity-check checkpoint
 
 ### Phase 2: Coverage Baseline
 **Goal**: Pre-refactor per-file coverage is snapshotted and the list of files requiring characterization tests before their fix phase begins is available
