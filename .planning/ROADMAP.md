@@ -35,7 +35,15 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. `.planning/audit/issues.json` exists with stable IDs, all findings severity-classified (CRITICAL / HIGH / MEDIUM / LOW), and human-readable `.planning/audit/ISSUES.md` produced alongside it
   4. Two CI guardrails are active: (a) `grep sqlite3_flutter_libs pubspec.lock` exits non-zero (rejects SQLCipher conflict); (b) `build_runner build --delete-conflicting-outputs && git diff --exit-code lib/` exits non-zero on stale generated files
   5. No code files are modified during this phase — audit is discovery-only
-**Plans**: TBD
+**Plans**: 8 plans
+  - [ ] 01-01-tooling-registration-PLAN.md — Register custom_lint plugin host + analyzer-7-compatible audit deps
+  - [ ] 01-02-layer-rules-PLAN.md — Place 18 import_guard.yaml files encoding the 5-layer Clean Architecture
+  - [ ] 01-03-schema-and-catalogue-layout-PLAN.md — Lock SCHEMA.md + scripts/audit/finding.dart canonical model
+  - [ ] 01-04-tooling-scanners-PLAN.md — 4 audit_*.sh wrappers + Dart cores producing JSON shards
+  - [ ] 01-05-merger-and-id-stamping-PLAN.md — Merger with stable IDs + idempotency TDD test + reaudit_diff stub
+  - [ ] 01-06-ai-semantic-scan-PLAN.md — /gsd-audit-semantic slash command + 4 locked subagent prompts
+  - [ ] 01-07-ci-workflow-PLAN.md — .github/workflows/audit.yml (3 jobs, staged enablement, AUDIT-09+10 blocking)
+  - [ ] 01-08-end-to-end-pipeline-run-PLAN.md — Full pipeline dry-run + owner sanity-check checkpoint
 
 ### Phase 2: Coverage Baseline
 **Goal**: Pre-refactor per-file coverage is snapshotted and the list of files requiring characterization tests before their fix phase begins is available
