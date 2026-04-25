@@ -1,0 +1,7 @@
+# lib/infrastructure/import_guard.yaml — Infrastructure depends on external SDKs only
+deny:
+  - package:home_pocket/features/**
+  - package:home_pocket/application/**
+  - package:home_pocket/data/**
+
+inherit: true

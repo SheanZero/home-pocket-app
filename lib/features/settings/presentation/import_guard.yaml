@@ -1,0 +1,11 @@
+# Presentation layer — uses Application + Domain + Infrastructure (indirect via app uses cases).
+# MUST NOT reach Infrastructure directly (HIGH-02 territory per .planning/codebase/CONCERNS.md).
+deny:
+  - package:home_pocket/data/tables/**
+  - package:home_pocket/data/daos/**
+  - package:home_pocket/infrastructure/crypto/services/**
+  - package:home_pocket/infrastructure/sync/**
+  - package:home_pocket/infrastructure/security/secure_storage_service.dart
+  - package:home_pocket/infrastructure/crypto/repositories/**
+
+inherit: true

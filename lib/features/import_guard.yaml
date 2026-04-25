@@ -1,0 +1,10 @@
+# lib/features/import_guard.yaml — Thin Feature rule (CLAUDE.md "Thin Feature Rule")
+# Catches the live CRIT-02 violation in lib/features/family_sync/use_cases/
+# (per .planning/codebase/CONCERNS.md).
+deny:
+  - package:home_pocket/features/*/use_cases/**
+  - package:home_pocket/features/*/application/**
+  - package:home_pocket/features/*/infrastructure/**
+  - package:home_pocket/features/*/data/**
+
+inherit: true

@@ -1,0 +1,8 @@
+# lib/application/import_guard.yaml — Application uses Domain + Infrastructure
+# Application MUST NOT reach into Presentation or into Data tables/DAOs directly.
+deny:
+  - package:home_pocket/features/*/presentation/**
+  - package:home_pocket/data/tables/**
+  - package:home_pocket/data/daos/**
+
+inherit: true
