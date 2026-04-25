@@ -33,7 +33,7 @@ A focused, audit-driven refactor of the Home Pocket (まもる家計簿) Flutter
 
 <!-- The cleanup project itself. Each is a hypothesis until shipped + validated by re-audit. -->
 
-- [ ] Establish a hybrid audit pipeline (automated tooling + AI-agent semantic scan) that catalogs every violation across the four target categories, with file references, line references, and severity classifications
+- [x] Establish a hybrid audit pipeline (automated tooling + AI-agent semantic scan) that catalogs every violation across the four target categories, with file references, line references, and severity classifications  *(Validated in Phase 1: Audit Pipeline + Tooling Setup — terminal `.planning/audit/issues.json` produced with 26 findings, stable IDs, owner-approved)*
 - [ ] Eliminate all layer-violation findings (Domain importing Data, features holding `application/`/`infrastructure/`/`data/tables/`/`data/daos/` code, dependency-flow inversions)
 - [ ] Eliminate all redundant-code findings (duplicate models/types, duplicate provider definitions, parallel implementations of the same concern)
 - [ ] Eliminate all dead-code findings (unused exports, unreachable branches, orphaned utilities, deprecated modules including MOD-009)
@@ -107,4 +107,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-25 after initialization*
+*Last updated: 2026-04-25 after Phase 1 (Audit Pipeline + Tooling Setup) completion*
