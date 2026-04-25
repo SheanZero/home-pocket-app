@@ -1,0 +1,16 @@
+# Domain layer — leafmost in the dependency graph (CRIT-04 territory).
+# Whitelist mode: deny everything except dart:core + the immutability/serialization annotations.
+deny:
+  - package:home_pocket/data/**
+  - package:home_pocket/infrastructure/**
+  - package:home_pocket/application/**
+  - package:home_pocket/features/**/presentation/**
+  - package:flutter/**
+
+allow:
+  - dart:core
+  - package:freezed_annotation/**
+  - package:json_annotation/**
+  - package:meta/**
+
+inherit: true

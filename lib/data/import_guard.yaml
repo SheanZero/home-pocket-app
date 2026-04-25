@@ -1,0 +1,7 @@
+# lib/data/import_guard.yaml — Data uses Domain + Infrastructure
+# Data MUST NOT reach into Application use cases or Presentation.
+deny:
+  - package:home_pocket/features/*/presentation/**
+  - package:home_pocket/application/**
+
+inherit: true
