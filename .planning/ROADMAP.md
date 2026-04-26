@@ -92,8 +92,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 6 plans
   - [ ] 04-01-application-layer-routing-scaffolding-PLAN.md — Application-layer DI scaffolding + new use cases + FormatterService (HIGH-02 prep; Wave 2)
   - [ ] 04-02-presentation-refactor-and-import-guard-PLAN.md — Replace 33 infrastructure imports + restructure presentation/providers + tighten import_guard.yaml + arch test (HIGH-02, HIGH-04 close; Wave 3)
-  - [ ] 04-03-resolveledgertypeservice-deletion-PLAN.md — Six-atomic-commit deletion of ResolveLedgerTypeService (HIGH-03; Wave 1)
-  - [ ] 04-04-mocktail-bigbang-migration-PLAN.md — Mocktail migration of 13 *.mocks.dart fixtures + mockito removal (HIGH-07; Wave 1)
+  - [x] 04-03-resolveledgertypeservice-deletion-PLAN.md — Six-atomic-commit deletion of ResolveLedgerTypeService (HIGH-03; Wave 1)
+  - [x] 04-04-mocktail-bigbang-migration-PLAN.md — Mocktail migration of 13 *.mocks.dart fixtures + mockito removal (HIGH-07; Wave 1)
   - [ ] 04-05-provider-graph-hygiene-test-PLAN.md — Architecture test enforcing HIGH-04 + HIGH-05 + HIGH-06 invariants; Phase 4 close gate (Wave 4)
   - [x] 04-06-characterization-tests-PLAN.md — Characterization tests for Phase-4 touched-files ∩ files-needing-tests.txt (HIGH-08 prereq; Wave 0)
 
