@@ -8,7 +8,7 @@ import 'package:home_pocket/application/accounting/get_transactions_use_case.dar
 import 'package:home_pocket/application/accounting/merchant_category_learning_service.dart';
 import 'package:home_pocket/application/accounting/seed_categories_use_case.dart';
 import 'package:home_pocket/application/dual_ledger/classification_service.dart';
-import 'package:home_pocket/application/dual_ledger/providers.dart';
+import 'package:home_pocket/application/dual_ledger/repository_providers.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/family_sync/transaction_change_tracker.dart';
 import 'package:home_pocket/application/voice/record_category_correction_use_case.dart';

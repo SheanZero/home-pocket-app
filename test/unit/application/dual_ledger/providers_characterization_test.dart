@@ -1,14 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/dual_ledger/classification_service.dart';
-import 'package:home_pocket/application/dual_ledger/providers.dart';
+import 'package:home_pocket/application/dual_ledger/repository_providers.dart';
 import 'package:home_pocket/application/dual_ledger/rule_engine.dart';
 
 // No mocks needed — RuleEngine and ClassificationService have no external deps
 // Characterization test: locks pre-rename behavior before Plan 04-01 Task 3
 // step 7 renames providers.dart → repository_providers.dart.
 // After rename, update import path from:
-//   package:home_pocket/application/dual_ledger/providers.dart
+//   package:home_pocket/application/dual_ledger/repository_providers.dart
 // to:
 //   package:home_pocket/application/dual_ledger/repository_providers.dart
 
