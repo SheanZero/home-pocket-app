@@ -250,7 +250,9 @@
       "suggested_fix": "Move to lib/application/family_sync/. Phase 3 fix.",
       "tool_source": "agent:layer",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "0e370d8"
     },
     {
       "id": "LV-018",
@@ -264,7 +266,9 @@
       "suggested_fix": "Move to lib/application/family_sync/. Phase 3 fix.",
       "tool_source": "agent:layer",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "3ff381a"
     },
     {
       "id": "LV-019",
@@ -278,7 +282,9 @@
       "suggested_fix": "Move to lib/application/family_sync/. Phase 3 fix.",
       "tool_source": "agent:layer",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "84018b9"
     },
     {
       "id": "LV-020",
@@ -292,7 +298,9 @@
       "suggested_fix": "Move to lib/application/family_sync/. Phase 3 fix.",
       "tool_source": "agent:layer",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "122cb8b"
     },
     {
       "id": "LV-021",
@@ -306,7 +314,9 @@
       "suggested_fix": "Move to lib/application/family_sync/. Phase 3 fix.",
       "tool_source": "agent:layer",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "b66ab47"
     },
     {
       "id": "LV-022",
