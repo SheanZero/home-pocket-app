@@ -73,11 +73,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. `import_guard` reports zero violations for Domain-layer files importing Data or Infrastructure — Domain files import only Dart core, `freezed_annotation`, and `json_annotation`
   5. Every file touched in this phase has ≥80% test coverage (characterization tests written before the refactor); `flutter analyze` exits 0; `dart run custom_lint` exits 0; all tests GREEN; user-observable behavior is unchanged
 **Plans**: 5 plans
-  - [ ] 03-01-domain-import-guard-rules-PLAN.md — Domain import_guard.yaml per-subdir rules + arch test (closes LV-001..016, LV-023, LV-024); LAST commit flips import_guard to blocking in audit.yml (D-17)
+  - [x] 03-01-domain-import-guard-rules-PLAN.md — Domain import_guard.yaml per-subdir rules + arch test (closes LV-001..016, LV-023, LV-024); LAST commit flips import_guard to blocking in audit.yml (D-17)
   - [ ] 03-02-app-initializer-and-database-provider-PLAN.md — AppInitializer extraction + concrete appDatabaseProvider + InitFailureScreen + 3 ARB keys (closes CRIT-03)
-  - [ ] 03-03-use-cases-migration-PLAN.md — Migrate 5 family_sync use_cases to lib/application/family_sync/ (closes LV-017..LV-021, CRIT-02)
-  - [ ] 03-04-ledger-row-data-presentation-move-PLAN.md — Move ledger_row_data.dart to presentation/models/ (closes LV-022)
-  - [ ] 03-05-characterization-tests-PLAN.md — Wave 0 test infra: characterization tests for Phase-3 touched-files ∩ files-needing-tests.txt (CRIT-05)
+  - [x] 03-03-use-cases-migration-PLAN.md — Migrate 5 family_sync use_cases to lib/application/family_sync/ (closes LV-017..LV-021, CRIT-02)
+  - [x] 03-04-ledger-row-data-presentation-move-PLAN.md — Move ledger_row_data.dart to presentation/models/ (closes LV-022)
+  - [x] 03-05-characterization-tests-PLAN.md — Wave 0 test infra: characterization tests for Phase-3 touched-files ∩ files-needing-tests.txt (CRIT-05)
 
 ### Phase 4: HIGH Fixes
 **Goal**: Every HIGH-severity finding in `issues.json` is resolved; the Riverpod provider graph is hygienic, deprecated services are fully deleted, and no presentation layer imports infrastructure directly
