@@ -17,7 +17,10 @@ const _projectRoot = '.';
 
 String _absoluteProjectRoot() => Directory.current.path;
 
-Future<ProcessResult> _runBaseline(Directory cwd, [List<String> extra = const []]) {
+Future<ProcessResult> _runBaseline(
+  Directory cwd, [
+  List<String> extra = const [],
+]) {
   return Process.run(
     'dart',
     ['run', '$_projectRoot/scripts/coverage_baseline.dart', ...extra],
@@ -32,16 +35,19 @@ Directory _setupTempProject() {
 
   // Copy the script and the parser it imports.
   Directory('${tmp.path}/scripts/coverage').createSync(recursive: true);
-  File('$root/scripts/coverage_baseline.dart')
-      .copySync('${tmp.path}/scripts/coverage_baseline.dart');
-  File('$root/scripts/coverage/lcov_parser.dart')
-      .copySync('${tmp.path}/scripts/coverage/lcov_parser.dart');
+  File(
+    '$root/scripts/coverage_baseline.dart',
+  ).copySync('${tmp.path}/scripts/coverage_baseline.dart');
+  File(
+    '$root/scripts/coverage/lcov_parser.dart',
+  ).copySync('${tmp.path}/scripts/coverage/lcov_parser.dart');
 
   // Copy pubspec + symlink .dart_tool so `dart run` picks up the package
   // config without a fresh pub get.
   File('$root/pubspec.yaml').copySync('${tmp.path}/pubspec.yaml');
-  Link('${tmp.path}/.dart_tool')
-      .createSync('$root/.dart_tool', recursive: true);
+  Link(
+    '${tmp.path}/.dart_tool',
+  ).createSync('$root/.dart_tool', recursive: true);
 
   // Ensure target directories exist.
   Directory('${tmp.path}/coverage').createSync(recursive: true);
@@ -111,10 +117,12 @@ void main() {
 
       final txt = File('${tmp.path}/.planning/audit/coverage-baseline.txt');
       final json = File('${tmp.path}/.planning/audit/coverage-baseline.json');
-      final needTxt =
-          File('${tmp.path}/.planning/audit/files-needing-tests.txt');
-      final needJson =
-          File('${tmp.path}/.planning/audit/files-needing-tests.json');
+      final needTxt = File(
+        '${tmp.path}/.planning/audit/files-needing-tests.txt',
+      );
+      final needJson = File(
+        '${tmp.path}/.planning/audit/files-needing-tests.json',
+      );
 
       expect(txt.existsSync(), isTrue);
       expect(json.existsSync(), isTrue);
@@ -172,12 +180,16 @@ void main() {
       final r = await _runBaseline(tmp);
       expect(r.exitCode, equals(0), reason: r.stderr.toString());
 
-      final j = jsonDecode(
-        File('${tmp.path}/.planning/audit/coverage-baseline.json')
-            .readAsStringSync(),
-      ) as Map<String, dynamic>;
-      final paths =
-          (j['entries'] as List).map((e) => (e as Map)['file_path']).toList();
+      final j =
+          jsonDecode(
+                File(
+                  '${tmp.path}/.planning/audit/coverage-baseline.json',
+                ).readAsStringSync(),
+              )
+              as Map<String, dynamic>;
+      final paths = (j['entries'] as List)
+          .map((e) => (e as Map)['file_path'])
+          .toList();
       expect(paths, equals(['lib/a.dart', 'lib/b.dart', 'lib/c.dart']));
 
       final txt = File('${tmp.path}/.planning/audit/coverage-baseline.txt')
@@ -189,53 +201,69 @@ void main() {
       expect(txt, equals(['lib/a.dart', 'lib/b.dart', 'lib/c.dart']));
     });
 
-    test('idempotent: two runs produce byte-identical artifacts modulo generated_at',
-        () async {
-      _writeLcov(tmp, _threeRecordFixture);
-      final r1 = await _runBaseline(tmp);
-      expect(r1.exitCode, equals(0), reason: r1.stderr.toString());
-      final json1 = jsonDecode(
-        File('${tmp.path}/.planning/audit/coverage-baseline.json')
-            .readAsStringSync(),
-      ) as Map<String, dynamic>;
-      final txt1 = File('${tmp.path}/.planning/audit/coverage-baseline.txt')
-          .readAsStringSync();
-      final needJson1 = jsonDecode(
-        File('${tmp.path}/.planning/audit/files-needing-tests.json')
-            .readAsStringSync(),
-      ) as Map<String, dynamic>;
-      final needTxt1 =
-          File('${tmp.path}/.planning/audit/files-needing-tests.txt')
-              .readAsStringSync();
+    test(
+      'idempotent: two runs produce byte-identical artifacts modulo generated_at',
+      () async {
+        _writeLcov(tmp, _threeRecordFixture);
+        final r1 = await _runBaseline(tmp);
+        expect(r1.exitCode, equals(0), reason: r1.stderr.toString());
+        final json1 =
+            jsonDecode(
+                  File(
+                    '${tmp.path}/.planning/audit/coverage-baseline.json',
+                  ).readAsStringSync(),
+                )
+                as Map<String, dynamic>;
+        final txt1 = File(
+          '${tmp.path}/.planning/audit/coverage-baseline.txt',
+        ).readAsStringSync();
+        final needJson1 =
+            jsonDecode(
+                  File(
+                    '${tmp.path}/.planning/audit/files-needing-tests.json',
+                  ).readAsStringSync(),
+                )
+                as Map<String, dynamic>;
+        final needTxt1 = File(
+          '${tmp.path}/.planning/audit/files-needing-tests.txt',
+        ).readAsStringSync();
 
-      final r2 = await _runBaseline(tmp);
-      expect(r2.exitCode, equals(0), reason: r2.stderr.toString());
-      final json2 = jsonDecode(
-        File('${tmp.path}/.planning/audit/coverage-baseline.json')
-            .readAsStringSync(),
-      ) as Map<String, dynamic>;
-      final txt2 = File('${tmp.path}/.planning/audit/coverage-baseline.txt')
-          .readAsStringSync();
-      final needJson2 = jsonDecode(
-        File('${tmp.path}/.planning/audit/files-needing-tests.json')
-            .readAsStringSync(),
-      ) as Map<String, dynamic>;
-      final needTxt2 =
-          File('${tmp.path}/.planning/audit/files-needing-tests.txt')
-              .readAsStringSync();
+        final r2 = await _runBaseline(tmp);
+        expect(r2.exitCode, equals(0), reason: r2.stderr.toString());
+        final json2 =
+            jsonDecode(
+                  File(
+                    '${tmp.path}/.planning/audit/coverage-baseline.json',
+                  ).readAsStringSync(),
+                )
+                as Map<String, dynamic>;
+        final txt2 = File(
+          '${tmp.path}/.planning/audit/coverage-baseline.txt',
+        ).readAsStringSync();
+        final needJson2 =
+            jsonDecode(
+                  File(
+                    '${tmp.path}/.planning/audit/files-needing-tests.json',
+                  ).readAsStringSync(),
+                )
+                as Map<String, dynamic>;
+        final needTxt2 = File(
+          '${tmp.path}/.planning/audit/files-needing-tests.txt',
+        ).readAsStringSync();
 
-      // .txt files are byte-identical (no timestamp embedded).
-      expect(txt2, equals(txt1));
-      expect(needTxt2, equals(needTxt1));
+        // .txt files are byte-identical (no timestamp embedded).
+        expect(txt2, equals(txt1));
+        expect(needTxt2, equals(needTxt1));
 
-      // .json: normalize generated_at, then compare.
-      json1.remove('generated_at');
-      json2.remove('generated_at');
-      expect(json2, equals(json1));
-      needJson1.remove('generated_at');
-      needJson2.remove('generated_at');
-      expect(needJson2, equals(needJson1));
-    });
+        // .json: normalize generated_at, then compare.
+        json1.remove('generated_at');
+        json2.remove('generated_at');
+        expect(json2, equals(json1));
+        needJson1.remove('generated_at');
+        needJson2.remove('generated_at');
+        expect(needJson2, equals(needJson1));
+      },
+    );
 
     test('missing lcov input exits 2 with actionable stderr', () async {
       // Do NOT write coverage/lcov_clean.info.
@@ -251,32 +279,38 @@ void main() {
       final r = await _runBaseline(tmp);
       expect(r.exitCode, equals(0), reason: r.stderr.toString());
 
-      final txt =
-          File('${tmp.path}/.planning/audit/coverage-baseline.txt')
-              .readAsStringSync();
+      final txt = File(
+        '${tmp.path}/.planning/audit/coverage-baseline.txt',
+      ).readAsStringSync();
       expect(txt, isNot(contains('lib/foo.g.dart')));
       expect(txt, contains('lib/real.dart'));
 
-      final j = jsonDecode(
-        File('${tmp.path}/.planning/audit/coverage-baseline.json')
-            .readAsStringSync(),
-      ) as Map<String, dynamic>;
+      final j =
+          jsonDecode(
+                File(
+                  '${tmp.path}/.planning/audit/coverage-baseline.json',
+                ).readAsStringSync(),
+              )
+              as Map<String, dynamic>;
       expect(j['total_files'], equals(1));
-      final paths =
-          (j['entries'] as List).map((e) => (e as Map)['file_path']).toList();
+      final paths = (j['entries'] as List)
+          .map((e) => (e as Map)['file_path'])
+          .toList();
       expect(paths, equals(['lib/real.dart']));
     });
 
     test('--lcov flag overrides default path', () async {
       File('${tmp.path}/custom.info').writeAsStringSync(_threeRecordFixture);
-      final r =
-          await _runBaseline(tmp, ['--lcov', 'custom.info']);
+      final r = await _runBaseline(tmp, ['--lcov', 'custom.info']);
       expect(r.exitCode, equals(0), reason: r.stderr.toString());
 
-      final j = jsonDecode(
-        File('${tmp.path}/.planning/audit/coverage-baseline.json')
-            .readAsStringSync(),
-      ) as Map<String, dynamic>;
+      final j =
+          jsonDecode(
+                File(
+                  '${tmp.path}/.planning/audit/coverage-baseline.json',
+                ).readAsStringSync(),
+              )
+              as Map<String, dynamic>;
       expect(j['lcov_source'], equals('custom.info'));
       expect(j['total_files'], equals(3));
     });
