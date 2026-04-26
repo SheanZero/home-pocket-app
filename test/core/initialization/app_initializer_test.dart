@@ -65,7 +65,7 @@ void main() {
     );
   });
 
-  AppInitializer _makeInitializer({
+  AppInitializer makeInitializer({
     AppDatabaseFactory? databaseFactory,
     SeedRunner? seedRunner,
   }) {
@@ -81,14 +81,14 @@ void main() {
 
   group('AppInitializer — happy path', () {
     test('returns InitSuccess with a ProviderContainer', () async {
-      final result = await _makeInitializer().initialize();
+      final result = await makeInitializer().initialize();
 
       expect(result, isA<InitSuccess>());
       (result as InitSuccess).container.dispose();
     });
 
     test('returned container has appDatabaseProvider overridden', () async {
-      final result = await _makeInitializer().initialize();
+      final result = await makeInitializer().initialize();
       final container = (result as InitSuccess).container;
       addTearDown(container.dispose);
 
@@ -97,7 +97,7 @@ void main() {
 
     test('does NOT call initializeMasterKey when key already exists', () async {
       when(() => fakeMasterKeyRepo.hasMasterKey()).thenAnswer((_) async => true);
-      final result = await _makeInitializer().initialize();
+      final result = await makeInitializer().initialize();
       (result as InitSuccess).container.dispose();
 
       verifyNever(() => fakeMasterKeyRepo.initializeMasterKey());
@@ -105,7 +105,7 @@ void main() {
 
     test('calls initializeMasterKey when no key exists', () async {
       when(() => fakeMasterKeyRepo.hasMasterKey()).thenAnswer((_) async => false);
-      final result = await _makeInitializer().initialize();
+      final result = await makeInitializer().initialize();
       (result as InitSuccess).container.dispose();
 
       verify(() => fakeMasterKeyRepo.initializeMasterKey()).called(1);
@@ -113,7 +113,7 @@ void main() {
 
     test('does NOT call generateKeyPair when key pair already exists', () async {
       when(() => fakeKeyRepo.hasKeyPair()).thenAnswer((_) async => true);
-      final result = await _makeInitializer().initialize();
+      final result = await makeInitializer().initialize();
       (result as InitSuccess).container.dispose();
 
       verifyNever(() => fakeKeyRepo.generateKeyPair());
@@ -121,7 +121,7 @@ void main() {
 
     test('calls generateKeyPair when no key pair exists', () async {
       when(() => fakeKeyRepo.hasKeyPair()).thenAnswer((_) async => false);
-      final result = await _makeInitializer().initialize();
+      final result = await makeInitializer().initialize();
       (result as InitSuccess).container.dispose();
 
       verify(() => fakeKeyRepo.generateKeyPair()).called(1);
@@ -152,7 +152,7 @@ void main() {
         Exception('secure storage unavailable'),
       );
 
-      final result = await _makeInitializer().initialize();
+      final result = await makeInitializer().initialize();
 
       expect(result, isA<InitFailure>());
       expect((result as InitFailure).type, equals(InitFailureType.masterKey));
@@ -165,7 +165,7 @@ void main() {
         Exception('key generation failed'),
       );
 
-      final result = await _makeInitializer().initialize();
+      final result = await makeInitializer().initialize();
 
       expect(result, isA<InitFailure>());
       expect((result as InitFailure).type, equals(InitFailureType.masterKey));
@@ -175,7 +175,7 @@ void main() {
         () async {
       when(() => fakeKeyRepo.getDeviceId()).thenAnswer((_) async => null);
 
-      final result = await _makeInitializer().initialize();
+      final result = await makeInitializer().initialize();
 
       expect(result, isA<InitFailure>());
       expect((result as InitFailure).type, equals(InitFailureType.masterKey));
@@ -184,7 +184,7 @@ void main() {
 
   group('AppInitializer — database failure', () {
     test('returns InitFailure(database) when databaseFactory throws', () async {
-      final result = await _makeInitializer(
+      final result = await makeInitializer(
         databaseFactory: _failingDatabaseFactory(Exception('db open failed')),
       ).initialize();
 
@@ -194,7 +194,7 @@ void main() {
 
     test('InitFailure(database) carries the thrown error', () async {
       final error = Exception('db corrupted');
-      final result = await _makeInitializer(
+      final result = await makeInitializer(
         databaseFactory: _failingDatabaseFactory(error),
       ).initialize();
 
@@ -205,7 +205,7 @@ void main() {
 
   group('AppInitializer — seed failure', () {
     test('returns InitFailure(seed) when seedRunner throws', () async {
-      final result = await _makeInitializer(
+      final result = await makeInitializer(
         seedRunner: _failingSeedRunner(Exception('seed failed')),
       ).initialize();
 
@@ -215,7 +215,7 @@ void main() {
 
     test('InitFailure(seed) carries the original error', () async {
       final originalError = Exception('categories missing');
-      final result = await _makeInitializer(
+      final result = await makeInitializer(
         seedRunner: _failingSeedRunner(originalError),
       ).initialize();
 

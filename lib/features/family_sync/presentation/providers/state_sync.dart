@@ -60,8 +60,12 @@ Stream<model.SyncStatus> syncStatusStream(Ref ref) {
 }
 
 /// GroupMembers stream via Drift watch query, mapped to domain model.
-@riverpod
-Stream<List<GroupMember>> groupMembers(Ref ref) {
+///
+/// Kept alive because this stream is long-lived and must not lose subscription
+/// state on tab switches. The name reflects that this stream observes
+/// [activeGroupProvider] (only members of the currently active group).
+@Riverpod(keepAlive: true)
+Stream<List<GroupMember>> activeGroupMembers(Ref ref) {
   final activeGroup = ref.watch(activeGroupProvider).valueOrNull;
   if (activeGroup == null) return Stream.value([]);
   final dao = ref.watch(groupMemberDaoProvider);

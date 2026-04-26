@@ -89,25 +89,29 @@ final syncStatusStreamProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SyncStatusStreamRef = AutoDisposeStreamProviderRef<model.SyncStatus>;
-String _$groupMembersHash() => r'f4ebc572ef07242c5ac0c3f19527e2f9c67792e8';
+String _$activeGroupMembersHash() =>
+    r'9079bb910adb2d30851248cf7846507d6b39b5be';
 
 /// GroupMembers stream via Drift watch query, mapped to domain model.
 ///
-/// Copied from [groupMembers].
-@ProviderFor(groupMembers)
-final groupMembersProvider =
-    AutoDisposeStreamProvider<List<GroupMember>>.internal(
-      groupMembers,
-      name: r'groupMembersProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$groupMembersHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+/// Kept alive because this stream is long-lived and must not lose subscription
+/// state on tab switches. The name reflects that this stream observes
+/// [activeGroupProvider] (only members of the currently active group).
+///
+/// Copied from [activeGroupMembers].
+@ProviderFor(activeGroupMembers)
+final activeGroupMembersProvider = StreamProvider<List<GroupMember>>.internal(
+  activeGroupMembers,
+  name: r'activeGroupMembersProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$activeGroupMembersHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef GroupMembersRef = AutoDisposeStreamProviderRef<List<GroupMember>>;
+typedef ActiveGroupMembersRef = StreamProviderRef<List<GroupMember>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

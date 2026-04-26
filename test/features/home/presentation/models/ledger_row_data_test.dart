@@ -22,48 +22,48 @@ import 'package:home_pocket/features/home/presentation/models/ledger_row_data.da
 
 void main() {
   group('LedgerRowData characterization (Phase 3 D-11 / LV-022)', () {
-    const _tagBg = Color(0xFFE8F5E9);
-    const _tagText = Color(0xFF2E7D32);
-    const _title = Color(0xFF1E2432);
-    const _amount = Color(0xFF47B88A);
-    const _chevron = Color(0xFFB0BEC5);
-    const _border = Color(0xFFFAFAFA);
+    const tagBg = Color(0xFFE8F5E9);
+    const tagText = Color(0xFF2E7D32);
+    const title = Color(0xFF1E2432);
+    const amount = Color(0xFF47B88A);
+    const chevron = Color(0xFFB0BEC5);
+    const border = Color(0xFFFAFAFA);
 
-    LedgerRowData _seed({Color? borderColor}) => LedgerRowData(
+    LedgerRowData seed({Color? borderColor}) => LedgerRowData(
           tagText: 'Soul',
-          tagBgColor: _tagBg,
-          tagTextColor: _tagText,
+          tagBgColor: tagBg,
+          tagTextColor: tagText,
           title: 'Concert ticket',
-          titleColor: _title,
+          titleColor: title,
           subtitle: '2026-04-26 · Music',
           formattedAmount: '¥8,500',
-          amountColor: _amount,
-          chevronColor: _chevron,
+          amountColor: amount,
+          chevronColor: chevron,
           borderColor: borderColor,
         );
 
     test('constructor preserves every supplied field byte-equivalently', () {
-      final row = _seed(borderColor: _border);
+      final row = seed(borderColor: border);
       expect(row.tagText, 'Soul');
-      expect(row.tagBgColor, _tagBg);
-      expect(row.tagTextColor, _tagText);
+      expect(row.tagBgColor, tagBg);
+      expect(row.tagTextColor, tagText);
       expect(row.title, 'Concert ticket');
-      expect(row.titleColor, _title);
+      expect(row.titleColor, title);
       expect(row.subtitle, '2026-04-26 · Music');
       expect(row.formattedAmount, '¥8,500');
-      expect(row.amountColor, _amount);
-      expect(row.chevronColor, _chevron);
-      expect(row.borderColor, _border);
+      expect(row.amountColor, amount);
+      expect(row.chevronColor, chevron);
+      expect(row.borderColor, border);
     });
 
     test('borderColor is optional and defaults to null', () {
-      final row = _seed();
+      final row = seed();
       expect(row.borderColor, isNull);
     });
 
     test('two LedgerRowData with identical fields are equal', () {
-      final a = _seed(borderColor: _border);
-      final b = _seed(borderColor: _border);
+      final a = seed(borderColor: border);
+      final b = seed(borderColor: border);
       expect(a, equals(b));
       expect(a.hashCode, equals(b.hashCode));
     });
@@ -71,7 +71,7 @@ void main() {
     group('copyWith preserves untouched fields when ONE field changes', () {
       // For each field, mutate it and verify the other 9 stay intact.
       test('copyWith(tagText: ...) preserves all other fields', () {
-        final base = _seed(borderColor: _border);
+        final base = seed(borderColor: border);
         final next = base.copyWith(tagText: 'Survival');
         expect(next.tagText, 'Survival');
         expect(next.tagBgColor, base.tagBgColor);
@@ -86,7 +86,7 @@ void main() {
       });
 
       test('copyWith(tagBgColor: ...) preserves all other fields', () {
-        final base = _seed(borderColor: _border);
+        final base = seed(borderColor: border);
         final next = base.copyWith(tagBgColor: const Color(0xFFFFEBEE));
         expect(next.tagBgColor, const Color(0xFFFFEBEE));
         expect(next.tagText, base.tagText);
@@ -101,7 +101,7 @@ void main() {
       });
 
       test('copyWith(tagTextColor: ...) preserves all other fields', () {
-        final base = _seed(borderColor: _border);
+        final base = seed(borderColor: border);
         final next = base.copyWith(tagTextColor: const Color(0xFFC62828));
         expect(next.tagTextColor, const Color(0xFFC62828));
         expect(next.tagText, base.tagText);
@@ -116,7 +116,7 @@ void main() {
       });
 
       test('copyWith(title: ...) preserves all other fields', () {
-        final base = _seed(borderColor: _border);
+        final base = seed(borderColor: border);
         final next = base.copyWith(title: 'Different');
         expect(next.title, 'Different');
         expect(next.tagText, base.tagText);
@@ -131,7 +131,7 @@ void main() {
       });
 
       test('copyWith(titleColor: ...) preserves all other fields', () {
-        final base = _seed(borderColor: _border);
+        final base = seed(borderColor: border);
         final next = base.copyWith(titleColor: const Color(0xFF000000));
         expect(next.titleColor, const Color(0xFF000000));
         expect(next.tagText, base.tagText);
@@ -146,7 +146,7 @@ void main() {
       });
 
       test('copyWith(subtitle: ...) preserves all other fields', () {
-        final base = _seed(borderColor: _border);
+        final base = seed(borderColor: border);
         final next = base.copyWith(subtitle: 'Other date');
         expect(next.subtitle, 'Other date');
         expect(next.tagText, base.tagText);
@@ -161,7 +161,7 @@ void main() {
       });
 
       test('copyWith(formattedAmount: ...) preserves all other fields', () {
-        final base = _seed(borderColor: _border);
+        final base = seed(borderColor: border);
         final next = base.copyWith(formattedAmount: '¥1,000');
         expect(next.formattedAmount, '¥1,000');
         expect(next.tagText, base.tagText);
@@ -176,7 +176,7 @@ void main() {
       });
 
       test('copyWith(amountColor: ...) preserves all other fields', () {
-        final base = _seed(borderColor: _border);
+        final base = seed(borderColor: border);
         final next = base.copyWith(amountColor: const Color(0xFF5A9CC8));
         expect(next.amountColor, const Color(0xFF5A9CC8));
         expect(next.tagText, base.tagText);
@@ -191,7 +191,7 @@ void main() {
       });
 
       test('copyWith(chevronColor: ...) preserves all other fields', () {
-        final base = _seed(borderColor: _border);
+        final base = seed(borderColor: border);
         final next = base.copyWith(chevronColor: const Color(0xFF000000));
         expect(next.chevronColor, const Color(0xFF000000));
         expect(next.tagText, base.tagText);
@@ -206,7 +206,7 @@ void main() {
       });
 
       test('copyWith(borderColor: ...) preserves all other fields', () {
-        final base = _seed(borderColor: _border);
+        final base = seed(borderColor: border);
         final next = base.copyWith(borderColor: const Color(0xFFFAFAFB));
         expect(next.borderColor, const Color(0xFFFAFAFB));
         expect(next.tagText, base.tagText);

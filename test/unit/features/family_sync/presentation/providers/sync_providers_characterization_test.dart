@@ -164,20 +164,21 @@ void main() {
         expect(svc, isA<SyncOrchestrator>());
       });
 
-      // groupMembersProvider behavior when activeGroup is null
+      // activeGroupMembersProvider behavior when activeGroup is null
       test(
-        'groupMembersProvider resolves to empty list when activeGroupProvider returns null',
+        'activeGroupMembersProvider resolves to empty list when activeGroupProvider returns null',
         () async {
           // activeGroupProvider will see null from mockGroupRepo.watchActiveGroup()
-          // so groupMembersProvider should resolve to [] (since it returns Stream.value([]))
+          // so activeGroupMembersProvider should resolve to [] (since it returns Stream.value([]))
           // Wait for the provider to settle by polling the AsyncValue
           await Future<void>.delayed(const Duration(milliseconds: 50));
-          final value = container.read(groupMembersProvider);
+          final value = container.read(activeGroupMembersProvider);
           // The value should be either loading (ActiveGroup stream not yet emitted)
           // or data with an empty list
           value.whenData(
             (members) => expect(members, isEmpty,
-                reason: 'groupMembersProvider must emit [] when no active group'),
+                reason:
+                    'activeGroupMembersProvider must emit [] when no active group'),
           );
           // Also verify the provider constructed without throwing
           expect(value, isA<AsyncValue<List<GroupMember>>>());

@@ -10,7 +10,6 @@ import 'package:home_pocket/infrastructure/sync/apns_push_messaging_client.dart'
 import 'package:home_pocket/infrastructure/sync/e2ee_service.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
-import 'package:home_pocket/infrastructure/sync/sync_queue_manager.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -26,7 +25,7 @@ void main() {
     mockSyncRepository = _MockSyncRepository();
   });
 
-  ProviderContainer _makeContainer() {
+  ProviderContainer makeContainer() {
     return ProviderContainer(
       overrides: [
         crypto.keyManagerProvider.overrideWithValue(mockKeyManager),
@@ -37,63 +36,63 @@ void main() {
 
   group('lib/application/family_sync/repository_providers.dart', () {
     test('appRelayApiClientProvider returns a non-null RelayApiClient', () {
-      final container = _makeContainer();
+      final container = makeContainer();
       addTearDown(container.dispose);
       final result = container.read(appRelayApiClientProvider);
       expect(result, isA<RelayApiClient>());
     });
 
     test('appE2eeServiceProvider returns a non-null E2EEService', () {
-      final container = _makeContainer();
+      final container = makeContainer();
       addTearDown(container.dispose);
       final result = container.read(appE2eeServiceProvider);
       expect(result, isA<E2EEService>());
     });
 
     test('appPushNotificationServiceProvider returns a PushNotificationService', () {
-      final container = _makeContainer();
+      final container = makeContainer();
       addTearDown(container.dispose);
       final result = container.read(appPushNotificationServiceProvider);
       expect(result, isA<PushNotificationService>());
     });
 
     test('appApnsPushMessagingClientProvider returns an ApnsPushMessagingClient', () {
-      final container = _makeContainer();
+      final container = makeContainer();
       addTearDown(container.dispose);
       final result = container.read(appApnsPushMessagingClientProvider);
       expect(result, isA<ApnsPushMessagingClient>());
     });
 
     test('appSyncQueueManagerProvider returns a SyncQueueManager', () {
-      final container = _makeContainer();
+      final container = makeContainer();
       addTearDown(container.dispose);
       final result = container.read(appSyncQueueManagerProvider);
       expect(result, isA<SyncQueueManager>());
     });
 
     test('appWebSocketServiceProvider returns a WebSocketService', () {
-      final container = _makeContainer();
+      final container = makeContainer();
       addTearDown(container.dispose);
       final result = container.read(appWebSocketServiceProvider);
       expect(result, isA<WebSocketService>());
     });
 
     test('appKeyManagerProvider (re-export) returns the same as overridden underlying provider', () {
-      final container = _makeContainer();
+      final container = makeContainer();
       addTearDown(container.dispose);
       final result = container.read(appKeyManagerProvider);
       expect(result, same(mockKeyManager));
     });
 
     test('notifyMemberApprovalUseCaseProvider returns a NotifyMemberApprovalUseCase', () {
-      final container = _makeContainer();
+      final container = makeContainer();
       addTearDown(container.dispose);
       final result = container.read(notifyMemberApprovalUseCaseProvider);
       expect(result, isA<NotifyMemberApprovalUseCase>());
     });
 
     test('listenToPushNotificationsUseCaseProvider returns a ListenToPushNotificationsUseCase', () {
-      final container = _makeContainer();
+      final container = makeContainer();
       addTearDown(container.dispose);
       final result = container.read(listenToPushNotificationsUseCaseProvider);
       expect(result, isA<ListenToPushNotificationsUseCase>());

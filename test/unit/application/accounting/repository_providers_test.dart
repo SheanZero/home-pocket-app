@@ -22,7 +22,7 @@ void main() {
     await mockDatabase.close();
   });
 
-  ProviderContainer _makeContainer() {
+  ProviderContainer makeContainer() {
     return ProviderContainer(
       overrides: [
         crypto.keyManagerProvider.overrideWithValue(mockKeyManager),
@@ -33,14 +33,14 @@ void main() {
 
   group('lib/application/accounting/repository_providers.dart', () {
     test('appAppDatabaseProvider (re-export) returns the overridden database', () {
-      final container = _makeContainer();
+      final container = makeContainer();
       addTearDown(container.dispose);
       final result = container.read(appAppDatabaseProvider);
       expect(result, same(mockDatabase));
     });
 
     test('appKeyManagerProvider (re-export) returns the overridden key manager', () {
-      final container = _makeContainer();
+      final container = makeContainer();
       addTearDown(container.dispose);
       final result = container.read(appKeyManagerProvider);
       expect(result, same(mockKeyManager));
