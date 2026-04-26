@@ -4,7 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'classification_service.dart';
 import 'rule_engine.dart';
 
-part 'providers.g.dart';
+part 'repository_providers.g.dart';
 
 @Riverpod(keepAlive: true)
 RuleEngine ruleEngine(Ref ref) {
