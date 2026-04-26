@@ -57,13 +57,13 @@ Eliminate every CRITICAL-severity finding from `.planning/audit/issues.json` (24
 
 ### Plan structure & wave parallelization
 
-- **D-13:** Phase 3 splits into **5 plans, one per concern**:
+- **D-13** [informational — describes plan structure, embodied by the 5 plan files existing]**:** Phase 3 splits into **5 plans, one per concern**:
   - **Plan 03-01:** Domain `import_guard.yaml` per-subdirectory rules + `test/architecture/domain_import_rules_test.dart` (covers LV-001..016, LV-023, LV-024 — 19 findings)
   - **Plan 03-02:** `AppInitializer` extraction + concrete `appDatabaseProvider` + `InitResult` fallback UI + 3 ARB keys (covers CRIT-03)
   - **Plan 03-03:** `family_sync/use_cases/` migration — 5 sub-tasks, one per file (covers LV-017..021)
   - **Plan 03-04:** `ledger_row_data.dart` move to presentation (covers LV-022)
   - **Plan 03-05:** Characterization-test pre-work for files in `files-needing-tests.txt` ∩ Phase-3 touched-files (gating prerequisite for Plan 03-02; concurrent prereq for Plans 03-01/03/04)
-- **D-14:** **Wave 1** runs `{Plan 03-01, Plan 03-03, Plan 03-04, Plan 03-05}` in parallel — they share no source-file dependencies (yaml-only, file moves to disjoint dirs, test-only changes). **Wave 2** runs `Plan 03-02` alone — depends on Plan 03-05's test infra (fake repository patterns) being merged. Estimated wall time: W1 ~16h parallel, W2 ~14h sequential.
+- **D-14** [informational — describes wave structure, embodied by plan frontmatter `wave:` and `depends_on:` fields]**:** **Wave 1** runs `{Plan 03-01, Plan 03-03, Plan 03-04, Plan 03-05}` in parallel — they share no source-file dependencies (yaml-only, file moves to disjoint dirs, test-only changes). **Wave 2** runs `Plan 03-02` alone — depends on Plan 03-05's test infra (fake repository patterns) being merged. Estimated wall time: W1 ~16h parallel, W2 ~14h sequential.
 
 ### Test rigor (CRIT-05)
 

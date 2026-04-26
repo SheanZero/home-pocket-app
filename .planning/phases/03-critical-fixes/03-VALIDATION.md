@@ -1,8 +1,8 @@
 ---
 phase: 3
 slug: critical-fixes
-status: draft
-nyquist_compliant: false
+status: ready
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-04-26
 ---
@@ -81,4 +81,4 @@ Wave 0 (test infrastructure) is owned by Plan 03-05. Specifically:
 - [ ] Feedback latency < 180s for full-suite run on touched-files
 - [ ] `nyquist_compliant: true` set in frontmatter once all checkboxes complete
 
-**Approval:** pending
+**Approval:** approved 2026-04-26 (planner; flipped after revision pass that addressed checker issues 1-4)
