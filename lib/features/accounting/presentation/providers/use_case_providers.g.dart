@@ -103,26 +103,6 @@ final categoryServiceProvider = AutoDisposeProvider<CategoryService>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef CategoryServiceRef = AutoDisposeProviderRef<CategoryService>;
-String _$resolveLedgerTypeServiceHash() =>
-    r'50f825aaa049bc5ba94fc90deae373cfe412d914';
-
-/// See also [resolveLedgerTypeService].
-@ProviderFor(resolveLedgerTypeService)
-final resolveLedgerTypeServiceProvider =
-    AutoDisposeProvider<ResolveLedgerTypeService>.internal(
-      resolveLedgerTypeService,
-      name: r'resolveLedgerTypeServiceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$resolveLedgerTypeServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ResolveLedgerTypeServiceRef =
-    AutoDisposeProviderRef<ResolveLedgerTypeService>;
 String _$ensureDefaultBookUseCaseHash() =>
     r'37e41e1327696132edf238d026cdfcb9f86ba297';
 

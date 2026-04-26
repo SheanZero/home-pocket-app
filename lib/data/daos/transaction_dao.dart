@@ -111,6 +111,53 @@ class TransactionDao {
     return result?.currentHash;
   }
 
+  /// Update an existing transaction row in place.
+  Future<void> updateTransaction({
+    required String id,
+    required String bookId,
+    required String deviceId,
+    required int amount,
+    required String type,
+    required String categoryId,
+    required String ledgerType,
+    required DateTime timestamp,
+    required String currentHash,
+    required DateTime createdAt,
+    String? note,
+    String? photoHash,
+    String? merchant,
+    String? metadata,
+    String? prevHash,
+    bool isPrivate = false,
+    bool isSynced = false,
+    int soulSatisfaction = 5,
+    DateTime? updatedAt,
+  }) async {
+    await (_db.update(_db.transactions)..where((t) => t.id.equals(id))).write(
+      TransactionsCompanion(
+        bookId: Value(bookId),
+        deviceId: Value(deviceId),
+        amount: Value(amount),
+        type: Value(type),
+        categoryId: Value(categoryId),
+        ledgerType: Value(ledgerType),
+        timestamp: Value(timestamp),
+        currentHash: Value(currentHash),
+        createdAt: Value(createdAt),
+        note: Value(note),
+        photoHash: Value(photoHash),
+        merchant: Value(merchant),
+        metadata: Value(metadata),
+        prevHash: Value(prevHash),
+        isPrivate: Value(isPrivate),
+        isSynced: Value(isSynced),
+        soulSatisfaction: Value(soulSatisfaction),
+        updatedAt: Value(updatedAt ?? DateTime.now()),
+        isDeleted: const Value(false),
+      ),
+    );
+  }
+
   /// Soft-delete a transaction.
   Future<void> softDelete(String id) async {
     await (_db.update(_db.transactions)..where((t) => t.id.equals(id))).write(

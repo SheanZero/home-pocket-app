@@ -10,8 +10,6 @@ import '../../../../application/accounting/merchant_category_learning_service.da
 import '../../../../application/accounting/seed_categories_use_case.dart';
 import '../../../../application/dual_ledger/providers.dart';
 import '../../../../application/voice/record_category_correction_use_case.dart';
-// ignore: deprecated_member_use_from_same_package
-import '../../../../application/dual_ledger/resolve_ledger_type_service.dart';
 import '../../../../features/family_sync/presentation/providers/sync_providers.dart';
 import '../../../../infrastructure/crypto/providers.dart';
 import 'repository_providers.dart';
@@ -58,16 +56,6 @@ SeedCategoriesUseCase seedCategoriesUseCase(Ref ref) {
 @riverpod
 CategoryService categoryService(Ref ref) {
   return CategoryService(
-    categoryRepository: ref.watch(categoryRepositoryProvider),
-    ledgerConfigRepository: ref.watch(categoryLedgerConfigRepositoryProvider),
-  );
-}
-
-// ignore: deprecated_member_use_from_same_package
-@riverpod
-ResolveLedgerTypeService resolveLedgerTypeService(Ref ref) {
-  // ignore: deprecated_member_use_from_same_package
-  return ResolveLedgerTypeService(
     categoryRepository: ref.watch(categoryRepositoryProvider),
     ledgerConfigRepository: ref.watch(categoryLedgerConfigRepositoryProvider),
   );

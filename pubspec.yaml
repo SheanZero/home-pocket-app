@@ -86,7 +86,6 @@ dev_dependencies:
   drift_dev: ^2.25.0
 
   # Testing
-  mockito: ^5.4.6
   mocktail: ^1.0.4
 
   # Audit Tooling

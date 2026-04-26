@@ -8,32 +8,39 @@ import 'package:home_pocket/features/accounting/domain/repositories/category_rep
 import 'package:home_pocket/features/accounting/domain/repositories/device_identity_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 
-@GenerateMocks([
-  TransactionRepository,
-  CategoryRepository,
-  DeviceIdentityRepository,
-  HashChainService,
-  ClassificationService,
-])
-import 'create_transaction_use_case_test.mocks.dart';
+class _MockTransactionRepository extends Mock implements TransactionRepository {}
+
+class _MockCategoryRepository extends Mock implements CategoryRepository {}
+
+class _MockDeviceIdentityRepository extends Mock
+    implements DeviceIdentityRepository {}
+
+class _MockHashChainService extends Mock implements HashChainService {}
+
+class _MockClassificationService extends Mock implements ClassificationService {}
+
+class _FakeTransaction extends Fake implements Transaction {}
 
 void main() {
-  late MockTransactionRepository mockTransactionRepo;
-  late MockCategoryRepository mockCategoryRepo;
-  late MockDeviceIdentityRepository mockDeviceIdentityRepo;
-  late MockHashChainService mockHashChainService;
-  late MockClassificationService mockClassificationService;
+  setUpAll(() {
+    registerFallbackValue(_FakeTransaction());
+  });
+
+  late _MockTransactionRepository mockTransactionRepo;
+  late _MockCategoryRepository mockCategoryRepo;
+  late _MockDeviceIdentityRepository mockDeviceIdentityRepo;
+  late _MockHashChainService mockHashChainService;
+  late _MockClassificationService mockClassificationService;
   late CreateTransactionUseCase useCase;
 
   setUp(() {
-    mockTransactionRepo = MockTransactionRepository();
-    mockCategoryRepo = MockCategoryRepository();
-    mockDeviceIdentityRepo = MockDeviceIdentityRepository();
-    mockHashChainService = MockHashChainService();
-    mockClassificationService = MockClassificationService();
+    mockTransactionRepo = _MockTransactionRepository();
+    mockCategoryRepo = _MockCategoryRepository();
+    mockDeviceIdentityRepo = _MockDeviceIdentityRepository();
+    mockHashChainService = _MockHashChainService();
+    mockClassificationService = _MockClassificationService();
 
     useCase = CreateTransactionUseCase(
       transactionRepository: mockTransactionRepo,
@@ -44,15 +51,15 @@ void main() {
     );
 
     when(
-      mockDeviceIdentityRepo.getDeviceId(),
+      () => mockDeviceIdentityRepo.getDeviceId(),
     ).thenAnswer((_) async => 'device_test_001');
 
     // Default classification stub: survival
     when(
-      mockClassificationService.classify(
-        categoryId: anyNamed('categoryId'),
-        merchant: anyNamed('merchant'),
-        note: anyNamed('note'),
+      () => mockClassificationService.classify(
+        categoryId: any(named: 'categoryId'),
+        merchant: any(named: 'merchant'),
+        note: any(named: 'note'),
       ),
     ).thenAnswer(
       (_) async => const ClassificationResult(
@@ -62,7 +69,9 @@ void main() {
         reason: 'Default stub',
       ),
     );
-    when(mockTransactionRepo.getLatestHash(any)).thenAnswer((_) async => null);
+    when(
+      () => mockTransactionRepo.getLatestHash(any()),
+    ).thenAnswer((_) async => null);
   });
 
   group('CreateTransactionUseCase', () {
@@ -79,20 +88,20 @@ void main() {
 
     test('successfully creates a transaction with hash chain', () async {
       when(
-        mockCategoryRepo.findById('cat_food'),
+        () => mockCategoryRepo.findById('cat_food'),
       ).thenAnswer((_) async => testCategory);
       when(
-        mockTransactionRepo.getLatestHash('book_001'),
+        () => mockTransactionRepo.getLatestHash('book_001'),
       ).thenAnswer((_) async => 'prev_hash_abc');
       when(
-        mockHashChainService.calculateTransactionHash(
-          transactionId: anyNamed('transactionId'),
-          amount: anyNamed('amount'),
-          timestamp: anyNamed('timestamp'),
-          previousHash: anyNamed('previousHash'),
+        () => mockHashChainService.calculateTransactionHash(
+          transactionId: any(named: 'transactionId'),
+          amount: any(named: 'amount'),
+          timestamp: any(named: 'timestamp'),
+          previousHash: any(named: 'previousHash'),
         ),
       ).thenReturn('computed_hash_xyz');
-      when(mockTransactionRepo.insert(any)).thenAnswer((_) async {});
+      when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
 
       final result = await useCase.execute(
         CreateTransactionParams(
@@ -110,25 +119,25 @@ void main() {
       expect(result.data!.deviceId, 'device_test_001');
       expect(result.data!.currentHash, 'computed_hash_xyz');
       expect(result.data!.prevHash, 'prev_hash_abc');
-      verify(mockTransactionRepo.insert(any)).called(1);
+      verify(() => mockTransactionRepo.insert(any())).called(1);
     });
 
     test('uses genesis hash when no previous transactions', () async {
       when(
-        mockCategoryRepo.findById('cat_food'),
+        () => mockCategoryRepo.findById('cat_food'),
       ).thenAnswer((_) async => testCategory);
       when(
-        mockTransactionRepo.getLatestHash('book_001'),
+        () => mockTransactionRepo.getLatestHash('book_001'),
       ).thenAnswer((_) async => null);
       when(
-        mockHashChainService.calculateTransactionHash(
-          transactionId: anyNamed('transactionId'),
-          amount: anyNamed('amount'),
-          timestamp: anyNamed('timestamp'),
-          previousHash: anyNamed('previousHash'),
+        () => mockHashChainService.calculateTransactionHash(
+          transactionId: any(named: 'transactionId'),
+          amount: any(named: 'amount'),
+          timestamp: any(named: 'timestamp'),
+          previousHash: any(named: 'previousHash'),
         ),
       ).thenReturn('genesis_hash');
-      when(mockTransactionRepo.insert(any)).thenAnswer((_) async {});
+      when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
 
       final result = await useCase.execute(
         CreateTransactionParams(
@@ -141,10 +150,10 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       verify(
-        mockHashChainService.calculateTransactionHash(
-          transactionId: anyNamed('transactionId'),
-          amount: anyNamed('amount'),
-          timestamp: anyNamed('timestamp'),
+        () => mockHashChainService.calculateTransactionHash(
+          transactionId: any(named: 'transactionId'),
+          amount: any(named: 'amount'),
+          timestamp: any(named: 'timestamp'),
           previousHash: '0' * 64,
         ),
       ).called(1);
@@ -162,12 +171,12 @@ void main() {
 
       expect(result.isError, isTrue);
       expect(result.error, contains('amount'));
-      verifyNever(mockTransactionRepo.insert(any));
+      verifyNever(() => mockTransactionRepo.insert(any()));
     });
 
     test('returns error when category does not exist', () async {
       when(
-        mockCategoryRepo.findById('invalid_cat'),
+        () => mockCategoryRepo.findById('invalid_cat'),
       ).thenAnswer((_) async => null);
 
       final result = await useCase.execute(
@@ -181,14 +190,16 @@ void main() {
 
       expect(result.isError, isTrue);
       expect(result.error, contains('category'));
-      verifyNever(mockTransactionRepo.insert(any));
+      verifyNever(() => mockTransactionRepo.insert(any()));
     });
 
     test('returns error when deviceId is unavailable', () async {
       when(
-        mockCategoryRepo.findById('cat_food'),
+        () => mockCategoryRepo.findById('cat_food'),
       ).thenAnswer((_) async => testCategory);
-      when(mockDeviceIdentityRepo.getDeviceId()).thenAnswer((_) async => null);
+      when(
+        () => mockDeviceIdentityRepo.getDeviceId(),
+      ).thenAnswer((_) async => null);
 
       final result = await useCase.execute(
         CreateTransactionParams(
@@ -201,7 +212,7 @@ void main() {
 
       expect(result.isError, isTrue);
       expect(result.error, contains('deviceId'));
-      verifyNever(mockTransactionRepo.insert(any));
+      verifyNever(() => mockTransactionRepo.insert(any()));
     });
 
     test('returns error when bookId is empty', () async {
@@ -215,15 +226,15 @@ void main() {
       );
 
       expect(result.isError, isTrue);
-      verifyNever(mockTransactionRepo.insert(any));
+      verifyNever(() => mockTransactionRepo.insert(any()));
     });
 
     test('uses classification service to determine ledgerType', () async {
       when(
-        mockClassificationService.classify(
-          categoryId: anyNamed('categoryId'),
-          merchant: anyNamed('merchant'),
-          note: anyNamed('note'),
+        () => mockClassificationService.classify(
+          categoryId: any(named: 'categoryId'),
+          merchant: any(named: 'merchant'),
+          note: any(named: 'note'),
         ),
       ).thenAnswer(
         (_) async => const ClassificationResult(
@@ -233,7 +244,9 @@ void main() {
           reason: 'Entertainment category',
         ),
       );
-      when(mockCategoryRepo.findById('cat_entertainment')).thenAnswer(
+      when(
+        () => mockCategoryRepo.findById('cat_entertainment'),
+      ).thenAnswer(
         (_) async => Category(
           id: 'cat_entertainment',
           name: 'Entertainment',
@@ -246,17 +259,17 @@ void main() {
         ),
       );
       when(
-        mockTransactionRepo.getLatestHash('book_001'),
+        () => mockTransactionRepo.getLatestHash('book_001'),
       ).thenAnswer((_) async => null);
       when(
-        mockHashChainService.calculateTransactionHash(
-          transactionId: anyNamed('transactionId'),
-          amount: anyNamed('amount'),
-          timestamp: anyNamed('timestamp'),
-          previousHash: anyNamed('previousHash'),
+        () => mockHashChainService.calculateTransactionHash(
+          transactionId: any(named: 'transactionId'),
+          amount: any(named: 'amount'),
+          timestamp: any(named: 'timestamp'),
+          previousHash: any(named: 'previousHash'),
         ),
       ).thenReturn('hash_soul');
-      when(mockTransactionRepo.insert(any)).thenAnswer((_) async {});
+      when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
 
       final result = await useCase.execute(
         CreateTransactionParams(
@@ -273,20 +286,20 @@ void main() {
 
     test('passes merchant and note to classification service', () async {
       when(
-        mockCategoryRepo.findById('cat_food'),
+        () => mockCategoryRepo.findById('cat_food'),
       ).thenAnswer((_) async => testCategory);
       when(
-        mockTransactionRepo.getLatestHash('book_001'),
+        () => mockTransactionRepo.getLatestHash('book_001'),
       ).thenAnswer((_) async => null);
       when(
-        mockHashChainService.calculateTransactionHash(
-          transactionId: anyNamed('transactionId'),
-          amount: anyNamed('amount'),
-          timestamp: anyNamed('timestamp'),
-          previousHash: anyNamed('previousHash'),
+        () => mockHashChainService.calculateTransactionHash(
+          transactionId: any(named: 'transactionId'),
+          amount: any(named: 'amount'),
+          timestamp: any(named: 'timestamp'),
+          previousHash: any(named: 'previousHash'),
         ),
       ).thenReturn('hash_123');
-      when(mockTransactionRepo.insert(any)).thenAnswer((_) async {});
+      when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
 
       await useCase.execute(
         CreateTransactionParams(
@@ -300,7 +313,7 @@ void main() {
       );
 
       verify(
-        mockClassificationService.classify(
+        () => mockClassificationService.classify(
           categoryId: 'cat_food',
           merchant: 'Lawson',
           note: 'Quick lunch',

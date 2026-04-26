@@ -6,28 +6,33 @@ import 'package:home_pocket/data/daos/transaction_dao.dart';
 import 'package:home_pocket/data/repositories/book_repository_impl.dart';
 import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 
-@GenerateMocks([FieldEncryptionService])
-import 'shadow_book_service_test.mocks.dart';
+class _MockFieldEncryptionService extends Mock
+    implements FieldEncryptionService {}
 
 void main() {
   late AppDatabase db;
   late ShadowBookService service;
   late TransactionDao transactionDao;
-  late MockFieldEncryptionService mockEncryption;
+  late _MockFieldEncryptionService mockEncryption;
 
   setUp(() {
     db = AppDatabase.forTesting();
     final bookRepo = BookRepositoryImpl(dao: BookDao(db));
     transactionDao = TransactionDao(db);
-    mockEncryption = MockFieldEncryptionService();
-    when(mockEncryption.encryptField(any)).thenAnswer(
-      (invocation) async => invocation.positionalArguments.first as String,
+    mockEncryption = _MockFieldEncryptionService();
+    when(
+      () => mockEncryption.encryptField(any()),
+    ).thenAnswer(
+      (invocation) async =>
+          invocation.positionalArguments.first as String,
     );
-    when(mockEncryption.decryptField(any)).thenAnswer(
-      (invocation) async => invocation.positionalArguments.first as String,
+    when(
+      () => mockEncryption.decryptField(any()),
+    ).thenAnswer(
+      (invocation) async =>
+          invocation.positionalArguments.first as String,
     );
     final transactionRepo = TransactionRepositoryImpl(
       dao: transactionDao,
