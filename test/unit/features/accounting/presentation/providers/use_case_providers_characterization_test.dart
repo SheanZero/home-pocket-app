@@ -9,8 +9,6 @@ import 'package:home_pocket/application/accounting/merchant_category_learning_se
 import 'package:home_pocket/application/accounting/seed_categories_use_case.dart';
 import 'package:home_pocket/application/dual_ledger/classification_service.dart';
 import 'package:home_pocket/application/dual_ledger/providers.dart';
-// ignore: deprecated_member_use_from_same_package
-import 'package:home_pocket/application/dual_ledger/resolve_ledger_type_service.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/family_sync/transaction_change_tracker.dart';
 import 'package:home_pocket/application/voice/record_category_correction_use_case.dart';
@@ -144,21 +142,6 @@ void main() {
         final svc = container.read(categoryServiceProvider);
         expect(svc, isA<CategoryService>());
       });
-
-      // PRE-DELETION behavior lock:
-      // This test captures that resolveLedgerTypeServiceProvider currently
-      // constructs without throwing. Plan 04-03 deletes this provider entirely;
-      // this test MUST be deleted in Plan 04-03 commit 4 (acceptable churn).
-      // ignore: deprecated_member_use_from_same_package
-      test(
-        'resolveLedgerTypeServiceProvider constructs without throwing (PRE-deletion)',
-        () {
-          // ignore: deprecated_member_use_from_same_package
-          final svc = container.read(resolveLedgerTypeServiceProvider);
-          // ignore: deprecated_member_use_from_same_package
-          expect(svc, isA<ResolveLedgerTypeService>());
-        },
-      );
 
       test('ensureDefaultBookUseCaseProvider constructs without error', () {
         final uc = container.read(ensureDefaultBookUseCaseProvider);
