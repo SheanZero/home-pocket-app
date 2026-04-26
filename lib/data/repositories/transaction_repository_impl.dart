@@ -106,8 +106,34 @@ class TransactionRepositoryImpl implements TransactionRepository {
 
   @override
   Future<void> update(Transaction transaction) async {
-    await _dao.softDelete(transaction.id);
-    await insert(transaction);
+    String? encryptedNote;
+    if (transaction.note != null && transaction.note!.isNotEmpty) {
+      encryptedNote = await _encryptionService.encryptField(transaction.note!);
+    }
+
+    await _dao.updateTransaction(
+      id: transaction.id,
+      bookId: transaction.bookId,
+      deviceId: transaction.deviceId,
+      amount: transaction.amount,
+      type: transaction.type.name,
+      categoryId: transaction.categoryId,
+      ledgerType: transaction.ledgerType.name,
+      timestamp: transaction.timestamp,
+      currentHash: transaction.currentHash,
+      createdAt: transaction.createdAt,
+      note: encryptedNote,
+      photoHash: transaction.photoHash,
+      merchant: transaction.merchant,
+      metadata: transaction.metadata != null
+          ? jsonEncode(transaction.metadata)
+          : null,
+      prevHash: transaction.prevHash,
+      isPrivate: transaction.isPrivate,
+      isSynced: transaction.isSynced,
+      soulSatisfaction: transaction.soulSatisfaction,
+      updatedAt: transaction.updatedAt,
+    );
   }
 
   @override
