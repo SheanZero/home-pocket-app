@@ -3,10 +3,10 @@ import 'dart:ui';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../infrastructure/i18n/models/locale_settings.dart';
+import '../../../../application/i18n/locale_settings_view.dart';
 import 'repository_providers.dart';
 
-part 'locale_provider.g.dart';
+part 'state_locale.g.dart';
 
 /// Manages the current locale settings for the app.
 ///

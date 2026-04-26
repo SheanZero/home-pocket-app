@@ -8,7 +8,6 @@ import 'package:home_pocket/features/accounting/domain/repositories/category_rep
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
-import 'package:home_pocket/features/settings/presentation/providers/backup_providers.dart';
 import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart';
 import 'package:mocktail/mocktail.dart';
 

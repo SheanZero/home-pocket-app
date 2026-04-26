@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'today_transactions_provider.dart';
+part of 'state_today_transactions.dart';
 
 // **************************************************************************
 // RiverpodGenerator

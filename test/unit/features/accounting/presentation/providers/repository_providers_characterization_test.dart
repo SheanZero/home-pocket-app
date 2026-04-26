@@ -11,7 +11,6 @@ import 'package:home_pocket/features/accounting/domain/repositories/transaction_
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/infrastructure/crypto/providers.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
-import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
 import 'package:mocktail/mocktail.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/features/home/presentation/providers/home_providers.dart';
+import 'package:home_pocket/features/home/presentation/providers/state_home.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_bottom_nav_bar.dart';
 
 import '../../helpers/test_localizations.dart';

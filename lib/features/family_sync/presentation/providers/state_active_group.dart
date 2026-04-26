@@ -4,7 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/models/group_info.dart';
 import 'repository_providers.dart';
 
-part 'active_group_provider.g.dart';
+part 'state_active_group.g.dart';
 
 /// Watches the local database for an active group.
 ///

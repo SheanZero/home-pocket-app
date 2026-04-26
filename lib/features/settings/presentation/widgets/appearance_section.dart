@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/i18n/models/locale_settings.dart';
+import '../../../../application/i18n/locale_settings_view.dart';
 import '../../domain/models/app_settings.dart';
-import '../providers/locale_provider.dart';
+import '../providers/state_locale.dart';
 import '../providers/repository_providers.dart';
-import '../providers/settings_providers.dart';
+import '../providers/state_settings.dart';
 
 /// Hardcoded language names displayed in their own language.
 const _languageNames = {'ja': '日本語', 'zh': '中文', 'en': 'English'};

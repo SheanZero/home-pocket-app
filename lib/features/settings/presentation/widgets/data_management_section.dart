@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../generated/app_localizations.dart';
-import '../providers/backup_providers.dart';
+import '../providers/repository_providers.dart';
 import 'password_dialog.dart';
 
 class DataManagementSection extends ConsumerWidget {

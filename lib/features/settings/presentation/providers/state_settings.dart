@@ -3,8 +3,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/models/app_settings.dart';
 import 'repository_providers.dart';
+import '../utils/voice_locale_helpers.dart';
 
-part 'settings_providers.g.dart';
+part 'state_settings.g.dart';
 
 /// Current app settings (async because SharedPreferences is async).
 @riverpod
@@ -21,19 +22,4 @@ Future<AppSettings> appSettings(Ref ref) async {
 Future<String> voiceLocaleId(Ref ref) async {
   final settings = await ref.watch(appSettingsProvider.future);
   return voiceLocaleIdFromLanguageCode(settings.voiceLanguage);
-}
-
-/// Converts a language code to a BCP-47 locale ID for speech recognition.
-/// Public for testing.
-String voiceLocaleIdFromLanguageCode(String code) {
-  switch (code) {
-    case 'zh':
-      return 'zh-CN';
-    case 'ja':
-      return 'ja-JP';
-    case 'en':
-      return 'en-US';
-    default:
-      return 'zh-CN';
-  }
 }

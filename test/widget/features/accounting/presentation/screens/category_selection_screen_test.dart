@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
-import 'package:home_pocket/features/accounting/presentation/providers/category_reorder_notifier.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/state_category_reorder.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/category_selection_screen.dart';
 import 'package:home_pocket/generated/app_localizations.dart';

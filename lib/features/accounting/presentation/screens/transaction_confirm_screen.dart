@@ -8,13 +8,11 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/dual_ledger/presentation/widgets/soul_celebration_overlay.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
-import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
-import '../../../settings/presentation/providers/locale_provider.dart';
+import '../../../../application/i18n/formatter_service.dart';
+import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/transaction.dart';
 import '../providers/repository_providers.dart';
-import '../providers/use_case_providers.dart';
 import '../utils/category_display_utils.dart';
 import '../widgets/amount_display.dart';
 import '../widgets/detail_info_card.dart';
@@ -106,7 +104,7 @@ class _TransactionConfirmScreenState
   }
 
   String _formatAmount(int amount, Locale locale) {
-    return NumberFormatter.formatCurrency(amount.toDouble(), 'JPY', locale);
+    return const FormatterService().formatCurrency(amount.toDouble(), 'JPY', locale);
   }
 
   // ── Amount editing via bottom sheet ──
@@ -608,7 +606,7 @@ class _TransactionConfirmScreenState
                       DetailInfoRow(
                         icon: Icons.calendar_today_outlined,
                         label: l10n.date,
-                        value: DateFormatter.formatDate(_date, locale),
+                        value: const FormatterService().formatDate(_date, locale),
                         showChevron: true,
                         onTap: _editDate,
                       ),

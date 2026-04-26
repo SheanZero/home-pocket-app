@@ -2,10 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/sync_avatar_use_case.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/avatar_sync_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
-import 'package:home_pocket/features/profile/presentation/providers/user_profile_providers.dart';
+import 'package:home_pocket/features/profile/presentation/providers/repository_providers.dart'
+    show userProfileRepositoryProvider;
 import 'package:home_pocket/infrastructure/sync/e2ee_service.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
 import 'package:mocktail/mocktail.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/features/home/presentation/providers/home_providers.dart';
+import 'package:home_pocket/features/home/presentation/providers/state_home.dart';
 
 void main() {
   group('SelectedTabIndex', () {

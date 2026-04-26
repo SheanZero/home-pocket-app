@@ -1,11 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/profile/get_user_profile_use_case.dart';
+import 'package:home_pocket/application/profile/repository_providers.dart'
+    as app_profile;
 import 'package:home_pocket/application/profile/save_user_profile_use_case.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
-import 'package:home_pocket/features/profile/presentation/providers/user_profile_providers.dart';
-import 'package:home_pocket/infrastructure/security/providers.dart';
+import 'package:home_pocket/features/profile/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/profile/presentation/providers/state_user_profile.dart';
 
 // No external mocks needed — AppDatabase.forTesting() provides in-memory DB.
 // UserProfileRepositoryImpl has no crypto deps.
@@ -18,7 +20,7 @@ void main() {
     testDatabase = AppDatabase.forTesting();
     container = ProviderContainer(
       overrides: [
-        appDatabaseProvider.overrideWithValue(testDatabase),
+        app_profile.appAppDatabaseProvider.overrideWithValue(testDatabase),
       ],
     );
   });

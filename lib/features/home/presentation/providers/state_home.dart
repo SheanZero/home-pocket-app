@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'home_providers.g.dart';
+part 'state_home.g.dart';
 
 /// Global bottom navigation tab index state.
 ///

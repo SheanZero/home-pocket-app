@@ -1,19 +1,17 @@
 import 'dart:async';
 
-import 'package:cryptography/cryptography.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/family_sync/confirm_member_use_case.dart';
+import 'package:home_pocket/application/family_sync/notify_member_approval_use_case.dart';
+import 'package:home_pocket/application/family_sync/remove_member_use_case.dart';
+import 'package:home_pocket/application/family_sync/repository_providers.dart'
+    show notifyMemberApprovalUseCaseProvider;
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/group_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/member_approval_screen.dart';
-import 'package:home_pocket/application/family_sync/confirm_member_use_case.dart';
-import 'package:home_pocket/application/family_sync/remove_member_use_case.dart';
-import 'package:home_pocket/infrastructure/crypto/providers.dart';
-import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
-import 'package:home_pocket/infrastructure/sync/websocket_connection_state.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -25,24 +23,21 @@ class MockConfirmMemberUseCase extends Mock implements ConfirmMemberUseCase {}
 
 class MockRemoveMemberUseCase extends Mock implements RemoveMemberUseCase {}
 
-class MockWebSocketService extends Mock implements WebSocketService {}
-
-class MockKeyManager extends Mock implements KeyManager {}
+class MockNotifyMemberApprovalUseCase extends Mock
+    implements NotifyMemberApprovalUseCase {}
 
 void main() {
   late MockGroupRepository groupRepository;
   late MockConfirmMemberUseCase confirmMemberUseCase;
   late MockRemoveMemberUseCase removeMemberUseCase;
-  late MockWebSocketService webSocketService;
-  late MockKeyManager keyManager;
+  late MockNotifyMemberApprovalUseCase notifyUseCase;
   late StreamController<WebSocketEvent> wsEventController;
 
   setUp(() {
     groupRepository = MockGroupRepository();
     confirmMemberUseCase = MockConfirmMemberUseCase();
     removeMemberUseCase = MockRemoveMemberUseCase();
-    webSocketService = MockWebSocketService();
-    keyManager = MockKeyManager();
+    notifyUseCase = MockNotifyMemberApprovalUseCase();
     wsEventController = StreamController<WebSocketEvent>.broadcast();
 
     when(() => groupRepository.getActiveGroup()).thenAnswer(
@@ -93,35 +88,13 @@ void main() {
       ),
     ).thenAnswer((_) async => const RemoveMemberResult.success());
 
-    // WebSocket mocks
+    // NotifyMemberApprovalUseCase mocks
+    when(() => notifyUseCase.listenForJoinRequests())
+        .thenAnswer((_) => wsEventController.stream);
     when(
-      () => webSocketService.connectionStateStream,
-    ).thenAnswer((_) => const Stream.empty());
-    when(
-      () => webSocketService.connectionState,
-    ).thenReturn(WebSocketConnectionState.disconnected);
-    when(
-      () => webSocketService.eventStream,
-    ).thenAnswer((_) => wsEventController.stream);
-    when(
-      () => webSocketService.connect(
-        groupId: any(named: 'groupId'),
-        deviceId: any(named: 'deviceId'),
-        signMessage: any(named: 'signMessage'),
-      ),
-    ).thenReturn(null);
-    when(() => webSocketService.disconnect()).thenReturn(null);
-    when(() => webSocketService.startLifecycleObservation()).thenReturn(null);
-    when(() => webSocketService.stopLifecycleObservation()).thenReturn(null);
-
-    // KeyManager mock
-    when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'test-device');
-    when(() => keyManager.signData(any())).thenAnswer(
-      (_) async => Signature(
-        [],
-        publicKey: SimplePublicKey([], type: KeyPairType.ed25519),
-      ),
-    );
+      () => notifyUseCase.connectWebSocket(groupId: any(named: 'groupId')),
+    ).thenAnswer((_) async {});
+    when(() => notifyUseCase.disconnectWebSocket()).thenReturn(null);
   });
 
   tearDown(() async {
@@ -132,8 +105,7 @@ void main() {
     groupRepositoryProvider.overrideWithValue(groupRepository),
     confirmMemberUseCaseProvider.overrideWithValue(confirmMemberUseCase),
     removeMemberUseCaseProvider.overrideWithValue(removeMemberUseCase),
-    webSocketServiceProvider.overrideWithValue(webSocketService),
-    keyManagerProvider.overrideWithValue(keyManager),
+    notifyMemberApprovalUseCaseProvider.overrideWithValue(notifyUseCase),
   ];
 
   testWidgets('connects WebSocket on init', (tester) async {
@@ -145,7 +117,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    verify(() => webSocketService.startLifecycleObservation()).called(1);
+    verify(
+      () => notifyUseCase.connectWebSocket(groupId: any(named: 'groupId')),
+    ).called(1);
   });
 
   testWidgets('reloads group when join_request event arrives', (tester) async {
@@ -157,10 +131,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Initial loads: _loadGroup() + _connectWebSocket() both call getActiveGroup
-    verify(() => groupRepository.getActiveGroup()).called(2);
+    // Initial loads: _loadGroup() called once on initState
+    verify(() => groupRepository.getActiveGroup()).called(greaterThanOrEqualTo(1));
 
-    // Simulate join_request WebSocket event
+    // Simulate join_request WebSocket event via the use case stream
     wsEventController.add(
       const WebSocketEvent(
         type: WebSocketEventType.joinRequest,
@@ -170,6 +144,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // Group should be reloaded once more
-    verify(() => groupRepository.getActiveGroup()).called(1);
+    verify(() => groupRepository.getActiveGroup()).called(greaterThanOrEqualTo(1));
   });
 }

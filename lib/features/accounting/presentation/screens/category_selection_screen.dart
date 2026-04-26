@@ -4,11 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/category/category_service.dart';
-import '../../../settings/presentation/providers/locale_provider.dart';
+import '../../../../application/accounting/category_localization_service.dart';
+import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/category_reorder_state.dart';
-import '../providers/category_reorder_notifier.dart';
+import '../providers/state_category_reorder.dart';
 import '../providers/repository_providers.dart';
 import '../utils/category_display_utils.dart';
 import '../widgets/category_reorder_row.dart';
@@ -93,13 +93,13 @@ class _CategorySelectionScreenState
     if (_searchQuery.isEmpty) return _l1Categories;
     final q = _searchQuery.toLowerCase();
     return _l1Categories.where((cat) {
-      final name = CategoryService.resolve(cat.name, locale);
+      final name = CategoryLocalizationService.resolve(cat.name, locale);
       if (name.toLowerCase().contains(q)) return true;
       // Also show L1 if any L2 child matches
       final children = _l2ByParent[cat.id] ?? [];
       return children.any(
         (c) =>
-            CategoryService.resolve(c.name, locale).toLowerCase().contains(q),
+            CategoryLocalizationService.resolve(c.name, locale).toLowerCase().contains(q),
       );
     }).toList();
   }
@@ -111,7 +111,7 @@ class _CategorySelectionScreenState
     return children
         .where(
           (c) =>
-              CategoryService.resolve(c.name, locale).toLowerCase().contains(q),
+              CategoryLocalizationService.resolve(c.name, locale).toLowerCase().contains(q),
         )
         .toList();
   }
@@ -359,7 +359,7 @@ class _CategorySelectionScreenState
           addSubcategoryLabel: l10n.addSubcategory,
           resolveIcon: resolveCategoryIcon,
           parseColor: _parseColor,
-          resolveName: (key) => CategoryService.resolve(key, locale),
+          resolveName: (key) => CategoryLocalizationService.resolve(key, locale),
         );
       },
     );
@@ -482,7 +482,7 @@ class _L1ReorderTile extends StatelessWidget {
           child: GestureDetector(
             onTap: onToggle,
             child: CategoryReorderRow(
-              label: CategoryService.resolve(category.name, locale),
+              label: CategoryLocalizationService.resolve(category.name, locale),
               iconData: resolveCategoryIcon(category.icon),
               color: categoryColor,
               variant: CategoryReorderRowVariant.l1,
@@ -505,7 +505,7 @@ class _L1ReorderTile extends StatelessWidget {
                 child: ReorderableDragStartListener(
                   index: i,
                   child: CategoryReorderRow(
-                    label: CategoryService.resolve(child.name, locale),
+                    label: CategoryLocalizationService.resolve(child.name, locale),
                     iconData: resolveCategoryIcon(child.icon),
                     color: childColor,
                     variant: CategoryReorderRowVariant.l2,

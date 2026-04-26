@@ -8,15 +8,15 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
-import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
-import '../../../../infrastructure/speech/speech_recognition_service.dart';
-import '../../../settings/presentation/providers/locale_provider.dart';
-import '../../../settings/presentation/providers/settings_providers.dart';
+import '../../../../application/i18n/formatter_service.dart';
+import '../../../../application/voice/repository_providers.dart'
+    show appSpeechRecognitionServiceProvider;
+import '../../../../application/voice/start_speech_recognition_use_case.dart';
+import '../../../settings/presentation/providers/state_locale.dart';
+import '../../../settings/presentation/providers/state_settings.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/voice_parse_result.dart';
 import '../providers/repository_providers.dart';
-import '../providers/voice_providers.dart';
 import '../utils/category_display_utils.dart';
 import '../widgets/entry_mode_switcher.dart';
 import '../widgets/input_mode_tabs.dart';
@@ -27,22 +27,21 @@ import 'transaction_confirm_screen.dart';
 /// Voice input screen for creating transactions through natural language speech.
 ///
 /// Replaces the previous static stub with a full [ConsumerStatefulWidget]
-/// implementation. Manages [SpeechRecognitionService] lifecycle directly
+/// implementation. Manages [StartSpeechRecognitionUseCase] lifecycle directly
 /// (not from provider) for correct stateful lifecycle binding.
 class VoiceInputScreen extends ConsumerStatefulWidget {
   const VoiceInputScreen({super.key, required this.bookId, this.speechService});
 
   final String bookId;
-  final SpeechRecognitionService? speechService;
+  final StartSpeechRecognitionUseCase? speechService;
 
   @override
   ConsumerState<VoiceInputScreen> createState() => _VoiceInputScreenState();
 }
 
 class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
-  // Speech recognition service — managed directly (stateful lifecycle)
-  late final SpeechRecognitionService _speechService =
-      widget.speechService ?? SpeechRecognitionService();
+  // Speech recognition use case — managed directly (stateful lifecycle)
+  late final StartSpeechRecognitionUseCase _speechService;
 
   // Recording state
   bool _isRecording = false;
@@ -81,6 +80,10 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   @override
   void initState() {
     super.initState();
+    _speechService = widget.speechService ??
+        StartSpeechRecognitionUseCase(
+          service: ref.read(appSpeechRecognitionServiceProvider),
+        );
     _initSpeechService();
   }
 
@@ -177,7 +180,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   }
 
   Future<void> _stopRecording() async {
-    await _speechService.stopListening();
+    await _speechService.stop();
     setState(() {
       _isRecording = false;
       _soundLevel = 0.0;
@@ -391,7 +394,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   String _parsedAmountText(Locale locale) {
     final amount = _parseResult?.amount;
     if (amount == null) return '';
-    return NumberFormatter.formatCurrency(amount, 'JPY', locale);
+    return const FormatterService().formatCurrency(amount, 'JPY', locale);
   }
 
   String _parsedCategoryText(Locale locale) {
@@ -407,7 +410,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   String _parsedDateText(Locale locale, S l10n) {
     final date = _parseResult?.parsedDate;
     if (date == null) return l10n.todayDate;
-    return DateFormatter.formatDate(date, locale);
+    return const FormatterService().formatDate(date, locale);
   }
 
   @override
@@ -587,7 +590,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   @override
   void dispose() {
     _parseDebounce?.cancel();
-    _speechService.cancelListening();
+    _speechService.cancel();
     super.dispose();
   }
 }

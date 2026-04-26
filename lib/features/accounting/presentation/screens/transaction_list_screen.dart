@@ -6,7 +6,6 @@ import '../../../../generated/app_localizations.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/transaction.dart';
 import '../providers/repository_providers.dart';
-import '../providers/use_case_providers.dart';
 import '../widgets/transaction_list_tile.dart';
 import 'transaction_form_screen.dart';
 

@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/features/settings/presentation/providers/locale_provider.dart';
+import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart';
 import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/data/repositories/settings_repository_impl.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/app_settings.dart';
 import '../providers/repository_providers.dart';
-import '../providers/settings_providers.dart';
+import '../providers/state_settings.dart';
 
 class SecuritySection extends ConsumerWidget {
   const SecuritySection({super.key, required this.settings});

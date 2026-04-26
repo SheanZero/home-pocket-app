@@ -5,9 +5,8 @@ import 'package:home_pocket/features/family_sync/domain/models/group_member.dart
 import 'package:home_pocket/features/family_sync/domain/models/sync_status_model.dart'
     as model;
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/group_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/sync_providers.dart';
+import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/group_management_screen.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/group_choice_screen.dart';
 import 'package:home_pocket/application/family_sync/create_group_use_case.dart';

@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/sync/push_notification_service.dart';
-import '../providers/notification_navigation_provider.dart';
+import '../providers/state_notification_navigation.dart';
 import '../screens/group_management_screen.dart';
 import '../screens/member_approval_screen.dart';
 
