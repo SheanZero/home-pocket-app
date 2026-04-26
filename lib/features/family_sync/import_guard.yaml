@@ -1,0 +1,18 @@
+# lib/features/family_sync/import_guard.yaml — feature-scoped Thin Feature rule.
+#
+# Per Phase 3 CONTEXT.md D-10 (verbatim): "a features/family_sync/ import_guard
+# rule is added that explicitly denies any future re-creation of use_cases/
+# underneath features."
+#
+# Closes LV-017..LV-021. The global rule at lib/features/import_guard.yaml
+# already denies package:home_pocket/features/*/use_cases/** project-wide;
+# this feature-scoped supplement satisfies D-10 literally and gives
+# contributors a discoverable, family_sync-local signal that use_cases/
+# belong in lib/application/family_sync/, not under this feature.
+deny:
+  - package:home_pocket/features/family_sync/use_cases/**
+  - package:home_pocket/features/family_sync/application/**
+  - package:home_pocket/features/family_sync/infrastructure/**
+  - package:home_pocket/features/family_sync/data/**
+
+inherit: true
