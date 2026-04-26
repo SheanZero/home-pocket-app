@@ -26,7 +26,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "LV-002",
@@ -40,7 +42,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "LV-003",
@@ -54,7 +58,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "LV-004",
@@ -68,7 +74,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "LV-005",
@@ -82,7 +90,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "LV-006",
@@ -96,7 +106,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "LV-007",
@@ -110,7 +122,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "LV-008",
@@ -124,7 +138,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "LV-009",
@@ -138,7 +154,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "LV-010",
@@ -152,7 +170,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "LV-011",
@@ -166,7 +186,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "LV-012",
@@ -180,7 +202,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "LV-013",
@@ -194,7 +218,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "LV-014",
@@ -208,7 +234,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "LV-015",
@@ -222,7 +250,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "LV-016",
@@ -236,7 +266,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "LV-017",
@@ -334,7 +366,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "LV-024",
@@ -348,7 +382,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "d6509c9"
     },
     {
       "id": "RD-002",
