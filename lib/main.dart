@@ -10,7 +10,8 @@ import 'core/initialization/init_failure_screen.dart';
 import 'core/initialization/init_result.dart';
 import 'core/theme/app_theme.dart';
 import 'data/app_database.dart';
-import 'features/accounting/presentation/providers/use_case_providers.dart';
+import 'features/accounting/presentation/providers/repository_providers.dart'
+    show seedCategoriesUseCaseProvider, ensureDefaultBookUseCaseProvider;
 import 'features/family_sync/presentation/providers/repository_providers.dart';
 import 'features/family_sync/presentation/providers/repository_providers.dart'
     show pushNotificationServiceProvider;

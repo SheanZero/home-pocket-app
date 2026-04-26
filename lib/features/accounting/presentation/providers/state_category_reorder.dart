@@ -4,7 +4,7 @@ import '../../domain/models/category.dart';
 import '../../domain/models/category_reorder_state.dart';
 import 'repository_providers.dart';
 
-part 'category_reorder_notifier.g.dart';
+part 'state_category_reorder.g.dart';
 
 @riverpod
 class CategoryReorderNotifier extends _$CategoryReorderNotifier {

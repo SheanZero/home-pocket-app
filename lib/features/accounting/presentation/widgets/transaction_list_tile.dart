@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../application/i18n/formatter_service.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../domain/models/transaction.dart';
 
 /// Displays a single transaction as a list tile.
@@ -127,6 +127,6 @@ class TransactionListTile extends StatelessWidget {
     } else if (diff.inDays == 1) {
       return S.of(context).yesterday;
     }
-    return DateFormatter.formatDate(dt, locale);
+    return const FormatterService().formatDate(dt, locale);
   }
 }

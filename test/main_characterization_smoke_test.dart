@@ -28,11 +28,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/accounting/ensure_default_book_use_case.dart';
 import 'package:home_pocket/application/accounting/seed_categories_use_case.dart';
+import 'package:home_pocket/application/family_sync/listen_to_push_notifications_use_case.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/profile/get_user_profile_use_case.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
-import 'package:home_pocket/features/accounting/presentation/providers/use_case_providers.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
+    show seedCategoriesUseCaseProvider, ensureDefaultBookUseCaseProvider;
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_notification_navigation.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
@@ -96,6 +98,17 @@ class _FakePushNotificationService extends Mock
       _navController.stream;
 }
 
+class _FakeListenToPushNotificationsUseCase extends Fake
+    implements ListenToPushNotificationsUseCase {
+  final _navController = StreamController<PushNavigationIntent>.broadcast();
+
+  @override
+  Stream<PushNavigationIntent> execute() => _navController.stream;
+
+  @override
+  PushNavigationIntent? takePendingIntent() => null;
+}
+
 class _FakeGetUserProfileUseCase extends Fake
     implements GetUserProfileUseCase {
   final UserProfile? _profile;
@@ -129,6 +142,7 @@ Future<void> _pumpApp(
   addTearDown(db.close);
 
   final fakePushService = _FakePushNotificationService();
+  final fakeListenUseCase = _FakeListenToPushNotificationsUseCase();
 
   final baseOverrides = [
     appDatabaseProvider.overrideWithValue(db),
@@ -140,7 +154,7 @@ Future<void> _pumpApp(
     ),
     pushNotificationServiceProvider.overrideWithValue(fakePushService),
     familySyncNotificationNavigationProvider.overrideWith(
-      (ref) => FamilySyncNotificationNavigationController(fakePushService),
+      (ref) => FamilySyncNotificationNavigationController(fakeListenUseCase),
     ),
     ...overrides,
   ];

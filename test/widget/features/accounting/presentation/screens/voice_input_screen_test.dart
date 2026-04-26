@@ -1,24 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/voice/start_speech_recognition_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/voice_input_screen.dart';
 import 'package:home_pocket/features/settings/presentation/providers/settings_providers.dart';
-import 'package:home_pocket/infrastructure/speech/speech_recognition_service.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 import '../../../../../helpers/test_localizations.dart';
 
-class FakeSpeechRecognitionService implements SpeechRecognitionService {
-  @override
-  Future<List<stt.LocaleName>> getAvailableLocales() async => [];
-
+class FakeStartSpeechRecognitionUseCase implements StartSpeechRecognitionUseCase {
   @override
   Future<bool> initialize({
-    void Function(String p1)? onStatus,
-    void Function(String p1, bool p2)? onError,
+    void Function(String status)? onStatus,
+    void Function(String errorMsg, bool permanent)? onError,
   }) async => true;
 
   @override
@@ -26,17 +22,6 @@ class FakeSpeechRecognitionService implements SpeechRecognitionService {
 
   @override
   bool get isListening => false;
-
-  @override
-  double normalizeSoundLevelForTest(
-    double rawLevel, {
-    required bool isAndroid,
-  }) {
-    return 0;
-  }
-
-  @override
-  Future<void> cancelListening() async {}
 
   @override
   Future<void> startListening({
@@ -48,7 +33,10 @@ class FakeSpeechRecognitionService implements SpeechRecognitionService {
   }) async {}
 
   @override
-  Future<void> stopListening() async {}
+  Future<void> stop() async {}
+
+  @override
+  Future<void> cancel() async {}
 }
 
 class FakeCategoryRepository implements CategoryRepository {
@@ -98,7 +86,7 @@ void main() {
       createLocalizedWidget(
         VoiceInputScreen(
           bookId: 'book-1',
-          speechService: FakeSpeechRecognitionService(),
+          speechService: FakeStartSpeechRecognitionUseCase(),
         ),
         locale: const Locale('ja'),
         overrides: [

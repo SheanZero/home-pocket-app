@@ -3,7 +3,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/accounting/get_transactions_use_case.dart';
 import '../../../accounting/domain/models/transaction.dart';
-import '../../../accounting/presentation/providers/use_case_providers.dart';
+import '../../../accounting/presentation/providers/repository_providers.dart'
+    show getTransactionsUseCaseProvider;
 
 part 'today_transactions_provider.g.dart';
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../infrastructure/category/category_service.dart';
+import '../../../../application/accounting/category_localization_service.dart';
 import '../../domain/models/category.dart';
 
 String formatCategoryPath({
@@ -8,12 +8,13 @@ String formatCategoryPath({
   Category? parentCategory,
   required Locale locale,
 }) {
-  final childName = CategoryService.resolve(category.name, locale);
+  final childName = CategoryLocalizationService.resolve(category.name, locale);
   if (parentCategory == null || parentCategory.id == category.id) {
     return childName;
   }
 
-  final parentName = CategoryService.resolve(parentCategory.name, locale);
+  final parentName =
+      CategoryLocalizationService.resolve(parentCategory.name, locale);
   return '$parentName > $childName';
 }
 

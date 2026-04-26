@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/category_reorder_state.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
-import 'package:home_pocket/features/accounting/presentation/providers/category_reorder_notifier.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/state_category_reorder.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 
 class _FakeRepo implements CategoryRepository {

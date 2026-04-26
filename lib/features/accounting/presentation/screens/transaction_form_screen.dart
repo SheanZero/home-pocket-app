@@ -7,12 +7,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../application/accounting/create_transaction_use_case.dart';
 import '../../../../features/dual_ledger/presentation/widgets/soul_celebration_overlay.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/category/category_service.dart';
+import '../../../../application/accounting/category_localization_service.dart';
 import '../../../settings/presentation/providers/locale_provider.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/transaction.dart';
 import '../providers/repository_providers.dart';
-import '../providers/use_case_providers.dart';
 
 /// Transaction entry form.
 ///
@@ -217,7 +216,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                         final selected = _selectedCategoryId == cat.id;
                         return ChoiceChip(
                           label: Text(
-                            CategoryService.resolve(cat.name, locale),
+                            CategoryLocalizationService.resolve(cat.name, locale),
                           ),
                           selected: selected,
                           onSelected: (_) {

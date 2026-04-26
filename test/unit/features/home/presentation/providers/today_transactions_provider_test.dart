@@ -3,7 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/accounting/get_transactions_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
-import 'package:home_pocket/features/accounting/presentation/providers/use_case_providers.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
+    show getTransactionsUseCaseProvider;
 import 'package:home_pocket/features/home/presentation/providers/today_transactions_provider.dart';
 import 'package:mocktail/mocktail.dart';
 

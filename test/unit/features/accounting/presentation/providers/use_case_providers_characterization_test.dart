@@ -6,13 +6,14 @@ import 'package:home_pocket/application/accounting/delete_transaction_use_case.d
 import 'package:home_pocket/application/accounting/ensure_default_book_use_case.dart';
 import 'package:home_pocket/application/accounting/get_transactions_use_case.dart';
 import 'package:home_pocket/application/accounting/merchant_category_learning_service.dart';
+import 'package:home_pocket/application/accounting/repository_providers.dart'
+    show appHashChainServiceProvider;
 import 'package:home_pocket/application/accounting/seed_categories_use_case.dart';
 import 'package:home_pocket/application/dual_ledger/classification_service.dart';
 import 'package:home_pocket/application/dual_ledger/repository_providers.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/family_sync/transaction_change_tracker.dart';
 import 'package:home_pocket/application/voice/record_category_correction_use_case.dart';
-import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_keyword_preference_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_ledger_config_repository.dart';
@@ -21,12 +22,8 @@ import 'package:home_pocket/features/accounting/domain/repositories/device_ident
 import 'package:home_pocket/features/accounting/domain/repositories/merchant_category_preference_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
-import 'package:home_pocket/features/accounting/presentation/providers/use_case_providers.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/sync_providers.dart';
-import 'package:home_pocket/infrastructure/crypto/providers.dart';
+import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
-import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
-import 'package:home_pocket/infrastructure/security/providers.dart';
 import 'package:mocktail/mocktail.dart';
 
 // Inline Mocktail-only mocks (no @GenerateMocks, no package:mockito)
@@ -56,8 +53,6 @@ class _MockSyncEngine extends Mock implements SyncEngine {}
 
 class _MockTransactionChangeTracker extends Mock
     implements TransactionChangeTracker {}
-
-class _MockKeyManager extends Mock implements KeyManager {}
 
 void main() {
   late _MockCategoryRepository mockCategoryRepo;
@@ -103,7 +98,7 @@ void main() {
         categoryKeywordPreferenceRepositoryProvider.overrideWithValue(
           mockKeywordPrefRepo,
         ),
-        hashChainServiceProvider.overrideWithValue(mockHashChainService),
+        appHashChainServiceProvider.overrideWithValue(mockHashChainService),
         classificationServiceProvider.overrideWithValue(
           mockClassificationService,
         ),
@@ -116,7 +111,7 @@ void main() {
   tearDown(() => container.dispose());
 
   group(
-    'accounting/use_case_providers characterization tests (pre-refactor behavior)',
+    'accounting/repository_providers use case characterization tests (post-refactor: folded from use_case_providers)',
     () {
       test('createTransactionUseCaseProvider constructs without error', () {
         final uc = container.read(createTransactionUseCaseProvider);
