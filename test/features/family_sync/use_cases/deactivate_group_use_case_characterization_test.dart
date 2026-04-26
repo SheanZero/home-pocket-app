@@ -14,7 +14,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/shadow_book_service.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
-import 'package:home_pocket/features/family_sync/use_cases/deactivate_group_use_case.dart';
+import 'package:home_pocket/application/family_sync/deactivate_group_use_case.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
 import 'package:home_pocket/infrastructure/sync/sync_queue_manager.dart';
 import 'package:mocktail/mocktail.dart';
