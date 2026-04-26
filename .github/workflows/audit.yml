@@ -38,7 +38,7 @@ jobs:
         continue-on-error: true   # Phase 6 exit gate flips this blocking (D-04)
         run: flutter analyze --no-fatal-infos
       - name: dart run custom_lint
-        continue-on-error: true   # Phase 4 exit gate flips this blocking (D-04)
+        # Made blocking at Phase 3 close per D-17 (previously non-blocking)
         run: dart run custom_lint
       - name: Audit scanners
         continue-on-error: true   # Phases 3/4/6 exit gates flip individual scanners blocking (D-04)
