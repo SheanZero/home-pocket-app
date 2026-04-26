@@ -57,9 +57,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. A GitHub Actions step using `very_good_coverage@v2` with `min_coverage: 80` against `lcov_clean.info` is added to CI
   6. No code files are modified during this phase
 **Plans**: 4 plans
-  - [ ] 02-01-PLAN.md — Build coverage_baseline.dart, coverage_gate.dart, shared lcov_parser, and Dart subprocess tests
-  - [ ] 02-02-PLAN.md — Evolve audit.yml coverage job: coverde activate + filter, very_good_coverage flip BLOCKING (D-05), artifact upload
-  - [ ] 02-03-PLAN.md — Lock Coverage Baseline Schema in SCHEMA.md §9 and create REPO-LOCK-POLICY.md (D-07)
+  - [x] 02-01-PLAN.md — Build coverage_baseline.dart, coverage_gate.dart, shared lcov_parser, and Dart subprocess tests
+  - [x] 02-02-PLAN.md — Evolve audit.yml coverage job: coverde activate + filter, very_good_coverage flip BLOCKING (D-05), artifact upload
+  - [x] 02-03-PLAN.md — Lock Coverage Baseline Schema in SCHEMA.md §9 and create REPO-LOCK-POLICY.md (D-07)
   - [ ] 02-04-PLAN.md — Run pipeline end-to-end and freeze the four .planning/audit/coverage-* artifacts (owner checkpoint)
 
 ### Phase 3: CRITICAL Fixes
