@@ -96,14 +96,34 @@ jobs:
           channel: stable
           flutter-version-file: pubspec.yaml
       - run: flutter pub get
+      - run: dart pub global activate coverde 0.3.0+1
       - run: flutter test --coverage
+      - name: Strip generated files from lcov
+        run: |
+          coverde filter \
+            --input coverage/lcov.info \
+            --output coverage/lcov_clean.info \
+            --mode w \
+            --filters '\.g\.dart$,\.freezed\.dart$,\.mocks\.dart$,^lib/generated/'
       - uses: VeryGoodOpenSource/very_good_coverage@v2
-        continue-on-error: true   # Phase 2 BASE-06 flips this blocking
+        # Phase 2 close (BASE-06 / D-05): blocking. Threshold 80 against lcov_clean.info.
         with:
-          path: coverage/lcov.info
+          path: coverage/lcov_clean.info   # Phase 2 BASE-02: cleaned by coverde filter upstream
           min_coverage: 80
           exclude: |
             **/*.g.dart
             **/*.freezed.dart
             **/*.mocks.dart
             lib/generated/**
+      - name: Generate coverage baseline artifacts
+        run: dart run scripts/coverage_baseline.dart
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-baseline
+          path: |
+            .planning/audit/coverage-baseline.txt
+            .planning/audit/coverage-baseline.json
+            .planning/audit/files-needing-tests.txt
+            .planning/audit/files-needing-tests.json
+      # NOTE: scripts/coverage_gate.dart per-file step is intentionally NOT wired here in Phase 2 (CONTEXT D-06).
+      #       It joins this job at Phase 7/8 close (CI tightening) and is blocking from the moment it is added.
