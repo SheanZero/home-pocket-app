@@ -1081,4 +1081,13 @@ class SZh extends S {
 
   @override
   String get languageSystem => '跟随系统设置';
+
+  @override
+  String get initFailedTitle => '初始化失败';
+
+  @override
+  String get initFailedMessage => '应用启动时出现问题。请点击重试按钮。';
+
+  @override
+  String get initFailedRetry => '重试';
 }

@@ -1092,4 +1092,14 @@ class SEn extends S {
 
   @override
   String get languageSystem => 'Follow System';
+
+  @override
+  String get initFailedTitle => 'Initialization failed';
+
+  @override
+  String get initFailedMessage =>
+      'Something went wrong while starting the app. Tap retry to try again.';
+
+  @override
+  String get initFailedRetry => 'Retry';
 }

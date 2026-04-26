@@ -1084,4 +1084,13 @@ class SJa extends S {
 
   @override
   String get languageSystem => 'システム設定に従う';
+
+  @override
+  String get initFailedTitle => '初期化に失敗しました';
+
+  @override
+  String get initFailedMessage => 'アプリの起動中に問題が発生しました。再試行ボタンをタップしてください。';
+
+  @override
+  String get initFailedRetry => '再試行';
 }

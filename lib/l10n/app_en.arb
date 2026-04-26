@@ -1065,5 +1065,14 @@
   "@selectLanguage": { "description": "Title of language selection dialog" },
 
   "languageSystem": "Follow System",
-  "@languageSystem": { "description": "Option to follow system language setting" }
+  "@languageSystem": { "description": "Option to follow system language setting" },
+
+  "initFailedTitle": "Initialization failed",
+  "@initFailedTitle": { "description": "Title shown on the AppInitializer failure fallback screen rendered before the main app mounts" },
+
+  "initFailedMessage": "Something went wrong while starting the app. Tap retry to try again.",
+  "@initFailedMessage": { "description": "Body message on the AppInitializer failure fallback screen — explains the failure plainly and points to the retry action. Must NOT include technical error details (those go to console logs)" },
+
+  "initFailedRetry": "Retry",
+  "@initFailedRetry": { "description": "Button label on the AppInitializer failure fallback screen. Re-invokes AppInitializer.initialize()" }
 }

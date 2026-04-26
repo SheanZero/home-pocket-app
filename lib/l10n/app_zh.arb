@@ -677,5 +677,9 @@
   "todoTab": "待办",
   "datePickerComingSoon": "日期选择即将推出",
   "selectLanguage": "选择语言",
-  "languageSystem": "跟随系统设置"
+  "languageSystem": "跟随系统设置",
+
+  "initFailedTitle": "初始化失败",
+  "initFailedMessage": "应用启动时出现问题。请点击重试按钮。",
+  "initFailedRetry": "重试"
 }

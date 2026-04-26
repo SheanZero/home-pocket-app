@@ -2126,6 +2126,24 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Follow System'**
   String get languageSystem;
+
+  /// Title shown on the AppInitializer failure fallback screen rendered before the main app mounts
+  ///
+  /// In en, this message translates to:
+  /// **'Initialization failed'**
+  String get initFailedTitle;
+
+  /// Body message on the AppInitializer failure fallback screen — explains the failure plainly and points to the retry action. Must NOT include technical error details (those go to console logs)
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong while starting the app. Tap retry to try again.'**
+  String get initFailedMessage;
+
+  /// Button label on the AppInitializer failure fallback screen. Re-invokes AppInitializer.initialize()
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get initFailedRetry;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

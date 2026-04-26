@@ -677,5 +677,9 @@
   "todoTab": "やること",
   "datePickerComingSoon": "日付選択は近日公開",
   "selectLanguage": "言語を選択",
-  "languageSystem": "システム設定に従う"
+  "languageSystem": "システム設定に従う",
+
+  "initFailedTitle": "初期化に失敗しました",
+  "initFailedMessage": "アプリの起動中に問題が発生しました。再試行ボタンをタップしてください。",
+  "initFailedRetry": "再試行"
 }
