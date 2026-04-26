@@ -95,7 +95,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [ ] 04-03-resolveledgertypeservice-deletion-PLAN.md — Six-atomic-commit deletion of ResolveLedgerTypeService (HIGH-03; Wave 1)
   - [ ] 04-04-mocktail-bigbang-migration-PLAN.md — Mocktail migration of 13 *.mocks.dart fixtures + mockito removal (HIGH-07; Wave 1)
   - [ ] 04-05-provider-graph-hygiene-test-PLAN.md — Architecture test enforcing HIGH-04 + HIGH-05 + HIGH-06 invariants; Phase 4 close gate (Wave 4)
-  - [ ] 04-06-characterization-tests-PLAN.md — Characterization tests for Phase-4 touched-files ∩ files-needing-tests.txt (HIGH-08 prereq; Wave 0)
+  - [x] 04-06-characterization-tests-PLAN.md — Characterization tests for Phase-4 touched-files ∩ files-needing-tests.txt (HIGH-08 prereq; Wave 0)
 
 ### Phase 5: MEDIUM Fixes
 **Goal**: Every MEDIUM-severity finding in `issues.json` is resolved; the dual-CategoryService naming collision is eliminated, all hardcoded CJK strings are extracted to ARB files, and MOD-009 deprecated code references are deleted
