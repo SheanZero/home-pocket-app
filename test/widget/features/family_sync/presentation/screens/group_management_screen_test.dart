@@ -5,9 +5,9 @@ import 'package:home_pocket/features/family_sync/domain/repositories/group_repos
 import 'package:home_pocket/features/family_sync/presentation/providers/group_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/group_management_screen.dart';
-import 'package:home_pocket/features/family_sync/use_cases/deactivate_group_use_case.dart';
-import 'package:home_pocket/features/family_sync/use_cases/leave_group_use_case.dart';
-import 'package:home_pocket/features/family_sync/use_cases/remove_member_use_case.dart';
+import 'package:home_pocket/application/family_sync/deactivate_group_use_case.dart';
+import 'package:home_pocket/application/family_sync/leave_group_use_case.dart';
+import 'package:home_pocket/application/family_sync/remove_member_use_case.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../../helpers/test_localizations.dart';

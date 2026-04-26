@@ -12,7 +12,7 @@ import '../../../../infrastructure/sync/websocket_service.dart';
 import '../../domain/models/group_info.dart';
 import '../../domain/models/group_member.dart';
 import '../../../../application/family_sync/confirm_member_use_case.dart';
-import '../../use_cases/remove_member_use_case.dart';
+import '../../../../application/family_sync/remove_member_use_case.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
 import '../providers/group_providers.dart';
 import '../providers/repository_providers.dart'

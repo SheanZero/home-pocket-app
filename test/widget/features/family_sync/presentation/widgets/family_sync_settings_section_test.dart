@@ -12,7 +12,7 @@ import 'package:home_pocket/features/family_sync/presentation/screens/group_mana
 import 'package:home_pocket/features/family_sync/presentation/screens/group_choice_screen.dart';
 import 'package:home_pocket/application/family_sync/create_group_use_case.dart';
 import 'package:home_pocket/application/family_sync/join_group_use_case.dart';
-import 'package:home_pocket/features/family_sync/use_cases/check_group_use_case.dart';
+import 'package:home_pocket/application/family_sync/check_group_use_case.dart';
 import 'package:home_pocket/features/family_sync/presentation/widgets/family_sync_settings_section.dart';
 import 'package:mocktail/mocktail.dart';
 
