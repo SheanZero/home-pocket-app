@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/initialization/app_initializer.dart';
+import 'core/initialization/init_failure_screen.dart';
+import 'core/initialization/init_result.dart';
 import 'core/theme/app_theme.dart';
 import 'data/app_database.dart';
 import 'features/accounting/presentation/providers/use_case_providers.dart';
@@ -18,8 +21,6 @@ import 'features/settings/presentation/providers/locale_provider.dart';
 import 'features/settings/presentation/providers/settings_providers.dart';
 import 'generated/app_localizations.dart';
 import 'infrastructure/crypto/database/encrypted_database.dart';
-import 'infrastructure/crypto/providers.dart';
-import 'infrastructure/security/providers.dart';
 
 /// Set to `true` for in-memory database (dev/debugging, data lost on restart).
 /// Set to `false` (default) for persistent encrypted SQLCipher database.
@@ -27,59 +28,45 @@ const _useInMemoryDatabase = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 0. Load SQLCipher native library (must be before any database operations)
   await ensureNativeLibrary();
+  await _boot();
+}
 
-  // 1. Initialize master key (first launch only)
-  final initContainer = ProviderContainer();
-  final masterKeyRepo = initContainer.read(masterKeyRepositoryProvider);
-  if (!await masterKeyRepo.hasMasterKey()) {
-    await masterKeyRepo.initializeMasterKey();
-    dev.log('Master key initialized', name: 'AppInit');
-  } else {
-    dev.log('Master key already exists', name: 'AppInit');
-  }
-
-  // 2. Initialize device key pair / device ID
-  final keyManager = initContainer.read(keyManagerProvider);
-  if (!await keyManager.hasKeyPair()) {
-    await keyManager.generateDeviceKeyPair();
-    dev.log('Device key pair initialized', name: 'AppInit');
-  } else {
-    dev.log('Device key pair already exists', name: 'AppInit');
-  }
-
-  final deviceId = await keyManager.getDeviceId();
-  if (deviceId == null || deviceId.isEmpty) {
-    throw StateError('Device ID is not available after key initialization.');
-  }
-  dev.log('Device identity ready: $deviceId', name: 'AppInit');
-
-  // 3. Create database
-  final AppDatabase database;
-  if (_useInMemoryDatabase) {
-    database = AppDatabase(NativeDatabase.memory());
-    dev.log('Using IN-MEMORY database (dev mode)', name: 'AppInit');
-  } else {
-    final executor = await createEncryptedExecutor(masterKeyRepo);
-    database = AppDatabase(executor);
-    dev.log('Encrypted database opened', name: 'AppInit');
-  }
-
-  // 4. Dispose init container, create final container with database
-  initContainer.dispose();
-
-  final container = ProviderContainer(
-    overrides: [appDatabaseProvider.overrideWithValue(database)],
+Future<void> _boot() async {
+  final initializer = AppInitializer(
+    containerFactory: ({overrides = const []}) =>
+        ProviderContainer(overrides: overrides),
+    databaseFactory: (masterKeyRepo) async {
+      if (_useInMemoryDatabase) {
+        dev.log('Using IN-MEMORY database (dev mode)', name: 'AppInit');
+        return AppDatabase(NativeDatabase.memory());
+      }
+      final executor = await createEncryptedExecutor(masterKeyRepo);
+      dev.log('Encrypted database opened', name: 'AppInit');
+      return AppDatabase(executor);
+    },
+    // Seeding (categories, default book) runs inside HomePocketApp._initialize().
+    seedRunner: (_) async {},
   );
 
-  runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: const HomePocketApp(),
-    ),
-  );
+  final result = await initializer.initialize();
+
+  switch (result) {
+    case InitSuccess(:final container):
+      runApp(
+        UncontrolledProviderScope(
+          container: container,
+          child: const HomePocketApp(),
+        ),
+      );
+    case InitFailure(:final type, :final error):
+      dev.log(
+        'Init failed: type=$type error=$error',
+        name: 'AppInit',
+        error: error,
+      );
+      runApp(InitFailureApp(onRetry: _boot));
+  }
 }
 
 class HomePocketApp extends ConsumerStatefulWidget {
