@@ -155,5 +155,52 @@ final appWebSocketServiceProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AppWebSocketServiceRef = AutoDisposeProviderRef<WebSocketService>;
+String _$notifyMemberApprovalUseCaseHash() =>
+    r'fb923c6de3d1d68551db66e764780a822d4adb21';
+
+/// NotifyMemberApprovalUseCase provider — wraps WebSocket management for the
+/// member approval screen so it no longer imports infrastructure/ directly.
+///
+/// Copied from [notifyMemberApprovalUseCase].
+@ProviderFor(notifyMemberApprovalUseCase)
+final notifyMemberApprovalUseCaseProvider =
+    AutoDisposeProvider<NotifyMemberApprovalUseCase>.internal(
+      notifyMemberApprovalUseCase,
+      name: r'notifyMemberApprovalUseCaseProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$notifyMemberApprovalUseCaseHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef NotifyMemberApprovalUseCaseRef =
+    AutoDisposeProviderRef<NotifyMemberApprovalUseCase>;
+String _$listenToPushNotificationsUseCaseHash() =>
+    r'1981ae71193d34f4c6a839ee7c2066346efef052';
+
+/// ListenToPushNotificationsUseCase provider — wraps PushNotificationService
+/// stream so notification_navigation_provider and the route listener no longer
+/// import infrastructure/ directly.
+///
+/// Copied from [listenToPushNotificationsUseCase].
+@ProviderFor(listenToPushNotificationsUseCase)
+final listenToPushNotificationsUseCaseProvider =
+    AutoDisposeProvider<ListenToPushNotificationsUseCase>.internal(
+      listenToPushNotificationsUseCase,
+      name: r'listenToPushNotificationsUseCaseProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$listenToPushNotificationsUseCaseHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ListenToPushNotificationsUseCaseRef =
+    AutoDisposeProviderRef<ListenToPushNotificationsUseCase>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

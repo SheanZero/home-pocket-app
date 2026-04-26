@@ -13,6 +13,8 @@ import '../../infrastructure/sync/push_notification_service.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
 import '../../infrastructure/sync/sync_queue_manager.dart';
 import '../../infrastructure/sync/websocket_service.dart';
+import 'listen_to_push_notifications_use_case.dart';
+import 'notify_member_approval_use_case.dart';
 
 part 'repository_providers.g.dart';
 
@@ -98,4 +100,24 @@ WebSocketService appWebSocketService(Ref ref) {
   final service = WebSocketService(baseUrl: RelayApiClient.wsBaseUrl);
   ref.onDispose(service.dispose);
   return service;
+}
+
+/// NotifyMemberApprovalUseCase provider — wraps WebSocket management for the
+/// member approval screen so it no longer imports infrastructure/ directly.
+@riverpod
+NotifyMemberApprovalUseCase notifyMemberApprovalUseCase(Ref ref) {
+  return NotifyMemberApprovalUseCase(
+    wsService: ref.watch(appWebSocketServiceProvider),
+    keyManager: ref.watch(appKeyManagerProvider),
+  );
+}
+
+/// ListenToPushNotificationsUseCase provider — wraps PushNotificationService
+/// stream so notification_navigation_provider and the route listener no longer
+/// import infrastructure/ directly.
+@riverpod
+ListenToPushNotificationsUseCase listenToPushNotificationsUseCase(Ref ref) {
+  return ListenToPushNotificationsUseCase(
+    service: ref.watch(appPushNotificationServiceProvider),
+  );
 }
