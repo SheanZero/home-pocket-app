@@ -169,7 +169,7 @@ Future<void> _pumpApp(
 void main() {
   final fakeSyncEngine = _FakeSyncEngine();
 
-  List<Override> _successOverrides({
+  List<Override> buildSuccessOverrides({
     required UserProfile? profile,
     EnsureDefaultBookUseCase? bookUseCase,
   }) {
@@ -193,7 +193,7 @@ void main() {
       (tester) async {
         await _pumpApp(
           tester,
-          overrides: _successOverrides(profile: _testProfile),
+          overrides: buildSuccessOverrides(profile: _testProfile),
         );
         // Before pumpAndSettle: _initialize() is async, loading state visible
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -205,7 +205,7 @@ void main() {
       (tester) async {
         await _pumpApp(
           tester,
-          overrides: _successOverrides(profile: _testProfile),
+          overrides: buildSuccessOverrides(profile: _testProfile),
         );
         await tester.pumpAndSettle(const Duration(seconds: 3));
         expect(find.byType(MainShellScreen), findsOneWidget);
@@ -217,7 +217,7 @@ void main() {
       (tester) async {
         await _pumpApp(
           tester,
-          overrides: _successOverrides(profile: null),
+          overrides: buildSuccessOverrides(profile: null),
         );
         await tester.pumpAndSettle(const Duration(seconds: 3));
         expect(find.byType(ProfileOnboardingScreen), findsOneWidget);
@@ -229,7 +229,7 @@ void main() {
       (tester) async {
         await _pumpApp(
           tester,
-          overrides: _successOverrides(
+          overrides: buildSuccessOverrides(
             profile: _testProfile,
             bookUseCase: _FailEnsureDefaultBookUseCase(),
           ),
