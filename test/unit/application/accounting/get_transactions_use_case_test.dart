@@ -2,18 +2,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/accounting/get_transactions_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 
-@GenerateMocks([TransactionRepository])
-import 'get_transactions_use_case_test.mocks.dart';
+class _MockTransactionRepository extends Mock implements TransactionRepository {}
 
 void main() {
-  late MockTransactionRepository mockRepo;
+  late _MockTransactionRepository mockRepo;
   late GetTransactionsUseCase useCase;
 
   setUp(() {
-    mockRepo = MockTransactionRepository();
+    mockRepo = _MockTransactionRepository();
     useCase = GetTransactionsUseCase(transactionRepository: mockRepo);
   });
 
@@ -36,10 +34,10 @@ void main() {
     test('returns transactions for a book', () async {
       final txList = [makeTransaction('tx1', 100), makeTransaction('tx2', 200)];
       when(
-        mockRepo.findByBookId(
+        () => mockRepo.findByBookId(
           'book_001',
-          limit: anyNamed('limit'),
-          offset: anyNamed('offset'),
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
         ),
       ).thenAnswer((_) async => txList);
 
@@ -53,12 +51,12 @@ void main() {
 
     test('passes filter parameters to repository', () async {
       when(
-        mockRepo.findByBookId(
+        () => mockRepo.findByBookId(
           'book_001',
           ledgerType: LedgerType.survival,
           categoryId: 'cat_food',
-          startDate: anyNamed('startDate'),
-          endDate: anyNamed('endDate'),
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
           limit: 50,
           offset: 10,
         ),
@@ -77,7 +75,7 @@ void main() {
       );
 
       verify(
-        mockRepo.findByBookId(
+        () => mockRepo.findByBookId(
           'book_001',
           ledgerType: LedgerType.survival,
           categoryId: 'cat_food',
@@ -93,7 +91,7 @@ void main() {
       final result = await useCase.execute(GetTransactionsParams(bookId: ''));
 
       expect(result.isError, isTrue);
-      verifyNever(mockRepo.findByBookId(any));
+      verifyNever(() => mockRepo.findByBookId(any()));
     });
   });
 }
