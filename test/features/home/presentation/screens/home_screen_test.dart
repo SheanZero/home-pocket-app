@@ -7,7 +7,7 @@ import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
-import 'package:home_pocket/features/analytics/presentation/providers/analytics_providers.dart';
+import 'package:home_pocket/features/analytics/presentation/providers/state_analytics.dart';
 import 'package:home_pocket/features/home/presentation/providers/shadow_books_provider.dart';
 import 'package:home_pocket/features/home/presentation/providers/today_transactions_provider.dart';
 import 'package:home_pocket/features/home/presentation/screens/home_screen.dart';

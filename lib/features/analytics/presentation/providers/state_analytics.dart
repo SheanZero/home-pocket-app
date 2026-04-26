@@ -1,16 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../application/analytics/get_budget_progress_use_case.dart';
-import '../../../../application/analytics/get_expense_trend_use_case.dart';
-import '../../../../application/analytics/get_monthly_report_use_case.dart';
-import '../../../../features/accounting/presentation/providers/repository_providers.dart';
 import '../../domain/models/budget_progress.dart';
 import '../../domain/models/expense_trend.dart';
 import '../../domain/models/monthly_report.dart';
 import 'repository_providers.dart';
 
-part 'analytics_providers.g.dart';
+part 'state_analytics.g.dart';
 
 /// Currently selected month for analytics view.
 @riverpod
@@ -29,29 +25,6 @@ class SelectedMonth extends _$SelectedMonth {
   void nextMonth() {
     state = DateTime(state.year, state.month + 1);
   }
-}
-
-/// GetMonthlyReportUseCase provider.
-@riverpod
-GetMonthlyReportUseCase getMonthlyReportUseCase(Ref ref) {
-  return GetMonthlyReportUseCase(
-    analyticsRepository: ref.watch(analyticsRepositoryProvider),
-    categoryRepository: ref.watch(categoryRepositoryProvider),
-  );
-}
-
-/// GetBudgetProgressUseCase provider.
-@riverpod
-GetBudgetProgressUseCase getBudgetProgressUseCase(Ref ref) {
-  return GetBudgetProgressUseCase();
-}
-
-/// GetExpenseTrendUseCase provider.
-@riverpod
-GetExpenseTrendUseCase getExpenseTrendUseCase(Ref ref) {
-  return GetExpenseTrendUseCase(
-    analyticsRepository: ref.watch(analyticsRepositoryProvider),
-  );
 }
 
 /// Monthly report for the selected month.

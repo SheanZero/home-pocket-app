@@ -4,7 +4,7 @@ import 'package:home_pocket/application/analytics/get_budget_progress_use_case.d
 import 'package:home_pocket/application/analytics/get_expense_trend_use_case.dart';
 import 'package:home_pocket/application/analytics/get_monthly_report_use_case.dart';
 import 'package:home_pocket/features/analytics/domain/repositories/analytics_repository.dart';
-import 'package:home_pocket/features/analytics/presentation/providers/analytics_providers.dart';
+import 'package:home_pocket/features/analytics/presentation/providers/state_analytics.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';

@@ -1,77 +1,11 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'analytics_providers.dart';
+part of 'state_analytics.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$getMonthlyReportUseCaseHash() =>
-    r'ba1bdbe33efe416704852d870225a34fc24cde98';
-
-/// GetMonthlyReportUseCase provider.
-///
-/// Copied from [getMonthlyReportUseCase].
-@ProviderFor(getMonthlyReportUseCase)
-final getMonthlyReportUseCaseProvider =
-    AutoDisposeProvider<GetMonthlyReportUseCase>.internal(
-      getMonthlyReportUseCase,
-      name: r'getMonthlyReportUseCaseProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$getMonthlyReportUseCaseHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef GetMonthlyReportUseCaseRef =
-    AutoDisposeProviderRef<GetMonthlyReportUseCase>;
-String _$getBudgetProgressUseCaseHash() =>
-    r'dec07f59ecb73ca73f6ee2b53912485c78ed23e1';
-
-/// GetBudgetProgressUseCase provider.
-///
-/// Copied from [getBudgetProgressUseCase].
-@ProviderFor(getBudgetProgressUseCase)
-final getBudgetProgressUseCaseProvider =
-    AutoDisposeProvider<GetBudgetProgressUseCase>.internal(
-      getBudgetProgressUseCase,
-      name: r'getBudgetProgressUseCaseProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$getBudgetProgressUseCaseHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef GetBudgetProgressUseCaseRef =
-    AutoDisposeProviderRef<GetBudgetProgressUseCase>;
-String _$getExpenseTrendUseCaseHash() =>
-    r'dfd62efcd364189bcdaa5d2b36b4dad57edb476d';
-
-/// GetExpenseTrendUseCase provider.
-///
-/// Copied from [getExpenseTrendUseCase].
-@ProviderFor(getExpenseTrendUseCase)
-final getExpenseTrendUseCaseProvider =
-    AutoDisposeProvider<GetExpenseTrendUseCase>.internal(
-      getExpenseTrendUseCase,
-      name: r'getExpenseTrendUseCaseProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$getExpenseTrendUseCaseHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef GetExpenseTrendUseCaseRef =
-    AutoDisposeProviderRef<GetExpenseTrendUseCase>;
 String _$monthlyReportHash() => r'7cf906607233c12e61fc5015a9ac872c4b8d122e';
 
 /// Copied from Dart SDK

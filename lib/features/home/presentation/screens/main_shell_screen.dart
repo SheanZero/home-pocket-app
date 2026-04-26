@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../generated/app_localizations.dart';
 
 import '../../../accounting/presentation/screens/transaction_entry_screen.dart';
-import '../../../analytics/presentation/providers/analytics_providers.dart';
+import '../../../analytics/presentation/providers/state_analytics.dart';
 import '../../../analytics/presentation/screens/analytics_screen.dart';
 import '../../../family_sync/domain/models/sync_status_model.dart';
 import '../../../family_sync/presentation/providers/state_sync.dart';

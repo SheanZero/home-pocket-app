@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/analytics/demo_data_service.dart';
+import '../../../../application/analytics/repository_providers.dart' as app_analytics;
+import '../../../../application/i18n/formatter_service.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
-import '../../../../infrastructure/security/providers.dart';
 import '../../domain/models/budget_progress.dart';
 import '../../domain/models/expense_trend.dart';
 import '../../domain/models/monthly_report.dart';
-import '../providers/analytics_providers.dart';
+import '../providers/state_analytics.dart';
 import '../widgets/budget_progress_list.dart';
 import '../widgets/category_breakdown_list.dart';
 import '../widgets/category_pie_chart.dart';
@@ -171,7 +171,7 @@ class AnalyticsScreen extends ConsumerWidget {
     if (confirmed != true) return;
     if (!context.mounted) return;
 
-    final database = ref.read(appDatabaseProvider);
+    final database = ref.read(app_analytics.appAppDatabaseProvider);
     final categoryRepo = ref.read(categoryRepositoryProvider);
     final service = DemoDataService(
       database: database,
@@ -259,7 +259,7 @@ class _MonthSelector extends StatelessWidget {
             onPressed: onPrevious,
           ),
           Text(
-            DateFormatter.formatMonthYear(
+            const FormatterService().formatMonthYear(
               DateTime(year, month),
               Localizations.localeOf(context),
             ),

@@ -5,7 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../accounting/domain/models/book.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart';
 import '../../../analytics/domain/models/monthly_report.dart';
-import '../../../analytics/presentation/providers/analytics_providers.dart';
+import '../../../analytics/presentation/providers/repository_providers.dart';
 import '../../../family_sync/presentation/providers/state_active_group.dart';
 
 part 'shadow_books_provider.g.dart';

@@ -9,7 +9,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../features/analytics/domain/models/monthly_report.dart';
-import '../../../../features/analytics/presentation/providers/analytics_providers.dart';
+import '../../../../features/analytics/presentation/providers/state_analytics.dart';
 import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
 import '../../../../features/family_sync/presentation/screens/group_choice_screen.dart';
 import '../../../../infrastructure/category/category_service.dart';
