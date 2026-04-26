@@ -18,7 +18,7 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/features/home/domain/models/ledger_row_data.dart';
+import 'package:home_pocket/features/home/presentation/models/ledger_row_data.dart';
 
 void main() {
   group('LedgerRowData characterization (Phase 3 D-11 / LV-022)', () {
