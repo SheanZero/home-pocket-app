@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/family_sync/listen_to_push_notifications_use_case.dart';
+import 'package:home_pocket/application/family_sync/notify_member_approval_use_case.dart';
 import 'package:home_pocket/application/family_sync/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/sync_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
@@ -81,6 +83,20 @@ void main() {
       addTearDown(container.dispose);
       final result = container.read(appKeyManagerProvider);
       expect(result, same(mockKeyManager));
+    });
+
+    test('notifyMemberApprovalUseCaseProvider returns a NotifyMemberApprovalUseCase', () {
+      final container = _makeContainer();
+      addTearDown(container.dispose);
+      final result = container.read(notifyMemberApprovalUseCaseProvider);
+      expect(result, isA<NotifyMemberApprovalUseCase>());
+    });
+
+    test('listenToPushNotificationsUseCaseProvider returns a ListenToPushNotificationsUseCase', () {
+      final container = _makeContainer();
+      addTearDown(container.dispose);
+      final result = container.read(listenToPushNotificationsUseCaseProvider);
+      expect(result, isA<ListenToPushNotificationsUseCase>());
     });
   });
 }

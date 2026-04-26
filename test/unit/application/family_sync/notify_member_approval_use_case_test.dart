@@ -1,3 +1,4 @@
+import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/notify_member_approval_use_case.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
@@ -77,6 +78,36 @@ void main() {
           signMessage: any(named: 'signMessage'),
         ),
       );
+    });
+
+    test('signMessage callback signs and base64-encodes the message', () async {
+      Future<String>? capturedCallback;
+
+      when(() => mockKeyManager.getDeviceId()).thenAnswer((_) async => 'dev-1');
+      when(
+        () => mockWsService.connect(
+          groupId: any(named: 'groupId'),
+          deviceId: any(named: 'deviceId'),
+          signMessage: any(named: 'signMessage'),
+        ),
+      ).thenAnswer((invocation) {
+        capturedCallback =
+            (invocation.namedArguments[#signMessage] as Future<String> Function(String))
+                .call('test-payload');
+      });
+      when(() => mockWsService.startLifecycleObservation()).thenReturn(null);
+      when(() => mockKeyManager.signData(any())).thenAnswer(
+        (_) async => Signature(
+          [1, 2, 3],
+          publicKey: SimplePublicKey([], type: KeyPairType.ed25519),
+        ),
+      );
+
+      await useCase.connectWebSocket(groupId: 'group-abc');
+      final result = await capturedCallback!;
+
+      expect(result, isA<String>());
+      expect(result.isNotEmpty, isTrue);
     });
   });
 }

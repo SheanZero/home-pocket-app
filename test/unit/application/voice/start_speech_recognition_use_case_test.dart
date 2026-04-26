@@ -79,5 +79,19 @@ void main() {
 
       expect(useCase.isListening, isTrue);
     });
+
+    test('cancel delegates to service cancelListening', () async {
+      when(() => mockService.cancelListening()).thenAnswer((_) async {});
+
+      await useCase.cancel();
+
+      verify(() => mockService.cancelListening()).called(1);
+    });
+
+    test('isAvailable delegates to service', () {
+      when(() => mockService.isAvailable).thenReturn(false);
+
+      expect(useCase.isAvailable, isFalse);
+    });
   });
 }
