@@ -60,7 +60,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [x] 02-01-PLAN.md — Build coverage_baseline.dart, coverage_gate.dart, shared lcov_parser, and Dart subprocess tests
   - [x] 02-02-PLAN.md — Evolve audit.yml coverage job: coverde activate + filter, very_good_coverage flip BLOCKING (D-05), artifact upload
   - [x] 02-03-PLAN.md — Lock Coverage Baseline Schema in SCHEMA.md §9 and create REPO-LOCK-POLICY.md (D-07)
-  - [ ] 02-04-PLAN.md — Run pipeline end-to-end and freeze the four .planning/audit/coverage-* artifacts (owner checkpoint)
+  - [x] 02-04-PLAN.md — Run pipeline end-to-end and freeze the four .planning/audit/coverage-* artifacts (owner checkpoint)
 
 ### Phase 3: CRITICAL Fixes
 **Goal**: Every CRITICAL-severity finding in `issues.json` is resolved; the codebase has no layer violations that could silently break behavior and no runtime-crash providers; all fix-phase exit gates pass
