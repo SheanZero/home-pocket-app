@@ -1,5 +1,9 @@
 # Domain layer — leafmost in the dependency graph (CRIT-04 territory).
-# Whitelist mode: deny everything except dart:core + the immutability/serialization annotations.
+# Per Phase 3 D-01 (corrected per 03-RESEARCH.md §"Pattern 1"):
+# allow whitelist moved to per-subdirectory yamls because import_guard_custom_lint
+# evaluates each config in the chain independently against its own allow whitelist
+# (verified at ~/.pub-cache/hosted/pub.dev/import_guard_custom_lint-1.0.0/lib/src/import_guard_lint.dart:71-94).
+# Parent owns deny only; children own the whitelist.
 deny:
   - package:home_pocket/data/**
   - package:home_pocket/infrastructure/**
@@ -7,10 +11,5 @@ deny:
   - package:home_pocket/features/**/presentation/**
   - package:flutter/**
 
-allow:
-  - dart:core
-  - package:freezed_annotation/**
-  - package:json_annotation/**
-  - package:meta/**
-
 inherit: true
+# NOTE: no `allow:` block — see models/import_guard.yaml and repositories/import_guard.yaml

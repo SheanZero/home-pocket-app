@@ -1,0 +1,10 @@
+# Per-subdirectory whitelist (Phase 3 D-01 corrected). Inherits parent feature-level deny.
+allow:
+  - dart:core
+  - package:freezed_annotation/**
+  - package:json_annotation/**
+  - package:meta/**
+  - ../models/group_info.dart         # closes LV-015 (group_repository.dart line 1)
+  - ../models/group_member.dart       # closes LV-016 (group_repository.dart line 2)
+
+inherit: true
