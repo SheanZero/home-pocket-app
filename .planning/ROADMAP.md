@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Audit Pipeline + Tooling Setup** - Establish hybrid audit tooling and produce the machine-readable findings catalogue (issues.json) that scopes every fix phase
 - [ ] **Phase 2: Coverage Baseline** - Snapshot pre-refactor per-file coverage; produce the list of files needing characterization tests before fix phases begin (parallelizable with Phase 1)
-- [ ] **Phase 3: CRITICAL Fixes** - Eliminate all CRITICAL-severity findings (layer violations, UnimplementedError runtime failures); every touched file reaches ≥80% coverage
+- [x] **Phase 3: CRITICAL Fixes** - Eliminate all CRITICAL-severity findings (layer violations, UnimplementedError runtime failures); every touched file reaches ≥80% coverage — COMPLETED 2026-04-26
 - [ ] **Phase 4: HIGH Fixes** - Eliminate all HIGH-severity findings (provider hygiene, architectural rule violations, deprecated service wiring); every touched file reaches ≥80% coverage
 - [ ] **Phase 5: MEDIUM Fixes** - Eliminate all MEDIUM-severity findings (dead code, redundancy, i18n violations, theme token debt); every touched file reaches ≥80% coverage
 - [ ] **Phase 6: LOW Fixes** - Eliminate all LOW-severity findings (unused members, stale suppression directives, Drift index additions, debug logging); every touched file reaches ≥80% coverage
@@ -74,7 +74,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. Every file touched in this phase has ≥80% test coverage (characterization tests written before the refactor); `flutter analyze` exits 0; `dart run custom_lint` exits 0; all tests GREEN; user-observable behavior is unchanged
 **Plans**: 5 plans
   - [x] 03-01-domain-import-guard-rules-PLAN.md — Domain import_guard.yaml per-subdir rules + arch test (closes LV-001..016, LV-023, LV-024); LAST commit flips import_guard to blocking in audit.yml (D-17)
-  - [ ] 03-02-app-initializer-and-database-provider-PLAN.md — AppInitializer extraction + concrete appDatabaseProvider + InitFailureScreen + 3 ARB keys (closes CRIT-03)
+  - [x] 03-02-app-initializer-and-database-provider-PLAN.md — AppInitializer extraction + concrete appDatabaseProvider + InitFailureScreen + 3 ARB keys (closes CRIT-03)
   - [x] 03-03-use-cases-migration-PLAN.md — Migrate 5 family_sync use_cases to lib/application/family_sync/ (closes LV-017..LV-021, CRIT-02)
   - [x] 03-04-ledger-row-data-presentation-move-PLAN.md — Move ledger_row_data.dart to presentation/models/ (closes LV-022)
   - [x] 03-05-characterization-tests-PLAN.md — Wave 0 test infra: characterization tests for Phase-3 touched-files ∩ files-needing-tests.txt (CRIT-05)
