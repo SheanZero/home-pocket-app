@@ -1,0 +1,9 @@
+# Per-subdirectory whitelist (Phase 3 D-01 corrected). Inherits parent feature-level deny.
+allow:
+  - dart:core
+  - package:freezed_annotation/**
+  - package:json_annotation/**
+  - package:meta/**
+  - ../models/user_profile.dart       # closes LV-023
+
+inherit: true
