@@ -14,11 +14,14 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/infrastructure/security/audit_logger.dart';
+import 'package:home_pocket/infrastructure/security/biometric_service.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
 import 'package:home_pocket/infrastructure/security/secure_storage_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _FakeSecureStorage extends Mock implements FlutterSecureStorage {}
+
+class _FakeBiometricService extends Mock implements BiometricService {}
 
 void main() {
   group('appDatabaseProvider current behavior (PRE-Plan-03-02)', () {
@@ -95,6 +98,32 @@ void main() {
       final s2 = container.read(secureStorageServiceProvider);
       // Both reads should be the same provider instance
       expect(identical(s1, s2), isTrue);
+    });
+  });
+
+  group('biometricServiceProvider wiring', () {
+    test('resolves to a BiometricService instance by default', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      expect(container.read(biometricServiceProvider), isA<BiometricService>());
+    });
+  });
+
+  group('biometricAvailabilityProvider wiring', () {
+    test('resolves with availability when biometricServiceProvider overridden', () async {
+      final fakeBiometric = _FakeBiometricService();
+      when(() => fakeBiometric.checkAvailability()).thenAnswer(
+        (_) async => BiometricAvailability.notSupported,
+      );
+      final container = ProviderContainer(
+        overrides: [
+          biometricServiceProvider.overrideWithValue(fakeBiometric),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final availability = await container.read(biometricAvailabilityProvider.future);
+      expect(availability, equals(BiometricAvailability.notSupported));
     });
   });
 }
