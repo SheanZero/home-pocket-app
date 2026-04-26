@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import '../../../infrastructure/crypto/models/device_key_pair.dart';
-import '../../../infrastructure/crypto/services/key_manager.dart';
-import '../../../infrastructure/sync/relay_api_client.dart';
-import '../domain/models/group_info.dart';
-import '../domain/models/group_member.dart';
-import '../domain/repositories/group_repository.dart';
+import '../../infrastructure/crypto/models/device_key_pair.dart';
+import '../../infrastructure/crypto/services/key_manager.dart';
+import '../../infrastructure/sync/relay_api_client.dart';
+import '../../features/family_sync/domain/models/group_info.dart';
+import '../../features/family_sync/domain/models/group_member.dart';
+import '../../features/family_sync/domain/repositories/group_repository.dart';
 
 sealed class CheckGroupResult {
   const CheckGroupResult();

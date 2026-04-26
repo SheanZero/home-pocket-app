@@ -18,7 +18,7 @@ import '../../../profile/presentation/widgets/avatar_display.dart';
 import '../providers/group_providers.dart';
 import '../providers/repository_providers.dart' show webSocketServiceProvider;
 import '../widgets/group_rename_dialog.dart';
-import '../../use_cases/check_group_use_case.dart';
+import '../../../../application/family_sync/check_group_use_case.dart';
 import 'member_approval_screen.dart';
 
 class CreateGroupScreen extends ConsumerStatefulWidget {

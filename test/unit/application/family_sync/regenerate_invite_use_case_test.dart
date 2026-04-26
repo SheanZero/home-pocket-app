@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
-import 'package:home_pocket/features/family_sync/use_cases/regenerate_invite_use_case.dart';
+import 'package:home_pocket/application/family_sync/regenerate_invite_use_case.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
 import 'package:mocktail/mocktail.dart';
 

@@ -1,7 +1,7 @@
-import '../../../application/family_sync/shadow_book_service.dart';
-import '../../../infrastructure/sync/relay_api_client.dart';
-import '../../../infrastructure/sync/sync_queue_manager.dart';
-import '../domain/repositories/group_repository.dart';
+import 'shadow_book_service.dart';
+import '../../infrastructure/sync/relay_api_client.dart';
+import '../../infrastructure/sync/sync_queue_manager.dart';
+import '../../features/family_sync/domain/repositories/group_repository.dart';
 
 sealed class DeactivateGroupResult {
   const DeactivateGroupResult();

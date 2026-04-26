@@ -10,7 +10,7 @@ import 'package:home_pocket/features/family_sync/presentation/providers/group_pr
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/member_approval_screen.dart';
 import 'package:home_pocket/application/family_sync/confirm_member_use_case.dart';
-import 'package:home_pocket/features/family_sync/use_cases/remove_member_use_case.dart';
+import 'package:home_pocket/application/family_sync/remove_member_use_case.dart';
 import 'package:home_pocket/infrastructure/crypto/providers.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_connection_state.dart';

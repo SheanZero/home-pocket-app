@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/sync_status_model.dart';
-import '../../use_cases/check_group_use_case.dart';
+import '../../../../application/family_sync/check_group_use_case.dart';
 import '../providers/active_group_provider.dart';
 import '../providers/group_providers.dart';
 import '../providers/sync_providers.dart';

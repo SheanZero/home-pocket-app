@@ -1,5 +1,5 @@
-import '../../../infrastructure/sync/relay_api_client.dart';
-import '../domain/repositories/group_repository.dart';
+import '../../infrastructure/sync/relay_api_client.dart';
+import '../../features/family_sync/domain/repositories/group_repository.dart';
 
 sealed class RemoveMemberResult {
   const RemoveMemberResult();
