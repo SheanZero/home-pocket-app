@@ -10,7 +10,8 @@ import 'package:home_pocket/features/family_sync/presentation/providers/reposito
     show webSocketServiceProvider, keyManagerProvider;
 import 'package:home_pocket/features/family_sync/presentation/screens/create_group_screen.dart';
 import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
-import 'package:home_pocket/features/profile/presentation/providers/user_profile_providers.dart';
+import 'package:home_pocket/features/profile/presentation/providers/repository_providers.dart'
+    show userProfileRepositoryProvider;
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
 import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart';

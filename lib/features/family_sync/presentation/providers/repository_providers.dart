@@ -34,7 +34,7 @@ import '../../../../data/repositories/sync_repository_impl.dart';
 import '../../../../features/accounting/domain/models/transaction_sync_mapper.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart'
     as accounting;
-import '../../../profile/presentation/providers/user_profile_providers.dart'
+import '../../../profile/presentation/providers/repository_providers.dart'
     as profile;
 import '../../domain/repositories/group_repository.dart';
 import '../../domain/repositories/sync_repository.dart';

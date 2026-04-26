@@ -8,7 +8,7 @@ import '../../../../application/family_sync/confirm_join_use_case.dart';
 import '../../../../application/family_sync/join_group_use_case.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../profile/presentation/providers/user_profile_providers.dart';
+import '../../../profile/presentation/providers/state_user_profile.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
 import '../providers/repository_providers.dart';
 import 'waiting_approval_screen.dart';

@@ -40,7 +40,8 @@ import 'package:home_pocket/features/family_sync/presentation/providers/state_no
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/home/presentation/screens/main_shell_screen.dart';
 import 'package:home_pocket/features/profile/domain/models/user_profile.dart';
-import 'package:home_pocket/features/profile/presentation/providers/user_profile_providers.dart';
+import 'package:home_pocket/features/profile/presentation/providers/repository_providers.dart'
+    show getUserProfileUseCaseProvider;
 import 'package:home_pocket/features/profile/presentation/screens/profile_onboarding_screen.dart';
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart';

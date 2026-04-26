@@ -18,7 +18,8 @@ import 'features/family_sync/presentation/providers/repository_providers.dart'
 import 'features/family_sync/presentation/providers/state_sync.dart'
     show syncEngineProvider;
 import 'features/home/presentation/screens/main_shell_screen.dart';
-import 'features/profile/presentation/providers/user_profile_providers.dart';
+import 'features/profile/presentation/providers/repository_providers.dart'
+    show getUserProfileUseCaseProvider;
 import 'features/profile/presentation/screens/profile_onboarding_screen.dart';
 import 'features/settings/domain/models/app_settings.dart';
 import 'features/settings/presentation/providers/state_locale.dart';

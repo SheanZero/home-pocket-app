@@ -16,7 +16,8 @@ import 'package:home_pocket/features/family_sync/domain/models/group_member.dart
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
-import 'package:home_pocket/features/profile/presentation/providers/user_profile_providers.dart';
+import 'package:home_pocket/features/profile/presentation/providers/repository_providers.dart'
+    show userProfileRepositoryProvider;
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/e2ee_service.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';

@@ -6,7 +6,7 @@ import '../../../../application/family_sync/sync_orchestrator.dart';
 import '../../../../application/family_sync/transaction_change_tracker.dart';
 import '../../domain/models/group_member.dart';
 import '../../domain/models/sync_status_model.dart' as model;
-import '../../../profile/presentation/providers/user_profile_providers.dart'
+import '../../../profile/presentation/providers/repository_providers.dart'
     as profile;
 import 'state_active_group.dart';
 import 'repository_providers.dart';
