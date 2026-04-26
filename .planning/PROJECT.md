@@ -107,4 +107,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-25 after Phase 1 (Audit Pipeline + Tooling Setup) completion*
+*Last updated: 2026-04-26 after Phase 2 (Coverage Baseline) completion — frozen baseline at `.planning/audit/coverage-baseline.{txt,json}` (234 files, 102 below 80%); REPO-LOCK window now operationally active until Phase 6 close*
