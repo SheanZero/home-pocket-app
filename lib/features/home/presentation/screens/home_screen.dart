@@ -12,11 +12,11 @@ import '../../../../features/analytics/domain/models/monthly_report.dart';
 import '../../../../features/analytics/presentation/providers/state_analytics.dart';
 import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
 import '../../../../features/family_sync/presentation/screens/group_choice_screen.dart';
-import '../../../../infrastructure/category/category_service.dart';
+import '../../../../application/accounting/category_localization_service.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../models/ledger_row_data.dart';
-import '../providers/shadow_books_provider.dart';
-import '../providers/today_transactions_provider.dart';
+import '../providers/state_shadow_books.dart';
+import '../providers/state_today_transactions.dart';
 import '../widgets/family_invite_banner.dart';
 import '../widgets/hero_header.dart';
 import '../widgets/home_transaction_tile.dart';
@@ -217,11 +217,11 @@ class HomeScreen extends ConsumerWidget {
                             : AppColors.survival,
                         merchant:
                             tx.merchant ??
-                            CategoryService.resolveFromId(
+                            CategoryLocalizationService.resolveFromId(
                               tx.categoryId,
                               locale,
                             ),
-                        category: CategoryService.resolveFromId(
+                        category: CategoryLocalizationService.resolveFromId(
                           tx.categoryId,
                           locale,
                         ),

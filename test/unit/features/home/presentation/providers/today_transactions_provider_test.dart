@@ -5,7 +5,7 @@ import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
     show getTransactionsUseCaseProvider;
-import 'package:home_pocket/features/home/presentation/providers/today_transactions_provider.dart';
+import 'package:home_pocket/features/home/presentation/providers/state_today_transactions.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockTransactionRepository extends Mock implements TransactionRepository {}

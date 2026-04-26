@@ -8,7 +8,7 @@ import '../../../analytics/domain/models/monthly_report.dart';
 import '../../../analytics/presentation/providers/repository_providers.dart';
 import '../../../family_sync/presentation/providers/state_active_group.dart';
 
-part 'shadow_books_provider.g.dart';
+part 'state_shadow_books.g.dart';
 
 class ShadowBookInfo {
   const ShadowBookInfo({

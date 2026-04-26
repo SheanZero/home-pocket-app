@@ -10,9 +10,9 @@ import '../../../family_sync/domain/models/sync_status_model.dart';
 import '../../../family_sync/presentation/providers/state_sync.dart';
 import '../../../family_sync/presentation/widgets/family_sync_notification_route_listener.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
-import '../providers/home_providers.dart';
-import '../providers/shadow_books_provider.dart';
-import '../providers/today_transactions_provider.dart';
+import '../providers/state_home.dart';
+import '../providers/state_shadow_books.dart';
+import '../providers/state_today_transactions.dart';
 import '../widgets/home_bottom_nav_bar.dart';
 import 'home_screen.dart';
 

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'shadow_books_provider.dart';
+part of 'state_shadow_books.dart';
 
 // **************************************************************************
 // RiverpodGenerator

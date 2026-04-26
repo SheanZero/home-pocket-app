@@ -6,7 +6,7 @@ import 'package:home_pocket/features/analytics/domain/repositories/analytics_rep
 import 'package:home_pocket/features/analytics/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
-import 'package:home_pocket/features/home/presentation/providers/shadow_books_provider.dart';
+import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
 import 'package:mocktail/mocktail.dart';
 
 // Inline Mocktail-only mocks (no @GenerateMocks, no package:mockito)

@@ -6,7 +6,7 @@ import '../../../accounting/domain/models/transaction.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart'
     show getTransactionsUseCaseProvider;
 
-part 'today_transactions_provider.g.dart';
+part 'state_today_transactions.g.dart';
 
 /// Fetches today's non-deleted transactions for the given [bookId].
 ///
