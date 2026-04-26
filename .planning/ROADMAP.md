@@ -89,7 +89,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. `ResolveLedgerTypeService` is fully deleted: source file, provider definition, generated `.g.dart` part, test file, and all `*.mocks.dart` references are gone; `flutter analyze` exits 0 and `flutter test` passes after each of the six deletion steps
   4. Each feature has exactly one `repository_providers.dart` (no duplicate provider definitions for the same dependency); `keepAlive: true` is preserved on `syncEngineProvider`, `transactionChangeTrackerProvider`, `merchantDatabaseProvider`, `activeGroupProvider`, `activeGroupMembersProvider`, and `ledgerProvider`
   5. Every file touched in this phase has ≥80% test coverage; `flutter analyze` exits 0; `dart run custom_lint` exits 0; all tests GREEN; behavior unchanged
-**Plans**: TBD
+**Plans**: 6 plans
+  - [ ] 04-01-application-layer-routing-scaffolding-PLAN.md — Application-layer DI scaffolding + new use cases + FormatterService (HIGH-02 prep; Wave 2)
+  - [ ] 04-02-presentation-refactor-and-import-guard-PLAN.md — Replace 33 infrastructure imports + restructure presentation/providers + tighten import_guard.yaml + arch test (HIGH-02, HIGH-04 close; Wave 3)
+  - [ ] 04-03-resolveledgertypeservice-deletion-PLAN.md — Six-atomic-commit deletion of ResolveLedgerTypeService (HIGH-03; Wave 1)
+  - [ ] 04-04-mocktail-bigbang-migration-PLAN.md — Mocktail migration of 13 *.mocks.dart fixtures + mockito removal (HIGH-07; Wave 1)
+  - [ ] 04-05-provider-graph-hygiene-test-PLAN.md — Architecture test enforcing HIGH-04 + HIGH-05 + HIGH-06 invariants; Phase 4 close gate (Wave 4)
+  - [ ] 04-06-characterization-tests-PLAN.md — Characterization tests for Phase-4 touched-files ∩ files-needing-tests.txt (HIGH-08 prereq; Wave 0)
 
 ### Phase 5: MEDIUM Fixes
 **Goal**: Every MEDIUM-severity finding in `issues.json` is resolved; the dual-CategoryService naming collision is eliminated, all hardcoded CJK strings are extracted to ARB files, and MOD-009 deprecated code references are deleted
@@ -165,7 +171,7 @@ Phases 1 and 2 run in parallel. Then: 3 → 4 → 5 → 6 → 7 → 8
 | 1. Audit Pipeline + Tooling Setup | 0/TBD | Not started | - |
 | 2. Coverage Baseline | 0/4 | Not started | - |
 | 3. CRITICAL Fixes | 0/5 | Not started | - |
-| 4. HIGH Fixes | 0/TBD | Not started | - |
+| 4. HIGH Fixes | 0/6 | Not started | - |
 | 5. MEDIUM Fixes | 0/TBD | Not started | - |
 | 6. LOW Fixes | 0/TBD | Not started | - |
 | 7. Documentation Sweep | 0/TBD | Not started | - |
