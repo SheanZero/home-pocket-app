@@ -4,22 +4,21 @@ import 'package:home_pocket/data/daos/transaction_dao.dart';
 import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 
-@GenerateMocks([FieldEncryptionService])
-import 'transaction_repository_impl_test.mocks.dart';
+class _MockFieldEncryptionService extends Mock
+    implements FieldEncryptionService {}
 
 void main() {
   late AppDatabase db;
   late TransactionDao dao;
-  late MockFieldEncryptionService mockEncryption;
+  late _MockFieldEncryptionService mockEncryption;
   late TransactionRepositoryImpl repo;
 
   setUp(() {
     db = AppDatabase.forTesting();
     dao = TransactionDao(db);
-    mockEncryption = MockFieldEncryptionService();
+    mockEncryption = _MockFieldEncryptionService();
     repo = TransactionRepositoryImpl(
       dao: dao,
       encryptionService: mockEncryption,
@@ -27,9 +26,13 @@ void main() {
 
     // Default: encryption passthrough for testing
     when(
-      mockEncryption.encryptField(any),
-    ).thenAnswer((inv) async => 'enc_${inv.positionalArguments[0]}');
-    when(mockEncryption.decryptField(any)).thenAnswer((inv) async {
+      () => mockEncryption.encryptField(any()),
+    ).thenAnswer(
+      (inv) async => 'enc_${inv.positionalArguments[0]}',
+    );
+    when(
+      () => mockEncryption.decryptField(any()),
+    ).thenAnswer((inv) async {
       final cipher = inv.positionalArguments[0] as String;
       return cipher.replaceFirst('enc_', '');
     });
@@ -58,7 +61,7 @@ void main() {
 
       await repo.insert(tx);
 
-      verify(mockEncryption.encryptField('Lunch at cafe')).called(1);
+      verify(() => mockEncryption.encryptField('Lunch at cafe')).called(1);
 
       final row = await dao.findById('tx_001');
       expect(row, isNotNull);
@@ -81,7 +84,7 @@ void main() {
       );
 
       await repo.insert(tx);
-      verifyNever(mockEncryption.encryptField(any));
+      verifyNever(() => mockEncryption.encryptField(any()));
     });
 
     test('findById decrypts note', () async {
@@ -106,7 +109,7 @@ void main() {
       expect(found, isNotNull);
       expect(found!.note, 'Lunch at cafe');
       expect(found.metadata?['sourceBookId'], 'remote-book-1');
-      verify(mockEncryption.decryptField('enc_Lunch at cafe')).called(1);
+      verify(() => mockEncryption.decryptField('enc_Lunch at cafe')).called(1);
     });
 
     test('findByBookId returns sorted, decrypted transactions', () async {

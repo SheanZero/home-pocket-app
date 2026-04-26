@@ -10,31 +10,38 @@ import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 
-@GenerateMocks([FieldEncryptionService, GroupRepository])
-import 'apply_sync_operations_use_case_test.mocks.dart';
+class _MockFieldEncryptionService extends Mock
+    implements FieldEncryptionService {}
+
+class _MockGroupRepository extends Mock implements GroupRepository {}
 
 void main() {
   late AppDatabase db;
   late ApplySyncOperationsUseCase useCase;
   late ShadowBookService shadowBookService;
   late TransactionDao transactionDao;
-  late MockFieldEncryptionService mockEncryption;
-  late MockGroupRepository mockGroupRepository;
+  late _MockFieldEncryptionService mockEncryption;
+  late _MockGroupRepository mockGroupRepository;
 
   setUp(() async {
     db = AppDatabase.forTesting();
     final bookRepo = BookRepositoryImpl(dao: BookDao(db));
     transactionDao = TransactionDao(db);
-    mockEncryption = MockFieldEncryptionService();
-    mockGroupRepository = MockGroupRepository();
-    when(mockEncryption.encryptField(any)).thenAnswer(
-      (invocation) async => invocation.positionalArguments.first as String,
+    mockEncryption = _MockFieldEncryptionService();
+    mockGroupRepository = _MockGroupRepository();
+    when(
+      () => mockEncryption.encryptField(any()),
+    ).thenAnswer(
+      (invocation) async =>
+          invocation.positionalArguments.first as String,
     );
-    when(mockEncryption.decryptField(any)).thenAnswer(
-      (invocation) async => invocation.positionalArguments.first as String,
+    when(
+      () => mockEncryption.decryptField(any()),
+    ).thenAnswer(
+      (invocation) async =>
+          invocation.positionalArguments.first as String,
     );
     final transactionRepo = TransactionRepositoryImpl(
       dao: transactionDao,
@@ -51,7 +58,9 @@ void main() {
       groupRepository: mockGroupRepository,
     );
 
-    when(mockGroupRepository.getActiveGroup()).thenAnswer(
+    when(
+      () => mockGroupRepository.getActiveGroup(),
+    ).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
         groupName: 'Test Family',
@@ -71,7 +80,9 @@ void main() {
         createdAt: DateTime(2026, 3, 15),
       ),
     );
-    when(mockGroupRepository.getPendingGroup()).thenAnswer((_) async => null);
+    when(
+      () => mockGroupRepository.getPendingGroup(),
+    ).thenAnswer((_) async => null);
 
     await shadowBookService.createShadowBook(
       groupId: 'group-1',
