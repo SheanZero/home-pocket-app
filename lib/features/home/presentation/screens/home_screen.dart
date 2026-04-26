@@ -14,7 +14,7 @@ import '../../../../features/family_sync/presentation/providers/active_group_pro
 import '../../../../features/family_sync/presentation/screens/group_choice_screen.dart';
 import '../../../../infrastructure/category/category_service.dart';
 import '../../../settings/presentation/providers/locale_provider.dart';
-import '../../domain/models/ledger_row_data.dart';
+import '../models/ledger_row_data.dart';
 import '../providers/shadow_books_provider.dart';
 import '../providers/today_transactions_provider.dart';
 import '../widgets/family_invite_banner.dart';

@@ -352,7 +352,9 @@
       "suggested_fix": "Move/refactor to satisfy the layer rule.",
       "tool_source": "import_guard",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": 3,
+      "closed_commit": "c549794"
     },
     {
       "id": "LV-023",

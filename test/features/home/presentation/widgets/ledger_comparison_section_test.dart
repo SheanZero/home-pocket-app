@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/features/home/domain/models/ledger_row_data.dart';
+import 'package:home_pocket/features/home/presentation/models/ledger_row_data.dart';
 import 'package:home_pocket/features/home/presentation/widgets/ledger_comparison_section.dart';
 
 void main() {

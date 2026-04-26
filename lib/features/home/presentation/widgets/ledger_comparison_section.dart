@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme_colors.dart';
-import '../../domain/models/ledger_row_data.dart';
+import '../models/ledger_row_data.dart';
 
 /// Displays a vertical list of ledger row cards.
 ///
