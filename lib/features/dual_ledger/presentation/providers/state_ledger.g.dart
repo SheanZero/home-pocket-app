@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'ledger_providers.dart';
+part of 'state_ledger.dart';
 
 // **************************************************************************
 // RiverpodGenerator

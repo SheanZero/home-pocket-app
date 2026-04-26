@@ -2,7 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../features/accounting/domain/models/transaction.dart';
 
-part 'ledger_providers.g.dart';
+part 'state_ledger.g.dart';
 
 /// Current ledger tab selection.
 @Riverpod(keepAlive: true)

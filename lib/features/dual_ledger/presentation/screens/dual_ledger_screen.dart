@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../features/accounting/presentation/screens/transaction_list_screen.dart';
 import '../../../../generated/app_localizations.dart';
-import '../providers/ledger_providers.dart';
+import '../providers/state_ledger.dart';
 
 class DualLedgerScreen extends ConsumerWidget {
   const DualLedgerScreen({super.key, required this.bookId});
