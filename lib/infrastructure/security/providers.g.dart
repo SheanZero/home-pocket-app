@@ -94,7 +94,7 @@ final auditLoggerProvider = AutoDisposeProvider<AuditLogger>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AuditLoggerRef = AutoDisposeProviderRef<AuditLogger>;
-String _$appDatabaseHash() => r'f6a5a69f8759ef73fd1fc22c5bd65764f0ab79d9';
+String _$appDatabaseHash() => r'88010833b86aa9a841ee56a0ccd57c65b66cf520';
 
 /// AppDatabase provider - PLACEHOLDER.
 ///
@@ -135,10 +135,20 @@ String _$appDatabaseHash() => r'f6a5a69f8759ef73fd1fc22c5bd65764f0ab79d9';
 ///
 /// - `MasterKeyRepository` from `lib/infrastructure/crypto/repositories/`
 /// - `createEncryptedExecutor` from `lib/infrastructure/crypto/database/`
+/// AppDatabase provider — concrete keepAlive: true.
+///
+/// Phase 3 / CRIT-03 fix: replaces the prior `UnimplementedError` placeholder.
+/// AppInitializer.initialize() overrides this via `.overrideWithValue(database)`
+/// on the production ProviderContainer. Tests use `createTestProviderScope`
+/// (test/helpers/test_provider_scope.dart) which always overrides with
+/// `AppDatabase.forTesting()`.
+///
+/// If reached without an override the wiring is broken — fail loud with a
+/// diagnostic StateError pointing to AppInitializer.
 ///
 /// Copied from [appDatabase].
 @ProviderFor(appDatabase)
-final appDatabaseProvider = AutoDisposeProvider<AppDatabase>.internal(
+final appDatabaseProvider = Provider<AppDatabase>.internal(
   appDatabase,
   name: r'appDatabaseProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -150,6 +160,6 @@ final appDatabaseProvider = AutoDisposeProvider<AppDatabase>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef AppDatabaseRef = AutoDisposeProviderRef<AppDatabase>;
+typedef AppDatabaseRef = ProviderRef<AppDatabase>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

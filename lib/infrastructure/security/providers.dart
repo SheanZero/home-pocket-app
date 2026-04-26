@@ -93,10 +93,23 @@ AuditLogger auditLogger(Ref ref) {
 ///
 /// - `MasterKeyRepository` from `lib/infrastructure/crypto/repositories/`
 /// - `createEncryptedExecutor` from `lib/infrastructure/crypto/database/`
-@riverpod
+/// AppDatabase provider — concrete keepAlive: true.
+///
+/// Phase 3 / CRIT-03 fix: replaces the prior `UnimplementedError` placeholder.
+/// AppInitializer.initialize() overrides this via `.overrideWithValue(database)`
+/// on the production ProviderContainer. Tests use `createTestProviderScope`
+/// (test/helpers/test_provider_scope.dart) which always overrides with
+/// `AppDatabase.forTesting()`.
+///
+/// If reached without an override the wiring is broken — fail loud with a
+/// diagnostic StateError pointing to AppInitializer.
+@Riverpod(keepAlive: true)
 AppDatabase appDatabase(Ref ref) {
-  throw UnimplementedError(
-    'appDatabaseProvider must be overridden during app initialization.\n'
-    'See AppInitializer pattern in lib/main.dart or the docstring above.',
+  throw StateError(
+    'appDatabaseProvider not overridden. AppInitializer.initialize() must run '
+    'before any consumer reads this provider, OR a test must inject '
+    'appDatabaseProvider.overrideWithValue(AppDatabase.forTesting()). '
+    'See lib/core/initialization/app_initializer.dart and '
+    'test/helpers/test_provider_scope.dart.',
   );
 }
