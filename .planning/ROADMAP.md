@@ -90,7 +90,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Each feature has exactly one `repository_providers.dart` (no duplicate provider definitions for the same dependency); `keepAlive: true` is preserved on `syncEngineProvider`, `transactionChangeTrackerProvider`, `merchantDatabaseProvider`, `activeGroupProvider`, `activeGroupMembersProvider`, and `ledgerProvider`
   5. Every file touched in this phase has ≥80% test coverage; `flutter analyze` exits 0; `dart run custom_lint` exits 0; all tests GREEN; behavior unchanged
 **Plans**: 6 plans
-  - [ ] 04-01-application-layer-routing-scaffolding-PLAN.md — Application-layer DI scaffolding + new use cases + FormatterService (HIGH-02 prep; Wave 2)
+  - [x] 04-01-application-layer-routing-scaffolding-PLAN.md — Application-layer DI scaffolding + new use cases + FormatterService (HIGH-02 prep; Wave 2)
   - [ ] 04-02-presentation-refactor-and-import-guard-PLAN.md — Replace 33 infrastructure imports + restructure presentation/providers + tighten import_guard.yaml + arch test (HIGH-02, HIGH-04 close; Wave 3)
   - [x] 04-03-resolveledgertypeservice-deletion-PLAN.md — Six-atomic-commit deletion of ResolveLedgerTypeService (HIGH-03; Wave 1)
   - [x] 04-04-mocktail-bigbang-migration-PLAN.md — Mocktail migration of 13 *.mocks.dart fixtures + mockito removal (HIGH-07; Wave 1)
