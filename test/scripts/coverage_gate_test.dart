@@ -13,10 +13,7 @@ const _projectRoot = '.';
 
 String _absoluteProjectRoot() => Directory.current.path;
 
-Future<ProcessResult> _runGate(
-  Directory cwd, [
-  List<String> extra = const [],
-]) {
+Future<ProcessResult> _runGate(Directory cwd, [List<String> extra = const []]) {
   return Process.run(
     'dart',
     ['run', '$_projectRoot/scripts/coverage_gate.dart', ...extra],
@@ -30,14 +27,17 @@ Directory _setupTempProject() {
   final root = _absoluteProjectRoot();
 
   Directory('${tmp.path}/scripts/coverage').createSync(recursive: true);
-  File('$root/scripts/coverage_gate.dart')
-      .copySync('${tmp.path}/scripts/coverage_gate.dart');
-  File('$root/scripts/coverage/lcov_parser.dart')
-      .copySync('${tmp.path}/scripts/coverage/lcov_parser.dart');
+  File(
+    '$root/scripts/coverage_gate.dart',
+  ).copySync('${tmp.path}/scripts/coverage_gate.dart');
+  File(
+    '$root/scripts/coverage/lcov_parser.dart',
+  ).copySync('${tmp.path}/scripts/coverage/lcov_parser.dart');
 
   File('$root/pubspec.yaml').copySync('${tmp.path}/pubspec.yaml');
-  Link('${tmp.path}/.dart_tool')
-      .createSync('$root/.dart_tool', recursive: true);
+  Link(
+    '${tmp.path}/.dart_tool',
+  ).createSync('$root/.dart_tool', recursive: true);
 
   Directory('${tmp.path}/coverage').createSync(recursive: true);
   Directory('${tmp.path}/.planning/audit').createSync(recursive: true);
@@ -58,7 +58,9 @@ void _writeLcov(Directory tmp, Map<String, (int, int)> records) {
     buf.writeln('LH:$lh');
     buf.writeln('end_of_record');
   });
-  File('${tmp.path}/coverage/lcov_clean.info').writeAsStringSync(buf.toString());
+  File(
+    '${tmp.path}/coverage/lcov_clean.info',
+  ).writeAsStringSync(buf.toString());
 }
 
 void main() {
@@ -91,22 +93,26 @@ void main() {
       expect(r.stdout.toString(), contains('FAIL'));
     });
 
-    test('--list <file> reads newline-delimited paths and gates them',
-        () async {
-      _writeLcov(tmp, {'lib/a.dart': (5, 10), 'lib/b.dart': (10, 10)});
-      File('${tmp.path}/scope.txt')
-          .writeAsStringSync('lib/a.dart\nlib/b.dart\n');
-      final r = await _runGate(tmp, ['--list', 'scope.txt']);
-      expect(r.exitCode, equals(1));
-      expect(r.stdout.toString(), contains('lib/a.dart'));
-    });
+    test(
+      '--list <file> reads newline-delimited paths and gates them',
+      () async {
+        _writeLcov(tmp, {'lib/a.dart': (5, 10), 'lib/b.dart': (10, 10)});
+        File(
+          '${tmp.path}/scope.txt',
+        ).writeAsStringSync('lib/a.dart\nlib/b.dart\n');
+        final r = await _runGate(tmp, ['--list', 'scope.txt']);
+        expect(r.exitCode, equals(1));
+        expect(r.stdout.toString(), contains('lib/a.dart'));
+      },
+    );
 
     test(
       'falls back to .planning/audit/files-needing-tests.txt when no positional/--list',
       () async {
         _writeLcov(tmp, {'lib/a.dart': (10, 10)});
-        File('${tmp.path}/.planning/audit/files-needing-tests.txt')
-            .writeAsStringSync('lib/a.dart\n');
+        File(
+          '${tmp.path}/.planning/audit/files-needing-tests.txt',
+        ).writeAsStringSync('lib/a.dart\n');
         final r = await _runGate(tmp);
         expect(r.exitCode, equals(0), reason: r.stderr.toString());
         expect(r.stdout.toString(), contains('lib/a.dart'));
@@ -135,18 +141,19 @@ void main() {
     });
 
     test('--json emits valid JSON with required keys lex-sorted', () async {
-      _writeLcov(tmp, {
-        'lib/b.dart': (10, 10),
-        'lib/a.dart': (5, 10),
-      });
-      final r = await _runGate(
-        tmp,
-        ['--json', 'lib/b.dart', 'lib/a.dart'],
-      );
+      _writeLcov(tmp, {'lib/b.dart': (10, 10), 'lib/a.dart': (5, 10)});
+      final r = await _runGate(tmp, ['--json', 'lib/b.dart', 'lib/a.dart']);
       expect(r.exitCode, equals(1)); // a.dart fails
-      final j = jsonDecode(r.stdout.toString()) as Map<String, dynamic>;
-      expect(j.keys.toSet(),
-          containsAll(['checked', 'failures', 'threshold', 'lcov_source']));
+      // `dart run` may prepend "Running build hooks..." to stdout on first
+      // invocation; slice from the first '{' to be robust.
+      final out = r.stdout.toString();
+      final start = out.indexOf('{');
+      expect(start, greaterThanOrEqualTo(0));
+      final j = jsonDecode(out.substring(start)) as Map<String, dynamic>;
+      expect(
+        j.keys.toSet(),
+        containsAll(['checked', 'failures', 'threshold', 'lcov_source']),
+      );
       final checked = (j['checked'] as List).cast<Map>();
       expect(checked.length, equals(2));
       expect(checked.first['file_path'], equals('lib/a.dart')); // lex-sorted
@@ -155,14 +162,16 @@ void main() {
       expect(failures.length, equals(1));
       expect(failures.first['file_path'], equals('lib/a.dart'));
       // Per-record schema mirrors coverage_baseline.json
-      expect(checked.first.keys.toSet(),
-          containsAll([
-            'file_path',
-            'lines_covered',
-            'lines_total',
-            'percentage',
-            'threshold_met',
-          ]));
+      expect(
+        checked.first.keys.toSet(),
+        containsAll([
+          'file_path',
+          'lines_covered',
+          'lines_total',
+          'percentage',
+          'threshold_met',
+        ]),
+      );
     });
 
     test('unknown flag exits 2 with the flag name in stderr', () async {
