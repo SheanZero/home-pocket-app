@@ -1,4 +1,3 @@
-import 'package:cryptography/cryptography.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/core/initialization/app_initializer.dart';
