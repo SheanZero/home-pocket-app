@@ -11,7 +11,7 @@ import '../../../../generated/app_localizations.dart';
 import '../../../profile/domain/models/user_profile.dart';
 import '../../../profile/presentation/providers/user_profile_providers.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
-import '../providers/group_providers.dart';
+import '../providers/repository_providers.dart';
 import 'confirm_join_screen.dart';
 
 const _purpleGradient = [

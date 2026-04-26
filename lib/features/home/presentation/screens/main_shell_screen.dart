@@ -7,7 +7,7 @@ import '../../../accounting/presentation/screens/transaction_entry_screen.dart';
 import '../../../analytics/presentation/providers/analytics_providers.dart';
 import '../../../analytics/presentation/screens/analytics_screen.dart';
 import '../../../family_sync/domain/models/sync_status_model.dart';
-import '../../../family_sync/presentation/providers/sync_providers.dart';
+import '../../../family_sync/presentation/providers/state_sync.dart';
 import '../../../family_sync/presentation/widgets/family_sync_notification_route_listener.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
 import '../providers/home_providers.dart';

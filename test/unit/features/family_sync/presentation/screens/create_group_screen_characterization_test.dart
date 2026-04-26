@@ -6,9 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart'
-    show webSocketServiceProvider;
+    show webSocketServiceProvider, keyManagerProvider;
 import 'package:home_pocket/features/family_sync/presentation/screens/create_group_screen.dart';
 import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
 import 'package:home_pocket/features/profile/presentation/providers/user_profile_providers.dart';
@@ -16,14 +15,11 @@ import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
 import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
-import 'package:home_pocket/infrastructure/crypto/providers.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockKeyManager extends Mock implements KeyManager {}
-
-class _MockGroupRepository extends Mock implements GroupRepository {}
 
 class _MockWebSocketService extends Mock implements WebSocketService {}
 
@@ -50,14 +46,12 @@ Widget _buildApp(Widget child, List<Override> overrides) {
 
 void main() {
   late _MockKeyManager mockKeyManager;
-  late _MockGroupRepository mockGroupRepo;
   late _MockWebSocketService mockWebSocketService;
   late _MockUserProfileRepository mockUserProfileRepo;
   late _MockSettingsRepository mockSettingsRepo;
 
   setUp(() {
     mockKeyManager = _MockKeyManager();
-    mockGroupRepo = _MockGroupRepository();
     mockWebSocketService = _MockWebSocketService();
     mockUserProfileRepo = _MockUserProfileRepository();
     mockSettingsRepo = _MockSettingsRepository();

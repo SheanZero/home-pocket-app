@@ -7,8 +7,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/sync_status_model.dart';
 import '../../../../application/family_sync/check_group_use_case.dart';
-import '../providers/group_providers.dart';
-import '../providers/sync_providers.dart';
+import '../providers/repository_providers.dart';
+import '../providers/state_sync.dart';
 import 'group_management_screen.dart';
 
 /// Centered waiting screen displayed after the joiner has confirmed their

@@ -4,7 +4,6 @@ import 'package:home_pocket/application/family_sync/apply_sync_operations_use_ca
 import 'package:home_pocket/application/family_sync/check_group_validity_use_case.dart';
 import 'package:home_pocket/application/family_sync/full_sync_use_case.dart';
 import 'package:home_pocket/application/family_sync/push_sync_use_case.dart';
-import 'package:home_pocket/application/family_sync/pull_sync_use_case.dart';
 import 'package:home_pocket/application/family_sync/shadow_book_service.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/family_sync/sync_orchestrator.dart';
@@ -13,15 +12,11 @@ import 'package:home_pocket/features/accounting/domain/repositories/book_reposit
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
-import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/active_group_provider.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/avatar_sync_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/sync_providers.dart';
+import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
 import 'package:home_pocket/features/profile/presentation/providers/user_profile_providers.dart';
-import 'package:home_pocket/infrastructure/crypto/providers.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/e2ee_service.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
@@ -48,12 +43,6 @@ class _MockBookRepository extends Mock implements BookRepository {}
 
 class _MockUserProfileRepository extends Mock implements UserProfileRepository {}
 
-class _MockSyncAvatarUseCase extends Mock
-    implements
-        // ignore: always_use_package_imports
-        Object {
-  // Minimal stub for syncAvatarUseCaseProvider override
-}
 
 void main() {
   late _MockRelayApiClient mockApiClient;

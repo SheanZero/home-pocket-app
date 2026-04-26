@@ -12,7 +12,10 @@ import 'core/theme/app_theme.dart';
 import 'data/app_database.dart';
 import 'features/accounting/presentation/providers/use_case_providers.dart';
 import 'features/family_sync/presentation/providers/repository_providers.dart';
-import 'features/family_sync/presentation/providers/sync_providers.dart';
+import 'features/family_sync/presentation/providers/repository_providers.dart'
+    show pushNotificationServiceProvider;
+import 'features/family_sync/presentation/providers/state_sync.dart'
+    show syncEngineProvider;
 import 'features/home/presentation/screens/main_shell_screen.dart';
 import 'features/profile/presentation/providers/user_profile_providers.dart';
 import 'features/profile/presentation/screens/profile_onboarding_screen.dart';

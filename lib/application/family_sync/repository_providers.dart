@@ -16,6 +16,14 @@ import '../../infrastructure/sync/websocket_service.dart';
 import 'listen_to_push_notifications_use_case.dart';
 import 'notify_member_approval_use_case.dart';
 
+// Re-exports so feature/presentation can use these types via application/
+// without importing infrastructure/ directly.
+export '../../infrastructure/sync/push_notification_service.dart'
+    show PushNavigationIntent, PushNavigationDestination;
+export '../../infrastructure/sync/sync_queue_manager.dart' show SyncQueueManager;
+export '../../infrastructure/sync/websocket_service.dart'
+    show WebSocketEvent, WebSocketEventType;
+
 part 'repository_providers.g.dart';
 
 // All providers prefixed with `app` to eliminate symbol collision with feature-side

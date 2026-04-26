@@ -1,22 +1,22 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../application/family_sync/confirm_member_use_case.dart';
+import '../../../../application/family_sync/notify_member_approval_use_case.dart';
+import '../../../../application/family_sync/remove_member_use_case.dart';
+import '../../../../application/family_sync/repository_providers.dart'
+    show WebSocketEventType, notifyMemberApprovalUseCaseProvider;
 import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/crypto/providers.dart';
-import '../../../../infrastructure/sync/websocket_service.dart';
 import '../../domain/models/group_info.dart';
 import '../../domain/models/group_member.dart';
-import '../../../../application/family_sync/confirm_member_use_case.dart';
-import '../../../../application/family_sync/remove_member_use_case.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
-import '../providers/group_providers.dart';
 import '../providers/repository_providers.dart'
-    show groupRepositoryProvider, webSocketServiceProvider;
+    show groupRepositoryProvider, confirmMemberUseCaseProvider,
+        removeMemberUseCaseProvider;
 import 'group_management_screen.dart';
 
 const _purpleGradient = [
@@ -40,8 +40,8 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
   bool _isLoading = true;
   String? _approvingMemberId;
   String? _rejectingMemberId;
-  StreamSubscription<WebSocketEvent>? _wsEventSubscription;
-  WebSocketService? _webSocketService;
+  StreamSubscription<dynamic>? _wsEventSubscription;
+  NotifyMemberApprovalUseCase? _notifyUseCase;
 
   @override
   void initState() {
@@ -51,13 +51,11 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
   }
 
   Future<void> _connectWebSocket() async {
-    final ws = ref.read(webSocketServiceProvider);
-    _webSocketService = ws;
-    final keyManager = ref.read(keyManagerProvider);
-    final groupId = widget.groupId;
+    final useCase = ref.read(notifyMemberApprovalUseCaseProvider);
+    _notifyUseCase = useCase;
 
     // Listen for join_request events to refresh the pending list
-    _wsEventSubscription = ws.eventStream.listen((event) {
+    _wsEventSubscription = useCase.listenForJoinRequests().listen((event) {
       if (!mounted) return;
       if (event.type == WebSocketEventType.joinRequest) {
         _loadGroup(); // Reload to pick up new pending member
@@ -65,33 +63,20 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
     });
 
     // Determine groupId for WebSocket connection
-    String? wsGroupId = groupId;
+    String? wsGroupId = widget.groupId;
     if (wsGroupId == null) {
       final group = await ref.read(groupRepositoryProvider).getActiveGroup();
       wsGroupId = group?.groupId;
     }
     if (!mounted || wsGroupId == null) return;
 
-    final deviceId = await keyManager.getDeviceId();
-    if (!mounted || deviceId == null) return;
-
-    ws.connect(
-      groupId: wsGroupId,
-      deviceId: deviceId,
-      signMessage: (message) async {
-        final sig = await keyManager.signData(utf8.encode(message));
-        return base64Encode(sig.bytes);
-      },
-    );
-    ws.startLifecycleObservation();
+    await useCase.connectWebSocket(groupId: wsGroupId);
   }
 
   @override
   void dispose() {
     unawaited(_wsEventSubscription?.cancel());
-    _webSocketService
-      ?..stopLifecycleObservation()
-      ..disconnect();
+    _notifyUseCase?.disconnectWebSocket();
     super.dispose();
   }
 

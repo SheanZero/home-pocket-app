@@ -10,7 +10,7 @@ import '../../../../application/accounting/merchant_category_learning_service.da
 import '../../../../application/accounting/seed_categories_use_case.dart';
 import '../../../../application/dual_ledger/repository_providers.dart';
 import '../../../../application/voice/record_category_correction_use_case.dart';
-import '../../../../features/family_sync/presentation/providers/sync_providers.dart';
+import '../../../../features/family_sync/presentation/providers/state_sync.dart';
 import '../../../../infrastructure/crypto/providers.dart';
 import 'repository_providers.dart';
 

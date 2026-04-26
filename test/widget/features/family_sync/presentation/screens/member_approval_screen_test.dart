@@ -1,20 +1,18 @@
 import 'dart:async';
 
-import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/family_sync/confirm_member_use_case.dart';
+import 'package:home_pocket/application/family_sync/notify_member_approval_use_case.dart';
+import 'package:home_pocket/application/family_sync/remove_member_use_case.dart';
+import 'package:home_pocket/application/family_sync/repository_providers.dart'
+    show notifyMemberApprovalUseCaseProvider;
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/group_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/member_approval_screen.dart';
-import 'package:home_pocket/application/family_sync/confirm_member_use_case.dart';
-import 'package:home_pocket/application/family_sync/remove_member_use_case.dart';
-import 'package:home_pocket/infrastructure/crypto/providers.dart';
-import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
-import 'package:home_pocket/infrastructure/sync/websocket_connection_state.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -26,23 +24,29 @@ class MockConfirmMemberUseCase extends Mock implements ConfirmMemberUseCase {}
 
 class MockRemoveMemberUseCase extends Mock implements RemoveMemberUseCase {}
 
-class MockWebSocketService extends Mock implements WebSocketService {}
+class MockNotifyMemberApprovalUseCase extends Mock
+    implements NotifyMemberApprovalUseCase {}
 
-class MockKeyManager extends Mock implements KeyManager {}
+class MockWebSocketService extends Mock implements WebSocketService {}
 
 void main() {
   late MockGroupRepository groupRepository;
   late MockConfirmMemberUseCase confirmMemberUseCase;
   late MockRemoveMemberUseCase removeMemberUseCase;
-  late MockWebSocketService webSocketService;
-  late MockKeyManager keyManager;
+  late MockNotifyMemberApprovalUseCase notifyUseCase;
 
   setUp(() {
     groupRepository = MockGroupRepository();
     confirmMemberUseCase = MockConfirmMemberUseCase();
     removeMemberUseCase = MockRemoveMemberUseCase();
-    webSocketService = MockWebSocketService();
-    keyManager = MockKeyManager();
+    notifyUseCase = MockNotifyMemberApprovalUseCase();
+
+    // NotifyMemberApprovalUseCase stubs
+    when(() => notifyUseCase.listenForJoinRequests())
+        .thenAnswer((_) => const Stream.empty());
+    when(() => notifyUseCase.connectWebSocket(groupId: any(named: 'groupId')))
+        .thenAnswer((_) async {});
+    when(() => notifyUseCase.disconnectWebSocket()).thenReturn(null);
 
     when(() => groupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
@@ -89,36 +93,6 @@ void main() {
       ),
     ).thenAnswer((_) async => const RemoveMemberResult.success());
 
-    // WebSocket mocks
-    when(
-      () => webSocketService.connectionStateStream,
-    ).thenAnswer((_) => const Stream.empty());
-    when(
-      () => webSocketService.connectionState,
-    ).thenReturn(WebSocketConnectionState.disconnected);
-    when(
-      () => webSocketService.eventStream,
-    ).thenAnswer((_) => const Stream.empty());
-    when(
-      () => webSocketService.connect(
-        groupId: any(named: 'groupId'),
-        deviceId: any(named: 'deviceId'),
-        signMessage: any(named: 'signMessage'),
-      ),
-    ).thenReturn(null);
-    when(() => webSocketService.disconnect()).thenReturn(null);
-    when(() => webSocketService.startLifecycleObservation()).thenReturn(null);
-    when(() => webSocketService.stopLifecycleObservation()).thenReturn(null);
-
-    // KeyManager mock
-    when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'test-device');
-    when(() => keyManager.signData(any())).thenAnswer(
-      (_) async => Signature(
-        [],
-        publicKey: SimplePublicKey([], type: KeyPairType.ed25519),
-      ),
-    );
-
     // Mock getGroupById for navigation to GroupManagementScreen after approve
     when(
       () => groupRepository.getGroupById(any()),
@@ -150,8 +124,7 @@ void main() {
     groupRepositoryProvider.overrideWithValue(groupRepository),
     confirmMemberUseCaseProvider.overrideWithValue(confirmMemberUseCase),
     removeMemberUseCaseProvider.overrideWithValue(removeMemberUseCase),
-    webSocketServiceProvider.overrideWithValue(webSocketService),
-    keyManagerProvider.overrideWithValue(keyManager),
+    notifyMemberApprovalUseCaseProvider.overrideWithValue(notifyUseCase),
   ];
 
   testWidgets('shows both approve and reject buttons', (tester) async {
