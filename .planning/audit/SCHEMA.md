@@ -177,6 +177,104 @@ When `id` is null on a raw shard (pre-merge), the `toJson()` serialization in `s
 
 ---
 
+## 9. Coverage Baseline Schema
+
+**Locked:** 2026-04-25
+**Phase 2**
+
+This section is the source-of-truth contract for the four `.planning/audit/coverage-*` artifacts emitted in Phase 2 and consumed by every fix phase (Phases 3–6) and the Phase-8 re-audit. The Dart code mirrors are [`scripts/coverage_baseline.dart`](../../scripts/coverage_baseline.dart) (producer) and [`scripts/coverage_gate.dart`](../../scripts/coverage_gate.dart) (consumer for fix-phase verify) — field names match 1:1 between this doc and those files.
+
+The four artifacts are emitted in a single pass by `coverage_baseline.dart` reading `coverage/lcov_clean.info` (the `coverde filter`-stripped output of `flutter test --coverage`). Phase 2 is decoupled from Phase 1's `issues.json` (no `issue_ids` cross-link, per D-12). Fix-phase planners join on `file_path` lazily.
+
+### 9.1 Common metadata block
+
+The two JSON artifacts (`coverage-baseline.json`, `files-needing-tests.json`) share a top-level metadata block. All keys are `snake_case`.
+
+| Field | Type | Required | Valid Values / Notes | Example |
+|-------|------|----------|----------------------|---------|
+| `generated_at` | string | required | ISO 8601 UTC timestamp. **Normalized by Phase-8 byte-compare** (D-12 idempotency carve-out). | `2026-04-25T15:30:00.000Z` |
+| `flutter_test_command` | string | required | The exact `flutter test` invocation used to produce the input lcov. | `flutter test --coverage` |
+| `lcov_source` | string | required | Repo-relative path to the input lcov consumed (default `coverage/lcov_clean.info`). | `coverage/lcov_clean.info` |
+| `threshold` | int | required | The percentage threshold below which a file enters `files-needing-tests`. Default 80; parameterized via `coverage_gate.dart --threshold N` (D-02). | `80` |
+| `total_files` | int | required | Count of non-generated source files in the input lcov (post-defense-in-depth filter). | `268` |
+| `files_below_threshold` | int | required | Count of records where `percentage < threshold`. | `87` |
+
+### 9.2 `coverage-baseline.txt`
+
+TSV. No header. One record per line. Columns separated by literal `\t` (tab). Trailing newline.
+
+Format: `<file_path>\t<lines_covered>/<lines_total>\t<percentage>`
+
+- `percentage` formatted via `.toStringAsFixed(2)` (e.g., `44.44`)
+- Records lex-sorted by `file_path` ASCENDING (D-10)
+- Generated files (`*.g.dart`, `*.freezed.dart`, `*.mocks.dart`, `lib/generated/**`) excluded — defense-in-depth even though `coverde filter` strips them upstream
+
+Example:
+```
+lib/core/theme/app_theme.dart	4/9	44.44
+lib/features/accounting/domain/models/category.dart	2/2	100.00
+lib/features/accounting/domain/models/transaction.dart	2/2	100.00
+```
+
+### 9.3 `coverage-baseline.json`
+
+2-space-indented JSON. `snake_case` keys throughout.
+
+Top-level shape: `{ ...metadata (§9.1), entries: [...] }`
+
+Per-entry shape:
+
+| Field | Type | Required | Valid Values / Notes | Example |
+|-------|------|----------|----------------------|---------|
+| `file_path` | string | required | Repo-relative source path. NEVER absolute. NEVER a generated-file pattern. | `lib/core/theme/app_theme.dart` |
+| `lines_covered` | int | required | Lines hit (LH from lcov, or count of `DA:line,hits` where hits > 0 in fallback path). | `4` |
+| `lines_total` | int | required | Lines instrumented (LF from lcov, or count of `DA:` lines in fallback path). | `9` |
+| `percentage` | number | required | `(lines_covered / lines_total) * 100`. Held as double internally; not pre-rounded. JSON serializer emits with default precision. | `44.44444444444444` |
+| `threshold_met` | bool | required | `percentage >= threshold` from metadata. | `false` |
+
+`entries` array lex-sorted by `file_path` ASCENDING.
+
+### 9.4 `files-needing-tests.txt`
+
+Filtered view of `coverage-baseline.txt`: bare `<file_path>` per line, only records where `percentage < threshold`. No header. Trailing newline. Lex-sorted.
+
+Example:
+```
+lib/core/initialization/app_initializer.dart
+lib/features/accounting/data/repositories/transaction_repository_impl.dart
+lib/features/family_sync/use_cases/sync_now_use_case.dart
+```
+
+Read directly by fix-phase planners during touched-files intersection (D-09).
+
+### 9.5 `files-needing-tests.json`
+
+Same top-level metadata as §9.1. Filtered `entries` array.
+
+Per-entry shape:
+
+| Field | Type | Required | Valid Values / Notes | Example |
+|-------|------|----------|----------------------|---------|
+| `file_path` | string | required | Repo-relative source path. | `lib/core/initialization/app_initializer.dart` |
+| `percentage` | number | required | Same as §9.3. | `42.10` |
+| `lines_below_threshold` | int | required | `lines_total - lines_covered`. The number of additional lines that must be hit to reach threshold (rough characterization-test sizing signal). | `19` |
+
+`entries` lex-sorted by `file_path` ASCENDING. Note that `lines_below_threshold` is a derived sizing signal — fix-phase planners use it to bucket characterization-test effort (small-N → quick wins; large-N → likely needs decomposition before tests can be written).
+
+### 9.6 Idempotency invariant (D-12)
+
+Re-running `scripts/coverage_baseline.dart` against the same `coverage/lcov_clean.info` produces byte-identical artifacts EXCEPT the `generated_at` metadata field in the two JSON outputs. Phase 8's re-audit byte-compares the new baseline against the Phase-2 baseline to prove the cleanup raised coverage; the byte-compare normalizes `generated_at` first.
+
+### 9.7 Decoupling from `issues.json` (D-12)
+
+The Phase-2 JSON artifacts do NOT carry `issue_ids` cross-references to `issues.json`. Phase 2 is concerned with coverage; Phase 1 is concerned with violations. Fix-phase planners join the two lazily on `file_path` — a one-line operation against existing artifacts. This decouples Phase 2's lifecycle from Phase 1's catalogue evolution.
+
+### 9.8 Frozen baseline (D-08)
+
+`coverage-baseline.{txt,json}` and `files-needing-tests.{txt,json}` are FROZEN at Phase 2 and regenerated only at Phase 8 (re-audit). No mid-initiative refresh. The Phase 2 lists are the canonical "before" image; the Phase 8 lists are the canonical "after" image; the diff is the empirical evidence that the cleanup raised coverage.
+
+---
+
 ## Files Referenced
 
 - `scripts/audit/finding.dart` — Dart code mirror; field names match this doc 1:1
@@ -184,3 +282,6 @@ When `id` is null on a raw shard (pre-merge), the `toJson()` serialization in `s
 - `.planning/codebase/STRUCTURE.md` — 5-layer architecture file layout encoded by `import_guard.yaml`
 - `analysis_options.yaml` — `analyzer.exclude` baseline that §7 extends with `.mocks.dart`
 - `CLAUDE.md` — "Common Pitfalls" list whose 13 categories the audit pipeline catches
+- `scripts/coverage_baseline.dart` — Producer of the four §9 artifacts (Phase 2)
+- `scripts/coverage_gate.dart` — Consumer of `lcov_clean.info` + `files-needing-tests.txt` (Phase 2; CI integration deferred to Phase 7/8 per D-06)
+- `scripts/coverage/lcov_parser.dart` — Shared lcov parser used by both
