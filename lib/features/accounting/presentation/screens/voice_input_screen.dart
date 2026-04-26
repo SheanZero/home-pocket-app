@@ -12,8 +12,8 @@ import '../../../../application/i18n/formatter_service.dart';
 import '../../../../application/voice/repository_providers.dart'
     show appSpeechRecognitionServiceProvider;
 import '../../../../application/voice/start_speech_recognition_use_case.dart';
-import '../../../settings/presentation/providers/locale_provider.dart';
-import '../../../settings/presentation/providers/settings_providers.dart';
+import '../../../settings/presentation/providers/state_locale.dart';
+import '../../../settings/presentation/providers/state_settings.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/voice_parse_result.dart';
 import '../providers/repository_providers.dart';

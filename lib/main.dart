@@ -21,8 +21,8 @@ import 'features/home/presentation/screens/main_shell_screen.dart';
 import 'features/profile/presentation/providers/user_profile_providers.dart';
 import 'features/profile/presentation/screens/profile_onboarding_screen.dart';
 import 'features/settings/domain/models/app_settings.dart';
-import 'features/settings/presentation/providers/locale_provider.dart';
-import 'features/settings/presentation/providers/settings_providers.dart';
+import 'features/settings/presentation/providers/state_locale.dart';
+import 'features/settings/presentation/providers/state_settings.dart';
 import 'generated/app_localizations.dart';
 import 'infrastructure/crypto/database/encrypted_database.dart';
 

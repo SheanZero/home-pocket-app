@@ -8,7 +8,7 @@ import '../../../../application/accounting/create_transaction_use_case.dart';
 import '../../../../features/dual_ledger/presentation/widgets/soul_celebration_overlay.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../application/accounting/category_localization_service.dart';
-import '../../../settings/presentation/providers/locale_provider.dart';
+import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/transaction.dart';
 import '../providers/repository_providers.dart';

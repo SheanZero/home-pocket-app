@@ -5,7 +5,7 @@ import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/voice_input_screen.dart';
-import 'package:home_pocket/features/settings/presentation/providers/settings_providers.dart';
+import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 
 import '../../../../../helpers/test_localizations.dart';

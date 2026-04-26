@@ -9,7 +9,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/dual_ledger/presentation/widgets/soul_celebration_overlay.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../application/i18n/formatter_service.dart';
-import '../../../settings/presentation/providers/locale_provider.dart';
+import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/transaction.dart';
 import '../providers/repository_providers.dart';

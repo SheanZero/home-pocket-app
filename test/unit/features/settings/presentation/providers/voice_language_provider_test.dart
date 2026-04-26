@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/features/settings/presentation/providers/settings_providers.dart';
+import 'package:home_pocket/features/settings/presentation/utils/voice_locale_helpers.dart';
 
 void main() {
   group('voiceLocaleIdProvider', () {

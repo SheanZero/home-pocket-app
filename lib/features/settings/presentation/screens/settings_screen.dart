@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../family_sync/presentation/widgets/family_sync_settings_section.dart';
 import '../../../profile/presentation/widgets/profile_section_card.dart';
-import '../providers/settings_providers.dart';
+import '../providers/state_settings.dart';
 import '../widgets/about_section.dart';
 import '../widgets/appearance_section.dart';
 import '../widgets/data_management_section.dart';
