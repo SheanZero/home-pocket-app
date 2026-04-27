@@ -57,7 +57,7 @@ Requirements for the cleanup initiative. Each maps to exactly one phase. All are
 - [x] **MED-04**: All three ARB files (`app_ja.arb`, `app_zh.arb`, `app_en.arb`) have key parity (same key set, no orphans on any side); `flutter gen-l10n` succeeds without warnings
 - [x] **MED-05**: Unused ARB keys are deleted only after the static-locale-map audit has been completed; intentional stubs (e.g., `ocrScan`, `ocrScanTitle`, `ocrHint`) are preserved with `@key` description comments
 - [ ] **MED-06**: All MOD-009 (deprecated i18n module) code references are deleted from `lib/`; deprecated documentation entries in `doc/arch/` are NOT touched (per PROJECT.md scope)
-- [ ] **MED-07**: All monetary-display widgets use `AppTextStyles.amountLarge/amountMedium/amountSmall`; widget tests verify `FontFeature.tabularFigures()` is preserved
+- [x] **MED-07**: All monetary-display widgets use `AppTextStyles.amountLarge/amountMedium/amountSmall`; widget tests verify `FontFeature.tabularFigures()` is preserved
 - [x] **MED-08**: Every file touched in this phase has ≥80% test coverage; `flutter analyze` 0; tests GREEN; behavior unchanged
 
 ### LOW-Severity Fixes (LOW)
@@ -163,7 +163,7 @@ Phase mapping populated by `gsd-roadmapper` during roadmap creation.
 | MED-04 | Phase 5 | Complete |
 | MED-05 | Phase 5 | Complete |
 | MED-06 | Phase 5 | Pending |
-| MED-07 | Phase 5 | Pending |
+| MED-07 | Phase 5 | Complete |
 | MED-08 | Phase 5 | Complete |
 | LOW-01 | Phase 6 | Pending |
 | LOW-02 | Phase 6 | Pending |
