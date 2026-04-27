@@ -73,6 +73,24 @@ void main() {
       },
     );
 
+    testWidgets('BudgetProgressList caps exceeded progress indicator at one', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _localizedApp(
+          locale: const Locale('en'),
+          child: const BudgetProgressList(progressList: [_exceededBudget]),
+        ),
+      );
+
+      expect(find.text('125.0%'), findsOneWidget);
+
+      final indicator = tester.widget<LinearProgressIndicator>(
+        find.byType(LinearProgressIndicator),
+      );
+      expect(indicator.value, 1.0);
+    });
+
     testWidgets(
       'CategoryBreakdownList renders localized English labels, formatted yen, and tabular amount styles',
       (tester) async {
@@ -204,6 +222,18 @@ const _budgetProgress = BudgetProgress(
   percentage: 50,
   status: BudgetStatus.safe,
   remainingAmount: 25000,
+);
+
+const _exceededBudget = BudgetProgress(
+  categoryId: 'food',
+  categoryName: 'Food',
+  icon: '🍱',
+  color: '#E85A4F',
+  budgetAmount: 10000,
+  spentAmount: 12500,
+  percentage: 125,
+  status: BudgetStatus.exceeded,
+  remainingAmount: -2500,
 );
 
 const _categoryFood = CategoryBreakdown(

@@ -113,7 +113,7 @@ class _BudgetProgressItem extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
-              value: (progress.percentage / 100).clamp(0.0, 1.5),
+              value: (progress.percentage / 100).clamp(0.0, 1.0),
               backgroundColor: Colors.grey[200],
               valueColor: AlwaysStoppedAnimation<Color>(_statusColor),
               minHeight: 8,
