@@ -3,7 +3,7 @@
 **更新日期:** 2026-02-03
 **版本:** 2.0 (新増国際化支持)
 
-> 注：BASIC-003 即原 MOD-014 i18n 模块（已于 2026-02-22 合并至 docs/arch/04-basic/）。
+> 注：BASIC-003 即原国际化模块（前称 MOD-014，已于 2026-02-22 合并至 docs/arch/04-basic/BASIC-003_I18N_Infrastructure.md）。
 
 ---
 
