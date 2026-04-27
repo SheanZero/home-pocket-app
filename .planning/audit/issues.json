@@ -12,7 +12,9 @@
       "suggested_fix": "See companion finding on lib/infrastructure/category/category_service.dart. Phase 6 fix.",
       "tool_source": "agent:duplication",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "5",
+      "closed_commit": "a66c625cd252705a4579c1728e992928370505d7"
     },
     {
       "id": "LV-001",
@@ -410,7 +412,9 @@
       "suggested_fix": "Rename one of the two to reflect its actual concern (e.g., CategoryLocaleFormatter vs CategoryClassifier), or consolidate. Phase 6 fix.",
       "tool_source": "agent:duplication",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "5",
+      "closed_commit": "a66c625cd252705a4579c1728e992928370505d7"
     }
   ]
 }
