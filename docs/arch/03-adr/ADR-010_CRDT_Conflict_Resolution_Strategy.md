@@ -1463,4 +1463,18 @@ class Transaction with _$Transaction {
 **文档状态:** ✅ 已接受
 **决策完成:** 2026-02-03
 **预计实施时间:** 4-5 周
+
+---
+
+## Update 2026-04-27: Cleanup Initiative Outcome
+
+**Cross-reference:** [ADR-011](./ADR-011_Codebase_Cleanup_Initiative_Outcome.md)
+
+Phase 3 centralization moved the file at line 37 of this ADR
+(`lib/features/accounting/data/repositories/transaction_repository_impl.dart`) to
+`lib/data/repositories/transaction_repository_impl.dart`. The line-37 reference is
+preserved as historical context per ADR append-only convention.
+
+The original decision body above is preserved verbatim per ADR append-only convention
+(`.claude/rules/arch.md:171-173`).
 **优先级:** P1（高优先级）
