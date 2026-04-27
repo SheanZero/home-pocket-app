@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../generated/app_localizations.dart';
 import '../../domain/models/month_comparison.dart';
 
 /// Card showing income/expense changes compared to previous month.
@@ -10,6 +11,8 @@ class MonthComparisonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = S.of(context);
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -21,9 +24,16 @@ class MonthComparisonCard extends StatelessWidget {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            _ChangeRow(label: 'Income', change: comparison.incomeChange),
+            _ChangeRow(
+              label: l10n.analyticsIncome,
+              change: comparison.incomeChange,
+            ),
             const SizedBox(height: 8),
-            _ChangeRow(label: 'Expenses', change: comparison.expenseChange),
+            _ChangeRow(
+              label: l10n.analyticsExpenses,
+              change: comparison.expenseChange,
+              isExpense: true,
+            ),
           ],
         ),
       ),
@@ -32,15 +42,20 @@ class MonthComparisonCard extends StatelessWidget {
 }
 
 class _ChangeRow extends StatelessWidget {
-  const _ChangeRow({required this.label, required this.change});
+  const _ChangeRow({
+    required this.label,
+    required this.change,
+    this.isExpense = false,
+  });
 
   final String label;
   final double change;
+  final bool isExpense;
 
   @override
   Widget build(BuildContext context) {
     final isPositive = change >= 0;
-    final color = label == 'Expenses'
+    final color = isExpense
         ? (isPositive ? Colors.red : Colors.green)
         : (isPositive ? Colors.green : Colors.red);
     final icon = isPositive ? Icons.arrow_upward : Icons.arrow_downward;

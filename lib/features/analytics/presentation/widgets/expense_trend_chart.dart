@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../application/i18n/formatter_service.dart';
+import '../../../../generated/app_localizations.dart';
 import '../../domain/models/expense_trend.dart';
 
 /// Line chart showing 6-month expense and income trend.
@@ -22,6 +24,9 @@ class ExpenseTrendChart extends StatelessWidget {
         .toList();
     final maxVal = allValues.isEmpty ? 1000 : allValues.reduce(max);
     final maxY = maxVal > 0 ? maxVal.toDouble() * 1.2 : 1000.0;
+    final l10n = S.of(context);
+    final locale = Localizations.localeOf(context);
+    const formatter = FormatterService();
 
     final expenseSpots = trendData.months.asMap().entries.map((entry) {
       return FlSpot(entry.key.toDouble(), entry.value.totalExpenses.toDouble());
@@ -39,14 +44,17 @@ class ExpenseTrendChart extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Text(
-                  '6-Month Trend',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.analyticsSixMonthTrend,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const Spacer(),
-                _LegendDot(color: Colors.red, label: 'Expenses'),
+                _LegendDot(color: Colors.red, label: l10n.analyticsExpenses),
                 const SizedBox(width: 12),
-                _LegendDot(color: Colors.green, label: 'Income'),
+                _LegendDot(color: Colors.green, label: l10n.analyticsIncome),
               ],
             ),
             const SizedBox(height: 16),
@@ -75,7 +83,7 @@ class ExpenseTrendChart extends StatelessWidget {
                           return Padding(
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(
-                              '${m.month}月',
+                              l10n.analyticsMonthNumberLabel(m.month),
                               style: const TextStyle(fontSize: 10),
                             ),
                           );
@@ -90,7 +98,7 @@ class ExpenseTrendChart extends StatelessWidget {
                         getTitlesWidget: (value, meta) {
                           if (value == 0) return const SizedBox.shrink();
                           return Text(
-                            _formatCompact(value.toInt()),
+                            formatter.formatCompact(value, locale),
                             style: const TextStyle(fontSize: 10),
                           );
                         },
@@ -135,16 +143,6 @@ class ExpenseTrendChart extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _formatCompact(int value) {
-    if (value >= 10000) {
-      return '${(value / 10000).toStringAsFixed(1)}万';
-    }
-    if (value >= 1000) {
-      return '${(value / 1000).toStringAsFixed(0)}k';
-    }
-    return '$value';
   }
 }
 

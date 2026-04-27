@@ -1,6 +1,10 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../application/i18n/formatter_service.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../generated/app_localizations.dart';
+
 /// Pie chart showing Survival vs Soul spending ratio.
 class LedgerRatioChart extends StatelessWidget {
   const LedgerRatioChart({
@@ -15,13 +19,14 @@ class LedgerRatioChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final total = survivalTotal + soulTotal;
+    final l10n = S.of(context);
     if (total == 0) {
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Center(
             child: Text(
-              'No ledger data',
+              l10n.analyticsNoLedgerData,
               style: TextStyle(color: Colors.grey[500]),
             ),
           ),
@@ -38,9 +43,9 @@ class LedgerRatioChart extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Survival vs Soul',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              l10n.analyticsSurvivalVsSoul,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Row(
@@ -86,13 +91,13 @@ class LedgerRatioChart extends StatelessWidget {
                   children: [
                     _LedgerLabel(
                       color: Colors.teal,
-                      label: 'Survival',
+                      label: l10n.survivalLedger,
                       amount: survivalTotal,
                     ),
                     const SizedBox(height: 8),
                     _LedgerLabel(
                       color: Colors.deepPurple,
-                      label: 'Soul',
+                      label: l10n.soulLedger,
                       amount: soulTotal,
                     ),
                   ],
@@ -119,6 +124,9 @@ class _LedgerLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context);
+    const formatter = FormatterService();
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -133,8 +141,8 @@ class _LedgerLabel extends StatelessWidget {
           children: [
             Text(label, style: const TextStyle(fontSize: 13)),
             Text(
-              '¥$amount',
-              style: TextStyle(
+              formatter.formatCurrency(amount, 'JPY', locale),
+              style: AppTextStyles.amountSmall.copyWith(
                 fontSize: 12,
                 color: Colors.grey[600],
                 fontWeight: FontWeight.w600,

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../application/i18n/formatter_service.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../generated/app_localizations.dart';
 import '../../domain/models/monthly_report.dart';
 
 /// 2x2 grid of summary cards: Income, Expenses, Savings, Savings Rate.
@@ -10,13 +13,15 @@ class SummaryCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = S.of(context);
+
     return Column(
       children: [
         Row(
           children: [
             Expanded(
               child: _SummaryCard(
-                title: 'Income',
+                title: l10n.analyticsIncome,
                 amount: report.totalIncome,
                 color: Colors.green,
                 icon: Icons.arrow_downward,
@@ -25,7 +30,7 @@ class SummaryCards extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: _SummaryCard(
-                title: 'Expenses',
+                title: l10n.analyticsExpenses,
                 amount: report.totalExpenses,
                 color: Colors.red,
                 icon: Icons.arrow_upward,
@@ -38,14 +43,19 @@ class SummaryCards extends StatelessWidget {
           children: [
             Expanded(
               child: _SummaryCard(
-                title: 'Savings',
+                title: l10n.analyticsSavings,
                 amount: report.savings,
                 color: report.savings >= 0 ? Colors.blue : Colors.orange,
                 icon: Icons.savings,
               ),
             ),
             const SizedBox(width: 12),
-            Expanded(child: _RateCard(rate: report.savingsRate)),
+            Expanded(
+              child: _RateCard(
+                title: l10n.analyticsSavingsRate,
+                rate: report.savingsRate,
+              ),
+            ),
           ],
         ),
       ],
@@ -68,6 +78,9 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context);
+    const formatter = FormatterService();
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -86,8 +99,8 @@ class _SummaryCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              '¥${_formatAmount(amount)}',
-              style: TextStyle(
+              formatter.formatCurrency(amount, 'JPY', locale),
+              style: AppTextStyles.amountMedium.copyWith(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: color,
@@ -98,21 +111,12 @@ class _SummaryCard extends StatelessWidget {
       ),
     );
   }
-
-  String _formatAmount(int amount) {
-    final abs = amount.abs().toString();
-    final prefix = amount < 0 ? '-' : '';
-    return prefix +
-        abs.replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (m) => '${m[1]},',
-        );
-  }
 }
 
 class _RateCard extends StatelessWidget {
-  const _RateCard({required this.rate});
+  const _RateCard({required this.title, required this.rate});
 
+  final String title;
   final double rate;
 
   @override
@@ -134,7 +138,7 @@ class _RateCard extends StatelessWidget {
                 Icon(Icons.percent, color: color, size: 20),
                 const SizedBox(width: 8),
                 Text(
-                  'Savings Rate',
+                  title,
                   style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
               ],

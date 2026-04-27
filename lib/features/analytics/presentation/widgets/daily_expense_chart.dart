@@ -3,6 +3,9 @@ import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../application/i18n/formatter_service.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../generated/app_localizations.dart';
 import '../../domain/models/daily_expense.dart';
 
 /// Bar chart showing daily expense amounts across the month.
@@ -19,6 +22,9 @@ class DailyExpenseChart extends StatelessWidget {
 
     final maxAmount = dailyExpenses.map((e) => e.amount).reduce(max);
     final maxY = maxAmount > 0 ? maxAmount.toDouble() * 1.2 : 1000.0;
+    final l10n = S.of(context);
+    final locale = Localizations.localeOf(context);
+    const formatter = FormatterService();
 
     return Card(
       child: Padding(
@@ -26,9 +32,9 @@ class DailyExpenseChart extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Daily Expenses',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              l10n.analyticsDailyExpenses,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -85,7 +91,7 @@ class DailyExpenseChart extends StatelessWidget {
                         getTitlesWidget: (value, meta) {
                           if (value == 0) return const SizedBox.shrink();
                           return Text(
-                            _formatCompact(value.toInt()),
+                            formatter.formatCompact(value, locale),
                             style: const TextStyle(fontSize: 10),
                           );
                         },
@@ -104,8 +110,12 @@ class DailyExpenseChart extends StatelessWidget {
                       getTooltipItem: (group, groupIndex, rod, rodIndex) {
                         final day = group.x + 1;
                         return BarTooltipItem(
-                          '$day日\n¥${rod.toY.toInt()}',
-                          const TextStyle(color: Colors.white, fontSize: 12),
+                          '${l10n.analyticsDayNumberLabel(day)}\n'
+                          '${formatter.formatCurrency(rod.toY, 'JPY', locale)}',
+                          AppTextStyles.amountSmall.copyWith(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
                         );
                       },
                     ),
@@ -117,15 +127,5 @@ class DailyExpenseChart extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _formatCompact(int value) {
-    if (value >= 10000) {
-      return '${(value / 10000).toStringAsFixed(1)}万';
-    }
-    if (value >= 1000) {
-      return '${(value / 1000).toStringAsFixed(0)}k';
-    }
-    return '$value';
   }
 }
