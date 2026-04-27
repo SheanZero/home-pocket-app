@@ -1090,4 +1090,77 @@ class SZh extends S {
 
   @override
   String get initFailedRetry => '重试';
+
+  @override
+  String get homeLedgersSection => '账本';
+
+  @override
+  String get homeRecentTransactions => '最近交易';
+
+  @override
+  String get homeViewAllTransactions => '查看全部';
+
+  @override
+  String get homeRecentSoulExpense => '最近灵魂支出';
+
+  @override
+  String get voiceMicrophonePermissionRequired => '请允许访问麦克风';
+
+  @override
+  String get analyticsBudgetProgress => '预算进度';
+
+  @override
+  String get analyticsNoBudgetsSet => '尚未设置预算';
+
+  @override
+  String get analyticsIncome => '收入';
+
+  @override
+  String get analyticsExpenses => '支出';
+
+  @override
+  String get analyticsSavings => '结余';
+
+  @override
+  String get analyticsSavingsRate => '结余率';
+
+  @override
+  String get analyticsCategoryDetails => '分类详情';
+
+  @override
+  String analyticsTransactionCount(int count) {
+    return '$count笔交易';
+  }
+
+  @override
+  String get analyticsDailyExpenses => '每日支出';
+
+  @override
+  String get analyticsNoLedgerData => '暂无账本数据';
+
+  @override
+  String get analyticsSurvivalVsSoul => '生存 vs 灵魂';
+
+  @override
+  String get analyticsSixMonthTrend => '六个月趋势';
+
+  @override
+  String analyticsDayNumberLabel(int day) {
+    return '$day日';
+  }
+
+  @override
+  String analyticsMonthNumberLabel(int month) {
+    return '$month月';
+  }
+
+  @override
+  String budgetRemainingAmount(String amount) {
+    return '剩余: $amount';
+  }
+
+  @override
+  String budgetExceededAmount(String amount) {
+    return '超出: $amount';
+  }
 }

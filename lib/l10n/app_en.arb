@@ -641,7 +641,7 @@
   },
   "ocrScan": "OCR",
   "@ocrScan": {
-    "description": "OCR scan mode tab label. Future OCR/MOD-005 stub."
+    "description": "Future OCR/MOD-005 stub"
   },
   "voiceInput": "Voice",
   "@voiceInput": {
@@ -697,11 +697,11 @@
   },
   "ocrScanTitle": "OCR Scan",
   "@ocrScanTitle": {
-    "description": "OCR scanner screen title. Future OCR/MOD-005 stub."
+    "description": "Future OCR/MOD-005 stub"
   },
   "ocrHint": "Place receipt in frame",
   "@ocrHint": {
-    "description": "OCR scanner hint text. Future OCR/MOD-005 stub."
+    "description": "Future OCR/MOD-005 stub"
   },
   "voiceRecognitionResult": "Recognition Result",
   "@voiceRecognitionResult": {
@@ -1357,6 +1357,115 @@
   "initFailedRetry": "Retry",
   "@initFailedRetry": {
     "description": "Button label on the AppInitializer failure fallback screen. Re-invokes AppInitializer.initialize()"
+  },
+  "homeLedgersSection": "Ledgers",
+  "@homeLedgersSection": {
+    "description": "Home section title for ledger cards"
+  },
+  "homeRecentTransactions": "Recent Transactions",
+  "@homeRecentTransactions": {
+    "description": "Home section title for recent transactions"
+  },
+  "homeViewAllTransactions": "View All",
+  "@homeViewAllTransactions": {
+    "description": "Button label to view all transactions from home"
+  },
+  "homeRecentSoulExpense": "Recent Soul Expense",
+  "@homeRecentSoulExpense": {
+    "description": "Soul card label for the most recent soul ledger expense"
+  },
+  "voiceMicrophonePermissionRequired": "Please allow microphone access",
+  "@voiceMicrophonePermissionRequired": {
+    "description": "Voice input permission message shown when microphone access is unavailable"
+  },
+  "analyticsBudgetProgress": "Budget Progress",
+  "@analyticsBudgetProgress": {
+    "description": "Analytics section title for budget progress"
+  },
+  "analyticsNoBudgetsSet": "No budgets set",
+  "@analyticsNoBudgetsSet": {
+    "description": "Analytics empty state shown when no budgets are configured"
+  },
+  "analyticsIncome": "Income",
+  "@analyticsIncome": {
+    "description": "Analytics income summary label"
+  },
+  "analyticsExpenses": "Expenses",
+  "@analyticsExpenses": {
+    "description": "Analytics expense summary label"
+  },
+  "analyticsSavings": "Savings",
+  "@analyticsSavings": {
+    "description": "Analytics savings summary label"
+  },
+  "analyticsSavingsRate": "Savings Rate",
+  "@analyticsSavingsRate": {
+    "description": "Analytics savings rate summary label"
+  },
+  "analyticsCategoryDetails": "Category Details",
+  "@analyticsCategoryDetails": {
+    "description": "Analytics category details section title"
+  },
+  "analyticsTransactionCount": "{count} transactions",
+  "@analyticsTransactionCount": {
+    "description": "Analytics transaction count label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsDailyExpenses": "Daily Expenses",
+  "@analyticsDailyExpenses": {
+    "description": "Analytics daily expenses chart title"
+  },
+  "analyticsNoLedgerData": "No ledger data",
+  "@analyticsNoLedgerData": {
+    "description": "Analytics empty state shown when ledger data is unavailable"
+  },
+  "analyticsSurvivalVsSoul": "Survival vs Soul",
+  "@analyticsSurvivalVsSoul": {
+    "description": "Analytics label comparing survival and soul ledger spending"
+  },
+  "analyticsSixMonthTrend": "Six-month Trend",
+  "@analyticsSixMonthTrend": {
+    "description": "Analytics six-month trend chart title"
+  },
+  "analyticsDayNumberLabel": "Day {day}",
+  "@analyticsDayNumberLabel": {
+    "description": "Analytics day number label",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsMonthNumberLabel": "Month {month}",
+  "@analyticsMonthNumberLabel": {
+    "description": "Analytics month number label",
+    "placeholders": {
+      "month": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetRemainingAmount": "Remaining: {amount}",
+  "@budgetRemainingAmount": {
+    "description": "Budget remaining amount label",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetExceededAmount": "Exceeded: {amount}",
+  "@budgetExceededAmount": {
+    "description": "Budget exceeded amount label",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "@@locale": "en"
 }

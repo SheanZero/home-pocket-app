@@ -641,7 +641,7 @@
   },
   "ocrScan": "OCR",
   "@ocrScan": {
-    "description": "OCR scan mode tab label. Future OCR/MOD-005 stub."
+    "description": "Future OCR/MOD-005 stub"
   },
   "voiceInput": "语音",
   "@voiceInput": {
@@ -697,11 +697,11 @@
   },
   "ocrScanTitle": "OCR扫描录入",
   "@ocrScanTitle": {
-    "description": "OCR scanner screen title. Future OCR/MOD-005 stub."
+    "description": "Future OCR/MOD-005 stub"
   },
   "ocrHint": "将票据完整放入框内",
   "@ocrHint": {
-    "description": "OCR scanner hint text. Future OCR/MOD-005 stub."
+    "description": "Future OCR/MOD-005 stub"
   },
   "voiceRecognitionResult": "识别结果",
   "@voiceRecognitionResult": {
@@ -1357,6 +1357,115 @@
   "initFailedRetry": "重试",
   "@initFailedRetry": {
     "description": "Button label on the AppInitializer failure fallback screen. Re-invokes AppInitializer.initialize()"
+  },
+  "homeLedgersSection": "账本",
+  "@homeLedgersSection": {
+    "description": "Home section title for ledger cards"
+  },
+  "homeRecentTransactions": "最近交易",
+  "@homeRecentTransactions": {
+    "description": "Home section title for recent transactions"
+  },
+  "homeViewAllTransactions": "查看全部",
+  "@homeViewAllTransactions": {
+    "description": "Button label to view all transactions from home"
+  },
+  "homeRecentSoulExpense": "最近灵魂支出",
+  "@homeRecentSoulExpense": {
+    "description": "Soul card label for the most recent soul ledger expense"
+  },
+  "voiceMicrophonePermissionRequired": "请允许访问麦克风",
+  "@voiceMicrophonePermissionRequired": {
+    "description": "Voice input permission message shown when microphone access is unavailable"
+  },
+  "analyticsBudgetProgress": "预算进度",
+  "@analyticsBudgetProgress": {
+    "description": "Analytics section title for budget progress"
+  },
+  "analyticsNoBudgetsSet": "尚未设置预算",
+  "@analyticsNoBudgetsSet": {
+    "description": "Analytics empty state shown when no budgets are configured"
+  },
+  "analyticsIncome": "收入",
+  "@analyticsIncome": {
+    "description": "Analytics income summary label"
+  },
+  "analyticsExpenses": "支出",
+  "@analyticsExpenses": {
+    "description": "Analytics expense summary label"
+  },
+  "analyticsSavings": "结余",
+  "@analyticsSavings": {
+    "description": "Analytics savings summary label"
+  },
+  "analyticsSavingsRate": "结余率",
+  "@analyticsSavingsRate": {
+    "description": "Analytics savings rate summary label"
+  },
+  "analyticsCategoryDetails": "分类详情",
+  "@analyticsCategoryDetails": {
+    "description": "Analytics category details section title"
+  },
+  "analyticsTransactionCount": "{count}笔交易",
+  "@analyticsTransactionCount": {
+    "description": "Analytics transaction count label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsDailyExpenses": "每日支出",
+  "@analyticsDailyExpenses": {
+    "description": "Analytics daily expenses chart title"
+  },
+  "analyticsNoLedgerData": "暂无账本数据",
+  "@analyticsNoLedgerData": {
+    "description": "Analytics empty state shown when ledger data is unavailable"
+  },
+  "analyticsSurvivalVsSoul": "生存 vs 灵魂",
+  "@analyticsSurvivalVsSoul": {
+    "description": "Analytics label comparing survival and soul ledger spending"
+  },
+  "analyticsSixMonthTrend": "六个月趋势",
+  "@analyticsSixMonthTrend": {
+    "description": "Analytics six-month trend chart title"
+  },
+  "analyticsDayNumberLabel": "{day}日",
+  "@analyticsDayNumberLabel": {
+    "description": "Analytics day number label",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsMonthNumberLabel": "{month}月",
+  "@analyticsMonthNumberLabel": {
+    "description": "Analytics month number label",
+    "placeholders": {
+      "month": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetRemainingAmount": "剩余: {amount}",
+  "@budgetRemainingAmount": {
+    "description": "Budget remaining amount label",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetExceededAmount": "超出: {amount}",
+  "@budgetExceededAmount": {
+    "description": "Budget exceeded amount label",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "@@locale": "zh"
 }

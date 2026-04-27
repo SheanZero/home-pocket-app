@@ -641,7 +641,7 @@
   },
   "ocrScan": "OCR",
   "@ocrScan": {
-    "description": "OCR scan mode tab label. Future OCR/MOD-005 stub."
+    "description": "Future OCR/MOD-005 stub"
   },
   "voiceInput": "音声",
   "@voiceInput": {
@@ -697,11 +697,11 @@
   },
   "ocrScanTitle": "OCRスキャン入力",
   "@ocrScanTitle": {
-    "description": "OCR scanner screen title. Future OCR/MOD-005 stub."
+    "description": "Future OCR/MOD-005 stub"
   },
   "ocrHint": "レシートを枠内に収めてください",
   "@ocrHint": {
-    "description": "OCR scanner hint text. Future OCR/MOD-005 stub."
+    "description": "Future OCR/MOD-005 stub"
   },
   "voiceRecognitionResult": "認識結果",
   "@voiceRecognitionResult": {
@@ -1357,6 +1357,115 @@
   "initFailedRetry": "再試行",
   "@initFailedRetry": {
     "description": "Button label on the AppInitializer failure fallback screen. Re-invokes AppInitializer.initialize()"
+  },
+  "homeLedgersSection": "帳簿",
+  "@homeLedgersSection": {
+    "description": "Home section title for ledger cards"
+  },
+  "homeRecentTransactions": "最近の取引",
+  "@homeRecentTransactions": {
+    "description": "Home section title for recent transactions"
+  },
+  "homeViewAllTransactions": "すべて見る",
+  "@homeViewAllTransactions": {
+    "description": "Button label to view all transactions from home"
+  },
+  "homeRecentSoulExpense": "最近の魂支出",
+  "@homeRecentSoulExpense": {
+    "description": "Soul card label for the most recent soul ledger expense"
+  },
+  "voiceMicrophonePermissionRequired": "マイクへのアクセスを許可してください",
+  "@voiceMicrophonePermissionRequired": {
+    "description": "Voice input permission message shown when microphone access is unavailable"
+  },
+  "analyticsBudgetProgress": "予算の進捗",
+  "@analyticsBudgetProgress": {
+    "description": "Analytics section title for budget progress"
+  },
+  "analyticsNoBudgetsSet": "予算が設定されていません",
+  "@analyticsNoBudgetsSet": {
+    "description": "Analytics empty state shown when no budgets are configured"
+  },
+  "analyticsIncome": "収入",
+  "@analyticsIncome": {
+    "description": "Analytics income summary label"
+  },
+  "analyticsExpenses": "支出",
+  "@analyticsExpenses": {
+    "description": "Analytics expense summary label"
+  },
+  "analyticsSavings": "貯蓄",
+  "@analyticsSavings": {
+    "description": "Analytics savings summary label"
+  },
+  "analyticsSavingsRate": "貯蓄率",
+  "@analyticsSavingsRate": {
+    "description": "Analytics savings rate summary label"
+  },
+  "analyticsCategoryDetails": "カテゴリ詳細",
+  "@analyticsCategoryDetails": {
+    "description": "Analytics category details section title"
+  },
+  "analyticsTransactionCount": "{count}件の取引",
+  "@analyticsTransactionCount": {
+    "description": "Analytics transaction count label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsDailyExpenses": "日別支出",
+  "@analyticsDailyExpenses": {
+    "description": "Analytics daily expenses chart title"
+  },
+  "analyticsNoLedgerData": "帳簿データがありません",
+  "@analyticsNoLedgerData": {
+    "description": "Analytics empty state shown when ledger data is unavailable"
+  },
+  "analyticsSurvivalVsSoul": "生存 vs 魂",
+  "@analyticsSurvivalVsSoul": {
+    "description": "Analytics label comparing survival and soul ledger spending"
+  },
+  "analyticsSixMonthTrend": "6か月推移",
+  "@analyticsSixMonthTrend": {
+    "description": "Analytics six-month trend chart title"
+  },
+  "analyticsDayNumberLabel": "{day}日",
+  "@analyticsDayNumberLabel": {
+    "description": "Analytics day number label",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsMonthNumberLabel": "{month}月",
+  "@analyticsMonthNumberLabel": {
+    "description": "Analytics month number label",
+    "placeholders": {
+      "month": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetRemainingAmount": "残り: {amount}",
+  "@budgetRemainingAmount": {
+    "description": "Budget remaining amount label",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetExceededAmount": "超過: {amount}",
+  "@budgetExceededAmount": {
+    "description": "Budget exceeded amount label",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "@@locale": "ja"
 }

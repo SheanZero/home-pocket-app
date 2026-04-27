@@ -1093,4 +1093,77 @@ class SJa extends S {
 
   @override
   String get initFailedRetry => '再試行';
+
+  @override
+  String get homeLedgersSection => '帳簿';
+
+  @override
+  String get homeRecentTransactions => '最近の取引';
+
+  @override
+  String get homeViewAllTransactions => 'すべて見る';
+
+  @override
+  String get homeRecentSoulExpense => '最近の魂支出';
+
+  @override
+  String get voiceMicrophonePermissionRequired => 'マイクへのアクセスを許可してください';
+
+  @override
+  String get analyticsBudgetProgress => '予算の進捗';
+
+  @override
+  String get analyticsNoBudgetsSet => '予算が設定されていません';
+
+  @override
+  String get analyticsIncome => '収入';
+
+  @override
+  String get analyticsExpenses => '支出';
+
+  @override
+  String get analyticsSavings => '貯蓄';
+
+  @override
+  String get analyticsSavingsRate => '貯蓄率';
+
+  @override
+  String get analyticsCategoryDetails => 'カテゴリ詳細';
+
+  @override
+  String analyticsTransactionCount(int count) {
+    return '$count件の取引';
+  }
+
+  @override
+  String get analyticsDailyExpenses => '日別支出';
+
+  @override
+  String get analyticsNoLedgerData => '帳簿データがありません';
+
+  @override
+  String get analyticsSurvivalVsSoul => '生存 vs 魂';
+
+  @override
+  String get analyticsSixMonthTrend => '6か月推移';
+
+  @override
+  String analyticsDayNumberLabel(int day) {
+    return '$day日';
+  }
+
+  @override
+  String analyticsMonthNumberLabel(int month) {
+    return '$month月';
+  }
+
+  @override
+  String budgetRemainingAmount(String amount) {
+    return '残り: $amount';
+  }
+
+  @override
+  String budgetExceededAmount(String amount) {
+    return '超過: $amount';
+  }
 }

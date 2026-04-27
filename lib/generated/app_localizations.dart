@@ -1065,7 +1065,7 @@ abstract class S {
   /// **'Manual'**
   String get manualInput;
 
-  /// OCR scan mode tab label. Future OCR/MOD-005 stub.
+  /// Future OCR/MOD-005 stub
   ///
   /// In en, this message translates to:
   /// **'OCR'**
@@ -1149,13 +1149,13 @@ abstract class S {
   /// **'Add photo'**
   String get addPhoto;
 
-  /// OCR scanner screen title. Future OCR/MOD-005 stub.
+  /// Future OCR/MOD-005 stub
   ///
   /// In en, this message translates to:
   /// **'OCR Scan'**
   String get ocrScanTitle;
 
-  /// OCR scanner hint text. Future OCR/MOD-005 stub.
+  /// Future OCR/MOD-005 stub
   ///
   /// In en, this message translates to:
   /// **'Place receipt in frame'**
@@ -2144,6 +2144,132 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Retry'**
   String get initFailedRetry;
+
+  /// Home section title for ledger cards
+  ///
+  /// In en, this message translates to:
+  /// **'Ledgers'**
+  String get homeLedgersSection;
+
+  /// Home section title for recent transactions
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Transactions'**
+  String get homeRecentTransactions;
+
+  /// Button label to view all transactions from home
+  ///
+  /// In en, this message translates to:
+  /// **'View All'**
+  String get homeViewAllTransactions;
+
+  /// Soul card label for the most recent soul ledger expense
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Soul Expense'**
+  String get homeRecentSoulExpense;
+
+  /// Voice input permission message shown when microphone access is unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'Please allow microphone access'**
+  String get voiceMicrophonePermissionRequired;
+
+  /// Analytics section title for budget progress
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Progress'**
+  String get analyticsBudgetProgress;
+
+  /// Analytics empty state shown when no budgets are configured
+  ///
+  /// In en, this message translates to:
+  /// **'No budgets set'**
+  String get analyticsNoBudgetsSet;
+
+  /// Analytics income summary label
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get analyticsIncome;
+
+  /// Analytics expense summary label
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get analyticsExpenses;
+
+  /// Analytics savings summary label
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get analyticsSavings;
+
+  /// Analytics savings rate summary label
+  ///
+  /// In en, this message translates to:
+  /// **'Savings Rate'**
+  String get analyticsSavingsRate;
+
+  /// Analytics category details section title
+  ///
+  /// In en, this message translates to:
+  /// **'Category Details'**
+  String get analyticsCategoryDetails;
+
+  /// Analytics transaction count label
+  ///
+  /// In en, this message translates to:
+  /// **'{count} transactions'**
+  String analyticsTransactionCount(int count);
+
+  /// Analytics daily expenses chart title
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Expenses'**
+  String get analyticsDailyExpenses;
+
+  /// Analytics empty state shown when ledger data is unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'No ledger data'**
+  String get analyticsNoLedgerData;
+
+  /// Analytics label comparing survival and soul ledger spending
+  ///
+  /// In en, this message translates to:
+  /// **'Survival vs Soul'**
+  String get analyticsSurvivalVsSoul;
+
+  /// Analytics six-month trend chart title
+  ///
+  /// In en, this message translates to:
+  /// **'Six-month Trend'**
+  String get analyticsSixMonthTrend;
+
+  /// Analytics day number label
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day}'**
+  String analyticsDayNumberLabel(int day);
+
+  /// Analytics month number label
+  ///
+  /// In en, this message translates to:
+  /// **'Month {month}'**
+  String analyticsMonthNumberLabel(int month);
+
+  /// Budget remaining amount label
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining: {amount}'**
+  String budgetRemainingAmount(String amount);
+
+  /// Budget exceeded amount label
+  ///
+  /// In en, this message translates to:
+  /// **'Exceeded: {amount}'**
+  String budgetExceededAmount(String amount);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

@@ -1102,4 +1102,78 @@ class SEn extends S {
 
   @override
   String get initFailedRetry => 'Retry';
+
+  @override
+  String get homeLedgersSection => 'Ledgers';
+
+  @override
+  String get homeRecentTransactions => 'Recent Transactions';
+
+  @override
+  String get homeViewAllTransactions => 'View All';
+
+  @override
+  String get homeRecentSoulExpense => 'Recent Soul Expense';
+
+  @override
+  String get voiceMicrophonePermissionRequired =>
+      'Please allow microphone access';
+
+  @override
+  String get analyticsBudgetProgress => 'Budget Progress';
+
+  @override
+  String get analyticsNoBudgetsSet => 'No budgets set';
+
+  @override
+  String get analyticsIncome => 'Income';
+
+  @override
+  String get analyticsExpenses => 'Expenses';
+
+  @override
+  String get analyticsSavings => 'Savings';
+
+  @override
+  String get analyticsSavingsRate => 'Savings Rate';
+
+  @override
+  String get analyticsCategoryDetails => 'Category Details';
+
+  @override
+  String analyticsTransactionCount(int count) {
+    return '$count transactions';
+  }
+
+  @override
+  String get analyticsDailyExpenses => 'Daily Expenses';
+
+  @override
+  String get analyticsNoLedgerData => 'No ledger data';
+
+  @override
+  String get analyticsSurvivalVsSoul => 'Survival vs Soul';
+
+  @override
+  String get analyticsSixMonthTrend => 'Six-month Trend';
+
+  @override
+  String analyticsDayNumberLabel(int day) {
+    return 'Day $day';
+  }
+
+  @override
+  String analyticsMonthNumberLabel(int month) {
+    return 'Month $month';
+  }
+
+  @override
+  String budgetRemainingAmount(String amount) {
+    return 'Remaining: $amount';
+  }
+
+  @override
+  String budgetExceededAmount(String amount) {
+    return 'Exceeded: $amount';
+  }
 }
