@@ -629,4 +629,24 @@ void main() {
 
 **文档维护者:** 技术架构团队
 **审核者:** CTO, 安全负责人
+
+---
+
+## Update 2026-04-27: Cleanup Initiative Outcome
+
+**Cross-reference:** [ADR-011](./ADR-011_Codebase_Cleanup_Initiative_Outcome.md)
+
+Phases 3–6 of the codebase cleanup initiative changed how this decision is enforced
+in production:
+
+- `sqlite3_flutter_libs` is now actively rejected by CI gate AUDIT-09
+  (`.github/workflows/audit.yml:69-75`) and by `lib/import_guard.yaml:6`
+  (`package:sqlite3_flutter_libs/**` deny rule).
+- Only `sqlcipher_flutter_libs` is permitted; the original ADR-002 dual-listing of
+  both libraries (lines 52, 387) is **historical context only** — the SQLCipher
+  conflict described in those sections is now an active CI gate rather than a
+  reviewer-discretion concern.
+
+The original decision body above is preserved verbatim per ADR append-only convention
+(`.claude/rules/arch.md:171-173`).
 **下次Review日期:** 2026-08-03
