@@ -58,6 +58,7 @@ A focused, audit-driven refactor of the Home Pocket (まもる家計簿) Flutter
 
 - **Codebase maturity:** Home Pocket is in active development at v0.1.0 (Phase 1 — Infrastructure). The codebase has grown rapidly across multiple feature areas (accounting, family sync, voice, analytics, settings, profile) and accumulated the typical entropy of fast greenfield work
 - **Codebase map exists:** `.planning/codebase/` was generated 2026-04-25 (`/gsd-map-codebase`). Contents: ARCHITECTURE.md, STACK.md, STRUCTURE.md, CONVENTIONS.md, INTEGRATIONS.md, TESTING.md, CONCERNS.md. These are the canonical "current state" reference for audit and planning
+- **Current state:** Phase 5 (MEDIUM Fixes) completed on 2026-04-27; MEDIUM audit findings are closed, ARB/CJK/MOD-009 guardrails are in place, and Phase 6 (LOW Fixes) is next
 - **CLAUDE.md "Common Pitfalls" list:** The project's `CLAUDE.md` already enumerates 13 known pitfalls (don't duplicate repository providers, don't violate layer dependencies, don't mutate, etc.) — these are exactly the categories this initiative will systematically eliminate
 - **Known deprecated module:** MOD-009 i18n was deprecated in favor of MOD-014. Code references to MOD-009 should be removed as part of this initiative
 - **Tech stack:** Flutter, Riverpod 2.4+ (`@riverpod` code-gen), Freezed, Drift + SQLCipher, GoRouter, flutter_localizations (intl 0.20.2 pinned)
@@ -86,6 +87,7 @@ A focused, audit-driven refactor of the Home Pocket (まもる家計簿) Flutter
 | ≥80% coverage on refactored files | Without a test net, refactor-induced regressions become silent; CLAUDE.md already mandates this for the project | — Pending |
 | New feature work paused | Prevents conflicts and ensures the cleanup actually completes instead of stalling at 60% | — Pending |
 | Delete deprecated code (e.g., MOD-009 references) | Deprecated code is dead weight that gets copy-pasted into new modules; remove now | — Pending |
+| Phase 5 MEDIUM guardrails | MEDIUM cleanup needs automated regression guards, not just one-time edits | Completed 2026-04-27: service-name collision, ARB parity, hardcoded-CJK, MOD-009, and MEDIUM-closure scanners now gate regressions |
 | Centralized doc sweep (not per-phase) | Doc churn during refactor is wasted effort; one sweep at the end aligns docs to final state | — Pending |
 | Audit re-run as final gate (zero violations) | Without a programmatic exit criterion, "done" becomes negotiable and the initiative drags | — Pending |
 
@@ -107,4 +109,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-26 after Phase 2 (Coverage Baseline) completion — frozen baseline at `.planning/audit/coverage-baseline.{txt,json}` (234 files, 102 below 80%); REPO-LOCK window now operationally active until Phase 6 close*
+*Last updated: 2026-04-27 after Phase 5 (MEDIUM Fixes) completion — MEDIUM audit findings closed and Phase 6 (LOW Fixes) is next*

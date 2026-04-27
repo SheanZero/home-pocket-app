@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: Coverage Baseline** - Snapshot pre-refactor per-file coverage; produce the list of files needing characterization tests before fix phases begin (parallelizable with Phase 1)
 - [x] **Phase 3: CRITICAL Fixes** - Eliminate all CRITICAL-severity findings (layer violations, UnimplementedError runtime failures); every touched file reaches ≥80% coverage — COMPLETED 2026-04-26
 - [x] **Phase 4: HIGH Fixes** - Eliminate all HIGH-severity findings (provider hygiene, architectural rule violations, deprecated service wiring); every touched file reaches ≥80% coverage — COMPLETED 2026-04-27
-- [ ] **Phase 5: MEDIUM Fixes** - Eliminate all MEDIUM-severity findings (dead code, redundancy, i18n violations, theme token debt); every touched file reaches ≥80% coverage
+- [x] **Phase 5: MEDIUM Fixes** - Eliminate all MEDIUM-severity findings (dead code, redundancy, i18n violations, theme token debt); every touched file reaches ≥80% coverage — COMPLETED 2026-04-27
 - [ ] **Phase 6: LOW Fixes** - Eliminate all LOW-severity findings (unused members, stale suppression directives, Drift index additions, debug logging); every touched file reaches ≥80% coverage
 - [ ] **Phase 7: Documentation Sweep** - Centralized post-refactor update of all ARCH/MOD/ADR docs and CLAUDE.md to match the cleaned codebase
 - [ ] **Phase 8: Re-Audit + Exit Verification** - Re-run full audit pipeline; confirm zero open findings across all four categories and all CI gates pass simultaneously
