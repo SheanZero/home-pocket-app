@@ -263,15 +263,28 @@ Always check max number before creating, use next sequential, update INDEX.md. S
 ## Common Pitfalls
 
 1. Don't modify generated files (`.g.dart`, `.freezed.dart`)
+   *[Partially enforced — AUDIT-10 catches stale committed files; hand-edits matching generator output go undetected]*
 2. Don't violate layer dependencies (Domain must not import Data)
+   *[Structurally enforced — import_guard via custom_lint + arch test domain_import_rules_test.dart]*
 3. Don't skip code generation after modifying annotated classes
+   *[Structurally enforced — AUDIT-10 CI guardrail blocks PRs with stale generated files]*
 4. Don't mutate objects — always use `copyWith`
+   *[Manually-checked only — freezed enforces it on @freezed classes; general mutation undetected]*
 5. Don't use `intl` version other than 0.20.2 (pinned by flutter_localizations)
+   *[Structurally enforced — exact pin in pubspec.yaml line 18]*
 6. Don't add `sqlite3_flutter_libs` (use only `sqlcipher_flutter_libs`)
+   *[Structurally enforced — import_guard deny rule + AUDIT-09 CI guardrail]*
 7. Don't modify Podfile `post_install` without preserving EXCLUDED_ARCHS fix
+   *[Manually-checked only — no Podfile lint; relies on reviewer + iOS build verification]*
 8. Don't commit with analyzer warnings
+   *[Structurally enforced — flutter analyze CI step (audit.yml line 34)]*
 9. Don't hardcode widget parameter defaults — use nullable + provider fallback
+   *[Manually-checked only — no automated detection]*
 10. Don't duplicate repository provider definitions
+   *[Structurally enforced — arch test provider_graph_hygiene_test.dart + riverpod_lint]*
 11. Don't use wrong Drift index syntax — use `TableIndex` with `{#column}`
+   *[Manually-checked only — Drift compiler does not enforce naming or symbol-syntax conventions]*
 12. Don't skip AppInitializer — initialize core services before `runApp()`
+   *[Partially enforced — provider_graph_hygiene_test.dart catches UnimplementedError providers; "forgot to call initialize()" is manual]*
 13. Don't forget to regenerate code after merge/pull
+   *[Structurally enforced — AUDIT-10 CI guardrail catches stale generated files post-merge]*
