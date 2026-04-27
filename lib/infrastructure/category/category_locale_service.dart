@@ -8,7 +8,7 @@ import 'dart:ui';
 /// lookup). Custom (non-system) category names pass through unchanged.
 ///
 /// Translations sourced from BASIC-004 PRD §10.
-abstract final class CategoryService {
+abstract final class CategoryLocaleService {
   /// Converts a system category ID (e.g. `cat_food`) to its name key
   /// (e.g. `category_food`) and resolves the localized display name.
   ///
