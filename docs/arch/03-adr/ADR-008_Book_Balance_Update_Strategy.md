@@ -1185,4 +1185,21 @@ class CachedBookRepository implements BookRepository {
 
 **决策状态:** ✅ 已接受
 **待办事项:** 按照实施计划执行（预计 4 周完成）
+
+---
+
+## Update 2026-04-27: Cleanup Initiative Outcome
+
+**Cross-reference:** [ADR-011](./ADR-011_Codebase_Cleanup_Initiative_Outcome.md)
+
+Phase 3 centralization moved repository implementations from
+`lib/features/accounting/data/repositories/` to `lib/data/repositories/`. The code
+samples in this ADR (lines ~832, ~848) still show the pre-cleanup layout; the
+post-cleanup canonical location is:
+- Source: `lib/data/repositories/transaction_repository_impl.dart`
+- Test: `test/unit/data/repositories/transaction_repository_impl_test.dart` (verify
+  via `find test -name 'transaction_repository_impl_test.dart'` if path differs)
+
+The original decision body above is preserved verbatim per ADR append-only convention
+(`.claude/rules/arch.md:171-173`).
 **下次审查:** 实施完成后进行效果评估
