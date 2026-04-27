@@ -220,9 +220,11 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
+      final l10n = S.of(tester.element(find.byType(HomeScreen)));
+
       expect(find.byType(SectionDivider), findsNWidgets(2));
-      expect(find.text('今月の支出'), findsOneWidget);
-      expect(find.text('帳 本'), findsOneWidget);
+      expect(find.text(l10n.homeMonthlyExpense), findsOneWidget);
+      expect(find.text(l10n.homeLedgersSection), findsOneWidget);
     });
 
     testWidgets('renders MonthOverviewCard', (tester) async {
@@ -250,8 +252,10 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.text('最近の取引'), findsOneWidget);
-      expect(find.text('すべて見る'), findsOneWidget);
+      final l10n = S.of(tester.element(find.byType(HomeScreen)));
+
+      expect(find.text(l10n.homeRecentTransactions), findsOneWidget);
+      expect(find.text(l10n.homeViewAllTransactions), findsOneWidget);
     });
   });
 
@@ -260,7 +264,9 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.text('取引がまだありません'), findsOneWidget);
+      final l10n = S.of(tester.element(find.byType(HomeScreen)));
+
+      expect(find.text(l10n.noTransactionsYet), findsOneWidget);
       expect(find.byType(TransactionListCard), findsNothing);
     });
 
@@ -378,8 +384,10 @@ void main() {
       await tester.pumpWidget(buildSubject(report: _reportWithData));
       await tester.pumpAndSettle();
 
-      expect(find.text('生存帳本'), findsOneWidget);
-      expect(find.text('灵魂帳本'), findsOneWidget);
+      final l10n = S.of(tester.element(find.byType(HomeScreen)));
+
+      expect(find.text(l10n.survivalLedger), findsOneWidget);
+      expect(find.text(l10n.soulLedger), findsOneWidget);
       expect(find.text('共有帳本'), findsNothing);
     });
 
@@ -413,8 +421,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('生存帳本'), findsOneWidget);
-      expect(find.text('灵魂帳本'), findsOneWidget);
+      final l10n = S.of(tester.element(find.byType(HomeScreen)));
+
+      expect(find.text(l10n.survivalLedger), findsOneWidget);
+      expect(find.text(l10n.soulLedger), findsOneWidget);
       expect(find.text('田中の帳本'), findsOneWidget);
       expect(find.text('共有帳本'), findsNothing);
     });
