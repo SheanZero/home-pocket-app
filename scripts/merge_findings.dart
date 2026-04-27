@@ -20,6 +20,7 @@ bool _isGenerated(String path) =>
     _generatedFileGlobs.any(path.endsWith) || path.contains('lib/generated/');
 
 Future<void> main(List<String> args) async {
+  final existingLifecycle = await _readExistingLifecycle();
   final shards = <Finding>[];
   for (final dir in const ['shards', 'agent-shards']) {
     final shardDir = Directory('.planning/audit/$dir');
@@ -83,6 +84,7 @@ Future<void> main(List<String> args) async {
   final stamped = sorted.map((f) {
     final prefix = _categoryPrefix[f.category]!;
     final n = (counters[prefix] = (counters[prefix] ?? 0) + 1);
+    final previous = existingLifecycle[_lifecycleKey(f)];
     return Finding(
       id: '$prefix-${n.toString().padLeft(3, '0')}',
       category: f.category,
@@ -95,9 +97,9 @@ Future<void> main(List<String> args) async {
       suggestedFix: f.suggestedFix,
       toolSource: f.toolSource,
       confidence: f.confidence,
-      status: f.status,
-      closedInPhase: f.closedInPhase,
-      closedCommit: f.closedCommit,
+      status: previous?.status ?? f.status,
+      closedInPhase: previous?.closedInPhase ?? f.closedInPhase,
+      closedCommit: previous?.closedCommit ?? f.closedCommit,
     );
   }).toList();
 
@@ -118,6 +120,38 @@ Future<void> main(List<String> args) async {
 
   print('[audit:merge] wrote ${stamped.length} findings to $issuesPath');
 }
+
+Future<Map<String, Finding>> _readExistingLifecycle() async {
+  final file = File('.planning/audit/issues.json');
+  if (!file.existsSync()) return const {};
+
+  try {
+    final decoded =
+        jsonDecode(await file.readAsString()) as Map<String, dynamic>;
+    final findings = decoded['findings'];
+    if (findings is! List) return const {};
+
+    return {
+      for (final entry in findings.whereType<Map>())
+        if (_hasLifecycle(entry))
+          _lifecycleKey(Finding.fromJson(entry.cast<String, dynamic>())):
+              Finding.fromJson(entry.cast<String, dynamic>()),
+    };
+  } catch (e) {
+    stderr.writeln(
+      '[audit:merge] WARNING: failed to read existing lifecycle metadata: $e',
+    );
+    return const {};
+  }
+}
+
+bool _hasLifecycle(Map<dynamic, dynamic> entry) =>
+    entry['status'] == 'closed' ||
+    entry['closed_in_phase'] != null ||
+    entry['closed_commit'] != null;
+
+String _lifecycleKey(Finding finding) =>
+    '${finding.category}|${finding.filePath}|${finding.lineStart}|${finding.description}';
 
 bool _isPreferred(Finding a, {required Finding over}) {
   // Higher-confidence wins; tie-broken by preferring tool_source over agent:*

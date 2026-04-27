@@ -287,5 +287,43 @@ void main() {
         expect(findings.first['id'], equals('LV-001'));
       },
     );
+
+    test(
+      'preserves closed lifecycle metadata across shard regeneration',
+      () async {
+        final original = _f(
+          filePath: 'lib/closed.dart',
+          line: 12,
+          description: 'previously closed',
+        );
+        File('${shardRoot.path}/issues.json').writeAsStringSync(
+          jsonEncode({
+            'findings': [
+              {
+                ...original.toJson(),
+                'id': 'LV-001',
+                'status': 'closed',
+                'closed_in_phase': 3,
+                'closed_commit': 'abc123',
+              },
+            ],
+          }),
+        );
+        File(
+          '${shardRoot.path}/shards/layer.json',
+        ).writeAsStringSync(jsonEncode(_shardWith([original], 'import_guard')));
+
+        final r = await _runMerger(tmp);
+        expect(r.exitCode, equals(0), reason: r.stderr.toString());
+        final issues = jsonDecode(
+          File('${shardRoot.path}/issues.json').readAsStringSync(),
+        );
+        final findings = (issues['findings'] as List).cast<Map>();
+
+        expect(findings.single['status'], equals('closed'));
+        expect(findings.single['closed_in_phase'], equals('3'));
+        expect(findings.single['closed_commit'], equals('abc123'));
+      },
+    );
   });
 }

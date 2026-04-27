@@ -31,7 +31,7 @@ Future<List<Finding>> _runUnused(String mode) async {
       '--reporter=json',
     ], runInShell: true);
 
-    final stdoutText = (result.stdout as String).trim();
+    final stdoutText = _extractJsonPayload((result.stdout as String).trim());
     if (stdoutText.isEmpty) {
       stderr.writeln(
         '[audit:dead_code] WARNING: $mode produced empty stdout; skipping',
@@ -55,7 +55,13 @@ Future<List<Finding>> _runUnused(String mode) async {
       records = decoded;
     } else if (decoded is Map) {
       // common shapes: {records: [...]} or {issues: [...]} or {files: [...]}
-      for (final key in const ['records', 'issues', 'files']) {
+      for (final key in const [
+        'records',
+        'issues',
+        'files',
+        'unusedCode',
+        'unusedFiles',
+      ]) {
         final v = decoded[key];
         if (v is List) {
           records = v;
@@ -80,7 +86,8 @@ Future<List<Finding>> _runUnused(String mode) async {
         for (final iss in issues) {
           if (iss is! Map) continue;
           final loc = iss['location'];
-          int lineStart = 1, lineEnd = 1;
+          var lineStart = (iss['line'] as int?) ?? 1;
+          var lineEnd = lineStart;
           if (loc is Map) {
             final start = loc['start'];
             final end = loc['end'];
@@ -94,6 +101,7 @@ Future<List<Finding>> _runUnused(String mode) async {
           final desc =
               (iss['message'] as String?) ??
               (iss['ruleId'] as String?) ??
+              _formatUnusedDeclaration(iss) ??
               'Unused code element';
           findings.add(
             Finding(
@@ -134,6 +142,24 @@ Future<List<Finding>> _runUnused(String mode) async {
     stderr.writeln('[audit:dead_code] WARNING: $mode failed: $e\n$st');
   }
   return findings;
+}
+
+String _extractJsonPayload(String output) {
+  final firstBrace = output.indexOf('{');
+  final lastBrace = output.lastIndexOf('}');
+  if (firstBrace == -1 || lastBrace == -1 || lastBrace < firstBrace) {
+    return output;
+  }
+  return output.substring(firstBrace, lastBrace + 1);
+}
+
+String? _formatUnusedDeclaration(Map<dynamic, dynamic> issue) {
+  final type = issue['declarationType'] as String?;
+  final name = issue['declarationName'] as String?;
+  if (type == null && name == null) return null;
+  if (type == null) return 'Unused declaration `$name`';
+  if (name == null) return 'Unused $type';
+  return 'Unused $type `$name`';
 }
 
 Future<void> main(List<String> args) async {

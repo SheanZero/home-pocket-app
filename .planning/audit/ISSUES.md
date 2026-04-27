@@ -1,6 +1,6 @@
 # Audit Findings
 
-**Total findings:** 26
+**Total findings:** 50
 
 ## CRITICAL
 
@@ -41,4 +41,35 @@
 |----|-----------|-------------|---------------|-------------|
 | RD-001 | lib/application/accounting/category_service.dart:1 | Duplicate CategoryService class — parallel implementation at lib/infrastructure/category/category_service.dart | See companion finding on lib/infrastructure/category/category_service.dart. Phase 6 fix. | agent:duplication |
 | RD-002 | lib/infrastructure/category/category_service.dart:1 | Duplicate CategoryService class — parallel implementation also exists at lib/application/accounting/category_service.dart with overlapping responsibilities | Rename one of the two to reflect its actual concern (e.g., CategoryLocaleFormatter vs CategoryClassifier), or consolidate. Phase 6 fix. | agent:duplication |
+
+## LOW
+
+### Dead Code
+
+| ID | File:Line | Description | Suggested Fix | tool_source |
+|----|-----------|-------------|---------------|-------------|
+| DC-001 | lib/application/home/repository_providers.dart:1 | Unused file (no incoming imports detected) | Delete the file if truly unused. | dart_code_linter |
+| DC-002 | lib/application/settings/repository_providers.dart:1 | Unused file (no incoming imports detected) | Delete the file if truly unused. | dart_code_linter |
+| DC-003 | lib/features/dual_ledger/presentation/screens/dual_ledger_screen.dart:1 | Unused file (no incoming imports detected) | Delete the file if truly unused. | dart_code_linter |
+| DC-004 | lib/features/dual_ledger/presentation/screens/dual_ledger_screen.dart:9 | Unused class `DualLedgerScreen` | Remove the unused declaration or export it. | dart_code_linter |
+| DC-005 | lib/features/family_sync/domain/models/sync_message.dart:1 | Unused file (no incoming imports detected) | Delete the file if truly unused. | dart_code_linter |
+| DC-006 | lib/features/family_sync/domain/models/sync_trigger_event.dart:1 | Unused file (no incoming imports detected) | Delete the file if truly unused. | dart_code_linter |
+| DC-007 | lib/features/family_sync/presentation/providers/repository_providers.dart:294 | Unused top level variable `regenerateInviteUseCaseProvider` | Remove the unused declaration or export it. | dart_code_linter |
+| DC-008 | lib/features/family_sync/presentation/screens/join_success_screen.dart:1 | Unused file (no incoming imports detected) | Delete the file if truly unused. | dart_code_linter |
+| DC-009 | lib/features/family_sync/presentation/screens/join_success_screen.dart:16 | Unused class `JoinSuccessScreen` | Remove the unused declaration or export it. | dart_code_linter |
+| DC-010 | lib/features/family_sync/presentation/widgets/member_avatar.dart:1 | Unused file (no incoming imports detected) | Delete the file if truly unused. | dart_code_linter |
+| DC-011 | lib/features/family_sync/presentation/widgets/member_avatar.dart:5 | Unused class `MemberAvatar` | Remove the unused declaration or export it. | dart_code_linter |
+| DC-012 | lib/features/family_sync/presentation/widgets/pair_code_display.dart:1 | Unused file (no incoming imports detected) | Delete the file if truly unused. | dart_code_linter |
+| DC-013 | lib/features/family_sync/presentation/widgets/pair_code_display.dart:12 | Unused class `PairCodeDisplay` | Remove the unused declaration or export it. | dart_code_linter |
+| DC-014 | lib/features/family_sync/presentation/widgets/pair_code_input.dart:1 | Unused file (no incoming imports detected) | Delete the file if truly unused. | dart_code_linter |
+| DC-015 | lib/features/family_sync/presentation/widgets/pair_code_input.dart:9 | Unused class `PairCodeInput` | Remove the unused declaration or export it. | dart_code_linter |
+| DC-016 | lib/features/family_sync/presentation/widgets/partner_device_tile.dart:1 | Unused file (no incoming imports detected) | Delete the file if truly unused. | dart_code_linter |
+| DC-017 | lib/features/family_sync/presentation/widgets/partner_device_tile.dart:6 | Unused class `PartnerDeviceTile` | Remove the unused declaration or export it. | dart_code_linter |
+| DC-018 | lib/features/family_sync/presentation/widgets/status_badge.dart:1 | Unused file (no incoming imports detected) | Delete the file if truly unused. | dart_code_linter |
+| DC-019 | lib/features/family_sync/presentation/widgets/status_badge.dart:3 | Unused class `StatusBadge` | Remove the unused declaration or export it. | dart_code_linter |
+| DC-020 | lib/features/family_sync/presentation/widgets/sync_stats_card.dart:1 | Unused file (no incoming imports detected) | Delete the file if truly unused. | dart_code_linter |
+| DC-021 | lib/features/family_sync/presentation/widgets/sync_stats_card.dart:5 | Unused class `SyncStatsCard` | Remove the unused declaration or export it. | dart_code_linter |
+| DC-022 | lib/features/home/presentation/widgets/group_bar.dart:1 | Unused file (no incoming imports detected) | Delete the file if truly unused. | dart_code_linter |
+| DC-023 | lib/features/home/presentation/widgets/group_bar.dart:8 | Unused class `GroupBar` | Remove the unused declaration or export it. | dart_code_linter |
+| DC-024 | lib/infrastructure/crypto/repositories/master_key_repository.dart:14 | Unused class `KeyDerivationException` | Remove the unused declaration or export it. | dart_code_linter |
 

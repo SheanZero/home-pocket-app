@@ -17,6 +17,34 @@
       "closed_commit": "a66c625cd252705a4579c1728e992928370505d7"
     },
     {
+      "id": "DC-001",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/application/home/repository_providers.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "Unused file (no incoming imports detected)",
+      "rationale": "dart_code_linter:metrics check-unused-files",
+      "suggested_fix": "Delete the file if truly unused.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-002",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/application/settings/repository_providers.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "Unused file (no incoming imports detected)",
+      "rationale": "dart_code_linter:metrics check-unused-files",
+      "suggested_fix": "Delete the file if truly unused.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
       "id": "LV-001",
       "category": "layer_violation",
       "severity": "CRITICAL",
@@ -29,7 +57,7 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
     },
     {
@@ -45,7 +73,7 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
     },
     {
@@ -61,7 +89,7 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
     },
     {
@@ -77,7 +105,7 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
     },
     {
@@ -93,7 +121,7 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
     },
     {
@@ -109,7 +137,7 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
     },
     {
@@ -125,7 +153,7 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
     },
     {
@@ -141,7 +169,7 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
     },
     {
@@ -157,7 +185,7 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
     },
     {
@@ -173,7 +201,7 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
     },
     {
@@ -189,7 +217,7 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
     },
     {
@@ -205,7 +233,7 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
     },
     {
@@ -221,8 +249,36 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
+    },
+    {
+      "id": "DC-003",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/dual_ledger/presentation/screens/dual_ledger_screen.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "Unused file (no incoming imports detected)",
+      "rationale": "dart_code_linter:metrics check-unused-files",
+      "suggested_fix": "Delete the file if truly unused.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-004",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/dual_ledger/presentation/screens/dual_ledger_screen.dart",
+      "line_start": 9,
+      "line_end": 9,
+      "description": "Unused class `DualLedgerScreen`",
+      "rationale": "dart_code_linter:metrics check-unused-code",
+      "suggested_fix": "Remove the unused declaration or export it.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
     },
     {
       "id": "LV-014",
@@ -237,8 +293,36 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
+    },
+    {
+      "id": "DC-005",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/family_sync/domain/models/sync_message.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "Unused file (no incoming imports detected)",
+      "rationale": "dart_code_linter:metrics check-unused-files",
+      "suggested_fix": "Delete the file if truly unused.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-006",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/family_sync/domain/models/sync_trigger_event.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "Unused file (no incoming imports detected)",
+      "rationale": "dart_code_linter:metrics check-unused-files",
+      "suggested_fix": "Delete the file if truly unused.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
     },
     {
       "id": "LV-015",
@@ -253,7 +337,7 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
     },
     {
@@ -269,8 +353,218 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
+    },
+    {
+      "id": "DC-007",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/family_sync/presentation/providers/repository_providers.dart",
+      "line_start": 294,
+      "line_end": 294,
+      "description": "Unused top level variable `regenerateInviteUseCaseProvider`",
+      "rationale": "dart_code_linter:metrics check-unused-code",
+      "suggested_fix": "Remove the unused declaration or export it.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-008",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/family_sync/presentation/screens/join_success_screen.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "Unused file (no incoming imports detected)",
+      "rationale": "dart_code_linter:metrics check-unused-files",
+      "suggested_fix": "Delete the file if truly unused.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-009",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/family_sync/presentation/screens/join_success_screen.dart",
+      "line_start": 16,
+      "line_end": 16,
+      "description": "Unused class `JoinSuccessScreen`",
+      "rationale": "dart_code_linter:metrics check-unused-code",
+      "suggested_fix": "Remove the unused declaration or export it.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-010",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/family_sync/presentation/widgets/member_avatar.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "Unused file (no incoming imports detected)",
+      "rationale": "dart_code_linter:metrics check-unused-files",
+      "suggested_fix": "Delete the file if truly unused.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-011",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/family_sync/presentation/widgets/member_avatar.dart",
+      "line_start": 5,
+      "line_end": 5,
+      "description": "Unused class `MemberAvatar`",
+      "rationale": "dart_code_linter:metrics check-unused-code",
+      "suggested_fix": "Remove the unused declaration or export it.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-012",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/family_sync/presentation/widgets/pair_code_display.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "Unused file (no incoming imports detected)",
+      "rationale": "dart_code_linter:metrics check-unused-files",
+      "suggested_fix": "Delete the file if truly unused.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-013",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/family_sync/presentation/widgets/pair_code_display.dart",
+      "line_start": 12,
+      "line_end": 12,
+      "description": "Unused class `PairCodeDisplay`",
+      "rationale": "dart_code_linter:metrics check-unused-code",
+      "suggested_fix": "Remove the unused declaration or export it.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-014",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/family_sync/presentation/widgets/pair_code_input.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "Unused file (no incoming imports detected)",
+      "rationale": "dart_code_linter:metrics check-unused-files",
+      "suggested_fix": "Delete the file if truly unused.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-015",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/family_sync/presentation/widgets/pair_code_input.dart",
+      "line_start": 9,
+      "line_end": 9,
+      "description": "Unused class `PairCodeInput`",
+      "rationale": "dart_code_linter:metrics check-unused-code",
+      "suggested_fix": "Remove the unused declaration or export it.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-016",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/family_sync/presentation/widgets/partner_device_tile.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "Unused file (no incoming imports detected)",
+      "rationale": "dart_code_linter:metrics check-unused-files",
+      "suggested_fix": "Delete the file if truly unused.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-017",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/family_sync/presentation/widgets/partner_device_tile.dart",
+      "line_start": 6,
+      "line_end": 6,
+      "description": "Unused class `PartnerDeviceTile`",
+      "rationale": "dart_code_linter:metrics check-unused-code",
+      "suggested_fix": "Remove the unused declaration or export it.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-018",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/family_sync/presentation/widgets/status_badge.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "Unused file (no incoming imports detected)",
+      "rationale": "dart_code_linter:metrics check-unused-files",
+      "suggested_fix": "Delete the file if truly unused.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-019",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/family_sync/presentation/widgets/status_badge.dart",
+      "line_start": 3,
+      "line_end": 3,
+      "description": "Unused class `StatusBadge`",
+      "rationale": "dart_code_linter:metrics check-unused-code",
+      "suggested_fix": "Remove the unused declaration or export it.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-020",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/family_sync/presentation/widgets/sync_stats_card.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "Unused file (no incoming imports detected)",
+      "rationale": "dart_code_linter:metrics check-unused-files",
+      "suggested_fix": "Delete the file if truly unused.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-021",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/family_sync/presentation/widgets/sync_stats_card.dart",
+      "line_start": 5,
+      "line_end": 5,
+      "description": "Unused class `SyncStatsCard`",
+      "rationale": "dart_code_linter:metrics check-unused-code",
+      "suggested_fix": "Remove the unused declaration or export it.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
     },
     {
       "id": "LV-017",
@@ -285,7 +579,7 @@
       "tool_source": "agent:layer",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "0e370d8"
     },
     {
@@ -301,7 +595,7 @@
       "tool_source": "agent:layer",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "3ff381a"
     },
     {
@@ -317,7 +611,7 @@
       "tool_source": "agent:layer",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "84018b9"
     },
     {
@@ -333,7 +627,7 @@
       "tool_source": "agent:layer",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "122cb8b"
     },
     {
@@ -349,7 +643,7 @@
       "tool_source": "agent:layer",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "b66ab47"
     },
     {
@@ -365,8 +659,36 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "c549794"
+    },
+    {
+      "id": "DC-022",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/home/presentation/widgets/group_bar.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "Unused file (no incoming imports detected)",
+      "rationale": "dart_code_linter:metrics check-unused-files",
+      "suggested_fix": "Delete the file if truly unused.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "id": "DC-023",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/features/home/presentation/widgets/group_bar.dart",
+      "line_start": 8,
+      "line_end": 8,
+      "description": "Unused class `GroupBar`",
+      "rationale": "dart_code_linter:metrics check-unused-code",
+      "suggested_fix": "Remove the unused declaration or export it.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
     },
     {
       "id": "LV-023",
@@ -381,7 +703,7 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
     },
     {
@@ -397,7 +719,7 @@
       "tool_source": "import_guard",
       "confidence": "high",
       "status": "closed",
-      "closed_in_phase": 3,
+      "closed_in_phase": "3",
       "closed_commit": "d6509c9"
     },
     {
@@ -415,6 +737,20 @@
       "status": "closed",
       "closed_in_phase": "5",
       "closed_commit": "a66c625cd252705a4579c1728e992928370505d7"
+    },
+    {
+      "id": "DC-024",
+      "category": "dead_code",
+      "severity": "LOW",
+      "file_path": "lib/infrastructure/crypto/repositories/master_key_repository.dart",
+      "line_start": 14,
+      "line_end": 14,
+      "description": "Unused class `KeyDerivationException`",
+      "rationale": "dart_code_linter:metrics check-unused-code",
+      "suggested_fix": "Remove the unused declaration or export it.",
+      "tool_source": "dart_code_linter",
+      "confidence": "high",
+      "status": "open"
     }
   ]
 }

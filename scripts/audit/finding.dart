@@ -66,7 +66,7 @@ class Finding {
     toolSource: j['tool_source'] as String,
     confidence: j['confidence'] as String,
     status: (j['status'] as String?) ?? 'open',
-    closedInPhase: j['closed_in_phase'] as String?,
+    closedInPhase: j['closed_in_phase']?.toString(),
     closedCommit: j['closed_commit'] as String?,
   );
 }
