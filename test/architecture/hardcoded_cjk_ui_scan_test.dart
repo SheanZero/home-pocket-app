@@ -32,7 +32,9 @@ void main() {
       for (final entity in Directory('lib').listSync(recursive: true)) {
         if (entity is! File || !_shouldScan(entity)) continue;
 
-        final source = _stripFullLineComments(entity.readAsStringSync());
+        final source = _stripRegExpLiterals(
+          _stripFullLineComments(entity.readAsStringSync()),
+        );
         final offendingStrings = stringLiteralPattern
             .allMatches(source)
             .map((match) => match.group(0)!)
@@ -71,6 +73,16 @@ String _stripFullLineComments(String source) {
       .split('\n')
       .where((line) => !line.trimLeft().startsWith('//'))
       .join('\n');
+}
+
+String _stripRegExpLiterals(String source) {
+  return source.replaceAll(
+    RegExp(
+      r'''RegExp\(\s*r?(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')\s*\)''',
+      multiLine: true,
+    ),
+    'RegExp()',
+  );
 }
 
 String _normalizePath(String path) => path.replaceAll(r'\', '/');

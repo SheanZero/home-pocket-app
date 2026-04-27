@@ -756,7 +756,7 @@ abstract class S {
   /// Japanese language option
   ///
   /// In en, this message translates to:
-  /// **'Japanese'**
+  /// **'日本語'**
   String get languageJapanese;
 
   /// English language option
@@ -768,7 +768,7 @@ abstract class S {
   /// Chinese language option
   ///
   /// In en, this message translates to:
-  /// **'Chinese'**
+  /// **'中文'**
   String get languageChinese;
 
   /// Confirm delete dialog title
@@ -944,6 +944,36 @@ abstract class S {
   /// In en, this message translates to:
   /// **'vs Last Month'**
   String get homeMonthComparison;
+
+  /// Previous month amount subtitle for home ledger rows
+  ///
+  /// In en, this message translates to:
+  /// **'Last month {amount}'**
+  String homePreviousMonthAmount(String amount);
+
+  /// Compact home ledger row tag for survival ledger
+  ///
+  /// In en, this message translates to:
+  /// **'S'**
+  String get homeSurvivalLedgerTag;
+
+  /// Compact home ledger row tag for soul/joy ledger
+  ///
+  /// In en, this message translates to:
+  /// **'J'**
+  String get homeSoulLedgerTag;
+
+  /// Compact home ledger row tag for shared family ledger
+  ///
+  /// In en, this message translates to:
+  /// **'G'**
+  String get homeSharedLedgerTag;
+
+  /// Home ledger row title for a family member shadow book
+  ///
+  /// In en, this message translates to:
+  /// **'{memberName}\'s Ledger'**
+  String homeShadowBookTitle(String memberName);
 
   /// Soul fullness section title
   ///

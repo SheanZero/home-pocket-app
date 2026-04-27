@@ -264,25 +264,31 @@ class HomeScreen extends ConsumerWidget {
   }) {
     final rows = <LedgerRowData>[
       LedgerRowData(
-        tagText: '生',
+        tagText: S.of(context).homeSurvivalLedgerTag,
         tagBgColor: context.wmSurvivalTagBg,
         tagTextColor: AppColors.survival,
         title: S.of(context).survivalLedger,
         titleColor: context.wmTextPrimary,
-        subtitle:
-            '先月 \u00a5${_formatInt(report.previousMonthComparison?.previousExpenses ?? 0)}',
+        subtitle: S
+            .of(context)
+            .homePreviousMonthAmount(
+              '\u00a5${_formatInt(report.previousMonthComparison?.previousExpenses ?? 0)}',
+            ),
         formattedAmount: '\u00a5${_formatInt(report.survivalTotal)}',
         amountColor: AppColors.survival,
         chevronColor: context.wmTextTertiary,
       ),
       LedgerRowData(
-        tagText: '灵',
+        tagText: S.of(context).homeSoulLedgerTag,
         tagBgColor: context.wmSoulTagBg,
         tagTextColor: AppColors.soul,
         title: S.of(context).soulLedger,
         titleColor: AppColors.soul,
-        subtitle:
-            '先月 \u00a5${_formatInt(report.previousMonthComparison?.previousExpenses ?? 0)}',
+        subtitle: S
+            .of(context)
+            .homePreviousMonthAmount(
+              '\u00a5${_formatInt(report.previousMonthComparison?.previousExpenses ?? 0)}',
+            ),
         formattedAmount: '\u00a5${_formatInt(report.soulTotal)}',
         amountColor: AppColors.soul,
         chevronColor: context.wmTextTertiary,
@@ -297,12 +303,14 @@ class HomeScreen extends ConsumerWidget {
             bookReport?.previousMonthComparison?.previousExpenses ?? 0;
         rows.add(
           LedgerRowData(
-            tagText: '共',
+            tagText: S.of(context).homeSharedLedgerTag,
             tagBgColor: context.wmSharedTagBg,
             tagTextColor: AppColors.shared,
-            title: '${shadow.memberDisplayName}の帳本',
+            title: S.of(context).homeShadowBookTitle(shadow.memberDisplayName),
             titleColor: AppColors.shared,
-            subtitle: '先月 \u00a5${_formatInt(prevTotal)}',
+            subtitle: S
+                .of(context)
+                .homePreviousMonthAmount('\u00a5${_formatInt(prevTotal)}'),
             formattedAmount: '\u00a5${_formatInt(total)}',
             amountColor: AppColors.shared,
             chevronColor: AppColors.sharedChevron,

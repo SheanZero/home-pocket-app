@@ -520,6 +520,36 @@
   "@homeMonthComparison": {
     "description": "Month-over-month comparison header"
   },
+  "homePreviousMonthAmount": "先月 {amount}",
+  "@homePreviousMonthAmount": {
+    "description": "Previous month amount subtitle for home ledger rows",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSurvivalLedgerTag": "生",
+  "@homeSurvivalLedgerTag": {
+    "description": "Compact home ledger row tag for survival ledger"
+  },
+  "homeSoulLedgerTag": "灵",
+  "@homeSoulLedgerTag": {
+    "description": "Compact home ledger row tag for soul/joy ledger"
+  },
+  "homeSharedLedgerTag": "共",
+  "@homeSharedLedgerTag": {
+    "description": "Compact home ledger row tag for shared family ledger"
+  },
+  "homeShadowBookTitle": "{memberName}の帳本",
+  "@homeShadowBookTitle": {
+    "description": "Home ledger row title for a family member shadow book",
+    "placeholders": {
+      "memberName": {
+        "type": "String"
+      }
+    }
+  },
   "homeSoulFullness": "魂の充実度",
   "@homeSoulFullness": {
     "description": "Soul fullness section title"

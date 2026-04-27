@@ -344,13 +344,13 @@ class SEn extends S {
   String get language => 'Language';
 
   @override
-  String get languageJapanese => 'Japanese';
+  String get languageJapanese => '日本語';
 
   @override
   String get languageEnglish => 'English';
 
   @override
-  String get languageChinese => 'Chinese';
+  String get languageChinese => '中文';
 
   @override
   String get confirmDelete => 'Confirm Delete';
@@ -440,6 +440,25 @@ class SEn extends S {
 
   @override
   String get homeMonthComparison => 'vs Last Month';
+
+  @override
+  String homePreviousMonthAmount(String amount) {
+    return 'Last month $amount';
+  }
+
+  @override
+  String get homeSurvivalLedgerTag => 'S';
+
+  @override
+  String get homeSoulLedgerTag => 'J';
+
+  @override
+  String get homeSharedLedgerTag => 'G';
+
+  @override
+  String homeShadowBookTitle(String memberName) {
+    return '$memberName\'s Ledger';
+  }
 
   @override
   String get homeSoulFullness => 'Soul Fullness';

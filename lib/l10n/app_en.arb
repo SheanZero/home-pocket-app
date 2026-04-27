@@ -450,7 +450,7 @@
   "@language": {
     "description": "Language setting label"
   },
-  "languageJapanese": "Japanese",
+  "languageJapanese": "日本語",
   "@languageJapanese": {
     "description": "Japanese language option"
   },
@@ -458,7 +458,7 @@
   "@languageEnglish": {
     "description": "English language option"
   },
-  "languageChinese": "Chinese",
+  "languageChinese": "中文",
   "@languageChinese": {
     "description": "Chinese language option"
   },
@@ -519,6 +519,36 @@
   "homeMonthComparison": "vs Last Month",
   "@homeMonthComparison": {
     "description": "Month-over-month comparison header"
+  },
+  "homePreviousMonthAmount": "Last month {amount}",
+  "@homePreviousMonthAmount": {
+    "description": "Previous month amount subtitle for home ledger rows",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSurvivalLedgerTag": "S",
+  "@homeSurvivalLedgerTag": {
+    "description": "Compact home ledger row tag for survival ledger"
+  },
+  "homeSoulLedgerTag": "J",
+  "@homeSoulLedgerTag": {
+    "description": "Compact home ledger row tag for soul/joy ledger"
+  },
+  "homeSharedLedgerTag": "G",
+  "@homeSharedLedgerTag": {
+    "description": "Compact home ledger row tag for shared family ledger"
+  },
+  "homeShadowBookTitle": "{memberName}'s Ledger",
+  "@homeShadowBookTitle": {
+    "description": "Home ledger row title for a family member shadow book",
+    "placeholders": {
+      "memberName": {
+        "type": "String"
+      }
+    }
   },
   "homeSoulFullness": "Soul Fullness",
   "@homeSoulFullness": {

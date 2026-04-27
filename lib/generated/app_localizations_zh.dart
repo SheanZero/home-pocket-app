@@ -440,6 +440,25 @@ class SZh extends S {
   String get homeMonthComparison => '较上月';
 
   @override
+  String homePreviousMonthAmount(String amount) {
+    return '上月 $amount';
+  }
+
+  @override
+  String get homeSurvivalLedgerTag => '生';
+
+  @override
+  String get homeSoulLedgerTag => '灵';
+
+  @override
+  String get homeSharedLedgerTag => '共';
+
+  @override
+  String homeShadowBookTitle(String memberName) {
+    return '$memberName的账本';
+  }
+
+  @override
   String get homeSoulFullness => '灵魂充盈度';
 
   @override

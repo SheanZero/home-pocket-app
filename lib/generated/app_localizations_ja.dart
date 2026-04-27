@@ -440,6 +440,25 @@ class SJa extends S {
   String get homeMonthComparison => '先月比';
 
   @override
+  String homePreviousMonthAmount(String amount) {
+    return '先月 $amount';
+  }
+
+  @override
+  String get homeSurvivalLedgerTag => '生';
+
+  @override
+  String get homeSoulLedgerTag => '灵';
+
+  @override
+  String get homeSharedLedgerTag => '共';
+
+  @override
+  String homeShadowBookTitle(String memberName) {
+    return '$memberNameの帳本';
+  }
+
+  @override
   String get homeSoulFullness => '魂の充実度';
 
   @override

@@ -8,9 +8,6 @@ import '../providers/state_locale.dart';
 import '../providers/repository_providers.dart';
 import '../providers/state_settings.dart';
 
-/// Hardcoded language names displayed in their own language.
-const _languageNames = {'ja': '日本語', 'zh': '中文', 'en': 'English'};
-
 class AppearanceSection extends ConsumerWidget {
   const AppearanceSection({super.key, required this.settings});
 
@@ -102,7 +99,8 @@ class _LanguageTile extends ConsumerWidget {
     if (localeSettings == null) {
       return '';
     }
-    final nativeName = _languageNames[localeSettings.locale.languageCode] ?? '';
+    final nativeName =
+        _languageNames(context)[localeSettings.locale.languageCode] ?? '';
     if (localeSettings.isSystemDefault) {
       return '${S.of(context).languageSystem} ($nativeName)';
     }
@@ -148,7 +146,7 @@ class _LanguageTile extends ConsumerWidget {
                 title: Text(S.of(context).languageSystem),
                 value: 'system',
               ),
-              ..._languageNames.entries.map((entry) {
+              ..._languageNames(context).entries.map((entry) {
                 return RadioListTile<String>(
                   title: Text(entry.value),
                   value: entry.key,
@@ -160,4 +158,13 @@ class _LanguageTile extends ConsumerWidget {
       ),
     );
   }
+}
+
+Map<String, String> _languageNames(BuildContext context) {
+  final l10n = S.of(context);
+  return {
+    'ja': l10n.languageJapanese,
+    'zh': l10n.languageChinese,
+    'en': l10n.languageEnglish,
+  };
 }
