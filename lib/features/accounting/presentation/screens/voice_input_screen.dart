@@ -80,7 +80,8 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   @override
   void initState() {
     super.initState();
-    _speechService = widget.speechService ??
+    _speechService =
+        widget.speechService ??
         StartSpeechRecognitionUseCase(
           service: ref.read(appSpeechRecognitionServiceProvider),
         );
@@ -131,7 +132,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
         left: 0,
         right: 0,
         child: SoftToast(
-          message: 'マイクへのアクセスを許可してください',
+          message: S.of(context).voiceMicrophonePermissionRequired,
           icon: Icons.mic_off,
           onDismissed: () => entry.remove(),
         ),
