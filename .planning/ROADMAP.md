@@ -112,7 +112,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [x] 05-01-PLAN.md — Rename infrastructure CategoryLocaleService and add service-name collision guard
   - [x] 05-02-PLAN.md — Normalize ARB keys, enforce parity, and regenerate localization output
   - [x] 05-03-PLAN.md — Extract home/accounting CJK UI strings and enforce touched money styling
-  - [ ] 05-04-PLAN.md — Localize analytics labels and enforce FormatterService/AppTextStyles money display
+  - [x] 05-04-PLAN.md — Localize analytics labels and enforce FormatterService/AppTextStyles money display
   - [ ] 05-05-PLAN.md — Add MOD-009/CJK/finding-closure scan gates and close MEDIUM audit entries
 
 ### Phase 6: LOW Fixes
