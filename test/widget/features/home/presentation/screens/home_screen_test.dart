@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
@@ -91,8 +92,42 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(SectionDivider), findsNWidgets(2));
-      expect(find.text('今月の支出'), findsOneWidget);
-      expect(find.text('帳 本'), findsOneWidget);
+      expect(
+        find.text(
+          S.of(tester.element(find.byType(HomeScreen))).homeMonthlyExpense,
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.text(
+          S.of(tester.element(find.byType(HomeScreen))).homeLedgersSection,
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('renders Japanese localized home section labels', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      final l10n = S.of(tester.element(find.byType(HomeScreen)));
+
+      expect(find.text(l10n.homeMonthlyExpense), findsOneWidget);
+      expect(find.text(l10n.homeRecentTransactions), findsOneWidget);
+    });
+
+    testWidgets('renders English localized home section labels', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject(locale: const Locale('en')));
+      await tester.pumpAndSettle();
+
+      final l10n = S.of(tester.element(find.byType(HomeScreen)));
+
+      expect(find.text(l10n.homeMonthlyExpense), findsOneWidget);
+      expect(find.text(l10n.homeRecentTransactions), findsOneWidget);
     });
 
     testWidgets('renders LedgerComparisonSection', (tester) async {
@@ -113,15 +148,19 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.text('最近の取引'), findsOneWidget);
-      expect(find.text('すべて見る'), findsOneWidget);
+      final l10n = S.of(tester.element(find.byType(HomeScreen)));
+
+      expect(find.text(l10n.homeRecentTransactions), findsOneWidget);
+      expect(find.text(l10n.homeViewAllTransactions), findsOneWidget);
     });
 
     testWidgets('shows empty state when no transactions', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.text('取引がまだありません'), findsOneWidget);
+      final l10n = S.of(tester.element(find.byType(HomeScreen)));
+
+      expect(find.text(l10n.noTransactionsYet), findsOneWidget);
       expect(find.byType(TransactionListCard), findsNothing);
     });
 
