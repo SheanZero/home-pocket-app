@@ -1065,7 +1065,7 @@ abstract class S {
   /// **'Manual'**
   String get manualInput;
 
-  /// OCR scan mode tab label
+  /// OCR scan mode tab label. Future OCR/MOD-005 stub.
   ///
   /// In en, this message translates to:
   /// **'OCR'**
@@ -1149,13 +1149,13 @@ abstract class S {
   /// **'Add photo'**
   String get addPhoto;
 
-  /// OCR scanner screen title
+  /// OCR scanner screen title. Future OCR/MOD-005 stub.
   ///
   /// In en, this message translates to:
   /// **'OCR Scan'**
   String get ocrScanTitle;
 
-  /// OCR scanner hint text
+  /// OCR scanner hint text. Future OCR/MOD-005 stub.
   ///
   /// In en, this message translates to:
   /// **'Place receipt in frame'**

@@ -1,356 +1,486 @@
 {
-  "@@locale": "en",
-
   "appName": "Home Pocket",
-  "@appName": { "description": "App title" },
-
+  "@appName": {
+    "description": "App title"
+  },
   "home": "Home",
-  "@home": { "description": "Home tab label" },
-
+  "@home": {
+    "description": "Home tab label"
+  },
   "transactions": "Transactions",
-  "@transactions": { "description": "Transactions tab/screen label" },
-
+  "@transactions": {
+    "description": "Transactions tab/screen label"
+  },
   "analytics": "Analytics",
-  "@analytics": { "description": "Analytics tab/screen label" },
-
+  "@analytics": {
+    "description": "Analytics tab/screen label"
+  },
   "settings": "Settings",
-  "@settings": { "description": "Settings tab/screen label" },
-
+  "@settings": {
+    "description": "Settings tab/screen label"
+  },
   "ledger": "Ledger",
-  "@ledger": { "description": "Ledger tab label" },
-
+  "@ledger": {
+    "description": "Ledger tab label"
+  },
   "newTransaction": "New Transaction",
-  "@newTransaction": { "description": "New transaction screen title" },
-
+  "@newTransaction": {
+    "description": "New transaction screen title"
+  },
   "amount": "Amount",
-  "@amount": { "description": "Amount field label" },
-
+  "@amount": {
+    "description": "Amount field label"
+  },
   "category": "Category",
-  "@category": { "description": "Category field label" },
-
+  "@category": {
+    "description": "Category field label"
+  },
   "note": "Note",
-  "@note": { "description": "Note field label" },
-
+  "@note": {
+    "description": "Note field label"
+  },
   "merchant": "Merchant",
-  "@merchant": { "description": "Merchant field label" },
-
+  "@merchant": {
+    "description": "Merchant field label"
+  },
   "date": "Date",
-  "@date": { "description": "Date field label" },
-
+  "@date": {
+    "description": "Date field label"
+  },
   "transactionTypeExpense": "Expense",
-  "@transactionTypeExpense": { "description": "Expense transaction type" },
-
+  "@transactionTypeExpense": {
+    "description": "Expense transaction type"
+  },
   "transactionTypeIncome": "Income",
-  "@transactionTypeIncome": { "description": "Income transaction type" },
-
+  "@transactionTypeIncome": {
+    "description": "Income transaction type"
+  },
   "categoryFood": "Food",
-  "@categoryFood": { "description": "Food category" },
-
+  "@categoryFood": {
+    "description": "Food category"
+  },
   "categoryHousing": "Housing",
-  "@categoryHousing": { "description": "Housing category" },
-
+  "@categoryHousing": {
+    "description": "Housing category"
+  },
   "categoryTransport": "Transport",
-  "@categoryTransport": { "description": "Transport category" },
-
+  "@categoryTransport": {
+    "description": "Transport category"
+  },
   "categoryUtilities": "Utilities",
-  "@categoryUtilities": { "description": "Utilities category" },
-
+  "@categoryUtilities": {
+    "description": "Utilities category"
+  },
   "categoryEntertainment": "Entertainment",
-  "@categoryEntertainment": { "description": "Entertainment category" },
-
+  "@categoryEntertainment": {
+    "description": "Entertainment category"
+  },
   "categoryEducation": "Education",
-  "@categoryEducation": { "description": "Education category" },
-
+  "@categoryEducation": {
+    "description": "Education category"
+  },
   "categoryHealth": "Health",
-  "@categoryHealth": { "description": "Health category" },
-
+  "@categoryHealth": {
+    "description": "Health category"
+  },
   "categoryShopping": "Shopping",
-  "@categoryShopping": { "description": "Shopping category" },
-
+  "@categoryShopping": {
+    "description": "Shopping category"
+  },
   "categoryOther": "Other",
-  "@categoryOther": { "description": "Other category" },
-
+  "@categoryOther": {
+    "description": "Other category"
+  },
   "survivalLedger": "Survival Ledger",
-  "@survivalLedger": { "description": "Survival ledger label" },
-
+  "@survivalLedger": {
+    "description": "Survival ledger label"
+  },
   "soulLedger": "Soul Ledger",
-  "@soulLedger": { "description": "Soul ledger label" },
-
+  "@soulLedger": {
+    "description": "Soul ledger label"
+  },
   "survival": "Survival",
-  "@survival": { "description": "Short survival label" },
-
+  "@survival": {
+    "description": "Short survival label"
+  },
   "soul": "Soul",
-  "@soul": { "description": "Short soul label" },
-
+  "@soul": {
+    "description": "Short soul label"
+  },
   "save": "Save",
-  "@save": { "description": "Save action" },
-
+  "@save": {
+    "description": "Save action"
+  },
   "cancel": "Cancel",
-  "@cancel": { "description": "Cancel action" },
-
+  "@cancel": {
+    "description": "Generic cancel button label"
+  },
   "delete": "Delete",
-  "@delete": { "description": "Delete action" },
-
+  "@delete": {
+    "description": "Delete action"
+  },
   "edit": "Edit",
-  "@edit": { "description": "Edit action" },
-
+  "@edit": {
+    "description": "Edit action"
+  },
   "confirm": "Confirm",
-  "@confirm": { "description": "Confirm action" },
-
+  "@confirm": {
+    "description": "Confirm action"
+  },
   "ok": "OK",
-  "@ok": { "description": "OK action" },
-
+  "@ok": {
+    "description": "OK action"
+  },
   "retry": "Retry",
-  "@retry": { "description": "Retry action" },
-
+  "@retry": {
+    "description": "Retry action"
+  },
   "search": "Search",
-  "@search": { "description": "Search action" },
-
+  "@search": {
+    "description": "Search action"
+  },
   "filter": "Filter",
-  "@filter": { "description": "Filter action" },
-
+  "@filter": {
+    "description": "Filter action"
+  },
   "sort": "Sort",
-  "@sort": { "description": "Sort action" },
-
+  "@sort": {
+    "description": "Sort action"
+  },
   "refresh": "Refresh",
-  "@refresh": { "description": "Refresh action" },
-
+  "@refresh": {
+    "description": "Refresh action"
+  },
   "loading": "Loading...",
-  "@loading": { "description": "Loading state text" },
-
+  "@loading": {
+    "description": "Loading state text"
+  },
   "noData": "No data available",
-  "@noData": { "description": "Empty state text" },
-
+  "@noData": {
+    "description": "Empty state text"
+  },
   "today": "Today",
-  "@today": { "description": "Today label" },
-
+  "@today": {
+    "description": "Today label"
+  },
   "yesterday": "Yesterday",
-  "@yesterday": { "description": "Yesterday label" },
-
+  "@yesterday": {
+    "description": "Yesterday label"
+  },
   "daysAgo": "{count} days ago",
-  "@daysAgo": { "description": "N days ago relative date", "placeholders": { "count": { "type": "int" } } },
-
+  "@daysAgo": {
+    "description": "N days ago relative date",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "errorNetwork": "Network error",
-  "@errorNetwork": { "description": "Network error" },
-
+  "@errorNetwork": {
+    "description": "Network error"
+  },
   "errorUnknown": "An unknown error occurred",
-  "@errorUnknown": { "description": "Unknown error" },
-
+  "@errorUnknown": {
+    "description": "Unknown error"
+  },
   "errorInvalidAmount": "Invalid amount",
-  "@errorInvalidAmount": { "description": "Invalid amount error" },
-
+  "@errorInvalidAmount": {
+    "description": "Invalid amount error"
+  },
   "errorRequired": "This field is required",
-  "@errorRequired": { "description": "Required field error" },
-
+  "@errorRequired": {
+    "description": "Required field error"
+  },
   "errorInvalidDate": "Invalid date",
-  "@errorInvalidDate": { "description": "Invalid date error" },
-
+  "@errorInvalidDate": {
+    "description": "Invalid date error"
+  },
   "errorDatabaseWrite": "Database write error",
-  "@errorDatabaseWrite": { "description": "Database write error" },
-
+  "@errorDatabaseWrite": {
+    "description": "Database write error"
+  },
   "errorDatabaseRead": "Database read error",
-  "@errorDatabaseRead": { "description": "Database read error" },
-
+  "@errorDatabaseRead": {
+    "description": "Database read error"
+  },
   "errorEncryption": "Encryption error",
-  "@errorEncryption": { "description": "Encryption error" },
-
+  "@errorEncryption": {
+    "description": "Encryption error"
+  },
   "errorSync": "Sync error",
-  "@errorSync": { "description": "Sync error" },
-
+  "@errorSync": {
+    "description": "Sync error"
+  },
   "errorBiometric": "Biometric error",
-  "@errorBiometric": { "description": "Biometric error" },
-
+  "@errorBiometric": {
+    "description": "Biometric error"
+  },
   "errorPermission": "Permission error",
-  "@errorPermission": { "description": "Permission error" },
-
+  "@errorPermission": {
+    "description": "Permission error"
+  },
   "errorMinAmount": "Please enter an amount of at least {min}",
-  "@errorMinAmount": { "description": "Minimum amount error", "placeholders": { "min": { "type": "double" } } },
-
+  "@errorMinAmount": {
+    "description": "Minimum amount error",
+    "placeholders": {
+      "min": {
+        "type": "double"
+      }
+    }
+  },
   "errorMaxAmount": "Please enter an amount no greater than {max}",
-  "@errorMaxAmount": { "description": "Maximum amount error", "placeholders": { "max": { "type": "double" } } },
-
+  "@errorMaxAmount": {
+    "description": "Maximum amount error",
+    "placeholders": {
+      "max": {
+        "type": "double"
+      }
+    }
+  },
   "successSaved": "Saved successfully",
-  "@successSaved": { "description": "Save success" },
-
+  "@successSaved": {
+    "description": "Save success"
+  },
   "successDeleted": "Deleted successfully",
-  "@successDeleted": { "description": "Delete success" },
-
+  "@successDeleted": {
+    "description": "Delete success"
+  },
   "successSynced": "Synced successfully",
-  "@successSynced": { "description": "Sync success" },
-
+  "@successSynced": {
+    "description": "Sync success"
+  },
   "merchantPlaceholder": "Enter merchant name",
-  "@merchantPlaceholder": { "description": "Merchant placeholder" },
-
+  "@merchantPlaceholder": {
+    "description": "Merchant placeholder"
+  },
   "notePlaceholder": "Enter a note",
-  "@notePlaceholder": { "description": "Note placeholder" },
-
+  "@notePlaceholder": {
+    "description": "Note placeholder"
+  },
   "noteOptional": "Note (optional)",
-  "@noteOptional": { "description": "Optional note label" },
-
+  "@noteOptional": {
+    "description": "Optional note label"
+  },
   "pleaseEnterAmount": "Please enter an amount",
-  "@pleaseEnterAmount": { "description": "Amount prompt" },
-
+  "@pleaseEnterAmount": {
+    "description": "Amount prompt"
+  },
   "amountMustBeGreaterThanZero": "Amount must be greater than zero",
-  "@amountMustBeGreaterThanZero": { "description": "Amount validation" },
-
+  "@amountMustBeGreaterThanZero": {
+    "description": "Amount validation"
+  },
   "pleaseSelectCategory": "Please select a category",
-  "@pleaseSelectCategory": { "description": "Category prompt" },
-
+  "@pleaseSelectCategory": {
+    "description": "Placeholder shown when no category is selected in confirm screen"
+  },
   "noTransactionsYet": "No transactions yet",
-  "@noTransactionsYet": { "description": "Empty transaction list" },
-
+  "@noTransactionsYet": {
+    "description": "Empty transaction list"
+  },
   "tapToAddFirstTransaction": "Tap + to add your first transaction",
-  "@tapToAddFirstTransaction": { "description": "Empty state hint" },
-
+  "@tapToAddFirstTransaction": {
+    "description": "Empty state hint"
+  },
   "transactionSaved": "Transaction saved",
-  "@transactionSaved": { "description": "Transaction save success" },
-
+  "@transactionSaved": {
+    "description": "Transaction save success"
+  },
   "failedToSave": "Failed to save",
-  "@failedToSave": { "description": "Save failure" },
-
+  "@failedToSave": {
+    "description": "Save failure"
+  },
   "appearance": "Appearance",
-  "@appearance": { "description": "Appearance section title" },
-
+  "@appearance": {
+    "description": "Appearance section title"
+  },
   "theme": "Theme",
-  "@theme": { "description": "Theme setting label" },
-
+  "@theme": {
+    "description": "Theme setting label"
+  },
   "selectTheme": "Select Theme",
-  "@selectTheme": { "description": "Theme dialog title" },
-
+  "@selectTheme": {
+    "description": "Theme dialog title"
+  },
   "themeSystem": "System",
-  "@themeSystem": { "description": "System theme" },
-
+  "@themeSystem": {
+    "description": "System theme"
+  },
   "themeLight": "Light",
-  "@themeLight": { "description": "Light theme" },
-
+  "@themeLight": {
+    "description": "Light theme"
+  },
   "themeDark": "Dark",
-  "@themeDark": { "description": "Dark theme" },
-
+  "@themeDark": {
+    "description": "Dark theme"
+  },
   "security": "Security",
-  "@security": { "description": "Security section title" },
-
+  "@security": {
+    "description": "Security section title"
+  },
   "biometricLock": "Biometric Lock",
-  "@biometricLock": { "description": "Biometric lock setting" },
-
+  "@biometricLock": {
+    "description": "Biometric lock setting"
+  },
   "biometricLockDescription": "Use Face ID / fingerprint to unlock",
-  "@biometricLockDescription": { "description": "Biometric lock subtitle" },
-
+  "@biometricLockDescription": {
+    "description": "Biometric lock subtitle"
+  },
   "notifications": "Notifications",
-  "@notifications": { "description": "Notifications setting" },
-
+  "@notifications": {
+    "description": "Notifications setting"
+  },
   "notificationsDescription": "Budget alerts and sync notifications",
-  "@notificationsDescription": { "description": "Notifications subtitle" },
-
+  "@notificationsDescription": {
+    "description": "Notifications subtitle"
+  },
   "dataManagement": "Data Management",
-  "@dataManagement": { "description": "Data management section" },
-
+  "@dataManagement": {
+    "description": "Data management section"
+  },
   "exportBackup": "Export Backup",
-  "@exportBackup": { "description": "Export backup action" },
-
+  "@exportBackup": {
+    "description": "Export backup action"
+  },
   "exportBackupDescription": "Create encrypted backup file",
-  "@exportBackupDescription": { "description": "Export subtitle" },
-
+  "@exportBackupDescription": {
+    "description": "Export subtitle"
+  },
   "importBackup": "Import Backup",
-  "@importBackup": { "description": "Import backup action" },
-
+  "@importBackup": {
+    "description": "Import backup action"
+  },
   "importBackupDescription": "Restore from backup file",
-  "@importBackupDescription": { "description": "Import subtitle" },
-
+  "@importBackupDescription": {
+    "description": "Import subtitle"
+  },
   "deleteAllData": "Delete All Data",
-  "@deleteAllData": { "description": "Delete all data action" },
-
+  "@deleteAllData": {
+    "description": "Delete all data action"
+  },
   "deleteAllDataDescription": "Permanently delete all records",
-  "@deleteAllDataDescription": { "description": "Delete all subtitle" },
-
+  "@deleteAllDataDescription": {
+    "description": "Delete all subtitle"
+  },
   "deleteAllDataConfirmation": "This action cannot be undone. Are you sure you want to delete all data?",
-  "@deleteAllDataConfirmation": { "description": "Delete all confirmation" },
-
+  "@deleteAllDataConfirmation": {
+    "description": "Delete all confirmation"
+  },
   "allDataDeleted": "All data deleted",
-  "@allDataDeleted": { "description": "Delete all success" },
-
+  "@allDataDeleted": {
+    "description": "Delete all success"
+  },
   "deleteFailed": "Delete failed",
-  "@deleteFailed": { "description": "Delete failure" },
-
+  "@deleteFailed": {
+    "description": "Delete failure"
+  },
   "backupExportedSuccessfully": "Backup exported successfully",
-  "@backupExportedSuccessfully": { "description": "Export success" },
-
+  "@backupExportedSuccessfully": {
+    "description": "Export success"
+  },
   "exportFailed": "Export failed",
-  "@exportFailed": { "description": "Export failure" },
-
+  "@exportFailed": {
+    "description": "Export failure"
+  },
   "backupImportedSuccessfully": "Backup imported successfully",
-  "@backupImportedSuccessfully": { "description": "Import success" },
-
+  "@backupImportedSuccessfully": {
+    "description": "Import success"
+  },
   "importFailed": "Import failed",
-  "@importFailed": { "description": "Import failure" },
-
+  "@importFailed": {
+    "description": "Import failure"
+  },
   "setBackupPassword": "Set Backup Password",
-  "@setBackupPassword": { "description": "Export password dialog title" },
-
+  "@setBackupPassword": {
+    "description": "Export password dialog title"
+  },
   "enterBackupPassword": "Enter Backup Password",
-  "@enterBackupPassword": { "description": "Import password dialog title" },
-
+  "@enterBackupPassword": {
+    "description": "Import password dialog title"
+  },
   "enterPassword": "Enter password",
-  "@enterPassword": { "description": "Password hint" },
-
+  "@enterPassword": {
+    "description": "Password hint"
+  },
   "confirmPassword": "Confirm password",
-  "@confirmPassword": { "description": "Confirm password hint" },
-
+  "@confirmPassword": {
+    "description": "Confirm password hint"
+  },
   "passwordMinLength": "Password must be at least 8 characters",
-  "@passwordMinLength": { "description": "Password validation" },
-
+  "@passwordMinLength": {
+    "description": "Password validation"
+  },
   "passwordsDoNotMatch": "Passwords do not match",
-  "@passwordsDoNotMatch": { "description": "Password mismatch" },
-
+  "@passwordsDoNotMatch": {
+    "description": "Password mismatch"
+  },
   "about": "About",
-  "@about": { "description": "About section title" },
-
+  "@about": {
+    "description": "About section title"
+  },
   "version": "Version",
-  "@version": { "description": "Version label" },
-
+  "@version": {
+    "description": "Version label"
+  },
   "privacyPolicy": "Privacy Policy",
-  "@privacyPolicy": { "description": "Privacy policy link" },
-
+  "@privacyPolicy": {
+    "description": "Privacy policy link"
+  },
   "openSourceLicenses": "Open Source Licenses",
-  "@openSourceLicenses": { "description": "Licenses link" },
-
+  "@openSourceLicenses": {
+    "description": "Licenses link"
+  },
   "generateDemoData": "Generate Demo Data",
-  "@generateDemoData": { "description": "Demo data action" },
-
+  "@generateDemoData": {
+    "description": "Demo data action"
+  },
   "generateDemoDataDescription": "This will create sample transactions for the last 3 months to showcase analytics features.",
-  "@generateDemoDataDescription": { "description": "Demo data dialog text" },
-
+  "@generateDemoDataDescription": {
+    "description": "Demo data dialog text"
+  },
   "generate": "Generate",
-  "@generate": { "description": "Generate action" },
-
+  "@generate": {
+    "description": "Generate action"
+  },
   "demoDataGenerated": "Demo data generated! Pull to refresh.",
-  "@demoDataGenerated": { "description": "Demo data success" },
-
+  "@demoDataGenerated": {
+    "description": "Demo data success"
+  },
   "language": "Language",
-  "@language": { "description": "Language setting label" },
-
+  "@language": {
+    "description": "Language setting label"
+  },
   "languageJapanese": "Japanese",
-  "@languageJapanese": { "description": "Japanese language option" },
-
+  "@languageJapanese": {
+    "description": "Japanese language option"
+  },
   "languageEnglish": "English",
-  "@languageEnglish": { "description": "English language option" },
-
+  "@languageEnglish": {
+    "description": "English language option"
+  },
   "languageChinese": "Chinese",
-  "@languageChinese": { "description": "Chinese language option" },
-
+  "@languageChinese": {
+    "description": "Chinese language option"
+  },
   "confirmDelete": "Confirm Delete",
-  "@confirmDelete": { "description": "Confirm delete dialog title" },
-
+  "@confirmDelete": {
+    "description": "Confirm delete dialog title"
+  },
   "deleteTransactionConfirmation": "Delete this transaction?",
-  "@deleteTransactionConfirmation": { "description": "Delete transaction confirmation message" },
-
+  "@deleteTransactionConfirmation": {
+    "description": "Delete transaction confirmation message"
+  },
   "error": "Error",
-  "@error": { "description": "Generic error title for error screens" },
-
+  "@error": {
+    "description": "Generic error title for error screens"
+  },
   "initializationError": "Initialization failed: {error}",
   "@initializationError": {
     "description": "Error message when app initialization fails",
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "profileSetup": "Nice to meet you!",
@@ -374,127 +504,205 @@
   "profileSaveFailed": "Failed to save",
   "profileNameTooLong": "Nickname must be 50 characters or less",
   "profileUploadPhoto": "Upload Photo",
-
   "homeMonthlyExpense": "Monthly Expenses",
-  "@homeMonthlyExpense": { "description": "Home card title for monthly expense overview" },
-
+  "@homeMonthlyExpense": {
+    "description": "Home card title for monthly expense overview"
+  },
   "homeSurvivalExpense": "Living Expenses",
-  "@homeSurvivalExpense": { "description": "Survival ledger expense label" },
-
+  "@homeSurvivalExpense": {
+    "description": "Survival ledger expense label"
+  },
   "homeSoulExpense": "Joy Expenses",
-  "@homeSoulExpense": { "description": "Soul ledger expense label" },
-
+  "@homeSoulExpense": {
+    "description": "Soul ledger expense label"
+  },
   "homeMonthComparison": "vs Last Month",
-  "@homeMonthComparison": { "description": "Month-over-month comparison header" },
-
+  "@homeMonthComparison": {
+    "description": "Month-over-month comparison header"
+  },
   "homeSoulFullness": "Soul Fullness",
-  "@homeSoulFullness": { "description": "Soul fullness section title" },
-
+  "@homeSoulFullness": {
+    "description": "Soul fullness section title"
+  },
   "homeSoulPercentLabel": "Soul spending ratio",
-  "@homeSoulPercentLabel": { "description": "Soul spending percentage metric label" },
-
+  "@homeSoulPercentLabel": {
+    "description": "Soul spending percentage metric label"
+  },
   "homeHappinessROI": "Happiness ROI",
-  "@homeHappinessROI": { "description": "Happiness ROI metric label" },
-
+  "@homeHappinessROI": {
+    "description": "Happiness ROI metric label"
+  },
   "homeFamilyInviteTitle": "Invite Family",
-  "@homeFamilyInviteTitle": { "description": "Family invite banner title" },
-
+  "@homeFamilyInviteTitle": {
+    "description": "Family invite banner title"
+  },
   "homeFamilyInviteDesc": "Share your ledger with your partner",
-  "@homeFamilyInviteDesc": { "description": "Family invite banner description" },
-
+  "@homeFamilyInviteDesc": {
+    "description": "Family invite banner description"
+  },
   "homeTodayTitle": "Today's Records",
-  "@homeTodayTitle": { "description": "Today's transaction section title" },
-
+  "@homeTodayTitle": {
+    "description": "Today's transaction section title"
+  },
   "homeTodayCount": "{count} items",
-  "@homeTodayCount": { "description": "Transaction count for today", "placeholders": { "count": { "type": "int" } } },
-
+  "@homeTodayCount": {
+    "description": "Transaction count for today",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "homePersonalMode": "Personal Mode",
-  "@homePersonalMode": { "description": "Mode badge for personal/solo mode" },
-
+  "@homePersonalMode": {
+    "description": "Mode badge for personal/solo mode"
+  },
   "homeFamilyMode": "Family Mode",
-  "@homeFamilyMode": { "description": "Mode badge for family/group mode" },
-
+  "@homeFamilyMode": {
+    "description": "Mode badge for family/group mode"
+  },
   "homeTabHome": "Home",
-  "@homeTabHome": { "description": "Bottom nav home tab label" },
-
+  "@homeTabHome": {
+    "description": "Bottom nav home tab label"
+  },
   "homeTabList": "List",
-  "@homeTabList": { "description": "Bottom nav list tab label" },
-
+  "@homeTabList": {
+    "description": "Bottom nav list tab label"
+  },
   "homeTabChart": "Charts",
-  "@homeTabChart": { "description": "Bottom nav charts tab label" },
-
+  "@homeTabChart": {
+    "description": "Bottom nav charts tab label"
+  },
   "homeTabTodo": "Todo",
-  "@homeTabTodo": { "description": "Bottom nav todo tab label" },
-
+  "@homeTabTodo": {
+    "description": "Bottom nav todo tab label"
+  },
   "homeMonthFormat": "{year}/{month}",
-  "@homeMonthFormat": { "description": "Year and month display format", "placeholders": { "year": { "type": "int" }, "month": { "type": "int" } } },
-
+  "@homeMonthFormat": {
+    "description": "Year and month display format",
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      }
+    }
+  },
   "homeMonthLabel": "M{month}",
-  "@homeMonthLabel": { "description": "Short month label for bar chart", "placeholders": { "month": { "type": "int" } } },
-
-  "homeRecentSoulTransaction": "Recent: {merchant} \u00a5{amount}",
-  "@homeRecentSoulTransaction": { "description": "Recent soul transaction summary", "placeholders": { "merchant": { "type": "String" }, "amount": { "type": "int" } } },
-
-  "homeSoulChargeStatus": "Soul Fullness {fullness}% \u00b7 Happiness ROI {roi}x",
-  "@homeSoulChargeStatus": { "description": "Soul charge card status line", "placeholders": { "fullness": { "type": "int" }, "roi": { "type": "double" } } },
-
+  "@homeMonthLabel": {
+    "description": "Short month label for bar chart",
+    "placeholders": {
+      "month": {
+        "type": "int"
+      }
+    }
+  },
+  "homeRecentSoulTransaction": "Recent: {merchant} ¥{amount}",
+  "@homeRecentSoulTransaction": {
+    "description": "Recent soul transaction summary",
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "homeSoulChargeStatus": "Soul Fullness {fullness}% · Happiness ROI {roi}x",
+  "@homeSoulChargeStatus": {
+    "description": "Soul charge card status line",
+    "placeholders": {
+      "fullness": {
+        "type": "int"
+      },
+      "roi": {
+        "type": "double"
+      }
+    }
+  },
   "homeMonthBadge": "This month {percent}%",
-  "@homeMonthBadge": { "description": "Soul fullness month badge", "placeholders": { "percent": { "type": "int" } } },
-
+  "@homeMonthBadge": {
+    "description": "Soul fullness month badge",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "addTransaction": "Add Transaction",
-  "@addTransaction": { "description": "Transaction entry screen title" },
-
+  "@addTransaction": {
+    "description": "Transaction entry screen title"
+  },
   "manualInput": "Manual",
-  "@manualInput": { "description": "Manual input mode tab label" },
-
+  "@manualInput": {
+    "description": "Manual input mode tab label"
+  },
   "ocrScan": "OCR",
-  "@ocrScan": { "description": "OCR scan mode tab label" },
-
+  "@ocrScan": {
+    "description": "OCR scan mode tab label. Future OCR/MOD-005 stub."
+  },
   "voiceInput": "Voice",
-  "@voiceInput": { "description": "Voice input mode tab label" },
-
+  "@voiceInput": {
+    "description": "Voice input mode tab label"
+  },
   "selectCategory": "Select Category",
-  "@selectCategory": { "description": "Category selection screen title" },
-
+  "@selectCategory": {
+    "description": "Category selection screen title"
+  },
   "searchCategory": "Search categories...",
-  "@searchCategory": { "description": "Category search placeholder" },
-
+  "@searchCategory": {
+    "description": "Category search placeholder"
+  },
   "expenseDetail": "Expense Detail",
-  "@expenseDetail": { "description": "Confirm screen title" },
-
+  "@expenseDetail": {
+    "description": "Confirm screen title"
+  },
   "back": "Back",
-  "@back": { "description": "Back navigation label" },
-
+  "@back": {
+    "description": "Back navigation label"
+  },
   "record": "Record",
-  "@record": { "description": "Save/record transaction button" },
-
+  "@record": {
+    "description": "Save/record transaction button"
+  },
   "enterStore": "Enter store",
-  "@enterStore": { "description": "Store input placeholder" },
-
+  "@enterStore": {
+    "description": "Store input placeholder"
+  },
   "enterMemo": "Enter memo...",
-  "@enterMemo": { "description": "Memo input placeholder" },
-
+  "@enterMemo": {
+    "description": "Memo input placeholder"
+  },
   "expenseClassification": "Expense Type",
-  "@expenseClassification": { "description": "Ledger type section title" },
-
+  "@expenseClassification": {
+    "description": "Ledger type section title"
+  },
   "survivalExpense": "Survival",
-  "@survivalExpense": { "description": "Survival ledger chip label" },
-
+  "@survivalExpense": {
+    "description": "Survival ledger chip label"
+  },
   "soulExpense": "Soul",
-  "@soulExpense": { "description": "Soul ledger chip label" },
-
+  "@soulExpense": {
+    "description": "Soul ledger chip label"
+  },
   "soulSatisfaction": "Soul Fullness",
-  "@soulSatisfaction": { "description": "Soul satisfaction slider label" },
-
+  "@soulSatisfaction": {
+    "description": "Soul satisfaction slider label"
+  },
   "addPhoto": "Add photo",
-  "@addPhoto": { "description": "Add photo button label" },
-
+  "@addPhoto": {
+    "description": "Add photo button label"
+  },
   "ocrScanTitle": "OCR Scan",
-  "@ocrScanTitle": { "description": "OCR scanner screen title" },
-
+  "@ocrScanTitle": {
+    "description": "OCR scanner screen title. Future OCR/MOD-005 stub."
+  },
   "ocrHint": "Place receipt in frame",
-  "@ocrHint": { "description": "OCR scanner hint text" },
-
+  "@ocrHint": {
+    "description": "OCR scanner hint text. Future OCR/MOD-005 stub."
+  },
   "voiceRecognitionResult": "Recognition Result",
   "@voiceRecognitionResult": {
     "description": "Label shown above the recognized voice transcript"
@@ -540,28 +748,45 @@
     "description": "Bottom action button label to add a category"
   },
   "editCategoryOrder": "Edit category order",
-  "@editCategoryOrder": { "description": "AppBar title during category reorder edit mode" },
+  "@editCategoryOrder": {
+    "description": "AppBar title during category reorder edit mode"
+  },
   "dragToReorder": "Drag to reorder",
-  "@dragToReorder": { "description": "Hint banner shown in category reorder edit mode" },
+  "@dragToReorder": {
+    "description": "Hint banner shown in category reorder edit mode"
+  },
   "orderUpdated": "Order updated",
-  "@orderUpdated": { "description": "SnackBar shown after successfully saving category reorder" },
+  "@orderUpdated": {
+    "description": "SnackBar shown after successfully saving category reorder"
+  },
   "orderSaveFailed": "Failed to save order. Please retry",
-  "@orderSaveFailed": { "description": "SnackBar shown when saving category reorder fails" },
+  "@orderSaveFailed": {
+    "description": "SnackBar shown when saving category reorder fails"
+  },
   "discardUnsavedChanges": "Discard unsaved changes?",
-  "@discardUnsavedChanges": { "description": "Dialog title when cancelling reorder with unsaved changes" },
+  "@discardUnsavedChanges": {
+    "description": "Dialog title when cancelling reorder with unsaved changes"
+  },
   "keepEditing": "Keep editing",
-  "@keepEditing": { "description": "Dialog cancel button: keep editing" },
+  "@keepEditing": {
+    "description": "Dialog cancel button: keep editing"
+  },
   "discard": "Discard",
-  "@discard": { "description": "Dialog confirm button: discard unsaved changes" },
+  "@discard": {
+    "description": "Dialog confirm button: discard unsaved changes"
+  },
   "tapToRecord": "Tap to record",
-  "@tapToRecord": { "description": "Voice input hint" },
-
+  "@tapToRecord": {
+    "description": "Voice input hint"
+  },
   "todayDate": "Today",
-  "@todayDate": { "description": "Today date chip label" },
-
+  "@todayDate": {
+    "description": "Today date chip label"
+  },
   "next": "Next",
-  "@next": { "description": "Next button label" },
-
+  "@next": {
+    "description": "Next button label"
+  },
   "voiceInputSettings": "Voice Recognition",
   "@voiceInputSettings": {
     "description": "Voice input settings section title"
@@ -574,11 +799,6 @@
   "@voiceLanguageSubtitle": {
     "description": "Subtitle for voice language setting"
   },
-  "pleaseSelectCategory": "Please select a category",
-  "@pleaseSelectCategory": {
-    "description": "Placeholder shown when no category is selected in confirm screen"
-  },
-
   "familySync": "Family Sync",
   "@familySync": {
     "description": "Title for the family sync feature"
@@ -981,20 +1201,27 @@
       }
     }
   },
-  "cancel": "Cancel",
-  "@cancel": {
-    "description": "Generic cancel button label"
-  },
-
   "groupDefaultName": "{name}'s Family",
-  "@groupDefaultName": { "placeholders": { "name": { "type": "String" } } },
+  "@groupDefaultName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "groupCreate": "Create Group",
   "groupName": "Group Name",
   "groupOwner": "Owner",
   "groupMember": "Member",
   "groupInviteCode": "Invite Code",
   "groupInviteExpiry": "Valid for {minutes} minutes",
-  "@groupInviteExpiry": { "placeholders": { "minutes": { "type": "int" } } },
+  "@groupInviteExpiry": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "groupShareCode": "Share Invite Code",
   "groupEnterCode": "Enter Invite Code",
   "groupVerify": "Verify",
@@ -1002,10 +1229,22 @@
   "groupJoinTarget": "Group to Join",
   "groupWaitingApproval": "Waiting for Owner approval...",
   "groupWaitingDesc": "{name} is reviewing your request",
-  "@groupWaitingDesc": { "placeholders": { "name": { "type": "String" } } },
+  "@groupWaitingDesc": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "groupJoinRequest": "Join request received",
   "groupJoinRequestDesc": "{name} wants to join",
-  "@groupJoinRequestDesc": { "placeholders": { "name": { "type": "String" } } },
+  "@groupJoinRequestDesc": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "groupApprove": "Approve",
   "groupReject": "Reject",
   "groupJoinSuccess": "Welcome!",
@@ -1029,50 +1268,95 @@
   "groupCodeHint": "Ask the group owner for the invite code",
   "groupBack": "Back",
   "syncInProgress": "Syncing...",
-  "@syncInProgress": { "description": "Sync in progress status" },
+  "@syncInProgress": {
+    "description": "Sync in progress status"
+  },
   "syncCompleted": "Sync complete",
-  "@syncCompleted": { "description": "Sync completed status" },
+  "@syncCompleted": {
+    "description": "Sync completed status"
+  },
   "syncFailed": "Sync failed",
-  "@syncFailed": { "description": "Sync failed status" },
+  "@syncFailed": {
+    "description": "Sync failed status"
+  },
   "syncRetry": "Retry",
-  "@syncRetry": { "description": "Retry sync button" },
+  "@syncRetry": {
+    "description": "Retry sync button"
+  },
   "syncManual": "Sync Now",
-  "@syncManual": { "description": "Manual sync button" },
+  "@syncManual": {
+    "description": "Manual sync button"
+  },
   "syncLastTime": "Last sync: {time}",
-  "@syncLastTime": { "description": "Last sync time", "placeholders": { "time": { "type": "String" } } },
+  "@syncLastTime": {
+    "description": "Last sync time",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "syncOfflineQueued": "{count} changes pending",
-  "@syncOfflineQueued": { "description": "Offline queue count", "placeholders": { "count": { "type": "int" } } },
+  "@syncOfflineQueued": {
+    "description": "Offline queue count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "syncInitialProgress": "Initial sync...",
-  "@syncInitialProgress": { "description": "Initial sync in progress" },
+  "@syncInitialProgress": {
+    "description": "Initial sync in progress"
+  },
   "syncProfileUpdated": "{name} updated their profile",
-  "@syncProfileUpdated": { "description": "Profile update notification", "placeholders": { "name": { "type": "String" } } },
-
+  "@syncProfileUpdated": {
+    "description": "Profile update notification",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "familySyncManualSync": "Sync Ledger",
-  "@familySyncManualSync": { "description": "Manual sync button label" },
+  "@familySyncManualSync": {
+    "description": "Manual sync button label"
+  },
   "familySyncManualSyncDesc": "Manually sync data",
-  "@familySyncManualSyncDesc": { "description": "Manual sync button description" },
-
+  "@familySyncManualSyncDesc": {
+    "description": "Manual sync button description"
+  },
   "listTab": "List",
-  "@listTab": { "description": "List tab label in bottom navigation" },
-
+  "@listTab": {
+    "description": "List tab label in bottom navigation"
+  },
   "todoTab": "Todo",
-  "@todoTab": { "description": "Todo tab label in bottom navigation" },
-
+  "@todoTab": {
+    "description": "Todo tab label in bottom navigation"
+  },
   "datePickerComingSoon": "Date picker coming soon",
-  "@datePickerComingSoon": { "description": "Placeholder message for date picker feature" },
-
+  "@datePickerComingSoon": {
+    "description": "Placeholder message for date picker feature"
+  },
   "selectLanguage": "Select Language",
-  "@selectLanguage": { "description": "Title of language selection dialog" },
-
+  "@selectLanguage": {
+    "description": "Title of language selection dialog"
+  },
   "languageSystem": "Follow System",
-  "@languageSystem": { "description": "Option to follow system language setting" },
-
+  "@languageSystem": {
+    "description": "Option to follow system language setting"
+  },
   "initFailedTitle": "Initialization failed",
-  "@initFailedTitle": { "description": "Title shown on the AppInitializer failure fallback screen rendered before the main app mounts" },
-
+  "@initFailedTitle": {
+    "description": "Title shown on the AppInitializer failure fallback screen rendered before the main app mounts"
+  },
   "initFailedMessage": "Something went wrong while starting the app. Tap retry to try again.",
-  "@initFailedMessage": { "description": "Body message on the AppInitializer failure fallback screen — explains the failure plainly and points to the retry action. Must NOT include technical error details (those go to console logs)" },
-
+  "@initFailedMessage": {
+    "description": "Body message on the AppInitializer failure fallback screen — explains the failure plainly and points to the retry action. Must NOT include technical error details (those go to console logs)"
+  },
   "initFailedRetry": "Retry",
-  "@initFailedRetry": { "description": "Button label on the AppInitializer failure fallback screen. Re-invokes AppInitializer.initialize()" }
+  "@initFailedRetry": {
+    "description": "Button label on the AppInitializer failure fallback screen. Re-invokes AppInitializer.initialize()"
+  },
+  "@@locale": "en"
 }

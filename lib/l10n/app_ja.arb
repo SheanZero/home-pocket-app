@@ -1,121 +1,488 @@
 {
-  "@@locale": "ja",
   "appName": "まもる家計簿",
+  "@appName": {
+    "description": "App title"
+  },
   "home": "ホーム",
+  "@home": {
+    "description": "Home tab label"
+  },
   "transactions": "取引",
+  "@transactions": {
+    "description": "Transactions tab/screen label"
+  },
   "analytics": "分析",
+  "@analytics": {
+    "description": "Analytics tab/screen label"
+  },
   "settings": "設定",
+  "@settings": {
+    "description": "Settings tab/screen label"
+  },
   "ledger": "帳簿",
+  "@ledger": {
+    "description": "Ledger tab label"
+  },
   "newTransaction": "新しい取引",
+  "@newTransaction": {
+    "description": "New transaction screen title"
+  },
   "amount": "金額",
+  "@amount": {
+    "description": "Amount field label"
+  },
   "category": "カテゴリ",
+  "@category": {
+    "description": "Category field label"
+  },
   "note": "メモ",
+  "@note": {
+    "description": "Note field label"
+  },
   "merchant": "店舗",
+  "@merchant": {
+    "description": "Merchant field label"
+  },
   "date": "日付",
+  "@date": {
+    "description": "Date field label"
+  },
   "transactionTypeExpense": "支出",
+  "@transactionTypeExpense": {
+    "description": "Expense transaction type"
+  },
   "transactionTypeIncome": "収入",
+  "@transactionTypeIncome": {
+    "description": "Income transaction type"
+  },
   "categoryFood": "食費",
+  "@categoryFood": {
+    "description": "Food category"
+  },
   "categoryHousing": "住居",
+  "@categoryHousing": {
+    "description": "Housing category"
+  },
   "categoryTransport": "交通",
+  "@categoryTransport": {
+    "description": "Transport category"
+  },
   "categoryUtilities": "光熱費",
+  "@categoryUtilities": {
+    "description": "Utilities category"
+  },
   "categoryEntertainment": "娯楽",
+  "@categoryEntertainment": {
+    "description": "Entertainment category"
+  },
   "categoryEducation": "教育",
+  "@categoryEducation": {
+    "description": "Education category"
+  },
   "categoryHealth": "医療",
+  "@categoryHealth": {
+    "description": "Health category"
+  },
   "categoryShopping": "買物",
+  "@categoryShopping": {
+    "description": "Shopping category"
+  },
   "categoryOther": "その他",
+  "@categoryOther": {
+    "description": "Other category"
+  },
   "survivalLedger": "生存帳簿",
+  "@survivalLedger": {
+    "description": "Survival ledger label"
+  },
   "soulLedger": "魂帳簿",
+  "@soulLedger": {
+    "description": "Soul ledger label"
+  },
   "survival": "生存",
+  "@survival": {
+    "description": "Short survival label"
+  },
   "soul": "魂",
+  "@soul": {
+    "description": "Short soul label"
+  },
   "save": "保存",
+  "@save": {
+    "description": "Save action"
+  },
   "cancel": "キャンセル",
+  "@cancel": {
+    "description": "Generic cancel button label"
+  },
   "delete": "削除",
+  "@delete": {
+    "description": "Delete action"
+  },
   "edit": "編集",
+  "@edit": {
+    "description": "Edit action"
+  },
   "confirm": "確認",
+  "@confirm": {
+    "description": "Confirm action"
+  },
   "ok": "OK",
+  "@ok": {
+    "description": "OK action"
+  },
   "retry": "再試行",
+  "@retry": {
+    "description": "Retry action"
+  },
   "search": "検索",
+  "@search": {
+    "description": "Search action"
+  },
   "filter": "フィルター",
+  "@filter": {
+    "description": "Filter action"
+  },
   "sort": "並び替え",
+  "@sort": {
+    "description": "Sort action"
+  },
   "refresh": "更新",
+  "@refresh": {
+    "description": "Refresh action"
+  },
   "loading": "読み込み中...",
+  "@loading": {
+    "description": "Loading state text"
+  },
   "noData": "データがありません",
+  "@noData": {
+    "description": "Empty state text"
+  },
   "today": "今日",
+  "@today": {
+    "description": "Today label"
+  },
   "yesterday": "昨日",
+  "@yesterday": {
+    "description": "Yesterday label"
+  },
   "daysAgo": "{count}日前",
+  "@daysAgo": {
+    "description": "N days ago relative date",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "errorNetwork": "ネットワークエラー",
+  "@errorNetwork": {
+    "description": "Network error"
+  },
   "errorUnknown": "不明なエラーが発生しました",
+  "@errorUnknown": {
+    "description": "Unknown error"
+  },
   "errorInvalidAmount": "無効な金額です",
+  "@errorInvalidAmount": {
+    "description": "Invalid amount error"
+  },
   "errorRequired": "必須項目です",
+  "@errorRequired": {
+    "description": "Required field error"
+  },
   "errorInvalidDate": "無効な日付です",
+  "@errorInvalidDate": {
+    "description": "Invalid date error"
+  },
   "errorDatabaseWrite": "データベース書込エラー",
+  "@errorDatabaseWrite": {
+    "description": "Database write error"
+  },
   "errorDatabaseRead": "データベース読取エラー",
+  "@errorDatabaseRead": {
+    "description": "Database read error"
+  },
   "errorEncryption": "暗号化エラー",
+  "@errorEncryption": {
+    "description": "Encryption error"
+  },
   "errorSync": "同期エラー",
+  "@errorSync": {
+    "description": "Sync error"
+  },
   "errorBiometric": "生体認証エラー",
+  "@errorBiometric": {
+    "description": "Biometric error"
+  },
   "errorPermission": "権限エラー",
+  "@errorPermission": {
+    "description": "Permission error"
+  },
   "errorMinAmount": "{min}以上の金額を入力してください",
+  "@errorMinAmount": {
+    "description": "Minimum amount error",
+    "placeholders": {
+      "min": {
+        "type": "double"
+      }
+    }
+  },
   "errorMaxAmount": "{max}以下の金額を入力してください",
+  "@errorMaxAmount": {
+    "description": "Maximum amount error",
+    "placeholders": {
+      "max": {
+        "type": "double"
+      }
+    }
+  },
   "successSaved": "保存しました",
+  "@successSaved": {
+    "description": "Save success"
+  },
   "successDeleted": "削除しました",
+  "@successDeleted": {
+    "description": "Delete success"
+  },
   "successSynced": "同期しました",
+  "@successSynced": {
+    "description": "Sync success"
+  },
   "merchantPlaceholder": "店舗名を入力",
+  "@merchantPlaceholder": {
+    "description": "Merchant placeholder"
+  },
   "notePlaceholder": "メモを入力",
+  "@notePlaceholder": {
+    "description": "Note placeholder"
+  },
   "noteOptional": "メモ（任意）",
+  "@noteOptional": {
+    "description": "Optional note label"
+  },
   "pleaseEnterAmount": "金額を入力してください",
+  "@pleaseEnterAmount": {
+    "description": "Amount prompt"
+  },
   "amountMustBeGreaterThanZero": "金額は0より大きくしてください",
+  "@amountMustBeGreaterThanZero": {
+    "description": "Amount validation"
+  },
   "pleaseSelectCategory": "カテゴリを選択してください",
+  "@pleaseSelectCategory": {
+    "description": "Placeholder shown when no category is selected in confirm screen"
+  },
   "noTransactionsYet": "取引がまだありません",
+  "@noTransactionsYet": {
+    "description": "Empty transaction list"
+  },
   "tapToAddFirstTransaction": "＋をタップして最初の取引を追加",
+  "@tapToAddFirstTransaction": {
+    "description": "Empty state hint"
+  },
   "transactionSaved": "取引を保存しました",
+  "@transactionSaved": {
+    "description": "Transaction save success"
+  },
   "failedToSave": "保存に失敗しました",
+  "@failedToSave": {
+    "description": "Save failure"
+  },
   "appearance": "外観",
+  "@appearance": {
+    "description": "Appearance section title"
+  },
   "theme": "テーマ",
+  "@theme": {
+    "description": "Theme setting label"
+  },
   "selectTheme": "テーマを選択",
+  "@selectTheme": {
+    "description": "Theme dialog title"
+  },
   "themeSystem": "システム",
+  "@themeSystem": {
+    "description": "System theme"
+  },
   "themeLight": "ライト",
+  "@themeLight": {
+    "description": "Light theme"
+  },
   "themeDark": "ダーク",
+  "@themeDark": {
+    "description": "Dark theme"
+  },
   "security": "セキュリティ",
+  "@security": {
+    "description": "Security section title"
+  },
   "biometricLock": "生体認証ロック",
+  "@biometricLock": {
+    "description": "Biometric lock setting"
+  },
   "biometricLockDescription": "Face ID / 指紋認証でロック解除",
+  "@biometricLockDescription": {
+    "description": "Biometric lock subtitle"
+  },
   "notifications": "通知",
+  "@notifications": {
+    "description": "Notifications setting"
+  },
   "notificationsDescription": "予算アラートと同期通知",
+  "@notificationsDescription": {
+    "description": "Notifications subtitle"
+  },
   "dataManagement": "データ管理",
+  "@dataManagement": {
+    "description": "Data management section"
+  },
   "exportBackup": "バックアップをエクスポート",
+  "@exportBackup": {
+    "description": "Export backup action"
+  },
   "exportBackupDescription": "暗号化バックアップファイルを作成",
+  "@exportBackupDescription": {
+    "description": "Export subtitle"
+  },
   "importBackup": "バックアップをインポート",
+  "@importBackup": {
+    "description": "Import backup action"
+  },
   "importBackupDescription": "バックアップファイルから復元",
+  "@importBackupDescription": {
+    "description": "Import subtitle"
+  },
   "deleteAllData": "全データを削除",
+  "@deleteAllData": {
+    "description": "Delete all data action"
+  },
   "deleteAllDataDescription": "すべての記録を完全に削除",
+  "@deleteAllDataDescription": {
+    "description": "Delete all subtitle"
+  },
   "deleteAllDataConfirmation": "この操作は取り消せません。すべてのデータを削除してもよろしいですか？",
+  "@deleteAllDataConfirmation": {
+    "description": "Delete all confirmation"
+  },
   "allDataDeleted": "全データを削除しました",
+  "@allDataDeleted": {
+    "description": "Delete all success"
+  },
   "deleteFailed": "削除に失敗しました",
+  "@deleteFailed": {
+    "description": "Delete failure"
+  },
   "backupExportedSuccessfully": "バックアップをエクスポートしました",
+  "@backupExportedSuccessfully": {
+    "description": "Export success"
+  },
   "exportFailed": "エクスポートに失敗しました",
+  "@exportFailed": {
+    "description": "Export failure"
+  },
   "backupImportedSuccessfully": "バックアップをインポートしました",
+  "@backupImportedSuccessfully": {
+    "description": "Import success"
+  },
   "importFailed": "インポートに失敗しました",
+  "@importFailed": {
+    "description": "Import failure"
+  },
   "setBackupPassword": "バックアップパスワードを設定",
+  "@setBackupPassword": {
+    "description": "Export password dialog title"
+  },
   "enterBackupPassword": "バックアップパスワードを入力",
+  "@enterBackupPassword": {
+    "description": "Import password dialog title"
+  },
   "enterPassword": "パスワードを入力",
+  "@enterPassword": {
+    "description": "Password hint"
+  },
   "confirmPassword": "パスワードを確認",
+  "@confirmPassword": {
+    "description": "Confirm password hint"
+  },
   "passwordMinLength": "パスワードは8文字以上にしてください",
+  "@passwordMinLength": {
+    "description": "Password validation"
+  },
   "passwordsDoNotMatch": "パスワードが一致しません",
+  "@passwordsDoNotMatch": {
+    "description": "Password mismatch"
+  },
   "about": "このアプリについて",
+  "@about": {
+    "description": "About section title"
+  },
   "version": "バージョン",
+  "@version": {
+    "description": "Version label"
+  },
   "privacyPolicy": "プライバシーポリシー",
+  "@privacyPolicy": {
+    "description": "Privacy policy link"
+  },
   "openSourceLicenses": "オープンソースライセンス",
+  "@openSourceLicenses": {
+    "description": "Licenses link"
+  },
   "generateDemoData": "デモデータを生成",
+  "@generateDemoData": {
+    "description": "Demo data action"
+  },
   "generateDemoDataDescription": "過去3か月分のサンプル取引を作成し、分析機能をデモします。",
+  "@generateDemoDataDescription": {
+    "description": "Demo data dialog text"
+  },
   "generate": "生成",
+  "@generate": {
+    "description": "Generate action"
+  },
   "demoDataGenerated": "デモデータを生成しました！引っ張って更新してください。",
+  "@demoDataGenerated": {
+    "description": "Demo data success"
+  },
   "language": "言語",
+  "@language": {
+    "description": "Language setting label"
+  },
   "languageJapanese": "日本語",
+  "@languageJapanese": {
+    "description": "Japanese language option"
+  },
   "languageEnglish": "English",
+  "@languageEnglish": {
+    "description": "English language option"
+  },
   "languageChinese": "中文",
+  "@languageChinese": {
+    "description": "Chinese language option"
+  },
   "confirmDelete": "削除の確認",
+  "@confirmDelete": {
+    "description": "Confirm delete dialog title"
+  },
   "deleteTransactionConfirmation": "この取引を削除しますか？",
+  "@deleteTransactionConfirmation": {
+    "description": "Delete transaction confirmation message"
+  },
   "error": "エラー",
+  "@error": {
+    "description": "Generic error title for error screens"
+  },
   "initializationError": "初期化に失敗しました: {error}",
+  "@initializationError": {
+    "description": "Error message when app initialization fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "profileSetup": "はじめまして！",
   "profileSetupSubtitle": "まもる家計簿へようこそ",
   "profileNickname": "あなたの呼び名",
@@ -137,72 +504,289 @@
   "profileSaveFailed": "保存に失敗しました",
   "profileNameTooLong": "ニックネームは50文字以内で入力してください",
   "profileUploadPhoto": "写真をアップロード",
-
   "homeMonthlyExpense": "今月の出費",
+  "@homeMonthlyExpense": {
+    "description": "Home card title for monthly expense overview"
+  },
   "homeSurvivalExpense": "暮らしの支出",
+  "@homeSurvivalExpense": {
+    "description": "Survival ledger expense label"
+  },
   "homeSoulExpense": "ときめき支出",
+  "@homeSoulExpense": {
+    "description": "Soul ledger expense label"
+  },
   "homeMonthComparison": "先月比",
+  "@homeMonthComparison": {
+    "description": "Month-over-month comparison header"
+  },
   "homeSoulFullness": "魂の充実度",
+  "@homeSoulFullness": {
+    "description": "Soul fullness section title"
+  },
   "homeSoulPercentLabel": "今月の魂支出の割合",
+  "@homeSoulPercentLabel": {
+    "description": "Soul spending percentage metric label"
+  },
   "homeHappinessROI": "幸せROI",
+  "@homeHappinessROI": {
+    "description": "Happiness ROI metric label"
+  },
   "homeFamilyInviteTitle": "家族を招待する",
+  "@homeFamilyInviteTitle": {
+    "description": "Family invite banner title"
+  },
   "homeFamilyInviteDesc": "パートナーと家計簿を共有しよう",
+  "@homeFamilyInviteDesc": {
+    "description": "Family invite banner description"
+  },
   "homeTodayTitle": "今日の記録",
+  "@homeTodayTitle": {
+    "description": "Today's transaction section title"
+  },
   "homeTodayCount": "{count}件",
+  "@homeTodayCount": {
+    "description": "Transaction count for today",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "homePersonalMode": "個人モード",
+  "@homePersonalMode": {
+    "description": "Mode badge for personal/solo mode"
+  },
   "homeFamilyMode": "家族モード",
+  "@homeFamilyMode": {
+    "description": "Mode badge for family/group mode"
+  },
   "homeTabHome": "ホーム",
+  "@homeTabHome": {
+    "description": "Bottom nav home tab label"
+  },
   "homeTabList": "一覧",
+  "@homeTabList": {
+    "description": "Bottom nav list tab label"
+  },
   "homeTabChart": "チャート",
+  "@homeTabChart": {
+    "description": "Bottom nav charts tab label"
+  },
   "homeTabTodo": "やること",
+  "@homeTabTodo": {
+    "description": "Bottom nav todo tab label"
+  },
   "homeMonthFormat": "{year}年{month}月",
+  "@homeMonthFormat": {
+    "description": "Year and month display format",
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      }
+    }
+  },
   "homeMonthLabel": "{month}月",
-  "homeRecentSoulTransaction": "直近: {merchant} \u00a5{amount}",
-  "homeSoulChargeStatus": "魂の充実度 {fullness}% \u00b7 幸せROI {roi}x",
+  "@homeMonthLabel": {
+    "description": "Short month label for bar chart",
+    "placeholders": {
+      "month": {
+        "type": "int"
+      }
+    }
+  },
+  "homeRecentSoulTransaction": "直近: {merchant} ¥{amount}",
+  "@homeRecentSoulTransaction": {
+    "description": "Recent soul transaction summary",
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "homeSoulChargeStatus": "魂の充実度 {fullness}% · 幸せROI {roi}x",
+  "@homeSoulChargeStatus": {
+    "description": "Soul charge card status line",
+    "placeholders": {
+      "fullness": {
+        "type": "int"
+      },
+      "roi": {
+        "type": "double"
+      }
+    }
+  },
   "homeMonthBadge": "今月 {percent}%",
-
+  "@homeMonthBadge": {
+    "description": "Soul fullness month badge",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "addTransaction": "取引を追加",
+  "@addTransaction": {
+    "description": "Transaction entry screen title"
+  },
   "manualInput": "手動入力",
+  "@manualInput": {
+    "description": "Manual input mode tab label"
+  },
   "ocrScan": "OCR",
+  "@ocrScan": {
+    "description": "OCR scan mode tab label. Future OCR/MOD-005 stub."
+  },
   "voiceInput": "音声",
+  "@voiceInput": {
+    "description": "Voice input mode tab label"
+  },
   "selectCategory": "分類を選択",
+  "@selectCategory": {
+    "description": "Category selection screen title"
+  },
   "searchCategory": "分類を検索...",
+  "@searchCategory": {
+    "description": "Category search placeholder"
+  },
   "expenseDetail": "支出の詳細",
+  "@expenseDetail": {
+    "description": "Confirm screen title"
+  },
   "back": "戻る",
+  "@back": {
+    "description": "Back navigation label"
+  },
   "record": "記録する",
+  "@record": {
+    "description": "Save/record transaction button"
+  },
   "enterStore": "お店を入力",
+  "@enterStore": {
+    "description": "Store input placeholder"
+  },
   "enterMemo": "メモを入力...",
+  "@enterMemo": {
+    "description": "Memo input placeholder"
+  },
   "expenseClassification": "支出分類",
+  "@expenseClassification": {
+    "description": "Ledger type section title"
+  },
   "survivalExpense": "生存支出",
+  "@survivalExpense": {
+    "description": "Survival ledger chip label"
+  },
   "soulExpense": "魂支出",
+  "@soulExpense": {
+    "description": "Soul ledger chip label"
+  },
   "soulSatisfaction": "魂の充盈度",
+  "@soulSatisfaction": {
+    "description": "Soul satisfaction slider label"
+  },
   "addPhoto": "写真を追加",
+  "@addPhoto": {
+    "description": "Add photo button label"
+  },
   "ocrScanTitle": "OCRスキャン入力",
+  "@ocrScanTitle": {
+    "description": "OCR scanner screen title. Future OCR/MOD-005 stub."
+  },
   "ocrHint": "レシートを枠内に収めてください",
+  "@ocrHint": {
+    "description": "OCR scanner hint text. Future OCR/MOD-005 stub."
+  },
   "voiceRecognitionResult": "認識結果",
   "@voiceRecognitionResult": {
     "description": "Label shown above the recognized voice transcript"
   },
   "recognitionResult": "認識結果",
+  "@recognitionResult": {
+    "description": "Section label shown above the parsed voice recognition card"
+  },
   "satisfactionLevel": "満足度",
+  "@satisfactionLevel": {
+    "description": "Header label for the emoji satisfaction picker"
+  },
   "satisfactionBad": "不満",
+  "@satisfactionBad": {
+    "description": "Lowest satisfaction label"
+  },
   "satisfactionSlightlyBad": "やや不満",
+  "@satisfactionSlightlyBad": {
+    "description": "Second lowest satisfaction label"
+  },
   "satisfactionNormal": "普通",
+  "@satisfactionNormal": {
+    "description": "Neutral satisfaction label"
+  },
   "satisfactionGood": "良い",
+  "@satisfactionGood": {
+    "description": "Positive satisfaction label"
+  },
   "satisfactionVeryGood": "とても良い",
+  "@satisfactionVeryGood": {
+    "description": "High satisfaction label"
+  },
   "satisfactionExcellent": "最高！",
+  "@satisfactionExcellent": {
+    "description": "Highest satisfaction label"
+  },
   "addSubcategory": "追加",
+  "@addSubcategory": {
+    "description": "Action chip label to add a subcategory"
+  },
   "addCategory": "カテゴリを追加",
+  "@addCategory": {
+    "description": "Bottom action button label to add a category"
+  },
   "editCategoryOrder": "順序を編集",
+  "@editCategoryOrder": {
+    "description": "AppBar title during category reorder edit mode"
+  },
   "dragToReorder": "ドラッグして並べ替え",
+  "@dragToReorder": {
+    "description": "Hint banner shown in category reorder edit mode"
+  },
   "orderUpdated": "順序を更新しました",
+  "@orderUpdated": {
+    "description": "SnackBar shown after successfully saving category reorder"
+  },
   "orderSaveFailed": "保存に失敗しました。再試行してください",
+  "@orderSaveFailed": {
+    "description": "SnackBar shown when saving category reorder fails"
+  },
   "discardUnsavedChanges": "未保存の変更を破棄しますか？",
+  "@discardUnsavedChanges": {
+    "description": "Dialog title when cancelling reorder with unsaved changes"
+  },
   "keepEditing": "編集を続ける",
+  "@keepEditing": {
+    "description": "Dialog cancel button: keep editing"
+  },
   "discard": "破棄",
+  "@discard": {
+    "description": "Dialog confirm button: discard unsaved changes"
+  },
   "tapToRecord": "タップして録音",
+  "@tapToRecord": {
+    "description": "Voice input hint"
+  },
   "todayDate": "今日",
+  "@todayDate": {
+    "description": "Today date chip label"
+  },
   "next": "次へ",
+  "@next": {
+    "description": "Next button label"
+  },
   "voiceInputSettings": "音声認識",
   "@voiceInputSettings": {
     "description": "Voice input settings section title"
@@ -215,11 +799,6 @@
   "@voiceLanguageSubtitle": {
     "description": "Subtitle for voice language setting"
   },
-  "pleaseSelectCategory": "カテゴリを選択してください",
-  "@pleaseSelectCategory": {
-    "description": "Placeholder shown when no category is selected in confirm screen"
-  },
-
   "familySync": "ファミリー同期",
   "@familySync": {
     "description": "Title for the family sync feature"
@@ -300,7 +879,7 @@
     "placeholders": {
       "message": {
         "type": "String",
-        "example": "ネットワークエラー"
+        "example": "Network error"
       }
     }
   },
@@ -333,7 +912,18 @@
     "description": "Sync status description when pairing"
   },
   "familySyncCheckingGroup": "グループ状況を確認中...",
+  "@familySyncCheckingGroup": {
+    "description": "Loading text while checking whether the device is already in a group"
+  },
   "familySyncCheckFailed": "グループ状況を確認できません: {message}",
+  "@familySyncCheckFailed": {
+    "description": "Error shown when verifying current group membership fails",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
   "familySyncStatusUnpaired": "タップしてファミリーグループを作成または参加",
   "@familySyncStatusUnpaired": {
     "description": "Sync status description when unpaired"
@@ -392,7 +982,7 @@
     "placeholders": {
       "message": {
         "type": "String",
-        "example": "ネットワークエラー"
+        "example": "Network error"
       }
     }
   },
@@ -402,7 +992,7 @@
     "placeholders": {
       "message": {
         "type": "String",
-        "example": "ネットワークエラー"
+        "example": "Network error"
       }
     }
   },
@@ -416,7 +1006,7 @@
     "placeholders": {
       "message": {
         "type": "String",
-        "example": "ネットワークエラー"
+        "example": "Network error"
       }
     }
   },
@@ -460,7 +1050,7 @@
     "placeholders": {
       "deviceName": {
         "type": "String",
-        "example": "キッチンタブレット"
+        "example": "Kitchen tablet"
       }
     }
   },
@@ -470,7 +1060,7 @@
     "placeholders": {
       "message": {
         "type": "String",
-        "example": "ネットワークエラー"
+        "example": "Network error"
       }
     }
   },
@@ -611,20 +1201,27 @@
       }
     }
   },
-  "cancel": "キャンセル",
-  "@cancel": {
-    "description": "Generic cancel button label"
-  },
-
   "groupDefaultName": "{name}の家庭",
-  "@groupDefaultName": { "placeholders": { "name": { "type": "String" } } },
+  "@groupDefaultName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "groupCreate": "グループを作成",
   "groupName": "グループ名",
   "groupOwner": "オーナー",
   "groupMember": "メンバー",
   "groupInviteCode": "招待コード",
   "groupInviteExpiry": "{minutes}分以内に有効",
-  "@groupInviteExpiry": { "placeholders": { "minutes": { "type": "int" } } },
+  "@groupInviteExpiry": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "groupShareCode": "招待コードを共有",
   "groupEnterCode": "招待コードを入力",
   "groupVerify": "検証",
@@ -632,10 +1229,22 @@
   "groupJoinTarget": "参加するグループ",
   "groupWaitingApproval": "オーナーの承認を待っています...",
   "groupWaitingDesc": "{name} があなたのリクエストを確認中",
-  "@groupWaitingDesc": { "placeholders": { "name": { "type": "String" } } },
+  "@groupWaitingDesc": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "groupJoinRequest": "参加リクエストを受信",
   "groupJoinRequestDesc": "{name} が参加を申請しています",
-  "@groupJoinRequestDesc": { "placeholders": { "name": { "type": "String" } } },
+  "@groupJoinRequestDesc": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "groupApprove": "承認",
   "groupReject": "拒否",
   "groupJoinSuccess": "ようこそ！",
@@ -659,27 +1268,95 @@
   "groupCodeHint": "招待コードはグループのオーナーに聞いてください",
   "groupBack": "戻る",
   "syncInProgress": "同期中...",
+  "@syncInProgress": {
+    "description": "Sync in progress status"
+  },
   "syncCompleted": "同期完了",
+  "@syncCompleted": {
+    "description": "Sync completed status"
+  },
   "syncFailed": "同期に失敗しました",
+  "@syncFailed": {
+    "description": "Sync failed status"
+  },
   "syncRetry": "再試行",
+  "@syncRetry": {
+    "description": "Retry sync button"
+  },
   "syncManual": "手動で同期",
+  "@syncManual": {
+    "description": "Manual sync button"
+  },
   "syncLastTime": "最終同期: {time}",
+  "@syncLastTime": {
+    "description": "Last sync time",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "syncOfflineQueued": "{count}件の変更が��信待ち",
+  "@syncOfflineQueued": {
+    "description": "Offline queue count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "syncInitialProgress": "初回同期中...",
+  "@syncInitialProgress": {
+    "description": "Initial sync in progress"
+  },
   "syncProfileUpdated": "{name}がプロフィール���更新しました",
-
+  "@syncProfileUpdated": {
+    "description": "Profile update notification",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "familySyncManualSync": "帳簿を同期",
-  "@familySyncManualSync": { "description": "Manual sync button label" },
+  "@familySyncManualSync": {
+    "description": "Manual sync button label"
+  },
   "familySyncManualSyncDesc": "手動でデータを同期",
-  "@familySyncManualSyncDesc": { "description": "Manual sync button description" },
-
+  "@familySyncManualSyncDesc": {
+    "description": "Manual sync button description"
+  },
   "listTab": "リスト",
+  "@listTab": {
+    "description": "List tab label in bottom navigation"
+  },
   "todoTab": "やること",
+  "@todoTab": {
+    "description": "Todo tab label in bottom navigation"
+  },
   "datePickerComingSoon": "日付選択は近日公開",
+  "@datePickerComingSoon": {
+    "description": "Placeholder message for date picker feature"
+  },
   "selectLanguage": "言語を選択",
+  "@selectLanguage": {
+    "description": "Title of language selection dialog"
+  },
   "languageSystem": "システム設定に従う",
-
+  "@languageSystem": {
+    "description": "Option to follow system language setting"
+  },
   "initFailedTitle": "初期化に失敗しました",
+  "@initFailedTitle": {
+    "description": "Title shown on the AppInitializer failure fallback screen rendered before the main app mounts"
+  },
   "initFailedMessage": "アプリの起動中に問題が発生しました。再試行ボタンをタップしてください。",
-  "initFailedRetry": "再試行"
+  "@initFailedMessage": {
+    "description": "Body message on the AppInitializer failure fallback screen — explains the failure plainly and points to the retry action. Must NOT include technical error details (those go to console logs)"
+  },
+  "initFailedRetry": "再試行",
+  "@initFailedRetry": {
+    "description": "Button label on the AppInitializer failure fallback screen. Re-invokes AppInitializer.initialize()"
+  },
+  "@@locale": "ja"
 }

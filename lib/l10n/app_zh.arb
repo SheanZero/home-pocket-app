@@ -1,121 +1,488 @@
 {
-  "@@locale": "zh",
   "appName": "守护家计簿",
+  "@appName": {
+    "description": "App title"
+  },
   "home": "首页",
+  "@home": {
+    "description": "Home tab label"
+  },
   "transactions": "交易",
+  "@transactions": {
+    "description": "Transactions tab/screen label"
+  },
   "analytics": "分析",
+  "@analytics": {
+    "description": "Analytics tab/screen label"
+  },
   "settings": "设置",
+  "@settings": {
+    "description": "Settings tab/screen label"
+  },
   "ledger": "账本",
+  "@ledger": {
+    "description": "Ledger tab label"
+  },
   "newTransaction": "新交易",
+  "@newTransaction": {
+    "description": "New transaction screen title"
+  },
   "amount": "金额",
+  "@amount": {
+    "description": "Amount field label"
+  },
   "category": "分类",
+  "@category": {
+    "description": "Category field label"
+  },
   "note": "备注",
+  "@note": {
+    "description": "Note field label"
+  },
   "merchant": "商家",
+  "@merchant": {
+    "description": "Merchant field label"
+  },
   "date": "日期",
+  "@date": {
+    "description": "Date field label"
+  },
   "transactionTypeExpense": "支出",
+  "@transactionTypeExpense": {
+    "description": "Expense transaction type"
+  },
   "transactionTypeIncome": "收入",
+  "@transactionTypeIncome": {
+    "description": "Income transaction type"
+  },
   "categoryFood": "餐饮",
+  "@categoryFood": {
+    "description": "Food category"
+  },
   "categoryHousing": "住房",
+  "@categoryHousing": {
+    "description": "Housing category"
+  },
   "categoryTransport": "交通",
+  "@categoryTransport": {
+    "description": "Transport category"
+  },
   "categoryUtilities": "水电费",
+  "@categoryUtilities": {
+    "description": "Utilities category"
+  },
   "categoryEntertainment": "娱乐",
+  "@categoryEntertainment": {
+    "description": "Entertainment category"
+  },
   "categoryEducation": "教育",
+  "@categoryEducation": {
+    "description": "Education category"
+  },
   "categoryHealth": "医疗",
+  "@categoryHealth": {
+    "description": "Health category"
+  },
   "categoryShopping": "购物",
+  "@categoryShopping": {
+    "description": "Shopping category"
+  },
   "categoryOther": "其他",
+  "@categoryOther": {
+    "description": "Other category"
+  },
   "survivalLedger": "生存账本",
+  "@survivalLedger": {
+    "description": "Survival ledger label"
+  },
   "soulLedger": "灵魂账本",
+  "@soulLedger": {
+    "description": "Soul ledger label"
+  },
   "survival": "生存",
+  "@survival": {
+    "description": "Short survival label"
+  },
   "soul": "灵魂",
+  "@soul": {
+    "description": "Short soul label"
+  },
   "save": "保存",
+  "@save": {
+    "description": "Save action"
+  },
   "cancel": "取消",
+  "@cancel": {
+    "description": "Generic cancel button label"
+  },
   "delete": "删除",
+  "@delete": {
+    "description": "Delete action"
+  },
   "edit": "编辑",
+  "@edit": {
+    "description": "Edit action"
+  },
   "confirm": "确认",
+  "@confirm": {
+    "description": "Confirm action"
+  },
   "ok": "确定",
+  "@ok": {
+    "description": "OK action"
+  },
   "retry": "重试",
+  "@retry": {
+    "description": "Retry action"
+  },
   "search": "搜索",
+  "@search": {
+    "description": "Search action"
+  },
   "filter": "筛选",
+  "@filter": {
+    "description": "Filter action"
+  },
   "sort": "排序",
+  "@sort": {
+    "description": "Sort action"
+  },
   "refresh": "刷新",
+  "@refresh": {
+    "description": "Refresh action"
+  },
   "loading": "加载中...",
+  "@loading": {
+    "description": "Loading state text"
+  },
   "noData": "暂无数据",
+  "@noData": {
+    "description": "Empty state text"
+  },
   "today": "今天",
+  "@today": {
+    "description": "Today label"
+  },
   "yesterday": "昨天",
+  "@yesterday": {
+    "description": "Yesterday label"
+  },
   "daysAgo": "{count}天前",
+  "@daysAgo": {
+    "description": "N days ago relative date",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "errorNetwork": "网络错误",
+  "@errorNetwork": {
+    "description": "Network error"
+  },
   "errorUnknown": "发生未知错误",
+  "@errorUnknown": {
+    "description": "Unknown error"
+  },
   "errorInvalidAmount": "无效金额",
+  "@errorInvalidAmount": {
+    "description": "Invalid amount error"
+  },
   "errorRequired": "必填项",
+  "@errorRequired": {
+    "description": "Required field error"
+  },
   "errorInvalidDate": "无效日期",
+  "@errorInvalidDate": {
+    "description": "Invalid date error"
+  },
   "errorDatabaseWrite": "数据库写入错误",
+  "@errorDatabaseWrite": {
+    "description": "Database write error"
+  },
   "errorDatabaseRead": "数据库读取错误",
+  "@errorDatabaseRead": {
+    "description": "Database read error"
+  },
   "errorEncryption": "加密错误",
+  "@errorEncryption": {
+    "description": "Encryption error"
+  },
   "errorSync": "同步错误",
+  "@errorSync": {
+    "description": "Sync error"
+  },
   "errorBiometric": "生物识别错误",
+  "@errorBiometric": {
+    "description": "Biometric error"
+  },
   "errorPermission": "权限错误",
+  "@errorPermission": {
+    "description": "Permission error"
+  },
   "errorMinAmount": "请输入至少{min}的金额",
+  "@errorMinAmount": {
+    "description": "Minimum amount error",
+    "placeholders": {
+      "min": {
+        "type": "double"
+      }
+    }
+  },
   "errorMaxAmount": "请输入不超过{max}的金额",
+  "@errorMaxAmount": {
+    "description": "Maximum amount error",
+    "placeholders": {
+      "max": {
+        "type": "double"
+      }
+    }
+  },
   "successSaved": "保存成功",
+  "@successSaved": {
+    "description": "Save success"
+  },
   "successDeleted": "删除成功",
+  "@successDeleted": {
+    "description": "Delete success"
+  },
   "successSynced": "同步成功",
+  "@successSynced": {
+    "description": "Sync success"
+  },
   "merchantPlaceholder": "请输入商家名称",
+  "@merchantPlaceholder": {
+    "description": "Merchant placeholder"
+  },
   "notePlaceholder": "请输入备注",
+  "@notePlaceholder": {
+    "description": "Note placeholder"
+  },
   "noteOptional": "备注（可选）",
+  "@noteOptional": {
+    "description": "Optional note label"
+  },
   "pleaseEnterAmount": "请输入金额",
+  "@pleaseEnterAmount": {
+    "description": "Amount prompt"
+  },
   "amountMustBeGreaterThanZero": "金额必须大于零",
-  "pleaseSelectCategory": "请选择分类",
+  "@amountMustBeGreaterThanZero": {
+    "description": "Amount validation"
+  },
+  "pleaseSelectCategory": "请选择类别",
+  "@pleaseSelectCategory": {
+    "description": "Placeholder shown when no category is selected in confirm screen"
+  },
   "noTransactionsYet": "暂无交易记录",
+  "@noTransactionsYet": {
+    "description": "Empty transaction list"
+  },
   "tapToAddFirstTransaction": "点击 + 添加第一笔交易",
+  "@tapToAddFirstTransaction": {
+    "description": "Empty state hint"
+  },
   "transactionSaved": "交易已保存",
+  "@transactionSaved": {
+    "description": "Transaction save success"
+  },
   "failedToSave": "保存失败",
+  "@failedToSave": {
+    "description": "Save failure"
+  },
   "appearance": "外观",
+  "@appearance": {
+    "description": "Appearance section title"
+  },
   "theme": "主题",
+  "@theme": {
+    "description": "Theme setting label"
+  },
   "selectTheme": "选择主题",
+  "@selectTheme": {
+    "description": "Theme dialog title"
+  },
   "themeSystem": "跟随系统",
+  "@themeSystem": {
+    "description": "System theme"
+  },
   "themeLight": "浅色",
+  "@themeLight": {
+    "description": "Light theme"
+  },
   "themeDark": "深色",
+  "@themeDark": {
+    "description": "Dark theme"
+  },
   "security": "安全",
+  "@security": {
+    "description": "Security section title"
+  },
   "biometricLock": "生物识别锁",
+  "@biometricLock": {
+    "description": "Biometric lock setting"
+  },
   "biometricLockDescription": "使用面容/指纹解锁",
+  "@biometricLockDescription": {
+    "description": "Biometric lock subtitle"
+  },
   "notifications": "通知",
+  "@notifications": {
+    "description": "Notifications setting"
+  },
   "notificationsDescription": "预算提醒和同步通知",
+  "@notificationsDescription": {
+    "description": "Notifications subtitle"
+  },
   "dataManagement": "数据管理",
+  "@dataManagement": {
+    "description": "Data management section"
+  },
   "exportBackup": "导出备份",
+  "@exportBackup": {
+    "description": "Export backup action"
+  },
   "exportBackupDescription": "创建加密备份文件",
+  "@exportBackupDescription": {
+    "description": "Export subtitle"
+  },
   "importBackup": "导入备份",
+  "@importBackup": {
+    "description": "Import backup action"
+  },
   "importBackupDescription": "从备份文件恢复",
+  "@importBackupDescription": {
+    "description": "Import subtitle"
+  },
   "deleteAllData": "删除所有数据",
+  "@deleteAllData": {
+    "description": "Delete all data action"
+  },
   "deleteAllDataDescription": "永久删除所有记录",
+  "@deleteAllDataDescription": {
+    "description": "Delete all subtitle"
+  },
   "deleteAllDataConfirmation": "此操作无法撤销。您确定要删除所有数据吗？",
+  "@deleteAllDataConfirmation": {
+    "description": "Delete all confirmation"
+  },
   "allDataDeleted": "所有数据已删除",
+  "@allDataDeleted": {
+    "description": "Delete all success"
+  },
   "deleteFailed": "删除失败",
+  "@deleteFailed": {
+    "description": "Delete failure"
+  },
   "backupExportedSuccessfully": "备份导出成功",
+  "@backupExportedSuccessfully": {
+    "description": "Export success"
+  },
   "exportFailed": "导出失败",
+  "@exportFailed": {
+    "description": "Export failure"
+  },
   "backupImportedSuccessfully": "备份导入成功",
+  "@backupImportedSuccessfully": {
+    "description": "Import success"
+  },
   "importFailed": "导入失败",
+  "@importFailed": {
+    "description": "Import failure"
+  },
   "setBackupPassword": "设置备份密码",
+  "@setBackupPassword": {
+    "description": "Export password dialog title"
+  },
   "enterBackupPassword": "输入备份密码",
+  "@enterBackupPassword": {
+    "description": "Import password dialog title"
+  },
   "enterPassword": "输入密码",
+  "@enterPassword": {
+    "description": "Password hint"
+  },
   "confirmPassword": "确认密码",
+  "@confirmPassword": {
+    "description": "Confirm password hint"
+  },
   "passwordMinLength": "密码至少需要8个字符",
+  "@passwordMinLength": {
+    "description": "Password validation"
+  },
   "passwordsDoNotMatch": "两次输入的密码不一致",
+  "@passwordsDoNotMatch": {
+    "description": "Password mismatch"
+  },
   "about": "关于",
+  "@about": {
+    "description": "About section title"
+  },
   "version": "版本",
+  "@version": {
+    "description": "Version label"
+  },
   "privacyPolicy": "隐私政策",
+  "@privacyPolicy": {
+    "description": "Privacy policy link"
+  },
   "openSourceLicenses": "开源许可",
+  "@openSourceLicenses": {
+    "description": "Licenses link"
+  },
   "generateDemoData": "生成演示数据",
+  "@generateDemoData": {
+    "description": "Demo data action"
+  },
   "generateDemoDataDescription": "将创建过去3个月的示例交易，以展示分析功能。",
+  "@generateDemoDataDescription": {
+    "description": "Demo data dialog text"
+  },
   "generate": "生成",
+  "@generate": {
+    "description": "Generate action"
+  },
   "demoDataGenerated": "演示数据已生成！下拉刷新查看。",
+  "@demoDataGenerated": {
+    "description": "Demo data success"
+  },
   "language": "语言",
+  "@language": {
+    "description": "Language setting label"
+  },
   "languageJapanese": "日本語",
+  "@languageJapanese": {
+    "description": "Japanese language option"
+  },
   "languageEnglish": "English",
+  "@languageEnglish": {
+    "description": "English language option"
+  },
   "languageChinese": "中文",
+  "@languageChinese": {
+    "description": "Chinese language option"
+  },
   "confirmDelete": "确认删除",
+  "@confirmDelete": {
+    "description": "Confirm delete dialog title"
+  },
   "deleteTransactionConfirmation": "删除此交易？",
+  "@deleteTransactionConfirmation": {
+    "description": "Delete transaction confirmation message"
+  },
   "error": "错误",
+  "@error": {
+    "description": "Generic error title for error screens"
+  },
   "initializationError": "初始化失败: {error}",
+  "@initializationError": {
+    "description": "Error message when app initialization fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "profileSetup": "初次见面！",
   "profileSetupSubtitle": "欢迎使用守护家计簿",
   "profileNickname": "你的昵称",
@@ -137,72 +504,289 @@
   "profileSaveFailed": "保存失败",
   "profileNameTooLong": "昵称不能超过50个字符",
   "profileUploadPhoto": "上传照片",
-
   "homeMonthlyExpense": "本月支出",
+  "@homeMonthlyExpense": {
+    "description": "Home card title for monthly expense overview"
+  },
   "homeSurvivalExpense": "生存支出",
+  "@homeSurvivalExpense": {
+    "description": "Survival ledger expense label"
+  },
   "homeSoulExpense": "灵魂支出",
+  "@homeSoulExpense": {
+    "description": "Soul ledger expense label"
+  },
   "homeMonthComparison": "较上月",
+  "@homeMonthComparison": {
+    "description": "Month-over-month comparison header"
+  },
   "homeSoulFullness": "灵魂充盈度",
+  "@homeSoulFullness": {
+    "description": "Soul fullness section title"
+  },
   "homeSoulPercentLabel": "本月灵魂支出占比",
+  "@homeSoulPercentLabel": {
+    "description": "Soul spending percentage metric label"
+  },
   "homeHappinessROI": "快乐 ROI",
+  "@homeHappinessROI": {
+    "description": "Happiness ROI metric label"
+  },
   "homeFamilyInviteTitle": "邀请家人",
+  "@homeFamilyInviteTitle": {
+    "description": "Family invite banner title"
+  },
   "homeFamilyInviteDesc": "与伴侣共享家计簿",
+  "@homeFamilyInviteDesc": {
+    "description": "Family invite banner description"
+  },
   "homeTodayTitle": "今日记录",
+  "@homeTodayTitle": {
+    "description": "Today's transaction section title"
+  },
   "homeTodayCount": "{count}条",
+  "@homeTodayCount": {
+    "description": "Transaction count for today",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "homePersonalMode": "个人模式",
+  "@homePersonalMode": {
+    "description": "Mode badge for personal/solo mode"
+  },
   "homeFamilyMode": "家庭模式",
+  "@homeFamilyMode": {
+    "description": "Mode badge for family/group mode"
+  },
   "homeTabHome": "主页",
+  "@homeTabHome": {
+    "description": "Bottom nav home tab label"
+  },
   "homeTabList": "列表",
+  "@homeTabList": {
+    "description": "Bottom nav list tab label"
+  },
   "homeTabChart": "图表",
+  "@homeTabChart": {
+    "description": "Bottom nav charts tab label"
+  },
   "homeTabTodo": "待办事项",
+  "@homeTabTodo": {
+    "description": "Bottom nav todo tab label"
+  },
   "homeMonthFormat": "{year}年{month}月",
+  "@homeMonthFormat": {
+    "description": "Year and month display format",
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      }
+    }
+  },
   "homeMonthLabel": "{month}月",
-  "homeRecentSoulTransaction": "最近一笔: {merchant} \u00a5{amount}",
-  "homeSoulChargeStatus": "灵魂充盈度 {fullness}% \u00b7 快乐ROI {roi}x",
+  "@homeMonthLabel": {
+    "description": "Short month label for bar chart",
+    "placeholders": {
+      "month": {
+        "type": "int"
+      }
+    }
+  },
+  "homeRecentSoulTransaction": "最近一笔: {merchant} ¥{amount}",
+  "@homeRecentSoulTransaction": {
+    "description": "Recent soul transaction summary",
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "homeSoulChargeStatus": "灵魂充盈度 {fullness}% · 快乐ROI {roi}x",
+  "@homeSoulChargeStatus": {
+    "description": "Soul charge card status line",
+    "placeholders": {
+      "fullness": {
+        "type": "int"
+      },
+      "roi": {
+        "type": "double"
+      }
+    }
+  },
   "homeMonthBadge": "本月 {percent}%",
-
+  "@homeMonthBadge": {
+    "description": "Soul fullness month badge",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "addTransaction": "添加账目",
+  "@addTransaction": {
+    "description": "Transaction entry screen title"
+  },
   "manualInput": "手动输入",
+  "@manualInput": {
+    "description": "Manual input mode tab label"
+  },
   "ocrScan": "OCR",
+  "@ocrScan": {
+    "description": "OCR scan mode tab label. Future OCR/MOD-005 stub."
+  },
   "voiceInput": "语音",
+  "@voiceInput": {
+    "description": "Voice input mode tab label"
+  },
   "selectCategory": "选择分类",
+  "@selectCategory": {
+    "description": "Category selection screen title"
+  },
   "searchCategory": "搜索分类...",
+  "@searchCategory": {
+    "description": "Category search placeholder"
+  },
   "expenseDetail": "支出详情",
+  "@expenseDetail": {
+    "description": "Confirm screen title"
+  },
   "back": "返回",
+  "@back": {
+    "description": "Back navigation label"
+  },
   "record": "记录",
+  "@record": {
+    "description": "Save/record transaction button"
+  },
   "enterStore": "输入店铺",
+  "@enterStore": {
+    "description": "Store input placeholder"
+  },
   "enterMemo": "输入备注...",
+  "@enterMemo": {
+    "description": "Memo input placeholder"
+  },
   "expenseClassification": "支出分类",
+  "@expenseClassification": {
+    "description": "Ledger type section title"
+  },
   "survivalExpense": "生存支出",
+  "@survivalExpense": {
+    "description": "Survival ledger chip label"
+  },
   "soulExpense": "灵魂支出",
+  "@soulExpense": {
+    "description": "Soul ledger chip label"
+  },
   "soulSatisfaction": "灵魂充盈度",
+  "@soulSatisfaction": {
+    "description": "Soul satisfaction slider label"
+  },
   "addPhoto": "添加照片",
+  "@addPhoto": {
+    "description": "Add photo button label"
+  },
   "ocrScanTitle": "OCR扫描录入",
+  "@ocrScanTitle": {
+    "description": "OCR scanner screen title. Future OCR/MOD-005 stub."
+  },
   "ocrHint": "将票据完整放入框内",
+  "@ocrHint": {
+    "description": "OCR scanner hint text. Future OCR/MOD-005 stub."
+  },
   "voiceRecognitionResult": "识别结果",
   "@voiceRecognitionResult": {
     "description": "Label shown above the recognized voice transcript"
   },
   "recognitionResult": "识别结果",
+  "@recognitionResult": {
+    "description": "Section label shown above the parsed voice recognition card"
+  },
   "satisfactionLevel": "满足度",
+  "@satisfactionLevel": {
+    "description": "Header label for the emoji satisfaction picker"
+  },
   "satisfactionBad": "不满",
+  "@satisfactionBad": {
+    "description": "Lowest satisfaction label"
+  },
   "satisfactionSlightlyBad": "稍有不满",
+  "@satisfactionSlightlyBad": {
+    "description": "Second lowest satisfaction label"
+  },
   "satisfactionNormal": "一般",
+  "@satisfactionNormal": {
+    "description": "Neutral satisfaction label"
+  },
   "satisfactionGood": "良好",
+  "@satisfactionGood": {
+    "description": "Positive satisfaction label"
+  },
   "satisfactionVeryGood": "非常好",
+  "@satisfactionVeryGood": {
+    "description": "High satisfaction label"
+  },
   "satisfactionExcellent": "最好！",
+  "@satisfactionExcellent": {
+    "description": "Highest satisfaction label"
+  },
   "addSubcategory": "添加",
+  "@addSubcategory": {
+    "description": "Action chip label to add a subcategory"
+  },
   "addCategory": "添加分类",
+  "@addCategory": {
+    "description": "Bottom action button label to add a category"
+  },
   "editCategoryOrder": "编辑分类顺序",
+  "@editCategoryOrder": {
+    "description": "AppBar title during category reorder edit mode"
+  },
   "dragToReorder": "拖拽重排",
+  "@dragToReorder": {
+    "description": "Hint banner shown in category reorder edit mode"
+  },
   "orderUpdated": "顺序已更新",
+  "@orderUpdated": {
+    "description": "SnackBar shown after successfully saving category reorder"
+  },
   "orderSaveFailed": "保存失败，请重试",
+  "@orderSaveFailed": {
+    "description": "SnackBar shown when saving category reorder fails"
+  },
   "discardUnsavedChanges": "放弃未保存的修改？",
+  "@discardUnsavedChanges": {
+    "description": "Dialog title when cancelling reorder with unsaved changes"
+  },
   "keepEditing": "继续编辑",
+  "@keepEditing": {
+    "description": "Dialog cancel button: keep editing"
+  },
   "discard": "放弃",
+  "@discard": {
+    "description": "Dialog confirm button: discard unsaved changes"
+  },
   "tapToRecord": "点击录音",
+  "@tapToRecord": {
+    "description": "Voice input hint"
+  },
   "todayDate": "今天",
+  "@todayDate": {
+    "description": "Today date chip label"
+  },
   "next": "下一步",
+  "@next": {
+    "description": "Next button label"
+  },
   "voiceInputSettings": "语音识别",
   "@voiceInputSettings": {
     "description": "Voice input settings section title"
@@ -215,11 +799,6 @@
   "@voiceLanguageSubtitle": {
     "description": "Subtitle for voice language setting"
   },
-  "pleaseSelectCategory": "请选择类别",
-  "@pleaseSelectCategory": {
-    "description": "Placeholder shown when no category is selected in confirm screen"
-  },
-
   "familySync": "家庭同步",
   "@familySync": {
     "description": "Title for the family sync feature"
@@ -300,7 +879,7 @@
     "placeholders": {
       "message": {
         "type": "String",
-        "example": "网络错误"
+        "example": "Network error"
       }
     }
   },
@@ -333,7 +912,18 @@
     "description": "Sync status description when pairing"
   },
   "familySyncCheckingGroup": "正在检查群组状态...",
+  "@familySyncCheckingGroup": {
+    "description": "Loading text while checking whether the device is already in a group"
+  },
   "familySyncCheckFailed": "无法检查群组状态: {message}",
+  "@familySyncCheckFailed": {
+    "description": "Error shown when verifying current group membership fails",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
   "familySyncStatusUnpaired": "点击创建或加入家庭分组",
   "@familySyncStatusUnpaired": {
     "description": "Sync status description when unpaired"
@@ -392,7 +982,7 @@
     "placeholders": {
       "message": {
         "type": "String",
-        "example": "网络错误"
+        "example": "Network error"
       }
     }
   },
@@ -402,7 +992,7 @@
     "placeholders": {
       "message": {
         "type": "String",
-        "example": "网络错误"
+        "example": "Network error"
       }
     }
   },
@@ -416,7 +1006,7 @@
     "placeholders": {
       "message": {
         "type": "String",
-        "example": "网络错误"
+        "example": "Network error"
       }
     }
   },
@@ -460,7 +1050,7 @@
     "placeholders": {
       "deviceName": {
         "type": "String",
-        "example": "厨房平板"
+        "example": "Kitchen tablet"
       }
     }
   },
@@ -470,7 +1060,7 @@
     "placeholders": {
       "message": {
         "type": "String",
-        "example": "网络错误"
+        "example": "Network error"
       }
     }
   },
@@ -611,20 +1201,27 @@
       }
     }
   },
-  "cancel": "取消",
-  "@cancel": {
-    "description": "Generic cancel button label"
-  },
-
   "groupDefaultName": "{name}的家",
-  "@groupDefaultName": { "placeholders": { "name": { "type": "String" } } },
+  "@groupDefaultName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "groupCreate": "创建群组",
   "groupName": "群组名称",
   "groupOwner": "群主",
   "groupMember": "成员",
   "groupInviteCode": "邀请码",
   "groupInviteExpiry": "{minutes}分钟内有效",
-  "@groupInviteExpiry": { "placeholders": { "minutes": { "type": "int" } } },
+  "@groupInviteExpiry": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "groupShareCode": "分享邀请码",
   "groupEnterCode": "输入邀请码",
   "groupVerify": "验证",
@@ -632,10 +1229,22 @@
   "groupJoinTarget": "你要加入的群组",
   "groupWaitingApproval": "等待群主审批...",
   "groupWaitingDesc": "{name} 正在确认你的请求",
-  "@groupWaitingDesc": { "placeholders": { "name": { "type": "String" } } },
+  "@groupWaitingDesc": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "groupJoinRequest": "收到加入请求",
   "groupJoinRequestDesc": "{name} 申请加入",
-  "@groupJoinRequestDesc": { "placeholders": { "name": { "type": "String" } } },
+  "@groupJoinRequestDesc": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "groupApprove": "批准",
   "groupReject": "拒绝",
   "groupJoinSuccess": "欢迎加入！",
@@ -659,27 +1268,95 @@
   "groupCodeHint": "请向群组的群主索取邀请码",
   "groupBack": "返回",
   "syncInProgress": "同步中...",
+  "@syncInProgress": {
+    "description": "Sync in progress status"
+  },
   "syncCompleted": "同步完成",
+  "@syncCompleted": {
+    "description": "Sync completed status"
+  },
   "syncFailed": "同步失败",
+  "@syncFailed": {
+    "description": "Sync failed status"
+  },
   "syncRetry": "重试",
+  "@syncRetry": {
+    "description": "Retry sync button"
+  },
   "syncManual": "手动同步",
+  "@syncManual": {
+    "description": "Manual sync button"
+  },
   "syncLastTime": "上次同步: {time}",
+  "@syncLastTime": {
+    "description": "Last sync time",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "syncOfflineQueued": "{count}条变更待发送",
+  "@syncOfflineQueued": {
+    "description": "Offline queue count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "syncInitialProgress": "首次同步中...",
+  "@syncInitialProgress": {
+    "description": "Initial sync in progress"
+  },
   "syncProfileUpdated": "{name}更新了个人资料",
-
+  "@syncProfileUpdated": {
+    "description": "Profile update notification",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "familySyncManualSync": "同步账本",
-  "@familySyncManualSync": { "description": "Manual sync button label" },
+  "@familySyncManualSync": {
+    "description": "Manual sync button label"
+  },
   "familySyncManualSyncDesc": "手动同步数据",
-  "@familySyncManualSyncDesc": { "description": "Manual sync button description" },
-
+  "@familySyncManualSyncDesc": {
+    "description": "Manual sync button description"
+  },
   "listTab": "列表",
+  "@listTab": {
+    "description": "List tab label in bottom navigation"
+  },
   "todoTab": "待办",
+  "@todoTab": {
+    "description": "Todo tab label in bottom navigation"
+  },
   "datePickerComingSoon": "日期选择即将推出",
+  "@datePickerComingSoon": {
+    "description": "Placeholder message for date picker feature"
+  },
   "selectLanguage": "选择语言",
+  "@selectLanguage": {
+    "description": "Title of language selection dialog"
+  },
   "languageSystem": "跟随系统设置",
-
+  "@languageSystem": {
+    "description": "Option to follow system language setting"
+  },
   "initFailedTitle": "初始化失败",
+  "@initFailedTitle": {
+    "description": "Title shown on the AppInitializer failure fallback screen rendered before the main app mounts"
+  },
   "initFailedMessage": "应用启动时出现问题。请点击重试按钮。",
-  "initFailedRetry": "重试"
+  "@initFailedMessage": {
+    "description": "Body message on the AppInitializer failure fallback screen — explains the failure plainly and points to the retry action. Must NOT include technical error details (those go to console logs)"
+  },
+  "initFailedRetry": "重试",
+  "@initFailedRetry": {
+    "description": "Button label on the AppInitializer failure fallback screen. Re-invokes AppInitializer.initialize()"
+  },
+  "@@locale": "zh"
 }
