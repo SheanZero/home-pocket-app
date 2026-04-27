@@ -38,7 +38,7 @@ class _MerchantEntry {
 /// Merchant lookup database.
 ///
 /// Provides fuzzy merchant matching for voice and OCR modules.
-/// This is the shared infrastructure — used by MOD-004 OCR and MOD-009 Voice.
+/// This is shared merchant lookup used by OCR and voice-input classification.
 ///
 /// Current implementation: seed data (~20 well-known Japanese merchants).
 /// Full 500+ merchant list is a backlog item.
