@@ -42,7 +42,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration {
@@ -239,6 +239,26 @@ class AppDatabase extends _$AppDatabase {
               ''');
             }
           });
+        }
+        if (from < 15) {
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_audit_logs_event ON audit_logs (event)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_audit_logs_device_id ON audit_logs (device_id)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs (timestamp)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_user_profiles_updated_at ON user_profiles (updated_at)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_category_ledger_configs_ledger_type ON category_ledger_configs (ledger_type)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_category_ledger_configs_updated_at ON category_ledger_configs (updated_at)',
+          );
         }
       },
     );

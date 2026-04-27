@@ -13,4 +13,15 @@ class CategoryLedgerConfigs extends Table {
 
   @override
   Set<Column> get primaryKey => {categoryId};
+
+  List<TableIndex> get customIndices => [
+    TableIndex(
+      name: 'idx_category_ledger_configs_ledger_type',
+      columns: {#ledgerType},
+    ),
+    TableIndex(
+      name: 'idx_category_ledger_configs_updated_at',
+      columns: {#updatedAt},
+    ),
+  ];
 }

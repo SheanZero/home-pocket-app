@@ -11,4 +11,8 @@ class UserProfiles extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
+
+  List<TableIndex> get customIndices => [
+    TableIndex(name: 'idx_user_profiles_updated_at', columns: {#updatedAt}),
+  ];
 }

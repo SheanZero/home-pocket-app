@@ -28,4 +28,10 @@ class AuditLogs extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
+
+  List<TableIndex> get customIndices => [
+    TableIndex(name: 'idx_audit_logs_event', columns: {#event}),
+    TableIndex(name: 'idx_audit_logs_device_id', columns: {#deviceId}),
+    TableIndex(name: 'idx_audit_logs_timestamp', columns: {#timestamp}),
+  ];
 }
