@@ -54,14 +54,17 @@ void main() {
         'shadowBooksProvider resolves to empty list when no active group',
         () async {
           // Listen to prevent auto-dispose during test
-          final sub = container.listen(shadowBooksProvider, (_, _n) {});
+          final sub = container.listen(shadowBooksProvider, (_, next) {});
           // Wait for activeGroupProvider stream to settle (it's a keepAlive stream provider)
           await Future<void>.delayed(const Duration(milliseconds: 100));
           final result = await container.read(shadowBooksProvider.future);
           sub.close();
-          expect(result, isEmpty,
-              reason:
-                  'shadowBooksProvider must return [] when activeGroup is null');
+          expect(
+            result,
+            isEmpty,
+            reason:
+                'shadowBooksProvider must return [] when activeGroup is null',
+          );
         },
       );
 
@@ -70,7 +73,7 @@ void main() {
         () async {
           final aggProvider = shadowAggregateProvider(year: 2026, month: 3);
           // Listen to prevent auto-dispose during test
-          final sub = container.listen(aggProvider, (_, _n) {});
+          final sub = container.listen(aggProvider, (_, next) {});
           // Wait for shadowBooksProvider (which aggProvider depends on) to settle
           await Future<void>.delayed(const Duration(milliseconds: 150));
           final result = await container.read(aggProvider.future);
