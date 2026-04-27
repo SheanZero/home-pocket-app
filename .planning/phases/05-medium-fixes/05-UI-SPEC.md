@@ -57,10 +57,10 @@ Use existing `AppTextStyles` only. Phase 05 does not define new text styles.
 |------|------|--------|-------------|
 | Body | 14px (`AppTextStyles.bodyMedium`) | 500 | existing style default |
 | Label | 12px (`AppTextStyles.caption`) | 500 | existing style default |
-| Heading | 18px (`AppTextStyles.headlineSmall`) | 700 | existing style default |
-| Amount | 15px / 18px / 30px (`amountSmall` / `amountMedium` / `amountLarge`) | 700 | existing style default; `amountLarge` height 0.9 |
+| Heading / medium amount | 18px (`AppTextStyles.headlineSmall`, `amountMedium`) | 700 | existing style default |
+| Large amount | 30px (`AppTextStyles.amountLarge`) | 700 | existing style default; `amountLarge` height 0.9 |
 
-Declared weights for Phase 05 decisions: 500 and 700. Existing 600-weight widgets may remain unchanged, but Phase 05 must not introduce new text styles or new 600-weight copy treatments.
+Declared font sizes for Phase 05 decisions: 12, 14, 18, and 30. `AppTextStyles.amountSmall` may remain in existing widgets as an inherited project style, but Phase 05 must not introduce a new declared size scale. Declared weights for Phase 05 decisions: 500 and 700. Existing 600-weight widgets may remain unchanged, but Phase 05 must not introduce new text styles or new 600-weight copy treatments.
 
 Money typography contract:
 
@@ -117,6 +117,8 @@ Source: `REQUIREMENTS.md` MED-03 through MED-05, `05-CONTEXT.md` D-05 through D-
 ## Interaction Contract
 
 Phase 05 must preserve existing behavior.
+
+Primary visual focal point: Home monthly expense remains the first visual anchor on the home screen; recent transactions, ledger cards, and soul metrics remain secondary surfaces. Phase 05 localization and money-formatting work must not reorder these surfaces or promote a secondary element into the primary visual anchor.
 
 | Surface | Contract |
 |---------|----------|
