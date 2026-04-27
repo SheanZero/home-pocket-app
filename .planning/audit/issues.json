@@ -28,7 +28,9 @@
       "suggested_fix": "Delete the file if truly unused.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-002",
@@ -42,7 +44,9 @@
       "suggested_fix": "Delete the file if truly unused.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "LV-001",
@@ -264,7 +268,9 @@
       "suggested_fix": "Delete the file if truly unused.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-004",
@@ -278,7 +284,9 @@
       "suggested_fix": "Remove the unused declaration or export it.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "LV-014",
@@ -308,7 +316,9 @@
       "suggested_fix": "Delete the file if truly unused.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-006",
@@ -322,7 +332,9 @@
       "suggested_fix": "Delete the file if truly unused.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "LV-015",
@@ -368,7 +380,9 @@
       "suggested_fix": "Remove the unused declaration or export it.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-008",
@@ -382,7 +396,9 @@
       "suggested_fix": "Delete the file if truly unused.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-009",
@@ -396,7 +412,9 @@
       "suggested_fix": "Remove the unused declaration or export it.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-010",
@@ -410,7 +428,9 @@
       "suggested_fix": "Delete the file if truly unused.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-011",
@@ -424,7 +444,9 @@
       "suggested_fix": "Remove the unused declaration or export it.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-012",
@@ -438,7 +460,9 @@
       "suggested_fix": "Delete the file if truly unused.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-013",
@@ -452,7 +476,9 @@
       "suggested_fix": "Remove the unused declaration or export it.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-014",
@@ -466,7 +492,9 @@
       "suggested_fix": "Delete the file if truly unused.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-015",
@@ -480,7 +508,9 @@
       "suggested_fix": "Remove the unused declaration or export it.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-016",
@@ -494,7 +524,9 @@
       "suggested_fix": "Delete the file if truly unused.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-017",
@@ -508,7 +540,9 @@
       "suggested_fix": "Remove the unused declaration or export it.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-018",
@@ -522,7 +556,9 @@
       "suggested_fix": "Delete the file if truly unused.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-019",
@@ -536,7 +572,9 @@
       "suggested_fix": "Remove the unused declaration or export it.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-020",
@@ -550,7 +588,9 @@
       "suggested_fix": "Delete the file if truly unused.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-021",
@@ -564,7 +604,9 @@
       "suggested_fix": "Remove the unused declaration or export it.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "LV-017",
@@ -674,7 +716,9 @@
       "suggested_fix": "Delete the file if truly unused.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "DC-023",
@@ -688,7 +732,9 @@
       "suggested_fix": "Remove the unused declaration or export it.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     },
     {
       "id": "LV-023",
@@ -750,7 +796,9 @@
       "suggested_fix": "Remove the unused declaration or export it.",
       "tool_source": "dart_code_linter",
       "confidence": "high",
-      "status": "open"
+      "status": "closed",
+      "closed_in_phase": "6",
+      "closed_commit": "f635b1aaee3293b46afaa3adbd66c7d63b60cf66"
     }
   ]
 }
