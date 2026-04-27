@@ -74,14 +74,17 @@ void main() {
     testWidgets('invokes onTap callback', (tester) async {
       var tapped = false;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: SoulFullnessCard(
-                satisfactionPercent: 60,
-                happinessROI: 4.6,
-                recentSoulAmount: 12800,
-                onTap: () => tapped = true,
+        testLocalizedApp(
+          child: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 700,
+                child: SoulFullnessCard(
+                  satisfactionPercent: 60,
+                  happinessROI: 4.6,
+                  recentSoulAmount: 12800,
+                  onTap: () => tapped = true,
+                ),
               ),
             ),
           ),

@@ -38,6 +38,7 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = S.of(context);
     final localeAsync = ref.watch(currentLocaleProvider);
     final locale = localeAsync.valueOrNull ?? const Locale('ja');
     final isGroupMode = ref.watch(isGroupModeProvider);
@@ -80,7 +81,7 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(height: 16),
 
               // ── Section: Monthly expenses ──
-              const SectionDivider(label: '今月の支出'),
+              SectionDivider(label: l10n.homeMonthlyExpense),
               const SizedBox(height: 16),
 
               // ── Month overview card ──
@@ -105,7 +106,7 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(height: 16),
 
               // ── Section: Ledgers ──
-              const SectionDivider(label: '帳 本'),
+              SectionDivider(label: l10n.homeLedgersSection),
               const SizedBox(height: 16),
 
               // ── Ledger comparison rows ──
@@ -166,7 +167,7 @@ class HomeScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '最近の取引',
+                    l10n.homeRecentTransactions,
                     style: AppTextStyles.titleSmall.copyWith(
                       color: context.wmTextPrimary,
                     ),
@@ -176,7 +177,7 @@ class HomeScreen extends ConsumerWidget {
                       // TODO: Navigate to full transaction list
                     },
                     child: Text(
-                      'すべて見る',
+                      l10n.homeViewAllTransactions,
                       style: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.accentPrimary,
                       ),
@@ -194,7 +195,7 @@ class HomeScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       child: Center(
                         child: Text(
-                          '取引がまだありません',
+                          l10n.noTransactionsYet,
                           style: AppTextStyles.bodySmall.copyWith(
                             color: context.wmTextSecondary,
                           ),
@@ -266,7 +267,7 @@ class HomeScreen extends ConsumerWidget {
         tagText: '生',
         tagBgColor: context.wmSurvivalTagBg,
         tagTextColor: AppColors.survival,
-        title: '生存帳本',
+        title: S.of(context).survivalLedger,
         titleColor: context.wmTextPrimary,
         subtitle:
             '先月 \u00a5${_formatInt(report.previousMonthComparison?.previousExpenses ?? 0)}',
@@ -278,7 +279,7 @@ class HomeScreen extends ConsumerWidget {
         tagText: '灵',
         tagBgColor: context.wmSoulTagBg,
         tagTextColor: AppColors.soul,
-        title: '灵魂帳本',
+        title: S.of(context).soulLedger,
         titleColor: AppColors.soul,
         subtitle:
             '先月 \u00a5${_formatInt(report.previousMonthComparison?.previousExpenses ?? 0)}',

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
+import '../../../../application/i18n/formatter_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme_colors.dart';
+import '../../../../generated/app_localizations.dart';
 
 /// Displays soul spending satisfaction, happiness ROI, and recent soul amount.
 ///
@@ -24,6 +25,9 @@ class SoulFullnessCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    final locale = Localizations.localeOf(context);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -35,25 +39,25 @@ class SoulFullnessCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            _buildTitleRow(context),
+            _buildTitleRow(context, l10n),
             const SizedBox(height: 12),
-            _buildMetricRow(context),
+            _buildMetricRow(context, l10n),
             const SizedBox(height: 12),
             Container(height: 1, color: context.wmBackgroundDivider),
             const SizedBox(height: 12),
-            _buildRecentSpendingRow(context),
+            _buildRecentSpendingRow(context, l10n, locale),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTitleRow(BuildContext context) {
+  Widget _buildTitleRow(BuildContext context, S l10n) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          '灵魂の充実度',
+          l10n.homeSoulFullness,
           style: AppTextStyles.bodyLarge.copyWith(color: context.wmTextPrimary),
         ),
         Icon(Icons.chevron_right, size: 14, color: context.wmTextTertiary),
@@ -61,17 +65,17 @@ class SoulFullnessCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricRow(BuildContext context) {
+  Widget _buildMetricRow(BuildContext context, S l10n) {
     return Row(
       children: [
-        Expanded(child: _buildSatisfactionTile(context)),
+        Expanded(child: _buildSatisfactionTile(context, l10n)),
         const SizedBox(width: 8),
-        Expanded(child: _buildROITile(context)),
+        Expanded(child: _buildROITile(context, l10n)),
       ],
     );
   }
 
-  Widget _buildSatisfactionTile(BuildContext context) {
+  Widget _buildSatisfactionTile(BuildContext context, S l10n) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 6),
       decoration: BoxDecoration(
@@ -91,7 +95,7 @@ class SoulFullnessCard extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                '満足度',
+                l10n.satisfactionLevel,
                 style: AppTextStyles.micro.copyWith(
                   fontWeight: FontWeight.w400,
                   color: AppColors.accentPrimary,
@@ -110,7 +114,7 @@ class SoulFullnessCard extends StatelessWidget {
     );
   }
 
-  Widget _buildROITile(BuildContext context) {
+  Widget _buildROITile(BuildContext context, S l10n) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 6),
       decoration: BoxDecoration(
@@ -126,7 +130,7 @@ class SoulFullnessCard extends StatelessWidget {
               const Icon(Icons.bolt, size: 14, color: AppColors.olive),
               const SizedBox(height: 2),
               Text(
-                '幸福ROI',
+                l10n.homeHappinessROI,
                 style: AppTextStyles.micro.copyWith(
                   fontWeight: FontWeight.w400,
                   color: AppColors.olive,
@@ -143,23 +147,22 @@ class SoulFullnessCard extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentSpendingRow(BuildContext context) {
+  Widget _buildRecentSpendingRow(BuildContext context, S l10n, Locale locale) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Text(
-          '最近の灵魂支出',
+          l10n.homeRecentSoulExpense,
           style: AppTextStyles.caption.copyWith(color: context.wmTextSecondary),
         ),
         Text(
-          NumberFormat.currency(
-            symbol: '\u00a5',
-            decimalDigits: 0,
-          ).format(recentSoulAmount),
-          style: AppTextStyles.headlineSmall.copyWith(
-            color: AppColors.survival,
+          const FormatterService().formatCurrency(
+            recentSoulAmount,
+            'JPY',
+            locale,
           ),
+          style: AppTextStyles.amountMedium.copyWith(color: AppColors.survival),
         ),
       ],
     );
