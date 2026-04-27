@@ -187,7 +187,7 @@ Core services MUST be initialized before `runApp()` via `AppInitializer` (`lib/c
 - Compact: ja/zh `123万` | en `1.23M`
 
 **Config:** `l10n.yaml` → output class `S`, dir `lib/generated`
-**Spec:** `doc/arch/02-module-specs/MOD-014_i18n.md`
+**Spec:** `docs/arch/04-basic/BASIC-003_I18N_Infrastructure.md`
 
 ---
 
@@ -217,14 +217,14 @@ final effectiveBookId = bookId ?? ref.watch(currentBookIdProvider).value;
 ## Module Development Priority
 
 See `doc/worklog/PROJECT_DEVELOPMENT_PLAN.md`:
-1. **Infrastructure:** MOD-006 Security, MOD-014 i18n
+1. **Infrastructure:** MOD-006 Security, BASIC-003 i18n
 2. **Core Accounting:** MOD-001 Basic Accounting, MOD-003 Dual Ledger
 3. **Sync & Analytics:** MOD-004 Family Sync, MOD-007 Analytics, MOD-008 Settings
 4. **Enhanced:** MOD-005 OCR, MOD-013 Gamification
 
 ---
 
-## Architecture Docs (`doc/arch/`)
+## Architecture Docs (`docs/arch/`)
 
 - `01-core-architecture/ARCH-{NNN}_{Name}.md`
 - `02-module-specs/MOD-{NNN}_{Name}.md`
@@ -252,10 +252,10 @@ Always check max number before creating, use next sequential, update INDEX.md. S
 
 ## Key References
 
-- **Architecture:** `doc/arch/01-core-architecture/ARCH-001_Complete_Guide.md`
-- **Data:** `doc/arch/01-core-architecture/ARCH-002_Data_Architecture.md`
-- **Security:** `doc/arch/01-core-architecture/ARCH-003_Security_Architecture.md`
-- **State:** `doc/arch/01-core-architecture/ARCH-004_State_Management.md`
+- **Architecture:** `docs/arch/01-core-architecture/ARCH-001_Complete_Guide.md`
+- **Data:** `docs/arch/01-core-architecture/ARCH-002_Data_Architecture.md`
+- **Security:** `docs/arch/01-core-architecture/ARCH-003_Security_Architecture.md`
+- **State:** `docs/arch/01-core-architecture/ARCH-004_State_Management.md`
 - **Dev Plan:** `doc/worklog/PROJECT_DEVELOPMENT_PLAN.md`
 
 ---
