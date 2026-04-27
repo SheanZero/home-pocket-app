@@ -4,7 +4,7 @@
 
 **在开始任何功能开发之前，MUST 遵循以下步骤：**
 
-1. **Review 架构文档 (doc/arch/)**
+1. **Review 架构文档 (docs/arch/)**
    - 阅读相关的 ARCH 文档（整体架构）
    - 阅读相关的 MOD 文档（模块规范）
    - 阅读相关的 ADR 文档（架构决策）
@@ -26,12 +26,12 @@
 
 ---
 
-## 架构文档管理规则 (doc/arch/)
+## 架构文档管理规则 (docs/arch/)
 
 ### 目录结构
 
 ```
-doc/arch/
+docs/arch/
 ├── 01-core-architecture/    # 整体架构文档
 ├── 02-module-specs/          # 模块功能架构文档
 ├── 03-adr/                   # 架构决策记录 (ADR)
@@ -87,13 +87,13 @@ doc/arch/
 
 ```bash
 # 检查整体架构文档的最大编号
-ls -1 doc/arch/01-core-architecture/ARCH-*.md | sort | tail -1
+ls -1 docs/arch/01-core-architecture/ARCH-*.md | sort | tail -1
 
 # 检查模块功能文档的最大编号
-ls -1 doc/arch/02-module-specs/MOD-*.md | sort | tail -1
+ls -1 docs/arch/02-module-specs/MOD-*.md | sort | tail -1
 
 # 检查 ADR 文档的最大编号
-ls -1 doc/arch/03-adr/ADR-*.md | sort | tail -1
+ls -1 docs/arch/03-adr/ADR-*.md | sort | tail -1
 ```
 
 #### Step 3: 分配新编号
@@ -184,13 +184,13 @@ ls -1 doc/arch/03-adr/ADR-*.md | sort | tail -1
 # 示例：添加新的 ADR 文档
 
 # Step 1: 检查现有 ADR 文档
-ls -1 doc/arch/03-adr/ADR-*.md
+ls -1 docs/arch/03-adr/ADR-*.md
 
 # 输出:
-# doc/arch/03-adr/ADR-000_INDEX.md
-# doc/arch/03-adr/ADR-001_State_Management.md
+# docs/arch/03-adr/ADR-000_INDEX.md
+# docs/arch/03-adr/ADR-001_State_Management.md
 # ...
-# doc/arch/03-adr/ADR-007_Layer_Responsibilities.md
+# docs/arch/03-adr/ADR-007_Layer_Responsibilities.md
 
 # Step 2: 确定最大编号是 007
 # Step 3: 新文档使用编号 008
@@ -198,7 +198,7 @@ ls -1 doc/arch/03-adr/ADR-*.md
 # Step 5: 更新 ADR-000_INDEX.md
 
 # Step 6: 验证
-ls -1 doc/arch/03-adr/ADR-*.md
+ls -1 docs/arch/03-adr/ADR-*.md
 ```
 
 ### 版本控制
@@ -215,6 +215,6 @@ ls -1 doc/arch/03-adr/ADR-*.md
 **创建日期:** 2026-02-03
 **最后更新:** 2026-02-03
 **更新内容:**
-- 迁移架构文档目录从 arch2/ 到 doc/arch/
+- 迁移架构文档目录从 arch2/ 到 docs/arch/
 - 添加开发前必读规则（CRITICAL）
-**适用范围:** doc/arch/ 目录下的所有架构文档
+**适用范围:** docs/arch/ 目录下的所有架构文档
