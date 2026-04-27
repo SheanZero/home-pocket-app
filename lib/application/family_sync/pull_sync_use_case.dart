@@ -108,10 +108,6 @@ class PullSyncUseCase {
         final payload = msg['payload'] as String;
         final payloadType = E2EEService.detectPayloadType(payload);
 
-        if (kDebugMode) {
-          debugPrint('[PullSync] Processing $payloadType from $fromDeviceId');
-        }
-
         switch (payloadType) {
           case 'v2_key':
             final processed = await _handleGroupKeyMessage(

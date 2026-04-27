@@ -117,7 +117,7 @@ class SyncOrchestrator {
     if (group == null) return const SyncOrchestratorNoGroup();
 
     if (kDebugMode) {
-      debugPrint('[SyncOrchestrator] initialSync for group ${group.groupId}');
+      debugPrint('[SyncOrchestrator] initialSync started');
     }
 
     // Always: push all → push avatar → pull

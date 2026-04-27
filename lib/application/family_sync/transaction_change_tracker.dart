@@ -15,9 +15,6 @@ class TransactionChangeTracker {
   /// Record a create operation for sync.
   void trackCreate(Map<String, dynamic> operation) {
     _pendingOps.add(operation);
-    if (kDebugMode) {
-      debugPrint('[ChangeTracker] trackCreate: ${operation['entityId']}');
-    }
   }
 
   /// Record a delete operation for sync.
@@ -29,17 +26,16 @@ class TransactionChangeTracker {
       'data': {'bookId': bookId},
       'timestamp': DateTime.now().toUtc().toIso8601String(),
     });
-    if (kDebugMode) {
-      debugPrint('[ChangeTracker] trackDelete: $transactionId');
-    }
   }
 
   /// Flush all pending operations. Returns the list and clears internal state.
   List<Map<String, dynamic>> flush() {
     final ops = List<Map<String, dynamic>>.of(_pendingOps);
     _pendingOps.clear();
-    if (kDebugMode && ops.isNotEmpty) {
-      debugPrint('[ChangeTracker] Flushed ${ops.length} operations');
+    if (kDebugMode) {
+      if (ops.isNotEmpty) {
+        debugPrint('[ChangeTracker] pending changes flushed');
+      }
     }
     return ops;
   }
