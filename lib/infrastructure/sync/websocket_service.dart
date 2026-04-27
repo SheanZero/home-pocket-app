@@ -203,9 +203,6 @@ class WebSocketService with WidgetsBindingObserver {
     };
 
     if (eventType == null) {
-      if (kDebugMode) {
-        debugPrint('WebSocketService: unknown event type: $type');
-      }
       return null;
     }
 

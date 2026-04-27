@@ -38,10 +38,6 @@ class RequestSigner {
     final bodyHash = hash_lib.sha256.convert(utf8.encode(body));
     final message = '$method:$path:$timestamp:$bodyHash';
 
-    if (kDebugMode) {
-      debugPrint('[RequestSigner] message=$message');
-    }
-
     // Ed25519 sign
     final signature = await _keyManager.signData(utf8.encode(message));
 
@@ -289,19 +285,14 @@ class RelayApiClient {
 
   void _logRequest(String method, String path, String body) {
     if (kDebugMode) {
-      debugPrint('[RelayAPI] → $method $baseUrl$path');
-      if (body.isNotEmpty && body != '{}') {
-        debugPrint('[RelayAPI]   body: $body');
-      }
+      debugPrint('[RelayAPI] request prepared: $method');
     }
   }
 
   void _logResponse(String method, String path, http.Response response) {
     if (kDebugMode) {
       debugPrint(
-        '[RelayAPI] ← $method $path '
-        'status=${response.statusCode} '
-        'body=${response.body}',
+        '[RelayAPI] response received: $method ${response.statusCode}',
       );
     }
   }

@@ -263,12 +263,6 @@ class PushNotificationService {
       await _messagingClient.requestPermission();
 
       final token = await _messagingClient.getToken();
-      if (kDebugMode) {
-        debugPrint(
-          'PushNotificationService: initial token '
-          '${token == null || token.isEmpty ? '<empty>' : token}',
-        );
-      }
       if (token != null && token.isNotEmpty) {
         await registerToken(token);
       }
@@ -277,7 +271,9 @@ class PushNotificationService {
         token,
       ) {
         if (kDebugMode) {
-          debugPrint('PushNotificationService: token refreshed $token');
+          debugPrint(
+            'PushNotificationService: registration credential refreshed',
+          );
         }
         unawaited(registerToken(token));
       });
@@ -287,7 +283,7 @@ class PushNotificationService {
       ) {
         if (kDebugMode) {
           debugPrint(
-            'PushNotificationService: foreground message received: $data',
+            'PushNotificationService: foreground notification received',
           );
         }
         unawaited(
@@ -299,9 +295,7 @@ class PushNotificationService {
         data,
       ) {
         if (kDebugMode) {
-          debugPrint(
-            'PushNotificationService: app opened message received: $data',
-          );
+          debugPrint('PushNotificationService: notification opened app');
         }
         unawaited(
           _handleIncomingMessage(data, source: _PushMessageSource.appOpened),
@@ -310,7 +304,7 @@ class PushNotificationService {
 
       final initialMessage = await _messagingClient.getInitialMessage();
       if (kDebugMode) {
-        debugPrint('PushNotificationService: initial message: $initialMessage');
+        debugPrint('PushNotificationService: launch notification checked');
       }
       if (initialMessage != null) {
         await _handleIncomingMessage(
@@ -320,9 +314,6 @@ class PushNotificationService {
       }
 
       _initialized = true;
-      if (kDebugMode) {
-        debugPrint('PushNotificationService: initialized');
-      }
       return token;
     } catch (e) {
       if (kDebugMode) {
@@ -338,13 +329,12 @@ class PushNotificationService {
     final platform = _pushPlatform ?? (Platform.isIOS ? 'apns' : 'fcm');
     if (kDebugMode) {
       debugPrint(
-        'PushNotificationService: registering token for $platform '
-        '(${token.length} chars)',
+        'PushNotificationService: registering push endpoint for $platform',
       );
     }
     await _apiClient.updatePushToken(pushToken: token, pushPlatform: platform);
     if (kDebugMode) {
-      debugPrint('PushNotificationService: token registered');
+      debugPrint('PushNotificationService: push endpoint registered');
     }
   }
 
@@ -382,7 +372,7 @@ class PushNotificationService {
     final type = data['type'] as String?;
     if (kDebugMode) {
       debugPrint(
-        'PushNotificationService: _handleIncomingMessage type=$type source=$source data=$data',
+        'PushNotificationService: routing notification type=$type source=$source',
       );
     }
 
@@ -417,7 +407,9 @@ class PushNotificationService {
         break;
       default:
         if (kDebugMode) {
-          debugPrint('PushNotificationService: unknown message type: $type');
+          debugPrint(
+            'PushNotificationService: unknown notification type: $type',
+          );
         }
     }
   }
