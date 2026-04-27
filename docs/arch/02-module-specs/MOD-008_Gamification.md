@@ -101,8 +101,8 @@
 ├─────────────────────────────────────────────────────┤
 │                    Data Layer                        │
 ├─────────────────────────────────────────────────────┤
-│  ConversionUnitRepositoryImpl                       │
-│  FortuneRepositoryImpl                              │
+│  ConversionUnitRepositoryImpl (目标位置，未实施)   │
+│  FortuneRepositoryImpl (目标位置，未实施)           │
 │  OtaConfigService                                    │
 └─────────────────────────────────────────────────────┘
 ```
@@ -432,12 +432,14 @@ class GetDailyFortuneUseCase {
 }
 ```
 
-## 6. Repository实现
+## 6. Repository実装
+
+> 注：MOD-008 游戏化模块为 v2 backlog 项；下列路径为目标位置，尚未在 lib/ 实施。
 
 ### 6.1 ConversionUnitRepository
 
 ```dart
-// lib/features/gamification/data/repositories/conversion_unit_repository_impl.dart
+// **目标位置（未实施）:** lib/data/repositories/conversion_unit_repository_impl.dart
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/conversion_unit.dart';
 import '../../domain/repositories/conversion_unit_repository.dart';
@@ -583,7 +585,7 @@ class ConversionUnitRepositoryImpl implements ConversionUnitRepository {
 ### 6.2 FortuneRepository
 
 ```dart
-// lib/features/gamification/data/repositories/fortune_repository_impl.dart
+// **目标位置（未实施）:** lib/data/repositories/fortune_repository_impl.dart
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/fortune.dart';
 import '../../domain/repositories/fortune_repository.dart';
@@ -1269,10 +1271,10 @@ class _GamificationScreenState extends ConsumerState<GamificationScreen> {
 ```dart
 // test/features/gamification/domain/usecases/convert_to_ohtani_test.dart
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
+import 'package:mocktail/mocktail.dart';
 
-@GenerateMocks([ConversionUnitRepository])
+class MockConversionUnitRepository extends Mock implements ConversionUnitRepository {}
+
 void main() {
   late ConvertToOhtaniUseCase useCase;
   late MockConversionUnitRepository mockRepository;
@@ -1431,10 +1433,10 @@ void main() {
 ```dart
 // test/features/gamification/domain/usecases/generate_fortune_test.dart
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
+import 'package:mocktail/mocktail.dart';
 
-@GenerateMocks([FortuneRepository])
+class MockFortuneRepository extends Mock implements FortuneRepository {}
+
 void main() {
   late GenerateFortuneUseCase useCase;
   late MockFortuneRepository mockRepository;

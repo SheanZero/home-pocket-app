@@ -45,7 +45,6 @@ Code Generation: riverpod_annotation ^2.3.0, riverpod_generator ^2.3.0
 
 # 本地数据库
 Database ORM: drift ^2.14.0
-Database Engine: sqlite3_flutter_libs ^0.5.18
 Encryption: sqlcipher_flutter_libs ^0.6.0
 
 # 安全与加密
@@ -83,7 +82,7 @@ Logging: logger ^2.0.2
 Unit Testing: flutter_test (SDK)
 Widget Testing: flutter_test (SDK)
 Integration Testing: integration_test (SDK)
-Mocking: mockito ^5.4.4
+Mocking: mocktail ^1.0.4
 ```
 
 ### 1.2 架构层次设计
@@ -2075,7 +2074,7 @@ class ImportBackupUseCase {
 }
 ```
 
-### MOD-009: 趣味功能
+### MOD-009: 语音记账
 
 #### 大谷翔平换算器
 

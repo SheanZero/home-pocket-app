@@ -351,10 +351,10 @@ find lib/features -type d -name "application" | wc -l    # 应该为 0
 | BiometricService | `lib/infrastructure/security/biometric_service.dart` | MOD-005 |
 | SecureStorageService | `lib/infrastructure/security/secure_storage_service.dart` | MOD-005 |
 | AuditLogger | `lib/infrastructure/security/audit_logger.dart` | MOD-005 |
-| DateFormatter | `lib/infrastructure/i18n/formatters/date_formatter.dart` | MOD-014 |
-| NumberFormatter | `lib/infrastructure/i18n/formatters/number_formatter.dart` | MOD-014 |
-| LocaleSettings | `lib/infrastructure/i18n/models/locale_settings.dart` | MOD-014 |
-| SupportedLocales | `lib/infrastructure/i18n/supported_locales.dart` | MOD-014 |
+| DateFormatter | `lib/infrastructure/i18n/formatters/date_formatter.dart` | BASIC-003 |
+| NumberFormatter | `lib/infrastructure/i18n/formatters/number_formatter.dart` | BASIC-003 |
+| LocaleSettings | `lib/infrastructure/i18n/models/locale_settings.dart` | BASIC-003 |
+| SupportedLocales | `lib/infrastructure/i18n/supported_locales.dart` | BASIC-003 |
 
 ---
 
