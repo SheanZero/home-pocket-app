@@ -52,7 +52,7 @@ Requirements for the cleanup initiative. Each maps to exactly one phase. All are
 ### MEDIUM-Severity Fixes (MED)
 
 - [ ] **MED-01**: Every MEDIUM-severity finding in `issues.json` is resolved; zero open MEDIUM entries remain
-- [ ] **MED-02**: `lib/infrastructure/category/category_service.dart` is renamed to `CategoryLocaleService`; all import sites updated; the dual-`CategoryService` naming collision is eliminated
+- [x] **MED-02**: `lib/infrastructure/category/category_service.dart` is renamed to `CategoryLocaleService`; all import sites updated; the dual-`CategoryService` naming collision is eliminated
 - [x] **MED-03**: All hardcoded CJK strings in `lib/` are extracted to ARB files; `S.of(context)` is used for every UI string
 - [x] **MED-04**: All three ARB files (`app_ja.arb`, `app_zh.arb`, `app_en.arb`) have key parity (same key set, no orphans on any side); `flutter gen-l10n` succeeds without warnings
 - [x] **MED-05**: Unused ARB keys are deleted only after the static-locale-map audit has been completed; intentional stubs (e.g., `ocrScan`, `ocrScanTitle`, `ocrHint`) are preserved with `@key` description comments
@@ -158,7 +158,7 @@ Phase mapping populated by `gsd-roadmapper` during roadmap creation.
 | HIGH-07 | Phase 4 | Pending |
 | HIGH-08 | Phase 4 | Pending |
 | MED-01 | Phase 5 | Pending |
-| MED-02 | Phase 5 | Pending |
+| MED-02 | Phase 5 | Complete |
 | MED-03 | Phase 5 | Complete |
 | MED-04 | Phase 5 | Complete |
 | MED-05 | Phase 5 | Complete |

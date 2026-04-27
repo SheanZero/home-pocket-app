@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-04-27T03:21:12.435Z"
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-04-27T03:58:54.479Z"
 last_activity: 2026-04-27
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 28
-  completed_plans: 24
-  percent: 86
+  completed_plans: 25
+  percent: 89
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 05 (medium-fixes) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-04-27
 
-Progress: [█████████░] 86%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Progress: [█████████░] 86%
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 05 P01 | 14min | 2 tasks | 5 files |
 | Phase 05 P02 | 10min | 2 tasks | 8 files |
 
 ## Accumulated Context
@@ -70,6 +71,8 @@ Recent decisions affecting current work:
 - Per-phase doc updates deferred; one sweep at Phase 7
 - [Phase 05-02]: Preserved OCR keys as explicit Future OCR/MOD-005 stubs instead of deleting unused-looking placeholders.
 - [Phase 05-02]: Copied ARB metadata shape across locales so normal keys and metadata keys are both parity-checked.
+- [Phase 05-01]: Renamed only the infrastructure category localization helper; application CategoryService remains the accounting business service.
+- [Phase 05-01]: Kept the cross-layer *Service name collision allow list empty so future duplicates fail by default.
 
 ### Pending Todos
 
@@ -96,8 +99,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-27T03:21:12.429Z
-Stopped at: Completed 05-02-PLAN.md
+Last session: 2026-04-27T03:58:27.124Z
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None
 
 **Planned Phase:** 2 (coverage-baseline) — 4 plans — 2026-04-25T15:05:23.420Z

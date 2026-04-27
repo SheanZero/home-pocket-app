@@ -109,7 +109,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. No `lib/` file imports from any MOD-009 (deprecated i18n module) code path; monetary-display widgets use `AppTextStyles.amountLarge/amountMedium/amountSmall` and widget tests verify `FontFeature.tabularFigures()` is present
   6. Every file touched in this phase has ≥80% test coverage; `flutter analyze` exits 0; all tests GREEN; behavior unchanged
 **Plans**: 5 plans
-  - [ ] 05-01-PLAN.md — Rename infrastructure CategoryLocaleService and add service-name collision guard
+  - [x] 05-01-PLAN.md — Rename infrastructure CategoryLocaleService and add service-name collision guard
   - [x] 05-02-PLAN.md — Normalize ARB keys, enforce parity, and regenerate localization output
   - [ ] 05-03-PLAN.md — Extract home/accounting CJK UI strings and enforce touched money styling
   - [ ] 05-04-PLAN.md — Localize analytics labels and enforce FormatterService/AppTextStyles money display
@@ -177,7 +177,7 @@ Phases 1 and 2 run in parallel. Then: 3 → 4 → 5 → 6 → 7 → 8
 | 2. Coverage Baseline | 0/4 | Not started | - |
 | 3. CRITICAL Fixes | 0/5 | Not started | - |
 | 4. HIGH Fixes | 0/6 | Not started | - |
-| 5. MEDIUM Fixes | 0/TBD | Not started | - |
+| 5. MEDIUM Fixes | 2/5 | In Progress | - |
 | 6. LOW Fixes | 0/TBD | Not started | - |
 | 7. Documentation Sweep | 0/TBD | Not started | - |
 | 8. Re-Audit + Exit Verification | 0/TBD | Not started | - |
