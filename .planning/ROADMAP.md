@@ -113,7 +113,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [x] 05-02-PLAN.md — Normalize ARB keys, enforce parity, and regenerate localization output
   - [x] 05-03-PLAN.md — Extract home/accounting CJK UI strings and enforce touched money styling
   - [x] 05-04-PLAN.md — Localize analytics labels and enforce FormatterService/AppTextStyles money display
-  - [ ] 05-05-PLAN.md — Add MOD-009/CJK/finding-closure scan gates and close MEDIUM audit entries
+  - [x] 05-05-PLAN.md — Add MOD-009/CJK/finding-closure scan gates and close MEDIUM audit entries
 
 ### Phase 6: LOW Fixes
 **Goal**: Every LOW-severity finding in `issues.json` is resolved; unused private members and orphaned files are deleted, stale suppression directives are removed, Drift indices are added with a migration step, and unguarded debug logging is wrapped

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 05-04-PLAN.md
-last_updated: "2026-04-27T04:52:08.260Z"
+status: verifying
+stopped_at: Completed 05-05-PLAN.md
+last_updated: "2026-04-27T05:18:34.331Z"
 last_activity: 2026-04-27
 progress:
   total_phases: 8
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 28
-  completed_plans: 27
-  percent: 96
+  completed_plans: 28
+  percent: 100
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 
 Phase: 05 (medium-fixes) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-27
 
-Progress: [██████████] 96%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Progress: [██████████] 96%
 | Phase 05 P01 | 14min | 2 tasks | 5 files |
 | Phase 05 P02 | 10min | 2 tasks | 8 files |
 | Phase 05 P03 | 18m40s | 2 tasks | 9 files |
+| Phase 05-medium-fixes P05 | 22min | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,9 @@ Recent decisions affecting current work:
 - [Phase 05-03]: Localized home and voice accounting UI copy through generated S.of(context) getters while preserving formatter and behavior contracts. — Plan 05-03 required hardcoded CJK copy removal, locale-aware money formatting, and unchanged voice permission flow.
 - [Phase 05]: Included month_comparison_card.dart because the analytics-wide hardcoded-label acceptance grep covered it. — The plan acceptance command searched every analytics widget and failed until this adjacent analytics label was localized.
 - [Phase 05]: Used positional arguments for scripts/coverage_gate.dart because the checked-in CLI rejects the planned --files flag. — This preserved the same per-file coverage gate semantics without changing the shared coverage script.
+- [Phase 05-medium-fixes]: 05-05: CJK scanner strips comments and RegExp literals while keeping whitelist paths exact. — Prevents false positives on parser data without permitting presentation-layer hardcoded CJK.
+- [Phase 05-medium-fixes]: 05-05: Residual home and settings CJK labels are ARB-backed instead of scanner-whitelisted. — Maintains the Phase 5 localization invariant that production UI text uses generated S getters.
+- [Phase 05-medium-fixes]: 05-05: RD-001 and RD-002 close against scanner-enforcement commit a66c625. — The audit catalogue now ties MEDIUM closure to the code change that enforces the guardrails.
 
 ### Pending Todos
 
@@ -103,8 +107,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-27T04:51:26.320Z
-Stopped at: Completed 05-04-PLAN.md
+Last session: 2026-04-27T05:18:34.326Z
+Stopped at: Completed 05-05-PLAN.md
 Resume file: None
 
 **Planned Phase:** 2 (coverage-baseline) — 4 plans — 2026-04-25T15:05:23.420Z
