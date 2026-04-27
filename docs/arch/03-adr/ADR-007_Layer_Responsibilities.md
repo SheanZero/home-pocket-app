@@ -954,3 +954,33 @@ class CreateTransactionUseCase {
 
 **变更日志:**
 - 2026-02-03: 创建 ADR-006，明确层次职责划分标准
+
+---
+
+## Update 2026-04-27: Cleanup Initiative Outcome
+
+**Cross-reference:** [ADR-011](./ADR-011_Codebase_Cleanup_Initiative_Outcome.md)
+
+Phases 3–6 of the codebase cleanup initiative made the layer rules described above
+**mechanically enforced**:
+
+- `import_guard_custom_lint` plugin loaded via `analysis_options.yaml` plugins list,
+  with per-layer YAML configs at:
+  - `lib/import_guard.yaml` (root)
+  - `lib/application/import_guard.yaml`
+  - `lib/data/import_guard.yaml`
+  - `lib/features/import_guard.yaml` (Thin Feature rule — features must NOT contain
+    `application/`, `infrastructure/`, `data/tables/`, or `data/daos/`)
+  - `lib/infrastructure/import_guard.yaml`
+- CI runs `dart run custom_lint` (`.github/workflows/audit.yml:39`) on every PR.
+- Architecture tests `test/architecture/domain_import_rules_test.dart` and
+  `test/architecture/provider_graph_hygiene_test.dart` enforce the same invariants
+  from the Dart side.
+
+Additionally, the code-sample stack diagrams in this ADR predate the Phase 4-04
+mocktail migration. Any `mockito` reference in this ADR's body should be read as
+a historical artifact; the post-cleanup mock framework is `mocktail` (per ADR-011
+§`*.mocks.dart` Strategy).
+
+The original decision body above is preserved verbatim per ADR append-only convention
+(`.claude/rules/arch.md:171-173`).
