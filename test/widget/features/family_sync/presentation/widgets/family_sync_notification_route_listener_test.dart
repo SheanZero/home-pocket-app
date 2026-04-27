@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/application/family_sync/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/widgets/family_sync_notification_route_listener.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
@@ -66,7 +66,9 @@ void main() {
               const Scaffold(body: Text('group-management-screen')),
           child: const Scaffold(body: Text('home')),
         ),
-        overrides: [pushNotificationServiceProvider.overrideWithValue(service)],
+        overrides: [
+          appPushNotificationServiceProvider.overrideWithValue(service),
+        ],
       ),
     );
 
@@ -102,7 +104,9 @@ void main() {
               const Scaffold(body: Text('group-management-screen')),
           child: const Scaffold(body: Text('home')),
         ),
-        overrides: [pushNotificationServiceProvider.overrideWithValue(service)],
+        overrides: [
+          appPushNotificationServiceProvider.overrideWithValue(service),
+        ],
       ),
     );
 
@@ -139,7 +143,9 @@ void main() {
           },
           child: const Scaffold(body: Text('home')),
         ),
-        overrides: [pushNotificationServiceProvider.overrideWithValue(service)],
+        overrides: [
+          appPushNotificationServiceProvider.overrideWithValue(service),
+        ],
       ),
     );
 
@@ -188,7 +194,9 @@ void main() {
             ),
           ),
         ),
-        overrides: [pushNotificationServiceProvider.overrideWithValue(service)],
+        overrides: [
+          appPushNotificationServiceProvider.overrideWithValue(service),
+        ],
       ),
     );
 

@@ -1,19 +1,11 @@
 # Phase 04 Deferred Items
 
-## Pre-existing Test Failures (Out of Scope)
+## Resolved: family_sync_notification_route_listener_test failures (2026-04-27)
 
 **File:** `test/widget/features/family_sync/presentation/widgets/family_sync_notification_route_listener_test.dart`
-**Status:** 4 pre-existing failures (confirmed present before Plan 04-05 changes)
-**Failing tests:**
-- routes join request notifications to the approval screen
-- passes groupId from push intent to member approval builder
-- passes groupId from push intent to group management builder
-- pops to root and resets status on groupDissolved intent
-
-**Root cause (not investigated):** These widget tests appear to have routing/widget-finding issues. The errors indicate `FamilySyncNotificationRouteListener` is not routing to the correct screen (0 widgets found with text "approval-screen").
-
-**Discovered during:** Plan 04-05 Task 2 full test suite run
-**Deferred to:** Phase 5 or dedicated investigation
+**Original status:** 4 failing tests, mis-classified as "pre-existing" by 04-05 agent.
+**Actual root cause:** Plan 04-02 (commit `c881d0d`) re-routed `FamilySyncNotificationRouteListener`'s DI through the application layer — `listenToPushNotificationsUseCaseProvider` now reads `appPushNotificationServiceProvider` instead of the feature-side `pushNotificationServiceProvider`. The tests still overrode the feature-side delegating provider, so the controller received an un-overridden service instance and never observed the test-injected `handleNotificationTap` calls.
+**Fix:** Override `appPushNotificationServiceProvider` (application layer) instead of `pushNotificationServiceProvider` (feature delegating provider). All 4 tests now pass.
 
 ## Pre-existing Analyzer Info Warnings (Out of Scope)
 
