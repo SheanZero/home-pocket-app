@@ -25,16 +25,20 @@ void main() {
       expect(result, same(fakeStream));
     });
 
-    test('takePendingIntent delegates to service.takePendingNavigationIntent', () {
-      const intent = PushNavigationIntent.memberApproval(groupId: 'g1');
-      when(() => mockService.takePendingNavigationIntent())
-          .thenReturn(intent);
+    test(
+      'takePendingIntent delegates to service.takePendingNavigationIntent',
+      () {
+        const intent = PushNavigationIntent.memberApproval(groupId: 'g1');
+        when(
+          () => mockService.takePendingNavigationIntent(),
+        ).thenReturn(intent);
 
-      final result = useCase.takePendingIntent();
+        final result = useCase.takePendingIntent();
 
-      expect(result, same(intent));
-      verify(() => mockService.takePendingNavigationIntent()).called(1);
-    });
+        expect(result, same(intent));
+        verify(() => mockService.takePendingNavigationIntent()).called(1);
+      },
+    );
 
     test('takePendingIntent returns null when no pending intent', () {
       when(() => mockService.takePendingNavigationIntent()).thenReturn(null);

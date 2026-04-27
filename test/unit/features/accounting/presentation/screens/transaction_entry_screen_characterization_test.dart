@@ -59,13 +59,10 @@ void main() {
         tester,
       ) async {
         await tester.pumpWidget(
-          _buildApp(
-            const TransactionEntryScreen(bookId: 'book-001'),
-            [
-              categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
-              settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
-            ],
-          ),
+          _buildApp(const TransactionEntryScreen(bookId: 'book-001'), [
+            categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
+            settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
+          ]),
         );
         // Pump one frame — screen may still be loading categories
         await tester.pump();
@@ -75,13 +72,10 @@ void main() {
 
       testWidgets('contains an AppBar with navigation icon', (tester) async {
         await tester.pumpWidget(
-          _buildApp(
-            const TransactionEntryScreen(bookId: 'book-001'),
-            [
-              categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
-              settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
-            ],
-          ),
+          _buildApp(const TransactionEntryScreen(bookId: 'book-001'), [
+            categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
+            settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
+          ]),
         );
         await tester.pump();
         expect(find.byType(AppBar), findsOneWidget);
@@ -94,13 +88,10 @@ void main() {
         // The initial date is DateTime.now() — for today, DateFormatter shows HH:mm.
         // For this test we just confirm the widget tree builds with text.
         await tester.pumpWidget(
-          _buildApp(
-            const TransactionEntryScreen(bookId: 'book-001'),
-            [
-              categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
-              settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
-            ],
-          ),
+          _buildApp(const TransactionEntryScreen(bookId: 'book-001'), [
+            categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
+            settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
+          ]),
         );
         await tester.pump();
         // Screen renders some text (date / amount placeholder)

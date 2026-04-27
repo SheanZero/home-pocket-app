@@ -10,7 +10,8 @@ import 'package:home_pocket/features/accounting/domain/repositories/transaction_
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
 import 'package:mocktail/mocktail.dart';
 
-class _MockTransactionRepository extends Mock implements TransactionRepository {}
+class _MockTransactionRepository extends Mock
+    implements TransactionRepository {}
 
 class _MockCategoryRepository extends Mock implements CategoryRepository {}
 
@@ -19,7 +20,8 @@ class _MockDeviceIdentityRepository extends Mock
 
 class _MockHashChainService extends Mock implements HashChainService {}
 
-class _MockClassificationService extends Mock implements ClassificationService {}
+class _MockClassificationService extends Mock
+    implements ClassificationService {}
 
 class _FakeTransaction extends Fake implements Transaction {}
 
@@ -244,9 +246,7 @@ void main() {
           reason: 'Entertainment category',
         ),
       );
-      when(
-        () => mockCategoryRepo.findById('cat_entertainment'),
-      ).thenAnswer(
+      when(() => mockCategoryRepo.findById('cat_entertainment')).thenAnswer(
         (_) async => Category(
           id: 'cat_entertainment',
           name: 'Entertainment',

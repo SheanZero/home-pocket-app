@@ -15,7 +15,8 @@ class _MockRelayApiClient extends Mock implements RelayApiClient {}
 
 class _MockGroupRepository extends Mock implements GroupRepository {}
 
-class _MockUserProfileRepository extends Mock implements UserProfileRepository {}
+class _MockUserProfileRepository extends Mock
+    implements UserProfileRepository {}
 
 class _MockE2EEService extends Mock implements E2EEService {}
 

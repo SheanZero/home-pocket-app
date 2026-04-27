@@ -4,7 +4,8 @@ import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:mocktail/mocktail.dart';
 
-class _MockTransactionRepository extends Mock implements TransactionRepository {}
+class _MockTransactionRepository extends Mock
+    implements TransactionRepository {}
 
 void main() {
   late _MockTransactionRepository mockRepo;

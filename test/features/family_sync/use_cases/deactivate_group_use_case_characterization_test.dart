@@ -65,43 +65,52 @@ void main() {
       expect(result, isA<DeactivateGroupSuccess>());
     });
 
-    test('calls apiClient, queueManager, shadowBookService, groupRepository in sequence', () async {
-      await useCase.execute('group-1');
+    test(
+      'calls apiClient, queueManager, shadowBookService, groupRepository in sequence',
+      () async {
+        await useCase.execute('group-1');
 
-      verify(() => fakeApiClient.deactivateGroup('group-1')).called(1);
-      verify(() => fakeSyncQueueManager.clearQueue()).called(1);
-      verify(() => fakeShadowBookService.cleanSyncData('group-1')).called(1);
-      verify(() => fakeGroupRepository.deactivateGroup('group-1')).called(1);
-    });
+        verify(() => fakeApiClient.deactivateGroup('group-1')).called(1);
+        verify(() => fakeSyncQueueManager.clearQueue()).called(1);
+        verify(() => fakeShadowBookService.cleanSyncData('group-1')).called(1);
+        verify(() => fakeGroupRepository.deactivateGroup('group-1')).called(1);
+      },
+    );
 
-    test('returns error with message when RelayApiException is thrown', () async {
-      when(() => fakeApiClient.deactivateGroup(any())).thenThrow(
-        const RelayApiException(statusCode: 403, message: 'forbidden'),
-      );
+    test(
+      'returns error with message when RelayApiException is thrown',
+      () async {
+        when(() => fakeApiClient.deactivateGroup(any())).thenThrow(
+          const RelayApiException(statusCode: 403, message: 'forbidden'),
+        );
 
-      final result = await useCase.execute('group-1');
+        final result = await useCase.execute('group-1');
 
-      expect(result, isA<DeactivateGroupError>());
-      final error = result as DeactivateGroupError;
-      expect(error.message, equals('forbidden'));
-    });
+        expect(result, isA<DeactivateGroupError>());
+        final error = result as DeactivateGroupError;
+        expect(error.message, equals('forbidden'));
+      },
+    );
 
-    test('returns error when generic exception is thrown by queueManager', () async {
-      when(() => fakeSyncQueueManager.clearQueue()).thenThrow(
-        StateError('queue broken'),
-      );
+    test(
+      'returns error when generic exception is thrown by queueManager',
+      () async {
+        when(
+          () => fakeSyncQueueManager.clearQueue(),
+        ).thenThrow(StateError('queue broken'));
 
-      final result = await useCase.execute('group-1');
+        final result = await useCase.execute('group-1');
 
-      expect(result, isA<DeactivateGroupError>());
-      final error = result as DeactivateGroupError;
-      expect(error.message, contains('queue broken'));
-    });
+        expect(result, isA<DeactivateGroupError>());
+        final error = result as DeactivateGroupError;
+        expect(error.message, contains('queue broken'));
+      },
+    );
 
     test('returns error when groupRepository.deactivateGroup throws', () async {
-      when(() => fakeGroupRepository.deactivateGroup(any())).thenThrow(
-        Exception('db write failed'),
-      );
+      when(
+        () => fakeGroupRepository.deactivateGroup(any()),
+      ).thenThrow(Exception('db write failed'));
 
       final result = await useCase.execute('group-1');
 

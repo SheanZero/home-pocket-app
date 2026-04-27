@@ -4,7 +4,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../application/analytics/get_budget_progress_use_case.dart';
 import '../../../../application/analytics/get_expense_trend_use_case.dart';
 import '../../../../application/analytics/get_monthly_report_use_case.dart';
-import '../../../../application/analytics/repository_providers.dart' as app_analytics;
+import '../../../../application/analytics/repository_providers.dart'
+    as app_analytics;
 import '../../../../data/daos/analytics_dao.dart';
 import '../../../../data/repositories/analytics_repository_impl.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart';

@@ -40,9 +40,9 @@ void main() {
     });
 
     test('returns null gracefully when database throws', () async {
-      when(() => mockDatabase.findMerchant(any())).thenThrow(
-        Exception('Database error'),
-      );
+      when(
+        () => mockDatabase.findMerchant(any()),
+      ).thenThrow(Exception('Database error'));
 
       final result = await useCase.execute('anything');
 

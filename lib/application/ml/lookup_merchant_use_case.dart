@@ -6,7 +6,7 @@ import '../../infrastructure/ml/merchant_database.dart';
 /// Constructor-injection pattern per PATTERNS.md §2/§3 and CLAUDE.md conventions.
 class LookupMerchantUseCase {
   LookupMerchantUseCase({required MerchantDatabase database})
-      : _database = database;
+    : _database = database;
 
   final MerchantDatabase _database;
 

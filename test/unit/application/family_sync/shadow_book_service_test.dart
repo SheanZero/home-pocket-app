@@ -22,17 +22,11 @@ void main() {
     final bookRepo = BookRepositoryImpl(dao: BookDao(db));
     transactionDao = TransactionDao(db);
     mockEncryption = _MockFieldEncryptionService();
-    when(
-      () => mockEncryption.encryptField(any()),
-    ).thenAnswer(
-      (invocation) async =>
-          invocation.positionalArguments.first as String,
+    when(() => mockEncryption.encryptField(any())).thenAnswer(
+      (invocation) async => invocation.positionalArguments.first as String,
     );
-    when(
-      () => mockEncryption.decryptField(any()),
-    ).thenAnswer(
-      (invocation) async =>
-          invocation.positionalArguments.first as String,
+    when(() => mockEncryption.decryptField(any())).thenAnswer(
+      (invocation) async => invocation.positionalArguments.first as String,
     );
     final transactionRepo = TransactionRepositoryImpl(
       dao: transactionDao,

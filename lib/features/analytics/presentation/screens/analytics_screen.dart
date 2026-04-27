@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/analytics/demo_data_service.dart';
-import '../../../../application/analytics/repository_providers.dart' as app_analytics;
+import '../../../../application/analytics/repository_providers.dart'
+    as app_analytics;
 import '../../../../application/i18n/formatter_service.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart';
 import '../../../../generated/app_localizations.dart';

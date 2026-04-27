@@ -26,5 +26,7 @@ MerchantDatabase appMerchantDatabase(Ref ref) {
 /// Application-layer LookupMerchantUseCase provider.
 @riverpod
 LookupMerchantUseCase lookupMerchantUseCase(Ref ref) {
-  return LookupMerchantUseCase(database: ref.watch(appMerchantDatabaseProvider));
+  return LookupMerchantUseCase(
+    database: ref.watch(appMerchantDatabaseProvider),
+  );
 }

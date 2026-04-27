@@ -8,9 +8,9 @@ import 'package:home_pocket/data/app_database.dart';
 ///   - bumps schemaVersion to 14 in AppDatabase
 ///   - adds the v14 migration block in onUpgrade
 ///
-/// The `schemaVersion` guard at the top of each group ensures tests fail
-/// (RED) until the version is actually bumped.  Once schemaVersion == 14 and
-/// the onUpgrade SQL is in place, all assertions should turn GREEN.
+/// The `schemaVersion` guard ensures the database is at least v14. Once
+/// schemaVersion >= 14 and the onUpgrade SQL is in place, all assertions
+/// should turn GREEN.
 ///
 /// Test approach (no drift_schemas/ snapshots available):
 ///   1. Open a fresh AppDatabase.forTesting() (in-memory NativeDatabase).
@@ -25,7 +25,7 @@ import 'package:home_pocket/data/app_database.dart';
 
 // ─── Expected target schema version ──────────────────────────────────────────
 
-const int _targetSchemaVersion = 14;
+const int _minimumSchemaVersionWithV14Migration = 14;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -225,12 +225,11 @@ void main() {
     await db.close();
   });
 
-  // Guard: this assertion fails (RED) until Task 14 bumps schemaVersion to 14.
-  test('AppDatabase schemaVersion is 14 (RED until Task 14)', () {
+  test('AppDatabase schemaVersion includes v14 migration', () {
     expect(
       db.schemaVersion,
-      _targetSchemaVersion,
-      reason: 'schemaVersion must be bumped to 14 in app_database.dart',
+      greaterThanOrEqualTo(_minimumSchemaVersionWithV14Migration),
+      reason: 'schemaVersion must include v14 migrations in app_database.dart',
     );
   });
 

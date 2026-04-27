@@ -12,7 +12,8 @@ import 'package:home_pocket/features/settings/presentation/providers/repository_
 import 'package:mocktail/mocktail.dart';
 
 // Inline Mocktail-only mocks (no @GenerateMocks, no package:mockito)
-class _MockTransactionRepository extends Mock implements TransactionRepository {}
+class _MockTransactionRepository extends Mock
+    implements TransactionRepository {}
 
 class _MockCategoryRepository extends Mock implements CategoryRepository {}
 

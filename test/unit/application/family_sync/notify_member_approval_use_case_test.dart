@@ -6,6 +6,7 @@ import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockWebSocketService extends Mock implements WebSocketService {}
+
 class _MockKeyManager extends Mock implements KeyManager {}
 
 void main() {
@@ -23,28 +24,33 @@ void main() {
   });
 
   group('NotifyMemberApprovalUseCase', () {
-    test('connect delegates to WebSocketService with groupId and deviceId', () async {
-      when(() => mockKeyManager.getDeviceId()).thenAnswer((_) async => 'device-123');
-      when(
-        () => mockWsService.connect(
-          groupId: any(named: 'groupId'),
-          deviceId: any(named: 'deviceId'),
-          signMessage: any(named: 'signMessage'),
-        ),
-      ).thenReturn(null);
-      when(() => mockWsService.startLifecycleObservation()).thenReturn(null);
+    test(
+      'connect delegates to WebSocketService with groupId and deviceId',
+      () async {
+        when(
+          () => mockKeyManager.getDeviceId(),
+        ).thenAnswer((_) async => 'device-123');
+        when(
+          () => mockWsService.connect(
+            groupId: any(named: 'groupId'),
+            deviceId: any(named: 'deviceId'),
+            signMessage: any(named: 'signMessage'),
+          ),
+        ).thenReturn(null);
+        when(() => mockWsService.startLifecycleObservation()).thenReturn(null);
 
-      await useCase.connectWebSocket(groupId: 'group-abc');
+        await useCase.connectWebSocket(groupId: 'group-abc');
 
-      verify(
-        () => mockWsService.connect(
-          groupId: 'group-abc',
-          deviceId: 'device-123',
-          signMessage: any(named: 'signMessage'),
-        ),
-      ).called(1);
-      verify(() => mockWsService.startLifecycleObservation()).called(1);
-    });
+        verify(
+          () => mockWsService.connect(
+            groupId: 'group-abc',
+            deviceId: 'device-123',
+            signMessage: any(named: 'signMessage'),
+          ),
+        ).called(1);
+        verify(() => mockWsService.startLifecycleObservation()).called(1);
+      },
+    );
 
     test('disconnect delegates to WebSocketService', () {
       when(() => mockWsService.stopLifecycleObservation()).thenReturn(null);
@@ -92,15 +98,17 @@ void main() {
         ),
       ).thenAnswer((invocation) {
         capturedCallback =
-            (invocation.namedArguments[#signMessage] as Future<String> Function(String))
+            (invocation.namedArguments[#signMessage]
+                    as Future<String> Function(String))
                 .call('test-payload');
       });
       when(() => mockWsService.startLifecycleObservation()).thenReturn(null);
       when(() => mockKeyManager.signData(any())).thenAnswer(
-        (_) async => Signature(
-          [1, 2, 3],
-          publicKey: SimplePublicKey([], type: KeyPairType.ed25519),
-        ),
+        (_) async => Signature([
+          1,
+          2,
+          3,
+        ], publicKey: SimplePublicKey([], type: KeyPairType.ed25519)),
       );
 
       await useCase.connectWebSocket(groupId: 'group-abc');

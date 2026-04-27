@@ -21,11 +21,13 @@ ProviderContainerFactory _makeContainerFactory({
   required KeyRepository keyRepo,
 }) {
   return ({overrides = const []}) {
-    return ProviderContainer(overrides: [
-      masterKeyRepositoryProvider.overrideWithValue(masterKeyRepo),
-      keyRepositoryProvider.overrideWithValue(keyRepo),
-      ...overrides,
-    ]);
+    return ProviderContainer(
+      overrides: [
+        masterKeyRepositoryProvider.overrideWithValue(masterKeyRepo),
+        keyRepositoryProvider.overrideWithValue(keyRepo),
+        ...overrides,
+      ],
+    );
   };
 }
 
@@ -39,7 +41,8 @@ AppDatabaseFactory _failingDatabaseFactory(Object error) {
 
 SeedRunner _noopSeedRunner() => (_) async {};
 
-SeedRunner _failingSeedRunner(Object error) => (_) async => throw error;
+SeedRunner _failingSeedRunner(Object error) =>
+    (_) async => throw error;
 
 void main() {
   late _FakeMasterKeyRepository fakeMasterKeyRepo;
@@ -51,9 +54,9 @@ void main() {
 
     // Happy-path defaults
     when(() => fakeMasterKeyRepo.hasMasterKey()).thenAnswer((_) async => true);
-    when(() => fakeMasterKeyRepo.initializeMasterKey()).thenAnswer(
-      (_) async {},
-    );
+    when(
+      () => fakeMasterKeyRepo.initializeMasterKey(),
+    ).thenAnswer((_) async {});
     when(() => fakeKeyRepo.hasKeyPair()).thenAnswer((_) async => true);
     when(() => fakeKeyRepo.getDeviceId()).thenAnswer((_) async => 'device-1');
     when(() => fakeKeyRepo.generateKeyPair()).thenAnswer(
@@ -96,7 +99,9 @@ void main() {
     });
 
     test('does NOT call initializeMasterKey when key already exists', () async {
-      when(() => fakeMasterKeyRepo.hasMasterKey()).thenAnswer((_) async => true);
+      when(
+        () => fakeMasterKeyRepo.hasMasterKey(),
+      ).thenAnswer((_) async => true);
       final result = await makeInitializer().initialize();
       (result as InitSuccess).container.dispose();
 
@@ -104,20 +109,25 @@ void main() {
     });
 
     test('calls initializeMasterKey when no key exists', () async {
-      when(() => fakeMasterKeyRepo.hasMasterKey()).thenAnswer((_) async => false);
+      when(
+        () => fakeMasterKeyRepo.hasMasterKey(),
+      ).thenAnswer((_) async => false);
       final result = await makeInitializer().initialize();
       (result as InitSuccess).container.dispose();
 
       verify(() => fakeMasterKeyRepo.initializeMasterKey()).called(1);
     });
 
-    test('does NOT call generateKeyPair when key pair already exists', () async {
-      when(() => fakeKeyRepo.hasKeyPair()).thenAnswer((_) async => true);
-      final result = await makeInitializer().initialize();
-      (result as InitSuccess).container.dispose();
+    test(
+      'does NOT call generateKeyPair when key pair already exists',
+      () async {
+        when(() => fakeKeyRepo.hasKeyPair()).thenAnswer((_) async => true);
+        final result = await makeInitializer().initialize();
+        (result as InitSuccess).container.dispose();
 
-      verifyNever(() => fakeKeyRepo.generateKeyPair());
-    });
+        verifyNever(() => fakeKeyRepo.generateKeyPair());
+      },
+    );
 
     test('calls generateKeyPair when no key pair exists', () async {
       when(() => fakeKeyRepo.hasKeyPair()).thenAnswer((_) async => false);
@@ -148,9 +158,9 @@ void main() {
 
   group('AppInitializer — masterKey failure', () {
     test('returns InitFailure(masterKey) when hasMasterKey throws', () async {
-      when(() => fakeMasterKeyRepo.hasMasterKey()).thenThrow(
-        Exception('secure storage unavailable'),
-      );
+      when(
+        () => fakeMasterKeyRepo.hasMasterKey(),
+      ).thenThrow(Exception('secure storage unavailable'));
 
       final result = await makeInitializer().initialize();
 
@@ -158,28 +168,34 @@ void main() {
       expect((result as InitFailure).type, equals(InitFailureType.masterKey));
     });
 
-    test('returns InitFailure(masterKey) when initializeMasterKey throws',
-        () async {
-      when(() => fakeMasterKeyRepo.hasMasterKey()).thenAnswer((_) async => false);
-      when(() => fakeMasterKeyRepo.initializeMasterKey()).thenThrow(
-        Exception('key generation failed'),
-      );
+    test(
+      'returns InitFailure(masterKey) when initializeMasterKey throws',
+      () async {
+        when(
+          () => fakeMasterKeyRepo.hasMasterKey(),
+        ).thenAnswer((_) async => false);
+        when(
+          () => fakeMasterKeyRepo.initializeMasterKey(),
+        ).thenThrow(Exception('key generation failed'));
 
-      final result = await makeInitializer().initialize();
+        final result = await makeInitializer().initialize();
 
-      expect(result, isA<InitFailure>());
-      expect((result as InitFailure).type, equals(InitFailureType.masterKey));
-    });
+        expect(result, isA<InitFailure>());
+        expect((result as InitFailure).type, equals(InitFailureType.masterKey));
+      },
+    );
 
-    test('returns InitFailure(masterKey) when getDeviceId returns null',
-        () async {
-      when(() => fakeKeyRepo.getDeviceId()).thenAnswer((_) async => null);
+    test(
+      'returns InitFailure(masterKey) when getDeviceId returns null',
+      () async {
+        when(() => fakeKeyRepo.getDeviceId()).thenAnswer((_) async => null);
 
-      final result = await makeInitializer().initialize();
+        final result = await makeInitializer().initialize();
 
-      expect(result, isA<InitFailure>());
-      expect((result as InitFailure).type, equals(InitFailureType.masterKey));
-    });
+        expect(result, isA<InitFailure>());
+        expect((result as InitFailure).type, equals(InitFailureType.masterKey));
+      },
+    );
   });
 
   group('AppInitializer — database failure', () {

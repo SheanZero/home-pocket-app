@@ -89,8 +89,9 @@ void main() {
     ).thenAnswer((_) async => const RemoveMemberResult.success());
 
     // NotifyMemberApprovalUseCase mocks
-    when(() => notifyUseCase.listenForJoinRequests())
-        .thenAnswer((_) => wsEventController.stream);
+    when(
+      () => notifyUseCase.listenForJoinRequests(),
+    ).thenAnswer((_) => wsEventController.stream);
     when(
       () => notifyUseCase.connectWebSocket(groupId: any(named: 'groupId')),
     ).thenAnswer((_) async {});
@@ -132,7 +133,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Initial loads: _loadGroup() called once on initState
-    verify(() => groupRepository.getActiveGroup()).called(greaterThanOrEqualTo(1));
+    verify(
+      () => groupRepository.getActiveGroup(),
+    ).called(greaterThanOrEqualTo(1));
 
     // Simulate join_request WebSocket event via the use case stream
     wsEventController.add(
@@ -144,6 +147,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // Group should be reloaded once more
-    verify(() => groupRepository.getActiveGroup()).called(greaterThanOrEqualTo(1));
+    verify(
+      () => groupRepository.getActiveGroup(),
+    ).called(greaterThanOrEqualTo(1));
   });
 }

@@ -46,9 +46,7 @@ void main() {
 
     when(() => mockCategoryRepo.findAll()).thenAnswer((_) async => []);
     when(() => mockCategoryRepo.findActive()).thenAnswer((_) async => []);
-    when(
-      () => mockCategoryRepo.findById(any()),
-    ).thenAnswer((_) async => null);
+    when(() => mockCategoryRepo.findById(any())).thenAnswer((_) async => null);
     when(
       () => mockSettingsRepo.getSettings(),
     ).thenAnswer((_) async => const AppSettings(language: 'ja'));
@@ -155,27 +153,29 @@ void main() {
         },
       );
 
-      testWidgets('createTransactionUseCaseProvider is wired (provider exists)',
-          (tester) async {
-        // This test verifies the use_case_providers wiring does not throw
-        // at build time — pure construction check.
-        await tester.pumpWidget(
-          _buildApp(
-            TransactionConfirmScreen(
-              bookId: 'book-001',
-              amount: 500,
-              date: DateTime.now(),
+      testWidgets(
+        'createTransactionUseCaseProvider is wired (provider exists)',
+        (tester) async {
+          // This test verifies the use_case_providers wiring does not throw
+          // at build time — pure construction check.
+          await tester.pumpWidget(
+            _buildApp(
+              TransactionConfirmScreen(
+                bookId: 'book-001',
+                amount: 500,
+                date: DateTime.now(),
+              ),
+              [
+                categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
+                settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
+              ],
             ),
-            [
-              categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
-              settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
-            ],
-          ),
-        );
-        await tester.pump();
-        // No crash = wiring is intact
-        expect(find.byType(TransactionConfirmScreen), findsOneWidget);
-      });
+          );
+          await tester.pump();
+          // No crash = wiring is intact
+          expect(find.byType(TransactionConfirmScreen), findsOneWidget);
+        },
+      );
     },
   );
 }

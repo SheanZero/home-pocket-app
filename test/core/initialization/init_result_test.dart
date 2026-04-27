@@ -43,12 +43,15 @@ void main() {
 
     test('InitFailureType has 4 variants', () {
       expect(InitFailureType.values, hasLength(4));
-      expect(InitFailureType.values, containsAll([
-        InitFailureType.masterKey,
-        InitFailureType.database,
-        InitFailureType.seed,
-        InitFailureType.unknown,
-      ]));
+      expect(
+        InitFailureType.values,
+        containsAll([
+          InitFailureType.masterKey,
+          InitFailureType.database,
+          InitFailureType.seed,
+          InitFailureType.unknown,
+        ]),
+      );
     });
 
     test('sealed class pattern matching on success', () {

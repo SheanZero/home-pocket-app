@@ -26,7 +26,9 @@ void main() {
     testDatabase = AppDatabase.forTesting();
     mockKeyManager = _MockKeyManager();
 
-    when(() => mockKeyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
+    when(
+      () => mockKeyManager.getDeviceId(),
+    ).thenAnswer((_) async => 'device-1');
     when(
       () => mockKeyManager.getPublicKey(),
     ).thenAnswer((_) async => 'pub-key');
@@ -88,13 +90,16 @@ void main() {
         expect(service, isA<WebSocketService>());
       });
 
-      test('all delegating sync-client providers return non-null instances', () {
-        expect(container.read(relayApiClientProvider), isNotNull);
-        expect(container.read(e2eeServiceProvider), isNotNull);
-        expect(container.read(pushNotificationServiceProvider), isNotNull);
-        expect(container.read(syncQueueManagerProvider), isNotNull);
-        expect(container.read(webSocketServiceProvider), isNotNull);
-      });
+      test(
+        'all delegating sync-client providers return non-null instances',
+        () {
+          expect(container.read(relayApiClientProvider), isNotNull);
+          expect(container.read(e2eeServiceProvider), isNotNull);
+          expect(container.read(pushNotificationServiceProvider), isNotNull);
+          expect(container.read(syncQueueManagerProvider), isNotNull);
+          expect(container.read(webSocketServiceProvider), isNotNull);
+        },
+      );
 
       test(
         'groupMemberDaoProvider constructs GroupMemberDao without error',

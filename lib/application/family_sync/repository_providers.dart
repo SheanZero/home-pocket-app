@@ -20,7 +20,8 @@ import 'notify_member_approval_use_case.dart';
 // without importing infrastructure/ directly.
 export '../../infrastructure/sync/push_notification_service.dart'
     show PushNavigationIntent, PushNavigationDestination;
-export '../../infrastructure/sync/sync_queue_manager.dart' show SyncQueueManager;
+export '../../infrastructure/sync/sync_queue_manager.dart'
+    show SyncQueueManager;
 export '../../infrastructure/sync/websocket_service.dart'
     show WebSocketEvent, WebSocketEventType;
 

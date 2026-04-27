@@ -7,9 +7,8 @@ enum InitFailureType { masterKey, database, seed, unknown }
 
 @freezed
 sealed class InitResult with _$InitResult {
-  const factory InitResult.success({
-    required ProviderContainer container,
-  }) = InitSuccess;
+  const factory InitResult.success({required ProviderContainer container}) =
+      InitSuccess;
 
   const factory InitResult.failure({
     required InitFailureType type,

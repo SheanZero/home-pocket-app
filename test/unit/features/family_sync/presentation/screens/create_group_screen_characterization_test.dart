@@ -24,7 +24,8 @@ class _MockKeyManager extends Mock implements KeyManager {}
 
 class _MockWebSocketService extends Mock implements WebSocketService {}
 
-class _MockUserProfileRepository extends Mock implements UserProfileRepository {}
+class _MockUserProfileRepository extends Mock
+    implements UserProfileRepository {}
 
 class _MockSettingsRepository extends Mock implements SettingsRepository {}
 
@@ -64,68 +65,49 @@ void main() {
     ).thenAnswer((_) async => const AppSettings(language: 'ja'));
   });
 
-  group(
-    'CreateGroupScreen characterization tests (pre-refactor behavior)',
-    () {
-      testWidgets('renders without crashing', (tester) async {
-        await tester.pumpWidget(
-          _buildApp(
-            const CreateGroupScreen(),
-            [
-              keyManagerProvider.overrideWithValue(mockKeyManager),
-              webSocketServiceProvider.overrideWithValue(mockWebSocketService),
-              userProfileRepositoryProvider.overrideWithValue(
-                mockUserProfileRepo,
-              ),
-              settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
-            ],
-          ),
-        );
-        await tester.pump();
-        expect(find.byType(Scaffold), findsWidgets);
-      });
-
-      testWidgets('contains a Scaffold body with content', (tester) async {
-        await tester.pumpWidget(
-          _buildApp(
-            const CreateGroupScreen(),
-            [
-              keyManagerProvider.overrideWithValue(mockKeyManager),
-              webSocketServiceProvider.overrideWithValue(mockWebSocketService),
-              userProfileRepositoryProvider.overrideWithValue(
-                mockUserProfileRepo,
-              ),
-              settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
-            ],
-          ),
-        );
-        await tester.pump();
-        // CreateGroupScreen wraps its content in a Scaffold
-        expect(find.byType(Scaffold), findsWidgets);
-      });
-
-      testWidgets(
-        'keyManagerProvider wired — crypto provider is overrideable',
-        (tester) async {
-          // This test verifies keyManagerProvider can be overridden,
-          // locking the dependency injection path before Plan 04-01 refactoring.
-          await tester.pumpWidget(
-            _buildApp(
-              const CreateGroupScreen(),
-              [
-                keyManagerProvider.overrideWithValue(mockKeyManager),
-                webSocketServiceProvider.overrideWithValue(mockWebSocketService),
-                userProfileRepositoryProvider.overrideWithValue(
-                  mockUserProfileRepo,
-                ),
-                settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
-              ],
-            ),
-          );
-          await tester.pump();
-          expect(find.byType(CreateGroupScreen), findsOneWidget);
-        },
+  group('CreateGroupScreen characterization tests (pre-refactor behavior)', () {
+    testWidgets('renders without crashing', (tester) async {
+      await tester.pumpWidget(
+        _buildApp(const CreateGroupScreen(), [
+          keyManagerProvider.overrideWithValue(mockKeyManager),
+          webSocketServiceProvider.overrideWithValue(mockWebSocketService),
+          userProfileRepositoryProvider.overrideWithValue(mockUserProfileRepo),
+          settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
+        ]),
       );
-    },
-  );
+      await tester.pump();
+      expect(find.byType(Scaffold), findsWidgets);
+    });
+
+    testWidgets('contains a Scaffold body with content', (tester) async {
+      await tester.pumpWidget(
+        _buildApp(const CreateGroupScreen(), [
+          keyManagerProvider.overrideWithValue(mockKeyManager),
+          webSocketServiceProvider.overrideWithValue(mockWebSocketService),
+          userProfileRepositoryProvider.overrideWithValue(mockUserProfileRepo),
+          settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
+        ]),
+      );
+      await tester.pump();
+      // CreateGroupScreen wraps its content in a Scaffold
+      expect(find.byType(Scaffold), findsWidgets);
+    });
+
+    testWidgets('keyManagerProvider wired — crypto provider is overrideable', (
+      tester,
+    ) async {
+      // This test verifies keyManagerProvider can be overridden,
+      // locking the dependency injection path before Plan 04-01 refactoring.
+      await tester.pumpWidget(
+        _buildApp(const CreateGroupScreen(), [
+          keyManagerProvider.overrideWithValue(mockKeyManager),
+          webSocketServiceProvider.overrideWithValue(mockWebSocketService),
+          userProfileRepositoryProvider.overrideWithValue(mockUserProfileRepo),
+          settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
+        ]),
+      );
+      await tester.pump();
+      expect(find.byType(CreateGroupScreen), findsOneWidget);
+    });
+  });
 }

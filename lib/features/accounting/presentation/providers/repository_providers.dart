@@ -7,7 +7,8 @@ import '../../../../application/accounting/delete_transaction_use_case.dart';
 import '../../../../application/accounting/ensure_default_book_use_case.dart';
 import '../../../../application/accounting/get_transactions_use_case.dart';
 import '../../../../application/accounting/merchant_category_learning_service.dart';
-import '../../../../application/accounting/repository_providers.dart' as app_accounting;
+import '../../../../application/accounting/repository_providers.dart'
+    as app_accounting;
 import '../../../../application/accounting/seed_categories_use_case.dart';
 import '../../../../application/dual_ledger/repository_providers.dart';
 import '../../../../application/ml/repository_providers.dart' as app_ml;

@@ -192,5 +192,5 @@ Future<void> main(List<String> args) async {
     shardPath,
   ).writeAsString(const JsonEncoder.withIndent('  ').convert(envelope));
   final n = (envelope['findings'] as List).length;
-  print('[audit:dead_code] wrote $n findings to $shardPath');
+  stdout.writeln('[audit:dead_code] wrote $n findings to $shardPath');
 }

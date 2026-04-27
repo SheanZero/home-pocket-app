@@ -13,8 +13,10 @@ String formatCategoryPath({
     return childName;
   }
 
-  final parentName =
-      CategoryLocalizationService.resolve(parentCategory.name, locale);
+  final parentName = CategoryLocalizationService.resolve(
+    parentCategory.name,
+    locale,
+  );
   return '$parentName > $childName';
 }
 

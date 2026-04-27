@@ -16,31 +16,37 @@ void main() {
   });
 
   group('StartSpeechRecognitionUseCase', () {
-    test('initialize returns true when service initializes successfully', () async {
-      when(
-        () => mockService.initialize(
-          onStatus: any(named: 'onStatus'),
-          onError: any(named: 'onError'),
-        ),
-      ).thenAnswer((_) async => true);
+    test(
+      'initialize returns true when service initializes successfully',
+      () async {
+        when(
+          () => mockService.initialize(
+            onStatus: any(named: 'onStatus'),
+            onError: any(named: 'onError'),
+          ),
+        ).thenAnswer((_) async => true);
 
-      final result = await useCase.initialize();
+        final result = await useCase.initialize();
 
-      expect(result, isTrue);
-    });
+        expect(result, isTrue);
+      },
+    );
 
-    test('initialize returns false when service initialization fails', () async {
-      when(
-        () => mockService.initialize(
-          onStatus: any(named: 'onStatus'),
-          onError: any(named: 'onError'),
-        ),
-      ).thenAnswer((_) async => false);
+    test(
+      'initialize returns false when service initialization fails',
+      () async {
+        when(
+          () => mockService.initialize(
+            onStatus: any(named: 'onStatus'),
+            onError: any(named: 'onError'),
+          ),
+        ).thenAnswer((_) async => false);
 
-      final result = await useCase.initialize();
+        final result = await useCase.initialize();
 
-      expect(result, isFalse);
-    });
+        expect(result, isFalse);
+      },
+    );
 
     test('startListening delegates to service with correct localeId', () async {
       when(

@@ -27,7 +27,9 @@ void main() {
     mockKeyManager = _MockKeyManager();
 
     // Stub methods used by DeviceIdentityRepositoryImpl
-    when(() => mockKeyManager.getDeviceId()).thenAnswer((_) async => 'device-1');
+    when(
+      () => mockKeyManager.getDeviceId(),
+    ).thenAnswer((_) async => 'device-1');
     when(
       () => mockKeyManager.getPublicKey(),
     ).thenAnswer((_) async => 'pub-key');
@@ -66,16 +68,20 @@ void main() {
         },
       );
 
-      test('transactionRepositoryProvider constructs TransactionRepository', () {
-        final repo = container.read(transactionRepositoryProvider);
-        expect(repo, isA<TransactionRepository>());
-      });
+      test(
+        'transactionRepositoryProvider constructs TransactionRepository',
+        () {
+          final repo = container.read(transactionRepositoryProvider);
+          expect(repo, isA<TransactionRepository>());
+        },
+      );
 
       test(
         'merchantCategoryPreferenceRepositoryProvider constructs MerchantCategoryPreferenceRepository',
         () {
-          final repo =
-              container.read(merchantCategoryPreferenceRepositoryProvider);
+          final repo = container.read(
+            merchantCategoryPreferenceRepositoryProvider,
+          );
           expect(repo, isA<MerchantCategoryPreferenceRepository>());
         },
       );
@@ -83,8 +89,9 @@ void main() {
       test(
         'categoryKeywordPreferenceRepositoryProvider constructs CategoryKeywordPreferenceRepository',
         () {
-          final repo =
-              container.read(categoryKeywordPreferenceRepositoryProvider);
+          final repo = container.read(
+            categoryKeywordPreferenceRepositoryProvider,
+          );
           expect(repo, isA<CategoryKeywordPreferenceRepository>());
         },
       );
@@ -97,27 +104,24 @@ void main() {
         },
       );
 
-      test(
-        'all 7 repository providers return non-null instances',
-        () {
-          expect(container.read(bookRepositoryProvider), isNotNull);
-          expect(container.read(categoryRepositoryProvider), isNotNull);
-          expect(
-            container.read(categoryLedgerConfigRepositoryProvider),
-            isNotNull,
-          );
-          expect(container.read(transactionRepositoryProvider), isNotNull);
-          expect(
-            container.read(merchantCategoryPreferenceRepositoryProvider),
-            isNotNull,
-          );
-          expect(
-            container.read(categoryKeywordPreferenceRepositoryProvider),
-            isNotNull,
-          );
-          expect(container.read(deviceIdentityRepositoryProvider), isNotNull);
-        },
-      );
+      test('all 7 repository providers return non-null instances', () {
+        expect(container.read(bookRepositoryProvider), isNotNull);
+        expect(container.read(categoryRepositoryProvider), isNotNull);
+        expect(
+          container.read(categoryLedgerConfigRepositoryProvider),
+          isNotNull,
+        );
+        expect(container.read(transactionRepositoryProvider), isNotNull);
+        expect(
+          container.read(merchantCategoryPreferenceRepositoryProvider),
+          isNotNull,
+        );
+        expect(
+          container.read(categoryKeywordPreferenceRepositoryProvider),
+          isNotNull,
+        );
+        expect(container.read(deviceIdentityRepositoryProvider), isNotNull);
+      });
     },
   );
 }

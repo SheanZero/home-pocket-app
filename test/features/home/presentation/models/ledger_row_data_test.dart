@@ -30,17 +30,17 @@ void main() {
     const border = Color(0xFFFAFAFA);
 
     LedgerRowData seed({Color? borderColor}) => LedgerRowData(
-          tagText: 'Soul',
-          tagBgColor: tagBg,
-          tagTextColor: tagText,
-          title: 'Concert ticket',
-          titleColor: title,
-          subtitle: '2026-04-26 · Music',
-          formattedAmount: '¥8,500',
-          amountColor: amount,
-          chevronColor: chevron,
-          borderColor: borderColor,
-        );
+      tagText: 'Soul',
+      tagBgColor: tagBg,
+      tagTextColor: tagText,
+      title: 'Concert ticket',
+      titleColor: title,
+      subtitle: '2026-04-26 · Music',
+      formattedAmount: '¥8,500',
+      amountColor: amount,
+      chevronColor: chevron,
+      borderColor: borderColor,
+    );
 
     test('constructor preserves every supplied field byte-equivalently', () {
       final row = seed(borderColor: border);

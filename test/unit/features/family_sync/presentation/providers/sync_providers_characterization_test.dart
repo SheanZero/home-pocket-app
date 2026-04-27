@@ -38,12 +38,13 @@ class _MockSyncQueueManager extends Mock implements SyncQueueManager {}
 
 class _MockWebSocketService extends Mock implements WebSocketService {}
 
-class _MockTransactionRepository extends Mock implements TransactionRepository {}
+class _MockTransactionRepository extends Mock
+    implements TransactionRepository {}
 
 class _MockBookRepository extends Mock implements BookRepository {}
 
-class _MockUserProfileRepository extends Mock implements UserProfileRepository {}
-
+class _MockUserProfileRepository extends Mock
+    implements UserProfileRepository {}
 
 void main() {
   late _MockRelayApiClient mockApiClient;
@@ -92,98 +93,103 @@ void main() {
 
   tearDown(() => container.dispose());
 
-  group(
-    'family_sync/sync_providers characterization tests (pre-refactor behavior)',
-    () {
-      // HIGH-05 keepAlive lock: transactionChangeTrackerProvider
-      test(
-        'transactionChangeTrackerProvider is keepAlive — same instance across two reads',
-        () {
-          final first = container.read(transactionChangeTrackerProvider);
-          final second = container.read(transactionChangeTrackerProvider);
-          expect(identical(first, second), isTrue,
-              reason:
-                  'transactionChangeTrackerProvider must be keepAlive: true');
-        },
-      );
+  group('family_sync/sync_providers characterization tests (pre-refactor behavior)', () {
+    // HIGH-05 keepAlive lock: transactionChangeTrackerProvider
+    test(
+      'transactionChangeTrackerProvider is keepAlive — same instance across two reads',
+      () {
+        final first = container.read(transactionChangeTrackerProvider);
+        final second = container.read(transactionChangeTrackerProvider);
+        expect(
+          identical(first, second),
+          isTrue,
+          reason: 'transactionChangeTrackerProvider must be keepAlive: true',
+        );
+      },
+    );
 
-      test(
-        'transactionChangeTrackerProvider constructs TransactionChangeTracker',
-        () {
-          final tracker = container.read(transactionChangeTrackerProvider);
-          expect(tracker, isA<TransactionChangeTracker>());
-        },
-      );
+    test(
+      'transactionChangeTrackerProvider constructs TransactionChangeTracker',
+      () {
+        final tracker = container.read(transactionChangeTrackerProvider);
+        expect(tracker, isA<TransactionChangeTracker>());
+      },
+    );
 
-      // HIGH-05 keepAlive lock: syncEngineProvider
-      test(
-        'syncEngineProvider is keepAlive — same instance across two reads',
-        () {
-          final first = container.read(syncEngineProvider);
-          final second = container.read(syncEngineProvider);
-          expect(identical(first, second), isTrue,
-              reason: 'syncEngineProvider must be keepAlive: true');
-        },
-      );
+    // HIGH-05 keepAlive lock: syncEngineProvider
+    test(
+      'syncEngineProvider is keepAlive — same instance across two reads',
+      () {
+        final first = container.read(syncEngineProvider);
+        final second = container.read(syncEngineProvider);
+        expect(
+          identical(first, second),
+          isTrue,
+          reason: 'syncEngineProvider must be keepAlive: true',
+        );
+      },
+    );
 
-      test('syncEngineProvider constructs SyncEngine without error', () {
-        final engine = container.read(syncEngineProvider);
-        expect(engine, isA<SyncEngine>());
-      });
+    test('syncEngineProvider constructs SyncEngine without error', () {
+      final engine = container.read(syncEngineProvider);
+      expect(engine, isA<SyncEngine>());
+    });
 
-      test('pushSyncUseCaseProvider constructs PushSyncUseCase', () {
-        final uc = container.read(pushSyncUseCaseProvider);
-        expect(uc, isA<PushSyncUseCase>());
-      });
+    test('pushSyncUseCaseProvider constructs PushSyncUseCase', () {
+      final uc = container.read(pushSyncUseCaseProvider);
+      expect(uc, isA<PushSyncUseCase>());
+    });
 
-      test('shadowBookServiceProvider constructs ShadowBookService', () {
-        final svc = container.read(shadowBookServiceProvider);
-        expect(svc, isA<ShadowBookService>());
-      });
+    test('shadowBookServiceProvider constructs ShadowBookService', () {
+      final svc = container.read(shadowBookServiceProvider);
+      expect(svc, isA<ShadowBookService>());
+    });
 
-      test(
-        'applySyncOperationsUseCaseProvider constructs ApplySyncOperationsUseCase',
-        () {
-          final uc = container.read(applySyncOperationsUseCaseProvider);
-          expect(uc, isA<ApplySyncOperationsUseCase>());
-        },
-      );
+    test(
+      'applySyncOperationsUseCaseProvider constructs ApplySyncOperationsUseCase',
+      () {
+        final uc = container.read(applySyncOperationsUseCaseProvider);
+        expect(uc, isA<ApplySyncOperationsUseCase>());
+      },
+    );
 
-      test('checkGroupValidityUseCaseProvider constructs without error', () {
-        final uc = container.read(checkGroupValidityUseCaseProvider);
-        expect(uc, isA<CheckGroupValidityUseCase>());
-      });
+    test('checkGroupValidityUseCaseProvider constructs without error', () {
+      final uc = container.read(checkGroupValidityUseCaseProvider);
+      expect(uc, isA<CheckGroupValidityUseCase>());
+    });
 
-      test('fullSyncUseCaseProvider constructs FullSyncUseCase', () {
-        final uc = container.read(fullSyncUseCaseProvider);
-        expect(uc, isA<FullSyncUseCase>());
-      });
+    test('fullSyncUseCaseProvider constructs FullSyncUseCase', () {
+      final uc = container.read(fullSyncUseCaseProvider);
+      expect(uc, isA<FullSyncUseCase>());
+    });
 
-      test('syncOrchestratorProvider constructs SyncOrchestrator', () {
-        final svc = container.read(syncOrchestratorProvider);
-        expect(svc, isA<SyncOrchestrator>());
-      });
+    test('syncOrchestratorProvider constructs SyncOrchestrator', () {
+      final svc = container.read(syncOrchestratorProvider);
+      expect(svc, isA<SyncOrchestrator>());
+    });
 
-      // activeGroupMembersProvider behavior when activeGroup is null
-      test(
-        'activeGroupMembersProvider resolves to empty list when activeGroupProvider returns null',
-        () async {
-          // activeGroupProvider will see null from mockGroupRepo.watchActiveGroup()
-          // so activeGroupMembersProvider should resolve to [] (since it returns Stream.value([]))
-          // Wait for the provider to settle by polling the AsyncValue
-          await Future<void>.delayed(const Duration(milliseconds: 50));
-          final value = container.read(activeGroupMembersProvider);
-          // The value should be either loading (ActiveGroup stream not yet emitted)
-          // or data with an empty list
-          value.whenData(
-            (members) => expect(members, isEmpty,
-                reason:
-                    'activeGroupMembersProvider must emit [] when no active group'),
-          );
-          // Also verify the provider constructed without throwing
-          expect(value, isA<AsyncValue<List<GroupMember>>>());
-        },
-      );
-    },
-  );
+    // activeGroupMembersProvider behavior when activeGroup is null
+    test(
+      'activeGroupMembersProvider resolves to empty list when activeGroupProvider returns null',
+      () async {
+        // activeGroupProvider will see null from mockGroupRepo.watchActiveGroup()
+        // so activeGroupMembersProvider should resolve to [] (since it returns Stream.value([]))
+        // Wait for the provider to settle by polling the AsyncValue
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        final value = container.read(activeGroupMembersProvider);
+        // The value should be either loading (ActiveGroup stream not yet emitted)
+        // or data with an empty list
+        value.whenData(
+          (members) => expect(
+            members,
+            isEmpty,
+            reason:
+                'activeGroupMembersProvider must emit [] when no active group',
+          ),
+        );
+        // Also verify the provider constructed without throwing
+        expect(value, isA<AsyncValue<List<GroupMember>>>());
+      },
+    );
+  });
 }

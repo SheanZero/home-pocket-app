@@ -24,13 +24,10 @@ void main() {
   group(
     'application/dual_ledger/providers characterization tests (pre-rename behavior)',
     () {
-      test(
-        'ruleEngineProvider constructs RuleEngine instance',
-        () {
-          final engine = container.read(ruleEngineProvider);
-          expect(engine, isA<RuleEngine>());
-        },
-      );
+      test('ruleEngineProvider constructs RuleEngine instance', () {
+        final engine = container.read(ruleEngineProvider);
+        expect(engine, isA<RuleEngine>());
+      });
 
       test(
         'ruleEngineProvider is keepAlive — same instance across two reads',
@@ -39,9 +36,12 @@ void main() {
           // instance is returned — this is the pre-rename behavior we lock.
           final first = container.read(ruleEngineProvider);
           final second = container.read(ruleEngineProvider);
-          expect(identical(first, second), isTrue,
-              reason:
-                  'ruleEngineProvider must be keepAlive: true — same instance expected');
+          expect(
+            identical(first, second),
+            isTrue,
+            reason:
+                'ruleEngineProvider must be keepAlive: true — same instance expected',
+          );
         },
       );
 
@@ -53,12 +53,9 @@ void main() {
         },
       );
 
-      test(
-        'classificationServiceProvider returns non-null instance',
-        () {
-          expect(container.read(classificationServiceProvider), isNotNull);
-        },
-      );
+      test('classificationServiceProvider returns non-null instance', () {
+        expect(container.read(classificationServiceProvider), isNotNull);
+      });
 
       test(
         'classificationServiceProvider uses ruleEngineProvider internally',

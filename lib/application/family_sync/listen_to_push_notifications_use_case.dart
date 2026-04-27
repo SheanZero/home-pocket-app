@@ -8,7 +8,7 @@ import '../../infrastructure/sync/push_notification_service.dart';
 /// no longer need to import infrastructure/ directly.
 class ListenToPushNotificationsUseCase {
   ListenToPushNotificationsUseCase({required PushNotificationService service})
-      : _service = service;
+    : _service = service;
 
   final PushNotificationService _service;
 
@@ -28,12 +28,11 @@ class ListenToPushNotificationsUseCase {
     PushMessageHandler? onJoinRequest,
     PushMessageHandler? onMemberLeft,
     PushMessageHandler? onGroupDissolved,
-  }) =>
-      _service.registerHandlers(
-        onMemberConfirmed: onMemberConfirmed,
-        onSyncAvailable: onSyncAvailable,
-        onJoinRequest: onJoinRequest,
-        onMemberLeft: onMemberLeft,
-        onGroupDissolved: onGroupDissolved,
-      );
+  }) => _service.registerHandlers(
+    onMemberConfirmed: onMemberConfirmed,
+    onSyncAvailable: onSyncAvailable,
+    onJoinRequest: onJoinRequest,
+    onMemberLeft: onMemberLeft,
+    onGroupDissolved: onGroupDissolved,
+  );
 }

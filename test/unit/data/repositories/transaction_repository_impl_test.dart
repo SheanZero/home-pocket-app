@@ -27,12 +27,8 @@ void main() {
     // Default: encryption passthrough for testing
     when(
       () => mockEncryption.encryptField(any()),
-    ).thenAnswer(
-      (inv) async => 'enc_${inv.positionalArguments[0]}',
-    );
-    when(
-      () => mockEncryption.decryptField(any()),
-    ).thenAnswer((inv) async {
+    ).thenAnswer((inv) async => 'enc_${inv.positionalArguments[0]}');
+    when(() => mockEncryption.decryptField(any())).thenAnswer((inv) async {
       final cipher = inv.positionalArguments[0] as String;
       return cipher.replaceFirst('enc_', '');
     });

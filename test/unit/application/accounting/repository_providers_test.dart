@@ -32,18 +32,24 @@ void main() {
   }
 
   group('lib/application/accounting/repository_providers.dart', () {
-    test('appAppDatabaseProvider (re-export) returns the overridden database', () {
-      final container = makeContainer();
-      addTearDown(container.dispose);
-      final result = container.read(appAppDatabaseProvider);
-      expect(result, same(mockDatabase));
-    });
+    test(
+      'appAppDatabaseProvider (re-export) returns the overridden database',
+      () {
+        final container = makeContainer();
+        addTearDown(container.dispose);
+        final result = container.read(appAppDatabaseProvider);
+        expect(result, same(mockDatabase));
+      },
+    );
 
-    test('appKeyManagerProvider (re-export) returns the overridden key manager', () {
-      final container = makeContainer();
-      addTearDown(container.dispose);
-      final result = container.read(appKeyManagerProvider);
-      expect(result, same(mockKeyManager));
-    });
+    test(
+      'appKeyManagerProvider (re-export) returns the overridden key manager',
+      () {
+        final container = makeContainer();
+        addTearDown(container.dispose);
+        final result = container.read(appKeyManagerProvider);
+        expect(result, same(mockKeyManager));
+      },
+    );
   });
 }

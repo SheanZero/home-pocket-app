@@ -15,7 +15,9 @@ import '../../domain/models/group_info.dart';
 import '../../domain/models/group_member.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
 import '../providers/repository_providers.dart'
-    show groupRepositoryProvider, confirmMemberUseCaseProvider,
+    show
+        groupRepositoryProvider,
+        confirmMemberUseCaseProvider,
         removeMemberUseCaseProvider;
 import 'group_management_screen.dart';
 

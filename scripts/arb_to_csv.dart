@@ -31,7 +31,9 @@ void main() {
   final outDir = Directory('docs/i18n');
   if (!outDir.existsSync()) outDir.createSync(recursive: true);
   File('docs/i18n/translations.csv').writeAsStringSync(buffer.toString());
-  print('Exported ${sortedKeys.length} keys to docs/i18n/translations.csv');
+  stdout.writeln(
+    'Exported ${sortedKeys.length} keys to docs/i18n/translations.csv',
+  );
 }
 
 String _escapeCsv(String value) {

@@ -18,5 +18,7 @@ Future<void> main(List<String> args) async {
     }),
   );
 
-  print('[audit:duplication] wrote 0 findings (Phase-1 stub) to $shardPath');
+  stdout.writeln(
+    '[audit:duplication] wrote 0 findings (Phase-1 stub) to $shardPath',
+  );
 }

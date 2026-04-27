@@ -4,10 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/core/initialization/init_failure_screen.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
-Widget _wrap(
-  InitFailureScreen screen, {
-  Locale locale = const Locale('en'),
-}) {
+Widget _wrap(InitFailureScreen screen, {Locale locale = const Locale('en')}) {
   return MaterialApp(
     locale: locale,
     localizationsDelegates: const [
@@ -72,9 +69,11 @@ void main() {
       var called = false;
       await tester.pumpWidget(
         _wrap(
-          InitFailureScreen(onRetry: () async {
-            called = true;
-          }),
+          InitFailureScreen(
+            onRetry: () async {
+              called = true;
+            },
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -118,9 +117,7 @@ void main() {
     });
 
     testWidgets('renders error_outline icon', (tester) async {
-      await tester.pumpWidget(
-        _wrap(InitFailureScreen(onRetry: () async {})),
-      );
+      await tester.pumpWidget(_wrap(InitFailureScreen(onRetry: () async {})));
       await tester.pumpAndSettle();
 
       expect(
@@ -132,23 +129,24 @@ void main() {
     });
 
     testWidgets('scaffold background is warm ivory (#FCFBF9)', (tester) async {
-      await tester.pumpWidget(
-        _wrap(InitFailureScreen(onRetry: () async {})),
-      );
+      await tester.pumpWidget(_wrap(InitFailureScreen(onRetry: () async {})));
       await tester.pumpAndSettle();
 
       final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
       expect(scaffold.backgroundColor, equals(const Color(0xFFFCFBF9)));
     });
 
-    testWidgets('retry button re-enables after onRetry completes',
-        (tester) async {
+    testWidgets('retry button re-enables after onRetry completes', (
+      tester,
+    ) async {
       var retryCount = 0;
       await tester.pumpWidget(
         _wrap(
-          InitFailureScreen(onRetry: () async {
-            retryCount++;
-          }),
+          InitFailureScreen(
+            onRetry: () async {
+              retryCount++;
+            },
+          ),
         ),
       );
       await tester.pumpAndSettle();

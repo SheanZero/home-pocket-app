@@ -35,13 +35,11 @@ jobs:
             echo "::warning::analyzer pin moved off 7.x — verify FUTURE-TOOL-01 readiness"
           fi
       - name: flutter analyze
-        continue-on-error: true   # Phase 6 exit gate flips this blocking (D-04)
         run: flutter analyze --no-fatal-infos
       - name: dart run custom_lint
         # Made blocking at Phase 3 close per D-17 (previously non-blocking)
         run: dart run custom_lint
       - name: Audit scanners
-        continue-on-error: true   # Phases 3/4/6 exit gates flip individual scanners blocking (D-04)
         run: |
           bash scripts/audit_layer.sh
           bash scripts/audit_dead_code.sh
@@ -105,6 +103,8 @@ jobs:
             --output coverage/lcov_clean.info \
             --mode w \
             --filters '\.g\.dart$,\.freezed\.dart$,\.mocks\.dart$,^lib/generated/'
+      - name: Per-file coverage gate
+        run: dart run scripts/coverage_gate.dart --list .planning/audit/phase6-touched-files.txt --threshold 80 --lcov coverage/lcov_clean.info
       - uses: VeryGoodOpenSource/very_good_coverage@v2
         # Phase 2 close (BASE-06 / D-05): blocking. Threshold 80 against lcov_clean.info.
         with:
@@ -125,5 +125,3 @@ jobs:
             .planning/audit/coverage-baseline.json
             .planning/audit/files-needing-tests.txt
             .planning/audit/files-needing-tests.json
-      # NOTE: scripts/coverage_gate.dart per-file step is intentionally NOT wired here in Phase 2 (CONTEXT D-06).
-      #       It joins this job at Phase 7/8 close (CI tightening) and is blocking from the moment it is added.

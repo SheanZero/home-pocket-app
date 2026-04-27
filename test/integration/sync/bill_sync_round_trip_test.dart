@@ -36,21 +36,13 @@ void main() {
     mockEncryption = _MockFieldEncryptionService();
     mockGroupRepository = _MockGroupRepository();
 
-    when(
-      () => mockEncryption.encryptField(any()),
-    ).thenAnswer(
-      (invocation) async =>
-          invocation.positionalArguments.first as String,
+    when(() => mockEncryption.encryptField(any())).thenAnswer(
+      (invocation) async => invocation.positionalArguments.first as String,
     );
-    when(
-      () => mockEncryption.decryptField(any()),
-    ).thenAnswer(
-      (invocation) async =>
-          invocation.positionalArguments.first as String,
+    when(() => mockEncryption.decryptField(any())).thenAnswer(
+      (invocation) async => invocation.positionalArguments.first as String,
     );
-    when(
-      () => mockGroupRepository.getActiveGroup(),
-    ).thenAnswer(
+    when(() => mockGroupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
         groupName: 'Test Family',

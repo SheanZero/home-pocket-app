@@ -31,17 +31,11 @@ void main() {
     transactionDao = TransactionDao(db);
     mockEncryption = _MockFieldEncryptionService();
     mockGroupRepository = _MockGroupRepository();
-    when(
-      () => mockEncryption.encryptField(any()),
-    ).thenAnswer(
-      (invocation) async =>
-          invocation.positionalArguments.first as String,
+    when(() => mockEncryption.encryptField(any())).thenAnswer(
+      (invocation) async => invocation.positionalArguments.first as String,
     );
-    when(
-      () => mockEncryption.decryptField(any()),
-    ).thenAnswer(
-      (invocation) async =>
-          invocation.positionalArguments.first as String,
+    when(() => mockEncryption.decryptField(any())).thenAnswer(
+      (invocation) async => invocation.positionalArguments.first as String,
     );
     final transactionRepo = TransactionRepositoryImpl(
       dao: transactionDao,
@@ -58,9 +52,7 @@ void main() {
       groupRepository: mockGroupRepository,
     );
 
-    when(
-      () => mockGroupRepository.getActiveGroup(),
-    ).thenAnswer(
+    when(() => mockGroupRepository.getActiveGroup()).thenAnswer(
       (_) async => GroupInfo(
         groupId: 'group-1',
         groupName: 'Test Family',
@@ -297,10 +289,7 @@ void main() {
           'entityType': 'bill',
           // no entityId
           'fromDeviceId': 'partner-device',
-          'data': {
-            'amount': 100,
-            'type': 'expense',
-          },
+          'data': {'amount': 100, 'type': 'expense'},
         },
       ]);
       // No crash — test passes
@@ -316,20 +305,14 @@ void main() {
         ),
       ).thenAnswer((_) async {});
 
-      await useCase.execute(
-        [
-          {
-            'op': 'update',
-            'entityType': 'profile',
-            'fromDeviceId': 'partner-device',
-            'data': {
-              'displayName': 'Partner Updated',
-              'avatarEmoji': '🌟',
-            },
-          },
-        ],
-        groupId: 'group-1',
-      );
+      await useCase.execute([
+        {
+          'op': 'update',
+          'entityType': 'profile',
+          'fromDeviceId': 'partner-device',
+          'data': {'displayName': 'Partner Updated', 'avatarEmoji': '🌟'},
+        },
+      ], groupId: 'group-1');
 
       verify(
         () => mockGroupRepository.updateMemberProfile(

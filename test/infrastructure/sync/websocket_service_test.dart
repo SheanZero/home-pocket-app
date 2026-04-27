@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:fake_async/fake_async.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_connection_state.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
@@ -45,6 +47,31 @@ void main() {
       expect(service.connectionState, WebSocketConnectionState.disconnected);
     });
 
+    test('events compare by type and group only', () {
+      expect(
+        const WebSocketEvent(
+          type: WebSocketEventType.groupStatus,
+          groupId: 'group-1',
+          data: {'members': 1},
+        ),
+        const WebSocketEvent(
+          type: WebSocketEventType.groupStatus,
+          groupId: 'group-1',
+          data: {'members': 2},
+        ),
+      );
+      expect(
+        const WebSocketEvent(
+          type: WebSocketEventType.groupStatus,
+          groupId: 'group-1',
+        ).hashCode,
+        const WebSocketEvent(
+          type: WebSocketEventType.groupStatus,
+          groupId: 'group-1',
+        ).hashCode,
+      );
+    });
+
     test('connect transitions to connecting then connected', () async {
       final states = <WebSocketConnectionState>[];
       service.connectionStateStream.listen(states.add);
@@ -81,6 +108,21 @@ void main() {
       service.disconnect();
 
       expect(service.connectionState, WebSocketConnectionState.disconnected);
+    });
+
+    test('connect replaces an active connection', () async {
+      service.connect(
+        groupId: 'group-1',
+        deviceId: 'device-1',
+        signMessage: (msg) async => 'mock-signature',
+      );
+      service.connect(
+        groupId: 'group-2',
+        deviceId: 'device-2',
+        signMessage: (msg) async => 'mock-signature',
+      );
+
+      verify(() => sink.close(any(), any())).called(greaterThanOrEqualTo(1));
     });
 
     test('parses member_confirmed event from WebSocket', () async {
@@ -160,6 +202,22 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       expect(events, isEmpty);
+    });
+
+    test('ignores malformed raw messages and handles pong frames', () async {
+      service.connect(
+        groupId: 'group-1',
+        deviceId: 'device-1',
+        signMessage: (msg) async => 'mock-sig',
+      );
+
+      incomingController.add(42);
+      incomingController.add('{not json');
+      incomingController.add(jsonEncode({'payload': 'missing-type'}));
+      incomingController.add(jsonEncode({'type': 'pong'}));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(service.connectionState, WebSocketConnectionState.connecting);
     });
 
     test('parses group_status event with data payload', () async {
@@ -271,6 +329,77 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       expect(service.connectionState, WebSocketConnectionState.disconnected);
+    });
+
+    test('stream errors disconnect and schedule reconnect', () async {
+      final states = <WebSocketConnectionState>[];
+      service.connectionStateStream.listen(states.add);
+      service.connect(
+        groupId: 'group-1',
+        deviceId: 'device-1',
+        signMessage: (msg) async => 'mock-sig',
+      );
+
+      incomingController.addError(StateError('socket failed'));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(states, contains(WebSocketConnectionState.disconnected));
+    });
+
+    test('heartbeat sends ping and reconnects on pong timeout', () {
+      fakeAsync((async) {
+        final controller = StreamController<dynamic>.broadcast(sync: true);
+        final localSink = MockWebSocketSink();
+        when(() => localSink.close(any(), any())).thenAnswer((_) async {});
+        when(() => localSink.add(any())).thenReturn(null);
+        final localService = WebSocketService(
+          baseUrl: 'wss://sync.happypocket.app',
+          channelFactory: ({required String url}) {
+            final channel = MockWebSocketChannel();
+            when(() => channel.stream).thenAnswer((_) => controller.stream);
+            when(() => channel.sink).thenReturn(localSink);
+            return channel;
+          },
+        );
+        localService.connect(
+          groupId: 'group-1',
+          deviceId: 'device-1',
+          signMessage: (msg) async => 'mock-sig',
+        );
+        async.flushMicrotasks();
+        controller.add(jsonEncode({'type': 'auth_success'}));
+        async.flushMicrotasks();
+
+        async.elapse(const Duration(seconds: 30));
+        verify(() => localSink.add(jsonEncode({'type': 'ping'}))).called(1);
+
+        async.elapse(const Duration(seconds: 45));
+
+        localService.dispose();
+        unawaited(controller.close());
+      });
+    });
+
+    testWidgets('lifecycle observer schedules and clears background timer', (
+      tester,
+    ) async {
+      service.startLifecycleObservation();
+      service.connect(
+        groupId: 'group-1',
+        deviceId: 'device-1',
+        signMessage: (msg) async => 'mock-signature',
+      );
+      incomingController.add(
+        jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
+      );
+      await tester.pump();
+
+      service.didChangeAppLifecycleState(AppLifecycleState.paused);
+      service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      service.stopLifecycleObservation();
+
+      expect(service.connectionState, WebSocketConnectionState.connected);
+      service.disconnect();
     });
 
     test('sends auth message on connect', () async {

@@ -31,12 +31,8 @@ void main() {
 
   group('ParseVoiceInputUseCase', () {
     test('parses amount correctly from text with 円', () async {
-      when(
-        () => mockMerchantDatabase.findMerchant(any()),
-      ).thenReturn(null);
-      when(
-        () => mockFuzzyCategoryMatcher.match(any(), any()),
-      ).thenAnswer(
+      when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
+      when(() => mockFuzzyCategoryMatcher.match(any(), any())).thenAnswer(
         (_) async => const CategoryMatchResult(
           categoryId: 'cat_food',
           confidence: 0.9,
@@ -75,12 +71,8 @@ void main() {
     });
 
     test('falls back to fuzzy match when no merchant found', () async {
-      when(
-        () => mockMerchantDatabase.findMerchant(any()),
-      ).thenReturn(null);
-      when(
-        () => mockFuzzyCategoryMatcher.match(any(), any()),
-      ).thenAnswer(
+      when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
+      when(() => mockFuzzyCategoryMatcher.match(any(), any())).thenAnswer(
         (_) async => const CategoryMatchResult(
           categoryId: 'cat_transport',
           confidence: 0.95,
@@ -100,9 +92,7 @@ void main() {
     test(
       'returns success with nulls when text has no recognizable content',
       () async {
-        when(
-          () => mockMerchantDatabase.findMerchant(any()),
-        ).thenReturn(null);
+        when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
         when(
           () => mockFuzzyCategoryMatcher.match(any(), any()),
         ).thenAnswer((_) async => null);

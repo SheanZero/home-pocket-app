@@ -42,10 +42,12 @@ void main() {
     notifyUseCase = MockNotifyMemberApprovalUseCase();
 
     // NotifyMemberApprovalUseCase stubs
-    when(() => notifyUseCase.listenForJoinRequests())
-        .thenAnswer((_) => const Stream.empty());
-    when(() => notifyUseCase.connectWebSocket(groupId: any(named: 'groupId')))
-        .thenAnswer((_) async {});
+    when(
+      () => notifyUseCase.listenForJoinRequests(),
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => notifyUseCase.connectWebSocket(groupId: any(named: 'groupId')),
+    ).thenAnswer((_) async {});
     when(() => notifyUseCase.disconnectWebSocket()).thenReturn(null);
 
     when(() => groupRepository.getActiveGroup()).thenAnswer(

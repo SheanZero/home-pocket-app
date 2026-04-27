@@ -123,7 +123,9 @@ Future<void> main(List<String> args) async {
   final md = _renderMarkdown(catalogue);
   await File('.planning/audit/ISSUES.md').writeAsString(md);
 
-  print('[audit:merge] wrote ${catalogue.length} findings to $issuesPath');
+  stdout.writeln(
+    '[audit:merge] wrote ${catalogue.length} findings to $issuesPath',
+  );
 }
 
 Future<Map<String, Finding>> _readExistingLifecycle() async {

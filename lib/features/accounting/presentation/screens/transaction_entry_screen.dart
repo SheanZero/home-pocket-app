@@ -295,7 +295,10 @@ class _TransactionEntryScreenState
                   label: l10n.date,
                   value: _isToday
                       ? l10n.todayDate
-                      : const FormatterService().formatDate(_selectedDate, locale),
+                      : const FormatterService().formatDate(
+                          _selectedDate,
+                          locale,
+                        ),
                   showChevron: true,
                   onTap: _selectDate,
                 ),

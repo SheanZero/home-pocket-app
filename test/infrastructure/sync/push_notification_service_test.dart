@@ -139,6 +139,7 @@ void main() {
   late FakeLocalNotificationClient localNotificationClient;
   late PushNotificationService service;
   late int memberConfirmedCalls;
+  late int syncAvailableCalls;
   late int joinRequestCalls;
   late int memberLeftCalls;
   late int groupDissolvedCalls;
@@ -148,6 +149,7 @@ void main() {
     messagingClient = FakePushMessagingClient(initialToken: 'token-1');
     localNotificationClient = FakeLocalNotificationClient();
     memberConfirmedCalls = 0;
+    syncAvailableCalls = 0;
     joinRequestCalls = 0;
     memberLeftCalls = 0;
     groupDissolvedCalls = 0;
@@ -170,7 +172,9 @@ void main() {
       onMemberConfirmed: (_) async {
         memberConfirmedCalls++;
       },
-      onSyncAvailable: (_) async {},
+      onSyncAvailable: (_) async {
+        syncAvailableCalls++;
+      },
       onJoinRequest: (_) async {
         joinRequestCalls++;
       },
@@ -186,6 +190,17 @@ void main() {
   tearDown(() async {
     await service.dispose();
     await messagingClient.dispose();
+  });
+
+  test('navigation intents compare member removal destinations', () {
+    expect(
+      const PushNavigationIntent.memberRemoved(groupId: 'group-1'),
+      const PushNavigationIntent.memberRemoved(groupId: 'group-1'),
+    );
+    expect(
+      const PushNavigationIntent.memberRemoved(groupId: 'group-1').hashCode,
+      const PushNavigationIntent.memberRemoved(groupId: 'group-1').hashCode,
+    );
   });
 
   test(
@@ -251,7 +266,9 @@ void main() {
         onMemberConfirmed: (_) async {
           memberConfirmedCalls++;
         },
-        onSyncAvailable: (_) async {},
+        onSyncAvailable: (_) async {
+          syncAvailableCalls++;
+        },
         onJoinRequest: (_) async {
           joinRequestCalls++;
         },
@@ -339,4 +356,116 @@ void main() {
       ]);
     },
   );
+
+  test(
+    'initialize is idempotent and getToken delegates to messaging client',
+    () async {
+      expect(await service.initialize(), 'token-1');
+      expect(await service.initialize(), 'token-1');
+      expect(await service.getToken(), 'token-1');
+
+      verify(
+        () => apiClient.updatePushToken(
+          pushToken: 'token-1',
+          pushPlatform: any(named: 'pushPlatform'),
+        ),
+      ).called(1);
+    },
+  );
+
+  test('initialize returns null when firebase bootstrap fails', () async {
+    service = PushNotificationService(
+      apiClient: apiClient,
+      messagingClient: messagingClient,
+      localNotificationClient: localNotificationClient,
+      firebaseInitializer: () async => throw StateError('firebase failed'),
+      localeProvider: () => const Locale('en'),
+    );
+
+    expect(await service.initialize(), isNull);
+  });
+
+  test(
+    'direct messages invoke handlers without navigation side effects',
+    () async {
+      final intents = <PushNavigationIntent>[];
+      service.navigationIntents.listen(intents.add);
+
+      await service.handleMessage({'type': 'sync_available'});
+      await service.handleMessage({
+        'type': 'pair_confirmed',
+        'groupId': 'group-1',
+      });
+      await service.handleMessage({'type': 'unknown'});
+
+      expect(syncAvailableCalls, 1);
+      expect(memberConfirmedCalls, 1);
+      expect(intents, isEmpty);
+      expect(service.takePendingNavigationIntent(), isNull);
+    },
+  );
+
+  test('foreground member confirmation shows localized notification', () async {
+    await service.initialize();
+
+    await messagingClient.emitForegroundMessage({
+      'type': 'pair_confirmed',
+      'groupId': 'group-1',
+    });
+
+    expect(memberConfirmedCalls, 1);
+    expect(localNotificationClient.shownNotifications, hasLength(1));
+    expect(localNotificationClient.shownNotifications.single.id, 1002);
+    expect(
+      localNotificationClient.shownNotifications.single.payload['groupId'],
+      'group-1',
+    );
+  });
+
+  test(
+    'opened pair_request and notification tap emit member approval intent',
+    () async {
+      await service.initialize();
+
+      final intents = <PushNavigationIntent>[];
+      service.navigationIntents.listen(intents.add);
+
+      await messagingClient.emitOpenedMessage({
+        'type': 'pair_request',
+        'groupId': 'group-1',
+      });
+      await service.handleNotificationTap({
+        'type': 'group_dissolved',
+        'groupId': 'group-1',
+      });
+      await service.handleNotificationTap({'type': 'member_left'});
+
+      expect(intents, [
+        const PushNavigationIntent.memberApproval(groupId: 'group-1'),
+        const PushNavigationIntent.groupDissolved(groupId: 'group-1'),
+      ]);
+      expect(
+        service.takePendingNavigationIntent(),
+        const PushNavigationIntent.groupDissolved(groupId: 'group-1'),
+      );
+      expect(service.takePendingNavigationIntent(), isNull);
+    },
+  );
+
+  test('foreground join request notification can be tapped', () async {
+    await service.initialize();
+
+    final intents = <PushNavigationIntent>[];
+    service.navigationIntents.listen(intents.add);
+
+    await messagingClient.emitForegroundMessage({
+      'type': 'pair_confirmed',
+      'groupId': 'group-1',
+    });
+    await localNotificationClient.tapLastNotification();
+
+    expect(intents, [
+      const PushNavigationIntent.groupManagement(groupId: 'group-1'),
+    ]);
+  });
 }

@@ -2,7 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/profile/get_user_profile_use_case.dart';
-import '../../../../application/profile/repository_providers.dart' as app_profile;
+import '../../../../application/profile/repository_providers.dart'
+    as app_profile;
 import '../../../../application/profile/save_user_profile_use_case.dart';
 import '../../../../data/daos/user_profile_dao.dart';
 import '../../../../data/repositories/user_profile_repository_impl.dart';

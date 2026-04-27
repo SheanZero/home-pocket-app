@@ -14,6 +14,7 @@ import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockKeyManager extends Mock implements KeyManager {}
+
 class _MockSyncRepository extends Mock implements SyncRepository {}
 
 void main() {
@@ -49,19 +50,25 @@ void main() {
       expect(result, isA<E2EEService>());
     });
 
-    test('appPushNotificationServiceProvider returns a PushNotificationService', () {
-      final container = makeContainer();
-      addTearDown(container.dispose);
-      final result = container.read(appPushNotificationServiceProvider);
-      expect(result, isA<PushNotificationService>());
-    });
+    test(
+      'appPushNotificationServiceProvider returns a PushNotificationService',
+      () {
+        final container = makeContainer();
+        addTearDown(container.dispose);
+        final result = container.read(appPushNotificationServiceProvider);
+        expect(result, isA<PushNotificationService>());
+      },
+    );
 
-    test('appApnsPushMessagingClientProvider returns an ApnsPushMessagingClient', () {
-      final container = makeContainer();
-      addTearDown(container.dispose);
-      final result = container.read(appApnsPushMessagingClientProvider);
-      expect(result, isA<ApnsPushMessagingClient>());
-    });
+    test(
+      'appApnsPushMessagingClientProvider returns an ApnsPushMessagingClient',
+      () {
+        final container = makeContainer();
+        addTearDown(container.dispose);
+        final result = container.read(appApnsPushMessagingClientProvider);
+        expect(result, isA<ApnsPushMessagingClient>());
+      },
+    );
 
     test('appSyncQueueManagerProvider returns a SyncQueueManager', () {
       final container = makeContainer();
@@ -77,25 +84,34 @@ void main() {
       expect(result, isA<WebSocketService>());
     });
 
-    test('appKeyManagerProvider (re-export) returns the same as overridden underlying provider', () {
-      final container = makeContainer();
-      addTearDown(container.dispose);
-      final result = container.read(appKeyManagerProvider);
-      expect(result, same(mockKeyManager));
-    });
+    test(
+      'appKeyManagerProvider (re-export) returns the same as overridden underlying provider',
+      () {
+        final container = makeContainer();
+        addTearDown(container.dispose);
+        final result = container.read(appKeyManagerProvider);
+        expect(result, same(mockKeyManager));
+      },
+    );
 
-    test('notifyMemberApprovalUseCaseProvider returns a NotifyMemberApprovalUseCase', () {
-      final container = makeContainer();
-      addTearDown(container.dispose);
-      final result = container.read(notifyMemberApprovalUseCaseProvider);
-      expect(result, isA<NotifyMemberApprovalUseCase>());
-    });
+    test(
+      'notifyMemberApprovalUseCaseProvider returns a NotifyMemberApprovalUseCase',
+      () {
+        final container = makeContainer();
+        addTearDown(container.dispose);
+        final result = container.read(notifyMemberApprovalUseCaseProvider);
+        expect(result, isA<NotifyMemberApprovalUseCase>());
+      },
+    );
 
-    test('listenToPushNotificationsUseCaseProvider returns a ListenToPushNotificationsUseCase', () {
-      final container = makeContainer();
-      addTearDown(container.dispose);
-      final result = container.read(listenToPushNotificationsUseCaseProvider);
-      expect(result, isA<ListenToPushNotificationsUseCase>());
-    });
+    test(
+      'listenToPushNotificationsUseCaseProvider returns a ListenToPushNotificationsUseCase',
+      () {
+        final container = makeContainer();
+        addTearDown(container.dispose);
+        final result = container.read(listenToPushNotificationsUseCaseProvider);
+        expect(result, isA<ListenToPushNotificationsUseCase>());
+      },
+    );
   });
 }

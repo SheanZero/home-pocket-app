@@ -30,7 +30,9 @@ abstract class WaModernLight {
 
   // Accent — Primary (Coral)
   static const accentPrimary = Color(0xFFE85A4F);
-  static const accentPrimaryLight = Color(0xFFFEF5F4); // family badge bg, satisfaction bg
+  static const accentPrimaryLight = Color(
+    0xFFFEF5F4,
+  ); // family badge bg, satisfaction bg
   static const accentPrimaryBorder = Color(0xFFF5D5D2); // satisfaction border
   static const accentGradientStart = Color(0xFFF08070); // FAB gradient
   static const accentGradientEnd = Color(0xFFE85A4F);

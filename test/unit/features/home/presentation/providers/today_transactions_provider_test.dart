@@ -8,7 +8,8 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
 import 'package:home_pocket/features/home/presentation/providers/state_today_transactions.dart';
 import 'package:mocktail/mocktail.dart';
 
-class _MockTransactionRepository extends Mock implements TransactionRepository {}
+class _MockTransactionRepository extends Mock
+    implements TransactionRepository {}
 
 Transaction _makeTransaction(
   String id, {

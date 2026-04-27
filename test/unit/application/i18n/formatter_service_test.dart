@@ -22,17 +22,26 @@ void main() {
 
     group('formatDate', () {
       test('formats date in Japanese locale', () {
-        final result = service.formatDate(DateTime(2026, 4, 26), const Locale('ja'));
+        final result = service.formatDate(
+          DateTime(2026, 4, 26),
+          const Locale('ja'),
+        );
         expect(result, '2026/04/26');
       });
 
       test('formats date in Chinese locale', () {
-        final result = service.formatDate(DateTime(2026, 4, 26), const Locale('zh'));
+        final result = service.formatDate(
+          DateTime(2026, 4, 26),
+          const Locale('zh'),
+        );
         expect(result, '2026年04月26日');
       });
 
       test('formats date in English locale', () {
-        final result = service.formatDate(DateTime(2026, 4, 26), const Locale('en'));
+        final result = service.formatDate(
+          DateTime(2026, 4, 26),
+          const Locale('en'),
+        );
         expect(result, '04/26/2026');
       });
     });
@@ -44,7 +53,11 @@ void main() {
       });
 
       test('formats USD with 2 decimals', () {
-        final result = service.formatCurrency(1234.5, 'USD', const Locale('en'));
+        final result = service.formatCurrency(
+          1234.5,
+          'USD',
+          const Locale('en'),
+        );
         expect(result, '\$1,234.50');
       });
     });
@@ -68,23 +81,36 @@ void main() {
 
     group('delegation smoke tests', () {
       test('formatRelative returns today for DateTime.now()', () {
-        final result = service.formatRelative(DateTime.now(), const Locale('ja'));
+        final result = service.formatRelative(
+          DateTime.now(),
+          const Locale('ja'),
+        );
         expect(result, '今日');
       });
 
       test('formatMonthYear returns expected format for Japanese', () {
-        final result = service.formatMonthYear(DateTime(2026, 4, 1), const Locale('ja'));
+        final result = service.formatMonthYear(
+          DateTime(2026, 4, 1),
+          const Locale('ja'),
+        );
         expect(result, contains('2026'));
         expect(result, contains('4'));
       });
 
       test('formatNumber delegates correctly', () {
-        final result = service.formatNumber(1234.56, const Locale('en'), decimals: 2);
+        final result = service.formatNumber(
+          1234.56,
+          const Locale('en'),
+          decimals: 2,
+        );
         expect(result, contains('1,234'));
       });
 
       test('formatDateTime delegates correctly', () {
-        final result = service.formatDateTime(DateTime(2026, 4, 26, 10, 30), const Locale('ja'));
+        final result = service.formatDateTime(
+          DateTime(2026, 4, 26, 10, 30),
+          const Locale('ja'),
+        );
         expect(result, contains('2026/04/26'));
         expect(result, contains('10:30'));
       });

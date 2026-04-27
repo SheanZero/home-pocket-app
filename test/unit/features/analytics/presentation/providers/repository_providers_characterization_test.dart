@@ -15,9 +15,7 @@ void main() {
   setUp(() {
     testDatabase = AppDatabase.forTesting();
     container = ProviderContainer(
-      overrides: [
-        appDatabaseProvider.overrideWithValue(testDatabase),
-      ],
+      overrides: [appDatabaseProvider.overrideWithValue(testDatabase)],
     );
   });
 

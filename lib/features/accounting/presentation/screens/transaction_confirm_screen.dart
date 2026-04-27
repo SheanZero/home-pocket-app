@@ -104,7 +104,11 @@ class _TransactionConfirmScreenState
   }
 
   String _formatAmount(int amount, Locale locale) {
-    return const FormatterService().formatCurrency(amount.toDouble(), 'JPY', locale);
+    return const FormatterService().formatCurrency(
+      amount.toDouble(),
+      'JPY',
+      locale,
+    );
   }
 
   // ── Amount editing via bottom sheet ──
@@ -606,7 +610,10 @@ class _TransactionConfirmScreenState
                       DetailInfoRow(
                         icon: Icons.calendar_today_outlined,
                         label: l10n.date,
-                        value: const FormatterService().formatDate(_date, locale),
+                        value: const FormatterService().formatDate(
+                          _date,
+                          locale,
+                        ),
                         showChevron: true,
                         onTap: _editDate,
                       ),

@@ -4,7 +4,8 @@ import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:mocktail/mocktail.dart';
 
-class _MockTransactionRepository extends Mock implements TransactionRepository {}
+class _MockTransactionRepository extends Mock
+    implements TransactionRepository {}
 
 void main() {
   late _MockTransactionRepository mockRepo;
@@ -17,9 +18,7 @@ void main() {
 
   group('DeleteTransactionUseCase', () {
     test('soft-deletes an existing transaction', () async {
-      when(
-        () => mockRepo.findById('tx_001'),
-      ).thenAnswer(
+      when(() => mockRepo.findById('tx_001')).thenAnswer(
         (_) async => Transaction(
           id: 'tx_001',
           bookId: 'book_001',
@@ -61,9 +60,7 @@ void main() {
     });
 
     test('soft-deletes successfully without sync engine', () async {
-      when(
-        () => mockRepo.findById('tx_002'),
-      ).thenAnswer(
+      when(() => mockRepo.findById('tx_002')).thenAnswer(
         (_) async => Transaction(
           id: 'tx_002',
           bookId: 'book_001',

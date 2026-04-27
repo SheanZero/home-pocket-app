@@ -49,68 +49,52 @@ void main() {
     ).thenAnswer((_) async => testSettings);
   });
 
-  group(
-    'AppearanceSection characterization tests (pre-refactor behavior)',
-    () {
-      testWidgets('renders without crashing', (tester) async {
-        await tester.pumpWidget(
-          _buildApp(
-            const AppearanceSection(settings: testSettings),
-            [
-              settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
-            ],
-          ),
-        );
-        await tester.pump();
-        expect(find.byType(AppearanceSection), findsOneWidget);
-      });
-
-      testWidgets('shows theme section via ListTile', (tester) async {
-        await tester.pumpWidget(
-          _buildApp(
-            const AppearanceSection(settings: testSettings),
-            [
-              settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
-            ],
-          ),
-        );
-        await tester.pump();
-        // AppearanceSection renders at least one ListTile (theme + language)
-        expect(find.byType(ListTile), findsWidgets);
-      });
-
-      testWidgets(
-        'localeNotifierProvider wired via settingsRepositoryProvider',
-        (tester) async {
-          // Characterization lock: locale settings flow through settingsRepositoryProvider.
-          // getSettings() is called by localeNotifierProvider.build().
-          await tester.pumpWidget(
-            _buildApp(
-              const AppearanceSection(settings: testSettings),
-              [
-                settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
-              ],
-            ),
-          );
-          await tester.pumpAndSettle();
-          // Verify getSettings was called (locale notifier initialization)
-          verify(() => mockSettingsRepo.getSettings()).called(greaterThan(0));
-        },
+  group('AppearanceSection characterization tests (pre-refactor behavior)', () {
+    testWidgets('renders without crashing', (tester) async {
+      await tester.pumpWidget(
+        _buildApp(const AppearanceSection(settings: testSettings), [
+          settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
+        ]),
       );
+      await tester.pump();
+      expect(find.byType(AppearanceSection), findsOneWidget);
+    });
 
-      testWidgets('language picker section is present', (tester) async {
-        await tester.pumpWidget(
-          _buildApp(
-            const AppearanceSection(settings: testSettings),
-            [
-              settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
-            ],
-          ),
-        );
-        await tester.pump();
-        // Column wrapping theme + language tiles
-        expect(find.byType(Column), findsWidgets);
-      });
-    },
-  );
+    testWidgets('shows theme section via ListTile', (tester) async {
+      await tester.pumpWidget(
+        _buildApp(const AppearanceSection(settings: testSettings), [
+          settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
+        ]),
+      );
+      await tester.pump();
+      // AppearanceSection renders at least one ListTile (theme + language)
+      expect(find.byType(ListTile), findsWidgets);
+    });
+
+    testWidgets('localeNotifierProvider wired via settingsRepositoryProvider', (
+      tester,
+    ) async {
+      // Characterization lock: locale settings flow through settingsRepositoryProvider.
+      // getSettings() is called by localeNotifierProvider.build().
+      await tester.pumpWidget(
+        _buildApp(const AppearanceSection(settings: testSettings), [
+          settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
+        ]),
+      );
+      await tester.pumpAndSettle();
+      // Verify getSettings was called (locale notifier initialization)
+      verify(() => mockSettingsRepo.getSettings()).called(greaterThan(0));
+    });
+
+    testWidgets('language picker section is present', (tester) async {
+      await tester.pumpWidget(
+        _buildApp(const AppearanceSection(settings: testSettings), [
+          settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
+        ]),
+      );
+      await tester.pump();
+      // Column wrapping theme + language tiles
+      expect(find.byType(Column), findsWidgets);
+    });
+  });
 }

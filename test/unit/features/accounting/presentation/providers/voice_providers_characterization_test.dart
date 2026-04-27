@@ -32,12 +32,8 @@ void main() {
     mockPreferenceRepo = _MockCategoryKeywordPreferenceRepository();
     mockCategoryService = _MockCategoryService();
 
-    when(
-      () => mockCategoryRepo.findActive(),
-    ).thenAnswer((_) async => []);
-    when(
-      () => mockCategoryRepo.findById(any()),
-    ).thenAnswer((_) async => null);
+    when(() => mockCategoryRepo.findActive()).thenAnswer((_) async => []);
+    when(() => mockCategoryRepo.findById(any())).thenAnswer((_) async => null);
 
     container = ProviderContainer(
       overrides: [
@@ -69,9 +65,12 @@ void main() {
           // appMerchantDatabaseProvider is @Riverpod(keepAlive: true) in application/ml
           final first = container.read(appMerchantDatabaseProvider);
           final second = container.read(appMerchantDatabaseProvider);
-          expect(identical(first, second), isTrue,
-              reason:
-                  'appMerchantDatabaseProvider must be keepAlive: true — same instance expected');
+          expect(
+            identical(first, second),
+            isTrue,
+            reason:
+                'appMerchantDatabaseProvider must be keepAlive: true — same instance expected',
+          );
         },
       );
 

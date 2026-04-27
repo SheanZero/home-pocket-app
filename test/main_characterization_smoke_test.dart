@@ -31,6 +31,8 @@ import 'package:home_pocket/application/accounting/seed_categories_use_case.dart
 import 'package:home_pocket/application/family_sync/listen_to_push_notifications_use_case.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/profile/get_user_profile_use_case.dart';
+import 'package:home_pocket/core/initialization/app_initializer.dart';
+import 'package:home_pocket/core/initialization/init_failure_screen.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
@@ -47,18 +49,27 @@ import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
+import 'package:home_pocket/infrastructure/crypto/models/device_key_pair.dart';
+import 'package:home_pocket/infrastructure/crypto/providers.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/key_repository.dart';
+import 'package:home_pocket/infrastructure/crypto/repositories/master_key_repository.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
-import 'package:home_pocket/main.dart';
+import 'package:home_pocket/main.dart' as app;
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
 
 // Hand-written fake use cases (no Mockito codegen — CONTEXT.md deferred).
 
-class _FakeSeedCategoriesUseCase extends Fake
-    implements SeedCategoriesUseCase {
+class _FakeSeedCategoriesUseCase extends Fake implements SeedCategoriesUseCase {
   @override
   Future<Result<void>> execute() async => Result.success(null);
+}
+
+class _ThrowingSeedCategoriesUseCase extends Fake
+    implements SeedCategoriesUseCase {
+  @override
+  Future<Result<void>> execute() async => throw StateError('seed failed');
 }
 
 class _FakeEnsureDefaultBookUseCase extends Fake
@@ -95,8 +106,7 @@ class _FakePushNotificationService extends Mock
   PushNavigationIntent? takePendingNavigationIntent() => null;
 
   @override
-  Stream<PushNavigationIntent> get navigationIntents =>
-      _navController.stream;
+  Stream<PushNavigationIntent> get navigationIntents => _navController.stream;
 }
 
 class _FakeListenToPushNotificationsUseCase extends Fake
@@ -110,8 +120,11 @@ class _FakeListenToPushNotificationsUseCase extends Fake
   PushNavigationIntent? takePendingIntent() => null;
 }
 
-class _FakeGetUserProfileUseCase extends Fake
-    implements GetUserProfileUseCase {
+class _FakeMasterKeyRepository extends Mock implements MasterKeyRepository {}
+
+class _FakeKeyRepository extends Mock implements KeyRepository {}
+
+class _FakeGetUserProfileUseCase extends Fake implements GetUserProfileUseCase {
   final UserProfile? _profile;
   _FakeGetUserProfileUseCase(this._profile);
 
@@ -138,6 +151,7 @@ final _testProfile = UserProfile(
 Future<void> _pumpApp(
   WidgetTester tester, {
   required List<Override> overrides,
+  AppSettings appSettings = const AppSettings(),
 }) async {
   final db = AppDatabase.forTesting();
   addTearDown(db.close);
@@ -147,9 +161,7 @@ Future<void> _pumpApp(
 
   final baseOverrides = [
     appDatabaseProvider.overrideWithValue(db),
-    appSettingsProvider.overrideWith(
-      (ref) => Future.value(const AppSettings()),
-    ),
+    appSettingsProvider.overrideWith((ref) => Future.value(appSettings)),
     currentLocaleProvider.overrideWith(
       (ref) => Future.value(const Locale('ja')),
     ),
@@ -175,7 +187,7 @@ Future<void> _pumpApp(
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: [Locale('ja'), Locale('en'), Locale('zh')],
-        home: HomePocketApp(),
+        home: app.HomePocketApp(),
       ),
     ),
   );
@@ -230,10 +242,7 @@ void main() {
     testWidgets(
       '_buildHome shows ProfileOnboardingScreen when profile is null',
       (tester) async {
-        await _pumpApp(
-          tester,
-          overrides: buildSuccessOverrides(profile: null),
-        );
+        await _pumpApp(tester, overrides: buildSuccessOverrides(profile: null));
         await tester.pumpAndSettle(const Duration(seconds: 3));
         expect(find.byType(ProfileOnboardingScreen), findsOneWidget);
       },
@@ -255,5 +264,141 @@ void main() {
         expect(find.byType(AppBar), findsAtLeastNWidgets(1));
       },
     );
+
+    testWidgets('_initialize catch branch shows initialization error', (
+      tester,
+    ) async {
+      await _pumpApp(
+        tester,
+        overrides: [
+          seedCategoriesUseCaseProvider.overrideWithValue(
+            _ThrowingSeedCategoriesUseCase(),
+          ),
+          ensureDefaultBookUseCaseProvider.overrideWithValue(
+            _FakeEnsureDefaultBookUseCase(_testBook),
+          ),
+          syncEngineProvider.overrideWithValue(fakeSyncEngine),
+          getUserProfileUseCaseProvider.overrideWithValue(
+            _FakeGetUserProfileUseCase(_testProfile),
+          ),
+        ],
+      );
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+
+      expect(find.byType(AppBar), findsAtLeastNWidgets(1));
+      expect(find.textContaining('seed failed'), findsOneWidget);
+    });
+
+    testWidgets('uses explicit light Flutter theme mode', (tester) async {
+      await _pumpApp(
+        tester,
+        appSettings: const AppSettings(themeMode: AppThemeMode.light),
+        overrides: [...buildSuccessOverrides(profile: _testProfile)],
+      );
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+      expect(
+        tester.widgetList<MaterialApp>(find.byType(MaterialApp)).last.themeMode,
+        ThemeMode.light,
+      );
+    });
+
+    testWidgets('uses explicit dark Flutter theme mode', (tester) async {
+      await _pumpApp(
+        tester,
+        appSettings: const AppSettings(themeMode: AppThemeMode.dark),
+        overrides: [...buildSuccessOverrides(profile: _testProfile)],
+      );
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+      expect(
+        tester.widgetList<MaterialApp>(find.byType(MaterialApp)).last.themeMode,
+        ThemeMode.dark,
+      );
+    });
+
+    test('boot helper runs success and failure shells', () async {
+      final fakeMasterKeyRepo = _FakeMasterKeyRepository();
+      final fakeKeyRepo = _FakeKeyRepository();
+      when(
+        () => fakeMasterKeyRepo.hasMasterKey(),
+      ).thenAnswer((_) async => true);
+      when(
+        () => fakeMasterKeyRepo.initializeMasterKey(),
+      ).thenAnswer((_) async {});
+      when(() => fakeKeyRepo.hasKeyPair()).thenAnswer((_) async => true);
+      when(() => fakeKeyRepo.getDeviceId()).thenAnswer((_) async => 'device-1');
+      when(() => fakeKeyRepo.generateKeyPair()).thenAnswer(
+        (_) async => DeviceKeyPair(
+          deviceId: 'device-1',
+          publicKey: 'pubkey',
+          createdAt: DateTime(2026, 1, 1),
+        ),
+      );
+
+      ProviderContainer? finalContainer;
+      addTearDown(() {
+        finalContainer?.dispose();
+      });
+
+      AppInitializer makeInitializer({bool failDatabase = false}) {
+        return AppInitializer(
+          containerFactory: ({overrides = const []}) {
+            final container = ProviderContainer(
+              overrides: [
+                masterKeyRepositoryProvider.overrideWithValue(
+                  fakeMasterKeyRepo,
+                ),
+                keyRepositoryProvider.overrideWithValue(fakeKeyRepo),
+                seedCategoriesUseCaseProvider.overrideWithValue(
+                  _FakeSeedCategoriesUseCase(),
+                ),
+                ensureDefaultBookUseCaseProvider.overrideWithValue(
+                  _FakeEnsureDefaultBookUseCase(_testBook),
+                ),
+                syncEngineProvider.overrideWithValue(fakeSyncEngine),
+                getUserProfileUseCaseProvider.overrideWithValue(
+                  _FakeGetUserProfileUseCase(_testProfile),
+                ),
+                pushNotificationServiceProvider.overrideWithValue(
+                  _FakePushNotificationService(),
+                ),
+                appSettingsProvider.overrideWith(
+                  (ref) => Future.value(const AppSettings()),
+                ),
+                currentLocaleProvider.overrideWith(
+                  (ref) => Future.value(const Locale('ja')),
+                ),
+                ...overrides,
+              ],
+            );
+            if (overrides.isNotEmpty) {
+              finalContainer = container;
+            }
+            return container;
+          },
+          databaseFactory: (_) async {
+            if (failDatabase) {
+              throw StateError('database failed');
+            }
+            return AppDatabase.forTesting();
+          },
+          seedRunner: (_) async {},
+        );
+      }
+
+      final rendered = <Widget>[];
+      await app.bootWithInitializerForTesting(
+        makeInitializer(),
+        appRunner: rendered.add,
+      );
+      expect(rendered.single, isA<UncontrolledProviderScope>());
+
+      finalContainer?.dispose();
+      finalContainer = null;
+      await app.bootWithInitializerForTesting(
+        makeInitializer(failDatabase: true),
+        appRunner: rendered.add,
+      );
+      expect(rendered.last, isA<InitFailureApp>());
+    });
   });
 }

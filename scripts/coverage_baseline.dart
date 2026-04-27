@@ -145,7 +145,7 @@ Future<void> main(List<String> args) async {
     '$_outDir/files-needing-tests.json',
   ).writeAsStringSync(const JsonEncoder.withIndent('  ').convert(needJson));
 
-  print(
+  stdout.writeln(
     '[coverage:baseline] wrote ${filtered.length} entries ($belowCount below threshold) to $_outDir/',
   );
 }

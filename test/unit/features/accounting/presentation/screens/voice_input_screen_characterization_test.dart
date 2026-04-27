@@ -70,24 +70,25 @@ void main() {
   group(
     'VoiceInputScreen characterization tests (post-refactor: StartSpeechRecognitionUseCase)',
     () {
-      testWidgets('renders without crashing with injected SpeechService', (
-        tester,
-      ) async {
-        await tester.pumpWidget(
-          _buildApp(
-            VoiceInputScreen(
-              bookId: 'book-001',
-              speechService: mockSpeechService,
+      testWidgets(
+        'renders without crashing with injected SpeechService',
+        (tester) async {
+          await tester.pumpWidget(
+            _buildApp(
+              VoiceInputScreen(
+                bookId: 'book-001',
+                speechService: mockSpeechService,
+              ),
+              [
+                categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
+                settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
+              ],
             ),
-            [
-              categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
-              settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
-            ],
-          ),
-        );
-        await tester.pump();
-        expect(find.byType(Scaffold), findsWidgets);
-      });
+          );
+          await tester.pump();
+          expect(find.byType(Scaffold), findsWidgets);
+        },
+      );
 
       testWidgets('contains an AppBar', (tester) async {
         await tester.pumpWidget(

@@ -7,7 +7,10 @@ import 'package:home_pocket/application/accounting/merchant_category_learning_se
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
-    show createTransactionUseCaseProvider, categoryServiceProvider, merchantCategoryLearningServiceProvider;
+    show
+        createTransactionUseCaseProvider,
+        categoryServiceProvider,
+        merchantCategoryLearningServiceProvider;
 import 'package:home_pocket/features/accounting/presentation/screens/transaction_confirm_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/satisfaction_emoji_picker.dart';
 import 'package:home_pocket/shared/utils/result.dart';

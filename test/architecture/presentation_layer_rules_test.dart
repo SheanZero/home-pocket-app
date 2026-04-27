@@ -27,14 +27,11 @@ void main() {
         test(
           'presentation yaml denies infrastructure/** + data/daos/** + data/tables/**',
           () {
-            final path =
-                'lib/features/$feature/presentation/import_guard.yaml';
-            final yaml =
-                loadYaml(File(path).readAsStringSync()) as YamlMap;
-            final deny =
-                (yaml['deny'] as YamlList)
-                    .map((e) => e.toString())
-                    .toList();
+            final path = 'lib/features/$feature/presentation/import_guard.yaml';
+            final yaml = loadYaml(File(path).readAsStringSync()) as YamlMap;
+            final deny = (yaml['deny'] as YamlList)
+                .map((e) => e.toString())
+                .toList();
             expect(
               deny,
               containsAll(requiredDeny),
@@ -45,8 +42,7 @@ void main() {
             expect(
               yaml['inherit'],
               isTrue,
-              reason:
-                  'Feature $feature presentation: inherit must be true',
+              reason: 'Feature $feature presentation: inherit must be true',
             );
           },
         );

@@ -9,7 +9,7 @@ import '../../infrastructure/speech/speech_recognition_service.dart';
 /// as a thin wrapper following constructor-injection + delegation pattern.
 class StartSpeechRecognitionUseCase {
   StartSpeechRecognitionUseCase({required SpeechRecognitionService service})
-      : _service = service;
+    : _service = service;
 
   final SpeechRecognitionService _service;
 
@@ -19,8 +19,7 @@ class StartSpeechRecognitionUseCase {
   Future<bool> initialize({
     void Function(String status)? onStatus,
     void Function(String errorMsg, bool permanent)? onError,
-  }) =>
-      _service.initialize(onStatus: onStatus, onError: onError);
+  }) => _service.initialize(onStatus: onStatus, onError: onError);
 
   /// Start listening for speech with [localeId].
   ///
@@ -31,14 +30,13 @@ class StartSpeechRecognitionUseCase {
     required String localeId,
     Duration listenFor = const Duration(seconds: 30),
     Duration pauseFor = const Duration(seconds: 3),
-  }) =>
-      _service.startListening(
-        onResult: onResult,
-        onSoundLevel: onSoundLevel,
-        localeId: localeId,
-        listenFor: listenFor,
-        pauseFor: pauseFor,
-      );
+  }) => _service.startListening(
+    onResult: onResult,
+    onSoundLevel: onSoundLevel,
+    localeId: localeId,
+    listenFor: listenFor,
+    pauseFor: pauseFor,
+  );
 
   /// Stop listening and finalize the transcription result.
   Future<void> stop() => _service.stopListening();

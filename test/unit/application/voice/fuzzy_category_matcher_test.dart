@@ -55,9 +55,7 @@ void main() {
         () => mockCategoryRepo.findById('cat_food_dining_out'),
       ).thenAnswer((_) async => _makeCategory('cat_food_dining_out', '朝食'));
       when(() => mockCategoryRepo.findAll()).thenAnswer((_) async => []);
-      when(
-        () => mockPrefRepo.findByKeyword(any()),
-      ).thenAnswer((_) async => []);
+      when(() => mockPrefRepo.findByKeyword(any())).thenAnswer((_) async => []);
       when(
         () => mockPrefRepo.suggestForKeyword(any()),
       ).thenAnswer((_) async => null);
@@ -79,9 +77,7 @@ void main() {
       when(
         () => mockCategoryRepo.findById(any()),
       ).thenAnswer((_) async => null);
-      when(
-        () => mockPrefRepo.findByKeyword(any()),
-      ).thenAnswer((_) async => []);
+      when(() => mockPrefRepo.findByKeyword(any())).thenAnswer((_) async => []);
       when(
         () => mockPrefRepo.suggestForKeyword(any()),
       ).thenAnswer((_) async => null);
@@ -107,9 +103,7 @@ void main() {
         ),
       );
       when(() => mockCategoryRepo.findAll()).thenAnswer((_) async => []);
-      when(
-        () => mockPrefRepo.findByKeyword('咖啡'),
-      ).thenAnswer(
+      when(() => mockPrefRepo.findByKeyword('咖啡')).thenAnswer(
         (_) async => [
           CategoryKeywordPreference(
             keyword: '咖啡',
@@ -119,9 +113,7 @@ void main() {
           ),
         ],
       );
-      when(
-        () => mockPrefRepo.suggestForKeyword('咖啡'),
-      ).thenAnswer(
+      when(() => mockPrefRepo.suggestForKeyword('咖啡')).thenAnswer(
         (_) async => CategoryKeywordPreference(
           keyword: '咖啡',
           categoryId: 'cat_entertainment_cafe',
@@ -140,9 +132,7 @@ void main() {
   group('Edge cases', () {
     test('empty keyword returns null', () async {
       when(() => mockCategoryRepo.findAll()).thenAnswer((_) async => []);
-      when(
-        () => mockPrefRepo.findByKeyword(any()),
-      ).thenAnswer((_) async => []);
+      when(() => mockPrefRepo.findByKeyword(any())).thenAnswer((_) async => []);
       when(
         () => mockPrefRepo.suggestForKeyword(any()),
       ).thenAnswer((_) async => null);
@@ -156,9 +146,7 @@ void main() {
       when(
         () => mockCategoryRepo.findById(any()),
       ).thenAnswer((_) async => null);
-      when(
-        () => mockPrefRepo.findByKeyword(any()),
-      ).thenAnswer((_) async => []);
+      when(() => mockPrefRepo.findByKeyword(any())).thenAnswer((_) async => []);
       when(
         () => mockPrefRepo.suggestForKeyword(any()),
       ).thenAnswer((_) async => null);

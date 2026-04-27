@@ -98,8 +98,10 @@ class _CategorySelectionScreenState
       // Also show L1 if any L2 child matches
       final children = _l2ByParent[cat.id] ?? [];
       return children.any(
-        (c) =>
-            CategoryLocalizationService.resolve(c.name, locale).toLowerCase().contains(q),
+        (c) => CategoryLocalizationService.resolve(
+          c.name,
+          locale,
+        ).toLowerCase().contains(q),
       );
     }).toList();
   }
@@ -110,8 +112,10 @@ class _CategorySelectionScreenState
     final q = _searchQuery.toLowerCase();
     return children
         .where(
-          (c) =>
-              CategoryLocalizationService.resolve(c.name, locale).toLowerCase().contains(q),
+          (c) => CategoryLocalizationService.resolve(
+            c.name,
+            locale,
+          ).toLowerCase().contains(q),
         )
         .toList();
   }
@@ -359,7 +363,8 @@ class _CategorySelectionScreenState
           addSubcategoryLabel: l10n.addSubcategory,
           resolveIcon: resolveCategoryIcon,
           parseColor: _parseColor,
-          resolveName: (key) => CategoryLocalizationService.resolve(key, locale),
+          resolveName: (key) =>
+              CategoryLocalizationService.resolve(key, locale),
         );
       },
     );
@@ -505,7 +510,10 @@ class _L1ReorderTile extends StatelessWidget {
                 child: ReorderableDragStartListener(
                   index: i,
                   child: CategoryReorderRow(
-                    label: CategoryLocalizationService.resolve(child.name, locale),
+                    label: CategoryLocalizationService.resolve(
+                      child.name,
+                      locale,
+                    ),
                     iconData: resolveCategoryIcon(child.icon),
                     color: childColor,
                     variant: CategoryReorderRowVariant.l2,

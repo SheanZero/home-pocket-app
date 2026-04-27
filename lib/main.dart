@@ -25,10 +25,15 @@ import 'features/settings/presentation/providers/state_settings.dart';
 import 'generated/app_localizations.dart';
 import 'infrastructure/crypto/database/encrypted_database.dart';
 
+typedef AppRunner = void Function(Widget app);
+
 /// Set to `true` for in-memory database (dev/debugging, data lost on restart).
 /// Set to `false` (default) for persistent encrypted SQLCipher database.
 const _useInMemoryDatabase = false;
 
+// coverage:ignore-start
+// Platform bootstrap loads native database libraries and encrypted storage.
+// Tests exercise the branch logic through bootWithInitializerForTesting below.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ensureNativeLibrary();
@@ -36,7 +41,11 @@ void main() async {
 }
 
 Future<void> _boot() async {
-  final initializer = AppInitializer(
+  await bootWithInitializerForTesting(_createAppInitializer());
+}
+
+AppInitializer _createAppInitializer() {
+  return AppInitializer(
     containerFactory: ({overrides = const []}) =>
         ProviderContainer(overrides: overrides),
     databaseFactory: (masterKeyRepo) async {
@@ -49,19 +58,26 @@ Future<void> _boot() async {
     // Seeding (categories, default book) runs inside HomePocketApp._initialize().
     seedRunner: (_) async {},
   );
+}
+// coverage:ignore-end
 
+@visibleForTesting
+Future<void> bootWithInitializerForTesting(
+  AppInitializer initializer, {
+  AppRunner appRunner = runApp,
+}) async {
   final result = await initializer.initialize();
 
   switch (result) {
     case InitSuccess(:final container):
-      runApp(
+      appRunner(
         UncontrolledProviderScope(
           container: container,
           child: const HomePocketApp(),
         ),
       );
     case InitFailure():
-      runApp(InitFailureApp(onRetry: _boot));
+      appRunner(InitFailureApp(onRetry: _boot));
   }
 }
 

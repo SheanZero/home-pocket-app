@@ -5,6 +5,9 @@ import 'package:drift/drift.dart';
 /// See [AuditEvent] enum for valid event type values.
 /// The `event` column stores enum `.name` strings.
 class AuditLogs extends Table {
+  // coverage:ignore-start
+  // Drift column DSL is consumed by code generation and is not callable at
+  // runtime. Generated table classes cover the executable behavior.
   /// ULID — time-sortable unique identifier.
   TextColumn get id => text()();
 
@@ -28,6 +31,7 @@ class AuditLogs extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
+  // coverage:ignore-end
 
   List<TableIndex> get customIndices => [
     TableIndex(name: 'idx_audit_logs_event', columns: {#event}),

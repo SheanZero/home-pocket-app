@@ -32,7 +32,8 @@ class _MockCategoryRepository extends Mock implements CategoryRepository {}
 class _MockCategoryLedgerConfigRepository extends Mock
     implements CategoryLedgerConfigRepository {}
 
-class _MockTransactionRepository extends Mock implements TransactionRepository {}
+class _MockTransactionRepository extends Mock
+    implements TransactionRepository {}
 
 class _MockBookRepository extends Mock implements BookRepository {}
 
@@ -47,7 +48,8 @@ class _MockCategoryKeywordPreferenceRepository extends Mock
 
 class _MockHashChainService extends Mock implements HashChainService {}
 
-class _MockClassificationService extends Mock implements ClassificationService {}
+class _MockClassificationService extends Mock
+    implements ClassificationService {}
 
 class _MockSyncEngine extends Mock implements SyncEngine {}
 

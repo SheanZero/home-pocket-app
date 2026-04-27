@@ -50,9 +50,7 @@ void main() {
     mockCategoryRepo = _MockCategoryRepository();
     mockSettingsRepo = _MockSettingsRepository();
 
-    when(
-      () => mockCategoryRepo.findAll(),
-    ).thenAnswer((_) async => []);
+    when(() => mockCategoryRepo.findAll()).thenAnswer((_) async => []);
 
     // AnalyticsRepository methods used by GetMonthlyReportUseCase / GetExpenseTrendUseCase
     when(
@@ -93,56 +91,45 @@ void main() {
     ).thenAnswer((_) async => const AppSettings(language: 'ja'));
   });
 
-  group(
-    'AnalyticsScreen characterization tests (pre-refactor behavior)',
-    () {
-      testWidgets('renders without crashing', (tester) async {
-        await tester.pumpWidget(
-          _buildApp(
-            const AnalyticsScreen(bookId: 'book-001'),
-            [
-              analyticsRepositoryProvider.overrideWithValue(mockAnalyticsRepo),
-              categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
-              settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
-            ],
-          ),
-        );
-        await tester.pump();
-        expect(find.byType(Scaffold), findsWidgets);
-      });
+  group('AnalyticsScreen characterization tests (pre-refactor behavior)', () {
+    testWidgets('renders without crashing', (tester) async {
+      await tester.pumpWidget(
+        _buildApp(const AnalyticsScreen(bookId: 'book-001'), [
+          analyticsRepositoryProvider.overrideWithValue(mockAnalyticsRepo),
+          categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
+          settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
+        ]),
+      );
+      await tester.pump();
+      expect(find.byType(Scaffold), findsWidgets);
+    });
 
-      testWidgets('contains an AppBar with analytics title', (tester) async {
-        await tester.pumpWidget(
-          _buildApp(
-            const AnalyticsScreen(bookId: 'book-001'),
-            [
-              analyticsRepositoryProvider.overrideWithValue(mockAnalyticsRepo),
-              categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
-              settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
-            ],
-          ),
-        );
-        await tester.pump();
-        expect(find.byType(AppBar), findsOneWidget);
-      });
+    testWidgets('contains an AppBar with analytics title', (tester) async {
+      await tester.pumpWidget(
+        _buildApp(const AnalyticsScreen(bookId: 'book-001'), [
+          analyticsRepositoryProvider.overrideWithValue(mockAnalyticsRepo),
+          categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
+          settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
+        ]),
+      );
+      await tester.pump();
+      expect(find.byType(AppBar), findsOneWidget);
+    });
 
-      testWidgets('selectedMonthProvider wired — screen accesses year/month',
-          (tester) async {
-        // selectedMonthProvider provides SelectedMonth(year, month) to the screen.
-        // This test verifies the provider chain is intact by confirming screen builds.
-        await tester.pumpWidget(
-          _buildApp(
-            const AnalyticsScreen(bookId: 'book-001'),
-            [
-              analyticsRepositoryProvider.overrideWithValue(mockAnalyticsRepo),
-              categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
-              settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
-            ],
-          ),
-        );
-        await tester.pump();
-        expect(find.byType(AnalyticsScreen), findsOneWidget);
-      });
-    },
-  );
+    testWidgets('selectedMonthProvider wired — screen accesses year/month', (
+      tester,
+    ) async {
+      // selectedMonthProvider provides SelectedMonth(year, month) to the screen.
+      // This test verifies the provider chain is intact by confirming screen builds.
+      await tester.pumpWidget(
+        _buildApp(const AnalyticsScreen(bookId: 'book-001'), [
+          analyticsRepositoryProvider.overrideWithValue(mockAnalyticsRepo),
+          categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
+          settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
+        ]),
+      );
+      await tester.pump();
+      expect(find.byType(AnalyticsScreen), findsOneWidget);
+    });
+  });
 }
