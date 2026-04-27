@@ -1260,6 +1260,11 @@ void main() {
 
 // test/unit/application/voice/category_matcher_test.dart
 
+import 'package:mocktail/mocktail.dart';
+
+class MockCategoryRepository extends Mock implements CategoryRepository {}
+class MockCategoryService extends Mock implements CategoryService {}
+
 void main() {
   late CategoryMatcher matcher;
   late MockCategoryRepository mockCategoryRepo;

@@ -12,7 +12,7 @@
 ## 1. 概述
 
 Home Pocket (まもる家計簿) 全部 UI 页面、对话框、共享组件的完整清单。
-覆盖所有模块：MOD-001 ~ MOD-009、MOD-014。
+覆盖所有模块：MOD-001 ~ MOD-009、BASIC-003。
 
 **统计:**
 - 页面 (Screen/Page): **37**
@@ -383,7 +383,7 @@ FAM-01 (选择角色)
 - [MOD-006 Analytics](../02-module-specs/MOD-006_Analytics.md)
 - [MOD-007 Settings](../02-module-specs/MOD-007_Settings.md)
 - [MOD-008 Gamification](../02-module-specs/MOD-008_Gamification.md)
-- [MOD-014 i18n](../02-module-specs/MOD-014_i18n.md)
+- [BASIC-003 I18N Infrastructure](../04-basic/BASIC-003_I18N_Infrastructure.md)
 - [PRD_MVP_App](../../requirement/PRD_MVP_App.md)
 - [PRD_MVP_Global](../../requirement/PRD_MVP_Global.md)
 

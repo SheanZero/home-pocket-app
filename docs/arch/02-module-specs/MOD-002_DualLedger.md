@@ -921,6 +921,12 @@ class _SoulCelebrationOverlayState
 ```dart
 // test/unit/application/dual_ledger/classification_service_test.dart
 
+import 'package:mocktail/mocktail.dart';
+
+class MockRuleEngine extends Mock implements RuleEngine {}
+class MockMerchantDatabase extends Mock implements MerchantDatabase {}
+class MockTFLiteClassifier extends Mock implements TFLiteClassifier {}
+
 void main() {
   late MockRuleEngine mockRuleEngine;
   late MockMerchantDatabase mockMerchantDB;
@@ -957,8 +963,8 @@ void main() {
 
       // 验证只调用了规则引擎
       verify(mockRuleEngine.classify('cat_entertainment')).called(1);
-      verifyNever(mockMerchantDB.lookup(any));
-      verifyNever(mockTFLiteClassifier.predict(
+      verifyNever(() => mockMerchantDB.lookup(any));
+      verifyNever(() => mockTFLiteClassifier.predict(
         categoryId: anyNamed('categoryId'),
       ));
     });
@@ -994,7 +1000,7 @@ void main() {
 
       verify(mockRuleEngine.classify('cat_food')).called(1);
       verify(mockMerchantDB.lookup('星巴克')).called(1);
-      verifyNever(mockTFLiteClassifier.predict(
+      verifyNever(() => mockTFLiteClassifier.predict(
         categoryId: anyNamed('categoryId'),
       ));
     });
