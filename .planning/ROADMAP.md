@@ -108,7 +108,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. `lib/` contains zero hardcoded CJK strings outside intentional dictionaries; every UI string uses `S.of(context).<key>`
   5. No `lib/` file imports from any MOD-009 (deprecated i18n module) code path; monetary-display widgets use `AppTextStyles.amountLarge/amountMedium/amountSmall` and widget tests verify `FontFeature.tabularFigures()` is present
   6. Every file touched in this phase has ≥80% test coverage; `flutter analyze` exits 0; all tests GREEN; behavior unchanged
-**Plans**: TBD
+**Plans**: 5 plans
+  - [ ] 05-01-PLAN.md — Rename infrastructure CategoryLocaleService and add service-name collision guard
+  - [ ] 05-02-PLAN.md — Normalize ARB keys, enforce parity, and regenerate localization output
+  - [ ] 05-03-PLAN.md — Extract home/accounting CJK UI strings and enforce touched money styling
+  - [ ] 05-04-PLAN.md — Localize analytics labels and enforce FormatterService/AppTextStyles money display
+  - [ ] 05-05-PLAN.md — Add MOD-009/CJK/finding-closure scan gates and close MEDIUM audit entries
 
 ### Phase 6: LOW Fixes
 **Goal**: Every LOW-severity finding in `issues.json` is resolved; unused private members and orphaned files are deleted, stale suppression directives are removed, Drift indices are added with a migration step, and unguarded debug logging is wrapped
