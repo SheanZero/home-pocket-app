@@ -62,13 +62,13 @@ Requirements for the cleanup initiative. Each maps to exactly one phase. All are
 
 ### LOW-Severity Fixes (LOW)
 
-- [ ] **LOW-01**: Every LOW-severity finding in `issues.json` is resolved; zero open LOW entries remain
-- [ ] **LOW-02**: Unused private members, unreachable branches, and orphaned files are deleted; `dart_code_linter check-unused-code` and `check-unused-files` both report 0 findings
-- [ ] **LOW-03**: All `// ignore:` and `// ignore_for_file:` suppression directives whose underlying violation is now fixed are removed
+- [x] **LOW-01**: Every LOW-severity finding in `issues.json` is resolved; zero open LOW entries remain
+- [x] **LOW-02**: Unused private members, unreachable branches, and orphaned files are deleted; `dart_code_linter check-unused-code` and `check-unused-files` both report 0 findings
+- [x] **LOW-03**: All `// ignore:` and `// ignore_for_file:` suppression directives whose underlying violation is now fixed are removed
 - [ ] **LOW-04**: The three known missing Drift indices are added (`audit_logs_table.dart`, `user_profiles_table.dart`, `category_ledger_configs_table.dart`); `schemaVersion` bumped; migration step added using parameterized SQL only (no string interpolation)
 - [ ] **LOW-05**: An integration test verifies the v(N-1)→vN migration creates the new indices via `PRAGMA index_list`
 - [ ] **LOW-06**: All `print()` and bare `debugPrint()` calls in production code paths are wrapped in `if (kDebugMode)` or moved to a centralized logging utility
-- [ ] **LOW-07**: Every file touched in this phase has ≥80% test coverage; `flutter analyze` 0; tests GREEN; behavior unchanged
+- [x] **LOW-07**: Every file touched in this phase has ≥80% test coverage; `flutter analyze` 0; tests GREEN; behavior unchanged
 
 ### Documentation Sweep (DOCS)
 
@@ -165,13 +165,13 @@ Phase mapping populated by `gsd-roadmapper` during roadmap creation.
 | MED-06 | Phase 5 | Complete |
 | MED-07 | Phase 5 | Complete |
 | MED-08 | Phase 5 | Complete |
-| LOW-01 | Phase 6 | Pending |
-| LOW-02 | Phase 6 | Pending |
-| LOW-03 | Phase 6 | Pending |
+| LOW-01 | Phase 6 | Complete |
+| LOW-02 | Phase 6 | Complete |
+| LOW-03 | Phase 6 | Complete |
 | LOW-04 | Phase 6 | Pending |
 | LOW-05 | Phase 6 | Pending |
 | LOW-06 | Phase 6 | Pending |
-| LOW-07 | Phase 6 | Pending |
+| LOW-07 | Phase 6 | Complete |
 | DOCS-01 | Phase 7 | Pending |
 | DOCS-02 | Phase 7 | Pending |
 | DOCS-03 | Phase 7 | Pending |

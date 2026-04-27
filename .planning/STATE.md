@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 6 context gathered
-last_updated: "2026-04-27T07:48:03.756Z"
-last_activity: 2026-04-27 -- Phase 6 planning complete
+stopped_at: Completed 06-01-low-catalogue-and-dead-code-PLAN.md
+last_updated: "2026-04-27T08:39:45.744Z"
+last_activity: 2026-04-27
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 34
-  completed_plans: 28
-  percent: 82
+  completed_plans: 29
+  percent: 85
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-25)
 
 **Core value:** Re-running the audit at the end finds zero violations across all four categories (layer violations, redundant code, dead code, Riverpod hygiene)
-**Current focus:** Phase 6 — low-fixes (next)
+**Current focus:** Phase 06 — low-fixes
 
 ## Current Position
 
-Phase: 6
-Plan: Not started
+Phase: 06 (low-fixes) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-04-27 -- Phase 6 planning complete
+Last activity: 2026-04-27
 
 Progress: [██████████] 100%
 
@@ -82,6 +82,8 @@ Recent decisions affecting current work:
 - [Phase 05-medium-fixes]: 05-05: CJK scanner strips comments and RegExp literals while keeping whitelist paths exact. — Prevents false positives on parser data without permitting presentation-layer hardcoded CJK.
 - [Phase 05-medium-fixes]: 05-05: Residual home and settings CJK labels are ARB-backed instead of scanner-whitelisted. — Maintains the Phase 5 localization invariant that production UI text uses generated S getters.
 - [Phase 05-medium-fixes]: 05-05: RD-001 and RD-002 close against scanner-enforcement commit a66c625. — The audit catalogue now ties MEDIUM closure to the code change that enforces the guardrails.
+- [Phase 06-01]: Closed LOW rows retain stable DC IDs even after clean scanner shards emit zero active findings. — Preserves Phase 8 traceability after dead-code cleanup.
+- [Phase 06-01]: Deleted generated outputs only when their source file was removed and the direct unused-file gate reported the generated output as orphaned. — Required for `check-unused-files lib` to reach zero after source deletion.
 
 ### Pending Todos
 
@@ -108,8 +110,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-27T06:42:56.900Z
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-low-fixes/06-CONTEXT.md
+Last session: 2026-04-27T08:39:40.089Z
+Stopped at: Completed 06-01-low-catalogue-and-dead-code-PLAN.md
+Resume file: None
 
 **Planned Phase:** 2 (coverage-baseline) — 4 plans — 2026-04-25T15:05:23.420Z
