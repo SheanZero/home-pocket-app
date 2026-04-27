@@ -1,5 +1,3 @@
-import 'dart:developer' as dev;
-
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -43,11 +41,9 @@ Future<void> _boot() async {
         ProviderContainer(overrides: overrides),
     databaseFactory: (masterKeyRepo) async {
       if (_useInMemoryDatabase) {
-        dev.log('Using IN-MEMORY database (dev mode)', name: 'AppInit');
         return AppDatabase(NativeDatabase.memory());
       }
       final executor = await createEncryptedExecutor(masterKeyRepo);
-      dev.log('Encrypted database opened', name: 'AppInit');
       return AppDatabase(executor);
     },
     // Seeding (categories, default book) runs inside HomePocketApp._initialize().
@@ -64,12 +60,7 @@ Future<void> _boot() async {
           child: const HomePocketApp(),
         ),
       );
-    case InitFailure(:final type, :final error):
-      dev.log(
-        'Init failed: type=$type error=$error',
-        name: 'AppInit',
-        error: error,
-      );
+    case InitFailure():
       runApp(InitFailureApp(onRetry: _boot));
   }
 }

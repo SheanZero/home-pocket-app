@@ -1,6 +1,3 @@
-import 'dart:developer' as dev;
-import 'dart:math' as math;
-
 import 'package:ulid/ulid.dart';
 
 import '../../features/accounting/domain/models/transaction.dart';
@@ -13,9 +10,6 @@ import '../dual_ledger/classification_service.dart';
 import '../family_sync/sync_engine.dart';
 import '../family_sync/transaction_change_tracker.dart';
 import '../../features/accounting/domain/models/transaction_sync_mapper.dart';
-
-String _trunc(String s, [int len = 16]) =>
-    s.length <= len ? s : '${s.substring(0, math.min(len, s.length))}...';
 
 /// Parameters for creating a new transaction.
 class CreateTransactionParams {
@@ -76,13 +70,6 @@ class CreateTransactionUseCase {
       '0000000000000000000000000000000000000000000000000000000000000000';
 
   Future<Result<Transaction>> execute(CreateTransactionParams params) async {
-    dev.log(
-      '[1/7 UseCase Input] amount=${params.amount} (int), '
-      'type=${params.type.name}, categoryId=${params.categoryId}, '
-      'note=${params.note}, bookId=${params.bookId}',
-      name: 'DataFlow',
-    );
-
     // 1. Validate input
     if (params.bookId.isEmpty) {
       return Result.error('bookId must not be empty');
@@ -145,11 +132,6 @@ class CreateTransactionUseCase {
     // 7. Compute hash chain
     final hashAmount = params.amount.toDouble();
     final hashTimestamp = timestamp.millisecondsSinceEpoch ~/ 1000;
-    dev.log(
-      '[2/7 HashChain Input] id=$id, amount=$hashAmount (double), '
-      'timestamp=$hashTimestamp (epoch sec), prevHash=${_trunc(prevHash)}',
-      name: 'DataFlow',
-    );
 
     final currentHash = _hashChainService.calculateTransactionHash(
       transactionId: id,
@@ -176,12 +158,6 @@ class CreateTransactionUseCase {
       soulSatisfaction: soulSatisfaction,
     );
 
-    dev.log(
-      '[3/7 Domain Object] id=$id, amount=${transaction.amount} (int), '
-      'note=${transaction.note}, currentHash=${_trunc(currentHash)}',
-      name: 'DataFlow',
-    );
-
     // 9. Persist
     await _transactionRepo.insert(transaction);
 
@@ -198,7 +174,6 @@ class CreateTransactionUseCase {
     // Fire-and-forget sync trigger — SyncEngine handles debounce and validity.
     _syncEngine?.onTransactionChanged();
 
-    dev.log('[7/7 UseCase Done] Transaction $id persisted', name: 'DataFlow');
     return Result.success(transaction);
   }
 }

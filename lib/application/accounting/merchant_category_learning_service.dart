@@ -1,5 +1,3 @@
-import 'dart:developer' as dev;
-
 import '../../features/accounting/domain/repositories/category_repository.dart';
 import '../../features/accounting/domain/repositories/merchant_category_preference_repository.dart';
 
@@ -54,11 +52,6 @@ class MerchantCategoryLearningService {
 
     final category = await _categoryRepository.findById(selectedCategoryId);
     if (category == null || category.level != 2) {
-      dev.log(
-        'Skip merchant preference update: category must be L2. '
-        'categoryId=$selectedCategoryId',
-        name: 'MerchantCategoryLearning',
-      );
       return;
     }
 
