@@ -17,7 +17,6 @@ import '../../../../application/family_sync/join_group_use_case.dart';
 import '../../../../application/family_sync/leave_group_use_case.dart';
 import '../../../../application/family_sync/pull_sync_use_case.dart';
 import '../../../../application/family_sync/push_sync_use_case.dart';
-import '../../../../application/family_sync/regenerate_invite_use_case.dart';
 import '../../../../application/family_sync/remove_member_use_case.dart';
 import '../../../../application/family_sync/rename_group_use_case.dart';
 import '../../../../application/family_sync/repository_providers.dart'
@@ -177,7 +176,9 @@ FullSyncUseCase fullSyncUseCase(Ref ref) {
   return FullSyncUseCase(
     pushSync: ref.watch(pushSyncUseCaseProvider),
     fetchAllTransactions: () async {
-      final transactionRepo = ref.read(accounting.transactionRepositoryProvider);
+      final transactionRepo = ref.read(
+        accounting.transactionRepositoryProvider,
+      );
       final bookRepo = ref.read(accounting.bookRepositoryProvider);
       final localBooks = await bookRepo.findAll();
       final operations = <Map<String, dynamic>>[];
@@ -288,15 +289,6 @@ final deactivateGroupUseCaseProvider = Provider<DeactivateGroupUseCase>((ref) {
     groupRepository: ref.watch(groupRepositoryProvider),
     queueManager: ref.watch(syncQueueManagerProvider),
     shadowBookService: ref.watch(shadowBookServiceProvider),
-  );
-});
-
-final regenerateInviteUseCaseProvider = Provider<RegenerateInviteUseCase>((
-  ref,
-) {
-  return RegenerateInviteUseCase(
-    apiClient: ref.watch(relayApiClientProvider),
-    groupRepository: ref.watch(groupRepositoryProvider),
   );
 });
 

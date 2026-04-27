@@ -43,6 +43,10 @@ Future<List<Finding>> _runUnused(String mode) async {
     try {
       decoded = jsonDecode(stdoutText);
     } catch (e) {
+      if (result.exitCode == 0 ||
+          (result.stdout as String).contains('no unused')) {
+        return findings;
+      }
       // Assumption A3 fallback: non-JSON output. Skip and return empty.
       stderr.writeln(
         '[audit:dead_code] WARNING: $mode emitted non-JSON output; skipping ($e)',

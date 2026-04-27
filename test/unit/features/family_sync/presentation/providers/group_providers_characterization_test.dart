@@ -8,7 +8,6 @@ import 'package:home_pocket/application/family_sync/deactivate_group_use_case.da
 import 'package:home_pocket/application/family_sync/full_sync_use_case.dart';
 import 'package:home_pocket/application/family_sync/join_group_use_case.dart';
 import 'package:home_pocket/application/family_sync/leave_group_use_case.dart';
-import 'package:home_pocket/application/family_sync/regenerate_invite_use_case.dart';
 import 'package:home_pocket/application/family_sync/remove_member_use_case.dart';
 import 'package:home_pocket/application/family_sync/rename_group_use_case.dart';
 import 'package:home_pocket/application/family_sync/shadow_book_service.dart';
@@ -118,17 +117,12 @@ void main() {
         expect(uc, isA<DeactivateGroupUseCase>());
       });
 
-      test('regenerateInviteUseCaseProvider constructs without error', () {
-        final uc = container.read(regenerateInviteUseCaseProvider);
-        expect(uc, isA<RegenerateInviteUseCase>());
-      });
-
       test('removeMemberUseCaseProvider constructs without error', () {
         final uc = container.read(removeMemberUseCaseProvider);
         expect(uc, isA<RemoveMemberUseCase>());
       });
 
-      test('all 10 group use case providers return non-null instances', () {
+      test('all 9 group use case providers return non-null instances', () {
         expect(container.read(createGroupUseCaseProvider), isNotNull);
         expect(container.read(joinGroupUseCaseProvider), isNotNull);
         expect(container.read(confirmJoinUseCaseProvider), isNotNull);
@@ -137,7 +131,6 @@ void main() {
         expect(container.read(confirmMemberUseCaseProvider), isNotNull);
         expect(container.read(leaveGroupUseCaseProvider), isNotNull);
         expect(container.read(deactivateGroupUseCaseProvider), isNotNull);
-        expect(container.read(regenerateInviteUseCaseProvider), isNotNull);
         expect(container.read(removeMemberUseCaseProvider), isNotNull);
       });
     },

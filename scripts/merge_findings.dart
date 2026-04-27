@@ -102,6 +102,11 @@ Future<void> main(List<String> args) async {
       closedCommit: previous?.closedCommit ?? f.closedCommit,
     );
   }).toList();
+  final stampedKeys = stamped.map(_lifecycleKey).toSet();
+  final retainedClosed = existingLifecycle.values
+      .where((finding) => !stampedKeys.contains(_lifecycleKey(finding)))
+      .toList();
+  final catalogue = [...stamped, ...retainedClosed]..sort(_compareFindings);
 
   // 5. Emit issues.json (machine-readable; no top-level timestamp so the
   //    file is byte-identical across re-runs — see merger_findings_test.dart).
@@ -111,14 +116,14 @@ Future<void> main(List<String> args) async {
   await File(issuesPath).writeAsString(
     const JsonEncoder.withIndent(
       '  ',
-    ).convert({'findings': stamped.map((f) => f.toJson()).toList()}),
+    ).convert({'findings': catalogue.map((f) => f.toJson()).toList()}),
   );
 
   // 6. Emit ISSUES.md (human-readable, severity-then-category, table per group).
-  final md = _renderMarkdown(stamped);
+  final md = _renderMarkdown(catalogue);
   await File('.planning/audit/ISSUES.md').writeAsString(md);
 
-  print('[audit:merge] wrote ${stamped.length} findings to $issuesPath');
+  print('[audit:merge] wrote ${catalogue.length} findings to $issuesPath');
 }
 
 Future<Map<String, Finding>> _readExistingLifecycle() async {
@@ -152,6 +157,14 @@ bool _hasLifecycle(Map<dynamic, dynamic> entry) =>
 
 String _lifecycleKey(Finding finding) =>
     '${finding.category}|${finding.filePath}|${finding.lineStart}|${finding.description}';
+
+int _compareFindings(Finding a, Finding b) {
+  final fp = a.filePath.compareTo(b.filePath);
+  if (fp != 0) return fp;
+  final ln = a.lineStart.compareTo(b.lineStart);
+  if (ln != 0) return ln;
+  return _categoryPrefix[a.category]!.compareTo(_categoryPrefix[b.category]!);
+}
 
 bool _isPreferred(Finding a, {required Finding over}) {
   // Higher-confidence wins; tie-broken by preferring tool_source over agent:*

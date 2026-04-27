@@ -325,5 +325,43 @@ void main() {
         expect(findings.single['closed_commit'], equals('abc123'));
       },
     );
+
+    test('retains closed findings that are absent from clean shards', () async {
+      final closed = _f(
+        filePath: 'lib/fixed.dart',
+        line: 7,
+        category: 'dead_code',
+        severity: 'LOW',
+        toolSource: 'dart_code_linter',
+        description: 'fixed dead code',
+      );
+      File('${shardRoot.path}/issues.json').writeAsStringSync(
+        jsonEncode({
+          'findings': [
+            {
+              ...closed.toJson(),
+              'id': 'DC-001',
+              'status': 'closed',
+              'closed_in_phase': '6',
+              'closed_commit': 'def456',
+            },
+          ],
+        }),
+      );
+      File(
+        '${shardRoot.path}/shards/dead_code.json',
+      ).writeAsStringSync(jsonEncode(_shardWith([], 'dart_code_linter')));
+
+      final r = await _runMerger(tmp);
+      expect(r.exitCode, equals(0), reason: r.stderr.toString());
+      final issues = jsonDecode(
+        File('${shardRoot.path}/issues.json').readAsStringSync(),
+      );
+      final findings = (issues['findings'] as List).cast<Map>();
+
+      expect(findings.single['id'], equals('DC-001'));
+      expect(findings.single['status'], equals('closed'));
+      expect(findings.single['closed_commit'], equals('def456'));
+    });
   });
 }

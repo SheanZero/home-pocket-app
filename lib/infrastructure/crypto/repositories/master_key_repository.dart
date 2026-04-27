@@ -11,15 +11,6 @@ class MasterKeyNotInitializedException implements Exception {
   String toString() => 'MasterKeyNotInitializedException: $message';
 }
 
-/// Key derivation failed.
-class KeyDerivationException implements Exception {
-  KeyDerivationException(this.message);
-  final String message;
-
-  @override
-  String toString() => 'KeyDerivationException: $message';
-}
-
 /// Abstract interface for master key management.
 ///
 /// The master key is a 256-bit cryptographically secure random key
