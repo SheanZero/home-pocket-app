@@ -124,10 +124,13 @@ docs/arch/README.md current state:
     6. Driver section calling `check_dir` for:
        - `docs/arch/01-core-architecture` against `ARCH-000_INDEX.md`
        - `docs/arch/03-adr` against `ADR-000_INDEX.md`
+       - `docs/arch/05-UI` against `../01-core-architecture/ARCH-000_INDEX.md` (cross-section: ARCH-000 doubles as the master index for UI specs per CONTEXT D-04 rationale; UI-001 must appear in ARCH-000's UI subsection)
        - `docs/arch/02-module-specs` against `MOD-000_INDEX.md` ONLY IF the latter exists (use `[ -f docs/arch/02-module-specs/MOD-000_INDEX.md ] && check_dir ...`)
     7. `exit $fail` at the end.
 
-    Then `chmod +x scripts/verify_index_health.sh` and run it once. Per the current state in `<index_health_facts>` it should print at least one ORPHAN or BROKEN LINK warning (e.g., UI-001 might be an orphan from ARCH-000's perspective, or some INDEX entry may not match the post-Wave-A renamed paths). Confirm exit non-zero — failure is the contract.
+    **Note on W-01 fix:** The 05-UI driver call is required so that on `main` (where UI-001 is NOT listed in ARCH-000) the script exits non-zero, satisfying the W0 "must currently fail" contract. Plan 07-04 Task 1 sub-task B then adds the UI-001 entry, which makes this gate pass.
+
+    Then `chmod +x scripts/verify_index_health.sh` and run it once. Per the current state in `<index_health_facts>` it must print at least one `ORPHAN: UI-001_Page_Inventory.md not listed in ../01-core-architecture/ARCH-000_INDEX.md` warning. Confirm exit non-zero — failure is the contract.
   </action>
   <verify>
     <automated>test -x scripts/verify_index_health.sh && grep -q "check_dir docs/arch/01-core-architecture" scripts/verify_index_health.sh && grep -q "check_dir docs/arch/03-adr" scripts/verify_index_health.sh && bash scripts/verify_index_health.sh; [ $? -ne 0 ] || echo "Script exists and currently fails as expected"</automated>
@@ -141,7 +144,9 @@ docs/arch/README.md current state:
     - `grep -q "ORPHAN:" scripts/verify_index_health.sh` exits 0 (orphan check present)
     - `grep -q "check_dir docs/arch/01-core-architecture" scripts/verify_index_health.sh` exits 0
     - `grep -q "check_dir docs/arch/03-adr" scripts/verify_index_health.sh` exits 0
+    - `grep -q "check_dir docs/arch/05-UI" scripts/verify_index_health.sh` exits 0 (W-01 fix: cross-section UI driver present)
     - `grep -q "MOD-000_INDEX\.md" scripts/verify_index_health.sh` exits 0 (conditional MOD INDEX check present)
+    - `bash scripts/verify_index_health.sh 2>&1 | grep -q "ORPHAN: UI-001_Page_Inventory.md"` exits 0 (script reports the expected drift item on main)
     - `bash scripts/verify_index_health.sh; [ $? -ne 0 ]` succeeds (script currently FAILS — contract)
     - `git diff --name-only HEAD~ HEAD | grep -cE '^(lib/|test/|pubspec|\.github/|analysis_options)'` returns `0` (lib/-clean; `scripts/` is allowed per CONTEXT lib/-clean invariant)
   </acceptance_criteria>

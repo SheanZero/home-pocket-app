@@ -192,7 +192,7 @@ Format constraints (D-CONTEXT):
     - `grep -q 'docs/arch/04-basic/BASIC-003_I18N_Infrastructure\.md' CLAUDE.md` exits 0 (D-01 replacement landed in spec link)
     - `grep -q 'BASIC-003 i18n' CLAUDE.md` exits 0 (D-01 replacement landed in module-priority list)
     - `grep -c 'docs/arch/' CLAUDE.md` returns at least `5` (the 5+ replacements landed correctly)
-    - `grep -c '## Architecture Docs (`docs/arch/`)' CLAUDE.md` returns `1` (header line corrected)
+    - `grep -F -c '## Architecture Docs (`docs/arch/`)' CLAUDE.md` returns `1` (header line corrected; -F forces fixed-string match so backticks are not interpreted)
     - `git diff --name-only HEAD~ HEAD | grep -cE '^(lib/|test/|pubspec|\.github/|analysis_options)'` returns `0` (lib/-clean)
   </acceptance_criteria>
   <files_modified>CLAUDE.md</files_modified>
