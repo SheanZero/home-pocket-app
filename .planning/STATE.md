@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 5 UI-SPEC approved
-last_updated: "2026-04-27T03:00:09.441Z"
-last_activity: 2026-04-27 -- Phase 05 planning complete
+stopped_at: Completed 05-02-PLAN.md
+last_updated: "2026-04-27T03:21:12.435Z"
+last_activity: 2026-04-27
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 28
-  completed_plans: 23
-  percent: 82
+  completed_plans: 24
+  percent: 86
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-25)
 
 **Core value:** Re-running the audit at the end finds zero violations across all four categories (layer violations, redundant code, dead code, Riverpod hygiene)
-**Current focus:** Phase 5 — medium-fixes (next)
+**Current focus:** Phase 05 — medium-fixes
 
 ## Current Position
 
-Phase: 5 (medium-fixes) — NEXT
-Plan: Not started
+Phase: 05 (medium-fixes) — EXECUTING
+Plan: 2 of 5
 Status: Ready to execute
-Last activity: 2026-04-27 -- Phase 05 planning complete
+Last activity: 2026-04-27
 
-Progress: [█████░░░░░] 50.0% (4/8 phases)
+Progress: [█████████░] 86%
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Progress: [█████░░░░░] 50.0% (4/8 phases)
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 05 P02 | 10min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,8 @@ Recent decisions affecting current work:
 - Severity ordering hard: CRITICAL → HIGH → MEDIUM → LOW; no collapsing adjacent tiers
 - New feature work (MOD-005/007/013) paused for entire initiative
 - Per-phase doc updates deferred; one sweep at Phase 7
+- [Phase 05-02]: Preserved OCR keys as explicit Future OCR/MOD-005 stubs instead of deleting unused-looking placeholders.
+- [Phase 05-02]: Copied ARB metadata shape across locales so normal keys and metadata keys are both parity-checked.
 
 ### Pending Todos
 
@@ -93,8 +96,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-27T02:10:02.819Z
-Stopped at: Phase 5 UI-SPEC approved
-Resume file: .planning/phases/05-medium-fixes/05-UI-SPEC.md
+Last session: 2026-04-27T03:21:12.429Z
+Stopped at: Completed 05-02-PLAN.md
+Resume file: None
 
 **Planned Phase:** 2 (coverage-baseline) — 4 plans — 2026-04-25T15:05:23.420Z

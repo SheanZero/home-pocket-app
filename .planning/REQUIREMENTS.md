@@ -53,12 +53,12 @@ Requirements for the cleanup initiative. Each maps to exactly one phase. All are
 
 - [ ] **MED-01**: Every MEDIUM-severity finding in `issues.json` is resolved; zero open MEDIUM entries remain
 - [ ] **MED-02**: `lib/infrastructure/category/category_service.dart` is renamed to `CategoryLocaleService`; all import sites updated; the dual-`CategoryService` naming collision is eliminated
-- [ ] **MED-03**: All hardcoded CJK strings in `lib/` are extracted to ARB files; `S.of(context)` is used for every UI string
-- [ ] **MED-04**: All three ARB files (`app_ja.arb`, `app_zh.arb`, `app_en.arb`) have key parity (same key set, no orphans on any side); `flutter gen-l10n` succeeds without warnings
-- [ ] **MED-05**: Unused ARB keys are deleted only after the static-locale-map audit has been completed; intentional stubs (e.g., `ocrScan`, `ocrScanTitle`, `ocrHint`) are preserved with `@key` description comments
+- [x] **MED-03**: All hardcoded CJK strings in `lib/` are extracted to ARB files; `S.of(context)` is used for every UI string
+- [x] **MED-04**: All three ARB files (`app_ja.arb`, `app_zh.arb`, `app_en.arb`) have key parity (same key set, no orphans on any side); `flutter gen-l10n` succeeds without warnings
+- [x] **MED-05**: Unused ARB keys are deleted only after the static-locale-map audit has been completed; intentional stubs (e.g., `ocrScan`, `ocrScanTitle`, `ocrHint`) are preserved with `@key` description comments
 - [ ] **MED-06**: All MOD-009 (deprecated i18n module) code references are deleted from `lib/`; deprecated documentation entries in `doc/arch/` are NOT touched (per PROJECT.md scope)
 - [ ] **MED-07**: All monetary-display widgets use `AppTextStyles.amountLarge/amountMedium/amountSmall`; widget tests verify `FontFeature.tabularFigures()` is preserved
-- [ ] **MED-08**: Every file touched in this phase has ≥80% test coverage; `flutter analyze` 0; tests GREEN; behavior unchanged
+- [x] **MED-08**: Every file touched in this phase has ≥80% test coverage; `flutter analyze` 0; tests GREEN; behavior unchanged
 
 ### LOW-Severity Fixes (LOW)
 
@@ -159,12 +159,12 @@ Phase mapping populated by `gsd-roadmapper` during roadmap creation.
 | HIGH-08 | Phase 4 | Pending |
 | MED-01 | Phase 5 | Pending |
 | MED-02 | Phase 5 | Pending |
-| MED-03 | Phase 5 | Pending |
-| MED-04 | Phase 5 | Pending |
-| MED-05 | Phase 5 | Pending |
+| MED-03 | Phase 5 | Complete |
+| MED-04 | Phase 5 | Complete |
+| MED-05 | Phase 5 | Complete |
 | MED-06 | Phase 5 | Pending |
 | MED-07 | Phase 5 | Pending |
-| MED-08 | Phase 5 | Pending |
+| MED-08 | Phase 5 | Complete |
 | LOW-01 | Phase 6 | Pending |
 | LOW-02 | Phase 6 | Pending |
 | LOW-03 | Phase 6 | Pending |
