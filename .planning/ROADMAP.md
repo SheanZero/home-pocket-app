@@ -136,7 +136,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. `doc/arch/INDEX.md` files (ARCH-000, ADR-000, MOD-000) reference only files that still exist on disk
   3. CLAUDE.md "Common Pitfalls" list is annotated to mark which of the 13 items are now structurally enforced by `import_guard` / `riverpod_lint` / `dart_code_linter` / CI gates (so future contributors know which pitfalls are automated)
   4. A new ADR is filed (next sequential number after current max) documenting the cleanup initiative outcome, the `*.mocks.dart` strategy decision, and ongoing CI enforcement mechanisms
-**Plans**: TBD
+**Plans**: 5 plans
+  - [ ] 07-01-arch-mod-drift-PLAN.md — ARCH/MOD/UI drift fixes + Wave 0 verify-doc-sweep.sh (DOCS-01 part 1)
+  - [ ] 07-02-adr-drift-PLAN.md — ADR-002/007/008/010 append-only Cleanup Initiative Outcome sections (DOCS-01 part 2)
+  - [ ] 07-03-claude-md-pitfall-annotation-PLAN.md — CLAUDE.md 13 pitfall annotations + path drift fix in CLAUDE.md and .claude/rules/arch.md (DOCS-02 + DOCS-01)
+  - [ ] 07-04-index-health-PLAN.md — INDEX health check script + MOD-000 stub + README sync (DOCS-03)
+  - [ ] 07-05-cleanup-outcome-adr-PLAN.md — Create ADR-011 + ADR-000 INDEX entry + final phase gate (DOCS-04)
 
 ### Phase 8: Re-Audit + Exit Verification
 **Goal**: The full audit pipeline is re-run on the post-refactor codebase and `reaudit_diff.dart` exits 0 — zero open findings across all four categories; all eight exit-criterion gates pass simultaneously; CI guardrails become permanent
@@ -179,5 +184,5 @@ Phases 1 and 2 run in parallel. Then: 3 → 4 → 5 → 6 → 7 → 8
 | 4. HIGH Fixes | 0/6 | Not started | - |
 | 5. MEDIUM Fixes | 2/5 | In Progress | - |
 | 6. LOW Fixes | 0/TBD | Not started | - |
-| 7. Documentation Sweep | 0/TBD | Not started | - |
+| 7. Documentation Sweep | 0/5 | Not started | - |
 | 8. Re-Audit + Exit Verification | 0/TBD | Not started | - |
