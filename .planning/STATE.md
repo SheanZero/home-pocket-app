@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-01-low-catalogue-and-dead-code-PLAN.md
-last_updated: "2026-04-27T08:39:45.744Z"
+stopped_at: Completed 06-02-drift-index-migration-PLAN.md
+last_updated: "2026-04-27T08:46:45.281Z"
 last_activity: 2026-04-27
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 34
-  completed_plans: 29
-  percent: 85
+  completed_plans: 30
+  percent: 88
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 06 (low-fixes) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-04-27
 
-Progress: [██████████] 100%
+Progress: [█████████░] 88%
 
 ## Performance Metrics
 
@@ -84,6 +84,7 @@ Recent decisions affecting current work:
 - [Phase 05-medium-fixes]: 05-05: RD-001 and RD-002 close against scanner-enforcement commit a66c625. — The audit catalogue now ties MEDIUM closure to the code change that enforces the guardrails.
 - [Phase 06-01]: Closed LOW rows retain stable DC IDs even after clean scanner shards emit zero active findings. — Preserves Phase 8 traceability after dead-code cleanup.
 - [Phase 06-01]: Deleted generated outputs only when their source file was removed and the direct unused-file gate reported the generated output as orphaned. — Required for `check-unused-files lib` to reach zero after source deletion.
+- [Phase 06-02]: AppDatabase schemaVersion is 15 with v15 migration SQL limited to static `CREATE INDEX IF NOT EXISTS` statements. — Keeps index migration idempotent and free of user data interpolation.
 
 ### Pending Todos
 
@@ -110,8 +111,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-27T08:39:40.089Z
-Stopped at: Completed 06-01-low-catalogue-and-dead-code-PLAN.md
+Last session: 2026-04-27T08:46:45.275Z
+Stopped at: Completed 06-02-drift-index-migration-PLAN.md
 Resume file: None
 
 **Planned Phase:** 2 (coverage-baseline) — 4 plans — 2026-04-25T15:05:23.420Z
