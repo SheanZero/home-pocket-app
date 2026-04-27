@@ -1,6 +1,6 @@
 ---
 phase: 05-medium-fixes
-reviewed: 2026-04-27T05:25:30Z
+reviewed: 2026-04-27T05:41:13Z
 depth: standard
 files_reviewed: 35
 files_reviewed_list:
@@ -41,43 +41,29 @@ files_reviewed_list:
   - test/widget/features/home/presentation/widgets/soul_fullness_card_test.dart
 findings:
   critical: 0
-  warning: 2
+  warning: 1
   info: 1
-  total: 3
+  total: 2
 status: issues_found
 ---
 
 # Phase 5: Code Review Report
 
-**Reviewed:** 2026-04-27T05:25:30Z
+**Reviewed:** 2026-04-27T05:41:13Z
 **Depth:** standard
 **Files Reviewed:** 35
 **Status:** issues_found
 
 ## Summary
 
-Reviewed the supplied Flutter source, generated localization output, ARB files, and tests for correctness, security, regressions, and maintainability. The localization changes are mostly consistent, but one analytics widget can assert/crash for exceeded budgets, and category localization does not cover legacy category IDs that are still emitted by in-scope merchant matching. One remaining user-visible hardcoded comparison label should also be localized.
+Re-reviewed the supplied Flutter source, generated localization output, ARB files, and tests after gap-fix commit `4fd5e3c`. The exceeded-budget progress indicator issue is fixed: `BudgetProgressList` now caps `LinearProgressIndicator.value` at `1.0`, and the regression test covers an exceeded budget. One warning remains because category localization still does not cover legacy category IDs emitted by in-scope merchant matching. One user-visible comparison label also still bypasses localization.
 
 ## Warnings
 
-### WR-01: Budget Progress Value Can Exceed Flutter's Valid Range
-
-**File:** `lib/features/analytics/presentation/widgets/budget_progress_list.dart:116`
-**Issue:** `LinearProgressIndicator.value` is clamped to `1.5`, but Flutter requires determinate progress values to stay between `0.0` and `1.0`. Any exceeded budget between 100% and 150% can trip framework assertions in debug/test builds.
-**Fix:**
-```dart
-LinearProgressIndicator(
-  value: (progress.percentage / 100).clamp(0.0, 1.0),
-  backgroundColor: Colors.grey[200],
-  valueColor: AlwaysStoppedAnimation<Color>(_statusColor),
-  minHeight: 8,
-)
-```
-
-### WR-02: Legacy Category IDs Resolve To Raw Localization Keys
+### WR-01: Legacy Category IDs Resolve To Raw Localization Keys
 
 **File:** `lib/infrastructure/category/category_locale_service.dart:16`
-**Issue:** `resolveFromId()` converts every `cat_*` ID to `category_*`, but the new localization map only contains current IDs such as `category_hobbies` and `category_clothing`. Existing producers still emit legacy IDs such as `cat_shopping` and `cat_entertainment` (`lib/infrastructure/ml/merchant_database.dart:86`, `:116`), so UI fallback paths can display raw strings like `category_shopping` instead of a localized label.
+**Issue:** `resolveFromId()` converts every `cat_*` ID to `category_*`, but the static localization map only contains current underscore keys such as `category_hobbies` and `category_clothing`. Existing in-scope merchant matching still emits legacy IDs such as `cat_shopping` and `cat_entertainment` (`lib/infrastructure/ml/merchant_database.dart:86`, `:116`), so UI fallback paths can display raw strings like `category_shopping` instead of localized labels.
 **Fix:**
 ```dart
 static const _legacyCategoryAliases = {
@@ -105,6 +91,6 @@ Alternatively, migrate the remaining producers to current category IDs, e.g. map
 
 ---
 
-_Reviewed: 2026-04-27T05:25:30Z_
+_Reviewed: 2026-04-27T05:41:13Z_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
