@@ -265,7 +265,7 @@ class BudgetProgress with _$BudgetProgress {
 ### 1. 月度报表用例实现
 
 ```dart
-// lib/features/analytics/application/use_cases/get_monthly_report_use_case.dart
+// lib/application/analytics/get_monthly_report_use_case.dart
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../transaction/domain/repositories/transaction_repository.dart';
@@ -517,7 +517,7 @@ Future<MonthlyReport> monthlyReport(
 ### 2. 预算跟踪用例实现
 
 ```dart
-// lib/features/analytics/application/use_cases/get_budget_progress_use_case.dart
+// lib/application/analytics/get_budget_progress_use_case.dart
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../transaction/domain/repositories/transaction_repository.dart';
@@ -1266,14 +1266,13 @@ class _BudgetProgressItem extends StatelessWidget {
 ### 单元测试
 
 ```dart
-// test/features/analytics/application/use_cases/get_monthly_report_use_case_test.dart
+// test/unit/application/analytics/get_monthly_report_use_case_test.dart
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
+import 'package:mocktail/mocktail.dart';
 
-@GenerateMocks([TransactionRepository, CategoryRepository])
-import 'get_monthly_report_use_case_test.mocks.dart';
+class MockTransactionRepository extends Mock implements TransactionRepository {}
+class MockCategoryRepository extends Mock implements CategoryRepository {}
 
 void main() {
   group('GetMonthlyReportUseCase', () {

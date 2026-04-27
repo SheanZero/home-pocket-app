@@ -98,7 +98,7 @@ class AppSettings with _$AppSettings {
 ### 1. 导出备份用例
 
 ```dart
-// lib/features/settings/application/use_cases/export_backup_use_case.dart
+// lib/application/settings/export_backup_use_case.dart
 
 import 'dart:convert';
 import 'dart:io';
@@ -233,7 +233,7 @@ ExportBackupUseCase exportBackupUseCase(ExportBackupUseCaseRef ref) {
 ### 2. 导入备份用例
 
 ```dart
-// lib/features/settings/application/use_cases/import_backup_use_case.dart
+// lib/application/settings/import_backup_use_case.dart
 
 import 'dart:convert';
 import 'dart:io';
@@ -368,7 +368,7 @@ class IncorrectPasswordException implements Exception {
 ### 3. 设置仓储实现
 
 ```dart
-// lib/features/settings/data/repositories/settings_repository_impl.dart
+// lib/data/repositories/settings_repository_impl.dart
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -816,18 +816,14 @@ class SettingsScreen extends ConsumerWidget {
 ### 单元测试
 
 ```dart
-// test/features/settings/application/use_cases/export_backup_use_case_test.dart
+// test/unit/application/settings/export_backup_use_case_test.dart
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
+import 'package:mocktail/mocktail.dart';
 
-@GenerateMocks([
-  TransactionRepository,
-  CategoryRepository,
-  SettingsRepository,
-])
-import 'export_backup_use_case_test.mocks.dart';
+class MockTransactionRepository extends Mock implements TransactionRepository {}
+class MockCategoryRepository extends Mock implements CategoryRepository {}
+class MockSettingsRepository extends Mock implements SettingsRepository {}
 
 void main() {
   group('ExportBackupUseCase', () {
