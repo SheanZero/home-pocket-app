@@ -1,6 +1,15 @@
 // scripts/merge_findings.dart
-// Reads .planning/audit/{shards,agent-shards}/*.json, dedupes,
-// stamps stable IDs, writes issues.json + ISSUES.md.
+// Reads <root>/{shards,agent-shards}/*.json, dedupes,
+// stamps stable IDs, writes <root>/issues.json + <root>/ISSUES.md.
+// Default root: .planning/audit (backwards-compatible with Phase 1 invocation).
+//
+// Usage:
+//   dart run scripts/merge_findings.dart                            # baseline (root = .planning/audit)
+//   dart run scripts/merge_findings.dart --root <path>              # re-audit (e.g. .planning/audit/re-audit)
+//
+// Exit codes:
+//   0 — merge succeeded
+//   2 — invocation error (missing --root value, unknown flag, unexpected arg)
 
 import 'dart:convert';
 import 'dart:io';
@@ -19,11 +28,37 @@ const _generatedFileGlobs = ['.g.dart', '.freezed.dart', '.mocks.dart'];
 bool _isGenerated(String path) =>
     _generatedFileGlobs.any(path.endsWith) || path.contains('lib/generated/');
 
+String _resolveRoot(List<String> args) {
+  var root = '.planning/audit';
+  for (var i = 0; i < args.length; i++) {
+    final a = args[i];
+    switch (a) {
+      case '--root':
+        if (i + 1 >= args.length) {
+          stderr.writeln('[audit:merge] ERROR: --root requires a path argument');
+          exit(2);
+        }
+        root = args[i + 1];
+        i++;
+        break;
+      default:
+        if (a.startsWith('--')) {
+          stderr.writeln('[audit:merge] ERROR: unknown flag: $a');
+          exit(2);
+        }
+        stderr.writeln('[audit:merge] ERROR: unexpected positional arg: $a');
+        exit(2);
+    }
+  }
+  return root;
+}
+
 Future<void> main(List<String> args) async {
-  final existingLifecycle = await _readExistingLifecycle();
+  final root = _resolveRoot(args);
+  final existingLifecycle = await _readExistingLifecycle(root);
   final shards = <Finding>[];
   for (final dir in const ['shards', 'agent-shards']) {
-    final shardDir = Directory('.planning/audit/$dir');
+    final shardDir = Directory('$root/$dir');
     if (!shardDir.existsSync()) continue;
     final files = shardDir.listSync().whereType<File>().toList()
       ..sort((a, b) => a.path.compareTo(b.path));
@@ -110,8 +145,8 @@ Future<void> main(List<String> args) async {
 
   // 5. Emit issues.json (machine-readable; no top-level timestamp so the
   //    file is byte-identical across re-runs — see merger_findings_test.dart).
-  final issuesPath = '.planning/audit/issues.json';
-  final issuesDir = Directory('.planning/audit');
+  final issuesPath = '$root/issues.json';
+  final issuesDir = Directory(root);
   if (!issuesDir.existsSync()) issuesDir.createSync(recursive: true);
   await File(issuesPath).writeAsString(
     const JsonEncoder.withIndent(
@@ -121,15 +156,15 @@ Future<void> main(List<String> args) async {
 
   // 6. Emit ISSUES.md (human-readable, severity-then-category, table per group).
   final md = _renderMarkdown(catalogue);
-  await File('.planning/audit/ISSUES.md').writeAsString(md);
+  await File('$root/ISSUES.md').writeAsString(md);
 
   stdout.writeln(
     '[audit:merge] wrote ${catalogue.length} findings to $issuesPath',
   );
 }
 
-Future<Map<String, Finding>> _readExistingLifecycle() async {
-  final file = File('.planning/audit/issues.json');
+Future<Map<String, Finding>> _readExistingLifecycle(String root) async {
+  final file = File('$root/issues.json');
   if (!file.existsSync()) return const {};
 
   try {
