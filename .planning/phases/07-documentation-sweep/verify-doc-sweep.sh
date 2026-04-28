@@ -19,7 +19,7 @@ hits=$(grep -rn --exclude-dir=03-adr "sqlite3_flutter_libs" docs/arch/ | wc -l |
 [ "$hits" -gt 0 ] && { echo "  FAIL: $hits sqlite3_flutter_libs in non-ADR docs"; fail=1; } || echo "  OK"
 
 echo "[4/6] Checking doc/arch path drift in CLAUDE.md and rules..."
-hits=$({ grep -hcE 'doc/arch[^/]' CLAUDE.md .claude/rules/arch.md 2>/dev/null || true; } | awk '{s+=$1} END {print s+0}')
+hits=$({ grep -hcE '(^|[^s])doc/arch' CLAUDE.md .claude/rules/arch.md 2>/dev/null || true; } | awk '{s+=$1} END {print s+0}')
 [ "$hits" -gt 0 ] && { echo "  FAIL: $hits 'doc/arch' references"; fail=1; } || echo "  OK"
 
 echo "[5/6] Checking MOD-014 phantom references..."
