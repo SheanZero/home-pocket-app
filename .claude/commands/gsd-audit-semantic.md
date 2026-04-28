@@ -9,14 +9,24 @@ into `.planning/audit/issues.json` by `dart run scripts/merge_findings.dart`.
 
 Spawn 4 subagents IN PARALLEL using the prompts at:
 
-1. `.claude/commands/audit/layer_violation.md` → `agent-shards/layer.json`
-2. `.claude/commands/audit/semantic_duplication.md` → `agent-shards/duplication.json`
-3. `.claude/commands/audit/transitive_import.md` → `agent-shards/transitive.json`
-4. `.claude/commands/audit/drift_unused_column.md` → `agent-shards/drift_col.json`
+1. `.claude/commands/audit/layer_violation.md` → `{output_dir}/layer.json`
+2. `.claude/commands/audit/semantic_duplication.md` → `{output_dir}/duplication.json`
+3. `.claude/commands/audit/transitive_import.md` → `{output_dir}/transitive.json`
+4. `.claude/commands/audit/drift_unused_column.md` → `{output_dir}/drift_col.json`
+
+`{output_dir}` is `.planning/audit/agent-shards/` by default, overridden by `--output-dir`.
 
 Each subagent reads `.planning/codebase/{STRUCTURE,CONCERNS,CONVENTIONS}.md`
 for context (CONTEXT.md D-02). Subagents do NOT modify any `.dart` file or
-any other repo file outside `.planning/audit/agent-shards/`.
+any other repo file outside `{output_dir}`.
+
+## Arguments
+
+`$ARGUMENTS` may contain:
+
+- `--output-dir <path>` — redirect each subagent's output from the default `.planning/audit/agent-shards/<dim>.json` to `<path>/<dim>.json`. The agent prompts themselves are unchanged; only the write target moves. Use this for Phase 8 re-audit (`--output-dir .planning/audit/re-audit/agent-shards`). If omitted, defaults to `.planning/audit/agent-shards/` (Phase 1 baseline behavior).
+
+If `--output-dir` is provided, the orchestrator MUST instruct each subagent to write to `<path>/<dim>.json` instead of the default — this is achieved by appending an explicit "Write your output JSON to: <path>/<dim>.json" line to the prompt passed via `Task(prompt=...)`.
 
 ## Inputs
 
