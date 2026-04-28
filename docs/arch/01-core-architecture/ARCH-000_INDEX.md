@@ -48,6 +48,12 @@
 | BASIC-003 I18N 基础设施 | [BASIC-003_I18N_Infrastructure.md](../04-basic/BASIC-003_I18N_Infrastructure.md) | 国际化基础设施实现规范 | ✅ 已有 |
 | BASIC-004 Category 双层分类 PRD | [BASIC-004_Category_PRD.md](../04-basic/BASIC-004_Category_PRD.md) | 双层分类、统计聚合、家庭同步合并与个人类型配置 | 🆕 新增 |
 
+### UI 规范文档
+
+| 编号 | 文档 | 描述 | 状态 |
+|------|------|------|------|
+| UI-001 页面清单 | [UI-001_Page_Inventory.md](../05-UI/UI-001_Page_Inventory.md) | 全部页面分类、数量、优先级清单 | ✅ 已有 |
+
 ### 架构决策记录 (ADRs)
 
 | ADR | 文件名 | 决策内容 | 状态 |
