@@ -1202,4 +1202,4 @@ post-cleanup canonical location is:
   via `find test -name 'transaction_repository_impl_test.dart'` if path differs)
 
 The original decision body above is preserved verbatim per ADR append-only convention
-(`.claude/rules/arch.md:171-173`).
+(`.claude/rules/arch.md:157-162`).

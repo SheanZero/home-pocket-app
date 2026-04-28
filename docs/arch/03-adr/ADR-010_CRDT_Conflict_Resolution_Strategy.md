@@ -1477,4 +1477,4 @@ Phase 3 centralization moved the file at line 37 of this ADR
 preserved as historical context per ADR append-only convention.
 
 The original decision body above is preserved verbatim per ADR append-only convention
-(`.claude/rules/arch.md:171-173`).
+(`.claude/rules/arch.md:157-162`).

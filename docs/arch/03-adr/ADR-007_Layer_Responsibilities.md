@@ -983,4 +983,4 @@ a historical artifact; the post-cleanup mock framework is `mocktail` (per ADR-01
 §`*.mocks.dart` Strategy).
 
 The original decision body above is preserved verbatim per ADR append-only convention
-(`.claude/rules/arch.md:171-173`).
+(`.claude/rules/arch.md:157-162`).
