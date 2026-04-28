@@ -13,11 +13,14 @@ fail=0
 check_dir() {
   local dir=$1
   local index=$2
+  local index_dir
+  index_dir=$(dirname "$index")
   echo "Checking $dir against $index..."
 
-  # (A) Broken-link check: for every (./...md) link in INDEX, verify the file exists
+  # (A) Broken-link check: for every (./...md) link in INDEX, verify the file exists.
+  # Paths are resolved relative to the index file's directory.
   while read -r path; do
-    full="$dir/$(basename "$path")"
+    full="${index_dir}/${path}"
     if [ ! -f "$full" ]; then
       echo "  BROKEN LINK in $index: $path"
       fail=1
