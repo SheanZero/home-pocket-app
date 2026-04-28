@@ -110,7 +110,12 @@ jobs:
       - run: dart pub global activate coverde 0.3.0+1
       - run: flutter test --coverage
       - name: Strip generated files from lcov
+        # WR-08 (defense-in-depth): strict-mode + remove any stale
+        # lcov_clean.info before invoking coverde filter so a partial write
+        # from a prior step cannot poison the downstream coverage gate.
         run: |
+          set -euo pipefail
+          rm -f coverage/lcov_clean.info
           coverde filter \
             --input coverage/lcov.info \
             --output coverage/lcov_clean.info \
