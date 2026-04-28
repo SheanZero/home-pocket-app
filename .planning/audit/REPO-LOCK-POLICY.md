@@ -66,3 +66,20 @@ The Phase 2 coverage baseline is FROZEN until Phase 8 (D-08). The lock window pr
 - `.planning/ROADMAP.md` — 8-phase ordering; cleanup runway = Phases 3–6
 - `.github/workflows/audit.yml` — The `coverage` job whose `continue-on-error` flip triggers this policy
 - `.planning/audit/SCHEMA.md` §9 — Coverage Baseline Schema (the contract the gate enforces)
+
+## Phase 8 Close — Permanent Gates
+
+**Locked:** 2026-04-28
+**Phase 8** — Codebase Cleanup Initiative terminal phase
+**Cross-reference:** [ADR-011](../../docs/arch/03-adr/ADR-011_Codebase_Cleanup_Initiative_Outcome.md) `## Update YYYY-MM-DD: Re-audit Outcome`
+
+The cleanup runway lock window CLOSES at Phase 8 close. The four CI guardrails are now permanent and blocking on every PR and direct push to `main`:
+
+1. **`import_guard`** (custom_lint plugin host) — runs in `.github/workflows/audit.yml` `static-analysis` job, `dart run custom_lint` step.
+2. **`riverpod_lint`** (custom_lint plugin host, same step as `import_guard`) — provider hygiene gate.
+3. **`coverde` per-file ≥80%** — runs in the `coverage` job; `if: pull_request` lifted per Phase 8 D-05 so push-to-main also gated.
+4. **`sqlite3_flutter_libs` reject** — runs in `guardrails` job; greps `pubspec.lock`, exits 1 on detection.
+
+`audit.yml` carries a top-of-file warning comment block recording these as permanent. Weakening any guardrail (adding `continue-on-error: true`, restoring `if: pull_request` on coverage, removing the warning block) requires an ADR-011 amendment.
+
+The non-cleanup PR lock from "## The Policy" (above) is LIFTED at Phase 6 close per the lifecycle table; the **gate-permanence** lock added by this section is independent and remains in force indefinitely.
