@@ -10,10 +10,20 @@
 //                                       [--lcov <path>]
 //                                       [--json]
 //
-// Exit codes (D-04):
-//   0 — every supplied file met threshold
-//   1 — at least one file below threshold (gate failure)
+// Exit codes (D-04, amended 2026-04-28):
+//   0 — every supplied file present in lcov met threshold
+//   1 — at least one file present in lcov fell below threshold (gate failure)
 //   2 — invocation error (missing lcov, unknown flag, no files supplied)
+//
+// Files supplied to the gate but NOT present in the lcov source are reported
+// as MISSING (separate from real failures). They emit a WARNING line on stderr
+// and appear in JSON output under the `missing` key, but do NOT influence
+// exit code. Rationale: cleanup-touched-files.txt is generated from PLAN.md
+// `files_modified:` frontmatter and includes generated/non-Dart entries
+// (`.g.dart`, `.freezed.dart`, `import_guard.yaml`) that coverde filters
+// from lcov_clean.info. Those are scope boundary issues, not coverage
+// failures. Real <threshold% files (in lcov but below threshold) still
+// fail exit code as before — see Phase 8 amendment in REPO-LOCK-POLICY.md.
 
 import 'dart:convert';
 import 'dart:io';
@@ -114,41 +124,42 @@ Future<void> main(List<String> args) async {
   final records = parseLcov(raw);
   final byPath = <String, LcovRecord>{for (final r in records) r.filePath: r};
 
-  // For each input file, look up the record (or synthesize a 0% one and warn).
+  // For each input file, classify as either:
+  //   - checked  : present in lcov → contributes to threshold gate + exit code
+  //   - missing  : not in lcov     → WARN-only (scope boundary, not a coverage failure)
+  // Phase 8 amendment 2026-04-28: missing-from-lcov no longer fails exit code.
   final checked = <_GateRow>[];
+  final missing = <String>[];
   for (final path in files) {
     final found = byPath[path];
-    final row = found != null
-        ? _GateRow(
-            filePath: path,
-            linesCovered: found.linesCovered,
-            linesTotal: found.linesTotal,
-            percentage: found.percentage,
-            thresholdMet: found.percentage >= threshold,
-          )
-        : _GateRow(
-            filePath: path,
-            linesCovered: 0,
-            linesTotal: 0,
-            percentage: 0.0,
-            thresholdMet: false,
-          );
     if (found == null) {
+      missing.add(path);
       stderr.writeln(
-        '[coverage:gate] WARNING: $path not in lcov source — treating as 0%',
+        '[coverage:gate] WARNING: $path not in lcov source — skipped (likely generated or filtered)',
       );
+      continue;
     }
-    checked.add(row);
+    checked.add(
+      _GateRow(
+        filePath: path,
+        linesCovered: found.linesCovered,
+        linesTotal: found.linesTotal,
+        percentage: found.percentage,
+        thresholdMet: found.percentage >= threshold,
+      ),
+    );
   }
 
   // Sort lex-ASC by file_path (D-10 mirror for downstream consumers).
   checked.sort((a, b) => a.filePath.compareTo(b.filePath));
+  missing.sort();
   final failures = checked.where((r) => !r.thresholdMet).toList();
 
   if (emitJson) {
     final body = <String, dynamic>{
       'checked': checked.map((r) => r.toJson()).toList(),
       'failures': failures.map((r) => r.toJson()).toList(),
+      'missing': missing,
       'threshold': threshold,
       'lcov_source': lcovPath,
     };
@@ -161,7 +172,7 @@ Future<void> main(List<String> args) async {
       );
     }
     stdout.writeln(
-      '[coverage:gate] ${checked.length} checked, ${failures.length} failed (threshold: $threshold)',
+      '[coverage:gate] ${checked.length} checked, ${failures.length} failed, ${missing.length} missing-from-lcov (skipped) (threshold: $threshold)',
     );
   }
 

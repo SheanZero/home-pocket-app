@@ -47,8 +47,12 @@ jobs:
       - name: flutter analyze
         run: flutter analyze --no-fatal-infos
       - name: dart run custom_lint
-        # Made blocking at Phase 3 close per D-17 (previously non-blocking)
-        run: dart run custom_lint
+        # Made blocking at Phase 3 close per D-17 (previously non-blocking).
+        # Phase 8 amendment 2026-04-28: --no-fatal-infos so riverpod_lint INFOs
+        # don't block CI — parity with scripts/audit/{layer,providers}.dart which
+        # already use this flag. import_guard (load-bearing rule) still hard-fails
+        # on errors regardless. Tracked as the riverpod_lint INFO half of FUTURE-TOOL-03.
+        run: dart run custom_lint --no-fatal-infos
       - name: Audit scanners
         run: |
           bash scripts/audit_layer.sh

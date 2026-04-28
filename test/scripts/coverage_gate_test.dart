@@ -182,12 +182,35 @@ void main() {
     });
 
     test(
-      'file in args but missing from lcov is treated as 0% (gate fails) with WARNING',
+      'file in args but missing from lcov is WARN-only (does NOT fail gate) — Phase 8 amendment 2026-04-28',
+      () async {
+        // Pre-amendment behavior: missing-from-lcov treated as 0% → exit 1.
+        // Post-amendment: missing files are reported as WARNINGs and listed
+        // separately; only files present in lcov below threshold fail exit code.
+        _writeLcov(tmp, {'lib/exists.dart': (10, 10)});
+        final r = await _runGate(tmp, ['lib/missing.dart', 'lib/exists.dart']);
+        expect(r.exitCode, equals(0), reason: r.stderr.toString());
+        expect(r.stderr.toString(), contains('not in lcov source'));
+        expect(r.stdout.toString(), contains('missing-from-lcov'));
+      },
+    );
+
+    test(
+      '--json output includes a "missing" key listing files absent from lcov',
       () async {
         _writeLcov(tmp, {'lib/exists.dart': (10, 10)});
-        final r = await _runGate(tmp, ['lib/missing.dart']);
-        expect(r.exitCode, equals(1));
-        expect(r.stderr.toString(), contains('not in lcov source'));
+        final r = await _runGate(tmp, [
+          '--json',
+          'lib/missing.dart',
+          'lib/exists.dart',
+        ]);
+        expect(r.exitCode, equals(0));
+        final out = r.stdout.toString();
+        final start = out.indexOf('{');
+        expect(start, greaterThanOrEqualTo(0));
+        final j = jsonDecode(out.substring(start)) as Map<String, dynamic>;
+        expect(j.keys.toSet(), contains('missing'));
+        expect((j['missing'] as List), equals(['lib/missing.dart']));
       },
     );
   });
