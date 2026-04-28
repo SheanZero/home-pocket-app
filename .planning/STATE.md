@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 08-02-PLAN.md
-last_updated: "2026-04-28T06:28:11.449Z"
+stopped_at: Completed 08-03-PLAN.md
+last_updated: "2026-04-28T06:35:34.447Z"
 last_activity: 2026-04-28
 progress:
   total_phases: 8
   completed_phases: 7
   total_plans: 48
-  completed_plans: 42
-  percent: 88
+  completed_plans: 43
+  percent: 90
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 08 (re-audit-exit-verification) — EXECUTING
-Plan: 3 of 8
+Plan: 4 of 8
 Status: Ready to execute
 Last activity: 2026-04-28
 
-Progress: [█████████░] 88%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Progress: [█████████░] 88%
 | Phase 07 P07-06 | 35min | 9 tasks | 10 files |
 | Phase 08 P01 | 13min | 2 tasks | 2 files |
 | Phase 08 P02 | 10min | 2 tasks | 4 files |
+| Phase Phase 08 PP03 | 4min | 2 tasks tasks | 2 files files |
 
 ## Accumulated Context
 
@@ -99,6 +100,9 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 08-02]: Bash awk frontmatter parser produces deterministic Phase 3-6 union (170 entries) for cleanup-touched-files.txt — sort -u keeps re-runs byte-stable; phase6-touched-files.txt kept on disk with header comment per D-04.
 - [Phase ?]: [Phase 08-02]: cleanup-touched-files.txt does NOT pre-filter .g.dart/.arb — coverde filter (audit.yml line 105) excludes them downstream and coverage_gate emits a non-blocking WARNING for missing-from-lcov entries. Keeps generator output a literal mirror of plan files_modified frontmatter.
 - [Phase ?]: [Phase 08-02]: audit.yml edit limited to line 107 --list arg swap — top-of-file warning block, continue-on-error sweep, and 'if: pull_request' lift on coverage job are 08-03's job to keep merge surface clean.
+- [Phase ?]: [Phase 08-03]: Reworded audit.yml warning comment line 6 to drop 'continue-on-error: true' literal — the verbatim plan text would have failed its own grep-based sweep (Rule 1 auto-fix); preserved load-bearing intent with 'every guardrail step is hard-failing by design'.
+- [Phase ?]: [Phase 08-03]: REPO-LOCK-POLICY '## Update YYYY-MM-DD' placeholder kept intentionally — Plan 08-08 fills the real ADR-011 amendment date.
+- [Phase ?]: [Phase 08-03]: Used ASCII '>=80%' in audit.yml warning header (CI YAML stays strict ASCII); REPO-LOCK-POLICY.md keeps Unicode '≥80%' per PATTERNS.md verbatim template.
 
 ### Pending Todos
 
@@ -125,8 +129,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-28T06:28:11.444Z
-Stopped at: Completed 08-02-PLAN.md
+Last session: 2026-04-28T06:35:34.441Z
+Stopped at: Completed 08-03-PLAN.md
 Resume file: None
 
 **Planned Phase:** 2 (coverage-baseline) — 4 plans — 2026-04-25T15:05:23.420Z
