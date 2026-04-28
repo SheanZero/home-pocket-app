@@ -154,7 +154,10 @@ Future<void> main(List<String> args) async {
       lineNo++;
       final line = raw.trim();
       if (line.isEmpty || line.startsWith('#')) continue;
-      final hashIdx = line.indexOf('#');
+      // WR-03: split on the literal `  #` (two spaces + hash) sentinel rather
+      // than the first `#` so that paths legitimately containing `#` (e.g.
+      // `lib/feature/v1#alpha/foo.dart`) are not silently truncated.
+      final hashIdx = line.indexOf('  #');
       if (hashIdx <= 0) {
         stderr.writeln(
           '[coverage:gate] ERROR: $deferredPath line $lineNo missing rationale (expected: <path>  # <rationale>): $line',
@@ -162,7 +165,7 @@ Future<void> main(List<String> args) async {
         exit(2);
       }
       final path = line.substring(0, hashIdx).trim();
-      final rationale = line.substring(hashIdx + 1).trim();
+      final rationale = line.substring(hashIdx + 3).trim();
       if (path.isEmpty) {
         stderr.writeln(
           '[coverage:gate] ERROR: $deferredPath line $lineNo empty path before #',
