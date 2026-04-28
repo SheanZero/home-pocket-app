@@ -24,6 +24,11 @@ const _outDir = '.planning/audit';
 
 Future<void> main(List<String> args) async {
   var lcovPath = _defaultLcov;
+  // Track which input source supplied lcovPath so a later conflicting source
+  // (positional after --lcov, or vice versa) fails loudly instead of silently
+  // overwriting (principle of least surprise — see WR-01).
+  var lcovExplicit = false;
+  var lcovPositional = false;
   for (var i = 0; i < args.length; i++) {
     final a = args[i];
     switch (a) {
@@ -32,14 +37,34 @@ Future<void> main(List<String> args) async {
           stderr.writeln('[coverage:baseline] ERROR: --lcov requires a path');
           exit(2);
         }
+        if (lcovPositional) {
+          stderr.writeln(
+            '[coverage:baseline] ERROR: --lcov conflicts with positional lcov path already supplied: $lcovPath',
+          );
+          exit(2);
+        }
         lcovPath = args[++i];
+        lcovExplicit = true;
       default:
         if (a.startsWith('--')) {
           stderr.writeln('[coverage:baseline] ERROR: unknown flag: $a');
           exit(2);
         }
         // Allow a single bare positional as lcov path override.
+        if (lcovExplicit) {
+          stderr.writeln(
+            '[coverage:baseline] ERROR: positional $a conflicts with --lcov already supplied',
+          );
+          exit(2);
+        }
+        if (lcovPositional) {
+          stderr.writeln(
+            '[coverage:baseline] ERROR: only one positional lcov path allowed (got $lcovPath then $a)',
+          );
+          exit(2);
+        }
         lcovPath = a;
+        lcovPositional = true;
     }
   }
 
