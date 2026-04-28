@@ -106,6 +106,7 @@ Deferred — explicitly out of this initiative but acknowledged for future track
 - **FUTURE-TOOL-01**: Add `riverpod_lint` 3.x once `json_serializable` analyzer conflict is resolved upstream
 - **FUTURE-TOOL-02**: Build a Drift-column unused-detection custom Dart script if AI-agent scan accuracy is insufficient at scale
 - **FUTURE-TOOL-03** *(coverage-baseline-review, added 2026-04-28)*: After v1 feature work completes, review the active 70% coverage threshold (lowered from 80% by Phase 8 amendment) and decide: raise uniformly back toward 80%, OR split per-area (e.g., infrastructure/data ≥80%, presentation ≥70%, generated/glue exempt). Inputs: latest `coverage-baseline.json`, distribution of per-area coverage, area-specific risk profile. Output: ADR amendment + matching `audit.yml` / `coverage_*.dart` edits.
+- **FUTURE-QA-01** *(smoke-test-owner-driven, added 2026-04-28)*: Phase 8 produced `.planning/phases/08-re-audit-exit-verification/08-SMOKE-TEST.md` (71-line owner-driven checklist of 8 user-observable surfaces) but the human-execution step was intentionally deferred at Phase 8 close per user directive. Owner runs the checklist on a fresh local build before v1 release as a release gate, not as part of the cleanup initiative. Sign-off block in the checklist file is filled at that point; any SMOKE-NN findings discovered there are recorded in `.planning/audit/re-audit/issues.json` and `dart run scripts/reaudit_diff.dart` is re-run to confirm the gate stays GREEN before v1 ships.
 
 ## Out of Scope
 

@@ -196,3 +196,23 @@ The project owner / tester must:
 ---
 *Phase: 08-re-audit-exit-verification*
 *Completed: 2026-04-28 (Task 1 boundary; Tasks 2 + 3 deferred to human + post-hoc executor)*
+
+---
+
+## Update 2026-04-28 — Tasks 2 + 3 formally deferred to v1 release gate
+
+User directive after Plan 08-07 produced the checklist artifact: skip human-execution at Phase 8 close, move it to v1 release gate as owner's responsibility. Recorded as `FUTURE-QA-01` in `.planning/REQUIREMENTS.md` v2 backlog.
+
+**What this means:**
+- Plan 08-07 is **complete** at the artifact-production boundary (Task 1). The checklist file lives at `.planning/phases/08-re-audit-exit-verification/08-SMOKE-TEST.md` with 34 empty checkboxes and an empty Sign-off block.
+- The execution side (Tasks 2 + 3 of the plan as originally written) is **not** Phase-8-blocking. ROADMAP success criterion 4 has been amended to make the artifact the deliverable; behavior verification is the v1 release gate.
+- ADR-011 (Plan 08-08) records this deferral honestly so that any future reader sees the cleanup initiative closed without lying about smoke-test signoff.
+
+**At v1 release:**
+1. Owner runs `flutter clean && flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs && flutter run` on a fresh local build.
+2. Walks the 8-section checklist, ticks boxes.
+3. Records any SMOKE-NN findings in `.planning/audit/re-audit/issues.json`; re-runs `dart run scripts/reaudit_diff.dart` to confirm gate stays GREEN.
+4. Fills the Sign-off block (tester / date / commit hash / platform / verdict).
+5. Commits the completed file.
+
+If smoke uncovers a regression, that becomes a follow-up bug-fix phase — it does not retroactively reopen the cleanup initiative; the cleanup closed on the discovery+remediation contract, not on perfect-as-released proof.
