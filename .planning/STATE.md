@@ -4,14 +4,14 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Phase 8 context gathered
-last_updated: "2026-04-28T06:10:35.615Z"
-last_activity: 2026-04-28 -- Phase 08 planning complete
+last_updated: "2026-04-28T06:21:15.240Z"
+last_activity: 2026-04-28
 progress:
   total_phases: 8
   completed_phases: 7
   total_plans: 48
-  completed_plans: 40
-  percent: 83
+  completed_plans: 41
+  percent: 85
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-25)
 
 **Core value:** Re-running the audit at the end finds zero violations across all four categories (layer violations, redundant code, dead code, Riverpod hygiene)
-**Current focus:** Phase 07 — documentation-sweep
+**Current focus:** Phase 08 — re-audit-exit-verification
 
 ## Current Position
 
-Phase: 8
-Plan: Not started
+Phase: 08 (re-audit-exit-verification) — EXECUTING
+Plan: 2 of 8
 Status: Ready to execute
-Last activity: 2026-04-28 -- Phase 08 planning complete
+Last activity: 2026-04-28
 
-Progress: [██████████] 100%
+Progress: [█████████░] 85%
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [██████████] 100%
 | Phase 05 P03 | 18m40s | 2 tasks | 9 files |
 | Phase 05-medium-fixes P05 | 22min | 2 tasks | 15 files |
 | Phase 07 P07-06 | 35min | 9 tasks | 10 files |
+| Phase 08 P01 | 13min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,9 @@ Recent decisions affecting current work:
 - [Phase 07-06]: Gate 4 grep pattern changed from 'doc/arch[^/]' to '(^|[^s])doc/arch' — original pattern excluded trailing-slash paths like 'doc/arch/foo', the canonical drift format.
 - [Phase 07-06]: Smoke fixtures use sed path-rewrite on temp script copies for hermetic drift injection testing (real files never mutated).
 - [Phase 07-06]: ADR footer metadata placed before the --- separator preceding Update sections, not after Update content — preserves append-only-at-file-end contract.
+- [Phase 08-01]: reaudit_diff match key drops line_start (Phase 1 D-07 + Phase 8 D-02): category|file_path|description — line numbers shift after cleanup but the triple is stable across re-runs
+- [Phase 08-01]: Reserved exit(2) for invocation errors (missing baseline / re-audit JSON, malformed JSON, unknown flag) per coverage_gate.dart precedent — keeps gate-failure (exit 1) and bug-in-CLI (exit 2) distinguishable
+- [Phase 08-01]: REAUDIT-DIFF.json carries no top-level generated_at field — keeps re-runs byte-stable per Phase 1 D-09 idempotency carry-over
 
 ### Pending Todos
 
@@ -117,8 +121,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-28T03:03:53.341Z
+Last session: 2026-04-28T06:21:01.989Z
 Stopped at: Phase 8 context gathered
-Resume file: .planning/phases/08-re-audit-exit-verification/08-CONTEXT.md
+Resume file: None
 
 **Planned Phase:** 2 (coverage-baseline) — 4 plans — 2026-04-25T15:05:23.420Z
