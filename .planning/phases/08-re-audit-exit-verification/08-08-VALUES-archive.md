@@ -1,10 +1,12 @@
-# Plan 08-08 Source Values (Working Document)
+# Plan 08-08 Source Values (Archived Working Document)
+
+> Archived working document — see 08-08-PLAN.md Task 1 for context. Values
+> below were transcribed into the ADR-011 `## Update 2026-04-28 — Re-audit
+> Outcome` section (commit `f3c7606`). Preserved as audit trail per Plan
+> 08-08 Task 3 alternate disposition.
 
 **Captured:** 2026-04-28
-
-> Working document for the ADR-011 Update 2026-04-28 amendment. Tasks 1+2 of
-> Plan 08-08 read these values from disk; Task 2 substitutes them into the
-> appended section. Task 3 deletes (or archives) this file.
+**Archived:** 2026-04-28 (post-Task-2)
 
 ## From .planning/audit/re-audit/REAUDIT-DIFF.json
 
