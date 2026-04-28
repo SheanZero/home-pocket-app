@@ -69,9 +69,10 @@ Future<void> main(List<String> args) async {
   // the count of baseline-closed findings.
   final resolvedKeys = baselineKeys.difference(reauditKeys);
 
-  // Regression = baseline finding (status == 'closed' OR closed_as_duplicate_of
-  // set, per Phase 1 D-08 merge semantics) that re-emerges in the re-audit
-  // catalogue.
+  // Regression = baseline finding with status == 'closed' that re-emerges in
+  // the re-audit catalogue. Phase 1 D-08 "duplicate child" merge semantics are
+  // realized in merge_findings.dart by stamping `status:'closed'` directly; no
+  // separate `closed_as_duplicate_of` marker is read here.
   final regressionKeys = baselineKeys.intersection(reauditKeys).where((k) {
     final b = baselineByKey[k]!;
     return _isClosed(b);
@@ -203,9 +204,9 @@ Map<String, Finding> _readCatalogue({
   return byKey;
 }
 
-/// A finding counts as "closed" if its status is closed OR it carries a
-/// `closed_as_duplicate_of` field (Phase 1 D-08 merge semantics — the child
-/// inherits closure from its parent regardless of stored `status`).
+/// A finding counts as "closed" iff status == 'closed'. The Phase 1 D-08
+/// "duplicate child" merge semantics are realized in merge_findings.dart by
+/// stamping `status:'closed'` directly; no separate marker is read here.
 bool _isClosed(Finding f) => f.status == 'closed';
 
 List<String> _sortKeys(Set<String> keys, Map<String, Finding> by) {
