@@ -114,14 +114,33 @@ Future<void> main(List<String> args) async {
       );
     });
 
-  // 4. Stamp IDs per category in sort order.
+  // 4. Compute retainedClosed first so we can reserve their IDs and avoid
+  //    duplicate-ID collisions with freshly stamped findings (WR-06).
+  final sortedKeys = sorted.map(_lifecycleKey).toSet();
+  final retainedClosed = existingLifecycle.values
+      .where((finding) => !sortedKeys.contains(_lifecycleKey(finding)))
+      .toList();
+  final reservedIds = retainedClosed
+      .where((f) => f.id != null)
+      .map((f) => f.id!)
+      .toSet();
+
+  // 5. Stamp IDs per category in sort order, skipping any IDs already
+  //    reserved by retainedClosed so the merged catalogue has unique IDs.
   final counters = <String, int>{};
+  String nextId(String prefix) {
+    while (true) {
+      final n = (counters[prefix] = (counters[prefix] ?? 0) + 1);
+      final candidate = '$prefix-${n.toString().padLeft(3, '0')}';
+      if (!reservedIds.contains(candidate)) return candidate;
+    }
+  }
+
   final stamped = sorted.map((f) {
     final prefix = _categoryPrefix[f.category]!;
-    final n = (counters[prefix] = (counters[prefix] ?? 0) + 1);
     final previous = existingLifecycle[_lifecycleKey(f)];
     return Finding(
-      id: '$prefix-${n.toString().padLeft(3, '0')}',
+      id: nextId(prefix),
       category: f.category,
       severity: f.severity,
       filePath: f.filePath,
@@ -137,10 +156,6 @@ Future<void> main(List<String> args) async {
       closedCommit: previous?.closedCommit ?? f.closedCommit,
     );
   }).toList();
-  final stampedKeys = stamped.map(_lifecycleKey).toSet();
-  final retainedClosed = existingLifecycle.values
-      .where((finding) => !stampedKeys.contains(_lifecycleKey(finding)))
-      .toList();
   final catalogue = [...stamped, ...retainedClosed]..sort(_compareFindings);
 
   // 5. Emit issues.json (machine-readable; no top-level timestamp so the
