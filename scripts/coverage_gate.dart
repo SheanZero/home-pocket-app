@@ -139,8 +139,8 @@ Future<void> main(List<String> args) async {
 
   // Phase 8 amendment 2026-04-28: parse --deferred file. Each non-blank
   // non-comment line must be `<path>  # <rationale>`; rationale is REQUIRED.
-  final deferredEntries = <_DeferredEntry>[];
-  final deferredPaths = <String>{};
+  // WR-05: keyed by path so the per-input-file lookup is O(1) rather than O(M).
+  final deferredByPath = <String, _DeferredEntry>{};
   if (deferredPath != null) {
     final f = File(deferredPath);
     if (!f.existsSync()) {
@@ -179,16 +179,16 @@ Future<void> main(List<String> args) async {
         exit(2);
       }
       // WR-04: reject duplicate paths so the on-disk record can never disagree
-      // with the JSON output (Set.add returns false if the element was already
-      // present — clean idiom for first-write-wins detection).
-      if (!deferredPaths.add(path)) {
+      // with the JSON output. Map insert + sentinel check is the clean idiom.
+      if (deferredByPath.containsKey(path)) {
         stderr.writeln(
           '[coverage:gate] ERROR: $deferredPath line $lineNo duplicate path: $path',
         );
         exit(2);
       }
-      deferredEntries.add(
-        _DeferredEntry(filePath: path, rationale: rationale),
+      deferredByPath[path] = _DeferredEntry(
+        filePath: path,
+        rationale: rationale,
       );
     }
   }
@@ -207,11 +207,11 @@ Future<void> main(List<String> args) async {
   final missing = <String>[];
   final deferredHits = <_DeferredEntry>[];
   for (final path in files) {
-    if (deferredPaths.contains(path)) {
-      final entry = deferredEntries.firstWhere((e) => e.filePath == path);
-      deferredHits.add(entry);
+    final deferredEntry = deferredByPath[path];
+    if (deferredEntry != null) {
+      deferredHits.add(deferredEntry);
       stderr.writeln(
-        '[coverage:gate] DEFERRED: $path — ${entry.rationale}',
+        '[coverage:gate] DEFERRED: $path — ${deferredEntry.rationale}',
       );
       continue;
     }
