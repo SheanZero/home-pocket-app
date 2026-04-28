@@ -185,4 +185,4 @@ Phases 1 and 2 run in parallel. Then: 3 → 4 → 5 → 6 → 7 → 8
 | 5. MEDIUM Fixes | 2/5 | In Progress | - |
 | 6. LOW Fixes | 0/TBD | Not started | - |
 | 7. Documentation Sweep | 0/5 | Not started | - |
-| 8. Re-Audit + Exit Verification | 5/8 | In Progress|  |
+| 8. Re-Audit + Exit Verification | 7/8 | In Progress|  |
