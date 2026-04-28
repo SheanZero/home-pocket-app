@@ -1,23 +1,30 @@
 {
-  "generated_at": "2026-04-26T00:36:30.799525Z",
+  "generated_at": "2026-04-28T07:01:20.526348Z",
   "flutter_test_command": "flutter test --coverage",
   "lcov_source": "coverage/lcov_clean.info",
   "threshold": 80,
-  "total_files": 234,
-  "files_below_threshold": 102,
+  "total_files": 232,
+  "files_below_threshold": 67,
   "entries": [
     {
-      "file_path": "lib/application/accounting/category_service.dart",
-      "lines_covered": 12,
-      "lines_total": 12,
+      "file_path": "lib/application/accounting/category_localization_service.dart",
+      "lines_covered": 4,
+      "lines_total": 4,
       "percentage": 100.0,
       "threshold_met": true
     },
     {
+      "file_path": "lib/application/accounting/category_service.dart",
+      "lines_covered": 1,
+      "lines_total": 12,
+      "percentage": 8.333333333333332,
+      "threshold_met": false
+    },
+    {
       "file_path": "lib/application/accounting/create_transaction_use_case.dart",
-      "lines_covered": 52,
-      "lines_total": 60,
-      "percentage": 86.66666666666667,
+      "lines_covered": 40,
+      "lines_total": 48,
+      "percentage": 83.33333333333334,
       "threshold_met": true
     },
     {
@@ -43,10 +50,17 @@
     },
     {
       "file_path": "lib/application/accounting/merchant_category_learning_service.dart",
-      "lines_covered": 25,
-      "lines_total": 26,
-      "percentage": 96.15384615384616,
+      "lines_covered": 24,
+      "lines_total": 25,
+      "percentage": 96.0,
       "threshold_met": true
+    },
+    {
+      "file_path": "lib/application/accounting/repository_providers.dart",
+      "lines_covered": 6,
+      "lines_total": 8,
+      "percentage": 75.0,
+      "threshold_met": false
     },
     {
       "file_path": "lib/application/accounting/seed_categories_use_case.dart",
@@ -84,6 +98,13 @@
       "threshold_met": true
     },
     {
+      "file_path": "lib/application/analytics/repository_providers.dart",
+      "lines_covered": 2,
+      "lines_total": 2,
+      "percentage": 100.0,
+      "threshold_met": true
+    },
+    {
       "file_path": "lib/application/dual_ledger/classification_result.dart",
       "lines_covered": 1,
       "lines_total": 1,
@@ -98,16 +119,9 @@
       "threshold_met": true
     },
     {
-      "file_path": "lib/application/dual_ledger/providers.dart",
-      "lines_covered": 0,
+      "file_path": "lib/application/dual_ledger/repository_providers.dart",
+      "lines_covered": 5,
       "lines_total": 5,
-      "percentage": 0.0,
-      "threshold_met": false
-    },
-    {
-      "file_path": "lib/application/dual_ledger/resolve_ledger_type_service.dart",
-      "lines_covered": 6,
-      "lines_total": 6,
       "percentage": 100.0,
       "threshold_met": true
     },
@@ -120,16 +134,23 @@
     },
     {
       "file_path": "lib/application/family_sync/apply_sync_operations_use_case.dart",
-      "lines_covered": 33,
+      "lines_covered": 51,
       "lines_total": 61,
-      "percentage": 54.09836065573771,
-      "threshold_met": false
+      "percentage": 83.60655737704919,
+      "threshold_met": true
+    },
+    {
+      "file_path": "lib/application/family_sync/check_group_use_case.dart",
+      "lines_covered": 46,
+      "lines_total": 49,
+      "percentage": 93.87755102040816,
+      "threshold_met": true
     },
     {
       "file_path": "lib/application/family_sync/check_group_validity_use_case.dart",
-      "lines_covered": 3,
+      "lines_covered": 4,
       "lines_total": 28,
-      "percentage": 10.714285714285714,
+      "percentage": 14.285714285714285,
       "threshold_met": false
     },
     {
@@ -151,6 +172,13 @@
       "lines_covered": 29,
       "lines_total": 30,
       "percentage": 96.66666666666667,
+      "threshold_met": true
+    },
+    {
+      "file_path": "lib/application/family_sync/deactivate_group_use_case.dart",
+      "lines_covered": 12,
+      "lines_total": 12,
+      "percentage": 100.0,
       "threshold_met": true
     },
     {
@@ -182,10 +210,31 @@
       "threshold_met": true
     },
     {
+      "file_path": "lib/application/family_sync/leave_group_use_case.dart",
+      "lines_covered": 11,
+      "lines_total": 12,
+      "percentage": 91.66666666666666,
+      "threshold_met": true
+    },
+    {
+      "file_path": "lib/application/family_sync/listen_to_push_notifications_use_case.dart",
+      "lines_covered": 6,
+      "lines_total": 6,
+      "percentage": 100.0,
+      "threshold_met": true
+    },
+    {
+      "file_path": "lib/application/family_sync/notify_member_approval_use_case.dart",
+      "lines_covered": 13,
+      "lines_total": 13,
+      "percentage": 100.0,
+      "threshold_met": true
+    },
+    {
       "file_path": "lib/application/family_sync/pull_sync_use_case.dart",
-      "lines_covered": 72,
-      "lines_total": 78,
-      "percentage": 92.3076923076923,
+      "lines_covered": 71,
+      "lines_total": 77,
+      "percentage": 92.20779220779221,
       "threshold_met": true
     },
     {
@@ -196,10 +245,24 @@
       "threshold_met": true
     },
     {
+      "file_path": "lib/application/family_sync/remove_member_use_case.dart",
+      "lines_covered": 14,
+      "lines_total": 14,
+      "percentage": 100.0,
+      "threshold_met": true
+    },
+    {
       "file_path": "lib/application/family_sync/rename_group_use_case.dart",
       "lines_covered": 14,
       "lines_total": 14,
       "percentage": 100.0,
+      "threshold_met": true
+    },
+    {
+      "file_path": "lib/application/family_sync/repository_providers.dart",
+      "lines_covered": 34,
+      "lines_total": 36,
+      "percentage": 94.44444444444444,
       "threshold_met": true
     },
     {
@@ -218,29 +281,57 @@
     },
     {
       "file_path": "lib/application/family_sync/sync_engine.dart",
-      "lines_covered": 48,
+      "lines_covered": 90,
       "lines_total": 107,
-      "percentage": 44.85981308411215,
-      "threshold_met": false
+      "percentage": 84.11214953271028,
+      "threshold_met": true
     },
     {
       "file_path": "lib/application/family_sync/sync_orchestrator.dart",
-      "lines_covered": 3,
+      "lines_covered": 88,
       "lines_total": 89,
-      "percentage": 3.3707865168539324,
-      "threshold_met": false
+      "percentage": 98.87640449438202,
+      "threshold_met": true
     },
     {
       "file_path": "lib/application/family_sync/transaction_change_tracker.dart",
-      "lines_covered": 0,
-      "lines_total": 14,
-      "percentage": 0.0,
+      "lines_covered": 12,
+      "lines_total": 12,
+      "percentage": 100.0,
+      "threshold_met": true
+    },
+    {
+      "file_path": "lib/application/i18n/formatter_service.dart",
+      "lines_covered": 18,
+      "lines_total": 18,
+      "percentage": 100.0,
+      "threshold_met": true
+    },
+    {
+      "file_path": "lib/application/ml/lookup_merchant_use_case.dart",
+      "lines_covered": 3,
+      "lines_total": 3,
+      "percentage": 100.0,
+      "threshold_met": true
+    },
+    {
+      "file_path": "lib/application/ml/repository_providers.dart",
+      "lines_covered": 2,
+      "lines_total": 5,
+      "percentage": 40.0,
       "threshold_met": false
     },
     {
       "file_path": "lib/application/profile/get_user_profile_use_case.dart",
-      "lines_covered": 0,
+      "lines_covered": 2,
       "lines_total": 2,
+      "percentage": 100.0,
+      "threshold_met": true
+    },
+    {
+      "file_path": "lib/application/profile/repository_providers.dart",
+      "lines_covered": 0,
+      "lines_total": 4,
       "percentage": 0.0,
       "threshold_met": false
     },
@@ -301,6 +392,20 @@
       "threshold_met": true
     },
     {
+      "file_path": "lib/application/voice/repository_providers.dart",
+      "lines_covered": 2,
+      "lines_total": 5,
+      "percentage": 40.0,
+      "threshold_met": false
+    },
+    {
+      "file_path": "lib/application/voice/start_speech_recognition_use_case.dart",
+      "lines_covered": 9,
+      "lines_total": 9,
+      "percentage": 100.0,
+      "threshold_met": true
+    },
+    {
       "file_path": "lib/application/voice/voice_satisfaction_estimator.dart",
       "lines_covered": 56,
       "lines_total": 56,
@@ -315,11 +420,25 @@
       "threshold_met": true
     },
     {
+      "file_path": "lib/core/initialization/app_initializer.dart",
+      "lines_covered": 22,
+      "lines_total": 23,
+      "percentage": 95.65217391304348,
+      "threshold_met": true
+    },
+    {
+      "file_path": "lib/core/initialization/init_failure_screen.dart",
+      "lines_covered": 29,
+      "lines_total": 32,
+      "percentage": 90.625,
+      "threshold_met": true
+    },
+    {
       "file_path": "lib/core/theme/app_theme.dart",
-      "lines_covered": 4,
+      "lines_covered": 9,
       "lines_total": 9,
-      "percentage": 44.44444444444444,
-      "threshold_met": false
+      "percentage": 100.0,
+      "threshold_met": true
     },
     {
       "file_path": "lib/core/theme/app_theme_colors.dart",
@@ -330,10 +449,10 @@
     },
     {
       "file_path": "lib/data/app_database.dart",
-      "lines_covered": 53,
-      "lines_total": 80,
-      "percentage": 66.25,
-      "threshold_met": false
+      "lines_covered": 79,
+      "lines_total": 87,
+      "percentage": 90.80459770114942,
+      "threshold_met": true
     },
     {
       "file_path": "lib/data/daos/analytics_dao.dart",
@@ -393,16 +512,16 @@
     },
     {
       "file_path": "lib/data/daos/sync_queue_dao.dart",
-      "lines_covered": 0,
+      "lines_covered": 1,
       "lines_total": 23,
-      "percentage": 0.0,
+      "percentage": 4.3478260869565215,
       "threshold_met": false
     },
     {
       "file_path": "lib/data/daos/transaction_dao.dart",
-      "lines_covered": 56,
-      "lines_total": 63,
-      "percentage": 88.88888888888889,
+      "lines_covered": 77,
+      "lines_total": 84,
+      "percentage": 91.66666666666666,
       "threshold_met": true
     },
     {
@@ -428,9 +547,9 @@
     },
     {
       "file_path": "lib/data/repositories/category_keyword_preference_repository_impl.dart",
-      "lines_covered": 0,
+      "lines_covered": 1,
       "lines_total": 18,
-      "percentage": 0.0,
+      "percentage": 5.555555555555555,
       "threshold_met": false
     },
     {
@@ -449,9 +568,9 @@
     },
     {
       "file_path": "lib/data/repositories/device_identity_repository_impl.dart",
-      "lines_covered": 0,
+      "lines_covered": 1,
       "lines_total": 3,
-      "percentage": 0.0,
+      "percentage": 33.33333333333333,
       "threshold_met": false
     },
     {
@@ -477,31 +596,31 @@
     },
     {
       "file_path": "lib/data/repositories/sync_repository_impl.dart",
-      "lines_covered": 0,
+      "lines_covered": 1,
       "lines_total": 25,
-      "percentage": 0.0,
+      "percentage": 4.0,
       "threshold_met": false
     },
     {
       "file_path": "lib/data/repositories/transaction_repository_impl.dart",
-      "lines_covered": 78,
-      "lines_total": 85,
-      "percentage": 91.76470588235294,
+      "lines_covered": 82,
+      "lines_total": 88,
+      "percentage": 93.18181818181817,
       "threshold_met": true
     },
     {
       "file_path": "lib/data/repositories/user_profile_repository_impl.dart",
-      "lines_covered": 0,
+      "lines_covered": 3,
       "lines_total": 20,
-      "percentage": 0.0,
+      "percentage": 15.0,
       "threshold_met": false
     },
     {
       "file_path": "lib/data/tables/audit_logs_table.dart",
-      "lines_covered": 0,
-      "lines_total": 9,
-      "percentage": 0.0,
-      "threshold_met": false
+      "lines_covered": 4,
+      "lines_total": 4,
+      "percentage": 100.0,
+      "threshold_met": true
     },
     {
       "file_path": "lib/data/tables/books_table.dart",
@@ -526,10 +645,10 @@
     },
     {
       "file_path": "lib/data/tables/category_ledger_configs_table.dart",
-      "lines_covered": 0,
-      "lines_total": 6,
-      "percentage": 0.0,
-      "threshold_met": false
+      "lines_covered": 5,
+      "lines_total": 5,
+      "percentage": 100.0,
+      "threshold_met": true
     },
     {
       "file_path": "lib/data/tables/group_members_table.dart",
@@ -568,10 +687,10 @@
     },
     {
       "file_path": "lib/data/tables/user_profiles_table.dart",
-      "lines_covered": 0,
-      "lines_total": 8,
-      "percentage": 0.0,
-      "threshold_met": false
+      "lines_covered": 2,
+      "lines_total": 2,
+      "percentage": 100.0,
+      "threshold_met": true
     },
     {
       "file_path": "lib/features/accounting/domain/models/book.dart",
@@ -637,38 +756,24 @@
       "threshold_met": true
     },
     {
-      "file_path": "lib/features/accounting/presentation/providers/category_reorder_notifier.dart",
+      "file_path": "lib/features/accounting/presentation/providers/repository_providers.dart",
+      "lines_covered": 81,
+      "lines_total": 81,
+      "percentage": 100.0,
+      "threshold_met": true
+    },
+    {
+      "file_path": "lib/features/accounting/presentation/providers/state_category_reorder.dart",
       "lines_covered": 33,
       "lines_total": 33,
       "percentage": 100.0,
       "threshold_met": true
     },
     {
-      "file_path": "lib/features/accounting/presentation/providers/repository_providers.dart",
-      "lines_covered": 4,
-      "lines_total": 28,
-      "percentage": 14.285714285714285,
-      "threshold_met": false
-    },
-    {
-      "file_path": "lib/features/accounting/presentation/providers/use_case_providers.dart",
-      "lines_covered": 0,
-      "lines_total": 41,
-      "percentage": 0.0,
-      "threshold_met": false
-    },
-    {
-      "file_path": "lib/features/accounting/presentation/providers/voice_providers.dart",
-      "lines_covered": 0,
-      "lines_total": 17,
-      "percentage": 0.0,
-      "threshold_met": false
-    },
-    {
       "file_path": "lib/features/accounting/presentation/screens/category_selection_screen.dart",
-      "lines_covered": 238,
-      "lines_total": 290,
-      "percentage": 82.06896551724138,
+      "lines_covered": 239,
+      "lines_total": 295,
+      "percentage": 81.01694915254237,
       "threshold_met": true
     },
     {
@@ -680,29 +785,29 @@
     },
     {
       "file_path": "lib/features/accounting/presentation/screens/transaction_confirm_screen.dart",
-      "lines_covered": 190,
-      "lines_total": 303,
-      "percentage": 62.70627062706271,
+      "lines_covered": 193,
+      "lines_total": 305,
+      "percentage": 63.278688524590166,
       "threshold_met": false
     },
     {
       "file_path": "lib/features/accounting/presentation/screens/transaction_entry_screen.dart",
       "lines_covered": 74,
-      "lines_total": 160,
-      "percentage": 46.25,
+      "lines_total": 161,
+      "percentage": 45.962732919254655,
       "threshold_met": false
     },
     {
       "file_path": "lib/features/accounting/presentation/screens/voice_input_screen.dart",
-      "lines_covered": 145,
-      "lines_total": 304,
-      "percentage": 47.69736842105263,
-      "threshold_met": false
+      "lines_covered": 258,
+      "lines_total": 307,
+      "percentage": 84.03908794788273,
+      "threshold_met": true
     },
     {
       "file_path": "lib/features/accounting/presentation/utils/category_display_utils.dart",
-      "lines_covered": 11,
-      "lines_total": 11,
+      "lines_covered": 12,
+      "lines_total": 12,
       "percentage": 100.0,
       "threshold_met": true
     },
@@ -764,23 +869,16 @@
     },
     {
       "file_path": "lib/features/accounting/presentation/widgets/soft_toast.dart",
-      "lines_covered": 0,
+      "lines_covered": 39,
       "lines_total": 44,
-      "percentage": 0.0,
-      "threshold_met": false
-    },
-    {
-      "file_path": "lib/features/accounting/presentation/widgets/transaction_list_tile.dart",
-      "lines_covered": 38,
-      "lines_total": 54,
-      "percentage": 70.37037037037037,
-      "threshold_met": false
+      "percentage": 88.63636363636364,
+      "threshold_met": true
     },
     {
       "file_path": "lib/features/accounting/presentation/widgets/voice_waveform.dart",
-      "lines_covered": 12,
+      "lines_covered": 13,
       "lines_total": 13,
-      "percentage": 92.3076923076923,
+      "percentage": 100.0,
       "threshold_met": true
     },
     {
@@ -826,81 +924,81 @@
       "threshold_met": false
     },
     {
-      "file_path": "lib/features/analytics/presentation/providers/analytics_providers.dart",
-      "lines_covered": 0,
-      "lines_total": 26,
-      "percentage": 0.0,
-      "threshold_met": false
+      "file_path": "lib/features/analytics/presentation/providers/repository_providers.dart",
+      "lines_covered": 14,
+      "lines_total": 14,
+      "percentage": 100.0,
+      "threshold_met": true
     },
     {
-      "file_path": "lib/features/analytics/presentation/providers/repository_providers.dart",
-      "lines_covered": 0,
-      "lines_total": 5,
-      "percentage": 0.0,
-      "threshold_met": false
+      "file_path": "lib/features/analytics/presentation/providers/state_analytics.dart",
+      "lines_covered": 17,
+      "lines_total": 17,
+      "percentage": 100.0,
+      "threshold_met": true
     },
     {
       "file_path": "lib/features/analytics/presentation/screens/analytics_screen.dart",
-      "lines_covered": 0,
+      "lines_covered": 58,
       "lines_total": 110,
-      "percentage": 0.0,
+      "percentage": 52.72727272727272,
       "threshold_met": false
     },
     {
       "file_path": "lib/features/analytics/presentation/widgets/budget_progress_list.dart",
-      "lines_covered": 0,
-      "lines_total": 50,
-      "percentage": 0.0,
-      "threshold_met": false
+      "lines_covered": 62,
+      "lines_total": 62,
+      "percentage": 100.0,
+      "threshold_met": true
     },
     {
       "file_path": "lib/features/analytics/presentation/widgets/category_breakdown_list.dart",
-      "lines_covered": 0,
-      "lines_total": 29,
-      "percentage": 0.0,
-      "threshold_met": false
+      "lines_covered": 35,
+      "lines_total": 35,
+      "percentage": 100.0,
+      "threshold_met": true
     },
     {
       "file_path": "lib/features/analytics/presentation/widgets/category_pie_chart.dart",
-      "lines_covered": 0,
+      "lines_covered": 8,
       "lines_total": 35,
-      "percentage": 0.0,
+      "percentage": 22.857142857142858,
       "threshold_met": false
     },
     {
       "file_path": "lib/features/analytics/presentation/widgets/daily_expense_chart.dart",
-      "lines_covered": 0,
+      "lines_covered": 46,
       "lines_total": 52,
-      "percentage": 0.0,
-      "threshold_met": false
+      "percentage": 88.46153846153845,
+      "threshold_met": true
     },
     {
       "file_path": "lib/features/analytics/presentation/widgets/expense_trend_chart.dart",
-      "lines_covered": 0,
-      "lines_total": 65,
-      "percentage": 0.0,
-      "threshold_met": false
+      "lines_covered": 63,
+      "lines_total": 63,
+      "percentage": 100.0,
+      "threshold_met": true
     },
     {
       "file_path": "lib/features/analytics/presentation/widgets/ledger_ratio_chart.dart",
-      "lines_covered": 0,
-      "lines_total": 47,
-      "percentage": 0.0,
-      "threshold_met": false
+      "lines_covered": 54,
+      "lines_total": 54,
+      "percentage": 100.0,
+      "threshold_met": true
     },
     {
       "file_path": "lib/features/analytics/presentation/widgets/month_comparison_card.dart",
-      "lines_covered": 0,
-      "lines_total": 23,
-      "percentage": 0.0,
-      "threshold_met": false
+      "lines_covered": 27,
+      "lines_total": 28,
+      "percentage": 96.42857142857143,
+      "threshold_met": true
     },
     {
       "file_path": "lib/features/analytics/presentation/widgets/summary_cards.dart",
-      "lines_covered": 0,
-      "lines_total": 58,
-      "percentage": 0.0,
-      "threshold_met": false
+      "lines_covered": 60,
+      "lines_total": 60,
+      "percentage": 100.0,
+      "threshold_met": true
     },
     {
       "file_path": "lib/features/dual_ledger/presentation/widgets/soul_celebration_overlay.dart",
@@ -931,45 +1029,31 @@
       "threshold_met": false
     },
     {
-      "file_path": "lib/features/family_sync/presentation/providers/active_group_provider.dart",
+      "file_path": "lib/features/family_sync/presentation/providers/repository_providers.dart",
+      "lines_covered": 111,
+      "lines_total": 137,
+      "percentage": 81.02189781021897,
+      "threshold_met": true
+    },
+    {
+      "file_path": "lib/features/family_sync/presentation/providers/state_active_group.dart",
       "lines_covered": 4,
       "lines_total": 4,
       "percentage": 100.0,
       "threshold_met": true
     },
     {
-      "file_path": "lib/features/family_sync/presentation/providers/avatar_sync_providers.dart",
-      "lines_covered": 0,
-      "lines_total": 6,
-      "percentage": 0.0,
-      "threshold_met": false
-    },
-    {
-      "file_path": "lib/features/family_sync/presentation/providers/group_providers.dart",
-      "lines_covered": 7,
-      "lines_total": 51,
-      "percentage": 13.725490196078432,
-      "threshold_met": false
-    },
-    {
-      "file_path": "lib/features/family_sync/presentation/providers/notification_navigation_provider.dart",
-      "lines_covered": 14,
-      "lines_total": 14,
+      "file_path": "lib/features/family_sync/presentation/providers/state_notification_navigation.dart",
+      "lines_covered": 15,
+      "lines_total": 15,
       "percentage": 100.0,
       "threshold_met": true
     },
     {
-      "file_path": "lib/features/family_sync/presentation/providers/repository_providers.dart",
-      "lines_covered": 1,
-      "lines_total": 37,
-      "percentage": 2.7027027027027026,
-      "threshold_met": false
-    },
-    {
-      "file_path": "lib/features/family_sync/presentation/providers/sync_providers.dart",
-      "lines_covered": 10,
-      "lines_total": 99,
-      "percentage": 10.1010101010101,
+      "file_path": "lib/features/family_sync/presentation/providers/state_sync.dart",
+      "lines_covered": 26,
+      "lines_total": 42,
+      "percentage": 61.904761904761905,
       "threshold_met": false
     },
     {
@@ -981,9 +1065,9 @@
     },
     {
       "file_path": "lib/features/family_sync/presentation/screens/create_group_screen.dart",
-      "lines_covered": 1,
-      "lines_total": 184,
-      "percentage": 0.5434782608695652,
+      "lines_covered": 31,
+      "lines_total": 175,
+      "percentage": 17.71428571428571,
       "threshold_met": false
     },
     {
@@ -1009,9 +1093,9 @@
     },
     {
       "file_path": "lib/features/family_sync/presentation/screens/member_approval_screen.dart",
-      "lines_covered": 128,
-      "lines_total": 144,
-      "percentage": 88.88888888888889,
+      "lines_covered": 122,
+      "lines_total": 135,
+      "percentage": 90.37037037037037,
       "threshold_met": true
     },
     {
@@ -1019,13 +1103,6 @@
       "lines_covered": 65,
       "lines_total": 67,
       "percentage": 97.01492537313433,
-      "threshold_met": true
-    },
-    {
-      "file_path": "lib/features/family_sync/presentation/widgets/digit_code_display.dart",
-      "lines_covered": 12,
-      "lines_total": 12,
-      "percentage": 100.0,
       "threshold_met": true
     },
     {
@@ -1043,13 +1120,6 @@
       "threshold_met": true
     },
     {
-      "file_path": "lib/features/family_sync/presentation/widgets/gradient_action_button.dart",
-      "lines_covered": 16,
-      "lines_total": 16,
-      "percentage": 100.0,
-      "threshold_met": true
-    },
-    {
       "file_path": "lib/features/family_sync/presentation/widgets/group_rename_dialog.dart",
       "lines_covered": 0,
       "lines_total": 30,
@@ -1057,65 +1127,9 @@
       "threshold_met": false
     },
     {
-      "file_path": "lib/features/family_sync/presentation/widgets/info_hint_box.dart",
-      "lines_covered": 11,
-      "lines_total": 11,
-      "percentage": 100.0,
-      "threshold_met": true
-    },
-    {
-      "file_path": "lib/features/family_sync/presentation/widgets/member_avatar.dart",
-      "lines_covered": 12,
-      "lines_total": 12,
-      "percentage": 100.0,
-      "threshold_met": true
-    },
-    {
       "file_path": "lib/features/family_sync/presentation/widgets/member_list_tile.dart",
       "lines_covered": 19,
       "lines_total": 19,
-      "percentage": 100.0,
-      "threshold_met": true
-    },
-    {
-      "file_path": "lib/features/family_sync/presentation/widgets/otp_digit_input.dart",
-      "lines_covered": 43,
-      "lines_total": 43,
-      "percentage": 100.0,
-      "threshold_met": true
-    },
-    {
-      "file_path": "lib/features/family_sync/presentation/widgets/outline_action_button.dart",
-      "lines_covered": 19,
-      "lines_total": 19,
-      "percentage": 100.0,
-      "threshold_met": true
-    },
-    {
-      "file_path": "lib/features/family_sync/presentation/widgets/pair_code_display.dart",
-      "lines_covered": 56,
-      "lines_total": 61,
-      "percentage": 91.80327868852459,
-      "threshold_met": true
-    },
-    {
-      "file_path": "lib/features/family_sync/presentation/widgets/pair_code_input.dart",
-      "lines_covered": 31,
-      "lines_total": 36,
-      "percentage": 86.11111111111111,
-      "threshold_met": true
-    },
-    {
-      "file_path": "lib/features/family_sync/presentation/widgets/status_badge.dart",
-      "lines_covered": 22,
-      "lines_total": 22,
-      "percentage": 100.0,
-      "threshold_met": true
-    },
-    {
-      "file_path": "lib/features/family_sync/presentation/widgets/sync_stats_card.dart",
-      "lines_covered": 27,
-      "lines_total": 27,
       "percentage": 100.0,
       "threshold_met": true
     },
@@ -1127,56 +1141,21 @@
       "threshold_met": false
     },
     {
-      "file_path": "lib/features/family_sync/use_cases/check_group_use_case.dart",
-      "lines_covered": 46,
-      "lines_total": 49,
-      "percentage": 93.87755102040816,
-      "threshold_met": true
-    },
-    {
-      "file_path": "lib/features/family_sync/use_cases/deactivate_group_use_case.dart",
-      "lines_covered": 8,
-      "lines_total": 12,
-      "percentage": 66.66666666666666,
-      "threshold_met": false
-    },
-    {
-      "file_path": "lib/features/family_sync/use_cases/leave_group_use_case.dart",
-      "lines_covered": 11,
-      "lines_total": 12,
-      "percentage": 91.66666666666666,
-      "threshold_met": true
-    },
-    {
-      "file_path": "lib/features/family_sync/use_cases/regenerate_invite_use_case.dart",
-      "lines_covered": 10,
-      "lines_total": 15,
-      "percentage": 66.66666666666666,
-      "threshold_met": false
-    },
-    {
-      "file_path": "lib/features/family_sync/use_cases/remove_member_use_case.dart",
-      "lines_covered": 10,
-      "lines_total": 14,
-      "percentage": 71.42857142857143,
-      "threshold_met": false
-    },
-    {
-      "file_path": "lib/features/home/presentation/providers/home_providers.dart",
+      "file_path": "lib/features/home/presentation/providers/state_home.dart",
       "lines_covered": 3,
       "lines_total": 3,
       "percentage": 100.0,
       "threshold_met": true
     },
     {
-      "file_path": "lib/features/home/presentation/providers/shadow_books_provider.dart",
+      "file_path": "lib/features/home/presentation/providers/state_shadow_books.dart",
       "lines_covered": 9,
       "lines_total": 26,
       "percentage": 34.61538461538461,
       "threshold_met": false
     },
     {
-      "file_path": "lib/features/home/presentation/providers/today_transactions_provider.dart",
+      "file_path": "lib/features/home/presentation/providers/state_today_transactions.dart",
       "lines_covered": 11,
       "lines_total": 11,
       "percentage": 100.0,
@@ -1184,29 +1163,22 @@
     },
     {
       "file_path": "lib/features/home/presentation/screens/home_screen.dart",
-      "lines_covered": 123,
-      "lines_total": 143,
-      "percentage": 86.01398601398601,
+      "lines_covered": 140,
+      "lines_total": 159,
+      "percentage": 88.0503144654088,
       "threshold_met": true
     },
     {
       "file_path": "lib/features/home/presentation/screens/main_shell_screen.dart",
-      "lines_covered": 0,
+      "lines_covered": 17,
       "lines_total": 49,
-      "percentage": 0.0,
+      "percentage": 34.69387755102041,
       "threshold_met": false
     },
     {
       "file_path": "lib/features/home/presentation/widgets/family_invite_banner.dart",
       "lines_covered": 36,
       "lines_total": 36,
-      "percentage": 100.0,
-      "threshold_met": true
-    },
-    {
-      "file_path": "lib/features/home/presentation/widgets/group_bar.dart",
-      "lines_covered": 31,
-      "lines_total": 31,
       "percentage": 100.0,
       "threshold_met": true
     },
@@ -1239,13 +1211,6 @@
       "threshold_met": true
     },
     {
-      "file_path": "lib/features/home/presentation/widgets/member_avatar.dart",
-      "lines_covered": 10,
-      "lines_total": 10,
-      "percentage": 100.0,
-      "threshold_met": true
-    },
-    {
       "file_path": "lib/features/home/presentation/widgets/month_overview_card.dart",
       "lines_covered": 56,
       "lines_total": 56,
@@ -1261,8 +1226,8 @@
     },
     {
       "file_path": "lib/features/home/presentation/widgets/soul_fullness_card.dart",
-      "lines_covered": 65,
-      "lines_total": 65,
+      "lines_covered": 71,
+      "lines_total": 71,
       "percentage": 100.0,
       "threshold_met": true
     },
@@ -1281,11 +1246,18 @@
       "threshold_met": true
     },
     {
-      "file_path": "lib/features/profile/presentation/providers/user_profile_providers.dart",
-      "lines_covered": 0,
-      "lines_total": 13,
-      "percentage": 0.0,
-      "threshold_met": false
+      "file_path": "lib/features/profile/presentation/providers/repository_providers.dart",
+      "lines_covered": 10,
+      "lines_total": 10,
+      "percentage": 100.0,
+      "threshold_met": true
+    },
+    {
+      "file_path": "lib/features/profile/presentation/providers/state_user_profile.dart",
+      "lines_covered": 3,
+      "lines_total": 3,
+      "percentage": 100.0,
+      "threshold_met": true
     },
     {
       "file_path": "lib/features/profile/presentation/screens/avatar_picker_screen.dart",
@@ -1344,31 +1316,24 @@
       "threshold_met": true
     },
     {
-      "file_path": "lib/features/settings/presentation/providers/backup_providers.dart",
-      "lines_covered": 0,
-      "lines_total": 18,
-      "percentage": 0.0,
-      "threshold_met": false
+      "file_path": "lib/features/settings/presentation/providers/repository_providers.dart",
+      "lines_covered": 22,
+      "lines_total": 23,
+      "percentage": 95.65217391304348,
+      "threshold_met": true
     },
     {
-      "file_path": "lib/features/settings/presentation/providers/locale_provider.dart",
+      "file_path": "lib/features/settings/presentation/providers/state_locale.dart",
       "lines_covered": 20,
       "lines_total": 20,
       "percentage": 100.0,
       "threshold_met": true
     },
     {
-      "file_path": "lib/features/settings/presentation/providers/repository_providers.dart",
-      "lines_covered": 4,
-      "lines_total": 5,
-      "percentage": 80.0,
-      "threshold_met": true
-    },
-    {
-      "file_path": "lib/features/settings/presentation/providers/settings_providers.dart",
-      "lines_covered": 8,
-      "lines_total": 10,
-      "percentage": 80.0,
+      "file_path": "lib/features/settings/presentation/providers/state_settings.dart",
+      "lines_covered": 6,
+      "lines_total": 6,
+      "percentage": 100.0,
       "threshold_met": true
     },
     {
@@ -1379,6 +1344,13 @@
       "threshold_met": false
     },
     {
+      "file_path": "lib/features/settings/presentation/utils/voice_locale_helpers.dart",
+      "lines_covered": 4,
+      "lines_total": 4,
+      "percentage": 100.0,
+      "threshold_met": true
+    },
+    {
       "file_path": "lib/features/settings/presentation/widgets/about_section.dart",
       "lines_covered": 1,
       "lines_total": 17,
@@ -1387,9 +1359,9 @@
     },
     {
       "file_path": "lib/features/settings/presentation/widgets/appearance_section.dart",
-      "lines_covered": 40,
-      "lines_total": 69,
-      "percentage": 57.971014492753625,
+      "lines_covered": 45,
+      "lines_total": 75,
+      "percentage": 60.0,
       "threshold_met": false
     },
     {
@@ -1421,11 +1393,18 @@
       "threshold_met": false
     },
     {
-      "file_path": "lib/infrastructure/category/category_service.dart",
+      "file_path": "lib/infrastructure/category/category_locale_service.dart",
       "lines_covered": 9,
       "lines_total": 9,
       "percentage": 100.0,
       "threshold_met": true
+    },
+    {
+      "file_path": "lib/infrastructure/crypto/database/encrypted_database.dart",
+      "lines_covered": 0,
+      "lines_total": 28,
+      "percentage": 0.0,
+      "threshold_met": false
     },
     {
       "file_path": "lib/infrastructure/crypto/models/chain_verification_result.dart",
@@ -1436,9 +1415,9 @@
     },
     {
       "file_path": "lib/infrastructure/crypto/providers.dart",
-      "lines_covered": 0,
+      "lines_covered": 15,
       "lines_total": 20,
-      "percentage": 0.0,
+      "percentage": 75.0,
       "threshold_met": false
     },
     {
@@ -1472,8 +1451,8 @@
     {
       "file_path": "lib/infrastructure/crypto/repositories/master_key_repository.dart",
       "lines_covered": 1,
-      "lines_total": 6,
-      "percentage": 16.666666666666664,
+      "lines_total": 3,
+      "percentage": 33.33333333333333,
       "threshold_met": false
     },
     {
@@ -1527,10 +1506,10 @@
     },
     {
       "file_path": "lib/infrastructure/ml/merchant_database.dart",
-      "lines_covered": 2,
+      "lines_covered": 24,
       "lines_total": 25,
-      "percentage": 8.0,
-      "threshold_met": false
+      "percentage": 96.0,
+      "threshold_met": true
     },
     {
       "file_path": "lib/infrastructure/security/audit_logger.dart",
@@ -1541,17 +1520,17 @@
     },
     {
       "file_path": "lib/infrastructure/security/biometric_service.dart",
-      "lines_covered": 30,
+      "lines_covered": 31,
       "lines_total": 31,
-      "percentage": 96.7741935483871,
+      "percentage": 100.0,
       "threshold_met": true
     },
     {
       "file_path": "lib/infrastructure/security/providers.dart",
-      "lines_covered": 2,
+      "lines_covered": 15,
       "lines_total": 15,
-      "percentage": 13.333333333333334,
-      "threshold_met": false
+      "percentage": 100.0,
+      "threshold_met": true
     },
     {
       "file_path": "lib/infrastructure/security/secure_storage_service.dart",
@@ -1569,9 +1548,9 @@
     },
     {
       "file_path": "lib/infrastructure/sync/apns_push_messaging_client.dart",
-      "lines_covered": 13,
+      "lines_covered": 15,
       "lines_total": 32,
-      "percentage": 40.625,
+      "percentage": 46.875,
       "threshold_met": false
     },
     {
@@ -1583,45 +1562,52 @@
     },
     {
       "file_path": "lib/infrastructure/sync/push_notification_service.dart",
-      "lines_covered": 96,
-      "lines_total": 154,
-      "percentage": 62.33766233766234,
-      "threshold_met": false
+      "lines_covered": 121,
+      "lines_total": 150,
+      "percentage": 80.66666666666666,
+      "threshold_met": true
     },
     {
       "file_path": "lib/infrastructure/sync/relay_api_client.dart",
-      "lines_covered": 47,
-      "lines_total": 155,
-      "percentage": 30.32258064516129,
-      "threshold_met": false
+      "lines_covered": 141,
+      "lines_total": 151,
+      "percentage": 93.37748344370861,
+      "threshold_met": true
     },
     {
       "file_path": "lib/infrastructure/sync/sync_lifecycle_observer.dart",
-      "lines_covered": 0,
+      "lines_covered": 14,
       "lines_total": 15,
-      "percentage": 0.0,
-      "threshold_met": false
+      "percentage": 93.33333333333333,
+      "threshold_met": true
     },
     {
       "file_path": "lib/infrastructure/sync/sync_queue_manager.dart",
-      "lines_covered": 0,
+      "lines_covered": 1,
       "lines_total": 24,
-      "percentage": 0.0,
+      "percentage": 4.166666666666666,
       "threshold_met": false
     },
     {
       "file_path": "lib/infrastructure/sync/sync_scheduler.dart",
-      "lines_covered": 17,
+      "lines_covered": 51,
       "lines_total": 55,
-      "percentage": 30.909090909090907,
-      "threshold_met": false
+      "percentage": 92.72727272727272,
+      "threshold_met": true
     },
     {
       "file_path": "lib/infrastructure/sync/websocket_service.dart",
-      "lines_covered": 105,
-      "lines_total": 143,
-      "percentage": 73.42657342657343,
-      "threshold_met": false
+      "lines_covered": 135,
+      "lines_total": 142,
+      "percentage": 95.07042253521126,
+      "threshold_met": true
+    },
+    {
+      "file_path": "lib/main.dart",
+      "lines_covered": 56,
+      "lines_total": 56,
+      "percentage": 100.0,
+      "threshold_met": true
     },
     {
       "file_path": "lib/shared/constants/default_categories.dart",

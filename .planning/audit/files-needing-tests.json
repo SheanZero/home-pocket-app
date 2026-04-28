@@ -1,30 +1,30 @@
 {
-  "generated_at": "2026-04-26T00:36:30.799525Z",
+  "generated_at": "2026-04-28T07:01:20.526348Z",
   "flutter_test_command": "flutter test --coverage",
   "lcov_source": "coverage/lcov_clean.info",
   "threshold": 80,
-  "total_files": 102,
-  "files_below_threshold": 102,
+  "total_files": 67,
+  "files_below_threshold": 67,
   "entries": [
+    {
+      "file_path": "lib/application/accounting/category_service.dart",
+      "percentage": 8.333333333333332,
+      "lines_below_threshold": 11
+    },
+    {
+      "file_path": "lib/application/accounting/repository_providers.dart",
+      "percentage": 75.0,
+      "lines_below_threshold": 2
+    },
     {
       "file_path": "lib/application/analytics/demo_data_service.dart",
       "percentage": 0.0,
       "lines_below_threshold": 68
     },
     {
-      "file_path": "lib/application/dual_ledger/providers.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 5
-    },
-    {
-      "file_path": "lib/application/family_sync/apply_sync_operations_use_case.dart",
-      "percentage": 54.09836065573771,
-      "lines_below_threshold": 28
-    },
-    {
       "file_path": "lib/application/family_sync/check_group_validity_use_case.dart",
-      "percentage": 10.714285714285714,
-      "lines_below_threshold": 25
+      "percentage": 14.285714285714285,
+      "lines_below_threshold": 24
     },
     {
       "file_path": "lib/application/family_sync/handle_group_dissolved_use_case.dart",
@@ -37,24 +37,14 @@
       "lines_below_threshold": 13
     },
     {
-      "file_path": "lib/application/family_sync/sync_engine.dart",
-      "percentage": 44.85981308411215,
-      "lines_below_threshold": 59
+      "file_path": "lib/application/ml/repository_providers.dart",
+      "percentage": 40.0,
+      "lines_below_threshold": 3
     },
     {
-      "file_path": "lib/application/family_sync/sync_orchestrator.dart",
-      "percentage": 3.3707865168539324,
-      "lines_below_threshold": 86
-    },
-    {
-      "file_path": "lib/application/family_sync/transaction_change_tracker.dart",
+      "file_path": "lib/application/profile/repository_providers.dart",
       "percentage": 0.0,
-      "lines_below_threshold": 14
-    },
-    {
-      "file_path": "lib/application/profile/get_user_profile_use_case.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 2
+      "lines_below_threshold": 4
     },
     {
       "file_path": "lib/application/profile/save_user_profile_use_case.dart",
@@ -62,14 +52,9 @@
       "lines_below_threshold": 4
     },
     {
-      "file_path": "lib/core/theme/app_theme.dart",
-      "percentage": 44.44444444444444,
-      "lines_below_threshold": 5
-    },
-    {
-      "file_path": "lib/data/app_database.dart",
-      "percentage": 66.25,
-      "lines_below_threshold": 27
+      "file_path": "lib/application/voice/repository_providers.dart",
+      "percentage": 40.0,
+      "lines_below_threshold": 3
     },
     {
       "file_path": "lib/data/daos/analytics_dao.dart",
@@ -93,18 +78,18 @@
     },
     {
       "file_path": "lib/data/daos/sync_queue_dao.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 23
+      "percentage": 4.3478260869565215,
+      "lines_below_threshold": 22
     },
     {
       "file_path": "lib/data/repositories/category_keyword_preference_repository_impl.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 18
+      "percentage": 5.555555555555555,
+      "lines_below_threshold": 17
     },
     {
       "file_path": "lib/data/repositories/device_identity_repository_impl.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 3
+      "percentage": 33.33333333333333,
+      "lines_below_threshold": 2
     },
     {
       "file_path": "lib/data/repositories/group_repository_impl.dart",
@@ -113,18 +98,13 @@
     },
     {
       "file_path": "lib/data/repositories/sync_repository_impl.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 25
+      "percentage": 4.0,
+      "lines_below_threshold": 24
     },
     {
       "file_path": "lib/data/repositories/user_profile_repository_impl.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 20
-    },
-    {
-      "file_path": "lib/data/tables/audit_logs_table.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 9
+      "percentage": 15.0,
+      "lines_below_threshold": 17
     },
     {
       "file_path": "lib/data/tables/books_table.dart",
@@ -140,11 +120,6 @@
       "file_path": "lib/data/tables/category_keyword_preferences_table.dart",
       "percentage": 0.0,
       "lines_below_threshold": 8
-    },
-    {
-      "file_path": "lib/data/tables/category_ledger_configs_table.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 6
     },
     {
       "file_path": "lib/data/tables/group_members_table.dart",
@@ -172,11 +147,6 @@
       "lines_below_threshold": 29
     },
     {
-      "file_path": "lib/data/tables/user_profiles_table.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 8
-    },
-    {
       "file_path": "lib/features/accounting/domain/models/merchant_category_preference.dart",
       "percentage": 62.5,
       "lines_below_threshold": 3
@@ -187,44 +157,14 @@
       "lines_below_threshold": 11
     },
     {
-      "file_path": "lib/features/accounting/presentation/providers/repository_providers.dart",
-      "percentage": 14.285714285714285,
-      "lines_below_threshold": 24
-    },
-    {
-      "file_path": "lib/features/accounting/presentation/providers/use_case_providers.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 41
-    },
-    {
-      "file_path": "lib/features/accounting/presentation/providers/voice_providers.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 17
-    },
-    {
       "file_path": "lib/features/accounting/presentation/screens/transaction_confirm_screen.dart",
-      "percentage": 62.70627062706271,
-      "lines_below_threshold": 113
+      "percentage": 63.278688524590166,
+      "lines_below_threshold": 112
     },
     {
       "file_path": "lib/features/accounting/presentation/screens/transaction_entry_screen.dart",
-      "percentage": 46.25,
-      "lines_below_threshold": 86
-    },
-    {
-      "file_path": "lib/features/accounting/presentation/screens/voice_input_screen.dart",
-      "percentage": 47.69736842105263,
-      "lines_below_threshold": 159
-    },
-    {
-      "file_path": "lib/features/accounting/presentation/widgets/soft_toast.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 44
-    },
-    {
-      "file_path": "lib/features/accounting/presentation/widgets/transaction_list_tile.dart",
-      "percentage": 70.37037037037037,
-      "lines_below_threshold": 16
+      "percentage": 45.962732919254655,
+      "lines_below_threshold": 87
     },
     {
       "file_path": "lib/features/analytics/domain/models/month_comparison.dart",
@@ -237,59 +177,14 @@
       "lines_below_threshold": 2
     },
     {
-      "file_path": "lib/features/analytics/presentation/providers/analytics_providers.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 26
-    },
-    {
-      "file_path": "lib/features/analytics/presentation/providers/repository_providers.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 5
-    },
-    {
       "file_path": "lib/features/analytics/presentation/screens/analytics_screen.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 110
-    },
-    {
-      "file_path": "lib/features/analytics/presentation/widgets/budget_progress_list.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 50
-    },
-    {
-      "file_path": "lib/features/analytics/presentation/widgets/category_breakdown_list.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 29
-    },
-    {
-      "file_path": "lib/features/analytics/presentation/widgets/category_pie_chart.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 35
-    },
-    {
-      "file_path": "lib/features/analytics/presentation/widgets/daily_expense_chart.dart",
-      "percentage": 0.0,
+      "percentage": 52.72727272727272,
       "lines_below_threshold": 52
     },
     {
-      "file_path": "lib/features/analytics/presentation/widgets/expense_trend_chart.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 65
-    },
-    {
-      "file_path": "lib/features/analytics/presentation/widgets/ledger_ratio_chart.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 47
-    },
-    {
-      "file_path": "lib/features/analytics/presentation/widgets/month_comparison_card.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 23
-    },
-    {
-      "file_path": "lib/features/analytics/presentation/widgets/summary_cards.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 58
+      "file_path": "lib/features/analytics/presentation/widgets/category_pie_chart.dart",
+      "percentage": 22.857142857142858,
+      "lines_below_threshold": 27
     },
     {
       "file_path": "lib/features/family_sync/domain/models/group_info.dart",
@@ -302,24 +197,9 @@
       "lines_below_threshold": 4
     },
     {
-      "file_path": "lib/features/family_sync/presentation/providers/avatar_sync_providers.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 6
-    },
-    {
-      "file_path": "lib/features/family_sync/presentation/providers/group_providers.dart",
-      "percentage": 13.725490196078432,
-      "lines_below_threshold": 44
-    },
-    {
-      "file_path": "lib/features/family_sync/presentation/providers/repository_providers.dart",
-      "percentage": 2.7027027027027026,
-      "lines_below_threshold": 36
-    },
-    {
-      "file_path": "lib/features/family_sync/presentation/providers/sync_providers.dart",
-      "percentage": 10.1010101010101,
-      "lines_below_threshold": 89
+      "file_path": "lib/features/family_sync/presentation/providers/state_sync.dart",
+      "percentage": 61.904761904761905,
+      "lines_below_threshold": 16
     },
     {
       "file_path": "lib/features/family_sync/presentation/screens/confirm_join_screen.dart",
@@ -328,8 +208,8 @@
     },
     {
       "file_path": "lib/features/family_sync/presentation/screens/create_group_screen.dart",
-      "percentage": 0.5434782608695652,
-      "lines_below_threshold": 183
+      "percentage": 17.71428571428571,
+      "lines_below_threshold": 144
     },
     {
       "file_path": "lib/features/family_sync/presentation/screens/group_management_screen.dart",
@@ -352,34 +232,14 @@
       "lines_below_threshold": 7
     },
     {
-      "file_path": "lib/features/family_sync/use_cases/deactivate_group_use_case.dart",
-      "percentage": 66.66666666666666,
-      "lines_below_threshold": 4
-    },
-    {
-      "file_path": "lib/features/family_sync/use_cases/regenerate_invite_use_case.dart",
-      "percentage": 66.66666666666666,
-      "lines_below_threshold": 5
-    },
-    {
-      "file_path": "lib/features/family_sync/use_cases/remove_member_use_case.dart",
-      "percentage": 71.42857142857143,
-      "lines_below_threshold": 4
-    },
-    {
-      "file_path": "lib/features/home/presentation/providers/shadow_books_provider.dart",
+      "file_path": "lib/features/home/presentation/providers/state_shadow_books.dart",
       "percentage": 34.61538461538461,
       "lines_below_threshold": 17
     },
     {
       "file_path": "lib/features/home/presentation/screens/main_shell_screen.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 49
-    },
-    {
-      "file_path": "lib/features/profile/presentation/providers/user_profile_providers.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 13
+      "percentage": 34.69387755102041,
+      "lines_below_threshold": 32
     },
     {
       "file_path": "lib/features/profile/presentation/screens/avatar_picker_screen.dart",
@@ -402,11 +262,6 @@
       "lines_below_threshold": 33
     },
     {
-      "file_path": "lib/features/settings/presentation/providers/backup_providers.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 18
-    },
-    {
       "file_path": "lib/features/settings/presentation/screens/settings_screen.dart",
       "percentage": 0.0,
       "lines_below_threshold": 14
@@ -418,8 +273,8 @@
     },
     {
       "file_path": "lib/features/settings/presentation/widgets/appearance_section.dart",
-      "percentage": 57.971014492753625,
-      "lines_below_threshold": 29
+      "percentage": 60.0,
+      "lines_below_threshold": 30
     },
     {
       "file_path": "lib/features/settings/presentation/widgets/data_management_section.dart",
@@ -437,9 +292,14 @@
       "lines_below_threshold": 37
     },
     {
-      "file_path": "lib/infrastructure/crypto/providers.dart",
+      "file_path": "lib/infrastructure/crypto/database/encrypted_database.dart",
       "percentage": 0.0,
-      "lines_below_threshold": 20
+      "lines_below_threshold": 28
+    },
+    {
+      "file_path": "lib/infrastructure/crypto/providers.dart",
+      "percentage": 75.0,
+      "lines_below_threshold": 5
     },
     {
       "file_path": "lib/infrastructure/crypto/repositories/encryption_repository.dart",
@@ -458,18 +318,8 @@
     },
     {
       "file_path": "lib/infrastructure/crypto/repositories/master_key_repository.dart",
-      "percentage": 16.666666666666664,
-      "lines_below_threshold": 5
-    },
-    {
-      "file_path": "lib/infrastructure/ml/merchant_database.dart",
-      "percentage": 8.0,
-      "lines_below_threshold": 23
-    },
-    {
-      "file_path": "lib/infrastructure/security/providers.dart",
-      "percentage": 13.333333333333334,
-      "lines_below_threshold": 13
+      "percentage": 33.33333333333333,
+      "lines_below_threshold": 2
     },
     {
       "file_path": "lib/infrastructure/security/secure_storage_service.dart",
@@ -483,38 +333,13 @@
     },
     {
       "file_path": "lib/infrastructure/sync/apns_push_messaging_client.dart",
-      "percentage": 40.625,
-      "lines_below_threshold": 19
-    },
-    {
-      "file_path": "lib/infrastructure/sync/push_notification_service.dart",
-      "percentage": 62.33766233766234,
-      "lines_below_threshold": 58
-    },
-    {
-      "file_path": "lib/infrastructure/sync/relay_api_client.dart",
-      "percentage": 30.32258064516129,
-      "lines_below_threshold": 108
-    },
-    {
-      "file_path": "lib/infrastructure/sync/sync_lifecycle_observer.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 15
+      "percentage": 46.875,
+      "lines_below_threshold": 17
     },
     {
       "file_path": "lib/infrastructure/sync/sync_queue_manager.dart",
-      "percentage": 0.0,
-      "lines_below_threshold": 24
-    },
-    {
-      "file_path": "lib/infrastructure/sync/sync_scheduler.dart",
-      "percentage": 30.909090909090907,
-      "lines_below_threshold": 38
-    },
-    {
-      "file_path": "lib/infrastructure/sync/websocket_service.dart",
-      "percentage": 73.42657342657343,
-      "lines_below_threshold": 38
+      "percentage": 4.166666666666666,
+      "lines_below_threshold": 23
     }
   ]
 }
