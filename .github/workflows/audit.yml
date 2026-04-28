@@ -1,3 +1,10 @@
+# Permanent gate — do not weaken without ADR amendment.
+# See docs/arch/03-adr/ADR-011_Codebase_Cleanup_Initiative_Outcome.md.
+# Phase 8 D-05: the four guardrails below (import_guard / custom_lint /
+# coverde per-file >=80% / sqlite3_flutter_libs reject) are blocking on
+# every PR + push to main. The coverage job intentionally has no PR-only
+# guard, and every guardrail step is hard-failing by design.
+
 name: audit
 
 on:
@@ -86,7 +93,6 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     needs: static-analysis
-    if: ${{ github.event_name == 'pull_request' }}
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
