@@ -46,7 +46,8 @@ docs/arch/
 │   ├── ADR-007_Layer_Responsibilities.md
 │   ├── ADR-008_Book_Balance_Update_Strategy.md
 │   ├── ADR-009_Incremental_Hash_Chain_Verification.md
-│   └── ADR-010_CRDT_Conflict_Resolution_Strategy.md
+│   ├── ADR-010_CRDT_Conflict_Resolution_Strategy.md
+│   └── ADR-011_Codebase_Cleanup_Initiative_Outcome.md
 │
 ├── 04-basic/                     # 基础能力 PRD 文档
 │   ├── BASIC-001_Crypto_Infrastructure.md
@@ -224,10 +225,10 @@ CI/CD: GitHub Actions
 |------|---------|------|
 | 整体架构文档 | 8 | ✅ 完成 |
 | 模块功能文档 | 9 | ✅ 完成 |
-| ADR 决策记录 | 10 | ✅ 完成 |
+| ADR 决策记录 | 11 | ✅ 完成 |
 | 基础能力 PRD | 4 | ✅ 完成 |
 | UI 规范文档 | 1 | ✅ 完成 |
-| **总计** | **32** | **✅ 完成** |
+| **总计** | **33** | **✅ 完成** |
 
 ---
 
