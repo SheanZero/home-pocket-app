@@ -178,10 +178,18 @@ Future<void> main(List<String> args) async {
         );
         exit(2);
       }
+      // WR-04: reject duplicate paths so the on-disk record can never disagree
+      // with the JSON output (Set.add returns false if the element was already
+      // present — clean idiom for first-write-wins detection).
+      if (!deferredPaths.add(path)) {
+        stderr.writeln(
+          '[coverage:gate] ERROR: $deferredPath line $lineNo duplicate path: $path',
+        );
+        exit(2);
+      }
       deferredEntries.add(
         _DeferredEntry(filePath: path, rationale: rationale),
       );
-      deferredPaths.add(path);
     }
   }
 
