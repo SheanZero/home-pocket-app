@@ -1,0 +1,6 @@
+{
+  "tool_source": "agent:drift_col",
+  "generated_at": "2026-04-28T00:00:00.000Z",
+  "findings": [],
+  "note": "Phase 8 re-audit: scoped scan of lib/data/tables/*_table.dart against lib/data/daos/*_dao.dart and lib/data/repositories/*_repository_impl.dart references. All declared columns across 11 Drift tables (audit_logs, books, categories, category_keyword_preferences, category_ledger_configs, group_members, groups, merchant_category_preferences, sync_queue, transactions, user_profiles) are referenced by at least one DAO or repository. No unused columns to flag. Note: per FUTURE-TOOL-02 deferral, programmatic Drift unused-column scan remains v2 backlog; this re-audit is a manual symbol-search verification."
+}

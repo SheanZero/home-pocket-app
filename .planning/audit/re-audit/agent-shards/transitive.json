@@ -1,0 +1,6 @@
+{
+  "tool_source": "agent:transitive",
+  "generated_at": "2026-04-28T00:00:00.000Z",
+  "findings": [],
+  "note": "Phase 8 re-audit: scoped scan of lib/features/*/domain/**, lib/features/*/presentation/**, lib/application/**. No typedef declarations alias forbidden cross-layer types. The Application-layer re-exports of Infrastructure types in lib/application/family_sync/repository_providers.dart (PushNavigationIntent, PushNavigationDestination, SyncQueueManager, WebSocketEvent, WebSocketEventType) are the documented Clean Architecture facade pattern (see comment lines 19-20 of that file) — Application is the public contract layer, the re-export is intentional. The thin re-export in lib/features/family_sync/presentation/providers/state_notification_navigation.dart is a pass-through of Application-published types and is compliant."
+}
