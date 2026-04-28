@@ -30,9 +30,12 @@ for plan in $PLANS; do
   # Extract the files_modified: YAML block: read until the next top-level
   # frontmatter key OR the closing ---. awk handles both bare `- path` and
   # quoted `- "path"` forms.
+  # WR-02: top-level-key regex is broad — any non-list, non-frontmatter,
+  # non-whitespace start-of-line counts (YAML keys can include digits and
+  # hyphens, e.g. `phase2_summary:` or `phase-id:`).
   awk '
     /^files_modified:/ {in_block=1; next}
-    in_block && /^[a-zA-Z_]+:/ {in_block=0}
+    in_block && /^[^[:space:]-][^:]*:/ {in_block=0}
     in_block && /^---$/ {in_block=0}
     in_block && /^[[:space:]]*-[[:space:]]+/ {
       # strip leading "  - " / "- " and quotes
