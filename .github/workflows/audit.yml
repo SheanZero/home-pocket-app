@@ -104,7 +104,7 @@ jobs:
             --mode w \
             --filters '\.g\.dart$,\.freezed\.dart$,\.mocks\.dart$,^lib/generated/'
       - name: Per-file coverage gate
-        run: dart run scripts/coverage_gate.dart --list .planning/audit/phase6-touched-files.txt --threshold 80 --lcov coverage/lcov_clean.info
+        run: dart run scripts/coverage_gate.dart --list .planning/audit/cleanup-touched-files.txt --threshold 80 --lcov coverage/lcov_clean.info
       - uses: VeryGoodOpenSource/very_good_coverage@v2
         # Phase 2 close (BASE-06 / D-05): blocking. Threshold 80 against lcov_clean.info.
         with:

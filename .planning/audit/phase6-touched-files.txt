@@ -1,3 +1,4 @@
+# Superseded by cleanup-touched-files.txt in Phase 8 (kept on disk for audit trail).
 lib/data/tables/audit_logs_table.dart
 lib/data/tables/user_profiles_table.dart
 lib/data/tables/category_ledger_configs_table.dart
