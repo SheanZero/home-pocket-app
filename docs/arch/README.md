@@ -1,4 +1,4 @@
-# Home Pocket MVP - 架构技术文档 (arch2)
+# Home Pocket MVP - 架构技术文档 (docs/arch/)
 
 **文档版本:** 2.0
 **更新日期:** 2026-02-03
@@ -12,7 +12,7 @@
 本目录采用模块化架构文档组织结构，按文档类型分为三个子目录：
 
 ```
-arch2/
+docs/arch/
 ├── 01-core-architecture/        # 整体架构文档
 │   ├── ARCH-000_INDEX.md       # 架构文档总索引
 │   ├── ARCH-001_Complete_Guide.md
@@ -22,10 +22,10 @@ arch2/
 │   ├── ARCH-005_Integration_Patterns.md
 │   ├── ARCH-006_Error_Boundaries.md
 │   ├── ARCH-007_Architecture_Diagram_I18N.md
-│   ├── ARCH-008_Layer_Clarification.md
-│   └── ARCH-009_I18N_Update_Summary.md
+│   └── ARCH-008_Layer_Clarification.md
 │
 ├── 02-module-specs/              # 模块功能架构文档
+│   ├── MOD-000_INDEX.md         # MOD索引（指向ARCH-000_INDEX.md）
 │   ├── MOD-001_BasicAccounting.md
 │   ├── MOD-002_DualLedger.md
 │   ├── MOD-003_FamilySync.md
@@ -33,7 +33,7 @@ arch2/
 │   ├── MOD-006_Analytics.md
 │   ├── MOD-007_Settings.md
 │   ├── MOD-008_Gamification.md
-│   └── MOD-009_Internationalization.md
+│   └── MOD-009_VoiceInput.md
 │
 ├── 03-adr/                       # 架构决策记录 (ADR)
 │   ├── ADR-000_INDEX.md         # ADR总索引
@@ -43,7 +43,19 @@ arch2/
 │   ├── ADR-004_CRDT_Sync.md
 │   ├── ADR-005_OCR_ML_Tech.md
 │   ├── ADR-006_Key_Derivation_Security.md
-│   └── ADR-007_Layer_Responsibilities.md
+│   ├── ADR-007_Layer_Responsibilities.md
+│   ├── ADR-008_Book_Balance_Update_Strategy.md
+│   ├── ADR-009_Incremental_Hash_Chain_Verification.md
+│   └── ADR-010_CRDT_Conflict_Resolution_Strategy.md
+│
+├── 04-basic/                     # 基础能力 PRD 文档
+│   ├── BASIC-001_Crypto_Infrastructure.md
+│   ├── BASIC-002_Security_Infrastructure.md
+│   ├── BASIC-003_I18N_Infrastructure.md
+│   └── BASIC-004_Category_PRD.md
+│
+├── 05-UI/                        # UI 规范文档
+│   └── UI-001_Page_Inventory.md
 │
 └── README.md                     # 本文件
 ```
@@ -79,7 +91,7 @@ arch2/
 - `MOD-006` - 数据分析
 - `MOD-007` - 设置管理
 - `MOD-008` - 趣味功能
-- `MOD-009` - 国际化多语言
+- `MOD-009` - 语音记账
 
 **适合阅读人群:**
 - Flutter 工程师 - 开发具体模块功能
@@ -98,6 +110,9 @@ arch2/
 - `ADR-005` - OCR 和 ML 技术选型
 - `ADR-006` - 密钥派生安全修复
 - `ADR-007` - 架构层职责划分
+- `ADR-008` - 账本余额更新策略
+- `ADR-009` - 增量哈希链验证
+- `ADR-010` - CRDT 冲突解决策略
 
 **适合阅读人群:**
 - 架构师 - 了解技术选型理由
@@ -207,10 +222,12 @@ CI/CD: GitHub Actions
 
 | 分类 | 文件数量 | 状态 |
 |------|---------|------|
-| 整体架构文档 | 10 | ✅ 完成 |
+| 整体架构文档 | 8 | ✅ 完成 |
 | 模块功能文档 | 9 | ✅ 完成 |
-| ADR 决策记录 | 8 | ✅ 完成 |
-| **总计** | **27** | **✅ 完成** |
+| ADR 决策记录 | 10 | ✅ 完成 |
+| 基础能力 PRD | 4 | ✅ 完成 |
+| UI 规范文档 | 1 | ✅ 完成 |
+| **总计** | **32** | **✅ 完成** |
 
 ---
 
