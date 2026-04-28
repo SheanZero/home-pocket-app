@@ -4,14 +4,14 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Completed 08-05-PLAN.md
-last_updated: "2026-04-28T06:57:24.429Z"
+last_updated: "2026-04-28T07:09:53.536Z"
 last_activity: 2026-04-28
 progress:
   total_phases: 8
   completed_phases: 7
   total_plans: 48
-  completed_plans: 45
-  percent: 94
+  completed_plans: 46
+  percent: 96
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 08 (re-audit-exit-verification) — EXECUTING
-Plan: 6 of 8
+Plan: 7 of 8
 Status: Ready to execute
 Last activity: 2026-04-28
 
-Progress: [█████████░] 94%
+Progress: [██████████] 96%
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Progress: [█████████░] 94%
 | Phase Phase 08 PP03 | 4min | 2 tasks tasks | 2 files files |
 | Phase 08 P04 | 4min | 3 tasks | 10 files |
 | Phase 08 P05 | 16min | 5 tasks | 12 files |
+| Phase 08 P06 | 7min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,9 @@ Recent decisions affecting current work:
 - [Phase 08-05]: [Phase 08-05]: Scanners hardcode output paths — chose run-then-cp-then-checkout pattern (run scanner, copy shard to re-audit/, restore baseline via git checkout) over modifying scanner code; preserves Phase 1 D-01 lock posture.
 - [Phase 08-05]: [Phase 08-05]: agent:transitive judgment — Application's documented re-export of Infrastructure types in lib/application/family_sync/repository_providers.dart lines 19-26 is intentional Clean Architecture facade (per the file's own comment), not transitive smuggling; flagged-as-clean with explicit note field.
 - [Phase 08-05]: [Phase 08-05]: Re-audit gate GREEN — resolved=50/regression=0/new=0/open_in_baseline=0; reaudit_diff.dart exits 0; EXIT-01 + EXIT-02 satisfied without massaging the script.
+- [Phase ?]: [Phase 08-06]: Used coverde 0.3.0+1 (matches audit.yml line 36) not plan-suggested 3.0.0 — Rule 1 fix preserves local-vs-CI parity.
+- [Phase ?]: [Phase 08-06]: Stopped at gate-failure documentation per plan success_criteria — did NOT edit gates to pass; EXIT-03/EXIT-04 not marked complete; surfaced 4 gate failures for user review.
+- [Phase ?]: [Phase 08-06]: Coverage delta — 41 lib files newly above 80% post-Phases 3-6 + 08-04 goldens (102 to 67 below-threshold); global 74.6% still below 80% threshold.
 
 ### Pending Todos
 
@@ -124,6 +128,7 @@ None yet.
 - `*.mocks.dart` strategy (CI-generated vs Mocktail migration) must be decided before Phase 4 (interface changes happen there) — SUMMARY.md recommends Mocktail
 - Phase 2 may reveal more files below 80% than anticipated (~68% naive coverage ratio noted in CONCERNS.md); characterization-test volume is an open variable
 - `recoverFromSeed()` key-overwrite bug (HIGH per CONCERNS.md) is out of cleanup scope; any Phase 3+ tests touching `KeyRepositoryImpl` must use mock-only approach (no real `flutter_secure_storage`)
+- Phase 8 cannot close — 4 of 8 EXIT-04 gates FAIL on post-cleanup tree. See 08-06-GATES-LOG.md for per-gate exit codes. Plan 08-08 (ADR-011 amendment) is BLOCKED. User decision required on 4 gate-pass paths in 08-06-SUMMARY.md Discoveries 1-4.
 
 ## Deferred Items
 
@@ -138,7 +143,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-28T06:57:24.424Z
+Last session: 2026-04-28T07:09:22.693Z
 Stopped at: Completed 08-05-PLAN.md
 Resume file: None
 
