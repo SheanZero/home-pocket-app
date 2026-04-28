@@ -1185,6 +1185,7 @@ class CachedBookRepository implements BookRepository {
 
 **决策状态:** ✅ 已接受
 **待办事项:** 按照实施计划执行（预计 4 周完成）
+**下次审查:** 实施完成后进行效果评估
 
 ---
 
@@ -1202,4 +1203,3 @@ post-cleanup canonical location is:
 
 The original decision body above is preserved verbatim per ADR append-only convention
 (`.claude/rules/arch.md:171-173`).
-**下次审查:** 实施完成后进行效果评估

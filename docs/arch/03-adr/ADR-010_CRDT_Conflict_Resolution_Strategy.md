@@ -1463,6 +1463,7 @@ class Transaction with _$Transaction {
 **文档状态:** ✅ 已接受
 **决策完成:** 2026-02-03
 **预计实施时间:** 4-5 周
+**优先级:** P1（高优先级）
 
 ---
 
@@ -1477,4 +1478,3 @@ preserved as historical context per ADR append-only convention.
 
 The original decision body above is preserved verbatim per ADR append-only convention
 (`.claude/rules/arch.md:171-173`).
-**优先级:** P1（高优先级）

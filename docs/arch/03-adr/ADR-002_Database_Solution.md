@@ -629,6 +629,7 @@ void main() {
 
 **文档维护者:** 技术架构团队
 **审核者:** CTO, 安全负责人
+**下次Review日期:** 2026-08-03
 
 ---
 
@@ -649,4 +650,3 @@ in production:
 
 The original decision body above is preserved verbatim per ADR append-only convention
 (`.claude/rules/arch.md:171-173`).
-**下次Review日期:** 2026-08-03
