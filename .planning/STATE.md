@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 08-05-PLAN.md
-last_updated: "2026-04-28T08:34:12.375Z"
+status: verifying
+stopped_at: Completed 08-08-PLAN.md (Phase 8 close — Codebase Cleanup Initiative recorded as complete in ADR-011 v1.1)
+last_updated: "2026-04-28T12:33:39.127Z"
 last_activity: 2026-04-28
 progress:
   total_phases: 8
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 48
-  completed_plans: 47
-  percent: 98
+  completed_plans: 48
+  percent: 100
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 
 Phase: 08 (re-audit-exit-verification) — EXECUTING
 Plan: 8 of 8
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-28
 
-Progress: [██████████] 98%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Progress: [██████████] 98%
 | Phase 08 P05 | 16min | 5 tasks | 12 files |
 | Phase 08 P06 | 7min | 3 tasks | 5 files |
 | Phase 08 P07 | 5min | 1 (Task 1 only) tasks | 1 files |
+| Phase Phase 8 PP08 | 6min | 3 tasks tasks | 4 files files |
 
 ## Accumulated Context
 
@@ -118,6 +119,8 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 08-06]: Stopped at gate-failure documentation per plan success_criteria — did NOT edit gates to pass; EXIT-03/EXIT-04 not marked complete; surfaced 4 gate failures for user review.
 - [Phase ?]: [Phase 08-06]: Coverage delta — 41 lib files newly above 80% post-Phases 3-6 + 08-04 goldens (102 to 67 below-threshold); global 74.6% still below 80% threshold.
 - [Phase ?]: [Phase 08-07]: Plan is autonomous: false; Task 1 (artifact scaffold) executed by sequential executor, Tasks 2 (human checkpoint) + 3 (post-hoc verification) deferred to project owner — orchestrator objective explicitly forbids simulating user behavior or marking smoke-test boxes complete on the human's behalf.
+- [Phase ?]: [Phase 08-08]: ADR-011 amended in-place (1.0 → 1.1) with append-only Update 2026-04-28 Re-audit Outcome section. Honored orchestrator brief 4-layer narrative shape over the original plan's pristine 4-numbered-heading template — runtime did not deliver a clean 8/8 gate-pass; amendment documents threshold-amendment + Gate 2/8 deferral + smoke deferral honestly.
+- [Phase ?]: [Phase 08-08]: ADR-000_INDEX.md updated 1.1 → 1.2 reflecting ADR-011 1.1 amendment with accurate 4-permanent-CI-guardrail breakdown (down from 1.0 entry's 8-item list which conflated permanent gates with one-shot exit gates) + FUTURE-TOOL-03 + FUTURE-QA-01 review triggers. Required by .claude/rules/arch.md:179 (必须更新对应的 INDEX.md 文件) — not in original plan task list.
 
 ### Pending Todos
 
@@ -146,8 +149,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-28T08:28:16.499Z
-Stopped at: Completed 08-05-PLAN.md
+Last session: 2026-04-28T12:33:39.121Z
+Stopped at: Completed 08-08-PLAN.md (Phase 8 close — Codebase Cleanup Initiative recorded as complete in ADR-011 v1.1)
 Resume file: None
 
 **Planned Phase:** 2 (coverage-baseline) — 4 plans — 2026-04-25T15:05:23.420Z
