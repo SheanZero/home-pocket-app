@@ -327,3 +327,48 @@ No source code changes; verification-only run.
 *Plan: 06*
 *Completed: 2026-04-28*
 *Amendment re-run: 2026-04-28T08:05:43Z*
+
+---
+
+## Update 2026-04-28 (#2) — Gate 2 + Gate 8 closed via deferral mechanism
+
+After the 70% threshold amendment surfaced 2 still-red gates (Gate 2 / Gate 8), the user chose **option 1 from the Wave-2 review**: fix Gate 2 with `--no-fatal-infos`, fix Gate 8's missing-from-lcov semantic, then add an explicit deferral mechanism for the 10 real <70% files.
+
+### Code changes (commits `436ccab` + this update)
+- **`audit.yml:48`**: `dart run custom_lint` → `dart run custom_lint --no-fatal-infos`
+- **`scripts/coverage_gate.dart`**: missing-from-lcov files become WARN-only and surface under a new `missing` key in JSON output (no longer fail exit code)
+- **`scripts/coverage_gate.dart`**: new `--deferred <path>` flag reading `<file>  # <rationale>` lines (rationale REQUIRED, exit 2 if absent); deferred files are skipped from threshold check, surfaced on stderr as `DEFERRED:`, and reported in JSON under a `deferred` key
+- **`audit.yml:113`**: per-file gate now passes `--deferred .planning/audit/coverage-gate-deferred.txt`
+- **`.planning/audit/coverage-gate-deferred.txt`** (NEW): 10 entries grouped by category (3 application-provider wrappers, 4 large UI screens, 3 state notifiers / widget sections), each with a written rationale tying the deferral to FUTURE-TOOL-03
+
+### Tests
+- 6 new subprocess tests in `test/scripts/coverage_gate_test.dart` covering `--deferred` (happy path, missing rationale, empty rationale, missing file, JSON output, non-masking of non-deferred failures)
+- Total `coverage_gate_test.dart`: 17 tests, all GREEN
+
+### Verification — final 8-gate state at 70% threshold
+
+```
+$ dart run custom_lint --no-fatal-infos
+28 issues found.
+exit 0  ✅
+
+$ dart run scripts/coverage_gate.dart \
+    --list .planning/audit/cleanup-touched-files.txt \
+    --deferred .planning/audit/coverage-gate-deferred.txt \
+    --threshold 70 \
+    --lcov coverage/lcov_clean.info
+[coverage:gate] 64 checked, 0 failed, 96 missing-from-lcov (skipped), 10 deferred (skipped) (threshold: 70)
+exit 0  ✅
+```
+
+Gates 1, 3, 4, 5, 6, 7 pass unchanged from earlier runs. **All 8 EXIT-04 gates now pass simultaneously.**
+
+### EXIT-03 / EXIT-04 disposition
+- EXIT-03 → **Complete** (74.6336% global > 70%)
+- EXIT-04 → **Complete** (8/8 gates pass; 10 deferrals reasoned and tracked)
+
+### Discipline preservation
+The `--deferred` mechanism is NOT a soft-fail flag. CI still hard-fails on:
+- Any `lib/` file in `cleanup-touched-files.txt` that is in lcov AND below 70% AND not in `coverage-gate-deferred.txt`
+- Any deferred-list entry without a rationale
+Each entry in `coverage-gate-deferred.txt` carries written rationale tying it to FUTURE-TOOL-03 (coverage-baseline-review). At the post-feature-work review the deferrals will either be retired (tests added) or formalized (per-area threshold split that subsumes the entries).

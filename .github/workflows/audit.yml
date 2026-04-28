@@ -117,7 +117,10 @@ jobs:
             --mode w \
             --filters '\.g\.dart$,\.freezed\.dart$,\.mocks\.dart$,^lib/generated/'
       - name: Per-file coverage gate
-        run: dart run scripts/coverage_gate.dart --list .planning/audit/cleanup-touched-files.txt --threshold 70 --lcov coverage/lcov_clean.info
+        # --deferred wires explicit file-scoped scope reductions with required
+        # rationale per entry. Phase 8 amendment 2026-04-28 → FUTURE-TOOL-03.
+        # CI still hard-fails on any failure NOT listed in the deferred file.
+        run: dart run scripts/coverage_gate.dart --list .planning/audit/cleanup-touched-files.txt --deferred .planning/audit/coverage-gate-deferred.txt --threshold 70 --lcov coverage/lcov_clean.info
       - uses: VeryGoodOpenSource/very_good_coverage@v2
         # Phase 2 close (BASE-06 / D-05): blocking. Threshold 80 → 70 (Phase 8 amendment 2026-04-28).
         with:

@@ -189,3 +189,53 @@ Down from 11 at the 80% threshold — `lib/application/accounting/repository_pro
 
 Threshold reduction closed the global-coverage gap (Gates 3 + 4) but did **not** address Gate 2's INFO findings or Gate 8's input-list filtering issue. Per success-criteria: marking EXIT-03 complete; leaving EXIT-04 pending with the two remaining blockers documented.
 
+
+---
+
+## Re-run #2 — 2026-04-28 (deferral mechanism + Gate 2 fix)
+
+After the 70%-threshold re-run still left Gate 2 + Gate 8 red, applied user-directed surgical fixes per Wave-2 review option 1 + the per-file deferral mechanism for the 10 real <70% files.
+
+### Gate 2 — `dart run custom_lint --no-fatal-infos`
+
+```
+$ dart run custom_lint --no-fatal-infos
+[... 28 INFO findings, all riverpod_lint scoped_providers_should_specify_dependencies ...]
+28 issues found.
+$ echo $?
+0
+```
+
+**Result: PASS.** import_guard rule still hard-fails on errors; only riverpod_lint INFO-severity findings are non-blocking (parity with `scripts/audit/{layer,providers}.dart`).
+
+### Gate 8 — `coverage_gate.dart --deferred ... --threshold 70`
+
+```
+$ dart run scripts/coverage_gate.dart \
+    --list .planning/audit/cleanup-touched-files.txt \
+    --deferred .planning/audit/coverage-gate-deferred.txt \
+    --threshold 70 \
+    --lcov coverage/lcov_clean.info
+[coverage:gate] 64 checked, 0 failed, 96 missing-from-lcov (skipped), 10 deferred (skipped) (threshold: 70)
+$ echo $?
+0
+```
+
+stderr shows 10 `DEFERRED:` lines (one per deferred-list entry, with rationale), 96 `WARNING:` lines for generated/non-Dart files filtered by coverde.
+
+**Result: PASS.**
+
+### Final 8-gate verdict (post-amendment, post-deferral)
+
+| Gate | Verdict | Notes |
+|------|---------|-------|
+| 1 — `flutter analyze` | ✅ PASS | unchanged |
+| 2 — `dart run custom_lint --no-fatal-infos` | ✅ PASS | 28 INFOs surface, non-blocking |
+| 3 — global ≥70% | ✅ PASS | 74.6336% |
+| 4 — `very_good_coverage@v2` | ✅ PASS | 70% min |
+| 5 — `import_guard` | ✅ PASS | unchanged, still hard-failing |
+| 6 — `check-unused-code lib` | ✅ PASS | unchanged |
+| 7 — `build_runner` clean diff | ✅ PASS | unchanged |
+| 8 — `coverage_gate.dart` | ✅ PASS | 64 checked / 0 failed / 96 missing / 10 deferred |
+
+**All 8 gates pass simultaneously.** EXIT-03 + EXIT-04 marked complete in REQUIREMENTS.md.

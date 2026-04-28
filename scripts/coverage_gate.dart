@@ -6,9 +6,20 @@
 // Usage:
 //   dart run scripts/coverage_gate.dart [<file>...]
 //                                       [--list <path>]
+//                                       [--deferred <path>]
 //                                       [--threshold N]
 //                                       [--lcov <path>]
 //                                       [--json]
+//
+// --deferred <path>: file listing paths explicitly deferred from the gate.
+//   Each non-blank non-comment line must be: <relative_path>  # <rationale>
+//   The rationale (text after `#`) is REQUIRED — entries without it cause
+//   exit 2 (invocation error). Deferred files are removed from threshold
+//   checking, surfaced on stderr as DEFERRED, and reported in JSON output
+//   under the `deferred` key. Mechanism added 2026-04-28 by Phase 8 amendment
+//   to support FUTURE-TOOL-03 (coverage-baseline-review): explicit, reasoned,
+//   file-scoped scope reduction with each entry justified — CI still hard-fails
+//   on any failure NOT in the deferral list.
 //
 // Exit codes (D-04, amended 2026-04-28):
 //   0 — every supplied file present in lcov met threshold
@@ -41,6 +52,7 @@ Future<void> main(List<String> args) async {
   var lcovPath = _defaultLcov;
   var emitJson = false;
   String? listPath;
+  String? deferredPath;
   final positionals = <String>[];
 
   for (var i = 0; i < args.length; i++) {
@@ -74,6 +86,12 @@ Future<void> main(List<String> args) async {
           exit(2);
         }
         listPath = args[++i];
+      case '--deferred':
+        if (i + 1 >= args.length) {
+          stderr.writeln('[coverage:gate] ERROR: --deferred requires a path');
+          exit(2);
+        }
+        deferredPath = args[++i];
       case '--json':
         emitJson = true;
       default:
@@ -119,18 +137,73 @@ Future<void> main(List<String> args) async {
     exit(2);
   }
 
+  // Phase 8 amendment 2026-04-28: parse --deferred file. Each non-blank
+  // non-comment line must be `<path>  # <rationale>`; rationale is REQUIRED.
+  final deferredEntries = <_DeferredEntry>[];
+  final deferredPaths = <String>{};
+  if (deferredPath != null) {
+    final f = File(deferredPath);
+    if (!f.existsSync()) {
+      stderr.writeln(
+        '[coverage:gate] ERROR: --deferred path not found: $deferredPath',
+      );
+      exit(2);
+    }
+    var lineNo = 0;
+    for (final raw in f.readAsLinesSync()) {
+      lineNo++;
+      final line = raw.trim();
+      if (line.isEmpty || line.startsWith('#')) continue;
+      final hashIdx = line.indexOf('#');
+      if (hashIdx <= 0) {
+        stderr.writeln(
+          '[coverage:gate] ERROR: $deferredPath line $lineNo missing rationale (expected: <path>  # <rationale>): $line',
+        );
+        exit(2);
+      }
+      final path = line.substring(0, hashIdx).trim();
+      final rationale = line.substring(hashIdx + 1).trim();
+      if (path.isEmpty) {
+        stderr.writeln(
+          '[coverage:gate] ERROR: $deferredPath line $lineNo empty path before #',
+        );
+        exit(2);
+      }
+      if (rationale.isEmpty) {
+        stderr.writeln(
+          '[coverage:gate] ERROR: $deferredPath line $lineNo empty rationale after # — rationale is required for deferral discipline',
+        );
+        exit(2);
+      }
+      deferredEntries.add(
+        _DeferredEntry(filePath: path, rationale: rationale),
+      );
+      deferredPaths.add(path);
+    }
+  }
+
   // Parse lcov once → map by file_path for O(1) lookup.
   final raw = File(lcovPath).readAsStringSync();
   final records = parseLcov(raw);
   final byPath = <String, LcovRecord>{for (final r in records) r.filePath: r};
 
-  // For each input file, classify as either:
-  //   - checked  : present in lcov → contributes to threshold gate + exit code
-  //   - missing  : not in lcov     → WARN-only (scope boundary, not a coverage failure)
-  // Phase 8 amendment 2026-04-28: missing-from-lcov no longer fails exit code.
+  // For each input file, classify as one of:
+  //   - deferred : in --deferred list → SKIP threshold check, record reasoning
+  //   - checked  : present in lcov  → contributes to threshold gate + exit code
+  //   - missing  : not in lcov      → WARN-only (scope boundary)
+  // Phase 8 amendment 2026-04-28: missing + deferred no longer fail exit code.
   final checked = <_GateRow>[];
   final missing = <String>[];
+  final deferredHits = <_DeferredEntry>[];
   for (final path in files) {
+    if (deferredPaths.contains(path)) {
+      final entry = deferredEntries.firstWhere((e) => e.filePath == path);
+      deferredHits.add(entry);
+      stderr.writeln(
+        '[coverage:gate] DEFERRED: $path — ${entry.rationale}',
+      );
+      continue;
+    }
     final found = byPath[path];
     if (found == null) {
       missing.add(path);
@@ -153,6 +226,7 @@ Future<void> main(List<String> args) async {
   // Sort lex-ASC by file_path (D-10 mirror for downstream consumers).
   checked.sort((a, b) => a.filePath.compareTo(b.filePath));
   missing.sort();
+  deferredHits.sort((a, b) => a.filePath.compareTo(b.filePath));
   final failures = checked.where((r) => !r.thresholdMet).toList();
 
   if (emitJson) {
@@ -160,6 +234,7 @@ Future<void> main(List<String> args) async {
       'checked': checked.map((r) => r.toJson()).toList(),
       'failures': failures.map((r) => r.toJson()).toList(),
       'missing': missing,
+      'deferred': deferredHits.map((e) => e.toJson()).toList(),
       'threshold': threshold,
       'lcov_source': lcovPath,
     };
@@ -172,11 +247,21 @@ Future<void> main(List<String> args) async {
       );
     }
     stdout.writeln(
-      '[coverage:gate] ${checked.length} checked, ${failures.length} failed, ${missing.length} missing-from-lcov (skipped) (threshold: $threshold)',
+      '[coverage:gate] ${checked.length} checked, ${failures.length} failed, ${missing.length} missing-from-lcov (skipped), ${deferredHits.length} deferred (skipped) (threshold: $threshold)',
     );
   }
 
   exit(failures.isEmpty ? 0 : 1);
+}
+
+class _DeferredEntry {
+  final String filePath;
+  final String rationale;
+  const _DeferredEntry({required this.filePath, required this.rationale});
+  Map<String, dynamic> toJson() => {
+    'file_path': filePath,
+    'rationale': rationale,
+  };
 }
 
 class _GateRow {

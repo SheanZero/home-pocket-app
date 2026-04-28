@@ -213,5 +213,129 @@ void main() {
         expect((j['missing'] as List), equals(['lib/missing.dart']));
       },
     );
+
+    // --- --deferred (Phase 8 amendment 2026-04-28) -------------------------
+
+    test(
+      '--deferred skips listed files from threshold check (gate passes)',
+      () async {
+        _writeLcov(tmp, {
+          'lib/a.dart': (5, 10), // 50% — would FAIL at default 70
+          'lib/b.dart': (10, 10),
+        });
+        File(
+          '${tmp.path}/deferred.txt',
+        ).writeAsStringSync('# header comment\nlib/a.dart  # deferred for X reason\n');
+        final r = await _runGate(tmp, [
+          '--deferred',
+          'deferred.txt',
+          'lib/a.dart',
+          'lib/b.dart',
+        ]);
+        expect(r.exitCode, equals(0), reason: r.stderr.toString());
+        expect(r.stderr.toString(), contains('DEFERRED: lib/a.dart'));
+        expect(r.stderr.toString(), contains('deferred for X reason'));
+        expect(r.stdout.toString(), contains('1 deferred (skipped)'));
+      },
+    );
+
+    test(
+      '--deferred entry without rationale exits 2',
+      () async {
+        _writeLcov(tmp, {'lib/a.dart': (5, 10)});
+        File('${tmp.path}/deferred.txt').writeAsStringSync('lib/a.dart\n');
+        final r = await _runGate(tmp, [
+          '--deferred',
+          'deferred.txt',
+          'lib/a.dart',
+        ]);
+        expect(r.exitCode, equals(2));
+        expect(r.stderr.toString(), contains('missing rationale'));
+      },
+    );
+
+    test(
+      '--deferred entry with empty rationale (just `#` and whitespace) exits 2',
+      () async {
+        _writeLcov(tmp, {'lib/a.dart': (5, 10)});
+        File('${tmp.path}/deferred.txt').writeAsStringSync('lib/a.dart  #   \n');
+        final r = await _runGate(tmp, [
+          '--deferred',
+          'deferred.txt',
+          'lib/a.dart',
+        ]);
+        expect(r.exitCode, equals(2));
+        expect(r.stderr.toString(), contains('empty rationale'));
+      },
+    );
+
+    test(
+      '--deferred missing path exits 2',
+      () async {
+        _writeLcov(tmp, {'lib/a.dart': (5, 10)});
+        final r = await _runGate(tmp, [
+          '--deferred',
+          'nope.txt',
+          'lib/a.dart',
+        ]);
+        expect(r.exitCode, equals(2));
+        expect(r.stderr.toString(), contains('--deferred path not found'));
+      },
+    );
+
+    test(
+      '--deferred + --json: deferred entries appear under "deferred" key with rationale',
+      () async {
+        _writeLcov(tmp, {
+          'lib/a.dart': (5, 10),
+          'lib/b.dart': (10, 10),
+        });
+        File('${tmp.path}/deferred.txt').writeAsStringSync(
+          'lib/a.dart  # rationale for a\n',
+        );
+        final r = await _runGate(tmp, [
+          '--deferred',
+          'deferred.txt',
+          '--json',
+          'lib/a.dart',
+          'lib/b.dart',
+        ]);
+        expect(r.exitCode, equals(0));
+        final out = r.stdout.toString();
+        final start = out.indexOf('{');
+        final j = jsonDecode(out.substring(start)) as Map<String, dynamic>;
+        expect(j.keys.toSet(), contains('deferred'));
+        final deferred = (j['deferred'] as List).cast<Map>();
+        expect(deferred, hasLength(1));
+        expect(deferred.first['file_path'], equals('lib/a.dart'));
+        expect(deferred.first['rationale'], equals('rationale for a'));
+      },
+    );
+
+    test(
+      '--deferred does not mask failures of files NOT in the deferred list',
+      () async {
+        // Defer a.dart (50%, would fail) — but NOT c.dart (30%, also fails).
+        // Gate must still exit 1 because c.dart is not deferred.
+        _writeLcov(tmp, {
+          'lib/a.dart': (5, 10),
+          'lib/b.dart': (10, 10),
+          'lib/c.dart': (3, 10),
+        });
+        File('${tmp.path}/deferred.txt').writeAsStringSync(
+          'lib/a.dart  # deferred\n',
+        );
+        final r = await _runGate(tmp, [
+          '--deferred',
+          'deferred.txt',
+          'lib/a.dart',
+          'lib/b.dart',
+          'lib/c.dart',
+        ]);
+        expect(r.exitCode, equals(1));
+        expect(r.stdout.toString(), contains('lib/c.dart'));
+        expect(r.stdout.toString(), contains('FAIL'));
+      },
+    );
   });
 }
