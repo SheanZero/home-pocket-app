@@ -199,7 +199,20 @@ Map<String, Finding> _readCatalogue({
       );
       exit(2);
     }
-    byKey[_diffKey(finding)] = finding;
+    final key = _diffKey(finding);
+    if (byKey.containsKey(key)) {
+      // WR-07: merger keys on (file_path, line_start, category) but the differ
+      // drops line_start from its key. Two findings sharing the differ key
+      // would silently overwrite each other and erode gate strictness — fail
+      // loudly so the operator either reworks descriptions or fixes the merger.
+      stderr.writeln(
+        '[reaudit:diff] ERROR: duplicate diff key in $path — '
+        '${finding.category}|${finding.filePath}|${finding.description} '
+        '(this catalogue is not safe for diffing; merger keys differ from differ keys)',
+      );
+      exit(2);
+    }
+    byKey[key] = finding;
   }
   return byKey;
 }
