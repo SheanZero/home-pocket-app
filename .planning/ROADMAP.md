@@ -149,8 +149,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Requirements**: EXIT-01, EXIT-02, EXIT-03, EXIT-04, EXIT-05
 **Success Criteria** (what must be TRUE):
   1. `.planning/audit/re-audit/issues.json` is produced by re-running the full audit pipeline on the post-refactor codebase; `scripts/reaudit_diff.dart` exits 0 with zero entries `"status": "open"` across all four finding categories (layer violations, redundant code, dead code, Riverpod hygiene)
-  2. All eight exit gates pass simultaneously: `flutter analyze` exits 0; `dart run custom_lint` exits 0; `flutter test --coverage` exits 0 with global ≥80% coverage; `very_good_coverage@v2` does not fail against `lcov_clean.info`; `import_guard` reports 0 violations; `dart run dart_code_linter:metrics check-unused-code lib` reports 0 findings; `build_runner build --delete-conflicting-outputs && git diff --exit-code lib/` exits 0
-  3. The four CI guardrails (`import_guard`, `riverpod_lint`/`custom_lint`, `coverde` per-file ≥80%, `sqlite3_flutter_libs` rejection) are permanent — they block future PRs and are documented in the CI configuration
+  2. All eight exit gates pass simultaneously: `flutter analyze` exits 0; `dart run custom_lint` exits 0; `flutter test --coverage` exits 0 with global ≥70% coverage; `very_good_coverage@v2` does not fail against `lcov_clean.info`; `import_guard` reports 0 violations; `dart run dart_code_linter:metrics check-unused-code lib` reports 0 findings; `build_runner build --delete-conflicting-outputs && git diff --exit-code lib/` exits 0. *Threshold amended 80→70 on 2026-04-28 (REPO-LOCK-POLICY.md "Update 2026-04-28").*
+  3. The four CI guardrails (`import_guard`, `riverpod_lint`/`custom_lint`, `coverde` per-file ≥70%, `sqlite3_flutter_libs` rejection) are permanent — they block future PRs and are documented in the CI configuration
   4. A human smoke test confirms user-observable behavior is identical to the pre-refactor baseline (UI, data, interactions, formatting are byte-identical from the user's perspective)
 **Plans**: TBD
 

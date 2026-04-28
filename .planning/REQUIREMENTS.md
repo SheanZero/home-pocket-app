@@ -3,9 +3,14 @@
 **Defined:** 2026-04-25
 **Core Value:** Re-running the audit at the end finds zero violations across all four categories.
 
+## Amendments
+
+### 2026-04-28 — Coverage threshold lowered 80% → 70%
+Phase 8 close discovered post-cleanup global coverage at 74.6%, ~5pp short of the original 80% target. User directive: lower the active threshold to 70% (well below current reality), proceed to phase close, and revisit raising the bar — or splitting per-area thresholds — after v1 feature work completes (see backlog item `coverage-baseline-review`). The change applies to EXIT-03, EXIT-04, the active CI gates (`audit.yml` `min_coverage` + `coverage_gate.dart --threshold`), and `coverage_*.dart` script defaults. Historical Phase 2/3/4/5/6 wording (BASE-04..06, CRIT-05, HIGH-08, MED-08, LOW-07) is left at 80% as the record of what those phases delivered against — this amendment governs forward, not retroactively.
+
 ## v1 Requirements
 
-Requirements for the cleanup initiative. Each maps to exactly one phase. All are gated by the project's universal constraints (strict behavior preservation, ≥80% coverage on touched files, `flutter analyze = 0`, all tests GREEN).
+Requirements for the cleanup initiative. Each maps to exactly one phase. All are gated by the project's universal constraints (strict behavior preservation, ≥80% coverage on touched files at fix-phase delivery time, `flutter analyze = 0`, all tests GREEN). The active forward-looking gate threshold is 70% per the 2026-04-28 amendment above.
 
 ### Audit Pipeline (AUDIT)
 
@@ -81,8 +86,8 @@ Requirements for the cleanup initiative. Each maps to exactly one phase. All are
 
 - [x] **EXIT-01**: The full audit pipeline is re-run on the post-refactor codebase; `.planning/audit/re-audit/issues.json` is produced
 - [x] **EXIT-02**: `scripts/reaudit_diff.dart` runs and reports the resolved / regression / new-finding counts; exits 0 only when there are zero open findings across all four categories
-- [ ] **EXIT-03**: Global coverage from `flutter test --coverage` is ≥80% (against `lcov_clean.info`); `very_good_coverage@v2` does not fail
-- [x] **EXIT-04**: All eight exit-criterion gates from SUMMARY.md pass simultaneously: re-audit zero, `flutter analyze` 0, `dart run custom_lint` 0, `flutter test` GREEN with ≥80% coverage, `very_good_coverage@v2` pass, `import_guard` 0 violations, `dart_code_linter check-unused-code` 0 findings, `build_runner` clean diff
+- [ ] **EXIT-03**: Global coverage from `flutter test --coverage` is ≥70% (against `lcov_clean.info`); `very_good_coverage@v2` does not fail. *Amended 2026-04-28: was 80%.*
+- [ ] **EXIT-04**: All eight exit-criterion gates from SUMMARY.md pass simultaneously: re-audit zero, `flutter analyze` 0, `dart run custom_lint` 0, `flutter test` GREEN with ≥70% coverage, `very_good_coverage@v2` pass, `import_guard` 0 violations, `dart_code_linter check-unused-code` 0 findings, `build_runner` clean diff. *Amended 2026-04-28: threshold 80→70.*
 - [x] **EXIT-05**: The four CI guardrails (`import_guard`, `riverpod_lint`/`custom_lint`, `coverde` per-file, `sqlite3_flutter_libs` rejection) become permanent — failing them blocks future PRs
 
 ## v2 Requirements
@@ -100,6 +105,7 @@ Deferred — explicitly out of this initiative but acknowledged for future track
 
 - **FUTURE-TOOL-01**: Add `riverpod_lint` 3.x once `json_serializable` analyzer conflict is resolved upstream
 - **FUTURE-TOOL-02**: Build a Drift-column unused-detection custom Dart script if AI-agent scan accuracy is insufficient at scale
+- **FUTURE-TOOL-03** *(coverage-baseline-review, added 2026-04-28)*: After v1 feature work completes, review the active 70% coverage threshold (lowered from 80% by Phase 8 amendment) and decide: raise uniformly back toward 80%, OR split per-area (e.g., infrastructure/data ≥80%, presentation ≥70%, generated/glue exempt). Inputs: latest `coverage-baseline.json`, distribution of per-area coverage, area-specific risk profile. Output: ADR amendment + matching `audit.yml` / `coverage_*.dart` edits.
 
 ## Out of Scope
 
@@ -179,7 +185,7 @@ Phase mapping populated by `gsd-roadmapper` during roadmap creation.
 | EXIT-01 | Phase 8 | Complete |
 | EXIT-02 | Phase 8 | Complete |
 | EXIT-03 | Phase 8 | Pending |
-| EXIT-04 | Phase 8 | Complete |
+| EXIT-04 | Phase 8 | Pending |
 | EXIT-05 | Phase 8 | Complete |
 
 **Coverage:**

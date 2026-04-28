@@ -25,7 +25,9 @@ const _fallbackList = '.planning/audit/files-needing-tests.txt';
 
 Future<void> main(List<String> args) async {
   // Defaults from D-02 (threshold) / D-03 (lcov path).
-  var threshold = 80;
+  // Threshold lowered 80 → 70 by Phase 8 amendment 2026-04-28; CI invocations
+  // pass --threshold explicitly so this default only affects local runs.
+  var threshold = 70;
   var lcovPath = _defaultLcov;
   var emitJson = false;
   String? listPath;

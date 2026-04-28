@@ -2,7 +2,7 @@
 // Subprocess tests for scripts/coverage_gate.dart.
 //
 // Covers CONTEXT.md decisions D-01 (hybrid input chain),
-// D-02 (--threshold default 80), D-03 (--lcov default + missing-lcov
+// D-02 (--threshold default 70 since Phase 8 amendment 2026-04-28; was 80), D-03 (--lcov default + missing-lcov
 // actionable error), D-04 (table + --json output, exit-code triple).
 import 'dart:convert';
 import 'dart:io';

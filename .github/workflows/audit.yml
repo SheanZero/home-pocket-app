@@ -1,9 +1,12 @@
 # Permanent gate — do not weaken without ADR amendment.
 # See docs/arch/03-adr/ADR-011_Codebase_Cleanup_Initiative_Outcome.md.
 # Phase 8 D-05: the four guardrails below (import_guard / custom_lint /
-# coverde per-file >=80% / sqlite3_flutter_libs reject) are blocking on
+# coverde per-file >=70% / sqlite3_flutter_libs reject) are blocking on
 # every PR + push to main. The coverage job intentionally has no PR-only
 # guard, and every guardrail step is hard-failing by design.
+# Threshold history: 80% (Phase 2 BASE-06) → 70% (Phase 8 amendment 2026-04-28,
+# user directive: post-cleanup coverage 74.6% short of 80%; raise revisited after
+# v1 feature work completes — see backlog ID coverage-baseline-review).
 
 name: audit
 
@@ -110,12 +113,12 @@ jobs:
             --mode w \
             --filters '\.g\.dart$,\.freezed\.dart$,\.mocks\.dart$,^lib/generated/'
       - name: Per-file coverage gate
-        run: dart run scripts/coverage_gate.dart --list .planning/audit/cleanup-touched-files.txt --threshold 80 --lcov coverage/lcov_clean.info
+        run: dart run scripts/coverage_gate.dart --list .planning/audit/cleanup-touched-files.txt --threshold 70 --lcov coverage/lcov_clean.info
       - uses: VeryGoodOpenSource/very_good_coverage@v2
-        # Phase 2 close (BASE-06 / D-05): blocking. Threshold 80 against lcov_clean.info.
+        # Phase 2 close (BASE-06 / D-05): blocking. Threshold 80 → 70 (Phase 8 amendment 2026-04-28).
         with:
           path: coverage/lcov_clean.info   # Phase 2 BASE-02: cleaned by coverde filter upstream
-          min_coverage: 80
+          min_coverage: 70
           exclude: |
             **/*.g.dart
             **/*.freezed.dart

@@ -77,9 +77,25 @@ The cleanup runway lock window CLOSES at Phase 8 close. The four CI guardrails a
 
 1. **`import_guard`** (custom_lint plugin host) — runs in `.github/workflows/audit.yml` `static-analysis` job, `dart run custom_lint` step.
 2. **`riverpod_lint`** (custom_lint plugin host, same step as `import_guard`) — provider hygiene gate.
-3. **`coverde` per-file ≥80%** — runs in the `coverage` job; `if: pull_request` lifted per Phase 8 D-05 so push-to-main also gated.
+3. **`coverde` per-file ≥70%** — runs in the `coverage` job; `if: pull_request` lifted per Phase 8 D-05 so push-to-main also gated. *Threshold amended 80→70 on 2026-04-28; see Update below.*
 4. **`sqlite3_flutter_libs` reject** — runs in `guardrails` job; greps `pubspec.lock`, exits 1 on detection.
 
 `audit.yml` carries a top-of-file warning comment block recording these as permanent. Weakening any guardrail (adding `continue-on-error: true`, restoring `if: pull_request` on coverage, removing the warning block) requires an ADR-011 amendment.
 
 The non-cleanup PR lock from "## The Policy" (above) is LIFTED at Phase 6 close per the lifecycle table; the **gate-permanence** lock added by this section is independent and remains in force indefinitely.
+
+## Update 2026-04-28 — Coverage threshold 80% → 70%
+
+Phase 8 Plan 08-06 ran all 8 EXIT-04 gates locally on the post-cleanup tree and surfaced a real gap: global coverage of `lcov_clean.info` came in at **74.6%** — ~5pp short of the 80% target inherited from Phase 2 (BASE-06 / D-05). Per-file `coverage_gate.dart` against `cleanup-touched-files.txt` also returned 11 real failures plus 96 missing-from-lcov warnings.
+
+**User decision (option 3 from the Phase 8 Wave-2 review):** lower the active threshold to 70%, proceed to phase close, and re-evaluate after v1 feature work — either raise the bar uniformly back toward 80% or split per-area thresholds (e.g., infrastructure/data 80%, presentation 70%, generated/glue exempt). Tracked as `coverage-baseline-review` in the backlog.
+
+**Concrete edits applied with this amendment:**
+- `.github/workflows/audit.yml`: `min_coverage: 80 → 70` (very_good_coverage step) and `coverage_gate.dart --threshold 80 → 70` (per-file gate step). Top-of-file warning comment updated to reference 70 + this amendment.
+- `scripts/coverage_baseline.dart`: const `_threshold = 80 → 70`.
+- `scripts/coverage_gate.dart`: default `threshold = 80 → 70` (CI invocations pass `--threshold` explicitly, so the default only governs local runs).
+- `test/scripts/coverage_baseline_test.dart`: assertion updated from `j['threshold'] == 80` to `== 70`.
+- `.planning/REQUIREMENTS.md`: EXIT-03 / EXIT-04 reworded to 70%; EXIT-04 reset to Pending (gate-pass not yet proven against new threshold). Phase 2 BASE-* and per-phase fix-phase wording (CRIT-05, HIGH-08, MED-08, LOW-07) left at 80% as historical record of what those phases delivered.
+- `.planning/ROADMAP.md`: Phase 8 success criteria threshold updated from 80 → 70.
+
+The amendment governs **forward** — fix-phase deliverable records (≥80% on touched files for Phases 3-6) remain unchanged. Future fix work targets the active 70% gate plus any per-area policy adopted at the post-feature-work review.

@@ -139,7 +139,7 @@ void main() {
       expect(txtLines.first.split('\t').length, equals(3));
 
       final j = jsonDecode(json.readAsStringSync()) as Map<String, dynamic>;
-      expect(j['threshold'], equals(80));
+      expect(j['threshold'], equals(70));
       expect(j['total_files'], equals(3));
       expect(j['files_below_threshold'], equals(2)); // a.dart 50%, c.dart 0%
       expect(j['flutter_test_command'], equals('flutter test --coverage'));

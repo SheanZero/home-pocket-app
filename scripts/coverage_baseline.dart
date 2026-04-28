@@ -18,7 +18,7 @@ import 'dart:io';
 import 'coverage/lcov_parser.dart';
 
 const _defaultLcov = 'coverage/lcov_clean.info';
-const _threshold = 80;
+const _threshold = 70;
 const _flutterTestCommand = 'flutter test --coverage';
 const _outDir = '.planning/audit';
 
