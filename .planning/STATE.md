@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 08-03-PLAN.md
-last_updated: "2026-04-28T06:43:13.845Z"
+stopped_at: Completed 08-05-PLAN.md
+last_updated: "2026-04-28T06:57:24.429Z"
 last_activity: 2026-04-28
 progress:
   total_phases: 8
   completed_phases: 7
   total_plans: 48
-  completed_plans: 44
-  percent: 92
+  completed_plans: 45
+  percent: 94
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 08 (re-audit-exit-verification) — EXECUTING
-Plan: 5 of 8
+Plan: 6 of 8
 Status: Ready to execute
 Last activity: 2026-04-28
 
-Progress: [█████████░] 92%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
@@ -65,6 +65,7 @@ Progress: [█████████░] 92%
 | Phase 08 P02 | 10min | 2 tasks | 4 files |
 | Phase Phase 08 PP03 | 4min | 2 tasks tasks | 2 files files |
 | Phase 08 P04 | 4min | 3 tasks | 10 files |
+| Phase 08 P05 | 16min | 5 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,10 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 08-04]: Widget golden bounds adjusted from plan-specified 360x200 to 600x280 (SummaryCards) and 420x200 (SoulFullnessCard) — Rule 3 fix for English-locale label widths and 2x2 grid extent.
 - [Phase ?]: [Phase 08-04]: _summaryReport fixture copied verbatim from analytics_money_widgets_test.dart — preserves field-set fidelity against MonthlyReport constructor extensions.
 - [Phase ?]: [Phase 08-04]: amount_display.dart absent from cleanup-touched-files.txt logged to deferred-items.md for Plan 08-06 — Phase 3-6 plan frontmatter completeness gap, out of Plan 08-04 scope.
+- [Phase 08-05]: [Phase 08-05]: merge_findings.dart --root is the only Phase-1-pipeline modification (single _resolveRoot helper threading root into 4 inline path literals; backwards-compat verified by re-running with no flags and git diff --exit-code on baseline issues.json).
+- [Phase 08-05]: [Phase 08-05]: Scanners hardcode output paths — chose run-then-cp-then-checkout pattern (run scanner, copy shard to re-audit/, restore baseline via git checkout) over modifying scanner code; preserves Phase 1 D-01 lock posture.
+- [Phase 08-05]: [Phase 08-05]: agent:transitive judgment — Application's documented re-export of Infrastructure types in lib/application/family_sync/repository_providers.dart lines 19-26 is intentional Clean Architecture facade (per the file's own comment), not transitive smuggling; flagged-as-clean with explicit note field.
+- [Phase 08-05]: [Phase 08-05]: Re-audit gate GREEN — resolved=50/regression=0/new=0/open_in_baseline=0; reaudit_diff.dart exits 0; EXIT-01 + EXIT-02 satisfied without massaging the script.
 
 ### Pending Todos
 
@@ -133,8 +138,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-28T06:43:07.390Z
-Stopped at: Completed 08-03-PLAN.md
+Last session: 2026-04-28T06:57:24.424Z
+Stopped at: Completed 08-05-PLAN.md
 Resume file: None
 
 **Planned Phase:** 2 (coverage-baseline) — 4 plans — 2026-04-25T15:05:23.420Z

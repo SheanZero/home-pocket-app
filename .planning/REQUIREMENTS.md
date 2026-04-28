@@ -79,7 +79,7 @@ Requirements for the cleanup initiative. Each maps to exactly one phase. All are
 
 ### Re-Audit / Exit Verification (EXIT)
 
-- [ ] **EXIT-01**: The full audit pipeline is re-run on the post-refactor codebase; `.planning/audit/re-audit/issues.json` is produced
+- [x] **EXIT-01**: The full audit pipeline is re-run on the post-refactor codebase; `.planning/audit/re-audit/issues.json` is produced
 - [x] **EXIT-02**: `scripts/reaudit_diff.dart` runs and reports the resolved / regression / new-finding counts; exits 0 only when there are zero open findings across all four categories
 - [ ] **EXIT-03**: Global coverage from `flutter test --coverage` is ≥80% (against `lcov_clean.info`); `very_good_coverage@v2` does not fail
 - [x] **EXIT-04**: All eight exit-criterion gates from SUMMARY.md pass simultaneously: re-audit zero, `flutter analyze` 0, `dart run custom_lint` 0, `flutter test` GREEN with ≥80% coverage, `very_good_coverage@v2` pass, `import_guard` 0 violations, `dart_code_linter check-unused-code` 0 findings, `build_runner` clean diff
@@ -176,7 +176,7 @@ Phase mapping populated by `gsd-roadmapper` during roadmap creation.
 | DOCS-02 | Phase 7 | Complete |
 | DOCS-03 | Phase 7 | Complete |
 | DOCS-04 | Phase 7 | Complete |
-| EXIT-01 | Phase 8 | Pending |
+| EXIT-01 | Phase 8 | Complete |
 | EXIT-02 | Phase 8 | Complete |
 | EXIT-03 | Phase 8 | Pending |
 | EXIT-04 | Phase 8 | Complete |
