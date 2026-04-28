@@ -140,7 +140,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [x] 07-01-arch-mod-drift-PLAN.md — ARCH/MOD/UI drift fixes + Wave 0 verify-doc-sweep.sh (DOCS-01 part 1)
   - [x] 07-02-adr-drift-PLAN.md — ADR-002/007/008/010 append-only Cleanup Initiative Outcome sections (DOCS-01 part 2)
   - [x] 07-03-claude-md-pitfall-annotation-PLAN.md — CLAUDE.md 13 pitfall annotations + path drift fix in CLAUDE.md and .claude/rules/arch.md (DOCS-02 + DOCS-01)
-  - [ ] 07-04-index-health-PLAN.md — INDEX health check script + MOD-000 stub + README sync (DOCS-03)
+  - [x] 07-04-index-health-PLAN.md — INDEX health check script + MOD-000 stub + README sync (DOCS-03)
   - [ ] 07-05-cleanup-outcome-adr-PLAN.md — Create ADR-011 + ADR-000 INDEX entry + final phase gate (DOCS-04)
 
 ### Phase 8: Re-Audit + Exit Verification
