@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 8 context gathered
-last_updated: "2026-04-28T06:21:15.240Z"
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-04-28T06:28:11.449Z"
 last_activity: 2026-04-28
 progress:
   total_phases: 8
   completed_phases: 7
   total_plans: 48
-  completed_plans: 41
-  percent: 85
+  completed_plans: 42
+  percent: 88
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 08 (re-audit-exit-verification) — EXECUTING
-Plan: 2 of 8
+Plan: 3 of 8
 Status: Ready to execute
 Last activity: 2026-04-28
 
-Progress: [█████████░] 85%
+Progress: [█████████░] 88%
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Progress: [█████████░] 85%
 | Phase 05-medium-fixes P05 | 22min | 2 tasks | 15 files |
 | Phase 07 P07-06 | 35min | 9 tasks | 10 files |
 | Phase 08 P01 | 13min | 2 tasks | 2 files |
+| Phase 08 P02 | 10min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,9 @@ Recent decisions affecting current work:
 - [Phase 08-01]: reaudit_diff match key drops line_start (Phase 1 D-07 + Phase 8 D-02): category|file_path|description — line numbers shift after cleanup but the triple is stable across re-runs
 - [Phase 08-01]: Reserved exit(2) for invocation errors (missing baseline / re-audit JSON, malformed JSON, unknown flag) per coverage_gate.dart precedent — keeps gate-failure (exit 1) and bug-in-CLI (exit 2) distinguishable
 - [Phase 08-01]: REAUDIT-DIFF.json carries no top-level generated_at field — keeps re-runs byte-stable per Phase 1 D-09 idempotency carry-over
+- [Phase ?]: [Phase 08-02]: Bash awk frontmatter parser produces deterministic Phase 3-6 union (170 entries) for cleanup-touched-files.txt — sort -u keeps re-runs byte-stable; phase6-touched-files.txt kept on disk with header comment per D-04.
+- [Phase ?]: [Phase 08-02]: cleanup-touched-files.txt does NOT pre-filter .g.dart/.arb — coverde filter (audit.yml line 105) excludes them downstream and coverage_gate emits a non-blocking WARNING for missing-from-lcov entries. Keeps generator output a literal mirror of plan files_modified frontmatter.
+- [Phase ?]: [Phase 08-02]: audit.yml edit limited to line 107 --list arg swap — top-of-file warning block, continue-on-error sweep, and 'if: pull_request' lift on coverage job are 08-03's job to keep merge surface clean.
 
 ### Pending Todos
 
@@ -121,8 +125,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-28T06:21:01.989Z
-Stopped at: Phase 8 context gathered
+Last session: 2026-04-28T06:28:11.444Z
+Stopped at: Completed 08-02-PLAN.md
 Resume file: None
 
 **Planned Phase:** 2 (coverage-baseline) — 4 plans — 2026-04-25T15:05:23.420Z
