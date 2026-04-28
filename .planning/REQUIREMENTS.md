@@ -86,8 +86,8 @@ Requirements for the cleanup initiative. Each maps to exactly one phase. All are
 
 - [x] **EXIT-01**: The full audit pipeline is re-run on the post-refactor codebase; `.planning/audit/re-audit/issues.json` is produced
 - [x] **EXIT-02**: `scripts/reaudit_diff.dart` runs and reports the resolved / regression / new-finding counts; exits 0 only when there are zero open findings across all four categories
-- [ ] **EXIT-03**: Global coverage from `flutter test --coverage` is ≥70% (against `lcov_clean.info`); `very_good_coverage@v2` does not fail. *Amended 2026-04-28: was 80%.*
-- [ ] **EXIT-04**: All eight exit-criterion gates from SUMMARY.md pass simultaneously: re-audit zero, `flutter analyze` 0, `dart run custom_lint` 0, `flutter test` GREEN with ≥70% coverage, `very_good_coverage@v2` pass, `import_guard` 0 violations, `dart_code_linter check-unused-code` 0 findings, `build_runner` clean diff. *Amended 2026-04-28: threshold 80→70.*
+- [x] **EXIT-03**: Global coverage from `flutter test --coverage` is ≥70% (against `lcov_clean.info`); `very_good_coverage@v2` does not fail. *Amended 2026-04-28: was 80%. Verified 2026-04-28T08:05:43Z at 74.6336% (Plan 08-06 amendment re-run).*
+- [ ] **EXIT-04**: All eight exit-criterion gates from SUMMARY.md pass simultaneously: re-audit zero, `flutter analyze` 0, `dart run custom_lint` 0, `flutter test` GREEN with ≥70% coverage, `very_good_coverage@v2` pass, `import_guard` 0 violations, `dart_code_linter check-unused-code` 0 findings, `build_runner` clean diff. *Amended 2026-04-28: threshold 80→70.* **Pending after 2026-04-28T08:05:43Z re-run: 6 of 8 gates pass; Gate 2 (`dart run custom_lint` — 28 INFO findings) and Gate 8 (`coverage_gate.dart` — 10 real failures + 96 missing-from-lcov WARNINGs) still fail. See 08-06-SUMMARY.md § "Update 2026-04-28 — Gate re-run at 70% threshold" for remediation paths.**
 - [x] **EXIT-05**: The four CI guardrails (`import_guard`, `riverpod_lint`/`custom_lint`, `coverde` per-file, `sqlite3_flutter_libs` rejection) become permanent — failing them blocks future PRs
 
 ## v2 Requirements
@@ -184,7 +184,7 @@ Phase mapping populated by `gsd-roadmapper` during roadmap creation.
 | DOCS-04 | Phase 7 | Complete |
 | EXIT-01 | Phase 8 | Complete |
 | EXIT-02 | Phase 8 | Complete |
-| EXIT-03 | Phase 8 | Pending |
+| EXIT-03 | Phase 8 | Complete |
 | EXIT-04 | Phase 8 | Pending |
 | EXIT-05 | Phase 8 | Complete |
 

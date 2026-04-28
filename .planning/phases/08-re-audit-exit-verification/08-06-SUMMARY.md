@@ -247,6 +247,83 @@ The four PASS gates (1, 5, 6, 7) confirm: `flutter analyze` clean, `import_guard
 
 ---
 
+## Update 2026-04-28 — Gate re-run at 70% threshold
+
+**Trigger:** Amendment commit `03b1a06` ("docs(08-amend): lower coverage threshold 80→70 per user directive") lowered the EXIT-03 / EXIT-04 / `audit.yml` / `coverage_gate.dart` threshold from 80% to 70%. This re-run verifies which gates that flipped.
+
+**Run timestamp:** 2026-04-28T08:05:43Z
+**Tree commit:** `03b1a06900693646b053658a0cc2ba22b15ff58d`
+**Coverage source:** `coverage/lcov_clean.info` from the prior 80% run on the same tree (no source changes intervening).
+**Methodology:** Re-executed only threshold-dependent gates (3, 4, 8). Gates 1/5/6/7 cited as already-passing (unaffected by threshold). Gate 2 cited as already-failing (INFO findings independent of coverage threshold). Full per-gate output in `08-06-GATES-LOG.md` § "Re-run 2026-04-28T08:05:43Z".
+
+### Gate verdict table (post-amendment)
+
+| Gate | Verdict at 80% | Verdict at 70% | Δ |
+|------|---------------|----------------|---|
+| 1 — `flutter analyze` | PASS | PASS (cited) | unchanged |
+| 2 — `dart run custom_lint` | FAIL | **FAIL** (cited) | unchanged — INFO findings are coverage-independent |
+| 3 — global LH/LF ≥threshold | FAIL (74.6% < 80%) | **PASS** (74.6336% > 70%) | flipped FAIL→PASS |
+| 4 — very_good_coverage@v2 | FAIL | **PASS** | flipped FAIL→PASS |
+| 5 — `import_guard` | PASS | PASS (cited) | unchanged |
+| 6 — `check-unused-code lib` | PASS | PASS (cited) | unchanged |
+| 7 — `build_runner` clean diff | PASS | PASS (cited) | unchanged |
+| 8 — `coverage_gate.dart --threshold 70` | FAIL (11 real + 96 warn) | **FAIL** (10 real + 96 warn) | partial — 1 file flipped (75% file passes at 70%) |
+
+**Net:** 6 of 8 gates PASS (was 4 of 8). Two gates still FAIL: **Gate 2** (custom_lint) and **Gate 8** (per-file gate).
+
+### What the threshold change closed
+
+- **Gate 3** flipped — global coverage 74.6336% clears the new 70% bar (was below 80%).
+- **Gate 4** flipped — `very_good_coverage@v2 min_coverage: 70` measures the same arithmetic as Gate 3.
+- **Gate 8** partially improved — `lib/application/accounting/repository_providers.dart` (75.00%) was the only file in the 70-80% band; it flipped FAIL→PASS. The other 10 real-failure files were all already below 70%, so they remain failing.
+
+### What the threshold change did NOT close
+
+**Gate 2 (custom_lint) — 28 INFO findings, exit 1.** Cited from original log § "Gate 2" and Discovery 1. Threshold change does not affect INFO-level findings; this was always a separate failure mode. User option 3 (lower threshold) addressed only the coverage gates, not the lint gate. Two remaining paths to gate-pass remain on the table (per Discovery 1):
+1. Add `--no-fatal-infos` to `audit.yml` line 51 (`dart run custom_lint`) — matches the flag already in use elsewhere.
+2. Refactor 7 `lib/` files to convert manual providers to `@riverpod` (high scope).
+
+**Gate 8 (`coverage_gate.dart`) — 10 real failures + 96 missing-from-lcov WARNINGs.** Decomposition unchanged from 80% run except for the one 75% → PASS flip:
+
+Real failures still <70%:
+- `application/profile/repository_providers.dart` — 0.00%
+- `application/ml/repository_providers.dart` — 40.00%
+- `application/voice/repository_providers.dart` — 40.00%
+- `features/family_sync/presentation/screens/create_group_screen.dart` — 17.71%
+- `features/home/presentation/providers/state_shadow_books.dart` — 34.62%
+- `features/accounting/presentation/screens/transaction_entry_screen.dart` — 45.96%
+- `features/analytics/presentation/screens/analytics_screen.dart` — 52.73%
+- `features/settings/presentation/widgets/appearance_section.dart` — 60.00%
+- `features/family_sync/presentation/providers/state_sync.dart` — 61.90%
+- `features/accounting/presentation/screens/transaction_confirm_screen.dart` — 63.28%
+
+96 WARNINGs (`.g.dart`, `.freezed.dart`, `.arb`, `import_guard.yaml`, untested dart files) unchanged — `coverage_gate.dart` policy treats missing-from-lcov as 0% FAIL, dominating the exit code.
+
+**Threshold reduction does not address this gate** because the WARNING class is independent of any threshold value (0%/0% entries fail at any positive threshold).
+
+### Requirement disposition
+
+- **EXIT-03** (≥70% global coverage per amendment): **PASS — marked complete**. Gate 3 and Gate 4 both clear at 74.6336%.
+- **EXIT-04** (all 8 gates pass simultaneously): **STILL PENDING — not marked complete**. Gates 2 and 8 still red. Per success-criteria, only marking [x] when the gate truly passes; remaining blockers documented above for user decision.
+
+### Remaining blockers for EXIT-04 close
+
+1. **Gate 2 — `dart run custom_lint`:** 28 INFO findings still cause exit 1 in CI. Not addressed by threshold change. Discovery 1 paths still apply.
+2. **Gate 8 — `coverage_gate.dart`:** Two independent issues:
+   - **Input-list policy** — Discovery 3 still applies. 96 missing-from-lcov entries dominate the exit code. Either pre-filter `cleanup-touched-files.txt` (contradicts Plan 08-02 D-04), or change `coverage_gate.dart` so WARNINGs do not fail (requires policy decision).
+   - **10 real-failure files** — substantive test coverage work needed regardless of input-list policy. Most-leveraged candidates: 4 repository_providers files (low LH/LF, high % impact) + 4 large UI screens.
+
+### Files modified by this amendment re-run
+
+- `.planning/phases/08-re-audit-exit-verification/08-06-GATES-LOG.md` — appended re-run section with post-70% gate table + per-failure detail.
+- `.planning/phases/08-re-audit-exit-verification/08-06-SUMMARY.md` — this section.
+- `.planning/REQUIREMENTS.md` — EXIT-03 marked complete; EXIT-04 left pending; traceability table EXIT-03/EXIT-04 status updated.
+
+No source code changes; verification-only run.
+
+---
+
 *Phase: 08-re-audit-exit-verification*
 *Plan: 06*
 *Completed: 2026-04-28*
+*Amendment re-run: 2026-04-28T08:05:43Z*

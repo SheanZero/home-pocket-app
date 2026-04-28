@@ -99,3 +99,93 @@
 - Gate 6: `check-unused-code lib` 0 unused symbols across 324 files.
 - Gate 7: `build_runner build` zero stale generated files in `lib/`.
 
+---
+
+## Re-run 2026-04-28T08:05:43Z — 70% threshold (per amendment commit `03b1a06`)
+
+**Run date:** 2026-04-28T08:05:43Z
+**Branch:** main
+**Commit:** 03b1a06900693646b053658a0cc2ba22b15ff58d ("docs(08-amend): lower coverage threshold 80→70")
+**Status:** 2 GATE(S) STILL FAILED (Gate 2 + Gate 8)
+**Coverage source:** `coverage/lcov_clean.info` from prior run (16:00 UTC, same tree)
+**Methodology:** Re-executed only threshold-dependent gates (3, 4, 8). Gates 1/5/6/7 cited as already-passing (unaffected by threshold). Gate 2 cited as already-failing (unaffected by threshold; INFO findings independent of coverage).
+
+| Gate | Command | Exit | Verdict | Δ vs 80% run |
+|------|---------|------|---------|--------------|
+| 1 | `flutter analyze` | (cited) 0 | PASS | unchanged |
+| 2 | `dart run custom_lint` | (cited) 1 | FAIL | unchanged — INFO findings independent of threshold |
+| 3 | global LH/LF on `lcov_clean.info` ≥70% (actual 74.6336%) | 0 | **PASS** | flipped FAIL→PASS |
+| 4 | very_good_coverage@v2 (`min_coverage: 70`, actual 74.6336%) | 0 | **PASS** | flipped FAIL→PASS |
+| 5 | import_guard via custom_lint (0 violations) | (cited) 0 | PASS | unchanged |
+| 6 | `dart_code_linter:metrics check-unused-code lib` | (cited) 0 | PASS | unchanged |
+| 7 | `build_runner build && git diff lib/` (no stale files) | (cited) 0 | PASS | unchanged |
+| 8 | `coverage_gate.dart --list cleanup-touched-files.txt --threshold 70` | 1 | **FAIL** | partial improvement — 11→10 real failures, 96 WARNINGs unchanged |
+
+### Gate 3 — global coverage 74.6336% ≥ 70% → PASS
+
+```bash
+$ awk -F: '/^LF:/ { lf += $2 } /^LH:/ { lh += $2 } END { printf "%.4f\n", lh/lf*100 }' coverage/lcov_clean.info
+74.6336
+```
+
+Threshold met (74.6336 > 70.0000). EXIT-03 success criterion ("≥70% global coverage" per 2026-04-28 amendment) is satisfied by this result.
+
+### Gate 4 — very_good_coverage@v2 at 70% → PASS
+
+`very_good_coverage@v2` action computes the same arithmetic (sum-of-LH / sum-of-LF on the supplied `path: coverage/lcov_clean.info`). With `min_coverage: 70` (per `audit.yml` line 121 post-amendment), 74.6336% clears the bar.
+
+### Gate 8 — coverage_gate.dart per-file ≥70% → STILL FAIL (exit 1)
+
+```
+[coverage:gate] 170 checked, 106 failed (threshold: 70)
+```
+
+Decomposition of the 106 failures:
+
+**(A) 10 real failures** — Dart source files actually under 70% coverage:
+
+| File | covered/total | % |
+|---|---|---|
+| `lib/application/profile/repository_providers.dart` | 0/4 | 0.00 |
+| `lib/application/ml/repository_providers.dart` | 2/5 | 40.00 |
+| `lib/application/voice/repository_providers.dart` | 2/5 | 40.00 |
+| `lib/features/family_sync/presentation/screens/create_group_screen.dart` | 31/175 | 17.71 |
+| `lib/features/home/presentation/providers/state_shadow_books.dart` | 9/26 | 34.62 |
+| `lib/features/accounting/presentation/screens/transaction_entry_screen.dart` | 74/161 | 45.96 |
+| `lib/features/analytics/presentation/screens/analytics_screen.dart` | 58/110 | 52.73 |
+| `lib/features/settings/presentation/widgets/appearance_section.dart` | 45/75 | 60.00 |
+| `lib/features/family_sync/presentation/providers/state_sync.dart` | 26/42 | 61.90 |
+| `lib/features/accounting/presentation/screens/transaction_confirm_screen.dart` | 193/305 | 63.28 |
+
+Down from 11 at the 80% threshold — `lib/application/accounting/repository_providers.dart` (75.00%) flipped FAIL→PASS at 70%.
+
+**(B) 96 missing-from-lcov WARNINGs** — Entries in `cleanup-touched-files.txt` that are not present in `coverage/lcov_clean.info`. Composition unchanged from 80% run:
+- `*.g.dart` files (filtered by `coverde filter`)
+- `*.freezed.dart` files (filtered by `coverde filter`)
+- `*.arb` localization files (3 files, no Dart code)
+- `import_guard.yaml` config files
+- Dart files not exercised by any test (e.g., `init_result.dart`, `home/presentation/providers/*.dart`, `family_sync/use_cases/*.dart`)
+
+`coverage_gate.dart` lines 130-138 + 144 + 166 emit a WARNING but treat each missing entry as 0% and FAIL — so the WARNINGs contribute to exit-1 even though they are non-Dart or generated files.
+
+**Threshold-change effect:** The threshold reduction did not eliminate the missing-from-lcov class — those entries are 0%/0% regardless of threshold. The per-file gate's exit code is dominated by the 96 WARNINGs, not by the 10 real failures. Lowering further would not flip Gate 8 to PASS; only `cleanup-touched-files.txt` filtering or `coverage_gate.dart` policy change would.
+
+### Cited gates (unchanged from 80% run; not re-executed)
+
+| Gate | Original verdict | Reason not re-run |
+|------|-----------------|-------------------|
+| 1 (`flutter analyze`) | PASS | Threshold-independent. No source changes since 80% run on this tree. |
+| 2 (`dart run custom_lint`) | FAIL — 28 INFO findings | Threshold-independent. Discovery 1 from 08-06 SUMMARY remains open. |
+| 5 (`import_guard`) | PASS | Threshold-independent. |
+| 6 (`check-unused-code lib`) | PASS | Threshold-independent. |
+| 7 (`build_runner` clean diff) | PASS | Threshold-independent. |
+
+### Net status after threshold amendment
+
+- **EXIT-03 (≥70% global coverage):** SATISFIED by Gate 3/4 PASS at 74.6336%.
+- **EXIT-04 (all 8 gates simultaneously):** **NOT SATISFIED** — Gate 2 and Gate 8 still fail.
+  - Gate 2: 28 INFO findings from `riverpod_lint` (Phase 4-introduced, pre-existing).
+  - Gate 8: 96 WARNING-class FAILs from non-Dart entries in `cleanup-touched-files.txt` + 10 real failures.
+
+Threshold reduction closed the global-coverage gap (Gates 3 + 4) but did **not** address Gate 2's INFO findings or Gate 8's input-list filtering issue. Per success-criteria: marking EXIT-03 complete; leaving EXIT-04 pending with the two remaining blockers documented.
+
