@@ -72,10 +72,10 @@ Requirements for the cleanup initiative. Each maps to exactly one phase. All are
 
 ### Documentation Sweep (DOCS)
 
-- [ ] **DOCS-01**: All ARCH/MOD/ADR files under `doc/arch/` are reviewed; entries describing relocated files, renamed classes, or deleted modules are updated to match the post-refactor codebase
-- [ ] **DOCS-02**: CLAUDE.md "Common Pitfalls" list (currently 13 items) is annotated to mark which items are now structurally enforced by `import_guard` / `riverpod_lint` / `dart_code_linter` / CI gates
-- [ ] **DOCS-03**: `doc/arch/INDEX.md` files (ARCH-000, ADR-000, MOD-000) are verified to reference only files that still exist
-- [ ] **DOCS-04**: A new ADR is filed describing the cleanup initiative's outcome, decisions made (e.g., `*.mocks.dart` strategy), and ongoing CI enforcement
+- [x] **DOCS-01**: All ARCH/MOD/ADR files under `doc/arch/` are reviewed; entries describing relocated files, renamed classes, or deleted modules are updated to match the post-refactor codebase
+- [x] **DOCS-02**: CLAUDE.md "Common Pitfalls" list (currently 13 items) is annotated to mark which items are now structurally enforced by `import_guard` / `riverpod_lint` / `dart_code_linter` / CI gates
+- [x] **DOCS-03**: `doc/arch/INDEX.md` files (ARCH-000, ADR-000, MOD-000) are verified to reference only files that still exist
+- [x] **DOCS-04**: A new ADR is filed describing the cleanup initiative's outcome, decisions made (e.g., `*.mocks.dart` strategy), and ongoing CI enforcement
 
 ### Re-Audit / Exit Verification (EXIT)
 
@@ -172,10 +172,10 @@ Phase mapping populated by `gsd-roadmapper` during roadmap creation.
 | LOW-05 | Phase 6 | Complete |
 | LOW-06 | Phase 6 | Complete |
 | LOW-07 | Phase 6 | Complete |
-| DOCS-01 | Phase 7 | Pending |
-| DOCS-02 | Phase 7 | Pending |
-| DOCS-03 | Phase 7 | Pending |
-| DOCS-04 | Phase 7 | Pending |
+| DOCS-01 | Phase 7 | Complete |
+| DOCS-02 | Phase 7 | Complete |
+| DOCS-03 | Phase 7 | Complete |
+| DOCS-04 | Phase 7 | Complete |
 | EXIT-01 | Phase 8 | Pending |
 | EXIT-02 | Phase 8 | Pending |
 | EXIT-03 | Phase 8 | Pending |

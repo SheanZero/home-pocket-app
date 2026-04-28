@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-05-sync-infrastructure-logging-PLAN.md
-last_updated: "2026-04-28T01:40:27.172Z"
-last_activity: 2026-04-28 -- Phase 07 planning complete
+stopped_at: Completed 07-06-verification-gap-closure-PLAN.md
+last_updated: "2026-04-28T02:15:34.101Z"
+last_activity: 2026-04-28
 progress:
   total_phases: 8
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 40
-  completed_plans: 39
-  percent: 98
+  completed_plans: 40
+  percent: 100
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-25)
 ## Current Position
 
 Phase: 07 (documentation-sweep) — EXECUTING
-Plan: 1 of 5
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-04-28 -- Phase 07 planning complete
+Last activity: 2026-04-28
 
 Progress: [██████████] 100%
 
@@ -59,6 +59,7 @@ Progress: [██████████] 100%
 | Phase 05 P02 | 10min | 2 tasks | 8 files |
 | Phase 05 P03 | 18m40s | 2 tasks | 9 files |
 | Phase 05-medium-fixes P05 | 22min | 2 tasks | 15 files |
+| Phase 07 P07-06 | 35min | 9 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,9 @@ Recent decisions affecting current work:
 - [Phase 06-01]: Deleted generated outputs only when their source file was removed and the direct unused-file gate reported the generated output as orphaned. — Required for `check-unused-files lib` to reach zero after source deletion.
 - [Phase 06-02]: AppDatabase schemaVersion is 15 with v15 migration SQL limited to static `CREATE INDEX IF NOT EXISTS` statements. — Keeps index migration idempotent and free of user data interpolation.
 - [Phase 06-03]: App/accounting sensitive diagnostics were removed instead of debug-guarded. — Avoids retaining transaction, amount, note, hash, and device identifiers in diagnostic code paths.
+- [Phase 07-06]: Gate 4 grep pattern changed from 'doc/arch[^/]' to '(^|[^s])doc/arch' — original pattern excluded trailing-slash paths like 'doc/arch/foo', the canonical drift format.
+- [Phase 07-06]: Smoke fixtures use sed path-rewrite on temp script copies for hermetic drift injection testing (real files never mutated).
+- [Phase 07-06]: ADR footer metadata placed before the --- separator preceding Update sections, not after Update content — preserves append-only-at-file-end contract.
 
 ### Pending Todos
 
@@ -112,7 +116,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-27T09:07:23.181Z
+Last session: 2026-04-28T02:15:34.096Z
 Stopped at: Completed 06-05-sync-infrastructure-logging-PLAN.md
 Resume file: None
 
