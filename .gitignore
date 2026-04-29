@@ -70,3 +70,6 @@ lib/features/accounting/presentation/providers/voice_providers_clean*
 lib/features/accounting/presentation/providers/voice_providers_final*
 lib/features/accounting/presentation/providers/voice_providers_part*
 .superpowers/
+
+# Claude Code runtime artifacts (per-machine; never commit)
+.claude/scheduled_tasks.lock
