@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Happiness Metric & Display
 status: planning
-last_updated: "2026-05-01T08:30:18.727Z"
+last_updated: "2026-05-01T19:15:00.000Z"
 last_activity: 2026-05-01
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,17 +17,28 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-29)
+See: .planning/PROJECT.md (updated 2026-05-01)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes survival spending from soul spending
-**Current focus:** Planning v1.1 milestone (run `/gsd-new-milestone`)
+**Current focus:** v1.1 milestone roadmap drafted (Phases 9-12); ready to plan Phase 9 (Happiness Domain & Formula Layer)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 9 — Happiness Domain & Formula Layer (next, not yet planned)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-01 — Milestone v1.1 started
+Status: Roadmap drafted; awaiting `/gsd-plan-phase 9`
+Last activity: 2026-05-01 — v1.1 ROADMAP.md generated (Phases 9-12, 26/26 REQ coverage)
+
+## v1.1 Phase Plan
+
+| Phase | Goal | Requirements | Depends on |
+|-------|------|--------------|------------|
+| 9. Happiness Domain & Formula Layer       | Lock formulas, contracts, soul-only filter, ¥500 floor, sealed `MetricResult`, family aggregate-only return type, no-gamification ADR | HAPPY-01..09 + FAMILY-01 + FAMILY-02 (11 REQs) | — (linchpin) |
+| 10. HomePage SoulFullnessCard Redesign    | Replace misleading `Happiness ROI`; render 4 personal metrics + Best Joy story card + family card with consent gate | FAMILY-03 + HOMEUI-01..04 (5 REQs) | Phase 9 |
+| 11. Statistics Surface for 悦己账本        | Wire 3 dormant DAO methods + new query into AnalyticsScreen; Joy-per-¥ trend line + satisfaction histogram | STATSUI-01..04 (4 REQs) | Phase 9 (parallel-able with Phase 10) |
+| 12. UI Copy Rename Pass (ARB values)      | Rename 4 ARB values ja/zh/en; lexical-hierarchy ADR; native-speaker register review | RENAME-01..06 (6 REQs) | Phase 10 + Phase 11 (must be LAST) |
+
+**Coverage:** 26/26 v1.1 requirements mapped ✓
 
 ## Last Milestone Snapshot (v1.0)
 
@@ -44,13 +55,23 @@ Last activity: 2026-05-01 — Milestone v1.1 started
 
 Decisions are logged in PROJECT.md Key Decisions table. v1.0 decisions are captured there with outcomes; older execution-log decisions are archived in `.planning/milestones/v1.0-ROADMAP.md` Milestone Summary.
 
+**v1.1 milestone-start decisions (2026-05-01):**
+- No schema changes; reuse existing `transactions.soul_satisfaction` (1-10) field
+- No theme color changes; survival/soul/primary tokens locked
+- No `LedgerType` enum rename; ARB values only
+- Zero new pub dependencies (research HIGH-confidence: every capability maps to existing packages)
+- Phase 9 is the linchpin — all formulas, contracts, and anti-gamification defenses must lock before any UI consumer builds on them
+
 ### Pending Todos
 
-None at milestone close.
+- Phase 9: verify `transactions.entry_source` column existence in substep 9.0 (single grep) — gates voice-bias manual-only sub-metric feasibility
+- Phase 9: product decision on mean-vs-median headline (recommend mean primary + median tooltip + coverage caption)
+- Phase 9: pick `Result<T>` vs `throw` envelope to match existing analytics module convention (recommend `throw`)
+- Phase 11: deeper-research moment for `shadowBooksProvider` family-mode book enumeration (MEDIUM-confidence in research)
 
 ### Blockers / Concerns
 
-No active blockers. Carried-forward debt:
+No active v1.1 blockers. Carried-forward debt (from v1.0):
 
 - **FUTURE-TOOL-03** *(coverage-baseline-review)*: After v1 feature work completes, review the active 70% coverage threshold (lowered from 80% by Phase 8 amendment); decide raise-uniformly or split-per-area
 - **FUTURE-QA-01** *(smoke-test-owner-driven)*: Owner runs `08-SMOKE-TEST.md` on fresh local build before v1 release; SMOKE-NN findings recorded in `re-audit/issues.json` and `reaudit_diff.dart` re-run before v1 ships
@@ -84,10 +105,13 @@ Items acknowledged and deferred at v1.0 milestone close on 2026-04-29:
 | Tech-debt nit | 2 INFO-level analyzer warnings in `shadow_books_provider_characterization_test.dart` (lines 57, 73) | accept | v1.0 close |
 | Tech-debt nit | `amount_display.dart` absent from `cleanup-touched-files.txt` (Plan 08-04 deferred-items.md) | accept | v1.0 close |
 
+**v1.1-deferred items (tracked in REQUIREMENTS.md "v2 Requirements"):**
+- HAPPY-V2-01..03, STATSUI-V2-01, FAMILY-V2-01..02, TOOL-V2-01..02
+
 ## Session Continuity
 
-Last session: 2026-04-29 (v1.0 milestone close + archive)
-Stopped at: v1.0 archived; tag pending; ready for `/gsd-new-milestone`
+Last session: 2026-05-01 (v1.1 ROADMAP.md generated, Phases 9-12)
+Stopped at: Roadmap committed; ready for `/gsd-plan-phase 9`
 Resume file: None
 
-**Planned Next:** `/gsd-new-milestone` to define v1.1 requirements
+**Planned Next:** `/gsd-plan-phase 9` to decompose Phase 9 (Happiness Domain & Formula Layer) into executable plans
