@@ -1,366 +1,224 @@
 # Stack Research
 
-**Domain:** Flutter/Dart codebase audit and cleanup tooling
-**Researched:** 2026-04-25
-**Confidence:** MEDIUM-HIGH — versions verified against pub.dev search results and official tool changelogs; DCM pricing/tier status verified against dcm.dev directly.
+**Domain:** Flutter app — happiness metric domain + Riverpod/Drift/fl_chart wiring (v1.1 milestone)
+**Researched:** 2026-05-01
+**Confidence:** HIGH — versions verified against pub.dev (May 2026); existing pubspec.yaml inspected; fl_chart 0.69 → 1.x changelog reviewed; intl/Drift/Riverpod feature surface already in active use in v1.0.
 
 ---
 
-## Context: What Is Already Installed
+## TL;DR (read this first)
 
-The project (`pubspec.yaml`, `analysis_options.yaml`) already has these audit-relevant tools:
+**The recommendation for v1.1 is: add NOTHING.**
 
-| Already Installed | Version | Status |
-|-------------------|---------|--------|
-| `flutter_lints` | `^6.0.0` | Active — base lint ruleset |
-| `custom_lint` | `^0.7.5` | Active — plugin host for riverpod_lint |
-| `riverpod_lint` | `^2.6.4` | Active — Riverpod-specific rules |
+Every capability v1.1 needs is already in the project's locked stack. The schema is frozen, the chart library is already wired, the formatting helpers exist, and the math (means, ratios, counts, max-by) is plain Dart `Iterable` work over a `List<TransactionRow>`. Introducing any new dependency at this milestone would buy zero capability and add review surface, lockfile churn, and CI guardrail risk.
 
-These are dev dependencies that survive into the cleanup phase. The audit pipeline adds on top of them, not instead of them.
+The only stack-level **change** worth considering is an optional fl_chart minor question (do we stay on `^0.69.0` or upgrade to `1.1.1`?), and the answer is **stay on 0.69 for v1.1** — see "fl_chart upgrade decision" below.
+
+This file therefore reads more like a **"do not add"** rationale than a recommendations list. That is intentional and matches the milestone's locked scope.
 
 ---
 
-## Recommended Stack by Category
+## Context: What Is Already Installed (relevant to v1.1)
 
-### Category 1 — Layer-Violation / Dependency-Direction Enforcement
+From `pubspec.yaml` (verified 2026-05-01):
 
-**Primary: `import_guard` (pub.dev analyzer plugin)**
+| Locked Dependency | Version | Used by v1.1 for |
+|-------------------|---------|-------------------|
+| `flutter_riverpod` | `^2.6.1` | Provider wiring for new use cases (HappinessMetricsProvider, family-metrics provider) |
+| `riverpod_annotation` | `^2.6.1` | `@riverpod` code-gen on the new providers |
+| `freezed_annotation` | `^3.0.0` | Immutable result models (`HappinessMetrics`, `FamilyHappinessMetrics`, `BestJoyHighlight`) |
+| `json_annotation` | `^4.9.0` | Optional — only if metric models need serialization (likely NOT for v1.1; pure in-memory) |
+| `drift` | `^2.25.0` | The 3 dormant DAO methods already exist; they return existing column projections |
+| `sqlcipher_flutter_libs` | `^0.6.7` | Encrypted DB — unchanged; v1.1 does NO schema work |
+| `fl_chart` | `^0.69.0` | Joy-per-¥ trend line + satisfaction distribution histogram (both BarChart/LineChart — already supported) |
+| `intl` | `0.20.2` (pinned) | `NumberFormat` for Joy/¥ ratio rendering; already pinned by `flutter_localizations` |
+| `flutter_localizations` | sdk | ARB-based ja/zh/en rename pass for `soulLedger`/`survivalLedger`/`homeHappinessROI`/`homeSoulFullness` |
+| `collection` | `^1.19.1` | `IterableExtension` (`maxBy`, `groupBy`) — needed for "Best Joy per ¥" highlight pick and family `category × avg satisfaction` aggregation |
 
-`import_guard` is an analyzer plugin that enforces import restrictions between folders using `import_guard.yaml` with glob patterns. It requires Dart 3.10+ (matching this project's `sdk: ^3.10.8`). Last updated January 4, 2026 on pub.dev. It integrates with the standard `dart analyze` flow — no separate CLI binary, no paid license, no build runner step.
+Dev-side, already locked: `mocktail ^1.0.4` for tests, `build_runner ^2.4.14` + `freezed ^3.0.0` + `riverpod_generator ^2.6.4` + `drift_dev ^2.25.0` + `json_serializable ^6.9.4` for code-gen, `custom_lint ^0.7.5` + `riverpod_lint ^2.6.4` + `import_guard_custom_lint ^1.0.0` + `dart_code_linter ^3.0.0` for the v1.0 guardrails (still active).
 
-Configuration lives in `import_guard.yaml` alongside `analysis_options.yaml`:
-
-```yaml
-# import_guard.yaml — enforces 5-layer Clean Architecture
-rules:
-  - path: "lib/features/**/domain/**"
-    deny:
-      - "lib/data/**"
-      - "lib/infrastructure/**"
-      - "lib/features/**/presentation/**"
-    message: "Domain layer must not import Data, Infrastructure, or Presentation"
-
-  - path: "lib/application/**"
-    deny:
-      - "lib/features/**/presentation/**"
-      - "lib/data/daos/**"
-      - "lib/data/tables/**"
-    message: "Application layer must not import Presentation or raw Data internals"
-
-  - path: "lib/features/**/presentation/**"
-    deny:
-      - "lib/data/tables/**"
-      - "lib/data/daos/**"
-      - "lib/infrastructure/crypto/services/**"
-    message: "Presentation must not access crypto services or DB internals directly"
-```
-
-Add to `analysis_options.yaml`:
-```yaml
-analyzer:
-  plugins:
-    - import_guard
-```
-
-Add to `pubspec.yaml` dev_dependencies:
-```yaml
-import_guard: ^0.x.x  # verify current version on pub.dev
-```
-
-**Why `import_guard` over alternatives:**
-
-| Tool | Verdict | Reason |
-|------|---------|--------|
-| `import_guard` | **USE** | Free, integrates with `dart analyze`, Dart 3.10+ compatible, Jan 2026 update |
-| `architecture_linter` | Fallback | CLI-only (not analyzer plugin), requires manual runs, less CI-friendly |
-| `clean_architecture_linter` (v1.0.8) | Avoid | Last seen at version 1.0.8, Dart 3 compatibility unverified, low adoption |
-| `clean_architecture_kit` | Investigate | Newer entrant, opinionated Riverpod assumptions, maturity uncertain |
-| DCM `avoid-banned-imports` rule | Use if DCM is licensed | Gold standard for precision; documented guide for layered architecture (dcm.dev/docs/guides/advanced-architecture-rules-guide); requires paid DCM license |
-
-**Fallback (CI script approach):** If `import_guard` proves insufficient for a specific rule, a Dart script using the `analyzer` package to walk ASTs and assert import paths is ~50 lines and fully auditable. This is the escape hatch, not the primary tool.
-
-**Confidence:** MEDIUM — `import_guard` is functional and maintained for Dart 3.10+, but it is a relatively niche package. The DCM `avoid-banned-imports` is the industry-grade solution; if the team acquires a DCM license, migrate to it.
+**Implication:** every layer of v1.1 (compute → store-access → expose-as-provider → consume-in-widget → render-as-chart → localize) maps to an already-installed package.
 
 ---
 
-### Category 2 — Dead Code and Unreachable Code Detection
+## Recommended Stack by v1.1 Capability
 
-**Primary: Built-in `dart analyze` diagnostics**
+For each new v1.1 deliverable, this section names the existing technology that handles it and explicitly states "no addition required."
 
-The Dart SDK analyzer already emits:
-- `dead_code` — unreachable branches, dead catch clauses, unreachable switch arms
-- `unused_element` — private declarations never referenced within the library
-- `unused_import` — imports with no referencing symbol in the file
-- `unused_local_variable` — local variables assigned but never read
+### Capability 1 — Compute the 4 personal happiness indicators
 
-These run as part of `flutter analyze` with zero additional setup. They catch the most common cases for unreachable branches and unused imports. The zero-analyzer-warnings policy already enforced by this project means these diagnostics are already gated.
+**Inputs:** A `List<TransactionRow>` filtered to `ledger_type='soul'` over month-to-date, with `soul_satisfaction` (1-10 int) and `amount_sub_unit` (int, JPY=yen, others=cents).
 
-**Secondary: `dart_code_linter` (free, open-source DCM fork)**
+**Operations needed:**
+- `avgSatisfaction = mean(soul_satisfaction)` — reduce/`average` on a `List<int>`
+- `joyPerYen = Σ soul_satisfaction / Σ amount_sub_unit` (with safe div by zero) — single fold
+- `highlightsCount = count where soul_satisfaction >= 8` — `where(...).length`
+- `bestJoyPerYen = transaction with max(soul_satisfaction / amount_sub_unit)` — `collection.IterableExtension.maxBy`
 
-`dart_code_linter` is the open-source fork of Dart Code Metrics maintained by a separate team after the commercial DCM split in 2023. Version 1.2.1 (November 2025), Dart 3 compatible, 70+ pre-built rules, free. Provides:
-- `check-unused-code` — finds unused class members, methods, and constructors across the whole project (not just within a file)
-- `check-unused-files` — finds orphaned `.dart` files with no imports pointing to them
+**Stack assignment:** Pure Dart + `package:collection` (already installed).
+**No addition.** A "statistics helper" library would be net-negative — the code is 4-6 expressions of plain Dart, and pulling a stats package would obscure the math behind a learning curve no one needs.
 
-```bash
-# One-off audit run
-dart run dart_code_linter:metrics check-unused-code lib
-dart run dart_code_linter:metrics check-unused-files lib
-```
+### Capability 2 — Compute the 2 family cooperative indicators
 
-Add to `pubspec.yaml` dev_dependencies:
-```yaml
-dart_code_linter: ^1.2.1
-```
+**Family Highlights Sum:** Same `where(satisfaction >= 8).length`, but over the merged `shadow_books` join (already exposed by existing `getSoulSatisfactionOverview` once filtered).
 
-Add to `analysis_options.yaml` to enable the analyzer plugin component:
-```yaml
-dart_code_linter:
-  rules:
-    - prefer-trailing-comma
-    # ... add specific rules as needed
-```
+**Shared Joy Insight (`category × avg satisfaction`):** `groupBy(category)` → `mapValues(average)` → `entries.sortedBy(.value).last` (or top-N for storytelling).
 
-**Why `dart_code_linter` over alternatives:**
+**Stack assignment:** `package:collection`'s `groupBy` + Dart `Iterable.average` (extension on `Iterable<num>` from `package:collection`).
+**No addition.** `groupBy` and `IterableExtension.average` already cover this idiom. If we ever want SQL-side aggregation later, Drift handles it via `selectOnly()` with `avg()` and `groupBy()` — but the existing dormant DAO methods are what v1.1 uses, so this is moot for now.
 
-| Tool | Verdict | Reason |
-|------|---------|--------|
-| `dart_code_linter` | **USE** | Free, Dart 3 compatible, Nov 2025 update, fork of original DCM with stable CLI |
-| DCM (`dcm`) | Use if licensed | Commercial product (dcm.dev/pricing). As of 2025-2026: paid Individual/Team licenses required. Free tier now includes 100 rules. `check-unused-code` and `check-unused-files` are the gold standard for exhaustiveness. Version 1.36.0 (March 2026). |
-| `dead_code_analyzer` | Avoid | Solo-author package, only at v0.1.1, regex-based (not AST), known false positives with constructors |
-| Built-in `unused_element` only | Insufficient | Misses project-level orphaned files and public API dead exports |
+### Capability 3 — Render Joy-per-¥ trend line
 
-**DO NOT USE: `dart_code_metrics` (the original pub.dev package).** The `dart_code_metrics` package on pub.dev was sunset in 2023 when DCM went commercial. The `dart-code-checker/dart-code-metrics` GitHub repository is archived/inactive. Using it will get stale rules and no Dart 3 compatibility guarantees.
+**fl_chart `LineChart`** with one `LineChartBarData` series, x = day index of month, y = daily Joy/¥. Both v0.69 and v1.x support this with identical surface; the existing AnalyticsScreen already uses `LineChart` for expense trends (see `features/analytics/presentation/widgets/`).
 
-**Confidence:** HIGH for built-in diagnostics (they ship with the SDK). MEDIUM for `dart_code_linter` (active but smaller community than DCM). LOW for DCM without purchasing a license (cannot verify exact free-tier coverage of `check-unused-code`).
+**Stack assignment:** `fl_chart: ^0.69.0` (existing).
+**No addition.** No combo-chart need (joy line is its own chart, separate from histogram), so the open issue [imaNNeo/fl_chart#1140 (line on bar chart)](https://github.com/imaNNeo/fl_chart/issues/1140) does not block us.
 
----
+### Capability 4 — Render satisfaction distribution histogram
 
-### Category 3 — Riverpod Provider Hygiene
+A histogram in fl_chart is a `BarChart` with one `BarChartGroupData` per bin (here: 10 bars for satisfaction 1-10), each holding a `BarChartRodData` whose `toY` is the bin count. There is no dedicated `HistogramChart` widget in fl_chart — there doesn't need to be; this is the standard fl_chart histogram recipe used widely in the community.
 
-**Primary: `riverpod_lint` (already installed at `^2.6.4`)**
+**Stack assignment:** `fl_chart: ^0.69.0` (existing).
+**No addition.** Histograms are a UI-side reshape of `Map<int, int>` → `List<BarChartGroupData>`; no new library.
 
-Already wired via `custom_lint: ^0.7.5`. No new installation needed. The existing `riverpod_lint: ^2.6.4` in the project's `pubspec.yaml` is the correct version for `riverpod_annotation: ^2.6.1`.
+### Capability 5 — Format "Joy per ¥" ratio for display
 
-**Do not upgrade to riverpod_lint 3.x** until the project upgrades to Riverpod 3.0. Riverpod 3.0 `riverpod_lint` 3.0.3 has known analyzer dependency conflicts with `json_serializable`'s requirement for `analyzer >=9.0.0`, which this project uses for its Freezed/JSON serialization code gen.
+The ratio is small and fractional (e.g., `8.4 satisfaction-points / 12,500 yen ≈ 0.000672`). The display target is something like `0.67 / 100¥` or `6.72 / ¥1000` — i.e., we scale to a readable denominator and use `NumberFormat` for the locale-aware decimal separator.
 
-Rules that `riverpod_lint 2.6.x` catches and that are directly relevant to the audit goals:
+**Stack assignment:** `intl: 0.20.2` (already pinned by `flutter_localizations`) via the existing `lib/infrastructure/i18n/formatters/number_formatter.dart`.
 
-| Rule | What It Catches | Audit Category |
-|------|-----------------|----------------|
-| `missing_provider_scope` | `runApp()` without `ProviderScope` | Provider hygiene |
-| `avoid_public_notifier_properties` | Public state outside `state` on Notifiers | Provider hygiene |
-| `provider_dependencies` | Incorrect `@Riverpod(dependencies: [...])` | Provider hygiene |
-| `scoped_providers_should_specify_dependencies` | Overridden providers missing `dependencies:` | Provider hygiene |
-| `unsupported_provider_value` | `StateNotifier` created via `riverpod_generator` | Provider hygiene |
+The existing `NumberFormatter` already handles `JPY 0-decimal` and `USD/CNY/EUR/GBP 2-decimal` per CLAUDE.md. v1.1 adds **one new method** to it (e.g., `formatJoyDensity(double ratio, Locale locale)`) that picks the per-locale "Joy / ¥1000" or "Joy / $10" framing. **No new package** — `intl.NumberFormat` covers fixed-decimal, percent, and arbitrary-pattern formatting natively.
 
-**What `riverpod_lint` does NOT catch** (requires manual/AI audit):
-- Duplicate `@riverpod` function names across feature `repository_providers.dart` files — riverpod_lint only validates semantics within a file, not cross-file uniqueness of logically equivalent providers
-- Misplaced Use Case providers wired in `lib/application/` instead of `lib/features/.../presentation/providers/`
-- `UnimplementedError` placeholders thrown from provider bodies (riverpod_lint does catch the scoped-provider override pattern, but not generic `throw UnimplementedError()` in non-scoped providers)
+**No addition.** Specifically, we do **not** need `decimal: ^4.x`. See "What NOT to add" below for the reasoning.
 
-For the gaps above, the AI-agent semantic scan is the correct tool (per the hybrid audit approach in PROJECT.md).
+### Capability 6 — Wire metric computation into the Riverpod graph
 
-**Enable `custom_lint` output in analysis:**
+New providers (`@riverpod`-annotated) for `personalHappinessMetrics(monthStart)`, `familyHappinessMetrics(monthStart, groupId)`, `joyDensityTrend(monthStart)`, `satisfactionHistogram(monthStart)`. Each composes on top of the dormant DAO methods.
 
-`custom_lint` is already a dev dependency. Ensure it runs in CI:
-```bash
-dart run custom_lint
-```
+**Stack assignment:** `riverpod_annotation` + `riverpod_generator` (both already installed). The existing `repository_providers.dart`-per-feature convention applies — all four new providers live in `lib/features/{home,analytics}/presentation/providers/` (as use-case providers, per CLAUDE.md). The use case classes themselves live in `lib/application/analytics/` (or a new `lib/application/happiness/` directory if the surface justifies the split — that's a design decision for ARCHITECTURE.md, not stack).
 
-This produces riverpod_lint output separately from `flutter analyze`. Both must pass.
+**No addition.**
 
-**Confidence:** HIGH — `riverpod_lint` is maintained by the Riverpod author (rrousselGit), updated February 2026, and the 2.6.x series is a stable match for this project's Riverpod 2.6.x.
+### Capability 7 — UI rename pass
+
+ARB-only changes to `lib/l10n/app_{ja,zh,en}.arb`, then `flutter gen-l10n`. Keys: `soulLedger`, `survivalLedger`, `homeHappinessROI`, `homeSoulFullness` (4 keys × 3 locales = 12 string changes). Enum names (`LedgerType.survival`, `LedgerType.soul`) and theme colors are explicitly locked to NOT change.
+
+**Stack assignment:** `flutter_localizations` + `intl` (existing pipeline).
+**No addition.**
 
 ---
 
-### Category 4 — Type and Code Duplication Detection
+## fl_chart upgrade decision: stay on 0.69.0 for v1.1
 
-**There is no authoritative, maintained Dart-native duplicate-code detection tool with AST-level precision that is free and Dart 3 compatible as of April 2026.**
+**Available:** `fl_chart: 1.1.1` (latest on pub.dev as of 2026-02-04).
 
-The options are:
+**Breaking changes between 0.69 and 1.1.1** (verified against [pub.dev/packages/fl_chart/changelog](https://pub.dev/packages/fl_chart/changelog)):
+- v1.0.0: removed deprecated `tooltipRoundedRadius` (use `tooltipBorderRadius`); minimum Flutter bumped to 3.27.4; `BarChart` is no longer `const`.
+- v1.0.0: introduced `CandlestickChart` (irrelevant to v1.1).
+- v1.1.0: `borderSide` in `BarChartRodStackItem` constructor changed from positional to named.
+- Various rendering/gradient improvements.
 
-**Option A: DCM `check-unused-code` + `avoid-banned-types` rule (paid)**
+**Decision: stay on `^0.69.0` for v1.1.**
 
-DCM provides the most precise duplicate-type and duplicate-implementation detection, but requires a license.
+**Rationale:**
+1. **Zero new capability needed.** Joy-per-¥ trend line and satisfaction histogram are vanilla LineChart/BarChart calls — both have been stable across the 0.69→1.x range. The new features in 1.x (CandlestickChart, BarChartRodStackItem labels/gradients, sideTitleAlignment) are not on v1.1's deliverable list.
+2. **Existing AnalyticsScreen is already on 0.69.** Upgrading the dep would force a sweep of all existing chart call sites (expense trend chart, budget progress chart, etc.) for the `tooltipRoundedRadius` rename and `BarChart` const-removal; that's incidental migration work that grows v1.1 scope outside its goal.
+3. **Flutter SDK floor.** 1.0.0 raised the minimum Flutter to 3.27.4. The project's `environment: sdk: ^3.10.8` (Dart) corresponds to a Flutter version that is fine here, but the version-bump rationale is "we want the new chart" — and we don't.
+4. **Upgrade defer is safe.** When a future milestone (e.g., a redesign or a new chart type like a candlestick / radar / box-plot) actually needs 1.x features, that milestone owns the migration — it's a well-bounded change with a clear changelog.
 
-**Option B: `jscpd` (cross-language copy-paste detector, free, Node.js)**
-
-`jscpd` (JavaScript Copy-Paste Detector) supports Dart files via its `--languages dart` flag. It does token-based similarity detection across files, not AST-level, but it is effective for finding copy-pasted blocks (e.g., duplicated Freezed model definitions, duplicated provider patterns).
-
-```bash
-npx jscpd lib/ --languages dart --min-lines 5 --min-tokens 50 --reporters console,html
-```
-
-No pub.dev dependency. Requires Node.js in CI (standard on GitHub Actions runners).
-
-**Option C: AI-agent semantic scan (per PROJECT.md hybrid approach)**
-
-For the specific case of duplicate Freezed models and duplicate domain types, an AI agent scanning the codebase with semantic understanding outperforms token-based tools. Two Freezed classes with different names but identical fields and semantics will not be caught by token-matching but will be caught by an AI reviewing `lib/features/*/domain/models/`.
-
-**Recommendation:** Use `jscpd` for mechanical copy-paste blocks, AI-agent scan for semantic duplication (duplicate model concepts with different names). Do not purchase DCM solely for duplication detection if the rest of the audit can be done free.
-
-**DO NOT USE:** `dart_code_metrics` cyclomatic detection (archived). No active Dart-native CPD tool beyond `jscpd` exists in the free tier.
-
-**Confidence:** LOW — the duplicate-detection gap is real and acknowledged. No single free tool covers it well. The hybrid approach is the pragmatic solution for this project.
+**Recommendation:** create a deferred-tech entry (`FUTURE-TOOL-fl_chart-1x`) in PROJECT.md if it doesn't already exist, so the upgrade question is tracked but not v1.1-blocking.
 
 ---
 
-### Category 5 — Test Coverage Measurement and Enforcement
+## What NOT to Add
 
-**Primary: `flutter test --coverage` + `very_good_coverage` GitHub Action**
+This section is the bulk of the recommendation. Each row names a real package the assistant might be tempted to suggest, and the reason it must not enter v1.1.
 
-`flutter test --coverage` generates `coverage/lcov.info` — this is the standard Flutter mechanism and requires no additional packages.
-
-`very_good_coverage` is a GitHub Action (not a pub.dev package) at `VeryGoodOpenSource/very_good_coverage@v2` (current version). It reads the `lcov.info` file and fails the PR if the global coverage falls below `min_coverage`.
-
-```yaml
-# .github/workflows/ci.yml
-- name: Run tests with coverage
-  run: flutter test --coverage
-
-- name: Enforce coverage threshold
-  uses: VeryGoodOpenSource/very_good_coverage@v2
-  with:
-    path: coverage/lcov.info
-    min_coverage: 80
-    exclude: |
-      **/*.g.dart
-      **/*.freezed.dart
-      lib/generated/**
-```
-
-**Secondary: `coverde` (pub.dev, free, active)**
-
-`coverde` is a Dart CLI tool that adds per-file coverage checking and human-readable coverage reports. It reads `lcov.info` and can fail if any individual file falls below a threshold. Updated January 11, 2026 on pub.dev.
-
-```bash
-# After flutter test --coverage
-dart run coverde check --min-coverage 80 coverage/lcov.info
-```
-
-Add to `pubspec.yaml` dev_dependencies:
-```yaml
-coverde: ^0.x.x  # verify current version on pub.dev
-```
-
-**Recommendation for this project:**
-- `very_good_coverage@v2` handles the CI gate (global 80% threshold)
-- `coverde` handles per-file inspection locally during audit phases to identify which refactored files need tests
-
-| Tool | Verdict | Reason |
-|------|---------|--------|
-| `very_good_coverage@v2` | **USE** | GitHub Action, zero pub.dev dependency, actively maintained by Very Good Ventures, supports exclude globs |
-| `coverde` | **USE** | Free, Dart CLI, per-file checks, Jan 2026 update |
-| `lcov` (system tool) | Optional | Raw LCOV processing; `coverde` wraps it more ergonomically |
-| `flutter_ci_guard` | Skip | Combined format+analyze+coverage guard — less granular than individual tools |
-| Codecov.io | Optional | Cloud coverage dashboard; adds upload step but provides diff coverage on PRs — good for tracking coverage trend over the cleanup |
-
-**Confidence:** HIGH — `very_good_coverage@v2` is the de facto Flutter community standard for CI coverage gates. `coverde` is actively maintained and straightforward.
+| Avoid | Why It's Tempting | Why It's Wrong For v1.1 | Use Instead |
+|-------|-------------------|--------------------------|-------------|
+| `decimal: ^4.x` | "Joy / ¥ is a financial ratio; doubles lose precision." | The ratio is **never compared for equality** and **never persisted as a precise value** — it's computed on-the-fly for display only. Floating-point error in the 16th decimal does not change the rendered "0.67 / 100¥". Adding `decimal` would force every aggregation through `Decimal.parse(...)` and pollute use-case signatures with a non-Dart-core type. | Use plain `double` math; round at the display boundary via `NumberFormat`. |
+| `equatable: ^2.x` | "We're adding new immutable models; equatable simplifies `==`/`hashCode`." | The project standardized on **Freezed** for immutability (CLAUDE.md "Models: Freezed with `@freezed` for immutability"). Freezed generates `==`/`hashCode`/`copyWith`/`toString` and is already in the dev-deps. Mixing `equatable` and Freezed creates two equality conventions in the same codebase and would break the `import_guard` / arch-test mental model. | `@freezed` with `freezed: ^3.0.0` (already installed). |
+| `meta: ^1.x` (explicit add) | "Tag use cases as `@immutable`." | `meta` already comes transitively via Flutter SDK; an explicit pin is unnecessary. Freezed-generated classes are structurally immutable without needing the annotation. | Don't add. Use Freezed's generated `@immutable` propagation. |
+| `dartx: ^1.x` / `darq: ^x.y` (LINQ-style) | "We need `groupBy`, `maxBy`, `average` for the family aggregation." | `package:collection` already provides `groupBy` (top-level function) and `IterableExtension.maxBy` / `IterableExtension.average`. It is already in `pubspec.yaml` at `^1.19.1`. Pulling a second collection-extensions package creates two competing idioms in the codebase. | `package:collection` (already installed). |
+| `statistical: ^x.y` / `stats: ^x.y` / `simple_stats` (or any "stats helper") | "We're computing means, distributions, percentiles." | The v1.1 stat ops are: 1 mean, 1 ratio, 1 count-where, 1 max-by, 1 group-and-average. Total: ~12 lines of plain Dart. Any third-party stats package is heavier than the code it would replace, and pub.dev's stats packages are mostly low-traffic / single-maintainer — adding one would expand the supply-chain surface for negative net code reduction. | Plain Dart `Iterable` ops + `package:collection`. |
+| `syncfusion_flutter_charts` (commercial chart lib) | "Has a dedicated `HistogramChart` widget; might be cleaner than building histogram from BarChart." | (1) Commercial license model conflicts with the project's open posture. (2) fl_chart is already wired into AnalyticsScreen — adopting Syncfusion would require a cross-codebase chart migration outside v1.1 scope. (3) "Dedicated histogram widget" is cosmetic; fl_chart's BarChart-as-histogram is a 30-line render function. | `fl_chart` BarChart for histogram. |
+| `charts_flutter` (Google) | "Official-looking alternative to fl_chart." | Discontinued / unmaintained; pub.dev score has decayed. fl_chart is the de-facto Flutter chart library in 2026 and is what the project already uses. Switching would be a net regression. | `fl_chart` (existing). |
+| `riverpod: 3.x` | "Latest major version; cleaner API." | Per PROJECT.md (Out of Scope, "Riverpod 3.x upgrade"): `analyzer` version conflict with `json_serializable` (deferred to FUTURE-TOOL-01). v1.1 must NOT touch this. | `flutter_riverpod ^2.6.1` (existing). |
+| `sqlite3_flutter_libs` | "Smaller alternative to sqlcipher." | Actively rejected by a permanent CI guardrail (CLAUDE.md pitfall #6, AUDIT-09). Conflicts with SQLCipher. **Do not even mention this in PRs.** | `sqlcipher_flutter_libs ^0.6.7` (existing). |
+| `intl_utils` / `intl_translation` | "Useful for ARB management." | The project uses `flutter_localizations` + `flutter gen-l10n` (`l10n.yaml` config, output class `S`, dir `lib/generated`). Adding a parallel ARB pipeline is destructive. | Existing `flutter gen-l10n` flow. |
+| `pretty_charts` / `mp_chart` / `flutter_echarts` | "Eye-candy alternatives." | Same reasons as Syncfusion — cosmetic upside, real migration cost, outside v1.1 scope. | `fl_chart` (existing). |
+| `tuple: ^x.y` | "Returning multi-value results from use cases." | Use Freezed records (`@freezed` data class) for any multi-value returns. Idiomatic Dart 3+ also has built-in record types `(double, int)` for ad-hoc cases. | Freezed model OR Dart 3 records. |
 
 ---
 
-## Full Stack Summary Table
+## Alternatives Considered (and rejected) for new computation patterns
 
-| Category | Primary Tool | Version | License | Setup Complexity |
-|----------|-------------|---------|---------|-----------------|
-| Layer enforcement | `import_guard` | verify pub.dev | Free | 1-line pubspec + yaml config |
-| Dead code (file/member) | `dart_code_linter` | 1.2.1 | Free/OSS | 1-line pubspec + CLI command |
-| Dead code (branch/import) | `dart analyze` built-ins | SDK | Free | Already running |
-| Riverpod hygiene | `riverpod_lint` + `custom_lint` | 2.6.4 + 0.7.5 | Free | Already installed |
-| Copy-paste duplication | `jscpd` | npm latest | Free | Node.js + CLI, no pubspec |
-| Semantic duplication | AI-agent scan | N/A | N/A | Per audit phase |
-| Coverage gate (CI) | `very_good_coverage@v2` | v2 | Free | GitHub Actions YAML only |
-| Coverage per-file | `coverde` | verify pub.dev | Free | 1-line pubspec + CLI command |
+| If we wanted to do… | Could use… | We are choosing… | Because |
+|----------------------|------------|-------------------|---------|
+| Aggregate metrics in SQL (vs. in-Dart fold) | Drift `selectOnly` + `avg()` + `groupBy()` (we already have this in dormant DAO methods) | **In-Dart fold over the existing dormant-DAO row stream** | The dormant DAO methods already exist and are what the milestone says to wire up. SQL-side aggregation is a future optimization if the ~100-row per-month soul-ledger working set ever becomes a bottleneck (it won't for the foreseeable user count). |
+| Cache metric results | `riverpod`'s `keepAlive` + manual invalidation, or a memoization helper | **Compute fresh on `ref.watch` (no cache)** | Soul ledger entries change on every transaction; cache invalidation is its own bug class. The compute is O(n) over <1000 rows. Riverpod's recompute-on-dependency-change is the right primitive. |
+| Render histogram with smoothing/density curve | `fl_chart` `LineChart` overlaid on `BarChart` (combo chart) | **Plain `BarChart` histogram** | Combo charts are blocked in fl_chart 0.69 (and partially in 1.x — see issue #1140). v1.1 spec is a histogram, not a density estimate. Don't escalate scope. |
 
 ---
 
-## Installation Additions
-
-Additions to `pubspec.yaml` `dev_dependencies` (nothing in `dependencies`):
-
-```yaml
-dev_dependencies:
-  # Already installed — no change needed:
-  custom_lint: ^0.7.5
-  riverpod_lint: ^2.6.4
-  flutter_lints: ^6.0.0
-
-  # Add for audit pipeline:
-  import_guard: ^0.x.x      # verify exact version on pub.dev before adding
-  dart_code_linter: ^1.2.1   # free DCM fork; provides check-unused-code/files CLI
-  coverde: ^0.x.x            # per-file coverage CLI; verify exact version on pub.dev
-```
-
-`analysis_options.yaml` additions:
-
-```yaml
-analyzer:
-  plugins:
-    - import_guard       # add this; keep existing custom_lint plugin
-    - custom_lint        # already present via riverpod_lint
-```
-
-`jscpd` needs no pubspec entry — run via `npx jscpd` in CI.
-
----
-
-## What NOT to Use
-
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| `dart_code_metrics` (pub.dev package) | Sunset June 2023 when DCM went commercial; archived GitHub repo; no Dart 3 updates | `dart_code_linter` (the free fork) |
-| `dead_code_analyzer` | Solo-author, v0.1.1 only, regex-based (not AST), known false positives with constructors | `dart_code_linter check-unused-code` |
-| `clean_architecture_linter` v1.0.8 | Last seen at 1.0.8, Dart 3 compatibility unclear, low pub.dev score | `import_guard` |
-| `riverpod_lint` v3.x (upgrade) | Introduces `analyzer >=7.0.0 <9.0.0` conflict with `json_serializable >=9.0.0`; project uses Riverpod 2.6.x stack | Stay at `^2.6.4` until full Riverpod 3.0 migration |
-| `flutter_clean_architecture` package | Framework/scaffolding package, not a lint tool; dead on Dart 3 | Enforce architecture via `import_guard` |
-
----
-
-## Version Compatibility
+## Version Compatibility (for the locked stack v1.1 leaves alone)
 
 | Package | Compatible With | Notes |
-|---------|-----------------|-------|
-| `riverpod_lint ^2.6.4` | `riverpod_annotation ^2.6.1`, `custom_lint ^0.7.5`, Dart 3.x | Do not upgrade to 3.x without upgrading full Riverpod stack |
-| `dart_code_linter ^1.2.1` | Dart 3+, Flutter 3+ | Free fork; verify it does not conflict with analyzer version used by other tools |
-| `import_guard` | Dart 3.10+ required | Matches project's `sdk: ^3.10.8` — compatible |
-| `coverde` | Dart 3+, reads standard lcov.info | No known conflicts |
-| `very_good_coverage@v2` | GitHub Actions only | Not a Dart package; no pubspec conflict |
-| `jscpd` | Node.js, any Dart version | Runs outside Dart toolchain entirely |
+|---------|------------------|-------|
+| `intl: 0.20.2` | `flutter_localizations` (sdk) | EXACT pin required (CLAUDE.md pitfall #5). Any change here is a migration project, not a v1.1 task. |
+| `sqlcipher_flutter_libs: ^0.6.7` | `sqlite3: ^2.7.5`, `drift: ^2.25.0` | Stable triple — do not touch. CI guardrail rejects `sqlite3_flutter_libs`. |
+| `fl_chart: ^0.69.0` | Flutter SDK ≥ 3.10 | Compatible with current Dart `sdk: ^3.10.8`. Upgrading to 1.x raises the floor — see "fl_chart upgrade decision". |
+| `flutter_riverpod: ^2.6.1` + `riverpod_annotation: ^2.6.1` + `riverpod_generator: ^2.6.4` + `riverpod_lint: ^2.6.4` | All four pinned to the 2.6.x line | These four versions move together. Riverpod 3.x is blocked (FUTURE-TOOL-01). |
+| `freezed: ^3.0.0` + `freezed_annotation: ^3.0.0` + `json_annotation: ^4.9.0` + `json_serializable: ^6.9.4` | Mutually compatible | Code-gen pipeline; do not touch in v1.1. |
+| `mocktail: ^1.0.4` | Test-only | Mockito was removed in v1.0 (HIGH-07). Do not reintroduce mockito. |
 
 ---
 
-## Alternatives Considered
+## Installation
 
-| Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|-------------------------|
-| `import_guard` | DCM `avoid-banned-imports` | When team purchases DCM license — DCM is more precise and supports regex paths |
-| `dart_code_linter` | DCM `check-unused-code` | When team purchases DCM license — DCM has Freezed-aware detection (v1.36 detects Freezed classes only referenced in generated code) |
-| `jscpd` + AI scan | DCM duplication rules | When team purchases DCM license |
-| `very_good_coverage@v2` | Codecov diff coverage | When per-PR diff coverage trend matters more than absolute threshold; Codecov adds cloud dependency |
+**No `pub add` commands. No `pubspec.yaml` edits.** v1.1 is a pure feature-build on the existing locked dep set.
 
-**On DCM (dcm.dev):** DCM is the gold standard for Flutter code quality tooling. Version 1.36.0 (March 2026), 181+ rules in recommended preset, MCP server integration for AI-assisted audits, active development with 8+ releases in 2025. Free tier (100 rules) may not cover `check-unused-code`/`check-unused-files` as CLI commands — verify at dcm.dev/pricing before assuming free. For a private app (not OSS), the paid license applies. If the team budgets for DCM, replace `dart_code_linter` + `import_guard` with DCM entirely.
+```bash
+# After ARB key changes (capability 7), regenerate localizations
+flutter gen-l10n
+
+# After adding @freezed / @riverpod-annotated classes (capabilities 1, 2, 6),
+# regenerate code (already CI-enforced via build_runner clean-diff guardrail)
+flutter pub run build_runner build --delete-conflicting-outputs
+```
+
+---
+
+## Stack Patterns by v1.1 Scenario
+
+**If the family-cooperative aggregation turns out to need SQL-side `groupBy(category)`:**
+- Add a 4th DAO method (`getCategoryAvgSatisfaction`) using Drift's `selectOnly()` + `avg()` + `groupBy()`.
+- This stays inside the locked stack — no new packages.
+- Stretch consideration only; for v1.1 the in-Dart `groupBy` from `package:collection` is sufficient at expected data volumes.
+
+**If the histogram needs to be interactive (tap a bar to filter the transaction list):**
+- fl_chart 0.69 supports `barTouchData` with a callback already.
+- No new package; this is a UI wiring detail, not a stack decision.
+
+**If the "Best Joy per ¥" highlight needs a story-mode card (image, transition):**
+- Use existing Flutter `Hero` / `AnimatedSwitcher` widgets.
+- No new animation package (no `flutter_animate`, no `rive`).
 
 ---
 
 ## Sources
 
-- [pub.dev: import_guard](https://pub.dev/packages/import_guard) — last updated Jan 2026, Dart 3.10+ requirement confirmed
-- [pub.dev: dart_code_linter](https://pub.dev/packages/dart_code_linter) — v1.2.1, Nov 2025, free OSS fork
-- [pub.dev: riverpod_lint](https://pub.dev/packages/riverpod_lint) — Feb 2026 update, 2.6.x series
-- [pub.dev: riverpod_lint changelog](https://pub.dev/packages/riverpod_lint/changelog) — rule list verified
-- [pub.dev: custom_lint](https://pub.dev/packages/custom_lint) — Sep 2025 update
-- [pub.dev: coverde](https://pub.dev/packages/coverde) — Jan 2026 update
-- [dcm.dev: avoid-banned-imports guide](https://dcm.dev/docs/guides/advanced-architecture-rules-guide/) — layer enforcement configuration
-- [dcm.dev: check-unused-code](https://dcm.dev/docs/cli/code-quality-checks/unused-code/) — CLI reference
-- [dcm.dev: DCM 2025 Year in Review](https://dcm.dev/blog/2026/01/15/dcm-2025-year-in-review) — 181 rules, 8 releases, Jan 2026
-- [dcm.dev: DCM 1.36.0 changelog](https://dcm.dev/blog/2026/03/19/whats-new-in-dcm-1-36-0/) — Freezed-aware unused-code detection
-- [dcm.dev: sunset announcement](https://dcm.dev/blog/2023/06/06/announcing-dcm-free-version-sunset/) — confirms pub.dev `dart_code_metrics` is dead
-- [GitHub: VeryGoodOpenSource/very_good_coverage](https://github.com/VeryGoodOpenSource/very_good_coverage) — @v2, actively maintained
-- [Riverpod issues: analyzer conflict #4393](https://github.com/rrousselGit/riverpod/issues/4393) — riverpod_lint 3.x / json_serializable conflict warning
-- [codewithandrea.com: riverpod_lint guide](https://codewithandrea.com/articles/flutter-riverpod-lint/) — rule explanations verified
-- [dart.dev: unused_element diagnostic](https://dart.dev/tools/diagnostics/unused_element) — built-in dead code detection confirmed
+- `pubspec.yaml` (read 2026-05-01) — verified all currently-locked dependencies and dev-dependencies.
+- `CLAUDE.md` — verified project's stack constraints, pitfalls, and i18n/Drift/crypto rules. HIGH confidence.
+- `.planning/PROJECT.md` (read 2026-05-01) — verified v1.1 milestone scope, locked constraints, and out-of-scope items.
+- [pub.dev/packages/fl_chart](https://pub.dev/packages/fl_chart) — verified latest version is 1.1.1 (analyzed 2026-02-04). HIGH confidence.
+- [pub.dev/packages/fl_chart/changelog](https://pub.dev/packages/fl_chart/changelog) — verified breaking changes between 0.69 and 1.1.1 (tooltipRoundedRadius removal, Flutter ≥3.27.4, BarChart non-const, BarChartRodStackItem.borderSide named param). HIGH confidence.
+- [imaNNeo/fl_chart#1140](https://github.com/imaNNeo/fl_chart/issues/1140) — confirmed combo-chart (line-over-bars) is still a feature request, not a built-in. Not blocking for v1.1 since trend and histogram are separate widgets. MEDIUM confidence.
+- [pub.dev/packages/decimal](https://pub.dev/packages/decimal) — confirmed `decimal` is the standard precision package; rejected for v1.1 because the Joy/¥ ratio is display-only and never compared/persisted with precision sensitivity. HIGH confidence.
+- [pub.dev/packages/intl - NumberFormat](https://pub.dev/documentation/intl/latest/intl/NumberFormat-class.html) — confirmed `NumberFormat` covers fixed-decimal, percent, and pattern formatting locale-aware. HIGH confidence.
+- `package:collection` ^1.19.1 (already in pubspec) — `groupBy` (top-level function) and `IterableExtension` (`maxBy`, `average`) are part of its standard surface as of 1.18+. HIGH confidence.
 
 ---
 
-*Stack research for: Flutter/Dart codebase audit and cleanup tooling*
-*Researched: 2026-04-25*
+*Stack research for: v1.1 Happiness Metric & Display milestone — Flutter / Dart / Riverpod / Drift+SQLCipher / fl_chart*
+*Researched: 2026-05-01*

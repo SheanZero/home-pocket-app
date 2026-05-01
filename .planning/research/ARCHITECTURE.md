@@ -1,438 +1,658 @@
-# Architecture Research
+# Architecture Research — v1.1 Happiness Metric & Display
 
-**Domain:** Audit-driven Flutter/Dart codebase cleanup pipeline
-**Researched:** 2026-04-25
-**Confidence:** HIGH
+**Domain:** Local-first Flutter accounting app — happiness metric integration into existing 5-layer Clean Architecture
+**Researched:** 2026-05-01
+**Confidence:** HIGH (verified directly against the live `lib/` tree; all path/symbol claims grounded in source reads)
 
----
-
-## Standard Architecture
-
-### System Overview
-
-The cleanup workflow is a five-component pipeline. Every component has a strict producer/consumer relationship: nothing flows backward except the re-audit at the end, which reads from the same source as the initial audit.
-
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│  COMPONENT 1 — AUDIT ENGINE                                          │
-│  ┌────────────────┐  ┌────────────────┐  ┌────────────────────────┐ │
-│  │  dart analyze  │  │  custom_lint   │  │  AI-Agent Semantic     │ │
-│  │  --format=     │  │  (riverpod_    │  │  Scan (import graph,   │ │
-│  │  machine       │  │  lint, layer   │  │  dead code, provider   │ │
-│  │                │  │  rules)        │  │  duplication)          │ │
-│  └───────┬────────┘  └───────┬────────┘  └──────────┬─────────────┘ │
-│          │                  │                       │               │
-│          └──────────────────┴───────────────────────┘               │
-│                                     │                               │
-│                             (raw findings)                          │
-└─────────────────────────────────────┼────────────────────────────── ┘
-                                      ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│  COMPONENT 2 — ISSUE CATALOGUE                                       │
-│                                                                      │
-│  .planning/ISSUES.md  (canonical, human-readable)                   │
-│  .planning/issues.json (machine-readable — feeds re-audit diffing)  │
-│                                                                      │
-│  Schema per entry:                                                   │
-│    id, category, severity, file, line_start, line_end,              │
-│    description, phase_assigned, status                              │
-└─────────────────────────────────────┬────────────────────────────── ┘
-                                      │
-                                      ▼ (grouped by severity)
-┌──────────────────────────────────────────────────────────────────────┐
-│  COMPONENT 3 — FIX PHASES (sequential, severity-ordered)            │
-│                                                                      │
-│  Phase A: CRITICAL-only — layer violations that make architecture   │
-│           fundamentally unsound (domain→data imports, feature-held  │
-│           application/ code, appDatabase UnimplementedError etc.)   │
-│                                                                      │
-│  Phase B: HIGH — provider hygiene, deprecated wired services,       │
-│           security regressions (recoverFromSeed guard), security    │
-│           boundary violations                                        │
-│                                                                      │
-│  Phase C: MEDIUM — dead code, redundant models, orphaned utilities, │
-│           MOD-009 code references, hardcoded strings (i18n), debug  │
-│           print cleanup, audit log retention, SQL string interpolation│
-│                                                                      │
-│  Phase D: LOW — minor style, missing indices, docs-vs-reality drift, │
-│           cosmetic duplication, analysis_options tweaks             │
-│                                                                      │
-│  Each phase:                                                         │
-│    1. Write characterization tests (capture current behavior)       │
-│    2. Refactor to eliminate findings                                 │
-│    3. Verify ≥80% coverage on every touched file                    │
-│    4. Run flutter analyze (must be 0 issues), dart format           │
-└─────────────────────────────────────┬────────────────────────────── ┘
-                                      │
-                                      ▼ (after ALL phases complete)
-┌──────────────────────────────────────────────────────────────────────┐
-│  COMPONENT 4 — DOC SWEEP                                            │
-│                                                                      │
-│  One centralized pass over doc/arch/ (ARCH/MOD/ADR files) aligning  │
-│  documentation to the refactored code state. Not per-phase.         │
-└─────────────────────────────────────┬────────────────────────────── ┘
-                                      │
-                                      ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│  COMPONENT 5 — RE-AUDIT (final gate)                                │
-│                                                                      │
-│  Re-run the identical audit pipeline from Component 1.              │
-│  Diff output against issues.json.                                   │
-│  Exit criterion: zero open findings across all four categories.     │
-│  If any remain: return to the appropriate fix phase.                │
-└──────────────────────────────────────────────────────────────────────┘
-```
-
-### Component Responsibilities
-
-| Component | Responsibility | Produces |
-|-----------|----------------|----------|
-| Audit Engine | Enumerate every violation with file + line reference and severity | Raw findings (mixed tool + agent output) |
-| Issue Catalogue | Normalize, deduplicate, and classify all findings into a single structured list | `ISSUES.md` + `issues.json` |
-| Fix Phases (A–D) | Eliminate findings grouped by severity; enforce coverage gate per phase | Refactored code + new/updated tests |
-| Doc Sweep | Align ARCH/MOD/ADR to post-refactor code state | Updated `doc/arch/` files |
-| Re-Audit | Re-run the full audit; produce a diff proving zero violations remain | Pass/fail verdict + diff report |
+> **Scope note.** This file answers the 8 integration questions asked in the milestone prompt. The existing 5-layer architecture is *already* documented in `.planning/codebase/ARCHITECTURE.md` (2026-04-25, v1.0 baseline) — this file builds on top of it rather than re-stating it. Read that file first if you need the layer/data-flow primer.
 
 ---
 
-## Recommended Project Structure
-
-This is the cleanup pipeline's own artifact structure, layered inside `.planning/`:
+## System Overview — Where v1.1 Components Land
 
 ```
-.planning/
-├── PROJECT.md                  # Mission + constraints (already exists)
-├── ROADMAP.md                  # Phase definitions (produced by roadmap phase)
-├── ISSUES.md                   # Human-readable issue catalogue (Phase 1 output)
-├── issues.json                 # Machine-readable issue catalogue (Phase 1 output)
-├── coverage-baseline.txt       # Baseline coverage snapshot taken before any fix phase
-├── re-audit/
-│   └── ISSUES-REAUDIT.md       # Final re-audit output (Component 5)
-├── codebase/                   # Existing codebase map (already exists)
-│   ├── ARCHITECTURE.md
-│   ├── STRUCTURE.md
-│   ├── CONCERNS.md
-│   └── ...
-└── research/                   # This directory
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          PRESENTATION LAYER                                  │
+│  features/home/presentation/                features/analytics/presentation/ │
+│  ┌─────────────────────────────┐            ┌──────────────────────────────┐│
+│  │ screens/home_screen.dart    │            │ screens/analytics_screen.dart││
+│  │   ├─ MonthOverviewCard      │            │   ├─ Summary / Pie / Daily   ││
+│  │   ├─ LedgerComparisonSec.   │            │   ├─ LedgerRatio / Budget    ││
+│  │   └─ SoulFullnessCard ★MOD  │            │   └─ ★NEW HappinessSection   ││
+│  │       (rebuilt: 4 tiles +   │            │       (4 widgets reading     ││
+│  │        story card)          │            │        dormant DAOs)         ││
+│  │                             │            │                              ││
+│  │ widgets/                    │            │ widgets/                     ││
+│  │   soul_fullness_card.dart◐  │            │   ★joy_density_trend.dart    ││
+│  │   ★best_joy_moment_card.    │            │   ★satisfaction_histogram.   ││
+│  │   ★family_highlights_card.  │            │   ★joy_summary_section.dart  ││
+│  │                             │            │                              ││
+│  │ providers/                  │            │ providers/                   ││
+│  │   state_home.dart◐          │            │   state_analytics.dart◐      ││
+│  │   ★state_happiness.dart     │            │   (extend with happiness     ││
+│  │   (re-exports from analytics│            │    providers — same family)  ││
+│  │    OR direct)               │            │                              ││
+│  └─────────────────────────────┘            └──────────────────────────────┘│
+└──────────────────┬─────────────────────────────────┬────────────────────────┘
+                   │ ref.watch(...Provider)          │
+┌──────────────────┴─────────────────────────────────┴────────────────────────┐
+│                          APPLICATION LAYER (GLOBAL)                          │
+│  lib/application/analytics/                                                  │
+│    get_monthly_report_use_case.dart       (existing)                         │
+│    get_expense_trend_use_case.dart        (existing)                         │
+│    get_budget_progress_use_case.dart      (existing)                         │
+│    ★get_happiness_report_use_case.dart    (NEW — primary)                    │
+│    ★get_best_joy_moment_use_case.dart     (NEW — story card)                 │
+│    ★get_family_happiness_use_case.dart    (NEW — group mode only)            │
+│    repository_providers.dart              (extend: add use case providers)   │
+└──────────────────┬─────────────────────────────────────────────────────────┘
+                   │ uses                                          implements
+┌──────────────────┴────────────────────────┐  ┌──────────────────────────────┐
+│   DOMAIN LAYER (per feature)              │  │       DATA LAYER             │
+│   features/analytics/domain/              │  │  lib/data/                   │
+│     models/                               │  │    daos/                     │
+│       monthly_report.dart       (existing)│  │      analytics_dao.dart◐     │
+│       budget_progress.dart      (existing)│  │      (3 dormant methods —    │
+│       expense_trend.dart        (existing)│  │       wire only, no schema)  │
+│       analytics_aggregate.dart  (existing)│  │      ★+1 method:             │
+│       ★happiness_report.dart    (NEW)     │  │        getBestJoyMoment()    │
+│       ★best_joy_moment.dart     (NEW)     │  │    repositories/             │
+│       ★family_happiness.dart    (NEW)     │  │      analytics_repository_   │
+│     repositories/                         │  │        impl.dart◐ (extend)   │
+│       analytics_repository.dart◐ (extend) │  │                              │
+└───────────────────────────────────────────┘  └──────────────────────────────┘
 
-scripts/                        # Existing, add cleanup-pipeline scripts here
-├── arb_to_csv.dart             # Already exists
-├── audit_layer.sh              # New: import-graph violation scanner
-├── audit_dead_code.sh          # New: dead export / unreachable branch scanner
-├── audit_providers.sh          # New: Riverpod provider hygiene scanner
-├── coverage_gate.sh            # New: per-file ≥80% coverage enforcer
-└── reaudit_diff.sh             # New: diff issues.json vs re-audit output
+★ = NEW file/symbol     ◐ = MODIFIED existing file     (no mark) = unchanged
+```
+
+### Component Responsibilities (v1.1 deltas only)
+
+| Component | Layer | Status | Responsibility |
+|-----------|-------|--------|----------------|
+| `HappinessReport` Freezed model | analytics/domain/models | NEW | Holds 4 personal metrics (avgSat, joyPerYen, highlightCount, bestJoyMoment ref) + optional 2 family fields |
+| `BestJoyMoment` Freezed model | analytics/domain/models | NEW | Story card: single transaction id + amount + satisfaction + categoryId + timestamp + computed joyPerYen |
+| `FamilyHappiness` Freezed model | analytics/domain/models | NEW | 2 cooperative metrics (familyHighlightsSum, sharedJoyInsight: List<CategorySatisfaction>) |
+| `GetHappinessReportUseCase` | application/analytics | NEW | Wires `getSoulSatisfactionOverview` + `getSatisfactionDistribution` + `getBestJoyMoment` into `HappinessReport`. Mirrors `GetMonthlyReportUseCase` shape. |
+| `GetBestJoyMomentUseCase` | application/analytics | NEW | Returns single `BestJoyMoment` for the month. Uses a new DAO query (see Q4). |
+| `GetFamilyHappinessUseCase` | application/analytics | NEW | Group-mode only. Aggregates over all books visible in current group. |
+| `AnalyticsRepository` interface | analytics/domain/repositories | EXTEND | Add `getSoulSatisfactionOverview`, `getSatisfactionDistribution`, `getDailySatisfactionTrend`, `getBestJoyMoment` method signatures. |
+| `AnalyticsRepositoryImpl` | data/repositories | EXTEND | Implement the 4 new interface methods by delegating to existing/new DAO methods. |
+| `AnalyticsDao` | data/daos | ADD ONE METHOD | Add `getBestJoyMoment` only. The 3 satisfaction methods already exist (verified in `lib/data/daos/analytics_dao.dart` lines 230–327). |
+| `state_happiness.dart` | features/analytics/presentation/providers | NEW | New `@riverpod` providers: `happinessReportProvider`, `bestJoyMomentProvider`, `familyHappinessProvider`, `joyPerYenTrendProvider` (derived). |
+| `SoulFullnessCard` | features/home/presentation/widgets | REBUILT | Replaces 2-tile (Satisfaction + ROI) layout with 4-tile + story card + conditional family card. Becomes container widget that takes `HappinessReport`. |
+| `BestJoyMomentCard` | features/home/presentation/widgets | NEW | Story card extracted from `SoulFullnessCard` for reusability between Home and Analytics screens. |
+| `FamilyHighlightsCard` | features/home/presentation/widgets | NEW | Conditional sub-widget for 2 family metrics. Group mode only. |
+| `JoyDensityTrendChart` | features/analytics/presentation/widgets | NEW | Joy-per-¥ line chart (mirror `ExpenseTrendChart` shape but uses `getDailySatisfactionTrend`). |
+| `SatisfactionHistogram` | features/analytics/presentation/widgets | NEW | Score-frequency bar chart (mirror `DailyExpenseChart` shape). |
+| `JoyLedgerStatisticsSection` | features/analytics/presentation/widgets | NEW | Section header + composes the two charts above. Inserted between `LedgerRatioChart` and `BudgetProgressList` in `analytics_screen.dart`. |
+
+### What is NOT changing (per Out-of-Scope locks)
+
+- `lib/data/tables/transactions_table.dart` — no schema mutation
+- `lib/data/app_database.dart` — no version bump
+- `lib/features/accounting/domain/models/transaction.dart` — no field added
+- `LedgerType` enum — values stay `survival` / `soul`
+- `lib/core/theme/app_colors.dart` — color tokens stay (`#5A9CC8`, `#47B88A`, `#8AB8DA`)
+- `SatisfactionEmojiPicker`, `VoiceSatisfactionEstimator` — input pipeline untouched
+
+---
+
+## Recommended Project Structure (v1.1 file additions)
+
+```
+lib/
+├── application/analytics/                                # GLOBAL use cases
+│   ├── get_monthly_report_use_case.dart                  # existing
+│   ├── get_expense_trend_use_case.dart                   # existing
+│   ├── get_budget_progress_use_case.dart                 # existing
+│   ├── get_happiness_report_use_case.dart                # ★ NEW (primary)
+│   ├── get_best_joy_moment_use_case.dart                 # ★ NEW (single-tx argmax)
+│   ├── get_family_happiness_use_case.dart                # ★ NEW (group mode)
+│   ├── repository_providers.dart                         # ◐ EXTEND (add new use case providers)
+│   └── repository_providers.g.dart                       # regenerated
+│
+├── data/
+│   ├── daos/
+│   │   └── analytics_dao.dart                            # ◐ EXTEND (+ 1 method: getBestJoyMoment)
+│   └── repositories/
+│       └── analytics_repository_impl.dart                # ◐ EXTEND (+ 4 method impls)
+│
+├── features/analytics/
+│   ├── domain/
+│   │   ├── models/
+│   │   │   ├── happiness_report.dart                     # ★ NEW (Freezed)
+│   │   │   ├── happiness_report.freezed.dart             # generated
+│   │   │   ├── happiness_report.g.dart                   # generated
+│   │   │   ├── best_joy_moment.dart                      # ★ NEW (Freezed)
+│   │   │   ├── best_joy_moment.freezed.dart              # generated
+│   │   │   ├── best_joy_moment.g.dart                    # generated
+│   │   │   ├── family_happiness.dart                     # ★ NEW (Freezed)
+│   │   │   ├── family_happiness.freezed.dart             # generated
+│   │   │   ├── family_happiness.g.dart                   # generated
+│   │   │   └── analytics_aggregate.dart                  # ◐ EXTEND (add SatisfactionOverview, SatisfactionDistribution, DailySatisfaction, BestJoyMomentRow domain types)
+│   │   └── repositories/
+│   │       └── analytics_repository.dart                 # ◐ EXTEND (+ 4 method signatures)
+│   └── presentation/
+│       ├── providers/
+│       │   ├── state_analytics.dart                      # ◐ unchanged or minimal — see Q5
+│       │   ├── state_happiness.dart                      # ★ NEW (4 providers)
+│       │   └── state_happiness.g.dart                    # generated
+│       ├── screens/
+│       │   └── analytics_screen.dart                     # ◐ EXTEND (insert JoyLedgerStatisticsSection)
+│       └── widgets/
+│           ├── joy_density_trend_chart.dart              # ★ NEW
+│           ├── satisfaction_histogram.dart               # ★ NEW
+│           └── joy_ledger_statistics_section.dart        # ★ NEW
+│
+├── features/home/presentation/
+│   ├── screens/
+│   │   └── home_screen.dart                              # ◐ MODIFY (drop _computeSatisfaction / _computeHappinessROI; switch SoulFullnessCard wiring to happinessReportProvider)
+│   └── widgets/
+│       ├── soul_fullness_card.dart                       # ◐ REBUILT (interface change)
+│       ├── best_joy_moment_card.dart                     # ★ NEW
+│       └── family_highlights_card.dart                   # ★ NEW
+│
+└── l10n/
+    ├── app_ja.arb                                        # ◐ rename 4 keys + add ~12 new keys
+    ├── app_zh.arb                                        # ◐ same
+    └── app_en.arb                                        # ◐ same
 ```
 
 ### Structure Rationale
 
-- `ISSUES.md` + `issues.json` colocate the catalogue with the plan so every phase can read from it without cross-repo lookups.
-- `scripts/` uses the existing directory (already has `arb_to_csv.dart`); no new top-level directory needed.
-- `coverage-baseline.txt` must be captured before any refactor begins so per-file enforcement is relative to a known state.
-- `re-audit/` is a separate directory so the re-audit output is never confused with the initial catalogue.
+- **Use cases stay in `lib/application/analytics/`, NOT in `features/happiness/`** — Thin Feature rule (`.claude/rules/arch.md` + `CLAUDE.md` "Placement Decision Rule" line 32) forbids `application/` inside `features/`. Existing analytics use cases live there; happiness is the same business-logic domain (analytics over `transactions` table).
+- **Domain models in `features/analytics/domain/models/`, NOT a new feature module** — see Q2. Keeping them in analytics avoids cross-feature import sprawl (Home would otherwise import `features/happiness/domain/...` AND `features/analytics/domain/...` for the same screen).
+- **DAO additions stay in `analytics_dao.dart`** — the file already groups soul-satisfaction queries (lines 230–327). One more method preserves cohesion. New DAO file would split a query family arbitrarily.
+- **Provider lives in analytics presentation, re-imported by Home** — single source of truth. Home already imports from `features/analytics/presentation/providers/state_analytics.dart` (verified `home_screen.dart` line 12), so the precedent is set.
 
 ---
 
-## Architectural Patterns
+## Architectural Patterns (project-specific, applied to v1.1)
 
-### Pattern 1: Tooling Stream → Catalogue Normalization
+### Pattern 1: Use Case Per Aggregate (existing project convention)
 
-**What:** The automated tools (`dart analyze --format=machine`, `flutter pub run custom_lint`, `riverpod_lint`) each emit their own format. These must be normalized into a single catalogue before any human or agent processes them. The AI-agent semantic scan supplements tooling with findings that grep cannot detect (cross-file dependency inversion, provider duplication across features, semantic dead code).
+**What:** One use case class per Freezed aggregate model returned to the UI. Constructor-injected repositories. `execute()` is the only public method. Internally calls `Future.wait` for parallel DAO queries.
 
-**When to use:** Always — do not let the two streams stay separate. A violation that appears in both tool output and agent findings must be deduplicated into one entry.
+**Project precedent:** `GetMonthlyReportUseCase` (`lib/application/analytics/get_monthly_report_use_case.dart`) bundles 4 parallel `AnalyticsRepository` calls + 1 `CategoryRepository` call into a single `MonthlyReport`.
 
-**Data interchange format:**
+**Apply to v1.1:** `GetHappinessReportUseCase` parallelises `getSoulSatisfactionOverview` + `getSatisfactionDistribution` + `getBestJoyMoment` into `HappinessReport`. Same shape.
 
-```
-Tooling output: dart analyze --format=machine
-  → SEVERITY|TYPE|CODE|FILE|LINE|COL|LEN|MESSAGE
-  → pipe-delimited, scriptable with awk/grep
+```dart
+// lib/application/analytics/get_happiness_report_use_case.dart
+class GetHappinessReportUseCase {
+  GetHappinessReportUseCase({required AnalyticsRepository analyticsRepository})
+    : _analyticsRepository = analyticsRepository;
 
-Agent output: structured Markdown list per category
-  → normalized by a Dart script into issues.json
+  final AnalyticsRepository _analyticsRepository;
 
-issues.json entry schema:
-{
-  "id": "LV-001",
-  "category": "layer_violation | redundant | dead_code | provider_hygiene",
-  "severity": "CRITICAL | HIGH | MEDIUM | LOW",
-  "file": "lib/features/accounting/presentation/providers/use_case_providers.dart",
-  "line_start": 13,
-  "line_end": 69,
-  "description": "ResolveLedgerTypeService retained with @Deprecated ignore suppression",
-  "phase_assigned": "B",
-  "status": "open | resolved | wont_fix"
+  Future<HappinessReport> execute({
+    required String bookId,
+    required int year,
+    required int month,
+  }) async {
+    final start = DateTime(year, month, 1);
+    final end = DateTime(year, month + 1, 0, 23, 59, 59);
+
+    final results = await Future.wait([
+      _analyticsRepository.getSoulSatisfactionOverview(bookId: bookId, startDate: start, endDate: end),
+      _analyticsRepository.getMonthlyTotals(bookId: bookId, startDate: start, endDate: end),  // for soulTotal
+      _analyticsRepository.getSatisfactionDistribution(bookId: bookId, startDate: start, endDate: end),
+      _analyticsRepository.getBestJoyMoment(bookId: bookId, startDate: start, endDate: end),
+    ]);
+
+    final overview = results[0] as SatisfactionOverview;
+    final totals = results[1] as MonthlyTotals;
+    final distribution = results[2] as List<SatisfactionDistribution>;
+    final best = results[3] as BestJoyMoment?;
+
+    final highlightCount = distribution
+        .where((d) => d.score >= 8)
+        .fold<int>(0, (s, d) => s + d.count);
+
+    final joyPerYen = totals.soulExpenses > 0
+        ? overview.avgSatisfaction * overview.count / totals.soulExpenses
+        : 0.0;
+
+    return HappinessReport(
+      year: year, month: month,
+      avgSatisfaction: overview.avgSatisfaction,
+      joyPerYen: joyPerYen,
+      highlightCount: highlightCount,
+      bestJoyMoment: best,
+    );
+  }
 }
 ```
 
-**Trade-offs:**
-- Normalization step adds upfront cost (~half a day) but pays for itself by enabling automated diffing at re-audit time.
-- JSON as interchange format is parseable by both Dart scripts and shell tools (`jq`).
-- Markdown is kept as the human-readable mirror so phases can read it without tooling.
+**Trade-offs:** Slightly heavier than helper functions, but consistent with the codebase. Testable in isolation. Riverpod-friendly.
 
-### Pattern 2: Characterization-Test-First Refactor (Feathers Pattern)
+### Pattern 2: Dormant DAO Wiring (specific to v1.1)
 
-**What:** Before modifying any file, write characterization tests that capture the current observable behavior of that file (or module boundary). Refactor next. Add edge-case tests last. This is the canonical pattern from *Working Effectively with Legacy Code* (Feathers, 2004) for safe large-scale structural refactoring.
+**What:** Three DAO methods (`getSoulSatisfactionOverview`, `getSatisfactionDistribution`, `getDailySatisfactionTrend`) already exist on `AnalyticsDao` (verified `lib/data/daos/analytics_dao.dart` lines 230–327) but are **not currently called by any repository, use case, or provider**. They are dormant data-access. v1.1 wires them through the layers without touching the queries themselves.
 
-**When to use:** Every fix phase. Mandatory before touching any file not already at ≥80% coverage.
+**Apply:** Each dormant DAO method needs:
+1. A domain-model counterpart in `analytics_aggregate.dart` (DAO-side has `SatisfactionOverviewResult`; domain side needs `SatisfactionOverview`).
+2. A signature on `AnalyticsRepository` (interface).
+3. An implementation on `AnalyticsRepositoryImpl` that translates DAO result → domain model (mirrors `getMonthlyTotals` translation pattern, lines 18–28 of `analytics_repository_impl.dart`).
+4. Consumption inside a use case (`GetHappinessReportUseCase`).
 
-**Sequence for each file targeted in a fix phase:**
+**Trade-offs:** Boilerplate-heavy (4 layers × 3 methods = 12 surface points), but enforces import_guard layering. Domain stays decoupled from Drift.
 
-```
-1. Measure current coverage for the file (lcov extract)
-2. If < 80%: write characterization tests until ≥ 80%
-   (golden/snapshot-style: assert current behavior, not ideal behavior)
-3. Run tests → GREEN (capturing current behavior)
-4. Apply the refactor (structural change only, no behavior change)
-5. Run tests → must stay GREEN (behavior preserved)
-6. Add edge-case / correctness tests for any new logic paths
-7. Re-measure coverage → must be ≥ 80%
-```
+### Pattern 3: Container Widget With Async Provider (existing pattern)
 
-**Trade-offs:**
-- Characterization tests are write-once artifacts; some will be deleted after the next feature wave introduces proper behavior tests. That is expected and acceptable.
-- This is slower upfront than "refactor first, test after" but eliminates silent regressions. For a codebase with ~68% current coverage and security-critical crypto paths, the risk of silent regression without this pattern is unacceptable.
-- Do NOT write characterization tests for generated files (`*.g.dart`, `*.freezed.dart`) — they are regenerated, not refactored.
+**What:** Widget receives a Freezed model directly (not raw values) and is rendered inside an `AsyncValue.when` from the parent screen. The widget itself is a `StatelessWidget` — it does not consume providers.
 
-### Pattern 3: Severity-Ordered Phase Separation with Hard Gate Between CRITICAL and HIGH
+**Project precedent:** `SoulFullnessCard` today is a `StatelessWidget` taking 3 primitives (`satisfactionPercent`, `happinessROI`, `recentSoulAmount`). The parent `home_screen.dart` line 132 unwraps `reportAsync.when(data: (report) => SoulFullnessCard(...), ...)`.
 
-**What:** CRITICAL findings get their own isolated phase (Phase A) with a mandatory quality gate before Phase B begins. HIGH through LOW can share a phase boundary if resourcing is tight, but CRITICAL is always alone.
+**Apply to v1.1:** `SoulFullnessCard` becomes `SoulFullnessCard({required HappinessReport report, required bool isGroupMode, FamilyHappiness? familyReport})`. Stays `StatelessWidget`. Widget tests still build it without ProviderScope.
 
-**When to use:** Any refactor initiative where layer-integrity violations exist alongside lower-severity issues. Doing MEDIUM-severity cleanup on top of unresolved CRITICAL architectural violations wastes effort — the CRITICAL fix will restructure the files the MEDIUM fix just touched.
+```dart
+// home_screen.dart (rebuilt section)
+final happinessAsync = ref.watch(happinessReportProvider(bookId: bookId, year: year, month: month));
+final familyAsync = isGroupMode
+    ? ref.watch(familyHappinessProvider(year: year, month: month))
+    : const AsyncValue.data(null);
 
-**Phase boundaries for this project (30k-line Flutter/Dart app, fine granularity):**
-
-```
-Phase 1: Audit + Catalogue  (prerequisite — must complete before any fix phase)
-Phase 2: Coverage Baseline  (must complete before any fix phase)
-Phase 3A: CRITICAL fixes    (hard gate: zero analyzer issues before proceeding)
-Phase 3B: HIGH fixes        (hard gate: zero analyzer issues + ≥80% coverage touched files)
-Phase 3C: MEDIUM fixes      (hard gate: same)
-Phase 3D: LOW fixes         (hard gate: same)
-Phase 4: Doc Sweep          (after all fix phases, before re-audit)
-Phase 5: Re-Audit           (final exit criterion: zero violations)
+happinessAsync.when(
+  data: (report) => familyAsync.when(
+    data: (family) => SoulFullnessCard(
+      report: report,
+      isGroupMode: isGroupMode,
+      familyReport: family,
+    ),
+    loading: () => SoulFullnessCard(report: report, isGroupMode: false),
+    error: (_, __) => SoulFullnessCard(report: report, isGroupMode: false),
+  ),
+  loading: ...,
+  error: ...,
+);
 ```
 
-Six fix-bearing phases is appropriate for this granularity. Combining CRITICAL+HIGH into one phase risks HIGH fixes landing on unstable foundations; separating MEDIUM+LOW from HIGH avoids premature polish.
-
-**Trade-offs:**
-- More phases = more gate ceremonies. For a solo or two-person team, the gates are `flutter analyze`, `flutter test`, `lcov` check — all scriptable and run in seconds, so overhead is negligible.
-- The audit and coverage-baseline phases have no code changes; they are information-gathering only.
-
-### Pattern 4: Shell Script + Dart Script Hybrid Task Runner (no Melos)
-
-**What:** Use shell scripts in `scripts/` for the audit pipeline and a `Makefile` (or equivalent) as the top-level task runner. Do NOT introduce Melos — it is a monorepo tool; this is a single package. Do NOT introduce a new build system (just/taskfile) unless the team already uses one.
-
-**When to use:** Single-package Flutter projects without an existing task runner. The existing `scripts/arb_to_csv.dart` establishes precedent for Dart scripts in this repo.
-
-**Concrete command surface:**
-
-```bash
-# Phase 1: Audit
-dart scripts/audit_layer.sh       # import-graph layer violations
-flutter pub run custom_lint       # Riverpod provider hygiene
-dart analyze --format=machine     # mechanical lint issues
-# (agent scan: run separately, output appended to ISSUES.md)
-
-# Coverage baseline (Phase 2)
-flutter test --coverage
-lcov --remove coverage/lcov.info '*.g.dart' '*.freezed.dart' -o coverage/lcov_clean.info
-dart scripts/coverage_baseline.dart   # snapshot per-file percentages → coverage-baseline.txt
-
-# Coverage gate (each fix phase)
-dart scripts/coverage_gate.dart --min 80 --changed-files $(git diff --name-only HEAD~1)
-
-# Quality gate (each fix phase)
-flutter analyze   # must exit 0
-dart format --set-exit-if-changed .
-
-# Re-audit diff (Phase 5)
-dart scripts/reaudit_diff.dart --baseline .planning/issues.json --current .planning/re-audit/ISSUES-REAUDIT.json
-```
-
-**Trade-offs:**
-- Shell + Dart scripts are immediately understandable by any Flutter developer without additional tooling knowledge.
-- `Makefile` adds an optional convenience layer but is not required if the team prefers running scripts directly.
-- `dart analyze --format=machine` does not produce clean JSON natively (an open dart-lang/sdk issue #54877 as of 2025); pipe-delimited output is parsed by the normalization script. DCM is an alternative that does produce JSON but requires a commercial license for full features — do not add it as a dependency; the built-in tools are sufficient.
+**Trade-offs:** Two `AsyncValue.when` reads when group mode is on; acceptable since both providers are cheap.
 
 ---
 
 ## Data Flow
 
-### Audit → Catalogue → Fix → Re-Audit Flow
+### v1.1 Read Path: Happiness Report
 
 ```
-[dart analyze --format=machine]        ──┐
-[flutter pub run custom_lint]          ──┤
-[flutter pub run riverpod_lint]        ──┤→ normalize.dart → .planning/ISSUES.md
-[AI-Agent semantic scan]               ──┤                 → .planning/issues.json
-[grep/import-graph scripts]            ──┘                 → coverage-baseline.txt
-
-                    ↓ (Phase A read)
-[ISSUES.md filtered by severity=CRITICAL]
-→ fix_phase_A: characterization tests → refactor → coverage gate → analyze gate
-
-                    ↓ (Phase B read, same ISSUES.md)
-[ISSUES.md filtered by severity=HIGH]
-→ fix_phase_B: characterization tests → refactor → coverage gate → analyze gate
-
-                    ↓ (Phase C, D same pattern)
-
-                    ↓ (Phase 4 doc sweep)
-[doc/arch/ ARCH/MOD/ADR updated once]
-
-                    ↓ (Phase 5)
-[Re-run audit pipeline]
-→ .planning/re-audit/ISSUES-REAUDIT.json
-→ reaudit_diff.dart: diff vs .planning/issues.json
-→ Exit criterion: zero open findings
+[HomeScreen / AnalyticsScreen builds]
+    ↓ ref.watch(happinessReportProvider(bookId, year, month))
+[state_happiness.dart provider]
+    ↓ executes
+[GetHappinessReportUseCase.execute()]
+    ↓ Future.wait([...])
+[AnalyticsRepository] (interface)  ← Domain
+    ↓ resolves to
+[AnalyticsRepositoryImpl] (data layer)
+    ↓ delegates to
+[AnalyticsDao]
+    ├─ getSoulSatisfactionOverview()      ← dormant, exists
+    ├─ getMonthlyTotals()                 ← used by report path; reused for soulExpenses
+    ├─ getSatisfactionDistribution()      ← dormant, exists
+    └─ getBestJoyMoment()                 ← NEW DAO query
+    ↓ raw SQL via _db.customSelect(...)
+[SQLCipher-encrypted transactions table]
+    ↑ rows
+[DAO Result classes]                       ← e.g. SatisfactionOverviewResult
+    ↑ mapped to domain types in Repository
+[Domain types]                             ← e.g. SatisfactionOverview
+    ↑ assembled into
+[HappinessReport Freezed model]
+    ↑ delivered as AsyncValue<HappinessReport>
+[StatelessWidget rendering]
 ```
 
-### Coverage Enforcement Data Flow
+### State Management Wiring
 
 ```
-[flutter test --coverage]
-→ coverage/lcov.info
-→ lcov --remove (strip *.g.dart, *.freezed.dart, lib/generated/*)
-→ coverage/lcov_clean.info
+@riverpod  (in state_happiness.dart)
+Future<HappinessReport> happinessReport(
+  Ref ref, {
+  required String bookId,
+  required int year,
+  required int month,
+}) async {
+  final useCase = ref.watch(getHappinessReportUseCaseProvider);
+  return useCase.execute(bookId: bookId, year: year, month: month);
+}
 
-[git diff --name-only HEAD~1]  (files touched by current phase)
-→ filter lcov_clean.info to touched files only
-→ assert each file line coverage ≥ 80%
-→ fail phase gate if any file below threshold
+// useCase provider lives in lib/application/analytics/repository_providers.dart
+@riverpod
+GetHappinessReportUseCase getHappinessReportUseCase(Ref ref) {
+  return GetHappinessReportUseCase(
+    analyticsRepository: ref.watch(analyticsRepositoryProvider),
+  );
+}
 ```
 
-### Key Data Flows
+### Key Data Flows (v1.1-specific)
 
-1. **Audit → Catalogue:** Raw multi-format tool output merged with agent-produced Markdown findings, normalized into `issues.json` with stable IDs so re-audit can diff by ID rather than by text match.
-2. **Catalogue → Fix Phases:** Each fix phase reads a filtered view of `issues.json` (by `severity` and `phase_assigned`). Resolved entries are marked `"status": "resolved"` in-place — the file is the source of truth for progress tracking.
-3. **Fix Phase → Coverage Gate:** Per-file coverage extracted from `lcov_clean.info` for the set of files touched in the phase; enforced before the phase is declared complete.
-4. **Phase A → Phase B dependency:** Phase B cannot start while any entry in `issues.json` with `severity=CRITICAL` has `status=open`. This is enforced manually (checked in gate script); no automated tooling locks it.
-5. **All Fix Phases → Doc Sweep:** Doc sweep is intentionally decoupled from individual phases to avoid documentation churn during refactoring. It reads the final state of the codebase, not intermediate states.
-6. **Doc Sweep → Re-Audit:** Re-audit happens after the doc sweep so the final state includes documentation alignment.
+1. **Personal happiness (HomePage + Analytics):** `bookId` (current book) → `happinessReportProvider` → `HappinessReport` (4 metrics + optional `BestJoyMoment`). Cached per `(bookId, year, month)`.
+2. **Family happiness (HomePage, group mode only):** `currentGroupId` → `familyHappinessProvider` → `FamilyHappiness` (2 metrics aggregated across all books in the group's shadow). Conditionally subscribed via `isGroupModeProvider` (verified in `lib/features/family_sync/presentation/providers/state_active_group.g.dart` line 40).
+3. **Joy density trend (Analytics):** `bookId` → `joyPerYenTrendProvider` → `List<DailyJoyPoint>` from `getDailySatisfactionTrend` + per-day soul amount join. Drives `JoyDensityTrendChart`.
+4. **Satisfaction histogram (Analytics):** `bookId` → derived selector on `happinessReportProvider.distribution` → `SatisfactionHistogram` widget. No new provider — selector inside widget.
 
 ---
 
-## Scaling Considerations
+## Answers to Specific Questions
 
-This pipeline is for a ~30k-line single-package Flutter app. The architecture is calibrated for that size.
+### Q1. Where does the new HappinessReport domain model live?
 
-| Scale | Architecture Adjustment |
-|-------|--------------------------|
-| Current (~30k lines, ~268 source files, ~183 test files) | Shell + Dart scripts, single ISSUES.md, per-phase manual gates — optimal |
-| 2x–3x growth (60k–90k lines, still single package) | Same structure; audit scripts may need `--exclude` flags for generated files to keep runtime under 5 minutes |
-| Monorepo (multiple packages) | Introduce Melos; one ISSUES.md per package; aggregate at a root level; coverage gate per package |
+**Recommendation:** `lib/features/analytics/domain/models/happiness_report.dart`. Same directory as `monthly_report.dart`, `expense_trend.dart`, `budget_progress.dart`.
 
-### Scaling Priorities
+**Reasoning:**
+- Domain models for analytics-style aggregates are already grouped here (verified directory listing). Adding `happiness_report.dart` continues the pattern.
+- `HappinessReport` is purely an analytics aggregate — it has no behavior of its own, no repository interface beyond what `AnalyticsRepository` already covers.
+- Putting it under a new `features/happiness/` would violate the Thin Feature rule's spirit because it would force `lib/application/analytics/` to import from `features/happiness/domain/` while continuing to import `features/analytics/domain/` — bidirectional coupling.
 
-1. **First bottleneck:** `AI-agent semantic scan` runtime grows linearly with file count. At 500+ files, batch the agent across feature directories rather than the whole codebase in a single prompt.
-2. **Second bottleneck:** `flutter test --coverage` runtime. Use `--name` filters to run only tests for touched files during intermediate gates, reserving full-suite coverage for phase completion gates.
+### Q2. New feature module `features/happiness/` or extend `features/analytics/`?
+
+**Recommendation:** **Extend `features/analytics/`.** Do NOT create `features/happiness/`.
+
+**Reasoning (from existing project pattern):**
+- Existing pattern: `features/{accounting, home, analytics, settings, family_sync, profile, dual_ledger}` — modules are scoped by **user-perceived surface area**, not by metric category. There is no `features/transactions/` despite transactions being a major domain — it lives under `accounting`.
+- `Happiness` is not a screen-level surface. It surfaces inside `HomePage` (the `home` feature) and inside `AnalyticsScreen` (the `analytics` feature). A new module would be a domain bag without screens.
+- The 3 dormant DAO methods are already on `AnalyticsDao`, the repo is `AnalyticsRepository`, the use cases live in `application/analytics/`. Renaming or splitting these to fit a happiness module would be a churn-heavy refactor with no benefit.
+- Counter-evidence consulted: there is no `features/voice/` either even though voice has its own `application/voice/` directory (verified `STRUCTURE.md` line 201) — voice surfaces inside `accounting`. Same logic applies: happiness surfaces inside `home` + `analytics`.
+
+**Where the metric *concept* lives in code:**
+- Models + repo signature: `features/analytics/domain/`
+- Computation: `application/analytics/`
+- UI in HomePage: `features/home/presentation/`
+- UI in Analytics: `features/analytics/presentation/`
+
+### Q3. One use case (`GetHappinessReportUseCase`) or split per metric / per audience?
+
+**Recommendation:** Three use cases, split by **audience boundary**, not by metric:
+
+| Use Case | Returns | Used By |
+|----------|---------|---------|
+| `GetHappinessReportUseCase` | `HappinessReport` (4 personal metrics) | HomePage SoulFullnessCard + Analytics summary |
+| `GetBestJoyMomentUseCase` | `BestJoyMoment?` (single tx) | Embedded in `HappinessReport` and standalone for re-use |
+| `GetFamilyHappinessUseCase` | `FamilyHappiness` (2 cooperative metrics) | HomePage only (group mode), Analytics if extended later |
+
+**Reasoning:**
+- **Personal vs Family is a real boundary.** Personal metrics scope to `bookId`. Family metrics scope to `groupId` and aggregate across multiple books (the current book + shadow books from other family members). Different inputs → different use cases.
+- **`BestJoyMoment` is a separate use case** because (a) it's the only one that returns a single transaction (others return aggregates), (b) it has a different DAO query shape (argmax not avg/sum), and (c) the story card may be re-used standalone in future screens (e.g., a "this month's joy highlight" notification).
+- **Don't split the 4 personal metrics into 4 use cases** — they share the same DAO calls. One round trip, one Freezed model, one provider. Splitting them would force 4 parallel DAO calls per home screen render.
+
+**Counter-pattern (rejected):** "One use case per metric." Would require 4–6 separate Riverpod providers on every home rebuild. Existing `GetMonthlyReportUseCase` has 8+ derived fields in `MonthlyReport` and is shipped as one — same logic applies.
+
+### Q4. Where does Best Joy per ¥ belong — new DAO query or in-memory from existing satisfaction data?
+
+**Recommendation:** **New DAO query.** Add `getBestJoyMoment` to `AnalyticsDao`.
+
+**Reasoning:**
+- The existing `getSatisfactionDistribution` and `getDailySatisfactionTrend` aggregate over groups (`GROUP BY soul_satisfaction`, `GROUP BY day`) — they discard transaction-level identity. You **cannot** recover the single best transaction's `id`, `categoryId`, `merchant`, `note` from these aggregates.
+- The required argmax query is `SELECT * FROM transactions WHERE ledger_type='soul' AND type='expense' AND is_deleted=0 AND timestamp BETWEEN ? AND ? AND amount > 0 ORDER BY (CAST(soul_satisfaction AS REAL) / amount) DESC LIMIT 1`. Trivial in SQL, expensive in-memory (would require pulling every soul transaction back through the encryption layer).
+- DAO-level filter respects the soul-only constraint without leaking the rule to the use case.
+- Pulling all transactions into memory would also defeat the v1.0 performance principle in `analytics_dao.dart` line 86: "Uses database-level SUM/GROUP BY for performance (<2s target)."
+
+**Encryption note (HIGH confidence):** The `note` column is field-encrypted (ChaCha20-Poly1305 via `FieldEncryptionService`, applied transparently in `TransactionRepositoryImpl`). The argmax DAO query should NOT return `note` — only return id, amount, categoryId, satisfaction, timestamp, merchant. If the UI needs `note` decrypted (e.g., to show "今天的午餐"), call the existing `TransactionRepository.findById(id)` from the use case after the argmax to get a fully-decrypted `Transaction` model. This avoids decrypt churn for the 99% case where `note` is empty.
+
+**Recommended DAO signature:**
+```dart
+// lib/data/daos/analytics_dao.dart
+Future<BestJoyMomentRow?> getBestJoyMoment({
+  required String bookId,
+  required DateTime startDate,
+  required DateTime endDate,
+}) async { ... }
+
+class BestJoyMomentRow {
+  final String transactionId;
+  final int amount;
+  final int satisfaction;
+  final String categoryId;
+  final DateTime timestamp;
+  // Note: no 'note' field — fetch via TransactionRepository if needed.
+}
+```
+
+### Q5. Provider organization — extend `state_analytics.dart` or new `state_happiness.dart`?
+
+**Recommendation:** **New `state_happiness.dart` in `features/analytics/presentation/providers/`.** Do not extend `state_analytics.dart`.
+
+**Reasoning:**
+- `state_analytics.dart` is currently 60 lines (verified) with 4 providers. Adding 4 more would push it over the cohesion line and toward the 200–400-line target ceiling in the project's coding-style rule.
+- File-per-aggregate matches the rest of the analytics feature: `monthly_report.dart` model + `expense_trend.dart` model + `budget_progress.dart` model are all separate files, so providers per aggregate is natural.
+- Home + Analytics both import from this single file (Home already imports `state_analytics.dart` per `home_screen.dart` line 12). Single source of truth.
+- Naming convention is already `state_<aggregate>.dart` (verified `STRUCTURE.md` line 161; existing files: `state_home.dart`, `state_shadow_books.dart`, `state_today_transactions.dart`, `state_analytics.dart`, `state_active_group.dart`).
+
+**File contents (proposed):**
+```dart
+// lib/features/analytics/presentation/providers/state_happiness.dart
+@riverpod
+Future<HappinessReport> happinessReport(Ref, {bookId, year, month}) => ...;
+
+@riverpod
+Future<BestJoyMoment?> bestJoyMoment(Ref, {bookId, year, month}) => ...;
+
+@riverpod
+Future<FamilyHappiness?> familyHappiness(Ref, {year, month}) => ...;
+
+@riverpod
+Future<List<DailyJoyPoint>> joyDensityTrend(Ref, {bookId, year, month}) => ...;
+```
+
+**Use case providers** stay in `lib/application/analytics/repository_providers.dart` (existing pattern: use case providers co-locate with the use case definition; verified `lib/application/analytics/repository_providers.dart`).
+
+### Q6. ARB rename pass blast radius
+
+**Verified consumer map (from `grep -rn` over `lib/`):**
+
+| ARB key | Used in `lib/` | Used in `test/` |
+|---------|----------------|-----------------|
+| `survivalLedger` | `home_screen.dart:270`, `ledger_ratio_chart.dart:94` | `home_screen_test.dart:389,426` |
+| `soulLedger` | `home_screen.dart:285`, `ledger_ratio_chart.dart:100` | `home_screen_test.dart:390,427` |
+| `homeSoulFullness` | `soul_fullness_card.dart:60` | `soul_fullness_card_test.dart:48,56,58` |
+| `homeHappinessROI` | `soul_fullness_card.dart:133` | (none) |
+| `homeRecentSoulExpense` | `soul_fullness_card.dart:156` | (none) |
+| `satisfactionLevel` | `soul_fullness_card.dart:98`, `transaction_confirm_screen.dart:662` | (none) |
+
+**Total source touch: 7 production files + 2 test files.**
+
+**Files needing edit (concrete list):**
+1. `lib/l10n/app_ja.arb` — rename 4 keys' values
+2. `lib/l10n/app_zh.arb` — rename 4 keys' values
+3. `lib/l10n/app_en.arb` — rename 4 keys' values
+4. `lib/features/home/presentation/screens/home_screen.dart` — 2 ARB call sites
+5. `lib/features/analytics/presentation/widgets/ledger_ratio_chart.dart` — 2 ARB call sites
+6. `lib/features/home/presentation/widgets/soul_fullness_card.dart` — 3 ARB call sites (will be substantially rebuilt regardless)
+7. `lib/features/accounting/presentation/screens/transaction_confirm_screen.dart` — 1 site (`satisfactionLevel`; **note: the project description says to rename only 4 specific keys; `satisfactionLevel` is not in that list — leave it alone**)
+8. `test/features/home/presentation/screens/home_screen_test.dart` — 4 ARB references (re-verify after rename)
+9. `test/widget/features/home/presentation/widgets/soul_fullness_card_test.dart` — 3 ARB references
+
+**Important nuance — ARB key names vs values:**
+The milestone description says "ARB-only renaming." Read carefully:
+- The **values** (Chinese / Japanese / English text) change in all 3 ARB files.
+- The **keys** (`soulLedger`, `survivalLedger`, `homeHappinessROI`, `homeSoulFullness`) — should they also rename?
+
+**Recommendation:** **Keep ARB keys unchanged; only change values.** Reasons:
+- Keys are referenced from 7 source files. Renaming keys forces broader code edits without semantic benefit.
+- ARB key parity is locked across `ja/zh/en` (per CLAUDE.md "i18n Rules"). Renaming keys requires updating all 3 files atomically anyway.
+- Future translation-platform exports use keys as identifiers. Stability matters.
+- `homeHappinessROI` will display "幸福密度 / ハピネス密度 / Joy / ¥" — the key name becomes slightly misleading (says "ROI", value says "density"), but this is technical debt outside v1.1's scope. v1.2+ can do a deliberate key-rename pass with proper grep-and-replace.
+
+**If you DO decide to rename keys** (not recommended for v1.1): use the global codebase-rename tool, NOT manual edits — `home_screen.dart` line 270 is hand-editable, but the 3 generated `app_localizations_*.dart` files (~3500 lines each, lib/generated/) are regenerated from ARB by `flutter gen-l10n` and any drift will cause runtime crashes.
+
+### Q7. Inline-helper migration — `_computeSatisfaction` and `_computeHappinessROI`
+
+**Verified current state:** Both helpers live in `home_screen.dart` lines 345–367. Both are short (15 and 6 lines respectively). Neither is shared.
+
+**Recommendation:** **Move both into `GetHappinessReportUseCase`.** Delete from `home_screen.dart`.
+
+**Reasoning:**
+1. **They are wrong as currently implemented.** `_computeHappinessROI` returns `report.soulTotal / report.totalExpenses` (line 364–366), which is **soul's share of total expenses**, NOT a joy-per-yen ratio. The PROJECT.md flags this explicitly: *"replace `Happiness ROI` (misleading: was budget-share, not joy density)"*. Keeping it in the screen makes the bug invisible to use case tests.
+2. **They use the wrong data window.** `_computeSatisfaction` reads `todayTransactionsProvider` (today's tx), not month-to-date. v1.1 specifies "本月累计" (month-to-date) per PROJECT.md "时间窗：本月累计". The screen-level helper has no business owning a time-window decision.
+3. **Test coverage is the real benefit, not LOC.** The current `_compute*` methods are private — they cannot be unit-tested. Moving them into a use case puts them under the existing 70%+ coverage requirement (`coverde --deferred` mechanism per CLAUDE.md "Active CI guardrails").
+4. **Riverpod-friendly.** Once inside the use case, the result becomes part of `HappinessReport` and is trivially memoized via `happinessReportProvider`.
+
+**Migration steps:**
+1. Delete `_computeSatisfaction` (line 345) — replaced by `HappinessReport.avgSatisfaction` from `getSoulSatisfactionOverview`.
+2. Delete `_computeHappinessROI` (line 362) — replaced by `HappinessReport.joyPerYen` (correct formula: Σ satisfaction × count / Σ amount). The misleading `soulTotal/totalExpenses` ratio is removed entirely.
+3. Update `home_screen.dart` line 134–135 to read from `HappinessReport` directly:
+   ```dart
+   reportAsync.when(
+     data: (report) => SoulFullnessCard(report: report, ...),
+     ...
+   )
+   ```
+
+### Q8. Build order & dependency chain
+
+**Recommended phase order** (each step buildable + testable independently; respects layer dependencies in `Presentation → Application → Domain ← Data ← Infrastructure`):
+
+```
+Phase A (Domain — establish models & contracts)
+  A1. lib/features/analytics/domain/models/analytics_aggregate.dart
+        + add SatisfactionOverview, SatisfactionDistribution, DailySatisfaction, BestJoyMomentRow domain types
+  A2. lib/features/analytics/domain/models/happiness_report.dart  (Freezed)
+  A3. lib/features/analytics/domain/models/best_joy_moment.dart   (Freezed)
+  A4. lib/features/analytics/domain/models/family_happiness.dart  (Freezed)
+  A5. lib/features/analytics/domain/repositories/analytics_repository.dart
+        + 4 new method signatures
+  --- run build_runner; verify import_guard (Domain has zero outer deps) ---
+
+Phase B (Data — DAO + Repository)
+  B1. lib/data/daos/analytics_dao.dart
+        + getBestJoyMoment() method only (3 others already exist)
+  B2. lib/data/repositories/analytics_repository_impl.dart
+        + 4 method impls (DAO result → domain mapping)
+  --- write DAO tests + repo tests; run flutter test ---
+
+Phase C (Application — Use Cases)
+  C1. lib/application/analytics/get_happiness_report_use_case.dart
+  C2. lib/application/analytics/get_best_joy_moment_use_case.dart
+  C3. lib/application/analytics/get_family_happiness_use_case.dart
+  C4. lib/application/analytics/repository_providers.dart
+        + 3 new @riverpod use case providers
+  --- run build_runner; write use-case tests; verify joyPerYen formula ---
+
+Phase D (Presentation Providers)
+  D1. lib/features/analytics/presentation/providers/state_happiness.dart
+        + 4 @riverpod async providers
+  --- run build_runner ---
+
+Phase E (Widgets — Home)
+  E1. lib/features/home/presentation/widgets/best_joy_moment_card.dart        (NEW — pure widget)
+  E2. lib/features/home/presentation/widgets/family_highlights_card.dart      (NEW — pure widget)
+  E3. lib/features/home/presentation/widgets/soul_fullness_card.dart           (REBUILT — interface change)
+  --- write widget tests for each in isolation ---
+
+Phase F (Widgets — Analytics)
+  F1. lib/features/analytics/presentation/widgets/satisfaction_histogram.dart  (NEW)
+  F2. lib/features/analytics/presentation/widgets/joy_density_trend_chart.dart (NEW)
+  F3. lib/features/analytics/presentation/widgets/joy_ledger_statistics_section.dart (NEW)
+  --- write widget tests ---
+
+Phase G (Screens — Wire Up)
+  G1. lib/features/home/presentation/screens/home_screen.dart
+        - Delete _computeSatisfaction, _computeHappinessROI
+        - Wire happinessReportProvider + familyHappinessProvider (group mode)
+        - Pass HappinessReport to rebuilt SoulFullnessCard
+  G2. lib/features/analytics/presentation/screens/analytics_screen.dart
+        - Insert JoyLedgerStatisticsSection between LedgerRatioChart and BudgetProgressList
+  --- update home_screen_test.dart, soul_fullness_card_test.dart ---
+
+Phase H (i18n — ARB Rename Pass)
+  H1. lib/l10n/app_ja.arb     (4 value renames + ~12 new keys for new tiles)
+  H2. lib/l10n/app_zh.arb     (same)
+  H3. lib/l10n/app_en.arb     (same)
+  H4. flutter gen-l10n        (regenerates lib/generated/app_localizations*.dart)
+  --- ARB key parity test (existing CI guardrail) must pass ---
+
+Phase I (Verification & QA)
+  I1. flutter analyze (must be 0 issues)
+  I2. dart run custom_lint (must be 0 errors — import_guard, riverpod_lint)
+  I3. flutter test --coverage (per-file ≥70% on touched files)
+  I4. build_runner clean-diff CI guardrail
+  I5. Manual smoke test: HomePage solo mode, HomePage group mode, AnalyticsScreen
+```
+
+**Why this order:**
+- **A → B → C** is the canonical Clean Architecture build direction (Domain → Data → Application). Reversing produces compile errors because outer layers depend on inner. Verified in `STRUCTURE.md` "Where to Put New Code" line 203.
+- **D before E/F** because widgets read from providers — providers must compile first.
+- **E/F before G** because screens compose widgets — widgets must compile first.
+- **H last** because ARB rename is value-only and decoupled from logic. Doing it earlier risks merge churn if widget text changes during dev. Doing it last lets all visible text get its final form in one pass.
+- **I after H** because the ARB-key-parity test in CI gates merges (per CLAUDE.md / v1.0 guardrails).
+
+**Critical dependency that drives the order:**
+`build_runner` regenerates `*.g.dart` for Freezed models AND for `@riverpod` providers. Skipping it between phases produces stale compilation. Run after each of A, B, C, D before moving on.
 
 ---
 
-## Anti-Patterns
+## Anti-Patterns (specific to v1.1)
 
-### Anti-Pattern 1: Refactor Before Baseline Coverage
+### Anti-Pattern 1: Adding `application/` or `data/daos/` Inside `features/happiness/`
 
-**What people do:** Jump straight into CRITICAL fixes without establishing what the test coverage baseline is or writing characterization tests first.
+**What people do:** Create `features/happiness/application/get_happiness_report_use_case.dart` because "happiness is its own concern."
+**Why it's wrong:** Violates the Thin Feature rule (CLAUDE.md "Thin Feature Rule" line 32; structurally enforced by `import_guard` per `.planning/PROJECT.md` line 75). CI will reject the PR.
+**Do this instead:** Use cases go in `lib/application/analytics/`. Period.
 
-**Why it's wrong:** With the project currently at ~68% naive coverage ratio and known gaps in sync engine, crypto negative paths, and high-traffic screens, refactoring without a safety net produces silent behavior regressions. The ≥80% gate becomes meaningless if you cannot tell whether you raised or lowered coverage on the specific file you touched.
+### Anti-Pattern 2: Reading `Transaction` Model Directly in HomePage to Compute Metrics
 
-**Do this instead:** Run `flutter test --coverage` and capture `coverage-baseline.txt` as Phase 2, before any code changes. Write characterization tests for any file below 80% before that file's refactor begins.
+**What people do:** Subscribe to `todayTransactionsProvider` (or equivalent) in `home_screen.dart` and compute averages inline (this is exactly what `_computeSatisfaction` does today, lines 345–358).
+**Why it's wrong:** (a) Pulls every transaction through the field-decryption layer for `note` even though metrics don't need notes — wasted CPU; (b) Cannot be unit-tested (private method on widget); (c) Duplicates logic if Analytics screen also wants the metric; (d) Wrong time-window (today vs. month).
+**Do this instead:** All metric computation lives in `application/analytics/`. UI consumes `HappinessReport` Freezed model only.
 
-### Anti-Pattern 2: Merging CRITICAL and HIGH Into One Phase
+### Anti-Pattern 3: Bypassing the Repository for the Argmax Query
 
-**What people do:** Combine the two most severe categories to "save time" on phase setup.
+**What people do:** Add `getBestJoyMoment` directly to `TransactionRepository` because "it returns a Transaction."
+**Why it's wrong:** `TransactionRepository` is for individual-transaction CRUD. The argmax is an analytics aggregate (even though it returns a single record). Mixing them couples analytics to the transactions encryption pipeline (`note` decryption on every read — see `lib/data/repositories/transaction_repository_impl.dart`).
+**Do this instead:** DAO returns `BestJoyMomentRow` (no `note`). If UI needs the full transaction (with decrypted `note`), call `TransactionRepository.findById(rowId)` in the use case as a second step. Best-case: zero extra decryption (no `note`); worst-case: one decryption.
 
-**Why it's wrong:** CRITICAL violations in this codebase include layer violations where `features/` hold `application/` code and `domain` imports `data`. Fixing these restructures files. If HIGH-severity provider hygiene fixes are applied to the same files simultaneously, the changes conflict, history becomes tangled, and rollback is harder. More importantly, HIGH fixes (deprecated service wiring, provider misplacement) often depend on the CRITICAL layer fixes to know where the correct home for code is.
+### Anti-Pattern 4: Renaming ARB Keys Mid-Milestone
 
-**Do this instead:** Complete Phase A (CRITICAL) and run `flutter analyze` to zero before touching any HIGH finding. The hard gate enforces sequencing.
+**What people do:** "Let's rename `homeHappinessROI` to `homeJoyDensity` while we're at it."
+**Why it's wrong:** Forces simultaneous edit to 3 ARB files + 1 source file + at minimum the `lib/generated/app_localizations*.dart` regeneration + ARB-key-parity CI gate. Any drift breaks the build. Out-of-scope drift risk.
+**Do this instead:** Change ARB **values** in v1.1; defer **key** renames to v1.2+ as a focused commit.
 
-### Anti-Pattern 3: Per-Phase Documentation Updates
+### Anti-Pattern 5: Conditionally Subscribing Family Provider Inside Widget
 
-**What people do:** Update `doc/arch/` ARCH/MOD/ADR docs after each fix phase to "keep docs in sync."
-
-**Why it's wrong:** Mid-refactor, the codebase is in a transitional state. Documenting transitional states produces docs that are wrong by the time the next phase completes. The PROJECT.md explicitly calls this out as out of scope during the initiative.
-
-**Do this instead:** Defer all doc/arch updates to the single Doc Sweep phase (Phase 4), after all fix phases are complete and the codebase is in its final stable state.
-
-### Anti-Pattern 4: Treating `dart analyze` Output as the Complete Issue List
-
-**What people do:** Run `dart analyze`, take its output as the full audit, and skip the AI-agent semantic scan.
-
-**Why it's wrong:** `dart analyze` catches mechanical lint violations but cannot detect: (a) semantic layer violations where the import is syntactically valid but crosses a boundary (e.g., a domain model importing a Data type via an alias), (b) redundant parallel implementations that are structurally correct but functionally duplicate, (c) provider definitions that are duplicated across features but each definition is individually correct, (d) dead code in branches that are reachable but never exercised by real usage patterns.
-
-**Do this instead:** Use `dart analyze` + `custom_lint`/`riverpod_lint` as the mechanical stream and AI-agent review as the semantic stream. Both streams are required; neither is sufficient alone.
-
-### Anti-Pattern 5: Re-Audit Without Stable Issue IDs
-
-**What people do:** Run the full audit again at the end and compare the human-readable output by eye, or by line-diff of the Markdown.
-
-**Why it's wrong:** The exit criterion is "zero violations across all four categories." If the initial catalogue and the re-audit output use different formats, comparing them by eye creates ambiguity ("is this the same issue or a new one?"). Line numbers shift as files are modified.
-
-**Do this instead:** Assign stable IDs to each finding in `issues.json` at catalogue time (e.g., `LV-001`, `PH-012`). The re-audit script resolves findings by ID and reports: resolved (was open, now absent), regression (was absent, now present), new (not in original catalogue). The exit criterion becomes programmatically checkable.
+**What people do:** `if (isGroupMode) ref.watch(familyHappinessProvider)` inside a widget's `build()`.
+**Why it's wrong:** Riverpod tracks subscription identity per build. Conditional `ref.watch` works but produces fragile rebuild graphs and breaks `keepAlive` reasoning.
+**Do this instead:** Always subscribe at the screen level; the provider itself short-circuits when there's no active group:
+```dart
+@riverpod
+Future<FamilyHappiness?> familyHappiness(Ref ref, {required int year, required int month}) async {
+  final groupId = ref.watch(activeGroupIdProvider);
+  if (groupId == null) return null;
+  return ref.watch(getFamilyHappinessUseCaseProvider).execute(groupId: groupId, year: year, month: month);
+}
+```
 
 ---
 
 ## Integration Points
 
+### External Services
+
+| Service | Integration Pattern | Notes |
+|---------|---------------------|-------|
+| SQLCipher (existing) | Drift `customSelect` in DAO | New `getBestJoyMoment` query — parameterized, soul-only, expense-only, not-deleted. Verify against schema v15 (current). |
+| Field encryption (existing) | Transparent in `TransactionRepositoryImpl.findById` | `BestJoyMomentRow` deliberately omits `note` to avoid unnecessary decryption. |
+| flutter_localizations (existing) | ARB files + `flutter gen-l10n` | Re-run after ARB value edits. Parity gate exists in CI. |
+
 ### Internal Boundaries
 
 | Boundary | Communication | Notes |
 |----------|---------------|-------|
-| Audit Engine → Catalogue | File write (`issues.json`, `ISSUES.md`) | Normalization script reads all tool outputs and agent findings; writes once |
-| Catalogue → Fix Phases | File read (filtered `issues.json` by severity) | Each phase reads the same file; marks entries resolved in-place |
-| Fix Phases → Coverage Gate | `lcov_clean.info` + `git diff --name-only` | Gate script is stateless; called at end of each phase |
-| Fix Phases → Quality Gate | Exit code of `flutter analyze` | Must be 0; non-zero blocks phase completion |
-| All Phases → Doc Sweep | Code state on disk | Doc sweep reads final code; no programmatic handoff |
-| Doc Sweep → Re-Audit | Nothing (re-audit triggers on completion) | Re-audit is triggered manually after doc sweep confirms completion |
-| Re-Audit → Exit | Diff of `issues.json` vs `ISSUES-REAUDIT.json` | Script exits 0 if zero open findings; exits non-zero otherwise |
+| Home ↔ Analytics presentation | Direct provider import (Home imports `state_happiness.dart` from `analytics/presentation/providers/`) | Already-established pattern (Home imports `state_analytics.dart`). NOT a layer violation — both are presentation. |
+| Application → Data | Through `AnalyticsRepository` interface | New methods land on the interface; impl adapts DAO. |
+| Application → Infrastructure | None added | No crypto/sync touches in v1.1. |
+| HomeScreen ↔ family_sync | Existing `isGroupModeProvider` from `state_active_group` | Reused — no new coupling. v1.1 adds `activeGroupIdProvider` reads inside `familyHappinessProvider`. |
+| Family happiness ↔ shadow books | Inside `GetFamilyHappinessUseCase`, query across all books in group | **Open question for roadmap:** how to enumerate group's book list — likely via existing `shadowBooksProvider` or a new use case. Flag for Phase A design. |
 
-### Existing Tooling Already in Project
+### Cross-Cutting Concerns (v1.1 deltas)
 
-| Tool | Role in Pipeline | Already in `pubspec.yaml` |
-|------|-----------------|--------------------------|
-| `dart analyze` | Mechanical lint, import violations | Yes (dart SDK) |
-| `custom_lint` | Plugin host for riverpod_lint | Yes (dev_dep) |
-| `riverpod_lint` | Riverpod-specific provider hygiene | Yes (dev_dep) |
-| `flutter test --coverage` | Coverage generation | Yes (flutter_test dev_dep) |
-| `lcov` | Coverage filtering + per-file extraction | System tool (not pub dep) |
-| `mockito`, `mocktail` | Test mocking in characterization tests | Yes (dev_dep) |
-| `build_runner` | Code regeneration after refactor | Yes (dev_dep) |
-
-No new `pubspec.yaml` dependencies are required for the cleanup pipeline itself.
-
----
-
-## Build Order Dependencies (Mandatory Sequencing)
-
-```
-Phase 1 (Audit + Catalogue) MUST complete before any fix phase.
-  ↓ produces: .planning/ISSUES.md, .planning/issues.json
-
-Phase 2 (Coverage Baseline) MUST complete before any fix phase.
-  ↓ produces: coverage-baseline.txt, coverage/lcov_clean.info
-
-Phase 3A (CRITICAL fixes) MUST complete + gate BEFORE Phase 3B.
-  ↓ gate: flutter analyze = 0 issues, all tests GREEN
-
-Phase 3B (HIGH fixes) MUST complete + gate BEFORE Phase 3C.
-  ↓ gate: flutter analyze = 0, all tests GREEN, ≥80% on touched files
-
-Phase 3C (MEDIUM fixes) MUST complete + gate BEFORE Phase 3D.
-  ↓ gate: same
-
-Phase 3D (LOW fixes) MUST complete + gate BEFORE Phase 4.
-  ↓ gate: same
-
-Phase 4 (Doc Sweep) MUST complete BEFORE Phase 5 (Re-Audit).
-  ↓ (no programmatic gate; human confirmation that sweep is done)
-
-Phase 5 (Re-Audit) is the terminal phase.
-  ↓ exit criterion: reaudit_diff.dart reports zero open findings
-```
-
-**The single hardest dependency:** Phase 1 must produce `issues.json` before anything else begins. Without the catalogue, phases have no definition of "done." The coverage baseline (Phase 2) is independent of Phase 1 logically but must happen before code changes, so it runs in parallel with or immediately after Phase 1.
+- **Logging:** Use `dev.log(..., name: 'Analytics')` — existing channel.
+- **Error handling:** Use cases return `Result<HappinessReport>` per `lib/shared/utils/result.dart` envelope (existing convention).
+  - ⚠️ **Discrepancy noted:** Existing `analytics/` use cases throw via Drift exceptions → caught at `AsyncValue.when(error: ...)` in widgets. They don't use `Result<T>` despite the project-wide convention (verified by reading `get_monthly_report_use_case.dart` — no `Result` import). v1.1 should match the analytics module's local convention (throw + AsyncValue) rather than introducing `Result` mid-module. Document this in a Phase A note for roadmapper.
+- **i18n:** All metric labels via `S.of(context)`. New ARB keys needed (~12 estimated): `bestJoyMomentTitle`, `bestJoyMomentEmptyState`, `joyPerYenLabel`, `joyHighlightsLabel` ("小確幸"), `familyHighlightsTitle`, `familyFavoriteCategoryTitle`, `joyDensityTrendTitle`, `satisfactionHistogramTitle`, etc. Final list emerges during widget design (Phase E/F).
+- **Encryption:** Argmax query reads only non-encrypted columns. Acceptable. Story card UI displays category icon + amount + satisfaction emoji — none of which require `note` decryption.
 
 ---
 
@@ -440,31 +660,37 @@ Phase 5 (Re-Audit) is the terminal phase.
 
 | Area | Confidence | Basis |
 |------|------------|-------|
-| Audit tooling choices (`dart analyze`, `custom_lint`, `riverpod_lint`) | HIGH | All confirmed present in `pubspec.yaml`; official Dart/Flutter tooling |
-| `--format=machine` pipe-delimited output | HIGH | dart-lang/sdk documentation + community examples |
-| AI-agent semantic scan necessity | HIGH | Codebase map (CONCERNS.md) shows violations grep cannot detect |
-| Characterization-test-first pattern | HIGH | Feathers (2004) — industry canonical; community consensus on legacy refactor |
-| `lcov` per-file coverage filtering | HIGH | Flutter community standard; multiple published examples |
-| Phase count recommendation (6 phases) | MEDIUM | Calibrated to project size and fine granularity config; no authoritative source for this exact figure |
-| `issues.json` stable-ID diffing approach | MEDIUM | Derived from AI audit tooling patterns; not a published Flutter-specific standard |
-| No Melos / no new task runner | HIGH | Single-package project; Melos is explicitly a monorepo tool; existing `scripts/` directory establishes precedent |
+| Layer placement of new components | HIGH | Directly grounded in CLAUDE.md "Placement Decision Rule" + STRUCTURE.md "Where to Put New Code" + verified existing analogues (`analytics/`, `accounting/`). |
+| Use case structure | HIGH | Mirrors `GetMonthlyReportUseCase` exactly (read in full). |
+| DAO additions | HIGH | Verified `analytics_dao.dart` — 3 of 4 needed methods already exist; only `getBestJoyMoment` is genuinely new. |
+| ARB blast radius | HIGH | `grep -rn` over `lib/` and `test/` produced complete consumer map. |
+| Inline-helper migration | HIGH | Read both helpers; verified bug claim from PROJECT.md ("misleading: was budget-share"). |
+| Build order | HIGH | Standard Clean Architecture order; matches existing CI gates. |
+| Family-mode book enumeration | MEDIUM | `shadowBooksProvider` exists (verified in `home_screen.dart` line 18) but the exact wiring for cross-book aggregation needs roadmapper-level design. |
+| Result<T> vs throw decision | MEDIUM | Discrepancy between project-wide convention and existing analytics module convention surfaced during research. Roadmapper must pick one for v1.1. |
 
 ---
 
 ## Sources
 
-- [dart analyze documentation](https://dart.dev/tools/dart-analyze) — `--format=machine` output format
-- [dart-lang/sdk #54877](https://github.com/dart-lang/sdk/issues/54877) — JSON output format gaps in `dart analyze`
-- [flutter/flutter #95090](https://github.com/flutter/flutter/issues/95090) — `--format=machine` for `flutter analyze`
-- [custom_lint pub.dev](https://pub.dev/packages/custom_lint) — custom lint rule authoring
-- [riverpod_lint pub.dev](https://pub.dev/packages/riverpod_lint) — Riverpod provider hygiene rules
-- [DCM Analyze docs](https://dcm.dev/docs/cli/analyze/) — JSON output format reference (not adopted as dependency)
-- [flutter test coverage with lcov](https://www.etiennetheodore.com/test-coverage-explain-with-lcov-on-dart/) — lcov filtering pattern
-- [Working Effectively with Legacy Code — key points](https://understandlegacycode.com/blog/key-points-of-working-effectively-with-legacy-code/) — characterization test pattern
-- [Golden Master Testing](https://www.sitepoint.com/golden-master-testing-refactor-complicated-views/) — snapshot/golden test approach for legacy refactor
-- [DCM MCP + AI quality loop](https://dcm.dev/blog/2025/08/25/agentic-code-quality-dcm-mcp/) — AI-agent + tooling cooperation pattern
-- [flutter_ci_guard](https://pub.dev/packages/flutter_ci_guard) — alternative coverage gate enforcer (noted; not adopted)
+- `.planning/PROJECT.md` (read in full — milestone scope, locks, out-of-scope list)
+- `.planning/codebase/ARCHITECTURE.md` (read in full — v1.0 baseline architecture)
+- `.planning/codebase/STRUCTURE.md` (read in full — file-tree conventions, naming, decision tree)
+- `CLAUDE.md` (project rules — Thin Feature, Placement Decision Rule, common pitfalls)
+- `lib/data/daos/analytics_dao.dart` (read in full — 3 dormant methods verified at lines 230–327)
+- `lib/features/home/presentation/widgets/soul_fullness_card.dart` (read in full — current 2-tile layout)
+- `lib/features/home/presentation/screens/home_screen.dart` (lines 1–160 + 320–367 — `_computeSatisfaction` and `_computeHappinessROI` helpers)
+- `lib/application/analytics/get_monthly_report_use_case.dart` (read in full — use case template)
+- `lib/features/analytics/presentation/providers/state_analytics.dart` (read in full — provider template)
+- `lib/features/analytics/presentation/screens/analytics_screen.dart` (read in full — section composition pattern)
+- `lib/features/analytics/domain/repositories/analytics_repository.dart` (read in full — interface to extend)
+- `lib/features/analytics/domain/models/analytics_aggregate.dart` (read in full — domain types pattern)
+- `lib/data/repositories/analytics_repository_impl.dart` (lines 1–80 — DAO→domain mapping pattern)
+- `lib/application/analytics/repository_providers.dart` (read in full — use case provider wiring)
+- `lib/l10n/app_{en,ja,zh}.arb` (greppable inventory of 6 ARB keys)
+- Live `grep -rn` over `lib/` and `test/` for ARB consumers, helper methods, group-mode wiring, soulSatisfaction usage
 
 ---
-*Architecture research for: audit-driven Flutter/Dart codebase cleanup pipeline*
-*Researched: 2026-04-25*
+
+*Architecture research for: v1.1 Happiness Metric & Display milestone*
+*Researched: 2026-05-01*

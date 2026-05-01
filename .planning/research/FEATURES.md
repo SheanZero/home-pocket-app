@@ -1,330 +1,300 @@
-# Feature Research — Audit Pipeline for Flutter/Dart Codebase Cleanup
+# Feature Research — Happiness Metric & Display (v1.1)
 
-**Domain:** Audit pipeline for audit-driven, multi-phase technical-debt cleanup of a Flutter/Dart codebase
-**Researched:** 2026-04-25
-**Confidence:** HIGH (verified against actual codebase findings; tooling verified via pub.dev and official docs)
+**Domain:** Personal/family finance app — "money happiness / spending wellbeing" indicators (v1.1 milestone scope)
+**Researched:** 2026-05-01
+**Confidence:** MEDIUM-HIGH (HIGH on JP-specific competitor analysis and academic foundations; MEDIUM on family-mode anti-comparison patterns, since most evidence is indirect — by absence rather than explicit design rhetoric)
 
 ---
 
-## Context
+## Scope & framing
 
-This document is about what an *audit pipeline* must produce — not what the Home Pocket app's features are. The pipeline's sole purpose is to surface every violation across four debt categories (layer violations, redundant code, dead code, Riverpod provider hygiene) so that severity-ordered phases can eliminate them one by one. Success criterion: re-run the pipeline at the end, find zero findings.
+This research covers **only the new v1.1 surface area**: how to express "spending happiness" as quantitative indicators, how to visualize them on home/analytics pages, and how to present family-cooperative versions without producing toxic comparison dynamics. It deliberately excludes already-shipped features (per-transaction satisfaction input, voice sentiment estimation, monthly analytics base, family sync). The four locked personal indicators (Avg Satisfaction / Joy per ¥ / Highlights count / Best Joy per ¥) and two family indicators (Family Highlights Sum / Shared Joy Insight) are taken as given — the goal is to validate that the picked formulas align with industry practice and surface anything we may be missing for the JP primary locale.
 
-The codebase has 268 hand-written Dart source files and 183 test files. Known actual violations confirmed by direct inspection include: screens directly importing `infrastructure/category/category_service.dart`, `features/family_sync/use_cases/` importing `infrastructure/sync/relay_api_client.dart` and `infrastructure/crypto/` directly (use cases inside a feature that should live in `lib/application/`), `infrastructure/security/providers.dart` containing an `appDatabaseProvider` that throws `UnimplementedError`, a deprecated `ResolveLedgerTypeService` still wired in provider graph, ~169 hardcoded CJK strings violating i18n rules, and a 735-line `category_service.dart` with parallel static translation maps. The pipeline must enumerate all of these, not just the ones already known.
+**Confidence on the locked formulas:** the four-personal + two-family decomposition turns out to be very well-aligned with what little prior art exists; most of the risk lies not in formula choice but in **presentation** (especially family mode and the "Best" highlight card). See "Differentiators" and "Anti-Features" for where the genuine design risk lives.
+
+---
+
+## Direct prior art (the most important finding)
+
+A Japanese app called **Joy Money** (CAMPFIRE crowdfunding project, currently pre-launch) ships an almost-identical core: 5-point satisfaction per transaction, "支出 × 幸福度 × 思い出" trio of metrics, "beautiful graphs visualizing the relationship between money spent and happiness gained", and per-transaction "memory cards" combining spend + satisfaction + photo. It is positioned for the **推し活 (oshi-katsu / fan-activity)** market — the same JP cultural niche our Soul ledger sits next to.
+
+**What this means for us:**
+- Concept-validity is HIGH for the JP market — at least one funded competitor is betting on the same thesis
+- Our **family mode** is a clear differentiator (Joy Money is single-user)
+- Our **encrypted local-first** architecture is a clear differentiator (Joy Money is presumed cloud-based)
+- Joy Money does NOT publish a satisfaction-per-yen formula or argmax highlight card — those are still novel territory; we are early on the formula side, not late
+
+A second adjacent app, **推しPay**, tracks oshi-katsu spend + days-since-start but does not surface satisfaction-density metrics. So the "幸福密度 / Joy per ¥" framing genuinely appears to be unclaimed in the JP market as of search date.
+
+Sources for the direct prior-art block:
+- [推し活をもっと楽しく！支出×幸福度×思い出を可視化する新しい家計簿アプリ — CAMPFIRE](https://camp-fire.jp/projects/883660/view)
+- [推しPay — Apps on Google Play](https://play.google.com/store/apps/details?id=com.nosuke.oshi_pay)
+- [推し活支出管理 — App Store JP](https://apps.apple.com/jp/app/%E6%8E%A8%E3%81%97%E6%B4%BB%E6%94%AF%E5%87%BA%E7%AE%A1%E7%90%86/id1503878877)
 
 ---
 
 ## Feature Landscape
 
-### Table Stakes — Must Have (audit is incomplete without these)
+### Table Stakes (Users Expect These)
 
-| Feature | Why Required | Complexity | Notes |
-|---------|-------------|------------|-------|
-| **Finding record schema** — structured per-finding data model with: `id`, `category`, `severity`, `file_path`, `line_start`, `line_end`, `description`, `rationale`, `suggested_fix`, `tool_source`, `confidence` | Downstream phases consume findings by severity; cannot sort or filter without this schema | LOW | Schema must be agreed before any scan runs; every scanner emits into it |
-| **Four-level severity taxonomy** — CRITICAL / HIGH / MEDIUM / LOW | Phases are ordered by severity (CRITICAL first); taxonomy is the gating mechanism between phases | LOW | See severity definitions below. Four levels is industry standard (CodeHawks, Veracode, OpenZeppelin audit reports all use this scheme). Five levels adds ambiguity; three levels loses the CRITICAL/HIGH distinction needed for architectural vs polish ordering. |
-| **Layer-violation scanner** — detect imports that cross the defined dependency direction | Primary debt category; 5-layer Clean Architecture means specific crossing rules. Already confirmed violations present | HIGH | Automated: grep/AST-based import path analysis. AI-agent: semantic review for indirect violations |
-| **Dead-code scanner** — unused Dart symbols (functions, classes, variables, private members) | Dart analyzer's built-in `dead_code` rule only catches unreachable branches, not unreferenced symbols. A dedicated tool is required | HIGH | `dead_code_analyzer` (pub.dev) or DCM `check-unused-code`; neither replaces the other entirely |
-| **Unused-file scanner** — files with no import graph entry points | Orphaned files (e.g. a service extracted and renamed but original left behind) | MEDIUM | DCM `check-unused-files`; excludes `main.dart` and test entry points |
-| **Deprecated-code scanner** — symbols annotated `@Deprecated` still referenced by non-deprecated code | `ResolveLedgerTypeService` confirmed deprecated but still wired via `ignore: deprecated_member_use_from_same_package`. Multiple fields in `SyncRepository` deprecated but still present | LOW | `flutter analyze` catches `deprecated_member_use` when `// ignore:` suppression is absent; supplement with grep for `// ignore: deprecated_member_use_from_same_package` |
-| **Duplicate-provider scanner** — multiple `@riverpod` providers for the same repository across feature files | Confirmed CLAUDE.md pitfall #10; causes stale/inconsistent DI graph | MEDIUM | AST grep for `@riverpod` + matching function signatures returning same repository type |
-| **UnimplementedError-in-provider detector** — providers that throw instead of returning a value | Confirmed: `appDatabaseProvider` in `lib/infrastructure/security/providers.dart:96-102` | LOW | grep `UnimplementedError` inside `@riverpod`-annotated functions |
-| **Misplaced-provider detector** — repository providers defined outside `repository_providers.dart` | CLAUDE.md rule: ONE `repository_providers.dart` per feature | LOW | grep: `@riverpod` annotating a repository-return function in any file not named `repository_providers.dart` |
-| **ARB unused-key scanner** — ARB keys defined in all 3 locale files but never referenced via `S.of(context)` | 3 confirmed stubs (`ocrScan`, `ocrScanTitle`, `ocrHint`) in generated localizations with no implementing screen | MEDIUM | `remove_unused_localizations` (pub.dev) or custom Dart script; must handle `S.of(context).keyName` call pattern |
-| **Hardcoded-string scanner** — CJK or user-visible string literals in non-ARB, non-generated Dart files | ~169 occurrences confirmed by CONCERNS.md; violates i18n rule | LOW | grep for CJK Unicode ranges `\p{Han}` in Dart source outside `lib/l10n/`, `lib/generated/`, `lib/shared/constants/` |
-| **Findings file output** — machine-readable output (JSON or YAML) + human-readable Markdown catalogue | Downstream phases read the machine-readable form; engineers read the Markdown | MEDIUM | Two formats: `ISSUES.json` (structured, machine-readable) and `ISSUES.md` (human-readable, severity-sorted) |
-| **Severity-ordered findings presentation** — CRITICAL findings listed first in ISSUES.md | Phases work CRITICAL → HIGH → MEDIUM → LOW; presentation must reinforce this | LOW | Sort during report generation; trivial once schema exists |
-| **Re-audit / zero-finding verification** — re-run full pipeline after fixes; confirm finding count drops to zero | Audit completeness is the exit criterion for the entire initiative | MEDIUM | Same scan scripts, same schema, compare before/after counts; CI can gate on finding count = 0 |
+These are the dimensions a user opening the v1.1 HomePage will assume exist — missing any of them makes the "happiness metric" framing feel half-baked. All six are already in the locked list, which is reassuring; commentary below documents the **expected behavior** the requirements step should verify against.
 
-### Differentiators — High Value but Optional for THIS Initiative
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Average satisfaction (period summary) | Mood/wellbeing apps universally show period average as the headline number (Daylio's monthly mood score, Headspace's mood overview, every CSAT dashboard). Without it, users can't answer "how was this month overall?" in one glance. | LOW | Simple `AVG(soul_satisfaction) WHERE ledger_type='soul' AND month=current`. Display as 1-decimal float (e.g. `7.3 / 10`); emoji translation OK as secondary. **Empty-state handling is mandatory:** a brand-new month has 0 soul transactions, and "0.0/10" reads as catastrophic. Show "—" or "まだ記録なし". |
+| Highlights count (satisfaction ≥ 8) | Threshold-counting is the standard pattern for "wins" in habit/mood trackers (Daylio's "great days" count, Apple Health's "exercise minutes ≥ goal" days). Users want to know "how many genuinely good moments did I have?" not just an average that washes out highs and lows. | LOW | `COUNT(*) WHERE soul_satisfaction >= 8`. Threshold of 8 on a 1-10 scale = top-30% definitionally; aligns with the "1/3 of recordings should feel like wins" intuition embedded in most mood-tracker UX. **Do NOT make threshold user-configurable in v1.1** — over-customization defeats the "comparable across months" property. |
+| Joy per ¥ (Σ satisfaction / Σ amount) | Density/efficiency metrics are the entire category — YNAB's "Age of Money", Apple Watch's calorie-per-minute. Once you have two correlated quantities (amount, satisfaction), users will naturally ask the ratio. | MEDIUM | The formula `Σ sat / Σ amount` is correct mathematically but **needs a unit treatment for display** — the raw number (e.g. `0.00012 sat/yen`) is unintelligible. Options: (a) normalize to `sat per ¥1,000` so a ¥1,000 8-satisfaction purchase reads as `8.0`; (b) percentile-rank against the user's own history; (c) graph-only, never display the bare number. **Recommendation:** option (a) — display `"幸福密度 8.2"` with tooltip "1,000円あたりの満足度合計". For non-JPY locales: equivalent normalization (per ¥1k / per $10 / per ¥10) per `currentLocaleProvider`. |
+| Best Joy per ¥ moment (story-mode card) | Spotify Wrapped's "your top moment" card is now a universally-recognized pattern; Joy Money's "memory cards" carry the same DNA. Users expect to see a *specific* peak moment celebrated, not just averages. | MEDIUM-HIGH (UI) | `argmax(satisfaction / amount) WHERE ledger_type='soul' AND month=current`. Card should show: amount, satisfaction emoji/score, category, date, optional note. **Edge cases that must be handled:** (1) divide-by-zero for ¥0 transactions (gifts received, refunds — exclude); (2) extreme outliers from very small purchases (a ¥10 candy with sat=10 will dominate forever — consider a floor like "amount must be ≥ ¥100" or use `argmax(sat × log(amount))` to dampen). (3) Same transaction every month — show "still your best!" framing instead of pretending it's new. |
+| Satisfaction distribution histogram | Daylio's mood-distribution chart is iconic; users learn more from "I had 3 great days, 12 mediocre, 2 bad" than from any average. Already unblocked by the `getSatisfactionDistribution` DAO. | LOW | 1-10 bar chart, x-axis = satisfaction score, y-axis = transaction count. Color-shade bars: red for ≤3, neutral for 4-7, soul-green (#47B88A) for ≥8 to visually mark the "highlights" zone. Tap a bar → list of transactions at that score (already a known pattern from analytics filtering). |
+| Joy per ¥ trend line (over the month) | Standard time-series in any mood/wellbeing app. Already unblocked by the `getDailySatisfactionTrend` DAO. | LOW-MEDIUM | Daily Joy-per-¥ value over month. **Watch out for sparsity**: many days will have 0 soul transactions → produces gaps, not zeros. Either (a) skip empty days and connect dots (best for trend reading), or (b) show as scatter not line. Don't draw zero-lines on empty days — that misleadingly suggests "no joy that day" when it really means "no spending that day". |
+
+**Dependencies on existing capabilities** (all confirmed present per PROJECT.md baseline):
+- `transactions.soul_satisfaction` field (1-10) — schema already supports
+- `ledger_type='soul'` filter — present in DAO layer
+- Three dormant DAO methods (`getSoulSatisfactionOverview`, `getSatisfactionDistribution`, `getDailySatisfactionTrend`) — exist, just need wiring
+- `currentLocaleProvider` + `NumberFormatter` — needed for ¥/$ unit display per locale
+
+---
+
+### Differentiators (Competitive Advantage)
+
+These set v1.1 apart from existing JP/CN/EN finance apps and the one direct competitor (Joy Money). All map to the locked feature list — commentary below explains *why* each is a differentiator and what raises/lowers its impact.
 
 | Feature | Value Proposition | Complexity | Notes |
-|---------|------------------|------------|-------|
-| **Confidence scoring on dead-code findings** — "definitely dead" vs "appears unused but may be reached via dynamic dispatch, reflection, or code-gen" | Prevents false positives from deleting code that is actually alive | MEDIUM | Mark as `confidence: HIGH` for private members with no Dart references; `confidence: LOW` for public symbols (could be exposed to tests or external callers); Drift-generated `*.g.dart` references excluded by convention |
-| **Feature-to-application layer mapping audit** — verify each `features/*/use_cases/` directory should be in `lib/application/` instead | `lib/features/family_sync/use_cases/` confirmed to exist with direct infrastructure imports — these use cases belong in `lib/application/family_sync/` | MEDIUM | AI-agent review; grep for `use_cases/` directories inside `lib/features/` |
-| **Semantic duplication detection** — two implementations of the same concern with different code | `CategoryService` static translation maps vs ARB-generated content; `ResolveLedgerTypeService` duplicates subset of `CategoryService` | HIGH | AI-agent review required; no automated Dart tool detects semantic clones reliably. DCM `check-code-duplication` catches exact and near-match token clones only |
-| **Theme token duplication audit** — old `AppColors` aliases retained alongside Wa-Modern tokens | Confirmed: `lib/core/theme/app_colors.dart:60` and `lib/core/theme/app_text_styles.dart:171` have TODO markers for removal | LOW | grep for `// TODO: Remove after all screens are migrated` pattern; enumerate usage of legacy token names |
-| **Drift unused-column detection** — table columns with no DAO getter/query reference | No automated Dart tool for this; requires AST cross-reference | HIGH | AI-agent review: cross-reference table column definitions with DAO query methods and repository usages |
-| **Diff-based re-audit** — after a phase, re-scan only files touched by that phase's changes | Reduces re-audit time proportionally to phase scope | HIGH | Requires git diff integration; useful for large codebases; lower priority here (268 files is small enough for full rescan in < 30s) |
-| **CI gate on finding count** — fail `flutter analyze`-style CI step if any CRITICAL or HIGH findings remain | Prevents regressions after the initiative is complete | MEDIUM | Wrap scan scripts in a shell script that exits non-zero if ISSUES.json contains severity=CRITICAL or severity=HIGH entries |
-| **Test-coverage gap scanner** — identify source files touched by refactor with < 80% line coverage | Ensures every refactored file meets the ≥80% coverage mandate before the phase is closed | MEDIUM | `flutter test --coverage` → lcov.info → parse per-file coverage; compare against list of files modified in the phase's git diff |
+|---------|-------------------|------------|-------|
+| **Joy per ¥ as a first-class metric** (not just a graph) | No identified competitor surfaces a satisfaction-density number on the home screen. Joy Money visualizes the *relationship* but doesn't reduce it to a single shareable scalar. Mainstream JP apps (マネーフォワード ME, Zaim) don't track satisfaction at all. The CN budget-app market focuses on *control* (predictive budget alerts, AI auto-categorization), not *appreciation*. A density metric on the home tile is uncontested ground. | MEDIUM | Risk: the metric only "feels right" once a user has 5+ soul transactions in a month. Plan for the cold-start period — show "もう少し記録すると現れます (a few more records will reveal it)" guard text instead of a misleading early number. |
+| **Best Joy per ¥ as a celebrated moment, not a leaderboard slot** | Spotify Wrapped showed that a single argmax card reframed as "your top X" is socially shareable and emotionally resonant. Joy Money's memory cards do this for individual purchases but not for an *aggregate winner*. Combined with the soul-ledger-only filter, this lands as "the best joy you bought yourself this month" — a phrasing that has no obvious competitor. | MEDIUM-HIGH | Story-mode card should be visually distinct from the metric tiles (full-width, photo-card composition). Borrows directly from Spotify Wrapped grammar — clean type, single statistic, optional photo. **Anti-pattern to avoid:** comparing against last month ("3% less joy than April") — exactly the social-comparison framing experiential-purchase research shows undermines the satisfaction itself. |
+| **Family Highlights Sum (cooperative, not competitive)** | OsidOri (the leading JP couples-finance app) has solved the "shared vs personal" split well, but does not aggregate any wellbeing/joy signal across family members. Honeydue and Splitwise are pure transactional tools. We have a clear lane for "the family had **N joyful moments together**" as a cooperative scoreboard with no per-member breakdown. | MEDIUM | Critical implementation rule: render as a **single number** ("家族の小確幸 27回") with optional category breakdown — **never per-member breakdown** in v1.1. The moment you show "Mom: 12, Dad: 8, Kid: 7" you've built a leaderboard accidentally. The Gilovich body of research on experiential purchases is explicit that comparison-driven evaluation undermines satisfaction. |
+| **Shared Joy Insight (top category by family-avg satisfaction)** | "What kind of spending makes our family happiest?" is a question NO existing finance app answers. JP shared apps (OsidOri, Zaim group) answer "what categories do we spend most on?". The semantic shift from amount-based to satisfaction-based category ranking is genuinely novel. | MEDIUM | Compute as `argmax(category, AVG(satisfaction)) WHERE ledger_type='soul' AND family.member IN <all> AND month=current`. **Minimum-N guard** is essential: a single 10-satisfaction sushi meal shouldn't crown "外食" as the family's joy category for the month. Require ≥3 transactions per category before it qualifies. Gracefully fall back to "もっと記録が必要" if no category meets the threshold. |
+| **Visual rename from "Soul" → "悦己 / ときめき / Joy"** (ARB-only) | The original "灵魂账本" framing imports translation friction (English "Soul ledger" sounds new-age; Japanese "魂の充実度" reads grim). The v1.1 renames track much better with the **悦己消费 (CN trend)** and **自分へのご褒美 (JP norm)** cultural conversations the target audience is already having. | LOW | This is positioning, not engineering — but its impact on adoption is plausibly larger than any indicator formula. |
+| **Local-first + encrypted positioning of joy data** | Joy Money is presumed cloud-based; mainstream JP apps push aggressively for bank-aggregation OAuth. Satisfaction data is *more sensitive* than transaction amounts (it reveals what you secretly love), so on-device-only encryption is a believable trust differentiator. | LOW (already shipped) | Existing infrastructure; v1.1 just inherits it. Worth surfacing in onboarding copy when the joy features first appear. |
 
-### Anti-Features — Deliberately Excluded
+---
 
-| Anti-Feature | Why Tempting | Why to Exclude | What to Do Instead |
-|--------------|-------------|----------------|-------------------|
-| **Auto-fix at audit time** — automatically rewrite imports, move files, delete symbols during scan | Audit phase is discovery; auto-fix skips human review of each finding | Auto-fix conflates audit with remediation; a wrong auto-fix silently breaks behavior; behaviors must be verified by tests after each change | Log the suggested fix in the finding record; human (or separate fix agent) applies it with test verification |
-| **Behavior-change suggestions** — "refactor this algorithm", "consolidate these two functions into a smarter one" | Sounds productive | Out of scope per PROJECT.md: pure structural refactor, zero behavior change. Behavior-change suggestions introduce risk without the audit pipeline having any way to verify correctness | Defer to a future "enhancement" initiative after cleanup is complete |
-| **Performance profiling as an audit output** — flag slow queries, large widget rebuilds | CONCERNS.md has known performance issues | Out of scope: performance is not a target for this initiative. Mixing performance findings into the severity-ordered cleanup phases dilutes focus and invites scope creep | Capture performance concerns in CONCERNS.md; address in a separate performance initiative |
-| **Security redesign suggestions** — "switch to X crypto primitive" | Security is always important | Out of scope per PROJECT.md: security cleanup is limited to enforcing existing rules (e.g., no direct `flutter_secure_storage` access), not redesigning crypto. The 4-layer stack is fixed | Enforce the existing crypto rules (boundary checks); surface violations as HIGH layer-violation findings |
-| **Style linting beyond what `dart format` + `flutter analyze` enforce** — "rename this variable", "extract this magic number" | Useful for general code quality | Not part of the four debt categories this initiative targets; running style lints generates noise that obscures architectural findings | Keep `prefer_single_quotes` and other existing lint rules; do not add opinionated style rules as part of this pipeline |
-| **Cross-feature dependency graph visualization** — generate a visual diagram of import relationships | Useful for documentation | Visualization is output, not a finding. It cannot be acted upon or counted toward zero-violations | If a diagram is wanted for docs, generate it separately; it is not part of the audit pipeline |
-| **Incremental auto-deletion of deprecated files** | Tempting as a "safe" cleanup | Deletion of files must be preceded by confirming no runtime references exist (reflection, platform channels, build scripts); auto-deletion skips this verification | Dead-code scanner flags deprecated files as findings; human verifies and deletes per finding |
+### Anti-Features (Commonly Requested, Often Problematic)
+
+These are the patterns the v1.1 design must explicitly *not* implement. Several will be requested either by users (who naively want them because they exist in social apps) or by future product instincts (because comparison drives engagement metrics in the short term, even when it harms satisfaction long term). Documenting them now creates a defensible "no" for later.
+
+| Anti-Feature | Why Requested | Why Problematic | Alternative |
+|---|---|---|---|
+| **Per-member joy leaderboard** ("Mom 8.2 ≫ Dad 6.1") | Looks engaging; mirrors Apple Health's family-share leaderboard; "fairness" instinct says all members should be visible. | The Gilovich/Van Boven body of research on experiential purchases explicitly identifies *social comparison* as the mechanism that undermines satisfaction. A family member with lower joy scores isn't measurably less happy — they may rate more conservatively (cultural and individual variance in scale use is well documented), or have fewer soul transactions. Surfacing the comparison ranks them as "less happy", which is corrosive in a household over months. | Family Highlights **Sum** (single number across the household) + Shared Joy Insight (category-level, no member attribution). Already in the locked list — keep it that way. |
+| **"Joy ROI" as a family budget percentage** | The original `Happiness ROI` tile was this — joy as a fraction of total budget. Sounds analytical. | It's a category-mix metric in disguise (a family that spends 100% on rent has 0% "joy ROI"; a family that spends 100% on hobbies has 100%). It rewards mix-shifting toward soul over actual emotional state, which is the opposite of what the metric should measure. The v1.1 spec already calls this out as misleading and replaces it. | Keep the Joy Index / Joy per ¥ density metric; do not resurrect ROI framing in the family tile. |
+| **Streak counter on satisfaction value** ("23-day streak of 8+!") | Standard fintech gamification; YNAB's Age-of-Money proves streaks work; Daylio uses streaks. | Streaks on *recording* are fine; **streaks on the satisfaction value itself** create direct pressure to inflate ratings to keep the streak alive. This is a documented bias in self-report scales (response inflation under reward-contingent reporting). | If streaks are added in v1.2+, scope them strictly to "days you logged a soul transaction" — never threshold the satisfaction value. **v1.1 should not add streaks at all** — the milestone is overcommitted already. |
+| **Year-over-year / month-over-month joy comparison on home tile** | "Trend" feels insightful; Spotify Wrapped does year-over-year. | Same comparison-drives-dissatisfaction trap as the leaderboard, applied temporally instead of socially. Also creates pressure when last month had unusual spending (medical, travel) producing an unfair baseline. Spotify Wrapped works because it's annual-only and celebratory; finance apps showing monthly deltas tend toward judgmental ("you're 8% less happy than April"). | Show the trend **line within the current month** (already in scope) — that's process information, not judgment. Defer cross-period comparison to v1.2+ and frame as opt-in retrospective ("Year in Joy" report), not always-on home tile. |
+| **AI-generated "interpretation" of the user's joy data** ("Your spending suggests you're happiest with food but that may be emotional eating") | Multiple JP/CN apps (叨叨记账, AI auto-categorization apps) lean on AI commentary; sounds insightful. | Two issues: (1) the local-first/zero-knowledge architecture makes server-side AI interpretation incompatible with the trust positioning; (2) algorithmic interpretation of satisfaction data is psychologically loaded — "your hobby spending is a coping mechanism" is the kind of message a finance app should not deliver. | Show data, let the user interpret. If a copy-style touch is wanted, fixed templates pulled from ARB ("今月のときめきは食べ物から！" with no judgment) are safer than generative output. |
+| **Letting users edit Best-Joy-per-¥ to "promote" a different transaction** | "But the algorithm picked the wrong one — the actual best moment was the concert, not the cheap coffee" — sounds reasonable. | Once the metric is user-overridable it stops being a measurement and becomes a curated post; it also encourages re-rating transactions to get them onto the highlight card, which is the satisfaction-inflation trap from a different direction. | Keep the argmax algorithmic. If users complain that small purchases dominate, fix the formula (amount floor, log dampening — see Best Joy per ¥ row in Table Stakes) — don't add manual override. |
+| **Public sharing of joy data with non-family** | Spotify Wrapped is publicly shareable; users will ask. | Public-share creates the same social-comparison harm as a leaderboard, plus exposes financial info that the local-first architecture is meant to protect. Even export-as-image risks this. | If sharing is added in v1.2+, scope strictly to **screenshot of the Best-Joy-per-¥ card** with amount redacted (e.g., `"¥¥¥¥"` placeholder), not raw indicators. |
+| **Negative/penalty satisfaction scores or "regret" tag** | Symmetry argument: if you can mark a 10/10 purchase, you should be able to mark a 1/10 regret. | The 1-10 scale already encodes regret at the low end; adding a separate "regret" tag double-counts and creates a "shame ledger" subtitle that runs counter to the Joy Ledger framing. JP/CN cultural context especially: explicit regret labels feel punitive. | The 1-10 scale is enough. Anti-add. |
 
 ---
 
 ## Feature Dependencies
 
 ```
-Severity Taxonomy (4 levels defined)
-    └──required by──> Finding Record Schema
-                          └──required by──> All Scanners (layer, dead code, provider, i18n, duplication)
-                                                └──required by──> Findings Output (ISSUES.json + ISSUES.md)
-                                                                      └──required by──> Severity-Ordered Presentation
-                                                                                            └──required by──> Re-Audit / Zero-Finding Verification
-                                                                                                                  └──enables──> CI Gate
+[Existing infra]
+  soul_satisfaction column ──┬──> [Avg Satisfaction]
+                              ├──> [Highlights count]
+                              ├──> [Joy per ¥ density]
+                              │       └──requires──> [unit-display strategy: per ¥1k]
+                              ├──> [Best Joy per ¥ card]
+                              │       ├──requires──> [amount-floor or log dampening]
+                              │       └──requires──> [empty-state handling]
+                              ├──> [Satisfaction distribution histogram]
+                              │       └──unblocked-by──> getSatisfactionDistribution DAO
+                              └──> [Joy per ¥ trend line]
+                                      └──unblocked-by──> getDailySatisfactionTrend DAO
 
-Layer-Violation Scanner
-    └──enhances──> Feature-to-Application Mapping Audit (catch use_cases/ inside features/)
+[Family sync (existing)]
+  shadow books ──┬──> [Family Highlights Sum]
+                 │       └──requires──> single-number rendering rule (NO per-member split)
+                 └──> [Shared Joy Insight (category × avg sat)]
+                          └──requires──> minimum-N guard (≥3 transactions per category)
 
-Dead-Code Scanner (symbol level)
-    └──complements──> Unused-File Scanner (file level)
-    └──both feed──> Confidence Scoring (differentiator)
+[ARB rename pass]
+  soulLedger / survivalLedger / homeHappinessROI / homeSoulFullness
+       └──no code dependencies, but blocks "feels coherent" UX gate
 
-Duplicate-Provider Scanner
-    └──depends on──> Finding Record Schema (to emit structured findings)
-
-UnimplementedError Detector
-    └──depends on──> Finding Record Schema
-
-Misplaced-Provider Detector
-    └──depends on──> Finding Record Schema
-
-ARB Unused-Key Scanner
-    └──independent of other scanners (i18n-specific toolchain)
-
-Hardcoded-String Scanner
-    └──independent (grep-based, no schema dependency for discovery; schema needed for output)
-
-Test-Coverage Gap Scanner (differentiator)
-    └──depends on──> git diff of each phase (which files were touched)
-    └──depends on──> flutter test --coverage output
+[Anti-pattern conflicts]
+  Per-member leaderboard ──conflicts──> Family Highlights Sum (mutually exclusive framings)
+  Streak on satisfaction value ──conflicts──> all density metrics (causes inflation)
+  Cross-month delta on tile ──conflicts──> "celebration not judgment" framing
 ```
 
 ### Dependency Notes
 
-- **Severity Taxonomy must be defined first:** Every scanner emits severity for each finding. If taxonomy is not agreed before scanning, findings cannot be merged or sorted. This is the only true blocking dependency.
-- **Finding Record Schema must exist before any scanner outputs:** All scanners must emit into the same schema so ISSUES.json can aggregate across tools and AI-agent reviews.
-- **Dead-code scanner and unused-file scanner are complementary, not redundant:** Symbol-level dead code (an exported class with no callers) and file-level dead code (an entire file with no importers) are separate axes. Both are needed.
-- **Confidence scoring enhances dead-code findings but does not block them:** Can be added to the schema from day one as an optional field, defaulting to HIGH for private symbols, LOW for public symbols.
-- **CI gate depends on re-audit:** The gate logic is trivial (exit non-zero on CRITICAL/HIGH count > 0), but only makes sense after the initiative proves the zero-finding state is achievable.
-- **Test-coverage gap scanner depends on knowing which files changed:** It requires a git diff from the start of the phase, not a standalone scan. Integrate at phase-close, not at audit-open.
+- **Joy per ¥ requires unit-display strategy:** raw `Σsat/Σamount` is unintelligible (~0.00012). Decide on `per ¥1,000` normalization (or equivalent for non-JPY locales) before wiring the home tile. This is a 30-min decision but it's a prerequisite for *any* density display.
+- **Best Joy per ¥ requires divide-by-zero and outlier handling:** without an amount floor, a ¥10 satisfying snack will dominate. Consider `WHERE amount >= 100` plus tiebreaker by absolute satisfaction.
+- **Family indicators require shadow-book aggregation:** depends on existing family-sync apply pipeline. The DAO methods may not yet support cross-shadow-book aggregation — verify in requirements step.
+- **Empty-state is not optional:** Avg Satisfaction, Joy per ¥, and the Best moment card all break elegantly only if you handle "0 soul transactions this month" explicitly. New users will see this state; so will users mid-month-1.
+- **Anti-features cluster around "comparison":** the three top anti-features (per-member leaderboard, year-over-year delta, public sharing) all share a common mechanism — they introduce comparison frames that the experiential-purchase research and self-report-bias research independently warn against. Treat "no comparison surfaces in v1.1" as a single design rule, not three separate rules.
 
 ---
 
-## Severity Taxonomy — Justified
+## MVP Definition
 
-Four levels (CRITICAL / HIGH / MEDIUM / LOW) are the industry standard used by Veracode, CodeHawks, OpenZeppelin, and Google's internal code review tooling. The justification for four (not three or five) in this context:
+The v1.1 milestone scope **is** the MVP for the happiness-metric domain. The locked feature list maps cleanly into MVP / Add-after / Future buckets:
 
-**Why not three (HIGH / MEDIUM / LOW):**
-Architectural violations that would cause a rewrite if not addressed (domain importing data, use cases inside feature folders with direct infrastructure access) are categorically different from "this function is unused." Losing the CRITICAL tier means these get treated the same as polish items.
+### Launch With (v1.1)
 
-**Why not five (CRITICAL / HIGH / MEDIUM / LOW / INFO):**
-Info-level findings (style notes, documentation gaps) are out of scope for this initiative. Adding an INFO tier creates noise in the findings file and tempts the initiative to address items outside the four target categories.
+All of these are already locked — listing them here for the requirements step to verify formulas + presentation align with industry practice.
 
-**Per-category severity assignments for this initiative:**
+- [x] **Avg Satisfaction tile** — period-summary headline number, empty-state safe
+- [x] **Joy per ¥ tile** — density metric, unit-normalized to per-¥1k display
+- [x] **Highlights count tile** — `COUNT WHERE sat ≥ 8` with non-configurable threshold
+- [x] **Best Joy per ¥ story card** — argmax with amount-floor, no manual override, no cross-period comparison
+- [x] **Satisfaction histogram** — wired through getSatisfactionDistribution
+- [x] **Joy per ¥ trend line** — wired through getDailySatisfactionTrend, sparsity-handled
+- [x] **Family Highlights Sum** — single household number, NO per-member split
+- [x] **Shared Joy Insight** — category × avg satisfaction with min-N guard
+- [x] **ARB rename pass** — Joy Ledger / Daily Ledger / Joy per ¥ / Joy Index across ja/zh/en
 
-| Severity | Definition for This Initiative | Examples |
-|----------|-------------------------------|---------|
-| CRITICAL | Violates the fundamental architectural contract in a way that could silently break behavior during refactor; or creates a runtime failure risk if the finding is not addressed before the next phase | Domain layer importing Data layer; Use cases inside `features/` with direct infrastructure access (`lib/features/family_sync/use_cases/` confirmed); `appDatabaseProvider` throwing `UnimplementedError` without guaranteed override |
-| HIGH | Violates a declared architectural rule that will cause copy-paste propagation or DI graph corruption, but does not immediately break runtime behavior | Presentation screen directly importing `infrastructure/` layer (bypassing application layer); deprecated service still wired into provider graph with `// ignore:` suppressions; duplicate repository provider definitions |
-| MEDIUM | Accumulates technical debt that degrades maintainability or creates drift between code and documentation | Hardcoded CJK strings (~169 occurrences, violating i18n rule); unused ARB keys; parallel translation maps in `CategoryService`; legacy theme token aliases; test-coverage below 80% on refactored files |
-| LOW | Isolated, non-propagating issues with no architectural impact | Unused private helper methods; unreachable code branches; orphaned test mock files (`*.mocks.dart` needing regeneration); single-site TODO markers for deferred UI stubs |
+### Add After Validation (v1.2+)
 
----
+Trigger: user feedback shows the v1.1 indicators are read and acted on, but users want more longitudinal context.
 
-## MVP Definition — For the Audit Pipeline
+- [ ] **Year-in-Joy retrospective** — opt-in, celebratory framing only, no judgmental deltas; modeled on Spotify Wrapped
+- [ ] **Per-category joy density** breakdown (drill-down on Shared Joy Insight) — needs minimum-N to avoid one-off events crowning a category
+- [ ] **Anticipation board** — flagging *upcoming* planned soul purchases for higher pre-purchase satisfaction (per Gilovich research, anticipation of experiential purchases drives meaningful share of total happiness)
+- [ ] **Recording streak** (record-action only, NEVER satisfaction-value streak) — requires careful copy
+- [ ] **Mood/context tags** on transactions (alone / with family / as gift) — would unlock per-context joy density; needs schema change so genuinely v1.2+
 
-The "launch" of the pipeline is Phase 1 of the initiative. The minimum it must produce before any fix work begins:
+### Future Consideration (v2+)
 
-### Launch With — Phase 1 Audit Deliverables
+Trigger: product-market fit established, JP user base validates the cooperative-family thesis works.
 
-- [x] Severity taxonomy documented (done above) — required before scanning
-- [x] Finding record schema defined (JSON fields: `id`, `category`, `severity`, `file_path`, `line_start`, `line_end`, `description`, `rationale`, `suggested_fix`, `tool_source`, `confidence`) — required before scanning
-- [ ] Layer-violation scan complete — automated (import path analysis) + AI-agent semantic review
-- [ ] Dead-code scan complete — `dead_code_analyzer` or DCM `check-unused-code`
-- [ ] Unused-file scan complete — DCM `check-unused-files`
-- [ ] Deprecated-code scan complete — `flutter analyze` + grep for suppression directives
-- [ ] Duplicate-provider scan complete — grep + AST analysis
-- [ ] UnimplementedError-in-provider scan complete — grep
-- [ ] Misplaced-provider scan complete — grep
-- [ ] ARB unused-key scan complete — `remove_unused_localizations` or equivalent
-- [ ] Hardcoded-string scan complete — grep for CJK Unicode ranges
-- [ ] ISSUES.json produced (machine-readable, all findings)
-- [ ] ISSUES.md produced (human-readable, severity-sorted, with suggested fix per finding)
-- [ ] Finding count by severity established as baseline (zero-finding target set)
-
-### Add After First Phase Completes (Phase 2+)
-
-- [ ] Confidence scoring on dead-code findings — add as the dead-code scan is refined based on false positives discovered in Phase 1
-- [ ] Test-coverage gap scanner — integrate at phase-close of each subsequent phase
-- [ ] Feature-to-application layer mapping audit — AI-agent supplement after automated scan; catches the `features/family_sync/use_cases/` case
-
-### Future (Post-Initiative)
-
-- [ ] CI gate (CRITICAL/HIGH count = 0) — set up after the initiative proves zero findings is achievable
-- [ ] Semantic duplication detection — AI-agent deep review; too expensive for the initial scan, useful for a post-initiative code quality review
-- [ ] Diff-based re-audit — not needed for 268 files; revisit if codebase grows beyond ~1,000 files
+- [ ] **Selective sharing** of Best-Joy card outside family (with amount redaction), if and only if the social-comparison risk can be designed around
+- [ ] **Cross-family-member highlight celebration** ("Mom's best moment this month was…") — only if explicit recipient-driven (gift-style), never algorithmic and never ranked
+- [ ] **Long-horizon joy trend** (12-month, lifetime) — only if presented as personal-only retrospective, not comparison
+- [ ] **Photo attachment for memory cards** (Joy Money parity feature) — adds emotional weight but introduces non-trivial encrypted-blob storage and sync complexity
 
 ---
 
 ## Feature Prioritization Matrix
 
-| Feature | Value to Initiative | Implementation Cost | Priority |
-|---------|--------------------|--------------------|----------|
-| Severity Taxonomy + Schema | HIGH | LOW | P1 — unblocks everything |
-| Layer-Violation Scanner | HIGH | HIGH | P1 — largest debt category |
-| Dead-Code Scanner (symbols) | HIGH | MEDIUM | P1 — needed before any deletion |
-| Unused-File Scanner | HIGH | LOW | P1 — trivial with DCM |
-| Deprecated-Code Scanner | HIGH | LOW | P1 — grep + analyzer |
-| Duplicate-Provider Scanner | HIGH | MEDIUM | P1 — confirmed violation exists |
-| UnimplementedError Detector | HIGH | LOW | P1 — confirmed violation exists |
-| Misplaced-Provider Detector | HIGH | LOW | P1 — architectural rule |
-| ARB Unused-Key Scanner | MEDIUM | MEDIUM | P1 — ~3 confirmed dead keys + more likely |
-| Hardcoded-String Scanner | MEDIUM | LOW | P1 — ~169 confirmed violations |
-| ISSUES.json + ISSUES.md Output | HIGH | MEDIUM | P1 — required for all downstream phases |
-| Severity-Ordered Presentation | HIGH | LOW | P1 — trivial once schema exists |
-| Re-Audit Verification | HIGH | MEDIUM | P1 — the exit criterion |
-| Confidence Scoring | MEDIUM | MEDIUM | P2 — add after first-pass false positives known |
-| Feature-to-App Mapping Audit | HIGH | MEDIUM | P2 — supplement automated layer scan |
-| Theme Token Duplication Audit | LOW | LOW | P2 — confirmed but bounded scope |
-| Semantic Duplication Detection | MEDIUM | HIGH | P3 — AI-agent heavy, deferred |
-| Drift Unused-Column Detection | MEDIUM | HIGH | P3 — no automated tool exists |
-| CI Gate | HIGH | LOW | P3 — post-initiative, after zero-findings proved |
-| Diff-Based Re-Audit | LOW | HIGH | P3 — 268 files too small to need this |
-| Test-Coverage Gap Scanner | HIGH | MEDIUM | P2 — integrate at each phase close |
+Within v1.1 scope (all P1 by milestone definition; relative ranking helps phase ordering and "if we have to cut something" decisions):
+
+| Feature | User Value | Implementation Cost | Priority |
+|---------|------------|---------------------|----------|
+| Avg Satisfaction tile | HIGH | LOW | P1 |
+| Joy per ¥ tile | HIGH | MEDIUM | P1 |
+| Highlights count tile | MEDIUM | LOW | P1 |
+| Best Joy per ¥ story card | HIGH (emotional centerpiece) | MEDIUM-HIGH (UI) | P1 |
+| Satisfaction histogram | MEDIUM | LOW | P1 |
+| Joy per ¥ trend line | MEDIUM | LOW-MEDIUM | P1 |
+| Family Highlights Sum | HIGH (in group mode) | MEDIUM | P1 |
+| Shared Joy Insight | MEDIUM-HIGH (in group mode) | MEDIUM | P1 |
+| ARB rename pass | MEDIUM (positioning) | LOW | P1 |
+
+**If overscoped:** the lowest-loss cut is Shared Joy Insight (depends on min-N guard logic, family aggregation, and copy that isn't judgmental about lower-ranked categories — three risk surfaces in one feature). Family Highlights Sum carries most of the "family mode feels real" value alone.
+
+**Highest-leverage feature:** **Best Joy per ¥ story card.** Industry pattern (Spotify Wrapped, Joy Money's memory cards) shows that a single celebrated moment outperforms multiple metric tiles in shareability and emotional recall. The four metric tiles together establish the *system*; the Best card gives the user *the take-home memory* of the month. Spend UI polish budget here.
 
 ---
 
-## Concrete Finding Examples
+## Competitor Feature Analysis
 
-### Layer Violation (CRITICAL)
+| Feature | Joy Money (JP, pre-launch) | OsidOri (JP, shipped) | マネーフォワード ME / Zaim (JP, shipped) | 叨叨记账 / 鲨鱼记账 (CN, shipped) | Daylio (mood, shipped) | Our Approach |
+|---|---|---|---|---|---|---|
+| Per-transaction satisfaction | 5-point scale | None | None | None | 5-point mood | 1-10 + emoji input (already shipped) |
+| Avg Satisfaction summary | Implied (graphs) | N/A | N/A | N/A | Yes (monthly mood avg) | Explicit tile |
+| Joy / ¥ density metric | No (graphs only) | N/A | N/A | N/A | N/A (not finance) | **Headline tile + trend line** |
+| Highlights count | No | N/A | N/A | N/A | "Great days" count | Tile (sat ≥ 8) |
+| Argmax highlight card | "Memory cards" per-transaction (not aggregate) | N/A | N/A | "Peak moment" pushes (notification copy) | N/A | **Aggregate Best card** |
+| Histogram of satisfaction | No | N/A | N/A | N/A | Yes (mood distribution) | Yes |
+| Trend line over period | Implied (graphs) | N/A | N/A | N/A | Yes (mood line) | Yes |
+| Family/group mode | No | Yes (shared+personal split, no joy aggregation) | Yes (Zaim group, no joy concept) | Limited | N/A | **Cooperative joy aggregation (novel)** |
+| Family ranking / leaderboard | N/A | No | No | No | N/A | **Explicitly NO** |
+| Local-first / encrypted | Unknown (presumed cloud) | Cloud | Cloud (bank-linked) | Cloud | Local | Local + E2EE (already shipped) |
+| Cultural framing | 推し活 fan-activity | Couples / shared | Generic budgeting | Young women, light gamification | Generic mood | 悦己 / ときめき / Joy (rename pass) |
 
-```json
-{
-  "id": "LV-001",
-  "category": "layer_violation",
-  "severity": "CRITICAL",
-  "file_path": "lib/features/family_sync/use_cases/check_group_use_case.dart",
-  "line_start": 3,
-  "line_end": 5,
-  "description": "Use case class lives inside lib/features/ and directly imports lib/infrastructure/. Use cases belong in lib/application/{domain}/, not in features/.",
-  "rationale": "Thin Feature rule: features must not contain application/ or infrastructure/. This file also directly accesses infrastructure/crypto/services/key_manager.dart, bypassing the application layer.",
-  "suggested_fix": "Move lib/features/family_sync/use_cases/check_group_use_case.dart to lib/application/family_sync/check_group_use_case.dart. Remove direct infrastructure imports; inject dependencies via constructor.",
-  "tool_source": "ai_agent_semantic_review",
-  "confidence": "HIGH"
-}
-```
-
-### Layer Violation (HIGH)
-
-```json
-{
-  "id": "LV-008",
-  "category": "layer_violation",
-  "severity": "HIGH",
-  "file_path": "lib/features/accounting/presentation/screens/category_selection_screen.dart",
-  "line_start": 7,
-  "line_end": 7,
-  "description": "Presentation screen imports lib/infrastructure/category/category_service.dart directly, bypassing the application layer.",
-  "rationale": "Dependency flow must be: Presentation -> Application -> Domain <- Data <- Infrastructure. Screens must not import infrastructure directly.",
-  "suggested_fix": "Expose CategoryService functionality through a use case in lib/application/accounting/ and inject via a Riverpod provider in use_case_providers.dart.",
-  "tool_source": "import_path_analyzer",
-  "confidence": "HIGH"
-}
-```
-
-### Dead Code (MEDIUM)
-
-```json
-{
-  "id": "DC-012",
-  "category": "dead_code",
-  "severity": "MEDIUM",
-  "file_path": "lib/application/dual_ledger/resolve_ledger_type_service.dart",
-  "line_start": 1,
-  "line_end": 95,
-  "description": "ResolveLedgerTypeService is annotated @Deprecated('Use CategoryService instead') and referenced only with // ignore: deprecated_member_use_from_same_package suppressions.",
-  "rationale": "Deprecated code with active ignore suppressions is a dead-code signal that has not been completed. CategoryService already covers this functionality.",
-  "suggested_fix": "Migrate all call sites in use_case_providers.dart to CategoryService.resolveLedgerType / resolveL1. Delete resolve_ledger_type_service.dart. Remove the ignore suppressions.",
-  "tool_source": "deprecated_code_scanner",
-  "confidence": "HIGH"
-}
-```
-
-### Provider Hygiene (CRITICAL)
-
-```json
-{
-  "id": "PH-001",
-  "category": "provider_hygiene",
-  "severity": "CRITICAL",
-  "file_path": "lib/infrastructure/security/providers.dart",
-  "line_start": 96,
-  "line_end": 102,
-  "description": "appDatabaseProvider is defined as @riverpod and throws UnimplementedError. Any code path that reaches this provider without the manual ProviderContainer override from main.dart will crash at runtime.",
-  "rationale": "Providers must not throw UnimplementedError. The override pattern in main.dart is implicit and non-enforced by static analysis. A test or widget instantiating its own ProviderScope without the override will crash silently.",
-  "suggested_fix": "Replace with a concrete provider that fails fast with a descriptive error, or restructure so the database is always provided through the override with a static assertion that the override is in place (integration test).",
-  "tool_source": "unimplemented_error_detector",
-  "confidence": "HIGH"
-}
-```
-
-### Dead i18n Key (LOW)
-
-```json
-{
-  "id": "I18N-003",
-  "category": "dead_code",
-  "severity": "LOW",
-  "file_path": "lib/l10n/app_en.arb",
-  "line_start": 1,
-  "line_end": 1,
-  "description": "ARB key 'ocrScan' is defined in all three locale files (app_en.arb, app_ja.arb, app_zh.arb) and generated into S class, but no Dart file calls S.of(context).ocrScan.",
-  "rationale": "OCR module (MOD-004) is confirmed absent from the codebase. The key was added speculatively. Dead keys create translation maintenance overhead.",
-  "suggested_fix": "Remove 'ocrScan', 'ocrScanTitle', 'ocrHint' from all three ARB files. Run flutter gen-l10n after removal. Re-add when the OCR screen is implemented.",
-  "tool_source": "arb_unused_key_scanner",
-  "confidence": "HIGH"
-}
-```
+**Strategic read:** No competitor occupies the (joy-density × cooperative-family × encrypted-local) intersection. Joy Money owns single-user joy visualization in JP; OsidOri owns shared-budget UX in JP; nobody owns family-cooperative joy. v1.1 is genuinely competing for new ground.
 
 ---
 
-## Tooling Map
+## JP/CN market specifics (extra emphasis per quality gate)
 
-This initiative uses a hybrid pipeline: automated tools for exhaustive, fast pattern matching; AI-agent review for semantic/structural issues that text patterns cannot catch.
+### JP market
 
-| Scan Type | Automated Tool | AI-Agent Supplement | Confidence Without AI |
-|-----------|---------------|--------------------|-----------------------|
-| Layer violations (import direction) | grep + AST import path analysis | YES — indirect violations, misclassified layers | MEDIUM (automated misses indirect) |
-| Feature-vs-application misplacement | grep for `features/*/use_cases/` | YES — primary detector | LOW (needs semantic understanding) |
-| Dead code (symbols) | `dead_code_analyzer` or DCM `check-unused-code` | MEDIUM — verify public symbols | HIGH for private; LOW for public |
-| Unused files | DCM `check-unused-files` | NO — file-level is mechanical | HIGH |
-| Deprecated symbols | `flutter analyze` + grep for `// ignore: deprecated_member_use` | NO | HIGH |
-| Duplicate providers | grep for `@riverpod` + same return type | MEDIUM — catches non-obvious duplicates | MEDIUM |
-| UnimplementedError in providers | grep | NO | HIGH |
-| Misplaced providers | grep | MEDIUM — catches providers in unexpected files | HIGH |
-| ARB unused keys | `remove_unused_localizations` or custom script | NO | HIGH |
-| Hardcoded strings | grep for CJK Unicode + string literals | NO | HIGH |
-| Semantic duplication | NONE | YES — primary detector | N/A |
-| Drift unused columns | NONE | YES — primary detector | N/A |
-| Theme token duplication | grep for TODO markers + legacy token names | NO | HIGH |
+- **推し活 (oshi-katsu)** is the dominant cultural vector for "happy spending" in JP, particularly among 20-30s women. Joy Money and 推しPay both target it explicitly. Our renamed "ときめき帳 / Joy Ledger" copy should resonate without forcing the oshi-katsu frame (we want general use, not niche).
+- **自分へのご褒美 (a reward for myself)** is the equivalent norm one demographic over (30-40s, less media-fan-coded). Joy Index tile copy should accommodate both reads.
+- **OsidOri's "shared + personal" split** is the JP-recognized best practice for couples-finance UX. The fact that we surface joy *only on the cooperative side* of the family fits this convention — soul transactions on individual phones stay individual; only highlights *count* (not per-person joy) is shared. Worth verifying explicitly in requirements step.
+- **Privacy expectation** in JP family-finance is higher than in EN markets — partners typically don't want full visibility into each other's discretionary spending. The cooperative-only family aggregation respects this; per-member breakdown would violate it.
+- **Visual sensibility:** JP finance apps (Zaim particularly, "good design award") favor cute icons and small celebratory animations on entry. Our soul-green (#47B88A) celebration on highlight count being incremented is consistent with this; resist the temptation to import Western dashboard severity.
+
+### CN market
+
+- **悦己消费 (yue-ji xiao-fei, "self-pleasing consumption")** is the directly-translated cultural concept; "悦己账本" as a name is already in idiomatic territory.
+- **仪式感 (yi-shi-gan, "sense of ceremony")** is the design language CN apps (iCost, 叨叨记账) ride hard — "completing a record produces a beautifully designed receipt image". Best-Joy-per-¥ as a story card slots directly into this aesthetic vocabulary; even more shareable in CN context than JP.
+- **Anti-pattern in CN market:** AI-character-driven "chat to record" (叨叨记账) gives users a virtual companion that reacts to records. Tempting differentiator, but **incompatible with local-first/encrypted positioning** (requires server-side AI). Anti-feature for us.
+- **复盘 (fu-pan, "review")** is the standard term for monthly retrospective in CN financial culture; the v1.1 statistics-page work is "悦己复盘". Worth using in CN ARB copy.
+
+### EN market context (third locale)
+
+- Less rich on this specific feature niche; Happy Money's Joy app is the closest reference but is a coaching/personality product, not a metric one. YNAB's "Age of Money" is the only quantitative-density metric with mainstream EN traction.
+- "Joy Ledger / Daily Ledger / Joy per ¥ / Joy Index" lexicon as renamed should read cleanly in EN — no equivalent cultural baggage to worry about.
+
+---
+
+## Quality-gate self-check
+
+Verifying against the consumer's quality gate stated in the prompt:
+
+- ✅ **Categories clear** — Table Stakes (6 features), Differentiators (6), Anti-Features (8); each row has Why/Complexity/Notes.
+- ✅ **Complexity noted** — every feature row has LOW/MEDIUM/HIGH with reasoning.
+- ✅ **Dependencies identified** — diagram + 5-point dependency notes; conflicts called out (3 anti-features × 1 design rule).
+- ✅ **JP/CN market practice covered** — dedicated section with five JP-specific findings, four CN-specific findings, and EN noted briefly. Joy Money and OsidOri called out as direct/adjacent prior art.
+- ✅ **Family-mode dynamics analyzed with concrete examples** — per-member leaderboard anti-feature has explicit "Mom 8.2 ≫ Dad 6.1" example and Gilovich-research justification; OsidOri's shared-vs-personal split discussed; cooperative-aggregation pattern grounded.
+- ✅ **Anti-features called out explicitly with reasoning** — 8 anti-features each with surface appeal / actual problem / alternative.
+- ⚠️ **Limitation:** Joy Money is a CAMPFIRE crowdfunding project, so its actual shipped behavior is not yet observable; statements about Joy Money are based on the project's own marketing material. Confidence on Joy Money specifics is MEDIUM, not HIGH.
 
 ---
 
 ## Sources
 
-- [riverpod_lint — Dart package](https://pub.dev/packages/riverpod_lint) — confirmed `riverpod_lint: ^2.6.4` already in this project's `dev_dependencies`
-- [custom_lint — Dart package](https://pub.dev/packages/custom_lint) — base framework for Riverpod lint rules
-- [clean_architecture_linter 1.0.8 — Dart package](https://pub.dev/packages/clean_architecture_linter/versions/1.0.8) — 33 rules for Clean Architecture enforcement; MEDIUM confidence on fit for this project's custom layer structure
-- [dead_code_analyzer — Dart package](https://pub.dev/packages/dead_code_analyzer) — CLI tool for unused classes, functions, variables
-- [DCM Check Unused Code](https://dcm.dev/docs/cli/code-quality-checks/unused-code/) — `check-unused-code`, `check-unused-files`, `check-code-duplication`; outputs JSON/checkstyle/codeclimate
-- [remove_unused_localizations — Dart package](https://pub.dev/packages/remove_unused_localizations) — ARB unused-key detection
-- [Dart Static Analysis Customization](https://dart.dev/tools/analysis) — official `analysis_options.yaml` reference
-- [CodeHawks Severity Taxonomy](https://docs.codehawks.com/hawks-auditors/how-to-evaluate-a-finding-severity) — CRITICAL/HIGH/MEDIUM/LOW four-level standard
-- [NVD CVSS Vulnerability Metrics](https://nvd.nist.gov/vuln-metrics/cvss) — industry-standard severity framing
-- Direct codebase inspection — `/Users/xinz/Development/home-pocket-app/lib/features/family_sync/use_cases/` confirmed with direct infrastructure imports; `lib/infrastructure/security/providers.dart:96-102` confirmed `UnimplementedError`; import analysis of `lib/features/*/presentation/` confirmed infrastructure direct-import violations
+### Direct prior art (HIGH relevance)
+- [Joy Money — CAMPFIRE crowdfunding (推し活×幸福度×思い出 visualization app)](https://camp-fire.jp/projects/883660/view) — almost-identical core concept; pre-launch
+- [推しPay — Apps on Google Play](https://play.google.com/store/apps/details?id=com.nosuke.oshi_pay)
+- [推し活支出管理 — App Store JP](https://apps.apple.com/jp/app/%E6%8E%A8%E3%81%97%E6%B4%BB%E6%94%AF%E5%87%BA%E7%AE%A1%E7%90%86/id1503878877)
+- [Touch Tech 京都橘大学 — 推し活感覚で続けられる家計簿アプリ (academic-style related project)](https://www.tachibana-u.ac.jp/admission/touchtech/project10.html)
+
+### JP family-finance UX baseline
+- [共有できる家計簿アプリ 9選ランキング — マイベスト](https://my-best.com/22600)
+- [OsidOri — 共有家計簿アプリ おすすめ10選 (shared+personal split rationale)](https://osidori.co/magazine/%E5%85%B1%E6%9C%89%E3%81%A7%E3%81%8D%E3%82%8B%E5%AE%B6%E8%A8%88%E7%B0%BF%E3%82%A2%E3%83%97%E3%83%AA%E3%81%8A%E3%81%99%E3%81%99%E3%82%8110%E9%81%B8/)
+- [Zaim vs マネーフォワードME 比較 — マネーリーフ](https://www.money-leaf.net/paid-zaim-moneyforwardme-comparison/)
+- [女性が選ぶ家計簿アプリランキング — PR TIMES (満足度1位データ)](https://prtimes.jp/main/html/rd/p/000000023.000057067.html)
+
+### CN finance-app UX patterns
+- [APP+1｜八款记账App评测 — 少数派 (iCost ceremony-design pattern)](https://sspai.com/post/76557)
+- [叨叨记账APP的爆火套路 — 人人都是产品经理 (peak-moment notification design)](https://www.woshipm.com/operate/4396844.html)
+- [挑选一款简单好用的 iOS 记账 App — 知乎](https://zhuanlan.zhihu.com/p/449989651)
+
+### Mood / wellbeing dashboard prior art
+- [Daylio Journal — Mood Tracker (5-point scale, histogram, monthly line graph)](https://daylio.net/)
+- [Daylio: mood-quantification — PMC academic study](https://pmc.ncbi.nlm.nih.gov/articles/PMC5344152/)
+- [Apple Activity Rings — HIG Components](https://developers.apple.com/design/human-interface-guidelines/components/status/activity-rings/)
+- [Headspace My Progress / mood reflection feature](https://help.headspace.com/hc/en-us/articles/360048720853-What-is-the-My-Progress-Feature)
+
+### Story-mode / argmax-card pattern
+- [Spotify 2025 Wrapped UX writeup — Spotify Newsroom](https://newsroom.spotify.com/2025-12-03/2025-wrapped-user-experience/)
+- [Spotify Wrapped design aesthetic 2025 — Envato Elements](https://elements.envato.com/learn/spotify-wrapped-design-aesthetic)
+
+### Couples / shared finance, anti-leaderboard adjacent
+- [Honeydue — Couples Finance App Store listing](https://apps.apple.com/us/app/honeydue-couples-finance/id1157633945)
+- [Splitwise vs Honeydue — SmartFinancePick](https://smartfinancepick.com/splitwise-vs-honeydue-splitting-bills-for-couples/)
+- [Koody Shared Budget App — design philosophy](https://koody.com/blog/shared-budgeting-app-for-couples)
+
+### Academic / research foundations
+- [Gilovich, Kumar, Jampol — Experiential consumption and the pursuit of happiness (PDF)](https://static1.squarespace.com/static/5394dfa6e4b0d7fc44700a04/t/547d589ee4b04b0980670fee/1417500830665/Gilovich+Kumar+Jampol+(in+press)+A+Wonderful+Life+JCP.pdf)
+- [Consumers' pursuit of material and experiential purchases — Gilovich 2020 review](https://myscp.onlinelibrary.wiley.com/doi/abs/10.1002/arcp.1053)
+- [The Welfare Effects of Social Media — Allcott et al. (Stanford PDF)](https://web.stanford.edu/~gentzkow/research/facebook.pdf)
+- [Response bias in self-reports — PNAS](https://www.pnas.org/doi/10.1073/pnas.2412807122)
+
+### Happiness-app / fintech-gamification context
+- [Happy Money's Joy App — psychology-based money app](https://happymoney.com/press/happy-money-launches-joy,-the-first-money-app-powered-by-psychology)
+- [Gamification in Financial Apps — DashDevs](https://dashdevs.com/blog/gamification-in-financial-apps-unlocking-new-opportunities-for-growth-and-engagement/)
+- [YNAB — value-aligned spending philosophy](https://www.ynab.com/)
+- [Monarch Money vs YNAB — Motley Fool comparison](https://www.fool.com/money/personal-finance/monarch-money-vs-ynab/)
 
 ---
-
-*Feature research for: Audit pipeline for Flutter/Dart codebase technical-debt cleanup*
-*Researched: 2026-04-25*
+*Feature research for: Personal/family finance app — happiness-metric domain (v1.1 scope)*
+*Researched: 2026-05-01*
