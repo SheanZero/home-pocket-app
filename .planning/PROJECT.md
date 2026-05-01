@@ -8,14 +8,38 @@ The v1.0 initiative was a pure-refactor cleanup, not a feature release. It deliv
 
 The codebase is now ready for the next wave of feature modules (MOD-005 OCR, MOD-007 Analytics, MOD-013 Gamification) without the structural debt that prompted the cleanup.
 
-## Next Milestone Goals
+## Current Milestone: v1.1 幸福度指标与展示 (Happiness Metric & Display)
 
-To be defined via `/gsd-new-milestone`. Likely candidates:
-- Resume feature work paused during cleanup (OCR / analytics / gamification)
-- Backfill verification + validation bookkeeping (FUTURE-DOC-04..06)
-- Wire doc-sweep verifiers into CI (FUTURE-DOC-03)
-- Coverage threshold review (FUTURE-TOOL-03)
-- Owner-driven smoke test as v1 release gate (FUTURE-QA-01)
+**Goal:** 把"花钱的幸福"从模糊感觉变成可计算、可展示的指标——让 HomePage 和统计页围绕「悦己账本」的幸福度数据组织起来；同时为家庭模式提供反对抗、合作型的共同指标。
+
+**Core insight driving this milestone:** 花钱的本质是满足精神需求，金额 ≠ 快乐——10 元的小確幸可能比 1000 元的购物更幸福。本期需要把这个直觉变成数学载体（"幸福密度 = Σ 满足度 / Σ 金额"），并通过数据让用户回看自己的幸福结构。
+
+**Target features:**
+- **4 个个人幸福度指标**（月累计窗口）：满足度均值 / 幸福密度 Joy per ¥ / 小確幸数（满足度 ≥ 8）/ 本期最值（最高 satisfaction-per-yen 的故事化亮点）
+- **2 个家庭合作型指标**（仅 group mode 显示，反对抗）：家族小確幸累计 / 家族共同最爱（category × avg satisfaction）
+- **HomePage 重做** `SoulFullnessCard`：替换误导性的 Happiness ROI，加入 4 个体指标卡 + 家庭模式条件渲染共同指标
+- **统计页接线**：把 3 个休眠 DAO 方法（`getSoulSatisfactionOverview` / `getSatisfactionDistribution` / `getDailySatisfactionTrend`）接到 AnalyticsScreen 「悦己账本统计」子区，新增幸福密度趋势线 + 满足度分布直方图
+- **UI 文案重命名（ARB-only，ja/zh/en 三语）**：
+  - `soulLedger` 灵魂账本 → **悦己账本** / **ときめき帳** / **Joy Ledger**
+  - `survivalLedger` 生存账本 → **日常账本** / **日々の帳** / **Daily Ledger**
+  - `homeHappinessROI` "Happiness ROI" → **幸福密度** / **ハピネス密度** / **Joy / ¥**
+  - `homeSoulFullness` "魂の充実度" → **悦己充盈** / **ときめき度** / **Joy Index**
+
+**Key context & constraints (locked at milestone start):**
+- **不动 schema** —— 完全基于现有 `transactions.soul_satisfaction` (1-10) 字段；任何字段新增推迟到 v1.2+
+- **不动色调** —— survival 蓝 #5A9CC8 / soul 绿 #47B88A / primary #8AB8DA 保持
+- **不动 enum** —— `LedgerType.survival` / `LedgerType.soul` 不改；重命名仅 ARB 文案
+- **算法范围仅灵魂账本** —— DAO 须按 `ledger_type='soul'` 过滤（待 Phase 9 校验）
+- **复用现有输入** —— `SatisfactionEmojiPicker` 5 emoji + `VoiceSatisfactionEstimator` 启发式预填不动
+- **时间窗：本月累计** —— 与现有 MonthOverviewCard 一致，避免双时间轴
+- **3 个休眠 DAO 方法已存在** —— 本期工作主要是接线 + 公式 + UI，非新建数据访问层
+
+**Out of scope（v1.2+）：**
+- 新增 schema 字段（地点 / 心情标签 / 分类满足度细分）
+- 满足度回填 / 重新打分流程
+- 成员互动（点赞 / 评论 / 标记别人的灵魂记录）—— 需新表
+- 时间窗自定义（周 / 年 / 任意区间）—— v1.1 只支持月
+- 色调改动 / 视觉重构 —— 本期专注内容
 
 <details>
 <summary>v1.0 Project Description (archived)</summary>
@@ -76,9 +100,12 @@ A family accounting app users can trust with sensitive financial data — local-
 
 ### Active
 
-<!-- For next milestone (v1.1). To be populated via `/gsd-new-milestone`. -->
+<!-- v1.1 milestone: Happiness Metric & Display. Detailed REQ-IDs in REQUIREMENTS.md. -->
 
-- (none yet — run `/gsd-new-milestone` to define v1.1 requirements)
+- [ ] **Happiness metric domain** — 4 personal indicators (Avg Satisfaction / Joy per ¥ / Highlights count / Best Joy per ¥) + 2 family-cooperative indicators (Family Highlights Sum / Shared Joy Insight); month-to-date window; soul ledger only
+- [ ] **HomePage SoulFullnessCard redesign** — replace `Happiness ROI` (misleading: was budget-share, not joy density); render new metric tiles + a story-mode "Best Joy per ¥" card; family metrics conditionally shown in group mode
+- [ ] **Statistics surface (Analytics screen)** — wire dormant `getSoulSatisfactionOverview` / `getSatisfactionDistribution` / `getDailySatisfactionTrend` DAO methods through use case → provider → widgets; add Joy-per-¥ trend line + satisfaction histogram
+- [ ] **UI rename pass (ARB-only, ja/zh/en)** — `soulLedger` → 悦己/ときめき/Joy; `survivalLedger` → 日常/日々/Daily; `homeHappinessROI` → 幸福密度/ハピネス密度/Joy per ¥; `homeSoulFullness` → 悦己充盈/ときめき度/Joy Index. No enum, no theme color changes.
 
 ### Out of Scope
 
@@ -159,4 +186,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-29 after v1.0 milestone (Codebase Cleanup Initiative) completion — see `.planning/MILESTONES.md` and `.planning/milestones/v1.0-ROADMAP.md`*
+*Last updated: 2026-05-01 after v1.1 milestone start (Happiness Metric & Display) — see `.planning/REQUIREMENTS.md` and `.planning/ROADMAP.md` once roadmap is generated*
