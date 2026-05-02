@@ -14,20 +14,30 @@ Requirements for the v1.1 release. Each maps to roadmap phases (9-12) defined in
 Foundation: 4 personal indicators + supporting infrastructure (filters, empty-state handling, gamification ban).
 
 - [ ] **HAPPY-01**: Compute **Avg Satisfaction** over month-to-date as the mean of soul-ledger transaction satisfaction values
-- [ ] **HAPPY-02**: Compute **Joy per ¥** as `Σ satisfaction / Σ amount` over month-to-date soul-ledger transactions; display normalized to "per ¥1,000" for legibility
-- [ ] **HAPPY-03**: Compute **Highlights count** as the count of soul-ledger transactions where `satisfaction ≥ 8` over month-to-date
-- [ ] **HAPPY-04**: Compute **Best Joy per ¥** via SQL `argmax(satisfaction / amount)` with `WHERE amount >= 500 AND ledger_type = 'soul'` (¥500 amount floor prevents ¥10-item domination); return single transaction reference for story-card rendering
+- [ ] **HAPPY-02**: Compute **Joy per ¥** density via Prospect Theory Value Function: `density = Σ (soul_satisfaction × (amount / base)^0.88) / Σ amount`; α=0.88 (Kahneman & Tversky 1979 empirical fit); base by currency (JPY=500 / CNY=25 / USD=5; fallback=500); folded in Dart layer (DAO returns row-wise tuples); display formatted by `joy_density_formatter.dart`. See ADR-013.
+- [ ] **HAPPY-03**: Compute **Highlights count** as the count of soul-ledger transactions where `satisfaction ≥ 6` ("Good or better") over month-to-date. Threshold matches the post-rename emoji semantic (emoji 3 writes 6).
+- [ ] **HAPPY-04**: Compute **Top Joy / 本月最值** via SQL `ORDER BY soul_satisfaction DESC, amount DESC, timestamp DESC LIMIT 1` over month-to-date soul-ledger transactions; **former ¥500 minimum removed** (amount-DESC tiebreak handles small-amount over-rewarding); returns single transaction reference for story-card rendering. See ADR-013 implementation rationale + the user intent quote in CONTEXT.md `<specifics>`: "虽然小东西会让人开心，但也要鼓励为了自己的开心花更多的钱".
 - [ ] **HAPPY-05**: All happiness aggregators consume a centralized **`_soulOnly()` SQL fragment** that filters `WHERE ledger_type = 'soul'`; survival rows must never contaminate metrics regardless of the `soul_satisfaction = 5` default
 - [ ] **HAPPY-06**: Sealed **`MetricResult`** type with `empty` / `thinSample` / `value` variants handles n=0/1/2 cases gracefully; UI never renders raw NaN, infinity, or "0%" placeholders for empty windows
 - [ ] **HAPPY-07**: Architecture decision record **`ADR-XXX_No_Gamification_v1_1.md`** ratifies "no streaks / no badges / no daily targets in v1.1" as a Goodhart's-Law defense; this rule is binding through milestone close
-- [ ] **HAPPY-08**: 5-emoji ↔ 1-10 satisfaction mapping (1-2 / 3-4 / 5-6 / 7-8 / 9-10 buckets) pinned by unit tests so refactors cannot silently drift the bucketing
-- [ ] **HAPPY-09**: Voice satisfaction estimator's +0.3 upward bias quantified by a regression test; if `transactions.entry_source` column exists (verify Phase 9.0), expose a manual-only sub-metric variant for analytics
+- [ ] **HAPPY-08**: 5-emoji ↔ value mapping pinned by unit tests under the unipolar positive satisfaction semantic so refactors cannot silently drift the bucketing.
+
+| Picker emoji | DB value (post-v16) | Phase 9 label (current ARB) | Phase 12 label (post-rename) |
+|--------------|---------------------|------------------------------|------------------------------|
+| 1 | 2 | Bad / 差 / 悪い | Neutral / 中性 / 中性 |
+| 2 | 4 | Slightly Bad / 较差 / やや悪い | OK / OK / OK |
+| 3 | 6 | Normal / 一般 / 普通 | Good / 不错 / 不錯 |
+| 4 | 8 | Good / 好 / 良い | Great / 满足 / 満足 |
+| 5 | 10 | Very Good / 很好 / とても良い | Amazing / 最爱 / 最愛 |
+
+Default value (no rating): **2** (was 5; bumped in schema v16 per ADR-014).
+Voice estimator output range remains [3, 10] until v1.2 realignment (per ADR-014 / D-12).
 
 ### FAMILY — Family Cooperative Indicators
 
 Two metrics that surface in family/group mode only. **All anti-comparison constraints are REQ-level**, not implementation detail.
 
-- [ ] **FAMILY-01**: **Family Highlights Sum** = aggregate count of `satisfaction ≥ 8` soul-ledger transactions across all family shadow books over month-to-date; **return type is `int` (single aggregate)**; per-member breakdown (e.g. `Map<MemberId, int>`) is forbidden by contract — the use case must not expose the data shape that enables leaderboards
+- [ ] **FAMILY-01**: **Family Highlights Sum** = aggregate count of `satisfaction ≥ 6` soul-ledger transactions across all family shadow books over month-to-date; **return type is `int` (single aggregate)**; per-member breakdown (e.g. `Map<MemberId, int>`) is forbidden by contract — the use case must not expose the data shape that enables leaderboards. (Threshold matches HAPPY-03.)
 - [ ] **FAMILY-02**: **Shared Joy Insight** identifies the category with the highest avg satisfaction across the family's soul-ledger transactions over month-to-date; **min-N=3 transactions per category** guard prevents single-data-point categories from being crowned; returns `(categoryId, avgSatisfaction, totalCount)` only — no per-member contributions
 - [ ] **FAMILY-03**: Family card consent gate — if any family member has not opted into shared analytics, the family card collapses entirely (not "shows partial data")
 
@@ -65,7 +75,7 @@ ARB-only changes (values, NOT keys). 三语 ja/zh/en. Native-speaker register re
 ### Personal extension
 - **HAPPY-V2-01**: Per-category satisfaction breakdown view (which categories bring most joy?)
 - **HAPPY-V2-02**: Custom time windows (week / quarter / year / arbitrary range) for happiness metrics
-- **HAPPY-V2-03**: Manual-only sub-metric variant if voice-bias proves problematic (depends on Phase 9.0 schema check)
+- **HAPPY-V2-03**: Manual-only sub-metric variant if voice-bias proves problematic. Depends on adding `entry_source` column in a future schema migration (Phase 9 verified the column does NOT currently exist; HAPPY-09 was folded into this entry per CONTEXT.md D-18).
 - **STATSUI-V2-01**: Soul-vs-Survival happiness comparison surface (with anti-toxicity framing)
 
 ### Family extension
@@ -109,7 +119,6 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HAPPY-06 | Phase 9 | Pending |
 | HAPPY-07 | Phase 9 | Pending |
 | HAPPY-08 | Phase 9 | Pending |
-| HAPPY-09 | Phase 9 | Pending |
 | FAMILY-01 | Phase 9 | Pending |
 | FAMILY-02 | Phase 9 | Pending |
 | FAMILY-03 | Phase 10 | Pending |
@@ -129,10 +138,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RENAME-06 | Phase 12 | Pending |
 
 **Coverage:**
-- v1.1 requirements: 26 total
-- Mapped to phases: 26 (provisional — confirmed during roadmap creation)
+- v1.1 requirements: 25 total
+- Mapped to phases: 25 (provisional — confirmed during roadmap creation)
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-05-01*
-*Last updated: 2026-05-01 after milestone v1.1 start (research-informed)*
+*Last updated: 2026-05-01 after Phase 9 spec amendments (HAPPY-02/03/04/08 + HAPPY-09 removal + FAMILY-01 — see ADR-012/013/014)*
