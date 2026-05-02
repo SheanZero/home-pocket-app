@@ -28,7 +28,7 @@ _Transaction _$TransactionFromJson(Map<String, dynamic> json) => _Transaction(
   isPrivate: json['isPrivate'] as bool? ?? false,
   isSynced: json['isSynced'] as bool? ?? false,
   isDeleted: json['isDeleted'] as bool? ?? false,
-  soulSatisfaction: (json['soulSatisfaction'] as num?)?.toInt() ?? 5,
+  soulSatisfaction: (json['soulSatisfaction'] as num?)?.toInt() ?? 2,
 );
 
 Map<String, dynamic> _$TransactionToJson(_Transaction instance) =>

@@ -71,7 +71,7 @@ class _TransactionConfirmScreenState
   String? _initialCategoryId;
 
   LedgerType _ledgerType = LedgerType.survival;
-  int _soulSatisfaction = 5;
+  int _soulSatisfaction = 2;
   bool _isSubmitting = false;
 
   @override

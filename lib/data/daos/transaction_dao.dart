@@ -26,7 +26,7 @@ class TransactionDao {
     String? prevHash,
     bool isPrivate = false,
     bool isSynced = false,
-    int soulSatisfaction = 5,
+    int soulSatisfaction = 2,
   }) async {
     await _db
         .into(_db.transactions)
@@ -130,7 +130,7 @@ class TransactionDao {
     String? prevHash,
     bool isPrivate = false,
     bool isSynced = false,
-    int soulSatisfaction = 5,
+    int soulSatisfaction = 2,
     DateTime? updatedAt,
   }) async {
     await (_db.update(_db.transactions)..where((t) => t.id.equals(id))).write(

@@ -78,6 +78,23 @@ void main() {
       expect(restored.metadata?['sourceBookId'], 'book-1');
     });
 
+    test('fromSyncMap defaults missing soulSatisfaction to 2', () {
+      final map = TransactionSyncMapper.toSyncMap(
+        sampleTransaction,
+        sourceBookId: 'book-1',
+        sourceBookName: 'Main Book',
+        sourceBookType: 'remote_book:book-1',
+      )..remove('soulSatisfaction');
+
+      final restored = TransactionSyncMapper.fromSyncMap(
+        map,
+        bookId: 'shadow-book-1',
+        deviceId: 'partner-device',
+      );
+
+      expect(restored.soulSatisfaction, 2);
+    });
+
     test('toCreateOperation wraps sync payload', () {
       final op = TransactionSyncMapper.toCreateOperation(
         sampleTransaction,

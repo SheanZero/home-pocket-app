@@ -284,6 +284,47 @@ void main() {
       expect(result.data!.ledgerType, LedgerType.soul);
     });
 
+    test('uses default soul satisfaction 2 for soul transactions', () async {
+      when(
+        () => mockClassificationService.classify(
+          categoryId: any(named: 'categoryId'),
+          merchant: any(named: 'merchant'),
+          note: any(named: 'note'),
+        ),
+      ).thenAnswer(
+        (_) async => const ClassificationResult(
+          ledgerType: LedgerType.soul,
+          confidence: 1.0,
+          method: ClassificationMethod.rule,
+          reason: 'Entertainment category',
+        ),
+      );
+      when(
+        () => mockCategoryRepo.findById('cat_food'),
+      ).thenAnswer((_) async => testCategory);
+      when(
+        () => mockHashChainService.calculateTransactionHash(
+          transactionId: any(named: 'transactionId'),
+          amount: any(named: 'amount'),
+          timestamp: any(named: 'timestamp'),
+          previousHash: any(named: 'previousHash'),
+        ),
+      ).thenReturn('hash_soul_default');
+      when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
+
+      final result = await useCase.execute(
+        CreateTransactionParams(
+          bookId: 'book_001',
+          amount: 2000,
+          type: TransactionType.expense,
+          categoryId: 'cat_food',
+        ),
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(result.data!.soulSatisfaction, 2);
+    });
+
     test('passes merchant and note to classification service', () async {
       when(
         () => mockCategoryRepo.findById('cat_food'),

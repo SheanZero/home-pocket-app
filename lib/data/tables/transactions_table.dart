@@ -31,8 +31,8 @@ class Transactions extends Table {
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
 
-  // Soul ledger satisfaction (1-10, default 5)
-  IntColumn get soulSatisfaction => integer().withDefault(const Constant(5))();
+  // Soul ledger satisfaction (1-10, default 2; D-10 unipolar positive scale)
+  IntColumn get soulSatisfaction => integer().withDefault(const Constant(2))();
 
   @override
   Set<Column> get primaryKey => {id};

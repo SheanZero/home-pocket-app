@@ -86,6 +86,7 @@ Future<void> _insertTransaction(
 }
 
 Future<TransactionRow> _findTransaction(AppDatabase db, String id) {
-  return (db.select(db.transactions)..where((row) => row.id.equals(id)))
-      .getSingle();
+  return (db.select(
+    db.transactions,
+  )..where((row) => row.id.equals(id))).getSingle();
 }

@@ -31,7 +31,7 @@ mixin _$Transaction {
   DateTime? get updatedAt; // Flags
   bool get isPrivate;
   bool get isSynced;
-  bool get isDeleted; // Soul ledger satisfaction score (1-10, default 5)
+  bool get isDeleted; // Soul ledger satisfaction score (1-10, default 2)
   int get soulSatisfaction;
 
   /// Create a copy of Transaction
@@ -577,7 +577,7 @@ class _Transaction implements Transaction {
     this.isPrivate = false,
     this.isSynced = false,
     this.isDeleted = false,
-    this.soulSatisfaction = 5,
+    this.soulSatisfaction = 2,
   }) : _metadata = metadata;
   factory _Transaction.fromJson(Map<String, dynamic> json) =>
       _$TransactionFromJson(json);
@@ -635,7 +635,7 @@ class _Transaction implements Transaction {
   @override
   @JsonKey()
   final bool isDeleted;
-  // Soul ledger satisfaction score (1-10, default 5)
+  // Soul ledger satisfaction score (1-10, default 2)
   @override
   @JsonKey()
   final int soulSatisfaction;

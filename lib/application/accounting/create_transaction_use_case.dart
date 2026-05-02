@@ -20,7 +20,7 @@ class CreateTransactionParams {
   final DateTime? timestamp;
   final String? note;
   final String? merchant;
-  final int? soulSatisfaction; // null = use default 5
+  final int? soulSatisfaction; // null = use default 2
   final LedgerType? ledgerType; // null = auto-classify
 
   const CreateTransactionParams({
@@ -109,7 +109,7 @@ class CreateTransactionUseCase {
     // 4.5 Resolve & validate soul satisfaction
     final int soulSatisfaction;
     if (resolvedLedgerType == LedgerType.soul) {
-      soulSatisfaction = params.soulSatisfaction ?? 5;
+      soulSatisfaction = params.soulSatisfaction ?? 2;
       if (soulSatisfaction < 1 || soulSatisfaction > 10) {
         return Result.error(
           'soulSatisfaction must be between 1 and 10, got $soulSatisfaction',
@@ -117,7 +117,7 @@ class CreateTransactionUseCase {
       }
     } else {
       // Non-soul transactions always get default
-      soulSatisfaction = 5;
+      soulSatisfaction = 2;
     }
 
     // 5. Get previous hash for chain

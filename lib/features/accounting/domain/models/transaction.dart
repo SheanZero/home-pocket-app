@@ -38,8 +38,8 @@ abstract class Transaction with _$Transaction {
     @Default(false) bool isSynced,
     @Default(false) bool isDeleted,
 
-    // Soul ledger satisfaction score (1-10, default 5)
-    @Default(5) int soulSatisfaction,
+    // Soul ledger satisfaction score (1-10, default 2)
+    @Default(2) int soulSatisfaction,
   }) = _Transaction;
 
   factory Transaction.fromJson(Map<String, dynamic> json) =>

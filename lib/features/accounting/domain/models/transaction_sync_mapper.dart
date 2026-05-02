@@ -55,7 +55,7 @@ class TransactionSyncMapper {
       createdAt: DateTime.parse(data['createdAt'] as String),
       isPrivate: data['isPrivate'] as bool? ?? false,
       isSynced: true,
-      soulSatisfaction: data['soulSatisfaction'] as int? ?? 5,
+      soulSatisfaction: data['soulSatisfaction'] as int? ?? 2,
     );
   }
 

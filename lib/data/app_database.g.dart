@@ -4994,7 +4994,7 @@ class $TransactionsTable extends Transactions
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultValue: const Constant(5),
+    defaultValue: const Constant(2),
   );
   @override
   List<GeneratedColumn> get $columns => [
