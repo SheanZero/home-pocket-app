@@ -1,4 +1,5 @@
 import '../../features/analytics/domain/models/analytics_aggregate.dart';
+import '../../features/analytics/domain/models/best_joy_moment_row.dart';
 import '../../features/analytics/domain/repositories/analytics_repository.dart';
 import '../daos/analytics_dao.dart';
 
@@ -90,5 +91,81 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
           ),
         )
         .toList();
+  }
+
+  @override
+  Future<SoulSatisfactionOverview> getSoulSatisfactionOverview({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final result = await _dao.getSoulSatisfactionOverview(
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+    );
+
+    return SoulSatisfactionOverview(
+      avgSatisfaction: result.avgSatisfaction,
+      count: result.count,
+    );
+  }
+
+  @override
+  Future<List<SatisfactionScoreBucket>> getSatisfactionDistribution({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final results = await _dao.getSatisfactionDistribution(
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+    );
+
+    return results
+        .map(
+          (row) => SatisfactionScoreBucket(score: row.score, count: row.count),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<SoulRowSample>> getSoulRowsForPtvf({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    return _dao.getSoulRowsForPtvf(
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+    );
+  }
+
+  @override
+  Future<BestJoyMomentRow?> getBestJoyMoment({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    return _dao.getBestJoyMoment(
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+    );
+  }
+
+  @override
+  Future<SharedJoyCategoryAggregate?> getSharedJoyCategoryInsight({
+    required List<String> bookIds,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    return _dao.getSharedJoyCategoryInsight(
+      bookIds: bookIds,
+      startDate: startDate,
+      endDate: endDate,
+    );
   }
 }
