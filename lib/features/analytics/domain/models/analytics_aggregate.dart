@@ -31,3 +31,43 @@ class LedgerTotal {
   final String ledgerType;
   final int totalAmount;
 }
+
+/// HAPPY-01 overview row - average + count over MTD soul ledger.
+class SoulSatisfactionOverview {
+  const SoulSatisfactionOverview({
+    required this.avgSatisfaction,
+    required this.count,
+  });
+
+  final double avgSatisfaction;
+  final int count;
+}
+
+/// HAPPY-02 row-wise PTVF input row.
+class SoulRowSample {
+  const SoulRowSample({required this.amount, required this.soulSatisfaction});
+
+  final int amount;
+  final int soulSatisfaction;
+}
+
+/// HAPPY-03 distribution bucket - score to count.
+class SatisfactionScoreBucket {
+  const SatisfactionScoreBucket({required this.score, required this.count});
+
+  final int score;
+  final int count;
+}
+
+/// FAMILY-02 category aggregate - anti-leaderboard tuple.
+class SharedJoyCategoryAggregate {
+  const SharedJoyCategoryAggregate({
+    required this.categoryId,
+    required this.avgSatisfaction,
+    required this.totalCount,
+  });
+
+  final String categoryId;
+  final double avgSatisfaction;
+  final int totalCount;
+}
