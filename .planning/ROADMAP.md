@@ -58,8 +58,8 @@ Phase numbering continues from Phase 9 (no reset).
 
 Plans:
 **Wave 1**
-- [ ] 09-01-PLAN.md — Schema migration v15→v16 (default soul_satisfaction 5→2; 5 code-side defaults aligned)
-- [ ] 09-02-PLAN.md — Domain models (sealed MetricResult<T>, HappinessReport, FamilyHappiness, BestJoyMomentRow, SharedJoyInsight)
+- [x] 09-01-PLAN.md — Schema migration v15→v16 (default soul_satisfaction 5→2; 5 code-side defaults aligned)
+- [x] 09-02-PLAN.md — Domain models (sealed MetricResult<T>, HappinessReport, FamilyHappiness, BestJoyMomentRow, SharedJoyInsight)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 09-03-PLAN.md — DAO additions (_soulExpenseFilter const, getBestJoyMoment, getSoulRowsForPtvf, getSharedJoyCategoryInsight)
