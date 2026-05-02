@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart';
 
+import '../../features/analytics/domain/models/analytics_aggregate.dart';
+import '../../features/analytics/domain/models/best_joy_moment_row.dart';
 import '../app_database.dart';
 
 /// Aggregate query result for monthly totals.
@@ -87,6 +89,11 @@ class AnalyticsDao {
   AnalyticsDao(this._db);
 
   final AppDatabase _db;
+
+  /// D-01 / HAPPY-05: ledger + lifecycle filter ONLY. NO satisfaction predicate.
+  /// Single source of truth: every soul aggregator MUST compose via interpolation.
+  static const String _soulExpenseFilter =
+      "ledger_type = 'soul' AND type = 'expense' AND is_deleted = 0";
 
   /// Get total income and expenses for a given month.
   Future<MonthlyTotalsResult> getMonthlyTotals({
@@ -236,8 +243,7 @@ class AnalyticsDao {
         .customSelect(
           'SELECT AVG(soul_satisfaction) as avg_sat, COUNT(*) as cnt '
           'FROM transactions '
-          'WHERE book_id = ? AND ledger_type = \'soul\' AND type = \'expense\' '
-          'AND is_deleted = 0 '
+          'WHERE book_id = ? AND $_soulExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ?',
           variables: [
             Variable.withString(bookId),
@@ -268,8 +274,7 @@ class AnalyticsDao {
         .customSelect(
           'SELECT soul_satisfaction as score, COUNT(*) as cnt '
           'FROM transactions '
-          'WHERE book_id = ? AND ledger_type = \'soul\' AND type = \'expense\' '
-          'AND is_deleted = 0 '
+          'WHERE book_id = ? AND $_soulExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ? '
           'GROUP BY soul_satisfaction '
           'ORDER BY soul_satisfaction ASC',
@@ -302,8 +307,7 @@ class AnalyticsDao {
           'SELECT DATE(timestamp, \'unixepoch\', \'localtime\') as day, '
           'AVG(soul_satisfaction) as avg_sat, COUNT(*) as cnt '
           'FROM transactions '
-          'WHERE book_id = ? AND ledger_type = \'soul\' AND type = \'expense\' '
-          'AND is_deleted = 0 '
+          'WHERE book_id = ? AND $_soulExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ? '
           'GROUP BY day '
           'ORDER BY day ASC',
@@ -324,5 +328,111 @@ class AnalyticsDao {
           ),
         )
         .toList();
+  }
+
+  /// HAPPY-04 / D-06: pure sat-sort argmax, amount DESC tiebreak, no JPY 500 floor.
+  /// Returns null when no soul tx exists in the window.
+  Future<BestJoyMomentRow?> getBestJoyMoment({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final results = await _db
+        .customSelect(
+          'SELECT id, amount, soul_satisfaction, category_id, timestamp '
+          'FROM transactions '
+          'WHERE book_id = ? AND $_soulExpenseFilter '
+          'AND timestamp >= ? AND timestamp <= ? '
+          'ORDER BY soul_satisfaction DESC, amount DESC, timestamp DESC '
+          'LIMIT 1',
+          variables: [
+            Variable.withString(bookId),
+            Variable.withDateTime(startDate),
+            Variable.withDateTime(endDate),
+          ],
+        )
+        .get();
+
+    if (results.isEmpty) return null;
+
+    final row = results.first;
+    return BestJoyMomentRow(
+      transactionId: row.read<String>('id'),
+      amount: row.read<int>('amount'),
+      soulSatisfaction: row.read<int>('soul_satisfaction'),
+      categoryId: row.read<String>('category_id'),
+      timestamp: row.read<DateTime>('timestamp'),
+    );
+  }
+
+  /// HAPPY-02 / D-04: row-wise (amount, sat) pull for Dart-layer PTVF fold.
+  /// Performance trade-off accepted vs SUM/GROUP BY (D-04, ADR-013); typical
+  /// monthly soul tx count 10-100 per book: negligible row volume.
+  Future<List<SoulRowSample>> getSoulRowsForPtvf({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final results = await _db
+        .customSelect(
+          'SELECT amount, soul_satisfaction '
+          'FROM transactions '
+          'WHERE book_id = ? AND $_soulExpenseFilter '
+          'AND timestamp >= ? AND timestamp <= ?',
+          variables: [
+            Variable.withString(bookId),
+            Variable.withDateTime(startDate),
+            Variable.withDateTime(endDate),
+          ],
+        )
+        .get();
+
+    return results
+        .map(
+          (row) => SoulRowSample(
+            amount: row.read<int>('amount'),
+            soulSatisfaction: row.read<int>('soul_satisfaction'),
+          ),
+        )
+        .toList();
+  }
+
+  /// FAMILY-02 / D-08: category argmax across multiple books with min-N=3 guard.
+  /// Tie-break: AVG DESC -> COUNT DESC -> category_id ASC.
+  /// Returns null when bookIds empty OR no category meets min-N=3.
+  Future<SharedJoyCategoryAggregate?> getSharedJoyCategoryInsight({
+    required List<String> bookIds,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    if (bookIds.isEmpty) return null;
+
+    final placeholders = List.filled(bookIds.length, '?').join(', ');
+    final results = await _db
+        .customSelect(
+          'SELECT category_id, AVG(soul_satisfaction) as avg_sat, COUNT(*) as cnt '
+          'FROM transactions '
+          'WHERE book_id IN ($placeholders) AND $_soulExpenseFilter '
+          'AND timestamp >= ? AND timestamp <= ? '
+          'GROUP BY category_id '
+          'HAVING COUNT(*) >= 3 '
+          'ORDER BY avg_sat DESC, cnt DESC, category_id ASC '
+          'LIMIT 1',
+          variables: [
+            ...bookIds.map(Variable.withString),
+            Variable.withDateTime(startDate),
+            Variable.withDateTime(endDate),
+          ],
+        )
+        .get();
+
+    if (results.isEmpty) return null;
+
+    final row = results.first;
+    return SharedJoyCategoryAggregate(
+      categoryId: row.read<String>('category_id'),
+      avgSatisfaction: row.read<double>('avg_sat'),
+      totalCount: row.read<int>('cnt'),
+    );
   }
 }
