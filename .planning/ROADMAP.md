@@ -27,7 +27,7 @@
 
 Phase numbering continues from Phase 9 (no reset).
 
-- [ ] **Phase 9: Happiness Domain & Formula Layer** — Lock formulas, contracts, soul-only filter, Top Joy ordering, sealed `MetricResult`, family aggregate-only return type, no-gamification ADR (linchpin)
+- [x] **Phase 9: Happiness Domain & Formula Layer** — Lock formulas, contracts, soul-only filter, Top Joy ordering, sealed `MetricResult`, family aggregate-only return type, no-gamification ADR (linchpin) — completed 2026-05-02
 - [ ] **Phase 10: HomePage SoulFullnessCard Redesign** — Replace misleading `Happiness ROI`; render 4 personal metric tiles + Best Joy story card + family card (group-mode + consent); delete inline helpers
 - [ ] **Phase 11: Statistics Surface for 悦己账本** — Wire 3 dormant DAO methods + new Best Joy query through to AnalyticsScreen sub-region; Joy-per-¥ trend line + satisfaction histogram (with `5`-bar annotation); footprint-audit doc first
 - [ ] **Phase 12: UI Copy Rename Pass (ARB values, ja/zh/en)** — Values-only rename of `soulLedger` / `survivalLedger` / `homeHappinessROI` / `homeSoulFullness`; lexical-hierarchy ADR; native-speaker register review
@@ -57,7 +57,7 @@ Phase numbering continues from Phase 9 (no reset).
   4. `FamilyHighlightsSum` use case signature returns `int` (compile-time enforced); `SharedJoyInsight` returns `(categoryId, avgSatisfaction, totalCount)` only — no per-member fields
   5. `ADR-XXX_No_Gamification_v1_1.md` and `ADR-XXX_Lexical_Hierarchy_v1_1.md` (the latter drafted, ratified in Phase 12) are committed; 5-emoji↔1-10 mapping test passes for the post-v16 default-2 semantic (voice-bias regression test removed per D-18 — moved to v2 HAPPY-V2-03).
   6. Schema migration v15→v16 round-trip test green (default soul_satisfaction reads back as 2 on fresh inserts; CHECK BETWEEN 1 AND 10 survives).
-**Plans:** 13 plans across 6 waves
+**Plans:** 14 plans across 7 waves
 
 Plans:
 **Wave 1**
@@ -84,6 +84,9 @@ Plans:
 
 **Wave 6** *(blocked on Wave 5 completion)*
 - [x] 09-13-PLAN.md — Spec amendments (REQUIREMENTS.md + ROADMAP.md edits per D-22)
+
+**Wave 7** *(gap closure after verification)*
+- [x] 09-14-PLAN.md — HAPPY-08 satisfaction picker mapping test closure (`face_0..face_4` → `[2, 4, 6, 8, 10]`)
 
 ### Phase 10: HomePage SoulFullnessCard Redesign
 **Goal**: Replace the misleading `Happiness ROI` card on HomePage with a redesigned `SoulFullnessCard` that renders the 4 personal happiness metrics + a story-mode Best Joy card, with the family card conditionally shown only in group mode + consent.

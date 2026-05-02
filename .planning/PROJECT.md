@@ -8,6 +8,8 @@ The v1.0 initiative was a pure-refactor cleanup, not a feature release. It deliv
 
 The codebase is now ready for the next wave of feature modules (MOD-005 OCR, MOD-007 Analytics, MOD-013 Gamification) without the structural debt that prompted the cleanup.
 
+**v1.1 progress:** Phase 09 Happiness Domain & Formula Layer completed on 2026-05-02. The happiness metric formulas, domain contracts, soul-only analytics filter, default-2 satisfaction semantics, family aggregate-only contract, no-gamification ADRs, and HAPPY-08 picker mapping test contract are validated. Phase 10 is next: HomePage `SoulFullnessCard` redesign.
+
 ## Current Milestone: v1.1 幸福度指标与展示 (Happiness Metric & Display)
 
 **Goal:** 把"花钱的幸福"从模糊感觉变成可计算、可展示的指标——让 HomePage 和统计页围绕「悦己账本」的幸福度数据组织起来；同时为家庭模式提供反对抗、合作型的共同指标。
@@ -97,12 +99,13 @@ A family accounting app users can trust with sensitive financial data — local-
 - ✓ All ARCH/MOD/ADR docs and CLAUDE.md aligned with post-refactor codebase; ADR-011 records cleanup outcome — v1.0
 - ✓ 4 permanent CI guardrails (`import_guard`, `riverpod_lint`/`custom_lint`, `coverde` per-file ≥70%, `sqlite3_flutter_libs` rejection) + global `very_good_coverage@v2` ≥70% + `build_runner` clean-diff — v1.0
 - ✓ Mocktail big-bang migration (13 fixtures); mockito removed — v1.0 (HIGH-07)
+- ✓ v1.1 happiness metric domain contracts validated in Phase 09: personal metric formulas, family aggregate-only return type, sealed `MetricResult`, soul-only filter, v16 default-2 satisfaction semantics, no-gamification ADRs, and full HAPPY-08 picker mapping test coverage.
 
 ### Active
 
 <!-- v1.1 milestone: Happiness Metric & Display. Detailed REQ-IDs in REQUIREMENTS.md. -->
 
-- [ ] **Happiness metric domain** — 4 personal indicators (Avg Satisfaction / Joy per ¥ / Highlights count / Best Joy per ¥) + 2 family-cooperative indicators (Family Highlights Sum / Shared Joy Insight); month-to-date window; soul ledger only
+- [x] **Happiness metric domain** — 4 personal indicators (Avg Satisfaction / Joy per ¥ / Highlights count / Best Joy per ¥) + 2 family-cooperative indicators (Family Highlights Sum / Shared Joy Insight); month-to-date window; soul ledger only. Validated in Phase 09.
 - [ ] **HomePage SoulFullnessCard redesign** — replace `Happiness ROI` (misleading: was budget-share, not joy density); render new metric tiles + a story-mode "Best Joy per ¥" card; family metrics conditionally shown in group mode
 - [ ] **Statistics surface (Analytics screen)** — wire dormant `getSoulSatisfactionOverview` / `getSatisfactionDistribution` / `getDailySatisfactionTrend` DAO methods through use case → provider → widgets; add Joy-per-¥ trend line + satisfaction histogram
 - [ ] **UI rename pass (ARB-only, ja/zh/en)** — `soulLedger` → 悦己/ときめき/Joy; `survivalLedger` → 日常/日々/Daily; `homeHappinessROI` → 幸福密度/ハピネス密度/Joy per ¥; `homeSoulFullness` → 悦己充盈/ときめき度/Joy Index. No enum, no theme color changes.
@@ -186,4 +189,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-01 after v1.1 milestone start (Happiness Metric & Display) — see `.planning/REQUIREMENTS.md` and `.planning/ROADMAP.md` once roadmap is generated*
+*Last updated: 2026-05-02 after Phase 09 completion (Happiness Domain & Formula Layer) — see `.planning/REQUIREMENTS.md` and `.planning/ROADMAP.md` for traceability*
