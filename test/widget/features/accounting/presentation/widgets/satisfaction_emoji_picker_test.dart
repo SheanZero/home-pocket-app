@@ -53,6 +53,22 @@ void main() {
       expect(newValue, 10);
     });
 
+    testWidgets('pins all five face values to the v1.1 unipolar scale', (
+      tester,
+    ) async {
+      final selectedValues = <int>[];
+
+      await tester.pumpWidget(
+        buildTestWidget(value: 2, onChanged: selectedValues.add),
+      );
+
+      for (var i = 0; i < 5; i++) {
+        await tester.tap(find.byKey(ValueKey('face_$i')));
+      }
+
+      expect(selectedValues, [2, 4, 6, 8, 10]);
+    });
+
     testWidgets('shows header with satisfaction label text', (tester) async {
       await tester.pumpWidget(buildTestWidget(value: 7, onChanged: (_) {}));
 
