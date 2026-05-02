@@ -71,22 +71,25 @@ void main() {
       );
     });
 
-    test('familyHappinessProvider short-circuits when no group is active', () async {
-      when(
-        () => groupRepository.watchActiveGroup(),
-      ).thenAnswer((_) => Stream.value(null));
-      final container = makeContainer();
+    test(
+      'familyHappinessProvider short-circuits when no group is active',
+      () async {
+        when(
+          () => groupRepository.watchActiveGroup(),
+        ).thenAnswer((_) => Stream.value(null));
+        final container = makeContainer();
 
-      final result = await container.read(
-        familyHappinessProvider(year: 2026, month: 3).future,
-      );
+        final result = await container.read(
+          familyHappinessProvider(year: 2026, month: 3).future,
+        );
 
-      expect(result.totalGroupSoulTx, 0);
-      expect(result.familyHighlightsSum, isA<Empty<int>>());
-      expect(result.sharedJoyInsight, isA<Empty>());
-      expect(result.medianSatisfaction, isA<Empty<double>>());
-      verifyZeroInteractions(analyticsRepository);
-    });
+        expect(result.totalGroupSoulTx, 0);
+        expect(result.familyHighlightsSum, isA<Empty<int>>());
+        expect(result.sharedJoyInsight, isA<Empty>());
+        expect(result.medianSatisfaction, isA<Empty<double>>());
+        verifyZeroInteractions(analyticsRepository);
+      },
+    );
 
     test(
       'familyHappinessProvider short-circuits when shadow books are empty',
