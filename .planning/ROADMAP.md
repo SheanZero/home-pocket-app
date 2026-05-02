@@ -67,9 +67,9 @@ Plans:
 - [x] 09-09-PLAN.md — joy_density_formatter.dart (PTVF base + display unit maps; locale-aware formatting)
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 09-05-PLAN.md — GetHappinessReportUseCase (HAPPY-01..04 with PTVF α=0.88 + median)
-- [ ] 09-06-PLAN.md — GetBestJoyMomentUseCase (standalone HAPPY-04 entry point)
-- [ ] 09-07-PLAN.md — GetFamilyHappinessUseCase (FAMILY-01 int aggregate + FAMILY-02 3-tuple; anti-leaderboard contract)
+- [x] 09-05-PLAN.md — GetHappinessReportUseCase (HAPPY-01..04 with PTVF α=0.88 + median)
+- [x] 09-06-PLAN.md — GetBestJoyMomentUseCase (standalone HAPPY-04 entry point)
+- [x] 09-07-PLAN.md — GetFamilyHappinessUseCase (FAMILY-01 int aggregate + FAMILY-02 3-tuple; anti-leaderboard contract)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 09-08-PLAN.md — Riverpod providers (3 use case providers + state_happiness.dart consumer-facing async providers)
