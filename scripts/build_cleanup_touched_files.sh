@@ -7,7 +7,9 @@
 # historical artifact).
 #
 # Steps:
-#   1. Glob .planning/phases/0[3-6]-*/*-PLAN.md
+#   1. Glob .planning/phases/0[3-6]-*/*-PLAN.md, falling back to archived
+#      .planning/milestones/v1.0-phases/0[3-6]-*/*-PLAN.md after milestone
+#      cleanup moves completed phase artifacts out of the active phase tree.
 #   2. For each plan: extract `files_modified:` YAML block, take entries
 #      starting with `lib/` only (filter test/, scripts/, docs/, etc.)
 #   3. Sort + uniq the union, write newline-delimited to output file
@@ -18,9 +20,12 @@ set -euo pipefail
 OUT=".planning/audit/cleanup-touched-files.txt"
 
 echo "[cleanup:touched] enumerating Phase 3-6 PLAN.md files..."
-PLANS=$(ls .planning/phases/0[3-6]-*/*-PLAN.md 2>/dev/null | sort)
+PLANS=$(ls .planning/phases/0[3-6]-*/*-PLAN.md 2>/dev/null | sort || true)
 if [ -z "$PLANS" ]; then
-  echo "[cleanup:touched] ERROR: no Phase 3-6 PLAN.md files found" >&2
+  PLANS=$(ls .planning/milestones/v1.0-phases/0[3-6]-*/*-PLAN.md 2>/dev/null | sort || true)
+fi
+if [ -z "$PLANS" ]; then
+  echo "[cleanup:touched] ERROR: no Phase 3-6 PLAN.md files found in active or archived phase trees" >&2
   exit 2
 fi
 
