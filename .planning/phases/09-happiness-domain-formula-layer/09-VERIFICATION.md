@@ -1,20 +1,10 @@
 ---
 phase: 09-happiness-domain-formula-layer
-verified: 2026-05-02T02:11:51Z
-status: gaps_found
-score: 5/6 must-haves verified
+verified: 2026-05-02T03:17:54Z
+status: passed
+score: 6/6 must-haves verified
 overrides_applied: 0
-gaps:
-  - truth: "5-emoji to value mapping test passes for the post-v16 default-2 semantic"
-    status: partial
-    reason: "Implementation uses [2, 4, 6, 8, 10], but tests only assert face_4 maps to 10; face_0 through face_3 are not pinned, so HAPPY-08's mapping-by-tests contract can drift silently."
-    artifacts:
-      - path: "test/widget/features/accounting/presentation/widgets/satisfaction_emoji_picker_test.dart"
-        issue: "Only one mapping assertion exists: face_4 -> 10."
-      - path: "lib/features/accounting/presentation/widgets/satisfaction_emoji_picker.dart"
-        issue: "Implementation is correct, but the full 5-value contract is not test-pinned."
-    missing:
-      - "Add a widget/unit test that taps face_0..face_4 and asserts [2, 4, 6, 8, 10]."
+gaps: []
 deferred:
   - truth: "ADR-XXX_Lexical_Hierarchy_v1_1.md is drafted and ratified"
     addressed_in: "Phase 12"
@@ -27,9 +17,9 @@ deferred:
 # Phase 9: Happiness Domain & Formula Layer Verification Report
 
 **Phase Goal:** Lock the math, contracts, and anti-gamification defenses for happiness metrics so every downstream UI consumer builds on stable ground.
-**Verified:** 2026-05-02T02:11:51Z
-**Status:** gaps_found
-**Re-verification:** No - initial verification
+**Verified:** 2026-05-02T03:17:54Z
+**Status:** passed
+**Re-verification:** Yes - after Plan 09-14 HAPPY-08 gap closure
 
 ## Goal Achievement
 
@@ -41,10 +31,10 @@ deferred:
 | 2 | HAPPY-04 Top Joy ordering is pinned as satisfaction DESC, amount DESC, timestamp DESC with no amount floor | VERIFIED | DAO query uses `ORDER BY soul_satisfaction DESC, amount DESC, timestamp DESC LIMIT 1` at `analytics_dao.dart:346`; no `amount >= 500` predicate was found. DAO fixture test passed. |
 | 3 | Sealed MetricResult handles empty/value states without NaN/infinity/raw-zero outputs | VERIFIED | `MetricResult<T>` is plain sealed with only `Empty<T>` and `Value<T>` in `metric_result.dart`; use cases return `Empty()` for no data and `Value(..., sampleSize)` for data. Tests passed. |
 | 4 | Family aggregate contract returns aggregate-only `int` and 3-tuple shared insight with no per-member fields | VERIFIED | `FamilyHappiness.familyHighlightsSum` is `MetricResult<int>`; `SharedJoyInsight` and `SharedJoyCategoryAggregate` expose only `categoryId`, `avgSatisfaction`, `totalCount`; grep found no per-member fields in family/shared joy return models. |
-| 5 | ADR/no-gamification, HAPPY-09 removal, and 5-emoji mapping contract are locked | FAILED | ADR-012 exists and HAPPY-09 is removed/folded into HAPPY-V2-03, but the mapping test is incomplete: only `face_4 -> 10` is asserted in `satisfaction_emoji_picker_test.dart`. |
+| 5 | ADR/no-gamification, HAPPY-09 removal, and 5-emoji mapping contract are locked | VERIFIED | ADR-012 exists, HAPPY-09 is removed/folded into HAPPY-V2-03, and Plan 09-14 added `pins all five face values to the v1.1 unipolar scale`, which taps `face_0..face_4` and asserts `[2, 4, 6, 8, 10]`. |
 | 6 | Schema migration v15 to v16 default-2 and CHECK constraint are verified | VERIFIED | `schemaVersion => 16`; table default is `Constant(2)`; `if (from < 16)` migration note exists; migration tests passed for omitted default 2 and CHECK 1..10. |
 
-**Score:** 5/6 truths verified
+**Score:** 6/6 truths verified
 
 ### Deferred Items
 
@@ -95,7 +85,7 @@ deferred:
 | Behavior | Command | Result | Status |
 | --- | --- | --- | --- |
 | Phase 9 targeted tests | `flutter test test/unit/data/migrations/migration_v15_to_v16_test.dart ... test/unit/infrastructure/i18n/formatters/joy_density_formatter_test.dart` | 71 tests passed | PASS |
-| Satisfaction picker existing tests | `flutter test test/widget/features/accounting/presentation/widgets/satisfaction_emoji_picker_test.dart` | 4 tests passed, but only one mapping assertion exists | PARTIAL |
+| Satisfaction picker mapping tests | `flutter test test/widget/features/accounting/presentation/widgets/satisfaction_emoji_picker_test.dart` | 5 tests passed; full mapping test taps `face_0..face_4` and asserts `[2, 4, 6, 8, 10]` | PASS |
 | Static analysis | `flutter analyze <15 phase production files>` | No issues found | PASS |
 
 ### Requirements Coverage
@@ -109,7 +99,7 @@ deferred:
 | HAPPY-05 | 09-03 | Centralized soul-only filter | SATISFIED | `_soulExpenseFilter` used by all six soul query sites; tests cover survival/deleted exclusion. |
 | HAPPY-06 | 09-02, 09-05 | Sealed MetricResult contract | SATISFIED_WITH_NOTE | Code and roadmap use two variants (`Empty`, `Value`). `.planning/REQUIREMENTS.md` still says `thinSample`, but Phase 9 plan and roadmap contract intentionally replaced that with the two-variant sealed type. |
 | HAPPY-07 | 09-10 | No-gamification ADR | SATISFIED | ADR-012 and index entry exist with forbidden features inventory. |
-| HAPPY-08 | 09-12, 09-13 | 5-emoji/value mapping under unipolar semantics | PARTIAL | Spec/ADR/code mapping exist, but the full mapping is not pinned by tests. |
+| HAPPY-08 | 09-12, 09-13, 09-14 | 5-emoji/value mapping under unipolar semantics | SATISFIED | Spec/ADR/code mapping exist; widget test now pins all five face keys to `[2, 4, 6, 8, 10]`, and production mapping remains `static const _faceValues = [2, 4, 6, 8, 10];`. |
 | HAPPY-09 | 09-13 | Removed/deferred | SATISFIED | No active requirement or traceability row; folded into HAPPY-V2-03 with future `entry_source` note. |
 | FAMILY-01 | 09-07, 09-08, 09-13 | Aggregate highlights sum as int | SATISFIED | Use case returns `Value(highlightsSum, totalGroupSoulTx)` and no per-member fields. |
 | FAMILY-02 | 09-03, 09-04, 09-07, 09-08 | Shared joy 3-tuple with min-N guard | SATISFIED | DAO `HAVING COUNT(*) >= 3`; return type exposes only categoryId/avgSatisfaction/totalCount. |
@@ -118,7 +108,6 @@ deferred:
 
 | File | Line | Pattern | Severity | Impact |
 | --- | --- | --- | --- | --- |
-| `test/widget/features/accounting/presentation/widgets/satisfaction_emoji_picker_test.dart` | 42-53 | Partial mapping test | BLOCKER | Does not pin all five HAPPY-08 values. |
 | `lib/features/analytics/presentation/providers/state_happiness.dart` | 60-67 | Review WR-01: shadow books only | WARNING | Non-blocking for Phase 9 because Plan 09-08 scoped current-book resolution as an open Phase 10/11 consumer concern; should be fixed before family UI consumption. |
 | `lib/application/analytics/demo_data_service.dart` | 130-134 | Review WR-02: demo soul values can include 1 | WARNING | Non-blocking because CHECK permits 1 and active Phase 9 required only survival/default baseline 2; should align demo fixtures to picker buckets before demo analytics is user-visible. |
 | `.planning/REQUIREMENTS.md` | 21 | Stale `thinSample` wording | WARNING | Non-blocking against the roadmap/plan contract, but should be cleaned up to avoid downstream confusion. |
@@ -129,11 +118,11 @@ None. This phase is contract/formula/documentation heavy and was verifiable thro
 
 ### Gaps Summary
 
-Phase 9 achieved the core formula, DAO, repository, use-case, domain contract, schema, ADR, and spec-amendment goals. The one blocking gap is test coverage for HAPPY-08: the picker implementation writes the correct `{2,4,6,8,10}` values, but only the fifth mapping is tested, so the requirement that the 5-emoji mapping be pinned by tests is not met.
+Phase 9 achieved the core formula, DAO, repository, use-case, domain contract, schema, ADR, and spec-amendment goals. Plan 09-14 closed the prior HAPPY-08 blocker by pinning all five picker faces through widget interaction and proving a one-value RED mutation fails the new test.
 
 The two code review warnings are valid follow-up, not phase-blocking gaps: WR-01 affects future family UI book-id resolution and was explicitly marked open in Plan 09-08; WR-02 affects demo data realism but not the legal schema/default/formula contract.
 
 ---
 
-_Verified: 2026-05-02T02:11:51Z_
-_Verifier: Claude (gsd-verifier)_
+_Verified: 2026-05-02T03:17:54Z_
+_Verifier: Codex (orchestrator spot-check after verifier timeout)_
