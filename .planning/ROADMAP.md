@@ -83,7 +83,7 @@ Plans:
 - [x] 09-12-PLAN.md — ADR-014 Soul Satisfaction Unipolar Positive Scale (default 5→2 rationale; voice-realignment defer)
 
 **Wave 6** *(blocked on Wave 5 completion)*
-- [ ] 09-13-PLAN.md — Spec amendments (REQUIREMENTS.md + ROADMAP.md edits per D-22)
+- [x] 09-13-PLAN.md — Spec amendments (REQUIREMENTS.md + ROADMAP.md edits per D-22)
 
 ### Phase 10: HomePage SoulFullnessCard Redesign
 **Goal**: Replace the misleading `Happiness ROI` card on HomePage with a redesigned `SoulFullnessCard` that renders the 4 personal happiness metrics + a story-mode Best Joy card, with the family card conditionally shown only in group mode + consent.
