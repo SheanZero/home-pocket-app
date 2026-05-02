@@ -1,10 +1,11 @@
 ---
 phase: 10
 slug: homepage-soulfullnesscard-redesign
-status: draft
+status: approved
 shadcn_initialized: false
 preset: not_applicable_flutter
 created: 2026-05-02
+reviewed_at: 2026-05-02
 visual_contract_source: /Users/xinz/Documents/0502.pen (cards HmvHU / NMHwT / VKoU4)
 upstream_context: .planning/phases/10-homepage-soulfullnesscard-redesign/10-CONTEXT.md
 phase_9_contracts: lib/features/analytics/domain/models/{happiness_report,family_happiness,best_joy_moment_row,metric_result,shared_joy_insight}.dart
