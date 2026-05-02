@@ -20,7 +20,7 @@ Foundation: 4 personal indicators + supporting infrastructure (filters, empty-st
 - [ ] **HAPPY-05**: All happiness aggregators consume a centralized **`_soulOnly()` SQL fragment** that filters `WHERE ledger_type = 'soul'`; survival rows must never contaminate metrics regardless of the `soul_satisfaction = 5` default
 - [ ] **HAPPY-06**: Sealed **`MetricResult`** type with `empty` / `thinSample` / `value` variants handles n=0/1/2 cases gracefully; UI never renders raw NaN, infinity, or "0%" placeholders for empty windows
 - [ ] **HAPPY-07**: Architecture decision record **`ADR-XXX_No_Gamification_v1_1.md`** ratifies "no streaks / no badges / no daily targets in v1.1" as a Goodhart's-Law defense; this rule is binding through milestone close
-- [ ] **HAPPY-08**: 5-emoji ↔ value mapping pinned by unit tests under the unipolar positive satisfaction semantic so refactors cannot silently drift the bucketing.
+- [x] **HAPPY-08**: 5-emoji ↔ value mapping pinned by unit tests under the unipolar positive satisfaction semantic so refactors cannot silently drift the bucketing.
 
 | Picker emoji | DB value (post-v16) | Phase 9 label (current ARB) | Phase 12 label (post-rename) |
 |--------------|---------------------|------------------------------|------------------------------|
@@ -118,7 +118,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HAPPY-05 | Phase 9 | Pending |
 | HAPPY-06 | Phase 9 | Pending |
 | HAPPY-07 | Phase 9 | Pending |
-| HAPPY-08 | Phase 9 | Pending |
+| HAPPY-08 | Phase 9 | Complete |
 | FAMILY-01 | Phase 9 | Pending |
 | FAMILY-02 | Phase 9 | Pending |
 | FAMILY-03 | Phase 10 | Pending |
