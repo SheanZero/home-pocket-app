@@ -62,9 +62,9 @@ Plans:
 - [x] 09-02-PLAN.md — Domain models (sealed MetricResult<T>, HappinessReport, FamilyHappiness, BestJoyMomentRow, SharedJoyInsight)
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 09-03-PLAN.md — DAO additions (_soulExpenseFilter const, getBestJoyMoment, getSoulRowsForPtvf, getSharedJoyCategoryInsight)
-- [ ] 09-04-PLAN.md — Repository interface + impl extension (5 new methods)
-- [ ] 09-09-PLAN.md — joy_density_formatter.dart (PTVF base + display unit maps; locale-aware formatting)
+- [x] 09-03-PLAN.md — DAO additions (_soulExpenseFilter const, getBestJoyMoment, getSoulRowsForPtvf, getSharedJoyCategoryInsight)
+- [x] 09-04-PLAN.md — Repository interface + impl extension (5 new methods)
+- [x] 09-09-PLAN.md — joy_density_formatter.dart (PTVF base + display unit maps; locale-aware formatting)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 09-05-PLAN.md — GetHappinessReportUseCase (HAPPY-01..04 with PTVF α=0.88 + median)
