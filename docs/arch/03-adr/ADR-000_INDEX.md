@@ -405,6 +405,29 @@ Streaks, badges, daily targets, cross-period delta, public sharing, per-member b
 
 ---
 
+### [ADR-013: Joy Density PTVF Scaling](./ADR-013_Joy_Density_PTVF_Scaling.md)
+
+**状态:** 📝 草稿
+**日期:** 2026-05-01
+**影响范围:** v1.1 happiness metric layer (HAPPY-02), AnalyticsDao 性能预算
+
+**核心决策:**
+HAPPY-02 Joy/¥ 密度采用 Kahneman-Tversky PTVF α=0.88，币种相关 base（JPY=500 / CNY=25 / USD=5），Dart 层折叠。
+
+**关键理由:**
+- K-T 1979 实证拟合常数（诺贝尔背书）
+- 满足"sat=10 ¥10000 击败 sat=6 ¥500"且"10 仍是天花板"双约束（α 临界 ≈ 0.83）
+- SQLite 无 POW/EXP，DAO 必须改回行级查询，但月度 soul tx 10-100 行下性能可接受
+
+**备选方案:**
+- 朴素 Σsat/Σamount（小金额完全主导）
+- sqrt α=0.5（压平太快）
+- log Weber-Fechner（amount→0 发散）
+
+**下次Review:** v1.2 milestone start 或月度 soul tx 数中位数 > 1000
+
+---
+
 ## 🔗 ADR关系图
 
 ```
@@ -440,9 +463,9 @@ ADR-009 (哈希链验证优化) ─→ ADR-003 (安全)
 | ✅ 已实施 | 1 |
 | 🔄 讨论中 | 0 |
 | ❌ 已拒绝 | 0 |
-| 📝 草稿 | 1 |
+| 📝 草稿 | 2 |
 
-**总计:** 12个ADR
+**总计:** 13个ADR
 
 ---
 
@@ -462,6 +485,7 @@ ADR-009 (哈希链验证优化) ─→ ADR-003 (安全)
 | ADR-010 | 实施完成后 | 一次性评估（数据完整性） |
 | ADR-011 | 2026-10-27 | 每6个月 |
 | ADR-012 | v1.2 milestone start | 一次性评估 |
+| ADR-013 | v1.2 milestone start 或月度 soul tx 数中位数 > 1000 | 一次性评估 |
 
 ---
 
