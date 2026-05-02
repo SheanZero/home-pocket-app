@@ -759,15 +759,21 @@ Type-system enforcement:
 
 ---
 
-## Open Questions for Planner
+## Open Questions for Planner (RESOLVED)
 
-> Short list — Claude's Discretion items where a concrete choice is needed.
+> Short list — Claude's Discretion items where a concrete choice was needed.
+> Each question carries a `**RESOLVED:**` line referencing the plan that pinned the decision.
 
 1. **O-1: Family books enumeration.** `shadowBooksProvider` returns *other members'* books. Confirm whether the current device's own book should be included in `groupBookIds` for `GetFamilyHappinessUseCase`. Read `book_repository.dart` `findShadowBooksByGroupId` semantics during planning to verify. (Q6c.)
+   **RESOLVED:** Phase 9 passes the unmodified `shadowBooks` list (other members' books only) to the use case. Whether to also include the current device's own book is a presentation-layer concern deferred to Phase 10's HomePage rebuild — not a Phase 9 contract surface change. Documented as a known caveat in Plan 08's must_haves.
 2. **O-2: `Book.currency` normalization.** Is currency code stored uppercase in `books_table.currency`? `joy_density_formatter`'s map uses `'JPY'`/`'CNY'`/`'USD'` uppercase keys. If DB stores mixed-case, formatter needs `.toUpperCase()` normalization. Verify by sampling existing book inserts. (Q13 case 5.)
+   **RESOLVED:** Plan 09 ships the formatter with case-sensitive lookup against the existing uppercase ISO codes. Plan 09 Test 10 (`'jpy'` → fallback 500.0) pins the contract; if DB ever stores mixed-case the test will trip and the planner will reopen the question.
 3. **O-3: `fromJson` / `toJson` on new Freezed aggregates.** `MonthlyReport` has `fromJson` (`monthly_report.dart:45`) but it's likely unused dead-weight (these are transient query results). Recommend NOT generating `fromJson`/`toJson` on the new happiness aggregates. (Q3b — minor.)
+   **RESOLVED:** Plan 02 omits `fromJson`/`toJson` on the new Freezed aggregates per the recommendation — they are transient query results, not persisted entities.
 4. **O-4: Empty-state sentinel for `formatJoyDensity(0.0, ...)`.** Should the formatter return `'—'` or `'0.0 / ¥1k'` for raw 0.0? UI semantics drive this — likely Phase 10 work but the helper API should be defined here. (Q13 case 9.)
+   **RESOLVED:** Plan 09 returns `'0.0 / <unit-label>'` for raw 0.0 so the formatter is total over its domain; the UI layer (Phase 10) substitutes `'—'` or a CTA when `MetricResult` is `Empty`. Formatter stays pure; sentinel handling lives where it belongs.
 5. **O-5: Test fixture strategy** (deferred per Claude's Discretion in CONTEXT.md). Recommend hand-built fixtures for unit tests (control over edge cases) + minor extension of `demo_data_service.dart` for integration smoke tests.
+   **RESOLVED:** 09-VALIDATION.md adopts the recommendation — hand-built fixtures inside each `*_use_case_test.dart` for unit edge cases; `demo_data_service.dart` extension is touched only by Plan 01 (sat=5 → sat=2 audit) and is not used as a test fixture.
 
 ---
 

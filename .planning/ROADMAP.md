@@ -54,7 +54,33 @@ Phase numbering continues from Phase 9 (no reset).
   3. Sealed `MetricResult` handles n=0, n=1, n=2 sample sizes without producing NaN/infinity/raw-zero outputs
   4. `FamilyHighlightsSum` use case signature returns `int` (compile-time enforced); `SharedJoyInsight` returns `(categoryId, avgSatisfaction, totalCount)` only — no per-member fields
   5. `ADR-XXX_No_Gamification_v1_1.md` and `ADR-XXX_Lexical_Hierarchy_v1_1.md` (the latter drafted, ratified in Phase 12) are committed; 5-emoji↔1-10 mapping test and voice-bias regression test both pass
-**Plans**: TBD
+**Plans:** 13 plans across 6 waves
+
+Plans:
+**Wave 1**
+- [ ] 09-01-PLAN.md — Schema migration v15→v16 (default soul_satisfaction 5→2; 5 code-side defaults aligned)
+- [ ] 09-02-PLAN.md — Domain models (sealed MetricResult<T>, HappinessReport, FamilyHappiness, BestJoyMomentRow, SharedJoyInsight)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 09-03-PLAN.md — DAO additions (_soulExpenseFilter const, getBestJoyMoment, getSoulRowsForPtvf, getSharedJoyCategoryInsight)
+- [ ] 09-04-PLAN.md — Repository interface + impl extension (5 new methods)
+- [ ] 09-09-PLAN.md — joy_density_formatter.dart (PTVF base + display unit maps; locale-aware formatting)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 09-05-PLAN.md — GetHappinessReportUseCase (HAPPY-01..04 with PTVF α=0.88 + median)
+- [ ] 09-06-PLAN.md — GetBestJoyMomentUseCase (standalone HAPPY-04 entry point)
+- [ ] 09-07-PLAN.md — GetFamilyHappinessUseCase (FAMILY-01 int aggregate + FAMILY-02 3-tuple; anti-leaderboard contract)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 09-08-PLAN.md — Riverpod providers (3 use case providers + state_happiness.dart consumer-facing async providers)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 09-10-PLAN.md — ADR-012 No Gamification v1.1 (Goodhart Law defense; Forbidden Features inventory)
+- [ ] 09-11-PLAN.md — ADR-013 Joy Density PTVF Scaling (K-T 1979 citation; currency table; perf trade-off)
+- [ ] 09-12-PLAN.md — ADR-014 Soul Satisfaction Unipolar Positive Scale (default 5→2 rationale; voice-realignment defer)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+- [ ] 09-13-PLAN.md — Spec amendments (REQUIREMENTS.md + ROADMAP.md edits per D-22)
 
 ### Phase 10: HomePage SoulFullnessCard Redesign
 **Goal**: Replace the misleading `Happiness ROI` card on HomePage with a redesigned `SoulFullnessCard` that renders the 4 personal happiness metrics + a story-mode Best Joy card, with the family card conditionally shown only in group mode + consent.
