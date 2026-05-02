@@ -105,7 +105,37 @@ Plans:
   3. Family card visible only when `isGroupModeProvider == true` AND all members have opted into shared analytics; collapses entirely otherwise
   4. Coverage caption present on headline metric tile; ≤2 `ⓘ` icons in the entire card; no streak/badge/target/cross-period copy
   5. `_computeHappinessROI` and `_computeSatisfaction` are gone from `home_screen.dart` (grep returns zero matches in `lib/`)
-**Plans**: TBD
+**Plans:** 11 plans across 8 waves
+
+Plans:
+
+**Wave 1** *(spec amendments — parallel-safe, no overlap)*
+- [ ] 10-01-PLAN.md — Amend REQUIREMENTS.md per D-06 (HOMEUI-05/06/07 added; FAMILY-03 minimum-gate annotation; v1.1 count 25 → 28)
+- [ ] 10-02-PLAN.md — Amend ROADMAP.md Phase 10 entry per D-07 (integrated HomeHeroCard goal; FAMILY-03 + HOMEUI-01..07 requirements; complexity M → M-L)
+
+**Wave 2** *(parallel-safe — fixtures, ARB, provider; no file overlap)*
+- [ ] 10-03-PLAN.md — Wave 0 test scaffold: shared fixtures + 3 skipped test files (compile clean)
+- [ ] 10-04-PLAN.md — ARB additions: 24 new keys atomically across ja/zh/en + flutter gen-l10n
+- [ ] 10-05-PLAN.md — Add `bookByIdProvider(bookId)` for D-12 currency resolution
+
+**Wave 3** *(blocked on 10-03 scaffold)*
+- [ ] 10-06-PLAN.md — `HappinessRingsPainter` CustomPainter + 8 painter unit tests (mocktail Canvas)
+
+**Wave 4** *(blocked on 10-04 ARB + 10-05 provider + 10-06 painter)*
+- [ ] 10-07-PLAN.md — `HomeHeroCard` master widget composition: 8-region D-02 vertical structure, sealed MetricResult pattern matching, ≤2 ⓘ icons, no hardcoded JPY
+
+**Wave 5** *(blocked on 10-07 widget exists)*
+- [ ] 10-08-PLAN.md — Wire `HomeHeroCard` into `home_screen.dart`; delete `_computeHappinessROI` / `_computeSatisfaction` / `_buildLedgerRows`
+
+**Wave 6** *(blocked on 10-08 home_screen no longer imports old widgets)*
+- [ ] 10-09-PLAN.md — Delete `MonthOverviewCard` / `LedgerComparisonSection` / `SoulFullnessCard` + their tests + soul golden image; update `home_screen_test.dart` finders
+
+**Wave 7** *(blocked on 10-07 + 10-08 + 10-09)*
+- [ ] 10-10-PLAN.md — Populate widget tests + 5 golden tests; verify ≥70% per-file coverage on home_hero_card.dart
+
+**Wave 8** *(blocked on 10-10 — final color polish per D-13)*
+- [ ] 10-11-PLAN.md — Hex-to-token audit; regenerate goldens; checkpoint visual verification against Pencil v8
+
 **UI hint**: yes
 
 ### Phase 11: Statistics Surface for 悦己账本
