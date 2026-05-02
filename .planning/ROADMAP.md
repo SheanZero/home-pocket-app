@@ -28,7 +28,7 @@
 Phase numbering continues from Phase 9 (no reset).
 
 - [x] **Phase 9: Happiness Domain & Formula Layer** — Lock formulas, contracts, soul-only filter, Top Joy ordering, sealed `MetricResult`, family aggregate-only return type, no-gamification ADR (linchpin) — completed 2026-05-02
-- [ ] **Phase 10: HomePage SoulFullnessCard Redesign** — Replace misleading `Happiness ROI`; render 4 personal metric tiles + Best Joy story card + family card (group-mode + consent); delete inline helpers
+- [ ] **Phase 10: HomePage SoulFullnessCard Redesign (HomeHeroCard integrated rebuild)** — Replace 3 widgets with 1 integrated `HomeHeroCard`; 3 concentric rings encode Phase 9 contracts (single → `HappinessReport`, group → `FamilyHappiness`); delete `_computeHappinessROI` / `_computeSatisfaction` / `_buildLedgerRows` from `home_screen.dart`
 - [ ] **Phase 11: Statistics Surface for 悦己账本** — Wire 3 dormant DAO methods + new Best Joy query through to AnalyticsScreen sub-region; Joy-per-¥ trend line + satisfaction histogram (with `5`-bar annotation); footprint-audit doc first
 - [ ] **Phase 12: UI Copy Rename Pass (ARB values, ja/zh/en)** — Values-only rename of `soulLedger` / `survivalLedger` / `homeHappinessROI` / `homeSoulFullness`; lexical-hierarchy ADR; native-speaker register review
 
@@ -88,54 +88,34 @@ Plans:
 **Wave 7** *(gap closure after verification)*
 - [x] 09-14-PLAN.md — HAPPY-08 satisfaction picker mapping test closure (`face_0..face_4` → `[2, 4, 6, 8, 10]`)
 
-### Phase 10: HomePage SoulFullnessCard Redesign
-**Goal**: Replace the misleading `Happiness ROI` card on HomePage with a redesigned `SoulFullnessCard` that renders the 4 personal happiness metrics + a story-mode Best Joy card, with the family card conditionally shown only in group mode + consent.
-**Depends on**: Phase 9 (consumes `GetHappinessReportUseCase`, `GetBestJoyMomentUseCase`, `GetFamilyHappinessUseCase` and the sealed `MetricResult` contract)
-**Requirements**: FAMILY-03, HOMEUI-01, HOMEUI-02, HOMEUI-03, HOMEUI-04
-**Complexity**: Medium (UI rebuild on stable contracts; Container Widget With Async Provider pattern already established)
+### Phase 10: HomePage SoulFullnessCard Redesign (HomeHeroCard integrated rebuild)
+**Goal**: Replace 3 separate sections (`MonthOverviewCard` + `LedgerComparisonSection` + `SoulFullnessCard`) on HomePage with 1 integrated `HomeHeroCard`. The integrated card encodes Phase 9 happiness contracts as 3 concentric gradient rings with mode-specific metric mapping (single mode → `HappinessReport`; group mode → `FamilyHappiness`), plus a hero header (total + month-over-month chip + previous-month sub-line), an inline 魂/生存 absolute-amount split bar, a Best Joy story strip emphasizing "what + when" over "amount", and (group mode only) per-member spending rows. Whole-card tap navigates to AnalyticsScreen 「悦己账本」 sub-region (Phase 11 deliverable).
+**Depends on**: Phase 9 (consumes `happinessReportProvider`, `bestJoyMomentProvider`, `familyHappinessProvider`, sealed `MetricResult` contract, and `BestJoyMomentRow` Freezed model)
+**Requirements**: FAMILY-03, HOMEUI-01, HOMEUI-02, HOMEUI-03, HOMEUI-04, HOMEUI-05, HOMEUI-06, HOMEUI-07
+**Complexity**: Medium-High (UI rebuild on stable contracts + new `CustomPainter` for 3 concentric gradient rings + integrated card composition replacing 3 widgets + spec amendments to REQUIREMENTS.md/ROADMAP.md per D-06/D-07; Container Widget With Async Provider pattern already established)
 **Critical pitfalls encoded**:
-- Family consent gate: if any family member has not opted into shared analytics, the family card collapses entirely (NOT "shows partial data")
-- ≤2 `ⓘ` info icons total — explain voice-estimator bias and hedonic adaptation only; no other tooltip clutter
-- Coverage caption ("n=23/31 rated") on the headline metric tile — honors HAPPY-06 empty-state contract
-- ZERO daily-target / streak / badge / "vs last month" copy anywhere — enforces ADR-No-Gamification at UI level
-- Both `_computeHappinessROI` (misleading "budget-share" formula) and `_computeSatisfaction` (intraday-only) must be DELETED from `home_screen.dart` — responsibilities now live in `GetHappinessReportUseCase`
+- Hero card single-mode rings encode `HappinessReport` (Phase 9 personal contract); group-mode rings encode `FamilyHappiness` (Phase 9 family contract). Switching mid-card is forbidden — provider/mode selection is a top-level branch in the parent screen.
+- Currency code MUST resolve from `Book.currency` via `bookByIdProvider`-style lookup (not hardcoded `'JPY'`); existing `FormatterService().formatCurrency(amount, 'JPY', locale)` violation in `SoulFullnessCard:162` is eliminated by this rebuild (CLAUDE.md Pitfall #9).
+- 魂/生存 split bar is a CATEGORY DISTRIBUTION (factual), not a happiness metric. Labels MUST stay "魂帳" / "生存帳" — NEVER "Joy ROI", "Joy %", "happiness share", "joy ratio", "soul %". Resurrecting joy-share framing reverts the milestone's anti-Goodhart stance (research line 81-82). Code reviewer is the final gate.
+- Strict FAMILY-03 consent (any-member-not-opted-in collapses card) is **DEFERRED to v1.2** per D-08 (new REQ FAMILY-V2-03); Phase 10 ships with minimum gate only: `isGroupModeProvider == true && shadowBooks.isNotEmpty`.
+- Both `_computeHappinessROI` (misleading "budget-share" formula) and `_computeSatisfaction` (intraday-only) — plus `_buildLedgerRows` (no longer needed) — must be DELETED from `home_screen.dart`. Grep `_computeHappinessROI\|_computeSatisfaction\|_buildLedgerRows` in `lib/` returns zero matches as a hard gate.
+- ≤2 `ⓘ` info icons total in the card (HOMEUI-04 hard cap); voice-bias mention REMOVED per D-10 (replaced with PTVF + hedonic adaptation only — Phase 9 D-12 deferred voice realignment to v1.2).
+- ZERO daily-target / streak / badge / "vs last month" copy anywhere — enforces ADR-012 binding ban at the UI level. The `+X%` trend chip on hero header is for SPENDING (absolute Yen, not gamified).
+- Coverage caption "n=k/N rated" sources from `MetricResult.Value.sampleSize` and `HappinessReport.totalSoulTx` per HAPPY-06 empty-state contract.
+- Color polish (D-13) is the LAST plan unit of Phase 10 — all hex literals in mockup are tentative; final tokens come from `lib/core/theme/app_colors.dart` + `lib/core/theme/app_theme_colors.dart` extension methods, not Pencil hex literals.
 **Success Criteria** (what must be TRUE):
-  1. HomePage `SoulFullnessCard` renders all 4 personal metrics (Avg Satisfaction, Joy per ¥, Highlights count, Best Joy per ¥) with values sourced exclusively from Phase 9 use cases
-  2. Best Joy story card renders the single argmax transaction with amount visible alongside satisfaction (anti-¥10-candy framing)
-  3. Family card visible only when `isGroupModeProvider == true` AND all members have opted into shared analytics; collapses entirely otherwise
-  4. Coverage caption present on headline metric tile; ≤2 `ⓘ` icons in the entire card; no streak/badge/target/cross-period copy
-  5. `_computeHappinessROI` and `_computeSatisfaction` are gone from `home_screen.dart` (grep returns zero matches in `lib/`)
-**Plans:** 11 plans across 8 waves
-
-Plans:
-
-**Wave 1** *(spec amendments — parallel-safe, no overlap)*
-- [ ] 10-01-PLAN.md — Amend REQUIREMENTS.md per D-06 (HOMEUI-05/06/07 added; FAMILY-03 minimum-gate annotation; v1.1 count 25 → 28)
-- [ ] 10-02-PLAN.md — Amend ROADMAP.md Phase 10 entry per D-07 (integrated HomeHeroCard goal; FAMILY-03 + HOMEUI-01..07 requirements; complexity M → M-L)
-
-**Wave 2** *(parallel-safe — fixtures, ARB, provider; no file overlap)*
-- [ ] 10-03-PLAN.md — Wave 0 test scaffold: shared fixtures + 3 skipped test files (compile clean)
-- [ ] 10-04-PLAN.md — ARB additions: 24 new keys atomically across ja/zh/en + flutter gen-l10n
-- [ ] 10-05-PLAN.md — Add `bookByIdProvider(bookId)` for D-12 currency resolution
-
-**Wave 3** *(blocked on 10-03 scaffold)*
-- [ ] 10-06-PLAN.md — `HappinessRingsPainter` CustomPainter + 8 painter unit tests (mocktail Canvas)
-
-**Wave 4** *(blocked on 10-04 ARB + 10-05 provider + 10-06 painter)*
-- [ ] 10-07-PLAN.md — `HomeHeroCard` master widget composition: 8-region D-02 vertical structure, sealed MetricResult pattern matching, ≤2 ⓘ icons, no hardcoded JPY
-
-**Wave 5** *(blocked on 10-07 widget exists)*
-- [ ] 10-08-PLAN.md — Wire `HomeHeroCard` into `home_screen.dart`; delete `_computeHappinessROI` / `_computeSatisfaction` / `_buildLedgerRows`
-
-**Wave 6** *(blocked on 10-08 home_screen no longer imports old widgets)*
-- [ ] 10-09-PLAN.md — Delete `MonthOverviewCard` / `LedgerComparisonSection` / `SoulFullnessCard` + their tests + soul golden image; update `home_screen_test.dart` finders
-
-**Wave 7** *(blocked on 10-07 + 10-08 + 10-09)*
-- [ ] 10-10-PLAN.md — Populate widget tests + 5 golden tests; verify ≥70% per-file coverage on home_hero_card.dart
-
-**Wave 8** *(blocked on 10-10 — final color polish per D-13)*
-- [ ] 10-11-PLAN.md — Hex-to-token audit; regenerate goldens; checkpoint visual verification against Pencil v8
-
+  1. HomePage renders a single `HomeHeroCard` widget (no `MonthOverviewCard`, `LedgerComparisonSection`, or `SoulFullnessCard` widgets exist in `lib/features/home/presentation/widgets/`)
+  2. `HomeHeroCard` renders all 4 personal metrics (Avg Satisfaction, Joy per ¥, Highlights count, Best Joy per ¥) with values sourced exclusively from Phase 9 use cases
+  3. `HomeHeroCard` displays 3 concentric gradient rings encoding `HappinessReport` in single mode and `FamilyHappiness` in group mode
+  4. Best Joy story strip renders the single argmax transaction with `category · date` BIG (fontSize 14) and `¥amount · 满足 X/10 ✨` small (fontSize 9) — anti-`¥10 candy` framing per D-04
+  5. Family card region (rings + member rows) visible only when `isGroupModeProvider == true` AND `shadowBooks.isNotEmpty`; collapses entirely otherwise (D-08 minimum gate)
+  6. Coverage caption visible on headline metric tile when `0 < totalSoulTx`; ≤2 `ⓘ` icons in the entire card
+  7. `_computeHappinessROI`, `_computeSatisfaction`, `_buildLedgerRows` are gone from `home_screen.dart` (`grep` returns zero matches in `lib/`)
+  8. `home_screen.dart` net line count DECREASES (currently 386 lines; post-Phase-10 must be < 386)
+  9. All ¥ amounts use `AppTextStyles.amountLarge/Medium/Small` (`FontFeature.tabularFigures()`); zero hardcoded `'JPY'` in `home_hero_card.dart`
+  10. All UI strings via `S.of(context)`; ARB keys added to all 3 locales (ja/zh/en); `flutter gen-l10n` regenerates without warnings; ARB-parity CI guardrail green
+  11. `flutter analyze lib/features/home/` reports 0 issues
+**Plans**: TBD
 **UI hint**: yes
 
 ### Phase 11: Statistics Surface for 悦己账本
@@ -192,8 +172,8 @@ Plans:
 
 ## Coverage
 
-- v1.1 requirements: 25 total
-- Mapped to phases: 25 ✓
+- v1.1 requirements: 28 total (was 25; +3 from Phase 10 D-06 scope expansion: HOMEUI-05/06/07)
+- Mapped to phases: 28 ✓
 - Unmapped: 0
 - See `.planning/REQUIREMENTS.md` Traceability table for the full REQ-ID → phase map
 
