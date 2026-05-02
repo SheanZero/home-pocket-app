@@ -27,7 +27,7 @@
 
 Phase numbering continues from Phase 9 (no reset).
 
-- [ ] **Phase 9: Happiness Domain & Formula Layer** — Lock formulas, contracts, soul-only filter, ¥500 floor, sealed `MetricResult`, family aggregate-only return type, no-gamification ADR (linchpin)
+- [ ] **Phase 9: Happiness Domain & Formula Layer** — Lock formulas, contracts, soul-only filter, Top Joy ordering, sealed `MetricResult`, family aggregate-only return type, no-gamification ADR (linchpin)
 - [ ] **Phase 10: HomePage SoulFullnessCard Redesign** — Replace misleading `Happiness ROI`; render 4 personal metric tiles + Best Joy story card + family card (group-mode + consent); delete inline helpers
 - [ ] **Phase 11: Statistics Surface for 悦己账本** — Wire 3 dormant DAO methods + new Best Joy query through to AnalyticsScreen sub-region; Joy-per-¥ trend line + satisfaction histogram (with `5`-bar annotation); footprint-audit doc first
 - [ ] **Phase 12: UI Copy Rename Pass (ARB values, ja/zh/en)** — Values-only rename of `soulLedger` / `survivalLedger` / `homeHappinessROI` / `homeSoulFullness`; lexical-hierarchy ADR; native-speaker register review
@@ -37,23 +37,26 @@ Phase numbering continues from Phase 9 (no reset).
 ### Phase 9: Happiness Domain & Formula Layer
 **Goal**: Lock the math, contracts, and anti-gamification defenses for happiness metrics so every downstream UI consumer builds on stable ground (linchpin phase — no UI may proceed until Phase 9 ships).
 **Depends on**: Nothing (first v1.1 phase; consumes existing schema + 3 dormant DAO methods)
-**Requirements**: HAPPY-01, HAPPY-02, HAPPY-03, HAPPY-04, HAPPY-05, HAPPY-06, HAPPY-07, HAPPY-08, HAPPY-09, FAMILY-01, FAMILY-02
+**Requirements**: HAPPY-01, HAPPY-02, HAPPY-03, HAPPY-04, HAPPY-05, HAPPY-06, HAPPY-07, HAPPY-08, FAMILY-01, FAMILY-02
 **Complexity**: Medium-High (formula correctness + 1 new DAO query + ADR; mirrors `GetMonthlyReportUseCase` precedent)
 **Critical pitfalls encoded**:
 - Centralized `_soulOnly()` SQL fragment (`WHERE ledger_type = 'soul'`) — every aggregator MUST consume; survival rows with `soul_satisfaction = 5` default must NEVER contaminate metrics
-- ¥500 amount floor on Best Joy per ¥ (`WHERE amount >= 500 AND ledger_type = 'soul'` for argmax) — prevents ¥10 candy from always winning
-- Sealed `MetricResult` with `empty` / `thinSample` / `value` variants — UI never sees raw NaN, infinity, or "0%" placeholders
+- Schema bump v15 → v16 — `transactions.soul_satisfaction` default 5 → 2 (Path B unipolar positive scale; ADR-014). All five code-side defaults (column, transaction_dao parameters, Freezed model @Default, demo_data_service) edited in lockstep — partial edits silently revert to 5.
+- PTVF α=0.88 (Kahneman & Tversky 1979) for HAPPY-02 with currency-aware base (JPY=500/CNY=25/USD=5/fallback=500); Dart-layer fold (SQLite has no POW/EXP). Performance trade-off vs SUM/GROUP BY <2s principle accepted (10-100 monthly soul tx per book). See ADR-013.
+- HAPPY-04 Top Joy: pure satisfaction sort with amount-DESC tiebreak (`ORDER BY soul_satisfaction DESC, amount DESC, timestamp DESC LIMIT 1`). NO 500-yen minimum — amount-DESC handles "small amount over-rewarding" (D-06).
+- Three new ADRs ratified at Phase 9: ADR-012 (No Gamification), ADR-013 (Joy Density PTVF Scaling), ADR-014 (Soul Satisfaction Unipolar Positive Scale). Drafts created in Phase 9 plans 09-10/09-11/09-12; status flips to ✅ 已接受 at Phase 12 close.
+- Sealed `MetricResult` with `Empty<T>` / `Value<T>` variants — UI never sees raw NaN, infinity, or "0%" placeholders
 - `FamilyHighlightsSum` returns `int` aggregate-only — `Map<MemberId, int>` is FORBIDDEN by contract (anti-leaderboard, anti-surveillance)
 - `SharedJoyInsight` requires min-N=3 transactions per category — single-data-point categories cannot be crowned
 - `ADR-XXX_No_Gamification_v1_1.md` ratifies "no streaks / no badges / no daily targets" as Goodhart's-Law defense
-- 5-emoji ↔ 1-10 satisfaction mapping pinned by unit test (1-2 / 3-4 / 5-6 / 7-8 / 9-10 buckets)
-- Voice-estimator +0.3 upward bias quantified by regression test; verify `transactions.entry_source` column exists in substep 9.0
+- 5-emoji ↔ value mapping pinned by unit test under the post-v16 unipolar positive semantic ({2, 4, 6, 8, 10})
 **Success Criteria** (what must be TRUE):
   1. All 4 personal happiness metrics (Avg Satisfaction, Joy per ¥, Highlights count, Best Joy per ¥) computable from a fresh test fixture, with survival rows demonstrably excluded by the centralized `_soulOnly()` fragment
-  2. ¥500 amount floor demonstrably applied to Best Joy per ¥ (argmax test fails when floor removed; passes when applied)
-  3. Sealed `MetricResult` handles n=0, n=1, n=2 sample sizes without producing NaN/infinity/raw-zero outputs
+  2. HAPPY-04 Top Joy ordering pinned by DAO test fixture: with rows {(¥10000, sat=8), (¥500, sat=10), (¥3000, sat=10), (¥3000, sat=10, older)}, the query returns the ¥3000 sat=10 (newer) row — proves sat DESC primary + amount DESC tiebreak + timestamp DESC final tiebreak (D-06).
+  3. Sealed `MetricResult` handles empty and value states without producing NaN/infinity/raw-zero outputs
   4. `FamilyHighlightsSum` use case signature returns `int` (compile-time enforced); `SharedJoyInsight` returns `(categoryId, avgSatisfaction, totalCount)` only — no per-member fields
-  5. `ADR-XXX_No_Gamification_v1_1.md` and `ADR-XXX_Lexical_Hierarchy_v1_1.md` (the latter drafted, ratified in Phase 12) are committed; 5-emoji↔1-10 mapping test and voice-bias regression test both pass
+  5. `ADR-XXX_No_Gamification_v1_1.md` and `ADR-XXX_Lexical_Hierarchy_v1_1.md` (the latter drafted, ratified in Phase 12) are committed; 5-emoji↔1-10 mapping test passes for the post-v16 default-2 semantic (voice-bias regression test removed per D-18 — moved to v2 HAPPY-V2-03).
+  6. Schema migration v15→v16 round-trip test green (default soul_satisfaction reads back as 2 on fresh inserts; CHECK BETWEEN 1 AND 10 survives).
 **Plans:** 13 plans across 6 waves
 
 Plans:
@@ -134,12 +137,16 @@ Plans:
 - `ADR-XXX_Lexical_Hierarchy_v1_1.md` captures the hierarchy: 幸福 / happiness for docs; ときめき / 悦己 / Joy in-product
 - CN family-mode MUST use 「家族的小确幸」 NOT 「家族悦己」 (collision with personal account name post-rename)
 - JP `「幸福」` register-mismatch (philosophical/wellbeing-research weight) — use `ときめき` / `小確幸` for in-product copy only
+- 5 satisfaction-level emoji ARB labels also renamed (D-11 expansion of original 4-key scope): `satisfactionBad` → "中性 / Neutral / 中性"; `satisfactionSlightlyBad` → "OK / OK / OK"; `satisfactionNormal` → "不错 / Good / 不錯"; `satisfactionGood` → "满足 / Great / 満足"; `satisfactionVeryGood` → "最爱 / Amazing / 最愛".
+- Picker icon update for emoji 1: `sentiment_very_dissatisfied_outlined` → `sentiment_neutral_outlined` (or equivalent). Other 4 icons may need symmetric adjustment — Phase 12 / planner decides icon set.
+- Voice estimator output realignment ([3,10] vs picker post-remap {2,4,6,8,10}) DEFERRED to v1.2 per D-12 / ADR-014.
 **Success Criteria** (what must be TRUE):
   1. ARB values updated for all 4 keys (`soulLedger`, `survivalLedger`, `homeHappinessROI`, `homeSoulFullness`) across ja/zh/en; KEYS unchanged (verified by grep)
   2. ARB-parity CI guardrail passes; `flutter gen-l10n` succeeds without warnings; `S.of(context)` call sites untouched
   3. `ADR-XXX_Lexical_Hierarchy_v1_1.md` committed and references the 「家族的小确幸」 vs 「家族悦己」 disambiguation
   4. Native-speaker register review evidence (annotated review doc or commit) committed for ja AND zh translations
   5. No 「家族悦己」 string appears in CN family-mode UI (grep confirms collision-free naming)
+  6. 5 emoji ARB labels updated across ja/zh/en (`satisfactionBad`/`satisfactionSlightlyBad`/`satisfactionNormal`/`satisfactionGood`/`satisfactionVeryGood`); picker icon for emoji 1 updated; existing satisfaction picker tests still pass with updated labels (HAPPY-08 mapping pinned by test).
 **Plans**: TBD
 **UI hint**: yes
 
@@ -152,8 +159,8 @@ Plans:
 
 ## Coverage
 
-- v1.1 requirements: 26 total
-- Mapped to phases: 26 ✓
+- v1.1 requirements: 25 total
+- Mapped to phases: 25 ✓
 - Unmapped: 0
 - See `.planning/REQUIREMENTS.md` Traceability table for the full REQ-ID → phase map
 
