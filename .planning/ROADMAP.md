@@ -72,7 +72,7 @@ Plans:
 - [x] 09-07-PLAN.md — GetFamilyHappinessUseCase (FAMILY-01 int aggregate + FAMILY-02 3-tuple; anti-leaderboard contract)
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 09-08-PLAN.md — Riverpod providers (3 use case providers + state_happiness.dart consumer-facing async providers)
+- [x] 09-08-PLAN.md — Riverpod providers (3 use case providers + state_happiness.dart consumer-facing async providers)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 - [ ] 09-10-PLAN.md — ADR-012 No Gamification v1.1 (Goodhart Law defense; Forbidden Features inventory)
