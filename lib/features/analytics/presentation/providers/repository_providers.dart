@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../application/analytics/get_best_joy_moment_use_case.dart';
 import '../../../../application/analytics/get_budget_progress_use_case.dart';
 import '../../../../application/analytics/get_expense_trend_use_case.dart';
+import '../../../../application/analytics/get_family_happiness_use_case.dart';
+import '../../../../application/analytics/get_happiness_report_use_case.dart';
 import '../../../../application/analytics/get_monthly_report_use_case.dart';
 import '../../../../application/analytics/repository_providers.dart'
     as app_analytics;
@@ -46,6 +49,30 @@ GetBudgetProgressUseCase getBudgetProgressUseCase(Ref ref) {
 @riverpod
 GetExpenseTrendUseCase getExpenseTrendUseCase(Ref ref) {
   return GetExpenseTrendUseCase(
+    analyticsRepository: ref.watch(analyticsRepositoryProvider),
+  );
+}
+
+/// HAPPY-01..04: GetHappinessReportUseCase provider.
+@riverpod
+GetHappinessReportUseCase getHappinessReportUseCase(Ref ref) {
+  return GetHappinessReportUseCase(
+    analyticsRepository: ref.watch(analyticsRepositoryProvider),
+  );
+}
+
+/// HAPPY-04: GetBestJoyMomentUseCase provider.
+@riverpod
+GetBestJoyMomentUseCase getBestJoyMomentUseCase(Ref ref) {
+  return GetBestJoyMomentUseCase(
+    analyticsRepository: ref.watch(analyticsRepositoryProvider),
+  );
+}
+
+/// FAMILY-01..02: GetFamilyHappinessUseCase provider.
+@riverpod
+GetFamilyHappinessUseCase getFamilyHappinessUseCase(Ref ref) {
+  return GetFamilyHappinessUseCase(
     analyticsRepository: ref.watch(analyticsRepositoryProvider),
   );
 }

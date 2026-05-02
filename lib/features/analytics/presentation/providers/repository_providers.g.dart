@@ -91,5 +91,71 @@ final getExpenseTrendUseCaseProvider =
 // ignore: unused_element
 typedef GetExpenseTrendUseCaseRef =
     AutoDisposeProviderRef<GetExpenseTrendUseCase>;
+String _$getHappinessReportUseCaseHash() =>
+    r'15d49cc3064fdd42c1795c7d6d71f538e13315dd';
+
+/// HAPPY-01..04: GetHappinessReportUseCase provider.
+///
+/// Copied from [getHappinessReportUseCase].
+@ProviderFor(getHappinessReportUseCase)
+final getHappinessReportUseCaseProvider =
+    AutoDisposeProvider<GetHappinessReportUseCase>.internal(
+      getHappinessReportUseCase,
+      name: r'getHappinessReportUseCaseProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$getHappinessReportUseCaseHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef GetHappinessReportUseCaseRef =
+    AutoDisposeProviderRef<GetHappinessReportUseCase>;
+String _$getBestJoyMomentUseCaseHash() =>
+    r'771dd6a48a0acc165f59d7605be955df501f6764';
+
+/// HAPPY-04: GetBestJoyMomentUseCase provider.
+///
+/// Copied from [getBestJoyMomentUseCase].
+@ProviderFor(getBestJoyMomentUseCase)
+final getBestJoyMomentUseCaseProvider =
+    AutoDisposeProvider<GetBestJoyMomentUseCase>.internal(
+      getBestJoyMomentUseCase,
+      name: r'getBestJoyMomentUseCaseProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$getBestJoyMomentUseCaseHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef GetBestJoyMomentUseCaseRef =
+    AutoDisposeProviderRef<GetBestJoyMomentUseCase>;
+String _$getFamilyHappinessUseCaseHash() =>
+    r'3b15f9eed8685f06f2e98a20b4c92bff4c96a0f4';
+
+/// FAMILY-01..02: GetFamilyHappinessUseCase provider.
+///
+/// Copied from [getFamilyHappinessUseCase].
+@ProviderFor(getFamilyHappinessUseCase)
+final getFamilyHappinessUseCaseProvider =
+    AutoDisposeProvider<GetFamilyHappinessUseCase>.internal(
+      getFamilyHappinessUseCase,
+      name: r'getFamilyHappinessUseCaseProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$getFamilyHappinessUseCaseHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef GetFamilyHappinessUseCaseRef =
+    AutoDisposeProviderRef<GetFamilyHappinessUseCase>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
