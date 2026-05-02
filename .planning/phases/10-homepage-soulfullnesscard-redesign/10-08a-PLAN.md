@@ -1,29 +1,27 @@
 ---
 phase: 10-homepage-soulfullnesscard-redesign
-plan: 08
+plan: 08a
 type: execute
 wave: 5
-depends_on: [07]
+depends_on: [07b]
 files_modified:
   - lib/features/home/presentation/screens/home_screen.dart
 autonomous: true
-requirements: [HOMEUI-02, HOMEUI-05, HOMEUI-06, HOMEUI-07, FAMILY-03]
-tags: [home-screen, integration, helper-deletion]
+requirements: [HOMEUI-05, HOMEUI-06, HOMEUI-07, FAMILY-03]
+tags: [home-screen, integration, wire-up]
 
 must_haves:
   truths:
     - "`home_screen.dart` imports `HomeHeroCard` and renders exactly one instance"
-    - "`MonthOverviewCard`, `LedgerComparisonSection`, `SoulFullnessCard` imports are removed from `home_screen.dart`"
-    - "`_computeHappinessROI`, `_computeSatisfaction`, `_buildLedgerRows` private methods are deleted"
-    - "Net line count of `home_screen.dart` DECREASES (currently 386; target < 386)"
+    - "`MonthOverviewCard`, `LedgerComparisonSection`, `SoulFullnessCard` imports are removed; the 3 separate widget call blocks are replaced with one consolidated provider-resolution Builder + HomeHeroCard"
+    - "Old helpers `_computeHappinessROI`, `_computeSatisfaction`, `_buildLedgerRows` may still EXIST as dead code at this stage — Plan 10-08b owns their deletion (intentional split for executor checkpoint per checker B3)"
     - "All providers needed by HomeHeroCard are watched and `.when()`-resolved at the parent: `monthlyReportProvider`, `happinessReportProvider`, `bestJoyMomentProvider`, `bookByIdProvider`, `currentLocaleProvider`, `isGroupModeProvider`; group-mode-only: `familyHappinessProvider`, `shadowBooksProvider`, `shadowAggregateProvider`"
     - "Tap target navigates to `AnalyticsScreen(bookId: bookId)` per Pitfall #9 (no `AnalyticsRegion` enum)"
-    - "Currency code resolved from `bookByIdProvider(bookId).valueOrNull?.currency ?? 'JPY'` — JPY fallback only when Book is missing"
+    - "Currency code resolved from `bookByIdProvider(bookId).valueOrNull?.currency ?? 'JPY'` — JPY fallback only when Book is missing — comment marker `Pitfall #9` or `fallback only when Book is missing` documents the legitimate site (B4 strict guard)"
     - "`flutter analyze lib/features/home/presentation/screens/home_screen.dart` reports 0 issues"
   artifacts:
     - path: "lib/features/home/presentation/screens/home_screen.dart"
-      provides: "Simplified HomePage rendering 1 HomeHeroCard instead of 3 cards"
-      max_lines: 386
+      provides: "HomePage renders 1 HomeHeroCard via consolidated provider-resolution Builder; old widget call sites removed; old helper bodies still present pending Plan 10-08b deletion"
       contains: "HomeHeroCard"
   key_links:
     - from: "lib/features/home/presentation/screens/home_screen.dart"
@@ -37,13 +35,13 @@ must_haves:
 ---
 
 <objective>
-Replace the 3 separate widget calls (`MonthOverviewCard`, `LedgerComparisonSection`, `SoulFullnessCard`) in `home_screen.dart` with a single `HomeHeroCard` call. Delete the inline helpers `_computeHappinessROI`, `_computeSatisfaction`, `_buildLedgerRows` since `HomeHeroCard` consumes Phase 9 use cases directly and computes ledger rows from `MonthlyReport.soulTotal/survivalTotal` itself.
+Wire `HomeHeroCard` into `home_screen.dart`: replace the 3 separate widget calls (`MonthOverviewCard`, `LedgerComparisonSection`, `SoulFullnessCard`) with a single `HomeHeroCard` call backed by a consolidated provider-resolution Builder.
 
-This plan owns HOMEUI-02 (delete inline helpers) + HOMEUI-05/06/07 wiring (the new card receives the data needed for hero header, split bar, member rows) + FAMILY-03 minimum-gate (parent decides isGroupMode + shadowBooks visibility).
+This plan does NOT delete the obsolete inline helpers (`_computeHappinessROI`, `_computeSatisfaction`, `_buildLedgerRows`). Plan 10-08b owns that deletion + line-count enforcement. The split between wire-up (10-08a) and cleanup (10-08b) provides an executor checkpoint per checker B3 — once 10-08a lands, the new HomeHeroCard renders correctly while the dead helper code coexists temporarily.
 
-Net effect: `home_screen.dart` shrinks. Currently 386 lines; the deletion of 3 methods (`_computeSatisfaction` ~14 lines, `_computeHappinessROI` ~5 lines, `_buildLedgerRows` ~66 lines = 85 lines deleted) plus collapsing 3 separate `.when()` blocks into one consolidated provider-resolution block must result in < 386 lines.
+This plan owns HOMEUI-05/06/07 wiring (the new card receives the data needed for hero header, split bar, member rows) + FAMILY-03 minimum-gate (parent decides isGroupMode + shadowBooks visibility). HOMEUI-02 (helper deletion) belongs to Plan 10-08b.
 
-Output: `home_screen.dart` modified to render `HomeHeroCard`; helpers deleted; line count decreased.
+Output: `home_screen.dart` renders `HomeHeroCard`; old widget call sites and their direct imports are removed; old helper bodies remain untouched (Plan 10-08b deletes them).
 </objective>
 
 <execution_context>
@@ -66,11 +64,11 @@ Output: `home_screen.dart` modified to render `HomeHeroCard`; helpers deleted; l
 <tasks>
 
 <task type="auto" tdd="false">
-  <name>Task 8.1: Wire HomeHeroCard into home_screen.dart and delete obsolete helpers</name>
+  <name>Task 8a.1: Wire HomeHeroCard into home_screen.dart (no helper deletion)</name>
   <files>lib/features/home/presentation/screens/home_screen.dart</files>
   <read_first>
-    - lib/features/home/presentation/screens/home_screen.dart (FULL FILE — 386 lines; locate every reference to MonthOverviewCard / LedgerComparisonSection / SoulFullnessCard / _computeHappinessROI / _computeSatisfaction / _buildLedgerRows)
-    - lib/features/home/presentation/widgets/home_hero_card.dart (just created in Plan 10-07 — confirm constructor signature: report, happiness, bestJoy, family, shadowBooks, shadowAggregate, currencyCode, locale, isGroupMode, onTap)
+    - lib/features/home/presentation/screens/home_screen.dart (FULL FILE — 386 lines; locate every reference to MonthOverviewCard / LedgerComparisonSection / SoulFullnessCard but DO NOT delete the helper methods in this plan)
+    - lib/features/home/presentation/widgets/home_hero_card.dart (delivered by Plan 10-07b — confirm constructor signature: report, happiness, bestJoy, family, shadowBooks, shadowAggregate, currencyCode, locale, isGroupMode, onTap)
     - lib/features/analytics/presentation/providers/state_happiness.dart (lines 14-65 — confirm provider signatures: `happinessReport(bookId, year, month, currencyCode)`, `bestJoyMoment(bookId, year, month)`, `familyHappiness(year, month)`)
     - lib/features/analytics/presentation/providers/state_analytics.dart (locate `monthlyReportProvider` signature)
     - lib/features/home/presentation/providers/state_shadow_books.dart (lines 13-72 — confirm `shadowBooksProvider` returns List<ShadowBookInfo>; `shadowAggregateProvider` returns ShadowAggregate)
@@ -84,8 +82,7 @@ Edit `lib/features/home/presentation/screens/home_screen.dart` per the following
 
 **Step 1: Update imports.**
 
-Remove these imports:
-- `'../models/ledger_row_data.dart'` (no longer used — _buildLedgerRows is deleted)
+Remove these imports (the widget call sites are gone — but DO NOT remove `'../models/ledger_row_data.dart'` yet; Plan 10-08b removes it after `_buildLedgerRows` is deleted):
 - `'../widgets/ledger_comparison_section.dart'`
 - `'../widgets/month_overview_card.dart'`
 - `'../widgets/soul_fullness_card.dart'`
@@ -93,7 +90,7 @@ Remove these imports:
 Add this import:
 - `'../widgets/home_hero_card.dart'`
 
-Keep all other existing imports (transaction list card, hero header, bottom nav, family invite banner, providers, etc.).
+Keep all other existing imports (transaction list card, hero header, bottom nav, family invite banner, providers, `'../models/ledger_row_data.dart'` until 10-08b, etc.).
 
 **Step 2: Locate the 3 separate widget rendering blocks.**
 
@@ -132,7 +129,9 @@ Builder(
     final isGroupMode = ref.watch(isGroupModeProvider);
     final locale = ref.watch(currentLocaleProvider);
 
-    // Currency code: from Book.currency; fallback to 'JPY' ONLY when Book is missing
+    // CLAUDE.md Pitfall #9 — fallback only when Book is missing.
+    // This is the SOLE legitimate 'JPY' literal in the home feature; future grep audits
+    // verify no other site re-introduces it.
     final currencyCode = bookAsync.valueOrNull?.currency ?? 'JPY';
 
     final happinessAsync = ref.watch(happinessReportProvider(
@@ -209,62 +208,46 @@ Builder(
 - The locale `currentLocaleProvider` returns `Locale` — it's NOT an AsyncValue based on existing project patterns; if it IS an AsyncValue, adjust the `.when()` accordingly.
 - `Navigator.of(context).push(MaterialPageRoute(...))` per Pitfall #9 — DO NOT introduce `AnalyticsRegion` enum (Phase 11 work).
 
-**Step 4: Delete the 3 obsolete helper methods.**
-
-Locate and delete:
-- `int _computeSatisfaction(AsyncValue<List<Transaction>> txAsync) { ... }` (lines ~345-359, ~14 lines)
-- `double _computeHappinessROI(MonthlyReport report) { ... }` (lines ~362-367, ~5 lines)
-- `List<LedgerRowData> _buildLedgerRows(...) { ... }` (lines ~258-324, ~66 lines)
-
-Also delete any now-unused private widgets/methods these helpers depended on (e.g., a `_buildLedgerRow` private widget if it existed only for `_buildLedgerRows`). Cross-check by running `grep _buildLedgerRow lib/features/home/presentation/screens/home_screen.dart` after the deletion — should return 0.
-
-DO NOT delete `_ErrorText` (line ~371-386) — it's reused by the new consolidated `.when()` chain.
-
-DO NOT delete the existing `todayTransactionsProvider` watch — it may still be needed for the transaction list card (existing `TransactionListCard` widget); verify by reading the rest of `home_screen.dart`.
-
-**Step 5: Update imports for AnalyticsScreen if not already present.**
+**Step 4: Update imports for AnalyticsScreen if not already present.**
 
 Add: `import '../../../analytics/presentation/screens/analytics_screen.dart';` if missing.
 
-**Step 6: Verify line count.**
-
-After edits, run `wc -l lib/features/home/presentation/screens/home_screen.dart` — must return < 386. Net deletion (85 lines of helpers + ~30 lines of replaced .when() blocks) minus net addition (~80 lines of consolidated block + 1 new import) = net negative. Expected new line count: ~300-350.
-
-**Step 7: Run analyzer + run existing home_screen tests.**
+**Step 5: Run analyzer.**
 
 ```bash
 flutter analyze lib/features/home/presentation/screens/home_screen.dart
-flutter test test/widget/features/home/presentation/screens/home_screen_test.dart
 ```
 
 Expect:
-- `flutter analyze` reports 0 issues.
-- `home_screen_test.dart` likely FAILS because it has `find.byType(MonthOverviewCard)` etc. assertions for widgets that no longer exist. This is EXPECTED at this point in Phase 10. Plan 10-09 owns deletion of those obsolete tests + Plan 10-10 owns the new test scaffold population. Note the test failures and proceed; do NOT modify the test file in this plan.
+- `flutter analyze` reports 0 issues. **EXCEPT** the analyzer may emit `unused_element` hints for `_computeHappinessROI`, `_computeSatisfaction`, `_buildLedgerRows` — those are intentional dead code at this stage and Plan 10-08b deletes them. If analyzer treats `unused_element` as warning rather than info, suppress the hint at each helper site with `// ignore: unused_element` (with a TODO marker `// TODO(plan-10-08b): delete this helper`); 10-08b removes both the helper and the ignore.
+- The existing `home_screen_test.dart` likely FAILS because it has `find.byType(MonthOverviewCard)` etc. assertions for widgets that no longer exist. This is EXPECTED at this point in Phase 10. Plan 10-09 owns deletion of those obsolete tests + Plan 10-10 owns the new test scaffold population. Note the test failures and proceed; do NOT modify the test file in this plan.
 
 **Forbidden:**
-- DO NOT touch ANY other helpers in `home_screen.dart` not listed in Step 4.
+- DO NOT delete `_computeHappinessROI`, `_computeSatisfaction`, or `_buildLedgerRows` in this plan — Plan 10-08b owns the deletion. The split is the executor checkpoint.
+- DO NOT touch ANY other helpers in `home_screen.dart` (e.g., `_ErrorText`, the `todayTransactionsProvider` watch).
 - DO NOT change the bookId/year/month resolution logic.
 - DO NOT add `AnalyticsRegion` enum or `initialRegion` parameter.
 - DO NOT introduce new top-level constants or private helpers beyond the `_ErrorText` already present.
-- DO NOT hardcode `'JPY'` anywhere except as the fallback in `currencyCode` resolution (with a comment explaining why).
+- DO NOT hardcode `'JPY'` anywhere except as the fallback in `currencyCode` resolution (with the `Pitfall #9 — fallback only when Book is missing` comment marker).
   </action>
   <verify>
     <automated>flutter analyze lib/features/home/presentation/screens/home_screen.dart 2>&1 | grep -q "No issues found"</automated>
   </verify>
   <acceptance_criteria>
     - `grep -q "import '../widgets/home_hero_card.dart';" lib/features/home/presentation/screens/home_screen.dart` returns exit code 0
-    - `grep -q "MonthOverviewCard\|LedgerComparisonSection\|SoulFullnessCard" lib/features/home/presentation/screens/home_screen.dart` returns exit code 1 (NO matches — all 3 removed)
-    - `grep -q "_computeHappinessROI\|_computeSatisfaction\|_buildLedgerRows" lib/features/home/presentation/screens/home_screen.dart` returns exit code 1 (NO matches — all 3 helpers deleted)
+    - `grep -E "import .*month_overview_card|import .*ledger_comparison_section|import .*soul_fullness_card" lib/features/home/presentation/screens/home_screen.dart` returns NO matches (NO imports of the 3 widgets)
+    - `grep -E "MonthOverviewCard\(|LedgerComparisonSection\(|SoulFullnessCard\(" lib/features/home/presentation/screens/home_screen.dart` returns NO matches (NO call sites of the 3 widgets — but helper bodies may still reference internal types like `LedgerRowData` until 10-08b)
     - `grep -q "HomeHeroCard(" lib/features/home/presentation/screens/home_screen.dart` returns exit code 0
     - `grep -q "bookByIdProvider" lib/features/home/presentation/screens/home_screen.dart` returns exit code 0
+    - `grep -q "Pitfall #9\|fallback only when Book is missing" lib/features/home/presentation/screens/home_screen.dart` returns exit code 0 (B4 strict guard — comment marker documents the legitimate `'JPY'` fallback)
+    - `grep -c "'JPY'" lib/features/home/presentation/screens/home_screen.dart` returns exactly 1 (only the documented fallback)
     - `grep -q "AnalyticsScreen(bookId: bookId)" lib/features/home/presentation/screens/home_screen.dart` returns exit code 0
     - `grep -q "AnalyticsRegion\|initialRegion" lib/features/home/presentation/screens/home_screen.dart` returns exit code 1 (NO match — Phase 11 introduces this enum)
-    - File line count: `wc -l lib/features/home/presentation/screens/home_screen.dart` returns less than 386
-    - `flutter analyze lib/features/home/presentation/screens/home_screen.dart` reports "No issues found"
-    - `flutter analyze lib/features/home/` reports "No issues found" (whole feature compiles)
+    - `grep -q "_computeHappinessROI\|_computeSatisfaction\|_buildLedgerRows" lib/features/home/presentation/screens/home_screen.dart` returns exit code 0 (helpers STILL exist as dead code; 10-08b deletes them — this asserts 10-08a did NOT touch them)
+    - `flutter analyze lib/features/home/presentation/screens/home_screen.dart` reports "No issues found" (or only `unused_element` hints, which 10-08b resolves)
   </acceptance_criteria>
   <done>
-home_screen.dart imports HomeHeroCard, renders one instance with the consolidated `.when()` chain, deletes the 3 obsolete helpers, removes imports of the 3 deleted widgets, navigates to AnalyticsScreen with `bookId` only (no enum), passes `flutter analyze`, has fewer total lines than 386.
+home_screen.dart imports HomeHeroCard, renders one instance with the consolidated `.when()` chain, removes imports + call sites of the 3 obsolete widgets, navigates to AnalyticsScreen with `bookId` only (no enum), passes `flutter analyze`, AND retains the 3 dead-code helper bodies (deleted by 10-08b). Comment marker `Pitfall #9 — fallback only when Book is missing` documents the legitimate `'JPY'` literal.
   </done>
 </task>
 
@@ -272,21 +255,21 @@ home_screen.dart imports HomeHeroCard, renders one instance with the consolidate
 
 <verification>
 - Grep guards pass:
-  - `grep -c "_computeHappinessROI\|_computeSatisfaction\|_buildLedgerRows" lib/` returns 0
-  - `grep -c "MonthOverviewCard\|LedgerComparisonSection\|SoulFullnessCard" lib/features/home/presentation/screens/home_screen.dart` returns 0
-- `flutter analyze lib/features/home/` 0 issues
+  - `grep -E "MonthOverviewCard\(|LedgerComparisonSection\(|SoulFullnessCard\(" lib/features/home/presentation/screens/home_screen.dart` returns NO matches
+  - `grep -q "Pitfall #9\|fallback only when Book is missing" lib/features/home/presentation/screens/home_screen.dart` returns exit code 0 (B4)
+  - `grep -q "_computeHappinessROI\|_computeSatisfaction\|_buildLedgerRows" lib/features/home/presentation/screens/home_screen.dart` returns exit code 0 (helpers still exist — 10-08b deletes them)
+- `flutter analyze lib/features/home/` 0 issues (excepting `unused_element` hints on the 3 helpers, which 10-08b clears)
 - Note: `home_screen_test.dart` will have failing assertions (uses old finders) — that's owned by Plan 10-10
 </verification>
 
 <success_criteria>
 - HomePage renders 1 HomeHeroCard instead of 3 separate cards
-- 3 obsolete helpers gone from `home_screen.dart`
-- File line count decreased
-- `flutter analyze` clean
-- Currency code resolves from Book.currency, not hardcoded
+- Currency code resolves from Book.currency, not hardcoded; B4 comment marker present
 - Tap navigation works (will manual-verify with placeholder route to AnalyticsScreen)
+- Old helper bodies remain (deleted by 10-08b) — splitting at this boundary is intentional per checker B3
+- `flutter analyze` clean (modulo `unused_element` hints)
 </success_criteria>
 
 <output>
-After completion, create `.planning/phases/10-homepage-soulfullnesscard-redesign/10-08-SUMMARY.md` recording: pre/post line count, the 3 deleted helper line ranges, the new consolidated block line range, and the imports diff.
+After completion, create `.planning/phases/10-homepage-soulfullnesscard-redesign/10-08a-SUMMARY.md` recording: pre/post line count, the new consolidated block line range, the imports diff, and confirmation that the 3 dead-code helpers are still present pending 10-08b.
 </output>
