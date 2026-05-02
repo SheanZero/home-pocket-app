@@ -75,9 +75,9 @@ Plans:
 - [x] 09-08-PLAN.md — Riverpod providers (3 use case providers + state_happiness.dart consumer-facing async providers)
 
 **Wave 5** *(blocked on Wave 4 completion)*
-- [ ] 09-10-PLAN.md — ADR-012 No Gamification v1.1 (Goodhart Law defense; Forbidden Features inventory)
-- [ ] 09-11-PLAN.md — ADR-013 Joy Density PTVF Scaling (K-T 1979 citation; currency table; perf trade-off)
-- [ ] 09-12-PLAN.md — ADR-014 Soul Satisfaction Unipolar Positive Scale (default 5→2 rationale; voice-realignment defer)
+- [x] 09-10-PLAN.md — ADR-012 No Gamification v1.1 (Goodhart Law defense; Forbidden Features inventory)
+- [x] 09-11-PLAN.md — ADR-013 Joy Density PTVF Scaling (K-T 1979 citation; currency table; perf trade-off)
+- [x] 09-12-PLAN.md — ADR-014 Soul Satisfaction Unipolar Positive Scale (default 5→2 rationale; voice-realignment defer)
 
 **Wave 6** *(blocked on Wave 5 completion)*
 - [ ] 09-13-PLAN.md — Spec amendments (REQUIREMENTS.md + ROADMAP.md edits per D-22)
