@@ -28,7 +28,7 @@
 Phase numbering continues from Phase 9 (no reset).
 
 - [x] **Phase 9: Happiness Domain & Formula Layer** — Lock formulas, contracts, soul-only filter, Top Joy ordering, sealed `MetricResult`, family aggregate-only return type, no-gamification ADR (linchpin) — completed 2026-05-02
-- [ ] **Phase 10: HomePage SoulFullnessCard Redesign (HomeHeroCard integrated rebuild)** — Replace 3 widgets with 1 integrated `HomeHeroCard`; 3 concentric rings encode Phase 9 contracts (single → `HappinessReport`, group → `FamilyHappiness`); delete `_computeHappinessROI` / `_computeSatisfaction` / `_buildLedgerRows` from `home_screen.dart`
+- [x] **Phase 10: HomePage SoulFullnessCard Redesign (HomeHeroCard integrated rebuild)** — Replace 3 widgets with 1 integrated `HomeHeroCard`; 3 concentric rings encode Phase 9 contracts (single → `HappinessReport`, group → `FamilyHappiness`); delete `_computeHappinessROI` / `_computeSatisfaction` / `_buildLedgerRows` from `home_screen.dart` (completed 2026-05-03)
 - [ ] **Phase 11: Statistics Surface for 悦己账本** — Wire 3 dormant DAO methods + new Best Joy query through to AnalyticsScreen sub-region; Joy-per-¥ trend line + satisfaction histogram (with `5`-bar annotation); footprint-audit doc first
 - [ ] **Phase 12: UI Copy Rename Pass (ARB values, ja/zh/en)** — Values-only rename of `soulLedger` / `survivalLedger` / `homeHappinessROI` / `homeSoulFullness`; lexical-hierarchy ADR; native-speaker register review
 
@@ -190,6 +190,6 @@ Plans:
 | 7. Documentation Sweep            | v1.0 | 6/6 | Complete | 2026-04-28 |
 | 8. Re-Audit + Exit Verification   | v1.0 | 8/8 | Complete | 2026-04-28 |
 | 9. Happiness Domain & Formula Layer       | v1.1 | 0/? | Not started | —          |
-| 10. HomePage SoulFullnessCard Redesign    | v1.1 | 12/13 | In Progress|  |
+| 10. HomePage SoulFullnessCard Redesign    | v1.1 | 13/13 | Complete   | 2026-05-03 |
 | 11. Statistics Surface for 悦己账本        | v1.1 | 0/? | Not started | —          |
 | 12. UI Copy Rename Pass (ARB values)      | v1.1 | 0/? | Not started | —          |
