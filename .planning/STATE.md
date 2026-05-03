@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Happiness Metric & Display
 status: executing
-stopped_at: Phase 11 UI-SPEC revision 2 approved (Variant δ unified dashboard)
-last_updated: "2026-05-03T13:23:50.596Z"
-last_activity: 2026-05-03 -- Phase 11 planning complete
+stopped_at: Completed 11-01-PLAN.md; ready for 11-02
+last_updated: "2026-05-03T13:49:28.892Z"
+last_activity: 2026-05-03
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 35
-  completed_plans: 27
-  percent: 77
+  completed_plans: 28
+  percent: 80
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-02)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes survival spending from soul spending
-**Current focus:** Phase 10 — homepage-soulfullnesscard-redesign
+**Current focus:** Phase 11 — statistics-surface-for
 
 ## Current Position
 
-Phase: 11
-Plan: Not started
+Phase: 11 (statistics-surface-for) — EXECUTING
+Plan: 2 of 8
 Status: Ready to execute
-Last activity: 2026-05-03 -- Phase 11 planning complete
+Last activity: 2026-05-03
 
 ## v1.1 Phase Plan
 
@@ -63,6 +63,11 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.0 decisions are captu
 - No `LedgerType` enum rename; ARB values only
 - Zero new pub dependencies (research HIGH-confidence: every capability maps to existing packages)
 - Phase 9 is the linchpin — all formulas, contracts, and anti-gamification defenses must lock before any UI consumer builds on them
+
+**v1.1 execution decisions (2026-05-03):**
+
+- Phase 11 audit corrects the dormant-DAO framing: only `getDailySatisfactionTrend` is truly dormant and it is superseded by `getDailySoulRowsForPtvf`.
+- Plan 07 must land the AnalyticsScreen rewrite, 8 widget deletions, test deletions, and replacement screen test as one atomic commit.
 
 ### Pending Todos
 
@@ -113,8 +118,8 @@ Items acknowledged and deferred at v1.0 milestone close on 2026-04-29:
 
 ## Session Continuity
 
-Last session: 2026-05-03T12:22:53.154Z
-Stopped at: Phase 11 UI-SPEC revision 2 approved (Variant δ unified dashboard)
-Resume file: .planning/phases/11-statistics-surface-for/11-UI-SPEC.md
+Last session: 2026-05-03T13:49:17.628Z
+Stopped at: Completed 11-01-PLAN.md; ready for 11-02
+Resume file: None
 
-**Planned Next:** `/gsd-plan-phase 10` to plan Phase 10 (HomePage SoulFullnessCard Redesign)
+**Planned Next:** `/gsd-execute-phase 11` to continue with Plan 11-02
