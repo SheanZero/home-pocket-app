@@ -525,6 +525,87 @@ class SJa extends S {
   }
 
   @override
+  String get homeJoyIndexTooltip => '外輪は Joy/¥ 密度・中輪は満足度の平均・内輪は小確幸の回数（満足度6以上）。';
+
+  @override
+  String get homeJoyPerYenTooltip =>
+      '幸福密度 = Σ(満足度 × (金額/base)^0.88) / Σ金額（K-T 1979 価値関数）。同じ金額でも繰り返すと喜びは弱まります（享楽的適応）。式は ¥1k 基準で正規化。';
+
+  @override
+  String get homeHeroCardLabelSingle => '今月の支出';
+
+  @override
+  String get homeHeroCardLabelGroup => '家族の支出';
+
+  @override
+  String homeHeroPreviousMonthSubline(String amount) {
+    return '先月 $amount';
+  }
+
+  @override
+  String get homeRingSectionTitleSingle => 'ときめき度';
+
+  @override
+  String get homeRingSectionTitleGroup => '家族の小確幸';
+
+  @override
+  String get homeBestJoyTagSingle => '今月の最愛';
+
+  @override
+  String get homeBestJoyTagGroup => '今月の最愛';
+
+  @override
+  String homeBestJoyAmountSat(String amount, int sat) {
+    return '$amount・満足 $sat/10 ✨';
+  }
+
+  @override
+  String get homeMembersSectionTitle => 'メンバー';
+
+  @override
+  String get homeNoSoulDataLegend => 'まだ記録なし';
+
+  @override
+  String get homeBestJoyEmptyTagPrimary => '今月の最愛';
+
+  @override
+  String get homeBestJoyEmptyBig => '初めての灵账を記録しよう';
+
+  @override
+  String get homeBestJoyEmptySmall => '今月の最愛がここに表示されます →';
+
+  @override
+  String get homeBestJoyAllNeutralBig => '一番大きな支出を評価して';
+
+  @override
+  String get homeBestJoyAllNeutralSmall => 'あなたの今月の最愛にしよう';
+
+  @override
+  String homeCoverageCaption(int rated, int total) {
+    return '$rated/$total 件評価済み';
+  }
+
+  @override
+  String get homeAvgSatisfactionLegend => '満足度の平均';
+
+  @override
+  String get homeJoyPerYenLegend => 'Joy/¥';
+
+  @override
+  String homeHighlightsCountLegend(int count) {
+    return '小確幸 ($count)';
+  }
+
+  @override
+  String get homeFamilyHighlightsLegend => '家族の小確幸';
+
+  @override
+  String get homeSharedJoyLegend => '共に好き';
+
+  @override
+  String get homeMedianSatisfactionLegend => '満足度の中央値';
+
+  @override
   String get addTransaction => '取引を追加';
 
   @override

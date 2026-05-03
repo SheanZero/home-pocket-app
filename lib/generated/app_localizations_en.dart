@@ -527,6 +527,89 @@ class SEn extends S {
   }
 
   @override
+  String get homeJoyIndexTooltip =>
+      'Outer ring is Joy/¥ density · middle is average satisfaction · inner is highlights count (satisfaction ≥ 6).';
+
+  @override
+  String get homeJoyPerYenTooltip =>
+      'Joy density = Σ(satisfaction × (amount/base)^0.88) / Σamount (Kahneman-Tversky 1979). Repeat purchases bring less joy (hedonic adaptation); the formula normalizes against ¥1k baseline.';
+
+  @override
+  String get homeHeroCardLabelSingle => 'This Month';
+
+  @override
+  String get homeHeroCardLabelGroup => 'Family This Month';
+
+  @override
+  String homeHeroPreviousMonthSubline(String amount) {
+    return 'Last month $amount';
+  }
+
+  @override
+  String get homeRingSectionTitleSingle => 'Joy Index';
+
+  @override
+  String get homeRingSectionTitleGroup => 'Family Joy';
+
+  @override
+  String get homeBestJoyTagSingle => 'Top of the Month';
+
+  @override
+  String get homeBestJoyTagGroup => 'Top of the Month';
+
+  @override
+  String homeBestJoyAmountSat(String amount, int sat) {
+    return '$amount · Satisfaction $sat/10 ✨';
+  }
+
+  @override
+  String get homeMembersSectionTitle => 'Members';
+
+  @override
+  String get homeNoSoulDataLegend => 'No data yet';
+
+  @override
+  String get homeBestJoyEmptyTagPrimary => 'Top of the Month';
+
+  @override
+  String get homeBestJoyEmptyBig => 'Record your first soul-ledger entry';
+
+  @override
+  String get homeBestJoyEmptySmall =>
+      'Your monthly favorite will appear here →';
+
+  @override
+  String get homeBestJoyAllNeutralBig => 'Rate your biggest spend';
+
+  @override
+  String get homeBestJoyAllNeutralSmall => 'Make it your monthly favorite';
+
+  @override
+  String homeCoverageCaption(int rated, int total) {
+    return 'n=$rated/$total rated';
+  }
+
+  @override
+  String get homeAvgSatisfactionLegend => 'Avg satisfaction';
+
+  @override
+  String get homeJoyPerYenLegend => 'Joy / ¥';
+
+  @override
+  String homeHighlightsCountLegend(int count) {
+    return 'Highlights ($count)';
+  }
+
+  @override
+  String get homeFamilyHighlightsLegend => 'Family highlights';
+
+  @override
+  String get homeSharedJoyLegend => 'Shared joy';
+
+  @override
+  String get homeMedianSatisfactionLegend => 'Median satisfaction';
+
+  @override
   String get addTransaction => 'Add Transaction';
 
   @override

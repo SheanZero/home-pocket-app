@@ -525,6 +525,88 @@ class SZh extends S {
   }
 
   @override
+  String get homeJoyIndexTooltip =>
+      '外环是 Joy/¥ 密度 · 中环是满足度均值 · 内环是小確幸数（满足度 ≥ 6 的次数）。';
+
+  @override
+  String get homeJoyPerYenTooltip =>
+      '幸福密度 = Σ(满足度 × (金额/base)^0.88) / Σ金额 (Kahneman-Tversky 1979 价值函数)。同样金额带来的快乐会随次数减弱 (享乐适应)，公式按¥1k基线归一化。';
+
+  @override
+  String get homeHeroCardLabelSingle => '本月支出';
+
+  @override
+  String get homeHeroCardLabelGroup => '家庭支出';
+
+  @override
+  String homeHeroPreviousMonthSubline(String amount) {
+    return '上月 $amount';
+  }
+
+  @override
+  String get homeRingSectionTitleSingle => '悦己充盈';
+
+  @override
+  String get homeRingSectionTitleGroup => '家族的小确幸';
+
+  @override
+  String get homeBestJoyTagSingle => '本月最爱';
+
+  @override
+  String get homeBestJoyTagGroup => '本月最爱';
+
+  @override
+  String homeBestJoyAmountSat(String amount, int sat) {
+    return '$amount · 满足 $sat/10 ✨';
+  }
+
+  @override
+  String get homeMembersSectionTitle => '群组成员';
+
+  @override
+  String get homeNoSoulDataLegend => '尚未记录';
+
+  @override
+  String get homeBestJoyEmptyTagPrimary => '本月最爱';
+
+  @override
+  String get homeBestJoyEmptyBig => '记录第一笔魂账';
+
+  @override
+  String get homeBestJoyEmptySmall => '你的本月最爱会出现在这里 →';
+
+  @override
+  String get homeBestJoyAllNeutralBig => '回去给最大那笔评个分';
+
+  @override
+  String get homeBestJoyAllNeutralSmall => '让它变成你的本月最爱';
+
+  @override
+  String homeCoverageCaption(int rated, int total) {
+    return '已评分 $rated/$total';
+  }
+
+  @override
+  String get homeAvgSatisfactionLegend => '满足度均值';
+
+  @override
+  String get homeJoyPerYenLegend => 'Joy/¥';
+
+  @override
+  String homeHighlightsCountLegend(int count) {
+    return '小確幸 ($count)';
+  }
+
+  @override
+  String get homeFamilyHighlightsLegend => '家族小確幸';
+
+  @override
+  String get homeSharedJoyLegend => '共爱品类';
+
+  @override
+  String get homeMedianSatisfactionLegend => '满足度中位数';
+
+  @override
   String get addTransaction => '添加账目';
 
   @override

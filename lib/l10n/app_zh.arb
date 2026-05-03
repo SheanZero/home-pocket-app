@@ -661,6 +661,128 @@
       }
     }
   },
+  "homeJoyIndexTooltip": "外环是 Joy/¥ 密度 · 中环是满足度均值 · 内环是小確幸数（满足度 ≥ 6 的次数）。",
+  "@homeJoyIndexTooltip": {
+    "description": "Tooltip explaining the 3-ring system on the HomeHeroCard (D-10 tooltip 1)"
+  },
+  "homeJoyPerYenTooltip": "幸福密度 = Σ(满足度 × (金额/base)^0.88) / Σ金额 (Kahneman-Tversky 1979 价值函数)。同样金额带来的快乐会随次数减弱 (享乐适应)，公式按¥1k基线归一化。",
+  "@homeJoyPerYenTooltip": {
+    "description": "Tooltip explaining the Joy/¥ density formula (D-10 tooltip 2)"
+  },
+  "homeHeroCardLabelSingle": "本月支出",
+  "@homeHeroCardLabelSingle": {
+    "description": "Hero header label — single mode (D-02)"
+  },
+  "homeHeroCardLabelGroup": "家庭支出",
+  "@homeHeroCardLabelGroup": {
+    "description": "Hero header label — group mode (D-02)"
+  },
+  "homeHeroPreviousMonthSubline": "上月 {amount}",
+  "@homeHeroPreviousMonthSubline": {
+    "description": "Hero header previous-month sub-line",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeRingSectionTitleSingle": "悦己充盈",
+  "@homeRingSectionTitleSingle": {
+    "description": "Ring section title — single mode (fallback if reusing homeSoulFullness is rejected)"
+  },
+  "homeRingSectionTitleGroup": "家族的小确幸",
+  "@homeRingSectionTitleGroup": {
+    "description": "Ring section title — group mode"
+  },
+  "homeBestJoyTagSingle": "本月最爱",
+  "@homeBestJoyTagSingle": {
+    "description": "Best Joy tag — single mode (D-04)"
+  },
+  "homeBestJoyTagGroup": "本月最爱",
+  "@homeBestJoyTagGroup": {
+    "description": "Best Joy tag — group mode (same copy as Single per D-04, separate key for future flexibility)"
+  },
+  "homeBestJoyAmountSat": "{amount} · 满足 {sat}/10 ✨",
+  "@homeBestJoyAmountSat": {
+    "description": "Best Joy strip small line composing amount and satisfaction (D-04)",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "sat": {
+        "type": "int"
+      }
+    }
+  },
+  "homeMembersSectionTitle": "群组成员",
+  "@homeMembersSectionTitle": {
+    "description": "Group-mode member rows subheader"
+  },
+  "homeNoSoulDataLegend": "尚未记录",
+  "@homeNoSoulDataLegend": {
+    "description": "Legend rows when totalSoulTx == 0 (D-09)"
+  },
+  "homeBestJoyEmptyTagPrimary": "本月最爱",
+  "@homeBestJoyEmptyTagPrimary": {
+    "description": "Best Joy CTA variant tag (same copy as homeBestJoyTagSingle but separate key)"
+  },
+  "homeBestJoyEmptyBig": "记录第一笔魂账",
+  "@homeBestJoyEmptyBig": {
+    "description": "Best Joy BIG line — totalSoulTx == 0 empty state (D-09)"
+  },
+  "homeBestJoyEmptySmall": "你的本月最爱会出现在这里 →",
+  "@homeBestJoyEmptySmall": {
+    "description": "Best Joy small line — totalSoulTx == 0 empty state (D-09)"
+  },
+  "homeBestJoyAllNeutralBig": "回去给最大那笔评个分",
+  "@homeBestJoyAllNeutralBig": {
+    "description": "Best Joy BIG line — all-neutral state (topJoy soulSatisfaction <= 2) (D-09)"
+  },
+  "homeBestJoyAllNeutralSmall": "让它变成你的本月最爱",
+  "@homeBestJoyAllNeutralSmall": {
+    "description": "Best Joy small line — all-neutral state (D-09)"
+  },
+  "homeCoverageCaption": "已评分 {rated}/{total}",
+  "@homeCoverageCaption": {
+    "description": "Coverage caption on headline metric tile (HOMEUI-04 / HAPPY-06)",
+    "placeholders": {
+      "rated": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "homeAvgSatisfactionLegend": "满足度均值",
+  "@homeAvgSatisfactionLegend": {
+    "description": "Single-mode mid-ring legend label"
+  },
+  "homeJoyPerYenLegend": "Joy/¥",
+  "@homeJoyPerYenLegend": {
+    "description": "Single-mode outer-ring legend label (matches D-20 display)"
+  },
+  "homeHighlightsCountLegend": "小確幸 ({count})",
+  "@homeHighlightsCountLegend": {
+    "description": "Single-mode inner-ring legend label with placeholder count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeFamilyHighlightsLegend": "家族小確幸",
+  "@homeFamilyHighlightsLegend": {
+    "description": "Group-mode outer-ring legend label"
+  },
+  "homeSharedJoyLegend": "共爱品类",
+  "@homeSharedJoyLegend": {
+    "description": "Group-mode mid-ring legend label"
+  },
+  "homeMedianSatisfactionLegend": "满足度中位数",
+  "@homeMedianSatisfactionLegend": {
+    "description": "Group-mode inner-ring legend label"
+  },
   "addTransaction": "添加账目",
   "@addTransaction": {
     "description": "Transaction entry screen title"
