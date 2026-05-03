@@ -1,39 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/generated/app_localizations.dart';
-import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
+import 'package:home_pocket/features/accounting/domain/models/book.dart';
+import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/analytics/presentation/providers/state_analytics.dart';
+import 'package:home_pocket/features/analytics/presentation/providers/state_happiness.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
-import 'package:home_pocket/features/analytics/presentation/providers/state_analytics.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_today_transactions.dart';
 import 'package:home_pocket/features/home/presentation/screens/home_screen.dart';
 import 'package:home_pocket/features/home/presentation/widgets/family_invite_banner.dart';
 import 'package:home_pocket/features/home/presentation/widgets/hero_header.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_bottom_nav_bar.dart';
-import 'package:home_pocket/features/home/presentation/widgets/ledger_comparison_section.dart';
-import 'package:home_pocket/features/home/presentation/widgets/month_overview_card.dart';
-import 'package:home_pocket/features/home/presentation/widgets/section_divider.dart';
-import 'package:home_pocket/features/home/presentation/widgets/soul_fullness_card.dart';
+import 'package:home_pocket/features/home/presentation/widgets/home_hero_card.dart';
 import 'package:home_pocket/features/home/presentation/widgets/transaction_list_card.dart';
+import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../../../../../helpers/happiness_test_fixtures.dart';
 import '../../helpers/test_localizations.dart';
 
 class MockGroupRepository extends Mock implements GroupRepository {}
 
-final _mockReport = MonthlyReport(
-  year: 2026,
-  month: 2,
-  totalIncome: 300000,
-  totalExpenses: 142800,
-  savings: 157200,
-  savingsRate: 52.4,
-  survivalTotal: 102200,
-  soulTotal: 40600,
-  categoryBreakdowns: [],
-  dailyExpenses: [],
+final _mockBook = Book(
+  id: 'book_001',
+  name: 'Test Book',
+  currency: 'JPY',
+  deviceId: 'device_local',
+  createdAt: DateTime.utc(2026, 1, 1),
 );
 
 void main() {
@@ -56,7 +51,21 @@ void main() {
             bookId: 'book_001',
             year: now.year,
             month: now.month,
-          ).overrideWith((ref) async => _mockReport),
+          ).overrideWith((ref) async => fixtureMonthlyReportRich()),
+          happinessReportProvider(
+            bookId: 'book_001',
+            year: now.year,
+            month: now.month,
+            currencyCode: 'JPY',
+          ).overrideWith((ref) async => fixtureHappinessReportRich()),
+          bestJoyMomentProvider(
+            bookId: 'book_001',
+            year: now.year,
+            month: now.month,
+          ).overrideWith((ref) async => fixtureBestJoyResultRich()),
+          bookByIdProvider(
+            bookId: 'book_001',
+          ).overrideWith((ref) async => _mockBook),
           todayTransactionsProvider(
             bookId: 'book_001',
           ).overrideWith((ref) async => []),
@@ -69,14 +78,14 @@ void main() {
       );
     }
 
-    testWidgets('renders HeroHeader and MonthOverviewCard with mock data', (
+    testWidgets('renders HeroHeader and HomeHeroCard with mock data', (
       tester,
     ) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
       expect(find.byType(HeroHeader), findsOneWidget);
-      expect(find.byType(MonthOverviewCard), findsOneWidget);
+      expect(find.byType(HomeHeroCard), findsOneWidget);
     });
 
     testWidgets('does NOT contain BottomNavigationBar', (tester) async {
@@ -87,25 +96,6 @@ void main() {
       expect(find.byType(HomeBottomNavBar), findsNothing);
     });
 
-    testWidgets('renders section dividers', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.byType(SectionDivider), findsNWidgets(2));
-      expect(
-        find.text(
-          S.of(tester.element(find.byType(HomeScreen))).homeMonthlyExpense,
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.text(
-          S.of(tester.element(find.byType(HomeScreen))).homeLedgersSection,
-        ),
-        findsOneWidget,
-      );
-    });
-
     testWidgets('renders Japanese localized home section labels', (
       tester,
     ) async {
@@ -114,7 +104,6 @@ void main() {
 
       final l10n = S.of(tester.element(find.byType(HomeScreen)));
 
-      expect(find.text(l10n.homeMonthlyExpense), findsOneWidget);
       expect(find.text(l10n.homeRecentTransactions), findsOneWidget);
     });
 
@@ -126,23 +115,21 @@ void main() {
 
       final l10n = S.of(tester.element(find.byType(HomeScreen)));
 
-      expect(find.text(l10n.homeMonthlyExpense), findsOneWidget);
       expect(find.text(l10n.homeRecentTransactions), findsOneWidget);
     });
 
-    testWidgets('renders LedgerComparisonSection', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
+    testWidgets(
+      'integrates the legacy month-overview, ledger-comparison, '
+      'and soul-fullness cards into a single HomeHeroCard',
+      (tester) async {
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
 
-      expect(find.byType(LedgerComparisonSection), findsOneWidget);
-    });
-
-    testWidgets('renders SoulFullnessCard', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.byType(SoulFullnessCard), findsOneWidget);
-    });
+        // The 3 legacy cards (month-overview / ledger-comparison /
+        // soul-fullness) were collapsed into ONE HomeHeroCard composition.
+        expect(find.byType(HomeHeroCard), findsOneWidget);
+      },
+    );
 
     testWidgets('renders transactions header row', (tester) async {
       await tester.pumpWidget(buildSubject());
