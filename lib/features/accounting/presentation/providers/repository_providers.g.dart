@@ -25,6 +25,183 @@ final bookRepositoryProvider = AutoDisposeProvider<BookRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef BookRepositoryRef = AutoDisposeProviderRef<BookRepository>;
+String _$bookByIdHash() => r'544dd59914ef0fb28f243b439f1046e87bb972e3';
+
+/// Copied from Dart SDK
+class _SystemHash {
+  _SystemHash._();
+
+  static int combine(int hash, int value) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + value);
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
+    return hash ^ (hash >> 6);
+  }
+
+  static int finish(int hash) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
+    // ignore: parameter_assignments
+    hash = hash ^ (hash >> 11);
+    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
+  }
+}
+
+/// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
+///
+/// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
+/// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
+/// for the given ID — caller falls back to `'JPY'` only in the missing-Book
+/// case, never in the widget body.
+///
+/// Copied from [bookById].
+@ProviderFor(bookById)
+const bookByIdProvider = BookByIdFamily();
+
+/// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
+///
+/// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
+/// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
+/// for the given ID — caller falls back to `'JPY'` only in the missing-Book
+/// case, never in the widget body.
+///
+/// Copied from [bookById].
+class BookByIdFamily extends Family<AsyncValue<Book?>> {
+  /// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
+  ///
+  /// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
+  /// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
+  /// for the given ID — caller falls back to `'JPY'` only in the missing-Book
+  /// case, never in the widget body.
+  ///
+  /// Copied from [bookById].
+  const BookByIdFamily();
+
+  /// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
+  ///
+  /// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
+  /// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
+  /// for the given ID — caller falls back to `'JPY'` only in the missing-Book
+  /// case, never in the widget body.
+  ///
+  /// Copied from [bookById].
+  BookByIdProvider call({required String bookId}) {
+    return BookByIdProvider(bookId: bookId);
+  }
+
+  @override
+  BookByIdProvider getProviderOverride(covariant BookByIdProvider provider) {
+    return call(bookId: provider.bookId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'bookByIdProvider';
+}
+
+/// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
+///
+/// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
+/// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
+/// for the given ID — caller falls back to `'JPY'` only in the missing-Book
+/// case, never in the widget body.
+///
+/// Copied from [bookById].
+class BookByIdProvider extends AutoDisposeFutureProvider<Book?> {
+  /// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
+  ///
+  /// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
+  /// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
+  /// for the given ID — caller falls back to `'JPY'` only in the missing-Book
+  /// case, never in the widget body.
+  ///
+  /// Copied from [bookById].
+  BookByIdProvider({required String bookId})
+    : this._internal(
+        (ref) => bookById(ref as BookByIdRef, bookId: bookId),
+        from: bookByIdProvider,
+        name: r'bookByIdProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$bookByIdHash,
+        dependencies: BookByIdFamily._dependencies,
+        allTransitiveDependencies: BookByIdFamily._allTransitiveDependencies,
+        bookId: bookId,
+      );
+
+  BookByIdProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.bookId,
+  }) : super.internal();
+
+  final String bookId;
+
+  @override
+  Override overrideWith(FutureOr<Book?> Function(BookByIdRef provider) create) {
+    return ProviderOverride(
+      origin: this,
+      override: BookByIdProvider._internal(
+        (ref) => create(ref as BookByIdRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        bookId: bookId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<Book?> createElement() {
+    return _BookByIdProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is BookByIdProvider && other.bookId == bookId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, bookId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin BookByIdRef on AutoDisposeFutureProviderRef<Book?> {
+  /// The parameter `bookId` of this provider.
+  String get bookId;
+}
+
+class _BookByIdProviderElement extends AutoDisposeFutureProviderElement<Book?>
+    with BookByIdRef {
+  _BookByIdProviderElement(super.provider);
+
+  @override
+  String get bookId => (origin as BookByIdProvider).bookId;
+}
+
 String _$categoryRepositoryHash() =>
     r'0efc054c1cb685a355e020bea93a3dbb90250e96';
 
