@@ -97,10 +97,7 @@ void main() {
       ),
     );
 
-    expect(
-      find.text('みんなで [食費] が好きみたい (n=5, 平均8.2/10)'),
-      findsOneWidget,
-    );
+    expect(find.text('みんなで [食費] が好きみたい (n=5, 平均8.2/10)'), findsOneWidget);
   });
 
   testWidgets('renders empty sentence when shared joy insight is empty', (
@@ -118,10 +115,7 @@ void main() {
       ),
     );
 
-    expect(
-      find.text('共通のお気に入り品目はまだ集計できません — もう少し記録してみよう'),
-      findsOneWidget,
-    );
+    expect(find.text('共通のお気に入り品目はまだ集計できません — もう少し記録してみよう'), findsOneWidget);
   });
 
   test('does not reference per-member identifiers', () {
