@@ -1083,6 +1083,150 @@ abstract class S {
   /// **'This month {percent}%'**
   String homeMonthBadge(int percent);
 
+  /// Tooltip explaining the 3-ring system on the HomeHeroCard (D-10 tooltip 1)
+  ///
+  /// In en, this message translates to:
+  /// **'Outer ring is Joy/¥ density · middle is average satisfaction · inner is highlights count (satisfaction ≥ 6).'**
+  String get homeJoyIndexTooltip;
+
+  /// Tooltip explaining the Joy/¥ density formula (D-10 tooltip 2)
+  ///
+  /// In en, this message translates to:
+  /// **'Joy density = Σ(satisfaction × (amount/base)^0.88) / Σamount (Kahneman-Tversky 1979). Repeat purchases bring less joy (hedonic adaptation); the formula normalizes against ¥1k baseline.'**
+  String get homeJoyPerYenTooltip;
+
+  /// Hero header label — single mode (D-02)
+  ///
+  /// In en, this message translates to:
+  /// **'This Month'**
+  String get homeHeroCardLabelSingle;
+
+  /// Hero header label — group mode (D-02)
+  ///
+  /// In en, this message translates to:
+  /// **'Family This Month'**
+  String get homeHeroCardLabelGroup;
+
+  /// Hero header previous-month sub-line
+  ///
+  /// In en, this message translates to:
+  /// **'Last month {amount}'**
+  String homeHeroPreviousMonthSubline(String amount);
+
+  /// Ring section title — single mode (fallback if reusing homeSoulFullness is rejected)
+  ///
+  /// In en, this message translates to:
+  /// **'Joy Index'**
+  String get homeRingSectionTitleSingle;
+
+  /// Ring section title — group mode
+  ///
+  /// In en, this message translates to:
+  /// **'Family Joy'**
+  String get homeRingSectionTitleGroup;
+
+  /// Best Joy tag — single mode (D-04)
+  ///
+  /// In en, this message translates to:
+  /// **'Top of the Month'**
+  String get homeBestJoyTagSingle;
+
+  /// Best Joy tag — group mode (same copy as Single per D-04, separate key for future flexibility)
+  ///
+  /// In en, this message translates to:
+  /// **'Top of the Month'**
+  String get homeBestJoyTagGroup;
+
+  /// Best Joy strip small line composing amount and satisfaction (D-04)
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} · Satisfaction {sat}/10 ✨'**
+  String homeBestJoyAmountSat(String amount, int sat);
+
+  /// Group-mode member rows subheader
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get homeMembersSectionTitle;
+
+  /// Legend rows when totalSoulTx == 0 (D-09)
+  ///
+  /// In en, this message translates to:
+  /// **'No data yet'**
+  String get homeNoSoulDataLegend;
+
+  /// Best Joy CTA variant tag (same copy as homeBestJoyTagSingle but separate key)
+  ///
+  /// In en, this message translates to:
+  /// **'Top of the Month'**
+  String get homeBestJoyEmptyTagPrimary;
+
+  /// Best Joy BIG line — totalSoulTx == 0 empty state (D-09)
+  ///
+  /// In en, this message translates to:
+  /// **'Record your first soul-ledger entry'**
+  String get homeBestJoyEmptyBig;
+
+  /// Best Joy small line — totalSoulTx == 0 empty state (D-09)
+  ///
+  /// In en, this message translates to:
+  /// **'Your monthly favorite will appear here →'**
+  String get homeBestJoyEmptySmall;
+
+  /// Best Joy BIG line — all-neutral state (topJoy soulSatisfaction <= 2) (D-09)
+  ///
+  /// In en, this message translates to:
+  /// **'Rate your biggest spend'**
+  String get homeBestJoyAllNeutralBig;
+
+  /// Best Joy small line — all-neutral state (D-09)
+  ///
+  /// In en, this message translates to:
+  /// **'Make it your monthly favorite'**
+  String get homeBestJoyAllNeutralSmall;
+
+  /// Coverage caption on headline metric tile (HOMEUI-04 / HAPPY-06)
+  ///
+  /// In en, this message translates to:
+  /// **'n={rated}/{total} rated'**
+  String homeCoverageCaption(int rated, int total);
+
+  /// Single-mode mid-ring legend label
+  ///
+  /// In en, this message translates to:
+  /// **'Avg satisfaction'**
+  String get homeAvgSatisfactionLegend;
+
+  /// Single-mode outer-ring legend label (matches D-20 display)
+  ///
+  /// In en, this message translates to:
+  /// **'Joy / ¥'**
+  String get homeJoyPerYenLegend;
+
+  /// Single-mode inner-ring legend label with placeholder count
+  ///
+  /// In en, this message translates to:
+  /// **'Highlights ({count})'**
+  String homeHighlightsCountLegend(int count);
+
+  /// Group-mode outer-ring legend label
+  ///
+  /// In en, this message translates to:
+  /// **'Family highlights'**
+  String get homeFamilyHighlightsLegend;
+
+  /// Group-mode mid-ring legend label
+  ///
+  /// In en, this message translates to:
+  /// **'Shared joy'**
+  String get homeSharedJoyLegend;
+
+  /// Group-mode inner-ring legend label
+  ///
+  /// In en, this message translates to:
+  /// **'Median satisfaction'**
+  String get homeMedianSatisfactionLegend;
+
   /// Transaction entry screen title
   ///
   /// In en, this message translates to:
