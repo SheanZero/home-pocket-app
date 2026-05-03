@@ -41,24 +41,24 @@ created: 2026-05-03
 
 | Task scope | Plan (expected) | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |------------|-----------------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| Footprint audit doc | 01 | 0 | STATSUI-04 | — | N/A (planning artifact) | manual (file-presence gate) | `git log --diff-filter=A --name-only -- .planning/phases/11-statistics-surface-for/11-AUDIT.md \| grep -q AUDIT.md` | ❌ W0 | ⬜ pending |
-| New DAO `getDailySoulRowsForPtvf` | 02 | 1 | D-05 (domain) | T-Tampering-1 | Drift parameterized `Variable.withString` (no string interpolation in SQL) | unit | `flutter test test/unit/data/daos/analytics_dao_daily_joy_test.dart` | ❌ W0 | ⬜ pending |
-| New use case `GetDailyJoyPerYenUseCase` | 02 | 1 | NEW (domain) | — | per-day fold matches monthly fold within rounding | unit | `flutter test test/unit/application/analytics/get_daily_joy_per_yen_use_case_test.dart` | ❌ W0 | ⬜ pending |
-| New use case `GetLargestMonthlyExpenseUseCase` | 02 | 1 | NEW (domain) | — | argmax (amount DESC, timestamp DESC) returns single row | unit | `flutter test test/unit/application/analytics/get_largest_monthly_expense_use_case_test.dart` | ❌ W0 | ⬜ pending |
-| Trilingual ARB additions (3 locales) | 02 | 1 | STATSUI-02, STATSUI-03 | — | ARB key parity across ja/zh/en | static | `flutter gen-l10n && flutter analyze` | ❌ W0 | ⬜ pending |
-| `JoyHeadlineKpiTile` widget | 04 | 2 | STATSUI-03, STATSUI-07 | T-Information-1 | error widget uses `l10n.analyticsCardErrorBody`; no raw `error.toString()` | widget | `flutter test test/widget/features/analytics/presentation/widgets/joy_headline_kpi_tile_test.dart` | ❌ W0 | ⬜ pending |
-| `KpiMiniHeroStrip` widget | 04 | 2 | STATSUI-07 | — | re-keys on `(bookId, year, month)`; tabularFigures alignment | widget | `flutter test test/widget/features/analytics/presentation/widgets/kpi_mini_hero_strip_test.dart` | ❌ W0 | ⬜ pending |
-| `MonthChipPicker` widget | 04 | 2 | STATSUI-07 | — | Range bound to `[earliestTxMonth, currentMonth]` | widget | `flutter test test/widget/features/analytics/presentation/widgets/month_chip_picker_test.dart` | ❌ W0 | ⬜ pending |
-| `MonthlySpendTrendBarChart` (6 か月) | 05 | 2 | STATSUI-06 | — | current month bar highlighted; respects `selectedMonthProvider` anchor | widget | `flutter test test/widget/features/analytics/presentation/widgets/monthly_spend_trend_bar_chart_test.dart` | ❌ W0 | ⬜ pending |
-| `JoyTrendLineChart` (Joy/¥) | 05 | 2 | STATSUI-01 | — | baseline-anchored y-axis; gap-vs-zero (segmented `LineChartBarData`) | widget | `flutter test test/widget/features/analytics/presentation/widgets/joy_trend_line_chart_test.dart` | ❌ W0 | ⬜ pending |
-| `CategorySpendDonutChart` (類別支出) | 05 | 2 | STATSUI-06 | — | Top-N + その他 grouping | widget | `flutter test test/widget/features/analytics/presentation/widgets/category_spend_donut_chart_test.dart` | ❌ W0 | ⬜ pending |
-| `SatisfactionDistributionHistogram` | 05 | 2 | STATSUI-02 | — | bar-5 trilingual `BarChartRodLabel` annotation; n<5 → joint fallback | widget | `flutter test test/widget/features/analytics/presentation/widgets/satisfaction_distribution_histogram_test.dart` | ❌ W0 | ⬜ pending |
-| `LargestExpenseStoryCard` (今月の最大支出) | 06 | 2 | STATSUI-06 | T-Information-1 | semantic label reads category + amount, NOT merchant/description | widget | `flutter test test/widget/features/analytics/presentation/widgets/largest_expense_story_card_test.dart` | ❌ W0 | ⬜ pending |
-| `BestJoyStoryStrip` story | 06 | 2 | STATSUI-02 | T-Information-1 | semantic label reads category + score + amount, NOT merchant | widget | `flutter test test/widget/features/analytics/presentation/widgets/best_joy_story_strip_test.dart` | ❌ W0 | ⬜ pending |
-| `FamilyInsightCard` group-mode render gate | 06 | 2 | STATSUI-02 | — | renders ONLY when `shadowBooks.isNotEmpty && groupMode`; aggregate-only | widget | `flutter test test/widget/features/analytics/presentation/widgets/family_insight_card_test.dart` | ❌ W0 | ⬜ pending |
-| `JoyLedgerThinSampleFallback` (n<5 joint placeholder) | 06 | 2 | STATSUI-02 | — | rendered in 時間 group when `dailyJoyPerYenProvider` sample size < 5; histogram slot suppressed jointly per D-07 | widget | `flutter test test/widget/features/analytics/presentation/widgets/joy_ledger_thin_sample_fallback_test.dart` | ❌ W0 | ⬜ pending |
-| AnalyticsScreen rebuild + 8-widget delete + characterization-test delete (atomic) | 07 | 3 | STATSUI-05 | — | Variant δ structure; `grep -rl '<8 widget names>' lib/` returns empty | widget + grep gate | `flutter test test/widget/features/analytics/presentation/screens/analytics_screen_test.dart && [ -z "$(grep -rl 'SummaryCards\|CategoryPieChart\|DailyExpenseChart\|LedgerRatioChart\|BudgetProgressList\|ExpenseTrendChart\|CategoryBreakdownList\|MonthComparisonCard' lib/)" ]` | ❌ W0 | ⬜ pending |
-| (optional) Goldens for Joy/¥ + histogram | 08 | 4 | STATSUI-01, STATSUI-02 | — | golden parity across themes | golden | `flutter test test/golden/joy_trend_line_chart_golden_test.dart test/golden/satisfaction_distribution_histogram_golden_test.dart` | ❌ W0 | ⬜ pending |
+| Footprint audit doc | 01 | 0 | STATSUI-04 | — | N/A (planning artifact) | manual (file-presence gate) | `git log --diff-filter=A --name-only -- .planning/phases/11-statistics-surface-for/11-AUDIT.md \| grep -q AUDIT.md` | ✅ | ✅ green |
+| New DAO `getDailySoulRowsForPtvf` | 02 | 1 | D-05 (domain) | T-Tampering-1 | Drift parameterized `Variable.withString` (no string interpolation in SQL) | unit | `flutter test test/unit/data/daos/analytics_dao_daily_joy_test.dart` | ✅ | ✅ green |
+| New use case `GetDailyJoyPerYenUseCase` | 02 | 1 | NEW (domain) | — | per-day fold matches monthly fold within rounding | unit | `flutter test test/unit/application/analytics/get_daily_joy_per_yen_use_case_test.dart` | ✅ | ✅ green |
+| New use case `GetLargestMonthlyExpenseUseCase` | 02 | 1 | NEW (domain) | — | argmax (amount DESC, timestamp DESC) returns single row | unit | `flutter test test/unit/application/analytics/get_largest_monthly_expense_use_case_test.dart` | ✅ | ✅ green |
+| Trilingual ARB additions (3 locales) | 02 | 1 | STATSUI-02, STATSUI-03 | — | ARB key parity across ja/zh/en | static | `flutter gen-l10n && flutter analyze` | ✅ | ✅ green |
+| `JoyHeadlineKpiTile` widget | 04 | 2 | STATSUI-03, STATSUI-07 | T-Information-1 | error widget uses `l10n.analyticsCardErrorBody`; no raw `error.toString()` | widget | `flutter test test/widget/features/analytics/presentation/widgets/joy_headline_kpi_tile_test.dart` | ✅ | ✅ green |
+| `KpiMiniHeroStrip` widget | 04 | 2 | STATSUI-07 | — | re-keys on `(bookId, year, month)`; tabularFigures alignment | widget | `flutter test test/widget/features/analytics/presentation/widgets/kpi_mini_hero_strip_test.dart` | ✅ | ✅ green |
+| `MonthChipPicker` widget | 04 | 2 | STATSUI-07 | — | Range bound to `[earliestTxMonth, currentMonth]` | widget | `flutter test test/widget/features/analytics/presentation/widgets/month_chip_picker_test.dart` | ✅ | ✅ green |
+| `MonthlySpendTrendBarChart` (6 か月) | 05 | 2 | STATSUI-06 | — | current month bar highlighted; respects `selectedMonthProvider` anchor | widget | `flutter test test/widget/features/analytics/presentation/widgets/monthly_spend_trend_bar_chart_test.dart` | ✅ | ✅ green |
+| `JoyTrendLineChart` (Joy/¥) | 05 | 2 | STATSUI-01 | — | baseline-anchored y-axis; gap-vs-zero (segmented `LineChartBarData`) | widget | `flutter test test/widget/features/analytics/presentation/widgets/joy_trend_line_chart_test.dart` | ✅ | ✅ green |
+| `CategorySpendDonutChart` (類別支出) | 05 | 2 | STATSUI-06 | — | Top-N + その他 grouping | widget | `flutter test test/widget/features/analytics/presentation/widgets/category_spend_donut_chart_test.dart` | ✅ | ✅ green |
+| `SatisfactionDistributionHistogram` | 05 | 2 | STATSUI-02 | — | bar-5 trilingual annotation; n<5 → joint fallback | widget | `flutter test test/widget/features/analytics/presentation/widgets/satisfaction_distribution_histogram_test.dart` | ✅ | ✅ green |
+| `LargestExpenseStoryCard` (今月の最大支出) | 06 | 2 | STATSUI-06 | T-Information-1 | semantic label reads category + amount, NOT merchant/description | widget | `flutter test test/widget/features/analytics/presentation/widgets/largest_expense_story_card_test.dart` | ✅ | ✅ green |
+| `BestJoyStoryStrip` story | 06 | 2 | STATSUI-02 | T-Information-1 | semantic label reads category + score + amount, NOT merchant | widget | `flutter test test/widget/features/analytics/presentation/widgets/best_joy_story_strip_test.dart` | ✅ | ✅ green |
+| `FamilyInsightCard` group-mode render gate | 06 | 2 | STATSUI-02 | — | renders ONLY when `shadowBooks.isNotEmpty && groupMode`; aggregate-only | widget | `flutter test test/widget/features/analytics/presentation/widgets/family_insight_card_test.dart` | ✅ | ✅ green |
+| `JoyLedgerThinSampleFallback` (n<5 joint placeholder) | 06 | 2 | STATSUI-02 | — | rendered in 時間 group when `dailyJoyPerYenProvider` sample size < 5; histogram slot suppressed jointly per D-07 | widget | `flutter test test/widget/features/analytics/presentation/widgets/joy_ledger_thin_sample_fallback_test.dart` | ✅ | ✅ green |
+| AnalyticsScreen rebuild + 8-widget delete + characterization-test delete (atomic) | 07 | 3 | STATSUI-05 | — | Variant δ structure; `grep -rl '<8 widget names>' lib/` returns empty | widget + grep gate | `flutter test test/widget/features/analytics/presentation/screens/analytics_screen_test.dart && [ -z "$(grep -rl 'SummaryCards\|CategoryPieChart\|DailyExpenseChart\|LedgerRatioChart\|BudgetProgressList\|ExpenseTrendChart\|CategoryBreakdownList\|MonthComparisonCard' lib/)" ]` | ✅ | ✅ green |
+| (optional) Goldens for Joy/¥ + histogram | 08 | 4 | STATSUI-01, STATSUI-02 | — | golden parity across themes | golden | `flutter test test/golden/joy_trend_line_chart_golden_test.dart test/golden/satisfaction_distribution_histogram_golden_test.dart` | — skipped | ⚪ optional deferred |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -85,14 +85,14 @@ created: 2026-05-03
 
 > First-commit gate before any wiring code. Plans MUST schedule these in Wave 0 / Wave 1 BEFORE Wave 2 widgets reference them.
 
-- [ ] `.planning/phases/11-statistics-surface-for/11-AUDIT.md` — STATSUI-04 footprint audit doc, FIRST commit of the phase
-- [ ] `test/unit/data/daos/analytics_dao_daily_joy_test.dart` — covers `getDailySoulRowsForPtvf` (Wave 1)
-- [ ] `test/unit/application/analytics/get_daily_joy_per_yen_use_case_test.dart` — Wave 1
-- [ ] `test/unit/application/analytics/get_largest_monthly_expense_use_case_test.dart` — Wave 1
-- [ ] 9 widget test files (KPI tile + month chip + 4 chart cards + 3 story cards + family card) — Wave 2 alongside the widgets
-- [ ] `test/widget/features/analytics/presentation/screens/analytics_screen_test.dart` — replaces deleted characterization test, Wave 3 atomic
-- [ ] (optional) `test/golden/joy_trend_line_chart_golden_test.dart` + `test/golden/satisfaction_distribution_histogram_golden_test.dart` — Wave 4 polish
-- [ ] ARB key parity check: `flutter gen-l10n` is part of Wave 1 commit; CI guardrail catches missing ja/zh/en additions
+- [x] `.planning/phases/11-statistics-surface-for/11-AUDIT.md` — STATSUI-04 footprint audit doc, FIRST commit of the phase
+- [x] `test/unit/data/daos/analytics_dao_daily_joy_test.dart` — covers `getDailySoulRowsForPtvf` (Wave 1)
+- [x] `test/unit/application/analytics/get_daily_joy_per_yen_use_case_test.dart` — Wave 1
+- [x] `test/unit/application/analytics/get_largest_monthly_expense_use_case_test.dart` — Wave 1
+- [x] 9 widget test files (KPI tile + month chip + 4 chart cards + 3 story cards + family card) — Wave 2 alongside the widgets
+- [x] `test/widget/features/analytics/presentation/screens/analytics_screen_test.dart` — replaces deleted characterization test, Wave 3 atomic
+- [ ] (optional) `test/golden/joy_trend_line_chart_golden_test.dart` + `test/golden/satisfaction_distribution_histogram_golden_test.dart` — Wave 4 polish deferred in Plan 11-08; existing `test/golden/` suite verified green
+- [x] ARB key parity check: `flutter gen-l10n` is part of Wave 1 commit; CI guardrail catches missing ja/zh/en additions
 
 ---
 
