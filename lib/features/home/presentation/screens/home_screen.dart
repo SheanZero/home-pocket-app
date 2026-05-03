@@ -11,14 +11,12 @@ import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart';
 import '../../../../features/analytics/domain/models/family_happiness.dart';
-import '../../../../features/analytics/domain/models/monthly_report.dart';
 import '../../../../features/analytics/presentation/providers/state_analytics.dart';
 import '../../../../features/analytics/presentation/providers/state_happiness.dart';
 import '../../../../features/analytics/presentation/screens/analytics_screen.dart';
 import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
 import '../../../../features/family_sync/presentation/screens/group_choice_screen.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
-import '../models/ledger_row_data.dart';
 import '../providers/state_shadow_books.dart';
 import '../providers/state_today_transactions.dart';
 import '../widgets/family_invite_banner.dart';
@@ -298,80 +296,6 @@ class HomeScreen extends ConsumerWidget {
 
   // ── Data wiring helpers ──
 
-  // TODO(plan-10-08b): delete this helper
-  // ignore: unused_element
-  List<LedgerRowData> _buildLedgerRows(
-    BuildContext context,
-    MonthlyReport report,
-    bool isGroupMode, {
-    List<ShadowBookInfo>? shadowBooks,
-    ShadowAggregate? shadowAgg,
-  }) {
-    final rows = <LedgerRowData>[
-      LedgerRowData(
-        tagText: S.of(context).homeSurvivalLedgerTag,
-        tagBgColor: context.wmSurvivalTagBg,
-        tagTextColor: AppColors.survival,
-        title: S.of(context).survivalLedger,
-        titleColor: context.wmTextPrimary,
-        subtitle: S
-            .of(context)
-            .homePreviousMonthAmount(
-              '\u00a5${_formatInt(report.previousMonthComparison?.previousExpenses ?? 0)}',
-            ),
-        formattedAmount: '\u00a5${_formatInt(report.survivalTotal)}',
-        amountColor: AppColors.survival,
-        chevronColor: context.wmTextTertiary,
-      ),
-      LedgerRowData(
-        tagText: S.of(context).homeSoulLedgerTag,
-        tagBgColor: context.wmSoulTagBg,
-        tagTextColor: AppColors.soul,
-        title: S.of(context).soulLedger,
-        titleColor: AppColors.soul,
-        subtitle: S
-            .of(context)
-            .homePreviousMonthAmount(
-              '\u00a5${_formatInt(report.previousMonthComparison?.previousExpenses ?? 0)}',
-            ),
-        formattedAmount: '\u00a5${_formatInt(report.soulTotal)}',
-        amountColor: AppColors.soul,
-        chevronColor: context.wmTextTertiary,
-      ),
-    ];
-
-    if (isGroupMode && shadowBooks != null) {
-      for (final shadow in shadowBooks) {
-        final bookReport = shadowAgg?.perBookReports[shadow.book.id];
-        final total = bookReport?.totalExpenses ?? 0;
-        final prevTotal =
-            bookReport?.previousMonthComparison?.previousExpenses ?? 0;
-        rows.add(
-          LedgerRowData(
-            tagText: S.of(context).homeSharedLedgerTag,
-            tagBgColor: context.wmSharedTagBg,
-            tagTextColor: AppColors.shared,
-            title: S.of(context).homeShadowBookTitle(shadow.memberDisplayName),
-            titleColor: AppColors.shared,
-            subtitle: S
-                .of(context)
-                .homePreviousMonthAmount('\u00a5${_formatInt(prevTotal)}'),
-            formattedAmount: '\u00a5${_formatInt(total)}',
-            amountColor: AppColors.shared,
-            chevronColor: AppColors.sharedChevron,
-            borderColor: AppColors.sharedBorder,
-          ),
-        );
-      }
-    }
-
-    return rows;
-  }
-
-  String _formatInt(int value) {
-    return NumberFormat('#,##0').format(value);
-  }
-
   String _formatAmount(Transaction tx) {
     final formatted = NumberFormat.currency(
       symbol: '\u00a5',
@@ -384,35 +308,6 @@ class HomeScreen extends ConsumerWidget {
   String _memberInitial(Transaction tx) {
     // Use device ID first character as fallback; real member data TBD
     return tx.deviceId.isNotEmpty ? tx.deviceId[0].toUpperCase() : '?';
-  }
-
-  /// Computes average satisfaction from today's soul transactions.
-  // TODO(plan-10-08b): delete this helper
-  // ignore: unused_element
-  int _computeSatisfaction(AsyncValue<List<Transaction>> txAsync) {
-    final transactions = txAsync.valueOrNull;
-    if (transactions == null || transactions.isEmpty) return 0;
-
-    final soulTxs = transactions
-        .where((tx) => tx.ledgerType == LedgerType.soul)
-        .toList();
-    if (soulTxs.isEmpty) return 0;
-
-    final totalSatisfaction = soulTxs.fold<int>(
-      0,
-      (sum, tx) => sum + tx.soulSatisfaction,
-    );
-    return (totalSatisfaction / soulTxs.length * 10).round();
-  }
-
-  /// Computes happiness ROI: soul total / total expenses ratio.
-  // TODO(plan-10-08b): delete this helper
-  // ignore: unused_element
-  double _computeHappinessROI(MonthlyReport report) {
-    if (report.totalExpenses == 0) return 0;
-    return double.parse(
-      (report.soulTotal / report.totalExpenses).toStringAsFixed(1),
-    );
   }
 }
 

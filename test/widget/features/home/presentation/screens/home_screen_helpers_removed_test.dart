@@ -52,5 +52,5 @@ void main() {
       isNot(contains('_buildLedgerRows')),
       reason: '_buildLedgerRows was deleted in Phase 10 D-01 — see CONTEXT.md',
     );
-  }, skip: 'pending Plan 10-08 helper deletion');
+  });
 }
