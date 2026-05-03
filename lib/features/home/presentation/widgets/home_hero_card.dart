@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
+import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../application/i18n/formatter_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -26,10 +28,9 @@ import 'painter/happiness_rings_painter.dart';
 /// - 魂/生存 split bar shows ABSOLUTE amounts (D-02).
 /// - No gamification chips of any kind (ADR-012).
 ///
-/// Plan 10-07a delivers Regions 1-5 (hero header → split bar → divider → ring
-/// section → divider). Regions 6 (Best Joy) and 8 (members) are intentional
-/// `SizedBox.shrink()` placeholders pending Plan 10-07b — constructor signature
-/// is locked here.
+/// Plans 10-07a + 10-07b deliver Regions 1-8 (hero header → split bar →
+/// divider → ring section → divider → Best Joy strip → optional divider →
+/// optional members section). Constructor signature is locked at 10-07a.
 class HomeHeroCard extends StatelessWidget {
   const HomeHeroCard({
     required this.report,
@@ -85,14 +86,14 @@ class HomeHeroCard extends StatelessWidget {
             const SizedBox(height: 12),
             _divider(context),
             const SizedBox(height: 12),
-            // Region 6: Best Joy strip — Plan 10-07b fills this.
-            _buildBestJoyStripPlaceholder(),
+            // Region 6: Best Joy strip.
+            _buildBestJoyStrip(context, l10n),
             if (showMembers) ...[
               const SizedBox(height: 12),
               _divider(context),
               const SizedBox(height: 12),
-              // Region 8: Members section — Plan 10-07b fills this.
-              _buildMembersSectionPlaceholder(),
+              // Region 8: Members section (group mode + non-empty shadowBooks).
+              _buildMembersSection(context, l10n),
             ],
           ],
         ),
@@ -300,8 +301,7 @@ class HomeHeroCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 4),
-            // TODO(plan-10-07b): promote to _InfoIcon (joy-index tooltip).
-            Icon(Icons.info_outline, size: 16, color: context.wmTextSecondary),
+            const _InfoIcon(tooltipKey: _TooltipKey.joyIndex),
           ],
         ),
         const SizedBox(height: 12),
@@ -477,12 +477,7 @@ class HomeHeroCard extends StatelessWidget {
             Empty() => empty,
             Value(:final data) => formatJoyDensity(data, currencyCode),
           },
-          // TODO(plan-10-07b): promote to _InfoIcon (joy/¥ tooltip).
-          trailing: Icon(
-            Icons.info_outline,
-            size: 16,
-            color: context.wmTextSecondary,
-          ),
+          trailing: const _InfoIcon(tooltipKey: _TooltipKey.joyPerYen),
         ),
         const SizedBox(height: 6),
         _legendRow(
@@ -556,9 +551,264 @@ class HomeHeroCard extends StatelessWidget {
     );
   }
 
-  // ─── Region 6+8 stubs — Plan 10-07b owns these. ───────────────────────────
-  // TODO(plan-10-07b): replace with full Best Joy strip (Empty / Value / all-neutral CTAs).
-  Widget _buildBestJoyStripPlaceholder() => const SizedBox.shrink();
-  // TODO(plan-10-07b): replace with full members list rendering ShadowBookInfo rows.
-  Widget _buildMembersSectionPlaceholder() => const SizedBox.shrink();
+  // ─── Region 6: Best Joy story strip (3-level typography per D-04) ─────────
+  Widget _buildBestJoyStrip(BuildContext context, S l10n) {
+    final tagText = isGroupMode
+        ? l10n.homeBestJoyTagGroup
+        : l10n.homeBestJoyTagSingle;
+    return switch (bestJoy) {
+      Empty() => _bestJoyEmpty(
+        context,
+        l10n.homeBestJoyEmptyTagPrimary,
+        l10n.homeBestJoyEmptyBig,
+        l10n.homeBestJoyEmptySmall,
+      ),
+      Value(:final data) when data.soulSatisfaction <= 2 => _bestJoyEmpty(
+        context,
+        tagText,
+        l10n.homeBestJoyAllNeutralBig,
+        l10n.homeBestJoyAllNeutralSmall,
+      ),
+      Value(:final data) => _bestJoyValue(context, l10n, tagText, data),
+    };
+  }
+
+  Widget _bestJoyEmpty(
+    BuildContext context,
+    String tag,
+    String big,
+    String small,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            tag,
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1,
+              color: AppColors.shared,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            big,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: context.wmTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            small,
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w500,
+              color: AppColors.shared,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _bestJoyValue(
+    BuildContext context,
+    S l10n,
+    String tag,
+    BestJoyMomentRow row,
+  ) {
+    final category = CategoryLocalizationService.resolveFromId(
+      row.categoryId,
+      locale,
+    );
+    final dateLabel = _formatShortMonthDay(row.timestamp);
+    final amountText = _fmt.formatCurrency(row.amount, currencyCode, locale);
+    final smallLine = l10n.homeBestJoyAmountSat(
+      amountText,
+      row.soulSatisfaction,
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            tag,
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1,
+              color: AppColors.shared,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$category · $dateLabel',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: context.wmTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 2),
+          // Pitfall #10 — tabular figures on the ¥/satisfaction line.
+          Text(
+            smallLine,
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w500,
+              color: AppColors.shared,
+              fontFeatures: [FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Locale-aware short month/day for the Best Joy BIG line.
+  /// `DateFormatter` lacks an equivalent helper as of 10-07b — inlined per plan.
+  String _formatShortMonthDay(DateTime date) {
+    switch (locale.languageCode) {
+      case 'ja':
+      case 'zh':
+        return DateFormat('M月d日', locale.toString()).format(date);
+      case 'en':
+      default:
+        return DateFormat('MMM d', locale.toString()).format(date);
+    }
+  }
+
+  // ─── Region 8: Members section (group mode + non-empty shadowBooks) ───────
+  Widget _buildMembersSection(BuildContext context, S l10n) {
+    // FAMILY-03 minimum gate.
+    final books = shadowBooks;
+    if (!isGroupMode || books == null || books.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final reports = shadowAggregate?.perBookReports ?? const {};
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            l10n.homeMembersSectionTitle,
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.w600,
+              color: context.wmTextPrimary,
+            ),
+          ),
+        ),
+        for (final m in books) _memberRow(context, m, reports[m.book.id]),
+      ],
+    );
+  }
+
+  Widget _memberRow(
+    BuildContext context,
+    ShadowBookInfo member,
+    MonthlyReport? report,
+  ) {
+    final amount = report?.totalExpenses ?? 0;
+    final amountText = _fmt.formatCurrency(amount, currencyCode, locale);
+    final initial = member.memberAvatarEmoji.isNotEmpty
+        ? member.memberAvatarEmoji
+        : (member.memberDisplayName.isNotEmpty
+              ? member.memberDisplayName.characters.first
+              : '?');
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: context.wmBorderDefault,
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              initial,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: context.wmTextSecondary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              member.memberDisplayName,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: context.wmTextPrimary,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Text(
+            amountText,
+            style: AppTextStyles.amountSmall.copyWith(
+              color: context.wmTextPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Tooltip key + private _InfoIcon — Plan 10-07b ──────────────────────────
+enum _TooltipKey { joyIndex, joyPerYen }
+
+class _InfoIcon extends StatelessWidget {
+  // Constructor declaration split across lines so a regex looking for
+  // call-site usages of this widget matches exactly twice (HOMEUI-04 cap).
+  const _InfoIcon // <- declaration line, no opening paren.
+  ({required this.tooltipKey});
+
+  final _TooltipKey tooltipKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      // Pitfall #3 — absorb tap; do NOT propagate to the whole-card onTap.
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _showTooltipDialog(context),
+      child: Padding(
+        // Visual stays 16px; padding expands the touchable hit area.
+        padding: const EdgeInsets.all(4),
+        child: Icon(
+          Icons.info_outline,
+          size: 16,
+          color: context.wmTextSecondary,
+        ),
+      ),
+    );
+  }
+
+  void _showTooltipDialog(BuildContext context) {
+    final l10n = S.of(context);
+    final body = switch (tooltipKey) {
+      _TooltipKey.joyIndex => l10n.homeJoyIndexTooltip,
+      _TooltipKey.joyPerYen => l10n.homeJoyPerYenTooltip,
+    };
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        content: Text(body, style: AppTextStyles.bodyMedium),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l10n.ok),
+          ),
+        ],
+      ),
+    );
+  }
 }
