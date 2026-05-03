@@ -43,45 +43,47 @@ void main() {
     expect(find.textContaining('¥10'), findsNothing);
   });
 
-  testWidgets('renders category date and amount when satisfaction is above two', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      createLocalizedWidget(
-        BestJoyStoryStrip(
-          bestJoy: Value<BestJoyMomentRow>(_highRatedJoy, 1),
-          currencyCode: 'JPY',
+  testWidgets(
+    'renders category date and amount when satisfaction is above two',
+    (tester) async {
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          BestJoyStoryStrip(
+            bestJoy: Value<BestJoyMomentRow>(_highRatedJoy, 1),
+            currencyCode: 'JPY',
+            locale: locale,
+          ),
           locale: locale,
         ),
-        locale: locale,
-      ),
-    );
+      );
 
-    expect(find.text('食費 · 5月15日'), findsOneWidget);
-    expect(find.text('¥3,000 · 満足 8/10 ✨'), findsOneWidget);
-  });
+      expect(find.text('食費 · 5月15日'), findsOneWidget);
+      expect(find.text('¥3,000 · 満足 8/10 ✨'), findsOneWidget);
+    },
+  );
 
-  testWidgets('tap invokes callback with transaction id when value is rendered', (
-    tester,
-  ) async {
-    String? tappedId;
-    await tester.pumpWidget(
-      createLocalizedWidget(
-        BestJoyStoryStrip(
-          bestJoy: Value<BestJoyMomentRow>(_highRatedJoy, 1),
-          currencyCode: 'JPY',
+  testWidgets(
+    'tap invokes callback with transaction id when value is rendered',
+    (tester) async {
+      String? tappedId;
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          BestJoyStoryStrip(
+            bestJoy: Value<BestJoyMomentRow>(_highRatedJoy, 1),
+            currencyCode: 'JPY',
+            locale: locale,
+            onTap: (transactionId) => tappedId = transactionId,
+          ),
           locale: locale,
-          onTap: (transactionId) => tappedId = transactionId,
         ),
-        locale: locale,
-      ),
-    );
+      );
 
-    await tester.tap(find.text('食費 · 5月15日'));
-    await tester.pump();
+      await tester.tap(find.text('食費 · 5月15日'));
+      await tester.pump();
 
-    expect(tappedId, 'joy-high');
-  });
+      expect(tappedId, 'joy-high');
+    },
+  );
 
   testWidgets('big and small lines use bodyMedium and caption text styles', (
     tester,
@@ -98,9 +100,7 @@ void main() {
     );
 
     final bigLine = tester.widget<Text>(find.text('食費 · 5月15日'));
-    final smallLine = tester.widget<Text>(
-      find.text('¥3,000 · 満足 8/10 ✨'),
-    );
+    final smallLine = tester.widget<Text>(find.text('¥3,000 · 満足 8/10 ✨'));
 
     expect(bigLine.style?.fontSize, AppTextStyles.bodyMedium.fontSize);
     expect(bigLine.style?.fontWeight, AppTextStyles.bodyMedium.fontWeight);
