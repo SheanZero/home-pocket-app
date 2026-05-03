@@ -1256,6 +1256,148 @@ class SZh extends S {
   }
 
   @override
+  String get analyticsTitle => '统计';
+
+  @override
+  String get analyticsMonthChipPickerTooltip => '选择月份';
+
+  @override
+  String get analyticsKpiTotalLabel => '本月支出';
+
+  @override
+  String analyticsKpiTotalDeltaIncreased(String pct) {
+    return '↑ +$pct% MoM';
+  }
+
+  @override
+  String analyticsKpiTotalDeltaDecreased(String pct) {
+    return '↓ -$pct% MoM';
+  }
+
+  @override
+  String get analyticsKpiJoyLabel => '本月平均满足度';
+
+  @override
+  String analyticsKpiJoySubMedianCoverage(String median, int k, int N) {
+    return '中位数 $median · n=$k/$N';
+  }
+
+  @override
+  String get analyticsKpiJoyEmptyCaption => '数据收集中...';
+
+  @override
+  String get analyticsGroupHeaderTime => '━ 时间 / Time ━';
+
+  @override
+  String get analyticsGroupHeaderDistribution => '━ 分布 / Distribution ━';
+
+  @override
+  String get analyticsGroupHeaderStories => '━ 故事 / Stories ━';
+
+  @override
+  String get analyticsCardTitleTotalSixMonth => '总 · 6 个月支出推移';
+
+  @override
+  String get analyticsCardCaptionTotalSixMonth => 'BarChart · 当月高亮';
+
+  @override
+  String get analyticsCardTitleJoyTrend => '悦己 · 幸福密度趋势';
+
+  @override
+  String get analyticsCardCaptionJoyTrendGap => 'MTD · 断点 = 当日没有魂账记录';
+
+  @override
+  String get analyticsCardTitleCategoryDonut => '总 · 类别支出分布';
+
+  @override
+  String get analyticsCardCaptionCategoryDonut => 'Donut/PieChart · top-N + 其他';
+
+  @override
+  String get analyticsCategoryDonutOther => '其他';
+
+  @override
+  String get analyticsCardTitleSatisfactionHistogram => '悦己 · 满足度分布 1–10';
+
+  @override
+  String get analyticsCardCaptionHistogram =>
+      'Histogram · cool→warm · 5 bar 三语注释';
+
+  @override
+  String get analyticsHistogramBarFiveAnnotation => '中位数·含未评分';
+
+  @override
+  String get analyticsHistogramColorCaption => '色彩仅为 ordinal 视觉区分';
+
+  @override
+  String get analyticsCardTitleLargestExpense => '总 · 本月最大支出';
+
+  @override
+  String analyticsCardLargestExpenseBody(
+    String categoryName,
+    String amount,
+    String date,
+  ) {
+    return '$categoryName · $amount · $date';
+  }
+
+  @override
+  String get analyticsCardEmptyLargestExpense => '暂无数据 — 本月还没有支出记录';
+
+  @override
+  String get analyticsCardTitleBestJoy => '悦己 · 本月最美时刻';
+
+  @override
+  String analyticsCardBestJoyBig(String categoryName, String date) {
+    return '$categoryName · $date';
+  }
+
+  @override
+  String analyticsCardSmallBestJoy(String amount, int sat) {
+    return '$amount · 满足 $sat/10 ✨';
+  }
+
+  @override
+  String get analyticsCardEmptyBestJoy => '本月最值还没出现';
+
+  @override
+  String get analyticsCardTitleFamilyInsight => '家族 · 小确幸总结';
+
+  @override
+  String analyticsFamilyHighlightsSentence(int N) {
+    return '本月家族小確幸 $N 次';
+  }
+
+  @override
+  String analyticsFamilySharedJoySentence(
+    String categoryName,
+    int count,
+    String avg,
+  ) {
+    return '你们都偏爱 [$categoryName] (n=$count, 平均 $avg/10)';
+  }
+
+  @override
+  String get analyticsFamilyEmpty => '还没有共同最爱品类——多记几笔魂账试试';
+
+  @override
+  String get analyticsThinSampleFallbackHeading => '本月魂账记录不足 5 笔';
+
+  @override
+  String get analyticsThinSampleFallbackBody => '多记录一周后回来看 Joy 趋势';
+
+  @override
+  String get analyticsThinSampleFallbackCta => '去记录 »';
+
+  @override
+  String get analyticsCardErrorHeading => '数据加载失败';
+
+  @override
+  String get analyticsCardErrorBody => '请稍后再试';
+
+  @override
+  String get analyticsCardErrorRetry => '重试';
+
+  @override
   String budgetRemainingAmount(String amount) {
     return '剩余: $amount';
   }

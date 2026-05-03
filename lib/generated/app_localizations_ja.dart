@@ -1258,6 +1258,149 @@ class SJa extends S {
   }
 
   @override
+  String get analyticsTitle => '統計';
+
+  @override
+  String get analyticsMonthChipPickerTooltip => '月を選ぶ';
+
+  @override
+  String get analyticsKpiTotalLabel => '今月の支出';
+
+  @override
+  String analyticsKpiTotalDeltaIncreased(String pct) {
+    return '↑ +$pct% MoM';
+  }
+
+  @override
+  String analyticsKpiTotalDeltaDecreased(String pct) {
+    return '↓ -$pct% MoM';
+  }
+
+  @override
+  String get analyticsKpiJoyLabel => '今月の平均満足度';
+
+  @override
+  String analyticsKpiJoySubMedianCoverage(String median, int k, int N) {
+    return '中央値 $median · n=$k/$N';
+  }
+
+  @override
+  String get analyticsKpiJoyEmptyCaption => 'データを集計中...';
+
+  @override
+  String get analyticsGroupHeaderTime => '━ 時間 / Time ━';
+
+  @override
+  String get analyticsGroupHeaderDistribution => '━ 分布 / Distribution ━';
+
+  @override
+  String get analyticsGroupHeaderStories => '━ 物語 / Stories ━';
+
+  @override
+  String get analyticsCardTitleTotalSixMonth => '総 · 6 か月支出推移';
+
+  @override
+  String get analyticsCardCaptionTotalSixMonth => 'BarChart · 当月 highlighted';
+
+  @override
+  String get analyticsCardTitleJoyTrend => '悦己 · ハピネス密度の推移';
+
+  @override
+  String get analyticsCardCaptionJoyTrendGap => 'MTD · 断点 = 未記録日';
+
+  @override
+  String get analyticsCardTitleCategoryDonut => '総 · 類別支出分布';
+
+  @override
+  String get analyticsCardCaptionCategoryDonut =>
+      'Donut/PieChart · top-N + その他';
+
+  @override
+  String get analyticsCategoryDonutOther => 'その他';
+
+  @override
+  String get analyticsCardTitleSatisfactionHistogram => '悦己 · 満足度の分布 1–10';
+
+  @override
+  String get analyticsCardCaptionHistogram =>
+      'Histogram · cool→warm · bar 5 三語注記';
+
+  @override
+  String get analyticsHistogramBarFiveAnnotation => '中央値・含未評価';
+
+  @override
+  String get analyticsHistogramColorCaption => '色は ordinal 表現です';
+
+  @override
+  String get analyticsCardTitleLargestExpense => '総 · 今月の最大支出';
+
+  @override
+  String analyticsCardLargestExpenseBody(
+    String categoryName,
+    String amount,
+    String date,
+  ) {
+    return '$categoryName · $amount · $date';
+  }
+
+  @override
+  String get analyticsCardEmptyLargestExpense => 'データなし — 今月はまだ記録がありません';
+
+  @override
+  String get analyticsCardTitleBestJoy => '悦己 · 今月のベスト ジョイ';
+
+  @override
+  String analyticsCardBestJoyBig(String categoryName, String date) {
+    return '$categoryName · $date';
+  }
+
+  @override
+  String analyticsCardSmallBestJoy(String amount, int sat) {
+    return '$amount · 満足 $sat/10 ✨';
+  }
+
+  @override
+  String get analyticsCardEmptyBestJoy => '今月の最大ハイライトはまだ見つからない';
+
+  @override
+  String get analyticsCardTitleFamilyInsight => '家族 · ハイライトサマリー';
+
+  @override
+  String analyticsFamilyHighlightsSentence(int N) {
+    return '今月、家族の小確幸 $N回';
+  }
+
+  @override
+  String analyticsFamilySharedJoySentence(
+    String categoryName,
+    int count,
+    String avg,
+  ) {
+    return 'みんなで [$categoryName] が好きみたい (n=$count, 平均$avg/10)';
+  }
+
+  @override
+  String get analyticsFamilyEmpty => '共通のお気に入り品目はまだ集計できません — もう少し記録してみよう';
+
+  @override
+  String get analyticsThinSampleFallbackHeading => '今月の魂帳の記録がまだ少ないよ';
+
+  @override
+  String get analyticsThinSampleFallbackBody => 'あと数日記録を続けたら、Joy の流れが見えてくる';
+
+  @override
+  String get analyticsThinSampleFallbackCta => '記録する »';
+
+  @override
+  String get analyticsCardErrorHeading => 'データが読み込めなかった';
+
+  @override
+  String get analyticsCardErrorBody => 'しばらくしてから、もう一度試してください';
+
+  @override
+  String get analyticsCardErrorRetry => '再試行';
+
+  @override
   String budgetRemainingAmount(String amount) {
     return '残り: $amount';
   }

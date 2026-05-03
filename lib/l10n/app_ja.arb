@@ -1601,6 +1601,136 @@
       }
     }
   },
+  "analyticsTitle": "統計",
+  "analyticsMonthChipPickerTooltip": "月を選ぶ",
+  "analyticsKpiTotalLabel": "今月の支出",
+  "analyticsKpiTotalDeltaIncreased": "↑ +{pct}% MoM",
+  "@analyticsKpiTotalDeltaIncreased": {
+    "description": "Total spending KPI month-over-month increase",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsKpiTotalDeltaDecreased": "↓ -{pct}% MoM",
+  "@analyticsKpiTotalDeltaDecreased": {
+    "description": "Total spending KPI month-over-month decrease",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsKpiJoyLabel": "今月の平均満足度",
+  "analyticsKpiJoySubMedianCoverage": "中央値 {median} · n={k}/{N}",
+  "@analyticsKpiJoySubMedianCoverage": {
+    "description": "KPI mini-hero 悦己平均 sub-line: median + coverage (STATSUI-03)",
+    "placeholders": {
+      "median": {
+        "type": "String"
+      },
+      "k": {
+        "type": "int"
+      },
+      "N": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsKpiJoyEmptyCaption": "データを集計中...",
+  "analyticsGroupHeaderTime": "━ 時間 / Time ━",
+  "analyticsGroupHeaderDistribution": "━ 分布 / Distribution ━",
+  "analyticsGroupHeaderStories": "━ 物語 / Stories ━",
+  "analyticsCardTitleTotalSixMonth": "総 · 6 か月支出推移",
+  "analyticsCardCaptionTotalSixMonth": "BarChart · 当月 highlighted",
+  "analyticsCardTitleJoyTrend": "悦己 · ハピネス密度の推移",
+  "analyticsCardCaptionJoyTrendGap": "MTD · 断点 = 未記録日",
+  "analyticsCardTitleCategoryDonut": "総 · 類別支出分布",
+  "analyticsCardCaptionCategoryDonut": "Donut/PieChart · top-N + その他",
+  "analyticsCategoryDonutOther": "その他",
+  "analyticsCardTitleSatisfactionHistogram": "悦己 · 満足度の分布 1–10",
+  "analyticsCardCaptionHistogram": "Histogram · cool→warm · bar 5 三語注記",
+  "analyticsHistogramBarFiveAnnotation": "中央値・含未評価",
+  "@analyticsHistogramBarFiveAnnotation": {
+    "description": "Permanent annotation above bar 5 of satisfaction histogram acknowledging default-5 cluster + East-Asian central-tendency clustering (STATSUI-02 HARD-LOCKED)"
+  },
+  "analyticsHistogramColorCaption": "色は ordinal 表現です",
+  "analyticsCardTitleLargestExpense": "総 · 今月の最大支出",
+  "analyticsCardLargestExpenseBody": "{categoryName} · {amount} · {date}",
+  "@analyticsCardLargestExpenseBody": {
+    "description": "Largest monthly expense story card body",
+    "placeholders": {
+      "categoryName": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsCardEmptyLargestExpense": "データなし — 今月はまだ記録がありません",
+  "analyticsCardTitleBestJoy": "悦己 · 今月のベスト ジョイ",
+  "analyticsCardBestJoyBig": "{categoryName} · {date}",
+  "@analyticsCardBestJoyBig": {
+    "description": "Best Joy story strip big line",
+    "placeholders": {
+      "categoryName": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsCardSmallBestJoy": "{amount} · 満足 {sat}/10 ✨",
+  "@analyticsCardSmallBestJoy": {
+    "description": "Best Joy story strip small line",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "sat": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsCardEmptyBestJoy": "今月の最大ハイライトはまだ見つからない",
+  "analyticsCardTitleFamilyInsight": "家族 · ハイライトサマリー",
+  "analyticsFamilyHighlightsSentence": "今月、家族の小確幸 {N}回",
+  "@analyticsFamilyHighlightsSentence": {
+    "description": "Family highlights aggregate sentence",
+    "placeholders": {
+      "N": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsFamilySharedJoySentence": "みんなで [{categoryName}] が好きみたい (n={count}, 平均{avg}/10)",
+  "@analyticsFamilySharedJoySentence": {
+    "description": "Family shared joy insight sentence",
+    "placeholders": {
+      "categoryName": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "avg": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsFamilyEmpty": "共通のお気に入り品目はまだ集計できません — もう少し記録してみよう",
+  "analyticsThinSampleFallbackHeading": "今月の魂帳の記録がまだ少ないよ",
+  "analyticsThinSampleFallbackBody": "あと数日記録を続けたら、Joy の流れが見えてくる",
+  "analyticsThinSampleFallbackCta": "記録する »",
+  "analyticsCardErrorHeading": "データが読み込めなかった",
+  "analyticsCardErrorBody": "しばらくしてから、もう一度試してください",
+  "analyticsCardErrorRetry": "再試行",
   "budgetRemainingAmount": "残り: {amount}",
   "@budgetRemainingAmount": {
     "description": "Budget remaining amount label",

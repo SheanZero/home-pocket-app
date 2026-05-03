@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/models/best_joy_moment_row.dart';
+import '../../domain/models/analytics_aggregate.dart';
+import '../../domain/models/daily_joy_per_yen_point.dart';
 import '../../domain/models/family_happiness.dart';
 import '../../domain/models/happiness_report.dart';
 import '../../domain/models/metric_result.dart';
@@ -38,6 +40,36 @@ Future<MetricResult<BestJoyMomentRow>> bestJoyMoment(
   required int month,
 }) async {
   final useCase = ref.watch(getBestJoyMomentUseCaseProvider);
+  return useCase.execute(bookId: bookId, year: year, month: month);
+}
+
+/// STATSUI-01 / D-05 — daily Joy/¥ trend (PTVF per-day fold).
+@riverpod
+Future<MetricResult<List<DailyJoyPerYenPoint>>> dailyJoyPerYen(
+  Ref ref, {
+  required String bookId,
+  required int year,
+  required int month,
+  required String currencyCode,
+}) async {
+  final useCase = ref.watch(getDailyJoyPerYenUseCaseProvider);
+  return useCase.execute(
+    bookId: bookId,
+    year: year,
+    month: month,
+    currencyCode: currencyCode,
+  );
+}
+
+/// STATSUI-06 / D-15 — single largest monthly expense for 物語 group 総 card.
+@riverpod
+Future<LargestMonthlyExpense?> largestMonthlyExpense(
+  Ref ref, {
+  required String bookId,
+  required int year,
+  required int month,
+}) async {
+  final useCase = ref.watch(getLargestMonthlyExpenseUseCaseProvider);
   return useCase.execute(bookId: bookId, year: year, month: month);
 }
 

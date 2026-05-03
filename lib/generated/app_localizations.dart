@@ -2433,6 +2433,248 @@ abstract class S {
   /// **'Month {month}'**
   String analyticsMonthNumberLabel(int month);
 
+  /// No description provided for @analyticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get analyticsTitle;
+
+  /// No description provided for @analyticsMonthChipPickerTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a month'**
+  String get analyticsMonthChipPickerTooltip;
+
+  /// No description provided for @analyticsKpiTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'This month\'s spending'**
+  String get analyticsKpiTotalLabel;
+
+  /// Total spending KPI month-over-month increase
+  ///
+  /// In en, this message translates to:
+  /// **'↑ +{pct}% MoM'**
+  String analyticsKpiTotalDeltaIncreased(String pct);
+
+  /// Total spending KPI month-over-month decrease
+  ///
+  /// In en, this message translates to:
+  /// **'↓ -{pct}% MoM'**
+  String analyticsKpiTotalDeltaDecreased(String pct);
+
+  /// No description provided for @analyticsKpiJoyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg satisfaction'**
+  String get analyticsKpiJoyLabel;
+
+  /// KPI mini-hero 悦己平均 sub-line: median + coverage (STATSUI-03)
+  ///
+  /// In en, this message translates to:
+  /// **'Median {median} · n={k}/{N}'**
+  String analyticsKpiJoySubMedianCoverage(String median, int k, int N);
+
+  /// No description provided for @analyticsKpiJoyEmptyCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Gathering data...'**
+  String get analyticsKpiJoyEmptyCaption;
+
+  /// No description provided for @analyticsGroupHeaderTime.
+  ///
+  /// In en, this message translates to:
+  /// **'━ Time ━'**
+  String get analyticsGroupHeaderTime;
+
+  /// No description provided for @analyticsGroupHeaderDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'━ Distribution ━'**
+  String get analyticsGroupHeaderDistribution;
+
+  /// No description provided for @analyticsGroupHeaderStories.
+  ///
+  /// In en, this message translates to:
+  /// **'━ Stories ━'**
+  String get analyticsGroupHeaderStories;
+
+  /// No description provided for @analyticsCardTitleTotalSixMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Total · 6-month trend'**
+  String get analyticsCardTitleTotalSixMonth;
+
+  /// No description provided for @analyticsCardCaptionTotalSixMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'BarChart · current month highlighted'**
+  String get analyticsCardCaptionTotalSixMonth;
+
+  /// No description provided for @analyticsCardTitleJoyTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'Joy · Joy/¥ trend'**
+  String get analyticsCardTitleJoyTrend;
+
+  /// No description provided for @analyticsCardCaptionJoyTrendGap.
+  ///
+  /// In en, this message translates to:
+  /// **'MTD · gaps = no Joy entry that day'**
+  String get analyticsCardCaptionJoyTrendGap;
+
+  /// No description provided for @analyticsCardTitleCategoryDonut.
+  ///
+  /// In en, this message translates to:
+  /// **'Total · Category breakdown'**
+  String get analyticsCardTitleCategoryDonut;
+
+  /// No description provided for @analyticsCardCaptionCategoryDonut.
+  ///
+  /// In en, this message translates to:
+  /// **'Donut/PieChart · top-N + Other'**
+  String get analyticsCardCaptionCategoryDonut;
+
+  /// No description provided for @analyticsCategoryDonutOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get analyticsCategoryDonutOther;
+
+  /// No description provided for @analyticsCardTitleSatisfactionHistogram.
+  ///
+  /// In en, this message translates to:
+  /// **'Joy · Satisfaction distribution 1–10'**
+  String get analyticsCardTitleSatisfactionHistogram;
+
+  /// No description provided for @analyticsCardCaptionHistogram.
+  ///
+  /// In en, this message translates to:
+  /// **'Histogram · cool→warm · 5-bar trilingual annotation'**
+  String get analyticsCardCaptionHistogram;
+
+  /// Permanent annotation above bar 5 of satisfaction histogram acknowledging default-5 cluster + East-Asian central-tendency clustering (STATSUI-02 HARD-LOCKED)
+  ///
+  /// In en, this message translates to:
+  /// **'Median + unrated'**
+  String get analyticsHistogramBarFiveAnnotation;
+
+  /// No description provided for @analyticsHistogramColorCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Colors are ordinal only'**
+  String get analyticsHistogramColorCaption;
+
+  /// No description provided for @analyticsCardTitleLargestExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Total · Largest expense this month'**
+  String get analyticsCardTitleLargestExpense;
+
+  /// Largest monthly expense story card body
+  ///
+  /// In en, this message translates to:
+  /// **'{categoryName} · {amount} · {date}'**
+  String analyticsCardLargestExpenseBody(
+    String categoryName,
+    String amount,
+    String date,
+  );
+
+  /// No description provided for @analyticsCardEmptyLargestExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'No data — no expenses logged yet this month'**
+  String get analyticsCardEmptyLargestExpense;
+
+  /// No description provided for @analyticsCardTitleBestJoy.
+  ///
+  /// In en, this message translates to:
+  /// **'Joy · Best Joy this month'**
+  String get analyticsCardTitleBestJoy;
+
+  /// Best Joy story strip big line
+  ///
+  /// In en, this message translates to:
+  /// **'{categoryName} · {date}'**
+  String analyticsCardBestJoyBig(String categoryName, String date);
+
+  /// Best Joy story strip small line
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} · sat {sat}/10 ✨'**
+  String analyticsCardSmallBestJoy(String amount, int sat);
+
+  /// No description provided for @analyticsCardEmptyBestJoy.
+  ///
+  /// In en, this message translates to:
+  /// **'No standout Joy this month yet'**
+  String get analyticsCardEmptyBestJoy;
+
+  /// No description provided for @analyticsCardTitleFamilyInsight.
+  ///
+  /// In en, this message translates to:
+  /// **'Family · Highlights Summary'**
+  String get analyticsCardTitleFamilyInsight;
+
+  /// Family highlights aggregate sentence
+  ///
+  /// In en, this message translates to:
+  /// **'{N} family Highlights this month'**
+  String analyticsFamilyHighlightsSentence(int N);
+
+  /// Family shared joy insight sentence
+  ///
+  /// In en, this message translates to:
+  /// **'You all love [{categoryName}] (n={count}, avg {avg}/10)'**
+  String analyticsFamilySharedJoySentence(
+    String categoryName,
+    int count,
+    String avg,
+  );
+
+  /// No description provided for @analyticsFamilyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No shared favorite yet — keep logging Joy entries'**
+  String get analyticsFamilyEmpty;
+
+  /// No description provided for @analyticsThinSampleFallbackHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough Joy entries this month yet'**
+  String get analyticsThinSampleFallbackHeading;
+
+  /// No description provided for @analyticsThinSampleFallbackBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep logging — your Joy pattern shows up after a few days'**
+  String get analyticsThinSampleFallbackBody;
+
+  /// No description provided for @analyticsThinSampleFallbackCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an entry »'**
+  String get analyticsThinSampleFallbackCta;
+
+  /// No description provided for @analyticsCardErrorHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load data'**
+  String get analyticsCardErrorHeading;
+
+  /// No description provided for @analyticsCardErrorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Please try again in a moment'**
+  String get analyticsCardErrorBody;
+
+  /// No description provided for @analyticsCardErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get analyticsCardErrorRetry;
+
   /// Budget remaining amount label
   ///
   /// In en, this message translates to:

@@ -1270,6 +1270,157 @@ class SEn extends S {
   }
 
   @override
+  String get analyticsTitle => 'Statistics';
+
+  @override
+  String get analyticsMonthChipPickerTooltip => 'Pick a month';
+
+  @override
+  String get analyticsKpiTotalLabel => 'This month\'s spending';
+
+  @override
+  String analyticsKpiTotalDeltaIncreased(String pct) {
+    return '↑ +$pct% MoM';
+  }
+
+  @override
+  String analyticsKpiTotalDeltaDecreased(String pct) {
+    return '↓ -$pct% MoM';
+  }
+
+  @override
+  String get analyticsKpiJoyLabel => 'Avg satisfaction';
+
+  @override
+  String analyticsKpiJoySubMedianCoverage(String median, int k, int N) {
+    return 'Median $median · n=$k/$N';
+  }
+
+  @override
+  String get analyticsKpiJoyEmptyCaption => 'Gathering data...';
+
+  @override
+  String get analyticsGroupHeaderTime => '━ Time ━';
+
+  @override
+  String get analyticsGroupHeaderDistribution => '━ Distribution ━';
+
+  @override
+  String get analyticsGroupHeaderStories => '━ Stories ━';
+
+  @override
+  String get analyticsCardTitleTotalSixMonth => 'Total · 6-month trend';
+
+  @override
+  String get analyticsCardCaptionTotalSixMonth =>
+      'BarChart · current month highlighted';
+
+  @override
+  String get analyticsCardTitleJoyTrend => 'Joy · Joy/¥ trend';
+
+  @override
+  String get analyticsCardCaptionJoyTrendGap =>
+      'MTD · gaps = no Joy entry that day';
+
+  @override
+  String get analyticsCardTitleCategoryDonut => 'Total · Category breakdown';
+
+  @override
+  String get analyticsCardCaptionCategoryDonut =>
+      'Donut/PieChart · top-N + Other';
+
+  @override
+  String get analyticsCategoryDonutOther => 'Other';
+
+  @override
+  String get analyticsCardTitleSatisfactionHistogram =>
+      'Joy · Satisfaction distribution 1–10';
+
+  @override
+  String get analyticsCardCaptionHistogram =>
+      'Histogram · cool→warm · 5-bar trilingual annotation';
+
+  @override
+  String get analyticsHistogramBarFiveAnnotation => 'Median + unrated';
+
+  @override
+  String get analyticsHistogramColorCaption => 'Colors are ordinal only';
+
+  @override
+  String get analyticsCardTitleLargestExpense =>
+      'Total · Largest expense this month';
+
+  @override
+  String analyticsCardLargestExpenseBody(
+    String categoryName,
+    String amount,
+    String date,
+  ) {
+    return '$categoryName · $amount · $date';
+  }
+
+  @override
+  String get analyticsCardEmptyLargestExpense =>
+      'No data — no expenses logged yet this month';
+
+  @override
+  String get analyticsCardTitleBestJoy => 'Joy · Best Joy this month';
+
+  @override
+  String analyticsCardBestJoyBig(String categoryName, String date) {
+    return '$categoryName · $date';
+  }
+
+  @override
+  String analyticsCardSmallBestJoy(String amount, int sat) {
+    return '$amount · sat $sat/10 ✨';
+  }
+
+  @override
+  String get analyticsCardEmptyBestJoy => 'No standout Joy this month yet';
+
+  @override
+  String get analyticsCardTitleFamilyInsight => 'Family · Highlights Summary';
+
+  @override
+  String analyticsFamilyHighlightsSentence(int N) {
+    return '$N family Highlights this month';
+  }
+
+  @override
+  String analyticsFamilySharedJoySentence(
+    String categoryName,
+    int count,
+    String avg,
+  ) {
+    return 'You all love [$categoryName] (n=$count, avg $avg/10)';
+  }
+
+  @override
+  String get analyticsFamilyEmpty =>
+      'No shared favorite yet — keep logging Joy entries';
+
+  @override
+  String get analyticsThinSampleFallbackHeading =>
+      'Not enough Joy entries this month yet';
+
+  @override
+  String get analyticsThinSampleFallbackBody =>
+      'Keep logging — your Joy pattern shows up after a few days';
+
+  @override
+  String get analyticsThinSampleFallbackCta => 'Add an entry »';
+
+  @override
+  String get analyticsCardErrorHeading => 'Could not load data';
+
+  @override
+  String get analyticsCardErrorBody => 'Please try again in a moment';
+
+  @override
+  String get analyticsCardErrorRetry => 'Retry';
+
+  @override
   String budgetRemainingAmount(String amount) {
     return 'Remaining: $amount';
   }

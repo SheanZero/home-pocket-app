@@ -1601,6 +1601,136 @@
       }
     }
   },
+  "analyticsTitle": "统计",
+  "analyticsMonthChipPickerTooltip": "选择月份",
+  "analyticsKpiTotalLabel": "本月支出",
+  "analyticsKpiTotalDeltaIncreased": "↑ +{pct}% MoM",
+  "@analyticsKpiTotalDeltaIncreased": {
+    "description": "Total spending KPI month-over-month increase",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsKpiTotalDeltaDecreased": "↓ -{pct}% MoM",
+  "@analyticsKpiTotalDeltaDecreased": {
+    "description": "Total spending KPI month-over-month decrease",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsKpiJoyLabel": "本月平均满足度",
+  "analyticsKpiJoySubMedianCoverage": "中位数 {median} · n={k}/{N}",
+  "@analyticsKpiJoySubMedianCoverage": {
+    "description": "KPI mini-hero 悦己平均 sub-line: median + coverage (STATSUI-03)",
+    "placeholders": {
+      "median": {
+        "type": "String"
+      },
+      "k": {
+        "type": "int"
+      },
+      "N": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsKpiJoyEmptyCaption": "数据收集中...",
+  "analyticsGroupHeaderTime": "━ 时间 / Time ━",
+  "analyticsGroupHeaderDistribution": "━ 分布 / Distribution ━",
+  "analyticsGroupHeaderStories": "━ 故事 / Stories ━",
+  "analyticsCardTitleTotalSixMonth": "总 · 6 个月支出推移",
+  "analyticsCardCaptionTotalSixMonth": "BarChart · 当月高亮",
+  "analyticsCardTitleJoyTrend": "悦己 · 幸福密度趋势",
+  "analyticsCardCaptionJoyTrendGap": "MTD · 断点 = 当日没有魂账记录",
+  "analyticsCardTitleCategoryDonut": "总 · 类别支出分布",
+  "analyticsCardCaptionCategoryDonut": "Donut/PieChart · top-N + 其他",
+  "analyticsCategoryDonutOther": "其他",
+  "analyticsCardTitleSatisfactionHistogram": "悦己 · 满足度分布 1–10",
+  "analyticsCardCaptionHistogram": "Histogram · cool→warm · 5 bar 三语注释",
+  "analyticsHistogramBarFiveAnnotation": "中位数·含未评分",
+  "@analyticsHistogramBarFiveAnnotation": {
+    "description": "Permanent annotation above bar 5 of satisfaction histogram acknowledging default-5 cluster + East-Asian central-tendency clustering (STATSUI-02 HARD-LOCKED)"
+  },
+  "analyticsHistogramColorCaption": "色彩仅为 ordinal 视觉区分",
+  "analyticsCardTitleLargestExpense": "总 · 本月最大支出",
+  "analyticsCardLargestExpenseBody": "{categoryName} · {amount} · {date}",
+  "@analyticsCardLargestExpenseBody": {
+    "description": "Largest monthly expense story card body",
+    "placeholders": {
+      "categoryName": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsCardEmptyLargestExpense": "暂无数据 — 本月还没有支出记录",
+  "analyticsCardTitleBestJoy": "悦己 · 本月最美时刻",
+  "analyticsCardBestJoyBig": "{categoryName} · {date}",
+  "@analyticsCardBestJoyBig": {
+    "description": "Best Joy story strip big line",
+    "placeholders": {
+      "categoryName": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsCardSmallBestJoy": "{amount} · 满足 {sat}/10 ✨",
+  "@analyticsCardSmallBestJoy": {
+    "description": "Best Joy story strip small line",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "sat": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsCardEmptyBestJoy": "本月最值还没出现",
+  "analyticsCardTitleFamilyInsight": "家族 · 小确幸总结",
+  "analyticsFamilyHighlightsSentence": "本月家族小確幸 {N} 次",
+  "@analyticsFamilyHighlightsSentence": {
+    "description": "Family highlights aggregate sentence",
+    "placeholders": {
+      "N": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsFamilySharedJoySentence": "你们都偏爱 [{categoryName}] (n={count}, 平均 {avg}/10)",
+  "@analyticsFamilySharedJoySentence": {
+    "description": "Family shared joy insight sentence",
+    "placeholders": {
+      "categoryName": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "avg": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsFamilyEmpty": "还没有共同最爱品类——多记几笔魂账试试",
+  "analyticsThinSampleFallbackHeading": "本月魂账记录不足 5 笔",
+  "analyticsThinSampleFallbackBody": "多记录一周后回来看 Joy 趋势",
+  "analyticsThinSampleFallbackCta": "去记录 »",
+  "analyticsCardErrorHeading": "数据加载失败",
+  "analyticsCardErrorBody": "请稍后再试",
+  "analyticsCardErrorRetry": "重试",
   "budgetRemainingAmount": "剩余: {amount}",
   "@budgetRemainingAmount": {
     "description": "Budget remaining amount label",

@@ -1601,6 +1601,136 @@
       }
     }
   },
+  "analyticsTitle": "Statistics",
+  "analyticsMonthChipPickerTooltip": "Pick a month",
+  "analyticsKpiTotalLabel": "This month's spending",
+  "analyticsKpiTotalDeltaIncreased": "↑ +{pct}% MoM",
+  "@analyticsKpiTotalDeltaIncreased": {
+    "description": "Total spending KPI month-over-month increase",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsKpiTotalDeltaDecreased": "↓ -{pct}% MoM",
+  "@analyticsKpiTotalDeltaDecreased": {
+    "description": "Total spending KPI month-over-month decrease",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsKpiJoyLabel": "Avg satisfaction",
+  "analyticsKpiJoySubMedianCoverage": "Median {median} · n={k}/{N}",
+  "@analyticsKpiJoySubMedianCoverage": {
+    "description": "KPI mini-hero 悦己平均 sub-line: median + coverage (STATSUI-03)",
+    "placeholders": {
+      "median": {
+        "type": "String"
+      },
+      "k": {
+        "type": "int"
+      },
+      "N": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsKpiJoyEmptyCaption": "Gathering data...",
+  "analyticsGroupHeaderTime": "━ Time ━",
+  "analyticsGroupHeaderDistribution": "━ Distribution ━",
+  "analyticsGroupHeaderStories": "━ Stories ━",
+  "analyticsCardTitleTotalSixMonth": "Total · 6-month trend",
+  "analyticsCardCaptionTotalSixMonth": "BarChart · current month highlighted",
+  "analyticsCardTitleJoyTrend": "Joy · Joy/¥ trend",
+  "analyticsCardCaptionJoyTrendGap": "MTD · gaps = no Joy entry that day",
+  "analyticsCardTitleCategoryDonut": "Total · Category breakdown",
+  "analyticsCardCaptionCategoryDonut": "Donut/PieChart · top-N + Other",
+  "analyticsCategoryDonutOther": "Other",
+  "analyticsCardTitleSatisfactionHistogram": "Joy · Satisfaction distribution 1–10",
+  "analyticsCardCaptionHistogram": "Histogram · cool→warm · 5-bar trilingual annotation",
+  "analyticsHistogramBarFiveAnnotation": "Median + unrated",
+  "@analyticsHistogramBarFiveAnnotation": {
+    "description": "Permanent annotation above bar 5 of satisfaction histogram acknowledging default-5 cluster + East-Asian central-tendency clustering (STATSUI-02 HARD-LOCKED)"
+  },
+  "analyticsHistogramColorCaption": "Colors are ordinal only",
+  "analyticsCardTitleLargestExpense": "Total · Largest expense this month",
+  "analyticsCardLargestExpenseBody": "{categoryName} · {amount} · {date}",
+  "@analyticsCardLargestExpenseBody": {
+    "description": "Largest monthly expense story card body",
+    "placeholders": {
+      "categoryName": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsCardEmptyLargestExpense": "No data — no expenses logged yet this month",
+  "analyticsCardTitleBestJoy": "Joy · Best Joy this month",
+  "analyticsCardBestJoyBig": "{categoryName} · {date}",
+  "@analyticsCardBestJoyBig": {
+    "description": "Best Joy story strip big line",
+    "placeholders": {
+      "categoryName": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsCardSmallBestJoy": "{amount} · sat {sat}/10 ✨",
+  "@analyticsCardSmallBestJoy": {
+    "description": "Best Joy story strip small line",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "sat": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsCardEmptyBestJoy": "No standout Joy this month yet",
+  "analyticsCardTitleFamilyInsight": "Family · Highlights Summary",
+  "analyticsFamilyHighlightsSentence": "{N} family Highlights this month",
+  "@analyticsFamilyHighlightsSentence": {
+    "description": "Family highlights aggregate sentence",
+    "placeholders": {
+      "N": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsFamilySharedJoySentence": "You all love [{categoryName}] (n={count}, avg {avg}/10)",
+  "@analyticsFamilySharedJoySentence": {
+    "description": "Family shared joy insight sentence",
+    "placeholders": {
+      "categoryName": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "avg": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsFamilyEmpty": "No shared favorite yet — keep logging Joy entries",
+  "analyticsThinSampleFallbackHeading": "Not enough Joy entries this month yet",
+  "analyticsThinSampleFallbackBody": "Keep logging — your Joy pattern shows up after a few days",
+  "analyticsThinSampleFallbackCta": "Add an entry »",
+  "analyticsCardErrorHeading": "Could not load data",
+  "analyticsCardErrorBody": "Please try again in a moment",
+  "analyticsCardErrorRetry": "Retry",
   "budgetRemainingAmount": "Remaining: {amount}",
   "@budgetRemainingAmount": {
     "description": "Budget remaining amount label",
