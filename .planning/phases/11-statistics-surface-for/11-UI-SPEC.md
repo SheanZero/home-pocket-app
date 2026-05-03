@@ -5,7 +5,7 @@ status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-05-03
-reviewed_at: 2026-05-03
+reviewed_at: 2026-05-03 (revision 2)
 revised_at: 2026-05-03
 variant: δ
 ---
@@ -409,14 +409,14 @@ Phase 11 introduces new widgets. Final widget tree is Variant δ (locked):
 
 The 2026-05-03 SCOPE simplification + Variant δ revision triggers a re-verification round. Original 6/6 PASS verdict (recorded `reviewed_at: 2026-05-03`) covered the 3-region IA; the 2-region Variant δ structure invalidates that audit on Color (跨账本 olive accent removal), Copywriting (3-region region-titles row dropped, themed-group H3s + KPI mini-hero copy added), Component Inventory (跨账本 placeholder dropped, 4 new widgets added), Layout Rhythm (full rewrite). Spacing / Typography / Registry Safety dimensions unchanged.
 
-- [ ] Dimension 1 Copywriting: re-verify (KPI mini-hero copy, themed-group headers, 総 card copy added; 跨账本 region rows dropped; bar-5 annotation HARD-LOCKED preserved)
-- [ ] Dimension 2 Visuals: re-verify (chart specs preserved + new Donut/PieChart contract for 類別支出; Variant δ layout image embedded above)
-- [ ] Dimension 3 Color: re-verify (60/30/10 split locked; only 2 ledger accents now — 総 + 悦己; 家族 ochre preserved as third tinge for FamilyInsight; histogram gradient unchanged)
-- [ ] Dimension 4 Typography: re-verify (no changes — same 4 sizes × 2 weights from `AppTextStyles`)
-- [ ] Dimension 5 Spacing: re-verify (8-point scale; chart-canvas + 14px card-inner exceptions justified; touch-target 44px floor noted)
-- [ ] Dimension 6 Registry Safety: re-verify (`fl_chart` adds `PieChart` consumption — same library, no new dependency)
+- [x] Dimension 1 Copywriting: PASS (KPI mini-hero copy + themed-group H3 headers + 総 card copy tables added; 跨账本 region rows dropped cleanly; bar-5 annotation HARD-LOCKED preserved trilingually; forbidden-pattern list extended with 生存帳本-as-region ban)
+- [x] Dimension 2 Visuals: PASS (Variant δ wireframe embedded inline; focal point hierarchy clear AppBar → KPI mini-hero → 3 themed groups; new Donut/PieChart contract documented; month chip 44px hit-area enforced via outer Padding)
+- [x] Dimension 3 Color: PASS (60/30/10 split locked; 2 ledger accents 総 + 悦己 + 家族 ochre tinge for FamilyInsight; reservation lists role-disjoint; histogram per-bar gradient unchanged with ADR-014 guard caption preserved)
+- [x] Dimension 4 Typography: PASS (unchanged from original — same conceptual roles × 2 effective weights from `AppTextStyles`; amount tier is project-mandated tabular-figure exception per CLAUDE.md)
+- [x] Dimension 5 Spacing: PASS (8-point scale; chart-canvas + 14px card-inner exceptions justified; touch-target 44px floor noted; Variant δ rhythm uses tokens consistently)
+- [x] Dimension 6 Registry Safety: PASS (`fl_chart 0.69.0` pre-existing dependency; Phase 11 adds `PieChart` consumption only — same library, no new dependency surface)
 
-**Approval:** pending re-verification (checker upgrades to `reviewed_at: 2026-05-03 (revision 2)` after sign-off)
+**Approval:** APPROVED (revision 2) — `reviewed_at: 2026-05-03 (revision 2)` recorded in frontmatter
 
 ---
 
