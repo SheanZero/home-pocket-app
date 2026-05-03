@@ -39,19 +39,19 @@ Two metrics that surface in family/group mode only. **All anti-comparison constr
 
 - [ ] **FAMILY-01**: **Family Highlights Sum** = aggregate count of `satisfaction ≥ 6` soul-ledger transactions across all family shadow books over month-to-date; **return type is `int` (single aggregate)**; per-member breakdown (e.g. `Map<MemberId, int>`) is forbidden by contract — the use case must not expose the data shape that enables leaderboards. (Threshold matches HAPPY-03.)
 - [ ] **FAMILY-02**: **Shared Joy Insight** identifies the category with the highest avg satisfaction across the family's soul-ledger transactions over month-to-date; **min-N=3 transactions per category** guard prevents single-data-point categories from being crowned; returns `(categoryId, avgSatisfaction, totalCount)` only — no per-member contributions
-- [ ] **FAMILY-03**: Family card consent gate — if any family member has not opted into shared analytics, the family card collapses entirely (not "shows partial data"). **Phase 10 minimum-gate** (D-08): renders iff `isGroupModeProvider == true` AND `shadowBooks.isNotEmpty`. **Strict per-member opt-in semantic deferred to v1.2** as `FAMILY-V2-03` — requires schema migration v16→v17 + consent provider + settings UI + ADR-Privacy-Consent-Gate-v1.2; disproportionate to ship in v1.1.
+- [x] **FAMILY-03**: Family card consent gate — if any family member has not opted into shared analytics, the family card collapses entirely (not "shows partial data"). **Phase 10 minimum-gate** (D-08): renders iff `isGroupModeProvider == true` AND `shadowBooks.isNotEmpty`. **Strict per-member opt-in semantic deferred to v1.2** as `FAMILY-V2-03` — requires schema migration v16→v17 + consent provider + settings UI + ADR-Privacy-Consent-Gate-v1.2; disproportionate to ship in v1.1.
 
 ### HOMEUI — HomePage Redesign
 
 Replace `SoulFullnessCard` to consume Phase 9 contracts. Drop the buggy inline helpers.
 
-- [ ] **HOMEUI-01**: `SoulFullnessCard` rebuilt to render the 4 personal happiness metrics (Avg Satisfaction, Joy per ¥, Highlights count, Best Joy per ¥ story card)
-- [ ] **HOMEUI-02**: Inline helpers `_computeHappinessROI` (misleading "budget-share" formula) and `_computeSatisfaction` (intraday-only) deleted from `home_screen.dart`; both responsibilities now live in `GetHappinessReportUseCase`
-- [ ] **HOMEUI-03**: Family card (FAMILY-01 + FAMILY-02) conditionally rendered when `isGroupModeProvider == true`; respects FAMILY-03 consent gate
-- [ ] **HOMEUI-04**: At most 2 `ⓘ` info icons explain voice estimator bias and hedonic adaptation; coverage caption ("n=23/31 rated") visible on the headline metric tile; no daily-target / streak / badge copy anywhere
-- [ ] **HOMEUI-05**: HomePage hero card absorbs total monthly spending (`monthlyReport.totalExpenses`) + month-over-month delta chip + previous-month amount; replaces `MonthOverviewCard` widget. Per Phase 10 D-06.
-- [ ] **HOMEUI-06**: HomePage hero card displays 魂/生存 absolute amount split via inline horizontal split bar (魂 portion gradient soul-green, track neutral gray); labels are absolute Yen amounts, NOT percentages or ratio framing; replaces `LedgerComparisonSection` survival/soul rows in single mode. Per Phase 10 D-06.
-- [ ] **HOMEUI-07**: In group mode, hero card appends per-member monthly spending rows after Best Joy strip (avatar + member name + ¥amount per row); replaces `LedgerComparisonSection`'s shadow-book rows. Per Phase 10 D-06.
+- [x] **HOMEUI-01**: `SoulFullnessCard` rebuilt to render the 4 personal happiness metrics (Avg Satisfaction, Joy per ¥, Highlights count, Best Joy per ¥ story card)
+- [x] **HOMEUI-02**: Inline helpers `_computeHappinessROI` (misleading "budget-share" formula) and `_computeSatisfaction` (intraday-only) deleted from `home_screen.dart`; both responsibilities now live in `GetHappinessReportUseCase`
+- [x] **HOMEUI-03**: Family card (FAMILY-01 + FAMILY-02) conditionally rendered when `isGroupModeProvider == true`; respects FAMILY-03 consent gate
+- [x] **HOMEUI-04**: At most 2 `ⓘ` info icons explain voice estimator bias and hedonic adaptation; coverage caption ("n=23/31 rated") visible on the headline metric tile; no daily-target / streak / badge copy anywhere
+- [x] **HOMEUI-05**: HomePage hero card absorbs total monthly spending (`monthlyReport.totalExpenses`) + month-over-month delta chip + previous-month amount; replaces `MonthOverviewCard` widget. Per Phase 10 D-06.
+- [x] **HOMEUI-06**: HomePage hero card displays 魂/生存 absolute amount split via inline horizontal split bar (魂 portion gradient soul-green, track neutral gray); labels are absolute Yen amounts, NOT percentages or ratio framing; replaces `LedgerComparisonSection` survival/soul rows in single mode. Per Phase 10 D-06.
+- [x] **HOMEUI-07**: In group mode, hero card appends per-member monthly spending rows after Best Joy strip (avatar + member name + ¥amount per row); replaces `LedgerComparisonSection`'s shadow-book rows. Per Phase 10 D-06.
 
 ### STATSUI — Statistics Surface (悦己账本统计)
 
@@ -125,14 +125,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HAPPY-08 | Phase 9 | Complete |
 | FAMILY-01 | Phase 9 | Pending |
 | FAMILY-02 | Phase 9 | Pending |
-| FAMILY-03 | Phase 10 | Pending |
-| HOMEUI-01 | Phase 10 | Pending |
-| HOMEUI-02 | Phase 10 | Pending |
-| HOMEUI-03 | Phase 10 | Pending |
-| HOMEUI-04 | Phase 10 | Pending |
-| HOMEUI-05 | Phase 10 | Pending |
-| HOMEUI-06 | Phase 10 | Pending |
-| HOMEUI-07 | Phase 10 | Pending |
+| FAMILY-03 | Phase 10 | Complete |
+| HOMEUI-01 | Phase 10 | Complete |
+| HOMEUI-02 | Phase 10 | Complete |
+| HOMEUI-03 | Phase 10 | Complete |
+| HOMEUI-04 | Phase 10 | Complete |
+| HOMEUI-05 | Phase 10 | Complete |
+| HOMEUI-06 | Phase 10 | Complete |
+| HOMEUI-07 | Phase 10 | Complete |
 | STATSUI-01 | Phase 11 | Pending |
 | STATSUI-02 | Phase 11 | Pending |
 | STATSUI-03 | Phase 11 | Pending |
