@@ -1,26 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../application/analytics/demo_data_service.dart';
-import '../../../../application/analytics/repository_providers.dart'
-    as app_analytics;
-import '../../../../application/i18n/formatter_service.dart';
-import '../../../../features/accounting/presentation/providers/repository_providers.dart';
+import '../../../../features/accounting/presentation/providers/repository_providers.dart'
+    as accounting_providers;
+import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
+import '../../../../features/home/presentation/providers/state_shadow_books.dart';
+import '../../../../features/settings/presentation/providers/state_locale.dart'
+    as locale_providers;
 import '../../../../generated/app_localizations.dart';
-import '../../domain/models/budget_progress.dart';
-import '../../domain/models/expense_trend.dart';
-import '../../domain/models/monthly_report.dart';
+import '../../domain/models/metric_result.dart';
 import '../providers/state_analytics.dart';
-import '../widgets/budget_progress_list.dart';
-import '../widgets/category_breakdown_list.dart';
-import '../widgets/category_pie_chart.dart';
-import '../widgets/daily_expense_chart.dart';
-import '../widgets/expense_trend_chart.dart';
-import '../widgets/ledger_ratio_chart.dart';
-import '../widgets/month_comparison_card.dart';
-import '../widgets/summary_cards.dart';
+import '../providers/state_happiness.dart';
+import '../widgets/analytics_card_error_state.dart';
+import '../widgets/analytics_screen_section_header.dart';
+import '../widgets/best_joy_story_strip.dart';
+import '../widgets/category_spend_donut_chart.dart';
+import '../widgets/family_insight_card.dart';
+import '../widgets/joy_ledger_thin_sample_fallback.dart';
+import '../widgets/joy_trend_line_chart.dart';
+import '../widgets/kpi_mini_hero_strip.dart';
+import '../widgets/largest_expense_story_card.dart';
+import '../widgets/month_chip_picker.dart';
+import '../widgets/monthly_spend_trend_bar_chart.dart';
+import '../widgets/satisfaction_distribution_histogram.dart';
 
-/// Main analytics screen showing all reports and charts.
+/// Phase 11 Variant delta unified analytics dashboard.
+///
+/// Structure: AppBar + MonthChipPicker, KPI mini-hero, then the Time,
+/// Distribution, and Stories themed groups. Each data card owns its own
+/// AsyncValue.when branch so one failing provider does not blank the screen.
 class AnalyticsScreen extends ConsumerWidget {
   const AnalyticsScreen({super.key, required this.bookId});
 
@@ -28,125 +36,115 @@ class AnalyticsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedMonth = ref.watch(selectedMonthProvider);
-    final year = selectedMonth.year;
-    final month = selectedMonth.month;
+    final l10n = S.of(context);
+    final selected = ref.watch(selectedMonthProvider);
+    final year = selected.year;
+    final month = selected.month;
+    final daysInMonth = DateTime(year, month + 1, 0).day;
+    final locale =
+        ref.watch(locale_providers.currentLocaleProvider).valueOrNull ??
+        Localizations.localeOf(context);
 
-    final reportAsync = ref.watch(
-      monthlyReportProvider(bookId: bookId, year: year, month: month),
+    final bookAsync = ref.watch(
+      accounting_providers.bookByIdProvider(bookId: bookId),
     );
-    final budgetAsync = ref.watch(
-      budgetProgressProvider(bookId: bookId, year: year, month: month),
-    );
-    final trendAsync = ref.watch(
-      expenseTrendProvider(bookId: bookId, anchor: selectedMonth),
-    );
+    final currencyCode = bookAsync.valueOrNull?.currency ?? 'JPY';
+
+    final isGroupMode = ref.watch(isGroupModeProvider);
+    final shadowBooksAsync = isGroupMode
+        ? ref
+              .watch(shadowBooksProvider)
+              .whenData<List<ShadowBookInfo>?>((value) => value)
+        : const AsyncData<List<ShadowBookInfo>?>(null);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(S.of(context).analytics),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.auto_fix_high),
-            tooltip: S.of(context).generateDemoData,
-            onPressed: () => _generateDemoData(context, ref),
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(40),
-          child: _MonthSelector(
-            year: year,
-            month: month,
-            onPrevious: () =>
-                ref.read(selectedMonthProvider.notifier).previousMonth(),
-            onNext: () => ref.read(selectedMonthProvider.notifier).nextMonth(),
-          ),
-        ),
+        title: Text(l10n.analyticsTitle),
+        actions: [MonthChipPicker(locale: locale)],
       ),
       body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(
-            monthlyReportProvider(bookId: bookId, year: year, month: month),
-          );
-          ref.invalidate(
-            budgetProgressProvider(bookId: bookId, year: year, month: month),
-          );
-          ref.invalidate(
-            expenseTrendProvider(bookId: bookId, anchor: selectedMonth),
-          );
-        },
+        onRefresh: () async => _refresh(
+          ref,
+          selected: selected,
+          currencyCode: currencyCode,
+          isGroupMode: isGroupMode,
+        ),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Summary Cards
-              _buildSection<MonthlyReport>(
-                reportAsync,
-                (report) => SummaryCards(report: report),
+              _KpiHero(
+                bookId: bookId,
+                year: year,
+                month: month,
+                currencyCode: currencyCode,
+                locale: locale,
               ),
-              const SizedBox(height: 16),
-
-              // Category Pie Chart
-              _buildSection<MonthlyReport>(
-                reportAsync,
-                (report) =>
-                    CategoryPieChart(breakdowns: report.categoryBreakdowns),
-              ),
-              const SizedBox(height: 16),
-
-              // Daily Expense Bar Chart
-              _buildSection<MonthlyReport>(
-                reportAsync,
-                (report) =>
-                    DailyExpenseChart(dailyExpenses: report.dailyExpenses),
-              ),
-              const SizedBox(height: 16),
-
-              // Ledger Ratio
-              _buildSection<MonthlyReport>(
-                reportAsync,
-                (report) => LedgerRatioChart(
-                  survivalTotal: report.survivalTotal,
-                  soulTotal: report.soulTotal,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Budget Progress
-              _buildSection<List<BudgetProgress>>(
-                budgetAsync,
-                (list) => BudgetProgressList(progressList: list),
-              ),
-              const SizedBox(height: 16),
-
-              // 6-Month Trend
-              _buildSection<ExpenseTrendData>(
-                trendAsync,
-                (data) => ExpenseTrendChart(trendData: data),
-              ),
-              const SizedBox(height: 16),
-
-              // Category Breakdown List
-              _buildSection<MonthlyReport>(
-                reportAsync,
-                (report) => CategoryBreakdownList(
-                  breakdowns: report.categoryBreakdowns,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Month Comparison
-              _buildSection<MonthlyReport>(reportAsync, (report) {
-                if (report.previousMonthComparison == null) {
-                  return const SizedBox.shrink();
-                }
-                return MonthComparisonCard(
-                  comparison: report.previousMonthComparison!,
-                );
-              }),
               const SizedBox(height: 32),
+              AnalyticsScreenSectionHeader(
+                label: l10n.analyticsGroupHeaderTime,
+              ),
+              const SizedBox(height: 8),
+              _TotalSixMonthCard(
+                bookId: bookId,
+                anchor: selected,
+                locale: locale,
+              ),
+              const SizedBox(height: 8),
+              _JoyTrendOrFallback(
+                bookId: bookId,
+                year: year,
+                month: month,
+                currencyCode: currencyCode,
+                daysInMonth: daysInMonth,
+                locale: locale,
+              ),
+              const SizedBox(height: 32),
+              AnalyticsScreenSectionHeader(
+                label: l10n.analyticsGroupHeaderDistribution,
+              ),
+              const SizedBox(height: 8),
+              _CategoryDonutCard(bookId: bookId, year: year, month: month),
+              const SizedBox(height: 8),
+              _SatisfactionHistogramOrFallback(
+                bookId: bookId,
+                year: year,
+                month: month,
+                currencyCode: currencyCode,
+              ),
+              const SizedBox(height: 32),
+              AnalyticsScreenSectionHeader(
+                label: l10n.analyticsGroupHeaderStories,
+              ),
+              const SizedBox(height: 8),
+              _LargestExpenseCard(
+                bookId: bookId,
+                year: year,
+                month: month,
+                currencyCode: currencyCode,
+                locale: locale,
+              ),
+              const SizedBox(height: 8),
+              _BestJoyCard(
+                bookId: bookId,
+                year: year,
+                month: month,
+                currencyCode: currencyCode,
+                locale: locale,
+              ),
+              if (isGroupMode) ...[
+                const SizedBox(height: 8),
+                _FamilyCard(
+                  year: year,
+                  month: month,
+                  isGroupMode: isGroupMode,
+                  shadowBooksAsync: shadowBooksAsync,
+                  locale: locale,
+                ),
+              ],
+              const SizedBox(height: 64),
             ],
           ),
         ),
@@ -154,86 +152,207 @@ class AnalyticsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _generateDemoData(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(S.of(context).generateDemoData),
-        content: Text(S.of(context).generateDemoDataDescription),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(S.of(context).cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(S.of(context).generate),
-          ),
-        ],
+  void _refresh(
+    WidgetRef ref, {
+    required DateTime selected,
+    required String currencyCode,
+    required bool isGroupMode,
+  }) {
+    final year = selected.year;
+    final month = selected.month;
+    ref.invalidate(
+      monthlyReportProvider(bookId: bookId, year: year, month: month),
+    );
+    ref.invalidate(expenseTrendProvider(bookId: bookId, anchor: selected));
+    ref.invalidate(
+      happinessReportProvider(
+        bookId: bookId,
+        year: year,
+        month: month,
+        currencyCode: currencyCode,
       ),
     );
-
-    if (confirmed != true) return;
-    if (!context.mounted) return;
-
-    final database = ref.read(app_analytics.appAppDatabaseProvider);
-    final categoryRepo = ref.read(categoryRepositoryProvider);
-    final service = DemoDataService(
-      database: database,
-      categoryRepository: categoryRepo,
+    ref.invalidate(
+      dailyJoyPerYenProvider(
+        bookId: bookId,
+        year: year,
+        month: month,
+        currencyCode: currencyCode,
+      ),
     );
-
-    try {
-      await service.generateDemoData(bookId: bookId);
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(S.of(context).demoDataGenerated)));
-      // Invalidate all providers to reload
-      final selectedMonth = ref.read(selectedMonthProvider);
-      ref.invalidate(
-        monthlyReportProvider(
-          bookId: bookId,
-          year: selectedMonth.year,
-          month: selectedMonth.month,
-        ),
-      );
-      ref.invalidate(
-        budgetProgressProvider(
-          bookId: bookId,
-          year: selectedMonth.year,
-          month: selectedMonth.month,
-        ),
-      );
-      ref.invalidate(
-        expenseTrendProvider(bookId: bookId, anchor: selectedMonth),
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    ref.invalidate(
+      satisfactionDistributionProvider(
+        bookId: bookId,
+        year: year,
+        month: month,
+      ),
+    );
+    ref.invalidate(
+      bestJoyMomentProvider(bookId: bookId, year: year, month: month),
+    );
+    ref.invalidate(
+      largestMonthlyExpenseProvider(bookId: bookId, year: year, month: month),
+    );
+    if (isGroupMode) {
+      ref.invalidate(familyHappinessProvider(year: year, month: month));
+      ref.invalidate(shadowBooksProvider);
     }
   }
+}
 
-  Widget _buildSection<T>(
-    AsyncValue<T> asyncValue,
-    Widget Function(T data) builder,
-  ) {
-    return asyncValue.when(
-      data: builder,
-      loading: () => const Center(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: CircularProgressIndicator(),
+class _KpiHero extends ConsumerWidget {
+  const _KpiHero({
+    required this.bookId,
+    required this.year,
+    required this.month,
+    required this.currencyCode,
+    required this.locale,
+  });
+
+  final String bookId;
+  final int year;
+  final int month;
+  final String currencyCode;
+  final Locale locale;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final monthlyAsync = ref.watch(
+      monthlyReportProvider(bookId: bookId, year: year, month: month),
+    );
+    final happinessAsync = ref.watch(
+      happinessReportProvider(
+        bookId: bookId,
+        year: year,
+        month: month,
+        currencyCode: currencyCode,
+      ),
+    );
+
+    return monthlyAsync.when(
+      data: (monthly) => happinessAsync.when(
+        data: (happiness) => SizedBox(
+          height: 120,
+          child: KpiMiniHeroStrip(
+            monthlyReport: monthly,
+            happinessReport: happiness,
+            currencyCode: currencyCode,
+            locale: locale,
+          ),
+        ),
+        loading: () => const SizedBox(height: 120),
+        error: (_, _) => AnalyticsCardErrorState(
+          onRetry: () => ref.invalidate(
+            happinessReportProvider(
+              bookId: bookId,
+              year: year,
+              month: month,
+              currencyCode: currencyCode,
+            ),
+          ),
         ),
       ),
-      error: (error, _) => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            'Error: $error',
-            style: const TextStyle(color: Colors.red),
+      loading: () => const SizedBox(height: 120),
+      error: (_, _) => AnalyticsCardErrorState(
+        onRetry: () => ref.invalidate(
+          monthlyReportProvider(bookId: bookId, year: year, month: month),
+        ),
+      ),
+    );
+  }
+}
+
+class _TotalSixMonthCard extends ConsumerWidget {
+  const _TotalSixMonthCard({
+    required this.bookId,
+    required this.anchor,
+    required this.locale,
+  });
+
+  final String bookId;
+  final DateTime anchor;
+  final Locale locale;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final trendAsync = ref.watch(
+      expenseTrendProvider(bookId: bookId, anchor: anchor),
+    );
+    return trendAsync.when(
+      data: (trend) => _AnalyticsDataCard(
+        title: S.of(context).analyticsCardTitleTotalSixMonth,
+        caption: S.of(context).analyticsCardCaptionTotalSixMonth,
+        child: MonthlySpendTrendBarChart(
+          trendData: trend,
+          selectedYear: anchor.year,
+          selectedMonth: anchor.month,
+          locale: locale,
+        ),
+      ),
+      loading: () => const SizedBox(height: 260),
+      error: (_, _) => AnalyticsCardErrorState(
+        onRetry: () => ref.invalidate(
+          expenseTrendProvider(bookId: bookId, anchor: anchor),
+        ),
+      ),
+    );
+  }
+}
+
+class _JoyTrendOrFallback extends ConsumerWidget {
+  const _JoyTrendOrFallback({
+    required this.bookId,
+    required this.year,
+    required this.month,
+    required this.currencyCode,
+    required this.daysInMonth,
+    required this.locale,
+  });
+
+  final String bookId;
+  final int year;
+  final int month;
+  final String currencyCode;
+  final int daysInMonth;
+  final Locale locale;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dailyAsync = ref.watch(
+      dailyJoyPerYenProvider(
+        bookId: bookId,
+        year: year,
+        month: month,
+        currencyCode: currencyCode,
+      ),
+    );
+    return dailyAsync.when(
+      data: (result) {
+        if (_sampleSizeOf(result) < 5) {
+          return JoyLedgerThinSampleFallback(
+            onAddEntryTap: () =>
+                Navigator.of(context).pushNamed('/transactions/add'),
+          );
+        }
+        return _AnalyticsDataCard(
+          title: S.of(context).analyticsCardTitleJoyTrend,
+          caption: S.of(context).analyticsCardCaptionJoyTrendGap,
+          child: JoyTrendLineChart(
+            result: result,
+            daysInMonth: daysInMonth,
+            currencyCode: currencyCode,
+            locale: locale,
+          ),
+        );
+      },
+      loading: () => const SizedBox(height: 240),
+      error: (_, _) => AnalyticsCardErrorState(
+        onRetry: () => ref.invalidate(
+          dailyJoyPerYenProvider(
+            bookId: bookId,
+            year: year,
+            month: month,
+            currencyCode: currencyCode,
           ),
         ),
       ),
@@ -241,40 +360,263 @@ class AnalyticsScreen extends ConsumerWidget {
   }
 }
 
-class _MonthSelector extends StatelessWidget {
-  const _MonthSelector({
+class _CategoryDonutCard extends ConsumerWidget {
+  const _CategoryDonutCard({
+    required this.bookId,
     required this.year,
     required this.month,
-    required this.onPrevious,
-    required this.onNext,
+  });
+
+  final String bookId;
+  final int year;
+  final int month;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final monthlyAsync = ref.watch(
+      monthlyReportProvider(bookId: bookId, year: year, month: month),
+    );
+    return monthlyAsync.when(
+      data: (monthly) => _AnalyticsDataCard(
+        title: S.of(context).analyticsCardTitleCategoryDonut,
+        caption: S.of(context).analyticsCardCaptionCategoryDonut,
+        child: CategorySpendDonutChart(breakdowns: monthly.categoryBreakdowns),
+      ),
+      loading: () => const SizedBox(height: 280),
+      error: (_, _) => AnalyticsCardErrorState(
+        onRetry: () => ref.invalidate(
+          monthlyReportProvider(bookId: bookId, year: year, month: month),
+        ),
+      ),
+    );
+  }
+}
+
+class _SatisfactionHistogramOrFallback extends ConsumerWidget {
+  const _SatisfactionHistogramOrFallback({
+    required this.bookId,
+    required this.year,
+    required this.month,
+    required this.currencyCode,
+  });
+
+  final String bookId;
+  final int year;
+  final int month;
+  final String currencyCode;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dailyAsync = ref.watch(
+      dailyJoyPerYenProvider(
+        bookId: bookId,
+        year: year,
+        month: month,
+        currencyCode: currencyCode,
+      ),
+    );
+    final distributionAsync = ref.watch(
+      satisfactionDistributionProvider(
+        bookId: bookId,
+        year: year,
+        month: month,
+      ),
+    );
+
+    return dailyAsync.when(
+      data: (daily) {
+        if (_sampleSizeOf(daily) < 5) {
+          return const SizedBox.shrink();
+        }
+        return distributionAsync.when(
+          data: (buckets) => _AnalyticsDataCard(
+            title: S.of(context).analyticsCardTitleSatisfactionHistogram,
+            caption: S.of(context).analyticsCardCaptionHistogram,
+            child: SatisfactionDistributionHistogram(buckets: buckets),
+          ),
+          loading: () => const SizedBox(height: 260),
+          error: (_, _) => AnalyticsCardErrorState(
+            onRetry: () => ref.invalidate(
+              satisfactionDistributionProvider(
+                bookId: bookId,
+                year: year,
+                month: month,
+              ),
+            ),
+          ),
+        );
+      },
+      loading: () => const SizedBox(height: 260),
+      error: (_, _) => AnalyticsCardErrorState(
+        onRetry: () => ref.invalidate(
+          dailyJoyPerYenProvider(
+            bookId: bookId,
+            year: year,
+            month: month,
+            currencyCode: currencyCode,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LargestExpenseCard extends ConsumerWidget {
+  const _LargestExpenseCard({
+    required this.bookId,
+    required this.year,
+    required this.month,
+    required this.currencyCode,
+    required this.locale,
+  });
+
+  final String bookId;
+  final int year;
+  final int month;
+  final String currencyCode;
+  final Locale locale;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final largestAsync = ref.watch(
+      largestMonthlyExpenseProvider(bookId: bookId, year: year, month: month),
+    );
+    return largestAsync.when(
+      data: (expense) => LargestExpenseStoryCard(
+        expense: expense,
+        currencyCode: currencyCode,
+        locale: locale,
+        onTap: expense == null
+            ? null
+            : () => Navigator.of(context).pushNamed(
+                '/transactions/detail',
+                arguments: expense.transactionId,
+              ),
+      ),
+      loading: () => const SizedBox(height: 110),
+      error: (_, _) => AnalyticsCardErrorState(
+        onRetry: () => ref.invalidate(
+          largestMonthlyExpenseProvider(
+            bookId: bookId,
+            year: year,
+            month: month,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BestJoyCard extends ConsumerWidget {
+  const _BestJoyCard({
+    required this.bookId,
+    required this.year,
+    required this.month,
+    required this.currencyCode,
+    required this.locale,
+  });
+
+  final String bookId;
+  final int year;
+  final int month;
+  final String currencyCode;
+  final Locale locale;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final joyAsync = ref.watch(
+      bestJoyMomentProvider(bookId: bookId, year: year, month: month),
+    );
+    return joyAsync.when(
+      data: (joy) => BestJoyStoryStrip(
+        bestJoy: joy,
+        currencyCode: currencyCode,
+        locale: locale,
+        onTap: (txId) => Navigator.of(
+          context,
+        ).pushNamed('/transactions/detail', arguments: txId),
+      ),
+      loading: () => const SizedBox(height: 120),
+      error: (_, _) => AnalyticsCardErrorState(
+        onRetry: () => ref.invalidate(
+          bestJoyMomentProvider(bookId: bookId, year: year, month: month),
+        ),
+      ),
+    );
+  }
+}
+
+class _FamilyCard extends ConsumerWidget {
+  const _FamilyCard({
+    required this.year,
+    required this.month,
+    required this.isGroupMode,
+    required this.shadowBooksAsync,
+    required this.locale,
   });
 
   final int year;
   final int month;
-  final VoidCallback onPrevious;
-  final VoidCallback onNext;
+  final bool isGroupMode;
+  final AsyncValue<List<ShadowBookInfo>?> shadowBooksAsync;
+  final Locale locale;
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: onPrevious,
-          ),
-          Text(
-            const FormatterService().formatMonthYear(
-              DateTime(year, month),
-              Localizations.localeOf(context),
-            ),
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          IconButton(icon: const Icon(Icons.chevron_right), onPressed: onNext),
-        ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final familyAsync = ref.watch(
+      familyHappinessProvider(year: year, month: month),
+    );
+    return familyAsync.when(
+      data: (family) => FamilyInsightCard(
+        family: family,
+        isGroupMode: isGroupMode,
+        shadowBooks: shadowBooksAsync.valueOrNull,
+        locale: locale,
+      ),
+      loading: () => const SizedBox(height: 110),
+      error: (_, _) => AnalyticsCardErrorState(
+        onRetry: () =>
+            ref.invalidate(familyHappinessProvider(year: year, month: month)),
       ),
     );
   }
+}
+
+class _AnalyticsDataCard extends StatelessWidget {
+  const _AnalyticsDataCard({
+    required this.title,
+    required this.caption,
+    required this.child,
+  });
+
+  final String title;
+  final String caption;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(caption, style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 12),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+int _sampleSizeOf<T>(Object result) {
+  return switch (result) {
+    Empty<T>() => 0,
+    Value<T>(:final sampleSize) => sampleSize,
+    _ => 0,
+  };
 }

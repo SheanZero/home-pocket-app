@@ -198,178 +198,6 @@ class _MonthlyReportProviderElement
   int get month => (origin as MonthlyReportProvider).month;
 }
 
-String _$budgetProgressHash() => r'ae41ba06c07f8df96d4f818047e39734ecf98443';
-
-/// Budget progress for the selected month.
-///
-/// Copied from [budgetProgress].
-@ProviderFor(budgetProgress)
-const budgetProgressProvider = BudgetProgressFamily();
-
-/// Budget progress for the selected month.
-///
-/// Copied from [budgetProgress].
-class BudgetProgressFamily extends Family<AsyncValue<List<BudgetProgress>>> {
-  /// Budget progress for the selected month.
-  ///
-  /// Copied from [budgetProgress].
-  const BudgetProgressFamily();
-
-  /// Budget progress for the selected month.
-  ///
-  /// Copied from [budgetProgress].
-  BudgetProgressProvider call({
-    required String bookId,
-    required int year,
-    required int month,
-  }) {
-    return BudgetProgressProvider(bookId: bookId, year: year, month: month);
-  }
-
-  @override
-  BudgetProgressProvider getProviderOverride(
-    covariant BudgetProgressProvider provider,
-  ) {
-    return call(
-      bookId: provider.bookId,
-      year: provider.year,
-      month: provider.month,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'budgetProgressProvider';
-}
-
-/// Budget progress for the selected month.
-///
-/// Copied from [budgetProgress].
-class BudgetProgressProvider
-    extends AutoDisposeFutureProvider<List<BudgetProgress>> {
-  /// Budget progress for the selected month.
-  ///
-  /// Copied from [budgetProgress].
-  BudgetProgressProvider({
-    required String bookId,
-    required int year,
-    required int month,
-  }) : this._internal(
-         (ref) => budgetProgress(
-           ref as BudgetProgressRef,
-           bookId: bookId,
-           year: year,
-           month: month,
-         ),
-         from: budgetProgressProvider,
-         name: r'budgetProgressProvider',
-         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-             ? null
-             : _$budgetProgressHash,
-         dependencies: BudgetProgressFamily._dependencies,
-         allTransitiveDependencies:
-             BudgetProgressFamily._allTransitiveDependencies,
-         bookId: bookId,
-         year: year,
-         month: month,
-       );
-
-  BudgetProgressProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.bookId,
-    required this.year,
-    required this.month,
-  }) : super.internal();
-
-  final String bookId;
-  final int year;
-  final int month;
-
-  @override
-  Override overrideWith(
-    FutureOr<List<BudgetProgress>> Function(BudgetProgressRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: BudgetProgressProvider._internal(
-        (ref) => create(ref as BudgetProgressRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        bookId: bookId,
-        year: year,
-        month: month,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeFutureProviderElement<List<BudgetProgress>> createElement() {
-    return _BudgetProgressProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is BudgetProgressProvider &&
-        other.bookId == bookId &&
-        other.year == year &&
-        other.month == month;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, bookId.hashCode);
-    hash = _SystemHash.combine(hash, year.hashCode);
-    hash = _SystemHash.combine(hash, month.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin BudgetProgressRef on AutoDisposeFutureProviderRef<List<BudgetProgress>> {
-  /// The parameter `bookId` of this provider.
-  String get bookId;
-
-  /// The parameter `year` of this provider.
-  int get year;
-
-  /// The parameter `month` of this provider.
-  int get month;
-}
-
-class _BudgetProgressProviderElement
-    extends AutoDisposeFutureProviderElement<List<BudgetProgress>>
-    with BudgetProgressRef {
-  _BudgetProgressProviderElement(super.provider);
-
-  @override
-  String get bookId => (origin as BudgetProgressProvider).bookId;
-  @override
-  int get year => (origin as BudgetProgressProvider).year;
-  @override
-  int get month => (origin as BudgetProgressProvider).month;
-}
-
 String _$expenseTrendHash() => r'3f3497209b33b8aac9e6eff40fe290252e131a24';
 
 /// 6-month expense trend.
@@ -519,6 +347,189 @@ class _ExpenseTrendProviderElement
   String get bookId => (origin as ExpenseTrendProvider).bookId;
   @override
   DateTime get anchor => (origin as ExpenseTrendProvider).anchor;
+}
+
+String _$satisfactionDistributionHash() =>
+    r'552bf246b2c6d7de1f6febb965dece7d093b3e6e';
+
+/// Satisfaction score distribution for the selected month.
+///
+/// Copied from [satisfactionDistribution].
+@ProviderFor(satisfactionDistribution)
+const satisfactionDistributionProvider = SatisfactionDistributionFamily();
+
+/// Satisfaction score distribution for the selected month.
+///
+/// Copied from [satisfactionDistribution].
+class SatisfactionDistributionFamily
+    extends Family<AsyncValue<List<SatisfactionScoreBucket>>> {
+  /// Satisfaction score distribution for the selected month.
+  ///
+  /// Copied from [satisfactionDistribution].
+  const SatisfactionDistributionFamily();
+
+  /// Satisfaction score distribution for the selected month.
+  ///
+  /// Copied from [satisfactionDistribution].
+  SatisfactionDistributionProvider call({
+    required String bookId,
+    required int year,
+    required int month,
+  }) {
+    return SatisfactionDistributionProvider(
+      bookId: bookId,
+      year: year,
+      month: month,
+    );
+  }
+
+  @override
+  SatisfactionDistributionProvider getProviderOverride(
+    covariant SatisfactionDistributionProvider provider,
+  ) {
+    return call(
+      bookId: provider.bookId,
+      year: provider.year,
+      month: provider.month,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'satisfactionDistributionProvider';
+}
+
+/// Satisfaction score distribution for the selected month.
+///
+/// Copied from [satisfactionDistribution].
+class SatisfactionDistributionProvider
+    extends AutoDisposeFutureProvider<List<SatisfactionScoreBucket>> {
+  /// Satisfaction score distribution for the selected month.
+  ///
+  /// Copied from [satisfactionDistribution].
+  SatisfactionDistributionProvider({
+    required String bookId,
+    required int year,
+    required int month,
+  }) : this._internal(
+         (ref) => satisfactionDistribution(
+           ref as SatisfactionDistributionRef,
+           bookId: bookId,
+           year: year,
+           month: month,
+         ),
+         from: satisfactionDistributionProvider,
+         name: r'satisfactionDistributionProvider',
+         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+             ? null
+             : _$satisfactionDistributionHash,
+         dependencies: SatisfactionDistributionFamily._dependencies,
+         allTransitiveDependencies:
+             SatisfactionDistributionFamily._allTransitiveDependencies,
+         bookId: bookId,
+         year: year,
+         month: month,
+       );
+
+  SatisfactionDistributionProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.bookId,
+    required this.year,
+    required this.month,
+  }) : super.internal();
+
+  final String bookId;
+  final int year;
+  final int month;
+
+  @override
+  Override overrideWith(
+    FutureOr<List<SatisfactionScoreBucket>> Function(
+      SatisfactionDistributionRef provider,
+    )
+    create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: SatisfactionDistributionProvider._internal(
+        (ref) => create(ref as SatisfactionDistributionRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        bookId: bookId,
+        year: year,
+        month: month,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<List<SatisfactionScoreBucket>>
+  createElement() {
+    return _SatisfactionDistributionProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SatisfactionDistributionProvider &&
+        other.bookId == bookId &&
+        other.year == year &&
+        other.month == month;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, bookId.hashCode);
+    hash = _SystemHash.combine(hash, year.hashCode);
+    hash = _SystemHash.combine(hash, month.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin SatisfactionDistributionRef
+    on AutoDisposeFutureProviderRef<List<SatisfactionScoreBucket>> {
+  /// The parameter `bookId` of this provider.
+  String get bookId;
+
+  /// The parameter `year` of this provider.
+  int get year;
+
+  /// The parameter `month` of this provider.
+  int get month;
+}
+
+class _SatisfactionDistributionProviderElement
+    extends AutoDisposeFutureProviderElement<List<SatisfactionScoreBucket>>
+    with SatisfactionDistributionRef {
+  _SatisfactionDistributionProviderElement(super.provider);
+
+  @override
+  String get bookId => (origin as SatisfactionDistributionProvider).bookId;
+  @override
+  int get year => (origin as SatisfactionDistributionProvider).year;
+  @override
+  int get month => (origin as SatisfactionDistributionProvider).month;
 }
 
 String _$selectedMonthHash() => r'1e278a1a3b1a328fc41224840fb663025d470215';
