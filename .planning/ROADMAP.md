@@ -141,7 +141,26 @@ Plans:
   5. KPI mini-hero 悦己 tile shows mean as primary, median in tooltip/sub-line, and coverage caption ("n=k rated"); honors HAPPY-06 empty-state by rendering text fallback when n<5
   6. 8 v1.0 AnalyticsScreen widgets deleted from `lib/features/analytics/presentation/widgets/` (verified by `grep` returning zero matches)
   7. All chart wiring consumes Phase 9 use cases (no direct DAO calls from widgets); `flutter analyze` reports 0 issues
-**Plans**: TBD
+**Plans:** 8 plans across 5 waves
+
+Plans:
+**Wave 0**
+- [ ] 11-01-PLAN.md — Footprint audit doc (STATSUI-04)
+
+**Wave 1**
+- [ ] 11-02-PLAN.md — DAO + repository + domain models (STATSUI-01, STATSUI-06)
+- [ ] 11-03-PLAN.md — Use cases + ARB + Riverpod providers (STATSUI-01, STATSUI-02, STATSUI-03, STATSUI-06, STATSUI-07)
+
+**Wave 2** *(parallel — no files_modified overlap)*
+- [ ] 11-04-PLAN.md — KPI strip + chrome widgets (STATSUI-03, STATSUI-07)
+- [ ] 11-05-PLAN.md — Chart widgets — 6か月推移 / Joy/¥ trend / donut / histogram (STATSUI-01, STATSUI-02, STATSUI-06)
+- [ ] 11-06-PLAN.md — Story + family widgets + thin-sample fallback (STATSUI-02, STATSUI-06)
+
+**Wave 3** *(ATOMIC — single commit)*
+- [ ] 11-07-PLAN.md — AnalyticsScreen rewrite + 8 v1.0 widget delete + 3 test delete (STATSUI-05)
+
+**Wave 4**
+- [ ] 11-08-PLAN.md — Goldens + spec doc updates + worklog (STATSUI-01..07)
 **UI hint**: yes (UI-SPEC = 11-UI-SPEC.md, Variant δ locked)
 
 ### Phase 12: UI Copy Rename Pass (ARB values, ja/zh/en)
