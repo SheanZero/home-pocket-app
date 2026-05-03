@@ -76,7 +76,6 @@ void main() {
       tester,
     ) async {
       final semantics = tester.ensureSemantics();
-      addTearDown(semantics.dispose);
 
       await tester.pumpWidget(_buildSubject(_happinessReport()));
       await tester.pumpAndSettle();
@@ -93,6 +92,7 @@ void main() {
       expect(semanticsWidget.properties.label, isNot(contains('Starbucks')));
       expect(semanticsWidget.properties.label, isNot(contains('merchant')));
       expect(semanticsWidget.properties.label, isNot(contains('transaction')));
+      semantics.dispose();
     });
   });
 }
