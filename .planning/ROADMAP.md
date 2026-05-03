@@ -141,7 +141,7 @@ Plans:
   5. KPI mini-hero 悦己 tile shows mean as primary, median in tooltip/sub-line, and coverage caption ("n=k rated"); honors HAPPY-06 empty-state by rendering text fallback when n<5
   6. 8 v1.0 AnalyticsScreen widgets deleted from `lib/features/analytics/presentation/widgets/` (verified by `grep` returning zero matches)
   7. All chart wiring consumes Phase 9 use cases (no direct DAO calls from widgets); `flutter analyze` reports 0 issues
-**Plans:** 6/8 plans executed
+**Plans:** 7/8 plans executed
 
 Plans:
 **Wave 0**
@@ -157,7 +157,7 @@ Plans:
 - [x] 11-06-PLAN.md — Story + family widgets + thin-sample fallback (STATSUI-02, STATSUI-06)
 
 **Wave 3** *(ATOMIC — single commit)*
-- [ ] 11-07-PLAN.md — AnalyticsScreen rewrite + 8 v1.0 widget delete + 3 test delete (STATSUI-05)
+- [x] 11-07-PLAN.md — AnalyticsScreen rewrite + 8 v1.0 widget delete + 3 test delete (STATSUI-05)
 
 **Wave 4**
 - [ ] 11-08-PLAN.md — Goldens + spec doc updates + worklog (STATSUI-01..07)
@@ -215,5 +215,5 @@ Plans:
 | 8. Re-Audit + Exit Verification   | v1.0 | 8/8 | Complete | 2026-04-28 |
 | 9. Happiness Domain & Formula Layer       | v1.1 | 0/? | Not started | —          |
 | 10. HomePage SoulFullnessCard Redesign    | v1.1 | 13/13 | Complete    | 2026-05-03 |
-| 11. Statistics Surface for 悦己账本        | v1.1 | 6/8 | In Progress|  |
+| 11. Statistics Surface for 悦己账本        | v1.1 | 7/8 | In Progress|  |
 | 12. UI Copy Rename Pass (ARB values)      | v1.1 | 0/? | Not started | —          |
