@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../application/i18n/formatter_service.dart';
@@ -7,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/joy_density_formatter.dart';
 import '../../../analytics/domain/models/best_joy_moment_row.dart';
 import '../../../analytics/domain/models/family_happiness.dart';
@@ -627,7 +627,7 @@ class HomeHeroCard extends StatelessWidget {
       row.categoryId,
       locale,
     );
-    final dateLabel = _formatShortMonthDay(row.timestamp);
+    final dateLabel = DateFormatter.formatShortMonthDay(row.timestamp, locale);
     final amountText = _fmt.formatCurrency(row.amount, currencyCode, locale);
     final smallLine = l10n.homeBestJoyAmountSat(
       amountText,
@@ -670,19 +670,6 @@ class HomeHeroCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  /// Locale-aware short month/day for the Best Joy BIG line.
-  /// `DateFormatter` lacks an equivalent helper as of 10-07b — inlined per plan.
-  String _formatShortMonthDay(DateTime date) {
-    switch (locale.languageCode) {
-      case 'ja':
-      case 'zh':
-        return DateFormat('M月d日', locale.toString()).format(date);
-      case 'en':
-      default:
-        return DateFormat('MMM d', locale.toString()).format(date);
-    }
   }
 
   // ─── Region 8: Members section (group mode + non-empty shadowBooks) ───────

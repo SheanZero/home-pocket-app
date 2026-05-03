@@ -40,6 +40,17 @@ class DateFormatter {
     }
   }
 
+  static String formatShortMonthDay(DateTime date, Locale locale) {
+    switch (locale.languageCode) {
+      case 'ja':
+      case 'zh':
+        return DateFormat('M月d日', locale.toString()).format(date);
+      case 'en':
+      default:
+        return DateFormat('MMM d', locale.toString()).format(date);
+    }
+  }
+
   static String formatRelative(DateTime date, Locale locale) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
