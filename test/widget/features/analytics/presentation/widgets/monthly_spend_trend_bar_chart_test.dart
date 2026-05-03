@@ -89,7 +89,10 @@ void main() {
     final previousRod = chart.data.barGroups[4].barRods.single;
 
     expect(currentRod.color, AppColors.survival);
-    expect(currentRod.borderSide.width, greaterThan(previousRod.borderSide.width));
+    expect(
+      currentRod.borderSide.width,
+      greaterThan(previousRod.borderSide.width),
+    );
   });
 
   testWidgets('Y-axis labels use formatCompact', (tester) async {
@@ -106,21 +109,20 @@ void main() {
     );
 
     final chart = tester.widget<BarChart>(find.byType(BarChart));
-    final leftTitles = chart
-        .data
-        .titlesData
-        .leftTitles
-        .sideTitles
-        .getTitlesWidget(1200000, TitleMeta(
-          min: 0,
-          max: 1200000,
-          parentAxisSize: 200,
-          axisPosition: 0,
-          appliedInterval: 300000,
-          sideTitles: const SideTitles(showTitles: true),
-          formattedValue: '1200000',
-          axisSide: AxisSide.left,
-        ));
+    final leftTitles = chart.data.titlesData.leftTitles.sideTitles
+        .getTitlesWidget(
+          1200000,
+          TitleMeta(
+            min: 0,
+            max: 1200000,
+            parentAxisSize: 200,
+            axisPosition: 0,
+            appliedInterval: 300000,
+            sideTitles: const SideTitles(showTitles: true),
+            formattedValue: '1200000',
+            axisSide: AxisSide.left,
+          ),
+        );
 
     expect(leftTitles, isA<Text>());
     expect((leftTitles as Text).data, isNot('1200000'));

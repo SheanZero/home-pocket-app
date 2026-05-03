@@ -89,21 +89,20 @@ void main() {
     );
 
     final chart = tester.widget<LineChart>(find.byType(LineChart));
-    final leftTitle = chart
-        .data
-        .titlesData
-        .leftTitles
-        .sideTitles
-        .getTitlesWidget(0.5, TitleMeta(
-          min: 0,
-          max: 1,
-          parentAxisSize: 180,
-          axisPosition: 0,
-          appliedInterval: 0.25,
-          sideTitles: const SideTitles(showTitles: true),
-          formattedValue: '0.5',
-          axisSide: AxisSide.left,
-        ));
+    final leftTitle = chart.data.titlesData.leftTitles.sideTitles
+        .getTitlesWidget(
+          0.5,
+          TitleMeta(
+            min: 0,
+            max: 1,
+            parentAxisSize: 180,
+            axisPosition: 0,
+            appliedInterval: 0.25,
+            sideTitles: const SideTitles(showTitles: true),
+            formattedValue: '0.5',
+            axisSide: AxisSide.left,
+          ),
+        );
 
     expect(leftTitle, isA<Text>());
     expect((leftTitle as Text).data, formatJoyDensity(0.5, 'CNY'));
