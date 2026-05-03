@@ -39,7 +39,7 @@ Two metrics that surface in family/group mode only. **All anti-comparison constr
 
 - [ ] **FAMILY-01**: **Family Highlights Sum** = aggregate count of `satisfaction ≥ 6` soul-ledger transactions across all family shadow books over month-to-date; **return type is `int` (single aggregate)**; per-member breakdown (e.g. `Map<MemberId, int>`) is forbidden by contract — the use case must not expose the data shape that enables leaderboards. (Threshold matches HAPPY-03.)
 - [ ] **FAMILY-02**: **Shared Joy Insight** identifies the category with the highest avg satisfaction across the family's soul-ledger transactions over month-to-date; **min-N=3 transactions per category** guard prevents single-data-point categories from being crowned; returns `(categoryId, avgSatisfaction, totalCount)` only — no per-member contributions
-- [ ] **FAMILY-03**: Family card consent gate — if any family member has not opted into shared analytics, the family card collapses entirely (not "shows partial data")
+- [ ] **FAMILY-03**: Family card consent gate — if any family member has not opted into shared analytics, the family card collapses entirely (not "shows partial data"). **Phase 10 minimum-gate** (D-08): renders iff `isGroupModeProvider == true` AND `shadowBooks.isNotEmpty`. **Strict per-member opt-in semantic deferred to v1.2** as `FAMILY-V2-03` — requires schema migration v16→v17 + consent provider + settings UI + ADR-Privacy-Consent-Gate-v1.2; disproportionate to ship in v1.1.
 
 ### HOMEUI — HomePage Redesign
 
@@ -49,6 +49,9 @@ Replace `SoulFullnessCard` to consume Phase 9 contracts. Drop the buggy inline h
 - [ ] **HOMEUI-02**: Inline helpers `_computeHappinessROI` (misleading "budget-share" formula) and `_computeSatisfaction` (intraday-only) deleted from `home_screen.dart`; both responsibilities now live in `GetHappinessReportUseCase`
 - [ ] **HOMEUI-03**: Family card (FAMILY-01 + FAMILY-02) conditionally rendered when `isGroupModeProvider == true`; respects FAMILY-03 consent gate
 - [ ] **HOMEUI-04**: At most 2 `ⓘ` info icons explain voice estimator bias and hedonic adaptation; coverage caption ("n=23/31 rated") visible on the headline metric tile; no daily-target / streak / badge copy anywhere
+- [ ] **HOMEUI-05**: HomePage hero card absorbs total monthly spending (`monthlyReport.totalExpenses`) + month-over-month delta chip + previous-month amount; replaces `MonthOverviewCard` widget. Per Phase 10 D-06.
+- [ ] **HOMEUI-06**: HomePage hero card displays 魂/生存 absolute amount split via inline horizontal split bar (魂 portion gradient soul-green, track neutral gray); labels are absolute Yen amounts, NOT percentages or ratio framing; replaces `LedgerComparisonSection` survival/soul rows in single mode. Per Phase 10 D-06.
+- [ ] **HOMEUI-07**: In group mode, hero card appends per-member monthly spending rows after Best Joy strip (avatar + member name + ¥amount per row); replaces `LedgerComparisonSection`'s shadow-book rows. Per Phase 10 D-06.
 
 ### STATSUI — Statistics Surface (悦己账本统计)
 
@@ -81,6 +84,7 @@ ARB-only changes (values, NOT keys). 三语 ja/zh/en. Native-speaker register re
 ### Family extension
 - **FAMILY-V2-01**: 4th DAO method for SQL-side `category × avg satisfaction` aggregation if data volumes justify it
 - **FAMILY-V2-02**: Family conversation-prompt cards ("This month you all loved coffee shops. Share a story?") — explicitly opt-in, no automation
+- **FAMILY-V2-03**: Strict FAMILY-03 consent gate — introduce `family_members.shared_analytics_opt_in` BOOLEAN field + `familyConsentProvider` + group settings UI; family card collapses if any member `opt_in == false`. Schema bump v16→v17. New ADR (Privacy Consent Gate v1.2). Deferred from v1.1 Phase 10 per D-08 (consent infrastructure construction was disproportionate to ship for a single acceptance criterion).
 
 ### Tooling
 - **TOOL-V2-01**: `fl_chart 1.x` upgrade (`FUTURE-TOOL-fl_chart-1x`) — incidental sweep of existing AnalyticsScreen chart call sites
@@ -126,6 +130,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HOMEUI-02 | Phase 10 | Pending |
 | HOMEUI-03 | Phase 10 | Pending |
 | HOMEUI-04 | Phase 10 | Pending |
+| HOMEUI-05 | Phase 10 | Pending |
+| HOMEUI-06 | Phase 10 | Pending |
+| HOMEUI-07 | Phase 10 | Pending |
 | STATSUI-01 | Phase 11 | Pending |
 | STATSUI-02 | Phase 11 | Pending |
 | STATSUI-03 | Phase 11 | Pending |
@@ -138,10 +145,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RENAME-06 | Phase 12 | Pending |
 
 **Coverage:**
-- v1.1 requirements: 25 total
-- Mapped to phases: 25 (provisional — confirmed during roadmap creation)
+- v1.1 requirements: 28 total (was 25; +3 from Phase 10 D-06 scope expansion)
+- Mapped to phases: 28
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-05-01*
-*Last updated: 2026-05-01 after Phase 9 spec amendments (HAPPY-02/03/04/08 + HAPPY-09 removal + FAMILY-01 — see ADR-012/013/014)*
+*Last updated: 2026-05-02 after Phase 10 D-06 scope expansion (HOMEUI-05/06/07 added; FAMILY-03 minimum-gate annotation per D-08)*
