@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Happiness Metric & Display
 status: executing
-stopped_at: Completed 11-01-PLAN.md; ready for 11-02
-last_updated: "2026-05-03T14:45:30.977Z"
+stopped_at: Completed 11-03-PLAN.md
+last_updated: "2026-05-03T14:59:33.849Z"
 last_activity: 2026-05-03
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 35
-  completed_plans: 28
-  percent: 80
+  completed_plans: 30
+  percent: 86
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-05-02)
 ## Current Position
 
 Phase: 11 (statistics-surface-for) — EXECUTING
-Plan: 3 of 8
+Plan: 4 of 8
 Status: Ready to execute
 Last activity: 2026-05-03
 
@@ -68,6 +68,9 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.0 decisions are captu
 
 - Phase 11 audit corrects the dormant-DAO framing: only `getDailySatisfactionTrend` is truly dormant and it is superseded by `getDailySoulRowsForPtvf`.
 - Plan 07 must land the AnalyticsScreen rewrite, 8 widget deletions, test deletions, and replacement screen test as one atomic commit.
+- [Phase 11]: Daily Joy/¥ folds use the same α=0.88 PTVF density formula and ptvfBaseFor(currencyCode) base as monthly happiness reports.
+- [Phase 11]: Expense trend now trails the selected month via an explicit anchor instead of DateTime.now().
+- [Phase 11]: Analytics ARB strings were added to ja/zh/en in one commit with the hard-locked bar-5 histogram annotation.
 
 ### Pending Todos
 
@@ -118,8 +121,8 @@ Items acknowledged and deferred at v1.0 milestone close on 2026-04-29:
 
 ## Session Continuity
 
-Last session: 2026-05-03T13:49:17.628Z
-Stopped at: Completed 11-01-PLAN.md; ready for 11-02
+Last session: 2026-05-03T14:59:33.844Z
+Stopped at: Completed 11-03-PLAN.md
 Resume file: None
 
-**Planned Next:** `/gsd-execute-phase 11` to continue with Plan 11-02
+**Planned Next:** `/gsd-execute-phase 11` to continue with Plan 11-04
