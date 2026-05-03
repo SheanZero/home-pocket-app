@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Happiness Metric & Display
-status: executing
-stopped_at: Completed 11-07-PLAN.md; ready for 11-08 close-out
-last_updated: "2026-05-03T16:09:24.062Z"
-last_activity: 2026-05-03
+status: ready_for_phase_12
+stopped_at: Phase 11 plans 01-08 complete (Variant delta AnalyticsScreen rebuild + 8 v1.0 widget delete shipped)
+last_updated: "2026-05-03T16:11:45Z"
+last_activity: 2026-05-04
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 35
-  completed_plans: 34
-  percent: 97
+  completed_plans: 35
+  percent: 100
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-02)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes survival spending from soul spending
-**Current focus:** Phase 11 — statistics-surface-for
+**Current focus:** Phase 12 — ui-copy-rename-pass
 
 ## Current Position
 
-Phase: 11 (statistics-surface-for) — EXECUTING
+Phase: 11 (complete) — ready to plan Phase 12
 Plan: 8 of 8
-Status: Ready to execute
-Last activity: 2026-05-03
+Status: Phase 11 complete; Phase 12 (RENAME) ready to plan
+Last activity: 2026-05-04
 
 ## v1.1 Phase Plan
 
@@ -36,7 +36,7 @@ Last activity: 2026-05-03
 |-------|------|--------------|------------|
 | 9. Happiness Domain & Formula Layer       | Lock formulas, contracts, soul-only filter, ¥500 floor, sealed `MetricResult`, family aggregate-only return type, no-gamification ADR | HAPPY-01..09 + FAMILY-01 + FAMILY-02 (11 REQs) | — (linchpin) |
 | 10. HomePage SoulFullnessCard Redesign    | Replace misleading `Happiness ROI`; render 4 personal metrics + Best Joy story card + family card with consent gate | FAMILY-03 + HOMEUI-01..04 (5 REQs) | Phase 9 |
-| 11. Statistics Surface for 悦己账本        | Wire 3 dormant DAO methods + new query into AnalyticsScreen; Joy-per-¥ trend line + satisfaction histogram | STATSUI-01..04 (4 REQs) | Phase 9 (parallel-able with Phase 10) |
+| 11. AnalyticsScreen Unified Dashboard (Variant δ) | Rebuild AnalyticsScreen as a unified 総帳本 + 悦己帳本 dashboard with KPI mini-hero, Joy-per-¥ trend, satisfaction histogram, story cards, and aggregate-only family insight | STATSUI-01..07 (7 REQs) | Phase 9 + Phase 10 |
 | 12. UI Copy Rename Pass (ARB values)      | Rename 4 ARB values ja/zh/en; lexical-hierarchy ADR; native-speaker register review | RENAME-01..06 (6 REQs) | Phase 10 + Phase 11 (must be LAST) |
 
 **Coverage:** 26/26 v1.1 requirements mapped ✓
@@ -71,13 +71,13 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.0 decisions are captu
 - [Phase 11]: Daily Joy/¥ folds use the same α=0.88 PTVF density formula and ptvfBaseFor(currencyCode) base as monthly happiness reports.
 - [Phase 11]: Expense trend now trails the selected month via an explicit anchor instead of DateTime.now().
 - [Phase 11]: Analytics ARB strings were added to ja/zh/en in one commit with the hard-locked bar-5 histogram annotation.
+- [Phase 11]: Variant δ AnalyticsScreen shipped as a 2-region unified dashboard; STATSUI-01..07 are complete and Phase 12 rename work is unblocked.
 
 ### Pending Todos
 
 - Phase 9: verify `transactions.entry_source` column existence in substep 9.0 (single grep) — gates voice-bias manual-only sub-metric feasibility
 - Phase 9: product decision on mean-vs-median headline (recommend mean primary + median tooltip + coverage caption)
 - Phase 9: pick `Result<T>` vs `throw` envelope to match existing analytics module convention (recommend `throw`)
-- Phase 11: deeper-research moment for `shadowBooksProvider` family-mode book enumeration (MEDIUM-confidence in research)
 
 ### Blockers / Concerns
 
@@ -121,8 +121,8 @@ Items acknowledged and deferred at v1.0 milestone close on 2026-04-29:
 
 ## Session Continuity
 
-Last session: 2026-05-03T14:59:33.844Z
-Stopped at: Completed 11-03-PLAN.md
+Last session: 2026-05-03T16:11:45Z
+Stopped at: Completed 11-08-PLAN.md; Phase 11 complete
 Resume file: None
 
-**Planned Next:** `/gsd-execute-phase 11` to continue with Plan 11-08 close-out
+**Planned Next:** `/gsd-plan-phase 12` for UI Copy Rename Pass (RENAME-01..06)

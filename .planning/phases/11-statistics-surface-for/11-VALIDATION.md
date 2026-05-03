@@ -1,9 +1,9 @@
 ---
 phase: 11
 slug: statistics-surface-for
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: approved
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-05-03
 ---
 
@@ -109,11 +109,11 @@ created: 2026-05-03
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify (check after planner emits PLAN.md files)
-- [ ] Wave 0 covers all MISSING references (footprint audit + ARB additions + 3 unit test stubs + 9 widget test stubs)
-- [ ] No watch-mode flags in any test command (one-shot only — `flutter test test/...`, never `flutter test --watch`)
-- [ ] Feedback latency < 90s for full suite, < 15s for quick suite
-- [ ] `nyquist_compliant: true` set in frontmatter once plans pass checker
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify (check after planner emits PLAN.md files)
+- [x] Wave 0 covers all MISSING references (footprint audit + ARB additions + 3 unit test stubs + 9 widget test stubs)
+- [x] No watch-mode flags in any test command (one-shot only — `flutter test test/...`, never `flutter test --watch`)
+- [x] Feedback latency < 90s for full suite, < 15s for quick suite
+- [x] `nyquist_compliant` frontmatter flag set to true once plans pass checker
 
-**Approval:** pending (will flip to `approved 2026-05-03` after plan-checker PASS)
+**Approval:** approved 2026-05-04 (Phase 11 plans 01-08 complete; `flutter analyze` clean; analytics and golden test targets green; per-task automated verify present in every PLAN.md)

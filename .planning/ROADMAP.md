@@ -29,7 +29,7 @@ Phase numbering continues from Phase 9 (no reset).
 
 - [x] **Phase 9: Happiness Domain & Formula Layer** — Lock formulas, contracts, soul-only filter, Top Joy ordering, sealed `MetricResult`, family aggregate-only return type, no-gamification ADR (linchpin) — completed 2026-05-02
 - [x] **Phase 10: HomePage SoulFullnessCard Redesign (HomeHeroCard integrated rebuild)** — Replace 3 widgets with 1 integrated `HomeHeroCard`; 3 concentric rings encode Phase 9 contracts (single → `HappinessReport`, group → `FamilyHappiness`); delete `_computeHappinessROI` / `_computeSatisfaction` / `_buildLedgerRows` from `home_screen.dart` (completed 2026-05-03)
-- [ ] **Phase 11: AnalyticsScreen Unified Dashboard (Variant δ)** — Rebuild AnalyticsScreen as a 2-region unified dashboard (総帳本 + 悦己帳本) with KPI mini-hero (総支出 + 悦己平均) + 3 themed groups (時間 / 分布 / 物語), 総-first card ordering. Wire 3 dormant DAO methods + new Best Joy query. 生存帳本 has no separate stats region. Footprint-audit doc first.
+- [x] **Phase 11: AnalyticsScreen Unified Dashboard (Variant δ)** — Rebuild AnalyticsScreen as a 2-region unified dashboard (総帳本 + 悦己帳本) with KPI mini-hero (総支出 + 悦己平均) + 3 themed groups (時間 / 分布 / 物語), 総-first card ordering. Wire daily Joy/¥ and largest-expense analytics paths. 生存帳本 has no separate stats region. Footprint-audit doc first. — completed 2026-05-04
 - [ ] **Phase 12: UI Copy Rename Pass (ARB values, ja/zh/en)** — Values-only rename of `soulLedger` / `survivalLedger` / `homeHappinessROI` / `homeSoulFullness`; lexical-hierarchy ADR; native-speaker register review
 
 ## Phase Details
@@ -141,7 +141,7 @@ Plans:
   5. KPI mini-hero 悦己 tile shows mean as primary, median in tooltip/sub-line, and coverage caption ("n=k rated"); honors HAPPY-06 empty-state by rendering text fallback when n<5
   6. 8 v1.0 AnalyticsScreen widgets deleted from `lib/features/analytics/presentation/widgets/` (verified by `grep` returning zero matches)
   7. All chart wiring consumes Phase 9 use cases (no direct DAO calls from widgets); `flutter analyze` reports 0 issues
-**Plans:** 7/8 plans executed
+**Plans**: 8 plans across 5 waves
 
 Plans:
 **Wave 0**
@@ -160,7 +160,7 @@ Plans:
 - [x] 11-07-PLAN.md — AnalyticsScreen rewrite + 8 v1.0 widget delete + 3 test delete (STATSUI-05)
 
 **Wave 4**
-- [ ] 11-08-PLAN.md — Goldens + spec doc updates + worklog (STATSUI-01..07)
+- [x] 11-08-PLAN.md — Goldens + spec doc updates + worklog (STATSUI-01..07)
 **UI hint**: yes (UI-SPEC = 11-UI-SPEC.md, Variant δ locked)
 
 ### Phase 12: UI Copy Rename Pass (ARB values, ja/zh/en)
@@ -215,5 +215,5 @@ Plans:
 | 8. Re-Audit + Exit Verification   | v1.0 | 8/8 | Complete | 2026-04-28 |
 | 9. Happiness Domain & Formula Layer       | v1.1 | 0/? | Not started | —          |
 | 10. HomePage SoulFullnessCard Redesign    | v1.1 | 13/13 | Complete    | 2026-05-03 |
-| 11. Statistics Surface for 悦己账本        | v1.1 | 7/8 | In Progress|  |
+| 11. AnalyticsScreen Unified Dashboard (Variant δ) | v1.1 | 8/8 | Complete | 2026-05-04 |
 | 12. UI Copy Rename Pass (ARB values)      | v1.1 | 0/? | Not started | —          |
