@@ -190,6 +190,6 @@ Plans:
 | 7. Documentation Sweep            | v1.0 | 6/6 | Complete | 2026-04-28 |
 | 8. Re-Audit + Exit Verification   | v1.0 | 8/8 | Complete | 2026-04-28 |
 | 9. Happiness Domain & Formula Layer       | v1.1 | 0/? | Not started | —          |
-| 10. HomePage SoulFullnessCard Redesign    | v1.1 | 2/13 | In Progress|  |
+| 10. HomePage SoulFullnessCard Redesign    | v1.1 | 5/13 | In Progress|  |
 | 11. Statistics Surface for 悦己账本        | v1.1 | 0/? | Not started | —          |
 | 12. UI Copy Rename Pass (ARB values)      | v1.1 | 0/? | Not started | —          |
