@@ -661,6 +661,128 @@
       }
     }
   },
+  "homeJoyIndexTooltip": "外輪は Joy/¥ 密度・中輪は満足度の平均・内輪は小確幸の回数（満足度6以上）。",
+  "@homeJoyIndexTooltip": {
+    "description": "Tooltip explaining the 3-ring system on the HomeHeroCard (D-10 tooltip 1)"
+  },
+  "homeJoyPerYenTooltip": "幸福密度 = Σ(満足度 × (金額/base)^0.88) / Σ金額（K-T 1979 価値関数）。同じ金額でも繰り返すと喜びは弱まります（享楽的適応）。式は ¥1k 基準で正規化。",
+  "@homeJoyPerYenTooltip": {
+    "description": "Tooltip explaining the Joy/¥ density formula (D-10 tooltip 2)"
+  },
+  "homeHeroCardLabelSingle": "今月の支出",
+  "@homeHeroCardLabelSingle": {
+    "description": "Hero header label — single mode (D-02)"
+  },
+  "homeHeroCardLabelGroup": "家族の支出",
+  "@homeHeroCardLabelGroup": {
+    "description": "Hero header label — group mode (D-02)"
+  },
+  "homeHeroPreviousMonthSubline": "先月 {amount}",
+  "@homeHeroPreviousMonthSubline": {
+    "description": "Hero header previous-month sub-line",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeRingSectionTitleSingle": "ときめき度",
+  "@homeRingSectionTitleSingle": {
+    "description": "Ring section title — single mode (fallback if reusing homeSoulFullness is rejected)"
+  },
+  "homeRingSectionTitleGroup": "家族の小確幸",
+  "@homeRingSectionTitleGroup": {
+    "description": "Ring section title — group mode"
+  },
+  "homeBestJoyTagSingle": "今月の最愛",
+  "@homeBestJoyTagSingle": {
+    "description": "Best Joy tag — single mode (D-04)"
+  },
+  "homeBestJoyTagGroup": "今月の最愛",
+  "@homeBestJoyTagGroup": {
+    "description": "Best Joy tag — group mode (same copy as Single per D-04, separate key for future flexibility)"
+  },
+  "homeBestJoyAmountSat": "{amount}・満足 {sat}/10 ✨",
+  "@homeBestJoyAmountSat": {
+    "description": "Best Joy strip small line composing amount and satisfaction (D-04)",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "sat": {
+        "type": "int"
+      }
+    }
+  },
+  "homeMembersSectionTitle": "メンバー",
+  "@homeMembersSectionTitle": {
+    "description": "Group-mode member rows subheader"
+  },
+  "homeNoSoulDataLegend": "まだ記録なし",
+  "@homeNoSoulDataLegend": {
+    "description": "Legend rows when totalSoulTx == 0 (D-09)"
+  },
+  "homeBestJoyEmptyTagPrimary": "今月の最愛",
+  "@homeBestJoyEmptyTagPrimary": {
+    "description": "Best Joy CTA variant tag (same copy as homeBestJoyTagSingle but separate key)"
+  },
+  "homeBestJoyEmptyBig": "初めての灵账を記録しよう",
+  "@homeBestJoyEmptyBig": {
+    "description": "Best Joy BIG line — totalSoulTx == 0 empty state (D-09)"
+  },
+  "homeBestJoyEmptySmall": "今月の最愛がここに表示されます →",
+  "@homeBestJoyEmptySmall": {
+    "description": "Best Joy small line — totalSoulTx == 0 empty state (D-09)"
+  },
+  "homeBestJoyAllNeutralBig": "一番大きな支出を評価して",
+  "@homeBestJoyAllNeutralBig": {
+    "description": "Best Joy BIG line — all-neutral state (topJoy soulSatisfaction <= 2) (D-09)"
+  },
+  "homeBestJoyAllNeutralSmall": "あなたの今月の最愛にしよう",
+  "@homeBestJoyAllNeutralSmall": {
+    "description": "Best Joy small line — all-neutral state (D-09)"
+  },
+  "homeCoverageCaption": "{rated}/{total} 件評価済み",
+  "@homeCoverageCaption": {
+    "description": "Coverage caption on headline metric tile (HOMEUI-04 / HAPPY-06)",
+    "placeholders": {
+      "rated": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "homeAvgSatisfactionLegend": "満足度の平均",
+  "@homeAvgSatisfactionLegend": {
+    "description": "Single-mode mid-ring legend label"
+  },
+  "homeJoyPerYenLegend": "Joy/¥",
+  "@homeJoyPerYenLegend": {
+    "description": "Single-mode outer-ring legend label (matches D-20 display)"
+  },
+  "homeHighlightsCountLegend": "小確幸 ({count})",
+  "@homeHighlightsCountLegend": {
+    "description": "Single-mode inner-ring legend label with placeholder count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeFamilyHighlightsLegend": "家族の小確幸",
+  "@homeFamilyHighlightsLegend": {
+    "description": "Group-mode outer-ring legend label"
+  },
+  "homeSharedJoyLegend": "共に好き",
+  "@homeSharedJoyLegend": {
+    "description": "Group-mode mid-ring legend label"
+  },
+  "homeMedianSatisfactionLegend": "満足度の中央値",
+  "@homeMedianSatisfactionLegend": {
+    "description": "Group-mode inner-ring legend label"
+  },
   "addTransaction": "取引を追加",
   "@addTransaction": {
     "description": "Transaction entry screen title"
