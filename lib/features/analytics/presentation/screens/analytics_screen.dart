@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../features/accounting/presentation/screens/transaction_entry_screen.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart'
     as accounting_providers;
 import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
@@ -49,6 +50,9 @@ class AnalyticsScreen extends ConsumerWidget {
       accounting_providers.bookByIdProvider(bookId: bookId),
     );
     final currencyCode = bookAsync.valueOrNull?.currency ?? 'JPY';
+    final earliestMonthAsync = ref.watch(
+      earliestTransactionMonthProvider(bookId: bookId),
+    );
 
     final isGroupMode = ref.watch(isGroupModeProvider);
     final shadowBooksAsync = isGroupMode
@@ -60,7 +64,12 @@ class AnalyticsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.analyticsTitle),
-        actions: [MonthChipPicker(locale: locale)],
+        actions: [
+          MonthChipPicker(
+            locale: locale,
+            earliestMonth: earliestMonthAsync.valueOrNull,
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async => _refresh(
@@ -164,6 +173,7 @@ class AnalyticsScreen extends ConsumerWidget {
       monthlyReportProvider(bookId: bookId, year: year, month: month),
     );
     ref.invalidate(expenseTrendProvider(bookId: bookId, anchor: selected));
+    ref.invalidate(earliestTransactionMonthProvider(bookId: bookId));
     ref.invalidate(
       happinessReportProvider(
         bookId: bookId,
@@ -330,8 +340,11 @@ class _JoyTrendOrFallback extends ConsumerWidget {
       data: (result) {
         if (_sampleSizeOf(result) < 5) {
           return JoyLedgerThinSampleFallback(
-            onAddEntryTap: () =>
-                Navigator.of(context).pushNamed('/transactions/add'),
+            onAddEntryTap: () => Navigator.of(context).push<void>(
+              MaterialPageRoute<void>(
+                builder: (_) => TransactionEntryScreen(bookId: bookId),
+              ),
+            ),
           );
         }
         return _AnalyticsDataCard(
@@ -486,12 +499,6 @@ class _LargestExpenseCard extends ConsumerWidget {
         expense: expense,
         currencyCode: currencyCode,
         locale: locale,
-        onTap: expense == null
-            ? null
-            : () => Navigator.of(context).pushNamed(
-                '/transactions/detail',
-                arguments: expense.transactionId,
-              ),
       ),
       loading: () => const SizedBox(height: 110),
       error: (_, _) => AnalyticsCardErrorState(
@@ -532,9 +539,6 @@ class _BestJoyCard extends ConsumerWidget {
         bestJoy: joy,
         currencyCode: currencyCode,
         locale: locale,
-        onTap: (txId) => Navigator.of(
-          context,
-        ).pushNamed('/transactions/detail', arguments: txId),
       ),
       loading: () => const SizedBox(height: 120),
       error: (_, _) => AnalyticsCardErrorState(

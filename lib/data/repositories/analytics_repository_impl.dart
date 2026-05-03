@@ -10,6 +10,11 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   final AnalyticsDao _dao;
 
   @override
+  Future<DateTime?> getEarliestTransactionTimestamp({required String bookId}) {
+    return _dao.getEarliestTransactionTimestamp(bookId: bookId);
+  }
+
+  @override
   Future<MonthlyTotals> getMonthlyTotals({
     required String bookId,
     required DateTime startDate,

@@ -50,6 +50,22 @@ Future<ExpenseTrendData> expenseTrend(
   return useCase.execute(bookId: bookId, anchor: anchor);
 }
 
+/// Earliest month with a non-deleted transaction in the active book.
+@riverpod
+Future<DateTime?> earliestTransactionMonth(
+  Ref ref, {
+  required String bookId,
+}) async {
+  final repository = ref.watch(analyticsRepositoryProvider);
+  final timestamp = await repository.getEarliestTransactionTimestamp(
+    bookId: bookId,
+  );
+  if (timestamp == null) {
+    return null;
+  }
+  return DateTime(timestamp.year, timestamp.month);
+}
+
 /// Satisfaction score distribution for the selected month.
 @riverpod
 Future<List<SatisfactionScoreBucket>> satisfactionDistribution(

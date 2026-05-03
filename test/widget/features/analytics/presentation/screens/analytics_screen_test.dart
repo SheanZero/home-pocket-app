@@ -107,6 +107,9 @@ Widget _buildSubject({
           distributionError: distributionError,
         ),
       ),
+      earliestTransactionMonthProvider(
+        bookId: _bookId,
+      ).overrideWith((_) async => DateTime(2024, 12)),
     ],
   );
 }
@@ -164,6 +167,47 @@ void main() {
       expect(find.byType(JoyLedgerThinSampleFallback), findsOneWidget);
       expect(find.byType(JoyTrendLineChart), findsNothing);
       expect(find.byType(SatisfactionDistributionHistogram), findsNothing);
+    });
+
+    testWidgets('thin-sample CTA does not call an unregistered named route', (
+      tester,
+    ) async {
+      await _pump(tester, _buildSubject(dailyJoy: _dailyJoyThin));
+
+      await tester.ensureVisible(find.text('Add an entry »'));
+      await tester.tap(find.text('Add an entry »'));
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('story cards do not call unregistered detail routes', (
+      tester,
+    ) async {
+      await _pump(tester, _buildSubject());
+
+      await tester.ensureVisible(find.byType(LargestExpenseStoryCard));
+      await tester.tap(find.byType(LargestExpenseStoryCard));
+      expect(tester.takeException(), isNull);
+
+      await tester.ensureVisible(find.byType(BestJoyStoryStrip));
+      await tester.tap(find.byType(BestJoyStoryStrip));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('month picker includes the earliest transaction month', (
+      tester,
+    ) async {
+      await _pump(tester, _buildSubject());
+
+      await tester.tap(find.byType(MonthChipPicker));
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('December 2024'),
+        500,
+        scrollable: find.byType(Scrollable).last,
+      );
+      expect(find.text('December 2024'), findsOneWidget);
     });
 
     testWidgets('family insight is gated by group mode and shadow books', (
@@ -367,6 +411,11 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
     required DateTime startDate,
     required DateTime endDate,
   }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<DateTime?> getEarliestTransactionTimestamp({required String bookId}) {
     throw UnimplementedError();
   }
 

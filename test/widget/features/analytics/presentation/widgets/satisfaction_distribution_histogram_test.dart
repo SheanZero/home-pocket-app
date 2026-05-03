@@ -37,6 +37,15 @@ void main() {
     );
 
     expect(find.text('中央値・含未評価'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(Stack),
+        matching: find.byKey(
+          const ValueKey('analytics_histogram_bar_5_annotation'),
+        ),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('色は ordinal 表現です'), findsOneWidget);
   });
 

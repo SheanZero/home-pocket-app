@@ -82,6 +82,26 @@ class AnalyticsDao {
   static const String _soulExpenseFilter =
       "ledger_type = 'soul' AND type = 'expense' AND is_deleted = 0";
 
+  /// Earliest non-deleted transaction timestamp for a book.
+  Future<DateTime?> getEarliestTransactionTimestamp({
+    required String bookId,
+  }) async {
+    final results = await _db
+        .customSelect(
+          'SELECT timestamp FROM transactions '
+          'WHERE book_id = ? AND is_deleted = 0 '
+          'ORDER BY timestamp ASC '
+          'LIMIT 1',
+          variables: [Variable.withString(bookId)],
+        )
+        .get();
+
+    if (results.isEmpty) {
+      return null;
+    }
+    return results.first.read<DateTime>('timestamp');
+  }
+
   /// Get total income and expenses for a given month.
   Future<MonthlyTotalsResult> getMonthlyTotals({
     required String bookId,

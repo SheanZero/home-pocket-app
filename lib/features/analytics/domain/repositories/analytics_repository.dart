@@ -3,6 +3,8 @@ import '../models/best_joy_moment_row.dart';
 
 /// Abstract repository for analytics aggregate queries.
 abstract class AnalyticsRepository {
+  Future<DateTime?> getEarliestTransactionTimestamp({required String bookId});
+
   Future<MonthlyTotals> getMonthlyTotals({
     required String bookId,
     required DateTime startDate,

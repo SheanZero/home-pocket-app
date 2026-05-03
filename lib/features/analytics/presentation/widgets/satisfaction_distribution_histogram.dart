@@ -32,81 +32,111 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
         children: [
           SizedBox(
             height: 200,
-            child: BarChart(
-              BarChartData(
-                minY: 0,
-                maxY: chartMaxY,
-                alignment: BarChartAlignment.spaceAround,
-                gridData: const FlGridData(show: true, drawVerticalLine: false),
-                borderData: FlBorderData(show: false),
-                titlesData: FlTitlesData(
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  leftTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      interval: 1,
-                      getTitlesWidget: (value, meta) {
-                        final score = value.toInt();
-                        if (score < 1 || score > 10) {
-                          return const SizedBox.shrink();
-                        }
-                        return Text(
-                          '$score',
-                          style: AppTextStyles.caption.copyWith(
-                            color: context.wmTextSecondary,
-                          ),
-                        );
-                      },
+            child: Stack(
+              children: [
+                BarChart(
+                  BarChartData(
+                    minY: 0,
+                    maxY: chartMaxY,
+                    alignment: BarChartAlignment.spaceAround,
+                    gridData: const FlGridData(
+                      show: true,
+                      drawVerticalLine: false,
                     ),
-                  ),
-                ),
-                barGroups: [
-                  for (final bucket in normalized)
-                    BarChartGroupData(
-                      x: bucket.score,
-                      barRods: [
-                        BarChartRodData(
-                          toY: bucket.count == 0 ? 1 : bucket.count.toDouble(),
-                          color: _colorForScore(bucket.score),
-                          width: 14,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(4),
-                            topRight: Radius.circular(4),
-                          ),
+                    borderData: FlBorderData(show: false),
+                    titlesData: FlTitlesData(
+                      topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      leftTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          interval: 1,
+                          getTitlesWidget: (value, meta) {
+                            final score = value.toInt();
+                            if (score < 1 || score > 10) {
+                              return const SizedBox.shrink();
+                            }
+                            return Text(
+                              '$score',
+                              style: AppTextStyles.caption.copyWith(
+                                color: context.wmTextSecondary,
+                              ),
+                            );
+                          },
                         ),
-                      ],
+                      ),
                     ),
-                ],
-                barTouchData: BarTouchData(
-                  touchTooltipData: BarTouchTooltipData(
-                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      final score = group.x;
-                      final count = normalized[score - 1].count;
-                      return BarTooltipItem(
-                        '$score/10\n$count',
-                        AppTextStyles.caption.copyWith(color: AppColors.card),
-                      );
-                    },
+                    barGroups: [
+                      for (final bucket in normalized)
+                        BarChartGroupData(
+                          x: bucket.score,
+                          barRods: [
+                            BarChartRodData(
+                              toY: bucket.count == 0
+                                  ? 1
+                                  : bucket.count.toDouble(),
+                              color: _colorForScore(bucket.score),
+                              width: 14,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(4),
+                                topRight: Radius.circular(4),
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                    barTouchData: BarTouchData(
+                      touchTooltipData: BarTouchTooltipData(
+                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                          final score = group.x;
+                          final count = normalized[score - 1].count;
+                          return BarTooltipItem(
+                            '$score/10\n$count',
+                            AppTextStyles.caption.copyWith(
+                              color: AppColors.card,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ),
-          Center(
-            child: Text(
-              l10n.analyticsHistogramBarFiveAnnotation,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.soul,
-                fontWeight: FontWeight.w700,
-              ),
+                Align(
+                  alignment: const Alignment(-0.12, -1),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: context.wmCard,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: AppColors.soul.withValues(alpha: 0.32),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      child: Text(
+                        l10n.analyticsHistogramBarFiveAnnotation,
+                        key: const ValueKey(
+                          'analytics_histogram_bar_5_annotation',
+                        ),
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.soul,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 6),

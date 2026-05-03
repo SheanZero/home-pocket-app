@@ -349,6 +349,143 @@ class _ExpenseTrendProviderElement
   DateTime get anchor => (origin as ExpenseTrendProvider).anchor;
 }
 
+String _$earliestTransactionMonthHash() =>
+    r'71b0c1fffe8f2530e09b0a091c191cf7d7e68634';
+
+/// Earliest month with a non-deleted transaction in the active book.
+///
+/// Copied from [earliestTransactionMonth].
+@ProviderFor(earliestTransactionMonth)
+const earliestTransactionMonthProvider = EarliestTransactionMonthFamily();
+
+/// Earliest month with a non-deleted transaction in the active book.
+///
+/// Copied from [earliestTransactionMonth].
+class EarliestTransactionMonthFamily extends Family<AsyncValue<DateTime?>> {
+  /// Earliest month with a non-deleted transaction in the active book.
+  ///
+  /// Copied from [earliestTransactionMonth].
+  const EarliestTransactionMonthFamily();
+
+  /// Earliest month with a non-deleted transaction in the active book.
+  ///
+  /// Copied from [earliestTransactionMonth].
+  EarliestTransactionMonthProvider call({required String bookId}) {
+    return EarliestTransactionMonthProvider(bookId: bookId);
+  }
+
+  @override
+  EarliestTransactionMonthProvider getProviderOverride(
+    covariant EarliestTransactionMonthProvider provider,
+  ) {
+    return call(bookId: provider.bookId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'earliestTransactionMonthProvider';
+}
+
+/// Earliest month with a non-deleted transaction in the active book.
+///
+/// Copied from [earliestTransactionMonth].
+class EarliestTransactionMonthProvider
+    extends AutoDisposeFutureProvider<DateTime?> {
+  /// Earliest month with a non-deleted transaction in the active book.
+  ///
+  /// Copied from [earliestTransactionMonth].
+  EarliestTransactionMonthProvider({required String bookId})
+    : this._internal(
+        (ref) => earliestTransactionMonth(
+          ref as EarliestTransactionMonthRef,
+          bookId: bookId,
+        ),
+        from: earliestTransactionMonthProvider,
+        name: r'earliestTransactionMonthProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$earliestTransactionMonthHash,
+        dependencies: EarliestTransactionMonthFamily._dependencies,
+        allTransitiveDependencies:
+            EarliestTransactionMonthFamily._allTransitiveDependencies,
+        bookId: bookId,
+      );
+
+  EarliestTransactionMonthProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.bookId,
+  }) : super.internal();
+
+  final String bookId;
+
+  @override
+  Override overrideWith(
+    FutureOr<DateTime?> Function(EarliestTransactionMonthRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: EarliestTransactionMonthProvider._internal(
+        (ref) => create(ref as EarliestTransactionMonthRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        bookId: bookId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<DateTime?> createElement() {
+    return _EarliestTransactionMonthProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is EarliestTransactionMonthProvider && other.bookId == bookId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, bookId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin EarliestTransactionMonthRef on AutoDisposeFutureProviderRef<DateTime?> {
+  /// The parameter `bookId` of this provider.
+  String get bookId;
+}
+
+class _EarliestTransactionMonthProviderElement
+    extends AutoDisposeFutureProviderElement<DateTime?>
+    with EarliestTransactionMonthRef {
+  _EarliestTransactionMonthProviderElement(super.provider);
+
+  @override
+  String get bookId => (origin as EarliestTransactionMonthProvider).bookId;
+}
+
 String _$satisfactionDistributionHash() =>
     r'552bf246b2c6d7de1f6febb965dece7d093b3e6e';
 
