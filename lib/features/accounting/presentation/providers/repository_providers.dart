@@ -30,6 +30,7 @@ import '../../../../data/repositories/category_repository_impl.dart';
 import '../../../../data/repositories/device_identity_repository_impl.dart';
 import '../../../../data/repositories/merchant_category_preference_repository_impl.dart';
 import '../../../../data/repositories/transaction_repository_impl.dart';
+import '../../domain/models/book.dart';
 import '../../domain/repositories/book_repository.dart';
 import '../../domain/repositories/category_keyword_preference_repository.dart';
 import '../../domain/repositories/category_ledger_config_repository.dart';
@@ -49,6 +50,18 @@ BookRepository bookRepository(Ref ref) {
   final database = ref.watch(app_accounting.appAppDatabaseProvider);
   final dao = BookDao(database);
   return BookRepositoryImpl(dao: dao);
+}
+
+/// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
+///
+/// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
+/// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
+/// for the given ID — caller falls back to `'JPY'` only in the missing-Book
+/// case, never in the widget body.
+@riverpod
+Future<Book?> bookById(Ref ref, {required String bookId}) async {
+  final repo = ref.watch(bookRepositoryProvider);
+  return repo.findById(bookId);
 }
 
 /// CategoryRepository provider.
