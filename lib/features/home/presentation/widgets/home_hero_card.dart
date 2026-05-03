@@ -16,9 +16,10 @@ import '../../../analytics/domain/models/monthly_report.dart';
 import '../providers/state_shadow_books.dart';
 import 'painter/happiness_rings_painter.dart';
 
-/// Integrated hero card replacing MonthOverviewCard + LedgerComparisonSection +
-/// SoulFullnessCard (Phase 10). Pure StatelessWidget — parent resolves
-/// AsyncValue.when() and passes Freezed aggregates (UI-SPEC line 277).
+/// Integrated hero card (Phase 10) replacing the previous trio of legacy
+/// cards: month-overview, ledger-comparison, and soul-fullness. Pure
+/// StatelessWidget — parent resolves AsyncValue.when() and passes Freezed
+/// aggregates (UI-SPEC line 277).
 ///
 /// Hard contracts (CONTEXT D-01..D-13):
 /// - Amounts via `AppTextStyles.amount*`; currency via FormatterService (no JPY literal).
