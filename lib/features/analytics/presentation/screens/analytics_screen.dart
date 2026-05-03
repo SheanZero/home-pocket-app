@@ -38,7 +38,9 @@ class AnalyticsScreen extends ConsumerWidget {
     final budgetAsync = ref.watch(
       budgetProgressProvider(bookId: bookId, year: year, month: month),
     );
-    final trendAsync = ref.watch(expenseTrendProvider(bookId: bookId));
+    final trendAsync = ref.watch(
+      expenseTrendProvider(bookId: bookId, anchor: selectedMonth),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -69,7 +71,9 @@ class AnalyticsScreen extends ConsumerWidget {
           ref.invalidate(
             budgetProgressProvider(bookId: bookId, year: year, month: month),
           );
-          ref.invalidate(expenseTrendProvider(bookId: bookId));
+          ref.invalidate(
+            expenseTrendProvider(bookId: bookId, anchor: selectedMonth),
+          );
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -201,7 +205,9 @@ class AnalyticsScreen extends ConsumerWidget {
           month: selectedMonth.month,
         ),
       );
-      ref.invalidate(expenseTrendProvider(bookId: bookId));
+      ref.invalidate(
+        expenseTrendProvider(bookId: bookId, anchor: selectedMonth),
+      );
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(

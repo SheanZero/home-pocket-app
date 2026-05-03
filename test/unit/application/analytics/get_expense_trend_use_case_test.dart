@@ -50,19 +50,30 @@ void main() {
 
   group('GetExpenseTrendUseCase', () {
     test('returns correct number of months', () async {
-      final result = await useCase.execute(bookId: 'book1', monthCount: 3);
+      final result = await useCase.execute(
+        bookId: 'book1',
+        anchor: DateTime(2026, 5, 15),
+        monthCount: 3,
+      );
 
       expect(result.months, hasLength(3));
     });
 
     test('returns default 6 months', () async {
-      final result = await useCase.execute(bookId: 'book1');
+      final result = await useCase.execute(
+        bookId: 'book1',
+        anchor: DateTime(2026, 5, 15),
+      );
 
       expect(result.months, hasLength(6));
     });
 
     test('returns zero totals for months with no data', () async {
-      final result = await useCase.execute(bookId: 'book1', monthCount: 2);
+      final result = await useCase.execute(
+        bookId: 'book1',
+        anchor: DateTime(2026, 5, 15),
+        monthCount: 2,
+      );
 
       for (final month in result.months) {
         expect(month.totalExpenses, 0);
@@ -71,7 +82,11 @@ void main() {
     });
 
     test('months are ordered chronologically', () async {
-      final result = await useCase.execute(bookId: 'book1', monthCount: 3);
+      final result = await useCase.execute(
+        bookId: 'book1',
+        anchor: DateTime(2026, 5, 15),
+        monthCount: 3,
+      );
 
       for (int i = 0; i < result.months.length - 1; i++) {
         final current = result.months[i];
@@ -82,18 +97,33 @@ void main() {
       }
     });
 
-    test('includes current month', () async {
-      final now = DateTime.now();
-      final result = await useCase.execute(bookId: 'book1', monthCount: 1);
+    test('includes anchor month', () async {
+      final anchor = DateTime(2026, 5, 15);
+      final result = await useCase.execute(
+        bookId: 'book1',
+        anchor: anchor,
+        monthCount: 1,
+      );
 
       expect(result.months, hasLength(1));
-      expect(result.months.last.year, now.year);
-      expect(result.months.last.month, now.month);
+      expect(result.months.last.year, anchor.year);
+      expect(result.months.last.month, anchor.month);
+    });
+
+    test('trails the selected anchor month', () async {
+      final result = await useCase.execute(
+        bookId: 'book1',
+        anchor: DateTime(2026, 3, 15),
+      );
+
+      expect(result.months.first.year, 2025);
+      expect(result.months.first.month, 10);
+      expect(result.months.last.year, 2026);
+      expect(result.months.last.month, 3);
     });
 
     test('aggregates transaction data for matching months', () async {
-      final now = DateTime.now();
-      final currentMonth = DateTime(now.year, now.month, 15);
+      final anchor = DateTime(2026, 5, 15);
 
       // Add expense in current month
       await transactionDao.insertTransaction(
@@ -104,9 +134,9 @@ void main() {
         type: 'expense',
         categoryId: 'cat_food',
         ledgerType: 'survival',
-        timestamp: currentMonth,
+        timestamp: anchor,
         currentHash: 'hash1',
-        createdAt: currentMonth,
+        createdAt: anchor,
       );
 
       // Add income in current month
@@ -118,13 +148,17 @@ void main() {
         type: 'income',
         categoryId: 'cat_income',
         ledgerType: 'survival',
-        timestamp: currentMonth,
+        timestamp: anchor,
         currentHash: 'hash2',
         prevHash: 'hash1',
-        createdAt: currentMonth,
+        createdAt: anchor,
       );
 
-      final result = await useCase.execute(bookId: 'book1', monthCount: 1);
+      final result = await useCase.execute(
+        bookId: 'book1',
+        anchor: anchor,
+        monthCount: 1,
+      );
 
       expect(result.months.last.totalExpenses, 50000);
       expect(result.months.last.totalIncome, 300000);

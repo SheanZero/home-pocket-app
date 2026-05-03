@@ -113,6 +113,28 @@ final getHappinessReportUseCaseProvider =
 // ignore: unused_element
 typedef GetHappinessReportUseCaseRef =
     AutoDisposeProviderRef<GetHappinessReportUseCase>;
+String _$getDailyJoyPerYenUseCaseHash() =>
+    r'c3100f1da8ec3532db8ff02f97599553e0118c28';
+
+/// STATSUI-01 / D-05: GetDailyJoyPerYenUseCase provider.
+///
+/// Copied from [getDailyJoyPerYenUseCase].
+@ProviderFor(getDailyJoyPerYenUseCase)
+final getDailyJoyPerYenUseCaseProvider =
+    AutoDisposeProvider<GetDailyJoyPerYenUseCase>.internal(
+      getDailyJoyPerYenUseCase,
+      name: r'getDailyJoyPerYenUseCaseProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$getDailyJoyPerYenUseCaseHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef GetDailyJoyPerYenUseCaseRef =
+    AutoDisposeProviderRef<GetDailyJoyPerYenUseCase>;
 String _$getBestJoyMomentUseCaseHash() =>
     r'771dd6a48a0acc165f59d7605be955df501f6764';
 
@@ -135,6 +157,28 @@ final getBestJoyMomentUseCaseProvider =
 // ignore: unused_element
 typedef GetBestJoyMomentUseCaseRef =
     AutoDisposeProviderRef<GetBestJoyMomentUseCase>;
+String _$getLargestMonthlyExpenseUseCaseHash() =>
+    r'668d2dd01bbbb4d5d03561f596be122301408893';
+
+/// STATSUI-06 / D-15: GetLargestMonthlyExpenseUseCase provider.
+///
+/// Copied from [getLargestMonthlyExpenseUseCase].
+@ProviderFor(getLargestMonthlyExpenseUseCase)
+final getLargestMonthlyExpenseUseCaseProvider =
+    AutoDisposeProvider<GetLargestMonthlyExpenseUseCase>.internal(
+      getLargestMonthlyExpenseUseCase,
+      name: r'getLargestMonthlyExpenseUseCaseProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$getLargestMonthlyExpenseUseCaseHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef GetLargestMonthlyExpenseUseCaseRef =
+    AutoDisposeProviderRef<GetLargestMonthlyExpenseUseCase>;
 String _$getFamilyHappinessUseCaseHash() =>
     r'3b15f9eed8685f06f2e98a20b4c92bff4c96a0f4';
 

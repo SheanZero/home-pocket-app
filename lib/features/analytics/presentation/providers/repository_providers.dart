@@ -3,9 +3,11 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/analytics/get_best_joy_moment_use_case.dart';
 import '../../../../application/analytics/get_budget_progress_use_case.dart';
+import '../../../../application/analytics/get_daily_joy_per_yen_use_case.dart';
 import '../../../../application/analytics/get_expense_trend_use_case.dart';
 import '../../../../application/analytics/get_family_happiness_use_case.dart';
 import '../../../../application/analytics/get_happiness_report_use_case.dart';
+import '../../../../application/analytics/get_largest_monthly_expense_use_case.dart';
 import '../../../../application/analytics/get_monthly_report_use_case.dart';
 import '../../../../application/analytics/repository_providers.dart'
     as app_analytics;
@@ -61,10 +63,26 @@ GetHappinessReportUseCase getHappinessReportUseCase(Ref ref) {
   );
 }
 
+/// STATSUI-01 / D-05: GetDailyJoyPerYenUseCase provider.
+@riverpod
+GetDailyJoyPerYenUseCase getDailyJoyPerYenUseCase(Ref ref) {
+  return GetDailyJoyPerYenUseCase(
+    analyticsRepository: ref.watch(analyticsRepositoryProvider),
+  );
+}
+
 /// HAPPY-04: GetBestJoyMomentUseCase provider.
 @riverpod
 GetBestJoyMomentUseCase getBestJoyMomentUseCase(Ref ref) {
   return GetBestJoyMomentUseCase(
+    analyticsRepository: ref.watch(analyticsRepositoryProvider),
+  );
+}
+
+/// STATSUI-06 / D-15: GetLargestMonthlyExpenseUseCase provider.
+@riverpod
+GetLargestMonthlyExpenseUseCase getLargestMonthlyExpenseUseCase(Ref ref) {
+  return GetLargestMonthlyExpenseUseCase(
     analyticsRepository: ref.watch(analyticsRepositoryProvider),
   );
 }

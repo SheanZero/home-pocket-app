@@ -15,9 +15,7 @@ void main() {
 
   setUp(() {
     repository = _MockAnalyticsRepository();
-    useCase = GetLargestMonthlyExpenseUseCase(
-      analyticsRepository: repository,
-    );
+    useCase = GetLargestMonthlyExpenseUseCase(analyticsRepository: repository);
   });
 
   void stubLargestExpense(LargestMonthlyExpense? row) {

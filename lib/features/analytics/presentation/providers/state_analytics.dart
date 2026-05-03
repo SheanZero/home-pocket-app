@@ -53,7 +53,11 @@ Future<List<BudgetProgress>> budgetProgress(
 
 /// 6-month expense trend.
 @riverpod
-Future<ExpenseTrendData> expenseTrend(Ref ref, {required String bookId}) async {
+Future<ExpenseTrendData> expenseTrend(
+  Ref ref, {
+  required String bookId,
+  required DateTime anchor,
+}) async {
   final useCase = ref.watch(getExpenseTrendUseCaseProvider);
-  return useCase.execute(bookId: bookId);
+  return useCase.execute(bookId: bookId, anchor: anchor);
 }

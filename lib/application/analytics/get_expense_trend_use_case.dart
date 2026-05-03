@@ -10,13 +10,13 @@ class GetExpenseTrendUseCase {
 
   Future<ExpenseTrendData> execute({
     required String bookId,
+    required DateTime anchor,
     int monthCount = 6,
   }) async {
-    final now = DateTime.now();
     final trends = <MonthlyTrend>[];
 
     for (int i = monthCount - 1; i >= 0; i--) {
-      final date = DateTime(now.year, now.month - i, 1);
+      final date = DateTime(anchor.year, anchor.month - i, 1);
       final year = date.year;
       final month = date.month;
 

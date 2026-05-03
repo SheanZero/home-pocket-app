@@ -370,7 +370,7 @@ class _BudgetProgressProviderElement
   int get month => (origin as BudgetProgressProvider).month;
 }
 
-String _$expenseTrendHash() => r'5d83b624ba1718f2bad4b96a31671c1acf48a8fd';
+String _$expenseTrendHash() => r'3f3497209b33b8aac9e6eff40fe290252e131a24';
 
 /// 6-month expense trend.
 ///
@@ -390,15 +390,18 @@ class ExpenseTrendFamily extends Family<AsyncValue<ExpenseTrendData>> {
   /// 6-month expense trend.
   ///
   /// Copied from [expenseTrend].
-  ExpenseTrendProvider call({required String bookId}) {
-    return ExpenseTrendProvider(bookId: bookId);
+  ExpenseTrendProvider call({
+    required String bookId,
+    required DateTime anchor,
+  }) {
+    return ExpenseTrendProvider(bookId: bookId, anchor: anchor);
   }
 
   @override
   ExpenseTrendProvider getProviderOverride(
     covariant ExpenseTrendProvider provider,
   ) {
-    return call(bookId: provider.bookId);
+    return call(bookId: provider.bookId, anchor: provider.anchor);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -423,9 +426,13 @@ class ExpenseTrendProvider extends AutoDisposeFutureProvider<ExpenseTrendData> {
   /// 6-month expense trend.
   ///
   /// Copied from [expenseTrend].
-  ExpenseTrendProvider({required String bookId})
+  ExpenseTrendProvider({required String bookId, required DateTime anchor})
     : this._internal(
-        (ref) => expenseTrend(ref as ExpenseTrendRef, bookId: bookId),
+        (ref) => expenseTrend(
+          ref as ExpenseTrendRef,
+          bookId: bookId,
+          anchor: anchor,
+        ),
         from: expenseTrendProvider,
         name: r'expenseTrendProvider',
         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -435,6 +442,7 @@ class ExpenseTrendProvider extends AutoDisposeFutureProvider<ExpenseTrendData> {
         allTransitiveDependencies:
             ExpenseTrendFamily._allTransitiveDependencies,
         bookId: bookId,
+        anchor: anchor,
       );
 
   ExpenseTrendProvider._internal(
@@ -445,9 +453,11 @@ class ExpenseTrendProvider extends AutoDisposeFutureProvider<ExpenseTrendData> {
     required super.debugGetCreateSourceHash,
     required super.from,
     required this.bookId,
+    required this.anchor,
   }) : super.internal();
 
   final String bookId;
+  final DateTime anchor;
 
   @override
   Override overrideWith(
@@ -463,6 +473,7 @@ class ExpenseTrendProvider extends AutoDisposeFutureProvider<ExpenseTrendData> {
         allTransitiveDependencies: null,
         debugGetCreateSourceHash: null,
         bookId: bookId,
+        anchor: anchor,
       ),
     );
   }
@@ -474,13 +485,16 @@ class ExpenseTrendProvider extends AutoDisposeFutureProvider<ExpenseTrendData> {
 
   @override
   bool operator ==(Object other) {
-    return other is ExpenseTrendProvider && other.bookId == bookId;
+    return other is ExpenseTrendProvider &&
+        other.bookId == bookId &&
+        other.anchor == anchor;
   }
 
   @override
   int get hashCode {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
     hash = _SystemHash.combine(hash, bookId.hashCode);
+    hash = _SystemHash.combine(hash, anchor.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -491,6 +505,9 @@ class ExpenseTrendProvider extends AutoDisposeFutureProvider<ExpenseTrendData> {
 mixin ExpenseTrendRef on AutoDisposeFutureProviderRef<ExpenseTrendData> {
   /// The parameter `bookId` of this provider.
   String get bookId;
+
+  /// The parameter `anchor` of this provider.
+  DateTime get anchor;
 }
 
 class _ExpenseTrendProviderElement
@@ -500,6 +517,8 @@ class _ExpenseTrendProviderElement
 
   @override
   String get bookId => (origin as ExpenseTrendProvider).bookId;
+  @override
+  DateTime get anchor => (origin as ExpenseTrendProvider).anchor;
 }
 
 String _$selectedMonthHash() => r'1e278a1a3b1a328fc41224840fb663025d470215';

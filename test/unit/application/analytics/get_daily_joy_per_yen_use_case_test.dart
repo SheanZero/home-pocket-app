@@ -99,24 +99,20 @@ void main() {
     expect(
       day5.joyPerYen,
       closeTo(
-        expectedDensity(
-          const [
-            SoulRowSample(amount: 1000, soulSatisfaction: 8),
-            SoulRowSample(amount: 500, soulSatisfaction: 6),
-            SoulRowSample(amount: 200, soulSatisfaction: 4),
-          ],
-          500,
-        ),
+        expectedDensity(const [
+          SoulRowSample(amount: 1000, soulSatisfaction: 8),
+          SoulRowSample(amount: 500, soulSatisfaction: 6),
+          SoulRowSample(amount: 200, soulSatisfaction: 4),
+        ], 500),
         0.0001,
       ),
     );
     expect(
       day10.joyPerYen,
       closeTo(
-        expectedDensity(
-          const [SoulRowSample(amount: 2000, soulSatisfaction: 10)],
-          500,
-        ),
+        expectedDensity(const [
+          SoulRowSample(amount: 2000, soulSatisfaction: 10),
+        ], 500),
         0.0001,
       ),
     );
@@ -134,18 +130,15 @@ void main() {
     final jpy = await execute();
     final cny = await execute(currencyCode: 'CNY');
 
-    final jpyPoint =
-        (jpy as Value<List<DailyJoyPerYenPoint>>).data.single;
-    final cnyPoint =
-        (cny as Value<List<DailyJoyPerYenPoint>>).data.single;
+    final jpyPoint = (jpy as Value<List<DailyJoyPerYenPoint>>).data.single;
+    final cnyPoint = (cny as Value<List<DailyJoyPerYenPoint>>).data.single;
     expect(jpyPoint.joyPerYen, isNot(cnyPoint.joyPerYen));
     expect(
       cnyPoint.joyPerYen,
       closeTo(
-        expectedDensity(
-          const [SoulRowSample(amount: 1000, soulSatisfaction: 8)],
-          25,
-        ),
+        expectedDensity(const [
+          SoulRowSample(amount: 1000, soulSatisfaction: 8),
+        ], 25),
         0.0001,
       ),
     );
