@@ -53,14 +53,17 @@ Replace `SoulFullnessCard` to consume Phase 9 contracts. Drop the buggy inline h
 - [x] **HOMEUI-06**: HomePage hero card displays 魂/生存 absolute amount split via inline horizontal split bar (魂 portion gradient soul-green, track neutral gray); labels are absolute Yen amounts, NOT percentages or ratio framing; replaces `LedgerComparisonSection` survival/soul rows in single mode. Per Phase 10 D-06.
 - [x] **HOMEUI-07**: In group mode, hero card appends per-member monthly spending rows after Best Joy strip (avatar + member name + ¥amount per row); replaces `LedgerComparisonSection`'s shadow-book rows. Per Phase 10 D-06.
 
-### STATSUI — Statistics Surface (悦己账本统计)
+### STATSUI — AnalyticsScreen Unified Dashboard (Variant δ)
 
-Wire the 3 dormant DAO methods + the new Best Joy DAO query into `AnalyticsScreen` as a composable sub-region.
+Rebuild `AnalyticsScreen` as a unified 2-region dashboard (総帳本 + 悦己帳本) wired through Phase 9 use cases. **生存帳本 has no separate stats region** — its data rolls up into 総帳本 cards. Family mode = 家庭账本 aggregate-only (ADR-012 / FAMILY-01-02 anti-leaderboard contract preserved).
 
-- [ ] **STATSUI-01**: **Joy per ¥ trend line** for month-to-date rendered as `LineChart` in a new AnalyticsScreen sub-region; baseline-anchored y-axis; gap-vs-zero policy documented in chart legend
-- [ ] **STATSUI-02**: **Satisfaction distribution histogram** rendered as `BarChart`; the bar at `5` is annotated "中央値・含未評価 / 中位数·含未评分 / Median + unrated" to acknowledge default-value clustering; text fallback rendered when sample size < 5
-- [ ] **STATSUI-03**: Headline metrics row above the charts shows mean (primary) + median (tooltip) + coverage caption ("n=k rated"); honors HAPPY-06 empty-state contract
+- [ ] **STATSUI-01**: **Joy per ¥ trend line** for month-to-date rendered as `LineChart` (悦己 card in 時間 group); baseline-anchored y-axis; gap-vs-zero policy documented in chart legend
+- [ ] **STATSUI-02**: **Satisfaction distribution histogram** rendered as `BarChart` (悦己 card in 分布 group); the bar at `5` is annotated "中央値・含未評価 / 中位数·含未评分 / Median + unrated" to acknowledge default-value clustering; text fallback rendered when sample size < 5
+- [ ] **STATSUI-03**: KPI mini-hero 悦己 tile shows mean (primary) + median (tooltip / sub-line) + coverage caption ("n=k rated"); honors HAPPY-06 empty-state contract by rendering text fallback when sample size < 5
 - [ ] **STATSUI-04**: Phase 11 begins with an **integration footprint audit document** (provider graph + widget tree + ARB namespace + DAO call sites) committed to `.planning/phases/11-*/` before any wiring code is written; counters typical 30-50% under-estimation of "just wire it up" tasks
+- [ ] **STATSUI-05**: AnalyticsScreen rebuilt as Variant δ unified dashboard. Structure: AppBar + month chip → KPI mini-hero (総支出 + 悦己平均) → 時間 group → 分布 group → 物語 group. Each themed group uses 総-first / 悦己-second card ordering globally. 8 v1.0 widgets deleted (`SummaryCards` / `CategoryPieChart` / `DailyExpenseChart` / `LedgerRatioChart` / `BudgetProgressList` / `ExpenseTrendChart` / `CategoryBreakdownList` / `MonthComparisonCard`).
+- [ ] **STATSUI-06**: 総帳本 column delivers 6 か月支出推移 (`BarChart`, current month highlighted) in 時間 group, 類別支出分布 (`Donut`/`PieChart`, top-N + その他) in 分布 group, and 今月の最大支出 story card (single-largest expense: category · amount · date) in 物語 group. Family mode = 家庭账本 aggregate-only — never per-member breakdown.
+- [ ] **STATSUI-07**: KPI mini-hero strip = horizontal 2-tile layout, 総支出 tile (left, 総-themed fill, MoM delta sub-line) + 悦己平均 tile (right, 悦己-themed fill, 中央値 + n=k sub-line). 月間月份切換 via month chip in AppBar; all dashboard cards re-key on `(bookId, year, month)`.
 
 ### RENAME — UI Copy Rename Pass
 
@@ -137,6 +140,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STATSUI-02 | Phase 11 | Pending |
 | STATSUI-03 | Phase 11 | Pending |
 | STATSUI-04 | Phase 11 | Pending |
+| STATSUI-05 | Phase 11 | Pending |
+| STATSUI-06 | Phase 11 | Pending |
+| STATSUI-07 | Phase 11 | Pending |
 | RENAME-01 | Phase 12 | Pending |
 | RENAME-02 | Phase 12 | Pending |
 | RENAME-03 | Phase 12 | Pending |

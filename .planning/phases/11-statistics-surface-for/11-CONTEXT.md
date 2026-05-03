@@ -288,5 +288,65 @@ Phase 11 **完整重做 `AnalyticsScreen`**：删除现有 8 个 widget，重新
 
 ---
 
-*Phase: 11-Statistics Surface for 悦己账本*
-*Context gathered: 2026-05-03*
+## Update 2026-05-03 — SCOPE simplification + Variant δ locked
+
+> Append-only revision. Original D-01..D-14 preserved above as historical discussion record.
+> The decisions below SUPERSEDE D-01, D-02, D-03 wherever they conflict.
+
+### What changed and why
+
+User feedback during `/gsd-ui-phase 11` Pencil ramp: **不需要把三个统计严格分开。在统计页面，显示总账本（家庭模式 = 家庭账本）统计和悦己统计，不需要对生存账本再做统计**. The original 3-region IA (悦己 / 生存 / 跨账本总览) was over-segmented for a v1.1 surface — collapsing 跨账本总览 into a single "総帳本" region (which already includes 生存 spending categories under 類別支出 breakdown) and dropping 生存 as a stand-alone region simplifies both IA and SCOPE.
+
+User also requested **「混合的方式 · 总览→细节 · 总账本和悦己指标交错」** — leading to a unified-dashboard pattern (no hard region dividers; cards interleaved by theme).
+
+### D-15 — SCOPE: 3-region → 2-region unified dashboard
+
+- **AnalyticsScreen has 2 regions** (not 3): 総帳本 + 悦己帳本
+- **生存帳本 has NO separate stats region** — 生存 spending categories appear inside 総帳本 cards (e.g., the 類別支出 donut breaks down 生存 + 悦己 categories together)
+- **Family mode**: 総帳本 = 家庭账本 (aggregate-only, anti-leaderboard ADR-012 + FAMILY-01-02 contracts preserved); 悦己帳本 stays single-book per D-11/D-12 (unchanged)
+- **D-01 superseded**: ROADMAP.md goal rewritten to reflect 2-region unified dashboard — see Phase 11 section in `.planning/ROADMAP.md`
+- **D-02 superseded**: REQUIREMENTS.md STATSUI-05/06/07 added with new content (NOT the original 3-region phrasing) — see `.planning/REQUIREMENTS.md` STATSUI section
+  - STATSUI-05: AnalyticsScreen rebuilt as Variant δ unified dashboard
+  - STATSUI-06: 総帳本 column delivers 6 か月推移 + 類別支出 + 今月の最大支出 (家庭账本 aggregate in family mode)
+  - STATSUI-07: KPI mini-hero (総支出 + 悦己平均) — replaces what would have been a stand-alone 跨账本 KPI region
+
+### D-16 — IA shape: Variant δ (Themed Groups + KPI mini-hero, 総先 ordering)
+
+3 IA candidates were drafted in `/Users/xinz/Documents/0503-analytics-redesign.pen` (α/β/γ); user picked β (Themed Groups) as the base, requested KPI hero from α and 総-first ordering, generating Variant δ.
+
+**Variant δ structure (locked):**
+1. AppBar: title「統計」 left + month chip 「2026年5月 ▼」 right
+2. KPI mini-hero strip (horizontal 2-tile): **総支出** (left, 総 fill #F0F6FB, MoM delta sub-line) + **悦己平均** (right, 悦己 fill #F0F8F4, 中央値 + n=k sub-line)
+3. **時間 group** (soft H3 「━ 時間 / Time ━」): 総 6 か月支出推移 (`BarChart`, current month highlighted) → 悦己 Joy/¥ トレンド (`LineChart`, MTD)
+4. **分布 group** (soft H3 「━ 分布 / Distribution ━」): 総 類別支出分布 (`Donut`/`PieChart`, top-N + その他) → 悦己 満足度分布 1–10 (`Histogram`, cool→warm, 5 bar 三語注記)
+5. **物語 group** (soft H3 「━ 物語 / Stories ━」): 総 今月の最大支出 (single-largest expense story) → 悦己 今月のベスト ジョイ (Best Joy story) → 家族 FamilyInsightCard (group mode only, ochre fill)
+
+**「総-first」 ordering global**: in every themed group, 総 card precedes 悦己 card (financial reality before subjective rating; framing-defensive against the comparison anti-pattern).
+
+**D-03 superseded**: IA shape no longer "3 candidates TBD" — Variant δ is the locked shape. Pencil file `/Users/xinz/Documents/0503-analytics-redesign.pen` retains all 4 candidates (α/β/γ/δ) as a historical decision artifact.
+
+**D-04 amended (not superseded)**: same Pencil file path; now contains 4 wireframes side-by-side (α at x=0, β at x=440, γ at x=880, δ at x=1320).
+
+### D-17 — Card color tinting + ledger badge convention
+
+- **総 cards**: fill `#F0F6FB`, stroke `#D5E3EE`, title color `#5A9CC8` (survival blue, project token `AppColors.survival`)
+- **悦己 cards**: fill `#F0F8F4`, stroke `#D5EAD8`, title color `#47B88A` (soul green, project token `AppColors.soul`)
+- **家族 cards** (FamilyInsight only): fill `#FFF7E6`, stroke `#F0E0BC`, title color `#A8842A` (ochre — distinguishes anti-leaderboard family aggregate from per-ledger cards)
+- Each card title prefixes with the ledger name: 「総 · ...」「悦己 · ...」「家族 · ...」 to make the ledger-of-origin self-evident on every card
+
+### D-18 — Phase 10 hero tap landing (revised)
+
+Phase 10 HomeHeroCard 整卡 tap → AnalyticsScreen scroll-top default (no `initialSection` parameter needed). Variant δ puts 悦己平均 KPI tile + 時間 group's first 悦己 chart immediately visible after the mini-hero strip, so 悦己-first feeling is preserved without explicit anchor logic. **D-22 (Phase 10 navigation contract) needs to be checked** — if it specified `initialSection: AnalyticsSection.joy`, that param can be removed from the Phase 10 widget; otherwise this is purely a Phase 11 routing simplification.
+
+### Downstream impact
+
+- ✅ ROADMAP.md updated (Phase 11 goal, complexity, requirements list, critical pitfalls, success criteria)
+- ✅ REQUIREMENTS.md updated (STATSUI section preamble + STATSUI-01..04 phrasing + STATSUI-05/06/07 added + traceability table)
+- ✅ This CONTEXT.md updated (this section)
+- ⏳ UI-SPEC.md (`.planning/phases/11-statistics-surface-for/11-UI-SPEC.md`): pending major rewrite to reflect Variant δ
+- ⏳ DISCUSSION-LOG.md: append a 2026-05-03 SCOPE-revision session note
+
+---
+
+*Phase: 11-AnalyticsScreen Unified Dashboard (Variant δ)*
+*Context gathered: 2026-05-03 · Revised: 2026-05-03 (SCOPE simplification + Variant δ)*

@@ -259,3 +259,48 @@ Claude flag 了 Q4.1 + Q4.2 选择与 ADR-012 / FAMILY-01/02 / Phase 9 D-08 bind
 - AI 生成 Joy 数据解释 / 公开分享
 - 「最低/最高满足度成员排行」
 - Joy ROI / happiness share / soul % 类框架重新出现
+
+---
+
+## Session 2: SCOPE simplification + Variant δ — 2026-05-03 (afternoon)
+
+**Trigger**: `/gsd-ui-phase 11` Pencil ramp.
+
+`/gsd-ui-phase 11` originally produced an IA-agnostic UI-SPEC.md (3-region IA = 悦己 / 生存 / 跨账本总览, see Session 1 D-03/D-04) and approved it via gsd-ui-checker (6/6 PASS). The orchestrator was supposed to draw 3 IA candidates in `/Users/xinz/Documents/0503-analytics-redesign.pen` but skipped that step and ended the workflow prematurely. User flagged the gap.
+
+After agreeing to draw the wireframes, user revised SCOPE during the candidate-presentation step:
+
+> 「不需要把三个统计严格分开，在统计页面，显示总帐本（如果是家庭，看家庭帐本）统计和悦己统计，不需要对生存帐本在做统计。设计显示总帐本和悦己的统计」
+>
+> 「可以考虑混合的方式进行显示，从总览→细节，总帐本和悦己统计指标是交错的」
+
+This collapsed the original 3-region structure to 2-region unified-dashboard. Generated 3 candidate dashboards (α / β / γ) with different interleaving strategies; user picked β as the base + requested KPI-hero borrowed from α + 総-first global ordering, generating Variant δ.
+
+### Decisions (D-15..D-18 — append to CONTEXT.md, supersede D-01..D-03)
+
+- **D-15**: SCOPE simplification — AnalyticsScreen has 2 regions (総帳本 + 悦己帳本), not 3. 生存帳本 has no separate stats region — its categories appear inside 総帳本 cards (e.g., 類別支出 donut breaks down 生存 + 悦己 categories together).
+- **D-16**: IA shape locked = Variant δ (Themed Groups + KPI mini-hero, 総-first ordering). Structure: AppBar + month chip → KPI mini-hero (総支出 + 悦己平均) → 時間 group (総 6 か月推移 → 悦己 Joy/¥) → 分布 group (総 類別支出 → 悦己 満足度 histogram) → 物語 group (総 今月の最大支出 → 悦己 ベスト ジョイ → 家族 FamilyInsight).
+- **D-17**: Card color tinting convention — 総 cards use `AppColors.survival` light tint + colored title; 悦己 cards use `AppColors.soul` light tint + colored title; 家族 FamilyInsight uses `AppColors.olive` ochre tint (semantically distinct from per-ledger cards).
+- **D-18**: Phase 10 hero tap landing simplified — `Navigator.push(AnalyticsScreen(bookId))` with no `initialSection` param. Variant δ scroll-top default places 悦己平均 KPI tile + 悦己 chart-card immediately visible.
+
+### Pencil artifact (4 candidates retained for historical record)
+
+- α at x=0: KPI Hero (4-tile) + interleaved detail cards
+- β at x=440: Themed Groups (時間 / 分布 / 物語) + 1-line summary header
+- γ at x=880: Pure interleave, no hero, no group headers
+- **δ at x=1320: Variant δ (LOCKED)** — themed groups + KPI mini-hero + 総-first
+
+User noted via the Pencil ramp that the screenshots/exports of named frames showed empty rendering — root-caused to a Pencil MCP behavior where setting a `name` property on a frame adds a 50px label header that pushes children down. Workaround: never set `name` on frames in the dashboard wireframes (use top-level header text nodes for labels instead). Documented for future Pencil-based UI-phase work.
+
+### Downstream artifacts updated
+
+- ✅ `.planning/ROADMAP.md` — Phase 11 goal, complexity, requirements list, critical pitfalls, success criteria
+- ✅ `.planning/REQUIREMENTS.md` — STATSUI section preamble + STATSUI-01..04 phrasing + STATSUI-05/06/07 added + traceability table
+- ✅ `.planning/phases/11-statistics-surface-for/11-CONTEXT.md` — appended `## Update 2026-05-03` section (D-15..D-18, supersedes D-01..D-03)
+- ✅ `.planning/phases/11-statistics-surface-for/11-UI-SPEC.md` — full rewrite for Variant δ (slug renamed `analytics-unified-dashboard-variant-d`, `revised_at: 2026-05-03`, `variant: δ`); checker re-verification pending
+- ✅ `.planning/phases/11-statistics-surface-for/11-DISCUSSION-LOG.md` — this session note
+
+### Re-verification queued
+
+- gsd-ui-checker should re-run against the revised UI-SPEC.md before Phase 11 plan-phase. Original 6/6 PASS verdict is invalidated on Color (跨账本 olive accent removed; new accent reservations for 総 + 悦己 cards), Copywriting (3-region region-titles dropped, themed-group H3s + KPI mini-hero copy added, 総 card copy tables added), Component Inventory (跨账本 placeholder dropped, 4 new widgets added: `KpiMiniHeroStrip`, `TotalSpendingTile`, `MonthlySpendTrendBarChart`, `CategorySpendDonutChart`, `LargestExpenseStoryCard`, `MonthChipPicker`), Layout Rhythm (full rewrite for Variant δ structure). Spacing / Typography / Registry Safety dimensions unchanged.
+

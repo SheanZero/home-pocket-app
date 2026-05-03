@@ -29,7 +29,7 @@ Phase numbering continues from Phase 9 (no reset).
 
 - [x] **Phase 9: Happiness Domain & Formula Layer** — Lock formulas, contracts, soul-only filter, Top Joy ordering, sealed `MetricResult`, family aggregate-only return type, no-gamification ADR (linchpin) — completed 2026-05-02
 - [x] **Phase 10: HomePage SoulFullnessCard Redesign (HomeHeroCard integrated rebuild)** — Replace 3 widgets with 1 integrated `HomeHeroCard`; 3 concentric rings encode Phase 9 contracts (single → `HappinessReport`, group → `FamilyHappiness`); delete `_computeHappinessROI` / `_computeSatisfaction` / `_buildLedgerRows` from `home_screen.dart` (completed 2026-05-03)
-- [ ] **Phase 11: Statistics Surface for 悦己账本** — Wire 3 dormant DAO methods + new Best Joy query through to AnalyticsScreen sub-region; Joy-per-¥ trend line + satisfaction histogram (with `5`-bar annotation); footprint-audit doc first
+- [ ] **Phase 11: AnalyticsScreen Unified Dashboard (Variant δ)** — Rebuild AnalyticsScreen as a 2-region unified dashboard (総帳本 + 悦己帳本) with KPI mini-hero (総支出 + 悦己平均) + 3 themed groups (時間 / 分布 / 物語), 総-first card ordering. Wire 3 dormant DAO methods + new Best Joy query. 生存帳本 has no separate stats region. Footprint-audit doc first.
 - [ ] **Phase 12: UI Copy Rename Pass (ARB values, ja/zh/en)** — Values-only rename of `soulLedger` / `survivalLedger` / `homeHappinessROI` / `homeSoulFullness`; lexical-hierarchy ADR; native-speaker register review
 
 ## Phase Details
@@ -89,7 +89,7 @@ Plans:
 - [x] 09-14-PLAN.md — HAPPY-08 satisfaction picker mapping test closure (`face_0..face_4` → `[2, 4, 6, 8, 10]`)
 
 ### Phase 10: HomePage SoulFullnessCard Redesign (HomeHeroCard integrated rebuild)
-**Goal**: Replace 3 separate sections (`MonthOverviewCard` + `LedgerComparisonSection` + `SoulFullnessCard`) on HomePage with 1 integrated `HomeHeroCard`. The integrated card encodes Phase 9 happiness contracts as 3 concentric gradient rings with mode-specific metric mapping (single mode → `HappinessReport`; group mode → `FamilyHappiness`), plus a hero header (total + month-over-month chip + previous-month sub-line), an inline 魂/生存 absolute-amount split bar, a Best Joy story strip emphasizing "what + when" over "amount", and (group mode only) per-member spending rows. Whole-card tap navigates to AnalyticsScreen 「悦己账本」 sub-region (Phase 11 deliverable).
+**Goal**: Replace 3 separate sections (`MonthOverviewCard` + `LedgerComparisonSection` + `SoulFullnessCard`) on HomePage with 1 integrated `HomeHeroCard`. The integrated card encodes Phase 9 happiness contracts as 3 concentric gradient rings with mode-specific metric mapping (single mode → `HappinessReport`; group mode → `FamilyHappiness`), plus a hero header (total + month-over-month chip + previous-month sub-line), an inline 魂/生存 absolute-amount split bar, a Best Joy story strip emphasizing "what + when" over "amount", and (group mode only) per-member spending rows. Whole-card tap navigates to AnalyticsScreen (Phase 11 unified dashboard, default scroll-top so 悦己平均 KPI tile + 時間/Joy/¥ card are immediately visible).
 **Depends on**: Phase 9 (consumes `happinessReportProvider`, `bestJoyMomentProvider`, `familyHappinessProvider`, sealed `MetricResult` contract, and `BestJoyMomentRow` Freezed model)
 **Requirements**: FAMILY-03, HOMEUI-01, HOMEUI-02, HOMEUI-03, HOMEUI-04, HOMEUI-05, HOMEUI-06, HOMEUI-07
 **Complexity**: Medium-High (UI rebuild on stable contracts + new `CustomPainter` for 3 concentric gradient rings + integrated card composition replacing 3 widgets + spec amendments to REQUIREMENTS.md/ROADMAP.md per D-06/D-07; Container Widget With Async Provider pattern already established)
@@ -118,26 +118,31 @@ Plans:
 **Plans**: TBD
 **UI hint**: yes
 
-### Phase 11: Statistics Surface for 悦己账本
-**Goal**: Wire the 3 dormant DAO methods (`getSoulSatisfactionOverview` / `getSatisfactionDistribution` / `getDailySatisfactionTrend`) plus the new Best Joy query through use case → provider → widgets into AnalyticsScreen as a composable 悦己账本统计 sub-region; deliver Joy-per-¥ trend line + satisfaction distribution histogram.
+### Phase 11: AnalyticsScreen Unified Dashboard (Variant δ)
+**Goal**: Rebuild `AnalyticsScreen` as a unified 2-region dashboard composed of (a) a KPI mini-hero strip showing 総支出 + 悦己平均 and (b) 3 themed groups — 時間 / 分布 / 物語 — each containing 総-first then 悦己-second cards, plus a 物語 trio (総 highlight + 悦己 Best Joy + group-mode FamilyInsightCard). Wire the 3 dormant DAO methods (`getSoulSatisfactionOverview` / `getSatisfactionDistribution` / `getDailySatisfactionTrend`) plus the new Best Joy query through use case → provider → widgets. **生存帳本 has no separate stats region** (生存 metrics roll up into 総帳本 column; family mode = 家庭账本 aggregate-only, anti-leaderboard preserved).
 **Depends on**: Phase 9 (consumes DAO + use cases). Can start after Phase 10 OR run in parallel with Phase 10 if capacity allows; Phase 12 must wait for both.
-**Requirements**: STATSUI-01, STATSUI-02, STATSUI-03, STATSUI-04
-**Complexity**: Medium (mostly wiring + 2 new chart widgets, but 30-50% under-estimation risk on "just wire it up" tasks — first sub-task is the footprint audit, NOT code)
+**Requirements**: STATSUI-01, STATSUI-02, STATSUI-03, STATSUI-04, STATSUI-05, STATSUI-06, STATSUI-07
+**Complexity**: Medium-High (full AnalyticsScreen rebuild — 8 v1.0 widgets deleted; new layout + 4 chart cards + 3 story cards + KPI mini-hero; 30-50% under-estimation risk persists on "just wire it up" tasks — first sub-task is the footprint audit, NOT code)
 **Critical pitfalls encoded**:
 - Phase 11 BEGINS with an integration footprint audit document (provider graph + widget tree + ARB namespace + DAO call sites) committed to `.planning/phases/11-*/` BEFORE any wiring code is written — counters typical 30-50% under-estimation
+- 8 v1.0 AnalyticsScreen widgets deleted (`SummaryCards` / `CategoryPieChart` / `DailyExpenseChart` / `LedgerRatioChart` / `BudgetProgressList` / `ExpenseTrendChart` / `CategoryBreakdownList` / `MonthComparisonCard`) — replaced by Variant δ unified dashboard
+- 生存帳本 receives NO separate stats region (per 2026-05-03 SCOPE revision); 生存 spending category data appears inside 総帳本 cards (e.g., 類別支出 donut breaks down 生存 + 悦己 categories together)
 - Histogram bar at `5` MUST be annotated ("中央値・含未評価 / 中位数·含未评分 / Median + unrated") — acknowledges East-Asian central-tendency clustering + default-5 cluster from missed/OCR/quick-add inputs; do NOT try to "fix" the cluster
-- Headline row shows mean (primary) + median (tooltip) + coverage caption ("n=k rated") — mean alone is fragile against the default-5 cluster
+- 悦己 KPI tile shows mean (primary) + median (tooltip) + coverage caption ("n=k rated") — mean alone is fragile against the default-5 cluster
 - Joy-per-¥ trend line uses baseline-anchored y-axis; gap-vs-zero policy documented in chart legend
 - Text fallback rendered when sample size < 5 (HAPPY-06 empty-state contract)
+- 総-first ordering global: in every themed group, 総 card precedes 悦己 card (anti-comparison framing — financial reality before subjective rating)
 - `shadowBooksProvider` family-mode book enumeration is the deeper-research moment for this phase (flagged MEDIUM-confidence in research)
 **Success Criteria** (what must be TRUE):
   1. Integration footprint audit document exists in `.planning/phases/11-*/` and was committed BEFORE any wiring code in this phase
-  2. Joy per ¥ trend line renders in AnalyticsScreen 悦己账本统计 sub-region as `LineChart` for month-to-date, with baseline-anchored y-axis and gap-vs-zero policy in legend
-  3. Satisfaction distribution histogram renders as `BarChart`; the `5` bar is annotated with the trilingual caption acknowledging default-value clustering
-  4. Headline metrics row shows mean as primary, median in tooltip, and coverage caption ("n=k rated"); honors HAPPY-06 empty-state by rendering text fallback when n<5
-  5. All chart wiring consumes Phase 9 use cases (no direct DAO calls from widgets); `flutter analyze` reports 0 issues
+  2. AnalyticsScreen renders as unified 2-region Variant δ dashboard: AppBar + month chip → KPI mini-hero (総支出 + 悦己平均) → 時間 group (総 6 か月 推移 + 悦己 Joy/¥ trend) → 分布 group (総 類別支出 + 悦己 満足度 histogram) → 物語 group (総 今月の最大支出 + 悦己 Best Joy + group-mode FamilyInsightCard)
+  3. Joy per ¥ trend line renders as `LineChart` for month-to-date, with baseline-anchored y-axis and gap-vs-zero policy in legend (悦己 card in 時間 group)
+  4. Satisfaction distribution histogram renders as `BarChart`; the `5` bar is annotated with the trilingual caption acknowledging default-value clustering (悦己 card in 分布 group)
+  5. KPI mini-hero 悦己 tile shows mean as primary, median in tooltip/sub-line, and coverage caption ("n=k rated"); honors HAPPY-06 empty-state by rendering text fallback when n<5
+  6. 8 v1.0 AnalyticsScreen widgets deleted from `lib/features/analytics/presentation/widgets/` (verified by `grep` returning zero matches)
+  7. All chart wiring consumes Phase 9 use cases (no direct DAO calls from widgets); `flutter analyze` reports 0 issues
 **Plans**: TBD
-**UI hint**: yes
+**UI hint**: yes (UI-SPEC = 11-UI-SPEC.md, Variant δ locked)
 
 ### Phase 12: UI Copy Rename Pass (ARB values, ja/zh/en)
 **Goal**: Rename 4 ARB values across all 3 locales (ja/zh/en) to reflect the milestone's lexical hierarchy (悦己 / ときめき / Joy in product; 幸福 / happiness reserved for documentation); ratify the lexical hierarchy as an ADR; complete native-speaker register review.
