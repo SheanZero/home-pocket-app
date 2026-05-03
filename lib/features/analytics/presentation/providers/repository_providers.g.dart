@@ -135,6 +135,28 @@ final getDailyJoyPerYenUseCaseProvider =
 // ignore: unused_element
 typedef GetDailyJoyPerYenUseCaseRef =
     AutoDisposeProviderRef<GetDailyJoyPerYenUseCase>;
+String _$getSatisfactionDistributionUseCaseHash() =>
+    r'c365f2ba9dba19868c355b237ee87adc705d7898';
+
+/// STATSUI-02 / D-05: GetSatisfactionDistributionUseCase provider.
+///
+/// Copied from [getSatisfactionDistributionUseCase].
+@ProviderFor(getSatisfactionDistributionUseCase)
+final getSatisfactionDistributionUseCaseProvider =
+    AutoDisposeProvider<GetSatisfactionDistributionUseCase>.internal(
+      getSatisfactionDistributionUseCase,
+      name: r'getSatisfactionDistributionUseCaseProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$getSatisfactionDistributionUseCaseHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef GetSatisfactionDistributionUseCaseRef =
+    AutoDisposeProviderRef<GetSatisfactionDistributionUseCase>;
 String _$getBestJoyMomentUseCaseHash() =>
     r'771dd6a48a0acc165f59d7605be955df501f6764';
 

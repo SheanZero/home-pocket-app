@@ -9,6 +9,7 @@ import '../../../../application/analytics/get_family_happiness_use_case.dart';
 import '../../../../application/analytics/get_happiness_report_use_case.dart';
 import '../../../../application/analytics/get_largest_monthly_expense_use_case.dart';
 import '../../../../application/analytics/get_monthly_report_use_case.dart';
+import '../../../../application/analytics/get_satisfaction_distribution_use_case.dart';
 import '../../../../application/analytics/repository_providers.dart'
     as app_analytics;
 import '../../../../data/daos/analytics_dao.dart';
@@ -67,6 +68,14 @@ GetHappinessReportUseCase getHappinessReportUseCase(Ref ref) {
 @riverpod
 GetDailyJoyPerYenUseCase getDailyJoyPerYenUseCase(Ref ref) {
   return GetDailyJoyPerYenUseCase(
+    analyticsRepository: ref.watch(analyticsRepositoryProvider),
+  );
+}
+
+/// STATSUI-02 / D-05: GetSatisfactionDistributionUseCase provider.
+@riverpod
+GetSatisfactionDistributionUseCase getSatisfactionDistributionUseCase(Ref ref) {
+  return GetSatisfactionDistributionUseCase(
     analyticsRepository: ref.watch(analyticsRepositoryProvider),
   );
 }

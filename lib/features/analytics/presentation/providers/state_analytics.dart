@@ -74,18 +74,6 @@ Future<List<SatisfactionScoreBucket>> satisfactionDistribution(
   required int year,
   required int month,
 }) async {
-  final repository = ref.watch(analyticsRepositoryProvider);
-  final range = _monthRange(year, month);
-  return repository.getSatisfactionDistribution(
-    bookId: bookId,
-    startDate: range.start,
-    endDate: range.end,
-  );
-}
-
-({DateTime start, DateTime end}) _monthRange(int year, int month) {
-  return (
-    start: DateTime(year, month),
-    end: DateTime(year, month + 1).subtract(const Duration(microseconds: 1)),
-  );
+  final useCase = ref.watch(getSatisfactionDistributionUseCaseProvider);
+  return useCase.execute(bookId: bookId, year: year, month: month);
 }

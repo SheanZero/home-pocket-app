@@ -487,7 +487,7 @@ class _EarliestTransactionMonthProviderElement
 }
 
 String _$satisfactionDistributionHash() =>
-    r'552bf246b2c6d7de1f6febb965dece7d093b3e6e';
+    r'33a0f1e6d5e6d598c7a9bc4345b0834cbd36c05e';
 
 /// Satisfaction score distribution for the selected month.
 ///
