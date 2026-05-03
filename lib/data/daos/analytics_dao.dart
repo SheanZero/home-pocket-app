@@ -69,19 +69,6 @@ class SatisfactionDistributionResult {
   });
 }
 
-/// Aggregate result for daily satisfaction trend.
-class DailySatisfactionResult {
-  final DateTime date;
-  final double avgSatisfaction;
-  final int count;
-
-  const DailySatisfactionResult({
-    required this.date,
-    required this.avgSatisfaction,
-    required this.count,
-  });
-}
-
 /// Data access object for analytics aggregate queries.
 ///
 /// Uses database-level SUM/GROUP BY for performance (<2s target).
@@ -296,8 +283,8 @@ class AnalyticsDao {
         .toList();
   }
 
-  /// Get daily average satisfaction trend for soul transactions.
-  Future<List<DailySatisfactionResult>> getDailySatisfactionTrend({
+  /// STATSUI-01 / D-05: row-wise daily pull for Dart-layer PTVF fold.
+  Future<List<DailySoulRowSampleWithDay>> getDailySoulRowsForPtvf({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
@@ -305,12 +292,11 @@ class AnalyticsDao {
     final results = await _db
         .customSelect(
           'SELECT DATE(timestamp, \'unixepoch\', \'localtime\') as day, '
-          'AVG(soul_satisfaction) as avg_sat, COUNT(*) as cnt '
+          'amount, soul_satisfaction '
           'FROM transactions '
           'WHERE book_id = ? AND $_soulExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ? '
-          'GROUP BY day '
-          'ORDER BY day ASC',
+          'ORDER BY timestamp ASC, id ASC',
           variables: [
             Variable.withString(bookId),
             Variable.withDateTime(startDate),
@@ -321,13 +307,47 @@ class AnalyticsDao {
 
     return results
         .map(
-          (row) => DailySatisfactionResult(
-            date: DateTime.parse(row.read<String>('day')),
-            avgSatisfaction: row.read<double?>('avg_sat') ?? 0,
-            count: row.read<int>('cnt'),
+          (row) => DailySoulRowSampleWithDay(
+            day: DateTime.parse(row.read<String>('day')),
+            amount: row.read<int>('amount'),
+            soulSatisfaction: row.read<int>('soul_satisfaction'),
           ),
         )
         .toList();
+  }
+
+  /// STATSUI-06 / D-15: largest expense across total ledger.
+  Future<LargestMonthlyExpense?> getLargestMonthlyExpense({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final results = await _db
+        .customSelect(
+          'SELECT id, amount, category_id, timestamp '
+          'FROM transactions '
+          'WHERE book_id = ? AND is_deleted = 0 AND type = ? '
+          'AND timestamp >= ? AND timestamp <= ? '
+          'ORDER BY amount DESC, timestamp DESC '
+          'LIMIT 1',
+          variables: [
+            Variable.withString(bookId),
+            Variable.withString('expense'),
+            Variable.withDateTime(startDate),
+            Variable.withDateTime(endDate),
+          ],
+        )
+        .get();
+
+    if (results.isEmpty) return null;
+
+    final row = results.first;
+    return LargestMonthlyExpense(
+      transactionId: row.read<String>('id'),
+      amount: row.read<int>('amount'),
+      categoryId: row.read<String>('category_id'),
+      timestamp: row.read<DateTime>('timestamp'),
+    );
   }
 
   /// HAPPY-04 / D-06: pure sat-sort argmax, amount DESC tiebreak, no JPY 500 floor.

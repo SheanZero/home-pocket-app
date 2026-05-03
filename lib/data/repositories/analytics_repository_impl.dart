@@ -144,12 +144,38 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   }
 
   @override
+  Future<List<DailySoulRowSampleWithDay>> getDailySoulRowsForPtvf({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    return _dao.getDailySoulRowsForPtvf(
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+    );
+  }
+
+  @override
   Future<BestJoyMomentRow?> getBestJoyMoment({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
   }) {
     return _dao.getBestJoyMoment(
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+    );
+  }
+
+  @override
+  Future<LargestMonthlyExpense?> getLargestMonthlyExpense({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    return _dao.getLargestMonthlyExpense(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,

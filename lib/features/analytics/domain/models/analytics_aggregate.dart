@@ -51,6 +51,19 @@ class SoulRowSample {
   final int soulSatisfaction;
 }
 
+/// STATSUI-01 row-wise daily PTVF input row.
+class DailySoulRowSampleWithDay {
+  const DailySoulRowSampleWithDay({
+    required this.day,
+    required this.amount,
+    required this.soulSatisfaction,
+  });
+
+  final DateTime day;
+  final int amount;
+  final int soulSatisfaction;
+}
+
 /// HAPPY-03 distribution bucket - score to count.
 class SatisfactionScoreBucket {
   const SatisfactionScoreBucket({required this.score, required this.count});
@@ -70,4 +83,19 @@ class SharedJoyCategoryAggregate {
   final String categoryId;
   final double avgSatisfaction;
   final int totalCount;
+}
+
+/// STATSUI-06 largest TOTAL-ledger monthly expense row.
+class LargestMonthlyExpense {
+  const LargestMonthlyExpense({
+    required this.transactionId,
+    required this.amount,
+    required this.categoryId,
+    required this.timestamp,
+  });
+
+  final String transactionId;
+  final int amount;
+  final String categoryId;
+  final DateTime timestamp;
 }

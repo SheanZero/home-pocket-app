@@ -50,6 +50,13 @@ abstract class AnalyticsRepository {
     required DateTime endDate,
   });
 
+  /// STATSUI-01 / D-05 — row-wise daily tuples for Dart-layer PTVF fold.
+  Future<List<DailySoulRowSampleWithDay>> getDailySoulRowsForPtvf({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  });
+
   /// HAPPY-04 / D-06 — argmax soul tx by sat DESC, amount DESC, timestamp DESC.
   Future<BestJoyMomentRow?> getBestJoyMoment({
     required String bookId,
@@ -60,6 +67,13 @@ abstract class AnalyticsRepository {
   /// FAMILY-02 / D-08 — category argmax across books with min-N=3 guard.
   Future<SharedJoyCategoryAggregate?> getSharedJoyCategoryInsight({
     required List<String> bookIds,
+    required DateTime startDate,
+    required DateTime endDate,
+  });
+
+  /// STATSUI-06 / D-15 — largest expense across TOTAL ledger.
+  Future<LargestMonthlyExpense?> getLargestMonthlyExpense({
+    required String bookId,
     required DateTime startDate,
     required DateTime endDate,
   });
