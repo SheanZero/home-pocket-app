@@ -4,26 +4,27 @@ import 'package:intl/intl.dart';
 
 import '../../../../generated/app_localizations.dart';
 
+import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
+import '../../../../features/accounting/presentation/providers/repository_providers.dart';
+import '../../../../features/analytics/domain/models/family_happiness.dart';
 import '../../../../features/analytics/domain/models/monthly_report.dart';
 import '../../../../features/analytics/presentation/providers/state_analytics.dart';
+import '../../../../features/analytics/presentation/providers/state_happiness.dart';
+import '../../../../features/analytics/presentation/screens/analytics_screen.dart';
 import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
 import '../../../../features/family_sync/presentation/screens/group_choice_screen.dart';
-import '../../../../application/accounting/category_localization_service.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../models/ledger_row_data.dart';
 import '../providers/state_shadow_books.dart';
 import '../providers/state_today_transactions.dart';
 import '../widgets/family_invite_banner.dart';
 import '../widgets/hero_header.dart';
+import '../widgets/home_hero_card.dart';
 import '../widgets/home_transaction_tile.dart';
-import '../widgets/ledger_comparison_section.dart';
-import '../widgets/month_overview_card.dart';
-import '../widgets/section_divider.dart';
-import '../widgets/soul_fullness_card.dart';
 import '../widgets/transaction_list_card.dart';
 
 /// Home tab content (Tab 0 inside MainShellScreen).
@@ -46,13 +47,6 @@ class HomeScreen extends ConsumerWidget {
     final year = now.year;
     final month = now.month;
 
-    final reportAsync = ref.watch(
-      monthlyReportProvider(bookId: bookId, year: year, month: month),
-    );
-    final shadowAsync = ref.watch(
-      shadowAggregateProvider(year: year, month: month),
-    );
-    final shadowBookList = ref.watch(shadowBooksProvider);
     final todayTxAsync = ref.watch(todayTransactionsProvider(bookId: bookId));
 
     return SingleChildScrollView(
@@ -80,66 +74,115 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
 
-              // ── Section: Monthly expenses ──
-              SectionDivider(label: l10n.homeMonthlyExpense),
-              const SizedBox(height: 16),
+              // ── Home hero card (replaces MonthOverviewCard +
+              //    LedgerComparisonSection + SoulFullnessCard — Phase 10). ──
+              Builder(
+                builder: (context) {
+                  final reportAsync = ref.watch(
+                    monthlyReportProvider(
+                      bookId: bookId,
+                      year: year,
+                      month: month,
+                    ),
+                  );
+                  final bookAsync = ref.watch(
+                    bookByIdProvider(bookId: bookId),
+                  );
 
-              // ── Month overview card ──
-              reportAsync.when(
-                data: (report) {
-                  final shadowData = shadowAsync.valueOrNull;
-                  return MonthOverviewCard(
-                    totalExpense:
-                        report.totalExpenses + (shadowData?.totalExpenses ?? 0),
-                    previousMonthTotal:
-                        (report.previousMonthComparison?.previousExpenses ??
-                            0) +
-                        (shadowData?.prevTotalExpenses ?? 0),
+                  // CLAUDE.md Pitfall #9 — fallback only when Book is missing.
+                  // This is the SOLE legitimate JPY currency-code literal in
+                  // the home feature; future grep audits verify no other site
+                  // re-introduces it.
+                  final currencyCode =
+                      bookAsync.valueOrNull?.currency ?? 'JPY';
+
+                  final happinessAsync = ref.watch(
+                    happinessReportProvider(
+                      bookId: bookId,
+                      year: year,
+                      month: month,
+                      currencyCode: currencyCode,
+                    ),
+                  );
+                  final bestJoyAsync = ref.watch(
+                    bestJoyMomentProvider(
+                      bookId: bookId,
+                      year: year,
+                      month: month,
+                    ),
+                  );
+
+                  // Group-mode-only providers — short-circuit to AsyncData(null/[])
+                  // when not in group mode so the .when() chain below resolves
+                  // immediately without spinning on never-watched providers.
+                  final familyAsync = isGroupMode
+                      ? ref
+                            .watch(
+                              familyHappinessProvider(year: year, month: month),
+                            )
+                            .whenData<FamilyHappiness?>((value) => value)
+                      : const AsyncData<FamilyHappiness?>(null);
+                  final shadowBooksAsync = isGroupMode
+                      ? ref
+                            .watch(shadowBooksProvider)
+                            .whenData<List<ShadowBookInfo>?>((value) => value)
+                      : const AsyncData<List<ShadowBookInfo>?>(null);
+                  final shadowAggregateAsync = isGroupMode
+                      ? ref
+                            .watch(
+                              shadowAggregateProvider(year: year, month: month),
+                            )
+                            .whenData<ShadowAggregate?>((value) => value)
+                      : const AsyncData<ShadowAggregate?>(null);
+
+                  Widget loading() => const SizedBox(
+                    height: 320,
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                  Widget error(Object e) => _ErrorText(message: '$e');
+
+                  return reportAsync.when(
+                    loading: loading,
+                    error: (e, _) => error(e),
+                    data: (report) => happinessAsync.when(
+                      loading: loading,
+                      error: (e, _) => error(e),
+                      data: (happiness) => bestJoyAsync.when(
+                        loading: loading,
+                        error: (e, _) => error(e),
+                        data: (bestJoy) => familyAsync.when(
+                          loading: loading,
+                          error: (e, _) => error(e),
+                          data: (family) => shadowBooksAsync.when(
+                            loading: loading,
+                            error: (e, _) => error(e),
+                            data: (shadowBooks) => shadowAggregateAsync.when(
+                              loading: loading,
+                              error: (e, _) => error(e),
+                              data: (shadowAggregate) => HomeHeroCard(
+                                report: report,
+                                happiness: happiness,
+                                bestJoy: bestJoy,
+                                family: family,
+                                shadowBooks: shadowBooks,
+                                shadowAggregate: shadowAggregate,
+                                currencyCode: currencyCode,
+                                locale: locale,
+                                isGroupMode: isGroupMode,
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) =>
+                                        AnalyticsScreen(bookId: bookId),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   );
                 },
-                loading: () => const SizedBox(
-                  height: 120,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                error: (error, _) => _ErrorText(message: '$error'),
-              ),
-              const SizedBox(height: 16),
-
-              // ── Section: Ledgers ──
-              SectionDivider(label: l10n.homeLedgersSection),
-              const SizedBox(height: 16),
-
-              // ── Ledger comparison rows ──
-              reportAsync.when(
-                data: (report) => LedgerComparisonSection(
-                  rows: _buildLedgerRows(
-                    context,
-                    report,
-                    isGroupMode,
-                    shadowBooks: shadowBookList.valueOrNull,
-                    shadowAgg: shadowAsync.valueOrNull,
-                  ),
-                ),
-                loading: () => const SizedBox(
-                  height: 80,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                error: (error, _) => _ErrorText(message: '$error'),
-              ),
-              const SizedBox(height: 16),
-
-              // ── Soul fullness card ──
-              reportAsync.when(
-                data: (report) => SoulFullnessCard(
-                  satisfactionPercent: _computeSatisfaction(todayTxAsync),
-                  happinessROI: _computeHappinessROI(report),
-                  recentSoulAmount: report.soulTotal,
-                ),
-                loading: () => const SizedBox(
-                  height: 120,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                error: (error, _) => _ErrorText(message: '$error'),
               ),
               const SizedBox(height: 16),
 
@@ -255,6 +298,8 @@ class HomeScreen extends ConsumerWidget {
 
   // ── Data wiring helpers ──
 
+  // TODO(plan-10-08b): delete this helper
+  // ignore: unused_element
   List<LedgerRowData> _buildLedgerRows(
     BuildContext context,
     MonthlyReport report,
@@ -342,6 +387,8 @@ class HomeScreen extends ConsumerWidget {
   }
 
   /// Computes average satisfaction from today's soul transactions.
+  // TODO(plan-10-08b): delete this helper
+  // ignore: unused_element
   int _computeSatisfaction(AsyncValue<List<Transaction>> txAsync) {
     final transactions = txAsync.valueOrNull;
     if (transactions == null || transactions.isEmpty) return 0;
@@ -359,6 +406,8 @@ class HomeScreen extends ConsumerWidget {
   }
 
   /// Computes happiness ROI: soul total / total expenses ratio.
+  // TODO(plan-10-08b): delete this helper
+  // ignore: unused_element
   double _computeHappinessROI(MonthlyReport report) {
     if (report.totalExpenses == 0) return 0;
     return double.parse(
