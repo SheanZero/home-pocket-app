@@ -184,14 +184,14 @@ Plans:
   4. Native-speaker register review evidence (annotated review doc or commit) committed for ja AND zh translations
   5. No 「家族悦己」 string appears in CN family-mode UI (grep confirms collision-free naming)
   6. 5 emoji ARB labels updated across ja/zh/en (`satisfactionBad`/`satisfactionSlightlyBad`/`satisfactionNormal`/`satisfactionGood`/`satisfactionVeryGood`); picker icon for emoji 1 updated; existing satisfaction picker tests still pass with updated labels (HAPPY-08 mapping pinned by test).
-**Plans:** 1/5 plans executed
+**Plans:** 2/5 plans executed
 
 Plans:
 **Wave 1**
 - [x] 12-01-PLAN.md — ARB value rewrites (10 keys × 3 locales) + flutter gen-l10n + register-audit evidence
 
 **Wave 2** *(blocked on Wave 1)*
-- [ ] 12-02-PLAN.md — Picker `_icons` sentiment-positive ladder swap + widget test label assertions
+- [x] 12-02-PLAN.md — Picker `_icons` sentiment-positive ladder swap + widget test label assertions
 
 **Wave 3** *(parallel — Plans 03 + 04 have disjoint files)*
 - [ ] 12-03-PLAN.md — REQUIREMENTS.md amend (add RENAME-07 spec entry; coverage 28→29)
@@ -231,4 +231,4 @@ Plans:
 | 9. Happiness Domain & Formula Layer       | v1.1 | 0/? | Not started | —          |
 | 10. HomePage SoulFullnessCard Redesign    | v1.1 | 13/13 | Complete    | 2026-05-03 |
 | 11. AnalyticsScreen Unified Dashboard (Variant δ) | v1.1 | 8/8 | Complete | 2026-05-04 |
-| 12. UI Copy Rename Pass (ARB values)      | v1.1 | 1/5 | In Progress|  |
+| 12. UI Copy Rename Pass (ARB values)      | v1.1 | 2/5 | In Progress|  |
