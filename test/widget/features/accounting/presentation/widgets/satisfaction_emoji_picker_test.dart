@@ -16,8 +16,8 @@ void main() {
             value: value,
             onChanged: onChanged,
             title: '満足度',
-            levelLabels: const ['不満', 'やや不満', '普通', '良い', 'とても良い'],
-            bottomLabels: const ['不満', '普通', '最高！'],
+            levelLabels: const ['無難', '快適', '順調', '満足', '至福'],
+            bottomLabels: const ['無難', '順調', '至福！'],
           ),
         ),
       );
@@ -34,9 +34,9 @@ void main() {
     testWidgets('renders satisfaction labels', (tester) async {
       await tester.pumpWidget(buildTestWidget(value: 8, onChanged: (_) {}));
 
-      expect(find.text('不満'), findsOneWidget);
-      expect(find.text('普通'), findsOneWidget);
-      expect(find.text('最高！'), findsOneWidget);
+      expect(find.text('無難'), findsOneWidget);
+      expect(find.text('順調'), findsOneWidget);
+      expect(find.text('至福！'), findsOneWidget);
     });
 
     testWidgets('tapping a face calls onChanged with mapped value', (
@@ -73,7 +73,7 @@ void main() {
       await tester.pumpWidget(buildTestWidget(value: 7, onChanged: (_) {}));
 
       expect(find.text('満足度'), findsOneWidget);
-      expect(find.text('良い'), findsOneWidget);
+      expect(find.text('満足'), findsOneWidget);
     });
   });
 }

@@ -15,10 +15,10 @@ class SatisfactionEmojiPicker extends StatelessWidget {
 
   static const _faceValues = [2, 4, 6, 8, 10];
   static const _icons = [
-    Icons.sentiment_very_dissatisfied_outlined,
-    Icons.sentiment_dissatisfied_outlined,
     Icons.sentiment_neutral_outlined,
+    Icons.sentiment_satisfied_outlined,
     Icons.sentiment_satisfied_alt_outlined,
+    Icons.sentiment_very_satisfied_outlined,
     Icons.favorite_border,
   ];
 
