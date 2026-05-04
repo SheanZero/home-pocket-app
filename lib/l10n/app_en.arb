@@ -91,11 +91,11 @@
   "@categoryOther": {
     "description": "Other category"
   },
-  "survivalLedger": "Survival Ledger",
+  "survivalLedger": "Daily Ledger",
   "@survivalLedger": {
     "description": "Survival ledger label"
   },
-  "soulLedger": "Soul Ledger",
+  "soulLedger": "Joy Ledger",
   "@soulLedger": {
     "description": "Soul ledger label"
   },
@@ -550,7 +550,7 @@
       }
     }
   },
-  "homeSoulFullness": "Soul Fullness",
+  "homeSoulFullness": "Joy Index",
   "@homeSoulFullness": {
     "description": "Soul fullness section title"
   },
@@ -558,7 +558,7 @@
   "@homeSoulPercentLabel": {
     "description": "Soul spending percentage metric label"
   },
-  "homeHappinessROI": "Happiness ROI",
+  "homeHappinessROI": "Joy per ¥",
   "@homeHappinessROI": {
     "description": "Happiness ROI metric label"
   },
@@ -867,27 +867,27 @@
   "@satisfactionLevel": {
     "description": "Header label for the emoji satisfaction picker"
   },
-  "satisfactionBad": "Bad",
+  "satisfactionBad": "Neutral",
   "@satisfactionBad": {
     "description": "Lowest satisfaction label"
   },
-  "satisfactionSlightlyBad": "Slightly bad",
+  "satisfactionSlightlyBad": "OK",
   "@satisfactionSlightlyBad": {
     "description": "Second lowest satisfaction label"
   },
-  "satisfactionNormal": "Normal",
+  "satisfactionNormal": "Good",
   "@satisfactionNormal": {
     "description": "Neutral satisfaction label"
   },
-  "satisfactionGood": "Good",
+  "satisfactionGood": "Great",
   "@satisfactionGood": {
     "description": "Positive satisfaction label"
   },
-  "satisfactionVeryGood": "Very good",
+  "satisfactionVeryGood": "Amazing",
   "@satisfactionVeryGood": {
     "description": "High satisfaction label"
   },
-  "satisfactionExcellent": "Excellent!",
+  "satisfactionExcellent": "Amazing!",
   "@satisfactionExcellent": {
     "description": "Highest satisfaction label"
   },

@@ -91,11 +91,11 @@
   "@categoryOther": {
     "description": "Other category"
   },
-  "survivalLedger": "生存账本",
+  "survivalLedger": "日常账本",
   "@survivalLedger": {
     "description": "Survival ledger label"
   },
-  "soulLedger": "灵魂账本",
+  "soulLedger": "悦己账本",
   "@soulLedger": {
     "description": "Soul ledger label"
   },
@@ -550,7 +550,7 @@
       }
     }
   },
-  "homeSoulFullness": "灵魂充盈度",
+  "homeSoulFullness": "悦己充盈",
   "@homeSoulFullness": {
     "description": "Soul fullness section title"
   },
@@ -558,7 +558,7 @@
   "@homeSoulPercentLabel": {
     "description": "Soul spending percentage metric label"
   },
-  "homeHappinessROI": "快乐 ROI",
+  "homeHappinessROI": "幸福密度",
   "@homeHappinessROI": {
     "description": "Happiness ROI metric label"
   },
@@ -867,27 +867,27 @@
   "@satisfactionLevel": {
     "description": "Header label for the emoji satisfaction picker"
   },
-  "satisfactionBad": "不满",
+  "satisfactionBad": "平和",
   "@satisfactionBad": {
     "description": "Lowest satisfaction label"
   },
-  "satisfactionSlightlyBad": "稍有不满",
+  "satisfactionSlightlyBad": "OK",
   "@satisfactionSlightlyBad": {
     "description": "Second lowest satisfaction label"
   },
-  "satisfactionNormal": "一般",
+  "satisfactionNormal": "不错",
   "@satisfactionNormal": {
     "description": "Neutral satisfaction label"
   },
-  "satisfactionGood": "良好",
+  "satisfactionGood": "满足",
   "@satisfactionGood": {
     "description": "Positive satisfaction label"
   },
-  "satisfactionVeryGood": "非常好",
+  "satisfactionVeryGood": "最爱",
   "@satisfactionVeryGood": {
     "description": "High satisfaction label"
   },
-  "satisfactionExcellent": "最好！",
+  "satisfactionExcellent": "最爱！",
   "@satisfactionExcellent": {
     "description": "Highest satisfaction label"
   },

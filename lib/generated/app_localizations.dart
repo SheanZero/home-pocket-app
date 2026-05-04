@@ -240,13 +240,13 @@ abstract class S {
   /// Survival ledger label
   ///
   /// In en, this message translates to:
-  /// **'Survival Ledger'**
+  /// **'Daily Ledger'**
   String get survivalLedger;
 
   /// Soul ledger label
   ///
   /// In en, this message translates to:
-  /// **'Soul Ledger'**
+  /// **'Joy Ledger'**
   String get soulLedger;
 
   /// Short survival label
@@ -978,7 +978,7 @@ abstract class S {
   /// Soul fullness section title
   ///
   /// In en, this message translates to:
-  /// **'Soul Fullness'**
+  /// **'Joy Index'**
   String get homeSoulFullness;
 
   /// Soul spending percentage metric label
@@ -990,7 +990,7 @@ abstract class S {
   /// Happiness ROI metric label
   ///
   /// In en, this message translates to:
-  /// **'Happiness ROI'**
+  /// **'Joy per ¥'**
   String get homeHappinessROI;
 
   /// Family invite banner title
@@ -1356,37 +1356,37 @@ abstract class S {
   /// Lowest satisfaction label
   ///
   /// In en, this message translates to:
-  /// **'Bad'**
+  /// **'Neutral'**
   String get satisfactionBad;
 
   /// Second lowest satisfaction label
   ///
   /// In en, this message translates to:
-  /// **'Slightly bad'**
+  /// **'OK'**
   String get satisfactionSlightlyBad;
 
   /// Neutral satisfaction label
   ///
   /// In en, this message translates to:
-  /// **'Normal'**
+  /// **'Good'**
   String get satisfactionNormal;
 
   /// Positive satisfaction label
   ///
   /// In en, this message translates to:
-  /// **'Good'**
+  /// **'Great'**
   String get satisfactionGood;
 
   /// High satisfaction label
   ///
   /// In en, this message translates to:
-  /// **'Very good'**
+  /// **'Amazing'**
   String get satisfactionVeryGood;
 
   /// Highest satisfaction label
   ///
   /// In en, this message translates to:
-  /// **'Excellent!'**
+  /// **'Amazing!'**
   String get satisfactionExcellent;
 
   /// Action chip label to add a subcategory

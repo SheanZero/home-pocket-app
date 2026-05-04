@@ -78,10 +78,10 @@ class SEn extends S {
   String get categoryOther => 'Other';
 
   @override
-  String get survivalLedger => 'Survival Ledger';
+  String get survivalLedger => 'Daily Ledger';
 
   @override
-  String get soulLedger => 'Soul Ledger';
+  String get soulLedger => 'Joy Ledger';
 
   @override
   String get survival => 'Survival';
@@ -461,13 +461,13 @@ class SEn extends S {
   }
 
   @override
-  String get homeSoulFullness => 'Soul Fullness';
+  String get homeSoulFullness => 'Joy Index';
 
   @override
   String get homeSoulPercentLabel => 'Soul spending ratio';
 
   @override
-  String get homeHappinessROI => 'Happiness ROI';
+  String get homeHappinessROI => 'Joy per ¥';
 
   @override
   String get homeFamilyInviteTitle => 'Invite Family';
@@ -673,22 +673,22 @@ class SEn extends S {
   String get satisfactionLevel => 'Satisfaction';
 
   @override
-  String get satisfactionBad => 'Bad';
+  String get satisfactionBad => 'Neutral';
 
   @override
-  String get satisfactionSlightlyBad => 'Slightly bad';
+  String get satisfactionSlightlyBad => 'OK';
 
   @override
-  String get satisfactionNormal => 'Normal';
+  String get satisfactionNormal => 'Good';
 
   @override
-  String get satisfactionGood => 'Good';
+  String get satisfactionGood => 'Great';
 
   @override
-  String get satisfactionVeryGood => 'Very good';
+  String get satisfactionVeryGood => 'Amazing';
 
   @override
-  String get satisfactionExcellent => 'Excellent!';
+  String get satisfactionExcellent => 'Amazing!';
 
   @override
   String get addSubcategory => 'Add';

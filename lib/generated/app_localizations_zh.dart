@@ -78,10 +78,10 @@ class SZh extends S {
   String get categoryOther => '其他';
 
   @override
-  String get survivalLedger => '生存账本';
+  String get survivalLedger => '日常账本';
 
   @override
-  String get soulLedger => '灵魂账本';
+  String get soulLedger => '悦己账本';
 
   @override
   String get survival => '生存';
@@ -459,13 +459,13 @@ class SZh extends S {
   }
 
   @override
-  String get homeSoulFullness => '灵魂充盈度';
+  String get homeSoulFullness => '悦己充盈';
 
   @override
   String get homeSoulPercentLabel => '本月灵魂支出占比';
 
   @override
-  String get homeHappinessROI => '快乐 ROI';
+  String get homeHappinessROI => '幸福密度';
 
   @override
   String get homeFamilyInviteTitle => '邀请家人';
@@ -670,22 +670,22 @@ class SZh extends S {
   String get satisfactionLevel => '满足度';
 
   @override
-  String get satisfactionBad => '不满';
+  String get satisfactionBad => '平和';
 
   @override
-  String get satisfactionSlightlyBad => '稍有不满';
+  String get satisfactionSlightlyBad => 'OK';
 
   @override
-  String get satisfactionNormal => '一般';
+  String get satisfactionNormal => '不错';
 
   @override
-  String get satisfactionGood => '良好';
+  String get satisfactionGood => '满足';
 
   @override
-  String get satisfactionVeryGood => '非常好';
+  String get satisfactionVeryGood => '最爱';
 
   @override
-  String get satisfactionExcellent => '最好！';
+  String get satisfactionExcellent => '最爱！';
 
   @override
   String get addSubcategory => '添加';

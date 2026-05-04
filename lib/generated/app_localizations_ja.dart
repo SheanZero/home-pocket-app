@@ -78,10 +78,10 @@ class SJa extends S {
   String get categoryOther => 'その他';
 
   @override
-  String get survivalLedger => '生存帳簿';
+  String get survivalLedger => '日々の帳';
 
   @override
-  String get soulLedger => '魂帳簿';
+  String get soulLedger => 'ときめき帳';
 
   @override
   String get survival => '生存';
@@ -459,13 +459,13 @@ class SJa extends S {
   }
 
   @override
-  String get homeSoulFullness => '魂の充実度';
+  String get homeSoulFullness => 'ときめき度';
 
   @override
   String get homeSoulPercentLabel => '今月の魂支出の割合';
 
   @override
-  String get homeHappinessROI => '幸せROI';
+  String get homeHappinessROI => 'ハピネス密度';
 
   @override
   String get homeFamilyInviteTitle => '家族を招待する';
@@ -669,22 +669,22 @@ class SJa extends S {
   String get satisfactionLevel => '満足度';
 
   @override
-  String get satisfactionBad => '不満';
+  String get satisfactionBad => '無難';
 
   @override
-  String get satisfactionSlightlyBad => 'やや不満';
+  String get satisfactionSlightlyBad => '快適';
 
   @override
-  String get satisfactionNormal => '普通';
+  String get satisfactionNormal => '順調';
 
   @override
-  String get satisfactionGood => '良い';
+  String get satisfactionGood => '満足';
 
   @override
-  String get satisfactionVeryGood => 'とても良い';
+  String get satisfactionVeryGood => '至福';
 
   @override
-  String get satisfactionExcellent => '最高！';
+  String get satisfactionExcellent => '至福！';
 
   @override
   String get addSubcategory => '追加';
