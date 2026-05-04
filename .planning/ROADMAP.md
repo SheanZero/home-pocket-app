@@ -30,7 +30,7 @@ Phase numbering continues from Phase 9 (no reset).
 - [x] **Phase 9: Happiness Domain & Formula Layer** — Lock formulas, contracts, soul-only filter, Top Joy ordering, sealed `MetricResult`, family aggregate-only return type, no-gamification ADR (linchpin) — completed 2026-05-02
 - [x] **Phase 10: HomePage SoulFullnessCard Redesign (HomeHeroCard integrated rebuild)** — Replace 3 widgets with 1 integrated `HomeHeroCard`; 3 concentric rings encode Phase 9 contracts (single → `HappinessReport`, group → `FamilyHappiness`); delete `_computeHappinessROI` / `_computeSatisfaction` / `_buildLedgerRows` from `home_screen.dart` (completed 2026-05-03)
 - [x] **Phase 11: AnalyticsScreen Unified Dashboard (Variant δ)** — Rebuild AnalyticsScreen as a 2-region unified dashboard (総帳本 + 悦己帳本) with KPI mini-hero (総支出 + 悦己平均) + 3 themed groups (時間 / 分布 / 物語), 総-first card ordering. Wire daily Joy/¥ and largest-expense analytics paths. 生存帳本 has no separate stats region. Footprint-audit doc first. — completed 2026-05-04
-- [ ] **Phase 12: UI Copy Rename Pass (ARB values, ja/zh/en)** — Values-only rename of `soulLedger` / `survivalLedger` / `homeHappinessROI` / `homeSoulFullness`; lexical-hierarchy ADR; native-speaker register review
+- [x] **Phase 12: UI Copy Rename Pass (ARB values, ja/zh/en)** — Values-only rename of `soulLedger` / `survivalLedger` / `homeHappinessROI` / `homeSoulFullness`; lexical-hierarchy ADR; native-speaker register review (completed 2026-05-04)
 
 ## Phase Details
 
@@ -184,7 +184,7 @@ Plans:
   4. Native-speaker register review evidence (annotated review doc or commit) committed for ja AND zh translations
   5. No 「家族悦己」 string appears in CN family-mode UI (grep confirms collision-free naming)
   6. 5 emoji ARB labels updated across ja/zh/en (`satisfactionBad`/`satisfactionSlightlyBad`/`satisfactionNormal`/`satisfactionGood`/`satisfactionVeryGood`); picker icon for emoji 1 updated; existing satisfaction picker tests still pass with updated labels (HAPPY-08 mapping pinned by test).
-**Plans:** 4/5 plans executed
+**Plans:** 5/5 plans complete
 
 Plans:
 **Wave 1**
@@ -198,7 +198,7 @@ Plans:
 - [x] 12-04-PLAN.md — ADR-015 Lexical Hierarchy v1.1 Draft + ADR-000_INDEX.md update
 
 **Wave 4** *(blocked on Plans 01-04)*
-- [ ] 12-05-PLAN.md — Phase close: integration verification + ADR-015 status flip 草稿→已接受 + worklog
+- [x] 12-05-PLAN.md — Phase close: integration verification + ADR-015 status flip 草稿→已接受 + worklog
 
 **UI hint**: yes
 
@@ -231,4 +231,4 @@ Plans:
 | 9. Happiness Domain & Formula Layer       | v1.1 | 0/? | Not started | —          |
 | 10. HomePage SoulFullnessCard Redesign    | v1.1 | 13/13 | Complete    | 2026-05-03 |
 | 11. AnalyticsScreen Unified Dashboard (Variant δ) | v1.1 | 8/8 | Complete | 2026-05-04 |
-| 12. UI Copy Rename Pass (ARB values)      | v1.1 | 4/5 | In Progress|  |
+| 12. UI Copy Rename Pass (ARB values)      | v1.1 | 5/5 | Complete   | 2026-05-04 |
