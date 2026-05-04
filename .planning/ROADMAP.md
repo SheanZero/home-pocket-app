@@ -231,4 +231,4 @@ Plans:
 | 9. Happiness Domain & Formula Layer       | v1.1 | 0/? | Not started | —          |
 | 10. HomePage SoulFullnessCard Redesign    | v1.1 | 13/13 | Complete    | 2026-05-03 |
 | 11. AnalyticsScreen Unified Dashboard (Variant δ) | v1.1 | 8/8 | Complete | 2026-05-04 |
-| 12. UI Copy Rename Pass (ARB values)      | v1.1 | 5/5 | Complete   | 2026-05-04 |
+| 12. UI Copy Rename Pass (ARB values)      | v1.1 | 5/5 | Complete    | 2026-05-04 |

@@ -69,12 +69,12 @@ Rebuild `AnalyticsScreen` as a unified 2-region dashboard (総帳本 + 悦己帳
 
 ARB-only changes (values, NOT keys). 三语 ja/zh/en. Native-speaker register review.
 
-- [ ] **RENAME-01**: `soulLedger` ARB value renamed across ja/zh/en — JP: ときめき帳; ZH: 悦己账本; EN: Joy Ledger. Key unchanged.
-- [ ] **RENAME-02**: `survivalLedger` ARB value renamed across ja/zh/en — JP: 日々の帳; ZH: 日常账本; EN: Daily Ledger. Key unchanged.
-- [ ] **RENAME-03**: `homeHappinessROI` ARB value renamed — JP: ハピネス密度; ZH: 幸福密度; EN: Joy per ¥. Key unchanged (semantically misleading post-rename, but key-rename forces wider edits and triggers ARB-parity CI churn; deferred to v1.2+).
-- [ ] **RENAME-04**: `homeSoulFullness` ARB value renamed — JP: ときめき度; ZH: 悦己充盈; EN: Joy Index. Key unchanged.
-- [ ] **RENAME-05**: ADR **`ADR-XXX_Lexical_Hierarchy_v1_1.md`** captures the translation register hierarchy: 幸福 / happiness reserved for documentation; ときめき / 悦己 / Joy used in-product; CN family-mode uses 「家族的小确幸」 NOT 「家族悦己」 (collision with personal account name)
-- [ ] **RENAME-06**: Native-speaker register review for ja/zh translations completed before merge — register matters more than lexical accuracy here
+- [x] **RENAME-01**: `soulLedger` ARB value renamed across ja/zh/en — JP: ときめき帳; ZH: 悦己账本; EN: Joy Ledger. Key unchanged.
+- [x] **RENAME-02**: `survivalLedger` ARB value renamed across ja/zh/en — JP: 日々の帳; ZH: 日常账本; EN: Daily Ledger. Key unchanged.
+- [x] **RENAME-03**: `homeHappinessROI` ARB value renamed — JP: ハピネス密度; ZH: 幸福密度; EN: Joy per ¥. Key unchanged (semantically misleading post-rename, but key-rename forces wider edits and triggers ARB-parity CI churn; deferred to v1.2+).
+- [x] **RENAME-04**: `homeSoulFullness` ARB value renamed — JP: ときめき度; ZH: 悦己充盈; EN: Joy Index. Key unchanged.
+- [x] **RENAME-05**: ADR **`ADR-XXX_Lexical_Hierarchy_v1_1.md`** captures the translation register hierarchy: 幸福 / happiness reserved for documentation; ときめき / 悦己 / Joy used in-product; CN family-mode uses 「家族的小确幸」 NOT 「家族悦己」 (collision with personal account name)
+- [x] **RENAME-06**: Native-speaker register review for ja/zh translations completed before merge — register matters more than lexical accuracy here
 - [ ] **RENAME-07**: `satisfactionExcellent` ARB value rewritten to Amazing! / 至福！/ 最爱！ across en/ja/zh — synchronized with `levelLabels[4]` (Amazing / 至福 / 最爱) plus `!` strengthening to keep the picker's bottom-hint scale-anchor in register with the level-achieved label. Key unchanged. `transaction_confirm_screen.dart` consumer (`bottomLabels: [satisfactionBad, satisfactionNormal, satisfactionExcellent]`) UNCHANGED — the rewrite stays inside the values-only Phase 12 boundary. Phase 12 D-05 spec amendment.
 
 ## v2 Requirements (Deferred — tracked but not in v1.1 roadmap)
@@ -144,12 +144,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STATSUI-05 | Phase 11 | Complete |
 | STATSUI-06 | Phase 11 | Complete |
 | STATSUI-07 | Phase 11 | Complete |
-| RENAME-01 | Phase 12 | Pending |
-| RENAME-02 | Phase 12 | Pending |
-| RENAME-03 | Phase 12 | Pending |
-| RENAME-04 | Phase 12 | Pending |
-| RENAME-05 | Phase 12 | Pending |
-| RENAME-06 | Phase 12 | Pending |
+| RENAME-01 | Phase 12 | Complete |
+| RENAME-02 | Phase 12 | Complete |
+| RENAME-03 | Phase 12 | Complete |
+| RENAME-04 | Phase 12 | Complete |
+| RENAME-05 | Phase 12 | Complete |
+| RENAME-06 | Phase 12 | Complete |
 | RENAME-07 | Phase 12 | Pending |
 
 **Coverage:**
