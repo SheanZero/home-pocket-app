@@ -8,7 +8,7 @@ The v1.0 initiative was a pure-refactor cleanup, not a feature release. It deliv
 
 The codebase is now ready for the next wave of feature modules (MOD-005 OCR, MOD-007 Analytics, MOD-013 Gamification) without the structural debt that prompted the cleanup.
 
-**v1.1 progress:** Phase 09 Happiness Domain & Formula Layer completed on 2026-05-02. The happiness metric formulas, domain contracts, soul-only analytics filter, default-2 satisfaction semantics, family aggregate-only contract, no-gamification ADRs, and HAPPY-08 picker mapping test contract are validated. Phase 10 is next: HomePage `SoulFullnessCard` redesign.
+**v1.1 progress:** Complete as of 2026-05-04. Phases 09-12 delivered the happiness metric domain, HomePage `SoulFullnessCard` redesign, AnalyticsScreen unified dashboard, and final trilingual UI copy rename pass. RENAME-01..07, HAPPY-01..09, FAMILY-01..03, HOMEUI-01..04, and STATSUI-01..07 are validated; remaining v2 ideas stay tracked in `.planning/REQUIREMENTS.md`.
 
 ## Current Milestone: v1.1 幸福度指标与展示 (Happiness Metric & Display)
 
@@ -100,15 +100,18 @@ A family accounting app users can trust with sensitive financial data — local-
 - ✓ 4 permanent CI guardrails (`import_guard`, `riverpod_lint`/`custom_lint`, `coverde` per-file ≥70%, `sqlite3_flutter_libs` rejection) + global `very_good_coverage@v2` ≥70% + `build_runner` clean-diff — v1.0
 - ✓ Mocktail big-bang migration (13 fixtures); mockito removed — v1.0 (HIGH-07)
 - ✓ v1.1 happiness metric domain contracts validated in Phase 09: personal metric formulas, family aggregate-only return type, sealed `MetricResult`, soul-only filter, v16 default-2 satisfaction semantics, no-gamification ADRs, and full HAPPY-08 picker mapping test coverage.
+- ✓ v1.1 HomePage happiness display validated in Phase 10: personal metric tiles, Best Joy story card, group-mode family insight, empty states, info tooltips, and golden coverage.
+- ✓ v1.1 AnalyticsScreen unified dashboard validated in Phase 11: KPI mini-hero, Joy-per-¥ trend, satisfaction histogram, story cards, month picker, and aggregate-only family insight.
+- ✓ v1.1 UI copy rename pass validated in Phase 12: ARB value rewrites for ja/zh/en, picker sentiment-positive icon ladder, RENAME-07 requirement, accepted ADR-015 lexical hierarchy, and refreshed goldens.
 
 ### Active
 
 <!-- v1.1 milestone: Happiness Metric & Display. Detailed REQ-IDs in REQUIREMENTS.md. -->
 
 - [x] **Happiness metric domain** — 4 personal indicators (Avg Satisfaction / Joy per ¥ / Highlights count / Best Joy per ¥) + 2 family-cooperative indicators (Family Highlights Sum / Shared Joy Insight); month-to-date window; soul ledger only. Validated in Phase 09.
-- [ ] **HomePage SoulFullnessCard redesign** — replace `Happiness ROI` (misleading: was budget-share, not joy density); render new metric tiles + a story-mode "Best Joy per ¥" card; family metrics conditionally shown in group mode
-- [ ] **Statistics surface (Analytics screen)** — wire dormant `getSoulSatisfactionOverview` / `getSatisfactionDistribution` / `getDailySatisfactionTrend` DAO methods through use case → provider → widgets; add Joy-per-¥ trend line + satisfaction histogram
-- [ ] **UI rename pass (ARB-only, ja/zh/en)** — `soulLedger` → 悦己/ときめき/Joy; `survivalLedger` → 日常/日々/Daily; `homeHappinessROI` → 幸福密度/ハピネス密度/Joy per ¥; `homeSoulFullness` → 悦己充盈/ときめき度/Joy Index. No enum, no theme color changes.
+- [x] **HomePage SoulFullnessCard redesign** — replace `Happiness ROI` (misleading: was budget-share, not joy density); render new metric tiles + a story-mode "Best Joy per ¥" card; family metrics conditionally shown in group mode. Validated in Phase 10.
+- [x] **Statistics surface (Analytics screen)** — wire happiness analytics through use cases/providers/widgets; add Joy-per-¥ trend line, satisfaction histogram, story cards, month picker, and aggregate-only family insight. Validated in Phase 11.
+- [x] **UI rename pass (ARB-only, ja/zh/en)** — `soulLedger` → 悦己/ときめき/Joy; `survivalLedger` → 日常/日々/Daily; `homeHappinessROI` → 幸福密度/ハピネス密度/Joy per ¥; `homeSoulFullness` → 悦己充盈/ときめき度/Joy Index; plus RENAME-07 `satisfactionExcellent`. No enum, no theme color changes. Validated in Phase 12.
 
 ### Out of Scope
 
@@ -189,4 +192,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-02 after Phase 09 completion (Happiness Domain & Formula Layer) — see `.planning/REQUIREMENTS.md` and `.planning/ROADMAP.md` for traceability*
+*Last updated: 2026-05-04 after Phase 12 completion (UI Copy Rename Pass) — v1.1 Happiness Metric & Display milestone complete; see `.planning/REQUIREMENTS.md` and `.planning/ROADMAP.md` for traceability*
