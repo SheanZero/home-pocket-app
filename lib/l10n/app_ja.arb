@@ -1638,6 +1638,24 @@
       }
     }
   },
+  "analyticsKpiJoySemantics": "悦己 {label} {value} n={rated}/{total}",
+  "@analyticsKpiJoySemantics": {
+    "description": "Screen reader label for the joy headline KPI tile",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "rated": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "analyticsKpiJoyEmptyCaption": "データを集計中...",
   "analyticsGroupHeaderTime": "━ 時間 / Time ━",
   "analyticsGroupHeaderDistribution": "━ 分布 / Distribution ━",

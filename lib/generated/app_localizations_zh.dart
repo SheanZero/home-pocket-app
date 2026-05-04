@@ -1283,6 +1283,16 @@ class SZh extends S {
   }
 
   @override
+  String analyticsKpiJoySemantics(
+    String label,
+    String value,
+    int rated,
+    int total,
+  ) {
+    return '悦己 $label $value n=$rated/$total';
+  }
+
+  @override
   String get analyticsKpiJoyEmptyCaption => '数据收集中...';
 
   @override

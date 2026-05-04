@@ -43,8 +43,12 @@ class JoyHeadlineKpiTile extends StatelessWidget {
     };
 
     return Semantics(
-      label:
-          '悦己 ${l10n.analyticsKpiJoyLabel} $primaryText n=$ratedCount/${report.totalSoulTx}',
+      label: l10n.analyticsKpiJoySemantics(
+        l10n.analyticsKpiJoyLabel,
+        primaryText,
+        ratedCount,
+        report.totalSoulTx,
+      ),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(

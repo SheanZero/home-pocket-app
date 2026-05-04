@@ -1638,6 +1638,24 @@
       }
     }
   },
+  "analyticsKpiJoySemantics": "Joy {label} {value} n={rated}/{total}",
+  "@analyticsKpiJoySemantics": {
+    "description": "Screen reader label for the joy headline KPI tile",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "rated": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "analyticsKpiJoyEmptyCaption": "Gathering data...",
   "analyticsGroupHeaderTime": "━ Time ━",
   "analyticsGroupHeaderDistribution": "━ Distribution ━",

@@ -1297,6 +1297,16 @@ class SEn extends S {
   }
 
   @override
+  String analyticsKpiJoySemantics(
+    String label,
+    String value,
+    int rated,
+    int total,
+  ) {
+    return 'Joy $label $value n=$rated/$total';
+  }
+
+  @override
   String get analyticsKpiJoyEmptyCaption => 'Gathering data...';
 
   @override

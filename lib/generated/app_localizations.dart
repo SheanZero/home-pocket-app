@@ -2475,6 +2475,17 @@ abstract class S {
   /// **'Median {median} · n={k}/{N}'**
   String analyticsKpiJoySubMedianCoverage(String median, int k, int N);
 
+  /// Screen reader label for the joy headline KPI tile
+  ///
+  /// In en, this message translates to:
+  /// **'Joy {label} {value} n={rated}/{total}'**
+  String analyticsKpiJoySemantics(
+    String label,
+    String value,
+    int rated,
+    int total,
+  );
+
   /// No description provided for @analyticsKpiJoyEmptyCaption.
   ///
   /// In en, this message translates to:
