@@ -75,6 +75,7 @@ ARB-only changes (values, NOT keys). 三语 ja/zh/en. Native-speaker register re
 - [ ] **RENAME-04**: `homeSoulFullness` ARB value renamed — JP: ときめき度; ZH: 悦己充盈; EN: Joy Index. Key unchanged.
 - [ ] **RENAME-05**: ADR **`ADR-XXX_Lexical_Hierarchy_v1_1.md`** captures the translation register hierarchy: 幸福 / happiness reserved for documentation; ときめき / 悦己 / Joy used in-product; CN family-mode uses 「家族的小确幸」 NOT 「家族悦己」 (collision with personal account name)
 - [ ] **RENAME-06**: Native-speaker register review for ja/zh translations completed before merge — register matters more than lexical accuracy here
+- [ ] **RENAME-07**: `satisfactionExcellent` ARB value rewritten to Amazing! / 至福！/ 最爱！ across en/ja/zh — synchronized with `levelLabels[4]` (Amazing / 至福 / 最爱) plus `!` strengthening to keep the picker's bottom-hint scale-anchor in register with the level-achieved label. Key unchanged. `transaction_confirm_screen.dart` consumer (`bottomLabels: [satisfactionBad, satisfactionNormal, satisfactionExcellent]`) UNCHANGED — the rewrite stays inside the values-only Phase 12 boundary. Phase 12 D-05 spec amendment.
 
 ## v2 Requirements (Deferred — tracked but not in v1.1 roadmap)
 
@@ -149,10 +150,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RENAME-04 | Phase 12 | Pending |
 | RENAME-05 | Phase 12 | Pending |
 | RENAME-06 | Phase 12 | Pending |
+| RENAME-07 | Phase 12 | Pending |
 
 **Coverage:**
-- v1.1 requirements: 28 total (was 25; +3 from Phase 10 D-06 scope expansion)
-- Mapped to phases: 28
+- v1.1 requirements: 29 total (was 25; +3 from Phase 10 D-06 scope expansion; +1 from Phase 12 D-05 RENAME-07 spec amendment)
+- Mapped to phases: 29
 - Unmapped: 0 ✓
 
 ---
