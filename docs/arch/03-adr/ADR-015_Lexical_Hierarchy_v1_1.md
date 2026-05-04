@@ -1,6 +1,6 @@
 # ADR-015: 词汇分层 v1.1 (Lexical Hierarchy v1.1)
 
-**状态:** 📝 草稿
+**状态:** ✅ 已接受
 **日期:** 2026-05-04
 **决策者:** zxsheanjp@gmail.com (project owner) + Claude (planning agent)
 **影响范围:** v1.1 milestone UI copy register (ja/zh/en); product-vs-documentation lexical separation; CN family-mode naming; JP picker-label wellbeing register
@@ -181,6 +181,7 @@ Future revisions to this ADR (e.g., v1.2 register polish, new family-mode lexica
 | 日期 | 版本 | 变更内容 | 作者 |
 |------|------|---------|------|
 | 2026-05-04 | 1.0 | 初版起草 (Draft) | Claude planning agent |
+| 2026-05-04 | 1.1 | 状态翻转: 📝 草稿 → ✅ 已接受 (Phase 12 close — RENAME-01..07 verified, INDEX synced) | Claude planning agent |
 
 ---
 

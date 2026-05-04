@@ -453,7 +453,7 @@ HAPPY-02 Joy/¥ 密度采用 Kahneman-Tversky PTVF α=0.88，币种相关 base�
 
 ### [ADR-015: 词汇分层 v1.1](./ADR-015_Lexical_Hierarchy_v1_1.md)
 
-**状态:** 📝 草稿
+**状态:** ✅ 已接受
 **日期:** 2026-05-04
 **影响范围:** v1.1 milestone UI copy register (ja/zh/en); product-vs-documentation lexical separation; CN family-mode naming; JP picker-label wellbeing register
 
@@ -508,11 +508,11 @@ ADR-009 (哈希链验证优化) ─→ ADR-003 (安全)
 
 | 状态 | 数量 |
 |------|------|
-| ✅ 已接受 | 10 |
+| ✅ 已接受 | 11 |
 | ✅ 已实施 | 1 |
 | 🔄 讨论中 | 0 |
 | ❌ 已拒绝 | 0 |
-| 📝 草稿 | 4 |
+| 📝 草稿 | 3 |
 
 **总计:** 15个ADR
 
