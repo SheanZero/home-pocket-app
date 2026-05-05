@@ -1,209 +1,253 @@
 # AGENTS.md — Home Pocket (まもる家計簿)
 
-> Local-first, privacy-focused family accounting app with dual-ledger system.
-> Phase 1 Infrastructure Layer (v0.1.0) · Flutter · iOS 14+ / Android 7+
+> Local-first, privacy-focused family accounting app with a dual-ledger system.
+> Flutter · iOS 14+ / Android 7+ · SQLCipher · Riverpod · Drift
+
+---
+
+## Current Project State
+
+- **v1.0 shipped:** Codebase Cleanup Initiative (2026-04-29)
+- **v1.1 shipped:** Happiness Metric & Display (2026-05-05)
+- **Current milestone:** none active. Start the next milestone with `$gsd-new-milestone`.
+- **Current source of truth:** `.planning/PROJECT.md`, `.planning/ROADMAP.md`, `.planning/MILESTONES.md`
+- **Archived v1.1 artifacts:** `.planning/milestones/v1.1-ROADMAP.md`, `.planning/milestones/v1.1-REQUIREMENTS.md`
+
+Known close debt:
+- Phase 11 has one human/device UAT verification item accepted as deferred close debt in `.planning/STATE.md`.
+- Codebase map in `.planning/codebase/` predates v1.0 cleanup and v1.1 feature work; refresh before major planning.
+
+---
+
+## Branch & Worktree Policy
+
+- Default development happens on the **`main` branch in a worktree**.
+- Use `codex` / `codex-dev` branches only when the user explicitly asks.
+- Before editing, run `git status -sb` and confirm the current branch.
+- Preserve user changes. Never revert, reset, or overwrite unrelated dirty files.
+- If another worktree already has `main` checked out, it is acceptable to use the current worktree on `main` when the user requested main-worktree development.
 
 ---
 
 ## Architecture
 
-**Clean Architecture (5 Layers) + "Thin Feature" Rule:**
+Clean Architecture with enforced import boundaries:
 
-- `lib/infrastructure/` — 技术基础设施（crypto, ML, sync, i18n, security, platform）
-- `lib/features/{feature}/` — 业务逻辑 Use Cases + domain models + repository interfaces
-- `lib/application/` — UI 层 (screens, widgets, providers)
-- `lib/data/` — 所有 Drift tables, DAOs, repository 实现（跨功能共享）
-- `lib/core/` — config, router, theme, constants, AppInitializer
-- `lib/shared/` — 公共 widgets, extensions, utils
+- `lib/infrastructure/` — platform/technical services: crypto, secure storage, sync, speech, ML, i18n formatters, platform APIs
+- `lib/data/` — Drift database, tables, DAOs, repository implementations
+- `lib/features/{feature}/domain/` — domain models and repository interfaces
+- `lib/features/{feature}/presentation/` — screens, widgets, presentation providers/navigation
+- `lib/application/` — cross-feature application use cases and orchestration services
+- `lib/core/` — initialization, router/config/theme/constants
+- `lib/shared/` — shared widgets, utils, constants, result helpers
 
-**关键约束 / Key Constraints:**
-- Feature 目录包含业务逻辑，禁止包含 `infrastructure/`, `data/tables/`, `data/daos/`
-- Features contain business logic; NEVER contain infrastructure/, data/tables/, data/daos/
-- 依赖方向 / Dependency direction: Application(UI) → Features(业务逻辑) ← Data ← Infrastructure
-- Domain 层完全独立，无外部依赖 / Domain layer is completely independent
+Dependency rules:
+- Infrastructure must not depend on `features/`, `application/`, or `data/`.
+- Data may depend on domain contracts and infrastructure, but not presentation or application use cases.
+- Domain models stay independent of Flutter, Drift, Riverpod, and platform SDKs.
+- Features must not define Drift tables, DAOs, or infrastructure adapters.
+- Prefer existing layer patterns and provider locations over new abstractions.
 
-**能力分类决策树 / Capability Classification Decision Tree:**
-1. 技术/平台能力? Technology/platform capability? → `lib/infrastructure/`
-2. 业务逻辑/Use Case/Domain models? → `lib/features/{feature}/`
-3. 数据访问 (tables, DAOs, repo impl)? Data access? → `lib/data/`
-4. UI (screens, widgets, providers)? → `lib/application/`
-5. 不确定? Not sure? → 放 `lib/` 对应层级 (safer, easier to refactor)
+Capability placement:
+1. Platform/technical capability → `lib/infrastructure/`
+2. Database/table/DAO/repository implementation → `lib/data/`
+3. Business model/repository contract → `lib/features/{feature}/domain/`
+4. Cross-feature use case/orchestration → `lib/application/`
+5. UI/presentation state → `lib/features/{feature}/presentation/`
 
 ---
 
 ## Build & Dev Commands
 
 ```bash
-flutter pub get                                              # 安装依赖
-flutter pub run build_runner build --delete-conflicting-outputs  # 代码生成
-flutter pub run build_runner watch                           # 持续生成
-flutter gen-l10n                                             # 国际化
-flutter devices                                              # 列出设备
-flutter run [-d <device_id>]                                 # 运行
-flutter analyze                                              # 静态分析 (必须 0 warnings)
-dart format .                                                # 格式化
-flutter test                                                 # 全部测试
-flutter test --coverage                                      # 覆盖率 (≥80%)
-flutter test integration_test/                               # 集成测试
+flutter pub get
+flutter pub run build_runner build --delete-conflicting-outputs
+flutter gen-l10n
+flutter analyze
+dart format .
+flutter test
+flutter test --coverage
+flutter test integration_test/
+flutter devices
+flutter run -d <device_id>
 ```
 
-**代码生成触发时机 / Code generation triggers:**
-修改 `@riverpod`/`@freezed`/Drift tables/包含 `part '*.g.dart'` 的模型后必须运行 build_runner。
-After modifying @riverpod/@freezed/Drift tables/or models with `part '*.g.dart'`, MUST run build_runner.
-
-修改 ARB 文件后必须运行 `flutter gen-l10n`。
-After modifying ARB files, MUST run `flutter gen-l10n`.
-
-**Git 操作后 / After git operations** (merge/rebase/switch branch) 也必须重新生成。
-MUST regenerate after merge/rebase/branch switch.
+Code generation triggers:
+- Run build_runner after changing `@riverpod`, `@freezed`, Drift tables/DAOs, or files with `part '*.g.dart'`.
+- Run `flutter gen-l10n` after changing any ARB file.
+- After merge/rebase/branch switch, regenerate if generated inputs changed.
+- Do not hand-edit generated files; edit sources and regenerate tracked outputs.
 
 ---
 
-## Coding Patterns
+## State Management & Coding Patterns
 
-### State Management
-- **Riverpod 2.4+** with `@riverpod` code gen
-- **Freezed** for immutable models (`copyWith`, 禁止 mutation / mutation forbidden)
-- **Drift** + SQLCipher (加密数据库 / encrypted database)
-- **GoRouter** declarative routing
-
-### Provider 组织规则 / Provider Organization Rules
-- 每个功能模块一个 `repository_providers.dart`（单一来源）
-  One `repository_providers.dart` per module (single source of truth)
-- Use Case providers 在 `lib/features/` 中定义，UI providers 在 `lib/application/` 中引用
-  Use Case providers defined in features/, UI providers reference them in application/
-- 禁止重复定义 repository provider
-  NEVER duplicate repository provider definitions
-
-### Widget 参数模式 / Widget Parameter Pattern
-- 使用 nullable 参数 + provider fallback，禁止硬编码默认值
-  Use nullable params + provider fallback, NEVER hardcode defaults
-- 优先级 / Priority: 显式参数 explicit > 当前选择 current selection > 用户默认 user default > null
+- Riverpod 2.4+ with `@riverpod` code generation.
+- Freezed for immutable data models; avoid mutation-style updates.
+- Drift + SQLCipher for local encrypted persistence.
+- GoRouter for declarative routing.
+- One `repository_providers.dart` per feature/module where the repo pattern already exists.
+- Do not duplicate repository providers.
+- UI providers may reference feature/application use case providers; lower layers must not reference UI providers.
+- Widget parameters should use nullable explicit overrides with provider fallback.
+- Fallback priority: explicit param > current selection > user default > null.
 
 ---
 
-## Security (4-Layer Encryption / 4层加密)
+## Security & Privacy
 
-1. **Database:** SQLCipher AES-256-CBC (256k PBKDF2)
+The app uses 4-layer protection:
+
+1. **Database:** SQLCipher AES-256-CBC with PBKDF2
 2. **Field:** ChaCha20-Poly1305 AEAD
-3. **File:** AES-256-GCM (photos)
-4. **Transport:** TLS 1.3 + E2EE (P2P sync)
+3. **File:** AES-256-GCM for photos/files
+4. **Transport:** TLS + E2EE for sync
 
-**强制规则 / Mandatory Rules:**
-- 所有加密操作必须使用 `lib/infrastructure/crypto/`
-  All crypto operations MUST use `lib/infrastructure/crypto/`
-- 禁止直接访问 flutter_secure_storage
-  NEVER access flutter_secure_storage directly for keys
-- 敏感字段必须加密 (amounts, notes, merchant names)
-  Sensitive fields MUST be encrypted
-- 禁止明文存储密钥或日志记录敏感数据
-  NEVER store keys in plaintext or log sensitive data
-- 使用 `sqlcipher_flutter_libs`，禁止 `sqlite3_flutter_libs`
-  Use sqlcipher_flutter_libs, NEVER sqlite3_flutter_libs
+Mandatory rules:
+- Use `lib/infrastructure/crypto/` and existing security services for crypto operations.
+- Never access `flutter_secure_storage` directly for keys outside the established secure-storage/key-manager layer.
+- Sensitive fields such as amounts, notes, merchant names, keys, tokens, recovery material, and sync payload details must not be logged.
+- Use `sqlcipher_flutter_libs`; never add or reintroduce `sqlite3_flutter_libs`.
+- Preserve local-first and zero-knowledge assumptions in new features.
 
----
-
-## Initialization / 初始化
-
-必须在 `runApp()` 前通过 `AppInitializer.initialize()` 初始化:
-MUST initialize before runApp() via AppInitializer.initialize():
-
-1. KeyManager（加载/生成设备密钥 / load or generate device keys）
-2. Database（加密数据库就绪 / encrypted DB ready）
-3. 其他服务 / Other services
-
-使用 `UncontrolledProviderScope` 传递已初始化的 container。
-Use UncontrolledProviderScope to pass initialized container.
+Initialization:
+- `AppInitializer.initialize()` must complete before `runApp()`.
+- Initialization order must preserve key/security readiness before encrypted database access.
+- Use `UncontrolledProviderScope` for the initialized provider container.
 
 ---
 
-## i18n (ja/zh/en)
+## i18n
 
-- 所有用户文本用 `S.of(context)`，禁止硬编码
-  All user text via S.of(context), NEVER hardcode strings
-- 日期用 `DateFormatter`，货币用 `NumberFormatter`（传 locale）
-  Dates via DateFormatter, currency via NumberFormatter (pass locale)
-- 修改 ARB 后必须更新全部 3 个文件 + 运行 `flutter gen-l10n`
-  After ARB changes, update all 3 files + run flutter gen-l10n
-- JPY: 0 位小数 / 0 decimals; USD/CNY/EUR/GBP: 2 位小数 / 2 decimals
+Supported locales: `ja`, `zh`, `en`.
 
----
-
-## Drift Database Indexes / Drift 数据库索引
-
-- 使用 `TableIndex` (非 `Index`) / Use TableIndex (not Index)
-- Symbol 语法 / Symbol syntax: `columns: {#columnName}`
-- 不加 `@override` / No @override annotation
-- 命名 / Naming: `idx_{table}_{columns}`
+- All user-facing text must come from `S.of(context)` or generated localizations.
+- Update all 3 ARB files together.
+- Run `flutter gen-l10n` after ARB changes.
+- Keep ARB keys stable unless a task explicitly scopes a key rename.
+- Use project formatters for dates/currency; pass locale and currency code.
+- Currency decimals: JPY 0; USD/CNY/EUR/GBP 2.
+- Product lexical hierarchy from ADR-015:
+  - In-product: 悦己 / ときめき / Joy
+  - Documentation/research framing: 幸福 / happiness
+  - CN family mode avoids 「家族悦己」; use the accepted family wording from ADR-015.
 
 ---
 
-## Testing (TDD)
+## Drift Database Rules
 
-1. RED: 先写测试 / Write test first
-2. GREEN: 最小实现 / Minimal implementation
-3. IMPROVE: 重构 / Refactor
-4. 覆盖率 ≥80% / Coverage ≥80%
-
-测试目录 / Test directories: `test/unit/`, `test/widget/`, `test/infrastructure/`, `integration_test/`
+- Use `TableIndex`, not `Index`.
+- Use symbol syntax: `columns: {#columnName}`.
+- Do not add `@override` to Drift table index getters unless Drift requires it.
+- Index naming: `idx_{table}_{columns}`.
+- Schema changes require migration tests and all Dart-side defaults to be updated in lockstep.
+- Current schema is post-v1.1 v16 with unipolar positive satisfaction semantics.
 
 ---
 
-## Codex Branch Rule (MANDATORY)
+## Testing & Quality Gates
 
-- **All Codex development MUST be done on the `codex-dev` branch.**
-- Before starting any work, check out `codex-dev`: `git checkout codex-dev` (create if not exists: `git checkout -b codex-dev`).
-- NEVER commit directly to `main` from Codex.
-- After work is complete, changes on `codex-dev` will be reviewed and merged to `main` manually.
+Use TDD for behavior changes:
+1. RED: write or expose the failing test
+2. GREEN: minimal implementation
+3. IMPROVE: refactor with tests green
+
+Test locations:
+- `test/unit/`
+- `test/widget/`
+- `test/infrastructure/`
+- `test/architecture/`
+- `test/golden/`
+- `integration_test/`
+
+Quality gates:
+- `flutter analyze` must report 0 issues.
+- `flutter test` should pass before shipping behavior changes.
+- Coverage gate is currently **70%** global/per configured cleanup-touched files, with deferred exceptions tracked from v1.0.
+- ARB parity and hardcoded-CJK architecture tests protect i18n.
+- For frontend/UI changes, run targeted widget/golden tests and inspect visual diffs when goldens change.
+
+Note: `dart format .` may touch unrelated legacy files depending on formatter version. If that happens, do not mix unrelated formatting churn into scoped commits.
+
+---
+
+## GSD Workflow
+
+- Planning state lives in `.planning/`.
+- Completed milestones are archived under `.planning/milestones/`.
+- No active `.planning/REQUIREMENTS.md` exists after v1.1 close; `$gsd-new-milestone` creates the next one.
+- Use `$gsd-progress` to inspect current status.
+- Use `$gsd-new-milestone` before starting a new milestone.
+- Use `$gsd-cleanup` later if phase directories should be archived out of `.planning/phases/`.
+
+When editing planning files:
+- Keep `PROJECT.md`, `ROADMAP.md`, `STATE.md`, and `MILESTONES.md` consistent.
+- Archive before deleting active milestone files.
+- Record accepted gaps/deferred work explicitly in `STATE.md`.
 
 ---
 
 ## Git Workflow
 
-```
-<type>(<scope>): <description>
+Commit format:
 
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+```text
+<type>(<scope>): <description>
 ```
 
 Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
-Branches: `main` (stable), `feature/MOD-XXX-description`, `codex-dev` (Codex exclusive)
+
+Rules:
+- Keep commits scoped and reviewable.
+- Do not commit generated or formatter-only churn unless it is required by the task.
+- Do not commit directly to a non-main branch unless the user requested that branch.
+- Push `main` and tags only when the user asks.
 
 ---
 
-## Pre-Commit Checklist / 提交前检查
+## Pre-Commit Checklist
 
-- [ ] `flutter analyze` → 0 issues
-- [ ] `dart format .`
-- [ ] `flutter test` → all pass
-- [ ] 不要手动编辑生成文件；源文件变更后重新生成并提交 repo 中已跟踪的输出
-  Don't hand-edit generated files; regenerate and commit tracked outputs when source files change
-- [ ] 不使用 `// ignore:` 压制警告 / Don't suppress warnings with // ignore:
-
----
-
-## Architecture Docs / 架构文档
-
-路径 / Path: `docs/arch/` (01-core-architecture, 02-module-specs, 03-adr, 04-basic, 05-UI)
-
-添加新文档前必须检查最大编号，使用下一个序号，并更新 `docs/arch/01-core-architecture/ARCH-000_INDEX.md`。
-Before adding new docs, check max number, use the next sequential number, and update `docs/arch/01-core-architecture/ARCH-000_INDEX.md`.
+- [ ] `git status -sb` reviewed
+- [ ] Relevant generated files regenerated
+- [ ] `flutter analyze` for code changes
+- [ ] Relevant targeted tests run
+- [ ] Full `flutter test` for broad behavior changes
+- [ ] ARB changes update ja/zh/en and run `flutter gen-l10n`
+- [ ] No unrelated user changes reverted
+- [ ] No `// ignore:` suppressions added without a specific, documented reason
 
 ---
 
-## iOS Build Notes / iOS 构建说明
+## Architecture Docs
 
-- 使用 `sqlcipher_flutter_libs`（禁止 `sqlite3_flutter_libs`）
-- Podfile 需保留 ML Kit simulator EXCLUDED_ARCHS fix
-- 遇到问题 / Troubleshooting:
-  `flutter clean && cd ios && rm -rf Pods Podfile.lock .symlinks && cd .. && flutter pub get && cd ios && pod install`
+Architecture docs live under `docs/arch/`:
+
+- `01-core-architecture`
+- `02-module-specs`
+- `03-adr`
+- `04-basic`
+- `05-UI`
+
+Before adding a new architecture doc:
+- Check the highest existing number in the target folder.
+- Use the next sequential number.
+- Update the relevant index, especially `docs/arch/01-core-architecture/ARCH-000_INDEX.md` or ADR index files.
+- Accepted ADRs are append-only; add dated update sections instead of rewriting history.
 
 ---
 
-## Development Phase / 开发阶段
+## iOS Build Notes
 
-**当前 / Current: Phase 1 Infrastructure (v0.1.0)**
-- MOD-006 Security & Privacy → MOD-014 i18n → MOD-001 Basic Accounting → ...
+- Keep `sqlcipher_flutter_libs`.
+- Preserve the Podfile ML Kit simulator `EXCLUDED_ARCHS` fix.
+- Troubleshooting sequence:
 
-详见 / See: `docs/plans/`, `docs/worklog/`
-TODO: `docs/worklog/PROJECT_DEVELOPMENT_PLAN.md` is referenced elsewhere but does not exist in the repo; verify the canonical roadmap file before adding a direct link.
+```bash
+flutter clean
+cd ios
+rm -rf Pods Podfile.lock .symlinks
+cd ..
+flutter pub get
+cd ios
+pod install
+```
