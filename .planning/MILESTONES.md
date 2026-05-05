@@ -4,6 +4,48 @@ Historical record of shipped versions. Each entry links to its full archive in `
 
 ---
 
+## v1.1 — Happiness Metric & Display
+
+**Shipped:** 2026-05-05
+**Phases:** 9-12 (4 phases, 40 plans)
+**Tag:** `v1.1`
+**Audit Status at Close:** `known_debt` — milestone goal achieved; one Phase 11 human UAT verification item acknowledged as deferred
+**Known deferred items at close:** 1 verification gap (Phase 11 `11-VERIFICATION.md` human UAT); see `.planning/STATE.md` Deferred Items.
+
+### Delivered
+
+Home Pocket now has a v1.1 happiness metric layer and UI surface: personal Joy metrics, aggregate-only family Joy insights, an integrated HomeHeroCard, a unified AnalyticsScreen dashboard, and final ja/zh/en product copy aligned to the 悦己 / ときめき / Joy lexical hierarchy.
+
+### Key Accomplishments
+
+1. **Happiness metric domain locked** — schema v16 default satisfaction semantics, sealed `MetricResult`, PTVF Joy-per-yen math, Top Joy ordering, soul-only filtering, and family aggregate-only contracts are implemented and verified.
+2. **Anti-gamification decisions codified** — ADR-012/013/014/015 capture no-gamification, Joy density scaling, unipolar satisfaction semantics, and trilingual lexical hierarchy.
+3. **HomePage rebuilt around Joy context** — `HomeHeroCard` replaces the previous monthly overview, ledger comparison, and SoulFullness surfaces with rings, split bar, Best Joy story, and group-mode family rows.
+4. **AnalyticsScreen Variant δ shipped** — unified KPI strip plus Time, Distribution, and Story groups render total-ledger and Joy-ledger analytics through use cases/providers, with v1.0 analytics widgets removed.
+5. **Trilingual copy rename completed** — ARB values for Joy/Daily ledger language, Joy density/index labels, satisfaction ladder, and `satisfactionExcellent` are updated across ja/zh/en; ADR-015 is accepted.
+6. **Verification baseline passed** — final Phase 12 gates included `flutter analyze`, full `flutter test` (1413 tests), ARB parity, hardcoded-CJK scan, picker tests, analytics widget tests, and refreshed HomeHeroCard goldens.
+
+### Stats
+
+- **Files archived:** `.planning/milestones/v1.1-ROADMAP.md`, `.planning/milestones/v1.1-REQUIREMENTS.md`
+- **Phase execution:** 4 phases, 40 plans, 80 GSD tasks
+- **Requirements:** 29/29 v1.1 requirements complete
+- **Timeline:** 2026-05-01 → 2026-05-05
+
+### Notable Decisions
+
+- Strict per-member family analytics consent is deferred to v1.2 (`FAMILY-V2-03`) rather than partially shipping schema/settings work.
+- ARB key renames are deferred (`TOOL-V2-02`); v1.1 changed values only to avoid wider generated-code churn.
+- Voice estimator range realignment is deferred (`HAPPY-V2-03`) because v1.1 locked picker semantics first.
+- One Phase 11 visual/device UAT item remains human-needed and is accepted as known close debt.
+
+### Archive
+
+- `.planning/milestones/v1.1-ROADMAP.md` — full phase details
+- `.planning/milestones/v1.1-REQUIREMENTS.md` — final requirement status + v2 backlog
+
+---
+
 ## v1.0 — Codebase Cleanup Initiative
 
 **Shipped:** 2026-04-29

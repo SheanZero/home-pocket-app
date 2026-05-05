@@ -3,45 +3,33 @@
 ## Current State
 
 **Shipped:** v1.0 Codebase Cleanup Initiative (2026-04-29) — see `.planning/milestones/v1.0-ROADMAP.md`
+**Shipped:** v1.1 Happiness Metric & Display (2026-05-05) — see `.planning/milestones/v1.1-ROADMAP.md`
 
 The v1.0 initiative was a pure-refactor cleanup, not a feature release. It delivered an operational hybrid audit pipeline, eliminated 50 catalogued findings (24 CRITICAL, 8 HIGH, 8 MEDIUM, 7 LOW + 3 layer-violation closures), aligned all architecture documentation with the post-refactor codebase, and locked 4 permanent CI guardrails. Re-audit reports zero open findings across all 4 categories.
 
-The codebase is now ready for the next wave of feature modules (MOD-005 OCR, MOD-007 Analytics, MOD-013 Gamification) without the structural debt that prompted the cleanup.
+The v1.1 milestone delivered the happiness metric domain, HomePage `HomeHeroCard`, AnalyticsScreen Variant δ unified dashboard, and final trilingual UI copy rename pass. It also ratified the v1.1 anti-gamification and lexical hierarchy ADRs. One Phase 11 human/device UAT item remains accepted as known close debt in `.planning/STATE.md`.
 
-**v1.1 progress:** Complete as of 2026-05-04. Phases 09-12 delivered the happiness metric domain, HomePage `SoulFullnessCard` redesign, AnalyticsScreen unified dashboard, and final trilingual UI copy rename pass. RENAME-01..07, HAPPY-01..09, FAMILY-01..03, HOMEUI-01..04, and STATSUI-01..07 are validated; remaining v2 ideas stay tracked in `.planning/REQUIREMENTS.md`.
+The codebase is now ready for the next milestone cycle. Candidate directions include release-readiness QA, OCR, family sync hardening, strict family analytics consent, or toolchain/doc guardrail cleanup.
 
-## Current Milestone: v1.1 幸福度指标与展示 (Happiness Metric & Display)
+## Current Milestone
+
+No active milestone. Start the next milestone with `$gsd-new-milestone`.
+
+<details>
+<summary>v1.1 Happiness Metric & Display (archived)</summary>
 
 **Goal:** 把"花钱的幸福"从模糊感觉变成可计算、可展示的指标——让 HomePage 和统计页围绕「悦己账本」的幸福度数据组织起来；同时为家庭模式提供反对抗、合作型的共同指标。
 
-**Core insight driving this milestone:** 花钱的本质是满足精神需求，金额 ≠ 快乐——10 元的小確幸可能比 1000 元的购物更幸福。本期需要把这个直觉变成数学载体（"幸福密度 = Σ 满足度 / Σ 金额"），并通过数据让用户回看自己的幸福结构。
+**Delivered:**
+- 4 personal Joy indicators: Avg Satisfaction, Joy per ¥, Highlights count, Best Joy story
+- 2 aggregate-only family indicators: Family Highlights Sum and Shared Joy Insight
+- HomePage integrated `HomeHeroCard`
+- AnalyticsScreen Variant δ unified dashboard
+- ARB-only rename across ja/zh/en: Joy/Daily ledger language, Joy density/index, satisfaction ladder, and `satisfactionExcellent`
 
-**Target features:**
-- **4 个个人幸福度指标**（月累计窗口）：满足度均值 / 幸福密度 Joy per ¥ / 小確幸数（满足度 ≥ 8）/ 本期最值（最高 satisfaction-per-yen 的故事化亮点）
-- **2 个家庭合作型指标**（仅 group mode 显示，反对抗）：家族小確幸累计 / 家族共同最爱（category × avg satisfaction）
-- **HomePage 重做** `SoulFullnessCard`：替换误导性的 Happiness ROI，加入 4 个体指标卡 + 家庭模式条件渲染共同指标
-- **统计页接线**：把 3 个休眠 DAO 方法（`getSoulSatisfactionOverview` / `getSatisfactionDistribution` / `getDailySatisfactionTrend`）接到 AnalyticsScreen 「悦己账本统计」子区，新增幸福密度趋势线 + 满足度分布直方图
-- **UI 文案重命名（ARB-only，ja/zh/en 三语）**：
-  - `soulLedger` 灵魂账本 → **悦己账本** / **ときめき帳** / **Joy Ledger**
-  - `survivalLedger` 生存账本 → **日常账本** / **日々の帳** / **Daily Ledger**
-  - `homeHappinessROI` "Happiness ROI" → **幸福密度** / **ハピネス密度** / **Joy / ¥**
-  - `homeSoulFullness` "魂の充実度" → **悦己充盈** / **ときめき度** / **Joy Index**
+**Archive:** `.planning/milestones/v1.1-ROADMAP.md`, `.planning/milestones/v1.1-REQUIREMENTS.md`
 
-**Key context & constraints (locked at milestone start):**
-- **不动 schema** —— 完全基于现有 `transactions.soul_satisfaction` (1-10) 字段；任何字段新增推迟到 v1.2+
-- **不动色调** —— survival 蓝 #5A9CC8 / soul 绿 #47B88A / primary #8AB8DA 保持
-- **不动 enum** —— `LedgerType.survival` / `LedgerType.soul` 不改；重命名仅 ARB 文案
-- **算法范围仅灵魂账本** —— DAO 须按 `ledger_type='soul'` 过滤（待 Phase 9 校验）
-- **复用现有输入** —— `SatisfactionEmojiPicker` 5 emoji + `VoiceSatisfactionEstimator` 启发式预填不动
-- **时间窗：本月累计** —— 与现有 MonthOverviewCard 一致，避免双时间轴
-- **3 个休眠 DAO 方法已存在** —— 本期工作主要是接线 + 公式 + UI，非新建数据访问层
-
-**Out of scope（v1.2+）：**
-- 新增 schema 字段（地点 / 心情标签 / 分类满足度细分）
-- 满足度回填 / 重新打分流程
-- 成员互动（点赞 / 评论 / 标记别人的灵魂记录）—— 需新表
-- 时间窗自定义（周 / 年 / 任意区间）—— v1.1 只支持月
-- 色调改动 / 视觉重构 —— 本期专注内容
+</details>
 
 <details>
 <summary>v1.0 Project Description (archived)</summary>
@@ -106,12 +94,7 @@ A family accounting app users can trust with sensitive financial data — local-
 
 ### Active
 
-<!-- v1.1 milestone: Happiness Metric & Display. Detailed REQ-IDs in REQUIREMENTS.md. -->
-
-- [x] **Happiness metric domain** — 4 personal indicators (Avg Satisfaction / Joy per ¥ / Highlights count / Best Joy per ¥) + 2 family-cooperative indicators (Family Highlights Sum / Shared Joy Insight); month-to-date window; soul ledger only. Validated in Phase 09.
-- [x] **HomePage SoulFullnessCard redesign** — replace `Happiness ROI` (misleading: was budget-share, not joy density); render new metric tiles + a story-mode "Best Joy per ¥" card; family metrics conditionally shown in group mode. Validated in Phase 10.
-- [x] **Statistics surface (Analytics screen)** — wire happiness analytics through use cases/providers/widgets; add Joy-per-¥ trend line, satisfaction histogram, story cards, month picker, and aggregate-only family insight. Validated in Phase 11.
-- [x] **UI rename pass (ARB-only, ja/zh/en)** — `soulLedger` → 悦己/ときめき/Joy; `survivalLedger` → 日常/日々/Daily; `homeHappinessROI` → 幸福密度/ハピネス密度/Joy per ¥; `homeSoulFullness` → 悦己充盈/ときめき度/Joy Index; plus RENAME-07 `satisfactionExcellent`. No enum, no theme color changes. Validated in Phase 12.
+No active milestone requirements. `$gsd-new-milestone` will define the next scoped requirement set and recreate `.planning/REQUIREMENTS.md`.
 
 ### Out of Scope
 
@@ -137,13 +120,13 @@ A family accounting app users can trust with sensitive financial data — local-
 
 ## Context
 
-- **Current state (post-v1.0):** Codebase Cleanup Initiative shipped 2026-04-29. Re-audit reports zero open findings. 4 permanent CI guardrails active. Architecture docs aligned with code. Schema at v15. Coverage threshold at 70% (lowered from 80% per Phase 8 amendment; FUTURE-TOOL-03 to revisit). MOD-009 references removed; ADR-011 records cleanup outcome.
-- **Codebase map:** `.planning/codebase/` was generated 2026-04-25 (`/gsd-map-codebase`). Contents: ARCHITECTURE.md, STACK.md, STRUCTURE.md, CONVENTIONS.md, INTEGRATIONS.md, TESTING.md, CONCERNS.md. **Note:** Map predates the v1.0 cleanup; refresh via `/gsd-map-codebase` or `/gsd-scan` before next milestone planning.
+- **Current state (post-v1.1):** Codebase Cleanup Initiative shipped 2026-04-29; Happiness Metric & Display shipped 2026-05-05. Schema is now v16 with unipolar positive satisfaction defaults. HomePage and AnalyticsScreen consume the v1.1 Joy metric contracts. Coverage threshold remains 70% (lowered from 80% per Phase 8 amendment; FUTURE-TOOL-03 to revisit).
+- **Codebase map:** `.planning/codebase/` was generated 2026-04-25 (`/gsd-map-codebase`). Contents: ARCHITECTURE.md, STACK.md, STRUCTURE.md, CONVENTIONS.md, INTEGRATIONS.md, TESTING.md, CONCERNS.md. **Note:** Map predates the v1.0 cleanup and v1.1 feature milestone; refresh via `/gsd-map-codebase` or `/gsd-scan` before next milestone planning.
 - **Tech stack:** Flutter, Riverpod 2.4+ (`@riverpod` code-gen), Freezed, Drift + SQLCipher, GoRouter, flutter_localizations (intl 0.20.2 pinned), Mocktail (replaced mockito in v1.0)
 - **Active CI guardrails:** `import_guard` (custom_lint), `riverpod_lint`/`custom_lint`, `coverde` per-file ≥70% with `--deferred` mechanism (10 explicit exceptions), `sqlite3_flutter_libs` rejection, `very_good_coverage@v2` ≥70% global, `build_runner` clean-diff
 - **Coverage:** Global ~74.6% (post-cleanup); 164 cleanup-touched files at 70%+; 10 deferred-list files below 70% (FUTURE-TOOL-03 review trigger)
-- **Known issues / debt carried forward:** 2 INFO-level analyzer warnings in `shadow_books_provider_characterization_test.dart`; pre-existing MOD-numbering drift in MOD-002/006/007/008 internal headers; ARCH-008 cites ADR-006 instead of ADR-007 (FUTURE-DOC); doc-sweep verifiers exist but not in CI; 12 architecture tests run only transitively via coverage job; Phase 03/06/08 missing canonical VERIFICATION.md (substitute evidence exists); Phase 02/04 missing VALIDATION.md; Phase 07 `nyquist_compliant: false`
-- **Why next:** v1.0 unblocked the feature roadmap. Next-wave candidates: MOD-005 OCR, MOD-007 Analytics expansion, MOD-013 Gamification — or a "release-readiness" milestone (smoke-test execution, doc-verifier CI wiring, validation-bookkeeping backfill, coverage-threshold review) before user-facing v1 release.
+- **Known issues / debt carried forward:** 1 Phase 11 human/device UAT verification item; 2 INFO-level analyzer warnings in `shadow_books_provider_characterization_test.dart`; pre-existing MOD-numbering drift in MOD-002/006/007/008 internal headers; ARCH-008 cites ADR-006 instead of ADR-007 (FUTURE-DOC); doc-sweep verifiers exist but not in CI; 12 architecture tests run only transitively via coverage job; Phase 03/06/08 missing canonical VERIFICATION.md (substitute evidence exists); Phase 02/04 missing VALIDATION.md; Phase 07 `nyquist_compliant: false`
+- **Why next:** v1.1 completed the Joy metric/display milestone. Next-wave candidates: release-readiness QA, MOD-005 OCR, family sync hardening, strict family analytics consent (`FAMILY-V2-03`), or documentation/tooling guardrail cleanup before a user-facing v1 release.
 
 ## Constraints
 
@@ -192,4 +175,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-04 after Phase 12 completion (UI Copy Rename Pass) — v1.1 Happiness Metric & Display milestone complete; see `.planning/REQUIREMENTS.md` and `.planning/ROADMAP.md` for traceability*
+*Last updated: 2026-05-05 after v1.1 milestone archive — see `.planning/MILESTONES.md` and `.planning/milestones/v1.1-*.md` for shipped traceability*
