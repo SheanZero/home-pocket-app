@@ -1185,12 +1185,6 @@ abstract class S {
   /// **'Make it your monthly favorite'**
   String get homeBestJoyAllNeutralSmall;
 
-  /// Coverage caption on headline metric tile (HOMEUI-04 / HAPPY-06)
-  ///
-  /// In en, this message translates to:
-  /// **'n={rated}/{total} rated'**
-  String homeCoverageCaption(int rated, int total);
-
   /// Single-mode mid-ring legend label
   ///
   /// In en, this message translates to:

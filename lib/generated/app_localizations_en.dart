@@ -585,11 +585,6 @@ class SEn extends S {
   String get homeBestJoyAllNeutralSmall => 'Make it your monthly favorite';
 
   @override
-  String homeCoverageCaption(int rated, int total) {
-    return 'n=$rated/$total rated';
-  }
-
-  @override
   String get homeAvgSatisfactionLegend => 'Avg satisfaction';
 
   @override

@@ -34,46 +34,46 @@ class _FixtureSnapshot {
 }
 
 _FixtureSnapshot _singleRich() => _FixtureSnapshot(
-      monthlyReport: fixtureMonthlyReportRich(),
-      happiness: fixtureHappinessReportRich(),
-      bestJoy: fixtureBestJoyResultRich(),
-    );
+  monthlyReport: fixtureMonthlyReportRich(),
+  happiness: fixtureHappinessReportRich(),
+  bestJoy: fixtureBestJoyResultRich(),
+);
 
 _FixtureSnapshot _singleEmpty() => _FixtureSnapshot(
-      monthlyReport: fixtureMonthlyReportEmpty(),
-      happiness: fixtureHappinessReportEmpty(),
-      bestJoy: fixtureBestJoyResultEmpty(),
-    );
+  monthlyReport: fixtureMonthlyReportEmpty(),
+  happiness: fixtureHappinessReportEmpty(),
+  bestJoy: fixtureBestJoyResultEmpty(),
+);
 
 _FixtureSnapshot _singleThin() => _FixtureSnapshot(
-      monthlyReport: fixtureMonthlyReportRich(),
-      happiness: fixtureHappinessReportThin(),
-      bestJoy: fixtureBestJoyResultThin(),
-    );
+  monthlyReport: fixtureMonthlyReportRich(),
+  happiness: fixtureHappinessReportThin(),
+  bestJoy: fixtureBestJoyResultThin(),
+);
 
 _FixtureSnapshot _singleAllNeutral() => _FixtureSnapshot(
-      monthlyReport: fixtureMonthlyReportRich(),
-      happiness: fixtureHappinessReportRich(),
-      bestJoy: fixtureBestJoyResultAllNeutral(),
-    );
+  monthlyReport: fixtureMonthlyReportRich(),
+  happiness: fixtureHappinessReportRich(),
+  bestJoy: fixtureBestJoyResultAllNeutral(),
+);
 
 _FixtureSnapshot _groupRich() => _FixtureSnapshot(
-      monthlyReport: fixtureMonthlyReportRich(),
-      happiness: fixtureHappinessReportRich(),
-      bestJoy: fixtureBestJoyResultRich(),
-      family: fixtureFamilyHappinessRich(),
-      shadowBooks: fixtureShadowBooksThree(),
-      shadowAggregate: fixtureShadowAggregateThree(),
-    );
+  monthlyReport: fixtureMonthlyReportRich(),
+  happiness: fixtureHappinessReportRich(),
+  bestJoy: fixtureBestJoyResultRich(),
+  family: fixtureFamilyHappinessRich(),
+  shadowBooks: fixtureShadowBooksThree(),
+  shadowAggregate: fixtureShadowAggregateThree(),
+);
 
 _FixtureSnapshot _groupEmptyShadows() => _FixtureSnapshot(
-      monthlyReport: fixtureMonthlyReportRich(),
-      happiness: fixtureHappinessReportRich(),
-      bestJoy: fixtureBestJoyResultRich(),
-      family: fixtureFamilyHappinessRich(),
-      shadowBooks: const [],
-      shadowAggregate: fixtureShadowAggregateThree(),
-    );
+  monthlyReport: fixtureMonthlyReportRich(),
+  happiness: fixtureHappinessReportRich(),
+  bestJoy: fixtureBestJoyResultRich(),
+  family: fixtureFamilyHappinessRich(),
+  shadowBooks: const [],
+  shadowAggregate: fixtureShadowAggregateThree(),
+);
 
 Widget _buildSubject({
   Locale locale = const Locale('ja'),
@@ -113,8 +113,9 @@ Widget _buildSubject({
 ///   - D-12         = currency resolution from constructor
 void main() {
   group('HomeHeroCard — single mode (HOMEUI-01, HOMEUI-05, HOMEUI-06)', () {
-    testWidgets('renders all 4 personal metrics from HappinessReport',
-        (tester) async {
+    testWidgets('renders all 4 personal metrics from HappinessReport', (
+      tester,
+    ) async {
       await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
       await tester.pumpAndSettle();
 
@@ -128,21 +129,23 @@ void main() {
     });
 
     testWidgets(
-        'hero header renders total + +X% trend chip + previous-month sub-line',
-        (tester) async {
-      await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
-      await tester.pumpAndSettle();
+      'hero header renders total + +X% trend chip + previous-month sub-line',
+      (tester) async {
+        await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
+        await tester.pumpAndSettle();
 
-      // total = 142,800 (JPY)
-      expect(find.textContaining('142,800'), findsWidgets);
-      // 142800 > 137000 ⇒ positive trend
-      expect(find.byIcon(Icons.trending_up), findsOneWidget);
-      // ja sub-line label "先月 ¥137,000"
-      expect(find.textContaining('先月'), findsOneWidget);
-    });
+        // total = 142,800 (JPY)
+        expect(find.textContaining('142,800'), findsWidgets);
+        // 142800 > 137000 ⇒ positive trend
+        expect(find.byIcon(Icons.trending_up), findsOneWidget);
+        // ja sub-line label "先月 ¥137,000"
+        expect(find.textContaining('先月'), findsOneWidget);
+      },
+    );
 
-    testWidgets('split bar renders 魂帳 / 生存帳 absolute amounts (no % glyph)',
-        (tester) async {
+    testWidgets('split bar renders 魂帳 / 生存帳 absolute amounts (no % glyph)', (
+      tester,
+    ) async {
       await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
       await tester.pumpAndSettle();
 
@@ -164,58 +167,62 @@ void main() {
 
   group('HomeHeroCard — group mode (HOMEUI-03, HOMEUI-07, FAMILY-03)', () {
     testWidgets(
-        'renders FamilyHappiness rings when isGroupMode == true && shadowBooks.isNotEmpty',
-        (tester) async {
-      await tester.pumpWidget(
-        _buildSubject(snapshot: _groupRich(), isGroupMode: true),
-      );
-      await tester.pumpAndSettle();
+      'renders FamilyHappiness rings when isGroupMode == true && shadowBooks.isNotEmpty',
+      (tester) async {
+        await tester.pumpWidget(
+          _buildSubject(snapshot: _groupRich(), isGroupMode: true),
+        );
+        await tester.pumpAndSettle();
 
-      // group-mode hero label
-      expect(find.textContaining('家族の支出'), findsOneWidget);
-      // familyHighlightsSum center text 27 — also appears in the legend value,
-      // so at least 1 occurrence is the strict assertion.
-      expect(find.text('27'), findsAtLeastNWidgets(1));
-      // group-mode ring section title 家族の小確幸
-      expect(find.textContaining('家族の小確幸'), findsWidgets);
-    });
-
-    testWidgets(
-        'renders 3 member rows after Best Joy strip with avatar + name + ¥amount',
-        (tester) async {
-      await tester.pumpWidget(
-        _buildSubject(snapshot: _groupRich(), isGroupMode: true),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('TestMember1'), findsOneWidget);
-      expect(find.text('TestMember2'), findsOneWidget);
-      expect(find.text('TestMember3'), findsOneWidget);
-      // At least one avatar emoji renders (🦊 / 🐻 / 🐼)
-      expect(find.text('🦊'), findsOneWidget);
-      expect(find.text('🐻'), findsOneWidget);
-      expect(find.text('🐼'), findsOneWidget);
-      // Per-member ¥amounts from perBookReports
-      expect(find.textContaining('25,000'), findsWidgets);
-      expect(find.textContaining('20,500'), findsWidgets);
-      expect(find.textContaining('27,000'), findsWidgets);
-    });
+        // group-mode hero label
+        expect(find.textContaining('家族の支出'), findsOneWidget);
+        // familyHighlightsSum center text 27 — also appears in the legend value,
+        // so at least 1 occurrence is the strict assertion.
+        expect(find.text('27'), findsAtLeastNWidgets(1));
+        // group-mode ring section title 家族の小確幸
+        expect(find.textContaining('家族の小確幸'), findsWidgets);
+      },
+    );
 
     testWidgets(
-        'hides member rows section when shadowBooks.isEmpty (D-08 minimum gate)',
-        (tester) async {
-      await tester.pumpWidget(
-        _buildSubject(snapshot: _groupEmptyShadows(), isGroupMode: true),
-      );
-      await tester.pumpAndSettle();
+      'renders 3 member rows after Best Joy strip with avatar + name + ¥amount',
+      (tester) async {
+        await tester.pumpWidget(
+          _buildSubject(snapshot: _groupRich(), isGroupMode: true),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.textContaining('TestMember'), findsNothing);
-      // ja section title homeMembersSectionTitle = "メンバー"
-      expect(find.text('メンバー'), findsNothing);
-    });
+        expect(find.text('TestMember1'), findsOneWidget);
+        expect(find.text('TestMember2'), findsOneWidget);
+        expect(find.text('TestMember3'), findsOneWidget);
+        // At least one avatar emoji renders (🦊 / 🐻 / 🐼)
+        expect(find.text('🦊'), findsOneWidget);
+        expect(find.text('🐻'), findsOneWidget);
+        expect(find.text('🐼'), findsOneWidget);
+        // Per-member ¥amounts from perBookReports
+        expect(find.textContaining('25,000'), findsWidgets);
+        expect(find.textContaining('20,500'), findsWidgets);
+        expect(find.textContaining('27,000'), findsWidgets);
+      },
+    );
 
-    testWidgets('hides family region entirely when isGroupMode == false',
-        (tester) async {
+    testWidgets(
+      'hides member rows section when shadowBooks.isEmpty (D-08 minimum gate)',
+      (tester) async {
+        await tester.pumpWidget(
+          _buildSubject(snapshot: _groupEmptyShadows(), isGroupMode: true),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('TestMember'), findsNothing);
+        // ja section title homeMembersSectionTitle = "メンバー"
+        expect(find.text('メンバー'), findsNothing);
+      },
+    );
+
+    testWidgets('hides family region entirely when isGroupMode == false', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _buildSubject(snapshot: _singleRich(), isGroupMode: false),
       );
@@ -229,48 +236,52 @@ void main() {
 
   group('HomeHeroCard — empty states (D-09)', () {
     testWidgets(
-        'totalExpenses == 0: hero renders ¥0, trend chip hidden, split bar gray, rings Empty',
-        (tester) async {
-      await tester.pumpWidget(_buildSubject(snapshot: _singleEmpty()));
-      await tester.pumpAndSettle();
+      'totalExpenses == 0: hero renders ¥0, trend chip hidden, split bar gray, rings Empty',
+      (tester) async {
+        await tester.pumpWidget(_buildSubject(snapshot: _singleEmpty()));
+        await tester.pumpAndSettle();
 
-      expect(find.textContaining('¥0'), findsWidgets);
-      // hasAny == false ⇒ trend chip hidden
-      expect(find.byIcon(Icons.trending_up), findsNothing);
-      expect(find.byIcon(Icons.trending_down), findsNothing);
-    });
-
-    testWidgets(
-        'totalSoulTx == 0: rings track-only, legend "No data yet", Best Joy CTA empty variant',
-        (tester) async {
-      await tester.pumpWidget(_buildSubject(snapshot: _singleEmpty()));
-      await tester.pumpAndSettle();
-
-      // ja "まだ記録なし" — legend empty value
-      expect(find.textContaining('まだ記録なし'), findsWidgets);
-      // ja "初めての灵账を記録しよう" — Best Joy empty BIG
-      expect(find.textContaining('初めての灵账'), findsOneWidget);
-    });
+        expect(find.textContaining('¥0'), findsWidgets);
+        // hasAny == false ⇒ trend chip hidden
+        expect(find.byIcon(Icons.trending_up), findsNothing);
+        expect(find.byIcon(Icons.trending_down), findsNothing);
+      },
+    );
 
     testWidgets(
-        'thin sample (n<5): rings render normally, coverage caption "n=k/N rated" visible',
-        (tester) async {
+      'totalSoulTx == 0: rings track-only, legend "No data yet", Best Joy CTA empty variant',
+      (tester) async {
+        await tester.pumpWidget(_buildSubject(snapshot: _singleEmpty()));
+        await tester.pumpAndSettle();
+
+        // ja "まだ記録なし" — legend empty value
+        expect(find.textContaining('まだ記録なし'), findsWidgets);
+        // ja "初めての灵账を記録しよう" — Best Joy empty BIG
+        expect(find.textContaining('初めての灵账'), findsOneWidget);
+      },
+    );
+
+    testWidgets('thin sample (n<5): rings render normally, no crash', (
+      tester,
+    ) async {
       await tester.pumpWidget(_buildSubject(snapshot: _singleThin()));
       await tester.pumpAndSettle();
 
-      // ja: "3/3 件評価済み" — totalSoulTx=3, all 3 rated.
-      expect(find.textContaining('3/3'), findsOneWidget);
+      // Coverage caption removed (item 5 of pf5 polish).
+      // Verify widget renders without error.
+      expect(find.byType(HomeHeroCard), findsOneWidget);
     });
 
     testWidgets(
-        'all-neutral Best Joy (sat<=2): Best Joy strip renders all-neutral CTA variant',
-        (tester) async {
-      await tester.pumpWidget(_buildSubject(snapshot: _singleAllNeutral()));
-      await tester.pumpAndSettle();
+      'all-neutral Best Joy (sat<=2): Best Joy strip renders all-neutral CTA variant',
+      (tester) async {
+        await tester.pumpWidget(_buildSubject(snapshot: _singleAllNeutral()));
+        await tester.pumpAndSettle();
 
-      // ja: "一番大きな支出を評価して"
-      expect(find.textContaining('一番大きな支出を評価して'), findsOneWidget);
-    });
+        // ja: "一番大きな支出を評価して"
+        expect(find.textContaining('一番大きな支出を評価して'), findsOneWidget);
+      },
+    );
   });
 
   group('HomeHeroCard — info icons (HOMEUI-04, D-10)', () {
@@ -285,27 +296,30 @@ void main() {
       expect(iconFinder, findsNWidgets(2));
     });
 
-    testWidgets('info icon tap shows tooltip dialog without firing card onTap',
-        (tester) async {
-      var tapped = 0;
-      await tester.pumpWidget(
-        _buildSubject(snapshot: _singleRich(), onTap: () => tapped++),
-      );
-      await tester.pumpAndSettle();
+    testWidgets(
+      'info icon tap shows tooltip dialog without firing card onTap',
+      (tester) async {
+        var tapped = 0;
+        await tester.pumpWidget(
+          _buildSubject(snapshot: _singleRich(), onTap: () => tapped++),
+        );
+        await tester.pumpAndSettle();
 
-      // Tap the FIRST info icon.
-      await tester.tap(find.byIcon(Icons.info_outline).first);
-      await tester.pumpAndSettle();
+        // Tap the FIRST info icon.
+        await tester.tap(find.byIcon(Icons.info_outline).first);
+        await tester.pumpAndSettle();
 
-      expect(find.byType(AlertDialog), findsOneWidget);
-      // Card-level onTap MUST NOT fire when info icon absorbs the tap.
-      expect(tapped, 0);
-    });
+        expect(find.byType(AlertDialog), findsOneWidget);
+        // Card-level onTap MUST NOT fire when info icon absorbs the tap.
+        expect(tapped, 0);
+      },
+    );
   });
 
   group('HomeHeroCard — tap target (D-11, Pitfall 3)', () {
-    testWidgets('tapping any region of the card fires onTap exactly once',
-        (tester) async {
+    testWidgets('tapping any region of the card fires onTap exactly once', (
+      tester,
+    ) async {
       var tapped = 0;
       await tester.pumpWidget(
         _buildSubject(snapshot: _singleRich(), onTap: () => tapped++),
@@ -321,61 +335,65 @@ void main() {
   });
 
   group(
-      'HomeHeroCard — typography (CLAUDE.md Amount Display Style, Pitfall 10)',
-      () {
-    testWidgets('hero total uses AppTextStyles.amountLarge with tabular figures',
+    'HomeHeroCard — typography (CLAUDE.md Amount Display Style, Pitfall 10)',
+    () {
+      testWidgets(
+        'hero total uses AppTextStyles.amountLarge with tabular figures',
         (tester) async {
-      await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
-      await tester.pumpAndSettle();
+          await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
+          await tester.pumpAndSettle();
 
-      // The hero total Text widget.
-      final heroFinder = find.descendant(
-        of: find.byType(HomeHeroCard),
-        matching: find.textContaining('142,800'),
+          // The hero total Text widget.
+          final heroFinder = find.descendant(
+            of: find.byType(HomeHeroCard),
+            matching: find.textContaining('142,800'),
+          );
+          expect(heroFinder, findsWidgets);
+          final heroTexts = tester.widgetList<Text>(heroFinder).toList();
+          // The largest font (amountLarge fontSize: 30) is the hero total.
+          Text? hero;
+          double maxSize = 0;
+          for (final t in heroTexts) {
+            final size = t.style?.fontSize ?? 0;
+            if (size > maxSize) {
+              maxSize = size;
+              hero = t;
+            }
+          }
+          expect(hero, isNotNull);
+          expect(
+            hero!.style?.fontFeatures,
+            contains(const FontFeature.tabularFigures()),
+          );
+        },
       );
-      expect(heroFinder, findsWidgets);
-      final heroTexts = tester.widgetList<Text>(heroFinder).toList();
-      // The largest font (amountLarge fontSize: 30) is the hero total.
-      Text? hero;
-      double maxSize = 0;
-      for (final t in heroTexts) {
-        final size = t.style?.fontSize ?? 0;
-        if (size > maxSize) {
-          maxSize = size;
-          hero = t;
-        }
-      }
-      expect(hero, isNotNull);
-      expect(
-        hero!.style?.fontFeatures,
-        contains(const FontFeature.tabularFigures()),
-      );
-    });
 
-    testWidgets('Best Joy small line ¥amount has fontFeatures.tabularFigures',
-        (tester) async {
-      await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
-      await tester.pumpAndSettle();
+      testWidgets('Best Joy small line ¥amount has fontFeatures.tabularFigures', (
+        tester,
+      ) async {
+        await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
+        await tester.pumpAndSettle();
 
-      // Best Joy small line: "¥3,000・満足 10/10 ✨"
-      final smallFinder = find.textContaining('3,000');
-      expect(smallFinder, findsWidgets);
-      final candidates = tester.widgetList<Text>(smallFinder).toList();
-      // Find the Text whose style has tabularFigures (the Best Joy small line
-      // explicitly sets this per Pitfall #10 gate).
-      final tabular = candidates.where(
-        (t) =>
-            (t.style?.fontFeatures ?? const []).contains(
-              const FontFeature.tabularFigures(),
-            ),
-      );
-      expect(tabular, isNotEmpty);
-    });
-  });
+        // Best Joy small line: "¥3,000・満足 10/10 ✨"
+        final smallFinder = find.textContaining('3,000');
+        expect(smallFinder, findsWidgets);
+        final candidates = tester.widgetList<Text>(smallFinder).toList();
+        // Find the Text whose style has tabularFigures (the Best Joy small line
+        // explicitly sets this per Pitfall #10 gate).
+        final tabular = candidates.where(
+          (t) => (t.style?.fontFeatures ?? const []).contains(
+            const FontFeature.tabularFigures(),
+          ),
+        );
+        expect(tabular, isNotEmpty);
+      });
+    },
+  );
 
   group('HomeHeroCard — currency resolution (D-12, CLAUDE.md Pitfall 9)', () {
-    testWidgets('renders currencyCode from constructor (no hardcoded JPY)',
-        (tester) async {
+    testWidgets('renders currencyCode from constructor (no hardcoded JPY)', (
+      tester,
+    ) async {
       // CNY also uses ¥ symbol but with 2 decimals (¥142,800.00 vs ¥142,800).
       await tester.pumpWidget(
         _buildSubject(snapshot: _singleRich(), currencyCode: 'CNY'),

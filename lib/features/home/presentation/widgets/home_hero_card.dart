@@ -125,7 +125,7 @@ class HomeHeroCard extends StatelessWidget {
             color: context.wmTextSecondary,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
@@ -139,7 +139,7 @@ class HomeHeroCard extends StatelessWidget {
             if (hasAny) _trendChip(trend),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Text(
           l10n.homeHeroPreviousMonthSubline(
             _fmt.formatCurrency(prev, currencyCode, locale),
@@ -216,7 +216,7 @@ class HomeHeroCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           child: Stack(
             children: [
-              Container(height: 6, color: context.wmBackgroundDivider),
+              Container(height: 6, color: AppColors.survival),
               FractionallySizedBox(
                 widthFactor: ratio,
                 child: Container(
@@ -497,23 +497,9 @@ class HomeHeroCard extends StatelessWidget {
           l10n.homeHighlightsCountLegend(highlights),
           '',
         ),
-        if (happiness.totalSoulTx > 0) ...[
-          const SizedBox(height: 6),
-          Text(
-            l10n.homeCoverageCaption(_rated(happiness), happiness.totalSoulTx),
-            style: AppTextStyles.bodySmall.copyWith(
-              color: context.wmTextSecondary,
-            ),
-          ),
-        ],
       ],
     );
   }
-
-  int _rated(HappinessReport h) => switch (h.avgSatisfaction) {
-    Empty() => 0,
-    Value(sampleSize: final n) => n,
-  };
 
   Widget _legendRow(
     BuildContext context,
@@ -587,29 +573,22 @@ class HomeHeroCard extends StatelessWidget {
         children: [
           Text(
             tag,
-            style: const TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1,
-              color: AppColors.shared,
-            ),
+            style: AppTextStyles.overline.copyWith(color: AppColors.shared),
           ),
           const SizedBox(height: 4),
           Text(
             big,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
+            style: AppTextStyles.titleSmall.copyWith(
               color: context.wmTextPrimary,
+              fontWeight: FontWeight.w400,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             small,
-            style: const TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w500,
+            style: AppTextStyles.caption.copyWith(
               color: AppColors.shared,
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
         ],
@@ -640,31 +619,23 @@ class HomeHeroCard extends StatelessWidget {
         children: [
           Text(
             tag,
-            style: const TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1,
-              color: AppColors.shared,
-            ),
+            style: AppTextStyles.overline.copyWith(color: AppColors.shared),
           ),
           const SizedBox(height: 4),
           Text(
             '$category · $dateLabel',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
+            style: AppTextStyles.titleSmall.copyWith(
               color: context.wmTextPrimary,
+              fontWeight: FontWeight.w400,
             ),
           ),
           const SizedBox(height: 2),
           // Pitfall #10 — tabular figures on the ¥/satisfaction line.
           Text(
             smallLine,
-            style: const TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w500,
+            style: AppTextStyles.caption.copyWith(
               color: AppColors.shared,
-              fontFeatures: [FontFeature.tabularFigures()],
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
         ],

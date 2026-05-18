@@ -582,11 +582,6 @@ class SZh extends S {
   String get homeBestJoyAllNeutralSmall => '让它变成你的本月最爱';
 
   @override
-  String homeCoverageCaption(int rated, int total) {
-    return '已评分 $rated/$total';
-  }
-
-  @override
   String get homeAvgSatisfactionLegend => '满足度均值';
 
   @override

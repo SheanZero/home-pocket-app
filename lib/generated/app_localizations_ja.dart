@@ -581,11 +581,6 @@ class SJa extends S {
   String get homeBestJoyAllNeutralSmall => 'あなたの今月の最愛にしよう';
 
   @override
-  String homeCoverageCaption(int rated, int total) {
-    return '$rated/$total 件評価済み';
-  }
-
-  @override
   String get homeAvgSatisfactionLegend => '満足度の平均';
 
   @override

@@ -742,18 +742,6 @@
   "@homeBestJoyAllNeutralSmall": {
     "description": "Best Joy small line — all-neutral state (D-09)"
   },
-  "homeCoverageCaption": "{rated}/{total} 件評価済み",
-  "@homeCoverageCaption": {
-    "description": "Coverage caption on headline metric tile (HOMEUI-04 / HAPPY-06)",
-    "placeholders": {
-      "rated": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "homeAvgSatisfactionLegend": "満足度の平均",
   "@homeAvgSatisfactionLegend": {
     "description": "Single-mode mid-ring legend label"
