@@ -58,7 +58,11 @@ class MainShellScreen extends ConsumerWidget {
           shadowAggregateProvider(year: now.year, month: now.month),
         );
         ref.invalidate(
-          bestJoyMomentProvider(bookId: bookId, year: now.year, month: now.month),
+          bestJoyMomentProvider(
+            bookId: bookId,
+            year: now.year,
+            month: now.month,
+          ),
         );
         final bookAsync = ref.read(bookByIdProvider(bookId: bookId));
         if (bookAsync.hasValue) {
@@ -123,7 +127,11 @@ class MainShellScreen extends ConsumerWidget {
                   );
                   ref.invalidate(todayTransactionsProvider(bookId: bookId));
                   ref.invalidate(
-                    bestJoyMomentProvider(bookId: bookId, year: now.year, month: now.month),
+                    bestJoyMomentProvider(
+                      bookId: bookId,
+                      year: now.year,
+                      month: now.month,
+                    ),
                   );
                   final bookAsync = ref.read(bookByIdProvider(bookId: bookId));
                   if (bookAsync.hasValue) {
