@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../generated/app_localizations.dart';
 
+import '../../../accounting/presentation/providers/repository_providers.dart';
 import '../../../accounting/presentation/screens/transaction_entry_screen.dart';
 import '../../../analytics/presentation/providers/state_analytics.dart';
+import '../../../analytics/presentation/providers/state_happiness.dart';
 import '../../../analytics/presentation/screens/analytics_screen.dart';
 import '../../../family_sync/domain/models/sync_status_model.dart';
 import '../../../family_sync/presentation/providers/state_sync.dart';
@@ -54,6 +56,19 @@ class MainShellScreen extends ConsumerWidget {
         ref.invalidate(shadowBooksProvider);
         ref.invalidate(
           shadowAggregateProvider(year: now.year, month: now.month),
+        );
+        final book = ref.read(bookByIdProvider(bookId: bookId)).value;
+        final currencyCode = book?.currency ?? 'JPY';
+        ref.invalidate(
+          happinessReportProvider(
+            bookId: bookId,
+            year: now.year,
+            month: now.month,
+            currencyCode: currencyCode,
+          ),
+        );
+        ref.invalidate(
+          bestJoyMomentProvider(bookId: bookId, year: now.year, month: now.month),
         );
       }
     });
@@ -106,6 +121,19 @@ class MainShellScreen extends ConsumerWidget {
                     ),
                   );
                   ref.invalidate(todayTransactionsProvider(bookId: bookId));
+                  final book = ref.read(bookByIdProvider(bookId: bookId)).value;
+                  final currencyCode = book?.currency ?? 'JPY';
+                  ref.invalidate(
+                    happinessReportProvider(
+                      bookId: bookId,
+                      year: now.year,
+                      month: now.month,
+                      currencyCode: currencyCode,
+                    ),
+                  );
+                  ref.invalidate(
+                    bestJoyMomentProvider(bookId: bookId, year: now.year, month: now.month),
+                  );
                 },
               ),
             ),
