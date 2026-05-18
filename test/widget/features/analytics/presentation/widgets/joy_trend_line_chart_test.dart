@@ -101,6 +101,7 @@ void main() {
             sideTitles: const SideTitles(showTitles: true),
             formattedValue: '0.5',
             axisSide: AxisSide.left,
+            rotationQuarterTurns: 0,
           ),
         );
 

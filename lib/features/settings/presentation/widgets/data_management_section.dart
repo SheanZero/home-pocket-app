@@ -73,7 +73,9 @@ class DataManagementSection extends ConsumerWidget {
     Navigator.pop(context); // Dismiss loading
 
     if (result.isSuccess && result.data != null) {
-      await Share.shareXFiles([XFile(result.data!.path)]);
+      await SharePlus.instance.share(
+        ShareParams(files: [XFile(result.data!.path)]),
+      );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(S.of(context).backupExportedSuccessfully)),
@@ -89,7 +91,7 @@ class DataManagementSection extends ConsumerWidget {
   }
 
   Future<void> _importBackup(BuildContext context, WidgetRef ref) async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['hpb'],
     );

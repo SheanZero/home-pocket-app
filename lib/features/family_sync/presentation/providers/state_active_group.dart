@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/models/group_info.dart';
@@ -21,5 +20,5 @@ Stream<GroupInfo?> activeGroup(Ref ref) {
 /// (banner visibility, mode badge text).
 @Riverpod(keepAlive: true)
 bool isGroupMode(Ref ref) {
-  return ref.watch(activeGroupProvider).valueOrNull != null;
+  return ref.watch(activeGroupProvider).value != null;
 }

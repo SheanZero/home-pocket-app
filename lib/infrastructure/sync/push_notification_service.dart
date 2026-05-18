@@ -154,7 +154,7 @@ class FlutterLocalNotificationClient implements LocalNotificationClient {
     );
 
     await _plugin.initialize(
-      settings,
+      settings: settings,
       onDidReceiveNotificationResponse: (response) async {
         final payload = response.payload;
         if (payload == null || payload.isEmpty) return;
@@ -181,7 +181,13 @@ class FlutterLocalNotificationClient implements LocalNotificationClient {
       iOS: DarwinNotificationDetails(),
     );
 
-    await _plugin.show(id, title, body, details, payload: jsonEncode(payload));
+    await _plugin.show(
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: details,
+      payload: jsonEncode(payload),
+    );
   }
 }
 

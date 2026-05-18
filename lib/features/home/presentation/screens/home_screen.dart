@@ -39,7 +39,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
     final localeAsync = ref.watch(currentLocaleProvider);
-    final locale = localeAsync.valueOrNull ?? const Locale('ja');
+    final locale = localeAsync.value ?? const Locale('ja');
     final isGroupMode = ref.watch(isGroupModeProvider);
     final now = DateTime.now();
     final year = now.year;
@@ -93,7 +93,7 @@ class HomeScreen extends ConsumerWidget {
                   // the home feature; future grep audits verify no other site
                   // re-introduces it.
                   final currencyCode =
-                      bookAsync.valueOrNull?.currency ?? 'JPY';
+                      bookAsync.value?.currency ?? 'JPY';
 
                   final happinessAsync = ref.watch(
                     happinessReportProvider(

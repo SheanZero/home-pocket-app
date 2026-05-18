@@ -5,6 +5,7 @@ import 'package:home_pocket/application/analytics/get_family_happiness_use_case.
 import 'package:home_pocket/application/analytics/get_happiness_report_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/analytics/domain/models/family_happiness.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
 import 'package:home_pocket/features/analytics/domain/repositories/analytics_repository.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/repository_providers.dart';
@@ -13,6 +14,8 @@ import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:mocktail/mocktail.dart';
+
+import '../../../../../helpers/test_provider_scope.dart';
 
 class _MockAnalyticsRepository extends Mock implements AnalyticsRepository {}
 
@@ -79,14 +82,16 @@ void main() {
         ).thenAnswer((_) => Stream.value(null));
         final container = makeContainer();
 
-        final result = await container.read(
-          familyHappinessProvider(year: 2026, month: 3).future,
+        final result = await waitForFirstValue<FamilyHappiness>(
+          container,
+          familyHappinessProvider(year: 2026, month: 3),
         );
+        final data = result.requireValue;
 
-        expect(result.totalGroupSoulTx, 0);
-        expect(result.familyHighlightsSum, isA<Empty<int>>());
-        expect(result.sharedJoyInsight, isA<Empty>());
-        expect(result.medianSatisfaction, isA<Empty<double>>());
+        expect(data.totalGroupSoulTx, 0);
+        expect(data.familyHighlightsSum, isA<Empty<int>>());
+        expect(data.sharedJoyInsight, isA<Empty>());
+        expect(data.medianSatisfaction, isA<Empty<double>>());
         verifyZeroInteractions(analyticsRepository);
       },
     );
@@ -102,14 +107,16 @@ void main() {
         ).thenAnswer((_) async => []);
         final container = makeContainer();
 
-        final result = await container.read(
-          familyHappinessProvider(year: 2026, month: 3).future,
+        final result = await waitForFirstValue<FamilyHappiness>(
+          container,
+          familyHappinessProvider(year: 2026, month: 3),
         );
+        final data = result.requireValue;
 
-        expect(result.totalGroupSoulTx, 0);
-        expect(result.familyHighlightsSum, isA<Empty<int>>());
-        expect(result.sharedJoyInsight, isA<Empty>());
-        expect(result.medianSatisfaction, isA<Empty<double>>());
+        expect(data.totalGroupSoulTx, 0);
+        expect(data.familyHighlightsSum, isA<Empty<int>>());
+        expect(data.sharedJoyInsight, isA<Empty>());
+        expect(data.medianSatisfaction, isA<Empty<double>>());
         verifyZeroInteractions(analyticsRepository);
       },
     );

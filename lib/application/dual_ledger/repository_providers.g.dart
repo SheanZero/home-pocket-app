@@ -6,42 +6,94 @@ part of 'repository_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(ruleEngine)
+final ruleEngineProvider = RuleEngineProvider._();
+
+final class RuleEngineProvider
+    extends $FunctionalProvider<RuleEngine, RuleEngine, RuleEngine>
+    with $Provider<RuleEngine> {
+  RuleEngineProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'ruleEngineProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$ruleEngineHash();
+
+  @$internal
+  @override
+  $ProviderElement<RuleEngine> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  RuleEngine create(Ref ref) {
+    return ruleEngine(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(RuleEngine value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<RuleEngine>(value),
+    );
+  }
+}
+
 String _$ruleEngineHash() => r'99a9cb2e188a388a61aeda76ae909fcd910708ae';
 
-/// See also [ruleEngine].
-@ProviderFor(ruleEngine)
-final ruleEngineProvider = Provider<RuleEngine>.internal(
-  ruleEngine,
-  name: r'ruleEngineProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$ruleEngineHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+@ProviderFor(classificationService)
+final classificationServiceProvider = ClassificationServiceProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef RuleEngineRef = ProviderRef<RuleEngine>;
+final class ClassificationServiceProvider
+    extends
+        $FunctionalProvider<
+          ClassificationService,
+          ClassificationService,
+          ClassificationService
+        >
+    with $Provider<ClassificationService> {
+  ClassificationServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'classificationServiceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$classificationServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<ClassificationService> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ClassificationService create(Ref ref) {
+    return classificationService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ClassificationService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ClassificationService>(value),
+    );
+  }
+}
+
 String _$classificationServiceHash() =>
     r'4096115d38aac706f4bb6caa14d825876a87269b';
-
-/// See also [classificationService].
-@ProviderFor(classificationService)
-final classificationServiceProvider =
-    AutoDisposeProvider<ClassificationService>.internal(
-      classificationService,
-      name: r'classificationServiceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$classificationServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ClassificationServiceRef =
-    AutoDisposeProviderRef<ClassificationService>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

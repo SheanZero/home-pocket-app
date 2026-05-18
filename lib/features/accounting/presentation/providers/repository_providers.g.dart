@@ -6,551 +6,1019 @@ part of 'repository_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$bookRepositoryHash() => r'd010c4f3be9aa4d9eb70242809cef015d87b6b03';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// BookRepository provider.
+
+@ProviderFor(bookRepository)
+final bookRepositoryProvider = BookRepositoryProvider._();
 
 /// BookRepository provider.
-///
-/// Copied from [bookRepository].
-@ProviderFor(bookRepository)
-final bookRepositoryProvider = AutoDisposeProvider<BookRepository>.internal(
-  bookRepository,
-  name: r'bookRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$bookRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef BookRepositoryRef = AutoDisposeProviderRef<BookRepository>;
-String _$bookByIdHash() => r'544dd59914ef0fb28f243b439f1046e87bb972e3';
-
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
-
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
-/// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
-///
-/// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
-/// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
-/// for the given ID — caller falls back to `'JPY'` only in the missing-Book
-/// case, never in the widget body.
-///
-/// Copied from [bookById].
-@ProviderFor(bookById)
-const bookByIdProvider = BookByIdFamily();
-
-/// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
-///
-/// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
-/// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
-/// for the given ID — caller falls back to `'JPY'` only in the missing-Book
-/// case, never in the widget body.
-///
-/// Copied from [bookById].
-class BookByIdFamily extends Family<AsyncValue<Book?>> {
-  /// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
-  ///
-  /// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
-  /// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
-  /// for the given ID — caller falls back to `'JPY'` only in the missing-Book
-  /// case, never in the widget body.
-  ///
-  /// Copied from [bookById].
-  const BookByIdFamily();
-
-  /// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
-  ///
-  /// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
-  /// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
-  /// for the given ID — caller falls back to `'JPY'` only in the missing-Book
-  /// case, never in the widget body.
-  ///
-  /// Copied from [bookById].
-  BookByIdProvider call({required String bookId}) {
-    return BookByIdProvider(bookId: bookId);
-  }
-
-  @override
-  BookByIdProvider getProviderOverride(covariant BookByIdProvider provider) {
-    return call(bookId: provider.bookId);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'bookByIdProvider';
-}
-
-/// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
-///
-/// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
-/// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
-/// for the given ID — caller falls back to `'JPY'` only in the missing-Book
-/// case, never in the widget body.
-///
-/// Copied from [bookById].
-class BookByIdProvider extends AutoDisposeFutureProvider<Book?> {
-  /// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
-  ///
-  /// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
-  /// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
-  /// for the given ID — caller falls back to `'JPY'` only in the missing-Book
-  /// case, never in the widget body.
-  ///
-  /// Copied from [bookById].
-  BookByIdProvider({required String bookId})
-    : this._internal(
-        (ref) => bookById(ref as BookByIdRef, bookId: bookId),
-        from: bookByIdProvider,
-        name: r'bookByIdProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$bookByIdHash,
-        dependencies: BookByIdFamily._dependencies,
-        allTransitiveDependencies: BookByIdFamily._allTransitiveDependencies,
-        bookId: bookId,
+final class BookRepositoryProvider
+    extends $FunctionalProvider<BookRepository, BookRepository, BookRepository>
+    with $Provider<BookRepository> {
+  /// BookRepository provider.
+  BookRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'bookRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
       );
 
-  BookByIdProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.bookId,
-  }) : super.internal();
+  @override
+  String debugGetCreateSourceHash() => _$bookRepositoryHash();
 
-  final String bookId;
+  @$internal
+  @override
+  $ProviderElement<BookRepository> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
 
   @override
-  Override overrideWith(FutureOr<Book?> Function(BookByIdRef provider) create) {
-    return ProviderOverride(
-      origin: this,
-      override: BookByIdProvider._internal(
-        (ref) => create(ref as BookByIdRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        bookId: bookId,
-      ),
-    );
+  BookRepository create(Ref ref) {
+    return bookRepository(ref);
   }
 
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(BookRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<BookRepository>(value),
+    );
+  }
+}
+
+String _$bookRepositoryHash() => r'd010c4f3be9aa4d9eb70242809cef015d87b6b03';
+
+/// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
+///
+/// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
+/// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
+/// for the given ID — caller falls back to `'JPY'` only in the missing-Book
+/// case, never in the widget body.
+
+@ProviderFor(bookById)
+final bookByIdProvider = BookByIdFamily._();
+
+/// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
+///
+/// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
+/// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
+/// for the given ID — caller falls back to `'JPY'` only in the missing-Book
+/// case, never in the widget body.
+
+final class BookByIdProvider
+    extends $FunctionalProvider<AsyncValue<Book?>, Book?, FutureOr<Book?>>
+    with $FutureModifier<Book?>, $FutureProvider<Book?> {
+  /// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
+  ///
+  /// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
+  /// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
+  /// for the given ID — caller falls back to `'JPY'` only in the missing-Book
+  /// case, never in the widget body.
+  BookByIdProvider._({
+    required BookByIdFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'bookByIdProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
   @override
-  AutoDisposeFutureProviderElement<Book?> createElement() {
-    return _BookByIdProviderElement(this);
+  String debugGetCreateSourceHash() => _$bookByIdHash();
+
+  @override
+  String toString() {
+    return r'bookByIdProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<Book?> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Book?> create(Ref ref) {
+    final argument = this.argument as String;
+    return bookById(ref, bookId: argument);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is BookByIdProvider && other.bookId == bookId;
+    return other is BookByIdProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, bookId.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin BookByIdRef on AutoDisposeFutureProviderRef<Book?> {
-  /// The parameter `bookId` of this provider.
-  String get bookId;
-}
+String _$bookByIdHash() => r'544dd59914ef0fb28f243b439f1046e87bb972e3';
 
-class _BookByIdProviderElement extends AutoDisposeFutureProviderElement<Book?>
-    with BookByIdRef {
-  _BookByIdProviderElement(super.provider);
+/// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
+///
+/// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
+/// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
+/// for the given ID — caller falls back to `'JPY'` only in the missing-Book
+/// case, never in the widget body.
+
+final class BookByIdFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<Book?>, String> {
+  BookByIdFamily._()
+    : super(
+        retry: null,
+        name: r'bookByIdProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Resolves a Book by ID for currency-code lookup (Phase 10 D-12).
+  ///
+  /// Use case: HomeHeroCard's parent screen needs `Book.currency` to eliminate
+  /// hardcoded `'JPY'` (CLAUDE.md Pitfall #9). Returns `null` if no Book exists
+  /// for the given ID — caller falls back to `'JPY'` only in the missing-Book
+  /// case, never in the widget body.
+
+  BookByIdProvider call({required String bookId}) =>
+      BookByIdProvider._(argument: bookId, from: this);
 
   @override
-  String get bookId => (origin as BookByIdProvider).bookId;
+  String toString() => r'bookByIdProvider';
+}
+
+/// CategoryRepository provider.
+
+@ProviderFor(categoryRepository)
+final categoryRepositoryProvider = CategoryRepositoryProvider._();
+
+/// CategoryRepository provider.
+
+final class CategoryRepositoryProvider
+    extends
+        $FunctionalProvider<
+          CategoryRepository,
+          CategoryRepository,
+          CategoryRepository
+        >
+    with $Provider<CategoryRepository> {
+  /// CategoryRepository provider.
+  CategoryRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'categoryRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$categoryRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<CategoryRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  CategoryRepository create(Ref ref) {
+    return categoryRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CategoryRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CategoryRepository>(value),
+    );
+  }
 }
 
 String _$categoryRepositoryHash() =>
     r'0efc054c1cb685a355e020bea93a3dbb90250e96';
 
-/// CategoryRepository provider.
-///
-/// Copied from [categoryRepository].
-@ProviderFor(categoryRepository)
-final categoryRepositoryProvider =
-    AutoDisposeProvider<CategoryRepository>.internal(
-      categoryRepository,
-      name: r'categoryRepositoryProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$categoryRepositoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+/// CategoryLedgerConfigRepository provider.
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef CategoryRepositoryRef = AutoDisposeProviderRef<CategoryRepository>;
+@ProviderFor(categoryLedgerConfigRepository)
+final categoryLedgerConfigRepositoryProvider =
+    CategoryLedgerConfigRepositoryProvider._();
+
+/// CategoryLedgerConfigRepository provider.
+
+final class CategoryLedgerConfigRepositoryProvider
+    extends
+        $FunctionalProvider<
+          CategoryLedgerConfigRepository,
+          CategoryLedgerConfigRepository,
+          CategoryLedgerConfigRepository
+        >
+    with $Provider<CategoryLedgerConfigRepository> {
+  /// CategoryLedgerConfigRepository provider.
+  CategoryLedgerConfigRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'categoryLedgerConfigRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$categoryLedgerConfigRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<CategoryLedgerConfigRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  CategoryLedgerConfigRepository create(Ref ref) {
+    return categoryLedgerConfigRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CategoryLedgerConfigRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CategoryLedgerConfigRepository>(
+        value,
+      ),
+    );
+  }
+}
+
 String _$categoryLedgerConfigRepositoryHash() =>
     r'a5464185fdbbbdee645ad65d28c378aa477cb47b';
 
-/// CategoryLedgerConfigRepository provider.
-///
-/// Copied from [categoryLedgerConfigRepository].
-@ProviderFor(categoryLedgerConfigRepository)
-final categoryLedgerConfigRepositoryProvider =
-    AutoDisposeProvider<CategoryLedgerConfigRepository>.internal(
-      categoryLedgerConfigRepository,
-      name: r'categoryLedgerConfigRepositoryProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$categoryLedgerConfigRepositoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+/// TransactionRepository provider.
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef CategoryLedgerConfigRepositoryRef =
-    AutoDisposeProviderRef<CategoryLedgerConfigRepository>;
+@ProviderFor(transactionRepository)
+final transactionRepositoryProvider = TransactionRepositoryProvider._();
+
+/// TransactionRepository provider.
+
+final class TransactionRepositoryProvider
+    extends
+        $FunctionalProvider<
+          TransactionRepository,
+          TransactionRepository,
+          TransactionRepository
+        >
+    with $Provider<TransactionRepository> {
+  /// TransactionRepository provider.
+  TransactionRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'transactionRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$transactionRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<TransactionRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  TransactionRepository create(Ref ref) {
+    return transactionRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TransactionRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TransactionRepository>(value),
+    );
+  }
+}
+
 String _$transactionRepositoryHash() =>
     r'c70882ecda67cc3dfa3156ddf91a8b0e0bdd9ead';
 
-/// TransactionRepository provider.
-///
-/// Copied from [transactionRepository].
-@ProviderFor(transactionRepository)
-final transactionRepositoryProvider =
-    AutoDisposeProvider<TransactionRepository>.internal(
-      transactionRepository,
-      name: r'transactionRepositoryProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$transactionRepositoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+/// MerchantCategoryPreferenceRepository provider.
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef TransactionRepositoryRef =
-    AutoDisposeProviderRef<TransactionRepository>;
+@ProviderFor(merchantCategoryPreferenceRepository)
+final merchantCategoryPreferenceRepositoryProvider =
+    MerchantCategoryPreferenceRepositoryProvider._();
+
+/// MerchantCategoryPreferenceRepository provider.
+
+final class MerchantCategoryPreferenceRepositoryProvider
+    extends
+        $FunctionalProvider<
+          MerchantCategoryPreferenceRepository,
+          MerchantCategoryPreferenceRepository,
+          MerchantCategoryPreferenceRepository
+        >
+    with $Provider<MerchantCategoryPreferenceRepository> {
+  /// MerchantCategoryPreferenceRepository provider.
+  MerchantCategoryPreferenceRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'merchantCategoryPreferenceRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() =>
+      _$merchantCategoryPreferenceRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<MerchantCategoryPreferenceRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  MerchantCategoryPreferenceRepository create(Ref ref) {
+    return merchantCategoryPreferenceRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(MerchantCategoryPreferenceRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<MerchantCategoryPreferenceRepository>(value),
+    );
+  }
+}
+
 String _$merchantCategoryPreferenceRepositoryHash() =>
     r'e973d898b68613759838ca2b7ddb947d77ba7d36';
 
-/// MerchantCategoryPreferenceRepository provider.
-///
-/// Copied from [merchantCategoryPreferenceRepository].
-@ProviderFor(merchantCategoryPreferenceRepository)
-final merchantCategoryPreferenceRepositoryProvider =
-    AutoDisposeProvider<MerchantCategoryPreferenceRepository>.internal(
-      merchantCategoryPreferenceRepository,
-      name: r'merchantCategoryPreferenceRepositoryProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$merchantCategoryPreferenceRepositoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+/// CategoryKeywordPreferenceRepository provider.
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef MerchantCategoryPreferenceRepositoryRef =
-    AutoDisposeProviderRef<MerchantCategoryPreferenceRepository>;
+@ProviderFor(categoryKeywordPreferenceRepository)
+final categoryKeywordPreferenceRepositoryProvider =
+    CategoryKeywordPreferenceRepositoryProvider._();
+
+/// CategoryKeywordPreferenceRepository provider.
+
+final class CategoryKeywordPreferenceRepositoryProvider
+    extends
+        $FunctionalProvider<
+          CategoryKeywordPreferenceRepository,
+          CategoryKeywordPreferenceRepository,
+          CategoryKeywordPreferenceRepository
+        >
+    with $Provider<CategoryKeywordPreferenceRepository> {
+  /// CategoryKeywordPreferenceRepository provider.
+  CategoryKeywordPreferenceRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'categoryKeywordPreferenceRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() =>
+      _$categoryKeywordPreferenceRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<CategoryKeywordPreferenceRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  CategoryKeywordPreferenceRepository create(Ref ref) {
+    return categoryKeywordPreferenceRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CategoryKeywordPreferenceRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CategoryKeywordPreferenceRepository>(
+        value,
+      ),
+    );
+  }
+}
+
 String _$categoryKeywordPreferenceRepositoryHash() =>
     r'e5179f02c7ea66cfa7c354d2bc0c349d1aaf6fdb';
 
-/// CategoryKeywordPreferenceRepository provider.
-///
-/// Copied from [categoryKeywordPreferenceRepository].
-@ProviderFor(categoryKeywordPreferenceRepository)
-final categoryKeywordPreferenceRepositoryProvider =
-    AutoDisposeProvider<CategoryKeywordPreferenceRepository>.internal(
-      categoryKeywordPreferenceRepository,
-      name: r'categoryKeywordPreferenceRepositoryProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$categoryKeywordPreferenceRepositoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+@ProviderFor(createTransactionUseCase)
+final createTransactionUseCaseProvider = CreateTransactionUseCaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef CategoryKeywordPreferenceRepositoryRef =
-    AutoDisposeProviderRef<CategoryKeywordPreferenceRepository>;
+final class CreateTransactionUseCaseProvider
+    extends
+        $FunctionalProvider<
+          CreateTransactionUseCase,
+          CreateTransactionUseCase,
+          CreateTransactionUseCase
+        >
+    with $Provider<CreateTransactionUseCase> {
+  CreateTransactionUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'createTransactionUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$createTransactionUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<CreateTransactionUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  CreateTransactionUseCase create(Ref ref) {
+    return createTransactionUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CreateTransactionUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CreateTransactionUseCase>(value),
+    );
+  }
+}
+
 String _$createTransactionUseCaseHash() =>
     r'a3b1c6f6b92937972bd991e565193ae36551bbf6';
 
-/// See also [createTransactionUseCase].
-@ProviderFor(createTransactionUseCase)
-final createTransactionUseCaseProvider =
-    AutoDisposeProvider<CreateTransactionUseCase>.internal(
-      createTransactionUseCase,
-      name: r'createTransactionUseCaseProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$createTransactionUseCaseHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+@ProviderFor(getTransactionsUseCase)
+final getTransactionsUseCaseProvider = GetTransactionsUseCaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef CreateTransactionUseCaseRef =
-    AutoDisposeProviderRef<CreateTransactionUseCase>;
+final class GetTransactionsUseCaseProvider
+    extends
+        $FunctionalProvider<
+          GetTransactionsUseCase,
+          GetTransactionsUseCase,
+          GetTransactionsUseCase
+        >
+    with $Provider<GetTransactionsUseCase> {
+  GetTransactionsUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'getTransactionsUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$getTransactionsUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<GetTransactionsUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  GetTransactionsUseCase create(Ref ref) {
+    return getTransactionsUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GetTransactionsUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GetTransactionsUseCase>(value),
+    );
+  }
+}
+
 String _$getTransactionsUseCaseHash() =>
     r'664cacb8c958067685e46bd87980a68b66734e50';
 
-/// See also [getTransactionsUseCase].
-@ProviderFor(getTransactionsUseCase)
-final getTransactionsUseCaseProvider =
-    AutoDisposeProvider<GetTransactionsUseCase>.internal(
-      getTransactionsUseCase,
-      name: r'getTransactionsUseCaseProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$getTransactionsUseCaseHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+@ProviderFor(deleteTransactionUseCase)
+final deleteTransactionUseCaseProvider = DeleteTransactionUseCaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef GetTransactionsUseCaseRef =
-    AutoDisposeProviderRef<GetTransactionsUseCase>;
+final class DeleteTransactionUseCaseProvider
+    extends
+        $FunctionalProvider<
+          DeleteTransactionUseCase,
+          DeleteTransactionUseCase,
+          DeleteTransactionUseCase
+        >
+    with $Provider<DeleteTransactionUseCase> {
+  DeleteTransactionUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'deleteTransactionUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$deleteTransactionUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<DeleteTransactionUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  DeleteTransactionUseCase create(Ref ref) {
+    return deleteTransactionUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DeleteTransactionUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DeleteTransactionUseCase>(value),
+    );
+  }
+}
+
 String _$deleteTransactionUseCaseHash() =>
     r'4a3f0ac07e4bb9b95de0de888aa1f930cefc371c';
 
-/// See also [deleteTransactionUseCase].
-@ProviderFor(deleteTransactionUseCase)
-final deleteTransactionUseCaseProvider =
-    AutoDisposeProvider<DeleteTransactionUseCase>.internal(
-      deleteTransactionUseCase,
-      name: r'deleteTransactionUseCaseProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$deleteTransactionUseCaseHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+@ProviderFor(seedCategoriesUseCase)
+final seedCategoriesUseCaseProvider = SeedCategoriesUseCaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef DeleteTransactionUseCaseRef =
-    AutoDisposeProviderRef<DeleteTransactionUseCase>;
+final class SeedCategoriesUseCaseProvider
+    extends
+        $FunctionalProvider<
+          SeedCategoriesUseCase,
+          SeedCategoriesUseCase,
+          SeedCategoriesUseCase
+        >
+    with $Provider<SeedCategoriesUseCase> {
+  SeedCategoriesUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'seedCategoriesUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$seedCategoriesUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<SeedCategoriesUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  SeedCategoriesUseCase create(Ref ref) {
+    return seedCategoriesUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SeedCategoriesUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SeedCategoriesUseCase>(value),
+    );
+  }
+}
+
 String _$seedCategoriesUseCaseHash() =>
     r'a4caa1f0c963fd92d35540d8de28751995f2020f';
 
-/// See also [seedCategoriesUseCase].
-@ProviderFor(seedCategoriesUseCase)
-final seedCategoriesUseCaseProvider =
-    AutoDisposeProvider<SeedCategoriesUseCase>.internal(
-      seedCategoriesUseCase,
-      name: r'seedCategoriesUseCaseProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$seedCategoriesUseCaseHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+@ProviderFor(categoryService)
+final categoryServiceProvider = CategoryServiceProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SeedCategoriesUseCaseRef =
-    AutoDisposeProviderRef<SeedCategoriesUseCase>;
+final class CategoryServiceProvider
+    extends
+        $FunctionalProvider<CategoryService, CategoryService, CategoryService>
+    with $Provider<CategoryService> {
+  CategoryServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'categoryServiceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$categoryServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<CategoryService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  CategoryService create(Ref ref) {
+    return categoryService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CategoryService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CategoryService>(value),
+    );
+  }
+}
+
 String _$categoryServiceHash() => r'0a0159aff6dd29a6c973915fe8a31e02b5d4beb7';
 
-/// See also [categoryService].
-@ProviderFor(categoryService)
-final categoryServiceProvider = AutoDisposeProvider<CategoryService>.internal(
-  categoryService,
-  name: r'categoryServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$categoryServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+@ProviderFor(ensureDefaultBookUseCase)
+final ensureDefaultBookUseCaseProvider = EnsureDefaultBookUseCaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef CategoryServiceRef = AutoDisposeProviderRef<CategoryService>;
+final class EnsureDefaultBookUseCaseProvider
+    extends
+        $FunctionalProvider<
+          EnsureDefaultBookUseCase,
+          EnsureDefaultBookUseCase,
+          EnsureDefaultBookUseCase
+        >
+    with $Provider<EnsureDefaultBookUseCase> {
+  EnsureDefaultBookUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'ensureDefaultBookUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$ensureDefaultBookUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<EnsureDefaultBookUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EnsureDefaultBookUseCase create(Ref ref) {
+    return ensureDefaultBookUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EnsureDefaultBookUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EnsureDefaultBookUseCase>(value),
+    );
+  }
+}
+
 String _$ensureDefaultBookUseCaseHash() =>
     r'37e41e1327696132edf238d026cdfcb9f86ba297';
 
-/// See also [ensureDefaultBookUseCase].
-@ProviderFor(ensureDefaultBookUseCase)
-final ensureDefaultBookUseCaseProvider =
-    AutoDisposeProvider<EnsureDefaultBookUseCase>.internal(
-      ensureDefaultBookUseCase,
-      name: r'ensureDefaultBookUseCaseProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$ensureDefaultBookUseCaseHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+@ProviderFor(merchantCategoryLearningService)
+final merchantCategoryLearningServiceProvider =
+    MerchantCategoryLearningServiceProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef EnsureDefaultBookUseCaseRef =
-    AutoDisposeProviderRef<EnsureDefaultBookUseCase>;
+final class MerchantCategoryLearningServiceProvider
+    extends
+        $FunctionalProvider<
+          MerchantCategoryLearningService,
+          MerchantCategoryLearningService,
+          MerchantCategoryLearningService
+        >
+    with $Provider<MerchantCategoryLearningService> {
+  MerchantCategoryLearningServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'merchantCategoryLearningServiceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$merchantCategoryLearningServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<MerchantCategoryLearningService> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  MerchantCategoryLearningService create(Ref ref) {
+    return merchantCategoryLearningService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(MerchantCategoryLearningService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<MerchantCategoryLearningService>(
+        value,
+      ),
+    );
+  }
+}
+
 String _$merchantCategoryLearningServiceHash() =>
     r'17a57f6c50e022072ffd2bdcd44230e7a98b463e';
 
-/// See also [merchantCategoryLearningService].
-@ProviderFor(merchantCategoryLearningService)
-final merchantCategoryLearningServiceProvider =
-    AutoDisposeProvider<MerchantCategoryLearningService>.internal(
-      merchantCategoryLearningService,
-      name: r'merchantCategoryLearningServiceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$merchantCategoryLearningServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+@ProviderFor(recordCategoryCorrectionUseCase)
+final recordCategoryCorrectionUseCaseProvider =
+    RecordCategoryCorrectionUseCaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef MerchantCategoryLearningServiceRef =
-    AutoDisposeProviderRef<MerchantCategoryLearningService>;
+final class RecordCategoryCorrectionUseCaseProvider
+    extends
+        $FunctionalProvider<
+          RecordCategoryCorrectionUseCase,
+          RecordCategoryCorrectionUseCase,
+          RecordCategoryCorrectionUseCase
+        >
+    with $Provider<RecordCategoryCorrectionUseCase> {
+  RecordCategoryCorrectionUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'recordCategoryCorrectionUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$recordCategoryCorrectionUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<RecordCategoryCorrectionUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  RecordCategoryCorrectionUseCase create(Ref ref) {
+    return recordCategoryCorrectionUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(RecordCategoryCorrectionUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<RecordCategoryCorrectionUseCase>(
+        value,
+      ),
+    );
+  }
+}
+
 String _$recordCategoryCorrectionUseCaseHash() =>
     r'9fc30b2a5e18adff9d18a15ea9f2a05212698750';
 
-/// See also [recordCategoryCorrectionUseCase].
-@ProviderFor(recordCategoryCorrectionUseCase)
-final recordCategoryCorrectionUseCaseProvider =
-    AutoDisposeProvider<RecordCategoryCorrectionUseCase>.internal(
-      recordCategoryCorrectionUseCase,
-      name: r'recordCategoryCorrectionUseCaseProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$recordCategoryCorrectionUseCaseHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+/// VoiceTextParser — stateless NLP parser, auto-disposed when not in use.
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef RecordCategoryCorrectionUseCaseRef =
-    AutoDisposeProviderRef<RecordCategoryCorrectionUseCase>;
-String _$voiceTextParserHash() => r'3493d74d0200f77486db448b8fc371a0fb3030fd';
+@ProviderFor(voiceTextParser)
+final voiceTextParserProvider = VoiceTextParserProvider._();
 
 /// VoiceTextParser — stateless NLP parser, auto-disposed when not in use.
-///
-/// Copied from [voiceTextParser].
-@ProviderFor(voiceTextParser)
-final voiceTextParserProvider = AutoDisposeProvider<VoiceTextParser>.internal(
-  voiceTextParser,
-  name: r'voiceTextParserProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$voiceTextParserHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef VoiceTextParserRef = AutoDisposeProviderRef<VoiceTextParser>;
+final class VoiceTextParserProvider
+    extends
+        $FunctionalProvider<VoiceTextParser, VoiceTextParser, VoiceTextParser>
+    with $Provider<VoiceTextParser> {
+  /// VoiceTextParser — stateless NLP parser, auto-disposed when not in use.
+  VoiceTextParserProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'voiceTextParserProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$voiceTextParserHash();
+
+  @$internal
+  @override
+  $ProviderElement<VoiceTextParser> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  VoiceTextParser create(Ref ref) {
+    return voiceTextParser(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(VoiceTextParser value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<VoiceTextParser>(value),
+    );
+  }
+}
+
+String _$voiceTextParserHash() => r'3493d74d0200f77486db448b8fc371a0fb3030fd';
+
+/// FuzzyCategoryMatcher — multi-signal category matcher with learning.
+
+@ProviderFor(fuzzyCategoryMatcher)
+final fuzzyCategoryMatcherProvider = FuzzyCategoryMatcherProvider._();
+
+/// FuzzyCategoryMatcher — multi-signal category matcher with learning.
+
+final class FuzzyCategoryMatcherProvider
+    extends
+        $FunctionalProvider<
+          FuzzyCategoryMatcher,
+          FuzzyCategoryMatcher,
+          FuzzyCategoryMatcher
+        >
+    with $Provider<FuzzyCategoryMatcher> {
+  /// FuzzyCategoryMatcher — multi-signal category matcher with learning.
+  FuzzyCategoryMatcherProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'fuzzyCategoryMatcherProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$fuzzyCategoryMatcherHash();
+
+  @$internal
+  @override
+  $ProviderElement<FuzzyCategoryMatcher> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  FuzzyCategoryMatcher create(Ref ref) {
+    return fuzzyCategoryMatcher(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(FuzzyCategoryMatcher value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<FuzzyCategoryMatcher>(value),
+    );
+  }
+}
+
 String _$fuzzyCategoryMatcherHash() =>
     r'83fb7164cd9431ee973c6158d5a7757e27581259';
 
-/// FuzzyCategoryMatcher — multi-signal category matcher with learning.
-///
-/// Copied from [fuzzyCategoryMatcher].
-@ProviderFor(fuzzyCategoryMatcher)
-final fuzzyCategoryMatcherProvider =
-    AutoDisposeProvider<FuzzyCategoryMatcher>.internal(
-      fuzzyCategoryMatcher,
-      name: r'fuzzyCategoryMatcherProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$fuzzyCategoryMatcherHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+/// ParseVoiceInputUseCase — wired to all voice application services.
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef FuzzyCategoryMatcherRef = AutoDisposeProviderRef<FuzzyCategoryMatcher>;
+@ProviderFor(parseVoiceInputUseCase)
+final parseVoiceInputUseCaseProvider = ParseVoiceInputUseCaseProvider._();
+
+/// ParseVoiceInputUseCase — wired to all voice application services.
+
+final class ParseVoiceInputUseCaseProvider
+    extends
+        $FunctionalProvider<
+          ParseVoiceInputUseCase,
+          ParseVoiceInputUseCase,
+          ParseVoiceInputUseCase
+        >
+    with $Provider<ParseVoiceInputUseCase> {
+  /// ParseVoiceInputUseCase — wired to all voice application services.
+  ParseVoiceInputUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'parseVoiceInputUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$parseVoiceInputUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<ParseVoiceInputUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ParseVoiceInputUseCase create(Ref ref) {
+    return parseVoiceInputUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ParseVoiceInputUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ParseVoiceInputUseCase>(value),
+    );
+  }
+}
+
 String _$parseVoiceInputUseCaseHash() =>
     r'f74720fb10aef0c570cb3d4e6313631734695bf1';
 
-/// ParseVoiceInputUseCase — wired to all voice application services.
-///
-/// Copied from [parseVoiceInputUseCase].
-@ProviderFor(parseVoiceInputUseCase)
-final parseVoiceInputUseCaseProvider =
-    AutoDisposeProvider<ParseVoiceInputUseCase>.internal(
-      parseVoiceInputUseCase,
-      name: r'parseVoiceInputUseCaseProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$parseVoiceInputUseCaseHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ParseVoiceInputUseCaseRef =
-    AutoDisposeProviderRef<ParseVoiceInputUseCase>;
-String _$voiceSatisfactionEstimatorHash() =>
-    r'633b00ee3ba24d00f0bf477ac217841dbcb2db4c';
-
 /// VoiceSatisfactionEstimator — pure stateless class.
-///
-/// Copied from [voiceSatisfactionEstimator].
+
 @ProviderFor(voiceSatisfactionEstimator)
 final voiceSatisfactionEstimatorProvider =
-    AutoDisposeProvider<VoiceSatisfactionEstimator>.internal(
-      voiceSatisfactionEstimator,
-      name: r'voiceSatisfactionEstimatorProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$voiceSatisfactionEstimatorHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+    VoiceSatisfactionEstimatorProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef VoiceSatisfactionEstimatorRef =
-    AutoDisposeProviderRef<VoiceSatisfactionEstimator>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+/// VoiceSatisfactionEstimator — pure stateless class.
+
+final class VoiceSatisfactionEstimatorProvider
+    extends
+        $FunctionalProvider<
+          VoiceSatisfactionEstimator,
+          VoiceSatisfactionEstimator,
+          VoiceSatisfactionEstimator
+        >
+    with $Provider<VoiceSatisfactionEstimator> {
+  /// VoiceSatisfactionEstimator — pure stateless class.
+  VoiceSatisfactionEstimatorProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'voiceSatisfactionEstimatorProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$voiceSatisfactionEstimatorHash();
+
+  @$internal
+  @override
+  $ProviderElement<VoiceSatisfactionEstimator> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  VoiceSatisfactionEstimator create(Ref ref) {
+    return voiceSatisfactionEstimator(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(VoiceSatisfactionEstimator value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<VoiceSatisfactionEstimator>(value),
+    );
+  }
+}
+
+String _$voiceSatisfactionEstimatorHash() =>
+    r'633b00ee3ba24d00f0bf477ac217841dbcb2db4c';

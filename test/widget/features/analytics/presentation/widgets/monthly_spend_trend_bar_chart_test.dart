@@ -121,6 +121,7 @@ void main() {
             sideTitles: const SideTitles(showTitles: true),
             formattedValue: '1200000',
             axisSide: AxisSide.left,
+            rotationQuarterTurns: 0,
           ),
         );
 

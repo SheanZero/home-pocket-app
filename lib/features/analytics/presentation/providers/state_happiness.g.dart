@@ -6,774 +6,500 @@ part of 'state_happiness.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$happinessReportHash() => r'123ad750b8925cd7f3c0f65179f4f8250c991996';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// HAPPY-01..04 personal happiness report.
 
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
+@ProviderFor(happinessReport)
+final happinessReportProvider = HappinessReportFamily._();
 
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
+/// HAPPY-01..04 personal happiness report.
+
+final class HappinessReportProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<HappinessReport>,
+          HappinessReport,
+          FutureOr<HappinessReport>
+        >
+    with $FutureModifier<HappinessReport>, $FutureProvider<HappinessReport> {
+  /// HAPPY-01..04 personal happiness report.
+  HappinessReportProvider._({
+    required HappinessReportFamily super.from,
+    required ({String bookId, int year, int month, String currencyCode})
+    super.argument,
+  }) : super(
+         retry: null,
+         name: r'happinessReportProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$happinessReportHash();
+
+  @override
+  String toString() {
+    return r'happinessReportProvider'
+        ''
+        '$argument';
   }
 
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
+  @$internal
+  @override
+  $FutureProviderElement<HappinessReport> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<HappinessReport> create(Ref ref) {
+    final argument =
+        this.argument
+            as ({String bookId, int year, int month, String currencyCode});
+    return happinessReport(
+      ref,
+      bookId: argument.bookId,
+      year: argument.year,
+      month: argument.month,
+      currencyCode: argument.currencyCode,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is HappinessReportProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
   }
 }
 
-/// HAPPY-01..04 personal happiness report.
-///
-/// Copied from [happinessReport].
-@ProviderFor(happinessReport)
-const happinessReportProvider = HappinessReportFamily();
+String _$happinessReportHash() => r'123ad750b8925cd7f3c0f65179f4f8250c991996';
 
 /// HAPPY-01..04 personal happiness report.
-///
-/// Copied from [happinessReport].
-class HappinessReportFamily extends Family<AsyncValue<HappinessReport>> {
-  /// HAPPY-01..04 personal happiness report.
-  ///
-  /// Copied from [happinessReport].
-  const HappinessReportFamily();
+
+final class HappinessReportFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<HappinessReport>,
+          ({String bookId, int year, int month, String currencyCode})
+        > {
+  HappinessReportFamily._()
+    : super(
+        retry: null,
+        name: r'happinessReportProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
 
   /// HAPPY-01..04 personal happiness report.
-  ///
-  /// Copied from [happinessReport].
+
   HappinessReportProvider call({
     required String bookId,
     required int year,
     required int month,
     required String currencyCode,
-  }) {
-    return HappinessReportProvider(
+  }) => HappinessReportProvider._(
+    argument: (
       bookId: bookId,
       year: year,
       month: month,
       currencyCode: currencyCode,
-    );
-  }
+    ),
+    from: this,
+  );
 
   @override
-  HappinessReportProvider getProviderOverride(
-    covariant HappinessReportProvider provider,
-  ) {
-    return call(
-      bookId: provider.bookId,
-      year: provider.year,
-      month: provider.month,
-      currencyCode: provider.currencyCode,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'happinessReportProvider';
+  String toString() => r'happinessReportProvider';
 }
 
-/// HAPPY-01..04 personal happiness report.
-///
-/// Copied from [happinessReport].
-class HappinessReportProvider
-    extends AutoDisposeFutureProvider<HappinessReport> {
-  /// HAPPY-01..04 personal happiness report.
-  ///
-  /// Copied from [happinessReport].
-  HappinessReportProvider({
-    required String bookId,
-    required int year,
-    required int month,
-    required String currencyCode,
-  }) : this._internal(
-         (ref) => happinessReport(
-           ref as HappinessReportRef,
-           bookId: bookId,
-           year: year,
-           month: month,
-           currencyCode: currencyCode,
-         ),
-         from: happinessReportProvider,
-         name: r'happinessReportProvider',
-         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-             ? null
-             : _$happinessReportHash,
-         dependencies: HappinessReportFamily._dependencies,
-         allTransitiveDependencies:
-             HappinessReportFamily._allTransitiveDependencies,
-         bookId: bookId,
-         year: year,
-         month: month,
-         currencyCode: currencyCode,
+/// HAPPY-04 standalone Top Joy.
+
+@ProviderFor(bestJoyMoment)
+final bestJoyMomentProvider = BestJoyMomentFamily._();
+
+/// HAPPY-04 standalone Top Joy.
+
+final class BestJoyMomentProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<MetricResult<BestJoyMomentRow>>,
+          MetricResult<BestJoyMomentRow>,
+          FutureOr<MetricResult<BestJoyMomentRow>>
+        >
+    with
+        $FutureModifier<MetricResult<BestJoyMomentRow>>,
+        $FutureProvider<MetricResult<BestJoyMomentRow>> {
+  /// HAPPY-04 standalone Top Joy.
+  BestJoyMomentProvider._({
+    required BestJoyMomentFamily super.from,
+    required ({String bookId, int year, int month}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'bestJoyMomentProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
        );
 
-  HappinessReportProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.bookId,
-    required this.year,
-    required this.month,
-    required this.currencyCode,
-  }) : super.internal();
-
-  final String bookId;
-  final int year;
-  final int month;
-  final String currencyCode;
+  @override
+  String debugGetCreateSourceHash() => _$bestJoyMomentHash();
 
   @override
-  Override overrideWith(
-    FutureOr<HappinessReport> Function(HappinessReportRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: HappinessReportProvider._internal(
-        (ref) => create(ref as HappinessReportRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        bookId: bookId,
-        year: year,
-        month: month,
-        currencyCode: currencyCode,
-      ),
-    );
+  String toString() {
+    return r'bestJoyMomentProvider'
+        ''
+        '$argument';
   }
 
+  @$internal
   @override
-  AutoDisposeFutureProviderElement<HappinessReport> createElement() {
-    return _HappinessReportProviderElement(this);
+  $FutureProviderElement<MetricResult<BestJoyMomentRow>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<MetricResult<BestJoyMomentRow>> create(Ref ref) {
+    final argument = this.argument as ({String bookId, int year, int month});
+    return bestJoyMoment(
+      ref,
+      bookId: argument.bookId,
+      year: argument.year,
+      month: argument.month,
+    );
   }
 
   @override
   bool operator ==(Object other) {
-    return other is HappinessReportProvider &&
-        other.bookId == bookId &&
-        other.year == year &&
-        other.month == month &&
-        other.currencyCode == currencyCode;
+    return other is BestJoyMomentProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, bookId.hashCode);
-    hash = _SystemHash.combine(hash, year.hashCode);
-    hash = _SystemHash.combine(hash, month.hashCode);
-    hash = _SystemHash.combine(hash, currencyCode.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin HappinessReportRef on AutoDisposeFutureProviderRef<HappinessReport> {
-  /// The parameter `bookId` of this provider.
-  String get bookId;
-
-  /// The parameter `year` of this provider.
-  int get year;
-
-  /// The parameter `month` of this provider.
-  int get month;
-
-  /// The parameter `currencyCode` of this provider.
-  String get currencyCode;
-}
-
-class _HappinessReportProviderElement
-    extends AutoDisposeFutureProviderElement<HappinessReport>
-    with HappinessReportRef {
-  _HappinessReportProviderElement(super.provider);
-
-  @override
-  String get bookId => (origin as HappinessReportProvider).bookId;
-  @override
-  int get year => (origin as HappinessReportProvider).year;
-  @override
-  int get month => (origin as HappinessReportProvider).month;
-  @override
-  String get currencyCode => (origin as HappinessReportProvider).currencyCode;
 }
 
 String _$bestJoyMomentHash() => r'62be259ee9a15c4638f28aea80293416b415e735';
 
 /// HAPPY-04 standalone Top Joy.
-///
-/// Copied from [bestJoyMoment].
-@ProviderFor(bestJoyMoment)
-const bestJoyMomentProvider = BestJoyMomentFamily();
 
-/// HAPPY-04 standalone Top Joy.
-///
-/// Copied from [bestJoyMoment].
-class BestJoyMomentFamily
-    extends Family<AsyncValue<MetricResult<BestJoyMomentRow>>> {
-  /// HAPPY-04 standalone Top Joy.
-  ///
-  /// Copied from [bestJoyMoment].
-  const BestJoyMomentFamily();
+final class BestJoyMomentFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<MetricResult<BestJoyMomentRow>>,
+          ({String bookId, int year, int month})
+        > {
+  BestJoyMomentFamily._()
+    : super(
+        retry: null,
+        name: r'bestJoyMomentProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
 
   /// HAPPY-04 standalone Top Joy.
-  ///
-  /// Copied from [bestJoyMoment].
+
   BestJoyMomentProvider call({
     required String bookId,
     required int year,
     required int month,
-  }) {
-    return BestJoyMomentProvider(bookId: bookId, year: year, month: month);
-  }
+  }) => BestJoyMomentProvider._(
+    argument: (bookId: bookId, year: year, month: month),
+    from: this,
+  );
 
   @override
-  BestJoyMomentProvider getProviderOverride(
-    covariant BestJoyMomentProvider provider,
-  ) {
-    return call(
-      bookId: provider.bookId,
-      year: provider.year,
-      month: provider.month,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'bestJoyMomentProvider';
+  String toString() => r'bestJoyMomentProvider';
 }
 
-/// HAPPY-04 standalone Top Joy.
-///
-/// Copied from [bestJoyMoment].
-class BestJoyMomentProvider
-    extends AutoDisposeFutureProvider<MetricResult<BestJoyMomentRow>> {
-  /// HAPPY-04 standalone Top Joy.
-  ///
-  /// Copied from [bestJoyMoment].
-  BestJoyMomentProvider({
-    required String bookId,
-    required int year,
-    required int month,
-  }) : this._internal(
-         (ref) => bestJoyMoment(
-           ref as BestJoyMomentRef,
-           bookId: bookId,
-           year: year,
-           month: month,
-         ),
-         from: bestJoyMomentProvider,
-         name: r'bestJoyMomentProvider',
-         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-             ? null
-             : _$bestJoyMomentHash,
-         dependencies: BestJoyMomentFamily._dependencies,
-         allTransitiveDependencies:
-             BestJoyMomentFamily._allTransitiveDependencies,
-         bookId: bookId,
-         year: year,
-         month: month,
+/// STATSUI-01 / D-05 — daily Joy/¥ trend (PTVF per-day fold).
+
+@ProviderFor(dailyJoyPerYen)
+final dailyJoyPerYenProvider = DailyJoyPerYenFamily._();
+
+/// STATSUI-01 / D-05 — daily Joy/¥ trend (PTVF per-day fold).
+
+final class DailyJoyPerYenProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<MetricResult<List<DailyJoyPerYenPoint>>>,
+          MetricResult<List<DailyJoyPerYenPoint>>,
+          FutureOr<MetricResult<List<DailyJoyPerYenPoint>>>
+        >
+    with
+        $FutureModifier<MetricResult<List<DailyJoyPerYenPoint>>>,
+        $FutureProvider<MetricResult<List<DailyJoyPerYenPoint>>> {
+  /// STATSUI-01 / D-05 — daily Joy/¥ trend (PTVF per-day fold).
+  DailyJoyPerYenProvider._({
+    required DailyJoyPerYenFamily super.from,
+    required ({String bookId, int year, int month, String currencyCode})
+    super.argument,
+  }) : super(
+         retry: null,
+         name: r'dailyJoyPerYenProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
        );
 
-  BestJoyMomentProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.bookId,
-    required this.year,
-    required this.month,
-  }) : super.internal();
-
-  final String bookId;
-  final int year;
-  final int month;
+  @override
+  String debugGetCreateSourceHash() => _$dailyJoyPerYenHash();
 
   @override
-  Override overrideWith(
-    FutureOr<MetricResult<BestJoyMomentRow>> Function(BestJoyMomentRef provider)
-    create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: BestJoyMomentProvider._internal(
-        (ref) => create(ref as BestJoyMomentRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        bookId: bookId,
-        year: year,
-        month: month,
-      ),
-    );
+  String toString() {
+    return r'dailyJoyPerYenProvider'
+        ''
+        '$argument';
   }
 
+  @$internal
   @override
-  AutoDisposeFutureProviderElement<MetricResult<BestJoyMomentRow>>
-  createElement() {
-    return _BestJoyMomentProviderElement(this);
+  $FutureProviderElement<MetricResult<List<DailyJoyPerYenPoint>>>
+  $createElement($ProviderPointer pointer) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<MetricResult<List<DailyJoyPerYenPoint>>> create(Ref ref) {
+    final argument =
+        this.argument
+            as ({String bookId, int year, int month, String currencyCode});
+    return dailyJoyPerYen(
+      ref,
+      bookId: argument.bookId,
+      year: argument.year,
+      month: argument.month,
+      currencyCode: argument.currencyCode,
+    );
   }
 
   @override
   bool operator ==(Object other) {
-    return other is BestJoyMomentProvider &&
-        other.bookId == bookId &&
-        other.year == year &&
-        other.month == month;
+    return other is DailyJoyPerYenProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, bookId.hashCode);
-    hash = _SystemHash.combine(hash, year.hashCode);
-    hash = _SystemHash.combine(hash, month.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin BestJoyMomentRef
-    on AutoDisposeFutureProviderRef<MetricResult<BestJoyMomentRow>> {
-  /// The parameter `bookId` of this provider.
-  String get bookId;
-
-  /// The parameter `year` of this provider.
-  int get year;
-
-  /// The parameter `month` of this provider.
-  int get month;
-}
-
-class _BestJoyMomentProviderElement
-    extends AutoDisposeFutureProviderElement<MetricResult<BestJoyMomentRow>>
-    with BestJoyMomentRef {
-  _BestJoyMomentProviderElement(super.provider);
-
-  @override
-  String get bookId => (origin as BestJoyMomentProvider).bookId;
-  @override
-  int get year => (origin as BestJoyMomentProvider).year;
-  @override
-  int get month => (origin as BestJoyMomentProvider).month;
 }
 
 String _$dailyJoyPerYenHash() => r'3f9f9596614a46014f27acf73f15c14b684cdaf0';
 
 /// STATSUI-01 / D-05 — daily Joy/¥ trend (PTVF per-day fold).
-///
-/// Copied from [dailyJoyPerYen].
-@ProviderFor(dailyJoyPerYen)
-const dailyJoyPerYenProvider = DailyJoyPerYenFamily();
 
-/// STATSUI-01 / D-05 — daily Joy/¥ trend (PTVF per-day fold).
-///
-/// Copied from [dailyJoyPerYen].
-class DailyJoyPerYenFamily
-    extends Family<AsyncValue<MetricResult<List<DailyJoyPerYenPoint>>>> {
-  /// STATSUI-01 / D-05 — daily Joy/¥ trend (PTVF per-day fold).
-  ///
-  /// Copied from [dailyJoyPerYen].
-  const DailyJoyPerYenFamily();
+final class DailyJoyPerYenFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<MetricResult<List<DailyJoyPerYenPoint>>>,
+          ({String bookId, int year, int month, String currencyCode})
+        > {
+  DailyJoyPerYenFamily._()
+    : super(
+        retry: null,
+        name: r'dailyJoyPerYenProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
 
   /// STATSUI-01 / D-05 — daily Joy/¥ trend (PTVF per-day fold).
-  ///
-  /// Copied from [dailyJoyPerYen].
+
   DailyJoyPerYenProvider call({
     required String bookId,
     required int year,
     required int month,
     required String currencyCode,
-  }) {
-    return DailyJoyPerYenProvider(
+  }) => DailyJoyPerYenProvider._(
+    argument: (
       bookId: bookId,
       year: year,
       month: month,
       currencyCode: currencyCode,
-    );
-  }
+    ),
+    from: this,
+  );
 
   @override
-  DailyJoyPerYenProvider getProviderOverride(
-    covariant DailyJoyPerYenProvider provider,
-  ) {
-    return call(
-      bookId: provider.bookId,
-      year: provider.year,
-      month: provider.month,
-      currencyCode: provider.currencyCode,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'dailyJoyPerYenProvider';
+  String toString() => r'dailyJoyPerYenProvider';
 }
 
-/// STATSUI-01 / D-05 — daily Joy/¥ trend (PTVF per-day fold).
-///
-/// Copied from [dailyJoyPerYen].
-class DailyJoyPerYenProvider
-    extends AutoDisposeFutureProvider<MetricResult<List<DailyJoyPerYenPoint>>> {
-  /// STATSUI-01 / D-05 — daily Joy/¥ trend (PTVF per-day fold).
-  ///
-  /// Copied from [dailyJoyPerYen].
-  DailyJoyPerYenProvider({
-    required String bookId,
-    required int year,
-    required int month,
-    required String currencyCode,
-  }) : this._internal(
-         (ref) => dailyJoyPerYen(
-           ref as DailyJoyPerYenRef,
-           bookId: bookId,
-           year: year,
-           month: month,
-           currencyCode: currencyCode,
-         ),
-         from: dailyJoyPerYenProvider,
-         name: r'dailyJoyPerYenProvider',
-         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-             ? null
-             : _$dailyJoyPerYenHash,
-         dependencies: DailyJoyPerYenFamily._dependencies,
-         allTransitiveDependencies:
-             DailyJoyPerYenFamily._allTransitiveDependencies,
-         bookId: bookId,
-         year: year,
-         month: month,
-         currencyCode: currencyCode,
+/// STATSUI-06 / D-15 — single largest monthly expense for 物語 group 総 card.
+
+@ProviderFor(largestMonthlyExpense)
+final largestMonthlyExpenseProvider = LargestMonthlyExpenseFamily._();
+
+/// STATSUI-06 / D-15 — single largest monthly expense for 物語 group 総 card.
+
+final class LargestMonthlyExpenseProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<LargestMonthlyExpense?>,
+          LargestMonthlyExpense?,
+          FutureOr<LargestMonthlyExpense?>
+        >
+    with
+        $FutureModifier<LargestMonthlyExpense?>,
+        $FutureProvider<LargestMonthlyExpense?> {
+  /// STATSUI-06 / D-15 — single largest monthly expense for 物語 group 総 card.
+  LargestMonthlyExpenseProvider._({
+    required LargestMonthlyExpenseFamily super.from,
+    required ({String bookId, int year, int month}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'largestMonthlyExpenseProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
        );
 
-  DailyJoyPerYenProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.bookId,
-    required this.year,
-    required this.month,
-    required this.currencyCode,
-  }) : super.internal();
-
-  final String bookId;
-  final int year;
-  final int month;
-  final String currencyCode;
+  @override
+  String debugGetCreateSourceHash() => _$largestMonthlyExpenseHash();
 
   @override
-  Override overrideWith(
-    FutureOr<MetricResult<List<DailyJoyPerYenPoint>>> Function(
-      DailyJoyPerYenRef provider,
-    )
-    create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: DailyJoyPerYenProvider._internal(
-        (ref) => create(ref as DailyJoyPerYenRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        bookId: bookId,
-        year: year,
-        month: month,
-        currencyCode: currencyCode,
-      ),
-    );
+  String toString() {
+    return r'largestMonthlyExpenseProvider'
+        ''
+        '$argument';
   }
 
+  @$internal
   @override
-  AutoDisposeFutureProviderElement<MetricResult<List<DailyJoyPerYenPoint>>>
-  createElement() {
-    return _DailyJoyPerYenProviderElement(this);
+  $FutureProviderElement<LargestMonthlyExpense?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<LargestMonthlyExpense?> create(Ref ref) {
+    final argument = this.argument as ({String bookId, int year, int month});
+    return largestMonthlyExpense(
+      ref,
+      bookId: argument.bookId,
+      year: argument.year,
+      month: argument.month,
+    );
   }
 
   @override
   bool operator ==(Object other) {
-    return other is DailyJoyPerYenProvider &&
-        other.bookId == bookId &&
-        other.year == year &&
-        other.month == month &&
-        other.currencyCode == currencyCode;
+    return other is LargestMonthlyExpenseProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, bookId.hashCode);
-    hash = _SystemHash.combine(hash, year.hashCode);
-    hash = _SystemHash.combine(hash, month.hashCode);
-    hash = _SystemHash.combine(hash, currencyCode.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin DailyJoyPerYenRef
-    on AutoDisposeFutureProviderRef<MetricResult<List<DailyJoyPerYenPoint>>> {
-  /// The parameter `bookId` of this provider.
-  String get bookId;
-
-  /// The parameter `year` of this provider.
-  int get year;
-
-  /// The parameter `month` of this provider.
-  int get month;
-
-  /// The parameter `currencyCode` of this provider.
-  String get currencyCode;
-}
-
-class _DailyJoyPerYenProviderElement
-    extends
-        AutoDisposeFutureProviderElement<
-          MetricResult<List<DailyJoyPerYenPoint>>
-        >
-    with DailyJoyPerYenRef {
-  _DailyJoyPerYenProviderElement(super.provider);
-
-  @override
-  String get bookId => (origin as DailyJoyPerYenProvider).bookId;
-  @override
-  int get year => (origin as DailyJoyPerYenProvider).year;
-  @override
-  int get month => (origin as DailyJoyPerYenProvider).month;
-  @override
-  String get currencyCode => (origin as DailyJoyPerYenProvider).currencyCode;
 }
 
 String _$largestMonthlyExpenseHash() =>
     r'8183e8ed497fbb177de3f0418793f50f1b0b87ea';
 
 /// STATSUI-06 / D-15 — single largest monthly expense for 物語 group 総 card.
-///
-/// Copied from [largestMonthlyExpense].
-@ProviderFor(largestMonthlyExpense)
-const largestMonthlyExpenseProvider = LargestMonthlyExpenseFamily();
 
-/// STATSUI-06 / D-15 — single largest monthly expense for 物語 group 総 card.
-///
-/// Copied from [largestMonthlyExpense].
-class LargestMonthlyExpenseFamily
-    extends Family<AsyncValue<LargestMonthlyExpense?>> {
-  /// STATSUI-06 / D-15 — single largest monthly expense for 物語 group 総 card.
-  ///
-  /// Copied from [largestMonthlyExpense].
-  const LargestMonthlyExpenseFamily();
+final class LargestMonthlyExpenseFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<LargestMonthlyExpense?>,
+          ({String bookId, int year, int month})
+        > {
+  LargestMonthlyExpenseFamily._()
+    : super(
+        retry: null,
+        name: r'largestMonthlyExpenseProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
 
   /// STATSUI-06 / D-15 — single largest monthly expense for 物語 group 総 card.
-  ///
-  /// Copied from [largestMonthlyExpense].
+
   LargestMonthlyExpenseProvider call({
     required String bookId,
     required int year,
     required int month,
-  }) {
-    return LargestMonthlyExpenseProvider(
-      bookId: bookId,
-      year: year,
-      month: month,
-    );
-  }
+  }) => LargestMonthlyExpenseProvider._(
+    argument: (bookId: bookId, year: year, month: month),
+    from: this,
+  );
 
   @override
-  LargestMonthlyExpenseProvider getProviderOverride(
-    covariant LargestMonthlyExpenseProvider provider,
-  ) {
-    return call(
-      bookId: provider.bookId,
-      year: provider.year,
-      month: provider.month,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'largestMonthlyExpenseProvider';
+  String toString() => r'largestMonthlyExpenseProvider';
 }
 
-/// STATSUI-06 / D-15 — single largest monthly expense for 物語 group 総 card.
+/// FAMILY-01..02 family happiness aggregate.
 ///
-/// Copied from [largestMonthlyExpense].
-class LargestMonthlyExpenseProvider
-    extends AutoDisposeFutureProvider<LargestMonthlyExpense?> {
-  /// STATSUI-06 / D-15 — single largest monthly expense for 物語 group 総 card.
+/// D-09: presentation resolves shadow books to book IDs before invoking the
+/// use case. Q6c remains open: this currently passes shadow books only; Phase
+/// 10/11 may extend the call site if current-device book inclusion is required.
+
+@ProviderFor(familyHappiness)
+final familyHappinessProvider = FamilyHappinessFamily._();
+
+/// FAMILY-01..02 family happiness aggregate.
+///
+/// D-09: presentation resolves shadow books to book IDs before invoking the
+/// use case. Q6c remains open: this currently passes shadow books only; Phase
+/// 10/11 may extend the call site if current-device book inclusion is required.
+
+final class FamilyHappinessProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<FamilyHappiness>,
+          FamilyHappiness,
+          FutureOr<FamilyHappiness>
+        >
+    with $FutureModifier<FamilyHappiness>, $FutureProvider<FamilyHappiness> {
+  /// FAMILY-01..02 family happiness aggregate.
   ///
-  /// Copied from [largestMonthlyExpense].
-  LargestMonthlyExpenseProvider({
-    required String bookId,
-    required int year,
-    required int month,
-  }) : this._internal(
-         (ref) => largestMonthlyExpense(
-           ref as LargestMonthlyExpenseRef,
-           bookId: bookId,
-           year: year,
-           month: month,
-         ),
-         from: largestMonthlyExpenseProvider,
-         name: r'largestMonthlyExpenseProvider',
-         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-             ? null
-             : _$largestMonthlyExpenseHash,
-         dependencies: LargestMonthlyExpenseFamily._dependencies,
-         allTransitiveDependencies:
-             LargestMonthlyExpenseFamily._allTransitiveDependencies,
-         bookId: bookId,
-         year: year,
-         month: month,
+  /// D-09: presentation resolves shadow books to book IDs before invoking the
+  /// use case. Q6c remains open: this currently passes shadow books only; Phase
+  /// 10/11 may extend the call site if current-device book inclusion is required.
+  FamilyHappinessProvider._({
+    required FamilyHappinessFamily super.from,
+    required ({int year, int month}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'familyHappinessProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
        );
 
-  LargestMonthlyExpenseProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.bookId,
-    required this.year,
-    required this.month,
-  }) : super.internal();
-
-  final String bookId;
-  final int year;
-  final int month;
+  @override
+  String debugGetCreateSourceHash() => _$familyHappinessHash();
 
   @override
-  Override overrideWith(
-    FutureOr<LargestMonthlyExpense?> Function(LargestMonthlyExpenseRef provider)
-    create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: LargestMonthlyExpenseProvider._internal(
-        (ref) => create(ref as LargestMonthlyExpenseRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        bookId: bookId,
-        year: year,
-        month: month,
-      ),
-    );
+  String toString() {
+    return r'familyHappinessProvider'
+        ''
+        '$argument';
   }
 
+  @$internal
   @override
-  AutoDisposeFutureProviderElement<LargestMonthlyExpense?> createElement() {
-    return _LargestMonthlyExpenseProviderElement(this);
+  $FutureProviderElement<FamilyHappiness> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<FamilyHappiness> create(Ref ref) {
+    final argument = this.argument as ({int year, int month});
+    return familyHappiness(ref, year: argument.year, month: argument.month);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is LargestMonthlyExpenseProvider &&
-        other.bookId == bookId &&
-        other.year == year &&
-        other.month == month;
+    return other is FamilyHappinessProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, bookId.hashCode);
-    hash = _SystemHash.combine(hash, year.hashCode);
-    hash = _SystemHash.combine(hash, month.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin LargestMonthlyExpenseRef
-    on AutoDisposeFutureProviderRef<LargestMonthlyExpense?> {
-  /// The parameter `bookId` of this provider.
-  String get bookId;
-
-  /// The parameter `year` of this provider.
-  int get year;
-
-  /// The parameter `month` of this provider.
-  int get month;
-}
-
-class _LargestMonthlyExpenseProviderElement
-    extends AutoDisposeFutureProviderElement<LargestMonthlyExpense?>
-    with LargestMonthlyExpenseRef {
-  _LargestMonthlyExpenseProviderElement(super.provider);
-
-  @override
-  String get bookId => (origin as LargestMonthlyExpenseProvider).bookId;
-  @override
-  int get year => (origin as LargestMonthlyExpenseProvider).year;
-  @override
-  int get month => (origin as LargestMonthlyExpenseProvider).month;
 }
 
 String _$familyHappinessHash() => r'5c47e90946b9c52fb257c27c3591378fb9f1e935';
@@ -783,171 +509,34 @@ String _$familyHappinessHash() => r'5c47e90946b9c52fb257c27c3591378fb9f1e935';
 /// D-09: presentation resolves shadow books to book IDs before invoking the
 /// use case. Q6c remains open: this currently passes shadow books only; Phase
 /// 10/11 may extend the call site if current-device book inclusion is required.
-///
-/// Copied from [familyHappiness].
-@ProviderFor(familyHappiness)
-const familyHappinessProvider = FamilyHappinessFamily();
 
-/// FAMILY-01..02 family happiness aggregate.
-///
-/// D-09: presentation resolves shadow books to book IDs before invoking the
-/// use case. Q6c remains open: this currently passes shadow books only; Phase
-/// 10/11 may extend the call site if current-device book inclusion is required.
-///
-/// Copied from [familyHappiness].
-class FamilyHappinessFamily extends Family<AsyncValue<FamilyHappiness>> {
-  /// FAMILY-01..02 family happiness aggregate.
-  ///
-  /// D-09: presentation resolves shadow books to book IDs before invoking the
-  /// use case. Q6c remains open: this currently passes shadow books only; Phase
-  /// 10/11 may extend the call site if current-device book inclusion is required.
-  ///
-  /// Copied from [familyHappiness].
-  const FamilyHappinessFamily();
-
-  /// FAMILY-01..02 family happiness aggregate.
-  ///
-  /// D-09: presentation resolves shadow books to book IDs before invoking the
-  /// use case. Q6c remains open: this currently passes shadow books only; Phase
-  /// 10/11 may extend the call site if current-device book inclusion is required.
-  ///
-  /// Copied from [familyHappiness].
-  FamilyHappinessProvider call({required int year, required int month}) {
-    return FamilyHappinessProvider(year: year, month: month);
-  }
-
-  @override
-  FamilyHappinessProvider getProviderOverride(
-    covariant FamilyHappinessProvider provider,
-  ) {
-    return call(year: provider.year, month: provider.month);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'familyHappinessProvider';
-}
-
-/// FAMILY-01..02 family happiness aggregate.
-///
-/// D-09: presentation resolves shadow books to book IDs before invoking the
-/// use case. Q6c remains open: this currently passes shadow books only; Phase
-/// 10/11 may extend the call site if current-device book inclusion is required.
-///
-/// Copied from [familyHappiness].
-class FamilyHappinessProvider
-    extends AutoDisposeFutureProvider<FamilyHappiness> {
-  /// FAMILY-01..02 family happiness aggregate.
-  ///
-  /// D-09: presentation resolves shadow books to book IDs before invoking the
-  /// use case. Q6c remains open: this currently passes shadow books only; Phase
-  /// 10/11 may extend the call site if current-device book inclusion is required.
-  ///
-  /// Copied from [familyHappiness].
-  FamilyHappinessProvider({required int year, required int month})
-    : this._internal(
-        (ref) => familyHappiness(
-          ref as FamilyHappinessRef,
-          year: year,
-          month: month,
-        ),
-        from: familyHappinessProvider,
+final class FamilyHappinessFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<FamilyHappiness>,
+          ({int year, int month})
+        > {
+  FamilyHappinessFamily._()
+    : super(
+        retry: null,
         name: r'familyHappinessProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$familyHappinessHash,
-        dependencies: FamilyHappinessFamily._dependencies,
-        allTransitiveDependencies:
-            FamilyHappinessFamily._allTransitiveDependencies,
-        year: year,
-        month: month,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
       );
 
-  FamilyHappinessProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.year,
-    required this.month,
-  }) : super.internal();
+  /// FAMILY-01..02 family happiness aggregate.
+  ///
+  /// D-09: presentation resolves shadow books to book IDs before invoking the
+  /// use case. Q6c remains open: this currently passes shadow books only; Phase
+  /// 10/11 may extend the call site if current-device book inclusion is required.
 
-  final int year;
-  final int month;
+  FamilyHappinessProvider call({required int year, required int month}) =>
+      FamilyHappinessProvider._(
+        argument: (year: year, month: month),
+        from: this,
+      );
 
   @override
-  Override overrideWith(
-    FutureOr<FamilyHappiness> Function(FamilyHappinessRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: FamilyHappinessProvider._internal(
-        (ref) => create(ref as FamilyHappinessRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        year: year,
-        month: month,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeFutureProviderElement<FamilyHappiness> createElement() {
-    return _FamilyHappinessProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is FamilyHappinessProvider &&
-        other.year == year &&
-        other.month == month;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, year.hashCode);
-    hash = _SystemHash.combine(hash, month.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
+  String toString() => r'familyHappinessProvider';
 }
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin FamilyHappinessRef on AutoDisposeFutureProviderRef<FamilyHappiness> {
-  /// The parameter `year` of this provider.
-  int get year;
-
-  /// The parameter `month` of this provider.
-  int get month;
-}
-
-class _FamilyHappinessProviderElement
-    extends AutoDisposeFutureProviderElement<FamilyHappiness>
-    with FamilyHappinessRef {
-  _FamilyHappinessProviderElement(super.provider);
-
-  @override
-  int get year => (origin as FamilyHappinessProvider).year;
-  @override
-  int get month => (origin as FamilyHappinessProvider).month;
-}
-
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

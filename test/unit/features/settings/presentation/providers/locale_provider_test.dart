@@ -31,7 +31,7 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      final settings = await container.read(localeNotifierProvider.future);
+      final settings = await container.read(localeProvider.future);
       expect(settings.locale, const Locale('en'));
       expect(settings.isSystemDefault, isFalse);
     });
@@ -40,7 +40,7 @@ void main() {
       final container = await createTestContainer();
       addTearDown(container.dispose);
 
-      final settings = await container.read(localeNotifierProvider.future);
+      final settings = await container.read(localeProvider.future);
       // Default is 'system' (changed in commit 0d126bc to use system locale for new installs)
       expect(settings.isSystemDefault, isTrue);
     });
@@ -51,7 +51,7 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      final settings = await container.read(localeNotifierProvider.future);
+      final settings = await container.read(localeProvider.future);
       expect(settings.isSystemDefault, isTrue);
     });
 
@@ -61,12 +61,12 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      await container.read(localeNotifierProvider.future);
+      await container.read(localeProvider.future);
       await container
-          .read(localeNotifierProvider.notifier)
+          .read(localeProvider.notifier)
           .setLocale(const Locale('zh'));
 
-      final settings = await container.read(localeNotifierProvider.future);
+      final settings = await container.read(localeProvider.future);
       expect(settings.locale, const Locale('zh'));
       expect(settings.isSystemDefault, isFalse);
 
@@ -81,10 +81,10 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      await container.read(localeNotifierProvider.future);
-      await container.read(localeNotifierProvider.notifier).setSystemDefault();
+      await container.read(localeProvider.future);
+      await container.read(localeProvider.notifier).setSystemDefault();
 
-      final settings = await container.read(localeNotifierProvider.future);
+      final settings = await container.read(localeProvider.future);
       expect(settings.isSystemDefault, isTrue);
 
       // Verify persistence

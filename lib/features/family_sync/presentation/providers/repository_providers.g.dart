@@ -6,249 +6,613 @@ part of 'repository_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$syncQueueManagerHash() => r'11b36bb04566f9cf578bb344c8ed7d2e5d50bee7';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// SyncQueueManager — built from local SyncRepository + application-layer relay client.
+///
+/// Uses local [syncRepositoryProvider] because the sync repository depends on
+/// the local database (not hoisted to application layer in Plan 04-01).
+
+@ProviderFor(syncQueueManager)
+final syncQueueManagerProvider = SyncQueueManagerProvider._();
 
 /// SyncQueueManager — built from local SyncRepository + application-layer relay client.
 ///
 /// Uses local [syncRepositoryProvider] because the sync repository depends on
 /// the local database (not hoisted to application layer in Plan 04-01).
-///
-/// Copied from [syncQueueManager].
-@ProviderFor(syncQueueManager)
-final syncQueueManagerProvider = AutoDisposeProvider<SyncQueueManager>.internal(
-  syncQueueManager,
-  name: r'syncQueueManagerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$syncQueueManagerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SyncQueueManagerRef = AutoDisposeProviderRef<SyncQueueManager>;
-String _$groupMemberDaoHash() => r'6989259a9bfda657d34856faf7005a3034085357';
+final class SyncQueueManagerProvider
+    extends
+        $FunctionalProvider<
+          app_family_sync.SyncQueueManager,
+          app_family_sync.SyncQueueManager,
+          app_family_sync.SyncQueueManager
+        >
+    with $Provider<app_family_sync.SyncQueueManager> {
+  /// SyncQueueManager — built from local SyncRepository + application-layer relay client.
+  ///
+  /// Uses local [syncRepositoryProvider] because the sync repository depends on
+  /// the local database (not hoisted to application layer in Plan 04-01).
+  SyncQueueManagerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'syncQueueManagerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$syncQueueManagerHash();
+
+  @$internal
+  @override
+  $ProviderElement<app_family_sync.SyncQueueManager> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  app_family_sync.SyncQueueManager create(Ref ref) {
+    return syncQueueManager(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(app_family_sync.SyncQueueManager value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<app_family_sync.SyncQueueManager>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$syncQueueManagerHash() => r'11b36bb04566f9cf578bb344c8ed7d2e5d50bee7';
 
 /// GroupMemberDao provider (for watch queries).
-///
-/// Copied from [groupMemberDao].
-@ProviderFor(groupMemberDao)
-final groupMemberDaoProvider = AutoDisposeProvider<GroupMemberDao>.internal(
-  groupMemberDao,
-  name: r'groupMemberDaoProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$groupMemberDaoHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef GroupMemberDaoRef = AutoDisposeProviderRef<GroupMemberDao>;
-String _$groupRepositoryHash() => r'bc4b839f1664f4f6d7488befc92cbdb98796772c';
+@ProviderFor(groupMemberDao)
+final groupMemberDaoProvider = GroupMemberDaoProvider._();
+
+/// GroupMemberDao provider (for watch queries).
+
+final class GroupMemberDaoProvider
+    extends $FunctionalProvider<GroupMemberDao, GroupMemberDao, GroupMemberDao>
+    with $Provider<GroupMemberDao> {
+  /// GroupMemberDao provider (for watch queries).
+  GroupMemberDaoProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'groupMemberDaoProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$groupMemberDaoHash();
+
+  @$internal
+  @override
+  $ProviderElement<GroupMemberDao> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GroupMemberDao create(Ref ref) {
+    return groupMemberDao(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GroupMemberDao value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GroupMemberDao>(value),
+    );
+  }
+}
+
+String _$groupMemberDaoHash() => r'6989259a9bfda657d34856faf7005a3034085357';
 
 /// GroupRepository provider.
-///
-/// Copied from [groupRepository].
-@ProviderFor(groupRepository)
-final groupRepositoryProvider = AutoDisposeProvider<GroupRepository>.internal(
-  groupRepository,
-  name: r'groupRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$groupRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef GroupRepositoryRef = AutoDisposeProviderRef<GroupRepository>;
-String _$syncRepositoryHash() => r'8e6fb815dcb2d21942af3d5b83169966d52f85ef';
+@ProviderFor(groupRepository)
+final groupRepositoryProvider = GroupRepositoryProvider._();
+
+/// GroupRepository provider.
+
+final class GroupRepositoryProvider
+    extends
+        $FunctionalProvider<GroupRepository, GroupRepository, GroupRepository>
+    with $Provider<GroupRepository> {
+  /// GroupRepository provider.
+  GroupRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'groupRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$groupRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<GroupRepository> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GroupRepository create(Ref ref) {
+    return groupRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GroupRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GroupRepository>(value),
+    );
+  }
+}
+
+String _$groupRepositoryHash() => r'bc4b839f1664f4f6d7488befc92cbdb98796772c';
 
 /// SyncRepository provider.
-///
-/// Copied from [syncRepository].
-@ProviderFor(syncRepository)
-final syncRepositoryProvider = AutoDisposeProvider<SyncRepository>.internal(
-  syncRepository,
-  name: r'syncRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$syncRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SyncRepositoryRef = AutoDisposeProviderRef<SyncRepository>;
-String _$shadowBookServiceHash() => r'1005597152b5fd1c45b2443aed006e95f24ee3db';
+@ProviderFor(syncRepository)
+final syncRepositoryProvider = SyncRepositoryProvider._();
+
+/// SyncRepository provider.
+
+final class SyncRepositoryProvider
+    extends $FunctionalProvider<SyncRepository, SyncRepository, SyncRepository>
+    with $Provider<SyncRepository> {
+  /// SyncRepository provider.
+  SyncRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'syncRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$syncRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<SyncRepository> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  SyncRepository create(Ref ref) {
+    return syncRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SyncRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SyncRepository>(value),
+    );
+  }
+}
+
+String _$syncRepositoryHash() => r'8e6fb815dcb2d21942af3d5b83169966d52f85ef';
 
 /// ShadowBookService provider.
-///
-/// Copied from [shadowBookService].
-@ProviderFor(shadowBookService)
-final shadowBookServiceProvider =
-    AutoDisposeProvider<ShadowBookService>.internal(
-      shadowBookService,
-      name: r'shadowBookServiceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$shadowBookServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ShadowBookServiceRef = AutoDisposeProviderRef<ShadowBookService>;
+@ProviderFor(shadowBookService)
+final shadowBookServiceProvider = ShadowBookServiceProvider._();
+
+/// ShadowBookService provider.
+
+final class ShadowBookServiceProvider
+    extends
+        $FunctionalProvider<
+          ShadowBookService,
+          ShadowBookService,
+          ShadowBookService
+        >
+    with $Provider<ShadowBookService> {
+  /// ShadowBookService provider.
+  ShadowBookServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'shadowBookServiceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$shadowBookServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<ShadowBookService> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ShadowBookService create(Ref ref) {
+    return shadowBookService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ShadowBookService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ShadowBookService>(value),
+    );
+  }
+}
+
+String _$shadowBookServiceHash() => r'1005597152b5fd1c45b2443aed006e95f24ee3db';
+
+/// ApplySyncOperationsUseCase provider.
+
+@ProviderFor(applySyncOperationsUseCase)
+final applySyncOperationsUseCaseProvider =
+    ApplySyncOperationsUseCaseProvider._();
+
+/// ApplySyncOperationsUseCase provider.
+
+final class ApplySyncOperationsUseCaseProvider
+    extends
+        $FunctionalProvider<
+          ApplySyncOperationsUseCase,
+          ApplySyncOperationsUseCase,
+          ApplySyncOperationsUseCase
+        >
+    with $Provider<ApplySyncOperationsUseCase> {
+  /// ApplySyncOperationsUseCase provider.
+  ApplySyncOperationsUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'applySyncOperationsUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$applySyncOperationsUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<ApplySyncOperationsUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ApplySyncOperationsUseCase create(Ref ref) {
+    return applySyncOperationsUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ApplySyncOperationsUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ApplySyncOperationsUseCase>(value),
+    );
+  }
+}
+
 String _$applySyncOperationsUseCaseHash() =>
     r'29da0bc6a10c3bd6960c4eec6769cd0058052e57';
 
-/// ApplySyncOperationsUseCase provider.
-///
-/// Copied from [applySyncOperationsUseCase].
-@ProviderFor(applySyncOperationsUseCase)
-final applySyncOperationsUseCaseProvider =
-    AutoDisposeProvider<ApplySyncOperationsUseCase>.internal(
-      applySyncOperationsUseCase,
-      name: r'applySyncOperationsUseCaseProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$applySyncOperationsUseCaseHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+/// PushSyncUseCase provider.
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ApplySyncOperationsUseCaseRef =
-    AutoDisposeProviderRef<ApplySyncOperationsUseCase>;
-String _$pushSyncUseCaseHash() => r'c3687aa735b9f850948af61f5615365e2832041d';
+@ProviderFor(pushSyncUseCase)
+final pushSyncUseCaseProvider = PushSyncUseCaseProvider._();
 
 /// PushSyncUseCase provider.
-///
-/// Copied from [pushSyncUseCase].
-@ProviderFor(pushSyncUseCase)
-final pushSyncUseCaseProvider = AutoDisposeProvider<PushSyncUseCase>.internal(
-  pushSyncUseCase,
-  name: r'pushSyncUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$pushSyncUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef PushSyncUseCaseRef = AutoDisposeProviderRef<PushSyncUseCase>;
-String _$pullSyncUseCaseHash() => r'340b68e055287df5a271a943bb2d722077e76769';
+final class PushSyncUseCaseProvider
+    extends
+        $FunctionalProvider<PushSyncUseCase, PushSyncUseCase, PushSyncUseCase>
+    with $Provider<PushSyncUseCase> {
+  /// PushSyncUseCase provider.
+  PushSyncUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'pushSyncUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$pushSyncUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<PushSyncUseCase> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  PushSyncUseCase create(Ref ref) {
+    return pushSyncUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(PushSyncUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<PushSyncUseCase>(value),
+    );
+  }
+}
+
+String _$pushSyncUseCaseHash() => r'c3687aa735b9f850948af61f5615365e2832041d';
 
 /// PullSyncUseCase provider.
-///
-/// Copied from [pullSyncUseCase].
-@ProviderFor(pullSyncUseCase)
-final pullSyncUseCaseProvider = AutoDisposeProvider<PullSyncUseCase>.internal(
-  pullSyncUseCase,
-  name: r'pullSyncUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$pullSyncUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef PullSyncUseCaseRef = AutoDisposeProviderRef<PullSyncUseCase>;
+@ProviderFor(pullSyncUseCase)
+final pullSyncUseCaseProvider = PullSyncUseCaseProvider._();
+
+/// PullSyncUseCase provider.
+
+final class PullSyncUseCaseProvider
+    extends
+        $FunctionalProvider<PullSyncUseCase, PullSyncUseCase, PullSyncUseCase>
+    with $Provider<PullSyncUseCase> {
+  /// PullSyncUseCase provider.
+  PullSyncUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'pullSyncUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$pullSyncUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<PullSyncUseCase> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  PullSyncUseCase create(Ref ref) {
+    return pullSyncUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(PullSyncUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<PullSyncUseCase>(value),
+    );
+  }
+}
+
+String _$pullSyncUseCaseHash() => r'340b68e055287df5a271a943bb2d722077e76769';
+
+/// CheckGroupValidityUseCase provider.
+
+@ProviderFor(checkGroupValidityUseCase)
+final checkGroupValidityUseCaseProvider = CheckGroupValidityUseCaseProvider._();
+
+/// CheckGroupValidityUseCase provider.
+
+final class CheckGroupValidityUseCaseProvider
+    extends
+        $FunctionalProvider<
+          CheckGroupValidityUseCase,
+          CheckGroupValidityUseCase,
+          CheckGroupValidityUseCase
+        >
+    with $Provider<CheckGroupValidityUseCase> {
+  /// CheckGroupValidityUseCase provider.
+  CheckGroupValidityUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'checkGroupValidityUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$checkGroupValidityUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<CheckGroupValidityUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  CheckGroupValidityUseCase create(Ref ref) {
+    return checkGroupValidityUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CheckGroupValidityUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CheckGroupValidityUseCase>(value),
+    );
+  }
+}
+
 String _$checkGroupValidityUseCaseHash() =>
     r'32e79f4bdac976f47d84c288953ae3d3e2f145df';
 
-/// CheckGroupValidityUseCase provider.
-///
-/// Copied from [checkGroupValidityUseCase].
-@ProviderFor(checkGroupValidityUseCase)
-final checkGroupValidityUseCaseProvider =
-    AutoDisposeProvider<CheckGroupValidityUseCase>.internal(
-      checkGroupValidityUseCase,
-      name: r'checkGroupValidityUseCaseProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$checkGroupValidityUseCaseHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+/// FullSyncUseCase provider.
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef CheckGroupValidityUseCaseRef =
-    AutoDisposeProviderRef<CheckGroupValidityUseCase>;
-String _$fullSyncUseCaseHash() => r'803e3bb92b8f6fe43e2f5ed791771a7bb74d5613';
+@ProviderFor(fullSyncUseCase)
+final fullSyncUseCaseProvider = FullSyncUseCaseProvider._();
 
 /// FullSyncUseCase provider.
-///
-/// Copied from [fullSyncUseCase].
-@ProviderFor(fullSyncUseCase)
-final fullSyncUseCaseProvider = AutoDisposeProvider<FullSyncUseCase>.internal(
-  fullSyncUseCase,
-  name: r'fullSyncUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$fullSyncUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef FullSyncUseCaseRef = AutoDisposeProviderRef<FullSyncUseCase>;
+final class FullSyncUseCaseProvider
+    extends
+        $FunctionalProvider<FullSyncUseCase, FullSyncUseCase, FullSyncUseCase>
+    with $Provider<FullSyncUseCase> {
+  /// FullSyncUseCase provider.
+  FullSyncUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'fullSyncUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$fullSyncUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<FullSyncUseCase> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  FullSyncUseCase create(Ref ref) {
+    return fullSyncUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(FullSyncUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<FullSyncUseCase>(value),
+    );
+  }
+}
+
+String _$fullSyncUseCaseHash() => r'803e3bb92b8f6fe43e2f5ed791771a7bb74d5613';
+
+/// HandleMemberLeftUseCase provider.
+
+@ProviderFor(handleMemberLeftUseCase)
+final handleMemberLeftUseCaseProvider = HandleMemberLeftUseCaseProvider._();
+
+/// HandleMemberLeftUseCase provider.
+
+final class HandleMemberLeftUseCaseProvider
+    extends
+        $FunctionalProvider<
+          HandleMemberLeftUseCase,
+          HandleMemberLeftUseCase,
+          HandleMemberLeftUseCase
+        >
+    with $Provider<HandleMemberLeftUseCase> {
+  /// HandleMemberLeftUseCase provider.
+  HandleMemberLeftUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'handleMemberLeftUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$handleMemberLeftUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<HandleMemberLeftUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  HandleMemberLeftUseCase create(Ref ref) {
+    return handleMemberLeftUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(HandleMemberLeftUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<HandleMemberLeftUseCase>(value),
+    );
+  }
+}
+
 String _$handleMemberLeftUseCaseHash() =>
     r'f505f07a7e915fbac6cbabe178b71e7527147c58';
 
-/// HandleMemberLeftUseCase provider.
-///
-/// Copied from [handleMemberLeftUseCase].
-@ProviderFor(handleMemberLeftUseCase)
-final handleMemberLeftUseCaseProvider =
-    AutoDisposeProvider<HandleMemberLeftUseCase>.internal(
-      handleMemberLeftUseCase,
-      name: r'handleMemberLeftUseCaseProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$handleMemberLeftUseCaseHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef HandleMemberLeftUseCaseRef =
-    AutoDisposeProviderRef<HandleMemberLeftUseCase>;
-String _$handleGroupDissolvedUseCaseHash() =>
-    r'7e9bf7d7954934cd0d7949c1ec48c0fea232e627';
-
 /// HandleGroupDissolvedUseCase provider.
-///
-/// Copied from [handleGroupDissolvedUseCase].
+
 @ProviderFor(handleGroupDissolvedUseCase)
 final handleGroupDissolvedUseCaseProvider =
-    AutoDisposeProvider<HandleGroupDissolvedUseCase>.internal(
-      handleGroupDissolvedUseCase,
-      name: r'handleGroupDissolvedUseCaseProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$handleGroupDissolvedUseCaseHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+    HandleGroupDissolvedUseCaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef HandleGroupDissolvedUseCaseRef =
-    AutoDisposeProviderRef<HandleGroupDissolvedUseCase>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+/// HandleGroupDissolvedUseCase provider.
+
+final class HandleGroupDissolvedUseCaseProvider
+    extends
+        $FunctionalProvider<
+          HandleGroupDissolvedUseCase,
+          HandleGroupDissolvedUseCase,
+          HandleGroupDissolvedUseCase
+        >
+    with $Provider<HandleGroupDissolvedUseCase> {
+  /// HandleGroupDissolvedUseCase provider.
+  HandleGroupDissolvedUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'handleGroupDissolvedUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$handleGroupDissolvedUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<HandleGroupDissolvedUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  HandleGroupDissolvedUseCase create(Ref ref) {
+    return handleGroupDissolvedUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(HandleGroupDissolvedUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<HandleGroupDissolvedUseCase>(value),
+    );
+  }
+}
+
+String _$handleGroupDissolvedUseCaseHash() =>
+    r'7e9bf7d7954934cd0d7949c1ec48c0fea232e627';

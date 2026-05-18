@@ -175,7 +175,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   Future<void> _handleShare() async {
     final code = _inviteCode;
     if (code == null) return;
-    await Share.share(code);
+    await SharePlus.instance.share(ShareParams(text: code));
   }
 
   @override

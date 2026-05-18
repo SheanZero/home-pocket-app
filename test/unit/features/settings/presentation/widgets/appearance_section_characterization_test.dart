@@ -1,9 +1,10 @@
 // Characterization test for AppearanceSection.
 // Locks: widget renders without crash, language picker UI renders,
-// localeNotifierProvider is overrideable via settingsRepositoryProvider.
+// localeProvider is overrideable via settingsRepositoryProvider.
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
@@ -71,11 +72,11 @@ void main() {
       expect(find.byType(ListTile), findsWidgets);
     });
 
-    testWidgets('localeNotifierProvider wired via settingsRepositoryProvider', (
+    testWidgets('localeProvider wired via settingsRepositoryProvider', (
       tester,
     ) async {
       // Characterization lock: locale settings flow through settingsRepositoryProvider.
-      // getSettings() is called by localeNotifierProvider.build().
+      // getSettings() is called by localeProvider.build().
       await tester.pumpWidget(
         _buildApp(const AppearanceSection(settings: testSettings), [
           settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),

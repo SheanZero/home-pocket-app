@@ -31,8 +31,8 @@ class MainShellScreen extends ConsumerWidget {
 
     // Refresh home data when sync completes (syncing → synced)
     ref.listen(syncStatusStreamProvider, (prev, next) {
-      final prevState = prev?.valueOrNull?.state;
-      final currState = next.valueOrNull?.state;
+      final prevState = prev?.value?.state;
+      final currState = next.value?.state;
       if (currState == null) return;
 
       final wasSyncing =

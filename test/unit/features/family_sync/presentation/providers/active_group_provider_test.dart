@@ -6,6 +6,8 @@ import 'package:home_pocket/features/family_sync/presentation/providers/state_ac
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../../../../../helpers/test_provider_scope.dart';
+
 class MockGroupRepository extends Mock implements GroupRepository {}
 
 void main() {
@@ -19,13 +21,11 @@ void main() {
     test('isGroupMode is false when no active group exists', () async {
       when(() => repo.watchActiveGroup()).thenAnswer((_) => Stream.value(null));
 
-      final container = ProviderContainer(
+      final container = ProviderContainer.test(
         overrides: [groupRepositoryProvider.overrideWithValue(repo)],
       );
-      addTearDown(container.dispose);
 
-      await container.read(activeGroupProvider.future);
-
+      await waitForFirstValue<GroupInfo?>(container, activeGroupProvider);
       expect(container.read(isGroupModeProvider), isFalse);
     });
 
@@ -34,13 +34,11 @@ void main() {
         () => repo.watchActiveGroup(),
       ).thenAnswer((_) => Stream.value(_buildActiveGroup()));
 
-      final container = ProviderContainer(
+      final container = ProviderContainer.test(
         overrides: [groupRepositoryProvider.overrideWithValue(repo)],
       );
-      addTearDown(container.dispose);
 
-      await container.read(activeGroupProvider.future);
-
+      await waitForFirstValue<GroupInfo?>(container, activeGroupProvider);
       expect(container.read(isGroupModeProvider), isTrue);
     });
   });

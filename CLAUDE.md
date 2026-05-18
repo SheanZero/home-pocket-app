@@ -93,7 +93,7 @@ Domain is independent. Outer layers depend on inner, never reverse.
 
 ### Key Patterns
 
-- **State:** Riverpod 2.4+ with `@riverpod` code generation
+- **State:** Riverpod 3.1+ with `@riverpod` code generation (generator 4.x)
 - **Models:** Freezed with `@freezed` for immutability (always use `copyWith`)
 - **Database:** Drift with SQLCipher (type-safe SQL + encryption)
 - **Routing:** GoRouter
@@ -106,6 +106,25 @@ Domain is independent. Outer layers depend on inner, never reverse.
 - NEVER duplicate repository provider definitions
 - NEVER throw `UnimplementedError` in providers
 - Use Cases classes live in `lib/application/`, but providers wiring them live in feature's `presentation/providers/`
+
+### Riverpod 3 conventions (vs 2.x)
+
+Public Riverpod 3 surface is split across three entry points. Pick the right one or symbols won't resolve:
+
+| Need | Import |
+|---|---|
+| `Provider`, `FutureProvider`, `StreamProvider`, `Notifier`, `AsyncNotifier`, `AsyncValue`, `ProviderContainer`, `ConsumerWidget`, `WidgetRef`, `ProviderScope` | `package:flutter_riverpod/flutter_riverpod.dart` |
+| `StateNotifier`, `StateNotifierProvider`, `StateProvider`, `StateController`, `ChangeNotifierProvider` (legacy/discouraged) | `package:flutter_riverpod/legacy.dart` |
+| `Override`, `ProviderListenable`, `ProviderException`, `Family`, `Refreshable`, `ProviderBase` | `package:flutter_riverpod/misc.dart` |
+
+Generator/API changes that bit us during the 2 → 3 migration — keep these in mind:
+
+- **Provider names strip the `Notifier` suffix.** `class LocaleNotifier` (annotated with `@riverpod`) now generates `localeProvider`, not `localeNotifierProvider`.
+- **`AsyncValue.valueOrNull` was renamed to `.value`.** The old throwing `value` is gone; `.value` is now nullable.
+- **Errors thrown by providers are wrapped in `ProviderException`** (`implements Exception`). Inner exception is on `.exception`. Tests that do `throwsA(isA<StateError>())` now need `throwsA(isA<ProviderException>().having((e) => e.exception, 'exception', isA<StateError>()))`.
+- **Side-effect listeners belong in `ref.listen`, not `ref.watch`.** Riverpod 3 dropped some `watch`-driven side-effect rebuilds for legacy `StateNotifierProvider`s — use `ref.listen` for navigation, snackbars, etc. (see `FamilySyncNotificationRouteListener`).
+- **Async test pattern: do NOT do bare `await container.read(provider.future)` on auto-dispose providers.** Riverpod 3 disposes the orphan read before the build settles, masking real values/errors with `Bad state: disposed during loading`. Use `waitForFirstValue<T>(container, provider)` in `test/helpers/test_provider_scope.dart` — it holds a `container.listen(..., fireImmediately: true)` subscription via a `Completer`.
+- **Use `ProviderContainer.test()` in tests** instead of `ProviderContainer() + addTearDown(container.dispose)`. It auto-disposes on test teardown.
 
 ---
 
@@ -208,9 +227,19 @@ final effectiveBookId = bookId ?? ref.watch(currentBookIdProvider).value;
 
 ## iOS Build
 
-- Use `sqlcipher_flutter_libs` — NEVER `sqlite3_flutter_libs` (conflicts)
+- Use `sqlcipher_flutter_libs` at `^0.6.x` — NEVER `sqlite3_flutter_libs` (conflicts). `0.7.0+eol` is intentionally a do-nothing package; the project hasn't migrated to `sqlite3` 3.x yet.
 - `ios/Podfile` has `EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64` fix for ML Kit
 - Clean rebuild: `flutter clean && cd ios && rm -rf Pods Podfile.lock .symlinks && cd .. && flutter pub get && cd ios && pod install`
+
+### Dependency pins to leave alone
+
+These versions are tied together via a transitive `win32` constraint. Bumping any one in isolation will fail `flutter pub get` or break the iOS native build:
+
+- `file_picker: ^11.0.2` — `^12.0.0-beta.*` ships a broken iOS Swift module (`FilePickerPlugin` duplicate definition); needs `win32 ^6.x`.
+- `package_info_plus: ^9.0.1` — `^10.x` requires `win32 ^6.0.1`, incompatible with `file_picker 11.x`.
+- `share_plus: ^12.0.2` — `^13.x` requires `win32 ^6.0.1`, same conflict.
+
+If you need to upgrade the trio, do them together AND verify `flutter build ios --debug --no-codesign` succeeds.
 
 ---
 

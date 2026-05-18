@@ -11,10 +11,6 @@ void main() {
   late MockLocalAuthentication mockAuth;
   late BiometricService service;
 
-  setUpAll(() {
-    registerFallbackValue(const AuthenticationOptions());
-  });
-
   setUp(() {
     mockAuth = MockLocalAuthentication();
     service = BiometricService(localAuth: mockAuth);
@@ -120,7 +116,9 @@ void main() {
       when(
         () => mockAuth.authenticate(
           localizedReason: any(named: 'localizedReason'),
-          options: any(named: 'options'),
+          biometricOnly: any(named: 'biometricOnly'),
+          sensitiveTransaction: any(named: 'sensitiveTransaction'),
+          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
         ),
       ).thenAnswer((_) async => true);
 
@@ -134,7 +132,9 @@ void main() {
       when(
         () => mockAuth.authenticate(
           localizedReason: any(named: 'localizedReason'),
-          options: any(named: 'options'),
+          biometricOnly: any(named: 'biometricOnly'),
+          sensitiveTransaction: any(named: 'sensitiveTransaction'),
+          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
         ),
       ).thenAnswer((_) async => false);
 
@@ -148,7 +148,9 @@ void main() {
       when(
         () => mockAuth.authenticate(
           localizedReason: any(named: 'localizedReason'),
-          options: any(named: 'options'),
+          biometricOnly: any(named: 'biometricOnly'),
+          sensitiveTransaction: any(named: 'sensitiveTransaction'),
+          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
         ),
       ).thenAnswer((_) async => false);
 
@@ -170,7 +172,9 @@ void main() {
       when(
         () => mockAuth.authenticate(
           localizedReason: any(named: 'localizedReason'),
-          options: any(named: 'options'),
+          biometricOnly: any(named: 'biometricOnly'),
+          sensitiveTransaction: any(named: 'sensitiveTransaction'),
+          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
         ),
       ).thenAnswer((_) async => false);
       await service.authenticate(reason: 'test');
@@ -180,7 +184,9 @@ void main() {
       when(
         () => mockAuth.authenticate(
           localizedReason: any(named: 'localizedReason'),
-          options: any(named: 'options'),
+          biometricOnly: any(named: 'biometricOnly'),
+          sensitiveTransaction: any(named: 'sensitiveTransaction'),
+          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
         ),
       ).thenAnswer((_) async => true);
       final result = await service.authenticate(reason: 'test');
@@ -191,7 +197,9 @@ void main() {
       when(
         () => mockAuth.authenticate(
           localizedReason: any(named: 'localizedReason'),
-          options: any(named: 'options'),
+          biometricOnly: any(named: 'biometricOnly'),
+          sensitiveTransaction: any(named: 'sensitiveTransaction'),
+          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
         ),
       ).thenAnswer((_) async => false);
       final afterReset = await service.authenticate(reason: 'test');
@@ -225,7 +233,9 @@ void main() {
         when(
           () => mockAuth.authenticate(
             localizedReason: any(named: 'localizedReason'),
-            options: any(named: 'options'),
+            biometricOnly: any(named: 'biometricOnly'),
+          sensitiveTransaction: any(named: 'sensitiveTransaction'),
+          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
           ),
         ).thenThrow(PlatformException(code: 'LockedOut'));
 
@@ -240,7 +250,9 @@ void main() {
       when(
         () => mockAuth.authenticate(
           localizedReason: any(named: 'localizedReason'),
-          options: any(named: 'options'),
+          biometricOnly: any(named: 'biometricOnly'),
+          sensitiveTransaction: any(named: 'sensitiveTransaction'),
+          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
         ),
       ).thenThrow(PlatformException(code: 'PermanentlyLockedOut'));
 
@@ -254,7 +266,9 @@ void main() {
       when(
         () => mockAuth.authenticate(
           localizedReason: any(named: 'localizedReason'),
-          options: any(named: 'options'),
+          biometricOnly: any(named: 'biometricOnly'),
+          sensitiveTransaction: any(named: 'sensitiveTransaction'),
+          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
         ),
       ).thenThrow(PlatformException(code: 'NotAvailable'));
 
@@ -268,7 +282,9 @@ void main() {
       when(
         () => mockAuth.authenticate(
           localizedReason: any(named: 'localizedReason'),
-          options: any(named: 'options'),
+          biometricOnly: any(named: 'biometricOnly'),
+          sensitiveTransaction: any(named: 'sensitiveTransaction'),
+          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
         ),
       ).thenThrow(
         PlatformException(code: 'UnknownError', message: 'something broke'),
@@ -292,7 +308,9 @@ void main() {
       when(
         () => mockAuth.authenticate(
           localizedReason: any(named: 'localizedReason'),
-          options: any(named: 'options'),
+          biometricOnly: any(named: 'biometricOnly'),
+          sensitiveTransaction: any(named: 'sensitiveTransaction'),
+          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
         ),
       ).thenAnswer((_) async => false);
       await service.authenticate(reason: 'test');
@@ -308,7 +326,9 @@ void main() {
       when(
         () => mockAuth.authenticate(
           localizedReason: any(named: 'localizedReason'),
-          options: any(named: 'options'),
+          biometricOnly: any(named: 'biometricOnly'),
+          sensitiveTransaction: any(named: 'sensitiveTransaction'),
+          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
         ),
       ).thenAnswer((_) async => true);
 

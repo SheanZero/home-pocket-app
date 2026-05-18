@@ -6,25 +6,59 @@ part of 'state_category_reorder.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(CategoryReorderNotifier)
+final categoryReorderProvider = CategoryReorderNotifierProvider._();
+
+final class CategoryReorderNotifierProvider
+    extends $NotifierProvider<CategoryReorderNotifier, CategoryReorderState> {
+  CategoryReorderNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'categoryReorderProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$categoryReorderNotifierHash();
+
+  @$internal
+  @override
+  CategoryReorderNotifier create() => CategoryReorderNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CategoryReorderState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CategoryReorderState>(value),
+    );
+  }
+}
+
 String _$categoryReorderNotifierHash() =>
     r'4338ccc503b0fd37d13974312078d9ed83a5c0da';
 
-/// See also [CategoryReorderNotifier].
-@ProviderFor(CategoryReorderNotifier)
-final categoryReorderNotifierProvider =
-    AutoDisposeNotifierProvider<
-      CategoryReorderNotifier,
-      CategoryReorderState
-    >.internal(
-      CategoryReorderNotifier.new,
-      name: r'categoryReorderNotifierProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$categoryReorderNotifierHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$CategoryReorderNotifier = AutoDisposeNotifier<CategoryReorderState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$CategoryReorderNotifier
+    extends $Notifier<CategoryReorderState> {
+  CategoryReorderState build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<CategoryReorderState, CategoryReorderState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<CategoryReorderState, CategoryReorderState>,
+              CategoryReorderState,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

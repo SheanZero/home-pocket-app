@@ -8,6 +8,8 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
 import 'package:home_pocket/features/home/presentation/providers/state_today_transactions.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../../../../../helpers/test_provider_scope.dart';
+
 class _MockTransactionRepository extends Mock
     implements TransactionRepository {}
 
@@ -181,16 +183,19 @@ void main() {
       ).thenAnswer((_) async => []);
 
       final useCase = GetTransactionsUseCase(transactionRepository: mockRepo);
-      final container = ProviderContainer(
+      final container = ProviderContainer.test(
         overrides: [getTransactionsUseCaseProvider.overrideWithValue(useCase)],
       );
-      addTearDown(container.dispose);
 
-      // Empty bookId triggers error in GetTransactionsUseCase
-      expect(
-        () => container.read(todayTransactionsProvider(bookId: '').future),
-        throwsA(isA<Exception>()),
+      // Empty bookId triggers Result.error in the use case; provider rethrows.
+      // Use waitForFirstValue helper since Riverpod 3 auto-disposes the
+      // .future read before the provider's exception surfaces.
+      final result = await waitForFirstValue<List<Transaction>>(
+        container,
+        todayTransactionsProvider(bookId: ''),
       );
+      expect(result.hasError, isTrue);
+      expect(result.error, isA<Exception>());
     });
   });
 }

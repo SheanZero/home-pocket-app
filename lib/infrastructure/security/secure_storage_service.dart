@@ -73,10 +73,9 @@ class SecureStorageService {
     accessibility: KeychainAccessibility.unlocked_this_device,
   );
 
-  /// Android Keystore: encrypted shared preferences.
-  static const _androidOptions = AndroidOptions(
-    encryptedSharedPreferences: true,
-  );
+  /// Android Keystore: default options (encrypted shared preferences deprecated
+  /// in flutter_secure_storage 10 — data auto-migrates to custom ciphers).
+  static const _androidOptions = AndroidOptions();
 
   // ── Core CRUD ──
 

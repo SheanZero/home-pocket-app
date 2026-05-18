@@ -43,13 +43,13 @@ class AnalyticsScreen extends ConsumerWidget {
     final month = selected.month;
     final daysInMonth = DateTime(year, month + 1, 0).day;
     final locale =
-        ref.watch(locale_providers.currentLocaleProvider).valueOrNull ??
+        ref.watch(locale_providers.currentLocaleProvider).value ??
         Localizations.localeOf(context);
 
     final bookAsync = ref.watch(
       accounting_providers.bookByIdProvider(bookId: bookId),
     );
-    final currencyCode = bookAsync.valueOrNull?.currency ?? 'JPY';
+    final currencyCode = bookAsync.value?.currency ?? 'JPY';
     final earliestMonthAsync = ref.watch(
       earliestTransactionMonthProvider(bookId: bookId),
     );
@@ -67,7 +67,7 @@ class AnalyticsScreen extends ConsumerWidget {
         actions: [
           MonthChipPicker(
             locale: locale,
-            earliestMonth: earliestMonthAsync.valueOrNull,
+            earliestMonth: earliestMonthAsync.value,
           ),
         ],
       ),
@@ -574,7 +574,7 @@ class _FamilyCard extends ConsumerWidget {
       data: (family) => FamilyInsightCard(
         family: family,
         isGroupMode: isGroupMode,
-        shadowBooks: shadowBooksAsync.valueOrNull,
+        shadowBooks: shadowBooksAsync.value,
         locale: locale,
       ),
       loading: () => const SizedBox(height: 110),

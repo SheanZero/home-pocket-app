@@ -188,7 +188,7 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
   @override
   Widget build(BuildContext context) {
     final syncStatusAsync = ref.watch(syncStatusStreamProvider);
-    final syncState = syncStatusAsync.valueOrNull?.state ?? SyncState.noGroup;
+    final syncState = syncStatusAsync.value?.state ?? SyncState.noGroup;
 
     return Scaffold(
       backgroundColor: AppColors.background,

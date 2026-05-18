@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../accounting/domain/models/book.dart';
@@ -24,7 +23,7 @@ class ShadowBookInfo {
 
 @riverpod
 Future<List<ShadowBookInfo>> shadowBooks(Ref ref) async {
-  final group = ref.watch(activeGroupProvider).valueOrNull;
+  final group = ref.watch(activeGroupProvider).value;
   if (group == null) return const [];
 
   final bookRepo = ref.watch(bookRepositoryProvider);

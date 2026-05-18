@@ -187,7 +187,7 @@ void main() {
       final container = ProviderScope.containerOf(
         tester.element(find.byType(CategorySelectionScreen)),
       );
-      container.read(categoryReorderNotifierProvider.notifier).reorderL1(0, 2);
+      container.read(categoryReorderProvider.notifier).reorderL1(0, 2);
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Save'));
@@ -262,7 +262,7 @@ void main() {
       final container = ProviderScope.containerOf(
         tester.element(find.byType(CategorySelectionScreen)),
       );
-      final notifier = container.read(categoryReorderNotifierProvider.notifier);
+      final notifier = container.read(categoryReorderProvider.notifier);
       notifier.enterEditing(
         l1: categories.where((c) => c.level == 1).toList(),
         l2ByParent: const {},

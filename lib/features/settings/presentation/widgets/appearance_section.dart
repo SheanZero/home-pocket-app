@@ -76,7 +76,7 @@ class AppearanceSection extends ConsumerWidget {
   }
 }
 
-/// Language picker tile that reads locale state from [localeNotifierProvider].
+/// Language picker tile that reads locale state from [localeProvider].
 class _LanguageTile extends ConsumerWidget {
   const _LanguageTile({required this.settings});
 
@@ -84,8 +84,8 @@ class _LanguageTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final localeAsync = ref.watch(localeNotifierProvider);
-    final localeSettings = localeAsync.valueOrNull;
+    final localeAsync = ref.watch(localeProvider);
+    final localeSettings = localeAsync.value;
 
     return ListTile(
       leading: const Icon(Icons.language),
@@ -128,11 +128,11 @@ class _LanguageTile extends ConsumerWidget {
             if (value != null) {
               if (value == 'system') {
                 await ref
-                    .read(localeNotifierProvider.notifier)
+                    .read(localeProvider.notifier)
                     .setSystemDefault();
               } else {
                 await ref
-                    .read(localeNotifierProvider.notifier)
+                    .read(localeProvider.notifier)
                     .setLocale(Locale(value));
               }
               ref.invalidate(appSettingsProvider);

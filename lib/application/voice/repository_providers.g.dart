@@ -6,52 +6,123 @@ part of 'repository_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$appSpeechRecognitionServiceHash() =>
-    r'059e8bca12f8a2a685d5667da5c8beed0e9b470d';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Application-layer SpeechRecognitionService provider.
+///
+/// Uses `app` prefix to avoid collision with any future feature-side definition
+/// during Wave 2/3 coexistence (per Warning 7 fix).
+
+@ProviderFor(appSpeechRecognitionService)
+final appSpeechRecognitionServiceProvider =
+    AppSpeechRecognitionServiceProvider._();
 
 /// Application-layer SpeechRecognitionService provider.
 ///
 /// Uses `app` prefix to avoid collision with any future feature-side definition
 /// during Wave 2/3 coexistence (per Warning 7 fix).
-///
-/// Copied from [appSpeechRecognitionService].
-@ProviderFor(appSpeechRecognitionService)
-final appSpeechRecognitionServiceProvider =
-    AutoDisposeProvider<SpeechRecognitionService>.internal(
-      appSpeechRecognitionService,
-      name: r'appSpeechRecognitionServiceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$appSpeechRecognitionServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef AppSpeechRecognitionServiceRef =
-    AutoDisposeProviderRef<SpeechRecognitionService>;
-String _$startSpeechRecognitionUseCaseHash() =>
-    r'2449977d8e6c57f2b0370fdaf039c21d703b25c7';
+final class AppSpeechRecognitionServiceProvider
+    extends
+        $FunctionalProvider<
+          SpeechRecognitionService,
+          SpeechRecognitionService,
+          SpeechRecognitionService
+        >
+    with $Provider<SpeechRecognitionService> {
+  /// Application-layer SpeechRecognitionService provider.
+  ///
+  /// Uses `app` prefix to avoid collision with any future feature-side definition
+  /// during Wave 2/3 coexistence (per Warning 7 fix).
+  AppSpeechRecognitionServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'appSpeechRecognitionServiceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$appSpeechRecognitionServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<SpeechRecognitionService> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  SpeechRecognitionService create(Ref ref) {
+    return appSpeechRecognitionService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SpeechRecognitionService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SpeechRecognitionService>(value),
+    );
+  }
+}
+
+String _$appSpeechRecognitionServiceHash() =>
+    r'059e8bca12f8a2a685d5667da5c8beed0e9b470d';
 
 /// Application-layer StartSpeechRecognitionUseCase provider.
-///
-/// Copied from [startSpeechRecognitionUseCase].
+
 @ProviderFor(startSpeechRecognitionUseCase)
 final startSpeechRecognitionUseCaseProvider =
-    AutoDisposeProvider<StartSpeechRecognitionUseCase>.internal(
-      startSpeechRecognitionUseCase,
-      name: r'startSpeechRecognitionUseCaseProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$startSpeechRecognitionUseCaseHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+    StartSpeechRecognitionUseCaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef StartSpeechRecognitionUseCaseRef =
-    AutoDisposeProviderRef<StartSpeechRecognitionUseCase>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+/// Application-layer StartSpeechRecognitionUseCase provider.
+
+final class StartSpeechRecognitionUseCaseProvider
+    extends
+        $FunctionalProvider<
+          StartSpeechRecognitionUseCase,
+          StartSpeechRecognitionUseCase,
+          StartSpeechRecognitionUseCase
+        >
+    with $Provider<StartSpeechRecognitionUseCase> {
+  /// Application-layer StartSpeechRecognitionUseCase provider.
+  StartSpeechRecognitionUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'startSpeechRecognitionUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$startSpeechRecognitionUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<StartSpeechRecognitionUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  StartSpeechRecognitionUseCase create(Ref ref) {
+    return startSpeechRecognitionUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(StartSpeechRecognitionUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<StartSpeechRecognitionUseCase>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$startSpeechRecognitionUseCaseHash() =>
+    r'2449977d8e6c57f2b0370fdaf039c21d703b25c7';

@@ -6,95 +6,225 @@ part of 'providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$biometricServiceHash() => r'18210c094d1a72ed9598598ff121847f2a12ad88';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Biometric authentication service.
+///
+/// Uses `keepAlive: true` to ensure the service persists across
+/// widget rebuilds, preserving the `_failedAttempts` counter state.
+
+@ProviderFor(biometricService)
+final biometricServiceProvider = BiometricServiceProvider._();
 
 /// Biometric authentication service.
 ///
 /// Uses `keepAlive: true` to ensure the service persists across
 /// widget rebuilds, preserving the `_failedAttempts` counter state.
-///
-/// Copied from [biometricService].
-@ProviderFor(biometricService)
-final biometricServiceProvider = Provider<BiometricService>.internal(
-  biometricService,
-  name: r'biometricServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$biometricServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef BiometricServiceRef = ProviderRef<BiometricService>;
+final class BiometricServiceProvider
+    extends
+        $FunctionalProvider<
+          BiometricService,
+          BiometricService,
+          BiometricService
+        >
+    with $Provider<BiometricService> {
+  /// Biometric authentication service.
+  ///
+  /// Uses `keepAlive: true` to ensure the service persists across
+  /// widget rebuilds, preserving the `_failedAttempts` counter state.
+  BiometricServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'biometricServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$biometricServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<BiometricService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  BiometricService create(Ref ref) {
+    return biometricService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(BiometricService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<BiometricService>(value),
+    );
+  }
+}
+
+String _$biometricServiceHash() => r'18210c094d1a72ed9598598ff121847f2a12ad88';
+
+/// Check biometric availability for the current device.
+
+@ProviderFor(biometricAvailability)
+final biometricAvailabilityProvider = BiometricAvailabilityProvider._();
+
+/// Check biometric availability for the current device.
+
+final class BiometricAvailabilityProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<BiometricAvailability>,
+          BiometricAvailability,
+          FutureOr<BiometricAvailability>
+        >
+    with
+        $FutureModifier<BiometricAvailability>,
+        $FutureProvider<BiometricAvailability> {
+  /// Check biometric availability for the current device.
+  BiometricAvailabilityProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'biometricAvailabilityProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$biometricAvailabilityHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<BiometricAvailability> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<BiometricAvailability> create(Ref ref) {
+    return biometricAvailability(ref);
+  }
+}
+
 String _$biometricAvailabilityHash() =>
     r'b34f08de89a68dabbf6c2f5bf5f031b87e7e647d';
 
-/// Check biometric availability for the current device.
-///
-/// Copied from [biometricAvailability].
-@ProviderFor(biometricAvailability)
-final biometricAvailabilityProvider =
-    AutoDisposeFutureProvider<BiometricAvailability>.internal(
-      biometricAvailability,
-      name: r'biometricAvailabilityProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$biometricAvailabilityHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+/// Secure storage service — iOS Keychain / Android Keystore wrapper.
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef BiometricAvailabilityRef =
-    AutoDisposeFutureProviderRef<BiometricAvailability>;
-String _$secureStorageServiceHash() =>
-    r'f44bb5666baebf64786c7d88095a3ba1b215b1d2';
+@ProviderFor(secureStorageService)
+final secureStorageServiceProvider = SecureStorageServiceProvider._();
 
 /// Secure storage service — iOS Keychain / Android Keystore wrapper.
-///
-/// Copied from [secureStorageService].
-@ProviderFor(secureStorageService)
-final secureStorageServiceProvider =
-    AutoDisposeProvider<SecureStorageService>.internal(
-      secureStorageService,
-      name: r'secureStorageServiceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$secureStorageServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SecureStorageServiceRef = AutoDisposeProviderRef<SecureStorageService>;
-String _$auditLoggerHash() => r'd20d2dbc362170585bc01c438bb4783c1bf1eb73';
+final class SecureStorageServiceProvider
+    extends
+        $FunctionalProvider<
+          SecureStorageService,
+          SecureStorageService,
+          SecureStorageService
+        >
+    with $Provider<SecureStorageService> {
+  /// Secure storage service — iOS Keychain / Android Keystore wrapper.
+  SecureStorageServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'secureStorageServiceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$secureStorageServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<SecureStorageService> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  SecureStorageService create(Ref ref) {
+    return secureStorageService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SecureStorageService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SecureStorageService>(value),
+    );
+  }
+}
+
+String _$secureStorageServiceHash() =>
+    r'f44bb5666baebf64786c7d88095a3ba1b215b1d2';
 
 /// Audit logger — depends on AppDatabase and SecureStorageService.
 ///
 /// NOTE: This provider requires [appDatabaseProvider] to be defined
 /// elsewhere (e.g. in app initialization). For now, it uses
 /// constructor injection and should be wired during app startup.
-///
-/// Copied from [auditLogger].
-@ProviderFor(auditLogger)
-final auditLoggerProvider = AutoDisposeProvider<AuditLogger>.internal(
-  auditLogger,
-  name: r'auditLoggerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$auditLoggerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef AuditLoggerRef = AutoDisposeProviderRef<AuditLogger>;
-String _$appDatabaseHash() => r'88010833b86aa9a841ee56a0ccd57c65b66cf520';
+@ProviderFor(auditLogger)
+final auditLoggerProvider = AuditLoggerProvider._();
+
+/// Audit logger — depends on AppDatabase and SecureStorageService.
+///
+/// NOTE: This provider requires [appDatabaseProvider] to be defined
+/// elsewhere (e.g. in app initialization). For now, it uses
+/// constructor injection and should be wired during app startup.
+
+final class AuditLoggerProvider
+    extends $FunctionalProvider<AuditLogger, AuditLogger, AuditLogger>
+    with $Provider<AuditLogger> {
+  /// Audit logger — depends on AppDatabase and SecureStorageService.
+  ///
+  /// NOTE: This provider requires [appDatabaseProvider] to be defined
+  /// elsewhere (e.g. in app initialization). For now, it uses
+  /// constructor injection and should be wired during app startup.
+  AuditLoggerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'auditLoggerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$auditLoggerHash();
+
+  @$internal
+  @override
+  $ProviderElement<AuditLogger> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  AuditLogger create(Ref ref) {
+    return auditLogger(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AuditLogger value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AuditLogger>(value),
+    );
+  }
+}
+
+String _$auditLoggerHash() => r'd20d2dbc362170585bc01c438bb4783c1bf1eb73';
 
 /// AppDatabase provider - PLACEHOLDER.
 ///
@@ -145,21 +275,143 @@ String _$appDatabaseHash() => r'88010833b86aa9a841ee56a0ccd57c65b66cf520';
 ///
 /// If reached without an override the wiring is broken — fail loud with a
 /// diagnostic StateError pointing to AppInitializer.
-///
-/// Copied from [appDatabase].
-@ProviderFor(appDatabase)
-final appDatabaseProvider = Provider<AppDatabase>.internal(
-  appDatabase,
-  name: r'appDatabaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$appDatabaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef AppDatabaseRef = ProviderRef<AppDatabase>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+@ProviderFor(appDatabase)
+final appDatabaseProvider = AppDatabaseProvider._();
+
+/// AppDatabase provider - PLACEHOLDER.
+///
+/// This provider MUST be overridden during app initialization.
+/// The placeholder throws to ensure it's properly configured before use.
+///
+/// ## How to Replace
+///
+/// In your `AppInitializer` or `main.dart`, override this provider:
+///
+/// ```dart
+/// Future<void> main() async {
+///   WidgetsFlutterBinding.ensureInitialized();
+///
+///   // 1. Get master key repository
+///   final masterKeyRepo = MasterKeyRepositoryImpl(secureStorage: secureStorage);
+///
+///   // 2. Initialize master key if needed
+///   if (!await masterKeyRepo.hasMasterKey()) {
+///     await masterKeyRepo.initializeMasterKey();
+///   }
+///
+///   // 3. Create encrypted database executor
+///   final executor = await createEncryptedExecutor(masterKeyRepo);
+///   final database = AppDatabase(executor);
+///
+///   // 4. Override the provider
+///   runApp(
+///     ProviderScope(
+///       overrides: [appDatabaseProvider.overrideWithValue(database)],
+///       child: const MyApp(),
+///     ),
+///   );
+/// }
+/// ```
+///
+/// ## Dependencies
+///
+/// - `MasterKeyRepository` from `lib/infrastructure/crypto/repositories/`
+/// - `createEncryptedExecutor` from `lib/infrastructure/crypto/database/`
+/// AppDatabase provider — concrete keepAlive: true.
+///
+/// Phase 3 / CRIT-03 fix: replaces the prior `UnimplementedError` placeholder.
+/// AppInitializer.initialize() overrides this via `.overrideWithValue(database)`
+/// on the production ProviderContainer. Tests use `createTestProviderScope`
+/// (test/helpers/test_provider_scope.dart) which always overrides with
+/// `AppDatabase.forTesting()`.
+///
+/// If reached without an override the wiring is broken — fail loud with a
+/// diagnostic StateError pointing to AppInitializer.
+
+final class AppDatabaseProvider
+    extends $FunctionalProvider<AppDatabase, AppDatabase, AppDatabase>
+    with $Provider<AppDatabase> {
+  /// AppDatabase provider - PLACEHOLDER.
+  ///
+  /// This provider MUST be overridden during app initialization.
+  /// The placeholder throws to ensure it's properly configured before use.
+  ///
+  /// ## How to Replace
+  ///
+  /// In your `AppInitializer` or `main.dart`, override this provider:
+  ///
+  /// ```dart
+  /// Future<void> main() async {
+  ///   WidgetsFlutterBinding.ensureInitialized();
+  ///
+  ///   // 1. Get master key repository
+  ///   final masterKeyRepo = MasterKeyRepositoryImpl(secureStorage: secureStorage);
+  ///
+  ///   // 2. Initialize master key if needed
+  ///   if (!await masterKeyRepo.hasMasterKey()) {
+  ///     await masterKeyRepo.initializeMasterKey();
+  ///   }
+  ///
+  ///   // 3. Create encrypted database executor
+  ///   final executor = await createEncryptedExecutor(masterKeyRepo);
+  ///   final database = AppDatabase(executor);
+  ///
+  ///   // 4. Override the provider
+  ///   runApp(
+  ///     ProviderScope(
+  ///       overrides: [appDatabaseProvider.overrideWithValue(database)],
+  ///       child: const MyApp(),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// ## Dependencies
+  ///
+  /// - `MasterKeyRepository` from `lib/infrastructure/crypto/repositories/`
+  /// - `createEncryptedExecutor` from `lib/infrastructure/crypto/database/`
+  /// AppDatabase provider — concrete keepAlive: true.
+  ///
+  /// Phase 3 / CRIT-03 fix: replaces the prior `UnimplementedError` placeholder.
+  /// AppInitializer.initialize() overrides this via `.overrideWithValue(database)`
+  /// on the production ProviderContainer. Tests use `createTestProviderScope`
+  /// (test/helpers/test_provider_scope.dart) which always overrides with
+  /// `AppDatabase.forTesting()`.
+  ///
+  /// If reached without an override the wiring is broken — fail loud with a
+  /// diagnostic StateError pointing to AppInitializer.
+  AppDatabaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'appDatabaseProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$appDatabaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<AppDatabase> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  AppDatabase create(Ref ref) {
+    return appDatabase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AppDatabase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AppDatabase>(value),
+    );
+  }
+}
+
+String _$appDatabaseHash() => r'88010833b86aa9a841ee56a0ccd57c65b66cf520';

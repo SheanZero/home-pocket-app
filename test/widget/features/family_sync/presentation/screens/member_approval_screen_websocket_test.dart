@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/confirm_member_use_case.dart';
 import 'package:home_pocket/application/family_sync/notify_member_approval_use_case.dart';

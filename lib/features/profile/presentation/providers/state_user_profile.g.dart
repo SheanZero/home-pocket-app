@@ -6,22 +6,44 @@ part of 'state_user_profile.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$userProfileHash() => r'052942e2084835be09ba2791481005468118c83e';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [userProfile].
 @ProviderFor(userProfile)
-final userProfileProvider = AutoDisposeFutureProvider<UserProfile?>.internal(
-  userProfile,
-  name: r'userProfileProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$userProfileHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final userProfileProvider = UserProfileProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef UserProfileRef = AutoDisposeFutureProviderRef<UserProfile?>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class UserProfileProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<UserProfile?>,
+          UserProfile?,
+          FutureOr<UserProfile?>
+        >
+    with $FutureModifier<UserProfile?>, $FutureProvider<UserProfile?> {
+  UserProfileProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'userProfileProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$userProfileHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<UserProfile?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<UserProfile?> create(Ref ref) {
+    return userProfile(ref);
+  }
+}
+
+String _$userProfileHash() => r'052942e2084835be09ba2791481005468118c83e';

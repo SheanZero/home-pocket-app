@@ -71,10 +71,10 @@ void main() {
   tearDown(() => container.dispose());
 
   CategoryReorderNotifier notifier() =>
-      container.read(categoryReorderNotifierProvider.notifier);
+      container.read(categoryReorderProvider.notifier);
 
   CategoryReorderState state() =>
-      container.read(categoryReorderNotifierProvider);
+      container.read(categoryReorderProvider);
 
   group('CategoryReorderNotifier', () {
     test('initial state has mode == idle', () {

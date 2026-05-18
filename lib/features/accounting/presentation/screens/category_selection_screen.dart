@@ -127,7 +127,7 @@ class _CategorySelectionScreenState
 
   void _onEnterReorderMode() {
     ref
-        .read(categoryReorderNotifierProvider.notifier)
+        .read(categoryReorderProvider.notifier)
         .enterEditing(l1: _l1Categories, l2ByParent: _l2ByParent);
     _searchController.clear();
     setState(() => _searchQuery = '');
@@ -139,7 +139,7 @@ class _CategorySelectionScreenState
       return;
     }
     if (reorderState.isEditing) {
-      ref.read(categoryReorderNotifierProvider.notifier).cancel();
+      ref.read(categoryReorderProvider.notifier).cancel();
       return;
     }
     Navigator.pop(context);
@@ -147,7 +147,7 @@ class _CategorySelectionScreenState
 
   Future<void> _onSave() async {
     try {
-      await ref.read(categoryReorderNotifierProvider.notifier).save();
+      await ref.read(categoryReorderProvider.notifier).save();
       await _loadCategories();
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -184,7 +184,7 @@ class _CategorySelectionScreenState
       ),
     );
     if (discard == true) {
-      ref.read(categoryReorderNotifierProvider.notifier).cancel();
+      ref.read(categoryReorderProvider.notifier).cancel();
     }
   }
 
@@ -192,10 +192,10 @@ class _CategorySelectionScreenState
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final localeAsync = ref.watch(currentLocaleProvider);
-    final locale = localeAsync.valueOrNull ?? const Locale('ja');
+    final locale = localeAsync.value ?? const Locale('ja');
     final filteredL1 = _getFilteredL1(locale);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final reorderState = ref.watch(categoryReorderNotifierProvider);
+    final reorderState = ref.watch(categoryReorderProvider);
     final isEditing = reorderState.isEditing;
 
     return Scaffold(
@@ -384,7 +384,7 @@ class _CategorySelectionScreenState
               SliverReorderableList(
                 itemCount: state.l1.length,
                 onReorder: (o, n) => ref
-                    .read(categoryReorderNotifierProvider.notifier)
+                    .read(categoryReorderProvider.notifier)
                     .reorderL1(o, n),
                 itemBuilder: (context, index) {
                   final l1 = state.l1[index];
@@ -405,7 +405,7 @@ class _CategorySelectionScreenState
                       () => _expandedL1IdInEdit = expanded ? null : l1.id,
                     ),
                     onReorderChild: (o, n) => ref
-                        .read(categoryReorderNotifierProvider.notifier)
+                        .read(categoryReorderProvider.notifier)
                         .reorderL2(l1.id, o, n),
                     locale: locale,
                     isDark: isDark,

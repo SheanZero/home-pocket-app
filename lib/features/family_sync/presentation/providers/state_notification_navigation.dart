@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../../application/family_sync/listen_to_push_notifications_use_case.dart';
 import '../../../../application/family_sync/repository_providers.dart'

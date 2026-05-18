@@ -144,7 +144,7 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
         ) ??
         ThemeMode.system;
     final localeAsync = ref.watch(currentLocaleProvider);
-    final locale = localeAsync.valueOrNull ?? const Locale('ja');
+    final locale = localeAsync.value ?? const Locale('ja');
 
     return MaterialApp(
       onGenerateTitle: (context) => S.of(context).appName,

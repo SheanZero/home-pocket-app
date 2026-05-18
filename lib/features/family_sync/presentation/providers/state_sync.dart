@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/family_sync/sync_engine.dart';
@@ -66,7 +65,7 @@ Stream<model.SyncStatus> syncStatusStream(Ref ref) {
 /// [activeGroupProvider] (only members of the currently active group).
 @Riverpod(keepAlive: true)
 Stream<List<GroupMember>> activeGroupMembers(Ref ref) {
-  final activeGroup = ref.watch(activeGroupProvider).valueOrNull;
+  final activeGroup = ref.watch(activeGroupProvider).value;
   if (activeGroup == null) return Stream.value([]);
   final dao = ref.watch(groupMemberDaoProvider);
   return dao

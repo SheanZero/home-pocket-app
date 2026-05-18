@@ -12,7 +12,6 @@ part 'providers.g.dart';
 /// Single source of truth for secure storage instance + platform options.
 final flutterSecureStorageProvider = Provider<FlutterSecureStorage>((ref) {
   return const FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
     iOptions: IOSOptions(
       accessibility: KeychainAccessibility.unlocked_this_device,
     ),

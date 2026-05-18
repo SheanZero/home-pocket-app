@@ -10,6 +10,7 @@
 // the auditLogger and other consumers depend on.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
@@ -31,9 +32,13 @@ void main() {
       expect(
         () => container.read(appDatabaseProvider),
         throwsA(
-          // BEFORE Plan 03-02: UnimplementedError
-          // AFTER Plan 03-02: StateError (Plan 03-02 Task 3 replaces this assertion)
-          anyOf(isA<UnimplementedError>(), isA<StateError>()),
+          // Riverpod 3 wraps thrown errors in ProviderException; the inner
+          // exception is what the provider actually threw (StateError after Plan 03-02).
+          isA<ProviderException>().having(
+            (e) => e.exception,
+            'exception',
+            anyOf(isA<UnimplementedError>(), isA<StateError>()),
+          ),
         ),
       );
     });

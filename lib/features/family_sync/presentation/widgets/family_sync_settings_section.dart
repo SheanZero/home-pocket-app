@@ -20,9 +20,9 @@ class FamilySyncSettingsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final syncStatusAsync = ref.watch(syncStatusStreamProvider);
-    final syncState = syncStatusAsync.valueOrNull?.state ?? SyncState.noGroup;
+    final syncState = syncStatusAsync.value?.state ?? SyncState.noGroup;
     final l10n = S.of(context);
-    final activeGroup = ref.watch(activeGroupProvider).valueOrNull;
+    final activeGroup = ref.watch(activeGroupProvider).value;
     final subtitle = activeGroup != null
         ? l10n.familySyncMemberCount(activeGroup.members.length)
         : _stateDescription(l10n, syncState);
@@ -78,7 +78,7 @@ class FamilySyncSettingsSection extends ConsumerWidget {
     WidgetRef ref,
     SyncState state,
   ) async {
-    final localGroup = ref.read(activeGroupProvider).valueOrNull;
+    final localGroup = ref.read(activeGroupProvider).value;
     if (!context.mounted) return;
 
     if (localGroup != null || state != SyncState.noGroup) {

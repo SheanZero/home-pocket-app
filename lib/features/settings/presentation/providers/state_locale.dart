@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/i18n/locale_settings_view.dart';
@@ -47,6 +46,6 @@ class LocaleNotifier extends _$LocaleNotifier {
 /// Convenience provider that extracts just the [Locale] from [LocaleNotifier].
 @riverpod
 Future<Locale> currentLocale(Ref ref) async {
-  final settings = await ref.watch(localeNotifierProvider.future);
+  final settings = await ref.watch(localeProvider.future);
   return settings.locale;
 }

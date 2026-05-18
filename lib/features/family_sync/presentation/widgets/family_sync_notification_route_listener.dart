@@ -28,21 +28,19 @@ class FamilySyncNotificationRouteListener extends ConsumerStatefulWidget {
 
 class _FamilySyncNotificationRouteListenerState
     extends ConsumerState<FamilySyncNotificationRouteListener> {
-  PushNavigationIntent? _lastHandledIntent;
-
   @override
   Widget build(BuildContext context) {
-    final intent = ref.watch(familySyncNotificationNavigationProvider);
-    if (intent == null) {
-      _lastHandledIntent = null;
-      return widget.child;
-    }
-
-    if (intent != _lastHandledIntent) {
-      _lastHandledIntent = intent;
-      _scheduleNavigation(intent);
-    }
-
+    // ref.listen is the Riverpod-recommended way to react to state changes
+    // for side effects (navigation). It fires reliably for legacy
+    // StateNotifierProviders in Riverpod 3, whereas the prior
+    // watch+postFrameCallback pattern dropped updates.
+    ref.listen<PushNavigationIntent?>(
+      familySyncNotificationNavigationProvider,
+      (previous, next) {
+        if (next == null || next == previous) return;
+        _scheduleNavigation(next);
+      },
+    );
     return widget.child;
   }
 

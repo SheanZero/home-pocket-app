@@ -6,45 +6,104 @@ part of 'state_locale.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$currentLocaleHash() => r'a12ccfd4e5abf45064f5b018daf044b6367e1ea0';
-
-/// Convenience provider that extracts just the [Locale] from [LocaleNotifier].
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Manages the current locale settings for the app.
 ///
-/// Copied from [currentLocale].
-@ProviderFor(currentLocale)
-final currentLocaleProvider = AutoDisposeFutureProvider<Locale>.internal(
-  currentLocale,
-  name: r'currentLocaleProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$currentLocaleHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+/// Reads persisted language from [SettingsRepository] on startup.
+/// Persists changes via [SettingsRepository.setLanguage()].
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef CurrentLocaleRef = AutoDisposeFutureProviderRef<Locale>;
+@ProviderFor(LocaleNotifier)
+final localeProvider = LocaleNotifierProvider._();
+
+/// Manages the current locale settings for the app.
+///
+/// Reads persisted language from [SettingsRepository] on startup.
+/// Persists changes via [SettingsRepository.setLanguage()].
+final class LocaleNotifierProvider
+    extends $AsyncNotifierProvider<LocaleNotifier, LocaleSettings> {
+  /// Manages the current locale settings for the app.
+  ///
+  /// Reads persisted language from [SettingsRepository] on startup.
+  /// Persists changes via [SettingsRepository.setLanguage()].
+  LocaleNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'localeProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$localeNotifierHash();
+
+  @$internal
+  @override
+  LocaleNotifier create() => LocaleNotifier();
+}
+
 String _$localeNotifierHash() => r'72397db5879bab4bff692ee5e8d5e37294b8cbf2';
 
 /// Manages the current locale settings for the app.
 ///
 /// Reads persisted language from [SettingsRepository] on startup.
 /// Persists changes via [SettingsRepository.setLanguage()].
-///
-/// Copied from [LocaleNotifier].
-@ProviderFor(LocaleNotifier)
-final localeNotifierProvider =
-    AutoDisposeAsyncNotifierProvider<LocaleNotifier, LocaleSettings>.internal(
-      LocaleNotifier.new,
-      name: r'localeNotifierProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$localeNotifierHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
 
-typedef _$LocaleNotifier = AutoDisposeAsyncNotifier<LocaleSettings>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$LocaleNotifier extends $AsyncNotifier<LocaleSettings> {
+  FutureOr<LocaleSettings> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<LocaleSettings>, LocaleSettings>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<LocaleSettings>, LocaleSettings>,
+              AsyncValue<LocaleSettings>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
+/// Convenience provider that extracts just the [Locale] from [LocaleNotifier].
+
+@ProviderFor(currentLocale)
+final currentLocaleProvider = CurrentLocaleProvider._();
+
+/// Convenience provider that extracts just the [Locale] from [LocaleNotifier].
+
+final class CurrentLocaleProvider
+    extends $FunctionalProvider<AsyncValue<Locale>, Locale, FutureOr<Locale>>
+    with $FutureModifier<Locale>, $FutureProvider<Locale> {
+  /// Convenience provider that extracts just the [Locale] from [LocaleNotifier].
+  CurrentLocaleProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currentLocaleProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentLocaleHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<Locale> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Locale> create(Ref ref) {
+    return currentLocale(ref);
+  }
+}
+
+String _$currentLocaleHash() => r'71aedaca2269eeb5a5a44e4d10f25c7bd3ffa2e6';

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
@@ -13,7 +14,13 @@ void main() {
 
       expect(
         () => container.read(appDatabaseProvider),
-        throwsA(isA<StateError>()),
+        throwsA(
+          isA<ProviderException>().having(
+            (e) => e.exception,
+            'exception',
+            isA<StateError>(),
+          ),
+        ),
       );
     });
 
@@ -24,9 +31,11 @@ void main() {
       try {
         container.read(appDatabaseProvider);
         fail('Expected StateError');
-      } on StateError catch (e) {
-        expect(e.message, contains('AppInitializer'));
-        expect(e.message, contains('test_provider_scope.dart'));
+      } on ProviderException catch (e) {
+        final inner = e.exception;
+        expect(inner, isA<StateError>());
+        expect((inner as StateError).message, contains('AppInitializer'));
+        expect(inner.message, contains('test_provider_scope.dart'));
       }
     });
 
