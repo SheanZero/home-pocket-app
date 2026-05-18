@@ -256,8 +256,9 @@ void main() {
 
         // ja "まだ記録なし" — legend empty value
         expect(find.textContaining('まだ記録なし'), findsWidgets);
-        // ja "初めての灵账を記録しよう" — Best Joy empty BIG
-        expect(find.textContaining('初めての灵账'), findsOneWidget);
+        // ja "今月の最愛がここに表示されます" — Best Joy Variant A empty Small.
+        // homeBestJoyEmptyBig was removed by 260518-v4v Variant A redesign.
+        expect(find.textContaining('今月の最愛がここに'), findsOneWidget);
       },
     );
 
@@ -278,8 +279,9 @@ void main() {
         await tester.pumpWidget(_buildSubject(snapshot: _singleAllNeutral()));
         await tester.pumpAndSettle();
 
-        // ja: "一番大きな支出を評価して"
-        expect(find.textContaining('一番大きな支出を評価して'), findsOneWidget);
+        // ja: "あなたの今月の最愛にしよう" — Best Joy Variant A all-neutral Small.
+        // homeBestJoyAllNeutralBig was removed by 260518-v4v Variant A redesign.
+        expect(find.textContaining('あなたの今月の最愛にしよう'), findsOneWidget);
       },
     );
   });

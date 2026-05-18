@@ -887,25 +887,25 @@
   "@satisfactionExcellent": {
     "description": "Highest satisfaction label"
   },
-  "satisfactionLabelNeutral": "中性",
+  "satisfactionLabelNeutral": "無難",
   "@satisfactionLabelNeutral": {
-    "description": "Variant A pill label: val 2, unipolar positive baseline (ADR-014)"
+    "description": "Variant A pill label: val 2, unipolar positive baseline (ADR-014). JA register matches picker labels per ADR-015 lock."
   },
-  "satisfactionLabelOK": "OK",
+  "satisfactionLabelOK": "快適",
   "@satisfactionLabelOK": {
-    "description": "Variant A pill label: val 4"
+    "description": "Variant A pill label: val 4. JA register matches picker labels per ADR-015 lock."
   },
-  "satisfactionLabelGood": "不錯",
+  "satisfactionLabelGood": "順調",
   "@satisfactionLabelGood": {
-    "description": "Variant A pill label: val 6"
+    "description": "Variant A pill label: val 6. JA register matches picker labels per ADR-015 lock."
   },
   "satisfactionLabelGreat": "満足",
   "@satisfactionLabelGreat": {
-    "description": "Variant A pill label: val 8"
+    "description": "Variant A pill label: val 8. JA register matches picker (satisfactionGood)."
   },
-  "satisfactionLabelAmazing": "最愛",
+  "satisfactionLabelAmazing": "至福",
   "@satisfactionLabelAmazing": {
-    "description": "Variant A pill label: val 10, top tier"
+    "description": "Variant A pill label: val 10, top tier. JA register matches picker (satisfactionVeryGood) per ADR-015 lock — picker says 至福, summary pill must agree."
   },
   "addSubcategory": "追加",
   "@addSubcategory": {
