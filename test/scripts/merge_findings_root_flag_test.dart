@@ -71,13 +71,16 @@ Directory _setupTempProject() {
   final tmp = Directory.systemTemp.createTempSync('merger_root_test_');
   final root = _absoluteProjectRoot();
   Directory('${tmp.path}/scripts/audit').createSync(recursive: true);
-  File('$root/scripts/audit/finding.dart')
-      .copySync('${tmp.path}/scripts/audit/finding.dart');
-  File('$root/scripts/merge_findings.dart')
-      .copySync('${tmp.path}/scripts/merge_findings.dart');
+  File(
+    '$root/scripts/audit/finding.dart',
+  ).copySync('${tmp.path}/scripts/audit/finding.dart');
+  File(
+    '$root/scripts/merge_findings.dart',
+  ).copySync('${tmp.path}/scripts/merge_findings.dart');
   File('$root/pubspec.yaml').copySync('${tmp.path}/pubspec.yaml');
-  Link('${tmp.path}/.dart_tool')
-      .createSync('$root/.dart_tool', recursive: true);
+  Link(
+    '${tmp.path}/.dart_tool',
+  ).createSync('$root/.dart_tool', recursive: true);
   return tmp;
 }
 
@@ -92,75 +95,80 @@ void main() {
     tearDown(() {
       try {
         tmp.deleteSync(recursive: true);
-      } catch (_) {/* ignore */}
+      } catch (_) {
+        /* ignore */
+      }
     });
 
-    test(
-      '--root <path> reads <path>/shards/ + <path>/agent-shards/ and writes '
-      '<path>/issues.json + <path>/ISSUES.md',
-      () async {
-        // Lay out the re-audit tree the way Phase 8 Plan 08-05 produces it.
-        final reauditRoot = '${tmp.path}/.planning/audit/re-audit';
-        Directory('$reauditRoot/shards').createSync(recursive: true);
-        Directory('$reauditRoot/agent-shards').createSync(recursive: true);
+    test('--root <path> reads <path>/shards/ + <path>/agent-shards/ and writes '
+        '<path>/issues.json + <path>/ISSUES.md', () async {
+      // Lay out the re-audit tree the way Phase 8 Plan 08-05 produces it.
+      final reauditRoot = '${tmp.path}/.planning/audit/re-audit';
+      Directory('$reauditRoot/shards').createSync(recursive: true);
+      Directory('$reauditRoot/agent-shards').createSync(recursive: true);
 
-        File('$reauditRoot/shards/layer.json').writeAsStringSync(
-          jsonEncode(_shardWith(
-            [_f(filePath: 'lib/foo.dart', line: 7)],
-            'import_guard',
-          )),
-        );
-        File('$reauditRoot/agent-shards/layer.json').writeAsStringSync(
-          jsonEncode(_shardWith(
-            [_f(filePath: 'lib/bar.dart', line: 3, toolSource: 'agent:layer',
-                confidence: 'medium')],
-            'agent:layer',
-          )),
-        );
+      File('$reauditRoot/shards/layer.json').writeAsStringSync(
+        jsonEncode(
+          _shardWith([_f(filePath: 'lib/foo.dart', line: 7)], 'import_guard'),
+        ),
+      );
+      File('$reauditRoot/agent-shards/layer.json').writeAsStringSync(
+        jsonEncode(
+          _shardWith([
+            _f(
+              filePath: 'lib/bar.dart',
+              line: 3,
+              toolSource: 'agent:layer',
+              confidence: 'medium',
+            ),
+          ], 'agent:layer'),
+        ),
+      );
 
-        final r = await _runMerger(
-          tmp,
-          ['--root', '.planning/audit/re-audit'],
-        );
-        expect(r.exitCode, equals(0), reason: r.stderr.toString());
+      final r = await _runMerger(tmp, ['--root', '.planning/audit/re-audit']);
+      expect(r.exitCode, equals(0), reason: r.stderr.toString());
 
-        // Outputs at the re-audit root.
-        final issuesFile = File('$reauditRoot/issues.json');
-        final issuesMd = File('$reauditRoot/ISSUES.md');
-        expect(issuesFile.existsSync(), isTrue,
-            reason: 'issues.json must be written under --root');
-        expect(issuesMd.existsSync(), isTrue,
-            reason: 'ISSUES.md must be written under --root');
+      // Outputs at the re-audit root.
+      final issuesFile = File('$reauditRoot/issues.json');
+      final issuesMd = File('$reauditRoot/ISSUES.md');
+      expect(
+        issuesFile.existsSync(),
+        isTrue,
+        reason: 'issues.json must be written under --root',
+      );
+      expect(
+        issuesMd.existsSync(),
+        isTrue,
+        reason: 'ISSUES.md must be written under --root',
+      );
 
-        // The catalogue contains both the tool-shard and agent-shard findings.
-        final issues = jsonDecode(issuesFile.readAsStringSync())
-            as Map<String, dynamic>;
-        final findings = (issues['findings'] as List).cast<Map>();
-        expect(findings.length, equals(2));
-        final paths = findings.map((f) => f['file_path']).toSet();
-        expect(paths, equals({'lib/foo.dart', 'lib/bar.dart'}));
+      // The catalogue contains both the tool-shard and agent-shard findings.
+      final issues =
+          jsonDecode(issuesFile.readAsStringSync()) as Map<String, dynamic>;
+      final findings = (issues['findings'] as List).cast<Map>();
+      expect(findings.length, equals(2));
+      final paths = findings.map((f) => f['file_path']).toSet();
+      expect(paths, equals({'lib/foo.dart', 'lib/bar.dart'}));
 
-        // Default-root tree must NOT have been touched: no
-        // .planning/audit/issues.json (or ISSUES.md) created at the
-        // default location during a --root invocation.
-        expect(
-          File('${tmp.path}/.planning/audit/issues.json').existsSync(),
-          isFalse,
-          reason:
-              '--root must redirect writes; default .planning/audit/issues.json '
-              'must NOT be created when --root is provided',
-        );
-        expect(
-          File('${tmp.path}/.planning/audit/ISSUES.md').existsSync(),
-          isFalse,
-        );
-      },
-    );
+      // Default-root tree must NOT have been touched: no
+      // .planning/audit/issues.json (or ISSUES.md) created at the
+      // default location during a --root invocation.
+      expect(
+        File('${tmp.path}/.planning/audit/issues.json').existsSync(),
+        isFalse,
+        reason:
+            '--root must redirect writes; default .planning/audit/issues.json '
+            'must NOT be created when --root is provided',
+      );
+      expect(
+        File('${tmp.path}/.planning/audit/ISSUES.md').existsSync(),
+        isFalse,
+      );
+    });
 
     test('--root with no value exits 2 with stderr error', () async {
       final r = await _runMerger(tmp, ['--root']);
-      expect(r.exitCode, equals(2),
-          reason: 'missing --root value must exit 2');
+      expect(r.exitCode, equals(2), reason: 'missing --root value must exit 2');
       expect(
         r.stderr.toString(),
         contains('--root requires a path argument'),
@@ -170,8 +178,7 @@ void main() {
 
     test('unknown flag exits 2 with stderr error', () async {
       final r = await _runMerger(tmp, ['--bogus-flag']);
-      expect(r.exitCode, equals(2),
-          reason: 'unknown flag must exit 2');
+      expect(r.exitCode, equals(2), reason: 'unknown flag must exit 2');
       expect(
         r.stderr.toString(),
         contains('unknown flag'),
@@ -181,8 +188,11 @@ void main() {
 
     test('unexpected positional arg exits 2 with stderr error', () async {
       final r = await _runMerger(tmp, ['some-positional']);
-      expect(r.exitCode, equals(2),
-          reason: 'unexpected positional arg must exit 2');
+      expect(
+        r.exitCode,
+        equals(2),
+        reason: 'unexpected positional arg must exit 2',
+      );
       expect(
         r.stderr.toString().toLowerCase(),
         contains('unexpected'),

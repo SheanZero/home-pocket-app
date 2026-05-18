@@ -234,8 +234,10 @@ void main() {
           () => mockAuth.authenticate(
             localizedReason: any(named: 'localizedReason'),
             biometricOnly: any(named: 'biometricOnly'),
-          sensitiveTransaction: any(named: 'sensitiveTransaction'),
-          persistAcrossBackgrounding: any(named: 'persistAcrossBackgrounding'),
+            sensitiveTransaction: any(named: 'sensitiveTransaction'),
+            persistAcrossBackgrounding: any(
+              named: 'persistAcrossBackgrounding',
+            ),
           ),
         ).thenThrow(PlatformException(code: 'LockedOut'));
 

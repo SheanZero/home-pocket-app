@@ -36,14 +36,10 @@ Future<AsyncValue<T>> waitForFirstValue<T>(
   ProviderListenable<AsyncValue<T>> provider,
 ) {
   final completer = Completer<AsyncValue<T>>();
-  final sub = container.listen<AsyncValue<T>>(
-    provider,
-    (_, next) {
-      if ((next.hasError || next.hasValue) && !completer.isCompleted) {
-        completer.complete(next);
-      }
-    },
-    fireImmediately: true,
-  );
+  final sub = container.listen<AsyncValue<T>>(provider, (_, next) {
+    if ((next.hasError || next.hasValue) && !completer.isCompleted) {
+      completer.complete(next);
+    }
+  }, fireImmediately: true);
   return completer.future.whenComplete(sub.close);
 }

@@ -383,9 +383,8 @@ class _CategorySelectionScreenState
             slivers: [
               SliverReorderableList(
                 itemCount: state.l1.length,
-                onReorder: (o, n) => ref
-                    .read(categoryReorderProvider.notifier)
-                    .reorderL1(o, n),
+                onReorder: (o, n) =>
+                    ref.read(categoryReorderProvider.notifier).reorderL1(o, n),
                 itemBuilder: (context, index) {
                   final l1 = state.l1[index];
                   final expanded = _expandedL1IdInEdit == l1.id;

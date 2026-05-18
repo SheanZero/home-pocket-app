@@ -127,9 +127,7 @@ class _LanguageTile extends ConsumerWidget {
           onChanged: (value) async {
             if (value != null) {
               if (value == 'system') {
-                await ref
-                    .read(localeProvider.notifier)
-                    .setSystemDefault();
+                await ref.read(localeProvider.notifier).setSystemDefault();
               } else {
                 await ref
                     .read(localeProvider.notifier)

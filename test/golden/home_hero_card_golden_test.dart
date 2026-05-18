@@ -37,31 +37,31 @@ class _FixtureSnapshot {
 }
 
 _FixtureSnapshot _singleRich() => _FixtureSnapshot(
-      monthlyReport: fixtureMonthlyReportRich(),
-      happiness: fixtureHappinessReportRich(),
-      bestJoy: fixtureBestJoyResultRich(),
-    );
+  monthlyReport: fixtureMonthlyReportRich(),
+  happiness: fixtureHappinessReportRich(),
+  bestJoy: fixtureBestJoyResultRich(),
+);
 
 _FixtureSnapshot _singleThin() => _FixtureSnapshot(
-      monthlyReport: fixtureMonthlyReportRich(),
-      happiness: fixtureHappinessReportThin(),
-      bestJoy: fixtureBestJoyResultThin(),
-    );
+  monthlyReport: fixtureMonthlyReportRich(),
+  happiness: fixtureHappinessReportThin(),
+  bestJoy: fixtureBestJoyResultThin(),
+);
 
 _FixtureSnapshot _singleAllNeutral() => _FixtureSnapshot(
-      monthlyReport: fixtureMonthlyReportRich(),
-      happiness: fixtureHappinessReportRich(),
-      bestJoy: fixtureBestJoyResultAllNeutral(),
-    );
+  monthlyReport: fixtureMonthlyReportRich(),
+  happiness: fixtureHappinessReportRich(),
+  bestJoy: fixtureBestJoyResultAllNeutral(),
+);
 
 _FixtureSnapshot _groupRich() => _FixtureSnapshot(
-      monthlyReport: fixtureMonthlyReportRich(),
-      happiness: fixtureHappinessReportRich(),
-      bestJoy: fixtureBestJoyResultRich(),
-      family: fixtureFamilyHappinessRich(),
-      shadowBooks: fixtureShadowBooksThree(),
-      shadowAggregate: fixtureShadowAggregateThree(),
-    );
+  monthlyReport: fixtureMonthlyReportRich(),
+  happiness: fixtureHappinessReportRich(),
+  bestJoy: fixtureBestJoyResultRich(),
+  family: fixtureFamilyHappinessRich(),
+  shadowBooks: fixtureShadowBooksThree(),
+  shadowAggregate: fixtureShadowAggregateThree(),
+);
 
 Widget _wrap({
   required Locale locale,

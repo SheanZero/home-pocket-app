@@ -5,12 +5,15 @@ import 'package:sqlite3/sqlite3.dart';
 const _targetSchemaVersion = 16;
 
 void main() {
-  test('AppDatabase schemaVersion includes v15 index migration and v16 defaults', () {
-    final db = AppDatabase.forTesting();
-    addTearDown(db.close);
+  test(
+    'AppDatabase schemaVersion includes v15 index migration and v16 defaults',
+    () {
+      final db = AppDatabase.forTesting();
+      addTearDown(db.close);
 
-    expect(db.schemaVersion, _targetSchemaVersion);
-  });
+      expect(db.schemaVersion, _targetSchemaVersion);
+    },
+  );
 
   group('v15 index migration', () {
     late Database rawDb;

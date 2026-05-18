@@ -35,7 +35,9 @@ String _resolveRoot(List<String> args) {
     switch (a) {
       case '--root':
         if (i + 1 >= args.length) {
-          stderr.writeln('[audit:merge] ERROR: --root requires a path argument');
+          stderr.writeln(
+            '[audit:merge] ERROR: --root requires a path argument',
+          );
           exit(2);
         }
         root = args[i + 1];

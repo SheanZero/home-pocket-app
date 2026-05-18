@@ -201,11 +201,7 @@ void main() {
     test('exit 1 — new: re-audit has finding absent from baseline', () async {
       _writeBaseline(tmp, []);
       _writeReaudit(tmp, [
-        _f(
-          filePath: 'lib/newone.dart',
-          description: 'fresh',
-          status: 'open',
-        ),
+        _f(filePath: 'lib/newone.dart', description: 'fresh', status: 'open'),
       ]);
       final r = await _runDiff(tmp);
       expect(r.exitCode, equals(1));
@@ -221,67 +217,67 @@ void main() {
       expect((diffJson['buckets']['new'] as List).length, equals(1));
     });
 
-    test(
-      'exit 1 — open_in_baseline: baseline has open finding',
-      () async {
-        _writeBaseline(tmp, [
-          _f(
-            filePath: 'lib/leftover.dart',
-            description: 'never closed',
-            status: 'open',
-          ),
-        ]);
-        _writeReaudit(tmp, []);
-        final r = await _runDiff(tmp);
-        expect(r.exitCode, equals(1));
-        expect(r.stdout.toString(), contains('open_in_baseline=1'));
-        final diffJson =
-            jsonDecode(
-                  File(
-                    '${tmp.path}/.planning/audit/re-audit/REAUDIT-DIFF.json',
-                  ).readAsStringSync(),
-                )
-                as Map<String, dynamic>;
-        expect(diffJson['summary']['open_in_baseline'], equals(1));
-        expect(
-          (diffJson['buckets']['open_in_baseline'] as List).length,
-          equals(1),
-        );
-      },
-    );
-
-    test('REAUDIT-DIFF.json shape: summary + buckets keys are well-typed', () async {
+    test('exit 1 — open_in_baseline: baseline has open finding', () async {
       _writeBaseline(tmp, [
         _f(
-          filePath: 'lib/s.dart',
-          description: 'shape',
-          status: 'closed',
-          closedInPhase: '3',
+          filePath: 'lib/leftover.dart',
+          description: 'never closed',
+          status: 'open',
         ),
       ]);
-      _writeReaudit(tmp, [
-        _f(filePath: 'lib/n.dart', description: 'newshape', status: 'open'),
-      ]);
+      _writeReaudit(tmp, []);
       final r = await _runDiff(tmp);
       expect(r.exitCode, equals(1));
-      final json =
+      expect(r.stdout.toString(), contains('open_in_baseline=1'));
+      final diffJson =
           jsonDecode(
                 File(
                   '${tmp.path}/.planning/audit/re-audit/REAUDIT-DIFF.json',
                 ).readAsStringSync(),
               )
               as Map<String, dynamic>;
-      expect(json['summary'], isA<Map<String, dynamic>>());
-      expect(json['summary']['resolved'], isA<int>());
-      expect(json['summary']['regression'], isA<int>());
-      expect(json['summary']['new'], isA<int>());
-      expect(json['summary']['open_in_baseline'], isA<int>());
-      expect(json['buckets'], isA<Map<String, dynamic>>());
-      expect(json['buckets']['resolved'], isA<List>());
-      expect(json['buckets']['regression'], isA<List>());
-      expect(json['buckets']['new'], isA<List>());
-      expect(json['buckets']['open_in_baseline'], isA<List>());
+      expect(diffJson['summary']['open_in_baseline'], equals(1));
+      expect(
+        (diffJson['buckets']['open_in_baseline'] as List).length,
+        equals(1),
+      );
     });
+
+    test(
+      'REAUDIT-DIFF.json shape: summary + buckets keys are well-typed',
+      () async {
+        _writeBaseline(tmp, [
+          _f(
+            filePath: 'lib/s.dart',
+            description: 'shape',
+            status: 'closed',
+            closedInPhase: '3',
+          ),
+        ]);
+        _writeReaudit(tmp, [
+          _f(filePath: 'lib/n.dart', description: 'newshape', status: 'open'),
+        ]);
+        final r = await _runDiff(tmp);
+        expect(r.exitCode, equals(1));
+        final json =
+            jsonDecode(
+                  File(
+                    '${tmp.path}/.planning/audit/re-audit/REAUDIT-DIFF.json',
+                  ).readAsStringSync(),
+                )
+                as Map<String, dynamic>;
+        expect(json['summary'], isA<Map<String, dynamic>>());
+        expect(json['summary']['resolved'], isA<int>());
+        expect(json['summary']['regression'], isA<int>());
+        expect(json['summary']['new'], isA<int>());
+        expect(json['summary']['open_in_baseline'], isA<int>());
+        expect(json['buckets'], isA<Map<String, dynamic>>());
+        expect(json['buckets']['resolved'], isA<List>());
+        expect(json['buckets']['regression'], isA<List>());
+        expect(json['buckets']['new'], isA<List>());
+        expect(json['buckets']['open_in_baseline'], isA<List>());
+      },
+    );
 
     test('REAUDIT-DIFF.md shape: title + bucket headings present', () async {
       _writeBaseline(tmp, [
@@ -301,7 +297,8 @@ void main() {
       expect(md, contains('# Re-Audit Diff Report'));
       expect(md, contains('**Resolved:**'));
       // At least one of the four bucket headings must appear.
-      final anyBucketHeading = md.contains('## Resolved') ||
+      final anyBucketHeading =
+          md.contains('## Resolved') ||
           md.contains('## Regression') ||
           md.contains('## New') ||
           md.contains('## Still Open in Baseline');
@@ -318,11 +315,7 @@ void main() {
 
     test('exit 2: missing re-audit catalogue', () async {
       _writeBaseline(tmp, [
-        _f(
-          filePath: 'lib/baseline.dart',
-          description: 'b',
-          status: 'closed',
-        ),
+        _f(filePath: 'lib/baseline.dart', description: 'b', status: 'closed'),
       ]);
       // Do not write re-audit.
       final r = await _runDiff(tmp);

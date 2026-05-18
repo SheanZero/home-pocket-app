@@ -223,9 +223,9 @@ void main() {
           'lib/a.dart': (5, 10), // 50% — would FAIL at default 70
           'lib/b.dart': (10, 10),
         });
-        File(
-          '${tmp.path}/deferred.txt',
-        ).writeAsStringSync('# header comment\nlib/a.dart  # deferred for X reason\n');
+        File('${tmp.path}/deferred.txt').writeAsStringSync(
+          '# header comment\nlib/a.dart  # deferred for X reason\n',
+        );
         final r = await _runGate(tmp, [
           '--deferred',
           'deferred.txt',
@@ -239,26 +239,25 @@ void main() {
       },
     );
 
-    test(
-      '--deferred entry without rationale exits 2',
-      () async {
-        _writeLcov(tmp, {'lib/a.dart': (5, 10)});
-        File('${tmp.path}/deferred.txt').writeAsStringSync('lib/a.dart\n');
-        final r = await _runGate(tmp, [
-          '--deferred',
-          'deferred.txt',
-          'lib/a.dart',
-        ]);
-        expect(r.exitCode, equals(2));
-        expect(r.stderr.toString(), contains('missing rationale'));
-      },
-    );
+    test('--deferred entry without rationale exits 2', () async {
+      _writeLcov(tmp, {'lib/a.dart': (5, 10)});
+      File('${tmp.path}/deferred.txt').writeAsStringSync('lib/a.dart\n');
+      final r = await _runGate(tmp, [
+        '--deferred',
+        'deferred.txt',
+        'lib/a.dart',
+      ]);
+      expect(r.exitCode, equals(2));
+      expect(r.stderr.toString(), contains('missing rationale'));
+    });
 
     test(
       '--deferred entry with empty rationale (just `#` and whitespace) exits 2',
       () async {
         _writeLcov(tmp, {'lib/a.dart': (5, 10)});
-        File('${tmp.path}/deferred.txt').writeAsStringSync('lib/a.dart  #   \n');
+        File(
+          '${tmp.path}/deferred.txt',
+        ).writeAsStringSync('lib/a.dart  #   \n');
         final r = await _runGate(tmp, [
           '--deferred',
           'deferred.txt',
@@ -269,30 +268,20 @@ void main() {
       },
     );
 
-    test(
-      '--deferred missing path exits 2',
-      () async {
-        _writeLcov(tmp, {'lib/a.dart': (5, 10)});
-        final r = await _runGate(tmp, [
-          '--deferred',
-          'nope.txt',
-          'lib/a.dart',
-        ]);
-        expect(r.exitCode, equals(2));
-        expect(r.stderr.toString(), contains('--deferred path not found'));
-      },
-    );
+    test('--deferred missing path exits 2', () async {
+      _writeLcov(tmp, {'lib/a.dart': (5, 10)});
+      final r = await _runGate(tmp, ['--deferred', 'nope.txt', 'lib/a.dart']);
+      expect(r.exitCode, equals(2));
+      expect(r.stderr.toString(), contains('--deferred path not found'));
+    });
 
     test(
       '--deferred + --json: deferred entries appear under "deferred" key with rationale',
       () async {
-        _writeLcov(tmp, {
-          'lib/a.dart': (5, 10),
-          'lib/b.dart': (10, 10),
-        });
-        File('${tmp.path}/deferred.txt').writeAsStringSync(
-          'lib/a.dart  # rationale for a\n',
-        );
+        _writeLcov(tmp, {'lib/a.dart': (5, 10), 'lib/b.dart': (10, 10)});
+        File(
+          '${tmp.path}/deferred.txt',
+        ).writeAsStringSync('lib/a.dart  # rationale for a\n');
         final r = await _runGate(tmp, [
           '--deferred',
           'deferred.txt',
@@ -322,9 +311,9 @@ void main() {
           'lib/b.dart': (10, 10),
           'lib/c.dart': (3, 10),
         });
-        File('${tmp.path}/deferred.txt').writeAsStringSync(
-          'lib/a.dart  # deferred\n',
-        );
+        File(
+          '${tmp.path}/deferred.txt',
+        ).writeAsStringSync('lib/a.dart  # deferred\n');
         final r = await _runGate(tmp, [
           '--deferred',
           'deferred.txt',

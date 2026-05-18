@@ -18,9 +18,7 @@ Widget _wrap({required Locale locale, required Widget child}) {
     ],
     supportedLocales: S.supportedLocales,
     home: Scaffold(
-      body: Center(
-        child: SizedBox(width: 360, height: 80, child: child),
-      ),
+      body: Center(child: SizedBox(width: 360, height: 80, child: child)),
     ),
   );
 }

@@ -73,8 +73,7 @@ void main() {
   CategoryReorderNotifier notifier() =>
       container.read(categoryReorderProvider.notifier);
 
-  CategoryReorderState state() =>
-      container.read(categoryReorderProvider);
+  CategoryReorderState state() => container.read(categoryReorderProvider);
 
   group('CategoryReorderNotifier', () {
     test('initial state has mode == idle', () {

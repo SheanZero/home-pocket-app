@@ -118,18 +118,15 @@ void main() {
       expect(find.text(l10n.homeRecentTransactions), findsOneWidget);
     });
 
-    testWidgets(
-      'integrates the legacy month-overview, ledger-comparison, '
-      'and soul-fullness cards into a single HomeHeroCard',
-      (tester) async {
-        await tester.pumpWidget(buildSubject());
-        await tester.pumpAndSettle();
+    testWidgets('integrates the legacy month-overview, ledger-comparison, '
+        'and soul-fullness cards into a single HomeHeroCard', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
 
-        // The 3 legacy cards (month-overview / ledger-comparison /
-        // soul-fullness) were collapsed into ONE HomeHeroCard composition.
-        expect(find.byType(HomeHeroCard), findsOneWidget);
-      },
-    );
+      // The 3 legacy cards (month-overview / ledger-comparison /
+      // soul-fullness) were collapsed into ONE HomeHeroCard composition.
+      expect(find.byType(HomeHeroCard), findsOneWidget);
+    });
 
     testWidgets('renders transactions header row', (tester) async {
       await tester.pumpWidget(buildSubject());

@@ -604,8 +604,7 @@ class HomeHeroCard extends StatelessWidget {
       locale,
     );
     final dateShort = DateFormatter.formatShortMonthDay(row.timestamp, locale);
-    final dayOfWeek =
-        DateFormat('E', locale.toString()).format(row.timestamp);
+    final dayOfWeek = DateFormat('E', locale.toString()).format(row.timestamp);
     final dateLabel = '$dateShort · $dayOfWeek';
 
     return Container(

@@ -28,7 +28,9 @@ import 'package:flutter_test/flutter_test.dart';
 /// runs on every `flutter test` invocation as a CI guard.
 void main() {
   test('home_screen.dart does not reintroduce deleted helpers', () {
-    final file = File('lib/features/home/presentation/screens/home_screen.dart');
+    final file = File(
+      'lib/features/home/presentation/screens/home_screen.dart',
+    );
     expect(
       file.existsSync(),
       isTrue,
@@ -40,12 +42,14 @@ void main() {
     expect(
       source,
       isNot(contains('_computeHappinessROI')),
-      reason: '_computeHappinessROI was deleted in Phase 10 D-01 — see CONTEXT.md',
+      reason:
+          '_computeHappinessROI was deleted in Phase 10 D-01 — see CONTEXT.md',
     );
     expect(
       source,
       isNot(contains('_computeSatisfaction')),
-      reason: '_computeSatisfaction was deleted in Phase 10 D-01 — see CONTEXT.md',
+      reason:
+          '_computeSatisfaction was deleted in Phase 10 D-01 — see CONTEXT.md',
     );
     expect(
       source,

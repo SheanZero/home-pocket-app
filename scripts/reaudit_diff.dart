@@ -151,7 +151,8 @@ Future<void> main(List<String> args) async {
   );
 
   // Strict-exit contract per D-01. Exit 0 only when every gate is clean.
-  final hasFailures = regressionSorted.isNotEmpty ||
+  final hasFailures =
+      regressionSorted.isNotEmpty ||
       newSorted.isNotEmpty ||
       openInBaselineSorted.isNotEmpty;
   exit(hasFailures ? 1 : 0);
@@ -194,9 +195,7 @@ Map<String, Finding> _readCatalogue({
     try {
       finding = Finding.fromJson(cast);
     } catch (e) {
-      stderr.writeln(
-        '[reaudit:diff] ERROR: malformed finding in $path: $e',
-      );
+      stderr.writeln('[reaudit:diff] ERROR: malformed finding in $path: $e');
       exit(2);
     }
     final key = _diffKey(finding);
@@ -227,9 +226,13 @@ List<String> _sortKeys(Set<String> keys, Map<String, Finding> by) {
   list.sort((a, b) {
     final fa = by[a]!;
     final fb = by[b]!;
-    final sev = _severityRank(fa.severity).compareTo(_severityRank(fb.severity));
+    final sev = _severityRank(
+      fa.severity,
+    ).compareTo(_severityRank(fb.severity));
     if (sev != 0) return sev;
-    final cat = _categoryRank(fa.category).compareTo(_categoryRank(fb.category));
+    final cat = _categoryRank(
+      fa.category,
+    ).compareTo(_categoryRank(fb.category));
     if (cat != 0) return cat;
     final fp = fa.filePath.compareTo(fb.filePath);
     if (fp != 0) return fp;

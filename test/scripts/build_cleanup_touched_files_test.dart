@@ -42,30 +42,31 @@ void main() {
   const generatedPath = '.planning/audit/cleanup-touched-files.txt';
 
   group('build_cleanup_touched_files.sh (subprocess against real plan tree)', () {
-    test('script exists, is executable, and uses /usr/bin/env bash shebang',
-        () {
-      final scriptPath =
-          '${_absoluteProjectRoot()}/scripts/build_cleanup_touched_files.sh';
-      final f = File(scriptPath);
-      expect(f.existsSync(), isTrue, reason: 'Script must exist on disk');
-      final stat = f.statSync();
-      // Owner-execute bit (0o100 == 64) — script must be runnable.
-      expect(
-        stat.mode & 64 != 0,
-        isTrue,
-        reason: 'Script must have owner-execute permission set',
-      );
-      final firstLine = f.readAsLinesSync().first;
-      expect(firstLine, equals('#!/usr/bin/env bash'));
-    });
+    test(
+      'script exists, is executable, and uses /usr/bin/env bash shebang',
+      () {
+        final scriptPath =
+            '${_absoluteProjectRoot()}/scripts/build_cleanup_touched_files.sh';
+        final f = File(scriptPath);
+        expect(f.existsSync(), isTrue, reason: 'Script must exist on disk');
+        final stat = f.statSync();
+        // Owner-execute bit (0o100 == 64) — script must be runnable.
+        expect(
+          stat.mode & 64 != 0,
+          isTrue,
+          reason: 'Script must have owner-execute permission set',
+        );
+        final firstLine = f.readAsLinesSync().first;
+        expect(firstLine, equals('#!/usr/bin/env bash'));
+      },
+    );
 
     test('exits 0 against real .planning/phases/03-06 tree', () async {
       final r = await _runGenerator();
       expect(
         r.exitCode,
         equals(0),
-        reason:
-            'Script exited non-zero. stderr=${r.stderr} stdout=${r.stdout}',
+        reason: 'Script exited non-zero. stderr=${r.stderr} stdout=${r.stdout}',
       );
     });
 
@@ -90,7 +91,8 @@ void main() {
       expect(
         lines.length,
         greaterThanOrEqualTo(50),
-        reason: 'Phase 3-6 union must contain ≥50 entries (got ${lines.length})',
+        reason:
+            'Phase 3-6 union must contain ≥50 entries (got ${lines.length})',
       );
 
       // 3. Every line begins with `lib/`.
@@ -122,12 +124,16 @@ void main() {
         runInShell: true,
         workingDirectory: _absoluteProjectRoot(),
       );
-      expect(sortResult.exitCode, equals(0),
-          reason: 'sort -u must exit 0: ${sortResult.stderr}');
+      expect(
+        sortResult.exitCode,
+        equals(0),
+        reason: 'sort -u must exit 0: ${sortResult.stderr}',
+      );
       expect(
         sortResult.stdout.toString(),
         equals(raw),
-        reason: 'Output must be sorted (sort -u) and deduplicated — '
+        reason:
+            'Output must be sorted (sort -u) and deduplicated — '
             '`sort -u` over the file must equal the file itself',
       );
 
@@ -137,55 +143,61 @@ void main() {
       for (final l in lines) {
         if (!seen.add(l)) dupes.add(l);
       }
-      expect(dupes, isEmpty,
-          reason: 'No duplicate lines allowed. Offenders: ${dupes.take(5)}');
-    });
-
-    test('sanity-check anchors: lib/main.dart and '
-        'lib/application/i18n/formatter_service.dart each appear exactly once',
-        () async {
-      final r = await _runGenerator();
-      expect(r.exitCode, equals(0), reason: r.stderr.toString());
-
-      final lines = File('${_absoluteProjectRoot()}/$generatedPath')
-          .readAsLinesSync()
-          .where((l) => l.isNotEmpty)
-          .toList();
-
       expect(
-        lines.where((l) => l == 'lib/main.dart').length,
-        equals(1),
-        reason: 'lib/main.dart must appear exactly once (Phase 3 + 6 union)',
-      );
-      expect(
-        lines
-            .where((l) => l == 'lib/application/i18n/formatter_service.dart')
-            .length,
-        equals(1),
-        reason:
-            'lib/application/i18n/formatter_service.dart must appear exactly once (Phase 4 + 5 union)',
+        dupes,
+        isEmpty,
+        reason: 'No duplicate lines allowed. Offenders: ${dupes.take(5)}',
       );
     });
 
-    test('determinism: two invocations produce byte-identical output',
-        () async {
-      final outFile = File('${_absoluteProjectRoot()}/$generatedPath');
+    test(
+      'sanity-check anchors: lib/main.dart and '
+      'lib/application/i18n/formatter_service.dart each appear exactly once',
+      () async {
+        final r = await _runGenerator();
+        expect(r.exitCode, equals(0), reason: r.stderr.toString());
 
-      final r1 = await _runGenerator();
-      expect(r1.exitCode, equals(0), reason: r1.stderr.toString());
-      final bytes1 = outFile.readAsBytesSync();
+        final lines = File(
+          '${_absoluteProjectRoot()}/$generatedPath',
+        ).readAsLinesSync().where((l) => l.isNotEmpty).toList();
 
-      final r2 = await _runGenerator();
-      expect(r2.exitCode, equals(0), reason: r2.stderr.toString());
-      final bytes2 = outFile.readAsBytesSync();
+        expect(
+          lines.where((l) => l == 'lib/main.dart').length,
+          equals(1),
+          reason: 'lib/main.dart must appear exactly once (Phase 3 + 6 union)',
+        );
+        expect(
+          lines
+              .where((l) => l == 'lib/application/i18n/formatter_service.dart')
+              .length,
+          equals(1),
+          reason:
+              'lib/application/i18n/formatter_service.dart must appear exactly once (Phase 4 + 5 union)',
+        );
+      },
+    );
 
-      expect(
-        bytes2,
-        equals(bytes1),
-        reason:
-            'Re-running the generator must produce byte-identical output '
-            '(determinism — sort -u is the load-bearing primitive).',
-      );
-    });
+    test(
+      'determinism: two invocations produce byte-identical output',
+      () async {
+        final outFile = File('${_absoluteProjectRoot()}/$generatedPath');
+
+        final r1 = await _runGenerator();
+        expect(r1.exitCode, equals(0), reason: r1.stderr.toString());
+        final bytes1 = outFile.readAsBytesSync();
+
+        final r2 = await _runGenerator();
+        expect(r2.exitCode, equals(0), reason: r2.stderr.toString());
+        final bytes2 = outFile.readAsBytesSync();
+
+        expect(
+          bytes2,
+          equals(bytes1),
+          reason:
+              'Re-running the generator must produce byte-identical output '
+              '(determinism — sort -u is the load-bearing primitive).',
+        );
+      },
+    );
   });
 }

@@ -60,7 +60,9 @@ abstract final class AppColors {
   static const surfaceCream = Color(0xFFFFFDF8); // Best Joy card background
   static const surfaceCreamBorder = Color(0xFFF2E4C9); // Best Joy card border
   static const textMutedGold = Color(0xFFB39A71); // Merchant/date muted text
-  static const satisfactionPillBg = Color(0xFFFFF1F1); // Pill background (light pink)
+  static const satisfactionPillBg = Color(
+    0xFFFFF1F1,
+  ); // Pill background (light pink)
   static const satisfactionPillRose = Color(0xFFD45F65); // Pill icon + label
 
   // ── Compatibility aliases ──

@@ -33,30 +33,45 @@ void main() {
 
     setUpAll(() {
       final f = File(path);
-      expect(f.existsSync(), isTrue,
-          reason: 'audit.yml must exist at $path');
+      expect(f.existsSync(), isTrue, reason: 'audit.yml must exist at $path');
       content = f.readAsStringSync();
     });
 
-    test('Invariant 1: top-of-file warning comment block has all three '
-        'load-bearing substrings (Permanent gate / ADR-011 / Phase 8 D-05)',
-        () {
-      // The warning block must appear before `name: audit` so that the first
-      // thing any future editor sees is the load-bearing-ness notice.
-      final nameIdx = content.indexOf('name: audit');
-      expect(nameIdx, greaterThan(0),
-          reason: 'audit.yml must contain a top-level `name: audit` line');
-      final preamble = content.substring(0, nameIdx);
+    test(
+      'Invariant 1: top-of-file warning comment block has all three '
+      'load-bearing substrings (Permanent gate / ADR-011 / Phase 8 D-05)',
+      () {
+        // The warning block must appear before `name: audit` so that the first
+        // thing any future editor sees is the load-bearing-ness notice.
+        final nameIdx = content.indexOf('name: audit');
+        expect(
+          nameIdx,
+          greaterThan(0),
+          reason: 'audit.yml must contain a top-level `name: audit` line',
+        );
+        final preamble = content.substring(0, nameIdx);
 
-      expect(preamble, contains('Permanent gate'),
-          reason: 'Top-of-file warning comment must say "Permanent gate" — '
-              'this is the explicit signal Phase 8 D-05 #1 mandated.');
-      expect(preamble, contains('ADR-011'),
-          reason: 'Top-of-file warning comment must cross-reference ADR-011.');
-      expect(preamble, contains('Phase 8 D-05'),
-          reason: 'Top-of-file warning comment must cite Phase 8 D-05 by name '
-              'so future readers can locate the decision context.');
-    });
+        expect(
+          preamble,
+          contains('Permanent gate'),
+          reason:
+              'Top-of-file warning comment must say "Permanent gate" — '
+              'this is the explicit signal Phase 8 D-05 #1 mandated.',
+        );
+        expect(
+          preamble,
+          contains('ADR-011'),
+          reason: 'Top-of-file warning comment must cross-reference ADR-011.',
+        );
+        expect(
+          preamble,
+          contains('Phase 8 D-05'),
+          reason:
+              'Top-of-file warning comment must cite Phase 8 D-05 by name '
+              'so future readers can locate the decision context.',
+        );
+      },
+    );
 
     test('Invariant 2: zero `continue-on-error: true` lines (no soft-fail '
         'flag on any guardrail)', () {
@@ -64,11 +79,14 @@ void main() {
       // Allow whitespace tolerance via regex.
       final regex = RegExp(r'continue-on-error:\s*true', multiLine: true);
       final matches = regex.allMatches(content).toList();
-      expect(matches, isEmpty,
-          reason:
-              'audit.yml must contain ZERO `continue-on-error: true` lines. '
-              'Found ${matches.length} occurrence(s) — restoring soft-fail on a '
-              'guardrail violates Phase 8 D-05 #2 (permanence).');
+      expect(
+        matches,
+        isEmpty,
+        reason:
+            'audit.yml must contain ZERO `continue-on-error: true` lines. '
+            'Found ${matches.length} occurrence(s) — restoring soft-fail on a '
+            'guardrail violates Phase 8 D-05 #2 (permanence).',
+      );
     });
 
     test('Invariant 3: zero `if: pull_request`-only guards (the Phase 8 D-05 '
@@ -81,17 +99,22 @@ void main() {
       //   if: github.event_name == 'pull_request'
       //   if: ${{ github.event_name == "pull_request" }}
       final regexes = [
-        RegExp(r'''if:\s*\$\{\{\s*github\.event_name\s*==\s*['"]pull_request['"]\s*\}\}'''),
+        RegExp(
+          r'''if:\s*\$\{\{\s*github\.event_name\s*==\s*['"]pull_request['"]\s*\}\}''',
+        ),
         RegExp(r'''if:\s*github\.event_name\s*==\s*['"]pull_request['"]'''),
       ];
       for (final re in regexes) {
         final matches = re.allMatches(content).toList();
-        expect(matches, isEmpty,
-            reason:
-                'audit.yml must contain ZERO `if: pull_request`-only guards '
-                '(Phase 8 D-05 #3). Found ${matches.length} match(es) for '
-                'pattern `${re.pattern}`. Restoring this guard would let '
-                'direct-to-main commits bypass the coverage gate.');
+        expect(
+          matches,
+          isEmpty,
+          reason:
+              'audit.yml must contain ZERO `if: pull_request`-only guards '
+              '(Phase 8 D-05 #3). Found ${matches.length} match(es) for '
+              'pattern `${re.pattern}`. Restoring this guard would let '
+              'direct-to-main commits bypass the coverage gate.',
+        );
       }
     });
 
@@ -101,14 +124,16 @@ void main() {
       // don't block CI; import_guard remains hard-failing on errors.
       // Match: `dart run custom_lint --no-fatal-infos` (with arbitrary
       // whitespace + optional trailing args).
-      final regex =
-          RegExp(r'dart\s+run\s+custom_lint\s+--no-fatal-infos\b');
-      expect(regex.hasMatch(content), isTrue,
-          reason:
-              'audit.yml must invoke `dart run custom_lint` with '
-              '`--no-fatal-infos` (Phase 8 amendment 2026-04-28 / 08-06 #2). '
-              'Without this flag the gate hard-fails on INFO-level findings '
-              'and Gate 2 cannot pass.');
+      final regex = RegExp(r'dart\s+run\s+custom_lint\s+--no-fatal-infos\b');
+      expect(
+        regex.hasMatch(content),
+        isTrue,
+        reason:
+            'audit.yml must invoke `dart run custom_lint` with '
+            '`--no-fatal-infos` (Phase 8 amendment 2026-04-28 / 08-06 #2). '
+            'Without this flag the gate hard-fails on INFO-level findings '
+            'and Gate 2 cannot pass.',
+      );
 
       // Defense-in-depth: there must NOT be a bare `dart run custom_lint`
       // invocation anywhere in the file (i.e. one without --no-fatal-infos).
@@ -138,23 +163,29 @@ void main() {
       final regex = RegExp(
         r'coverage_gate\.dart\s+--list\s+\.planning/audit/cleanup-touched-files\.txt',
       );
-      expect(regex.hasMatch(content), isTrue,
-          reason:
-              'audit.yml must invoke `coverage_gate.dart --list '
-              '.planning/audit/cleanup-touched-files.txt` (Plan 08-02 D-04). '
-              'Reverting to phase6-touched-files.txt would re-introduce the '
-              'gap that Phase 8 D-04 closed.');
+      expect(
+        regex.hasMatch(content),
+        isTrue,
+        reason:
+            'audit.yml must invoke `coverage_gate.dart --list '
+            '.planning/audit/cleanup-touched-files.txt` (Plan 08-02 D-04). '
+            'Reverting to phase6-touched-files.txt would re-introduce the '
+            'gap that Phase 8 D-04 closed.',
+      );
 
       // Negative invariant: phase6-touched-files.txt must NOT appear as a
       // gate-input argument anywhere in audit.yml.
       final legacy = RegExp(
         r'coverage_gate\.dart\s+--list\s+\.planning/audit/phase6-touched-files\.txt',
       );
-      expect(legacy.hasMatch(content), isFalse,
-          reason:
-              'Legacy `--list .planning/audit/phase6-touched-files.txt` must '
-              'NOT appear in audit.yml. Plan 08-02 D-04 swapped it for '
-              'cleanup-touched-files.txt; reverting would weaken the gate.');
+      expect(
+        legacy.hasMatch(content),
+        isFalse,
+        reason:
+            'Legacy `--list .planning/audit/phase6-touched-files.txt` must '
+            'NOT appear in audit.yml. Plan 08-02 D-04 swapped it for '
+            'cleanup-touched-files.txt; reverting would weaken the gate.',
+      );
     });
 
     test('Invariant 6: coverage_gate.dart invocation includes '
@@ -167,13 +198,16 @@ void main() {
       final regex = RegExp(
         r'--deferred\s+\.planning/audit/coverage-gate-deferred\.txt',
       );
-      expect(regex.hasMatch(content), isTrue,
-          reason:
-              'audit.yml must pass `--deferred '
-              '.planning/audit/coverage-gate-deferred.txt` to coverage_gate.dart '
-              '(Phase 8 08-06 amendment #2). The deferral file carries '
-              'rationale for each scope-reduced entry; removing this flag '
-              'breaks the EXIT-04 close contract.');
+      expect(
+        regex.hasMatch(content),
+        isTrue,
+        reason:
+            'audit.yml must pass `--deferred '
+            '.planning/audit/coverage-gate-deferred.txt` to coverage_gate.dart '
+            '(Phase 8 08-06 amendment #2). The deferral file carries '
+            'rationale for each scope-reduced entry; removing this flag '
+            'breaks the EXIT-04 close contract.',
+      );
 
       // Cross-check: the deferred file itself must exist at the referenced path.
       // (If the path drifts, the gate fails at runtime — but the test catches
