@@ -57,19 +57,20 @@ class MainShellScreen extends ConsumerWidget {
         ref.invalidate(
           shadowAggregateProvider(year: now.year, month: now.month),
         );
-        final book = ref.read(bookByIdProvider(bookId: bookId)).value;
-        final currencyCode = book?.currency ?? 'JPY';
-        ref.invalidate(
-          happinessReportProvider(
-            bookId: bookId,
-            year: now.year,
-            month: now.month,
-            currencyCode: currencyCode,
-          ),
-        );
         ref.invalidate(
           bestJoyMomentProvider(bookId: bookId, year: now.year, month: now.month),
         );
+        final bookAsync = ref.read(bookByIdProvider(bookId: bookId));
+        if (bookAsync.hasValue) {
+          ref.invalidate(
+            happinessReportProvider(
+              bookId: bookId,
+              year: now.year,
+              month: now.month,
+              currencyCode: bookAsync.value?.currency ?? 'JPY',
+            ),
+          );
+        }
       }
     });
 
@@ -121,19 +122,20 @@ class MainShellScreen extends ConsumerWidget {
                     ),
                   );
                   ref.invalidate(todayTransactionsProvider(bookId: bookId));
-                  final book = ref.read(bookByIdProvider(bookId: bookId)).value;
-                  final currencyCode = book?.currency ?? 'JPY';
-                  ref.invalidate(
-                    happinessReportProvider(
-                      bookId: bookId,
-                      year: now.year,
-                      month: now.month,
-                      currencyCode: currencyCode,
-                    ),
-                  );
                   ref.invalidate(
                     bestJoyMomentProvider(bookId: bookId, year: now.year, month: now.month),
                   );
+                  final bookAsync = ref.read(bookByIdProvider(bookId: bookId));
+                  if (bookAsync.hasValue) {
+                    ref.invalidate(
+                      happinessReportProvider(
+                        bookId: bookId,
+                        year: now.year,
+                        month: now.month,
+                        currencyCode: bookAsync.value?.currency ?? 'JPY',
+                      ),
+                    );
+                  }
                 },
               ),
             ),
