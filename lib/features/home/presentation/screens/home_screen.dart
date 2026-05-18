@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../generated/app_localizations.dart';
 
 import '../../../../application/accounting/category_localization_service.dart';
+import '../../../../application/i18n/formatter_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme_colors.dart';
@@ -35,6 +35,8 @@ class HomeScreen extends ConsumerWidget {
   final String bookId;
   final VoidCallback? onSettingsTap;
 
+  static const _fmt = FormatterService();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
@@ -46,6 +48,9 @@ class HomeScreen extends ConsumerWidget {
     final month = now.month;
 
     final todayTxAsync = ref.watch(todayTransactionsProvider(bookId: bookId));
+    // Used for currency code in the transaction list formatter (WR-01 fix).
+    final bookAsyncOuter = ref.watch(bookByIdProvider(bookId: bookId));
+    final outerCurrencyCode = bookAsyncOuter.value?.currency ?? 'JPY';
 
     return SingleChildScrollView(
       child: SafeArea(
@@ -265,11 +270,19 @@ class HomeScreen extends ConsumerWidget {
                           tx.categoryId,
                           locale,
                         ),
+                        // Soul rows use brand green for category + amount (user decision 260518-v4v).
+                        // Survival rows use neutral text colors.
                         categoryColor: isSoul
-                            ? AppColors.accentPrimary
+                            ? AppColors.soul
                             : context.wmTextSecondary,
-                        formattedAmount: _formatAmount(tx),
-                        amountColor: context.wmTextPrimary,
+                        formattedAmount: _formatAmount(
+                          tx,
+                          outerCurrencyCode,
+                          locale,
+                        ),
+                        amountColor: isSoul
+                            ? AppColors.soul
+                            : context.wmTextPrimary,
                         satisfactionIcon: _satisfactionIcon(tx),
                       );
                     }).toList(),
@@ -293,13 +306,9 @@ class HomeScreen extends ConsumerWidget {
 
   // ── Data wiring helpers ──
 
-  String _formatAmount(Transaction tx) {
-    final formatted = NumberFormat.currency(
-      symbol: '\u00a5',
-      decimalDigits: 0,
-    ).format(tx.amount);
-    return formatted;
-  }
+  // WR-01 fix: use FormatterService instead of hardcoded JPY NumberFormat.
+  String _formatAmount(Transaction tx, String currencyCode, Locale locale) =>
+      _fmt.formatCurrency(tx.amount, currencyCode, locale);
 
   IconData? _satisfactionIcon(Transaction tx) {
     if (tx.ledgerType != LedgerType.soul) return null;
