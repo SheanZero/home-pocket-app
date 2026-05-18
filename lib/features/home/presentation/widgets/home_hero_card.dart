@@ -560,34 +560,33 @@ class HomeHeroCard extends StatelessWidget {
   }
 
   Widget _bestJoyEmpty(BuildContext context, String title, String mutedLine) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceCream,
-        border: Border.all(color: AppColors.surfaceCreamBorder),
-        borderRadius: BorderRadius.circular(22),
-      ),
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Row 1: title only (no pill in empty state)
-          Text(
-            title,
-            // w800 per Pencil Variant A — no w800 token in AppTextStyles
-            style: AppTextStyles.titleLarge.copyWith(
-              fontWeight: FontWeight.w800,
-              color: context.wmTextPrimary,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _bestJoyTitleRow(context, title),
+        const SizedBox(height: 12),
+        Text(
+          mutedLine,
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textMutedGold,
           ),
-          const SizedBox(height: 14),
-          Text(
-            mutedLine,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textMutedGold,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
+    );
+  }
+
+  /// Section title row matching `_ringSection` style: icon + bodyLarge text,
+  /// left-aligned, transparent background (no card chrome).
+  Widget _bestJoyTitleRow(BuildContext context, String title) {
+    return Row(
+      children: [
+        const Icon(Icons.favorite, size: 16, color: AppColors.soul),
+        const SizedBox(width: 6),
+        Text(
+          title,
+          style: AppTextStyles.bodyLarge.copyWith(color: context.wmTextPrimary),
+        ),
+      ],
     );
   }
 
@@ -607,94 +606,82 @@ class HomeHeroCard extends StatelessWidget {
     final dayOfWeek = DateFormat('E', locale.toString()).format(row.timestamp);
     final dateLabel = '$dateShort · $dayOfWeek';
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceCream,
-        border: Border.all(color: AppColors.surfaceCreamBorder),
-        borderRadius: BorderRadius.circular(22),
-      ),
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Row 1: title + satisfaction pill
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                title,
-                // w800 per Pencil Variant A — no w800 token in AppTextStyles
-                style: AppTextStyles.titleLarge.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: context.wmTextPrimary,
-                ),
-              ),
-              _satisfactionPill(l10n, row.soulSatisfaction),
-            ],
-          ),
-          const SizedBox(height: 14),
-          // Row 2: hero amount (currency symbol + number)
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                splitResult.$1,
-                style: AppTextStyles.amountSmall.copyWith(
-                  fontSize: 20,
-                  color: AppColors.soul,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                splitResult.$2,
-                style: AppTextStyles.amountLarge.copyWith(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.soul,
-                  letterSpacing: -0.5,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          // Row 3: category/merchant left + date right
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Text(
-                  category,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontFamily: 'Outfit',
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textMutedGold,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Row 1: title only — left-aligned (pill moved to amount row)
+        _bestJoyTitleRow(context, title),
+        const SizedBox(height: 12),
+        // Row 2: hero amount left + enlarged satisfaction pill right
+        // (pill vertically centered on amount center line per user 260518-v4v r2)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  splitResult.$1,
+                  style: AppTextStyles.amountSmall.copyWith(
+                    fontSize: 20,
+                    color: AppColors.soul,
                   ),
                 ),
-              ),
-              Text(
-                dateLabel,
+                const SizedBox(width: 6),
+                Text(
+                  splitResult.$2,
+                  style: AppTextStyles.amountLarge.copyWith(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.soul,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ],
+            ),
+            _satisfactionPill(l10n, row.soulSatisfaction),
+          ],
+        ),
+        const SizedBox(height: 10),
+        // Row 3: category/merchant left + date right
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Text(
+                category,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontFamily: 'Outfit',
-                  fontSize: 11,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textMutedGold,
                 ),
               ),
-            ],
-          ),
-        ],
-      ),
+            ),
+            Text(
+              dateLabel,
+              style: const TextStyle(
+                fontFamily: 'Outfit',
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textMutedGold,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
   /// Satisfaction pill widget (Variant A — pill with icon + tier label).
+  /// Enlarged per user 260518-v4v r2: icon 16→20, text 11→14, padding (8,4)→(12,7).
   Widget _satisfactionPill(S l10n, int sat) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
         color: AppColors.satisfactionPillBg,
         borderRadius: BorderRadius.circular(999),
@@ -704,15 +691,15 @@ class HomeHeroCard extends StatelessWidget {
         children: [
           Icon(
             _satisfactionPillIcon(sat),
-            size: 16,
+            size: 20,
             color: AppColors.satisfactionPillRose,
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 6),
           Text(
             _satisfactionPillLabel(l10n, sat),
             style: const TextStyle(
               fontFamily: 'Outfit',
-              fontSize: 11,
+              fontSize: 14,
               fontWeight: FontWeight.w800,
               color: AppColors.satisfactionPillRose,
             ),
