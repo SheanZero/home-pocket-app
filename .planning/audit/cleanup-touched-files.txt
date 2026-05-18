@@ -151,10 +151,10 @@ lib/features/settings/presentation/providers/state_locale.g.dart
 lib/features/settings/presentation/providers/state_settings.dart
 lib/features/settings/presentation/providers/state_settings.g.dart
 lib/features/settings/presentation/widgets/appearance_section.dart
-lib/generated/app_localizations.dart
 lib/generated/app_localizations_en.dart
 lib/generated/app_localizations_ja.dart
 lib/generated/app_localizations_zh.dart
+lib/generated/app_localizations.dart
 lib/infrastructure/category/category_locale_service.dart
 lib/infrastructure/ml/merchant_database.dart
 lib/infrastructure/security/providers.dart

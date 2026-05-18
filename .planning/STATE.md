@@ -4,7 +4,7 @@ milestone: v1.1
 milestone_name: Happiness Metric & Display
 status: completed
 stopped_at: v1.1 milestone close
-last_updated: "2026-05-18T06:30:00.000Z"
+last_updated: "2026-05-18T11:30:00.000Z"
 last_activity: 2026-05-18
 progress:
   total_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-05-05)
 Phase: none active
 Plan: none active
 Status: Milestone complete
-Last activity: 2026-05-18 - Completed quick task 260518-kyr: Fix soul stats and monthly favorite not refreshing after new soul ledger entry
+Last activity: 2026-05-18 - Completed quick task 260518-pf5: Home polish Bucket A (typography, ledger bar, caption removal, family invite i18n, recent-tx display, analytics spacing); ADR-016 opened for Bucket B Joy formula/ring redesign discussion
 
 ## v1.1 Phase Plan
 
@@ -97,6 +97,7 @@ No active v1.1 blockers. Carried-forward debt (from v1.0):
 | # | Description | Date | Commit | Status | Directory |
 |---|-------------|------|--------|--------|-----------|
 | 260518-kyr | Fix soul stats and monthly favorite not refreshing after new soul ledger entry | 2026-05-18 | 7f216e7 | Verified | [260518-kyr-fix-soul-stats-and-monthly-favorite-not-](./quick/260518-kyr-fix-soul-stats-and-monthly-favorite-not-/) |
+| 260518-pf5 | Home polish Bucket A — typography spacing, ledger bar color, caption removal, family invite i18n, tx display, analytics spacing | 2026-05-18 | 5b7b6ee | Awaiting UI verification | [260518-pf5-home-polish-typography-spacing-ledger-ba](./quick/260518-pf5-home-polish-typography-spacing-ledger-ba/) |
 
 ## Deferred Items
 
@@ -133,8 +134,8 @@ Items acknowledged and deferred at v1.0 milestone close on 2026-04-29:
 
 ## Session Continuity
 
-Last session: 2026-05-05T11:16:31.398Z
-Stopped at: v1.1 milestone close
+Last session: 2026-05-18T11:18:00Z
+Stopped at: Quick task 260518-pf5 complete — awaiting human UI verification
 Resume file: n/a
 
 **Planned Next:** `/gsd-new-milestone` to define the next milestone requirements and roadmap
