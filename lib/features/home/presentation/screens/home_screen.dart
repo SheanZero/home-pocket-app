@@ -75,7 +75,11 @@ class HomeScreen extends ConsumerWidget {
                   );
                 },
               ),
-              const SizedBox(height: 16),
+              // 24 (not 16) to visually match AnalyticsScreen's AppBar+padding stack (user decision 260518-v4v).
+              // Analytics has a 56px opaque AppBar creating structural visual weight absent on home
+              // (inline body HeroHeader). Reducing analytics padding to 8px would look cramped;
+              // bumping home from 16px to 24px achieves visual equivalence. Numeric asymmetry intentional.
+              const SizedBox(height: 24),
 
               // ── Home hero card (Phase 10 — integrates the legacy
               //    month-overview, ledger-comparison, and soul-fullness cards
