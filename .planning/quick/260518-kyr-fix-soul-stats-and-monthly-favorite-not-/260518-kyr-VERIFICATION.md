@@ -1,9 +1,10 @@
 ---
 phase: quick-260518-kyr
 verified: 2026-05-18T06:45:00Z
-status: human_needed
-score: 6/6 must-haves verified
+status: passed
+score: 6/6 must-haves verified + user-confirmed runtime behavior 2026-05-18
 overrides_applied: 0
+user_confirmation: "确认修复成功 (2026-05-18) — manual UI checks pass"
 human_verification:
   - test: "FAB path — soul transaction auto-refreshes 悦己统计 ring without pull-to-refresh"
     expected: "After creating a soul-ledger transaction via FAB and returning to home, the 悦己统计 ring percentages/amounts visibly update without any swipe gesture"
