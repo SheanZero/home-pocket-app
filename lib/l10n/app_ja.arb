@@ -570,6 +570,14 @@
   "@homeFamilyInviteDesc": {
     "description": "Family invite banner description"
   },
+  "homeFamilyBannerTitle": "家族と一緒に管理しよう",
+  "@homeFamilyBannerTitle": {
+    "description": "Family invite banner heading text"
+  },
+  "homeFamilyBannerSubtitle": "パートナーを招待して、家計簿をリアルタイムで共有しよう",
+  "@homeFamilyBannerSubtitle": {
+    "description": "Family invite banner subtitle text"
+  },
   "homeTodayTitle": "今日の記録",
   "@homeTodayTitle": {
     "description": "Today's transaction section title"

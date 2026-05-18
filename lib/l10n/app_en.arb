@@ -91,11 +91,11 @@
   "@categoryOther": {
     "description": "Other category"
   },
-  "survivalLedger": "Daily Ledger",
+  "survivalLedger": "Daily",
   "@survivalLedger": {
     "description": "Survival ledger label"
   },
-  "soulLedger": "Joy Ledger",
+  "soulLedger": "Joy",
   "@soulLedger": {
     "description": "Soul ledger label"
   },
@@ -569,6 +569,14 @@
   "homeFamilyInviteDesc": "Share your ledger with your partner",
   "@homeFamilyInviteDesc": {
     "description": "Family invite banner description"
+  },
+  "homeFamilyBannerTitle": "Manage Together",
+  "@homeFamilyBannerTitle": {
+    "description": "Family invite banner heading text"
+  },
+  "homeFamilyBannerSubtitle": "Invite your partner to share your ledger in real time",
+  "@homeFamilyBannerSubtitle": {
+    "description": "Family invite banner subtitle text"
   },
   "homeTodayTitle": "Today's Records",
   "@homeTodayTitle": {
