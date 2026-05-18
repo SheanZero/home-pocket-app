@@ -693,6 +693,21 @@ class SEn extends S {
   String get satisfactionExcellent => 'Amazing!';
 
   @override
+  String get satisfactionLabelNeutral => 'Neutral';
+
+  @override
+  String get satisfactionLabelOK => 'OK';
+
+  @override
+  String get satisfactionLabelGood => 'Good';
+
+  @override
+  String get satisfactionLabelGreat => 'Great';
+
+  @override
+  String get satisfactionLabelAmazing => 'Amazing';
+
+  @override
   String get addSubcategory => 'Add';
 
   @override

@@ -689,6 +689,21 @@ class SZh extends S {
   String get satisfactionExcellent => '最爱！';
 
   @override
+  String get satisfactionLabelNeutral => '中性';
+
+  @override
+  String get satisfactionLabelOK => 'OK';
+
+  @override
+  String get satisfactionLabelGood => '不错';
+
+  @override
+  String get satisfactionLabelGreat => '满足';
+
+  @override
+  String get satisfactionLabelAmazing => '最爱';
+
+  @override
   String get addSubcategory => '添加';
 
   @override

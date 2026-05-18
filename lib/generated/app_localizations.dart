@@ -1395,6 +1395,36 @@ abstract class S {
   /// **'Amazing!'**
   String get satisfactionExcellent;
 
+  /// Variant A pill label: val 2, unipolar positive baseline (ADR-014)
+  ///
+  /// In en, this message translates to:
+  /// **'Neutral'**
+  String get satisfactionLabelNeutral;
+
+  /// Variant A pill label: val 4
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get satisfactionLabelOK;
+
+  /// Variant A pill label: val 6
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get satisfactionLabelGood;
+
+  /// Variant A pill label: val 8
+  ///
+  /// In en, this message translates to:
+  /// **'Great'**
+  String get satisfactionLabelGreat;
+
+  /// Variant A pill label: val 10, top tier
+  ///
+  /// In en, this message translates to:
+  /// **'Amazing'**
+  String get satisfactionLabelAmazing;
+
   /// Action chip label to add a subcategory
   ///
   /// In en, this message translates to:

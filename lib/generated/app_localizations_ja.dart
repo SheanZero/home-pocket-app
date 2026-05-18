@@ -688,6 +688,21 @@ class SJa extends S {
   String get satisfactionExcellent => '至福！';
 
   @override
+  String get satisfactionLabelNeutral => '中性';
+
+  @override
+  String get satisfactionLabelOK => 'OK';
+
+  @override
+  String get satisfactionLabelGood => '不錯';
+
+  @override
+  String get satisfactionLabelGreat => '満足';
+
+  @override
+  String get satisfactionLabelAmazing => '最愛';
+
+  @override
   String get addSubcategory => '追加';
 
   @override

@@ -887,6 +887,26 @@
   "@satisfactionExcellent": {
     "description": "Highest satisfaction label"
   },
+  "satisfactionLabelNeutral": "中性",
+  "@satisfactionLabelNeutral": {
+    "description": "Variant A pill label: val 2, unipolar positive baseline (ADR-014)"
+  },
+  "satisfactionLabelOK": "OK",
+  "@satisfactionLabelOK": {
+    "description": "Variant A pill label: val 4"
+  },
+  "satisfactionLabelGood": "不錯",
+  "@satisfactionLabelGood": {
+    "description": "Variant A pill label: val 6"
+  },
+  "satisfactionLabelGreat": "満足",
+  "@satisfactionLabelGreat": {
+    "description": "Variant A pill label: val 8"
+  },
+  "satisfactionLabelAmazing": "最愛",
+  "@satisfactionLabelAmazing": {
+    "description": "Variant A pill label: val 10, top tier"
+  },
   "addSubcategory": "追加",
   "@addSubcategory": {
     "description": "Action chip label to add a subcategory"

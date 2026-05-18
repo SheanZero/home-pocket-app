@@ -76,7 +76,8 @@ class HomeTransactionTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            // Info column
+            // Info column — satisfactionIcon is inline-right of category text
+            // (not after amount) to keep soul and survival row heights identical.
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,22 +89,29 @@ class HomeTransactionTile extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    category,
-                    style: AppTextStyles.caption.copyWith(color: categoryColor),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        category,
+                        style: AppTextStyles.caption.copyWith(
+                          color: categoryColor,
+                        ),
+                      ),
+                      if (satisfactionIcon != null) ...[
+                        const SizedBox(width: 4),
+                        Icon(satisfactionIcon, size: 14, color: AppColors.soul),
+                      ],
+                    ],
                   ),
                 ],
               ),
             ),
-            // Amount + optional satisfaction icon (soul rows only)
+            // Amount only — icon has moved to the category row above
             Text(
               formattedAmount,
               style: AppTextStyles.amountSmall.copyWith(color: amountColor),
             ),
-            if (satisfactionIcon != null) ...[
-              const SizedBox(width: 4),
-              Icon(satisfactionIcon, size: 14, color: AppColors.soul),
-            ],
           ],
         ),
       ),
