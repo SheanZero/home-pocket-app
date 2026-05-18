@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme_colors.dart';
 
@@ -7,7 +8,7 @@ import '../../../../core/theme/app_theme_colors.dart';
 /// and formatted amount.
 ///
 /// Pure UI component -- all data injected via constructor.
-/// Amount should be pre-formatted by the parent (e.g. "-\u00a53,280").
+/// Amount should be pre-formatted by the parent (e.g. "\u00a53,280").
 class HomeTransactionTile extends StatelessWidget {
   const HomeTransactionTile({
     super.key,
@@ -19,6 +20,7 @@ class HomeTransactionTile extends StatelessWidget {
     required this.categoryColor,
     required this.formattedAmount,
     required this.amountColor,
+    this.satisfactionIcon,
     this.onTap,
   });
 
@@ -40,11 +42,14 @@ class HomeTransactionTile extends StatelessWidget {
   /// Colour of the category label.
   final Color categoryColor;
 
-  /// Pre-formatted amount string (e.g. "-\u00a53,480").
+  /// Pre-formatted amount string (e.g. "\u00a53,480").
   final String formattedAmount;
 
   /// Colour of the amount text.
   final Color amountColor;
+
+  /// Optional satisfaction icon for soul-ledger rows (ADR-014 mapping).
+  final IconData? satisfactionIcon;
 
   /// Optional tap callback.
   final VoidCallback? onTap;
@@ -90,11 +95,15 @@ class HomeTransactionTile extends StatelessWidget {
                 ],
               ),
             ),
-            // Amount
+            // Amount + optional satisfaction icon (soul rows only)
             Text(
               formattedAmount,
               style: AppTextStyles.amountSmall.copyWith(color: amountColor),
             ),
+            if (satisfactionIcon != null) ...[
+              const SizedBox(width: 4),
+              Icon(satisfactionIcon, size: 14, color: AppColors.soul),
+            ],
           ],
         ),
       ),

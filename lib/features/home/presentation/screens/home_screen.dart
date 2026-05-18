@@ -84,16 +84,13 @@ class HomeScreen extends ConsumerWidget {
                       month: month,
                     ),
                   );
-                  final bookAsync = ref.watch(
-                    bookByIdProvider(bookId: bookId),
-                  );
+                  final bookAsync = ref.watch(bookByIdProvider(bookId: bookId));
 
                   // CLAUDE.md Pitfall #9 — fallback only when Book is missing.
                   // This is the SOLE legitimate JPY currency-code literal in
                   // the home feature; future grep audits verify no other site
                   // re-introduces it.
-                  final currencyCode =
-                      bookAsync.value?.currency ?? 'JPY';
+                  final currencyCode = bookAsync.value?.currency ?? 'JPY';
 
                   final happinessAsync = ref.watch(
                     happinessReportProvider(
@@ -272,9 +269,8 @@ class HomeScreen extends ConsumerWidget {
                             ? AppColors.accentPrimary
                             : context.wmTextSecondary,
                         formattedAmount: _formatAmount(tx),
-                        amountColor: isSoul
-                            ? AppColors.accentPrimary
-                            : context.wmTextPrimary,
+                        amountColor: context.wmTextPrimary,
+                        satisfactionIcon: _satisfactionIcon(tx),
                       );
                     }).toList(),
                   );
@@ -302,7 +298,17 @@ class HomeScreen extends ConsumerWidget {
       symbol: '\u00a5',
       decimalDigits: 0,
     ).format(tx.amount);
-    return tx.type == TransactionType.expense ? '-$formatted' : formatted;
+    return formatted;
+  }
+
+  IconData? _satisfactionIcon(Transaction tx) {
+    if (tx.ledgerType != LedgerType.soul) return null;
+    final v = tx.soulSatisfaction;
+    if (v <= 2) return Icons.sentiment_neutral_outlined;
+    if (v <= 4) return Icons.sentiment_satisfied_outlined;
+    if (v <= 6) return Icons.sentiment_satisfied_alt_outlined;
+    if (v <= 8) return Icons.sentiment_very_satisfied_outlined;
+    return Icons.favorite_border;
   }
 
   /// Extracts the first character of a member identifier for group mode.
