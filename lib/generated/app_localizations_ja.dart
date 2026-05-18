@@ -474,6 +474,12 @@ class SJa extends S {
   String get homeFamilyInviteDesc => 'パートナーと家計簿を共有しよう';
 
   @override
+  String get homeFamilyBannerTitle => '家族と一緒に管理しよう';
+
+  @override
+  String get homeFamilyBannerSubtitle => 'パートナーを招待して、家計簿をリアルタイムで共有しよう';
+
+  @override
   String get homeTodayTitle => '今日の記録';
 
   @override

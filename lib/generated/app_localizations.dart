@@ -240,13 +240,13 @@ abstract class S {
   /// Survival ledger label
   ///
   /// In en, this message translates to:
-  /// **'Daily Ledger'**
+  /// **'Daily'**
   String get survivalLedger;
 
   /// Soul ledger label
   ///
   /// In en, this message translates to:
-  /// **'Joy Ledger'**
+  /// **'Joy'**
   String get soulLedger;
 
   /// Short survival label
@@ -1004,6 +1004,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Share your ledger with your partner'**
   String get homeFamilyInviteDesc;
+
+  /// Family invite banner heading text
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Together'**
+  String get homeFamilyBannerTitle;
+
+  /// Family invite banner subtitle text
+  ///
+  /// In en, this message translates to:
+  /// **'Invite your partner to share your ledger in real time'**
+  String get homeFamilyBannerSubtitle;
 
   /// Today's transaction section title
   ///

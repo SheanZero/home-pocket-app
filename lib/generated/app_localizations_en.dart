@@ -78,10 +78,10 @@ class SEn extends S {
   String get categoryOther => 'Other';
 
   @override
-  String get survivalLedger => 'Daily Ledger';
+  String get survivalLedger => 'Daily';
 
   @override
-  String get soulLedger => 'Joy Ledger';
+  String get soulLedger => 'Joy';
 
   @override
   String get survival => 'Survival';
@@ -474,6 +474,13 @@ class SEn extends S {
 
   @override
   String get homeFamilyInviteDesc => 'Share your ledger with your partner';
+
+  @override
+  String get homeFamilyBannerTitle => 'Manage Together';
+
+  @override
+  String get homeFamilyBannerSubtitle =>
+      'Invite your partner to share your ledger in real time';
 
   @override
   String get homeTodayTitle => 'Today\'s Records';

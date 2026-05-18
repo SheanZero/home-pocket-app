@@ -78,10 +78,10 @@ class SZh extends S {
   String get categoryOther => '其他';
 
   @override
-  String get survivalLedger => '日常账本';
+  String get survivalLedger => '日常';
 
   @override
-  String get soulLedger => '悦己账本';
+  String get soulLedger => '悦己';
 
   @override
   String get survival => '生存';
@@ -472,6 +472,12 @@ class SZh extends S {
 
   @override
   String get homeFamilyInviteDesc => '与伴侣共享家计簿';
+
+  @override
+  String get homeFamilyBannerTitle => '一起管理家庭账本';
+
+  @override
+  String get homeFamilyBannerSubtitle => '邀请伴侣，实时共享家庭账本';
 
   @override
   String get homeTodayTitle => '今日记录';
