@@ -56,6 +56,13 @@ abstract final class AppColors {
   static const fabShadow = Color(0x35E85A4F);
   static const navShadow = Color(0x08000000);
 
+  // ── Best Joy strip (Variant A — Pencil mock n6VVd) ──
+  static const surfaceCream = Color(0xFFFFFDF8); // Best Joy card background
+  static const surfaceCreamBorder = Color(0xFFF2E4C9); // Best Joy card border
+  static const textMutedGold = Color(0xFFB39A71); // Merchant/date muted text
+  static const satisfactionPillBg = Color(0xFFFFF1F1); // Pill background (light pink)
+  static const satisfactionPillRose = Color(0xFFD45F65); // Pill icon + label
+
   // ── Compatibility aliases ──
   // TODO: Remove after all screens are migrated to Wa-Modern
   static const divider = borderDivider;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../application/i18n/formatter_service.dart';
@@ -538,57 +539,51 @@ class HomeHeroCard extends StatelessWidget {
     );
   }
 
-  // ─── Region 6: Best Joy story strip (3-level typography per D-04) ─────────
+  // ─── Region 6: Best Joy strip (Variant A — Pencil mock n6VVd) ────────────
+  //
+  // 3-row cream card: Row 1 = title + satisfaction pill; Row 2 = hero amount;
+  // Row 3 = merchant/category + date. Replaces old 3-line text layout.
+  // homeBestJoyEmptyBig/AllNeutralBig ARB keys unused after Variant A — see v4v worklog.
   Widget _buildBestJoyStrip(BuildContext context, S l10n) {
-    final tagText = isGroupMode
+    final titleText = isGroupMode
         ? l10n.homeBestJoyTagGroup
         : l10n.homeBestJoyTagSingle;
     return switch (bestJoy) {
-      Empty() => _bestJoyEmpty(
-        context,
-        l10n.homeBestJoyEmptyTagPrimary,
-        l10n.homeBestJoyEmptyBig,
-        l10n.homeBestJoyEmptySmall,
-      ),
+      Empty() => _bestJoyEmpty(context, titleText, l10n.homeBestJoyEmptySmall),
       Value(:final data) when data.soulSatisfaction <= 2 => _bestJoyEmpty(
         context,
-        tagText,
-        l10n.homeBestJoyAllNeutralBig,
+        titleText,
         l10n.homeBestJoyAllNeutralSmall,
       ),
-      Value(:final data) => _bestJoyValue(context, l10n, tagText, data),
+      Value(:final data) => _bestJoyValue(context, l10n, titleText, data),
     };
   }
 
-  Widget _bestJoyEmpty(
-    BuildContext context,
-    String tag,
-    String big,
-    String small,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+  Widget _bestJoyEmpty(BuildContext context, String title, String mutedLine) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceCream,
+        border: Border.all(color: AppColors.surfaceCreamBorder),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Row 1: title only (no pill in empty state)
           Text(
-            tag,
-            style: AppTextStyles.overline.copyWith(color: AppColors.shared),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            big,
-            style: AppTextStyles.titleSmall.copyWith(
+            title,
+            // w800 per Pencil Variant A — no w800 token in AppTextStyles
+            style: AppTextStyles.titleLarge.copyWith(
+              fontWeight: FontWeight.w800,
               color: context.wmTextPrimary,
-              fontWeight: FontWeight.w400,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 14),
           Text(
-            small,
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.shared,
-              fontFeatures: const [FontFeature.tabularFigures()],
+            mutedLine,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textMutedGold,
             ),
           ),
         ],
@@ -599,48 +594,159 @@ class HomeHeroCard extends StatelessWidget {
   Widget _bestJoyValue(
     BuildContext context,
     S l10n,
-    String tag,
+    String title,
     BestJoyMomentRow row,
   ) {
+    final formatted = _fmt.formatCurrency(row.amount, currencyCode, locale);
+    final splitResult = _splitCurrencySymbol(formatted);
     final category = CategoryLocalizationService.resolveFromId(
       row.categoryId,
       locale,
     );
-    final dateLabel = DateFormatter.formatShortMonthDay(row.timestamp, locale);
-    final amountText = _fmt.formatCurrency(row.amount, currencyCode, locale);
-    final smallLine = l10n.homeBestJoyAmountSat(
-      amountText,
-      row.soulSatisfaction,
-    );
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+    final dateShort = DateFormatter.formatShortMonthDay(row.timestamp, locale);
+    final dayOfWeek =
+        DateFormat('E', locale.toString()).format(row.timestamp);
+    final dateLabel = '$dateShort · $dayOfWeek';
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceCream,
+        border: Border.all(color: AppColors.surfaceCreamBorder),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            tag,
-            style: AppTextStyles.overline.copyWith(color: AppColors.shared),
+          // Row 1: title + satisfaction pill
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                title,
+                // w800 per Pencil Variant A — no w800 token in AppTextStyles
+                style: AppTextStyles.titleLarge.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: context.wmTextPrimary,
+                ),
+              ),
+              _satisfactionPill(l10n, row.soulSatisfaction),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            '$category · $dateLabel',
-            style: AppTextStyles.titleSmall.copyWith(
-              color: context.wmTextPrimary,
-              fontWeight: FontWeight.w400,
-            ),
+          const SizedBox(height: 14),
+          // Row 2: hero amount (currency symbol + number)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                splitResult.$1,
+                style: AppTextStyles.amountSmall.copyWith(
+                  fontSize: 20,
+                  color: AppColors.soul,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                splitResult.$2,
+                style: AppTextStyles.amountLarge.copyWith(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.soul,
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 2),
-          // Pitfall #10 — tabular figures on the ¥/satisfaction line.
+          const SizedBox(height: 14),
+          // Row 3: category/merchant left + date right
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Text(
+                  category,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textMutedGold,
+                  ),
+                ),
+              ),
+              Text(
+                dateLabel,
+                style: const TextStyle(
+                  fontFamily: 'Outfit',
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textMutedGold,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Satisfaction pill widget (Variant A — pill with icon + tier label).
+  Widget _satisfactionPill(S l10n, int sat) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.satisfactionPillBg,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            _satisfactionPillIcon(sat),
+            size: 16,
+            color: AppColors.satisfactionPillRose,
+          ),
+          const SizedBox(width: 4),
           Text(
-            smallLine,
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.shared,
-              fontFeatures: const [FontFeature.tabularFigures()],
+            _satisfactionPillLabel(l10n, sat),
+            style: const TextStyle(
+              fontFamily: 'Outfit',
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: AppColors.satisfactionPillRose,
             ),
           ),
         ],
       ),
     );
+  }
+
+  /// ADR-014 satisfaction value → icon mapping (unipolar positive scale).
+  IconData _satisfactionPillIcon(int sat) {
+    if (sat <= 2) return Icons.sentiment_neutral_outlined;
+    if (sat <= 4) return Icons.sentiment_satisfied_outlined;
+    if (sat <= 6) return Icons.sentiment_satisfied_alt_outlined;
+    if (sat <= 8) return Icons.sentiment_very_satisfied_outlined;
+    return Icons.favorite_border;
+  }
+
+  /// ADR-014 satisfaction value → tier label mapping (Variant A pill).
+  String _satisfactionPillLabel(S l10n, int sat) {
+    if (sat <= 2) return l10n.satisfactionLabelNeutral;
+    if (sat <= 4) return l10n.satisfactionLabelOK;
+    if (sat <= 6) return l10n.satisfactionLabelGood;
+    if (sat <= 8) return l10n.satisfactionLabelGreat;
+    return l10n.satisfactionLabelAmazing;
+  }
+
+  /// Splits a formatted currency string into (symbol, number) pair.
+  /// e.g. "¥4,200" → ("¥", "4,200"), "$4.20" → ("$", "4.20")
+  (String, String) _splitCurrencySymbol(String formatted) {
+    final idx = formatted.indexOf(RegExp(r'\d'));
+    if (idx <= 0) return ('', formatted);
+    return (formatted.substring(0, idx), formatted.substring(idx));
   }
 
   // ─── Region 8: Members section (group mode + non-empty shadowBooks) ───────
