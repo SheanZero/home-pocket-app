@@ -4,8 +4,8 @@ milestone: v1.1
 milestone_name: Happiness Metric & Display
 status: completed
 stopped_at: v1.1 milestone close
-last_updated: "2026-05-18T11:30:00.000Z"
-last_activity: 2026-05-18
+last_updated: "2026-05-19T00:30:00.000Z"
+last_activity: 2026-05-19
 progress:
   total_phases: 4
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-05-05)
 Phase: none active
 Plan: none active
 Status: Milestone complete
-Last activity: 2026-05-18 - Completed quick task 260518-pf5: Home polish Bucket A (typography, ledger bar, caption removal, family invite i18n, recent-tx display, analytics spacing); ADR-016 opened for Bucket B Joy formula/ring redesign discussion
+Last activity: 2026-05-19 - Completed quick task 260518-v4v: Home polish Round 2 (Best Joy Variant A redesign per Pencil mock, recent-tx soul brand color + icon repositioning, home SizedBox 16→24 for visual parity with analytics)
 
 ## v1.1 Phase Plan
 
@@ -98,6 +98,7 @@ No active v1.1 blockers. Carried-forward debt (from v1.0):
 |---|-------------|------|--------|--------|-----------|
 | 260518-kyr | Fix soul stats and monthly favorite not refreshing after new soul ledger entry | 2026-05-18 | 7f216e7 | Verified | [260518-kyr-fix-soul-stats-and-monthly-favorite-not-](./quick/260518-kyr-fix-soul-stats-and-monthly-favorite-not-/) |
 | 260518-pf5 | Home polish Bucket A — typography spacing, ledger bar color, caption removal, family invite i18n, tx display, analytics spacing | 2026-05-18 | 5b7b6ee | Awaiting UI verification | [260518-pf5-home-polish-typography-spacing-ledger-ba](./quick/260518-pf5-home-polish-typography-spacing-ledger-ba/) |
+| 260518-v4v | Home polish Round 2 — Best Joy Variant A (Pencil mock), recent-tx soul color + icon reposition, home SizedBox 16→24 for analytics parity | 2026-05-19 | ae3475d | Awaiting UI verification | [260518-v4v-home-polish-round-2-best-joy-variant-a-r](./quick/260518-v4v-home-polish-round-2-best-joy-variant-a-r/) |
 
 ## Deferred Items
 
