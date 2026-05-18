@@ -4,8 +4,8 @@ milestone: v1.1
 milestone_name: Happiness Metric & Display
 status: completed
 stopped_at: v1.1 milestone close
-last_updated: "2026-05-05T11:19:14.350Z"
-last_activity: 2026-05-05
+last_updated: "2026-05-18T06:30:00.000Z"
+last_activity: 2026-05-18
 progress:
   total_phases: 4
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-05-05)
 Phase: none active
 Plan: none active
 Status: Milestone complete
-Last activity: 2026-05-05
+Last activity: 2026-05-18 - Completed quick task 260518-kyr: Fix soul stats and monthly favorite not refreshing after new soul ledger entry
 
 ## v1.1 Phase Plan
 
@@ -91,6 +91,12 @@ No active v1.1 blockers. Carried-forward debt (from v1.0):
 - **FUTURE-DOC-06**: `/gsd-validate-phase 07` to remediate `nyquist_compliant: false`
 - **FUTURE-DOC-01**: Pre-existing MOD-numbering drift inside MOD-002/006/007/008 internal headers
 - **FUTURE-DOC-02**: ARCH-008 cites ADR-006 instead of ADR-007 in 7 places
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Status | Directory |
+|---|-------------|------|--------|--------|-----------|
+| 260518-kyr | Fix soul stats and monthly favorite not refreshing after new soul ledger entry | 2026-05-18 | 7f216e7 | Needs Review | [260518-kyr-fix-soul-stats-and-monthly-favorite-not-](./quick/260518-kyr-fix-soul-stats-and-monthly-favorite-not-/) |
 
 ## Deferred Items
 
