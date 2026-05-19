@@ -44,6 +44,9 @@ class HomeHeroCard extends StatelessWidget {
     required this.currencyCode,
     required this.locale,
     required this.isGroupMode,
+    required this.activeMonthlyJoyTarget,
+    required this.recommendedMonthlyJoyTarget,
+    required this.isMonthlyJoyTargetConfigured,
     required this.onTap,
     super.key,
   });
@@ -57,6 +60,9 @@ class HomeHeroCard extends StatelessWidget {
   final String currencyCode;
   final Locale locale;
   final bool isGroupMode;
+  final int activeMonthlyJoyTarget;
+  final int? recommendedMonthlyJoyTarget;
+  final bool isMonthlyJoyTargetConfigured;
   final VoidCallback onTap;
 
   static const FormatterService _fmt = FormatterService();
@@ -320,12 +326,7 @@ class HomeHeroCard extends StatelessWidget {
                       size: const Size(120, 120),
                       painter: _painter(context),
                     ),
-                    Text(
-                      _centerText(),
-                      style: AppTextStyles.amountMedium.copyWith(
-                        color: context.wmTextPrimary,
-                      ),
-                    ),
+                    _centerContent(context, l10n),
                   ],
                 ),
               ),
@@ -380,7 +381,9 @@ class HomeHeroCard extends StatelessWidget {
 
   double? _outerSingle(MetricResult<double> r) => switch (r) {
     Empty() => null,
-    Value(:final data) => (data / 2.0).clamp(0.0, 1.0),
+    Value(:final data) => activeMonthlyJoyTarget > 0
+        ? (data / activeMonthlyJoyTarget).clamp(0.0, 1.0)
+        : null,
   };
   double? _middleSingle(MetricResult<double> r) => switch (r) {
     Empty() => null,
@@ -403,18 +406,48 @@ class HomeHeroCard extends StatelessWidget {
     Value(:final data) => (data / 10.0).clamp(0.0, 1.0),
   };
 
-  String _centerText() {
+  Widget _centerContent(BuildContext context, S l10n) {
     if (isGroupMode) {
-      final f = family;
-      if (f == null) return '—';
-      return switch (f.familyHighlightsSum) {
-        Empty() => '—',
-        Value(:final data) => '$data',
-      };
+      return Text(
+        _groupCenterText(),
+        style: AppTextStyles.amountMedium.copyWith(
+          color: context.wmTextPrimary,
+        ),
+      );
     }
-    return switch (happiness.avgSatisfaction) {
+    final valueText = switch (happiness.joyContribution) {
       Empty() => '—',
-      Value(:final data) => data.toStringAsFixed(1),
+      Value(:final data) => formatJoyCumulative(data, currencyCode),
+    };
+    return Semantics(
+      label: l10n.homeJoyTargetSemantics(valueText, activeMonthlyJoyTarget),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            valueText,
+            style: AppTextStyles.amountMedium.copyWith(
+              color: context.wmTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            l10n.homeJoyTargetReference(activeMonthlyJoyTarget),
+            style: AppTextStyles.caption.copyWith(
+              color: context.wmTextSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _groupCenterText() {
+    final f = family;
+    if (f == null) return '—';
+    return switch (f.familyHighlightsSum) {
+      Empty() => '—',
+      Value(:final data) => '$data',
     };
   }
 
@@ -474,7 +507,7 @@ class HomeHeroCard extends StatelessWidget {
         _legendRow(
           context,
           AppColors.soul,
-          l10n.homeJoyPerYenLegend,
+          l10n.homeJoyContributionLegend,
           switch (happiness.joyContribution) {
             Empty() => empty,
             Value(:final data) => formatJoyCumulative(data, currencyCode),
@@ -847,7 +880,7 @@ class _InfoIcon extends StatelessWidget {
     final l10n = S.of(context);
     final body = switch (tooltipKey) {
       _TooltipKey.joyIndex => l10n.homeJoyIndexTooltip,
-      _TooltipKey.joyContribution => l10n.homeJoyPerYenTooltip,
+      _TooltipKey.joyContribution => l10n.homeJoyContributionTooltip,
     };
     showDialog<void>(
       context: context,

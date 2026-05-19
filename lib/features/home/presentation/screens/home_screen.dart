@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../generated/app_localizations.dart';
 
+import '../../../../application/analytics/get_monthly_joy_target_recommendation_use_case.dart';
 import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../application/i18n/formatter_service.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -11,12 +12,14 @@ import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart';
 import '../../../../features/analytics/domain/models/family_happiness.dart';
+import '../../../../features/analytics/domain/models/metric_result.dart';
 import '../../../../features/analytics/presentation/providers/state_analytics.dart';
 import '../../../../features/analytics/presentation/providers/state_happiness.dart';
 import '../../../../features/analytics/presentation/screens/analytics_screen.dart';
 import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
 import '../../../../features/family_sync/presentation/screens/group_choice_screen.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
+import '../../../settings/presentation/providers/state_settings.dart';
 import '../providers/state_shadow_books.dart';
 import '../providers/state_today_transactions.dart';
 import '../widgets/family_invite_banner.dart';
@@ -116,6 +119,27 @@ class HomeScreen extends ConsumerWidget {
                       month: month,
                     ),
                   );
+                  final settingsAsync = ref.watch(appSettingsProvider);
+                  final targetRecommendationAsync = ref.watch(
+                    monthlyJoyTargetRecommendationProvider(
+                      bookId: bookId,
+                      currencyCode: currencyCode,
+                    ),
+                  );
+                  final configuredTarget =
+                      settingsAsync.valueOrNull?.monthlyJoyTarget;
+                  final configuredTargetValid =
+                      configuredTarget != null && configuredTarget > 0;
+                  final recommendedTarget =
+                      switch (targetRecommendationAsync.valueOrNull) {
+                        Value<int>(:final data) => data,
+                        _ => null,
+                      };
+                  final fallbackBaseline =
+                      GetMonthlyJoyTargetRecommendationUseCase.fallbackBaseline;
+                  final activeMonthlyJoyTarget = configuredTargetValid
+                      ? configuredTarget
+                      : recommendedTarget ?? fallbackBaseline;
 
                   // Group-mode-only providers — short-circuit to AsyncData(null/[])
                   // when not in group mode so the .when() chain below resolves
@@ -174,6 +198,12 @@ class HomeScreen extends ConsumerWidget {
                                 currencyCode: currencyCode,
                                 locale: locale,
                                 isGroupMode: isGroupMode,
+                                activeMonthlyJoyTarget:
+                                    activeMonthlyJoyTarget,
+                                recommendedMonthlyJoyTarget:
+                                    recommendedTarget,
+                                isMonthlyJoyTargetConfigured:
+                                    configuredTargetValid,
                                 onTap: () => Navigator.of(context).push(
                                   MaterialPageRoute<void>(
                                     builder: (_) =>

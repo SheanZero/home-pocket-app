@@ -51,6 +51,14 @@ _FixtureSnapshot _singleThin() => _FixtureSnapshot(
   bestJoy: fixtureBestJoyResultThin(),
 );
 
+_FixtureSnapshot _singleWithJoy(double joyContribution) => _FixtureSnapshot(
+  monthlyReport: fixtureMonthlyReportRich(),
+  happiness: fixtureHappinessReportRich().copyWith(
+    joyContribution: Value(joyContribution, 4),
+  ),
+  bestJoy: fixtureBestJoyResultRich(),
+);
+
 _FixtureSnapshot _singleAllNeutral() => _FixtureSnapshot(
   monthlyReport: fixtureMonthlyReportRich(),
   happiness: fixtureHappinessReportRich(),
@@ -79,6 +87,9 @@ Widget _buildSubject({
   Locale locale = const Locale('ja'),
   bool isGroupMode = false,
   String currencyCode = 'JPY',
+  int activeMonthlyJoyTarget = 50,
+  int? recommendedMonthlyJoyTarget = 50,
+  bool isMonthlyJoyTargetConfigured = false,
   required _FixtureSnapshot snapshot,
   VoidCallback? onTap,
 }) {
@@ -96,6 +107,9 @@ Widget _buildSubject({
           currencyCode: currencyCode,
           locale: locale,
           isGroupMode: isGroupMode,
+          activeMonthlyJoyTarget: activeMonthlyJoyTarget,
+          recommendedMonthlyJoyTarget: recommendedMonthlyJoyTarget,
+          isMonthlyJoyTargetConfigured: isMonthlyJoyTargetConfigured,
           onTap: onTap ?? () {},
         ),
       ),
@@ -113,6 +127,51 @@ Widget _buildSubject({
 ///   - D-12         = currency resolution from constructor
 void main() {
   group('HomeHeroCard — single mode (HOMEUI-01, HOMEUI-05, HOMEUI-06)', () {
+    testWidgets('shows zero cumulative Joy and target reference without percentage', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildSubject(snapshot: _singleWithJoy(0)));
+      await tester.pumpAndSettle();
+
+      expect(find.text('0'), findsWidgets);
+      expect(find.textContaining('目標 50'), findsOneWidget);
+      expect(find.textContaining('0%'), findsNothing);
+    });
+
+    testWidgets('shows half-target cumulative Joy without percentage', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildSubject(snapshot: _singleWithJoy(25)));
+      await tester.pumpAndSettle();
+
+      expect(find.text('25'), findsWidgets);
+      expect(find.textContaining('目標 50'), findsOneWidget);
+      expect(find.textContaining('50%'), findsNothing);
+    });
+
+    testWidgets('shows target-level cumulative Joy without percentage', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildSubject(snapshot: _singleWithJoy(50)));
+      await tester.pumpAndSettle();
+
+      expect(find.text('50'), findsWidgets);
+      expect(find.textContaining('目標 50'), findsOneWidget);
+      expect(find.textContaining('100%'), findsNothing);
+    });
+
+    testWidgets('shows over-target cumulative Joy uncapped without percentage', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildSubject(snapshot: _singleWithJoy(80)));
+      await tester.pumpAndSettle();
+
+      expect(find.text('80'), findsWidgets);
+      expect(find.textContaining('目標 50'), findsOneWidget);
+      expect(find.textContaining('>100%'), findsNothing);
+      expect(find.textContaining('160%'), findsNothing);
+    });
+
     testWidgets('renders all 4 personal metrics from HappinessReport', (
       tester,
     ) async {
@@ -120,10 +179,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(HomeHeroCard), findsOneWidget);
-      // avgSatisfaction center text 7.8
+      // avgSatisfaction remains visible as a supporting ring metric.
       expect(find.text('7.8'), findsWidgets);
-      // Joy/¥ legend label
-      expect(find.textContaining('Joy'), findsWidgets);
+      // Monthly Joy target progress is the outer ring label.
+      expect(find.text('ときめき目標'), findsOneWidget);
       // 小確幸 (12) highlights count legend
       expect(find.textContaining('小確幸'), findsWidgets);
     });
