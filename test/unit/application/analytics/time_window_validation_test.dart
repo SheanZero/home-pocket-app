@@ -95,6 +95,36 @@ void main() {
       );
     });
 
+    test(
+      'allows current calendar month window even when month end is future',
+      () {
+        final now = DateTime.now();
+
+        expect(
+          () => TimeWindowValidation.assertValid(
+            DateTime(now.year, now.month),
+            DateTime(now.year, now.month + 1, 0, 23, 59, 59),
+          ),
+          returnsNormally,
+        );
+      },
+    );
+
+    test(
+      'allows current calendar year window even when year end is future',
+      () {
+        final now = DateTime.now();
+
+        expect(
+          () => TimeWindowValidation.assertValid(
+            DateTime(now.year),
+            DateTime(now.year, 12, 31, 23, 59, 59),
+          ),
+          returnsNormally,
+        );
+      },
+    );
+
     test('allows end dates just before now', () {
       expect(
         () => TimeWindowValidation.assertValid(

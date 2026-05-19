@@ -8,11 +8,13 @@ import 'package:home_pocket/features/analytics/domain/models/best_joy_moment_row
 import 'package:home_pocket/features/analytics/domain/models/expense_trend.dart';
 import 'package:home_pocket/features/analytics/domain/models/happiness_report.dart';
 import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
+import 'package:home_pocket/features/analytics/domain/models/time_window.dart';
 import 'package:home_pocket/features/analytics/domain/repositories/analytics_repository.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/repository_providers.dart'
     as analytics_repositories;
 import 'package:home_pocket/features/analytics/presentation/providers/state_analytics.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_happiness.dart';
+import 'package:home_pocket/features/analytics/presentation/providers/state_time_window.dart';
 import 'package:home_pocket/features/analytics/presentation/screens/analytics_screen.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/analytics_card_error_state.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/analytics_screen_section_header.dart';
@@ -21,9 +23,9 @@ import 'package:home_pocket/features/analytics/presentation/widgets/category_spe
 import 'package:home_pocket/features/analytics/presentation/widgets/family_insight_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/kpi_mini_hero_strip.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/largest_expense_story_card.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/month_chip_picker.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/monthly_spend_trend_bar_chart.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/satisfaction_distribution_histogram.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/time_window_chip.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_active_group.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
@@ -34,11 +36,17 @@ import '../../../../../helpers/happiness_test_fixtures.dart';
 import '../../../../../helpers/test_localizations.dart';
 
 const _bookId = 'book_001';
-final _selectedMonth = DateTime(2026, 4);
+final _windowStart = DateTime(2026, 5);
+final _windowEnd = DateTime(2026, 5, 31, 23, 59, 59);
+final _trendAnchor = DateTime(2026, 5);
 
-class _TestSelectedMonth extends SelectedMonth {
+class _TestSelectedTimeWindow extends SelectedTimeWindow {
+  _TestSelectedTimeWindow();
+
+  static TimeWindow fixedWindow = TimeWindow.month(year: 2026, month: 5);
+
   @override
-  DateTime build() => _selectedMonth;
+  TimeWindow build() => fixedWindow;
 }
 
 Widget _buildSubject({
@@ -47,11 +55,13 @@ Widget _buildSubject({
   bool groupMode = false,
   List<ShadowBookInfo> shadowBooks = const [],
 }) {
+  _TestSelectedTimeWindow.fixedWindow = TimeWindow.month(year: 2026, month: 5);
+
   return createLocalizedWidget(
     const AnalyticsScreen(bookId: _bookId),
     locale: const Locale('en'),
     overrides: [
-      selectedMonthProvider.overrideWith(_TestSelectedMonth.new),
+      selectedTimeWindowProvider.overrideWith(_TestSelectedTimeWindow.new),
       locale_providers.currentLocaleProvider.overrideWith(
         (_) async => const Locale('en'),
       ),
@@ -60,34 +70,34 @@ Widget _buildSubject({
           .overrideWith((_) async => _book),
       monthlyReportProvider(
         bookId: _bookId,
-        year: 2026,
-        month: 4,
+        startDate: _windowStart,
+        endDate: _windowEnd,
       ).overrideWith((_) async => _monthlyReport),
       expenseTrendProvider(
         bookId: _bookId,
-        anchor: _selectedMonth,
+        anchor: _trendAnchor,
       ).overrideWith((_) async => _expenseTrend),
       happinessReportProvider(
         bookId: _bookId,
-        year: 2026,
-        month: 4,
+        startDate: _windowStart,
+        endDate: _windowEnd,
         currencyCode: 'JPY',
       ).overrideWith(
         (_) async => happinessReport ?? fixtureHappinessReportRich(),
       ),
       bestJoyMomentProvider(
         bookId: _bookId,
-        year: 2026,
-        month: 4,
+        startDate: _windowStart,
+        endDate: _windowEnd,
       ).overrideWith((_) async => fixtureBestJoyResultRich()),
       largestMonthlyExpenseProvider(
         bookId: _bookId,
-        year: 2026,
-        month: 4,
+        startDate: _windowStart,
+        endDate: _windowEnd,
       ).overrideWith((_) async => _largestExpense),
       familyHappinessProvider(
-        year: 2026,
-        month: 4,
+        startDate: _windowStart,
+        endDate: _windowEnd,
       ).overrideWith((_) async => fixtureFamilyHappinessRich()),
       activeGroupProvider.overrideWith(
         (_) => Stream.value(groupMode ? _groupInfo : null),
@@ -123,11 +133,11 @@ Future<void> _resetProviderScope(WidgetTester tester) async {
 void main() {
   group('AnalyticsScreen Variant delta', () {
     testWidgets(
-      'renders KPI mini-hero, AppBar month picker, groups, and cards',
+      'renders KPI mini-hero, AppBar time window chip, groups, and cards',
       (tester) async {
         await _pump(tester, _buildSubject());
 
-        expect(find.byType(MonthChipPicker), findsOneWidget);
+        expect(find.byType(TimeWindowChip), findsOneWidget);
         expect(find.byType(KpiMiniHeroStrip), findsOneWidget);
         expect(find.byType(AnalyticsScreenSectionHeader), findsNWidgets(3));
         expect(find.byType(MonthlySpendTrendBarChart), findsOneWidget);
@@ -174,12 +184,12 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('month picker includes the earliest transaction month', (
+    testWidgets('time window sheet includes the earliest transaction month', (
       tester,
     ) async {
       await _pump(tester, _buildSubject());
 
-      await tester.tap(find.byType(MonthChipPicker));
+      await tester.tap(find.byType(TimeWindowChip));
       await tester.pumpAndSettle();
 
       await tester.scrollUntilVisible(

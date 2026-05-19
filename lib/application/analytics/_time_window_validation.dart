@@ -28,12 +28,63 @@ class TimeWindowValidation {
       );
     }
 
-    if (endDate.isAfter(DateTime.now())) {
+    final now = DateTime.now();
+    if (endDate.isAfter(now) &&
+        !_isCurrentCalendarWindow(startDate, endDate, now)) {
       throw ArgumentError.value(
         (startDate, endDate),
         'window',
         'endDate must not be in the future',
       );
     }
+  }
+
+  static bool _isCurrentCalendarWindow(
+    DateTime startDate,
+    DateTime endDate,
+    DateTime now,
+  ) {
+    if (startDate.isAfter(now) || endDate.isBefore(now)) {
+      return false;
+    }
+
+    final start = DateTime(startDate.year, startDate.month, startDate.day);
+    final end = DateTime(
+      endDate.year,
+      endDate.month,
+      endDate.day,
+      endDate.hour,
+      endDate.minute,
+      endDate.second,
+    );
+
+    return _sameSecond(
+              end,
+              DateTime(start.year, start.month, start.day + 6, 23, 59, 59),
+            ) &&
+            start.weekday == DateTime.monday ||
+        _sameSecond(
+              end,
+              DateTime(start.year, start.month + 1, 0, 23, 59, 59),
+            ) &&
+            start.day == 1 ||
+        _sameSecond(
+              end,
+              DateTime(start.year, start.month + 3, 0, 23, 59, 59),
+            ) &&
+            start.day == 1 &&
+            const {1, 4, 7, 10}.contains(start.month) ||
+        _sameSecond(end, DateTime(start.year, 12, 31, 23, 59, 59)) &&
+            start.month == 1 &&
+            start.day == 1;
+  }
+
+  static bool _sameSecond(DateTime a, DateTime b) {
+    return a.year == b.year &&
+        a.month == b.month &&
+        a.day == b.day &&
+        a.hour == b.hour &&
+        a.minute == b.minute &&
+        a.second == b.second;
   }
 }

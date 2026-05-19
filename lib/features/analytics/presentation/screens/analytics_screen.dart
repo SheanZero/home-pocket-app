@@ -8,6 +8,7 @@ import '../../../../features/home/presentation/providers/state_shadow_books.dart
 import '../../../../features/settings/presentation/providers/state_locale.dart'
     as locale_providers;
 import '../../../../generated/app_localizations.dart';
+import '../../domain/models/time_window.dart';
 import '../providers/state_analytics.dart';
 import '../providers/state_happiness.dart';
 import '../providers/state_time_window.dart';
@@ -18,13 +19,13 @@ import '../widgets/category_spend_donut_chart.dart';
 import '../widgets/family_insight_card.dart';
 import '../widgets/kpi_mini_hero_strip.dart';
 import '../widgets/largest_expense_story_card.dart';
-import '../widgets/month_chip_picker.dart';
 import '../widgets/monthly_spend_trend_bar_chart.dart';
 import '../widgets/satisfaction_distribution_histogram.dart';
+import '../widgets/time_window_chip.dart';
 
 /// Phase 11 Variant delta unified analytics dashboard.
 ///
-/// Structure: AppBar + MonthChipPicker, KPI mini-hero, then the Time,
+/// Structure: AppBar + TimeWindowChip, KPI mini-hero, then the Time,
 /// Distribution, and Stories themed groups. Each data card owns its own
 /// AsyncValue.when branch so one failing provider does not blank the screen.
 class AnalyticsScreen extends ConsumerWidget {
@@ -35,11 +36,11 @@ class AnalyticsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
-    final selectedWindow = ref.watch(selectedTimeWindowProvider);
-    final selectedRange = selectedWindow.range;
-    final selected = DateTime(selectedRange.end.year, selectedRange.end.month);
-    final year = selected.year;
-    final month = selected.month;
+    final window = ref.watch(selectedTimeWindowProvider);
+    final range = window.range;
+    final startDate = range.start;
+    final endDate = range.end;
+    final trendAnchor = DateTime(endDate.year, endDate.month);
     final locale =
         ref.watch(locale_providers.currentLocaleProvider).value ??
         Localizations.localeOf(context);
@@ -63,18 +64,18 @@ class AnalyticsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.analyticsTitle),
         actions: [
-          MonthChipPicker(
+          TimeWindowChip(
             locale: locale,
-            earliestMonth: earliestMonthAsync.value,
+            earliestData: earliestMonthAsync.value,
           ),
         ],
       ),
       body: RefreshIndicator(
         onRefresh: () async => _refresh(
           ref,
-          selected: selected,
-          startDate: selectedRange.start,
-          endDate: selectedRange.end,
+          startDate: startDate,
+          endDate: endDate,
+          trendAnchor: trendAnchor,
           currencyCode: currencyCode,
           isGroupMode: isGroupMode,
         ),
@@ -86,10 +87,8 @@ class AnalyticsScreen extends ConsumerWidget {
             children: [
               _KpiHero(
                 bookId: bookId,
-                startDate: selectedRange.start,
-                endDate: selectedRange.end,
-                year: year,
-                month: month,
+                startDate: startDate,
+                endDate: endDate,
                 currencyCode: currencyCode,
                 locale: locale,
               ),
@@ -100,7 +99,7 @@ class AnalyticsScreen extends ConsumerWidget {
               const SizedBox(height: 8),
               _TotalSixMonthCard(
                 bookId: bookId,
-                anchor: selected,
+                anchor: trendAnchor,
                 locale: locale,
               ),
               const SizedBox(height: 32),
@@ -110,16 +109,14 @@ class AnalyticsScreen extends ConsumerWidget {
               const SizedBox(height: 8),
               _CategoryDonutCard(
                 bookId: bookId,
-                startDate: selectedRange.start,
-                endDate: selectedRange.end,
+                startDate: startDate,
+                endDate: endDate,
               ),
               const SizedBox(height: 8),
               _SatisfactionHistogramOrFallback(
                 bookId: bookId,
-                startDate: selectedRange.start,
-                endDate: selectedRange.end,
-                year: year,
-                month: month,
+                startDate: startDate,
+                endDate: endDate,
                 currencyCode: currencyCode,
               ),
               const SizedBox(height: 32),
@@ -129,24 +126,24 @@ class AnalyticsScreen extends ConsumerWidget {
               const SizedBox(height: 8),
               _LargestExpenseCard(
                 bookId: bookId,
-                year: year,
-                month: month,
+                startDate: startDate,
+                endDate: endDate,
                 currencyCode: currencyCode,
                 locale: locale,
               ),
               const SizedBox(height: 8),
               _BestJoyCard(
                 bookId: bookId,
-                year: year,
-                month: month,
+                startDate: startDate,
+                endDate: endDate,
                 currencyCode: currencyCode,
                 locale: locale,
               ),
               if (isGroupMode) ...[
                 const SizedBox(height: 8),
                 _FamilyCard(
-                  year: year,
-                  month: month,
+                  startDate: startDate,
+                  endDate: endDate,
                   isGroupMode: isGroupMode,
                   shadowBooksAsync: shadowBooksAsync,
                   locale: locale,
@@ -162,14 +159,13 @@ class AnalyticsScreen extends ConsumerWidget {
 
   void _refresh(
     WidgetRef ref, {
-    required DateTime selected,
     required DateTime startDate,
     required DateTime endDate,
+    required DateTime trendAnchor,
     required String currencyCode,
     required bool isGroupMode,
   }) {
-    final year = selected.year;
-    final month = selected.month;
+    // D-12: _refresh MUST NOT invalidate any home/* provider (verified by widget test home_screen_isolation_test.dart in Plan 06).
     ref.invalidate(
       monthlyReportProvider(
         bookId: bookId,
@@ -177,13 +173,13 @@ class AnalyticsScreen extends ConsumerWidget {
         endDate: endDate,
       ),
     );
-    ref.invalidate(expenseTrendProvider(bookId: bookId, anchor: selected));
+    ref.invalidate(expenseTrendProvider(bookId: bookId, anchor: trendAnchor));
     ref.invalidate(earliestTransactionMonthProvider(bookId: bookId));
     ref.invalidate(
       happinessReportProvider(
         bookId: bookId,
-        year: year,
-        month: month,
+        startDate: startDate,
+        endDate: endDate,
         currencyCode: currencyCode,
       ),
     );
@@ -195,13 +191,23 @@ class AnalyticsScreen extends ConsumerWidget {
       ),
     );
     ref.invalidate(
-      bestJoyMomentProvider(bookId: bookId, year: year, month: month),
+      bestJoyMomentProvider(
+        bookId: bookId,
+        startDate: startDate,
+        endDate: endDate,
+      ),
     );
     ref.invalidate(
-      largestMonthlyExpenseProvider(bookId: bookId, year: year, month: month),
+      largestMonthlyExpenseProvider(
+        bookId: bookId,
+        startDate: startDate,
+        endDate: endDate,
+      ),
     );
     if (isGroupMode) {
-      ref.invalidate(familyHappinessProvider(year: year, month: month));
+      ref.invalidate(
+        familyHappinessProvider(startDate: startDate, endDate: endDate),
+      );
       ref.invalidate(shadowBooksProvider);
     }
   }
@@ -212,8 +218,6 @@ class _KpiHero extends ConsumerWidget {
     required this.bookId,
     required this.startDate,
     required this.endDate,
-    required this.year,
-    required this.month,
     required this.currencyCode,
     required this.locale,
   });
@@ -221,8 +225,6 @@ class _KpiHero extends ConsumerWidget {
   final String bookId;
   final DateTime startDate;
   final DateTime endDate;
-  final int year;
-  final int month;
   final String currencyCode;
   final Locale locale;
 
@@ -238,8 +240,8 @@ class _KpiHero extends ConsumerWidget {
     final happinessAsync = ref.watch(
       happinessReportProvider(
         bookId: bookId,
-        year: year,
-        month: month,
+        startDate: startDate,
+        endDate: endDate,
         currencyCode: currencyCode,
       ),
     );
@@ -260,8 +262,8 @@ class _KpiHero extends ConsumerWidget {
           onRetry: () => ref.invalidate(
             happinessReportProvider(
               bookId: bookId,
-              year: year,
-              month: month,
+              startDate: startDate,
+              endDate: endDate,
               currencyCode: currencyCode,
             ),
           ),
@@ -363,16 +365,12 @@ class _SatisfactionHistogramOrFallback extends ConsumerWidget {
     required this.bookId,
     required this.startDate,
     required this.endDate,
-    required this.year,
-    required this.month,
     required this.currencyCode,
   });
 
   final String bookId;
   final DateTime startDate;
   final DateTime endDate;
-  final int year;
-  final int month;
   final String currencyCode;
 
   @override
@@ -380,8 +378,8 @@ class _SatisfactionHistogramOrFallback extends ConsumerWidget {
     final happinessAsync = ref.watch(
       happinessReportProvider(
         bookId: bookId,
-        year: year,
-        month: month,
+        startDate: startDate,
+        endDate: endDate,
         currencyCode: currencyCode,
       ),
     );
@@ -421,8 +419,8 @@ class _SatisfactionHistogramOrFallback extends ConsumerWidget {
         onRetry: () => ref.invalidate(
           happinessReportProvider(
             bookId: bookId,
-            year: year,
-            month: month,
+            startDate: startDate,
+            endDate: endDate,
             currencyCode: currencyCode,
           ),
         ),
@@ -434,22 +432,26 @@ class _SatisfactionHistogramOrFallback extends ConsumerWidget {
 class _LargestExpenseCard extends ConsumerWidget {
   const _LargestExpenseCard({
     required this.bookId,
-    required this.year,
-    required this.month,
+    required this.startDate,
+    required this.endDate,
     required this.currencyCode,
     required this.locale,
   });
 
   final String bookId;
-  final int year;
-  final int month;
+  final DateTime startDate;
+  final DateTime endDate;
   final String currencyCode;
   final Locale locale;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final largestAsync = ref.watch(
-      largestMonthlyExpenseProvider(bookId: bookId, year: year, month: month),
+      largestMonthlyExpenseProvider(
+        bookId: bookId,
+        startDate: startDate,
+        endDate: endDate,
+      ),
     );
     return largestAsync.when(
       data: (expense) => LargestExpenseStoryCard(
@@ -462,8 +464,8 @@ class _LargestExpenseCard extends ConsumerWidget {
         onRetry: () => ref.invalidate(
           largestMonthlyExpenseProvider(
             bookId: bookId,
-            year: year,
-            month: month,
+            startDate: startDate,
+            endDate: endDate,
           ),
         ),
       ),
@@ -474,22 +476,26 @@ class _LargestExpenseCard extends ConsumerWidget {
 class _BestJoyCard extends ConsumerWidget {
   const _BestJoyCard({
     required this.bookId,
-    required this.year,
-    required this.month,
+    required this.startDate,
+    required this.endDate,
     required this.currencyCode,
     required this.locale,
   });
 
   final String bookId;
-  final int year;
-  final int month;
+  final DateTime startDate;
+  final DateTime endDate;
   final String currencyCode;
   final Locale locale;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final joyAsync = ref.watch(
-      bestJoyMomentProvider(bookId: bookId, year: year, month: month),
+      bestJoyMomentProvider(
+        bookId: bookId,
+        startDate: startDate,
+        endDate: endDate,
+      ),
     );
     return joyAsync.when(
       data: (joy) => BestJoyStoryStrip(
@@ -500,7 +506,11 @@ class _BestJoyCard extends ConsumerWidget {
       loading: () => const SizedBox(height: 120),
       error: (_, _) => AnalyticsCardErrorState(
         onRetry: () => ref.invalidate(
-          bestJoyMomentProvider(bookId: bookId, year: year, month: month),
+          bestJoyMomentProvider(
+            bookId: bookId,
+            startDate: startDate,
+            endDate: endDate,
+          ),
         ),
       ),
     );
@@ -509,15 +519,15 @@ class _BestJoyCard extends ConsumerWidget {
 
 class _FamilyCard extends ConsumerWidget {
   const _FamilyCard({
-    required this.year,
-    required this.month,
+    required this.startDate,
+    required this.endDate,
     required this.isGroupMode,
     required this.shadowBooksAsync,
     required this.locale,
   });
 
-  final int year;
-  final int month;
+  final DateTime startDate;
+  final DateTime endDate;
   final bool isGroupMode;
   final AsyncValue<List<ShadowBookInfo>?> shadowBooksAsync;
   final Locale locale;
@@ -525,7 +535,7 @@ class _FamilyCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final familyAsync = ref.watch(
-      familyHappinessProvider(year: year, month: month),
+      familyHappinessProvider(startDate: startDate, endDate: endDate),
     );
     return familyAsync.when(
       data: (family) => FamilyInsightCard(
@@ -536,8 +546,9 @@ class _FamilyCard extends ConsumerWidget {
       ),
       loading: () => const SizedBox(height: 110),
       error: (_, _) => AnalyticsCardErrorState(
-        onRetry: () =>
-            ref.invalidate(familyHappinessProvider(year: year, month: month)),
+        onRetry: () => ref.invalidate(
+          familyHappinessProvider(startDate: startDate, endDate: endDate),
+        ),
       ),
     );
   }
