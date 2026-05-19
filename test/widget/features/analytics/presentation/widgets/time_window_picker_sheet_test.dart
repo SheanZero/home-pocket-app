@@ -205,13 +205,12 @@ void main() {
     });
 
     testWidgets('Custom valid range commits and closes', (tester) async {
+      final end = DateTime.now().subtract(const Duration(days: 1));
+      final start = DateTime(end.year, end.month - 2, end.day);
       await tester.pumpWidget(
         _buildSheetHost(
           pickRangeOverride: (context, firstDate, lastDate) async {
-            return DateTimeRange(
-              start: DateTime(2026, 3, 15),
-              end: DateTime(2026, 7, 20),
-            );
+            return DateTimeRange(start: start, end: end);
           },
         ),
       );
@@ -225,10 +224,7 @@ void main() {
       expect(_TestSelectedTimeWindow.setWindowCalls, 1);
       expect(
         _TestSelectedTimeWindow.lastSetWindow,
-        TimeWindow.custom(
-          startDate: DateTime(2026, 3, 15),
-          endDate: DateTime(2026, 7, 20),
-        ),
+        TimeWindow.custom(startDate: start, endDate: end),
       );
       expect(find.text('Time window'), findsNothing);
     });
@@ -246,7 +242,7 @@ void main() {
       await tester.tap(find.text('Custom'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Pick a date range'));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(find.text('Start date must be before end date.'), findsOneWidget);
       expect(_TestSelectedTimeWindow.setWindowCalls, 0);
@@ -270,7 +266,7 @@ void main() {
       await tester.tap(find.text('Custom'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Pick a date range'));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(
         find.text('Range cannot exceed 12 months. Pick a shorter range.'),
@@ -295,7 +291,7 @@ void main() {
       await tester.tap(find.text('Custom'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Pick a date range'));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(find.text('End date cannot be in the future.'), findsOneWidget);
       expect(_TestSelectedTimeWindow.setWindowCalls, 0);
