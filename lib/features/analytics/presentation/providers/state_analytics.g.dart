@@ -8,70 +8,12 @@ part of 'state_analytics.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Currently selected month for analytics view.
-
-@ProviderFor(SelectedMonth)
-final selectedMonthProvider = SelectedMonthProvider._();
-
-/// Currently selected month for analytics view.
-final class SelectedMonthProvider
-    extends $NotifierProvider<SelectedMonth, DateTime> {
-  /// Currently selected month for analytics view.
-  SelectedMonthProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'selectedMonthProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$selectedMonthHash();
-
-  @$internal
-  @override
-  SelectedMonth create() => SelectedMonth();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(DateTime value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<DateTime>(value),
-    );
-  }
-}
-
-String _$selectedMonthHash() => r'1e278a1a3b1a328fc41224840fb663025d470215';
-
-/// Currently selected month for analytics view.
-
-abstract class _$SelectedMonth extends $Notifier<DateTime> {
-  DateTime build();
-  @$mustCallSuper
-  @override
-  void runBuild() {
-    final ref = this.ref as $Ref<DateTime, DateTime>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<DateTime, DateTime>,
-              DateTime,
-              Object?,
-              Object?
-            >;
-    element.handleCreate(ref, build);
-  }
-}
-
-/// Monthly report for the selected month.
+/// Monthly report for the selected window.
 
 @ProviderFor(monthlyReport)
 final monthlyReportProvider = MonthlyReportFamily._();
 
-/// Monthly report for the selected month.
+/// Monthly report for the selected window.
 
 final class MonthlyReportProvider
     extends
@@ -81,10 +23,11 @@ final class MonthlyReportProvider
           FutureOr<MonthlyReport>
         >
     with $FutureModifier<MonthlyReport>, $FutureProvider<MonthlyReport> {
-  /// Monthly report for the selected month.
+  /// Monthly report for the selected window.
   MonthlyReportProvider._({
     required MonthlyReportFamily super.from,
-    required ({String bookId, int year, int month}) super.argument,
+    required ({String bookId, DateTime startDate, DateTime endDate})
+    super.argument,
   }) : super(
          retry: null,
          name: r'monthlyReportProvider',
@@ -111,12 +54,14 @@ final class MonthlyReportProvider
 
   @override
   FutureOr<MonthlyReport> create(Ref ref) {
-    final argument = this.argument as ({String bookId, int year, int month});
+    final argument =
+        this.argument
+            as ({String bookId, DateTime startDate, DateTime endDate});
     return monthlyReport(
       ref,
       bookId: argument.bookId,
-      year: argument.year,
-      month: argument.month,
+      startDate: argument.startDate,
+      endDate: argument.endDate,
     );
   }
 
@@ -131,15 +76,15 @@ final class MonthlyReportProvider
   }
 }
 
-String _$monthlyReportHash() => r'7cf906607233c12e61fc5015a9ac872c4b8d122e';
+String _$monthlyReportHash() => r'f638e2c4193007cd84efc597361c7c556015e60b';
 
-/// Monthly report for the selected month.
+/// Monthly report for the selected window.
 
 final class MonthlyReportFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<MonthlyReport>,
-          ({String bookId, int year, int month})
+          ({String bookId, DateTime startDate, DateTime endDate})
         > {
   MonthlyReportFamily._()
     : super(
@@ -150,14 +95,14 @@ final class MonthlyReportFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Monthly report for the selected month.
+  /// Monthly report for the selected window.
 
   MonthlyReportProvider call({
     required String bookId,
-    required int year,
-    required int month,
+    required DateTime startDate,
+    required DateTime endDate,
   }) => MonthlyReportProvider._(
-    argument: (bookId: bookId, year: year, month: month),
+    argument: (bookId: bookId, startDate: startDate, endDate: endDate),
     from: this,
   );
 
@@ -343,12 +288,12 @@ final class EarliestTransactionMonthFamily extends $Family
   String toString() => r'earliestTransactionMonthProvider';
 }
 
-/// Satisfaction score distribution for the selected month.
+/// Satisfaction score distribution for the selected window.
 
 @ProviderFor(satisfactionDistribution)
 final satisfactionDistributionProvider = SatisfactionDistributionFamily._();
 
-/// Satisfaction score distribution for the selected month.
+/// Satisfaction score distribution for the selected window.
 
 final class SatisfactionDistributionProvider
     extends
@@ -360,10 +305,11 @@ final class SatisfactionDistributionProvider
     with
         $FutureModifier<List<SatisfactionScoreBucket>>,
         $FutureProvider<List<SatisfactionScoreBucket>> {
-  /// Satisfaction score distribution for the selected month.
+  /// Satisfaction score distribution for the selected window.
   SatisfactionDistributionProvider._({
     required SatisfactionDistributionFamily super.from,
-    required ({String bookId, int year, int month}) super.argument,
+    required ({String bookId, DateTime startDate, DateTime endDate})
+    super.argument,
   }) : super(
          retry: null,
          name: r'satisfactionDistributionProvider',
@@ -390,12 +336,14 @@ final class SatisfactionDistributionProvider
 
   @override
   FutureOr<List<SatisfactionScoreBucket>> create(Ref ref) {
-    final argument = this.argument as ({String bookId, int year, int month});
+    final argument =
+        this.argument
+            as ({String bookId, DateTime startDate, DateTime endDate});
     return satisfactionDistribution(
       ref,
       bookId: argument.bookId,
-      year: argument.year,
-      month: argument.month,
+      startDate: argument.startDate,
+      endDate: argument.endDate,
     );
   }
 
@@ -412,15 +360,15 @@ final class SatisfactionDistributionProvider
 }
 
 String _$satisfactionDistributionHash() =>
-    r'33a0f1e6d5e6d598c7a9bc4345b0834cbd36c05e';
+    r'ad577b2f3bdb52b0f0a269e541d82aac25a58f60';
 
-/// Satisfaction score distribution for the selected month.
+/// Satisfaction score distribution for the selected window.
 
 final class SatisfactionDistributionFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<List<SatisfactionScoreBucket>>,
-          ({String bookId, int year, int month})
+          ({String bookId, DateTime startDate, DateTime endDate})
         > {
   SatisfactionDistributionFamily._()
     : super(
@@ -431,14 +379,14 @@ final class SatisfactionDistributionFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Satisfaction score distribution for the selected month.
+  /// Satisfaction score distribution for the selected window.
 
   SatisfactionDistributionProvider call({
     required String bookId,
-    required int year,
-    required int month,
+    required DateTime startDate,
+    required DateTime endDate,
   }) => SatisfactionDistributionProvider._(
-    argument: (bookId: bookId, year: year, month: month),
+    argument: (bookId: bookId, startDate: startDate, endDate: endDate),
     from: this,
   );
 

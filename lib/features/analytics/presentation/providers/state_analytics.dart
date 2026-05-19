@@ -7,35 +7,20 @@ import 'repository_providers.dart';
 
 part 'state_analytics.g.dart';
 
-/// Currently selected month for analytics view.
-@riverpod
-class SelectedMonth extends _$SelectedMonth {
-  @override
-  DateTime build() => DateTime.now();
-
-  void setMonth(DateTime month) {
-    state = DateTime(month.year, month.month);
-  }
-
-  void previousMonth() {
-    state = DateTime(state.year, state.month - 1);
-  }
-
-  void nextMonth() {
-    state = DateTime(state.year, state.month + 1);
-  }
-}
-
-/// Monthly report for the selected month.
+/// Monthly report for the selected window.
 @riverpod
 Future<MonthlyReport> monthlyReport(
   Ref ref, {
   required String bookId,
-  required int year,
-  required int month,
+  required DateTime startDate,
+  required DateTime endDate,
 }) async {
   final useCase = ref.watch(getMonthlyReportUseCaseProvider);
-  return useCase.execute(bookId: bookId, year: year, month: month);
+  return useCase.execute(
+    bookId: bookId,
+    startDate: startDate,
+    endDate: endDate,
+  );
 }
 
 /// 6-month expense trend.
@@ -65,14 +50,18 @@ Future<DateTime?> earliestTransactionMonth(
   return DateTime(timestamp.year, timestamp.month);
 }
 
-/// Satisfaction score distribution for the selected month.
+/// Satisfaction score distribution for the selected window.
 @riverpod
 Future<List<SatisfactionScoreBucket>> satisfactionDistribution(
   Ref ref, {
   required String bookId,
-  required int year,
-  required int month,
+  required DateTime startDate,
+  required DateTime endDate,
 }) async {
   final useCase = ref.watch(getSatisfactionDistributionUseCaseProvider);
-  return useCase.execute(bookId: bookId, year: year, month: month);
+  return useCase.execute(
+    bookId: bookId,
+    startDate: startDate,
+    endDate: endDate,
+  );
 }

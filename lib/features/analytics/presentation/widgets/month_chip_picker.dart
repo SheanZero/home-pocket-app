@@ -5,7 +5,8 @@ import '../../../../application/i18n/formatter_service.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
-import '../providers/state_analytics.dart';
+import '../../domain/models/time_window.dart';
+import '../providers/state_time_window.dart';
 
 /// STATSUI-07 — AppBar trailing month chip.
 ///
@@ -27,14 +28,16 @@ class MonthChipPicker extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
-    final selectedMonth = _monthOnly(ref.watch(selectedMonthProvider));
+    final selectedWindow = ref.watch(selectedTimeWindowProvider);
+    final selectedRange = selectedWindow.range;
+    final selectedMonth = _monthOnly(selectedRange.end);
     final label = const FormatterService().formatMonthYear(
       selectedMonth,
       locale,
     );
 
     return Tooltip(
-      message: l10n.analyticsMonthChipPickerTooltip,
+      message: l10n.analyticsTimeWindowChipTooltip,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         child: InkWell(
@@ -110,7 +113,9 @@ class MonthChipPicker extends ConsumerWidget {
     );
 
     if (picked != null) {
-      ref.read(selectedMonthProvider.notifier).setMonth(picked);
+      ref
+          .read(selectedTimeWindowProvider.notifier)
+          .setWindow(TimeWindow.month(year: picked.year, month: picked.month));
     }
   }
 

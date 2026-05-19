@@ -10,6 +10,7 @@ import '../../../../features/settings/presentation/providers/state_locale.dart'
 import '../../../../generated/app_localizations.dart';
 import '../providers/state_analytics.dart';
 import '../providers/state_happiness.dart';
+import '../providers/state_time_window.dart';
 import '../widgets/analytics_card_error_state.dart';
 import '../widgets/analytics_screen_section_header.dart';
 import '../widgets/best_joy_story_strip.dart';
@@ -34,7 +35,9 @@ class AnalyticsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
-    final selected = ref.watch(selectedMonthProvider);
+    final selectedWindow = ref.watch(selectedTimeWindowProvider);
+    final selectedRange = selectedWindow.range;
+    final selected = DateTime(selectedRange.end.year, selectedRange.end.month);
     final year = selected.year;
     final month = selected.month;
     final locale =
@@ -70,6 +73,8 @@ class AnalyticsScreen extends ConsumerWidget {
         onRefresh: () async => _refresh(
           ref,
           selected: selected,
+          startDate: selectedRange.start,
+          endDate: selectedRange.end,
           currencyCode: currencyCode,
           isGroupMode: isGroupMode,
         ),
@@ -81,6 +86,8 @@ class AnalyticsScreen extends ConsumerWidget {
             children: [
               _KpiHero(
                 bookId: bookId,
+                startDate: selectedRange.start,
+                endDate: selectedRange.end,
                 year: year,
                 month: month,
                 currencyCode: currencyCode,
@@ -101,10 +108,16 @@ class AnalyticsScreen extends ConsumerWidget {
                 label: l10n.analyticsGroupHeaderDistribution,
               ),
               const SizedBox(height: 8),
-              _CategoryDonutCard(bookId: bookId, year: year, month: month),
+              _CategoryDonutCard(
+                bookId: bookId,
+                startDate: selectedRange.start,
+                endDate: selectedRange.end,
+              ),
               const SizedBox(height: 8),
               _SatisfactionHistogramOrFallback(
                 bookId: bookId,
+                startDate: selectedRange.start,
+                endDate: selectedRange.end,
                 year: year,
                 month: month,
                 currencyCode: currencyCode,
@@ -150,13 +163,19 @@ class AnalyticsScreen extends ConsumerWidget {
   void _refresh(
     WidgetRef ref, {
     required DateTime selected,
+    required DateTime startDate,
+    required DateTime endDate,
     required String currencyCode,
     required bool isGroupMode,
   }) {
     final year = selected.year;
     final month = selected.month;
     ref.invalidate(
-      monthlyReportProvider(bookId: bookId, year: year, month: month),
+      monthlyReportProvider(
+        bookId: bookId,
+        startDate: startDate,
+        endDate: endDate,
+      ),
     );
     ref.invalidate(expenseTrendProvider(bookId: bookId, anchor: selected));
     ref.invalidate(earliestTransactionMonthProvider(bookId: bookId));
@@ -171,8 +190,8 @@ class AnalyticsScreen extends ConsumerWidget {
     ref.invalidate(
       satisfactionDistributionProvider(
         bookId: bookId,
-        year: year,
-        month: month,
+        startDate: startDate,
+        endDate: endDate,
       ),
     );
     ref.invalidate(
@@ -191,6 +210,8 @@ class AnalyticsScreen extends ConsumerWidget {
 class _KpiHero extends ConsumerWidget {
   const _KpiHero({
     required this.bookId,
+    required this.startDate,
+    required this.endDate,
     required this.year,
     required this.month,
     required this.currencyCode,
@@ -198,6 +219,8 @@ class _KpiHero extends ConsumerWidget {
   });
 
   final String bookId;
+  final DateTime startDate;
+  final DateTime endDate;
   final int year;
   final int month;
   final String currencyCode;
@@ -206,7 +229,11 @@ class _KpiHero extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final monthlyAsync = ref.watch(
-      monthlyReportProvider(bookId: bookId, year: year, month: month),
+      monthlyReportProvider(
+        bookId: bookId,
+        startDate: startDate,
+        endDate: endDate,
+      ),
     );
     final happinessAsync = ref.watch(
       happinessReportProvider(
@@ -243,7 +270,11 @@ class _KpiHero extends ConsumerWidget {
       loading: () => const SizedBox(height: 120),
       error: (_, _) => AnalyticsCardErrorState(
         onRetry: () => ref.invalidate(
-          monthlyReportProvider(bookId: bookId, year: year, month: month),
+          monthlyReportProvider(
+            bookId: bookId,
+            startDate: startDate,
+            endDate: endDate,
+          ),
         ),
       ),
     );
@@ -290,18 +321,22 @@ class _TotalSixMonthCard extends ConsumerWidget {
 class _CategoryDonutCard extends ConsumerWidget {
   const _CategoryDonutCard({
     required this.bookId,
-    required this.year,
-    required this.month,
+    required this.startDate,
+    required this.endDate,
   });
 
   final String bookId;
-  final int year;
-  final int month;
+  final DateTime startDate;
+  final DateTime endDate;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final monthlyAsync = ref.watch(
-      monthlyReportProvider(bookId: bookId, year: year, month: month),
+      monthlyReportProvider(
+        bookId: bookId,
+        startDate: startDate,
+        endDate: endDate,
+      ),
     );
     return monthlyAsync.when(
       data: (monthly) => _AnalyticsDataCard(
@@ -312,7 +347,11 @@ class _CategoryDonutCard extends ConsumerWidget {
       loading: () => const SizedBox(height: 280),
       error: (_, _) => AnalyticsCardErrorState(
         onRetry: () => ref.invalidate(
-          monthlyReportProvider(bookId: bookId, year: year, month: month),
+          monthlyReportProvider(
+            bookId: bookId,
+            startDate: startDate,
+            endDate: endDate,
+          ),
         ),
       ),
     );
@@ -322,12 +361,16 @@ class _CategoryDonutCard extends ConsumerWidget {
 class _SatisfactionHistogramOrFallback extends ConsumerWidget {
   const _SatisfactionHistogramOrFallback({
     required this.bookId,
+    required this.startDate,
+    required this.endDate,
     required this.year,
     required this.month,
     required this.currencyCode,
   });
 
   final String bookId;
+  final DateTime startDate;
+  final DateTime endDate;
   final int year;
   final int month;
   final String currencyCode;
@@ -345,8 +388,8 @@ class _SatisfactionHistogramOrFallback extends ConsumerWidget {
     final distributionAsync = ref.watch(
       satisfactionDistributionProvider(
         bookId: bookId,
-        year: year,
-        month: month,
+        startDate: startDate,
+        endDate: endDate,
       ),
     );
 
@@ -366,8 +409,8 @@ class _SatisfactionHistogramOrFallback extends ConsumerWidget {
             onRetry: () => ref.invalidate(
               satisfactionDistributionProvider(
                 bookId: bookId,
-                year: year,
-                month: month,
+                startDate: startDate,
+                endDate: endDate,
               ),
             ),
           ),
