@@ -30,7 +30,7 @@ const _happinessReport = HappinessReport(
   totalSoulTx: 15,
   avgSatisfaction: Value(7.83, 12),
   medianSatisfaction: Value(8.0, 12),
-  joyPerYen: Empty(),
+  joyContribution: Empty(),
   highlightsCount: Empty(),
   topJoy: Empty<BestJoyMomentRow>(),
 );

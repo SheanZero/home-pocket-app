@@ -8,7 +8,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
-import '../../../../infrastructure/i18n/formatters/joy_density_formatter.dart';
+import '../../../../infrastructure/i18n/formatters/joy_cumulative_formatter.dart';
 import '../../../analytics/domain/models/best_joy_moment_row.dart';
 import '../../../analytics/domain/models/family_happiness.dart';
 import '../../../analytics/domain/models/happiness_report.dart';
@@ -359,7 +359,7 @@ class HomeHeroCard extends StatelessWidget {
       );
     }
     return HappinessRingsPainter(
-      outerSweepRatio: _outerSingle(happiness.joyPerYen),
+      outerSweepRatio: _outerSingle(happiness.joyContribution),
       middleSweepRatio: _middleSingle(happiness.avgSatisfaction),
       innerSweepRatio: _innerSingle(
         happiness.highlightsCount,
@@ -475,11 +475,11 @@ class HomeHeroCard extends StatelessWidget {
           context,
           AppColors.soul,
           l10n.homeJoyPerYenLegend,
-          switch (happiness.joyPerYen) {
+          switch (happiness.joyContribution) {
             Empty() => empty,
-            Value(:final data) => formatJoyDensity(data, currencyCode),
+            Value(:final data) => formatJoyCumulative(data, currencyCode),
           },
-          trailing: const _InfoIcon(tooltipKey: _TooltipKey.joyPerYen),
+          trailing: const _InfoIcon(tooltipKey: _TooltipKey.joyContribution),
         ),
         const SizedBox(height: 6),
         _legendRow(
@@ -815,7 +815,7 @@ class HomeHeroCard extends StatelessWidget {
 }
 
 // ─── Tooltip key + private _InfoIcon — Plan 10-07b ──────────────────────────
-enum _TooltipKey { joyIndex, joyPerYen }
+enum _TooltipKey { joyIndex, joyContribution }
 
 class _InfoIcon extends StatelessWidget {
   // Constructor declaration split across lines so a regex looking for
@@ -847,7 +847,7 @@ class _InfoIcon extends StatelessWidget {
     final l10n = S.of(context);
     final body = switch (tooltipKey) {
       _TooltipKey.joyIndex => l10n.homeJoyIndexTooltip,
-      _TooltipKey.joyPerYen => l10n.homeJoyPerYenTooltip,
+      _TooltipKey.joyContribution => l10n.homeJoyPerYenTooltip,
     };
     showDialog<void>(
       context: context,

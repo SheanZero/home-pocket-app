@@ -19,7 +19,7 @@ HappinessReport _happinessReport({
     totalSoulTx: totalSoulTx,
     avgSatisfaction: avgSatisfaction,
     medianSatisfaction: medianSatisfaction,
-    joyPerYen: const Empty(),
+    joyContribution: const Empty(),
     highlightsCount: const Empty(),
     topJoy: const Empty<BestJoyMomentRow>(),
   );
