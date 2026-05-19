@@ -54,7 +54,7 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 **Requirements**: JOYMIG-02, JOYMIG-05
 **Success Criteria** (what must be TRUE):
   1. `GetHappinessReportUseCase` returns `Σ joy_contribution = Σ (soul_satisfaction × (amount / base)^0.88)` (no division by Σ amount); density (Joy/¥) computation is removed from the use case and DAO; verified by use-case + DAO tests.
-  2. Schema migration adds `user_settings.monthly_joy_target` (INTEGER NULLABLE) with round-trip migration test green; existing rows nullable-default; no v1.1 baseline data lost.
+  2. `AppSettings.monthlyJoyTarget int?` persists via SharedPreferences (`settings_repository_impl.dart`); round-trip getter/setter unit test green; no v1.1 baseline data lost (settings keys are additive, not replacing).
   3. Recommendation algorithm computes `ceil(median(past 3 complete months Σ joy_contribution))` when ≥3 months of soul data exist; falls back to spike-decided hardcoded baseline otherwise; algorithm covered by unit tests including outlier-sensitivity case.
   4. 1-day spike has decided and documented (in plan deliverable) the fallback baseline number, the outlier-truncation policy, and whether recommended value persists in UI after user configuration.
   5. ADR-016 §2 single-Joy-expression constraint holds across the use case, DAO, and formatter layers — `grep -r 'density' lib/` returns only deprecation notes or removed-call comments; no live density code path remains.
