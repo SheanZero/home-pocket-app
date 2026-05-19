@@ -9,7 +9,7 @@ The v1.0 initiative was a pure-refactor cleanup, not a feature release. It deliv
 
 The v1.1 milestone delivered the happiness metric domain, HomePage `HomeHeroCard`, AnalyticsScreen Variant δ unified dashboard, and final trilingual UI copy rename pass. It also ratified the v1.1 anti-gamification and lexical hierarchy ADRs. One Phase 11 human/device UAT item remains accepted as known close debt in `.planning/STATE.md`.
 
-The v1.2 milestone is underway. Phase 13 established the ADR-016 backend foundation, and Phase 14 completed the frontend + ARB reconciliation: HomeHero, Settings, and Analytics now use the Σ joy_contribution vocabulary, with stale density/Joy-per-yen UI removed. Phase 15 is next: Custom Time Windows.
+The v1.2 milestone is underway. Phase 13 established the ADR-016 backend foundation, Phase 14 completed frontend + ARB reconciliation, and Phase 15 shipped Custom Time Windows for AnalyticsScreen Joy metrics. Phase 16 is next: Per-category Breakdown + Soul-vs-Survival.
 
 ## Current Milestone: v1.2 Happiness Metric Refresh
 
@@ -121,10 +121,10 @@ A family accounting app users can trust with sensitive financial data — local-
 - ✓ v1.1 AnalyticsScreen unified dashboard validated in Phase 11: KPI mini-hero, Joy-per-¥ trend, satisfaction histogram, story cards, month picker, and aggregate-only family insight.
 - ✓ v1.1 UI copy rename pass validated in Phase 12: ARB value rewrites for ja/zh/en, picker sentiment-positive icon ladder, RENAME-07 requirement, accepted ADR-015 lexical hierarchy, and refreshed goldens.
 - ✓ v1.2 Phase 14 ADR-016 frontend + ARB reconciliation validated: HomeHero principal Joy metric migrated to cumulative `Σ joy_contribution`, monthly target ring and sage-green→gold state machine shipped, Settings target UI added, Analytics Joy Index promoted, 100% no-event contract verified, and stale density/ROI localization removed across ja/zh/en.
+- ✓ v1.2 Phase 15 Custom Time Windows validated: AnalyticsScreen week/month/quarter/year/custom selector shipped, all Joy metrics re-query against selected `TimeWindow` ranges, HomeHero remains current-month anchored, period copy is ARB-backed across ja/zh/en, and no cross-period delta UI is present.
 
 ### Active
 
-- HAPPY-V2-02: Custom time windows (week / month / quarter / year / arbitrary) for Joy metrics — Phase 15
 - HAPPY-V2-01: Per-category satisfaction breakdown in AnalyticsScreen — Phase 16
 - STATSUI-V2-01: Soul-vs-Survival happiness comparison surface with anti-toxicity framing — Phase 16
 - HAPPY-V2-03: Manual-entry-only Joy sub-metric variant with `entry_source` schema migration — Phase 17
@@ -208,4 +208,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-19 — Phase 14 ADR-016 frontend + ARB reconciliation completed; see `.planning/ROADMAP.md` for v1.2 phase status*
+*Last updated: 2026-05-19 — Phase 15 Custom Time Windows completed; see `.planning/ROADMAP.md` for v1.2 phase status*
