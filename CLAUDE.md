@@ -228,6 +228,7 @@ final effectiveBookId = bookId ?? ref.watch(currentBookIdProvider).value;
 ## iOS Build
 
 - Use `sqlcipher_flutter_libs` at `^0.6.x` — NEVER `sqlite3_flutter_libs` (conflicts). `0.7.0+eol` is intentionally a do-nothing package; the project hasn't migrated to `sqlite3` 3.x yet.
+- `ios/Podfile` `post_install` strips `-l"sqlite3"` from every Pod xcconfig. **Do not remove this.** `FirebaseMessaging` (and any pod declaring `s.libraries = 'sqlite3'`) otherwise pulls in the system `libsqlite3.tbd`, which wins `dlsym(RTLD_DEFAULT, "sqlite3_open")` over SQLCipher at runtime — `PRAGMA cipher_version` then returns empty and `encrypted_database.dart` throws `Bad state: SQLCipher not loaded - encryption unavailable`. SQLCipher's symbols are ABI-compatible, so stripping `-lsqlite3` doesn't break those pods.
 - `ios/Podfile` has `EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64` fix for ML Kit
 - Clean rebuild: `flutter clean && cd ios && rm -rf Pods Podfile.lock .symlinks && cd .. && flutter pub get && cd ios && pod install`
 
@@ -303,8 +304,8 @@ Always check max number before creating, use next sequential, update INDEX.md. S
    *[Structurally enforced — exact pin in pubspec.yaml line 18]*
 6. Don't add `sqlite3_flutter_libs` (use only `sqlcipher_flutter_libs`)
    *[Structurally enforced — import_guard deny rule + AUDIT-09 CI guardrail]*
-7. Don't modify Podfile `post_install` without preserving EXCLUDED_ARCHS fix
-   *[Manually-checked only — no Podfile lint; relies on reviewer + iOS build verification]*
+7. Don't modify Podfile `post_install` without preserving EXCLUDED_ARCHS fix AND the `-lsqlite3` strip
+   *[Manually-checked only — no Podfile lint; relies on reviewer + iOS runtime verification (PRAGMA cipher_version returns empty if strip is removed)]*
 8. Don't commit with analyzer warnings
    *[Structurally enforced — flutter analyze CI step (audit.yml line 34)]*
 9. Don't hardcode widget parameter defaults — use nullable + provider fallback

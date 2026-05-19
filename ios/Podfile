@@ -39,4 +39,29 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
   end
+
+  # Strip `-l"sqlite3"` from every Pod xcconfig so the system libsqlite3.tbd
+  # never enters the link line. SQLCipher provides ABI-compatible sqlite3
+  # symbols; without this strip, FirebaseMessaging (and other pods that
+  # declare `s.libraries = 'sqlite3'`) pull in the system sqlite3, which
+  # then wins `dlsym(RTLD_DEFAULT, "sqlite3_open")` over SQLCipher at
+  # runtime — making `PRAGMA cipher_version` return empty and breaking
+  # database encryption entirely.
+  #
+  # If you need to re-enable system sqlite3 for any pod, do it in that
+  # pod's own target_xcconfig instead of reverting this strip.
+  #
+  # Ref: sqlcipher_flutter_libs README "Incompatibilities with sqlite3 on
+  # iOS and macOS", and https://github.com/simolus3/drift/issues/1810
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      ref = config.base_configuration_reference
+      next if ref.nil?
+      xcconfig_path = ref.real_path
+      next unless File.exist?(xcconfig_path)
+      original = File.read(xcconfig_path)
+      stripped = original.gsub(/\s-l"?sqlite3"?/, '')
+      File.write(xcconfig_path, stripped) if stripped != original
+    end
+  end
 end
