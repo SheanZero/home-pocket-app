@@ -15,8 +15,8 @@ void main() {
   late _MockAnalyticsRepository repository;
   late GetHappinessReportUseCase useCase;
 
-  final startDate = DateTime(2026, 5);
-  final endDate = DateTime(2026, 5, 31, 23, 59, 59);
+  final startDate = DateTime(2026, 4);
+  final endDate = DateTime(2026, 4, 30, 23, 59, 59);
 
   setUp(() {
     repository = _MockAnalyticsRepository();
@@ -72,8 +72,8 @@ void main() {
   Future<HappinessReport> execute({String currencyCode = 'JPY'}) {
     return useCase.execute(
       bookId: 'book-1',
-      year: 2026,
-      month: 5,
+      startDate: startDate,
+      endDate: endDate,
       currencyCode: currencyCode,
     );
   }
@@ -88,6 +88,8 @@ void main() {
 
       final report = await execute();
 
+      expect(report.year, endDate.year);
+      expect(report.month, endDate.month);
       expect(report.totalSoulTx, 0);
       await emptyMetric<double>(report.avgSatisfaction);
       await emptyMetric<double>(report.joyContribution);
@@ -441,6 +443,44 @@ void main() {
       expect((report.medianSatisfaction as Value<double>).sampleSize, 4);
       expect((report.highlightsCount as Value<int>).sampleSize, 4);
       expect((report.topJoy as Value<BestJoyMomentRow>).sampleSize, 4);
+    });
+  });
+
+  group('time window validation', () {
+    test('throws ArgumentError when start > end', () async {
+      expect(
+        () => useCase.execute(
+          bookId: 'book-1',
+          startDate: DateTime(2026, 5, 31),
+          endDate: DateTime(2026, 5),
+          currencyCode: 'JPY',
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('throws ArgumentError when range exceeds 12 months', () async {
+      expect(
+        () => useCase.execute(
+          bookId: 'book-1',
+          startDate: DateTime(2024, 5),
+          endDate: DateTime(2025, 6),
+          currencyCode: 'JPY',
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('throws ArgumentError when endDate is in the future', () async {
+      expect(
+        () => useCase.execute(
+          bookId: 'book-1',
+          startDate: DateTime.now().subtract(const Duration(days: 1)),
+          endDate: DateTime.now().add(const Duration(days: 2)),
+          currencyCode: 'JPY',
+        ),
+        throwsArgumentError,
+      );
     });
   });
 }

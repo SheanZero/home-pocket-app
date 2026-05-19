@@ -12,8 +12,8 @@ void main() {
   late _MockAnalyticsRepository repo;
   late GetBestJoyMomentUseCase useCase;
 
-  final startDate = DateTime(2026, 5);
-  final endDate = DateTime(2026, 5, 31, 23, 59, 59);
+  final startDate = DateTime(2026, 4);
+  final endDate = DateTime(2026, 4, 30, 23, 59, 59);
 
   setUp(() {
     repo = _MockAnalyticsRepository();
@@ -37,8 +37,8 @@ void main() {
 
         final result = await useCase.execute(
           bookId: 'book-1',
-          year: 2026,
-          month: 5,
+          startDate: startDate,
+          endDate: endDate,
         );
 
         expect(result, isA<Empty<BestJoyMomentRow>>());
@@ -75,8 +75,8 @@ void main() {
 
         final result = await useCase.execute(
           bookId: 'book-1',
-          year: 2026,
-          month: 5,
+          startDate: startDate,
+          endDate: endDate,
         );
 
         expect(result, isA<Empty<BestJoyMomentRow>>());
@@ -111,8 +111,8 @@ void main() {
 
       final result = await useCase.execute(
         bookId: 'book-1',
-        year: 2026,
-        month: 5,
+        startDate: startDate,
+        endDate: endDate,
       );
 
       expect(
@@ -151,12 +151,45 @@ void main() {
 
       final result = await useCase.execute(
         bookId: 'book-1',
-        year: 2026,
-        month: 5,
+        startDate: startDate,
+        endDate: endDate,
       );
 
       expect(result, isA<Value<BestJoyMomentRow>>());
       expect((result as Value<BestJoyMomentRow>).sampleSize, 11);
+    });
+
+    test('throws ArgumentError when start > end', () async {
+      expect(
+        () => useCase.execute(
+          bookId: 'book-1',
+          startDate: DateTime(2026, 5, 31),
+          endDate: DateTime(2026, 5),
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('throws ArgumentError when range exceeds 12 months', () async {
+      expect(
+        () => useCase.execute(
+          bookId: 'book-1',
+          startDate: DateTime(2024, 5),
+          endDate: DateTime(2025, 6),
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('throws ArgumentError when endDate is in the future', () async {
+      expect(
+        () => useCase.execute(
+          bookId: 'book-1',
+          startDate: DateTime.now().subtract(const Duration(days: 1)),
+          endDate: DateTime.now().add(const Duration(days: 2)),
+        ),
+        throwsArgumentError,
+      );
     });
   });
 }

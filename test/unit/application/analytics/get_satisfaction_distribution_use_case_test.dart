@@ -10,8 +10,8 @@ void main() {
   late _MockAnalyticsRepository repository;
   late GetSatisfactionDistributionUseCase useCase;
 
-  final startDate = DateTime(2026, 5);
-  final endDate = DateTime(2026, 5, 31, 23, 59, 59);
+  final startDate = DateTime(2026, 4);
+  final endDate = DateTime(2026, 4, 30, 23, 59, 59);
 
   setUp(() {
     repository = _MockAnalyticsRepository();
@@ -31,7 +31,11 @@ void main() {
   }
 
   Future<List<SatisfactionScoreBucket>> execute() {
-    return useCase.execute(bookId: 'book-1', year: 2026, month: 5);
+    return useCase.execute(
+      bookId: 'book-1',
+      startDate: startDate,
+      endDate: endDate,
+    );
   }
 
   test('passes through repository buckets', () async {
@@ -58,5 +62,38 @@ void main() {
         endDate: endDate,
       ),
     ).called(1);
+  });
+
+  test('throws ArgumentError when start > end', () async {
+    expect(
+      () => useCase.execute(
+        bookId: 'book-1',
+        startDate: DateTime(2026, 5, 31),
+        endDate: DateTime(2026, 5),
+      ),
+      throwsArgumentError,
+    );
+  });
+
+  test('throws ArgumentError when range exceeds 12 months', () async {
+    expect(
+      () => useCase.execute(
+        bookId: 'book-1',
+        startDate: DateTime(2024, 5),
+        endDate: DateTime(2025, 6),
+      ),
+      throwsArgumentError,
+    );
+  });
+
+  test('throws ArgumentError when endDate is in the future', () async {
+    expect(
+      () => useCase.execute(
+        bookId: 'book-1',
+        startDate: DateTime.now().subtract(const Duration(days: 1)),
+        endDate: DateTime.now().add(const Duration(days: 2)),
+      ),
+      throwsArgumentError,
+    );
   });
 }
