@@ -1694,26 +1694,97 @@
     }
   },
   "analyticsTitle": "Statistics",
-  "analyticsMonthChipPickerTooltip": "Pick a month",
-  "analyticsKpiTotalLabel": "This month's spending",
-  "analyticsKpiTotalDeltaIncreased": "↑ +{pct}% MoM",
-  "@analyticsKpiTotalDeltaIncreased": {
-    "description": "Total spending KPI month-over-month increase",
+  "analyticsTimeWindowChipTooltip": "Pick a time window",
+  "@analyticsTimeWindowChipTooltip": {
+    "description": "Analytics screen time-window selector chip tooltip"
+  },
+  "analyticsTimeWindowChipLabelWeek": "Week of {monday}",
+  "@analyticsTimeWindowChipLabelWeek": {
+    "description": "Analytics screen time-window selector week chip label",
     "placeholders": {
-      "pct": {
+      "monday": {
         "type": "String"
       }
     }
   },
-  "analyticsKpiTotalDeltaDecreased": "↓ -{pct}% MoM",
-  "@analyticsKpiTotalDeltaDecreased": {
-    "description": "Total spending KPI month-over-month decrease",
+  "analyticsTimeWindowChipLabelQuarter": "Q{q} {year}",
+  "@analyticsTimeWindowChipLabelQuarter": {
+    "description": "Analytics screen time-window selector quarter chip label",
     "placeholders": {
-      "pct": {
+      "q": {
+        "type": "String"
+      },
+      "year": {
         "type": "String"
       }
     }
   },
+  "analyticsTimeWindowChipLabelYear": "{year}",
+  "@analyticsTimeWindowChipLabelYear": {
+    "description": "Analytics screen time-window selector year chip label",
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsTimeWindowChipLabelCustom": "{start} – {end}",
+  "@analyticsTimeWindowChipLabelCustom": {
+    "description": "Analytics screen time-window selector custom range chip label",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsTimeWindowSheetTitle": "Time window",
+  "@analyticsTimeWindowSheetTitle": {
+    "description": "Analytics screen time-window picker sheet title"
+  },
+  "analyticsTimeWindowTypeWeek": "Week",
+  "@analyticsTimeWindowTypeWeek": {
+    "description": "Analytics screen time-window type option for week"
+  },
+  "analyticsTimeWindowTypeMonth": "Month",
+  "@analyticsTimeWindowTypeMonth": {
+    "description": "Analytics screen time-window type option for month"
+  },
+  "analyticsTimeWindowTypeQuarter": "Quarter",
+  "@analyticsTimeWindowTypeQuarter": {
+    "description": "Analytics screen time-window type option for quarter"
+  },
+  "analyticsTimeWindowTypeYear": "Year",
+  "@analyticsTimeWindowTypeYear": {
+    "description": "Analytics screen time-window type option for year"
+  },
+  "analyticsTimeWindowTypeCustom": "Custom",
+  "@analyticsTimeWindowTypeCustom": {
+    "description": "Analytics screen time-window type option for custom range"
+  },
+  "analyticsTimeWindowCustomCta": "Pick a date range",
+  "@analyticsTimeWindowCustomCta": {
+    "description": "Analytics screen time-window custom range picker call to action"
+  },
+  "analyticsTimeWindowErrorTooLong": "Range cannot exceed 12 months. Pick a shorter range.",
+  "@analyticsTimeWindowErrorTooLong": {
+    "description": "Analytics screen time-window validation error for overlong ranges"
+  },
+  "analyticsTimeWindowErrorInverted": "Start date must be before end date.",
+  "@analyticsTimeWindowErrorInverted": {
+    "description": "Analytics screen time-window validation error for inverted date ranges"
+  },
+  "analyticsTimeWindowErrorFutureEnd": "End date cannot be in the future.",
+  "@analyticsTimeWindowErrorFutureEnd": {
+    "description": "Analytics screen time-window validation error for future end dates"
+  },
+  "analyticsTimeWindowEmptyPreset": "No data yet for this view. Add a transaction to begin.",
+  "@analyticsTimeWindowEmptyPreset": {
+    "description": "Analytics screen time-window picker empty preset list message"
+  },
+  "analyticsKpiTotalLabel": "Total spending",
   "analyticsKpiJoyLabel": "Avg satisfaction",
   "analyticsKpiJoySubMedianCoverage": "Median {median} · n={k}/{N}",
   "@analyticsKpiJoySubMedianCoverage": {

@@ -1694,26 +1694,97 @@
     }
   },
   "analyticsTitle": "統計",
-  "analyticsMonthChipPickerTooltip": "月を選ぶ",
-  "analyticsKpiTotalLabel": "今月の支出",
-  "analyticsKpiTotalDeltaIncreased": "↑ +{pct}% MoM",
-  "@analyticsKpiTotalDeltaIncreased": {
-    "description": "Total spending KPI month-over-month increase",
+  "analyticsTimeWindowChipTooltip": "期間を選ぶ",
+  "@analyticsTimeWindowChipTooltip": {
+    "description": "Analytics screen time-window selector chip tooltip"
+  },
+  "analyticsTimeWindowChipLabelWeek": "{monday}の週",
+  "@analyticsTimeWindowChipLabelWeek": {
+    "description": "Analytics screen time-window selector week chip label",
     "placeholders": {
-      "pct": {
+      "monday": {
         "type": "String"
       }
     }
   },
-  "analyticsKpiTotalDeltaDecreased": "↓ -{pct}% MoM",
-  "@analyticsKpiTotalDeltaDecreased": {
-    "description": "Total spending KPI month-over-month decrease",
+  "analyticsTimeWindowChipLabelQuarter": "{year}年 第{q}四半期",
+  "@analyticsTimeWindowChipLabelQuarter": {
+    "description": "Analytics screen time-window selector quarter chip label",
     "placeholders": {
-      "pct": {
+      "q": {
+        "type": "String"
+      },
+      "year": {
         "type": "String"
       }
     }
   },
+  "analyticsTimeWindowChipLabelYear": "{year}年",
+  "@analyticsTimeWindowChipLabelYear": {
+    "description": "Analytics screen time-window selector year chip label",
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsTimeWindowChipLabelCustom": "{start} 〜 {end}",
+  "@analyticsTimeWindowChipLabelCustom": {
+    "description": "Analytics screen time-window selector custom range chip label",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsTimeWindowSheetTitle": "期間",
+  "@analyticsTimeWindowSheetTitle": {
+    "description": "Analytics screen time-window picker sheet title"
+  },
+  "analyticsTimeWindowTypeWeek": "週",
+  "@analyticsTimeWindowTypeWeek": {
+    "description": "Analytics screen time-window type option for week"
+  },
+  "analyticsTimeWindowTypeMonth": "月",
+  "@analyticsTimeWindowTypeMonth": {
+    "description": "Analytics screen time-window type option for month"
+  },
+  "analyticsTimeWindowTypeQuarter": "四半期",
+  "@analyticsTimeWindowTypeQuarter": {
+    "description": "Analytics screen time-window type option for quarter"
+  },
+  "analyticsTimeWindowTypeYear": "年",
+  "@analyticsTimeWindowTypeYear": {
+    "description": "Analytics screen time-window type option for year"
+  },
+  "analyticsTimeWindowTypeCustom": "カスタム",
+  "@analyticsTimeWindowTypeCustom": {
+    "description": "Analytics screen time-window type option for custom range"
+  },
+  "analyticsTimeWindowCustomCta": "日付範囲を選ぶ",
+  "@analyticsTimeWindowCustomCta": {
+    "description": "Analytics screen time-window custom range picker call to action"
+  },
+  "analyticsTimeWindowErrorTooLong": "期間は12ヶ月を超えられません。短い期間を選んでください。",
+  "@analyticsTimeWindowErrorTooLong": {
+    "description": "Analytics screen time-window validation error for overlong ranges"
+  },
+  "analyticsTimeWindowErrorInverted": "開始日は終了日より前にしてください。",
+  "@analyticsTimeWindowErrorInverted": {
+    "description": "Analytics screen time-window validation error for inverted date ranges"
+  },
+  "analyticsTimeWindowErrorFutureEnd": "終了日に未来の日付は選べません。",
+  "@analyticsTimeWindowErrorFutureEnd": {
+    "description": "Analytics screen time-window validation error for future end dates"
+  },
+  "analyticsTimeWindowEmptyPreset": "このビュー用のデータがありません。取引を追加してください。",
+  "@analyticsTimeWindowEmptyPreset": {
+    "description": "Analytics screen time-window picker empty preset list message"
+  },
+  "analyticsKpiTotalLabel": "支出合計",
   "analyticsKpiJoyLabel": "今月の平均満足度",
   "analyticsKpiJoySubMedianCoverage": "中央値 {median} · n={k}/{N}",
   "@analyticsKpiJoySubMedianCoverage": {

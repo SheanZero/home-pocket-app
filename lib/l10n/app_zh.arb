@@ -1694,26 +1694,97 @@
     }
   },
   "analyticsTitle": "统计",
-  "analyticsMonthChipPickerTooltip": "选择月份",
-  "analyticsKpiTotalLabel": "本月支出",
-  "analyticsKpiTotalDeltaIncreased": "↑ +{pct}% MoM",
-  "@analyticsKpiTotalDeltaIncreased": {
-    "description": "Total spending KPI month-over-month increase",
+  "analyticsTimeWindowChipTooltip": "选择时间范围",
+  "@analyticsTimeWindowChipTooltip": {
+    "description": "Analytics screen time-window selector chip tooltip"
+  },
+  "analyticsTimeWindowChipLabelWeek": "{monday}的一周",
+  "@analyticsTimeWindowChipLabelWeek": {
+    "description": "Analytics screen time-window selector week chip label",
     "placeholders": {
-      "pct": {
+      "monday": {
         "type": "String"
       }
     }
   },
-  "analyticsKpiTotalDeltaDecreased": "↓ -{pct}% MoM",
-  "@analyticsKpiTotalDeltaDecreased": {
-    "description": "Total spending KPI month-over-month decrease",
+  "analyticsTimeWindowChipLabelQuarter": "{year}年 第{q}季度",
+  "@analyticsTimeWindowChipLabelQuarter": {
+    "description": "Analytics screen time-window selector quarter chip label",
     "placeholders": {
-      "pct": {
+      "q": {
+        "type": "String"
+      },
+      "year": {
         "type": "String"
       }
     }
   },
+  "analyticsTimeWindowChipLabelYear": "{year}年",
+  "@analyticsTimeWindowChipLabelYear": {
+    "description": "Analytics screen time-window selector year chip label",
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsTimeWindowChipLabelCustom": "{start} 至 {end}",
+  "@analyticsTimeWindowChipLabelCustom": {
+    "description": "Analytics screen time-window selector custom range chip label",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsTimeWindowSheetTitle": "时间范围",
+  "@analyticsTimeWindowSheetTitle": {
+    "description": "Analytics screen time-window picker sheet title"
+  },
+  "analyticsTimeWindowTypeWeek": "周",
+  "@analyticsTimeWindowTypeWeek": {
+    "description": "Analytics screen time-window type option for week"
+  },
+  "analyticsTimeWindowTypeMonth": "月",
+  "@analyticsTimeWindowTypeMonth": {
+    "description": "Analytics screen time-window type option for month"
+  },
+  "analyticsTimeWindowTypeQuarter": "季度",
+  "@analyticsTimeWindowTypeQuarter": {
+    "description": "Analytics screen time-window type option for quarter"
+  },
+  "analyticsTimeWindowTypeYear": "年",
+  "@analyticsTimeWindowTypeYear": {
+    "description": "Analytics screen time-window type option for year"
+  },
+  "analyticsTimeWindowTypeCustom": "自定义",
+  "@analyticsTimeWindowTypeCustom": {
+    "description": "Analytics screen time-window type option for custom range"
+  },
+  "analyticsTimeWindowCustomCta": "选择日期范围",
+  "@analyticsTimeWindowCustomCta": {
+    "description": "Analytics screen time-window custom range picker call to action"
+  },
+  "analyticsTimeWindowErrorTooLong": "时间范围不能超过 12 个月。请选择较短的范围。",
+  "@analyticsTimeWindowErrorTooLong": {
+    "description": "Analytics screen time-window validation error for overlong ranges"
+  },
+  "analyticsTimeWindowErrorInverted": "开始日期必须早于结束日期。",
+  "@analyticsTimeWindowErrorInverted": {
+    "description": "Analytics screen time-window validation error for inverted date ranges"
+  },
+  "analyticsTimeWindowErrorFutureEnd": "结束日期不能晚于今天。",
+  "@analyticsTimeWindowErrorFutureEnd": {
+    "description": "Analytics screen time-window validation error for future end dates"
+  },
+  "analyticsTimeWindowEmptyPreset": "此视图暂无数据。请先添加一笔交易。",
+  "@analyticsTimeWindowEmptyPreset": {
+    "description": "Analytics screen time-window picker empty preset list message"
+  },
+  "analyticsKpiTotalLabel": "支出合计",
   "analyticsKpiJoyLabel": "本月平均满足度",
   "analyticsKpiJoySubMedianCoverage": "中位数 {median} · n={k}/{N}",
   "@analyticsKpiJoySubMedianCoverage": {
