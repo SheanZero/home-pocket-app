@@ -30,7 +30,7 @@ const _happinessReport = HappinessReport(
   totalSoulTx: 15,
   avgSatisfaction: Value(7.83, 12),
   medianSatisfaction: Value(8.0, 12),
-  joyContribution: Empty(),
+  joyContribution: Value(1234.0, 12),
   highlightsCount: Empty(),
   topJoy: Empty<BestJoyMomentRow>(),
 );
@@ -54,7 +54,7 @@ Widget _buildSubject() {
 
 void main() {
   group('KpiMiniHeroStrip', () {
-    testWidgets('renders 総 tile then 悦己 tile in horizontal Row', (
+    testWidgets('renders Joy Index tile then 総 tile in horizontal Row', (
       tester,
     ) async {
       await tester.pumpWidget(_buildSubject());
@@ -63,9 +63,13 @@ void main() {
       final row = tester.widget<Row>(find.byType(Row).first);
       expect(row.mainAxisAlignment, MainAxisAlignment.start);
       expect(row.children[0], isA<Expanded>());
-      expect((row.children[0] as Expanded).child, isA<TotalSpendingKpiTile>());
+      expect((row.children[0] as Expanded).child, isA<JoyHeadlineKpiTile>());
       expect(row.children[2], isA<Expanded>());
-      expect((row.children[2] as Expanded).child, isA<JoyHeadlineKpiTile>());
+      expect((row.children[2] as Expanded).child, isA<TotalSpendingKpiTile>());
+      expect(find.text('ときめき指数'), findsOneWidget);
+      expect(find.textContaining('Joy/¥'), findsNothing);
+      expect(find.textContaining('density'), findsNothing);
+      expect(find.textContaining('ROI'), findsNothing);
     });
 
     testWidgets('tiles are equally weighted with Expanded wrappers', (

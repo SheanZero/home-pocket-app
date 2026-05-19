@@ -5,7 +5,7 @@ import '../../domain/models/monthly_report.dart';
 import 'joy_headline_kpi_tile.dart';
 import 'total_spending_kpi_tile.dart';
 
-/// STATSUI-07 — Horizontal KPI mini-hero strip (総 left, 悦己 right).
+/// STATSUI-07 — Horizontal KPI mini-hero strip (Joy Index left, 総 right).
 class KpiMiniHeroStrip extends StatelessWidget {
   const KpiMiniHeroStrip({
     super.key,
@@ -27,15 +27,19 @@ class KpiMiniHeroStrip extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
-          child: TotalSpendingKpiTile(
-            report: monthlyReport,
+          child: JoyHeadlineKpiTile(
+            report: happinessReport,
             currencyCode: currencyCode,
             locale: locale,
           ),
         ),
         const SizedBox(width: 8),
         Expanded(
-          child: JoyHeadlineKpiTile(report: happinessReport, locale: locale),
+          child: TotalSpendingKpiTile(
+            report: monthlyReport,
+            currencyCode: currencyCode,
+            locale: locale,
+          ),
         ),
       ],
     );

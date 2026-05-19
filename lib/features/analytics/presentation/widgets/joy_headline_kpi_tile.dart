@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/i18n/formatters/joy_cumulative_formatter.dart';
 import '../../domain/models/happiness_report.dart';
 import '../../domain/models/metric_result.dart';
 
@@ -12,10 +13,12 @@ class JoyHeadlineKpiTile extends StatelessWidget {
   const JoyHeadlineKpiTile({
     super.key,
     required this.report,
+    required this.currencyCode,
     required this.locale,
   });
 
   final HappinessReport report;
+  final String currencyCode;
   final Locale locale;
 
   @override
@@ -24,17 +27,17 @@ class JoyHeadlineKpiTile extends StatelessWidget {
     final (
       :primaryText,
       :ratedCount,
-      :hasAverage,
-    ) = switch (report.avgSatisfaction) {
+      :hasJoyContribution,
+    ) = switch (report.joyContribution) {
       Empty() => (
-        primaryText: l10n.analyticsKpiJoyEmptyCaption,
+        primaryText: l10n.analyticsKpiJoyIndexEmptyCaption,
         ratedCount: 0,
-        hasAverage: false,
+        hasJoyContribution: false,
       ),
       Value(:final data, :final sampleSize) => (
-        primaryText: data.toStringAsFixed(1),
+        primaryText: formatJoyCumulative(data, currencyCode),
         ratedCount: sampleSize,
-        hasAverage: true,
+        hasJoyContribution: true,
       ),
     };
     final medianText = switch (report.medianSatisfaction) {
@@ -43,8 +46,8 @@ class JoyHeadlineKpiTile extends StatelessWidget {
     };
 
     return Semantics(
-      label: l10n.analyticsKpiJoySemantics(
-        l10n.analyticsKpiJoyLabel,
+      label: l10n.analyticsKpiJoyIndexSemantics(
+        l10n.analyticsKpiJoyIndexLabel,
         primaryText,
         ratedCount,
         report.totalSoulTx,
@@ -61,22 +64,22 @@ class JoyHeadlineKpiTile extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              l10n.analyticsKpiJoyLabel,
+              l10n.analyticsKpiJoyIndexLabel,
               style: AppTextStyles.caption.copyWith(color: AppColors.soul),
             ),
             const SizedBox(height: 4),
             Text(
               primaryText,
               style:
-                  (hasAverage
+                  (hasJoyContribution
                           ? AppTextStyles.amountLarge
                           : AppTextStyles.caption)
                       .copyWith(color: context.wmTextPrimary),
             ),
-            if (hasAverage || report.totalSoulTx > 0) ...[
+            if (hasJoyContribution || report.totalSoulTx > 0) ...[
               const SizedBox(height: 4),
               Text(
-                l10n.analyticsKpiJoySubMedianCoverage(
+                l10n.analyticsKpiJoyIndexSubMedianCoverage(
                   medianText,
                   ratedCount,
                   report.totalSoulTx,

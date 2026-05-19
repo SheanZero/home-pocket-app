@@ -10,6 +10,7 @@ import '../../../../../helpers/test_localizations.dart';
 HappinessReport _happinessReport({
   MetricResult<double> avgSatisfaction = const Value(7.83, 12),
   MetricResult<double> medianSatisfaction = const Value(8.0, 12),
+  MetricResult<double> joyContribution = const Value(1234.0, 12),
   int totalSoulTx = 15,
 }) {
   return HappinessReport(
@@ -19,7 +20,7 @@ HappinessReport _happinessReport({
     totalSoulTx: totalSoulTx,
     avgSatisfaction: avgSatisfaction,
     medianSatisfaction: medianSatisfaction,
-    joyContribution: const Empty(),
+    joyContribution: joyContribution,
     highlightsCount: const Empty(),
     topJoy: const Empty<BestJoyMomentRow>(),
   );
@@ -28,7 +29,11 @@ HappinessReport _happinessReport({
 Widget _buildSubject(HappinessReport report) {
   return createLocalizedWidget(
     Scaffold(
-      body: JoyHeadlineKpiTile(report: report, locale: const Locale('ja')),
+      body: JoyHeadlineKpiTile(
+        report: report,
+        currencyCode: 'JPY',
+        locale: const Locale('ja'),
+      ),
     ),
     locale: const Locale('ja'),
   );
@@ -36,13 +41,13 @@ Widget _buildSubject(HappinessReport report) {
 
 void main() {
   group('JoyHeadlineKpiTile', () {
-    testWidgets('renders Empty state caption when avgSatisfaction is Empty', (
+    testWidgets('renders Empty state caption when joyContribution is Empty', (
       tester,
     ) async {
       await tester.pumpWidget(
         _buildSubject(
           _happinessReport(
-            avgSatisfaction: const Empty(),
+            joyContribution: const Empty(),
             medianSatisfaction: const Empty(),
             totalSoulTx: 0,
           ),
@@ -50,16 +55,17 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('データを集計中...'), findsOneWidget);
+      expect(find.text('魂の記録に満足度をつけると、ときめき指数が表示されます。'), findsOneWidget);
     });
 
-    testWidgets('renders mean primary value to 1 decimal place when Value', (
+    testWidgets('renders cumulative joyContribution as primary value', (
       tester,
     ) async {
       await tester.pumpWidget(_buildSubject(_happinessReport()));
       await tester.pumpAndSettle();
 
-      expect(find.text('7.8'), findsOneWidget);
+      expect(find.text('1,234'), findsOneWidget);
+      expect(find.text('7.8'), findsNothing);
     });
 
     testWidgets('renders sub-line median + n=k/N coverage', (tester) async {
@@ -67,7 +73,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.textContaining(RegExp(r'中央値 8(\.0)? · n=12/15')),
+        find.textContaining(RegExp(r'中央値 8(\.0)? · 評価 12/15')),
         findsOneWidget,
       );
     });
@@ -87,8 +93,8 @@ void main() {
         ),
       );
 
-      expect(semanticsWidget.properties.label, contains('悦己'));
-      expect(semanticsWidget.properties.label, contains('7.8'));
+      expect(semanticsWidget.properties.label, contains('ときめき指数'));
+      expect(semanticsWidget.properties.label, contains('1,234'));
       expect(semanticsWidget.properties.label, isNot(contains('Starbucks')));
       expect(semanticsWidget.properties.label, isNot(contains('merchant')));
       expect(semanticsWidget.properties.label, isNot(contains('transaction')));
