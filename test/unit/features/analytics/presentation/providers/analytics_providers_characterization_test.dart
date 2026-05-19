@@ -37,41 +37,7 @@ void main() {
   group(
     'analytics/analytics_providers characterization tests (pre-refactor behavior)',
     () {
-      test('selectedMonthProvider initial state is current month', () {
-        final month = container.read(selectedMonthProvider);
-        final now = DateTime.now();
-        // Initial state should be current year/month
-        expect(month.year, now.year);
-        expect(month.month, now.month);
-      });
-
-      test('selectedMonthProvider setMonth changes state correctly', () {
-        final target = DateTime(2026, 3);
-        container.read(selectedMonthProvider.notifier).setMonth(target);
-        final month = container.read(selectedMonthProvider);
-        expect(month.year, 2026);
-        expect(month.month, 3);
-      });
-
-      test('selectedMonthProvider previousMonth navigates back one month', () {
-        container
-            .read(selectedMonthProvider.notifier)
-            .setMonth(DateTime(2026, 3));
-        container.read(selectedMonthProvider.notifier).previousMonth();
-        final month = container.read(selectedMonthProvider);
-        expect(month.month, 2);
-        expect(month.year, 2026);
-      });
-
-      test('selectedMonthProvider nextMonth navigates forward one month', () {
-        container
-            .read(selectedMonthProvider.notifier)
-            .setMonth(DateTime(2026, 3));
-        container.read(selectedMonthProvider.notifier).nextMonth();
-        final month = container.read(selectedMonthProvider);
-        expect(month.month, 4);
-        expect(month.year, 2026);
-      });
+      // SelectedTimeWindow tests live in state_time_window_test.dart (Phase 15).
 
       test('getMonthlyReportUseCaseProvider constructs without error', () {
         final uc = container.read(getMonthlyReportUseCaseProvider);
