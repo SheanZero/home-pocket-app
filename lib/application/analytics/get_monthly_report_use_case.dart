@@ -5,6 +5,7 @@ import '../../features/analytics/domain/models/daily_expense.dart';
 import '../../features/analytics/domain/models/month_comparison.dart';
 import '../../features/analytics/domain/models/monthly_report.dart';
 import '../../features/analytics/domain/repositories/analytics_repository.dart';
+import '_time_window_validation.dart';
 
 /// Generates a comprehensive monthly financial report.
 ///
@@ -22,11 +23,12 @@ class GetMonthlyReportUseCase {
 
   Future<MonthlyReport> execute({
     required String bookId,
-    required int year,
-    required int month,
+    required DateTime startDate,
+    required DateTime endDate,
   }) async {
-    final startDate = DateTime(year, month, 1);
-    final endDate = DateTime(year, month + 1, 0, 23, 59, 59);
+    TimeWindowValidation.assertValid(startDate, endDate);
+    final anchorYear = endDate.year;
+    final anchorMonth = endDate.month;
 
     // Run independent queries in parallel
     final results = await Future.wait([
@@ -78,11 +80,11 @@ class GetMonthlyReportUseCase {
     );
 
     // Build daily expenses (fill in zero-days)
-    final daysInMonth = DateTime(year, month + 1, 0).day;
+    final daysInMonth = DateTime(anchorYear, anchorMonth + 1, 0).day;
     final dailyExpenses = _buildDailyExpenses(
       dailyTotals: dailyTotals,
-      year: year,
-      month: month,
+      year: anchorYear,
+      month: anchorMonth,
       daysInMonth: daysInMonth,
     );
 
@@ -100,15 +102,15 @@ class GetMonthlyReportUseCase {
     // Previous month comparison
     final comparison = await _getPreviousMonthComparison(
       bookId: bookId,
-      currentYear: year,
-      currentMonth: month,
+      currentYear: anchorYear,
+      currentMonth: anchorMonth,
       currentIncome: totals.totalIncome,
       currentExpenses: totals.totalExpenses,
     );
 
     return MonthlyReport(
-      year: year,
-      month: month,
+      year: endDate.year,
+      month: endDate.month,
       totalIncome: totals.totalIncome,
       totalExpenses: totals.totalExpenses,
       savings: savings,

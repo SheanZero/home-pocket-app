@@ -567,7 +567,12 @@ class __$CategoryBreakdownCopyWithImpl<$Res>
 
 /// @nodoc
 mixin _$MonthlyReport {
+  /// Display anchor: the year of the active window's endDate (Phase 15+).
+  /// Source-of-truth date range is the use-case (startDate, endDate) input.
   int get year;
+
+  /// Display anchor: the month of the active window's endDate (Phase 15+).
+  /// See use-case (startDate, endDate) for the queried range.
   int get month;
   int get totalIncome;
   int get totalExpenses;
@@ -577,6 +582,10 @@ mixin _$MonthlyReport {
   int get soulTotal;
   List<CategoryBreakdown> get categoryBreakdowns;
   List<DailyExpense> get dailyExpenses;
+
+  /// Comparison against the calendar month BEFORE this report's
+  /// display-anchor month. Consumed by HomeHero for current-month trend
+  /// percent; AnalyticsScreen no longer surfaces this delta (ADR-012 §4).
   MonthComparison? get previousMonthComparison;
 
   /// Create a copy of MonthlyReport
@@ -1016,8 +1025,13 @@ class _MonthlyReport implements MonthlyReport {
   factory _MonthlyReport.fromJson(Map<String, dynamic> json) =>
       _$MonthlyReportFromJson(json);
 
+  /// Display anchor: the year of the active window's endDate (Phase 15+).
+  /// Source-of-truth date range is the use-case (startDate, endDate) input.
   @override
   final int year;
+
+  /// Display anchor: the month of the active window's endDate (Phase 15+).
+  /// See use-case (startDate, endDate) for the queried range.
   @override
   final int month;
   @override
@@ -1049,6 +1063,9 @@ class _MonthlyReport implements MonthlyReport {
     return EqualUnmodifiableListView(_dailyExpenses);
   }
 
+  /// Comparison against the calendar month BEFORE this report's
+  /// display-anchor month. Consumed by HomeHero for current-month trend
+  /// percent; AnalyticsScreen no longer surfaces this delta (ADR-012 §4).
   @override
   final MonthComparison? previousMonthComparison;
 

@@ -29,7 +29,12 @@ abstract class CategoryBreakdown with _$CategoryBreakdown {
 @freezed
 abstract class MonthlyReport with _$MonthlyReport {
   const factory MonthlyReport({
+    /// Display anchor: the year of the active window's endDate (Phase 15+).
+    /// Source-of-truth date range is the use-case (startDate, endDate) input.
     required int year,
+
+    /// Display anchor: the month of the active window's endDate (Phase 15+).
+    /// See use-case (startDate, endDate) for the queried range.
     required int month,
     required int totalIncome,
     required int totalExpenses,
@@ -39,6 +44,10 @@ abstract class MonthlyReport with _$MonthlyReport {
     required int soulTotal,
     required List<CategoryBreakdown> categoryBreakdowns,
     required List<DailyExpense> dailyExpenses,
+
+    /// Comparison against the calendar month BEFORE this report's
+    /// display-anchor month. Consumed by HomeHero for current-month trend
+    /// percent; AnalyticsScreen no longer surfaces this delta (ADR-012 §4).
     MonthComparison? previousMonthComparison,
   }) = _MonthlyReport;
 
