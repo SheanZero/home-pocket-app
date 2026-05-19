@@ -58,7 +58,14 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
   3. Recommendation algorithm computes `ceil(median(past 3 complete months Σ joy_contribution))` when ≥3 months of soul data exist; falls back to spike-decided hardcoded baseline otherwise; algorithm covered by unit tests including outlier-sensitivity case.
   4. 1-day spike has decided and documented (in plan deliverable) the fallback baseline number, the outlier-truncation policy, and whether recommended value persists in UI after user configuration.
   5. ADR-016 §2 single-Joy-expression constraint holds across the use case, DAO, and formatter layers — `grep -r 'density' lib/` returns only deprecation notes or removed-call comments; no live density code path remains.
-**Plans**: TBD
+**Plans**: 7 plans
+  - [ ] 13-01-PLAN.md — Correct ROADMAP SC-2 wording (SharedPreferences not Drift) per D-02
+  - [ ] 13-02-PLAN.md — Replace joy_density_formatter with joy_cumulative_formatter; preserve ptvfBaseFor
+  - [ ] 13-03-PLAN.md — Add AppSettings.monthlyJoyTarget int? + SharedPreferences round-trip (D-01/D-03)
+  - [ ] 13-04-PLAN.md — Rewrite GetHappinessReportUseCase fold to Σ joy_contribution; rename HappinessReport field + DAO method
+  - [ ] 13-05-PLAN.md — Spike simulation + 13-SPIKE.md (fallback baseline, outlier policy, persistence behavior)
+  - [ ] 13-06-PLAN.md — GetMonthlyJoyTargetRecommendationUseCase + Riverpod provider wiring
+  - [ ] 13-07-PLAN.md — Density rip (delete trend/daily files), HomeHero rename, AnalyticsScreen histogram gate rewire, grep gate verification
 
 ### Phase 14: ADR-016 Frontend + ARB Reconciliation (TOOL-V2-02)
 **Goal**: Ship the user-facing redesign of HomeHero and AnalyticsScreen on the new `Σ joy_contribution` backend, plus the Settings target-configuration UI and ARB cleanup, so the end-user perceives the full ADR-016 migration in one coherent surface.

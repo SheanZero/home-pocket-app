@@ -841,22 +841,19 @@ The `monthly_joy_target` field is a personal preference integer (no spend data, 
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **`formatJoyCumulative` exact locale format**
+1. **`formatJoyCumulative` exact locale format** — RESOLVED: use `intl.NumberFormat.decimalPattern('en')` as a safe default that produces comma-separated integers. Phase 14 can make it locale-aware if needed. See UI-SPEC §4 and PATTERNS.md §`joy_cumulative_formatter.dart`; implemented in plan 13-02.
    - What we know: must be integer + thousand-separator.
    - What's unclear: Should it be `intl.NumberFormat('#,##0', 'en')` (always comma), or locale-aware (ja: `1,234`, zh: `1,234`, en: `1,234` — they're all the same for these locales)?
-   - Recommendation: use `intl.NumberFormat.decimalPattern('en')` as a safe default that produces comma-separated integers. Phase 14 can make it locale-aware if needed.
 
-2. **`_SatisfactionHistogramOrFallback` gate replacement**
+2. **`_SatisfactionHistogramOrFallback` gate replacement** — RESOLVED: watch `happinessReportProvider` directly inside `_SatisfactionHistogramOrFallback` — consistent with other private card widgets that own their data. The provider is already cached by Riverpod from `_KpiHero`'s watch. See PATTERNS.md §`analytics_screen.dart` histogram-gate replacement; implemented in plan 13-07 task 2.
    - What we know: it needs a soul-transaction count to drive the n<5 guard.
    - What's unclear: whether to watch `happinessReportProvider` in `_SatisfactionHistogramOrFallback` (adds a second provider watch) or to receive `totalSoulTx` as a constructor parameter from the parent.
-   - Recommendation: watch `happinessReportProvider` directly inside `_SatisfactionHistogramOrFallback` — consistent with other private card widgets that own their data. The provider is already cached by Riverpod from `_KpiHero`'s watch.
 
-3. **Spike outcome uncertainty**
+3. **Spike outcome uncertainty** — RESOLVED: keep `_fallbackBaseline` as a private const in the recommendation use case body (not extracted to the formatter). Rationale: the constant is a domain-layer policy of the recommendation use case, not a presentation concern; co-locating it keeps the use case self-contained and matches the existing sibling use case pattern. Phase 14 can re-tune by editing one line at a stable site. Implemented in plan 13-06 task 2; spike (plan 13-05) records the chosen integer in `13-SPIKE.md` for traceability.
    - What we know: baseline anchor is 50; spike decides within [30, 100].
    - What's unclear: whether real demo-data scenarios might push the anchor outside the intuitive range.
-   - Recommendation: the `_fallbackBaseline` constant in the use case should be extracted to a named constant in `joy_cumulative_formatter.dart` (or a constants file) rather than hard-coded in the use case body, so Phase 14 can adjust it without digging into the algorithm.
 
 ---
 
