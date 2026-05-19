@@ -6,6 +6,7 @@ import 'package:home_pocket/data/daos/category_dao.dart';
 import 'package:home_pocket/data/daos/transaction_dao.dart';
 import 'package:home_pocket/data/repositories/analytics_repository_impl.dart';
 import 'package:home_pocket/data/repositories/category_repository_impl.dart';
+import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
 
 void main() {
   late AppDatabase database;
@@ -55,12 +56,40 @@ void main() {
   });
 
   group('GetMonthlyReportUseCase', () {
-    test('returns zero totals for empty month', () async {
-      final report = await useCase.execute(
+    Future<void> insertExpense({
+      required String id,
+      required int amount,
+      required DateTime timestamp,
+      String? prevHash,
+    }) {
+      return transactionDao.insertTransaction(
+        id: id,
         bookId: 'book1',
-        year: 2026,
-        month: 2,
+        deviceId: 'dev1',
+        amount: amount,
+        type: 'expense',
+        categoryId: 'cat_food',
+        ledgerType: 'survival',
+        timestamp: timestamp,
+        currentHash: 'hash_$id',
+        prevHash: prevHash,
+        createdAt: timestamp,
       );
+    }
+
+    Future<MonthlyReport> executeWindow({
+      DateTime? startDate,
+      DateTime? endDate,
+    }) {
+      return useCase.execute(
+        bookId: 'book1',
+        startDate: startDate ?? DateTime(2026, 2),
+        endDate: endDate ?? DateTime(2026, 2, 28, 23, 59, 59),
+      );
+    }
+
+    test('returns zero totals for empty month', () async {
+      final report = await executeWindow();
 
       expect(report.year, 2026);
       expect(report.month, 2);
@@ -115,11 +144,7 @@ void main() {
         createdAt: DateTime(2026, 2, 15),
       );
 
-      final report = await useCase.execute(
-        bookId: 'book1',
-        year: 2026,
-        month: 2,
-      );
+      final report = await executeWindow();
 
       expect(report.totalIncome, 300000);
       expect(report.totalExpenses, 80000);
@@ -142,11 +167,7 @@ void main() {
         createdAt: DateTime(2026, 2, 10),
       );
 
-      final report = await useCase.execute(
-        bookId: 'book1',
-        year: 2026,
-        month: 2,
-      );
+      final report = await executeWindow();
 
       expect(report.categoryBreakdowns, hasLength(1));
       final breakdown = report.categoryBreakdowns.first;
@@ -171,11 +192,7 @@ void main() {
         createdAt: DateTime(2026, 2, 10),
       );
 
-      final report = await useCase.execute(
-        bookId: 'book1',
-        year: 2026,
-        month: 2,
-      );
+      final report = await executeWindow();
 
       // February 2026 has 28 days
       expect(report.dailyExpenses, hasLength(28));
@@ -202,11 +219,7 @@ void main() {
       // Soft-delete the transaction
       await transactionDao.softDelete('tx1');
 
-      final report = await useCase.execute(
-        bookId: 'book1',
-        year: 2026,
-        month: 2,
-      );
+      final report = await executeWindow();
 
       expect(report.totalExpenses, 0);
     });
@@ -240,11 +253,7 @@ void main() {
         createdAt: DateTime(2026, 2, 15),
       );
 
-      final report = await useCase.execute(
-        bookId: 'book1',
-        year: 2026,
-        month: 2,
-      );
+      final report = await executeWindow();
 
       expect(report.previousMonthComparison, isNotNull);
       // Expense change = (250000-200000)/200000 * 100 = 25%
@@ -265,11 +274,7 @@ void main() {
         createdAt: DateTime(2026, 2, 10),
       );
 
-      final report = await useCase.execute(
-        bookId: 'book1',
-        year: 2026,
-        month: 2,
-      );
+      final report = await executeWindow();
 
       expect(report.previousMonthComparison, isNull);
     });
@@ -302,14 +307,104 @@ void main() {
         createdAt: DateTime(2026, 2, 12),
       );
 
-      final report = await useCase.execute(
-        bookId: 'book1',
-        year: 2026,
-        month: 2,
-      );
+      final report = await executeWindow();
 
       expect(report.survivalTotal, 50000);
       expect(report.soulTotal, 20000);
     });
+
+    test('uses endDate month as display anchor for yearly windows', () async {
+      // The plan's `endDate: DateTime(2026, 12...)` / `month: 12`
+      // fixture is future-dated on 2026-05-19; use the same anchor month
+      // in the last fully past calendar year.
+      final report = await executeWindow(
+        startDate: DateTime(2025),
+        endDate: DateTime(2025, 12, 31, 23, 59, 59),
+      );
+
+      expect(report.year, 2025);
+      expect(report.month, 12);
+    });
+
+    test(
+      'uses endDate month as display anchor for quarterly windows',
+      () async {
+        final report = await executeWindow(
+          startDate: DateTime(2026),
+          endDate: DateTime(2026, 3, 31, 23, 59, 59),
+        );
+
+        expect(report.year, 2026);
+        expect(report.month, 3);
+      },
+    );
+
+    test('uses endDate month as display anchor for custom windows', () async {
+      final report = await executeWindow(
+        startDate: DateTime(2026, 1, 15),
+        endDate: DateTime(2026, 4, 20, 23, 59, 59),
+      );
+
+      expect(report.year, 2026);
+      expect(report.month, 4);
+    });
+
+    test('throws ArgumentError when start > end', () async {
+      expect(
+        () => executeWindow(
+          startDate: DateTime(2026, 5, 31),
+          endDate: DateTime(2026, 5),
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('throws ArgumentError when range exceeds 12 months', () async {
+      expect(
+        () => executeWindow(
+          startDate: DateTime(2024, 5),
+          endDate: DateTime(2025, 6),
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('throws ArgumentError when endDate is in the future', () async {
+      expect(
+        () => executeWindow(
+          startDate: DateTime.now().subtract(const Duration(days: 1)),
+          endDate: DateTime.now().add(const Duration(days: 2)),
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test(
+      'non-month windows compare against month before display anchor',
+      () async {
+        await insertExpense(
+          id: 'tx_march',
+          amount: 120000,
+          timestamp: DateTime(2026, 3, 10),
+        );
+        await insertExpense(
+          id: 'tx_april',
+          amount: 180000,
+          timestamp: DateTime(2026, 4, 10),
+          prevHash: 'hash_tx_march',
+        );
+
+        final report = await executeWindow(
+          startDate: DateTime(2026, 1),
+          endDate: DateTime(2026, 4, 30, 23, 59, 59),
+        );
+
+        expect(report.month, 4);
+        expect(report.previousMonthComparison, isNotNull);
+        expect(report.previousMonthComparison!.previousYear, 2026);
+        expect(report.previousMonthComparison!.previousMonth, 3);
+        expect(report.previousMonthComparison!.previousExpenses, 120000);
+      },
+    );
   });
 }
