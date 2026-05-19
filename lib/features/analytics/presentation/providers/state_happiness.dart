@@ -42,6 +42,23 @@ Future<MetricResult<BestJoyMomentRow>> bestJoyMoment(
   return useCase.execute(bookId: bookId, year: year, month: month);
 }
 
+/// JOYMIG-02 / D-04 — recommended monthlyJoyTarget from past 3 months.
+///
+/// Returns Empty when fewer than 3 past months have soul transaction data.
+@riverpod
+Future<MetricResult<int>> monthlyJoyTargetRecommendation(
+  Ref ref, {
+  required String bookId,
+  required String currencyCode,
+}) async {
+  final useCase = ref.watch(getMonthlyJoyTargetRecommendationUseCaseProvider);
+  return useCase.execute(
+    bookId: bookId,
+    currencyCode: currencyCode,
+    asOf: DateTime.now(),
+  );
+}
+
 /// STATSUI-01 / D-05 — daily Joy/¥ trend (PTVF per-day fold).
 @riverpod
 Future<MetricResult<List<DailyJoyPerYenPoint>>> dailyJoyPerYen(

@@ -218,6 +218,118 @@ final class BestJoyMomentFamily extends $Family
   String toString() => r'bestJoyMomentProvider';
 }
 
+/// JOYMIG-02 / D-04 — recommended monthlyJoyTarget from past 3 months.
+///
+/// Returns Empty when fewer than 3 past months have soul transaction data.
+
+@ProviderFor(monthlyJoyTargetRecommendation)
+final monthlyJoyTargetRecommendationProvider =
+    MonthlyJoyTargetRecommendationFamily._();
+
+/// JOYMIG-02 / D-04 — recommended monthlyJoyTarget from past 3 months.
+///
+/// Returns Empty when fewer than 3 past months have soul transaction data.
+
+final class MonthlyJoyTargetRecommendationProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<MetricResult<int>>,
+          MetricResult<int>,
+          FutureOr<MetricResult<int>>
+        >
+    with
+        $FutureModifier<MetricResult<int>>,
+        $FutureProvider<MetricResult<int>> {
+  /// JOYMIG-02 / D-04 — recommended monthlyJoyTarget from past 3 months.
+  ///
+  /// Returns Empty when fewer than 3 past months have soul transaction data.
+  MonthlyJoyTargetRecommendationProvider._({
+    required MonthlyJoyTargetRecommendationFamily super.from,
+    required ({String bookId, String currencyCode}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'monthlyJoyTargetRecommendationProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$monthlyJoyTargetRecommendationHash();
+
+  @override
+  String toString() {
+    return r'monthlyJoyTargetRecommendationProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<MetricResult<int>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<MetricResult<int>> create(Ref ref) {
+    final argument = this.argument as ({String bookId, String currencyCode});
+    return monthlyJoyTargetRecommendation(
+      ref,
+      bookId: argument.bookId,
+      currencyCode: argument.currencyCode,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is MonthlyJoyTargetRecommendationProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$monthlyJoyTargetRecommendationHash() =>
+    r'43a04b4e788697bb3b9c72773789822c8528dbe6';
+
+/// JOYMIG-02 / D-04 — recommended monthlyJoyTarget from past 3 months.
+///
+/// Returns Empty when fewer than 3 past months have soul transaction data.
+
+final class MonthlyJoyTargetRecommendationFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<MetricResult<int>>,
+          ({String bookId, String currencyCode})
+        > {
+  MonthlyJoyTargetRecommendationFamily._()
+    : super(
+        retry: null,
+        name: r'monthlyJoyTargetRecommendationProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// JOYMIG-02 / D-04 — recommended monthlyJoyTarget from past 3 months.
+  ///
+  /// Returns Empty when fewer than 3 past months have soul transaction data.
+
+  MonthlyJoyTargetRecommendationProvider call({
+    required String bookId,
+    required String currencyCode,
+  }) => MonthlyJoyTargetRecommendationProvider._(
+    argument: (bookId: bookId, currencyCode: currencyCode),
+    from: this,
+  );
+
+  @override
+  String toString() => r'monthlyJoyTargetRecommendationProvider';
+}
+
 /// STATSUI-01 / D-05 — daily Joy/¥ trend (PTVF per-day fold).
 
 @ProviderFor(dailyJoyPerYen)

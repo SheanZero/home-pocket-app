@@ -8,6 +8,7 @@ import '../../../../application/analytics/get_expense_trend_use_case.dart';
 import '../../../../application/analytics/get_family_happiness_use_case.dart';
 import '../../../../application/analytics/get_happiness_report_use_case.dart';
 import '../../../../application/analytics/get_largest_monthly_expense_use_case.dart';
+import '../../../../application/analytics/get_monthly_joy_target_recommendation_use_case.dart';
 import '../../../../application/analytics/get_monthly_report_use_case.dart';
 import '../../../../application/analytics/get_satisfaction_distribution_use_case.dart';
 import '../../../../application/analytics/repository_providers.dart'
@@ -68,6 +69,15 @@ GetHappinessReportUseCase getHappinessReportUseCase(Ref ref) {
 @riverpod
 GetDailyJoyPerYenUseCase getDailyJoyPerYenUseCase(Ref ref) {
   return GetDailyJoyPerYenUseCase(
+    analyticsRepository: ref.watch(analyticsRepositoryProvider),
+  );
+}
+
+/// JOYMIG-02 / D-04: GetMonthlyJoyTargetRecommendationUseCase provider.
+@riverpod
+GetMonthlyJoyTargetRecommendationUseCase
+getMonthlyJoyTargetRecommendationUseCase(Ref ref) {
+  return GetMonthlyJoyTargetRecommendationUseCase(
     analyticsRepository: ref.watch(analyticsRepositoryProvider),
   );
 }

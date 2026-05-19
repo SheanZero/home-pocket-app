@@ -319,6 +319,62 @@ final class GetDailyJoyPerYenUseCaseProvider
 String _$getDailyJoyPerYenUseCaseHash() =>
     r'c3100f1da8ec3532db8ff02f97599553e0118c28';
 
+/// JOYMIG-02 / D-04: GetMonthlyJoyTargetRecommendationUseCase provider.
+
+@ProviderFor(getMonthlyJoyTargetRecommendationUseCase)
+final getMonthlyJoyTargetRecommendationUseCaseProvider =
+    GetMonthlyJoyTargetRecommendationUseCaseProvider._();
+
+/// JOYMIG-02 / D-04: GetMonthlyJoyTargetRecommendationUseCase provider.
+
+final class GetMonthlyJoyTargetRecommendationUseCaseProvider
+    extends
+        $FunctionalProvider<
+          GetMonthlyJoyTargetRecommendationUseCase,
+          GetMonthlyJoyTargetRecommendationUseCase,
+          GetMonthlyJoyTargetRecommendationUseCase
+        >
+    with $Provider<GetMonthlyJoyTargetRecommendationUseCase> {
+  /// JOYMIG-02 / D-04: GetMonthlyJoyTargetRecommendationUseCase provider.
+  GetMonthlyJoyTargetRecommendationUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'getMonthlyJoyTargetRecommendationUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() =>
+      _$getMonthlyJoyTargetRecommendationUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<GetMonthlyJoyTargetRecommendationUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  GetMonthlyJoyTargetRecommendationUseCase create(Ref ref) {
+    return getMonthlyJoyTargetRecommendationUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GetMonthlyJoyTargetRecommendationUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<GetMonthlyJoyTargetRecommendationUseCase>(value),
+    );
+  }
+}
+
+String _$getMonthlyJoyTargetRecommendationUseCaseHash() =>
+    r'd8940e9f1c5d56ee7d00a5fde540944ccb43428b';
+
 /// STATSUI-02 / D-05: GetSatisfactionDistributionUseCase provider.
 
 @ProviderFor(getSatisfactionDistributionUseCase)
