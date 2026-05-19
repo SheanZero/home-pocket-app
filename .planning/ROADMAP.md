@@ -59,9 +59,9 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
   4. 1-day spike has decided and documented (in plan deliverable) the fallback baseline number, the outlier-truncation policy, and whether recommended value persists in UI after user configuration.
   5. ADR-016 §2 single-Joy-expression constraint holds across the use case, DAO, and formatter layers — `grep -r 'density' lib/` returns only deprecation notes or removed-call comments; no live density code path remains.
 **Plans**: 7 plans
-  - [ ] 13-01-PLAN.md — Correct ROADMAP SC-2 wording (SharedPreferences not Drift) per D-02
-  - [ ] 13-02-PLAN.md — Replace joy_density_formatter with joy_cumulative_formatter; preserve ptvfBaseFor
-  - [ ] 13-03-PLAN.md — Add AppSettings.monthlyJoyTarget int? + SharedPreferences round-trip (D-01/D-03)
+  - [x] 13-01-PLAN.md — Correct ROADMAP SC-2 wording (SharedPreferences not Drift) per D-02
+  - [x] 13-02-PLAN.md — Replace joy_density_formatter with joy_cumulative_formatter; preserve ptvfBaseFor
+  - [x] 13-03-PLAN.md — Add AppSettings.monthlyJoyTarget int? + SharedPreferences round-trip (D-01/D-03)
   - [ ] 13-04-PLAN.md — Rewrite GetHappinessReportUseCase fold to Σ joy_contribution; rename HappinessReport field + DAO method
   - [ ] 13-05-PLAN.md — Spike simulation + 13-SPIKE.md (fallback baseline, outlier policy, persistence behavior)
   - [ ] 13-06-PLAN.md — GetMonthlyJoyTargetRecommendationUseCase + Riverpod provider wiring
@@ -135,7 +135,7 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 13. ADR-016 Backend Foundation | 0/0 | Not started | — |
+| 13. ADR-016 Backend Foundation | 3/7 | In Progress|  |
 | 14. ADR-016 Frontend + ARB Reconciliation | 0/0 | Not started | — |
 | 15. Custom Time Windows | 0/0 | Not started | — |
 | 16. Per-Category Breakdown + Soul-vs-Survival | 0/0 | Not started | — |
