@@ -1,10 +1,11 @@
 ---
 phase: 13
 slug: adr-016-backend-foundation
-status: draft
+status: approved
 shadcn_initialized: false
 preset: not-applicable
 created: 2026-05-19
+reviewed_at: 2026-05-19T00:00:00Z
 scope_type: migration-and-deletion
 ---
 
