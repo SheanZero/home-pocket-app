@@ -19,6 +19,65 @@
   "@settings": {
     "description": "Settings tab/screen label"
   },
+  "settingsJoyTargetTitle": "悦己目标",
+  "@settingsJoyTargetTitle": {
+    "description": "Settings section title for monthly Joy target configuration"
+  },
+  "settingsJoyTargetCurrentConfigured": "当前目标：{target}",
+  "@settingsJoyTargetCurrentConfigured": {
+    "description": "Configured monthly Joy target value in Settings",
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsJoyTargetCurrentRecommended": "参考值：{target}",
+  "@settingsJoyTargetCurrentRecommended": {
+    "description": "Active recommended monthly Joy target value in Settings",
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsJoyTargetRecommendation": "来自近期悦己记录的参考值：{target}",
+  "@settingsJoyTargetRecommendation": {
+    "description": "Neutral recommendation copy for monthly Joy target",
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsJoyTargetFallback": "记录更多悦己条目后会显示参考值。现在使用初始参考值。",
+  "@settingsJoyTargetFallback": {
+    "description": "Fallback copy when monthly Joy target recommendation has insufficient data"
+  },
+  "settingsJoyTargetInputLabel": "月度悦己目标",
+  "@settingsJoyTargetInputLabel": {
+    "description": "Input label for monthly Joy target dialog"
+  },
+  "settingsJoyTargetInputHint": "输入正整数",
+  "@settingsJoyTargetInputHint": {
+    "description": "Input hint for monthly Joy target dialog"
+  },
+  "settingsJoyTargetInvalid": "请输入大于零的整数。",
+  "@settingsJoyTargetInvalid": {
+    "description": "Validation error for invalid monthly Joy target input"
+  },
+  "settingsJoyTargetUseRecommendation": "使用参考值",
+  "@settingsJoyTargetUseRecommendation": {
+    "description": "Button to clear configured target and use the recommended or fallback target"
+  },
+  "settingsJoyTargetSave": "保存",
+  "@settingsJoyTargetSave": {
+    "description": "Save button for monthly Joy target dialog"
+  },
+  "settingsJoyTargetCancel": "取消",
+  "@settingsJoyTargetCancel": {
+    "description": "Cancel button for monthly Joy target dialog"
+  },
   "ledger": "账本",
   "@ledger": {
     "description": "Ledger tab label"
@@ -677,6 +736,31 @@
   "@homeJoyPerYenTooltip": {
     "description": "Tooltip explaining the Joy/¥ density formula (D-10 tooltip 2)"
   },
+  "homeJoyContributionTooltip": "外环是朝向当前目标的月度悦己指数，中环是满足度均值，内环是小確幸数。",
+  "@homeJoyContributionTooltip": {
+    "description": "Tooltip explaining the HomeHero three-ring system after ADR-016"
+  },
+  "homeJoyTargetReference": "目标 {target}",
+  "@homeJoyTargetReference": {
+    "description": "Compact HomeHero target reference under cumulative Joy value",
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "homeJoyTargetSemantics": "悦己指数 {value}，目标 {target}",
+  "@homeJoyTargetSemantics": {
+    "description": "Screen reader label for HomeHero cumulative Joy and active target",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
   "homeHeroCardLabelSingle": "本月支出",
   "@homeHeroCardLabelSingle": {
     "description": "Hero header label — single mode (D-02)"
@@ -757,6 +841,10 @@
   "homeJoyPerYenLegend": "Joy/¥",
   "@homeJoyPerYenLegend": {
     "description": "Single-mode outer-ring legend label (matches D-20 display)"
+  },
+  "homeJoyContributionLegend": "悦己目标",
+  "@homeJoyContributionLegend": {
+    "description": "Single-mode outer-ring legend label for monthly Joy target progress"
   },
   "homeHighlightsCountLegend": "小確幸 ({count})",
   "@homeHighlightsCountLegend": {
@@ -1673,6 +1761,47 @@
     }
   },
   "analyticsKpiJoyEmptyCaption": "数据收集中...",
+  "analyticsKpiJoyIndexLabel": "悦己指数",
+  "@analyticsKpiJoyIndexLabel": {
+    "description": "Analytics KPI label for cumulative Joy Index"
+  },
+  "analyticsKpiJoyIndexEmptyCaption": "给魂账条目标记满足度后，会显示悦己指数。",
+  "@analyticsKpiJoyIndexEmptyCaption": {
+    "description": "Empty state caption for Analytics Joy Index KPI"
+  },
+  "analyticsKpiJoyIndexSemantics": "{label} {value}，已评分 {ratedCount}/{totalCount}",
+  "@analyticsKpiJoyIndexSemantics": {
+    "description": "Screen reader label for Analytics Joy Index KPI",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "ratedCount": {
+        "type": "int"
+      },
+      "totalCount": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsKpiJoyIndexSubMedianCoverage": "中位数 {median} · 已评分 {ratedCount}/{totalCount}",
+  "@analyticsKpiJoyIndexSubMedianCoverage": {
+    "description": "Supporting median and coverage copy for Analytics Joy Index KPI",
+    "placeholders": {
+      "median": {
+        "type": "String"
+      },
+      "ratedCount": {
+        "type": "int"
+      },
+      "totalCount": {
+        "type": "int"
+      }
+    }
+  },
   "analyticsGroupHeaderTime": "━ 时间 / Time ━",
   "analyticsGroupHeaderDistribution": "━ 分布 / Distribution ━",
   "analyticsGroupHeaderStories": "━ 故事 / Stories ━",

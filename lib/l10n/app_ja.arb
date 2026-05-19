@@ -19,6 +19,65 @@
   "@settings": {
     "description": "Settings tab/screen label"
   },
+  "settingsJoyTargetTitle": "ときめき目標",
+  "@settingsJoyTargetTitle": {
+    "description": "Settings section title for monthly Joy target configuration"
+  },
+  "settingsJoyTargetCurrentConfigured": "現在の目標: {target}",
+  "@settingsJoyTargetCurrentConfigured": {
+    "description": "Configured monthly Joy target value in Settings",
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsJoyTargetCurrentRecommended": "参照値: {target}",
+  "@settingsJoyTargetCurrentRecommended": {
+    "description": "Active recommended monthly Joy target value in Settings",
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsJoyTargetRecommendation": "最近のときめき記録からの参照値: {target}",
+  "@settingsJoyTargetRecommendation": {
+    "description": "Neutral recommendation copy for monthly Joy target",
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsJoyTargetFallback": "記録が増えると参照値を表示できます。今は初期の参照値を使います。",
+  "@settingsJoyTargetFallback": {
+    "description": "Fallback copy when monthly Joy target recommendation has insufficient data"
+  },
+  "settingsJoyTargetInputLabel": "月間ときめき目標",
+  "@settingsJoyTargetInputLabel": {
+    "description": "Input label for monthly Joy target dialog"
+  },
+  "settingsJoyTargetInputHint": "正の整数を入力",
+  "@settingsJoyTargetInputHint": {
+    "description": "Input hint for monthly Joy target dialog"
+  },
+  "settingsJoyTargetInvalid": "0より大きい整数を入力してください。",
+  "@settingsJoyTargetInvalid": {
+    "description": "Validation error for invalid monthly Joy target input"
+  },
+  "settingsJoyTargetUseRecommendation": "参照値を使う",
+  "@settingsJoyTargetUseRecommendation": {
+    "description": "Button to clear configured target and use the recommended or fallback target"
+  },
+  "settingsJoyTargetSave": "保存",
+  "@settingsJoyTargetSave": {
+    "description": "Save button for monthly Joy target dialog"
+  },
+  "settingsJoyTargetCancel": "キャンセル",
+  "@settingsJoyTargetCancel": {
+    "description": "Cancel button for monthly Joy target dialog"
+  },
   "ledger": "帳簿",
   "@ledger": {
     "description": "Ledger tab label"
@@ -677,6 +736,31 @@
   "@homeJoyPerYenTooltip": {
     "description": "Tooltip explaining the Joy/¥ density formula (D-10 tooltip 2)"
   },
+  "homeJoyContributionTooltip": "外輪は有効な目標に向かう月間ときめき指数、中輪は満足度の平均、内輪は小確幸の数です。",
+  "@homeJoyContributionTooltip": {
+    "description": "Tooltip explaining the HomeHero three-ring system after ADR-016"
+  },
+  "homeJoyTargetReference": "目標 {target}",
+  "@homeJoyTargetReference": {
+    "description": "Compact HomeHero target reference under cumulative Joy value",
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "homeJoyTargetSemantics": "ときめき指数 {value}、目標 {target}",
+  "@homeJoyTargetSemantics": {
+    "description": "Screen reader label for HomeHero cumulative Joy and active target",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
   "homeHeroCardLabelSingle": "今月の支出",
   "@homeHeroCardLabelSingle": {
     "description": "Hero header label — single mode (D-02)"
@@ -757,6 +841,10 @@
   "homeJoyPerYenLegend": "Joy/¥",
   "@homeJoyPerYenLegend": {
     "description": "Single-mode outer-ring legend label (matches D-20 display)"
+  },
+  "homeJoyContributionLegend": "ときめき目標",
+  "@homeJoyContributionLegend": {
+    "description": "Single-mode outer-ring legend label for monthly Joy target progress"
   },
   "homeHighlightsCountLegend": "小確幸 ({count})",
   "@homeHighlightsCountLegend": {
@@ -1673,6 +1761,47 @@
     }
   },
   "analyticsKpiJoyEmptyCaption": "データを集計中...",
+  "analyticsKpiJoyIndexLabel": "ときめき指数",
+  "@analyticsKpiJoyIndexLabel": {
+    "description": "Analytics KPI label for cumulative Joy Index"
+  },
+  "analyticsKpiJoyIndexEmptyCaption": "魂の記録に満足度をつけると、ときめき指数が表示されます。",
+  "@analyticsKpiJoyIndexEmptyCaption": {
+    "description": "Empty state caption for Analytics Joy Index KPI"
+  },
+  "analyticsKpiJoyIndexSemantics": "{label} {value}、評価済み {ratedCount}/{totalCount}",
+  "@analyticsKpiJoyIndexSemantics": {
+    "description": "Screen reader label for Analytics Joy Index KPI",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "ratedCount": {
+        "type": "int"
+      },
+      "totalCount": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsKpiJoyIndexSubMedianCoverage": "中央値 {median} · 評価 {ratedCount}/{totalCount}",
+  "@analyticsKpiJoyIndexSubMedianCoverage": {
+    "description": "Supporting median and coverage copy for Analytics Joy Index KPI",
+    "placeholders": {
+      "median": {
+        "type": "String"
+      },
+      "ratedCount": {
+        "type": "int"
+      },
+      "totalCount": {
+        "type": "int"
+      }
+    }
+  },
   "analyticsGroupHeaderTime": "━ 時間 / Time ━",
   "analyticsGroupHeaderDistribution": "━ 分布 / Distribution ━",
   "analyticsGroupHeaderStories": "━ 物語 / Stories ━",

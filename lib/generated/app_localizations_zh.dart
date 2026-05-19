@@ -24,6 +24,45 @@ class SZh extends S {
   String get settings => '设置';
 
   @override
+  String get settingsJoyTargetTitle => '悦己目标';
+
+  @override
+  String settingsJoyTargetCurrentConfigured(int target) {
+    return '当前目标：$target';
+  }
+
+  @override
+  String settingsJoyTargetCurrentRecommended(int target) {
+    return '参考值：$target';
+  }
+
+  @override
+  String settingsJoyTargetRecommendation(int target) {
+    return '来自近期悦己记录的参考值：$target';
+  }
+
+  @override
+  String get settingsJoyTargetFallback => '记录更多悦己条目后会显示参考值。现在使用初始参考值。';
+
+  @override
+  String get settingsJoyTargetInputLabel => '月度悦己目标';
+
+  @override
+  String get settingsJoyTargetInputHint => '输入正整数';
+
+  @override
+  String get settingsJoyTargetInvalid => '请输入大于零的整数。';
+
+  @override
+  String get settingsJoyTargetUseRecommendation => '使用参考值';
+
+  @override
+  String get settingsJoyTargetSave => '保存';
+
+  @override
+  String get settingsJoyTargetCancel => '取消';
+
+  @override
   String get ledger => '账本';
 
   @override
@@ -539,6 +578,19 @@ class SZh extends S {
       '幸福密度 = Σ(满足度 × (金额/base)^0.88) / Σ金额 (Kahneman-Tversky 1979 价值函数)。同样金额带来的快乐会随次数减弱 (享乐适应)，公式按¥1k基线归一化。';
 
   @override
+  String get homeJoyContributionTooltip => '外环是朝向当前目标的月度悦己指数，中环是满足度均值，内环是小確幸数。';
+
+  @override
+  String homeJoyTargetReference(int target) {
+    return '目标 $target';
+  }
+
+  @override
+  String homeJoyTargetSemantics(String value, int target) {
+    return '悦己指数 $value，目标 $target';
+  }
+
+  @override
   String get homeHeroCardLabelSingle => '本月支出';
 
   @override
@@ -592,6 +644,9 @@ class SZh extends S {
 
   @override
   String get homeJoyPerYenLegend => 'Joy/¥';
+
+  @override
+  String get homeJoyContributionLegend => '悦己目标';
 
   @override
   String homeHighlightsCountLegend(int count) {
@@ -1310,6 +1365,31 @@ class SZh extends S {
 
   @override
   String get analyticsKpiJoyEmptyCaption => '数据收集中...';
+
+  @override
+  String get analyticsKpiJoyIndexLabel => '悦己指数';
+
+  @override
+  String get analyticsKpiJoyIndexEmptyCaption => '给魂账条目标记满足度后，会显示悦己指数。';
+
+  @override
+  String analyticsKpiJoyIndexSemantics(
+    String label,
+    String value,
+    int ratedCount,
+    int totalCount,
+  ) {
+    return '$label $value，已评分 $ratedCount/$totalCount';
+  }
+
+  @override
+  String analyticsKpiJoyIndexSubMedianCoverage(
+    String median,
+    int ratedCount,
+    int totalCount,
+  ) {
+    return '中位数 $median · 已评分 $ratedCount/$totalCount';
+  }
 
   @override
   String get analyticsGroupHeaderTime => '━ 时间 / Time ━';

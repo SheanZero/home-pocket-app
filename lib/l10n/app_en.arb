@@ -19,6 +19,65 @@
   "@settings": {
     "description": "Settings tab/screen label"
   },
+  "settingsJoyTargetTitle": "Joy target",
+  "@settingsJoyTargetTitle": {
+    "description": "Settings section title for monthly Joy target configuration"
+  },
+  "settingsJoyTargetCurrentConfigured": "Current target: {target}",
+  "@settingsJoyTargetCurrentConfigured": {
+    "description": "Configured monthly Joy target value in Settings",
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsJoyTargetCurrentRecommended": "Active reference: {target}",
+  "@settingsJoyTargetCurrentRecommended": {
+    "description": "Active recommended monthly Joy target value in Settings",
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsJoyTargetRecommendation": "Reference from recent Joy patterns: {target}",
+  "@settingsJoyTargetRecommendation": {
+    "description": "Neutral recommendation copy for monthly Joy target",
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsJoyTargetFallback": "Reference target is available after more Joy entries. Using the starter reference for now.",
+  "@settingsJoyTargetFallback": {
+    "description": "Fallback copy when monthly Joy target recommendation has insufficient data"
+  },
+  "settingsJoyTargetInputLabel": "Monthly Joy target",
+  "@settingsJoyTargetInputLabel": {
+    "description": "Input label for monthly Joy target dialog"
+  },
+  "settingsJoyTargetInputHint": "Enter a positive whole number",
+  "@settingsJoyTargetInputHint": {
+    "description": "Input hint for monthly Joy target dialog"
+  },
+  "settingsJoyTargetInvalid": "Enter a whole number greater than zero.",
+  "@settingsJoyTargetInvalid": {
+    "description": "Validation error for invalid monthly Joy target input"
+  },
+  "settingsJoyTargetUseRecommendation": "Use reference",
+  "@settingsJoyTargetUseRecommendation": {
+    "description": "Button to clear configured target and use the recommended or fallback target"
+  },
+  "settingsJoyTargetSave": "Save",
+  "@settingsJoyTargetSave": {
+    "description": "Save button for monthly Joy target dialog"
+  },
+  "settingsJoyTargetCancel": "Cancel",
+  "@settingsJoyTargetCancel": {
+    "description": "Cancel button for monthly Joy target dialog"
+  },
   "ledger": "Ledger",
   "@ledger": {
     "description": "Ledger tab label"
@@ -677,6 +736,31 @@
   "@homeJoyPerYenTooltip": {
     "description": "Tooltip explaining the Joy/¥ density formula (D-10 tooltip 2)"
   },
+  "homeJoyContributionTooltip": "Outer ring is monthly Joy Index toward your active target; middle is average satisfaction; inner is highlights count.",
+  "@homeJoyContributionTooltip": {
+    "description": "Tooltip explaining the HomeHero three-ring system after ADR-016"
+  },
+  "homeJoyTargetReference": "of {target}",
+  "@homeJoyTargetReference": {
+    "description": "Compact HomeHero target reference under cumulative Joy value",
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "homeJoyTargetSemantics": "Joy Index {value} of target {target}",
+  "@homeJoyTargetSemantics": {
+    "description": "Screen reader label for HomeHero cumulative Joy and active target",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
   "homeHeroCardLabelSingle": "This Month",
   "@homeHeroCardLabelSingle": {
     "description": "Hero header label — single mode (D-02)"
@@ -757,6 +841,10 @@
   "homeJoyPerYenLegend": "Joy / ¥",
   "@homeJoyPerYenLegend": {
     "description": "Single-mode outer-ring legend label (matches D-20 display)"
+  },
+  "homeJoyContributionLegend": "Joy Index target",
+  "@homeJoyContributionLegend": {
+    "description": "Single-mode outer-ring legend label for monthly Joy target progress"
   },
   "homeHighlightsCountLegend": "Highlights ({count})",
   "@homeHighlightsCountLegend": {
@@ -1673,6 +1761,47 @@
     }
   },
   "analyticsKpiJoyEmptyCaption": "Gathering data...",
+  "analyticsKpiJoyIndexLabel": "Joy Index",
+  "@analyticsKpiJoyIndexLabel": {
+    "description": "Analytics KPI label for cumulative Joy Index"
+  },
+  "analyticsKpiJoyIndexEmptyCaption": "Joy Index appears after you rate soul-ledger entries.",
+  "@analyticsKpiJoyIndexEmptyCaption": {
+    "description": "Empty state caption for Analytics Joy Index KPI"
+  },
+  "analyticsKpiJoyIndexSemantics": "{label} {value}, {ratedCount} rated of {totalCount} soul entries",
+  "@analyticsKpiJoyIndexSemantics": {
+    "description": "Screen reader label for Analytics Joy Index KPI",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "ratedCount": {
+        "type": "int"
+      },
+      "totalCount": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsKpiJoyIndexSubMedianCoverage": "Median {median} · rated {ratedCount}/{totalCount}",
+  "@analyticsKpiJoyIndexSubMedianCoverage": {
+    "description": "Supporting median and coverage copy for Analytics Joy Index KPI",
+    "placeholders": {
+      "median": {
+        "type": "String"
+      },
+      "ratedCount": {
+        "type": "int"
+      },
+      "totalCount": {
+        "type": "int"
+      }
+    }
+  },
   "analyticsGroupHeaderTime": "━ Time ━",
   "analyticsGroupHeaderDistribution": "━ Distribution ━",
   "analyticsGroupHeaderStories": "━ Stories ━",

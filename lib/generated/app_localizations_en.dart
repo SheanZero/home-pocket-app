@@ -24,6 +24,47 @@ class SEn extends S {
   String get settings => 'Settings';
 
   @override
+  String get settingsJoyTargetTitle => 'Joy target';
+
+  @override
+  String settingsJoyTargetCurrentConfigured(int target) {
+    return 'Current target: $target';
+  }
+
+  @override
+  String settingsJoyTargetCurrentRecommended(int target) {
+    return 'Active reference: $target';
+  }
+
+  @override
+  String settingsJoyTargetRecommendation(int target) {
+    return 'Reference from recent Joy patterns: $target';
+  }
+
+  @override
+  String get settingsJoyTargetFallback =>
+      'Reference target is available after more Joy entries. Using the starter reference for now.';
+
+  @override
+  String get settingsJoyTargetInputLabel => 'Monthly Joy target';
+
+  @override
+  String get settingsJoyTargetInputHint => 'Enter a positive whole number';
+
+  @override
+  String get settingsJoyTargetInvalid =>
+      'Enter a whole number greater than zero.';
+
+  @override
+  String get settingsJoyTargetUseRecommendation => 'Use reference';
+
+  @override
+  String get settingsJoyTargetSave => 'Save';
+
+  @override
+  String get settingsJoyTargetCancel => 'Cancel';
+
+  @override
   String get ledger => 'Ledger';
 
   @override
@@ -542,6 +583,20 @@ class SEn extends S {
       'Joy density = Σ(satisfaction × (amount/base)^0.88) / Σamount (Kahneman-Tversky 1979). Repeat purchases bring less joy (hedonic adaptation); the formula normalizes against ¥1k baseline.';
 
   @override
+  String get homeJoyContributionTooltip =>
+      'Outer ring is monthly Joy Index toward your active target; middle is average satisfaction; inner is highlights count.';
+
+  @override
+  String homeJoyTargetReference(int target) {
+    return 'of $target';
+  }
+
+  @override
+  String homeJoyTargetSemantics(String value, int target) {
+    return 'Joy Index $value of target $target';
+  }
+
+  @override
   String get homeHeroCardLabelSingle => 'This Month';
 
   @override
@@ -596,6 +651,9 @@ class SEn extends S {
 
   @override
   String get homeJoyPerYenLegend => 'Joy / ¥';
+
+  @override
+  String get homeJoyContributionLegend => 'Joy Index target';
 
   @override
   String homeHighlightsCountLegend(int count) {
@@ -1325,6 +1383,32 @@ class SEn extends S {
 
   @override
   String get analyticsKpiJoyEmptyCaption => 'Gathering data...';
+
+  @override
+  String get analyticsKpiJoyIndexLabel => 'Joy Index';
+
+  @override
+  String get analyticsKpiJoyIndexEmptyCaption =>
+      'Joy Index appears after you rate soul-ledger entries.';
+
+  @override
+  String analyticsKpiJoyIndexSemantics(
+    String label,
+    String value,
+    int ratedCount,
+    int totalCount,
+  ) {
+    return '$label $value, $ratedCount rated of $totalCount soul entries';
+  }
+
+  @override
+  String analyticsKpiJoyIndexSubMedianCoverage(
+    String median,
+    int ratedCount,
+    int totalCount,
+  ) {
+    return 'Median $median · rated $ratedCount/$totalCount';
+  }
 
   @override
   String get analyticsGroupHeaderTime => '━ Time ━';

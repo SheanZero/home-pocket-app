@@ -24,6 +24,45 @@ class SJa extends S {
   String get settings => '設定';
 
   @override
+  String get settingsJoyTargetTitle => 'ときめき目標';
+
+  @override
+  String settingsJoyTargetCurrentConfigured(int target) {
+    return '現在の目標: $target';
+  }
+
+  @override
+  String settingsJoyTargetCurrentRecommended(int target) {
+    return '参照値: $target';
+  }
+
+  @override
+  String settingsJoyTargetRecommendation(int target) {
+    return '最近のときめき記録からの参照値: $target';
+  }
+
+  @override
+  String get settingsJoyTargetFallback => '記録が増えると参照値を表示できます。今は初期の参照値を使います。';
+
+  @override
+  String get settingsJoyTargetInputLabel => '月間ときめき目標';
+
+  @override
+  String get settingsJoyTargetInputHint => '正の整数を入力';
+
+  @override
+  String get settingsJoyTargetInvalid => '0より大きい整数を入力してください。';
+
+  @override
+  String get settingsJoyTargetUseRecommendation => '参照値を使う';
+
+  @override
+  String get settingsJoyTargetSave => '保存';
+
+  @override
+  String get settingsJoyTargetCancel => 'キャンセル';
+
+  @override
   String get ledger => '帳簿';
 
   @override
@@ -538,6 +577,20 @@ class SJa extends S {
       '幸福密度 = Σ(満足度 × (金額/base)^0.88) / Σ金額（K-T 1979 価値関数）。同じ金額でも繰り返すと喜びは弱まります（享楽的適応）。式は ¥1k 基準で正規化。';
 
   @override
+  String get homeJoyContributionTooltip =>
+      '外輪は有効な目標に向かう月間ときめき指数、中輪は満足度の平均、内輪は小確幸の数です。';
+
+  @override
+  String homeJoyTargetReference(int target) {
+    return '目標 $target';
+  }
+
+  @override
+  String homeJoyTargetSemantics(String value, int target) {
+    return 'ときめき指数 $value、目標 $target';
+  }
+
+  @override
   String get homeHeroCardLabelSingle => '今月の支出';
 
   @override
@@ -591,6 +644,9 @@ class SJa extends S {
 
   @override
   String get homeJoyPerYenLegend => 'Joy/¥';
+
+  @override
+  String get homeJoyContributionLegend => 'ときめき目標';
 
   @override
   String homeHighlightsCountLegend(int count) {
@@ -1312,6 +1368,31 @@ class SJa extends S {
 
   @override
   String get analyticsKpiJoyEmptyCaption => 'データを集計中...';
+
+  @override
+  String get analyticsKpiJoyIndexLabel => 'ときめき指数';
+
+  @override
+  String get analyticsKpiJoyIndexEmptyCaption => '魂の記録に満足度をつけると、ときめき指数が表示されます。';
+
+  @override
+  String analyticsKpiJoyIndexSemantics(
+    String label,
+    String value,
+    int ratedCount,
+    int totalCount,
+  ) {
+    return '$label $value、評価済み $ratedCount/$totalCount';
+  }
+
+  @override
+  String analyticsKpiJoyIndexSubMedianCoverage(
+    String median,
+    int ratedCount,
+    int totalCount,
+  ) {
+    return '中央値 $median · 評価 $ratedCount/$totalCount';
+  }
 
   @override
   String get analyticsGroupHeaderTime => '━ 時間 / Time ━';

@@ -129,6 +129,72 @@ abstract class S {
   /// **'Settings'**
   String get settings;
 
+  /// Settings section title for monthly Joy target configuration
+  ///
+  /// In en, this message translates to:
+  /// **'Joy target'**
+  String get settingsJoyTargetTitle;
+
+  /// Configured monthly Joy target value in Settings
+  ///
+  /// In en, this message translates to:
+  /// **'Current target: {target}'**
+  String settingsJoyTargetCurrentConfigured(int target);
+
+  /// Active recommended monthly Joy target value in Settings
+  ///
+  /// In en, this message translates to:
+  /// **'Active reference: {target}'**
+  String settingsJoyTargetCurrentRecommended(int target);
+
+  /// Neutral recommendation copy for monthly Joy target
+  ///
+  /// In en, this message translates to:
+  /// **'Reference from recent Joy patterns: {target}'**
+  String settingsJoyTargetRecommendation(int target);
+
+  /// Fallback copy when monthly Joy target recommendation has insufficient data
+  ///
+  /// In en, this message translates to:
+  /// **'Reference target is available after more Joy entries. Using the starter reference for now.'**
+  String get settingsJoyTargetFallback;
+
+  /// Input label for monthly Joy target dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Joy target'**
+  String get settingsJoyTargetInputLabel;
+
+  /// Input hint for monthly Joy target dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a positive whole number'**
+  String get settingsJoyTargetInputHint;
+
+  /// Validation error for invalid monthly Joy target input
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number greater than zero.'**
+  String get settingsJoyTargetInvalid;
+
+  /// Button to clear configured target and use the recommended or fallback target
+  ///
+  /// In en, this message translates to:
+  /// **'Use reference'**
+  String get settingsJoyTargetUseRecommendation;
+
+  /// Save button for monthly Joy target dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get settingsJoyTargetSave;
+
+  /// Cancel button for monthly Joy target dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get settingsJoyTargetCancel;
+
   /// Ledger tab label
   ///
   /// In en, this message translates to:
@@ -1107,6 +1173,24 @@ abstract class S {
   /// **'Joy density = Σ(satisfaction × (amount/base)^0.88) / Σamount (Kahneman-Tversky 1979). Repeat purchases bring less joy (hedonic adaptation); the formula normalizes against ¥1k baseline.'**
   String get homeJoyPerYenTooltip;
 
+  /// Tooltip explaining the HomeHero three-ring system after ADR-016
+  ///
+  /// In en, this message translates to:
+  /// **'Outer ring is monthly Joy Index toward your active target; middle is average satisfaction; inner is highlights count.'**
+  String get homeJoyContributionTooltip;
+
+  /// Compact HomeHero target reference under cumulative Joy value
+  ///
+  /// In en, this message translates to:
+  /// **'of {target}'**
+  String homeJoyTargetReference(int target);
+
+  /// Screen reader label for HomeHero cumulative Joy and active target
+  ///
+  /// In en, this message translates to:
+  /// **'Joy Index {value} of target {target}'**
+  String homeJoyTargetSemantics(String value, int target);
+
   /// Hero header label — single mode (D-02)
   ///
   /// In en, this message translates to:
@@ -1208,6 +1292,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Joy / ¥'**
   String get homeJoyPerYenLegend;
+
+  /// Single-mode outer-ring legend label for monthly Joy target progress
+  ///
+  /// In en, this message translates to:
+  /// **'Joy Index target'**
+  String get homeJoyContributionLegend;
 
   /// Single-mode inner-ring legend label with placeholder count
   ///
@@ -2527,6 +2617,39 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Gathering data...'**
   String get analyticsKpiJoyEmptyCaption;
+
+  /// Analytics KPI label for cumulative Joy Index
+  ///
+  /// In en, this message translates to:
+  /// **'Joy Index'**
+  String get analyticsKpiJoyIndexLabel;
+
+  /// Empty state caption for Analytics Joy Index KPI
+  ///
+  /// In en, this message translates to:
+  /// **'Joy Index appears after you rate soul-ledger entries.'**
+  String get analyticsKpiJoyIndexEmptyCaption;
+
+  /// Screen reader label for Analytics Joy Index KPI
+  ///
+  /// In en, this message translates to:
+  /// **'{label} {value}, {ratedCount} rated of {totalCount} soul entries'**
+  String analyticsKpiJoyIndexSemantics(
+    String label,
+    String value,
+    int ratedCount,
+    int totalCount,
+  );
+
+  /// Supporting median and coverage copy for Analytics Joy Index KPI
+  ///
+  /// In en, this message translates to:
+  /// **'Median {median} · rated {ratedCount}/{totalCount}'**
+  String analyticsKpiJoyIndexSubMedianCoverage(
+    String median,
+    int ratedCount,
+    int totalCount,
+  );
 
   /// No description provided for @analyticsGroupHeaderTime.
   ///
