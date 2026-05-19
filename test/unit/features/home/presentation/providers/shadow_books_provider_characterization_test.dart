@@ -71,7 +71,10 @@ void main() {
       test(
         'shadowAggregateProvider resolves to ShadowAggregate.empty() when no shadow books',
         () async {
-          final aggProvider = shadowAggregateProvider(year: 2026, month: 3);
+          final aggProvider = shadowAggregateProvider(
+            startDate: DateTime(2026, 3),
+            endDate: DateTime(2026, 3, 31, 23, 59, 59),
+          );
           // Listen to prevent auto-dispose during test
           final sub = container.listen(aggProvider, (_, next) {});
           // Wait for shadowBooksProvider (which aggProvider depends on) to settle

@@ -35,10 +35,14 @@ void main() {
   group('HomeScreen', () {
     late MockGroupRepository groupRepository;
     late DateTime now;
+    late DateTime currentMonthStart;
+    late DateTime currentMonthEnd;
 
     setUp(() {
       groupRepository = MockGroupRepository();
       now = DateTime.now();
+      currentMonthStart = DateTime(now.year, now.month);
+      currentMonthEnd = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
       when(
         () => groupRepository.watchActiveGroup(),
       ).thenAnswer((_) => Stream.value(null));
@@ -49,19 +53,19 @@ void main() {
         overrides: [
           monthlyReportProvider(
             bookId: 'book_001',
-            year: now.year,
-            month: now.month,
+            startDate: currentMonthStart,
+            endDate: currentMonthEnd,
           ).overrideWith((ref) async => fixtureMonthlyReportRich()),
           happinessReportProvider(
             bookId: 'book_001',
-            year: now.year,
-            month: now.month,
+            startDate: currentMonthStart,
+            endDate: currentMonthEnd,
             currencyCode: 'JPY',
           ).overrideWith((ref) async => fixtureHappinessReportRich()),
           bestJoyMomentProvider(
             bookId: 'book_001',
-            year: now.year,
-            month: now.month,
+            startDate: currentMonthStart,
+            endDate: currentMonthEnd,
           ).overrideWith((ref) async => fixtureBestJoyResultRich()),
           bookByIdProvider(
             bookId: 'book_001',

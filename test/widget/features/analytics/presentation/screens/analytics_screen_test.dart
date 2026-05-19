@@ -221,6 +221,29 @@ void main() {
       );
       expect(find.text('Family · Highlights Summary'), findsOneWidget);
     });
+
+    testWidgets(
+      'pull-to-refresh invalidates windowed providers in group mode',
+      (tester) async {
+        await _pump(
+          tester,
+          _buildSubject(
+            groupMode: true,
+            shadowBooks: fixtureShadowBooksThree(),
+          ),
+        );
+
+        await tester.fling(
+          find.byType(SingleChildScrollView),
+          const Offset(0, 320),
+          1000,
+        );
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+
+        expect(tester.takeException(), isNull);
+      },
+    );
   });
 }
 

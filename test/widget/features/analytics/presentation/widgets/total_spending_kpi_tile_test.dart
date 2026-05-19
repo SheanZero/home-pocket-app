@@ -53,26 +53,32 @@ void main() {
       await tester.pumpWidget(_buildSubject(_monthlyReport()));
       await tester.pumpAndSettle();
 
-      expect(find.text('今月の支出'), findsOneWidget);
+      expect(find.text('支出合計'), findsOneWidget);
       expect(find.text('¥41,200'), findsOneWidget);
     });
 
-    testWidgets('renders MoM increased delta', (tester) async {
+    testWidgets('omits increased delta even when comparison data exists', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _buildSubject(_monthlyReport(expenseChange: 8.5)),
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining(RegExp(r'↑ \+(8|9)% MoM')), findsOneWidget);
+      expect(find.textContaining('MoM'), findsNothing);
+      expect(find.text('↑'), findsNothing);
     });
 
-    testWidgets('renders MoM decreased delta', (tester) async {
+    testWidgets('omits decreased delta even when comparison data exists', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _buildSubject(_monthlyReport(expenseChange: -8.5)),
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining(RegExp(r'↓ -(8|9)% MoM')), findsOneWidget);
+      expect(find.textContaining('MoM'), findsNothing);
+      expect(find.text('↓'), findsNothing);
     });
 
     testWidgets('omits sub-line when previousMonthComparison is null', (

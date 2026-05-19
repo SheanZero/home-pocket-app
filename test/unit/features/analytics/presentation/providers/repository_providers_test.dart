@@ -24,6 +24,8 @@ class _MockBookRepository extends Mock implements BookRepository {}
 class _MockGroupRepository extends Mock implements GroupRepository {}
 
 void main() {
+  final startDate = DateTime(2026, 3);
+  final endDate = DateTime(2026, 3, 31, 23, 59, 59);
   late _MockAnalyticsRepository analyticsRepository;
   late _MockBookRepository bookRepository;
   late _MockGroupRepository groupRepository;
@@ -84,7 +86,7 @@ void main() {
 
         final result = await waitForFirstValue<FamilyHappiness>(
           container,
-          familyHappinessProvider(year: 2026, month: 3),
+          familyHappinessProvider(startDate: startDate, endDate: endDate),
         );
         final data = result.requireValue;
 
@@ -109,7 +111,7 @@ void main() {
 
         final result = await waitForFirstValue<FamilyHappiness>(
           container,
-          familyHappinessProvider(year: 2026, month: 3),
+          familyHappinessProvider(startDate: startDate, endDate: endDate),
         );
         final data = result.requireValue;
 

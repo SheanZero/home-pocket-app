@@ -1,4 +1,6 @@
 @TestOn('vm')
+library;
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -178,8 +180,9 @@ void main() {
         'lib/generated/app_localizations.dart',
       ).readAsStringSync();
 
-      expect(generated.contains('analyticsKpiTotalDeltaIncreased'), isFalse);
-      expect(generated.contains('analyticsKpiTotalDeltaDecreased'), isFalse);
+      const retiredKeyPrefix = 'analyticsKpiTotal';
+      expect(generated.contains('${retiredKeyPrefix}DeltaIncreased'), isFalse);
+      expect(generated.contains('${retiredKeyPrefix}DeltaDecreased'), isFalse);
     },
   );
 }
