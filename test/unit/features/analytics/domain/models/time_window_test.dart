@@ -96,6 +96,37 @@ void main() {
     });
   });
 
+  group('TimeWindow invariants', () {
+    test('week requires a Monday start', () {
+      expect(
+        () => TimeWindow.week(mondayStart: DateTime(2026, 5, 12)),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('month requires a value from 1 through 12', () {
+      expect(
+        () => const TimeWindow.month(year: 2026, month: 0),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => const TimeWindow.month(year: 2026, month: 13),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('quarter requires a value from 1 through 4', () {
+      expect(
+        () => const TimeWindow.quarter(year: 2026, quarter: 0),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => const TimeWindow.quarter(year: 2026, quarter: 5),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+  });
+
   test('sealed pattern matching covers every variant without default', () {
     String label(TimeWindow window) => switch (window) {
       WeekWindow() => 'week',

@@ -125,6 +125,18 @@ void main() {
       },
     );
 
+    test('allows custom ranges ending today at inclusive day end', () {
+      final now = DateTime.now();
+
+      expect(
+        () => TimeWindowValidation.assertValid(
+          DateTime(now.year, now.month, 1),
+          DateTime(now.year, now.month, now.day, 23, 59, 59),
+        ),
+        returnsNormally,
+      );
+    });
+
     test('allows end dates just before now', () {
       expect(
         () => TimeWindowValidation.assertValid(

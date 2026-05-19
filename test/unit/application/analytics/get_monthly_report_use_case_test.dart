@@ -202,6 +202,39 @@ void main() {
       expect(report.dailyExpenses[0].amount, 0);
     });
 
+    test('builds daily expenses for every day in non-month windows', () async {
+      await insertExpense(
+        id: 'tx_jan_10',
+        amount: 5000,
+        timestamp: DateTime(2026, 1, 10),
+      );
+      await insertExpense(
+        id: 'tx_apr_10',
+        amount: 7000,
+        timestamp: DateTime(2026, 4, 10),
+        prevHash: 'hash_tx_jan_10',
+      );
+
+      final report = await executeWindow(
+        startDate: DateTime(2026),
+        endDate: DateTime(2026, 4, 30, 23, 59, 59),
+      );
+
+      expect(report.dailyExpenses, hasLength(120));
+      expect(
+        report.dailyExpenses
+            .firstWhere((expense) => expense.date == DateTime(2026, 1, 10))
+            .amount,
+        5000,
+      );
+      expect(
+        report.dailyExpenses
+            .firstWhere((expense) => expense.date == DateTime(2026, 4, 10))
+            .amount,
+        7000,
+      );
+    });
+
     test('excludes soft-deleted transactions', () async {
       await transactionDao.insertTransaction(
         id: 'tx1',
