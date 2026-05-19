@@ -28,7 +28,6 @@ class TotalSpendingKpiTile extends StatelessWidget {
       currencyCode,
       locale,
     );
-    final delta = report.previousMonthComparison?.expenseChange;
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -52,32 +51,8 @@ class TotalSpendingKpiTile extends StatelessWidget {
               color: context.wmTextPrimary,
             ),
           ),
-          if (delta != null) ...[
-            const SizedBox(height: 4),
-            _MomDeltaSubLine(delta: delta),
-          ],
         ],
       ),
-    );
-  }
-}
-
-class _MomDeltaSubLine extends StatelessWidget {
-  const _MomDeltaSubLine({required this.delta});
-
-  final double delta;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = S.of(context);
-    final pct = delta.abs().round().toString();
-    final text = delta < 0
-        ? l10n.analyticsKpiTotalDeltaDecreased(pct)
-        : l10n.analyticsKpiTotalDeltaIncreased(pct);
-
-    return Text(
-      text,
-      style: AppTextStyles.caption.copyWith(color: context.wmTextSecondary),
     );
   }
 }
