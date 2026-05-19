@@ -78,7 +78,13 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
   4. **100% behavior contract (ADR-012 §2 + ADR-016 §5) holds** — at and beyond 100% the app produces no copy text, no toast, no snackbar, no notification, no haptic feedback, no celebration animation, no `>100%` percentage display; verified by widget test asserting absence of these UI events.
   5. Settings screen exposes a numeric input for `monthly_joy_target`; when blank, copy displays the recommended value ("基于过去 3 个月，建议 X" / "Based on past 3 months, recommended X" / equivalent in zh); ARB keys exist in ja/zh/en parity and `flutter gen-l10n` succeeds without warnings.
   6. AnalyticsScreen renders `Σ joy_contribution` as the primary Joy KPI; density (Joy/¥) UI elements are removed (KPI strip, trend, distribution, story); ARB keys related to density are removed or renamed; `grep -r 'joyPerYen\|homeHappinessROI' lib/` returns 0 hits in live UI code.
-**Plans**: TBD
+**Plans**: 6 plans
+  - [ ] 14-01-PLAN.md — ARB foundation for JoyContribution, Settings target, and Analytics epsilon copy
+  - [ ] 14-02-PLAN.md — HomeHero active target data contract and ring ratio wiring
+  - [ ] 14-03-PLAN.md — HomeHero color state machine, 100% no-event contract, and 0/50/100/>100 goldens
+  - [ ] 14-04-PLAN.md — Settings monthly Joy target UI with neutral recommendation framing
+  - [ ] 14-05-PLAN.md — Analytics Variant epsilon Joy Index KPI ordering and cumulative value display
+  - [ ] 14-06-PLAN.md — Final density ARB cleanup, generated localization, and full verification sweep
 **UI hint**: yes
 
 ### Phase 15: Custom Time Windows (HAPPY-V2-02)
@@ -123,7 +129,7 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 ## Current Status
 
 **Active milestone:** v1.2 Happiness Metric Refresh (in progress)
-**Current phase:** Phase 14 (not started — awaiting `/gsd:plan-phase 14`)
+**Current phase:** Phase 14 (planned — awaiting `/gsd:execute-phase 14`)
 
 ## Progress
 
