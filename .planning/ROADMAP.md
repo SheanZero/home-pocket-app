@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 Codebase Cleanup Initiative** — Phases 1-8 (shipped 2026-04-29) — see [archive](milestones/v1.0-ROADMAP.md)
 - ✅ **v1.1 Happiness Metric & Display** — Phases 9-12 (shipped 2026-05-05) — see [archive](milestones/v1.1-ROADMAP.md)
-- 🟢 **v1.2 Happiness Metric Refresh** — Phases 13-17 (planning, started 2026-05-19)
+- 🟢 **v1.2 Happiness Metric Refresh** — Phases 13-17 (in progress, started 2026-05-19)
 
 ## Phases
 
@@ -36,11 +36,11 @@
 
 </details>
 
-### 🟢 v1.2 — Happiness Metric Refresh (Phases 13-17 — planning)
+### 🟢 v1.2 — Happiness Metric Refresh (Phases 13-17 — in progress)
 
 Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify (2026-05-19).
 
-- [ ] **Phase 13: ADR-016 Backend Foundation** — Spike fallback baseline; schema bump (`user_settings.monthly_joy_target` field + table reuse); `GetHappinessReportUseCase` rewrite (density → Σ joy_contribution); DAO query simplification; formatter rename (`joy_density_formatter` → `joy_cumulative_formatter`); recommendation algorithm (median of past 3 months + fallback)
+- [x] **Phase 13: ADR-016 Backend Foundation** — Spike fallback baseline; schema bump (`user_settings.monthly_joy_target` field + table reuse); `GetHappinessReportUseCase` rewrite (density → Σ joy_contribution); DAO query simplification; formatter rename (`joy_density_formatter` → `joy_cumulative_formatter`); recommendation algorithm (median of past 3 months + fallback) — completed 2026-05-19
 - [ ] **Phase 14: ADR-016 Frontend + ARB Reconciliation (TOOL-V2-02)** — `HomeHeroCard` rebuild (累加 ring + sage-green→gold color state machine); AnalyticsScreen Variant ε redesign (density KPI retired); Settings UI (`monthly_joy_target` config + recommended-value display); ARB key reconciliation (density-related keys removed/renamed across ja/zh/en); 100%-behavior gate (no discrete events per ADR-012 §2 / ADR-016 §5); golden regen for 0% / 50% / 100% / >100% states
 - [ ] **Phase 15: Custom Time Windows (HAPPY-V2-02)** — Week / month / quarter / year / arbitrary date-range selector wired across all Joy metrics in AnalyticsScreen; selection persists per session; HomeHero remains month-anchored (per ADR-016 ring semantics)
 - [ ] **Phase 16: Per-Category Breakdown + Soul-vs-Survival Comparison (HAPPY-V2-01 + STATSUI-V2-01)** — Per-category satisfaction breakdown view in AnalyticsScreen; Soul-vs-Survival happiness comparison surface with anti-toxicity framing (descriptive only, no value-judgment language)
@@ -65,7 +65,7 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
   - [x] 13-04-PLAN.md — Rewrite GetHappinessReportUseCase fold to Σ joy_contribution; rename HappinessReport field + DAO method
   - [x] 13-05-PLAN.md — Spike simulation + 13-SPIKE.md (fallback baseline, outlier policy, persistence behavior)
   - [x] 13-06-PLAN.md — GetMonthlyJoyTargetRecommendationUseCase + Riverpod provider wiring
-  - [ ] 13-07-PLAN.md — Density rip (delete trend/daily files), HomeHero rename, AnalyticsScreen histogram gate rewire, grep gate verification
+  - [x] 13-07-PLAN.md — Density rip (delete trend/daily files), HomeHero rename, AnalyticsScreen histogram gate rewire, grep gate verification
 
 ### Phase 14: ADR-016 Frontend + ARB Reconciliation (TOOL-V2-02)
 **Goal**: Ship the user-facing redesign of HomeHero and AnalyticsScreen on the new `Σ joy_contribution` backend, plus the Settings target-configuration UI and ARB cleanup, so the end-user perceives the full ADR-016 migration in one coherent surface.
@@ -122,8 +122,8 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 
 ## Current Status
 
-**Active milestone:** v1.2 Happiness Metric Refresh (planning)
-**Current phase:** Phase 13 (planning — awaiting `/gsd:plan-phase 13`)
+**Active milestone:** v1.2 Happiness Metric Refresh (in progress)
+**Current phase:** Phase 14 (not started — awaiting `/gsd:plan-phase 14`)
 
 ## Progress
 
@@ -131,11 +131,11 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 |-----------|--------|----------------|--------|---------|
 | v1.0 Codebase Cleanup Initiative | 1-8 | 48/48 | Complete | 2026-04-29 |
 | v1.1 Happiness Metric & Display | 9-12 | 40/40 | Complete | 2026-05-05 |
-| v1.2 Happiness Metric Refresh | 13-17 | 0/0 | Planning | — |
+| v1.2 Happiness Metric Refresh | 13-17 | 7/7 | In Progress | — |
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 13. ADR-016 Backend Foundation | 6/7 | In Progress|  |
+| 13. ADR-016 Backend Foundation | 7/7 | Complete | 2026-05-19 |
 | 14. ADR-016 Frontend + ARB Reconciliation | 0/0 | Not started | — |
 | 15. Custom Time Windows | 0/0 | Not started | — |
 | 16. Per-Category Breakdown + Soul-vs-Survival | 0/0 | Not started | — |

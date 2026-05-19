@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Happiness Metric Refresh
 status: executing
-stopped_at: Completed Phase 13 Wave 4 plan 13-06
-last_updated: "2026-05-19T04:45:21.673Z"
+stopped_at: Completed Phase 13 plan 13-07 and close gates
+last_updated: "2026-05-19T04:55:25Z"
 last_activity: 2026-05-19
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 7
-  completed_plans: 6
-  percent: 0
+  completed_plans: 7
+  percent: 20
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-19)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes survival spending from soul spending
-**Current focus:** Phase 13 — adr-016-backend-foundation
+**Current focus:** Phase 14 — ADR-016 Frontend + ARB Reconciliation
 
 ## Current Position
 
-Phase: 13 (adr-016-backend-foundation) — EXECUTING
-Plan: 7 of 7
-Status: Ready to execute
+Phase: 14 (ADR-016 Frontend + ARB Reconciliation) — NOT STARTED
+Plan: TBD
+Status: Ready to plan
 Last activity: 2026-05-19
 
 ## v1.2 Phase Plan
@@ -64,7 +64,7 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 decisions ca
 - ADR-016 ratified 2026-05-19: Σ joy_contribution supersedes density (Joy/¥) as the single Joy expression; ADR-013 marked as superseded via append-only update (per-tx PTVF scaling formula stays active)
 - v1.1 baseline-purity is explicitly broken with this milestone (per ADR-016 §1) — accepted cost
 - HomeHero ring is single-month accumulation with sage-green→gold smooth color transition; **no discrete events** at 100% (no copy, no toast, no notification, no haptic, no celebration animation) per ADR-016 §5 + ADR-012 §2
-- monthly_joy_target user-configurable; recommended value = `ceil(median(past 3 months Σ joy_contribution))` when ≥3 months data, else spike-decided fallback (Phase 13 1-day spike resolves the number)
+- monthly_joy_target user-configurable; recommended value = `ceil(median(past 3 months Σ joy_contribution))` when ≥3 months data, else fallback baseline 50 (Phase 13 spike)
 - Family privacy hardening (FAMILY-V2-01/02/03) explicitly deferred to keep v1.2 Joy-axis focused
 - Phase numbering continues from v1.1 (Phase 13 starts v1.2)
 
@@ -78,8 +78,6 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 decisions ca
 
 ### Pending Todos
 
-- **Phase 13 spike (must land in plan-phase 13):** decide fallback `monthly_joy_target` baseline number (candidate range 30-100 per ADR-016 §4); decide whether to apply outlier truncation to median computation; decide whether recommended value persists in UI after user configures their own target
-- **Phase 13:** confirm `joy_density_formatter` rename target name (e.g., `joy_cumulative_formatter`) and migration path for any cached references
 - **Phase 17 prereq:** confirm `transactions.entry_source` column truly doesn't exist (Phase 9 of v1.1 noted absence; re-verify before plan-phase 17)
 - **Phase 14:** Decide whether sage-green→gold transition is full 0-100% gradient or 90%+ trigger (ADR-016 §5 leaves to implementation)
 
@@ -140,8 +138,8 @@ Items acknowledged and deferred at v1.0 milestone close on 2026-04-29:
 
 ## Session Continuity
 
-Last session: 2026-05-19T04:45:21.667Z
-Stopped at: Completed Phase 13 Wave 4 plan 13-06
-Resume file: .planning/phases/13-adr-016-backend-foundation/13-07-PLAN.md
+Last session: 2026-05-19T04:55:25Z
+Stopped at: Completed Phase 13 plan 13-07 and close gates
+Resume file: .planning/ROADMAP.md
 
-**Planned Next:** `/gsd:plan-phase 13` — plan the ADR-016 Backend Foundation phase (spike + schema + use-case rewrite + formatter rename + recommendation algorithm)
+**Planned Next:** `/gsd:plan-phase 14` — plan the ADR-016 Frontend + ARB Reconciliation phase (HomeHero ring target behavior, Settings target UI, Analytics redesign, ARB cleanup)
