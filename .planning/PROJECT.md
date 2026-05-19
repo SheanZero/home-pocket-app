@@ -9,7 +9,7 @@ The v1.0 initiative was a pure-refactor cleanup, not a feature release. It deliv
 
 The v1.1 milestone delivered the happiness metric domain, HomePage `HomeHeroCard`, AnalyticsScreen Variant δ unified dashboard, and final trilingual UI copy rename pass. It also ratified the v1.1 anti-gamification and lexical hierarchy ADRs. One Phase 11 human/device UAT item remains accepted as known close debt in `.planning/STATE.md`.
 
-The codebase is now ready for the next milestone cycle. Candidate directions include release-readiness QA, OCR, family sync hardening, strict family analytics consent, or toolchain/doc guardrail cleanup.
+The v1.2 milestone is underway. Phase 13 established the ADR-016 backend foundation, and Phase 14 completed the frontend + ARB reconciliation: HomeHero, Settings, and Analytics now use the Σ joy_contribution vocabulary, with stale density/Joy-per-yen UI removed. Phase 15 is next: Custom Time Windows.
 
 ## Current Milestone: v1.2 Happiness Metric Refresh
 
@@ -29,7 +29,7 @@ The codebase is now ready for the next milestone cycle. Candidate directions inc
 - **HAPPY-V2-02**: Custom time windows (week / quarter / year / arbitrary)
 - **HAPPY-V2-03**: Manual-only sub-metric (依赖 entry_source schema 迁移)
 - **STATSUI-V2-01**: Soul-vs-Survival happiness comparison surface (anti-toxicity framing)
-- **TOOL-V2-02**: ARB key rename (`homeHappinessROI` → `homeJoyPerYen`, `homeSoulFullness` → `homeJoyIndex`) ja/zh/en 同步
+- **TOOL-V2-02**: ARB reconciliation for the ADR-016 Joy vocabulary; obsolete density/Joy-per-yen/ROI keys removed across ja/zh/en
 
 **Key context:**
 - v1.1 close + 14 天；ADR-016 §1 显式接受 v1.1 baseline 不再 pure 的代价
@@ -120,10 +120,14 @@ A family accounting app users can trust with sensitive financial data — local-
 - ✓ v1.1 HomePage happiness display validated in Phase 10: personal metric tiles, Best Joy story card, group-mode family insight, empty states, info tooltips, and golden coverage.
 - ✓ v1.1 AnalyticsScreen unified dashboard validated in Phase 11: KPI mini-hero, Joy-per-¥ trend, satisfaction histogram, story cards, month picker, and aggregate-only family insight.
 - ✓ v1.1 UI copy rename pass validated in Phase 12: ARB value rewrites for ja/zh/en, picker sentiment-positive icon ladder, RENAME-07 requirement, accepted ADR-015 lexical hierarchy, and refreshed goldens.
+- ✓ v1.2 Phase 14 ADR-016 frontend + ARB reconciliation validated: HomeHero principal Joy metric migrated to cumulative `Σ joy_contribution`, monthly target ring and sage-green→gold state machine shipped, Settings target UI added, Analytics Joy Index promoted, 100% no-event contract verified, and stale density/ROI localization removed across ja/zh/en.
 
 ### Active
 
-No active milestone requirements. `$gsd-new-milestone` will define the next scoped requirement set and recreate `.planning/REQUIREMENTS.md`.
+- HAPPY-V2-02: Custom time windows (week / month / quarter / year / arbitrary) for Joy metrics — Phase 15
+- HAPPY-V2-01: Per-category satisfaction breakdown in AnalyticsScreen — Phase 16
+- STATSUI-V2-01: Soul-vs-Survival happiness comparison surface with anti-toxicity framing — Phase 16
+- HAPPY-V2-03: Manual-entry-only Joy sub-metric variant with `entry_source` schema migration — Phase 17
 
 ### Out of Scope
 
@@ -149,7 +153,7 @@ No active milestone requirements. `$gsd-new-milestone` will define the next scop
 
 ## Context
 
-- **Current state (post-v1.1):** Codebase Cleanup Initiative shipped 2026-04-29; Happiness Metric & Display shipped 2026-05-05. Schema is now v16 with unipolar positive satisfaction defaults. HomePage and AnalyticsScreen consume the v1.1 Joy metric contracts. Coverage threshold remains 70% (lowered from 80% per Phase 8 amendment; FUTURE-TOOL-03 to revisit).
+- **Current state (v1.2 in progress):** Codebase Cleanup Initiative shipped 2026-04-29; Happiness Metric & Display shipped 2026-05-05. v1.2 Phases 13 and 14 completed on 2026-05-19: backend and frontend surfaces now use ADR-016 cumulative `Σ joy_contribution` semantics, and HomeHero/Settings/Analytics no longer expose density/Joy-per-yen UI. Coverage threshold remains 70% (lowered from 80% per Phase 8 amendment; FUTURE-TOOL-03 to revisit).
 - **Codebase map:** `.planning/codebase/` was generated 2026-04-25 (`/gsd-map-codebase`). Contents: ARCHITECTURE.md, STACK.md, STRUCTURE.md, CONVENTIONS.md, INTEGRATIONS.md, TESTING.md, CONCERNS.md. **Note:** Map predates the v1.0 cleanup and v1.1 feature milestone; refresh via `/gsd-map-codebase` or `/gsd-scan` before next milestone planning.
 - **Tech stack:** Flutter, Riverpod 2.4+ (`@riverpod` code-gen), Freezed, Drift + SQLCipher, GoRouter, flutter_localizations (intl 0.20.2 pinned), Mocktail (replaced mockito in v1.0)
 - **Active CI guardrails:** `import_guard` (custom_lint), `riverpod_lint`/`custom_lint`, `coverde` per-file ≥70% with `--deferred` mechanism (10 explicit exceptions), `sqlite3_flutter_libs` rejection, `very_good_coverage@v2` ≥70% global, `build_runner` clean-diff
@@ -204,4 +208,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-19 — milestone v1.2 Happiness Metric Refresh started (triggered by ADR-016 ratify); see `.planning/MILESTONES.md` for shipped milestones and `.planning/ROADMAP.md` for v1.2 phases*
+*Last updated: 2026-05-19 — Phase 14 ADR-016 frontend + ARB reconciliation completed; see `.planning/ROADMAP.md` for v1.2 phase status*
