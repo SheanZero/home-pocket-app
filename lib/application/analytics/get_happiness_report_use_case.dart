@@ -5,7 +5,7 @@ import '../../features/analytics/domain/models/best_joy_moment_row.dart';
 import '../../features/analytics/domain/models/happiness_report.dart';
 import '../../features/analytics/domain/models/metric_result.dart';
 import '../../features/analytics/domain/repositories/analytics_repository.dart';
-import '../../infrastructure/i18n/formatters/joy_density_formatter.dart';
+import '../../infrastructure/i18n/formatters/joy_cumulative_formatter.dart';
 
 /// Personal happiness report use case (HAPPY-01..04).
 ///
@@ -45,7 +45,7 @@ class GetHappinessReportUseCase {
         startDate: startDate,
         endDate: endDate,
       ),
-      _repo.getSoulRowsForPtvf(
+      _repo.getSoulRowsForJoyContribution(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
@@ -71,7 +71,7 @@ class GetHappinessReportUseCase {
         bookId: bookId,
         totalSoulTx: 0,
         avgSatisfaction: const Empty(),
-        joyPerYen: const Empty(),
+        joyContribution: const Empty(),
         medianSatisfaction: const Empty(),
         highlightsCount: const Empty(),
         topJoy: const Empty(),
@@ -79,7 +79,7 @@ class GetHappinessReportUseCase {
     }
 
     final base = ptvfBaseFor(currencyCode);
-    final density = _computePtvfDensity(ptvfRows, base);
+    final joyContribution = _computeJoyContribution(ptvfRows, base);
     final median = _computeMedianFromDistribution(distribution);
     final highlights = _countHighlights(distribution);
 
@@ -89,25 +89,22 @@ class GetHappinessReportUseCase {
       bookId: bookId,
       totalSoulTx: totalSoulTx,
       avgSatisfaction: Value(overview.avgSatisfaction, totalSoulTx),
-      joyPerYen: Value(density, totalSoulTx),
+      joyContribution: Value(joyContribution, totalSoulTx),
       medianSatisfaction: Value(median, totalSoulTx),
       highlightsCount: Value(highlights, totalSoulTx),
       topJoy: topJoy == null ? const Empty() : Value(topJoy, totalSoulTx),
     );
   }
 
-  /// HAPPY-02 / D-04: density = Σ(sat × (amount/base)^α) / Σ(amount).
-  double _computePtvfDensity(List<SoulRowSample> rows, double base) {
+  /// ADR-016 §2: joy_contribution = Σ(sat × (amount/base)^α).
+  double _computeJoyContribution(List<SoulRowSample> rows, double base) {
     if (rows.isEmpty) return 0;
-    var numerator = 0.0;
-    var denominator = 0;
+    var sum = 0.0;
     for (final r in rows) {
       final scaled = math.pow(r.amount / base, _ptvfAlpha).toDouble();
-      numerator += r.soulSatisfaction * scaled;
-      denominator += r.amount;
+      sum += r.soulSatisfaction * scaled;
     }
-    if (denominator == 0) return 0;
-    return numerator / denominator;
+    return sum;
   }
 
   /// RESEARCH Q2 Option A: count-keyed walk over score distribution.

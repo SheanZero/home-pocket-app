@@ -44,7 +44,7 @@ void main() {
       ),
     ).thenAnswer((_) async => distribution);
     when(
-      () => repository.getSoulRowsForPtvf(
+      () => repository.getSoulRowsForJoyContribution(
         bookId: 'book-1',
         startDate: startDate,
         endDate: endDate,
@@ -90,7 +90,7 @@ void main() {
 
       expect(report.totalSoulTx, 0);
       await emptyMetric<double>(report.avgSatisfaction);
-      await emptyMetric<double>(report.joyPerYen);
+      await emptyMetric<double>(report.joyContribution);
       await emptyMetric<double>(report.medianSatisfaction);
       await emptyMetric<int>(report.highlightsCount);
       await emptyMetric<BestJoyMomentRow>(report.topJoy);
@@ -116,7 +116,7 @@ void main() {
     });
   });
 
-  group('PTVF Joy/yen (HAPPY-02 / D-04)', () {
+  group('Joy contribution (ADR-016 / HAPPY-02)', () {
     test('single JPY row uses alpha 0.88 and base 500', () async {
       stubReportInputs(
         overview: const SoulSatisfactionOverview(avgSatisfaction: 8, count: 1),
@@ -125,17 +125,15 @@ void main() {
       );
 
       final report = await execute();
-      final joy = await valueMetric<double>(report.joyPerYen);
+      final joy = await valueMetric<double>(report.joyContribution);
 
-      // PTVF / prospect theory: 8 * (3000 / 500)^0.88 / 3000
-      // = 8 * 6.0^0.88 / 3000 ~= 8 * 4.8371 / 3000 = 0.012899.
-      final expected = 8 * math.pow(3000 / 500, 0.88) / 3000;
+      final expected = 8 * math.pow(3000 / 500, 0.88);
       expect(joy.data, closeTo(expected, 0.0001));
       expect(joy.sampleSize, 1);
     });
 
     test(
-      'mixed JPY rows fold numerator over total amount denominator',
+      'mixed JPY rows sum contribution without amount denominator',
       () async {
         stubReportInputs(
           overview: const SoulSatisfactionOverview(
@@ -153,19 +151,16 @@ void main() {
         );
 
         final report = await execute();
-        final joy = await valueMetric<double>(report.joyPerYen);
+        final joy = await valueMetric<double>(report.joyContribution);
 
-        // (10 * (10000 / 500)^0.88 + 6 * (500 / 500)^0.88) / 10500
-        // = (10 * 13.9573 + 6 * 1) / 10500 = 0.013864.
         final expected =
-            (10 * math.pow(10000 / 500, 0.88) + 6 * math.pow(500 / 500, 0.88)) /
-            10500;
+            10 * math.pow(10000 / 500, 0.88) + 6 * math.pow(500 / 500, 0.88);
         expect(joy.data, closeTo(expected, 0.0001));
       },
     );
 
     test(
-      'all post-migration default sat 2 rows compute non-zero density',
+      'all post-migration default sat 2 rows compute non-zero contribution',
       () async {
         stubReportInputs(
           overview: const SoulSatisfactionOverview(
@@ -180,7 +175,7 @@ void main() {
         );
 
         final report = await execute();
-        final joy = await valueMetric<double>(report.joyPerYen);
+        final joy = await valueMetric<double>(report.joyContribution);
 
         expect(joy.data, isNonZero);
         expect(joy.data.isNaN, isFalse);
@@ -203,20 +198,20 @@ void main() {
         );
 
         final report = await execute();
-        final joy = await valueMetric<double>(report.joyPerYen);
+        final joy = await valueMetric<double>(report.joyContribution);
         final highAmountContribution = 10 * math.pow(10000 / 500, 0.88);
         final lowAmountContribution = 10 * math.pow(500 / 500, 0.88);
 
         expect(highAmountContribution, greaterThan(lowAmountContribution));
         expect(
           joy.data,
-          closeTo((highAmountContribution + 10) / 10500, 0.0001),
+          closeTo(highAmountContribution + lowAmountContribution, 0.0001),
         );
       },
     );
 
     test(
-      'JPY and CNY bases produce densities with base ratio direction',
+      'JPY and CNY bases produce contributions with base ratio direction',
       () async {
         stubReportInputs(
           overview: const SoulSatisfactionOverview(
@@ -229,8 +224,8 @@ void main() {
 
         final jpy = await execute(currencyCode: 'JPY');
         final cny = await execute(currencyCode: 'CNY');
-        final jpyJoy = await valueMetric<double>(jpy.joyPerYen);
-        final cnyJoy = await valueMetric<double>(cny.joyPerYen);
+        final jpyJoy = await valueMetric<double>(jpy.joyContribution);
+        final cnyJoy = await valueMetric<double>(cny.joyContribution);
 
         expect(cnyJoy.data, greaterThan(jpyJoy.data));
         expect(
@@ -249,8 +244,8 @@ void main() {
 
       final jpy = await execute(currencyCode: 'JPY');
       final eur = await execute(currencyCode: 'EUR');
-      final jpyJoy = await valueMetric<double>(jpy.joyPerYen);
-      final eurJoy = await valueMetric<double>(eur.joyPerYen);
+      final jpyJoy = await valueMetric<double>(jpy.joyContribution);
+      final eurJoy = await valueMetric<double>(eur.joyContribution);
 
       expect(eurJoy.data, closeTo(jpyJoy.data, 0.0001));
     });
@@ -264,12 +259,12 @@ void main() {
       );
 
       final report = await execute();
-      final joy = await valueMetric<double>(report.joyPerYen);
-      final expected = 8 * math.pow(3000 / 500, 0.88) / 3000;
+      final joy = await valueMetric<double>(report.joyContribution);
+      final expected = 8 * math.pow(3000 / 500, 0.88);
 
       expect(joy.data, closeTo(expected, 0.0001));
       verify(
-        () => repository.getSoulRowsForPtvf(
+        () => repository.getSoulRowsForJoyContribution(
           bookId: 'book-1',
           startDate: startDate,
           endDate: endDate,
@@ -442,7 +437,7 @@ void main() {
       final report = await execute();
 
       expect((report.avgSatisfaction as Value<double>).sampleSize, 4);
-      expect((report.joyPerYen as Value<double>).sampleSize, 4);
+      expect((report.joyContribution as Value<double>).sampleSize, 4);
       expect((report.medianSatisfaction as Value<double>).sampleSize, 4);
       expect((report.highlightsCount as Value<int>).sampleSize, 4);
       expect((report.topJoy as Value<BestJoyMomentRow>).sampleSize, 4);
