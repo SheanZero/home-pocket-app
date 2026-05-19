@@ -20,10 +20,7 @@ Widget _buildSubject({Locale locale = const Locale('en')}) {
     Scaffold(
       appBar: AppBar(
         actions: [
-          TimeWindowChip(
-            locale: locale,
-            earliestData: DateTime(2026, 3, 1),
-          ),
+          TimeWindowChip(locale: locale, earliestData: DateTime(2026, 3, 1)),
         ],
       ),
     ),
