@@ -6,6 +6,7 @@ import '../../features/analytics/domain/models/happiness_report.dart';
 import '../../features/analytics/domain/models/metric_result.dart';
 import '../../features/analytics/domain/repositories/analytics_repository.dart';
 import '../../infrastructure/i18n/formatters/joy_cumulative_formatter.dart';
+import '_time_window_validation.dart';
 
 /// Personal happiness report use case (HAPPY-01..04).
 ///
@@ -27,12 +28,11 @@ class GetHappinessReportUseCase {
 
   Future<HappinessReport> execute({
     required String bookId,
-    required int year,
-    required int month,
+    required DateTime startDate,
+    required DateTime endDate,
     required String currencyCode,
   }) async {
-    final startDate = DateTime(year, month, 1);
-    final endDate = DateTime(year, month + 1, 0, 23, 59, 59);
+    TimeWindowValidation.assertValid(startDate, endDate);
 
     final results = await Future.wait([
       _repo.getSoulSatisfactionOverview(
@@ -66,8 +66,8 @@ class GetHappinessReportUseCase {
     // D-16: all personal metrics co-empty under totalSoulTx == 0.
     if (totalSoulTx == 0) {
       return HappinessReport(
-        year: year,
-        month: month,
+        year: endDate.year,
+        month: endDate.month,
         bookId: bookId,
         totalSoulTx: 0,
         avgSatisfaction: const Empty(),
@@ -84,8 +84,8 @@ class GetHappinessReportUseCase {
     final highlights = _countHighlights(distribution);
 
     return HappinessReport(
-      year: year,
-      month: month,
+      year: endDate.year,
+      month: endDate.month,
       bookId: bookId,
       totalSoulTx: totalSoulTx,
       avgSatisfaction: Value(overview.avgSatisfaction, totalSoulTx),

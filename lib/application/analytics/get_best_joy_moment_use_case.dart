@@ -1,6 +1,7 @@
 import '../../features/analytics/domain/models/best_joy_moment_row.dart';
 import '../../features/analytics/domain/models/metric_result.dart';
 import '../../features/analytics/domain/repositories/analytics_repository.dart';
+import '_time_window_validation.dart';
 
 /// HAPPY-04 / D-06 / D-17: standalone Top Joy use case.
 ///
@@ -16,11 +17,10 @@ class GetBestJoyMomentUseCase {
 
   Future<MetricResult<BestJoyMomentRow>> execute({
     required String bookId,
-    required int year,
-    required int month,
+    required DateTime startDate,
+    required DateTime endDate,
   }) async {
-    final startDate = DateTime(year, month, 1);
-    final endDate = DateTime(year, month + 1, 0, 23, 59, 59);
+    TimeWindowValidation.assertValid(startDate, endDate);
 
     final overview = await _repo.getSoulSatisfactionOverview(
       bookId: bookId,

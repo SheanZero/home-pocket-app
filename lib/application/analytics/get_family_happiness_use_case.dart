@@ -3,6 +3,7 @@ import '../../features/analytics/domain/models/family_happiness.dart';
 import '../../features/analytics/domain/models/metric_result.dart';
 import '../../features/analytics/domain/models/shared_joy_insight.dart';
 import '../../features/analytics/domain/repositories/analytics_repository.dart';
+import '_time_window_validation.dart';
 
 /// Family happiness aggregate use case (FAMILY-01 + FAMILY-02 + group median).
 ///
@@ -21,17 +22,16 @@ class GetFamilyHappinessUseCase {
 
   Future<FamilyHappiness> execute({
     required List<String> groupBookIds,
-    required int year,
-    required int month,
+    required DateTime startDate,
+    required DateTime endDate,
   }) async {
-    final startDate = DateTime(year, month);
-    final endDate = DateTime(year, month + 1, 0, 23, 59, 59);
+    TimeWindowValidation.assertValid(startDate, endDate);
 
     // D-09 + D-16: empty short-circuit with no repository calls.
     if (groupBookIds.isEmpty) {
       return FamilyHappiness(
-        year: year,
-        month: month,
+        year: endDate.year,
+        month: endDate.month,
         totalGroupSoulTx: 0,
         familyHighlightsSum: const Empty(),
         sharedJoyInsight: const Empty(),
@@ -71,8 +71,8 @@ class GetFamilyHappinessUseCase {
     // D-16 family alignment: zero group sample means all main metrics Empty.
     if (totalGroupSoulTx == 0) {
       return FamilyHappiness(
-        year: year,
-        month: month,
+        year: endDate.year,
+        month: endDate.month,
         totalGroupSoulTx: 0,
         familyHighlightsSum: const Empty(),
         sharedJoyInsight: const Empty(),
@@ -96,8 +96,8 @@ class GetFamilyHappinessUseCase {
           );
 
     return FamilyHappiness(
-      year: year,
-      month: month,
+      year: endDate.year,
+      month: endDate.month,
       totalGroupSoulTx: totalGroupSoulTx,
       familyHighlightsSum: Value(highlightsSum, totalGroupSoulTx),
       sharedJoyInsight: sharedJoyResult,

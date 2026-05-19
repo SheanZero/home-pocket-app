@@ -1,5 +1,6 @@
 import '../../features/analytics/domain/models/analytics_aggregate.dart';
 import '../../features/analytics/domain/repositories/analytics_repository.dart';
+import '_time_window_validation.dart';
 
 /// STATSUI-06 / D-15 — single largest monthly expense across TOTAL ledger.
 class GetLargestMonthlyExpenseUseCase {
@@ -11,11 +12,10 @@ class GetLargestMonthlyExpenseUseCase {
 
   Future<LargestMonthlyExpense?> execute({
     required String bookId,
-    required int year,
-    required int month,
+    required DateTime startDate,
+    required DateTime endDate,
   }) {
-    final startDate = DateTime(year, month, 1);
-    final endDate = DateTime(year, month + 1, 0, 23, 59, 59);
+    TimeWindowValidation.assertValid(startDate, endDate);
     return _repo.getLargestMonthlyExpense(
       bookId: bookId,
       startDate: startDate,
