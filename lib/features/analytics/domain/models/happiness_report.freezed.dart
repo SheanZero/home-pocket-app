@@ -19,7 +19,7 @@ mixin _$HappinessReport {
   String get bookId;
   int get totalSoulTx; // main metrics (MetricResult-wrapped)
   MetricResult<double> get avgSatisfaction;
-  MetricResult<double> get joyPerYen;
+  MetricResult<double> get joyContribution;
   MetricResult<double> get medianSatisfaction;
   MetricResult<int> get highlightsCount;
   MetricResult<BestJoyMomentRow> get topJoy;
@@ -46,8 +46,8 @@ mixin _$HappinessReport {
                 other.totalSoulTx == totalSoulTx) &&
             (identical(other.avgSatisfaction, avgSatisfaction) ||
                 other.avgSatisfaction == avgSatisfaction) &&
-            (identical(other.joyPerYen, joyPerYen) ||
-                other.joyPerYen == joyPerYen) &&
+            (identical(other.joyContribution, joyContribution) ||
+                other.joyContribution == joyContribution) &&
             (identical(other.medianSatisfaction, medianSatisfaction) ||
                 other.medianSatisfaction == medianSatisfaction) &&
             (identical(other.highlightsCount, highlightsCount) ||
@@ -63,7 +63,7 @@ mixin _$HappinessReport {
     bookId,
     totalSoulTx,
     avgSatisfaction,
-    joyPerYen,
+    joyContribution,
     medianSatisfaction,
     highlightsCount,
     topJoy,
@@ -71,7 +71,7 @@ mixin _$HappinessReport {
 
   @override
   String toString() {
-    return 'HappinessReport(year: $year, month: $month, bookId: $bookId, totalSoulTx: $totalSoulTx, avgSatisfaction: $avgSatisfaction, joyPerYen: $joyPerYen, medianSatisfaction: $medianSatisfaction, highlightsCount: $highlightsCount, topJoy: $topJoy)';
+    return 'HappinessReport(year: $year, month: $month, bookId: $bookId, totalSoulTx: $totalSoulTx, avgSatisfaction: $avgSatisfaction, joyContribution: $joyContribution, medianSatisfaction: $medianSatisfaction, highlightsCount: $highlightsCount, topJoy: $topJoy)';
   }
 }
 
@@ -88,7 +88,7 @@ abstract mixin class $HappinessReportCopyWith<$Res> {
     String bookId,
     int totalSoulTx,
     MetricResult<double> avgSatisfaction,
-    MetricResult<double> joyPerYen,
+    MetricResult<double> joyContribution,
     MetricResult<double> medianSatisfaction,
     MetricResult<int> highlightsCount,
     MetricResult<BestJoyMomentRow> topJoy,
@@ -113,7 +113,7 @@ class _$HappinessReportCopyWithImpl<$Res>
     Object? bookId = null,
     Object? totalSoulTx = null,
     Object? avgSatisfaction = null,
-    Object? joyPerYen = null,
+    Object? joyContribution = null,
     Object? medianSatisfaction = null,
     Object? highlightsCount = null,
     Object? topJoy = null,
@@ -140,9 +140,9 @@ class _$HappinessReportCopyWithImpl<$Res>
             ? _self.avgSatisfaction
             : avgSatisfaction // ignore: cast_nullable_to_non_nullable
                   as MetricResult<double>,
-        joyPerYen: null == joyPerYen
-            ? _self.joyPerYen
-            : joyPerYen // ignore: cast_nullable_to_non_nullable
+        joyContribution: null == joyContribution
+            ? _self.joyContribution
+            : joyContribution // ignore: cast_nullable_to_non_nullable
                   as MetricResult<double>,
         medianSatisfaction: null == medianSatisfaction
             ? _self.medianSatisfaction
@@ -260,7 +260,7 @@ extension HappinessReportPatterns on HappinessReport {
       String bookId,
       int totalSoulTx,
       MetricResult<double> avgSatisfaction,
-      MetricResult<double> joyPerYen,
+      MetricResult<double> joyContribution,
       MetricResult<double> medianSatisfaction,
       MetricResult<int> highlightsCount,
       MetricResult<BestJoyMomentRow> topJoy,
@@ -277,7 +277,7 @@ extension HappinessReportPatterns on HappinessReport {
           _that.bookId,
           _that.totalSoulTx,
           _that.avgSatisfaction,
-          _that.joyPerYen,
+          _that.joyContribution,
           _that.medianSatisfaction,
           _that.highlightsCount,
           _that.topJoy,
@@ -308,7 +308,7 @@ extension HappinessReportPatterns on HappinessReport {
       String bookId,
       int totalSoulTx,
       MetricResult<double> avgSatisfaction,
-      MetricResult<double> joyPerYen,
+      MetricResult<double> joyContribution,
       MetricResult<double> medianSatisfaction,
       MetricResult<int> highlightsCount,
       MetricResult<BestJoyMomentRow> topJoy,
@@ -324,7 +324,7 @@ extension HappinessReportPatterns on HappinessReport {
           _that.bookId,
           _that.totalSoulTx,
           _that.avgSatisfaction,
-          _that.joyPerYen,
+          _that.joyContribution,
           _that.medianSatisfaction,
           _that.highlightsCount,
           _that.topJoy,
@@ -354,7 +354,7 @@ extension HappinessReportPatterns on HappinessReport {
       String bookId,
       int totalSoulTx,
       MetricResult<double> avgSatisfaction,
-      MetricResult<double> joyPerYen,
+      MetricResult<double> joyContribution,
       MetricResult<double> medianSatisfaction,
       MetricResult<int> highlightsCount,
       MetricResult<BestJoyMomentRow> topJoy,
@@ -370,7 +370,7 @@ extension HappinessReportPatterns on HappinessReport {
           _that.bookId,
           _that.totalSoulTx,
           _that.avgSatisfaction,
-          _that.joyPerYen,
+          _that.joyContribution,
           _that.medianSatisfaction,
           _that.highlightsCount,
           _that.topJoy,
@@ -390,7 +390,7 @@ class _HappinessReport implements HappinessReport {
     required this.bookId,
     required this.totalSoulTx,
     required this.avgSatisfaction,
-    required this.joyPerYen,
+    required this.joyContribution,
     required this.medianSatisfaction,
     required this.highlightsCount,
     required this.topJoy,
@@ -409,7 +409,7 @@ class _HappinessReport implements HappinessReport {
   @override
   final MetricResult<double> avgSatisfaction;
   @override
-  final MetricResult<double> joyPerYen;
+  final MetricResult<double> joyContribution;
   @override
   final MetricResult<double> medianSatisfaction;
   @override
@@ -437,8 +437,8 @@ class _HappinessReport implements HappinessReport {
                 other.totalSoulTx == totalSoulTx) &&
             (identical(other.avgSatisfaction, avgSatisfaction) ||
                 other.avgSatisfaction == avgSatisfaction) &&
-            (identical(other.joyPerYen, joyPerYen) ||
-                other.joyPerYen == joyPerYen) &&
+            (identical(other.joyContribution, joyContribution) ||
+                other.joyContribution == joyContribution) &&
             (identical(other.medianSatisfaction, medianSatisfaction) ||
                 other.medianSatisfaction == medianSatisfaction) &&
             (identical(other.highlightsCount, highlightsCount) ||
@@ -454,7 +454,7 @@ class _HappinessReport implements HappinessReport {
     bookId,
     totalSoulTx,
     avgSatisfaction,
-    joyPerYen,
+    joyContribution,
     medianSatisfaction,
     highlightsCount,
     topJoy,
@@ -462,7 +462,7 @@ class _HappinessReport implements HappinessReport {
 
   @override
   String toString() {
-    return 'HappinessReport(year: $year, month: $month, bookId: $bookId, totalSoulTx: $totalSoulTx, avgSatisfaction: $avgSatisfaction, joyPerYen: $joyPerYen, medianSatisfaction: $medianSatisfaction, highlightsCount: $highlightsCount, topJoy: $topJoy)';
+    return 'HappinessReport(year: $year, month: $month, bookId: $bookId, totalSoulTx: $totalSoulTx, avgSatisfaction: $avgSatisfaction, joyContribution: $joyContribution, medianSatisfaction: $medianSatisfaction, highlightsCount: $highlightsCount, topJoy: $topJoy)';
   }
 }
 
@@ -481,7 +481,7 @@ abstract mixin class _$HappinessReportCopyWith<$Res>
     String bookId,
     int totalSoulTx,
     MetricResult<double> avgSatisfaction,
-    MetricResult<double> joyPerYen,
+    MetricResult<double> joyContribution,
     MetricResult<double> medianSatisfaction,
     MetricResult<int> highlightsCount,
     MetricResult<BestJoyMomentRow> topJoy,
@@ -506,7 +506,7 @@ class __$HappinessReportCopyWithImpl<$Res>
     Object? bookId = null,
     Object? totalSoulTx = null,
     Object? avgSatisfaction = null,
-    Object? joyPerYen = null,
+    Object? joyContribution = null,
     Object? medianSatisfaction = null,
     Object? highlightsCount = null,
     Object? topJoy = null,
@@ -533,9 +533,9 @@ class __$HappinessReportCopyWithImpl<$Res>
             ? _self.avgSatisfaction
             : avgSatisfaction // ignore: cast_nullable_to_non_nullable
                   as MetricResult<double>,
-        joyPerYen: null == joyPerYen
-            ? _self.joyPerYen
-            : joyPerYen // ignore: cast_nullable_to_non_nullable
+        joyContribution: null == joyContribution
+            ? _self.joyContribution
+            : joyContribution // ignore: cast_nullable_to_non_nullable
                   as MetricResult<double>,
         medianSatisfaction: null == medianSatisfaction
             ? _self.medianSatisfaction

@@ -14,7 +14,7 @@ void main() {
         bookId: 'b1',
         totalSoulTx: 0,
         avgSatisfaction: Empty<double>(),
-        joyPerYen: Empty<double>(),
+        joyContribution: Empty<double>(),
         medianSatisfaction: Empty<double>(),
         highlightsCount: Empty<int>(),
         topJoy: Empty<BestJoyMomentRow>(),
@@ -34,7 +34,7 @@ void main() {
         bookId: 'b1',
         totalSoulTx: 8,
         avgSatisfaction: const Value<double>(0.75, 8),
-        joyPerYen: const Value<double>(0.0025, 8),
+        joyContribution: const Value<double>(24.69, 8),
         medianSatisfaction: const Value<double>(8, 8),
         highlightsCount: const Value<int>(3, 8),
         topJoy: Value<BestJoyMomentRow>(

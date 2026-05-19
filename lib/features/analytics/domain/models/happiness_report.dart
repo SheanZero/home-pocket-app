@@ -16,7 +16,7 @@ abstract class HappinessReport with _$HappinessReport {
 
     // main metrics (MetricResult-wrapped)
     required MetricResult<double> avgSatisfaction,
-    required MetricResult<double> joyPerYen,
+    required MetricResult<double> joyContribution,
     required MetricResult<double> medianSatisfaction,
     required MetricResult<int> highlightsCount,
     required MetricResult<BestJoyMomentRow> topJoy,

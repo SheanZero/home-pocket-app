@@ -96,7 +96,7 @@ HappinessReport fixtureHappinessReportRich({String bookId = 'book_001'}) {
     totalSoulTx: 31,
     avgSatisfaction: const Value(7.8, 23),
     medianSatisfaction: const Value(8.0, 23),
-    joyPerYen: const Value(1.2, 23),
+    joyContribution: const Value(78.4, 23),
     highlightsCount: const Value(12, 23),
     topJoy: Value(fixtureBestJoyMomentRich(), 23),
   );
@@ -112,7 +112,7 @@ HappinessReport fixtureHappinessReportThin({String bookId = 'book_001'}) {
     totalSoulTx: 3,
     avgSatisfaction: const Value(7.8, 3),
     medianSatisfaction: const Value(8.0, 3),
-    joyPerYen: const Value(1.2, 3),
+    joyContribution: const Value(12.0, 3),
     highlightsCount: const Value(1, 3),
     topJoy: Value(fixtureBestJoyMomentRich(), 3),
   );
@@ -127,7 +127,7 @@ HappinessReport fixtureHappinessReportEmpty({String bookId = 'book_001'}) {
     totalSoulTx: 0,
     avgSatisfaction: const Empty(),
     medianSatisfaction: const Empty(),
-    joyPerYen: const Empty(),
+    joyContribution: const Empty(),
     highlightsCount: const Empty(),
     topJoy: const Empty(),
   );
