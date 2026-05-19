@@ -1324,20 +1324,63 @@ class SJa extends S {
   String get analyticsTitle => '統計';
 
   @override
-  String get analyticsMonthChipPickerTooltip => '月を選ぶ';
+  String get analyticsTimeWindowChipTooltip => '期間を選ぶ';
 
   @override
-  String get analyticsKpiTotalLabel => '今月の支出';
-
-  @override
-  String analyticsKpiTotalDeltaIncreased(String pct) {
-    return '↑ +$pct% MoM';
+  String analyticsTimeWindowChipLabelWeek(String monday) {
+    return '$mondayの週';
   }
 
   @override
-  String analyticsKpiTotalDeltaDecreased(String pct) {
-    return '↓ -$pct% MoM';
+  String analyticsTimeWindowChipLabelQuarter(String q, String year) {
+    return '$year年 第$q四半期';
   }
+
+  @override
+  String analyticsTimeWindowChipLabelYear(String year) {
+    return '$year年';
+  }
+
+  @override
+  String analyticsTimeWindowChipLabelCustom(String start, String end) {
+    return '$start 〜 $end';
+  }
+
+  @override
+  String get analyticsTimeWindowSheetTitle => '期間';
+
+  @override
+  String get analyticsTimeWindowTypeWeek => '週';
+
+  @override
+  String get analyticsTimeWindowTypeMonth => '月';
+
+  @override
+  String get analyticsTimeWindowTypeQuarter => '四半期';
+
+  @override
+  String get analyticsTimeWindowTypeYear => '年';
+
+  @override
+  String get analyticsTimeWindowTypeCustom => 'カスタム';
+
+  @override
+  String get analyticsTimeWindowCustomCta => '日付範囲を選ぶ';
+
+  @override
+  String get analyticsTimeWindowErrorTooLong => '期間は12ヶ月を超えられません。短い期間を選んでください。';
+
+  @override
+  String get analyticsTimeWindowErrorInverted => '開始日は終了日より前にしてください。';
+
+  @override
+  String get analyticsTimeWindowErrorFutureEnd => '終了日に未来の日付は選べません。';
+
+  @override
+  String get analyticsTimeWindowEmptyPreset => 'このビュー用のデータがありません。取引を追加してください。';
+
+  @override
+  String get analyticsKpiTotalLabel => '支出合計';
 
   @override
   String get analyticsKpiJoyLabel => '今月の平均満足度';

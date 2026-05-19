@@ -1338,20 +1338,67 @@ class SEn extends S {
   String get analyticsTitle => 'Statistics';
 
   @override
-  String get analyticsMonthChipPickerTooltip => 'Pick a month';
+  String get analyticsTimeWindowChipTooltip => 'Pick a time window';
 
   @override
-  String get analyticsKpiTotalLabel => 'This month\'s spending';
-
-  @override
-  String analyticsKpiTotalDeltaIncreased(String pct) {
-    return '↑ +$pct% MoM';
+  String analyticsTimeWindowChipLabelWeek(String monday) {
+    return 'Week of $monday';
   }
 
   @override
-  String analyticsKpiTotalDeltaDecreased(String pct) {
-    return '↓ -$pct% MoM';
+  String analyticsTimeWindowChipLabelQuarter(String q, String year) {
+    return 'Q$q $year';
   }
+
+  @override
+  String analyticsTimeWindowChipLabelYear(String year) {
+    return '$year';
+  }
+
+  @override
+  String analyticsTimeWindowChipLabelCustom(String start, String end) {
+    return '$start – $end';
+  }
+
+  @override
+  String get analyticsTimeWindowSheetTitle => 'Time window';
+
+  @override
+  String get analyticsTimeWindowTypeWeek => 'Week';
+
+  @override
+  String get analyticsTimeWindowTypeMonth => 'Month';
+
+  @override
+  String get analyticsTimeWindowTypeQuarter => 'Quarter';
+
+  @override
+  String get analyticsTimeWindowTypeYear => 'Year';
+
+  @override
+  String get analyticsTimeWindowTypeCustom => 'Custom';
+
+  @override
+  String get analyticsTimeWindowCustomCta => 'Pick a date range';
+
+  @override
+  String get analyticsTimeWindowErrorTooLong =>
+      'Range cannot exceed 12 months. Pick a shorter range.';
+
+  @override
+  String get analyticsTimeWindowErrorInverted =>
+      'Start date must be before end date.';
+
+  @override
+  String get analyticsTimeWindowErrorFutureEnd =>
+      'End date cannot be in the future.';
+
+  @override
+  String get analyticsTimeWindowEmptyPreset =>
+      'No data yet for this view. Add a transaction to begin.';
+
+  @override
+  String get analyticsKpiTotalLabel => 'Total spending';
 
   @override
   String get analyticsKpiJoyLabel => 'Avg satisfaction';

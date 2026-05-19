@@ -1319,20 +1319,63 @@ class SZh extends S {
   String get analyticsTitle => '统计';
 
   @override
-  String get analyticsMonthChipPickerTooltip => '选择月份';
+  String get analyticsTimeWindowChipTooltip => '选择时间范围';
 
   @override
-  String get analyticsKpiTotalLabel => '本月支出';
-
-  @override
-  String analyticsKpiTotalDeltaIncreased(String pct) {
-    return '↑ +$pct% MoM';
+  String analyticsTimeWindowChipLabelWeek(String monday) {
+    return '$monday的一周';
   }
 
   @override
-  String analyticsKpiTotalDeltaDecreased(String pct) {
-    return '↓ -$pct% MoM';
+  String analyticsTimeWindowChipLabelQuarter(String q, String year) {
+    return '$year年 第$q季度';
   }
+
+  @override
+  String analyticsTimeWindowChipLabelYear(String year) {
+    return '$year年';
+  }
+
+  @override
+  String analyticsTimeWindowChipLabelCustom(String start, String end) {
+    return '$start 至 $end';
+  }
+
+  @override
+  String get analyticsTimeWindowSheetTitle => '时间范围';
+
+  @override
+  String get analyticsTimeWindowTypeWeek => '周';
+
+  @override
+  String get analyticsTimeWindowTypeMonth => '月';
+
+  @override
+  String get analyticsTimeWindowTypeQuarter => '季度';
+
+  @override
+  String get analyticsTimeWindowTypeYear => '年';
+
+  @override
+  String get analyticsTimeWindowTypeCustom => '自定义';
+
+  @override
+  String get analyticsTimeWindowCustomCta => '选择日期范围';
+
+  @override
+  String get analyticsTimeWindowErrorTooLong => '时间范围不能超过 12 个月。请选择较短的范围。';
+
+  @override
+  String get analyticsTimeWindowErrorInverted => '开始日期必须早于结束日期。';
+
+  @override
+  String get analyticsTimeWindowErrorFutureEnd => '结束日期不能晚于今天。';
+
+  @override
+  String get analyticsTimeWindowEmptyPreset => '此视图暂无数据。请先添加一笔交易。';
+
+  @override
+  String get analyticsKpiTotalLabel => '支出合计';
 
   @override
   String get analyticsKpiJoyLabel => '本月平均满足度';

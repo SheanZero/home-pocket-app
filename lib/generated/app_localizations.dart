@@ -2547,29 +2547,107 @@ abstract class S {
   /// **'Statistics'**
   String get analyticsTitle;
 
-  /// No description provided for @analyticsMonthChipPickerTooltip.
+  /// Analytics screen time-window selector chip tooltip
   ///
   /// In en, this message translates to:
-  /// **'Pick a month'**
-  String get analyticsMonthChipPickerTooltip;
+  /// **'Pick a time window'**
+  String get analyticsTimeWindowChipTooltip;
+
+  /// Analytics screen time-window selector week chip label
+  ///
+  /// In en, this message translates to:
+  /// **'Week of {monday}'**
+  String analyticsTimeWindowChipLabelWeek(String monday);
+
+  /// Analytics screen time-window selector quarter chip label
+  ///
+  /// In en, this message translates to:
+  /// **'Q{q} {year}'**
+  String analyticsTimeWindowChipLabelQuarter(String q, String year);
+
+  /// Analytics screen time-window selector year chip label
+  ///
+  /// In en, this message translates to:
+  /// **'{year}'**
+  String analyticsTimeWindowChipLabelYear(String year);
+
+  /// Analytics screen time-window selector custom range chip label
+  ///
+  /// In en, this message translates to:
+  /// **'{start} – {end}'**
+  String analyticsTimeWindowChipLabelCustom(String start, String end);
+
+  /// Analytics screen time-window picker sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Time window'**
+  String get analyticsTimeWindowSheetTitle;
+
+  /// Analytics screen time-window type option for week
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get analyticsTimeWindowTypeWeek;
+
+  /// Analytics screen time-window type option for month
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get analyticsTimeWindowTypeMonth;
+
+  /// Analytics screen time-window type option for quarter
+  ///
+  /// In en, this message translates to:
+  /// **'Quarter'**
+  String get analyticsTimeWindowTypeQuarter;
+
+  /// Analytics screen time-window type option for year
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get analyticsTimeWindowTypeYear;
+
+  /// Analytics screen time-window type option for custom range
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get analyticsTimeWindowTypeCustom;
+
+  /// Analytics screen time-window custom range picker call to action
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date range'**
+  String get analyticsTimeWindowCustomCta;
+
+  /// Analytics screen time-window validation error for overlong ranges
+  ///
+  /// In en, this message translates to:
+  /// **'Range cannot exceed 12 months. Pick a shorter range.'**
+  String get analyticsTimeWindowErrorTooLong;
+
+  /// Analytics screen time-window validation error for inverted date ranges
+  ///
+  /// In en, this message translates to:
+  /// **'Start date must be before end date.'**
+  String get analyticsTimeWindowErrorInverted;
+
+  /// Analytics screen time-window validation error for future end dates
+  ///
+  /// In en, this message translates to:
+  /// **'End date cannot be in the future.'**
+  String get analyticsTimeWindowErrorFutureEnd;
+
+  /// Analytics screen time-window picker empty preset list message
+  ///
+  /// In en, this message translates to:
+  /// **'No data yet for this view. Add a transaction to begin.'**
+  String get analyticsTimeWindowEmptyPreset;
 
   /// No description provided for @analyticsKpiTotalLabel.
   ///
   /// In en, this message translates to:
-  /// **'This month\'s spending'**
+  /// **'Total spending'**
   String get analyticsKpiTotalLabel;
-
-  /// Total spending KPI month-over-month increase
-  ///
-  /// In en, this message translates to:
-  /// **'↑ +{pct}% MoM'**
-  String analyticsKpiTotalDeltaIncreased(String pct);
-
-  /// Total spending KPI month-over-month decrease
-  ///
-  /// In en, this message translates to:
-  /// **'↓ -{pct}% MoM'**
-  String analyticsKpiTotalDeltaDecreased(String pct);
 
   /// No description provided for @analyticsKpiJoyLabel.
   ///
