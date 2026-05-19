@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Happiness Metric Refresh
 status: planning
-last_updated: "2026-05-19T02:34:38.459Z"
+last_updated: "2026-05-19T03:15:00.000Z"
 last_activity: 2026-05-19
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,79 +17,80 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-05)
+See: .planning/PROJECT.md (updated 2026-05-19)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes survival spending from soul spending
-**Current focus:** v1.1 milestone archive and next milestone preparation
+**Current focus:** v1.2 Happiness Metric Refresh — ADR-016 Joy metric migration (density → Σ joy_contribution) bundled with v1.1-deferred Joy/Analytics backlog
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Phase 13 (not started — planning)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-19 — Milestone v1.2 started
+Status: ROADMAP created, awaiting `/gsd:plan-phase 13`
+Last activity: 2026-05-19 — v1.2 ROADMAP populated (5 phases: 13-17)
 
-## v1.1 Phase Plan
+## v1.2 Phase Plan
 
 | Phase | Goal | Requirements | Depends on |
 |-------|------|--------------|------------|
-| 9. Happiness Domain & Formula Layer       | Lock formulas, contracts, soul-only filter, ¥500 floor, sealed `MetricResult`, family aggregate-only return type, no-gamification ADR | HAPPY-01..09 + FAMILY-01 + FAMILY-02 (11 REQs) | — (linchpin) |
-| 10. HomePage SoulFullnessCard Redesign    | Replace misleading `Happiness ROI`; render 4 personal metrics + Best Joy story card + family card with consent gate | FAMILY-03 + HOMEUI-01..04 (5 REQs) | Phase 9 |
-| 11. AnalyticsScreen Unified Dashboard (Variant δ) | Rebuild AnalyticsScreen as a unified 総帳本 + 悦己帳本 dashboard with KPI mini-hero, Joy-per-¥ trend, satisfaction histogram, story cards, and aggregate-only family insight | STATSUI-01..07 (7 REQs) | Phase 9 + Phase 10 |
-| 12. UI Copy Rename Pass (ARB values)      | Rename 4 ARB values ja/zh/en; lexical-hierarchy ADR; native-speaker register review | RENAME-01..06 (6 REQs) | Phase 10 + Phase 11 (must be LAST) |
+| 13. ADR-016 Backend Foundation | Stabilize Joy backend on Σ joy_contribution; ship schema + recommendation infra for Phases 14/17 | JOYMIG-02, JOYMIG-05 | — (first v1.2 phase) |
+| 14. ADR-016 Frontend + ARB Reconciliation (TOOL-V2-02) | Ship HomeHero rebuild + AnalyticsScreen Variant ε + Settings target UI + ARB cleanup; honor 100% behavior contract | JOYMIG-01, JOYMIG-03, JOYMIG-04, JOYMIG-06, TOOL-V2-02 | Phase 13 |
+| 15. Custom Time Windows | Week/month/quarter/year/arbitrary selector wired across all Joy metrics in AnalyticsScreen | HAPPY-V2-02 | Phase 14 |
+| 16. Per-Category Breakdown + Soul-vs-Survival | Per-category satisfaction breakdown + Soul-vs-Survival comparison (both anti-toxicity framed) | HAPPY-V2-01, STATSUI-V2-01 | Phases 14 + 15 |
+| 17. Manual-Only Joy Sub-Metric | Schema migration (entry_source column) + manual-only Joy variant toggle in AnalyticsScreen | HAPPY-V2-03 | Phases 13 + 14 |
 
-**Coverage:** 29/29 v1.1 requirements mapped ✓
+**Coverage:** 11/11 v1.2 requirements mapped ✓
 
-## Last Milestone Snapshot (v1.0)
+**Cross-phase constraints (apply to every phase):** ADR-012 No Gamification v1.1, ADR-014 Unipolar Positive Satisfaction, ADR-016 §2 single-Joy-expression, ADR-013 append-only update rule, all permanent CI guardrails (analyze 0, custom_lint 0, import_guard 0, riverpod_lint 0, per-file coverage ≥70%, global ≥70%, build_runner clean-diff, sqlite3_flutter_libs rejection), ARB ja/zh/en parity.
 
-- **Phases:** 8 (1-8)
-- **Plans:** 48
-- **Duration:** 2026-04-25 → 2026-04-28 (~4 days)
-- **Audit Status at Close:** `tech_debt` — accepted as known debt
-- **Outcome:** REAUDIT-DIFF.json reports `resolved=50, regression=0, new=0, open_in_baseline=0`
-- **Tag:** `v1.0`
+## Last Milestone Snapshot (v1.1)
+
+- **Phases:** 4 (9-12)
+- **Plans:** 40
+- **Duration:** 2026-05-01 → 2026-05-05
+- **Audit Status at Close:** `known_debt` — accepted (1 Phase 11 human UAT verification item)
+- **Outcome:** Happiness Metric & Display shipped — HomeHeroCard, AnalyticsScreen Variant δ, trilingual rename pass, ADR-012/013/014/015 ratified
+- **Tag:** `v1.1`
 
 ## Accumulated Context
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table. v1.0 decisions are captured there with outcomes; older execution-log decisions are archived in `.planning/milestones/v1.0-ROADMAP.md` Milestone Summary.
+Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 decisions captured there with outcomes.
 
-**v1.1 milestone-start decisions (2026-05-01):**
+**v1.2 milestone-start decisions (2026-05-19):**
 
-- No schema changes; reuse existing `transactions.soul_satisfaction` (1-10) field
-- No theme color changes; survival/soul/primary tokens locked
-- No `LedgerType` enum rename; ARB values only
-- Zero new pub dependencies (research HIGH-confidence: every capability maps to existing packages)
-- Phase 9 is the linchpin — all formulas, contracts, and anti-gamification defenses must lock before any UI consumer builds on them
+- ADR-016 ratified 2026-05-19: Σ joy_contribution supersedes density (Joy/¥) as the single Joy expression; ADR-013 marked as superseded via append-only update (per-tx PTVF scaling formula stays active)
+- v1.1 baseline-purity is explicitly broken with this milestone (per ADR-016 §1) — accepted cost
+- HomeHero ring is single-month accumulation with sage-green→gold smooth color transition; **no discrete events** at 100% (no copy, no toast, no notification, no haptic, no celebration animation) per ADR-016 §5 + ADR-012 §2
+- monthly_joy_target user-configurable; recommended value = `ceil(median(past 3 months Σ joy_contribution))` when ≥3 months data, else spike-decided fallback (Phase 13 1-day spike resolves the number)
+- Family privacy hardening (FAMILY-V2-01/02/03) explicitly deferred to keep v1.2 Joy-axis focused
+- Phase numbering continues from v1.1 (Phase 13 starts v1.2)
 
-**v1.1 execution decisions (2026-05-03):**
+**v1.1 execution decisions (carried for reference):**
 
 - Phase 11 audit corrects the dormant-DAO framing: only `getDailySatisfactionTrend` is truly dormant and it is superseded by `getDailySoulRowsForPtvf`.
-- Plan 07 must land the AnalyticsScreen rewrite, 8 widget deletions, test deletions, and replacement screen test as one atomic commit.
 - [Phase 11]: Daily Joy/¥ folds use the same α=0.88 PTVF density formula and ptvfBaseFor(currencyCode) base as monthly happiness reports.
 - [Phase 11]: Expense trend now trails the selected month via an explicit anchor instead of DateTime.now().
 - [Phase 11]: Analytics ARB strings were added to ja/zh/en in one commit with the hard-locked bar-5 histogram annotation.
-- [Phase 11]: Variant δ AnalyticsScreen shipped as a 2-region unified dashboard; STATSUI-01..07 are complete and Phase 12 rename work is unblocked.
+- [Phase 11]: Variant δ AnalyticsScreen shipped as a 2-region unified dashboard.
 
 ### Pending Todos
 
-- Phase 9: verify `transactions.entry_source` column existence in substep 9.0 (single grep) — gates voice-bias manual-only sub-metric feasibility
-- Phase 9: product decision on mean-vs-median headline (recommend mean primary + median tooltip + coverage caption)
-- Phase 9: pick `Result<T>` vs `throw` envelope to match existing analytics module convention (recommend `throw`)
+- **Phase 13 spike (must land in plan-phase 13):** decide fallback `monthly_joy_target` baseline number (candidate range 30-100 per ADR-016 §4); decide whether to apply outlier truncation to median computation; decide whether recommended value persists in UI after user configures their own target
+- **Phase 13:** confirm `joy_density_formatter` rename target name (e.g., `joy_cumulative_formatter`) and migration path for any cached references
+- **Phase 17 prereq:** confirm `transactions.entry_source` column truly doesn't exist (Phase 9 of v1.1 noted absence; re-verify before plan-phase 17)
+- **Phase 14:** Decide whether sage-green→gold transition is full 0-100% gradient or 90%+ trigger (ADR-016 §5 leaves to implementation)
 
 ### Blockers / Concerns
 
-No active v1.1 blockers. Carried-forward debt (from v1.0):
+No active v1.2 blockers. Carried-forward debt (from v1.0/v1.1):
 
-- **FUTURE-TOOL-03** *(coverage-baseline-review)*: After v1 feature work completes, review the active 70% coverage threshold (lowered from 80% by Phase 8 amendment); decide raise-uniformly or split-per-area
-- **FUTURE-QA-01** *(smoke-test-owner-driven)*: Owner runs `08-SMOKE-TEST.md` on fresh local build before v1 release; SMOKE-NN findings recorded in `re-audit/issues.json` and `reaudit_diff.dart` re-run before v1 ships
-- **FUTURE-DOC-03**: Wire `verify-doc-sweep.sh` + `verify_index_health.sh` into `.github/workflows/audit.yml` (verifiers exist locally but not in CI)
-- **FUTURE-DOC-04**: Backfill `02-VALIDATION.md` and `04-VALIDATION.md` (Nyquist gap)
-- **FUTURE-DOC-05**: Backfill `03-VERIFICATION.md`, `06-VERIFICATION.md`, `08-VERIFICATION.md` (canonical artifacts; substitute evidence exists)
-- **FUTURE-DOC-06**: `/gsd-validate-phase 07` to remediate `nyquist_compliant: false`
-- **FUTURE-DOC-01**: Pre-existing MOD-numbering drift inside MOD-002/006/007/008 internal headers
-- **FUTURE-DOC-02**: ARCH-008 cites ADR-006 instead of ADR-007 in 7 places
+- **FUTURE-TOOL-03** *(coverage-baseline-review)*: Review 70% coverage threshold after v1.2 close
+- **FUTURE-QA-01** *(smoke-test-owner-driven)*: Owner runs smoke tests before v1 release
+- **FUTURE-DOC-01..06** *(documentation drift)*: 6 doc-related items (MOD-numbering, ARCH-008 ADR citation, missing VALIDATION/VERIFICATION docs, doc-sweep verifier CI wiring)
+- **FUTURE-ARCH-04** *(security)*: `recoverFromSeed()` key-overwrite bug fix (held — security architecture out of scope per long-term project rule)
+- **v1.1 verification debt:** Phase 11 device/simulator UAT for AnalyticsScreen month chip + pull-to-refresh (human_needed)
 
 ### Quick Tasks Completed
 
@@ -122,9 +123,13 @@ Items acknowledged and deferred at v1.0 milestone close on 2026-04-29:
 | Tech-debt nit | 2 INFO-level analyzer warnings in `shadow_books_provider_characterization_test.dart` (lines 57, 73) | accept | v1.0 close |
 | Tech-debt nit | `amount_display.dart` absent from `cleanup-touched-files.txt` (Plan 08-04 deferred-items.md) | accept | v1.0 close |
 
-**v1.1-deferred items (tracked in REQUIREMENTS.md "v2 Requirements"):**
+**v1.1-deferred items (now subsumed into v1.2 active scope):**
 
-- HAPPY-V2-01..03, STATSUI-V2-01, FAMILY-V2-01..02, TOOL-V2-01..02
+- HAPPY-V2-01..03 → Phases 16, 15, 17 respectively
+- STATSUI-V2-01 → Phase 16
+- TOOL-V2-02 → Phase 14
+- FAMILY-V2-01..03 → still v2 backlog (explicitly out of v1.2 scope to keep Joy-axis focus)
+- TOOL-V2-01 (fl_chart 1.x) → still v2 backlog
 
 **Items acknowledged and deferred at v1.1 milestone close on 2026-05-05:**
 
@@ -134,8 +139,8 @@ Items acknowledged and deferred at v1.0 milestone close on 2026-04-29:
 
 ## Session Continuity
 
-Last session: 2026-05-18T11:18:00Z
-Stopped at: Quick task 260518-pf5 complete — awaiting human UI verification
+Last session: 2026-05-19T03:15:00Z
+Stopped at: v1.2 ROADMAP created (5 phases: 13-17); REQUIREMENTS.md Traceability table populated; awaiting `/gsd:plan-phase 13`
 Resume file: n/a
 
-**Planned Next:** `/gsd-new-milestone` to define the next milestone requirements and roadmap
+**Planned Next:** `/gsd:plan-phase 13` — plan the ADR-016 Backend Foundation phase (spike + schema + use-case rewrite + formatter rename + recommendation algorithm)

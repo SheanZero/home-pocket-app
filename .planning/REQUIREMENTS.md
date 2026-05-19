@@ -91,25 +91,32 @@ These hold for ALL phases in this milestone; planner and reviewer should treat t
 
 ## Traceability
 
-Empty initially. The roadmapper populates this table when ROADMAP.md is created.
+Populated by gsd-roadmapper on 2026-05-19 with v1.2 ROADMAP.md creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| JOYMIG-01 | TBD | Pending |
-| JOYMIG-02 | TBD | Pending |
-| JOYMIG-03 | TBD | Pending |
-| JOYMIG-04 | TBD | Pending |
-| JOYMIG-05 | TBD | Pending |
-| JOYMIG-06 | TBD | Pending |
-| HAPPY-V2-01 | TBD | Pending |
-| HAPPY-V2-02 | TBD | Pending |
-| HAPPY-V2-03 | TBD | Pending |
-| STATSUI-V2-01 | TBD | Pending |
-| TOOL-V2-02 | TBD | Pending |
+| JOYMIG-01 | Phase 14 | Pending |
+| JOYMIG-02 | Phase 13 | Pending |
+| JOYMIG-03 | Phase 14 | Pending |
+| JOYMIG-04 | Phase 14 | Pending |
+| JOYMIG-05 | Phase 13 | Pending |
+| JOYMIG-06 | Phase 14 | Pending |
+| HAPPY-V2-01 | Phase 16 | Pending |
+| HAPPY-V2-02 | Phase 15 | Pending |
+| HAPPY-V2-03 | Phase 17 | Pending |
+| STATSUI-V2-01 | Phase 16 | Pending |
+| TOOL-V2-02 | Phase 14 | Pending |
 
-**Coverage target:**
+**Coverage:**
 - Active v1.2 requirements: 11 total
-- To be mapped to phases by gsd-roadmapper
+- Mapped: 11/11 ✓ (no orphans, no duplicates)
+
+**Per-phase REQ count:**
+- Phase 13: 2 (JOYMIG-02, JOYMIG-05) — backend foundation
+- Phase 14: 5 (JOYMIG-01, JOYMIG-03, JOYMIG-04, JOYMIG-06, TOOL-V2-02) — frontend + ARB
+- Phase 15: 1 (HAPPY-V2-02) — custom time windows
+- Phase 16: 2 (HAPPY-V2-01, STATSUI-V2-01) — analytics surface extensions
+- Phase 17: 1 (HAPPY-V2-03) — manual-only sub-metric (schema migration + toggle)
 
 ---
 
@@ -122,4 +129,4 @@ Empty initially. The roadmapper populates this table when ROADMAP.md is created.
 
 ---
 *Requirements defined: 2026-05-19*
-*Last updated: 2026-05-19 — initial v1.2 definition; awaiting roadmapper to populate Traceability table*
+*Last updated: 2026-05-19 — Traceability table populated by gsd-roadmapper; all 11 REQs mapped across Phases 13-17*
