@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../features/accounting/presentation/screens/transaction_entry_screen.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart'
     as accounting_providers;
 import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
@@ -9,7 +8,6 @@ import '../../../../features/home/presentation/providers/state_shadow_books.dart
 import '../../../../features/settings/presentation/providers/state_locale.dart'
     as locale_providers;
 import '../../../../generated/app_localizations.dart';
-import '../../domain/models/metric_result.dart';
 import '../providers/state_analytics.dart';
 import '../providers/state_happiness.dart';
 import '../widgets/analytics_card_error_state.dart';
@@ -17,8 +15,6 @@ import '../widgets/analytics_screen_section_header.dart';
 import '../widgets/best_joy_story_strip.dart';
 import '../widgets/category_spend_donut_chart.dart';
 import '../widgets/family_insight_card.dart';
-import '../widgets/joy_ledger_thin_sample_fallback.dart';
-import '../widgets/joy_trend_line_chart.dart';
 import '../widgets/kpi_mini_hero_strip.dart';
 import '../widgets/largest_expense_story_card.dart';
 import '../widgets/month_chip_picker.dart';
@@ -41,7 +37,6 @@ class AnalyticsScreen extends ConsumerWidget {
     final selected = ref.watch(selectedMonthProvider);
     final year = selected.year;
     final month = selected.month;
-    final daysInMonth = DateTime(year, month + 1, 0).day;
     final locale =
         ref.watch(locale_providers.currentLocaleProvider).value ??
         Localizations.localeOf(context);
@@ -99,15 +94,6 @@ class AnalyticsScreen extends ConsumerWidget {
               _TotalSixMonthCard(
                 bookId: bookId,
                 anchor: selected,
-                locale: locale,
-              ),
-              const SizedBox(height: 8),
-              _JoyTrendOrFallback(
-                bookId: bookId,
-                year: year,
-                month: month,
-                currencyCode: currencyCode,
-                daysInMonth: daysInMonth,
                 locale: locale,
               ),
               const SizedBox(height: 32),
@@ -176,14 +162,6 @@ class AnalyticsScreen extends ConsumerWidget {
     ref.invalidate(earliestTransactionMonthProvider(bookId: bookId));
     ref.invalidate(
       happinessReportProvider(
-        bookId: bookId,
-        year: year,
-        month: month,
-        currencyCode: currencyCode,
-      ),
-    );
-    ref.invalidate(
-      dailyJoyPerYenProvider(
         bookId: bookId,
         year: year,
         month: month,
@@ -309,70 +287,6 @@ class _TotalSixMonthCard extends ConsumerWidget {
   }
 }
 
-class _JoyTrendOrFallback extends ConsumerWidget {
-  const _JoyTrendOrFallback({
-    required this.bookId,
-    required this.year,
-    required this.month,
-    required this.currencyCode,
-    required this.daysInMonth,
-    required this.locale,
-  });
-
-  final String bookId;
-  final int year;
-  final int month;
-  final String currencyCode;
-  final int daysInMonth;
-  final Locale locale;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final dailyAsync = ref.watch(
-      dailyJoyPerYenProvider(
-        bookId: bookId,
-        year: year,
-        month: month,
-        currencyCode: currencyCode,
-      ),
-    );
-    return dailyAsync.when(
-      data: (result) {
-        if (_sampleSizeOf(result) < 5) {
-          return JoyLedgerThinSampleFallback(
-            onAddEntryTap: () => Navigator.of(context).push<void>(
-              MaterialPageRoute<void>(
-                builder: (_) => TransactionEntryScreen(bookId: bookId),
-              ),
-            ),
-          );
-        }
-        return _AnalyticsDataCard(
-          title: S.of(context).analyticsCardTitleJoyTrend,
-          caption: S.of(context).analyticsCardCaptionJoyTrendGap,
-          child: JoyTrendLineChart(
-            result: result,
-            daysInMonth: daysInMonth,
-            currencyCode: currencyCode,
-            locale: locale,
-          ),
-        );
-      },
-      loading: () => const SizedBox(height: 240),
-      error: (_, _) => AnalyticsCardErrorState(
-        onRetry: () => ref.invalidate(
-          dailyJoyPerYenProvider(
-            bookId: bookId,
-            year: year,
-            month: month,
-            currencyCode: currencyCode,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _CategoryDonutCard extends ConsumerWidget {
   const _CategoryDonutCard({
     required this.bookId,
@@ -420,8 +334,8 @@ class _SatisfactionHistogramOrFallback extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dailyAsync = ref.watch(
-      dailyJoyPerYenProvider(
+    final happinessAsync = ref.watch(
+      happinessReportProvider(
         bookId: bookId,
         year: year,
         month: month,
@@ -436,9 +350,9 @@ class _SatisfactionHistogramOrFallback extends ConsumerWidget {
       ),
     );
 
-    return dailyAsync.when(
-      data: (daily) {
-        if (_sampleSizeOf(daily) < 5) {
+    return happinessAsync.when(
+      data: (report) {
+        if (report.totalSoulTx < 5) {
           return const SizedBox.shrink();
         }
         return distributionAsync.when(
@@ -462,7 +376,7 @@ class _SatisfactionHistogramOrFallback extends ConsumerWidget {
       loading: () => const SizedBox(height: 260),
       error: (_, _) => AnalyticsCardErrorState(
         onRetry: () => ref.invalidate(
-          dailyJoyPerYenProvider(
+          happinessReportProvider(
             bookId: bookId,
             year: year,
             month: month,
@@ -615,12 +529,4 @@ class _AnalyticsDataCard extends StatelessWidget {
       ),
     );
   }
-}
-
-int _sampleSizeOf<T>(Object result) {
-  return switch (result) {
-    Empty<T>() => 0,
-    Value<T>(:final sampleSize) => sampleSize,
-    _ => 0,
-  };
 }

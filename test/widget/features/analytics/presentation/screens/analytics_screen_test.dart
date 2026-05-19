@@ -5,9 +5,8 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
     as accounting_providers;
 import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
 import 'package:home_pocket/features/analytics/domain/models/best_joy_moment_row.dart';
-import 'package:home_pocket/features/analytics/domain/models/daily_joy_per_yen_point.dart';
 import 'package:home_pocket/features/analytics/domain/models/expense_trend.dart';
-import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
+import 'package:home_pocket/features/analytics/domain/models/happiness_report.dart';
 import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
 import 'package:home_pocket/features/analytics/domain/repositories/analytics_repository.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/repository_providers.dart'
@@ -20,8 +19,6 @@ import 'package:home_pocket/features/analytics/presentation/widgets/analytics_sc
 import 'package:home_pocket/features/analytics/presentation/widgets/best_joy_story_strip.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/category_spend_donut_chart.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/family_insight_card.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/joy_ledger_thin_sample_fallback.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/joy_trend_line_chart.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/kpi_mini_hero_strip.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/largest_expense_story_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/month_chip_picker.dart';
@@ -45,7 +42,7 @@ class _TestSelectedMonth extends SelectedMonth {
 }
 
 Widget _buildSubject({
-  MetricResult<List<DailyJoyPerYenPoint>>? dailyJoy,
+  HappinessReport? happinessReport,
   Object? distributionError,
   bool groupMode = false,
   List<ShadowBookInfo> shadowBooks = const [],
@@ -75,13 +72,9 @@ Widget _buildSubject({
         year: 2026,
         month: 4,
         currencyCode: 'JPY',
-      ).overrideWith((_) async => fixtureHappinessReportRich()),
-      dailyJoyPerYenProvider(
-        bookId: _bookId,
-        year: 2026,
-        month: 4,
-        currencyCode: 'JPY',
-      ).overrideWith((_) async => dailyJoy ?? _dailyJoyRich),
+      ).overrideWith(
+        (_) async => happinessReport ?? fixtureHappinessReportRich(),
+      ),
       bestJoyMomentProvider(
         bookId: _bookId,
         year: 2026,
@@ -138,7 +131,6 @@ void main() {
         expect(find.byType(KpiMiniHeroStrip), findsOneWidget);
         expect(find.byType(AnalyticsScreenSectionHeader), findsNWidgets(3));
         expect(find.byType(MonthlySpendTrendBarChart), findsOneWidget);
-        expect(find.byType(JoyTrendLineChart), findsOneWidget);
         expect(find.byType(CategorySpendDonutChart), findsOneWidget);
         expect(find.byType(SatisfactionDistributionHistogram), findsOneWidget);
         expect(find.byType(LargestExpenseStoryCard), findsOneWidget);
@@ -159,25 +151,13 @@ void main() {
       expect(find.byType(SatisfactionDistributionHistogram), findsNothing);
     });
 
-    testWidgets('thin-sample fallback replaces Joy trend and histogram slot', (
-      tester,
-    ) async {
-      await _pump(tester, _buildSubject(dailyJoy: _dailyJoyThin));
+    testWidgets('thin-sample happiness hides histogram slot', (tester) async {
+      await _pump(
+        tester,
+        _buildSubject(happinessReport: fixtureHappinessReportThin()),
+      );
 
-      expect(find.byType(JoyLedgerThinSampleFallback), findsOneWidget);
-      expect(find.byType(JoyTrendLineChart), findsNothing);
       expect(find.byType(SatisfactionDistributionHistogram), findsNothing);
-    });
-
-    testWidgets('thin-sample CTA does not call an unregistered named route', (
-      tester,
-    ) async {
-      await _pump(tester, _buildSubject(dailyJoy: _dailyJoyThin));
-
-      await tester.ensureVisible(find.text('Add an entry »'));
-      await tester.tap(find.text('Add an entry »'));
-
-      expect(tester.takeException(), isNull);
     });
 
     testWidgets('story cards do not call unregistered detail routes', (
@@ -315,16 +295,6 @@ const _expenseTrend = ExpenseTrendData(
   ],
 );
 
-final _dailyJoyRich = Value<List<DailyJoyPerYenPoint>>(const [
-  DailyJoyPerYenPoint(day: 1, joyPerYen: 0.8, sampleSize: 2),
-  DailyJoyPerYenPoint(day: 2, joyPerYen: 1.1, sampleSize: 2),
-  DailyJoyPerYenPoint(day: 4, joyPerYen: 1.5, sampleSize: 2),
-], 6);
-
-final _dailyJoyThin = Value<List<DailyJoyPerYenPoint>>(const [
-  DailyJoyPerYenPoint(day: 1, joyPerYen: 0.8, sampleSize: 3),
-], 3);
-
 final _largestExpense = LargestMonthlyExpense(
   transactionId: 'tx_largest',
   amount: 18000,
@@ -382,15 +352,6 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
     required DateTime startDate,
     required DateTime endDate,
     String type = 'expense',
-  }) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<List<DailySoulRowSampleWithDay>> getDailySoulRowsForPtvf({
-    required String bookId,
-    required DateTime startDate,
-    required DateTime endDate,
   }) {
     throw UnimplementedError();
   }
