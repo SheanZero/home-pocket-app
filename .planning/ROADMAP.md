@@ -149,6 +149,6 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 |-------|----------------|--------|-----------|
 | 13. ADR-016 Backend Foundation | 7/7 | Complete | 2026-05-19 |
 | 14. ADR-016 Frontend + ARB Reconciliation | 6/6 | Complete | 2026-05-19 |
-| 15. Custom Time Windows | 6/6 | Complete   | 2026-05-19 |
+| 15. Custom Time Windows | 6/6 | Complete    | 2026-05-19 |
 | 16. Per-Category Breakdown + Soul-vs-Survival | 0/0 | Not started | — |
 | 17. Manual-Only Joy Sub-Metric | 0/0 | Not started | — |
