@@ -45,15 +45,8 @@ abstract class AnalyticsRepository {
     required DateTime endDate,
   });
 
-  /// HAPPY-02 / D-04 — row-wise (amount, sat) tuples for Dart-layer PTVF fold.
-  Future<List<SoulRowSample>> getSoulRowsForPtvf({
-    required String bookId,
-    required DateTime startDate,
-    required DateTime endDate,
-  });
-
-  /// STATSUI-01 / D-05 — row-wise daily tuples for Dart-layer PTVF fold.
-  Future<List<DailySoulRowSampleWithDay>> getDailySoulRowsForPtvf({
+  /// ADR-016 §2 — row-wise tuples for Dart-layer Joy contribution fold.
+  Future<List<SoulRowSample>> getSoulRowsForJoyContribution({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,

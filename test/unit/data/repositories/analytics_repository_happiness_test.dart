@@ -77,37 +77,40 @@ void main() {
       ).called(1);
     });
 
-    test('getSoulRowsForPtvf preserves DAO row order and values', () async {
-      const rows = [
-        SoulRowSample(amount: 500, soulSatisfaction: 6),
-        SoulRowSample(amount: 1500, soulSatisfaction: 8),
-        SoulRowSample(amount: 3000, soulSatisfaction: 10),
-      ];
-      when(
-        () => dao.getSoulRowsForPtvf(
+    test(
+      'getSoulRowsForJoyContribution preserves DAO row order and values',
+      () async {
+        const rows = [
+          SoulRowSample(amount: 500, soulSatisfaction: 6),
+          SoulRowSample(amount: 1500, soulSatisfaction: 8),
+          SoulRowSample(amount: 3000, soulSatisfaction: 10),
+        ];
+        when(
+          () => dao.getSoulRowsForJoyContribution(
+            bookId: 'book-1',
+            startDate: startDate,
+            endDate: endDate,
+          ),
+        ).thenAnswer((_) async => rows);
+
+        final result = await repository.getSoulRowsForJoyContribution(
           bookId: 'book-1',
           startDate: startDate,
           endDate: endDate,
-        ),
-      ).thenAnswer((_) async => rows);
+        );
 
-      final result = await repository.getSoulRowsForPtvf(
-        bookId: 'book-1',
-        startDate: startDate,
-        endDate: endDate,
-      );
-
-      expect(result.length, 3);
-      expect(result.map((row) => row.amount), [500, 1500, 3000]);
-      expect(result.map((row) => row.soulSatisfaction), [6, 8, 10]);
-      verify(
-        () => dao.getSoulRowsForPtvf(
-          bookId: 'book-1',
-          startDate: startDate,
-          endDate: endDate,
-        ),
-      ).called(1);
-    });
+        expect(result.length, 3);
+        expect(result.map((row) => row.amount), [500, 1500, 3000]);
+        expect(result.map((row) => row.soulSatisfaction), [6, 8, 10]);
+        verify(
+          () => dao.getSoulRowsForJoyContribution(
+            bookId: 'book-1',
+            startDate: startDate,
+            endDate: endDate,
+          ),
+        ).called(1);
+      },
+    );
 
     test(
       'getSoulSatisfactionOverview maps DAO result to domain type',

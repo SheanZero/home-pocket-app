@@ -303,39 +303,6 @@ class AnalyticsDao {
         .toList();
   }
 
-  /// STATSUI-01 / D-05: row-wise daily pull for Dart-layer PTVF fold.
-  Future<List<DailySoulRowSampleWithDay>> getDailySoulRowsForPtvf({
-    required String bookId,
-    required DateTime startDate,
-    required DateTime endDate,
-  }) async {
-    final results = await _db
-        .customSelect(
-          'SELECT DATE(timestamp, \'unixepoch\', \'localtime\') as day, '
-          'amount, soul_satisfaction '
-          'FROM transactions '
-          'WHERE book_id = ? AND $_soulExpenseFilter '
-          'AND timestamp >= ? AND timestamp <= ? '
-          'ORDER BY timestamp ASC, id ASC',
-          variables: [
-            Variable.withString(bookId),
-            Variable.withDateTime(startDate),
-            Variable.withDateTime(endDate),
-          ],
-        )
-        .get();
-
-    return results
-        .map(
-          (row) => DailySoulRowSampleWithDay(
-            day: DateTime.parse(row.read<String>('day')),
-            amount: row.read<int>('amount'),
-            soulSatisfaction: row.read<int>('soul_satisfaction'),
-          ),
-        )
-        .toList();
-  }
-
   /// STATSUI-06 / D-15: largest expense across total ledger.
   Future<LargestMonthlyExpense?> getLargestMonthlyExpense({
     required String bookId,
@@ -405,10 +372,10 @@ class AnalyticsDao {
     );
   }
 
-  /// HAPPY-02 / D-04: row-wise (amount, sat) pull for Dart-layer PTVF fold.
+  /// ADR-016 §2: row-wise (amount, sat) pull for Dart-layer Joy contribution.
   /// Performance trade-off accepted vs SUM/GROUP BY (D-04, ADR-013); typical
   /// monthly soul tx count 10-100 per book: negligible row volume.
-  Future<List<SoulRowSample>> getSoulRowsForPtvf({
+  Future<List<SoulRowSample>> getSoulRowsForJoyContribution({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,

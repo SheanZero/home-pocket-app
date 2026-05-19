@@ -91,7 +91,7 @@ void main() {
       await seedTx(id: 'row_2', amount: 2500, soulSatisfaction: 8);
       await seedTx(id: 'row_3', amount: 700, soulSatisfaction: 10);
 
-      final rows = await dao.getSoulRowsForPtvf(
+      final rows = await dao.getSoulRowsForJoyContribution(
         bookId: 'book_joy',
         startDate: windowStart,
         endDate: windowEnd,

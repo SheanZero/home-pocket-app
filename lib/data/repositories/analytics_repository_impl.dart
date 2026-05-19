@@ -136,25 +136,12 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   }
 
   @override
-  Future<List<SoulRowSample>> getSoulRowsForPtvf({
+  Future<List<SoulRowSample>> getSoulRowsForJoyContribution({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
   }) {
-    return _dao.getSoulRowsForPtvf(
-      bookId: bookId,
-      startDate: startDate,
-      endDate: endDate,
-    );
-  }
-
-  @override
-  Future<List<DailySoulRowSampleWithDay>> getDailySoulRowsForPtvf({
-    required String bookId,
-    required DateTime startDate,
-    required DateTime endDate,
-  }) {
-    return _dao.getDailySoulRowsForPtvf(
+    return _dao.getSoulRowsForJoyContribution(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,

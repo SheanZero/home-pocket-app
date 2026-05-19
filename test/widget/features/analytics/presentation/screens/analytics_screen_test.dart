@@ -456,7 +456,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
   }
 
   @override
-  Future<List<SoulRowSample>> getSoulRowsForPtvf({
+  Future<List<SoulRowSample>> getSoulRowsForJoyContribution({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
