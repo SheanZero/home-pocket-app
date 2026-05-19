@@ -26,7 +26,12 @@ final class HappinessReportProvider
   /// HAPPY-01..04 personal happiness report.
   HappinessReportProvider._({
     required HappinessReportFamily super.from,
-    required ({String bookId, int year, int month, String currencyCode})
+    required ({
+      String bookId,
+      DateTime startDate,
+      DateTime endDate,
+      String currencyCode,
+    })
     super.argument,
   }) : super(
          retry: null,
@@ -56,12 +61,17 @@ final class HappinessReportProvider
   FutureOr<HappinessReport> create(Ref ref) {
     final argument =
         this.argument
-            as ({String bookId, int year, int month, String currencyCode});
+            as ({
+              String bookId,
+              DateTime startDate,
+              DateTime endDate,
+              String currencyCode,
+            });
     return happinessReport(
       ref,
       bookId: argument.bookId,
-      year: argument.year,
-      month: argument.month,
+      startDate: argument.startDate,
+      endDate: argument.endDate,
       currencyCode: argument.currencyCode,
     );
   }
@@ -77,7 +87,7 @@ final class HappinessReportProvider
   }
 }
 
-String _$happinessReportHash() => r'123ad750b8925cd7f3c0f65179f4f8250c991996';
+String _$happinessReportHash() => r'236f5372581442f06baf87749750e24547ae4764';
 
 /// HAPPY-01..04 personal happiness report.
 
@@ -85,7 +95,12 @@ final class HappinessReportFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<HappinessReport>,
-          ({String bookId, int year, int month, String currencyCode})
+          ({
+            String bookId,
+            DateTime startDate,
+            DateTime endDate,
+            String currencyCode,
+          })
         > {
   HappinessReportFamily._()
     : super(
@@ -100,14 +115,14 @@ final class HappinessReportFamily extends $Family
 
   HappinessReportProvider call({
     required String bookId,
-    required int year,
-    required int month,
+    required DateTime startDate,
+    required DateTime endDate,
     required String currencyCode,
   }) => HappinessReportProvider._(
     argument: (
       bookId: bookId,
-      year: year,
-      month: month,
+      startDate: startDate,
+      endDate: endDate,
       currencyCode: currencyCode,
     ),
     from: this,
@@ -137,7 +152,8 @@ final class BestJoyMomentProvider
   /// HAPPY-04 standalone Top Joy.
   BestJoyMomentProvider._({
     required BestJoyMomentFamily super.from,
-    required ({String bookId, int year, int month}) super.argument,
+    required ({String bookId, DateTime startDate, DateTime endDate})
+    super.argument,
   }) : super(
          retry: null,
          name: r'bestJoyMomentProvider',
@@ -164,12 +180,14 @@ final class BestJoyMomentProvider
 
   @override
   FutureOr<MetricResult<BestJoyMomentRow>> create(Ref ref) {
-    final argument = this.argument as ({String bookId, int year, int month});
+    final argument =
+        this.argument
+            as ({String bookId, DateTime startDate, DateTime endDate});
     return bestJoyMoment(
       ref,
       bookId: argument.bookId,
-      year: argument.year,
-      month: argument.month,
+      startDate: argument.startDate,
+      endDate: argument.endDate,
     );
   }
 
@@ -184,7 +202,7 @@ final class BestJoyMomentProvider
   }
 }
 
-String _$bestJoyMomentHash() => r'62be259ee9a15c4638f28aea80293416b415e735';
+String _$bestJoyMomentHash() => r'32dd35a5d11b9ad591f5fc758d26254c6c7689e1';
 
 /// HAPPY-04 standalone Top Joy.
 
@@ -192,7 +210,7 @@ final class BestJoyMomentFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<MetricResult<BestJoyMomentRow>>,
-          ({String bookId, int year, int month})
+          ({String bookId, DateTime startDate, DateTime endDate})
         > {
   BestJoyMomentFamily._()
     : super(
@@ -207,10 +225,10 @@ final class BestJoyMomentFamily extends $Family
 
   BestJoyMomentProvider call({
     required String bookId,
-    required int year,
-    required int month,
+    required DateTime startDate,
+    required DateTime endDate,
   }) => BestJoyMomentProvider._(
-    argument: (bookId: bookId, year: year, month: month),
+    argument: (bookId: bookId, startDate: startDate, endDate: endDate),
     from: this,
   );
 
@@ -350,7 +368,8 @@ final class LargestMonthlyExpenseProvider
   /// STATSUI-06 / D-15 — single largest monthly expense for 物語 group 総 card.
   LargestMonthlyExpenseProvider._({
     required LargestMonthlyExpenseFamily super.from,
-    required ({String bookId, int year, int month}) super.argument,
+    required ({String bookId, DateTime startDate, DateTime endDate})
+    super.argument,
   }) : super(
          retry: null,
          name: r'largestMonthlyExpenseProvider',
@@ -377,12 +396,14 @@ final class LargestMonthlyExpenseProvider
 
   @override
   FutureOr<LargestMonthlyExpense?> create(Ref ref) {
-    final argument = this.argument as ({String bookId, int year, int month});
+    final argument =
+        this.argument
+            as ({String bookId, DateTime startDate, DateTime endDate});
     return largestMonthlyExpense(
       ref,
       bookId: argument.bookId,
-      year: argument.year,
-      month: argument.month,
+      startDate: argument.startDate,
+      endDate: argument.endDate,
     );
   }
 
@@ -398,7 +419,7 @@ final class LargestMonthlyExpenseProvider
 }
 
 String _$largestMonthlyExpenseHash() =>
-    r'8183e8ed497fbb177de3f0418793f50f1b0b87ea';
+    r'10c10dad0a1bced96cfa5c53ec560a5a7c846ec0';
 
 /// STATSUI-06 / D-15 — single largest monthly expense for 物語 group 総 card.
 
@@ -406,7 +427,7 @@ final class LargestMonthlyExpenseFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<LargestMonthlyExpense?>,
-          ({String bookId, int year, int month})
+          ({String bookId, DateTime startDate, DateTime endDate})
         > {
   LargestMonthlyExpenseFamily._()
     : super(
@@ -421,10 +442,10 @@ final class LargestMonthlyExpenseFamily extends $Family
 
   LargestMonthlyExpenseProvider call({
     required String bookId,
-    required int year,
-    required int month,
+    required DateTime startDate,
+    required DateTime endDate,
   }) => LargestMonthlyExpenseProvider._(
-    argument: (bookId: bookId, year: year, month: month),
+    argument: (bookId: bookId, startDate: startDate, endDate: endDate),
     from: this,
   );
 
@@ -462,7 +483,7 @@ final class FamilyHappinessProvider
   /// 10/11 may extend the call site if current-device book inclusion is required.
   FamilyHappinessProvider._({
     required FamilyHappinessFamily super.from,
-    required ({int year, int month}) super.argument,
+    required ({DateTime startDate, DateTime endDate}) super.argument,
   }) : super(
          retry: null,
          name: r'familyHappinessProvider',
@@ -489,8 +510,12 @@ final class FamilyHappinessProvider
 
   @override
   FutureOr<FamilyHappiness> create(Ref ref) {
-    final argument = this.argument as ({int year, int month});
-    return familyHappiness(ref, year: argument.year, month: argument.month);
+    final argument = this.argument as ({DateTime startDate, DateTime endDate});
+    return familyHappiness(
+      ref,
+      startDate: argument.startDate,
+      endDate: argument.endDate,
+    );
   }
 
   @override
@@ -504,7 +529,7 @@ final class FamilyHappinessProvider
   }
 }
 
-String _$familyHappinessHash() => r'5c47e90946b9c52fb257c27c3591378fb9f1e935';
+String _$familyHappinessHash() => r'3b7409409c859ea75df4540a1023fd20b53186c9';
 
 /// FAMILY-01..02 family happiness aggregate.
 ///
@@ -516,7 +541,7 @@ final class FamilyHappinessFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<FamilyHappiness>,
-          ({int year, int month})
+          ({DateTime startDate, DateTime endDate})
         > {
   FamilyHappinessFamily._()
     : super(
@@ -533,11 +558,13 @@ final class FamilyHappinessFamily extends $Family
   /// use case. Q6c remains open: this currently passes shadow books only; Phase
   /// 10/11 may extend the call site if current-device book inclusion is required.
 
-  FamilyHappinessProvider call({required int year, required int month}) =>
-      FamilyHappinessProvider._(
-        argument: (year: year, month: month),
-        from: this,
-      );
+  FamilyHappinessProvider call({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) => FamilyHappinessProvider._(
+    argument: (startDate: startDate, endDate: endDate),
+    from: this,
+  );
 
   @override
   String toString() => r'familyHappinessProvider';

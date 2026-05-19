@@ -16,15 +16,15 @@ part 'state_happiness.g.dart';
 Future<HappinessReport> happinessReport(
   Ref ref, {
   required String bookId,
-  required int year,
-  required int month,
+  required DateTime startDate,
+  required DateTime endDate,
   required String currencyCode,
 }) async {
   final useCase = ref.watch(getHappinessReportUseCaseProvider);
   return useCase.execute(
     bookId: bookId,
-    year: year,
-    month: month,
+    startDate: startDate,
+    endDate: endDate,
     currencyCode: currencyCode,
   );
 }
@@ -34,11 +34,15 @@ Future<HappinessReport> happinessReport(
 Future<MetricResult<BestJoyMomentRow>> bestJoyMoment(
   Ref ref, {
   required String bookId,
-  required int year,
-  required int month,
+  required DateTime startDate,
+  required DateTime endDate,
 }) async {
   final useCase = ref.watch(getBestJoyMomentUseCaseProvider);
-  return useCase.execute(bookId: bookId, year: year, month: month);
+  return useCase.execute(
+    bookId: bookId,
+    startDate: startDate,
+    endDate: endDate,
+  );
 }
 
 /// JOYMIG-02 / D-04 — recommended monthlyJoyTarget from past 3 months.
@@ -63,11 +67,15 @@ Future<MetricResult<int>> monthlyJoyTargetRecommendation(
 Future<LargestMonthlyExpense?> largestMonthlyExpense(
   Ref ref, {
   required String bookId,
-  required int year,
-  required int month,
+  required DateTime startDate,
+  required DateTime endDate,
 }) async {
   final useCase = ref.watch(getLargestMonthlyExpenseUseCaseProvider);
-  return useCase.execute(bookId: bookId, year: year, month: month);
+  return useCase.execute(
+    bookId: bookId,
+    startDate: startDate,
+    endDate: endDate,
+  );
 }
 
 /// FAMILY-01..02 family happiness aggregate.
@@ -78,28 +86,32 @@ Future<LargestMonthlyExpense?> largestMonthlyExpense(
 @riverpod
 Future<FamilyHappiness> familyHappiness(
   Ref ref, {
-  required int year,
-  required int month,
+  required DateTime startDate,
+  required DateTime endDate,
 }) async {
   final activeGroup = await ref.watch(activeGroupProvider.future);
   if (activeGroup == null) {
-    return _emptyFamilyHappiness(year: year, month: month);
+    return _emptyFamilyHappiness(endDate: endDate);
   }
 
   final shadowBooks = await ref.watch(shadowBooksProvider.future);
   final groupBookIds = shadowBooks.map((shadow) => shadow.book.id).toList();
   if (groupBookIds.isEmpty) {
-    return _emptyFamilyHappiness(year: year, month: month);
+    return _emptyFamilyHappiness(endDate: endDate);
   }
 
   final useCase = ref.watch(getFamilyHappinessUseCaseProvider);
-  return useCase.execute(groupBookIds: groupBookIds, year: year, month: month);
+  return useCase.execute(
+    groupBookIds: groupBookIds,
+    startDate: startDate,
+    endDate: endDate,
+  );
 }
 
-FamilyHappiness _emptyFamilyHappiness({required int year, required int month}) {
+FamilyHappiness _emptyFamilyHappiness({required DateTime endDate}) {
   return FamilyHappiness(
-    year: year,
-    month: month,
+    year: endDate.year,
+    month: endDate.month,
     totalGroupSoulTx: 0,
     familyHighlightsSum: const Empty(),
     sharedJoyInsight: const Empty(),
