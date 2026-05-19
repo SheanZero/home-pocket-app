@@ -135,7 +135,7 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 ## Current Status
 
 **Active milestone:** v1.2 Happiness Metric Refresh (in progress)
-**Current phase:** Phase 15 (ready to discuss before planning)
+**Current phase:** Phase 16 (ready to discuss before planning)
 
 ## Progress
 

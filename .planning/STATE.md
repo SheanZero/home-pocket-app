@@ -146,7 +146,7 @@ Items acknowledged and deferred at v1.0 milestone close on 2026-04-29:
 ## Session Continuity
 
 Last session: 2026-05-19T13:52:30.492Z
-Stopped at: Completed 15-06-PLAN.md
+Stopped at: Phase 15 complete (6/6) — ready to discuss Phase 16
 Resume file: None
 
-**Planned Next:** `/gsd:verify-work 15` — verify completed Custom Time Windows before moving to Phase 16
+**Planned Next:** `/gsd:discuss-phase 16` — clarify Per-Category Breakdown + Soul-vs-Survival before planning
