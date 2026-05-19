@@ -102,7 +102,7 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
   - [x] 15-02-PLAN.md — TimeWindow Freezed sealed domain model + TimeWindowValidation helper (calendar-month math)
   - [x] 15-03-PLAN.md — Use-case (startDate, endDate) migration + display-anchor (Option A) + MoM delta UI retirement
   - [x] 15-04-PLAN.md — Provider re-keying + SelectedTimeWindow notifier + HomeScreen current-month adapter
-  - [ ] 15-05-PLAN.md — TimeWindowChip + TimeWindowPickerSheet widgets + DateFormatter additions
+  - [x] 15-05-PLAN.md — TimeWindowChip + TimeWindowPickerSheet widgets + DateFormatter additions
   - [ ] 15-06-PLAN.md — AnalyticsScreen integration + MonthChipPicker deletion + HomeHero isolation lock + no-delta widget tests
 **UI hint**: yes
 
@@ -149,6 +149,6 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 |-------|----------------|--------|-----------|
 | 13. ADR-016 Backend Foundation | 7/7 | Complete | 2026-05-19 |
 | 14. ADR-016 Frontend + ARB Reconciliation | 6/6 | Complete | 2026-05-19 |
-| 15. Custom Time Windows | 4/6 | In Progress|  |
+| 15. Custom Time Windows | 5/6 | In Progress|  |
 | 16. Per-Category Breakdown + Soul-vs-Survival | 0/0 | Not started | — |
 | 17. Manual-Only Joy Sub-Metric | 0/0 | Not started | — |
