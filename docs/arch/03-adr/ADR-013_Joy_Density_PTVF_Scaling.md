@@ -153,3 +153,49 @@ density = Σ (soul_satisfaction × (amount / base)^0.88) / Σ amount
 
 **Review timestamp:** 2026-05-01T00:00:00Z
 **Next-review timestamp:** v1.2 milestone start or when monthly soul tx median exceeds 1000
+
+---
+
+## Update 2026-05-19: Superseded by ADR-016 §2
+
+**Status:** density (Joy/¥) as principal Joy metric — **superseded**. Underlying PTVF scaling formula (single-tx contribution) — **retained and re-used** by ADR-016.
+
+### What changed
+
+ADR-016 (Joy Metric Visualization Redesign, 2026-05-19 ratify) replaces the **density** output of this ADR with a **cumulative sum** output:
+
+- **This ADR (ADR-013) defined:** `density = Σ (soul_satisfaction × (amount / base)^0.88) / Σ amount` — a ratio
+- **ADR-016 §2 redefines the principal Joy metric as:** `Σ joy_contribution = Σ (soul_satisfaction × (amount / base)^0.88)` — the same numerator, but **not divided by Σ amount**
+
+The PTVF scaling — `soul_satisfaction × (amount / base)^0.88` — remains the per-transaction Joy contribution formula. Only the **aggregation step** changed: the global divisor (Σ amount) is removed.
+
+### Trigger
+
+User feedback on 2026-05-18 home review (item 3): "重新设计 Joy 的计算方式，看是否用 sum 会更好一些，同时要考虑在同心环中的显示，要能不断累加，让用户有成就感". The density metric, while mathematically defensible as a per-yen efficiency measure, did not surface "accumulation" — a UX property the user explicitly wanted for HomeHeroCard's concentric ring.
+
+### What this means in code
+
+The following components defined by ADR-013 §📝 实施计划 will change during the v1.2 "Joy metric migration" phase (see ADR-016 §7):
+
+- `lib/application/analytics/get_happiness_report_use_case.dart` — fold logic changes (numerator only, no `/ Σ amount`); return type adjusts
+- `lib/data/daos/analytics_dao.dart` — query may simplify (no longer requires `Σ amount` dimension)
+- `lib/infrastructure/i18n/formatters/joy_density_formatter.dart` — to be replaced by a cumulative-sum formatter (integer + thousands separator)
+- All tests that pin `joyPerYen: density` output need updating to `joyCumulative: int` semantics
+
+### What is preserved
+
+- The PTVF rationale (`amount^0.88` to dampen amount dominance) is preserved per-transaction
+- Soul-only filtering (this ADR's filter conventions) is preserved
+- The §🚫 已知局限 in this ADR remains valid for the per-transaction contribution function
+
+### Why this ADR stays ✅ 已接受 (not 已废弃)
+
+Per project ADR conventions (`.claude/rules/arch.md`):
+- ADRs in ✅ 已接受 are append-only — status cannot be reverted
+- The per-transaction PTVF scaling formula defined here is **actively re-used** by ADR-016, so this ADR is not废弃
+- Supersede is **scoped to the aggregation step only** (density → cumulative sum), not the underlying math
+
+Future readers: when implementing or auditing Joy metric, **read ADR-016 first** for the current contract, then ADR-013 for the per-transaction scaling rationale that ADR-016 inherits.
+
+**Update author:** xinz + Architecture Team (Claude)
+**Update review timestamp:** 2026-05-19

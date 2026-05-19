@@ -1,23 +1,24 @@
 # ADR-016: Joy Metric Visualization Redesign
 
 **文档编号:** ADR-016
-**文档版本:** 0.1
+**文档版本:** 1.0
 **创建日期:** 2026-05-18
-**最后更新:** 2026-05-18
-**状态:** 📝 草稿 (Proposed — open for discussion)
-**决策者:** TBD (用户产品决策 + Architecture Team)
-**影响范围:** HomeHeroCard 同心环视觉、AnalyticsScreen 悦己 KPI、HAPPY-02 公式层、可能的新增 metric
-**相关 ADR:** ADR-012 (No Gamification v1.1)、ADR-013 (Joy Density PTVF Scaling)、ADR-014 (Soul Satisfaction Unipolar Positive Scale)
+**最后更新:** 2026-05-19
+**状态:** ✅ 已接受 (Accepted — 2026-05-19)
+**决策者:** xinz (用户产品决策) + Architecture Team
+**影响范围:** HomeHeroCard 同心环视觉、AnalyticsScreen 悦己 KPI、HAPPY-02 公式层、ADR-013 supersede、新增 user_settings.monthly_joy_target
+**相关 ADR:** ADR-012 (No Gamification v1.1)、ADR-013 (Joy Density PTVF Scaling — superseded by 本 ADR §2)、ADR-014 (Soul Satisfaction Unipolar Positive Scale)
 
-> **本 ADR 当前为 Proposed，仅梳理讨论空间，未做决定。**
-> 决策将在用户与 Architecture Team 一轮 discuss-phase 之后再 append `## Decision (YYYY-MM-DD)` 段落。
+> **本 ADR 已 ratify 于 2026-05-19。** 决策见下文 [✅ Decision (2026-05-19)](#-decision-2026-05-19) 段落。
+> 原文 Context + Considered Options 保留作为历史决策依据。Status 翻为 ✅ 已接受 后本文进入 append-only 模式（后续仅以 `## Update YYYY-MM-DD: <topic>` 追加，不修改既有正文）。
 
 ---
 
 ## 📋 状态
 
-**当前状态:** 📝 草稿 — 仅 Context + Options
+**当前状态:** ✅ 已接受 (2026-05-19) — Context + Options + Decision 三段齐备
 **触发来源:** 用户首页样式 review 2026-05-18，原文：「重新设计 Joy 的计算方式，看是否用 sum 会更好一些，同时要考虑在同心环中的显示，要能不断累加，让用户有成就感」+「满意度均值是 5，但圆环是 1/4 深色、1/4 浅色，无法让用户理解，需要调整」
+**Ratify 路径:** 2026-05-19 用户 + Claude Architecture Team Socratic discussion，5 个 Open Questions 逐题确认
 
 **关联 quick task:** 2026-05-18 用户首页 review，其中 7 项纯视觉/bug 改动已拆为 `quick/260518-*-home-polish`；本 ADR 覆盖剩余的产品决策项（item 3 + item 4）。
 
@@ -155,6 +156,142 @@
 4. **决策后 append `## Decision (YYYY-MM-DD)`** 段落到本 ADR，状态从 `📝 草稿` 翻为 `✅ 已接受`
 5. **若决策走方案 B/C：** 起新 phase 实现 + 可能修订 ADR-013（追加 update 段落，不改原文）
 
+> **2026-05-19 update:** Steps 1-4 已完成（见下文 Decision）。Step 5 进入新 phase 规划，归属 v1.2 milestone。
+
+---
+
+## ✅ Decision (2026-05-19)
+
+**Status:** ✅ 已接受
+**决策者:** xinz (用户产品决策) + Architecture Team Socratic discussion
+**讨论方法:** 本 ADR Open Questions §⚖️ 5 项逐题确认（Q5 → Q1 → Q2 → 冲突 reconcile → Q4 子任务 → ADR-012 边界）
+
+### 1. 时机 (Q5)
+
+现在 ratify，**显式接受打破 v1.1 baseline pure 状态** 的代价。v1.1 close 至今 13 天，本决定意味着：
+
+- v1.1 retrospective 里追加一条「HomeHero + Analytics Joy metric 从密度 (Joy/¥) 迁移到累计量 (Σ joy_contribution)」的迁移点
+- 未来 baseline 对比时以本 ADR 接受日 (2026-05-19) 为分水岭
+- v1.1.x patch 与 v1.2 都可能承载实现，不强制锁定到单一 milestone
+
+### 2. Joy metric 处理 (Q2) — supersede ADR-013
+
+**替换 ADR-013。** Σ joy_contribution 成为全局唯一 Joy 表达。
+
+**新公式:**
+```
+Σ joy_contribution = Σ (soul_satisfaction × (amount / base)^0.88)
+```
+
+**关键差异 vs ADR-013:**
+- ADR-013: `density = Σ (soul_satisfaction × (amount / base)^0.88) / Σ amount` — 除以 Σamount，是 ratio
+- ADR-016: 同样的分子，**不除以 Σamount**，是 cumulative sum
+
+**ADR-013 处置:**
+- ADR-013 保留 ✅ 已接受状态（append-only 规则不允许翻转回退）
+- ADR-013 文末追加 `## Update 2026-05-19: Superseded by ADR-016 §2` 段落，记录 supersede 事实
+- ADR-013 §🎯 背景 的 PTVF 标度数学定义作为 **单项贡献的算法** 继续保留并被 ADR-016 引用
+- 密度 (Joy/¥) 作为 metric 退役，HomeHero 和 Analytics 都不再展示
+
+**代码影响范围（实现 phase 列出）:**
+- `lib/application/analytics/get_happiness_report_use_case.dart` — fold 逻辑改 (不再 / Σamount)，return type 调整为 `MetricResult<int>` 或类似
+- `lib/data/daos/analytics_dao.dart` — query 可能简化 (不再需要 Σamount 维度)
+- `lib/infrastructure/i18n/formatters/joy_density_formatter.dart` — 改名或删除，新增 `joy_cumulative_formatter` (整数 + 千分位)
+- `lib/features/home/presentation/widgets/home_hero_card.dart` — 同心环数据源改 + 视觉重设计
+- AnalyticsScreen 的 Variant δ 体系需重画 (密度 KPI 退役)
+
+### 3. 累加视觉边界 (Q1)
+
+**HomeHero 同心环 = 单月内 Σ joy_contribution 累加进度环。**
+
+允许的视觉行为:
+- ✅ 月初归零，环空
+- ✅ 每笔 soul 交易提交后环递增（可有 micro-feedback 填充动画，单次时长 < 0.6s）
+- ✅ 月底归零（下月 1 日重新从 0 开始）
+- ✅ 与当月「软目标」对比的填充百分比（见 §4）
+
+**禁止的视觉行为（仍守 ADR-012）:**
+- ❌ 与上月、上周、季度均值、家庭成员均值对比 (ADR-012 #4)
+- ❌ 累计天数 streak 显示 (ADR-012 #5)
+- ❌ 「本月超过上月 +N」delta 提示 (ADR-012 #4)
+- ❌ Joy 达成相关的 badge / 成就解锁 (ADR-012 #2)
+
+### 4. 目标值机制 (Q1 子任务 + 原 Q4 重定向)
+
+**用户可配置 + 默认值推荐：**
+
+新增 schema field:
+```
+user_settings.monthly_joy_target  INTEGER NULLABLE
+```
+
+设置页 UI 提供数字输入框 + 默认值推荐文案。
+
+**默认值推荐算法（用户未配置时，圆环按此填充比例计算）:**
+
+| 用户历史 | 推荐值 |
+|---|---|
+| ≥3 个完整自然月 soul 交易数据 | `ceil(median(过去 3 个月每月 Σ joy_contribution))` |
+| <3 个完整自然月 | fallback hardcoded baseline（**具体数字 TBD in plan-phase**） |
+
+**TBD in 实现 phase（建议 1 天 spike 决定）:**
+- fallback baseline 具体数字（候选区间 30-100，需基于早期种子数据测试）
+- 中位数是否需要 outlier 截断（例如剔除 single-tx > 3× p75 的月份）
+- 推荐值是否在用户配置后仍持续显示（"基于你过去 3 个月，建议 X"）
+
+### 5. 100% 行为 (ADR-012 #2 边界) (Q3)
+
+**纯环境变化。无 discrete event，避免触发 ADR-012 #2 (milestone/achievement)。**
+
+允许:
+- ✅ 环颜色从葵绿 (#47B88A, 灵魂账本绿) 平滑过渡到金色（具体色值实现期定）
+- ✅ 颜色过渡曲线可以是 0%-100% 全程渐变，或 90%+ 才开始变金（实现期 UI 决策）
+- ✅ 超过 100% 后环视觉冻结在金色饱和态（不再变化）
+
+禁止:
+- ❌ 文案提示（"本月你送了 X 份愉悦给自己"）
+- ❌ 任何 toast / snackbar / push notification
+- ❌ 一次性 celebration 动画（如发光、闪烁、放大脉冲）
+- ❌ Haptic feedback 触发
+- ❌ 显示 >100% 的数字（如 120%、150%）— 数字部分仅显示绝对值 Σ joy_contribution，不显示百分比
+
+**ADR-012 兼容性声明:**
+环颜色变化是 ambient state 渲染（连续函数 f(progress) → color），不是 achievement trigger（无 discrete unlock event）。此区分被显式记录以备未来 review 追溯。
+
+### 6. 双屏一致性 (原 Q3 隐含)
+
+- **HomeHero**: 累加环 + 数字 (Σ joy_contribution 绝对值) + 颜色状态（如 §5）
+- **Analytics**: 改用 Σ joy_contribution 作为主 KPI；可视化形式（趋势线 / 月度分布块 / per-tx 散点）在实现 phase 重新设计 — 当前 Variant δ 的「密度 + 趋势 + 分布」体系需要重画
+- **不允许:** 两屏使用不同 metric（避免用户认知割裂）
+
+### 7. 后续工作
+
+**本 ADR 落地后立即（同 commit 内）:**
+- ADR-013 append `## Update 2026-05-19: Superseded by ADR-016 §2` 段落
+- doc/worklog/ 写本次决策日志
+
+**新建 phase（建议归属 v1.2 milestone 首个 phase）:** "Joy metric migration to Σ joy_contribution"
+- Scope: schema 变更 + use case 重写 + HomeHero 重写 + Analytics 重写 + settings UI + golden 重生 + i18n key 增减
+- 1 天 spike 决定 §4 fallback baseline 数字
+- 验收 must-haves:
+  - density 公式从代码 + UI 完全移除
+  - Σ joy_contribution 在 HomeHero 单月内递增展示
+  - 月度目标可配置 + 默认值推荐算法正确
+  - 100% 行为符合 §5（颜色平滑、无文案、无动画、无提醒）
+  - golden 测试覆盖 0%, 50%, 100%, >100% 四态
+
+**v1.1 RETROSPECTIVE.md:** 追加一条 baseline migration note（Joy metric 已迁移、对比基线分水岭日期 2026-05-19）
+
+### 8. 显式被拒绝的方案
+
+- **方案 D (保持现状)** — 用户视觉可读性诉求是 deficit not preference，不可搁置
+- **方案 C (圆环改分布直方图)** — 不答用户「累加」诉求；信息密度高但与「成就感」无关联
+- **方案 B + 「上月累计」作软目标** — 撞 ADR-012 #4 (cross-period delta)，明确拒绝
+- **100% 行为之 ②金色 + 一次性发光动画** — 在 ADR-012 #2 边界灰色地带，保守拒绝
+- **100% 行为之 ③文案 toast** — 直接撞 ADR-012 #2 (achievement trigger)，明确拒绝
+- **Q4 目标值之 ②产品拍固定 baseline** — 缺个人化，约 40% 用户会落在两端无意义区间
+- **Q4 目标值之 ③v1.1 当窗口加 settings field** — v1.1 close 后窗口太重，但被并入新 phase
+
 ---
 
 ## 🔗 引用
@@ -169,5 +306,5 @@
 
 ---
 
-*最后审查日期: 2026-05-18*
-*下次审查触发: 用户产品方向澄清 + Architecture Team discuss-phase*
+*最后审查日期: 2026-05-19 (ratify + Decision append)*
+*下次审查触发: Joy metric migration phase 实现完成后回顾 (验证 §7 must-haves 达成情况)*
