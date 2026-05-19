@@ -37,6 +37,12 @@ class FormatterService {
   String formatMonthYear(DateTime date, Locale locale) =>
       DateFormatter.formatMonthYear(date, locale);
 
+  /// Format a [date] as a compact month-day label.
+  ///
+  /// ja/zh: 4月26日 · en: Apr 26
+  String formatShortMonthDay(DateTime date, Locale locale) =>
+      DateFormatter.formatShortMonthDay(date, locale);
+
   /// Format [date] as a relative label (today/yesterday/N days ago) or date.
   ///
   /// ja: 今日, 昨日, N日前 · zh: 今天, 昨天, N天前 · en: Today, Yesterday, N days ago
