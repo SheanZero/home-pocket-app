@@ -13,12 +13,12 @@ Requirements committed for this milestone. Each maps to one roadmap phase.
 
 ### Joy Metric Migration (JOYMIG-*) — ADR-016 implementation
 
-- [ ] **JOYMIG-01**: User sees `Σ joy_contribution` (not density Joy/¥) as the principal Joy metric in HomeHero — both in the central numeric display and as the value driving the ring fill.
+- [x] **JOYMIG-01**: User sees `Σ joy_contribution` (not density Joy/¥) as the principal Joy metric in HomeHero — both in the central numeric display and as the value driving the ring fill.
 - [ ] **JOYMIG-02**: User can configure a monthly Joy target (`monthly_joy_target`) in Settings; when unconfigured, the system computes and shows a recommended value (historical median of past 3 months if ≥3 months of data exist, else a hardcoded fallback baseline TBD by Phase 13 spike).
-- [ ] **JOYMIG-03**: HomeHero ring resets to 0% at the start of each calendar month and fills toward the active target (configured or recommended) as soul transactions accumulate.
-- [ ] **JOYMIG-04**: HomeHero ring color transitions smoothly from sage green (`#47B88A`, soul ledger green) to gold as the fill progresses; the color reaches gold saturation at or beyond 100% and stays there (no oscillation, no second-cycle re-color).
+- [x] **JOYMIG-03**: HomeHero ring resets to 0% at the start of each calendar month and fills toward the active target (configured or recommended) as soul transactions accumulate.
+- [x] **JOYMIG-04**: HomeHero ring color transitions smoothly from sage green (`#47B88A`, soul ledger green) to gold as the fill progresses; the color reaches gold saturation at or beyond 100% and stays there (no oscillation, no second-cycle re-color).
 - [ ] **JOYMIG-05**: AnalyticsScreen surfaces `Σ joy_contribution` as the primary Joy KPI; density (Joy/¥) is removed from all user-facing surfaces (KPI strip, trend, distribution, story).
-- [ ] **JOYMIG-06**: When HomeHero ring crosses 100%, the app produces **no** discrete events — no copy text, no animation pulse, no toast, no notification, no haptic feedback. Only the ambient ring color (per JOYMIG-04) changes. This requirement is a hard contract per ADR-012 §2 and ADR-016 §5.
+- [x] **JOYMIG-06**: When HomeHero ring crosses 100%, the app produces **no** discrete events — no copy text, no animation pulse, no toast, no notification, no haptic feedback. Only the ambient ring color (per JOYMIG-04) changes. This requirement is a hard contract per ADR-012 §2 and ADR-016 §5.
 
 ### Happiness Domain Extensions (carried from v1.1 v2 backlog)
 
@@ -32,7 +32,7 @@ Requirements committed for this milestone. Each maps to one roadmap phase.
 
 ### Tooling
 
-- [ ] **TOOL-V2-02**: ARB keys are reconciled with the new Joy vocabulary across ja/zh/en. **Note:** the original v1.1-deferral intent (rename `homeHappinessROI → homeJoyPerYen`, `homeSoulFullness → homeJoyIndex`) is **partially invalidated** by JOYMIG-05 — `joyPerYen` is no longer a target metric. Active goal: deprecated density-related keys are removed or renamed to vocabulary aligned with `Σ joy_contribution`; ARB parity locked across ja/zh/en; `flutter gen-l10n` succeeds without warnings.
+- [x] **TOOL-V2-02**: ARB keys are reconciled with the new Joy vocabulary across ja/zh/en. **Note:** the original v1.1-deferral intent (rename `homeHappinessROI → homeJoyPerYen`, `homeSoulFullness → homeJoyIndex`) is **partially invalidated** by JOYMIG-05 — `joyPerYen` is no longer a target metric. Active goal: deprecated density-related keys are removed or renamed to vocabulary aligned with `Σ joy_contribution`; ARB parity locked across ja/zh/en; `flutter gen-l10n` succeeds without warnings.
 
 ---
 
@@ -95,17 +95,17 @@ Populated by gsd-roadmapper on 2026-05-19 with v1.2 ROADMAP.md creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| JOYMIG-01 | Phase 14 | Pending |
+| JOYMIG-01 | Phase 14 | Complete |
 | JOYMIG-02 | Phase 13 | Pending |
-| JOYMIG-03 | Phase 14 | Pending |
-| JOYMIG-04 | Phase 14 | Pending |
+| JOYMIG-03 | Phase 14 | Complete |
+| JOYMIG-04 | Phase 14 | Complete |
 | JOYMIG-05 | Phase 13 | Pending |
-| JOYMIG-06 | Phase 14 | Pending |
+| JOYMIG-06 | Phase 14 | Complete |
 | HAPPY-V2-01 | Phase 16 | Pending |
 | HAPPY-V2-02 | Phase 15 | Pending |
 | HAPPY-V2-03 | Phase 17 | Pending |
 | STATSUI-V2-01 | Phase 16 | Pending |
-| TOOL-V2-02 | Phase 14 | Pending |
+| TOOL-V2-02 | Phase 14 | Complete |
 
 **Coverage:**
 - Active v1.2 requirements: 11 total

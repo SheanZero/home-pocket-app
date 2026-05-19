@@ -41,7 +41,7 @@
 Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify (2026-05-19).
 
 - [x] **Phase 13: ADR-016 Backend Foundation** — Spike fallback baseline; schema bump (`user_settings.monthly_joy_target` field + table reuse); `GetHappinessReportUseCase` rewrite (density → Σ joy_contribution); DAO query simplification; formatter rename (`joy_density_formatter` → `joy_cumulative_formatter`); recommendation algorithm (median of past 3 months + fallback) — completed 2026-05-19
-- [ ] **Phase 14: ADR-016 Frontend + ARB Reconciliation (TOOL-V2-02)** — `HomeHeroCard` rebuild (累加 ring + sage-green→gold color state machine); AnalyticsScreen Variant ε redesign (density KPI retired); Settings UI (`monthly_joy_target` config + recommended-value display); ARB key reconciliation (density-related keys removed/renamed across ja/zh/en); 100%-behavior gate (no discrete events per ADR-012 §2 / ADR-016 §5); golden regen for 0% / 50% / 100% / >100% states
+- [x] **Phase 14: ADR-016 Frontend + ARB Reconciliation (TOOL-V2-02)** — `HomeHeroCard` rebuild (累加 ring + sage-green→gold color state machine); AnalyticsScreen Variant ε redesign (density KPI retired); Settings UI (`monthly_joy_target` config + recommended-value display); ARB key reconciliation (density-related keys removed/renamed across ja/zh/en); 100%-behavior gate (no discrete events per ADR-012 §2 / ADR-016 §5); golden regen for 0% / 50% / 100% / >100% states (completed 2026-05-19)
 - [ ] **Phase 15: Custom Time Windows (HAPPY-V2-02)** — Week / month / quarter / year / arbitrary date-range selector wired across all Joy metrics in AnalyticsScreen; selection persists per session; HomeHero remains month-anchored (per ADR-016 ring semantics)
 - [ ] **Phase 16: Per-Category Breakdown + Soul-vs-Survival Comparison (HAPPY-V2-01 + STATSUI-V2-01)** — Per-category satisfaction breakdown view in AnalyticsScreen; Soul-vs-Survival happiness comparison surface with anti-toxicity framing (descriptive only, no value-judgment language)
 - [ ] **Phase 17: Manual-Only Joy Sub-Metric (HAPPY-V2-03)** — Schema migration adding `transactions.entry_source` column; backend filter for manual-only Joy variant; AnalyticsScreen toggle to switch between full and manual-only Joy metric
@@ -79,12 +79,12 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
   5. Settings screen exposes a numeric input for `monthly_joy_target`; when blank, copy displays the recommended value ("基于过去 3 个月，建议 X" / "Based on past 3 months, recommended X" / equivalent in zh); ARB keys exist in ja/zh/en parity and `flutter gen-l10n` succeeds without warnings.
   6. AnalyticsScreen renders `Σ joy_contribution` as the primary Joy KPI; density (Joy/¥) UI elements are removed (KPI strip, trend, distribution, story); ARB keys related to density are removed or renamed; `grep -r 'joyPerYen\|homeHappinessROI' lib/` returns 0 hits in live UI code.
 **Plans**: 6 plans
-  - [ ] 14-01-PLAN.md — ARB foundation for JoyContribution, Settings target, and Analytics epsilon copy
-  - [ ] 14-02-PLAN.md — HomeHero active target data contract and ring ratio wiring
-  - [ ] 14-03-PLAN.md — HomeHero color state machine, 100% no-event contract, and 0/50/100/>100 goldens
-  - [ ] 14-04-PLAN.md — Settings monthly Joy target UI with neutral recommendation framing
-  - [ ] 14-05-PLAN.md — Analytics Variant epsilon Joy Index KPI ordering and cumulative value display
-  - [ ] 14-06-PLAN.md — Final density ARB cleanup, generated localization, and full verification sweep
+  - [x] 14-01-PLAN.md — ARB foundation for JoyContribution, Settings target, and Analytics epsilon copy
+  - [x] 14-02-PLAN.md — HomeHero active target data contract and ring ratio wiring
+  - [x] 14-03-PLAN.md — HomeHero color state machine, 100% no-event contract, and 0/50/100/>100 goldens
+  - [x] 14-04-PLAN.md — Settings monthly Joy target UI with neutral recommendation framing
+  - [x] 14-05-PLAN.md — Analytics Variant epsilon Joy Index KPI ordering and cumulative value display
+  - [x] 14-06-PLAN.md — Final density ARB cleanup, generated localization, and full verification sweep
 **UI hint**: yes
 
 ### Phase 15: Custom Time Windows (HAPPY-V2-02)
@@ -129,7 +129,7 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 ## Current Status
 
 **Active milestone:** v1.2 Happiness Metric Refresh (in progress)
-**Current phase:** Phase 14 (planned — awaiting `/gsd:execute-phase 14`)
+**Current phase:** Phase 15 (ready to discuss before planning)
 
 ## Progress
 
@@ -137,12 +137,12 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 |-----------|--------|----------------|--------|---------|
 | v1.0 Codebase Cleanup Initiative | 1-8 | 48/48 | Complete | 2026-04-29 |
 | v1.1 Happiness Metric & Display | 9-12 | 40/40 | Complete | 2026-05-05 |
-| v1.2 Happiness Metric Refresh | 13-17 | 7/7 | In Progress | — |
+| v1.2 Happiness Metric Refresh | 13-17 | 13/13 | In Progress | — |
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 13. ADR-016 Backend Foundation | 7/7 | Complete | 2026-05-19 |
-| 14. ADR-016 Frontend + ARB Reconciliation | 0/0 | Not started | — |
+| 14. ADR-016 Frontend + ARB Reconciliation | 6/6 | Complete | 2026-05-19 |
 | 15. Custom Time Windows | 0/0 | Not started | — |
 | 16. Per-Category Breakdown + Soul-vs-Survival | 0/0 | Not started | — |
 | 17. Manual-Only Joy Sub-Metric | 0/0 | Not started | — |
