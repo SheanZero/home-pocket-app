@@ -3,7 +3,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/analytics/get_best_joy_moment_use_case.dart';
 import '../../../../application/analytics/get_budget_progress_use_case.dart';
-import '../../../../application/analytics/get_daily_joy_per_yen_use_case.dart';
 import '../../../../application/analytics/get_expense_trend_use_case.dart';
 import '../../../../application/analytics/get_family_happiness_use_case.dart';
 import '../../../../application/analytics/get_happiness_report_use_case.dart';
@@ -61,14 +60,6 @@ GetExpenseTrendUseCase getExpenseTrendUseCase(Ref ref) {
 @riverpod
 GetHappinessReportUseCase getHappinessReportUseCase(Ref ref) {
   return GetHappinessReportUseCase(
-    analyticsRepository: ref.watch(analyticsRepositoryProvider),
-  );
-}
-
-/// STATSUI-01 / D-05: GetDailyJoyPerYenUseCase provider.
-@riverpod
-GetDailyJoyPerYenUseCase getDailyJoyPerYenUseCase(Ref ref) {
-  return GetDailyJoyPerYenUseCase(
     analyticsRepository: ref.watch(analyticsRepositoryProvider),
   );
 }

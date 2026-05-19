@@ -266,59 +266,6 @@ final class GetHappinessReportUseCaseProvider
 String _$getHappinessReportUseCaseHash() =>
     r'15d49cc3064fdd42c1795c7d6d71f538e13315dd';
 
-/// STATSUI-01 / D-05: GetDailyJoyPerYenUseCase provider.
-
-@ProviderFor(getDailyJoyPerYenUseCase)
-final getDailyJoyPerYenUseCaseProvider = GetDailyJoyPerYenUseCaseProvider._();
-
-/// STATSUI-01 / D-05: GetDailyJoyPerYenUseCase provider.
-
-final class GetDailyJoyPerYenUseCaseProvider
-    extends
-        $FunctionalProvider<
-          GetDailyJoyPerYenUseCase,
-          GetDailyJoyPerYenUseCase,
-          GetDailyJoyPerYenUseCase
-        >
-    with $Provider<GetDailyJoyPerYenUseCase> {
-  /// STATSUI-01 / D-05: GetDailyJoyPerYenUseCase provider.
-  GetDailyJoyPerYenUseCaseProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'getDailyJoyPerYenUseCaseProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$getDailyJoyPerYenUseCaseHash();
-
-  @$internal
-  @override
-  $ProviderElement<GetDailyJoyPerYenUseCase> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  GetDailyJoyPerYenUseCase create(Ref ref) {
-    return getDailyJoyPerYenUseCase(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(GetDailyJoyPerYenUseCase value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<GetDailyJoyPerYenUseCase>(value),
-    );
-  }
-}
-
-String _$getDailyJoyPerYenUseCaseHash() =>
-    r'c3100f1da8ec3532db8ff02f97599553e0118c28';
-
 /// JOYMIG-02 / D-04: GetMonthlyJoyTargetRecommendationUseCase provider.
 
 @ProviderFor(getMonthlyJoyTargetRecommendationUseCase)

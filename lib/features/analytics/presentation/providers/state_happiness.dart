@@ -2,7 +2,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/models/best_joy_moment_row.dart';
 import '../../domain/models/analytics_aggregate.dart';
-import '../../domain/models/daily_joy_per_yen_point.dart';
 import '../../domain/models/family_happiness.dart';
 import '../../domain/models/happiness_report.dart';
 import '../../domain/models/metric_result.dart';
@@ -56,24 +55,6 @@ Future<MetricResult<int>> monthlyJoyTargetRecommendation(
     bookId: bookId,
     currencyCode: currencyCode,
     asOf: DateTime.now(),
-  );
-}
-
-/// STATSUI-01 / D-05 — daily Joy/¥ trend (PTVF per-day fold).
-@riverpod
-Future<MetricResult<List<DailyJoyPerYenPoint>>> dailyJoyPerYen(
-  Ref ref, {
-  required String bookId,
-  required int year,
-  required int month,
-  required String currencyCode,
-}) async {
-  final useCase = ref.watch(getDailyJoyPerYenUseCaseProvider);
-  return useCase.execute(
-    bookId: bookId,
-    year: year,
-    month: month,
-    currencyCode: currencyCode,
   );
 }
 
