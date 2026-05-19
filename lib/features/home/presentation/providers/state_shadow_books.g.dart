@@ -63,7 +63,7 @@ final class ShadowAggregateProvider
     with $FutureModifier<ShadowAggregate>, $FutureProvider<ShadowAggregate> {
   ShadowAggregateProvider._({
     required ShadowAggregateFamily super.from,
-    required ({int year, int month}) super.argument,
+    required ({DateTime startDate, DateTime endDate}) super.argument,
   }) : super(
          retry: null,
          name: r'shadowAggregateProvider',
@@ -90,8 +90,12 @@ final class ShadowAggregateProvider
 
   @override
   FutureOr<ShadowAggregate> create(Ref ref) {
-    final argument = this.argument as ({int year, int month});
-    return shadowAggregate(ref, year: argument.year, month: argument.month);
+    final argument = this.argument as ({DateTime startDate, DateTime endDate});
+    return shadowAggregate(
+      ref,
+      startDate: argument.startDate,
+      endDate: argument.endDate,
+    );
   }
 
   @override
@@ -105,13 +109,13 @@ final class ShadowAggregateProvider
   }
 }
 
-String _$shadowAggregateHash() => r'e67d7c0c27079f961e5f001e1f93f8fbbc911e1d';
+String _$shadowAggregateHash() => r'7ab7c002d00244c69d8938c10e5a83b527df4982';
 
 final class ShadowAggregateFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<ShadowAggregate>,
-          ({int year, int month})
+          ({DateTime startDate, DateTime endDate})
         > {
   ShadowAggregateFamily._()
     : super(
@@ -122,11 +126,13 @@ final class ShadowAggregateFamily extends $Family
         isAutoDispose: true,
       );
 
-  ShadowAggregateProvider call({required int year, required int month}) =>
-      ShadowAggregateProvider._(
-        argument: (year: year, month: month),
-        from: this,
-      );
+  ShadowAggregateProvider call({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) => ShadowAggregateProvider._(
+    argument: (startDate: startDate, endDate: endDate),
+    from: this,
+  );
 
   @override
   String toString() => r'shadowAggregateProvider';

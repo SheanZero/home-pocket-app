@@ -45,23 +45,35 @@ class MainShellScreen extends ConsumerWidget {
 
       if (wasSyncing && nowDone) {
         final now = DateTime.now();
+        final currentMonthStart = DateTime(now.year, now.month, 1);
+        final currentMonthEnd = DateTime(
+          now.year,
+          now.month + 1,
+          0,
+          23,
+          59,
+          59,
+        );
         ref.invalidate(todayTransactionsProvider(bookId: bookId));
         ref.invalidate(
           monthlyReportProvider(
             bookId: bookId,
-            year: now.year,
-            month: now.month,
+            startDate: currentMonthStart,
+            endDate: currentMonthEnd,
           ),
         );
         ref.invalidate(shadowBooksProvider);
         ref.invalidate(
-          shadowAggregateProvider(year: now.year, month: now.month),
+          shadowAggregateProvider(
+            startDate: currentMonthStart,
+            endDate: currentMonthEnd,
+          ),
         );
         ref.invalidate(
           bestJoyMomentProvider(
             bookId: bookId,
-            year: now.year,
-            month: now.month,
+            startDate: currentMonthStart,
+            endDate: currentMonthEnd,
           ),
         );
         final bookAsync = ref.read(bookByIdProvider(bookId: bookId));
@@ -69,8 +81,8 @@ class MainShellScreen extends ConsumerWidget {
           ref.invalidate(
             happinessReportProvider(
               bookId: bookId,
-              year: now.year,
-              month: now.month,
+              startDate: currentMonthStart,
+              endDate: currentMonthEnd,
               currencyCode: bookAsync.value?.currency ?? 'JPY',
             ),
           );
@@ -118,19 +130,28 @@ class MainShellScreen extends ConsumerWidget {
                   );
                   // Refresh data after returning from entry flow
                   final now = DateTime.now();
+                  final currentMonthStart = DateTime(now.year, now.month, 1);
+                  final currentMonthEnd = DateTime(
+                    now.year,
+                    now.month + 1,
+                    0,
+                    23,
+                    59,
+                    59,
+                  );
                   ref.invalidate(
                     monthlyReportProvider(
                       bookId: bookId,
-                      year: now.year,
-                      month: now.month,
+                      startDate: currentMonthStart,
+                      endDate: currentMonthEnd,
                     ),
                   );
                   ref.invalidate(todayTransactionsProvider(bookId: bookId));
                   ref.invalidate(
                     bestJoyMomentProvider(
                       bookId: bookId,
-                      year: now.year,
-                      month: now.month,
+                      startDate: currentMonthStart,
+                      endDate: currentMonthEnd,
                     ),
                   );
                   final bookAsync = ref.read(bookByIdProvider(bookId: bookId));
@@ -138,8 +159,8 @@ class MainShellScreen extends ConsumerWidget {
                     ref.invalidate(
                       happinessReportProvider(
                         bookId: bookId,
-                        year: now.year,
-                        month: now.month,
+                        startDate: currentMonthStart,
+                        endDate: currentMonthEnd,
                         currencyCode: bookAsync.value?.currency ?? 'JPY',
                       ),
                     );

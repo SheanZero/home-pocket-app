@@ -49,6 +49,8 @@ class HomeScreen extends ConsumerWidget {
     final now = DateTime.now();
     final year = now.year;
     final month = now.month;
+    final currentMonthStart = DateTime(now.year, now.month, 1);
+    final currentMonthEnd = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
 
     final todayTxAsync = ref.watch(todayTransactionsProvider(bookId: bookId));
     // Used for currency code in the transaction list formatter (WR-01 fix).
@@ -92,8 +94,8 @@ class HomeScreen extends ConsumerWidget {
                   final reportAsync = ref.watch(
                     monthlyReportProvider(
                       bookId: bookId,
-                      year: year,
-                      month: month,
+                      startDate: currentMonthStart,
+                      endDate: currentMonthEnd,
                     ),
                   );
                   final bookAsync = ref.watch(bookByIdProvider(bookId: bookId));
@@ -107,16 +109,16 @@ class HomeScreen extends ConsumerWidget {
                   final happinessAsync = ref.watch(
                     happinessReportProvider(
                       bookId: bookId,
-                      year: year,
-                      month: month,
+                      startDate: currentMonthStart,
+                      endDate: currentMonthEnd,
                       currencyCode: currencyCode,
                     ),
                   );
                   final bestJoyAsync = ref.watch(
                     bestJoyMomentProvider(
                       bookId: bookId,
-                      year: year,
-                      month: month,
+                      startDate: currentMonthStart,
+                      endDate: currentMonthEnd,
                     ),
                   );
                   final settingsAsync = ref.watch(appSettingsProvider);
@@ -147,7 +149,10 @@ class HomeScreen extends ConsumerWidget {
                   final familyAsync = isGroupMode
                       ? ref
                             .watch(
-                              familyHappinessProvider(year: year, month: month),
+                              familyHappinessProvider(
+                                startDate: currentMonthStart,
+                                endDate: currentMonthEnd,
+                              ),
                             )
                             .whenData<FamilyHappiness?>((value) => value)
                       : const AsyncData<FamilyHappiness?>(null);
@@ -159,7 +164,10 @@ class HomeScreen extends ConsumerWidget {
                   final shadowAggregateAsync = isGroupMode
                       ? ref
                             .watch(
-                              shadowAggregateProvider(year: year, month: month),
+                              shadowAggregateProvider(
+                                startDate: currentMonthStart,
+                                endDate: currentMonthEnd,
+                              ),
                             )
                             .whenData<ShadowAggregate?>((value) => value)
                       : const AsyncData<ShadowAggregate?>(null);

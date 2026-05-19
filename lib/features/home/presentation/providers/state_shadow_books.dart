@@ -65,8 +65,8 @@ class ShadowAggregate {
 @riverpod
 Future<ShadowAggregate> shadowAggregate(
   Ref ref, {
-  required int year,
-  required int month,
+  required DateTime startDate,
+  required DateTime endDate,
 }) async {
   final shadowBookList = await ref.watch(shadowBooksProvider.future);
   if (shadowBookList.isEmpty) return const ShadowAggregate.empty();
@@ -80,8 +80,8 @@ Future<ShadowAggregate> shadowAggregate(
   for (final shadow in shadowBookList) {
     final report = await reportUseCase.execute(
       bookId: shadow.book.id,
-      year: year,
-      month: month,
+      startDate: startDate,
+      endDate: endDate,
     );
     totalExpenses += report.totalExpenses;
     prevTotalExpenses += report.previousMonthComparison?.previousExpenses ?? 0;
