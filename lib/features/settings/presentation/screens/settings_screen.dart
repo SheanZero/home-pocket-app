@@ -34,7 +34,7 @@ class SettingsScreen extends ConsumerWidget {
         currencyCode: currencyCode,
       ),
     );
-    final recommendedTarget = switch (recommendationAsync.valueOrNull) {
+    final recommendedTarget = switch (recommendationAsync.value) {
       Value<int>(:final data) => data,
       _ => null,
     };

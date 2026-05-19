@@ -504,9 +504,6 @@ class SJa extends S {
   String get homeSoulPercentLabel => '今月の魂支出の割合';
 
   @override
-  String get homeHappinessROI => 'ハピネス密度';
-
-  @override
   String get homeFamilyInviteTitle => '家族を招待する';
 
   @override
@@ -561,7 +558,7 @@ class SJa extends S {
 
   @override
   String homeSoulChargeStatus(int fullness, double roi) {
-    return '魂の充実度 $fullness% · 幸せROI ${roi}x';
+    return '魂の充実度 $fullness% · ときめき指数 $roi';
   }
 
   @override
@@ -570,11 +567,8 @@ class SJa extends S {
   }
 
   @override
-  String get homeJoyIndexTooltip => '外輪は Joy/¥ 密度・中輪は満足度の平均・内輪は小確幸の回数（満足度6以上）。';
-
-  @override
-  String get homeJoyPerYenTooltip =>
-      '幸福密度 = Σ(満足度 × (金額/base)^0.88) / Σ金額（K-T 1979 価値関数）。同じ金額でも繰り返すと喜びは弱まります（享楽的適応）。式は ¥1k 基準で正規化。';
+  String get homeJoyIndexTooltip =>
+      '外輪は有効な目標に向かう月間ときめき指数、中輪は満足度の平均、内輪は小確幸の回数（満足度6以上）。';
 
   @override
   String get homeJoyContributionTooltip =>
@@ -641,9 +635,6 @@ class SJa extends S {
 
   @override
   String get homeAvgSatisfactionLegend => '満足度の平均';
-
-  @override
-  String get homeJoyPerYenLegend => 'Joy/¥';
 
   @override
   String get homeJoyContributionLegend => 'ときめき目標';
@@ -1408,12 +1399,6 @@ class SJa extends S {
 
   @override
   String get analyticsCardCaptionTotalSixMonth => 'BarChart · 当月 highlighted';
-
-  @override
-  String get analyticsCardTitleJoyTrend => '悦己 · ハピネス密度の推移';
-
-  @override
-  String get analyticsCardCaptionJoyTrendGap => 'MTD · 断点 = 未記録日';
 
   @override
   String get analyticsCardTitleCategoryDonut => '総 · 類別支出分布';

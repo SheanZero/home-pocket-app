@@ -508,9 +508,6 @@ class SEn extends S {
   String get homeSoulPercentLabel => 'Soul spending ratio';
 
   @override
-  String get homeHappinessROI => 'Joy per ¥';
-
-  @override
   String get homeFamilyInviteTitle => 'Invite Family';
 
   @override
@@ -566,7 +563,7 @@ class SEn extends S {
 
   @override
   String homeSoulChargeStatus(int fullness, double roi) {
-    return 'Soul Fullness $fullness% · Happiness ROI ${roi}x';
+    return 'Soul Fullness $fullness% · Joy Index $roi';
   }
 
   @override
@@ -576,11 +573,7 @@ class SEn extends S {
 
   @override
   String get homeJoyIndexTooltip =>
-      'Outer ring is Joy/¥ density · middle is average satisfaction · inner is highlights count (satisfaction ≥ 6).';
-
-  @override
-  String get homeJoyPerYenTooltip =>
-      'Joy density = Σ(satisfaction × (amount/base)^0.88) / Σamount (Kahneman-Tversky 1979). Repeat purchases bring less joy (hedonic adaptation); the formula normalizes against ¥1k baseline.';
+      'Outer ring is monthly Joy Index toward your active target; middle is average satisfaction; inner is highlights count (satisfaction >= 6).';
 
   @override
   String get homeJoyContributionTooltip =>
@@ -648,9 +641,6 @@ class SEn extends S {
 
   @override
   String get homeAvgSatisfactionLegend => 'Avg satisfaction';
-
-  @override
-  String get homeJoyPerYenLegend => 'Joy / ¥';
 
   @override
   String get homeJoyContributionLegend => 'Joy Index target';
@@ -1425,13 +1415,6 @@ class SEn extends S {
   @override
   String get analyticsCardCaptionTotalSixMonth =>
       'BarChart · current month highlighted';
-
-  @override
-  String get analyticsCardTitleJoyTrend => 'Joy · Joy/¥ trend';
-
-  @override
-  String get analyticsCardCaptionJoyTrendGap =>
-      'MTD · gaps = no Joy entry that day';
 
   @override
   String get analyticsCardTitleCategoryDonut => 'Total · Category breakdown';

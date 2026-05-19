@@ -1053,12 +1053,6 @@ abstract class S {
   /// **'Soul spending ratio'**
   String get homeSoulPercentLabel;
 
-  /// Happiness ROI metric label
-  ///
-  /// In en, this message translates to:
-  /// **'Joy per ¥'**
-  String get homeHappinessROI;
-
   /// Family invite banner title
   ///
   /// In en, this message translates to:
@@ -1152,7 +1146,7 @@ abstract class S {
   /// Soul charge card status line
   ///
   /// In en, this message translates to:
-  /// **'Soul Fullness {fullness}% · Happiness ROI {roi}x'**
+  /// **'Soul Fullness {fullness}% · Joy Index {roi}'**
   String homeSoulChargeStatus(int fullness, double roi);
 
   /// Soul fullness month badge
@@ -1164,14 +1158,8 @@ abstract class S {
   /// Tooltip explaining the 3-ring system on the HomeHeroCard (D-10 tooltip 1)
   ///
   /// In en, this message translates to:
-  /// **'Outer ring is Joy/¥ density · middle is average satisfaction · inner is highlights count (satisfaction ≥ 6).'**
+  /// **'Outer ring is monthly Joy Index toward your active target; middle is average satisfaction; inner is highlights count (satisfaction >= 6).'**
   String get homeJoyIndexTooltip;
-
-  /// Tooltip explaining the Joy/¥ density formula (D-10 tooltip 2)
-  ///
-  /// In en, this message translates to:
-  /// **'Joy density = Σ(satisfaction × (amount/base)^0.88) / Σamount (Kahneman-Tversky 1979). Repeat purchases bring less joy (hedonic adaptation); the formula normalizes against ¥1k baseline.'**
-  String get homeJoyPerYenTooltip;
 
   /// Tooltip explaining the HomeHero three-ring system after ADR-016
   ///
@@ -1286,12 +1274,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Avg satisfaction'**
   String get homeAvgSatisfactionLegend;
-
-  /// Single-mode outer-ring legend label (matches D-20 display)
-  ///
-  /// In en, this message translates to:
-  /// **'Joy / ¥'**
-  String get homeJoyPerYenLegend;
 
   /// Single-mode outer-ring legend label for monthly Joy target progress
   ///
@@ -2680,18 +2662,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'BarChart · current month highlighted'**
   String get analyticsCardCaptionTotalSixMonth;
-
-  /// No description provided for @analyticsCardTitleJoyTrend.
-  ///
-  /// In en, this message translates to:
-  /// **'Joy · Joy/¥ trend'**
-  String get analyticsCardTitleJoyTrend;
-
-  /// No description provided for @analyticsCardCaptionJoyTrendGap.
-  ///
-  /// In en, this message translates to:
-  /// **'MTD · gaps = no Joy entry that day'**
-  String get analyticsCardCaptionJoyTrendGap;
 
   /// No description provided for @analyticsCardTitleCategoryDonut.
   ///

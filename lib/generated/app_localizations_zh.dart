@@ -504,9 +504,6 @@ class SZh extends S {
   String get homeSoulPercentLabel => '本月灵魂支出占比';
 
   @override
-  String get homeHappinessROI => '幸福密度';
-
-  @override
   String get homeFamilyInviteTitle => '邀请家人';
 
   @override
@@ -561,7 +558,7 @@ class SZh extends S {
 
   @override
   String homeSoulChargeStatus(int fullness, double roi) {
-    return '灵魂充盈度 $fullness% · 快乐ROI ${roi}x';
+    return '灵魂充盈度 $fullness% · 悦己指数 $roi';
   }
 
   @override
@@ -570,12 +567,7 @@ class SZh extends S {
   }
 
   @override
-  String get homeJoyIndexTooltip =>
-      '外环是 Joy/¥ 密度 · 中环是满足度均值 · 内环是小確幸数（满足度 ≥ 6 的次数）。';
-
-  @override
-  String get homeJoyPerYenTooltip =>
-      '幸福密度 = Σ(满足度 × (金额/base)^0.88) / Σ金额 (Kahneman-Tversky 1979 价值函数)。同样金额带来的快乐会随次数减弱 (享乐适应)，公式按¥1k基线归一化。';
+  String get homeJoyIndexTooltip => '外环是朝向当前目标的月度悦己指数，中环是满足度均值，内环是小確幸数（满足度≥6）。';
 
   @override
   String get homeJoyContributionTooltip => '外环是朝向当前目标的月度悦己指数，中环是满足度均值，内环是小確幸数。';
@@ -641,9 +633,6 @@ class SZh extends S {
 
   @override
   String get homeAvgSatisfactionLegend => '满足度均值';
-
-  @override
-  String get homeJoyPerYenLegend => 'Joy/¥';
 
   @override
   String get homeJoyContributionLegend => '悦己目标';
@@ -1405,12 +1394,6 @@ class SZh extends S {
 
   @override
   String get analyticsCardCaptionTotalSixMonth => 'BarChart · 当月高亮';
-
-  @override
-  String get analyticsCardTitleJoyTrend => '悦己 · 幸福密度趋势';
-
-  @override
-  String get analyticsCardCaptionJoyTrendGap => 'MTD · 断点 = 当日没有魂账记录';
 
   @override
   String get analyticsCardTitleCategoryDonut => '总 · 类别支出分布';

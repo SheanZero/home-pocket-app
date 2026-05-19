@@ -127,11 +127,11 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   );
                   final configuredTarget =
-                      settingsAsync.valueOrNull?.monthlyJoyTarget;
+                      settingsAsync.value?.monthlyJoyTarget;
                   final configuredTargetValid =
                       configuredTarget != null && configuredTarget > 0;
                   final recommendedTarget =
-                      switch (targetRecommendationAsync.valueOrNull) {
+                      switch (targetRecommendationAsync.value) {
                         Value<int>(:final data) => data,
                         _ => null,
                       };
@@ -198,10 +198,8 @@ class HomeScreen extends ConsumerWidget {
                                 currencyCode: currencyCode,
                                 locale: locale,
                                 isGroupMode: isGroupMode,
-                                activeMonthlyJoyTarget:
-                                    activeMonthlyJoyTarget,
-                                recommendedMonthlyJoyTarget:
-                                    recommendedTarget,
+                                activeMonthlyJoyTarget: activeMonthlyJoyTarget,
+                                recommendedMonthlyJoyTarget: recommendedTarget,
                                 isMonthlyJoyTargetConfigured:
                                     configuredTargetValid,
                                 onTap: () => Navigator.of(context).push(
