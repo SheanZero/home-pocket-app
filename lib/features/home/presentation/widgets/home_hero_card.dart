@@ -17,6 +17,14 @@ import '../../../analytics/domain/models/monthly_report.dart';
 import '../providers/state_shadow_books.dart';
 import 'painter/happiness_rings_painter.dart';
 
+const Color _joyTargetStartColor = Color(0xFF47B88A);
+const Color _joyTargetEndColor = Color(0xFFD9A441);
+
+Color joyTargetProgressColor(double ratio) {
+  final clamped = ratio.clamp(0.0, 1.0).toDouble();
+  return Color.lerp(_joyTargetStartColor, _joyTargetEndColor, clamped)!;
+}
+
 /// Integrated hero card (Phase 10) replacing the previous trio of legacy
 /// cards: month-overview, ledger-comparison, and soul-fullness. Pure
 /// StatelessWidget — parent resolves AsyncValue.when() and passes Freezed
@@ -367,7 +375,10 @@ class HomeHeroCard extends StatelessWidget {
         happiness.totalSoulTx,
       ),
       outerGradient: SweepGradient(
-        colors: [AppColors.soul.withValues(alpha: 0.6), AppColors.soul],
+        colors: [
+          _singleProgressColor().withValues(alpha: 0.6),
+          _singleProgressColor(),
+        ],
       ),
       middleGradient: const SweepGradient(
         colors: [AppColors.oliveLight, AppColors.olive],
@@ -381,10 +392,20 @@ class HomeHeroCard extends StatelessWidget {
 
   double? _outerSingle(MetricResult<double> r) => switch (r) {
     Empty() => null,
-    Value(:final data) => activeMonthlyJoyTarget > 0
-        ? (data / activeMonthlyJoyTarget).clamp(0.0, 1.0)
-        : null,
+    Value(:final data) =>
+      activeMonthlyJoyTarget > 0
+          ? (data / activeMonthlyJoyTarget).clamp(0.0, 1.0)
+          : null,
   };
+  double _singleProgressRatioForColor() => switch (happiness.joyContribution) {
+    Empty() => 0.0,
+    Value(:final data) =>
+      activeMonthlyJoyTarget > 0
+          ? (data / activeMonthlyJoyTarget).clamp(0.0, 1.0)
+          : 0.0,
+  };
+  Color _singleProgressColor() =>
+      joyTargetProgressColor(_singleProgressRatioForColor());
   double? _middleSingle(MetricResult<double> r) => switch (r) {
     Empty() => null,
     Value(:final data) => (data / 10.0).clamp(0.0, 1.0),
@@ -419,6 +440,10 @@ class HomeHeroCard extends StatelessWidget {
       Empty() => '—',
       Value(:final data) => formatJoyCumulative(data, currencyCode),
     };
+    final valueColor = switch (happiness.joyContribution) {
+      Empty() => context.wmTextPrimary,
+      Value() => _singleProgressColor(),
+    };
     return Semantics(
       label: l10n.homeJoyTargetSemantics(valueText, activeMonthlyJoyTarget),
       child: Column(
@@ -426,9 +451,7 @@ class HomeHeroCard extends StatelessWidget {
         children: [
           Text(
             valueText,
-            style: AppTextStyles.amountMedium.copyWith(
-              color: context.wmTextPrimary,
-            ),
+            style: AppTextStyles.amountMedium.copyWith(color: valueColor),
           ),
           const SizedBox(height: 2),
           Text(

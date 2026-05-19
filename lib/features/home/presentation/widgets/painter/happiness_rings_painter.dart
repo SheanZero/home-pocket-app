@@ -114,5 +114,8 @@ class HappinessRingsPainter extends CustomPainter {
       outerSweepRatio != oldDelegate.outerSweepRatio ||
       middleSweepRatio != oldDelegate.middleSweepRatio ||
       innerSweepRatio != oldDelegate.innerSweepRatio ||
+      outerGradient != oldDelegate.outerGradient ||
+      middleGradient != oldDelegate.middleGradient ||
+      innerGradient != oldDelegate.innerGradient ||
       trackColor != oldDelegate.trackColor;
 }

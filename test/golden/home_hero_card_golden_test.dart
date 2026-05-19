@@ -48,6 +48,14 @@ _FixtureSnapshot _singleThin() => _FixtureSnapshot(
   bestJoy: fixtureBestJoyResultThin(),
 );
 
+_FixtureSnapshot _singleWithJoy(double joyContribution) => _FixtureSnapshot(
+  monthlyReport: fixtureMonthlyReportRich(),
+  happiness: fixtureHappinessReportRich().copyWith(
+    joyContribution: Value(joyContribution, 4),
+  ),
+  bestJoy: fixtureBestJoyResultRich(),
+);
+
 _FixtureSnapshot _singleAllNeutral() => _FixtureSnapshot(
   monthlyReport: fixtureMonthlyReportRich(),
   happiness: fixtureHappinessReportRich(),
@@ -124,6 +132,50 @@ void main() {
       await expectLater(
         find.byType(HomeHeroCard),
         matchesGoldenFile('goldens/home_hero_card_single_light_ja.png'),
+      );
+    });
+
+    testWidgets('single mode target 0 light ja', (tester) async {
+      await tester.pumpWidget(
+        _wrap(locale: const Locale('ja'), snapshot: _singleWithJoy(0)),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(HomeHeroCard),
+        matchesGoldenFile('goldens/home_hero_card_joy_target_0_ja.png'),
+      );
+    });
+
+    testWidgets('single mode target 50 light ja', (tester) async {
+      await tester.pumpWidget(
+        _wrap(locale: const Locale('ja'), snapshot: _singleWithJoy(25)),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(HomeHeroCard),
+        matchesGoldenFile('goldens/home_hero_card_joy_target_50_ja.png'),
+      );
+    });
+
+    testWidgets('single mode target 100 light ja', (tester) async {
+      await tester.pumpWidget(
+        _wrap(locale: const Locale('ja'), snapshot: _singleWithJoy(50)),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(HomeHeroCard),
+        matchesGoldenFile('goldens/home_hero_card_joy_target_100_ja.png'),
+      );
+    });
+
+    testWidgets('single mode target over 100 light ja', (tester) async {
+      await tester.pumpWidget(
+        _wrap(locale: const Locale('ja'), snapshot: _singleWithJoy(80)),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(HomeHeroCard),
+        matchesGoldenFile('goldens/home_hero_card_joy_target_over_100_ja.png'),
       );
     });
 

@@ -126,17 +126,30 @@ Widget _buildSubject({
 ///   - D-11         = card tap target
 ///   - D-12         = currency resolution from constructor
 void main() {
-  group('HomeHeroCard — single mode (HOMEUI-01, HOMEUI-05, HOMEUI-06)', () {
-    testWidgets('shows zero cumulative Joy and target reference without percentage', (
-      tester,
-    ) async {
-      await tester.pumpWidget(_buildSubject(snapshot: _singleWithJoy(0)));
-      await tester.pumpAndSettle();
+  group('HomeHeroCard — Joy target progress color', () {
+    test('interpolates from sage green to gold and clamps overflow', () {
+      expect(joyTargetProgressColor(0), const Color(0xFF47B88A));
+      expect(joyTargetProgressColor(1), const Color(0xFFD9A441));
+      expect(joyTargetProgressColor(1.6), const Color(0xFFD9A441));
 
-      expect(find.text('0'), findsWidgets);
-      expect(find.textContaining('目標 50'), findsOneWidget);
-      expect(find.textContaining('0%'), findsNothing);
+      final midpoint = joyTargetProgressColor(0.5);
+      expect(midpoint, isNot(const Color(0xFF47B88A)));
+      expect(midpoint, isNot(const Color(0xFFD9A441)));
     });
+  });
+
+  group('HomeHeroCard — single mode (HOMEUI-01, HOMEUI-05, HOMEUI-06)', () {
+    testWidgets(
+      'shows zero cumulative Joy and target reference without percentage',
+      (tester) async {
+        await tester.pumpWidget(_buildSubject(snapshot: _singleWithJoy(0)));
+        await tester.pumpAndSettle();
+
+        expect(find.text('0'), findsWidgets);
+        expect(find.textContaining('目標 50'), findsOneWidget);
+        expect(find.textContaining('0%'), findsNothing);
+      },
+    );
 
     testWidgets('shows half-target cumulative Joy without percentage', (
       tester,
@@ -160,16 +173,32 @@ void main() {
       expect(find.textContaining('100%'), findsNothing);
     });
 
-    testWidgets('shows over-target cumulative Joy uncapped without percentage', (
+    testWidgets(
+      'shows over-target cumulative Joy uncapped without percentage',
+      (tester) async {
+        await tester.pumpWidget(_buildSubject(snapshot: _singleWithJoy(80)));
+        await tester.pumpAndSettle();
+
+        expect(find.text('80'), findsWidgets);
+        expect(find.textContaining('目標 50'), findsOneWidget);
+        expect(find.textContaining('>100%'), findsNothing);
+        expect(find.textContaining('160%'), findsNothing);
+      },
+    );
+
+    testWidgets('target threshold states do not emit celebratory UI', (
       tester,
     ) async {
       await tester.pumpWidget(_buildSubject(snapshot: _singleWithJoy(80)));
       await tester.pumpAndSettle();
 
-      expect(find.text('80'), findsWidgets);
-      expect(find.textContaining('目標 50'), findsOneWidget);
-      expect(find.textContaining('>100%'), findsNothing);
+      expect(find.byType(SnackBar), findsNothing);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.textContaining('achievement'), findsNothing);
+      expect(find.textContaining('milestone'), findsNothing);
+      expect(find.textContaining('120%'), findsNothing);
       expect(find.textContaining('160%'), findsNothing);
+      expect(find.textContaining('>100%'), findsNothing);
     });
 
     testWidgets('renders all 4 personal metrics from HappinessReport', (
