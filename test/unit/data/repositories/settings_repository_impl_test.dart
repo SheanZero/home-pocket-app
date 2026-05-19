@@ -20,6 +20,7 @@ void main() {
       expect(settings.language, 'system');
       expect(settings.notificationsEnabled, true);
       expect(settings.biometricLockEnabled, true);
+      expect(settings.monthlyJoyTarget, isNull);
     });
 
     test('returns stored settings', () async {
@@ -28,6 +29,7 @@ void main() {
         'language': 'en',
         'notifications_enabled': false,
         'biometric_lock_enabled': false,
+        'monthly_joy_target': 75,
       });
       final prefs = await SharedPreferences.getInstance();
       repository = SettingsRepositoryImpl(prefs: prefs);
@@ -38,6 +40,7 @@ void main() {
       expect(settings.language, 'en');
       expect(settings.notificationsEnabled, false);
       expect(settings.biometricLockEnabled, false);
+      expect(settings.monthlyJoyTarget, 75);
     });
   });
 
@@ -48,12 +51,22 @@ void main() {
         language: 'zh',
         notificationsEnabled: false,
         biometricLockEnabled: false,
+        monthlyJoyTarget: 60,
       );
 
       await repository.updateSettings(settings);
       final restored = await repository.getSettings();
 
       expect(restored, settings);
+    });
+
+    test('removes monthlyJoyTarget when updated to null', () async {
+      await repository.setMonthlyJoyTarget(75);
+
+      await repository.updateSettings(const AppSettings());
+      final restored = await repository.getSettings();
+
+      expect(restored.monthlyJoyTarget, isNull);
     });
   });
 
@@ -90,6 +103,34 @@ void main() {
 
       final settings = await repository.getSettings();
       expect(settings.notificationsEnabled, false);
+    });
+  });
+
+  group('monthlyJoyTarget', () {
+    test('getMonthlyJoyTarget returns null when key absent', () async {
+      expect(await repository.getMonthlyJoyTarget(), isNull);
+    });
+
+    test(
+      'setMonthlyJoyTarget persists and getSettings reflects change',
+      () async {
+        await repository.setMonthlyJoyTarget(75);
+
+        final settings = await repository.getSettings();
+
+        expect(settings.monthlyJoyTarget, 75);
+        expect(await repository.getMonthlyJoyTarget(), 75);
+      },
+    );
+
+    test('setMonthlyJoyTarget(null) removes the key', () async {
+      await repository.setMonthlyJoyTarget(75);
+
+      await repository.setMonthlyJoyTarget(null);
+      final settings = await repository.getSettings();
+
+      expect(settings.monthlyJoyTarget, isNull);
+      expect(await repository.getMonthlyJoyTarget(), isNull);
     });
   });
 }

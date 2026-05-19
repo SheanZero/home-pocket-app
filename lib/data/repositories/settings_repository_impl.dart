@@ -14,6 +14,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   static const String _notificationsKey = 'notifications_enabled';
   static const String _biometricLockKey = 'biometric_lock_enabled';
   static const String _voiceLanguageKey = 'voice_language';
+  static const String _monthlyJoyTargetKey = 'monthly_joy_target';
 
   @override
   Future<AppSettings> getSettings() async {
@@ -23,6 +24,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       notificationsEnabled: _prefs.getBool(_notificationsKey) ?? true,
       biometricLockEnabled: _prefs.getBool(_biometricLockKey) ?? true,
       voiceLanguage: _prefs.getString(_voiceLanguageKey) ?? 'zh',
+      monthlyJoyTarget: _prefs.getInt(_monthlyJoyTargetKey),
     );
   }
 
@@ -33,6 +35,11 @@ class SettingsRepositoryImpl implements SettingsRepository {
     await _prefs.setBool(_notificationsKey, settings.notificationsEnabled);
     await _prefs.setBool(_biometricLockKey, settings.biometricLockEnabled);
     await _prefs.setString(_voiceLanguageKey, settings.voiceLanguage);
+    if (settings.monthlyJoyTarget == null) {
+      await _prefs.remove(_monthlyJoyTargetKey);
+    } else {
+      await _prefs.setInt(_monthlyJoyTargetKey, settings.monthlyJoyTarget!);
+    }
   }
 
   @override
@@ -58,6 +65,20 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<void> setVoiceLanguage(String languageCode) async {
     await _prefs.setString(_voiceLanguageKey, languageCode);
+  }
+
+  @override
+  Future<int?> getMonthlyJoyTarget() async {
+    return _prefs.getInt(_monthlyJoyTargetKey);
+  }
+
+  @override
+  Future<void> setMonthlyJoyTarget(int? value) async {
+    if (value == null) {
+      await _prefs.remove(_monthlyJoyTargetKey);
+    } else {
+      await _prefs.setInt(_monthlyJoyTargetKey, value);
+    }
   }
 
   AppThemeMode _getThemeMode() {

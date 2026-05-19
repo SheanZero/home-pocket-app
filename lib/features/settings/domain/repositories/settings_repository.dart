@@ -9,4 +9,14 @@ abstract class SettingsRepository {
   Future<void> setBiometricLock(bool enabled);
   Future<void> setNotificationsEnabled(bool enabled);
   Future<void> setVoiceLanguage(String languageCode);
+
+  /// Reads the configured monthly Joy target.
+  ///
+  /// Null means unconfigured and is encoded as key absence in persistence.
+  Future<int?> getMonthlyJoyTarget();
+
+  /// Persists the monthly Joy target consumed by recommendation UI/use cases.
+  ///
+  /// Passing null clears the persisted key rather than storing a sentinel.
+  Future<void> setMonthlyJoyTarget(int? value);
 }

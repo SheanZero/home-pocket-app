@@ -14,6 +14,7 @@ _AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => _AppSettings(
   notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
   biometricLockEnabled: json['biometricLockEnabled'] as bool? ?? true,
   voiceLanguage: json['voiceLanguage'] as String? ?? 'zh',
+  monthlyJoyTarget: (json['monthlyJoyTarget'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$AppSettingsToJson(_AppSettings instance) =>
@@ -23,6 +24,7 @@ Map<String, dynamic> _$AppSettingsToJson(_AppSettings instance) =>
       'notificationsEnabled': instance.notificationsEnabled,
       'biometricLockEnabled': instance.biometricLockEnabled,
       'voiceLanguage': instance.voiceLanguage,
+      'monthlyJoyTarget': instance.monthlyJoyTarget,
     };
 
 const _$AppThemeModeEnumMap = {
