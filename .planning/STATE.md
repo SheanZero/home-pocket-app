@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Happiness Metric Refresh
 status: executing
-stopped_at: Completed 15-02-PLAN.md
-last_updated: "2026-05-19T12:41:29.263Z"
+stopped_at: Completed 15-03-PLAN.md
+last_updated: "2026-05-19T12:55:21.281Z"
 last_activity: 2026-05-19
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 19
-  completed_plans: 15
+  completed_plans: 16
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-05-19)
 ## Current Position
 
 Phase: 15 (custom-time-windows-happy-v2-02) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-05-19
 
@@ -75,6 +75,8 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 decisions ca
 - [Phase 11]: Expense trend now trails the selected month via an explicit anchor instead of DateTime.now().
 - [Phase 11]: Analytics ARB strings were added to ja/zh/en in one commit with the hard-locked bar-5 histogram annotation.
 - [Phase 11]: Variant δ AnalyticsScreen shipped as a 2-region unified dashboard.
+- [Phase 15]: Plan 03 retains MonthlyReport.previousMonthComparison for HomeHero but removes the AnalyticsScreen total-spending MoM delta UI. — This preserves HomeHero compatibility while clearing the ADR-012 cross-period delta surface.
+- [Phase 15]: Plan 03 uses endDate as the display anchor for MonthlyReport, HappinessReport, and FamilyHappiness year/month fields. — Source-of-truth query bounds are now startDate/endDate.
 
 ### Pending Todos
 
@@ -137,8 +139,8 @@ Items acknowledged and deferred at v1.0 milestone close on 2026-04-29:
 
 ## Session Continuity
 
-Last session: 2026-05-19T12:41:29.257Z
-Stopped at: Completed 15-02-PLAN.md
+Last session: 2026-05-19T12:54:28.756Z
+Stopped at: Completed 15-03-PLAN.md
 Resume file: None
 
 **Planned Next:** `/gsd:discuss-phase 15` — discuss Custom Time Windows before planning
