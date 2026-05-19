@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Happiness Metric Refresh
-status: executing
-stopped_at: Completed 15-05-PLAN.md
-last_updated: "2026-05-19T13:23:48.712Z"
+status: verifying
+stopped_at: Completed 15-06-PLAN.md
+last_updated: "2026-05-19T13:52:30.498Z"
 last_activity: 2026-05-19
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 19
-  completed_plans: 18
-  percent: 40
+  completed_plans: 19
+  percent: 60
 ---
 
 # Project State
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-05-19)
 
 ## Current Position
 
-Phase: 15 (custom-time-windows-happy-v2-02) — EXECUTING
+Phase: 15 (custom-time-windows-happy-v2-02) — COMPLETE
 Plan: 6 of 6
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-05-19
 
 ## v1.2 Phase Plan
@@ -80,6 +80,9 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 decisions ca
 - [Phase 15]: Plan 04 keeps SelectedTimeWindow default auto-dispose because MainShellScreen IndexedStack keeps tabs alive. — Avoids unnecessary provider lifetime widening while preserving tab-session behavior.
 - [Phase 15]: Plan 05 added FormatterService.formatShortMonthDay as the presentation-safe delegate for selector date labels. — The selector widgets must not import infrastructure formatters directly, and DateFormatter already owned the actual formatting behavior.
 - [Phase 15]: Plan 05 uses isScrollControlled for the time-window bottom sheet. — The type row plus chooser body overflows Flutter's default half-height modal constraint in tests.
+- [Phase 15]: Plan 06 replaced the AnalyticsScreen month picker with TimeWindowChip and purged MonthChipPicker/selectedMonthProvider symbols. — Completes HAPPY-V2-02 analytics window selection and removes the legacy month-only UI path.
+- [Phase 15]: AnalyticsScreen refresh stays scoped to analytics and shadow-book providers keyed by selected TimeWindow ranges. — Protects HomeHero current-month anchoring and prevents cross-screen invalidation coupling.
+- [Phase 15]: TimeWindowValidation permits canonical current calendar preset windows while rejecting arbitrary future custom ranges. — Default current-month/current-year analytics windows must load even when their calendar end date is still in the future.
 
 ### Pending Todos
 
@@ -142,8 +145,8 @@ Items acknowledged and deferred at v1.0 milestone close on 2026-04-29:
 
 ## Session Continuity
 
-Last session: 2026-05-19T13:23:48.706Z
-Stopped at: Completed 15-05-PLAN.md
+Last session: 2026-05-19T13:52:30.492Z
+Stopped at: Completed 15-06-PLAN.md
 Resume file: None
 
-**Planned Next:** `/gsd:discuss-phase 15` — discuss Custom Time Windows before planning
+**Planned Next:** `/gsd:verify-work 15` — verify completed Custom Time Windows before moving to Phase 16
