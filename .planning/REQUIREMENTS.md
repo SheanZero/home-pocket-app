@@ -23,7 +23,7 @@ Requirements committed for this milestone. Each maps to one roadmap phase.
 ### Happiness Domain Extensions (carried from v1.1 v2 backlog)
 
 - [ ] **HAPPY-V2-01**: User can view a per-category satisfaction breakdown in AnalyticsScreen — which spending categories bring the most joy (e.g., "Coffee shops: 8.2 avg / 12 entries"). Carried from `.planning/milestones/v1.1-REQUIREMENTS.md`.
-- [ ] **HAPPY-V2-02**: User can select custom time windows (week / month / quarter / year / arbitrary date range) for all Joy metrics, with the selection persisting per session. Carried from `.planning/milestones/v1.1-REQUIREMENTS.md`.
+- [x] **HAPPY-V2-02**: User can select custom time windows (week / month / quarter / year / arbitrary date range) for all Joy metrics, with the selection persisting per session. Carried from `.planning/milestones/v1.1-REQUIREMENTS.md`.
 - [ ] **HAPPY-V2-03**: User can opt to view a manual-entry-only Joy sub-metric variant (excludes voice-estimated entries). Requires schema migration to add `entry_source` column to transactions table (Phase 9 of v1.1 confirmed the column does not currently exist). Carried from `.planning/milestones/v1.1-REQUIREMENTS.md`.
 
 ### Analytics Surface Extensions
@@ -102,7 +102,7 @@ Populated by gsd-roadmapper on 2026-05-19 with v1.2 ROADMAP.md creation.
 | JOYMIG-05 | Phase 13 | Pending |
 | JOYMIG-06 | Phase 14 | Complete |
 | HAPPY-V2-01 | Phase 16 | Pending |
-| HAPPY-V2-02 | Phase 15 | Pending |
+| HAPPY-V2-02 | Phase 15 | Complete |
 | HAPPY-V2-03 | Phase 17 | Pending |
 | STATSUI-V2-01 | Phase 16 | Pending |
 | TOOL-V2-02 | Phase 14 | Complete |

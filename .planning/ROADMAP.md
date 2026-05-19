@@ -98,7 +98,7 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
   4. Selector and resulting metric labels respect ARB parity across ja/zh/en; no hardcoded date strings introduced; `DateFormatter` consumed for all date display.
   5. No cross-period delta UI is introduced (e.g., "this quarter vs last quarter" overlays) — ADR-012 §4 holds; verified by widget test asserting no delta-comparison surface exists.
 **Plans**: 6 plans
-  - [ ] 15-01-PLAN.md — ARB foundation: 15 new analyticsTimeWindow* keys + retire MoM delta keys + analyticsKpiTotalLabel generalization
+  - [x] 15-01-PLAN.md — ARB foundation: 15 new analyticsTimeWindow* keys + retire MoM delta keys + analyticsKpiTotalLabel generalization
   - [ ] 15-02-PLAN.md — TimeWindow Freezed sealed domain model + TimeWindowValidation helper (calendar-month math)
   - [ ] 15-03-PLAN.md — Use-case (startDate, endDate) migration + display-anchor (Option A) + MoM delta UI retirement
   - [ ] 15-04-PLAN.md — Provider re-keying + SelectedTimeWindow notifier + HomeScreen current-month adapter
@@ -149,6 +149,6 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 |-------|----------------|--------|-----------|
 | 13. ADR-016 Backend Foundation | 7/7 | Complete | 2026-05-19 |
 | 14. ADR-016 Frontend + ARB Reconciliation | 6/6 | Complete | 2026-05-19 |
-| 15. Custom Time Windows | 0/6 | Planned | — |
+| 15. Custom Time Windows | 1/6 | In Progress|  |
 | 16. Per-Category Breakdown + Soul-vs-Survival | 0/0 | Not started | — |
 | 17. Manual-Only Joy Sub-Metric | 0/0 | Not started | — |
