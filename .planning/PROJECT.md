@@ -11,9 +11,38 @@ The v1.1 milestone delivered the happiness metric domain, HomePage `HomeHeroCard
 
 The codebase is now ready for the next milestone cycle. Candidate directions include release-readiness QA, OCR, family sync hardening, strict family analytics consent, or toolchain/doc guardrail cleanup.
 
-## Current Milestone
+## Current Milestone: v1.2 Happiness Metric Refresh
 
-No active milestone. Start the next milestone with `$gsd-new-milestone`.
+**Started:** 2026-05-19
+**Phase numbering:** 承接 v1.1，从 Phase 13 起 (v1.1 末为 Phase 12)
+**Trigger:** ADR-016 ratify (2026-05-19) — Joy metric supersede from density to Σ joy_contribution
+
+**Goal:** 把 ADR-016 ratify 的 Joy metric supersede 与 v1.1 deferred 的悦己/分析项一起出货，让 HomePage 与 AnalyticsScreen 在新 Σ joy_contribution 体系下完成第二轮重画。
+
+**Target features:**
+- **ADR-016 Joy metric migration** (拆 2 phases: backend + frontend)
+  - Σ joy_contribution 替换 density 成为全局唯一 Joy 表达
+  - HomeHero 同心环：单月内累加 + 颜色状态机 (葵绿→金色平滑)
+  - Settings: monthly_joy_target 用户可配置 + 默认值推荐
+  - 100% 行为：纯环境变化 (守 ADR-012 #2)
+- **HAPPY-V2-01**: Per-category satisfaction breakdown view
+- **HAPPY-V2-02**: Custom time windows (week / quarter / year / arbitrary)
+- **HAPPY-V2-03**: Manual-only sub-metric (依赖 entry_source schema 迁移)
+- **STATSUI-V2-01**: Soul-vs-Survival happiness comparison surface (anti-toxicity framing)
+- **TOOL-V2-02**: ARB key rename (`homeHappinessROI` → `homeJoyPerYen`, `homeSoulFullness` → `homeJoyIndex`) ja/zh/en 同步
+
+**Key context:**
+- v1.1 close + 14 天；ADR-016 §1 显式接受 v1.1 baseline 不再 pure 的代价
+- ADR-013 已 supersede via append-only Update (per-tx PTVF scaling 公式仍 active 被 ADR-016 引用)
+- 跨 phase 共享 must-haves：守 ADR-012 (No Gamification)、ADR-014 (满意度单极正向语义)
+- v1.0 phase dirs 已 archive 至 `milestones/v1.0-phases/`；v1.1 phase dirs (09-12) 待 archive
+
+**Out of v1.2 scope (留 v1.3+ 或后续 milestone):**
+- FAMILY-V2-01/02/03 — family privacy hardening (含 schema v16→v17 + 新 ADR Privacy Consent Gate)
+- TOOL-V2-01 — fl_chart 1.x 升级
+- MOD-005 OCR
+- FUTURE-QA-01 — release-readiness smoke tests
+- 文档/工具 guardrail cleanup (FUTURE-DOC, FUTURE-TOOL-03)
 
 <details>
 <summary>v1.1 Happiness Metric & Display (archived)</summary>
@@ -175,4 +204,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-05 after v1.1 milestone archive — see `.planning/MILESTONES.md` and `.planning/milestones/v1.1-*.md` for shipped traceability*
+*Last updated: 2026-05-19 — milestone v1.2 Happiness Metric Refresh started (triggered by ADR-016 ratify); see `.planning/MILESTONES.md` for shipped milestones and `.planning/ROADMAP.md` for v1.2 phases*
