@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/i18n/formatter_service.dart';
 import 'package:home_pocket/infrastructure/i18n/formatters/date_formatter.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -64,6 +65,38 @@ void main() {
 
       test('formats Chinese month-year', () {
         expect(DateFormatter.formatMonthYear(testDate, zh), '2026年2月');
+      });
+    });
+
+    group('formatShortMonthDay', () {
+      final shortDate = DateTime(2026, 5, 11);
+
+      test('formats English short month-day', () {
+        expect(DateFormatter.formatShortMonthDay(shortDate, en), 'May 11');
+      });
+
+      test('formats Japanese short month-day', () {
+        expect(DateFormatter.formatShortMonthDay(shortDate, ja), '5月11日');
+      });
+
+      test('formats Chinese short month-day', () {
+        expect(DateFormatter.formatShortMonthDay(shortDate, zh), '5月11日');
+      });
+    });
+
+    group('FormatterService date delegates', () {
+      test('delegates month-year and short month-day formatting', () {
+        const service = FormatterService();
+        final date = DateTime(2026, 5, 11);
+
+        expect(
+          service.formatMonthYear(date, en),
+          DateFormatter.formatMonthYear(date, en),
+        );
+        expect(
+          service.formatShortMonthDay(date, ja),
+          DateFormatter.formatShortMonthDay(date, ja),
+        );
       });
     });
 
