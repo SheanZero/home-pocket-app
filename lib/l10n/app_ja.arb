@@ -1785,7 +1785,7 @@
     "description": "Analytics screen time-window picker empty preset list message"
   },
   "analyticsKpiTotalLabel": "支出合計",
-  "analyticsKpiJoyLabel": "今月の平均満足度",
+  "analyticsKpiJoyLabel": "平均満足度",
   "analyticsKpiJoySubMedianCoverage": "中央値 {median} · n={k}/{N}",
   "@analyticsKpiJoySubMedianCoverage": {
     "description": "KPI mini-hero 悦己平均 sub-line: median + coverage (STATSUI-03)",
@@ -1876,7 +1876,7 @@
     "description": "Permanent annotation above bar 5 of satisfaction histogram acknowledging default-5 cluster + East-Asian central-tendency clustering (STATSUI-02 HARD-LOCKED)"
   },
   "analyticsHistogramColorCaption": "色は ordinal 表現です",
-  "analyticsCardTitleLargestExpense": "総 · 今月の最大支出",
+  "analyticsCardTitleLargestExpense": "総 · 最大支出",
   "analyticsCardLargestExpenseBody": "{categoryName} · {amount} · {date}",
   "@analyticsCardLargestExpenseBody": {
     "description": "Largest monthly expense story card body",
@@ -1892,8 +1892,8 @@
       }
     }
   },
-  "analyticsCardEmptyLargestExpense": "データなし — 今月はまだ記録がありません",
-  "analyticsCardTitleBestJoy": "悦己 · 今月のベスト ジョイ",
+  "analyticsCardEmptyLargestExpense": "データなし — まだ記録がありません",
+  "analyticsCardTitleBestJoy": "悦己 · ベスト ジョイ",
   "analyticsCardBestJoyBig": "{categoryName} · {date}",
   "@analyticsCardBestJoyBig": {
     "description": "Best Joy story strip big line",
@@ -1918,9 +1918,9 @@
       }
     }
   },
-  "analyticsCardEmptyBestJoy": "今月の最大ハイライトはまだ見つからない",
+  "analyticsCardEmptyBestJoy": "最大ハイライトはまだ見つからない",
   "analyticsCardTitleFamilyInsight": "家族 · ハイライトサマリー",
-  "analyticsFamilyHighlightsSentence": "今月、家族の小確幸 {N}回",
+  "analyticsFamilyHighlightsSentence": "家族の小確幸 {N}回",
   "@analyticsFamilyHighlightsSentence": {
     "description": "Family highlights aggregate sentence",
     "placeholders": {
@@ -1945,7 +1945,7 @@
     }
   },
   "analyticsFamilyEmpty": "共通のお気に入り品目はまだ集計できません — もう少し記録してみよう",
-  "analyticsThinSampleFallbackHeading": "今月の魂帳の記録がまだ少ないよ",
+  "analyticsThinSampleFallbackHeading": "魂帳の記録がまだ少ないよ",
   "analyticsThinSampleFallbackBody": "あと数日記録を続けたら、Joy の流れが見えてくる",
   "analyticsThinSampleFallbackCta": "記録する »",
   "analyticsCardErrorHeading": "データが読み込めなかった",

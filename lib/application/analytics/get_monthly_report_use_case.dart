@@ -80,12 +80,10 @@ class GetMonthlyReportUseCase {
     );
 
     // Build daily expenses (fill in zero-days)
-    final daysInMonth = DateTime(anchorYear, anchorMonth + 1, 0).day;
-    final dailyExpenses = _buildDailyExpenses(
+    final dailyExpenses = _buildDailyExpensesForRange(
       dailyTotals: dailyTotals,
-      year: anchorYear,
-      month: anchorMonth,
-      daysInMonth: daysInMonth,
+      startDate: startDate,
+      endDate: endDate,
     );
 
     // Ledger splits
@@ -146,24 +144,26 @@ class GetMonthlyReportUseCase {
     }).toList();
   }
 
-  List<DailyExpense> _buildDailyExpenses({
+  List<DailyExpense> _buildDailyExpensesForRange({
     required List<DailyTotal> dailyTotals,
-    required int year,
-    required int month,
-    required int daysInMonth,
+    required DateTime startDate,
+    required DateTime endDate,
   }) {
-    final dailyMap = <int, int>{};
-    for (final dt in dailyTotals) {
-      dailyMap[dt.date.day] = dt.totalAmount;
-    }
+    final dailyMap = {
+      for (final dt in dailyTotals)
+        DateTime(dt.date.year, dt.date.month, dt.date.day): dt.totalAmount,
+    };
+    final firstDay = DateTime(startDate.year, startDate.month, startDate.day);
+    final lastDay = DateTime(endDate.year, endDate.month, endDate.day);
 
-    return List.generate(daysInMonth, (index) {
-      final day = index + 1;
-      return DailyExpense(
-        date: DateTime(year, month, day),
-        amount: dailyMap[day] ?? 0,
-      );
-    });
+    return [
+      for (
+        var day = firstDay;
+        !day.isAfter(lastDay);
+        day = day.add(const Duration(days: 1))
+      )
+        DailyExpense(date: day, amount: dailyMap[day] ?? 0),
+    ];
   }
 
   Future<MonthComparison?> _getPreviousMonthComparison({

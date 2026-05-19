@@ -106,22 +106,22 @@ void main() {
 
     test('month requires a value from 1 through 12', () {
       expect(
-        () => const TimeWindow.month(year: 2026, month: 0),
+        () => TimeWindow.month(year: 2026, month: 0),
         throwsA(isA<AssertionError>()),
       );
       expect(
-        () => const TimeWindow.month(year: 2026, month: 13),
+        () => TimeWindow.month(year: 2026, month: 13),
         throwsA(isA<AssertionError>()),
       );
     });
 
     test('quarter requires a value from 1 through 4', () {
       expect(
-        () => const TimeWindow.quarter(year: 2026, quarter: 0),
+        () => TimeWindow.quarter(year: 2026, quarter: 0),
         throwsA(isA<AssertionError>()),
       );
       expect(
-        () => const TimeWindow.quarter(year: 2026, quarter: 5),
+        () => TimeWindow.quarter(year: 2026, quarter: 5),
         throwsA(isA<AssertionError>()),
       );
     });

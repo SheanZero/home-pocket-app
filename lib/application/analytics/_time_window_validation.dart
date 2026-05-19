@@ -29,7 +29,8 @@ class TimeWindowValidation {
     }
 
     final now = DateTime.now();
-    if (endDate.isAfter(now) &&
+    final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    if (endDate.isAfter(todayEnd) &&
         !_isCurrentCalendarWindow(startDate, endDate, now)) {
       throw ArgumentError.value(
         (startDate, endDate),

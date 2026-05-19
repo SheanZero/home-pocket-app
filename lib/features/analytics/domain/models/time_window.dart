@@ -13,15 +13,18 @@ sealed class TimeWindow with _$TimeWindow {
 
   /// ISO-week-Monday-anchored 7-day window. [mondayStart] MUST be a Monday;
   /// constructor callers are responsible for snapping to Monday (D-05).
-  const factory TimeWindow.week({required DateTime mondayStart}) = WeekWindow;
+  @Assert('mondayStart.weekday == DateTime.monday')
+  factory TimeWindow.week({required DateTime mondayStart}) = WeekWindow;
 
   /// Calendar month: [year]-[month] (month in 1..12).
+  @Assert('month >= 1 && month <= 12')
   const factory TimeWindow.month({
     required int year,
     required int month,
   }) = MonthWindow;
 
   /// Calendar quarter (1..4). Q1=Jan-Mar, Q2=Apr-Jun, Q3=Jul-Sep, Q4=Oct-Dec.
+  @Assert('quarter >= 1 && quarter <= 4')
   const factory TimeWindow.quarter({
     required int year,
     required int quarter,

@@ -2786,7 +2786,7 @@ abstract class S {
   /// No description provided for @analyticsCardTitleLargestExpense.
   ///
   /// In en, this message translates to:
-  /// **'Total · Largest expense this month'**
+  /// **'Total · Largest expense'**
   String get analyticsCardTitleLargestExpense;
 
   /// Largest monthly expense story card body
@@ -2802,13 +2802,13 @@ abstract class S {
   /// No description provided for @analyticsCardEmptyLargestExpense.
   ///
   /// In en, this message translates to:
-  /// **'No data — no expenses logged yet this month'**
+  /// **'No data — no expenses logged yet'**
   String get analyticsCardEmptyLargestExpense;
 
   /// No description provided for @analyticsCardTitleBestJoy.
   ///
   /// In en, this message translates to:
-  /// **'Joy · Best Joy this month'**
+  /// **'Joy · Best Joy moment'**
   String get analyticsCardTitleBestJoy;
 
   /// Best Joy story strip big line
@@ -2826,7 +2826,7 @@ abstract class S {
   /// No description provided for @analyticsCardEmptyBestJoy.
   ///
   /// In en, this message translates to:
-  /// **'No standout Joy this month yet'**
+  /// **'No standout Joy yet'**
   String get analyticsCardEmptyBestJoy;
 
   /// No description provided for @analyticsCardTitleFamilyInsight.
@@ -2838,7 +2838,7 @@ abstract class S {
   /// Family highlights aggregate sentence
   ///
   /// In en, this message translates to:
-  /// **'{N} family Highlights this month'**
+  /// **'{N} family Highlights'**
   String analyticsFamilyHighlightsSentence(int N);
 
   /// Family shared joy insight sentence
@@ -2860,7 +2860,7 @@ abstract class S {
   /// No description provided for @analyticsThinSampleFallbackHeading.
   ///
   /// In en, this message translates to:
-  /// **'Not enough Joy entries this month yet'**
+  /// **'Not enough Joy entries yet'**
   String get analyticsThinSampleFallbackHeading;
 
   /// No description provided for @analyticsThinSampleFallbackBody.

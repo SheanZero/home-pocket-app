@@ -1785,7 +1785,7 @@
     "description": "Analytics screen time-window picker empty preset list message"
   },
   "analyticsKpiTotalLabel": "支出合计",
-  "analyticsKpiJoyLabel": "本月平均满足度",
+  "analyticsKpiJoyLabel": "平均满足度",
   "analyticsKpiJoySubMedianCoverage": "中位数 {median} · n={k}/{N}",
   "@analyticsKpiJoySubMedianCoverage": {
     "description": "KPI mini-hero 悦己平均 sub-line: median + coverage (STATSUI-03)",
@@ -1876,7 +1876,7 @@
     "description": "Permanent annotation above bar 5 of satisfaction histogram acknowledging default-5 cluster + East-Asian central-tendency clustering (STATSUI-02 HARD-LOCKED)"
   },
   "analyticsHistogramColorCaption": "色彩仅为 ordinal 视觉区分",
-  "analyticsCardTitleLargestExpense": "总 · 本月最大支出",
+  "analyticsCardTitleLargestExpense": "总 · 最大支出",
   "analyticsCardLargestExpenseBody": "{categoryName} · {amount} · {date}",
   "@analyticsCardLargestExpenseBody": {
     "description": "Largest monthly expense story card body",
@@ -1892,8 +1892,8 @@
       }
     }
   },
-  "analyticsCardEmptyLargestExpense": "暂无数据 — 本月还没有支出记录",
-  "analyticsCardTitleBestJoy": "悦己 · 本月最美时刻",
+  "analyticsCardEmptyLargestExpense": "暂无数据 — 还没有支出记录",
+  "analyticsCardTitleBestJoy": "悦己 · 最美时刻",
   "analyticsCardBestJoyBig": "{categoryName} · {date}",
   "@analyticsCardBestJoyBig": {
     "description": "Best Joy story strip big line",
@@ -1918,9 +1918,9 @@
       }
     }
   },
-  "analyticsCardEmptyBestJoy": "本月最值还没出现",
+  "analyticsCardEmptyBestJoy": "最值还没出现",
   "analyticsCardTitleFamilyInsight": "家族 · 小确幸总结",
-  "analyticsFamilyHighlightsSentence": "本月家族小確幸 {N} 次",
+  "analyticsFamilyHighlightsSentence": "家族小確幸 {N} 次",
   "@analyticsFamilyHighlightsSentence": {
     "description": "Family highlights aggregate sentence",
     "placeholders": {
@@ -1945,7 +1945,7 @@
     }
   },
   "analyticsFamilyEmpty": "还没有共同最爱品类——多记几笔魂账试试",
-  "analyticsThinSampleFallbackHeading": "本月魂账记录不足 5 笔",
+  "analyticsThinSampleFallbackHeading": "魂账记录不足 5 笔",
   "analyticsThinSampleFallbackBody": "多记录一周后回来看 Joy 趋势",
   "analyticsThinSampleFallbackCta": "去记录 »",
   "analyticsCardErrorHeading": "数据加载失败",

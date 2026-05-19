@@ -1383,7 +1383,7 @@ class SJa extends S {
   String get analyticsKpiTotalLabel => '支出合計';
 
   @override
-  String get analyticsKpiJoyLabel => '今月の平均満足度';
+  String get analyticsKpiJoyLabel => '平均満足度';
 
   @override
   String analyticsKpiJoySubMedianCoverage(String median, int k, int N) {
@@ -1467,7 +1467,7 @@ class SJa extends S {
   String get analyticsHistogramColorCaption => '色は ordinal 表現です';
 
   @override
-  String get analyticsCardTitleLargestExpense => '総 · 今月の最大支出';
+  String get analyticsCardTitleLargestExpense => '総 · 最大支出';
 
   @override
   String analyticsCardLargestExpenseBody(
@@ -1479,10 +1479,10 @@ class SJa extends S {
   }
 
   @override
-  String get analyticsCardEmptyLargestExpense => 'データなし — 今月はまだ記録がありません';
+  String get analyticsCardEmptyLargestExpense => 'データなし — まだ記録がありません';
 
   @override
-  String get analyticsCardTitleBestJoy => '悦己 · 今月のベスト ジョイ';
+  String get analyticsCardTitleBestJoy => '悦己 · ベスト ジョイ';
 
   @override
   String analyticsCardBestJoyBig(String categoryName, String date) {
@@ -1495,14 +1495,14 @@ class SJa extends S {
   }
 
   @override
-  String get analyticsCardEmptyBestJoy => '今月の最大ハイライトはまだ見つからない';
+  String get analyticsCardEmptyBestJoy => '最大ハイライトはまだ見つからない';
 
   @override
   String get analyticsCardTitleFamilyInsight => '家族 · ハイライトサマリー';
 
   @override
   String analyticsFamilyHighlightsSentence(int N) {
-    return '今月、家族の小確幸 $N回';
+    return '家族の小確幸 $N回';
   }
 
   @override
@@ -1518,7 +1518,7 @@ class SJa extends S {
   String get analyticsFamilyEmpty => '共通のお気に入り品目はまだ集計できません — もう少し記録してみよう';
 
   @override
-  String get analyticsThinSampleFallbackHeading => '今月の魂帳の記録がまだ少ないよ';
+  String get analyticsThinSampleFallbackHeading => '魂帳の記録がまだ少ないよ';
 
   @override
   String get analyticsThinSampleFallbackBody => 'あと数日記録を続けたら、Joy の流れが見えてくる';

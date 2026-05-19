@@ -1378,7 +1378,7 @@ class SZh extends S {
   String get analyticsKpiTotalLabel => '支出合计';
 
   @override
-  String get analyticsKpiJoyLabel => '本月平均满足度';
+  String get analyticsKpiJoyLabel => '平均满足度';
 
   @override
   String analyticsKpiJoySubMedianCoverage(String median, int k, int N) {
@@ -1461,7 +1461,7 @@ class SZh extends S {
   String get analyticsHistogramColorCaption => '色彩仅为 ordinal 视觉区分';
 
   @override
-  String get analyticsCardTitleLargestExpense => '总 · 本月最大支出';
+  String get analyticsCardTitleLargestExpense => '总 · 最大支出';
 
   @override
   String analyticsCardLargestExpenseBody(
@@ -1473,10 +1473,10 @@ class SZh extends S {
   }
 
   @override
-  String get analyticsCardEmptyLargestExpense => '暂无数据 — 本月还没有支出记录';
+  String get analyticsCardEmptyLargestExpense => '暂无数据 — 还没有支出记录';
 
   @override
-  String get analyticsCardTitleBestJoy => '悦己 · 本月最美时刻';
+  String get analyticsCardTitleBestJoy => '悦己 · 最美时刻';
 
   @override
   String analyticsCardBestJoyBig(String categoryName, String date) {
@@ -1489,14 +1489,14 @@ class SZh extends S {
   }
 
   @override
-  String get analyticsCardEmptyBestJoy => '本月最值还没出现';
+  String get analyticsCardEmptyBestJoy => '最值还没出现';
 
   @override
   String get analyticsCardTitleFamilyInsight => '家族 · 小确幸总结';
 
   @override
   String analyticsFamilyHighlightsSentence(int N) {
-    return '本月家族小確幸 $N 次';
+    return '家族小確幸 $N 次';
   }
 
   @override
@@ -1512,7 +1512,7 @@ class SZh extends S {
   String get analyticsFamilyEmpty => '还没有共同最爱品类——多记几笔魂账试试';
 
   @override
-  String get analyticsThinSampleFallbackHeading => '本月魂账记录不足 5 笔';
+  String get analyticsThinSampleFallbackHeading => '魂账记录不足 5 笔';
 
   @override
   String get analyticsThinSampleFallbackBody => '多记录一周后回来看 Joy 趋势';

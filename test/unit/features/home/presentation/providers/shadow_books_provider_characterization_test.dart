@@ -9,6 +9,8 @@ import 'package:home_pocket/features/family_sync/presentation/providers/reposito
 import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../../../../../helpers/test_provider_scope.dart';
+
 // Inline Mocktail-only mocks (no @GenerateMocks, no package:mockito)
 class _MockGroupRepository extends Mock implements GroupRepository {}
 
@@ -53,14 +55,10 @@ void main() {
       test(
         'shadowBooksProvider resolves to empty list when no active group',
         () async {
-          // Listen to prevent auto-dispose during test
-          final sub = container.listen(shadowBooksProvider, (_, next) {});
-          // Wait for activeGroupProvider stream to settle (it's a keepAlive stream provider)
-          await Future<void>.delayed(const Duration(milliseconds: 100));
-          final result = await container.read(shadowBooksProvider.future);
-          sub.close();
+          final result = await waitForFirstValue(container, shadowBooksProvider);
+
           expect(
-            result,
+            result.requireValue,
             isEmpty,
             reason:
                 'shadowBooksProvider must return [] when activeGroup is null',
@@ -75,15 +73,11 @@ void main() {
             startDate: DateTime(2026, 3),
             endDate: DateTime(2026, 3, 31, 23, 59, 59),
           );
-          // Listen to prevent auto-dispose during test
-          final sub = container.listen(aggProvider, (_, next) {});
-          // Wait for shadowBooksProvider (which aggProvider depends on) to settle
-          await Future<void>.delayed(const Duration(milliseconds: 150));
-          final result = await container.read(aggProvider.future);
-          sub.close();
-          expect(result.totalExpenses, 0);
-          expect(result.prevTotalExpenses, 0);
-          expect(result.perBookReports, isEmpty);
+          final result = await waitForFirstValue(container, aggProvider);
+
+          expect(result.requireValue.totalExpenses, 0);
+          expect(result.requireValue.prevTotalExpenses, 0);
+          expect(result.requireValue.perBookReports, isEmpty);
         },
       );
     },

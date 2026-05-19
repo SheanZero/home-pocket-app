@@ -261,7 +261,9 @@ extension TimeWindowPatterns on TimeWindow {
 /// @nodoc
 
 class WeekWindow extends TimeWindow {
-  const WeekWindow({required this.mondayStart}) : super._();
+  WeekWindow({required this.mondayStart})
+    : assert(mondayStart.weekday == DateTime.monday),
+      super._();
 
   final DateTime mondayStart;
 
@@ -326,7 +328,9 @@ class _$WeekWindowCopyWithImpl<$Res> implements $WeekWindowCopyWith<$Res> {
 /// @nodoc
 
 class MonthWindow extends TimeWindow {
-  const MonthWindow({required this.year, required this.month}) : super._();
+  const MonthWindow({required this.year, required this.month})
+    : assert(month >= 1 && month <= 12),
+      super._();
 
   final int year;
   final int month;
@@ -396,7 +400,9 @@ class _$MonthWindowCopyWithImpl<$Res> implements $MonthWindowCopyWith<$Res> {
 /// @nodoc
 
 class QuarterWindow extends TimeWindow {
-  const QuarterWindow({required this.year, required this.quarter}) : super._();
+  const QuarterWindow({required this.year, required this.quarter})
+    : assert(quarter >= 1 && quarter <= 4),
+      super._();
 
   final int year;
   final int quarter;

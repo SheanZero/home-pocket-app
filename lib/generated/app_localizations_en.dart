@@ -1488,8 +1488,7 @@ class SEn extends S {
   String get analyticsHistogramColorCaption => 'Colors are ordinal only';
 
   @override
-  String get analyticsCardTitleLargestExpense =>
-      'Total · Largest expense this month';
+  String get analyticsCardTitleLargestExpense => 'Total · Largest expense';
 
   @override
   String analyticsCardLargestExpenseBody(
@@ -1502,10 +1501,10 @@ class SEn extends S {
 
   @override
   String get analyticsCardEmptyLargestExpense =>
-      'No data — no expenses logged yet this month';
+      'No data — no expenses logged yet';
 
   @override
-  String get analyticsCardTitleBestJoy => 'Joy · Best Joy this month';
+  String get analyticsCardTitleBestJoy => 'Joy · Best Joy moment';
 
   @override
   String analyticsCardBestJoyBig(String categoryName, String date) {
@@ -1518,14 +1517,14 @@ class SEn extends S {
   }
 
   @override
-  String get analyticsCardEmptyBestJoy => 'No standout Joy this month yet';
+  String get analyticsCardEmptyBestJoy => 'No standout Joy yet';
 
   @override
   String get analyticsCardTitleFamilyInsight => 'Family · Highlights Summary';
 
   @override
   String analyticsFamilyHighlightsSentence(int N) {
-    return '$N family Highlights this month';
+    return '$N family Highlights';
   }
 
   @override
@@ -1542,8 +1541,7 @@ class SEn extends S {
       'No shared favorite yet — keep logging Joy entries';
 
   @override
-  String get analyticsThinSampleFallbackHeading =>
-      'Not enough Joy entries this month yet';
+  String get analyticsThinSampleFallbackHeading => 'Not enough Joy entries yet';
 
   @override
   String get analyticsThinSampleFallbackBody =>
