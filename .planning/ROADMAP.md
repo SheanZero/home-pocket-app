@@ -139,7 +139,15 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
   3. AnalyticsScreen exposes a toggle ("Joy metric: All entries / Manual entries only" or locale equivalents); when manual-only is selected, all Joy metrics (Σ joy_contribution, per-category breakdown, Soul-vs-Survival comparison) re-query with `entry_source = 'manual'` filter.
   4. HomeHero remains unaffected by the toggle — HomeHero ring continues to reflect all entries per ADR-016 §3 (toggle is an analytics-side audit lens, not a global metric switch); verified by widget test.
   5. ARB keys for the toggle and explanatory copy exist in ja/zh/en parity; `flutter gen-l10n` succeeds; copy is neutral (no implication that voice entries are "less valid", only that the toggle "excludes voice-estimated entries").
-**Plans**: TBD
+**Plans**: 8 plans
+  - [ ] 17-01-PLAN.md — Correct ROADMAP Phase 17 SC-3 wording to whole-AnalyticsScreen audit-lens framing (D-16)
+  - [ ] 17-02-PLAN.md — Drift schema v16→v17: entry_source column + customStatement migration + round-trip test (D-01/D-04/D-05)
+  - [ ] 17-03-PLAN.md — EntrySource enum + Transaction Freezed field + TransactionSyncMapper extension with manual fallback (D-01/D-03/D-09)
+  - [ ] 17-04-PLAN.md — TransactionDao + repo impl + CreateTransactionParams required-no-default + 3 push sites (voice/manual/demo); OCR untouched (D-02/D-06/D-07/D-08)
+  - [ ] 17-05-PLAN.md — AnalyticsDao 12+ methods gain EntrySource? entrySourceFilter; predicate-drift constants byte-identical; repo interface re-emitted; DAO tests (D-15/D-17)
+  - [ ] 17-06-PLAN.md — 11 use-case execute() signatures gain entrySourceFilter; recommendation use case byte-identical; 3 representative use-case tests (D-15)
+  - [ ] 17-07-PLAN.md — ARB ×3 trilingual lockstep + state_joy_metric_variant provider + JoyMetricVariantChip widget + family-key extensions; anti-toxicity + chip-flow tests (D-10..D-14/D-18)
+  - [ ] 17-08-PLAN.md — AnalyticsScreen integration (AppBar chip + _refresh) + HomeHero isolation test extension + entry-path-stamping + sync round-trip integration tests (SC-2/SC-3/SC-4/D-03/D-09)
 **UI hint**: yes
 
 ## Current Status
