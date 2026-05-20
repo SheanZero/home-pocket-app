@@ -2995,6 +2995,12 @@ abstract class S {
   /// **'Family data not available this window'**
   String get analyticsLedgerFamilyEmpty;
 
+  /// No description provided for @analyticsLedgerFamilyError.
+  ///
+  /// In en, this message translates to:
+  /// **'Family data unavailable'**
+  String get analyticsLedgerFamilyError;
+
   /// Budget remaining amount label
   ///
   /// In en, this message translates to:

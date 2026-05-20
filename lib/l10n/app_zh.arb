@@ -2009,6 +2009,7 @@
   "analyticsPerCategoryEmpty": "本期暂无类别数据",
   "analyticsLedgerEmpty": "本期暂无数据",
   "analyticsLedgerFamilyEmpty": "本期暂无家庭数据",
+  "analyticsLedgerFamilyError": "无法获取家庭数据",
   "budgetRemainingAmount": "剩余: {amount}",
   "@budgetRemainingAmount": {
     "description": "Budget remaining amount label",
