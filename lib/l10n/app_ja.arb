@@ -1951,6 +1951,64 @@
   "analyticsCardErrorHeading": "データが読み込めなかった",
   "analyticsCardErrorBody": "しばらくしてから、もう一度試してください",
   "analyticsCardErrorRetry": "再試行",
+  "analyticsCardTitlePerCategorySoul": "ときめき · カテゴリ",
+  "analyticsCardTitlePerCategorySoulYou": "ときめき · あなたのカテゴリ",
+  "analyticsCardTitlePerCategorySoulFamily": "ときめき · 家族のカテゴリ",
+  "analyticsPerCategoryRow": "{categoryName} · 平均 {avgSat} / {count} 件",
+  "@analyticsPerCategoryRow": {
+    "description": "Per-category breakdown row format: category name, average satisfaction, entry count",
+    "placeholders": {
+      "categoryName": {
+        "type": "String"
+      },
+      "avgSat": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsPerCategoryOtherFold": "その他：{totalCount} 件、{categoryCount} カテゴリ",
+  "@analyticsPerCategoryOtherFold": {
+    "description": "Per-category breakdown 'Other' fold row (entries beyond top-N)",
+    "placeholders": {
+      "totalCount": {
+        "type": "int"
+      },
+      "categoryCount": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsPerCategoryShowAll": "すべて表示",
+  "analyticsPerCategoryShowLess": "折りたたむ",
+  "analyticsCardTitleLedgerThisWindow": "今期の家計簿",
+  "analyticsLedgerColumnSoul": "ときめき",
+  "analyticsLedgerColumnSurvival": "生活",
+  "analyticsLedgerRowYou": "あなた",
+  "analyticsLedgerRowFamily": "家族",
+  "analyticsLedgerCellEntries": "{count} 件",
+  "@analyticsLedgerCellEntries": {
+    "description": "Ledger card cell metric: entry count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsLedgerCellAvgSat": "平均満足 {avgSat}",
+  "@analyticsLedgerCellAvgSat": {
+    "description": "Ledger card cell metric: average satisfaction (Soul column only). avgSat is a pre-formatted decimal string.",
+    "placeholders": {
+      "avgSat": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsPerCategoryEmpty": "今期はカテゴリデータがありません",
+  "analyticsLedgerEmpty": "今期はデータがありません",
+  "analyticsLedgerFamilyEmpty": "今期は家族データがありません",
   "budgetRemainingAmount": "残り: {amount}",
   "@budgetRemainingAmount": {
     "description": "Budget remaining amount label",

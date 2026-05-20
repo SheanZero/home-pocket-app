@@ -1951,6 +1951,64 @@
   "analyticsCardErrorHeading": "Could not load data",
   "analyticsCardErrorBody": "Please try again in a moment",
   "analyticsCardErrorRetry": "Retry",
+  "analyticsCardTitlePerCategorySoul": "Joy · Categories",
+  "analyticsCardTitlePerCategorySoulYou": "Joy · Your categories",
+  "analyticsCardTitlePerCategorySoulFamily": "Joy · Family categories",
+  "analyticsPerCategoryRow": "{categoryName} · {avgSat} avg / {count} entries",
+  "@analyticsPerCategoryRow": {
+    "description": "Per-category breakdown row format: category name, average satisfaction, entry count",
+    "placeholders": {
+      "categoryName": {
+        "type": "String"
+      },
+      "avgSat": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsPerCategoryOtherFold": "Other: {totalCount} entries across {categoryCount} categories",
+  "@analyticsPerCategoryOtherFold": {
+    "description": "Per-category breakdown 'Other' fold row (entries beyond top-N)",
+    "placeholders": {
+      "totalCount": {
+        "type": "int"
+      },
+      "categoryCount": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsPerCategoryShowAll": "Show all",
+  "analyticsPerCategoryShowLess": "Show less",
+  "analyticsCardTitleLedgerThisWindow": "Ledger · This window",
+  "analyticsLedgerColumnSoul": "Soul",
+  "analyticsLedgerColumnSurvival": "Survival",
+  "analyticsLedgerRowYou": "You",
+  "analyticsLedgerRowFamily": "Family",
+  "analyticsLedgerCellEntries": "{count} entries",
+  "@analyticsLedgerCellEntries": {
+    "description": "Ledger card cell metric: entry count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsLedgerCellAvgSat": "{avgSat} avg satisfaction",
+  "@analyticsLedgerCellAvgSat": {
+    "description": "Ledger card cell metric: average satisfaction (Soul column only). avgSat is a pre-formatted decimal string.",
+    "placeholders": {
+      "avgSat": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsPerCategoryEmpty": "No category data this window",
+  "analyticsLedgerEmpty": "No data this window",
+  "analyticsLedgerFamilyEmpty": "Family data not available this window",
   "budgetRemainingAmount": "Remaining: {amount}",
   "@budgetRemainingAmount": {
     "description": "Budget remaining amount label",

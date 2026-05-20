@@ -1530,6 +1530,69 @@ class SZh extends S {
   String get analyticsCardErrorRetry => '重试';
 
   @override
+  String get analyticsCardTitlePerCategorySoul => '悦己 · 类别';
+
+  @override
+  String get analyticsCardTitlePerCategorySoulYou => '悦己 · 你的类别';
+
+  @override
+  String get analyticsCardTitlePerCategorySoulFamily => '悦己 · 家庭类别';
+
+  @override
+  String analyticsPerCategoryRow(
+    String categoryName,
+    String avgSat,
+    int count,
+  ) {
+    return '$categoryName · 平均 $avgSat / $count 条';
+  }
+
+  @override
+  String analyticsPerCategoryOtherFold(int totalCount, int categoryCount) {
+    return '其他：$totalCount 条，跨 $categoryCount 个类别';
+  }
+
+  @override
+  String get analyticsPerCategoryShowAll => '展开全部';
+
+  @override
+  String get analyticsPerCategoryShowLess => '收起';
+
+  @override
+  String get analyticsCardTitleLedgerThisWindow => '本期账本描述';
+
+  @override
+  String get analyticsLedgerColumnSoul => '灵魂';
+
+  @override
+  String get analyticsLedgerColumnSurvival => '生存';
+
+  @override
+  String get analyticsLedgerRowYou => '你';
+
+  @override
+  String get analyticsLedgerRowFamily => '家庭';
+
+  @override
+  String analyticsLedgerCellEntries(int count) {
+    return '$count 条';
+  }
+
+  @override
+  String analyticsLedgerCellAvgSat(String avgSat) {
+    return '平均满意 $avgSat';
+  }
+
+  @override
+  String get analyticsPerCategoryEmpty => '本期暂无类别数据';
+
+  @override
+  String get analyticsLedgerEmpty => '本期暂无数据';
+
+  @override
+  String get analyticsLedgerFamilyEmpty => '本期暂无家庭数据';
+
+  @override
   String budgetRemainingAmount(String amount) {
     return '剩余: $amount';
   }

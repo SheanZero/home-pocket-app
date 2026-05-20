@@ -2893,6 +2893,108 @@ abstract class S {
   /// **'Retry'**
   String get analyticsCardErrorRetry;
 
+  /// No description provided for @analyticsCardTitlePerCategorySoul.
+  ///
+  /// In en, this message translates to:
+  /// **'Joy · Categories'**
+  String get analyticsCardTitlePerCategorySoul;
+
+  /// No description provided for @analyticsCardTitlePerCategorySoulYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Joy · Your categories'**
+  String get analyticsCardTitlePerCategorySoulYou;
+
+  /// No description provided for @analyticsCardTitlePerCategorySoulFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Joy · Family categories'**
+  String get analyticsCardTitlePerCategorySoulFamily;
+
+  /// Per-category breakdown row format: category name, average satisfaction, entry count
+  ///
+  /// In en, this message translates to:
+  /// **'{categoryName} · {avgSat} avg / {count} entries'**
+  String analyticsPerCategoryRow(String categoryName, String avgSat, int count);
+
+  /// Per-category breakdown 'Other' fold row (entries beyond top-N)
+  ///
+  /// In en, this message translates to:
+  /// **'Other: {totalCount} entries across {categoryCount} categories'**
+  String analyticsPerCategoryOtherFold(int totalCount, int categoryCount);
+
+  /// No description provided for @analyticsPerCategoryShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get analyticsPerCategoryShowAll;
+
+  /// No description provided for @analyticsPerCategoryShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get analyticsPerCategoryShowLess;
+
+  /// No description provided for @analyticsCardTitleLedgerThisWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger · This window'**
+  String get analyticsCardTitleLedgerThisWindow;
+
+  /// No description provided for @analyticsLedgerColumnSoul.
+  ///
+  /// In en, this message translates to:
+  /// **'Soul'**
+  String get analyticsLedgerColumnSoul;
+
+  /// No description provided for @analyticsLedgerColumnSurvival.
+  ///
+  /// In en, this message translates to:
+  /// **'Survival'**
+  String get analyticsLedgerColumnSurvival;
+
+  /// No description provided for @analyticsLedgerRowYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get analyticsLedgerRowYou;
+
+  /// No description provided for @analyticsLedgerRowFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get analyticsLedgerRowFamily;
+
+  /// Ledger card cell metric: entry count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entries'**
+  String analyticsLedgerCellEntries(int count);
+
+  /// Ledger card cell metric: average satisfaction (Soul column only). avgSat is a pre-formatted decimal string.
+  ///
+  /// In en, this message translates to:
+  /// **'{avgSat} avg satisfaction'**
+  String analyticsLedgerCellAvgSat(String avgSat);
+
+  /// No description provided for @analyticsPerCategoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No category data this window'**
+  String get analyticsPerCategoryEmpty;
+
+  /// No description provided for @analyticsLedgerEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No data this window'**
+  String get analyticsLedgerEmpty;
+
+  /// No description provided for @analyticsLedgerFamilyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Family data not available this window'**
+  String get analyticsLedgerFamilyEmpty;
+
   /// Budget remaining amount label
   ///
   /// In en, this message translates to:
