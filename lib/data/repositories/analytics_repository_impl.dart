@@ -1,5 +1,7 @@
 import '../../features/analytics/domain/models/analytics_aggregate.dart';
 import '../../features/analytics/domain/models/best_joy_moment_row.dart';
+import '../../features/analytics/domain/models/ledger_snapshot.dart';
+import '../../features/analytics/domain/models/per_category_soul_breakdown.dart';
 import '../../features/analytics/domain/repositories/analytics_repository.dart';
 import '../daos/analytics_dao.dart';
 
@@ -181,6 +183,77 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     required DateTime endDate,
   }) {
     return _dao.getSharedJoyCategoryInsight(
+      bookIds: bookIds,
+      startDate: startDate,
+      endDate: endDate,
+    );
+  }
+
+  @override
+  Future<List<PerCategorySoulBreakdownItem>> getPerCategorySoulBreakdown({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final raws = await _dao.getPerCategorySoulBreakdown(
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+    );
+    return raws
+        .map(
+          (r) => PerCategorySoulBreakdownItem(
+            categoryId: r.categoryId,
+            avgSatisfaction: r.avgSatisfaction,
+            totalCount: r.totalCount,
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<PerCategorySoulBreakdownItem>>
+  getPerCategorySoulBreakdownAcrossBooks({
+    required List<String> bookIds,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final raws = await _dao.getPerCategorySoulBreakdownAcrossBooks(
+      bookIds: bookIds,
+      startDate: startDate,
+      endDate: endDate,
+    );
+    return raws
+        .map(
+          (r) => PerCategorySoulBreakdownItem(
+            categoryId: r.categoryId,
+            avgSatisfaction: r.avgSatisfaction,
+            totalCount: r.totalCount,
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<LedgerSnapshotRow>> getLedgerSnapshot({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    return _dao.getLedgerSnapshot(
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+    );
+  }
+
+  @override
+  Future<List<LedgerSnapshotRow>> getLedgerSnapshotAcrossBooks({
+    required List<String> bookIds,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    return _dao.getLedgerSnapshotAcrossBooks(
       bookIds: bookIds,
       startDate: startDate,
       endDate: endDate,
