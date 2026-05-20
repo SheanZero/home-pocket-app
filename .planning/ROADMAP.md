@@ -117,9 +117,9 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
   4. New AnalyticsScreen widgets follow v1.1 Variant ε / δ-derived layout conventions; goldens added for both surfaces in light + dark themes (if applicable per current theme support).
   5. ADR-012 §6 holds — no per-family-member breakdown is introduced anywhere in the comparison surface; only ledger-type aggregates are shown.
 **Plans**: 10 plans
-  - [ ] 16-01-PLAN.md — ROADMAP SC-3 wording correction to engagement-axis framing (D-15)
-  - [ ] 16-02-PLAN.md — ARB additions: 17 new keys across en/ja/zh for Phase 16 surfaces
-  - [ ] 16-03-PLAN.md — Domain models: PerCategorySoulBreakdown + LedgerSnapshot (SurvivalLedgerSnapshot has NO avgSatisfaction — D-04 type-system gate)
+  - [x] 16-01-PLAN.md — ROADMAP SC-3 wording correction to engagement-axis framing (D-15)
+  - [x] 16-02-PLAN.md — ARB additions: 17 new keys across en/ja/zh for Phase 16 surfaces
+  - [x] 16-03-PLAN.md — Domain models: PerCategorySoulBreakdown + LedgerSnapshot (SurvivalLedgerSnapshot has NO avgSatisfaction — D-04 type-system gate)
   - [ ] 16-04-PLAN.md — DAO methods (4) + _survivalExpenseFilter + repository interface/impl + DAO unit tests
   - [ ] 16-05-PLAN.md — Application use cases (4): per-category single + family-aggregate; soul-vs-survival single + family-aggregate
   - [ ] 16-06-PLAN.md — Riverpod providers: new state_ledger_snapshot.dart (4 providers) + repository_providers extension
@@ -160,5 +160,5 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 | 13. ADR-016 Backend Foundation | 7/7 | Complete | 2026-05-19 |
 | 14. ADR-016 Frontend + ARB Reconciliation | 6/6 | Complete | 2026-05-19 |
 | 15. Custom Time Windows | 6/6 | Complete    | 2026-05-19 |
-| 16. Per-Category Breakdown + Soul-vs-Survival | 0/0 | Not started | — |
+| 16. Per-Category Breakdown + Soul-vs-Survival | 3/10 | In Progress|  |
 | 17. Manual-Only Joy Sub-Metric | 0/0 | Not started | — |
