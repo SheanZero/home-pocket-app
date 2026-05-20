@@ -113,7 +113,7 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 **Success Criteria** (what must be TRUE):
   1. AnalyticsScreen renders a per-category satisfaction breakdown showing category name, average satisfaction, and entry count (e.g., "Coffee shops: 8.2 avg / 12 entries") for soul-ledger transactions within the active time window from Phase 15.
   2. Per-category breakdown respects min-N filtering (categories with <3 entries grouped or suppressed) consistent with v1.1 SharedJoyInsight contract — single-data-point categories never crowned.
-  3. AnalyticsScreen renders a Soul-vs-Survival comparison surface displaying both ledgers' average satisfaction (e.g., "Soul ledger averages 7.4 satisfaction; survival ledger 5.1") with descriptive copy only — no value-judgment terms ("better", "worse", "higher is good", winner/loser framing); verified by ARB review + widget assertion of forbidden-substring absence in all three locales.
+  3. AnalyticsScreen renders a Soul-vs-Survival "Ledger · This window" surface displaying both ledgers' engagement metrics (entry count + total spend), with the Soul column additionally showing average satisfaction. Copy is descriptive only — no value-judgment terms (better/worse/winner/loser/vs framing) — verified by ARB review + widget assertion of forbidden-substring absence in all three locales.
   4. New AnalyticsScreen widgets follow v1.1 Variant ε / δ-derived layout conventions; goldens added for both surfaces in light + dark themes (if applicable per current theme support).
   5. ADR-012 §6 holds — no per-family-member breakdown is introduced anywhere in the comparison surface; only ledger-type aggregates are shown.
 **Plans**: 10 plans
