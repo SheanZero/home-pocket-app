@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Happiness Metric Refresh
-status: ready_to_plan
-stopped_at: Phase 16 complete (10/10) — ready to discuss Phase 17
-last_updated: 2026-05-20T10:30:40.367Z
-last_activity: 2026-05-20 -- Phase 16 execution started
+status: planning
+stopped_at: Phase 17 context gathered
+last_updated: "2026-05-20T12:47:27.276Z"
+last_activity: 2026-05-20
 progress:
   total_phases: 5
-  completed_phases: 2
-  total_plans: 101
+  completed_phases: 4
+  total_plans: 29
   completed_plans: 29
-  percent: 40
+  percent: 80
 ---
 
 # Project State
@@ -145,8 +145,8 @@ Items acknowledged and deferred at v1.0 milestone close on 2026-04-29:
 
 ## Session Continuity
 
-Last session: 2026-05-20T01:46:24.527Z
-Stopped at: Phase 16 UI-SPEC approved
-Resume file: .planning/phases/16-per-category-breakdown-soul-vs-survival-comparison-happy-v2-/16-UI-SPEC.md
+Last session: 2026-05-20T12:47:27.271Z
+Stopped at: Phase 17 context gathered
+Resume file: .planning/phases/17-manual-only-joy-sub-metric-happy-v2-03/17-CONTEXT.md
 
 **Planned Next:** `/gsd:discuss-phase 16` — clarify Per-Category Breakdown + Soul-vs-Survival before planning
