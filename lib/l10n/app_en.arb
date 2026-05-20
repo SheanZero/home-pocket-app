@@ -2009,6 +2009,7 @@
   "analyticsPerCategoryEmpty": "No category data this window",
   "analyticsLedgerEmpty": "No data this window",
   "analyticsLedgerFamilyEmpty": "Family data not available this window",
+  "analyticsLedgerFamilyError": "Family data unavailable",
   "budgetRemainingAmount": "Remaining: {amount}",
   "@budgetRemainingAmount": {
     "description": "Budget remaining amount label",

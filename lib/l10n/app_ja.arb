@@ -2009,6 +2009,7 @@
   "analyticsPerCategoryEmpty": "今期はカテゴリデータがありません",
   "analyticsLedgerEmpty": "今期はデータがありません",
   "analyticsLedgerFamilyEmpty": "今期は家族データがありません",
+  "analyticsLedgerFamilyError": "家族データを取得できません",
   "budgetRemainingAmount": "残り: {amount}",
   "@budgetRemainingAmount": {
     "description": "Budget remaining amount label",

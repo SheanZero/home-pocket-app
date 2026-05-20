@@ -1599,6 +1599,9 @@ class SJa extends S {
   String get analyticsLedgerFamilyEmpty => '今期は家族データがありません';
 
   @override
+  String get analyticsLedgerFamilyError => '家族データを取得できません';
+
+  @override
   String budgetRemainingAmount(String amount) {
     return '残り: $amount';
   }

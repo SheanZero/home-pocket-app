@@ -1593,6 +1593,9 @@ class SZh extends S {
   String get analyticsLedgerFamilyEmpty => '本期暂无家庭数据';
 
   @override
+  String get analyticsLedgerFamilyError => '无法获取家庭数据';
+
+  @override
   String budgetRemainingAmount(String amount) {
     return '剩余: $amount';
   }

@@ -1625,6 +1625,9 @@ class SEn extends S {
       'Family data not available this window';
 
   @override
+  String get analyticsLedgerFamilyError => 'Family data unavailable';
+
+  @override
   String budgetRemainingAmount(String amount) {
     return 'Remaining: $amount';
   }
