@@ -11,6 +11,7 @@ import '../../../../generated/app_localizations.dart';
 import '../../domain/models/time_window.dart';
 import '../providers/state_analytics.dart';
 import '../providers/state_happiness.dart';
+import '../providers/state_ledger_snapshot.dart';
 import '../providers/state_time_window.dart';
 import '../widgets/analytics_card_error_state.dart';
 import '../widgets/analytics_screen_section_header.dart';
@@ -20,7 +21,9 @@ import '../widgets/family_insight_card.dart';
 import '../widgets/kpi_mini_hero_strip.dart';
 import '../widgets/largest_expense_story_card.dart';
 import '../widgets/monthly_spend_trend_bar_chart.dart';
+import '../widgets/per_category_breakdown_card.dart';
 import '../widgets/satisfaction_distribution_histogram.dart';
+import '../widgets/soul_vs_survival_card.dart';
 import '../widgets/time_window_chip.dart';
 
 /// Phase 11 Variant delta unified analytics dashboard.
@@ -113,12 +116,49 @@ class AnalyticsScreen extends ConsumerWidget {
                 endDate: endDate,
               ),
               const SizedBox(height: 8),
+              // D-13: STATSUI-V2-01 Soul-vs-Survival card between donut and
+              // satisfaction histogram in the Distribution section.
+              SoulVsSurvivalCard(
+                bookId: bookId,
+                startDate: startDate,
+                endDate: endDate,
+                currencyCode: currencyCode,
+                locale: locale,
+                isGroupMode: isGroupMode,
+              ),
+              const SizedBox(height: 8),
               _SatisfactionHistogramOrFallback(
                 bookId: bookId,
                 startDate: startDate,
                 endDate: endDate,
                 currencyCode: currencyCode,
               ),
+              const SizedBox(height: 8),
+              // D-13: HAPPY-V2-01 per-category breakdown card after the
+              // satisfaction histogram. Solo mode renders one card; group mode
+              // renders You first.
+              PerCategoryBreakdownCard(
+                bookId: bookId,
+                startDate: startDate,
+                endDate: endDate,
+                locale: locale,
+                scope: isGroupMode
+                    ? PerCategoryScope.you
+                    : PerCategoryScope.solo,
+              ),
+              if (isGroupMode) ...[
+                const SizedBox(height: 8),
+                // D-17: group-mode adds a second stacked PerCategoryBreakdownCard
+                // for the family-aggregate scope. PerCategoryScope.family reads
+                // perCategorySoulBreakdownFamilyProvider (no bookId arg).
+                PerCategoryBreakdownCard(
+                  bookId: bookId,
+                  startDate: startDate,
+                  endDate: endDate,
+                  locale: locale,
+                  scope: PerCategoryScope.family,
+                ),
+              ],
               const SizedBox(height: 32),
               AnalyticsScreenSectionHeader(
                 label: l10n.analyticsGroupHeaderStories,
@@ -204,11 +244,42 @@ class AnalyticsScreen extends ConsumerWidget {
         endDate: endDate,
       ),
     );
+    // Phase 16 — HAPPY-V2-01 + STATSUI-V2-01. Same (bookId, startDate, endDate)
+    // keys as the build context so HomeHero's month-anchored provider instances
+    // remain untouched (D-12).
+    ref.invalidate(
+      perCategorySoulBreakdownProvider(
+        bookId: bookId,
+        startDate: startDate,
+        endDate: endDate,
+      ),
+    );
+    ref.invalidate(
+      soulVsSurvivalSnapshotProvider(
+        bookId: bookId,
+        startDate: startDate,
+        endDate: endDate,
+      ),
+    );
     if (isGroupMode) {
       ref.invalidate(
         familyHappinessProvider(startDate: startDate, endDate: endDate),
       );
       ref.invalidate(shadowBooksProvider);
+      // Phase 16 — D-17 / D-18 family-aggregate variants. Drop bookId because
+      // these providers derive ids from shadowBooksProvider.
+      ref.invalidate(
+        perCategorySoulBreakdownFamilyProvider(
+          startDate: startDate,
+          endDate: endDate,
+        ),
+      );
+      ref.invalidate(
+        soulVsSurvivalSnapshotFamilyProvider(
+          startDate: startDate,
+          endDate: endDate,
+        ),
+      );
     }
   }
 }
