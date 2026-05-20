@@ -43,7 +43,7 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 - [x] **Phase 13: ADR-016 Backend Foundation** — Spike fallback baseline; schema bump (`user_settings.monthly_joy_target` field + table reuse); `GetHappinessReportUseCase` rewrite (density → Σ joy_contribution); DAO query simplification; formatter rename (`joy_density_formatter` → `joy_cumulative_formatter`); recommendation algorithm (median of past 3 months + fallback) — completed 2026-05-19
 - [x] **Phase 14: ADR-016 Frontend + ARB Reconciliation (TOOL-V2-02)** — `HomeHeroCard` rebuild (累加 ring + sage-green→gold color state machine); AnalyticsScreen Variant ε redesign (density KPI retired); Settings UI (`monthly_joy_target` config + recommended-value display); ARB key reconciliation (density-related keys removed/renamed across ja/zh/en); 100%-behavior gate (no discrete events per ADR-012 §2 / ADR-016 §5); golden regen for 0% / 50% / 100% / >100% states (completed 2026-05-19)
 - [x] **Phase 15: Custom Time Windows (HAPPY-V2-02)** — Week / month / quarter / year / arbitrary date-range selector wired across all Joy metrics in AnalyticsScreen; selection persists per session; HomeHero remains month-anchored (per ADR-016 ring semantics) (completed 2026-05-19)
-- [ ] **Phase 16: Per-Category Breakdown + Soul-vs-Survival Comparison (HAPPY-V2-01 + STATSUI-V2-01)** — Per-category satisfaction breakdown view in AnalyticsScreen; Soul-vs-Survival happiness comparison surface with anti-toxicity framing (descriptive only, no value-judgment language)
+- [x] **Phase 16: Per-Category Breakdown + Soul-vs-Survival Comparison (HAPPY-V2-01 + STATSUI-V2-01)** — Per-category satisfaction breakdown view in AnalyticsScreen; Soul-vs-Survival happiness comparison surface with anti-toxicity framing (descriptive only, no value-judgment language) (completed 2026-05-20)
 - [ ] **Phase 17: Manual-Only Joy Sub-Metric (HAPPY-V2-03)** — Schema migration adding `transactions.entry_source` column; backend filter for manual-only Joy variant; AnalyticsScreen toggle to switch between full and manual-only Joy metric
 
 ## Phase Details
@@ -125,8 +125,8 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
   - [x] 16-06-PLAN.md — Riverpod providers: new state_ledger_snapshot.dart (4 providers) + repository_providers extension
   - [x] 16-07-PLAN.md — PerCategoryBreakdownCard widget + widget tests + light/dark/group goldens
   - [x] 16-08-PLAN.md — SoulVsSurvivalCard widget + widget tests + light/dark/group goldens
-  - [ ] 16-09-PLAN.md — Anti-toxicity widget test (trilingual forbidden-substring sweep across both cards × 3 locales × 4 states)
-  - [ ] 16-10-PLAN.md — AnalyticsScreen integration (Distribution composition + _refresh()) + home_screen_isolation_test extension
+  - [x] 16-09-PLAN.md — Anti-toxicity widget test (trilingual forbidden-substring sweep across both cards × 3 locales × 4 states)
+  - [x] 16-10-PLAN.md — AnalyticsScreen integration (Distribution composition + _refresh()) + home_screen_isolation_test extension
 **UI hint**: yes
 
 ### Phase 17: Manual-Only Joy Sub-Metric (HAPPY-V2-03)
@@ -160,5 +160,5 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 | 13. ADR-016 Backend Foundation | 7/7 | Complete | 2026-05-19 |
 | 14. ADR-016 Frontend + ARB Reconciliation | 6/6 | Complete | 2026-05-19 |
 | 15. Custom Time Windows | 6/6 | Complete    | 2026-05-19 |
-| 16. Per-Category Breakdown + Soul-vs-Survival | 8/10 | In Progress|  |
+| 16. Per-Category Breakdown + Soul-vs-Survival | 10/10 | Complete   | 2026-05-20 |
 | 17. Manual-Only Joy Sub-Metric | 0/0 | Not started | — |
