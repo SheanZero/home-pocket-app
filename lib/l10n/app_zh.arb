@@ -1951,6 +1951,64 @@
   "analyticsCardErrorHeading": "数据加载失败",
   "analyticsCardErrorBody": "请稍后再试",
   "analyticsCardErrorRetry": "重试",
+  "analyticsCardTitlePerCategorySoul": "悦己 · 类别",
+  "analyticsCardTitlePerCategorySoulYou": "悦己 · 你的类别",
+  "analyticsCardTitlePerCategorySoulFamily": "悦己 · 家庭类别",
+  "analyticsPerCategoryRow": "{categoryName} · 平均 {avgSat} / {count} 条",
+  "@analyticsPerCategoryRow": {
+    "description": "Per-category breakdown row format: category name, average satisfaction, entry count",
+    "placeholders": {
+      "categoryName": {
+        "type": "String"
+      },
+      "avgSat": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsPerCategoryOtherFold": "其他：{totalCount} 条，跨 {categoryCount} 个类别",
+  "@analyticsPerCategoryOtherFold": {
+    "description": "Per-category breakdown 'Other' fold row (entries beyond top-N)",
+    "placeholders": {
+      "totalCount": {
+        "type": "int"
+      },
+      "categoryCount": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsPerCategoryShowAll": "展开全部",
+  "analyticsPerCategoryShowLess": "收起",
+  "analyticsCardTitleLedgerThisWindow": "本期账本描述",
+  "analyticsLedgerColumnSoul": "灵魂",
+  "analyticsLedgerColumnSurvival": "生存",
+  "analyticsLedgerRowYou": "你",
+  "analyticsLedgerRowFamily": "家庭",
+  "analyticsLedgerCellEntries": "{count} 条",
+  "@analyticsLedgerCellEntries": {
+    "description": "Ledger card cell metric: entry count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsLedgerCellAvgSat": "平均满意 {avgSat}",
+  "@analyticsLedgerCellAvgSat": {
+    "description": "Ledger card cell metric: average satisfaction (Soul column only). avgSat is a pre-formatted decimal string.",
+    "placeholders": {
+      "avgSat": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsPerCategoryEmpty": "本期暂无类别数据",
+  "analyticsLedgerEmpty": "本期暂无数据",
+  "analyticsLedgerFamilyEmpty": "本期暂无家庭数据",
   "budgetRemainingAmount": "剩余: {amount}",
   "@budgetRemainingAmount": {
     "description": "Budget remaining amount label",

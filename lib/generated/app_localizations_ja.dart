@@ -1536,6 +1536,69 @@ class SJa extends S {
   String get analyticsCardErrorRetry => '再試行';
 
   @override
+  String get analyticsCardTitlePerCategorySoul => 'ときめき · カテゴリ';
+
+  @override
+  String get analyticsCardTitlePerCategorySoulYou => 'ときめき · あなたのカテゴリ';
+
+  @override
+  String get analyticsCardTitlePerCategorySoulFamily => 'ときめき · 家族のカテゴリ';
+
+  @override
+  String analyticsPerCategoryRow(
+    String categoryName,
+    String avgSat,
+    int count,
+  ) {
+    return '$categoryName · 平均 $avgSat / $count 件';
+  }
+
+  @override
+  String analyticsPerCategoryOtherFold(int totalCount, int categoryCount) {
+    return 'その他：$totalCount 件、$categoryCount カテゴリ';
+  }
+
+  @override
+  String get analyticsPerCategoryShowAll => 'すべて表示';
+
+  @override
+  String get analyticsPerCategoryShowLess => '折りたたむ';
+
+  @override
+  String get analyticsCardTitleLedgerThisWindow => '今期の家計簿';
+
+  @override
+  String get analyticsLedgerColumnSoul => 'ときめき';
+
+  @override
+  String get analyticsLedgerColumnSurvival => '生活';
+
+  @override
+  String get analyticsLedgerRowYou => 'あなた';
+
+  @override
+  String get analyticsLedgerRowFamily => '家族';
+
+  @override
+  String analyticsLedgerCellEntries(int count) {
+    return '$count 件';
+  }
+
+  @override
+  String analyticsLedgerCellAvgSat(String avgSat) {
+    return '平均満足 $avgSat';
+  }
+
+  @override
+  String get analyticsPerCategoryEmpty => '今期はカテゴリデータがありません';
+
+  @override
+  String get analyticsLedgerEmpty => '今期はデータがありません';
+
+  @override
+  String get analyticsLedgerFamilyEmpty => '今期は家族データがありません';
+
+  @override
   String budgetRemainingAmount(String amount) {
     return '残り: $amount';
   }

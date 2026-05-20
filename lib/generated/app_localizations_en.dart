@@ -1560,6 +1560,71 @@ class SEn extends S {
   String get analyticsCardErrorRetry => 'Retry';
 
   @override
+  String get analyticsCardTitlePerCategorySoul => 'Joy · Categories';
+
+  @override
+  String get analyticsCardTitlePerCategorySoulYou => 'Joy · Your categories';
+
+  @override
+  String get analyticsCardTitlePerCategorySoulFamily =>
+      'Joy · Family categories';
+
+  @override
+  String analyticsPerCategoryRow(
+    String categoryName,
+    String avgSat,
+    int count,
+  ) {
+    return '$categoryName · $avgSat avg / $count entries';
+  }
+
+  @override
+  String analyticsPerCategoryOtherFold(int totalCount, int categoryCount) {
+    return 'Other: $totalCount entries across $categoryCount categories';
+  }
+
+  @override
+  String get analyticsPerCategoryShowAll => 'Show all';
+
+  @override
+  String get analyticsPerCategoryShowLess => 'Show less';
+
+  @override
+  String get analyticsCardTitleLedgerThisWindow => 'Ledger · This window';
+
+  @override
+  String get analyticsLedgerColumnSoul => 'Soul';
+
+  @override
+  String get analyticsLedgerColumnSurvival => 'Survival';
+
+  @override
+  String get analyticsLedgerRowYou => 'You';
+
+  @override
+  String get analyticsLedgerRowFamily => 'Family';
+
+  @override
+  String analyticsLedgerCellEntries(int count) {
+    return '$count entries';
+  }
+
+  @override
+  String analyticsLedgerCellAvgSat(String avgSat) {
+    return '$avgSat avg satisfaction';
+  }
+
+  @override
+  String get analyticsPerCategoryEmpty => 'No category data this window';
+
+  @override
+  String get analyticsLedgerEmpty => 'No data this window';
+
+  @override
+  String get analyticsLedgerFamilyEmpty =>
+      'Family data not available this window';
+
+  @override
   String budgetRemainingAmount(String amount) {
     return 'Remaining: $amount';
   }
