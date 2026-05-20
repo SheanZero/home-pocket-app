@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Happiness Metric Refresh
-status: executing
-stopped_at: Phase 16 UI-SPEC approved
-last_updated: "2026-05-20T03:20:58.405Z"
+status: ready_to_plan
+stopped_at: Phase 16 complete (10/10) — ready to discuss Phase 17
+last_updated: 2026-05-20T10:30:40.367Z
 last_activity: 2026-05-20 -- Phase 16 execution started
 progress:
   total_phases: 5
-  completed_phases: 3
-  total_plans: 29
-  completed_plans: 19
-  percent: 60
+  completed_phases: 2
+  total_plans: 101
+  completed_plans: 29
+  percent: 40
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-19)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes survival spending from soul spending
-**Current focus:** Phase 16 — per-category-breakdown-soul-vs-survival-comparison-happy-v2-
+**Current focus:** Phase 17 — manual only joy sub metric (happy v2 03)
 
 ## Current Position
 
-Phase: 16 (per-category-breakdown-soul-vs-survival-comparison-happy-v2-) — EXECUTING
-Plan: 1 of 10
-Status: Executing Phase 16
-Last activity: 2026-05-20 -- Phase 16 execution started
+Phase: 17
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-05-20
 
 ## v1.2 Phase Plan
 
