@@ -77,11 +77,11 @@ abstract class AnalyticsRepository {
 
   /// HAPPY-V2-01 / D-07 — per-category soul satisfaction aggregate (returns
   /// ALL categories as domain items; use case applies min-N=3 + Other rollup).
-  /// Returns domain [PerCategorySoulBreakdownItem]; the data-layer DAO row
-  /// tuple (a `(categoryId, avgSatisfaction, totalCount)` triple defined in
-  /// `lib/data/daos/analytics_dao.dart`) is converted at the impl boundary
-  /// in `analytics_repository_impl.dart` (CLAUDE.md Pitfall #2 — Domain MUST
-  /// NOT import the DAO row type).
+  /// Returns domain [PerCategorySoulBreakdownItem]; the data-layer transient
+  /// row tuple (a `(categoryId, avgSatisfaction, totalCount)` triple defined
+  /// inside the analytics DAO) is converted at the impl boundary in the
+  /// concrete repository (CLAUDE.md Pitfall #2 — Domain MUST NOT import the
+  /// DAO row type).
   Future<List<PerCategorySoulBreakdownItem>> getPerCategorySoulBreakdown({
     required String bookId,
     required DateTime startDate,
