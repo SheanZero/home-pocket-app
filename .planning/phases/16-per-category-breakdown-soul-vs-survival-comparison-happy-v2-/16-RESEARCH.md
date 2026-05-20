@@ -1147,31 +1147,38 @@ The principal "security" risk for Phase 16 is **product integrity** (anti-toxici
 - `PerCategorySoulBreakdown` is a top-level aggregate with no per-member projection → cannot accidentally surface family-member data.
 - ADR-012 §6 + D-16 + existing `SharedJoyInsight` precedent are the contract; Phase 16 inherits.
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+All open questions below were resolved during planning (Plans 16-03..16-10) — recommendations were adopted. Tags are inline `**RESOLVED:**` lines so any future re-reader sees the disposition without re-tracing the recommendation tree.
 
 1. **Should the per-category use case return a sorted list, or leave sorting to the widget?**
    - What we know: D-07 mandates `AVG DESC, COUNT DESC, categoryId ASC`. The DAO returns rows in this order (via `ORDER BY`). Dart-side min-N split also needs to preserve order.
    - What's unclear: Whether the use case re-sorts after the split (defensive, but redundant) or trusts DAO ordering.
    - Recommendation: Use case re-sorts the `qualifying` list explicitly (matches `get_family_happiness_use_case.dart` defensive style). Cost is O(n log n) for n ≤ ~30 categories — negligible.
+   - **RESOLVED:** Defensive re-sort adopted in Plan 16-05 Task 1 use case body step 5.
 
 2. **Should `_PerCategoryBreakdownCard` use a stateful `_isExpanded: bool` toggle, or a separate `expandedProvider` family?**
    - What we know: D-09 says "expand all" affordance. Tap state could be local (StatefulWidget) or shared via Riverpod.
    - What's unclear: Whether expansion state should persist across navigation (Phase 15 STATE.md says IndexedStack keeps tabs alive, so a local widget state works).
    - Recommendation: Local `StatefulWidget` with `_isExpanded` field. Per-card local state. Simpler. No new provider. (Group-mode "show all" is independent per card.)
+   - **RESOLVED:** Local `ConsumerStatefulWidget` adopted in Plan 16-07 Task 1 (PerCategoryBreakdownCard).
 
 3. **Should the Soul-vs-Survival snapshot use case compute total spend separately, or reuse `getLedgerTotals`?**
    - What we know: `getLedgerTotals` already exists (`lib/data/daos/analytics_dao.dart:214-241`); returns `List<LedgerTotalResult>(ledgerType, totalAmount)` — but lacks COUNT.
    - What's unclear: Whether to add a `getLedgerSnapshot` that returns both COUNT+SUM (single query, recommended) or compose `getLedgerTotals` + a separate count helper.
    - Recommendation: Add new `getLedgerSnapshot(bookId, start, end) → List<LedgerSnapshotRow(ledgerType, totalAmount, entryCount)>` (one query, three columns). Mirrors `getLedgerTotals` pattern, adds COUNT. Keeps the use case parallel-fetch simple (1 DAO call for both ledgers + 1 DAO call for Soul avg sat = 2 parallel calls total).
+   - **RESOLVED:** New `getLedgerSnapshot` DAO method adopted in Plan 16-04 Task 1; LedgerSnapshotRow lives in domain layer to preserve Domain → Data import gate.
 
 4. **Group-aggregate variant: separate use case file, or `aggregate: bool` flag on existing use case?**
    - What we know: CONTEXT.md §"Planner Discretion" notes both options acceptable, recommends separate methods. `SharedJoyInsight` is fetched in `GetFamilyHappinessUseCase` alongside personal aggregates — but that's a multi-aggregate use case.
    - Recommendation: Separate `GetPerCategorySoulBreakdownAcrossBooksUseCase` + `GetSoulVsSurvivalSnapshotAcrossBooksUseCase`. (a) Mirrors `GetFamilyHappinessUseCase` for group-mode separation; (b) keeps single-book use cases simple; (c) easier to test independently; (d) wired via `state_ledger_snapshot.dart` `*FamilyProvider` providers that consume `shadowBooksProvider`.
+   - **RESOLVED:** Separate AcrossBooks use case files adopted in Plan 16-05 (two new files for per-category + Soul-vs-Survival group variants).
 
 5. **Should `PerCategoryBreakdownCard` solo-mode title differ from group-mode title?**
    - What we know: UI-SPEC.md lines 97-99 define three titles: `analyticsCardTitlePerCategorySoul` (solo), `analyticsCardTitlePerCategorySoulYou` (group/You card), `analyticsCardTitlePerCategorySoulFamily` (group/Family card).
    - What's unclear: Should solo mode share the "You" key, or use a generic "Joy · Categories"?
    - Recommendation: Use the three distinct keys per UI-SPEC. The "You / Family" framing only makes sense when both are present; solo mode uses the generic key.
+   - **RESOLVED:** Three distinct ARB keys adopted in Plan 16-02; widget selects via `PerCategoryScope` enum in Plan 16-07.
 
 ## Environment Availability
 
@@ -1951,13 +1958,15 @@ Concrete failure modes the planner should pre-empt:
 | Test strategy | HIGH | All existing analytics test patterns + helpers reusable; 14 new test files mapped. |
 | Validation architecture | HIGH | `nyquist_validation: true` in config; full Req→Test map populated. |
 
-### Open Questions
+### Open Questions (RESOLVED)
 
-1. Should the per-category use case re-sort `qualifying` items defensively, or trust DAO `ORDER BY`? — Recommend defensive sort.
-2. `_PerCategoryBreakdownCard` "show all" — `_isExpanded: bool` widget state vs Riverpod state? — Recommend local widget state.
-3. `getLedgerSnapshot` (new DAO method with COUNT) vs composing `getLedgerTotals` + separate count helper? — Recommend new method.
-4. Group-aggregate variants: separate use case files vs `aggregate: bool` flag? — Recommend separate files.
-5. Solo-mode title — share "You" key or use generic `analyticsCardTitlePerCategorySoul`? — Recommend three distinct keys per UI-SPEC.
+All five resolved during planning. Inline `**RESOLVED:**` tags per question:
+
+1. Should the per-category use case re-sort `qualifying` items defensively, or trust DAO `ORDER BY`? — Recommend defensive sort. **RESOLVED:** defensive re-sort (Plan 16-05).
+2. `_PerCategoryBreakdownCard` "show all" — `_isExpanded: bool` widget state vs Riverpod state? — Recommend local widget state. **RESOLVED:** local `ConsumerStatefulWidget._isExpanded` (Plan 16-07).
+3. `getLedgerSnapshot` (new DAO method with COUNT) vs composing `getLedgerTotals` + separate count helper? — Recommend new method. **RESOLVED:** new method `getLedgerSnapshot` (Plan 16-04); row type lives in domain layer to satisfy Domain → Data import gate.
+4. Group-aggregate variants: separate use case files vs `aggregate: bool` flag? — Recommend separate files. **RESOLVED:** separate files (Plan 16-05 — `*AcrossBooksUseCase`).
+5. Solo-mode title — share "You" key or use generic `analyticsCardTitlePerCategorySoul`? — Recommend three distinct keys per UI-SPEC. **RESOLVED:** three distinct ARB keys (Plan 16-02) + `PerCategoryScope` enum widget switch (Plan 16-07).
 
 ### Ready for Planning
 

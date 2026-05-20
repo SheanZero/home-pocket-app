@@ -36,7 +36,7 @@
 | 22 | `test/unit/application/analytics/get_soul_vs_survival_snapshot_across_books_use_case_test.dart` | test-unit | application | `test/unit/application/analytics/get_family_happiness_use_case_test.dart` | exact |
 | 23 | `test/widget/features/analytics/presentation/widgets/per_category_breakdown_card_test.dart` | test-widget | presentation | `test/widget/features/analytics/presentation/widgets/family_insight_card_test.dart:1-120` | exact |
 | 24 | `test/widget/features/analytics/presentation/widgets/soul_vs_survival_card_test.dart` | test-widget | presentation | `test/widget/features/analytics/presentation/widgets/family_insight_card_test.dart:1-120` | exact |
-| 25 | `test/widget/features/analytics/presentation/widgets/anti_toxicity_copy_test.dart` | test-widget | presentation | `test/widget/features/analytics/presentation/widgets/family_insight_card_test.dart` (locale loop) — **no exact analog for substring-absence sweep** | partial / novel |
+| 25 | `test/widget/features/analytics/presentation/widgets/anti_toxicity_phase16_test.dart` | test-widget | presentation | `test/widget/features/analytics/presentation/widgets/family_insight_card_test.dart` (locale loop) — **no exact analog for substring-absence sweep** | partial / novel |
 | 26 | `test/golden/per_category_breakdown_card_golden_test.dart` + `test/golden/soul_vs_survival_card_golden_test.dart` | test-golden | presentation | `test/golden/amount_display_golden_test.dart:1-79` | exact |
 | 27 | `test/widget/features/home/presentation/screens/home_screen_isolation_test.dart` (extend) | test-widget | presentation | self (lines 122-250 — entire scaffolding pattern) | exact |
 | 28 | `lib/features/analytics/presentation/screens/analytics_screen.dart` (extend) | screen-integration | presentation | self (lines 105-121 Distribution composition + 160-213 `_refresh()`) | exact |
@@ -892,7 +892,7 @@ testWidgets('does not render when group mode is false', (tester) async {
 
 ---
 
-### 25. `test/widget/features/analytics/presentation/widgets/anti_toxicity_copy_test.dart` (NEW)
+### 25. `test/widget/features/analytics/presentation/widgets/anti_toxicity_phase16_test.dart` (NEW)
 
 **Role:** test-widget (presentation layer) — **trilingual forbidden-substring sweep**
 **Analog:** `test/widget/features/analytics/presentation/widgets/family_insight_card_test.dart` (locale parameterization) — **partial; no codebase analog does a forbidden-substring sweep across rendered widget trees**
@@ -1276,7 +1276,7 @@ await tester.pumpWidget(
 
 ## Files Without Close Analogs
 
-### `test/widget/features/analytics/presentation/widgets/anti_toxicity_copy_test.dart`
+### `test/widget/features/analytics/presentation/widgets/anti_toxicity_phase16_test.dart`
 
 **Why novel:** No existing test in the codebase performs a forbidden-substring sweep across rendered widget trees per locale. The closest precedent is `family_insight_card_test.dart` which uses `find.text(localizedString)` for positive assertion of expected text — but NOT `find.textContaining(forbidden)` with `findsNothing` for negative assertion.
 
@@ -1291,12 +1291,12 @@ await tester.pumpWidget(
 
 | Concern | Status |
 |---------|--------|
-| All NEW files have a cited analog (file:lines) | yes — 26 of 27 exact/role-match; 1 partial-novel (anti_toxicity_copy_test.dart) |
+| All NEW files have a cited analog (file:lines) | yes — 26 of 27 exact/role-match; 1 partial-novel (anti_toxicity_phase16_test.dart) |
 | All MODIFIED files cite the specific lines to extend | yes — analytics_screen.dart:105-121 + 167-212; analytics_dao.dart additions follow lines 82, 214-241, 244-272, 410-444; ARB files extend lines 1860-1949 region |
 | Code excerpts include path + line range | yes — every excerpt cites `file:line-range` |
 | Shared cross-cutting patterns extracted | yes — S1 (TimeWindowValidation), S2 (MetricResult), S3 (_soulExpenseFilter + new _survivalExpenseFilter), S4 (Drift Variable), S5 (AsyncValue.when), S6 (CategoryLocalizationService), S7 (test scaffolding) |
 | D-04 type-system gate captured in pattern | yes — `SurvivalLedgerSnapshot` has no `avgSatisfaction` field (file #3); `_SurvivalCell` widget cannot read what model doesn't expose (file #13) |
-| D-12 framing captured (no vs/comparison wording) | yes — file #13 + #14-16 + #25 (anti_toxicity_copy_test.dart) |
+| D-12 framing captured (no vs/comparison wording) | yes — file #13 + #14-16 + #25 (anti_toxicity_phase16_test.dart) |
 | D-17 stacked cards in group mode | yes — file #28 (two `_PerCategoryBreakdownCard` insertions with `scope: solo|you|family`) |
 | D-18 2×2 grid in group mode | yes — file #13 (Column<Row> layout per RESEARCH lines 1017-1030) |
 | D-20 family-empty fallback | yes — file #11 (`if (groupBookIds.length < 2) return const Empty();`) |
@@ -1311,13 +1311,13 @@ await tester.pumpWidget(
 
 **Phase:** 16 — Per-Category Breakdown + Soul-vs-Survival Comparison (HAPPY-V2-01 + STATSUI-V2-01)
 **Files classified:** 29 (24 NEW + 4 MODIFIED + 1 doc-only)
-**Analogs found:** 28 / 29 (one partial — anti_toxicity_copy_test.dart is novel in structure but uses existing locale-iteration scaffold)
+**Analogs found:** 28 / 29 (one partial — anti_toxicity_phase16_test.dart is novel in structure but uses existing locale-iteration scaffold)
 
 ### Coverage
 
 - Files with exact analog: 22
 - Files with role-match analog (different role/data-flow, similar pattern): 6
-- Files with partial/novel: 1 (`anti_toxicity_copy_test.dart`)
+- Files with partial/novel: 1 (`anti_toxicity_phase16_test.dart`)
 
 ### Key Patterns Identified
 

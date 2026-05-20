@@ -116,7 +116,17 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
   3. AnalyticsScreen renders a Soul-vs-Survival comparison surface displaying both ledgers' average satisfaction (e.g., "Soul ledger averages 7.4 satisfaction; survival ledger 5.1") with descriptive copy only — no value-judgment terms ("better", "worse", "higher is good", winner/loser framing); verified by ARB review + widget assertion of forbidden-substring absence in all three locales.
   4. New AnalyticsScreen widgets follow v1.1 Variant ε / δ-derived layout conventions; goldens added for both surfaces in light + dark themes (if applicable per current theme support).
   5. ADR-012 §6 holds — no per-family-member breakdown is introduced anywhere in the comparison surface; only ledger-type aggregates are shown.
-**Plans**: TBD
+**Plans**: 10 plans
+  - [ ] 16-01-PLAN.md — ROADMAP SC-3 wording correction to engagement-axis framing (D-15)
+  - [ ] 16-02-PLAN.md — ARB additions: 17 new keys across en/ja/zh for Phase 16 surfaces
+  - [ ] 16-03-PLAN.md — Domain models: PerCategorySoulBreakdown + LedgerSnapshot (SurvivalLedgerSnapshot has NO avgSatisfaction — D-04 type-system gate)
+  - [ ] 16-04-PLAN.md — DAO methods (4) + _survivalExpenseFilter + repository interface/impl + DAO unit tests
+  - [ ] 16-05-PLAN.md — Application use cases (4): per-category single + family-aggregate; soul-vs-survival single + family-aggregate
+  - [ ] 16-06-PLAN.md — Riverpod providers: new state_ledger_snapshot.dart (4 providers) + repository_providers extension
+  - [ ] 16-07-PLAN.md — PerCategoryBreakdownCard widget + widget tests + light/dark/group goldens
+  - [ ] 16-08-PLAN.md — SoulVsSurvivalCard widget + widget tests + light/dark/group goldens
+  - [ ] 16-09-PLAN.md — Anti-toxicity widget test (trilingual forbidden-substring sweep across both cards × 3 locales × 4 states)
+  - [ ] 16-10-PLAN.md — AnalyticsScreen integration (Distribution composition + _refresh()) + home_screen_isolation_test extension
 **UI hint**: yes
 
 ### Phase 17: Manual-Only Joy Sub-Metric (HAPPY-V2-03)
