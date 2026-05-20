@@ -122,7 +122,7 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
   - [x] 16-03-PLAN.md — Domain models: PerCategorySoulBreakdown + LedgerSnapshot (SurvivalLedgerSnapshot has NO avgSatisfaction — D-04 type-system gate)
   - [x] 16-04-PLAN.md — DAO methods (4) + _survivalExpenseFilter + repository interface/impl + DAO unit tests
   - [x] 16-05-PLAN.md — Application use cases (4): per-category single + family-aggregate; soul-vs-survival single + family-aggregate
-  - [ ] 16-06-PLAN.md — Riverpod providers: new state_ledger_snapshot.dart (4 providers) + repository_providers extension
+  - [x] 16-06-PLAN.md — Riverpod providers: new state_ledger_snapshot.dart (4 providers) + repository_providers extension
   - [ ] 16-07-PLAN.md — PerCategoryBreakdownCard widget + widget tests + light/dark/group goldens
   - [ ] 16-08-PLAN.md — SoulVsSurvivalCard widget + widget tests + light/dark/group goldens
   - [ ] 16-09-PLAN.md — Anti-toxicity widget test (trilingual forbidden-substring sweep across both cards × 3 locales × 4 states)
@@ -160,5 +160,5 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 | 13. ADR-016 Backend Foundation | 7/7 | Complete | 2026-05-19 |
 | 14. ADR-016 Frontend + ARB Reconciliation | 6/6 | Complete | 2026-05-19 |
 | 15. Custom Time Windows | 6/6 | Complete    | 2026-05-19 |
-| 16. Per-Category Breakdown + Soul-vs-Survival | 5/10 | In Progress|  |
+| 16. Per-Category Breakdown + Soul-vs-Survival | 6/10 | In Progress|  |
 | 17. Manual-Only Joy Sub-Metric | 0/0 | Not started | — |
