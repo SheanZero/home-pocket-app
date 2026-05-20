@@ -7,7 +7,9 @@ import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate
 import 'package:home_pocket/features/analytics/domain/models/best_joy_moment_row.dart';
 import 'package:home_pocket/features/analytics/domain/models/expense_trend.dart';
 import 'package:home_pocket/features/analytics/domain/models/happiness_report.dart';
+import 'package:home_pocket/features/analytics/domain/models/ledger_snapshot.dart';
 import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
+import 'package:home_pocket/features/analytics/domain/models/per_category_soul_breakdown.dart';
 import 'package:home_pocket/features/analytics/domain/models/time_window.dart';
 import 'package:home_pocket/features/analytics/domain/repositories/analytics_repository.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/repository_providers.dart'
@@ -452,6 +454,43 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
   @override
   Future<List<SoulRowSample>> getSoulRowsForJoyContribution({
     required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<PerCategorySoulBreakdownItem>> getPerCategorySoulBreakdown({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<PerCategorySoulBreakdownItem>>
+  getPerCategorySoulBreakdownAcrossBooks({
+    required List<String> bookIds,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<LedgerSnapshotRow>> getLedgerSnapshot({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<LedgerSnapshotRow>> getLedgerSnapshotAcrossBooks({
+    required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,
   }) {

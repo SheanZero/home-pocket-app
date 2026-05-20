@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../features/analytics/domain/models/analytics_aggregate.dart';
 import '../../features/analytics/domain/models/best_joy_moment_row.dart';
+import '../../features/analytics/domain/models/ledger_snapshot.dart';
 import '../app_database.dart';
 
 /// Aggregate query result for monthly totals.
@@ -69,6 +70,27 @@ class SatisfactionDistributionResult {
   });
 }
 
+/// DAO-only transient row tuple for `getPerCategorySoulBreakdown*` queries.
+///
+/// Repository impl in `lib/data/repositories/analytics_repository_impl.dart`
+/// converts each row to the domain `PerCategorySoulBreakdownItem`
+/// (see `lib/features/analytics/domain/models/per_category_soul_breakdown.dart`).
+/// The `Raw` suffix marks this as a transient data-layer row — DO NOT export
+/// across the data → domain boundary. The domain interface MUST return
+/// `List<PerCategorySoulBreakdownItem>`, not `List<PerCategorySoulRowRaw>`
+/// (CLAUDE.md Pitfall #2 — Domain → Data forbidden, enforced by `import_guard`).
+class PerCategorySoulRowRaw {
+  final String categoryId;
+  final double avgSatisfaction;
+  final int totalCount;
+
+  const PerCategorySoulRowRaw({
+    required this.categoryId,
+    required this.avgSatisfaction,
+    required this.totalCount,
+  });
+}
+
 /// Data access object for analytics aggregate queries.
 ///
 /// Uses database-level SUM/GROUP BY for performance (<2s target).
@@ -81,6 +103,15 @@ class AnalyticsDao {
   /// Single source of truth: every soul aggregator MUST compose via interpolation.
   static const String _soulExpenseFilter =
       "ledger_type = 'soul' AND type = 'expense' AND is_deleted = 0";
+
+  /// Mirror of [_soulExpenseFilter] for survival ledger.
+  ///
+  /// Defined as a constant to prevent predicate drift (per RESEARCH
+  /// §Established Patterns). NEVER aggregate `soul_satisfaction` over rows
+  /// matching this filter — `transactions.soul_satisfaction` defaults to `2`
+  /// for survival rows (ADR-014 D-10 / Phase 16 D-04 type-system gate).
+  static const String _survivalExpenseFilter =
+      "ledger_type = 'survival' AND type = 'expense' AND is_deleted = 0";
 
   /// Earliest non-deleted transaction timestamp for a book.
   Future<DateTime?> getEarliestTransactionTimestamp({
@@ -441,5 +472,176 @@ class AnalyticsDao {
       avgSatisfaction: row.read<double>('avg_sat'),
       totalCount: row.read<int>('cnt'),
     );
+  }
+
+  /// HAPPY-V2-01 / D-07: per-category soul satisfaction aggregate for one book.
+  ///
+  /// Returns ALL categories (NO HAVING) sorted by `avg_sat DESC, cnt DESC,
+  /// category_id ASC`. Low-N rows (count < 3) are intentionally included so
+  /// the use case can fold them into the Other row (D-08 / D-10) — applying
+  /// min-N at the DAO layer would hide categories the Other-row count needs.
+  ///
+  /// Mirrors [getSharedJoyCategoryInsight] (analytics_dao.dart line 410-444)
+  /// minus `HAVING COUNT(*) >= 3` and `LIMIT 1`.
+  ///
+  /// Returns the DAO-only row type [PerCategorySoulRowRaw]; the repository
+  /// impl converts to the domain `PerCategorySoulBreakdownItem` at the layer
+  /// boundary (CLAUDE.md Pitfall #2).
+  Future<List<PerCategorySoulRowRaw>> getPerCategorySoulBreakdown({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final results = await _db
+        .customSelect(
+          'SELECT category_id, AVG(soul_satisfaction) as avg_sat, COUNT(*) as cnt '
+          'FROM transactions '
+          'WHERE book_id = ? AND $_soulExpenseFilter '
+          'AND timestamp >= ? AND timestamp <= ? '
+          'GROUP BY category_id '
+          'ORDER BY avg_sat DESC, cnt DESC, category_id ASC',
+          variables: [
+            Variable.withString(bookId),
+            Variable.withDateTime(startDate),
+            Variable.withDateTime(endDate),
+          ],
+        )
+        .get();
+
+    return results
+        .map(
+          (row) => PerCategorySoulRowRaw(
+            categoryId: row.read<String>('category_id'),
+            avgSatisfaction: row.read<double>('avg_sat'),
+            totalCount: row.read<int>('cnt'),
+          ),
+        )
+        .toList();
+  }
+
+  /// HAPPY-V2-01 / D-16, D-17: family-aggregate variant of
+  /// [getPerCategorySoulBreakdown] using `book_id IN (...)`.
+  ///
+  /// NEVER groups by `book_id` per ADR-012 §6 — rows are pooled across all
+  /// member books and only grouped by `category_id`. Empty `bookIds`
+  /// short-circuits to `const []` (no DB call).
+  Future<List<PerCategorySoulRowRaw>> getPerCategorySoulBreakdownAcrossBooks({
+    required List<String> bookIds,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    if (bookIds.isEmpty) return const [];
+
+    final placeholders = List.filled(bookIds.length, '?').join(', ');
+    final results = await _db
+        .customSelect(
+          'SELECT category_id, AVG(soul_satisfaction) as avg_sat, COUNT(*) as cnt '
+          'FROM transactions '
+          'WHERE book_id IN ($placeholders) AND $_soulExpenseFilter '
+          'AND timestamp >= ? AND timestamp <= ? '
+          'GROUP BY category_id '
+          'ORDER BY avg_sat DESC, cnt DESC, category_id ASC',
+          variables: [
+            ...bookIds.map(Variable.withString),
+            Variable.withDateTime(startDate),
+            Variable.withDateTime(endDate),
+          ],
+        )
+        .get();
+
+    return results
+        .map(
+          (row) => PerCategorySoulRowRaw(
+            categoryId: row.read<String>('category_id'),
+            avgSatisfaction: row.read<double>('avg_sat'),
+            totalCount: row.read<int>('cnt'),
+          ),
+        )
+        .toList();
+  }
+
+  /// STATSUI-V2-01 / D-01..D-04: per-ledger `(count, total spend)` snapshot.
+  ///
+  /// Mirrors [getLedgerTotals] (analytics_dao.dart line 214-241) but adds
+  /// `COUNT(*)` so the use case can build [SoulLedgerSnapshot] +
+  /// [SurvivalLedgerSnapshot] from one DB round-trip (per RESEARCH A5).
+  ///
+  /// Does NOT aggregate `soul_satisfaction` — survival rows default-2 would
+  /// poison the aggregate (D-04 anti-toxicity reverse pattern). The Soul
+  /// column's `avgSatisfaction` is computed separately via
+  /// [getSoulSatisfactionOverview].
+  ///
+  /// Returns the domain [LedgerSnapshotRow] (Data → Domain import allowed).
+  Future<List<LedgerSnapshotRow>> getLedgerSnapshot({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final results = await _db
+        .customSelect(
+          'SELECT ledger_type, SUM(amount) as total, COUNT(*) as cnt '
+          'FROM transactions '
+          'WHERE book_id = ? '
+          'AND ($_soulExpenseFilter OR $_survivalExpenseFilter) '
+          'AND timestamp >= ? AND timestamp <= ? '
+          'GROUP BY ledger_type',
+          variables: [
+            Variable.withString(bookId),
+            Variable.withDateTime(startDate),
+            Variable.withDateTime(endDate),
+          ],
+        )
+        .get();
+
+    return results
+        .map(
+          (row) => LedgerSnapshotRow(
+            ledgerType: row.read<String>('ledger_type'),
+            totalAmount: row.read<int>('total'),
+            entryCount: row.read<int>('cnt'),
+          ),
+        )
+        .toList();
+  }
+
+  /// STATSUI-V2-01 / D-18: family-aggregate variant of [getLedgerSnapshot]
+  /// using `book_id IN (...)`.
+  ///
+  /// NEVER groups by `book_id` per ADR-012 §6 — rows are pooled across all
+  /// member books and only grouped by `ledger_type`. Empty `bookIds`
+  /// short-circuits to `const []` (no DB call).
+  Future<List<LedgerSnapshotRow>> getLedgerSnapshotAcrossBooks({
+    required List<String> bookIds,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    if (bookIds.isEmpty) return const [];
+
+    final placeholders = List.filled(bookIds.length, '?').join(', ');
+    final results = await _db
+        .customSelect(
+          'SELECT ledger_type, SUM(amount) as total, COUNT(*) as cnt '
+          'FROM transactions '
+          'WHERE book_id IN ($placeholders) '
+          'AND ($_soulExpenseFilter OR $_survivalExpenseFilter) '
+          'AND timestamp >= ? AND timestamp <= ? '
+          'GROUP BY ledger_type',
+          variables: [
+            ...bookIds.map(Variable.withString),
+            Variable.withDateTime(startDate),
+            Variable.withDateTime(endDate),
+          ],
+        )
+        .get();
+
+    return results
+        .map(
+          (row) => LedgerSnapshotRow(
+            ledgerType: row.read<String>('ledger_type'),
+            totalAmount: row.read<int>('total'),
+            entryCount: row.read<int>('cnt'),
+          ),
+        )
+        .toList();
   }
 }
