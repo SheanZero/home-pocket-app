@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction_sync_mapper.dart';
 
@@ -36,6 +37,7 @@ void main() {
       expect(map['note'], 'Lunch');
       expect(map['merchant'], 'Cafe');
       expect(map['soulSatisfaction'], 7);
+      expect(map['entrySource'], 'manual');
       expect(map['metadata'], {
         'sourceBookId': 'book-1',
         'sourceBookName': 'Main Book',
@@ -78,6 +80,36 @@ void main() {
       expect(restored.metadata?['sourceBookId'], 'book-1');
     });
 
+    test('toSyncMap encodes entrySource as enum name (voice)', () {
+      final map = TransactionSyncMapper.toSyncMap(
+        sampleTransaction.copyWith(entrySource: EntrySource.voice),
+        sourceBookId: 'book-1',
+        sourceBookName: 'Main Book',
+        sourceBookType: 'remote_book:book-1',
+      );
+
+      expect(map['entrySource'], 'voice');
+    });
+
+    test('round-trip preserves entrySource across all 3 values', () {
+      for (final entrySource in EntrySource.values) {
+        final map = TransactionSyncMapper.toSyncMap(
+          sampleTransaction.copyWith(entrySource: entrySource),
+          sourceBookId: 'book-1',
+          sourceBookName: 'Main Book',
+          sourceBookType: 'remote_book:book-1',
+        );
+
+        final restored = TransactionSyncMapper.fromSyncMap(
+          map,
+          bookId: 'shadow-book-1',
+          deviceId: 'partner-device',
+        );
+
+        expect(restored.entrySource, entrySource);
+      }
+    });
+
     test('fromSyncMap defaults missing soulSatisfaction to 2', () {
       final map = TransactionSyncMapper.toSyncMap(
         sampleTransaction,
@@ -93,6 +125,44 @@ void main() {
       );
 
       expect(restored.soulSatisfaction, 2);
+    });
+
+    test(
+      'fromSyncMap defaults missing entrySource to manual (D-09 fallback)',
+      () {
+        final map = TransactionSyncMapper.toSyncMap(
+          sampleTransaction.copyWith(entrySource: EntrySource.voice),
+          sourceBookId: 'book-1',
+          sourceBookName: 'Main Book',
+          sourceBookType: 'remote_book:book-1',
+        )..remove('entrySource');
+
+        final restored = TransactionSyncMapper.fromSyncMap(
+          map,
+          bookId: 'shadow-book-1',
+          deviceId: 'partner-device',
+        );
+
+        expect(restored.entrySource, EntrySource.manual);
+      },
+    );
+
+    test('fromSyncMap throws on invalid entrySource value', () {
+      final map = TransactionSyncMapper.toSyncMap(
+        sampleTransaction,
+        sourceBookId: 'book-1',
+        sourceBookName: 'Main Book',
+        sourceBookType: 'remote_book:book-1',
+      )..['entrySource'] = 'keyboard';
+
+      expect(
+        () => TransactionSyncMapper.fromSyncMap(
+          map,
+          bookId: 'shadow-book-1',
+          deviceId: 'partner-device',
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
     });
 
     test('toCreateOperation wraps sync payload', () {

@@ -1,3 +1,4 @@
+import 'entry_source.dart';
 import 'transaction.dart';
 
 /// Maps [Transaction] to and from the sync protocol payload.
@@ -29,6 +30,7 @@ class TransactionSyncMapper {
         'sourceBookType': sourceBookType,
       },
       'soulSatisfaction': transaction.soulSatisfaction,
+      'entrySource': transaction.entrySource.name,
       'isPrivate': transaction.isPrivate,
     };
   }
@@ -56,6 +58,8 @@ class TransactionSyncMapper {
       isPrivate: data['isPrivate'] as bool? ?? false,
       isSynced: true,
       soulSatisfaction: data['soulSatisfaction'] as int? ?? 2,
+      // D-09: absent field falls back to 'manual' (older v16 peers do not send entrySource).
+      entrySource: EntrySource.values.byName((data['entrySource'] as String?) ?? 'manual'),
     );
   }
 
