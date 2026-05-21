@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/analytics/get_best_joy_moment_use_case.dart';
+import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
 import 'package:home_pocket/features/analytics/domain/models/best_joy_moment_row.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
@@ -29,6 +30,7 @@ void main() {
             bookId: 'book-1',
             startDate: startDate,
             endDate: endDate,
+            entrySourceFilter: null,
           ),
         ).thenAnswer(
           (_) async =>
@@ -39,6 +41,7 @@ void main() {
           bookId: 'book-1',
           startDate: startDate,
           endDate: endDate,
+          entrySourceFilter: null,
         );
 
         expect(result, isA<Empty<BestJoyMomentRow>>());
@@ -47,6 +50,7 @@ void main() {
             bookId: 'book-1',
             startDate: startDate,
             endDate: endDate,
+            entrySourceFilter: null,
           ),
         );
       },
@@ -60,6 +64,7 @@ void main() {
             bookId: 'book-1',
             startDate: startDate,
             endDate: endDate,
+            entrySourceFilter: null,
           ),
         ).thenAnswer(
           (_) async =>
@@ -70,6 +75,7 @@ void main() {
             bookId: 'book-1',
             startDate: startDate,
             endDate: endDate,
+            entrySourceFilter: null,
           ),
         ).thenAnswer((_) async => null);
 
@@ -77,6 +83,7 @@ void main() {
           bookId: 'book-1',
           startDate: startDate,
           endDate: endDate,
+          entrySourceFilter: null,
         );
 
         expect(result, isA<Empty<BestJoyMomentRow>>());
@@ -96,6 +103,7 @@ void main() {
           bookId: 'book-1',
           startDate: startDate,
           endDate: endDate,
+          entrySourceFilter: null,
         ),
       ).thenAnswer(
         (_) async =>
@@ -106,6 +114,7 @@ void main() {
           bookId: 'book-1',
           startDate: startDate,
           endDate: endDate,
+          entrySourceFilter: null,
         ),
       ).thenAnswer((_) async => row);
 
@@ -113,6 +122,7 @@ void main() {
         bookId: 'book-1',
         startDate: startDate,
         endDate: endDate,
+        entrySourceFilter: null,
       );
 
       expect(
@@ -136,6 +146,7 @@ void main() {
           bookId: 'book-1',
           startDate: startDate,
           endDate: endDate,
+          entrySourceFilter: null,
         ),
       ).thenAnswer(
         (_) async =>
@@ -146,6 +157,7 @@ void main() {
           bookId: 'book-1',
           startDate: startDate,
           endDate: endDate,
+          entrySourceFilter: null,
         ),
       ).thenAnswer((_) async => row);
 
@@ -153,11 +165,117 @@ void main() {
         bookId: 'book-1',
         startDate: startDate,
         endDate: endDate,
+        entrySourceFilter: null,
       );
 
       expect(result, isA<Value<BestJoyMomentRow>>());
       expect((result as Value<BestJoyMomentRow>).sampleSize, 11);
     });
+
+    test(
+      'execute with entrySourceFilter = null forwards null to repo',
+      () async {
+        final row = BestJoyMomentRow(
+          transactionId: 'tx-null',
+          amount: 3200,
+          soulSatisfaction: 8,
+          categoryId: 'cat-null',
+          timestamp: DateTime(2026, 5, 21, 19),
+        );
+        when(
+          () => repo.getSoulSatisfactionOverview(
+            bookId: 'book-1',
+            startDate: startDate,
+            endDate: endDate,
+            entrySourceFilter: null,
+          ),
+        ).thenAnswer(
+          (_) async =>
+              const SoulSatisfactionOverview(avgSatisfaction: 7.1, count: 3),
+        );
+        when(
+          () => repo.getBestJoyMoment(
+            bookId: 'book-1',
+            startDate: startDate,
+            endDate: endDate,
+            entrySourceFilter: null,
+          ),
+        ).thenAnswer((_) async => row);
+
+        final result = await useCase.execute(
+          bookId: 'book-1',
+          startDate: startDate,
+          endDate: endDate,
+        );
+
+        expect(result, isA<Value<BestJoyMomentRow>>());
+        verify(
+          () => repo.getBestJoyMoment(
+            bookId: 'book-1',
+            startDate: startDate,
+            endDate: endDate,
+            entrySourceFilter: null,
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'execute with entrySourceFilter = EntrySource.manual forwards filter',
+      () async {
+        final row = BestJoyMomentRow(
+          transactionId: 'tx-manual',
+          amount: 4500,
+          soulSatisfaction: 9,
+          categoryId: 'cat-manual',
+          timestamp: DateTime(2026, 5, 21, 19),
+        );
+        when(
+          () => repo.getSoulSatisfactionOverview(
+            bookId: 'book-1',
+            startDate: startDate,
+            endDate: endDate,
+            entrySourceFilter: EntrySource.manual,
+          ),
+        ).thenAnswer(
+          (_) async =>
+              const SoulSatisfactionOverview(avgSatisfaction: 8.2, count: 4),
+        );
+        when(
+          () => repo.getBestJoyMoment(
+            bookId: 'book-1',
+            startDate: startDate,
+            endDate: endDate,
+            entrySourceFilter: EntrySource.manual,
+          ),
+        ).thenAnswer((_) async => row);
+
+        final result = await useCase.execute(
+          bookId: 'book-1',
+          startDate: startDate,
+          endDate: endDate,
+          entrySourceFilter: EntrySource.manual,
+        );
+
+        expect(result, isA<Value<BestJoyMomentRow>>());
+        verify(
+          () => repo.getSoulSatisfactionOverview(
+            bookId: 'book-1',
+            startDate: startDate,
+            endDate: endDate,
+            entrySourceFilter: EntrySource.manual,
+          ),
+        ).called(1);
+        verify(
+          () => repo.getBestJoyMoment(
+            bookId: 'book-1',
+            startDate: startDate,
+            endDate: endDate,
+            entrySourceFilter: EntrySource.manual,
+          ),
+        ).called(1);
+      },
+    );
 
     test('throws ArgumentError when start > end', () async {
       expect(

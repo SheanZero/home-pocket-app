@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/analytics/get_per_category_soul_breakdown_use_case.dart';
+import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
 import 'package:home_pocket/features/analytics/domain/models/per_category_soul_breakdown.dart';
 import 'package:home_pocket/features/analytics/domain/repositories/analytics_repository.dart';
@@ -29,21 +30,28 @@ void main() {
     );
   });
 
-  void stubBreakdown(List<PerCategorySoulBreakdownItem> items) {
+  void stubBreakdown(
+    List<PerCategorySoulBreakdownItem> items, {
+    EntrySource? entrySourceFilter,
+  }) {
     when(
       () => repository.getPerCategorySoulBreakdown(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        entrySourceFilter: entrySourceFilter,
       ),
     ).thenAnswer((_) async => items);
   }
 
-  Future<MetricResult<PerCategorySoulBreakdown>> execute() {
+  Future<MetricResult<PerCategorySoulBreakdown>> execute({
+    EntrySource? entrySourceFilter,
+  }) {
     return useCase.execute(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
   }
 
@@ -141,6 +149,50 @@ void main() {
       expect(result.data.otherCount, 3); // 1 + 2
       expect(result.data.totalCount, qualifyingSum + result.data.otherCount);
     });
+  });
+
+  group('entrySourceFilter forwarding', () {
+    test(
+      'execute with entrySourceFilter = null preserves default behavior',
+      () async {
+        final items = [_item('cat_a', 8.0, 3)];
+        stubBreakdown(items, entrySourceFilter: null);
+
+        final result = await execute() as Value<PerCategorySoulBreakdown>;
+
+        expect(result.data.items.single.categoryId, 'cat_a');
+        verify(
+          () => repository.getPerCategorySoulBreakdown(
+            bookId: bookId,
+            startDate: startDate,
+            endDate: endDate,
+            entrySourceFilter: null,
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'execute with entrySourceFilter = EntrySource.manual forwards filter',
+      () async {
+        final items = [_item('cat_manual', 9.0, 4)];
+        stubBreakdown(items, entrySourceFilter: EntrySource.manual);
+
+        final result =
+            await execute(entrySourceFilter: EntrySource.manual)
+                as Value<PerCategorySoulBreakdown>;
+
+        expect(result.data.items.single.categoryId, 'cat_manual');
+        verify(
+          () => repository.getPerCategorySoulBreakdown(
+            bookId: bookId,
+            startDate: startDate,
+            endDate: endDate,
+            entrySourceFilter: EntrySource.manual,
+          ),
+        ).called(1);
+      },
+    );
   });
 
   group('time window validation', () {
