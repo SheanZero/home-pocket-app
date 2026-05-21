@@ -1341,6 +1341,22 @@ class SEn extends S {
   String get analyticsTimeWindowChipTooltip => 'Pick a time window';
 
   @override
+  String get analyticsJoyMetricVariantChipLabel => 'Entries';
+
+  @override
+  String get analyticsJoyMetricVariantSheetTitle => 'Joy metric variant';
+
+  @override
+  String get analyticsJoyMetricVariantOptionAll => 'All entries';
+
+  @override
+  String get analyticsJoyMetricVariantOptionManualOnly => 'Manual entries only';
+
+  @override
+  String get analyticsJoyMetricVariantManualOnlyExplain =>
+      'Manual entries only · excludes voice-estimated entries';
+
+  @override
   String analyticsTimeWindowChipLabelWeek(String monday) {
     return 'Week of $monday';
   }

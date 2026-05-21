@@ -2553,6 +2553,36 @@ abstract class S {
   /// **'Pick a time window'**
   String get analyticsTimeWindowChipTooltip;
 
+  /// AppBar chip label for manual-vs-all entries audit toggle (Phase 17)
+  ///
+  /// In en, this message translates to:
+  /// **'Entries'**
+  String get analyticsJoyMetricVariantChipLabel;
+
+  /// Bottom sheet title for the entries-source filter
+  ///
+  /// In en, this message translates to:
+  /// **'Joy metric variant'**
+  String get analyticsJoyMetricVariantSheetTitle;
+
+  /// Option label: include voice and manual entries
+  ///
+  /// In en, this message translates to:
+  /// **'All entries'**
+  String get analyticsJoyMetricVariantOptionAll;
+
+  /// Option label: exclude voice-estimated entries for audit mode
+  ///
+  /// In en, this message translates to:
+  /// **'Manual entries only'**
+  String get analyticsJoyMetricVariantOptionManualOnly;
+
+  /// One-line explanation appended to the manualOnly option; descriptive copy, not judgmental
+  ///
+  /// In en, this message translates to:
+  /// **'Manual entries only · excludes voice-estimated entries'**
+  String get analyticsJoyMetricVariantManualOnlyExplain;
+
   /// Analytics screen time-window selector week chip label
   ///
   /// In en, this message translates to:

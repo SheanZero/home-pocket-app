@@ -1698,6 +1698,26 @@
   "@analyticsTimeWindowChipTooltip": {
     "description": "Analytics screen time-window selector chip tooltip"
   },
+  "analyticsJoyMetricVariantChipLabel": "Entries",
+  "@analyticsJoyMetricVariantChipLabel": {
+    "description": "AppBar chip label for manual-vs-all entries audit toggle (Phase 17)"
+  },
+  "analyticsJoyMetricVariantSheetTitle": "Joy metric variant",
+  "@analyticsJoyMetricVariantSheetTitle": {
+    "description": "Bottom sheet title for the entries-source filter"
+  },
+  "analyticsJoyMetricVariantOptionAll": "All entries",
+  "@analyticsJoyMetricVariantOptionAll": {
+    "description": "Option label: include voice and manual entries"
+  },
+  "analyticsJoyMetricVariantOptionManualOnly": "Manual entries only",
+  "@analyticsJoyMetricVariantOptionManualOnly": {
+    "description": "Option label: exclude voice-estimated entries for audit mode"
+  },
+  "analyticsJoyMetricVariantManualOnlyExplain": "Manual entries only · excludes voice-estimated entries",
+  "@analyticsJoyMetricVariantManualOnlyExplain": {
+    "description": "One-line explanation appended to the manualOnly option; descriptive copy, not judgmental"
+  },
   "analyticsTimeWindowChipLabelWeek": "Week of {monday}",
   "@analyticsTimeWindowChipLabelWeek": {
     "description": "Analytics screen time-window selector week chip label",

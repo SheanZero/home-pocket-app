@@ -1322,6 +1322,21 @@ class SZh extends S {
   String get analyticsTimeWindowChipTooltip => '选择时间范围';
 
   @override
+  String get analyticsJoyMetricVariantChipLabel => '条目';
+
+  @override
+  String get analyticsJoyMetricVariantSheetTitle => 'Joy 指标变体';
+
+  @override
+  String get analyticsJoyMetricVariantOptionAll => '全部条目';
+
+  @override
+  String get analyticsJoyMetricVariantOptionManualOnly => '仅手动输入';
+
+  @override
+  String get analyticsJoyMetricVariantManualOnlyExplain => '仅手动输入 · 不含语音估算条目';
+
+  @override
   String analyticsTimeWindowChipLabelWeek(String monday) {
     return '$monday的一周';
   }

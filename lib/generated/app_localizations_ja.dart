@@ -1327,6 +1327,21 @@ class SJa extends S {
   String get analyticsTimeWindowChipTooltip => '期間を選ぶ';
 
   @override
+  String get analyticsJoyMetricVariantChipLabel => 'エントリ';
+
+  @override
+  String get analyticsJoyMetricVariantSheetTitle => 'Joy 指標バリアント';
+
+  @override
+  String get analyticsJoyMetricVariantOptionAll => 'すべてのエントリ';
+
+  @override
+  String get analyticsJoyMetricVariantOptionManualOnly => '手動入力のみ';
+
+  @override
+  String get analyticsJoyMetricVariantManualOnlyExplain => '手動入力のみ · 音声推定を除外';
+
+  @override
   String analyticsTimeWindowChipLabelWeek(String monday) {
     return '$mondayの週';
   }
