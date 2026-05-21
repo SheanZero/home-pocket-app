@@ -7,6 +7,7 @@ import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/metric_result.dart';
 import '../../domain/models/per_category_soul_breakdown.dart';
+import '../providers/state_joy_metric_variant.dart';
 import '../providers/state_ledger_snapshot.dart';
 import 'analytics_card_error_state.dart';
 
@@ -44,6 +45,7 @@ class PerCategoryBreakdownCard extends ConsumerStatefulWidget {
     required this.startDate,
     required this.endDate,
     required this.locale,
+    this.joyMetricVariant = JoyMetricVariant.all,
     this.scope = PerCategoryScope.solo,
   });
 
@@ -61,6 +63,9 @@ class PerCategoryBreakdownCard extends ConsumerStatefulWidget {
   /// Locale threaded through `CategoryLocalizationService` for category-name
   /// resolution. Sourced from `currentLocaleProvider` at the screen level.
   final Locale locale;
+
+  /// AnalyticsScreen entry-source variant threaded into the provider family key.
+  final JoyMetricVariant joyMetricVariant;
 
   /// Selector for title + provider variant.
   final PerCategoryScope scope;
@@ -86,6 +91,7 @@ class _PerCategoryBreakdownCardState
             perCategorySoulBreakdownFamilyProvider(
               startDate: widget.startDate,
               endDate: widget.endDate,
+              joyMetricVariant: widget.joyMetricVariant,
             ),
           )
         : ref.watch(
@@ -93,14 +99,13 @@ class _PerCategoryBreakdownCardState
               bookId: widget.bookId,
               startDate: widget.startDate,
               endDate: widget.endDate,
+              joyMetricVariant: widget.joyMetricVariant,
             ),
           );
 
     return Card(
       color: context.wmCard,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -141,6 +146,7 @@ class _PerCategoryBreakdownCardState
         perCategorySoulBreakdownFamilyProvider(
           startDate: widget.startDate,
           endDate: widget.endDate,
+          joyMetricVariant: widget.joyMetricVariant,
         ),
       );
     } else {
@@ -149,6 +155,7 @@ class _PerCategoryBreakdownCardState
           bookId: widget.bookId,
           startDate: widget.startDate,
           endDate: widget.endDate,
+          joyMetricVariant: widget.joyMetricVariant,
         ),
       );
     }
@@ -158,9 +165,7 @@ class _PerCategoryBreakdownCardState
     return switch (result) {
       Empty<PerCategorySoulBreakdown>() => Text(
         S.of(context).analyticsPerCategoryEmpty,
-        style: AppTextStyles.caption.copyWith(
-          color: context.wmTextSecondary,
-        ),
+        style: AppTextStyles.caption.copyWith(color: context.wmTextSecondary),
       ),
       Value<PerCategorySoulBreakdown>(:final data) => _renderValue(data),
     };
@@ -196,9 +201,7 @@ class _PerCategoryBreakdownCardState
       // rather than an empty card body if it slips through.
       return Text(
         l10n.analyticsPerCategoryEmpty,
-        style: AppTextStyles.caption.copyWith(
-          color: context.wmTextSecondary,
-        ),
+        style: AppTextStyles.caption.copyWith(color: context.wmTextSecondary),
       );
     }
 
@@ -221,9 +224,7 @@ class _PerCategoryBreakdownCardState
     );
     return Text(
       rowText,
-      style: AppTextStyles.amountMedium.copyWith(
-        color: context.wmTextPrimary,
-      ),
+      style: AppTextStyles.amountMedium.copyWith(color: context.wmTextPrimary),
     );
   }
 
@@ -233,9 +234,7 @@ class _PerCategoryBreakdownCardState
         data.otherCount,
         data.otherCategoryCount,
       ),
-      style: AppTextStyles.caption.copyWith(
-        color: context.wmTextSecondary,
-      ),
+      style: AppTextStyles.caption.copyWith(color: context.wmTextSecondary),
     );
   }
 

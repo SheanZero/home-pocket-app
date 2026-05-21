@@ -103,7 +103,7 @@ final class PerCategorySoulBreakdownProvider
 }
 
 String _$perCategorySoulBreakdownHash() =>
-    r'4b23e1e331fc80889512cb76740a6fa8978c0451';
+    r'4161e0a42a2fcac03e00c5f14fbc86371310d040';
 
 /// HAPPY-V2-01 single-book per-category soul satisfaction breakdown.
 ///
@@ -141,7 +141,7 @@ final class PerCategorySoulBreakdownFamily extends $Family
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
-    required JoyMetricVariant joyMetricVariant,
+    JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
   }) => PerCategorySoulBreakdownProvider._(
     argument: (
       bookId: bookId,
@@ -255,7 +255,7 @@ final class PerCategorySoulBreakdownFamilyProvider
 }
 
 String _$perCategorySoulBreakdownFamilyHash() =>
-    r'd4d391d5b716ba90deb494cf2b8a297864129397';
+    r'7925a639e37c6d1ebf203a1cb12b47ab697a9ddf';
 
 /// HAPPY-V2-01 D-17, D-20 — family-aggregate variant for group-mode
 /// "Family · Top categories" card.
@@ -295,7 +295,7 @@ final class PerCategorySoulBreakdownFamilyFamily extends $Family
   PerCategorySoulBreakdownFamilyProvider call({
     required DateTime startDate,
     required DateTime endDate,
-    required JoyMetricVariant joyMetricVariant,
+    JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
   }) => PerCategorySoulBreakdownFamilyProvider._(
     argument: (
       startDate: startDate,
@@ -404,7 +404,7 @@ final class SoulVsSurvivalSnapshotProvider
 }
 
 String _$soulVsSurvivalSnapshotHash() =>
-    r'ef3ff573e6ebc5b09e1b7f71e0952eb51e25cc9c';
+    r'25ba40374bf172a8f009da2555cc76699c27edd3';
 
 /// STATSUI-V2-01 single-book Soul-vs-Survival engagement snapshot.
 ///
@@ -442,7 +442,7 @@ final class SoulVsSurvivalSnapshotFamily extends $Family
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
-    required JoyMetricVariant joyMetricVariant,
+    JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
   }) => SoulVsSurvivalSnapshotProvider._(
     argument: (
       bookId: bookId,
@@ -553,7 +553,7 @@ final class SoulVsSurvivalSnapshotFamilyProvider
 }
 
 String _$soulVsSurvivalSnapshotFamilyHash() =>
-    r'b5624708e20e2ea8c55e43f8cda5223385123261';
+    r'0a14bb9c18a5d3c4fd3784bf9655c3ca18fb403b';
 
 /// STATSUI-V2-01 D-18, D-20 — family-aggregate Soul-vs-Survival snapshot.
 ///
@@ -591,7 +591,7 @@ final class SoulVsSurvivalSnapshotFamilyFamily extends $Family
   SoulVsSurvivalSnapshotFamilyProvider call({
     required DateTime startDate,
     required DateTime endDate,
-    required JoyMetricVariant joyMetricVariant,
+    JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
   }) => SoulVsSurvivalSnapshotFamilyProvider._(
     argument: (
       startDate: startDate,

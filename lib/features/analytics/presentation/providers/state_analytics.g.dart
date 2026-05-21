@@ -87,7 +87,7 @@ final class MonthlyReportProvider
   }
 }
 
-String _$monthlyReportHash() => r'1183ed0554f08fc571fdc62e54f01bba27a361f0';
+String _$monthlyReportHash() => r'c8717c211e662147ef931407e27e2de744382378';
 
 /// Monthly report for the selected window.
 
@@ -117,7 +117,7 @@ final class MonthlyReportFamily extends $Family
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
-    required JoyMetricVariant joyMetricVariant,
+    JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
   }) => MonthlyReportProvider._(
     argument: (
       bookId: bookId,
@@ -208,7 +208,7 @@ final class ExpenseTrendProvider
   }
 }
 
-String _$expenseTrendHash() => r'a5986dabee649899c3bbf8915239554bed2104de';
+String _$expenseTrendHash() => r'0ff13a49235e35493e4f9c8ec5a2ffa8daeade0c';
 
 /// 6-month expense trend.
 
@@ -232,7 +232,7 @@ final class ExpenseTrendFamily extends $Family
   ExpenseTrendProvider call({
     required String bookId,
     required DateTime anchor,
-    required JoyMetricVariant joyMetricVariant,
+    JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
   }) => ExpenseTrendProvider._(
     argument: (
       bookId: bookId,
@@ -414,7 +414,7 @@ final class SatisfactionDistributionProvider
 }
 
 String _$satisfactionDistributionHash() =>
-    r'f03444cb63a5437a3f3a75072b827b0ce629b1d3';
+    r'179ba0ba9c310d05c182c3c23aaec6ddb12f5627';
 
 /// Satisfaction score distribution for the selected window.
 
@@ -444,7 +444,7 @@ final class SatisfactionDistributionFamily extends $Family
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
-    required JoyMetricVariant joyMetricVariant,
+    JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
   }) => SatisfactionDistributionProvider._(
     argument: (
       bookId: bookId,

@@ -22,7 +22,7 @@ Future<MetricResult<PerCategorySoulBreakdown>> perCategorySoulBreakdown(
   required String bookId,
   required DateTime startDate,
   required DateTime endDate,
-  required JoyMetricVariant joyMetricVariant,
+  JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
 }) async {
   final useCase = ref.watch(getPerCategorySoulBreakdownUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
@@ -49,7 +49,7 @@ Future<MetricResult<PerCategorySoulBreakdown>> perCategorySoulBreakdownFamily(
   Ref ref, {
   required DateTime startDate,
   required DateTime endDate,
-  required JoyMetricVariant joyMetricVariant,
+  JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
 }) async {
   final activeGroup = await ref.watch(activeGroupProvider.future);
   if (activeGroup == null) return const Empty();
@@ -84,7 +84,7 @@ Future<MetricResult<SoulVsSurvivalSnapshot>> soulVsSurvivalSnapshot(
   required String bookId,
   required DateTime startDate,
   required DateTime endDate,
-  required JoyMetricVariant joyMetricVariant,
+  JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
 }) async {
   final useCase = ref.watch(getSoulVsSurvivalSnapshotUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
@@ -110,7 +110,7 @@ Future<MetricResult<SoulVsSurvivalSnapshot>> soulVsSurvivalSnapshotFamily(
   Ref ref, {
   required DateTime startDate,
   required DateTime endDate,
-  required JoyMetricVariant joyMetricVariant,
+  JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
 }) async {
   final activeGroup = await ref.watch(activeGroupProvider.future);
   if (activeGroup == null) return const Empty();

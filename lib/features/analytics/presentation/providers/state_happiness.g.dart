@@ -90,7 +90,7 @@ final class HappinessReportProvider
   }
 }
 
-String _$happinessReportHash() => r'bba825f71b0a9fba4f6cff27843387d4f81a9f94';
+String _$happinessReportHash() => r'155e4dc5ce8e48848014a7900e153deb84469080';
 
 /// HAPPY-01..04 personal happiness report.
 
@@ -122,7 +122,7 @@ final class HappinessReportFamily extends $Family
     required DateTime startDate,
     required DateTime endDate,
     required String currencyCode,
-    required JoyMetricVariant joyMetricVariant,
+    JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
   }) => HappinessReportProvider._(
     argument: (
       bookId: bookId,
@@ -219,7 +219,7 @@ final class BestJoyMomentProvider
   }
 }
 
-String _$bestJoyMomentHash() => r'acf10ac260279e40a9a0b146e490e0e6486b5643';
+String _$bestJoyMomentHash() => r'a19c30fdf7582e765b6745897ba05e25e6ec7ca0';
 
 /// HAPPY-04 standalone Top Joy.
 
@@ -249,7 +249,7 @@ final class BestJoyMomentFamily extends $Family
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
-    required JoyMetricVariant joyMetricVariant,
+    JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
   }) => BestJoyMomentProvider._(
     argument: (
       bookId: bookId,
@@ -458,7 +458,7 @@ final class LargestMonthlyExpenseProvider
 }
 
 String _$largestMonthlyExpenseHash() =>
-    r'6aba58c5717985dc052f5d045f3bc731688f1120';
+    r'9c3dfdf7951b20d7bf279cb58704efd20290e491';
 
 /// STATSUI-06 / D-15 — single largest monthly expense for 物語 group 総 card.
 
@@ -488,7 +488,7 @@ final class LargestMonthlyExpenseFamily extends $Family
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
-    required JoyMetricVariant joyMetricVariant,
+    JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
   }) => LargestMonthlyExpenseProvider._(
     argument: (
       bookId: bookId,
@@ -591,7 +591,7 @@ final class FamilyHappinessProvider
   }
 }
 
-String _$familyHappinessHash() => r'0b6cfb8efd44e7538988d3ee993e6e303e436161';
+String _$familyHappinessHash() => r'2e9d6f9e67b026b3d95a77f7280ca6275704389b';
 
 /// FAMILY-01..02 family happiness aggregate.
 ///
@@ -627,7 +627,7 @@ final class FamilyHappinessFamily extends $Family
   FamilyHappinessProvider call({
     required DateTime startDate,
     required DateTime endDate,
-    required JoyMetricVariant joyMetricVariant,
+    JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
   }) => FamilyHappinessProvider._(
     argument: (
       startDate: startDate,

@@ -8,6 +8,7 @@ import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../domain/models/ledger_snapshot.dart';
 import '../../domain/models/metric_result.dart';
+import '../providers/state_joy_metric_variant.dart';
 import '../providers/state_ledger_snapshot.dart';
 import 'analytics_card_error_state.dart';
 
@@ -34,6 +35,7 @@ class SoulVsSurvivalCard extends ConsumerWidget {
     required this.currencyCode,
     required this.locale,
     required this.isGroupMode,
+    this.joyMetricVariant = JoyMetricVariant.all,
   });
 
   final String bookId;
@@ -42,6 +44,7 @@ class SoulVsSurvivalCard extends ConsumerWidget {
   final String currencyCode;
   final Locale locale;
   final bool isGroupMode;
+  final JoyMetricVariant joyMetricVariant;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,6 +53,7 @@ class SoulVsSurvivalCard extends ConsumerWidget {
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        joyMetricVariant: joyMetricVariant,
       ),
     );
 
@@ -58,6 +62,7 @@ class SoulVsSurvivalCard extends ConsumerWidget {
             soulVsSurvivalSnapshotFamilyProvider(
               startDate: startDate,
               endDate: endDate,
+              joyMetricVariant: joyMetricVariant,
             ),
           )
         : const AsyncValue<MetricResult<SoulVsSurvivalSnapshot>>.data(
@@ -68,9 +73,7 @@ class SoulVsSurvivalCard extends ConsumerWidget {
 
     return Card(
       color: context.wmCard,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -92,23 +95,25 @@ class SoulVsSurvivalCard extends ConsumerWidget {
                     bookId: bookId,
                     startDate: startDate,
                     endDate: endDate,
+                    joyMetricVariant: joyMetricVariant,
                   ),
                 ),
               ),
               data: (result) => switch (result) {
                 Empty<SoulVsSurvivalSnapshot>() => _EmptyBody(),
-                Value<SoulVsSurvivalSnapshot>(:final data) => isGroupMode
-                    ? _GroupGrid(
-                        you: data,
-                        familyAsync: familyAsyncSnapshot,
-                        currencyCode: currencyCode,
-                        locale: locale,
-                      )
-                    : _SoloTwoColumn(
-                        data: data,
-                        currencyCode: currencyCode,
-                        locale: locale,
-                      ),
+                Value<SoulVsSurvivalSnapshot>(:final data) =>
+                  isGroupMode
+                      ? _GroupGrid(
+                          you: data,
+                          familyAsync: familyAsyncSnapshot,
+                          currencyCode: currencyCode,
+                          locale: locale,
+                        )
+                      : _SoloTwoColumn(
+                          data: data,
+                          currencyCode: currencyCode,
+                          locale: locale,
+                        ),
               },
             ),
           ],
@@ -226,47 +231,42 @@ class _GroupGrid extends StatelessWidget {
           ),
           error: (_, _) => _LabeledRow(
             label: l10n.analyticsLedgerRowFamily,
-            child: _FamilyCaptionBody(
-              message: l10n.analyticsLedgerFamilyError,
-            ),
+            child: _FamilyCaptionBody(message: l10n.analyticsLedgerFamilyError),
           ),
           data: (result) => switch (result) {
             Empty<SoulVsSurvivalSnapshot>() => _LabeledRow(
-                label: l10n.analyticsLedgerRowFamily,
-                child: _FamilyCaptionBody(
-                  message: l10n.analyticsLedgerFamilyEmpty,
-                ),
+              label: l10n.analyticsLedgerRowFamily,
+              child: _FamilyCaptionBody(
+                message: l10n.analyticsLedgerFamilyEmpty,
               ),
+            ),
             Value<SoulVsSurvivalSnapshot>(:final data) => _LabeledRow(
-                label: l10n.analyticsLedgerRowFamily,
-                child: IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: _SoulCell(
-                          soul: data.soul,
-                          currencyCode: currencyCode,
-                          locale: locale,
-                          label: null,
-                        ),
+              label: l10n.analyticsLedgerRowFamily,
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: _SoulCell(
+                        soul: data.soul,
+                        currencyCode: currencyCode,
+                        locale: locale,
+                        label: null,
                       ),
-                      VerticalDivider(
-                        width: 1,
-                        color: context.wmBorderDivider,
+                    ),
+                    VerticalDivider(width: 1, color: context.wmBorderDivider),
+                    Expanded(
+                      child: _SurvivalCell(
+                        survival: data.survival,
+                        currencyCode: currencyCode,
+                        locale: locale,
+                        label: null,
                       ),
-                      Expanded(
-                        child: _SurvivalCell(
-                          survival: data.survival,
-                          currencyCode: currencyCode,
-                          locale: locale,
-                          label: null,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
+            ),
           },
         ),
       ],

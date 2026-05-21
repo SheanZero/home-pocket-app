@@ -21,7 +21,7 @@ Future<HappinessReport> happinessReport(
   required DateTime startDate,
   required DateTime endDate,
   required String currencyCode,
-  required JoyMetricVariant joyMetricVariant,
+  JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
 }) async {
   final useCase = ref.watch(getHappinessReportUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
@@ -44,7 +44,7 @@ Future<MetricResult<BestJoyMomentRow>> bestJoyMoment(
   required String bookId,
   required DateTime startDate,
   required DateTime endDate,
-  required JoyMetricVariant joyMetricVariant,
+  JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
 }) async {
   final useCase = ref.watch(getBestJoyMomentUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
@@ -83,7 +83,7 @@ Future<LargestMonthlyExpense?> largestMonthlyExpense(
   required String bookId,
   required DateTime startDate,
   required DateTime endDate,
-  required JoyMetricVariant joyMetricVariant,
+  JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
 }) async {
   final useCase = ref.watch(getLargestMonthlyExpenseUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
@@ -108,7 +108,7 @@ Future<FamilyHappiness> familyHappiness(
   Ref ref, {
   required DateTime startDate,
   required DateTime endDate,
-  required JoyMetricVariant joyMetricVariant,
+  JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
 }) async {
   final activeGroup = await ref.watch(activeGroupProvider.future);
   if (activeGroup == null) {

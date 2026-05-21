@@ -11,6 +11,7 @@ import '../../../../generated/app_localizations.dart';
 import '../../domain/models/time_window.dart';
 import '../providers/state_analytics.dart';
 import '../providers/state_happiness.dart';
+import '../providers/state_joy_metric_variant.dart';
 import '../providers/state_ledger_snapshot.dart';
 import '../providers/state_time_window.dart';
 import '../widgets/analytics_card_error_state.dart';
@@ -24,6 +25,7 @@ import '../widgets/monthly_spend_trend_bar_chart.dart';
 import '../widgets/per_category_breakdown_card.dart';
 import '../widgets/satisfaction_distribution_histogram.dart';
 import '../widgets/soul_vs_survival_card.dart';
+import '../widgets/joy_metric_variant_chip.dart';
 import '../widgets/time_window_chip.dart';
 
 /// Phase 11 Variant delta unified analytics dashboard.
@@ -55,6 +57,7 @@ class AnalyticsScreen extends ConsumerWidget {
     final earliestMonthAsync = ref.watch(
       earliestTransactionMonthProvider(bookId: bookId),
     );
+    final joyMetricVariant = ref.watch(selectedJoyMetricVariantProvider);
 
     final isGroupMode = ref.watch(isGroupModeProvider);
     final shadowBooksAsync = isGroupMode
@@ -71,6 +74,7 @@ class AnalyticsScreen extends ConsumerWidget {
             locale: locale,
             earliestData: earliestMonthAsync.value,
           ),
+          JoyMetricVariantChip(locale: locale),
         ],
       ),
       body: RefreshIndicator(
@@ -94,6 +98,7 @@ class AnalyticsScreen extends ConsumerWidget {
                 endDate: endDate,
                 currencyCode: currencyCode,
                 locale: locale,
+                joyMetricVariant: joyMetricVariant,
               ),
               const SizedBox(height: 32),
               AnalyticsScreenSectionHeader(
@@ -104,6 +109,7 @@ class AnalyticsScreen extends ConsumerWidget {
                 bookId: bookId,
                 anchor: trendAnchor,
                 locale: locale,
+                joyMetricVariant: joyMetricVariant,
               ),
               const SizedBox(height: 32),
               AnalyticsScreenSectionHeader(
@@ -114,6 +120,7 @@ class AnalyticsScreen extends ConsumerWidget {
                 bookId: bookId,
                 startDate: startDate,
                 endDate: endDate,
+                joyMetricVariant: joyMetricVariant,
               ),
               const SizedBox(height: 8),
               // D-13: STATSUI-V2-01 Soul-vs-Survival card between donut and
@@ -125,6 +132,7 @@ class AnalyticsScreen extends ConsumerWidget {
                 currencyCode: currencyCode,
                 locale: locale,
                 isGroupMode: isGroupMode,
+                joyMetricVariant: joyMetricVariant,
               ),
               const SizedBox(height: 8),
               _SatisfactionHistogramOrFallback(
@@ -132,6 +140,7 @@ class AnalyticsScreen extends ConsumerWidget {
                 startDate: startDate,
                 endDate: endDate,
                 currencyCode: currencyCode,
+                joyMetricVariant: joyMetricVariant,
               ),
               const SizedBox(height: 8),
               // D-13: HAPPY-V2-01 per-category breakdown card after the
@@ -145,6 +154,7 @@ class AnalyticsScreen extends ConsumerWidget {
                 scope: isGroupMode
                     ? PerCategoryScope.you
                     : PerCategoryScope.solo,
+                joyMetricVariant: joyMetricVariant,
               ),
               if (isGroupMode) ...[
                 const SizedBox(height: 8),
@@ -157,6 +167,7 @@ class AnalyticsScreen extends ConsumerWidget {
                   endDate: endDate,
                   locale: locale,
                   scope: PerCategoryScope.family,
+                  joyMetricVariant: joyMetricVariant,
                 ),
               ],
               const SizedBox(height: 32),
@@ -170,6 +181,7 @@ class AnalyticsScreen extends ConsumerWidget {
                 endDate: endDate,
                 currencyCode: currencyCode,
                 locale: locale,
+                joyMetricVariant: joyMetricVariant,
               ),
               const SizedBox(height: 8),
               _BestJoyCard(
@@ -178,6 +190,7 @@ class AnalyticsScreen extends ConsumerWidget {
                 endDate: endDate,
                 currencyCode: currencyCode,
                 locale: locale,
+                joyMetricVariant: joyMetricVariant,
               ),
               if (isGroupMode) ...[
                 const SizedBox(height: 8),
@@ -187,6 +200,7 @@ class AnalyticsScreen extends ConsumerWidget {
                   isGroupMode: isGroupMode,
                   shadowBooksAsync: shadowBooksAsync,
                   locale: locale,
+                  joyMetricVariant: joyMetricVariant,
                 ),
               ],
               const SizedBox(height: 64),
@@ -206,14 +220,26 @@ class AnalyticsScreen extends ConsumerWidget {
     required bool isGroupMode,
   }) {
     // D-12: _refresh MUST NOT invalidate any home/* provider (verified by widget test home_screen_isolation_test.dart in Plan 06).
+    // D-18 (Phase 17): fold current joyMetricVariant into invalidations so the
+    // variant-aware family entries are refreshed. Riverpod 3 auto-invalidates
+    // on key-tuple change for toggle changes themselves; this _refresh only
+    // runs on pull-to-refresh.
+    final variant = ref.read(selectedJoyMetricVariantProvider);
     ref.invalidate(
       monthlyReportProvider(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        joyMetricVariant: variant,
       ),
     );
-    ref.invalidate(expenseTrendProvider(bookId: bookId, anchor: trendAnchor));
+    ref.invalidate(
+      expenseTrendProvider(
+        bookId: bookId,
+        anchor: trendAnchor,
+        joyMetricVariant: variant,
+      ),
+    );
     ref.invalidate(earliestTransactionMonthProvider(bookId: bookId));
     ref.invalidate(
       happinessReportProvider(
@@ -221,6 +247,7 @@ class AnalyticsScreen extends ConsumerWidget {
         startDate: startDate,
         endDate: endDate,
         currencyCode: currencyCode,
+        joyMetricVariant: variant,
       ),
     );
     ref.invalidate(
@@ -228,6 +255,7 @@ class AnalyticsScreen extends ConsumerWidget {
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        joyMetricVariant: variant,
       ),
     );
     ref.invalidate(
@@ -235,6 +263,7 @@ class AnalyticsScreen extends ConsumerWidget {
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        joyMetricVariant: variant,
       ),
     );
     ref.invalidate(
@@ -242,6 +271,7 @@ class AnalyticsScreen extends ConsumerWidget {
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        joyMetricVariant: variant,
       ),
     );
     // Phase 16 — HAPPY-V2-01 + STATSUI-V2-01. Same (bookId, startDate, endDate)
@@ -252,6 +282,7 @@ class AnalyticsScreen extends ConsumerWidget {
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        joyMetricVariant: variant,
       ),
     );
     ref.invalidate(
@@ -259,11 +290,16 @@ class AnalyticsScreen extends ConsumerWidget {
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        joyMetricVariant: variant,
       ),
     );
     if (isGroupMode) {
       ref.invalidate(
-        familyHappinessProvider(startDate: startDate, endDate: endDate),
+        familyHappinessProvider(
+          startDate: startDate,
+          endDate: endDate,
+          joyMetricVariant: variant,
+        ),
       );
       ref.invalidate(shadowBooksProvider);
       // Phase 16 — D-17 / D-18 family-aggregate variants. Drop bookId because
@@ -272,12 +308,14 @@ class AnalyticsScreen extends ConsumerWidget {
         perCategorySoulBreakdownFamilyProvider(
           startDate: startDate,
           endDate: endDate,
+          joyMetricVariant: variant,
         ),
       );
       ref.invalidate(
         soulVsSurvivalSnapshotFamilyProvider(
           startDate: startDate,
           endDate: endDate,
+          joyMetricVariant: variant,
         ),
       );
     }
@@ -291,6 +329,7 @@ class _KpiHero extends ConsumerWidget {
     required this.endDate,
     required this.currencyCode,
     required this.locale,
+    required this.joyMetricVariant,
   });
 
   final String bookId;
@@ -298,6 +337,7 @@ class _KpiHero extends ConsumerWidget {
   final DateTime endDate;
   final String currencyCode;
   final Locale locale;
+  final JoyMetricVariant joyMetricVariant;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -306,6 +346,7 @@ class _KpiHero extends ConsumerWidget {
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        joyMetricVariant: joyMetricVariant,
       ),
     );
     final happinessAsync = ref.watch(
@@ -314,6 +355,7 @@ class _KpiHero extends ConsumerWidget {
         startDate: startDate,
         endDate: endDate,
         currencyCode: currencyCode,
+        joyMetricVariant: joyMetricVariant,
       ),
     );
 
@@ -336,6 +378,7 @@ class _KpiHero extends ConsumerWidget {
               startDate: startDate,
               endDate: endDate,
               currencyCode: currencyCode,
+              joyMetricVariant: joyMetricVariant,
             ),
           ),
         ),
@@ -347,6 +390,7 @@ class _KpiHero extends ConsumerWidget {
             bookId: bookId,
             startDate: startDate,
             endDate: endDate,
+            joyMetricVariant: joyMetricVariant,
           ),
         ),
       ),
@@ -359,16 +403,22 @@ class _TotalSixMonthCard extends ConsumerWidget {
     required this.bookId,
     required this.anchor,
     required this.locale,
+    required this.joyMetricVariant,
   });
 
   final String bookId;
   final DateTime anchor;
   final Locale locale;
+  final JoyMetricVariant joyMetricVariant;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final trendAsync = ref.watch(
-      expenseTrendProvider(bookId: bookId, anchor: anchor),
+      expenseTrendProvider(
+        bookId: bookId,
+        anchor: anchor,
+        joyMetricVariant: joyMetricVariant,
+      ),
     );
     return trendAsync.when(
       data: (trend) => _AnalyticsDataCard(
@@ -384,7 +434,11 @@ class _TotalSixMonthCard extends ConsumerWidget {
       loading: () => const SizedBox(height: 260),
       error: (_, _) => AnalyticsCardErrorState(
         onRetry: () => ref.invalidate(
-          expenseTrendProvider(bookId: bookId, anchor: anchor),
+          expenseTrendProvider(
+            bookId: bookId,
+            anchor: anchor,
+            joyMetricVariant: joyMetricVariant,
+          ),
         ),
       ),
     );
@@ -396,11 +450,13 @@ class _CategoryDonutCard extends ConsumerWidget {
     required this.bookId,
     required this.startDate,
     required this.endDate,
+    required this.joyMetricVariant,
   });
 
   final String bookId;
   final DateTime startDate;
   final DateTime endDate;
+  final JoyMetricVariant joyMetricVariant;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -409,6 +465,7 @@ class _CategoryDonutCard extends ConsumerWidget {
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        joyMetricVariant: joyMetricVariant,
       ),
     );
     return monthlyAsync.when(
@@ -424,6 +481,7 @@ class _CategoryDonutCard extends ConsumerWidget {
             bookId: bookId,
             startDate: startDate,
             endDate: endDate,
+            joyMetricVariant: joyMetricVariant,
           ),
         ),
       ),
@@ -437,12 +495,14 @@ class _SatisfactionHistogramOrFallback extends ConsumerWidget {
     required this.startDate,
     required this.endDate,
     required this.currencyCode,
+    required this.joyMetricVariant,
   });
 
   final String bookId;
   final DateTime startDate;
   final DateTime endDate;
   final String currencyCode;
+  final JoyMetricVariant joyMetricVariant;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -452,6 +512,7 @@ class _SatisfactionHistogramOrFallback extends ConsumerWidget {
         startDate: startDate,
         endDate: endDate,
         currencyCode: currencyCode,
+        joyMetricVariant: joyMetricVariant,
       ),
     );
     final distributionAsync = ref.watch(
@@ -459,6 +520,7 @@ class _SatisfactionHistogramOrFallback extends ConsumerWidget {
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        joyMetricVariant: joyMetricVariant,
       ),
     );
 
@@ -480,6 +542,7 @@ class _SatisfactionHistogramOrFallback extends ConsumerWidget {
                 bookId: bookId,
                 startDate: startDate,
                 endDate: endDate,
+                joyMetricVariant: joyMetricVariant,
               ),
             ),
           ),
@@ -493,6 +556,7 @@ class _SatisfactionHistogramOrFallback extends ConsumerWidget {
             startDate: startDate,
             endDate: endDate,
             currencyCode: currencyCode,
+            joyMetricVariant: joyMetricVariant,
           ),
         ),
       ),
@@ -507,6 +571,7 @@ class _LargestExpenseCard extends ConsumerWidget {
     required this.endDate,
     required this.currencyCode,
     required this.locale,
+    required this.joyMetricVariant,
   });
 
   final String bookId;
@@ -514,6 +579,7 @@ class _LargestExpenseCard extends ConsumerWidget {
   final DateTime endDate;
   final String currencyCode;
   final Locale locale;
+  final JoyMetricVariant joyMetricVariant;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -522,6 +588,7 @@ class _LargestExpenseCard extends ConsumerWidget {
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        joyMetricVariant: joyMetricVariant,
       ),
     );
     return largestAsync.when(
@@ -537,6 +604,7 @@ class _LargestExpenseCard extends ConsumerWidget {
             bookId: bookId,
             startDate: startDate,
             endDate: endDate,
+            joyMetricVariant: joyMetricVariant,
           ),
         ),
       ),
@@ -551,6 +619,7 @@ class _BestJoyCard extends ConsumerWidget {
     required this.endDate,
     required this.currencyCode,
     required this.locale,
+    required this.joyMetricVariant,
   });
 
   final String bookId;
@@ -558,6 +627,7 @@ class _BestJoyCard extends ConsumerWidget {
   final DateTime endDate;
   final String currencyCode;
   final Locale locale;
+  final JoyMetricVariant joyMetricVariant;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -566,6 +636,7 @@ class _BestJoyCard extends ConsumerWidget {
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        joyMetricVariant: joyMetricVariant,
       ),
     );
     return joyAsync.when(
@@ -581,6 +652,7 @@ class _BestJoyCard extends ConsumerWidget {
             bookId: bookId,
             startDate: startDate,
             endDate: endDate,
+            joyMetricVariant: joyMetricVariant,
           ),
         ),
       ),
@@ -595,6 +667,7 @@ class _FamilyCard extends ConsumerWidget {
     required this.isGroupMode,
     required this.shadowBooksAsync,
     required this.locale,
+    required this.joyMetricVariant,
   });
 
   final DateTime startDate;
@@ -602,11 +675,16 @@ class _FamilyCard extends ConsumerWidget {
   final bool isGroupMode;
   final AsyncValue<List<ShadowBookInfo>?> shadowBooksAsync;
   final Locale locale;
+  final JoyMetricVariant joyMetricVariant;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final familyAsync = ref.watch(
-      familyHappinessProvider(startDate: startDate, endDate: endDate),
+      familyHappinessProvider(
+        startDate: startDate,
+        endDate: endDate,
+        joyMetricVariant: joyMetricVariant,
+      ),
     );
     return familyAsync.when(
       data: (family) => FamilyInsightCard(
@@ -618,7 +696,11 @@ class _FamilyCard extends ConsumerWidget {
       loading: () => const SizedBox(height: 110),
       error: (_, _) => AnalyticsCardErrorState(
         onRetry: () => ref.invalidate(
-          familyHappinessProvider(startDate: startDate, endDate: endDate),
+          familyHappinessProvider(
+            startDate: startDate,
+            endDate: endDate,
+            joyMetricVariant: joyMetricVariant,
+          ),
         ),
       ),
     );

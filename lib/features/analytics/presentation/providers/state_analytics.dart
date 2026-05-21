@@ -16,7 +16,7 @@ Future<MonthlyReport> monthlyReport(
   required String bookId,
   required DateTime startDate,
   required DateTime endDate,
-  required JoyMetricVariant joyMetricVariant,
+  JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
 }) async {
   final useCase = ref.watch(getMonthlyReportUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
@@ -37,7 +37,7 @@ Future<ExpenseTrendData> expenseTrend(
   Ref ref, {
   required String bookId,
   required DateTime anchor,
-  required JoyMetricVariant joyMetricVariant,
+  JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
 }) async {
   final useCase = ref.watch(getExpenseTrendUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
@@ -74,7 +74,7 @@ Future<List<SatisfactionScoreBucket>> satisfactionDistribution(
   required String bookId,
   required DateTime startDate,
   required DateTime endDate,
-  required JoyMetricVariant joyMetricVariant,
+  JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
 }) async {
   final useCase = ref.watch(getSatisfactionDistributionUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
