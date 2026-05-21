@@ -140,7 +140,7 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
   4. HomeHero remains unaffected by the toggle — HomeHero ring continues to reflect all entries per ADR-016 §3 (toggle is an analytics-side audit lens, not a global metric switch); verified by widget test.
   5. ARB keys for the toggle and explanatory copy exist in ja/zh/en parity; `flutter gen-l10n` succeeds; copy is neutral (no implication that voice entries are "less valid", only that the toggle "excludes voice-estimated entries").
 **Plans**: 8 plans
-  - [ ] 17-01-PLAN.md — Correct ROADMAP Phase 17 SC-3 wording to whole-AnalyticsScreen audit-lens framing (D-16)
+  - [x] 17-01-PLAN.md — Correct ROADMAP Phase 17 SC-3 wording to whole-AnalyticsScreen audit-lens framing (D-16)
   - [ ] 17-02-PLAN.md — Drift schema v16→v17: entry_source column + customStatement migration + round-trip test (D-01/D-04/D-05)
   - [ ] 17-03-PLAN.md — EntrySource enum + Transaction Freezed field + TransactionSyncMapper extension with manual fallback (D-01/D-03/D-09)
   - [ ] 17-04-PLAN.md — TransactionDao + repo impl + CreateTransactionParams required-no-default + 3 push sites (voice/manual/demo); OCR untouched (D-02/D-06/D-07/D-08)
@@ -169,4 +169,4 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 | 14. ADR-016 Frontend + ARB Reconciliation | 6/6 | Complete | 2026-05-19 |
 | 15. Custom Time Windows | 6/6 | Complete    | 2026-05-19 |
 | 16. Per-Category Breakdown + Soul-vs-Survival | 10/10 | Complete    | 2026-05-20 |
-| 17. Manual-Only Joy Sub-Metric | 0/0 | Not started | — |
+| 17. Manual-Only Joy Sub-Metric | 1/8 | In Progress|  |
