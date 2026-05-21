@@ -1,3 +1,4 @@
+import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/analytics/domain/models/analytics_aggregate.dart';
 import '../../features/analytics/domain/repositories/analytics_repository.dart';
 import '_time_window_validation.dart';
@@ -14,12 +15,14 @@ class GetSatisfactionDistributionUseCase {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     TimeWindowValidation.assertValid(startDate, endDate);
     return _repo.getSatisfactionDistribution(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
   }
 }

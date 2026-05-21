@@ -1,3 +1,4 @@
+import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/analytics/domain/models/metric_result.dart';
 import '../../features/analytics/domain/models/per_category_soul_breakdown.dart';
 import '../../features/analytics/domain/repositories/analytics_repository.dart';
@@ -27,6 +28,7 @@ class GetPerCategorySoulBreakdownAcrossBooksUseCase {
     required List<String> groupBookIds,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
     TimeWindowValidation.assertValid(startDate, endDate);
 
@@ -38,6 +40,7 @@ class GetPerCategorySoulBreakdownAcrossBooksUseCase {
       bookIds: groupBookIds,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
 
     return aggregatePerCategoryBreakdown(items);

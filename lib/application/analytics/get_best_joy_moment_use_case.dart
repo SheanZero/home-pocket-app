@@ -1,3 +1,4 @@
+import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/analytics/domain/models/best_joy_moment_row.dart';
 import '../../features/analytics/domain/models/metric_result.dart';
 import '../../features/analytics/domain/repositories/analytics_repository.dart';
@@ -19,6 +20,7 @@ class GetBestJoyMomentUseCase {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
     TimeWindowValidation.assertValid(startDate, endDate);
 
@@ -26,6 +28,7 @@ class GetBestJoyMomentUseCase {
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
 
     if (overview.count == 0) return const Empty();
@@ -34,6 +37,7 @@ class GetBestJoyMomentUseCase {
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
 
     if (row == null) return const Empty();

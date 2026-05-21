@@ -1,3 +1,4 @@
+import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/analytics/domain/models/metric_result.dart';
 import '../../features/analytics/domain/models/per_category_soul_breakdown.dart';
 import '../../features/analytics/domain/repositories/analytics_repository.dart';
@@ -35,6 +36,7 @@ class GetPerCategorySoulBreakdownUseCase {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
     TimeWindowValidation.assertValid(startDate, endDate);
 
@@ -42,6 +44,7 @@ class GetPerCategorySoulBreakdownUseCase {
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
 
     return aggregatePerCategoryBreakdown(items);
@@ -63,18 +66,17 @@ MetricResult<PerCategorySoulBreakdown> aggregatePerCategoryBreakdown(
   final qualifying = items
       .where((r) => r.totalCount >= minN)
       .toList(growable: false);
-  final lowN = items
-      .where((r) => r.totalCount < minN)
-      .toList(growable: false);
+  final lowN = items.where((r) => r.totalCount < minN).toList(growable: false);
 
   // Defensive re-sort by D-07: avg DESC, count DESC, categoryId ASC.
-  final sortedQualifying = [...qualifying]..sort((a, b) {
-    final byAvg = b.avgSatisfaction.compareTo(a.avgSatisfaction);
-    if (byAvg != 0) return byAvg;
-    final byCount = b.totalCount.compareTo(a.totalCount);
-    if (byCount != 0) return byCount;
-    return a.categoryId.compareTo(b.categoryId);
-  });
+  final sortedQualifying = [...qualifying]
+    ..sort((a, b) {
+      final byAvg = b.avgSatisfaction.compareTo(a.avgSatisfaction);
+      if (byAvg != 0) return byAvg;
+      final byCount = b.totalCount.compareTo(a.totalCount);
+      if (byCount != 0) return byCount;
+      return a.categoryId.compareTo(b.categoryId);
+    });
 
   final otherCount = lowN.fold<int>(0, (acc, r) => acc + r.totalCount);
   final otherCategoryCount = lowN.length;

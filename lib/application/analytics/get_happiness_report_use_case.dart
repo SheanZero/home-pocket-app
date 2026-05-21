@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/analytics/domain/models/analytics_aggregate.dart';
 import '../../features/analytics/domain/models/best_joy_moment_row.dart';
 import '../../features/analytics/domain/models/happiness_report.dart';
@@ -31,6 +32,7 @@ class GetHappinessReportUseCase {
     required DateTime startDate,
     required DateTime endDate,
     required String currencyCode,
+    EntrySource? entrySourceFilter,
   }) async {
     TimeWindowValidation.assertValid(startDate, endDate);
 
@@ -39,21 +41,25 @@ class GetHappinessReportUseCase {
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        entrySourceFilter: entrySourceFilter,
       ),
       _repo.getSatisfactionDistribution(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        entrySourceFilter: entrySourceFilter,
       ),
       _repo.getSoulRowsForJoyContribution(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        entrySourceFilter: entrySourceFilter,
       ),
       _repo.getBestJoyMoment(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        entrySourceFilter: entrySourceFilter,
       ),
     ]);
 

@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 
+import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/analytics/domain/models/ledger_snapshot.dart';
 import '../../features/analytics/domain/models/metric_result.dart';
 import '../../features/analytics/domain/repositories/analytics_repository.dart';
@@ -31,6 +32,7 @@ class GetSoulVsSurvivalSnapshotUseCase {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
     TimeWindowValidation.assertValid(startDate, endDate);
 
@@ -40,11 +42,13 @@ class GetSoulVsSurvivalSnapshotUseCase {
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
     final overviewFuture = _repo.getSoulSatisfactionOverview(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
     final ledgerRows = await ledgerFuture;
     final soulOverview = await overviewFuture;

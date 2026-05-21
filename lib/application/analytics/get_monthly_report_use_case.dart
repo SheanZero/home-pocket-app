@@ -1,4 +1,5 @@
 import '../../features/accounting/domain/models/category.dart';
+import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/accounting/domain/repositories/category_repository.dart';
 import '../../features/analytics/domain/models/analytics_aggregate.dart';
 import '../../features/analytics/domain/models/daily_expense.dart';
@@ -25,6 +26,7 @@ class GetMonthlyReportUseCase {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
     TimeWindowValidation.assertValid(startDate, endDate);
     final anchorYear = endDate.year;
@@ -36,21 +38,25 @@ class GetMonthlyReportUseCase {
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        entrySourceFilter: entrySourceFilter,
       ),
       _analyticsRepository.getCategoryTotals(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        entrySourceFilter: entrySourceFilter,
       ),
       _analyticsRepository.getDailyTotals(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        entrySourceFilter: entrySourceFilter,
       ),
       _analyticsRepository.getLedgerTotals(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        entrySourceFilter: entrySourceFilter,
       ),
       _categoryRepo.findAll(),
     ]);
@@ -104,6 +110,7 @@ class GetMonthlyReportUseCase {
       currentMonth: anchorMonth,
       currentIncome: totals.totalIncome,
       currentExpenses: totals.totalExpenses,
+      entrySourceFilter: entrySourceFilter,
     );
 
     return MonthlyReport(
@@ -172,6 +179,7 @@ class GetMonthlyReportUseCase {
     required int currentMonth,
     required int currentIncome,
     required int currentExpenses,
+    EntrySource? entrySourceFilter,
   }) async {
     int prevYear = currentYear;
     int prevMonth = currentMonth - 1;
@@ -187,6 +195,7 @@ class GetMonthlyReportUseCase {
       bookId: bookId,
       startDate: prevStart,
       endDate: prevEnd,
+      entrySourceFilter: entrySourceFilter,
     );
 
     if (prevTotals.totalIncome == 0 && prevTotals.totalExpenses == 0) {

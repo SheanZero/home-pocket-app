@@ -1,3 +1,4 @@
+import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/analytics/domain/models/analytics_aggregate.dart';
 import '../../features/analytics/domain/models/family_happiness.dart';
 import '../../features/analytics/domain/models/metric_result.dart';
@@ -24,6 +25,7 @@ class GetFamilyHappinessUseCase {
     required List<String> groupBookIds,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
     TimeWindowValidation.assertValid(startDate, endDate);
 
@@ -45,6 +47,7 @@ class GetFamilyHappinessUseCase {
           bookId: id,
           startDate: startDate,
           endDate: endDate,
+          entrySourceFilter: entrySourceFilter,
         ),
       ),
     );
@@ -54,6 +57,7 @@ class GetFamilyHappinessUseCase {
           bookId: id,
           startDate: startDate,
           endDate: endDate,
+          entrySourceFilter: entrySourceFilter,
         ),
       ),
     );
@@ -61,6 +65,7 @@ class GetFamilyHappinessUseCase {
       bookIds: groupBookIds,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
 
     final totalGroupSoulTx = overviews.fold<int>(

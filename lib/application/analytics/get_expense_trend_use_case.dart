@@ -1,3 +1,4 @@
+import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/analytics/domain/models/expense_trend.dart';
 import '../../features/analytics/domain/repositories/analytics_repository.dart';
 
@@ -12,6 +13,7 @@ class GetExpenseTrendUseCase {
     required String bookId,
     required DateTime anchor,
     int monthCount = 6,
+    EntrySource? entrySourceFilter,
   }) async {
     final trends = <MonthlyTrend>[];
 
@@ -27,6 +29,7 @@ class GetExpenseTrendUseCase {
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
+        entrySourceFilter: entrySourceFilter,
       );
 
       trends.add(

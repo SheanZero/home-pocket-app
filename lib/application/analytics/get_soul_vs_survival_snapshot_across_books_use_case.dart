@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 
+import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/analytics/domain/models/analytics_aggregate.dart';
 import '../../features/analytics/domain/models/ledger_snapshot.dart';
 import '../../features/analytics/domain/models/metric_result.dart';
@@ -42,6 +43,7 @@ class GetSoulVsSurvivalSnapshotAcrossBooksUseCase {
     required List<String> groupBookIds,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
     TimeWindowValidation.assertValid(startDate, endDate);
 
@@ -56,6 +58,7 @@ class GetSoulVsSurvivalSnapshotAcrossBooksUseCase {
       bookIds: groupBookIds,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
     final overviewsFuture = Future.wait(
       groupBookIds.map(
@@ -63,6 +66,7 @@ class GetSoulVsSurvivalSnapshotAcrossBooksUseCase {
           bookId: id,
           startDate: startDate,
           endDate: endDate,
+          entrySourceFilter: entrySourceFilter,
         ),
       ),
     );
