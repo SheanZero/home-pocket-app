@@ -42,7 +42,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration {
@@ -266,6 +266,19 @@ class AppDatabase extends _$AppDatabase {
           // at the companion-class layer, not as SQL DEFAULT constraints.
           // CHECK(soul_satisfaction BETWEEN 1 AND 10) survives unchanged.
           // Pre-launch project: no backfill required (D-02).
+        }
+        if (from < 17) {
+          // D-01: Phase 17 entry_source column. Column-level inline CHECK and
+          // DEFAULT in a single ALTER TABLE statement. The DEFAULT clause
+          // backfills pre-existing rows in one operation (D-04, no separate
+          // UPDATE). Cannot use migrator.addColumn here because table-level
+          // customConstraints are not applied by addColumn to existing rows
+          // (RESEARCH Pitfall #1). The table-level entry in customConstraints
+          // handles fresh installs; this statement handles migrated v16 rows.
+          await customStatement(
+            '''ALTER TABLE transactions ADD COLUMN entry_source TEXT NOT NULL '''
+            '''DEFAULT 'manual' CHECK(entry_source IN ('manual', 'voice', 'ocr'))''',
+          );
         }
       },
     );

@@ -4996,6 +4996,18 @@ class $TransactionsTable extends Transactions
     requiredDuringInsert: false,
     defaultValue: const Constant(2),
   );
+  static const VerificationMeta _entrySourceMeta = const VerificationMeta(
+    'entrySource',
+  );
+  @override
+  late final GeneratedColumn<String> entrySource = GeneratedColumn<String>(
+    'entry_source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('manual'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -5018,6 +5030,7 @@ class $TransactionsTable extends Transactions
     isSynced,
     isDeleted,
     soulSatisfaction,
+    entrySource,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -5174,6 +5187,15 @@ class $TransactionsTable extends Transactions
         ),
       );
     }
+    if (data.containsKey('entry_source')) {
+      context.handle(
+        _entrySourceMeta,
+        entrySource.isAcceptableOrUnknown(
+          data['entry_source']!,
+          _entrySourceMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -5263,6 +5285,10 @@ class $TransactionsTable extends Transactions
         DriftSqlType.int,
         data['${effectivePrefix}soul_satisfaction'],
       )!,
+      entrySource: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entry_source'],
+      )!,
     );
   }
 
@@ -5293,6 +5319,7 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
   final bool isSynced;
   final bool isDeleted;
   final int soulSatisfaction;
+  final String entrySource;
   const TransactionRow({
     required this.id,
     required this.bookId,
@@ -5314,6 +5341,7 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     required this.isSynced,
     required this.isDeleted,
     required this.soulSatisfaction,
+    required this.entrySource,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -5350,6 +5378,7 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     map['is_synced'] = Variable<bool>(isSynced);
     map['is_deleted'] = Variable<bool>(isDeleted);
     map['soul_satisfaction'] = Variable<int>(soulSatisfaction);
+    map['entry_source'] = Variable<String>(entrySource);
     return map;
   }
 
@@ -5385,6 +5414,7 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       isSynced: Value(isSynced),
       isDeleted: Value(isDeleted),
       soulSatisfaction: Value(soulSatisfaction),
+      entrySource: Value(entrySource),
     );
   }
 
@@ -5414,6 +5444,7 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       isSynced: serializer.fromJson<bool>(json['isSynced']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
       soulSatisfaction: serializer.fromJson<int>(json['soulSatisfaction']),
+      entrySource: serializer.fromJson<String>(json['entrySource']),
     );
   }
   @override
@@ -5440,6 +5471,7 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       'isSynced': serializer.toJson<bool>(isSynced),
       'isDeleted': serializer.toJson<bool>(isDeleted),
       'soulSatisfaction': serializer.toJson<int>(soulSatisfaction),
+      'entrySource': serializer.toJson<String>(entrySource),
     };
   }
 
@@ -5464,6 +5496,7 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     bool? isSynced,
     bool? isDeleted,
     int? soulSatisfaction,
+    String? entrySource,
   }) => TransactionRow(
     id: id ?? this.id,
     bookId: bookId ?? this.bookId,
@@ -5485,6 +5518,7 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     isSynced: isSynced ?? this.isSynced,
     isDeleted: isDeleted ?? this.isDeleted,
     soulSatisfaction: soulSatisfaction ?? this.soulSatisfaction,
+    entrySource: entrySource ?? this.entrySource,
   );
   TransactionRow copyWithCompanion(TransactionsCompanion data) {
     return TransactionRow(
@@ -5516,6 +5550,9 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       soulSatisfaction: data.soulSatisfaction.present
           ? data.soulSatisfaction.value
           : this.soulSatisfaction,
+      entrySource: data.entrySource.present
+          ? data.entrySource.value
+          : this.entrySource,
     );
   }
 
@@ -5541,13 +5578,14 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
           ..write('isPrivate: $isPrivate, ')
           ..write('isSynced: $isSynced, ')
           ..write('isDeleted: $isDeleted, ')
-          ..write('soulSatisfaction: $soulSatisfaction')
+          ..write('soulSatisfaction: $soulSatisfaction, ')
+          ..write('entrySource: $entrySource')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     bookId,
     deviceId,
@@ -5568,7 +5606,8 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     isSynced,
     isDeleted,
     soulSatisfaction,
-  );
+    entrySource,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5592,7 +5631,8 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
           other.isPrivate == this.isPrivate &&
           other.isSynced == this.isSynced &&
           other.isDeleted == this.isDeleted &&
-          other.soulSatisfaction == this.soulSatisfaction);
+          other.soulSatisfaction == this.soulSatisfaction &&
+          other.entrySource == this.entrySource);
 }
 
 class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
@@ -5616,6 +5656,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
   final Value<bool> isSynced;
   final Value<bool> isDeleted;
   final Value<int> soulSatisfaction;
+  final Value<String> entrySource;
   final Value<int> rowid;
   const TransactionsCompanion({
     this.id = const Value.absent(),
@@ -5638,6 +5679,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     this.isSynced = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.soulSatisfaction = const Value.absent(),
+    this.entrySource = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TransactionsCompanion.insert({
@@ -5661,6 +5703,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     this.isSynced = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.soulSatisfaction = const Value.absent(),
+    this.entrySource = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        bookId = Value(bookId),
@@ -5693,6 +5736,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     Expression<bool>? isSynced,
     Expression<bool>? isDeleted,
     Expression<int>? soulSatisfaction,
+    Expression<String>? entrySource,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -5716,6 +5760,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
       if (isSynced != null) 'is_synced': isSynced,
       if (isDeleted != null) 'is_deleted': isDeleted,
       if (soulSatisfaction != null) 'soul_satisfaction': soulSatisfaction,
+      if (entrySource != null) 'entry_source': entrySource,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -5741,6 +5786,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     Value<bool>? isSynced,
     Value<bool>? isDeleted,
     Value<int>? soulSatisfaction,
+    Value<String>? entrySource,
     Value<int>? rowid,
   }) {
     return TransactionsCompanion(
@@ -5764,6 +5810,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
       isSynced: isSynced ?? this.isSynced,
       isDeleted: isDeleted ?? this.isDeleted,
       soulSatisfaction: soulSatisfaction ?? this.soulSatisfaction,
+      entrySource: entrySource ?? this.entrySource,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -5831,6 +5878,9 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     if (soulSatisfaction.present) {
       map['soul_satisfaction'] = Variable<int>(soulSatisfaction.value);
     }
+    if (entrySource.present) {
+      map['entry_source'] = Variable<String>(entrySource.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -5860,6 +5910,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
           ..write('isSynced: $isSynced, ')
           ..write('isDeleted: $isDeleted, ')
           ..write('soulSatisfaction: $soulSatisfaction, ')
+          ..write('entrySource: $entrySource, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -9101,6 +9152,7 @@ typedef $$TransactionsTableCreateCompanionBuilder =
       Value<bool> isSynced,
       Value<bool> isDeleted,
       Value<int> soulSatisfaction,
+      Value<String> entrySource,
       Value<int> rowid,
     });
 typedef $$TransactionsTableUpdateCompanionBuilder =
@@ -9125,6 +9177,7 @@ typedef $$TransactionsTableUpdateCompanionBuilder =
       Value<bool> isSynced,
       Value<bool> isDeleted,
       Value<int> soulSatisfaction,
+      Value<String> entrySource,
       Value<int> rowid,
     });
 
@@ -9234,6 +9287,11 @@ class $$TransactionsTableFilterComposer
 
   ColumnFilters<int> get soulSatisfaction => $composableBuilder(
     column: $table.soulSatisfaction,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entrySource => $composableBuilder(
+    column: $table.entrySource,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -9346,6 +9404,11 @@ class $$TransactionsTableOrderingComposer
     column: $table.soulSatisfaction,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get entrySource => $composableBuilder(
+    column: $table.entrySource,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TransactionsTableAnnotationComposer
@@ -9424,6 +9487,11 @@ class $$TransactionsTableAnnotationComposer
     column: $table.soulSatisfaction,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get entrySource => $composableBuilder(
+    column: $table.entrySource,
+    builder: (column) => column,
+  );
 }
 
 class $$TransactionsTableTableManager
@@ -9477,6 +9545,7 @@ class $$TransactionsTableTableManager
                 Value<bool> isSynced = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<int> soulSatisfaction = const Value.absent(),
+                Value<String> entrySource = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsCompanion(
                 id: id,
@@ -9499,6 +9568,7 @@ class $$TransactionsTableTableManager
                 isSynced: isSynced,
                 isDeleted: isDeleted,
                 soulSatisfaction: soulSatisfaction,
+                entrySource: entrySource,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -9523,6 +9593,7 @@ class $$TransactionsTableTableManager
                 Value<bool> isSynced = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<int> soulSatisfaction = const Value.absent(),
+                Value<String> entrySource = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsCompanion.insert(
                 id: id,
@@ -9545,6 +9616,7 @@ class $$TransactionsTableTableManager
                 isSynced: isSynced,
                 isDeleted: isDeleted,
                 soulSatisfaction: soulSatisfaction,
+                entrySource: entrySource,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

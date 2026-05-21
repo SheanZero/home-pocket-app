@@ -34,12 +34,18 @@ class Transactions extends Table {
   // Soul ledger satisfaction (1-10, default 2; D-10 unipolar positive scale)
   IntColumn get soulSatisfaction => integer().withDefault(const Constant(2))();
 
+  // Entry-path provenance (D-01). Default 'manual' backfills pre-launch rows;
+  // CHECK in customConstraints enforces the 3-value domain on fresh installs;
+  // migration in app_database.dart applies the same CHECK to v16 rows.
+  TextColumn get entrySource => text().withDefault(const Constant('manual'))();
+
   @override
   Set<Column> get primaryKey => {id};
 
   @override
   List<String> get customConstraints => [
     'CHECK(soul_satisfaction BETWEEN 1 AND 10)',
+    "CHECK(entry_source IN ('manual', 'voice', 'ocr'))",
   ];
 
   List<TableIndex> get customIndices => [
