@@ -142,7 +142,7 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 **Plans**: 8 plans
   - [x] 17-01-PLAN.md — Correct ROADMAP Phase 17 SC-3 wording to whole-AnalyticsScreen audit-lens framing (D-16)
   - [x] 17-02-PLAN.md — Drift schema v16→v17: entry_source column + customStatement migration + round-trip test (D-01/D-04/D-05)
-  - [ ] 17-03-PLAN.md — EntrySource enum + Transaction Freezed field + TransactionSyncMapper extension with manual fallback (D-01/D-03/D-09)
+  - [x] 17-03-PLAN.md — EntrySource enum + Transaction Freezed field + TransactionSyncMapper extension with manual fallback (D-01/D-03/D-09)
   - [ ] 17-04-PLAN.md — TransactionDao + repo impl + CreateTransactionParams required-no-default + 3 push sites (voice/manual/demo); OCR untouched (D-02/D-06/D-07/D-08)
   - [ ] 17-05-PLAN.md — AnalyticsDao 12+ methods gain EntrySource? entrySourceFilter; predicate-drift constants byte-identical; repo interface re-emitted; DAO tests (D-15/D-17)
   - [ ] 17-06-PLAN.md — 11 use-case execute() signatures gain entrySourceFilter; recommendation use case byte-identical; 3 representative use-case tests (D-15)
@@ -161,7 +161,7 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 |-----------|--------|----------------|--------|---------|
 | v1.0 Codebase Cleanup Initiative | 1-8 | 48/48 | Complete | 2026-04-29 |
 | v1.1 Happiness Metric & Display | 9-12 | 40/40 | Complete | 2026-05-05 |
-| v1.2 Happiness Metric Refresh | 13-17 | 31/37 | In Progress | — |
+| v1.2 Happiness Metric Refresh | 13-17 | 32/37 | In Progress | — |
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -169,4 +169,4 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 | 14. ADR-016 Frontend + ARB Reconciliation | 6/6 | Complete | 2026-05-19 |
 | 15. Custom Time Windows | 6/6 | Complete    | 2026-05-19 |
 | 16. Per-Category Breakdown + Soul-vs-Survival | 10/10 | Complete    | 2026-05-20 |
-| 17. Manual-Only Joy Sub-Metric | 2/8 | In Progress | — |
+| 17. Manual-Only Joy Sub-Metric | 3/8 | In Progress | — |
