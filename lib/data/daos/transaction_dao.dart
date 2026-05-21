@@ -27,6 +27,7 @@ class TransactionDao {
     bool isPrivate = false,
     bool isSynced = false,
     int soulSatisfaction = 2,
+    required String entrySource,
   }) async {
     await _db
         .into(_db.transactions)
@@ -50,6 +51,7 @@ class TransactionDao {
             isPrivate: Value(isPrivate),
             isSynced: Value(isSynced),
             soulSatisfaction: Value(soulSatisfaction),
+            entrySource: Value(entrySource),
           ),
         );
   }
@@ -131,6 +133,7 @@ class TransactionDao {
     bool isPrivate = false,
     bool isSynced = false,
     int soulSatisfaction = 2,
+    String? entrySource,
     DateTime? updatedAt,
   }) async {
     await (_db.update(_db.transactions)..where((t) => t.id.equals(id))).write(
@@ -152,6 +155,9 @@ class TransactionDao {
         isPrivate: Value(isPrivate),
         isSynced: Value(isSynced),
         soulSatisfaction: Value(soulSatisfaction),
+        entrySource: entrySource != null
+            ? Value(entrySource)
+            : const Value.absent(),
         updatedAt: Value(updatedAt ?? DateTime.now()),
         isDeleted: const Value(false),
       ),

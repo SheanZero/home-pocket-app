@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
 import '../../infrastructure/crypto/services/field_encryption_service.dart';
@@ -47,6 +48,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
       isPrivate: transaction.isPrivate,
       isSynced: transaction.isSynced,
       soulSatisfaction: transaction.soulSatisfaction,
+      entrySource: transaction.entrySource.name,
     );
   }
 
@@ -108,6 +110,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
       isPrivate: transaction.isPrivate,
       isSynced: transaction.isSynced,
       soulSatisfaction: transaction.soulSatisfaction,
+      entrySource: transaction.entrySource.name,
       updatedAt: transaction.updatedAt,
     );
   }
@@ -159,6 +162,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
       isSynced: row.isSynced,
       isDeleted: row.isDeleted,
       soulSatisfaction: row.soulSatisfaction,
+      entrySource: EntrySource.values.byName(row.entrySource),
     );
   }
 }
