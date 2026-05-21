@@ -4,6 +4,56 @@ Historical record of shipped versions. Each entry links to its full archive in `
 
 ---
 
+## v1.2 — Happiness Metric Refresh
+
+**Shipped:** 2026-05-21
+**Phases:** 13-17 (5 phases, 37 plans, 63 tasks)
+**Duration:** 2026-05-19 → 2026-05-21 (3 days)
+**Tag:** `v1.2`
+**Audit Status at Close:** `tech_debt` — milestone goal achieved with documentation-grade close debt accepted (Phase 13/17 missing VERIFICATION.md; 3 VALIDATION.md drafts with `nyquist_compliant: false`). Mirrors v1.0 FUTURE-DOC-05 pattern. See `.planning/milestones/v1.2-MILESTONE-AUDIT.md`.
+**Known deferred items at close:** 6 items (2 verification gaps, 1 Nyquist gap, 1 stale test from Phase 15 ARB drift, 1 forward-compat schema slot, 1 quick-task metadata drift) — see `.planning/STATE.md` Deferred Items §v1.2.
+
+### Delivered
+
+The Home Pocket Joy metric is now expressed as `Σ joy_contribution` (cumulative per-month) per ADR-016, superseding the v1.1 density (Joy/¥) formulation. HomeHero shows a single-month accumulation ring against a user-configurable `monthly_joy_target` with sage-green→gold color interpolation; AnalyticsScreen Variant ε retired density and added Custom Time Windows, Per-Category breakdown, Soul-vs-Survival comparison (anti-toxicity framed), and a Manual-Only Joy audit-lens variant. Drift schema migrated to v17 (`transactions.entry_source` column). HomeHero isolation invariant (ADR-016 §3) is structurally enforced by test guards across Phases 15-17.
+
+### Key Accomplishments
+
+1. **ADR-016 Joy migration shipped end-to-end** — `Σ joy_contribution = Σ (soul_satisfaction × (amount / base)^0.88)` replaces density (Joy/¥) as the single Joy expression. `lib/` is density-free (`grep -rn 'density|joyPerYen|homeHappinessROI' lib/` returns 0 hits); ARB density vocabulary fully scrubbed across ja/zh/en at 487 keys parity.
+2. **HomeHero target ring + user-configurable target** — sage-green `#47B88A` → gold smooth color interpolation with clamp at 100% (no oscillation, no discrete events at threshold per ADR-012 §2 / ADR-016 §5). `monthly_joy_target` persists in SharedPreferences; recommended value = `ceil(median(past 3 months Σ joy_contribution))` when ≥3 months data, else fallback baseline 50 (Phase 13 spike decision).
+3. **AnalyticsScreen Variant ε with Custom Time Windows** — Freezed `TimeWindow` sealed value object (week/month/quarter/year/arbitrary), `TimeWindowValidation` calendar-month guard, `selectedTimeWindowProvider` session state, AppBar `TimeWindowChip` + `TimeWindowPickerSheet`. Six analytics use cases migrated to `(startDate, endDate)`; HomeHero remains current-month-anchored.
+4. **Per-Category Breakdown + Soul-vs-Survival comparison shipped with type-system invariants** — `PerCategoryBreakdownCard` with min-N=3 filter + "Other" rollup. `SoulVsSurvivalCard` Soul column shows entries + spend + avgSatisfaction; Survival column shows entries + spend only — enforced by `SurvivalLedgerSnapshot` Freezed class having no `avgSatisfaction` field (D-04 type-system gate). Trilingual anti-toxicity widget sweep (24 cases × 3 locales × 4 states) passes.
+5. **Manual-Only Joy variant on schema v17** — `ALTER TABLE transactions ADD COLUMN entry_source TEXT NOT NULL DEFAULT 'manual' CHECK ∈ {manual, voice, ocr}`. `EntrySource? entrySourceFilter` threaded through 12+ use cases + 16 analytics providers + DAO `AND entry_source = ?` clauses. `JoyMetricVariantChip` toggle on AnalyticsScreen AppBar; HomeHero isolation SC-4 enforced (variant toggle does not affect HomeHero providers).
+6. **HomeHero isolation invariant structurally enforced** — `lib/features/home/` has zero hits for `selectedTimeWindowProvider`, `state_time_window`, `state_joy_metric_variant`, or `joyMetricVariant`. `home_screen_isolation_test.dart` combines source-grep guards, Phase 16 `verifyNever` assertions, and Phase 17 SC-4 variant-toggle non-effect verification.
+
+### Stats
+
+- **Commits since v1.1 tag:** 212
+- **Files changed:** 521 (+57,460 / -7,168 LOC); `lib/` +15,828 / -5,189; `test/` +8,034 / -1,565
+- **Phase commit distribution:** 13: 26, 14: 17, 15: 36, 16: 39, 17: 32
+- **Requirements:** 11/11 v1.2 requirements complete (8 fully verified, 3 partial-due-to-missing-VERIFICATION.md with integration-check substitute evidence)
+- **ARB parity:** 487 keys per locale (ja=zh=en)
+- **Drift schema:** v16 → v17 (single column addition + inline backfill default)
+
+### Notable Decisions
+
+- ADR-016 ratify (2026-05-19) consciously broke v1.1 baseline purity to consolidate density retirement and target-ring rebuild into a single coherent milestone (ADR-016 §1 accepted cost).
+- HomeHero ring is **single-month accumulation only**; no cross-period delta surfaces (hard ADR-012 §4 boundary).
+- HomeHero ring at and beyond 100%: **no copy, no toast, no notification, no haptic, no celebration animation** — only ambient color change (hard ADR-012 §2 / ADR-016 §5 contract; verified by widget test asserting absence of all event paths).
+- Monthly Joy target fallback baseline = 50 (Phase 13 spike-decided); revisit after real-user data collected.
+- `SurvivalLedgerSnapshot` deliberately lacks `avgSatisfaction` field (D-04) — type-system gate against value-judgment framing on the survival ledger.
+- Family privacy hardening (FAMILY-V2-01/02/03) explicitly out of v1.2 scope to keep Joy-axis focused; remains v2 backlog.
+- Phase 13 + 17 shipped without running `/gsd:verify-work` — integration check at milestone close acts as backstop; documented as v1.2 close debt for retroactive backfill.
+
+### Archive
+
+- `.planning/milestones/v1.2-ROADMAP.md` — full phase details
+- `.planning/milestones/v1.2-REQUIREMENTS.md` — final requirement status + v2 backlog
+- `.planning/milestones/v1.2-MILESTONE-AUDIT.md` — pre-close audit report (status: `tech_debt`)
+- `.planning/milestones/v1.2-phases/` — archived phase directories (13-17)
+
+---
+
 ## v1.1 — Happiness Metric & Display
 
 **Shipped:** 2026-05-05

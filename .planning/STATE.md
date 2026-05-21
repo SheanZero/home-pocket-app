@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Happiness Metric Refresh
-status: complete
-stopped_at: Completed 17-08-PLAN.md
-last_updated: "2026-05-21T01:55:27.000Z"
-last_activity: 2026-05-21
+status: Awaiting next milestone
+stopped_at: v1.2 milestone closed
+last_updated: "2026-05-21T03:30:00.000Z"
+last_activity: 2026-05-21 — Milestone v1.2 completed and archived
 progress:
   total_phases: 5
   completed_phases: 5
@@ -18,85 +18,53 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-19)
+See: .planning/PROJECT.md (updated 2026-05-21 after v1.2 close)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes survival spending from soul spending
-**Current focus:** Phase 17 — manual-only-joy-sub-metric-happy-v2-03
+**Current focus:** Planning next milestone — see PROJECT.md "Next Milestone Goals"
 
 ## Current Position
 
-Phase: 17 (manual-only-joy-sub-metric-happy-v2-03) — COMPLETE
-Plan: 8 of 8
-Status: Complete
-Last activity: 2026-05-21
+Phase: All v1.2 phases archived (Phases 13-17 → `milestones/v1.2-phases/`)
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-05-21 — Milestone v1.2 completed and archived
 
-## v1.2 Phase Plan
+## Last Milestone Snapshot (v1.2)
 
-| Phase | Goal | Requirements | Depends on |
-|-------|------|--------------|------------|
-| 13. ADR-016 Backend Foundation | Stabilize Joy backend on Σ joy_contribution; ship schema + recommendation infra for Phases 14/17 | JOYMIG-02, JOYMIG-05 | — (first v1.2 phase) |
-| 14. ADR-016 Frontend + ARB Reconciliation (TOOL-V2-02) | Ship HomeHero rebuild + AnalyticsScreen Variant ε + Settings target UI + ARB cleanup; honor 100% behavior contract | JOYMIG-01, JOYMIG-03, JOYMIG-04, JOYMIG-06, TOOL-V2-02 | Phase 13 |
-| 15. Custom Time Windows | Week/month/quarter/year/arbitrary selector wired across all Joy metrics in AnalyticsScreen | HAPPY-V2-02 | Phase 14 |
-| 16. Per-Category Breakdown + Soul-vs-Survival | Per-category satisfaction breakdown + Soul-vs-Survival comparison (both anti-toxicity framed) | HAPPY-V2-01, STATSUI-V2-01 | Phases 14 + 15 |
-| 17. Manual-Only Joy Sub-Metric | Schema migration (entry_source column) + manual-only Joy variant toggle in AnalyticsScreen | HAPPY-V2-03 | Phases 13 + 14 |
+- **Phases:** 5 (13-17)
+- **Plans:** 37
+- **Duration:** 2026-05-19 → 2026-05-21 (3 days)
+- **Commits:** 212 (vs v1.1 tag); 521 files changed; +57,460 / -7,168 LOC
+- **Audit Status at Close:** `tech_debt` — accepted (Phase 13/17 missing VERIFICATION.md; 3 VALIDATION.md drafts; documentation-grade debt only)
+- **Outcome:** ADR-016 Joy migration (density → `Σ joy_contribution`); HomeHero target ring rebuild; user-configurable `monthly_joy_target` + 3-month median recommendation + fallback 50; AnalyticsScreen Variant ε with Custom Time Windows + Per-Category breakdown + Soul-vs-Survival comparison + Manual-Only Joy variant; Drift schema v17 (`entry_source`); HomeHero isolation structurally enforced
+- **Tag:** `v1.2`
 
-**Coverage:** 11/11 v1.2 requirements mapped ✓
+## Previous Milestone Snapshots
 
-**Cross-phase constraints (apply to every phase):** ADR-012 No Gamification v1.1, ADR-014 Unipolar Positive Satisfaction, ADR-016 §2 single-Joy-expression, ADR-013 append-only update rule, all permanent CI guardrails (analyze 0, custom_lint 0, import_guard 0, riverpod_lint 0, per-file coverage ≥70%, global ≥70%, build_runner clean-diff, sqlite3_flutter_libs rejection), ARB ja/zh/en parity.
-
-## Last Milestone Snapshot (v1.1)
-
-- **Phases:** 4 (9-12)
-- **Plans:** 40
-- **Duration:** 2026-05-01 → 2026-05-05
-- **Audit Status at Close:** `known_debt` — accepted (1 Phase 11 human UAT verification item)
-- **Outcome:** Happiness Metric & Display shipped — HomeHeroCard, AnalyticsScreen Variant δ, trilingual rename pass, ADR-012/013/014/015 ratified
-- **Tag:** `v1.1`
+- **v1.1** (4 phases, 40 plans, 2026-05-01 → 2026-05-05, audit `known_debt` accepted) — Happiness Metric & Display
+- **v1.0** (8 phases, 48 plans, 2026-04-24 → 2026-04-29, audit `passed`) — Codebase Cleanup Initiative
 
 ## Accumulated Context
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 decisions captured there with outcomes.
-
-**v1.2 milestone-start decisions (2026-05-19):**
-
-- ADR-016 ratified 2026-05-19: Σ joy_contribution supersedes density (Joy/¥) as the single Joy expression; ADR-013 marked as superseded via append-only update (per-tx PTVF scaling formula stays active)
-- v1.1 baseline-purity is explicitly broken with this milestone (per ADR-016 §1) — accepted cost
-- HomeHero ring is single-month accumulation with sage-green→gold smooth color transition; **no discrete events** at 100% (no copy, no toast, no notification, no haptic, no celebration animation) per ADR-016 §5 + ADR-012 §2
-- monthly_joy_target user-configurable; recommended value = `ceil(median(past 3 months Σ joy_contribution))` when ≥3 months data, else fallback baseline 50 (Phase 13 spike)
-- Family privacy hardening (FAMILY-V2-01/02/03) explicitly deferred to keep v1.2 Joy-axis focused
-- Phase numbering continues from v1.1 (Phase 13 starts v1.2)
-
-**v1.1 execution decisions (carried for reference):**
-
-- Phase 11 audit corrects the dormant-DAO framing: only `getDailySatisfactionTrend` is truly dormant and it is superseded by `getDailySoulRowsForPtvf`.
-- [Phase 11]: Daily Joy/¥ folds use the same α=0.88 PTVF density formula and ptvfBaseFor(currencyCode) base as monthly happiness reports.
-- [Phase 11]: Expense trend now trails the selected month via an explicit anchor instead of DateTime.now().
-- [Phase 11]: Analytics ARB strings were added to ja/zh/en in one commit with the hard-locked bar-5 histogram annotation.
-- [Phase 11]: Variant δ AnalyticsScreen shipped as a 2-region unified dashboard.
-- [Phase 15]: Plan 03 retains MonthlyReport.previousMonthComparison for HomeHero but removes the AnalyticsScreen total-spending MoM delta UI. — This preserves HomeHero compatibility while clearing the ADR-012 cross-period delta surface.
-- [Phase 15]: Plan 03 uses endDate as the display anchor for MonthlyReport, HappinessReport, and FamilyHappiness year/month fields. — Source-of-truth query bounds are now startDate/endDate.
-- [Phase 15]: Plan 04 keeps SelectedTimeWindow default auto-dispose because MainShellScreen IndexedStack keeps tabs alive. — Avoids unnecessary provider lifetime widening while preserving tab-session behavior.
-- [Phase 15]: Plan 05 added FormatterService.formatShortMonthDay as the presentation-safe delegate for selector date labels. — The selector widgets must not import infrastructure formatters directly, and DateFormatter already owned the actual formatting behavior.
-- [Phase 15]: Plan 05 uses isScrollControlled for the time-window bottom sheet. — The type row plus chooser body overflows Flutter's default half-height modal constraint in tests.
-- [Phase 15]: Plan 06 replaced the AnalyticsScreen month picker with TimeWindowChip and purged MonthChipPicker/selectedMonthProvider symbols. — Completes HAPPY-V2-02 analytics window selection and removes the legacy month-only UI path.
-- [Phase 15]: AnalyticsScreen refresh stays scoped to analytics and shadow-book providers keyed by selected TimeWindow ranges. — Protects HomeHero current-month anchoring and prevents cross-screen invalidation coupling.
-- [Phase 15]: TimeWindowValidation permits canonical current calendar preset windows while rejecting arbitrary future custom ranges. — Default current-month/current-year analytics windows must load even when their calendar end date is still in the future.
+Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 decisions captured there with outcomes.
 
 ### Pending Todos
 
-- **Phase 17 prereq:** confirm `transactions.entry_source` column truly doesn't exist (Phase 9 of v1.1 noted absence; re-verify before plan-phase 17)
+(None — between milestones.)
 
 ### Blockers / Concerns
 
-No active v1.2 blockers. Carried-forward debt (from v1.0/v1.1):
+No active blockers. Carried-forward debt (cross-milestone):
 
-- **FUTURE-TOOL-03** *(coverage-baseline-review)*: Review 70% coverage threshold after v1.2 close
+- **FUTURE-TOOL-03** *(coverage-baseline-review)*: Review 70% coverage threshold after v1.2 close (now triggered)
 - **FUTURE-QA-01** *(smoke-test-owner-driven)*: Owner runs smoke tests before v1 release
-- **FUTURE-DOC-01..06** *(documentation drift)*: 6 doc-related items (MOD-numbering, ARCH-008 ADR citation, missing VALIDATION/VERIFICATION docs, doc-sweep verifier CI wiring)
+- **FUTURE-DOC-01..06** *(documentation drift)*: 6 doc-related items from v1.0 close
 - **FUTURE-ARCH-04** *(security)*: `recoverFromSeed()` key-overwrite bug fix (held — security architecture out of scope per long-term project rule)
 - **v1.1 verification debt:** Phase 11 device/simulator UAT for AnalyticsScreen month chip + pull-to-refresh (human_needed)
+- **v1.2 verification debt:** Phase 13 + 17 missing VERIFICATION.md (live code wired + integration-verified at milestone close; per-phase verifier artifact never run)
 
 ### Quick Tasks Completed
 
@@ -108,7 +76,24 @@ No active v1.2 blockers. Carried-forward debt (from v1.0/v1.1):
 
 ## Deferred Items
 
-Items acknowledged and deferred at v1.0 milestone close on 2026-04-29:
+### Items acknowledged and deferred at v1.2 milestone close on 2026-05-21
+
+| Category | Item | Status | Deferred At |
+|----------|------|--------|-------------|
+| verification_gap | Phase 13 (`ADR-016 Backend Foundation`) lacks 13-VERIFICATION.md; live code wired and integration-verified via Phase 14 transitively + audit integration check at close | accept (documentation-grade) | v1.2 close |
+| verification_gap | Phase 17 (`Manual-Only Joy Sub-Metric`) lacks 17-VERIFICATION.md; live code wired and integration-verified at close | accept (documentation-grade) | v1.2 close |
+| nyquist_gap | Phase 13/14/17 VALIDATION.md status: draft, `nyquist_compliant: false`, `wave_0_complete: false`; mirrors v1.0 FUTURE-DOC-06 pattern | accept (FUTURE-DOC equivalent) | v1.2 close |
+| test_debt | 6 pre-existing test failures in `test/widget/features/analytics/presentation/widgets/family_insight_card_test.dart` caused by Phase 15 commit `8d5f136` (`今月、` prefix dropped from `analyticsFamilyHighlightsSentence`); does NOT break any v1.2 user-observable flow; documented in Phase 16 `deferred-items.md` | accept (re-baseline test strings in next milestone) | v1.2 close |
+| forward_compat | `EntrySource.ocr` literal accepted by schema v17 CHECK constraint and by DAO filter, but no production write site stamps `EntrySource.ocr` yet (consistent with MOD-005 OCR being a later module) | reserved (will be writer-claimed by MOD-005) | v1.2 close |
+| metadata_drift | `gsd-sdk audit-open` reports 3 quick tasks (`260518-kyr`, `260518-pf5`, `260518-v4v`) as `missing` status while STATE.md confirms all 3 Verified with commit refs; tool reads internal slug metadata not STATE.md table | cosmetic, no functional gap | v1.2 close |
+
+### Items acknowledged and deferred at v1.1 milestone close on 2026-05-05
+
+| Category | Item | Status | Deferred At |
+|----------|------|--------|-------------|
+| verification_gap | Phase 11 `11-VERIFICATION.md` human UAT: run AnalyticsScreen on device/simulator and exercise month chip + pull-to-refresh on real app data | human_needed | v1.1 close |
+
+### Items acknowledged and deferred at v1.0 milestone close on 2026-04-29
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
@@ -129,24 +114,24 @@ Items acknowledged and deferred at v1.0 milestone close on 2026-04-29:
 | Tech-debt nit | 2 INFO-level analyzer warnings in `shadow_books_provider_characterization_test.dart` (lines 57, 73) | accept | v1.0 close |
 | Tech-debt nit | `amount_display.dart` absent from `cleanup-touched-files.txt` (Plan 08-04 deferred-items.md) | accept | v1.0 close |
 
-**v1.1-deferred items (now subsumed into v1.2 active scope):**
+**v1.1-deferred items (subsumed into v1.2 active scope and shipped):**
 
-- HAPPY-V2-01..03 → Phases 16, 15, 17 respectively
-- STATSUI-V2-01 → Phase 16
-- TOOL-V2-02 → Phase 14
-- FAMILY-V2-01..03 → still v2 backlog (explicitly out of v1.2 scope to keep Joy-axis focus)
+- HAPPY-V2-01..03 → shipped in Phases 16, 15, 17 respectively
+- STATSUI-V2-01 → shipped in Phase 16
+- TOOL-V2-02 → shipped in Phase 14
+- FAMILY-V2-01..03 → still v2 backlog (explicitly out of v1.2 scope; candidate for next milestone)
 - TOOL-V2-01 (fl_chart 1.x) → still v2 backlog
-
-**Items acknowledged and deferred at v1.1 milestone close on 2026-05-05:**
-
-| Category | Item | Status | Deferred At |
-|----------|------|--------|-------------|
-| verification_gap | Phase 11 `11-VERIFICATION.md` human UAT: run AnalyticsScreen on device/simulator and exercise month chip + pull-to-refresh on real app data | human_needed | v1.1 close |
 
 ## Session Continuity
 
-Last session: 2026-05-21T01:55:27.000Z
-Stopped at: Completed 17-08-PLAN.md
+Last session: 2026-05-21T03:30:00.000Z
+Stopped at: v1.2 milestone closed
 Resume file: None
 
-**Planned Next:** Run v1.2 milestone verification / close-out.
+**Planned Next:** Start next milestone via `/gsd:new-milestone`.
+
+## Operator Next Steps
+
+- Start the next milestone with `/gsd:new-milestone` (will run requirements definition + research + roadmap creation).
+- Optional pre-work: refresh codebase map with `/gsd:map-codebase` (last refresh 2026-04-25 — three milestones of drift).
+- Optional: backfill v1.2 verification debt with `/gsd:verify-work 13` and `/gsd:verify-work 17` if a clean re-audit is desired before next-milestone planning.
