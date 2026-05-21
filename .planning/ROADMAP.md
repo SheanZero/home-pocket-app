@@ -147,7 +147,7 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
   - [x] 17-05-PLAN.md — AnalyticsDao 12+ methods gain EntrySource? entrySourceFilter; predicate-drift constants byte-identical; repo interface re-emitted; DAO tests (D-15/D-17)
   - [x] 17-06-PLAN.md — 11 use-case execute() signatures gain entrySourceFilter; recommendation use case byte-identical; 3 representative use-case tests (D-15)
   - [x] 17-07-PLAN.md — ARB ×3 trilingual lockstep + state_joy_metric_variant provider + JoyMetricVariantChip widget + family-key extensions; anti-toxicity + chip-flow tests (D-10..D-14/D-18)
-  - [ ] 17-08-PLAN.md — AnalyticsScreen integration (AppBar chip + _refresh) + HomeHero isolation test extension + entry-path-stamping + sync round-trip integration tests (SC-2/SC-3/SC-4/D-03/D-09)
+  - [x] 17-08-PLAN.md — AnalyticsScreen integration (AppBar chip + _refresh) + HomeHero isolation test extension + entry-path-stamping + sync round-trip integration tests (SC-2/SC-3/SC-4/D-03/D-09)
 **UI hint**: yes
 
 ## Current Status
@@ -161,7 +161,7 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 |-----------|--------|----------------|--------|---------|
 | v1.0 Codebase Cleanup Initiative | 1-8 | 48/48 | Complete | 2026-04-29 |
 | v1.1 Happiness Metric & Display | 9-12 | 40/40 | Complete | 2026-05-05 |
-| v1.2 Happiness Metric Refresh | 13-17 | 36/37 | In Progress | — |
+| v1.2 Happiness Metric Refresh | 13-17 | 37/37 | In Progress | — |
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -169,4 +169,4 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 | 14. ADR-016 Frontend + ARB Reconciliation | 6/6 | Complete | 2026-05-19 |
 | 15. Custom Time Windows | 6/6 | Complete    | 2026-05-19 |
 | 16. Per-Category Breakdown + Soul-vs-Survival | 10/10 | Complete    | 2026-05-20 |
-| 17. Manual-Only Joy Sub-Metric | 7/8 | In Progress | — |
+| 17. Manual-Only Joy Sub-Metric | 8/8 | Complete | 2026-05-21 |
