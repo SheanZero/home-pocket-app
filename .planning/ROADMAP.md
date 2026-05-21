@@ -136,7 +136,7 @@ Phase numbering continues from Phase 13 (no reset). Triggered by ADR-016 ratify 
 **Success Criteria** (what must be TRUE):
   1. Schema migration adds `transactions.entry_source` column (enum/string: `manual` / `voice` / future values); existing rows backfill to a documented default; round-trip migration test green and no data loss verified.
   2. Voice-entry code path stamps `entry_source = 'voice'` on new transactions; manual-entry code path stamps `entry_source = 'manual'`; verified by integration tests covering both entry surfaces.
-  3. AnalyticsScreen exposes a toggle ("Joy metric: All entries / Manual entries only" or locale equivalents); when manual-only is selected, all Joy metrics (Σ joy_contribution, per-category breakdown, Soul-vs-Survival comparison) re-query with `entry_source = 'manual'` filter.
+  3. When manual-only is selected, every data card on AnalyticsScreen re-queries with entry_source = 'manual' filter (including total spend / category distribution / 6-month trend / largest expense / Soul-vs-Survival both columns). HomeHero and Settings recommendation remain unaffected (SC-4).
   4. HomeHero remains unaffected by the toggle — HomeHero ring continues to reflect all entries per ADR-016 §3 (toggle is an analytics-side audit lens, not a global metric switch); verified by widget test.
   5. ARB keys for the toggle and explanatory copy exist in ja/zh/en parity; `flutter gen-l10n` succeeds; copy is neutral (no implication that voice entries are "less valid", only that the toggle "excludes voice-estimated entries").
 **Plans**: 8 plans
