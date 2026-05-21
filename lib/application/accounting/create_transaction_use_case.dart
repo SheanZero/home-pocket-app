@@ -1,6 +1,8 @@
 import 'package:ulid/ulid.dart';
 
+import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/accounting/domain/models/transaction.dart';
+import '../../features/accounting/domain/models/transaction_sync_mapper.dart';
 import '../../features/accounting/domain/repositories/category_repository.dart';
 import '../../features/accounting/domain/repositories/device_identity_repository.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
@@ -9,7 +11,6 @@ import '../../shared/utils/result.dart';
 import '../dual_ledger/classification_service.dart';
 import '../family_sync/sync_engine.dart';
 import '../family_sync/transaction_change_tracker.dart';
-import '../../features/accounting/domain/models/transaction_sync_mapper.dart';
 
 /// Parameters for creating a new transaction.
 class CreateTransactionParams {
@@ -22,6 +23,7 @@ class CreateTransactionParams {
   final String? merchant;
   final int? soulSatisfaction; // null = use default 2
   final LedgerType? ledgerType; // null = auto-classify
+  final EntrySource entrySource;
 
   const CreateTransactionParams({
     required this.bookId,
@@ -33,6 +35,8 @@ class CreateTransactionParams {
     this.merchant,
     this.soulSatisfaction,
     this.ledgerType,
+    // D-06: required, no default — every push site MUST specify.
+    required this.entrySource,
   });
 }
 
@@ -156,6 +160,7 @@ class CreateTransactionUseCase {
       note: params.note,
       merchant: params.merchant,
       soulSatisfaction: soulSatisfaction,
+      entrySource: params.entrySource,
     );
 
     // 9. Persist
