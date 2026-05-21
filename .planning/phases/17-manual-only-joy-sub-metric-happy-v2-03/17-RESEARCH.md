@@ -667,22 +667,25 @@ test('fromSyncMap defaults missing entry_source to manual (D-09)', () {
 | A5 | No new entry path is added during Phase 17 itself (e.g., shortcut widget, sharing extension) | Push-site list | LOW — verified by grepping `MaterialPageRoute.*TransactionConfirmScreen` in lib/ (3 sites found) |
 | A6 | `bill_sync_round_trip_test.dart` exists and can be extended to assert entry_source round-trip survival | Pattern: test infrastructure | LOW — file located at `test/integration/sync/bill_sync_round_trip_test.dart` (verified) |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **ARB substring sweep handling of `estimated` (and Chinese `估算`)**
    - What we know: D-14 includes `estimated` in the en forbidden list when it's a value-judgment context, but the explanation ARB key may contain "voice-estimated entries" descriptively.
    - What's unclear: Whether the widget test should use phrase-level matching (e.g., forbid `less accurate` but allow `voice-estimated`) or accept the false-positive risk of substring matching.
    - Recommendation: Plan-phase produces final ARB wording FIRST, then the widget test team chooses test strategy. If `estimated` / `估算` appears in any final ARB string, replace it with a more specific forbidden phrase (e.g., `estimated · less` or skip `estimated` entirely and rely on the other 6 en substrings).
+   - **RESOLVED:** Plan 07 Task 1 anchors the ARB wording (`Manual entries only · excludes voice-estimated entries`, `仅手动输入 · 不含语音估算条目`) — the bare `estimated` token is descriptive in the compound `voice-estimated` / `语音估算` and is intentionally omitted from the en forbidden list per Q1 recommendation. Plan 07 Task 5 (`anti_toxicity_phase17_test.dart`) encodes the resulting forbidden lists: en excludes bare `'estimated'`; zh forbids the compound `估算不准` but allows standalone `估算`.
 
 2. **`analyticsRepositoryProvider` plumbing for new use-case parameter**
    - What we know: The repository interface `AnalyticsRepository` likely already mirrors DAO signatures. Adding `EntrySource? entrySourceFilter` cascades through interface → impl → use case → state provider.
    - What's unclear: Whether the repository interface should be re-emitted in this phase OR Phase 17 should add the parameter to ONLY the impl + use case (and the interface accepts the param via overload).
    - Recommendation: Add the parameter to the abstract `AnalyticsRepository` interface AND impl. Phase 16 added 4 new repo methods (per-category + soul-vs-survival × single + across-books) and this is the established pattern.
+   - **RESOLVED:** Plan 05 Task 2 updates the abstract `AnalyticsRepository` interface AND the concrete `AnalyticsRepositoryImpl` in lockstep (both gain `EntrySource? entrySourceFilter` on every method mirroring a Plan 05 Task 1-modified DAO method). Acceptance criteria require ≥12 occurrences of `EntrySource? entrySourceFilter,` in the abstract interface and ≥12 occurrences of `entrySourceFilter: entrySourceFilter,` in the impl.
 
 3. **Which AnalyticsScreen card-feeding state provider needs a family-key change?**
    - What we know: `monthlyReportProvider`, `happinessReportProvider`, `satisfactionDistributionProvider`, `bestJoyMomentProvider`, `largestMonthlyExpenseProvider`, `expenseTrendProvider`, `perCategorySoulBreakdownProvider`, `perCategorySoulBreakdownFamilyProvider`, `soulVsSurvivalSnapshotProvider`, `soulVsSurvivalSnapshotFamilyProvider`, `familyHappinessProvider` are all candidates per D-15.
    - What's unclear: `expenseTrendProvider` family key is currently `(bookId, anchor)` — adding `joyMetricVariant` makes 3-tuple, but D-15 says 6-month trend respects the variant filter.
    - Recommendation: Plan-phase verifies each provider's current family key, adds `joyMetricVariant` to it, and threads the value into the use case execute call. The exact list is 10-11 providers.
+   - **RESOLVED:** Plan 07 Task 3 enumerates the family-key extensions across `state_happiness.dart`, `state_analytics.dart`, `state_ledger_snapshot.dart` (every AnalyticsScreen-feeding provider gains `required JoyMetricVariant joyMetricVariant`, including `expenseTrendProvider`). Plan 08 Task 1 wires the screen-level consumer-site invocations and `_refresh()` invalidations to pass the current variant. `monthlyJoyTargetRecommendationProvider` is the explicit negative exclusion (D-15) — Plan 07 Task 3 acceptance criteria verify the recommendation provider declaration is byte-identical pre/post.
 
 ## Environment Availability
 
