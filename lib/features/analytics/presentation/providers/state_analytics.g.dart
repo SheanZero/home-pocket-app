@@ -26,7 +26,12 @@ final class MonthlyReportProvider
   /// Monthly report for the selected window.
   MonthlyReportProvider._({
     required MonthlyReportFamily super.from,
-    required ({String bookId, DateTime startDate, DateTime endDate})
+    required ({
+      String bookId,
+      DateTime startDate,
+      DateTime endDate,
+      JoyMetricVariant joyMetricVariant,
+    })
     super.argument,
   }) : super(
          retry: null,
@@ -56,12 +61,18 @@ final class MonthlyReportProvider
   FutureOr<MonthlyReport> create(Ref ref) {
     final argument =
         this.argument
-            as ({String bookId, DateTime startDate, DateTime endDate});
+            as ({
+              String bookId,
+              DateTime startDate,
+              DateTime endDate,
+              JoyMetricVariant joyMetricVariant,
+            });
     return monthlyReport(
       ref,
       bookId: argument.bookId,
       startDate: argument.startDate,
       endDate: argument.endDate,
+      joyMetricVariant: argument.joyMetricVariant,
     );
   }
 
@@ -76,7 +87,7 @@ final class MonthlyReportProvider
   }
 }
 
-String _$monthlyReportHash() => r'f638e2c4193007cd84efc597361c7c556015e60b';
+String _$monthlyReportHash() => r'1183ed0554f08fc571fdc62e54f01bba27a361f0';
 
 /// Monthly report for the selected window.
 
@@ -84,7 +95,12 @@ final class MonthlyReportFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<MonthlyReport>,
-          ({String bookId, DateTime startDate, DateTime endDate})
+          ({
+            String bookId,
+            DateTime startDate,
+            DateTime endDate,
+            JoyMetricVariant joyMetricVariant,
+          })
         > {
   MonthlyReportFamily._()
     : super(
@@ -101,8 +117,14 @@ final class MonthlyReportFamily extends $Family
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    required JoyMetricVariant joyMetricVariant,
   }) => MonthlyReportProvider._(
-    argument: (bookId: bookId, startDate: startDate, endDate: endDate),
+    argument: (
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+      joyMetricVariant: joyMetricVariant,
+    ),
     from: this,
   );
 
@@ -128,7 +150,12 @@ final class ExpenseTrendProvider
   /// 6-month expense trend.
   ExpenseTrendProvider._({
     required ExpenseTrendFamily super.from,
-    required ({String bookId, DateTime anchor}) super.argument,
+    required ({
+      String bookId,
+      DateTime anchor,
+      JoyMetricVariant joyMetricVariant,
+    })
+    super.argument,
   }) : super(
          retry: null,
          name: r'expenseTrendProvider',
@@ -155,8 +182,19 @@ final class ExpenseTrendProvider
 
   @override
   FutureOr<ExpenseTrendData> create(Ref ref) {
-    final argument = this.argument as ({String bookId, DateTime anchor});
-    return expenseTrend(ref, bookId: argument.bookId, anchor: argument.anchor);
+    final argument =
+        this.argument
+            as ({
+              String bookId,
+              DateTime anchor,
+              JoyMetricVariant joyMetricVariant,
+            });
+    return expenseTrend(
+      ref,
+      bookId: argument.bookId,
+      anchor: argument.anchor,
+      joyMetricVariant: argument.joyMetricVariant,
+    );
   }
 
   @override
@@ -170,7 +208,7 @@ final class ExpenseTrendProvider
   }
 }
 
-String _$expenseTrendHash() => r'3f3497209b33b8aac9e6eff40fe290252e131a24';
+String _$expenseTrendHash() => r'a5986dabee649899c3bbf8915239554bed2104de';
 
 /// 6-month expense trend.
 
@@ -178,7 +216,7 @@ final class ExpenseTrendFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<ExpenseTrendData>,
-          ({String bookId, DateTime anchor})
+          ({String bookId, DateTime anchor, JoyMetricVariant joyMetricVariant})
         > {
   ExpenseTrendFamily._()
     : super(
@@ -194,8 +232,13 @@ final class ExpenseTrendFamily extends $Family
   ExpenseTrendProvider call({
     required String bookId,
     required DateTime anchor,
+    required JoyMetricVariant joyMetricVariant,
   }) => ExpenseTrendProvider._(
-    argument: (bookId: bookId, anchor: anchor),
+    argument: (
+      bookId: bookId,
+      anchor: anchor,
+      joyMetricVariant: joyMetricVariant,
+    ),
     from: this,
   );
 
@@ -308,7 +351,12 @@ final class SatisfactionDistributionProvider
   /// Satisfaction score distribution for the selected window.
   SatisfactionDistributionProvider._({
     required SatisfactionDistributionFamily super.from,
-    required ({String bookId, DateTime startDate, DateTime endDate})
+    required ({
+      String bookId,
+      DateTime startDate,
+      DateTime endDate,
+      JoyMetricVariant joyMetricVariant,
+    })
     super.argument,
   }) : super(
          retry: null,
@@ -338,12 +386,18 @@ final class SatisfactionDistributionProvider
   FutureOr<List<SatisfactionScoreBucket>> create(Ref ref) {
     final argument =
         this.argument
-            as ({String bookId, DateTime startDate, DateTime endDate});
+            as ({
+              String bookId,
+              DateTime startDate,
+              DateTime endDate,
+              JoyMetricVariant joyMetricVariant,
+            });
     return satisfactionDistribution(
       ref,
       bookId: argument.bookId,
       startDate: argument.startDate,
       endDate: argument.endDate,
+      joyMetricVariant: argument.joyMetricVariant,
     );
   }
 
@@ -360,7 +414,7 @@ final class SatisfactionDistributionProvider
 }
 
 String _$satisfactionDistributionHash() =>
-    r'ad577b2f3bdb52b0f0a269e541d82aac25a58f60';
+    r'f03444cb63a5437a3f3a75072b827b0ce629b1d3';
 
 /// Satisfaction score distribution for the selected window.
 
@@ -368,7 +422,12 @@ final class SatisfactionDistributionFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<List<SatisfactionScoreBucket>>,
-          ({String bookId, DateTime startDate, DateTime endDate})
+          ({
+            String bookId,
+            DateTime startDate,
+            DateTime endDate,
+            JoyMetricVariant joyMetricVariant,
+          })
         > {
   SatisfactionDistributionFamily._()
     : super(
@@ -385,8 +444,14 @@ final class SatisfactionDistributionFamily extends $Family
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    required JoyMetricVariant joyMetricVariant,
   }) => SatisfactionDistributionProvider._(
-    argument: (bookId: bookId, startDate: startDate, endDate: endDate),
+    argument: (
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+      joyMetricVariant: joyMetricVariant,
+    ),
     from: this,
   );
 

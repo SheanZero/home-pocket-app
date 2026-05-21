@@ -31,6 +31,7 @@ final class HappinessReportProvider
       DateTime startDate,
       DateTime endDate,
       String currencyCode,
+      JoyMetricVariant joyMetricVariant,
     })
     super.argument,
   }) : super(
@@ -66,6 +67,7 @@ final class HappinessReportProvider
               DateTime startDate,
               DateTime endDate,
               String currencyCode,
+              JoyMetricVariant joyMetricVariant,
             });
     return happinessReport(
       ref,
@@ -73,6 +75,7 @@ final class HappinessReportProvider
       startDate: argument.startDate,
       endDate: argument.endDate,
       currencyCode: argument.currencyCode,
+      joyMetricVariant: argument.joyMetricVariant,
     );
   }
 
@@ -87,7 +90,7 @@ final class HappinessReportProvider
   }
 }
 
-String _$happinessReportHash() => r'236f5372581442f06baf87749750e24547ae4764';
+String _$happinessReportHash() => r'bba825f71b0a9fba4f6cff27843387d4f81a9f94';
 
 /// HAPPY-01..04 personal happiness report.
 
@@ -100,6 +103,7 @@ final class HappinessReportFamily extends $Family
             DateTime startDate,
             DateTime endDate,
             String currencyCode,
+            JoyMetricVariant joyMetricVariant,
           })
         > {
   HappinessReportFamily._()
@@ -118,12 +122,14 @@ final class HappinessReportFamily extends $Family
     required DateTime startDate,
     required DateTime endDate,
     required String currencyCode,
+    required JoyMetricVariant joyMetricVariant,
   }) => HappinessReportProvider._(
     argument: (
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
       currencyCode: currencyCode,
+      joyMetricVariant: joyMetricVariant,
     ),
     from: this,
   );
@@ -152,7 +158,12 @@ final class BestJoyMomentProvider
   /// HAPPY-04 standalone Top Joy.
   BestJoyMomentProvider._({
     required BestJoyMomentFamily super.from,
-    required ({String bookId, DateTime startDate, DateTime endDate})
+    required ({
+      String bookId,
+      DateTime startDate,
+      DateTime endDate,
+      JoyMetricVariant joyMetricVariant,
+    })
     super.argument,
   }) : super(
          retry: null,
@@ -182,12 +193,18 @@ final class BestJoyMomentProvider
   FutureOr<MetricResult<BestJoyMomentRow>> create(Ref ref) {
     final argument =
         this.argument
-            as ({String bookId, DateTime startDate, DateTime endDate});
+            as ({
+              String bookId,
+              DateTime startDate,
+              DateTime endDate,
+              JoyMetricVariant joyMetricVariant,
+            });
     return bestJoyMoment(
       ref,
       bookId: argument.bookId,
       startDate: argument.startDate,
       endDate: argument.endDate,
+      joyMetricVariant: argument.joyMetricVariant,
     );
   }
 
@@ -202,7 +219,7 @@ final class BestJoyMomentProvider
   }
 }
 
-String _$bestJoyMomentHash() => r'32dd35a5d11b9ad591f5fc758d26254c6c7689e1';
+String _$bestJoyMomentHash() => r'acf10ac260279e40a9a0b146e490e0e6486b5643';
 
 /// HAPPY-04 standalone Top Joy.
 
@@ -210,7 +227,12 @@ final class BestJoyMomentFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<MetricResult<BestJoyMomentRow>>,
-          ({String bookId, DateTime startDate, DateTime endDate})
+          ({
+            String bookId,
+            DateTime startDate,
+            DateTime endDate,
+            JoyMetricVariant joyMetricVariant,
+          })
         > {
   BestJoyMomentFamily._()
     : super(
@@ -227,8 +249,14 @@ final class BestJoyMomentFamily extends $Family
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    required JoyMetricVariant joyMetricVariant,
   }) => BestJoyMomentProvider._(
-    argument: (bookId: bookId, startDate: startDate, endDate: endDate),
+    argument: (
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+      joyMetricVariant: joyMetricVariant,
+    ),
     from: this,
   );
 
@@ -368,7 +396,12 @@ final class LargestMonthlyExpenseProvider
   /// STATSUI-06 / D-15 — single largest monthly expense for 物語 group 総 card.
   LargestMonthlyExpenseProvider._({
     required LargestMonthlyExpenseFamily super.from,
-    required ({String bookId, DateTime startDate, DateTime endDate})
+    required ({
+      String bookId,
+      DateTime startDate,
+      DateTime endDate,
+      JoyMetricVariant joyMetricVariant,
+    })
     super.argument,
   }) : super(
          retry: null,
@@ -398,12 +431,18 @@ final class LargestMonthlyExpenseProvider
   FutureOr<LargestMonthlyExpense?> create(Ref ref) {
     final argument =
         this.argument
-            as ({String bookId, DateTime startDate, DateTime endDate});
+            as ({
+              String bookId,
+              DateTime startDate,
+              DateTime endDate,
+              JoyMetricVariant joyMetricVariant,
+            });
     return largestMonthlyExpense(
       ref,
       bookId: argument.bookId,
       startDate: argument.startDate,
       endDate: argument.endDate,
+      joyMetricVariant: argument.joyMetricVariant,
     );
   }
 
@@ -419,7 +458,7 @@ final class LargestMonthlyExpenseProvider
 }
 
 String _$largestMonthlyExpenseHash() =>
-    r'10c10dad0a1bced96cfa5c53ec560a5a7c846ec0';
+    r'6aba58c5717985dc052f5d045f3bc731688f1120';
 
 /// STATSUI-06 / D-15 — single largest monthly expense for 物語 group 総 card.
 
@@ -427,7 +466,12 @@ final class LargestMonthlyExpenseFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<LargestMonthlyExpense?>,
-          ({String bookId, DateTime startDate, DateTime endDate})
+          ({
+            String bookId,
+            DateTime startDate,
+            DateTime endDate,
+            JoyMetricVariant joyMetricVariant,
+          })
         > {
   LargestMonthlyExpenseFamily._()
     : super(
@@ -444,8 +488,14 @@ final class LargestMonthlyExpenseFamily extends $Family
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    required JoyMetricVariant joyMetricVariant,
   }) => LargestMonthlyExpenseProvider._(
-    argument: (bookId: bookId, startDate: startDate, endDate: endDate),
+    argument: (
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+      joyMetricVariant: joyMetricVariant,
+    ),
     from: this,
   );
 
@@ -483,7 +533,12 @@ final class FamilyHappinessProvider
   /// 10/11 may extend the call site if current-device book inclusion is required.
   FamilyHappinessProvider._({
     required FamilyHappinessFamily super.from,
-    required ({DateTime startDate, DateTime endDate}) super.argument,
+    required ({
+      DateTime startDate,
+      DateTime endDate,
+      JoyMetricVariant joyMetricVariant,
+    })
+    super.argument,
   }) : super(
          retry: null,
          name: r'familyHappinessProvider',
@@ -510,11 +565,18 @@ final class FamilyHappinessProvider
 
   @override
   FutureOr<FamilyHappiness> create(Ref ref) {
-    final argument = this.argument as ({DateTime startDate, DateTime endDate});
+    final argument =
+        this.argument
+            as ({
+              DateTime startDate,
+              DateTime endDate,
+              JoyMetricVariant joyMetricVariant,
+            });
     return familyHappiness(
       ref,
       startDate: argument.startDate,
       endDate: argument.endDate,
+      joyMetricVariant: argument.joyMetricVariant,
     );
   }
 
@@ -529,7 +591,7 @@ final class FamilyHappinessProvider
   }
 }
 
-String _$familyHappinessHash() => r'3b7409409c859ea75df4540a1023fd20b53186c9';
+String _$familyHappinessHash() => r'0b6cfb8efd44e7538988d3ee993e6e303e436161';
 
 /// FAMILY-01..02 family happiness aggregate.
 ///
@@ -541,7 +603,11 @@ final class FamilyHappinessFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<FamilyHappiness>,
-          ({DateTime startDate, DateTime endDate})
+          ({
+            DateTime startDate,
+            DateTime endDate,
+            JoyMetricVariant joyMetricVariant,
+          })
         > {
   FamilyHappinessFamily._()
     : super(
@@ -561,8 +627,13 @@ final class FamilyHappinessFamily extends $Family
   FamilyHappinessProvider call({
     required DateTime startDate,
     required DateTime endDate,
+    required JoyMetricVariant joyMetricVariant,
   }) => FamilyHappinessProvider._(
-    argument: (startDate: startDate, endDate: endDate),
+    argument: (
+      startDate: startDate,
+      endDate: endDate,
+      joyMetricVariant: joyMetricVariant,
+    ),
     from: this,
   );
 

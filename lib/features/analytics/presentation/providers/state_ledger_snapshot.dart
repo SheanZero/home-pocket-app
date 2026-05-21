@@ -1,11 +1,13 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../accounting/domain/models/entry_source.dart';
 import '../../../family_sync/presentation/providers/state_active_group.dart';
 import '../../../home/presentation/providers/state_shadow_books.dart';
 import '../../domain/models/ledger_snapshot.dart';
 import '../../domain/models/metric_result.dart';
 import '../../domain/models/per_category_soul_breakdown.dart';
 import 'repository_providers.dart';
+import 'state_joy_metric_variant.dart';
 
 part 'state_ledger_snapshot.g.dart';
 
@@ -20,12 +22,18 @@ Future<MetricResult<PerCategorySoulBreakdown>> perCategorySoulBreakdown(
   required String bookId,
   required DateTime startDate,
   required DateTime endDate,
+  required JoyMetricVariant joyMetricVariant,
 }) async {
   final useCase = ref.watch(getPerCategorySoulBreakdownUseCaseProvider);
+  // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
+  final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
+      ? EntrySource.manual
+      : null;
   return useCase.execute(
     bookId: bookId,
     startDate: startDate,
     endDate: endDate,
+    entrySourceFilter: entrySourceFilter,
   );
 }
 
@@ -41,6 +49,7 @@ Future<MetricResult<PerCategorySoulBreakdown>> perCategorySoulBreakdownFamily(
   Ref ref, {
   required DateTime startDate,
   required DateTime endDate,
+  required JoyMetricVariant joyMetricVariant,
 }) async {
   final activeGroup = await ref.watch(activeGroupProvider.future);
   if (activeGroup == null) return const Empty();
@@ -52,10 +61,15 @@ Future<MetricResult<PerCategorySoulBreakdown>> perCategorySoulBreakdownFamily(
   final useCase = ref.watch(
     getPerCategorySoulBreakdownAcrossBooksUseCaseProvider,
   );
+  // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
+  final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
+      ? EntrySource.manual
+      : null;
   return useCase.execute(
     groupBookIds: groupBookIds,
     startDate: startDate,
     endDate: endDate,
+    entrySourceFilter: entrySourceFilter,
   );
 }
 
@@ -70,12 +84,18 @@ Future<MetricResult<SoulVsSurvivalSnapshot>> soulVsSurvivalSnapshot(
   required String bookId,
   required DateTime startDate,
   required DateTime endDate,
+  required JoyMetricVariant joyMetricVariant,
 }) async {
   final useCase = ref.watch(getSoulVsSurvivalSnapshotUseCaseProvider);
+  // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
+  final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
+      ? EntrySource.manual
+      : null;
   return useCase.execute(
     bookId: bookId,
     startDate: startDate,
     endDate: endDate,
+    entrySourceFilter: entrySourceFilter,
   );
 }
 
@@ -90,6 +110,7 @@ Future<MetricResult<SoulVsSurvivalSnapshot>> soulVsSurvivalSnapshotFamily(
   Ref ref, {
   required DateTime startDate,
   required DateTime endDate,
+  required JoyMetricVariant joyMetricVariant,
 }) async {
   final activeGroup = await ref.watch(activeGroupProvider.future);
   if (activeGroup == null) return const Empty();
@@ -101,9 +122,14 @@ Future<MetricResult<SoulVsSurvivalSnapshot>> soulVsSurvivalSnapshotFamily(
   final useCase = ref.watch(
     getSoulVsSurvivalSnapshotAcrossBooksUseCaseProvider,
   );
+  // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
+  final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
+      ? EntrySource.manual
+      : null;
   return useCase.execute(
     groupBookIds: groupBookIds,
     startDate: startDate,
     endDate: endDate,
+    entrySourceFilter: entrySourceFilter,
   );
 }

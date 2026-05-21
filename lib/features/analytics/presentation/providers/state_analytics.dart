@@ -1,9 +1,11 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../accounting/domain/models/entry_source.dart';
 import '../../domain/models/analytics_aggregate.dart';
 import '../../domain/models/expense_trend.dart';
 import '../../domain/models/monthly_report.dart';
 import 'repository_providers.dart';
+import 'state_joy_metric_variant.dart';
 
 part 'state_analytics.g.dart';
 
@@ -14,12 +16,18 @@ Future<MonthlyReport> monthlyReport(
   required String bookId,
   required DateTime startDate,
   required DateTime endDate,
+  required JoyMetricVariant joyMetricVariant,
 }) async {
   final useCase = ref.watch(getMonthlyReportUseCaseProvider);
+  // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
+  final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
+      ? EntrySource.manual
+      : null;
   return useCase.execute(
     bookId: bookId,
     startDate: startDate,
     endDate: endDate,
+    entrySourceFilter: entrySourceFilter,
   );
 }
 
@@ -29,9 +37,18 @@ Future<ExpenseTrendData> expenseTrend(
   Ref ref, {
   required String bookId,
   required DateTime anchor,
+  required JoyMetricVariant joyMetricVariant,
 }) async {
   final useCase = ref.watch(getExpenseTrendUseCaseProvider);
-  return useCase.execute(bookId: bookId, anchor: anchor);
+  // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
+  final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
+      ? EntrySource.manual
+      : null;
+  return useCase.execute(
+    bookId: bookId,
+    anchor: anchor,
+    entrySourceFilter: entrySourceFilter,
+  );
 }
 
 /// Earliest month with a non-deleted transaction in the active book.
@@ -57,11 +74,17 @@ Future<List<SatisfactionScoreBucket>> satisfactionDistribution(
   required String bookId,
   required DateTime startDate,
   required DateTime endDate,
+  required JoyMetricVariant joyMetricVariant,
 }) async {
   final useCase = ref.watch(getSatisfactionDistributionUseCaseProvider);
+  // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
+  final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
+      ? EntrySource.manual
+      : null;
   return useCase.execute(
     bookId: bookId,
     startDate: startDate,
     endDate: endDate,
+    entrySourceFilter: entrySourceFilter,
   );
 }

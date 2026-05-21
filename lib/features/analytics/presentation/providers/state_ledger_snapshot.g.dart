@@ -40,7 +40,12 @@ final class PerCategorySoulBreakdownProvider
   /// D-08 min-N/Other rollup — the provider is plumbing only.
   PerCategorySoulBreakdownProvider._({
     required PerCategorySoulBreakdownFamily super.from,
-    required ({String bookId, DateTime startDate, DateTime endDate})
+    required ({
+      String bookId,
+      DateTime startDate,
+      DateTime endDate,
+      JoyMetricVariant joyMetricVariant,
+    })
     super.argument,
   }) : super(
          retry: null,
@@ -70,12 +75,18 @@ final class PerCategorySoulBreakdownProvider
   FutureOr<MetricResult<PerCategorySoulBreakdown>> create(Ref ref) {
     final argument =
         this.argument
-            as ({String bookId, DateTime startDate, DateTime endDate});
+            as ({
+              String bookId,
+              DateTime startDate,
+              DateTime endDate,
+              JoyMetricVariant joyMetricVariant,
+            });
     return perCategorySoulBreakdown(
       ref,
       bookId: argument.bookId,
       startDate: argument.startDate,
       endDate: argument.endDate,
+      joyMetricVariant: argument.joyMetricVariant,
     );
   }
 
@@ -92,7 +103,7 @@ final class PerCategorySoulBreakdownProvider
 }
 
 String _$perCategorySoulBreakdownHash() =>
-    r'30bca139acd6fd684f612b6f646bdb8823ee7d36';
+    r'4b23e1e331fc80889512cb76740a6fa8978c0451';
 
 /// HAPPY-V2-01 single-book per-category soul satisfaction breakdown.
 ///
@@ -104,7 +115,12 @@ final class PerCategorySoulBreakdownFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<MetricResult<PerCategorySoulBreakdown>>,
-          ({String bookId, DateTime startDate, DateTime endDate})
+          ({
+            String bookId,
+            DateTime startDate,
+            DateTime endDate,
+            JoyMetricVariant joyMetricVariant,
+          })
         > {
   PerCategorySoulBreakdownFamily._()
     : super(
@@ -125,8 +141,14 @@ final class PerCategorySoulBreakdownFamily extends $Family
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    required JoyMetricVariant joyMetricVariant,
   }) => PerCategorySoulBreakdownProvider._(
-    argument: (bookId: bookId, startDate: startDate, endDate: endDate),
+    argument: (
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+      joyMetricVariant: joyMetricVariant,
+    ),
     from: this,
   );
 
@@ -173,7 +195,12 @@ final class PerCategorySoulBreakdownFamilyProvider
   /// single-book result.
   PerCategorySoulBreakdownFamilyProvider._({
     required PerCategorySoulBreakdownFamilyFamily super.from,
-    required ({DateTime startDate, DateTime endDate}) super.argument,
+    required ({
+      DateTime startDate,
+      DateTime endDate,
+      JoyMetricVariant joyMetricVariant,
+    })
+    super.argument,
   }) : super(
          retry: null,
          name: r'perCategorySoulBreakdownFamilyProvider',
@@ -200,11 +227,18 @@ final class PerCategorySoulBreakdownFamilyProvider
 
   @override
   FutureOr<MetricResult<PerCategorySoulBreakdown>> create(Ref ref) {
-    final argument = this.argument as ({DateTime startDate, DateTime endDate});
+    final argument =
+        this.argument
+            as ({
+              DateTime startDate,
+              DateTime endDate,
+              JoyMetricVariant joyMetricVariant,
+            });
     return perCategorySoulBreakdownFamily(
       ref,
       startDate: argument.startDate,
       endDate: argument.endDate,
+      joyMetricVariant: argument.joyMetricVariant,
     );
   }
 
@@ -221,7 +255,7 @@ final class PerCategorySoulBreakdownFamilyProvider
 }
 
 String _$perCategorySoulBreakdownFamilyHash() =>
-    r'c51495a2ba0d5fd685f73471ba64875e34b9ce12';
+    r'd4d391d5b716ba90deb494cf2b8a297864129397';
 
 /// HAPPY-V2-01 D-17, D-20 — family-aggregate variant for group-mode
 /// "Family · Top categories" card.
@@ -235,7 +269,11 @@ final class PerCategorySoulBreakdownFamilyFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<MetricResult<PerCategorySoulBreakdown>>,
-          ({DateTime startDate, DateTime endDate})
+          ({
+            DateTime startDate,
+            DateTime endDate,
+            JoyMetricVariant joyMetricVariant,
+          })
         > {
   PerCategorySoulBreakdownFamilyFamily._()
     : super(
@@ -257,8 +295,13 @@ final class PerCategorySoulBreakdownFamilyFamily extends $Family
   PerCategorySoulBreakdownFamilyProvider call({
     required DateTime startDate,
     required DateTime endDate,
+    required JoyMetricVariant joyMetricVariant,
   }) => PerCategorySoulBreakdownFamilyProvider._(
-    argument: (startDate: startDate, endDate: endDate),
+    argument: (
+      startDate: startDate,
+      endDate: endDate,
+      joyMetricVariant: joyMetricVariant,
+    ),
     from: this,
   );
 
@@ -298,7 +341,12 @@ final class SoulVsSurvivalSnapshotProvider
   /// either-ledger-zero gate (any side missing/zero → [Empty]).
   SoulVsSurvivalSnapshotProvider._({
     required SoulVsSurvivalSnapshotFamily super.from,
-    required ({String bookId, DateTime startDate, DateTime endDate})
+    required ({
+      String bookId,
+      DateTime startDate,
+      DateTime endDate,
+      JoyMetricVariant joyMetricVariant,
+    })
     super.argument,
   }) : super(
          retry: null,
@@ -328,12 +376,18 @@ final class SoulVsSurvivalSnapshotProvider
   FutureOr<MetricResult<SoulVsSurvivalSnapshot>> create(Ref ref) {
     final argument =
         this.argument
-            as ({String bookId, DateTime startDate, DateTime endDate});
+            as ({
+              String bookId,
+              DateTime startDate,
+              DateTime endDate,
+              JoyMetricVariant joyMetricVariant,
+            });
     return soulVsSurvivalSnapshot(
       ref,
       bookId: argument.bookId,
       startDate: argument.startDate,
       endDate: argument.endDate,
+      joyMetricVariant: argument.joyMetricVariant,
     );
   }
 
@@ -350,7 +404,7 @@ final class SoulVsSurvivalSnapshotProvider
 }
 
 String _$soulVsSurvivalSnapshotHash() =>
-    r'5ca6639842b04517210bd670b784bf9a39728a6f';
+    r'ef3ff573e6ebc5b09e1b7f71e0952eb51e25cc9c';
 
 /// STATSUI-V2-01 single-book Soul-vs-Survival engagement snapshot.
 ///
@@ -362,7 +416,12 @@ final class SoulVsSurvivalSnapshotFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<MetricResult<SoulVsSurvivalSnapshot>>,
-          ({String bookId, DateTime startDate, DateTime endDate})
+          ({
+            String bookId,
+            DateTime startDate,
+            DateTime endDate,
+            JoyMetricVariant joyMetricVariant,
+          })
         > {
   SoulVsSurvivalSnapshotFamily._()
     : super(
@@ -383,8 +442,14 @@ final class SoulVsSurvivalSnapshotFamily extends $Family
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    required JoyMetricVariant joyMetricVariant,
   }) => SoulVsSurvivalSnapshotProvider._(
-    argument: (bookId: bookId, startDate: startDate, endDate: endDate),
+    argument: (
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+      joyMetricVariant: joyMetricVariant,
+    ),
     from: this,
   );
 
@@ -428,7 +493,12 @@ final class SoulVsSurvivalSnapshotFamilyProvider
   /// populated family aggregate.
   SoulVsSurvivalSnapshotFamilyProvider._({
     required SoulVsSurvivalSnapshotFamilyFamily super.from,
-    required ({DateTime startDate, DateTime endDate}) super.argument,
+    required ({
+      DateTime startDate,
+      DateTime endDate,
+      JoyMetricVariant joyMetricVariant,
+    })
+    super.argument,
   }) : super(
          retry: null,
          name: r'soulVsSurvivalSnapshotFamilyProvider',
@@ -455,11 +525,18 @@ final class SoulVsSurvivalSnapshotFamilyProvider
 
   @override
   FutureOr<MetricResult<SoulVsSurvivalSnapshot>> create(Ref ref) {
-    final argument = this.argument as ({DateTime startDate, DateTime endDate});
+    final argument =
+        this.argument
+            as ({
+              DateTime startDate,
+              DateTime endDate,
+              JoyMetricVariant joyMetricVariant,
+            });
     return soulVsSurvivalSnapshotFamily(
       ref,
       startDate: argument.startDate,
       endDate: argument.endDate,
+      joyMetricVariant: argument.joyMetricVariant,
     );
   }
 
@@ -476,7 +553,7 @@ final class SoulVsSurvivalSnapshotFamilyProvider
 }
 
 String _$soulVsSurvivalSnapshotFamilyHash() =>
-    r'2ddd419a385e1f2413e94969fecd6184dbf32a70';
+    r'b5624708e20e2ea8c55e43f8cda5223385123261';
 
 /// STATSUI-V2-01 D-18, D-20 — family-aggregate Soul-vs-Survival snapshot.
 ///
@@ -489,7 +566,11 @@ final class SoulVsSurvivalSnapshotFamilyFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<MetricResult<SoulVsSurvivalSnapshot>>,
-          ({DateTime startDate, DateTime endDate})
+          ({
+            DateTime startDate,
+            DateTime endDate,
+            JoyMetricVariant joyMetricVariant,
+          })
         > {
   SoulVsSurvivalSnapshotFamilyFamily._()
     : super(
@@ -510,8 +591,13 @@ final class SoulVsSurvivalSnapshotFamilyFamily extends $Family
   SoulVsSurvivalSnapshotFamilyProvider call({
     required DateTime startDate,
     required DateTime endDate,
+    required JoyMetricVariant joyMetricVariant,
   }) => SoulVsSurvivalSnapshotFamilyProvider._(
-    argument: (startDate: startDate, endDate: endDate),
+    argument: (
+      startDate: startDate,
+      endDate: endDate,
+      joyMetricVariant: joyMetricVariant,
+    ),
     from: this,
   );
 

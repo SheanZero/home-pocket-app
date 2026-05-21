@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../accounting/domain/models/entry_source.dart';
 import '../../domain/models/best_joy_moment_row.dart';
 import '../../domain/models/analytics_aggregate.dart';
 import '../../domain/models/family_happiness.dart';
@@ -8,6 +9,7 @@ import '../../domain/models/metric_result.dart';
 import '../../../family_sync/presentation/providers/state_active_group.dart';
 import '../../../home/presentation/providers/state_shadow_books.dart';
 import 'repository_providers.dart';
+import 'state_joy_metric_variant.dart';
 
 part 'state_happiness.g.dart';
 
@@ -19,13 +21,19 @@ Future<HappinessReport> happinessReport(
   required DateTime startDate,
   required DateTime endDate,
   required String currencyCode,
+  required JoyMetricVariant joyMetricVariant,
 }) async {
   final useCase = ref.watch(getHappinessReportUseCaseProvider);
+  // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
+  final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
+      ? EntrySource.manual
+      : null;
   return useCase.execute(
     bookId: bookId,
     startDate: startDate,
     endDate: endDate,
     currencyCode: currencyCode,
+    entrySourceFilter: entrySourceFilter,
   );
 }
 
@@ -36,12 +44,18 @@ Future<MetricResult<BestJoyMomentRow>> bestJoyMoment(
   required String bookId,
   required DateTime startDate,
   required DateTime endDate,
+  required JoyMetricVariant joyMetricVariant,
 }) async {
   final useCase = ref.watch(getBestJoyMomentUseCaseProvider);
+  // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
+  final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
+      ? EntrySource.manual
+      : null;
   return useCase.execute(
     bookId: bookId,
     startDate: startDate,
     endDate: endDate,
+    entrySourceFilter: entrySourceFilter,
   );
 }
 
@@ -69,12 +83,18 @@ Future<LargestMonthlyExpense?> largestMonthlyExpense(
   required String bookId,
   required DateTime startDate,
   required DateTime endDate,
+  required JoyMetricVariant joyMetricVariant,
 }) async {
   final useCase = ref.watch(getLargestMonthlyExpenseUseCaseProvider);
+  // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
+  final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
+      ? EntrySource.manual
+      : null;
   return useCase.execute(
     bookId: bookId,
     startDate: startDate,
     endDate: endDate,
+    entrySourceFilter: entrySourceFilter,
   );
 }
 
@@ -88,6 +108,7 @@ Future<FamilyHappiness> familyHappiness(
   Ref ref, {
   required DateTime startDate,
   required DateTime endDate,
+  required JoyMetricVariant joyMetricVariant,
 }) async {
   final activeGroup = await ref.watch(activeGroupProvider.future);
   if (activeGroup == null) {
@@ -101,10 +122,15 @@ Future<FamilyHappiness> familyHappiness(
   }
 
   final useCase = ref.watch(getFamilyHappinessUseCaseProvider);
+  // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
+  final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
+      ? EntrySource.manual
+      : null;
   return useCase.execute(
     groupBookIds: groupBookIds,
     startDate: startDate,
     endDate: endDate,
+    entrySourceFilter: entrySourceFilter,
   );
 }
 
