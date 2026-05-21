@@ -7,6 +7,7 @@ import '../../../../generated/app_localizations.dart';
 import '../../../../application/i18n/formatter_service.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/models/category.dart';
+import '../../domain/models/entry_source.dart';
 import '../providers/repository_providers.dart';
 import '../utils/category_display_utils.dart';
 import '../widgets/amount_display.dart';
@@ -228,6 +229,7 @@ class _TransactionEntryScreenState
           category: _selectedCategory!,
           parentCategory: _selectedParentCategory,
           date: _selectedDate,
+          entrySource: EntrySource.manual,
         ),
       ),
     );

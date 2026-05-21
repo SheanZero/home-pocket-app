@@ -30,6 +30,8 @@ void main() {
         timestamp: now,
         currentHash: 'hash_abc',
         createdAt: now,
+
+        entrySource: 'manual',
       );
 
       final tx = await dao.findById('tx_001');
@@ -55,6 +57,8 @@ void main() {
           timestamp: t1,
           currentHash: 'h1',
           createdAt: t1,
+
+          entrySource: 'manual',
         );
 
         await dao.insertTransaction(
@@ -68,6 +72,8 @@ void main() {
           timestamp: t2,
           currentHash: 'h2',
           createdAt: t2,
+
+          entrySource: 'manual',
         );
 
         final results = await dao.findByBookId('book_001');
@@ -90,6 +96,8 @@ void main() {
         timestamp: now,
         currentHash: 'h1',
         createdAt: now,
+
+        entrySource: 'manual',
       );
 
       await dao.softDelete('tx_001');
@@ -113,6 +121,8 @@ void main() {
         timestamp: t1,
         currentHash: 'h1',
         createdAt: t1,
+
+        entrySource: 'manual',
       );
 
       await dao.insertTransaction(
@@ -126,6 +136,8 @@ void main() {
         timestamp: t2,
         currentHash: 'h2',
         createdAt: t2,
+
+        entrySource: 'manual',
       );
 
       // Filter by ledger type
@@ -158,6 +170,8 @@ void main() {
           timestamp: now.add(Duration(hours: i)),
           currentHash: 'h$i',
           createdAt: now,
+
+          entrySource: 'manual',
         );
       }
 
@@ -186,6 +200,8 @@ void main() {
         timestamp: t1,
         currentHash: 'first_hash',
         createdAt: t1,
+
+        entrySource: 'manual',
       );
 
       await dao.insertTransaction(
@@ -200,6 +216,8 @@ void main() {
         currentHash: 'latest_hash',
         createdAt: t2,
         prevHash: 'first_hash',
+
+        entrySource: 'manual',
       );
 
       final hash = await dao.getLatestHash('book_001');
@@ -225,6 +243,8 @@ void main() {
         timestamp: now,
         currentHash: 'h1',
         createdAt: now,
+
+        entrySource: 'manual',
       );
 
       await dao.insertTransaction(
@@ -238,6 +258,8 @@ void main() {
         timestamp: now,
         currentHash: 'h2',
         createdAt: now,
+
+        entrySource: 'manual',
       );
 
       await dao.softDelete('tx_002');

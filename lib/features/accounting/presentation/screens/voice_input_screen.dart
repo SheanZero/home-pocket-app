@@ -15,6 +15,7 @@ import '../../../../application/voice/start_speech_recognition_use_case.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../../../settings/presentation/providers/state_settings.dart';
 import '../../domain/models/category.dart';
+import '../../domain/models/entry_source.dart';
 import '../../domain/models/voice_parse_result.dart';
 import '../providers/repository_providers.dart';
 import '../utils/category_display_utils.dart';
@@ -360,6 +361,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
               ? result.estimatedSatisfaction
               : null,
           voiceKeyword: keyword,
+          entrySource: EntrySource.voice,
         ),
       ),
     );

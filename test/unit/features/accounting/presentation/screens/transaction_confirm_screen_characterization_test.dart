@@ -15,6 +15,7 @@ import 'package:home_pocket/features/settings/domain/repositories/settings_repos
 import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 
 class _MockCategoryRepository extends Mock implements CategoryRepository {}
 
@@ -80,6 +81,8 @@ void main() {
               bookId: 'book-001',
               amount: 1500,
               date: DateTime(2026, 3, 15, 12, 30),
+
+              entrySource: EntrySource.manual,
             ),
             [
               categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
@@ -98,6 +101,8 @@ void main() {
               bookId: 'book-001',
               amount: 1500,
               date: DateTime(2026, 3, 15, 12, 30),
+
+              entrySource: EntrySource.manual,
             ),
             [
               categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
@@ -118,6 +123,8 @@ void main() {
                 bookId: 'book-001',
                 amount: 1500,
                 date: DateTime(2026, 3, 15, 12, 30),
+
+                entrySource: EntrySource.manual,
               ),
               [
                 categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
@@ -141,6 +148,8 @@ void main() {
                 amount: 1500,
                 // Use an old date so DateFormatter.formatDate produces yyyy/MM/dd
                 date: DateTime(2020, 1, 1),
+
+                entrySource: EntrySource.manual,
               ),
               [
                 categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
@@ -165,6 +174,8 @@ void main() {
                 bookId: 'book-001',
                 amount: 500,
                 date: DateTime.now(),
+
+                entrySource: EntrySource.manual,
               ),
               [
                 categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),

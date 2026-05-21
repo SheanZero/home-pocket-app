@@ -81,6 +81,8 @@ void main() {
         timestamp: DateTime.utc(2026, 3, 15, 10),
         currentHash: '',
         createdAt: DateTime.utc(2026, 3, 15, 10),
+
+        entrySource: 'manual',
       );
 
       await service.cleanSyncData('group-1');

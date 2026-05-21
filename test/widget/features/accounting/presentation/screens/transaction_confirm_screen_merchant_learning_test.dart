@@ -17,6 +17,7 @@ import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../home/helpers/test_localizations.dart';
+import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 
 class MockCreateTransactionUseCase extends Mock
     implements CreateTransactionUseCase {}
@@ -102,6 +103,8 @@ void main() {
                 category: category,
                 parentCategory: null,
                 date: DateTime(2026, 2, 22),
+
+                entrySource: EntrySource.manual,
               ),
             ),
           ),

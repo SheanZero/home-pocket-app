@@ -74,6 +74,8 @@ void main() {
         currentHash: 'hash_$id',
         prevHash: prevHash,
         createdAt: timestamp,
+
+        entrySource: 'manual',
       );
     }
 
@@ -113,6 +115,8 @@ void main() {
         timestamp: DateTime(2026, 2, 25),
         currentHash: 'hash1',
         createdAt: DateTime(2026, 2, 25),
+
+        entrySource: 'manual',
       );
 
       // Add expenses
@@ -128,6 +132,8 @@ void main() {
         currentHash: 'hash2',
         prevHash: 'hash1',
         createdAt: DateTime(2026, 2, 10),
+
+        entrySource: 'manual',
       );
 
       await transactionDao.insertTransaction(
@@ -142,6 +148,8 @@ void main() {
         currentHash: 'hash3',
         prevHash: 'hash2',
         createdAt: DateTime(2026, 2, 15),
+
+        entrySource: 'manual',
       );
 
       final report = await executeWindow();
@@ -165,6 +173,8 @@ void main() {
         timestamp: DateTime(2026, 2, 10),
         currentHash: 'hash1',
         createdAt: DateTime(2026, 2, 10),
+
+        entrySource: 'manual',
       );
 
       final report = await executeWindow();
@@ -190,6 +200,8 @@ void main() {
         timestamp: DateTime(2026, 2, 10),
         currentHash: 'hash1',
         createdAt: DateTime(2026, 2, 10),
+
+        entrySource: 'manual',
       );
 
       final report = await executeWindow();
@@ -247,6 +259,8 @@ void main() {
         timestamp: DateTime(2026, 2, 10),
         currentHash: 'hash1',
         createdAt: DateTime(2026, 2, 10),
+
+        entrySource: 'manual',
       );
 
       // Soft-delete the transaction
@@ -270,6 +284,8 @@ void main() {
         timestamp: DateTime(2026, 1, 15),
         currentHash: 'hash_jan',
         createdAt: DateTime(2026, 1, 15),
+
+        entrySource: 'manual',
       );
 
       // Add February data
@@ -284,6 +300,8 @@ void main() {
         timestamp: DateTime(2026, 2, 15),
         currentHash: 'hash_feb',
         createdAt: DateTime(2026, 2, 15),
+
+        entrySource: 'manual',
       );
 
       final report = await executeWindow();
@@ -305,6 +323,8 @@ void main() {
         timestamp: DateTime(2026, 2, 10),
         currentHash: 'hash1',
         createdAt: DateTime(2026, 2, 10),
+
+        entrySource: 'manual',
       );
 
       final report = await executeWindow();
@@ -324,6 +344,8 @@ void main() {
         timestamp: DateTime(2026, 2, 10),
         currentHash: 'hash1',
         createdAt: DateTime(2026, 2, 10),
+
+        entrySource: 'manual',
       );
 
       await transactionDao.insertTransaction(
@@ -338,6 +360,8 @@ void main() {
         currentHash: 'hash2',
         prevHash: 'hash1',
         createdAt: DateTime(2026, 2, 12),
+
+        entrySource: 'manual',
       );
 
       final report = await executeWindow();

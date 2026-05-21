@@ -9,6 +9,7 @@ import 'package:home_pocket/features/accounting/domain/repositories/device_ident
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 
 class _MockTransactionRepository extends Mock
     implements TransactionRepository {}
@@ -111,6 +112,8 @@ void main() {
           amount: 1500,
           type: TransactionType.expense,
           categoryId: 'cat_food',
+
+          entrySource: EntrySource.manual,
         ),
       );
 
@@ -147,6 +150,8 @@ void main() {
           amount: 1000,
           type: TransactionType.income,
           categoryId: 'cat_food',
+
+          entrySource: EntrySource.manual,
         ),
       );
 
@@ -168,6 +173,8 @@ void main() {
           amount: 0,
           type: TransactionType.expense,
           categoryId: 'cat_food',
+
+          entrySource: EntrySource.manual,
         ),
       );
 
@@ -187,6 +194,8 @@ void main() {
           amount: 1000,
           type: TransactionType.expense,
           categoryId: 'invalid_cat',
+
+          entrySource: EntrySource.manual,
         ),
       );
 
@@ -209,6 +218,8 @@ void main() {
           amount: 1000,
           type: TransactionType.expense,
           categoryId: 'cat_food',
+
+          entrySource: EntrySource.manual,
         ),
       );
 
@@ -224,6 +235,8 @@ void main() {
           amount: 1000,
           type: TransactionType.expense,
           categoryId: 'cat_food',
+
+          entrySource: EntrySource.manual,
         ),
       );
 
@@ -277,6 +290,8 @@ void main() {
           amount: 2000,
           type: TransactionType.expense,
           categoryId: 'cat_entertainment',
+
+          entrySource: EntrySource.manual,
         ),
       );
 
@@ -318,6 +333,8 @@ void main() {
           amount: 2000,
           type: TransactionType.expense,
           categoryId: 'cat_food',
+
+          entrySource: EntrySource.manual,
         ),
       );
 
@@ -350,6 +367,8 @@ void main() {
           categoryId: 'cat_food',
           merchant: 'Lawson',
           note: 'Quick lunch',
+
+          entrySource: EntrySource.manual,
         ),
       );
 

@@ -137,6 +137,8 @@ void main() {
         timestamp: anchor,
         currentHash: 'hash1',
         createdAt: anchor,
+
+        entrySource: 'manual',
       );
 
       // Add income in current month
@@ -152,6 +154,8 @@ void main() {
         currentHash: 'hash2',
         prevHash: 'hash1',
         createdAt: anchor,
+
+        entrySource: 'manual',
       );
 
       final result = await useCase.execute(

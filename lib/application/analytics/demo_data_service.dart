@@ -112,6 +112,7 @@ class DemoDataService {
           currentHash: hash,
           prevHash: prevHash.isEmpty ? null : prevHash,
           createdAt: DateTime(year, month, day, 9, 0),
+          entrySource: 'manual',
         );
         prevHash = hash;
       }
@@ -153,6 +154,7 @@ class DemoDataService {
             currentHash: hash,
             prevHash: prevHash.isEmpty ? null : prevHash,
             createdAt: DateTime(year, month, day),
+            entrySource: 'manual',
           );
           prevHash = hash;
         }
