@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/analytics/domain/models/analytics_aggregate.dart';
 import '../../features/analytics/domain/models/best_joy_moment_row.dart';
 import '../../features/analytics/domain/models/ledger_snapshot.dart';
@@ -138,17 +139,24 @@ class AnalyticsDao {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
+    final entrySourceClause = entrySourceFilter != null
+        ? ' AND entry_source = ?'
+        : '';
     final results = await _db
         .customSelect(
           'SELECT type, SUM(amount) as total FROM transactions '
           'WHERE book_id = ? AND is_deleted = 0 '
-          'AND timestamp >= ? AND timestamp <= ? '
+          'AND timestamp >= ? AND timestamp <= ?'
+          '$entrySourceClause '
           'GROUP BY type',
           variables: [
             Variable.withString(bookId),
             Variable.withDateTime(startDate),
             Variable.withDateTime(endDate),
+            if (entrySourceFilter != null)
+              Variable.withString(entrySourceFilter.name),
           ],
         )
         .get();
@@ -177,14 +185,19 @@ class AnalyticsDao {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
     String type = 'expense',
   }) async {
+    final entrySourceClause = entrySourceFilter != null
+        ? ' AND entry_source = ?'
+        : '';
     final results = await _db
         .customSelect(
           'SELECT category_id, SUM(amount) as total, COUNT(*) as tx_count '
           'FROM transactions '
           'WHERE book_id = ? AND is_deleted = 0 AND type = ? '
-          'AND timestamp >= ? AND timestamp <= ? '
+          'AND timestamp >= ? AND timestamp <= ?'
+          '$entrySourceClause '
           'GROUP BY category_id '
           'ORDER BY total DESC',
           variables: [
@@ -192,6 +205,8 @@ class AnalyticsDao {
             Variable.withString(type),
             Variable.withDateTime(startDate),
             Variable.withDateTime(endDate),
+            if (entrySourceFilter != null)
+              Variable.withString(entrySourceFilter.name),
           ],
         )
         .get();
@@ -212,14 +227,19 @@ class AnalyticsDao {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
     String type = 'expense',
   }) async {
+    final entrySourceClause = entrySourceFilter != null
+        ? ' AND entry_source = ?'
+        : '';
     final results = await _db
         .customSelect(
           'SELECT DATE(timestamp, \'unixepoch\', \'localtime\') as day, SUM(amount) as total '
           'FROM transactions '
           'WHERE book_id = ? AND is_deleted = 0 AND type = ? '
-          'AND timestamp >= ? AND timestamp <= ? '
+          'AND timestamp >= ? AND timestamp <= ?'
+          '$entrySourceClause '
           'GROUP BY day '
           'ORDER BY day ASC',
           variables: [
@@ -227,6 +247,8 @@ class AnalyticsDao {
             Variable.withString(type),
             Variable.withDateTime(startDate),
             Variable.withDateTime(endDate),
+            if (entrySourceFilter != null)
+              Variable.withString(entrySourceFilter.name),
           ],
         )
         .get();
@@ -246,17 +268,24 @@ class AnalyticsDao {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
+    final entrySourceClause = entrySourceFilter != null
+        ? ' AND entry_source = ?'
+        : '';
     final results = await _db
         .customSelect(
           'SELECT ledger_type, SUM(amount) as total FROM transactions '
           'WHERE book_id = ? AND is_deleted = 0 AND type = \'expense\' '
-          'AND timestamp >= ? AND timestamp <= ? '
+          'AND timestamp >= ? AND timestamp <= ?'
+          '$entrySourceClause '
           'GROUP BY ledger_type',
           variables: [
             Variable.withString(bookId),
             Variable.withDateTime(startDate),
             Variable.withDateTime(endDate),
+            if (entrySourceFilter != null)
+              Variable.withString(entrySourceFilter.name),
           ],
         )
         .get();
@@ -276,17 +305,24 @@ class AnalyticsDao {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
+    final entrySourceClause = entrySourceFilter != null
+        ? ' AND entry_source = ?'
+        : '';
     final results = await _db
         .customSelect(
           'SELECT AVG(soul_satisfaction) as avg_sat, COUNT(*) as cnt '
           'FROM transactions '
           'WHERE book_id = ? AND $_soulExpenseFilter '
-          'AND timestamp >= ? AND timestamp <= ?',
+          'AND timestamp >= ? AND timestamp <= ?'
+          '$entrySourceClause',
           variables: [
             Variable.withString(bookId),
             Variable.withDateTime(startDate),
             Variable.withDateTime(endDate),
+            if (entrySourceFilter != null)
+              Variable.withString(entrySourceFilter.name),
           ],
         )
         .get();
@@ -307,19 +343,26 @@ class AnalyticsDao {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
+    final entrySourceClause = entrySourceFilter != null
+        ? ' AND entry_source = ?'
+        : '';
     final results = await _db
         .customSelect(
           'SELECT soul_satisfaction as score, COUNT(*) as cnt '
           'FROM transactions '
           'WHERE book_id = ? AND $_soulExpenseFilter '
-          'AND timestamp >= ? AND timestamp <= ? '
+          'AND timestamp >= ? AND timestamp <= ?'
+          '$entrySourceClause '
           'GROUP BY soul_satisfaction '
           'ORDER BY soul_satisfaction ASC',
           variables: [
             Variable.withString(bookId),
             Variable.withDateTime(startDate),
             Variable.withDateTime(endDate),
+            if (entrySourceFilter != null)
+              Variable.withString(entrySourceFilter.name),
           ],
         )
         .get();
@@ -339,13 +382,18 @@ class AnalyticsDao {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
+    final entrySourceClause = entrySourceFilter != null
+        ? ' AND entry_source = ?'
+        : '';
     final results = await _db
         .customSelect(
           'SELECT id, amount, category_id, timestamp '
           'FROM transactions '
           'WHERE book_id = ? AND is_deleted = 0 AND type = ? '
-          'AND timestamp >= ? AND timestamp <= ? '
+          'AND timestamp >= ? AND timestamp <= ?'
+          '$entrySourceClause '
           'ORDER BY amount DESC, timestamp DESC '
           'LIMIT 1',
           variables: [
@@ -353,6 +401,8 @@ class AnalyticsDao {
             Variable.withString('expense'),
             Variable.withDateTime(startDate),
             Variable.withDateTime(endDate),
+            if (entrySourceFilter != null)
+              Variable.withString(entrySourceFilter.name),
           ],
         )
         .get();
@@ -374,19 +424,26 @@ class AnalyticsDao {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
+    final entrySourceClause = entrySourceFilter != null
+        ? ' AND entry_source = ?'
+        : '';
     final results = await _db
         .customSelect(
           'SELECT id, amount, soul_satisfaction, category_id, timestamp '
           'FROM transactions '
           'WHERE book_id = ? AND $_soulExpenseFilter '
-          'AND timestamp >= ? AND timestamp <= ? '
+          'AND timestamp >= ? AND timestamp <= ?'
+          '$entrySourceClause '
           'ORDER BY soul_satisfaction DESC, amount DESC, timestamp DESC '
           'LIMIT 1',
           variables: [
             Variable.withString(bookId),
             Variable.withDateTime(startDate),
             Variable.withDateTime(endDate),
+            if (entrySourceFilter != null)
+              Variable.withString(entrySourceFilter.name),
           ],
         )
         .get();
@@ -410,17 +467,24 @@ class AnalyticsDao {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
+    final entrySourceClause = entrySourceFilter != null
+        ? ' AND entry_source = ?'
+        : '';
     final results = await _db
         .customSelect(
           'SELECT amount, soul_satisfaction '
           'FROM transactions '
           'WHERE book_id = ? AND $_soulExpenseFilter '
-          'AND timestamp >= ? AND timestamp <= ?',
+          'AND timestamp >= ? AND timestamp <= ?'
+          '$entrySourceClause',
           variables: [
             Variable.withString(bookId),
             Variable.withDateTime(startDate),
             Variable.withDateTime(endDate),
+            if (entrySourceFilter != null)
+              Variable.withString(entrySourceFilter.name),
           ],
         )
         .get();
@@ -442,16 +506,21 @@ class AnalyticsDao {
     required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
     if (bookIds.isEmpty) return null;
 
+    final entrySourceClause = entrySourceFilter != null
+        ? ' AND entry_source = ?'
+        : '';
     final placeholders = List.filled(bookIds.length, '?').join(', ');
     final results = await _db
         .customSelect(
           'SELECT category_id, AVG(soul_satisfaction) as avg_sat, COUNT(*) as cnt '
           'FROM transactions '
           'WHERE book_id IN ($placeholders) AND $_soulExpenseFilter '
-          'AND timestamp >= ? AND timestamp <= ? '
+          'AND timestamp >= ? AND timestamp <= ?'
+          '$entrySourceClause '
           'GROUP BY category_id '
           'HAVING COUNT(*) >= 3 '
           'ORDER BY avg_sat DESC, cnt DESC, category_id ASC '
@@ -460,6 +529,8 @@ class AnalyticsDao {
             ...bookIds.map(Variable.withString),
             Variable.withDateTime(startDate),
             Variable.withDateTime(endDate),
+            if (entrySourceFilter != null)
+              Variable.withString(entrySourceFilter.name),
           ],
         )
         .get();
@@ -491,19 +562,26 @@ class AnalyticsDao {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
+    final entrySourceClause = entrySourceFilter != null
+        ? ' AND entry_source = ?'
+        : '';
     final results = await _db
         .customSelect(
           'SELECT category_id, AVG(soul_satisfaction) as avg_sat, COUNT(*) as cnt '
           'FROM transactions '
           'WHERE book_id = ? AND $_soulExpenseFilter '
-          'AND timestamp >= ? AND timestamp <= ? '
+          'AND timestamp >= ? AND timestamp <= ?'
+          '$entrySourceClause '
           'GROUP BY category_id '
           'ORDER BY avg_sat DESC, cnt DESC, category_id ASC',
           variables: [
             Variable.withString(bookId),
             Variable.withDateTime(startDate),
             Variable.withDateTime(endDate),
+            if (entrySourceFilter != null)
+              Variable.withString(entrySourceFilter.name),
           ],
         )
         .get();
@@ -529,22 +607,29 @@ class AnalyticsDao {
     required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
     if (bookIds.isEmpty) return const [];
 
+    final entrySourceClause = entrySourceFilter != null
+        ? ' AND entry_source = ?'
+        : '';
     final placeholders = List.filled(bookIds.length, '?').join(', ');
     final results = await _db
         .customSelect(
           'SELECT category_id, AVG(soul_satisfaction) as avg_sat, COUNT(*) as cnt '
           'FROM transactions '
           'WHERE book_id IN ($placeholders) AND $_soulExpenseFilter '
-          'AND timestamp >= ? AND timestamp <= ? '
+          'AND timestamp >= ? AND timestamp <= ?'
+          '$entrySourceClause '
           'GROUP BY category_id '
           'ORDER BY avg_sat DESC, cnt DESC, category_id ASC',
           variables: [
             ...bookIds.map(Variable.withString),
             Variable.withDateTime(startDate),
             Variable.withDateTime(endDate),
+            if (entrySourceFilter != null)
+              Variable.withString(entrySourceFilter.name),
           ],
         )
         .get();
@@ -576,19 +661,26 @@ class AnalyticsDao {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
+    final entrySourceClause = entrySourceFilter != null
+        ? ' AND entry_source = ?'
+        : '';
     final results = await _db
         .customSelect(
           'SELECT ledger_type, SUM(amount) as total, COUNT(*) as cnt '
           'FROM transactions '
           'WHERE book_id = ? '
           'AND ($_soulExpenseFilter OR $_survivalExpenseFilter) '
-          'AND timestamp >= ? AND timestamp <= ? '
+          'AND timestamp >= ? AND timestamp <= ?'
+          '$entrySourceClause '
           'GROUP BY ledger_type',
           variables: [
             Variable.withString(bookId),
             Variable.withDateTime(startDate),
             Variable.withDateTime(endDate),
+            if (entrySourceFilter != null)
+              Variable.withString(entrySourceFilter.name),
           ],
         )
         .get();
@@ -614,9 +706,13 @@ class AnalyticsDao {
     required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
     if (bookIds.isEmpty) return const [];
 
+    final entrySourceClause = entrySourceFilter != null
+        ? ' AND entry_source = ?'
+        : '';
     final placeholders = List.filled(bookIds.length, '?').join(', ');
     final results = await _db
         .customSelect(
@@ -624,12 +720,15 @@ class AnalyticsDao {
           'FROM transactions '
           'WHERE book_id IN ($placeholders) '
           'AND ($_soulExpenseFilter OR $_survivalExpenseFilter) '
-          'AND timestamp >= ? AND timestamp <= ? '
+          'AND timestamp >= ? AND timestamp <= ?'
+          '$entrySourceClause '
           'GROUP BY ledger_type',
           variables: [
             ...bookIds.map(Variable.withString),
             Variable.withDateTime(startDate),
             Variable.withDateTime(endDate),
+            if (entrySourceFilter != null)
+              Variable.withString(entrySourceFilter.name),
           ],
         )
         .get();

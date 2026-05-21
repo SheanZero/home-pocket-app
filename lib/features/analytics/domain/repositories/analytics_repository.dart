@@ -1,3 +1,4 @@
+import '../../../accounting/domain/models/entry_source.dart';
 import '../models/analytics_aggregate.dart';
 import '../models/best_joy_moment_row.dart';
 import '../models/ledger_snapshot.dart';
@@ -11,12 +12,14 @@ abstract class AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   });
 
   Future<List<CategoryTotal>> getCategoryTotals({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
     String type = 'expense',
   });
 
@@ -24,6 +27,7 @@ abstract class AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
     String type = 'expense',
   });
 
@@ -31,6 +35,7 @@ abstract class AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   });
 
   /// HAPPY-01 / D-03 — average soul satisfaction + sample count over MTD.
@@ -38,6 +43,7 @@ abstract class AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   });
 
   /// HAPPY-03 / D-05 — distribution of soul satisfaction scores 1-10.
@@ -45,6 +51,7 @@ abstract class AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   });
 
   /// ADR-016 §2 — row-wise tuples for Dart-layer Joy contribution fold.
@@ -52,6 +59,7 @@ abstract class AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   });
 
   /// HAPPY-04 / D-06 — argmax soul tx by sat DESC, amount DESC, timestamp DESC.
@@ -59,6 +67,7 @@ abstract class AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   });
 
   /// FAMILY-02 / D-08 — category argmax across books with min-N=3 guard.
@@ -66,6 +75,7 @@ abstract class AnalyticsRepository {
     required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   });
 
   /// STATSUI-06 / D-15 — largest expense across TOTAL ledger.
@@ -73,6 +83,7 @@ abstract class AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   });
 
   /// HAPPY-V2-01 / D-07 — per-category soul satisfaction aggregate (returns
@@ -86,6 +97,7 @@ abstract class AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   });
 
   /// HAPPY-V2-01 / D-16, D-17 — family-aggregate variant using
@@ -96,6 +108,7 @@ abstract class AnalyticsRepository {
     required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   });
 
   /// STATSUI-V2-01 / D-01..D-04 — per-ledger `(count, total spend)` snapshot
@@ -105,6 +118,7 @@ abstract class AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   });
 
   /// STATSUI-V2-01 / D-18 — family-aggregate ledger snapshot via
@@ -113,5 +127,6 @@ abstract class AnalyticsRepository {
     required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   });
 }

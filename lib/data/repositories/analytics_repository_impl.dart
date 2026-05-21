@@ -1,3 +1,4 @@
+import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/analytics/domain/models/analytics_aggregate.dart';
 import '../../features/analytics/domain/models/best_joy_moment_row.dart';
 import '../../features/analytics/domain/models/ledger_snapshot.dart';
@@ -21,11 +22,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
     final result = await _dao.getMonthlyTotals(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
 
     return MonthlyTotals(
@@ -39,12 +42,14 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
     String type = 'expense',
   }) async {
     final results = await _dao.getCategoryTotals(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
       type: type,
     );
 
@@ -64,12 +69,14 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
     String type = 'expense',
   }) async {
     final results = await _dao.getDailyTotals(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
       type: type,
     );
 
@@ -83,11 +90,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
     final results = await _dao.getLedgerTotals(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
 
     return results
@@ -105,11 +114,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
     final result = await _dao.getSoulSatisfactionOverview(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
 
     return SoulSatisfactionOverview(
@@ -123,11 +134,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
     final results = await _dao.getSatisfactionDistribution(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
 
     return results
@@ -142,11 +155,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     return _dao.getSoulRowsForJoyContribution(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
   }
 
@@ -155,11 +170,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     return _dao.getBestJoyMoment(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
   }
 
@@ -168,11 +185,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     return _dao.getLargestMonthlyExpense(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
   }
 
@@ -181,11 +200,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     return _dao.getSharedJoyCategoryInsight(
       bookIds: bookIds,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
   }
 
@@ -194,11 +215,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
     final raws = await _dao.getPerCategorySoulBreakdown(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
     return raws
         .map(
@@ -217,11 +240,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
     final raws = await _dao.getPerCategorySoulBreakdownAcrossBooks(
       bookIds: bookIds,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
     return raws
         .map(
@@ -239,11 +264,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     return _dao.getLedgerSnapshot(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
   }
 
@@ -252,11 +279,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     return _dao.getLedgerSnapshotAcrossBooks(
       bookIds: bookIds,
       startDate: startDate,
       endDate: endDate,
+      entrySourceFilter: entrySourceFilter,
     );
   }
 }
