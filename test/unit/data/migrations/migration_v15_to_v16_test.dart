@@ -2,7 +2,7 @@ import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
 
-const _targetSchemaVersion = 16;
+const _targetSchemaVersion = 17;
 
 void main() {
   late AppDatabase db;
@@ -18,9 +18,12 @@ void main() {
   group('v16 soul satisfaction default migration', () {
     // D-02: default soul satisfaction moves from 5 to 2 while preserving
     // the existing inclusive CHECK(soul_satisfaction BETWEEN 1 AND 10).
-    test('AppDatabase schemaVersion is 16', () {
-      expect(db.schemaVersion, _targetSchemaVersion);
-    });
+    test(
+      'AppDatabase schemaVersion includes v16 migration and later migrations',
+      () {
+        expect(db.schemaVersion, _targetSchemaVersion);
+      },
+    );
 
     test('omitted soulSatisfaction stores default 2', () async {
       await _insertTransaction(db, id: 'tx_default');

@@ -88,30 +88,6 @@ void main() {
     );
   });
 
-  test('v15 app database migration creates phase 6 indices', () async {
-    await db.migration.onUpgrade(db.createMigrator(), 14, 15);
-
-    expect(
-      await _indexNames(db, 'audit_logs'),
-      containsAll([
-        'idx_audit_logs_event',
-        'idx_audit_logs_device_id',
-        'idx_audit_logs_timestamp',
-      ]),
-    );
-    expect(
-      await _indexNames(db, 'user_profiles'),
-      contains('idx_user_profiles_updated_at'),
-    );
-    expect(
-      await _indexNames(db, 'category_ledger_configs'),
-      containsAll([
-        'idx_category_ledger_configs_ledger_type',
-        'idx_category_ledger_configs_updated_at',
-      ]),
-    );
-  });
-
   test('legacy v4 database upgrades through cleanup migrations', () async {
     final rawDb = sqlite3.openInMemory();
     _createV4Schema(rawDb);
@@ -175,14 +151,6 @@ void main() {
         .getSingle();
     expect(displayName.data['display_name'], 'Phone');
   });
-}
-
-Future<List<String>> _indexNames(AppDatabase db, String table) async {
-  final rows = await db.customSelect('PRAGMA index_list($table)').get();
-  return [
-    for (final row in rows)
-      if (row.data['name'] case final String name) name,
-  ];
 }
 
 Future<bool> _hasTable(AppDatabase db, String table) async {

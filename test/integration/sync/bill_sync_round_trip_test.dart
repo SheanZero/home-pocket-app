@@ -6,6 +6,7 @@ import 'package:home_pocket/data/daos/book_dao.dart';
 import 'package:home_pocket/data/daos/transaction_dao.dart';
 import 'package:home_pocket/data/repositories/book_repository_impl.dart';
 import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
+import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction_sync_mapper.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
@@ -300,5 +301,71 @@ void main() {
       final tx = await txDao.findById('cat-remote');
       expect(tx, isNull);
     });
+
+    test(
+      'end-to-end sync preserves entry_source across device round-trip (D-03)',
+      () async {
+        final transaction = Transaction(
+          id: 'tx-entry-source-voice',
+          bookId: 'partner-main',
+          deviceId: 'partner-device',
+          amount: 4200,
+          type: TransactionType.expense,
+          categoryId: 'cat-dining',
+          ledgerType: LedgerType.soul,
+          timestamp: DateTime.utc(2026, 5, 21, 10),
+          currentHash: 'hash-entry-source-voice',
+          createdAt: DateTime.utc(2026, 5, 21, 10),
+          soulSatisfaction: 8,
+          entrySource: EntrySource.voice,
+        );
+        final operation = TransactionSyncMapper.toCreateOperation(
+          transaction,
+          sourceBookId: 'partner-main',
+          sourceBookName: 'Partner Main',
+          sourceBookType: 'remote_book:partner-main',
+        );
+        operation['fromDeviceId'] = 'partner-device';
+
+        await applyOps.execute([operation]);
+
+        final row = await txDao.findById('tx-entry-source-voice');
+        expect(row, isNotNull);
+        expect(row!.entrySource, 'voice');
+      },
+    );
+
+    test(
+      'end-to-end sync from older-schema peer falls back to manual (D-09)',
+      () async {
+        final transaction = Transaction(
+          id: 'tx-entry-source-missing',
+          bookId: 'partner-main',
+          deviceId: 'partner-device',
+          amount: 1800,
+          type: TransactionType.expense,
+          categoryId: 'cat-food',
+          ledgerType: LedgerType.survival,
+          timestamp: DateTime.utc(2026, 5, 21, 11),
+          currentHash: 'hash-entry-source-missing',
+          createdAt: DateTime.utc(2026, 5, 21, 11),
+          entrySource: EntrySource.ocr,
+        );
+        final operation = TransactionSyncMapper.toCreateOperation(
+          transaction,
+          sourceBookId: 'partner-main',
+          sourceBookName: 'Partner Main',
+          sourceBookType: 'remote_book:partner-main',
+        );
+        operation['fromDeviceId'] = 'partner-device';
+        (operation['data'] as Map<String, dynamic>).remove('entrySource');
+
+        await applyOps.execute([operation]);
+
+        final row = await txDao.findById('tx-entry-source-missing');
+        expect(row, isNotNull);
+        expect(row!.entrySource, 'manual');
+      },
+    );
   });
 }

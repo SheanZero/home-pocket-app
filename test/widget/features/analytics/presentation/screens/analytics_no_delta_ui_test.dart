@@ -10,9 +10,14 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
     as accounting_providers;
 import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
 import 'package:home_pocket/features/analytics/domain/models/expense_trend.dart';
+import 'package:home_pocket/features/analytics/domain/models/ledger_snapshot.dart';
+import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
+import 'package:home_pocket/features/analytics/domain/models/per_category_soul_breakdown.dart';
 import 'package:home_pocket/features/analytics/domain/models/time_window.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_analytics.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_happiness.dart';
+import 'package:home_pocket/features/analytics/presentation/providers/state_joy_metric_variant.dart';
+import 'package:home_pocket/features/analytics/presentation/providers/state_ledger_snapshot.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_time_window.dart';
 import 'package:home_pocket/features/analytics/presentation/screens/analytics_screen.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_active_group.dart';
@@ -152,6 +157,28 @@ void main() {
           startDate: range.start,
           endDate: range.end,
         ).overrideWith((_) async => fixtureFamilyHappinessRich()),
+        perCategorySoulBreakdownProvider(
+          bookId: _bookId,
+          startDate: range.start,
+          endDate: range.end,
+          joyMetricVariant: JoyMetricVariant.all,
+        ).overrideWith((_) async => const Empty<PerCategorySoulBreakdown>()),
+        perCategorySoulBreakdownFamilyProvider(
+          startDate: range.start,
+          endDate: range.end,
+          joyMetricVariant: JoyMetricVariant.all,
+        ).overrideWith((_) async => const Empty<PerCategorySoulBreakdown>()),
+        soulVsSurvivalSnapshotProvider(
+          bookId: _bookId,
+          startDate: range.start,
+          endDate: range.end,
+          joyMetricVariant: JoyMetricVariant.all,
+        ).overrideWith((_) async => const Empty<SoulVsSurvivalSnapshot>()),
+        soulVsSurvivalSnapshotFamilyProvider(
+          startDate: range.start,
+          endDate: range.end,
+          joyMetricVariant: JoyMetricVariant.all,
+        ).overrideWith((_) async => const Empty<SoulVsSurvivalSnapshot>()),
         activeGroupProvider.overrideWith((_) => Stream.value(null)),
         isGroupModeProvider.overrideWith((_) => false),
         shadowBooksProvider.overrideWith((_) async => const []),

@@ -22,7 +22,7 @@ void main() {
       ),
     );
 
-    expect(find.text('今月の最大ハイライトはまだ見つからない'), findsOneWidget);
+    expect(find.text('最大ハイライトはまだ見つからない'), findsOneWidget);
   });
 
   testWidgets('renders empty state when satisfaction is two or lower', (
@@ -39,7 +39,7 @@ void main() {
       ),
     );
 
-    expect(find.text('今月の最大ハイライトはまだ見つからない'), findsOneWidget);
+    expect(find.text('最大ハイライトはまだ見つからない'), findsOneWidget);
     expect(find.textContaining('¥10'), findsNothing);
   });
 

@@ -4,6 +4,7 @@ library;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/analytics/get_best_joy_moment_use_case.dart';
 import 'package:home_pocket/application/analytics/get_family_happiness_use_case.dart';
@@ -20,12 +21,14 @@ import 'package:home_pocket/features/analytics/domain/models/time_window.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_happiness.dart';
+import 'package:home_pocket/features/analytics/presentation/providers/state_joy_metric_variant.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_time_window.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_active_group.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_today_transactions.dart';
 import 'package:home_pocket/features/home/presentation/screens/home_screen.dart';
+import 'package:home_pocket/features/home/presentation/widgets/home_hero_card.dart';
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart'
     as locale_providers;
@@ -97,10 +100,10 @@ void main() {
   late _MockFamilyHappinessUseCase familyHappinessUseCase;
   late _MockGetPerCategorySoulBreakdownUseCase perCategorySoulBreakdownUseCase;
   late _MockGetPerCategorySoulBreakdownAcrossBooksUseCase
-      perCategorySoulBreakdownAcrossBooksUseCase;
+  perCategorySoulBreakdownAcrossBooksUseCase;
   late _MockGetSoulVsSurvivalSnapshotUseCase soulVsSurvivalSnapshotUseCase;
   late _MockGetSoulVsSurvivalSnapshotAcrossBooksUseCase
-      soulVsSurvivalSnapshotAcrossBooksUseCase;
+  soulVsSurvivalSnapshotAcrossBooksUseCase;
 
   setUp(() {
     final now = DateTime.now();
@@ -179,9 +182,29 @@ void main() {
     ).thenAnswer((_) async => const Empty());
   });
 
-  Widget buildSubject() {
+  Widget buildSubject({bool includeJoyMetricVariantToggle = false}) {
     return createLocalizedWidget(
-      const Scaffold(body: HomeScreen(bookId: _bookId)),
+      Scaffold(
+        body: Stack(
+          children: [
+            const HomeScreen(bookId: _bookId),
+            if (includeJoyMetricVariantToggle)
+              Consumer(
+                builder: (context, ref, _) => Positioned(
+                  left: 0,
+                  bottom: 0,
+                  child: TextButton(
+                    key: const Key('joy-metric-variant-toggle'),
+                    onPressed: () => ref
+                        .read(selectedJoyMetricVariantProvider.notifier)
+                        .setVariant(JoyMetricVariant.manualOnly),
+                    child: const Text('toggle variant'),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
       locale: const Locale('en'),
       overrides: [
         selectedTimeWindowProvider.overrideWith(_TestSelectedTimeWindow.new),
@@ -363,4 +386,71 @@ void main() {
           'D-12 + Phase 16: HomeScreen must not import analytics state_ledger_snapshot — those providers are AnalyticsScreen-only.',
     );
   });
+
+  testWidgets(
+    'AnalyticsScreen JoyMetricVariant toggle does not invalidate or change HomeHero (Phase 17 SC-4 / D-15)',
+    (tester) async {
+      await tester.pumpWidget(
+        buildSubject(includeJoyMetricVariantToggle: true),
+      );
+      await tester.pumpAndSettle();
+
+      final heroBefore = tester.widget<HomeHeroCard>(find.byType(HomeHeroCard));
+      final textsBefore = tester
+          .widgetList<Text>(find.byType(Text, skipOffstage: false))
+          .map((widget) => widget.data ?? widget.textSpan?.toPlainText() ?? '')
+          .toList();
+
+      clearInteractions(monthlyReportUseCase);
+      clearInteractions(happinessReportUseCase);
+      clearInteractions(bestJoyMomentUseCase);
+      clearInteractions(familyHappinessUseCase);
+
+      await tester.tap(find.byKey(const Key('joy-metric-variant-toggle')));
+      await tester.pumpAndSettle();
+
+      final heroAfter = tester.widget<HomeHeroCard>(find.byType(HomeHeroCard));
+      final textsAfter = tester
+          .widgetList<Text>(find.byType(Text, skipOffstage: false))
+          .map((widget) => widget.data ?? widget.textSpan?.toPlainText() ?? '')
+          .toList();
+
+      expect(
+        heroAfter.happiness.joyContribution,
+        heroBefore.happiness.joyContribution,
+      );
+      expect(heroAfter.report, heroBefore.report);
+      expect(textsAfter, textsBefore);
+
+      verifyNever(
+        () => monthlyReportUseCase.execute(
+          bookId: any(named: 'bookId'),
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      );
+      verifyNever(
+        () => happinessReportUseCase.execute(
+          bookId: any(named: 'bookId'),
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+          currencyCode: any(named: 'currencyCode'),
+        ),
+      );
+      verifyNever(
+        () => bestJoyMomentUseCase.execute(
+          bookId: any(named: 'bookId'),
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      );
+      verifyNever(
+        () => familyHappinessUseCase.execute(
+          groupBookIds: any(named: 'groupBookIds'),
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      );
+    },
+  );
 }

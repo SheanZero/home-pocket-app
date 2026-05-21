@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
+import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
     as accounting_providers;
 import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
@@ -8,6 +9,7 @@ import 'package:home_pocket/features/analytics/domain/models/best_joy_moment_row
 import 'package:home_pocket/features/analytics/domain/models/expense_trend.dart';
 import 'package:home_pocket/features/analytics/domain/models/happiness_report.dart';
 import 'package:home_pocket/features/analytics/domain/models/ledger_snapshot.dart';
+import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
 import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
 import 'package:home_pocket/features/analytics/domain/models/per_category_soul_breakdown.dart';
 import 'package:home_pocket/features/analytics/domain/models/time_window.dart';
@@ -16,6 +18,8 @@ import 'package:home_pocket/features/analytics/presentation/providers/repository
     as analytics_repositories;
 import 'package:home_pocket/features/analytics/presentation/providers/state_analytics.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_happiness.dart';
+import 'package:home_pocket/features/analytics/presentation/providers/state_joy_metric_variant.dart';
+import 'package:home_pocket/features/analytics/presentation/providers/state_ledger_snapshot.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_time_window.dart';
 import 'package:home_pocket/features/analytics/presentation/screens/analytics_screen.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/analytics_card_error_state.dart';
@@ -101,6 +105,28 @@ Widget _buildSubject({
         startDate: _windowStart,
         endDate: _windowEnd,
       ).overrideWith((_) async => fixtureFamilyHappinessRich()),
+      perCategorySoulBreakdownProvider(
+        bookId: _bookId,
+        startDate: _windowStart,
+        endDate: _windowEnd,
+        joyMetricVariant: JoyMetricVariant.all,
+      ).overrideWith((_) async => const Empty<PerCategorySoulBreakdown>()),
+      perCategorySoulBreakdownFamilyProvider(
+        startDate: _windowStart,
+        endDate: _windowEnd,
+        joyMetricVariant: JoyMetricVariant.all,
+      ).overrideWith((_) async => const Empty<PerCategorySoulBreakdown>()),
+      soulVsSurvivalSnapshotProvider(
+        bookId: _bookId,
+        startDate: _windowStart,
+        endDate: _windowEnd,
+        joyMetricVariant: JoyMetricVariant.all,
+      ).overrideWith((_) async => const Empty<SoulVsSurvivalSnapshot>()),
+      soulVsSurvivalSnapshotFamilyProvider(
+        startDate: _windowStart,
+        endDate: _windowEnd,
+        joyMetricVariant: JoyMetricVariant.all,
+      ).overrideWith((_) async => const Empty<SoulVsSurvivalSnapshot>()),
       activeGroupProvider.overrideWith(
         (_) => Stream.value(groupMode ? _groupInfo : null),
       ),
@@ -366,6 +392,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) async {
     final error = distributionError;
     if (error != null) throw error;
@@ -377,6 +404,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     throw UnimplementedError();
   }
@@ -387,6 +415,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
     required DateTime startDate,
     required DateTime endDate,
     String type = 'expense',
+    EntrySource? entrySourceFilter,
   }) {
     throw UnimplementedError();
   }
@@ -397,6 +426,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
     required DateTime startDate,
     required DateTime endDate,
     String type = 'expense',
+    EntrySource? entrySourceFilter,
   }) {
     throw UnimplementedError();
   }
@@ -406,6 +436,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     throw UnimplementedError();
   }
@@ -420,6 +451,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     throw UnimplementedError();
   }
@@ -429,6 +461,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     throw UnimplementedError();
   }
@@ -438,6 +471,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
     required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     throw UnimplementedError();
   }
@@ -447,6 +481,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     throw UnimplementedError();
   }
@@ -456,6 +491,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     throw UnimplementedError();
   }
@@ -465,6 +501,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     throw UnimplementedError();
   }
@@ -475,6 +512,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
     required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     throw UnimplementedError();
   }
@@ -484,6 +522,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     throw UnimplementedError();
   }
@@ -493,6 +532,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
     required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,
+    EntrySource? entrySourceFilter,
   }) {
     throw UnimplementedError();
   }

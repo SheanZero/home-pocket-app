@@ -79,7 +79,7 @@ void main() {
       ),
     );
 
-    expect(find.text('今月、家族の小確幸 23回'), findsOneWidget);
+    expect(find.text('家族の小確幸 23回'), findsOneWidget);
   });
 
   testWidgets('renders shared joy sentence from aggregate tuple', (

@@ -22,7 +22,7 @@ void main() {
       ),
     );
 
-    expect(find.text('総 · 今月の最大支出'), findsOneWidget);
+    expect(find.text('総 · 最大支出'), findsOneWidget);
     expect(find.textContaining('食費'), findsOneWidget);
     expect(find.textContaining('¥25,000'), findsOneWidget);
     expect(find.textContaining('5月20日'), findsOneWidget);
@@ -40,7 +40,7 @@ void main() {
       ),
     );
 
-    expect(find.text('データなし — 今月はまだ記録がありません'), findsOneWidget);
+    expect(find.text('データなし — まだ記録がありません'), findsOneWidget);
   });
 
   testWidgets('tap invokes callback when expense is present', (tester) async {
