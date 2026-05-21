@@ -32,7 +32,11 @@ mixin _$Transaction {
   bool get isPrivate;
   bool get isSynced;
   bool get isDeleted; // Soul ledger satisfaction score (1-10, default 2)
-  int get soulSatisfaction;
+  int
+  get soulSatisfaction; // Entry-path provenance (D-01 / D-09). Default 'manual' applies for older
+  // sync payloads / DB rows where the column DEFAULT triggered.
+  // CreateTransactionParams enforces required-no-default (D-06, Plan 04).
+  EntrySource get entrySource;
 
   /// Create a copy of Transaction
   /// with the given fields replaced by the non-null parameter values.
@@ -82,7 +86,9 @@ mixin _$Transaction {
             (identical(other.isDeleted, isDeleted) ||
                 other.isDeleted == isDeleted) &&
             (identical(other.soulSatisfaction, soulSatisfaction) ||
-                other.soulSatisfaction == soulSatisfaction));
+                other.soulSatisfaction == soulSatisfaction) &&
+            (identical(other.entrySource, entrySource) ||
+                other.entrySource == entrySource));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -109,11 +115,12 @@ mixin _$Transaction {
     isSynced,
     isDeleted,
     soulSatisfaction,
+    entrySource,
   ]);
 
   @override
   String toString() {
-    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, metadata: $metadata, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, soulSatisfaction: $soulSatisfaction)';
+    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, metadata: $metadata, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, soulSatisfaction: $soulSatisfaction, entrySource: $entrySource)';
   }
 }
 
@@ -145,6 +152,7 @@ abstract mixin class $TransactionCopyWith<$Res> {
     bool isSynced,
     bool isDeleted,
     int soulSatisfaction,
+    EntrySource entrySource,
   });
 }
 
@@ -180,6 +188,7 @@ class _$TransactionCopyWithImpl<$Res> implements $TransactionCopyWith<$Res> {
     Object? isSynced = null,
     Object? isDeleted = null,
     Object? soulSatisfaction = null,
+    Object? entrySource = null,
   }) {
     return _then(
       _self.copyWith(
@@ -263,6 +272,10 @@ class _$TransactionCopyWithImpl<$Res> implements $TransactionCopyWith<$Res> {
             ? _self.soulSatisfaction
             : soulSatisfaction // ignore: cast_nullable_to_non_nullable
                   as int,
+        entrySource: null == entrySource
+            ? _self.entrySource
+            : entrySource // ignore: cast_nullable_to_non_nullable
+                  as EntrySource,
       ),
     );
   }
@@ -382,6 +395,7 @@ extension TransactionPatterns on Transaction {
       bool isSynced,
       bool isDeleted,
       int soulSatisfaction,
+      EntrySource entrySource,
     )?
     $default, {
     required TResult orElse(),
@@ -410,6 +424,7 @@ extension TransactionPatterns on Transaction {
           _that.isSynced,
           _that.isDeleted,
           _that.soulSatisfaction,
+          _that.entrySource,
         );
       case _:
         return orElse();
@@ -452,6 +467,7 @@ extension TransactionPatterns on Transaction {
       bool isSynced,
       bool isDeleted,
       int soulSatisfaction,
+      EntrySource entrySource,
     )
     $default,
   ) {
@@ -479,6 +495,7 @@ extension TransactionPatterns on Transaction {
           _that.isSynced,
           _that.isDeleted,
           _that.soulSatisfaction,
+          _that.entrySource,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -520,6 +537,7 @@ extension TransactionPatterns on Transaction {
       bool isSynced,
       bool isDeleted,
       int soulSatisfaction,
+      EntrySource entrySource,
     )?
     $default,
   ) {
@@ -547,6 +565,7 @@ extension TransactionPatterns on Transaction {
           _that.isSynced,
           _that.isDeleted,
           _that.soulSatisfaction,
+          _that.entrySource,
         );
       case _:
         return null;
@@ -578,6 +597,7 @@ class _Transaction implements Transaction {
     this.isSynced = false,
     this.isDeleted = false,
     this.soulSatisfaction = 2,
+    this.entrySource = EntrySource.manual,
   }) : _metadata = metadata;
   factory _Transaction.fromJson(Map<String, dynamic> json) =>
       _$TransactionFromJson(json);
@@ -639,6 +659,12 @@ class _Transaction implements Transaction {
   @override
   @JsonKey()
   final int soulSatisfaction;
+  // Entry-path provenance (D-01 / D-09). Default 'manual' applies for older
+  // sync payloads / DB rows where the column DEFAULT triggered.
+  // CreateTransactionParams enforces required-no-default (D-06, Plan 04).
+  @override
+  @JsonKey()
+  final EntrySource entrySource;
 
   /// Create a copy of Transaction
   /// with the given fields replaced by the non-null parameter values.
@@ -691,7 +717,9 @@ class _Transaction implements Transaction {
             (identical(other.isDeleted, isDeleted) ||
                 other.isDeleted == isDeleted) &&
             (identical(other.soulSatisfaction, soulSatisfaction) ||
-                other.soulSatisfaction == soulSatisfaction));
+                other.soulSatisfaction == soulSatisfaction) &&
+            (identical(other.entrySource, entrySource) ||
+                other.entrySource == entrySource));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -718,11 +746,12 @@ class _Transaction implements Transaction {
     isSynced,
     isDeleted,
     soulSatisfaction,
+    entrySource,
   ]);
 
   @override
   String toString() {
-    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, metadata: $metadata, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, soulSatisfaction: $soulSatisfaction)';
+    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, metadata: $metadata, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, soulSatisfaction: $soulSatisfaction, entrySource: $entrySource)';
   }
 }
 
@@ -756,6 +785,7 @@ abstract mixin class _$TransactionCopyWith<$Res>
     bool isSynced,
     bool isDeleted,
     int soulSatisfaction,
+    EntrySource entrySource,
   });
 }
 
@@ -791,6 +821,7 @@ class __$TransactionCopyWithImpl<$Res> implements _$TransactionCopyWith<$Res> {
     Object? isSynced = null,
     Object? isDeleted = null,
     Object? soulSatisfaction = null,
+    Object? entrySource = null,
   }) {
     return _then(
       _Transaction(
@@ -874,6 +905,10 @@ class __$TransactionCopyWithImpl<$Res> implements _$TransactionCopyWith<$Res> {
             ? _self.soulSatisfaction
             : soulSatisfaction // ignore: cast_nullable_to_non_nullable
                   as int,
+        entrySource: null == entrySource
+            ? _self.entrySource
+            : entrySource // ignore: cast_nullable_to_non_nullable
+                  as EntrySource,
       ),
     );
   }

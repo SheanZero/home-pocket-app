@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'entry_source.dart';
+
 part 'transaction.freezed.dart';
 part 'transaction.g.dart';
 
@@ -40,6 +42,11 @@ abstract class Transaction with _$Transaction {
 
     // Soul ledger satisfaction score (1-10, default 2)
     @Default(2) int soulSatisfaction,
+
+    // Entry-path provenance (D-01 / D-09). Default 'manual' applies for older
+    // sync payloads / DB rows where the column DEFAULT triggered.
+    // CreateTransactionParams enforces required-no-default (D-06, Plan 04).
+    @Default(EntrySource.manual) EntrySource entrySource,
   }) = _Transaction;
 
   factory Transaction.fromJson(Map<String, dynamic> json) =>
