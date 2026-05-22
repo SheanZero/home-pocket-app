@@ -352,9 +352,9 @@ class HomeHeroCard extends StatelessWidget {
     if (isGroupMode) {
       final f = family;
       return HappinessRingsPainter(
-        outerSweepRatio: f == null ? null : _outerGroup(f.familyHighlightsSum),
-        middleSweepRatio: f == null ? null : _middleGroup(f.sharedJoyInsight),
-        innerSweepRatio: f == null ? null : _innerGroup(f.medianSatisfaction),
+        outerSweepRatio: f == null ? null : _familyHighlightsRatio(f.familyHighlightsSum),
+        middleSweepRatio: f == null ? null : _sharedJoyRatio(f.sharedJoyInsight),
+        innerSweepRatio: f == null ? null : _medianSatisfactionRatio(f.medianSatisfaction),
         outerGradient: const SweepGradient(
           colors: [AppColors.sharedLight, AppColors.shared],
         ),
@@ -368,23 +368,23 @@ class HomeHeroCard extends StatelessWidget {
       );
     }
     return HappinessRingsPainter(
-      outerSweepRatio: _outerSingle(happiness.joyContribution),
-      middleSweepRatio: _middleSingle(happiness.avgSatisfaction),
-      innerSweepRatio: _innerSingle(happiness.highlightsCount),
-      outerGradient: SweepGradient(
-        colors: [_singleProgressColor(), _singleProgressColor()],
+      outerSweepRatio: _highlightsRatio(happiness.highlightsCount),
+      middleSweepRatio: _avgSatisfactionRatio(happiness.avgSatisfaction),
+      innerSweepRatio: _joyContributionRatio(happiness.joyContribution),
+      outerGradient: const SweepGradient(
+        colors: [AppColors.accentPrimary, AppColors.accentPrimary],
       ),
       middleGradient: const SweepGradient(
-        colors: [AppColors.oliveLight, AppColors.olive],
+        colors: [AppColors.olive, AppColors.olive],
       ),
-      innerGradient: const SweepGradient(
-        colors: [AppColors.accentPrimaryLight, AppColors.accentPrimary],
+      innerGradient: SweepGradient(
+        colors: [_singleProgressColor(), _singleProgressColor()],
       ),
       trackColor: track,
     );
   }
 
-  double? _outerSingle(MetricResult<double> r) => switch (r) {
+  double? _joyContributionRatio(MetricResult<double> r) => switch (r) {
     Empty() => null,
     Value(:final data) =>
       activeMonthlyJoyTarget > 0
@@ -400,23 +400,23 @@ class HomeHeroCard extends StatelessWidget {
   };
   Color _singleProgressColor() =>
       joyTargetProgressColor(_singleProgressRatioForColor());
-  double? _middleSingle(MetricResult<double> r) => switch (r) {
+  double? _avgSatisfactionRatio(MetricResult<double> r) => switch (r) {
     Empty() => null,
     Value(:final data) => (data / 10.0).clamp(0.0, 1.0),
   };
-  double? _innerSingle(MetricResult<int> r) => switch (r) {
+  double? _highlightsRatio(MetricResult<int> r) => switch (r) {
     Empty() => null,
     Value(:final data) => (data / 10.0).clamp(0.0, 1.0),
   };
-  double? _outerGroup(MetricResult<int> r) => switch (r) {
+  double? _familyHighlightsRatio(MetricResult<int> r) => switch (r) {
     Empty() => null,
     Value(:final data) => (data / 30.0).clamp(0.0, 1.0),
   };
-  double? _middleGroup(MetricResult<Object> r) => switch (r) {
+  double? _sharedJoyRatio(MetricResult<Object> r) => switch (r) {
     Empty() => null,
     Value() => 1.0,
   };
-  double? _innerGroup(MetricResult<double> r) => switch (r) {
+  double? _medianSatisfactionRatio(MetricResult<double> r) => switch (r) {
     Empty() => null,
     Value(:final data) => (data / 10.0).clamp(0.0, 1.0),
   };
