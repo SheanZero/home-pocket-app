@@ -567,10 +567,10 @@ class SZh extends S {
   }
 
   @override
-  String get homeJoyIndexTooltip => '外环是朝向当前目标的月度悦己指数，中环是满足度均值，内环是小確幸数（满足度≥6）。';
+  String get homeJoyIndexTooltip => '外环是朝向当前目标的月度悦己指数，中环是满足度均值，内环是小确幸数（满足度≥6）。';
 
   @override
-  String get homeJoyContributionTooltip => '外环是朝向当前目标的月度悦己指数，中环是满足度均值，内环是小確幸数。';
+  String get homeJoyContributionTooltip => '外环是朝向当前目标的月度悦己指数，中环是满足度均值，内环是小确幸数。';
 
   @override
   String homeJoyTargetReference(int target) {
@@ -638,12 +638,10 @@ class SZh extends S {
   String get homeJoyContributionLegend => '悦己目标';
 
   @override
-  String homeHighlightsCountLegend(int count) {
-    return '小確幸 ($count)';
-  }
+  String get homeHighlightsCountLegend => '小确幸';
 
   @override
-  String get homeFamilyHighlightsLegend => '家族小確幸';
+  String get homeFamilyHighlightsLegend => '家族小确幸';
 
   @override
   String get homeSharedJoyLegend => '共爱品类';
@@ -1511,7 +1509,7 @@ class SZh extends S {
 
   @override
   String analyticsFamilyHighlightsSentence(int N) {
-    return '家族小確幸 $N 次';
+    return '家族小确幸 $N 次';
   }
 
   @override

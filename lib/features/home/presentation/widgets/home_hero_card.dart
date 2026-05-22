@@ -370,15 +370,9 @@ class HomeHeroCard extends StatelessWidget {
     return HappinessRingsPainter(
       outerSweepRatio: _outerSingle(happiness.joyContribution),
       middleSweepRatio: _middleSingle(happiness.avgSatisfaction),
-      innerSweepRatio: _innerSingle(
-        happiness.highlightsCount,
-        happiness.totalSoulTx,
-      ),
+      innerSweepRatio: _innerSingle(happiness.highlightsCount),
       outerGradient: SweepGradient(
-        colors: [
-          _singleProgressColor().withValues(alpha: 0.6),
-          _singleProgressColor(),
-        ],
+        colors: [_singleProgressColor(), _singleProgressColor()],
       ),
       middleGradient: const SweepGradient(
         colors: [AppColors.oliveLight, AppColors.olive],
@@ -410,9 +404,9 @@ class HomeHeroCard extends StatelessWidget {
     Empty() => null,
     Value(:final data) => (data / 10.0).clamp(0.0, 1.0),
   };
-  double? _innerSingle(MetricResult<int> r, int total) => switch (r) {
+  double? _innerSingle(MetricResult<int> r) => switch (r) {
     Empty() => null,
-    Value(:final data) => total > 0 ? (data / total).clamp(0.0, 1.0) : null,
+    Value(:final data) => (data / 10.0).clamp(0.0, 1.0),
   };
   double? _outerGroup(MetricResult<int> r) => switch (r) {
     Empty() => null,
@@ -446,21 +440,9 @@ class HomeHeroCard extends StatelessWidget {
     };
     return Semantics(
       label: l10n.homeJoyTargetSemantics(valueText, activeMonthlyJoyTarget),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            valueText,
-            style: AppTextStyles.amountMedium.copyWith(color: valueColor),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            l10n.homeJoyTargetReference(activeMonthlyJoyTarget),
-            style: AppTextStyles.caption.copyWith(
-              color: context.wmTextSecondary,
-            ),
-          ),
-        ],
+      child: Text(
+        valueText,
+        style: AppTextStyles.amountMedium.copyWith(color: valueColor),
       ),
     );
   }
@@ -535,7 +517,9 @@ class HomeHeroCard extends StatelessWidget {
             Empty() => empty,
             Value(:final data) => formatJoyCumulative(data, currencyCode),
           },
-          trailing: const _InfoIcon(tooltipKey: _TooltipKey.joyContribution),
+          labelTrailing: const _InfoIcon(
+            tooltipKey: _TooltipKey.joyContribution,
+          ),
         ),
         const SizedBox(height: 6),
         _legendRow(
@@ -551,8 +535,8 @@ class HomeHeroCard extends StatelessWidget {
         _legendRow(
           context,
           AppColors.accentPrimary,
-          l10n.homeHighlightsCountLegend(highlights),
-          '',
+          l10n.homeHighlightsCountLegend,
+          '$highlights',
         ),
       ],
     );
@@ -564,6 +548,7 @@ class HomeHeroCard extends StatelessWidget {
     String label,
     String value, {
     Widget? trailing,
+    Widget? labelTrailing,
   }) {
     return Row(
       children: [
@@ -574,12 +559,23 @@ class HomeHeroCard extends StatelessWidget {
         ),
         const SizedBox(width: 6),
         Expanded(
-          child: Text(
-            label,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: context.wmTextSecondary,
-            ),
-            overflow: TextOverflow.ellipsis,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  label,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: context.wmTextSecondary,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (labelTrailing != null) ...[
+                const SizedBox(width: 4),
+                labelTrailing,
+              ],
+            ],
           ),
         ),
         if (value.isNotEmpty)

@@ -640,9 +640,7 @@ class SJa extends S {
   String get homeJoyContributionLegend => 'ときめき目標';
 
   @override
-  String homeHighlightsCountLegend(int count) {
-    return '小確幸 ($count)';
-  }
+  String get homeHighlightsCountLegend => '小確幸';
 
   @override
   String get homeFamilyHighlightsLegend => '家族の小確幸';

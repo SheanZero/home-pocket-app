@@ -16,8 +16,8 @@ class GetMonthlyJoyTargetRecommendationUseCase {
   /// D-04: Kahneman & Tversky 1979 PTVF empirical fit.
   static const double _ptvfAlpha = 0.88;
 
-  /// Spike-decided per 13-SPIKE.md (D-06), inside ADR-016 range [30, 100].
-  static const int _fallbackBaseline = 50;
+  /// Spike-decided per 13-SPIKE.md (D-06), at top of ADR-016 range [30, 100].
+  static const int _fallbackBaseline = 100;
 
   /// Cold-start baseline for UI consumers when [execute] returns [Empty].
   static int get fallbackBaseline => _fallbackBaseline;

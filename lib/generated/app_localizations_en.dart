@@ -646,9 +646,7 @@ class SEn extends S {
   String get homeJoyContributionLegend => 'Joy Index target';
 
   @override
-  String homeHighlightsCountLegend(int count) {
-    return 'Highlights ($count)';
-  }
+  String get homeHighlightsCountLegend => 'Highlights';
 
   @override
   String get homeFamilyHighlightsLegend => 'Family highlights';

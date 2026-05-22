@@ -724,11 +724,11 @@
       }
     }
   },
-  "homeJoyIndexTooltip": "外环是朝向当前目标的月度悦己指数，中环是满足度均值，内环是小確幸数（满足度≥6）。",
+  "homeJoyIndexTooltip": "外环是朝向当前目标的月度悦己指数，中环是满足度均值，内环是小确幸数（满足度≥6）。",
   "@homeJoyIndexTooltip": {
     "description": "Tooltip explaining the 3-ring system on the HomeHeroCard (D-10 tooltip 1)"
   },
-  "homeJoyContributionTooltip": "外环是朝向当前目标的月度悦己指数，中环是满足度均值，内环是小確幸数。",
+  "homeJoyContributionTooltip": "外环是朝向当前目标的月度悦己指数，中环是满足度均值，内环是小确幸数。",
   "@homeJoyContributionTooltip": {
     "description": "Tooltip explaining the HomeHero three-ring system after ADR-016"
   },
@@ -834,16 +834,11 @@
   "@homeJoyContributionLegend": {
     "description": "Single-mode outer-ring legend label for monthly Joy target progress"
   },
-  "homeHighlightsCountLegend": "小確幸 ({count})",
+  "homeHighlightsCountLegend": "小确幸",
   "@homeHighlightsCountLegend": {
-    "description": "Single-mode inner-ring legend label with placeholder count",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
+    "description": "Single-mode inner-ring legend label (count is shown on the right column in UI)"
   },
-  "homeFamilyHighlightsLegend": "家族小確幸",
+  "homeFamilyHighlightsLegend": "家族小确幸",
   "@homeFamilyHighlightsLegend": {
     "description": "Group-mode outer-ring legend label"
   },
@@ -1940,7 +1935,7 @@
   },
   "analyticsCardEmptyBestJoy": "最值还没出现",
   "analyticsCardTitleFamilyInsight": "家族 · 小确幸总结",
-  "analyticsFamilyHighlightsSentence": "家族小確幸 {N} 次",
+  "analyticsFamilyHighlightsSentence": "家族小确幸 {N} 次",
   "@analyticsFamilyHighlightsSentence": {
     "description": "Family highlights aggregate sentence",
     "placeholders": {
