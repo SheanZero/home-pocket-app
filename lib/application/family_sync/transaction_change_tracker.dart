@@ -17,6 +17,14 @@ class TransactionChangeTracker {
     _pendingOps.add(operation);
   }
 
+  /// Record an update operation for sync.
+  ///
+  /// The receiving sync engine already handles `op: 'update'` payloads via
+  /// the existing [TransactionSyncMapper.toUpdateOperation] producer.
+  void trackUpdate(Map<String, dynamic> operation) {
+    _pendingOps.add(operation);
+  }
+
   /// Record a delete operation for sync.
   void trackDelete({required String transactionId, required String bookId}) {
     _pendingOps.add({
