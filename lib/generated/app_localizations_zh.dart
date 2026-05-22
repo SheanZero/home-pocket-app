@@ -261,6 +261,21 @@ class SZh extends S {
   String get failedToSave => '保存失败';
 
   @override
+  String get transactionEditTitle => '明细编辑';
+
+  @override
+  String get ocrReviewTitle => '票据复核';
+
+  @override
+  String get ocrReviewEmptyDraftBanner => 'OCR 尚未实现，请手动填写各字段。';
+
+  @override
+  String get transactionUpdated => '明细已更新';
+
+  @override
+  String get failedToUpdate => '更新失败';
+
+  @override
   String get appearance => '外观';
 
   @override

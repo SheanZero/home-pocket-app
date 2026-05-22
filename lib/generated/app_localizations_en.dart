@@ -263,6 +263,22 @@ class SEn extends S {
   String get failedToSave => 'Failed to save';
 
   @override
+  String get transactionEditTitle => 'Edit Entry';
+
+  @override
+  String get ocrReviewTitle => 'Review Receipt';
+
+  @override
+  String get ocrReviewEmptyDraftBanner =>
+      'OCR is not implemented yet — please fill in the fields manually.';
+
+  @override
+  String get transactionUpdated => 'Transaction updated';
+
+  @override
+  String get failedToUpdate => 'Failed to update';
+
+  @override
   String get appearance => 'Appearance';
 
   @override

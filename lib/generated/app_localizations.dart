@@ -579,6 +579,36 @@ abstract class S {
   /// **'Failed to save'**
   String get failedToSave;
 
+  /// AppBar title for TransactionEditScreen (Phase 18 EDIT-01)
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Entry'**
+  String get transactionEditTitle;
+
+  /// AppBar title for OcrReviewScreen (Phase 18 INPUT-04 architectural slot)
+  ///
+  /// In en, this message translates to:
+  /// **'Review Receipt'**
+  String get ocrReviewTitle;
+
+  /// Banner shown on OcrReviewScreen when draft is empty (Phase 18 — MOD-005 writer not landed)
+  ///
+  /// In en, this message translates to:
+  /// **'OCR is not implemented yet — please fill in the fields manually.'**
+  String get ocrReviewEmptyDraftBanner;
+
+  /// Snackbar after successful edit save (sibling to transactionSaved)
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction updated'**
+  String get transactionUpdated;
+
+  /// Error snackbar on edit save failure (sibling to failedToSave)
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update'**
+  String get failedToUpdate;
+
   /// Appearance section title
   ///
   /// In en, this message translates to:

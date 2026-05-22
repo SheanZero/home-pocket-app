@@ -261,6 +261,21 @@ class SJa extends S {
   String get failedToSave => '保存に失敗しました';
 
   @override
+  String get transactionEditTitle => '明細編集';
+
+  @override
+  String get ocrReviewTitle => 'レシート確認';
+
+  @override
+  String get ocrReviewEmptyDraftBanner => 'OCRはまだ実装されていません。手動で入力してください。';
+
+  @override
+  String get transactionUpdated => '明細を更新しました';
+
+  @override
+  String get failedToUpdate => '更新に失敗しました';
+
+  @override
   String get appearance => '外観';
 
   @override
