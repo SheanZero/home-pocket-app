@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-05-21 after v1.2 close)
 Phase: All v1.2 phases archived (Phases 13-17 → `milestones/v1.2-phases/`)
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-05-21 — Milestone v1.2 completed and archived
+Last activity: 2026-05-22 — Completed quick task 260522-fj5: 悦己充盈卡片 UI 修复（7 项改动）
 
 ## Last Milestone Snapshot (v1.2)
 
@@ -73,6 +73,7 @@ No active blockers. Carried-forward debt (cross-milestone):
 | 260518-kyr | Fix soul stats and monthly favorite not refreshing after new soul ledger entry | 2026-05-18 | 7f216e7 | Verified | [260518-kyr-fix-soul-stats-and-monthly-favorite-not-](./quick/260518-kyr-fix-soul-stats-and-monthly-favorite-not-/) |
 | 260518-pf5 | Home polish Bucket A — typography spacing, ledger bar color, caption removal, family invite i18n, tx display, analytics spacing | 2026-05-18 | 5b7b6ee | Verified (3/6 PASS round 1; remaining 3 items reworked in pf6) | [260518-pf5-home-polish-typography-spacing-ledger-ba](./quick/260518-pf5-home-polish-typography-spacing-ledger-ba/) |
 | 260518-v4v | Home polish Round 2 — Best Joy Variant A (Pencil mock) + r2 flat-layout tweak, recent-tx soul color + icon reposition, home SizedBox 16→24 for analytics parity | 2026-05-19 | e142f4f | Verified | [260518-v4v-home-polish-round-2-best-joy-variant-a-r](./quick/260518-v4v-home-polish-round-2-best-joy-variant-a-r/) |
+| 260522-fj5 | 悦己充盈卡片 UI 修复 — info icon 位置、小确幸数字右移、目标 default 50→100、圆环中心不显示目标、繁体→简体、内环目标固定 10、外环颜色过渡修复 | 2026-05-22 | c90ef9a | — (28 golden diffs pending human re-baseline) | [260522-fj5-ui-7-info-icon-50-100-10](./quick/260522-fj5-ui-7-info-icon-50-100-10/) |
 
 ## Deferred Items
 
