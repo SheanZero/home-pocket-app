@@ -87,7 +87,7 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 - [x] 18-04-PLAN.md — TransactionDetailsForm widget (load-bearing — extracts confirm-screen body, exposes submit())
 - [x] 18-05-PLAN.md — Refactor TransactionConfirmScreen to thin .new host wrapping TransactionDetailsForm
 - [x] 18-06-PLAN.md — New TransactionEditScreen (.edit host) + new OcrReviewScreen (.new host with MOD-005 marker)
-- [ ] 18-07-PLAN.md — Wire HomeTransactionTile.onTap → TransactionEditScreen + OCR shutter onTap → OcrReviewScreen
+- [x] 18-07-PLAN.md — Wire HomeTransactionTile.onTap → TransactionEditScreen + OCR shutter onTap → OcrReviewScreen
 - [ ] 18-08-PLAN.md — Test suite (form widget tests, use case unit, DAO entry_source round-trip, home tap-to-edit, OCR two-step seam D-14)
 **UI hint**: yes
 
@@ -154,7 +154,7 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 18. Shared Details Form Foundation | 6/8 | In Progress|  |
+| 18. Shared Details Form Foundation | 7/8 | In Progress|  |
 | 19. Manual One-Step + Keypad Polish | 0/0 | Not started | — |
 | 20. Voice Number Parser (zh + ja) | 0/0 | Not started | — |
 | 21. Voice Category Resolver Level-2 Enforcement | 0/0 | Not started | — |
