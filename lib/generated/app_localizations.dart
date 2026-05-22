@@ -1281,11 +1281,11 @@ abstract class S {
   /// **'Joy Index target'**
   String get homeJoyContributionLegend;
 
-  /// Single-mode inner-ring legend label with placeholder count
+  /// Single-mode inner-ring legend label (count is shown on the right column in UI)
   ///
   /// In en, this message translates to:
-  /// **'Highlights ({count})'**
-  String homeHighlightsCountLegend(int count);
+  /// **'Highlights'**
+  String get homeHighlightsCountLegend;
 
   /// Group-mode outer-ring legend label
   ///

@@ -834,14 +834,9 @@
   "@homeJoyContributionLegend": {
     "description": "Single-mode outer-ring legend label for monthly Joy target progress"
   },
-  "homeHighlightsCountLegend": "小確幸 ({count})",
+  "homeHighlightsCountLegend": "小確幸",
   "@homeHighlightsCountLegend": {
-    "description": "Single-mode inner-ring legend label with placeholder count",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
+    "description": "Single-mode inner-ring legend label (count is shown on the right column in UI)"
   },
   "homeFamilyHighlightsLegend": "家族の小確幸",
   "@homeFamilyHighlightsLegend": {
