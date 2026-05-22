@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../application/accounting/category_service.dart';
 import '../../../../application/accounting/create_transaction_use_case.dart';
 import '../../../../application/accounting/delete_transaction_use_case.dart';
+import '../../../../application/accounting/update_transaction_use_case.dart';
 import '../../../../application/accounting/ensure_default_book_use_case.dart';
 import '../../../../application/accounting/get_transactions_use_case.dart';
 import '../../../../application/accounting/merchant_category_learning_service.dart';
@@ -133,6 +134,15 @@ CreateTransactionUseCase createTransactionUseCase(Ref ref) {
     deviceIdentityRepository: ref.watch(deviceIdentityRepositoryProvider),
     hashChainService: ref.watch(app_accounting.appHashChainServiceProvider),
     classificationService: ref.watch(classificationServiceProvider),
+    syncEngine: ref.watch(syncEngineProvider),
+    changeTracker: ref.watch(transactionChangeTrackerProvider),
+  );
+}
+
+@riverpod
+UpdateTransactionUseCase updateTransactionUseCase(Ref ref) {
+  return UpdateTransactionUseCase(
+    transactionRepository: ref.watch(transactionRepositoryProvider),
     syncEngine: ref.watch(syncEngineProvider),
     changeTracker: ref.watch(transactionChangeTrackerProvider),
   );

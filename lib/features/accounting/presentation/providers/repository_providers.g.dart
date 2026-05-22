@@ -480,6 +480,54 @@ final class CreateTransactionUseCaseProvider
 String _$createTransactionUseCaseHash() =>
     r'a3b1c6f6b92937972bd991e565193ae36551bbf6';
 
+@ProviderFor(updateTransactionUseCase)
+final updateTransactionUseCaseProvider = UpdateTransactionUseCaseProvider._();
+
+final class UpdateTransactionUseCaseProvider
+    extends
+        $FunctionalProvider<
+          UpdateTransactionUseCase,
+          UpdateTransactionUseCase,
+          UpdateTransactionUseCase
+        >
+    with $Provider<UpdateTransactionUseCase> {
+  UpdateTransactionUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'updateTransactionUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$updateTransactionUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<UpdateTransactionUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  UpdateTransactionUseCase create(Ref ref) {
+    return updateTransactionUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(UpdateTransactionUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<UpdateTransactionUseCase>(value),
+    );
+  }
+}
+
+String _$updateTransactionUseCaseHash() =>
+    r'2d93a1870453f403a491cbb6b1e125f621fe76e0';
+
 @ProviderFor(getTransactionsUseCase)
 final getTransactionsUseCaseProvider = GetTransactionsUseCaseProvider._();
 
