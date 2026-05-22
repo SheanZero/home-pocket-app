@@ -81,9 +81,9 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
   4. OCR flow code path exposes a two-step container (capture stub → details review) whose step 2 mounts the same shared widget; no OCR writer is implemented — only the architectural slot is reserved and a TODO-marker test asserts the integration seam exists
   5. No new Drift schema migration introduced; current v17 schema (`entry_source` column) suffices for edit/save path
 **Plans**: 8 plans
-- [ ] 18-01-PLAN.md — Freezed domain models (OcrParseDraft + TransactionDetailsFormConfig + TransactionDetailsFormResult)
-- [ ] 18-02-PLAN.md — UpdateTransactionUseCase + TransactionChangeTracker.trackUpdate + updateTransactionUseCaseProvider
-- [ ] 18-03-PLAN.md — 5 new ARB keys (transactionEditTitle, ocrReviewTitle, ocrReviewEmptyDraftBanner, transactionUpdated, failedToUpdate) × ja/zh/en + flutter gen-l10n
+- [x] 18-01-PLAN.md — Freezed domain models (OcrParseDraft + TransactionDetailsFormConfig + TransactionDetailsFormResult)
+- [x] 18-02-PLAN.md — UpdateTransactionUseCase + TransactionChangeTracker.trackUpdate + updateTransactionUseCaseProvider
+- [x] 18-03-PLAN.md — 5 new ARB keys (transactionEditTitle, ocrReviewTitle, ocrReviewEmptyDraftBanner, transactionUpdated, failedToUpdate) × ja/zh/en + flutter gen-l10n
 - [ ] 18-04-PLAN.md — TransactionDetailsForm widget (load-bearing — extracts confirm-screen body, exposes submit())
 - [ ] 18-05-PLAN.md — Refactor TransactionConfirmScreen to thin .new host wrapping TransactionDetailsForm
 - [ ] 18-06-PLAN.md — New TransactionEditScreen (.edit host) + new OcrReviewScreen (.new host with MOD-005 marker)
@@ -154,7 +154,7 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 18. Shared Details Form Foundation | 0/0 | Not started | — |
+| 18. Shared Details Form Foundation | 3/8 | In Progress|  |
 | 19. Manual One-Step + Keypad Polish | 0/0 | Not started | — |
 | 20. Voice Number Parser (zh + ja) | 0/0 | Not started | — |
 | 21. Voice Category Resolver Level-2 Enforcement | 0/0 | Not started | — |
