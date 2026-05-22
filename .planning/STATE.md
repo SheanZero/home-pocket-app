@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Happiness Metric Refresh
-status: Awaiting next milestone
-stopped_at: v1.2 milestone closed
-last_updated: "2026-05-21T03:30:00.000Z"
-last_activity: 2026-05-21 — Milestone v1.2 completed and archived
+milestone: v1.3
+milestone_name: 迭代帐本输入
+status: planning
+last_updated: "2026-05-22T02:57:34.988Z"
+last_activity: 2026-05-22
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 37
-  completed_plans: 37
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-05-21 after v1.2 close)
 
 ## Current Position
 
-Phase: All v1.2 phases archived (Phases 13-17 → `milestones/v1.2-phases/`)
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-05-22 — Completed quick task 260522-fj5: 悦己充盈卡片 UI 修复（7 项改动）
+Status: Defining requirements
+Last activity: 2026-05-22 — Milestone v1.3 started
 
 ## Last Milestone Snapshot (v1.2)
 

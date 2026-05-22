@@ -12,19 +12,36 @@ The v1.1 milestone delivered the happiness metric domain, HomePage `HomeHeroCard
 
 The v1.2 milestone shipped the ADR-016 Joy migration (density → `Σ joy_contribution`), HomeHero target ring rebuild with user-configurable `monthly_joy_target` + 3-month median recommendation, AnalyticsScreen Variant ε with Custom Time Windows (week/month/quarter/year/arbitrary), Per-Category breakdown + Soul-vs-Survival comparison (anti-toxicity framed), and Manual-Only Joy sub-metric variant on Drift schema v17 (`entry_source` column). HomeHero isolation invariant (ADR-016 §3) is structurally enforced. Audit closed at `tech_debt` — Phase 13/17 lack VERIFICATION.md and 3 VALIDATION.md drafts have `nyquist_compliant: false`; documentation-grade debt only, all 11 v1.2 requirements satisfied in implementation.
 
-## Next Milestone Goals
+## Current Milestone: v1.3 迭代帐本输入
 
-**Status:** Planning. Use `/gsd:new-milestone` to scope.
+**Goal:** 把账本录入从「多步、易误按、语音不准」打磨成「单屏、稳准、语音可信」的核心体验，并复用同一 details 表单作为已存账本的编辑入口。
 
-**Candidate themes** (carried from v1.0/v1.1/v1.2 close decisions):
+**Target features:**
 
-- **MOD-005 OCR module** — receipt scanning + parsing (long-deferred core feature)
-- **Family privacy hardening (FAMILY-V2-01/02/03)** — strict consent gate, possibly schema v17→v18; new ADR Privacy Consent Gate
-- **Release-readiness QA (FUTURE-QA-01)** — owner-driven smoke tests before any public v1 release
-- **Documentation + tooling guardrail cleanup** — FUTURE-DOC-01..06 (MOD-numbering, ARCH-008 ADR citation, missing VALIDATION/VERIFICATION docs, doc-sweep verifier CI wiring), FUTURE-TOOL-03 (coverage threshold review post-v1.2)
-- **fl_chart 1.x upgrade (TOOL-V2-01)** — bundle with future Analytics chart-stack work
+- **数字键盘优化** — 增大数字键高度/可点击区域，消除"键太低易误按"问题
+- **一步记录** — 手动 & 语音录入合并为单屏（amount + category + 备注 + 商家 + 日期 + 账本类型），去掉"下一步"按钮；OCR 路径保留两步（识别→details 校对），forward-compat 留架构容器
+- **语音数字识别强化** — 中文复合数字"千百十"多段解析正确（"2千2百零4元"→2204、"1千8百4十元"慢速分段→1840），不丢位、不错拆
+- **语音类目→二级** — 强制识别到二级类目；只识别到一级时 fallback 该一级下第一个二级；merchant_database / 同义词扩充以提高二级准确率
+- **录音按钮交互优化** — 静态状态明确"点按 vs 长按"；录音中状态按钮形态 + 提示文案变化（"录音中…"）
+- **details = 编辑入口** — details 表单复用：既是 OCR 流程第二步，也是已存账本的修改入口
+
+**Out of scope (this milestone only):**
+
+- **MOD-005 OCR writer 真正落地** — schema 槽位已存在，本 milestone 只为 OCR 流程预留 details 步骤的架构容器，writer 留待下一 milestone
+- **FAMILY-V2 家庭隐私加固** — 与录入流程无关
+- **FUTURE-QA / FUTURE-DOC 清理** — 推后
+- **fl_chart 1.x upgrade** — 推后
+- **Joy metric / HomeHero 语义改动** — ADR-012/016 反游戏化、Joy 表达、HomeHero isolation 等永久边界全部保留
 
 Phase numbering continues from **Phase 18**.
+
+**Carry-forward candidate themes (deferred to v1.4+):**
+
+- MOD-005 OCR writer 落地（writer 接管 schema v17 已有 `entry_source='ocr'` 槽位）
+- FAMILY-V2-01/02/03 家庭隐私加固
+- FUTURE-QA-01 release-readiness smoke tests
+- FUTURE-DOC-01..06 文档漂移修复 + FUTURE-TOOL-03 覆盖率阈值回审
+- TOOL-V2-01 fl_chart 1.x 升级
 
 <details>
 <summary>v1.2 Happiness Metric Refresh (archived)</summary>
@@ -156,9 +173,9 @@ A family accounting app users can trust with sensitive financial data — local-
 
 ### Active
 
-<!-- No active requirements between milestones. Use /gsd:new-milestone to scope the next set. -->
+<!-- v1.3 迭代帐本输入 — REQ-IDs populated by REQUIREMENTS.md after roadmap phase. -->
 
-(See **Next Milestone Goals** above for candidate themes.)
+See **Current Milestone: v1.3 迭代帐本输入** above. Detailed REQ-IDs in `.planning/REQUIREMENTS.md` after milestone scoping.
 
 ### Out of Scope
 
@@ -260,4 +277,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-21 after v1.2 milestone close*
+*Last updated: 2026-05-22 — v1.3 迭代帐本输入 milestone opened*
