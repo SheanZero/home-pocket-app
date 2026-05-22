@@ -52,7 +52,7 @@
 
 ### 🚧 v1.3 迭代帐本输入 (Phases 18-22) — ACTIVE
 
-- [ ] **Phase 18: Shared Details Form Foundation** — Single shared details widget (INPUT-03/04 + EDIT-01/02 foundation): contract supports new/edit modes, OCR two-step architectural slot, edit-from-list entry path, `entry_source` preserved on save
+- [x] **Phase 18: Shared Details Form Foundation** — Single shared details widget (INPUT-03/04 + EDIT-01/02 foundation): contract supports new/edit modes, OCR two-step architectural slot, edit-from-list entry path, `entry_source` preserved on save (completed 2026-05-22)
 - [ ] **Phase 19: Manual One-Step + Keypad Polish** — Manual entry collapses to single screen, no "下一步" button; numeric keypad enlarged to platform-min touch targets (KEYPAD-01, INPUT-01)
 - [ ] **Phase 20: Voice Number Parser (zh + ja)** — Compound number state machine, intra-pause continued-listening window, locale-aware combining; per-locale corpus fixtures ≥95% accuracy (VOICE-01/02/03)
 - [ ] **Phase 21: Voice Category Resolver Level-2 Enforcement** — Always-level-2 contract, level-1 → first-level-2 fallback, merchant DB + synonym dictionary data sources extensible without code changes (VOICE-04/05/06)
@@ -88,7 +88,7 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 - [x] 18-05-PLAN.md — Refactor TransactionConfirmScreen to thin .new host wrapping TransactionDetailsForm
 - [x] 18-06-PLAN.md — New TransactionEditScreen (.edit host) + new OcrReviewScreen (.new host with MOD-005 marker)
 - [x] 18-07-PLAN.md — Wire HomeTransactionTile.onTap → TransactionEditScreen + OCR shutter onTap → OcrReviewScreen
-- [ ] 18-08-PLAN.md — Test suite (form widget tests, use case unit, DAO entry_source round-trip, home tap-to-edit, OCR two-step seam D-14)
+- [x] 18-08-PLAN.md — Test suite (form widget tests, use case unit, DAO entry_source round-trip, home tap-to-edit, OCR two-step seam D-14)
 **UI hint**: yes
 
 ### Phase 19: Manual One-Step + Keypad Polish
@@ -154,7 +154,7 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 18. Shared Details Form Foundation | 7/8 | In Progress|  |
+| 18. Shared Details Form Foundation | 8/8 | Complete   | 2026-05-22 |
 | 19. Manual One-Step + Keypad Polish | 0/0 | Not started | — |
 | 20. Voice Number Parser (zh + ja) | 0/0 | Not started | — |
 | 21. Voice Category Resolver Level-2 Enforcement | 0/0 | Not started | — |
