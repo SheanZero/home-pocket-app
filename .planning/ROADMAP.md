@@ -84,7 +84,7 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 - [x] 18-01-PLAN.md — Freezed domain models (OcrParseDraft + TransactionDetailsFormConfig + TransactionDetailsFormResult)
 - [x] 18-02-PLAN.md — UpdateTransactionUseCase + TransactionChangeTracker.trackUpdate + updateTransactionUseCaseProvider
 - [x] 18-03-PLAN.md — 5 new ARB keys (transactionEditTitle, ocrReviewTitle, ocrReviewEmptyDraftBanner, transactionUpdated, failedToUpdate) × ja/zh/en + flutter gen-l10n
-- [ ] 18-04-PLAN.md — TransactionDetailsForm widget (load-bearing — extracts confirm-screen body, exposes submit())
+- [x] 18-04-PLAN.md — TransactionDetailsForm widget (load-bearing — extracts confirm-screen body, exposes submit())
 - [ ] 18-05-PLAN.md — Refactor TransactionConfirmScreen to thin .new host wrapping TransactionDetailsForm
 - [ ] 18-06-PLAN.md — New TransactionEditScreen (.edit host) + new OcrReviewScreen (.new host with MOD-005 marker)
 - [ ] 18-07-PLAN.md — Wire HomeTransactionTile.onTap → TransactionEditScreen + OCR shutter onTap → OcrReviewScreen
@@ -154,7 +154,7 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 18. Shared Details Form Foundation | 3/8 | In Progress|  |
+| 18. Shared Details Form Foundation | 4/8 | In Progress|  |
 | 19. Manual One-Step + Keypad Polish | 0/0 | Not started | — |
 | 20. Voice Number Parser (zh + ja) | 0/0 | Not started | — |
 | 21. Voice Category Resolver Level-2 Enforcement | 0/0 | Not started | — |
