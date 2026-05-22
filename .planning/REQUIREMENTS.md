@@ -100,30 +100,30 @@ Explicitly excluded to keep the milestone focused on the input-flow axis.
 
 ## Traceability
 
-Empty initially. Populated by roadmapper after phase decomposition.
+Mapped by roadmapper on 2026-05-22.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| KEYPAD-01 | TBD | Pending |
-| INPUT-01 | TBD | Pending |
-| INPUT-02 | TBD | Pending |
-| INPUT-03 | TBD | Pending |
-| INPUT-04 | TBD | Pending |
-| VOICE-01 | TBD | Pending |
-| VOICE-02 | TBD | Pending |
-| VOICE-03 | TBD | Pending |
-| VOICE-04 | TBD | Pending |
-| VOICE-05 | TBD | Pending |
-| VOICE-06 | TBD | Pending |
-| REC-01 | TBD | Pending |
-| REC-02 | TBD | Pending |
-| EDIT-01 | TBD | Pending |
-| EDIT-02 | TBD | Pending |
+| KEYPAD-01 | Phase 19 | Pending |
+| INPUT-01 | Phase 19 | Pending |
+| INPUT-02 | Phase 22 | Pending |
+| INPUT-03 | Phase 18 | Pending |
+| INPUT-04 | Phase 18 | Pending |
+| VOICE-01 | Phase 20 | Pending |
+| VOICE-02 | Phase 20 | Pending |
+| VOICE-03 | Phase 20 | Pending |
+| VOICE-04 | Phase 21 | Pending |
+| VOICE-05 | Phase 21 | Pending |
+| VOICE-06 | Phase 21 | Pending |
+| REC-01 | Phase 22 | Pending |
+| REC-02 | Phase 22 | Pending |
+| EDIT-01 | Phase 18 | Pending |
+| EDIT-02 | Phase 18 | Pending |
 
 **Coverage:**
 - v1.3 requirements: 15 total
-- Mapped to phases: 0 (pending roadmapper)
-- Unmapped: 15 ⚠️ (will be 0 after `## ROADMAP CREATED`)
+- Mapped to phases: 15 / Unmapped: 0 ✓
+- Phase distribution: Phase 18 (4 reqs), Phase 19 (2 reqs), Phase 20 (3 reqs), Phase 21 (3 reqs), Phase 22 (3 reqs)
 
 ---
 
@@ -140,4 +140,4 @@ Empty initially. Populated by roadmapper after phase decomposition.
 ---
 
 *Requirements defined: 2026-05-22*
-*Last updated: 2026-05-22 after initial definition*
+*Last updated: 2026-05-22 — traceability populated, 15/15 mapped to Phases 18-22*

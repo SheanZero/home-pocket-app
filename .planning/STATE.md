@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: 迭代帐本输入
 status: planning
-last_updated: "2026-05-22T02:57:34.988Z"
+last_updated: "2026-05-22T03:30:00.000Z"
 last_activity: 2026-05-22
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,17 +17,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-21 after v1.2 close)
+See: .planning/PROJECT.md (updated 2026-05-22 — v1.3 迭代帐本输入 milestone opened)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes survival spending from soul spending
-**Current focus:** Planning next milestone — see PROJECT.md "Next Milestone Goals"
+**Current focus:** v1.3 迭代帐本输入 — 把账本录入从「多步、易误按、语音不准」打磨成「单屏、稳准、语音可信」的核心体验，并复用同一 details 表单作为已存账本的编辑入口
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Phase 18: Shared Details Form Foundation
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-22 — Milestone v1.3 started
+Status: Ready to plan
+Last activity: 2026-05-22 — v1.3 roadmap created (Phases 18-22)
 
 ## Last Milestone Snapshot (v1.2)
 
@@ -44,15 +44,32 @@ Last activity: 2026-05-22 — Milestone v1.3 started
 - **v1.1** (4 phases, 40 plans, 2026-05-01 → 2026-05-05, audit `known_debt` accepted) — Happiness Metric & Display
 - **v1.0** (8 phases, 48 plans, 2026-04-24 → 2026-04-29, audit `passed`) — Codebase Cleanup Initiative
 
+## v1.3 Phase Map
+
+| Phase | Name | Requirements | Depends On |
+|-------|------|--------------|------------|
+| 18 | Shared Details Form Foundation | INPUT-03, INPUT-04, EDIT-01, EDIT-02 | — (foundation) |
+| 19 | Manual One-Step + Keypad Polish | KEYPAD-01, INPUT-01 | Phase 18 |
+| 20 | Voice Number Parser (zh + ja) | VOICE-01, VOICE-02, VOICE-03 | — (parallel-safe with 19) |
+| 21 | Voice Category Resolver Level-2 Enforcement | VOICE-04, VOICE-05, VOICE-06 | Phase 20 |
+| 22 | Voice One-Step Integration + Record Button UX | INPUT-02, REC-01, REC-02 | Phases 18, 20, 21 |
+
+Coverage: 15/15 v1.3 requirements mapped, 0 unmapped.
+
 ## Accumulated Context
 
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 decisions captured there with outcomes.
 
+v1.3 decisions to date:
+- 5-phase split chosen over 4-phase: separates voice number parser (Phase 20) from voice category resolver (Phase 21) — different testing surfaces (state-machine corpus vs database resolution), and isolates the voice integration phase (22) so it consumes stable parser + resolver outputs.
+- Phase 18 ships first as foundation — INPUT-03 shared widget unblocks INPUT-01 (manual one-step), INPUT-02 (voice one-step), and EDIT-01/02 (edit-from-list path).
+- Phase 20 deliberately UI-independent — voice parser strengthening can start in parallel with Phase 19, both feed into Phase 22 integration.
+
 ### Pending Todos
 
-(None — between milestones.)
+(None — ready to plan Phase 18 via `/gsd:plan-phase 18`.)
 
 ### Blockers / Concerns
 
@@ -124,14 +141,14 @@ No active blockers. Carried-forward debt (cross-milestone):
 
 ## Session Continuity
 
-Last session: 2026-05-21T03:30:00.000Z
-Stopped at: v1.2 milestone closed
+Last session: 2026-05-22T03:30:00.000Z
+Stopped at: v1.3 roadmap created (Phases 18-22)
 Resume file: None
 
-**Planned Next:** Start next milestone via `/gsd:new-milestone`.
+**Planned Next:** Plan Phase 18 via `/gsd:plan-phase 18`.
 
 ## Operator Next Steps
 
-- Start the next milestone with `/gsd:new-milestone` (will run requirements definition + research + roadmap creation).
-- Optional pre-work: refresh codebase map with `/gsd:map-codebase` (last refresh 2026-04-25 — three milestones of drift).
-- Optional: backfill v1.2 verification debt with `/gsd:verify-work 13` and `/gsd:verify-work 17` if a clean re-audit is desired before next-milestone planning.
+- Plan Phase 18 (Shared Details Form Foundation) via `/gsd:plan-phase 18` — foundational, blocks Phases 19/22.
+- Optional pre-work: refresh codebase map with `/gsd:map-codebase` (last refresh 2026-04-25 — three milestones of drift; relevant for INPUT-03 shared-widget refactor since it touches the existing entry surface).
+- Optional: backfill v1.2 verification debt with `/gsd:verify-work 13` and `/gsd:verify-work 17` if a clean re-audit is desired before merging v1.3 work.

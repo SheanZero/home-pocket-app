@@ -5,6 +5,7 @@
 - ✅ **v1.0 Codebase Cleanup Initiative** — Phases 1-8 (shipped 2026-04-29) — see [archive](milestones/v1.0-ROADMAP.md)
 - ✅ **v1.1 Happiness Metric & Display** — Phases 9-12 (shipped 2026-05-05) — see [archive](milestones/v1.1-ROADMAP.md)
 - ✅ **v1.2 Happiness Metric Refresh** — Phases 13-17 (shipped 2026-05-21) — see [archive](milestones/v1.2-ROADMAP.md)
+- 🚧 **v1.3 迭代帐本输入** — Phases 18-22 (active, started 2026-05-22)
 
 ## Phases
 
@@ -49,17 +50,88 @@
 
 </details>
 
+### 🚧 v1.3 迭代帐本输入 (Phases 18-22) — ACTIVE
+
+- [ ] **Phase 18: Shared Details Form Foundation** — Single shared details widget (INPUT-03/04 + EDIT-01/02 foundation): contract supports new/edit modes, OCR two-step architectural slot, edit-from-list entry path, `entry_source` preserved on save
+- [ ] **Phase 19: Manual One-Step + Keypad Polish** — Manual entry collapses to single screen, no "下一步" button; numeric keypad enlarged to platform-min touch targets (KEYPAD-01, INPUT-01)
+- [ ] **Phase 20: Voice Number Parser (zh + ja)** — Compound number state machine, intra-pause continued-listening window, locale-aware combining; per-locale corpus fixtures ≥95% accuracy (VOICE-01/02/03)
+- [ ] **Phase 21: Voice Category Resolver Level-2 Enforcement** — Always-level-2 contract, level-1 → first-level-2 fallback, merchant DB + synonym dictionary data sources extensible without code changes (VOICE-04/05/06)
+- [ ] **Phase 22: Voice One-Step Integration + Record Button UX** — Voice fills shared details form in-place on single screen; record button idle caption + recording-state visual change within 100ms (INPUT-02, REC-01, REC-02)
+
 ### 📋 Next Milestone (Planned)
 
-Use `/gsd:new-milestone` to scope the next milestone. Candidate themes carried in PROJECT.md:
+Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.md:
 
-- **MOD-005 OCR module** — receipt scanning + parsing
+- **MOD-005 OCR writer landing** — receipt → text → fields (v1.3 reserves the details-form slot; v1.4+ wires the writer)
 - **Family privacy hardening (FAMILY-V2-01/02/03)** — strict consent gate, schema v17→v18 if needed
 - **Release readiness QA (FUTURE-QA-01)** — owner-driven smoke tests before v1 public release
 - **Tooling/docs cleanup (FUTURE-TOOL-03, FUTURE-DOC-*)** — coverage threshold review, ADR/MOD numbering drift
 - **fl_chart 1.x upgrade (TOOL-V2-01)** — bundle with any future Analytics chart-stack work
 
-Phase numbering continues from **Phase 18**.
+## Phase Details
+
+### Phase 18: Shared Details Form Foundation
+**Goal**: Consolidate the entry-details surface into one Freezed-backed widget that serves manual single-screen, voice single-screen, OCR two-step, and edit-existing flows — with `entry_source` preservation on edit and the OCR architectural slot reserved.
+**Depends on**: Nothing (first v1.3 phase; foundation for 19/22)
+**Requirements**: INPUT-03, INPUT-04, EDIT-01, EDIT-02
+**Success Criteria** (what must be TRUE):
+  1. A single `TransactionDetailsForm` widget renders all editable fields (amount, category, note, merchant, date, ledger type) and is consumed by the manual entry screen, the future voice integration point, the OCR two-step container, and the edit-existing entry path — same widget, configured via a mode parameter (`new` vs `edit`) and an optional `Transaction` seed
+  2. User can tap any existing transaction in the home recent-tx list and the shared details form opens pre-populated with that transaction's current field values; cancel returns to the list with no DB write
+  3. User can modify any editable field in edit mode, tap save, and the underlying Drift row is updated atomically (single transaction, no partial writes verified by integration test); `entry_source` value present before the edit is preserved verbatim (does not flip to `'manual'` on edit) — enforced by a Drift DAO test exercising all three `EntrySource` literals
+  4. OCR flow code path exposes a two-step container (capture stub → details review) whose step 2 mounts the same shared widget; no OCR writer is implemented — only the architectural slot is reserved and a TODO-marker test asserts the integration seam exists
+  5. No new Drift schema migration introduced; current v17 schema (`entry_source` column) suffices for edit/save path
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 19: Manual One-Step + Keypad Polish
+**Goal**: Collapse manual entry into one screen reusing Phase 18's shared form, and polish the numeric keypad so digit taps register reliably at thumb reach on iOS/Android minimum touch targets.
+**Depends on**: Phase 18 (consumes shared details form)
+**Requirements**: KEYPAD-01, INPUT-01
+**Success Criteria** (what must be TRUE):
+  1. Manual entry flow renders amount + category (二级) + note + merchant + date + ledger type (悦己/生存) all inline on a single screen with no "下一步" navigation button anywhere in the manual path — verified by widget test asserting the absence of a "next/下一步" button and presence of all six field surfaces
+  2. Each amount-keypad digit key meets the platform-minimum touch target (iOS HIG 44pt × 44pt / Material 48dp × 48dp), measured by widget test querying rendered button constraints
+  3. Adjacent keypad keys are visually discriminable (spacing/divider/contrast) per a golden test covering ja/zh/en locale renders in both light and dark themes
+  4. User can save a manual entry from the single screen and the resulting Transaction row has `entry_source = 'manual'` (DAO-level integration test)
+  5. All new UI strings (any keypad helper text, save button label changes) are routed through `S.of(context)` with parity across ja/zh/en ARB files; `flutter gen-l10n` runs clean
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 20: Voice Number Parser (zh + ja)
+**Goal**: Rebuild the voice number recognition state machine so compound numbers across 千/百/十/零/万 combine correctly without digit dropping, handle intra-number pauses via a continued-listening window, and reach ≥95% accuracy on per-locale committed corpora.
+**Depends on**: Nothing structural (independent of Phase 18 UI work; can run in parallel with Phase 19)
+**Requirements**: VOICE-01, VOICE-02, VOICE-03
+**Success Criteria** (what must be TRUE):
+  1. `voice_number_parser_corpus_test.dart` (zh corpus) reports ≥95% accuracy on a committed fixture covering 千/百/十/零 combinations, with and without intra-pauses; per-case results are emitted so failing cases are inspectable
+  2. `voice_number_parser_corpus_test.dart` (ja corpus) reports ≥95% accuracy on a committed fixture covering 千/百/十/万 combinations including 万-scale amounts (e.g. 一万二千 → 12000), with and without intra-pauses; per-locale accuracy reported separately from zh
+  3. Specific anchor cases verified: zh "2千2百零4元" → 2204, zh "1千8百4十元" with pause-before-4十 → 1840, ja 「にせんにひゃくよん」 → 2204, ja 「せんはっぴゃくよんじゅう」 with pause-before-よんじゅう → 1840 (each as a named test case, not just corpus aggregate)
+  4. A locale-aware numeral-combining state machine + continued-listening window implementation lives in `lib/infrastructure/` (parser-tech, not feature code) per "Thin Feature" rule; consumed by feature voice flow via Application use case
+  5. `flutter analyze` 0 issues; per-file coverage ≥70% on new parser files; no Drift schema change
+**Plans**: TBD
+
+### Phase 21: Voice Category Resolver Level-2 Enforcement
+**Goal**: Guarantee voice-driven Transactions always carry a level-2 category by enforcing the always-level-2 contract — falling back to a level-1's first level-2 sub-category when no exact level-2 match exists — and make the resolution data sources (merchant database + synonym dictionary) extensible without code changes.
+**Depends on**: Phase 20 (consumes the strengthened voice parser pipeline; shares test infrastructure)
+**Requirements**: VOICE-04, VOICE-05, VOICE-06
+**Success Criteria** (what must be TRUE):
+  1. Voice category resolver returns a level-2 category whenever the spoken phrase matches any level-2 entry in the merchant database or synonym dictionary — verified by a corpus test with mixed level-2-direct-match cases
+  2. When voice resolves only to a level-1 category (no level-2 entry matched), the resolver returns that level-1's first level-2 sub-category — verified by a corpus test specifically covering level-1-only inputs; the resulting `Transaction.categoryId` value is asserted to always reference a level-2 row in the categories table (DAO integration test)
+  3. Resolver consults both (a) the merchant database AND (b) a synonym dictionary for common spoken-form variants before any fallback; lookup order documented in code and verified by unit test that mocks each data source independently
+  4. Both data sources are extensible by adding entries (rows / YAML / ARB-adjacent format — implementation choice) without modifying resolver code; verified by a test that adds an entry to a fixture data source and asserts the new mapping resolves end-to-end
+  5. `flutter analyze` 0 issues; per-file coverage ≥70% on new resolver files; resolver placement honors "Thin Feature" rule (lives in `lib/application/` or `lib/infrastructure/`, not inside `lib/features/`)
+**Plans**: TBD
+
+### Phase 22: Voice One-Step Integration + Record Button UX
+**Goal**: Wire the strengthened voice parser + level-2 category resolver into the shared details form on the same single screen as manual entry, and polish the record button so its idle caption unambiguously communicates the interaction model and its recording state is visibly distinct within 100ms.
+**Depends on**: Phase 18 (shared details form), Phase 20 (voice number parser), Phase 21 (level-2 category resolver)
+**Requirements**: INPUT-02, REC-01, REC-02
+**Success Criteria** (what must be TRUE):
+  1. Voice-driven ledger entry completes on the same single screen as manual entry — voice parser output fills amount, category, note, merchant fields in-place in the shared details form (Phase 18 widget); user can edit any auto-filled field before saving — verified by widget integration test simulating a voice transcript and asserting field values + post-edit save path
+  2. Saved voice entry produces a Transaction row with `entry_source = 'voice'` (DAO integration test)
+  3. Record button's idle-state caption text unambiguously communicates the interaction model (tap-to-toggle vs hold-to-record); the chosen model is consistent app-wide — verified by widget test asserting caption string presence + an integration test that exercises the chosen interaction on at least one other voice surface (if any exists) or documents the single-surface choice in a Decision Record
+  4. While recording, the record button visibly changes (color/shape/icon) AND caption text changes to "录音中…" (zh) / equivalent for ja/en — verified by widget test asserting both visual diff (golden) and caption text change; perceived state change within 100ms enforced by a timing test (`expect(stopwatch.elapsedMilliseconds, lessThan(100))` between record-start trigger and rebuild completion)
+  5. All new/changed UI strings (record button captions, recording status text) routed through `S.of(context)` with ja/zh/en parity; `flutter gen-l10n` clean; `flutter analyze` 0 issues
+**Plans**: TBD
+**UI hint**: yes
 
 ## Progress
 
@@ -68,3 +140,14 @@ Phase numbering continues from **Phase 18**.
 | v1.0 Codebase Cleanup Initiative | 1-8 | 48/48 | Complete | 2026-04-29 |
 | v1.1 Happiness Metric & Display | 9-12 | 40/40 | Complete | 2026-05-05 |
 | v1.2 Happiness Metric Refresh | 13-17 | 37/37 | Complete | 2026-05-21 |
+| v1.3 迭代帐本输入 | 18-22 | 0/0 | Not started | — |
+
+### v1.3 Phase Progress
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 18. Shared Details Form Foundation | 0/0 | Not started | — |
+| 19. Manual One-Step + Keypad Polish | 0/0 | Not started | — |
+| 20. Voice Number Parser (zh + ja) | 0/0 | Not started | — |
+| 21. Voice Category Resolver Level-2 Enforcement | 0/0 | Not started | — |
+| 22. Voice One-Step Integration + Record Button UX | 0/0 | Not started | — |
