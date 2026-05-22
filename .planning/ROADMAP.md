@@ -80,7 +80,15 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
   3. User can modify any editable field in edit mode, tap save, and the underlying Drift row is updated atomically (single transaction, no partial writes verified by integration test); `entry_source` value present before the edit is preserved verbatim (does not flip to `'manual'` on edit) — enforced by a Drift DAO test exercising all three `EntrySource` literals
   4. OCR flow code path exposes a two-step container (capture stub → details review) whose step 2 mounts the same shared widget; no OCR writer is implemented — only the architectural slot is reserved and a TODO-marker test asserts the integration seam exists
   5. No new Drift schema migration introduced; current v17 schema (`entry_source` column) suffices for edit/save path
-**Plans**: TBD
+**Plans**: 8 plans
+- [ ] 18-01-PLAN.md — Freezed domain models (OcrParseDraft + TransactionDetailsFormConfig + TransactionDetailsFormResult)
+- [ ] 18-02-PLAN.md — UpdateTransactionUseCase + TransactionChangeTracker.trackUpdate + updateTransactionUseCaseProvider
+- [ ] 18-03-PLAN.md — 5 new ARB keys (transactionEditTitle, ocrReviewTitle, ocrReviewEmptyDraftBanner, transactionUpdated, failedToUpdate) × ja/zh/en + flutter gen-l10n
+- [ ] 18-04-PLAN.md — TransactionDetailsForm widget (load-bearing — extracts confirm-screen body, exposes submit())
+- [ ] 18-05-PLAN.md — Refactor TransactionConfirmScreen to thin .new host wrapping TransactionDetailsForm
+- [ ] 18-06-PLAN.md — New TransactionEditScreen (.edit host) + new OcrReviewScreen (.new host with MOD-005 marker)
+- [ ] 18-07-PLAN.md — Wire HomeTransactionTile.onTap → TransactionEditScreen + OCR shutter onTap → OcrReviewScreen
+- [ ] 18-08-PLAN.md — Test suite (form widget tests, use case unit, DAO entry_source round-trip, home tap-to-edit, OCR two-step seam D-14)
 **UI hint**: yes
 
 ### Phase 19: Manual One-Step + Keypad Polish
