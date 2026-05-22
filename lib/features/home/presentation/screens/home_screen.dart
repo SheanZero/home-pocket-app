@@ -22,6 +22,7 @@ import '../../../settings/presentation/providers/state_locale.dart';
 import '../../../settings/presentation/providers/state_settings.dart';
 import '../providers/state_shadow_books.dart';
 import '../providers/state_today_transactions.dart';
+import '../../../accounting/presentation/screens/transaction_edit_screen.dart';
 import '../widgets/family_invite_banner.dart';
 import '../widgets/hero_header.dart';
 import '../widgets/home_hero_card.dart';
@@ -324,6 +325,12 @@ class HomeScreen extends ConsumerWidget {
                             ? AppColors.soul
                             : context.wmTextPrimary,
                         satisfactionIcon: _satisfactionIcon(tx),
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute<bool>(
+                            builder: (_) =>
+                                TransactionEditScreen(transaction: tx),
+                          ),
+                        ),
                       );
                     }).toList(),
                   );
