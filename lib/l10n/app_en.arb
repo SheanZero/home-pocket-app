@@ -349,6 +349,26 @@
   "@failedToSave": {
     "description": "Save failure"
   },
+  "transactionEditTitle": "Edit Entry",
+  "@transactionEditTitle": {
+    "description": "AppBar title for TransactionEditScreen (Phase 18 EDIT-01)"
+  },
+  "ocrReviewTitle": "Review Receipt",
+  "@ocrReviewTitle": {
+    "description": "AppBar title for OcrReviewScreen (Phase 18 INPUT-04 architectural slot)"
+  },
+  "ocrReviewEmptyDraftBanner": "OCR is not implemented yet — please fill in the fields manually.",
+  "@ocrReviewEmptyDraftBanner": {
+    "description": "Banner shown on OcrReviewScreen when draft is empty (Phase 18 — MOD-005 writer not landed)"
+  },
+  "transactionUpdated": "Transaction updated",
+  "@transactionUpdated": {
+    "description": "Snackbar after successful edit save (sibling to transactionSaved)"
+  },
+  "failedToUpdate": "Failed to update",
+  "@failedToUpdate": {
+    "description": "Error snackbar on edit save failure (sibling to failedToSave)"
+  },
   "appearance": "Appearance",
   "@appearance": {
     "description": "Appearance section title"

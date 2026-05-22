@@ -349,6 +349,26 @@
   "@failedToSave": {
     "description": "Save failure"
   },
+  "transactionEditTitle": "明細編集",
+  "@transactionEditTitle": {
+    "description": "AppBar title for TransactionEditScreen (Phase 18 EDIT-01)"
+  },
+  "ocrReviewTitle": "レシート確認",
+  "@ocrReviewTitle": {
+    "description": "AppBar title for OcrReviewScreen (Phase 18 INPUT-04 architectural slot)"
+  },
+  "ocrReviewEmptyDraftBanner": "OCRはまだ実装されていません。手動で入力してください。",
+  "@ocrReviewEmptyDraftBanner": {
+    "description": "Banner shown on OcrReviewScreen when draft is empty (Phase 18 — MOD-005 writer not landed)"
+  },
+  "transactionUpdated": "明細を更新しました",
+  "@transactionUpdated": {
+    "description": "Snackbar after successful edit save (sibling to transactionSaved)"
+  },
+  "failedToUpdate": "更新に失敗しました",
+  "@failedToUpdate": {
+    "description": "Error snackbar on edit save failure (sibling to failedToSave)"
+  },
   "appearance": "外観",
   "@appearance": {
     "description": "Appearance section title"

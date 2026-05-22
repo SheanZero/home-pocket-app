@@ -349,6 +349,26 @@
   "@failedToSave": {
     "description": "Save failure"
   },
+  "transactionEditTitle": "明细编辑",
+  "@transactionEditTitle": {
+    "description": "AppBar title for TransactionEditScreen (Phase 18 EDIT-01)"
+  },
+  "ocrReviewTitle": "票据复核",
+  "@ocrReviewTitle": {
+    "description": "AppBar title for OcrReviewScreen (Phase 18 INPUT-04 architectural slot)"
+  },
+  "ocrReviewEmptyDraftBanner": "OCR 尚未实现，请手动填写各字段。",
+  "@ocrReviewEmptyDraftBanner": {
+    "description": "Banner shown on OcrReviewScreen when draft is empty (Phase 18 — MOD-005 writer not landed)"
+  },
+  "transactionUpdated": "明细已更新",
+  "@transactionUpdated": {
+    "description": "Snackbar after successful edit save (sibling to transactionSaved)"
+  },
+  "failedToUpdate": "更新失败",
+  "@failedToUpdate": {
+    "description": "Error snackbar on edit save failure (sibling to failedToSave)"
+  },
   "appearance": "外观",
   "@appearance": {
     "description": "Appearance section title"
