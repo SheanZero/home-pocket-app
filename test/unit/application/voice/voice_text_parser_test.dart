@@ -42,21 +42,40 @@ void main() {
     });
   });
 
-  group('VoiceTextParser - Kanji amount extraction', () {
-    test('extracts 六百八十円 -> 680', () {
-      expect(parser.extractAmount('六百八十円'), equals(680));
+  group('VoiceTextParser - extractAmount locale routing', () {
+    late VoiceTextParser routingParser;
+    setUp(() {
+      routingParser = VoiceTextParser(); // default machines
     });
 
-    test('extracts 千二百円 -> 1200', () {
-      expect(parser.extractAmount('千二百円'), equals(1200));
+    test('arabic numerals win regardless of localeId', () {
+      // ¥1,280 (comma-formatted) is unambiguous and handled by Arabic regex
+      expect(routingParser.extractAmount('¥1,280', localeId: 'zh-CN'), 1280);
+      expect(routingParser.extractAmount('¥1,280', localeId: 'ja-JP'), 1280);
     });
 
-    test('extracts 三千九百八十 -> 3980', () {
-      expect(parser.extractAmount('三千九百八十'), equals(3980));
+    test('localeId starting with ja routes to JapaneseNumeralStateMachine', () {
+      expect(routingParser.extractAmount('にせんにひゃくよん', localeId: 'ja-JP'), 2204);
     });
 
-    test('extracts 一千二百元 -> 1200', () {
-      expect(parser.extractAmount('一千二百元'), equals(1200));
+    test('localeId starting with zh routes to ChineseNumeralStateMachine', () {
+      // Use all-kanji input to avoid Arabic-path interception (e.g. 4元 → 4)
+      // 二千二百零四 = 2204 via zh state machine
+      expect(routingParser.extractAmount('二千二百零四', localeId: 'zh-CN'), 2204);
+    });
+
+    test('null localeId falls back to ja-then-zh', () {
+      // 一万二千 is recognised by ja machine (kanji digit + unit)
+      expect(routingParser.extractAmount('一万二千'), 12000);
+    });
+
+    test('non-numeric en-US text returns null', () {
+      expect(routingParser.extractAmount('hello world', localeId: 'en-US'), isNull);
+    });
+
+    test('zh all-kanji anchor 二千二百零四 with explicit locale returns 2204', () {
+      // Integration: transfer-station routes to zh machine for pure-kanji input
+      expect(routingParser.extractAmount('二千二百零四', localeId: 'zh-CN'), 2204);
     });
   });
 

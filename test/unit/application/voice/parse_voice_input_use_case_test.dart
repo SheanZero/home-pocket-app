@@ -11,7 +11,15 @@ class _MockFuzzyCategoryMatcher extends Mock implements FuzzyCategoryMatcher {}
 
 class _MockMerchantDatabase extends Mock implements MerchantDatabase {}
 
+class _MockVoiceTextParser extends Mock implements VoiceTextParser {}
+
+class _FakeMerchantDatabase extends Fake implements MerchantDatabase {}
+
 void main() {
+  setUpAll(() {
+    registerFallbackValue(_FakeMerchantDatabase());
+  });
+
   late _MockFuzzyCategoryMatcher mockFuzzyCategoryMatcher;
   late _MockMerchantDatabase mockMerchantDatabase;
   late VoiceTextParser parser;
@@ -105,5 +113,39 @@ void main() {
         expect(result.data!.categoryMatch, isNull);
       },
     );
+  });
+
+  group('ParseVoiceInputUseCase - localeId routing', () {
+    late _MockVoiceTextParser mockTextParser;
+    late _MockFuzzyCategoryMatcher localMockMatcher;
+    late _MockMerchantDatabase localMockDb;
+    late ParseVoiceInputUseCase useCaseWithMockParser;
+
+    setUp(() {
+      mockTextParser = _MockVoiceTextParser();
+      localMockMatcher = _MockFuzzyCategoryMatcher();
+      localMockDb = _MockMerchantDatabase();
+      useCaseWithMockParser = ParseVoiceInputUseCase(
+        textParser: mockTextParser,
+        fuzzyCategoryMatcher: localMockMatcher,
+        merchantDatabase: localMockDb,
+      );
+    });
+
+    test('execute(text, localeId: x) forwards localeId to textParser.extractAmount', () async {
+      when(() => mockTextParser.extractAmount(any(), localeId: any(named: 'localeId')))
+          .thenReturn(2204);
+      when(() => mockTextParser.extractDate(any())).thenReturn(null);
+      when(() => mockTextParser.extractAndMatchMerchant(any(), any()))
+          .thenReturn(null);
+      when(() => localMockMatcher.match(any(), any())).thenAnswer((_) async => null);
+      when(() => localMockDb.findMerchant(any())).thenReturn(null);
+
+      await useCaseWithMockParser.execute('test text', localeId: 'ja-JP');
+
+      verify(
+        () => mockTextParser.extractAmount('test text', localeId: 'ja-JP'),
+      ).called(1);
+    });
   });
 }

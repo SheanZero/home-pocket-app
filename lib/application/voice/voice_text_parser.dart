@@ -1,27 +1,67 @@
 import '../../infrastructure/ml/merchant_database.dart';
+import '../../infrastructure/voice/chinese_numeral_state_machine.dart';
+import '../../infrastructure/voice/japanese_numeral_state_machine.dart';
 
 /// NLP text parser for voice input.
 ///
 /// Extracts structured data (amounts, merchants) from natural language text.
 /// Supports Japanese, Chinese, and English input.
+///
+/// Amount extraction is a thin transfer station:
+/// 1. Arabic-numeral path (_extractArabicAmount) always wins priority.
+/// 2. Kanji/kana parsing is delegated to locale-specific state machines
+///    (ChineseNumeralStateMachine / JapaneseNumeralStateMachine).
 class VoiceTextParser {
+  final ChineseNumeralStateMachine _zhMachine;
+  final JapaneseNumeralStateMachine _jaMachine;
+
+  VoiceTextParser({
+    ChineseNumeralStateMachine? zhMachine,
+    JapaneseNumeralStateMachine? jaMachine,
+  }) : _zhMachine = zhMachine ?? const ChineseNumeralStateMachine(),
+       _jaMachine = jaMachine ?? JapaneseNumeralStateMachine();
+
+  /// Fast guard: contains at least one kanji numeral OR a multi-char kana numeral
+  /// sequence that unambiguously signals a number context.
+  ///
+  /// Used by the null-locale fallback to prevent false positives from
+  /// single-character hiragana digits (e.g. `ご`=5 in 「ごはん」) appearing in
+  /// ordinary Japanese prose.
+  static final _numeralHintPattern = RegExp(
+    r'[一二三四五六七八九十百千万萬零〇壱弐参壹贰叁伍仟]|'
+    r'(?:いち|ひと|ふた|さん|よん|ろく|なな|しち|はち|きゅう|せん|ひゃく|じゅう|まん|'
+    r'いっせん|さんぜん|はっせん|さんびゃく|ろっぴゃく|はっぴゃく|いちまん)',
+  );
+
   /// Extracts the monetary amount from a text string.
   ///
-  /// Supports three formats:
-  /// 1. Arabic numerals: 「680円」「¥1280」「1,280」
-  /// 2. Japanese kanji numbers: 「六百八十円」「千二百円」
-  /// 3. Chinese numbers: 「六百八十块」「一千二百元」
+  /// Supports:
+  /// 1. Arabic numerals: 「680円」「¥1280」「1,280」 — always tried first.
+  /// 2. Locale-routed kanji/kana state machines:
+  ///    - localeId starts with 'ja' → JapaneseNumeralStateMachine
+  ///    - localeId starts with 'zh' → ChineseNumeralStateMachine
+  ///    - null or other localeId → try ja then zh as defensive fallback
   ///
   /// Returns null if no amount is found.
-  int? extractAmount(String text) {
-    // Priority 1: Arabic numeral amounts
+  int? extractAmount(String text, {String? localeId}) {
+    // Priority 1: Arabic numerals (locale-independent)
     final arabicAmount = _extractArabicAmount(text);
     if (arabicAmount != null) return arabicAmount;
 
-    // Priority 2: Japanese/Chinese kanji numeral amounts
-    final kanjiAmount = _extractKanjiAmount(text);
-    if (kanjiAmount != null) return kanjiAmount;
-
+    // Priority 2: locale-routed numeral state machines
+    if (localeId != null && localeId.startsWith('ja')) {
+      return _jaMachine.parse(text);
+    }
+    if (localeId != null && localeId.startsWith('zh')) {
+      return _zhMachine.parse(text);
+    }
+    // Fallback (null locale or unsupported) — only route to ja/zh if text
+    // contains a recognizable numeral hint (kanji or multi-char kana unit).
+    // Single-char hiragana like 'ご' can appear in common words (e.g. ごはん)
+    // and must not trigger a false positive amount extraction.
+    if (_numeralHintPattern.hasMatch(text)) {
+      return _jaMachine.parse(text) ?? _zhMachine.parse(text);
+    }
     return null;
   }
 
@@ -51,92 +91,6 @@ class VoiceTextParser {
     }
 
     return null;
-  }
-
-  /// Extracts Japanese/Chinese kanji numeral amounts from text.
-  ///
-  /// Examples: 「六百八十」→ 680、「千二百」→ 1200、「三万五千」→ 35000
-  int? _extractKanjiAmount(String text) {
-    const kanjiDigits = {
-      '零': 0,
-      '〇': 0,
-      '一': 1,
-      '壱': 1,
-      '壹': 1,
-      '二': 2,
-      '弐': 2,
-      '贰': 2,
-      '三': 3,
-      '参': 3,
-      '叁': 3,
-      '四': 4,
-      '五': 5,
-      '伍': 5,
-      '六': 6,
-      '七': 7,
-      '八': 8,
-      '九': 9,
-    };
-
-    const kanjiUnits = {
-      '十': 10,
-      '百': 100,
-      '千': 1000,
-      '仟': 1000,
-      '万': 10000,
-      '萬': 10000,
-    };
-
-    // Find the text region that may contain a kanji number
-    final amountPattern = RegExp(
-      r'[零〇一壱壹二弐贰三参叁四五伍六七八九十百千仟万萬]+'
-      r'(?:\s*(?:円|えん|yen|元|块|塊))?',
-    );
-
-    final match = amountPattern.firstMatch(text);
-    if (match == null) return null;
-
-    final kanjiText = match.group(0)!.replaceAll(RegExp(r'[\s円えんyen元块塊]'), '');
-
-    if (kanjiText.isEmpty) return null;
-
-    // Parse kanji numbers
-    var result = 0;
-    var currentSection = 0;
-    var currentDigit =
-        1; // default multiplier for units without preceding digit
-
-    for (var i = 0; i < kanjiText.length; i++) {
-      final char = kanjiText[i];
-
-      if (kanjiDigits.containsKey(char)) {
-        currentDigit = kanjiDigits[char]!;
-      } else if (kanjiUnits.containsKey(char)) {
-        final unit = kanjiUnits[char]!;
-        if (unit == 10000) {
-          // 「万」: multiply current section by 10000
-          final sectionValue = currentSection == 0
-              ? currentDigit
-              : currentSection + currentDigit;
-          result += sectionValue * 10000;
-          currentSection = 0;
-          currentDigit = 1;
-        } else {
-          currentSection += currentDigit * unit;
-          currentDigit = 1;
-        }
-      }
-    }
-
-    // Add remaining digits at the end
-    final lastChar = kanjiText[kanjiText.length - 1];
-    if (!kanjiUnits.containsKey(lastChar) && currentDigit < 10) {
-      currentSection += currentDigit;
-    }
-
-    result += currentSection;
-
-    return result > 0 ? result : null;
   }
 
   /// Extracts a date from voice-recognized text.
