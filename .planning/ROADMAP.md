@@ -53,7 +53,7 @@
 ### 🚧 v1.3 迭代帐本输入 (Phases 18-22) — ACTIVE
 
 - [x] **Phase 18: Shared Details Form Foundation** — Single shared details widget (INPUT-03/04 + EDIT-01/02 foundation): contract supports new/edit modes, OCR two-step architectural slot, edit-from-list entry path, `entry_source` preserved on save (completed 2026-05-22)
-- [ ] **Phase 19: Manual One-Step + Keypad Polish** — Manual entry collapses to single screen, no "下一步" button; numeric keypad enlarged to platform-min touch targets (KEYPAD-01, INPUT-01)
+- [x] **Phase 19: Manual One-Step + Keypad Polish** — Manual entry collapses to single screen, no "下一步" button; numeric keypad enlarged to platform-min touch targets (KEYPAD-01, INPUT-01) (completed 2026-05-23)
 - [ ] **Phase 20: Voice Number Parser (zh + ja)** — Compound number state machine, intra-pause continued-listening window, locale-aware combining; per-locale corpus fixtures ≥95% accuracy (VOICE-01/02/03)
 - [ ] **Phase 21: Voice Category Resolver Level-2 Enforcement** — Always-level-2 contract, level-1 → first-level-2 fallback, merchant DB + synonym dictionary data sources extensible without code changes (VOICE-04/05/06)
 - [ ] **Phase 22: Voice One-Step Integration + Record Button UX** — Voice fills shared details form in-place on single screen; record button idle caption + recording-state visual change within 100ms (INPUT-02, REC-01, REC-02)
@@ -106,7 +106,7 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 - [x] 19-02-PLAN.md — SmartKeyboard responsive height + 48dp clamp + actionLabel rename + 6 golden baselines (Wave 1, D-06/07/08/09 + SC-2/SC-3)
 - [x] 19-03-PLAN.md — KeyboardToolbar + ManualOneStepScreen + voice/router/shell repoints + widget tests (Wave 2, D-01..D-13/D-16/D-24 + SC-1)
 - [x] 19-04-PLAN.md — D-14 spillover: TransactionEditScreen + OcrReviewScreen adopt host-owned AmountDisplay + AmountEditBottomSheet (Wave 2)
-- [ ] 19-05-PLAN.md — Delete TransactionEntryScreen/ConfirmScreen + stale tests, re-target merchant-learning test, SC-4 integration test, D-16 voice regression test, phase-wide gate (Wave 3)
+- [x] 19-05-PLAN.md — Delete TransactionEntryScreen/ConfirmScreen + stale tests, re-target merchant-learning test, SC-4 integration test, D-16 voice regression test, phase-wide gate (Wave 3)
 **UI hint**: yes
 
 ### Phase 20: Voice Number Parser (zh + ja)
@@ -160,7 +160,7 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 18. Shared Details Form Foundation | 8/8 | Complete   | 2026-05-22 |
-| 19. Manual One-Step + Keypad Polish | 4/5 | In Progress|  |
+| 19. Manual One-Step + Keypad Polish | 5/5 | Complete   | 2026-05-23 |
 | 20. Voice Number Parser (zh + ja) | 0/0 | Not started | — |
 | 21. Voice Category Resolver Level-2 Enforcement | 0/0 | Not started | — |
 | 22. Voice One-Step Integration + Record Button UX | 0/0 | Not started | — |
