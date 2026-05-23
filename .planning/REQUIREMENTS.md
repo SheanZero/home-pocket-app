@@ -12,11 +12,11 @@
 
 ### Numeric Keypad
 
-- [ ] **KEYPAD-01**: User can tap each amount-input digit key with the intended digit registering ≥95% of taps; key height/touch-target meets platform minimum (iOS HIG 44pt / Material 48dp) and visual hierarchy makes adjacent keys discriminable at thumb reach
+- [x] **KEYPAD-01**: User can tap each amount-input digit key with the intended digit registering ≥95% of taps; key height/touch-target meets platform minimum (iOS HIG 44pt / Material 48dp) and visual hierarchy makes adjacent keys discriminable at thumb reach
 
 ### One-Step Recording
 
-- [ ] **INPUT-01**: User can complete a manual ledger entry on a single screen — amount, category (二级), note, merchant, date, and ledger type (悦己/生存) all editable inline without a "下一步" navigation
+- [x] **INPUT-01**: User can complete a manual ledger entry on a single screen — amount, category (二级), note, merchant, date, and ledger type (悦己/生存) all editable inline without a "下一步" navigation
 - [ ] **INPUT-02**: User can complete a voice-driven ledger entry from the same single screen — voice parser fills amount, category, note, merchant fields in-place; user can edit any field before saving
 - [ ] **INPUT-03**: Details form is implemented as a single shared widget consumed by both manual/voice single-screen flow AND the future OCR two-step flow (capture → details review). Widget contract supports both "new entry" and "edit existing" modes
 - [ ] **INPUT-04**: OCR-flow code path preserves a two-step UX (capture → details) but the details step reuses the INPUT-03 shared widget; OCR writer itself remains out of v1.3 scope, only the architectural slot is reserved
@@ -104,8 +104,8 @@ Mapped by roadmapper on 2026-05-22.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| KEYPAD-01 | Phase 19 | Pending |
-| INPUT-01 | Phase 19 | Pending |
+| KEYPAD-01 | Phase 19 | Complete |
+| INPUT-01 | Phase 19 | Complete |
 | INPUT-02 | Phase 22 | Pending |
 | INPUT-03 | Phase 18 | Pending |
 | INPUT-04 | Phase 18 | Pending |
