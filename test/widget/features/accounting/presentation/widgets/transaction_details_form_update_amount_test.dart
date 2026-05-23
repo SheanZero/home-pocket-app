@@ -16,7 +16,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/accounting/category_service.dart';
 import 'package:home_pocket/application/accounting/create_transaction_use_case.dart';
 import 'package:home_pocket/application/accounting/update_transaction_use_case.dart';
-import 'package:home_pocket/application/voice/record_category_correction_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/category_ledger_config.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
@@ -39,9 +38,6 @@ class _MockCreateTransactionUseCase extends Mock
 
 class _MockUpdateTransactionUseCase extends Mock
     implements UpdateTransactionUseCase {}
-
-class _MockRecordCategoryCorrectionUseCase extends Mock
-    implements RecordCategoryCorrectionUseCase {}
 
 class _FakeCreateTransactionParams extends Fake
     implements CreateTransactionParams {}

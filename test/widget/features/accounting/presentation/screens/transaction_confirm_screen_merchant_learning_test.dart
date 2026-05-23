@@ -5,19 +5,21 @@ import 'package:home_pocket/application/accounting/category_service.dart';
 import 'package:home_pocket/application/accounting/create_transaction_use_case.dart';
 import 'package:home_pocket/application/accounting/merchant_category_learning_service.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
+import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
+import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
     show
         createTransactionUseCaseProvider,
         categoryServiceProvider,
-        merchantCategoryLearningServiceProvider;
-import 'package:home_pocket/features/accounting/presentation/screens/transaction_confirm_screen.dart';
+        merchantCategoryLearningServiceProvider,
+        categoryRepositoryProvider;
+import 'package:home_pocket/features/accounting/presentation/screens/manual_one_step_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/satisfaction_emoji_picker.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../home/helpers/test_localizations.dart';
-import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 
 class MockCreateTransactionUseCase extends Mock
     implements CreateTransactionUseCase {}
@@ -30,10 +32,78 @@ class MockMerchantCategoryLearningService extends Mock
 class FakeCreateTransactionParams extends Fake
     implements CreateTransactionParams {}
 
+/// Minimal fake that returns the seeded category in findActive/findById/etc.
+/// Required because ManualOneStepScreen._initializeDefaultCategory calls
+/// categoryRepositoryProvider.findActive() in initState.
+class _FakeCategoryRepository implements CategoryRepository {
+  _FakeCategoryRepository(this._category, this._parent);
+
+  final Category _category;
+  final Category? _parent;
+
+  @override
+  Future<List<Category>> findActive() async {
+    return [if (_parent != null) _parent, _category].whereType<Category>().toList();
+  }
+
+  @override
+  Future<Category?> findById(String id) async {
+    if (id == _category.id) return _category;
+    if (_parent != null && id == _parent.id) return _parent;
+    return null;
+  }
+
+  @override
+  Future<List<Category>> findAll() async => findActive();
+
+  @override
+  Future<List<Category>> findByLevel(int level) async =>
+      (await findActive()).where((c) => c.level == level).toList();
+
+  @override
+  Future<List<Category>> findByParent(String parentId) async =>
+      (await findActive())
+          .where((c) => c.parentId == parentId)
+          .toList();
+
+  @override
+  Future<void> insert(Category category) async {}
+
+  @override
+  Future<void> insertBatch(List<Category> categories) async {}
+
+  @override
+  Future<void> update({
+    required String id,
+    String? name,
+    String? icon,
+    String? color,
+    bool? isArchived,
+    int? sortOrder,
+  }) async {}
+
+  @override
+  Future<void> deleteAll() async {}
+
+  @override
+  Future<void> updateSortOrders(Map<String, int> idToSortOrder) async {}
+}
+
 void main() {
   late MockCreateTransactionUseCase mockCreateUseCase;
   late MockCategoryService mockCategoryService;
   late MockMerchantCategoryLearningService mockLearningService;
+
+  final parentCategory = Category(
+    id: 'cat_food',
+    name: 'Food',
+    icon: 'restaurant',
+    color: '#FF5722',
+    level: 1,
+    isSystem: true,
+    sortOrder: 1,
+    createdAt: DateTime(2026, 1, 1),
+  );
 
   final category = Category(
     id: 'cat_food_groceries',
@@ -83,6 +153,11 @@ void main() {
   });
 
   Future<void> pumpScreen(WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -91,21 +166,21 @@ void main() {
           merchantCategoryLearningServiceProvider.overrideWithValue(
             mockLearningService,
           ),
+          categoryRepositoryProvider.overrideWithValue(
+            _FakeCategoryRepository(category, parentCategory),
+          ),
         ],
         child: testLocalizedApp(
           locale: const Locale('en'),
           child: Theme(
             data: ThemeData(splashFactory: NoSplash.splashFactory),
-            child: Scaffold(
-              body: TransactionConfirmScreen(
-                bookId: 'book_001',
-                amount: 1200,
-                category: category,
-                parentCategory: null,
-                date: DateTime(2026, 2, 22),
-
-                entrySource: EntrySource.manual,
-              ),
+            child: ManualOneStepScreen(
+              bookId: 'book_001',
+              initialAmount: 1200,
+              initialCategory: category,
+              initialParentCategory: parentCategory,
+              initialDate: DateTime(2026, 2, 22),
+              entrySource: EntrySource.manual,
             ),
           ),
         ),
@@ -115,7 +190,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  group('TransactionConfirmScreen merchant learning hook', () {
+  group('ManualOneStepScreen merchant learning hook (via TransactionDetailsForm)', () {
     testWidgets('shows emoji picker for soul ledger transactions', (
       tester,
     ) async {

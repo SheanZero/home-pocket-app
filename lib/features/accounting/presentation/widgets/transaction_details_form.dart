@@ -341,6 +341,20 @@ class TransactionDetailsFormState
             );
           }
           final tx = result.data!;
+
+          // Merchant-learning hook (Phase 18 D-09, ported to this form from
+          // the legacy two-screen flow): record merchant→category preference
+          // so the ML classifier improves suggestions over time.
+          final merchantRaw = _storeController.text.trim();
+          if (merchantRaw.isNotEmpty && mounted) {
+            await ref
+                .read(merchantCategoryLearningServiceProvider)
+                .recordSelection(
+                  merchantRaw: merchantRaw,
+                  selectedCategoryId: _category!.id,
+                );
+          }
+
           // D-15: celebration only for .new soul saves. .edit branch never
           // touches _showCelebration.
           if (tx.ledgerType == LedgerType.soul && mounted) {
