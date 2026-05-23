@@ -21,6 +21,18 @@ class VoiceTextParser {
   }) : _zhMachine = zhMachine ?? const ChineseNumeralStateMachine(),
        _jaMachine = jaMachine ?? JapaneseNumeralStateMachine();
 
+  /// Fast guard: contains at least one kanji numeral OR a multi-char kana numeral
+  /// sequence that unambiguously signals a number context.
+  ///
+  /// Used by the null-locale fallback to prevent false positives from
+  /// single-character hiragana digits (e.g. `ご`=5 in 「ごはん」) appearing in
+  /// ordinary Japanese prose.
+  static final _numeralHintPattern = RegExp(
+    r'[一二三四五六七八九十百千万萬零〇壱弐参壹贰叁伍仟]|'
+    r'(?:いち|ひと|ふた|さん|よん|ろく|なな|しち|はち|きゅう|せん|ひゃく|じゅう|まん|'
+    r'いっせん|さんぜん|はっせん|さんびゃく|ろっぴゃく|はっぴゃく|いちまん)',
+  );
+
   /// Extracts the monetary amount from a text string.
   ///
   /// Supports:
@@ -43,8 +55,14 @@ class VoiceTextParser {
     if (localeId != null && localeId.startsWith('zh')) {
       return _zhMachine.parse(text);
     }
-    // Fallback (null locale or unsupported) — try ja then zh.
-    return _jaMachine.parse(text) ?? _zhMachine.parse(text);
+    // Fallback (null locale or unsupported) — only route to ja/zh if text
+    // contains a recognizable numeral hint (kanji or multi-char kana unit).
+    // Single-char hiragana like 'ご' can appear in common words (e.g. ごはん)
+    // and must not trigger a false positive amount extraction.
+    if (_numeralHintPattern.hasMatch(text)) {
+      return _jaMachine.parse(text) ?? _zhMachine.parse(text);
+    }
+    return null;
   }
 
   /// Extracts Arabic numeral amounts from text.
