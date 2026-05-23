@@ -104,7 +104,7 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 **Plans**: 5 plans
 - [x] 19-01-PLAN.md — ARB keyboardToolbarDone + AmountEditBottomSheet extraction + TransactionDetailsForm externalize-amount refactor (Wave 1, D-14/D-22)
 - [x] 19-02-PLAN.md — SmartKeyboard responsive height + 48dp clamp + actionLabel rename + 6 golden baselines (Wave 1, D-06/07/08/09 + SC-2/SC-3)
-- [ ] 19-03-PLAN.md — KeyboardToolbar + ManualOneStepScreen + voice/router/shell repoints + widget tests (Wave 2, D-01..D-13/D-16/D-24 + SC-1)
+- [x] 19-03-PLAN.md — KeyboardToolbar + ManualOneStepScreen + voice/router/shell repoints + widget tests (Wave 2, D-01..D-13/D-16/D-24 + SC-1)
 - [x] 19-04-PLAN.md — D-14 spillover: TransactionEditScreen + OcrReviewScreen adopt host-owned AmountDisplay + AmountEditBottomSheet (Wave 2)
 - [ ] 19-05-PLAN.md — Delete TransactionEntryScreen/ConfirmScreen + stale tests, re-target merchant-learning test, SC-4 integration test, D-16 voice regression test, phase-wide gate (Wave 3)
 **UI hint**: yes
@@ -160,7 +160,7 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 18. Shared Details Form Foundation | 8/8 | Complete   | 2026-05-22 |
-| 19. Manual One-Step + Keypad Polish | 3/5 | In Progress|  |
+| 19. Manual One-Step + Keypad Polish | 4/5 | In Progress|  |
 | 20. Voice Number Parser (zh + ja) | 0/0 | Not started | — |
 | 21. Voice Category Resolver Level-2 Enforcement | 0/0 | Not started | — |
 | 22. Voice One-Step Integration + Record Button UX | 0/0 | Not started | — |
