@@ -8,8 +8,8 @@
 /// Submit via GlobalKey[TransactionDetailsFormState].currentState!.submit()
 /// which returns [Future] of [TransactionDetailsFormResult].
 ///
-/// Locale-aware formatting is delegated to child widgets (AmountDisplay,
-/// DetailInfoCard); Phase 19/22 may revisit if in-form formatting is needed.
+/// Locale-aware formatting is delegated to child widgets (DetailInfoCard);
+/// Phase 19/22 may revisit if in-form formatting is needed.
 library;
 
 import 'dart:async';
@@ -31,11 +31,9 @@ import '../../domain/models/transaction_details_form_config.dart';
 import '../providers/repository_providers.dart';
 import '../screens/category_selection_screen.dart';
 import '../utils/category_display_utils.dart';
-import '../widgets/amount_display.dart';
 import '../widgets/detail_info_card.dart';
 import '../widgets/ledger_type_selector.dart';
 import '../widgets/satisfaction_emoji_picker.dart';
-import '../widgets/smart_keyboard.dart';
 
 /// Embeddable form for creating and editing transactions.
 ///
@@ -89,6 +87,8 @@ class TransactionDetailsFormState
         initialDate,
         entrySource,
         voiceKeyword,
+        merchantFocusNode,
+        noteFocusNode,
       ) {
         _amount = initialAmount ?? 0;
         _category = initialCategory;
@@ -179,110 +179,16 @@ class TransactionDetailsFormState
 
   // ── Field edit affordances ─────────────────────────────────────────────────
 
-  void _editAmount() {
-    var editStr = _amount.toString();
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            void onDigit(String digit) {
-              final dotIndex = editStr.indexOf('.');
-              if (dotIndex >= 0) {
-                final decimals = editStr.length - dotIndex - 1;
-                if (decimals >= 4) return;
-              }
-              if (editStr == '0' && digit != '0') {
-                setSheetState(() => editStr = digit);
-              } else if (editStr == '0' && digit == '0') {
-                return;
-              } else {
-                setSheetState(() => editStr += digit);
-              }
-            }
-
-            void onDoubleZero() {
-              if (editStr.isEmpty || editStr == '0') return;
-              final dotIndex = editStr.indexOf('.');
-              if (dotIndex >= 0) {
-                final decimals = editStr.length - dotIndex - 1;
-                if (decimals >= 4) return;
-                final zerosToAdd = (4 - decimals).clamp(0, 2);
-                setSheetState(() => editStr += '0' * zerosToAdd);
-              } else {
-                setSheetState(() => editStr += '00');
-              }
-            }
-
-            void onDot() {
-              if (editStr.contains('.')) return;
-              if (editStr.isEmpty) {
-                setSheetState(() => editStr = '0.');
-              } else {
-                setSheetState(() => editStr += '.');
-              }
-            }
-
-            void onDelete() {
-              if (editStr.isNotEmpty) {
-                setSheetState(
-                  () => editStr = editStr.substring(0, editStr.length - 1),
-                );
-              }
-            }
-
-            void onClear() {
-              setSheetState(() => editStr = '');
-            }
-
-            void onConfirm() {
-              final cleaned = editStr.endsWith('.')
-                  ? editStr.substring(0, editStr.length - 1)
-                  : editStr;
-              final parsed = double.tryParse(cleaned);
-              if (parsed != null && parsed > 0) {
-                setState(() => _amount = parsed.round());
-              }
-              Navigator.pop(context);
-            }
-
-            return Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: SafeArea(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(height: 8),
-                    Container(
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFD0D8E0),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    AmountDisplay(amount: editStr, onClear: onClear),
-                    SmartKeyboard(
-                      onDigit: onDigit,
-                      onDoubleZero: onDoubleZero,
-                      onDot: onDot,
-                      onDelete: onDelete,
-                      onNext: onConfirm,
-                      nextLabel: S.of(context).record,
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
+  /// Phase 19 D-14 — host owns amount editing UX; form widget keeps `_amount`
+  /// in sync for save-time validation in `submit()`.
+  ///
+  /// Short-circuits if the new value equals the current `_amount` (Pattern S-1
+  /// idempotency — prevents unnecessary rebuilds when the host's SmartKeyboard
+  /// fires on every digit).
+  void updateAmount(int amount) {
+    if (!mounted) return;
+    if (amount == _amount) return;
+    setState(() => _amount = amount);
   }
 
   Future<void> _editCategory() async {
@@ -327,6 +233,8 @@ class TransactionDetailsFormState
         nInitialDate,
         nEntrySource,
         voiceKeyword,
+        p10,
+        p11,
       ) async {
         if (voiceKeyword != null &&
             voiceKeyword.isNotEmpty &&
@@ -397,6 +305,8 @@ class TransactionDetailsFormState
           newInitialDate,
           entrySource,
           voiceKeyword,
+          p10,
+          p11,
         ) async {
           final result = await ref
               .read(createTransactionUseCaseProvider)
@@ -480,14 +390,6 @@ class TransactionDetailsFormState
 
   // ── UI helpers ─────────────────────────────────────────────────────────────
 
-  String _formatAmount(int amount, Locale locale) {
-    return const FormatterService().formatCurrency(
-      amount.toDouble(),
-      'JPY',
-      locale,
-    );
-  }
-
   String _categoryLabel(Locale locale, S l10n) {
     if (_category == null) return l10n.pleaseSelectCategory;
     return formatCategoryPath(
@@ -524,7 +426,25 @@ class TransactionDetailsFormState
               const SizedBox(width: 12),
               Expanded(
                 child: TextField(
+                  key: const ValueKey('merchant-textfield'),
                   controller: _storeController,
+                  focusNode: widget.config.maybeWhen(
+                    $new: (
+                      p1,
+                      p2,
+                      p3,
+                      p4,
+                      p5,
+                      p6,
+                      p7,
+                      p8,
+                      p9,
+                      merchantFocusNode,
+                      p11,
+                    ) =>
+                        merchantFocusNode,
+                    orElse: () => null,
+                  ),
                   textAlign: TextAlign.end,
                   decoration: InputDecoration(
                     isDense: true,
@@ -588,7 +508,25 @@ class TransactionDetailsFormState
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: TextField(
+                  key: const ValueKey('note-textfield'),
                   controller: _memoController,
+                  focusNode: widget.config.maybeWhen(
+                    $new: (
+                      p1,
+                      p2,
+                      p3,
+                      p4,
+                      p5,
+                      p6,
+                      p7,
+                      p8,
+                      p9,
+                      p10,
+                      noteFocusNode,
+                    ) =>
+                        noteFocusNode,
+                    orElse: () => null,
+                  ),
                   maxLines: null,
                   expands: true,
                   decoration: InputDecoration(
@@ -631,14 +569,7 @@ class TransactionDetailsFormState
             DetailInfoCard(
               rows: [
                 DetailInfoRow(
-                  icon: Icons.payments_outlined,
-                  label: l10n.amount,
-                  value: _formatAmount(_amount, locale),
-                  valueStyle: AppTextStyles.amountMedium,
-                  showChevron: true,
-                  onTap: _editAmount,
-                ),
-                DetailInfoRow(
+                  key: const ValueKey('category-chip'),
                   icon: displayCategory != null
                       ? resolveCategoryIcon(displayCategory.icon)
                       : Icons.shopping_bag_outlined,
@@ -648,6 +579,7 @@ class TransactionDetailsFormState
                   onTap: _editCategory,
                 ),
                 DetailInfoRow(
+                  key: const ValueKey('date-chip'),
                   icon: Icons.calendar_today_outlined,
                   label: l10n.date,
                   value: const FormatterService().formatDate(_date, locale),

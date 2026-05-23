@@ -5,6 +5,7 @@ import '../../../../core/theme/app_text_styles.dart';
 
 class DetailInfoRow {
   const DetailInfoRow({
+    this.key,
     required this.icon,
     required this.label,
     required this.value,
@@ -13,6 +14,9 @@ class DetailInfoRow {
     this.valueStyle,
   });
 
+  /// Optional key forwarded to the rendered row widget for testability
+  /// (Phase 19 P19-W2 — downstream tests use find.byKey(ValueKey('...'))).
+  final Key? key;
   final IconData icon;
   final String label;
   final String value;
@@ -47,7 +51,7 @@ class DetailInfoCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           for (var index = 0; index < rows.length; index++) ...[
-            _DetailInfoCardRow(row: rows[index], isDark: isDark),
+            _DetailInfoCardRow(key: rows[index].key, row: rows[index], isDark: isDark),
             if (index < rows.length - 1)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -72,7 +76,7 @@ class DetailInfoCard extends StatelessWidget {
 }
 
 class _DetailInfoCardRow extends StatelessWidget {
-  const _DetailInfoCardRow({required this.row, required this.isDark});
+  const _DetailInfoCardRow({super.key, required this.row, required this.isDark});
 
   final DetailInfoRow row;
   final bool isDark;

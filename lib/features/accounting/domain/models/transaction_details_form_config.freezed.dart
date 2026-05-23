@@ -147,6 +147,8 @@ extension TransactionDetailsFormConfigPatterns on TransactionDetailsFormConfig {
       DateTime? initialDate,
       EntrySource entrySource,
       String? voiceKeyword,
+      FocusNode? merchantFocusNode,
+      FocusNode? noteFocusNode,
     )?
     $new,
     TResult Function(Transaction seed)? edit,
@@ -165,6 +167,8 @@ extension TransactionDetailsFormConfigPatterns on TransactionDetailsFormConfig {
           _that.initialDate,
           _that.entrySource,
           _that.voiceKeyword,
+          _that.merchantFocusNode,
+          _that.noteFocusNode,
         );
       case EditEntryConfig() when edit != null:
         return edit(_that.seed);
@@ -198,6 +202,8 @@ extension TransactionDetailsFormConfigPatterns on TransactionDetailsFormConfig {
       DateTime? initialDate,
       EntrySource entrySource,
       String? voiceKeyword,
+      FocusNode? merchantFocusNode,
+      FocusNode? noteFocusNode,
     )
     $new,
     required TResult Function(Transaction seed) edit,
@@ -215,6 +221,8 @@ extension TransactionDetailsFormConfigPatterns on TransactionDetailsFormConfig {
           _that.initialDate,
           _that.entrySource,
           _that.voiceKeyword,
+          _that.merchantFocusNode,
+          _that.noteFocusNode,
         );
       case EditEntryConfig():
         return edit(_that.seed);
@@ -245,6 +253,8 @@ extension TransactionDetailsFormConfigPatterns on TransactionDetailsFormConfig {
       DateTime? initialDate,
       EntrySource entrySource,
       String? voiceKeyword,
+      FocusNode? merchantFocusNode,
+      FocusNode? noteFocusNode,
     )?
     $new,
     TResult? Function(Transaction seed)? edit,
@@ -262,6 +272,8 @@ extension TransactionDetailsFormConfigPatterns on TransactionDetailsFormConfig {
           _that.initialDate,
           _that.entrySource,
           _that.voiceKeyword,
+          _that.merchantFocusNode,
+          _that.noteFocusNode,
         );
       case EditEntryConfig() when edit != null:
         return edit(_that.seed);
@@ -284,6 +296,8 @@ class NewEntryConfig extends TransactionDetailsFormConfig {
     this.initialDate,
     required this.entrySource,
     this.voiceKeyword,
+    this.merchantFocusNode,
+    this.noteFocusNode,
   }) : super._();
 
   final String bookId;
@@ -296,6 +310,12 @@ class NewEntryConfig extends TransactionDetailsFormConfig {
   final EntrySource entrySource;
   // Voice-correction keyword — present only in .new mode (D-09).
   final String? voiceKeyword;
+  // Phase 19 P19-W3: optional FocusNodes wired into the form's TextFields.
+  // Only on $new — edit hosts use modal sheets, no persistent-keypad focus.
+  // When null, TextFields default to their own internal FocusNode (backward
+  // compatible with all existing Phase-18 callers).
+  final FocusNode? merchantFocusNode;
+  final FocusNode? noteFocusNode;
 
   /// Create a copy of TransactionDetailsFormConfig
   /// with the given fields replaced by the non-null parameter values.
@@ -325,7 +345,11 @@ class NewEntryConfig extends TransactionDetailsFormConfig {
             (identical(other.entrySource, entrySource) ||
                 other.entrySource == entrySource) &&
             (identical(other.voiceKeyword, voiceKeyword) ||
-                other.voiceKeyword == voiceKeyword));
+                other.voiceKeyword == voiceKeyword) &&
+            (identical(other.merchantFocusNode, merchantFocusNode) ||
+                other.merchantFocusNode == merchantFocusNode) &&
+            (identical(other.noteFocusNode, noteFocusNode) ||
+                other.noteFocusNode == noteFocusNode));
   }
 
   @override
@@ -340,11 +364,13 @@ class NewEntryConfig extends TransactionDetailsFormConfig {
     initialDate,
     entrySource,
     voiceKeyword,
+    merchantFocusNode,
+    noteFocusNode,
   );
 
   @override
   String toString() {
-    return 'TransactionDetailsFormConfig.\$new(bookId: $bookId, initialAmount: $initialAmount, initialCategory: $initialCategory, initialParentCategory: $initialParentCategory, initialMerchant: $initialMerchant, initialSatisfaction: $initialSatisfaction, initialDate: $initialDate, entrySource: $entrySource, voiceKeyword: $voiceKeyword)';
+    return 'TransactionDetailsFormConfig.\$new(bookId: $bookId, initialAmount: $initialAmount, initialCategory: $initialCategory, initialParentCategory: $initialParentCategory, initialMerchant: $initialMerchant, initialSatisfaction: $initialSatisfaction, initialDate: $initialDate, entrySource: $entrySource, voiceKeyword: $voiceKeyword, merchantFocusNode: $merchantFocusNode, noteFocusNode: $noteFocusNode)';
   }
 }
 
@@ -366,6 +392,8 @@ abstract mixin class $NewEntryConfigCopyWith<$Res>
     DateTime? initialDate,
     EntrySource entrySource,
     String? voiceKeyword,
+    FocusNode? merchantFocusNode,
+    FocusNode? noteFocusNode,
   });
 
   $CategoryCopyWith<$Res>? get initialCategory;
@@ -393,6 +421,8 @@ class _$NewEntryConfigCopyWithImpl<$Res>
     Object? initialDate = freezed,
     Object? entrySource = null,
     Object? voiceKeyword = freezed,
+    Object? merchantFocusNode = freezed,
+    Object? noteFocusNode = freezed,
   }) {
     return _then(
       NewEntryConfig(
@@ -432,6 +462,14 @@ class _$NewEntryConfigCopyWithImpl<$Res>
             ? _self.voiceKeyword
             : voiceKeyword // ignore: cast_nullable_to_non_nullable
                   as String?,
+        merchantFocusNode: freezed == merchantFocusNode
+            ? _self.merchantFocusNode
+            : merchantFocusNode // ignore: cast_nullable_to_non_nullable
+                  as FocusNode?,
+        noteFocusNode: freezed == noteFocusNode
+            ? _self.noteFocusNode
+            : noteFocusNode // ignore: cast_nullable_to_non_nullable
+                  as FocusNode?,
       ),
     );
   }
