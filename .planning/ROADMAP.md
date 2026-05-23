@@ -161,6 +161,6 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 |-------|----------------|--------|-----------|
 | 18. Shared Details Form Foundation | 8/8 | Complete   | 2026-05-22 |
 | 19. Manual One-Step + Keypad Polish | 5/5 | Complete    | 2026-05-23 |
-| 20. Voice Number Parser (zh + ja) | 0/0 | Not started | — |
+| 20. Voice Number Parser (zh + ja) | 2/9 | In Progress|  |
 | 21. Voice Category Resolver Level-2 Enforcement | 0/0 | Not started | — |
 | 22. Voice One-Step Integration + Record Button UX | 0/0 | Not started | — |
