@@ -542,4 +542,84 @@ void main() {
     final params = captured.first as CreateTransactionParams;
     expect(params.entrySource, EntrySource.voice);
   });
+
+  // ── CR-01: decimal-point parsing regression ────────────────────────────────
+
+  testWidgets(
+      'CR-01: typing 1,2,3,. then Record calls use case with amount=123 (not 0)',
+      (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    when(
+      () => mockCreateUseCase.execute(any()),
+    ).thenAnswer((_) async => Result.success(_successTransaction));
+
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        ManualOneStepScreen(
+          bookId: 'book-1',
+          initialCategory: _l2Category,
+          initialParentCategory: _l1Category,
+          entrySource: EntrySource.manual,
+        ),
+        locale: const Locale('en'),
+        overrides: [
+          categoryRepositoryProvider.overrideWithValue(
+            FakeCategoryRepository(_fakeCategories),
+          ),
+          createTransactionUseCaseProvider.overrideWithValue(mockCreateUseCase),
+          categoryServiceProvider.overrideWithValue(mockCategoryService),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final keyboard = find.byType(SmartKeyboard);
+    expect(keyboard, findsOneWidget);
+
+    // Tap '1', '2', '3'
+    for (final digit in ['1', '2', '3']) {
+      final finder = find.descendant(
+        of: keyboard,
+        matching: find.text(digit),
+      );
+      expect(finder, findsOneWidget);
+      await tester.tap(finder);
+      await tester.pump();
+    }
+
+    // Tap '.' — this previously caused int.tryParse("123.") = null → updateAmount(0)
+    final dotFinder = find.descendant(
+      of: keyboard,
+      matching: find.text('.'),
+    );
+    expect(dotFinder, findsOneWidget);
+    await tester.tap(dotFinder);
+    await tester.pump();
+
+    // Tap 'Record' — the form should submit with amount=123 (not 0)
+    final recordFinder = find.descendant(
+      of: keyboard,
+      matching: find.text('Record'),
+    );
+    expect(recordFinder, findsOneWidget);
+    await tester.tap(recordFinder);
+    await tester.pumpAndSettle();
+
+    final captured = verify(
+      () => mockCreateUseCase.execute(captureAny()),
+    ).captured;
+    expect(captured.length, 1,
+        reason: 'use case must be called exactly once');
+    final params = captured.first as CreateTransactionParams;
+    expect(
+      params.amount,
+      123,
+      reason:
+          'After typing "123." the parsed amount must be 123, not 0 (CR-01 regression)',
+    );
+  });
 }

@@ -199,7 +199,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
     // Don't allow leading zeros (except "0.")
     if (_amount.isEmpty && digit == '0') return;
     setState(() => _amount += digit);
-    final parsed = int.tryParse(_amount) ?? 0;
+    final parsed = (double.tryParse(_amount) ?? 0.0).round();
     _formKey.currentState?.updateAmount(parsed);
   }
 
@@ -215,7 +215,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
     } else {
       setState(() => _amount += '00');
     }
-    final parsed = int.tryParse(_amount) ?? 0;
+    final parsed = (double.tryParse(_amount) ?? 0.0).round();
     _formKey.currentState?.updateAmount(parsed);
   }
 
@@ -226,14 +226,14 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
     } else {
       setState(() => _amount += '.');
     }
-    final parsed = int.tryParse(_amount) ?? 0;
+    final parsed = (double.tryParse(_amount) ?? 0.0).round();
     _formKey.currentState?.updateAmount(parsed);
   }
 
   void _onDelete() {
     if (_amount.isNotEmpty) {
       setState(() => _amount = _amount.substring(0, _amount.length - 1));
-      final parsed = int.tryParse(_amount) ?? 0;
+      final parsed = (double.tryParse(_amount) ?? 0.0).round();
       _formKey.currentState?.updateAmount(parsed);
     }
   }
