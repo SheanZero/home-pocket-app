@@ -310,14 +310,18 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
   /// Uses static MediaQuery.size.height (RESEARCH §Pitfall 2) to avoid
   /// dependency on the render tree during layout. Floor at 48dp per
   /// RESEARCH §Pitfall 1 (iPhone SE 667pt gives ~36.96dp without clamp).
+  ///
+  /// IN-02: includes SmartKeyboard's internal padding (12 top + 24 bottom = 36dp)
+  /// so scrollPaddingBottom matches actual rendered height.
   double _computeSmartKeypadHeight(BuildContext context) {
     final mq = MediaQuery.of(context);
     final total = mq.size.height * 0.40;
     const rowGaps = 4 * 12.0;
     final safeAreaBottom = mq.padding.bottom;
+    const keyboardPaddingVertical = 12.0 + 24.0; // fromLTRB(12,12,12,24)
     final perKey = (total - rowGaps - safeAreaBottom) / 5;
     final clampedPerKey = math.max(48.0, perKey);
-    return clampedPerKey * 5 + rowGaps + safeAreaBottom;
+    return clampedPerKey * 5 + rowGaps + safeAreaBottom + keyboardPaddingVertical;
   }
 
   @override
