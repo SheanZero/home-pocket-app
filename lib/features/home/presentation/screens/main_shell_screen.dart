@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../generated/app_localizations.dart';
 
 import '../../../accounting/presentation/providers/repository_providers.dart';
-import '../../../accounting/presentation/screens/transaction_entry_screen.dart';
+import '../../../accounting/presentation/screens/manual_one_step_screen.dart';
 import '../../../analytics/presentation/providers/state_analytics.dart';
 import '../../../analytics/presentation/providers/state_happiness.dart';
 import '../../../analytics/presentation/screens/analytics_screen.dart';
@@ -125,7 +125,7 @@ class MainShellScreen extends ConsumerWidget {
                 onFabTap: () async {
                   await Navigator.of(context).push<void>(
                     MaterialPageRoute<void>(
-                      builder: (_) => TransactionEntryScreen(bookId: bookId),
+                      builder: (_) => ManualOneStepScreen(bookId: bookId),
                     ),
                   );
                   // Refresh data after returning from entry flow

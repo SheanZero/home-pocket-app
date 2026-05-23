@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../screens/ocr_scanner_screen.dart';
-import '../screens/transaction_entry_screen.dart';
+import '../screens/manual_one_step_screen.dart';
 import '../screens/voice_input_screen.dart';
 import '../widgets/input_mode_tabs.dart';
 
@@ -21,7 +21,7 @@ class EntryModeRouteConfig {
 final _entryModeRouteConfigs = <InputMode, EntryModeRouteConfig>{
   InputMode.manual: EntryModeRouteConfig(
     mode: InputMode.manual,
-    builder: (bookId) => TransactionEntryScreen(bookId: bookId),
+    builder: (bookId) => ManualOneStepScreen(bookId: bookId),
   ),
   InputMode.ocr: EntryModeRouteConfig(
     mode: InputMode.ocr,

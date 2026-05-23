@@ -23,7 +23,7 @@ import '../widgets/entry_mode_switcher.dart';
 import '../widgets/input_mode_tabs.dart';
 import '../widgets/soft_toast.dart';
 import '../widgets/voice_waveform.dart';
-import 'transaction_confirm_screen.dart';
+import 'manual_one_step_screen.dart';
 
 /// Voice input screen for creating transactions through natural language speech.
 ///
@@ -350,12 +350,12 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
 
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => TransactionConfirmScreen(
+        builder: (_) => ManualOneStepScreen(
           bookId: widget.bookId,
-          amount: result.amount ?? 0,
-          category: category,
-          parentCategory: parentCategory,
-          date: result.parsedDate ?? DateTime.now(),
+          initialAmount: result.amount ?? 0,
+          initialCategory: category,
+          initialParentCategory: parentCategory,
+          initialDate: result.parsedDate ?? DateTime.now(),
           initialMerchant: result.merchantName,
           initialSatisfaction: result.ledgerType == LedgerType.soul
               ? result.estimatedSatisfaction
