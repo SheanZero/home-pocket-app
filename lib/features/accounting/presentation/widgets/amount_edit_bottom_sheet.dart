@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import 'amount_display.dart';
 import 'smart_keyboard.dart';
@@ -67,6 +68,8 @@ class AmountEditBottomSheet extends StatelessWidget {
 
     return StatefulBuilder(
       builder: (context, setSheetState) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+
         void onDigit(String digit) {
           final dotIndex = editStr.indexOf('.');
           if (dotIndex >= 0) {
@@ -130,9 +133,9 @@ class AmountEditBottomSheet extends StatelessWidget {
         }
 
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: BoxDecoration(
+            color: isDark ? AppColorsDark.card : AppColors.card,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: SafeArea(
             child: Column(
@@ -143,7 +146,9 @@ class AmountEditBottomSheet extends StatelessWidget {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD0D8E0),
+                    color: isDark
+                        ? AppColorsDark.borderDefault
+                        : AppColors.borderDefault,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
