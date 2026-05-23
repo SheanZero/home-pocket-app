@@ -341,10 +341,10 @@ void main() {
       of: find.byType(SmartKeyboard),
       matching: find.text('1'),
     );
-    if (digitOneFinder.evaluate().isNotEmpty) {
-      await tester.tap(digitOneFinder.first);
-      await tester.pump();
-    }
+    expect(digitOneFinder, findsOneWidget,
+        reason: 'SmartKeyboard digit "1" must be visible');
+    await tester.tap(digitOneFinder);
+    await tester.pump();
 
     // Just pump — the guard should prevent use case invocation
     await tester.pump(const Duration(milliseconds: 100));

@@ -187,10 +187,10 @@ void main() {
       of: keyboardFinder,
       matching: find.text('5'),
     );
-    if (fiveFinder.evaluate().isNotEmpty) {
-      await tester.tap(fiveFinder.first);
-      await tester.pump();
-    }
+    expect(fiveFinder, findsOneWidget,
+        reason: 'SmartKeyboard digit "5" must be visible');
+    await tester.tap(fiveFinder);
+    await tester.pump();
 
     // Tap '0' twice
     final zeroFinder = find.descendant(
@@ -198,10 +198,10 @@ void main() {
       matching: find.text('0'),
     );
     for (var i = 0; i < 2; i++) {
-      if (zeroFinder.evaluate().isNotEmpty) {
-        await tester.tap(zeroFinder.first);
-        await tester.pump();
-      }
+      expect(zeroFinder, findsOneWidget,
+          reason: 'SmartKeyboard digit "0" must be visible');
+      await tester.tap(zeroFinder);
+      await tester.pump();
     }
 
     // Tap 'Record' (actionLabel = l10n.record = "Record" in English)

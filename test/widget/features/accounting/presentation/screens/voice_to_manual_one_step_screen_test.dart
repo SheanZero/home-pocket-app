@@ -305,10 +305,10 @@ void main() {
 
     // Tap the 'Next' button to navigate to ManualOneStepScreen
     final nextFinder = find.text('Next');
-    if (nextFinder.evaluate().isNotEmpty) {
-      await tester.tap(nextFinder.first);
-      await tester.pumpAndSettle();
-    }
+    expect(nextFinder, findsOneWidget,
+        reason: 'Next button must be visible after voice recognition completes');
+    await tester.tap(nextFinder);
+    await tester.pumpAndSettle();
 
     return speechService;
   }
@@ -357,10 +357,10 @@ void main() {
       of: find.byType(SmartKeyboard),
       matching: find.text('Record'),
     );
-    if (recordFinder.evaluate().isNotEmpty) {
-      await tester.tap(recordFinder);
-      await tester.pumpAndSettle();
-    }
+    expect(recordFinder, findsOneWidget,
+        reason: 'SmartKeyboard Record button must be visible on ManualOneStepScreen');
+    await tester.tap(recordFinder);
+    await tester.pumpAndSettle();
 
     // Assert DB: entry_source = 'voice'
     final rows = await transactionDao.findByBookId('book-1');
@@ -463,10 +463,10 @@ void main() {
       of: find.byType(SmartKeyboard),
       matching: find.text('Record'),
     );
-    if (recordFinder.evaluate().isNotEmpty) {
-      await tester.tap(recordFinder);
-      await tester.pumpAndSettle();
-    }
+    expect(recordFinder, findsOneWidget,
+        reason: 'SmartKeyboard Record button must be visible for soul voice save');
+    await tester.tap(recordFinder);
+    await tester.pumpAndSettle();
 
     // Assert DB row
     final rows = await transactionDao.findByBookId('book-1');
