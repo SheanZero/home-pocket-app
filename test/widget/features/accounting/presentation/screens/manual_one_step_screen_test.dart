@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:home_pocket/application/accounting/category_service.dart';
 import 'package:home_pocket/application/accounting/create_transaction_use_case.dart';
@@ -347,11 +346,6 @@ void main() {
       await tester.pump();
     }
 
-    // Tap Save — should be guarded by _trySave → !_canSave → no-op
-    final saveKeyFinder = find.descendant(
-      of: find.byType(SmartKeyboard),
-      matching: find.byType(GestureDetector),
-    );
     // Just pump — the guard should prevent use case invocation
     await tester.pump(const Duration(milliseconds: 100));
 
