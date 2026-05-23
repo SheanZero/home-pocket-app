@@ -17,7 +17,14 @@ void main() {
 
   testWidgets('smart keyboard uses dark surface colors', (tester) async {
     await tester.pumpWidget(
-      buildDark(SmartKeyboard(onDigit: (_) {}, onDelete: () {}, onNext: () {})),
+      buildDark(
+        SmartKeyboard(
+          onDigit: (_) {},
+          onDelete: () {},
+          onNext: () {},
+          actionLabel: '記録',
+        ),
+      ),
     );
 
     final container = tester.widget<Container>(

@@ -3,7 +3,8 @@ import '../../features/accounting/domain/repositories/category_keyword_preferenc
 /// Records a user's category correction for voice input learning.
 ///
 /// Called when the user changes the auto-matched category on
-/// TransactionConfirmScreen. Increments the hitCount for the
+/// ManualOneStepScreen (or any other host that mounts TransactionDetailsForm
+/// with a voiceKeyword). Increments the hitCount for the
 /// (keyword, categoryId) pair in the learning table.
 class RecordCategoryCorrectionUseCase {
   final CategoryKeywordPreferenceRepository _preferenceRepository;
