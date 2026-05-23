@@ -26,11 +26,18 @@ class ParseVoiceInputUseCase {
 
   /// Parses [recognizedText] into a [VoiceParseResult].
   ///
+  /// [localeId] is optional. When provided, amount extraction routes to the
+  /// locale-specific numeral state machine (e.g. 'ja-JP' → Japanese, 'zh-CN' → Chinese).
+  /// When null, the transfer station falls back to ja-then-zh heuristic.
+  ///
   /// Returns [Result.error] if an unexpected exception occurs.
-  Future<Result<VoiceParseResult>> execute(String recognizedText) async {
+  Future<Result<VoiceParseResult>> execute(
+    String recognizedText, {
+    String? localeId,
+  }) async {
     try {
       // 1. Extract amount
-      final amount = _textParser.extractAmount(recognizedText);
+      final amount = _textParser.extractAmount(recognizedText, localeId: localeId);
 
       // 2. Extract date
       final parsedDate = _textParser.extractDate(recognizedText);
