@@ -7,6 +7,8 @@ import '../../../../generated/app_localizations.dart';
 import '../../domain/models/entry_source.dart';
 import '../../domain/models/ocr_parse_draft.dart';
 import '../../domain/models/transaction_details_form_config.dart';
+import '../widgets/amount_display.dart';
+import '../widgets/amount_edit_bottom_sheet.dart';
 import '../widgets/transaction_details_form.dart';
 
 /// Host screen for OCR review (step 2 of the two-step OCR flow).
@@ -15,6 +17,10 @@ import '../widgets/transaction_details_form.dart';
 /// the camera stub in [OcrScannerScreen] with real capture + OCR and populates
 /// the [OcrParseDraft]. The `entrySource: EntrySource.manual` literal here
 /// flips to `EntrySource.ocr` when the OCR writer lands (D-12).
+///
+/// Phase 19 D-14 spillover: this host renders its own [AmountDisplay] above
+/// the embedded form. Tapping the display opens [AmountEditBottomSheet] (modal
+/// sheet UX — only ManualOneStepScreen uses the persistent keypad).
 ///
 /// Thin Scaffold + AppBar + bottom save CTA wrapper around [TransactionDetailsForm]
 /// configured as `.$new`. No field-editing logic in this screen (D-01).
@@ -31,6 +37,13 @@ class _OcrReviewScreenState extends ConsumerState<OcrReviewScreen> {
   final _formKey = GlobalKey<TransactionDetailsFormState>();
   bool _isSubmitting = false;
 
+  /// Host-owned display amount (Phase 19 D-14 spillover).
+  ///
+  /// Initialized from the OCR draft's amount field; updated by
+  /// [_editAmount] (sheet confirm) and the clear button.
+  /// Must stay in sync with the form's internal _amount via [updateAmount].
+  late int _displayAmount;
+
   TransactionDetailsFormConfig get _config => widget.draft.maybeWhen(
         (amount, merchant, date, rawOcrText, imagePath) =>
             TransactionDetailsFormConfig.$new(
@@ -45,6 +58,16 @@ class _OcrReviewScreenState extends ConsumerState<OcrReviewScreen> {
           entrySource: EntrySource.manual, // MOD-005: flip to EntrySource.ocr when OCR writer ships (D-12)
         ),
       );
+
+  @override
+  void initState() {
+    super.initState();
+    // Seed _displayAmount from the draft's amount field; default to 0 for empty drafts.
+    _displayAmount = widget.draft.maybeWhen(
+      (amount, merchant, date, rawOcrText, imagePath) => amount ?? 0,
+      orElse: () => 0,
+    );
+  }
 
   Future<void> _save() async {
     if (_isSubmitting) return;
@@ -63,6 +86,21 @@ class _OcrReviewScreenState extends ConsumerState<OcrReviewScreen> {
           .showSnackBar(SnackBar(content: Text(msg))),
       persistError: (msg) => ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(msg))),
+    );
+  }
+
+  /// Opens [AmountEditBottomSheet] for amount editing (D-14 spillover modal-sheet UX).
+  ///
+  /// On confirm: updates host display state AND pushes value to form via [updateAmount].
+  Future<void> _editAmount() async {
+    await AmountEditBottomSheet.show(
+      context,
+      initialAmount: _displayAmount,
+      onConfirm: (v) {
+        if (!mounted) return;
+        setState(() => _displayAmount = v);
+        _formKey.currentState?.updateAmount(v);
+      },
     );
   }
 
@@ -90,6 +128,22 @@ class _OcrReviewScreenState extends ConsumerState<OcrReviewScreen> {
         centerTitle: true,
       ),
       body: Column(children: [
+        // D-14 spillover: host renders AmountDisplay above the form.
+        // Tapping opens AmountEditBottomSheet (modal-sheet UX, not persistent keyboard).
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _editAmount,
+          child: AmountDisplay(
+            amount: _displayAmount > 0 ? _displayAmount.toString() : '',
+            onClear: () {
+              if (!mounted) return;
+              setState(() => _displayAmount = 0);
+              _formKey.currentState?.updateAmount(0);
+            },
+          ),
+        ),
+        // Empty-draft banner — preserved verbatim (Phase 18 D-13).
+        // Positioned AFTER AmountDisplay so the display is always visible at top.
         if (widget.draft.isEmpty)
           MaterialBanner(
             content: Text(l10n.ocrReviewEmptyDraftBanner),

@@ -6,6 +6,8 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/transaction.dart';
 import '../../domain/models/transaction_details_form_config.dart';
+import '../widgets/amount_display.dart';
+import '../widgets/amount_edit_bottom_sheet.dart';
 import '../widgets/transaction_details_form.dart';
 
 /// Host screen for editing an existing transaction.
@@ -13,6 +15,10 @@ import '../widgets/transaction_details_form.dart';
 /// Thin Scaffold + AppBar + bottom save CTA wrapper around [TransactionDetailsForm]
 /// configured as `.edit(seed: transaction)`. The form widget owns all field-editing
 /// logic; the screen owns chrome + navigation only (D-01).
+///
+/// Phase 19 D-14 spillover: this host renders its own [AmountDisplay] above the
+/// embedded form. Tapping the display opens [AmountEditBottomSheet] (modal sheet
+/// UX — only ManualOneStepScreen uses the persistent keypad; this host uses modal sheet).
 ///
 /// Post-save: `Navigator.pop(context, true)` per D-18 (pop-with-result, NOT popUntil).
 /// Cancel: silent discard — no dirty-state confirmation in Phase 18 (D-10/D-16).
@@ -31,6 +37,19 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
   final _formKey = GlobalKey<TransactionDetailsFormState>();
   bool _isSubmitting = false;
 
+  /// Host-owned display amount (Phase 19 D-14 spillover).
+  ///
+  /// Initialized to the seed transaction's amount; updated by
+  /// [_editAmount] (sheet confirm) and the clear button.
+  /// Must stay in sync with the form's internal _amount via [updateAmount].
+  late int _displayAmount;
+
+  @override
+  void initState() {
+    super.initState();
+    _displayAmount = widget.transaction.amount;
+  }
+
   Future<void> _save() async {
     if (_isSubmitting) return;
     setState(() => _isSubmitting = true);
@@ -48,6 +67,21 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
           .showSnackBar(SnackBar(content: Text(msg))),
       persistError: (msg) => ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(msg))),
+    );
+  }
+
+  /// Opens [AmountEditBottomSheet] for amount editing (D-14 spillover modal-sheet UX).
+  ///
+  /// On confirm: updates host display state AND pushes value to form via [updateAmount].
+  Future<void> _editAmount() async {
+    await AmountEditBottomSheet.show(
+      context,
+      initialAmount: _displayAmount,
+      onConfirm: (v) {
+        if (!mounted) return;
+        setState(() => _displayAmount = v);
+        _formKey.currentState?.updateAmount(v);
+      },
     );
   }
 
@@ -78,6 +112,20 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
         centerTitle: true,
       ),
       body: Column(children: [
+        // D-14 spillover: host renders AmountDisplay above the form.
+        // Tapping opens AmountEditBottomSheet (modal-sheet UX, not persistent keyboard).
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _editAmount,
+          child: AmountDisplay(
+            amount: _displayAmount > 0 ? _displayAmount.toString() : '',
+            onClear: () {
+              if (!mounted) return;
+              setState(() => _displayAmount = 0);
+              _formKey.currentState?.updateAmount(0);
+            },
+          ),
+        ),
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
