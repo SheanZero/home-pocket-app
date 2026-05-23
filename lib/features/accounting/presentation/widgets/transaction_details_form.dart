@@ -332,8 +332,11 @@ class TransactionDetailsFormState
               );
           if (!result.isSuccess) {
             if (!mounted) {
+              // Widget disposed before result arrived — host's !mounted guard
+              // prevents this value from reaching the UI. Use an internal
+              // sentinel rather than a hardcoded English string.
               return const TransactionDetailsFormResult.persistError(
-                'Save failed',
+                'INTERNAL_UNMOUNTED',
               );
             }
             return TransactionDetailsFormResult.persistError(
@@ -386,8 +389,10 @@ class TransactionDetailsFormState
           // .edit branch NEVER sets _showCelebration (D-15 invariant).
           if (!result.isSuccess) {
             if (!mounted) {
+              // Widget disposed before result arrived — internal sentinel
+              // (host's !mounted guard already prevents UI display).
               return const TransactionDetailsFormResult.persistError(
-                'Update failed',
+                'INTERNAL_UNMOUNTED',
               );
             }
             return TransactionDetailsFormResult.persistError(
