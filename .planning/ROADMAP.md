@@ -101,7 +101,12 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
   3. Adjacent keypad keys are visually discriminable (spacing/divider/contrast) per a golden test covering ja/zh/en locale renders in both light and dark themes
   4. User can save a manual entry from the single screen and the resulting Transaction row has `entry_source = 'manual'` (DAO-level integration test)
   5. All new UI strings (any keypad helper text, save button label changes) are routed through `S.of(context)` with parity across ja/zh/en ARB files; `flutter gen-l10n` runs clean
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 19-01-PLAN.md — ARB keyboardToolbarDone + AmountEditBottomSheet extraction + TransactionDetailsForm externalize-amount refactor (Wave 1, D-14/D-22)
+- [ ] 19-02-PLAN.md — SmartKeyboard responsive height + 48dp clamp + actionLabel rename + 6 golden baselines (Wave 1, D-06/07/08/09 + SC-2/SC-3)
+- [ ] 19-03-PLAN.md — KeyboardToolbar + ManualOneStepScreen + voice/router/shell repoints + widget tests (Wave 2, D-01..D-13/D-16/D-24 + SC-1)
+- [ ] 19-04-PLAN.md — D-14 spillover: TransactionEditScreen + OcrReviewScreen adopt host-owned AmountDisplay + AmountEditBottomSheet (Wave 2)
+- [ ] 19-05-PLAN.md — Delete TransactionEntryScreen/ConfirmScreen + stale tests, re-target merchant-learning test, SC-4 integration test, D-16 voice regression test, phase-wide gate (Wave 3)
 **UI hint**: yes
 
 ### Phase 20: Voice Number Parser (zh + ja)
@@ -155,7 +160,7 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 18. Shared Details Form Foundation | 8/8 | Complete   | 2026-05-22 |
-| 19. Manual One-Step + Keypad Polish | 0/0 | Not started | — |
+| 19. Manual One-Step + Keypad Polish | 0/5 | Planned | — |
 | 20. Voice Number Parser (zh + ja) | 0/0 | Not started | — |
 | 21. Voice Category Resolver Level-2 Enforcement | 0/0 | Not started | — |
 | 22. Voice One-Step Integration + Record Button UX | 0/0 | Not started | — |
