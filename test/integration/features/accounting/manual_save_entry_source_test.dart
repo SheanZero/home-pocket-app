@@ -15,7 +15,6 @@ import 'package:home_pocket/data/daos/transaction_dao.dart';
 import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
-import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/device_identity_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'

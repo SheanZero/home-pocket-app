@@ -342,9 +342,9 @@ class TransactionDetailsFormState
           }
           final tx = result.data!;
 
-          // Merchant-learning hook (Phase 18 D-09, preserved from
-          // TransactionConfirmScreen): record merchant→category preference so
-          // the ML classifier improves suggestions over time.
+          // Merchant-learning hook (Phase 18 D-09, ported to this form from
+          // the legacy two-screen flow): record merchant→category preference
+          // so the ML classifier improves suggestions over time.
           final merchantRaw = _storeController.text.trim();
           if (merchantRaw.isNotEmpty && mounted) {
             await ref
