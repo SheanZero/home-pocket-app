@@ -9,8 +9,25 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 /// Provides a unified interface for speech recognition and handles
 /// platform differences (sound level normalization).
 class SpeechRecognitionService {
-  final stt.SpeechToText _speech = stt.SpeechToText();
+  SpeechRecognitionService({stt.SpeechToText? speech})
+      : _speech = speech ?? stt.SpeechToText();
+
+  final stt.SpeechToText _speech;
   bool _isInitialized = false;
+
+  /// Captures the last [startListening] arguments so [restartListen] can
+  /// replay them without the caller having to remember 5 params.
+  ///
+  /// Per Pitfall 3 (RESEARCH.md): the merger calls restartListen() between
+  /// finalResult emissions. This field is the single source of truth for
+  /// the cached config — there is no other state to drift from it.
+  ({
+    void Function(SpeechRecognitionResult result) onResult,
+    void Function(double normalizedLevel) onSoundLevel,
+    String localeId,
+    Duration listenFor,
+    Duration pauseFor,
+  })? _lastConfig;
 
   /// Initialize speech recognition.
   ///
@@ -38,6 +55,17 @@ class SpeechRecognitionService {
     Duration listenFor = const Duration(seconds: 30),
     Duration pauseFor = const Duration(seconds: 3),
   }) async {
+    // Cache config BEFORE the _isInitialized guard so restartListen can
+    // still find config even if a startListening attempt no-ops on uninitialised state.
+    // The init check below preserves the existing no-op semantics.
+    _lastConfig = (
+      onResult: onResult,
+      onSoundLevel: onSoundLevel,
+      localeId: localeId,
+      listenFor: listenFor,
+      pauseFor: pauseFor,
+    );
+
     if (!_isInitialized) return;
 
     await _speech.listen(
@@ -55,6 +83,40 @@ class SpeechRecognitionService {
         partialResults: true,
       ),
     );
+  }
+
+  /// Restart listening using the most recently used [startListening] configuration.
+  ///
+  /// Used by the voice chunk merger (Phase 20 / VOICE-02) to reopen
+  /// recognition between final results within a continued-listening window.
+  ///
+  /// Behavior:
+  ///   - If [initialize] has not been called OR no prior [startListening]
+  ///     call was made, returns false and does nothing.
+  ///   - If the recognizer is currently listening, cancels first then
+  ///     re-invokes [startListening] with the cached config (per
+  ///     speech_to_text Pitfall 3 — calling listen() mid-session can throw).
+  ///   - Otherwise, calls [startListening] directly with cached config.
+  ///
+  /// Errors from [cancel] or [listen] propagate to the caller — the
+  /// merger should display an error in the voice screen rather than
+  /// silently dropping the user's continued speech.
+  Future<bool> restartListen() async {
+    final cfg = _lastConfig;
+    if (cfg == null || !_isInitialized) {
+      return false;
+    }
+    if (_speech.isListening) {
+      await _speech.cancel();
+    }
+    await startListening(
+      onResult: cfg.onResult,
+      onSoundLevel: cfg.onSoundLevel,
+      localeId: cfg.localeId,
+      listenFor: cfg.listenFor,
+      pauseFor: cfg.pauseFor,
+    );
+    return true;
   }
 
   /// Stop listening and get the final result.
