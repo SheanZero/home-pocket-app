@@ -6,6 +6,8 @@
 **Shipped:** v1.1 Happiness Metric & Display (2026-05-05) — see `.planning/milestones/v1.1-ROADMAP.md`
 **Shipped:** v1.2 Happiness Metric Refresh (2026-05-21) — see `.planning/milestones/v1.2-ROADMAP.md` + `.planning/milestones/v1.2-MILESTONE-AUDIT.md`
 
+**In progress:** v1.3 迭代帐本输入 — Phase 18 (shared details form foundation) complete 2026-05-22; **Phase 19 (manual one-step + keypad polish) complete 2026-05-23** — `ManualOneStepScreen` collapses manual entry into a single screen, `SmartKeyboard` enforces 48 dp NON-NEGOTIABLE per-key floor across iPhone SE/14/Pro Max, 6 user-approved golden baselines (ja/zh/en × light/dark), KEYPAD-01 + INPUT-01 validated; HUMAN-UAT.md tracks physical-device keypad feel pending.
+
 The v1.0 initiative was a pure-refactor cleanup. It delivered an operational hybrid audit pipeline, eliminated 50 catalogued findings (24 CRITICAL, 8 HIGH, 8 MEDIUM, 7 LOW + 3 layer-violation closures), aligned all architecture documentation with the post-refactor codebase, and locked 4 permanent CI guardrails.
 
 The v1.1 milestone delivered the happiness metric domain, HomePage `HomeHeroCard`, AnalyticsScreen Variant δ unified dashboard, and final trilingual UI copy rename pass. It also ratified the v1.1 anti-gamification and lexical hierarchy ADRs.
@@ -277,4 +279,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-22 — v1.3 迭代帐本输入 milestone opened*
+*Last updated: 2026-05-23 — Phase 19 (manual one-step + keypad polish) complete*
