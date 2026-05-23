@@ -694,6 +694,9 @@ class SJa extends S {
   String get record => '記録する';
 
   @override
+  String get keyboardToolbarDone => '完了';
+
+  @override
   String get enterStore => 'お店を入力';
 
   @override

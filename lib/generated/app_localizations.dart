@@ -1389,6 +1389,12 @@ abstract class S {
   /// **'Record'**
   String get record;
 
+  /// Soft-keyboard accessory toolbar dismiss button (Phase 19)
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get keyboardToolbarDone;
+
   /// Store input placeholder
   ///
   /// In en, this message translates to:

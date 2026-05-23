@@ -692,6 +692,9 @@ class SZh extends S {
   String get record => '记录';
 
   @override
+  String get keyboardToolbarDone => '完成';
+
+  @override
   String get enterStore => '输入店铺';
 
   @override

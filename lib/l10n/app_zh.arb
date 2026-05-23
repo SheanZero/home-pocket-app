@@ -906,6 +906,10 @@
   "@record": {
     "description": "Save/record transaction button"
   },
+  "keyboardToolbarDone": "完成",
+  "@keyboardToolbarDone": {
+    "description": "Soft-keyboard accessory toolbar dismiss button (Phase 19)"
+  },
   "enterStore": "输入店铺",
   "@enterStore": {
     "description": "Store input placeholder"

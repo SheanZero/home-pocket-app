@@ -701,6 +701,9 @@ class SEn extends S {
   String get record => 'Record';
 
   @override
+  String get keyboardToolbarDone => 'Done';
+
+  @override
   String get enterStore => 'Enter store';
 
   @override
