@@ -33,6 +33,7 @@ class ChineseNumeralStateMachine extends NumeralStateMachine {
     '壱': 1,
     '壹': 1,
     '二': 2,
+    '两': 2,
     '弐': 2,
     '贰': 2,
     '三': 3,
