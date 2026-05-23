@@ -39,6 +39,7 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
 import 'package:home_pocket/features/accounting/presentation/screens/manual_one_step_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/voice_input_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/smart_keyboard.dart';
+import 'package:home_pocket/features/dual_ledger/presentation/widgets/soul_celebration_overlay.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
@@ -475,6 +476,64 @@ void main() {
         reason: 'Soul voice save must also stamp entry_source=voice');
     expect(rows.first.ledgerType, 'soul',
         reason: 'Ledger type must be soul');
+  });
+
+  testWidgets(
+      'TEST 4 (D-15): SoulCelebrationOverlay appears after soul voice save',
+      (tester) async {
+    // Wire soul category for this test
+    when(() => categoryRepository.findById(_soulCategory.id))
+        .thenAnswer((_) async => _soulCategory);
+    when(() => categoryRepository.findById(_soulParentCategory.id))
+        .thenAnswer((_) async => _soulParentCategory);
+    when(() => categoryRepository.findActive()).thenAnswer((_) async =>
+        [_parentCategory, _category, _soulParentCategory, _soulCategory]);
+
+    // CategoryService returns soul for soul category
+    final mockCategoryService = _MockCategoryService();
+    when(() => mockCategoryService.resolveLedgerType(any()))
+        .thenAnswer((_) async => LedgerType.soul);
+
+    final soulParseResult = VoiceParseResult(
+      rawText: 'Games 5000 yen celebration',
+      amount: 5000,
+      parsedDate: DateTime(2026, 5, 10),
+      merchantName: null,
+      categoryMatch: CategoryMatchResult(
+        categoryId: _soulCategory.id,
+        confidence: 0.92,
+        source: MatchSource.keyword,
+      ),
+      ledgerType: LedgerType.soul,
+      estimatedSatisfaction: 9,
+    );
+
+    await pumpAndNavigate(
+      tester,
+      parseResult: soulParseResult,
+      rawText: 'Games 5000 yen celebration',
+      categoryService: mockCategoryService,
+    );
+
+    expect(find.byType(ManualOneStepScreen), findsOneWidget);
+
+    // Tap Record to trigger soul save and D-15 celebration overlay
+    final recordFinder = find.descendant(
+      of: find.byType(SmartKeyboard),
+      matching: find.text('Record'),
+    );
+    expect(recordFinder, findsOneWidget,
+        reason: 'SmartKeyboard Record button must be visible for soul celebration test');
+    await tester.tap(recordFinder);
+    await tester.pump(); // trigger post-save setState(_showCelebration = true)
+
+    // D-15: SoulCelebrationOverlay must appear in the widget tree after soul save
+    expect(
+      find.byType(SoulCelebrationOverlay),
+      findsOneWidget,
+      reason:
+          'TEST 4 (D-15): SoulCelebrationOverlay must appear after soul voice save',
+    );
   });
 }
 
