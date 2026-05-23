@@ -126,3 +126,126 @@ final class StartSpeechRecognitionUseCaseProvider
 
 String _$startSpeechRecognitionUseCaseHash() =>
     r'2449977d8e6c57f2b0370fdaf039c21d703b25c7';
+
+/// Chinese numeral state machine — stateless, const constructor.
+///
+/// Provides ChineseNumeralStateMachine for injection into VoiceChunkMerger.
+/// The merger itself is per-recording-session and constructed inline in
+/// VoiceInputScreen (Plan 20-09) — only the stateless machines are provided here.
+
+@ProviderFor(chineseNumeralStateMachine)
+final chineseNumeralStateMachineProvider =
+    ChineseNumeralStateMachineProvider._();
+
+/// Chinese numeral state machine — stateless, const constructor.
+///
+/// Provides ChineseNumeralStateMachine for injection into VoiceChunkMerger.
+/// The merger itself is per-recording-session and constructed inline in
+/// VoiceInputScreen (Plan 20-09) — only the stateless machines are provided here.
+
+final class ChineseNumeralStateMachineProvider
+    extends
+        $FunctionalProvider<
+          ChineseNumeralStateMachine,
+          ChineseNumeralStateMachine,
+          ChineseNumeralStateMachine
+        >
+    with $Provider<ChineseNumeralStateMachine> {
+  /// Chinese numeral state machine — stateless, const constructor.
+  ///
+  /// Provides ChineseNumeralStateMachine for injection into VoiceChunkMerger.
+  /// The merger itself is per-recording-session and constructed inline in
+  /// VoiceInputScreen (Plan 20-09) — only the stateless machines are provided here.
+  ChineseNumeralStateMachineProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'chineseNumeralStateMachineProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$chineseNumeralStateMachineHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChineseNumeralStateMachine> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ChineseNumeralStateMachine create(Ref ref) {
+    return chineseNumeralStateMachine(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChineseNumeralStateMachine value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChineseNumeralStateMachine>(value),
+    );
+  }
+}
+
+String _$chineseNumeralStateMachineHash() =>
+    r'49c9b80fcdbb189ba51caefb58b0affdbf725fed';
+
+/// Japanese numeral state machine — stateless but non-const due to static
+/// sorted-keys initialization at first use.
+
+@ProviderFor(japaneseNumeralStateMachine)
+final japaneseNumeralStateMachineProvider =
+    JapaneseNumeralStateMachineProvider._();
+
+/// Japanese numeral state machine — stateless but non-const due to static
+/// sorted-keys initialization at first use.
+
+final class JapaneseNumeralStateMachineProvider
+    extends
+        $FunctionalProvider<
+          JapaneseNumeralStateMachine,
+          JapaneseNumeralStateMachine,
+          JapaneseNumeralStateMachine
+        >
+    with $Provider<JapaneseNumeralStateMachine> {
+  /// Japanese numeral state machine — stateless but non-const due to static
+  /// sorted-keys initialization at first use.
+  JapaneseNumeralStateMachineProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'japaneseNumeralStateMachineProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$japaneseNumeralStateMachineHash();
+
+  @$internal
+  @override
+  $ProviderElement<JapaneseNumeralStateMachine> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  JapaneseNumeralStateMachine create(Ref ref) {
+    return japaneseNumeralStateMachine(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(JapaneseNumeralStateMachine value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<JapaneseNumeralStateMachine>(value),
+    );
+  }
+}
+
+String _$japaneseNumeralStateMachineHash() =>
+    r'6fc88d9818b85335affa91697207ad8f3bc56c61';
