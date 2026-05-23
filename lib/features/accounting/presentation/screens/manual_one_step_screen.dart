@@ -271,29 +271,36 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
 
   /// Core save handler — delegates to the embedded form's submit().
   /// Ported from transaction_confirm_screen.dart:55-81.
+  ///
+  /// WR-01: try/finally ensures _isSubmitting is always reset even if
+  /// submit() throws an unexpected exception, preventing a permanent
+  /// disabled-save-button deadlock.
   Future<void> _save() async {
     if (_isSubmitting) return;
     setState(() => _isSubmitting = true);
-    final result = await _formKey.currentState!.submit();
-    if (!mounted) return;
-    setState(() => _isSubmitting = false);
-    result.when(
-      success: (_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(S.of(context).transactionSaved)),
-        );
-        // Pop all the way back to main shell (D-04 preserved).
-        Navigator.of(context).popUntil((route) => route.isFirst);
-      },
-      validationError: (msg) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(msg)));
-      },
-      persistError: (msg) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(msg)));
-      },
-    );
+    try {
+      final result = await _formKey.currentState!.submit();
+      if (!mounted) return;
+      result.when(
+        success: (_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(S.of(context).transactionSaved)),
+          );
+          // Pop all the way back to main shell (D-04 preserved).
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        },
+        validationError: (msg) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(msg)));
+        },
+        persistError: (msg) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(msg)));
+        },
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   // ── Layout helpers ──

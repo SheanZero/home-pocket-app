@@ -622,4 +622,77 @@ void main() {
           'After typing "123." the parsed amount must be 123, not 0 (CR-01 regression)',
     );
   });
+
+  // ── WR-01: _isSubmitting deadlock recovery ────────────────────────────────
+
+  testWidgets(
+      'WR-01: after persistError result, _isSubmitting resets and second save is possible',
+      (tester) async {
+    // WR-01 adds a try/finally to _save() so _isSubmitting is always reset.
+    // This test verifies the reset path by:
+    //   1. First save → use case returns an error result (snackbar, no nav).
+    //   2. Second save → use case returns success.
+    // If _isSubmitting were NOT reset after step 1, step 2 would be a no-op
+    // and the verify would see only 1 call instead of 2.
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    // First tap: use case returns a persist error (not a throw).
+    when(
+      () => mockCreateUseCase.execute(any()),
+    ).thenAnswer((_) async => Result.error('DB write failed'));
+
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        ManualOneStepScreen(
+          bookId: 'book-1',
+          initialAmount: 500,
+          initialCategory: _l2Category,
+          initialParentCategory: _l1Category,
+          entrySource: EntrySource.manual,
+        ),
+        locale: const Locale('en'),
+        overrides: [
+          categoryRepositoryProvider.overrideWithValue(
+            FakeCategoryRepository(_fakeCategories),
+          ),
+          createTransactionUseCaseProvider.overrideWithValue(mockCreateUseCase),
+          categoryServiceProvider.overrideWithValue(mockCategoryService),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final recordFinder = find.descendant(
+      of: find.byType(SmartKeyboard),
+      matching: find.text('Record'),
+    );
+    expect(recordFinder, findsOneWidget);
+
+    // First tap — use case returns persist error, _isSubmitting should reset.
+    await tester.tap(recordFinder);
+    await tester.pumpAndSettle();
+
+    // Second tap — use case returns success this time.
+    when(
+      () => mockCreateUseCase.execute(any()),
+    ).thenAnswer((_) async => Result.success(_successTransaction));
+
+    await tester.tap(recordFinder);
+    await tester.pumpAndSettle();
+
+    // Both taps must have invoked the use case — proving _isSubmitting reset
+    // after the first error result so the second save was not blocked.
+    final calls = verify(
+      () => mockCreateUseCase.execute(any()),
+    ).callCount;
+    expect(
+      calls,
+      2,
+      reason:
+          'WR-01: _isSubmitting must reset after persistError so a second save is not deadlocked',
+    );
+  });
 }
