@@ -28,41 +28,40 @@ class VoiceTextParser {
   /// single-character hiragana digits (e.g. `ご`=5 in 「ごはん」) appearing in
   /// ordinary Japanese prose.
   static final _numeralHintPattern = RegExp(
-    r'[一二三四五六七八九十百千万萬零〇壱弐参壹贰叁伍仟]|'
+    r'[一二两三四五六七八九十百千万萬零〇壱弐参壹贰叁伍仟]|'
     r'(?:いち|ひと|ふた|さん|よん|ろく|なな|しち|はち|きゅう|せん|ひゃく|じゅう|まん|'
     r'いっせん|さんぜん|はっせん|さんびゃく|ろっぴゃく|はっぴゃく|いちまん)',
   );
 
   /// Extracts the monetary amount from a text string.
   ///
-  /// Supports:
-  /// 1. Arabic numerals: 「680円」「¥1280」「1,280」 — always tried first.
-  /// 2. Locale-routed kanji/kana state machines:
-  ///    - localeId starts with 'ja' → JapaneseNumeralStateMachine
-  ///    - localeId starts with 'zh' → ChineseNumeralStateMachine
-  ///    - null or other localeId → try ja then zh as defensive fallback
-  ///
-  /// Returns null if no amount is found.
+  /// Routing:
+  /// 1. If text contains kanji/kana numerals, try the locale-routed state
+  ///    machine FIRST (mixed forms like 「2千304元」 must read as 2304, not 304
+  ///    — the arabic regex would otherwise short-circuit on `304元`).
+  /// 2. Otherwise, try the arabic regex (「680円」「¥1280」「1,280」).
+  /// 3. As a last resort, fall through to the other path.
   int? extractAmount(String text, {String? localeId}) {
-    // Priority 1: Arabic numerals (locale-independent)
-    final arabicAmount = _extractArabicAmount(text);
-    if (arabicAmount != null) return arabicAmount;
+    final hasNumeralHint = _numeralHintPattern.hasMatch(text);
 
-    // Priority 2: locale-routed numeral state machines
+    // Mixed kanji+arabic strings (e.g. 「2千304元」) must NOT fall through to
+    // the arabic regex — it would partial-match the trailing 「304元」 and
+    // return 304, masking the correct 2304 reading. State machine is
+    // authoritative when any numeral hint is present.
+    if (hasNumeralHint) {
+      return _runStateMachine(text, localeId);
+    }
+    return _extractArabicAmount(text);
+  }
+
+  int? _runStateMachine(String text, String? localeId) {
     if (localeId != null && localeId.startsWith('ja')) {
       return _jaMachine.parse(text);
     }
     if (localeId != null && localeId.startsWith('zh')) {
       return _zhMachine.parse(text);
     }
-    // Fallback (null locale or unsupported) — only route to ja/zh if text
-    // contains a recognizable numeral hint (kanji or multi-char kana unit).
-    // Single-char hiragana like 'ご' can appear in common words (e.g. ごはん)
-    // and must not trigger a false positive amount extraction.
-    if (_numeralHintPattern.hasMatch(text)) {
-      return _jaMachine.parse(text) ?? _zhMachine.parse(text);
-    }
-    return null;
+    return _jaMachine.parse(text) ?? _zhMachine.parse(text);
   }
 
   /// Extracts Arabic numeral amounts from text.
@@ -71,8 +70,10 @@ class VoiceTextParser {
       // ¥1,280 / ￥1280
       RegExp(r'[¥￥]\s*(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?)'),
       // 1,280円 / 1280円 / 1280yen / 480块 / 480元
+      // (?<!\d) anchors capture at a non-digit boundary so 「1280块」 does not
+      // partial-match to 「280块」 and return 280.
       RegExp(
-        r'(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?)\s*(?:円|えん|yen|元|块|塊)',
+        r'(?<!\d)(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?|\d{4,7}(?:\.\d{1,2})?)\s*(?:円|えん|yen|元|块|塊)',
         caseSensitive: false,
       ),
       // Standalone numbers (3+ digits, likely amount)

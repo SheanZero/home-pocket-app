@@ -545,7 +545,10 @@ class _FakeParseVoiceInputUseCase implements ParseVoiceInputUseCase {
   final Map<String, VoiceParseResult> results;
 
   @override
-  Future<Result<VoiceParseResult>> execute(String recognizedText) async {
+  Future<Result<VoiceParseResult>> execute(
+    String recognizedText, {
+    String? localeId,
+  }) async {
     final r = results[recognizedText];
     return r != null ? Result.success(r) : Result.error('no result for: $recognizedText');
   }

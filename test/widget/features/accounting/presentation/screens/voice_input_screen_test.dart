@@ -142,7 +142,10 @@ class FakeParseVoiceInputUseCase implements ParseVoiceInputUseCase {
   final inputs = <String>[];
 
   @override
-  Future<Result<VoiceParseResult>> execute(String recognizedText) async {
+  Future<Result<VoiceParseResult>> execute(
+    String recognizedText, {
+    String? localeId,
+  }) async {
     inputs.add(recognizedText);
     return Result.success(results[recognizedText]);
   }
