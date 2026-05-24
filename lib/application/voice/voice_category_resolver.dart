@@ -1,10 +1,18 @@
 /// Voice category resolver — short-circuit pipeline that always returns an L2 categoryId.
 ///
-/// Per Phase 21 CONTEXT D-07 + D-03 + D-08 + D-09:
-///   1. MerchantDatabase
-///   2. category_keyword_preferences (seed `hitCount=0` + learned, DAO orders hitCount DESC, lastUsed DESC)
-///   3. L1 → `${l1Id}_other` fallback (D-03; with cat_other_expense → cat_other_other override)
-///   4. miss → null
+/// Per Phase 21 CONTEXT D-07 + D-03 + D-08 + D-09. Two lookups + L2
+/// normalization (WR-03 doc-fix — the prior "4-stage pipeline" framing was
+/// not what the code did; there is no fuzzy stage in this phase):
+///   1. MerchantDatabase lookup (extracted keyword → MerchantMatch)
+///   2. category_keyword_preferences lookup (extracted keyword → first row by
+///      hitCount DESC, lastUsed DESC; seeds carry `hitCount=0`)
+/// Each successful lookup is normalized to L2 via `_ensureL2` (D-03 always-L2
+/// contract, with `cat_other_expense → cat_other_other` override).
+///
+/// Short-circuit semantics (WR-02 doc-fix): a SUCCESSFUL step-1 hit
+/// short-circuits step 2; a step-1 hit whose categoryId cannot be normalized
+/// to L2 (e.g. stale/typo'd merchant entry) DOES fall through to step 2 so
+/// the caller still has a chance at a useful result.
 ///
 /// Replaces the pre-Phase-21 multi-signal matcher (Plan 05 — D-06 dropped the
 /// hardcoded seed map and D-08 dropped edit-distance scoring).
@@ -20,7 +28,8 @@ import '../accounting/category_service.dart';
 /// L1 ids whose `_other` L2 child does NOT follow the `${l1Id}_other` convention.
 /// Mirrors test/architecture/category_other_l2_invariant_test.dart::_otherIdOverrides
 /// (Phase 21 D-03 + PATTERNS.md §7 caveat). When adding entries here, update
-/// the architecture test allowlist atomically.
+/// the architecture test allowlist atomically. IN-05 follow-up tracks lifting
+/// this to a single shared source of truth.
 const Map<String, String> _otherIdOverrides = {
   'cat_other_expense': 'cat_other_other',
 };
@@ -46,17 +55,20 @@ class VoiceCategoryResolver {
   final CategoryService _categoryService;
   final MerchantDatabase _merchantDatabase;
 
-  /// Resolve voice input to an L2 [CategoryMatchResult] via the D-07
-  /// short-circuit pipeline. Returns null when neither step produces a hit.
+  /// Resolve [extractedKeyword] to an L2 [CategoryMatchResult] via the D-07
+  /// short-circuit pipeline. Returns null when neither step produces a hit
+  /// (or [extractedKeyword] is empty).
   ///
-  /// Pipeline order is STRICT — a hit in step 1 short-circuits step 2.
-  /// Both steps route their resolved categoryId through [_ensureL2], so
-  /// the public surface always returns an L2 id (D-03 always-L2 contract).
-  Future<CategoryMatchResult?> resolve(
-    String inputText,
-    String extractedKeyword,
-  ) async {
-    if (extractedKeyword.isEmpty && inputText.isEmpty) return null;
+  /// Pipeline short-circuit semantics: a SUCCESSFUL step-1 hit (merchant
+  /// match whose categoryId normalizes cleanly to L2) skips step 2. A
+  /// step-1 hit whose categoryId is unresolvable falls through to step 2.
+  /// Both steps route their resolved categoryId through [_ensureL2], so the
+  /// public surface always returns an L2 id (D-03 always-L2 contract).
+  ///
+  /// WR-04: prior `inputText` parameter dropped — only `extractedKeyword`
+  /// drove lookups. Callers should pass the already-extracted keyword.
+  Future<CategoryMatchResult?> resolve(String extractedKeyword) async {
+    if (extractedKeyword.isEmpty) return null;
 
     // Step 1: MerchantDatabase (synchronous lookup).
     final merchantMatch = _merchantDatabase.findMerchant(extractedKeyword);
@@ -69,6 +81,8 @@ class VoiceCategoryResolver {
           source: MatchSource.merchant,
         );
       }
+      // Unresolvable merchant categoryId — fall through to step 2 rather than
+      // hide a usable keyword signal behind a stale merchant entry.
     }
 
     // Step 2: category_keyword_preferences — DAO orders by hitCount DESC,
@@ -90,9 +104,19 @@ class VoiceCategoryResolver {
       }
     }
 
-    // Step 3 (miss): no match — the screen surfaces a manual-pick affordance.
+    // Miss — caller renders a manual-pick affordance.
     return null;
   }
+
+  /// Public entry to the L2-normalization step.
+  ///
+  /// WR-05: surfaces `_ensureL2` so callers (e.g. `ParseVoiceInputUseCase`'s
+  /// merchant branch) can normalize a pre-derived categoryId to L2 without
+  /// re-running [MerchantDatabase.findMerchant] against the canonical name.
+  /// Returns null when [categoryId] resolves to no category at all, or when
+  /// no L2 child can be found via override / convention / first-child safety
+  /// net (PATTERNS.md §7).
+  Future<String?> normalizeToL2(String categoryId) => _ensureL2(categoryId);
 
   /// Resolve [categoryId] (L1 or L2) to a concrete L2 id.
   ///

@@ -83,7 +83,7 @@ void main() {
         (_) async => _makeCategory('cat_food_cafe', parentId: 'cat_food'),
       );
 
-      final result = await resolver.resolve('スタバでコーヒー', 'スタバ');
+      final result = await resolver.resolve('スタバ');
 
       expect(result, isNotNull);
       expect(result!.categoryId, 'cat_food_cafe');
@@ -111,11 +111,74 @@ void main() {
         (_) async => _makeCategory('cat_food_other', parentId: 'cat_food'),
       );
 
-      final result = await resolver.resolve('マクドナルドで', 'マクドナルド');
+      final result = await resolver.resolve('マクドナルド');
 
       expect(result, isNotNull);
       expect(result!.categoryId, 'cat_food_other');
       expect(result.source, MatchSource.merchant);
+    });
+  });
+
+  group('WR-02 fallthrough', () {
+    test(
+      'merchant hit with unresolvable categoryId falls through to keyword preferences',
+      () async {
+        // Merchant DB returns a match whose categoryId no longer exists in
+        // the category table (e.g. stale entry). _ensureL2 returns null, so
+        // the resolver falls through to step 2 rather than hiding the
+        // usable keyword signal.
+        when(() => mockMerchantDb.findMerchant(any())).thenReturn(
+          const MerchantMatch(
+            merchantName: 'X',
+            categoryId: 'cat_nonexistent',
+            confidence: 0.9,
+            ledgerType: LedgerType.survival,
+          ),
+        );
+        when(
+          () => mockCategoryRepo.findById('cat_nonexistent'),
+        ).thenAnswer((_) async => null);
+        when(() => mockPrefRepo.findByKeyword('X')).thenAnswer(
+          (_) async => [_pref('X', 'cat_food_dining_out')],
+        );
+        when(
+          () => mockCategoryRepo.findById('cat_food_dining_out'),
+        ).thenAnswer(
+          (_) async =>
+              _makeCategory('cat_food_dining_out', parentId: 'cat_food'),
+        );
+
+        final result = await resolver.resolve('X');
+
+        expect(result, isNotNull);
+        expect(result!.categoryId, 'cat_food_dining_out');
+        expect(result.source, MatchSource.keyword);
+      },
+    );
+  });
+
+  group('WR-05 normalizeToL2 public surface', () {
+    test('L2 categoryId pass-through returns same id', () async {
+      when(() => mockCategoryRepo.findById('cat_food_cafe')).thenAnswer(
+        (_) async => _makeCategory('cat_food_cafe', parentId: 'cat_food'),
+      );
+      expect(await resolver.normalizeToL2('cat_food_cafe'), 'cat_food_cafe');
+    });
+
+    test('L1 categoryId routes through \${l1Id}_other convention', () async {
+      when(() => mockCategoryRepo.findById('cat_food')).thenAnswer(
+        (_) async => _makeCategory('cat_food', level: 1),
+      );
+      when(() => mockCategoryRepo.findById('cat_food_other')).thenAnswer(
+        (_) async => _makeCategory('cat_food_other', parentId: 'cat_food'),
+      );
+      expect(await resolver.normalizeToL2('cat_food'), 'cat_food_other');
+    });
+
+    test('unknown id returns null without throwing', () async {
+      when(() => mockCategoryRepo.findById('cat_missing'))
+          .thenAnswer((_) async => null);
+      expect(await resolver.normalizeToL2('cat_missing'), isNull);
     });
   });
 
@@ -130,7 +193,7 @@ void main() {
             _makeCategory('cat_food_dining_out', parentId: 'cat_food'),
       );
 
-      final result = await resolver.resolve('早餐 100元', '早餐');
+      final result = await resolver.resolve('早餐');
 
       expect(result, isNotNull);
       expect(result!.categoryId, 'cat_food_dining_out');
@@ -149,7 +212,7 @@ void main() {
         (_) async => _makeCategory('cat_food_other', parentId: 'cat_food'),
       );
 
-      final result = await resolver.resolve('吃饭 300元', '吃饭');
+      final result = await resolver.resolve('吃饭');
 
       expect(result, isNotNull);
       expect(result!.categoryId, 'cat_food_other');
@@ -175,7 +238,7 @@ void main() {
         ),
       );
 
-      final result = await resolver.resolve('咖啡 500円', '咖啡');
+      final result = await resolver.resolve('咖啡');
 
       expect(result, isNotNull);
       expect(result!.categoryId, 'cat_hobbies_subscription');
@@ -193,7 +256,7 @@ void main() {
       when(() => mockCategoryRepo.findById('cat_seed_l2')).thenAnswer(
         (_) async => _makeCategory('cat_seed_l2', parentId: 'cat_x'),
       );
-      final seedResult = await resolver.resolve('seed', 'seed');
+      final seedResult = await resolver.resolve('seed');
       expect(seedResult!.confidence, closeTo(1.0, 1e-9));
 
       // Learned bonus 0.30 + base 0.85 = 1.15 → clamped to 1.0.
@@ -203,7 +266,7 @@ void main() {
       when(() => mockCategoryRepo.findById('cat_learned_l2')).thenAnswer(
         (_) async => _makeCategory('cat_learned_l2', parentId: 'cat_x'),
       );
-      final learnedResult = await resolver.resolve('learned', 'learned');
+      final learnedResult = await resolver.resolve('learned');
       expect(learnedResult!.confidence, 1.0);
       expect(learnedResult.source, MatchSource.learning);
     });
@@ -230,7 +293,7 @@ void main() {
         ),
       );
 
-      final result = await resolver.resolve('其他支出 100元', '其他');
+      final result = await resolver.resolve('其他');
 
       expect(result, isNotNull);
       expect(result!.categoryId, 'cat_other_other');
@@ -255,7 +318,7 @@ void main() {
         ],
       );
 
-      final result = await resolver.resolve('odd', 'odd');
+      final result = await resolver.resolve('odd');
 
       expect(result, isNotNull);
       expect(result!.categoryId, 'cat_oddL1_first');
@@ -267,13 +330,13 @@ void main() {
       when(() => mockMerchantDb.findMerchant(any())).thenReturn(null);
       when(() => mockPrefRepo.findByKeyword(any())).thenAnswer((_) async => []);
 
-      final result = await resolver.resolve('something weird', 'weird');
+      final result = await resolver.resolve('weird');
 
       expect(result, isNull);
     });
 
     test('empty input guard returns null without consulting any source', () async {
-      final result = await resolver.resolve('', '');
+      final result = await resolver.resolve('');
 
       expect(result, isNull);
       verifyNever(() => mockMerchantDb.findMerchant(any()));
