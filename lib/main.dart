@@ -9,7 +9,10 @@ import 'core/initialization/init_result.dart';
 import 'core/theme/app_theme.dart';
 import 'data/app_database.dart';
 import 'features/accounting/presentation/providers/repository_providers.dart'
-    show seedCategoriesUseCaseProvider, ensureDefaultBookUseCaseProvider;
+    show
+        seedCategoriesUseCaseProvider,
+        seedVoiceSynonymsUseCaseProvider,
+        ensureDefaultBookUseCaseProvider;
 import 'features/family_sync/presentation/providers/repository_providers.dart';
 import 'features/family_sync/presentation/providers/repository_providers.dart'
     show pushNotificationServiceProvider;
@@ -105,6 +108,9 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
       // Seed categories
       final seedCategories = ref.read(seedCategoriesUseCaseProvider);
       await seedCategories.execute();
+      // Phase 21 D-01: synonyms must run AFTER categories.
+      final seedVoiceSynonyms = ref.read(seedVoiceSynonymsUseCaseProvider);
+      await seedVoiceSynonyms.execute();
 
       // Ensure default book
       final ensureBook = ref.read(ensureDefaultBookUseCaseProvider);

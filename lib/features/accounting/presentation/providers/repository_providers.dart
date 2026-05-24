@@ -11,6 +11,7 @@ import '../../../../application/accounting/merchant_category_learning_service.da
 import '../../../../application/accounting/repository_providers.dart'
     as app_accounting;
 import '../../../../application/accounting/seed_categories_use_case.dart';
+import '../../../../application/accounting/seed_voice_synonyms_use_case.dart';
 import '../../../../application/dual_ledger/repository_providers.dart';
 import '../../../../application/ml/repository_providers.dart' as app_ml;
 import '../../../../application/voice/fuzzy_category_matcher.dart';
@@ -169,6 +170,14 @@ SeedCategoriesUseCase seedCategoriesUseCase(Ref ref) {
   return SeedCategoriesUseCase(
     categoryRepository: ref.watch(categoryRepositoryProvider),
     ledgerConfigRepository: ref.watch(categoryLedgerConfigRepositoryProvider),
+  );
+}
+
+/// Phase 21 D-01 — seeds default voice synonyms after categories.
+@riverpod
+SeedVoiceSynonymsUseCase seedVoiceSynonymsUseCase(Ref ref) {
+  return SeedVoiceSynonymsUseCase(
+    preferenceRepository: ref.watch(categoryKeywordPreferenceRepositoryProvider),
   );
 }
 
