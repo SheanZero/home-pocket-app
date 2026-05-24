@@ -110,29 +110,35 @@ class CategoryKeywordPreferenceDao {
   /// Phase 21 D-01 sentinel protection — `hitCount=0` rows are seed entries
   /// (from `insertSeedBatch`) and MUST survive decay so the synonym
   /// dictionary stays intact even after long idle periods.
+  ///
+  /// WR-01: DELETE and UPDATE run inside a single transaction. If the app is
+  /// killed between them the table would otherwise be left in a partial state
+  /// (hit_count=1 rows deleted but the rest not decremented).
   Future<void> decayStalePreferences(Duration staleDuration) async {
     final cutoff = DateTime.now().subtract(staleDuration);
 
-    // Delete entries with hitCount in {1} that are stale.
-    // Phase 21 D-01: explicitly exclude `hitCount=0` seed sentinel rows.
-    await (_db.delete(_db.categoryKeywordPreferences)..where(
-          (t) =>
-              t.lastUsed.isSmallerThan(Variable(cutoff)) &
-              t.hitCount.isSmallerOrEqual(const Variable(1)) &
-              t.hitCount.isBiggerThan(const Variable(0)),
-        ))
-        .go();
+    await _db.transaction(() async {
+      // Delete entries with hitCount = 1 that are stale.
+      // Phase 21 D-01: explicitly exclude `hitCount=0` seed sentinel rows.
+      await (_db.delete(_db.categoryKeywordPreferences)..where(
+            (t) =>
+                t.lastUsed.isSmallerThan(Variable(cutoff)) &
+                t.hitCount.equals(1),
+          ))
+          .go();
 
-    // Decrement hitCount for remaining stale entries.
-    // Phase 21 D-01: `AND hit_count > 0` guards the seed sentinel — a decay
-    // pass must not push seeds to negative hitCount.
-    await _db.customUpdate(
-      'UPDATE category_keyword_preferences '
-      'SET hit_count = hit_count - 1 '
-      'WHERE last_used < ? AND hit_count > 0',
-      variables: [Variable(cutoff)],
-      updates: {_db.categoryKeywordPreferences},
-    );
+      // Decrement hitCount for remaining stale entries with hitCount > 1.
+      // WR-01: tightened from `> 0` to `> 1` — the prior DELETE removed the
+      // hitCount=1 rows, so the UPDATE never needed to touch them.
+      // Phase 21 D-01: this also guards the seed sentinel (hitCount=0).
+      await _db.customUpdate(
+        'UPDATE category_keyword_preferences '
+        'SET hit_count = hit_count - 1 '
+        'WHERE last_used < ? AND hit_count > 1',
+        variables: [Variable(cutoff)],
+        updates: {_db.categoryKeywordPreferences},
+      );
+    });
   }
 
   /// Delete all preferences (for testing/reset).
