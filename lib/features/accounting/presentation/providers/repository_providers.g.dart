@@ -964,58 +964,73 @@ final class VoiceTextParserProvider
 
 String _$voiceTextParserHash() => r'3493d74d0200f77486db448b8fc371a0fb3030fd';
 
-/// FuzzyCategoryMatcher — multi-signal category matcher with learning.
+/// VoiceCategoryResolver — Phase 21 short-circuit pipeline (D-07).
+///
+/// Replaces the deleted multi-signal matcher (Phase 21 / D-06 + D-08).
+/// Owns the 4-stage lookup pipeline: MerchantDatabase → keyword preferences →
+/// `${l1Id}_other` L1→L2 fallback → null. Always returns an L2 categoryId
+/// (D-03 always-L2 contract).
 
-@ProviderFor(fuzzyCategoryMatcher)
-final fuzzyCategoryMatcherProvider = FuzzyCategoryMatcherProvider._();
+@ProviderFor(voiceCategoryResolver)
+final voiceCategoryResolverProvider = VoiceCategoryResolverProvider._();
 
-/// FuzzyCategoryMatcher — multi-signal category matcher with learning.
+/// VoiceCategoryResolver — Phase 21 short-circuit pipeline (D-07).
+///
+/// Replaces the deleted multi-signal matcher (Phase 21 / D-06 + D-08).
+/// Owns the 4-stage lookup pipeline: MerchantDatabase → keyword preferences →
+/// `${l1Id}_other` L1→L2 fallback → null. Always returns an L2 categoryId
+/// (D-03 always-L2 contract).
 
-final class FuzzyCategoryMatcherProvider
+final class VoiceCategoryResolverProvider
     extends
         $FunctionalProvider<
-          FuzzyCategoryMatcher,
-          FuzzyCategoryMatcher,
-          FuzzyCategoryMatcher
+          VoiceCategoryResolver,
+          VoiceCategoryResolver,
+          VoiceCategoryResolver
         >
-    with $Provider<FuzzyCategoryMatcher> {
-  /// FuzzyCategoryMatcher — multi-signal category matcher with learning.
-  FuzzyCategoryMatcherProvider._()
+    with $Provider<VoiceCategoryResolver> {
+  /// VoiceCategoryResolver — Phase 21 short-circuit pipeline (D-07).
+  ///
+  /// Replaces the deleted multi-signal matcher (Phase 21 / D-06 + D-08).
+  /// Owns the 4-stage lookup pipeline: MerchantDatabase → keyword preferences →
+  /// `${l1Id}_other` L1→L2 fallback → null. Always returns an L2 categoryId
+  /// (D-03 always-L2 contract).
+  VoiceCategoryResolverProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'fuzzyCategoryMatcherProvider',
+        name: r'voiceCategoryResolverProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$fuzzyCategoryMatcherHash();
+  String debugGetCreateSourceHash() => _$voiceCategoryResolverHash();
 
   @$internal
   @override
-  $ProviderElement<FuzzyCategoryMatcher> $createElement(
+  $ProviderElement<VoiceCategoryResolver> $createElement(
     $ProviderPointer pointer,
   ) => $ProviderElement(pointer);
 
   @override
-  FuzzyCategoryMatcher create(Ref ref) {
-    return fuzzyCategoryMatcher(ref);
+  VoiceCategoryResolver create(Ref ref) {
+    return voiceCategoryResolver(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(FuzzyCategoryMatcher value) {
+  Override overrideWithValue(VoiceCategoryResolver value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<FuzzyCategoryMatcher>(value),
+      providerOverride: $SyncValueProvider<VoiceCategoryResolver>(value),
     );
   }
 }
 
-String _$fuzzyCategoryMatcherHash() =>
-    r'83fb7164cd9431ee973c6158d5a7757e27581259';
+String _$voiceCategoryResolverHash() =>
+    r'b4c0da8814c96e49fd88f50bfbd6d3436a4a32e5';
 
 /// ParseVoiceInputUseCase — wired to all voice application services.
 
@@ -1068,7 +1083,7 @@ final class ParseVoiceInputUseCaseProvider
 }
 
 String _$parseVoiceInputUseCaseHash() =>
-    r'f74720fb10aef0c570cb3d4e6313631734695bf1';
+    r'89ff3e167c094bc3f2a11bdbc9830619a8d899dd';
 
 /// VoiceSatisfactionEstimator — pure stateless class.
 

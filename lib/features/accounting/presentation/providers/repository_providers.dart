@@ -14,9 +14,9 @@ import '../../../../application/accounting/seed_categories_use_case.dart';
 import '../../../../application/accounting/seed_voice_synonyms_use_case.dart';
 import '../../../../application/dual_ledger/repository_providers.dart';
 import '../../../../application/ml/repository_providers.dart' as app_ml;
-import '../../../../application/voice/fuzzy_category_matcher.dart';
 import '../../../../application/voice/parse_voice_input_use_case.dart';
 import '../../../../application/voice/record_category_correction_use_case.dart';
+import '../../../../application/voice/voice_category_resolver.dart';
 import '../../../../application/voice/voice_satisfaction_estimator.dart';
 import '../../../../application/voice/voice_text_parser.dart';
 import '../../../../data/daos/book_dao.dart';
@@ -225,15 +225,21 @@ VoiceTextParser voiceTextParser(Ref ref) {
   return VoiceTextParser();
 }
 
-/// FuzzyCategoryMatcher — multi-signal category matcher with learning.
+/// VoiceCategoryResolver — Phase 21 short-circuit pipeline (D-07).
+///
+/// Replaces the deleted multi-signal matcher (Phase 21 / D-06 + D-08).
+/// Owns the 4-stage lookup pipeline: MerchantDatabase → keyword preferences →
+/// `${l1Id}_other` L1→L2 fallback → null. Always returns an L2 categoryId
+/// (D-03 always-L2 contract).
 @riverpod
-FuzzyCategoryMatcher fuzzyCategoryMatcher(Ref ref) {
-  return FuzzyCategoryMatcher(
+VoiceCategoryResolver voiceCategoryResolver(Ref ref) {
+  return VoiceCategoryResolver(
     categoryRepository: ref.watch(categoryRepositoryProvider),
     preferenceRepository: ref.watch(
       categoryKeywordPreferenceRepositoryProvider,
     ),
     categoryService: ref.watch(categoryServiceProvider),
+    merchantDatabase: ref.watch(app_ml.appMerchantDatabaseProvider),
   );
 }
 
@@ -242,7 +248,7 @@ FuzzyCategoryMatcher fuzzyCategoryMatcher(Ref ref) {
 ParseVoiceInputUseCase parseVoiceInputUseCase(Ref ref) {
   return ParseVoiceInputUseCase(
     textParser: ref.watch(voiceTextParserProvider),
-    fuzzyCategoryMatcher: ref.watch(fuzzyCategoryMatcherProvider),
+    voiceCategoryResolver: ref.watch(voiceCategoryResolverProvider),
     merchantDatabase: ref.watch(app_ml.appMerchantDatabaseProvider),
   );
 }
