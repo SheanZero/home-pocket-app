@@ -22,6 +22,10 @@ const approvedWhitelist = {
   'lib/infrastructure/voice/chinese_numeral_state_machine.dart',
   'lib/infrastructure/voice/japanese_numeral_state_machine.dart',
   'lib/infrastructure/voice/japanese_numeral_dictionary.dart',
+  // Phase 21 voice category resolver seed dictionary. CJK keywords are seed
+  // data inserted into category_keyword_preferences, not UI text — they
+  // cannot be ARB-keyed (resolver matches against speech tokens).
+  'lib/shared/constants/default_synonyms.dart',
 };
 
 void main() {
