@@ -6,7 +6,8 @@
 ///   3. L1 → `${l1Id}_other` fallback (D-03; with cat_other_expense → cat_other_other override)
 ///   4. miss → null
 ///
-/// Replaces FuzzyCategoryMatcher (deleted in Plan 05 — D-06 dropped the hardcoded seed map and D-08 dropped edit-distance scoring).
+/// Replaces the pre-Phase-21 multi-signal matcher (Plan 05 — D-06 dropped the
+/// hardcoded seed map and D-08 dropped edit-distance scoring).
 library;
 
 import '../../features/accounting/domain/models/transaction.dart';

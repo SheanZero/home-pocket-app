@@ -3,8 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/accounting/category_service.dart';
 import 'package:home_pocket/application/ml/repository_providers.dart'
     show appMerchantDatabaseProvider;
-import 'package:home_pocket/application/voice/fuzzy_category_matcher.dart';
 import 'package:home_pocket/application/voice/parse_voice_input_use_case.dart';
+import 'package:home_pocket/application/voice/voice_category_resolver.dart';
 import 'package:home_pocket/application/voice/voice_satisfaction_estimator.dart';
 import 'package:home_pocket/application/voice/voice_text_parser.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_keyword_preference_repository.dart';
@@ -83,10 +83,10 @@ void main() {
       );
 
       test(
-        'fuzzyCategoryMatcherProvider constructs FuzzyCategoryMatcher with injected deps',
+        'voiceCategoryResolverProvider constructs VoiceCategoryResolver with injected deps',
         () {
-          final matcher = container.read(fuzzyCategoryMatcherProvider);
-          expect(matcher, isA<FuzzyCategoryMatcher>());
+          final resolver = container.read(voiceCategoryResolverProvider);
+          expect(resolver, isA<VoiceCategoryResolver>());
         },
       );
 
