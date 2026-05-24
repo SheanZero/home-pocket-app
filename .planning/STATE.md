@@ -4,14 +4,14 @@ milestone: v1.3
 milestone_name: 迭代帐本输入
 status: executing
 stopped_at: Phase 20 context gathered
-last_updated: "2026-05-23T11:34:03.303Z"
-last_activity: 2026-05-23 -- Phase 20 execution started
+last_updated: "2026-05-24T00:00:00.000Z"
+last_activity: 2026-05-24 -- Phase 20 execution complete (Plan 20-08 device verification deferred)
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 22
-  completed_plans: 13
-  percent: 40
+  completed_plans: 22
+  percent: 100
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-05-22 — v1.3 迭代帐本输入 milest
 
 ## Current Position
 
-Phase: 20 (voice-number-parser-zh-ja) — EXECUTING
-Plan: 1 of 9
-Status: Executing Phase 20
-Last activity: 2026-05-23 -- Phase 20 execution started
+Phase: 20 (voice-number-parser-zh-ja) — COMPLETE (9/9 plans; Plan 20-08 device verification deferred)
+Plan: 9 of 9
+Status: Phase 20 done; awaiting phase verification + advance to Phase 21
+Last activity: 2026-05-24 -- Phase 20 execution complete (Plan 20-08 device verification deferred)
 
 ## Last Milestone Snapshot (v1.2)
 
@@ -83,6 +83,7 @@ No active blockers. Carried-forward debt (cross-milestone):
 - **FUTURE-ARCH-04** *(security)*: `recoverFromSeed()` key-overwrite bug fix (held — security architecture out of scope per long-term project rule)
 - **v1.1 verification debt:** Phase 11 device/simulator UAT for AnalyticsScreen month chip + pull-to-refresh (human_needed)
 - **v1.2 verification debt:** Phase 13 + 17 missing VERIFICATION.md (live code wired + integration-verified at milestone close; per-phase verifier artifact never run)
+- **v1.3 verification debt:** Phase 20 Plan 20-08 device verification deferred (VOICE-02-DEVICE-VERIFY) — 8 anchor cases on physical iPhone/Android (zh: 2204 continuous, 1840 intra-pause merge, 1800 false-merge regression; ja: にせんにひゃくよん→2204, せんはっぴゃく+よんじゅう円→1840, 一万二千→12000; sanity: record button stays lit across finals + ManualOneStepScreen carries correct initialAmount). Resume via `/gsd:verify-work 20` after device run, or carry into Phase 22 if not resolved by milestone close. See `.planning/phases/20-voice-number-parser-zh-ja/20-08-SUMMARY.md` for tuning levers if cases fail (`_windowDuration`, restartListen, lexical-gate normalize).
 
 ### Quick Tasks Completed
 
@@ -143,14 +144,15 @@ No active blockers. Carried-forward debt (cross-milestone):
 
 ## Session Continuity
 
-Last session: 2026-05-23T09:27:44.294Z
-Stopped at: Phase 20 context gathered
-Resume file: .planning/phases/20-voice-number-parser-zh-ja/20-CONTEXT.md
+Last session: 2026-05-24T00:00:00.000Z
+Stopped at: Phase 20 execution complete (9/9 plans; 20-08 device verification deferred)
+Resume file: .planning/phases/20-voice-number-parser-zh-ja/20-08-SUMMARY.md
 
-**Planned Next:** Plan Phase 18 via `/gsd:plan-phase 18`.
+**Planned Next:** Run `/gsd:verify-work 20` to produce the phase verification artifact, then advance to Phase 21 (Voice Category Resolver Level-2 Enforcement).
 
 ## Operator Next Steps
 
-- Plan Phase 18 (Shared Details Form Foundation) via `/gsd:plan-phase 18` — foundational, blocks Phases 19/22.
-- Optional pre-work: refresh codebase map with `/gsd:map-codebase` (last refresh 2026-04-25 — three milestones of drift; relevant for INPUT-03 shared-widget refactor since it touches the existing entry surface).
-- Optional: backfill v1.2 verification debt with `/gsd:verify-work 13` and `/gsd:verify-work 17` if a clean re-audit is desired before merging v1.3 work.
+- Run `/gsd:verify-work 20` to verify Phase 20 against VOICE-01/VOICE-02/VOICE-03 requirements (verifier will flag the deferred Plan 20-08 device run as a verification gap — accept or clear via device test).
+- Optional: clear `VOICE-02-DEVICE-VERIFY` device verification debt by running the 8 anchor cases on a physical iPhone/Android (script in `.planning/phases/20-voice-number-parser-zh-ja/20-08-SUMMARY.md`).
+- Then advance: `/gsd:discuss-phase 21` → `/gsd:plan-phase 21` → `/gsd:execute-phase 21`.
+- Backlog (no longer blocking): Phase 18 (Shared Details Form Foundation) — re-evaluate whether v1.3 still needs it given Phase 20's parallel-safe completion.

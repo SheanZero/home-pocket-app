@@ -54,7 +54,7 @@
 
 - [x] **Phase 18: Shared Details Form Foundation** — Single shared details widget (INPUT-03/04 + EDIT-01/02 foundation): contract supports new/edit modes, OCR two-step architectural slot, edit-from-list entry path, `entry_source` preserved on save (completed 2026-05-22)
 - [x] **Phase 19: Manual One-Step + Keypad Polish** — Manual entry collapses to single screen, no "下一步" button; numeric keypad enlarged to platform-min touch targets (KEYPAD-01, INPUT-01) (completed 2026-05-23)
-- [ ] **Phase 20: Voice Number Parser (zh + ja)** — Compound number state machine, intra-pause continued-listening window, locale-aware combining; per-locale corpus fixtures ≥95% accuracy (VOICE-01/02/03)
+- [x] **Phase 20: Voice Number Parser (zh + ja)** — Compound number state machine, intra-pause continued-listening window, locale-aware combining; per-locale corpus fixtures ≥95% accuracy (VOICE-01/02/03) (completed 2026-05-24)
 - [ ] **Phase 21: Voice Category Resolver Level-2 Enforcement** — Always-level-2 contract, level-1 → first-level-2 fallback, merchant DB + synonym dictionary data sources extensible without code changes (VOICE-04/05/06)
 - [ ] **Phase 22: Voice One-Step Integration + Record Button UX** — Voice fills shared details form in-place on single screen; record button idle caption + recording-state visual change within 100ms (INPUT-02, REC-01, REC-02)
 
@@ -161,6 +161,6 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 |-------|----------------|--------|-----------|
 | 18. Shared Details Form Foundation | 8/8 | Complete   | 2026-05-22 |
 | 19. Manual One-Step + Keypad Polish | 5/5 | Complete    | 2026-05-23 |
-| 20. Voice Number Parser (zh + ja) | 8/9 | In Progress|  |
+| 20. Voice Number Parser (zh + ja) | 9/9 | Complete   | 2026-05-24 |
 | 21. Voice Category Resolver Level-2 Enforcement | 0/0 | Not started | — |
 | 22. Voice One-Step Integration + Record Button UX | 0/0 | Not started | — |
