@@ -132,10 +132,10 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
   4. Both data sources are extensible by adding entries (rows / YAML / ARB-adjacent format — implementation choice) without modifying resolver code; verified by a test that adds an entry to a fixture data source and asserts the new mapping resolves end-to-end
   5. `flutter analyze` 0 issues; per-file coverage ≥70% on new resolver files; resolver placement honors "Thin Feature" rule (lives in `lib/application/` or `lib/infrastructure/`, not inside `lib/features/`)
 **Plans**: 6 plans
-- [ ] 21-01-PLAN.md — Architecture invariant test for D-03 L1 → ${l1Id}_other (with cat_other_expense override)
-- [ ] 21-02-PLAN.md — Synonym dict infrastructure (DAO + repo + DefaultVoiceSynonyms + SeedVoiceSynonymsUseCase + Riverpod + AppInitializer)
+- [x] 21-01-PLAN.md — Architecture invariant test for D-03 L1 → ${l1Id}_other (with cat_other_expense override)
+- [x] 21-02-PLAN.md — Synonym dict infrastructure (DAO + repo + DefaultVoiceSynonyms + SeedVoiceSynonymsUseCase + Riverpod + AppInitializer)
 - [ ] 21-03-PLAN.md — VoiceCategoryResolver class + unit tests (mocktail, per-step VOICE-06 coverage)
-- [ ] 21-04-PLAN.md — MerchantDatabase 12-entry L2 enrichment + D-04 ID drift fixes
+- [x] 21-04-PLAN.md — MerchantDatabase 12-entry L2 enrichment + D-04 ID drift fixes
 - [ ] 21-05-PLAN.md — Wire resolver into ParseVoiceInputUseCase, swap Riverpod provider, delete FuzzyCategoryMatcher + levenshtein + stale tests
 - [ ] 21-06-PLAN.md — Voice category corpus tests (zh + ja) + fixtures + VOICE-06 runtime-insert test + VOICE-SCANNER-ALLOWLIST extension
 
@@ -168,5 +168,5 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 | 18. Shared Details Form Foundation | 8/8 | Complete   | 2026-05-22 |
 | 19. Manual One-Step + Keypad Polish | 5/5 | Complete    | 2026-05-23 |
 | 20. Voice Number Parser (zh + ja) | 9/9 | Complete   | 2026-05-24 |
-| 21. Voice Category Resolver Level-2 Enforcement | 0/0 | Not started | — |
+| 21. Voice Category Resolver Level-2 Enforcement | 3/6 | In Progress|  |
 | 22. Voice One-Step Integration + Record Button UX | 0/0 | Not started | — |
