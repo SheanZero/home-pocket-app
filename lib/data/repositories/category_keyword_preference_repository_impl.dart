@@ -26,6 +26,17 @@ class CategoryKeywordPreferenceRepositoryImpl
   }
 
   @override
+  Future<void> insertSeedBatch(List<CategoryKeywordPreference> seeds) async {
+    // The DAO writes `hitCount=0` and a fixed epoch by construction
+    // (Phase 21 D-01 sentinel) — model fields are ignored intentionally.
+    await _dao.insertSeedBatch(
+      seeds
+          .map((s) => (keyword: s.keyword, categoryId: s.categoryId))
+          .toList(growable: false),
+    );
+  }
+
+  @override
   Future<CategoryKeywordPreference?> suggestForKeyword(String keyword) async {
     final rows = await _dao.findByKeyword(keyword);
     if (rows.isEmpty) return null;

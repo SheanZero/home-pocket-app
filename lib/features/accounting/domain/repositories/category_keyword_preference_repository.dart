@@ -12,6 +12,13 @@ abstract class CategoryKeywordPreferenceRepository {
     required String categoryId,
   });
 
+  /// Phase 21 D-01: batch insert seed rows with `hitCount=0` sentinel using
+  /// `INSERT OR IGNORE` semantics — preserves user-corrected rows. Idempotent.
+  ///
+  /// The seed model values for `hitCount`/`lastUsed` are documentary only —
+  /// the underlying DAO writes `hitCount=0` and a fixed epoch regardless.
+  Future<void> insertSeedBatch(List<CategoryKeywordPreference> seeds);
+
   /// Suggest the best category for a keyword based on learning data.
   /// Returns null if no learned mapping exists.
   Future<CategoryKeywordPreference?> suggestForKeyword(String keyword);
