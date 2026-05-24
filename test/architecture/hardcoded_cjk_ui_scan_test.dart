@@ -17,6 +17,11 @@ const approvedWhitelist = {
   'lib/infrastructure/i18n/formatters/date_formatter.dart',
   'lib/infrastructure/i18n/formatters/number_formatter.dart',
   'lib/infrastructure/category/category_locale_service.dart',
+  // Phase 20 NLP lexicons (numeral state machines + JP dictionary). CJK
+  // literals are the data itself, not UI text — they cannot be ARB-keyed.
+  'lib/infrastructure/voice/chinese_numeral_state_machine.dart',
+  'lib/infrastructure/voice/japanese_numeral_state_machine.dart',
+  'lib/infrastructure/voice/japanese_numeral_dictionary.dart',
 };
 
 void main() {

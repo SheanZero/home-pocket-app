@@ -7,7 +7,28 @@ import 'package:flutter_test/flutter_test.dart';
 ///
 /// Run: flutter test test/architecture/stale_suppressions_scan_test.dart
 
-const approvedSuppressions = <String, String>{};
+const approvedSuppressions = <String, String>{
+  // Phase 20 corpus accuracy reporters — print() is the deliberate per-locale
+  // accuracy summary surface per RESEARCH §Validation Architecture; the
+  // printOnFailure() ignore guards against any analyzer pass that treats the
+  // identifier as print()-adjacent. Keep grouped (zh + ja, mirrored layout).
+  'test/integration/voice/voice_corpus_zh_test.dart:64':
+      'printOnFailure() reporter for per-case soft failures',
+  'test/integration/voice/voice_corpus_zh_test.dart:76':
+      'print() accuracy banner top',
+  'test/integration/voice/voice_corpus_zh_test.dart:78':
+      'print() accuracy summary line',
+  'test/integration/voice/voice_corpus_zh_test.dart:80':
+      'print() accuracy banner bottom',
+  'test/integration/voice/voice_corpus_ja_test.dart:64':
+      'printOnFailure() reporter for per-case soft failures',
+  'test/integration/voice/voice_corpus_ja_test.dart:76':
+      'print() accuracy banner top',
+  'test/integration/voice/voice_corpus_ja_test.dart:78':
+      'print() accuracy summary line',
+  'test/integration/voice/voice_corpus_ja_test.dart:80':
+      'print() accuracy banner bottom',
+};
 
 void main() {
   group('stale suppression scanner', () {
