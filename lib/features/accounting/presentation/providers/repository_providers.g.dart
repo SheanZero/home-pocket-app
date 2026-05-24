@@ -672,6 +672,59 @@ final class SeedCategoriesUseCaseProvider
 String _$seedCategoriesUseCaseHash() =>
     r'a4caa1f0c963fd92d35540d8de28751995f2020f';
 
+/// Phase 21 D-01 — seeds default voice synonyms after categories.
+
+@ProviderFor(seedVoiceSynonymsUseCase)
+final seedVoiceSynonymsUseCaseProvider = SeedVoiceSynonymsUseCaseProvider._();
+
+/// Phase 21 D-01 — seeds default voice synonyms after categories.
+
+final class SeedVoiceSynonymsUseCaseProvider
+    extends
+        $FunctionalProvider<
+          SeedVoiceSynonymsUseCase,
+          SeedVoiceSynonymsUseCase,
+          SeedVoiceSynonymsUseCase
+        >
+    with $Provider<SeedVoiceSynonymsUseCase> {
+  /// Phase 21 D-01 — seeds default voice synonyms after categories.
+  SeedVoiceSynonymsUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'seedVoiceSynonymsUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$seedVoiceSynonymsUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<SeedVoiceSynonymsUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  SeedVoiceSynonymsUseCase create(Ref ref) {
+    return seedVoiceSynonymsUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SeedVoiceSynonymsUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SeedVoiceSynonymsUseCase>(value),
+    );
+  }
+}
+
+String _$seedVoiceSynonymsUseCaseHash() =>
+    r'841f677819587fe04a615c7ce084a6f6f07c457a';
+
 @ProviderFor(categoryService)
 final categoryServiceProvider = CategoryServiceProvider._();
 
