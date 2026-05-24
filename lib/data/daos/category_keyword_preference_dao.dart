@@ -9,6 +9,11 @@ class CategoryKeywordPreferenceDao {
   final AppDatabase _db;
 
   /// Find all learned mappings for a keyword.
+  ///
+  /// Phase 21 D-07 step 2 ordering: `hitCount DESC, lastUsed DESC`.
+  /// Seed rows (Phase 21 D-01, `hitCount=0` sentinel) and learned rows
+  /// share this lookup surface; the tiebreaker keeps recently-touched seeds
+  /// above ancient seeds when hitCount is equal.
   Future<List<CategoryKeywordPreferenceRow>> findByKeyword(
     String keyword,
   ) async {
@@ -17,6 +22,8 @@ class CategoryKeywordPreferenceDao {
           ..orderBy([
             (t) =>
                 OrderingTerm(expression: t.hitCount, mode: OrderingMode.desc),
+            (t) =>
+                OrderingTerm(expression: t.lastUsed, mode: OrderingMode.desc),
           ]))
         .get();
   }
@@ -66,24 +73,63 @@ class CategoryKeywordPreferenceDao {
     }
   }
 
+  /// Phase 21 D-01 — batch insert seed synonyms with `hitCount=0` sentinel.
+  ///
+  /// Uses `INSERT OR IGNORE` so existing user-corrected rows
+  /// (`hitCount >= 1`) are preserved verbatim (Claude's-Discretion option
+  /// (a) per Phase 21 CONTEXT). Idempotent on re-invocation.
+  ///
+  /// Seed rows use the fixed epoch `DateTime(2026, 1, 1)` — this is matched
+  /// by `DefaultVoiceSynonyms._epoch` so audit queries can distinguish
+  /// untouched seeds from seeds whose hitCount has been bumped by
+  /// `recordCorrection` (which writes `DateTime.now()`).
+  Future<void> insertSeedBatch(
+    List<({String keyword, String categoryId})> seeds,
+  ) async {
+    if (seeds.isEmpty) return;
+    final epoch = DateTime(2026, 1, 1);
+    await _db.batch((b) {
+      for (final seed in seeds) {
+        b.insert(
+          _db.categoryKeywordPreferences,
+          CategoryKeywordPreferencesCompanion.insert(
+            keyword: seed.keyword,
+            categoryId: seed.categoryId,
+            hitCount: const Value(0),
+            lastUsed: epoch,
+          ),
+          mode: InsertMode.insertOrIgnore,
+        );
+      }
+    });
+  }
+
   /// Decay stale preferences: reduce hitCount by 1 for entries not used
   /// within [staleDuration]. Entries that reach hitCount=0 are deleted.
+  ///
+  /// Phase 21 D-01 sentinel protection — `hitCount=0` rows are seed entries
+  /// (from `insertSeedBatch`) and MUST survive decay so the synonym
+  /// dictionary stays intact even after long idle periods.
   Future<void> decayStalePreferences(Duration staleDuration) async {
     final cutoff = DateTime.now().subtract(staleDuration);
 
-    // Delete entries with hitCount <= 1 that are stale
+    // Delete entries with hitCount in {1} that are stale.
+    // Phase 21 D-01: explicitly exclude `hitCount=0` seed sentinel rows.
     await (_db.delete(_db.categoryKeywordPreferences)..where(
           (t) =>
               t.lastUsed.isSmallerThan(Variable(cutoff)) &
-              t.hitCount.isSmallerOrEqual(const Variable(1)),
+              t.hitCount.isSmallerOrEqual(const Variable(1)) &
+              t.hitCount.isBiggerThan(const Variable(0)),
         ))
         .go();
 
-    // Decrement hitCount for remaining stale entries
+    // Decrement hitCount for remaining stale entries.
+    // Phase 21 D-01: `AND hit_count > 0` guards the seed sentinel — a decay
+    // pass must not push seeds to negative hitCount.
     await _db.customUpdate(
       'UPDATE category_keyword_preferences '
       'SET hit_count = hit_count - 1 '
-      'WHERE last_used < ?',
+      'WHERE last_used < ? AND hit_count > 0',
       variables: [Variable(cutoff)],
       updates: {_db.categoryKeywordPreferences},
     );
