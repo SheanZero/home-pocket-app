@@ -131,7 +131,13 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
   3. Resolver consults both (a) the merchant database AND (b) a synonym dictionary for common spoken-form variants before any fallback; lookup order documented in code and verified by unit test that mocks each data source independently
   4. Both data sources are extensible by adding entries (rows / YAML / ARB-adjacent format — implementation choice) without modifying resolver code; verified by a test that adds an entry to a fixture data source and asserts the new mapping resolves end-to-end
   5. `flutter analyze` 0 issues; per-file coverage ≥70% on new resolver files; resolver placement honors "Thin Feature" rule (lives in `lib/application/` or `lib/infrastructure/`, not inside `lib/features/`)
-**Plans**: TBD
+**Plans**: 6 plans
+- [ ] 21-01-PLAN.md — Architecture invariant test for D-03 L1 → ${l1Id}_other (with cat_other_expense override)
+- [ ] 21-02-PLAN.md — Synonym dict infrastructure (DAO + repo + DefaultVoiceSynonyms + SeedVoiceSynonymsUseCase + Riverpod + AppInitializer)
+- [ ] 21-03-PLAN.md — VoiceCategoryResolver class + unit tests (mocktail, per-step VOICE-06 coverage)
+- [ ] 21-04-PLAN.md — MerchantDatabase 12-entry L2 enrichment + D-04 ID drift fixes
+- [ ] 21-05-PLAN.md — Wire resolver into ParseVoiceInputUseCase, swap Riverpod provider, delete FuzzyCategoryMatcher + levenshtein + stale tests
+- [ ] 21-06-PLAN.md — Voice category corpus tests (zh + ja) + fixtures + VOICE-06 runtime-insert test + VOICE-SCANNER-ALLOWLIST extension
 
 ### Phase 22: Voice One-Step Integration + Record Button UX
 **Goal**: Wire the strengthened voice parser + level-2 category resolver into the shared details form on the same single screen as manual entry, and polish the record button so its idle caption unambiguously communicates the interaction model and its recording state is visibly distinct within 100ms.
