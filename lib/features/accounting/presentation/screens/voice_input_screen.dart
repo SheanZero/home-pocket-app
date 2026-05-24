@@ -10,8 +10,12 @@ import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../application/i18n/formatter_service.dart';
 import '../../../../application/voice/repository_providers.dart'
-    show appSpeechRecognitionServiceProvider;
+    show
+        appSpeechRecognitionServiceProvider,
+        chineseNumeralStateMachineProvider,
+        japaneseNumeralStateMachineProvider;
 import '../../../../application/voice/start_speech_recognition_use_case.dart';
+import '../../../../application/voice/voice_chunk_merger.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../../../settings/presentation/providers/state_settings.dart';
 import '../../domain/models/category.dart';
@@ -74,6 +78,16 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
 
   // Debounce timer for partial result parsing
   Timer? _parseDebounce;
+
+  /// Cross-final-result merger for the amount path (VOICE-02).
+  /// Null when not recording; rebuilt on each _startRecording with the
+  /// locale-correct parser.
+  VoiceChunkMerger? _amountMerger;
+
+  /// Latest committed amount from the merger (VOICE-02). Wins over
+  /// _parseResult.amount in _navigateToConfirm so that intra-pause merges
+  /// (e.g., "1千8百" + "4十元" → 1840) survive the navigation.
+  int? _mergedAmount;
 
   // Sound level sampling throttle
   DateTime? _lastSampleTime;
@@ -163,6 +177,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
       _finalText = '';
       _soundLevel = 0.0;
       _parseResult = null;
+      _mergedAmount = null;
       _resolvedCategory = null;
       _resolvedParentCategory = null;
     });
@@ -171,6 +186,21 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
     _startTime = DateTime.now();
     _partialResultCount = 0;
     _lastWordCount = 0;
+
+    // Build the per-session merger (VOICE-02). Tear down any prior merger first.
+    _amountMerger?.dispose();
+    final speechService = ref.read(appSpeechRecognitionServiceProvider);
+    final parser = localeId.startsWith('ja')
+        ? ref.read(japaneseNumeralStateMachineProvider)
+        : ref.read(chineseNumeralStateMachineProvider);
+    _amountMerger = VoiceChunkMerger(
+      parser: parser,
+      speechService: speechService,
+      onAmountResolved: (amount) {
+        if (!mounted) return;
+        setState(() => _mergedAmount = amount);
+      },
+    );
 
     await _speechService.startListening(
       onResult: _onResult,
@@ -182,6 +212,9 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   }
 
   Future<void> _stopRecording() async {
+    // Commit any pending merger buffer immediately (user-stop semantics
+    // per VoiceChunkMerger contract; see voice_chunk_merger.dart D-09).
+    _amountMerger?.stop();
     await _speechService.stop();
     setState(() {
       _isRecording = false;
@@ -229,12 +262,19 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
       setState(() {
         _finalText = text;
         _partialText = '';
-        _isRecording = false;
+        // Do NOT clear the recording flag here. The merger orchestrates
+        // continued listening across multiple finals (VOICE-02). The screen
+        // transitions out of recording only via:
+        //   (a) explicit user stop (_stopRecording)
+        //   (b) onStatus 'done' / 'notListening' callback (line 110)
         _soundLevel = 0.0;
       });
 
       _parseDebounce?.cancel();
       if (text.isNotEmpty) {
+        // Amount path: merger gates and commits on window expiry / lexical close.
+        _amountMerger?.feedChunk(text, isFinal: true);
+        // Merchant / category / date path: unchanged — runs every final.
         _parseFinalResult(text);
       }
     }
@@ -243,7 +283,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   Future<void> _parseVoiceInput(String text) async {
     if (!mounted) return;
     final useCase = ref.read(parseVoiceInputUseCaseProvider);
-    final result = await useCase.execute(text);
+    final result = await useCase.execute(text, localeId: _voiceLocaleId);
     if (mounted && result.isSuccess) {
       setState(() => _parseResult = result.data);
       await _resolveCategory(
@@ -256,7 +296,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   Future<void> _parseFinalResult(String text) async {
     if (!mounted) return;
     final useCase = ref.read(parseVoiceInputUseCaseProvider);
-    final result = await useCase.execute(text);
+    final result = await useCase.execute(text, localeId: _voiceLocaleId);
 
     if (!mounted || !result.isSuccess) return;
 
@@ -352,7 +392,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
       MaterialPageRoute<void>(
         builder: (_) => ManualOneStepScreen(
           bookId: widget.bookId,
-          initialAmount: result.amount ?? 0,
+          initialAmount: _mergedAmount ?? result.amount ?? 0,
           initialCategory: category,
           initialParentCategory: parentCategory,
           initialDate: result.parsedDate ?? DateTime.now(),
@@ -593,6 +633,8 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   @override
   void dispose() {
     _parseDebounce?.cancel();
+    _amountMerger?.dispose();
+    _amountMerger = null;
     _speechService.cancel();
     super.dispose();
   }
