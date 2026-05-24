@@ -7,8 +7,9 @@ import 'package:home_pocket/features/accounting/domain/models/voice_parse_result
 import 'package:home_pocket/infrastructure/ml/merchant_database.dart';
 import 'package:mocktail/mocktail.dart';
 
-// Phase 21 D-09 — ParseVoiceInputUseCase now consumes VoiceCategoryResolver.
-// PATTERNS.md §9 caveat — the merchant branch ALSO routes through resolver
+// Phase 21 D-09 — ParseVoiceInputUseCase consumes VoiceCategoryResolver.
+// PATTERNS.md §9 caveat — the merchant branch routes the derived categoryId
+// through resolver.normalizeToL2 (WR-05 — was resolve+findMerchant double-pass)
 // so the always-L2 contract has no escape hatch.
 
 class _MockVoiceCategoryResolver extends Mock
@@ -45,7 +46,7 @@ void main() {
   group('ParseVoiceInputUseCase', () {
     test('parses amount correctly from text with 円', () async {
       when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
-      when(() => mockResolver.resolve(any(), any())).thenAnswer(
+      when(() => mockResolver.resolve(any())).thenAnswer(
         (_) async => const CategoryMatchResult(
           categoryId: 'cat_food_dining_out',
           confidence: 0.9,
@@ -64,10 +65,10 @@ void main() {
     });
 
     test(
-      'merchant match routes through resolver (PATTERNS.md §9 — always-L2)',
+      'merchant match routes through normalizeToL2 (PATTERNS.md §9 — always-L2; WR-05)',
       () async {
-        // Merchant lookup hits — but resolver MUST still be called so the
-        // merchant categoryId is normalized to L2 via _ensureL2.
+        // Merchant lookup hits — the use case MUST call normalizeToL2 on the
+        // derived categoryId, NOT re-run resolve() against the canonical name.
         final merchantMatch = MerchantMatch(
           merchantName: 'マクドナルド',
           categoryId: 'cat_food_dining_out',
@@ -77,13 +78,9 @@ void main() {
         when(
           () => mockMerchantDatabase.findMerchant(any()),
         ).thenReturn(merchantMatch);
-        when(() => mockResolver.resolve(any(), any())).thenAnswer(
-          (_) async => const CategoryMatchResult(
-            categoryId: 'cat_food_dining_out',
-            confidence: 0.95,
-            source: MatchSource.merchant,
-          ),
-        );
+        when(
+          () => mockResolver.normalizeToL2('cat_food_dining_out'),
+        ).thenAnswer((_) async => 'cat_food_dining_out');
 
         final result = await useCase.execute('マクドナルドで680円');
 
@@ -97,17 +94,22 @@ void main() {
           result.data!.categoryMatch!.categoryId,
           equals('cat_food_dining_out'),
         );
+        // Original confidence preserved (WR-05 — no longer overwritten by
+        // the resolver's hard-coded 0.90 for canonical-name re-match)
+        expect(result.data!.categoryMatch!.confidence, equals(0.95));
         // merchant-specific ledgerType wins
         expect(result.data!.ledgerType, equals(LedgerType.survival));
-        // resolver MUST be consulted even on the merchant branch
+        // resolve() MUST NOT be consulted on the merchant branch — only
+        // normalizeToL2 is.
+        verifyNever(() => mockResolver.resolve(any()));
         verify(
-          () => mockResolver.resolve(any(), 'マクドナルド'),
+          () => mockResolver.normalizeToL2('cat_food_dining_out'),
         ).called(1);
       },
     );
 
     test(
-      'merchant branch defensive fallback: when resolver returns null, '
+      'merchant branch defensive fallback: when normalizeToL2 returns null, '
       'raw merchant categoryId is surfaced',
       () async {
         final merchantMatch = MerchantMatch(
@@ -119,9 +121,9 @@ void main() {
         when(
           () => mockMerchantDatabase.findMerchant(any()),
         ).thenReturn(merchantMatch);
-        // Resolver miss — defensive branch kicks in.
+        // normalizeToL2 miss — defensive branch kicks in.
         when(
-          () => mockResolver.resolve(any(), any()),
+          () => mockResolver.normalizeToL2(any()),
         ).thenAnswer((_) async => null);
 
         final result = await useCase.execute('マクドナルドで680円');
@@ -143,7 +145,7 @@ void main() {
 
     test('falls back to resolver when no merchant found', () async {
       when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
-      when(() => mockResolver.resolve(any(), any())).thenAnswer(
+      when(() => mockResolver.resolve(any())).thenAnswer(
         (_) async => const CategoryMatchResult(
           categoryId: 'cat_transport_train',
           confidence: 0.95,
@@ -173,7 +175,7 @@ void main() {
       () async {
         when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
         when(
-          () => mockResolver.resolve(any(), any()),
+          () => mockResolver.resolve(any()),
         ).thenAnswer((_) async => null);
 
         final result = await useCase.execute('test');
@@ -217,7 +219,7 @@ void main() {
           () => mockTextParser.extractAndMatchMerchant(any(), any()),
         ).thenReturn(null);
         when(
-          () => localMockResolver.resolve(any(), any()),
+          () => localMockResolver.resolve(any()),
         ).thenAnswer((_) async => null);
         when(() => localMockDb.findMerchant(any())).thenReturn(null);
 

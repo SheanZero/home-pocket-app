@@ -1,6 +1,7 @@
 import '../../infrastructure/ml/merchant_database.dart';
 import '../../infrastructure/voice/chinese_numeral_state_machine.dart';
 import '../../infrastructure/voice/japanese_numeral_state_machine.dart';
+import '../../shared/constants/voice_currency_suffixes.dart';
 
 /// NLP text parser for voice input.
 ///
@@ -433,10 +434,19 @@ class VoiceTextParser {
   List<String> _extractPotentialMerchantNames(String text) {
     final results = <String>[];
 
-    // Remove amounts and common verbs, leaving potential merchant name words
+    // Remove amounts and common verbs, leaving potential merchant name words.
+    // WR-07: currency suffix set comes from VoiceCurrencySuffixes so the list
+    // stays in sync with ParseVoiceInputUseCase._extractKeyword.
     var cleaned = text
         .replaceAll(RegExp(r'[¥￥]\s*\d[\d,.]*'), '')
-        .replaceAll(RegExp(r'\d[\d,.]*\s*(?:円|元|块|yen)'), '')
+        .replaceAll(
+          RegExp(
+            r'\d[\d,.]*\s*(?:' +
+                VoiceCurrencySuffixes.regexAlternation +
+                r')',
+          ),
+          '',
+        )
         .replaceAll(RegExp(r'[でにをがはのとへからまで]|した|って|ました|だった|です'), ' ')
         .replaceAll(RegExp(r'[在了花买吃用去到]'), ' ')
         .replaceAll(RegExp(r'\b(?:at|for|in|on|spent|paid|bought)\b'), ' ')

@@ -40,7 +40,9 @@ void main() {
   });
 
   Future<String?> resolveCategory(String input, String keyword) async {
-    final r = await resolver.resolve(input, keyword);
+    // WR-04: resolver.resolve() now takes only the extracted keyword. The
+    // corpus fixture pre-extracts the keyword, so we drop inputText.
+    final r = await resolver.resolve(keyword);
     return r?.categoryId;
   }
 
@@ -108,7 +110,7 @@ void main() {
         keyword: 'タピオカ',
         categoryId: 'cat_food_drinks',
       );
-      final actual = await resolver.resolve('タピオカ 600円', 'タピオカ');
+      final actual = await resolver.resolve('タピオカ');
       expect(actual, isNotNull,
           reason: 'Resolver must pick up the runtime-inserted keyword');
       expect(actual!.categoryId, 'cat_food_drinks',

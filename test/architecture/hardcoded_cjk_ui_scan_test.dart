@@ -25,6 +25,11 @@ const approvedWhitelist = {
   // data inserted into category_keyword_preferences, not UI text — they
   // cannot be ARB-keyed (resolver matches against speech tokens).
   'lib/shared/constants/default_synonyms.dart',
+  // Phase 21 WR-07 — voice currency suffix tokens. CJK literals are the
+  // speech-token data the voice pipeline strips during amount extraction,
+  // not UI text. Centralized so VoiceTextParser and ParseVoiceInputUseCase
+  // share one source of truth.
+  'lib/shared/constants/voice_currency_suffixes.dart',
 };
 
 void main() {
