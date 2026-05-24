@@ -2,7 +2,7 @@ import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/models/voice_parse_result.dart';
 import '../../infrastructure/ml/merchant_database.dart';
 import '../../shared/utils/result.dart';
-import 'fuzzy_category_matcher.dart';
+import 'voice_category_resolver.dart';
 import 'voice_text_parser.dart';
 
 /// Use case for parsing voice-recognized text into structured transaction data.
@@ -11,17 +11,21 @@ import 'voice_text_parser.dart';
 /// ledger type resolution → [VoiceParseResult] construction.
 ///
 /// Merchant matching has higher priority than keyword category matching.
+/// Per Phase 21 PATTERNS.md §9 caveat, BOTH the merchant branch and the
+/// fallback keyword branch route through [VoiceCategoryResolver.resolve] so
+/// the always-L2 contract has no escape hatch — even if MerchantDatabase
+/// regresses and yields an L1 id, the resolver's `_ensureL2` re-maps it.
 class ParseVoiceInputUseCase {
   final VoiceTextParser _textParser;
-  final FuzzyCategoryMatcher _fuzzyCategoryMatcher;
+  final VoiceCategoryResolver _voiceCategoryResolver;
   final MerchantDatabase _merchantDatabase;
 
   ParseVoiceInputUseCase({
     required VoiceTextParser textParser,
-    required FuzzyCategoryMatcher fuzzyCategoryMatcher,
+    required VoiceCategoryResolver voiceCategoryResolver,
     required MerchantDatabase merchantDatabase,
   }) : _textParser = textParser,
-       _fuzzyCategoryMatcher = fuzzyCategoryMatcher,
+       _voiceCategoryResolver = voiceCategoryResolver,
        _merchantDatabase = merchantDatabase;
 
   /// Parses [recognizedText] into a [VoiceParseResult].
@@ -53,21 +57,32 @@ class ParseVoiceInputUseCase {
       LedgerType? ledgerType;
 
       if (merchantMatch != null) {
-        categoryMatch = CategoryMatchResult(
+        // PATTERNS.md §9 caveat: route merchant categoryId through
+        // VoiceCategoryResolver._ensureL2 so the always-L2 contract has no
+        // escape hatch — never trust an external source to deliver L2 directly.
+        categoryMatch = await _voiceCategoryResolver.resolve(
+          recognizedText,
+          merchantMatch.merchantName,
+        );
+        // merchant-specific ledgerType continues to win when present.
+        ledgerType = merchantMatch.ledgerType;
+        // Defensive fallback — if the resolver could not normalize the
+        // merchant id (e.g. unknown id, missing _other L2), surface the
+        // raw merchant categoryId rather than dropping the category.
+        categoryMatch ??= CategoryMatchResult(
           categoryId: merchantMatch.categoryId,
           confidence: merchantMatch.confidence,
           source: MatchSource.merchant,
         );
-        ledgerType = merchantMatch.ledgerType;
       } else {
-        // Extract keyword: remove amount/date/merchant text from input
+        // Extract keyword: remove amount/date/merchant text from input.
         final keyword = _extractKeyword(recognizedText);
-        categoryMatch = await _fuzzyCategoryMatcher.match(
+        categoryMatch = await _voiceCategoryResolver.resolve(
           recognizedText,
           keyword,
         );
         if (categoryMatch != null) {
-          ledgerType = await _fuzzyCategoryMatcher.resolveLedgerType(
+          ledgerType = await _voiceCategoryResolver.resolveLedgerType(
             categoryMatch.categoryId,
           );
         }
