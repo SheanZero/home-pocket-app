@@ -32,6 +32,10 @@ abstract final class AppColors {
   static const actionGradientEnd = fabGradientEnd;
   static const actionShadow = Color(0x4DE85A4F);
 
+  // ── Recording — Phase 22 D-04 (mic button recording state) ──
+  static const recordingGradientStart = Color(0xFFE05050);
+  static const recordingGradientEnd = Color(0xFFC03030);
+
   // ── Accent — Survival (Blue) ──
   static const survival = Color(0xFF5A9CC8);
   static const survivalLight = Color(0xFFE8F0F8);
@@ -106,4 +110,8 @@ abstract final class AppColorsDark {
 
   // ── Nav shadow ──
   static const navShadow = Color(0x20000000);
+
+  // ── Recording — Phase 22 D-04 (dark-theme variant) ──
+  static const recordingGradientStart = Color(0xFFE07070);
+  static const recordingGradientEnd = Color(0xFFB04040);
 }
