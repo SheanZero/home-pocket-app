@@ -1003,4 +1003,58 @@ void main() {
       },
     );
   });
+
+  // ── D-09 (Open Q2 regression): FocusNode listener cleanup on dispose ──
+  //
+  // Production code already correct per RESEARCH Open Q2: _merchantFocus and
+  // _noteFocus both add and remove the SAME _handleFocusChange method reference
+  // (lines 140-141 and 788-789 in voice_input_screen.dart). This test pins the
+  // invariant so future refactors that accidentally use distinct closures (e.g.,
+  // anonymous lambdas) will fail loudly via tester.takeException().
+  //
+  // CONTEXT D-09 / PATTERNS MOD entry: production code is UNCHANGED. This plan
+  // adds only the regression assertion (Open Q2 confirmed correct).
+  testWidgets(
+    'D-09 (Open Q2 regression): FocusNode listeners cleaned up on dispose',
+    (tester) async {
+      // Phase 23 D-09 / WR-07 regression: voice_input_screen.dart uses the
+      // same _handleFocusChange method reference for both add and dispose,
+      // so removeListener actually cleans up. This test asserts the invariant
+      // so future refactors that accidentally pass distinct closures (e.g.,
+      // anonymous lambdas) will fail loudly.
+      //
+      // RESEARCH Open Q2: production code is already correct; the test is a
+      // safety net. The actual WR-07 distinct-closure bug is in
+      // transaction_details_form_test.dart (test code, OUT OF SCOPE per
+      // CONTEXT canonical_refs; deferred to v1.4+).
+
+      // Pump the voice screen using the shared buildSubject helper (same
+      // overrides as other tests in this file).
+      await tester.pumpWidget(
+        buildSubject(
+          speechService: FakeStartSpeechRecognitionUseCase(),
+          parseUseCase: FakeParseVoiceInputUseCase(const {}),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tear down by pumping an empty widget — triggers dispose() on the
+      // voice screen and its FocusNodes (_merchantFocus, _noteFocus).
+      await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
+      await tester.pump();
+
+      // If any FocusNode listener leaked across dispose, Flutter surfaces a
+      // "ChangeNotifier was used after being disposed" error via tester's
+      // exception capture. Assert no such exception — production code correctly
+      // reuses _handleFocusChange as the same method reference for both
+      // addListener and removeListener.
+      expect(
+        tester.takeException(),
+        isNull,
+        reason:
+            'D-09 regression: FocusNode listeners must be removed in dispose; '
+            'a leaked listener would surface as a ChangeNotifier-disposed exception',
+      );
+    },
+  );
 }

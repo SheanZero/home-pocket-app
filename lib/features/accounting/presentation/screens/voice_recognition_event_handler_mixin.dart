@@ -79,13 +79,33 @@ mixin VoiceRecognitionEventHandlerMixin<W extends StatefulWidget>
   /// eventual finger release short-circuits at its `!isRecording` guard
   /// and silently drops the transcript.
   ///
-  /// NOTE: D-05 intra-session guard is NOT added in this plan — Plan 05
-  /// adds it on top of this surface. Only [lastMergerFinalAt] and
-  /// [intraSessionThreshold] are staged here as the dependency surface.
+  /// D-05 intra-session guard is active in this plan (Plan 05): when
+  /// [status] is `'notListening'` and a final chunk arrived recently (within
+  /// [intraSessionThreshold]), the commit is suppressed — the recognizer is
+  /// performing a self-restart between chunks. `'done'` is always terminal and
+  /// is NOT gated.
   void onStatus(String status) {
     if (!mounted) return;
     if (status != 'done' && status != 'notListening') return;
     if (!isRecording) return;
+
+    // Phase 23 D-05 (WR-NEW-01 intra-session heuristic): the
+    // recognizer can emit 'notListening' between chunks on some Android
+    // devices (real-world report 22-REVIEW.md WR-NEW-01). Skip commit
+    // if a final chunk arrived very recently — recognizer self-restart
+    // is in flight. 'done' is canonically terminal per speech_to_text
+    // v5+ docs and is NOT gated here.
+    //
+    // RESEARCH §Open Q1: uses lastFinalAt; if device UAT (Plan 23-08)
+    // shows finals too sparse, v1.4+ pivots to _lastPartialAt threaded
+    // through the screen — see RESEARCH escalation path.
+    if (status == 'notListening' && pressStart != null) {
+      final lastFinal = lastMergerFinalAt;
+      if (lastFinal != null &&
+          DateTime.now().difference(lastFinal) < intraSessionThreshold) {
+        return; // intra-session — let recognizer self-restart path resume
+      }
+    }
 
     if (pressStart != null) {
       pressStart = null;
