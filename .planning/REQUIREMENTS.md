@@ -18,27 +18,27 @@
 
 - [x] **INPUT-01**: User can complete a manual ledger entry on a single screen — amount, category (二级), note, merchant, date, and ledger type (悦己/生存) all editable inline without a "下一步" navigation
 - [x] **INPUT-02**: User can complete a voice-driven ledger entry from the same single screen — voice parser fills amount, category, note, merchant fields in-place; user can edit any field before saving
-- [ ] **INPUT-03**: Details form is implemented as a single shared widget consumed by both manual/voice single-screen flow AND the future OCR two-step flow (capture → details review). Widget contract supports both "new entry" and "edit existing" modes
-- [ ] **INPUT-04**: OCR-flow code path preserves a two-step UX (capture → details) but the details step reuses the INPUT-03 shared widget; OCR writer itself remains out of v1.3 scope, only the architectural slot is reserved
+- [x] **INPUT-03**: Details form is implemented as a single shared widget consumed by both manual/voice single-screen flow AND the future OCR two-step flow (capture → details review). Widget contract supports both "new entry" and "edit existing" modes
+- [x] **INPUT-04**: OCR-flow code path preserves a two-step UX (capture → details) but the details step reuses the INPUT-03 shared widget; OCR writer itself remains out of v1.3 scope, only the architectural slot is reserved
 
 ### Voice Number Recognition (Chinese)
 
-- [ ] **VOICE-01**: Voice parser correctly converts compound numbers without digit dropping —
+- [x] **VOICE-01**: Voice parser correctly converts compound numbers without digit dropping —
   - zh: "2千2百零4元" → 2204
   - ja: "にせんにひゃくよん（円）" → 2204
-- [ ] **VOICE-02**: Voice parser correctly combines intra-number pauses (no fragmenting into separate numeric tokens) via continued-listening window + locale-aware numeral combining state machine —
+- [x] **VOICE-02**: Voice parser correctly combines intra-number pauses (no fragmenting into separate numeric tokens) via continued-listening window + locale-aware numeral combining state machine —
   - zh: "1千8百4十元" with pause before "4十" → 1840 (not 1800 + 40)
   - ja: "せんはっぴゃくよんじゅう（円）" with pause before "よんじゅう" → 1840 (not 1800 + 40)
-- [ ] **VOICE-03**: Voice parser correctness reaches ≥95% accuracy on EACH of two committed test corpora:
+- [x] **VOICE-03**: Voice parser correctness reaches ≥95% accuracy on EACH of two committed test corpora:
   - zh corpus: 千/百/十/零 combinations, with and without intra-pauses
   - ja corpus: 千/百/十/万 combinations (incl. 万-scale amounts like 一万二千 = 12000), with and without intra-pauses
   - both corpora committed as test fixtures; per-locale accuracy reported separately
 
 ### Voice Category Recognition
 
-- [ ] **VOICE-04**: Voice category resolver resolves to a level-2 (sub-)category whenever the spoken phrase is matchable to a level-2 entry in the merchant database or synonym dictionary
-- [ ] **VOICE-05**: When voice resolves only to a level-1 category (no level-2 match), the resolver returns that level-1's first level-2 sub-category as the chosen value — the resulting Transaction always has a level-2 category, never bare level-1
-- [ ] **VOICE-06**: Voice category resolver consults (a) merchant database lookups AND (b) a synonym dictionary for common spoken-form variants before falling back; both data sources are extensible by adding entries without code changes
+- [x] **VOICE-04**: Voice category resolver resolves to a level-2 (sub-)category whenever the spoken phrase is matchable to a level-2 entry in the merchant database or synonym dictionary
+- [x] **VOICE-05**: When voice resolves only to a level-1 category (no level-2 match), the resolver returns that level-1's first level-2 sub-category as the chosen value — the resulting Transaction always has a level-2 category, never bare level-1
+- [x] **VOICE-06**: Voice category resolver consults (a) merchant database lookups AND (b) a synonym dictionary for common spoken-form variants before falling back; both data sources are extensible by adding entries without code changes
 
 ### Record Button UX
 
@@ -47,8 +47,8 @@
 
 ### Details Form as Edit Entry
 
-- [ ] **EDIT-01**: User can tap an existing transaction from the home recent-tx list (or other transaction list views) and open the INPUT-03 shared details form in "edit" mode pre-populated with the current transaction's field values
-- [ ] **EDIT-02**: User can modify any editable field in edit mode and save the change; the underlying Drift row is updated atomically; `entry_source` is preserved (does not flip to 'manual' on edit)
+- [x] **EDIT-01**: User can tap an existing transaction from the home recent-tx list (or other transaction list views) and open the INPUT-03 shared details form in "edit" mode pre-populated with the current transaction's field values
+- [x] **EDIT-02**: User can modify any editable field in edit mode and save the change; the underlying Drift row is updated atomically; `entry_source` is preserved (does not flip to 'manual' on edit)
 
 ---
 
@@ -107,18 +107,18 @@ Mapped by roadmapper on 2026-05-22.
 | KEYPAD-01 | Phase 19 | Complete |
 | INPUT-01 | Phase 19 | Complete |
 | INPUT-02 | Phase 22 | Complete |
-| INPUT-03 | Phase 18 | Pending |
-| INPUT-04 | Phase 18 | Pending |
-| VOICE-01 | Phase 20 | Pending |
-| VOICE-02 | Phase 20 | Pending |
-| VOICE-03 | Phase 20 | Pending |
-| VOICE-04 | Phase 21 | Pending |
-| VOICE-05 | Phase 21 | Pending |
-| VOICE-06 | Phase 21 | Pending |
+| INPUT-03 | Phase 18 | Complete |
+| INPUT-04 | Phase 18 | Complete |
+| VOICE-01 | Phase 20 | Complete |
+| VOICE-02 | Phase 20 | Complete |
+| VOICE-03 | Phase 20 | Complete |
+| VOICE-04 | Phase 21 | Complete |
+| VOICE-05 | Phase 21 | Complete |
+| VOICE-06 | Phase 21 | Complete |
 | REC-01 | Phase 22 | Complete |
 | REC-02 | Phase 22 | Complete |
-| EDIT-01 | Phase 18 | Pending |
-| EDIT-02 | Phase 18 | Pending |
+| EDIT-01 | Phase 18 | Complete |
+| EDIT-02 | Phase 18 | Complete |
 
 **Coverage:**
 - v1.3 requirements: 15 total
