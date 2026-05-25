@@ -1,18 +1,29 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/accounting/category_service.dart';
+import 'package:home_pocket/application/accounting/create_transaction_use_case.dart';
 import 'package:home_pocket/application/voice/parse_voice_input_use_case.dart';
 import 'package:home_pocket/application/voice/start_speech_recognition_use_case.dart';
 import 'package:home_pocket/application/voice/voice_satisfaction_estimator.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/category_ledger_config.dart';
+import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/models/voice_parse_result.dart';
+import 'package:home_pocket/application/accounting/merchant_category_learning_service.dart';
+import 'package:home_pocket/features/accounting/domain/models/merchant_category_preference.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_ledger_config_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
+import 'package:home_pocket/features/accounting/domain/repositories/merchant_category_preference_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/voice_input_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/soft_toast.dart';
+import 'package:home_pocket/features/dual_ledger/presentation/widgets/soul_celebration_overlay.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/shared/utils/result.dart';
@@ -278,6 +289,115 @@ class FakeCategoryRepository implements CategoryRepository {
 
   @override
   Future<void> updateSortOrders(Map<String, int> idToSortOrder) async {}
+}
+
+// ── D-08 fakes: CreateTransactionUseCase stub ────────────────────────────────
+
+/// Returns a predetermined transaction on execute(). Used for D-08 tests that
+/// need to control whether the save result is soul or survival ledger.
+class FakeCreateTransactionUseCase implements CreateTransactionUseCase {
+  FakeCreateTransactionUseCase(this._transaction);
+
+  final Transaction _transaction;
+
+  @override
+  Future<Result<Transaction>> execute(CreateTransactionParams params) async {
+    return Result.success(_transaction);
+  }
+}
+
+/// No-op [MerchantCategoryPreferenceRepository] for D-08 tests.
+/// Prevents [merchantCategoryLearningServiceProvider] from reaching the DB.
+class _FakeMerchantCategoryPreferenceRepository
+    implements MerchantCategoryPreferenceRepository {
+  @override
+  Future<MerchantCategoryPreference?> findByMerchantKey(
+    String merchantKey,
+  ) async => null;
+
+  @override
+  Future<void> upsert(MerchantCategoryPreference preference) async {}
+
+  @override
+  Future<void> recordSelection({
+    required String merchantKey,
+    required String selectedCategoryId,
+  }) async {}
+
+  @override
+  Future<String?> suggestCategoryId(String merchantKey) async => null;
+}
+
+/// A soul-ledger transaction returned by [FakeCreateTransactionUseCase] in
+/// the D-08 soul test.
+final _soulTransaction = Transaction(
+  id: 'tx-soul-d08',
+  bookId: 'book-1',
+  deviceId: 'device-1',
+  amount: 1000,
+  type: TransactionType.expense,
+  categoryId: 'dining',
+  ledgerType: LedgerType.soul,
+  timestamp: DateTime(2026, 5, 25),
+  currentHash: 'hash-soul',
+  createdAt: DateTime(2026, 5, 25),
+  soulSatisfaction: 7,
+  entrySource: EntrySource.voice,
+);
+
+/// A survival-ledger transaction returned by [FakeCreateTransactionUseCase] in
+/// the D-08 survival test.
+final _survivalTransaction = Transaction(
+  id: 'tx-survival-d08',
+  bookId: 'book-1',
+  deviceId: 'device-1',
+  amount: 1840,
+  type: TransactionType.expense,
+  categoryId: 'dining',
+  ledgerType: LedgerType.survival,
+  timestamp: DateTime(2026, 5, 25),
+  currentHash: 'hash-survival',
+  createdAt: DateTime(2026, 5, 25),
+  entrySource: EntrySource.voice,
+);
+
+// ── D-08 test helper: two-route host ─────────────────────────────────────────
+//
+// D-08 Navigator fix: VoiceInputScreen must be a non-first route for
+// Navigator.popUntil((r) => r.isFirst) to actually pop it. This widget is
+// the home route (first); it immediately pushes [child] as the second route
+// via addPostFrameCallback so VoiceInputScreen is on top of the stack.
+// Using PageRouteBuilder with Duration.zero avoids any animation settle delay.
+class _TwoRouteHost extends StatefulWidget {
+  const _TwoRouteHost({required this.child});
+  final Widget child;
+
+  @override
+  State<_TwoRouteHost> createState() => _TwoRouteHostState();
+}
+
+class _TwoRouteHostState extends State<_TwoRouteHost> {
+  @override
+  void initState() {
+    super.initState();
+    // Push the child screen after the first frame so the home route is
+    // fully mounted before the push occurs.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Navigator.of(context).push<void>(
+        PageRouteBuilder<void>(
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+          pageBuilder: (ctx, anim, secAnim) => widget.child,
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(body: Center(child: Text('home')));
+  }
 }
 
 void main() {
@@ -971,6 +1091,18 @@ void main() {
         await tester.pump(); // flush setState in _onError
         await tester.pump(const Duration(milliseconds: 50));
 
+        // Phase 23 D-11 (IN-03): assert the localized error string appears in
+        // the toast. Verifies G-02's ARB-key lookup path is healthy. Comes
+        // BEFORE the SoftToast presence assertion so a failure points at the
+        // missed string, not the toast widget.
+        final l10nForD11 = S.of(tester.element(find.byType(VoiceInputScreen)));
+        expect(
+          find.text(l10nForD11.voiceRecognitionErrorAudio),
+          findsOneWidget,
+          reason: 'D-11: G-02 permanent test must surface the localized '
+              'voiceRecognitionErrorAudio string (ARB-key health check)',
+        );
+
         // The toast appears (already covered by transient test for assertion
         // depth; here we just confirm no exception was thrown).
         expect(find.byType(SoftToast), findsOneWidget);
@@ -1057,4 +1189,336 @@ void main() {
       );
     },
   );
+
+  // ── D-07 cold-start race (Phase 23 WR-01) ────────────────────────────────────
+  //
+  // Gate: _onLongPressStart must short-circuit when voiceLocaleIdProvider has
+  // not yet resolved (_isLocaleReady == false). After the provider resolves,
+  // the mic must become usable.
+  group('D-07 cold-start race (Phase 23 WR-01)', () {
+    final micFinder = find.byKey(const ValueKey('voice-mic-button'));
+
+    testWidgets(
+      'D-07: long-press is no-op while voiceLocaleIdProvider is loading',
+      (tester) async {
+        // Keep voiceLocaleIdProvider in loading state by returning a future
+        // that never completes during the test.
+        final neverCompleter = Completer<String>();
+        final speechService = CapturingStartSpeechRecognitionUseCase();
+
+        final categoryRepository = FakeCategoryRepository();
+        final categoryService = CategoryService(
+          categoryRepository: categoryRepository,
+          ledgerConfigRepository: FakeCategoryLedgerConfigRepository(),
+        );
+        await tester.pumpWidget(
+          createLocalizedWidget(
+            VoiceInputScreen(bookId: 'book-1', speechService: speechService),
+            locale: const Locale('ja'),
+            overrides: [
+              categoryRepositoryProvider.overrideWithValue(categoryRepository),
+              categoryServiceProvider.overrideWithValue(categoryService),
+              parseVoiceInputUseCaseProvider.overrideWithValue(
+                FakeParseVoiceInputUseCase(const {}),
+              ),
+              // Override voiceLocaleIdProvider to stay in loading state.
+              voiceLocaleIdProvider.overrideWith(
+                (ref) => neverCompleter.future,
+              ),
+            ],
+          ),
+        );
+        // pump() (not pumpAndSettle) so the loading state is preserved.
+        await tester.pump();
+
+        // Attempt a long-press on the mic while locale is still loading.
+        final gesture = await tester.startGesture(tester.getCenter(micFinder));
+        await tester.pump(const Duration(milliseconds: 1));
+        await tester.pump(const Duration(milliseconds: 400));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        // _isLocaleReady == false → _onLongPressStart guard short-circuits;
+        // startListening must NOT have been invoked.
+        expect(
+          speechService.startedLocaleId,
+          isNull,
+          reason:
+              'D-07: long-press must be blocked when voiceLocaleIdProvider is still loading',
+        );
+      },
+    );
+
+    testWidgets(
+      'D-07: long-press fires startListening after voiceLocaleIdProvider resolves',
+      (tester) async {
+        // voiceLocaleIdProvider resolves immediately to 'ja-JP' (already the
+        // default in buildSubject but we make it explicit here for clarity).
+        final speechService = CapturingStartSpeechRecognitionUseCase();
+
+        await tester.pumpWidget(
+          buildSubject(
+            speechService: speechService,
+            parseUseCase: FakeParseVoiceInputUseCase(const {}),
+          ),
+        );
+        // pumpAndSettle: voiceLocaleIdProvider resolves → _isLocaleReady = true.
+        await tester.pumpAndSettle();
+
+        // Attempt a long-press — locale is now ready.
+        final gesture = await tester.startGesture(tester.getCenter(micFinder));
+        await tester.pump(const Duration(milliseconds: 1));
+        await tester.pump();
+
+        // _isLocaleReady == true AND _isInitialized == true → startListening fired.
+        expect(
+          speechService.startedLocaleId,
+          isNotNull,
+          reason: 'D-07: startListening must fire once voiceLocaleIdProvider resolves',
+        );
+
+        // Cleanup.
+        await tester.pump(const Duration(milliseconds: 400));
+        await gesture.up();
+        await tester.pumpAndSettle();
+      },
+    );
+  });
+
+  // ── D-08 popUntil deferral (Phase 23 WR-04) ──────────────────────────────────
+  //
+  // Soul-ledger save: Navigator.popUntil deferred until SoulCelebrationOverlay
+  // dismisses (animation ≈ 1.5 s). Survival-ledger save: pop fires immediately.
+  //
+  // Helper: builds a voice screen with a predetermined create-transaction result.
+  // Pumps voice through batch fill to enable the Save button, then taps it.
+  group('D-08 popUntil deferral (Phase 23 WR-04)', () {
+    final micFinder = find.byKey(const ValueKey('voice-mic-button'));
+
+    Widget buildSubjectForSave({
+      required Transaction createResult,
+      required String voiceText,
+      required VoiceParseResult parseResult,
+    }) {
+      final categoryRepository = FakeCategoryRepository();
+      final categoryService = CategoryService(
+        categoryRepository: categoryRepository,
+        ledgerConfigRepository: FakeCategoryLedgerConfigRepository(),
+      );
+      // Build a no-op MerchantCategoryLearningService to prevent the
+      // merchantCategoryLearningServiceProvider from reaching appDatabaseProvider.
+      final fakeMerchantLearningService = MerchantCategoryLearningService(
+        repository: _FakeMerchantCategoryPreferenceRepository(),
+        categoryRepository: categoryRepository,
+      );
+      final speechService = CapturingStartSpeechRecognitionUseCase();
+      // D-08 Navigator fix: VoiceInputScreen must be pushed on top of a home
+      // route so that Navigator.popUntil((r) => r.isFirst) actually pops it.
+      // Using MaterialApp(home: VoiceInputScreen) makes VoiceInputScreen the
+      // first route, so popUntil is a no-op and find.byType(VoiceInputScreen)
+      // remains findsOneWidget. We push VoiceInputScreen on top of a dummy
+      // placeholder Scaffold to give popUntil a parent route to land on.
+      final overrides = <Override>[
+        categoryRepositoryProvider.overrideWithValue(categoryRepository),
+        categoryServiceProvider.overrideWithValue(categoryService),
+        parseVoiceInputUseCaseProvider.overrideWithValue(
+          FakeParseVoiceInputUseCase({voiceText: parseResult}),
+        ),
+        voiceSatisfactionEstimatorProvider.overrideWithValue(
+          FakeVoiceSatisfactionEstimator(),
+        ),
+        voiceLocaleIdProvider.overrideWith((ref) async => 'ja-JP'),
+        createTransactionUseCaseProvider.overrideWithValue(
+          FakeCreateTransactionUseCase(createResult),
+        ),
+        merchantCategoryLearningServiceProvider.overrideWithValue(
+          fakeMerchantLearningService,
+        ),
+      ];
+      // D-08 Navigator fix: VoiceInputScreen must be a pushed (non-first) route
+      // so that Navigator.popUntil((r) => r.isFirst) actually pops it. We build
+      // a custom Navigator with two initial pages: a dummy home + VoiceInputScreen.
+      // Both use no-transition builders so pumpAndSettle() settles immediately.
+      return ProviderScope(
+        overrides: overrides,
+        child: MaterialApp(
+          locale: const Locale('ja'),
+          localizationsDelegates: const [
+            S.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: S.supportedLocales,
+          home: _TwoRouteHost(
+            child: VoiceInputScreen(
+              bookId: 'book-1',
+              speechService: speechService,
+            ),
+          ),
+        ),
+      );
+    }
+
+    /// Helper to fill the voice screen form via batch fill and return the
+    /// CapturingStartSpeechRecognitionUseCase so callers can emit speech.
+    /// After this helper, the Save button is enabled.
+    Future<CapturingStartSpeechRecognitionUseCase> fillFormViaVoice({
+      required WidgetTester tester,
+      required Widget subject,
+      required String voiceText,
+    }) async {
+      await tester.pumpWidget(subject);
+      await tester.pumpAndSettle();
+
+      // Find the speechService from the VoiceInputScreen widget — the screen
+      // was built with a CapturingStartSpeechRecognitionUseCase injected via
+      // the speechService parameter in buildSubjectForSave. We need to cast
+      // the widget to retrieve it; instead we drive via tester gestures.
+      //
+      // Start long-press, emit final voice, wait past 300ms misfire threshold.
+      final gesture = await tester.startGesture(tester.getCenter(micFinder));
+      await tester.pump(const Duration(milliseconds: 1));
+      await tester.pump();
+
+      // Retrieve the capturing service to emit a result. Since it's injected
+      // as speechService into VoiceInputScreen, we find it through the widget.
+      final screenWidget = tester.widget<VoiceInputScreen>(
+        find.byType(VoiceInputScreen),
+      );
+      // The speechService is exposed on the widget as a nullable parameter.
+      // Cast it — we know it's a CapturingStartSpeechRecognitionUseCase.
+      final capturingSvc =
+          screenWidget.speechService! as CapturingStartSpeechRecognitionUseCase;
+      capturingSvc.emitFinal(voiceText);
+
+      await tester.binding.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 350)),
+      );
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      return capturingSvc;
+    }
+
+    testWidgets(
+      'D-08: soul-ledger save defers Navigator.pop until SoulCelebrationOverlay dismisses',
+      (tester) async {
+        // The parse result maps to a soul category (dining with soul ledger).
+        const voiceText = 'ラテ 1千';
+        final parseResult = VoiceParseResult(
+          rawText: voiceText,
+          amount: 1000,
+          parsedDate: DateTime(2026, 5, 25),
+          merchantName: null,
+          categoryMatch: const CategoryMatchResult(
+            categoryId: 'dining',
+            confidence: 0.91,
+            source: MatchSource.keyword,
+          ),
+          ledgerType: LedgerType.soul,
+        );
+
+        final subject = buildSubjectForSave(
+          createResult: _soulTransaction,
+          voiceText: voiceText,
+          parseResult: parseResult,
+        );
+
+        await fillFormViaVoice(
+          tester: tester,
+          subject: subject,
+          voiceText: voiceText,
+        );
+
+        // At this point the form is filled; Save button should be enabled.
+        // Tap the Save button.
+        final saveButtonFinder = find.byKey(const ValueKey('voice-save-button'));
+        expect(saveButtonFinder, findsOneWidget);
+        await tester.tap(saveButtonFinder);
+
+        // pump() without settling — let the save flow start but NOT run
+        // the full animation so we can check the intermediate state.
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+
+        // D-08: SoulCelebrationOverlay must be in the tree after soul save.
+        expect(
+          find.byType(SoulCelebrationOverlay),
+          findsOneWidget,
+          reason: 'D-08: SoulCelebrationOverlay must appear on soul-ledger save',
+        );
+
+        // Navigation must NOT have fired yet (Navigator still on voice screen).
+        expect(
+          find.byType(VoiceInputScreen),
+          findsOneWidget,
+          reason: 'D-08: Navigator.popUntil must NOT fire before overlay dismisses',
+        );
+
+        // Let the 1.5 s animation run to completion — overlay dismisses →
+        // waitForCelebrationDismissed future completes → popUntil fires.
+        await tester.pumpAndSettle(const Duration(seconds: 3));
+
+        // After animation completes, the route is popped.
+        expect(
+          find.byType(VoiceInputScreen),
+          findsNothing,
+          reason: 'D-08: Navigator.popUntil must fire after overlay dismisses',
+        );
+      },
+    );
+
+    testWidgets(
+      'D-08: survival-ledger save pops immediately, no overlay',
+      (tester) async {
+        const voiceText = '星巴克 1千8百';
+        final parseResult = VoiceParseResult(
+          rawText: voiceText,
+          amount: 1840,
+          parsedDate: DateTime(2026, 5, 25),
+          merchantName: '星巴克',
+          categoryMatch: const CategoryMatchResult(
+            categoryId: 'dining',
+            confidence: 0.91,
+            source: MatchSource.keyword,
+          ),
+          ledgerType: LedgerType.survival,
+        );
+
+        final subject = buildSubjectForSave(
+          createResult: _survivalTransaction,
+          voiceText: voiceText,
+          parseResult: parseResult,
+        );
+
+        await fillFormViaVoice(
+          tester: tester,
+          subject: subject,
+          voiceText: voiceText,
+        );
+
+        // Tap the Save button.
+        final saveButtonFinder = find.byKey(const ValueKey('voice-save-button'));
+        expect(saveButtonFinder, findsOneWidget);
+        await tester.tap(saveButtonFinder);
+        await tester.pumpAndSettle();
+
+        // D-08: no SoulCelebrationOverlay for survival save.
+        expect(
+          find.byType(SoulCelebrationOverlay),
+          findsNothing,
+          reason: 'D-08: SoulCelebrationOverlay must NOT appear on survival-ledger save',
+        );
+
+        // D-08: pop fires immediately — VoiceInputScreen is no longer in tree.
+        expect(
+          find.byType(VoiceInputScreen),
+          findsNothing,
+          reason: 'D-08: Navigator.popUntil must fire immediately on survival-ledger save',
+        );
+      },
+    );
+  });
 }

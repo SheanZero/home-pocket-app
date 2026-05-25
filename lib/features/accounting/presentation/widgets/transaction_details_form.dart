@@ -70,6 +70,13 @@ class TransactionDetailsFormState
   // Drives the celebration Stack overlay; only mutated by .new branch (D-15).
   bool _showCelebration = false;
 
+  /// Phase 23 D-08 / WR-04: completion future for the soul celebration overlay.
+  /// Initialized just before the overlay mounts; completed in [onDismissed].
+  /// [waitForCelebrationDismissed] returns this future so the voice screen can
+  /// defer Navigator.popUntil until the animation finishes (RESEARCH §Pattern 3
+  /// Option A). Null when no celebration is pending.
+  Completer<void>? _celebrationCompleter;
+
   // Local category cache for parent-lookup (mirrors analog _categoryById).
   final Map<String, Category> _categoryById = {};
 
@@ -127,6 +134,7 @@ class TransactionDetailsFormState
   void dispose() {
     _storeController.dispose();
     _memoController.dispose();
+    _celebrationCompleter = null;
     super.dispose();
   }
 
@@ -252,6 +260,14 @@ class TransactionDetailsFormState
     if (!mounted) return;
     if (satisfaction == _soulSatisfaction) return;
     setState(() => _soulSatisfaction = satisfaction.clamp(1, 10));
+  }
+
+  /// Phase 23 D-08 / WR-04: host-await accessor used by the voice screen to
+  /// defer Navigator.popUntil until the soul celebration animation finishes
+  /// (RESEARCH §Pattern 3 Option A). Returns immediately if no celebration
+  /// is pending.
+  Future<void> waitForCelebrationDismissed() {
+    return _celebrationCompleter?.future ?? Future.value();
   }
 
   Future<void> _editCategory() async {
@@ -423,7 +439,10 @@ class TransactionDetailsFormState
 
           // D-15: celebration only for .new soul saves. .edit branch never
           // touches _showCelebration.
+          // Phase 23 D-08: initialize the completer before showing the overlay
+          // so waitForCelebrationDismissed() returns a pending future.
           if (tx.ledgerType == LedgerType.soul && mounted) {
+            _celebrationCompleter = Completer<void>();
             setState(() => _showCelebration = true);
           }
           return TransactionDetailsFormResult.success(tx);
@@ -743,6 +762,12 @@ class TransactionDetailsFormState
           Positioned.fill(
             child: SoulCelebrationOverlay(
               onDismissed: () {
+                // Phase 23 D-08: complete the host-await future FIRST so the
+                // voice screen's deferred pop fires before the overlay clears.
+                if (_celebrationCompleter != null &&
+                    !_celebrationCompleter!.isCompleted) {
+                  _celebrationCompleter!.complete();
+                }
                 if (mounted) setState(() => _showCelebration = false);
               },
             ),
