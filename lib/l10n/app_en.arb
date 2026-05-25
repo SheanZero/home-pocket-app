@@ -1645,6 +1645,22 @@
   "@voiceMicrophonePermissionRequired": {
     "description": "Voice input permission message shown when microphone access is unavailable"
   },
+  "voiceRecognitionErrorNetwork": "Can't reach the network. Please check your connection and try again",
+  "@voiceRecognitionErrorNetwork": {
+    "description": "Voice recognition error: network unavailable (platform error_network / error_network_timeout)"
+  },
+  "voiceRecognitionErrorNoMatch": "Didn't catch that. Please try again",
+  "@voiceRecognitionErrorNoMatch": {
+    "description": "Voice recognition error: no transcription returned (platform error_no_match)"
+  },
+  "voiceRecognitionErrorAudio": "Couldn't read audio from the microphone",
+  "@voiceRecognitionErrorAudio": {
+    "description": "Voice recognition error: audio capture failure (platform error_audio)"
+  },
+  "voiceRecognitionErrorUnknown": "Voice recognition error occurred",
+  "@voiceRecognitionErrorUnknown": {
+    "description": "Voice recognition error: unknown / fallback (platform error_speech_timeout / error_client / other)"
+  },
   "analyticsBudgetProgress": "Budget Progress",
   "@analyticsBudgetProgress": {
     "description": "Analytics section title for budget progress"

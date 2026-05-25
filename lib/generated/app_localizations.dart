@@ -2499,6 +2499,30 @@ abstract class S {
   /// **'Please allow microphone access'**
   String get voiceMicrophonePermissionRequired;
 
+  /// Voice recognition error: network unavailable (platform error_network / error_network_timeout)
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t reach the network. Please check your connection and try again'**
+  String get voiceRecognitionErrorNetwork;
+
+  /// Voice recognition error: no transcription returned (platform error_no_match)
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t catch that. Please try again'**
+  String get voiceRecognitionErrorNoMatch;
+
+  /// Voice recognition error: audio capture failure (platform error_audio)
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read audio from the microphone'**
+  String get voiceRecognitionErrorAudio;
+
+  /// Voice recognition error: unknown / fallback (platform error_speech_timeout / error_client / other)
+  ///
+  /// In en, this message translates to:
+  /// **'Voice recognition error occurred'**
+  String get voiceRecognitionErrorUnknown;
+
   /// Analytics section title for budget progress
   ///
   /// In en, this message translates to:

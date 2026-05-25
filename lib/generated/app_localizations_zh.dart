@@ -1287,6 +1287,18 @@ class SZh extends S {
   String get voiceMicrophonePermissionRequired => '请允许访问麦克风';
 
   @override
+  String get voiceRecognitionErrorNetwork => '无法连接到网络，请检查网络状态后重试';
+
+  @override
+  String get voiceRecognitionErrorNoMatch => '未识别到语音内容，请再试一次';
+
+  @override
+  String get voiceRecognitionErrorAudio => '无法获取麦克风音频';
+
+  @override
+  String get voiceRecognitionErrorUnknown => '语音识别出现错误';
+
+  @override
   String get analyticsBudgetProgress => '预算进度';
 
   @override
