@@ -208,14 +208,34 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     overlay.insert(entry);
   }
 
-  Future<void> _toggleRecording() async {
-    if (!_isInitialized) return;
+  // ── Phase 22 D-03: hold-to-record gesture lifecycle ──
 
-    if (_isRecording) {
-      await _stopRecording();
+  void _onLongPressStart(LongPressStartDetails details) {
+    if (!_isInitialized || _isRecording) return;
+    _pressStart = DateTime.now();
+    _startRecording();
+  }
+
+  void _onLongPressEnd(LongPressEndDetails details) {
+    final start = _pressStart;
+    _pressStart = null;
+    if (start == null || !_isRecording) return;
+    final held = DateTime.now().difference(start);
+    // D-03 misfire threshold: presses shorter than 300 ms are treated as
+    // accidental taps and discarded without parsing.
+    if (held < const Duration(milliseconds: 300)) {
+      _cancelRecordingAndDiscard();
     } else {
-      await _startRecording();
+      _stopRecordingAndCommit();
     }
+  }
+
+  void _onLongPressCancel() {
+    // Finger slid off the recognizer's hit area before release.
+    // Treat as misfire — discard buffer, no commit.
+    if (_pressStart == null || !_isRecording) return;
+    _pressStart = null;
+    _cancelRecordingAndDiscard();
   }
 
   Future<void> _startRecording() async {
@@ -230,8 +250,6 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
       _soundLevel = 0.0;
       _parseResult = null;
       _mergedAmount = null;
-      _resolvedCategory = null;
-      _resolvedParentCategory = null;
     });
     _soundLevels.clear();
     _timestamps.clear();
@@ -263,15 +281,136 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     );
   }
 
-  Future<void> _stopRecording() async {
-    // Commit any pending merger buffer immediately (user-stop semantics
-    // per VoiceChunkMerger contract; see voice_chunk_merger.dart D-09).
+  /// D-05 commit path: synchronously commit the merger buffer, graceful-drain
+  /// the speech service, then batch-fill the embedded form via 4 + 1 public
+  /// setters on TransactionDetailsFormState (Plan 02 Wave 0 surface).
+  ///
+  /// BLOCKER B-2 (host-cache mirror): _hostAmount + _hostCategory are written
+  /// in the same setState block as the form push, so AmountDisplay and the
+  /// _canSave predicate reflect the new values without depending on
+  /// GlobalKey.currentState first-build null timing.
+  Future<void> _stopRecordingAndCommit() async {
+    // 1. Synchronously commit the merger buffer (Pattern 7 — bypasses 2.5s
+    //    window). MUST happen BEFORE _speechService.stop() to preserve the
+    //    original ordering invariant.
     _amountMerger?.stop();
+    // 2. Graceful drain on the speech service so any in-flight finals flush.
     await _speechService.stop();
+    if (!mounted) return;
     setState(() {
       _isRecording = false;
       _soundLevel = 0.0;
     });
+
+    // D-05: batch-fill the form via parser + setter calls.
+    final text = _finalText.isNotEmpty ? _finalText : _partialText;
+    if (text.isEmpty) return;
+
+    final parseUseCase = ref.read(parseVoiceInputUseCaseProvider);
+    final parseResult = await parseUseCase.execute(
+      text,
+      localeId: _voiceLocaleId,
+    );
+    if (!mounted || !parseResult.isSuccess) return;
+    final data = parseResult.data;
+    if (data == null) return;
+
+    // Category lookup — voice resolver guarantees a level-2 categoryId per
+    // Phase 21 D-03.
+    Category? category;
+    Category? parent;
+    final categoryId = data.categoryMatch?.categoryId ?? data.merchantCategoryId;
+    if (categoryId != null) {
+      final repo = ref.read(categoryRepositoryProvider);
+      category = await repo.findById(categoryId);
+      if (category?.parentId != null) {
+        parent = await repo.findById(category!.parentId!);
+      }
+    }
+
+    final amount = _mergedAmount ?? data.amount ?? 0;
+    if (!mounted) return;
+    final state = _formKey.currentState;
+    if (state == null) return;
+
+    // 4 + 1 form setter calls (D-07 — Wave 0 Plan 02 added them):
+    if (amount > 0) state.updateAmount(amount);
+    if (category != null) state.updateCategory(category, parent);
+    if (data.merchantName != null && data.merchantName!.isNotEmpty) {
+      state.updateMerchant(data.merchantName!);
+    }
+    // updateNote: parser does NOT emit a discrete note field in v1.3
+    // (RESEARCH §Assumptions A5). No setter call because there is no value
+    // to push, NOT because we are protecting user input. Per D-08
+    // voice-always-overwrites — if a future parser version emits notes, this
+    // becomes a real setter call.
+
+    // RESEARCH §Open Q2 (BLOCKER B-1 resolution): preserve Phase 11
+    // satisfaction estimator wiring through the single-screen rewrite.
+    // _parseResult.estimatedSatisfaction is populated by the existing
+    // _onResult callback for the soul-ledger branch; push it into the form
+    // via the new updateSatisfaction setter (Plan 02 added). Survival-ledger
+    // categories ignore the value (form's submit() only reads
+    // _soulSatisfaction when ledgerType == soul).
+    if (_parseResult?.estimatedSatisfaction != null) {
+      state.updateSatisfaction(_parseResult!.estimatedSatisfaction);
+    }
+
+    // B-2 host-cache mirror: update _hostAmount + _hostCategory in the SAME
+    // setState block so the AmountDisplay render and _canSave predicate
+    // reflect the new values atomically with the form rebuild.
+    setState(() {
+      _hostAmount = amount;
+      _hostCategory = category;
+    });
+  }
+
+  /// Pitfall 6 (RESEARCH lines 656-668): discard path uses dispose+cancel,
+  /// NOT stop+stop. The merger's dispose() drops the buffer; the speech
+  /// service's cancel() abandons any pending finals. Calling stop() on
+  /// either would COMMIT instead of discard.
+  Future<void> _cancelRecordingAndDiscard() async {
+    _amountMerger?.dispose();
+    _amountMerger = null;
+    await _speechService.cancel();
+    if (!mounted) return;
+    setState(() {
+      _isRecording = false;
+      _soundLevel = 0.0;
+    });
+    _pressStart = null;
+  }
+
+  /// Save handler — delegates to the embedded form's submit() with the same
+  /// try/finally + result.when shape as manual_one_step_screen.dart:_save
+  /// (lines 278-304).
+  Future<void> _onSavePressed() async {
+    if (_isSubmitting) return;
+    setState(() => _isSubmitting = true);
+    try {
+      final result = await _formKey.currentState!.submit();
+      if (!mounted) return;
+      result.when(
+        success: (_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(S.of(context).transactionSaved)),
+          );
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        },
+        validationError: (msg) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(msg)));
+        },
+        persistError: (msg) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(msg)));
+        },
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   void _onSoundLevel(double level) {
@@ -338,10 +477,6 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     final result = await useCase.execute(text, localeId: _voiceLocaleId);
     if (mounted && result.isSuccess) {
       setState(() => _parseResult = result.data);
-      await _resolveCategory(
-        result.data?.categoryMatch?.categoryId ??
-            result.data?.merchantCategoryId,
-      );
     }
   }
 
@@ -354,7 +489,10 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
 
     var parseResult = result.data!;
 
-    // For soul ledger transactions, estimate satisfaction from audio features
+    // For soul ledger transactions, estimate satisfaction from audio features.
+    // BLOCKER B-1: this estimator output is the source of
+    // _parseResult.estimatedSatisfaction that _stopRecordingAndCommit later
+    // pushes into the form via state.updateSatisfaction(...).
     if (parseResult.ledgerType == LedgerType.soul) {
       final features = _buildAudioFeatures();
       final estimator = ref.read(voiceSatisfactionEstimatorProvider);
@@ -366,32 +504,6 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     }
 
     setState(() => _parseResult = parseResult);
-    await _resolveCategory(
-      parseResult.categoryMatch?.categoryId ?? parseResult.merchantCategoryId,
-    );
-  }
-
-  Future<void> _resolveCategory(String? categoryId) async {
-    if (categoryId == null) {
-      if (mounted) {
-        setState(() {
-          _resolvedCategory = null;
-          _resolvedParentCategory = null;
-        });
-      }
-      return;
-    }
-    final categoryRepo = ref.read(categoryRepositoryProvider);
-    final category = await categoryRepo.findById(categoryId);
-    final parentCategory = category?.parentId != null
-        ? await categoryRepo.findById(category!.parentId!)
-        : null;
-    if (mounted) {
-      setState(() {
-        _resolvedCategory = category;
-        _resolvedParentCategory = parentCategory;
-      });
-    }
   }
 
   VoiceAudioFeatures _buildAudioFeatures() {
@@ -417,48 +529,6 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     return (text.replaceAll(RegExp(r'\s'), '').length / 2).ceil();
   }
 
-  Future<void> _navigateToConfirm() async {
-    final result = _parseResult;
-    if (result == null) return;
-
-    final categoryId =
-        result.categoryMatch?.categoryId ?? result.merchantCategoryId;
-
-    // Look up the Category object (may be null if not recognized)
-    final categoryRepo = ref.read(categoryRepositoryProvider);
-    final category = categoryId != null
-        ? await categoryRepo.findById(categoryId)
-        : null;
-
-    // Look up parent category if the matched category has a parentId
-    final parentCategory = category?.parentId != null
-        ? await categoryRepo.findById(category!.parentId!)
-        : null;
-
-    if (!mounted) return;
-
-    // Extract keyword for voice learning
-    final keyword = _extractVoiceKeyword(result);
-
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => ManualOneStepScreen(
-          bookId: widget.bookId,
-          initialAmount: _mergedAmount ?? result.amount ?? 0,
-          initialCategory: category,
-          initialParentCategory: parentCategory,
-          initialDate: result.parsedDate ?? DateTime.now(),
-          initialMerchant: result.merchantName,
-          initialSatisfaction: result.ledgerType == LedgerType.soul
-              ? result.estimatedSatisfaction
-              : null,
-          voiceKeyword: keyword,
-          entrySource: EntrySource.voice,
-        ),
-      ),
-    );
-  }
-
   String _extractVoiceKeyword(VoiceParseResult result) {
     var remaining = result.rawText;
 
@@ -480,32 +550,6 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     remaining = remaining.replaceAll(RegExp(r'[的了吗呢吧啊呀哦]'), '');
 
     return remaining.trim();
-  }
-
-  String _transcriptText() {
-    return _finalText.isNotEmpty ? _finalText : _partialText;
-  }
-
-  String _parsedAmountText(Locale locale) {
-    final amount = _parseResult?.amount;
-    if (amount == null) return '';
-    return const FormatterService().formatCurrency(amount, 'JPY', locale);
-  }
-
-  String _parsedCategoryText(Locale locale) {
-    final category = _resolvedCategory;
-    if (category == null) return '';
-    return formatCategoryPath(
-      category: category,
-      parentCategory: _resolvedParentCategory,
-      locale: locale,
-    );
-  }
-
-  String _parsedDateText(Locale locale, S l10n) {
-    final date = _parseResult?.parsedDate;
-    if (date == null) return l10n.todayDate;
-    return const FormatterService().formatDate(date, locale);
   }
 
   @override
@@ -714,174 +758,3 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
   }
 }
 
-class VoiceRecognitionResultCard extends StatelessWidget {
-  const VoiceRecognitionResultCard({
-    super.key,
-    required this.transcript,
-    required this.recognitionLabel,
-    required this.amountLabel,
-    required this.amountValue,
-    required this.categoryLabel,
-    required this.categoryValue,
-    required this.dateLabel,
-    required this.dateValue,
-    required this.isDark,
-  });
-
-  final String transcript;
-  final String recognitionLabel;
-  final String amountLabel;
-  final String amountValue;
-  final String categoryLabel;
-  final String categoryValue;
-  final String dateLabel;
-  final String dateValue;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final primaryColor = isDark
-        ? AppColorsDark.textPrimary
-        : AppColors.textPrimary;
-    final secondaryColor = isDark
-        ? AppColorsDark.textSecondary
-        : AppColors.textSecondary;
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: isDark ? AppColorsDark.card : AppColors.card,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isDark ? AppColorsDark.borderDefault : AppColors.borderDefault,
-        ),
-      ),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          Text(
-            recognitionLabel,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: secondaryColor,
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 2,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            transcript,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.titleLarge.copyWith(
-              color: primaryColor,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            height: 1,
-            color: isDark
-                ? AppColorsDark.backgroundDivider
-                : AppColors.backgroundDivider,
-          ),
-          _ParsedInfoRow(
-            icon: Icons.payments_outlined,
-            label: amountLabel,
-            value: amountValue,
-            valueStyle: AppTextStyles.amountMedium,
-            isDark: isDark,
-          ),
-          _ParsedDivider(isDark: isDark),
-          _ParsedInfoRow(
-            icon: Icons.shopping_bag_outlined,
-            label: categoryLabel,
-            value: categoryValue,
-            isDark: isDark,
-          ),
-          _ParsedDivider(isDark: isDark),
-          _ParsedInfoRow(
-            icon: Icons.calendar_today_outlined,
-            label: dateLabel,
-            value: dateValue,
-            isDark: isDark,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ParsedInfoRow extends StatelessWidget {
-  const _ParsedInfoRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.isDark,
-    this.valueStyle,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-  final bool isDark;
-  final TextStyle? valueStyle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 16,
-            color: isDark ? AppColorsDark.textTertiary : AppColors.textTertiary,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: isDark
-                  ? AppColorsDark.textSecondary
-                  : AppColors.textSecondary,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              overflow: TextOverflow.ellipsis,
-              style: (valueStyle ?? AppTextStyles.bodyMedium).copyWith(
-                color: isDark
-                    ? AppColorsDark.textPrimary
-                    : AppColors.textPrimary,
-                fontSize: valueStyle?.fontSize ?? 14,
-                fontWeight: valueStyle?.fontWeight ?? FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ParsedDivider extends StatelessWidget {
-  const _ParsedDivider({required this.isDark});
-
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 1,
-      color: isDark
-          ? AppColorsDark.backgroundDivider
-          : AppColors.backgroundDivider,
-    );
-  }
-}
