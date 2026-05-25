@@ -800,7 +800,10 @@ class SEn extends S {
   String get discard => 'Discard';
 
   @override
-  String get tapToRecord => 'Tap to record';
+  String get holdToRecord => 'Hold to speak';
+
+  @override
+  String get recording => 'Recording…';
 
   @override
   String get todayDate => 'Today';

@@ -791,7 +791,10 @@ class SZh extends S {
   String get discard => '放弃';
 
   @override
-  String get tapToRecord => '点击录音';
+  String get holdToRecord => '按住说话';
+
+  @override
+  String get recording => '录音中…';
 
   @override
   String get todayDate => '今天';
