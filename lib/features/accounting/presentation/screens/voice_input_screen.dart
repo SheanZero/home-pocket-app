@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart'
     show
-        GestureRecognizerFactory,
-        GestureRecognizerFactoryWithHandlers,
         LongPressGestureRecognizer,
         LongPressStartDetails,
         LongPressEndDetails;
@@ -555,10 +553,9 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
-    final hasResult = _parseResult != null;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final localeAsync = ref.watch(currentLocaleProvider);
-    final locale = localeAsync.value ?? const Locale('ja');
+    // Watch locale to trigger rebuild on locale change (formatting downstream).
+    ref.watch(currentLocaleProvider);
 
     // Watch voiceLocaleIdProvider so the screen rebuilds when the user changes
     // the voice language in Settings. The current value is stored in
@@ -567,6 +564,15 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     if (voiceLocaleAsync case AsyncData(:final value)) {
       _voiceLocaleId = value;
     }
+
+    // BLOCKER B-2: AmountDisplay takes a String — render the host-cache mirror.
+    final amountStr = _hostAmount > 0 ? _hostAmount.toString() : '';
+    // Voice-correction learning keyword (Phase 18 D-09 hook) — only meaningful
+    // when a parse result exists. Keep the helper signature untouched; pass
+    // null until a parse runs.
+    final voiceKeyword = _parseResult != null
+        ? _extractVoiceKeyword(_parseResult!)
+        : null;
 
     return Scaffold(
       backgroundColor: isDark
@@ -601,25 +607,43 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
             bookId: widget.bookId,
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 8),
 
+          // D-10: AmountDisplay above the form — tap opens the modal sheet
+          // for amount editing. Reads from the host-cache mirror (B-2).
+          GestureDetector(
+            onTap: () async {
+              await AmountEditBottomSheet.show(
+                context,
+                initialAmount: _hostAmount,
+                onConfirm: (value) {
+                  // Push into the form AND update the host-cache mirror so
+                  // the AmountDisplay and _canSave predicate stay aligned.
+                  _formKey.currentState?.updateAmount(value);
+                  if (!mounted) return;
+                  setState(() => _hostAmount = value);
+                },
+              );
+            },
+            behavior: HitTestBehavior.opaque,
+            child: AmountDisplay(amount: amountStr),
+          ),
+
+          // D-01: scrollable embedded form replaces the read-only result card.
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  VoiceRecognitionResultCard(
-                    transcript: _transcriptText(),
-                    recognitionLabel: l10n.recognitionResult,
-                    amountLabel: l10n.amount,
-                    amountValue: _parsedAmountText(locale),
-                    categoryLabel: l10n.category,
-                    categoryValue: _parsedCategoryText(locale),
-                    dateLabel: l10n.date,
-                    dateValue: _parsedDateText(locale, l10n),
-                    isDark: isDark,
-                  ),
-                ],
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: TransactionDetailsForm(
+                key: _formKey,
+                config: TransactionDetailsFormConfig.$new(
+                  bookId: widget.bookId,
+                  // All initial fields null — voice batch-fills via
+                  // _formKey.currentState!.updateXxx on long-press release.
+                  voiceKeyword: voiceKeyword,
+                  entrySource: EntrySource.voice,
+                  merchantFocusNode: _merchantFocus,
+                  noteFocusNode: _noteFocus,
+                ),
               ),
             ),
           ),
@@ -634,21 +658,52 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
             ),
           ),
 
-          // Mic button
-          GestureDetector(
-            onTap: _isInitialized ? _toggleRecording : null,
-            child: Container(
+          // D-03 / D-04: hold-to-record mic button — RawGestureDetector wraps
+          // an AnimatedContainer that morphs shape + gradient on _isRecording.
+          // The recognizer's `duration: Duration.zero` lets LongPress fire
+          // immediately on press-down (push-to-talk), with the 300 ms misfire
+          // threshold enforced inside _onLongPressEnd.
+          RawGestureDetector(
+            gestures: <Type, GestureRecognizerFactory>{
+              LongPressGestureRecognizer:
+                  GestureRecognizerFactoryWithHandlers<
+                    LongPressGestureRecognizer
+                  >(
+                    () => LongPressGestureRecognizer(
+                      duration: Duration.zero,
+                      debugOwner: this,
+                    ),
+                    (LongPressGestureRecognizer instance) {
+                      instance
+                        ..onLongPressStart = _onLongPressStart
+                        ..onLongPressEnd = _onLongPressEnd
+                        ..onLongPressCancel = _onLongPressCancel;
+                    },
+                  ),
+            },
+            child: AnimatedContainer(
+              key: const ValueKey('voice-mic-button'),
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeInOut,
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
+                // D-04: shape stays BoxShape.rectangle in both states; only
+                // borderRadius interpolates (36 ≈ circle on 72×72 → 16 square).
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.circular(_isRecording ? 16 : 36),
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: const [
-                    AppColors.actionGradientStart,
-                    AppColors.actionGradientEnd,
-                  ],
+                  colors: _isRecording
+                      ? const [
+                          AppColors.recordingGradientStart,
+                          AppColors.recordingGradientEnd,
+                        ]
+                      : const [
+                          AppColors.actionGradientStart,
+                          AppColors.actionGradientEnd,
+                        ],
                 ),
                 boxShadow: const [
                   BoxShadow(
@@ -658,32 +713,40 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
                   ),
                 ],
               ),
+              // D-04: Icon stays Icons.mic in BOTH states (no Mic→Stop swap).
               child: const Icon(Icons.mic, color: Colors.white, size: 32),
             ),
           ),
 
           const SizedBox(height: 12),
 
-          Text(
-            l10n.tapToRecord,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: isDark
-                  ? AppColorsDark.textTertiary
-                  : AppColors.textTertiary,
+          // D-06: caption cross-fades between idle and recording.
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 150),
+            child: Text(
+              _isRecording ? l10n.recording : l10n.holdToRecord,
+              key: ValueKey(_isRecording),
+              style: AppTextStyles.bodySmall.copyWith(
+                color: isDark
+                    ? AppColorsDark.textTertiary
+                    : AppColors.textTertiary,
+              ),
             ),
           ),
 
           const SizedBox(height: 24),
 
-          // Next button — enabled only when parse result is ready
+          // D-11: Save button (renamed from Next) — full-width gradient CTA
+          // gated by _canSave (host-cache predicate, NOT _formKey.currentState).
           Padding(
+            key: const ValueKey('voice-save-button'),
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
             child: SizedBox(
               width: double.infinity,
               height: 52,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  gradient: hasResult
+                  gradient: _canSave
                       ? const LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
@@ -705,11 +768,11 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: hasResult ? _navigateToConfirm : null,
+                    onTap: _canSave ? _onSavePressed : null,
                     borderRadius: BorderRadius.circular(14),
                     child: Center(
                       child: Text(
-                        l10n.next,
+                        l10n.save,
                         style: AppTextStyles.titleLarge.copyWith(
                           color: Colors.white,
                           fontSize: 16,
