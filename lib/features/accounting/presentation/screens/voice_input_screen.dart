@@ -1,5 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart'
+    show
+        GestureRecognizerFactory,
+        GestureRecognizerFactoryWithHandlers,
+        LongPressGestureRecognizer,
+        LongPressStartDetails,
+        LongPressEndDetails;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -8,7 +15,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../application/i18n/formatter_service.dart';
 import '../../../../application/voice/repository_providers.dart'
     show
         appSpeechRecognitionServiceProvider,
@@ -20,14 +26,16 @@ import '../../../settings/presentation/providers/state_locale.dart';
 import '../../../settings/presentation/providers/state_settings.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/entry_source.dart';
+import '../../domain/models/transaction_details_form_config.dart';
 import '../../domain/models/voice_parse_result.dart';
 import '../providers/repository_providers.dart';
-import '../utils/category_display_utils.dart';
+import '../widgets/amount_display.dart';
+import '../widgets/amount_edit_bottom_sheet.dart';
 import '../widgets/entry_mode_switcher.dart';
 import '../widgets/input_mode_tabs.dart';
 import '../widgets/soft_toast.dart';
+import '../widgets/transaction_details_form.dart';
 import '../widgets/voice_waveform.dart';
-import 'manual_one_step_screen.dart';
 
 /// Voice input screen for creating transactions through natural language speech.
 ///
@@ -44,7 +52,8 @@ class VoiceInputScreen extends ConsumerStatefulWidget {
   ConsumerState<VoiceInputScreen> createState() => _VoiceInputScreenState();
 }
 
-class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
+class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
+    with WidgetsBindingObserver {
   // Speech recognition use case — managed directly (stateful lifecycle)
   late final StartSpeechRecognitionUseCase _speechService;
 
@@ -62,12 +71,42 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   // Parse result
   VoiceParseResult? _parseResult;
 
-  // Resolved category objects for display
-  Category? _resolvedCategory;
-  Category? _resolvedParentCategory;
-
   // Effective voice locale (updated reactively from voiceLocaleIdProvider)
   String _voiceLocaleId = 'zh-CN';
+
+  // ── Phase 22: embedded form integration (D-01) ──
+
+  /// GlobalKey on the embedded TransactionDetailsForm so the voice screen
+  /// can call public setters (updateAmount/Category/Merchant/Note/Satisfaction)
+  /// on long-press release (D-05 batch-fill).
+  final _formKey = GlobalKey<TransactionDetailsFormState>();
+
+  /// Per-host FocusNodes for the form's merchant/note TextFields (D-09).
+  /// Listeners auto-stop recording when text-field gains focus.
+  late final FocusNode _merchantFocus;
+  late final FocusNode _noteFocus;
+
+  /// Captured at _onLongPressStart; consumed at _onLongPressEnd to compute
+  /// held duration vs the 300 ms misfire threshold (D-03).
+  DateTime? _pressStart;
+
+  /// Submit-in-flight flag for the Save button (mirrors manual screen's
+  /// _isSubmitting at manual_one_step_screen.dart:77).
+  bool _isSubmitting = false;
+
+  /// Host-cache mirror of the form's amount + category state (BLOCKER B-2
+  /// resolution). Mirrors manual_one_step_screen.dart:74-78 precedent.
+  /// Updated in the same setState block that pushes values into the form
+  /// via _formKey.currentState!.updateXxx — keeps the AmountDisplay render
+  /// and the _canSave predicate decoupled from GlobalKey.currentState
+  /// first-build null timing.
+  int _hostAmount = 0;
+  Category? _hostCategory;
+
+  /// Save button enable predicate — pure read from the host-cache mirror
+  /// (mirrors manual_one_step_screen.dart:89 _canSave getter shape).
+  bool get _canSave =>
+      _hostCategory != null && _hostAmount > 0 && !_isSubmitting;
 
   // Audio features collection
   final List<double> _soundLevels = [];
@@ -95,6 +134,19 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Phase 22 D-09: per-host FocusNodes wired through the form config so the
+    // form's TextFields use them; listener auto-stops recording when a
+    // text field gains focus mid-session.
+    _merchantFocus = FocusNode()..addListener(_handleFocusChange);
+    _noteFocus = FocusNode()..addListener(_handleFocusChange);
+
+    // Phase 22 / Pitfall 7 (RESEARCH Open Q1): observe app lifecycle so a
+    // paused app cancels any in-progress recording (didChangeAppLifecycleState
+    // below). Without this, locking the screen mid-press would leave the mic
+    // "live" with no user-visible affordance.
+    WidgetsBinding.instance.addObserver(this);
+
     _speechService =
         widget.speechService ??
         StartSpeechRecognitionUseCase(
@@ -631,11 +683,33 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Pitfall 7 (RESEARCH Open Q1): app-pause must cancel an in-progress
+    // recording, otherwise the mic stays "live" with no user awareness.
+    if (state == AppLifecycleState.paused && _isRecording) {
+      _cancelRecordingAndDiscard();
+    }
+  }
+
+  /// D-09: text-field focus during recording auto-stops the session.
+  /// Mic returns to idle; no batch-fill of the form (caller controls modality).
+  void _handleFocusChange() {
+    final hasTextFocus = _merchantFocus.hasFocus || _noteFocus.hasFocus;
+    if (hasTextFocus && _isRecording) {
+      _cancelRecordingAndDiscard();
+    }
+  }
+
+  @override
   void dispose() {
     _parseDebounce?.cancel();
     _amountMerger?.dispose();
     _amountMerger = null;
     _speechService.cancel();
+    // Phase 22: unregister lifecycle observer + dispose FocusNodes.
+    WidgetsBinding.instance.removeObserver(this);
+    _merchantFocus.dispose();
+    _noteFocus.dispose();
     super.dispose();
   }
 }
