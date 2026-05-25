@@ -1,8 +1,9 @@
 ---
 phase: 23-v1-3-cleanup-scanner-allow-lists-voice-flow-polish
 reviewed: 2026-05-25T00:00:00Z
+updated: 2026-05-26T00:00:00Z
 depth: standard
-files_reviewed: 22
+files_reviewed: 25
 files_reviewed_list:
   - lib/application/seed/seed_all_use_case.dart
   - lib/application/seed/seed_providers.dart
@@ -10,6 +11,8 @@ files_reviewed_list:
   - lib/application/voice/voice_chunk_merger.dart
   - lib/data/daos/category_keyword_preference_dao.dart
   - lib/features/accounting/presentation/screens/voice_input_screen.dart
+  - lib/features/accounting/presentation/screens/voice_input_screen_helpers.dart
+  - lib/features/accounting/presentation/screens/voice_locale_readiness_mixin.dart
   - lib/features/accounting/presentation/screens/voice_recognition_event_handler_mixin.dart
   - lib/features/accounting/presentation/widgets/transaction_details_form.dart
   - lib/infrastructure/ml/merchant_database.dart
@@ -28,9 +31,9 @@ files_reviewed_list:
   - CLAUDE.md
 findings:
   critical: 0
-  warning: 5
-  info: 2
-  total: 7
+  warning: 6
+  info: 3
+  total: 9
 status: issues_found
 ---
 
@@ -216,5 +219,118 @@ DateTime Function()? _clock;
 ---
 
 _Reviewed: 2026-05-25_
+_Reviewer: Claude (gsd-code-reviewer)_
+_Depth: standard_
+
+---
+
+## Wave 6 Review (Plan 23-09 — gap closure)
+
+**Reviewed:** 2026-05-26
+**Files reviewed:** 3 (1 modified, 2 new)
+**Depth:** standard
+**Status for this wave:** issues_found (1 Warning, 1 Info)
+
+### Scope
+
+This wave covers a pure-refactor gap closure to bring `voice_input_screen.dart` below the CLAUDE.md `<800` LOC cap (838 → 776, 24-line headroom):
+
+- `lib/features/accounting/presentation/screens/voice_locale_readiness_mixin.dart` (NEW, 99 LOC) — extracts the D-07 cold-start gate
+- `lib/features/accounting/presentation/screens/voice_input_screen_helpers.dart` (NEW, 73 LOC) — extracts 3 pure helpers
+- `lib/features/accounting/presentation/screens/voice_input_screen.dart` (MODIFIED, 776 LOC) — mixes in the new mixin, calls the helpers
+
+Verified invariants (per 23-09-SUMMARY.md grep evidence and direct read):
+- D-05 intra-session guard untouched (mixin file unchanged)
+- D-07 cold-start gate behavior preserved verbatim in the new mixin (both `AsyncData` and `AsyncError` flip `_isLocaleReady = true`; `fireImmediately: true` preserved)
+- D-08 soul-ledger pop deferral untouched at call site (line 381-392)
+- D-09 FocusNode listener cleanup intact in dispose() (lines 771-772)
+- D-10 `VoiceRecognitionEventHandlerMixin` untouched
+- D-11 G-02 localized-error toast untouched
+- File-cap: 776 LOC < 800 ✓
+- Mixin constraint `on ConsumerState<W>` is correct (needs `ref.listenManual`)
+- `ProviderSubscription?.close()` runs BEFORE `super.dispose()` ✓
+- Import surface uses only `package:flutter_riverpod/flutter_riverpod.dart` (broad entry) per CLAUDE.md Riverpod 3 conventions ✓
+
+### Findings
+
+---
+
+### WR-06: Duplicate locale-mirror update path — `_voiceLocaleId` reassigned in both `build()` and mixin listener
+
+**File:** `lib/features/accounting/presentation/screens/voice_input_screen.dart:519-522` (build-side update); `lib/features/accounting/presentation/screens/voice_input_screen.dart:190` (mixin-callback update)
+
+**Issue:** After this refactor, `_voiceLocaleId` is updated from TWO independent paths:
+
+1. The new mixin's `ref.listenManual` calls `onVoiceLocaleResolved(value)` → host setter at line 190 assigns `_voiceLocaleId = localeId`.
+2. The pre-existing `build()` method still does `ref.watch(voiceLocaleIdProvider)` + side-effect assignment:
+```dart
+final voiceLocaleAsync = ref.watch(voiceLocaleIdProvider);
+if (voiceLocaleAsync case AsyncData(:final value)) {
+  _voiceLocaleId = value;   // line 521 — duplicate update path
+}
+```
+
+The functional consequence is benign (both paths assign the same value, and the mixin's `fireImmediately: true` ensures the listener has already run before the first `build()` completes), but two problems remain:
+
+1. **Side-effect in `build()` is a Flutter anti-pattern.** Mutating instance state inside `build()` violates the framework's purity contract — `build` can be called arbitrarily often by the framework (rebuild storms, hot reload, key changes, parent rebuilds) and must be free of side effects. Now that the mixin's `ref.listenManual` is the canonical update path, the build-side assignment is no longer load-bearing for correctness.
+2. **Cleanup miss surfaced by the refactor.** The plan's intent (per 23-09-PLAN.md item 7) was for the mixin to own readiness and the host to own the locale string mirror through `onVoiceLocaleResolved`. The build-side update path was not in the plan's `<action>` items A-G and was not removed. This is exactly the kind of dead-code-by-refactor that 23-09 was meant to surface as it slims the screen.
+
+The `ref.watch(voiceLocaleIdProvider)` call ITSELF is still needed to trigger rebuilds when the user switches voice language in Settings (because `ref.listenManual` does not trigger rebuilds). Only the assignment statement is redundant.
+
+**Fix:** Remove the redundant assignment but keep the watch:
+```dart
+// Watch voiceLocaleIdProvider so the screen rebuilds when the user changes
+// the voice language in Settings. Field updates are owned by
+// VoiceLocaleReadinessMixin's listener via onVoiceLocaleResolved (line 190).
+ref.watch(voiceLocaleIdProvider);
+// (delete lines 519-522's AsyncData destructuring + _voiceLocaleId = value assignment)
+```
+
+---
+
+### IN-03: `onVoiceLocaleResolved` host implementation lacks setState; mixin docs should warn future implementers
+
+**File:** `lib/features/accounting/presentation/screens/voice_locale_readiness_mixin.dart:52-58` (abstract method docs); `lib/features/accounting/presentation/screens/voice_input_screen.dart:190` (host impl)
+
+**Issue:** The host's implementation is a bare field assignment:
+```dart
+@override void onVoiceLocaleResolved(String localeId) => _voiceLocaleId = localeId;
+```
+No `setState` is called because `_voiceLocaleId` is only read inside async handlers (`_startRecording`, `_parseFinalResult`, `_stopRecordingAndCommit`), never inside `build()`. This is correct for the current screen, but the mixin's docstring at lines 52-58 does not warn future implementers about two important contracts:
+
+1. **Do NOT call `setState` from inside `onVoiceLocaleResolved`.** The mixin invokes this callback BEFORE its own `setState(() => _isLocaleReady = true)` block (line 76, before line 78). Calling `setState` inside the host's `onVoiceLocaleResolved` would cause nested setState (the same anti-pattern flagged by WR-01 in earlier waves). The mixin's listener body should be the single writer.
+2. **Do NOT do anything async or expensive in this hook** — it runs synchronously on the provider's microtask, with `fireImmediately: true` it may run during `initState` before the first frame.
+
+Additionally, the mixin's `initLocaleReadiness` invokes the abstract `onVoiceLocaleResolved` before the `setState` flipping `_isLocaleReady`. If the host's implementation reads `isLocaleReady` (e.g., to gate something), it will observe `false`. This is consistent with the screen today (the host implementation does not read the getter), but the temporal ordering is non-obvious and should be documented.
+
+**Fix:** Add two notes to the abstract method's dartdoc:
+```dart
+/// Host-supplied locale-string mirror update hook. ...
+///
+/// Contract:
+/// - MUST NOT call setState — the mixin owns the setState that flips
+///   isLocaleReady from false → true (called immediately after this hook).
+/// - MUST be synchronous and cheap — invoked from a Riverpod listener with
+///   `fireImmediately: true`, so it may run during initState() before the
+///   first frame.
+/// - Observes isLocaleReady == false during the cold-start invocation
+///   (the flag flips AFTER this hook returns); do not read isLocaleReady
+///   here.
+void onVoiceLocaleResolved(String localeId);
+```
+
+---
+
+### Wave 6 Summary
+
+- 1 Warning (WR-06) — pre-existing build-side side-effect was made dead by this refactor; should be cleaned up to satisfy CLAUDE.md "no mutation" and Flutter build-purity contracts.
+- 1 Info (IN-03) — mixin contract documentation gap for future maintainers; not a correctness bug today.
+- 0 Critical — the refactor is correct: `_localeSubscription?.close()` runs before `super.dispose()`, mixin constraint on `ConsumerState<W>` is right, `ProviderSubscription` resolves from the broad `flutter_riverpod.dart` entry, helper functions are genuinely pure with no `this` capture, naming mirrors the D-10 precedent.
+- D-05, D-07, D-08, D-09, D-10, D-11 invariants preserved per grep evidence + direct read.
+- LOC cap satisfied: 776 < 800 (24-line headroom).
+
+Overall phase status bumped from existing `issues_found` (already non-clean from earlier waves) — this wave adds 1 Warning + 1 Info, no Critical.
+
+_Reviewed: 2026-05-26_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
