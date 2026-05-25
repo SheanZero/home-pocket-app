@@ -148,6 +148,12 @@ class MerchantDatabase {
     }
 
     // 3. Substring match (query contains entry name, or entry name contains query)
+    // IN-03 guard (Phase 23 D-13): skip substring matching for queries shorter
+    // than 3 chars because single/double-char queries match too many false
+    // positives (e.g., 'a' matches 'amazon' via 'amazon'.contains('a')).
+    // Exact-match pass (steps 1+2 above) is unaffected by this guard.
+    if (lowerQuery.length < 3) return null;
+
     for (final entry in _entries) {
       if (lowerQuery.contains(entry.name.toLowerCase()) ||
           entry.name.toLowerCase().contains(lowerQuery)) {

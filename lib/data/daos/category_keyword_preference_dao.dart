@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../shared/constants/default_synonyms.dart' show kVoiceSynonymSeedEpoch;
 import '../app_database.dart';
 
 /// Data access object for [CategoryKeywordPreferences] table.
@@ -79,15 +80,14 @@ class CategoryKeywordPreferenceDao {
   /// (`hitCount >= 1`) are preserved verbatim (Claude's-Discretion option
   /// (a) per Phase 21 CONTEXT). Idempotent on re-invocation.
   ///
-  /// Seed rows use the fixed epoch `DateTime(2026, 1, 1)` — this is matched
-  /// by `DefaultVoiceSynonyms._epoch` so audit queries can distinguish
+  /// Seed rows use the fixed epoch `kVoiceSynonymSeedEpoch` — this is matched
+  /// by [kVoiceSynonymSeedEpoch] in `default_synonyms.dart` so audit queries can distinguish
   /// untouched seeds from seeds whose hitCount has been bumped by
   /// `recordCorrection` (which writes `DateTime.now()`).
   Future<void> insertSeedBatch(
     List<({String keyword, String categoryId})> seeds,
   ) async {
     if (seeds.isEmpty) return;
-    final epoch = DateTime(2026, 1, 1);
     await _db.batch((b) {
       for (final seed in seeds) {
         b.insert(
@@ -96,7 +96,7 @@ class CategoryKeywordPreferenceDao {
             keyword: seed.keyword,
             categoryId: seed.categoryId,
             hitCount: const Value(0),
-            lastUsed: epoch,
+            lastUsed: kVoiceSynonymSeedEpoch,
           ),
           mode: InsertMode.insertOrIgnore,
         );

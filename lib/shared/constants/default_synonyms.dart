@@ -1,5 +1,13 @@
 import '../../features/accounting/domain/models/category_keyword_preference.dart';
 
+/// Phase 21 D-01 / Phase 23 D-12 IN-01: Fixed epoch used as `lastUsed`
+/// sentinel for all voice synonym seed rows. Single source of truth —
+/// imported by both [DefaultVoiceSynonyms._seed] and
+/// [CategoryKeywordPreferenceDao.insertSeedBatch] so that audit queries
+/// filtering on `lastUsed = epoch` see consistent row counts across
+/// both write paths.
+final DateTime kVoiceSynonymSeedEpoch = DateTime(2026, 1, 1);
+
 /// System default voice synonyms — seed source for VOICE-04 / VOICE-06.
 ///
 /// Phase 21 D-01: seed rows are written into the existing
@@ -18,12 +26,6 @@ import '../../features/accounting/domain/models/category_keyword_preference.dart
 /// `medicine`, `rent`, `utilities`, `movie`, `game`, `train`, `bus`, `taxi`.
 /// REQUIREMENTS.md §Out of scope defers English voice input to v1.4+.
 abstract final class DefaultVoiceSynonyms {
-  /// Fixed epoch used as `lastUsed` for all seed rows.
-  ///
-  /// Mirrors the value the DAO writes when persisting seeds (see
-  /// `CategoryKeywordPreferenceDao.insertSeedBatch`). The model field is
-  /// documentary only — the DAO ignores it and writes this constant.
-  static final DateTime _epoch = DateTime(2026, 1, 1);
 
   /// All built-in voice synonym seeds (zh + ja, no en).
   static List<CategoryKeywordPreference> get all => _all;
@@ -103,6 +105,18 @@ abstract final class DefaultVoiceSynonyms {
     // ===== Education =====
     _seed('本', 'cat_education_books'),
     _seed('书', 'cat_education_books'),
+
+    // ===== Other-expense override seeds (Phase 23 D-15 / IN-06) =====
+    // Exercises the cat_other_expense → cat_other_other override in
+    // VoiceCategoryResolver._ensureL2 via real corpus utterances.
+    // 'other' is added as a v1.4+ en-voice hedge — voice gating in v1.3 is
+    // zh/ja only, but the override is exercised in case en voice activates.
+    // Warning for v1.4+ en voice: 'other' is a common English word that may
+    // collide with contextual utterances like "the other day…". Add corpus
+    // regression cases before enabling full en voice support.
+    _seed('その他', 'cat_other_expense'),
+    _seed('其他', 'cat_other_expense'),
+    _seed('other', 'cat_other_expense'),
   ];
 
   /// Helper factory — builds a documentary `CategoryKeywordPreference` carrying
@@ -113,6 +127,6 @@ abstract final class DefaultVoiceSynonyms {
         keyword: keyword,
         categoryId: categoryId,
         hitCount: 0,
-        lastUsed: _epoch,
+        lastUsed: kVoiceSynonymSeedEpoch,
       );
 }

@@ -23,16 +23,10 @@ import '../../features/accounting/domain/models/voice_parse_result.dart';
 import '../../features/accounting/domain/repositories/category_keyword_preference_repository.dart';
 import '../../features/accounting/domain/repositories/category_repository.dart';
 import '../../infrastructure/ml/merchant_database.dart';
+import '../../shared/constants/category_other_id_overrides.dart';
 import '../accounting/category_service.dart';
 
-/// L1 ids whose `_other` L2 child does NOT follow the `${l1Id}_other` convention.
-/// Mirrors test/architecture/category_other_l2_invariant_test.dart::_otherIdOverrides
-/// (Phase 21 D-03 + PATTERNS.md §7 caveat). When adding entries here, update
-/// the architecture test allowlist atomically. IN-05 follow-up tracks lifting
-/// this to a single shared source of truth.
-const Map<String, String> _otherIdOverrides = {
-  'cat_other_expense': 'cat_other_other',
-};
+// _ensureL2 override map lives in lib/shared/constants/category_other_id_overrides.dart per Phase 23 D-12 IN-05
 
 /// Short-circuit voice category resolver.
 ///
@@ -121,7 +115,7 @@ class VoiceCategoryResolver {
   /// Resolve [categoryId] (L1 or L2) to a concrete L2 id.
   ///
   /// Returns the input unchanged when it is already L2. For an L1 input,
-  /// synthesizes `${l1Id}_other` (with the [_otherIdOverrides] aliasing) and
+  /// synthesizes `${l1Id}_other` (with the [kCategoryOtherIdOverrides] aliasing) and
   /// validates it via [CategoryRepository.findById]; if missing, falls back
   /// to the first L2 child by `sortOrder` (D-03 safety net).
   Future<String?> _ensureL2(String categoryId) async {
@@ -130,7 +124,7 @@ class VoiceCategoryResolver {
     if (cat.level == 2) return cat.id;
 
     // L1 case — synthesize the conventional `_other` id, honoring overrides.
-    final otherId = _otherIdOverrides[cat.id] ?? '${cat.id}_other';
+    final otherId = kCategoryOtherIdOverrides[cat.id] ?? '${cat.id}_other';
     final otherCat = await _categoryRepository.findById(otherId);
     if (otherCat != null && otherCat.level == 2) return otherCat.id;
 
