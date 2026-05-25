@@ -56,7 +56,7 @@
 - [x] **Phase 19: Manual One-Step + Keypad Polish** — Manual entry collapses to single screen, no "下一步" button; numeric keypad enlarged to platform-min touch targets (KEYPAD-01, INPUT-01) (completed 2026-05-23)
 - [x] **Phase 20: Voice Number Parser (zh + ja)** — Compound number state machine, intra-pause continued-listening window, locale-aware combining; per-locale corpus fixtures ≥95% accuracy (VOICE-01/02/03) (completed 2026-05-24)
 - [x] **Phase 21: Voice Category Resolver Level-2 Enforcement** — Always-level-2 contract, level-1 → first-level-2 fallback, merchant DB + synonym dictionary data sources extensible without code changes (VOICE-04/05/06) (completed 2026-05-24)
-- [ ] **Phase 22: Voice One-Step Integration + Record Button UX** — Voice fills shared details form in-place on single screen; record button idle caption + recording-state visual change within 100ms (INPUT-02, REC-01, REC-02) — code goal achieved (5/5 SC), 2 BLOCKER gaps pending closure (G-01 recognizer self-termination, G-02 silent errors)
+- [x] **Phase 22: Voice One-Step Integration + Record Button UX** — Voice fills shared details form in-place on single screen; record button idle caption + recording-state visual change within 100ms (INPUT-02, REC-01, REC-02) — code goal achieved (5/5 SC), 2 BLOCKER gaps pending closure (G-01 recognizer self-termination, G-02 silent errors) (completed 2026-05-25)
 
 ### 📋 Next Milestone (Planned)
 
@@ -159,7 +159,7 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 - [x] 22-07-PLAN.md — Phase verification + closure SUMMARY (analyze 0, custom_lint 0, gen-l10n clean, test pass, coverage ≥70%, no schema/pubspec drift) (Wave 2)
 - [x] 22-08-PLAN.md — Gap closure G-02 i18n foundation: add 4 voice-recognition error ARB keys (voiceRecognitionErrorNetwork/NoMatch/Audio/Unknown × ja/zh/en) + flutter gen-l10n (Wave 0)
 - [x] 22-09-PLAN.md — Gap closure G-01 + G-02 code fix: voice_input_screen.dart _onStatus drives commit on recognizer self-termination (CR-01); _onError surfaces localized SoftToast + permanent-flag mic gate (CR-02 + WR-05) (Wave 1)
-- [ ] 22-10-PLAN.md — Gap closure G-01 + G-02 widget tests: +3 tests (status-driven commit, transient-error toast, permanent-error mic gate) in voice_input_screen_test.dart (Wave 2)
+- [x] 22-10-PLAN.md — Gap closure G-01 + G-02 widget tests: +3 tests (status-driven commit, transient-error toast, permanent-error mic gate) in voice_input_screen_test.dart (Wave 2)
 **UI hint**: yes
 
 ## Progress
@@ -179,4 +179,4 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 | 19. Manual One-Step + Keypad Polish | 5/5 | Complete    | 2026-05-23 |
 | 20. Voice Number Parser (zh + ja) | 9/9 | Complete   | 2026-05-24 |
 | 21. Voice Category Resolver Level-2 Enforcement | 6/6 | Complete   | 2026-05-24 |
-| 22. Voice One-Step Integration + Record Button UX | 9/10 | In Progress|  |
+| 22. Voice One-Step Integration + Record Button UX | 10/10 | Complete   | 2026-05-25 |
