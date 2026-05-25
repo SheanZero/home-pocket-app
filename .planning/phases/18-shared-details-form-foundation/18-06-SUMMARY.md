@@ -40,6 +40,7 @@ metrics:
   files_created: 2
   files_modified: 0
   lines_of_code: 288
+requirements-completed: [INPUT-04]
 ---
 
 # Phase 18 Plan 06: TransactionEditScreen + OcrReviewScreen — Summary

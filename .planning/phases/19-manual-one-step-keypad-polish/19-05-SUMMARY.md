@@ -55,6 +55,7 @@ metrics:
   tasks_completed: 5
   tasks_total: 5
   files_changed: 12
+requirements-completed: [INPUT-01]
 ---
 
 # Phase 19 Plan 05: Phase Close-Out and Integration Tests Summary
