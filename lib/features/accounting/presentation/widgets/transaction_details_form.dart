@@ -191,6 +191,69 @@ class TransactionDetailsFormState
     setState(() => _amount = amount);
   }
 
+  /// Phase 22 D-07 — host (VoiceInputScreen) pushes voice-resolved category +
+  /// parent via this method on `_stopRecordingAndCommit` batch fill. Mirrors
+  /// the internal `_editCategory` write set + ledger resolution so behavior is
+  /// identical regardless of whether the user tapped the chevron or voice
+  /// resolved a category.
+  ///
+  /// Idempotency: short-circuits when `category.id == _category?.id`. Caller
+  /// may invoke repeatedly without rebuild storms.
+  void updateCategory(Category category, Category? parentCategory) {
+    if (!mounted) return;
+    if (category.id == _category?.id) return;
+    setState(() {
+      _categoryById[category.id] = category;
+      if (parentCategory != null) {
+        _categoryById[parentCategory.id] = parentCategory;
+      }
+      _category = category;
+      _parentCategory = parentCategory;
+    });
+    _resolveLedgerType(category.id);
+  }
+
+  /// Phase 22 D-07 — host pushes voice-resolved merchant string via this
+  /// method on batch fill. Assigning `.text` on the existing controller
+  /// triggers a TextField rebuild without recreating the controller.
+  ///
+  /// Idempotency: short-circuits when the new value equals the current
+  /// `_storeController.text`. Prevents cursor-reset (Pitfall 3) on re-runs.
+  void updateMerchant(String merchant) {
+    if (!mounted) return;
+    if (merchant == _storeController.text) return;
+    _storeController.text = merchant;
+  }
+
+  /// Phase 22 D-07 — public surface for note batch-fill. In v1.3 the voice
+  /// parser does NOT emit a discrete note (per RESEARCH §Assumptions A5);
+  /// this method exists for forward-compat with future parser revisions and
+  /// is typically a no-op call from the voice screen.
+  void updateNote(String note) {
+    if (!mounted) return;
+    if (note == _memoController.text) return;
+    _memoController.text = note;
+  }
+
+  /// Phase 22 D-07 / RESEARCH §Open Q2 — host pushes the voice-estimated
+  /// soul-ledger satisfaction value via this method on batch fill. Preserves
+  /// the Phase 11 `VoiceSatisfactionEstimator` → `_parseResult.estimatedSatisfaction`
+  /// pipeline through the Phase 22 single-screen rewrite (deletion of
+  /// `_navigateToConfirm` in Plan 04 removes the previous handoff via
+  /// `initialSatisfaction:`).
+  ///
+  /// Soul-ledger only — for survival-ledger categories the satisfaction field
+  /// is not rendered; calling this method is harmless (state is still mutated
+  /// but never read at submit() time).
+  ///
+  /// Idempotency: short-circuits when the new value equals the current
+  /// `_soulSatisfaction`.
+  void updateSatisfaction(int satisfaction) {
+    if (!mounted) return;
+    if (satisfaction == _soulSatisfaction) return;
+    setState(() => _soulSatisfaction = satisfaction.clamp(1, 10));
+  }
+
   Future<void> _editCategory() async {
     final result = await Navigator.of(context).push<Category>(
       MaterialPageRoute<Category>(
