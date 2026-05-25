@@ -6,7 +6,7 @@
 **Shipped:** v1.1 Happiness Metric & Display (2026-05-05) — see `.planning/milestones/v1.1-ROADMAP.md`
 **Shipped:** v1.2 Happiness Metric Refresh (2026-05-21) — see `.planning/milestones/v1.2-ROADMAP.md` + `.planning/milestones/v1.2-MILESTONE-AUDIT.md`
 
-**In progress:** v1.3 迭代帐本输入 — Phase 18 (shared details form foundation) complete 2026-05-22; **Phase 19 (manual one-step + keypad polish) complete 2026-05-23** — `ManualOneStepScreen` collapses manual entry into a single screen, `SmartKeyboard` enforces 48 dp NON-NEGOTIABLE per-key floor across iPhone SE/14/Pro Max, 6 user-approved golden baselines (ja/zh/en × light/dark), KEYPAD-01 + INPUT-01 validated; HUMAN-UAT.md tracks physical-device keypad feel pending.
+**In progress:** v1.3 迭代帐本输入 — Phase 18 (shared details form foundation) complete 2026-05-22; Phase 19 (manual one-step + keypad polish) complete 2026-05-23; **Phase 22 (voice one-step + record button UX) complete 2026-05-25** — `VoiceInputScreen` embeds shared details form on a single screen with hold-to-record gesture (300 ms misfire threshold), green→red gradient + idle→recording caption swap, post-gap-closure G-01 (`_onStatus` self-termination drives commit) + G-02 (`_onError` surfaces localized SoftToast, permanent errors gate mic); INPUT-02 + REC-01 + REC-02 validated, 22-HUMAN-UAT.md tracks 4 device-only items (touch latency, recognizer accuracy, golden aliasing, `notListening` intra-session behavior).
 
 The v1.0 initiative was a pure-refactor cleanup. It delivered an operational hybrid audit pipeline, eliminated 50 catalogued findings (24 CRITICAL, 8 HIGH, 8 MEDIUM, 7 LOW + 3 layer-violation closures), aligned all architecture documentation with the post-refactor codebase, and locked 4 permanent CI guardrails.
 
@@ -279,4 +279,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-23 — Phase 19 (manual one-step + keypad polish) complete*
+*Last updated: 2026-05-25 — Phase 22 (voice one-step + record button UX) complete after G-01 + G-02 gap closure*
