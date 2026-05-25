@@ -170,8 +170,23 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
 
   void _onStatus(String status) {
     if (!mounted) return;
-    // When speech service reports "done" or "notListening" after recording
+    // G-01: When the platform speech recognizer self-terminates (status 'done'
+    // or 'notListening' — triggered by 30s listenFor expiry, 3s pauseFor mid-press,
+    // or platform mic interruption) while the user is still holding the mic
+    // (_pressStart != null), drive the SAME commit path as _onLongPressEnd.
+    // Without this branch, _onLongPressEnd on the eventual finger release
+    // short-circuits at its `!_isRecording` guard and silently drops the
+    // transcript. CR-01 (22-REVIEW.md:47-83).
+    //
+    // Idempotency: clear _pressStart BEFORE invoking the commit path so the
+    // subsequent _onLongPressEnd hits its `start == null` guard and returns
+    // without re-running commit or discard.
     if ((status == 'done' || status == 'notListening') && _isRecording) {
+      if (_pressStart != null) {
+        _pressStart = null;
+        unawaited(_stopRecordingAndCommit());
+        return;
+      }
       setState(() {
         _isRecording = false;
         _soundLevel = 0.0;
