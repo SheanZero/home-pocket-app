@@ -2,7 +2,7 @@
 phase: 22
 slug: voice-one-step-integration-record-button-ux
 status: draft
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-05-25
 ---
@@ -48,7 +48,7 @@ created: 2026-05-25
 | `Stopwatch` around `setState → pump` < 100 ms (SC-4 timing) | 2 | REC-02 | — | N/A | widget | `flutter test test/widget/.../voice_input_screen_test.dart -p "100ms"` | ✅ Extend | ⬜ pending |
 | Pre-filled amount=100; voice fills 5000 → form amount=5000 (D-08 overwrite) | 1 | INPUT-02 | — | N/A | widget | `flutter test test/widget/.../voice_input_screen_test.dart -p "D-08"` | ✅ Extend | ⬜ pending |
 | Long-press start → tap merchant TextField → recording stops, no batch fill (D-09 focus interrupts) | 1 | INPUT-02 | — | N/A | widget | `flutter test test/widget/.../voice_input_screen_test.dart -p "D-09"` | ✅ Extend | ⬜ pending |
-| `updateCategory` / `updateMerchant` / `updateNote` mutate `TransactionDetailsFormState` correctly (D-07) | 0 | INPUT-02 | — | N/A | widget | `flutter test test/widget/features/accounting/presentation/widgets/transaction_details_form_test.dart -p "D-07"` | ✅ Extend | ⬜ pending |
+| `updateCategory` / `updateMerchant` / `updateNote` / `updateSatisfaction` mutate `TransactionDetailsFormState` correctly (D-07 + RESEARCH Open Q2 / B-1) | 0 | INPUT-02 | — | N/A | widget | `flutter test test/widget/features/accounting/presentation/widgets/transaction_details_form_test.dart -p "D-07"` | ✅ Extend | ⬜ pending |
 | ARB parity: `holdToRecord` + `recording` × ja/zh/en exist; `tapToRecord` removed; `flutter gen-l10n` clean (SC-5) | 0 | REC-01, REC-02 | — | N/A | CLI + arch test | `flutter gen-l10n && flutter analyze` + `flutter test test/arch/arb_parity_test.dart` (if exists) | ✅ Existing | ⬜ pending |
 
 *Status legend: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
@@ -60,7 +60,7 @@ created: 2026-05-25
 - [ ] `test/widget/features/accounting/presentation/screens/voice_input_screen_mic_button_golden_test.dart` — NEW golden harness (idle-state only per D-12; recording state asserted via decoration introspection because mid-animation goldens flake)
 - [ ] `test/widget/features/accounting/presentation/screens/voice_input_screen_mic_button_golden.png` — idle golden baseline (single locale × single theme; generated via `flutter test --update-goldens` on first run)
 - [ ] `test/integration/features/accounting/voice_save_entry_source_test.dart` — NEW integration test for SC-2 (mirror `test/integration/features/accounting/manual_save_entry_source_test.dart:218-242` structure with `entrySource: EntrySource.voice`)
-- [ ] `test/widget/features/accounting/presentation/widgets/transaction_details_form_test.dart` — extend with tests for the 3 new public methods (D-07) `updateCategory`, `updateMerchant`, `updateNote` before voice screen integration tests depend on them
+- [ ] `test/widget/features/accounting/presentation/widgets/transaction_details_form_test.dart` — extend with tests for the 4 new public methods (D-07 + Open Q2) `updateCategory`, `updateMerchant`, `updateNote`, `updateSatisfaction` before voice screen integration tests depend on them
 - [ ] DELETE `test/widget/features/accounting/presentation/screens/voice_to_manual_one_step_screen_test.dart` (Phase 19 D-16 regression test) — the voice→manual push no longer exists; SC-2 integration test replaces its coverage
 - [ ] Major rewrite of existing `test/widget/features/accounting/presentation/screens/voice_input_screen_test.dart` — strip assertions on `VoiceRecognitionResultCard`/「認識結果」/「タップして録音」 and replace with hold-to-record + caption-swap + 100 ms + batch-fill + focus-interrupts assertions
 
@@ -78,11 +78,11 @@ created: 2026-05-25
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references (golden harness + voice_save_entry_source_test + form widget D-07 extension)
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 10 s (quick) / < 60 s (wave gate)
-- [ ] `nyquist_compliant: true` set in frontmatter after planner cross-links every task
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references (golden harness + voice_save_entry_source_test + form widget D-07 extension including updateSatisfaction)
+- [x] No watch-mode flags
+- [x] Feedback latency < 10 s (quick) / < 60 s (wave gate)
+- [x] `nyquist_compliant: true` set in frontmatter after planner cross-links every task
 
-**Approval:** pending
+**Approval:** approved 2026-05-25
