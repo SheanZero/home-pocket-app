@@ -30,22 +30,22 @@ const approvedSuppressions = <String, String>{
       'print() accuracy banner bottom',
   // Phase 21 voice category corpus accuracy reporters — same rationale as
   // Phase 20 (per-locale accuracy summary surface). Keep grouped (zh + ja,
-  // mirrored layout).
+  // mirrored layout). Line numbers shifted by Phase 23 plan 23-03 D-15 group.
   'test/integration/voice/voice_category_corpus_zh_test.dart:118':
       'printOnFailure() reporter for per-case soft failures',
-  'test/integration/voice/voice_category_corpus_zh_test.dart:147':
+  'test/integration/voice/voice_category_corpus_zh_test.dart:160':
       'print() accuracy banner top',
-  'test/integration/voice/voice_category_corpus_zh_test.dart:149':
+  'test/integration/voice/voice_category_corpus_zh_test.dart:162':
       'print() accuracy summary line',
-  'test/integration/voice/voice_category_corpus_zh_test.dart:151':
+  'test/integration/voice/voice_category_corpus_zh_test.dart:164':
       'print() accuracy banner bottom',
   'test/integration/voice/voice_category_corpus_ja_test.dart:96':
       'printOnFailure() reporter for per-case soft failures',
-  'test/integration/voice/voice_category_corpus_ja_test.dart:125':
+  'test/integration/voice/voice_category_corpus_ja_test.dart:138':
       'print() accuracy banner top',
-  'test/integration/voice/voice_category_corpus_ja_test.dart:127':
+  'test/integration/voice/voice_category_corpus_ja_test.dart:140':
       'print() accuracy summary line',
-  'test/integration/voice/voice_category_corpus_ja_test.dart:129':
+  'test/integration/voice/voice_category_corpus_ja_test.dart:142':
       'print() accuracy banner bottom',
 };
 
