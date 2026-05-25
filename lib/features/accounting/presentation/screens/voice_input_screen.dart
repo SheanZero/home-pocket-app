@@ -33,6 +33,7 @@ import '../widgets/entry_mode_switcher.dart';
 import '../widgets/input_mode_tabs.dart';
 import '../widgets/soft_toast.dart';
 import '../widgets/transaction_details_form.dart';
+import '../widgets/voice_error_toast.dart';
 import '../widgets/voice_waveform.dart';
 
 /// Voice input screen for creating transactions through natural language speech.
@@ -170,8 +171,23 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
 
   void _onStatus(String status) {
     if (!mounted) return;
-    // When speech service reports "done" or "notListening" after recording
+    // G-01: When the platform speech recognizer self-terminates (status 'done'
+    // or 'notListening' — triggered by 30s listenFor expiry, 3s pauseFor mid-press,
+    // or platform mic interruption) while the user is still holding the mic
+    // (_pressStart != null), drive the SAME commit path as _onLongPressEnd.
+    // Without this branch, _onLongPressEnd on the eventual finger release
+    // short-circuits at its `!_isRecording` guard and silently drops the
+    // transcript. CR-01 (22-REVIEW.md:47-83).
+    //
+    // Idempotency: clear _pressStart BEFORE invoking the commit path so the
+    // subsequent _onLongPressEnd hits its `start == null` guard and returns
+    // without re-running commit or discard.
     if ((status == 'done' || status == 'notListening') && _isRecording) {
+      if (_pressStart != null) {
+        _pressStart = null;
+        unawaited(_stopRecordingAndCommit());
+        return;
+      }
       setState(() {
         _isRecording = false;
         _soundLevel = 0.0;
@@ -181,10 +197,26 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
 
   void _onError(String errorMsg, bool permanent) {
     if (!mounted) return;
+    // G-02: surface error to the user — never silently swallow (CLAUDE.md rule
+    // "never silently swallow errors", "provide user-friendly error messages
+    // in UI-facing code"). The errorMsg comes from the platform speech engine
+    // and is English-only (e.g., 'error_network'); showVoiceRecognitionErrorToast
+    // maps it to a localized ARB string (WR-05 i18n compliance).
+    //
+    // CR-02 literal shape (22-REVIEW.md:99-108): on permanent==true, flip
+    // _isInitialized = false so the EXISTING _onLongPressStart guard
+    // `if (!_isInitialized || _isRecording) return;` short-circuits new
+    // presses. Recovery: next successful _initSpeechService() call restores
+    // _isInitialized=true (currently only on screen rebuild; no in-screen
+    // retry affordance — out of scope for gap closure).
     setState(() {
       _isRecording = false;
       _soundLevel = 0.0;
+      if (permanent) {
+        _isInitialized = false;
+      }
     });
+    showVoiceRecognitionErrorToast(context, errorMsg);
   }
 
   void _showPermissionError() {
