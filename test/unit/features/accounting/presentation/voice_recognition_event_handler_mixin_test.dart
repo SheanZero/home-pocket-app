@@ -32,16 +32,19 @@ class _TestState extends State<_TestWidget> with VoiceRecognitionEventHandlerMix
   @override
   DateTime? pressStart;
 
-  /// Writable isInitialized (abstract set-only accessor in mixin).
-  bool _isInitialized = true;
+  /// Backing store for the abstract [isInitialized] setter.
+  // Exposed as a readable field so tests can assert on it if needed;
+  // prevents the unused-field warning on a write-only backing var.
+  bool lastIsInitialized = true;
 
   @override
-  set isInitialized(bool value) => setState(() => _isInitialized = value);
+  set isInitialized(bool value) => setState(() => lastIsInitialized = value);
 
-  double _soundLevel = 0.0;
+  /// Backing store for the abstract [soundLevel] setter.
+  double lastSoundLevel = 0.0;
 
   @override
-  set soundLevel(double value) => setState(() => _soundLevel = value);
+  set soundLevel(double value) => setState(() => lastSoundLevel = value);
 
   /// Mock last-final timestamp — set directly by tests.
   DateTime? mockLastFinal;
