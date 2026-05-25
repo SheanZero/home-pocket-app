@@ -1587,11 +1587,17 @@ abstract class S {
   /// **'Discard'**
   String get discard;
 
-  /// Voice input hint
+  /// Voice idle caption: hold to speak (push-to-talk)
   ///
   /// In en, this message translates to:
-  /// **'Tap to record'**
-  String get tapToRecord;
+  /// **'Hold to speak'**
+  String get holdToRecord;
+
+  /// Voice recording-state caption
+  ///
+  /// In en, this message translates to:
+  /// **'Recording…'**
+  String get recording;
 
   /// Today date chip label
   ///

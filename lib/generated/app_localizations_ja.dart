@@ -793,7 +793,10 @@ class SJa extends S {
   String get discard => '破棄';
 
   @override
-  String get tapToRecord => 'タップして録音';
+  String get holdToRecord => '押して話す';
+
+  @override
+  String get recording => '録音中…';
 
   @override
   String get todayDate => '今日';
