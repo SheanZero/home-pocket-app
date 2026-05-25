@@ -34,6 +34,7 @@ import '../widgets/input_mode_tabs.dart';
 import '../widgets/soft_toast.dart';
 import '../widgets/transaction_details_form.dart';
 import '../widgets/voice_waveform.dart';
+import 'voice_locale_readiness_mixin.dart';
 import 'voice_recognition_event_handler_mixin.dart';
 
 /// Voice input screen for creating transactions through natural language speech.
@@ -52,7 +53,10 @@ class VoiceInputScreen extends ConsumerStatefulWidget {
 }
 
 class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
-    with WidgetsBindingObserver, VoiceRecognitionEventHandlerMixin {
+    with
+        WidgetsBindingObserver,
+        VoiceRecognitionEventHandlerMixin,
+        VoiceLocaleReadinessMixin {
   // Speech recognition use case — managed directly (stateful lifecycle)
   late final StartSpeechRecognitionUseCase _speechService;
 
@@ -72,12 +76,6 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
 
   // Effective voice locale (updated reactively from voiceLocaleIdProvider)
   String _voiceLocaleId = 'zh-CN';
-
-  /// Phase 23 D-07 (WR-01 cold-start race fix): the recognizer must not
-  /// run with the wrong locale during the first ms after launch.
-  /// Flipped to true when voiceLocaleIdProvider resolves (or errors —
-  /// see RESEARCH Pitfall 3 graceful degradation).
-  bool _isLocaleReady = false;
 
   // ── Phase 22: embedded form integration (D-01) ──
 
@@ -174,30 +172,8 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
       }
     }
 
-    // Phase 23 D-07 (WR-01): gate the mic on voiceLocaleIdProvider resolution
-    // so the recognizer is never started with the wrong locale during cold start.
-    // fireImmediately: true ensures the flag flips synchronously when the provider
-    // has already resolved (common on warm launches). RESEARCH §Pattern 2.
-    ref.listenManual<AsyncValue<String>>(
-      voiceLocaleIdProvider,
-      (prev, next) {
-        if (next case AsyncData(:final value)) {
-          _voiceLocaleId = value;
-          if (mounted && !_isLocaleReady) {
-            setState(() => _isLocaleReady = true);
-          }
-        } else if (next case AsyncError()) {
-          // RESEARCH Pitfall 3: graceful degradation. Fall back to
-          // default locale (already initialized to 'zh-CN' above) and
-          // unlock the mic. Prevents soft-lock when AppSettings provider
-          // errors (e.g. corrupted SharedPreferences).
-          if (mounted && !_isLocaleReady) {
-            setState(() => _isLocaleReady = true);
-          }
-        }
-      },
-      fireImmediately: true,
-    );
+    // Phase 23 D-07 (WR-01) cold-start gate — owned by VoiceLocaleReadinessMixin.
+    initLocaleReadiness();
   }
 
   // ── Abstract contract — VoiceRecognitionEventHandlerMixin implementations ──
@@ -210,6 +186,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
   @override set soundLevel(double value) => _soundLevel = value;
   @override DateTime? get lastMergerFinalAt => _amountMerger?.lastFinalAt;
   @override Future<void> stopRecordingAndCommit() => _stopRecordingAndCommit();
+  @override void onVoiceLocaleResolved(String localeId) => _voiceLocaleId = localeId;
 
   void _showPermissionError() {
     // Insert a SoftToast overlay for permission error feedback
@@ -233,7 +210,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
   // ── Phase 22 D-03: hold-to-record gesture lifecycle ──
 
   void _onLongPressStart(LongPressStartDetails details) {
-    if (!_isInitialized || !_isLocaleReady || _isRecording) return;
+    if (!_isInitialized || !isLocaleReady || _isRecording) return;
     _pressStart = DateTime.now();
     _startRecording();
   }
