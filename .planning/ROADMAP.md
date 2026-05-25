@@ -150,9 +150,9 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
   4. While recording, the record button visibly changes (color/shape/icon) AND caption text changes to "录音中…" (zh) / equivalent for ja/en — verified by widget test asserting both visual diff (golden) and caption text change; perceived state change within 100ms enforced by a timing test (`expect(stopwatch.elapsedMilliseconds, lessThan(100))` between record-start trigger and rebuild completion)
   5. All new/changed UI strings (record button captions, recording status text) routed through `S.of(context)` with ja/zh/en parity; `flutter gen-l10n` clean; `flutter analyze` 0 issues
 **Plans**: 7 plans
-- [ ] 22-01-PLAN.md — ARB key swap (tapToRecord → holdToRecord + recording × ja/zh/en) + flutter gen-l10n (Wave 0)
-- [ ] 22-02-PLAN.md — TransactionDetailsForm D-07 extension (3 new public setters: updateCategory / updateMerchant / updateNote) + 9 widget tests (Wave 0)
-- [ ] 22-03-PLAN.md — AppColors recordingGradientStart / recordingGradientEnd constants (Wave 0)
+- [x] 22-01-PLAN.md — ARB key swap (tapToRecord → holdToRecord + recording × ja/zh/en) + flutter gen-l10n (Wave 0)
+- [x] 22-02-PLAN.md — TransactionDetailsForm D-07 extension (3 new public setters: updateCategory / updateMerchant / updateNote) + 9 widget tests (Wave 0)
+- [x] 22-03-PLAN.md — AppColors recordingGradientStart / recordingGradientEnd constants (Wave 0)
 - [ ] 22-04-PLAN.md — voice_input_screen.dart body rewrite: embed TransactionDetailsForm, hold-to-record gesture (RawGestureDetector + Duration.zero), AnimatedContainer shape morph, AnimatedSwitcher caption swap, Save CTA, FocusNode auto-stop, WidgetsBindingObserver lifecycle cancel (Wave 1)
 - [ ] 22-05-PLAN.md — voice_input_screen_test.dart major rewrite (8 tests: REC-01/REC-02/D-08/D-09/INPUT-02 happy path) + new idle golden harness + delete obsolete voice_to_manual_one_step_screen_test.dart (Wave 2)
 - [ ] 22-06-PLAN.md — NEW voice_save_entry_source_test.dart integration test (SC-2 DAO round-trip with real Drift DB + real CreateTransactionUseCase) (Wave 2)
@@ -176,4 +176,4 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 | 19. Manual One-Step + Keypad Polish | 5/5 | Complete    | 2026-05-23 |
 | 20. Voice Number Parser (zh + ja) | 9/9 | Complete   | 2026-05-24 |
 | 21. Voice Category Resolver Level-2 Enforcement | 6/6 | Complete   | 2026-05-24 |
-| 22. Voice One-Step Integration + Record Button UX | 0/0 | Not started | — |
+| 22. Voice One-Step Integration + Record Button UX | 3/7 | In Progress|  |
