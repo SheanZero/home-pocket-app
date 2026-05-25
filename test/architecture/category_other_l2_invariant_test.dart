@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/shared/constants/category_other_id_overrides.dart';
 import 'package:home_pocket/shared/constants/default_categories.dart';
 
 /// Architecture invariant test — Phase 21 D-03.
@@ -21,20 +22,16 @@ import 'package:home_pocket/shared/constants/default_categories.dart';
 /// `cat_other_other` rather than the synthetic `cat_other_expense_other`. The
 /// override is intentional and historical — destructive renaming is forbidden
 /// without an ADR (PATTERNS.md §7 caveat), so we accommodate it here. Adding
-/// entries to `_otherIdOverrides` is permitted ONLY after
+/// entries to [kCategoryOtherIdOverrides] is permitted ONLY after
 /// VoiceCategoryResolver._ensureL2 (Plan 03) is updated to consult the same
 /// map.
 ///
+/// Phase 23 D-12 IN-05: the override map was moved to
+/// lib/shared/constants/category_other_id_overrides.dart as [kCategoryOtherIdOverrides].
+///
 /// Run: flutter test test/architecture/category_other_l2_invariant_test.dart
 
-/// Explicit override map for L1 ids whose `${l1Id}_other` L2 does NOT follow
-/// the `${l1Id}_other` convention — verified in `default_categories.dart`
-/// (line ~1181 for cat_other_other). Adding entries here is permitted ONLY
-/// after VoiceCategoryResolver._ensureL2 (Plan 03) is updated to consult the
-/// same map.
-const Map<String, String> _otherIdOverrides = {
-  'cat_other_expense': 'cat_other_other',
-};
+// Override map moved to lib/shared/constants/category_other_id_overrides.dart per Phase 23 D-12 IN-05
 
 void main() {
   group('Category L2 _other invariant (Phase 21 D-03)', () {
@@ -61,7 +58,7 @@ void main() {
 
         final missing = <String>[];
         for (final l1Id in l1Ids) {
-          final expectedOtherId = _otherIdOverrides[l1Id] ?? '${l1Id}_other';
+          final expectedOtherId = kCategoryOtherIdOverrides[l1Id] ?? '${l1Id}_other';
           final otherL2 = l2ById[expectedOtherId];
           if (otherL2 == null) {
             missing.add(l1Id);
@@ -88,7 +85,8 @@ void main() {
               'Missing _other L2 for L1(s): $missing — Phase 21 D-03 invariant broken; '
               'VoiceCategoryResolver fallback will degrade. Either add the missing '
               '`<l1Id>_other` L2 to `default_categories.dart`, or — if the L2 must '
-              'use a non-convention id — add an entry to `_otherIdOverrides` '
+              'use a non-convention id — add an entry to `kCategoryOtherIdOverrides` '
+              'in lib/shared/constants/category_other_id_overrides.dart '
               'AND update VoiceCategoryResolver._ensureL2 (Plan 03) to consult it.',
         );
       },
