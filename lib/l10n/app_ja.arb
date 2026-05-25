@@ -1645,6 +1645,22 @@
   "@voiceMicrophonePermissionRequired": {
     "description": "Voice input permission message shown when microphone access is unavailable"
   },
+  "voiceRecognitionErrorNetwork": "ネットワークに接続できません。通信状況を確認してください",
+  "@voiceRecognitionErrorNetwork": {
+    "description": "Voice recognition error: network unavailable (platform error_network / error_network_timeout)"
+  },
+  "voiceRecognitionErrorNoMatch": "音声を認識できませんでした。もう一度お試しください",
+  "@voiceRecognitionErrorNoMatch": {
+    "description": "Voice recognition error: no transcription returned (platform error_no_match)"
+  },
+  "voiceRecognitionErrorAudio": "マイクの音声を取得できませんでした",
+  "@voiceRecognitionErrorAudio": {
+    "description": "Voice recognition error: audio capture failure (platform error_audio)"
+  },
+  "voiceRecognitionErrorUnknown": "音声認識でエラーが発生しました",
+  "@voiceRecognitionErrorUnknown": {
+    "description": "Voice recognition error: unknown / fallback (platform error_speech_timeout / error_client / other)"
+  },
   "analyticsBudgetProgress": "予算の進捗",
   "@analyticsBudgetProgress": {
     "description": "Analytics section title for budget progress"
