@@ -34,6 +34,7 @@ import '../widgets/input_mode_tabs.dart';
 import '../widgets/soft_toast.dart';
 import '../widgets/transaction_details_form.dart';
 import '../widgets/voice_waveform.dart';
+import 'voice_input_screen_helpers.dart';
 import 'voice_locale_readiness_mixin.dart';
 import 'voice_recognition_event_handler_mixin.dart';
 
@@ -429,7 +430,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
 
     if (!result.finalResult) {
       _partialResultCount++;
-      _lastWordCount = _countWords(result.recognizedWords);
+      _lastWordCount = countVoiceWords(result.recognizedWords);
 
       setState(() => _partialText = result.recognizedWords);
 
@@ -487,7 +488,13 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     // _parseResult.estimatedSatisfaction that _stopRecordingAndCommit later
     // pushes into the form via state.updateSatisfaction(...).
     if (parseResult.ledgerType == LedgerType.soul) {
-      final features = _buildAudioFeatures();
+      final features = buildVoiceAudioFeatures(
+        soundLevels: _soundLevels,
+        timestamps: _timestamps,
+        startTime: _startTime,
+        partialResultCount: _partialResultCount,
+        wordCount: _lastWordCount,
+      );
       final estimator = ref.read(voiceSatisfactionEstimatorProvider);
       final satisfaction = estimator.estimate(
         audioFeatures: features,
@@ -497,52 +504,6 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     }
 
     setState(() => _parseResult = parseResult);
-  }
-
-  VoiceAudioFeatures _buildAudioFeatures() {
-    final now = DateTime.now();
-    return VoiceAudioFeatures(
-      soundLevels: List.unmodifiable(_soundLevels),
-      timestamps: List.unmodifiable(_timestamps),
-      startTime: _startTime ?? now,
-      endTime: now,
-      partialResultCount: _partialResultCount,
-      wordCount: _lastWordCount,
-    );
-  }
-
-  int _countWords(String text) {
-    if (text.isEmpty) return 0;
-    // Japanese/Chinese: estimate by character count (2 chars ≈ 1 word)
-    // English: split by whitespace
-    final hasLatin = RegExp(r'[a-zA-Z]').hasMatch(text);
-    if (hasLatin) {
-      return text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
-    }
-    return (text.replaceAll(RegExp(r'\s'), '').length / 2).ceil();
-  }
-
-  String _extractVoiceKeyword(VoiceParseResult result) {
-    var remaining = result.rawText;
-
-    // Remove amount patterns
-    remaining = remaining.replaceAll(
-      RegExp(r'[¥￥]?\s*[\d,]+\.?\d*\s*(円|元|ドル)?'),
-      '',
-    );
-
-    // Remove merchant name if matched
-    if (result.merchantName != null) {
-      remaining = remaining.replaceFirst(result.merchantName!, '');
-    }
-
-    // Remove Japanese particles
-    remaining = remaining.replaceAll(RegExp(r'[のにでをはがもへとや]'), '');
-
-    // Remove Chinese particles
-    remaining = remaining.replaceAll(RegExp(r'[的了吗呢吧啊呀哦]'), '');
-
-    return remaining.trim();
   }
 
   @override
@@ -566,7 +527,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     // when a parse result exists. Keep the helper signature untouched; pass
     // null until a parse runs.
     final voiceKeyword = _parseResult != null
-        ? _extractVoiceKeyword(_parseResult!)
+        ? extractVoiceKeyword(_parseResult!)
         : null;
 
     return Scaffold(
