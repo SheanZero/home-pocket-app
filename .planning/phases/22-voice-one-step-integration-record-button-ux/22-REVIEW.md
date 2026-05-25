@@ -2,296 +2,203 @@
 phase: 22-voice-one-step-integration-record-button-ux
 reviewed: 2026-05-25T00:00:00Z
 depth: standard
-files_reviewed: 10
+files_reviewed: 3
 files_reviewed_list:
-  - lib/core/theme/app_colors.dart
+  - lib/features/accounting/presentation/widgets/voice_error_toast.dart
   - lib/features/accounting/presentation/screens/voice_input_screen.dart
-  - lib/features/accounting/presentation/widgets/transaction_details_form.dart
-  - lib/l10n/app_en.arb
-  - lib/l10n/app_ja.arb
-  - lib/l10n/app_zh.arb
-  - test/integration/features/accounting/voice_save_entry_source_test.dart
-  - test/widget/features/accounting/presentation/screens/voice_input_screen_mic_button_golden_test.dart
   - test/widget/features/accounting/presentation/screens/voice_input_screen_test.dart
-  - test/widget/features/accounting/presentation/widgets/transaction_details_form_test.dart
 findings:
-  critical: 2
-  warning: 7
+  critical: 0
+  warning: 3
   info: 3
-  total: 12
+  total: 6
 status: issues_found
 ---
 
-# Phase 22: Code Review Report
+# Phase 22: Code Re-Review Report (Post Gap Closure G-01 + G-02)
 
 **Reviewed:** 2026-05-25
 **Depth:** standard
-**Files Reviewed:** 10 (4 auto-generated localization Dart files and 1 PNG golden baseline skipped)
+**Files Reviewed:** 3
 **Status:** issues_found
 
 ## Summary
 
-The hold-to-record rewrite is structurally coherent: gesture dispatch, the 300 ms misfire gate, mic-button AnimatedContainer morph, EntrySource.voice stamping, and the GlobalKey batch-fill into TransactionDetailsForm all line up with Plan 22's design. Tests cover the happy path, misfire, focus interruption, idempotency of the new setters, and the SC-2 schema CHECK round-trip end-to-end.
+Re-review of Plans 22-08/09/10 gap closure work after CR-01 and CR-02 were elevated to BLOCKERs. The prior-flagged defects are **correctly fixed**:
 
-That said, two correctness gaps will surface in real use:
+- **CR-01 (G-01) is closed**: `_onStatus` now drives `_stopRecordingAndCommit` when the recognizer self-terminates mid-press, with proper idempotency via pre-emptive `_pressStart = null` clearing. Verified by a passing widget test that simulates `onStatus('done')` while the gesture is still held.
+- **CR-02 (G-02) is closed** in the literal shape prescribed by the prior review: `_onError` flips `_isInitialized = false` on `permanent==true`, reusing the existing `_onLongPressStart` guard. No orthogonal flag was introduced.
+- **WR-05 (i18n compliance) is closed**: `voice_error_toast.dart` maps every platform error code to one of the 4 new ARB-backed `voiceRecognitionError*` strings via switch; raw English `errorMsg` is never rendered. All 3 locales (ja/zh/en) have the keys (verified in `app_*.arb`).
+- **Test coverage is rigorous**: the 3 new widget tests genuinely exercise the production code paths, including an idempotency assertion that gesture.up after a status-driven commit does NOT re-invoke `stop()` or the parser.
 
-1. **Self-terminated sessions silently drop the transcript.** The speech service's "done"/"notListening" status callback flips `_isRecording` to false but never invokes the parse + batch-fill path. Once the recognizer ends itself (any 30 s holdover, network glitch, or `pauseFor` timeout), the subsequent finger-release falls through both guards in `_onLongPressEnd` and the user's transcript evaporates with no UI signal.
-2. **Errors from the speech service are swallowed.** `_onError` discards `errorMsg` and `permanent`, so permission revocation, network failures, and unavailable engines reset the UI to idle with zero feedback — indistinguishable from a normal end-of-recording.
+Three WARNING findings remain — none are regressions; two are latent issues amplified or made newly observable by the gap closure shape, and one is a subtle semantic risk in the `notListening` branch that should be considered.
 
-Beyond those, several issues add up to a fragile commit path: the `_voiceLocaleId` initial value can leak through if the user holds the mic before `voiceLocaleIdProvider` resolves; the satisfaction batch-fill reads a stale `_parseResult` instead of the just-resolved parse; and a vacuous null check papers over the model contract. The l10n ARB parity is correct (`holdToRecord`, `recording`, `voiceMicrophonePermissionRequired` exist in all three locales with matching `@meta` blocks).
+**Pre-existing analyzer warnings** (firebase_messaging build artifact, 2 onReorder deprecations in `category_selection_screen.dart`) are explicitly out of scope per the re-review context note.
 
-The two new colors (`recordingGradientStart`/`recordingGradientEnd`, light + dark) are well-scoped. Tests have minor cleanup leaks but assertions are sound.
+## Warnings
 
-## Critical Issues
+### WR-01: `_onStatus` commits on transient `notListening` events — risk of premature commit during normal recording
 
-### CR-01: Speech service self-termination silently drops the user's transcript and batch-fill
+**File:** `lib/features/accounting/presentation/screens/voice_input_screen.dart:185-195`
+**Issue:** The `_onStatus` G-01 fix routes BOTH `'done'` and `'notListening'` statuses through `_stopRecordingAndCommit` when `_pressStart != null`. The platform `speech_to_text` package can emit `'notListening'` transitions during normal in-session pauses (the recognizer briefly stops the audio stream between recognition chunks even within a single listen call). Per the package's status semantics, `notListening` is distinct from `done`:
 
-**File:** `lib/features/accounting/presentation/screens/voice_input_screen.dart:171-180, 217-229`
-**Issue:** `_onStatus` flips `_isRecording = false` when the recognizer reports "done" or "notListening", but performs no parse / commit / batch-fill. After the flag clears, `_onLongPressEnd` short-circuits at line 220 (`!_isRecording → return`) on the eventual finger release, so neither `_stopRecordingAndCommit` nor `_cancelRecordingAndDiscard` ever runs.
+- `done` is terminal — the recognizer has shut down its session.
+- `notListening` can be **intermediate** — emitted when the engine pauses mid-session (e.g., on iOS when the recognition request transitions states, on Android during partial result buffering).
 
-Real-world triggers:
-- `listenFor: Duration(seconds: 30)` expiry mid-press (long voice notes).
-- `pauseFor: Duration(seconds: 3)` triggering between phrases (very common in Japanese hesitation patterns).
-- Platform-side mic interruption (incoming call audio routing changes, audio focus loss on Android).
+If `notListening` fires during normal recording while the user is still holding, we will now prematurely commit the partial transcript and stop the recognizer, even though the user intended to keep speaking. The 3s `pauseFor` timer normally guards against this for the silence case, but the platform also emits `notListening` for non-silence transitions on some devices.
 
-The user holds, speaks "1千8百4十元 星巴克", the engine emits a final transcript, status flips to "notListening" 3 s after the last word, `_isRecording = false`, user releases their finger expecting the transaction to be filled — nothing happens and the mic returns to idle with no feedback. The comment at lines 434-438 of `_onResult` even acknowledges path (b) as the auto-termination route, but the handler doesn't implement the commit.
+**Severity rationale:** This is a latent correctness risk in real-world recording sessions. The prior code had the same predicate (it flipped `_isRecording = false` on `notListening` too), but it failed silently — the user could continue holding and the bug surfaced as "transcript lost on release." The new code now **commits with the partial buffer**, which is technically better but may surprise users with truncated transcripts. The original CR-01 recommendation referred to `done` as the canonical self-termination signal; `notListening` was inherited from the broken code.
 
-Compare with the legacy two-screen flow (per CONTEXT/Plan 22): there, "done" status drove the navigation to confirm-screen, which itself displayed the parsed result. After Phase 22's collapse to one screen, that exit path was deleted but no replacement was wired into `_onStatus`.
-
-**Fix:** Drive the same commit path from `_onStatus` when the recognizer self-terminates while the user still has the finger down (`_pressStart != null`):
-
+**Fix:**
 ```dart
-void _onStatus(String status) {
-  if (!mounted) return;
-  if ((status == 'done' || status == 'notListening') && _isRecording) {
-    // If the user is still pressing, treat self-termination as a successful
-    // commit — same path as releasing past the 300 ms threshold.
-    if (_pressStart != null) {
-      _pressStart = null;
-      // Fire-and-forget — _stopRecordingAndCommit already gates on mounted.
-      unawaited(_stopRecordingAndCommit());
-      return;
-    }
-    setState(() {
-      _isRecording = false;
-      _soundLevel = 0.0;
-    });
+// Option A (safer): only commit on terminal 'done'; treat 'notListening' as transient
+if (status == 'done' && _isRecording) {
+  if (_pressStart != null) {
+    _pressStart = null;
+    unawaited(_stopRecordingAndCommit());
+    return;
   }
+  setState(() {
+    _isRecording = false;
+    _soundLevel = 0.0;
+  });
+}
+
+// Option B: log/research `notListening` semantics on both platforms and decide.
+// Keep current behavior with a TODO + research note linked to the speech_to_text
+// status-state-machine docs.
+```
+
+At minimum, document the intentional broadening in the inline comment and link to a research note proving `notListening` is terminal on iOS+Android. Today's comment claims it is triggered by "30s listenFor expiry, 3s pauseFor mid-press, or platform mic interruption" — none of those are intra-session, and no source is cited.
+
+### WR-02: `_onError` shows the toast even when `_stopRecordingAndCommit` is already in flight — possible spurious toast on successful commit
+
+**File:** `lib/features/accounting/presentation/screens/voice_input_screen.dart:198-220` (and interaction with `_onStatus` G-01 branch at 185-195)
+**Issue:** Sequence of events possible in production:
+
+1. User releases finger; `_onLongPressEnd` calls `_stopRecordingAndCommit()` (or `_onStatus('done')` does, per the new G-01 path).
+2. `_stopRecordingAndCommit` calls `_amountMerger?.stop()` and `await _speechService.stop()`.
+3. The platform engine, during shutdown, can emit a final `_onError` callback (some Android error codes fire on tear-down, e.g., `error_speech_timeout`, `error_no_match` when the buffer was empty).
+4. Our `_onError` sets `_isRecording = false` (already false — harmless) AND mounts a SoftToast.
+
+Result: the form fills correctly from the parsed transcript, AND a toast appears claiming an error. The user sees conflicting signals.
+
+The fake test never exercises this race because `CapturingStartSpeechRecognitionUseCase.stop()` does not fire `_onError` afterwards.
+
+**Severity rationale:** Confusing UX, not data loss. Mitigation should at minimum suppress the toast when a commit completed successfully within a short window (e.g., 500ms), or only render the toast when no parse result was committed.
+
+**Fix:**
+```dart
+void _onError(String errorMsg, bool permanent) {
+  if (!mounted) return;
+
+  // If a commit just succeeded, the platform's tear-down error is spurious.
+  // Track _lastCommitAt or _committedThisGesture and skip the toast for
+  // transient errors fired within 500ms of a successful commit.
+  setState(() {
+    _isRecording = false;
+    _soundLevel = 0.0;
+    if (permanent) {
+      _isInitialized = false;
+    }
+  });
+
+  // Suppress transient toast if we just committed.
+  if (!permanent && _committedRecently) return;
+
+  showVoiceRecognitionErrorToast(context, errorMsg);
 }
 ```
 
-Also add a widget test that emits a final result, fires `onStatus('done')` from the fake speech service, and asserts the form is filled.
+Or document the race explicitly and accept it.
 
-### CR-02: `_onError` swallows all speech-recognition errors with zero user feedback
+### WR-03: `_stopRecordingAndCommit` double-parses the final transcript — once via `_parseFinalResult` from `_onResult`, again from the commit path
 
-**File:** `lib/features/accounting/presentation/screens/voice_input_screen.dart:182-188`
-**Issue:** The error callback receives `errorMsg` and a `permanent` flag but ignores both. The UI silently resets to the idle state — visually identical to a successful end-of-recording — even when the failure is unrecoverable (e.g., permission revoked mid-session, no network for cloud recognizer, engine unavailable).
+**File:** `lib/features/accounting/presentation/screens/voice_input_screen.dart:317-377` and `444-482`
+**Issue:** When the recognizer emits a final result via `_onResult` (lines 460-481), the code calls `_parseFinalResult(text)` which awaits `parseUseCase.execute(text, ...)`. That populates `_parseResult` and (for soul ledger) `estimatedSatisfaction`.
 
-Two consequences:
-1. Users who lose mic permission while the screen is open see no signal that recording is broken; the permission toast (`_showPermissionError`) only fires once during initial `_initSpeechService`.
-2. Transient network errors look the same as the user manually stopping early — there's no retry affordance or even a hint to check connection.
+Then on commit (either gesture release or G-01 status-driven), `_stopRecordingAndCommit` (line 333) ALSO calls `parseUseCase.execute(text, ...)` against the same text. So the parser runs **twice** for every successful voice session.
 
-CLAUDE.md security/error-handling rules require "user-friendly error messages in UI-facing code" and "never silently swallow errors". `_onError` does exactly that.
+This is visible in the G-01 widget test: `parseUseCase.inputs` will contain `'1千8百4十元 星巴克'` two times (once from `_parseFinalResult`, once from `_stopRecordingAndCommit`). The test uses `contains` and `where().length` snapshots — both still pass — but it documents the duplication.
 
-**Fix:** Surface the error via the existing `SoftToast` infrastructure already used for `_showPermissionError`. At minimum, log + show a localized toast; for `permanent=true`, gate the mic button until re-initialization. Example:
+Worse: the SECOND parse in `_stopRecordingAndCommit` IGNORES `_parseResult` (which was already populated by the first parse) and re-fetches. The only place `_parseResult` is actually consumed in the commit path is line 368-370 for `estimatedSatisfaction` — and that piggybacks on the FIRST parse, not the second. So the second parse is structurally wasted work AND a stale-read risk if the parser is non-deterministic (e.g., timestamp-dependent).
 
+**Severity rationale:** Pre-existing waste/coupling; not a new defect introduced by gap closure. The G-01 path makes it slightly more visible because status-driven commit triggers the second parse without a gesture release in between. Not a blocker but should be cleaned up.
+
+**Fix:**
 ```dart
-void _onError(String errorMsg, bool permanent) {
+// In _stopRecordingAndCommit, reuse the already-populated _parseResult instead
+// of re-parsing:
+Future<void> _stopRecordingAndCommit() async {
+  _amountMerger?.stop();
+  await _speechService.stop();
   if (!mounted) return;
   setState(() {
     _isRecording = false;
     _soundLevel = 0.0;
-    if (permanent) _isInitialized = false;
   });
-  _showRecognitionErrorToast(errorMsg, permanent);
+
+  final data = _parseResult; // already populated by _parseFinalResult
+  if (data == null) return;
+  // ... rest of the flow uses `data` directly ...
 }
 ```
 
-Add a corresponding ARB key (e.g., `voiceRecognitionError`, `voiceRecognitionErrorPermanent`) in all three locales and a widget test that fires `onError('network', false)` and asserts the toast appears.
-
-## Warnings
-
-### WR-01: First-tap race condition leaks default `_voiceLocaleId = 'zh-CN'` to the recognizer
-
-**File:** `lib/features/accounting/presentation/screens/voice_input_screen.dart:73, 239-280, 540-546`
-**Issue:** `_voiceLocaleId` is initialized to `'zh-CN'` at line 73 and updated only inside `build()` when `voiceLocaleIdProvider` resolves to `AsyncData`. If the user holds the mic before the first build completes the provider load (or during the loading state on a cold start), `_startRecording` reads the default `'zh-CN'` and passes that to the speech engine and to the numeral-machine parser selection (lines 261-263).
-
-For a Japanese-default device this is the worst-case mismatch:
-- The platform recognizer is asked for `zh-CN` but the user speaks Japanese → either no result or garbage transcripts.
-- `_amountMerger`'s parser is the Chinese state machine, so cross-final merging of "千 / 百" tokens runs the wrong tokenizer.
-
-The integration test (`voice_save_entry_source_test.dart`) hides this with `await tester.pumpAndSettle()` after the override, so the bug doesn't appear in tests. The mic-button golden test similarly settles before any interaction is possible.
-
-**Fix:** Either (a) gate the mic button's `onLongPressStart` on `voiceLocaleAsync is AsyncData` so taps before resolution are ignored, or (b) make `_voiceLocaleId` nullable and treat null as "not ready" with a localized hint. A simple guard:
-
-```dart
-void _onLongPressStart(LongPressStartDetails details) {
-  if (!_isInitialized || _isRecording) return;
-  if (_voiceLocaleId.isEmpty) return; // or check a separate _isLocaleReady flag
-  _pressStart = DateTime.now();
-  _startRecording();
-}
-```
-
-Backed by an explicit `_isLocaleReady` flag set only inside the `AsyncData` branch of `build()`.
-
-### WR-02: Vacuous null check on non-nullable `estimatedSatisfaction`
-
-**File:** `lib/features/accounting/presentation/screens/voice_input_screen.dart:336-338`
-**Issue:**
-
-```dart
-if (_parseResult?.estimatedSatisfaction != null) {
-  state.updateSatisfaction(_parseResult!.estimatedSatisfaction);
-}
-```
-
-`VoiceParseResult.estimatedSatisfaction` is `@Default(5) int` (non-nullable) per `voice_parse_result.dart:27`. The inner expression `_parseResult!.estimatedSatisfaction != null` is always `true` whenever `_parseResult != null`, so the gate is equivalent to a plain non-null check on `_parseResult`. Worse, the check obscures the real semantic — survival-ledger transactions get satisfaction = 5 pushed into the form unconditionally (technically harmless because `submit()` discards it for non-soul ledgers, but it makes the intent unclear and the form state inconsistent with the displayed ledger).
-
-The deeper problem: the value being pushed is the *stale* `_parseResult` from a previous partial/final-result handler (see WR-03), not the satisfaction computed for the in-flight `parseResult` at lines 302-307. The two `_parseResult` writers (`_parseFinalResult` on line 484 and `_parseVoiceInput` on line 457) race against `_stopRecordingAndCommit`.
-
-**Fix:** Compute satisfaction from the just-resolved `parseResult.data` (re-run the soul-ledger estimator inline, or have `parseUseCase.execute` return satisfaction directly when ledgerType==soul). Skip when ledger is survival:
-
-```dart
-if (data.ledgerType == LedgerType.soul) {
-  final features = _buildAudioFeatures();
-  final estimator = ref.read(voiceSatisfactionEstimatorProvider);
-  final satisfaction = estimator.estimate(
-    audioFeatures: features,
-    recognizedText: text,
-  );
-  state.updateSatisfaction(satisfaction);
-}
-```
-
-### WR-03: Satisfaction batch-fill reads a stale `_parseResult` racing with `_parseFinalResult`
-
-**File:** `lib/features/accounting/presentation/screens/voice_input_screen.dart:336-338, 412-450, 461-485`
-**Issue:** Two independent async pipelines write to `_parseResult`:
-
-1. `_parseFinalResult(text)` (fire-and-forget from `_onResult` line 447) — runs the parser, optionally invokes the soul estimator, and writes `_parseResult` at line 484.
-2. `_stopRecordingAndCommit` (line 286) — runs its own `parseUseCase.execute` at line 302 (independent invocation, different timing) and then reads `_parseResult` at line 336 to grab the satisfaction.
-
-Whether pipeline 1 wins the race against pipeline 2 depends on microtask scheduling and how fast the parse use case resolves. If pipeline 2 races ahead, `_parseResult` is the *previous* recording's result (or null), and the satisfaction either uses a stale value or is skipped entirely. The integration tests don't catch this because the fake `_FakeParseVoiceInputUseCase` resolves synchronously in a single microtask.
-
-**Fix:** Coupled with WR-02 — compute satisfaction inline from the in-scope `data` rather than from a side-channel field. Eliminating `_parseResult` reads at line 336 removes the race entirely.
-
-### WR-04: Soul-celebration overlay is unreachable from the voice flow (host pops route before animation)
-
-**File:** `lib/features/accounting/presentation/screens/voice_input_screen.dart:365-392`, `lib/features/accounting/presentation/widgets/transaction_details_form.dart:425-428, 737-750`
-**Issue:** `_onSavePressed` calls `Navigator.of(context).popUntil((route) => route.isFirst)` immediately on `success` (line 376). Inside `submit()`, the form sets `_showCelebration = true` for soul saves (line 427) — but the Stack overlay rendering this only runs on the next frame, which never arrives because the route is popped first. The form is disposed before the celebration overlay paints.
-
-Phase 22 explicitly preserves D-15 ("celebration only for .new soul saves"), but the celebration is now invisible in the voice flow. Tests at `transaction_details_form_test.dart:392-437` assert the overlay exists *if* you don't pop, but no test asserts the integrated voice→celebration→pop sequence.
-
-**Fix:** Either (a) defer the pop until the celebration's `onDismissed` callback fires (refactor: pass a continuation through `submit()`, or expose `_showCelebration` as a public listener on the form state), or (b) move celebration ownership to the host so it can be sequenced with navigation. Approach (a) is less invasive:
-
-```dart
-result.when(
-  success: (tx) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(S.of(context).transactionSaved)),
-    );
-    if (tx.ledgerType == LedgerType.soul) {
-      // Wait for celebration animation to complete before popping.
-      // (Pseudo-API — actual implementation needs SoulCelebrationOverlay
-      //  to expose a Future<void> dismissal signal.)
-    } else {
-      Navigator.of(context).popUntil((route) => route.isFirst);
-    }
-  },
-  ...
-);
-```
-
-### WR-05: `_onError` is also non-localized when surfaced (compounds CR-02)
-
-**File:** `lib/features/accounting/presentation/screens/voice_input_screen.dart:182-188`
-**Issue:** Even if CR-02 is fixed by showing a toast with `errorMsg`, the underlying string comes from the platform speech engine and is typically English-only ("network", "no-speech", "error_audio", etc.). Surfacing those verbatim violates the project's i18n rule ("All UI text via `S.of(context)` — never hardcode strings").
-
-**Fix:** When fixing CR-02, map the platform error codes to a localized message in all three ARBs. Common codes from `speech_to_text`:
-- `error_network` / `error_network_timeout`
-- `error_no_match`
-- `error_audio`
-- `error_permission` (overlaps with permanent=true)
-- `error_speech_timeout`
-
-Define `voiceRecognitionErrorNetwork`, `voiceRecognitionErrorNoMatch`, `voiceRecognitionErrorAudio`, `voiceRecognitionErrorUnknown` in all three locales and switch on `errorMsg`.
-
-### WR-06: Integration-test mocktail `findById(any())` catch-all overrides specific stubs
-
-**File:** `test/integration/features/accounting/voice_save_entry_source_test.dart:192-201`
-**Issue:**
-
-```dart
-when(() => categoryRepository.findById(_category.id))
-    .thenAnswer((_) async => _category);
-when(() => categoryRepository.findById(_parentCategory.id))
-    .thenAnswer((_) async => _parentCategory);
-when(() => categoryRepository.findById(any()))     // ← LAST wins for any matching id
-    .thenAnswer((_) async => _category);
-```
-
-In mocktail, later `when` calls registered with broader matchers (`any()`) take precedence over earlier specific argument stubs when both can match. As a result, the parent lookup at `voice_input_screen.dart:320` (`repo.findById(category.parentId!)` where `parentId == 'cat_food'`) returns `_category` (the L2 cafe) instead of `_parentCategory` (the L1 food).
-
-For the test's assertion (`rows.first.entrySource == 'voice'` and `rows.first.amount == 500`), this doesn't matter because the use case stores `categoryId = _category.id` regardless. But the test creates a misleading impression that the parent-resolution path works — if a future change starts asserting parent fields, this latent mock issue will misdirect debugging.
-
-**Fix:** Drop the catch-all and rely on the two specific stubs. If the test legitimately needs a fallback for other ids, use a `when(() => findById(any(that: isNot(equals(_category.id) | equals(_parentCategory.id)))))`-style guard, or throw on unexpected ids to make missing stubs loud.
-
-### WR-07: TextEditingController listener removal in tests uses a new lambda — listener leak
-
-**File:** `test/widget/features/accounting/presentation/widgets/transaction_details_form_test.dart:910-911, 1056-1057`
-**Issue:**
-
-```dart
-var notifications = 0;
-controller.addListener(() => notifications++);
-addTearDown(() => controller.removeListener(() => notifications++));
-```
-
-`addListener` and `removeListener` are passed two *different* closure instances (each `() => notifications++` literal builds a new `Function` object), so `removeListener` does nothing — the listener stays attached for the controller's remaining lifetime. The test currently passes because the controller is disposed shortly after via the parent widget's dispose, but the cleanup is purely cosmetic: it doesn't actually remove anything, and a future refactor that keeps the controller alive longer (e.g., a shared controller across tests) would surface stale-listener crashes or counter inflation.
-
-**Fix:** Hoist the listener into a named variable so the same reference is used in both calls:
-
-```dart
-var notifications = 0;
-void listener() => notifications++;
-controller.addListener(listener);
-addTearDown(() => controller.removeListener(listener));
-```
+This also fixes a subtle ordering issue: `_parseFinalResult` adds `estimatedSatisfaction` (for soul ledger), but the current commit path uses `_parseResult?.estimatedSatisfaction` on line 368 while reading other fields from `parseResult.data` (the freshly-executed Result). Two different snapshots for one logical operation.
 
 ## Info
 
-### IN-01: Dead/unused parameter — `LongPressStartDetails details` and `LongPressEndDetails details`
+### IN-01: Toast helper has no recovery affordance after permanent error — user must navigate away and back
 
-**File:** `lib/features/accounting/presentation/screens/voice_input_screen.dart:211, 217`
-**Issue:** Both `_onLongPressStart(LongPressStartDetails details)` and `_onLongPressEnd(LongPressEndDetails details)` ignore the `details` argument (no use of `globalPosition`, `velocity`, etc.). The signatures are imposed by `LongPressGestureRecognizer`, so the parameters can't be dropped, but a leading underscore (`_`) clarifies intent and matches Dart conventions.
+**File:** `lib/features/accounting/presentation/screens/voice_input_screen.dart:198-220` and `lib/features/accounting/presentation/widgets/voice_error_toast.dart:48-62`
+**Issue:** Per the 22-09 summary, this is explicitly out of scope for gap closure: when `_onError(..., true)` flips `_isInitialized = false`, recovery requires the screen to be rebuilt (which only re-runs `initState` → `_initSpeechService`). There is no in-screen retry button on the toast, no auto-retry, and no link to settings.
+
+Worse, the toast auto-dismisses after 3 seconds (per `SoftToast.duration`), leaving the user with a dead mic icon and no visible explanation. The mic visual does not change (still uses idle gradient), so the user cannot distinguish "ready" from "permanently failed."
+
+**Fix:** Follow-up phase — add either:
+1. A "Retry" action on the toast (extend SoftToast with an optional action).
+2. A visual state on the mic button when `!_isInitialized` (e.g., grayed-out + lock icon).
+3. An auto-retry of `_initSpeechService()` after N seconds.
+
+### IN-02: `voice_input_screen.dart` is 832 lines — 32 lines over the 800 CLAUDE.md hard cap
+
+**File:** `lib/features/accounting/presentation/screens/voice_input_screen.dart:1-832`
+**Issue:** CLAUDE.md `coding-style.md` specifies "800 max" as the hard cap. The 22-09 SUMMARY acknowledges this as a follow-up. The verbose G-01 / G-02 inline comments (~25 lines of provenance + cross-link prose) account for most of the overage.
+
+**Fix:** Follow-up — either trim the inline rationale (move to a worklog or doc file) or extract a self-contained widget cluster (e.g., the mic-button `RawGestureDetector` + `AnimatedContainer` block at lines 677-729 is about 53 lines that could move to a `VoiceMicButton` widget).
+
+### IN-03: G-02 test 3 only asserts negative (`startedLocaleId == null`) — does not assert the toast surfaced
+
+**File:** `test/widget/features/accounting/presentation/screens/voice_input_screen_test.dart:946-1004`
+**Issue:** The G-02 permanent test confirms `find.byType(SoftToast)` is present at line 976 (after the error fires), but does NOT assert which **localized** string the toast shows for `'error_audio'`. The transient test asserts the `voiceRecognitionErrorNetwork` string explicitly; the permanent test does not assert `voiceRecognitionErrorAudio`.
+
+If a refactor of the switch in `voice_error_toast.dart` later mapped `error_audio` to the wrong key, this test would still pass.
 
 **Fix:**
-
 ```dart
-void _onLongPressStart(LongPressStartDetails _) { ... }
-void _onLongPressEnd(LongPressEndDetails _) { ... }
+final l10n = S.of(tester.element(find.byType(VoiceInputScreen)));
+expect(
+  find.text(l10n.voiceRecognitionErrorAudio),
+  findsOneWidget,
+  reason: 'G-02 permanent: error_audio must map to voiceRecognitionErrorAudio',
+);
 ```
 
-### IN-02: `_extractVoiceKeyword` particle list is hardcoded to ja/zh only
+This is a minor coverage gap, not a blocker — but the 3-test set could be strengthened cheaply.
 
-**File:** `lib/features/accounting/presentation/screens/voice_input_screen.dart:510-531`
-**Issue:** The regex lists `[のにでをはがもへとや]` (JP particles) and `[的了吗呢吧啊呀哦]` (CN particles). For English / future locales, no cleanup runs, so the voice-correction keyword would include stop words like "at", "the", etc. The function returns whatever remains after the amount + merchant strip, which is acceptable as a fallback, but worth documenting or extending if English voice input becomes a target.
+---
 
-**Fix:** Either add a comment ("ja/zh only — English path returns the raw remainder by design"), or factor the particle set into a `Map<String, RegExp>` keyed by locale prefix.
+## Cross-Reference: Prior BLOCKER Closure
 
-### IN-03: Magic number 300 (ms) for misfire threshold appears in code without a named constant
+| Prior Finding | Status | Evidence |
+|---------------|--------|----------|
+| **CR-01 (G-01)**: `_onStatus` silently dropped transcript on self-termination | **CLOSED** | `voice_input_screen.dart:185-195` routes to `_stopRecordingAndCommit` when `_pressStart != null`; widget test at `voice_input_screen_test.dart:774-865` proves form fills without gesture release; idempotency block at lines 848-863 proves no double-commit on subsequent `gesture.up`. |
+| **CR-02 (G-02 part A)**: `_onError` silently reset to idle | **CLOSED** | `voice_input_screen.dart:198-220` now calls `showVoiceRecognitionErrorToast(context, errorMsg)`; widget test at `voice_input_screen_test.dart:875-936` asserts `SoftToast` mounts with localized text and raw `error_network` is NOT visible (WR-05 i18n compliance). |
+| **CR-02 (G-02 part B)**: permanent error did not gate the mic | **CLOSED** | `voice_input_screen.dart:215-217` flips `_isInitialized = false` when `permanent==true`, reusing the existing `_onLongPressStart` guard at line 244; widget test at `voice_input_screen_test.dart:946-1004` proves `startListening` is never called after a permanent error. |
+| **WR-05 (i18n)**: raw English errorMsg surfaced to UI | **CLOSED** | `voice_error_toast.dart:32-46` switches on the error code and renders ONLY ARB-backed `voiceRecognitionError*` strings. ARB keys verified in `app_ja.arb`, `app_zh.arb`, `app_en.arb` at line 1648-1660 each. |
+| **Adoption of CR-02 LITERAL shape** (no `_hasPermanentError` field) | **CONFIRMED** | `grep -r _hasPermanentError lib/ test/` returns zero matches. The existing `_isInitialized` guard at line 244 is byte-identical to pre-22-09 state. |
 
-**File:** `lib/features/accounting/presentation/screens/voice_input_screen.dart:224`
-**Issue:** `const Duration(milliseconds: 300)` appears as a literal at the gesture decision boundary. The same threshold is implicit in three tests (300, 350, 400 ms wait values across `voice_input_screen_test.dart`). A named constant would keep code and tests synchronized:
-
-```dart
-static const _misfireThreshold = Duration(milliseconds: 300);
-```
-
-Referenced from both production code and a publicly exported constant the tests import would prevent silent drift if the threshold is ever tuned.
-
-**Fix:** Add a class-private constant; expose via a `@visibleForTesting` getter if tests need to reference it.
+The closure work was executed faithfully to the prescribed shape. The remaining WR findings above are either latent pre-existing issues (WR-03), new semantic risks made visible by the broadened commit path (WR-01, WR-02), or follow-up polish items (IN-01/02/03). None require re-opening the phase.
 
 ---
 
