@@ -393,11 +393,25 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
       final result = await _formKey.currentState!.submit();
       if (!mounted) return;
       result.when(
-        success: (_) {
+        success: (tx) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(S.of(context).transactionSaved)),
           );
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          // Phase 23 D-08 / WR-04: soul-ledger save defers Navigator.popUntil
+          // until SoulCelebrationOverlay's onDismissed fires so the joy moment
+          // is visible. Survival-ledger save pops immediately (no overlay).
+          if (tx.ledgerType == LedgerType.soul) {
+            _formKey.currentState
+                ?.waitForCelebrationDismissed()
+                .then((_) {
+              // RESEARCH Pitfall 4: app may background mid-celebration;
+              // check mounted before accessing Navigator.
+              if (!mounted) return;
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            });
+          } else {
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          }
         },
         validationError: (msg) {
           ScaffoldMessenger.of(
