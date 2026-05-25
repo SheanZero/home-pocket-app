@@ -232,4 +232,48 @@ void main() {
       });
     });
   });
+
+  group('lastFinalAt (Phase 23 D-05 prep)', () {
+    test('returns null before any chunk is fed', () {
+      final mockSpeech = _MockSpeechRecognitionService();
+      when(() => mockSpeech.restartListen()).thenAnswer((_) async => true);
+
+      final merger = VoiceChunkMerger(
+        parser: const ChineseNumeralStateMachine(),
+        speechService: mockSpeech,
+        onAmountResolved: (_) {},
+      );
+
+      expect(merger.lastFinalAt, isNull);
+      merger.dispose();
+    });
+
+    test('returns DateTime within range after a final chunk is fed', () async {
+      final mockSpeech = _MockSpeechRecognitionService();
+      when(() => mockSpeech.restartListen()).thenAnswer((_) async => true);
+
+      final merger = VoiceChunkMerger(
+        parser: const ChineseNumeralStateMachine(),
+        speechService: mockSpeech,
+        onAmountResolved: (_) {},
+      );
+
+      final before = DateTime.now();
+      await merger.feedChunk('1千元', isFinal: true);
+      final after = DateTime.now();
+
+      expect(merger.lastFinalAt, isNotNull);
+      expect(
+        merger.lastFinalAt!
+            .isAfter(before.subtract(const Duration(milliseconds: 1))),
+        isTrue,
+      );
+      expect(
+        merger.lastFinalAt!
+            .isBefore(after.add(const Duration(milliseconds: 1))),
+        isTrue,
+      );
+      merger.dispose();
+    });
+  });
 }

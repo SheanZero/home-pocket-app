@@ -55,6 +55,18 @@ class VoiceChunkMerger {
   DateTime? _lastFinalAt;
   Timer? _windowTimer;
 
+  /// Phase 23 D-05: last final-result timestamp, exposed for the voice
+  /// screen's intra-session `notListening` heuristic guard. Null when no
+  /// final has been fed yet in the current session.
+  ///
+  /// RESEARCH §Open Q1: chose `lastFinalAt` over `lastPartialAt` because
+  /// the merger does not track partials (feedChunk ignores non-finals).
+  /// If device UAT in Plan 08 shows finals are too sparse to drive the
+  /// D-05 guard reliably, v1.4+ pivots to adding `_lastPartialAt` on
+  /// _VoiceInputScreenState directly and exposing via the mixin's
+  /// abstract `DateTime? get lastPartialAt` — see RESEARCH §Open Q1.
+  DateTime? get lastFinalAt => _lastFinalAt;
+
   /// Feed a speech recognition result chunk into the merger.
   ///
   /// - Partial results (`isFinal: false`) are ignored — only finals drive the merger.
