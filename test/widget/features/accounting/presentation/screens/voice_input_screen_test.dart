@@ -12,6 +12,7 @@ import 'package:home_pocket/features/accounting/domain/repositories/category_led
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/voice_input_screen.dart';
+import 'package:home_pocket/features/accounting/presentation/widgets/soft_toast.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/shared/utils/result.dart';
@@ -750,6 +751,255 @@ void main() {
           findsOneWidget,
           reason: 'category Cafe (L2) must render after lookup',
         );
+      },
+    );
+  });
+
+  // ── Phase 22 gap closure — G-01 + G-02 (CR-01 + CR-02 from 22-REVIEW.md) ──
+  //
+  // These 3 tests close the production-risk gaps elevated from the code review
+  // to BLOCKER status at phase verification (2026-05-25). Without the Plan 22-09
+  // fix, all 3 fail per the documented failure modes in 22-VERIFICATION.md.
+  group('Phase 22 gap closure — G-01 + G-02', () {
+    final micFinder = find.byKey(const ValueKey('voice-mic-button'));
+
+    // ── G-01: recognizer self-termination drives the commit path ──
+    //
+    // Failure mode (pre-Plan-22-09): _onStatus flips _isRecording=false on
+    // status='done' / 'notListening'; subsequent _onLongPressEnd short-circuits
+    // on !_isRecording; transcript is silently dropped.
+    //
+    // Fix (Plan 22-09): _onStatus checks _pressStart != null and routes to
+    // _stopRecordingAndCommit when the user is still holding.
+    testWidgets(
+      'G-01: status="done" mid-press drives commit and form fills without gesture release',
+      (tester) async {
+        final speechService = CapturingStartSpeechRecognitionUseCase();
+        final parseUseCase = FakeParseVoiceInputUseCase({
+          '1千8百4十元 星巴克': VoiceParseResult(
+            rawText: '1千8百4十元 星巴克',
+            amount: 1840,
+            parsedDate: DateTime(2026, 5, 25),
+            merchantName: '星巴克',
+            categoryMatch: const CategoryMatchResult(
+              categoryId: 'cat_food_cafe',
+              confidence: 0.92,
+              source: MatchSource.keyword,
+            ),
+            ledgerType: LedgerType.survival,
+          ),
+        });
+
+        await tester.pumpWidget(
+          buildSubject(
+            speechService: speechService,
+            parseUseCase: parseUseCase,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // 1. User begins long-press on mic.
+        final gesture = await tester.startGesture(tester.getCenter(micFinder));
+        await tester.pump(const Duration(milliseconds: 1));
+        await tester.pump();
+
+        // 2. Recognizer emits a final transcript (this fires _onResult only;
+        //    does NOT yet trigger the commit path — that happens in step 3).
+        speechService.emitFinal('1千8百4十元 星巴克');
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+
+        // 3. Recognizer self-terminates (e.g., 3s pauseFor expiry) WHILE the
+        //    user is still holding the mic. Pre-Plan-22-09: silently drops.
+        //    Post-Plan-22-09: routes into _stopRecordingAndCommit.
+        speechService.onStatus!('done');
+        await tester.pumpAndSettle();
+
+        // 4. Without releasing the gesture, the form must be filled.
+        //    Parser was invoked exactly once on the transcript.
+        expect(
+          parseUseCase.inputs,
+          contains('1千8百4十元 星巴克'),
+          reason: 'G-01: parser must run when recognizer self-terminates mid-press',
+        );
+        // CRITICAL: AmountDisplay runs the amount through NumberFormatter,
+        // which inserts thousands separators. The rendered string for 1840
+        // is '1,840' (with comma), NOT '1840'. Mirrors existing INPUT-02 SC-1
+        // assertion at voice_input_screen_test.dart:737.
+        expect(
+          find.text('1,840'),
+          findsOneWidget,
+          reason: 'G-01: amount=1840 must render via host-cache + AmountDisplay '
+              'after status-driven commit (mirrors INPUT-02 SC-1 at line 737)',
+        );
+        expect(
+          find.text('星巴克'),
+          findsOneWidget,
+          reason: 'G-01: merchant TextField must show 星巴克 (single instance) '
+              'after status-driven commit',
+        );
+
+        // 5. Idempotency: the eventual gesture.up() must NOT trigger a second
+        //    commit. _stopRecordingAndCommit calls _speechService.stop() once;
+        //    if a second commit ran, stop() would be invoked again — but the
+        //    fake's `stopped` flag is set on the first call and remains true.
+        //    Stronger check: parser.inputs should still contain the transcript
+        //    exactly once (no duplicate parse from a re-entrant commit).
+        final stoppedBeforeRelease = speechService.stopped;
+        final inputCountBeforeRelease = parseUseCase.inputs
+            .where((s) => s == '1千8百4十元 星巴克')
+            .length;
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(
+          speechService.stopped,
+          stoppedBeforeRelease,
+          reason: 'G-01 idempotency: gesture.up after status-driven commit must not re-call stop()',
+        );
+        expect(
+          parseUseCase.inputs.where((s) => s == '1千8百4十元 星巴克').length,
+          inputCountBeforeRelease,
+          reason: 'G-01 idempotency: gesture.up after status-driven commit must not re-invoke parser',
+        );
+      },
+    );
+
+    // ── G-02 transient error: surfaces localized toast, mic remains usable ──
+    //
+    // Failure mode (pre-Plan-22-09): _onError silently resets to idle; user
+    // sees no signal that recognition failed.
+    //
+    // Fix (Plan 22-09): _onError calls showVoiceRecognitionErrorToast which
+    // switches on errorMsg and mounts a SoftToast with the localized message
+    // from Plan 22-08's ARB keys.
+    testWidgets(
+      'G-02 transient: onError("error_network", false) surfaces localized SoftToast (ja)',
+      (tester) async {
+        final speechService = CapturingStartSpeechRecognitionUseCase();
+
+        await tester.pumpWidget(
+          buildSubject(
+            speechService: speechService,
+            parseUseCase: FakeParseVoiceInputUseCase(const {}),
+          ),
+        );
+        // Wait for _initSpeechService → setState(_isInitialized = true) so
+        // the screen is in steady state and onError can be invoked.
+        await tester.pumpAndSettle();
+
+        // Sanity: no toast visible at idle.
+        expect(find.byType(SoftToast), findsNothing);
+
+        // Fire the platform error callback the screen registered during
+        // _initSpeechService (saved by the fake at line 102).
+        expect(
+          speechService.onError,
+          isNotNull,
+          reason: 'fake must have captured onError during _initSpeechService',
+        );
+        speechService.onError!('error_network', false);
+        await tester.pump(); // flush setState in _onError
+        await tester.pump(const Duration(milliseconds: 50)); // mount overlay entry + SoftToast animation start
+
+        // Assert the SoftToast widget is now in the tree.
+        expect(
+          find.byType(SoftToast),
+          findsOneWidget,
+          reason: 'G-02: SoftToast must mount on transient error',
+        );
+
+        // Assert the toast carries the LOCALIZED ja string (not raw "error_network").
+        // Pull the live S.of(context) value to avoid hard-coding the literal.
+        final l10n = S.of(tester.element(find.byType(VoiceInputScreen)));
+        expect(
+          find.text(l10n.voiceRecognitionErrorNetwork),
+          findsOneWidget,
+          reason: 'G-02 / WR-05: toast text must be the localized voiceRecognitionErrorNetwork string',
+        );
+        expect(
+          find.text('error_network'),
+          findsNothing,
+          reason: 'WR-05: raw platform error code must never be surfaced to UI',
+        );
+
+        // Mic remains usable for retry — _isInitialized stays true on transient.
+        // We don't drive a new gesture here (covered by the permanent test
+        // below as the contrast case) but we DO verify the mic button is
+        // still rendered (not gated by some other guard).
+        expect(micFinder, findsOneWidget);
+
+        // Let the SoftToast auto-dismiss timer settle so the test tears down
+        // cleanly (SoftToast.duration default = 3s).
+        await tester.pump(const Duration(seconds: 4));
+        await tester.pumpAndSettle();
+      },
+    );
+
+    // ── G-02 permanent error: mic is gated until reinit ──
+    //
+    // Failure mode (pre-Plan-22-09): _onError ignores `permanent`; subsequent
+    // long-press still triggers recording into the dead engine.
+    //
+    // Fix (Plan 22-09 / CR-02 literal): _onError sets _isInitialized=false on
+    // permanent==true; _onLongPressStart's existing top guard
+    // `if (!_isInitialized || _isRecording) return;` short-circuits new presses.
+    testWidgets(
+      'G-02 permanent: onError(..., true) gates mic — subsequent long-press does NOT call startListening',
+      (tester) async {
+        final speechService = CapturingStartSpeechRecognitionUseCase();
+
+        await tester.pumpWidget(
+          buildSubject(
+            speechService: speechService,
+            parseUseCase: FakeParseVoiceInputUseCase(const {}),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Sanity: startedLocaleId is null before any press (fake initializes
+        // it as null per line 91).
+        expect(
+          speechService.startedLocaleId,
+          isNull,
+          reason: 'fake startedLocaleId must be null at idle',
+        );
+
+        // Fire a permanent error (e.g., permission revoked mid-session, or
+        // engine unavailable). Plan 22-09's _onError sets _isInitialized=false.
+        expect(speechService.onError, isNotNull);
+        speechService.onError!('error_audio', true);
+        await tester.pump(); // flush setState in _onError
+        await tester.pump(const Duration(milliseconds: 50));
+
+        // The toast appears (already covered by transient test for assertion
+        // depth; here we just confirm no exception was thrown).
+        expect(find.byType(SoftToast), findsOneWidget);
+
+        // Now attempt a long-press on the mic. Plan 22-09's _onError flipped
+        // _isInitialized to false, so _onLongPressStart's existing top guard
+        // (`if (!_isInitialized || _isRecording) return;`) short-circuits.
+        final gesture = await tester.startGesture(tester.getCenter(micFinder));
+        await tester.pump(const Duration(milliseconds: 1));
+        await tester.pump();
+        // Hold past the 300 ms misfire threshold to ensure the test exercises
+        // the _onLongPressStart guard, not the _onLongPressEnd misfire branch.
+        await tester.pump(const Duration(milliseconds: 400));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        // CORE ASSERTION: speech service was never asked to start listening.
+        // _startRecording calls _speechService.startListening which the fake
+        // overrides to set startedLocaleId. If the guard worked, it stays null.
+        expect(
+          speechService.startedLocaleId,
+          isNull,
+          reason: 'G-02 permanent: _onLongPressStart must short-circuit on !_isInitialized; '
+              'startListening must NOT be invoked',
+        );
+
+        // Let the toast settle so test tears down cleanly.
+        await tester.pump(const Duration(seconds: 4));
+        await tester.pumpAndSettle();
       },
     );
   });
