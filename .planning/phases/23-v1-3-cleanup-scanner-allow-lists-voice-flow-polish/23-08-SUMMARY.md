@@ -11,7 +11,7 @@ tags:
   - deferred-debt-accepted
 requirements: []
 decisions-implemented: [D-03]
-device-uat-result: pending
+device-uat-result: pass
 dependency_graph:
   requires:
     - "23-01 through 23-07 (all code polish + doc reconciliation complete)"
@@ -32,9 +32,9 @@ key_decisions:
   - "D-05 threshold (800ms) tracked in 22-T4 with explicit RESEARCH §Open Q1 escalation path (pivot to _lastPartialAt in v1.4+)"
   - "Phase 20 tuning levers (VoiceChunkMerger _windowDuration, restartListen, lexical-gate normalize) documented in 20-T3 for device-session failure recovery"
 metrics:
-  duration: ~5min (Task 8.1 automated generation; Task 8.2 pending human execution)
-  completed: 2026-05-25T13:04:24Z
-  tasks_completed: 1/2
+  duration: ~5min (Task 8.1 automated generation; Task 8.2 device session per CONTEXT D-03)
+  completed: 2026-05-25T13:30:00Z
+  tasks_completed: 2/2
   files_created: 1
 ---
 
@@ -44,9 +44,10 @@ metrics:
 
 ## Performance
 
-- **Duration:** ~5 min (Task 8.1 automated generation; Task 8.2 awaiting human execution)
-- **Tasks:** 1/2 complete (Task 8.2 is checkpoint:human-verify — paused for human execution)
+- **Duration:** ~5 min (Task 8.1 automated generation; Task 8.2 device session per CONTEXT D-03)
+- **Tasks:** 2/2 complete
 - **Files created:** 1
+- **Device UAT result:** 9/9 pass, 0 debt, 0 blockers
 
 ## Accomplishments
 
@@ -62,7 +63,7 @@ metrics:
 ## Task Commits
 
 1. **Task 8.1: Generate 23-HUMAN-UAT.md** — `94fb7b7` (docs)
-2. **Task 8.2: Human runs device UAT** — **CHECKPOINT** (awaiting human execution)
+2. **Task 8.2: Human runs device UAT** — recorded in 23-HUMAN-UAT.md (status: complete, 9/9 pass)
 
 ## Automated Verification (Task 8.1)
 
@@ -82,7 +83,7 @@ None — plan executed exactly as written. Task 8.1 used source phase wording ve
 
 ## Known Stubs
 
-The `23-HUMAN-UAT.md` `device-uat-result: pending` in this SUMMARY's frontmatter reflects that Task 8.2 (human device session) has not yet run. This is expected — the plan is non-autonomous and explicitly pauses at Task 8.2. The result field will be updated when the orchestrator resumes after the human-verify checkpoint.
+None. Task 8.2 device session ran and all 9 items passed; results recorded in `23-HUMAN-UAT.md` (status: complete).
 
 ## Threat Surface Scan
 
@@ -96,4 +97,4 @@ No new network endpoints, auth paths, file access patterns, or schema changes in
 ---
 *Phase: 23-v1-3-cleanup-scanner-allow-lists-voice-flow-polish*
 *Plan: 08*
-*Completed (partial — checkpoint reached): 2026-05-25T13:04:24Z*
+*Completed: 2026-05-25T13:30:00Z*
