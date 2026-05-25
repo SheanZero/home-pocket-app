@@ -17,7 +17,7 @@
 ### One-Step Recording
 
 - [x] **INPUT-01**: User can complete a manual ledger entry on a single screen — amount, category (二级), note, merchant, date, and ledger type (悦己/生存) all editable inline without a "下一步" navigation
-- [ ] **INPUT-02**: User can complete a voice-driven ledger entry from the same single screen — voice parser fills amount, category, note, merchant fields in-place; user can edit any field before saving
+- [x] **INPUT-02**: User can complete a voice-driven ledger entry from the same single screen — voice parser fills amount, category, note, merchant fields in-place; user can edit any field before saving
 - [ ] **INPUT-03**: Details form is implemented as a single shared widget consumed by both manual/voice single-screen flow AND the future OCR two-step flow (capture → details review). Widget contract supports both "new entry" and "edit existing" modes
 - [ ] **INPUT-04**: OCR-flow code path preserves a two-step UX (capture → details) but the details step reuses the INPUT-03 shared widget; OCR writer itself remains out of v1.3 scope, only the architectural slot is reserved
 
@@ -42,8 +42,8 @@
 
 ### Record Button UX
 
-- [ ] **REC-01**: Record button's idle-state caption unambiguously communicates the interaction model (tap-to-toggle vs. hold-to-record); chosen model is consistent app-wide
-- [ ] **REC-02**: While recording, the record button visibly changes (color/shape/icon) AND the caption text changes to "录音中…" (i18n: ja/zh/en three locales); state change is perceivable within 100ms of recording start
+- [x] **REC-01**: Record button's idle-state caption unambiguously communicates the interaction model (tap-to-toggle vs. hold-to-record); chosen model is consistent app-wide
+- [x] **REC-02**: While recording, the record button visibly changes (color/shape/icon) AND the caption text changes to "录音中…" (i18n: ja/zh/en three locales); state change is perceivable within 100ms of recording start
 
 ### Details Form as Edit Entry
 
@@ -106,7 +106,7 @@ Mapped by roadmapper on 2026-05-22.
 |-------------|-------|--------|
 | KEYPAD-01 | Phase 19 | Complete |
 | INPUT-01 | Phase 19 | Complete |
-| INPUT-02 | Phase 22 | Pending |
+| INPUT-02 | Phase 22 | Complete |
 | INPUT-03 | Phase 18 | Pending |
 | INPUT-04 | Phase 18 | Pending |
 | VOICE-01 | Phase 20 | Pending |
@@ -115,8 +115,8 @@ Mapped by roadmapper on 2026-05-22.
 | VOICE-04 | Phase 21 | Pending |
 | VOICE-05 | Phase 21 | Pending |
 | VOICE-06 | Phase 21 | Pending |
-| REC-01 | Phase 22 | Pending |
-| REC-02 | Phase 22 | Pending |
+| REC-01 | Phase 22 | Complete |
+| REC-02 | Phase 22 | Complete |
 | EDIT-01 | Phase 18 | Pending |
 | EDIT-02 | Phase 18 | Pending |
 

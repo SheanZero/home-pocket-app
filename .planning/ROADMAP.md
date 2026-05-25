@@ -179,4 +179,4 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 | 19. Manual One-Step + Keypad Polish | 5/5 | Complete    | 2026-05-23 |
 | 20. Voice Number Parser (zh + ja) | 9/9 | Complete   | 2026-05-24 |
 | 21. Voice Category Resolver Level-2 Enforcement | 6/6 | Complete   | 2026-05-24 |
-| 22. Voice One-Step Integration + Record Button UX | 10/10 | Complete   | 2026-05-25 |
+| 22. Voice One-Step Integration + Record Button UX | 10/10 | Complete    | 2026-05-25 |
