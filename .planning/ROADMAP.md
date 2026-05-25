@@ -56,7 +56,7 @@
 - [x] **Phase 19: Manual One-Step + Keypad Polish** — Manual entry collapses to single screen, no "下一步" button; numeric keypad enlarged to platform-min touch targets (KEYPAD-01, INPUT-01) (completed 2026-05-23)
 - [x] **Phase 20: Voice Number Parser (zh + ja)** — Compound number state machine, intra-pause continued-listening window, locale-aware combining; per-locale corpus fixtures ≥95% accuracy (VOICE-01/02/03) (completed 2026-05-24)
 - [x] **Phase 21: Voice Category Resolver Level-2 Enforcement** — Always-level-2 contract, level-1 → first-level-2 fallback, merchant DB + synonym dictionary data sources extensible without code changes (VOICE-04/05/06) (completed 2026-05-24)
-- [ ] **Phase 22: Voice One-Step Integration + Record Button UX** — Voice fills shared details form in-place on single screen; record button idle caption + recording-state visual change within 100ms (INPUT-02, REC-01, REC-02)
+- [x] **Phase 22: Voice One-Step Integration + Record Button UX** — Voice fills shared details form in-place on single screen; record button idle caption + recording-state visual change within 100ms (INPUT-02, REC-01, REC-02) (completed 2026-05-25)
 
 ### 📋 Next Milestone (Planned)
 
@@ -156,7 +156,7 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 - [x] 22-04-PLAN.md — voice_input_screen.dart body rewrite: embed TransactionDetailsForm, hold-to-record gesture (RawGestureDetector + Duration.zero), AnimatedContainer shape morph, AnimatedSwitcher caption swap, Save CTA, FocusNode auto-stop, WidgetsBindingObserver lifecycle cancel (Wave 1)
 - [x] 22-05-PLAN.md — voice_input_screen_test.dart major rewrite (8 tests: REC-01/REC-02/D-08/D-09/INPUT-02 happy path) + new idle golden harness + delete obsolete voice_to_manual_one_step_screen_test.dart (Wave 2)
 - [x] 22-06-PLAN.md — NEW voice_save_entry_source_test.dart integration test (SC-2 DAO round-trip with real Drift DB + real CreateTransactionUseCase) (Wave 2)
-- [ ] 22-07-PLAN.md — Phase verification + closure SUMMARY (analyze 0, custom_lint 0, gen-l10n clean, test pass, coverage ≥70%, no schema/pubspec drift) (Wave 2)
+- [x] 22-07-PLAN.md — Phase verification + closure SUMMARY (analyze 0, custom_lint 0, gen-l10n clean, test pass, coverage ≥70%, no schema/pubspec drift) (Wave 2)
 **UI hint**: yes
 
 ## Progress
@@ -176,4 +176,4 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 | 19. Manual One-Step + Keypad Polish | 5/5 | Complete    | 2026-05-23 |
 | 20. Voice Number Parser (zh + ja) | 9/9 | Complete   | 2026-05-24 |
 | 21. Voice Category Resolver Level-2 Enforcement | 6/6 | Complete   | 2026-05-24 |
-| 22. Voice One-Step Integration + Record Button UX | 6/7 | In Progress|  |
+| 22. Voice One-Step Integration + Record Button UX | 7/7 | Complete   | 2026-05-25 |
