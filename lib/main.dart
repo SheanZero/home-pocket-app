@@ -8,11 +8,9 @@ import 'core/initialization/init_failure_screen.dart';
 import 'core/initialization/init_result.dart';
 import 'core/theme/app_theme.dart';
 import 'data/app_database.dart';
+import 'application/seed/seed_providers.dart';
 import 'features/accounting/presentation/providers/repository_providers.dart'
-    show
-        seedCategoriesUseCaseProvider,
-        seedVoiceSynonymsUseCaseProvider,
-        ensureDefaultBookUseCaseProvider;
+    show ensureDefaultBookUseCaseProvider;
 import 'features/family_sync/presentation/providers/repository_providers.dart';
 import 'features/family_sync/presentation/providers/repository_providers.dart'
     show pushNotificationServiceProvider;
@@ -105,12 +103,9 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
 
   Future<void> _initialize() async {
     try {
-      // Seed categories
-      final seedCategories = ref.read(seedCategoriesUseCaseProvider);
-      await seedCategories.execute();
-      // Phase 21 D-01: synonyms must run AFTER categories.
-      final seedVoiceSynonyms = ref.read(seedVoiceSynonymsUseCaseProvider);
-      await seedVoiceSynonyms.execute();
+      // Phase 23 D-14: SeedAllUseCase owns the ordering contract.
+      final seedAll = ref.read(seedAllUseCaseProvider);
+      await seedAll.execute();
 
       // Ensure default book
       final ensureBook = ref.read(ensureDefaultBookUseCaseProvider);
