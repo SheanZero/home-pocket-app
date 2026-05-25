@@ -34,6 +34,8 @@ import '../widgets/input_mode_tabs.dart';
 import '../widgets/soft_toast.dart';
 import '../widgets/transaction_details_form.dart';
 import '../widgets/voice_waveform.dart';
+import 'voice_input_screen_helpers.dart';
+import 'voice_locale_readiness_mixin.dart';
 import 'voice_recognition_event_handler_mixin.dart';
 
 /// Voice input screen for creating transactions through natural language speech.
@@ -52,7 +54,10 @@ class VoiceInputScreen extends ConsumerStatefulWidget {
 }
 
 class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
-    with WidgetsBindingObserver, VoiceRecognitionEventHandlerMixin {
+    with
+        WidgetsBindingObserver,
+        VoiceRecognitionEventHandlerMixin,
+        VoiceLocaleReadinessMixin {
   // Speech recognition use case — managed directly (stateful lifecycle)
   late final StartSpeechRecognitionUseCase _speechService;
 
@@ -72,12 +77,6 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
 
   // Effective voice locale (updated reactively from voiceLocaleIdProvider)
   String _voiceLocaleId = 'zh-CN';
-
-  /// Phase 23 D-07 (WR-01 cold-start race fix): the recognizer must not
-  /// run with the wrong locale during the first ms after launch.
-  /// Flipped to true when voiceLocaleIdProvider resolves (or errors —
-  /// see RESEARCH Pitfall 3 graceful degradation).
-  bool _isLocaleReady = false;
 
   // ── Phase 22: embedded form integration (D-01) ──
 
@@ -174,30 +173,8 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
       }
     }
 
-    // Phase 23 D-07 (WR-01): gate the mic on voiceLocaleIdProvider resolution
-    // so the recognizer is never started with the wrong locale during cold start.
-    // fireImmediately: true ensures the flag flips synchronously when the provider
-    // has already resolved (common on warm launches). RESEARCH §Pattern 2.
-    ref.listenManual<AsyncValue<String>>(
-      voiceLocaleIdProvider,
-      (prev, next) {
-        if (next case AsyncData(:final value)) {
-          _voiceLocaleId = value;
-          if (mounted && !_isLocaleReady) {
-            setState(() => _isLocaleReady = true);
-          }
-        } else if (next case AsyncError()) {
-          // RESEARCH Pitfall 3: graceful degradation. Fall back to
-          // default locale (already initialized to 'zh-CN' above) and
-          // unlock the mic. Prevents soft-lock when AppSettings provider
-          // errors (e.g. corrupted SharedPreferences).
-          if (mounted && !_isLocaleReady) {
-            setState(() => _isLocaleReady = true);
-          }
-        }
-      },
-      fireImmediately: true,
-    );
+    // Phase 23 D-07 (WR-01) cold-start gate — owned by VoiceLocaleReadinessMixin.
+    initLocaleReadiness();
   }
 
   // ── Abstract contract — VoiceRecognitionEventHandlerMixin implementations ──
@@ -210,6 +187,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
   @override set soundLevel(double value) => _soundLevel = value;
   @override DateTime? get lastMergerFinalAt => _amountMerger?.lastFinalAt;
   @override Future<void> stopRecordingAndCommit() => _stopRecordingAndCommit();
+  @override void onVoiceLocaleResolved(String localeId) => _voiceLocaleId = localeId;
 
   void _showPermissionError() {
     // Insert a SoftToast overlay for permission error feedback
@@ -233,7 +211,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
   // ── Phase 22 D-03: hold-to-record gesture lifecycle ──
 
   void _onLongPressStart(LongPressStartDetails details) {
-    if (!_isInitialized || !_isLocaleReady || _isRecording) return;
+    if (!_isInitialized || !isLocaleReady || _isRecording) return;
     _pressStart = DateTime.now();
     _startRecording();
   }
@@ -452,7 +430,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
 
     if (!result.finalResult) {
       _partialResultCount++;
-      _lastWordCount = _countWords(result.recognizedWords);
+      _lastWordCount = countVoiceWords(result.recognizedWords);
 
       setState(() => _partialText = result.recognizedWords);
 
@@ -510,7 +488,13 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     // _parseResult.estimatedSatisfaction that _stopRecordingAndCommit later
     // pushes into the form via state.updateSatisfaction(...).
     if (parseResult.ledgerType == LedgerType.soul) {
-      final features = _buildAudioFeatures();
+      final features = buildVoiceAudioFeatures(
+        soundLevels: _soundLevels,
+        timestamps: _timestamps,
+        startTime: _startTime,
+        partialResultCount: _partialResultCount,
+        wordCount: _lastWordCount,
+      );
       final estimator = ref.read(voiceSatisfactionEstimatorProvider);
       final satisfaction = estimator.estimate(
         audioFeatures: features,
@@ -520,52 +504,6 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     }
 
     setState(() => _parseResult = parseResult);
-  }
-
-  VoiceAudioFeatures _buildAudioFeatures() {
-    final now = DateTime.now();
-    return VoiceAudioFeatures(
-      soundLevels: List.unmodifiable(_soundLevels),
-      timestamps: List.unmodifiable(_timestamps),
-      startTime: _startTime ?? now,
-      endTime: now,
-      partialResultCount: _partialResultCount,
-      wordCount: _lastWordCount,
-    );
-  }
-
-  int _countWords(String text) {
-    if (text.isEmpty) return 0;
-    // Japanese/Chinese: estimate by character count (2 chars ≈ 1 word)
-    // English: split by whitespace
-    final hasLatin = RegExp(r'[a-zA-Z]').hasMatch(text);
-    if (hasLatin) {
-      return text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
-    }
-    return (text.replaceAll(RegExp(r'\s'), '').length / 2).ceil();
-  }
-
-  String _extractVoiceKeyword(VoiceParseResult result) {
-    var remaining = result.rawText;
-
-    // Remove amount patterns
-    remaining = remaining.replaceAll(
-      RegExp(r'[¥￥]?\s*[\d,]+\.?\d*\s*(円|元|ドル)?'),
-      '',
-    );
-
-    // Remove merchant name if matched
-    if (result.merchantName != null) {
-      remaining = remaining.replaceFirst(result.merchantName!, '');
-    }
-
-    // Remove Japanese particles
-    remaining = remaining.replaceAll(RegExp(r'[のにでをはがもへとや]'), '');
-
-    // Remove Chinese particles
-    remaining = remaining.replaceAll(RegExp(r'[的了吗呢吧啊呀哦]'), '');
-
-    return remaining.trim();
   }
 
   @override
@@ -589,7 +527,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     // when a parse result exists. Keep the helper signature untouched; pass
     // null until a parse runs.
     final voiceKeyword = _parseResult != null
-        ? _extractVoiceKeyword(_parseResult!)
+        ? extractVoiceKeyword(_parseResult!)
         : null;
 
     return Scaffold(
