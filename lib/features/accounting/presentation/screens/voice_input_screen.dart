@@ -1,5 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart'
+    show
+        LongPressGestureRecognizer,
+        LongPressStartDetails,
+        LongPressEndDetails;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -8,7 +13,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../application/i18n/formatter_service.dart';
 import '../../../../application/voice/repository_providers.dart'
     show
         appSpeechRecognitionServiceProvider,
@@ -20,14 +24,16 @@ import '../../../settings/presentation/providers/state_locale.dart';
 import '../../../settings/presentation/providers/state_settings.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/entry_source.dart';
+import '../../domain/models/transaction_details_form_config.dart';
 import '../../domain/models/voice_parse_result.dart';
 import '../providers/repository_providers.dart';
-import '../utils/category_display_utils.dart';
+import '../widgets/amount_display.dart';
+import '../widgets/amount_edit_bottom_sheet.dart';
 import '../widgets/entry_mode_switcher.dart';
 import '../widgets/input_mode_tabs.dart';
 import '../widgets/soft_toast.dart';
+import '../widgets/transaction_details_form.dart';
 import '../widgets/voice_waveform.dart';
-import 'manual_one_step_screen.dart';
 
 /// Voice input screen for creating transactions through natural language speech.
 ///
@@ -44,7 +50,8 @@ class VoiceInputScreen extends ConsumerStatefulWidget {
   ConsumerState<VoiceInputScreen> createState() => _VoiceInputScreenState();
 }
 
-class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
+class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
+    with WidgetsBindingObserver {
   // Speech recognition use case — managed directly (stateful lifecycle)
   late final StartSpeechRecognitionUseCase _speechService;
 
@@ -62,12 +69,42 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   // Parse result
   VoiceParseResult? _parseResult;
 
-  // Resolved category objects for display
-  Category? _resolvedCategory;
-  Category? _resolvedParentCategory;
-
   // Effective voice locale (updated reactively from voiceLocaleIdProvider)
   String _voiceLocaleId = 'zh-CN';
+
+  // ── Phase 22: embedded form integration (D-01) ──
+
+  /// GlobalKey on the embedded TransactionDetailsForm so the voice screen
+  /// can call public setters (updateAmount/Category/Merchant/Note/Satisfaction)
+  /// on long-press release (D-05 batch-fill).
+  final _formKey = GlobalKey<TransactionDetailsFormState>();
+
+  /// Per-host FocusNodes for the form's merchant/note TextFields (D-09).
+  /// Listeners auto-stop recording when text-field gains focus.
+  late final FocusNode _merchantFocus;
+  late final FocusNode _noteFocus;
+
+  /// Captured at _onLongPressStart; consumed at _onLongPressEnd to compute
+  /// held duration vs the 300 ms misfire threshold (D-03).
+  DateTime? _pressStart;
+
+  /// Submit-in-flight flag for the Save button (mirrors manual screen's
+  /// _isSubmitting at manual_one_step_screen.dart:77).
+  bool _isSubmitting = false;
+
+  /// Host-cache mirror of the form's amount + category state (BLOCKER B-2
+  /// resolution). Mirrors manual_one_step_screen.dart:74-78 precedent.
+  /// Updated in the same setState block that pushes values into the form
+  /// via _formKey.currentState!.updateXxx — keeps the AmountDisplay render
+  /// and the _canSave predicate decoupled from GlobalKey.currentState
+  /// first-build null timing.
+  int _hostAmount = 0;
+  Category? _hostCategory;
+
+  /// Save button enable predicate — pure read from the host-cache mirror
+  /// (mirrors manual_one_step_screen.dart:89 _canSave getter shape).
+  bool get _canSave =>
+      _hostCategory != null && _hostAmount > 0 && !_isSubmitting;
 
   // Audio features collection
   final List<double> _soundLevels = [];
@@ -95,6 +132,19 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Phase 22 D-09: per-host FocusNodes wired through the form config so the
+    // form's TextFields use them; listener auto-stops recording when a
+    // text field gains focus mid-session.
+    _merchantFocus = FocusNode()..addListener(_handleFocusChange);
+    _noteFocus = FocusNode()..addListener(_handleFocusChange);
+
+    // Phase 22 / Pitfall 7 (RESEARCH Open Q1): observe app lifecycle so a
+    // paused app cancels any in-progress recording (didChangeAppLifecycleState
+    // below). Without this, locking the screen mid-press would leave the mic
+    // "live" with no user-visible affordance.
+    WidgetsBinding.instance.addObserver(this);
+
     _speechService =
         widget.speechService ??
         StartSpeechRecognitionUseCase(
@@ -156,14 +206,34 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
     overlay.insert(entry);
   }
 
-  Future<void> _toggleRecording() async {
-    if (!_isInitialized) return;
+  // ── Phase 22 D-03: hold-to-record gesture lifecycle ──
 
-    if (_isRecording) {
-      await _stopRecording();
+  void _onLongPressStart(LongPressStartDetails details) {
+    if (!_isInitialized || _isRecording) return;
+    _pressStart = DateTime.now();
+    _startRecording();
+  }
+
+  void _onLongPressEnd(LongPressEndDetails details) {
+    final start = _pressStart;
+    _pressStart = null;
+    if (start == null || !_isRecording) return;
+    final held = DateTime.now().difference(start);
+    // D-03 misfire threshold: presses shorter than 300 ms are treated as
+    // accidental taps and discarded without parsing.
+    if (held < const Duration(milliseconds: 300)) {
+      _cancelRecordingAndDiscard();
     } else {
-      await _startRecording();
+      _stopRecordingAndCommit();
     }
+  }
+
+  void _onLongPressCancel() {
+    // Finger slid off the recognizer's hit area before release.
+    // Treat as misfire — discard buffer, no commit.
+    if (_pressStart == null || !_isRecording) return;
+    _pressStart = null;
+    _cancelRecordingAndDiscard();
   }
 
   Future<void> _startRecording() async {
@@ -178,8 +248,6 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
       _soundLevel = 0.0;
       _parseResult = null;
       _mergedAmount = null;
-      _resolvedCategory = null;
-      _resolvedParentCategory = null;
     });
     _soundLevels.clear();
     _timestamps.clear();
@@ -211,15 +279,116 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
     );
   }
 
-  Future<void> _stopRecording() async {
-    // Commit any pending merger buffer immediately (user-stop semantics
-    // per VoiceChunkMerger contract; see voice_chunk_merger.dart D-09).
+  /// D-05 commit path: commit merger buffer, drain speech service, then
+  /// batch-fill the embedded form via the 4 + 1 public setters added in
+  /// Plan 02. BLOCKER B-2: _hostAmount + _hostCategory are mirrored so
+  /// AmountDisplay and _canSave see the new values atomically.
+  Future<void> _stopRecordingAndCommit() async {
+    // Pattern 7: merger.stop() bypasses the 2.5s window. MUST run BEFORE
+    // _speechService.stop() to preserve the original ordering invariant.
     _amountMerger?.stop();
     await _speechService.stop();
+    if (!mounted) return;
     setState(() {
       _isRecording = false;
       _soundLevel = 0.0;
     });
+
+    // D-05: batch-fill the form via parser + setter calls.
+    final text = _finalText.isNotEmpty ? _finalText : _partialText;
+    if (text.isEmpty) return;
+
+    final parseUseCase = ref.read(parseVoiceInputUseCaseProvider);
+    final parseResult = await parseUseCase.execute(
+      text,
+      localeId: _voiceLocaleId,
+    );
+    if (!mounted || !parseResult.isSuccess) return;
+    final data = parseResult.data;
+    if (data == null) return;
+
+    // Category lookup — voice resolver guarantees a level-2 categoryId per
+    // Phase 21 D-03.
+    Category? category;
+    Category? parent;
+    final categoryId = data.categoryMatch?.categoryId ?? data.merchantCategoryId;
+    if (categoryId != null) {
+      final repo = ref.read(categoryRepositoryProvider);
+      category = await repo.findById(categoryId);
+      if (category?.parentId != null) {
+        parent = await repo.findById(category!.parentId!);
+      }
+    }
+
+    final amount = _mergedAmount ?? data.amount ?? 0;
+    if (!mounted) return;
+    final state = _formKey.currentState;
+    if (state == null) return;
+
+    // 4 + 1 form setter calls (D-07 — Wave 0 Plan 02 added them).
+    // updateNote intentionally absent: parser does not emit a discrete note
+    // in v1.3 (RESEARCH §A5). updateSatisfaction wired per Open Q2 (B-1).
+    if (amount > 0) state.updateAmount(amount);
+    if (category != null) state.updateCategory(category, parent);
+    if (data.merchantName != null && data.merchantName!.isNotEmpty) {
+      state.updateMerchant(data.merchantName!);
+    }
+    if (_parseResult?.estimatedSatisfaction != null) {
+      state.updateSatisfaction(_parseResult!.estimatedSatisfaction);
+    }
+
+    // B-2 host-cache mirror — AmountDisplay + _canSave see consistent values.
+    setState(() {
+      _hostAmount = amount;
+      _hostCategory = category;
+    });
+  }
+
+  /// Pitfall 6: discard path uses dispose+cancel (NOT stop+stop).
+  /// merger.dispose() drops the buffer; speech.cancel() abandons pending
+  /// finals. Calling stop() on either would COMMIT instead.
+  Future<void> _cancelRecordingAndDiscard() async {
+    _amountMerger?.dispose();
+    _amountMerger = null;
+    await _speechService.cancel();
+    if (!mounted) return;
+    setState(() {
+      _isRecording = false;
+      _soundLevel = 0.0;
+    });
+    _pressStart = null;
+  }
+
+  /// Save handler — delegates to the embedded form's submit() with the same
+  /// try/finally + result.when shape as manual_one_step_screen.dart:_save
+  /// (lines 278-304).
+  Future<void> _onSavePressed() async {
+    if (_isSubmitting) return;
+    setState(() => _isSubmitting = true);
+    try {
+      final result = await _formKey.currentState!.submit();
+      if (!mounted) return;
+      result.when(
+        success: (_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(S.of(context).transactionSaved)),
+          );
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        },
+        validationError: (msg) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(msg)));
+        },
+        persistError: (msg) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(msg)));
+        },
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   void _onSoundLevel(double level) {
@@ -286,10 +455,6 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
     final result = await useCase.execute(text, localeId: _voiceLocaleId);
     if (mounted && result.isSuccess) {
       setState(() => _parseResult = result.data);
-      await _resolveCategory(
-        result.data?.categoryMatch?.categoryId ??
-            result.data?.merchantCategoryId,
-      );
     }
   }
 
@@ -302,7 +467,10 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
 
     var parseResult = result.data!;
 
-    // For soul ledger transactions, estimate satisfaction from audio features
+    // For soul ledger transactions, estimate satisfaction from audio features.
+    // BLOCKER B-1: this estimator output is the source of
+    // _parseResult.estimatedSatisfaction that _stopRecordingAndCommit later
+    // pushes into the form via state.updateSatisfaction(...).
     if (parseResult.ledgerType == LedgerType.soul) {
       final features = _buildAudioFeatures();
       final estimator = ref.read(voiceSatisfactionEstimatorProvider);
@@ -314,32 +482,6 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
     }
 
     setState(() => _parseResult = parseResult);
-    await _resolveCategory(
-      parseResult.categoryMatch?.categoryId ?? parseResult.merchantCategoryId,
-    );
-  }
-
-  Future<void> _resolveCategory(String? categoryId) async {
-    if (categoryId == null) {
-      if (mounted) {
-        setState(() {
-          _resolvedCategory = null;
-          _resolvedParentCategory = null;
-        });
-      }
-      return;
-    }
-    final categoryRepo = ref.read(categoryRepositoryProvider);
-    final category = await categoryRepo.findById(categoryId);
-    final parentCategory = category?.parentId != null
-        ? await categoryRepo.findById(category!.parentId!)
-        : null;
-    if (mounted) {
-      setState(() {
-        _resolvedCategory = category;
-        _resolvedParentCategory = parentCategory;
-      });
-    }
   }
 
   VoiceAudioFeatures _buildAudioFeatures() {
@@ -365,48 +507,6 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
     return (text.replaceAll(RegExp(r'\s'), '').length / 2).ceil();
   }
 
-  Future<void> _navigateToConfirm() async {
-    final result = _parseResult;
-    if (result == null) return;
-
-    final categoryId =
-        result.categoryMatch?.categoryId ?? result.merchantCategoryId;
-
-    // Look up the Category object (may be null if not recognized)
-    final categoryRepo = ref.read(categoryRepositoryProvider);
-    final category = categoryId != null
-        ? await categoryRepo.findById(categoryId)
-        : null;
-
-    // Look up parent category if the matched category has a parentId
-    final parentCategory = category?.parentId != null
-        ? await categoryRepo.findById(category!.parentId!)
-        : null;
-
-    if (!mounted) return;
-
-    // Extract keyword for voice learning
-    final keyword = _extractVoiceKeyword(result);
-
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => ManualOneStepScreen(
-          bookId: widget.bookId,
-          initialAmount: _mergedAmount ?? result.amount ?? 0,
-          initialCategory: category,
-          initialParentCategory: parentCategory,
-          initialDate: result.parsedDate ?? DateTime.now(),
-          initialMerchant: result.merchantName,
-          initialSatisfaction: result.ledgerType == LedgerType.soul
-              ? result.estimatedSatisfaction
-              : null,
-          voiceKeyword: keyword,
-          entrySource: EntrySource.voice,
-        ),
-      ),
-    );
-  }
-
   String _extractVoiceKeyword(VoiceParseResult result) {
     var remaining = result.rawText;
 
@@ -430,39 +530,12 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
     return remaining.trim();
   }
 
-  String _transcriptText() {
-    return _finalText.isNotEmpty ? _finalText : _partialText;
-  }
-
-  String _parsedAmountText(Locale locale) {
-    final amount = _parseResult?.amount;
-    if (amount == null) return '';
-    return const FormatterService().formatCurrency(amount, 'JPY', locale);
-  }
-
-  String _parsedCategoryText(Locale locale) {
-    final category = _resolvedCategory;
-    if (category == null) return '';
-    return formatCategoryPath(
-      category: category,
-      parentCategory: _resolvedParentCategory,
-      locale: locale,
-    );
-  }
-
-  String _parsedDateText(Locale locale, S l10n) {
-    final date = _parseResult?.parsedDate;
-    if (date == null) return l10n.todayDate;
-    return const FormatterService().formatDate(date, locale);
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
-    final hasResult = _parseResult != null;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final localeAsync = ref.watch(currentLocaleProvider);
-    final locale = localeAsync.value ?? const Locale('ja');
+    // Watch locale to trigger rebuild on locale change (formatting downstream).
+    ref.watch(currentLocaleProvider);
 
     // Watch voiceLocaleIdProvider so the screen rebuilds when the user changes
     // the voice language in Settings. The current value is stored in
@@ -471,6 +544,15 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
     if (voiceLocaleAsync case AsyncData(:final value)) {
       _voiceLocaleId = value;
     }
+
+    // BLOCKER B-2: AmountDisplay takes a String — render the host-cache mirror.
+    final amountStr = _hostAmount > 0 ? _hostAmount.toString() : '';
+    // Voice-correction learning keyword (Phase 18 D-09 hook) — only meaningful
+    // when a parse result exists. Keep the helper signature untouched; pass
+    // null until a parse runs.
+    final voiceKeyword = _parseResult != null
+        ? _extractVoiceKeyword(_parseResult!)
+        : null;
 
     return Scaffold(
       backgroundColor: isDark
@@ -505,25 +587,43 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
             bookId: widget.bookId,
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 8),
 
+          // D-10: AmountDisplay above the form — tap opens the modal sheet
+          // for amount editing. Reads from the host-cache mirror (B-2).
+          GestureDetector(
+            onTap: () async {
+              await AmountEditBottomSheet.show(
+                context,
+                initialAmount: _hostAmount,
+                onConfirm: (value) {
+                  // Push into the form AND update the host-cache mirror so
+                  // the AmountDisplay and _canSave predicate stay aligned.
+                  _formKey.currentState?.updateAmount(value);
+                  if (!mounted) return;
+                  setState(() => _hostAmount = value);
+                },
+              );
+            },
+            behavior: HitTestBehavior.opaque,
+            child: AmountDisplay(amount: amountStr),
+          ),
+
+          // D-01: scrollable embedded form replaces the read-only result card.
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  VoiceRecognitionResultCard(
-                    transcript: _transcriptText(),
-                    recognitionLabel: l10n.recognitionResult,
-                    amountLabel: l10n.amount,
-                    amountValue: _parsedAmountText(locale),
-                    categoryLabel: l10n.category,
-                    categoryValue: _parsedCategoryText(locale),
-                    dateLabel: l10n.date,
-                    dateValue: _parsedDateText(locale, l10n),
-                    isDark: isDark,
-                  ),
-                ],
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: TransactionDetailsForm(
+                key: _formKey,
+                config: TransactionDetailsFormConfig.$new(
+                  bookId: widget.bookId,
+                  // All initial fields null — voice batch-fills via
+                  // _formKey.currentState!.updateXxx on long-press release.
+                  voiceKeyword: voiceKeyword,
+                  entrySource: EntrySource.voice,
+                  merchantFocusNode: _merchantFocus,
+                  noteFocusNode: _noteFocus,
+                ),
               ),
             ),
           ),
@@ -538,21 +638,50 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
             ),
           ),
 
-          // Mic button
-          GestureDetector(
-            onTap: _isInitialized ? _toggleRecording : null,
-            child: Container(
+          // D-03 / D-04: hold-to-record mic button. duration: Duration.zero
+          // makes LongPress fire on press-down; the 300 ms misfire threshold
+          // lives inside _onLongPressEnd (not here, so it's visible at the
+          // gesture-decision boundary).
+          RawGestureDetector(
+            gestures: <Type, GestureRecognizerFactory>{
+              LongPressGestureRecognizer:
+                  GestureRecognizerFactoryWithHandlers<
+                    LongPressGestureRecognizer
+                  >(
+                    () => LongPressGestureRecognizer(
+                      duration: Duration.zero,
+                      debugOwner: this,
+                    ),
+                    (LongPressGestureRecognizer instance) {
+                      instance
+                        ..onLongPressStart = _onLongPressStart
+                        ..onLongPressEnd = _onLongPressEnd
+                        ..onLongPressCancel = _onLongPressCancel;
+                    },
+                  ),
+            },
+            child: AnimatedContainer(
+              key: const ValueKey('voice-mic-button'),
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeInOut,
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
+                // D-04: shape stays rectangle; borderRadius interpolates 36→16.
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.circular(_isRecording ? 16 : 36),
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: const [
-                    AppColors.actionGradientStart,
-                    AppColors.actionGradientEnd,
-                  ],
+                  colors: _isRecording
+                      ? const [
+                          AppColors.recordingGradientStart,
+                          AppColors.recordingGradientEnd,
+                        ]
+                      : const [
+                          AppColors.actionGradientStart,
+                          AppColors.actionGradientEnd,
+                        ],
                 ),
                 boxShadow: const [
                   BoxShadow(
@@ -562,32 +691,39 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
                   ),
                 ],
               ),
+              // D-04: Icon stays Icons.mic in BOTH states (no Mic→Stop swap).
               child: const Icon(Icons.mic, color: Colors.white, size: 32),
             ),
           ),
 
           const SizedBox(height: 12),
 
-          Text(
-            l10n.tapToRecord,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: isDark
-                  ? AppColorsDark.textTertiary
-                  : AppColors.textTertiary,
+          // D-06: caption cross-fades between idle and recording.
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 150),
+            child: Text(
+              _isRecording ? l10n.recording : l10n.holdToRecord,
+              key: ValueKey(_isRecording),
+              style: AppTextStyles.bodySmall.copyWith(
+                color: isDark
+                    ? AppColorsDark.textTertiary
+                    : AppColors.textTertiary,
+              ),
             ),
           ),
 
           const SizedBox(height: 24),
 
-          // Next button — enabled only when parse result is ready
+          // D-11: Save button — gated by _canSave (host-cache, not currentState).
           Padding(
+            key: const ValueKey('voice-save-button'),
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
             child: SizedBox(
               width: double.infinity,
               height: 52,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  gradient: hasResult
+                  gradient: _canSave
                       ? const LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
@@ -609,11 +745,11 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: hasResult ? _navigateToConfirm : null,
+                    onTap: _canSave ? _onSavePressed : null,
                     borderRadius: BorderRadius.circular(14),
                     child: Center(
                       child: Text(
-                        l10n.next,
+                        l10n.save,
                         style: AppTextStyles.titleLarge.copyWith(
                           color: Colors.white,
                           fontSize: 16,
@@ -631,183 +767,34 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Pitfall 7 (RESEARCH Open Q1): app-pause must cancel an in-progress
+    // recording, otherwise the mic stays "live" with no user awareness.
+    if (state == AppLifecycleState.paused && _isRecording) {
+      _cancelRecordingAndDiscard();
+    }
+  }
+
+  /// D-09: text-field focus during recording auto-stops the session.
+  /// Mic returns to idle; no batch-fill of the form (caller controls modality).
+  void _handleFocusChange() {
+    final hasTextFocus = _merchantFocus.hasFocus || _noteFocus.hasFocus;
+    if (hasTextFocus && _isRecording) {
+      _cancelRecordingAndDiscard();
+    }
+  }
+
+  @override
   void dispose() {
     _parseDebounce?.cancel();
     _amountMerger?.dispose();
     _amountMerger = null;
     _speechService.cancel();
+    // Phase 22: unregister lifecycle observer + dispose FocusNodes.
+    WidgetsBinding.instance.removeObserver(this);
+    _merchantFocus.dispose();
+    _noteFocus.dispose();
     super.dispose();
   }
 }
 
-class VoiceRecognitionResultCard extends StatelessWidget {
-  const VoiceRecognitionResultCard({
-    super.key,
-    required this.transcript,
-    required this.recognitionLabel,
-    required this.amountLabel,
-    required this.amountValue,
-    required this.categoryLabel,
-    required this.categoryValue,
-    required this.dateLabel,
-    required this.dateValue,
-    required this.isDark,
-  });
-
-  final String transcript;
-  final String recognitionLabel;
-  final String amountLabel;
-  final String amountValue;
-  final String categoryLabel;
-  final String categoryValue;
-  final String dateLabel;
-  final String dateValue;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final primaryColor = isDark
-        ? AppColorsDark.textPrimary
-        : AppColors.textPrimary;
-    final secondaryColor = isDark
-        ? AppColorsDark.textSecondary
-        : AppColors.textSecondary;
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: isDark ? AppColorsDark.card : AppColors.card,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isDark ? AppColorsDark.borderDefault : AppColors.borderDefault,
-        ),
-      ),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          Text(
-            recognitionLabel,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: secondaryColor,
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 2,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            transcript,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.titleLarge.copyWith(
-              color: primaryColor,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            height: 1,
-            color: isDark
-                ? AppColorsDark.backgroundDivider
-                : AppColors.backgroundDivider,
-          ),
-          _ParsedInfoRow(
-            icon: Icons.payments_outlined,
-            label: amountLabel,
-            value: amountValue,
-            valueStyle: AppTextStyles.amountMedium,
-            isDark: isDark,
-          ),
-          _ParsedDivider(isDark: isDark),
-          _ParsedInfoRow(
-            icon: Icons.shopping_bag_outlined,
-            label: categoryLabel,
-            value: categoryValue,
-            isDark: isDark,
-          ),
-          _ParsedDivider(isDark: isDark),
-          _ParsedInfoRow(
-            icon: Icons.calendar_today_outlined,
-            label: dateLabel,
-            value: dateValue,
-            isDark: isDark,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ParsedInfoRow extends StatelessWidget {
-  const _ParsedInfoRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.isDark,
-    this.valueStyle,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-  final bool isDark;
-  final TextStyle? valueStyle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 16,
-            color: isDark ? AppColorsDark.textTertiary : AppColors.textTertiary,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: isDark
-                  ? AppColorsDark.textSecondary
-                  : AppColors.textSecondary,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              overflow: TextOverflow.ellipsis,
-              style: (valueStyle ?? AppTextStyles.bodyMedium).copyWith(
-                color: isDark
-                    ? AppColorsDark.textPrimary
-                    : AppColors.textPrimary,
-                fontSize: valueStyle?.fontSize ?? 14,
-                fontWeight: valueStyle?.fontWeight ?? FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ParsedDivider extends StatelessWidget {
-  const _ParsedDivider({required this.isDark});
-
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 1,
-      color: isDark
-          ? AppColorsDark.backgroundDivider
-          : AppColors.backgroundDivider,
-    );
-  }
-}
