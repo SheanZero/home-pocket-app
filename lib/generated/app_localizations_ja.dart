@@ -1292,6 +1292,18 @@ class SJa extends S {
   String get voiceMicrophonePermissionRequired => 'マイクへのアクセスを許可してください';
 
   @override
+  String get voiceRecognitionErrorNetwork => 'ネットワークに接続できません。通信状況を確認してください';
+
+  @override
+  String get voiceRecognitionErrorNoMatch => '音声を認識できませんでした。もう一度お試しください';
+
+  @override
+  String get voiceRecognitionErrorAudio => 'マイクの音声を取得できませんでした';
+
+  @override
+  String get voiceRecognitionErrorUnknown => '音声認識でエラーが発生しました';
+
+  @override
   String get analyticsBudgetProgress => '予算の進捗';
 
   @override

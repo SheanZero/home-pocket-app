@@ -1307,6 +1307,21 @@ class SEn extends S {
       'Please allow microphone access';
 
   @override
+  String get voiceRecognitionErrorNetwork =>
+      'Can\'t reach the network. Please check your connection and try again';
+
+  @override
+  String get voiceRecognitionErrorNoMatch =>
+      'Didn\'t catch that. Please try again';
+
+  @override
+  String get voiceRecognitionErrorAudio =>
+      'Couldn\'t read audio from the microphone';
+
+  @override
+  String get voiceRecognitionErrorUnknown => 'Voice recognition error occurred';
+
+  @override
   String get analyticsBudgetProgress => 'Budget Progress';
 
   @override
