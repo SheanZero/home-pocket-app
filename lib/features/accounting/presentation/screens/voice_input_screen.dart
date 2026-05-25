@@ -73,6 +73,12 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
   // Effective voice locale (updated reactively from voiceLocaleIdProvider)
   String _voiceLocaleId = 'zh-CN';
 
+  /// Phase 23 D-07 (WR-01 cold-start race fix): the recognizer must not
+  /// run with the wrong locale during the first ms after launch.
+  /// Flipped to true when voiceLocaleIdProvider resolves (or errors —
+  /// see RESEARCH Pitfall 3 graceful degradation).
+  bool _isLocaleReady = false;
+
   // ── Phase 22: embedded form integration (D-01) ──
 
   /// GlobalKey on the embedded TransactionDetailsForm so the voice screen
@@ -167,6 +173,31 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
         _showPermissionError();
       }
     }
+
+    // Phase 23 D-07 (WR-01): gate the mic on voiceLocaleIdProvider resolution
+    // so the recognizer is never started with the wrong locale during cold start.
+    // fireImmediately: true ensures the flag flips synchronously when the provider
+    // has already resolved (common on warm launches). RESEARCH §Pattern 2.
+    ref.listenManual<AsyncValue<String>>(
+      voiceLocaleIdProvider,
+      (prev, next) {
+        if (next case AsyncData(:final value)) {
+          _voiceLocaleId = value;
+          if (mounted && !_isLocaleReady) {
+            setState(() => _isLocaleReady = true);
+          }
+        } else if (next case AsyncError()) {
+          // RESEARCH Pitfall 3: graceful degradation. Fall back to
+          // default locale (already initialized to 'zh-CN' above) and
+          // unlock the mic. Prevents soft-lock when AppSettings provider
+          // errors (e.g. corrupted SharedPreferences).
+          if (mounted && !_isLocaleReady) {
+            setState(() => _isLocaleReady = true);
+          }
+        }
+      },
+      fireImmediately: true,
+    );
   }
 
   // ── Abstract contract — VoiceRecognitionEventHandlerMixin implementations ──
@@ -202,7 +233,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
   // ── Phase 22 D-03: hold-to-record gesture lifecycle ──
 
   void _onLongPressStart(LongPressStartDetails details) {
-    if (!_isInitialized || _isRecording) return;
+    if (!_isInitialized || !_isLocaleReady || _isRecording) return;
     _pressStart = DateTime.now();
     _startRecording();
   }
