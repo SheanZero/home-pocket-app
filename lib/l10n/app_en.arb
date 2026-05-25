@@ -1038,9 +1038,13 @@
   "@discard": {
     "description": "Dialog confirm button: discard unsaved changes"
   },
-  "tapToRecord": "Tap to record",
-  "@tapToRecord": {
-    "description": "Voice input hint"
+  "holdToRecord": "Hold to speak",
+  "@holdToRecord": {
+    "description": "Voice idle caption: hold to speak (push-to-talk)"
+  },
+  "recording": "Recording…",
+  "@recording": {
+    "description": "Voice recording-state caption"
   },
   "todayDate": "Today",
   "@todayDate": {

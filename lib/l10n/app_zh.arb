@@ -1038,9 +1038,13 @@
   "@discard": {
     "description": "Dialog confirm button: discard unsaved changes"
   },
-  "tapToRecord": "点击录音",
-  "@tapToRecord": {
-    "description": "Voice input hint"
+  "holdToRecord": "按住说话",
+  "@holdToRecord": {
+    "description": "Voice idle caption: hold to speak (push-to-talk)"
+  },
+  "recording": "录音中…",
+  "@recording": {
+    "description": "Voice recording-state caption"
   },
   "todayDate": "今天",
   "@todayDate": {
