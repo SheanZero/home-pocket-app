@@ -34,8 +34,8 @@ Phase 23 closes the v1.3 milestone by absorbing carried tech-debt before `/gsd:c
 
 ### Scope & Phase Identity
 
-- **D-01:** Intent is **full voice-flow polish** — Phase 22 voice items (selective per below) + Phase 21 IN-01..06 (selective per below). Cleanup-only; no new capabilities.
-- **D-02:** Keep ROADMAP.md Phase 23 title verbatim (`v1.3 cleanup: scanner allow-lists + voice flow polish`). Scanner allow-lists already cleared in Phase 21 (`117be50` + `a570dfc`). CONTEXT.md is the canonical scope record.
+- **D-01 [informational]:** Intent is **full voice-flow polish** — Phase 22 voice items (selective per below) + Phase 21 IN-01..06 (selective per below). Cleanup-only; no new capabilities. *Framing decision; honored implicitly by the absence of any new-capability tasks across all plans.*
+- **D-02 [informational]:** Keep ROADMAP.md Phase 23 title verbatim (`v1.3 cleanup: scanner allow-lists + voice flow polish`). Scanner allow-lists already cleared in Phase 21 (`117be50` + `a570dfc`). CONTEXT.md is the canonical scope record. *Framing decision; no plan modifies the title.*
 - **D-03:** Fold ALL carried human UATs into Phase 23:
   - Phase 19 — keypad-feel + 6-golden visual baseline
   - Phase 20 — VOICE-02-DEVICE-VERIFY 8-anchor (zh: 2204 continuous, 1840 intra-pause merge, 1800 false-merge regression; ja: にせんにひゃくよん→2204, せんはっぴゃく+よんじゅう円→1840, 一万二千→12000; sanity: record button stays lit + ManualOneStepScreen carries initialAmount)
@@ -63,11 +63,11 @@ Phase 23 closes the v1.3 milestone by absorbing carried tech-debt before `/gsd:c
 
 ### Phase 21 — Deferred (v1.4+)
 
-- **D-16:** **IN-02 (`CategoryKeywordPreference` SeedSpec signature change) DEFERRED.** The repo's `insertSeedBatch` parameter-type lie is real but signature changes ripple through callers; risk/effort doesn't justify in a cleanup phase. v1.4+ candidate when a related repo touch happens organically.
+- **D-16 [informational]:** **IN-02 (`CategoryKeywordPreference` SeedSpec signature change) DEFERRED.** The repo's `insertSeedBatch` parameter-type lie is real but signature changes ripple through callers; risk/effort doesn't justify in a cleanup phase. v1.4+ candidate when a related repo touch happens organically. *Deferral decision; correctly excluded from all Phase 23 plans.*
 
 ### Documentation Reconciliation
 
-- **D-17:** Phase 23 carries the 10-checkbox + 7-frontmatter reconciliation as a discrete commit (or set of commits) within the phase. Suggested ordering: code-polish first (D-05..D-15), THEN doc reconciliation (D-04 items), THEN device UAT (D-03 items). Doc reconciliation comes after code so the SUMMARY frontmatter accurately reflects what shipped.
+- **D-17 [informational]:** Phase 23 carries the 10-checkbox + 7-frontmatter reconciliation as a discrete commit (or set of commits) within the phase. Suggested ordering: code-polish first (D-05..D-15), THEN doc reconciliation (D-04 items), THEN device UAT (D-03 items). Doc reconciliation comes after code so the SUMMARY frontmatter accurately reflects what shipped. *Ordering hint; honored by wave assignment — 23-07 (D-04) lands in Wave 4 after all code plans, 23-08 (D-03) lands in Wave 5.*
 
 ### Claude's Discretion
 
