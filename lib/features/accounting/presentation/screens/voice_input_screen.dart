@@ -279,20 +279,14 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     );
   }
 
-  /// D-05 commit path: synchronously commit the merger buffer, graceful-drain
-  /// the speech service, then batch-fill the embedded form via 4 + 1 public
-  /// setters on TransactionDetailsFormState (Plan 02 Wave 0 surface).
-  ///
-  /// BLOCKER B-2 (host-cache mirror): _hostAmount + _hostCategory are written
-  /// in the same setState block as the form push, so AmountDisplay and the
-  /// _canSave predicate reflect the new values without depending on
-  /// GlobalKey.currentState first-build null timing.
+  /// D-05 commit path: commit merger buffer, drain speech service, then
+  /// batch-fill the embedded form via the 4 + 1 public setters added in
+  /// Plan 02. BLOCKER B-2: _hostAmount + _hostCategory are mirrored so
+  /// AmountDisplay and _canSave see the new values atomically.
   Future<void> _stopRecordingAndCommit() async {
-    // 1. Synchronously commit the merger buffer (Pattern 7 — bypasses 2.5s
-    //    window). MUST happen BEFORE _speechService.stop() to preserve the
-    //    original ordering invariant.
+    // Pattern 7: merger.stop() bypasses the 2.5s window. MUST run BEFORE
+    // _speechService.stop() to preserve the original ordering invariant.
     _amountMerger?.stop();
-    // 2. Graceful drain on the speech service so any in-flight finals flush.
     await _speechService.stop();
     if (!mounted) return;
     setState(() {
@@ -331,42 +325,28 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     final state = _formKey.currentState;
     if (state == null) return;
 
-    // 4 + 1 form setter calls (D-07 — Wave 0 Plan 02 added them):
+    // 4 + 1 form setter calls (D-07 — Wave 0 Plan 02 added them).
+    // updateNote intentionally absent: parser does not emit a discrete note
+    // in v1.3 (RESEARCH §A5). updateSatisfaction wired per Open Q2 (B-1).
     if (amount > 0) state.updateAmount(amount);
     if (category != null) state.updateCategory(category, parent);
     if (data.merchantName != null && data.merchantName!.isNotEmpty) {
       state.updateMerchant(data.merchantName!);
     }
-    // updateNote: parser does NOT emit a discrete note field in v1.3
-    // (RESEARCH §Assumptions A5). No setter call because there is no value
-    // to push, NOT because we are protecting user input. Per D-08
-    // voice-always-overwrites — if a future parser version emits notes, this
-    // becomes a real setter call.
-
-    // RESEARCH §Open Q2 (BLOCKER B-1 resolution): preserve Phase 11
-    // satisfaction estimator wiring through the single-screen rewrite.
-    // _parseResult.estimatedSatisfaction is populated by the existing
-    // _onResult callback for the soul-ledger branch; push it into the form
-    // via the new updateSatisfaction setter (Plan 02 added). Survival-ledger
-    // categories ignore the value (form's submit() only reads
-    // _soulSatisfaction when ledgerType == soul).
     if (_parseResult?.estimatedSatisfaction != null) {
       state.updateSatisfaction(_parseResult!.estimatedSatisfaction);
     }
 
-    // B-2 host-cache mirror: update _hostAmount + _hostCategory in the SAME
-    // setState block so the AmountDisplay render and _canSave predicate
-    // reflect the new values atomically with the form rebuild.
+    // B-2 host-cache mirror — AmountDisplay + _canSave see consistent values.
     setState(() {
       _hostAmount = amount;
       _hostCategory = category;
     });
   }
 
-  /// Pitfall 6 (RESEARCH lines 656-668): discard path uses dispose+cancel,
-  /// NOT stop+stop. The merger's dispose() drops the buffer; the speech
-  /// service's cancel() abandons any pending finals. Calling stop() on
-  /// either would COMMIT instead of discard.
+  /// Pitfall 6: discard path uses dispose+cancel (NOT stop+stop).
+  /// merger.dispose() drops the buffer; speech.cancel() abandons pending
+  /// finals. Calling stop() on either would COMMIT instead.
   Future<void> _cancelRecordingAndDiscard() async {
     _amountMerger?.dispose();
     _amountMerger = null;
@@ -658,11 +638,10 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
             ),
           ),
 
-          // D-03 / D-04: hold-to-record mic button — RawGestureDetector wraps
-          // an AnimatedContainer that morphs shape + gradient on _isRecording.
-          // The recognizer's `duration: Duration.zero` lets LongPress fire
-          // immediately on press-down (push-to-talk), with the 300 ms misfire
-          // threshold enforced inside _onLongPressEnd.
+          // D-03 / D-04: hold-to-record mic button. duration: Duration.zero
+          // makes LongPress fire on press-down; the 300 ms misfire threshold
+          // lives inside _onLongPressEnd (not here, so it's visible at the
+          // gesture-decision boundary).
           RawGestureDetector(
             gestures: <Type, GestureRecognizerFactory>{
               LongPressGestureRecognizer:
@@ -688,8 +667,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                // D-04: shape stays BoxShape.rectangle in both states; only
-                // borderRadius interpolates (36 ≈ circle on 72×72 → 16 square).
+                // D-04: shape stays rectangle; borderRadius interpolates 36→16.
                 shape: BoxShape.rectangle,
                 borderRadius: BorderRadius.circular(_isRecording ? 16 : 36),
                 gradient: LinearGradient(
@@ -736,8 +714,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
 
           const SizedBox(height: 24),
 
-          // D-11: Save button (renamed from Next) — full-width gradient CTA
-          // gated by _canSave (host-cache predicate, NOT _formKey.currentState).
+          // D-11: Save button — gated by _canSave (host-cache, not currentState).
           Padding(
             key: const ValueKey('voice-save-button'),
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
