@@ -118,6 +118,19 @@ void main() {
     });
   });
 
+  // ─── Phase 23 D-15 / IN-06 override anchor ───
+  // Exercises the cat_other_expense → cat_other_other override path in
+  // VoiceCategoryResolver._ensureL2 via a real seeded corpus utterance.
+  group('D-15 other-expense override (Phase 23 / IN-06)', () {
+    test('D-15: "その他" -> cat_other_other override (Phase 23)', () async {
+      final result = await resolver.resolve('その他');
+      expect(result, isNotNull,
+          reason: 'Phase 23 D-15: その他 must seed-route through cat_other_expense '
+              'override to cat_other_other');
+      expect(result!.categoryId, 'cat_other_other');
+    });
+  });
+
   tearDownAll(() {
     container.dispose();
     final pct = totalCount == 0 ? 0.0 : (passCount / totalCount * 100);
