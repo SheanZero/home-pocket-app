@@ -208,7 +208,7 @@ Use `/gsd:new-milestone` after v1.3 ships. Candidate themes carried in PROJECT.m
 **Goal:** Close v1.3 by absorbing carried tech-debt: Phase 22 voice-flow surgical polish (D-05 intra-session guard, D-07 cold-start race, D-08 popUntil deferral, D-09 listener-leak regression, D-10 mixin extraction, D-11 G-02 localized assert), Phase 21 mechanical polish (D-12 constant dedup, D-13 substring guard, D-14 SeedAllUseCase, D-15 その他/其他/other seed), documentation reconciliation (D-04 REQUIREMENTS.md + 7 SUMMARY frontmatter backfills), and 9 carried device UATs (Phase 19 + 20 + 22). Cleanup-only — no new user-visible capabilities.
 **Requirements**: None — phase_req_ids is null. CONTEXT.md D-01..D-20 are the authoritative scope record. The 10 v1.3 REQ-IDs flipped in D-04 belong to Phases 18/20/21 functionally; Phase 23 only reconciles documentation metadata.
 **Depends on:** Phase 22
-**Plans:** 7/8 plans executed
+**Plans:** 8/8 plans complete
 
 Plans:
 **Wave 1**
@@ -232,4 +232,4 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 23-08-PLAN.md — D-03 device UAT runbook aggregating 9 carried items (Phase 19 + 20 + 22); accepts-deferral per Phase 11/13/17 precedent (Wave 5, non-autonomous)
+- [x] 23-08-PLAN.md — D-03 device UAT runbook aggregating 9 carried items (Phase 19 + 20 + 22); accepts-deferral per Phase 11/13/17 precedent (Wave 5, non-autonomous)
