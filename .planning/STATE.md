@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-05-26 — v1.3 迭代帐本输入 milest
 Phase: None — between milestones
 Plan: Not started
 Status: v1.3 shipped; awaiting next-milestone scoping
-Last activity: 2026-05-26 - Quick task 260526-k92: 语音 tab 4-fix（手动 label、保存 button 灰、transcript 显示、date+category NLU 静默填入）— 待人工真机验证
+Last activity: 2026-05-26 - Quick task 260526-l0o: voice follow-up 5-fix（12,450→450 数字漏、新干线 misclassify、save 仍灰、voice 默认 category 反转、transcript UI 收紧）— 待人工真机验证
 
 ## Last Milestone Snapshot (v1.3)
 
@@ -82,7 +82,8 @@ No active blockers. Carried-forward debt (cross-milestone):
 | 260526-i9a | 添加账目 tab 切换改为只换 tag 下面的内容区（MaterialPageRoute → zero-duration PageRouteBuilder，AppBar/tab 不再整页滑动） | 2026-05-26 | 2a7d6ce | Verified | [260526-i9a-tab-switch-inner-content-only](./quick/260526-i9a-tab-switch-inner-content-only/) |
 | 260526-inb | IME 收起后恢复数字键盘（TextField 加 textInputAction.done + onTapOutside；fixup: `_handleFocusChange` 把 `_amountFocused` 镜像到 `!hasTextFocus` 才能让 `_showSmartKeypad` 真正变 true）+ KeyboardToolbar elevation 0 + 完成按钮加 outlined frame | 2026-05-26 | 91b401a | Verified | [260526-inb-ime-dismiss-restore-keypad-and-action-ba](./quick/260526-inb-ime-dismiss-restore-keypad-and-action-ba/) |
 | 260526-j98 | 添加账目 4 项 polish：(1) 备注 拆独立卡片放分类后；(2) 支出分类 → 用途/用途/Purpose（ARB 单 key）；(3) 底部 scrollPaddingBottom 从全键盘高改 32dp（删 `_computeSmartKeypadHeight`）；(4) freezed 加 `onPickerDismissed` 回调，date/category picker dismiss 后 `_restoreKeypadFocus()` 让 SmartKeyboard 回来；voice mic golden 同步 re-baseline | 2026-05-26 | fedf995 | Verified | [260526-j98-form-restructure-note-card-rename-paddin](./quick/260526-j98-form-restructure-note-card-rename-paddin/) |
-| 260526-k92 | 语音 tab 4-fix：(1) ARB `manualInput` zh=手动/ja=手動 与 OCR/语音 长度对齐；(2) CRITICAL 保存按钮永久灰 — voice screen 没像 manual 那样 seed 默认 category，加 `_initializeDefaultCategory()` postFrame 调用 + `_canSave` 不再 gate `_hostAmount > 0`（无金额时点 submit 由 snackbar 兜底）；(3) 加固定 40dp transcript 区域显示 `_partialText` / `_finalText`；(4) `extractDate` 已存在但 `parsedDate` 没消费，加 `updateDate` setter + LAST-wins 多次提及规则 + zh/ja 各 5 条 date corpus | 2026-05-26 | f6fa621 | Pending visual check | [260526-k92-voice-tab-fixes-save-transcript-date-cat](./quick/260526-k92-voice-tab-fixes-save-transcript-date-cat/) |
+| 260526-k92 | 语音 tab 4-fix：(1) ARB `manualInput` zh=手动/ja=手動 与 OCR/语音 长度对齐；(2) CRITICAL 保存按钮永久灰 — voice screen 没像 manual 那样 seed 默认 category，加 `_initializeDefaultCategory()` postFrame 调用 + `_canSave` 不再 gate `_hostAmount > 0`（无金额时点 submit 由 snackbar 兜底）；(3) 加固定 40dp transcript 区域显示 `_partialText` / `_finalText`；(4) `extractDate` 已存在但 `parsedDate` 没消费，加 `updateDate` setter + LAST-wins 多次提及规则 + zh/ja 各 5 条 date corpus | 2026-05-26 | f6fa621 | Superseded by 260526-l0o (real-world test surfaced 5 regressions/bugs) | [260526-k92-voice-tab-fixes-save-transcript-date-cat](./quick/260526-k92-voice-tab-fixes-save-transcript-date-cat/) |
+| 260526-l0o | Voice follow-up 5-fix（k92 真机回归）：(1) `12,450日元 → 450` — `日元` 不在 `VoiceCurrencySuffixes.all` 导致 comma-aware regex miss 退回 `\d{3,7}` fallback；加 `日元/日圓/日币`；(2) `新干线 → 交际费/聚会饮酒` — `default_synonyms.dart` 没 Shinkansen 词条 + resolver 缺 substring fallback；加 13 个交通同义词 + resolver 增 substring 兜底；(3+5) 反转 voice 默认 category seed（manual 仍保留）+ `_canSave = !_isSubmitting`（去掉 `_hostCategory` gate，submit 时 snackbar 兜底）+ guard `_stopRecordingAndCommit` 不让 null 覆盖 host category；(4) transcript 从 bodyMedium/40dp → caption/28dp single-line ellipsis | 2026-05-26 | 5f94743 | Pending visual check | [260526-l0o-voice-followup-amount-parse-loss-categor](./quick/260526-l0o-voice-followup-amount-parse-loss-categor/) |
 
 ## Deferred Items
 
