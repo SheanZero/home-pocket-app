@@ -46,10 +46,30 @@ int countVoiceWords(String text) {
   return (text.replaceAll(RegExp(r'\s'), '').length / 2).ceil();
 }
 
-/// Extract the "keyword" portion of a recognized voice transcript by stripping
-/// the amount, the matched merchant name (if any), and common Japanese/Chinese
-/// particles. Used by the voice-correction learning hook (Phase 18 D-09).
+/// Extract the "keyword" portion of a recognized voice transcript.
+///
+/// Quick task 260526-pg6 (Option F — Task 2): preferred path consumes
+/// `result.resolvedKeyword` verbatim — the canonical key the resolver
+/// internally used. This guarantees the write path (`recordCorrection`) and
+/// read path (`resolver.resolve`) speak the same key, closing the
+/// silent-orphan bug where divergent extractors wrote rows the resolver
+/// never looked up.
+///
+/// The legacy regex path is retained ONLY as a null-safety fallback for
+/// callers that construct a [VoiceParseResult] without populating
+/// `resolvedKeyword` (e.g. older tests, future schema-free fakes). In
+/// v1.3.1 production this fallback never fires — ParseVoiceInputUseCase
+/// always populates `resolvedKeyword` when non-empty.
 String extractVoiceKeyword(VoiceParseResult result) {
+  // Preferred: canonical key from the use case (Task 1). Identity-equal to
+  // what the resolver consumed, so DAO writes line up with future resolves.
+  final resolved = result.resolvedKeyword;
+  if (resolved != null && resolved.isNotEmpty) {
+    return resolved;
+  }
+
+  // Legacy fallback — kept byte-identical to pre-Task-2 behavior so callers
+  // that don't populate resolvedKeyword still get the historic strip.
   var remaining = result.rawText;
 
   // Remove amount patterns

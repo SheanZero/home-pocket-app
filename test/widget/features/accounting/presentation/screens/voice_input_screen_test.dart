@@ -14,6 +14,7 @@ import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/category_ledger_config.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
+import 'package:home_pocket/features/accounting/domain/models/transaction_details_form_config.dart';
 import 'package:home_pocket/features/accounting/domain/models/voice_parse_result.dart';
 import 'package:home_pocket/application/accounting/merchant_category_learning_service.dart';
 import 'package:home_pocket/features/accounting/domain/models/merchant_category_preference.dart';
@@ -23,6 +24,7 @@ import 'package:home_pocket/features/accounting/domain/repositories/merchant_cat
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/voice_input_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/soft_toast.dart';
+import 'package:home_pocket/features/accounting/presentation/widgets/transaction_details_form.dart';
 import 'package:home_pocket/features/dual_ledger/presentation/widgets/soul_celebration_overlay.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
@@ -1760,6 +1762,89 @@ void main() {
               'l0o Issue 5: tapping save with no category must surface the '
               'pleaseSelectCategory snackbar via form.submit() validation',
         );
+      },
+    );
+  });
+
+  // ── Quick task 260526-pg6 (Option F — Task 2): WRITE-path uses canonical key
+  //
+  // Closes the silent-orphan bug — after a voice batch fill, the form's
+  // `voiceKeyword` (which downstream feeds `recordCorrection`) MUST equal
+  // `VoiceParseResult.resolvedKeyword` verbatim, NOT the legacy regex strip.
+  // We verify by reading the live `TransactionDetailsForm` widget's config.
+  group('260526-pg6 — Task 2: voiceKeyword passed to form == resolvedKeyword', () {
+    final micFinder = find.byKey(const ValueKey('voice-mic-button'));
+
+    testWidgets(
+      'Test 2.B: after voice batch fill, TransactionDetailsForm.config.voiceKeyword '
+      'equals VoiceParseResult.resolvedKeyword (NOT the legacy stripped variant)',
+      (tester) async {
+        // Parse fake returns a result whose resolvedKeyword="去外食" — the
+        // canonical key the resolver consumed. Legacy regex on rawText
+        // '去外食12,450日元' would produce '去外食日元' (bug). Pin the canonical
+        // key flows through to the form.
+        const voiceText = '去外食12,450日元';
+        final parseResult = VoiceParseResult(
+          rawText: voiceText,
+          amount: 12450,
+          parsedDate: DateTime(2026, 5, 26),
+          merchantName: null,
+          categoryMatch: const CategoryMatchResult(
+            categoryId: 'dining',
+            confidence: 0.85,
+            source: MatchSource.keyword,
+          ),
+          ledgerType: LedgerType.survival,
+          resolvedKeyword: '去外食',
+        );
+        final speechService = CapturingStartSpeechRecognitionUseCase();
+        final parseUseCase = FakeParseVoiceInputUseCase({
+          voiceText: parseResult,
+        });
+
+        await tester.pumpWidget(
+          buildSubject(
+            speechService: speechService,
+            parseUseCase: parseUseCase,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Drive the voice batch-fill: hold mic, emit final, release past 300ms.
+        final gesture = await tester.startGesture(tester.getCenter(micFinder));
+        await tester.pump(const Duration(milliseconds: 1));
+        await tester.pump();
+        speechService.emitFinal(voiceText);
+        await tester.binding.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 350)),
+        );
+        await tester.pumpAndSettle();
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        // Inspect the live TransactionDetailsForm widget's config — the host
+        // computed `voiceKeyword = extractVoiceKeyword(_parseResult!)` and
+        // wired it into the config when building the form subtree.
+        final form = tester.widget<TransactionDetailsForm>(
+          find.byType(TransactionDetailsForm),
+        );
+        // The `$new` variant exposes `voiceKeyword`. Sealed pattern-match
+        // on NewEntryConfig (Freezed v3 — `maybeWhen` API still available on
+        // the mixin per production code at transaction_details_form.dart:351).
+        final config = form.config;
+        final actualVoiceKeyword = config is NewEntryConfig
+            ? config.voiceKeyword
+            : null;
+        expect(
+          actualVoiceKeyword,
+          equals('去外食'),
+          reason:
+              'pg6 Task 2: form-side voiceKeyword must equal '
+              'VoiceParseResult.resolvedKeyword verbatim — NOT the legacy '
+              'regex strip "去外食日元" produced by pre-pg6 extractVoiceKeyword',
+        );
+        // Negative: never the buggy variant.
+        expect(actualVoiceKeyword, isNot(equals('去外食日元')));
       },
     );
   });
