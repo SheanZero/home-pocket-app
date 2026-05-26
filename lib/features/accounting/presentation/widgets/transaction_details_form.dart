@@ -547,6 +547,9 @@ class TransactionDetailsFormState
                     orElse: () => null,
                   ),
                   textAlign: TextAlign.end,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => FocusScope.of(context).unfocus(),
+                  onTapOutside: (_) => FocusScope.of(context).unfocus(),
                   decoration: InputDecoration(
                     isDense: true,
                     border: InputBorder.none,
@@ -630,6 +633,7 @@ class TransactionDetailsFormState
                   ),
                   maxLines: null,
                   expands: true,
+                  onTapOutside: (_) => FocusScope.of(context).unfocus(),
                   decoration: InputDecoration(
                     isCollapsed: true,
                     border: InputBorder.none,
