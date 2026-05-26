@@ -17,6 +17,7 @@ dependency_graph:
   provides:
     - lib/features/accounting/presentation/widgets/transaction_details_form.dart  # merchant + note TextFields with IME-done/unfocus wiring
     - lib/features/accounting/presentation/widgets/keyboard_toolbar.dart          # flat-white accessory bar with outlined 完成 button
+    - lib/features/accounting/presentation/screens/manual_one_step_screen.dart    # _handleFocusChange restores _amountFocused when text drops (fixup commit 91b401a)
   affects:
     - voice_input_screen.dart, transaction_edit_screen.dart, ocr_review_screen.dart  # transitively pick up the TextField focus fix (same shared form widget); no other change
 tech_stack:
@@ -102,6 +103,11 @@ Fixed three defects on ManualOneStepScreen reported in screenshots 260526-inb-2/
 |---|---|---|
 | 1 | `f29a6ef` | fix(260526-inb): wire IME-done/unfocus on merchant + note TextFields to restore SmartKeyboard |
 | 2 | `c57fda6` | fix(260526-inb): flatten KeyboardToolbar to elevation 0 and add outlined frame to 完成 button |
+| 1.5 (fixup) | `91b401a` | fix(260526-inb): restore _amountFocused when text focus drops so SmartKeyboard reappears |
+
+### Fixup root cause (post-verification)
+
+Initial Task 1 fix correctly made the IME ✓/Done drop focus, which made `_handleFocusChange` fire and set `_isTextFieldFocused = false`. But `_showSmartKeypad = _amountFocused && !_isTextFieldFocused` also requires `_amountFocused = true`, and the listener only ever set `_amountFocused = false` (when text gained focus) — it never restored it on text loss. The original design relied on the user explicitly tapping the amount display (`_onAmountTap` at line 183) to flip `_amountFocused` back to true. With IME dismissal now expected to auto-restore the keypad, the listener was changed to mirror text focus: `_amountFocused = !hasTextFocus`. Verified by `flutter analyze` (0 issues) and the existing 10-test widget suite (10/10 pass — no test changes).
 
 ## Task 3 — Awaiting Human Verification on Device
 
