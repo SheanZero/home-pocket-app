@@ -668,7 +668,7 @@ class SZh extends S {
   String get addTransaction => '添加账目';
 
   @override
-  String get manualInput => '手动输入';
+  String get manualInput => '手动';
 
   @override
   String get ocrScan => 'OCR';

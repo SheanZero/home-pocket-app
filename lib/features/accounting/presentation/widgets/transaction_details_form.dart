@@ -274,6 +274,19 @@ class TransactionDetailsFormState
     return _celebrationCompleter?.future ?? Future.value();
   }
 
+  /// Quick task 260526-k92 (Item 4): host pushes voice-resolved date via this
+  /// method on batch fill. Mirrors the public-setter contract of
+  /// `updateAmount` / `updateCategory` so the voice screen can populate `_date`
+  /// without touching the date picker. Whole-day comparison short-circuits
+  /// idempotent re-runs.
+  void updateDate(DateTime date) {
+    if (!mounted) return;
+    final normalized = DateTime(date.year, date.month, date.day);
+    final current = DateTime(_date.year, _date.month, _date.day);
+    if (normalized == current) return;
+    setState(() => _date = normalized);
+  }
+
   /// Item 4 (260526-j98): fires the host-supplied `onPickerDismissed` callback
   /// (if any) after a date/category picker closes — regardless of whether the
   /// user picked or cancelled. ManualOneStepScreen uses this to reclaim amount

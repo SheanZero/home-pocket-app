@@ -109,8 +109,13 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
 
   /// Save button enable predicate — pure read from the host-cache mirror
   /// (mirrors manual_one_step_screen.dart:89 _canSave getter shape).
-  bool get _canSave =>
-      _hostCategory != null && _hostAmount > 0 && !_isSubmitting;
+  ///
+  /// Quick task 260526-k92 (Item 2): amount > 0 clause dropped. Default
+  /// category seeds in initState via [_initializeDefaultCategory], so the
+  /// gate now relies on category presence + non-submitting state. The form's
+  /// `submit()` validates amount > 0 internally and surfaces a snackbar on
+  /// failure — user-friendlier than a permanently gray button.
+  bool get _canSave => _hostCategory != null && !_isSubmitting;
 
   // Audio features collection
   final List<double> _soundLevels = [];
@@ -157,6 +162,47 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
           service: ref.read(appSpeechRecognitionServiceProvider),
         );
     _initSpeechService();
+
+    // Quick task 260526-k92 (Item 2): seed default L1 + L2 so the Save
+    // button is tappable at first render. Mirrors the manual screen's
+    // initState flow (manual_one_step_screen.dart:122). Deferred to
+    // post-frame so the embedded form's GlobalKey.currentState is non-null
+    // when we push the resolved category into it.
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _initializeDefaultCategory(),
+    );
+  }
+
+  /// Quick task 260526-k92 (Item 2) — ported from
+  /// manual_one_step_screen.dart:135 with the host-cache mirror write at the
+  /// tail so `_canSave` flips to true once the L2 category resolves.
+  Future<void> _initializeDefaultCategory() async {
+    final repo = ref.read(categoryRepositoryProvider);
+    final allCategories = await repo.findActive();
+    if (!mounted) return;
+
+    final l1Categories = allCategories.where((c) => c.level == 1).toList()
+      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    final defaultL1 = l1Categories.isNotEmpty ? l1Categories.first : null;
+
+    Category? defaultL2;
+    if (defaultL1 != null) {
+      final l2UnderSelectedL1 =
+          allCategories
+              .where((c) => c.level == 2 && c.parentId == defaultL1.id)
+              .toList()
+            ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+      if (l2UnderSelectedL1.isNotEmpty) {
+        defaultL2 = l2UnderSelectedL1.first;
+      }
+    }
+
+    if (!mounted || defaultL2 == null) return;
+    // Push into the form (drives the category-chip render) AND mirror to
+    // the host cache (drives the _canSave predicate). Same setState block
+    // for atomicity.
+    _formKey.currentState?.updateCategory(defaultL2, defaultL1);
+    setState(() => _hostCategory = defaultL2);
   }
 
   Future<void> _initSpeechService() async {

@@ -670,7 +670,7 @@ class SJa extends S {
   String get addTransaction => '取引を追加';
 
   @override
-  String get manualInput => '手動入力';
+  String get manualInput => '手動';
 
   @override
   String get ocrScan => 'OCR';

@@ -874,7 +874,7 @@
   "@addTransaction": {
     "description": "Transaction entry screen title"
   },
-  "manualInput": "手动输入",
+  "manualInput": "手动",
   "@manualInput": {
     "description": "Manual input mode tab label"
   },
