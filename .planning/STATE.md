@@ -1,96 +1,75 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.3
-milestone_name: 迭代帐本输入
+milestone: null
+milestone_name: null
 status: milestone_complete
-stopped_at: Milestone complete (Phase 23 was final phase)
-last_updated: 2026-05-26T00:04:54.517Z
-last_activity: 2026-05-25 -- Phase 23 execution started
+stopped_at: v1.3 milestone shipped 2026-05-26
+last_updated: 2026-05-26T00:00:00.000Z
+last_activity: 2026-05-26 -- v1.3 milestone complete; ready for /gsd:new-milestone
 progress:
-  total_phases: 6
-  completed_phases: 3
-  total_plans: 125
-  completed_plans: 47
-  percent: 50
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-22 — v1.3 迭代帐本输入 milestone opened)
+See: .planning/PROJECT.md (updated 2026-05-26 — v1.3 迭代帐本输入 milestone shipped)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes survival spending from soul spending
-**Current focus:** Milestone complete
+**Current focus:** Planning next milestone (use `/gsd:new-milestone` to scope)
 
 ## Current Position
 
-Phase: 23
+Phase: None — between milestones
 Plan: Not started
-Status: Milestone complete
+Status: v1.3 shipped; awaiting next-milestone scoping
 Last activity: 2026-05-26
 
-## Last Milestone Snapshot (v1.2)
+## Last Milestone Snapshot (v1.3)
 
-- **Phases:** 5 (13-17)
-- **Plans:** 37
-- **Duration:** 2026-05-19 → 2026-05-21 (3 days)
-- **Commits:** 212 (vs v1.1 tag); 521 files changed; +57,460 / -7,168 LOC
-- **Audit Status at Close:** `tech_debt` — accepted (Phase 13/17 missing VERIFICATION.md; 3 VALIDATION.md drafts; documentation-grade debt only)
-- **Outcome:** ADR-016 Joy migration (density → `Σ joy_contribution`); HomeHero target ring rebuild; user-configurable `monthly_joy_target` + 3-month median recommendation + fallback 50; AnalyticsScreen Variant ε with Custom Time Windows + Per-Category breakdown + Soul-vs-Survival comparison + Manual-Only Joy variant; Drift schema v17 (`entry_source`); HomeHero isolation structurally enforced
-- **Tag:** `v1.2`
+- **Phases:** 6 (18-23)
+- **Plans:** 47
+- **Duration:** 2026-05-22 → 2026-05-26 (~5 days)
+- **Commits:** 330 (vs v1.2 tag); 304 files changed; +64,157 / -4,747 LOC
+- **Audit Status at Close:** `tech_debt` — accepted (Phase 18/21 missing VALIDATION.md; Phase 19/20 draft + `nyquist_compliant: false`; Phase 22 draft + `nyquist_compliant: true`; documentation-grade debt only)
+- **Outcome:** Single shared `TransactionDetailsForm` widget across 4 hosts (manual/voice/edit/OCR review); `ManualOneStepScreen` single-screen manual entry; SmartKeyboard 48dp touch-target floor + 6 golden baselines; voice number parser zh + ja (zh 96% + ja 100% corpus accuracy) with `VoiceChunkMerger` 2.5s continued-listening window; `VoiceCategoryResolver` always-L2 contract with extensible merchant DB + synonym dictionary; hold-to-record gesture with `<100ms` perceived state change; edit-from-list path with `entry_source` verbatim preservation; 2 BLOCKER gaps (G-01/G-02) closed; Phase 23 cleanup absorbed carried tech-debt (scanner allow-lists, 6 voice-flow surgical fixes, 4 mechanical polish items, REQUIREMENTS.md reconciliation, 9 device UATs run + passed, `voice_input_screen.dart` 838→776 LOC)
+- **Tag:** `v1.3`
 
 ## Previous Milestone Snapshots
 
+- **v1.2** (5 phases, 37 plans, 2026-05-19 → 2026-05-21, audit `tech_debt` accepted) — Happiness Metric Refresh
 - **v1.1** (4 phases, 40 plans, 2026-05-01 → 2026-05-05, audit `known_debt` accepted) — Happiness Metric & Display
 - **v1.0** (8 phases, 48 plans, 2026-04-24 → 2026-04-29, audit `passed`) — Codebase Cleanup Initiative
 
-## v1.3 Phase Map
-
-| Phase | Name | Requirements | Depends On |
-|-------|------|--------------|------------|
-| 18 | Shared Details Form Foundation | INPUT-03, INPUT-04, EDIT-01, EDIT-02 | — (foundation) |
-| 19 | Manual One-Step + Keypad Polish | KEYPAD-01, INPUT-01 | Phase 18 |
-| 20 | Voice Number Parser (zh + ja) | VOICE-01, VOICE-02, VOICE-03 | — (parallel-safe with 19) |
-| 21 | Voice Category Resolver Level-2 Enforcement | VOICE-04, VOICE-05, VOICE-06 | Phase 20 |
-| 22 | Voice One-Step Integration + Record Button UX | INPUT-02, REC-01, REC-02 | Phases 18, 20, 21 |
-
-Coverage: 15/15 v1.3 requirements mapped, 0 unmapped.
-
 ## Accumulated Context
-
-### Roadmap Evolution
-
-- Phase 23 added: v1.3 cleanup: scanner allow-lists + voice flow polish
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 decisions captured there with outcomes.
-
-v1.3 decisions to date:
-
-- 5-phase split chosen over 4-phase: separates voice number parser (Phase 20) from voice category resolver (Phase 21) — different testing surfaces (state-machine corpus vs database resolution), and isolates the voice integration phase (22) so it consumes stable parser + resolver outputs.
-- Phase 18 ships first as foundation — INPUT-03 shared widget unblocks INPUT-01 (manual one-step), INPUT-02 (voice one-step), and EDIT-01/02 (edit-from-list path).
-- Phase 20 deliberately UI-independent — voice parser strengthening can start in parallel with Phase 19, both feed into Phase 22 integration.
+Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 + v1.3 decisions captured there with outcomes.
 
 ### Pending Todos
 
-(None — ready to plan Phase 18 via `/gsd:plan-phase 18`.)
+None — v1.3 shipped 2026-05-26. Use `/gsd:new-milestone` to scope the next milestone.
 
 ### Blockers / Concerns
 
 No active blockers. Carried-forward debt (cross-milestone):
 
-- **FUTURE-TOOL-03** *(coverage-baseline-review)*: Review 70% coverage threshold after v1.2 close (now triggered)
+- **FUTURE-TOOL-03** *(coverage-baseline-review)*: Review 70% coverage threshold (triggered post-v1.2; still open)
 - **FUTURE-QA-01** *(smoke-test-owner-driven)*: Owner runs smoke tests before v1 release
 - **FUTURE-DOC-01..06** *(documentation drift)*: 6 doc-related items from v1.0 close
 - **FUTURE-ARCH-04** *(security)*: `recoverFromSeed()` key-overwrite bug fix (held — security architecture out of scope per long-term project rule)
 - **v1.1 verification debt:** Phase 11 device/simulator UAT for AnalyticsScreen month chip + pull-to-refresh (human_needed)
 - **v1.2 verification debt:** Phase 13 + 17 missing VERIFICATION.md (live code wired + integration-verified at milestone close; per-phase verifier artifact never run)
-- **v1.3 verification debt:** Phase 20 Plan 20-08 device verification deferred (VOICE-02-DEVICE-VERIFY) — 8 anchor cases on physical iPhone/Android (zh: 2204 continuous, 1840 intra-pause merge, 1800 false-merge regression; ja: にせんにひゃくよん→2204, せんはっぴゃく+よんじゅう円→1840, 一万二千→12000; sanity: record button stays lit across finals + ManualOneStepScreen carries correct initialAmount). Resume via `/gsd:verify-work 20` after device run, or carry into Phase 22 if not resolved by milestone close. See `.planning/phases/20-voice-number-parser-zh-ja/20-08-SUMMARY.md` for tuning levers if cases fail (`_windowDuration`, restartListen, lexical-gate normalize).
-- ~~**v1.3 scanner regressions (Phase 20)** *(VOICE-SCANNER-ALLOWLIST)*: cleared 2026-05-24 (commit `f04b978`). Added 3 Phase 20 NLP lexicon files to `hardcoded_cjk_ui_scan` allow-list + 8 corpus-test `// ignore: avoid_print` entries to `stale_suppressions_scan` allow-list. All 45 architecture tests pass; total project failures restored to 11 (= pre-Phase-20 baseline).~~
-
-**Phase 20 verification verdict:** `PASS_WITH_DEBT` (5/5 SCs verified at parser/corpus layer; VOICE-SCANNER-ALLOWLIST cleared; only VOICE-02-DEVICE-VERIFY remains open). See `.planning/phases/20-voice-number-parser-zh-ja/20-VERIFICATION.md` (commit `c3e2069`).
+- **v1.3 Nyquist debt:** Phase 18 + 21 missing VALIDATION.md; Phase 19 + 20 draft + `nyquist_compliant: false`; Phase 22 draft + `nyquist_compliant: true` — documentation-grade only
+- **v1.3 voice-flow polish backlog:** Phase 22 advisory WR-02/03/06/07/NEW-02/NEW-03 + IN-01/02/03 on `voice_input_screen.dart` (vacuous null check, async pipeline race, mocktail catch-all stub, addListener closure equality, spurious tear-down toast, double-parse, no permanent-error recovery affordance, dartdoc gap, missing localized error_audio assert); plus Phase 23 WR-06 `_voiceLocaleId` build-side reassignment functionally dead after mixin extraction. Candidate for v1.4+ VOICE-POLISH-V2 phase.
+- **MOD-005 OCR slot:** `ocr_review_screen.dart:54,58` hardcodes `EntrySource.manual` pending writer landing — annotated with `// MOD-005: flip to EntrySource.ocr when OCR writer ships (D-12)`. Schema accepts 'ocr' literal already (v1.2 schema v17).
+- **VOICE-EN-V2-01:** English voice parser skeleton only (Plan 23-03 `voice_corpus_en.dart`); no production en voice parser.
 
 ### Quick Tasks Completed
 
@@ -102,6 +81,15 @@ No active blockers. Carried-forward debt (cross-milestone):
 | 260522-fj5 | 悦己充盈卡片 UI 修复 — info icon 位置、小确幸数字右移、目标 default 50→100、圆环中心不显示目标、繁体→简体、内环目标固定 10、外环颜色过渡修复 | 2026-05-22 | c90ef9a | — (28 golden diffs pending human re-baseline) | [260522-fj5-ui-7-info-icon-50-100-10](./quick/260522-fj5-ui-7-info-icon-50-100-10/) |
 
 ## Deferred Items
+
+### Items acknowledged and deferred at v1.3 milestone close on 2026-05-26
+
+| Category | Item | Status | Deferred At |
+|----------|------|--------|-------------|
+| nyquist_gap | Phase 18 + 21 missing VALIDATION.md; Phase 19/20 draft + `nyquist_compliant: false`; Phase 22 draft + `nyquist_compliant: true` (`wave_0_complete: false` across the draft set) | accept (documentation-grade, mirrors v1.0 FUTURE-DOC-05 / v1.2 close precedent) | v1.3 close |
+| voice_polish_backlog | 6 standing WARNINGS (WR-02/03/06/07/NEW-02/NEW-03) + 3 INFOS (IN-01/02/03) on `voice_input_screen.dart` from Phase 22 — vacuous null check, async pipeline race, mocktail catch-all stub override, addListener closure equality, spurious tear-down toast, final-transcript double-parse, no permanent-error recovery affordance, dartdoc gap, missing localized error_audio assert | defer to v1.4+ VOICE-POLISH-V2 phase | v1.3 close |
+| voice_polish_backlog | Phase 23 WR-06 `_voiceLocaleId = value` build-side reassignment functionally dead after Plan 23-09 mixin extraction (mixin listener with `fireImmediately:true` is canonical writer); benign but anti-pattern | defer to v1.4+ cleanup | v1.3 close |
+| forward_compat | `ocr_review_screen.dart:54,58` hardcodes `EntrySource.manual` pending MOD-005 OCR writer; schema accepts 'ocr' literal already; annotated with `// MOD-005: flip to EntrySource.ocr when OCR writer ships (D-12)` marker | reserved (will be writer-claimed by MOD-005) | v1.3 close |
 
 ### Items acknowledged and deferred at v1.2 milestone close on 2026-05-21
 
@@ -149,17 +137,26 @@ No active blockers. Carried-forward debt (cross-milestone):
 - FAMILY-V2-01..03 → still v2 backlog (explicitly out of v1.2 scope; candidate for next milestone)
 - TOOL-V2-01 (fl_chart 1.x) → still v2 backlog
 
+**v1.2-deferred items (subsumed into v1.3 active scope and shipped):**
+
+- v1.2 close debt: 6 `family_insight_card_test.dart` failures from Phase 15 ARB drift → still carried (not touched by v1.3)
+- Forward-compat `EntrySource.ocr` slot → still reserved (will be writer-claimed by MOD-005)
+
 ## Session Continuity
 
-Last session: 2026-05-25T10:46:09.394Z
-Stopped at: Phase 23 context gathered
-Resume file: .planning/phases/23-v1-3-cleanup-scanner-allow-lists-voice-flow-polish/23-CONTEXT.md
+Last session: 2026-05-26
+Stopped at: v1.3 milestone complete; archives written + commits pending
 
-**Planned Next:** Run `/gsd:verify-work 20` to produce the phase verification artifact, then advance to Phase 21 (Voice Category Resolver Level-2 Enforcement).
+**Planned Next:** Run `/gsd:new-milestone` to scope the next milestone. Candidate themes carried in PROJECT.md.
 
 ## Operator Next Steps
 
-- Run `/gsd:verify-work 20` to verify Phase 20 against VOICE-01/VOICE-02/VOICE-03 requirements (verifier will flag the deferred Plan 20-08 device run as a verification gap — accept or clear via device test).
-- Optional: clear `VOICE-02-DEVICE-VERIFY` device verification debt by running the 8 anchor cases on a physical iPhone/Android (script in `.planning/phases/20-voice-number-parser-zh-ja/20-08-SUMMARY.md`).
-- Then advance: `/gsd:discuss-phase 21` → `/gsd:plan-phase 21` → `/gsd:execute-phase 21`.
-- Backlog (no longer blocking): Phase 18 (Shared Details Form Foundation) — re-evaluate whether v1.3 still needs it given Phase 20's parallel-safe completion.
+- `/clear` then `/gsd:new-milestone` to scope the next milestone — questioning → research → requirements → roadmap
+- Candidate themes (from PROJECT.md):
+  - **MOD-005 OCR writer landing** — receipt → text → fields (v1.3 reserved architectural slot in `OcrReviewScreen` with MOD-005 marker; schema accepts 'ocr' literal already)
+  - **VOICE-POLISH-V2** — consolidate Phase 22 advisory WR-* + Phase 23 WR-06 into a focused polish phase
+  - **VOICE-EN-V2-01** — English voice parser (skeleton only in Plan 23-03)
+  - **FAMILY-V2-01/02/03** family privacy hardening
+  - **FUTURE-QA-01** release-readiness QA
+  - **TOOL-V2-01** fl_chart 1.x upgrade
+  - **FUTURE-DOC/TOOL** documentation/tooling cleanup

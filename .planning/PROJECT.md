@@ -5,8 +5,9 @@
 **Shipped:** v1.0 Codebase Cleanup Initiative (2026-04-29) — see `.planning/milestones/v1.0-ROADMAP.md`
 **Shipped:** v1.1 Happiness Metric & Display (2026-05-05) — see `.planning/milestones/v1.1-ROADMAP.md`
 **Shipped:** v1.2 Happiness Metric Refresh (2026-05-21) — see `.planning/milestones/v1.2-ROADMAP.md` + `.planning/milestones/v1.2-MILESTONE-AUDIT.md`
+**Shipped:** v1.3 迭代帐本输入 (2026-05-26) — see `.planning/milestones/v1.3-ROADMAP.md` + `.planning/milestones/v1.3-MILESTONE-AUDIT.md`
 
-**In progress:** v1.3 迭代帐本输入 — Phase 18 (shared details form foundation) complete 2026-05-22; Phase 19 (manual one-step + keypad polish) complete 2026-05-23; Phase 22 (voice one-step + record button UX) complete 2026-05-25; **Phase 23 (v1.3 cleanup — scanner allow-lists + voice flow polish) complete 2026-05-26** — absorbed carried tech-debt from Phases 21/22 (D-05 intra-session guard, D-07 cold-start race, D-08 popUntil deferral, D-09 listener cleanup, D-10/D-11 mixin extractions, D-12..D-15 mechanical polish), reconciled REQUIREMENTS.md + 7 SUMMARY frontmatters, ran 9 carried device UATs, closed 838→776 LOC gap on `voice_input_screen.dart` via `VoiceLocaleReadinessMixin` + pure-helpers extraction. v1.3 milestone ready for `/gsd-complete-milestone`.
+**Next milestone:** TBD. Candidate themes carried forward: MOD-005 OCR writer landing, FAMILY-V2-01/02/03 family privacy hardening, FUTURE-QA-01 release-readiness QA, FUTURE-DOC/TOOL cleanup, fl_chart 1.x upgrade (TOOL-V2-01), voice flow polish carry (VOICE-POLISH-V2-01..08), English voice parser (VOICE-EN-V2-01). Use `/gsd:new-milestone` to scope.
 
 The v1.0 initiative was a pure-refactor cleanup. It delivered an operational hybrid audit pipeline, eliminated 50 catalogued findings (24 CRITICAL, 8 HIGH, 8 MEDIUM, 7 LOW + 3 layer-violation closures), aligned all architecture documentation with the post-refactor codebase, and locked 4 permanent CI guardrails.
 
@@ -14,36 +15,43 @@ The v1.1 milestone delivered the happiness metric domain, HomePage `HomeHeroCard
 
 The v1.2 milestone shipped the ADR-016 Joy migration (density → `Σ joy_contribution`), HomeHero target ring rebuild with user-configurable `monthly_joy_target` + 3-month median recommendation, AnalyticsScreen Variant ε with Custom Time Windows (week/month/quarter/year/arbitrary), Per-Category breakdown + Soul-vs-Survival comparison (anti-toxicity framed), and Manual-Only Joy sub-metric variant on Drift schema v17 (`entry_source` column). HomeHero isolation invariant (ADR-016 §3) is structurally enforced. Audit closed at `tech_debt` — Phase 13/17 lack VERIFICATION.md and 3 VALIDATION.md drafts have `nyquist_compliant: false`; documentation-grade debt only, all 11 v1.2 requirements satisfied in implementation.
 
-## Current Milestone: v1.3 迭代帐本输入
+The v1.3 milestone transformed ledger entry into a single-screen, voice-trustworthy core experience. Shipped: single shared `TransactionDetailsForm` widget consumed by 4 hosts (manual, voice, edit, OCR review); `ManualOneStepScreen` replacing the prior 2-screen chain; SmartKeyboard 48dp touch-target floor; locale-aware zh + ja voice number parsing (state machines + `VoiceChunkMerger` 2.5s continued-listening window) at zh 96% + ja 100% corpus accuracy; `VoiceCategoryResolver` always-L2 contract with merchant DB + synonym dictionary (extensible without code changes); hold-to-record gesture with AnimatedContainer shape morph + caption swap (`<100ms` verified); edit-from-list path with `entry_source` verbatim preservation. Two BLOCKER gaps (G-01 recognizer self-termination, G-02 silent errors) closed in Phase 22. Phase 23 cleanup absorbed carried tech-debt (scanner allow-lists, 6 voice-flow surgical fixes, 4 mechanical polish items, REQUIREMENTS.md reconciliation, 9 device UATs run + passed, voice_input_screen.dart 838→776 LOC via mixin + helpers extraction). Audit closed at `tech_debt` — documentation-grade Nyquist debt only; all 15 v1.3 requirements satisfied and reconciled.
+
+<details>
+<summary>v1.3 迭代帐本输入 (archived)</summary>
+
+**Started:** 2026-05-22
+**Shipped:** 2026-05-26 (~5 days)
+**Phase numbering:** Phases 18-23
+**Trigger:** "Input flow is too multi-step, mis-tap-prone, voice-unreliable" — owner feedback after v1.2
 
 **Goal:** 把账本录入从「多步、易误按、语音不准」打磨成「单屏、稳准、语音可信」的核心体验，并复用同一 details 表单作为已存账本的编辑入口。
 
-**Target features:**
+**Delivered:**
+- **Shared details form foundation (Phase 18):** Single `TransactionDetailsForm` widget reused by 4 hosts (ManualOneStepScreen, VoiceInputScreen, TransactionEditScreen, OcrReviewScreen) via Freezed `TransactionDetailsFormConfig.when(.new/.edit)`; `UpdateTransactionUseCase` preserves `entry_source` verbatim through edits; OCR two-step architectural slot reserved with MOD-005 marker; widget test `ocr_two_step_seam_test.dart` enforces seam.
+- **Manual one-step + keypad polish (Phase 19):** `ManualOneStepScreen` collapses 2-screen chain into single screen; `math.max(48.0, rawKeyHeight)` non-negotiable touch-target floor; 6 golden baselines (ja/zh/en × light/dark); `manual_save_entry_source_test.dart` verifies `entry_source='manual'` against real Drift DB.
+- **Voice number parser zh + ja (Phase 20):** Locale-aware numeral state machines (千/百/十/零/万) + JA numeral dictionary in `lib/infrastructure/voice/`; `VoiceChunkMerger` 2.5s continued-listening window via `SpeechRecognitionService.restartListen()`; zh corpus 48/50 (96%) + ja corpus 50/50 (100%); anchor cases zh 2204 / 1840, ja 2204 / 1840 verbatim verified. VOICE-02 device UAT (8 anchor cases) cleared in Phase 23.
+- **Voice category resolver L2 enforcement (Phase 21):** `VoiceCategoryResolver` always-L2 contract via `_ensureL2` 3-stage fallback (override map → `${l1Id}_other` convention → `findByParent.first` safety net); 19-L1 architecture invariant test; merchant DB (12 L2 entries) + synonym dict (59 seed entries) extensible without code changes — runtime-insert tests for 珍珠奶茶 (zh) + タピオカ (ja); legacy `FuzzyCategoryMatcher` + Levenshtein deleted.
+- **Voice one-step integration + record button UX (Phase 22):** `VoiceInputScreen` embeds `TransactionDetailsForm`; hold-to-record gesture via `RawGestureDetector` with `Duration.zero`; AnimatedContainer 180ms shape morph + AnimatedSwitcher caption swap to "录音中…"; Stopwatch test enforces `<100ms` perceived state change. Two BLOCKER gaps (G-01 recognizer self-termination, G-02 silent errors) elevated from code review and closed via plans 22-08/09/10 with 4 new ARB error keys + permanent-error mic gate.
+- **v1.3 cleanup (Phase 23):** Scanner allow-list cleanup (VOICE-SCANNER-ALLOWLIST); 6 voice-flow surgical fixes (D-05/07/08/09/10/11); 4 mechanical polish items (D-12/13/14/15); REQUIREMENTS.md + 7 SUMMARY frontmatters reconciled (D-04); 9/9 carried device UATs run and passed; `voice_input_screen.dart` slimmed 838 → 776 LOC via `VoiceLocaleReadinessMixin` + pure-helper extraction (Plan 23-09) — back under CLAUDE.md `<800` cap.
 
-- **数字键盘优化** — 增大数字键高度/可点击区域，消除"键太低易误按"问题
-- **一步记录** — 手动 & 语音录入合并为单屏（amount + category + 备注 + 商家 + 日期 + 账本类型），去掉"下一步"按钮；OCR 路径保留两步（识别→details 校对），forward-compat 留架构容器
-- **语音数字识别强化** — 中文 + 日文复合数字"千百十（万）"多段解析正确，不丢位、不错拆；zh 例 "2千2百零4元"→2204、"1千8百4十元"（慢速分段）→1840；ja 例 「にせんにひゃくよん」→2204、「せんはっぴゃくよんじゅう」（慢速分段）→1840
-- **语音类目→二级** — 强制识别到二级类目；只识别到一级时 fallback 该一级下第一个二级；merchant_database / 同义词扩充以提高二级准确率
-- **录音按钮交互优化** — 静态状态明确"点按 vs 长按"；录音中状态按钮形态 + 提示文案变化（"录音中…"）
-- **details = 编辑入口** — details 表单复用：既是 OCR 流程第二步，也是已存账本的修改入口
-
-**Out of scope (this milestone only):**
-
-- **MOD-005 OCR writer 真正落地** — schema 槽位已存在，本 milestone 只为 OCR 流程预留 details 步骤的架构容器，writer 留待下一 milestone
-- **FAMILY-V2 家庭隐私加固** — 与录入流程无关
-- **FUTURE-QA / FUTURE-DOC 清理** — 推后
-- **fl_chart 1.x upgrade** — 推后
-- **Joy metric / HomeHero 语义改动** — ADR-012/016 反游戏化、Joy 表达、HomeHero isolation 等永久边界全部保留
-
-Phase numbering continues from **Phase 18**.
-
-**Carry-forward candidate themes (deferred to v1.4+):**
-
-- MOD-005 OCR writer 落地（writer 接管 schema v17 已有 `entry_source='ocr'` 槽位）
-- FAMILY-V2-01/02/03 家庭隐私加固
+**Out of v1.3 scope (carried to v1.4+):**
+- MOD-005 OCR writer landing — architectural slot reserved with `// MOD-005: flip to EntrySource.ocr when OCR writer ships` marker; schema already accepts 'ocr' literal
+- FAMILY-V2-01/02/03 family privacy hardening
 - FUTURE-QA-01 release-readiness smoke tests
-- FUTURE-DOC-01..06 文档漂移修复 + FUTURE-TOOL-03 覆盖率阈值回审
-- TOOL-V2-01 fl_chart 1.x 升级
+- FUTURE-DOC-01..06 + FUTURE-TOOL-03 documentation/tooling cleanup
+- TOOL-V2-01 fl_chart 1.x upgrade
+- VOICE-POLISH-V2-01..08 voice flow polish (Phase 22 WR-02/03/06/07/NEW-02/NEW-03 + IN-03 + Phase 23 WR-06)
+- VOICE-EN-V2-01 English voice parser (skeleton only in Plan 23-03)
+
+**Known close debt** (documented in `.planning/milestones/v1.3-MILESTONE-AUDIT.md`):
+- Phase 18 + 21 missing VALIDATION.md (Nyquist); Phase 19 + 20 draft + `nyquist_compliant: false`; Phase 22 draft + `nyquist_compliant: true` — documentation-grade debt only
+- Phase 22 advisory WR-02/03/06/07/NEW-02/NEW-03 + IN-01/02/03 — 9 standing warnings + 3 infos on `voice_input_screen.dart` carry as voice-flow polish backlog
+- Pre-existing 15 test failures + 4 analyzer findings carry from v1.2 (none touched by v1.3)
+
+**Archive:** `.planning/milestones/v1.3-ROADMAP.md`, `.planning/milestones/v1.3-REQUIREMENTS.md`, `.planning/milestones/v1.3-MILESTONE-AUDIT.md`, `.planning/milestones/v1.3-phases/`
+
+</details>
 
 <details>
 <summary>v1.2 Happiness Metric Refresh (archived)</summary>
@@ -173,11 +181,29 @@ A family accounting app users can trust with sensitive financial data — local-
 - ✓ **STATSUI-V2-01** Soul-vs-Survival comparison card with anti-toxicity framing (24-case trilingual forbidden-substring sweep) — v1.2 Phase 16
 - ✓ **TOOL-V2-02** ARB density/ROI keys removed; ja/zh/en parity locked at 487 keys per locale — v1.2 Phase 14
 
+**Shipped in v1.3 (迭代帐本输入):**
+
+- ✓ **INPUT-03** Single shared `TransactionDetailsForm` widget across 4 hosts (manual, voice, edit, OCR review) — v1.3 Phase 18
+- ✓ **INPUT-04** OCR two-step architectural slot reserved (`OcrReviewScreen` mounts shared widget; writer pending MOD-005) — v1.3 Phase 18
+- ✓ **EDIT-01** Tap any existing transaction in home recent-tx list → shared form opens pre-populated — v1.3 Phase 18
+- ✓ **EDIT-02** Edit-existing path preserves `entry_source` verbatim (manual/voice/ocr; DAO test exercises all 3 literals) — v1.3 Phase 18
+- ✓ **KEYPAD-01** SmartKeyboard 48dp non-negotiable touch-target floor + visual-discriminability goldens (ja/zh/en × light/dark) — v1.3 Phase 19
+- ✓ **INPUT-01** `ManualOneStepScreen` single-screen manual entry, no "下一步" navigation — v1.3 Phase 19
+- ✓ **VOICE-01** Voice parser zh "2千2百零4元" → 2204, ja 「にせんにひゃくよん」 → 2204 — v1.3 Phase 20
+- ✓ **VOICE-02** Voice parser intra-pause merge: zh "1千8百4十元" → 1840, ja 「せんはっぴゃくよんじゅう」 → 1840; VOICE-02-DEVICE-VERIFY 8 anchor cases cleared via Phase 23 device UAT — v1.3 Phase 20 (+ Phase 23 23-08)
+- ✓ **VOICE-03** Per-locale corpus accuracy: zh 48/50 (96%) + ja 50/50 (100%), both ≥95% — v1.3 Phase 20
+- ✓ **VOICE-04** `VoiceCategoryResolver` returns L2 whenever spoken phrase matches merchant DB or synonym dict L2 entry — v1.3 Phase 21
+- ✓ **VOICE-05** `_ensureL2` 3-stage fallback ensures L2 always; architecture invariant test enforces across 19 expense L1s — v1.3 Phase 21
+- ✓ **VOICE-06** Merchant DB + synonym dict extensible without code changes (runtime-insert tests for 珍珠奶茶 / タピオカ) — v1.3 Phase 21
+- ✓ **REC-01** Hold-to-record idle caption via `holdToRecord` ARB key × ja/zh/en; consistent app-wide — v1.3 Phase 22
+- ✓ **REC-02** Recording state: AnimatedContainer 180ms shape morph + AnimatedSwitcher caption swap to "录音中…"; Stopwatch test `<100ms` — v1.3 Phase 22
+- ✓ **INPUT-02** Voice-driven entry on same single screen as manual; parser fills amount/category/note/merchant in-place; edit any field before save — v1.3 Phase 22
+
 ### Active
 
-<!-- v1.3 迭代帐本输入 — REQ-IDs populated by REQUIREMENTS.md after roadmap phase. -->
+<!-- Next milestone TBD — use /gsd:new-milestone to scope. -->
 
-See **Current Milestone: v1.3 迭代帐本输入** above. Detailed REQ-IDs in `.planning/REQUIREMENTS.md` after milestone scoping.
+(None active — v1.3 shipped 2026-05-26. Use `/gsd:new-milestone` to scope the next milestone.)
 
 ### Out of Scope
 
@@ -208,16 +234,17 @@ See **Current Milestone: v1.3 迭代帐本输入** above. Detailed REQ-IDs in `.
 
 ## Context
 
-- **Current state (post-v1.2):** v1.0 Codebase Cleanup shipped 2026-04-29; v1.1 Happiness Metric & Display shipped 2026-05-05; v1.2 Happiness Metric Refresh shipped 2026-05-21 (3 days, 212 commits, 521 files changed, +57,460/-7,168 LOC). Drift schema at v17. ADR-016 Joy migration is complete: density (Joy/¥) is fully retired from `lib/` and all three ARB locales. HomeHero isolation invariant (ADR-016 §3) is structurally enforced. Coverage threshold remains 70% (lowered from 80% per Phase 8 amendment; FUTURE-TOOL-03 review trigger remains open).
-- **Codebase map:** `.planning/codebase/` was last refreshed 2026-04-25 (`/gsd-map-codebase`). Contents: ARCHITECTURE.md, STACK.md, STRUCTURE.md, CONVENTIONS.md, INTEGRATIONS.md, TESTING.md, CONCERNS.md. **Stale — three milestones of drift.** Refresh via `/gsd:map-codebase` before next milestone planning.
-- **Tech stack:** Flutter, Riverpod 2.4+ (`@riverpod` code-gen), Freezed, Drift + SQLCipher (schema v17), GoRouter, flutter_localizations (intl 0.20.2 pinned), Mocktail
+- **Current state (post-v1.3):** v1.0 Codebase Cleanup shipped 2026-04-29; v1.1 Happiness Metric & Display shipped 2026-05-05; v1.2 Happiness Metric Refresh shipped 2026-05-21; **v1.3 迭代帐本输入 shipped 2026-05-26** (~5 days, 330 commits, 304 files changed, +64,157/-4,747 LOC; `lib/` +6,559/-2,197; `test/` +10,246/-836). Drift schema unchanged at v17 (no migration this milestone). Ledger entry is now single-screen for both manual and voice; voice parser zh+ja, hold-to-record gesture, edit-from-list path. ARB parity locked at 506 keys per locale.
+- **Codebase map:** `.planning/codebase/` was last refreshed 2026-04-25 (`/gsd-map-codebase`). Contents: ARCHITECTURE.md, STACK.md, STRUCTURE.md, CONVENTIONS.md, INTEGRATIONS.md, TESTING.md, CONCERNS.md. **Stale — four milestones of drift.** Refresh via `/gsd:map-codebase` before next milestone planning.
+- **Tech stack:** Flutter, Riverpod 3.x (`@riverpod` code-gen, generator 4.x), Freezed, Drift + SQLCipher (schema v17), GoRouter, flutter_localizations (intl 0.20.2 pinned), Mocktail
 - **Active CI guardrails:** `import_guard` (custom_lint), `riverpod_lint`/`custom_lint`, `coverde` per-file ≥70% with `--deferred` mechanism, `sqlite3_flutter_libs` rejection, `very_good_coverage@v2` ≥70% global, `build_runner` clean-diff
-- **Coverage:** Global ~74.6% (last measured post-v1.0); v1.2 added ~6.5k LOC of test code, expect coverage to be at or above baseline. Re-measure during next milestone planning.
+- **Coverage:** Global ~74.6% baseline (last measured post-v1.0); v1.2 + v1.3 added substantial test code (~17k LOC), expect coverage at or above baseline. Re-measure during next milestone planning.
 - **Known issues / debt carried forward:**
-  - **v1.2 close debt** (per `.planning/milestones/v1.2-MILESTONE-AUDIT.md`): Phase 13/17 missing VERIFICATION.md; Phase 13/14/17 VALIDATION.md status draft + `nyquist_compliant: false`; 6 pre-existing `family_insight_card_test.dart` failures from Phase 15 ARB drift; `EntrySource.ocr` schema-accepted but no writer yet
+  - **v1.3 close debt** (per `.planning/milestones/v1.3-MILESTONE-AUDIT.md`): Phase 18/21 missing VALIDATION.md; Phase 19/20 VALIDATION.md draft + `nyquist_compliant: false`; Phase 22 VALIDATION.md draft + `nyquist_compliant: true`; Phase 22 advisory WR-02/03/06/07/NEW-02/NEW-03 + IN-01/02/03 on `voice_input_screen.dart` (voice-flow polish backlog); Phase 23 WR-06 build-side `_voiceLocaleId` reassignment functionally dead; OCR slot hardcodes `EntrySource.manual` pending MOD-005 writer
+  - **v1.2 close debt** (per `.planning/milestones/v1.2-MILESTONE-AUDIT.md`): Phase 13/17 missing VERIFICATION.md; Phase 13/14/17 VALIDATION.md status draft + `nyquist_compliant: false`; 6 pre-existing `family_insight_card_test.dart` failures from Phase 15 ARB drift; `EntrySource.ocr` schema-accepted but no writer yet (now also reserved at OCR review screen layer in v1.3)
   - **v1.1 close debt:** 1 Phase 11 human/device UAT verification item (AnalyticsScreen month chip + pull-to-refresh on device)
   - **v1.0 close debt:** 2 INFO-level analyzer warnings in `shadow_books_provider_characterization_test.dart`; MOD-numbering drift in MOD-002/006/007/008; ARCH-008 cites ADR-006 instead of ADR-007; doc-sweep verifiers exist but not in CI; 12 architecture tests run only transitively via coverage job; Phase 03/06/08 missing canonical VERIFICATION.md; Phase 02/04 missing VALIDATION.md; Phase 07 `nyquist_compliant: false`
-- **Why next:** v1.2 closed the Joy-metric-refresh axis. Next-wave candidates: MOD-005 OCR (long-deferred core feature), family privacy hardening (FAMILY-V2-*), release-readiness QA (FUTURE-QA-01), or documentation/tooling guardrail cleanup before any user-facing v1 release.
+- **Why next:** v1.3 closed the input-flow axis. Next-wave candidates: **MOD-005 OCR writer landing** (architectural slot reserved in v1.3, ready to consume; schema accepts 'ocr' literal), **VOICE-POLISH-V2** (consolidate Phase 22 advisory WR-* into a focused polish phase if voice work continues), **FAMILY-V2-01/02/03** family privacy hardening, **FUTURE-QA-01** release-readiness QA, **VOICE-EN-V2-01** English voice parser, **TOOL-V2-01** fl_chart 1.x upgrade, or documentation/tooling guardrail cleanup (FUTURE-DOC/TOOL) before any user-facing v1 release.
 
 ## Constraints
 
@@ -260,6 +287,14 @@ See **Current Milestone: v1.3 迭代帐本输入** above. Detailed REQ-IDs in `.
 | Manual-only as audit-lens (not gating) | User wants visibility into Joy data quality without breaking the universal Joy metric | ✓ Good — AnalyticsScreen-scope chip toggle, HomeHero untouched (v1.2) |
 | `entry_source` CHECK ∈ {manual, voice, ocr} | Forward-compat for MOD-005 OCR; manual fallback at sync boundary | ✓ Good — schema v17 stable; OCR writer slot reserved (v1.2) |
 | Phase 13 + 17 ship without VERIFICATION.md | Single-developer flow; verification ran transitively via integration check at milestone close | ⚠️ Accept — recorded as documentation-grade close debt (v1.2) |
+| 5-phase split (18-22) + cleanup phase (23) for v1.3 | Separates voice number parser (state-machine corpus) from voice category resolver (database resolution); isolates voice integration phase; cleanup phase chosen inline (vs carry to v1.4) for same-milestone debt absorption | ✓ Good — independent test surfaces, clean wave parallelism, 9/9 device UATs run in Phase 23 (v1.3) |
+| Phase 18 ships first as v1.3 foundation | INPUT-03 shared widget unblocks INPUT-01 (manual), INPUT-02 (voice), EDIT-01/02 (edit-from-list) | ✓ Good — 4 hosts consume single `TransactionDetailsForm` via `Config.when(.new/.edit)` (v1.3) |
+| Hold-to-record gesture (vs tap-to-toggle) | Long-press model is the dominant mobile voice-input pattern; reduces accidental activation | ✓ Good — RawGestureDetector with `Duration.zero` works on iOS + Android; consistent app-wide (v1.3) |
+| `_ensureL2` 3-stage fallback (override → `${l1Id}_other` convention → `findByParent.first`) | Always-L2 contract via deterministic fallback; data-driven extensibility | ✓ Good — architecture invariant test enforces 19 expense L1s (v1.3) |
+| Phase 22 G-01/G-02 elevated to BLOCKER from code review | Recognizer self-termination + silent errors are production-risk; cannot be advisory-deferred | ✓ Good — closed in plans 22-08/09/10 before Phase 22 close (v1.3) |
+| OCR slot hardcodes `EntrySource.manual` pending MOD-005 | Schema accepts 'ocr' literal already (v1.2); v1.3 reserves architectural slot only with `// MOD-005: flip when writer ships (D-12)` marker | — Pending — MOD-005 OCR writer landing (v1.4+) |
+| Plan 23-09 LOC-cap extraction (`voice_input_screen.dart` 838 → 776) | CLAUDE.md `<800` line cap; `VoiceLocaleReadinessMixin` + 3 pure helpers preserve behavior | ✓ Good — zero behavior change, cap re-cleared (v1.3) |
+| Phase 23 cleanup phase inline (vs carry to v1.4) | Same-milestone debt absorption: surgical fixes + documentation reconciliation + device UAT runbook in single phase | ✓ Good — 9/9 plans complete; 9/9 device UATs pass; LOC-cap closed (v1.3) |
 
 ## Evolution
 
@@ -279,4 +314,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-26 — Phase 23 (v1.3 cleanup) complete; v1.3 milestone ready for completion ceremony*
+*Last updated: 2026-05-26 after v1.3 迭代帐本输入 milestone shipped*

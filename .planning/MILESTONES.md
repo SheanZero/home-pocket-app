@@ -4,6 +4,59 @@ Historical record of shipped versions. Each entry links to its full archive in `
 
 ---
 
+## v1.3 — 迭代帐本输入
+
+**Shipped:** 2026-05-26
+**Phases:** 18-23 (6 phases, 47 plans)
+**Duration:** 2026-05-22 → 2026-05-26 (~5 days)
+**Tag:** `v1.3`
+**Audit Status at Close:** `tech_debt` — milestone goal achieved with documentation-grade Nyquist debt accepted (Phase 18/21 missing VALIDATION.md; Phase 19/20 draft + `nyquist_compliant: false`; Phase 22 draft + `nyquist_compliant: true`). Phase 23 closed all functional gaps from the original audit. Mirrors v1.0 FUTURE-DOC-05 / v1.2 close precedent. See `.planning/milestones/v1.3-MILESTONE-AUDIT.md`.
+**Known deferred items at close:** 4 items — see `.planning/STATE.md` Deferred Items §v1.3.
+
+### Delivered
+
+Home Pocket ledger entry now lives on a single screen for both manual and voice flows. A single shared `TransactionDetailsForm` widget powers four hosts: manual entry, voice entry, edit-existing, and OCR-review (architectural slot reserved for MOD-005). The numeric keypad enforces a 48dp touch-target floor across iOS HIG / Material guidance; six light/dark × ja/zh/en golden baselines lock visual discriminability. Voice number parsing now correctly combines 千/百/十/零/万 across zh + ja, including intra-pause merges via a `VoiceChunkMerger` 2.5s continued-listening window — corpora pass at zh 48/50 (96%) + ja 50/50 (100%). Voice category resolution always lands on an L2 category via a 3-stage fallback (override → `${l1Id}_other` convention → `findByParent.first`) consulting both merchant DB and an extensible synonym dictionary. The record button uses a hold-to-record gesture with AnimatedContainer shape morph + caption swap to "录音中…" — Stopwatch-verified perceived state change `<100ms`. Edit-from-list opens the shared form pre-populated; `entry_source` is preserved verbatim through edits.
+
+### Key Accomplishments
+
+1. **Single shared `TransactionDetailsForm` widget across 4 hosts** (Phase 18) — Freezed `TransactionDetailsFormConfig` sealed class with `.$new(...)` and `.edit(seed:)` factories; consumed by `ManualOneStepScreen`, `VoiceInputScreen`, `TransactionEditScreen`, `OcrReviewScreen` via `Config.when(...)`. `UpdateTransactionUseCase` preserves `entry_source` verbatim via `seed.copyWith()` with no `entrySource` override (DAO test exercises all 3 EntrySource literals).
+2. **Manual one-step entry + keypad polish** (Phase 19) — `ManualOneStepScreen` collapses prior 2-screen entry chain; SmartKeyboard `math.max(48.0, rawKeyHeight)` non-negotiable touch-target floor; 6 golden baselines (ja/zh/en × light/dark) at 390×844; `manual_save_entry_source_test.dart` verifies `entry_source='manual'` round-trip against real Drift DB.
+3. **Voice number parser zh + ja with continued-listening** (Phase 20) — Locale-aware numeral state machines + JA numeral dictionary in `lib/infrastructure/voice/` (per "Thin Feature" rule); `VoiceChunkMerger` 2.5s window via `SpeechRecognitionService.restartListen()`; zh corpus 96% + ja corpus 100%; anchor cases (zh 2204 / 1840, ja 2204 / 1840) verbatim verified. VOICE-02 device UAT (8 anchor cases) cleared in Phase 23 plan 23-08.
+4. **Voice category resolver Level-2 enforcement** (Phase 21) — `VoiceCategoryResolver` always-L2 contract via `_ensureL2` 3-stage fallback (override map → `${l1Id}_other` convention → `findByParent.first` safety net); 19-L1 architecture invariant test; merchant DB (12 L2 entries) + synonym dict (59 seed entries) extensible without code changes — runtime-insert tests for 珍珠奶茶 (zh) + タピオカ (ja); legacy `FuzzyCategoryMatcher` + Levenshtein deleted.
+5. **Voice one-step integration + hold-to-record button UX** (Phase 22) — `VoiceInputScreen` embeds `TransactionDetailsForm`; hold-to-record gesture via `RawGestureDetector` with `Duration.zero`; AnimatedContainer 180ms shape morph + AnimatedSwitcher caption swap to "录音中…"; Stopwatch test enforces `<100ms` perceived state change. Two BLOCKER gaps (G-01 recognizer self-termination, G-02 silent errors) elevated from code review and closed via plans 22-08/09/10 with 4 new ARB error keys + permanent-error mic gate.
+6. **v1.3 cleanup phase absorbs carried tech-debt** (Phase 23) — Scanner allow-list cleanup (VOICE-SCANNER-ALLOWLIST cleared 2026-05-24); 6 voice-flow surgical fixes (D-05 intra-session guard, D-07 cold-start race, D-08 popUntil deferral, D-09 listener-leak regression, D-10 mixin extraction, D-11 G-02 localized assert); 4 mechanical polish items (D-12 constant dedup, D-13 substring guard, D-14 SeedAllUseCase, D-15 その他/其他/other seed); REQUIREMENTS.md + 7 SUMMARY frontmatters reconciled (D-04); 9/9 carried device UATs run and passed; `voice_input_screen.dart` slimmed 838 → 776 LOC via `VoiceLocaleReadinessMixin` + pure-helper extraction (Plan 23-09) — back under CLAUDE.md `<800` cap.
+
+### Stats
+
+- **Commits since v1.2 tag:** 330
+- **Files changed:** 304 (+64,157 / -4,747 LOC); `lib/` +6,559 / -2,197; `test/` +10,246 / -836
+- **Commit categories:** feat 52, fix 18, refactor 14, test 38, docs 158
+- **Phase commit distribution:** Phase 20: 15, Phase 21: 14, Phase 22: 11, Phase 23: 10 (Phases 18-19 commits intermixed in early v1.3 tail)
+- **Requirements:** 15/15 v1.3 requirements complete (4 fully verified at audit time + 11 partial-by-documentation-only reconciled in Phase 23 plan 23-07)
+- **ARB parity:** 506 keys per locale (ja=zh=en) — +19 from v1.2 baseline of 487
+- **Drift schema:** unchanged at v17 (no migration this milestone)
+- **LOC cap:** `voice_input_screen.dart` 776 LOC (under 800 cap after Plan 23-09 mixin + helpers extraction)
+
+### Notable Decisions
+
+- 5-phase split (18-22) + cleanup phase (23) separates voice number parser (state-machine corpus) from voice category resolver (database resolution); isolates voice integration phase; cleanup phase chosen inline (vs carry to v1.4) for same-milestone debt absorption.
+- Phase 18 ships first as foundation — INPUT-03 shared widget unblocks INPUT-01 (manual), INPUT-02 (voice), and EDIT-01/02 (edit-from-list).
+- Phase 20 deliberately UI-independent (parallel-safe with Phase 19); both feed into Phase 22 integration.
+- **Hold-to-record gesture** (vs tap-to-toggle) chosen and consistent app-wide; reduces accidental activation; documented in 22-04 SUMMARY.
+- L1 → `${l1Id}_other` convention + `cat_other_expense → cat_other_other` override; always-L2 contract via deterministic fallback; architecture invariant test enforces 19 expense L1s.
+- Phase 22 G-01/G-02 elevated to BLOCKER from code review (production-risk recognizer self-termination + silent errors); cannot be advisory-deferred. Closed in plans 22-08/09/10 before Phase 22 close.
+- OCR slot intentionally hardcodes `EntrySource.manual` pending MOD-005 writer (annotated `// MOD-005: flip to EntrySource.ocr when OCR writer ships (D-12)`); schema accepts 'ocr' literal already.
+- Phase 23 plan 23-09 LOC-cap extraction (838 → 776) via `VoiceLocaleReadinessMixin` + 3 pure helpers; zero behavior change.
+
+### Archive
+
+- `.planning/milestones/v1.3-ROADMAP.md` — full phase details
+- `.planning/milestones/v1.3-REQUIREMENTS.md` — final requirement status + v1.4+ backlog
+- `.planning/milestones/v1.3-MILESTONE-AUDIT.md` — pre-close audit report (status: `tech_debt`; Phase 23 closed all functional gaps after audit was taken)
+- `.planning/milestones/v1.3-phases/` — archived phase directories (18-23)
+
+---
+
 ## v1.2 — Happiness Metric Refresh
 
 **Shipped:** 2026-05-21
