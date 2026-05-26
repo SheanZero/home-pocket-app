@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_riverpod/misc.dart';
 import 'package:home_pocket/application/accounting/category_service.dart';
 import 'package:home_pocket/application/accounting/create_transaction_use_case.dart';
@@ -17,6 +18,7 @@ import 'package:home_pocket/features/accounting/presentation/widgets/amount_disp
 import 'package:home_pocket/features/accounting/presentation/widgets/entry_mode_switcher.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/keyboard_toolbar.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/smart_keyboard.dart';
+import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -421,6 +423,143 @@ void main() {
       );
     }
   });
+
+  // ── 260526-r8y Item 3: regression — toolbar 记录 must save when TextField focused ──
+  //
+  // Bug: TextField's `onTapOutside: (_) => FocusScope.of(context).unfocus()`
+  // fires on pointer-down before the floating KeyboardToolbar's InkWell.onTap
+  // can resolve on pointer-up. The unfocus causes `_handleFocusChange` to flip
+  // `_isTextFieldFocused = false`, which unmounts the toolbar via
+  // `if (_isTextFieldFocused) Positioned(...)`. The pending pointer-up reaches
+  // a disposed widget and `onSave` is never invoked.
+  //
+  // Fix (Task 2): wrap KeyboardToolbar in `TapRegion(groupId: …)` and set
+  // `TextField.groupId` to the same constant on the merchant + note TextFields.
+  // This test MUST FAIL on current main (proves bug) and PASS after Task 2.
+  testWidgets(
+    '260526-r8y Item 3: KeyboardToolbar 记录 button saves transaction when merchant TextField is focused',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      when(
+        () => mockCreateUseCase.execute(any()),
+      ).thenAnswer((_) async => Result.success(_successTransaction));
+
+      // D-08 popUntil fix mirrors voice_input_screen_test._TwoRouteHost: push
+      // ManualOneStepScreen on top of a dummy home so Navigator.popUntil
+      // ((r) => r.isFirst) actually pops the screen.
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('en'),
+          localizationsDelegates: S.localizationsDelegates,
+          supportedLocales: S.supportedLocales,
+          home: ProviderScope(
+            overrides: [
+              categoryRepositoryProvider.overrideWithValue(
+                FakeCategoryRepository(_fakeCategories),
+              ),
+              createTransactionUseCaseProvider.overrideWithValue(
+                mockCreateUseCase,
+              ),
+              categoryServiceProvider.overrideWithValue(mockCategoryService),
+            ],
+            child: Navigator(
+              onGenerateRoute: (settings) {
+                if (settings.name == '/') {
+                  return MaterialPageRoute<void>(
+                    builder: (ctx) => Scaffold(
+                      body: Builder(
+                        builder: (ctx) {
+                          // Push the screen on top of the home route after the
+                          // first frame so the toolbar/save flow can pop back.
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            Navigator.of(ctx).push<void>(
+                              MaterialPageRoute<void>(
+                                builder: (_) => ManualOneStepScreen(
+                                  bookId: 'book-1',
+                                  initialCategory: _l2Category,
+                                  initialParentCategory: _l1Category,
+                                  entrySource: EntrySource.manual,
+                                ),
+                              ),
+                            );
+                          });
+                          return const Center(child: Text('home'));
+                        },
+                      ),
+                    ),
+                  );
+                }
+                return null;
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap digit '1' on SmartKeyboard to seed an amount.
+      final digit1Finder = find.descendant(
+        of: find.byType(SmartKeyboard),
+        matching: find.text('1'),
+      );
+      expect(digit1Finder, findsOneWidget);
+      await tester.tap(digit1Finder);
+      await tester.pumpAndSettle();
+
+      // Focus the merchant TextField → KeyboardToolbar mounts.
+      await tester.tap(find.byKey(const ValueKey('merchant-textfield')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byType(KeyboardToolbar),
+        findsOneWidget,
+        reason: 'KeyboardToolbar must be visible while merchant field is focused',
+      );
+
+      // Tap the toolbar's 记录 button (en locale → "Record").
+      final toolbarSaveFinder = find.descendant(
+        of: find.byType(KeyboardToolbar),
+        matching: find.text('Record'),
+      );
+      expect(
+        toolbarSaveFinder,
+        findsOneWidget,
+        reason: 'toolbar must render the Record label',
+      );
+
+      // Use an explicit down + up gesture (not tester.tap which fast-paths
+      // both events) so the production race between TextField.onTapOutside
+      // (fires on pointer-down) and the InkWell's onTap (resolves on
+      // pointer-up after the toolbar may have unmounted) is exercised
+      // faithfully. With pumpAndSettle between down and up, the
+      // _handleFocusChange → setState → toolbar unmount happens between
+      // the events on the unfixed build.
+      final gesture = await tester.startGesture(
+        tester.getCenter(toolbarSaveFinder),
+      );
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // CORE BUG ASSERTION: save use case MUST be invoked exactly once.
+      // Pre-fix: TextField.onTapOutside fires on pointer-down, unfocuses the
+      // field, unmounts the toolbar, and the InkWell never receives the tap-up
+      // — so verify(...).called(1) sees zero calls.
+      verify(() => mockCreateUseCase.execute(any())).called(1);
+
+      // After save, Navigator pops back to the home route.
+      expect(
+        find.byKey(const ValueKey('manual-one-step-screen')),
+        findsNothing,
+        reason:
+            'screen must pop after toolbar 记录 save (Navigator.popUntil((r) => r.isFirst))',
+      );
+    },
+  );
 
   // ── Digit tap + Save via SmartKeyboard (SC-4 precursor) ────────────────────
 
