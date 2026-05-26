@@ -293,38 +293,19 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
           Navigator.of(context).popUntil((route) => route.isFirst);
         },
         validationError: (msg) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(msg)));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(msg)));
         },
         persistError: (msg) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(msg)));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(msg)));
         },
       );
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
-  }
-
-  // ── Layout helpers ──
-
-  /// Responsive keypad height — ~40% of screen height over 5 rows (D-06).
-  ///
-  /// Uses static MediaQuery.size.height (RESEARCH §Pitfall 2) to avoid
-  /// dependency on the render tree during layout. Floor at 48dp per
-  /// RESEARCH §Pitfall 1 (iPhone SE 667pt gives ~36.96dp without clamp).
-  ///
-  /// IN-02: includes SmartKeyboard's internal padding (12 top + 24 bottom = 36dp)
-  /// so scrollPaddingBottom matches actual rendered height.
-  double _computeSmartKeypadHeight(BuildContext context) {
-    final mq = MediaQuery.of(context);
-    final total = mq.size.height * 0.40;
-    const rowGaps = 4 * 12.0;
-    final safeAreaBottom = mq.padding.bottom;
-    const keyboardPaddingVertical = 12.0 + 24.0; // fromLTRB(12,12,12,24)
-    final perKey = (total - rowGaps - safeAreaBottom) / 5;
-    final clampedPerKey = math.max(48.0, perKey);
-    return clampedPerKey * 5 + rowGaps + safeAreaBottom + keyboardPaddingVertical;
   }
 
   @override
@@ -334,10 +315,11 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
     ref.watch(currentLocaleProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final smartKeypadHeight = _computeSmartKeypadHeight(context);
     final viewInsetsBottom = MediaQuery.of(context).viewInsets.bottom;
-    // D-13: ensure scrollable content scrolls above whichever keyboard is shown.
-    final scrollPaddingBottom = math.max(viewInsetsBottom, smartKeypadHeight);
+    // Item 3 (260526-j98): bottom padding clears IME only — the SmartKeyboard
+    // sits AFTER the Expanded in the Column so it naturally bounds the
+    // scrollable from below. 32dp = one comfortable rest gap per user spec.
+    final scrollPaddingBottom = math.max(viewInsetsBottom, 32.0);
 
     return Scaffold(
       key: const ValueKey('manual-one-step-screen'),
@@ -384,10 +366,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
               GestureDetector(
                 onTap: _onAmountTap,
                 behavior: HitTestBehavior.opaque,
-                child: AmountDisplay(
-                  amount: _amount,
-                  onClear: _onClear,
-                ),
+                child: AmountDisplay(amount: _amount, onClear: _onClear),
               ),
 
               // Inline toast below AmountDisplay
@@ -404,12 +383,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
               // Scrollable details section with smart bottom padding (D-13)
               Expanded(
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(
-                    16,
-                    8,
-                    16,
-                    scrollPaddingBottom,
-                  ),
+                  padding: EdgeInsets.fromLTRB(16, 8, 16, scrollPaddingBottom),
                   child: TransactionDetailsForm(
                     key: _formKey,
                     config: TransactionDetailsFormConfig.$new(
