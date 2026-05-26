@@ -40,6 +40,25 @@ void main() {
     test('extracts comma-formatted amount: 1,280円', () {
       expect(parser.extractAmount('1,280円'), equals(1280));
     });
+
+    test(
+      '260526-n7b: falls through to arabic regex when CJK weekday (周二) trips numeral hint',
+      () {
+        // 周二 contains 二 which triggers _numeralHintPattern, but is not a
+        // number — state machine returns null; arabic regex must catch ¥5240.
+        expect(
+          parser.extractAmount('上周二交公交卡用了¥5240'),
+          equals(5240),
+        );
+      },
+    );
+
+    test(
+      '260526-n7b: handles ¥-prefix amount with leading CJK context',
+      () {
+        expect(parser.extractAmount('星期三午饭¥680'), equals(680));
+      },
+    );
   });
 
   group('VoiceTextParser - extractAmount locale routing', () {

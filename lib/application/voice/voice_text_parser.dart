@@ -49,8 +49,15 @@ class VoiceTextParser {
     // the arabic regex — it would partial-match the trailing 「304元」 and
     // return 304, masking the correct 2304 reading. State machine is
     // authoritative when any numeral hint is present.
+    //
+    // Fallthrough (260526-n7b): hint detection has false positives on CJK
+    // day-of-week / month names where 二/三/四 etc. are NOT numbers (e.g.
+    // 「上周二交公交卡用了¥5240」 → 周二 trips the hint, machine fails on the
+    // non-numeric context, arabic regex would correctly match ¥5240). When
+    // the state machine yields null, try the arabic path instead of giving up.
     if (hasNumeralHint) {
-      return _runStateMachine(text, localeId);
+      final fromMachine = _runStateMachine(text, localeId);
+      if (fromMachine != null) return fromMachine;
     }
     return _extractArabicAmount(text);
   }
@@ -78,8 +85,13 @@ class VoiceTextParser {
   int? _extractArabicAmount(String text) {
     final suffixGroup = VoiceCurrencySuffixes.regexAlternation;
     final patterns = [
-      // ¥1,280 / ￥1280
-      RegExp(r'[¥￥]\s*(\d{1,3}(?:[,，]\d{3})*(?:\.\d{1,2})?)'),
+      // ¥1,280 / ￥1280 / ¥5240 — alternation mirrors the suffix pattern
+      // below so 4-9 digit non-comma amounts are not truncated to 3 chars.
+      // (?!\d) trailing anchor forces backtracking from \d{1,3} (which would
+      // otherwise greedily match "524" out of "5240") to the \d{4,9} branch.
+      RegExp(
+        r'[¥￥]\s*(\d{1,3}(?:[,，]\d{3})*(?:\.\d{1,2})?|\d{4,9}(?:\.\d{1,2})?)(?!\d)',
+      ),
       // 1,280円 / 12,450日元 / 1280円 / 1280yen / 480块 / 480元
       // (?<!\d) anchors capture at a non-digit boundary so 「1280块」 does not
       // partial-match to 「280块」 and return 280. Full-width comma (，) is
