@@ -710,7 +710,7 @@ class SEn extends S {
   String get enterMemo => 'Enter memo...';
 
   @override
-  String get expenseClassification => 'Expense Type';
+  String get expenseClassification => 'Purpose';
 
   @override
   String get survivalExpense => 'Survival';

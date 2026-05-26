@@ -1410,7 +1410,7 @@ abstract class S {
   /// Ledger type section title
   ///
   /// In en, this message translates to:
-  /// **'Expense Type'**
+  /// **'Purpose'**
   String get expenseClassification;
 
   /// Survival ledger chip label

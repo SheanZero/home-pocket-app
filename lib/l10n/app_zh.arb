@@ -918,7 +918,7 @@
   "@enterMemo": {
     "description": "Memo input placeholder"
   },
-  "expenseClassification": "支出分类",
+  "expenseClassification": "用途",
   "@expenseClassification": {
     "description": "Ledger type section title"
   },

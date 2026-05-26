@@ -84,35 +84,37 @@ class TransactionDetailsFormState
   void initState() {
     super.initState();
     widget.config.when(
-      $new: (
-        bookId,
-        initialAmount,
-        initialCategory,
-        initialParentCategory,
-        initialMerchant,
-        initialSatisfaction,
-        initialDate,
-        entrySource,
-        voiceKeyword,
-        merchantFocusNode,
-        noteFocusNode,
-      ) {
-        _amount = initialAmount ?? 0;
-        _category = initialCategory;
-        _parentCategory = initialParentCategory;
-        _date = initialDate ?? DateTime.now();
-        _initialCategoryId = initialCategory?.id;
-        if (initialMerchant != null) _storeController.text = initialMerchant;
-        if (initialSatisfaction != null) {
-          _soulSatisfaction = initialSatisfaction.clamp(1, 10);
-        }
-        // Resolve ledger type from category if one was pre-seeded.
-        if (_category != null) {
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) => _resolveLedgerType(_category!.id),
-          );
-        }
-      },
+      $new:
+          (
+            bookId,
+            initialAmount,
+            initialCategory,
+            initialParentCategory,
+            initialMerchant,
+            initialSatisfaction,
+            initialDate,
+            entrySource,
+            voiceKeyword,
+            merchantFocusNode,
+            noteFocusNode,
+          ) {
+            _amount = initialAmount ?? 0;
+            _category = initialCategory;
+            _parentCategory = initialParentCategory;
+            _date = initialDate ?? DateTime.now();
+            _initialCategoryId = initialCategory?.id;
+            if (initialMerchant != null)
+              _storeController.text = initialMerchant;
+            if (initialSatisfaction != null) {
+              _soulSatisfaction = initialSatisfaction.clamp(1, 10);
+            }
+            // Resolve ledger type from category if one was pre-seeded.
+            if (_category != null) {
+              WidgetsBinding.instance.addPostFrameCallback(
+                (_) => _resolveLedgerType(_category!.id),
+              );
+            }
+          },
       edit: (seed) {
         // .edit init: preload all mutable fields from seed verbatim (D-07).
         // seed.ledgerType used as-is — _resolveLedgerType is NOT called (W3).
@@ -302,31 +304,32 @@ class TransactionDetailsFormState
     // Voice-correction gate (D-09): .new mode only, fires when category
     // changed from the initial voice-matched one.
     await widget.config.maybeWhen(
-      $new: (
-        nBookId,
-        nInitialAmount,
-        nInitialCategory,
-        nInitialParentCategory,
-        nInitialMerchant,
-        nInitialSatisfaction,
-        nInitialDate,
-        nEntrySource,
-        voiceKeyword,
-        p10,
-        p11,
-      ) async {
-        if (voiceKeyword != null &&
-            voiceKeyword.isNotEmpty &&
-            result.id != _initialCategoryId) {
-          final correctionUseCase = ref.read(
-            recordCategoryCorrectionUseCaseProvider,
-          );
-          await correctionUseCase.execute(
-            keyword: voiceKeyword,
-            correctedCategoryId: result.id,
-          );
-        }
-      },
+      $new:
+          (
+            nBookId,
+            nInitialAmount,
+            nInitialCategory,
+            nInitialParentCategory,
+            nInitialMerchant,
+            nInitialSatisfaction,
+            nInitialDate,
+            nEntrySource,
+            voiceKeyword,
+            p10,
+            p11,
+          ) async {
+            if (voiceKeyword != null &&
+                voiceKeyword.isNotEmpty &&
+                result.id != _initialCategoryId) {
+              final correctionUseCase = ref.read(
+                recordCategoryCorrectionUseCaseProvider,
+              );
+              await correctionUseCase.execute(
+                keyword: voiceKeyword,
+                correctedCategoryId: result.id,
+              );
+            }
+          },
       orElse: () {},
     );
   }
@@ -374,79 +377,80 @@ class TransactionDetailsFormState
     setState(() => _isSubmitting = true);
     try {
       return await widget.config.when(
-        $new: (
-          bookId,
-          newInitialAmount,
-          newInitialCategory,
-          newInitialParentCategory,
-          newInitialMerchant,
-          newInitialSatisfaction,
-          newInitialDate,
-          entrySource,
-          voiceKeyword,
-          p10,
-          p11,
-        ) async {
-          final result = await ref
-              .read(createTransactionUseCaseProvider)
-              .execute(
-                CreateTransactionParams(
-                  bookId: bookId,
-                  amount: _amount,
-                  type: TransactionType.expense,
-                  categoryId: _category!.id,
-                  timestamp: _date,
-                  note: _memoController.text.trim().isEmpty
-                      ? null
-                      : _memoController.text.trim(),
-                  merchant: _storeController.text.trim().isEmpty
-                      ? null
-                      : _storeController.text.trim(),
-                  soulSatisfaction: _ledgerType == LedgerType.soul
-                      ? _soulSatisfaction
-                      : null,
-                  ledgerType: _ledgerType,
-                  entrySource: entrySource,
-                ),
-              );
-          if (!result.isSuccess) {
-            if (!mounted) {
-              // Widget disposed before result arrived — host's !mounted guard
-              // prevents this value from reaching the UI. Use an internal
-              // sentinel rather than a hardcoded English string.
-              return const TransactionDetailsFormResult.persistError(
-                'INTERNAL_UNMOUNTED',
-              );
-            }
-            return TransactionDetailsFormResult.persistError(
-              result.error ?? S.of(context).failedToSave,
-            );
-          }
-          final tx = result.data!;
-
-          // Merchant-learning hook (Phase 18 D-09, ported to this form from
-          // the legacy two-screen flow): record merchant→category preference
-          // so the ML classifier improves suggestions over time.
-          final merchantRaw = _storeController.text.trim();
-          if (merchantRaw.isNotEmpty && mounted) {
-            await ref
-                .read(merchantCategoryLearningServiceProvider)
-                .recordSelection(
-                  merchantRaw: merchantRaw,
-                  selectedCategoryId: _category!.id,
+        $new:
+            (
+              bookId,
+              newInitialAmount,
+              newInitialCategory,
+              newInitialParentCategory,
+              newInitialMerchant,
+              newInitialSatisfaction,
+              newInitialDate,
+              entrySource,
+              voiceKeyword,
+              p10,
+              p11,
+            ) async {
+              final result = await ref
+                  .read(createTransactionUseCaseProvider)
+                  .execute(
+                    CreateTransactionParams(
+                      bookId: bookId,
+                      amount: _amount,
+                      type: TransactionType.expense,
+                      categoryId: _category!.id,
+                      timestamp: _date,
+                      note: _memoController.text.trim().isEmpty
+                          ? null
+                          : _memoController.text.trim(),
+                      merchant: _storeController.text.trim().isEmpty
+                          ? null
+                          : _storeController.text.trim(),
+                      soulSatisfaction: _ledgerType == LedgerType.soul
+                          ? _soulSatisfaction
+                          : null,
+                      ledgerType: _ledgerType,
+                      entrySource: entrySource,
+                    ),
+                  );
+              if (!result.isSuccess) {
+                if (!mounted) {
+                  // Widget disposed before result arrived — host's !mounted guard
+                  // prevents this value from reaching the UI. Use an internal
+                  // sentinel rather than a hardcoded English string.
+                  return const TransactionDetailsFormResult.persistError(
+                    'INTERNAL_UNMOUNTED',
+                  );
+                }
+                return TransactionDetailsFormResult.persistError(
+                  result.error ?? S.of(context).failedToSave,
                 );
-          }
+              }
+              final tx = result.data!;
 
-          // D-15: celebration only for .new soul saves. .edit branch never
-          // touches _showCelebration.
-          // Phase 23 D-08: initialize the completer before showing the overlay
-          // so waitForCelebrationDismissed() returns a pending future.
-          if (tx.ledgerType == LedgerType.soul && mounted) {
-            _celebrationCompleter = Completer<void>();
-            setState(() => _showCelebration = true);
-          }
-          return TransactionDetailsFormResult.success(tx);
-        },
+              // Merchant-learning hook (Phase 18 D-09, ported to this form from
+              // the legacy two-screen flow): record merchant→category preference
+              // so the ML classifier improves suggestions over time.
+              final merchantRaw = _storeController.text.trim();
+              if (merchantRaw.isNotEmpty && mounted) {
+                await ref
+                    .read(merchantCategoryLearningServiceProvider)
+                    .recordSelection(
+                      merchantRaw: merchantRaw,
+                      selectedCategoryId: _category!.id,
+                    );
+              }
+
+              // D-15: celebration only for .new soul saves. .edit branch never
+              // touches _showCelebration.
+              // Phase 23 D-08: initialize the completer before showing the overlay
+              // so waitForCelebrationDismissed() returns a pending future.
+              if (tx.ledgerType == LedgerType.soul && mounted) {
+                _celebrationCompleter = Completer<void>();
+                setState(() => _showCelebration = true);
+              }
+              return TransactionDetailsFormResult.success(tx);
+            },
         edit: (seed) async {
           final result = await ref
               .read(updateTransactionUseCaseProvider)
@@ -500,159 +504,176 @@ class TransactionDetailsFormState
     );
   }
 
-  Widget _buildStoreAndMemoSection(S l10n, bool isDark) {
-    final secondaryColor =
-        isDark ? AppColorsDark.textSecondary : AppColors.textSecondary;
-    final tertiaryColor =
-        isDark ? AppColorsDark.textTertiary : AppColors.textTertiary;
-    final primaryColor =
-        isDark ? AppColorsDark.textPrimary : AppColors.textPrimary;
+  Widget _buildMerchantRow(S l10n, bool isDark) {
+    final secondaryColor = isDark
+        ? AppColorsDark.textSecondary
+        : AppColors.textSecondary;
+    final tertiaryColor = isDark
+        ? AppColorsDark.textTertiary
+        : AppColors.textTertiary;
+    final primaryColor = isDark
+        ? AppColorsDark.textPrimary
+        : AppColors.textPrimary;
 
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Icon(Icons.store_outlined, size: 16, color: tertiaryColor),
+          const SizedBox(width: 8),
+          Text(
+            l10n.merchant,
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: secondaryColor,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextField(
+              key: const ValueKey('merchant-textfield'),
+              controller: _storeController,
+              focusNode: widget.config.maybeWhen(
+                $new:
+                    (
+                      bookId,
+                      initialAmount,
+                      initialCategory,
+                      initialParentCategory,
+                      initialMerchant,
+                      initialSatisfaction,
+                      initialDate,
+                      entrySource,
+                      voiceKeyword,
+                      merchantFocusNode,
+                      noteFocusNode,
+                    ) => merchantFocusNode,
+                orElse: () => null,
+              ),
+              textAlign: TextAlign.end,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => FocusScope.of(context).unfocus(),
+              onTapOutside: (_) => FocusScope.of(context).unfocus(),
+              decoration: InputDecoration(
+                isDense: true,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+                hintText: l10n.enterStore,
+                hintStyle: AppTextStyles.bodyMedium.copyWith(
+                  color: secondaryColor,
+                  fontSize: 14,
+                ),
+              ),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: primaryColor,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoteSection(S l10n, bool isDark) {
+    final secondaryColor = isDark
+        ? AppColorsDark.textSecondary
+        : AppColors.textSecondary;
+    final tertiaryColor = isDark
+        ? AppColorsDark.textTertiary
+        : AppColors.textTertiary;
+    final primaryColor = isDark
+        ? AppColorsDark.textPrimary
+        : AppColors.textPrimary;
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Icon(Icons.store_outlined, size: 16, color: tertiaryColor),
+              Icon(Icons.edit_outlined, size: 16, color: tertiaryColor),
               const SizedBox(width: 8),
               Text(
-                l10n.merchant,
+                l10n.note,
                 style: AppTextStyles.bodyMedium.copyWith(
+                  color: secondaryColor,
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Container(
+            height: 72,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? AppColorsDark.backgroundMuted
+                  : AppColors.backgroundMuted,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: TextField(
+              key: const ValueKey('note-textfield'),
+              controller: _memoController,
+              focusNode: widget.config.maybeWhen(
+                $new:
+                    (
+                      bookId,
+                      initialAmount,
+                      initialCategory,
+                      initialParentCategory,
+                      initialMerchant,
+                      initialSatisfaction,
+                      initialDate,
+                      entrySource,
+                      voiceKeyword,
+                      merchantFocusNode,
+                      noteFocusNode,
+                    ) => noteFocusNode,
+                orElse: () => null,
+              ),
+              maxLines: null,
+              expands: true,
+              onTapOutside: (_) => FocusScope.of(context).unfocus(),
+              decoration: InputDecoration(
+                isCollapsed: true,
+                border: InputBorder.none,
+                hintText: l10n.enterMemo,
+                hintStyle: AppTextStyles.bodyMedium.copyWith(
                   color: secondaryColor,
+                  fontSize: 13,
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  key: const ValueKey('merchant-textfield'),
-                  controller: _storeController,
-                  focusNode: widget.config.maybeWhen(
-                    $new: (
-                      bookId,
-                      initialAmount,
-                      initialCategory,
-                      initialParentCategory,
-                      initialMerchant,
-                      initialSatisfaction,
-                      initialDate,
-                      entrySource,
-                      voiceKeyword,
-                      merchantFocusNode,
-                      noteFocusNode,
-                    ) =>
-                        merchantFocusNode,
-                    orElse: () => null,
-                  ),
-                  textAlign: TextAlign.end,
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => FocusScope.of(context).unfocus(),
-                  onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                  decoration: InputDecoration(
-                    isDense: true,
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                    hintText: l10n.enterStore,
-                    hintStyle: AppTextStyles.bodyMedium.copyWith(
-                      color: secondaryColor,
-                      fontSize: 14,
-                    ),
-                  ),
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: primaryColor,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: primaryColor,
+                fontSize: 13,
               ),
-            ],
+            ),
           ),
+        ],
+      ),
+    );
+  }
+
+  /// Item 1 (260526-j98): shared rounded-card wrapper for Card B (ledger +
+  /// satisfaction) and Card C (note). Dedupes the inline Container decoration
+  /// previously used only for Card B.
+  Widget _formCard({required Widget child}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColorsDark.card : AppColors.card,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark ? AppColorsDark.borderDefault : AppColors.borderDefault,
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Container(
-            height: 1,
-            color: isDark
-                ? AppColorsDark.backgroundDivider
-                : AppColors.backgroundDivider,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.edit_outlined, size: 16, color: tertiaryColor),
-                  const SizedBox(width: 8),
-                  Text(
-                    l10n.note,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: secondaryColor,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Container(
-                height: 72,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? AppColorsDark.backgroundMuted
-                      : AppColors.backgroundMuted,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: TextField(
-                  key: const ValueKey('note-textfield'),
-                  controller: _memoController,
-                  focusNode: widget.config.maybeWhen(
-                    $new: (
-                      bookId,
-                      initialAmount,
-                      initialCategory,
-                      initialParentCategory,
-                      initialMerchant,
-                      initialSatisfaction,
-                      initialDate,
-                      entrySource,
-                      voiceKeyword,
-                      merchantFocusNode,
-                      noteFocusNode,
-                    ) =>
-                        noteFocusNode,
-                    orElse: () => null,
-                  ),
-                  maxLines: null,
-                  expands: true,
-                  onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                  decoration: InputDecoration(
-                    isCollapsed: true,
-                    border: InputBorder.none,
-                    hintText: l10n.enterMemo,
-                    hintStyle: AppTextStyles.bodyMedium.copyWith(
-                      color: secondaryColor,
-                      fontSize: 13,
-                    ),
-                  ),
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: primaryColor,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+      ),
+      child: child,
     );
   }
 
@@ -692,63 +713,63 @@ class TransactionDetailsFormState
                   onTap: _editDate,
                 ),
               ],
-              trailing: _buildStoreAndMemoSection(l10n, isDark),
+              trailing: _buildMerchantRow(l10n, isDark),
             ),
 
             const SizedBox(height: 16),
 
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: isDark ? AppColorsDark.card : AppColors.card,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: isDark
-                      ? AppColorsDark.borderDefault
-                      : AppColors.borderDefault,
+            // Card B: 用途 (Purpose) header + ledger + (soul) satisfaction.
+            _formCard(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.expenseClassification,
+                      style: AppTextStyles.titleMedium.copyWith(
+                        color: isDark
+                            ? AppColorsDark.textPrimary
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    LedgerTypeSelector(
+                      selected: _ledgerType,
+                      onChanged: (type) => setState(() => _ledgerType = type),
+                      survivalLabel: l10n.survivalExpense,
+                      soulLabel: l10n.soulExpense,
+                    ),
+                    if (_ledgerType == LedgerType.soul) ...[
+                      const SizedBox(height: 20),
+                      SatisfactionEmojiPicker(
+                        value: _soulSatisfaction,
+                        onChanged: (v) => setState(() => _soulSatisfaction = v),
+                        title: l10n.satisfactionLevel,
+                        levelLabels: [
+                          l10n.satisfactionBad,
+                          l10n.satisfactionSlightlyBad,
+                          l10n.satisfactionNormal,
+                          l10n.satisfactionGood,
+                          l10n.satisfactionVeryGood,
+                        ],
+                        bottomLabels: [
+                          l10n.satisfactionBad,
+                          l10n.satisfactionNormal,
+                          l10n.satisfactionExcellent,
+                        ],
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.expenseClassification,
-                    style: AppTextStyles.titleMedium.copyWith(
-                      color: isDark
-                          ? AppColorsDark.textPrimary
-                          : AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  LedgerTypeSelector(
-                    selected: _ledgerType,
-                    onChanged: (type) => setState(() => _ledgerType = type),
-                    survivalLabel: l10n.survivalExpense,
-                    soulLabel: l10n.soulExpense,
-                  ),
-                  if (_ledgerType == LedgerType.soul) ...[
-                    const SizedBox(height: 20),
-                    SatisfactionEmojiPicker(
-                      value: _soulSatisfaction,
-                      onChanged: (v) => setState(() => _soulSatisfaction = v),
-                      title: l10n.satisfactionLevel,
-                      levelLabels: [
-                        l10n.satisfactionBad,
-                        l10n.satisfactionSlightlyBad,
-                        l10n.satisfactionNormal,
-                        l10n.satisfactionGood,
-                        l10n.satisfactionVeryGood,
-                      ],
-                      bottomLabels: [
-                        l10n.satisfactionBad,
-                        l10n.satisfactionNormal,
-                        l10n.satisfactionExcellent,
-                      ],
-                    ),
-                  ],
-                ],
-              ),
             ),
+
+            const SizedBox(height: 16),
+
+            // Card C: 备注 (note) — extracted from Card A's trailing so the
+            // note has its own rounded card per Item 1 (260526-j98).
+            _formCard(child: _buildNoteSection(l10n, isDark)),
 
             const SizedBox(height: 16),
           ],

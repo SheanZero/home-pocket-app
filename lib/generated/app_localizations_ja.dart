@@ -703,7 +703,7 @@ class SJa extends S {
   String get enterMemo => 'メモを入力...';
 
   @override
-  String get expenseClassification => '支出分類';
+  String get expenseClassification => '用途';
 
   @override
   String get survivalExpense => '生存支出';
