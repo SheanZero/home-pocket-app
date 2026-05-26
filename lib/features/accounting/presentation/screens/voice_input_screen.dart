@@ -98,24 +98,29 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
   /// _isSubmitting at manual_one_step_screen.dart:77).
   bool _isSubmitting = false;
 
-  /// Host-cache mirror of the form's amount + category state (BLOCKER B-2
-  /// resolution). Mirrors manual_one_step_screen.dart:74-78 precedent.
-  /// Updated in the same setState block that pushes values into the form
-  /// via _formKey.currentState!.updateXxx — keeps the AmountDisplay render
-  /// and the _canSave predicate decoupled from GlobalKey.currentState
-  /// first-build null timing.
-  int _hostAmount = 0;
-  Category? _hostCategory;
-
-  /// Save button enable predicate — pure read from the host-cache mirror
-  /// (mirrors manual_one_step_screen.dart:89 _canSave getter shape).
+  /// Host-cache mirror of the form's amount state (BLOCKER B-2 resolution).
+  /// Mirrors manual_one_step_screen.dart:74-78 precedent. Updated in the
+  /// same setState block that pushes values into the form via
+  /// `_formKey.currentState!.updateAmount` — keeps the AmountDisplay render
+  /// decoupled from GlobalKey.currentState first-build null timing.
   ///
-  /// Quick task 260526-k92 (Item 2): amount > 0 clause dropped. Default
-  /// category seeds in initState via [_initializeDefaultCategory], so the
-  /// gate now relies on category presence + non-submitting state. The form's
-  /// `submit()` validates amount > 0 internally and surfaces a snackbar on
-  /// failure — user-friendlier than a permanently gray button.
-  bool get _canSave => _hostCategory != null && !_isSubmitting;
+  /// 260526-l0o (Issues 3 + 5): the prior `_hostCategory` mirror was
+  /// dropped — voice tab's `_canSave` no longer gates on category, and the
+  /// form's internal `_category` is the only save-time source of truth.
+  int _hostAmount = 0;
+
+  /// Save button enable predicate — voice tab keeps the button clickable at
+  /// all times except while a submit is in flight.
+  ///
+  /// Quick task 260526-l0o (Issues 3 + 5) reverses k92's category gate.
+  /// Rationale: with the gate in place, a voice resolver miss would
+  /// overwrite the seeded default `_hostCategory` to null (commit-flow
+  /// `setState(_hostCategory = category)`) and the button would flip gray
+  /// with no user-discoverable affordance for recovery. The form's
+  /// `submit()` already surfaces a `pleaseSelectCategory` snackbar when
+  /// the user taps save with no category — same user-visible outcome,
+  /// without the silent gray-button confusion.
+  bool get _canSave => !_isSubmitting;
 
   // Audio features collection
   final List<double> _soundLevels = [];
@@ -163,46 +168,11 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
         );
     _initSpeechService();
 
-    // Quick task 260526-k92 (Item 2): seed default L1 + L2 so the Save
-    // button is tappable at first render. Mirrors the manual screen's
-    // initState flow (manual_one_step_screen.dart:122). Deferred to
-    // post-frame so the embedded form's GlobalKey.currentState is non-null
-    // when we push the resolved category into it.
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _initializeDefaultCategory(),
-    );
-  }
-
-  /// Quick task 260526-k92 (Item 2) — ported from
-  /// manual_one_step_screen.dart:135 with the host-cache mirror write at the
-  /// tail so `_canSave` flips to true once the L2 category resolves.
-  Future<void> _initializeDefaultCategory() async {
-    final repo = ref.read(categoryRepositoryProvider);
-    final allCategories = await repo.findActive();
-    if (!mounted) return;
-
-    final l1Categories = allCategories.where((c) => c.level == 1).toList()
-      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-    final defaultL1 = l1Categories.isNotEmpty ? l1Categories.first : null;
-
-    Category? defaultL2;
-    if (defaultL1 != null) {
-      final l2UnderSelectedL1 =
-          allCategories
-              .where((c) => c.level == 2 && c.parentId == defaultL1.id)
-              .toList()
-            ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-      if (l2UnderSelectedL1.isNotEmpty) {
-        defaultL2 = l2UnderSelectedL1.first;
-      }
-    }
-
-    if (!mounted || defaultL2 == null) return;
-    // Push into the form (drives the category-chip render) AND mirror to
-    // the host cache (drives the _canSave predicate). Same setState block
-    // for atomicity.
-    _formKey.currentState?.updateCategory(defaultL2, defaultL1);
-    setState(() => _hostCategory = defaultL2);
+    // Quick task 260526-l0o (Issue 3) — voice tab REVERSES k92's default
+    // category seed. Voice has no default; save button is always clickable;
+    // errors surface via the form's existing pleaseSelectCategory snackbar
+    // at submit time. See `_canSave` getter above and `_stopRecordingAndCommit`
+    // for the host-cache null guard.
   }
 
   Future<void> _initSpeechService() async {
@@ -388,10 +358,14 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
       state.updateSatisfaction(_parseResult!.estimatedSatisfaction);
     }
 
-    // B-2 host-cache mirror — AmountDisplay + _canSave see consistent values.
+    // B-2 host-cache mirror — AmountDisplay sees the new value atomically.
+    // 260526-l0o (Issues 3 + 5): the category mirror was dropped — voice
+    // tab's `_canSave` no longer gates on category, and overwriting the
+    // form's prior category with a resolver miss would silently regress
+    // the user's selection. The form's `state.updateCategory` call above
+    // is already guarded by `if (category != null)` for the same reason.
     setState(() {
       _hostAmount = amount;
-      _hostCategory = category;
     });
   }
 
