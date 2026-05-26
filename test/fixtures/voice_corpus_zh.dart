@@ -23,6 +23,23 @@ library;
 /// use either fixture interchangeably.
 typedef VoiceCorpusCase = ({String input, int expected, String? note});
 
+/// Quick task 260526-k92 (Item 4): record type for date-phrase corpus cases.
+/// `offsetFromToday` is a whole-day offset (negative = past, positive = future).
+typedef VoiceDateCase = ({String input, int offsetFromToday, String? note});
+
+/// Chinese voice date-phrase corpus (Item 4 of 260526-k92).
+///
+/// Covers the new keywords added to `_extractRelativeDate` plus the LAST-wins
+/// rule for contradictory mentions. Asserted by
+/// `test/integration/voice/voice_date_corpus_test.dart`.
+const List<VoiceDateCase> voiceDateCorpusZh = [
+  (input: '今天买了水果50元', offsetFromToday: 0, note: 'baseline 今天'),
+  (input: '昨天吃饭花了三千日元', offsetFromToday: -1, note: 'baseline 昨天'),
+  (input: '前天的咖啡480日元', offsetFromToday: -2, note: 'baseline 前天'),
+  (input: '明天预约的诊费', offsetFromToday: 1, note: 'NEW 明天'),
+  (input: '昨天今天都没记账', offsetFromToday: 0, note: 'LAST-wins: 今天 after 昨天'),
+];
+
 /// Chinese voice numeral corpus — ~50 const test cases.
 ///
 /// Split: 5 anchor + ~15 baseline + ~15 currency suffix + ~10 adversarial + ~5 edge.

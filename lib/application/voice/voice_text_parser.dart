@@ -129,43 +129,85 @@ class VoiceTextParser {
   }
 
   /// Matches relative date keywords across 3 languages.
+  ///
+  /// Quick task 260526-k92 (Item 4): LAST-wins rule — when an utterance
+  /// mentions multiple keywords (e.g. "昨天今天都没记账"), the keyword whose
+  /// rightmost occurrence has the largest `text.lastIndexOf` wins. Replaces
+  /// the prior first-match-wins iteration so contradictory phrases resolve
+  /// to the speaker's final intent.
   DateTime? _extractRelativeDate(String text, DateTime today) {
     final lowerText = text.toLowerCase();
 
-    // Map of keywords to day offsets (negative = past)
+    // Map of keywords to day offsets (negative = past, positive = future)
     const relativeKeywords = <String, int>{
-      // Japanese
+      // Japanese — past
       '一昨日': -2,
       'おととい': -2,
       '昨日': -1,
       'きのう': -1,
       '今日': 0,
       'きょう': 0,
-      // Chinese
+      // Japanese — future (Item 4, 260526-k92)
+      '明日': 1,
+      'あした': 1,
+      'あす': 1,
+      '明後日': 2,
+      'あさって': 2,
+      // Chinese — past
+      '大前天': -3,
       '前天': -2,
       '昨天': -1,
       '今天': 0,
+      // Chinese — future (Item 4, 260526-k92)
+      '明天': 1,
+      '后天': 2,
       // English (checked via lowered text)
     };
 
-    // Check Japanese/Chinese keywords (case-sensitive)
+    // Item 4: LAST-wins — pick the keyword whose rightmost match ENDS
+    // furthest right in the utterance. Ties broken by longer keyword (so
+    // 一昨日 wins over the 昨日 substring it contains, and 大前天 wins over 前天).
+    String? bestKey;
+    int bestEnd = -1;
+    int bestLen = -1;
     for (final entry in relativeKeywords.entries) {
-      if (text.contains(entry.key)) {
-        return today.add(Duration(days: entry.value));
+      final idx = text.lastIndexOf(entry.key);
+      if (idx < 0) continue;
+      final end = idx + entry.key.length;
+      if (end > bestEnd || (end == bestEnd && entry.key.length > bestLen)) {
+        bestEnd = end;
+        bestLen = entry.key.length;
+        bestKey = entry.key;
       }
     }
+    if (bestKey != null) {
+      return today.add(Duration(days: relativeKeywords[bestKey]!));
+    }
 
-    // Check English keywords (case-insensitive)
+    // Check English keywords (case-insensitive) — same end-position rule with
+    // length tiebreaker (so "day before yesterday" wins over the "yesterday"
+    // substring it contains).
     const englishKeywords = <String, int>{
       'day before yesterday': -2,
       'yesterday': -1,
       'today': 0,
     };
 
+    String? bestEnKey;
+    int bestEnEnd = -1;
+    int bestEnLen = -1;
     for (final entry in englishKeywords.entries) {
-      if (lowerText.contains(entry.key)) {
-        return today.add(Duration(days: entry.value));
+      final idx = lowerText.lastIndexOf(entry.key);
+      if (idx < 0) continue;
+      final end = idx + entry.key.length;
+      if (end > bestEnEnd || (end == bestEnEnd && entry.key.length > bestEnLen)) {
+        bestEnEnd = end;
+        bestEnLen = entry.key.length;
+        bestEnKey = entry.key;
       }
+    }
+    if (bestEnKey != null) {
+      return today.add(Duration(days: englishKeywords[bestEnKey]!));
     }
 
     // "Last week" / "Last month" keywords

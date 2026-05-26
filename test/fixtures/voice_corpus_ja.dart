@@ -23,6 +23,24 @@ library;
 /// can use either fixture interchangeably.
 typedef VoiceCorpusCase = ({String input, int expected, String? note});
 
+/// Quick task 260526-k92 (Item 4): record type for date-phrase corpus cases.
+/// Intentionally redeclared here as `VoiceDateCaseJa` to keep the ja fixture
+/// self-contained (siblings the zh `VoiceDateCase`).
+typedef VoiceDateCaseJa = ({String input, int offsetFromToday, String? note});
+
+/// Japanese voice date-phrase corpus (Item 4 of 260526-k92).
+///
+/// Covers the new 明日/あした/あす/明後日/あさって keywords plus baselines for
+/// existing 今日/昨日/おととい. Asserted by
+/// `test/integration/voice/voice_date_corpus_test.dart`.
+const List<VoiceDateCaseJa> voiceDateCorpusJa = [
+  (input: 'きょう 牛乳 280円', offsetFromToday: 0, note: 'baseline きょう'),
+  (input: '昨日のラーメン 980円', offsetFromToday: -1, note: 'baseline 昨日'),
+  (input: 'おととい買った本 1500円', offsetFromToday: -2, note: 'baseline おととい'),
+  (input: '明日の昼食 600円', offsetFromToday: 1, note: 'NEW 明日'),
+  (input: 'あさっての約束 2000円', offsetFromToday: 2, note: 'NEW あさって'),
+];
+
 /// Japanese voice numeral corpus — ~50 const test cases.
 ///
 /// Split: 5 anchor + ~15 baseline + ~15 currency suffix + ~10 multi-reading + ~5 kanji/edge.

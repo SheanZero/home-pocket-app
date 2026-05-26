@@ -381,6 +381,9 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     if (data.merchantName != null && data.merchantName!.isNotEmpty) {
       state.updateMerchant(data.merchantName!);
     }
+    // Quick task 260526-k92 (Item 4): silent-fill the date from the voice
+    // parser. Null parsedDate is a no-op — form keeps the default (today).
+    if (data.parsedDate != null) state.updateDate(data.parsedDate!);
     if (_parseResult?.estimatedSatisfaction != null) {
       state.updateSatisfaction(_parseResult!.estimatedSatisfaction);
     }
