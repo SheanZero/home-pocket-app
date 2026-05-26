@@ -44,7 +44,12 @@ void navigateToEntryMode({
   final config = _entryModeRouteConfigs[toMode];
   if (config == null) return;
 
-  final route = MaterialPageRoute<void>(builder: (_) => config.builder(bookId));
+  final route = PageRouteBuilder<void>(
+    pageBuilder: (_, _, _) => config.builder(bookId),
+    transitionDuration: Duration.zero,
+    reverseTransitionDuration: Duration.zero,
+    transitionsBuilder: (_, _, _, child) => child,
+  );
 
   if (config.replaceCurrent) {
     Navigator.of(context).pushReplacement(route);
