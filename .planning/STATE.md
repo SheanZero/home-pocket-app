@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-05-26 — v1.3 迭代帐本输入 milest
 Phase: None — between milestones
 Plan: Not started
 Status: v1.3 shipped; awaiting next-milestone scoping
-Last activity: 2026-05-26 - Completed quick task 260526-inb: IME 收起后恢复数字键盘 + KeyboardToolbar 配色与按键样式（人工视觉验证通过）
+Last activity: 2026-05-26 - Quick task 260526-j98: 添加账目 3-card 重排 + 用途/Purpose 重命名 + 底部 32dp + 选择器后还原键盘（待人工视觉验证；voice mic button golden 需 re-baseline）
 
 ## Last Milestone Snapshot (v1.3)
 
@@ -81,6 +81,7 @@ No active blockers. Carried-forward debt (cross-milestone):
 | 260522-fj5 | 悦己充盈卡片 UI 修复 — info icon 位置、小确幸数字右移、目标 default 50→100、圆环中心不显示目标、繁体→简体、内环目标固定 10、外环颜色过渡修复 | 2026-05-22 | c90ef9a | — (28 golden diffs pending human re-baseline) | [260522-fj5-ui-7-info-icon-50-100-10](./quick/260522-fj5-ui-7-info-icon-50-100-10/) |
 | 260526-i9a | 添加账目 tab 切换改为只换 tag 下面的内容区（MaterialPageRoute → zero-duration PageRouteBuilder，AppBar/tab 不再整页滑动） | 2026-05-26 | 2a7d6ce | Verified | [260526-i9a-tab-switch-inner-content-only](./quick/260526-i9a-tab-switch-inner-content-only/) |
 | 260526-inb | IME 收起后恢复数字键盘（TextField 加 textInputAction.done + onTapOutside；fixup: `_handleFocusChange` 把 `_amountFocused` 镜像到 `!hasTextFocus` 才能让 `_showSmartKeypad` 真正变 true）+ KeyboardToolbar elevation 0 + 完成按钮加 outlined frame | 2026-05-26 | 91b401a | Verified | [260526-inb-ime-dismiss-restore-keypad-and-action-ba](./quick/260526-inb-ime-dismiss-restore-keypad-and-action-ba/) |
+| 260526-j98 | 添加账目 4 项 polish：(1) 备注 拆独立卡片放分类后；(2) 支出分类 → 用途/用途/Purpose（ARB 单 key）；(3) 底部 scrollPaddingBottom 从全键盘高改 32dp（删 `_computeSmartKeypadHeight`）；(4) freezed 加 `onPickerDismissed` 回调，date/category picker dismiss 后 `_restoreKeypadFocus()` 让 SmartKeyboard 回来 | 2026-05-26 | fedf995 | Pending visual check (1 golden 需 re-baseline) | [260526-j98-form-restructure-note-card-rename-paddin](./quick/260526-j98-form-restructure-note-card-rename-paddin/) |
 
 ## Deferred Items
 
