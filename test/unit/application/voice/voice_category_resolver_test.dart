@@ -71,6 +71,12 @@ void main() {
     // cache via findAllSeedRows. Default to empty so tests not exercising the
     // fallback are unaffected; per-test stubs can override.
     when(() => mockPrefRepo.findAllSeedRows()).thenAnswer((_) async => []);
+    // Quick task 260526-pg6 (Option F — Task 3): step 2.5 also consults
+    // learned rows at-or-above kLearnedPromotionThreshold. Default to empty
+    // so seed-only tests are unaffected.
+    when(
+      () => mockPrefRepo.findLearnedRowsAtOrAbove(any()),
+    ).thenAnswer((_) async => []);
   });
 
   group('Step 1: MerchantDatabase', () {
@@ -359,5 +365,191 @@ void main() {
       verify(() => mockCategoryService.resolveLedgerType('cat_food_cafe'))
           .called(1);
     });
+  });
+
+  // ── Quick task 260526-pg6 (Option F — Task 3): learned promotion ─────────
+  //
+  // Step 2.5 substring fallback now scans seeds ∪ learned(hitCount ≥
+  // kLearnedPromotionThreshold = 3). Longest-key-wins is preserved across
+  // the union. Seeds cached lazily; learned fetched fresh each call.
+  group('Quick task 260526-pg6 — learned promotion in step 2.5', () {
+    test(
+      'Test 3.B: learned row (hitCount=3) wins substring fallback when no '
+      'seed matches; source=learning',
+      () async {
+        when(() => mockMerchantDb.findMerchant(any())).thenReturn(null);
+        when(
+          () => mockPrefRepo.findByKeyword(any()),
+        ).thenAnswer((_) async => []);
+        // No seed matches.
+        when(() => mockPrefRepo.findAllSeedRows()).thenAnswer(
+          (_) async => [_pref('外食', 'cat_food_dining_out')],
+        );
+        // Learned: 新干线 → cat_transport_taxi, hitCount=3.
+        when(
+          () => mockPrefRepo.findLearnedRowsAtOrAbove(
+            kLearnedPromotionThreshold,
+          ),
+        ).thenAnswer(
+          (_) async => [_pref('新干线', 'cat_transport_taxi', hitCount: 3)],
+        );
+        when(() => mockCategoryRepo.findById('cat_transport_taxi')).thenAnswer(
+          (_) async =>
+              _makeCategory('cat_transport_taxi', parentId: 'cat_transport'),
+        );
+
+        final result = await resolver.resolve('坐新干线去东京');
+
+        expect(result, isNotNull);
+        expect(result!.categoryId, equals('cat_transport_taxi'));
+        expect(
+          result.source,
+          equals(MatchSource.learning),
+          reason: 'pg6 3.B: learned row in step 2.5 must surface as '
+              'MatchSource.learning, NOT keyword',
+        );
+      },
+    );
+
+    test(
+      'Test 3.C: longest-key wins across seed-vs-learned boundary',
+      () async {
+        when(() => mockMerchantDb.findMerchant(any())).thenReturn(null);
+        when(
+          () => mockPrefRepo.findByKeyword(any()),
+        ).thenAnswer((_) async => []);
+        // Seed: 外食 (len=2) → cat_food_dining_out
+        when(() => mockPrefRepo.findAllSeedRows()).thenAnswer(
+          (_) async => [_pref('外食', 'cat_food_dining_out')],
+        );
+        // Learned: 去外食 (len=3, longer) → cat_food_other, hitCount=3
+        when(
+          () => mockPrefRepo.findLearnedRowsAtOrAbove(
+            kLearnedPromotionThreshold,
+          ),
+        ).thenAnswer(
+          (_) async => [_pref('去外食', 'cat_food_other', hitCount: 3)],
+        );
+        when(() => mockCategoryRepo.findById('cat_food_other')).thenAnswer(
+          (_) async => _makeCategory('cat_food_other', parentId: 'cat_food'),
+        );
+
+        // Input contains BOTH `外食` and `去外食` — longer key wins.
+        final result = await resolver.resolve('我打算去外食呢');
+
+        expect(result, isNotNull);
+        expect(
+          result!.categoryId,
+          equals('cat_food_other'),
+          reason: 'pg6 3.C: longest-key-wins preserved across seed/learned '
+              'union; 去外食 (3 chars, learned) beats 外食 (2 chars, seed)',
+        );
+        expect(result.source, equals(MatchSource.learning));
+      },
+    );
+
+    test(
+      'Test 3.D: learned row BELOW threshold does NOT participate in step 2.5; '
+      'seed wins instead',
+      () async {
+        when(() => mockMerchantDb.findMerchant(any())).thenReturn(null);
+        when(
+          () => mockPrefRepo.findByKeyword(any()),
+        ).thenAnswer((_) async => []);
+        when(() => mockPrefRepo.findAllSeedRows()).thenAnswer(
+          (_) async => [_pref('外食', 'cat_food_dining_out')],
+        );
+        // Learned 去外食 at hitCount=2 (below threshold of 3). The repo
+        // call with kLearnedPromotionThreshold MUST return empty per the
+        // contract (hitCount < threshold ⇒ excluded). Stub matches that.
+        when(
+          () => mockPrefRepo.findLearnedRowsAtOrAbove(
+            kLearnedPromotionThreshold,
+          ),
+        ).thenAnswer((_) async => []);
+        when(
+          () => mockCategoryRepo.findById('cat_food_dining_out'),
+        ).thenAnswer(
+          (_) async =>
+              _makeCategory('cat_food_dining_out', parentId: 'cat_food'),
+        );
+
+        final result = await resolver.resolve('我打算去外食呢');
+
+        expect(result, isNotNull);
+        expect(
+          result!.categoryId,
+          equals('cat_food_dining_out'),
+          reason:
+              'pg6 3.D: hitCount=2 learned row must NOT compete with seeds '
+              'in step 2.5 — threshold contract locked at '
+              'kLearnedPromotionThreshold',
+        );
+        expect(result.source, equals(MatchSource.keyword));
+      },
+    );
+
+    test(
+      'Test 3.E: exact-match step 2 wins over step 2.5 even when a learned '
+      'row would also substring-match (short-circuit invariant)',
+      () async {
+        when(() => mockMerchantDb.findMerchant(any())).thenReturn(null);
+        // Step 2 (exact match by keyword) hits — short-circuits before
+        // step 2.5 fires.
+        when(() => mockPrefRepo.findByKeyword('去外食')).thenAnswer(
+          (_) async => [_pref('去外食', 'cat_food_dining_out', hitCount: 5)],
+        );
+        when(
+          () => mockCategoryRepo.findById('cat_food_dining_out'),
+        ).thenAnswer(
+          (_) async =>
+              _makeCategory('cat_food_dining_out', parentId: 'cat_food'),
+        );
+
+        final result = await resolver.resolve('去外食');
+
+        expect(result, isNotNull);
+        expect(result!.categoryId, equals('cat_food_dining_out'));
+        // Step 2.5 must NOT be consulted on an exact-match hit.
+        verifyNever(() => mockPrefRepo.findAllSeedRows());
+        verifyNever(
+          () => mockPrefRepo.findLearnedRowsAtOrAbove(
+            kLearnedPromotionThreshold,
+          ),
+        );
+      },
+    );
+
+    test(
+      'Test 3.F: seed cache persists across calls; learned set fetched fresh '
+      'each call (in-session visibility)',
+      () async {
+        when(() => mockMerchantDb.findMerchant(any())).thenReturn(null);
+        when(
+          () => mockPrefRepo.findByKeyword(any()),
+        ).thenAnswer((_) async => []);
+        // Seed empty so step 2.5 never short-circuits the cache fill.
+        when(
+          () => mockPrefRepo.findAllSeedRows(),
+        ).thenAnswer((_) async => []);
+        when(
+          () => mockPrefRepo.findLearnedRowsAtOrAbove(
+            kLearnedPromotionThreshold,
+          ),
+        ).thenAnswer((_) async => []);
+
+        await resolver.resolve('one');
+        await resolver.resolve('two');
+
+        // Seed cache: 1 call total (lazy load).
+        verify(() => mockPrefRepo.findAllSeedRows()).called(1);
+        // Learned: 1 call per resolve (fresh).
+        verify(
+          () => mockPrefRepo.findLearnedRowsAtOrAbove(
+            kLearnedPromotionThreshold,
+          ),
+        ).called(2);
+      },
+    );
   });
 }

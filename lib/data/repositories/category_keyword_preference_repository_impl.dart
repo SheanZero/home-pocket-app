@@ -43,6 +43,20 @@ class CategoryKeywordPreferenceRepositoryImpl
   }
 
   @override
+  Future<List<CategoryKeywordPreference>> findLearnedRowsAtOrAbove(
+    int minHitCount,
+  ) async {
+    final rows = await _dao.findLearnedAtOrAbove(minHitCount);
+    return rows.map(_toModel).toList();
+  }
+
+  @override
+  Future<List<CategoryKeywordPreference>> findTopLearned({int limit = 20}) async {
+    final rows = await _dao.findTopLearned(limit: limit);
+    return rows.map(_toModel).toList();
+  }
+
+  @override
   Future<CategoryKeywordPreference?> suggestForKeyword(String keyword) async {
     final rows = await _dao.findByKeyword(keyword);
     if (rows.isEmpty) return null;

@@ -29,6 +29,18 @@ import '../accounting/category_service.dart';
 
 // _ensureL2 override map lives in lib/shared/constants/category_other_id_overrides.dart per Phase 23 D-12 IN-05
 
+/// Quick task 260526-pg6 (Option F — Task 3): hitCount threshold above which
+/// a learned row is promoted into the resolver's step 2.5 substring fallback
+/// alongside curated seed rows. Set to 3 — one above the existing
+/// [CategoryKeywordPreference.isLearned] threshold (2), matching the corpus
+/// fixture pattern that uses 3 corrections to mark a phrase "fully learned".
+///
+/// Below this threshold a learned row participates ONLY in the exact-match
+/// step 2 (today's behavior). At or above, it joins seeds in substring
+/// matching, so `坐新干线` learned-then-uttered-as-`坐新干线去东京` resolves
+/// without any dictionary edit.
+const int kLearnedPromotionThreshold = 3;
+
 /// Short-circuit voice category resolver.
 ///
 /// Constructed with the four data sources required by the pipeline. Each
@@ -106,26 +118,49 @@ class VoiceCategoryResolver {
     }
 
     // Step 2.5: quick task 260526-l0o (Issue 2) — substring fallback over
-    // curated seed rows only. The exact-match step above misses when the
+    // curated seed rows. The exact-match step above misses when the
     // extracted keyword embeds the seed in surrounding chatter (e.g.
-    // `坐新干线去东京` contains `新干线`). Scan ONLY seed rows (hitCount = 0)
+    // `坐新干线去东京` contains `新干线`). Scan seed rows (hitCount = 0)
     // and require seed key length >= 2 to avoid common single-char false
     // positives like `本`/`服`/`药`/`书`. Longest seed key wins so `新干线`
     // beats any substring overlap. Confidence is held below the exact-match
     // 0.85 baseline since substring is a weaker signal.
+    //
+    // Quick task 260526-pg6 (Option F — Task 3): learned rows with
+    // hitCount >= kLearnedPromotionThreshold (3) ALSO participate so
+    // frequently corrected user phrases ride the same substring lane as
+    // seeds. Seeds are lazily cached (immutable per app version, ~7.5KB),
+    // but learned rows are fetched fresh on every resolve() — their
+    // hitCount changes within a session, and in-session learning should be
+    // visible immediately. Longest-key-wins is unchanged across the
+    // seed/learned union.
     _seedCache ??= await _preferenceRepository.findAllSeedRows();
-    final candidates = _seedCache!
-        .where((s) =>
-            s.keyword.length >= 2 && extractedKeyword.contains(s.keyword))
+    final learned = await _preferenceRepository.findLearnedRowsAtOrAbove(
+      kLearnedPromotionThreshold,
+    );
+    final allCandidates = <CategoryKeywordPreference>[
+      ..._seedCache!,
+      ...learned,
+    ];
+    final candidates = allCandidates
+        .where(
+          (s) => s.keyword.length >= 2 && extractedKeyword.contains(s.keyword),
+        )
         .toList()
       ..sort((a, b) => b.keyword.length.compareTo(a.keyword.length));
     if (candidates.isNotEmpty) {
-      final l2 = await _ensureL2(candidates.first.categoryId);
+      final winner = candidates.first;
+      final l2 = await _ensureL2(winner.categoryId);
       if (l2 != null) {
+        // Learned rows are user-validated — give them a slight confidence
+        // boost over the seed-substring 0.80 baseline. Seeds stay at 0.80.
+        final isLearned = winner.hitCount > 0;
         return CategoryMatchResult(
           categoryId: l2,
-          confidence: 0.80,
-          source: MatchSource.keyword,
+          confidence: isLearned
+              ? (0.80 + winner.scoreBonus * 0.5).clamp(0.0, 1.0)
+              : 0.80,
+          source: isLearned ? MatchSource.learning : MatchSource.keyword,
         );
       }
     }

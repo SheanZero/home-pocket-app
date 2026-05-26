@@ -39,6 +39,46 @@ class CategoryKeywordPreferenceDao {
         .get();
   }
 
+  /// Quick task 260526-pg6 (Option F — Task 3): fetch learned rows whose
+  /// hitCount has reached at least [minHitCount]. Used by
+  /// [VoiceCategoryResolver]'s step 2.5 substring fallback so that frequently
+  /// corrected user phrases (e.g. "新干线" learned at hitCount=3) participate
+  /// alongside seed rows. Ordered by hitCount DESC, lastUsed DESC so the
+  /// resolver can apply longest-key-wins on a stably-ordered candidate set.
+  Future<List<CategoryKeywordPreferenceRow>> findLearnedAtOrAbove(
+    int minHitCount,
+  ) async {
+    return (_db.select(_db.categoryKeywordPreferences)
+          ..where((t) => t.hitCount.isBiggerOrEqualValue(minHitCount))
+          ..orderBy([
+            (t) =>
+                OrderingTerm(expression: t.hitCount, mode: OrderingMode.desc),
+            (t) =>
+                OrderingTerm(expression: t.lastUsed, mode: OrderingMode.desc),
+          ]))
+        .get();
+  }
+
+  /// Quick task 260526-pg6 (Option F — Task 4): dev/ops CLI inspection.
+  /// Returns top-N learned rows (hitCount >= 1) ordered by recency-weighted
+  /// activity. Excludes seeds (hitCount = 0) per the seed/learned discriminator
+  /// established by [findAllSeeds]. NOT used by the resolver — only by
+  /// `tool/dump_learned_keywords.dart`.
+  Future<List<CategoryKeywordPreferenceRow>> findTopLearned({
+    int limit = 20,
+  }) async {
+    return (_db.select(_db.categoryKeywordPreferences)
+          ..where((t) => t.hitCount.isBiggerOrEqualValue(1))
+          ..orderBy([
+            (t) =>
+                OrderingTerm(expression: t.hitCount, mode: OrderingMode.desc),
+            (t) =>
+                OrderingTerm(expression: t.lastUsed, mode: OrderingMode.desc),
+          ])
+          ..limit(limit))
+        .get();
+  }
+
   /// Find a specific keyword→categoryId mapping.
   Future<CategoryKeywordPreferenceRow?> findByKeywordAndCategory(
     String keyword,
