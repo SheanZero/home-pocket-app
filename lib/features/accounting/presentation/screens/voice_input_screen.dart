@@ -627,24 +627,26 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
             ),
           ),
 
-          // Quick task 260526-k92 (Item 3): transcript readout. Fixed-height
-          // SizedBox so the mic/waveform layout never reflows. Partial text
-          // wins display priority over final text — while recording the user
-          // sees their in-flight words; after release the final transcript
-          // persists until the next utterance starts (_startRecording clears
-          // both buffers).
+          // 260526-k92 (Item 3) + 260526-l0o (Issue 4): transcript readout.
+          // Fixed-height SizedBox so the mic/waveform layout never reflows.
+          // l0o Issue 4 shrinks the slot from 40dp/bodyMedium → 28dp/caption
+          // and switches overflow from fade(2-line) to ellipsis(1-line); the
+          // user explicitly asked for a smaller, less obtrusive readout.
+          // Partial text wins display priority over final text — while
+          // recording the user sees their in-flight words; after release the
+          // final transcript persists until the next utterance starts.
           SizedBox(
             key: const ValueKey('voice-transcript'),
-            height: 40,
+            height: 28,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Center(
                 child: Text(
                   _partialText.isNotEmpty ? _partialText : _finalText,
-                  maxLines: 2,
-                  overflow: TextOverflow.fade,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: AppTextStyles.bodyMedium.copyWith(
+                  style: AppTextStyles.caption.copyWith(
                     color: _partialText.isNotEmpty
                         ? (isDark
                             ? AppColorsDark.textTertiary
