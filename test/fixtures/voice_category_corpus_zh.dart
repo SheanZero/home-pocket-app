@@ -101,6 +101,24 @@ const List<VoiceCategoryCorpusCase> voiceCategoryCorpusZh = [
     expectedCategoryId: 'cat_food_dining_out',
     note: null,
   ),
+  (
+    input: '外出就餐，用了5000日元',
+    keyword: '外出就餐',
+    expectedCategoryId: 'cat_food_dining_out',
+    note: '260526 real-world utterance — was missing from synonyms',
+  ),
+  (
+    input: '聚餐 3000',
+    keyword: '聚餐',
+    expectedCategoryId: 'cat_food_dining_out',
+    note: null,
+  ),
+  (
+    input: '今晚去餐厅吃饭',
+    keyword: '餐厅',
+    expectedCategoryId: 'cat_food_dining_out',
+    note: null,
+  ),
   // Food (L1 fallback)
   (
     input: '外卖 50元',

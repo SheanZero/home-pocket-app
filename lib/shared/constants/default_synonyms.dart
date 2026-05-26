@@ -46,6 +46,10 @@ abstract final class DefaultVoiceSynonyms {
     _seed('コーヒー', 'cat_food_cafe'),
     _seed('カフェ', 'cat_food_cafe'),
     _seed('おやつ', 'cat_food'), // L1 → cat_food_other
+    _seed('外食', 'cat_food_dining_out'),
+    _seed('レストラン', 'cat_food_dining_out'),
+    _seed('居酒屋', 'cat_food_dining_out'),
+    _seed('飲み会', 'cat_food_dining_out'),
 
     // ===== Food (zh) =====
     _seed('早饭', 'cat_food_dining_out'),
@@ -57,6 +61,14 @@ abstract final class DefaultVoiceSynonyms {
     _seed('吃饭', 'cat_food'), // L1 → cat_food_other
     _seed('外卖', 'cat_food'), // L1 → cat_food_other
     _seed('咖啡', 'cat_food_cafe'),
+    _seed('外出就餐', 'cat_food_dining_out'),
+    _seed('外食', 'cat_food_dining_out'),
+    _seed('聚餐', 'cat_food_dining_out'),
+    _seed('餐厅', 'cat_food_dining_out'),
+    _seed('饭店', 'cat_food_dining_out'),
+    _seed('下馆子', 'cat_food_dining_out'),
+    _seed('堂食', 'cat_food_dining_out'),
+    _seed('点外卖', 'cat_food'), // L1 → cat_food_other
 
     // ===== Transport =====
     _seed('電車', 'cat_transport_train'),
