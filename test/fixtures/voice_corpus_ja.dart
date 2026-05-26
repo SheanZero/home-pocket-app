@@ -114,4 +114,11 @@ const List<VoiceCorpusCase> voiceCorpusJa = [
   (input: '六百八十円', expected: 680, note: 'kanji + currency suffix'),
   (input: '一万二千三百四十五', expected: 12345, note: 'kanji 5-unit full parse'),
   (input: '九万九千', expected: 99000, note: 'kanji 万-scale two-section'),
+
+  // ---------------------------------------------------------------------------
+  // Quick task 260526-l0o (Issue 1) — comma-separated amounts (ja-side guard)
+  // ---------------------------------------------------------------------------
+  (input: '12,450円', expected: 12450, note: 'l0o Issue 1 repro ja: comma + 円'),
+  (input: '1,234,567円', expected: 1234567, note: 'l0o Issue 1: million separator ja'),
+  (input: '12，450円', expected: 12450, note: 'l0o Issue 1: full-width comma ja'),
 ];

@@ -113,4 +113,13 @@ const List<VoiceCorpusCase> voiceCorpusZh = [
   (input: '一万零一', expected: 10001, note: '万+零+digit tail'),
   (input: '千', expected: 1000, note: 'bare 千 — implicit digit=1'),
   (input: '百', expected: 100, note: 'bare 百 — implicit digit=1'),
+
+  // ---------------------------------------------------------------------------
+  // Quick task 260526-l0o (Issue 1) — comma-separated amounts + 日元 suffix
+  // ---------------------------------------------------------------------------
+  (input: '12,450日元', expected: 12450, note: 'l0o Issue 1 repro: half-width comma + 日元'),
+  (input: '10,000日元', expected: 10000, note: 'l0o Issue 1: 5-digit half-width'),
+  (input: '1,234,567日元', expected: 1234567, note: 'l0o Issue 1: million separator'),
+  (input: '12，450日元', expected: 12450, note: 'l0o Issue 1: full-width comma 日元'),
+  (input: '1,500元', expected: 1500, note: 'l0o Issue 1 regression: existing 元 + comma'),
 ];

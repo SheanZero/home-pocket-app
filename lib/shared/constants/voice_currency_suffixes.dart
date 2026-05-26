@@ -20,6 +20,11 @@ class VoiceCurrencySuffixes {
   ///
   /// Used to construct extraction regexes — see `regexAlternation`.
   static const List<String> all = <String>[
+    // Quick task 260526-l0o (Issue 1): '日元' (zh — "Japanese yen") MUST come
+    // before the bare '元' so the longer two-char token wins the regex
+    // alternation. Without it, `12,450日元` partial-matches `,450` and drops
+    // the thousands group.
+    '日元',
     '块钱',
     'えん',
     'yen',

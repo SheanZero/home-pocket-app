@@ -66,17 +66,35 @@ class VoiceTextParser {
   }
 
   /// Extracts Arabic numeral amounts from text.
+  ///
+  /// Quick task 260526-l0o (Issue 1): pattern set extended to handle
+  /// `12,450日元` and full-width-comma variants (`12，450日元`). The suffix
+  /// alternation is sourced from [VoiceCurrencySuffixes.regexAlternation] so
+  /// `日元` is recognized in the same place merchant stripping is. The bare
+  /// comma-separated standalone pattern (third entry) covers utterances
+  /// without any currency suffix, and the upper digit cap is bumped 7 → 9
+  /// to cover million-plus integer amounts (the post-parse range check at
+  /// line bottom still guards against >10M).
   int? _extractArabicAmount(String text) {
+    final suffixGroup = VoiceCurrencySuffixes.regexAlternation;
     final patterns = [
       // ¥1,280 / ￥1280
-      RegExp(r'[¥￥]\s*(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?)'),
-      // 1,280円 / 1280円 / 1280yen / 480块 / 480元
+      RegExp(r'[¥￥]\s*(\d{1,3}(?:[,，]\d{3})*(?:\.\d{1,2})?)'),
+      // 1,280円 / 12,450日元 / 1280円 / 1280yen / 480块 / 480元
       // (?<!\d) anchors capture at a non-digit boundary so 「1280块」 does not
-      // partial-match to 「280块」 and return 280.
+      // partial-match to 「280块」 and return 280. Full-width comma (，) is
+      // tolerated for CJK keyboards. Suffix list is centralized so `日元`
+      // is recognized identically here and in keyword extraction.
       RegExp(
-        r'(?<!\d)(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?|\d{4,7}(?:\.\d{1,2})?)\s*(?:円|えん|yen|元|块|塊)',
+        r'(?<!\d)(\d{1,3}(?:[,，]\d{3})*(?:\.\d{1,2})?|\d{4,9}(?:\.\d{1,2})?)\s*(?:' +
+            suffixGroup +
+            r')',
         caseSensitive: false,
       ),
+      // Comma-separated standalone (no currency suffix): `12,450` → 12450.
+      // Requires at least one comma group so we don't compete with the
+      // last-resort 3-7-digit fallback below.
+      RegExp(r'(?<!\d)(\d{1,3}(?:[,，]\d{3})+)(?!\d)'),
       // Standalone numbers (3+ digits, likely amount)
       RegExp(r'(?<!\d)(\d{3,7}(?:\.\d{1,2})?)(?!\d)'),
     ];
@@ -84,7 +102,7 @@ class VoiceTextParser {
     for (final pattern in patterns) {
       final match = pattern.firstMatch(text);
       if (match != null && match.groupCount > 0) {
-        final amountStr = match.group(1)!.replaceAll(',', '');
+        final amountStr = match.group(1)!.replaceAll(RegExp(r'[,，]'), '');
         final amount = double.tryParse(amountStr);
         if (amount != null && amount > 0 && amount < 10000000) {
           return amount.round();
