@@ -521,6 +521,58 @@ void main() {
     );
 
     test(
+      'Backward-compat: pre-v1.3.1 polluted row (e.g. "去外食日元" written by '
+      'the divergent extractor) survives — does not poison the resolver for '
+      'unrelated inputs',
+      () async {
+        // Pre-pg6 the form-side extractVoiceKeyword could leave a stray
+        // currency suffix (`日元`) attached. Such a learned row written to
+        // the table BEFORE Task 2 landed must survive untouched: it should
+        // still appear in findLearnedRowsAtOrAbove and the resolver MUST
+        // ignore it when the current utterance doesn't contain that literal
+        // substring. No auto-purge, no schema migration.
+        when(() => mockMerchantDb.findMerchant(any())).thenReturn(null);
+        when(
+          () => mockPrefRepo.findByKeyword(any()),
+        ).thenAnswer((_) async => []);
+        when(() => mockPrefRepo.findAllSeedRows()).thenAnswer(
+          (_) async => [_pref('外食', 'cat_food_dining_out')],
+        );
+        // Stale polluted learned row from pre-pg6 testing.
+        when(
+          () => mockPrefRepo.findLearnedRowsAtOrAbove(
+            kLearnedPromotionThreshold,
+          ),
+        ).thenAnswer(
+          (_) async => [_pref('去外食日元', 'cat_food_dining_out', hitCount: 5)],
+        );
+        when(
+          () => mockCategoryRepo.findById('cat_food_dining_out'),
+        ).thenAnswer(
+          (_) async =>
+              _makeCategory('cat_food_dining_out', parentId: 'cat_food'),
+        );
+
+        // Current utterance does NOT contain "去外食日元" — only "外食".
+        // The polluted learned row's keyword fails `contains` and is
+        // harmlessly ignored. Seed `外食` wins.
+        final result = await resolver.resolve('我打算去外食呢');
+
+        expect(result, isNotNull);
+        expect(
+          result!.categoryId,
+          equals('cat_food_dining_out'),
+          reason: 'pg6 backward-compat: polluted "去外食日元" row must NOT '
+              'pollute resolution for utterances that lack that literal '
+              'substring — no auto-purge needed',
+        );
+        // Source is keyword (seed) because the seed `外食` matched, not the
+        // polluted learned row.
+        expect(result.source, equals(MatchSource.keyword));
+      },
+    );
+
+    test(
       'Test 3.F: seed cache persists across calls; learned set fetched fresh '
       'each call (in-session visibility)',
       () async {
