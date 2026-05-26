@@ -2,7 +2,7 @@
 phase: quick-260526-r8y
 plan: 01
 subsystem: accounting/presentation
-status: incomplete
+status: complete  # All 3 items + critical toolbar save bug verified on device 2026-05-26
 tags: [bug-fix, voice-ui, manual-tab, ime-toolbar, tap-region]
 dependency_graph:
   requires:
