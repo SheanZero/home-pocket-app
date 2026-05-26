@@ -183,11 +183,18 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
 
   // ── Amount tap handler (D-10) ──
 
-  void _onAmountTap() {
+  /// Item 4 (260526-j98) / D-10: reclaim amount focus so the SmartKeyboard
+  /// reappears. Shared by `_onAmountTap` and the form's `onPickerDismissed`
+  /// callback (fired after the date/category picker dismisses).
+  void _restoreKeypadFocus() {
     FocusManager.instance.primaryFocus?.unfocus();
-    setState(() => _amountFocused = true);
+    if (mounted) setState(() => _amountFocused = true);
     // Unfocusing the text field triggers _handleFocusChange →
     // _isTextFieldFocused = false → _showSmartKeypad = true.
+  }
+
+  void _onAmountTap() {
+    _restoreKeypadFocus();
   }
 
   // ── Digit handlers (ported verbatim from transaction_entry_screen.dart:84-129) ──
@@ -399,6 +406,9 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
                       // P19-W3: per-host FocusNodes so _handleFocusChange fires.
                       merchantFocusNode: _merchantFocus,
                       noteFocusNode: _noteFocus,
+                      // Item 4 (260526-j98): reclaim amount focus after date /
+                      // category picker dismisses so SmartKeyboard reappears.
+                      onPickerDismissed: _restoreKeypadFocus,
                     ),
                   ),
                 ),

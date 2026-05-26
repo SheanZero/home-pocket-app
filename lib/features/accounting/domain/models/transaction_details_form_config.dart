@@ -40,13 +40,17 @@ sealed class TransactionDetailsFormConfig with _$TransactionDetailsFormConfig {
     // compatible with all existing Phase-18 callers).
     FocusNode? merchantFocusNode,
     FocusNode? noteFocusNode,
+    // Item 4 (260526-j98): host-supplied callback fired after the form's date
+    // picker or category picker dismisses (pick OR cancel). ManualOneStepScreen
+    // wires this to reclaim amount focus so the SmartKeyboard reappears.
+    // Null in voice / OCR-review hosts (they don't render the SmartKeyboard).
+    VoidCallback? onPickerDismissed,
   }) = NewEntryConfig;
 
   /// Edit-existing mode. The full [Transaction] seed supplies all field values.
   /// [voiceKeyword] is structurally unreachable in this variant (D-09).
-  const factory TransactionDetailsFormConfig.edit({
-    required Transaction seed,
-  }) = EditEntryConfig;
+  const factory TransactionDetailsFormConfig.edit({required Transaction seed}) =
+      EditEntryConfig;
 }
 
 /// Return type for [TransactionDetailsForm.submit()].
@@ -57,17 +61,14 @@ sealed class TransactionDetailsFormResult with _$TransactionDetailsFormResult {
   const TransactionDetailsFormResult._();
 
   /// Save succeeded — [transaction] is the persisted/updated row.
-  const factory TransactionDetailsFormResult.success(
-    Transaction transaction,
-  ) = _Success;
+  const factory TransactionDetailsFormResult.success(Transaction transaction) =
+      _Success;
 
   /// Client-side validation failed — [message] is a user-facing error string.
-  const factory TransactionDetailsFormResult.validationError(
-    String message,
-  ) = _ValidationError;
+  const factory TransactionDetailsFormResult.validationError(String message) =
+      _ValidationError;
 
   /// Repository persist failed — [message] is a user-facing error string.
-  const factory TransactionDetailsFormResult.persistError(
-    String message,
-  ) = _PersistError;
+  const factory TransactionDetailsFormResult.persistError(String message) =
+      _PersistError;
 }

@@ -97,14 +97,16 @@ class TransactionDetailsFormState
             voiceKeyword,
             merchantFocusNode,
             noteFocusNode,
+            onPickerDismissed,
           ) {
             _amount = initialAmount ?? 0;
             _category = initialCategory;
             _parentCategory = initialParentCategory;
             _date = initialDate ?? DateTime.now();
             _initialCategoryId = initialCategory?.id;
-            if (initialMerchant != null)
+            if (initialMerchant != null) {
               _storeController.text = initialMerchant;
+            }
             if (initialSatisfaction != null) {
               _soulSatisfaction = initialSatisfaction.clamp(1, 10);
             }
@@ -272,6 +274,32 @@ class TransactionDetailsFormState
     return _celebrationCompleter?.future ?? Future.value();
   }
 
+  /// Item 4 (260526-j98): fires the host-supplied `onPickerDismissed` callback
+  /// (if any) after a date/category picker closes — regardless of whether the
+  /// user picked or cancelled. ManualOneStepScreen uses this to reclaim amount
+  /// focus so the SmartKeyboard reappears.
+  void _notifyPickerDismissed() {
+    if (!mounted) return;
+    widget.config.maybeWhen(
+      $new:
+          (
+            bookId,
+            initialAmount,
+            initialCategory,
+            initialParentCategory,
+            initialMerchant,
+            initialSatisfaction,
+            initialDate,
+            entrySource,
+            voiceKeyword,
+            merchantFocusNode,
+            noteFocusNode,
+            onPickerDismissed,
+          ) => onPickerDismissed?.call(),
+      orElse: () {},
+    );
+  }
+
   Future<void> _editCategory() async {
     final result = await Navigator.of(context).push<Category>(
       MaterialPageRoute<Category>(
@@ -279,7 +307,11 @@ class TransactionDetailsFormState
             CategorySelectionScreen(selectedCategoryId: _category?.id),
       ),
     );
-    if (result == null || !mounted) return;
+    // Item 4: cancel path — picker dismissed without selection.
+    if (result == null || !mounted) {
+      _notifyPickerDismissed();
+      return;
+    }
 
     // Resolve parent for display path.
     Category? parent = resolveParentCategory(result, _categoryById);
@@ -317,6 +349,7 @@ class TransactionDetailsFormState
             voiceKeyword,
             p10,
             p11,
+            p12,
           ) async {
             if (voiceKeyword != null &&
                 voiceKeyword.isNotEmpty &&
@@ -332,6 +365,9 @@ class TransactionDetailsFormState
           },
       orElse: () {},
     );
+
+    // Item 4: success path — fire after voice-correction tail.
+    _notifyPickerDismissed();
   }
 
   Future<void> _editDate() async {
@@ -354,6 +390,8 @@ class TransactionDetailsFormState
     if (picked != null && mounted) {
       setState(() => _date = picked);
     }
+    // Item 4: fire dismissal callback on BOTH pick and cancel paths.
+    _notifyPickerDismissed();
   }
 
   // ── Public submit() — invoked by host CTA via GlobalKey (D-02) ─────────────
@@ -390,6 +428,7 @@ class TransactionDetailsFormState
               voiceKeyword,
               p10,
               p11,
+              p12,
             ) async {
               final result = await ref
                   .read(createTransactionUseCaseProvider)
@@ -548,6 +587,7 @@ class TransactionDetailsFormState
                       voiceKeyword,
                       merchantFocusNode,
                       noteFocusNode,
+                      onPickerDismissed,
                     ) => merchantFocusNode,
                 orElse: () => null,
               ),
@@ -634,6 +674,7 @@ class TransactionDetailsFormState
                       voiceKeyword,
                       merchantFocusNode,
                       noteFocusNode,
+                      onPickerDismissed,
                     ) => noteFocusNode,
                 orElse: () => null,
               ),
