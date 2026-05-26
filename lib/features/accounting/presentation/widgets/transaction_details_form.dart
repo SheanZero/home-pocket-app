@@ -32,6 +32,7 @@ import '../providers/repository_providers.dart';
 import '../screens/category_selection_screen.dart';
 import '../utils/category_display_utils.dart';
 import '../widgets/detail_info_card.dart';
+import '../widgets/keyboard_toolbar.dart' show kKeyboardToolbarTapRegionGroup;
 import '../widgets/ledger_type_selector.dart';
 import '../widgets/satisfaction_emoji_picker.dart';
 
@@ -604,6 +605,10 @@ class TransactionDetailsFormState
                     ) => merchantFocusNode,
                 orElse: () => null,
               ),
+              // 260526-r8y Item 3: shared TapRegion group with KeyboardToolbar
+              // so taps on the toolbar are treated as inside-region — onTapOutside
+              // does NOT fire, the toolbar stays mounted, and save fires.
+              groupId: kKeyboardToolbarTapRegionGroup,
               textAlign: TextAlign.end,
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => FocusScope.of(context).unfocus(),
@@ -691,6 +696,8 @@ class TransactionDetailsFormState
                     ) => noteFocusNode,
                 orElse: () => null,
               ),
+              // 260526-r8y Item 3: shared TapRegion group with KeyboardToolbar.
+              groupId: kKeyboardToolbarTapRegionGroup,
               maxLines: null,
               expands: true,
               onTapOutside: (_) => FocusScope.of(context).unfocus(),
