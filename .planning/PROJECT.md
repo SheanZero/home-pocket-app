@@ -6,7 +6,7 @@
 **Shipped:** v1.1 Happiness Metric & Display (2026-05-05) — see `.planning/milestones/v1.1-ROADMAP.md`
 **Shipped:** v1.2 Happiness Metric Refresh (2026-05-21) — see `.planning/milestones/v1.2-ROADMAP.md` + `.planning/milestones/v1.2-MILESTONE-AUDIT.md`
 
-**In progress:** v1.3 迭代帐本输入 — Phase 18 (shared details form foundation) complete 2026-05-22; Phase 19 (manual one-step + keypad polish) complete 2026-05-23; **Phase 22 (voice one-step + record button UX) complete 2026-05-25** — `VoiceInputScreen` embeds shared details form on a single screen with hold-to-record gesture (300 ms misfire threshold), green→red gradient + idle→recording caption swap, post-gap-closure G-01 (`_onStatus` self-termination drives commit) + G-02 (`_onError` surfaces localized SoftToast, permanent errors gate mic); INPUT-02 + REC-01 + REC-02 validated, 22-HUMAN-UAT.md tracks 4 device-only items (touch latency, recognizer accuracy, golden aliasing, `notListening` intra-session behavior).
+**In progress:** v1.3 迭代帐本输入 — Phase 18 (shared details form foundation) complete 2026-05-22; Phase 19 (manual one-step + keypad polish) complete 2026-05-23; Phase 22 (voice one-step + record button UX) complete 2026-05-25; **Phase 23 (v1.3 cleanup — scanner allow-lists + voice flow polish) complete 2026-05-26** — absorbed carried tech-debt from Phases 21/22 (D-05 intra-session guard, D-07 cold-start race, D-08 popUntil deferral, D-09 listener cleanup, D-10/D-11 mixin extractions, D-12..D-15 mechanical polish), reconciled REQUIREMENTS.md + 7 SUMMARY frontmatters, ran 9 carried device UATs, closed 838→776 LOC gap on `voice_input_screen.dart` via `VoiceLocaleReadinessMixin` + pure-helpers extraction. v1.3 milestone ready for `/gsd-complete-milestone`.
 
 The v1.0 initiative was a pure-refactor cleanup. It delivered an operational hybrid audit pipeline, eliminated 50 catalogued findings (24 CRITICAL, 8 HIGH, 8 MEDIUM, 7 LOW + 3 layer-violation closures), aligned all architecture documentation with the post-refactor codebase, and locked 4 permanent CI guardrails.
 
@@ -279,4 +279,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-25 — Phase 22 (voice one-step + record button UX) complete after G-01 + G-02 gap closure*
+*Last updated: 2026-05-26 — Phase 23 (v1.3 cleanup) complete; v1.3 milestone ready for completion ceremony*
