@@ -33,7 +33,7 @@ class KeyboardToolbar extends StatelessWidget {
 
     return Material(
       color: isDark ? AppColorsDark.card : AppColors.card,
-      elevation: 8,
+      elevation: 0,
       child: Container(
         height: 44,
         decoration: BoxDecoration(
@@ -45,18 +45,37 @@ class KeyboardToolbar extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Left: Done button
+            // Left: Done outlined ghost button
             Expanded(
-              child: InkWell(
-                onTap: onDone,
-                child: Center(
-                  child: Text(
-                    S.of(context).keyboardToolbarDone,
-                    style: AppTextStyles.bodyMedium.copyWith(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColorsDark.card : AppColors.card,
+                    border: Border.all(
                       color: isDark
-                          ? AppColorsDark.textSecondary
-                          : AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
+                          ? AppColorsDark.borderDefault
+                          : AppColors.borderDefault,
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: onDone,
+                      borderRadius: BorderRadius.circular(10),
+                      child: Center(
+                        child: Text(
+                          S.of(context).keyboardToolbarDone,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: isDark
+                                ? AppColorsDark.textPrimary
+                                : AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
