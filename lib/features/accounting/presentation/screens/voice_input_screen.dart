@@ -1,10 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/gestures.dart'
-    show
-        LongPressGestureRecognizer,
-        LongPressStartDetails,
-        LongPressEndDetails;
+    show LongPressGestureRecognizer, LongPressStartDetails, LongPressEndDetails;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -195,15 +192,24 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
 
   // ── Abstract contract — VoiceRecognitionEventHandlerMixin implementations ──
   // Phase 23 D-10: mixin drives state through these setters/getters.
-  @override bool get isRecording => _isRecording;
-  @override set isRecording(bool value) => _isRecording = value;
-  @override DateTime? get pressStart => _pressStart;
-  @override set pressStart(DateTime? value) => _pressStart = value;
-  @override set isInitialized(bool value) => setState(() => _isInitialized = value);
-  @override set soundLevel(double value) => _soundLevel = value;
-  @override DateTime? get lastMergerFinalAt => _amountMerger?.lastFinalAt;
-  @override Future<void> stopRecordingAndCommit() => _stopRecordingAndCommit();
-  @override void onVoiceLocaleResolved(String localeId) => _voiceLocaleId = localeId;
+  @override
+  bool get isRecording => _isRecording;
+  @override
+  set isRecording(bool value) => _isRecording = value;
+  @override
+  DateTime? get pressStart => _pressStart;
+  @override
+  set pressStart(DateTime? value) => _pressStart = value;
+  @override
+  set isInitialized(bool value) => setState(() => _isInitialized = value);
+  @override
+  set soundLevel(double value) => _soundLevel = value;
+  @override
+  DateTime? get lastMergerFinalAt => _amountMerger?.lastFinalAt;
+  @override
+  Future<void> stopRecordingAndCommit() => _stopRecordingAndCommit();
+  @override
+  void onVoiceLocaleResolved(String localeId) => _voiceLocaleId = localeId;
 
   void _showPermissionError() {
     // Insert a SoftToast overlay for permission error feedback
@@ -329,7 +335,8 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     // Phase 21 D-03.
     Category? category;
     Category? parent;
-    final categoryId = data.categoryMatch?.categoryId ?? data.merchantCategoryId;
+    final categoryId =
+        data.categoryMatch?.categoryId ?? data.merchantCategoryId;
     if (categoryId != null) {
       final repo = ref.read(categoryRepositoryProvider);
       category = await repo.findById(categoryId);
@@ -402,9 +409,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
           // until SoulCelebrationOverlay's onDismissed fires so the joy moment
           // is visible. Survival-ledger save pops immediately (no overlay).
           if (tx.ledgerType == LedgerType.soul) {
-            _formKey.currentState
-                ?.waitForCelebrationDismissed()
-                .then((_) {
+            _formKey.currentState?.waitForCelebrationDismissed().then((_) {
               // RESEARCH Pitfall 4: app may background mid-celebration;
               // check mounted before accessing Navigator.
               if (!mounted) return;
@@ -627,124 +632,153 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
             ),
           ),
 
-          // 260526-k92 (Item 3) + 260526-l0o (Issue 4): transcript readout.
-          // Fixed-height SizedBox so the mic/waveform layout never reflows.
-          // l0o Issue 4 shrinks the slot from 40dp/bodyMedium → 28dp/caption
-          // and switches overflow from fade(2-line) to ellipsis(1-line); the
-          // user explicitly asked for a smaller, less obtrusive readout.
-          // Partial text wins display priority over final text — while
-          // recording the user sees their in-flight words; after release the
-          // final transcript persists until the next utterance starts.
-          SizedBox(
-            key: const ValueKey('voice-transcript'),
-            height: 28,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Center(
-                child: Text(
-                  _partialText.isNotEmpty ? _partialText : _finalText,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.caption.copyWith(
-                    color: _partialText.isNotEmpty
-                        ? (isDark
-                            ? AppColorsDark.textTertiary
-                            : AppColors.textTertiary)
-                        : (isDark
-                            ? AppColorsDark.textPrimary
-                            : AppColors.textPrimary),
-                  ),
-                ),
+          // 260526-r8y Item 1: voice-input area wrapped in a 14dp-radius card
+          // matching Cards A/B/C of the form above. Duplicates the _formCard
+          // decoration inline (private to transaction_details_form.dart).
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            decoration: BoxDecoration(
+              color: isDark ? AppColorsDark.card : AppColors.card,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isDark
+                    ? AppColorsDark.borderDefault
+                    : AppColors.borderDefault,
               ),
             ),
-          ),
-
-          // Waveform
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: VoiceWaveform(
-              soundLevel: _soundLevel,
-              isActive: _isRecording,
-              color: AppColors.survival,
-            ),
-          ),
-
-          // D-03 / D-04: hold-to-record mic button. duration: Duration.zero
-          // makes LongPress fire on press-down; the 300 ms misfire threshold
-          // lives inside _onLongPressEnd (not here, so it's visible at the
-          // gesture-decision boundary).
-          RawGestureDetector(
-            gestures: <Type, GestureRecognizerFactory>{
-              LongPressGestureRecognizer:
-                  GestureRecognizerFactoryWithHandlers<
-                    LongPressGestureRecognizer
-                  >(
-                    () => LongPressGestureRecognizer(
-                      duration: Duration.zero,
-                      debugOwner: this,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 260526-k92 (Item 3) + 260526-l0o (Issue 4): transcript readout.
+                  // Fixed-height SizedBox so the mic/waveform layout never reflows.
+                  // l0o Issue 4 shrinks the slot from 40dp/bodyMedium → 28dp/caption
+                  // and switches overflow from fade(2-line) to ellipsis(1-line); the
+                  // user explicitly asked for a smaller, less obtrusive readout.
+                  // Partial text wins display priority over final text — while
+                  // recording the user sees their in-flight words; after release the
+                  // final transcript persists until the next utterance starts.
+                  // 260526-r8y Item 1: extra top + bottom padding so the transcript
+                  // sits "a bit further down" with breathing room inside the card.
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+                    child: SizedBox(
+                      key: const ValueKey('voice-transcript'),
+                      height: 28,
+                      child: Center(
+                        child: Text(
+                          _partialText.isNotEmpty ? _partialText : _finalText,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.caption.copyWith(
+                            color: _partialText.isNotEmpty
+                                ? (isDark
+                                      ? AppColorsDark.textTertiary
+                                      : AppColors.textTertiary)
+                                : (isDark
+                                      ? AppColorsDark.textPrimary
+                                      : AppColors.textPrimary),
+                          ),
+                        ),
+                      ),
                     ),
-                    (LongPressGestureRecognizer instance) {
-                      instance
-                        ..onLongPressStart = _onLongPressStart
-                        ..onLongPressEnd = _onLongPressEnd
-                        ..onLongPressCancel = _onLongPressCancel;
-                    },
                   ),
-            },
-            child: AnimatedContainer(
-              key: const ValueKey('voice-mic-button'),
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeInOut,
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                // D-04: shape stays rectangle; borderRadius interpolates 36→16.
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.circular(_isRecording ? 16 : 36),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: _isRecording
-                      ? const [
-                          AppColors.recordingGradientStart,
-                          AppColors.recordingGradientEnd,
-                        ]
-                      : const [
-                          AppColors.actionGradientStart,
-                          AppColors.actionGradientEnd,
+
+                  // Waveform
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: VoiceWaveform(
+                      soundLevel: _soundLevel,
+                      isActive: _isRecording,
+                      color: AppColors.survival,
+                    ),
+                  ),
+
+                  // D-03 / D-04: hold-to-record mic button. duration: Duration.zero
+                  // makes LongPress fire on press-down; the 300 ms misfire threshold
+                  // lives inside _onLongPressEnd (not here, so it's visible at the
+                  // gesture-decision boundary).
+                  RawGestureDetector(
+                    gestures: <Type, GestureRecognizerFactory>{
+                      LongPressGestureRecognizer:
+                          GestureRecognizerFactoryWithHandlers<
+                            LongPressGestureRecognizer
+                          >(
+                            () => LongPressGestureRecognizer(
+                              duration: Duration.zero,
+                              debugOwner: this,
+                            ),
+                            (LongPressGestureRecognizer instance) {
+                              instance
+                                ..onLongPressStart = _onLongPressStart
+                                ..onLongPressEnd = _onLongPressEnd
+                                ..onLongPressCancel = _onLongPressCancel;
+                            },
+                          ),
+                    },
+                    child: AnimatedContainer(
+                      key: const ValueKey('voice-mic-button'),
+                      duration: const Duration(milliseconds: 180),
+                      curve: Curves.easeInOut,
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        // D-04: shape stays rectangle; borderRadius interpolates 36→16.
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.circular(
+                          _isRecording ? 16 : 36,
+                        ),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: _isRecording
+                              ? const [
+                                  AppColors.recordingGradientStart,
+                                  AppColors.recordingGradientEnd,
+                                ]
+                              : const [
+                                  AppColors.actionGradientStart,
+                                  AppColors.actionGradientEnd,
+                                ],
+                        ),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: AppColors.actionShadow,
+                            blurRadius: 16,
+                            offset: Offset(0, 4),
+                          ),
                         ],
-                ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: AppColors.actionShadow,
-                    blurRadius: 16,
-                    offset: Offset(0, 4),
+                      ),
+                      // D-04: Icon stays Icons.mic in BOTH states (no Mic→Stop swap).
+                      child: const Icon(
+                        Icons.mic,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // D-06: caption cross-fades between idle and recording.
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 150),
+                    child: Text(
+                      _isRecording ? l10n.recording : l10n.holdToRecord,
+                      key: ValueKey(_isRecording),
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: isDark
+                            ? AppColorsDark.textTertiary
+                            : AppColors.textTertiary,
+                      ),
+                    ),
                   ),
                 ],
               ),
-              // D-04: Icon stays Icons.mic in BOTH states (no Mic→Stop swap).
-              child: const Icon(Icons.mic, color: Colors.white, size: 32),
             ),
           ),
-
-          const SizedBox(height: 12),
-
-          // D-06: caption cross-fades between idle and recording.
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 150),
-            child: Text(
-              _isRecording ? l10n.recording : l10n.holdToRecord,
-              key: ValueKey(_isRecording),
-              style: AppTextStyles.bodySmall.copyWith(
-                color: isDark
-                    ? AppColorsDark.textTertiary
-                    : AppColors.textTertiary,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 24),
 
           // D-11: Save button — gated by _canSave (host-cache, not currentState).
           Padding(
@@ -780,8 +814,11 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
                     onTap: _canSave ? _onSavePressed : null,
                     borderRadius: BorderRadius.circular(14),
                     child: Center(
+                      // 260526-r8y Item 2: rename 保存 → 记录 to match manual
+                      // tab's KeyboardToolbar. Reuses existing `record` ARB key
+                      // (zh=记录 / ja=記録する / en=Record). Zero ARB edits.
                       child: Text(
-                        l10n.save,
+                        l10n.record,
                         style: AppTextStyles.titleLarge.copyWith(
                           color: Colors.white,
                           fontSize: 16,
@@ -829,4 +866,3 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     super.dispose();
   }
 }
-
