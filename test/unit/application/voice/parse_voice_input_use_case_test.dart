@@ -188,6 +188,134 @@ void main() {
     );
   });
 
+  // ─── Quick task 260526-pg6 (Option F — Task 1): resolvedKeyword surface ───
+  //
+  // The use case must populate `VoiceParseResult.resolvedKeyword` with the
+  // SAME string the resolver internally received (post-strip). This closes
+  // the silent-orphan bug where form-side recordCorrection wrote keys that
+  // never matched the resolver's lookup key.
+  group('Quick task 260526-pg6 — resolvedKeyword surface', () {
+    test(
+      'Test 1.A: keyword branch — resolvedKeyword equals the post-strip key '
+      'the resolver received (zh)',
+      () async {
+        // Capture the keyword the resolver actually sees so the assertion
+        // pins the contract: resolvedKeyword == resolver-input keyword.
+        String? resolverSawKeyword;
+        when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
+        when(() => mockResolver.resolve(any())).thenAnswer((invocation) async {
+          resolverSawKeyword = invocation.positionalArguments.first as String;
+          return null;
+        });
+
+        // Input: "去外食12,450日元" with zh-CN locale.
+        // `_extractKeyword` strips `12,450日元` (amount + 日元 currency suffix
+        // via VoiceCurrencySuffixes.regexAlternation) and zh particles, but
+        // `去外食` contains no listed particles → stays intact.
+        final result = await useCase.execute(
+          '去外食12,450日元',
+          localeId: 'zh-CN',
+        );
+
+        expect(result.isSuccess, isTrue);
+        expect(resolverSawKeyword, equals('去外食'));
+        expect(result.data!.resolvedKeyword, equals('去外食'));
+        // Pin: resolvedKeyword is EXACTLY what the resolver saw.
+        expect(result.data!.resolvedKeyword, equals(resolverSawKeyword));
+      },
+    );
+
+    test(
+      'Test 1.B: merchant branch — resolvedKeyword populated even when '
+      'resolver.resolve never runs',
+      () async {
+        // Merchant DB hit short-circuits the resolver, but the use case still
+        // computes the post-strip keyword so the form has a usable key for
+        // future recordCorrection calls.
+        final merchantMatch = MerchantMatch(
+          merchantName: '星巴克',
+          categoryId: 'cat_food_cafe',
+          confidence: 0.92,
+          ledgerType: LedgerType.survival,
+        );
+        when(
+          () => mockMerchantDatabase.findMerchant(any()),
+        ).thenReturn(merchantMatch);
+        when(
+          () => mockResolver.normalizeToL2('cat_food_cafe'),
+        ).thenAnswer((_) async => 'cat_food_cafe');
+
+        final result = await useCase.execute(
+          '去星巴克500日元',
+          localeId: 'zh-CN',
+        );
+
+        expect(result.isSuccess, isTrue);
+        // Merchant branch took over but resolvedKeyword is still populated.
+        expect(result.data!.resolvedKeyword, isNotNull);
+        expect(result.data!.resolvedKeyword!.isNotEmpty, isTrue);
+        // resolver.resolve must NOT have been consulted (merchant short-circuit).
+        verifyNever(() => mockResolver.resolve(any()));
+      },
+    );
+
+    test(
+      'Test 1.C: amount-only utterance yields null resolvedKeyword',
+      () async {
+        // Input "500日元" strips amount+currency → empty keyword → use case
+        // surfaces null so consumers can guard on `!= null && isNotEmpty`.
+        when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
+        when(() => mockResolver.resolve(any())).thenAnswer((_) async => null);
+
+        final result = await useCase.execute('500日元', localeId: 'zh-CN');
+
+        expect(result.isSuccess, isTrue);
+        expect(
+          result.data!.resolvedKeyword,
+          isNull,
+          reason: 'amount-only utterance must yield null resolvedKeyword, '
+              'not empty-string — consumer null-guards are explicit',
+        );
+      },
+    );
+
+    test(
+      'Test 1.D: existing VoiceParseResult fields remain populated alongside '
+      'resolvedKeyword (additive, non-breaking)',
+      () async {
+        when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
+        when(() => mockResolver.resolve(any())).thenAnswer(
+          (_) async => const CategoryMatchResult(
+            categoryId: 'cat_food_dining_out',
+            confidence: 0.9,
+            source: MatchSource.keyword,
+          ),
+        );
+        when(
+          () => mockResolver.resolveLedgerType(any()),
+        ).thenAnswer((_) async => LedgerType.survival);
+
+        final result = await useCase.execute(
+          '昼ごはんに680円',
+          localeId: 'ja-JP',
+        );
+
+        expect(result.isSuccess, isTrue);
+        // All pre-existing fields still flow.
+        expect(result.data!.amount, equals(680));
+        expect(result.data!.rawText, equals('昼ごはんに680円'));
+        expect(
+          result.data!.categoryMatch!.categoryId,
+          equals('cat_food_dining_out'),
+        );
+        expect(result.data!.ledgerType, equals(LedgerType.survival));
+        // NEW field also populated.
+        expect(result.data!.resolvedKeyword, isNotNull);
+        expect(result.data!.resolvedKeyword!.isNotEmpty, isTrue);
+      },
+    );
+  });
+
   group('ParseVoiceInputUseCase - localeId routing', () {
     late _MockVoiceTextParser mockTextParser;
     late _MockVoiceCategoryResolver localMockResolver;

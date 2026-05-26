@@ -23,7 +23,18 @@ mixin _$VoiceParseResult {
   LedgerType? get merchantLedgerType; // Category keyword match
   CategoryMatchResult?
   get categoryMatch; // Resolved ledger type (from merchant or category)
-  LedgerType? get ledgerType;
+  LedgerType? get ledgerType; // Quick task 260526-pg6 (Option F — Task 1):
+  // Canonical keyword string used internally by the resolver (post-strip:
+  // amount/currency suffix stripped, particles stripped per `localeId`).
+  // Surfaced here so the form-side write path (`recordCorrection`) can
+  // persist the SAME string the resolver will later look up — closing
+  // the silent-orphan bug where a divergent re-extractor wrote keys that
+  // never matched the resolver's lookup key.
+  //
+  // Null when no extraction occurred (e.g. caller did not provide enough
+  // context, or amount-only utterances). Consumers MUST treat null/empty
+  // as "fall back to legacy behavior" — see voice_input_screen_helpers.dart.
+  String? get resolvedKeyword;
   int get estimatedSatisfaction;
 
   /// Create a copy of VoiceParseResult
@@ -55,6 +66,8 @@ mixin _$VoiceParseResult {
                 other.categoryMatch == categoryMatch) &&
             (identical(other.ledgerType, ledgerType) ||
                 other.ledgerType == ledgerType) &&
+            (identical(other.resolvedKeyword, resolvedKeyword) ||
+                other.resolvedKeyword == resolvedKeyword) &&
             (identical(other.estimatedSatisfaction, estimatedSatisfaction) ||
                 other.estimatedSatisfaction == estimatedSatisfaction));
   }
@@ -70,12 +83,13 @@ mixin _$VoiceParseResult {
     merchantLedgerType,
     categoryMatch,
     ledgerType,
+    resolvedKeyword,
     estimatedSatisfaction,
   );
 
   @override
   String toString() {
-    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, estimatedSatisfaction: $estimatedSatisfaction)';
+    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, estimatedSatisfaction: $estimatedSatisfaction)';
   }
 }
 
@@ -95,6 +109,7 @@ abstract mixin class $VoiceParseResultCopyWith<$Res> {
     LedgerType? merchantLedgerType,
     CategoryMatchResult? categoryMatch,
     LedgerType? ledgerType,
+    String? resolvedKeyword,
     int estimatedSatisfaction,
   });
 
@@ -122,6 +137,7 @@ class _$VoiceParseResultCopyWithImpl<$Res>
     Object? merchantLedgerType = freezed,
     Object? categoryMatch = freezed,
     Object? ledgerType = freezed,
+    Object? resolvedKeyword = freezed,
     Object? estimatedSatisfaction = null,
   }) {
     return _then(
@@ -158,6 +174,10 @@ class _$VoiceParseResultCopyWithImpl<$Res>
             ? _self.ledgerType
             : ledgerType // ignore: cast_nullable_to_non_nullable
                   as LedgerType?,
+        resolvedKeyword: freezed == resolvedKeyword
+            ? _self.resolvedKeyword
+            : resolvedKeyword // ignore: cast_nullable_to_non_nullable
+                  as String?,
         estimatedSatisfaction: null == estimatedSatisfaction
             ? _self.estimatedSatisfaction
             : estimatedSatisfaction // ignore: cast_nullable_to_non_nullable
@@ -283,6 +303,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       LedgerType? merchantLedgerType,
       CategoryMatchResult? categoryMatch,
       LedgerType? ledgerType,
+      String? resolvedKeyword,
       int estimatedSatisfaction,
     )?
     $default, {
@@ -300,6 +321,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.merchantLedgerType,
           _that.categoryMatch,
           _that.ledgerType,
+          _that.resolvedKeyword,
           _that.estimatedSatisfaction,
         );
       case _:
@@ -331,6 +353,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       LedgerType? merchantLedgerType,
       CategoryMatchResult? categoryMatch,
       LedgerType? ledgerType,
+      String? resolvedKeyword,
       int estimatedSatisfaction,
     )
     $default,
@@ -347,6 +370,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.merchantLedgerType,
           _that.categoryMatch,
           _that.ledgerType,
+          _that.resolvedKeyword,
           _that.estimatedSatisfaction,
         );
       case _:
@@ -377,6 +401,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       LedgerType? merchantLedgerType,
       CategoryMatchResult? categoryMatch,
       LedgerType? ledgerType,
+      String? resolvedKeyword,
       int estimatedSatisfaction,
     )?
     $default,
@@ -393,6 +418,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.merchantLedgerType,
           _that.categoryMatch,
           _that.ledgerType,
+          _that.resolvedKeyword,
           _that.estimatedSatisfaction,
         );
       case _:
@@ -413,6 +439,7 @@ class _VoiceParseResult implements VoiceParseResult {
     this.merchantLedgerType,
     this.categoryMatch,
     this.ledgerType,
+    this.resolvedKeyword,
     this.estimatedSatisfaction = 5,
   });
 
@@ -436,6 +463,19 @@ class _VoiceParseResult implements VoiceParseResult {
   // Resolved ledger type (from merchant or category)
   @override
   final LedgerType? ledgerType;
+  // Quick task 260526-pg6 (Option F — Task 1):
+  // Canonical keyword string used internally by the resolver (post-strip:
+  // amount/currency suffix stripped, particles stripped per `localeId`).
+  // Surfaced here so the form-side write path (`recordCorrection`) can
+  // persist the SAME string the resolver will later look up — closing
+  // the silent-orphan bug where a divergent re-extractor wrote keys that
+  // never matched the resolver's lookup key.
+  //
+  // Null when no extraction occurred (e.g. caller did not provide enough
+  // context, or amount-only utterances). Consumers MUST treat null/empty
+  // as "fall back to legacy behavior" — see voice_input_screen_helpers.dart.
+  @override
+  final String? resolvedKeyword;
   @override
   @JsonKey()
   final int estimatedSatisfaction;
@@ -467,6 +507,8 @@ class _VoiceParseResult implements VoiceParseResult {
                 other.categoryMatch == categoryMatch) &&
             (identical(other.ledgerType, ledgerType) ||
                 other.ledgerType == ledgerType) &&
+            (identical(other.resolvedKeyword, resolvedKeyword) ||
+                other.resolvedKeyword == resolvedKeyword) &&
             (identical(other.estimatedSatisfaction, estimatedSatisfaction) ||
                 other.estimatedSatisfaction == estimatedSatisfaction));
   }
@@ -482,12 +524,13 @@ class _VoiceParseResult implements VoiceParseResult {
     merchantLedgerType,
     categoryMatch,
     ledgerType,
+    resolvedKeyword,
     estimatedSatisfaction,
   );
 
   @override
   String toString() {
-    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, estimatedSatisfaction: $estimatedSatisfaction)';
+    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, estimatedSatisfaction: $estimatedSatisfaction)';
   }
 }
 
@@ -509,6 +552,7 @@ abstract mixin class _$VoiceParseResultCopyWith<$Res>
     LedgerType? merchantLedgerType,
     CategoryMatchResult? categoryMatch,
     LedgerType? ledgerType,
+    String? resolvedKeyword,
     int estimatedSatisfaction,
   });
 
@@ -537,6 +581,7 @@ class __$VoiceParseResultCopyWithImpl<$Res>
     Object? merchantLedgerType = freezed,
     Object? categoryMatch = freezed,
     Object? ledgerType = freezed,
+    Object? resolvedKeyword = freezed,
     Object? estimatedSatisfaction = null,
   }) {
     return _then(
@@ -573,6 +618,10 @@ class __$VoiceParseResultCopyWithImpl<$Res>
             ? _self.ledgerType
             : ledgerType // ignore: cast_nullable_to_non_nullable
                   as LedgerType?,
+        resolvedKeyword: freezed == resolvedKeyword
+            ? _self.resolvedKeyword
+            : resolvedKeyword // ignore: cast_nullable_to_non_nullable
+                  as String?,
         estimatedSatisfaction: null == estimatedSatisfaction
             ? _self.estimatedSatisfaction
             : estimatedSatisfaction // ignore: cast_nullable_to_non_nullable

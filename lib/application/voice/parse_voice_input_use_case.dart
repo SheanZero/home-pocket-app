@@ -58,6 +58,19 @@ class ParseVoiceInputUseCase {
         _merchantDatabase,
       );
 
+      // Quick task 260526-pg6 (Option F — Task 1): lift the resolver-bound
+      // keyword to the top so BOTH branches (merchant + keyword) populate the
+      // returned VoiceParseResult with the SAME canonical key the resolver
+      // uses internally. Form-side `recordCorrection` then writes that exact
+      // key — closing the silent-orphan bug where a divergent re-extractor
+      // wrote keys the resolver never looked up.
+      //
+      // We compute it unconditionally (cheap) so the merchant branch also
+      // surfaces a usable correction key when the user changes the
+      // merchant-derived category.
+      final keyword = _extractKeyword(recognizedText, localeId: localeId);
+      final resolvedKeyword = keyword.isEmpty ? null : keyword;
+
       // 4. Match category and resolve ledger type
       CategoryMatchResult? categoryMatch;
       LedgerType? ledgerType;
@@ -77,8 +90,7 @@ class ParseVoiceInputUseCase {
         // merchant-specific ledgerType continues to win when present.
         ledgerType = merchantMatch.ledgerType;
       } else {
-        // Extract keyword: remove amount/date/merchant text from input.
-        final keyword = _extractKeyword(recognizedText, localeId: localeId);
+        // Keyword branch: pass the pre-computed keyword to the resolver.
         categoryMatch = await _voiceCategoryResolver.resolve(keyword);
         if (categoryMatch != null) {
           ledgerType = await _voiceCategoryResolver.resolveLedgerType(
@@ -97,6 +109,7 @@ class ParseVoiceInputUseCase {
           merchantLedgerType: merchantMatch?.ledgerType,
           categoryMatch: categoryMatch,
           ledgerType: ledgerType,
+          resolvedKeyword: resolvedKeyword,
         ),
       );
     } catch (e) {

@@ -24,6 +24,18 @@ abstract class VoiceParseResult with _$VoiceParseResult {
     CategoryMatchResult? categoryMatch,
     // Resolved ledger type (from merchant or category)
     LedgerType? ledgerType,
+    // Quick task 260526-pg6 (Option F — Task 1):
+    // Canonical keyword string used internally by the resolver (post-strip:
+    // amount/currency suffix stripped, particles stripped per `localeId`).
+    // Surfaced here so the form-side write path (`recordCorrection`) can
+    // persist the SAME string the resolver will later look up — closing
+    // the silent-orphan bug where a divergent re-extractor wrote keys that
+    // never matched the resolver's lookup key.
+    //
+    // Null when no extraction occurred (e.g. caller did not provide enough
+    // context, or amount-only utterances). Consumers MUST treat null/empty
+    // as "fall back to legacy behavior" — see voice_input_screen_helpers.dart.
+    String? resolvedKeyword,
     @Default(5) int estimatedSatisfaction,
   }) = _VoiceParseResult;
 }
