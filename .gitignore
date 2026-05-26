@@ -75,4 +75,7 @@ lib/features/accounting/presentation/providers/voice_providers_part*
 .claude/scheduled_tasks.lock
 
 # Golden test failure artifacts (regenerated per failed run)
+# Flutter writes them to `<test-dir>/failures/` next to each golden test file,
+# so the glob must match every subtree, not only `test/golden/failures/`.
 test/golden/failures/
+**/failures/
