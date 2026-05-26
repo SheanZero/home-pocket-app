@@ -72,6 +72,21 @@ abstract final class DefaultVoiceSynonyms {
     _seed('公交', 'cat_transport_bus'),
     _seed('打车', 'cat_transport_taxi'),
 
+    // ===== Quick task 260526-l0o (Issue 2) — extended transport synonyms ====
+    _seed('新干线', 'cat_transport_shinkansen'),     // zh — bullet train
+    _seed('新幹線', 'cat_transport_shinkansen'),     // ja — bullet train
+    _seed('しんかんせん', 'cat_transport_shinkansen'),  // ja kana reading
+    _seed('飞机', 'cat_transport_flights'),          // zh — plane
+    _seed('飞机票', 'cat_transport_flights'),
+    _seed('機票', 'cat_transport_flights'),           // zh-TW
+    _seed('飛行機', 'cat_transport_flights'),         // ja
+    _seed('地下鉄', 'cat_transport_train'),            // ja
+    _seed('巴士', 'cat_transport_bus'),               // zh
+    _seed('出租车', 'cat_transport_taxi'),             // zh
+    _seed('出租', 'cat_transport_taxi'),               // zh shortened
+    _seed('的士', 'cat_transport_taxi'),               // zh-HK
+    _seed('高速バス', 'cat_transport_highway_bus'),    // ja
+
     // ===== Clothing — D-04 ID-drift fix: prior placeholder L1 corrected to cat_clothing* =====
     _seed('服', 'cat_clothing'), // L1 → cat_clothing_other
     _seed('洋服', 'cat_clothing'), // L1 → cat_clothing_other

@@ -236,4 +236,38 @@ const List<VoiceCategoryCorpusCase> voiceCategoryCorpusZh = [
     expectedCategoryId: 'cat_daily_other',
     note: 'merchant alias (D-04 cat_shopping ID drift fixed)',
   ),
+
+  // ---------------------------------------------------------------------------
+  // Quick task 260526-l0o (Issue 2) — extended transport synonyms + substring
+  // ---------------------------------------------------------------------------
+  (
+    input: '新干线票价',
+    keyword: '新干线',
+    expectedCategoryId: 'cat_transport_shinkansen',
+    note: 'l0o Issue 2: zh 新干线 exact seed',
+  ),
+  (
+    input: '坐新干线去东京',
+    keyword: '坐新干线去东京',
+    expectedCategoryId: 'cat_transport_shinkansen',
+    note: 'l0o Issue 2: zh 新干线 substring scan',
+  ),
+  (
+    input: '飞机票钱',
+    keyword: '飞机票',
+    expectedCategoryId: 'cat_transport_flights',
+    note: 'l0o Issue 2: zh 飞机票 new seed',
+  ),
+  (
+    input: '地铁卡充值',
+    keyword: '地铁卡充值',
+    expectedCategoryId: 'cat_transport_train',
+    note: 'l0o Issue 2: zh 地铁 substring scan',
+  ),
+  (
+    input: '出租车去机场',
+    keyword: '出租车',
+    expectedCategoryId: 'cat_transport_taxi',
+    note: 'l0o Issue 2: zh 出租车 new seed',
+  ),
 ];

@@ -67,6 +67,10 @@ void main() {
       categoryService: mockCategoryService,
       merchantDatabase: mockMerchantDb,
     );
+    // 260526-l0o (Issue 2): step 2.5 substring fallback consults the seed
+    // cache via findAllSeedRows. Default to empty so tests not exercising the
+    // fallback are unaffected; per-test stubs can override.
+    when(() => mockPrefRepo.findAllSeedRows()).thenAnswer((_) async => []);
   });
 
   group('Step 1: MerchantDatabase', () {

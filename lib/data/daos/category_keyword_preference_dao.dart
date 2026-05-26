@@ -29,6 +29,16 @@ class CategoryKeywordPreferenceDao {
         .get();
   }
 
+  /// Quick task 260526-l0o (Issue 2): fetch all seed rows (hitCount = 0) for
+  /// in-memory substring scanning inside [VoiceCategoryResolver]. User-learned
+  /// rows (hitCount >= 1) are intentionally excluded — those are exact-match
+  /// only to bound false positives.
+  Future<List<CategoryKeywordPreferenceRow>> findAllSeeds() async {
+    return (_db.select(_db.categoryKeywordPreferences)
+          ..where((t) => t.hitCount.equals(0)))
+        .get();
+  }
+
   /// Find a specific keyword→categoryId mapping.
   Future<CategoryKeywordPreferenceRow?> findByKeywordAndCategory(
     String keyword,

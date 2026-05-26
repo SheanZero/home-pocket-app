@@ -37,6 +37,12 @@ class CategoryKeywordPreferenceRepositoryImpl
   }
 
   @override
+  Future<List<CategoryKeywordPreference>> findAllSeedRows() async {
+    final rows = await _dao.findAllSeeds();
+    return rows.map(_toModel).toList();
+  }
+
+  @override
   Future<CategoryKeywordPreference?> suggestForKeyword(String keyword) async {
     final rows = await _dao.findByKeyword(keyword);
     if (rows.isEmpty) return null;

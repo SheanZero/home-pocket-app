@@ -241,4 +241,26 @@ const List<VoiceCategoryCorpusCase> voiceCategoryCorpusJa = [
     expectedCategoryId: 'cat_hobbies_subscription',
     note: 'merchant (D-04 cat_entertainment ID drift fixed)',
   ),
+
+  // ---------------------------------------------------------------------------
+  // Quick task 260526-l0o (Issue 2) — extended transport synonyms + substring
+  // ---------------------------------------------------------------------------
+  (
+    input: '新幹線で東京へ',
+    keyword: '新幹線で東京へ',
+    expectedCategoryId: 'cat_transport_shinkansen',
+    note: 'l0o Issue 2: ja 新幹線 substring scan',
+  ),
+  (
+    input: '飛行機の予約',
+    keyword: '飛行機の予約',
+    expectedCategoryId: 'cat_transport_flights',
+    note: 'l0o Issue 2: ja 飛行機 substring scan via new seed',
+  ),
+  (
+    input: '地下鉄の定期',
+    keyword: '地下鉄の定期',
+    expectedCategoryId: 'cat_transport_train',
+    note: 'l0o Issue 2: ja 地下鉄 substring scan via new seed',
+  ),
 ];

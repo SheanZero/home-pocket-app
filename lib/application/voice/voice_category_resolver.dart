@@ -18,6 +18,7 @@
 /// hardcoded seed map and D-08 dropped edit-distance scoring).
 library;
 
+import '../../features/accounting/domain/models/category_keyword_preference.dart';
 import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/models/voice_parse_result.dart';
 import '../../features/accounting/domain/repositories/category_keyword_preference_repository.dart';
@@ -48,6 +49,12 @@ class VoiceCategoryResolver {
   final CategoryKeywordPreferenceRepository _preferenceRepository;
   final CategoryService _categoryService;
   final MerchantDatabase _merchantDatabase;
+
+  /// Quick task 260526-l0o (Issue 2): lazy cache of seed rows for the
+  /// substring fallback. Loaded on the first `resolve()` invocation that
+  /// reaches step 2.5 and never invalidated — seed rows are immutable per
+  /// app version. ~150 rows × ~50 bytes ≈ 7.5 KB.
+  List<CategoryKeywordPreference>? _seedCache;
 
   /// Resolve [extractedKeyword] to an L2 [CategoryMatchResult] via the D-07
   /// short-circuit pipeline. Returns null when neither step produces a hit
@@ -94,6 +101,31 @@ class VoiceCategoryResolver {
           categoryId: l2,
           confidence: (0.85 + best.scoreBonus).clamp(0.0, 1.0),
           source: source,
+        );
+      }
+    }
+
+    // Step 2.5: quick task 260526-l0o (Issue 2) — substring fallback over
+    // curated seed rows only. The exact-match step above misses when the
+    // extracted keyword embeds the seed in surrounding chatter (e.g.
+    // `坐新干线去东京` contains `新干线`). Scan ONLY seed rows (hitCount = 0)
+    // and require seed key length >= 2 to avoid common single-char false
+    // positives like `本`/`服`/`药`/`书`. Longest seed key wins so `新干线`
+    // beats any substring overlap. Confidence is held below the exact-match
+    // 0.85 baseline since substring is a weaker signal.
+    _seedCache ??= await _preferenceRepository.findAllSeedRows();
+    final candidates = _seedCache!
+        .where((s) =>
+            s.keyword.length >= 2 && extractedKeyword.contains(s.keyword))
+        .toList()
+      ..sort((a, b) => b.keyword.length.compareTo(a.keyword.length));
+    if (candidates.isNotEmpty) {
+      final l2 = await _ensureL2(candidates.first.categoryId);
+      if (l2 != null) {
+        return CategoryMatchResult(
+          categoryId: l2,
+          confidence: 0.80,
+          source: MatchSource.keyword,
         );
       }
     }
