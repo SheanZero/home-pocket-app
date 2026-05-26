@@ -174,7 +174,10 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
     if (hasTextFocus == _isTextFieldFocused) return;
     setState(() {
       _isTextFieldFocused = hasTextFocus;
-      if (hasTextFocus) _amountFocused = false;
+      // Mirror text focus: when IME opens we yield amount focus; when IME
+      // dismisses (via toolbar 完成, IME ✓, or onTapOutside) we reclaim it so
+      // SmartKeyboard reappears automatically instead of leaving a blank gap.
+      _amountFocused = !hasTextFocus;
     });
   }
 
