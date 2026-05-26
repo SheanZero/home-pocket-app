@@ -149,6 +149,7 @@ extension TransactionDetailsFormConfigPatterns on TransactionDetailsFormConfig {
       String? voiceKeyword,
       FocusNode? merchantFocusNode,
       FocusNode? noteFocusNode,
+      VoidCallback? onPickerDismissed,
     )?
     $new,
     TResult Function(Transaction seed)? edit,
@@ -169,6 +170,7 @@ extension TransactionDetailsFormConfigPatterns on TransactionDetailsFormConfig {
           _that.voiceKeyword,
           _that.merchantFocusNode,
           _that.noteFocusNode,
+          _that.onPickerDismissed,
         );
       case EditEntryConfig() when edit != null:
         return edit(_that.seed);
@@ -204,6 +206,7 @@ extension TransactionDetailsFormConfigPatterns on TransactionDetailsFormConfig {
       String? voiceKeyword,
       FocusNode? merchantFocusNode,
       FocusNode? noteFocusNode,
+      VoidCallback? onPickerDismissed,
     )
     $new,
     required TResult Function(Transaction seed) edit,
@@ -223,6 +226,7 @@ extension TransactionDetailsFormConfigPatterns on TransactionDetailsFormConfig {
           _that.voiceKeyword,
           _that.merchantFocusNode,
           _that.noteFocusNode,
+          _that.onPickerDismissed,
         );
       case EditEntryConfig():
         return edit(_that.seed);
@@ -255,6 +259,7 @@ extension TransactionDetailsFormConfigPatterns on TransactionDetailsFormConfig {
       String? voiceKeyword,
       FocusNode? merchantFocusNode,
       FocusNode? noteFocusNode,
+      VoidCallback? onPickerDismissed,
     )?
     $new,
     TResult? Function(Transaction seed)? edit,
@@ -274,6 +279,7 @@ extension TransactionDetailsFormConfigPatterns on TransactionDetailsFormConfig {
           _that.voiceKeyword,
           _that.merchantFocusNode,
           _that.noteFocusNode,
+          _that.onPickerDismissed,
         );
       case EditEntryConfig() when edit != null:
         return edit(_that.seed);
@@ -298,6 +304,7 @@ class NewEntryConfig extends TransactionDetailsFormConfig {
     this.voiceKeyword,
     this.merchantFocusNode,
     this.noteFocusNode,
+    this.onPickerDismissed,
   }) : super._();
 
   final String bookId;
@@ -316,6 +323,11 @@ class NewEntryConfig extends TransactionDetailsFormConfig {
   // compatible with all existing Phase-18 callers).
   final FocusNode? merchantFocusNode;
   final FocusNode? noteFocusNode;
+  // Item 4 (260526-j98): host-supplied callback fired after the form's date
+  // picker or category picker dismisses (pick OR cancel). ManualOneStepScreen
+  // wires this to reclaim amount focus so the SmartKeyboard reappears.
+  // Null in voice / OCR-review hosts (they don't render the SmartKeyboard).
+  final VoidCallback? onPickerDismissed;
 
   /// Create a copy of TransactionDetailsFormConfig
   /// with the given fields replaced by the non-null parameter values.
@@ -349,7 +361,9 @@ class NewEntryConfig extends TransactionDetailsFormConfig {
             (identical(other.merchantFocusNode, merchantFocusNode) ||
                 other.merchantFocusNode == merchantFocusNode) &&
             (identical(other.noteFocusNode, noteFocusNode) ||
-                other.noteFocusNode == noteFocusNode));
+                other.noteFocusNode == noteFocusNode) &&
+            (identical(other.onPickerDismissed, onPickerDismissed) ||
+                other.onPickerDismissed == onPickerDismissed));
   }
 
   @override
@@ -366,11 +380,12 @@ class NewEntryConfig extends TransactionDetailsFormConfig {
     voiceKeyword,
     merchantFocusNode,
     noteFocusNode,
+    onPickerDismissed,
   );
 
   @override
   String toString() {
-    return 'TransactionDetailsFormConfig.\$new(bookId: $bookId, initialAmount: $initialAmount, initialCategory: $initialCategory, initialParentCategory: $initialParentCategory, initialMerchant: $initialMerchant, initialSatisfaction: $initialSatisfaction, initialDate: $initialDate, entrySource: $entrySource, voiceKeyword: $voiceKeyword, merchantFocusNode: $merchantFocusNode, noteFocusNode: $noteFocusNode)';
+    return 'TransactionDetailsFormConfig.\$new(bookId: $bookId, initialAmount: $initialAmount, initialCategory: $initialCategory, initialParentCategory: $initialParentCategory, initialMerchant: $initialMerchant, initialSatisfaction: $initialSatisfaction, initialDate: $initialDate, entrySource: $entrySource, voiceKeyword: $voiceKeyword, merchantFocusNode: $merchantFocusNode, noteFocusNode: $noteFocusNode, onPickerDismissed: $onPickerDismissed)';
   }
 }
 
@@ -394,6 +409,7 @@ abstract mixin class $NewEntryConfigCopyWith<$Res>
     String? voiceKeyword,
     FocusNode? merchantFocusNode,
     FocusNode? noteFocusNode,
+    VoidCallback? onPickerDismissed,
   });
 
   $CategoryCopyWith<$Res>? get initialCategory;
@@ -423,6 +439,7 @@ class _$NewEntryConfigCopyWithImpl<$Res>
     Object? voiceKeyword = freezed,
     Object? merchantFocusNode = freezed,
     Object? noteFocusNode = freezed,
+    Object? onPickerDismissed = freezed,
   }) {
     return _then(
       NewEntryConfig(
@@ -470,6 +487,10 @@ class _$NewEntryConfigCopyWithImpl<$Res>
             ? _self.noteFocusNode
             : noteFocusNode // ignore: cast_nullable_to_non_nullable
                   as FocusNode?,
+        onPickerDismissed: freezed == onPickerDismissed
+            ? _self.onPickerDismissed
+            : onPickerDismissed // ignore: cast_nullable_to_non_nullable
+                  as VoidCallback?,
       ),
     );
   }
