@@ -653,6 +653,37 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
             ),
           ),
 
+          // Quick task 260526-k92 (Item 3): transcript readout. Fixed-height
+          // SizedBox so the mic/waveform layout never reflows. Partial text
+          // wins display priority over final text — while recording the user
+          // sees their in-flight words; after release the final transcript
+          // persists until the next utterance starts (_startRecording clears
+          // both buffers).
+          SizedBox(
+            key: const ValueKey('voice-transcript'),
+            height: 40,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Center(
+                child: Text(
+                  _partialText.isNotEmpty ? _partialText : _finalText,
+                  maxLines: 2,
+                  overflow: TextOverflow.fade,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: _partialText.isNotEmpty
+                        ? (isDark
+                            ? AppColorsDark.textTertiary
+                            : AppColors.textTertiary)
+                        : (isDark
+                            ? AppColorsDark.textPrimary
+                            : AppColors.textPrimary),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
           // Waveform
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),

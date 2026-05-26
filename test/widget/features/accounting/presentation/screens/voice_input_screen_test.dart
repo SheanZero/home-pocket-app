@@ -291,6 +291,75 @@ class FakeCategoryRepository implements CategoryRepository {
   Future<void> updateSortOrders(Map<String, int> idToSortOrder) async {}
 }
 
+/// Quick task 260526-k92 (Item 2) — variant of FakeCategoryRepository whose
+/// `findActive()` returns the seed L1+L2 needed for the voice screen's
+/// `_initializeDefaultCategory()` to resolve a default category. Used by the
+/// k92 save-button-enabled-at-start regression test.
+class FakeCategoryRepositoryWithSeed implements CategoryRepository {
+  final _l1 = Category(
+    id: 'food',
+    name: 'Food',
+    icon: 'restaurant',
+    color: '#F59E0B',
+    level: 1,
+    sortOrder: 0,
+    createdAt: DateTime(2026),
+  );
+  late final _l2 = Category(
+    id: 'dining',
+    name: 'Dining',
+    icon: 'restaurant_menu',
+    color: '#F59E0B',
+    parentId: 'food',
+    level: 2,
+    sortOrder: 0,
+    createdAt: DateTime(2026),
+  );
+
+  @override
+  Future<void> deleteAll() async {}
+
+  @override
+  Future<List<Category>> findActive() async => [_l1, _l2];
+
+  @override
+  Future<List<Category>> findAll() async => [_l1, _l2];
+
+  @override
+  Future<Category?> findById(String id) async {
+    if (id == _l1.id) return _l1;
+    if (id == _l2.id) return _l2;
+    return null;
+  }
+
+  @override
+  Future<List<Category>> findByLevel(int level) async =>
+      [_l1, _l2].where((c) => c.level == level).toList();
+
+  @override
+  Future<List<Category>> findByParent(String parentId) async =>
+      [_l1, _l2].where((c) => c.parentId == parentId).toList();
+
+  @override
+  Future<void> insert(Category category) async {}
+
+  @override
+  Future<void> insertBatch(List<Category> categories) async {}
+
+  @override
+  Future<void> update({
+    required String id,
+    String? name,
+    String? icon,
+    String? color,
+    bool? isArchived,
+    int? sortOrder,
+  }) async {}
+
+  @override
+  Future<void> updateSortOrders(Map<String, int> idToSortOrder) async {}
+}
+
 // ── D-08 fakes: CreateTransactionUseCase stub ────────────────────────────────
 
 /// Returns a predetermined transaction on execute(). Used for D-08 tests that
@@ -770,8 +839,13 @@ void main() {
 
         // Focus the merchant TextField mid-press — triggers _handleFocusChange
         // → _cancelRecordingAndDiscard via the per-host FocusNode listener.
+        // 260526-k92 (Item 3): the new transcript SizedBox above the waveform
+        // squeezes the Expanded form area; ensureVisible scrolls the merchant
+        // field into the hit-testable region so the tap actually lands.
         final merchantField = find.byKey(const ValueKey('merchant-textfield'));
         expect(merchantField, findsOneWidget);
+        await tester.ensureVisible(merchantField);
+        await tester.pumpAndSettle();
         await tester.tap(merchantField, warnIfMissed: false);
         await tester.pumpAndSettle();
 
@@ -1518,6 +1592,80 @@ void main() {
           findsNothing,
           reason: 'D-08: Navigator.popUntil must fire immediately on survival-ledger save',
         );
+      },
+    );
+  });
+
+  // ── Quick task 260526-k92: Item 2 (save button) + Item 3 (transcript) ──
+  group('260526-k92 — save-button + transcript', () {
+    Widget buildSeededSubject() {
+      final categoryRepository = FakeCategoryRepositoryWithSeed();
+      final categoryService = CategoryService(
+        categoryRepository: categoryRepository,
+        ledgerConfigRepository: FakeCategoryLedgerConfigRepository(),
+      );
+      return ProviderScope(
+        overrides: [
+          categoryRepositoryProvider.overrideWithValue(categoryRepository),
+          categoryServiceProvider.overrideWithValue(categoryService),
+          parseVoiceInputUseCaseProvider.overrideWithValue(
+            FakeParseVoiceInputUseCase(const {}),
+          ),
+          voiceLocaleIdProvider.overrideWith((ref) async => 'ja-JP'),
+        ],
+        child: MaterialApp(
+          locale: const Locale('ja'),
+          localizationsDelegates: const [
+            S.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: S.supportedLocales,
+          home: VoiceInputScreen(
+            bookId: 'book-1',
+            speechService: FakeStartSpeechRecognitionUseCase(),
+          ),
+        ),
+      );
+    }
+
+    testWidgets(
+      'Item 2: Save button is enabled at initial render once default category resolves',
+      (tester) async {
+        await tester.pumpWidget(buildSeededSubject());
+        await tester.pumpAndSettle();
+
+        final saveBtnFinder = find.byKey(const ValueKey('voice-save-button'));
+        expect(saveBtnFinder, findsOneWidget);
+
+        final inkWell = tester.widget<InkWell>(
+          find.descendant(of: saveBtnFinder, matching: find.byType(InkWell)),
+        );
+        expect(
+          inkWell.onTap,
+          isNotNull,
+          reason:
+              'k92 Item 2: Save button must be tappable at initial render '
+              '(default category seeded in initState)',
+        );
+      },
+    );
+
+    testWidgets(
+      'Item 3: transcript SizedBox exists and renders empty text at initial state',
+      (tester) async {
+        await tester.pumpWidget(buildSeededSubject());
+        await tester.pumpAndSettle();
+
+        final transcript = find.byKey(const ValueKey('voice-transcript'));
+        expect(transcript, findsOneWidget);
+        // At initial state both _partialText and _finalText are empty —
+        // Text widget renders an empty string.
+        final textWidget = tester.widget<Text>(
+          find.descendant(of: transcript, matching: find.byType(Text)),
+        );
+        expect(textWidget.data, equals(''));
       },
     );
   });
