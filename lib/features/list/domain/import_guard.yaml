@@ -1,0 +1,16 @@
+# Domain layer — leafmost in the dependency graph (CRIT-04 territory).
+# Per Phase 3 D-01 (corrected per 03-RESEARCH.md §"Pattern 1"):
+# allow whitelist moved to per-subdirectory yamls because import_guard_custom_lint
+# evaluates each config in the chain independently against its own allow whitelist
+# (verified at ~/.pub-cache/hosted/pub.dev/import_guard_custom_lint-1.0.0/lib/src/import_guard_lint.dart:71-94).
+# Parent owns deny only; children own the whitelist.
+# List feature domain layer — mirrors accounting/domain/import_guard.yaml structure.
+deny:
+  - package:home_pocket/data/**
+  - package:home_pocket/infrastructure/**
+  - package:home_pocket/application/**
+  - package:home_pocket/features/**/presentation/**
+  - package:flutter/**
+
+inherit: true
+# NOTE: no `allow:` block — see models/import_guard.yaml
