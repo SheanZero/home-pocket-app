@@ -1,658 +1,698 @@
-# Architecture Research — v1.1 Happiness Metric & Display
+# Architecture Research — v1.4 列表功能 (Transaction List Tab)
 
-**Domain:** Local-first Flutter accounting app — happiness metric integration into existing 5-layer Clean Architecture
-**Researched:** 2026-05-01
-**Confidence:** HIGH (verified directly against the live `lib/` tree; all path/symbol claims grounded in source reads)
+**Domain:** Local-first Flutter accounting app — adding a full-featured List tab to the existing 5-layer Clean Architecture
+**Researched:** 2026-05-29
+**Confidence:** HIGH (all claims verified against live `lib/` tree)
 
-> **Scope note.** This file answers the 8 integration questions asked in the milestone prompt. The existing 5-layer architecture is *already* documented in `.planning/codebase/ARCHITECTURE.md` (2026-04-25, v1.0 baseline) — this file builds on top of it rather than re-stating it. Read that file first if you need the layer/data-flow primer.
+> **Scope note.** This file answers the integration questions for v1.4: feature placement, new Riverpod providers, new DAO methods, edit/delete reuse, family data sourcing, and build order. The 5-layer architecture and Thin Feature rule are established; this file builds on them rather than re-stating them.
 
 ---
 
-## System Overview — Where v1.1 Components Land
+## System Overview — Where v1.4 Components Land
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          PRESENTATION LAYER                                  │
-│  features/home/presentation/                features/analytics/presentation/ │
-│  ┌─────────────────────────────┐            ┌──────────────────────────────┐│
-│  │ screens/home_screen.dart    │            │ screens/analytics_screen.dart││
-│  │   ├─ MonthOverviewCard      │            │   ├─ Summary / Pie / Daily   ││
-│  │   ├─ LedgerComparisonSec.   │            │   ├─ LedgerRatio / Budget    ││
-│  │   └─ SoulFullnessCard ★MOD  │            │   └─ ★NEW HappinessSection   ││
-│  │       (rebuilt: 4 tiles +   │            │       (4 widgets reading     ││
-│  │        story card)          │            │        dormant DAOs)         ││
-│  │                             │            │                              ││
-│  │ widgets/                    │            │ widgets/                     ││
-│  │   soul_fullness_card.dart◐  │            │   ★joy_density_trend.dart    ││
-│  │   ★best_joy_moment_card.    │            │   ★satisfaction_histogram.   ││
-│  │   ★family_highlights_card.  │            │   ★joy_summary_section.dart  ││
-│  │                             │            │                              ││
-│  │ providers/                  │            │ providers/                   ││
-│  │   state_home.dart◐          │            │   state_analytics.dart◐      ││
-│  │   ★state_happiness.dart     │            │   (extend with happiness     ││
-│  │   (re-exports from analytics│            │    providers — same family)  ││
-│  │    OR direct)               │            │                              ││
-│  └─────────────────────────────┘            └──────────────────────────────┘│
-└──────────────────┬─────────────────────────────────┬────────────────────────┘
-                   │ ref.watch(...Provider)          │
-┌──────────────────┴─────────────────────────────────┴────────────────────────┐
-│                          APPLICATION LAYER (GLOBAL)                          │
-│  lib/application/analytics/                                                  │
-│    get_monthly_report_use_case.dart       (existing)                         │
-│    get_expense_trend_use_case.dart        (existing)                         │
-│    get_budget_progress_use_case.dart      (existing)                         │
-│    ★get_happiness_report_use_case.dart    (NEW — primary)                    │
-│    ★get_best_joy_moment_use_case.dart     (NEW — story card)                 │
-│    ★get_family_happiness_use_case.dart    (NEW — group mode only)            │
-│    repository_providers.dart              (extend: add use case providers)   │
-└──────────────────┬─────────────────────────────────────────────────────────┘
-                   │ uses                                          implements
-┌──────────────────┴────────────────────────┐  ┌──────────────────────────────┐
-│   DOMAIN LAYER (per feature)              │  │       DATA LAYER             │
-│   features/analytics/domain/              │  │  lib/data/                   │
-│     models/                               │  │    daos/                     │
-│       monthly_report.dart       (existing)│  │      analytics_dao.dart◐     │
-│       budget_progress.dart      (existing)│  │      (3 dormant methods —    │
-│       expense_trend.dart        (existing)│  │       wire only, no schema)  │
-│       analytics_aggregate.dart  (existing)│  │      ★+1 method:             │
-│       ★happiness_report.dart    (NEW)     │  │        getBestJoyMoment()    │
-│       ★best_joy_moment.dart     (NEW)     │  │    repositories/             │
-│       ★family_happiness.dart    (NEW)     │  │      analytics_repository_   │
-│     repositories/                         │  │        impl.dart◐ (extend)   │
-│       analytics_repository.dart◐ (extend) │  │                              │
-└───────────────────────────────────────────┘  └──────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                            PRESENTATION LAYER                                    │
+│                                                                                  │
+│  features/home/presentation/             features/list/presentation/  ★NEW       │
+│  ┌──────────────────────────┐           ┌───────────────────────────────────┐   │
+│  │ screens/                 │           │ screens/                          │   │
+│  │   main_shell_screen.dart ◐           │   list_screen.dart  ★             │   │
+│  │   (line 111: replace     │           │                                   │   │
+│  │    placeholder with      │           │ widgets/                          │   │
+│  │    ListScreen)           │           │   list_calendar_header.dart  ★    │   │
+│  └──────────────────────────┘           │   list_month_summary.dart  ★      │   │
+│                                         │   list_transaction_tile.dart  ★   │   │
+│  features/accounting/presentation/      │   list_sort_filter_bar.dart  ★    │   │
+│  ┌──────────────────────────┐           │   list_empty_state.dart  ★        │   │
+│  │ transaction_edit_screen  │◄──tap────►│                                   │   │
+│  │   (reused as-is)         │  to edit  │ providers/                        │   │
+│  └──────────────────────────┘           │   repository_providers.dart  ★    │   │
+│                                         │   state_list_filter.dart  ★       │   │
+│                                         │   state_list_transactions.dart  ★ │   │
+│                                         │   state_list_calendar.dart  ★     │   │
+│                                         └───────────────────────────────────┘   │
+└────────────────────────┬────────────────────────────────────┬───────────────────┘
+                         │ ref.watch                          │
+┌────────────────────────┴────────────────────────────────────┴───────────────────┐
+│                         APPLICATION LAYER (GLOBAL)                               │
+│                                                                                  │
+│  lib/application/list/  ★NEW                                                     │
+│    get_list_transactions_use_case.dart                                           │
+│    list_use_case_models.dart   (GetListParams)                                   │
+│                                                                                  │
+│  lib/application/accounting/  (unchanged — DeleteTransactionUseCase reused)     │
+└────────────────────────┬────────────────────────────────────────────────────────┘
+                         │ uses (interface)
+┌────────────────────────┴────────────────────────────────────────────────────────┐
+│  DOMAIN LAYER                                                                    │
+│                                                                                  │
+│  features/list/domain/  ★NEW                                                     │
+│    models/list_filter_state.dart   (Freezed)                                    │
+│    models/list_sort_config.dart    (Freezed — refs SortField from shared/)      │
+│    repositories/list_transaction_repository.dart   (interface)                  │
+│                                                                                  │
+│  features/accounting/domain/repositories/transaction_repository.dart  ◐         │
+│    + findByBookIds() abstract method                                             │
+│                                                                                  │
+│  lib/shared/constants/sort_config.dart  ★NEW                                    │
+│    SortField enum, SortDirection enum                                            │
+└────────────────────────┬────────────────────────────────────────────────────────┘
+                         │ implements
+┌────────────────────────┴────────────────────────────────────────────────────────┐
+│  DATA LAYER                                                                      │
+│                                                                                  │
+│  lib/data/daos/transaction_dao.dart  ◐                                           │
+│    + findByBookIds() — multi-book date-range + sort query                        │
+│                                                                                  │
+│  lib/data/repositories/transaction_repository_impl.dart  ◐                      │
+│    + findByBookIds() implementation                                              │
+│                                                                                  │
+│  lib/data/daos/analytics_dao.dart  (unchanged — getDailyTotals reused)           │
+└─────────────────────────────────────────────────────────────────────────────────┘
 
 ★ = NEW file/symbol     ◐ = MODIFIED existing file     (no mark) = unchanged
 ```
 
-### Component Responsibilities (v1.1 deltas only)
+---
 
-| Component | Layer | Status | Responsibility |
-|-----------|-------|--------|----------------|
-| `HappinessReport` Freezed model | analytics/domain/models | NEW | Holds 4 personal metrics (avgSat, joyPerYen, highlightCount, bestJoyMoment ref) + optional 2 family fields |
-| `BestJoyMoment` Freezed model | analytics/domain/models | NEW | Story card: single transaction id + amount + satisfaction + categoryId + timestamp + computed joyPerYen |
-| `FamilyHappiness` Freezed model | analytics/domain/models | NEW | 2 cooperative metrics (familyHighlightsSum, sharedJoyInsight: List<CategorySatisfaction>) |
-| `GetHappinessReportUseCase` | application/analytics | NEW | Wires `getSoulSatisfactionOverview` + `getSatisfactionDistribution` + `getBestJoyMoment` into `HappinessReport`. Mirrors `GetMonthlyReportUseCase` shape. |
-| `GetBestJoyMomentUseCase` | application/analytics | NEW | Returns single `BestJoyMoment` for the month. Uses a new DAO query (see Q4). |
-| `GetFamilyHappinessUseCase` | application/analytics | NEW | Group-mode only. Aggregates over all books visible in current group. |
-| `AnalyticsRepository` interface | analytics/domain/repositories | EXTEND | Add `getSoulSatisfactionOverview`, `getSatisfactionDistribution`, `getDailySatisfactionTrend`, `getBestJoyMoment` method signatures. |
-| `AnalyticsRepositoryImpl` | data/repositories | EXTEND | Implement the 4 new interface methods by delegating to existing/new DAO methods. |
-| `AnalyticsDao` | data/daos | ADD ONE METHOD | Add `getBestJoyMoment` only. The 3 satisfaction methods already exist (verified in `lib/data/daos/analytics_dao.dart` lines 230–327). |
-| `state_happiness.dart` | features/analytics/presentation/providers | NEW | New `@riverpod` providers: `happinessReportProvider`, `bestJoyMomentProvider`, `familyHappinessProvider`, `joyPerYenTrendProvider` (derived). |
-| `SoulFullnessCard` | features/home/presentation/widgets | REBUILT | Replaces 2-tile (Satisfaction + ROI) layout with 4-tile + story card + conditional family card. Becomes container widget that takes `HappinessReport`. |
-| `BestJoyMomentCard` | features/home/presentation/widgets | NEW | Story card extracted from `SoulFullnessCard` for reusability between Home and Analytics screens. |
-| `FamilyHighlightsCard` | features/home/presentation/widgets | NEW | Conditional sub-widget for 2 family metrics. Group mode only. |
-| `JoyDensityTrendChart` | features/analytics/presentation/widgets | NEW | Joy-per-¥ line chart (mirror `ExpenseTrendChart` shape but uses `getDailySatisfactionTrend`). |
-| `SatisfactionHistogram` | features/analytics/presentation/widgets | NEW | Score-frequency bar chart (mirror `DailyExpenseChart` shape). |
-| `JoyLedgerStatisticsSection` | features/analytics/presentation/widgets | NEW | Section header + composes the two charts above. Inserted between `LedgerRatioChart` and `BudgetProgressList` in `analytics_screen.dart`. |
+## Feature Placement Decision
 
-### What is NOT changing (per Out-of-Scope locks)
+**Decision: new `lib/features/list/` feature module**, not folded into `features/accounting/`.
 
-- `lib/data/tables/transactions_table.dart` — no schema mutation
-- `lib/data/app_database.dart` — no version bump
-- `lib/features/accounting/domain/models/transaction.dart` — no field added
-- `LedgerType` enum — values stay `survival` / `soul`
-- `lib/core/theme/app_colors.dart` — color tokens stay (`#5A9CC8`, `#47B88A`, `#8AB8DA`)
-- `SatisfactionEmojiPicker`, `VoiceSatisfactionEstimator` — input pipeline untouched
+Rationale:
+- `features/accounting/` owns the _entry_ domain: manual/voice/edit/OCR screens, category management, transaction CRUD forms. The List tab is a _read-biased query/display_ domain with distinct domain models (`ListFilterState`, `SortConfig`) not shared with the entry domain.
+- Precedent: `features/analytics/` is a separate read-biased domain alongside `features/accounting/`. Same split applies here.
+- `main_shell_screen.dart:111` already has a placeholder at IndexedStack index 1 (`Center(child: Text(S.of(context).listTab))`).
+- Thin Feature rule: `features/list/` will contain only `domain/` (models + repo interface) and `presentation/` (screens/widgets/providers). NO `application/`, `infrastructure/`, `data/tables/`, `data/daos/`.
 
 ---
 
-## Recommended Project Structure (v1.1 file additions)
+## Component Map — New vs Modified
+
+### NEW (create)
 
 ```
-lib/
-├── application/analytics/                                # GLOBAL use cases
-│   ├── get_monthly_report_use_case.dart                  # existing
-│   ├── get_expense_trend_use_case.dart                   # existing
-│   ├── get_budget_progress_use_case.dart                 # existing
-│   ├── get_happiness_report_use_case.dart                # ★ NEW (primary)
-│   ├── get_best_joy_moment_use_case.dart                 # ★ NEW (single-tx argmax)
-│   ├── get_family_happiness_use_case.dart                # ★ NEW (group mode)
-│   ├── repository_providers.dart                         # ◐ EXTEND (add new use case providers)
-│   └── repository_providers.g.dart                       # regenerated
-│
-├── data/
-│   ├── daos/
-│   │   └── analytics_dao.dart                            # ◐ EXTEND (+ 1 method: getBestJoyMoment)
-│   └── repositories/
-│       └── analytics_repository_impl.dart                # ◐ EXTEND (+ 4 method impls)
-│
-├── features/analytics/
-│   ├── domain/
-│   │   ├── models/
-│   │   │   ├── happiness_report.dart                     # ★ NEW (Freezed)
-│   │   │   ├── happiness_report.freezed.dart             # generated
-│   │   │   ├── happiness_report.g.dart                   # generated
-│   │   │   ├── best_joy_moment.dart                      # ★ NEW (Freezed)
-│   │   │   ├── best_joy_moment.freezed.dart              # generated
-│   │   │   ├── best_joy_moment.g.dart                    # generated
-│   │   │   ├── family_happiness.dart                     # ★ NEW (Freezed)
-│   │   │   ├── family_happiness.freezed.dart             # generated
-│   │   │   ├── family_happiness.g.dart                   # generated
-│   │   │   └── analytics_aggregate.dart                  # ◐ EXTEND (add SatisfactionOverview, SatisfactionDistribution, DailySatisfaction, BestJoyMomentRow domain types)
-│   │   └── repositories/
-│   │       └── analytics_repository.dart                 # ◐ EXTEND (+ 4 method signatures)
-│   └── presentation/
-│       ├── providers/
-│       │   ├── state_analytics.dart                      # ◐ unchanged or minimal — see Q5
-│       │   ├── state_happiness.dart                      # ★ NEW (4 providers)
-│       │   └── state_happiness.g.dart                    # generated
-│       ├── screens/
-│       │   └── analytics_screen.dart                     # ◐ EXTEND (insert JoyLedgerStatisticsSection)
-│       └── widgets/
-│           ├── joy_density_trend_chart.dart              # ★ NEW
-│           ├── satisfaction_histogram.dart               # ★ NEW
-│           └── joy_ledger_statistics_section.dart        # ★ NEW
-│
-├── features/home/presentation/
-│   ├── screens/
-│   │   └── home_screen.dart                              # ◐ MODIFY (drop _computeSatisfaction / _computeHappinessROI; switch SoulFullnessCard wiring to happinessReportProvider)
-│   └── widgets/
-│       ├── soul_fullness_card.dart                       # ◐ REBUILT (interface change)
-│       ├── best_joy_moment_card.dart                     # ★ NEW
-│       └── family_highlights_card.dart                   # ★ NEW
-│
-└── l10n/
-    ├── app_ja.arb                                        # ◐ rename 4 keys + add ~12 new keys
-    ├── app_zh.arb                                        # ◐ same
-    └── app_en.arb                                        # ◐ same
+lib/features/list/
+  domain/
+    models/
+      list_filter_state.dart          # Freezed: selectedMonth, activeDayFilter, sortConfig,
+                                      #   ledgerType?, categoryId?, searchQuery, memberBookId?
+      list_sort_config.dart           # Freezed: SortField (from shared) + SortDirection
+    repositories/
+      list_transaction_repository.dart  # interface — findByBookIds with filter params
+
+  presentation/
+    providers/
+      repository_providers.dart       # ONE file per feature rule:
+                                      #   listTransactionRepositoryProvider (wraps existing transactionRepositoryProvider)
+                                      #   getListTransactionsUseCaseProvider
+      state_list_filter.dart          # @riverpod Notifier<ListFilter>
+      state_list_transactions.dart    # @riverpod Future<List<TaggedTransaction>>
+      state_list_calendar.dart        # @riverpod Future<List<DailyTotal>>({bookId, month})
+
+    screens/
+      list_screen.dart                # Root screen replacing placeholder in main_shell_screen
+
+    widgets/
+      list_calendar_header.dart       # Month-nav + calendar grid + per-day totals + tap-to-filter
+      list_month_summary.dart         # Month total expense (expense-only basis)
+      list_transaction_tile.dart      # category emoji, ledger tag, date, amount, optional member tag
+      list_sort_filter_bar.dart       # sort chip + ledger/category filter chips + search field
+      list_empty_state.dart           # empty state (filtered vs unfiltered messages)
+
+lib/application/list/
+  get_list_transactions_use_case.dart # multi-book query: wraps TransactionRepository.findByBookIds
+  list_use_case_models.dart           # GetListParams(bookIds, startDate, endDate, ledgerType,
+                                      #   categoryId, sortField, sortAscending)
+
+lib/shared/constants/sort_config.dart # SortField enum + SortDirection enum (shared to avoid
+                                      # cross-feature domain import from list/domain)
 ```
 
-### Structure Rationale
+### MODIFIED (extend existing)
 
-- **Use cases stay in `lib/application/analytics/`, NOT in `features/happiness/`** — Thin Feature rule (`.claude/rules/arch.md` + `CLAUDE.md` "Placement Decision Rule" line 32) forbids `application/` inside `features/`. Existing analytics use cases live there; happiness is the same business-logic domain (analytics over `transactions` table).
-- **Domain models in `features/analytics/domain/models/`, NOT a new feature module** — see Q2. Keeping them in analytics avoids cross-feature import sprawl (Home would otherwise import `features/happiness/domain/...` AND `features/analytics/domain/...` for the same screen).
-- **DAO additions stay in `analytics_dao.dart`** — the file already groups soul-satisfaction queries (lines 230–327). One more method preserves cohesion. New DAO file would split a query family arbitrarily.
-- **Provider lives in analytics presentation, re-imported by Home** — single source of truth. Home already imports from `features/analytics/presentation/providers/state_analytics.dart` (verified `home_screen.dart` line 12), so the precedent is set.
+```
+lib/data/daos/transaction_dao.dart
+  + findByBookIds(List<String> bookIds, {startDate, endDate, ledgerType?, categoryId?,
+                  sortField, sortAscending, limit=500})
+    → Future<List<TransactionRow>>
+
+lib/features/accounting/domain/repositories/transaction_repository.dart
+  + findByBookIds(List<String> bookIds, {same params})
+    → Future<List<Transaction>>   (abstract)
+
+lib/data/repositories/transaction_repository_impl.dart
+  + findByBookIds(...)   → delegates to extended DAO; applies _toModel per-row
+
+lib/features/home/presentation/screens/main_shell_screen.dart
+  Line 111: replace placeholder Center(...) with ListScreen(bookId: bookId)
+```
+
+### UNCHANGED (reuse as-is)
+
+```
+lib/features/accounting/presentation/screens/transaction_edit_screen.dart
+  — tap-to-edit entry point; push with Transaction, pop(true) triggers list invalidate
+
+lib/features/accounting/presentation/providers/repository_providers.dart
+  — deleteTransactionUseCaseProvider (swipe-to-delete)
+  — updateTransactionUseCaseProvider (used transitively by TransactionEditScreen)
+
+lib/features/analytics/domain/repositories/analytics_repository.dart
+  getDailyTotals() — calendar per-day rollup; called via analyticsRepositoryProvider
+
+lib/features/analytics/presentation/providers/repository_providers.dart
+  analyticsRepositoryProvider — watches in state_list_calendar.dart
+
+lib/features/family_sync/presentation/providers/state_active_group.dart
+  activeGroupProvider (keepAlive) + isGroupModeProvider — guards family branch in list provider
+
+lib/features/home/presentation/providers/state_shadow_books.dart
+  shadowBooksProvider — supplies shadow bookIds + member display names
+
+lib/features/accounting/domain/models/transaction.dart
+  Transaction domain model — no field additions needed
+
+lib/infrastructure/i18n/ formatters (DateFormatter, NumberFormatter)
+  — same pattern as HomeScreen via currentLocaleProvider
+```
 
 ---
 
-## Architectural Patterns (project-specific, applied to v1.1)
+## Family Data Sourcing (Critical Question Answered)
 
-### Pattern 1: Use Case Per Aggregate (existing project convention)
+**The family sync model stores each member's transactions in a local shadow book — NOT a separate in-memory merge.**
 
-**What:** One use case class per Freezed aggregate model returned to the UI. Constructor-injected repositories. `execute()` is the only public method. Internally calls `Future.wait` for parallel DAO queries.
+Evidence from codebase inspection:
+- `ShadowBookService` (`lib/application/family_sync/shadow_book_service.dart`) creates a `Book` row with `isShadow = true`, `groupId`, `ownerDeviceId` for each remote member.
+- `ApplySyncOperationsUseCase` writes inbound transaction payloads into the shadow book's `bookId` in the local SQLite DB.
+- `shadowBooksProvider` (`lib/features/home/presentation/providers/state_shadow_books.dart`) already returns `List<ShadowBookInfo>` (each contains `book.id` + `memberDisplayName` + `memberAvatarEmoji`) by querying `bookRepository.findShadowBooksByGroupId(group.groupId)`.
 
-**Project precedent:** `GetMonthlyReportUseCase` (`lib/application/analytics/get_monthly_report_use_case.dart`) bundles 4 parallel `AnalyticsRepository` calls + 1 `CategoryRepository` call into a single `MonthlyReport`.
+Therefore the List feature only needs to:
+1. Watch `isGroupModeProvider` → if true, watch `shadowBooksProvider`
+2. Collect `[myBookId, ...shadowBooks.map((s) => s.book.id)]`
+3. Pass the list to `TransactionDao.findByBookIds([...])`
 
-**Apply to v1.1:** `GetHappinessReportUseCase` parallelises `getSoulSatisfactionOverview` + `getSatisfactionDistribution` + `getBestJoyMoment` into `HappinessReport`. Same shape.
+**No additional merge, no schema change, no new sync logic.** All data is already in the local encrypted DB under different `book_id` values.
+
+**Member attribution:** `Transaction.bookId` identifies which shadow book (which member) owns a row. The provider maintains a `Map<String, String> bookIdToMemberLabel` from `ShadowBookInfo` and attaches the label at display time via a `TaggedTransaction` wrapper:
 
 ```dart
-// lib/application/analytics/get_happiness_report_use_case.dart
-class GetHappinessReportUseCase {
-  GetHappinessReportUseCase({required AnalyticsRepository analyticsRepository})
-    : _analyticsRepository = analyticsRepository;
-
-  final AnalyticsRepository _analyticsRepository;
-
-  Future<HappinessReport> execute({
-    required String bookId,
-    required int year,
-    required int month,
-  }) async {
-    final start = DateTime(year, month, 1);
-    final end = DateTime(year, month + 1, 0, 23, 59, 59);
-
-    final results = await Future.wait([
-      _analyticsRepository.getSoulSatisfactionOverview(bookId: bookId, startDate: start, endDate: end),
-      _analyticsRepository.getMonthlyTotals(bookId: bookId, startDate: start, endDate: end),  // for soulTotal
-      _analyticsRepository.getSatisfactionDistribution(bookId: bookId, startDate: start, endDate: end),
-      _analyticsRepository.getBestJoyMoment(bookId: bookId, startDate: start, endDate: end),
-    ]);
-
-    final overview = results[0] as SatisfactionOverview;
-    final totals = results[1] as MonthlyTotals;
-    final distribution = results[2] as List<SatisfactionDistribution>;
-    final best = results[3] as BestJoyMoment?;
-
-    final highlightCount = distribution
-        .where((d) => d.score >= 8)
-        .fold<int>(0, (s, d) => s + d.count);
-
-    final joyPerYen = totals.soulExpenses > 0
-        ? overview.avgSatisfaction * overview.count / totals.soulExpenses
-        : 0.0;
-
-    return HappinessReport(
-      year: year, month: month,
-      avgSatisfaction: overview.avgSatisfaction,
-      joyPerYen: joyPerYen,
-      highlightCount: highlightCount,
-      bestJoyMoment: best,
-    );
-  }
+class TaggedTransaction {
+  final Transaction transaction;
+  final String? memberLabel;  // null = own transaction; non-null = family member name
 }
 ```
 
-**Trade-offs:** Slightly heavier than helper functions, but consistent with the codebase. Testable in isolation. Riverpod-friendly.
-
-### Pattern 2: Dormant DAO Wiring (specific to v1.1)
-
-**What:** Three DAO methods (`getSoulSatisfactionOverview`, `getSatisfactionDistribution`, `getDailySatisfactionTrend`) already exist on `AnalyticsDao` (verified `lib/data/daos/analytics_dao.dart` lines 230–327) but are **not currently called by any repository, use case, or provider**. They are dormant data-access. v1.1 wires them through the layers without touching the queries themselves.
-
-**Apply:** Each dormant DAO method needs:
-1. A domain-model counterpart in `analytics_aggregate.dart` (DAO-side has `SatisfactionOverviewResult`; domain side needs `SatisfactionOverview`).
-2. A signature on `AnalyticsRepository` (interface).
-3. An implementation on `AnalyticsRepositoryImpl` that translates DAO result → domain model (mirrors `getMonthlyTotals` translation pattern, lines 18–28 of `analytics_repository_impl.dart`).
-4. Consumption inside a use case (`GetHappinessReportUseCase`).
-
-**Trade-offs:** Boilerplate-heavy (4 layers × 3 methods = 12 surface points), but enforces import_guard layering. Domain stays decoupled from Drift.
-
-### Pattern 3: Container Widget With Async Provider (existing pattern)
-
-**What:** Widget receives a Freezed model directly (not raw values) and is rendered inside an `AsyncValue.when` from the parent screen. The widget itself is a `StatelessWidget` — it does not consume providers.
-
-**Project precedent:** `SoulFullnessCard` today is a `StatelessWidget` taking 3 primitives (`satisfactionPercent`, `happinessROI`, `recentSoulAmount`). The parent `home_screen.dart` line 132 unwraps `reportAsync.when(data: (report) => SoulFullnessCard(...), ...)`.
-
-**Apply to v1.1:** `SoulFullnessCard` becomes `SoulFullnessCard({required HappinessReport report, required bool isGroupMode, FamilyHappiness? familyReport})`. Stays `StatelessWidget`. Widget tests still build it without ProviderScope.
-
-```dart
-// home_screen.dart (rebuilt section)
-final happinessAsync = ref.watch(happinessReportProvider(bookId: bookId, year: year, month: month));
-final familyAsync = isGroupMode
-    ? ref.watch(familyHappinessProvider(year: year, month: month))
-    : const AsyncValue.data(null);
-
-happinessAsync.when(
-  data: (report) => familyAsync.when(
-    data: (family) => SoulFullnessCard(
-      report: report,
-      isGroupMode: isGroupMode,
-      familyReport: family,
-    ),
-    loading: () => SoulFullnessCard(report: report, isGroupMode: false),
-    error: (_, __) => SoulFullnessCard(report: report, isGroupMode: false),
-  ),
-  loading: ...,
-  error: ...,
-);
-```
-
-**Trade-offs:** Two `AsyncValue.when` reads when group mode is on; acceptable since both providers are cheap.
+**Note decryption on shadow books:** `FieldEncryptionService.decryptField()` will fail for shadow book rows (note was encrypted with the originating device's key). `TransactionRepositoryImpl._toModel()` currently calls decryptField and the result goes to `decryptedNote`. If decryption fails (expected on shadow notes), the impl should catch the exception and return `note: null` — the List tile renders notes as empty. This is pre-existing behavior to verify/confirm in Phase A.
 
 ---
 
-## Data Flow
-
-### v1.1 Read Path: Happiness Report
+## Provider Dependency Graph
 
 ```
-[HomeScreen / AnalyticsScreen builds]
-    ↓ ref.watch(happinessReportProvider(bookId, year, month))
-[state_happiness.dart provider]
-    ↓ executes
-[GetHappinessReportUseCase.execute()]
-    ↓ Future.wait([...])
-[AnalyticsRepository] (interface)  ← Domain
-    ↓ resolves to
-[AnalyticsRepositoryImpl] (data layer)
-    ↓ delegates to
-[AnalyticsDao]
-    ├─ getSoulSatisfactionOverview()      ← dormant, exists
-    ├─ getMonthlyTotals()                 ← used by report path; reused for soulExpenses
-    ├─ getSatisfactionDistribution()      ← dormant, exists
-    └─ getBestJoyMoment()                 ← NEW DAO query
-    ↓ raw SQL via _db.customSelect(...)
-[SQLCipher-encrypted transactions table]
-    ↑ rows
-[DAO Result classes]                       ← e.g. SatisfactionOverviewResult
-    ↑ mapped to domain types in Repository
-[Domain types]                             ← e.g. SatisfactionOverview
-    ↑ assembled into
-[HappinessReport Freezed model]
-    ↑ delivered as AsyncValue<HappinessReport>
-[StatelessWidget rendering]
+isGroupModeProvider (keepAlive: true, existing)
+shadowBooksProvider (existing)
+    │
+    ▼
+listFilterStateProvider  ──(Notifier, auto-dispose)
+  holds: selectedMonth, activeDayFilter, sortConfig,
+         ledgerType?, categoryId?, searchQuery, memberBookId?
+    │
+    ▼
+listTransactionsProvider({bookId})  ─────(FutureProvider, auto-dispose)
+  1. reads listFilterStateProvider
+  2. reads shadowBooksProvider (if isGroupMode)
+  3. calls getListTransactionsUseCase.execute(GetListParams)
+     → TransactionRepository.findByBookIds (SQL: bookIds, dateRange, ledger?, category?, ORDER BY)
+  4. Dart-side post-process:
+       if activeDayFilter != null  → .where(tx.timestamp.day == day)
+       if searchQuery != ''        → .where(note|merchant|categoryName contains query)
+       if memberBookId != null     → .where(tx.bookId == memberBookId)
+     (returns List<TaggedTransaction>)
+    │
+    ▼
+ListScreen
+
+analyticsRepositoryProvider (existing)
+    │
+    ▼
+listCalendarProvider({bookId, month})  ──(FutureProvider, auto-dispose)
+  calls analyticsRepository.getDailyTotals(bookId: myBookId, ...)
+  (own-book only; family calendar aggregation is out-of-scope v1.4)
+    │
+    ▼
+ListCalendarHeader (rebuilds on month change only)
 ```
 
-### State Management Wiring
+---
+
+## Tap-to-Edit Flow
 
 ```
-@riverpod  (in state_happiness.dart)
-Future<HappinessReport> happinessReport(
-  Ref ref, {
-  required String bookId,
-  required int year,
-  required int month,
+ListTransactionTile.onTap(tx)
+    │
+    ▼
+Navigator.push(MaterialPageRoute(builder: (_) =>
+    TransactionEditScreen(transaction: tx)))
+    │
+    ▼ pop(true)
+ref.invalidate(listTransactionsProvider(bookId: bookId))
+ref.invalidate(listCalendarProvider(bookId: bookId, month: selectedMonth))
+// also invalidate home screen providers per main_shell_screen.dart pattern:
+ref.invalidate(todayTransactionsProvider(bookId: bookId))
+ref.invalidate(monthlyReportProvider(bookId: ..., startDate: ..., endDate: ...))
+```
+
+Note: `TransactionEditScreen` does NOT support delete (per its Phase 18 design, `D-11/D-17`). Delete is swipe-to-delete from the list tile only.
+
+---
+
+## Swipe-to-Delete Flow
+
+```
+Dismissible(
+  key: ValueKey(tx.id),
+  direction: DismissDirection.endToStart,
+  confirmDismiss: (_) async => showDialog(confirm?)
+)
+    │ confirmed
+    ▼
+ref.read(deleteTransactionUseCaseProvider).execute(tx.id)
+    │
+    ▼
+ref.invalidate(listTransactionsProvider(...))
+ref.invalidate(listCalendarProvider(...))
+ref.invalidate(todayTransactionsProvider(bookId: bookId))  // home screen refresh
+ref.invalidate(monthlyReportProvider(...))                 // home screen refresh
+```
+
+---
+
+## New DAO Method Required
+
+**Location:** `lib/data/daos/transaction_dao.dart`
+
+```dart
+/// Multi-book date-range query for the List tab.
+///
+/// ORDER BY is SQL-level (timestamp|updatedAt|amount, asc/desc).
+/// Text search and member filter are Dart-side post-process.
+/// Soft-deleted rows excluded. Own-book + shadow books in one query.
+Future<List<TransactionRow>> findByBookIds(
+  List<String> bookIds, {
+  required DateTime startDate,
+  required DateTime endDate,
+  String? ledgerType,
+  String? categoryId,
+  SortField sortField = SortField.timestamp,
+  bool sortAscending = false,
+  int limit = 500,
 }) async {
-  final useCase = ref.watch(getHappinessReportUseCaseProvider);
-  return useCase.execute(bookId: bookId, year: year, month: month);
+  // Uses Drift typesafe DSL or customSelect with IN (?) expansion
+  // ORDER BY: timestamp/updatedAt/amount DESC (or ASC) + id DESC as tiebreaker
 }
+```
 
-// useCase provider lives in lib/application/analytics/repository_providers.dart
+The existing `AnalyticsDao.getDailyTotals()` already handles calendar per-day rollups — no new DAO method needed there.
+
+---
+
+## New Application Use Case
+
+**Location:** `lib/application/list/get_list_transactions_use_case.dart`
+
+Constructor receives `TransactionRepository` (injected, no Riverpod).
+
+`execute(GetListParams)` → `Result<List<Transaction>>`:
+- Validates `bookIds` non-empty, `startDate` before `endDate`
+- Calls `transactionRepository.findByBookIds(...)`
+- Returns `Result.success(transactions)`
+
+Dart-side sort/filter (day, text search, member) is applied in the **provider** (`state_list_transactions.dart`), not in the use case. The use case is only responsible for the DB roundtrip. This keeps the use case testable without filter-state dependencies.
+
+---
+
+## Riverpod Provider Design
+
+All new providers in `lib/features/list/presentation/providers/`.
+
+### `state_list_filter.dart`
+
+```dart
 @riverpod
-GetHappinessReportUseCase getHappinessReportUseCase(Ref ref) {
-  return GetHappinessReportUseCase(
-    analyticsRepository: ref.watch(analyticsRepositoryProvider),
+class ListFilterState extends _$ListFilterState {
+  @override
+  ListFilter build() => ListFilter.initial(DateTime.now());
+
+  void selectMonth(DateTime month) =>
+    state = state.copyWith(selectedMonth: month, activeDayFilter: null);
+  void selectDay(int? day) => state = state.copyWith(activeDayFilter: day);
+  void setSort(ListSortConfig sort) => state = state.copyWith(sort: sort);
+  void setLedgerFilter(LedgerType? type) =>
+    state = state.copyWith(ledgerType: type, activeDayFilter: null);
+  void setCategoryFilter(String? id) => state = state.copyWith(categoryId: id);
+  void setSearch(String q) => state = state.copyWith(searchQuery: q);
+  void setMemberFilter(String? bookId) => state = state.copyWith(memberBookId: bookId);
+}
+```
+
+Note: `keepAlive: false` (default) — state auto-disposes when List tab is not visible in IndexedStack. Month resets to current month on next tab open. If persistence-across-tab-switches is needed, add `keepAlive: true`.
+
+### `state_list_transactions.dart`
+
+```dart
+@riverpod
+Future<List<TaggedTransaction>> listTransactions(
+  Ref ref, {required String bookId}
+) async {
+  final filter = ref.watch(listFilterStateProvider);
+  final isGroup = ref.watch(isGroupModeProvider);
+  final shadowBooks = isGroup
+      ? await ref.watch(shadowBooksProvider.future)
+      : <ShadowBookInfo>[];
+
+  final bookIds = [bookId, ...shadowBooks.map((s) => s.book.id)];
+  final bookIdToLabel = {
+    for (final s in shadowBooks) s.book.id: s.memberDisplayName,
+  };
+
+  final monthStart = DateTime(filter.selectedMonth.year, filter.selectedMonth.month, 1);
+  final monthEnd = DateTime(filter.selectedMonth.year, filter.selectedMonth.month + 1, 0, 23, 59, 59);
+
+  final useCase = ref.watch(getListTransactionsUseCaseProvider);
+  final result = await useCase.execute(GetListParams(
+    bookIds: bookIds,
+    startDate: monthStart,
+    endDate: monthEnd,
+    ledgerType: filter.ledgerType,
+    categoryId: filter.categoryId,
+    sortField: filter.sort.field,
+    sortAscending: filter.sort.ascending,
+  ));
+
+  if (result.isError) throw Exception(result.error);
+  var txs = result.data!;
+
+  // Dart-side post-process (note: text search on encrypted notes is unavailable
+  // for shadow books — only merchant/category fields are searchable cross-member)
+  if (filter.activeDayFilter != null) {
+    txs = txs.where((t) => t.timestamp.day == filter.activeDayFilter).toList();
+  }
+  final q = filter.searchQuery.toLowerCase().trim();
+  if (q.isNotEmpty) {
+    txs = txs.where((t) =>
+      (t.note?.toLowerCase().contains(q) ?? false) ||
+      (t.merchant?.toLowerCase().contains(q) ?? false) ||
+      t.categoryId.toLowerCase().contains(q)
+    ).toList();
+  }
+  if (filter.memberBookId != null) {
+    txs = txs.where((t) => t.bookId == filter.memberBookId).toList();
+  }
+
+  return txs.map((t) => TaggedTransaction(
+    transaction: t,
+    memberLabel: bookIdToLabel[t.bookId],
+  )).toList();
+}
+```
+
+### `state_list_calendar.dart`
+
+```dart
+@riverpod
+Future<List<DailyTotal>> listCalendar(
+  Ref ref, {required String bookId, required DateTime month}
+) async {
+  final repo = ref.watch(analyticsRepositoryProvider);
+  return repo.getDailyTotals(
+    bookId: bookId,
+    startDate: DateTime(month.year, month.month, 1),
+    endDate: DateTime(month.year, month.month + 1, 0, 23, 59, 59),
   );
 }
 ```
 
-### Key Data Flows (v1.1-specific)
+### `repository_providers.dart` (ONE file per feature)
 
-1. **Personal happiness (HomePage + Analytics):** `bookId` (current book) → `happinessReportProvider` → `HappinessReport` (4 metrics + optional `BestJoyMoment`). Cached per `(bookId, year, month)`.
-2. **Family happiness (HomePage, group mode only):** `currentGroupId` → `familyHappinessProvider` → `FamilyHappiness` (2 metrics aggregated across all books in the group's shadow). Conditionally subscribed via `isGroupModeProvider` (verified in `lib/features/family_sync/presentation/providers/state_active_group.g.dart` line 40).
-3. **Joy density trend (Analytics):** `bookId` → `joyPerYenTrendProvider` → `List<DailyJoyPoint>` from `getDailySatisfactionTrend` + per-day soul amount join. Drives `JoyDensityTrendChart`.
-4. **Satisfaction histogram (Analytics):** `bookId` → derived selector on `happinessReportProvider.distribution` → `SatisfactionHistogram` widget. No new provider — selector inside widget.
-
----
-
-## Answers to Specific Questions
-
-### Q1. Where does the new HappinessReport domain model live?
-
-**Recommendation:** `lib/features/analytics/domain/models/happiness_report.dart`. Same directory as `monthly_report.dart`, `expense_trend.dart`, `budget_progress.dart`.
-
-**Reasoning:**
-- Domain models for analytics-style aggregates are already grouped here (verified directory listing). Adding `happiness_report.dart` continues the pattern.
-- `HappinessReport` is purely an analytics aggregate — it has no behavior of its own, no repository interface beyond what `AnalyticsRepository` already covers.
-- Putting it under a new `features/happiness/` would violate the Thin Feature rule's spirit because it would force `lib/application/analytics/` to import from `features/happiness/domain/` while continuing to import `features/analytics/domain/` — bidirectional coupling.
-
-### Q2. New feature module `features/happiness/` or extend `features/analytics/`?
-
-**Recommendation:** **Extend `features/analytics/`.** Do NOT create `features/happiness/`.
-
-**Reasoning (from existing project pattern):**
-- Existing pattern: `features/{accounting, home, analytics, settings, family_sync, profile, dual_ledger}` — modules are scoped by **user-perceived surface area**, not by metric category. There is no `features/transactions/` despite transactions being a major domain — it lives under `accounting`.
-- `Happiness` is not a screen-level surface. It surfaces inside `HomePage` (the `home` feature) and inside `AnalyticsScreen` (the `analytics` feature). A new module would be a domain bag without screens.
-- The 3 dormant DAO methods are already on `AnalyticsDao`, the repo is `AnalyticsRepository`, the use cases live in `application/analytics/`. Renaming or splitting these to fit a happiness module would be a churn-heavy refactor with no benefit.
-- Counter-evidence consulted: there is no `features/voice/` either even though voice has its own `application/voice/` directory (verified `STRUCTURE.md` line 201) — voice surfaces inside `accounting`. Same logic applies: happiness surfaces inside `home` + `analytics`.
-
-**Where the metric *concept* lives in code:**
-- Models + repo signature: `features/analytics/domain/`
-- Computation: `application/analytics/`
-- UI in HomePage: `features/home/presentation/`
-- UI in Analytics: `features/analytics/presentation/`
-
-### Q3. One use case (`GetHappinessReportUseCase`) or split per metric / per audience?
-
-**Recommendation:** Three use cases, split by **audience boundary**, not by metric:
-
-| Use Case | Returns | Used By |
-|----------|---------|---------|
-| `GetHappinessReportUseCase` | `HappinessReport` (4 personal metrics) | HomePage SoulFullnessCard + Analytics summary |
-| `GetBestJoyMomentUseCase` | `BestJoyMoment?` (single tx) | Embedded in `HappinessReport` and standalone for re-use |
-| `GetFamilyHappinessUseCase` | `FamilyHappiness` (2 cooperative metrics) | HomePage only (group mode), Analytics if extended later |
-
-**Reasoning:**
-- **Personal vs Family is a real boundary.** Personal metrics scope to `bookId`. Family metrics scope to `groupId` and aggregate across multiple books (the current book + shadow books from other family members). Different inputs → different use cases.
-- **`BestJoyMoment` is a separate use case** because (a) it's the only one that returns a single transaction (others return aggregates), (b) it has a different DAO query shape (argmax not avg/sum), and (c) the story card may be re-used standalone in future screens (e.g., a "this month's joy highlight" notification).
-- **Don't split the 4 personal metrics into 4 use cases** — they share the same DAO calls. One round trip, one Freezed model, one provider. Splitting them would force 4 parallel DAO calls per home screen render.
-
-**Counter-pattern (rejected):** "One use case per metric." Would require 4–6 separate Riverpod providers on every home rebuild. Existing `GetMonthlyReportUseCase` has 8+ derived fields in `MonthlyReport` and is shipped as one — same logic applies.
-
-### Q4. Where does Best Joy per ¥ belong — new DAO query or in-memory from existing satisfaction data?
-
-**Recommendation:** **New DAO query.** Add `getBestJoyMoment` to `AnalyticsDao`.
-
-**Reasoning:**
-- The existing `getSatisfactionDistribution` and `getDailySatisfactionTrend` aggregate over groups (`GROUP BY soul_satisfaction`, `GROUP BY day`) — they discard transaction-level identity. You **cannot** recover the single best transaction's `id`, `categoryId`, `merchant`, `note` from these aggregates.
-- The required argmax query is `SELECT * FROM transactions WHERE ledger_type='soul' AND type='expense' AND is_deleted=0 AND timestamp BETWEEN ? AND ? AND amount > 0 ORDER BY (CAST(soul_satisfaction AS REAL) / amount) DESC LIMIT 1`. Trivial in SQL, expensive in-memory (would require pulling every soul transaction back through the encryption layer).
-- DAO-level filter respects the soul-only constraint without leaking the rule to the use case.
-- Pulling all transactions into memory would also defeat the v1.0 performance principle in `analytics_dao.dart` line 86: "Uses database-level SUM/GROUP BY for performance (<2s target)."
-
-**Encryption note (HIGH confidence):** The `note` column is field-encrypted (ChaCha20-Poly1305 via `FieldEncryptionService`, applied transparently in `TransactionRepositoryImpl`). The argmax DAO query should NOT return `note` — only return id, amount, categoryId, satisfaction, timestamp, merchant. If the UI needs `note` decrypted (e.g., to show "今天的午餐"), call the existing `TransactionRepository.findById(id)` from the use case after the argmax to get a fully-decrypted `Transaction` model. This avoids decrypt churn for the 99% case where `note` is empty.
-
-**Recommended DAO signature:**
 ```dart
-// lib/data/daos/analytics_dao.dart
-Future<BestJoyMomentRow?> getBestJoyMoment({
-  required String bookId,
-  required DateTime startDate,
-  required DateTime endDate,
-}) async { ... }
-
-class BestJoyMomentRow {
-  final String transactionId;
-  final int amount;
-  final int satisfaction;
-  final String categoryId;
-  final DateTime timestamp;
-  // Note: no 'note' field — fetch via TransactionRepository if needed.
+// Reuses existing transactionRepository — no second impl needed
+@riverpod
+ListTransactionRepository listTransactionRepository(Ref ref) {
+  // ListTransactionRepositoryImpl wraps TransactionRepositoryImpl
+  // OR: simply cast/delegate to the existing provider
+  return ref.watch(transactionRepositoryProvider) as ListTransactionRepository;
+  // TransactionRepositoryImpl implements both interfaces after findByBookIds is added
 }
-```
-
-### Q5. Provider organization — extend `state_analytics.dart` or new `state_happiness.dart`?
-
-**Recommendation:** **New `state_happiness.dart` in `features/analytics/presentation/providers/`.** Do not extend `state_analytics.dart`.
-
-**Reasoning:**
-- `state_analytics.dart` is currently 60 lines (verified) with 4 providers. Adding 4 more would push it over the cohesion line and toward the 200–400-line target ceiling in the project's coding-style rule.
-- File-per-aggregate matches the rest of the analytics feature: `monthly_report.dart` model + `expense_trend.dart` model + `budget_progress.dart` model are all separate files, so providers per aggregate is natural.
-- Home + Analytics both import from this single file (Home already imports `state_analytics.dart` per `home_screen.dart` line 12). Single source of truth.
-- Naming convention is already `state_<aggregate>.dart` (verified `STRUCTURE.md` line 161; existing files: `state_home.dart`, `state_shadow_books.dart`, `state_today_transactions.dart`, `state_analytics.dart`, `state_active_group.dart`).
-
-**File contents (proposed):**
-```dart
-// lib/features/analytics/presentation/providers/state_happiness.dart
-@riverpod
-Future<HappinessReport> happinessReport(Ref, {bookId, year, month}) => ...;
 
 @riverpod
-Future<BestJoyMoment?> bestJoyMoment(Ref, {bookId, year, month}) => ...;
-
-@riverpod
-Future<FamilyHappiness?> familyHappiness(Ref, {year, month}) => ...;
-
-@riverpod
-Future<List<DailyJoyPoint>> joyDensityTrend(Ref, {bookId, year, month}) => ...;
-```
-
-**Use case providers** stay in `lib/application/analytics/repository_providers.dart` (existing pattern: use case providers co-locate with the use case definition; verified `lib/application/analytics/repository_providers.dart`).
-
-### Q6. ARB rename pass blast radius
-
-**Verified consumer map (from `grep -rn` over `lib/`):**
-
-| ARB key | Used in `lib/` | Used in `test/` |
-|---------|----------------|-----------------|
-| `survivalLedger` | `home_screen.dart:270`, `ledger_ratio_chart.dart:94` | `home_screen_test.dart:389,426` |
-| `soulLedger` | `home_screen.dart:285`, `ledger_ratio_chart.dart:100` | `home_screen_test.dart:390,427` |
-| `homeSoulFullness` | `soul_fullness_card.dart:60` | `soul_fullness_card_test.dart:48,56,58` |
-| `homeHappinessROI` | `soul_fullness_card.dart:133` | (none) |
-| `homeRecentSoulExpense` | `soul_fullness_card.dart:156` | (none) |
-| `satisfactionLevel` | `soul_fullness_card.dart:98`, `transaction_confirm_screen.dart:662` | (none) |
-
-**Total source touch: 7 production files + 2 test files.**
-
-**Files needing edit (concrete list):**
-1. `lib/l10n/app_ja.arb` — rename 4 keys' values
-2. `lib/l10n/app_zh.arb` — rename 4 keys' values
-3. `lib/l10n/app_en.arb` — rename 4 keys' values
-4. `lib/features/home/presentation/screens/home_screen.dart` — 2 ARB call sites
-5. `lib/features/analytics/presentation/widgets/ledger_ratio_chart.dart` — 2 ARB call sites
-6. `lib/features/home/presentation/widgets/soul_fullness_card.dart` — 3 ARB call sites (will be substantially rebuilt regardless)
-7. `lib/features/accounting/presentation/screens/transaction_confirm_screen.dart` — 1 site (`satisfactionLevel`; **note: the project description says to rename only 4 specific keys; `satisfactionLevel` is not in that list — leave it alone**)
-8. `test/features/home/presentation/screens/home_screen_test.dart` — 4 ARB references (re-verify after rename)
-9. `test/widget/features/home/presentation/widgets/soul_fullness_card_test.dart` — 3 ARB references
-
-**Important nuance — ARB key names vs values:**
-The milestone description says "ARB-only renaming." Read carefully:
-- The **values** (Chinese / Japanese / English text) change in all 3 ARB files.
-- The **keys** (`soulLedger`, `survivalLedger`, `homeHappinessROI`, `homeSoulFullness`) — should they also rename?
-
-**Recommendation:** **Keep ARB keys unchanged; only change values.** Reasons:
-- Keys are referenced from 7 source files. Renaming keys forces broader code edits without semantic benefit.
-- ARB key parity is locked across `ja/zh/en` (per CLAUDE.md "i18n Rules"). Renaming keys requires updating all 3 files atomically anyway.
-- Future translation-platform exports use keys as identifiers. Stability matters.
-- `homeHappinessROI` will display "幸福密度 / ハピネス密度 / Joy / ¥" — the key name becomes slightly misleading (says "ROI", value says "density"), but this is technical debt outside v1.1's scope. v1.2+ can do a deliberate key-rename pass with proper grep-and-replace.
-
-**If you DO decide to rename keys** (not recommended for v1.1): use the global codebase-rename tool, NOT manual edits — `home_screen.dart` line 270 is hand-editable, but the 3 generated `app_localizations_*.dart` files (~3500 lines each, lib/generated/) are regenerated from ARB by `flutter gen-l10n` and any drift will cause runtime crashes.
-
-### Q7. Inline-helper migration — `_computeSatisfaction` and `_computeHappinessROI`
-
-**Verified current state:** Both helpers live in `home_screen.dart` lines 345–367. Both are short (15 and 6 lines respectively). Neither is shared.
-
-**Recommendation:** **Move both into `GetHappinessReportUseCase`.** Delete from `home_screen.dart`.
-
-**Reasoning:**
-1. **They are wrong as currently implemented.** `_computeHappinessROI` returns `report.soulTotal / report.totalExpenses` (line 364–366), which is **soul's share of total expenses**, NOT a joy-per-yen ratio. The PROJECT.md flags this explicitly: *"replace `Happiness ROI` (misleading: was budget-share, not joy density)"*. Keeping it in the screen makes the bug invisible to use case tests.
-2. **They use the wrong data window.** `_computeSatisfaction` reads `todayTransactionsProvider` (today's tx), not month-to-date. v1.1 specifies "本月累计" (month-to-date) per PROJECT.md "时间窗：本月累计". The screen-level helper has no business owning a time-window decision.
-3. **Test coverage is the real benefit, not LOC.** The current `_compute*` methods are private — they cannot be unit-tested. Moving them into a use case puts them under the existing 70%+ coverage requirement (`coverde --deferred` mechanism per CLAUDE.md "Active CI guardrails").
-4. **Riverpod-friendly.** Once inside the use case, the result becomes part of `HappinessReport` and is trivially memoized via `happinessReportProvider`.
-
-**Migration steps:**
-1. Delete `_computeSatisfaction` (line 345) — replaced by `HappinessReport.avgSatisfaction` from `getSoulSatisfactionOverview`.
-2. Delete `_computeHappinessROI` (line 362) — replaced by `HappinessReport.joyPerYen` (correct formula: Σ satisfaction × count / Σ amount). The misleading `soulTotal/totalExpenses` ratio is removed entirely.
-3. Update `home_screen.dart` line 134–135 to read from `HappinessReport` directly:
-   ```dart
-   reportAsync.when(
-     data: (report) => SoulFullnessCard(report: report, ...),
-     ...
-   )
-   ```
-
-### Q8. Build order & dependency chain
-
-**Recommended phase order** (each step buildable + testable independently; respects layer dependencies in `Presentation → Application → Domain ← Data ← Infrastructure`):
-
-```
-Phase A (Domain — establish models & contracts)
-  A1. lib/features/analytics/domain/models/analytics_aggregate.dart
-        + add SatisfactionOverview, SatisfactionDistribution, DailySatisfaction, BestJoyMomentRow domain types
-  A2. lib/features/analytics/domain/models/happiness_report.dart  (Freezed)
-  A3. lib/features/analytics/domain/models/best_joy_moment.dart   (Freezed)
-  A4. lib/features/analytics/domain/models/family_happiness.dart  (Freezed)
-  A5. lib/features/analytics/domain/repositories/analytics_repository.dart
-        + 4 new method signatures
-  --- run build_runner; verify import_guard (Domain has zero outer deps) ---
-
-Phase B (Data — DAO + Repository)
-  B1. lib/data/daos/analytics_dao.dart
-        + getBestJoyMoment() method only (3 others already exist)
-  B2. lib/data/repositories/analytics_repository_impl.dart
-        + 4 method impls (DAO result → domain mapping)
-  --- write DAO tests + repo tests; run flutter test ---
-
-Phase C (Application — Use Cases)
-  C1. lib/application/analytics/get_happiness_report_use_case.dart
-  C2. lib/application/analytics/get_best_joy_moment_use_case.dart
-  C3. lib/application/analytics/get_family_happiness_use_case.dart
-  C4. lib/application/analytics/repository_providers.dart
-        + 3 new @riverpod use case providers
-  --- run build_runner; write use-case tests; verify joyPerYen formula ---
-
-Phase D (Presentation Providers)
-  D1. lib/features/analytics/presentation/providers/state_happiness.dart
-        + 4 @riverpod async providers
-  --- run build_runner ---
-
-Phase E (Widgets — Home)
-  E1. lib/features/home/presentation/widgets/best_joy_moment_card.dart        (NEW — pure widget)
-  E2. lib/features/home/presentation/widgets/family_highlights_card.dart      (NEW — pure widget)
-  E3. lib/features/home/presentation/widgets/soul_fullness_card.dart           (REBUILT — interface change)
-  --- write widget tests for each in isolation ---
-
-Phase F (Widgets — Analytics)
-  F1. lib/features/analytics/presentation/widgets/satisfaction_histogram.dart  (NEW)
-  F2. lib/features/analytics/presentation/widgets/joy_density_trend_chart.dart (NEW)
-  F3. lib/features/analytics/presentation/widgets/joy_ledger_statistics_section.dart (NEW)
-  --- write widget tests ---
-
-Phase G (Screens — Wire Up)
-  G1. lib/features/home/presentation/screens/home_screen.dart
-        - Delete _computeSatisfaction, _computeHappinessROI
-        - Wire happinessReportProvider + familyHappinessProvider (group mode)
-        - Pass HappinessReport to rebuilt SoulFullnessCard
-  G2. lib/features/analytics/presentation/screens/analytics_screen.dart
-        - Insert JoyLedgerStatisticsSection between LedgerRatioChart and BudgetProgressList
-  --- update home_screen_test.dart, soul_fullness_card_test.dart ---
-
-Phase H (i18n — ARB Rename Pass)
-  H1. lib/l10n/app_ja.arb     (4 value renames + ~12 new keys for new tiles)
-  H2. lib/l10n/app_zh.arb     (same)
-  H3. lib/l10n/app_en.arb     (same)
-  H4. flutter gen-l10n        (regenerates lib/generated/app_localizations*.dart)
-  --- ARB key parity test (existing CI guardrail) must pass ---
-
-Phase I (Verification & QA)
-  I1. flutter analyze (must be 0 issues)
-  I2. dart run custom_lint (must be 0 errors — import_guard, riverpod_lint)
-  I3. flutter test --coverage (per-file ≥70% on touched files)
-  I4. build_runner clean-diff CI guardrail
-  I5. Manual smoke test: HomePage solo mode, HomePage group mode, AnalyticsScreen
-```
-
-**Why this order:**
-- **A → B → C** is the canonical Clean Architecture build direction (Domain → Data → Application). Reversing produces compile errors because outer layers depend on inner. Verified in `STRUCTURE.md` "Where to Put New Code" line 203.
-- **D before E/F** because widgets read from providers — providers must compile first.
-- **E/F before G** because screens compose widgets — widgets must compile first.
-- **H last** because ARB rename is value-only and decoupled from logic. Doing it earlier risks merge churn if widget text changes during dev. Doing it last lets all visible text get its final form in one pass.
-- **I after H** because the ARB-key-parity test in CI gates merges (per CLAUDE.md / v1.0 guardrails).
-
-**Critical dependency that drives the order:**
-`build_runner` regenerates `*.g.dart` for Freezed models AND for `@riverpod` providers. Skipping it between phases produces stale compilation. Run after each of A, B, C, D before moving on.
-
----
-
-## Anti-Patterns (specific to v1.1)
-
-### Anti-Pattern 1: Adding `application/` or `data/daos/` Inside `features/happiness/`
-
-**What people do:** Create `features/happiness/application/get_happiness_report_use_case.dart` because "happiness is its own concern."
-**Why it's wrong:** Violates the Thin Feature rule (CLAUDE.md "Thin Feature Rule" line 32; structurally enforced by `import_guard` per `.planning/PROJECT.md` line 75). CI will reject the PR.
-**Do this instead:** Use cases go in `lib/application/analytics/`. Period.
-
-### Anti-Pattern 2: Reading `Transaction` Model Directly in HomePage to Compute Metrics
-
-**What people do:** Subscribe to `todayTransactionsProvider` (or equivalent) in `home_screen.dart` and compute averages inline (this is exactly what `_computeSatisfaction` does today, lines 345–358).
-**Why it's wrong:** (a) Pulls every transaction through the field-decryption layer for `note` even though metrics don't need notes — wasted CPU; (b) Cannot be unit-tested (private method on widget); (c) Duplicates logic if Analytics screen also wants the metric; (d) Wrong time-window (today vs. month).
-**Do this instead:** All metric computation lives in `application/analytics/`. UI consumes `HappinessReport` Freezed model only.
-
-### Anti-Pattern 3: Bypassing the Repository for the Argmax Query
-
-**What people do:** Add `getBestJoyMoment` directly to `TransactionRepository` because "it returns a Transaction."
-**Why it's wrong:** `TransactionRepository` is for individual-transaction CRUD. The argmax is an analytics aggregate (even though it returns a single record). Mixing them couples analytics to the transactions encryption pipeline (`note` decryption on every read — see `lib/data/repositories/transaction_repository_impl.dart`).
-**Do this instead:** DAO returns `BestJoyMomentRow` (no `note`). If UI needs the full transaction (with decrypted `note`), call `TransactionRepository.findById(rowId)` in the use case as a second step. Best-case: zero extra decryption (no `note`); worst-case: one decryption.
-
-### Anti-Pattern 4: Renaming ARB Keys Mid-Milestone
-
-**What people do:** "Let's rename `homeHappinessROI` to `homeJoyDensity` while we're at it."
-**Why it's wrong:** Forces simultaneous edit to 3 ARB files + 1 source file + at minimum the `lib/generated/app_localizations*.dart` regeneration + ARB-key-parity CI gate. Any drift breaks the build. Out-of-scope drift risk.
-**Do this instead:** Change ARB **values** in v1.1; defer **key** renames to v1.2+ as a focused commit.
-
-### Anti-Pattern 5: Conditionally Subscribing Family Provider Inside Widget
-
-**What people do:** `if (isGroupMode) ref.watch(familyHappinessProvider)` inside a widget's `build()`.
-**Why it's wrong:** Riverpod tracks subscription identity per build. Conditional `ref.watch` works but produces fragile rebuild graphs and breaks `keepAlive` reasoning.
-**Do this instead:** Always subscribe at the screen level; the provider itself short-circuits when there's no active group:
-```dart
-@riverpod
-Future<FamilyHappiness?> familyHappiness(Ref ref, {required int year, required int month}) async {
-  final groupId = ref.watch(activeGroupIdProvider);
-  if (groupId == null) return null;
-  return ref.watch(getFamilyHappinessUseCaseProvider).execute(groupId: groupId, year: year, month: month);
+GetListTransactionsUseCase getListTransactionsUseCase(Ref ref) {
+  return GetListTransactionsUseCase(
+    transactionRepository: ref.watch(transactionRepositoryProvider),
+  );
 }
 ```
 
 ---
 
-## Integration Points
+## Recommended Project Structure (v1.4 additions)
 
-### External Services
+```
+lib/
+├── application/list/                                    ★ NEW
+│   ├── get_list_transactions_use_case.dart
+│   └── list_use_case_models.dart
+│
+├── data/
+│   ├── daos/
+│   │   └── transaction_dao.dart                         ◐ + findByBookIds
+│   └── repositories/
+│       └── transaction_repository_impl.dart              ◐ + findByBookIds impl
+│
+├── features/accounting/domain/repositories/
+│   └── transaction_repository.dart                       ◐ + findByBookIds abstract
+│
+├── features/home/presentation/screens/
+│   └── main_shell_screen.dart                            ◐ line 111: ListScreen
+│
+├── features/list/                                        ★ NEW feature module
+│   ├── domain/
+│   │   ├── models/
+│   │   │   ├── list_filter_state.dart                   ★ (Freezed)
+│   │   │   ├── list_filter_state.freezed.dart           generated
+│   │   │   ├── list_filter_state.g.dart                 generated
+│   │   │   ├── list_sort_config.dart                    ★ (Freezed)
+│   │   │   ├── list_sort_config.freezed.dart            generated
+│   │   │   └── list_sort_config.g.dart                  generated
+│   │   └── repositories/
+│   │       └── list_transaction_repository.dart         ★ interface
+│   └── presentation/
+│       ├── providers/
+│       │   ├── repository_providers.dart                ★
+│       │   ├── repository_providers.g.dart              generated
+│       │   ├── state_list_filter.dart                   ★
+│       │   ├── state_list_filter.g.dart                 generated
+│       │   ├── state_list_transactions.dart             ★
+│       │   ├── state_list_transactions.g.dart           generated
+│       │   ├── state_list_calendar.dart                 ★
+│       │   └── state_list_calendar.g.dart               generated
+│       ├── screens/
+│       │   └── list_screen.dart                         ★
+│       └── widgets/
+│           ├── list_calendar_header.dart                ★
+│           ├── list_month_summary.dart                  ★
+│           ├── list_transaction_tile.dart               ★
+│           ├── list_sort_filter_bar.dart                ★
+│           └── list_empty_state.dart                    ★
+│
+├── shared/constants/
+│   └── sort_config.dart                                  ★ SortField + SortDirection enums
+│
+└── l10n/
+    ├── intl_ja.arb                                       ◐ new keys for list UI
+    ├── intl_zh.arb                                       ◐
+    └── intl_en.arb                                       ◐
+```
 
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| SQLCipher (existing) | Drift `customSelect` in DAO | New `getBestJoyMoment` query — parameterized, soul-only, expense-only, not-deleted. Verify against schema v15 (current). |
-| Field encryption (existing) | Transparent in `TransactionRepositoryImpl.findById` | `BestJoyMomentRow` deliberately omits `note` to avoid unnecessary decryption. |
-| flutter_localizations (existing) | ARB files + `flutter gen-l10n` | Re-run after ARB value edits. Parity gate exists in CI. |
+---
 
-### Internal Boundaries
+## Build Order (Phase Sequence)
 
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| Home ↔ Analytics presentation | Direct provider import (Home imports `state_happiness.dart` from `analytics/presentation/providers/`) | Already-established pattern (Home imports `state_analytics.dart`). NOT a layer violation — both are presentation. |
-| Application → Data | Through `AnalyticsRepository` interface | New methods land on the interface; impl adapts DAO. |
-| Application → Infrastructure | None added | No crypto/sync touches in v1.1. |
-| HomeScreen ↔ family_sync | Existing `isGroupModeProvider` from `state_active_group` | Reused — no new coupling. v1.1 adds `activeGroupIdProvider` reads inside `familyHappinessProvider`. |
-| Family happiness ↔ shadow books | Inside `GetFamilyHappinessUseCase`, query across all books in group | **Open question for roadmap:** how to enumerate group's book list — likely via existing `shadowBooksProvider` or a new use case. Flag for Phase A design. |
+Each phase is independently testable. Ordered by dependency (data → application → domain → providers → widgets → screen → i18n).
 
-### Cross-Cutting Concerns (v1.1 deltas)
+### Phase A — Data Layer Extension
 
-- **Logging:** Use `dev.log(..., name: 'Analytics')` — existing channel.
-- **Error handling:** Use cases return `Result<HappinessReport>` per `lib/shared/utils/result.dart` envelope (existing convention).
-  - ⚠️ **Discrepancy noted:** Existing `analytics/` use cases throw via Drift exceptions → caught at `AsyncValue.when(error: ...)` in widgets. They don't use `Result<T>` despite the project-wide convention (verified by reading `get_monthly_report_use_case.dart` — no `Result` import). v1.1 should match the analytics module's local convention (throw + AsyncValue) rather than introducing `Result` mid-module. Document this in a Phase A note for roadmapper.
-- **i18n:** All metric labels via `S.of(context)`. New ARB keys needed (~12 estimated): `bestJoyMomentTitle`, `bestJoyMomentEmptyState`, `joyPerYenLabel`, `joyHighlightsLabel` ("小確幸"), `familyHighlightsTitle`, `familyFavoriteCategoryTitle`, `joyDensityTrendTitle`, `satisfactionHistogramTitle`, etc. Final list emerges during widget design (Phase E/F).
-- **Encryption:** Argmax query reads only non-encrypted columns. Acceptable. Story card UI displays category icon + amount + satisfaction emoji — none of which require `note` decryption.
+**Deliverables:**
+- `lib/shared/constants/sort_config.dart` — `SortField` + `SortDirection` enums
+- `lib/data/daos/transaction_dao.dart` — `findByBookIds()`
+- `lib/features/accounting/domain/repositories/transaction_repository.dart` — abstract `findByBookIds()`
+- `lib/data/repositories/transaction_repository_impl.dart` — impl
+
+**Tests:** `test/data/daos/transaction_dao_multi_book_test.dart` — multi-book, date-range, ledger filter, sort variants, deleted-excluded, 0-rows
+
+No migration (query-only extension). No UI, no providers.
+
+**Unblocks:** Phase B.
+
+---
+
+### Phase B — Application Use Case
+
+**Deliverables:**
+- `lib/application/list/list_use_case_models.dart` — `GetListParams`
+- `lib/application/list/get_list_transactions_use_case.dart`
+
+**Tests:** unit test with `MockTransactionRepository` — verify params forwarded, `Result.error` on empty bookIds
+
+**Unblocks:** Phase C.
+
+---
+
+### Phase C — Domain Models + Repository Interface
+
+**Deliverables:**
+- `lib/features/list/domain/models/list_filter_state.dart` (Freezed)
+- `lib/features/list/domain/models/list_sort_config.dart` (Freezed)
+- `lib/features/list/domain/repositories/list_transaction_repository.dart`
+- Run `build_runner` after Freezed additions
+
+**Unblocks:** Phase D.
+
+---
+
+### Phase D — Riverpod Providers + Shell Wiring
+
+**Deliverables:**
+- `lib/features/list/presentation/providers/repository_providers.dart`
+- `lib/features/list/presentation/providers/state_list_filter.dart`
+- `lib/features/list/presentation/providers/state_list_transactions.dart`
+- `lib/features/list/presentation/providers/state_list_calendar.dart`
+- `lib/features/home/presentation/screens/main_shell_screen.dart` — replace placeholder with `ListScreen(bookId: bookId)` (minimal: just make it compile)
+- Run `build_runner`
+
+**Tests:** provider unit tests with `ProviderContainer.test()` + `waitForFirstValue`:
+- solo mode: returns only own-book rows
+- group mode: returns own + shadow-book rows merged
+- day filter: Dart-side narrowing
+- text search: matches merchant
+
+**Unblocks:** Phase E, F.
+
+---
+
+### Phase E — Calendar Header Widget
+
+**Deliverables:**
+- `lib/features/list/presentation/widgets/list_calendar_header.dart` — month-nav arrows + calendar grid + per-day amount dots/labels + tap-day dispatches `listFilterStateProvider.selectDay()`
+- `lib/features/list/presentation/widgets/list_month_summary.dart` — month total expense label
+
+**Tests:** widget tests — day tap → `activeDayFilter` mutation; month nav → `selectedMonth` mutation; golden baselines ja/zh/en × light/dark
+
+**Unblocks:** Phase G.
+
+---
+
+### Phase F — Transaction Tile + Sort/Filter Bar
+
+**Deliverables:**
+- `lib/features/list/presentation/widgets/list_transaction_tile.dart` — category emoji, ledger color tag, date, amount, optional member tag; `onTap` → edit, `Dismissible` → delete
+- `lib/features/list/presentation/widgets/list_sort_filter_bar.dart` — sort chip, ledger chips, category chip, search `TextField`
+- `lib/features/list/presentation/widgets/list_empty_state.dart`
+
+**Tests:**
+- Tile: tap navigates to `TransactionEditScreen`, swipe triggers confirm dialog, confirmed delete calls `deleteTransactionUseCaseProvider`
+- Sort/filter bar: chip taps mutate filter state; search field change mutates `searchQuery`
+
+**Unblocks:** Phase G.
+
+---
+
+### Phase G — List Screen Assembly + Full Integration
+
+**Deliverables:**
+- `lib/features/list/presentation/screens/list_screen.dart`
+  - `CustomScrollView` with `SliverToBoxAdapter` (calendar header) + `SliverToBoxAdapter` (sort/filter bar) + `SliverList` (tiles) + pull-to-refresh
+  - On edit-return(true) and post-delete: `ref.invalidate` of list + calendar + home providers
+  - Connects `listCalendarProvider(bookId: bookId, month: filter.selectedMonth)` to header
+
+**Tests:** integration test — month switch → calendar rebuilds, day tap → list filters, search → list narrows, delete → tile removed
+
+---
+
+### Phase H — ARB + i18n Completion
+
+**Deliverables:** All new keys added to `intl_ja.arb`, `intl_zh.arb`, `intl_en.arb`; `flutter gen-l10n` clean.
+
+Estimated new ARB keys:
+- Sort labels: `sortByDate`, `sortByEditTime`, `sortByAmount`, `sortAscending`, `sortDescending`
+- Filter labels: `filterByLedger`, `filterByCategory`, `filterByMember`, `filterAllLedgers`, `filterAllCategories`
+- Search: `searchHint`
+- Calendar: `calendarMonthTitle` (e.g. "YYYY年MM月")
+- Summary: `monthTotalExpense`
+- Empty states: `listEmptyNoTransactions`, `listEmptyFiltered`
+- Delete: `deleteTransactionConfirmTitle`, `deleteTransactionConfirmBody`, `deleteTransactionConfirmOk`, `deleteTransactionConfirmCancel`
+- Member: `memberLabel` (e.g. "by {name}")
+
+ARB key parity must be locked across all 3 locales before Phase G golden tests are finalized.
+
+---
+
+## Integration Points Summary
+
+| Point | Existing File | Action |
+|-------|--------------|--------|
+| Shell tab placeholder | `main_shell_screen.dart:111` | Replace `Center(child: Text(...))` with `ListScreen(bookId: bookId)` |
+| Edit from list | `transaction_edit_screen.dart` | Reuse as-is; push with `Transaction`, pop(true) triggers invalidate |
+| Delete from list | `deleteTransactionUseCaseProvider` (accounting) | `ref.watch(...)` in list tile, same as edit path used by home screen |
+| Shadow book IDs | `shadowBooksProvider` (home) | Watch in `state_list_transactions.dart` for family branch |
+| Group mode guard | `isGroupModeProvider` (family_sync) | Gate family branch in list provider |
+| Calendar daily data | `analyticsRepositoryProvider.getDailyTotals()` | Watch in `state_list_calendar.dart`; no new DAO method |
+| Amount formatting | `NumberFormatter` + `currentLocaleProvider` | Same pattern as `HomeScreen` (`FormatterService`) |
+| Date formatting | `DateFormatter` + `currentLocaleProvider` | Same pattern as `HomeScreen` |
+| Ledger colors | `AppColors.survival`, `AppColors.soul` | `lib/core/theme/app_colors.dart` — unchanged |
+| Ledger tag color | `AppThemeColors.wmCard`, etc. | Same theming surface as `HomeTransactionTile` |
+| Amount text style | `AppTextStyles.amountSmall` | `lib/core/theme/app_text_styles.dart` — tabular figures alignment |
+| Transaction tile shell | `HomeTransactionTile` (home/widgets) | Do NOT reuse directly — List tile needs date column + member tag. Create `ListTransactionTile` composing same color/style constants. |
+| Home refresh after edit/delete | `main_shell_screen.dart` post-FAB pattern | Mirror the `ref.invalidate(todayTransactionsProvider, monthlyReportProvider, ...)` block |
+
+---
+
+## Key Constraints
+
+1. **No Drift migration required.** The `transactions` table (schema v17) already has all required columns. `findByBookIds` is a query-only extension.
+
+2. **`note` decryption on shadow books.** Shadow books' notes were encrypted with the originating device's key — local device cannot decrypt them. `TransactionRepositoryImpl._toModel()` calls `decryptField()` and the caller should handle `null` note gracefully. List tile renders note as empty/omitted. No user-visible error.
+
+3. **`note` field is not text-searchable for shadow books.** The List search only matches `merchant` and `categoryId` for shadow rows; own-book rows allow `note` search. This is acceptable behavior for v1.4.
+
+4. **`import_guard` compliance.** `lib/features/list/` follows Thin Feature rule. `lib/application/list/` follows Application layer rules (no Presentation imports, no DAO/table imports). `SortField` in `lib/shared/constants/` avoids cross-feature domain imports.
+
+5. **Performance.** Monthly query with `limit=500` rows through the decrypt loop in `_toModel()` via `Future.wait` is acceptable (async parallel). If profiling reveals >200ms, the optimization path is lazy `note` decryption (decode only when edit screen opens, not during list load).
+
+6. **`activeGroupProvider` is `keepAlive: true`** — safe to watch in `listTransactionsProvider`.
+
+7. **`TransactionRepositoryImpl` satisfies `ListTransactionRepository` interface** after `findByBookIds` is added — no second repository implementation class. The list feature's `repository_providers.dart` simply delegates to the existing `transactionRepositoryProvider`.
+
+---
+
+## Anti-Patterns to Avoid
+
+### Anti-Pattern 1: Putting filter/sort logic in the DAO or use case
+Text search, day filter, and member filter belong Dart-side in the provider. The DAO handles: `bookIds IN (...)`, date range, `ledger_type`, `category_id`, and `ORDER BY`. Pushing text search into SQL requires `LIKE '%q%'` which cannot search the ChaCha20-Poly1305-encrypted `note` field. Keep search Dart-side.
+
+### Anti-Pattern 2: Creating a second TransactionRepository implementation
+`TransactionRepositoryImpl` will implement both `TransactionRepository` and `ListTransactionRepository` after `findByBookIds` is added. No second impl class — that would duplicate the field encryption logic.
+
+### Anti-Pattern 3: Assembling bookIds inside the use case
+Family data sourcing (shadow bookId enumeration) is a provider-level concern. The use case receives `bookIds: List<String>` as a plain parameter, making it testable without Riverpod or shadow book state.
+
+### Anti-Pattern 4: Reusing `HomeTransactionTile` directly
+The home tile assumes merchant+category+ledger-tag layout without a date column or member attribution tag. Create `ListTransactionTile`. Both tiles share `AppColors`, `AppTextStyles.amountSmall`, and `AppThemeColors` — but their layout signatures differ enough to warrant separate widgets.
+
+### Anti-Pattern 5: Calendar per-day rollup spanning shadow books
+Calendar shows own-book-only daily totals (`bookId = myBookId`). Summing all members' spending per day requires a different analytics query and is out of scope v1.4. Implementing it would require a new DAO variant in `AnalyticsDao` — flag as a future extension point.
 
 ---
 
@@ -660,37 +700,41 @@ Future<FamilyHappiness?> familyHappiness(Ref ref, {required int year, required i
 
 | Area | Confidence | Basis |
 |------|------------|-------|
-| Layer placement of new components | HIGH | Directly grounded in CLAUDE.md "Placement Decision Rule" + STRUCTURE.md "Where to Put New Code" + verified existing analogues (`analytics/`, `accounting/`). |
-| Use case structure | HIGH | Mirrors `GetMonthlyReportUseCase` exactly (read in full). |
-| DAO additions | HIGH | Verified `analytics_dao.dart` — 3 of 4 needed methods already exist; only `getBestJoyMoment` is genuinely new. |
-| ARB blast radius | HIGH | `grep -rn` over `lib/` and `test/` produced complete consumer map. |
-| Inline-helper migration | HIGH | Read both helpers; verified bug claim from PROJECT.md ("misleading: was budget-share"). |
-| Build order | HIGH | Standard Clean Architecture order; matches existing CI gates. |
-| Family-mode book enumeration | MEDIUM | `shadowBooksProvider` exists (verified in `home_screen.dart` line 18) but the exact wiring for cross-book aggregation needs roadmapper-level design. |
-| Result<T> vs throw decision | MEDIUM | Discrepancy between project-wide convention and existing analytics module convention surfaced during research. Roadmapper must pick one for v1.1. |
+| Feature placement (new `features/list/`) | HIGH | Direct inspection of `features/accounting/` scope; `main_shell_screen.dart:111` placeholder verified |
+| Family data sourcing (shadow books in local DB) | HIGH | `ShadowBookService`, `shadowBooksProvider`, `state_shadow_books.dart` read in full |
+| DAO extension (additive, no migration) | HIGH | `transactions_table.dart` schema v17 verified; `transaction_dao.dart` read in full |
+| Analytics DAO reuse for calendar | HIGH | `analytics_dao.dart` `getDailyTotals` verified; already called via `AnalyticsRepository` interface |
+| Edit-from-list path (reuse `TransactionEditScreen`) | HIGH | `transaction_edit_screen.dart` read in full; `pop(true)` pattern confirmed |
+| Delete path (reuse `deleteTransactionUseCaseProvider`) | HIGH | `delete_transaction_use_case.dart` read in full |
+| Provider dependency graph | HIGH | `isGroupModeProvider`, `shadowBooksProvider`, `activeGroupProvider` all verified |
+| Shadow `note` decryption behavior | MEDIUM | `TransactionRepositoryImpl._toModel()` calls `decryptField()` — exception handling not explicitly verified; confirm in Phase A |
+| ARB key count estimate (~20 new keys) | MEDIUM | Based on feature list; exact count emerges during Phase H widget design |
 
 ---
 
 ## Sources
 
-- `.planning/PROJECT.md` (read in full — milestone scope, locks, out-of-scope list)
-- `.planning/codebase/ARCHITECTURE.md` (read in full — v1.0 baseline architecture)
-- `.planning/codebase/STRUCTURE.md` (read in full — file-tree conventions, naming, decision tree)
-- `CLAUDE.md` (project rules — Thin Feature, Placement Decision Rule, common pitfalls)
-- `lib/data/daos/analytics_dao.dart` (read in full — 3 dormant methods verified at lines 230–327)
-- `lib/features/home/presentation/widgets/soul_fullness_card.dart` (read in full — current 2-tile layout)
-- `lib/features/home/presentation/screens/home_screen.dart` (lines 1–160 + 320–367 — `_computeSatisfaction` and `_computeHappinessROI` helpers)
-- `lib/application/analytics/get_monthly_report_use_case.dart` (read in full — use case template)
-- `lib/features/analytics/presentation/providers/state_analytics.dart` (read in full — provider template)
-- `lib/features/analytics/presentation/screens/analytics_screen.dart` (read in full — section composition pattern)
-- `lib/features/analytics/domain/repositories/analytics_repository.dart` (read in full — interface to extend)
-- `lib/features/analytics/domain/models/analytics_aggregate.dart` (read in full — domain types pattern)
-- `lib/data/repositories/analytics_repository_impl.dart` (lines 1–80 — DAO→domain mapping pattern)
-- `lib/application/analytics/repository_providers.dart` (read in full — use case provider wiring)
-- `lib/l10n/app_{en,ja,zh}.arb` (greppable inventory of 6 ARB keys)
-- Live `grep -rn` over `lib/` and `test/` for ARB consumers, helper methods, group-mode wiring, soulSatisfaction usage
+- `.planning/PROJECT.md` (v1.4 milestone scope, target features, out-of-scope)
+- `CLAUDE.md` (Thin Feature rule, Placement Decision Rule, Riverpod 3 conventions, Drift syntax)
+- `lib/features/home/presentation/screens/main_shell_screen.dart` (line 111 placeholder confirmed)
+- `lib/data/daos/transaction_dao.dart` (read in full — query surface, existing methods)
+- `lib/data/repositories/transaction_repository_impl.dart` (read in full — `_toModel`, `findByBookIds` gap)
+- `lib/features/accounting/domain/repositories/transaction_repository.dart` (read in full — interface to extend)
+- `lib/features/accounting/domain/models/transaction.dart` (schema: `bookId`, `timestamp`, `ledgerType`, fields)
+- `lib/data/tables/transactions_table.dart` (schema v17, indices confirmed)
+- `lib/application/family_sync/shadow_book_service.dart` (read in full — shadow book creation/lifecycle)
+- `lib/features/home/presentation/providers/state_shadow_books.dart` (read in full — family data pattern)
+- `lib/features/family_sync/presentation/providers/state_active_group.dart` (keepAlive confirmed)
+- `lib/features/accounting/presentation/screens/transaction_edit_screen.dart` (read in full — pop(true) pattern)
+- `lib/application/accounting/delete_transaction_use_case.dart` (read in full)
+- `lib/features/analytics/domain/repositories/analytics_repository.dart` (getDailyTotals interface)
+- `lib/data/daos/analytics_dao.dart` (getDailyTotals query pattern)
+- `lib/features/home/presentation/widgets/home_transaction_tile.dart` (read in full — NOT reusable for list)
+- `lib/features/home/presentation/widgets/transaction_list_card.dart` (read in full — card shell, reusable)
+- `lib/features/accounting/presentation/providers/repository_providers.dart` (provider patterns, delete/update)
+- Live directory inspection of all feature modules and application sub-domains
 
 ---
 
-*Architecture research for: v1.1 Happiness Metric & Display milestone*
-*Researched: 2026-05-01*
+*Architecture research for: v1.4 列表功能 — Home Pocket transaction list tab*
+*Researched: 2026-05-29*
