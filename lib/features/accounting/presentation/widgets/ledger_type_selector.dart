@@ -24,6 +24,7 @@ class LedgerTypeSelector extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         _chip(
           label: survivalLabel,

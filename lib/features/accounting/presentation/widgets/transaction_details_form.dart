@@ -786,20 +786,33 @@ class TransactionDetailsFormState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      l10n.expenseClassification,
-                      style: AppTextStyles.titleMedium.copyWith(
-                        color: isDark
-                            ? AppColorsDark.textPrimary
-                            : AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    LedgerTypeSelector(
-                      selected: _ledgerType,
-                      onChanged: (type) => setState(() => _ledgerType = type),
-                      survivalLabel: l10n.survivalExpense,
-                      soulLabel: l10n.soulExpense,
+                    // 260529-e5f: 用途 title and the ledger pills share one
+                    // row (pills on the right) so Card B is shorter and the
+                    // soul satisfaction picker below gets more vertical room.
+                    // Flexible wraps the title so a long localized label
+                    // ellipsises instead of overflowing the row.
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            l10n.expenseClassification,
+                            style: AppTextStyles.titleMedium.copyWith(
+                              color: isDark
+                                  ? AppColorsDark.textPrimary
+                                  : AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        LedgerTypeSelector(
+                          selected: _ledgerType,
+                          onChanged: (type) =>
+                              setState(() => _ledgerType = type),
+                          survivalLabel: l10n.survivalExpense,
+                          soulLabel: l10n.soulExpense,
+                        ),
+                      ],
                     ),
                     if (_ledgerType == LedgerType.soul) ...[
                       const SizedBox(height: 20),
