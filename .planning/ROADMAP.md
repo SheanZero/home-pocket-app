@@ -148,7 +148,24 @@ Plans:
   3. `listTransactionsProvider(bookId)` returns a `List<TaggedTransaction>` where text search queries against `searchQuery` match on category name, merchant, and note fields with AND-composition against the active ledger and category filters — verified with `ProviderContainer.test()` + `waitForFirstValue`
   4. `ListScreen` is reachable via the List tab in `MainShellScreen` (the `Center(child: Text(...))` placeholder at line 111 is replaced); `flutter analyze` is zero issues; `build_runner` diff is clean
 
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+**Wave 1**
+
+- [ ] 26-01-PLAN.md — TaggedTransaction + MemberTag Freezed VOs + import_guard + Wave 0 test stubs (Wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 26-02-PLAN.md — ListFilter Notifier (keepAlive:true) + getListTransactionsUseCaseProvider + filter notifier tests (Wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 26-03-PLAN.md — listTransactionsProvider + locale-aware text search + transactions provider tests (Wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 26-04-PLAN.md — ListScreen loading scaffold + main_shell_screen.dart wiring + human verify (Wave 4)
+
 **UI hint**: yes
 
 ---
@@ -230,7 +247,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 24. Data Layer Extension | 3/3 | Complete    | 2026-05-29 |
 | 25. Domain Models + Use Case | 2/2 | Complete    | 2026-05-29 |
-| 26. Providers + Shell Wiring | 0/TBD | Not started | - |
+| 26. Providers + Shell Wiring | 0/4 | Not started | - |
 | 27. Calendar Header + Month Summary | 0/TBD | Not started | - |
 | 28. Transaction Tile + Sort/Filter Bar | 0/TBD | Not started | - |
 | 29. List Screen Assembly + Family | 0/TBD | Not started | - |
