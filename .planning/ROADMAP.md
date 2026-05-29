@@ -122,7 +122,16 @@ Plans:
   3. `GetListTransactionsUseCase.execute(GetListParams)` returns `Result.error` when `bookIds` is empty, and forwards validated params to `TransactionRepository.findByBookIds(...)` — verified with a `MockTransactionRepository` unit test
   4. Changing sort field from `timestamp` to `amount` via `ListSortConfig.copyWith()` produces a new immutable object and does not mutate the original (Freezed `copyWith` contract)
 
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+**Wave 1**
+
+- [ ] 25-01-PLAN.md — ListSortConfig + ListFilterState Freezed VOs + import_guard configs + build_runner (Wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 25-02-PLAN.md — GetListTransactionsUseCase + GetListParams + Mocktail unit tests (Wave 2)
+
 **UI hint**: no
 
 ---
@@ -220,7 +229,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 24. Data Layer Extension | 3/3 | Complete    | 2026-05-29 |
-| 25. Domain Models + Use Case | 0/TBD | Not started | - |
+| 25. Domain Models + Use Case | 0/2 | Not started | - |
 | 26. Providers + Shell Wiring | 0/TBD | Not started | - |
 | 27. Calendar Header + Month Summary | 0/TBD | Not started | - |
 | 28. Transaction Tile + Sort/Filter Bar | 0/TBD | Not started | - |
