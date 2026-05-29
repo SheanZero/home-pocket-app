@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: 列表功能
-status: planning
-last_updated: "2026-05-29T03:18:38.158Z"
+status: roadmapped
+last_updated: "2026-05-29"
 last_activity: 2026-05-29
 progress:
-  total_phases: 0
+  total_phases: 7
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,17 +17,33 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-26 — v1.3 迭代帐本输入 milestone shipped)
+See: .planning/PROJECT.md (updated 2026-05-29 — v1.4 列表功能 milestone started)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes survival spending from soul spending
-**Current focus:** Planning next milestone (use `/gsd:new-milestone` to scope)
+**Current focus:** v1.4 列表功能 — build out the placeholder List tab into a full transaction overview
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 24 — Data Layer Extension (not yet started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-29 — Milestone v1.4 started
+Status: Roadmapped; ready to plan Phase 24
+Last activity: 2026-05-29 — Roadmap created for v1.4 (7 phases, 22 requirements mapped)
+
+**Next action:** `/gsd:plan-phase 24`
+
+## Phase Overview (v1.4)
+
+| Phase | Name | Requirements | Status |
+|-------|------|-------------|--------|
+| 24 | Data Layer Extension | LIST-02 | Not started |
+| 25 | Domain Models + Use Case | SORT-01, SORT-02, SORT-03, SORT-04 | Not started |
+| 26 | Providers + Shell Wiring | FILTER-01, FILTER-02, FILTER-03, FILTER-04 | Not started |
+| 27 | Calendar Header + Month Summary | CAL-01, CAL-02, CAL-03, CAL-04 | Not started |
+| 28 | Transaction Tile + Sort/Filter Bar | LIST-01, ROW-01, ROW-02, SORT-01–04, FILTER-01–04 | Not started |
+| 29 | List Screen Assembly + Family | LIST-04, FAM-01, FAM-02, FAM-03, FAM-04 | Not started |
+| 30 | i18n + Empty States + Golden Polish | LIST-03 | Not started |
+
+Note: SORT-01/02/03/04 and FILTER-01/02/03/04 are defined in Phases 25/26 respectively and first become fully user-observable in Phase 28. Their traceability maps to Phase 28 as the primary delivery phase per REQUIREMENTS.md.
 
 ## Last Milestone Snapshot (v1.3)
 
@@ -51,24 +67,37 @@ Last activity: 2026-05-29 — Milestone v1.4 started
 
 Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 + v1.3 decisions captured there with outcomes.
 
+**v1.4 locked product decisions (pre-implementation):**
+- Calendar per-day totals: own-book only in v1.4 (combined family calendar totals deferred to v1.5+)
+- Swipe-delete: confirm-only soft-delete, NO undo SnackBar in v1.4 (undo deferred — requires `RestoreTransactionUseCase`)
+- Filter state persistence: keepAlive under `IndexedStack` — filter/sort state persists across tab switches (decided in Phase 26)
+- Family "Mine only" shortcut: included in v1.4 (FAM-04)
+- Scope: expense-only; no income tracking; no month settlement/lock; no amount-range filter; no "New" badge
+
 ### Pending Todos
 
-None — v1.3 shipped 2026-05-26. Use `/gsd:new-milestone` to scope the next milestone.
+Roadmap created. Ready to plan Phase 24.
 
 ### Blockers / Concerns
 
-No active blockers. Carried-forward debt (cross-milestone):
+No active blockers for v1.4. Carried-forward debt (cross-milestone):
 
 - **FUTURE-TOOL-03** *(coverage-baseline-review)*: Review 70% coverage threshold (triggered post-v1.2; still open)
 - **FUTURE-QA-01** *(smoke-test-owner-driven)*: Owner runs smoke tests before v1 release
 - **FUTURE-DOC-01..06** *(documentation drift)*: 6 doc-related items from v1.0 close
-- **FUTURE-ARCH-04** *(security)*: `recoverFromSeed()` key-overwrite bug fix (held — security architecture out of scope per long-term project rule)
+- **FUTURE-ARCH-04** *(security)*: `recoverFromSeed()` key-overwrite bug fix (held — security architecture out of scope)
 - **v1.1 verification debt:** Phase 11 device/simulator UAT for AnalyticsScreen month chip + pull-to-refresh (human_needed)
-- **v1.2 verification debt:** Phase 13 + 17 missing VERIFICATION.md (live code wired + integration-verified at milestone close; per-phase verifier artifact never run)
+- **v1.2 verification debt:** Phase 13 + 17 missing VERIFICATION.md (live code wired + integration-verified at milestone close)
 - **v1.3 Nyquist debt:** Phase 18 + 21 missing VALIDATION.md; Phase 19 + 20 draft + `nyquist_compliant: false`; Phase 22 draft + `nyquist_compliant: true` — documentation-grade only
-- **v1.3 voice-flow polish backlog:** Phase 22 advisory WR-02/03/06/07/NEW-02/NEW-03 + IN-01/02/03 on `voice_input_screen.dart` (vacuous null check, async pipeline race, mocktail catch-all stub, addListener closure equality, spurious tear-down toast, double-parse, no permanent-error recovery affordance, dartdoc gap, missing localized error_audio assert); plus Phase 23 WR-06 `_voiceLocaleId` build-side reassignment functionally dead after mixin extraction. Candidate for v1.4+ VOICE-POLISH-V2 phase.
+- **v1.3 voice-flow polish backlog:** Phase 22 advisory WR-02/03/06/07/NEW-02/NEW-03 + IN-01/02/03 on `voice_input_screen.dart`; Phase 23 WR-06 `_voiceLocaleId` reassignment functionally dead. Candidate for v1.4+ VOICE-POLISH-V2 phase.
 - **MOD-005 OCR slot:** `ocr_review_screen.dart:54,58` hardcodes `EntrySource.manual` pending writer landing — annotated with `// MOD-005: flip to EntrySource.ocr when OCR writer ships (D-12)`. Schema accepts 'ocr' literal already (v1.2 schema v17).
 - **VOICE-EN-V2-01:** English voice parser skeleton only (Plan 23-03 `voice_corpus_en.dart`); no production en voice parser.
+
+**v1.4-specific risks to watch:**
+- Shadow-book `note` decryption: `TransactionRepositoryImpl._toModel()` exception handling for undecryptable shadow notes — verify in Phase 24
+- Ledger color constants: verify `AppColors.soul` / `AppColors.survival` against `lib/core/theme/app_colors.dart` before Phase 28 tile implementation (never use hardcoded hex)
+- `ProviderException` wrapping: all provider error test assertions must use `throwsA(isA<ProviderException>().having(...))` — enforce in every phase adding providers
+- Dual-ledger total contamination: calendar + month summary must filter `WHERE type = 'expense'` only — verify in Phase 27
 
 ### Quick Tasks Completed
 
@@ -153,19 +182,16 @@ No active blockers. Carried-forward debt (cross-milestone):
 
 ## Session Continuity
 
-Last session: 2026-05-26
-Stopped at: v1.3 milestone complete; archives written + commits pending
+Last session: 2026-05-29
+Stopped at: v1.4 roadmap created (7 phases, 22 requirements mapped)
 
-**Planned Next:** Run `/gsd:new-milestone` to scope the next milestone. Candidate themes carried in PROJECT.md.
+**Planned Next:** `/gsd:plan-phase 24` — Data Layer Extension
 
 ## Operator Next Steps
 
-- `/clear` then `/gsd:new-milestone` to scope the next milestone — questioning → research → requirements → roadmap
-- Candidate themes (from PROJECT.md):
-  - **MOD-005 OCR writer landing** — receipt → text → fields (v1.3 reserved architectural slot in `OcrReviewScreen` with MOD-005 marker; schema accepts 'ocr' literal already)
-  - **VOICE-POLISH-V2** — consolidate Phase 22 advisory WR-* + Phase 23 WR-06 into a focused polish phase
-  - **VOICE-EN-V2-01** — English voice parser (skeleton only in Plan 23-03)
-  - **FAMILY-V2-01/02/03** family privacy hardening
-  - **FUTURE-QA-01** release-readiness QA
-  - **TOOL-V2-01** fl_chart 1.x upgrade
-  - **FUTURE-DOC/TOOL** documentation/tooling cleanup
+- `/gsd:plan-phase 24` — start Phase 24: Data Layer Extension
+- Key decisions for Phase 24 implementer:
+  - Add `TransactionDao.findByBookIds(...)` + `.watch()` stream variant
+  - Extract `DateBoundaries` utility to `lib/shared/utils/date_boundaries.dart`
+  - Add chain-integrity-after-soft-delete test before any UI phase
+  - Verify shadow-book `note` decryption exception handling in `TransactionRepositoryImpl._toModel()`

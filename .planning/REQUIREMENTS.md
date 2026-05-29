@@ -76,8 +76,8 @@
 - **Reuse:** `AnalyticsDao/Repository.getDailyTotals()` for calendar rollups; `shadowBooksProvider` for family books; `TransactionEditScreen` + `DeleteTransactionUseCase` as-is.
 - **New DAO:** `findByBookIds(...)` (multi-book) + a `watch*` stream (no `watch()` queries exist today).
 - **Hash-chain:** swipe-delete soft-deletes only; add a chain-integrity-after-delete test.
-- **IndexedStack:** filter/search/sort state survives tab switches — decide keepAlive vs explicit reset before writing providers.
-- **Shared month-boundary util:** consolidate the `DateTime(y, m+1, 0, 23,59,59)` idiom (6 existing call sites) rather than adding a 7th.
+- **IndexedStack:** filter/search/sort state survives tab switches — keepAlive: true decided in Phase 26 (natural under IndexedStack; filter state persists across tab switches).
+- **Shared month-boundary util:** consolidate the `DateTime(y, m+1, 0, 23,59,59)` idiom (6 existing call sites) rather than adding a 7th. Extract `DateBoundaries` utility to `lib/shared/utils/`.
 - **i18n:** all strings via `S.of(context)` (ja default, + zh/en); dates via `DateFormatter`; amounts via `NumberFormatter`. ~20–25 new ARB keys.
 - **Stack:** add `table_calendar: ^3.2.0` (pin-safe; intl 0.20.2 compatible; no win32/native). Verify `flutter build ios` stays green.
 
@@ -85,4 +85,27 @@
 
 ## Traceability
 
-<!-- Filled by roadmapper: REQ-ID → Phase mapping. -->
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| LIST-02 | Phase 24 — Data Layer Extension | Pending |
+| SORT-01 | Phase 25 — Domain Models + Use Case | Pending |
+| SORT-02 | Phase 25 — Domain Models + Use Case | Pending |
+| SORT-03 | Phase 25 — Domain Models + Use Case | Pending |
+| SORT-04 | Phase 25 — Domain Models + Use Case | Pending |
+| FILTER-01 | Phase 26 — Providers + Shell Wiring | Pending |
+| FILTER-02 | Phase 26 — Providers + Shell Wiring | Pending |
+| FILTER-03 | Phase 26 — Providers + Shell Wiring | Pending |
+| FILTER-04 | Phase 26 — Providers + Shell Wiring | Pending |
+| CAL-01 | Phase 27 — Calendar Header + Month Summary | Pending |
+| CAL-02 | Phase 27 — Calendar Header + Month Summary | Pending |
+| CAL-03 | Phase 27 — Calendar Header + Month Summary | Pending |
+| CAL-04 | Phase 27 — Calendar Header + Month Summary | Pending |
+| LIST-01 | Phase 28 — Transaction Tile + Sort/Filter Bar | Pending |
+| ROW-01 | Phase 28 — Transaction Tile + Sort/Filter Bar | Pending |
+| ROW-02 | Phase 28 — Transaction Tile + Sort/Filter Bar | Pending |
+| LIST-04 | Phase 29 — List Screen Assembly + Family | Pending |
+| FAM-01 | Phase 29 — List Screen Assembly + Family | Pending |
+| FAM-02 | Phase 29 — List Screen Assembly + Family | Pending |
+| FAM-03 | Phase 29 — List Screen Assembly + Family | Pending |
+| FAM-04 | Phase 29 — List Screen Assembly + Family | Pending |
+| LIST-03 | Phase 30 — i18n + Empty States + Golden Polish | Pending |
