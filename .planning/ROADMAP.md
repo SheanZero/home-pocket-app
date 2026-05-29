@@ -100,7 +100,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 24-02-PLAN.md — TransactionDao.findByBookIds + watchByBookIds + SC#1/SC#2/SC#4 tests (Wave 2)
+- [x] 24-02-PLAN.md — TransactionDao.findByBookIds + watchByBookIds + SC#1/SC#2/SC#4 tests (Wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -219,7 +219,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 24. Data Layer Extension | 1/3 | In Progress|  |
+| 24. Data Layer Extension | 2/3 | In Progress|  |
 | 25. Domain Models + Use Case | 0/TBD | Not started | - |
 | 26. Providers + Shell Wiring | 0/TBD | Not started | - |
 | 27. Calendar Header + Month Summary | 0/TBD | Not started | - |
