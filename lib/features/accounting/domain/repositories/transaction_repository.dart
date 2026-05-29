@@ -1,4 +1,5 @@
 import '../models/transaction.dart';
+import '../../../../shared/constants/sort_config.dart';
 
 /// Abstract repository interface for transaction data access.
 abstract class TransactionRepository {
@@ -23,4 +24,32 @@ abstract class TransactionRepository {
 
   /// Delete all transactions for a book (for backup restore).
   Future<void> deleteAllByBook(String bookId);
+
+  /// Query transactions spanning multiple books in a single call.
+  ///
+  /// Excludes soft-deleted rows. [startDate]..[endDate] are inclusive bounds.
+  /// D-02: No limit applied — all matching rows for the date range are returned.
+  Future<List<Transaction>> findByBookIds(
+    List<String> bookIds, {
+    LedgerType? ledgerType,
+    String? categoryId,
+    required DateTime startDate,
+    required DateTime endDate,
+    SortField sortField,
+    SortDirection sortDirection,
+  });
+
+  /// Reactive stream of transactions spanning multiple books.
+  ///
+  /// Emits a new list whenever the underlying transactions table changes.
+  /// Excludes soft-deleted rows.
+  Stream<List<Transaction>> watchByBookIds(
+    List<String> bookIds, {
+    LedgerType? ledgerType,
+    String? categoryId,
+    required DateTime startDate,
+    required DateTime endDate,
+    SortField sortField,
+    SortDirection sortDirection,
+  });
 }
