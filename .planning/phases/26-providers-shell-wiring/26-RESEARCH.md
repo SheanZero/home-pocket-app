@@ -761,16 +761,16 @@ No new authentication, session management, access control, or cryptography in th
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **`import_guard.yaml` for `lib/features/list/domain/models/` — update needed for `tagged_transaction.dart`**
+> Both questions are resolved by planning (Plan 26-01 T1 creates `lib/features/list/presentation/import_guard.yaml`; PATTERNS.md confirms the presentation import_guard permits domain-model imports). Retained for traceability.
+
+1. **`import_guard.yaml` for `lib/features/list/domain/models/` — update needed for `tagged_transaction.dart`** — RESOLVED: presentation import_guard (analytics analog) denies only `infrastructure/`, `data/daos/`, `data/tables/`; domain-model imports are permitted. No deny-rule conflict.
    - What we know: the current allow-list at `lib/features/list/domain/models/import_guard.yaml` allows `../../../accounting/domain/models/transaction.dart` and `freezed_annotation/**`
    - What's unclear: whether `tagged_transaction.dart` itself needs to be added to the allow-list of `state_list_transactions.dart` in the presentation layer, or if the presentation-layer `import_guard.yaml` (inherited from analytics) already permits domain model imports
    - Recommendation: The presentation layer's `import_guard.yaml` (mirrors analytics) denies `data/daos/**` and `data/tables/**` and `infrastructure/**` but permits domain models. The planner should verify that importing `lib/features/list/domain/models/tagged_transaction.dart` from `lib/features/list/presentation/providers/` does not trigger a deny rule. Based on the analytics presentation layer's `import_guard.yaml` (denies infrastructure/data/daos only), this import should be fine. Low risk.
 
-2. **`list/presentation/import_guard.yaml` — does it need creating?**
-   - What we know: `lib/features/list/presentation/` does not exist yet; analytics has `lib/features/analytics/presentation/import_guard.yaml`
-   - Recommendation: Create `lib/features/list/presentation/import_guard.yaml` mirroring analytics: deny `infrastructure/**`, `data/daos/**`, `data/tables/**`, inherit: true.
+2. **`list/presentation/import_guard.yaml` — does it need creating?** — RESOLVED: yes. Plan 26-01 T1 creates `lib/features/list/presentation/import_guard.yaml` mirroring analytics (deny `infrastructure/**`, `data/daos/**`, `data/tables/**`, inherit: true).
 
 ---
 
