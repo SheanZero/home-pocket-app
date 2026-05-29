@@ -89,7 +89,11 @@
   3. `DateBoundaries.monthRange(year, month)` and `DateBoundaries.dayRange(day)` return boundaries that include transactions at `00:00:00` and `23:59:59` on the boundary day (unit tests pass)
   4. After soft-deleting a mid-chain transaction via `DeleteTransactionUseCase`, `HashChainService.verifyChain()` on the remaining non-deleted rows returns `ChainVerificationResult.valid` — confirming the soft-delete-only contract for swipe-delete
   5. Shadow-book `note` decryption failures in `TransactionRepositoryImpl._toModel()` are caught and return `note: null` — the remaining transaction fields are intact (explicit test with a fixture that simulates decrypt failure)
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 24-01-PLAN.md — SortField/SortDirection enums + DateBoundaries utility + SC#3 tests (Wave 1)
+- [ ] 24-02-PLAN.md — TransactionDao.findByBookIds + watchByBookIds + SC#1/SC#2/SC#4 tests (Wave 2)
+- [ ] 24-03-PLAN.md — Repository impl + domain interface + SC#5 decrypt-failure test (Wave 3)
 **UI hint**: no
 
 ---
@@ -185,7 +189,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 24. Data Layer Extension | 0/TBD | Not started | - |
+| 24. Data Layer Extension | 0/3 | In Progress | - |
 | 25. Domain Models + Use Case | 0/TBD | Not started | - |
 | 26. Providers + Shell Wiring | 0/TBD | Not started | - |
 | 27. Calendar Header + Month Summary | 0/TBD | Not started | - |
