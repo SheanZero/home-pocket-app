@@ -4,6 +4,7 @@ import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
 import '../../infrastructure/crypto/services/field_encryption_service.dart';
+import '../../shared/constants/sort_config.dart';
 import '../app_database.dart';
 import '../daos/transaction_dao.dart';
 
@@ -133,10 +134,62 @@ class TransactionRepositoryImpl implements TransactionRepository {
   @override
   Future<void> deleteAllByBook(String bookId) => _dao.deleteAllByBook(bookId);
 
+  @override
+  Future<List<Transaction>> findByBookIds(
+    List<String> bookIds, {
+    LedgerType? ledgerType,
+    String? categoryId,
+    required DateTime startDate,
+    required DateTime endDate,
+    SortField sortField = SortField.timestamp,
+    SortDirection sortDirection = SortDirection.desc,
+  }) async {
+    final rows = await _dao.findByBookIds(
+      bookIds,
+      startDate: startDate,
+      endDate: endDate,
+      ledgerType: ledgerType?.name,
+      categoryId: categoryId,
+      sortField: sortField,
+      sortDirection: sortDirection,
+    );
+    return Future.wait(rows.map(_toModel));
+  }
+
+  @override
+  Stream<List<Transaction>> watchByBookIds(
+    List<String> bookIds, {
+    LedgerType? ledgerType,
+    String? categoryId,
+    required DateTime startDate,
+    required DateTime endDate,
+    SortField sortField = SortField.timestamp,
+    SortDirection sortDirection = SortDirection.desc,
+  }) {
+    return _dao
+        .watchByBookIds(
+          bookIds,
+          startDate: startDate,
+          endDate: endDate,
+          ledgerType: ledgerType?.name,
+          categoryId: categoryId,
+          sortField: sortField,
+          sortDirection: sortDirection,
+        )
+        .asyncMap((rows) => Future.wait(rows.map(_toModel)));
+  }
+
   Future<Transaction> _toModel(TransactionRow row) async {
     String? decryptedNote;
     if (row.note != null && row.note!.isNotEmpty) {
-      decryptedNote = await _encryptionService.decryptField(row.note!);
+      try {
+        decryptedNote = await _encryptionService.decryptField(row.note!);
+      } catch (_) {
+        // Shadow-book notes are encrypted with the originating device key.
+        // Decryption fails on other devices. Return null silently —
+        // DO NOT log row.note or the exception (may contain ciphertext).
+        decryptedNote = null;
+      }
     }
 
     return Transaction(
