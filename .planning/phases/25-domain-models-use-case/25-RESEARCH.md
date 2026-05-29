@@ -654,17 +654,17 @@ This is a pure domain / application layer phase with no crypto operations, no us
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **`selectedYear` in `ListFilterState`**
+1. **`selectedYear` in `ListFilterState`** — RESOLVED (locked in plan 25-01 Task 2)
    - What we know: `DateBoundaries.monthRange(year, month)` requires both year and month
-   - What's unclear: Whether the intent is `selectedYear + selectedMonth` as separate ints, or a `DateTime` month anchor (year/month only), or a `(year, month)` record
-   - Recommendation: Use `selectedYear: int` + `selectedMonth: int` — mirrors `TimeWindow.MonthWindow(year:, month:)` in analytics and avoids DateTime confusion
+   - What was unclear: Whether the intent is `selectedYear + selectedMonth` as separate ints, or a `DateTime` month anchor (year/month only), or a `(year, month)` record
+   - **Resolution:** Use `selectedYear: int` + `selectedMonth: int` (separate ints) — mirrors `TimeWindow.MonthWindow(year:, month:)` in analytics and avoids DateTime confusion. Plan 25-01 Task 2 action specifies `required int selectedYear, required int selectedMonth`.
 
-2. **`clearAll()` — should `selectedYear`/`selectedMonth` reset to current date?**
+2. **`clearAll()` — should `selectedYear`/`selectedMonth` reset to current date?** — RESOLVED (locked in plan 25-01 Task 2)
    - What we know: CONTEXT.md says `clearAll()` resets to initial state; initial = current month
-   - What's unclear: Whether "current month" is captured at construction time or re-evaluated on `clearAll()`
-   - Recommendation: `clearAll()` calls `ListFilterState.initial()` which re-evaluates `DateTime.now()` — conservative and consistent with UX (clears back to "today's month")
+   - What was unclear: Whether "current month" is captured at construction time or re-evaluated on `clearAll()`
+   - **Resolution:** `clearAll()` returns `ListFilterState.initial()`, which re-evaluates `DateTime.now()` — conservative and consistent with UX (clears back to "today's month"). Plan 25-01 Task 2 action specifies `factory ListFilterState.initial() => ... DateTime.now().year / DateTime.now().month`.
 
 ---
 
