@@ -4,8 +4,8 @@ milestone: null
 milestone_name: null
 status: milestone_complete
 stopped_at: v1.3 milestone shipped 2026-05-26
-last_updated: 2026-05-26T00:00:00.000Z
-last_activity: 2026-05-26 -- v1.3 milestone complete; ready for /gsd:new-milestone
+last_updated: 2026-05-29T00:00:00.000Z
+last_activity: 2026-05-29 -- Completed quick task 260529-e5f: 用途 ledger pills moved to title's right row (Card B shorter, satisfaction picker gets more room)
 progress:
   total_phases: 0
   completed_phases: 0
@@ -87,6 +87,7 @@ No active blockers. Carried-forward debt (cross-milestone):
 | 260526-n7b | 语音 amount parser 直接修复（无 plan/summary，单 commit）：「上周二交公交卡用了¥5240」→ 0 — 两个叠加 bug：(a) 周二 的 二 触发 `_numeralHintPattern` → 路由到 state machine → 失败但**不 fallthrough 到 arabic regex**（docstring 承诺了但 code 没做）；(b) `[¥￥]\s*(\d{1,3}...)` 的 \d{1,3} 贪婪匹配 "524" 出自 "5240"，无 `(?!\d)` 锚，alternation 永不试 `\d{4,9}`。加 fallthrough + 加 `(?!\d)` + 2 个 corpus 测试 | 2026-05-26 | (hotfix) | Pending visual check | (no plan dir) |
 | 260526-pg6 | Option F active-learning（v1.3.1 quick win，研究报告推荐路径之一）：发现 write/read 用两个 keyword extractor 导致 learned row **silent orphan**（write 留 `日元` 后缀，read 剥掉 → 永不重命中）。加 `VoiceParseResult.resolvedKeyword` 共享 canonical key；learned row `hitCount ≥ 3` 自动 promote 到 substring fallback；`tool/dump_learned_keywords.dart` CLI inspection。Schema v17 不变。350/350 测试通过，zh/ja corpus 100% | 2026-05-26 | 6ff4ea3 | Pending visual check (round-trip 学习) | [260526-pg6-voice-active-learning-record-full-keywor](./quick/260526-pg6-voice-active-learning-record-full-keywor/) |
 | 260526-r8y | 语音 polish + CRITICAL toolbar save bug：(1) 语音区包 `_FormCard` 风格 14dp 圆角+1px AppColors.borderDefault 边框，与上面表单卡片对齐；transcript 上方加 12dp padding；mic 手势/渐变不动；(2) 语音底部按钮 `l10n.save` → `l10n.record`（复用现有 ARB，0 文件 ARB 改动，zh=记录/ja=記録する/en=Record）；(3) CRITICAL — TextField `onTapOutside: unfocus`（260526-inb 加的）在 pointer-down 触发，**早于** KeyboardToolbar InkWell `onTap` 在 pointer-up resolve，unfocus 把 `_isTextFieldFocused→false` 翻转 → toolbar 下一帧被卸载 → tap-up 永远到不了 `onSave`。Fix：toolbar 包 `TapRegion(groupId: kKeyboardToolbarTapRegionGroup)` + 两个 TextField 加同样 `groupId`，toolbar 上的 tap 不再触发 `onTapOutside`。re-baseline voice mic golden（mic 现在住卡片里背景像素自然变） | 2026-05-26 | dc1f677 | Verified | [260526-r8y-voice-area-border-transcript-spacing-sav](./quick/260526-r8y-voice-area-border-transcript-spacing-sav/) |
+| 260529-e5f | 用途 ledger pills 移到标题右侧同行（Card B `[Text, SizedBox(12), LedgerTypeSelector]` → `Row(spaceBetween)` + `Flexible` 标题左 / pills 右；`LedgerTypeSelector` Row 加 `MainAxisSize.min` 以可嵌入水平布局）— Card B 变矮，灵魂满足度选择器获得更多垂直空间；共享 widget 影响 4 hosts；whole-screen voice golden re-baseline | 2026-05-29 | f86e8fc | Pending visual check | [260529-e5f-purpose-pills-inline-right](./quick/260529-e5f-purpose-pills-inline-right/) |
 
 ## Deferred Items
 
