@@ -5,7 +5,7 @@ milestone_name: null
 status: milestone_complete
 stopped_at: v1.3 milestone shipped 2026-05-26
 last_updated: 2026-05-29T00:00:00.000Z
-last_activity: 2026-05-29 -- Completed quick task 260529-e5f: 用途 ledger pills moved to title's right row (Card B shorter, satisfaction picker gets more room)
+last_activity: 2026-05-29 -- Completed quick task 260529-e5f: 用途 ledger pills moved to title's right row + shrunk (titleSmall label, lower height) for style consistency
 progress:
   total_phases: 0
   completed_phases: 0

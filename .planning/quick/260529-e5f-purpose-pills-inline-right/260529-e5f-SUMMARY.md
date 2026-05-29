@@ -27,6 +27,16 @@ Net effect: Card B is shorter; the soul satisfaction picker and the following
 备注 card gain vertical room (visible in the re-baselined screen golden — Card C
 now peeks into view).
 
+### Follow-up (visual check) — commit 8d6a479
+
+Pills were too large beside the title. Shrunk for hierarchy/consistency:
+
+- Label `titleMedium` (15/w600) → `titleSmall` (14/w600) — one notch under the
+  用途 title, same weight.
+- Chip padding `vertical 10→8`, `horizontal 16→14`; icon `16→15`.
+
+Net: lower, tighter pills consistent with the 用途 heading. Golden re-baselined.
+
 ## Scope
 
 Shared widget → applies consistently to all 4 hosts (manual / voice / edit /
