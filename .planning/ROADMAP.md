@@ -80,106 +80,136 @@
 ## Phase Details
 
 ### Phase 24: Data Layer Extension
+
 **Goal**: The data foundation for the list feature is correct, testable, and safe — multi-book queries, reactive watch stream, and month-boundary arithmetic are established as shared utilities before any UI is written.
 **Depends on**: Phase 23 (v1.3 shipped)
 **Requirements**: LIST-02
 **Success Criteria** (what must be TRUE):
+
   1. `TransactionDao.findByBookIds(bookIds, startDate, endDate, ...)` executes a single SQL query spanning multiple `book_id` values, excludes soft-deleted rows, respects `ledgerType` and `categoryId` filters, and orders results by the requested `SortField`
   2. A Drift `.watch()` stream on `findByBookIds` emits a new event within one Riverpod rebuild cycle after any of: insert, soft-delete, sync-applied write — without requiring `ref.invalidate` from the caller
   3. `DateBoundaries.monthRange(year, month)` and `DateBoundaries.dayRange(day)` return boundaries that include transactions at `00:00:00` and `23:59:59` on the boundary day (unit tests pass)
   4. After soft-deleting a mid-chain transaction via `DeleteTransactionUseCase`, `HashChainService.verifyChain()` on the remaining non-deleted rows returns `ChainVerificationResult.valid` — confirming the soft-delete-only contract for swipe-delete
   5. Shadow-book `note` decryption failures in `TransactionRepositoryImpl._toModel()` are caught and return `note: null` — the remaining transaction fields are intact (explicit test with a fixture that simulates decrypt failure)
+
 **Plans**: 3 plans
 Plans:
+**Wave 1**
+
 - [ ] 24-01-PLAN.md — SortField/SortDirection enums + DateBoundaries utility + SC#3 tests (Wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 24-02-PLAN.md — TransactionDao.findByBookIds + watchByBookIds + SC#1/SC#2/SC#4 tests (Wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 24-03-PLAN.md — Repository impl + domain interface + SC#5 decrypt-failure test (Wave 3)
+
 **UI hint**: no
 
 ---
 
 ### Phase 25: Domain Models + Use Case
+
 **Goal**: The pure-Dart domain layer for the list feature is locked — Freezed value objects describe all filter/sort state, the repository interface is declared, and the use case is unit-tested without Riverpod.
 **Depends on**: Phase 24
 **Requirements**: SORT-01, SORT-02, SORT-03, SORT-04
 **Success Criteria** (what must be TRUE):
+
   1. `SortField` enum (timestamp, updatedAt, amount) and `SortDirection` enum (asc, desc) exist in `lib/shared/constants/sort_config.dart` — importable by both the domain layer and the DAO without triggering `import_guard` violations
   2. `ListSortConfig` and `ListFilterState` Freezed classes exist, `build_runner` generates `.freezed.dart` and `.g.dart` without errors, and `flutter analyze` reports zero issues on the new files
   3. `GetListTransactionsUseCase.execute(GetListParams)` returns `Result.error` when `bookIds` is empty, and forwards validated params to `TransactionRepository.findByBookIds(...)` — verified with a `MockTransactionRepository` unit test
   4. Changing sort field from `timestamp` to `amount` via `ListSortConfig.copyWith()` produces a new immutable object and does not mutate the original (Freezed `copyWith` contract)
+
 **Plans**: TBD
 **UI hint**: no
 
 ---
 
 ### Phase 26: Providers + Shell Wiring
+
 **Goal**: All Riverpod providers for the list feature are wired together, the `keepAlive` policy under `IndexedStack` is explicitly decided and encoded, and `ListScreen` replaces the shell placeholder — the list tab is reachable but shows a loading state.
 **Depends on**: Phase 25
 **Requirements**: FILTER-01, FILTER-02, FILTER-03, FILTER-04
 **Success Criteria** (what must be TRUE):
+
   1. `listFilterStateProvider` holds all composed filter state (`selectedMonth`, `activeDayFilter`, `sortConfig`, `ledgerType?`, `categoryId?`, `searchQuery`, `memberBookId?`) in a single Freezed value object, and `clearAll()` resets every filter to its initial value in one call
   2. The `keepAlive` policy is documented in the provider annotation comment: filter state persists across tab switches under `IndexedStack` (keepAlive: true) — the policy is encoded in code, not just a comment
   3. `listTransactionsProvider(bookId)` returns a `List<TaggedTransaction>` where text search queries against `searchQuery` match on category name, merchant, and note fields with AND-composition against the active ledger and category filters — verified with `ProviderContainer.test()` + `waitForFirstValue`
   4. `ListScreen` is reachable via the List tab in `MainShellScreen` (the `Center(child: Text(...))` placeholder at line 111 is replaced); `flutter analyze` is zero issues; `build_runner` diff is clean
+
 **Plans**: TBD
 **UI hint**: yes
 
 ---
 
 ### Phase 27: Calendar Header + Month Summary
+
 **Goal**: The calendar header is a complete, independently testable widget — month navigation, per-day expense totals, day-tap filter, and the month expense summary are all observable in isolation.
 **Depends on**: Phase 26
 **Requirements**: CAL-01, CAL-02, CAL-03, CAL-04
 **Success Criteria** (what must be TRUE):
+
   1. User can tap the previous/next arrows on the List tab to switch months; the calendar grid re-renders with the correct month and the displayed month label updates (e.g. "2026年5月" in ja locale)
   2. Each day cell in the calendar grid shows the total expense for that day (expense-only basis, own-book only in v1.4); days with no expenses show no amount indicator
   3. User can tap a day cell to filter the list to that day; the tapped day is visually highlighted; tapping the same day again clears the day filter and shows all entries in the month
   4. A month expense summary line below the calendar shows the current month's total expense-only spend formatted via `NumberFormatter` + `AppTextStyles.amountSmall` (tabular figures aligned); the total excludes income transactions
   5. `table_calendar: ^3.2.0` is added to `pubspec.yaml`; `flutter build ios --debug --no-codesign` succeeds; `intl: 0.20.2` pin is not violated
+
 **Plans**: TBD
 **UI hint**: yes
 
 ---
 
 ### Phase 28: Transaction Tile + Sort/Filter Bar
+
 **Goal**: Individual list rows and the sort/filter controls are complete, correctly styled, and safe — the transaction tile shows all required fields with correct colors and formatting, swipe-delete routes exclusively through `DeleteTransactionUseCase`, and tap-to-edit opens the v1.3 edit screen.
 **Depends on**: Phase 27
 **Requirements**: LIST-01, ROW-01, ROW-02, SORT-01, SORT-02, SORT-03, SORT-04, FILTER-01, FILTER-02, FILTER-03, FILTER-04
 **Success Criteria** (what must be TRUE):
+
   1. Each transaction row displays category emoji + name, a ledger-color tag using `AppColors.survival` / `AppColors.soul` constants (verified against `lib/core/theme/app_colors.dart`, never hardcoded hex), transaction date formatted via `DateFormatter`, and amount formatted via `NumberFormatter` + `AppTextStyles.amountSmall` with tabular figures visually aligned across rows with differing digit counts
   2. User can tap a row to open `TransactionEditScreen` with the transaction pre-populated; saving the edit closes the screen and the list reflects the updated values without a manual refresh
   3. User can swipe a row to trigger a delete confirmation dialog; confirming the delete calls `DeleteTransactionUseCase.execute(id)` (soft-delete only — a unit test asserts `isDeleted = true` on the row and `HashChainService.verifyChain()` returns valid after the operation); the row disappears from the list
   4. User can tap the sort control to cycle through date / edit-time / amount sort fields and toggle ascending/descending; the active sort field and direction are visually indicated in the sort bar
   5. User can tap the ledger filter chip to filter to Survival or Soul entries; user can open the category filter to select one or more categories; both filters compose with text search (AND logic) and a single "clear all" control resets all active filters
+
 **Plans**: TBD
 **UI hint**: yes
 
 ---
 
 ### Phase 29: List Screen Assembly + Family
+
 **Goal**: The complete list screen is assembled — all components integrated, pull-to-refresh works, reactive sync updates propagate automatically, and when a family is joined the list merges members' entries with per-row attribution and a "Mine only" shortcut.
 **Depends on**: Phase 28
 **Requirements**: LIST-04, FAM-01, FAM-02, FAM-03, FAM-04
 **Success Criteria** (what must be TRUE):
+
   1. User can pull down on the transaction list to trigger a refresh; the list reloads and reflects any new entries added on another device since the last sync
   2. When the user has joined a family group, the transaction list includes entries from all family members (shadow books via `shadowBooksProvider`) merged with the user's own entries — the month total and calendar per-day totals reflect all members' combined expenses
   3. Each row belonging to a family member displays a member attribution label (name or emoji indicator) so the user can distinguish whose entry it is; own entries show no attribution label
   4. User can tap a family member chip in the filter bar to show only that member's entries; the member filter composes with the active ledger and category filters
   5. User can tap the "Mine only" shortcut (a prominent toggle in the filter area) to instantly show only their own entries; tapping it again returns to the full family view — the shortcut is visible even when no other member filter is active
+
 **Plans**: TBD
 **UI hint**: yes
 
 ---
 
 ### Phase 30: i18n + Empty States + Golden Polish
+
 **Goal**: Every user-visible string in the list tab is trilingual, the empty-state messages are clear and contextual, golden baselines are locked on stable isolated widgets, and the full CI suite passes at zero issues.
 **Depends on**: Phase 29
 **Requirements**: LIST-03
 **Success Criteria** (what must be TRUE):
+
   1. All list-tab UI strings are served via `S.of(context)` ARB keys; `flutter gen-l10n` produces no warnings; all three locale files (ja/zh/en) have identical key count (no orphan keys in any locale)
   2. When no transactions exist in the selected month, the user sees a clear empty-state message (e.g. "この月の記録はありません" in ja) — not a blank area
   3. When the user has applied filters that match no transactions, the user sees a distinct filtered-empty-state message (e.g. "条件に合う記録が見つかりません" in ja) with a "clear filters" inline action — distinct from the no-data empty state
   4. `flutter analyze` reports zero issues; `dart run custom_lint --no-fatal-infos` reports zero errors; `build_runner` diff is clean; global test coverage remains ≥70%
+
 **Plans**: TBD
 **UI hint**: yes
 

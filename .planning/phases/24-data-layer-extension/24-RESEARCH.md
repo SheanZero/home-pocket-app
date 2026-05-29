@@ -657,17 +657,19 @@ ChainVerificationResult verifyChain(List<Map<String, dynamic>> transactions)
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **`mapFromRow` vs manual column reads for `customSelect` returning `TransactionRow`**
    - What we know: `analytics_dao.dart` reads named columns via `row.read<T>('column')` directly. `TransactionDao` uses the typesafe builder which returns typed rows automatically.
    - What's unclear: Whether `_db.transactions.mapFromRow(row.data)` actually compiles for a `customSelect` result on the `transactions` table in this Drift version (2.25.0).
    - Recommendation: The planner should include a compile-verify step in the first plan task after writing `findByBookIds`. Fallback: manually read all columns from `QueryRow`.
+   - **RESOLVED:** Plan 24-02 Task 1 action mandates a compile-verify step and the explicit fallback ("if `mapFromRow` does not compile, construct `TransactionRow` via `row.read<T>('column')` per column"). No ambiguity reaches the executor.
 
 2. **SC#4 verifyChain contract restatement**
    - What we know: `verifyChain([tx_001, tx_003])` (excluding soft-deleted `tx_002`) WILL fail the linkage check because `tx_003.prevHash != tx_001.currentHash`.
    - What's unclear: Whether the roadmap's SC#4 wording is intentional (testing a known invariant differently) or is an error in the success criterion.
    - Recommendation: The planner should note this discrepancy and write the SC#4 test to verify "soft-delete does not mutate hash fields" rather than "verifyChain on remaining rows = valid."
+   - **RESOLVED:** Restated invariant locked in `24-VALIDATION.md` §"SC#4 Invariant Restatement (CRITICAL)" and tested in Plan 24-02 Task 1 — `softDelete()` does not mutate `currentHash`/`prevHash`, and `verifyChain(ALL rows incl. soft-deleted)` returns `valid`.
 
 ---
 
@@ -713,8 +715,9 @@ ChainVerificationResult verifyChain(List<Map<String, dynamic>> transactions)
 | SC#3 | `DateBoundaries.dayRange` includes tx at 00:00:00 and 23:59:59 | Unit (pure Dart) | same | ❌ Wave 0 |
 | SC#3 | `DateBoundaries.monthRange` excludes tx at 00:00:00 on day 1 of NEXT month | Unit (pure Dart) | same | ❌ Wave 0 |
 | SC#4 | `softDelete()` sets `isDeleted=true`, does NOT change `currentHash`/`prevHash` | Unit (in-memory DB) | `flutter test test/unit/data/daos/transaction_dao_multi_book_test.dart` | ❌ Wave 0 |
-| SC#4 | `verifyChain` on all 3 rows (including soft-deleted) = valid | Unit (pure Dart, no DB) | `flutter test test/unit/infrastructure/crypto/hash_chain_soft_delete_test.dart` | ❌ Wave 0 |
-| SC#5 | `_toModel()` with simulated decrypt failure → `note: null`, all other fields intact | Unit (mock EncryptionService) | `flutter test test/data/repositories/transaction_repository_note_decrypt_test.dart` | ❌ Wave 0 |
+| SC#4 | `verifyChain` on all 3 rows (including soft-deleted) = valid | Integration (in-memory DB) | `flutter test test/unit/data/daos/transaction_dao_multi_book_test.dart` | ❌ Wave 0 |
+| | *(SC#4 consolidated into the DAO multi-book test rather than a standalone `hash_chain_soft_delete_test.dart` — see 24-VALIDATION.md)* | | | |
+| SC#5 | `_toModel()` with simulated decrypt failure → `note: null`, all other fields intact | Unit (mock EncryptionService) | `flutter test test/unit/data/repositories/transaction_repository_note_decrypt_test.dart` | ❌ Wave 0 |
 
 ### Sampling Rate
 
@@ -726,8 +729,8 @@ ChainVerificationResult verifyChain(List<Map<String, dynamic>> transactions)
 
 - [ ] `test/unit/data/daos/transaction_dao_multi_book_test.dart` — covers SC#1, SC#2, SC#4 (soft-delete flag verification)
 - [ ] `test/unit/shared/utils/date_boundaries_test.dart` — covers SC#3 (6 boundary cases)
-- [ ] `test/unit/infrastructure/crypto/hash_chain_soft_delete_test.dart` — covers SC#4 (chain integrity)
-- [ ] `test/data/repositories/transaction_repository_note_decrypt_test.dart` — covers SC#5
+- [ ] SC#4 (chain integrity) covered within `test/unit/data/daos/transaction_dao_multi_book_test.dart` — soft-delete a mid-chain row, assert hash fields unchanged + `verifyChain(all rows)` valid (consolidated; no standalone `hash_chain_soft_delete_test.dart`)
+- [ ] `test/unit/data/repositories/transaction_repository_note_decrypt_test.dart` — covers SC#5
 
 *(No new framework install needed — `flutter_test` and `AppDatabase.forTesting()` already available.)*
 
