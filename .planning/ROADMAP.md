@@ -126,7 +126,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 25-01-PLAN.md — ListSortConfig + ListFilterState Freezed VOs + import_guard configs + build_runner (Wave 1)
+- [x] 25-01-PLAN.md — ListSortConfig + ListFilterState Freezed VOs + import_guard configs + build_runner (Wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -229,7 +229,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 24. Data Layer Extension | 3/3 | Complete    | 2026-05-29 |
-| 25. Domain Models + Use Case | 0/2 | Not started | - |
+| 25. Domain Models + Use Case | 1/2 | In Progress|  |
 | 26. Providers + Shell Wiring | 0/TBD | Not started | - |
 | 27. Calendar Header + Month Summary | 0/TBD | Not started | - |
 | 28. Transaction Tile + Sort/Filter Bar | 0/TBD | Not started | - |

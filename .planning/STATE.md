@@ -4,8 +4,8 @@ milestone: v1.4
 milestone_name: 列表功能
 status: executing
 stopped_at: Phase 25 context gathered
-last_updated: "2026-05-29T08:40:16.172Z"
-last_activity: 2026-05-29 -- Phase 25 planning complete
+last_updated: "2026-05-29T08:42:10.634Z"
+last_activity: 2026-05-29 -- Phase 25 execution started
 progress:
   total_phases: 7
   completed_phases: 1
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-29 — v1.4 列表功能 milestone started)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes survival spending from soul spending
-**Current focus:** Phase 25 — domain models + use case
+**Current focus:** Phase 25 — domain-models-use-case
 
 ## Current Position
 
-Phase: 25
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-05-29 -- Phase 25 planning complete
+Phase: 25 (domain-models-use-case) — EXECUTING
+Plan: 1 of 2
+Status: Executing Phase 25
+Last activity: 2026-05-29 -- Phase 25 execution started
 
 **Next action:** `/gsd:plan-phase 24`
 
