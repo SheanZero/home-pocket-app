@@ -65,7 +65,7 @@ class LedgerTypeSelector extends StatelessWidget {
       child: AnimatedContainer(
         key: key,
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: isActive
               ? activeBg
@@ -87,7 +87,7 @@ class LedgerTypeSelector extends StatelessWidget {
           children: [
             Icon(
               icon,
-              size: 16,
+              size: 15,
               color: isActive
                   ? activeColor
                   : (isDark
@@ -97,7 +97,7 @@ class LedgerTypeSelector extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               label,
-              style: AppTextStyles.titleMedium.copyWith(
+              style: AppTextStyles.titleSmall.copyWith(
                 color: isActive
                     ? activeColor
                     : (isDark
