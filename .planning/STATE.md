@@ -2,9 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: 列表功能
-status: roadmapped
-last_updated: "2026-05-29"
-last_activity: 2026-05-29
+status: planning
+stopped_at: Phase 24 context gathered
+last_updated: "2026-05-29T04:30:53.580Z"
+last_activity: 2026-05-29 — Roadmap created for v1.4 (7 phases, 22 requirements mapped)
 progress:
   total_phases: 7
   completed_phases: 0
@@ -68,6 +69,7 @@ Note: SORT-01/02/03/04 and FILTER-01/02/03/04 are defined in Phases 25/26 respec
 Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 + v1.3 decisions captured there with outcomes.
 
 **v1.4 locked product decisions (pre-implementation):**
+
 - Calendar per-day totals: own-book only in v1.4 (combined family calendar totals deferred to v1.5+)
 - Swipe-delete: confirm-only soft-delete, NO undo SnackBar in v1.4 (undo deferred — requires `RestoreTransactionUseCase`)
 - Filter state persistence: keepAlive under `IndexedStack` — filter/sort state persists across tab switches (decided in Phase 26)
@@ -94,6 +96,7 @@ No active blockers for v1.4. Carried-forward debt (cross-milestone):
 - **VOICE-EN-V2-01:** English voice parser skeleton only (Plan 23-03 `voice_corpus_en.dart`); no production en voice parser.
 
 **v1.4-specific risks to watch:**
+
 - Shadow-book `note` decryption: `TransactionRepositoryImpl._toModel()` exception handling for undecryptable shadow notes — verify in Phase 24
 - Ledger color constants: verify `AppColors.soul` / `AppColors.survival` against `lib/core/theme/app_colors.dart` before Phase 28 tile implementation (never use hardcoded hex)
 - `ProviderException` wrapping: all provider error test assertions must use `throwsA(isA<ProviderException>().having(...))` — enforce in every phase adding providers
@@ -182,8 +185,8 @@ No active blockers for v1.4. Carried-forward debt (cross-milestone):
 
 ## Session Continuity
 
-Last session: 2026-05-29
-Stopped at: v1.4 roadmap created (7 phases, 22 requirements mapped)
+Last session: 2026-05-29T04:30:53.574Z
+Stopped at: Phase 24 context gathered
 
 **Planned Next:** `/gsd:plan-phase 24` — Data Layer Extension
 
