@@ -67,7 +67,7 @@
 
 ### 🚧 v1.4 列表功能 (Phases 24-30)
 
-- [ ] **Phase 24: Data Layer Extension** — Multi-book DAO query + watch stream + DateBoundaries utility
+- [x] **Phase 24: Data Layer Extension** — Multi-book DAO query + watch stream + DateBoundaries utility (completed 2026-05-29)
 - [ ] **Phase 25: Domain Models + Use Case** — `ListFilterState`, `ListSortConfig`, `GetListTransactionsUseCase`
 - [ ] **Phase 26: Providers + Shell Wiring** — All 4 Riverpod providers + keepAlive policy + shell placeholder replaced
 - [ ] **Phase 27: Calendar Header + Month Summary** — `table_calendar` integration, per-day totals, month nav, day-tap filter
@@ -104,7 +104,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 24-03-PLAN.md — Repository impl + domain interface + SC#5 decrypt-failure test (Wave 3)
+- [x] 24-03-PLAN.md — Repository impl + domain interface + SC#5 decrypt-failure test (Wave 3)
 
 **UI hint**: no
 
@@ -219,7 +219,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 24. Data Layer Extension | 2/3 | In Progress|  |
+| 24. Data Layer Extension | 3/3 | Complete   | 2026-05-29 |
 | 25. Domain Models + Use Case | 0/TBD | Not started | - |
 | 26. Providers + Shell Wiring | 0/TBD | Not started | - |
 | 27. Calendar Header + Month Summary | 0/TBD | Not started | - |
