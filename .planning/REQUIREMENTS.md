@@ -19,7 +19,7 @@
 ### List Display (LIST)
 
 - [ ] **LIST-01**: User sees the selected month's transactions as a scrollable list; each row shows category emoji + name, ledger-color tag (Survival `AppColors.survival` / Soul `AppColors.soul`), date, and amount (tabular figures via `AppTextStyles.amount*`, formatted by `NumberFormatter` + locale).
-- [ ] **LIST-02**: The list updates reactively after add / edit / delete / family-sync — no manual refresh required (new `TransactionDao.watchByBookId(s)` stream).
+- [x] **LIST-02**: The list updates reactively after add / edit / delete / family-sync — no manual refresh required (new `TransactionDao.watchByBookId(s)` stream).
 - [ ] **LIST-03**: User sees a clear empty state when no transactions match the current month + active filters.
 - [ ] **LIST-04**: User can pull-to-refresh the list.
 
@@ -87,7 +87,7 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LIST-02 | Phase 24 — Data Layer Extension | Pending |
+| LIST-02 | Phase 24 — Data Layer Extension | Complete |
 | SORT-01 | Phase 25 — Domain Models + Use Case | Pending |
 | SORT-02 | Phase 25 — Domain Models + Use Case | Pending |
 | SORT-03 | Phase 25 — Domain Models + Use Case | Pending |
