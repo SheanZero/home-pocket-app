@@ -39,7 +39,10 @@ void main() {
       expect(score, lessThanOrEqualTo(10));
     });
 
-    test('calm voice with neutral text -> satisfaction 4-6', () {
+    test('calm voice with neutral text -> rests near the default (1-3)', () {
+      // Neutral/weak-signal speech must rest at ~2 (the soul-ledger form
+      // default), not drift to the middle faces. Was 4-6 before the
+      // _mapToSatisfaction re-anchor (voice-soul default bug fix).
       final features = VoiceAudioFeatures(
         soundLevels: [0.3, 0.35, 0.3, 0.32, 0.3],
         timestamps: _generateTimestamps(5, intervalMs: 400),
@@ -54,11 +57,12 @@ void main() {
         recognizedText: '電車代320円',
       );
 
-      expect(score, greaterThanOrEqualTo(4));
-      expect(score, lessThanOrEqualTo(6));
+      expect(score, greaterThanOrEqualTo(1));
+      expect(score, lessThanOrEqualTo(3));
     });
 
-    test('empty audio features -> default satisfaction 3-5', () {
+    test('empty audio features -> low default satisfaction (1-4)', () {
+      // No signal → rest low (near 2), not the old 3-5 mid band.
       final features = VoiceAudioFeatures(
         soundLevels: [],
         timestamps: [],
@@ -73,8 +77,8 @@ void main() {
         recognizedText: '',
       );
 
-      expect(score, greaterThanOrEqualTo(3));
-      expect(score, lessThanOrEqualTo(5));
+      expect(score, greaterThanOrEqualTo(1));
+      expect(score, lessThanOrEqualTo(4));
     });
 
     test('score is always in range 1-10', () {

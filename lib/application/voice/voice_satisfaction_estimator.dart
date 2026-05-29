@@ -179,12 +179,25 @@ class VoiceSatisfactionEstimator {
     return 1.0;
   }
 
-  /// Maps a 0.0–1.0 score to 1–10 satisfaction range.
+  /// Maps a 0.0–1.0 weighted score to the 1–10 satisfaction range.
   ///
-  /// Uses a slight upward bias since a purchase is generally a positive act.
+  /// Soul-ledger satisfaction rests at **2** (the form / domain default) for
+  /// neutral or weak-signal speech, and only climbs toward 10 on clear
+  /// positive signal (sentiment words, louder/livelier delivery); negative
+  /// sentiment dips it to 1. Without this anchor a neutral utterance scored
+  /// ~0.3 and mapped to the middle faces (~5–6), pre-filling the picker too
+  /// high (bug: voice soul entries defaulted to the middle instead of 2).
+  ///
+  /// Anchored on the estimator's own signal band:
+  ///   neutral utterance   score ≈ 0.26 → 2
+  ///   excited + positive  score ≈ 0.56 → 7
+  /// giving slope ≈ (7 − 2) / (0.56 − 0.26) ≈ 16.7 and offset ≈ −2.4. The
+  /// fit is steep because the upstream sub-scores compress the neutral and
+  /// excited bands close together; the clamp keeps strong positives at 10 and
+  /// negatives at 1.
   int _mapToSatisfaction(double score) {
-    // Minimum ~0.3 → satisfaction 3
-    final adjusted = 0.3 + score * 0.7;
-    return (adjusted * 10).round().clamp(1, 10);
+    const slope = 16.7;
+    const offset = -2.4;
+    return (offset + slope * score).round().clamp(1, 10);
   }
 }
