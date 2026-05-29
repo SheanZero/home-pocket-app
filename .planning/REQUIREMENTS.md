@@ -25,10 +25,10 @@
 
 ### Sort (SORT)
 
-- [ ] **SORT-01**: User can sort the list by transaction date.
-- [ ] **SORT-02**: User can sort the list by edit / created time (reference default).
-- [ ] **SORT-03**: User can sort the list by amount.
-- [ ] **SORT-04**: User can toggle ascending / descending for the active sort.
+- [x] **SORT-01**: User can sort the list by transaction date.
+- [x] **SORT-02**: User can sort the list by edit / created time (reference default).
+- [x] **SORT-03**: User can sort the list by amount.
+- [x] **SORT-04**: User can toggle ascending / descending for the active sort.
 
 ### Search & Filter (FILTER)
 
@@ -88,10 +88,10 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | LIST-02 | Phase 24 — Data Layer Extension | Complete |
-| SORT-01 | Phase 25 — Domain Models + Use Case | Pending |
-| SORT-02 | Phase 25 — Domain Models + Use Case | Pending |
-| SORT-03 | Phase 25 — Domain Models + Use Case | Pending |
-| SORT-04 | Phase 25 — Domain Models + Use Case | Pending |
+| SORT-01 | Phase 25 — Domain Models + Use Case | Complete |
+| SORT-02 | Phase 25 — Domain Models + Use Case | Complete |
+| SORT-03 | Phase 25 — Domain Models + Use Case | Complete |
+| SORT-04 | Phase 25 — Domain Models + Use Case | Complete |
 | FILTER-01 | Phase 26 — Providers + Shell Wiring | Pending |
 | FILTER-02 | Phase 26 — Providers + Shell Wiring | Pending |
 | FILTER-03 | Phase 26 — Providers + Shell Wiring | Pending |
