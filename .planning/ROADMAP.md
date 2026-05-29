@@ -68,7 +68,7 @@
 ### 🚧 v1.4 列表功能 (Phases 24-30)
 
 - [x] **Phase 24: Data Layer Extension** — Multi-book DAO query + watch stream + DateBoundaries utility (completed 2026-05-29)
-- [ ] **Phase 25: Domain Models + Use Case** — `ListFilterState`, `ListSortConfig`, `GetListTransactionsUseCase`
+- [x] **Phase 25: Domain Models + Use Case** — `ListFilterState`, `ListSortConfig`, `GetListTransactionsUseCase` (completed 2026-05-29)
 - [ ] **Phase 26: Providers + Shell Wiring** — All 4 Riverpod providers + keepAlive policy + shell placeholder replaced
 - [ ] **Phase 27: Calendar Header + Month Summary** — `table_calendar` integration, per-day totals, month nav, day-tap filter
 - [ ] **Phase 28: Transaction Tile + Sort/Filter Bar** — Row display, swipe-delete, tap-to-edit, sort/filter controls
@@ -130,7 +130,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 25-02-PLAN.md — GetListTransactionsUseCase + GetListParams + Mocktail unit tests (Wave 2)
+- [x] 25-02-PLAN.md — GetListTransactionsUseCase + GetListParams + Mocktail unit tests (Wave 2)
 
 **UI hint**: no
 
@@ -229,7 +229,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 24. Data Layer Extension | 3/3 | Complete    | 2026-05-29 |
-| 25. Domain Models + Use Case | 1/2 | In Progress|  |
+| 25. Domain Models + Use Case | 2/2 | Complete   | 2026-05-29 |
 | 26. Providers + Shell Wiring | 0/TBD | Not started | - |
 | 27. Calendar Header + Month Summary | 0/TBD | Not started | - |
 | 28. Transaction Tile + Sort/Filter Bar | 0/TBD | Not started | - |
