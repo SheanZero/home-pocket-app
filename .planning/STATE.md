@@ -1,11 +1,10 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: milestone_complete
-stopped_at: v1.3 milestone shipped 2026-05-26
-last_updated: 2026-05-29T00:00:00.000Z
-last_activity: 2026-05-29 -- Completed quick task 260529-gbp: fix voice soul-ledger satisfaction defaulting to middle (~5-6); re-anchored VoiceSatisfactionEstimator so neutral speech rests at default 2
+milestone: v1.4
+milestone_name: 列表功能
+status: planning
+last_updated: "2026-05-29T03:18:38.158Z"
+last_activity: 2026-05-29
 progress:
   total_phases: 0
   completed_phases: 0
@@ -25,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-05-26 — v1.3 迭代帐本输入 milest
 
 ## Current Position
 
-Phase: None — between milestones
-Plan: Not started
-Status: v1.3 shipped; awaiting next-milestone scoping
-Last activity: 2026-05-26 - Completed quick task 260526-r8y: 语音区加 14dp card 边框 + 文本下移 + save→记录 标签统一 + CRITICAL fix KeyboardToolbar 记录 按钮 onTapOutside vs onTap race（TapRegion + groupId 修复）— 人工验证通过
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-29 — Milestone v1.4 started
 
 ## Last Milestone Snapshot (v1.3)
 

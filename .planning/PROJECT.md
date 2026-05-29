@@ -124,6 +124,21 @@ Home Pocket (まもる家計簿) is a local-first, privacy-focused family accoun
 
 A family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, with a dual-ledger system that distinguishes survival spending from soul spending so families can have honest money conversations.
 
+## Current Milestone: v1.4 列表功能 (Transaction List / 一覧)
+
+**Goal:** Build out the currently-placeholder List tab into a full transaction overview matching the reference design — a month calendar (per-day expense totals + tap-a-day to filter), a sortable / searchable / filterable transaction list, a basic month-summary, reusing the v1.3 edit path, and surfacing family members' entries when a family is joined.
+
+**Target features:**
+- Calendar header — month switch + month grid with per-day expense totals + tap-a-day to filter the list to that day
+- Basic month summary — current-month total expense (expense-only basis)
+- Transaction list rows — category emoji + name, ledger-color tag (Survival/Soul), date, amount
+- Sorting — by transaction date / edit time / amount, with ascending/descending toggle
+- Search & filter — text search (category / merchant / note), filter by ledger (Survival/Soul), filter by category
+- Row interactions — tap → edit (reuse v1.3 `TransactionEditScreen` + shared details form), swipe-to-delete (confirmed)
+- Family-aware list — when a family is joined, include members' entries with per-row member attribution + member filter
+
+**Out of scope (v1.4):** month settlement / month-lock (结账锁月), income tracking, "New" badge, amount-range filter.
+
 ## Requirements
 
 ### Validated
@@ -201,9 +216,9 @@ A family accounting app users can trust with sensitive financial data — local-
 
 ### Active
 
-<!-- Next milestone TBD — use /gsd:new-milestone to scope. -->
+<!-- v1.4 列表功能 — requirements defined in .planning/REQUIREMENTS.md (LIST-*, CAL-*, FILTER-*, FAM-*). -->
 
-(None active — v1.3 shipped 2026-05-26. Use `/gsd:new-milestone` to scope the next milestone.)
+v1.4 列表功能 — see `.planning/REQUIREMENTS.md` for scoped requirements (calendar, list, sort, search/filter, row interactions, family-aware display).
 
 ### Out of Scope
 
@@ -314,4 +329,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-26 after v1.3 迭代帐本输入 milestone shipped*
+*Last updated: 2026-05-29 — v1.4 列表功能 milestone started*
