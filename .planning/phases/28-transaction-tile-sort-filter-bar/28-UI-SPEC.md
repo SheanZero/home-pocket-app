@@ -51,6 +51,7 @@ Same 8-point scale as Phase 27 (inherited; do not redefine per phase). Declared 
 - Tile row padding: `EdgeInsets.symmetric(horizontal: 10, vertical: 14)` is inherited from `HomeTransactionTile` verbatim. Do not change it — altering would break visual consistency with the Home screen tile.
 - Day-header height: 32dp (`SizedBox(height: 32)`) — explicitly compact to not steal vertical space from tiles.
 - Filter bar height: 44dp fixed (`SizedBox(height: 44)` wrapping the `SingleChildScrollView`) — enough for chip tap targets with `EdgeInsets.symmetric(horizontal: 8, vertical: 6)` chip padding.
+- Chip vertical padding & bar scroll vertical padding: 6dp — required to fit 32dp chips inside the 44dp pinned bar (32 + 2×6 = 44) while preserving touch-target clearance; raising to 8dp would force bar height to 48dp.
 - Swipe delete background: red zone right-side icon has `EdgeInsets.only(right: 16)` padding (confirmed from RESEARCH.md Pattern 2).
 - Category sheet tristate checkbox row height: 48dp minimum (Material touch-target floor).
 
@@ -60,14 +61,15 @@ Same 8-point scale as Phase 27 (inherited; do not redefine per phase). Declared 
 
 All text uses the `Outfit` font family (project standard). Same w500/w600/w700 project scale as Phase 27; the 2-weight-per-phase GSD default is superseded by the project's shared `AppTextStyles` scale (see Phase 27 waiver, still in effect).
 
+Four font sizes in active use: 10 / 12 / 14 / 15 dp.
+
 | Role | Style Token | Size | Weight | Line-height | Color Token | Usage |
 |------|-------------|------|--------|-------------|-------------|-------|
 | Tile merchant name | `AppTextStyles.bodyMedium` | 14dp | w500 | default | `AppColors.textPrimary` | Primary line in tile row (merchant / payee text) |
 | Tile category name | `AppTextStyles.caption` | 12dp | w500 | default | ledger-specific (see Color) | Category label below merchant; color-overridden to `AppColors.survival` or `AppColors.soul` |
 | Tile amount | `AppTextStyles.amountSmall` | 15dp | w700 | default | `AppColors.textPrimary` | Right-aligned formatted amount; tabular figures baked in — mandatory for SC#1 cross-row alignment |
 | Tile tag label | `AppTextStyles.micro` | 10dp | w700 | default | ledger tag color (see Color) | Ledger-type tag badge text ("生存" / "魂") |
-| Day-header date | `AppTextStyles.caption` | 12dp | w500 | default | `AppColors.textSecondary` | Day group header (e.g. "2026/05/30" in ja → format below); letter-spacing 0 |
-| Day-header divider label | `AppTextStyles.dividerLabel` | 13dp | w500 | default | `AppColors.textSecondary` | Alternative: use `dividerLabel` (13dp, 2dp letter-spacing) if visual prominence needed; checker picks one — default to `caption` 12dp |
+| Day-header date | `AppTextStyles.caption` | 12dp | w500 | default | `AppColors.textSecondary` | Day group header (e.g. "2026/05/30" in ja → format below). Day-header is `caption` 12dp — the committed choice; optional 2dp letter-spacing may be applied via `.copyWith(letterSpacing: 2)` for prominence without changing the size |
 | Bar chip label | `AppTextStyles.caption` | 12dp | w500 | default | `AppColors.textPrimary` (active) / `AppColors.textSecondary` (inactive) | Sort/filter chip text; active chips use `textPrimary`; inactive `textSecondary` |
 | Bar sort-field name | `AppTextStyles.caption` | 12dp | w500 | default | `AppColors.textPrimary` | Sort chip label showing active field name — must NOT be generic "Sort" (SC#4 / D-05) |
 | Category sheet section header | `AppTextStyles.titleSmall` | 14dp | w600 | default | `AppColors.textPrimary` | L1 parent category label in sheet |
@@ -82,7 +84,7 @@ All text uses the `Outfit` font family (project standard). Same w500/w600/w700 p
 >
 > **Status:** Developer-approved waiver standing from Phase 27 (2026-05-30).
 >
-> Active weights in Phase 28: w500 (merchant, category, bar chip labels, day-header, caption roles), w600 (day-header dividerLabel variant, sheet section headers, apply button, dialog title), w700 (amounts via `amountSmall`, tag micro text). This mirrors the project's established `AppTextStyles` w500/w600/w700 type system. No new weight outside this system is introduced.
+> Active weights in Phase 28: w500 (merchant, category, bar chip labels, day-header, caption roles), w600 (sheet section headers, apply button, dialog title), w700 (amounts via `amountSmall`, tag micro text). This mirrors the project's established `AppTextStyles` w500/w600/w700 type system. No new weight outside this system is introduced.
 
 ---
 
