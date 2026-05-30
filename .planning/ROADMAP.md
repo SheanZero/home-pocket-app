@@ -232,7 +232,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2)*
 
-- [ ] 28-05-PLAN.md — ListSortFilterBar (C-03) + bar tests GREEN (Wave 3)
+- [x] 28-05-PLAN.md — ListSortFilterBar (C-03) + bar tests GREEN (Wave 3)
 
 **Wave 4** *(blocked on Wave 3)*
 
@@ -289,7 +289,7 @@ Plans:
 | 25. Domain Models + Use Case | 2/2 | Complete    | 2026-05-29 |
 | 26. Providers + Shell Wiring | 4/4 | Complete    | 2026-05-30 |
 | 27. Calendar Header + Month Summary | 4/4 | Complete    | 2026-05-30 |
-| 28. Transaction Tile + Sort/Filter Bar | 4/7 | In Progress|  |
+| 28. Transaction Tile + Sort/Filter Bar | 5/7 | In Progress|  |
 | 29. List Screen Assembly + Family | 0/TBD | Not started | - |
 | 30. i18n + Empty States + Golden Polish | 0/TBD | Not started | - |
 
