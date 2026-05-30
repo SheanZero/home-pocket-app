@@ -72,7 +72,7 @@
 - [x] **Phase 26: Providers + Shell Wiring** — All 4 Riverpod providers + keepAlive policy + shell placeholder replaced (completed 2026-05-30)
 - [x] **Phase 27: Calendar Header + Month Summary** — `table_calendar` integration, per-day totals, month nav, day-tap filter (completed 2026-05-30)
 - [x] **Phase 28: Transaction Tile + Sort/Filter Bar** — Row display, swipe-delete, tap-to-edit, sort/filter controls (completed 2026-05-30)
-- [ ] **Phase 29: List Screen Assembly + Family** — Full screen, pull-to-refresh, shadow books, member attribution + filter
+- [x] **Phase 29: List Screen Assembly + Family** — Full screen, pull-to-refresh, shadow books, member attribution + filter (completed 2026-05-30)
 - [ ] **Phase 30: i18n + Empty States + Golden Polish** — ~20–25 ARB keys × 3 locales, empty states, golden baselines
 
 ---
@@ -275,7 +275,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 29-04-PLAN.md — list_screen.dart RefreshIndicator + anyFilterActive fix + full suite GREEN + human verify (Wave 4)
+- [x] 29-04-PLAN.md — list_screen.dart RefreshIndicator + anyFilterActive fix + full suite GREEN + human verify (Wave 4)
 
 **UI hint**: yes
 
@@ -307,7 +307,7 @@ Plans:
 | 26. Providers + Shell Wiring | 4/4 | Complete    | 2026-05-30 |
 | 27. Calendar Header + Month Summary | 4/4 | Complete    | 2026-05-30 |
 | 28. Transaction Tile + Sort/Filter Bar | 6/7 | Complete    | 2026-05-30 |
-| 29. List Screen Assembly + Family | 3/4 | In Progress|  |
+| 29. List Screen Assembly + Family | 4/4 | Complete   | 2026-05-30 |
 | 30. i18n + Empty States + Golden Polish | 0/TBD | Not started | - |
 
 ---

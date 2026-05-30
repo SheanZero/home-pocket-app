@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: 列表功能
-status: executing
-stopped_at: Completed 29-01-PLAN.md
-last_updated: "2026-05-30T15:02:04.567Z"
-last_activity: 2026-05-30
+status: verifying
+stopped_at: Completed 29-04-PLAN.md (last plan of Phase 29)
+last_updated: "2026-05-31T00:30:00.000Z"
+last_activity: 2026-05-31
 progress:
   total_phases: 7
-  completed_phases: 4
+  completed_phases: 6
   total_plans: 24
-  completed_plans: 22
-  percent: 57
+  completed_plans: 24
+  percent: 86
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-05-29 — v1.4 列表功能 milestone st
 
 ## Current Position
 
-Phase: 29 (list-screen-assembly-family) — EXECUTING
-Plan: 4 of 4
-Status: Ready to execute
-Last activity: 2026-05-30
+Phase: 29 (list-screen-assembly-family) — COMPLETE (ready for verification)
+Plan: 4 of 4 (all complete)
+Status: Phase complete — ready for verification
+Last activity: 2026-05-31
 
-**Next action:** `/gsd:plan-phase 24`
+**Next action:** `/gsd:verify-work 29` — verify Phase 29 (last phase of v1.4)
 
 ## Phase Overview (v1.4)
 
@@ -41,7 +41,7 @@ Last activity: 2026-05-30
 | 26 | Providers + Shell Wiring | FILTER-01, FILTER-02, FILTER-03, FILTER-04 | Not started |
 | 27 | Calendar Header + Month Summary | CAL-01, CAL-02, CAL-03, CAL-04 | Not started |
 | 28 | Transaction Tile + Sort/Filter Bar | LIST-01, ROW-01, ROW-02, SORT-01–04, FILTER-01–04 | Not started |
-| 29 | List Screen Assembly + Family | LIST-04, FAM-01, FAM-02, FAM-03, FAM-04 | Not started |
+| 29 | List Screen Assembly + Family | LIST-04, FAM-01, FAM-02, FAM-03, FAM-04 | Complete (4/4 plans) — ready for verification |
 | 30 | i18n + Empty States + Golden Polish | LIST-03 | Not started |
 
 Note: SORT-01/02/03/04 and FILTER-01/02/03/04 are defined in Phases 25/26 respectively and first become fully user-observable in Phase 28. Their traceability maps to Phase 28 as the primary delivery phase per REQUIREMENTS.md.
@@ -77,6 +77,8 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 + v1.
 - Scope: expense-only; no income tracking; no month settlement/lock; no amount-range filter; no "New" badge
 - [Phase ?]: initializeDateFormatting placed at top of AppInitializer.initialize() before provider container setup
 - [Phase ?]: CategoryFilterSheet tests use ProviderScope + currentLocaleProvider override to prevent async retry timers
+- [Phase 29]: Pull-to-refresh = RefreshIndicator + dual-invalidate (list + calendar providers) + await .future.catchError for honest spinner (D-05/Pitfall F)
+- [Phase 29]: anyFilterActive 5-condition form identical in list_screen.dart + list_sort_filter_bar.dart (incl memberBookId, Pitfall B); loading/error/empty branches all SingleChildScrollView(AlwaysScrollableScrollPhysics) (Pitfall E)
 
 ### Pending Todos
 
@@ -187,7 +189,7 @@ No active blockers for v1.4. Carried-forward debt (cross-milestone):
 
 ## Session Continuity
 
-Last session: 2026-05-30T15:02:04.562Z
+Last session: 2026-05-30T23:36:43.185Z
 Stopped at: Completed 29-01-PLAN.md
 
 **Planned Next:** `/gsd:plan-phase 24` — Data Layer Extension
