@@ -684,22 +684,25 @@ testWidgets('SC#3: tap day highlights it; tap again clears filter', (tester) asy
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does `table_calendar` require `initializeDateFormatting`?**
    - What we know: `table_calendar` uses `intl` for locale-aware day names. Some `intl` use cases require `initializeDateFormatting(locale)` before formatting.
    - What's unclear: Whether the project's existing `AppInitializer` already calls this, or whether `table_calendar` handles it internally.
    - Recommendation: Check `AppInitializer.initialize()` for `initializeDateFormatting` calls. If absent, the Wave 0 task should add it (or confirm table_calendar doesn't require it). Failure mode: day-of-week headers display incorrectly in non-en locales.
+   - **RESOLVED:** Plan 27-01 Task 2 verifies `lib/core/initialization/app_initializer.dart` for `initializeDateFormatting` and adds it if absent.
 
 2. **Does `widgets/` directory exist in `lib/features/list/presentation/`?**
    - What we know: The file layout contract (UI-SPEC §File Layout Contract) places `list_calendar_header.dart` in `lib/features/list/presentation/widgets/`. That directory does not currently exist (Phase 26 only created `providers/` and `screens/`).
    - What's unclear: Whether `import_guard.yaml` for the list presentation layer restricts widget files.
    - Recommendation: Wave 0 task creates `lib/features/list/presentation/widgets/` directory and places the new widget there.
+   - **RESOLVED:** Plan 27-01 Task 2 creates `lib/features/list/presentation/widgets/` and confirms no `import_guard.yaml` violation.
 
 3. **`bookByIdProvider` availability in `ListScreen` context**
    - What we know: `CalendarHeaderWidget` needs `currencyCode` from the book. `home_screen.dart` uses `bookByIdProvider(bookId: bookId)`. This provider is in the accounting/home feature.
    - What's unclear: Whether the list feature's `import_guard.yaml` allows importing `bookByIdProvider` from the accounting/home feature presentation layer, or whether `bookId`'s currency should be passed as a constructor param.
    - Recommendation: Pass `currencyCode` as a constructor param to `CalendarHeaderWidget` (resolved by `ListScreen` which already has `bookId`), rather than reading `bookByIdProvider` inside the widget — avoids potential import-guard violation.
+   - **RESOLVED:** Plan 27-03 Tasks 1 & 2 pass `currencyCode`/`locale` into `CalendarHeaderWidget` as constructor params (Phase 27 placeholder `'JPY'` with a Phase 29 seam comment); the widget does not import `bookByIdProvider`.
 
 ---
 
