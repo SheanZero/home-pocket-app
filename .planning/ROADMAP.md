@@ -271,7 +271,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 29-03-PLAN.md — list_transaction_tile.dart member attribution chip + list_sort_filter_bar.dart family segment + anyFilterActive fix (Wave 3)
+- [x] 29-03-PLAN.md — list_transaction_tile.dart member attribution chip + list_sort_filter_bar.dart family segment + anyFilterActive fix (Wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -307,7 +307,7 @@ Plans:
 | 26. Providers + Shell Wiring | 4/4 | Complete    | 2026-05-30 |
 | 27. Calendar Header + Month Summary | 4/4 | Complete    | 2026-05-30 |
 | 28. Transaction Tile + Sort/Filter Bar | 6/7 | Complete    | 2026-05-30 |
-| 29. List Screen Assembly + Family | 2/4 | In Progress|  |
+| 29. List Screen Assembly + Family | 3/4 | In Progress|  |
 | 30. i18n + Empty States + Golden Polish | 0/TBD | Not started | - |
 
 ---
