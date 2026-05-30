@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
+import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
+import '../../../../features/home/presentation/providers/state_shadow_books.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/list_sort_config.dart';
 import '../providers/state_list_filter.dart';
@@ -124,11 +126,16 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
     final filter = ref.watch(listFilterProvider);
     final l10n = S.of(context);
     final sortConfig = filter.sortConfig;
+    final isGroupMode = ref.watch(isGroupModeProvider);
+    final shadowBooksAsync = isGroupMode
+        ? ref.watch(shadowBooksProvider)
+        : const AsyncData<List<ShadowBookInfo>>([]);
 
     final anyFilterActive = filter.activeDayFilter != null ||
         filter.ledgerType != null ||
         filter.categoryIds.isNotEmpty ||
-        filter.searchQuery.isNotEmpty;
+        filter.searchQuery.isNotEmpty ||
+        filter.memberBookId != null; // FAM-03 fix (Pitfall B)
 
     return Container(
       height: 44,
@@ -416,6 +423,73 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                           minWidth: 44, minHeight: 44),
                     ),
                   ),
+            // ── Family segment (FAM-03/FAM-04) — group mode only (D-04 / CC-4) ──
+            if (isGroupMode) ...[
+              const SizedBox(width: 8),
+              // Mine-only chip: always visible in group mode (SC#5)
+              ActionChip(
+                avatar: Icon(
+                  Icons.person_outline,
+                  size: 14,
+                  color: filter.memberBookId == widget.bookId
+                      ? AppColors.textPrimary
+                      : AppColors.textSecondary,
+                ),
+                label: Text(
+                  S.of(context).listMineOnly,
+                  style: AppTextStyles.caption
+                      .copyWith(color: AppColors.textPrimary),
+                ),
+                backgroundColor: AppColors.backgroundMuted,
+                side: const BorderSide(
+                    color: AppColors.borderDefault, width: 1),
+                onPressed: () => ref
+                    .read(listFilterProvider.notifier)
+                    .setMemberFilter(
+                      filter.memberBookId == widget.bookId
+                          ? null
+                          : widget.bookId,
+                    ),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              const SizedBox(width: 4),
+              // Per-member chips: one per shadow book
+              ...shadowBooksAsync.when(
+                data: (shadows) => shadows.map((info) {
+                  final isSelected = filter.memberBookId == info.book.id;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: ActionChip(
+                      label: Text(
+                        '${info.memberAvatarEmoji} ${info.memberDisplayName}',
+                        style: AppTextStyles.caption.copyWith(
+                          color: isSelected
+                              ? AppColors.shared
+                              : AppColors.textSecondary,
+                        ),
+                      ),
+                      backgroundColor:
+                          isSelected ? AppColors.sharedLight : AppColors.card,
+                      side: BorderSide(
+                        color: isSelected
+                            ? AppColors.sharedBorder
+                            : AppColors.borderDefault,
+                        width: 1,
+                      ),
+                      onPressed: () => ref
+                          .read(listFilterProvider.notifier)
+                          .setMemberFilter(
+                              isSelected ? null : info.book.id),
+                      materialTapTargetSize:
+                          MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  );
+                }).toList(),
+                loading: () => const [],
+                // ignore: avoid_types_on_closure_parameters
+                error: (Object e, StackTrace s) => const [],
+              ),
+            ],
             // ── Conditional clear chip (C-03f) ────────────────────────────
             if (anyFilterActive) ...[
               const SizedBox(width: 8),
