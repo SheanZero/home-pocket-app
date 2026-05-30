@@ -218,7 +218,30 @@ Plans:
   4. User can tap the sort control to cycle through date / edit-time / amount sort fields and toggle ascending/descending; the active sort field and direction are visually indicated in the sort bar
   5. User can tap the ledger filter chip to filter to Survival or Soul entries; user can open the category filter to select one or more categories; both filters compose with text search (AND logic) and a single "clear all" control resets all active filters
 
-**Plans**: TBD
+**Plans**: 7 plans
+Plans:
+**Wave 1** *(parallel)*
+
+- [ ] 28-01-PLAN.md — D-01 Freezed state change (categoryIds Set) + ARB keys + build_runner (Wave 1)
+- [ ] 28-02-PLAN.md — Wave 0 test stubs: notifier + hash-chain + widget tests (Wave 1)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 28-03-PLAN.md — ListTransactionTile (C-01) + ListDayGroupHeader (C-02) + tile tests GREEN (Wave 2)
+- [ ] 28-04-PLAN.md — CategoryFilterSheet (C-05) + ListEmptyState (C-06) (Wave 2)
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 28-05-PLAN.md — ListSortFilterBar (C-03) + bar tests GREEN (Wave 3)
+
+**Wave 4** *(blocked on Wave 3)*
+
+- [ ] 28-06-PLAN.md — ListScreen assembly + SC#3 hash-chain test + full suite GREEN (Wave 4)
+
+**Wave 5** *(blocked on Wave 4)*
+
+- [ ] 28-07-PLAN.md — Human verify: all 21 behavioral checks (Wave 5)
+
 **UI hint**: yes
 
 ---
@@ -266,7 +289,7 @@ Plans:
 | 25. Domain Models + Use Case | 2/2 | Complete    | 2026-05-29 |
 | 26. Providers + Shell Wiring | 4/4 | Complete    | 2026-05-30 |
 | 27. Calendar Header + Month Summary | 4/4 | Complete    | 2026-05-30 |
-| 28. Transaction Tile + Sort/Filter Bar | 0/TBD | Not started | - |
+| 28. Transaction Tile + Sort/Filter Bar | 0/7 | Not started | - |
 | 29. List Screen Assembly + Family | 0/TBD | Not started | - |
 | 30. i18n + Empty States + Golden Polish | 0/TBD | Not started | - |
 
