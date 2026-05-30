@@ -227,7 +227,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 28-03-PLAN.md — ListTransactionTile (C-01) + ListDayGroupHeader (C-02) + tile tests GREEN (Wave 2)
+- [x] 28-03-PLAN.md — ListTransactionTile (C-01) + ListDayGroupHeader (C-02) + tile tests GREEN (Wave 2)
 - [ ] 28-04-PLAN.md — CategoryFilterSheet (C-05) + ListEmptyState (C-06) (Wave 2)
 
 **Wave 3** *(blocked on Wave 2)*
@@ -289,7 +289,7 @@ Plans:
 | 25. Domain Models + Use Case | 2/2 | Complete    | 2026-05-29 |
 | 26. Providers + Shell Wiring | 4/4 | Complete    | 2026-05-30 |
 | 27. Calendar Header + Month Summary | 4/4 | Complete    | 2026-05-30 |
-| 28. Transaction Tile + Sort/Filter Bar | 2/7 | In Progress|  |
+| 28. Transaction Tile + Sort/Filter Bar | 3/7 | In Progress|  |
 | 29. List Screen Assembly + Family | 0/TBD | Not started | - |
 | 30. i18n + Empty States + Golden Polish | 0/TBD | Not started | - |
 
