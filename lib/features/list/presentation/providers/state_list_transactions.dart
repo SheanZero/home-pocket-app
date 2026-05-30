@@ -4,6 +4,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../application/list/get_list_transactions_use_case.dart';
+import '../../../family_sync/presentation/providers/state_active_group.dart';
+import '../../../home/presentation/providers/state_shadow_books.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/models/tagged_transaction.dart';
 import 'repository_providers.dart';
@@ -41,13 +43,27 @@ Future<List<TaggedTransaction>> listTransactions(
   final locale =
       ref.watch(currentLocaleProvider).value ?? const Locale('ja');
 
-  // Step 3: own-book only (Phase 29: merge shadow books → bookIds + memberTag)
-  final bookIds = [bookId];
+  // Step 3: own-book + shadow books in group mode (FAM-01)
+  final isGroup = ref.watch(isGroupModeProvider);
+  final shadowBookList = isGroup
+      ? (await ref.watch(shadowBooksProvider.future))
+      : const <ShadowBookInfo>[];
+
+  final bookIds = [bookId, ...shadowBookList.map((s) => s.book.id)];
+  // Build lookup table once: shadowBookId → ShadowBookInfo (for memberTag fill, D-01)
+  final bookIdToShadow = {for (final s in shadowBookList) s.book.id: s};
+
+  // Member filter narrowing — SQL-level (D-02 preference)
+  // Reduces bookIds to one book when a member chip is selected.
+  final memberBookId = filter.memberBookId;
+  final effectiveBookIds = memberBookId != null
+      ? (bookIds.contains(memberBookId) ? [memberBookId] : const <String>[])
+      : bookIds;
 
   // Step 4: call use case with SQL-able filters
   final useCase = ref.watch(getListTransactionsUseCaseProvider);
   final result = await useCase.execute(
-    GetListParams(bookIds: bookIds, filter: filter),
+    GetListParams(bookIds: effectiveBookIds, filter: filter),
   );
 
   // Step 5: propagate errors as exceptions so AsyncValue.hasError is set
@@ -99,9 +115,17 @@ Future<List<TaggedTransaction>> listTransactions(
     }).toList();
   }
 
-  // Step 7: wrap as TaggedTransaction
-  // Phase 29: fill memberTag from shadowBooks lookup
-  return txs
-      .map((tx) => TaggedTransaction(transaction: tx, memberTag: null))
-      .toList();
+  // Step 7: wrap as TaggedTransaction; own-book rows → memberTag null (D-01/SC#3)
+  return txs.map((tx) {
+    final shadow = bookIdToShadow[tx.bookId];
+    return TaggedTransaction(
+      transaction: tx,
+      memberTag: shadow == null
+          ? null
+          : MemberTag(
+              emoji: shadow.memberAvatarEmoji,
+              name: shadow.memberDisplayName,
+            ),
+    );
+  }).toList();
 }
