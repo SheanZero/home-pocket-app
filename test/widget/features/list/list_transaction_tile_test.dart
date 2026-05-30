@@ -48,6 +48,7 @@ Future<void> _pumpTile(
   ProviderContainer container,
   TaggedTransaction tx, {
   VoidCallback? onTap,
+  VoidCallback? onDeleted,
 }) async {
   await tester.pumpWidget(
     UncontrolledProviderScope(
@@ -60,6 +61,7 @@ Future<void> _pumpTile(
             taggedTx: tx,
             bookId: 'book1',
             onTap: onTap ?? () {},
+            onDeleted: onDeleted ?? () {},
             tagText: '生存',
             tagBgColor: const Color(0xFFE8F0F8),
             tagTextColor: const Color(0xFF5A9CC8),

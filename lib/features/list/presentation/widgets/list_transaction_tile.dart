@@ -7,9 +7,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart'
     show deleteTransactionUseCaseProvider;
-import '../../../../features/accounting/presentation/screens/transaction_edit_screen.dart';
 import '../../domain/models/tagged_transaction.dart';
-import '../providers/state_list_transactions.dart';
 
 /// List tile wrapping the transaction row in a [Dismissible] for swipe-to-delete
 /// and adding [onTap] for tap-to-edit navigation (ROW-01 / ROW-02).
@@ -18,15 +16,17 @@ import '../providers/state_list_transactions.dart';
 /// Replicates [HomeTransactionTile] layout verbatim with the addition of a time
 /// sub-label (D-09: date is in the day-group header, tile shows HH:mm only).
 ///
-/// Navigation on tap is handled by the [onTap] callback injected by the parent.
-/// The parent should use [buildTileTapHandler] to create the standard navigation
-/// callback that pushes [TransactionEditScreen] and invalidates the list on save.
+/// Navigation on tap is handled by the [onTap] callback injected by the parent,
+/// which pushes the edit screen and invalidates the list on save. Provider
+/// invalidation after delete is delegated to [onDeleted] (parent owns the
+/// filter context needed for the calendar totals provider).
 class ListTransactionTile extends ConsumerWidget {
   const ListTransactionTile({
     super.key,
     required this.taggedTx,
     required this.bookId,
     required this.onTap,
+    required this.onDeleted,
     required this.tagText,
     required this.tagBgColor,
     required this.tagTextColor,
@@ -40,8 +40,14 @@ class ListTransactionTile extends ConsumerWidget {
   final TaggedTransaction taggedTx;
   final String bookId;
 
-  /// Tap callback injected by parent — typically built with [buildTileTapHandler].
+  /// Tap callback injected by parent (pushes the edit screen + reactive refresh).
   final VoidCallback onTap;
+
+  /// Called after a confirmed swipe-delete fires, so the parent can invalidate
+  /// the providers that need filter context — the transaction list AND the
+  /// calendar daily totals (the tile lacks the active year/month). Without this
+  /// the calendar header would show stale totals until the month is changed.
+  final VoidCallback onDeleted;
 
   // Pre-formatted display values injected by parent (pure-UI contract)
   final String tagText;
@@ -114,7 +120,8 @@ class ListTransactionTile extends ConsumerWidget {
         ref
             .read(deleteTransactionUseCaseProvider)
             .execute(taggedTx.transaction.id);
-        ref.invalidate(listTransactionsProvider(bookId: bookId));
+        // Parent invalidates list + calendar totals (needs active year/month).
+        onDeleted();
       },
       child: GestureDetector(
         onTap: onTap,
@@ -197,38 +204,6 @@ class ListTransactionTile extends ConsumerWidget {
       ),
     );
   }
-}
-
-/// Builds the standard tap handler for [ListTransactionTile] that pushes
-/// [TransactionEditScreen] and invalidates the transaction list on save.
-///
-/// Usage in parent (ListScreen):
-/// ```dart
-/// onTap: buildTileTapHandler(context: context, ref: ref,
-///   taggedTx: tx, bookId: bookId),
-/// ```
-///
-/// The handler pushes [TransactionEditScreen] via [Navigator.push]. When the
-/// screen pops with `result == true` (saved), [listTransactionsProvider] is
-/// invalidated to trigger a reactive list refresh (ROW-01 contract).
-VoidCallback buildTileTapHandler({
-  required BuildContext context,
-  required WidgetRef ref,
-  required TaggedTransaction taggedTx,
-  required String bookId,
-}) {
-  return () async {
-    final result = await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-            TransactionEditScreen(transaction: taggedTx.transaction),
-      ),
-    );
-    if (result == true) {
-      ref.invalidate(listTransactionsProvider(bookId: bookId));
-    }
-  };
 }
 
 /// Formats transaction timestamp to time-only string (HH:mm) per D-09.

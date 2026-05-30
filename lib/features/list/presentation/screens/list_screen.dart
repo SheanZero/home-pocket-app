@@ -167,23 +167,37 @@ class ListScreen extends ConsumerWidget {
     // Satisfaction icon: soul transactions only (ADR-014 mapping from home_screen.dart)
     final satisfactionIcon = _satisfactionIcon(transaction);
 
-    // Tap handler: push TransactionEditScreen; on save (result == true), invalidate list
-    // AND calendar totals (RESEARCH.md Open Q#2 / UI-SPEC C-04 step 5)
-    Future<void> onTap() async {
-      final result = await Navigator.push<bool>(
-        context,
-        MaterialPageRoute(
-          builder: (ctx) => TransactionEditScreen(transaction: transaction),
+    // Invalidate list + calendar totals together. Both the edit-save and the
+    // swipe-delete paths must refresh the calendar header (CR-01 / UI-SPEC C-04
+    // step 5) — the calendar reads calendarDailyTotalsProvider, which the tile
+    // cannot invalidate itself because it lacks the active year/month.
+    void invalidateAfterMutation() {
+      ref.invalidate(listTransactionsProvider(bookId: bookId));
+      ref.invalidate(
+        calendarDailyTotalsProvider(
+          bookId: bookId,
+          year: filter.selectedYear,
+          month: filter.selectedMonth,
         ),
       );
-      if (result == true) {
-        ref.invalidate(listTransactionsProvider(bookId: bookId));
-        ref.invalidate(
-          calendarDailyTotalsProvider(
-            bookId: bookId,
-            year: filter.selectedYear,
-            month: filter.selectedMonth,
+    }
+
+    // Tap handler: push TransactionEditScreen; on save (result == true), refresh.
+    Future<void> onTap() async {
+      try {
+        final result = await Navigator.push<bool>(
+          context,
+          MaterialPageRoute(
+            builder: (ctx) => TransactionEditScreen(transaction: transaction),
           ),
+        );
+        if (result == true) {
+          invalidateAfterMutation();
+        }
+      } catch (e, st) {
+        // Surface rather than silently dropping the unhandled Future (WR-03).
+        FlutterError.reportError(
+          FlutterErrorDetails(exception: e, stack: st, library: 'list_screen'),
         );
       }
     }
@@ -192,6 +206,7 @@ class ListScreen extends ConsumerWidget {
       taggedTx: tx,
       bookId: bookId,
       onTap: onTap,
+      onDeleted: invalidateAfterMutation,
       tagText: tagText,
       tagBgColor: tagBgColor,
       tagTextColor: tagTextColor,

@@ -82,26 +82,27 @@ class _CategoryFilterSheetState extends ConsumerState<CategoryFilterSheet> {
   void _toggleL1(String l1Id) {
     final children = _l2ByParent[l1Id] ?? [];
     final s = _l1State(l1Id);
+    final childIds = children.map((c) => c.id);
     setState(() {
+      final next = {..._localSelected};
       if (s == _L1SelectState.all) {
-        for (final c in children) {
-          _localSelected.remove(c.id);
-        }
+        next.removeAll(childIds);
       } else {
-        for (final c in children) {
-          _localSelected.add(c.id);
-        }
+        next.addAll(childIds);
       }
+      _localSelected = next;
     });
   }
 
   void _toggleL2(String l2Id) {
     setState(() {
-      if (_localSelected.contains(l2Id)) {
-        _localSelected.remove(l2Id);
+      final next = {..._localSelected};
+      if (next.contains(l2Id)) {
+        next.remove(l2Id);
       } else {
-        _localSelected.add(l2Id);
+        next.add(l2Id);
       }
+      _localSelected = next;
     });
   }
 
@@ -145,7 +146,7 @@ class _CategoryFilterSheetState extends ConsumerState<CategoryFilterSheet> {
                 ),
                 TextButton(
                   onPressed: () {
-                    setState(() => _localSelected.clear());
+                    setState(() => _localSelected = <String>{});
                   },
                   child: Text(
                     S.of(context).listCategorySheetClear,
