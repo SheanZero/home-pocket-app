@@ -18,7 +18,7 @@
 
 ### List Display (LIST)
 
-- [ ] **LIST-01**: User sees the selected month's transactions as a scrollable list; each row shows category emoji + name, ledger-color tag (Survival `AppColors.survival` / Soul `AppColors.soul`), date, and amount (tabular figures via `AppTextStyles.amount*`, formatted by `NumberFormatter` + locale).
+- [x] **LIST-01**: User sees the selected month's transactions as a scrollable list; each row shows category emoji + name, ledger-color tag (Survival `AppColors.survival` / Soul `AppColors.soul`), date, and amount (tabular figures via `AppTextStyles.amount*`, formatted by `NumberFormatter` + locale).
 - [x] **LIST-02**: The list updates reactively after add / edit / delete / family-sync — no manual refresh required (new `TransactionDao.watchByBookId(s)` stream).
 - [ ] **LIST-03**: User sees a clear empty state when no transactions match the current month + active filters.
 - [ ] **LIST-04**: User can pull-to-refresh the list.
@@ -100,7 +100,7 @@
 | CAL-02 | Phase 27 — Calendar Header + Month Summary | Complete |
 | CAL-03 | Phase 27 — Calendar Header + Month Summary | Complete |
 | CAL-04 | Phase 27 — Calendar Header + Month Summary | Complete |
-| LIST-01 | Phase 28 — Transaction Tile + Sort/Filter Bar | Pending |
+| LIST-01 | Phase 28 — Transaction Tile + Sort/Filter Bar | Complete |
 | ROW-01 | Phase 28 — Transaction Tile + Sort/Filter Bar | Pending |
 | ROW-02 | Phase 28 — Transaction Tile + Sort/Filter Bar | Pending |
 | LIST-04 | Phase 29 — List Screen Assembly + Family | Pending |
