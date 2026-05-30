@@ -329,4 +329,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-30 — v1.4 列表功能: Phase 26 (Providers + Shell Wiring) complete; list feature providers wired, ListScreen reachable showing loading state*
+*Last updated: 2026-05-30 — v1.4 列表功能: Phase 28 (Transaction Tile + Sort/Filter Bar) complete; List tab fully functional — grouped-by-day rows, swipe-delete via DeleteTransactionUseCase, tap-to-edit, multi-select category filter + sort/ledger/search bar, 22 ARB keys × 3 locales. Human UAT 21/21 passed.*

@@ -1,8 +1,10 @@
 ---
 phase: 28-transaction-tile-sort-filter-bar
 verified: 2026-05-30T10:00:00Z
-status: human_needed
+status: passed
+human_verified: 2026-05-30T21:25:00Z (user approved all 21 checks — see 28-HUMAN-UAT.md)
 score: 11/11 automated must-haves verified
+human_checks: 21/21 passed
 overrides_applied: 0
 human_verification:
   - test: "SC#1 — Transaction tile display fields"
