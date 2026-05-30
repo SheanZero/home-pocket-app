@@ -8,6 +8,8 @@ import '../../../accounting/presentation/screens/manual_one_step_screen.dart';
 import '../../../analytics/presentation/providers/state_analytics.dart';
 import '../../../analytics/presentation/providers/state_happiness.dart';
 import '../../../analytics/presentation/screens/analytics_screen.dart';
+import '../../../list/presentation/providers/state_list_transactions.dart';
+import '../../../list/presentation/screens/list_screen.dart';
 import '../../../family_sync/domain/models/sync_status_model.dart';
 import '../../../family_sync/presentation/providers/state_sync.dart';
 import '../../../family_sync/presentation/widgets/family_sync_notification_route_listener.dart';
@@ -87,6 +89,8 @@ class MainShellScreen extends ConsumerWidget {
             ),
           );
         }
+        // D-03: forward-wiring; no visible effect this phase (ListScreen is loading-only)
+        ref.invalidate(listTransactionsProvider(bookId: bookId));
       }
     });
 
@@ -107,8 +111,7 @@ class MainShellScreen extends ConsumerWidget {
                     );
                   },
                 ),
-                // Placeholder for List tab
-                Center(child: Text(S.of(context).listTab)),
+                ListScreen(bookId: bookId),
                 AnalyticsScreen(bookId: bookId),
                 // Placeholder for Todo tab
                 Center(child: Text(S.of(context).todoTab)),
@@ -165,6 +168,8 @@ class MainShellScreen extends ConsumerWidget {
                       ),
                     );
                   }
+                  // D-03: forward-wiring; no visible effect this phase (ListScreen is loading-only)
+                  ref.invalidate(listTransactionsProvider(bookId: bookId));
                 },
               ),
             ),
