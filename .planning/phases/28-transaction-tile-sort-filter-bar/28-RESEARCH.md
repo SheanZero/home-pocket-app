@@ -758,17 +758,17 @@ Future<void> _loadCategories() async {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does `GetListParams` need updating for `Set<String>` categories?**
    - What we know: `GetListParams` currently takes `ListFilterState filter` (Phase 25 D-04); the use case reads `filter.categoryId` (single value) and passes to the DAO.
    - What's unclear: After D-01, should `GetListParams` be updated to pass `categoryIds: Set<String>` to DAO (SQL `IN (...)`), or should category filtering stay Dart-side only?
-   - Recommendation: For Phase 28, Dart-side filtering is sufficient (single-month, <500 rows). Pass `null` for the SQL `categoryId` param. A future optimization could push `IN (...)` to SQL. The planner should choose whichever path results in fewer modified files.
+   - RESOLVED: Use Dart-side filtering in `state_list_transactions.dart` (single-month, <500 rows). Pass `categoryId: null` to the use case; do **not** modify `GetListParams`. The Dart-side step (`filter.categoryIds.contains(...)`) handles multi-select. A future optimization could push `IN (...)` to SQL. Implemented in 28-01 (Pattern 3, Assumption A3).
 
 2. **Should `calendarDailyTotalsProvider` be invalidated after edit/delete?**
    - What we know: `CalendarHeaderWidget` watches `calendarDailyTotalsProvider(bookId, year, month)`; editing or deleting a transaction changes the per-day total.
    - What's unclear: The provider is parameterized — invalidating it requires knowing the current `year` and `month` from `filter`.
-   - Recommendation: Yes, invalidate on edit/delete return. Read `filter.selectedYear/selectedMonth` from `listFilterProvider` to construct the invalidation key.
+   - RESOLVED: Yes — invalidate on both edit (onTap return) and delete (onDismissed) paths. Read `filter.selectedYear/selectedMonth` from `listFilterProvider` to construct `calendarDailyTotalsProvider(bookId, year, month)`. Wired in 28-06 key_links (UI-SPEC C-04 step 5).
 
 ---
 
