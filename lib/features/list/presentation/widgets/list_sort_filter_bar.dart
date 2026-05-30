@@ -486,8 +486,7 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                   );
                 }).toList(),
                 loading: () => const [],
-                // ignore: avoid_types_on_closure_parameters
-                error: (Object e, StackTrace s) => const [],
+                error: (e, s) => const [],
               ),
             ],
             // ── Conditional clear chip (C-03f) ────────────────────────────

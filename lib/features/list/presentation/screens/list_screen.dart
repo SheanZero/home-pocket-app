@@ -61,65 +61,92 @@ class ListScreen extends ConsumerWidget {
     Locale locale,
   ) {
     final txsAsync = ref.watch(listTransactionsProvider(bookId: bookId));
-    return txsAsync.when(
-      loading: () => const Center(
-        child: CircularProgressIndicator(
-          color: AppColors.accentPrimary,
-          strokeWidth: 2,
-        ),
-      ),
-      error: (err, st) => Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              size: 40,
-              color: AppColors.textTertiary,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '[data load error]',
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-      data: (txs) {
-        final anyFilterActive = filter.activeDayFilter != null ||
-            filter.ledgerType != null ||
-            filter.categoryIds.isNotEmpty ||
-            filter.searchQuery.isNotEmpty;
-
-        if (txs.isEmpty) {
-          return ListEmptyState(isFilterActive: anyFilterActive);
-        }
-
-        final items = buildFlatList(txs, filter.sortConfig.sortDirection);
-        return ListView.builder(
-          itemCount: items.length,
-          itemBuilder: (context, i) {
-            final item = items[i];
-            return switch (item) {
-              DayHeaderItem() => ListDayGroupHeader(
-                  date: item.date,
-                  locale: locale,
-                ),
-              TransactionRowItem() => _buildTile(
-                  context,
-                  ref,
-                  item.tx,
-                  filter,
-                  locale,
-                  items,
-                  i,
-                ),
-            };
-          },
-        );
+    return RefreshIndicator(
+      color: AppColors.accentPrimary,
+      onRefresh: () async {
+        ref.invalidate(listTransactionsProvider(bookId: bookId));
+        ref.invalidate(calendarDailyTotalsProvider(
+          bookId: bookId,
+          year: filter.selectedYear,
+          month: filter.selectedMonth,
+        ));
+        // Await re-settlement so spinner dismisses honestly (Pitfall F)
+        await ref
+            .read(listTransactionsProvider(bookId: bookId).future)
+            .catchError((_) => <TaggedTransaction>[]);
       },
+      child: txsAsync.when(
+        loading: () => SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Center(
+            child: const CircularProgressIndicator(
+              color: AppColors.accentPrimary,
+              strokeWidth: 2,
+            ),
+          ),
+        ),
+        error: (err, st) => SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  size: 40,
+                  color: AppColors.textTertiary,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '[data load error]',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        data: (txs) {
+          final anyFilterActive = filter.activeDayFilter != null ||
+              filter.ledgerType != null ||
+              filter.categoryIds.isNotEmpty ||
+              filter.searchQuery.isNotEmpty ||
+              filter.memberBookId != null; // FAM-03 fix (Pitfall B)
+
+          if (txs.isEmpty) {
+            // Wrap in scrollable so pull-to-refresh gesture fires when empty (Pitfall E)
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: ListEmptyState(isFilterActive: anyFilterActive),
+            );
+          }
+
+          final items = buildFlatList(txs, filter.sortConfig.sortDirection);
+          return ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: items.length,
+            itemBuilder: (context, i) {
+              final item = items[i];
+              return switch (item) {
+                DayHeaderItem() => ListDayGroupHeader(
+                    date: item.date,
+                    locale: locale,
+                  ),
+                TransactionRowItem() => _buildTile(
+                    context,
+                    ref,
+                    item.tx,
+                    filter,
+                    locale,
+                    items,
+                    i,
+                  ),
+              };
+            },
+          );
+        },
+      ),
     );
   }
 

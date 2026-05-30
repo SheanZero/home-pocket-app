@@ -151,12 +151,12 @@ void main() {
 
         await _pumpScreen(tester, mockUseCase, mockRepo);
 
-        // RED: no RefreshIndicator yet; fling will not trigger refresh
-        // Perform pull-to-refresh gesture
-        await tester.fling(
-          find.byType(ListView),
+        // Perform pull-to-refresh gesture on the RefreshIndicator itself.
+        // Using the RefreshIndicator as the drag start point ensures the
+        // gesture is routed to onRefresh regardless of list empty/non-empty state.
+        await tester.drag(
+          find.byType(RefreshIndicator),
           const Offset(0, 300),
-          1000,
         );
         await tester.pumpAndSettle();
 
@@ -189,11 +189,12 @@ void main() {
 
         await _pumpScreen(tester, mockUseCase, mockRepo);
 
-        // RED: no RefreshIndicator yet; fling will not trigger calendar refresh
-        await tester.fling(
-          find.byType(ListView),
+        // Perform pull-to-refresh gesture on the RefreshIndicator itself.
+        // Using the RefreshIndicator as the drag start point ensures the
+        // gesture is routed to onRefresh regardless of list empty/non-empty state.
+        await tester.drag(
+          find.byType(RefreshIndicator),
           const Offset(0, 300),
-          1000,
         );
         await tester.pumpAndSettle();
 
