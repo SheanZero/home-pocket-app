@@ -39,8 +39,8 @@
 
 ### Row Interactions (ROW)
 
-- [ ] **ROW-01**: User can tap a row to open it for editing (reuses `TransactionEditScreen` + shared `TransactionDetailsForm`; preserves `entry_source`).
-- [ ] **ROW-02**: User can swipe a row to delete it with a confirmation dialog; deletion routes exclusively through `DeleteTransactionUseCase` (soft-delete, hash-chain integrity preserved).
+- [x] **ROW-01**: User can tap a row to open it for editing (reuses `TransactionEditScreen` + shared `TransactionDetailsForm`; preserves `entry_source`).
+- [x] **ROW-02**: User can swipe a row to delete it with a confirmation dialog; deletion routes exclusively through `DeleteTransactionUseCase` (soft-delete, hash-chain integrity preserved).
 
 ### Family-Aware (FAM)
 
@@ -101,8 +101,8 @@
 | CAL-03 | Phase 27 — Calendar Header + Month Summary | Complete |
 | CAL-04 | Phase 27 — Calendar Header + Month Summary | Complete |
 | LIST-01 | Phase 28 — Transaction Tile + Sort/Filter Bar | Complete |
-| ROW-01 | Phase 28 — Transaction Tile + Sort/Filter Bar | Pending |
-| ROW-02 | Phase 28 — Transaction Tile + Sort/Filter Bar | Pending |
+| ROW-01 | Phase 28 — Transaction Tile + Sort/Filter Bar | Complete |
+| ROW-02 | Phase 28 — Transaction Tile + Sort/Filter Bar | Complete |
 | LIST-04 | Phase 29 — List Screen Assembly + Family | Pending |
 | FAM-01 | Phase 29 — List Screen Assembly + Family | Pending |
 | FAM-02 | Phase 29 — List Screen Assembly + Family | Pending |

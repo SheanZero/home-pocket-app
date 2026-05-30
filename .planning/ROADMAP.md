@@ -223,7 +223,7 @@ Plans:
 **Wave 1** *(parallel)*
 
 - [x] 28-01-PLAN.md — D-01 Freezed state change (categoryIds Set) + ARB keys + build_runner (Wave 1)
-- [ ] 28-02-PLAN.md — Wave 0 test stubs: notifier + hash-chain + widget tests (Wave 1)
+- [x] 28-02-PLAN.md — Wave 0 test stubs: notifier + hash-chain + widget tests (Wave 1)
 
 **Wave 2** *(blocked on Wave 1)*
 
@@ -289,7 +289,7 @@ Plans:
 | 25. Domain Models + Use Case | 2/2 | Complete    | 2026-05-29 |
 | 26. Providers + Shell Wiring | 4/4 | Complete    | 2026-05-30 |
 | 27. Calendar Header + Month Summary | 4/4 | Complete    | 2026-05-30 |
-| 28. Transaction Tile + Sort/Filter Bar | 1/7 | In Progress|  |
+| 28. Transaction Tile + Sort/Filter Bar | 2/7 | In Progress|  |
 | 29. List Screen Assembly + Family | 0/TBD | Not started | - |
 | 30. i18n + Empty States + Golden Polish | 0/TBD | Not started | - |
 
