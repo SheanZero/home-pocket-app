@@ -259,7 +259,24 @@ Plans:
   4. User can tap a family member chip in the filter bar to show only that member's entries; the member filter composes with the active ledger and category filters
   5. User can tap the "Mine only" shortcut (a prominent toggle in the filter area) to instantly show only their own entries; tapping it again returns to the full family view — the shortcut is visible even when no other member filter is active
 
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+**Wave 1**
+
+- [ ] 29-01-PLAN.md — Wave 0 test stubs: 2 new widget test files + extensions to 3 existing test files (Wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 29-02-PLAN.md — state_list_transactions.dart group-mode bookIds fan-out + memberTag fill + member filter narrowing + state_calendar_totals.dart per-book sum + ARB listMineOnly key (Wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 29-03-PLAN.md — list_transaction_tile.dart member attribution chip + list_sort_filter_bar.dart family segment + anyFilterActive fix (Wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 29-04-PLAN.md — list_screen.dart RefreshIndicator + anyFilterActive fix + full suite GREEN + human verify (Wave 4)
+
 **UI hint**: yes
 
 ---
@@ -290,7 +307,7 @@ Plans:
 | 26. Providers + Shell Wiring | 4/4 | Complete    | 2026-05-30 |
 | 27. Calendar Header + Month Summary | 4/4 | Complete    | 2026-05-30 |
 | 28. Transaction Tile + Sort/Filter Bar | 6/7 | Complete    | 2026-05-30 |
-| 29. List Screen Assembly + Family | 0/TBD | Not started | - |
+| 29. List Screen Assembly + Family | 0/4 | Not started | - |
 | 30. i18n + Empty States + Golden Polish | 0/TBD | Not started | - |
 
 ---
