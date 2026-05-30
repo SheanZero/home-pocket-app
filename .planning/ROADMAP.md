@@ -236,7 +236,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3)*
 
-- [ ] 28-06-PLAN.md — ListScreen assembly + SC#3 hash-chain test + full suite GREEN (Wave 4)
+- [x] 28-06-PLAN.md — ListScreen assembly + SC#3 hash-chain test + full suite GREEN (Wave 4)
 
 **Wave 5** *(blocked on Wave 4)*
 
@@ -289,7 +289,7 @@ Plans:
 | 25. Domain Models + Use Case | 2/2 | Complete    | 2026-05-29 |
 | 26. Providers + Shell Wiring | 4/4 | Complete    | 2026-05-30 |
 | 27. Calendar Header + Month Summary | 4/4 | Complete    | 2026-05-30 |
-| 28. Transaction Tile + Sort/Filter Bar | 5/7 | In Progress|  |
+| 28. Transaction Tile + Sort/Filter Bar | 6/7 | In Progress|  |
 | 29. List Screen Assembly + Family | 0/TBD | Not started | - |
 | 30. i18n + Empty States + Golden Polish | 0/TBD | Not started | - |
 
