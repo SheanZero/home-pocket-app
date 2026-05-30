@@ -191,6 +191,29 @@ class ListTransactionTile extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
+              // Member attribution chip — second trailing element, only for shadow-book rows (D-01/SC#3)
+              // taggedTx.memberTag is null for own-book rows; no isOwn branch needed
+              if (taggedTx.memberTag case final tag?) ...[
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 72),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.sharedLight,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                    child: Text(
+                      '${tag.emoji} ${tag.name}',
+                      style: AppTextStyles.micro
+                          .copyWith(color: AppColors.shared),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
               // Amount — amountSmall with tabular figures (SC#1)
               Text(
                 formattedAmount,
