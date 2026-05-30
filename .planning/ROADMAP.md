@@ -267,7 +267,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 29-02-PLAN.md — state_list_transactions.dart group-mode bookIds fan-out + memberTag fill + member filter narrowing + state_calendar_totals.dart per-book sum + ARB listMineOnly key (Wave 2)
+- [x] 29-02-PLAN.md — state_list_transactions.dart group-mode bookIds fan-out + memberTag fill + member filter narrowing + state_calendar_totals.dart per-book sum + ARB listMineOnly key (Wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -307,7 +307,7 @@ Plans:
 | 26. Providers + Shell Wiring | 4/4 | Complete    | 2026-05-30 |
 | 27. Calendar Header + Month Summary | 4/4 | Complete    | 2026-05-30 |
 | 28. Transaction Tile + Sort/Filter Bar | 6/7 | Complete    | 2026-05-30 |
-| 29. List Screen Assembly + Family | 1/4 | In Progress|  |
+| 29. List Screen Assembly + Family | 2/4 | In Progress|  |
 | 30. i18n + Empty States + Golden Polish | 0/TBD | Not started | - |
 
 ---
