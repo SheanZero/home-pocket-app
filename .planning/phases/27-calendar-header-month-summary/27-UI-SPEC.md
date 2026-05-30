@@ -1,7 +1,7 @@
 ---
 phase: 27
 slug: calendar-header-month-summary
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-05-30
@@ -395,11 +395,11 @@ No third-party shadcn registries. Registry vetting gate: not applicable (Flutter
 - [x] Dimension 1 Copywriting: PASS
 - [x] Dimension 2 Visuals: PASS
 - [x] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PENDING RE-CHECK — three weights (w500/w600/w700) in active use; resolved via developer-approved project-token waiver (see Typography section). Awaiting checker confirmation that the waiver clears the block.
+- [x] Dimension 4 Typography: PASS — three weights (w500/w600/w700) in active use; cleared via developer-approved project-token waiver (see Typography section). Checker confirmed the waiver satisfies fix option (b).
 - [x] Dimension 5 Spacing: PASS
 - [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** PENDING re-verification of Dimension 4 (typography waiver). Dimensions 1/2/3/5/6 previously passed (gsd-ui-checker, 2026-05-30) and are unchanged by this revision.
+**Approval:** APPROVED (gsd-ui-checker, 2026-05-30) — 6/6 dimensions pass. Dimension 4 typography waiver re-verified and accepted per fix option (b).
 
 **Refinement note (2026-05-30):** Spec refined post-approval with executor-precision additions only — all token size/weight/hex values re-verified against `lib/core/theme/` source; added `## Data Normalization` section (shared day-key contract to prevent silent blank-cell failure), nav-callback de-duplication note (single `selectMonth` mutation path), color-override caveat for `micro`/`bodySmall` tokens, and year-boundary rollover note for chevron month math. No design-contract substance (tokens, colors, copy, registry) changed; approval stood.
 
