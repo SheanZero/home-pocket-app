@@ -1,10 +1,11 @@
 ---
 phase: 28
 slug: transaction-tile-sort-filter-bar
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-05-30
+reviewed_at: 2026-05-30
 ---
 
 # Phase 28 — UI Design Contract
@@ -117,7 +118,8 @@ Color assignments from `lib/core/theme/app_colors.dart`. No hardcoded hex in imp
 
 **Accent (`AppColors.accentPrimary` `#E85A4F`) reserved for:**
 1. Sort chip active border (the only accent use in the bar)
-2. No other element in this phase uses coral accent
+2. Category filter sheet "Apply" button background (C-05)
+3. No other element in this phase uses coral accent
 
 **Destructive color:** `Colors.red` on swipe-delete background only. AlertDialog cancel action uses `AppColors.textSecondary`; confirm-delete action uses `Colors.red` foreground text (via `TextButton.styleFrom(foregroundColor: Colors.red)` — see RESEARCH.md Pattern 2). This is the sole destructive semantic color in this phase.
 
