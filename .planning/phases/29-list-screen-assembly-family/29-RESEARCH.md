@@ -644,17 +644,17 @@ All 3 ARB files (app_ja.arb, app_zh.arb, app_en.arb) must have the key in the sa
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **`shadowBooksProvider` keepAlive in calendar context**
    - What we know: `shadowBooksProvider` is `@riverpod` (auto-dispose). `calendarDailyTotalsProvider` is also auto-dispose. Both are subscribed from a `keepAlive: true` `listFilterProvider` chain under IndexedStack.
    - What's unclear: Under IndexedStack, the List tab's widgets remain mounted — subscriptions never drop. So auto-dispose providers should stay alive. But the calendar provider is invalidated explicitly on pull-to-refresh; when it rebuilds, it re-awaits `shadowBooksProvider.future`. This should work.
-   - Recommendation: No action needed. If "disposed during loading" appears in tests, add `keepAlive: true` to `shadowBooksProvider`. This is a runtime-only concern, easily fixed.
+   - RESOLVED: No action needed. If "disposed during loading" appears in tests, add `keepAlive: true` to `shadowBooksProvider`. This is a runtime-only concern, easily fixed.
 
 2. **Mine-only chip ARB key or reuse `listLedgerAll`?**
    - What we know: `listLedgerAll` = `"All"` already exists. A new `listMineOnly` key is needed.
    - What's unclear: Whether a separate "All members" chip is needed (UI-SPEC CC-2 says "do not add a separate All members chip unless needed for discoverability").
-   - Recommendation: Skip "All members" chip in Phase 29. The `null` state is implicit (no chip selected in the member segment). Add `listMineOnly` key only.
+   - RESOLVED: Skip "All members" chip in Phase 29. The `null` state is implicit (no chip selected in the member segment). Add `listMineOnly` key only.
 
 ---
 
