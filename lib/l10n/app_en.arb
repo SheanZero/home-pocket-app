@@ -2087,5 +2087,22 @@
       }
     }
   },
+  "calMonthTotal": "Monthly Spend",
+  "@calMonthTotal": {
+    "description": "Calendar header: monthly expense total label (Phase 27 placeholder)"
+  },
+  "calDayTotal": "{date} Spend",
+  "@calDayTotal": {
+    "description": "Calendar day-tap summary: daily expense total label (Phase 27 placeholder)",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "calLoadError": "Unable to load data",
+  "@calLoadError": {
+    "description": "Calendar error state: unable to load data (Phase 27 placeholder)"
+  },
   "@@locale": "en"
 }

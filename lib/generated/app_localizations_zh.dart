@@ -1650,4 +1650,15 @@ class SZh extends S {
   String budgetExceededAmount(String amount) {
     return '超出: $amount';
   }
+
+  @override
+  String get calMonthTotal => '本月支出';
+
+  @override
+  String calDayTotal(String date) {
+    return '$date支出';
+  }
+
+  @override
+  String get calLoadError => '无法加载数据';
 }

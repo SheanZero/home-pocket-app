@@ -1687,4 +1687,15 @@ class SEn extends S {
   String budgetExceededAmount(String amount) {
     return 'Exceeded: $amount';
   }
+
+  @override
+  String get calMonthTotal => 'Monthly Spend';
+
+  @override
+  String calDayTotal(String date) {
+    return '$date Spend';
+  }
+
+  @override
+  String get calLoadError => 'Unable to load data';
 }

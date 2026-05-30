@@ -1656,4 +1656,15 @@ class SJa extends S {
   String budgetExceededAmount(String amount) {
     return '超過: $amount';
   }
+
+  @override
+  String get calMonthTotal => '今月の支出';
+
+  @override
+  String calDayTotal(String date) {
+    return '$dateの支出';
+  }
+
+  @override
+  String get calLoadError => 'データを読み込めません';
 }

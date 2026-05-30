@@ -35,6 +35,7 @@ dependencies:
   local_auth: ^3.0.1
 
   # Unique ID Generation
+  table_calendar: ^3.2.0
   ulid: ^2.0.0
 
   # Voice Input

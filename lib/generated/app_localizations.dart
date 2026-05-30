@@ -3108,6 +3108,24 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Exceeded: {amount}'**
   String budgetExceededAmount(String amount);
+
+  /// Calendar header: monthly expense total label (Phase 27 placeholder)
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Spend'**
+  String get calMonthTotal;
+
+  /// Calendar day-tap summary: daily expense total label (Phase 27 placeholder)
+  ///
+  /// In en, this message translates to:
+  /// **'{date} Spend'**
+  String calDayTotal(String date);
+
+  /// Calendar error state: unable to load data (Phase 27 placeholder)
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load data'**
+  String get calLoadError;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {
