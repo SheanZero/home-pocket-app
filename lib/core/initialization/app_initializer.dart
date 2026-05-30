@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import '../../data/app_database.dart';
 import '../../infrastructure/crypto/providers.dart';
@@ -29,6 +30,11 @@ class AppInitializer {
   final SeedRunner _seedRunner;
 
   Future<InitResult> initialize() async {
+    // Initialize intl date formatting data for all locales so that
+    // table_calendar day-of-week headers and DateFormatter render correctly
+    // in ja/zh/en. Must run before any DateFormatter or NumberFormatter usage.
+    await initializeDateFormatting();
+
     ProviderContainer? initContainer;
     try {
       // Stage 1: Master key + device key pair
