@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../features/accounting/domain/models/transaction.dart';
+import '../../../../features/accounting/presentation/screens/transaction_edit_screen.dart';
 import '../../../../features/settings/presentation/providers/state_locale.dart';
+import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../domain/models/list_filter_state.dart';
 import '../../domain/models/tagged_transaction.dart';
+import '../providers/state_calendar_totals.dart';
 import '../providers/state_list_filter.dart';
 import '../providers/state_list_transactions.dart';
 import '../widgets/list_calendar_header.dart';
@@ -126,26 +131,76 @@ class ListScreen extends ConsumerWidget {
     List<ListItem> items,
     int index,
   ) {
-    // Stub: display values will be computed in Task 1b
+    final transaction = tx.transaction;
+    final ledgerType = transaction.ledgerType;
+
+    // Ledger tag colors (AppColors constants — never hardcoded hex)
+    final tagText = ledgerType == LedgerType.survival ? '生存' : '魂';
+    final tagBgColor =
+        ledgerType == LedgerType.survival
+            ? AppColors.survivalLight
+            : AppColors.soulLight;
+    final tagTextColor =
+        ledgerType == LedgerType.survival ? AppColors.survival : AppColors.soul;
+    // Category label uses same color as ledger tag per UI-SPEC Typography table
+    final categoryColor = tagTextColor;
+
+    // Locale-resolved category name (FILTER-01 / D-04 — NEVER raw categoryId)
+    final category = CategoryLocalizationService.resolveFromId(
+      transaction.categoryId,
+      locale,
+    );
+
+    // Formatted amount with currency symbol (SC#1 — amountSmall tabular figures applied by tile)
+    final formattedAmount = NumberFormatter.formatCurrency(
+      transaction.amount,
+      'JPY',
+      locale,
+    );
+
+    // Time-only string HH:mm (D-09: date is shown in ListDayGroupHeader)
+    final formattedTime = formatTransactionTime(transaction.timestamp, locale);
+
+    // Satisfaction icon: soul transactions only (ADR-014 mapping from home_screen.dart)
+    final satisfactionIcon = _satisfactionIcon(transaction);
+
+    // Tap handler: push TransactionEditScreen; on save (result == true), invalidate list
+    // AND calendar totals (RESEARCH.md Open Q#2 / UI-SPEC C-04 step 5)
+    Future<void> onTap() async {
+      final result = await Navigator.push<bool>(
+        context,
+        MaterialPageRoute(
+          builder: (ctx) => TransactionEditScreen(transaction: transaction),
+        ),
+      );
+      if (result == true) {
+        ref.invalidate(listTransactionsProvider(bookId: bookId));
+        ref.invalidate(
+          calendarDailyTotalsProvider(
+            bookId: bookId,
+            year: filter.selectedYear,
+            month: filter.selectedMonth,
+          ),
+        );
+      }
+    }
+
     final tile = ListTransactionTile(
       taggedTx: tx,
       bookId: bookId,
-      onTap: buildTileTapHandler(
-        context: context,
-        ref: ref,
-        taggedTx: tx,
-        bookId: bookId,
-      ),
-      tagText: '',
-      tagBgColor: AppColors.survivalLight,
-      tagTextColor: AppColors.survival,
-      category: '',
-      categoryColor: AppColors.survival,
-      formattedAmount: '',
-      formattedTime: '',
+      onTap: onTap,
+      tagText: tagText,
+      tagBgColor: tagBgColor,
+      tagTextColor: tagTextColor,
+      category: category,
+      categoryColor: categoryColor,
+      formattedAmount: formattedAmount,
+      formattedTime: formattedTime,
+      satisfactionIcon: satisfactionIcon,
     );
 
-    // Divider between consecutive tiles in the same day group
+    // Divider between consecutive tiles in the same day group (not after a row
+    // followed by a day-group header).
     final nextItem = index + 1 < items.length ? items[index + 1] : null;
     final showDivider = nextItem is TransactionRowItem;
 
@@ -154,14 +209,24 @@ class ListScreen extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           tile,
-          const Divider(
-            height: 1,
-            thickness: 1,
-            color: AppColors.borderList,
-          ),
+          const Divider(height: 1, thickness: 1, color: AppColors.borderList),
         ],
       );
     }
     return tile;
+  }
+
+  /// ADR-014 satisfaction icon mapping for soul-ledger transactions.
+  ///
+  /// Returns null for survival transactions (ledgerType != soul).
+  /// Mirrors the mapping in [HomeScreen._satisfactionIcon].
+  static IconData? _satisfactionIcon(Transaction tx) {
+    if (tx.ledgerType != LedgerType.soul) return null;
+    final v = tx.soulSatisfaction;
+    if (v <= 2) return Icons.sentiment_neutral_outlined;
+    if (v <= 4) return Icons.sentiment_satisfied_outlined;
+    if (v <= 6) return Icons.sentiment_satisfied_alt_outlined;
+    if (v <= 8) return Icons.sentiment_very_satisfied_outlined;
+    return Icons.favorite_border;
   }
 }
