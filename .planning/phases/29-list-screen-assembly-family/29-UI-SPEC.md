@@ -1,10 +1,11 @@
 ---
 phase: 29
 slug: list-screen-assembly-family
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-05-30
+reviewed_at: 2026-05-30
 ---
 
 # Phase 29 — UI Design Contract
@@ -220,11 +221,11 @@ No third-party registries. No shadcn. Registry vetting gate not applicable.
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS (placeholders acceptable per Phase-30 deferral; existing keys reused)
-- [ ] Dimension 2 Visuals: PASS (member chip reuses ledger-tag container; chips reuse ActionChip)
-- [ ] Dimension 3 Color: PASS (member accent = existing `AppColors.shared*`; no new hex; reserved-for list explicit)
-- [ ] Dimension 4 Typography: PASS (no new text style; `micro` for chips, `caption` for bar)
-- [ ] Dimension 5 Spacing: PASS (conforms to Phase 28 dense-bar precedent; 44px bar height preserved)
-- [ ] Dimension 6 Registry Safety: PASS (not applicable — Flutter)
+- [x] Dimension 1 Copywriting: PASS (placeholders acceptable per Phase-30 deferral; existing keys reused)
+- [x] Dimension 2 Visuals: PASS (member chip reuses ledger-tag container; chips reuse ActionChip)
+- [x] Dimension 3 Color: PASS (member accent = existing `AppColors.shared*`; no new hex; reserved-for list explicit)
+- [x] Dimension 4 Typography: PASS (no new text style; `micro` for chips, `caption` for bar)
+- [x] Dimension 5 Spacing: FLAG (non-blocking — 2px/6px off-grid values are justified conformance to Phase 28 dense-bar precedent; 44px bar height preserved)
+- [x] Dimension 6 Registry Safety: PASS (not applicable — Flutter)
 
-**Approval:** pending
+**Approval:** approved (2026-05-30 — 5 PASS / 1 non-blocking FLAG)
