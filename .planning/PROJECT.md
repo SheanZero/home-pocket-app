@@ -329,4 +329,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-29 — v1.4 列表功能 milestone started*
+*Last updated: 2026-05-30 — v1.4 列表功能: Phase 26 (Providers + Shell Wiring) complete; list feature providers wired, ListScreen reachable showing loading state*
