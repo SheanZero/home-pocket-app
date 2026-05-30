@@ -70,7 +70,7 @@
 - [x] **Phase 24: Data Layer Extension** — Multi-book DAO query + watch stream + DateBoundaries utility (completed 2026-05-29)
 - [x] **Phase 25: Domain Models + Use Case** — `ListFilterState`, `ListSortConfig`, `GetListTransactionsUseCase` (completed 2026-05-29)
 - [x] **Phase 26: Providers + Shell Wiring** — All 4 Riverpod providers + keepAlive policy + shell placeholder replaced (completed 2026-05-30)
-- [ ] **Phase 27: Calendar Header + Month Summary** — `table_calendar` integration, per-day totals, month nav, day-tap filter
+- [x] **Phase 27: Calendar Header + Month Summary** — `table_calendar` integration, per-day totals, month nav, day-tap filter (completed 2026-05-30)
 - [ ] **Phase 28: Transaction Tile + Sort/Filter Bar** — Row display, swipe-delete, tap-to-edit, sort/filter controls
 - [ ] **Phase 29: List Screen Assembly + Family** — Full screen, pull-to-refresh, shadow books, member attribution + filter
 - [ ] **Phase 30: i18n + Empty States + Golden Polish** — ~20–25 ARB keys × 3 locales, empty states, golden baselines
@@ -199,7 +199,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 27-04-PLAN.md — iOS build gate (SC#5) + full test suite + human verify (Wave 4)
+- [x] 27-04-PLAN.md — iOS build gate (SC#5) + full test suite + human verify (Wave 4)
 
 **UI hint**: yes
 
@@ -265,7 +265,7 @@ Plans:
 | 24. Data Layer Extension | 3/3 | Complete    | 2026-05-29 |
 | 25. Domain Models + Use Case | 2/2 | Complete    | 2026-05-29 |
 | 26. Providers + Shell Wiring | 4/4 | Complete    | 2026-05-30 |
-| 27. Calendar Header + Month Summary | 3/4 | In Progress|  |
+| 27. Calendar Header + Month Summary | 4/4 | Complete   | 2026-05-30 |
 | 28. Transaction Tile + Sort/Filter Bar | 0/TBD | Not started | - |
 | 29. List Screen Assembly + Family | 0/TBD | Not started | - |
 | 30. i18n + Empty States + Golden Polish | 0/TBD | Not started | - |
