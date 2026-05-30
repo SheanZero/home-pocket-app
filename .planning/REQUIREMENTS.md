@@ -21,7 +21,7 @@
 - [x] **LIST-01**: User sees the selected month's transactions as a scrollable list; each row shows category emoji + name, ledger-color tag (Survival `AppColors.survival` / Soul `AppColors.soul`), date, and amount (tabular figures via `AppTextStyles.amount*`, formatted by `NumberFormatter` + locale).
 - [x] **LIST-02**: The list updates reactively after add / edit / delete / family-sync — no manual refresh required (new `TransactionDao.watchByBookId(s)` stream).
 - [ ] **LIST-03**: User sees a clear empty state when no transactions match the current month + active filters.
-- [ ] **LIST-04**: User can pull-to-refresh the list.
+- [x] **LIST-04**: User can pull-to-refresh the list.
 
 ### Sort (SORT)
 
@@ -44,10 +44,10 @@
 
 ### Family-Aware (FAM)
 
-- [ ] **FAM-01**: When a family is joined, the list includes family members' transactions (shadow books) merged with the user's own.
-- [ ] **FAM-02**: Each row attributes its owner (member name / emoji indicator) when in family mode.
-- [ ] **FAM-03**: User can filter the list by family member.
-- [ ] **FAM-04**: User can quickly switch to a "Mine only" view in family mode.
+- [x] **FAM-01**: When a family is joined, the list includes family members' transactions (shadow books) merged with the user's own.
+- [x] **FAM-02**: Each row attributes its owner (member name / emoji indicator) when in family mode.
+- [x] **FAM-03**: User can filter the list by family member.
+- [x] **FAM-04**: User can quickly switch to a "Mine only" view in family mode.
 
 ---
 
@@ -103,9 +103,9 @@
 | LIST-01 | Phase 28 — Transaction Tile + Sort/Filter Bar | Complete |
 | ROW-01 | Phase 28 — Transaction Tile + Sort/Filter Bar | Complete |
 | ROW-02 | Phase 28 — Transaction Tile + Sort/Filter Bar | Complete |
-| LIST-04 | Phase 29 — List Screen Assembly + Family | Pending |
-| FAM-01 | Phase 29 — List Screen Assembly + Family | Pending |
-| FAM-02 | Phase 29 — List Screen Assembly + Family | Pending |
-| FAM-03 | Phase 29 — List Screen Assembly + Family | Pending |
-| FAM-04 | Phase 29 — List Screen Assembly + Family | Pending |
+| LIST-04 | Phase 29 — List Screen Assembly + Family | Complete |
+| FAM-01 | Phase 29 — List Screen Assembly + Family | Complete |
+| FAM-02 | Phase 29 — List Screen Assembly + Family | Complete |
+| FAM-03 | Phase 29 — List Screen Assembly + Family | Complete |
+| FAM-04 | Phase 29 — List Screen Assembly + Family | Complete |
 | LIST-03 | Phase 30 — i18n + Empty States + Golden Polish | Pending |

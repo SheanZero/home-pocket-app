@@ -263,7 +263,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 29-01-PLAN.md — Wave 0 test stubs: 2 new widget test files + extensions to 3 existing test files (Wave 1)
+- [x] 29-01-PLAN.md — Wave 0 test stubs: 2 new widget test files + extensions to 3 existing test files (Wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -307,7 +307,7 @@ Plans:
 | 26. Providers + Shell Wiring | 4/4 | Complete    | 2026-05-30 |
 | 27. Calendar Header + Month Summary | 4/4 | Complete    | 2026-05-30 |
 | 28. Transaction Tile + Sort/Filter Bar | 6/7 | Complete    | 2026-05-30 |
-| 29. List Screen Assembly + Family | 0/4 | Not started | - |
+| 29. List Screen Assembly + Family | 1/4 | In Progress|  |
 | 30. i18n + Empty States + Golden Polish | 0/TBD | Not started | - |
 
 ---
