@@ -195,7 +195,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 27-03-PLAN.md — `CalendarHeaderWidget` (C-01/C-02/C-03/C-04) + `ListScreen` integration + 3 widget tests (Wave 3)
+- [x] 27-03-PLAN.md — `CalendarHeaderWidget` (C-01/C-02/C-03/C-04) + `ListScreen` integration + 3 widget tests (Wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -265,7 +265,7 @@ Plans:
 | 24. Data Layer Extension | 3/3 | Complete    | 2026-05-29 |
 | 25. Domain Models + Use Case | 2/2 | Complete    | 2026-05-29 |
 | 26. Providers + Shell Wiring | 4/4 | Complete    | 2026-05-30 |
-| 27. Calendar Header + Month Summary | 2/4 | In Progress|  |
+| 27. Calendar Header + Month Summary | 3/4 | In Progress|  |
 | 28. Transaction Tile + Sort/Filter Bar | 0/TBD | Not started | - |
 | 29. List Screen Assembly + Family | 0/TBD | Not started | - |
 | 30. i18n + Empty States + Golden Polish | 0/TBD | Not started | - |
