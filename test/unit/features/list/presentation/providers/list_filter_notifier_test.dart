@@ -6,9 +6,6 @@ import 'package:home_pocket/features/list/domain/models/list_sort_config.dart';
 import 'package:home_pocket/features/list/presentation/providers/state_list_filter.dart';
 import 'package:home_pocket/shared/constants/sort_config.dart';
 
-// ignore_for_file: unused_import
-import '../../../../../helpers/test_provider_scope.dart';
-
 void main() {
   group('listFilterProvider', () {
     test('initial state has all 7 ListFilterState fields (SC#1)', () {

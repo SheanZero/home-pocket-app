@@ -194,6 +194,22 @@ Future<void> _pumpApp(
   );
 }
 
+/// Pumps a bounded number of frames to let async app initialization resolve
+/// without waiting on the List tab's loading [CircularProgressIndicator].
+///
+/// Phase 26 replaced the static List-tab placeholder with [ListScreen], whose
+/// loading state shows a spinner that animates indefinitely while
+/// `listTransactionsProvider` is unresolved. Because `MainShellScreen` builds
+/// every tab eagerly inside an `IndexedStack`, that perpetual animation makes
+/// [WidgetTester.pumpAndSettle] time out. These characterization tests only
+/// assert structural facts (which screen renders, the theme mode), so a bounded
+/// pump that flushes the initialization futures is sufficient and correct.
+Future<void> _pumpInitNoSettle(WidgetTester tester) async {
+  for (var i = 0; i < 10; i++) {
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+}
+
 void main() {
   final fakeSyncEngine = _FakeSyncEngine();
 
@@ -235,7 +251,7 @@ void main() {
           tester,
           overrides: buildSuccessOverrides(profile: _testProfile),
         );
-        await tester.pumpAndSettle(const Duration(seconds: 3));
+        await _pumpInitNoSettle(tester);
         expect(find.byType(MainShellScreen), findsOneWidget);
       },
     );
@@ -296,7 +312,7 @@ void main() {
         appSettings: const AppSettings(themeMode: AppThemeMode.light),
         overrides: [...buildSuccessOverrides(profile: _testProfile)],
       );
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      await _pumpInitNoSettle(tester);
       expect(
         tester.widgetList<MaterialApp>(find.byType(MaterialApp)).last.themeMode,
         ThemeMode.light,
@@ -309,7 +325,7 @@ void main() {
         appSettings: const AppSettings(themeMode: AppThemeMode.dark),
         overrides: [...buildSuccessOverrides(profile: _testProfile)],
       );
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      await _pumpInitNoSettle(tester);
       expect(
         tester.widgetList<MaterialApp>(find.byType(MaterialApp)).last.themeMode,
         ThemeMode.dark,
