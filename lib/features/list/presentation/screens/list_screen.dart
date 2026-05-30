@@ -5,6 +5,7 @@ import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
+import '../../../../generated/app_localizations.dart';
 import '../../../../features/accounting/presentation/screens/transaction_edit_screen.dart';
 import '../../../../features/settings/presentation/providers/state_locale.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
@@ -135,7 +136,9 @@ class ListScreen extends ConsumerWidget {
     final ledgerType = transaction.ledgerType;
 
     // Ledger tag colors (AppColors constants — never hardcoded hex)
-    final tagText = ledgerType == LedgerType.survival ? '生存' : '魂';
+    final tagText = ledgerType == LedgerType.survival
+        ? S.of(context).listLedgerSurvival
+        : S.of(context).listLedgerSoul;
     final tagBgColor =
         ledgerType == LedgerType.survival
             ? AppColors.survivalLight

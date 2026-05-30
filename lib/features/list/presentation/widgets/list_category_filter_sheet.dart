@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../generated/app_localizations.dart';
 import '../../../accounting/domain/models/category.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart'
     show categoryRepositoryProvider;
@@ -139,7 +140,7 @@ class _CategoryFilterSheetState extends ConsumerState<CategoryFilterSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'カテゴリで絞り込む',
+                  S.of(context).listCategorySheetTitle,
                   style: AppTextStyles.titleMedium,
                 ),
                 TextButton(
@@ -147,7 +148,7 @@ class _CategoryFilterSheetState extends ConsumerState<CategoryFilterSheet> {
                     setState(() => _localSelected.clear());
                   },
                   child: Text(
-                    'クリア',
+                    S.of(context).listCategorySheetClear,
                     style: AppTextStyles.caption.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -267,7 +268,7 @@ class _CategoryFilterSheetState extends ConsumerState<CategoryFilterSheet> {
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: Text(
-                    'キャンセル',
+                    S.of(context).listDeleteCancelButton,
                     style: AppTextStyles.titleSmall.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -287,8 +288,8 @@ class _CategoryFilterSheetState extends ConsumerState<CategoryFilterSheet> {
                     },
                     child: Text(
                       _localSelected.isEmpty
-                          ? '適用'
-                          : '適用 (${_localSelected.length})',
+                          ? S.of(context).listCategorySheetApply
+                          : S.of(context).listCategorySheetApplyN(_localSelected.length),
                       style: AppTextStyles.titleSmall.copyWith(
                         color: AppColors.card,
                       ),

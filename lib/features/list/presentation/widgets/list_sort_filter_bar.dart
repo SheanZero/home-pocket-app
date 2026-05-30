@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../features/settings/presentation/providers/state_locale.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
+import '../../../../generated/app_localizations.dart';
 import '../../domain/models/list_sort_config.dart';
 import '../providers/state_list_filter.dart';
 import '../../../../shared/constants/sort_config.dart';
@@ -45,25 +45,21 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
 
   /// Returns a locale-aware label for the current sort field (SC#4 — MUST NOT
   /// return the generic string "Sort").
-  String _sortFieldLabel(SortField field, Locale locale) {
-    final lang = locale.languageCode;
+  String _sortFieldLabel(SortField field, BuildContext context) {
+    final l10n = S.of(context);
     switch (field) {
       case SortField.timestamp:
-        return lang == 'ja' ? '日付' : (lang == 'zh' ? '日期' : 'Date');
+        return l10n.listSortDate;
       case SortField.updatedAt:
-        return lang == 'ja' ? '更新日時' : (lang == 'zh' ? '更新时间' : 'Edit time');
+        return l10n.listSortEditTime;
       case SortField.amount:
-        return lang == 'ja' ? '金額' : (lang == 'zh' ? '金额' : 'Amount');
+        return l10n.listSortAmount;
     }
   }
 
-  /// Returns all three sort-field options as localized strings.
-  String _sortFieldOptionLabel(SortField field, Locale locale) =>
-      _sortFieldLabel(field, locale);
-
   /// Shows the sort-field popup menu positioned below the sort chip.
   Future<void> _showSortMenu(
-      BuildContext context, ListSortConfig sortConfig, Locale locale) async {
+      BuildContext context, ListSortConfig sortConfig) async {
     final renderBox =
         _sortChipKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
@@ -91,7 +87,7 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                 const SizedBox(width: 16),
               const SizedBox(width: 8),
               Text(
-                _sortFieldOptionLabel(field, locale),
+                _sortFieldLabel(field, context),
                 style: AppTextStyles.caption.copyWith(
                   color: AppColors.textPrimary,
                   fontWeight:
@@ -126,9 +122,7 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
   @override
   Widget build(BuildContext context) {
     final filter = ref.watch(listFilterProvider);
-    final locale =
-        ref.watch(currentLocaleProvider).value ?? const Locale('ja');
-    final l10n = _L10n.of(locale);
+    final l10n = S.of(context);
     final sortConfig = filter.sortConfig;
 
     final anyFilterActive = filter.activeDayFilter != null ||
@@ -161,12 +155,12 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                   color: AppColors.textSecondary,
                 ),
                 label: Text(
-                  _sortFieldLabel(sortConfig.sortField, locale),
+                  _sortFieldLabel(sortConfig.sortField, context),
                   style: AppTextStyles.caption
                       .copyWith(color: AppColors.textPrimary),
                 ),
                 onPressed: () =>
-                    _showSortMenu(context, sortConfig, locale),
+                    _showSortMenu(context, sortConfig),
                 side: const BorderSide(
                     color: AppColors.accentPrimary, width: 1),
                 backgroundColor: AppColors.card,
@@ -210,7 +204,7 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
               selected: filter.ledgerType == null,
               child: ActionChip(
                 label: Text(
-                  l10n.ledgerAll,
+                  l10n.listLedgerAll,
                   style: AppTextStyles.caption.copyWith(
                     color: filter.ledgerType == null
                         ? AppColors.textPrimary
@@ -238,7 +232,7 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
               selected: filter.ledgerType == LedgerType.survival,
               child: ActionChip(
                 label: Text(
-                  l10n.ledgerSurvival,
+                  l10n.listLedgerSurvival,
                   style: AppTextStyles.caption.copyWith(
                     color: filter.ledgerType == LedgerType.survival
                         ? AppColors.survival
@@ -271,7 +265,7 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
               selected: filter.ledgerType == LedgerType.soul,
               child: ActionChip(
                 label: Text(
-                  l10n.ledgerSoul,
+                  l10n.listLedgerSoul,
                   style: AppTextStyles.caption.copyWith(
                     color: filter.ledgerType == LedgerType.soul
                         ? AppColors.soul
@@ -309,8 +303,8 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                 ),
                 label: Text(
                   filter.categoryIds.isEmpty
-                      ? l10n.categoryChip
-                      : l10n.categoryChipN(filter.categoryIds.length),
+                      ? l10n.listCategoryChip
+                      : l10n.listCategoryChipN(filter.categoryIds.length),
                   style: AppTextStyles.caption.copyWith(
                     color: filter.categoryIds.isEmpty
                         ? AppColors.textSecondary
@@ -352,7 +346,7 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                       style: AppTextStyles.caption
                           .copyWith(color: AppColors.textPrimary),
                       decoration: InputDecoration(
-                        hintText: l10n.searchHint,
+                        hintText: l10n.listSearchHint,
                         hintStyle: AppTextStyles.caption
                             .copyWith(color: AppColors.textSecondary),
                         isDense: true,
@@ -434,7 +428,7 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                     color: AppColors.textSecondary,
                   ),
                   label: Text(
-                    l10n.clearAll,
+                    l10n.listClearAll,
                     style: AppTextStyles.caption
                         .copyWith(color: AppColors.textSecondary),
                   ),
@@ -459,62 +453,3 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
   }
 }
 
-/// Thin locale-aware string accessor for the sort/filter bar.
-///
-/// Uses the generated [S] class values indirectly to avoid reading
-/// [BuildContext] inside non-build methods.
-class _L10n {
-  const _L10n._({
-    required this.ledgerAll,
-    required this.ledgerSurvival,
-    required this.ledgerSoul,
-    required this.categoryChip,
-    required this.searchHint,
-    required this.clearAll,
-    required this.categoryChipN,
-  });
-
-  final String ledgerAll;
-  final String ledgerSurvival;
-  final String ledgerSoul;
-  final String categoryChip;
-  final String searchHint;
-  final String clearAll;
-  final String Function(int) categoryChipN;
-
-  factory _L10n.of(Locale locale) {
-    final lang = locale.languageCode;
-    if (lang == 'zh') {
-      return _L10n._(
-        ledgerAll: '全部',
-        ledgerSurvival: '生存',
-        ledgerSoul: '灵魂',
-        categoryChip: '分类',
-        searchHint: '搜索...',
-        clearAll: '清除',
-        categoryChipN: (n) => '分类 ($n)',
-      );
-    } else if (lang == 'en') {
-      return _L10n._(
-        ledgerAll: 'All',
-        ledgerSurvival: 'Survival',
-        ledgerSoul: 'Soul',
-        categoryChip: 'Category',
-        searchHint: 'Search...',
-        clearAll: 'Clear',
-        categoryChipN: (n) => 'Category ($n)',
-      );
-    } else {
-      // Default: Japanese
-      return _L10n._(
-        ledgerAll: 'すべて',
-        ledgerSurvival: '生存',
-        ledgerSoul: '魂',
-        categoryChip: 'カテゴリ',
-        searchHint: '検索...',
-        clearAll: 'クリア',
-        categoryChipN: (n) => 'カテゴリ ($n)',
-      );
-    }
-  }
-}

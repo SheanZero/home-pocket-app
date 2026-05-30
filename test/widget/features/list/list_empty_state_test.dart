@@ -9,11 +9,9 @@
 //
 // Run: flutter test test/widget/features/list/list_empty_state_test.dart
 
-// ignore_for_file: unused_import
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/features/list/presentation/providers/state_list_filter.dart';
 import 'package:home_pocket/features/list/presentation/widgets/list_empty_state.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 

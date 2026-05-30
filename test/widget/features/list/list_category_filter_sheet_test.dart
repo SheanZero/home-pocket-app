@@ -11,7 +11,6 @@
 //
 // Run: flutter test test/widget/features/list/list_category_filter_sheet_test.dart
 
-// ignore_for_file: unused_import
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -134,6 +133,7 @@ Future<ProviderContainer> _pumpSheet(
           return MaterialApp(
             localizationsDelegates: S.localizationsDelegates,
             supportedLocales: S.supportedLocales,
+            locale: const Locale('ja'),
             home: Scaffold(
               body: Center(
                 child: CategoryFilterSheet(initialSelected: initialSelected),

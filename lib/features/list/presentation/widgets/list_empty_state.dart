@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../generated/app_localizations.dart';
 import '../providers/state_list_filter.dart';
 
 /// Empty-state placeholder for the transaction list.
@@ -33,8 +34,8 @@ class ListEmptyState extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(
               isFilterActive
-                  ? '絞り込み条件に一致する記録がありません'
-                  : 'この月の記録はまだありません',
+                  ? S.of(context).listEmptyFiltered
+                  : S.of(context).listEmptyMonth,
               style: AppTextStyles.bodyMedium.copyWith(
                 color: AppColors.textSecondary,
                 height: 1.5,
@@ -47,7 +48,7 @@ class ListEmptyState extends ConsumerWidget {
                 onPressed: () =>
                     ref.read(listFilterProvider.notifier).clearAll(),
                 child: Text(
-                  '絞り込みをクリア',
+                  S.of(context).listEmptyFilteredClear,
                   style: AppTextStyles.caption.copyWith(
                     color: AppColors.accentPrimary,
                   ),

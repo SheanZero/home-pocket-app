@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../generated/app_localizations.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart'
     show deleteTransactionUseCaseProvider;
 import '../../../../features/accounting/presentation/screens/transaction_edit_screen.dart';
@@ -71,11 +72,11 @@ class ListTransactionTile extends ConsumerWidget {
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(
-            '削除しますか？', // Phase 30: S.of(context).listDeleteConfirmTitle
+            S.of(context).listDeleteConfirmTitle,
             style: AppTextStyles.titleSmall,
           ),
           content: Text(
-            'この記録を削除します。元に戻せません。', // Phase 30: S.of(context).listDeleteConfirmBody
+            S.of(context).listDeleteConfirmBody,
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary,
               height: 1.5,
@@ -85,7 +86,7 @@ class ListTransactionTile extends ConsumerWidget {
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
               child: Text(
-                'キャンセル', // Phase 30: S.of(context).listDeleteCancelButton
+                S.of(context).listDeleteCancelButton,
                 style: AppTextStyles.titleSmall.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -95,7 +96,7 @@ class ListTransactionTile extends ConsumerWidget {
               style: TextButton.styleFrom(foregroundColor: Colors.red),
               onPressed: () => Navigator.pop(ctx, true),
               child: Text(
-                '削除', // Phase 30: S.of(context).listDeleteConfirmButton
+                S.of(context).listDeleteConfirmButton,
                 style: AppTextStyles.titleSmall.copyWith(color: Colors.red),
               ),
             ),
@@ -105,8 +106,8 @@ class ListTransactionTile extends ConsumerWidget {
       onDismissed: (_) {
         // CRITICAL order: ScaffoldMessenger BEFORE any provider calls (context still valid here)
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('削除しました'), // Phase 30: S.of(context).listDeletedSnackBar
+          SnackBar(
+            content: Text(S.of(context).listDeletedSnackBar),
           ),
         );
         // Fire-and-forget: do NOT await inside onDismissed
