@@ -12,7 +12,7 @@ part of 'repository_providers.dart';
 ///
 /// Wires the list use case to the single [transactionRepositoryProvider]
 /// from the accounting feature — no duplicate repository provider (T-26-02-DP
-/// mitigated by using `show transactionRepositoryProvider` import).
+/// mitigated by importing with a `show` clause).
 
 @ProviderFor(getListTransactionsUseCase)
 final getListTransactionsUseCaseProvider =
@@ -22,7 +22,7 @@ final getListTransactionsUseCaseProvider =
 ///
 /// Wires the list use case to the single [transactionRepositoryProvider]
 /// from the accounting feature — no duplicate repository provider (T-26-02-DP
-/// mitigated by using `show transactionRepositoryProvider` import).
+/// mitigated by importing with a `show` clause).
 
 final class GetListTransactionsUseCaseProvider
     extends
@@ -36,7 +36,7 @@ final class GetListTransactionsUseCaseProvider
   ///
   /// Wires the list use case to the single [transactionRepositoryProvider]
   /// from the accounting feature — no duplicate repository provider (T-26-02-DP
-  /// mitigated by using `show transactionRepositoryProvider` import).
+  /// mitigated by importing with a `show` clause).
   GetListTransactionsUseCaseProvider._()
     : super(
         from: null,
