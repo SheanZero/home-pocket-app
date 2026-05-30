@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
 import 'package:home_pocket/features/analytics/domain/repositories/analytics_repository.dart';
@@ -128,7 +127,7 @@ void main() {
     });
 
     test(
-      'ProviderException wraps repository error (StateError)',
+      'repository error propagates as AsyncValue.error (StateError)',
       () async {
         final mockRepo = _MockAnalyticsRepository();
         when(
@@ -141,23 +140,31 @@ void main() {
 
         final container = _makeContainer(mockRepo);
 
-        await expectLater(
-          waitForFirstValue<Map<DateTime, int>>(
-            container,
-            calendarDailyTotalsProvider(bookId: 'book1', year: 2026, month: 5),
-          ).then(
-            (v) =>
-                v.hasError
-                    ? throw v.error!
-                    : fail('Expected error but got value'),
-          ),
-          throwsA(
-            isA<ProviderException>().having(
-              (e) => e.exception,
-              'exception',
-              isA<StateError>(),
+        // For @riverpod Future<T> providers in Riverpod 3.1.0, errors thrown
+        // by the async function are stored in AsyncValue.error as-is (the raw
+        // error, not wrapped in ProviderException).
+        // ProviderException wrapping applies to synchronous provider reads only.
+        // Import ProviderException from package:flutter_riverpod/misc.dart.
+        final result = await waitForFirstValue<Map<DateTime, int>>(
+          container,
+          calendarDailyTotalsProvider(bookId: 'book1', year: 2026, month: 5),
+        );
+
+        expect(result.hasError, isTrue);
+        // The error stored in AsyncValue is the raw StateError thrown by the repo.
+        // Use ProviderException pattern when reading synchronous providers;
+        // for async providers the inner error is accessible directly.
+        expect(result.error, isA<StateError>());
+        expect(
+          () => container.read(
+            calendarDailyTotalsProvider(
+              bookId: 'book1',
+              year: 2026,
+              month: 5,
             ),
           ),
+          isNot(throwsA(anything)),
+          // container.read() for settled async providers returns AsyncValue, never throws.
         );
       },
     );
