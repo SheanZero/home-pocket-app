@@ -1,4 +1,4 @@
-// Widget tests for ListTransactionTile (ROW-01 / ROW-02).
+// Widget tests for ListTransactionTile (ROW-01 / ROW-02, FAM-02).
 //
 // ListTransactionTile is defined in:
 //   lib/features/list/presentation/widgets/list_transaction_tile.dart
@@ -126,5 +126,137 @@ void main() {
 
       expect(find.byType(AlertDialog), findsOneWidget);
     });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Phase 29: member attribution chip (FAM-02)
+  // ---------------------------------------------------------------------------
+  // Tests are RED until list_transaction_tile.dart is updated in Plan 03 to
+  // render the member chip when memberTag is non-null.
+  // ---------------------------------------------------------------------------
+
+  group('Phase 29: member attribution chip FAM-02', () {
+    testWidgets(
+      'FAM-02/CC-1: member chip renders when memberTag non-null',
+      (tester) async {
+        final mockDelete = _MockDeleteTransactionUseCase();
+        when(() => mockDelete.execute(any()))
+            .thenAnswer((_) async => Result.success(null));
+
+        final container = ProviderContainer.test(overrides: [
+          deleteTransactionUseCaseProvider.overrideWithValue(mockDelete),
+        ]);
+
+        // Build a TaggedTransaction with memberTag set
+        final tx = TaggedTransaction(
+          transaction: _makeTx().transaction,
+          memberTag: const MemberTag(emoji: '🐻', name: '太郎'),
+        );
+
+        await _pumpTile(tester, container, tx);
+
+        // RED: tile does not render member chip yet (Plan 03 adds it)
+        expect(
+          find.text('🐻 太郎'),
+          findsOneWidget,
+          reason: 'FAM-02/CC-1: member chip must show emoji + name',
+        );
+      },
+    );
+
+    testWidgets(
+      'FAM-02/SC#3: member chip absent when memberTag null (own-book row)',
+      (tester) async {
+        final mockDelete = _MockDeleteTransactionUseCase();
+        when(() => mockDelete.execute(any()))
+            .thenAnswer((_) async => Result.success(null));
+
+        final container = ProviderContainer.test(overrides: [
+          deleteTransactionUseCaseProvider.overrideWithValue(mockDelete),
+        ]);
+
+        // Own-book row: memberTag is null
+        final tx = _makeTx(); // _makeTx() returns memberTag: null
+
+        await _pumpTile(tester, container, tx);
+
+        // Own-book rows must never show a member chip
+        expect(
+          find.text('🐻 太郎'),
+          findsNothing,
+          reason: 'FAM-02/SC#3: no member chip when memberTag is null',
+        );
+        // No ConstrainedBox with maxWidth 72 should be added for own-book rows
+        final constrained = find.descendant(
+          of: find.byType(ListTransactionTile),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is ConstrainedBox &&
+                widget.constraints.maxWidth == 72,
+          ),
+        );
+        expect(
+          constrained,
+          findsNothing,
+          reason: 'SC#3: no maxWidth-72 ConstrainedBox for own-book rows',
+        );
+      },
+    );
+
+    testWidgets(
+      'FAM-02/CC-1: member chip text truncates at maxWidth 72',
+      (tester) async {
+        final mockDelete = _MockDeleteTransactionUseCase();
+        when(() => mockDelete.execute(any()))
+            .thenAnswer((_) async => Result.success(null));
+
+        final container = ProviderContainer.test(overrides: [
+          deleteTransactionUseCaseProvider.overrideWithValue(mockDelete),
+        ]);
+
+        // Very long name to trigger ellipsis
+        final tx = TaggedTransaction(
+          transaction: _makeTx().transaction,
+          memberTag: const MemberTag(
+            emoji: '🐻',
+            name: 'とても長い名前のファミリーメンバー',
+          ),
+        );
+
+        await _pumpTile(tester, container, tx);
+
+        // RED: chip not yet rendered (Plan 03)
+        // After Plan 03: ConstrainedBox with maxWidth 72 must exist
+        final constrained = find.descendant(
+          of: find.byType(ListTransactionTile),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is ConstrainedBox &&
+                widget.constraints.maxWidth == 72,
+          ),
+        );
+        expect(
+          constrained,
+          findsOneWidget,
+          reason:
+              'CC-1: member chip must be constrained to maxWidth 72',
+        );
+
+        // The Text widget inside the chip must have TextOverflow.ellipsis
+        final memberChipText = find.descendant(
+          of: constrained,
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Text &&
+                widget.overflow == TextOverflow.ellipsis,
+          ),
+        );
+        expect(
+          memberChipText,
+          findsOneWidget,
+          reason: 'CC-1: member chip text must use TextOverflow.ellipsis',
+        );
+      },
+    );
   });
 }
