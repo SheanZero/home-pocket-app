@@ -1,0 +1,8 @@
+# Presentation layer — uses Application + Domain only. MUST NOT reach Infrastructure.
+# data/repositories/** access remains permitted (use case layer mediates data access).
+deny:
+  - package:home_pocket/infrastructure/**
+  - package:home_pocket/data/daos/**
+  - package:home_pocket/data/tables/**
+
+inherit: true
