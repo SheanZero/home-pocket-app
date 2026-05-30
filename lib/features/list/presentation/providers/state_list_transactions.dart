@@ -55,9 +55,13 @@ Future<List<TaggedTransaction>> listTransactions(
 
   // Member filter narrowing — SQL-level (D-02 preference)
   // Reduces bookIds to one book when a member chip is selected.
+  // A stale memberBookId (member removed, or returned to solo mode while the
+  // keepAlive filter still holds a shadow id) is treated as "no member filter"
+  // and falls back to the full book set — never an empty list, which the use
+  // case rejects and would strand the user on an error screen (CR-01).
   final memberBookId = filter.memberBookId;
-  final effectiveBookIds = memberBookId != null
-      ? (bookIds.contains(memberBookId) ? [memberBookId] : const <String>[])
+  final effectiveBookIds = (memberBookId != null && bookIds.contains(memberBookId))
+      ? [memberBookId]
       : bookIds;
 
   // Step 4: call use case with SQL-able filters

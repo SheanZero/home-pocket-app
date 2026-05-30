@@ -640,6 +640,60 @@ void main() {
     );
 
     test(
+      'CR-01: stale memberBookId (not in bookIds) falls back to full book set, '
+      'never empty',
+      () async {
+        // Regression for code review CR-01: a memberBookId left over from group
+        // mode (e.g. member removed from group, or returned to solo) must NOT
+        // collapse effectiveBookIds to const [] — that makes the use case reject
+        // an empty bookIds list and strands the user on an error screen with no
+        // filter chip to recover. Stale member filter == no member filter.
+        final mock = _MockGetListTransactionsUseCase();
+        final ownTx = _makeTransaction(id: 'own-tx', bookId: 'book1');
+
+        when(() => mock.execute(any())).thenAnswer(
+          (_) async => Result.success([ownTx]),
+        );
+
+        final shadows = [
+          ShadowBookInfo(
+            book: _stubBook('shadow-1'),
+            memberDisplayName: '太郎',
+            memberAvatarEmoji: '🐻',
+          ),
+        ];
+
+        final container = _makeContainer(
+          mock,
+          isGroupMode: true,
+          shadows: shadows,
+          filterState: const ListFilterState(
+            selectedYear: 2026,
+            selectedMonth: 5,
+            memberBookId: 'shadow-removed', // no longer in the group
+          ),
+        );
+
+        final result = await waitForFirstValue<List<TaggedTransaction>>(
+          container,
+          listTransactionsProvider(bookId: 'book1'),
+        );
+
+        expect(result.hasValue, isTrue,
+            reason: 'CR-01: stale member filter must not produce an error state');
+
+        final captured = verify(() => mock.execute(captureAny())).captured;
+        final params = captured.first as GetListParams;
+        expect(
+          params.bookIds,
+          equals(['book1', 'shadow-1']),
+          reason: 'CR-01: stale memberBookId must fall back to the full book '
+              'set (own + shadows), never an empty list',
+        );
+      },
+    );
+
+    test(
       'D-04: solo mode returns own-book rows only, all memberTags null',
       () async {
         final mock = _MockGetListTransactionsUseCase();
