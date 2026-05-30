@@ -1,31 +1,128 @@
-// Wave 0 stub — bodies implemented in Plan 27-03.
-// File must compile and run; placeholder assertions are intentional.
+import 'dart:ui';
 
-// ignore_for_file: unused_element
-// ignore: uri_does_not_exist — widget created in Plan 27-03
-// import 'package:home_pocket/features/list/presentation/widgets/list_calendar_header.dart';
-
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
 import 'package:home_pocket/features/analytics/domain/repositories/analytics_repository.dart';
+import 'package:home_pocket/features/analytics/presentation/providers/repository_providers.dart'
+    show analyticsRepositoryProvider;
+import 'package:home_pocket/features/list/presentation/providers/state_list_filter.dart';
+import 'package:home_pocket/features/list/presentation/widgets/list_calendar_header.dart';
+import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockAnalyticsRepository extends Mock implements AnalyticsRepository {}
 
+/// Pumps CalendarHeaderWidget inside a ProviderScope + MaterialApp with i18n.
+Future<void> _pumpCalendarHeader(
+  WidgetTester tester,
+  ProviderContainer container,
+) async {
+  await tester.pumpWidget(
+    UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(
+        localizationsDelegates: S.localizationsDelegates,
+        supportedLocales: S.supportedLocales,
+        home: Scaffold(
+          body: CalendarHeaderWidget(
+            bookId: 'book1',
+            currencyCode: 'JPY',
+            locale: const Locale('ja'),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
 void main() {
-  group('ListCalendarHeader widget (Wave 0 stubs)', () {
-    test('SC#1: month nav — TODO implement in Plan 27-03', () {
-      // TODO: implement in Plan 27-03
-      expect(true, isTrue);
+  group('CalendarHeaderWidget', () {
+    testWidgets('SC#1: right chevron tap advances selectedMonth by 1',
+        (tester) async {
+      final mockRepo = _MockAnalyticsRepository();
+      when(() => mockRepo.getDailyTotals(
+            bookId: any(named: 'bookId'),
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+          )).thenAnswer((_) async => []);
+
+      final container = ProviderContainer.test(overrides: [
+        analyticsRepositoryProvider.overrideWithValue(mockRepo),
+      ]);
+
+      final initialMonth = container.read(listFilterProvider).selectedMonth;
+      final initialYear = container.read(listFilterProvider).selectedYear;
+
+      await _pumpCalendarHeader(tester, container);
+
+      // Tap right chevron
+      await tester.tap(find.byIcon(Icons.chevron_right));
+      await tester.pumpAndSettle();
+
+      final filter = container.read(listFilterProvider);
+      // Compute expected next month (with year rollover for December)
+      final expected = DateTime(initialYear, initialMonth + 1);
+      expect(filter.selectedMonth, equals(expected.month));
+      expect(filter.selectedYear, equals(expected.year));
     });
 
-    test('SC#3: day tap toggle — TODO implement in Plan 27-03', () {
-      // TODO: implement in Plan 27-03
-      expect(true, isTrue);
+    testWidgets('SC#3: tap day selects it; tap same day again clears filter',
+        (tester) async {
+      final mockRepo = _MockAnalyticsRepository();
+      when(() => mockRepo.getDailyTotals(
+            bookId: any(named: 'bookId'),
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+          )).thenAnswer((_) async => []);
+
+      final container = ProviderContainer.test(overrides: [
+        analyticsRepositoryProvider.overrideWithValue(mockRepo),
+      ]);
+
+      await _pumpCalendarHeader(tester, container);
+
+      // Tap text '5' — a day cell for day 5
+      await tester.tap(find.text('5').first);
+      await tester.pump();
+
+      expect(
+        container.read(listFilterProvider).activeDayFilter?.day,
+        equals(5),
+      );
+
+      // Tap same day again → clear
+      await tester.tap(find.text('5').first);
+      await tester.pump();
+
+      expect(container.read(listFilterProvider).activeDayFilter, isNull);
     });
 
-    test('SC#4: summary row amount — TODO implement in Plan 27-03', () {
-      // TODO: implement in Plan 27-03
-      expect(true, isTrue);
+    testWidgets('SC#4: summary row shows month total formatted as JPY',
+        (tester) async {
+      final now = DateTime.now();
+      final mockRepo = _MockAnalyticsRepository();
+      when(() => mockRepo.getDailyTotals(
+            bookId: any(named: 'bookId'),
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+          )).thenAnswer((_) async => [
+            DailyTotal(
+              date: DateTime(now.year, now.month, 3),
+              totalAmount: 12345,
+            ),
+          ]);
+
+      final container = ProviderContainer.test(overrides: [
+        analyticsRepositoryProvider.overrideWithValue(mockRepo),
+      ]);
+
+      await _pumpCalendarHeader(tester, container);
+
+      // JPY 0 decimals: ¥12,345
+      expect(find.text('¥12,345'), findsOneWidget);
     });
   });
 }
