@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/state_list_transactions.dart';
+import '../../../../features/settings/presentation/providers/state_locale.dart';
+import '../widgets/list_calendar_header.dart';
 
-/// Loading scaffold for the List tab.
+/// List screen for Phase 27 — mounts CalendarHeaderWidget at top.
 ///
-/// Consumes [listTransactionsProvider] and shows a [CircularProgressIndicator]
-/// while loading or on error. Data rendering is deferred to Phase 28.
+/// Phase 28 will replace the placeholder spinner with a transaction list.
 class ListScreen extends ConsumerWidget {
   const ListScreen({super.key, required this.bookId});
 
@@ -14,15 +14,22 @@ class ListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final transactionsAsync = ref.watch(
-      listTransactionsProvider(bookId: bookId),
-    );
+    // Riverpod 3: .value is the nullable accessor (not .valueOrNull, which was removed)
+    final locale =
+        ref.watch(currentLocaleProvider).value ?? const Locale('ja');
+    // Phase 29: resolve currencyCode from bookByIdProvider
+    const currencyCode = 'JPY';
 
-    return transactionsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text(e.toString())),
-      // Phase 28: replace data branch with ListView of TaggedTransaction tiles
-      data: (_) => const Center(child: CircularProgressIndicator()),
+    return Column(
+      children: [
+        CalendarHeaderWidget(
+          bookId: bookId,
+          currencyCode: currencyCode,
+          locale: locale,
+        ),
+        // Phase 28: replace with transaction list
+        const Expanded(child: Center(child: CircularProgressIndicator())),
+      ],
     );
   }
 }
