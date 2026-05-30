@@ -189,16 +189,16 @@ No active blockers for v1.4. Carried-forward debt (cross-milestone):
 
 ## Session Continuity
 
-Last session: 2026-05-30T23:36:43.185Z
-Stopped at: Completed 29-01-PLAN.md
+Last session: 2026-05-31T00:30:00.000Z
+Stopped at: Completed 29-04-PLAN.md (last plan of Phase 29; human-verify checkpoint APPROVED)
 
-**Planned Next:** `/gsd:plan-phase 24` — Data Layer Extension
+**Planned Next:** `/gsd:verify-work 29` — verify Phase 29 (last phase of v1.4 列表功能)
 
 ## Operator Next Steps
 
-- `/gsd:plan-phase 24` — start Phase 24: Data Layer Extension
-- Key decisions for Phase 24 implementer:
-  - Add `TransactionDao.findByBookIds(...)` + `.watch()` stream variant
-  - Extract `DateBoundaries` utility to `lib/shared/utils/date_boundaries.dart`
-  - Add chain-integrity-after-soft-delete test before any UI phase
-  - Verify shadow-book `note` decryption exception handling in `TransactionRepositoryImpl._toModel()`
+- `/gsd:verify-work 29` — verify Phase 29 (LIST-04, FAM-01–04 delivered + visually approved)
+- Phase 29 close notes:
+  - LIST-04 pull-to-refresh: RefreshIndicator on list screen, dual-invalidate (list + calendar), honest spinner (D-05/Pitfall F)
+  - FAM-01–04 all visually verified in solo + family mode (member chips, Mine-only, AND-composition, filtered-empty)
+  - Pre-existing out-of-scope debt: 11 golden pixel-diff failures in `home_hero_card_golden_test.dart` (home feature, from quick task 260522-fj5 — pending human re-baseline; NOT a Phase 29 regression)
+  - `const currencyCode = 'JPY'` seam in list_screen.dart left unchanged (deferred per RESEARCH.md)
