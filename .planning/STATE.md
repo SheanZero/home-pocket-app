@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: 列表功能
 status: executing
-stopped_at: Completed 28-03-PLAN.md — ListTransactionTile + ListDayGroupHeader + buildFlatList
-last_updated: "2026-05-30T11:52:00Z"
+stopped_at: Phase 28 UI-SPEC approved
+last_updated: "2026-05-30T12:01:23.101Z"
 last_activity: 2026-05-30
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 20
-  completed_plans: 16
+  completed_plans: 17
   percent: 57
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-05-29 — v1.4 列表功能 milestone st
 ## Current Position
 
 Phase: 28 (transaction-tile-sort-filter-bar) — EXECUTING
-Plan: 4 of 7
+Plan: 5 of 7
 Status: Ready to execute
 Last activity: 2026-05-30
 
@@ -76,6 +76,7 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 + v1.
 - Family "Mine only" shortcut: included in v1.4 (FAM-04)
 - Scope: expense-only; no income tracking; no month settlement/lock; no amount-range filter; no "New" badge
 - [Phase ?]: initializeDateFormatting placed at top of AppInitializer.initialize() before provider container setup
+- [Phase ?]: CategoryFilterSheet tests use ProviderScope + currentLocaleProvider override to prevent async retry timers
 
 ### Pending Todos
 
@@ -186,7 +187,7 @@ No active blockers for v1.4. Carried-forward debt (cross-milestone):
 
 ## Session Continuity
 
-Last session: 2026-05-30T11:51:00.336Z
+Last session: 2026-05-30T12:01:06.159Z
 Stopped at: Phase 28 UI-SPEC approved
 
 **Planned Next:** `/gsd:plan-phase 24` — Data Layer Extension
