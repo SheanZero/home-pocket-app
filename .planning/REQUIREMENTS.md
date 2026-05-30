@@ -32,10 +32,10 @@
 
 ### Search & Filter (FILTER)
 
-- [ ] **FILTER-01**: User can text-search the list by category name, merchant, and note.
-- [ ] **FILTER-02**: User can filter the list by ledger (Survival / Soul).
-- [ ] **FILTER-03**: User can filter the list by one or more categories.
-- [ ] **FILTER-04**: Active search + filters compose together (AND logic) and the user can clear all filters in one action.
+- [x] **FILTER-01**: User can text-search the list by category name, merchant, and note.
+- [x] **FILTER-02**: User can filter the list by ledger (Survival / Soul).
+- [x] **FILTER-03**: User can filter the list by one or more categories.
+- [x] **FILTER-04**: Active search + filters compose together (AND logic) and the user can clear all filters in one action.
 
 ### Row Interactions (ROW)
 
@@ -92,10 +92,10 @@
 | SORT-02 | Phase 25 — Domain Models + Use Case | Complete |
 | SORT-03 | Phase 25 — Domain Models + Use Case | Complete |
 | SORT-04 | Phase 25 — Domain Models + Use Case | Complete |
-| FILTER-01 | Phase 26 — Providers + Shell Wiring | Pending |
-| FILTER-02 | Phase 26 — Providers + Shell Wiring | Pending |
-| FILTER-03 | Phase 26 — Providers + Shell Wiring | Pending |
-| FILTER-04 | Phase 26 — Providers + Shell Wiring | Pending |
+| FILTER-01 | Phase 26 — Providers + Shell Wiring | Complete |
+| FILTER-02 | Phase 26 — Providers + Shell Wiring | Complete |
+| FILTER-03 | Phase 26 — Providers + Shell Wiring | Complete |
+| FILTER-04 | Phase 26 — Providers + Shell Wiring | Complete |
 | CAL-01 | Phase 27 — Calendar Header + Month Summary | Pending |
 | CAL-02 | Phase 27 — Calendar Header + Month Summary | Pending |
 | CAL-03 | Phase 27 — Calendar Header + Month Summary | Pending |
