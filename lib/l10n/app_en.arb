@@ -2149,6 +2149,10 @@
   "@listClearAll": {
     "description": "Clear all filters chip label in sort/filter bar (Phase 28)"
   },
+  "listMineOnly": "Mine only",
+  "@listMineOnly": {
+    "description": "Mine-only filter chip label in family group mode (Phase 29)"
+  },
   "listDeleteConfirmTitle": "Delete entry?",
   "@listDeleteConfirmTitle": {
     "description": "Swipe-to-delete confirmation dialog title (Phase 28)"

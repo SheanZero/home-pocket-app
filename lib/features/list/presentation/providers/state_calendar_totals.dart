@@ -3,6 +3,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../features/analytics/presentation/providers/repository_providers.dart'
     show analyticsRepositoryProvider;
 import '../../../../shared/utils/date_boundaries.dart';
+import '../../../family_sync/presentation/providers/state_active_group.dart';
+import '../../../home/presentation/providers/state_shadow_books.dart';
 
 part 'state_calendar_totals.g.dart';
 
@@ -27,14 +29,31 @@ Future<Map<DateTime, int>> calendarDailyTotals(
   required int year,
   required int month,
 }) async {
-  // Phase 29: combine shadow books for family per-day totals
+  // CRITICAL: watch only (bookIds, year, month) — NEVER watch memberBookId/ledger/search
+  // Pitfall 3 / D-06: calendar always full-family combined, isolated from filter state
+  final isGroup = ref.watch(isGroupModeProvider);
+  final shadowBookList = isGroup
+      ? (await ref.watch(shadowBooksProvider.future))
+      : const <ShadowBookInfo>[];
+
+  final allBookIds = [bookId, ...shadowBookList.map((s) => s.book.id)];
+
   final repo = ref.watch(analyticsRepositoryProvider);
   final range = DateBoundaries.monthRange(year, month);
-  final totals = await repo.getDailyTotals(
-    bookId: bookId,
-    startDate: range.start,
-    endDate: range.end,
-    // type defaults to 'expense' — expense-only basis (D-09, Pitfall 6)
-  );
-  return {for (final t in totals) _dayKey(t.date): t.totalAmount};
+
+  // Per-book calls (N = 1 solo; 2–5 family; ≤31 rows per book — fast enough, D-06)
+  final merged = <DateTime, int>{};
+  for (final bid in allBookIds) {
+    final totals = await repo.getDailyTotals(
+      bookId: bid,
+      startDate: range.start,
+      endDate: range.end,
+      // type defaults to 'expense' (Pitfall 6)
+    );
+    for (final t in totals) {
+      final k = _dayKey(t.date);
+      merged[k] = (merged[k] ?? 0) + t.totalAmount;
+    }
+  }
+  return merged;
 }

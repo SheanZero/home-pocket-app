@@ -1732,6 +1732,9 @@ class SEn extends S {
   String get listClearAll => 'Clear';
 
   @override
+  String get listMineOnly => 'Mine only';
+
+  @override
   String get listDeleteConfirmTitle => 'Delete entry?';
 
   @override

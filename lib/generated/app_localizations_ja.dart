@@ -1701,6 +1701,9 @@ class SJa extends S {
   String get listClearAll => 'クリア';
 
   @override
+  String get listMineOnly => 'Mine only';
+
+  @override
   String get listDeleteConfirmTitle => '削除しますか？';
 
   @override

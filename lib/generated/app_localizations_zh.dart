@@ -1695,6 +1695,9 @@ class SZh extends S {
   String get listClearAll => '清除';
 
   @override
+  String get listMineOnly => 'Mine only';
+
+  @override
   String get listDeleteConfirmTitle => '确认删除？';
 
   @override

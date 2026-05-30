@@ -3187,6 +3187,12 @@ abstract class S {
   /// **'Clear'**
   String get listClearAll;
 
+  /// Mine-only filter chip label in family group mode (Phase 29)
+  ///
+  /// In en, this message translates to:
+  /// **'Mine only'**
+  String get listMineOnly;
+
   /// Swipe-to-delete confirmation dialog title (Phase 28)
   ///
   /// In en, this message translates to:
