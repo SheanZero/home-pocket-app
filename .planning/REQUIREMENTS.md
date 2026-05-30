@@ -11,10 +11,10 @@
 
 ### Calendar & Month (CAL)
 
-- [ ] **CAL-01**: User can switch the displayed month (previous / next + month picker) on the List tab.
-- [ ] **CAL-02**: User sees a month calendar grid showing each day's total expense; in family mode the per-day total combines the user's own + members' expenses (consistent with the list).
-- [ ] **CAL-03**: User can tap a day in the calendar to filter the list to that day; tapping the selected day again clears the day filter.
-- [ ] **CAL-04**: User sees a current-month summary (total expense, expense-only basis) on the List tab.
+- [x] **CAL-01**: User can switch the displayed month (previous / next + month picker) on the List tab.
+- [x] **CAL-02**: User sees a month calendar grid showing each day's total expense; in family mode the per-day total combines the user's own + members' expenses (consistent with the list).
+- [x] **CAL-03**: User can tap a day in the calendar to filter the list to that day; tapping the selected day again clears the day filter.
+- [x] **CAL-04**: User sees a current-month summary (total expense, expense-only basis) on the List tab.
 
 ### List Display (LIST)
 
@@ -96,10 +96,10 @@
 | FILTER-02 | Phase 26 — Providers + Shell Wiring | Complete |
 | FILTER-03 | Phase 26 — Providers + Shell Wiring | Complete |
 | FILTER-04 | Phase 26 — Providers + Shell Wiring | Complete |
-| CAL-01 | Phase 27 — Calendar Header + Month Summary | Pending |
-| CAL-02 | Phase 27 — Calendar Header + Month Summary | Pending |
-| CAL-03 | Phase 27 — Calendar Header + Month Summary | Pending |
-| CAL-04 | Phase 27 — Calendar Header + Month Summary | Pending |
+| CAL-01 | Phase 27 — Calendar Header + Month Summary | Complete |
+| CAL-02 | Phase 27 — Calendar Header + Month Summary | Complete |
+| CAL-03 | Phase 27 — Calendar Header + Month Summary | Complete |
+| CAL-04 | Phase 27 — Calendar Header + Month Summary | Complete |
 | LIST-01 | Phase 28 — Transaction Tile + Sort/Filter Bar | Pending |
 | ROW-01 | Phase 28 — Transaction Tile + Sort/Filter Bar | Pending |
 | ROW-02 | Phase 28 — Transaction Tile + Sort/Filter Bar | Pending |

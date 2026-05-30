@@ -4,13 +4,13 @@ milestone: v1.4
 milestone_name: 列表功能
 status: executing
 stopped_at: Phase 27 UI-SPEC approved (typography waiver)
-last_updated: "2026-05-30T04:20:52.988Z"
-last_activity: 2026-05-30 -- Phase 27 planning complete
+last_updated: "2026-05-30T05:43:36.402Z"
+last_activity: 2026-05-30
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 13
-  completed_plans: 9
+  completed_plans: 10
   percent: 43
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-29 — v1.4 列表功能 milestone started)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes survival spending from soul spending
-**Current focus:** Phase 27 — calendar header + month summary
+**Current focus:** Phase 27 — calendar-header-month-summary
 
 ## Current Position
 
-Phase: 27
-Plan: Not started
+Phase: 27 (calendar-header-month-summary) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-05-30 -- Phase 27 planning complete
+Last activity: 2026-05-30
 
 **Next action:** `/gsd:plan-phase 24`
 
@@ -75,6 +75,7 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 + v1.
 - Filter state persistence: keepAlive under `IndexedStack` — filter/sort state persists across tab switches (decided in Phase 26)
 - Family "Mine only" shortcut: included in v1.4 (FAM-04)
 - Scope: expense-only; no income tracking; no month settlement/lock; no amount-range filter; no "New" badge
+- [Phase ?]: initializeDateFormatting placed at top of AppInitializer.initialize() before provider container setup
 
 ### Pending Todos
 
@@ -185,7 +186,7 @@ No active blockers for v1.4. Carried-forward debt (cross-milestone):
 
 ## Session Continuity
 
-Last session: 2026-05-30T03:21:25.147Z
+Last session: 2026-05-30T05:43:31.649Z
 Stopped at: Phase 27 UI-SPEC approved (typography waiver)
 
 **Planned Next:** `/gsd:plan-phase 24` — Data Layer Extension
