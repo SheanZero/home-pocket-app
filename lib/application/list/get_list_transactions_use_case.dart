@@ -51,7 +51,9 @@ class GetListTransactionsUseCase {
     final txs = await _repo.findByBookIds(
       params.bookIds,
       ledgerType: params.filter.ledgerType,
-      categoryId: params.filter.categoryId,
+      // categoryId: null — multi-category filtering is Dart-side in
+      // listTransactionsProvider via filter.categoryIds.contains (D-01 / A3).
+      categoryId: null,
       startDate: dateRange.startDate,
       endDate: dateRange.endDate,
       sortField: params.filter.sortConfig.sortField,
@@ -75,7 +77,9 @@ class GetListTransactionsUseCase {
     return _repo.watchByBookIds(
       params.bookIds,
       ledgerType: params.filter.ledgerType,
-      categoryId: params.filter.categoryId,
+      // categoryId: null — multi-category filtering is Dart-side in
+      // listTransactionsProvider via filter.categoryIds.contains (D-01 / A3).
+      categoryId: null,
       startDate: dateRange.startDate,
       endDate: dateRange.endDate,
       sortField: params.filter.sortConfig.sortField,

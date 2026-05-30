@@ -18,7 +18,7 @@ void main() {
       expect(state.activeDayFilter, isNull);
       expect(state.sortConfig, equals(const ListSortConfig()));
       expect(state.ledgerType, isNull);
-      expect(state.categoryId, isNull);
+      expect(state.categoryIds, isEmpty);
       expect(state.searchQuery, equals(''));
       expect(state.memberBookId, isNull);
     });
@@ -101,24 +101,24 @@ void main() {
       expect(container.read(listFilterProvider).ledgerType, isNull);
     });
 
-    test('setCategoryFilter sets categoryId', () {
+    test('setCategories sets categoryIds (D-01)', () {
       final container = ProviderContainer.test();
       final notifier = container.read(listFilterProvider.notifier);
 
-      notifier.setCategoryFilter('cat_food');
+      notifier.setCategories({'cat_food'});
       final state = container.read(listFilterProvider);
 
-      expect(state.categoryId, equals('cat_food'));
+      expect(state.categoryIds, equals({'cat_food'}));
     });
 
-    test('setCategoryFilter with null clears categoryId', () {
+    test('setCategories with empty set clears categoryIds (D-01)', () {
       final container = ProviderContainer.test();
       final notifier = container.read(listFilterProvider.notifier);
 
-      notifier.setCategoryFilter('cat_food');
-      notifier.setCategoryFilter(null);
+      notifier.setCategories({'cat_food'});
+      notifier.setCategories({});
 
-      expect(container.read(listFilterProvider).categoryId, isNull);
+      expect(container.read(listFilterProvider).categoryIds, isEmpty);
     });
 
     test('setSearch updates searchQuery', () {
@@ -160,7 +160,7 @@ void main() {
         notifier.selectMonth(2025, 6);
         notifier.selectDay(DateTime(2025, 6, 10));
         notifier.setLedgerFilter(LedgerType.soul);
-        notifier.setCategoryFilter('cat_food');
+        notifier.setCategories({'cat_food'});
         notifier.setSearch('ランチ');
         notifier.setMemberFilter('book_abc');
         notifier.setSort(
@@ -204,14 +204,14 @@ void main() {
         expect(container.read(listFilterProvider).ledgerType, isNull);
       });
 
-      test('clearAll resets categoryId to null (FILTER-04 explicit)', () {
+      test('clearAll resets categoryIds to empty Set (FILTER-04 explicit)', () {
         final container = ProviderContainer.test();
         final notifier = container.read(listFilterProvider.notifier);
 
-        notifier.setCategoryFilter('cat_transport');
+        notifier.setCategories({'cat_transport'});
         notifier.clearAll();
 
-        expect(container.read(listFilterProvider).categoryId, isNull);
+        expect(container.read(listFilterProvider).categoryIds, isEmpty);
       });
 
       test('clearAll resets activeDayFilter to null (FILTER-04 explicit)', () {

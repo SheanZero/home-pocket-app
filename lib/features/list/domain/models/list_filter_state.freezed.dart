@@ -18,7 +18,7 @@ mixin _$ListFilterState {
   DateTime? get activeDayFilter;
   ListSortConfig get sortConfig;
   LedgerType? get ledgerType;
-  String? get categoryId;
+  Set<String> get categoryIds;
   String get searchQuery;
   String? get memberBookId;
 
@@ -47,8 +47,10 @@ mixin _$ListFilterState {
                 other.sortConfig == sortConfig) &&
             (identical(other.ledgerType, ledgerType) ||
                 other.ledgerType == ledgerType) &&
-            (identical(other.categoryId, categoryId) ||
-                other.categoryId == categoryId) &&
+            const DeepCollectionEquality().equals(
+              other.categoryIds,
+              categoryIds,
+            ) &&
             (identical(other.searchQuery, searchQuery) ||
                 other.searchQuery == searchQuery) &&
             (identical(other.memberBookId, memberBookId) ||
@@ -63,14 +65,14 @@ mixin _$ListFilterState {
     activeDayFilter,
     sortConfig,
     ledgerType,
-    categoryId,
+    const DeepCollectionEquality().hash(categoryIds),
     searchQuery,
     memberBookId,
   );
 
   @override
   String toString() {
-    return 'ListFilterState(selectedYear: $selectedYear, selectedMonth: $selectedMonth, activeDayFilter: $activeDayFilter, sortConfig: $sortConfig, ledgerType: $ledgerType, categoryId: $categoryId, searchQuery: $searchQuery, memberBookId: $memberBookId)';
+    return 'ListFilterState(selectedYear: $selectedYear, selectedMonth: $selectedMonth, activeDayFilter: $activeDayFilter, sortConfig: $sortConfig, ledgerType: $ledgerType, categoryIds: $categoryIds, searchQuery: $searchQuery, memberBookId: $memberBookId)';
   }
 }
 
@@ -87,7 +89,7 @@ abstract mixin class $ListFilterStateCopyWith<$Res> {
     DateTime? activeDayFilter,
     ListSortConfig sortConfig,
     LedgerType? ledgerType,
-    String? categoryId,
+    Set<String> categoryIds,
     String searchQuery,
     String? memberBookId,
   });
@@ -113,7 +115,7 @@ class _$ListFilterStateCopyWithImpl<$Res>
     Object? activeDayFilter = freezed,
     Object? sortConfig = null,
     Object? ledgerType = freezed,
-    Object? categoryId = freezed,
+    Object? categoryIds = null,
     Object? searchQuery = null,
     Object? memberBookId = freezed,
   }) {
@@ -139,10 +141,10 @@ class _$ListFilterStateCopyWithImpl<$Res>
             ? _self.ledgerType
             : ledgerType // ignore: cast_nullable_to_non_nullable
                   as LedgerType?,
-        categoryId: freezed == categoryId
-            ? _self.categoryId
-            : categoryId // ignore: cast_nullable_to_non_nullable
-                  as String?,
+        categoryIds: null == categoryIds
+            ? _self.categoryIds
+            : categoryIds // ignore: cast_nullable_to_non_nullable
+                  as Set<String>,
         searchQuery: null == searchQuery
             ? _self.searchQuery
             : searchQuery // ignore: cast_nullable_to_non_nullable
@@ -265,7 +267,7 @@ extension ListFilterStatePatterns on ListFilterState {
       DateTime? activeDayFilter,
       ListSortConfig sortConfig,
       LedgerType? ledgerType,
-      String? categoryId,
+      Set<String> categoryIds,
       String searchQuery,
       String? memberBookId,
     )?
@@ -281,7 +283,7 @@ extension ListFilterStatePatterns on ListFilterState {
           _that.activeDayFilter,
           _that.sortConfig,
           _that.ledgerType,
-          _that.categoryId,
+          _that.categoryIds,
           _that.searchQuery,
           _that.memberBookId,
         );
@@ -311,7 +313,7 @@ extension ListFilterStatePatterns on ListFilterState {
       DateTime? activeDayFilter,
       ListSortConfig sortConfig,
       LedgerType? ledgerType,
-      String? categoryId,
+      Set<String> categoryIds,
       String searchQuery,
       String? memberBookId,
     )
@@ -326,7 +328,7 @@ extension ListFilterStatePatterns on ListFilterState {
           _that.activeDayFilter,
           _that.sortConfig,
           _that.ledgerType,
-          _that.categoryId,
+          _that.categoryIds,
           _that.searchQuery,
           _that.memberBookId,
         );
@@ -355,7 +357,7 @@ extension ListFilterStatePatterns on ListFilterState {
       DateTime? activeDayFilter,
       ListSortConfig sortConfig,
       LedgerType? ledgerType,
-      String? categoryId,
+      Set<String> categoryIds,
       String searchQuery,
       String? memberBookId,
     )?
@@ -370,7 +372,7 @@ extension ListFilterStatePatterns on ListFilterState {
           _that.activeDayFilter,
           _that.sortConfig,
           _that.ledgerType,
-          _that.categoryId,
+          _that.categoryIds,
           _that.searchQuery,
           _that.memberBookId,
         );
@@ -389,10 +391,11 @@ class _ListFilterState extends ListFilterState {
     this.activeDayFilter,
     this.sortConfig = const ListSortConfig(),
     this.ledgerType,
-    this.categoryId,
+    final Set<String> categoryIds = const <String>{},
     this.searchQuery = '',
     this.memberBookId,
-  }) : super._();
+  }) : _categoryIds = categoryIds,
+       super._();
 
   @override
   final int selectedYear;
@@ -405,8 +408,15 @@ class _ListFilterState extends ListFilterState {
   final ListSortConfig sortConfig;
   @override
   final LedgerType? ledgerType;
+  final Set<String> _categoryIds;
   @override
-  final String? categoryId;
+  @JsonKey()
+  Set<String> get categoryIds {
+    if (_categoryIds is EqualUnmodifiableSetView) return _categoryIds;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableSetView(_categoryIds);
+  }
+
   @override
   @JsonKey()
   final String searchQuery;
@@ -436,8 +446,10 @@ class _ListFilterState extends ListFilterState {
                 other.sortConfig == sortConfig) &&
             (identical(other.ledgerType, ledgerType) ||
                 other.ledgerType == ledgerType) &&
-            (identical(other.categoryId, categoryId) ||
-                other.categoryId == categoryId) &&
+            const DeepCollectionEquality().equals(
+              other._categoryIds,
+              _categoryIds,
+            ) &&
             (identical(other.searchQuery, searchQuery) ||
                 other.searchQuery == searchQuery) &&
             (identical(other.memberBookId, memberBookId) ||
@@ -452,14 +464,14 @@ class _ListFilterState extends ListFilterState {
     activeDayFilter,
     sortConfig,
     ledgerType,
-    categoryId,
+    const DeepCollectionEquality().hash(_categoryIds),
     searchQuery,
     memberBookId,
   );
 
   @override
   String toString() {
-    return 'ListFilterState(selectedYear: $selectedYear, selectedMonth: $selectedMonth, activeDayFilter: $activeDayFilter, sortConfig: $sortConfig, ledgerType: $ledgerType, categoryId: $categoryId, searchQuery: $searchQuery, memberBookId: $memberBookId)';
+    return 'ListFilterState(selectedYear: $selectedYear, selectedMonth: $selectedMonth, activeDayFilter: $activeDayFilter, sortConfig: $sortConfig, ledgerType: $ledgerType, categoryIds: $categoryIds, searchQuery: $searchQuery, memberBookId: $memberBookId)';
   }
 }
 
@@ -478,7 +490,7 @@ abstract mixin class _$ListFilterStateCopyWith<$Res>
     DateTime? activeDayFilter,
     ListSortConfig sortConfig,
     LedgerType? ledgerType,
-    String? categoryId,
+    Set<String> categoryIds,
     String searchQuery,
     String? memberBookId,
   });
@@ -505,7 +517,7 @@ class __$ListFilterStateCopyWithImpl<$Res>
     Object? activeDayFilter = freezed,
     Object? sortConfig = null,
     Object? ledgerType = freezed,
-    Object? categoryId = freezed,
+    Object? categoryIds = null,
     Object? searchQuery = null,
     Object? memberBookId = freezed,
   }) {
@@ -531,10 +543,10 @@ class __$ListFilterStateCopyWithImpl<$Res>
             ? _self.ledgerType
             : ledgerType // ignore: cast_nullable_to_non_nullable
                   as LedgerType?,
-        categoryId: freezed == categoryId
-            ? _self.categoryId
-            : categoryId // ignore: cast_nullable_to_non_nullable
-                  as String?,
+        categoryIds: null == categoryIds
+            ? _self._categoryIds
+            : categoryIds // ignore: cast_nullable_to_non_nullable
+                  as Set<String>,
         searchQuery: null == searchQuery
             ? _self.searchQuery
             : searchQuery // ignore: cast_nullable_to_non_nullable

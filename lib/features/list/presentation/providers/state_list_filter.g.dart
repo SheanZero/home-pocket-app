@@ -62,7 +62,7 @@ final class ListFilterProvider
   }
 }
 
-String _$listFilterHash() => r'cf441242129f814f1970316a54d3ebc2969bf80b';
+String _$listFilterHash() => r'f31cc5d691d8124f4b0bab928793d64fa06c1cb9';
 
 /// Holds the complete filter + sort state for the transaction list view.
 ///

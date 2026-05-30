@@ -13,7 +13,7 @@ part 'list_filter_state.freezed.dart';
 /// - [activeDayFilter]: non-null = filter to a single calendar day; null = full month
 /// - [sortConfig]: embedded [ListSortConfig] — single source of truth for sort state
 /// - [ledgerType]: optional filter to Survival or Soul ledger
-/// - [categoryId]: optional single-category filter (D-02; multi-category deferred to Phase 28)
+/// - [categoryIds]: multi-select category filter (D-01 Phase 28; empty = no filter)
 /// - [searchQuery]: text search token (matched in Phase 26 provider in-memory; D-05)
 /// - [memberBookId]: family member book filter (consumed in Phase 29; D-01 forward field)
 @freezed
@@ -26,7 +26,7 @@ abstract class ListFilterState with _$ListFilterState {
     DateTime? activeDayFilter,
     @Default(ListSortConfig()) ListSortConfig sortConfig,
     LedgerType? ledgerType,
-    String? categoryId,
+    @Default(<String>{}) Set<String> categoryIds,
     @Default('') String searchQuery,
     String? memberBookId,
   }) = _ListFilterState;

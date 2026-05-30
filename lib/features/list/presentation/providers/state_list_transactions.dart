@@ -71,6 +71,15 @@ Future<List<TaggedTransaction>> listTransactions(
         .toList();
   }
 
+  // Step 6a-bis: Dart-side category filter (D-01 — Set<String> multi-select)
+  // categoryId is null in SQL query; multi-select filtering is done here.
+  // Empty set = no category filter (pass-all).
+  if (filter.categoryIds.isNotEmpty) {
+    txs = txs
+        .where((tx) => filter.categoryIds.contains(tx.categoryId))
+        .toList();
+  }
+
   // Step 6b: Dart-side text search (FILTER-01 / D-04 / D-05)
   // Matches localized category name, merchant, or note (OR within search).
   // AND-composed with the SQL filters applied by the use case (FILTER-04).

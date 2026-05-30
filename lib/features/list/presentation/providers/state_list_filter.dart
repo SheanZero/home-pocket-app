@@ -46,9 +46,21 @@ class ListFilter extends _$ListFilter {
     state = state.copyWith(ledgerType: type);
   }
 
-  /// Filters by a single category ID (or clears when [id] is null).
-  void setCategoryFilter(String? id) {
-    state = state.copyWith(categoryId: id);
+  /// Replaces the category filter with a new Set of leaf category IDs.
+  /// An empty set clears the category filter (pass-all behaviour, D-01).
+  void setCategories(Set<String> ids) {
+    state = state.copyWith(categoryIds: ids);
+  }
+
+  /// Toggles a single leaf category ID in/out of the active filter set (D-01).
+  void toggleCategory(String id) {
+    final current = Set<String>.from(state.categoryIds);
+    if (current.contains(id)) {
+      current.remove(id);
+    } else {
+      current.add(id);
+    }
+    state = state.copyWith(categoryIds: current);
   }
 
   /// Updates the text search query.

@@ -281,18 +281,21 @@ void main() {
     });
 
     test(
-        'categoryId filter forwarded to use case (FILTER-03): '
-        'use case receives non-null categoryId', () async {
+        'categoryIds Dart-side filter (FILTER-03 D-01): '
+        'only transactions matching categoryIds are returned', () async {
       final mock = _MockGetListTransactionsUseCase();
-      final tx = _makeTransaction(categoryId: 'cat_transport');
-      when(() => mock.execute(any())).thenAnswer((_) async => Result.success([tx]));
+      final matching = _makeTransaction(id: 'tx-match', categoryId: 'cat_transport');
+      final notMatching = _makeTransaction(id: 'tx-no-match', categoryId: 'cat_food');
+      when(() => mock.execute(any())).thenAnswer(
+        (_) async => Result.success([matching, notMatching]),
+      );
 
       final container = _makeContainer(
         mock,
         filterState: ListFilterState(
           selectedYear: 2026,
           selectedMonth: 5,
-          categoryId: 'cat_transport',
+          categoryIds: {'cat_transport'},
         ),
       );
 
@@ -302,10 +305,15 @@ void main() {
       );
 
       expect(result.hasValue, isTrue);
+      // D-01: category filtering is Dart-side; use case receives null categoryId
       final captured = verify(() => mock.execute(captureAny())).captured;
       final params = captured.first as GetListParams;
-      expect(params.filter.categoryId, equals('cat_transport'),
-          reason: 'FILTER-03: categoryId forwarded to use case');
+      expect(params.filter.categoryIds, equals({'cat_transport'}),
+          reason: 'FILTER-03 D-01: categoryIds present in filter state');
+      // Dart-side filter should keep only matching transaction
+      expect(result.value!.length, equals(1),
+          reason: 'FILTER-03: Dart-side filter keeps only matching tx');
+      expect(result.value!.first.transaction.categoryId, equals('cat_transport'));
     });
 
     test(
