@@ -156,7 +156,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 26-02-PLAN.md — ListFilter Notifier (keepAlive:true) + getListTransactionsUseCaseProvider + filter notifier tests (Wave 2)
+- [x] 26-02-PLAN.md — ListFilter Notifier (keepAlive:true) + getListTransactionsUseCaseProvider + filter notifier tests (Wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -247,7 +247,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 24. Data Layer Extension | 3/3 | Complete    | 2026-05-29 |
 | 25. Domain Models + Use Case | 2/2 | Complete    | 2026-05-29 |
-| 26. Providers + Shell Wiring | 1/4 | In Progress|  |
+| 26. Providers + Shell Wiring | 2/4 | In Progress|  |
 | 27. Calendar Header + Month Summary | 0/TBD | Not started | - |
 | 28. Transaction Tile + Sort/Filter Bar | 0/TBD | Not started | - |
 | 29. List Screen Assembly + Family | 0/TBD | Not started | - |
