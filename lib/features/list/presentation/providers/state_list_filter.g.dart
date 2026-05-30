@@ -10,37 +10,31 @@ part of 'state_list_filter.dart';
 // ignore_for_file: type=lint, type=warning
 /// Holds the complete filter + sort state for the transaction list view.
 ///
-/// Kept alive so all filter fields (month, day, sort, search, ledger,
-/// category, member) persist across IndexedStack tab switches (D-01/D-02).
-/// `keepAlive: true` is encoded in the annotation — not just a comment —
-/// satisfying SC#2. Under IndexedStack widgets are never unmounted, so
-/// subscriptions to this provider never drop; keepAlive makes the intent
-/// explicit and guards against future refactors that might move the list
-/// screen out of IndexedStack.
+/// Kept alive across IndexedStack tab switches (D-01/D-02, SC#2) so that all
+/// filter fields — month, day, sort, search, ledger, category, member — persist
+/// when the user navigates away from the List tab and returns. Under IndexedStack
+/// widgets are never unmounted, so subscriptions never drop; the keepAlive
+/// annotation makes the intent explicit and guards against future refactors.
 
 @ProviderFor(ListFilter)
 final listFilterProvider = ListFilterProvider._();
 
 /// Holds the complete filter + sort state for the transaction list view.
 ///
-/// Kept alive so all filter fields (month, day, sort, search, ledger,
-/// category, member) persist across IndexedStack tab switches (D-01/D-02).
-/// `keepAlive: true` is encoded in the annotation — not just a comment —
-/// satisfying SC#2. Under IndexedStack widgets are never unmounted, so
-/// subscriptions to this provider never drop; keepAlive makes the intent
-/// explicit and guards against future refactors that might move the list
-/// screen out of IndexedStack.
+/// Kept alive across IndexedStack tab switches (D-01/D-02, SC#2) so that all
+/// filter fields — month, day, sort, search, ledger, category, member — persist
+/// when the user navigates away from the List tab and returns. Under IndexedStack
+/// widgets are never unmounted, so subscriptions never drop; the keepAlive
+/// annotation makes the intent explicit and guards against future refactors.
 final class ListFilterProvider
     extends $NotifierProvider<ListFilter, ListFilterState> {
   /// Holds the complete filter + sort state for the transaction list view.
   ///
-  /// Kept alive so all filter fields (month, day, sort, search, ledger,
-  /// category, member) persist across IndexedStack tab switches (D-01/D-02).
-  /// `keepAlive: true` is encoded in the annotation — not just a comment —
-  /// satisfying SC#2. Under IndexedStack widgets are never unmounted, so
-  /// subscriptions to this provider never drop; keepAlive makes the intent
-  /// explicit and guards against future refactors that might move the list
-  /// screen out of IndexedStack.
+  /// Kept alive across IndexedStack tab switches (D-01/D-02, SC#2) so that all
+  /// filter fields — month, day, sort, search, ledger, category, member — persist
+  /// when the user navigates away from the List tab and returns. Under IndexedStack
+  /// widgets are never unmounted, so subscriptions never drop; the keepAlive
+  /// annotation makes the intent explicit and guards against future refactors.
   ListFilterProvider._()
     : super(
         from: null,
@@ -72,13 +66,11 @@ String _$listFilterHash() => r'cf441242129f814f1970316a54d3ebc2969bf80b';
 
 /// Holds the complete filter + sort state for the transaction list view.
 ///
-/// Kept alive so all filter fields (month, day, sort, search, ledger,
-/// category, member) persist across IndexedStack tab switches (D-01/D-02).
-/// `keepAlive: true` is encoded in the annotation — not just a comment —
-/// satisfying SC#2. Under IndexedStack widgets are never unmounted, so
-/// subscriptions to this provider never drop; keepAlive makes the intent
-/// explicit and guards against future refactors that might move the list
-/// screen out of IndexedStack.
+/// Kept alive across IndexedStack tab switches (D-01/D-02, SC#2) so that all
+/// filter fields — month, day, sort, search, ledger, category, member — persist
+/// when the user navigates away from the List tab and returns. Under IndexedStack
+/// widgets are never unmounted, so subscriptions never drop; the keepAlive
+/// annotation makes the intent explicit and guards against future refactors.
 
 abstract class _$ListFilter extends $Notifier<ListFilterState> {
   ListFilterState build();
