@@ -1698,4 +1698,75 @@ class SEn extends S {
 
   @override
   String get calLoadError => 'Unable to load data';
+
+  @override
+  String get listSortDate => 'Date';
+
+  @override
+  String get listSortEditTime => 'Edit time';
+
+  @override
+  String get listSortAmount => 'Amount';
+
+  @override
+  String get listLedgerAll => 'All';
+
+  @override
+  String get listLedgerSurvival => 'Survival';
+
+  @override
+  String get listLedgerSoul => 'Soul';
+
+  @override
+  String get listCategoryChip => 'Categories';
+
+  @override
+  String listCategoryChipN(int n) {
+    return 'Categories ($n)';
+  }
+
+  @override
+  String get listSearchHint => 'Search...';
+
+  @override
+  String get listClearAll => 'Clear';
+
+  @override
+  String get listDeleteConfirmTitle => 'Delete entry?';
+
+  @override
+  String get listDeleteConfirmBody =>
+      'This entry will be deleted and cannot be undone.';
+
+  @override
+  String get listDeleteCancelButton => 'Cancel';
+
+  @override
+  String get listDeleteConfirmButton => 'Delete';
+
+  @override
+  String get listDeletedSnackBar => 'Deleted';
+
+  @override
+  String get listCategorySheetTitle => 'Filter by category';
+
+  @override
+  String get listCategorySheetClear => 'Clear';
+
+  @override
+  String get listCategorySheetApply => 'Apply';
+
+  @override
+  String listCategorySheetApplyN(int n) {
+    return 'Apply ($n)';
+  }
+
+  @override
+  String get listEmptyMonth => 'No entries this month';
+
+  @override
+  String get listEmptyFiltered => 'No entries match your filters';
+
+  @override
+  String get listEmptyFilteredClear => 'Clear filters';
 }

@@ -2104,5 +2104,103 @@
   "@calLoadError": {
     "description": "Calendar error state: unable to load data (Phase 27 placeholder)"
   },
+  "listSortDate": "Date",
+  "@listSortDate": {
+    "description": "Sort chip label: sort by transaction date (Phase 28)"
+  },
+  "listSortEditTime": "Edit time",
+  "@listSortEditTime": {
+    "description": "Sort chip label: sort by edit/created time (Phase 28)"
+  },
+  "listSortAmount": "Amount",
+  "@listSortAmount": {
+    "description": "Sort chip label: sort by amount (Phase 28)"
+  },
+  "listLedgerAll": "All",
+  "@listLedgerAll": {
+    "description": "Ledger filter chip: show all ledger types (Phase 28)"
+  },
+  "listLedgerSurvival": "Survival",
+  "@listLedgerSurvival": {
+    "description": "Ledger filter chip: show Survival ledger only (Phase 28)"
+  },
+  "listLedgerSoul": "Soul",
+  "@listLedgerSoul": {
+    "description": "Ledger filter chip: show Soul ledger only (Phase 28)"
+  },
+  "listCategoryChip": "Categories",
+  "@listCategoryChip": {
+    "description": "Category filter chip label when no categories selected (Phase 28)"
+  },
+  "listCategoryChipN": "Categories ({n})",
+  "@listCategoryChipN": {
+    "description": "Category filter chip label when N categories selected (Phase 28)",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "listSearchHint": "Search...",
+  "@listSearchHint": {
+    "description": "Search field hint text in sort/filter bar (Phase 28)"
+  },
+  "listClearAll": "Clear",
+  "@listClearAll": {
+    "description": "Clear all filters chip label in sort/filter bar (Phase 28)"
+  },
+  "listDeleteConfirmTitle": "Delete entry?",
+  "@listDeleteConfirmTitle": {
+    "description": "Swipe-to-delete confirmation dialog title (Phase 28)"
+  },
+  "listDeleteConfirmBody": "This entry will be deleted and cannot be undone.",
+  "@listDeleteConfirmBody": {
+    "description": "Swipe-to-delete confirmation dialog body text (Phase 28)"
+  },
+  "listDeleteCancelButton": "Cancel",
+  "@listDeleteCancelButton": {
+    "description": "Cancel button in swipe-to-delete confirmation dialog (Phase 28)"
+  },
+  "listDeleteConfirmButton": "Delete",
+  "@listDeleteConfirmButton": {
+    "description": "Confirm delete button in swipe-to-delete confirmation dialog (Phase 28)"
+  },
+  "listDeletedSnackBar": "Deleted",
+  "@listDeletedSnackBar": {
+    "description": "Post-delete SnackBar message (Phase 28)"
+  },
+  "listCategorySheetTitle": "Filter by category",
+  "@listCategorySheetTitle": {
+    "description": "Category filter sheet title (Phase 28)"
+  },
+  "listCategorySheetClear": "Clear",
+  "@listCategorySheetClear": {
+    "description": "Clear all selections button in category filter sheet (Phase 28)"
+  },
+  "listCategorySheetApply": "Apply",
+  "@listCategorySheetApply": {
+    "description": "Apply button in category filter sheet when 0 categories selected (Phase 28)"
+  },
+  "listCategorySheetApplyN": "Apply ({n})",
+  "@listCategorySheetApplyN": {
+    "description": "Apply button with count in category filter sheet (Phase 28)",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "listEmptyMonth": "No entries this month",
+  "@listEmptyMonth": {
+    "description": "Empty state when no transactions in selected month (Phase 28)"
+  },
+  "listEmptyFiltered": "No entries match your filters",
+  "@listEmptyFiltered": {
+    "description": "Empty state when filters return no results (Phase 28)"
+  },
+  "listEmptyFilteredClear": "Clear filters",
+  "@listEmptyFilteredClear": {
+    "description": "Clear filters action in filtered-empty state (Phase 28)"
+  },
   "@@locale": "en"
 }

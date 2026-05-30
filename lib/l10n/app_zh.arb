@@ -2104,5 +2104,103 @@
   "@calLoadError": {
     "description": "Calendar error state: unable to load data (Phase 27 placeholder)"
   },
+  "listSortDate": "日期",
+  "@listSortDate": {
+    "description": "Sort chip label: sort by transaction date (Phase 28)"
+  },
+  "listSortEditTime": "更新时间",
+  "@listSortEditTime": {
+    "description": "Sort chip label: sort by edit/created time (Phase 28)"
+  },
+  "listSortAmount": "金额",
+  "@listSortAmount": {
+    "description": "Sort chip label: sort by amount (Phase 28)"
+  },
+  "listLedgerAll": "全部",
+  "@listLedgerAll": {
+    "description": "Ledger filter chip: show all ledger types (Phase 28)"
+  },
+  "listLedgerSurvival": "生存",
+  "@listLedgerSurvival": {
+    "description": "Ledger filter chip: show Survival ledger only (Phase 28)"
+  },
+  "listLedgerSoul": "灵魂",
+  "@listLedgerSoul": {
+    "description": "Ledger filter chip: show Soul ledger only (Phase 28)"
+  },
+  "listCategoryChip": "分类",
+  "@listCategoryChip": {
+    "description": "Category filter chip label when no categories selected (Phase 28)"
+  },
+  "listCategoryChipN": "分类 ({n})",
+  "@listCategoryChipN": {
+    "description": "Category filter chip label when N categories selected (Phase 28)",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "listSearchHint": "搜索...",
+  "@listSearchHint": {
+    "description": "Search field hint text in sort/filter bar (Phase 28)"
+  },
+  "listClearAll": "清除",
+  "@listClearAll": {
+    "description": "Clear all filters chip label in sort/filter bar (Phase 28)"
+  },
+  "listDeleteConfirmTitle": "确认删除？",
+  "@listDeleteConfirmTitle": {
+    "description": "Swipe-to-delete confirmation dialog title (Phase 28)"
+  },
+  "listDeleteConfirmBody": "此记录将被删除，无法恢复。",
+  "@listDeleteConfirmBody": {
+    "description": "Swipe-to-delete confirmation dialog body text (Phase 28)"
+  },
+  "listDeleteCancelButton": "取消",
+  "@listDeleteCancelButton": {
+    "description": "Cancel button in swipe-to-delete confirmation dialog (Phase 28)"
+  },
+  "listDeleteConfirmButton": "删除",
+  "@listDeleteConfirmButton": {
+    "description": "Confirm delete button in swipe-to-delete confirmation dialog (Phase 28)"
+  },
+  "listDeletedSnackBar": "已删除",
+  "@listDeletedSnackBar": {
+    "description": "Post-delete SnackBar message (Phase 28)"
+  },
+  "listCategorySheetTitle": "按分类筛选",
+  "@listCategorySheetTitle": {
+    "description": "Category filter sheet title (Phase 28)"
+  },
+  "listCategorySheetClear": "清除",
+  "@listCategorySheetClear": {
+    "description": "Clear all selections button in category filter sheet (Phase 28)"
+  },
+  "listCategorySheetApply": "应用",
+  "@listCategorySheetApply": {
+    "description": "Apply button in category filter sheet when 0 categories selected (Phase 28)"
+  },
+  "listCategorySheetApplyN": "应用 ({n})",
+  "@listCategorySheetApplyN": {
+    "description": "Apply button with count in category filter sheet (Phase 28)",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "listEmptyMonth": "本月暂无记录",
+  "@listEmptyMonth": {
+    "description": "Empty state when no transactions in selected month (Phase 28)"
+  },
+  "listEmptyFiltered": "没有符合条件的记录",
+  "@listEmptyFiltered": {
+    "description": "Empty state when filters return no results (Phase 28)"
+  },
+  "listEmptyFilteredClear": "清除筛选",
+  "@listEmptyFilteredClear": {
+    "description": "Clear filters action in filtered-empty state (Phase 28)"
+  },
   "@@locale": "zh"
 }

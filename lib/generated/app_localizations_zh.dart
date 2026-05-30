@@ -1661,4 +1661,74 @@ class SZh extends S {
 
   @override
   String get calLoadError => '无法加载数据';
+
+  @override
+  String get listSortDate => '日期';
+
+  @override
+  String get listSortEditTime => '更新时间';
+
+  @override
+  String get listSortAmount => '金额';
+
+  @override
+  String get listLedgerAll => '全部';
+
+  @override
+  String get listLedgerSurvival => '生存';
+
+  @override
+  String get listLedgerSoul => '灵魂';
+
+  @override
+  String get listCategoryChip => '分类';
+
+  @override
+  String listCategoryChipN(int n) {
+    return '分类 ($n)';
+  }
+
+  @override
+  String get listSearchHint => '搜索...';
+
+  @override
+  String get listClearAll => '清除';
+
+  @override
+  String get listDeleteConfirmTitle => '确认删除？';
+
+  @override
+  String get listDeleteConfirmBody => '此记录将被删除，无法恢复。';
+
+  @override
+  String get listDeleteCancelButton => '取消';
+
+  @override
+  String get listDeleteConfirmButton => '删除';
+
+  @override
+  String get listDeletedSnackBar => '已删除';
+
+  @override
+  String get listCategorySheetTitle => '按分类筛选';
+
+  @override
+  String get listCategorySheetClear => '清除';
+
+  @override
+  String get listCategorySheetApply => '应用';
+
+  @override
+  String listCategorySheetApplyN(int n) {
+    return '应用 ($n)';
+  }
+
+  @override
+  String get listEmptyMonth => '本月暂无记录';
+
+  @override
+  String get listEmptyFiltered => '没有符合条件的记录';
+
+  @override
+  String get listEmptyFilteredClear => '清除筛选';
 }

@@ -3126,6 +3126,138 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Unable to load data'**
   String get calLoadError;
+
+  /// Sort chip label: sort by transaction date (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get listSortDate;
+
+  /// Sort chip label: sort by edit/created time (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Edit time'**
+  String get listSortEditTime;
+
+  /// Sort chip label: sort by amount (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get listSortAmount;
+
+  /// Ledger filter chip: show all ledger types (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get listLedgerAll;
+
+  /// Ledger filter chip: show Survival ledger only (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Survival'**
+  String get listLedgerSurvival;
+
+  /// Ledger filter chip: show Soul ledger only (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Soul'**
+  String get listLedgerSoul;
+
+  /// Category filter chip label when no categories selected (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get listCategoryChip;
+
+  /// Category filter chip label when N categories selected (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Categories ({n})'**
+  String listCategoryChipN(int n);
+
+  /// Search field hint text in sort/filter bar (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Search...'**
+  String get listSearchHint;
+
+  /// Clear all filters chip label in sort/filter bar (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get listClearAll;
+
+  /// Swipe-to-delete confirmation dialog title (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Delete entry?'**
+  String get listDeleteConfirmTitle;
+
+  /// Swipe-to-delete confirmation dialog body text (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'This entry will be deleted and cannot be undone.'**
+  String get listDeleteConfirmBody;
+
+  /// Cancel button in swipe-to-delete confirmation dialog (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get listDeleteCancelButton;
+
+  /// Confirm delete button in swipe-to-delete confirmation dialog (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get listDeleteConfirmButton;
+
+  /// Post-delete SnackBar message (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get listDeletedSnackBar;
+
+  /// Category filter sheet title (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by category'**
+  String get listCategorySheetTitle;
+
+  /// Clear all selections button in category filter sheet (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get listCategorySheetClear;
+
+  /// Apply button in category filter sheet when 0 categories selected (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get listCategorySheetApply;
+
+  /// Apply button with count in category filter sheet (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Apply ({n})'**
+  String listCategorySheetApplyN(int n);
+
+  /// Empty state when no transactions in selected month (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'No entries this month'**
+  String get listEmptyMonth;
+
+  /// Empty state when filters return no results (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'No entries match your filters'**
+  String get listEmptyFiltered;
+
+  /// Clear filters action in filtered-empty state (Phase 28)
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get listEmptyFilteredClear;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

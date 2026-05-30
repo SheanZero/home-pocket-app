@@ -1667,4 +1667,74 @@ class SJa extends S {
 
   @override
   String get calLoadError => 'データを読み込めません';
+
+  @override
+  String get listSortDate => '日付';
+
+  @override
+  String get listSortEditTime => '更新日時';
+
+  @override
+  String get listSortAmount => '金額';
+
+  @override
+  String get listLedgerAll => 'すべて';
+
+  @override
+  String get listLedgerSurvival => '生存';
+
+  @override
+  String get listLedgerSoul => '魂';
+
+  @override
+  String get listCategoryChip => 'カテゴリ';
+
+  @override
+  String listCategoryChipN(int n) {
+    return 'カテゴリ ($n)';
+  }
+
+  @override
+  String get listSearchHint => '検索...';
+
+  @override
+  String get listClearAll => 'クリア';
+
+  @override
+  String get listDeleteConfirmTitle => '削除しますか？';
+
+  @override
+  String get listDeleteConfirmBody => 'この記録を削除します。元に戻せません。';
+
+  @override
+  String get listDeleteCancelButton => 'キャンセル';
+
+  @override
+  String get listDeleteConfirmButton => '削除';
+
+  @override
+  String get listDeletedSnackBar => '削除しました';
+
+  @override
+  String get listCategorySheetTitle => 'カテゴリで絞り込む';
+
+  @override
+  String get listCategorySheetClear => 'クリア';
+
+  @override
+  String get listCategorySheetApply => '適用';
+
+  @override
+  String listCategorySheetApplyN(int n) {
+    return '適用 ($n)';
+  }
+
+  @override
+  String get listEmptyMonth => 'この月の記録はありません';
+
+  @override
+  String get listEmptyFiltered => '条件に合う記録が見つかりません';
+
+  @override
+  String get listEmptyFilteredClear => 'フィルターをクリア';
 }

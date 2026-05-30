@@ -2104,5 +2104,103 @@
   "@calLoadError": {
     "description": "Calendar error state: unable to load data (Phase 27 placeholder)"
   },
+  "listSortDate": "日付",
+  "@listSortDate": {
+    "description": "Sort chip label: sort by transaction date (Phase 28)"
+  },
+  "listSortEditTime": "更新日時",
+  "@listSortEditTime": {
+    "description": "Sort chip label: sort by edit/created time (Phase 28)"
+  },
+  "listSortAmount": "金額",
+  "@listSortAmount": {
+    "description": "Sort chip label: sort by amount (Phase 28)"
+  },
+  "listLedgerAll": "すべて",
+  "@listLedgerAll": {
+    "description": "Ledger filter chip: show all ledger types (Phase 28)"
+  },
+  "listLedgerSurvival": "生存",
+  "@listLedgerSurvival": {
+    "description": "Ledger filter chip: show Survival ledger only (Phase 28)"
+  },
+  "listLedgerSoul": "魂",
+  "@listLedgerSoul": {
+    "description": "Ledger filter chip: show Soul ledger only (Phase 28)"
+  },
+  "listCategoryChip": "カテゴリ",
+  "@listCategoryChip": {
+    "description": "Category filter chip label when no categories selected (Phase 28)"
+  },
+  "listCategoryChipN": "カテゴリ ({n})",
+  "@listCategoryChipN": {
+    "description": "Category filter chip label when N categories selected (Phase 28)",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "listSearchHint": "検索...",
+  "@listSearchHint": {
+    "description": "Search field hint text in sort/filter bar (Phase 28)"
+  },
+  "listClearAll": "クリア",
+  "@listClearAll": {
+    "description": "Clear all filters chip label in sort/filter bar (Phase 28)"
+  },
+  "listDeleteConfirmTitle": "削除しますか？",
+  "@listDeleteConfirmTitle": {
+    "description": "Swipe-to-delete confirmation dialog title (Phase 28)"
+  },
+  "listDeleteConfirmBody": "この記録を削除します。元に戻せません。",
+  "@listDeleteConfirmBody": {
+    "description": "Swipe-to-delete confirmation dialog body text (Phase 28)"
+  },
+  "listDeleteCancelButton": "キャンセル",
+  "@listDeleteCancelButton": {
+    "description": "Cancel button in swipe-to-delete confirmation dialog (Phase 28)"
+  },
+  "listDeleteConfirmButton": "削除",
+  "@listDeleteConfirmButton": {
+    "description": "Confirm delete button in swipe-to-delete confirmation dialog (Phase 28)"
+  },
+  "listDeletedSnackBar": "削除しました",
+  "@listDeletedSnackBar": {
+    "description": "Post-delete SnackBar message (Phase 28)"
+  },
+  "listCategorySheetTitle": "カテゴリで絞り込む",
+  "@listCategorySheetTitle": {
+    "description": "Category filter sheet title (Phase 28)"
+  },
+  "listCategorySheetClear": "クリア",
+  "@listCategorySheetClear": {
+    "description": "Clear all selections button in category filter sheet (Phase 28)"
+  },
+  "listCategorySheetApply": "適用",
+  "@listCategorySheetApply": {
+    "description": "Apply button in category filter sheet when 0 categories selected (Phase 28)"
+  },
+  "listCategorySheetApplyN": "適用 ({n})",
+  "@listCategorySheetApplyN": {
+    "description": "Apply button with count in category filter sheet (Phase 28)",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "listEmptyMonth": "この月の記録はありません",
+  "@listEmptyMonth": {
+    "description": "Empty state when no transactions in selected month (Phase 28)"
+  },
+  "listEmptyFiltered": "条件に合う記録が見つかりません",
+  "@listEmptyFiltered": {
+    "description": "Empty state when filters return no results (Phase 28)"
+  },
+  "listEmptyFilteredClear": "フィルターをクリア",
+  "@listEmptyFilteredClear": {
+    "description": "Clear filters action in filtered-empty state (Phase 28)"
+  },
   "@@locale": "ja"
 }
