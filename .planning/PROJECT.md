@@ -329,4 +329,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-30 — v1.4 列表功能: Phase 28 (Transaction Tile + Sort/Filter Bar) complete; List tab fully functional — grouped-by-day rows, swipe-delete via DeleteTransactionUseCase, tap-to-edit, multi-select category filter + sort/ledger/search bar, 22 ARB keys × 3 locales. Human UAT 21/21 passed.*
+*Last updated: 2026-05-31 — v1.4 列表功能: Phase 29 (List Screen Assembly + Family) complete. List screen fully assembled with pull-to-refresh (RefreshIndicator invalidating list + calendar providers); family mode merges members' entries with per-row member attribution chips, a "Mine only" shortcut, and per-member filter chips (SQL-level narrowing, calendar totals isolated from member filter per D-06). Closes LIST-04 + FAM-01/02/03/04. Verification 14/14, human UAT 4/4 approved. Code review CR-01 (stale memberBookId → empty bookIds error state) fixed with regression test. Only Phase 30 (i18n + empty states + golden polish) remains in v1.4. Prior: Phase 28 (Transaction Tile + Sort/Filter Bar) complete.*
