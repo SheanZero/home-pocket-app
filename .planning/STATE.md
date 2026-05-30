@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: 列表功能
-status: verifying
-stopped_at: Phase 27 UI-SPEC approved (typography waiver)
-last_updated: "2026-05-30T06:44:35.628Z"
+status: ready_to_plan
+stopped_at: Phase 27 complete (4/4) — ready to discuss Phase 28
+last_updated: 2026-05-30T06:52:33.541Z
 last_activity: 2026-05-30
 progress:
   total_phases: 7
   completed_phases: 4
-  total_plans: 13
+  total_plans: 172
   completed_plans: 13
   percent: 57
 ---
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-29 — v1.4 列表功能 milestone started)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes survival spending from soul spending
-**Current focus:** Phase 27 — calendar-header-month-summary
+**Current focus:** Phase 28 — transaction tile + sort/filter bar
 
 ## Current Position
 
-Phase: 27 (calendar-header-month-summary) — EXECUTING
-Plan: 4 of 4
-Status: Phase complete — ready for verification
+Phase: 28
+Plan: Not started
+Status: Ready to plan
 Last activity: 2026-05-30
 
 **Next action:** `/gsd:plan-phase 24`
