@@ -146,7 +146,10 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('0'), findsWidgets);
-        expect(find.textContaining('目標 50'), findsOneWidget);
+        // Target reference now lives on the center value's Semantics label
+      // (homeJoyTargetSemantics), not standalone visible Text — the 2026-05
+      // ring-polish change (64168f81 / c54e06fc) moved it to the a11y layer.
+      expect(find.bySemanticsLabel(RegExp('目標 50')), findsOneWidget);
         expect(find.textContaining('0%'), findsNothing);
       },
     );
@@ -158,7 +161,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('25'), findsWidgets);
-      expect(find.textContaining('目標 50'), findsOneWidget);
+      // Target reference now lives on the center value's Semantics label
+      // (homeJoyTargetSemantics), not standalone visible Text — the 2026-05
+      // ring-polish change (64168f81 / c54e06fc) moved it to the a11y layer.
+      expect(find.bySemanticsLabel(RegExp('目標 50')), findsOneWidget);
       expect(find.textContaining('50%'), findsNothing);
     });
 
@@ -169,7 +175,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('50'), findsWidgets);
-      expect(find.textContaining('目標 50'), findsOneWidget);
+      // Target reference now lives on the center value's Semantics label
+      // (homeJoyTargetSemantics), not standalone visible Text — the 2026-05
+      // ring-polish change (64168f81 / c54e06fc) moved it to the a11y layer.
+      expect(find.bySemanticsLabel(RegExp('目標 50')), findsOneWidget);
       expect(find.textContaining('100%'), findsNothing);
     });
 
@@ -180,7 +189,10 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('80'), findsWidgets);
-        expect(find.textContaining('目標 50'), findsOneWidget);
+        // Target reference now lives on the center value's Semantics label
+      // (homeJoyTargetSemantics), not standalone visible Text — the 2026-05
+      // ring-polish change (64168f81 / c54e06fc) moved it to the a11y layer.
+      expect(find.bySemanticsLabel(RegExp('目標 50')), findsOneWidget);
         expect(find.textContaining('>100%'), findsNothing);
         expect(find.textContaining('160%'), findsNothing);
       },
