@@ -218,7 +218,7 @@ class _MonthNavBar extends StatelessWidget {
     return Row(
       children: [
         Semantics(
-          label: 'Previous month',
+          label: S.of(context).listCalNavPrev,
           child: SizedBox(
             width: 48,
             height: 48,
@@ -233,7 +233,7 @@ class _MonthNavBar extends StatelessWidget {
         ),
         Expanded(
           child: Semantics(
-            label: 'Return to current month',
+            label: S.of(context).listCalNavCurrentMonth,
             child: GestureDetector(
               onTap: onLabelTap,
               behavior: HitTestBehavior.opaque,
@@ -250,7 +250,7 @@ class _MonthNavBar extends StatelessWidget {
           ),
         ),
         Semantics(
-          label: 'Next month',
+          label: S.of(context).listCalNavNext,
           child: SizedBox(
             width: 48,
             height: 48,

@@ -67,6 +67,33 @@ void main() {
       expect(container.read(listFilterProvider).activeDayFilter, isNull);
     });
 
+    test(
+      'selectDay(null) clears day filter but preserves all other filter fields (D-05)',
+      () {
+        final container = ProviderContainer.test();
+        final notifier = container.read(listFilterProvider.notifier);
+
+        // Set all non-day filters to non-default values
+        notifier.setLedgerFilter(LedgerType.soul);
+        notifier.setCategories({'cat_food'});
+        notifier.setSearch('ランチ');
+        notifier.setMemberFilter('book_member_01');
+        notifier.selectDay(DateTime(2025, 6, 10));
+
+        // Clear ONLY the day filter
+        notifier.selectDay(null);
+        final state = container.read(listFilterProvider);
+
+        // Day filter cleared
+        expect(state.activeDayFilter, isNull);
+        // All other filters preserved (D-05 requirement)
+        expect(state.ledgerType, equals(LedgerType.soul));
+        expect(state.categoryIds, equals({'cat_food'}));
+        expect(state.searchQuery, equals('ランチ'));
+        expect(state.memberBookId, equals('book_member_01'));
+      },
+    );
+
     test('setSort updates sortConfig', () {
       final container = ProviderContainer.test();
       final notifier = container.read(listFilterProvider.notifier);
