@@ -10,5 +10,6 @@ allow:
   - ../models/category.dart                      # closes LV-008
   - ../models/merchant_category_preference.dart  # closes LV-009
   - ../models/transaction.dart                   # closes LV-010
+  - ../../../../shared/constants/sort_config.dart # shared sort enums, allow-listed per sort_config.dart header (transaction_repository.dart)
 
 inherit: true

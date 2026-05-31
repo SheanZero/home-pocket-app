@@ -5,5 +5,9 @@ allow:
   - package:json_annotation/**
   - package:meta/**
   - ../models/analytics_aggregate.dart   # closes LV-013
+  - ../models/best_joy_moment_row.dart        # analytics domain model (analytics_repository.dart)
+  - ../models/ledger_snapshot.dart            # analytics domain model (analytics_repository.dart)
+  - ../models/per_category_soul_breakdown.dart # analytics domain model (analytics_repository.dart)
+  - ../../../accounting/domain/models/entry_source.dart  # cross-feature domain model (domain→domain, no layer violation)
 
 inherit: true

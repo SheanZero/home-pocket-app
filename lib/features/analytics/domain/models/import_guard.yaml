@@ -6,5 +6,8 @@ allow:
   - package:meta/**
   - daily_expense.dart                # closes LV-011 (monthly_report.dart line 3)
   - month_comparison.dart             # closes LV-012 (monthly_report.dart line 4)
+  - metric_result.dart                # sibling domain model (family_happiness.dart, happiness_report.dart)
+  - shared_joy_insight.dart           # sibling domain model (family_happiness.dart)
+  - best_joy_moment_row.dart          # sibling domain model (happiness_report.dart)
 
 inherit: true
