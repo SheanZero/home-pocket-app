@@ -168,6 +168,8 @@ class ListScreen extends ConsumerWidget {
           final items = buildFlatList(txs, filter.sortConfig.sortDirection);
           return ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
+            // Clear the floating bottom navigation bar so the last row is not obscured.
+            padding: const EdgeInsets.only(bottom: 100),
             itemCount: items.length,
             itemBuilder: (context, i) {
               final item = items[i];

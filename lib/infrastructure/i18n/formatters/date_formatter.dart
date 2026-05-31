@@ -51,6 +51,12 @@ class DateFormatter {
     }
   }
 
+  /// Short localized weekday label (ja 月, zh 周一, en Mon) — matches the labels
+  /// table_calendar renders in its days-of-week row.
+  static String formatShortWeekday(DateTime date, Locale locale) {
+    return DateFormat.E(locale.toString()).format(date);
+  }
+
   static String formatRelative(DateTime date, Locale locale) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);

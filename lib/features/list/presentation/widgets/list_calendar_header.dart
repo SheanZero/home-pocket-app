@@ -41,6 +41,10 @@ class CalendarHeaderWidget extends ConsumerWidget {
   final String currencyCode;
   final Locale locale;
 
+  /// Weekend numeral/header colors by true weekday — explicitly specified.
+  static const Color _saturdayColor = Color(0xFF1565C0); // Material Blue 800
+  static const Color _sundayColor = Color(0xFFD32F2F); // Material Red 700
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
@@ -69,8 +73,8 @@ class CalendarHeaderWidget extends ConsumerWidget {
           calendarFormat: CalendarFormat.month,
           availableCalendarFormats: const {CalendarFormat.month: ''},
           headerVisible: false,
-          rowHeight: 52,
-          daysOfWeekHeight: 20,
+          rowHeight: 44,
+          daysOfWeekHeight: 18,
           locale: locale.toLanguageTag(),
           startingDayOfWeek: weekStartDay == WeekStartDay.monday
               ? StartingDayOfWeek.monday
@@ -84,6 +88,21 @@ class CalendarHeaderWidget extends ConsumerWidget {
                 .selectMonth(focusedDay.year, focusedDay.month);
           },
           calendarBuilders: CalendarBuilders(
+            // Color the day-of-week header labels to match the date numerals:
+            // Saturday blue, Sunday red, weekdays neutral (by true weekday).
+            dowBuilder: (context, day) {
+              final Color color = switch (day.weekday) {
+                DateTime.saturday => _saturdayColor,
+                DateTime.sunday => _sundayColor,
+                _ => AppColors.textSecondary,
+              };
+              return Center(
+                child: Text(
+                  DateFormatter.formatShortWeekday(day, locale),
+                  style: AppTextStyles.caption.copyWith(color: color),
+                ),
+              );
+            },
             defaultBuilder: (context, day, focusedDay) =>
                 _buildDayCell(day, dailyMap, filter.activeDayFilter, false),
             todayBuilder: (context, day, focusedDay) =>
@@ -115,34 +134,23 @@ class CalendarHeaderWidget extends ConsumerWidget {
   ) {
     final isSelected =
         activeDayFilter != null && isSameDay(day, activeDayFilter);
-    final isToday = isSameDay(day, DateTime.now());
     final dayTotal = isOutside ? 0 : (dailyMap[_dayKey(day)] ?? 0);
 
-    // Decoration
-    BoxDecoration? decoration;
-    if (isSelected) {
-      decoration = BoxDecoration(
-        color: AppColors.accentPrimary,
-        borderRadius: BorderRadius.circular(6),
-      );
-    } else if (isToday) {
-      decoration = BoxDecoration(
-        color: AppColors.accentPrimaryLight,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: AppColors.accentPrimaryBorder, width: 1),
-      );
-    }
+    // Decoration — only the actively selected day gets a filled chip.
+    // No "today" frame/background (removed per request).
+    final BoxDecoration? decoration = isSelected
+        ? BoxDecoration(
+            color: AppColors.accentPrimary,
+            borderRadius: BorderRadius.circular(6),
+          )
+        : null;
 
     // Weekend colors by true weekday (not column position)
-    // Saturday = blue; Sunday = red — explicitly specified requirement
-    Color baseNumeralColor;
-    if (day.weekday == DateTime.saturday) {
-      baseNumeralColor = const Color(0xFF1565C0); // Material Blue 800
-    } else if (day.weekday == DateTime.sunday) {
-      baseNumeralColor = const Color(0xFFD32F2F); // Material Red 700
-    } else {
-      baseNumeralColor = AppColors.textPrimary;
-    }
+    final Color baseNumeralColor = switch (day.weekday) {
+      DateTime.saturday => _saturdayColor,
+      DateTime.sunday => _sundayColor,
+      _ => AppColors.textPrimary,
+    };
     final numeralColor = isSelected ? AppColors.card : baseNumeralColor;
     final amountColor = isSelected ? AppColors.card : AppColors.textSecondary;
 
