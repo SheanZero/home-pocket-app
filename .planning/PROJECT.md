@@ -161,9 +161,25 @@ Home Pocket (まもる家計簿) is a local-first, privacy-focused family accoun
 
 A family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, with a dual-ledger system that distinguishes survival spending from soul spending so families can have honest money conversations.
 
-## Next Milestone: TBD
+## Current Milestone: v1.5 文案与配色统一 (Terminology & Color Unification)
 
-v1.4 shipped 2026-05-31. No active milestone — run `/gsd-new-milestone` to scope the next one. Candidate themes: combined family-calendar totals + undo-on-delete (v1.4 deferrals), MOD-005 OCR writer landing, FAMILY-V2 privacy hardening, FUTURE-QA-01 release-readiness QA, fl_chart 1.x upgrade, voice-polish/English-voice carries, documentation/tooling guardrail cleanup before any user-facing v1 release.
+**Goal:** Unify the half-migrated dual-ledger vocabulary across all three locales *and* internal code identifiers, and consolidate scattered hardcoded colors into a single semantic design-token system — a brownfield consistency refactor with no new user features.
+
+**Target features:**
+- Trilingual terminology rename (user-facing ARB values, all 3 locales) — 生存/Survival → 日常/Daily; 灵魂·魂/ソウル/Soul → 悦己/ときめき/Joy
+- Internal-identifier rename — ARB keys (`soulLedger`→`joyLedger`, `survival*`→`daily*`), `AppColors.survival`→`daily` / `soul`→`joy`, related symbols
+- Color consolidation — ~62 hardcoded `Color(0x…)` literals → centralized `AppColors` tokens
+- Ledger theme-color consistency audit — 日常 blue (`#5A9CC8`) / 悦己 green (`#47B88A`) applied uniformly
+- Semantic design-token system — primary/ledger/surface/semantic + profile dark palette as single source of truth
+
+**Locale mapping (locked):**
+
+| Concept | zh | ja | en |
+|---|---|---|---|
+| Survival ledger | 日常 | 日常 (にちじょう) | Daily |
+| Soul ledger | 悦己 | ときめき | Joy |
+
+**Key context:** Risk concentrated in the ARB-key + `AppColors` symbol rename (ripples into `.g.dart` generation and golden baselines). May warrant an ADR update if ADR-015 governs the lexical hierarchy. `ときめき` reuses the existing ja joy-index term (`ときめき指数`) for vocabulary coherence.
 
 ## Requirements
 
@@ -381,4 +397,6 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-31 after v1.4 列表功能 milestone — shipped + archived (7 phases, 29 plans, tag `v1.4`). Full kakeibo-style List tab: calendar month header, sortable/searchable/filterable transaction list, month summary, family-aware display. Audit `tech_debt` accepted (22/22 requirements, 7/7 phases, 7/7 flows); GAP-1 closed at close via quick task 260531-u34; GAP-2 dead-code + draft-Nyquist docs carried as debt. No active milestone — run `/gsd-new-milestone` to scope next.*
+*Last updated: 2026-05-31 — started milestone v1.5 文案与配色统一 (Terminology & Color Unification). Brownfield consistency refactor: unify 日常/悦己/ときめき/Daily/Joy vocabulary across ja/zh/en + internal identifiers, consolidate ~62 hardcoded colors into a semantic design-token system. Locale mapping locked; rename depth = strings + internal symbols. Defining requirements next.*
+
+*Prior: 2026-05-31 after v1.4 列表功能 milestone — shipped + archived (7 phases, 29 plans, tag `v1.4`). Full kakeibo-style List tab. Audit `tech_debt` accepted (22/22 requirements, 7/7 phases, 7/7 flows); GAP-1 closed via quick task 260531-u34; GAP-2 dead-code + draft-Nyquist docs carried as debt.*
