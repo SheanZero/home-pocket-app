@@ -102,11 +102,25 @@ void main() {
                 entry.startsWith('package:meta');
             final isIntraDomainLeaf =
                 entry.startsWith('../models/') && entry.endsWith('.dart');
+            // Cross-feature domain model (domain→domain across features, e.g.
+            // analytics repo referencing accounting's EntrySource enum). Still
+            // a pure domain dependency — no layer violation.
+            final isCrossFeatureDomainModel =
+                entry.contains('/domain/models/') && entry.endsWith('.dart');
+            // Shared cross-cutting constants (lib/shared/constants/) are
+            // explicitly designed to be importable from both data and domain
+            // layers (see sort_config.dart header) — not a layer violation.
+            final isSharedConstant =
+                entry.contains('shared/constants/') && entry.endsWith('.dart');
             expect(
-              isAnnotation || isIntraDomainLeaf,
+              isAnnotation ||
+                  isIntraDomainLeaf ||
+                  isCrossFeatureDomainModel ||
+                  isSharedConstant,
               isTrue,
               reason:
-                  'Feature $feature repositories/: allow leaf "$entry" is neither annotation nor ../models/*.dart',
+                  'Feature $feature repositories/: allow leaf "$entry" is not an annotation, '
+                  '../models/*.dart, cross-feature domain model, or shared/constants/*.dart',
             );
           }
           expect(yaml['inherit'], isTrue);
