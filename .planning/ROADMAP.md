@@ -73,7 +73,7 @@
 - [x] **Phase 27: Calendar Header + Month Summary** — `table_calendar` integration, per-day totals, month nav, day-tap filter (completed 2026-05-30)
 - [x] **Phase 28: Transaction Tile + Sort/Filter Bar** — Row display, swipe-delete, tap-to-edit, sort/filter controls (completed 2026-05-30)
 - [x] **Phase 29: List Screen Assembly + Family** — Full screen, pull-to-refresh, shadow books, member attribution + filter (completed 2026-05-30)
-- [ ] **Phase 30: i18n + Empty States + Golden Polish** — ~20–25 ARB keys × 3 locales, empty states, golden baselines
+- [x] **Phase 30: i18n + Empty States + Golden Polish** — ~20–25 ARB keys × 3 locales, empty states, golden baselines (completed 2026-05-31)
 
 ---
 
@@ -310,7 +310,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 30-05-PLAN.md — CI green gate: analyze 0 + custom_lint 0 + build_runner clean + coverage ≥70% + human verify (Wave 4)
+- [x] 30-05-PLAN.md — CI green gate: analyze 0 + custom_lint 0 + build_runner clean + coverage ≥70% + human verify (Wave 4)
 
 **UI hint**: yes
 
@@ -326,7 +326,7 @@ Plans:
 | 27. Calendar Header + Month Summary | 4/4 | Complete    | 2026-05-30 |
 | 28. Transaction Tile + Sort/Filter Bar | 6/7 | Complete    | 2026-05-30 |
 | 29. List Screen Assembly + Family | 4/4 | Complete    | 2026-05-30 |
-| 30. i18n + Empty States + Golden Polish | 4/5 | In Progress|  |
+| 30. i18n + Empty States + Golden Polish | 5/5 | Complete   | 2026-05-31 |
 
 ---
 
