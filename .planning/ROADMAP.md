@@ -297,7 +297,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 30-01-PLAN.md — ARB key edits (6 new keys + 4 updated values) in all 3 locales + flutter gen-l10n (Wave 1)
+- [x] 30-01-PLAN.md — ARB key edits (6 new keys + 4 updated values) in all 3 locales + flutter gen-l10n (Wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -326,7 +326,7 @@ Plans:
 | 27. Calendar Header + Month Summary | 4/4 | Complete    | 2026-05-30 |
 | 28. Transaction Tile + Sort/Filter Bar | 6/7 | Complete    | 2026-05-30 |
 | 29. List Screen Assembly + Family | 4/4 | Complete    | 2026-05-30 |
-| 30. i18n + Empty States + Golden Polish | 0/5 | Not started | - |
+| 30. i18n + Empty States + Golden Polish | 1/5 | In Progress|  |
 
 ---
 
