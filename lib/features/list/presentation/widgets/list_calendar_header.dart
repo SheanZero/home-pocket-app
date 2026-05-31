@@ -16,9 +16,11 @@ import '../providers/state_list_filter.dart';
 /// provider map keys and cell lookup keys match.
 DateTime _dayKey(DateTime d) => DateTime(d.year, d.month, d.day);
 
-/// Calendar header widget showing month navigation, full-month grid with
-/// per-day expense amounts, and a summary row with month total + optional
-/// day subline.
+/// Calendar header widget showing a full-month grid with per-day expense
+/// amounts and a summary row with month total + optional day subline.
+///
+/// Month navigation and the month label have moved to the [ListScreen]
+/// AppBar (Task 1). This widget owns only the calendar grid and summary row.
 ///
 /// Reads [calendarDailyTotalsProvider] for per-day totals and
 /// [listFilterProvider] for month/day selection state.
@@ -55,28 +57,6 @@ class CalendarHeaderWidget extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _MonthNavBar(
-          filter: filter,
-          locale: locale,
-          onPrevMonth: () {
-            final prev = DateTime(filter.selectedYear, filter.selectedMonth - 1);
-            ref
-                .read(listFilterProvider.notifier)
-                .selectMonth(prev.year, prev.month);
-          },
-          onNextMonth: () {
-            final next = DateTime(filter.selectedYear, filter.selectedMonth + 1);
-            ref
-                .read(listFilterProvider.notifier)
-                .selectMonth(next.year, next.month);
-          },
-          onLabelTap: () {
-            final now = DateTime.now();
-            ref
-                .read(listFilterProvider.notifier)
-                .selectMonth(now.year, now.month);
-          },
-        ),
         TableCalendar(
           firstDay: DateTime(2020, 1, 1),
           lastDay: DateTime(2030, 12, 31),
@@ -87,7 +67,7 @@ class CalendarHeaderWidget extends ConsumerWidget {
           rowHeight: 52,
           daysOfWeekHeight: 20,
           locale: locale.toLanguageTag(),
-          startingDayOfWeek: _startingDay(locale),
+          startingDayOfWeek: StartingDayOfWeek.monday,
           selectedDayPredicate: (day) => isSameDay(day, filter.activeDayFilter),
           onDaySelected: (selectedDay, focusedDay) =>
               _onDayTapped(ref, selectedDay),
@@ -119,17 +99,6 @@ class CalendarHeaderWidget extends ConsumerWidget {
     );
   }
 
-  /// Returns the locale-appropriate starting day of week.
-  StartingDayOfWeek _startingDay(Locale locale) {
-    switch (locale.languageCode) {
-      case 'en':
-        return StartingDayOfWeek.monday;
-      default:
-        // ja + zh: Sunday-start by convention
-        return StartingDayOfWeek.sunday;
-    }
-  }
-
   /// Builds a custom day cell widget.
   Widget _buildDayCell(
     DateTime day,
@@ -157,8 +126,16 @@ class CalendarHeaderWidget extends ConsumerWidget {
       );
     }
 
-    // Colors
-    final numeralColor = isSelected ? AppColors.card : AppColors.textPrimary;
+    // Weekend colors by true weekday (not column position)
+    // Saturday = blue; Sunday = black (AppColors.textPrimary)
+    Color baseNumeralColor;
+    if (day.weekday == DateTime.saturday) {
+      // Saturday calendar numeral — explicitly specified requirement
+      baseNumeralColor = const Color(0xFF1565C0); // Material Blue 800
+    } else {
+      baseNumeralColor = AppColors.textPrimary;
+    }
+    final numeralColor = isSelected ? AppColors.card : baseNumeralColor;
     final amountColor = isSelected ? AppColors.card : AppColors.textSecondary;
 
     return Opacity(
@@ -174,11 +151,15 @@ class CalendarHeaderWidget extends ConsumerWidget {
               '${day.day}',
               style: AppTextStyles.bodySmall.copyWith(color: numeralColor),
             ),
+            // Always render an amount slot so numerals align vertically across
+            // all cells in a row regardless of whether an amount is present.
             if (dayTotal > 0 && !isOutside)
               Text(
                 NumberFormatter.formatCompact(dayTotal, locale),
                 style: AppTextStyles.micro.copyWith(color: amountColor),
-              ),
+              )
+            else
+              const SizedBox(height: 14), // matches AppTextStyles.micro line height
           ],
         ),
       ),
@@ -194,77 +175,6 @@ class CalendarHeaderWidget extends ConsumerWidget {
     } else {
       notifier.selectDay(selectedDay);
     }
-  }
-}
-
-/// Month navigation bar: left chevron, centered month label, right chevron.
-class _MonthNavBar extends StatelessWidget {
-  const _MonthNavBar({
-    required this.filter,
-    required this.locale,
-    required this.onPrevMonth,
-    required this.onNextMonth,
-    required this.onLabelTap,
-  });
-
-  final dynamic filter;
-  final Locale locale;
-  final VoidCallback onPrevMonth;
-  final VoidCallback onNextMonth;
-  final VoidCallback onLabelTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Semantics(
-          label: S.of(context).listCalNavPrev,
-          child: SizedBox(
-            width: 48,
-            height: 48,
-            child: IconButton(
-              icon: const Icon(Icons.chevron_left),
-              iconSize: 24,
-              color: AppColors.textTertiary,
-              onPressed: onPrevMonth,
-              padding: EdgeInsets.zero,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Semantics(
-            label: S.of(context).listCalNavCurrentMonth,
-            child: GestureDetector(
-              onTap: onLabelTap,
-              behavior: HitTestBehavior.opaque,
-              child: Center(
-                child: Text(
-                  DateFormatter.formatMonthYear(
-                    DateTime(filter.selectedYear, filter.selectedMonth),
-                    locale,
-                  ),
-                  style: AppTextStyles.titleMedium,
-                ),
-              ),
-            ),
-          ),
-        ),
-        Semantics(
-          label: S.of(context).listCalNavNext,
-          child: SizedBox(
-            width: 48,
-            height: 48,
-            child: IconButton(
-              icon: const Icon(Icons.chevron_right),
-              iconSize: 24,
-              color: AppColors.textTertiary,
-              onPressed: onNextMonth,
-              padding: EdgeInsets.zero,
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }
 

@@ -81,9 +81,9 @@ Future<ProviderContainer> _pumpScreen(
             localizationsDelegates: S.localizationsDelegates,
             supportedLocales: S.supportedLocales,
             locale: const Locale('ja'),
-            home: const Scaffold(
-              body: ListScreen(bookId: 'book1'),
-            ),
+            // ListScreen now provides its own Scaffold + AppBar (Task 1 oqn-ui),
+            // so we use it directly as the home widget without wrapping it in Scaffold.
+            home: const ListScreen(bookId: 'book1'),
           );
         },
       ),
@@ -151,13 +151,14 @@ void main() {
 
         await _pumpScreen(tester, mockUseCase, mockRepo);
 
-        // Perform pull-to-refresh gesture on the RefreshIndicator itself.
-        // Using the RefreshIndicator as the drag start point ensures the
-        // gesture is routed to onRefresh regardless of list empty/non-empty state.
-        await tester.drag(
-          find.byType(RefreshIndicator),
-          const Offset(0, 300),
+        // Perform pull-to-refresh gesture.
+        // ListScreen now provides its own Scaffold+AppBar (Task 1 oqn-ui).
+        // Drag on the SingleChildScrollView inside RefreshIndicator to fire onRefresh.
+        final refreshScrollable = find.descendant(
+          of: find.byType(RefreshIndicator),
+          matching: find.byType(SingleChildScrollView),
         );
+        await tester.drag(refreshScrollable, const Offset(0, 300));
         await tester.pumpAndSettle();
 
         // After invalidate, provider rebuilds and re-executes use case.
@@ -189,13 +190,15 @@ void main() {
 
         await _pumpScreen(tester, mockUseCase, mockRepo);
 
-        // Perform pull-to-refresh gesture on the RefreshIndicator itself.
-        // Using the RefreshIndicator as the drag start point ensures the
-        // gesture is routed to onRefresh regardless of list empty/non-empty state.
-        await tester.drag(
-          find.byType(RefreshIndicator),
-          const Offset(0, 300),
+        // Trigger pull-to-refresh.
+        // ListScreen now provides its own Scaffold+AppBar (Task 1 oqn-ui).
+        // onRefresh is triggered by the drag gesture on the first Scrollable
+        // descendant inside the RefreshIndicator (the list's SingleChildScrollView).
+        final refreshScrollable = find.descendant(
+          of: find.byType(RefreshIndicator),
+          matching: find.byType(SingleChildScrollView),
         );
+        await tester.drag(refreshScrollable, const Offset(0, 300));
         await tester.pumpAndSettle();
 
         // After refresh, calendarDailyTotalsProvider is invalidated and

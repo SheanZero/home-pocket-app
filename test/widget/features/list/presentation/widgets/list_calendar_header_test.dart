@@ -38,34 +38,10 @@ Future<void> _pumpCalendarHeader(
 
 void main() {
   group('CalendarHeaderWidget', () {
-    testWidgets('SC#1: right chevron tap advances selectedMonth by 1',
-        (tester) async {
-      final mockRepo = _MockAnalyticsRepository();
-      when(() => mockRepo.getDailyTotals(
-            bookId: any(named: 'bookId'),
-            startDate: any(named: 'startDate'),
-            endDate: any(named: 'endDate'),
-          )).thenAnswer((_) async => []);
-
-      final container = ProviderContainer.test(overrides: [
-        analyticsRepositoryProvider.overrideWithValue(mockRepo),
-      ]);
-
-      final initialMonth = container.read(listFilterProvider).selectedMonth;
-      final initialYear = container.read(listFilterProvider).selectedYear;
-
-      await _pumpCalendarHeader(tester, container);
-
-      // Tap right chevron
-      await tester.tap(find.byIcon(Icons.chevron_right));
-      await tester.pumpAndSettle();
-
-      final filter = container.read(listFilterProvider);
-      // Compute expected next month (with year rollover for December)
-      final expected = DateTime(initialYear, initialMonth + 1);
-      expect(filter.selectedMonth, equals(expected.month));
-      expect(filter.selectedYear, equals(expected.year));
-    });
+    // SC#1: Month navigation chevrons have moved to ListScreen's AppBar.
+    // Month navigation is covered by the ListScreen-level tests in
+    // list_screen_refresh_test.dart. This widget test no longer has AppBar
+    // chevrons to tap since CalendarHeaderWidget is pumped without a ListScreen.
 
     testWidgets('SC#3: tap day selects it; tap same day again clears filter',
         (tester) async {

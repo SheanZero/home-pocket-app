@@ -8,6 +8,7 @@ import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../features/accounting/presentation/screens/transaction_edit_screen.dart';
 import '../../../../features/settings/presentation/providers/state_locale.dart';
+import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../domain/models/list_filter_state.dart';
 import '../../domain/models/tagged_transaction.dart';
@@ -39,18 +40,54 @@ class ListScreen extends ConsumerWidget {
     const currencyCode = 'JPY';
     final filter = ref.watch(listFilterProvider);
 
-    return Column(
-      children: [
-        CalendarHeaderWidget(
-          bookId: bookId,
-          currencyCode: currencyCode,
-          locale: locale,
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.chevron_left),
+          tooltip: S.of(context).listCalNavPrev,
+          onPressed: () {
+            final prev = DateTime(filter.selectedYear, filter.selectedMonth - 1);
+            ref.read(listFilterProvider.notifier).selectMonth(prev.year, prev.month);
+          },
         ),
-        ListSortFilterBar(bookId: bookId),
-        Expanded(
-          child: _buildList(context, ref, filter, locale),
+        title: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            final now = DateTime.now();
+            ref.read(listFilterProvider.notifier).selectMonth(now.year, now.month);
+          },
+          child: Text(
+            DateFormatter.formatMonthYear(
+              DateTime(filter.selectedYear, filter.selectedMonth),
+              locale,
+            ),
+          ),
         ),
-      ],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            tooltip: S.of(context).listCalNavNext,
+            onPressed: () {
+              final next = DateTime(filter.selectedYear, filter.selectedMonth + 1);
+              ref.read(listFilterProvider.notifier).selectMonth(next.year, next.month);
+            },
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          CalendarHeaderWidget(
+            bookId: bookId,
+            currencyCode: currencyCode,
+            locale: locale,
+          ),
+          ListSortFilterBar(bookId: bookId),
+          Expanded(
+            child: _buildList(context, ref, filter, locale),
+          ),
+        ],
+      ),
     );
   }
 
@@ -194,8 +231,8 @@ class ListScreen extends ConsumerWidget {
       locale,
     );
 
-    // Time-only string HH:mm (D-09: date is shown in ListDayGroupHeader)
-    final formattedTime = formatTransactionTime(transaction.timestamp, locale);
+    // L1 icon resolved from category ID
+    final l1Icon = _resolveL1IconForCategory(transaction.categoryId);
 
     // Satisfaction icon: soul transactions only (ADR-014 mapping from home_screen.dart)
     final satisfactionIcon = _satisfactionIcon(transaction);
@@ -246,7 +283,8 @@ class ListScreen extends ConsumerWidget {
       category: category,
       categoryColor: categoryColor,
       formattedAmount: formattedAmount,
-      formattedTime: formattedTime,
+      l1Icon: l1Icon,
+      merchant: transaction.merchant,
       satisfactionIcon: satisfactionIcon,
     );
 
@@ -279,5 +317,40 @@ class ListScreen extends ConsumerWidget {
     if (v <= 6) return Icons.sentiment_satisfied_alt_outlined;
     if (v <= 8) return Icons.sentiment_very_satisfied_outlined;
     return Icons.favorite_border;
+  }
+
+  /// Resolves the L1 category icon from a category ID string.
+  ///
+  /// Category IDs follow the pattern 'cat_{l1key}' (L1) or
+  /// 'cat_{l1key}_{l2key}' (L2). For L2 IDs the last segment is stripped
+  /// to get the L1 prefix, which is then looked up in the static icon map.
+  static IconData _resolveL1IconForCategory(String categoryId) {
+    const iconMap = <String, IconData>{
+      'cat_food': Icons.restaurant,
+      'cat_daily': Icons.local_mall,
+      'cat_transport': Icons.directions_bus,
+      'cat_hobbies': Icons.sports_esports,
+      'cat_clothing': Icons.checkroom,
+      'cat_social': Icons.people,
+      'cat_health': Icons.local_hospital,
+      'cat_education': Icons.school,
+      'cat_utilities': Icons.flash_on,
+      'cat_communication': Icons.phone_iphone,
+      'cat_housing': Icons.home,
+      'cat_car': Icons.directions_car,
+      'cat_tax': Icons.account_balance,
+      'cat_insurance': Icons.security,
+      'cat_special': Icons.star,
+      'cat_savings': Icons.savings,
+      'cat_other': Icons.more_horiz,
+    };
+
+    if (!categoryId.startsWith('cat_')) return Icons.category;
+
+    // Strip 'cat_' prefix, split remainder on '_', take first segment
+    final withoutPrefix = categoryId.substring(4); // remove 'cat_'
+    final parts = withoutPrefix.split('_');
+    final l1Key = 'cat_${parts.first}';
+    return iconMap[l1Key] ?? Icons.category;
   }
 }

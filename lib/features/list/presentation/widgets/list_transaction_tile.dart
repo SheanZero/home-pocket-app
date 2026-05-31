@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -13,8 +12,11 @@ import '../../domain/models/tagged_transaction.dart';
 /// and adding [onTap] for tap-to-edit navigation (ROW-01 / ROW-02).
 ///
 /// Pure data-driven: all display values computed from [TaggedTransaction] by caller.
-/// Replicates [HomeTransactionTile] layout verbatim with the addition of a time
-/// sub-label (D-09: date is in the day-group header, tile shows HH:mm only).
+///
+/// Layout:
+/// - LEFT primary row: L1 category icon + L2 category name + optional soul emoji
+/// - LEFT secondary row: ledger type label + optional merchant name
+/// - RIGHT: amount only (no time label)
 ///
 /// Navigation on tap is handled by the [onTap] callback injected by the parent,
 /// which pushes the edit screen and invalidates the list on save. Provider
@@ -33,7 +35,8 @@ class ListTransactionTile extends ConsumerWidget {
     required this.category,
     required this.categoryColor,
     required this.formattedAmount,
-    required this.formattedTime,
+    required this.l1Icon,
+    this.merchant,
     this.satisfactionIcon,
   });
 
@@ -57,14 +60,20 @@ class ListTransactionTile extends ConsumerWidget {
   final Color categoryColor;
   final String formattedAmount;
 
-  /// Time-only string (D-09: e.g. "14:32"); date is in [ListDayGroupHeader].
-  final String formattedTime;
+  /// L1 category icon resolved by parent (static icon map in list_screen.dart).
+  final IconData l1Icon;
+
+  /// Optional merchant name to display on the secondary row.
+  final String? merchant;
 
   /// Optional satisfaction icon for soul-ledger rows (ADR-014 mapping).
   final IconData? satisfactionIcon;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Secondary row text: ledger type label + optional merchant
+    final secondaryText = merchant != null ? '$tagText · $merchant' : tagText;
+
     return Dismissible(
       key: ValueKey(taggedTx.transaction.id),
       direction: DismissDirection.endToStart,
@@ -130,62 +139,42 @@ class ListTransactionTile extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
           child: Row(
             children: [
-              // Tag badge
-              Container(
-                decoration: BoxDecoration(
-                  color: tagBgColor,
-                  borderRadius: BorderRadius.circular(3),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                child: Text(
-                  tagText,
-                  style: AppTextStyles.micro.copyWith(color: tagTextColor),
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Info column: merchant + category/time row
+              // Left info column
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      taggedTx.transaction.merchant ??
-                          taggedTx.transaction.note ??
-                          '—',
-                      style: AppTextStyles.bodyMedium,
-                    ),
-                    const SizedBox(height: 2),
-                    // Category + satisfactionIcon on left, time on right (D-09)
+                    // Primary: L1 icon + L2 category name + optional soul emoji
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              category,
-                              style: AppTextStyles.caption.copyWith(
-                                color: categoryColor,
-                              ),
-                            ),
-                            if (satisfactionIcon != null) ...[
-                              const SizedBox(width: 4),
-                              Icon(
-                                satisfactionIcon,
-                                size: 14,
-                                color: AppColors.soul,
-                              ),
-                            ],
-                          ],
-                        ),
-                        Text(
-                          formattedTime,
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textSecondary,
+                        Icon(l1Icon, size: 18, color: categoryColor),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            category,
+                            style: AppTextStyles.bodyMedium,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
                         ),
+                        if (satisfactionIcon != null) ...[
+                          const SizedBox(width: 6),
+                          Icon(
+                            satisfactionIcon,
+                            size: 14,
+                            color: AppColors.soul,
+                          ),
+                        ],
                       ],
+                    ),
+                    const SizedBox(height: 2),
+                    // Secondary: ledger type label (+ merchant if present)
+                    Text(
+                      secondaryText,
+                      style: AppTextStyles.micro.copyWith(color: tagTextColor),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -227,12 +216,4 @@ class ListTransactionTile extends ConsumerWidget {
       ),
     );
   }
-}
-
-/// Formats transaction timestamp to time-only string (HH:mm) per D-09.
-///
-/// Used by parent (ListScreen) when building [ListTransactionTile.formattedTime].
-/// Uses [intl.DateFormat] directly — [DateFormatter.formatDateTime] includes date.
-String formatTransactionTime(DateTime timestamp, Locale locale) {
-  return DateFormat('HH:mm', locale.toString()).format(timestamp);
 }
