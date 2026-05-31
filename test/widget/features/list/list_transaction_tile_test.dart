@@ -69,6 +69,7 @@ Future<void> _pumpTile(
             categoryColor: const Color(0xFF5A9CC8),
             formattedAmount: '¥1,500',
             l1Icon: Icons.restaurant,
+            locale: const Locale('ja'),
             merchant: null,
           ),
         ),
@@ -80,24 +81,21 @@ Future<void> _pumpTile(
 
 void main() {
   group('ListTransactionTile', () {
-    testWidgets('ROW-01: tapping tile invokes onTap callback',
-        (tester) async {
+    testWidgets('ROW-01: tapping tile invokes onTap callback', (tester) async {
       final mockDelete = _MockDeleteTransactionUseCase();
-      when(() => mockDelete.execute(any()))
-          .thenAnswer((_) async => Result.success(null));
+      when(
+        () => mockDelete.execute(any()),
+      ).thenAnswer((_) async => Result.success(null));
 
-      final container = ProviderContainer.test(overrides: [
-        deleteTransactionUseCaseProvider.overrideWithValue(mockDelete),
-      ]);
+      final container = ProviderContainer.test(
+        overrides: [
+          deleteTransactionUseCaseProvider.overrideWithValue(mockDelete),
+        ],
+      );
 
       bool tapped = false;
       final tx = _makeTx();
-      await _pumpTile(
-        tester,
-        container,
-        tx,
-        onTap: () => tapped = true,
-      );
+      await _pumpTile(tester, container, tx, onTap: () => tapped = true);
 
       await tester.tap(find.byType(ListTransactionTile));
       // Only pump one frame — do not pumpAndSettle because that would try to
@@ -109,12 +107,15 @@ void main() {
 
     testWidgets('ROW-02: left swipe shows confirm dialog', (tester) async {
       final mockDelete = _MockDeleteTransactionUseCase();
-      when(() => mockDelete.execute(any()))
-          .thenAnswer((_) async => Result.success(null));
+      when(
+        () => mockDelete.execute(any()),
+      ).thenAnswer((_) async => Result.success(null));
 
-      final container = ProviderContainer.test(overrides: [
-        deleteTransactionUseCaseProvider.overrideWithValue(mockDelete),
-      ]);
+      final container = ProviderContainer.test(
+        overrides: [
+          deleteTransactionUseCaseProvider.overrideWithValue(mockDelete),
+        ],
+      );
 
       final tx = _makeTx();
       await _pumpTile(tester, container, tx);
@@ -137,44 +138,49 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('Phase 29: member attribution chip FAM-02', () {
-    testWidgets(
-      'FAM-02/CC-1: member chip renders when memberTag non-null',
-      (tester) async {
-        final mockDelete = _MockDeleteTransactionUseCase();
-        when(() => mockDelete.execute(any()))
-            .thenAnswer((_) async => Result.success(null));
+    testWidgets('FAM-02/CC-1: member chip renders when memberTag non-null', (
+      tester,
+    ) async {
+      final mockDelete = _MockDeleteTransactionUseCase();
+      when(
+        () => mockDelete.execute(any()),
+      ).thenAnswer((_) async => Result.success(null));
 
-        final container = ProviderContainer.test(overrides: [
+      final container = ProviderContainer.test(
+        overrides: [
           deleteTransactionUseCaseProvider.overrideWithValue(mockDelete),
-        ]);
+        ],
+      );
 
-        // Build a TaggedTransaction with memberTag set
-        final tx = TaggedTransaction(
-          transaction: _makeTx().transaction,
-          memberTag: const MemberTag(emoji: '🐻', name: '太郎'),
-        );
+      // Build a TaggedTransaction with memberTag set
+      final tx = TaggedTransaction(
+        transaction: _makeTx().transaction,
+        memberTag: const MemberTag(emoji: '🐻', name: '太郎'),
+      );
 
-        await _pumpTile(tester, container, tx);
+      await _pumpTile(tester, container, tx);
 
-        // RED: tile does not render member chip yet (Plan 03 adds it)
-        expect(
-          find.text('🐻 太郎'),
-          findsOneWidget,
-          reason: 'FAM-02/CC-1: member chip must show emoji + name',
-        );
-      },
-    );
+      // RED: tile does not render member chip yet (Plan 03 adds it)
+      expect(
+        find.text('🐻 太郎'),
+        findsOneWidget,
+        reason: 'FAM-02/CC-1: member chip must show emoji + name',
+      );
+    });
 
     testWidgets(
       'FAM-02/SC#3: member chip absent when memberTag null (own-book row)',
       (tester) async {
         final mockDelete = _MockDeleteTransactionUseCase();
-        when(() => mockDelete.execute(any()))
-            .thenAnswer((_) async => Result.success(null));
+        when(
+          () => mockDelete.execute(any()),
+        ).thenAnswer((_) async => Result.success(null));
 
-        final container = ProviderContainer.test(overrides: [
-          deleteTransactionUseCaseProvider.overrideWithValue(mockDelete),
-        ]);
+        final container = ProviderContainer.test(
+          overrides: [
+            deleteTransactionUseCaseProvider.overrideWithValue(mockDelete),
+          ],
+        );
 
         // Own-book row: memberTag is null
         final tx = _makeTx(); // _makeTx() returns memberTag: null
@@ -192,8 +198,7 @@ void main() {
           of: find.byType(ListTransactionTile),
           matching: find.byWidgetPredicate(
             (widget) =>
-                widget is ConstrainedBox &&
-                widget.constraints.maxWidth == 72,
+                widget is ConstrainedBox && widget.constraints.maxWidth == 72,
           ),
         );
         expect(
@@ -204,60 +209,56 @@ void main() {
       },
     );
 
-    testWidgets(
-      'FAM-02/CC-1: member chip text truncates at maxWidth 72',
-      (tester) async {
-        final mockDelete = _MockDeleteTransactionUseCase();
-        when(() => mockDelete.execute(any()))
-            .thenAnswer((_) async => Result.success(null));
+    testWidgets('FAM-02/CC-1: member chip text truncates at maxWidth 72', (
+      tester,
+    ) async {
+      final mockDelete = _MockDeleteTransactionUseCase();
+      when(
+        () => mockDelete.execute(any()),
+      ).thenAnswer((_) async => Result.success(null));
 
-        final container = ProviderContainer.test(overrides: [
+      final container = ProviderContainer.test(
+        overrides: [
           deleteTransactionUseCaseProvider.overrideWithValue(mockDelete),
-        ]);
+        ],
+      );
 
-        // Very long name to trigger ellipsis
-        final tx = TaggedTransaction(
-          transaction: _makeTx().transaction,
-          memberTag: const MemberTag(
-            emoji: '🐻',
-            name: 'とても長い名前のファミリーメンバー',
-          ),
-        );
+      // Very long name to trigger ellipsis
+      final tx = TaggedTransaction(
+        transaction: _makeTx().transaction,
+        memberTag: const MemberTag(emoji: '🐻', name: 'とても長い名前のファミリーメンバー'),
+      );
 
-        await _pumpTile(tester, container, tx);
+      await _pumpTile(tester, container, tx);
 
-        // RED: chip not yet rendered (Plan 03)
-        // After Plan 03: ConstrainedBox with maxWidth 72 must exist
-        final constrained = find.descendant(
-          of: find.byType(ListTransactionTile),
-          matching: find.byWidgetPredicate(
-            (widget) =>
-                widget is ConstrainedBox &&
-                widget.constraints.maxWidth == 72,
-          ),
-        );
-        expect(
-          constrained,
-          findsOneWidget,
-          reason:
-              'CC-1: member chip must be constrained to maxWidth 72',
-        );
+      // RED: chip not yet rendered (Plan 03)
+      // After Plan 03: ConstrainedBox with maxWidth 72 must exist
+      final constrained = find.descendant(
+        of: find.byType(ListTransactionTile),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is ConstrainedBox && widget.constraints.maxWidth == 72,
+        ),
+      );
+      expect(
+        constrained,
+        findsOneWidget,
+        reason: 'CC-1: member chip must be constrained to maxWidth 72',
+      );
 
-        // The Text widget inside the chip must have TextOverflow.ellipsis
-        final memberChipText = find.descendant(
-          of: constrained,
-          matching: find.byWidgetPredicate(
-            (widget) =>
-                widget is Text &&
-                widget.overflow == TextOverflow.ellipsis,
-          ),
-        );
-        expect(
-          memberChipText,
-          findsOneWidget,
-          reason: 'CC-1: member chip text must use TextOverflow.ellipsis',
-        );
-      },
-    );
+      // The Text widget inside the chip must have TextOverflow.ellipsis
+      final memberChipText = find.descendant(
+        of: constrained,
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is Text && widget.overflow == TextOverflow.ellipsis,
+        ),
+      );
+      expect(
+        memberChipText,
+        findsOneWidget,
+        reason: 'CC-1: member chip text must use TextOverflow.ellipsis',
+      );
+    });
   });
 }

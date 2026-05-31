@@ -69,6 +69,7 @@ Widget _wrap({required Locale locale}) {
             categoryColor: AppColors.survival,
             formattedAmount: '¥1,234',
             l1Icon: Icons.restaurant,
+            locale: const Locale('ja'),
             merchant: null,
             satisfactionIcon: null,
           ),

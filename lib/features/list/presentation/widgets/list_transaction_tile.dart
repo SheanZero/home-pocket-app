@@ -6,6 +6,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart'
     show deleteTransactionUseCaseProvider;
+import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../domain/models/tagged_transaction.dart';
 
 /// List tile wrapping the transaction row in a [Dismissible] for swipe-to-delete
@@ -37,8 +38,10 @@ class ListTransactionTile extends ConsumerWidget {
     required this.categoryColor,
     required this.formattedAmount,
     required this.l1Icon,
+    required this.locale,
     this.merchant,
     this.satisfactionIcon,
+    this.showDate = false,
   });
 
   final TaggedTransaction taggedTx;
@@ -67,8 +70,15 @@ class ListTransactionTile extends ConsumerWidget {
   /// Optional merchant name to display on the secondary row.
   final String? merchant;
 
+  /// Locale used for date formatting when [showDate] is true.
+  final Locale locale;
+
   /// Optional satisfaction icon for soul-ledger rows (ADR-014 mapping).
   final IconData? satisfactionIcon;
+
+  /// When true, the tile title shows "short date + L2 category" (amount-sort
+  /// flat mode). When false (default), the title shows the L2 category only.
+  final bool showDate;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -119,9 +129,7 @@ class ListTransactionTile extends ConsumerWidget {
       onDismissed: (_) {
         // CRITICAL order: ScaffoldMessenger BEFORE any provider calls (context still valid here)
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(S.of(context).listDeletedSnackBar),
-          ),
+          SnackBar(content: Text(S.of(context).listDeletedSnackBar)),
         );
         // Fire-and-forget: do NOT await inside onDismissed
         ref
@@ -151,7 +159,9 @@ class ListTransactionTile extends ConsumerWidget {
                       children: [
                         Flexible(
                           child: Text(
-                            category,
+                            showDate
+                                ? '${DateFormatter.formatShortMonthDay(taggedTx.transaction.timestamp, locale)} $category'
+                                : category,
                             style: AppTextStyles.bodyMedium,
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
@@ -183,8 +193,9 @@ class ListTransactionTile extends ConsumerWidget {
                           ),
                           child: Text(
                             tagText,
-                            style: AppTextStyles.micro
-                                .copyWith(color: tagTextColor),
+                            style: AppTextStyles.micro.copyWith(
+                              color: tagTextColor,
+                            ),
                             maxLines: 1,
                           ),
                         ),
@@ -217,12 +228,15 @@ class ListTransactionTile extends ConsumerWidget {
                       color: AppColors.sharedLight,
                       borderRadius: BorderRadius.circular(3),
                     ),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 1,
+                    ),
                     child: Text(
                       '${tag.emoji} ${tag.name}',
-                      style: AppTextStyles.micro
-                          .copyWith(color: AppColors.shared),
+                      style: AppTextStyles.micro.copyWith(
+                        color: AppColors.shared,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

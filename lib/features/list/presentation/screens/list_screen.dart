@@ -10,6 +10,7 @@ import '../../../../features/accounting/presentation/screens/transaction_edit_sc
 import '../../../../features/settings/presentation/providers/state_locale.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
+import '../../../../shared/constants/sort_config.dart';
 import '../../domain/models/list_filter_state.dart';
 import '../../domain/models/tagged_transaction.dart';
 import '../providers/state_calendar_totals.dart';
@@ -34,8 +35,7 @@ class ListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Riverpod 3: .value is the nullable accessor (not .valueOrNull, which was removed)
-    final locale =
-        ref.watch(currentLocaleProvider).value ?? const Locale('ja');
+    final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
     // Phase 29: resolve currencyCode from bookByIdProvider
     const currencyCode = 'JPY';
     final filter = ref.watch(listFilterProvider);
@@ -47,15 +47,22 @@ class ListScreen extends ConsumerWidget {
           icon: const Icon(Icons.chevron_left),
           tooltip: S.of(context).listCalNavPrev,
           onPressed: () {
-            final prev = DateTime(filter.selectedYear, filter.selectedMonth - 1);
-            ref.read(listFilterProvider.notifier).selectMonth(prev.year, prev.month);
+            final prev = DateTime(
+              filter.selectedYear,
+              filter.selectedMonth - 1,
+            );
+            ref
+                .read(listFilterProvider.notifier)
+                .selectMonth(prev.year, prev.month);
           },
         ),
         title: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () {
             final now = DateTime.now();
-            ref.read(listFilterProvider.notifier).selectMonth(now.year, now.month);
+            ref
+                .read(listFilterProvider.notifier)
+                .selectMonth(now.year, now.month);
           },
           child: Text(
             DateFormatter.formatMonthYear(
@@ -69,8 +76,13 @@ class ListScreen extends ConsumerWidget {
             icon: const Icon(Icons.chevron_right),
             tooltip: S.of(context).listCalNavNext,
             onPressed: () {
-              final next = DateTime(filter.selectedYear, filter.selectedMonth + 1);
-              ref.read(listFilterProvider.notifier).selectMonth(next.year, next.month);
+              final next = DateTime(
+                filter.selectedYear,
+                filter.selectedMonth + 1,
+              );
+              ref
+                  .read(listFilterProvider.notifier)
+                  .selectMonth(next.year, next.month);
             },
           ),
         ],
@@ -83,9 +95,7 @@ class ListScreen extends ConsumerWidget {
             locale: locale,
           ),
           ListSortFilterBar(bookId: bookId),
-          Expanded(
-            child: _buildList(context, ref, filter, locale),
-          ),
+          Expanded(child: _buildList(context, ref, filter, locale)),
         ],
       ),
     );
@@ -102,11 +112,13 @@ class ListScreen extends ConsumerWidget {
       color: AppColors.accentPrimary,
       onRefresh: () async {
         ref.invalidate(listTransactionsProvider(bookId: bookId));
-        ref.invalidate(calendarDailyTotalsProvider(
-          bookId: bookId,
-          year: filter.selectedYear,
-          month: filter.selectedMonth,
-        ));
+        ref.invalidate(
+          calendarDailyTotalsProvider(
+            bookId: bookId,
+            year: filter.selectedYear,
+            month: filter.selectedMonth,
+          ),
+        );
         // Await re-settlement so spinner dismisses honestly (Pitfall F)
         await ref
             .read(listTransactionsProvider(bookId: bookId).future)
@@ -146,7 +158,8 @@ class ListScreen extends ConsumerWidget {
         ),
         data: (txs) {
           // D-05: "other" filters = non-day filters; anyOtherFilter takes priority over day filter
-          final anyOtherFilter = filter.ledgerType != null ||
+          final anyOtherFilter =
+              filter.ledgerType != null ||
               filter.categoryIds.isNotEmpty ||
               filter.searchQuery.isNotEmpty ||
               filter.memberBookId != null;
@@ -154,8 +167,8 @@ class ListScreen extends ConsumerWidget {
           final variant = anyOtherFilter
               ? ListEmptyVariant.filtered
               : (filter.activeDayFilter != null
-                  ? ListEmptyVariant.dayEmpty
-                  : ListEmptyVariant.noData);
+                    ? ListEmptyVariant.dayEmpty
+                    : ListEmptyVariant.noData);
 
           if (txs.isEmpty) {
             // Wrap in scrollable so pull-to-refresh gesture fires when empty (Pitfall E)
@@ -167,6 +180,28 @@ class ListScreen extends ConsumerWidget {
             );
           }
 
+          // D-01 flat mode: amount sort renders a globally-sorted flat list with
+          // no day-group headers. The transactions are already sorted by the
+          // provider; skip buildFlatList entirely.
+          if (filter.sortConfig.sortField == SortField.amount) {
+            return ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 100),
+              itemCount: txs.length,
+              itemBuilder: (context, i) => _buildTile(
+                context,
+                ref,
+                txs[i],
+                filter,
+                locale,
+                txs,
+                i,
+                showDate: true,
+              ),
+            );
+          }
+
+          // Default: timestamp sort — grouped-by-day with day headers (unchanged).
           final items = buildFlatList(txs, filter.sortConfig.sortDirection);
           return ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -177,18 +212,18 @@ class ListScreen extends ConsumerWidget {
               final item = items[i];
               return switch (item) {
                 DayHeaderItem() => ListDayGroupHeader(
-                    date: item.date,
-                    locale: locale,
-                  ),
+                  date: item.date,
+                  locale: locale,
+                ),
                 TransactionRowItem() => _buildTile(
-                    context,
-                    ref,
-                    item.tx,
-                    filter,
-                    locale,
-                    items,
-                    i,
-                  ),
+                  context,
+                  ref,
+                  item.tx,
+                  filter,
+                  locale,
+                  items,
+                  i,
+                ),
               };
             },
           );
@@ -203,9 +238,12 @@ class ListScreen extends ConsumerWidget {
     TaggedTransaction tx,
     ListFilterState filter,
     Locale locale,
-    List<ListItem> items,
-    int index,
-  ) {
+    // Either List<ListItem> (timestamp mode) or List<TaggedTransaction> (amount mode).
+    // Only used for divider lookahead; length is all that matters in amount mode.
+    List<dynamic> items,
+    int index, {
+    bool showDate = false,
+  }) {
     final transaction = tx.transaction;
     final ledgerType = transaction.ledgerType;
 
@@ -213,12 +251,12 @@ class ListScreen extends ConsumerWidget {
     final tagText = ledgerType == LedgerType.survival
         ? S.of(context).listLedgerSurvival
         : S.of(context).listLedgerSoul;
-    final tagBgColor =
-        ledgerType == LedgerType.survival
-            ? AppColors.survivalLight
-            : AppColors.soulLight;
-    final tagTextColor =
-        ledgerType == LedgerType.survival ? AppColors.survival : AppColors.soul;
+    final tagBgColor = ledgerType == LedgerType.survival
+        ? AppColors.survivalLight
+        : AppColors.soulLight;
+    final tagTextColor = ledgerType == LedgerType.survival
+        ? AppColors.survival
+        : AppColors.soul;
     // Category label uses same color as ledger tag per UI-SPEC Typography table
     final categoryColor = tagTextColor;
 
@@ -288,14 +326,20 @@ class ListScreen extends ConsumerWidget {
       categoryColor: categoryColor,
       formattedAmount: formattedAmount,
       l1Icon: l1Icon,
+      locale: locale,
       merchant: transaction.merchant,
       satisfactionIcon: satisfactionIcon,
+      showDate: showDate,
     );
 
-    // Divider between consecutive tiles in the same day group (not after a row
-    // followed by a day-group header).
+    // Divider between consecutive tiles.
+    // In amount-sort flat mode (showDate == true): always show divider except
+    // after the last row. In timestamp grouped mode: show only between
+    // consecutive transaction rows (not between a row and a day-group header).
     final nextItem = index + 1 < items.length ? items[index + 1] : null;
-    final showDivider = nextItem is TransactionRowItem;
+    final showDivider = showDate
+        ? nextItem != null
+        : nextItem is TransactionRowItem;
 
     if (showDivider) {
       return Column(
