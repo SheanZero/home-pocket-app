@@ -301,7 +301,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 30-02-PLAN.md — ListEmptyState 3-state rework + list_screen.dart branching + list_calendar_header.dart Semantics + test updates + D-08 sweep (Wave 2)
+- [x] 30-02-PLAN.md — ListEmptyState 3-state rework + list_screen.dart branching + list_calendar_header.dart Semantics + test updates + D-08 sweep (Wave 2)
 
 **Wave 3** *(blocked on Wave 2, parallel pair)*
 
@@ -326,7 +326,7 @@ Plans:
 | 27. Calendar Header + Month Summary | 4/4 | Complete    | 2026-05-30 |
 | 28. Transaction Tile + Sort/Filter Bar | 6/7 | Complete    | 2026-05-30 |
 | 29. List Screen Assembly + Family | 4/4 | Complete    | 2026-05-30 |
-| 30. i18n + Empty States + Golden Polish | 1/5 | In Progress|  |
+| 30. i18n + Empty States + Golden Polish | 2/5 | In Progress|  |
 
 ---
 
