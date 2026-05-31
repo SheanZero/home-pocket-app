@@ -5,7 +5,7 @@ milestone_name: 列表功能
 status: completed
 stopped_at: Phase 30 context gathered
 last_updated: "2026-05-31T08:22:35.605Z"
-last_activity: 2026-05-31 -- Completed quick task 260531-se5: 列表按金额排序全量排序、隐藏日期、标题改为日期+类目
+last_activity: 2026-05-31 -- Completed quick task 260531-u34: fix CAL-02/CAL-04 calendar staleness after family-sync + FAB (GAP-1)
 progress:
   total_phases: 7
   completed_phases: 6
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-05-29 — v1.4 列表功能 milestone st
 Phase: 30 — COMPLETE
 Plan: 1 of 5
 Status: Phase 30 complete
-Last activity: 2026-05-31 -- Completed quick task 260531-se5: 列表按金额排序全量排序、隐藏日期、标题改为日期+类目
+Last activity: 2026-05-31 -- Completed quick task 260531-u34: fix CAL-02/CAL-04 calendar staleness after family-sync + FAB (GAP-1)
 
 **Next action:** `/gsd:verify-work 29` — verify Phase 29 (last phase of v1.4)
 
@@ -126,6 +126,7 @@ No active blockers for v1.4. Carried-forward debt (cross-milestone):
 | 260529-gbp | 修复语音灵魂支出满足度默认值 bug：voice 流程对 soul ledger 跑 `VoiceSatisfactionEstimator` 并 `updateSatisfaction` 覆盖表单默认 2；`_mapToSatisfaction` 旧 `0.3+score*0.7` 把中性语音(~0.3)映射到 ~5（中间表情）。重锚定线性映射：中性 ≈0.26→2、兴奋+正面 ≈0.56→7（`round(-2.4+16.7*score)` clamp 1..10）；估算回 2 时与默认相等，`updateSatisfaction` no-op，停在默认。同步更新 estimator 单测中性区间（calm 4-6→1-3、empty 3-5→1-4），excited/negative/range 不变。widget 测试用 fake estimator 不受影响 | 2026-05-29 | 11120ca | Pending visual check | [260529-gbp-voice-soul-satisfaction-default-2](./quick/260529-gbp-voice-soul-satisfaction-default-2/) |
 | 260531-oqn | 日历列表页 UI 6 项调整：(1) ListScreen 加 Scaffold+AppBar，月份移到标题（中心，可点击跳当月）+ 左右 chevron 翻月，删除 `_MonthNavBar`，解决「头部无月份」+「顶太高」；(2) 无金额日期格加 `SizedBox(height:14)` 占位，数字垂直对齐；(3) 新增 `WeekStartDay` 设置（默认周一，SharedPreferences 持久化，外观设置页选择器，3 ARB key）；(4) 周六数字蓝色 `0xFF1565C0`、周日黑色，按 `day.weekday` 判定不随列；(5) `SortField` 删 `updatedAt` 仅留 timestamp+amount，默认 timestamp-desc，同步 DAO/UI/默认值；(6) 列表项重构：L1 图标+L2 类目名（灵魂加满足度 emoji）主标题，账本类型+店名副标题，金额右侧，去时间。build_runner+gen-l10n+analyze 0 issue，2238/2238 测试通过，goldens re-baseline | 2026-05-31 | 002ac6b3 | Pending visual check | [260531-oqn-ui](./quick/260531-oqn-ui/) |
 | 260531-se5 | 按金额排序时全量排序、隐藏日期分组、标题改为「日期+二级类目」 | 2026-05-31 | ae85734e | Done — analyze 0 new issues, 2238/2238 tests pass; manual visual check pending | [260531-se5](./quick/260531-se5-amount-sort-flat-date-title/) |
+| 260531-u34 | fix CAL-02/CAL-04 calendar staleness after family-sync + FAB (GAP-1) — invalidate `calendarDailyTotalsProvider(current month)` at the two shell sites (post-sync, post-FAB) alongside the existing `listTransactionsProvider` invalidation; calendar per-day totals + month summary now refresh without pull-to-refresh | 2026-05-31 | 291a9ff4 | Done — analyze 0 issues; closes milestone-audit GAP-1; manual visual check pending | [260531-u34](./quick/260531-u34-fix-cal-02-cal-04-calendar-staleness-aft/) |
 
 ## Deferred Items
 
