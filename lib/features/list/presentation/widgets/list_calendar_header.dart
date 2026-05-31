@@ -134,11 +134,12 @@ class CalendarHeaderWidget extends ConsumerWidget {
     }
 
     // Weekend colors by true weekday (not column position)
-    // Saturday = blue; Sunday = black (AppColors.textPrimary)
+    // Saturday = blue; Sunday = red — explicitly specified requirement
     Color baseNumeralColor;
     if (day.weekday == DateTime.saturday) {
-      // Saturday calendar numeral — explicitly specified requirement
       baseNumeralColor = const Color(0xFF1565C0); // Material Blue 800
+    } else if (day.weekday == DateTime.sunday) {
+      baseNumeralColor = const Color(0xFFD32F2F); // Material Red 700
     } else {
       baseNumeralColor = AppColors.textPrimary;
     }

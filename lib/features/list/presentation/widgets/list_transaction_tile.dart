@@ -14,8 +14,9 @@ import '../../domain/models/tagged_transaction.dart';
 /// Pure data-driven: all display values computed from [TaggedTransaction] by caller.
 ///
 /// Layout:
-/// - LEFT primary row: L1 category icon + L2 category name + optional soul emoji
-/// - LEFT secondary row: ledger type label + optional merchant name
+/// - LEADING: enlarged, vertically-centered L1 category icon
+/// - LEFT primary row: L2 category name + optional soul emoji
+/// - LEFT secondary row: ledger type badge (background pill) + optional merchant
 /// - RIGHT: amount only (no time label)
 ///
 /// Navigation on tap is handled by the [onTap] callback injected by the parent,
@@ -71,9 +72,6 @@ class ListTransactionTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Secondary row text: ledger type label + optional merchant
-    final secondaryText = merchant != null ? '$tagText · $merchant' : tagText;
-
     return Dismissible(
       key: ValueKey(taggedTx.transaction.id),
       direction: DismissDirection.endToStart,
@@ -139,17 +137,18 @@ class ListTransactionTile extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
           child: Row(
             children: [
-              // Left info column
+              // Leading: enlarged, vertically-centered L1 category icon
+              Icon(l1Icon, size: 28, color: categoryColor),
+              const SizedBox(width: 12),
+              // Left info column (title + ledger badge aligned to title)
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Primary: L1 icon + L2 category name + optional soul emoji
+                    // Primary: L2 category name + optional soul emoji
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(l1Icon, size: 18, color: categoryColor),
-                        const SizedBox(width: 6),
                         Flexible(
                           child: Text(
                             category,
@@ -168,13 +167,41 @@ class ListTransactionTile extends ConsumerWidget {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 2),
-                    // Secondary: ledger type label (+ merchant if present)
-                    Text(
-                      secondaryText,
-                      style: AppTextStyles.micro.copyWith(color: tagTextColor),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    const SizedBox(height: 3),
+                    // Secondary: ledger badge (background pill) + optional merchant
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: tagBgColor,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 1,
+                          ),
+                          child: Text(
+                            tagText,
+                            style: AppTextStyles.micro
+                                .copyWith(color: tagTextColor),
+                            maxLines: 1,
+                          ),
+                        ),
+                        if (merchant != null) ...[
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              merchant!,
+                              style: AppTextStyles.micro.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ),
