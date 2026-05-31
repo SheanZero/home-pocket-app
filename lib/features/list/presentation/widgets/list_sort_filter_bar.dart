@@ -52,8 +52,6 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
     switch (field) {
       case SortField.timestamp:
         return l10n.listSortDate;
-      case SortField.updatedAt:
-        return l10n.listSortEditTime;
       case SortField.amount:
         return l10n.listSortAmount;
     }

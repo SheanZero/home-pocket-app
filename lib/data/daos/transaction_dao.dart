@@ -210,7 +210,6 @@ class TransactionDao {
         sortDirection == SortDirection.asc ? 'ASC' : 'DESC';
     final col = switch (sortField) {
       SortField.timestamp => 'timestamp',
-      SortField.updatedAt => 'COALESCE(updated_at, created_at)',
       SortField.amount => 'amount',
     };
     return '$col $direction, id DESC';

@@ -247,7 +247,7 @@ extension ListSortConfigPatterns on ListSortConfig {
 
 class _ListSortConfig implements ListSortConfig {
   const _ListSortConfig({
-    this.sortField = SortField.updatedAt,
+    this.sortField = SortField.timestamp,
     this.sortDirection = SortDirection.desc,
   });
 

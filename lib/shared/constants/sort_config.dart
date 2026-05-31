@@ -15,11 +15,9 @@
 ///
 /// Values map to Drift table columns in `TransactionDao`:
 /// - [timestamp] → `transactions.timestamp` (transaction date entered by user)
-/// - [updatedAt] → `transactions.updated_at` (last edit time)
 /// - [amount]    → `transactions.amount` (absolute value, descending for large first)
 enum SortField {
   timestamp,
-  updatedAt,
   amount,
 }
 
