@@ -83,3 +83,15 @@ commit `8999a77e`：
    - 店名改为 badge 右侧的弱化文字（`textSecondary`）。
 - 验证：`flutter analyze` 0 问题；list widget + golden 共 69 测试通过；`list_calendar_header` / `list_transaction_tile` goldens 三语言 re-baseline。
 - 仍待真机视觉确认。
+
+---
+
+## 追加修复 2（2026-05-31 19:55，真机反馈后）
+
+commit `b5615c72`：
+
+1. **去掉当天（31 日）外框 + 背景**：移除 `isToday` 装饰分支，仅选中日保留填充 chip。
+2. **日历更紧凑**：`rowHeight` 52→44、`daysOfWeekHeight` 20→18，减少周间距。
+3. **星期表头配色与日期一致**：周六蓝、周日红（按真实 `weekday`），用 `dowBuilder` + 新增 `DateFormatter.formatShortWeekday`；周末色提为共享常量 `_saturdayColor`/`_sundayColor`，日期格与表头复用。
+4. **最后一条被底部菜单挡住**：`ListView` 加 `padding: bottom 100`，让末行避开悬浮底栏。
+- 验证：`flutter analyze` 0 问题；list widget + golden 共 69 测试通过；`list_calendar_header` goldens 三语言 re-baseline。仍待真机视觉确认。
