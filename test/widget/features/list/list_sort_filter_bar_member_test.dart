@@ -95,7 +95,7 @@ void main() {
         await _pumpBar(tester, isGroupMode: true);
 
         // RED until Mine-only chip is added in list_sort_filter_bar.dart (Plan 03)
-        expect(find.text('Mine only'), findsOneWidget);
+        expect(find.text('自分のみ'), findsOneWidget);
       },
     );
 
@@ -105,7 +105,7 @@ void main() {
         await _pumpBar(tester, isGroupMode: false);
 
         // In solo mode, the family segment must not appear.
-        expect(find.text('Mine only'), findsNothing);
+        expect(find.text('自分のみ'), findsNothing);
       },
     );
 
@@ -165,7 +165,7 @@ void main() {
         );
 
         // RED: chip not present yet
-        await tester.tap(find.text('Mine only'));
+        await tester.tap(find.text('自分のみ'));
         await tester.pumpAndSettle();
 
         // The bar is constructed with bookId: 'book1' — Mine-only uses the own bookId
@@ -219,7 +219,7 @@ void main() {
         await _pumpBar(tester, isGroupMode: false, shadows: shadows);
 
         expect(find.text('🐻 太郎'), findsNothing);
-        expect(find.text('Mine only'), findsNothing);
+        expect(find.text('自分のみ'), findsNothing);
       },
     );
   });
