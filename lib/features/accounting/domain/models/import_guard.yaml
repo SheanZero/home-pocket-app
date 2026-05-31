@@ -7,6 +7,5 @@ allow:
   - transaction.dart                 # closes LV-001 (category_ledger_config.dart), LV-003 (transaction_sync_mapper.dart), LV-004 (voice_parse_result.dart)
   - category.dart                    # closes LV-002 (category_reorder_state.dart)
   - entry_source.dart                # sibling domain enum (transaction.dart, transaction_details_form_config.dart, transaction_sync_mapper.dart)
-  - package:flutter/widgets.dart     # FocusNode form-wiring only (transaction_details_form_config.dart, Phase 19 P19-W3) — not Widgets
 
 inherit: true

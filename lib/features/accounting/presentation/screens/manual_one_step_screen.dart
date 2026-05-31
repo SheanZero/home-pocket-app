@@ -403,13 +403,13 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
                       initialSatisfaction: widget.initialSatisfaction,
                       voiceKeyword: widget.voiceKeyword,
                       entrySource: widget.entrySource,
-                      // P19-W3: per-host FocusNodes so _handleFocusChange fires.
-                      merchantFocusNode: _merchantFocus,
-                      noteFocusNode: _noteFocus,
-                      // Item 4 (260526-j98): reclaim amount focus after date /
-                      // category picker dismisses so SmartKeyboard reappears.
-                      onPickerDismissed: _restoreKeypadFocus,
                     ),
+                    // P19-W3: per-host FocusNodes so _handleFocusChange fires.
+                    merchantFocusNode: _merchantFocus,
+                    noteFocusNode: _noteFocus,
+                    // Item 4 (260526-j98): reclaim amount focus after date /
+                    // category picker dismisses so SmartKeyboard reappears.
+                    onPickerDismissed: _restoreKeypadFocus,
                   ),
                 ),
               ),

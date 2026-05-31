@@ -187,9 +187,18 @@ Widget _buildForm(
   TransactionDetailsFormConfig config, {
   Key? formKey,
   List<Override> overrides = const [],
+  FocusNode? merchantFocusNode,
+  FocusNode? noteFocusNode,
 }) {
   return createLocalizedWidget(
-    Scaffold(body: TransactionDetailsForm(key: formKey, config: config)),
+    Scaffold(
+      body: TransactionDetailsForm(
+        key: formKey,
+        config: config,
+        merchantFocusNode: merchantFocusNode,
+        noteFocusNode: noteFocusNode,
+      ),
+    ),
     locale: const Locale('en'),
     overrides: overrides,
   );
@@ -432,7 +441,7 @@ void main() {
 
   // ── TEST 6: FocusNode plumbing from TransactionDetailsFormConfig.$new (P19-W3)
   testWidgets(
-    r'TEST 6: FocusNode from $new config.merchantFocusNode is wired to merchant TextField',
+    r'TEST 6: FocusNode from TransactionDetailsForm.merchantFocusNode is wired to merchant TextField',
     (tester) async {
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1;
@@ -449,10 +458,10 @@ void main() {
           TransactionDetailsFormConfig.$new(
             bookId: 'book-1',
             entrySource: EntrySource.manual,
-            merchantFocusNode: merchantFn,
-            noteFocusNode: noteFn,
           ),
           overrides: _overrides(),
+          merchantFocusNode: merchantFn,
+          noteFocusNode: noteFn,
         ),
       );
       await tester.pumpAndSettle();
@@ -465,7 +474,7 @@ void main() {
       expect(
         merchantFn.hasFocus,
         isTrue,
-        reason: 'merchantFocusNode from config must be wired to merchant TextField',
+        reason: 'merchantFocusNode from the widget must be wired to merchant TextField',
       );
 
       // Request focus on the note FocusNode
@@ -475,7 +484,7 @@ void main() {
       expect(
         noteFn.hasFocus,
         isTrue,
-        reason: 'noteFocusNode from config must be wired to note TextField',
+        reason: 'noteFocusNode from the widget must be wired to note TextField',
       );
     },
   );

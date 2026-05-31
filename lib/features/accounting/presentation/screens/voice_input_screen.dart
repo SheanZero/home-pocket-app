@@ -625,9 +625,9 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
                   // _formKey.currentState!.updateXxx on long-press release.
                   voiceKeyword: voiceKeyword,
                   entrySource: EntrySource.voice,
-                  merchantFocusNode: _merchantFocus,
-                  noteFocusNode: _noteFocus,
                 ),
+                merchantFocusNode: _merchantFocus,
+                noteFocusNode: _noteFocus,
               ),
             ),
           ),

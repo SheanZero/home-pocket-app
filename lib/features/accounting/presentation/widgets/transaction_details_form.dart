@@ -43,9 +43,27 @@ import '../widgets/satisfaction_emoji_picker.dart';
 /// [GlobalKey] of [TransactionDetailsFormState] and handles post-save
 /// navigation.
 class TransactionDetailsForm extends ConsumerStatefulWidget {
-  const TransactionDetailsForm({super.key, required this.config});
+  const TransactionDetailsForm({
+    super.key,
+    required this.config,
+    this.merchantFocusNode,
+    this.noteFocusNode,
+    this.onPickerDismissed,
+  });
 
   final TransactionDetailsFormConfig config;
+
+  /// Presentation-layer form wiring (moved off the domain config to keep
+  /// [TransactionDetailsFormConfig] free of package:flutter — CRIT-04).
+  /// Only new-entry hosts supply these; null in edit / voice / OCR hosts,
+  /// in which case the TextFields fall back to their own internal FocusNode.
+  final FocusNode? merchantFocusNode;
+  final FocusNode? noteFocusNode;
+
+  /// Fired after a date/category picker dismisses (pick OR cancel).
+  /// ManualOneStepScreen wires this to reclaim amount focus so the
+  /// SmartKeyboard reappears. Null in hosts that don't render the keypad.
+  final VoidCallback? onPickerDismissed;
 
   @override
   ConsumerState<TransactionDetailsForm> createState() =>
@@ -96,9 +114,6 @@ class TransactionDetailsFormState
             initialDate,
             entrySource,
             voiceKeyword,
-            merchantFocusNode,
-            noteFocusNode,
-            onPickerDismissed,
           ) {
             _amount = initialAmount ?? 0;
             _category = initialCategory;
@@ -294,24 +309,7 @@ class TransactionDetailsFormState
   /// focus so the SmartKeyboard reappears.
   void _notifyPickerDismissed() {
     if (!mounted) return;
-    widget.config.maybeWhen(
-      $new:
-          (
-            bookId,
-            initialAmount,
-            initialCategory,
-            initialParentCategory,
-            initialMerchant,
-            initialSatisfaction,
-            initialDate,
-            entrySource,
-            voiceKeyword,
-            merchantFocusNode,
-            noteFocusNode,
-            onPickerDismissed,
-          ) => onPickerDismissed?.call(),
-      orElse: () {},
-    );
+    widget.onPickerDismissed?.call();
   }
 
   Future<void> _editCategory() async {
@@ -361,9 +359,6 @@ class TransactionDetailsFormState
             nInitialDate,
             nEntrySource,
             voiceKeyword,
-            p10,
-            p11,
-            p12,
           ) async {
             if (voiceKeyword != null &&
                 voiceKeyword.isNotEmpty &&
@@ -440,9 +435,6 @@ class TransactionDetailsFormState
               newInitialDate,
               entrySource,
               voiceKeyword,
-              p10,
-              p11,
-              p12,
             ) async {
               final result = await ref
                   .read(createTransactionUseCaseProvider)
@@ -587,24 +579,7 @@ class TransactionDetailsFormState
             child: TextField(
               key: const ValueKey('merchant-textfield'),
               controller: _storeController,
-              focusNode: widget.config.maybeWhen(
-                $new:
-                    (
-                      bookId,
-                      initialAmount,
-                      initialCategory,
-                      initialParentCategory,
-                      initialMerchant,
-                      initialSatisfaction,
-                      initialDate,
-                      entrySource,
-                      voiceKeyword,
-                      merchantFocusNode,
-                      noteFocusNode,
-                      onPickerDismissed,
-                    ) => merchantFocusNode,
-                orElse: () => null,
-              ),
+              focusNode: widget.merchantFocusNode,
               // 260526-r8y Item 3: shared TapRegion group with KeyboardToolbar
               // so taps on the toolbar are treated as inside-region — onTapOutside
               // does NOT fire, the toolbar stays mounted, and save fires.
@@ -678,24 +653,7 @@ class TransactionDetailsFormState
             child: TextField(
               key: const ValueKey('note-textfield'),
               controller: _memoController,
-              focusNode: widget.config.maybeWhen(
-                $new:
-                    (
-                      bookId,
-                      initialAmount,
-                      initialCategory,
-                      initialParentCategory,
-                      initialMerchant,
-                      initialSatisfaction,
-                      initialDate,
-                      entrySource,
-                      voiceKeyword,
-                      merchantFocusNode,
-                      noteFocusNode,
-                      onPickerDismissed,
-                    ) => noteFocusNode,
-                orElse: () => null,
-              ),
+              focusNode: widget.noteFocusNode,
               // 260526-r8y Item 3: shared TapRegion group with KeyboardToolbar.
               groupId: kKeyboardToolbarTapRegionGroup,
               maxLines: null,

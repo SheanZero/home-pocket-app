@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'category.dart';
@@ -34,17 +33,9 @@ sealed class TransactionDetailsFormConfig with _$TransactionDetailsFormConfig {
     required EntrySource entrySource,
     // Voice-correction keyword — present only in .new mode (D-09).
     String? voiceKeyword,
-    // Phase 19 P19-W3: optional FocusNodes wired into the form's TextFields.
-    // Only on $new — edit hosts use modal sheets, no persistent-keypad focus.
-    // When null, TextFields default to their own internal FocusNode (backward
-    // compatible with all existing Phase-18 callers).
-    FocusNode? merchantFocusNode,
-    FocusNode? noteFocusNode,
-    // Item 4 (260526-j98): host-supplied callback fired after the form's date
-    // picker or category picker dismisses (pick OR cancel). ManualOneStepScreen
-    // wires this to reclaim amount focus so the SmartKeyboard reappears.
-    // Null in voice / OCR-review hosts (they don't render the SmartKeyboard).
-    VoidCallback? onPickerDismissed,
+    // NOTE: Form-wiring (FocusNodes, picker-dismiss callback) is presentation
+    // state and lives on the TransactionDetailsForm widget, NOT here — the
+    // domain layer must stay free of package:flutter (CRIT-04 domain purity).
   }) = NewEntryConfig;
 
   /// Edit-existing mode. The full [Transaction] seed supplies all field values.
