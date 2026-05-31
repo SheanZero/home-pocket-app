@@ -3250,13 +3250,13 @@ abstract class S {
   /// Empty state when no transactions in selected month (Phase 28)
   ///
   /// In en, this message translates to:
-  /// **'No entries this month'**
+  /// **'No records yet this month'**
   String get listEmptyMonth;
 
   /// Empty state when filters return no results (Phase 28)
   ///
   /// In en, this message translates to:
-  /// **'No entries match your filters'**
+  /// **'No records match your filters'**
   String get listEmptyFiltered;
 
   /// Clear filters action in filtered-empty state (Phase 28)
@@ -3264,6 +3264,42 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Clear filters'**
   String get listEmptyFilteredClear;
+
+  /// Empty state when day filter active and no transactions on that day (Phase 30)
+  ///
+  /// In en, this message translates to:
+  /// **'No records on this day'**
+  String get listEmptyDay;
+
+  /// Clear day filter action in day-empty state (Phase 30)
+  ///
+  /// In en, this message translates to:
+  /// **'Show full month'**
+  String get listEmptyDayClear;
+
+  /// Error state when list data fails to load (Phase 30)
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load data'**
+  String get listLoadError;
+
+  /// Semantics label for previous month button in calendar header (Phase 30)
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get listCalNavPrev;
+
+  /// Semantics label for next month button in calendar header (Phase 30)
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get listCalNavNext;
+
+  /// Semantics label for return to current month gesture in calendar header (Phase 30)
+  ///
+  /// In en, this message translates to:
+  /// **'Return to current month'**
+  String get listCalNavCurrentMonth;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

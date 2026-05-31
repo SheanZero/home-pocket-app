@@ -1701,7 +1701,7 @@ class SJa extends S {
   String get listClearAll => 'クリア';
 
   @override
-  String get listMineOnly => 'Mine only';
+  String get listMineOnly => '自分のみ';
 
   @override
   String get listDeleteConfirmTitle => '削除しますか？';
@@ -1733,11 +1733,29 @@ class SJa extends S {
   }
 
   @override
-  String get listEmptyMonth => 'この月の記録はありません';
+  String get listEmptyMonth => 'この月にはまだ記録がありません';
 
   @override
   String get listEmptyFiltered => '条件に合う記録が見つかりません';
 
   @override
   String get listEmptyFilteredClear => 'フィルターをクリア';
+
+  @override
+  String get listEmptyDay => 'この日の記録はありません';
+
+  @override
+  String get listEmptyDayClear => '月全体を表示';
+
+  @override
+  String get listLoadError => 'データを読み込めません';
+
+  @override
+  String get listCalNavPrev => '前の月';
+
+  @override
+  String get listCalNavNext => '次の月';
+
+  @override
+  String get listCalNavCurrentMonth => '今月に戻る';
 }

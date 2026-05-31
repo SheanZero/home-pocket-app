@@ -1765,11 +1765,29 @@ class SEn extends S {
   }
 
   @override
-  String get listEmptyMonth => 'No entries this month';
+  String get listEmptyMonth => 'No records yet this month';
 
   @override
-  String get listEmptyFiltered => 'No entries match your filters';
+  String get listEmptyFiltered => 'No records match your filters';
 
   @override
   String get listEmptyFilteredClear => 'Clear filters';
+
+  @override
+  String get listEmptyDay => 'No records on this day';
+
+  @override
+  String get listEmptyDayClear => 'Show full month';
+
+  @override
+  String get listLoadError => 'Unable to load data';
+
+  @override
+  String get listCalNavPrev => 'Previous month';
+
+  @override
+  String get listCalNavNext => 'Next month';
+
+  @override
+  String get listCalNavCurrentMonth => 'Return to current month';
 }

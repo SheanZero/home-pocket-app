@@ -1695,7 +1695,7 @@ class SZh extends S {
   String get listClearAll => '清除';
 
   @override
-  String get listMineOnly => 'Mine only';
+  String get listMineOnly => '仅自己';
 
   @override
   String get listDeleteConfirmTitle => '确认删除？';
@@ -1727,11 +1727,29 @@ class SZh extends S {
   }
 
   @override
-  String get listEmptyMonth => '本月暂无记录';
+  String get listEmptyMonth => '本月还没有记录';
 
   @override
   String get listEmptyFiltered => '没有符合条件的记录';
 
   @override
   String get listEmptyFilteredClear => '清除筛选';
+
+  @override
+  String get listEmptyDay => '这一天没有记录';
+
+  @override
+  String get listEmptyDayClear => '显示整月';
+
+  @override
+  String get listLoadError => '无法加载数据';
+
+  @override
+  String get listCalNavPrev => '上个月';
+
+  @override
+  String get listCalNavNext => '下个月';
+
+  @override
+  String get listCalNavCurrentMonth => '返回本月';
 }
