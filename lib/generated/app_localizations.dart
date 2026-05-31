@@ -645,6 +645,24 @@ abstract class S {
   /// **'Dark'**
   String get themeDark;
 
+  /// Week start day setting label
+  ///
+  /// In en, this message translates to:
+  /// **'Week starts on'**
+  String get settingsWeekStart;
+
+  /// Monday option for week start
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get settingsWeekStartMonday;
+
+  /// Sunday option for week start
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get settingsWeekStartSunday;
+
   /// Security section title
   ///
   /// In en, this message translates to:

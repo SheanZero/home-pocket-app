@@ -19,6 +19,7 @@ mixin _$AppSettings {
   bool get biometricLockEnabled;
   String get voiceLanguage;
   int? get monthlyJoyTarget;
+  WeekStartDay get weekStartDay;
 
   /// Create a copy of AppSettings
   /// with the given fields replaced by the non-null parameter values.
@@ -46,7 +47,9 @@ mixin _$AppSettings {
             (identical(other.voiceLanguage, voiceLanguage) ||
                 other.voiceLanguage == voiceLanguage) &&
             (identical(other.monthlyJoyTarget, monthlyJoyTarget) ||
-                other.monthlyJoyTarget == monthlyJoyTarget));
+                other.monthlyJoyTarget == monthlyJoyTarget) &&
+            (identical(other.weekStartDay, weekStartDay) ||
+                other.weekStartDay == weekStartDay));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -59,11 +62,12 @@ mixin _$AppSettings {
     biometricLockEnabled,
     voiceLanguage,
     monthlyJoyTarget,
+    weekStartDay,
   );
 
   @override
   String toString() {
-    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled, voiceLanguage: $voiceLanguage, monthlyJoyTarget: $monthlyJoyTarget)';
+    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled, voiceLanguage: $voiceLanguage, monthlyJoyTarget: $monthlyJoyTarget, weekStartDay: $weekStartDay)';
   }
 }
 
@@ -81,6 +85,7 @@ abstract mixin class $AppSettingsCopyWith<$Res> {
     bool biometricLockEnabled,
     String voiceLanguage,
     int? monthlyJoyTarget,
+    WeekStartDay weekStartDay,
   });
 }
 
@@ -102,6 +107,7 @@ class _$AppSettingsCopyWithImpl<$Res> implements $AppSettingsCopyWith<$Res> {
     Object? biometricLockEnabled = null,
     Object? voiceLanguage = null,
     Object? monthlyJoyTarget = freezed,
+    Object? weekStartDay = null,
   }) {
     return _then(
       _self.copyWith(
@@ -129,6 +135,10 @@ class _$AppSettingsCopyWithImpl<$Res> implements $AppSettingsCopyWith<$Res> {
             ? _self.monthlyJoyTarget
             : monthlyJoyTarget // ignore: cast_nullable_to_non_nullable
                   as int?,
+        weekStartDay: null == weekStartDay
+            ? _self.weekStartDay
+            : weekStartDay // ignore: cast_nullable_to_non_nullable
+                  as WeekStartDay,
       ),
     );
   }
@@ -234,6 +244,7 @@ extension AppSettingsPatterns on AppSettings {
       bool biometricLockEnabled,
       String voiceLanguage,
       int? monthlyJoyTarget,
+      WeekStartDay weekStartDay,
     )?
     $default, {
     required TResult orElse(),
@@ -248,6 +259,7 @@ extension AppSettingsPatterns on AppSettings {
           _that.biometricLockEnabled,
           _that.voiceLanguage,
           _that.monthlyJoyTarget,
+          _that.weekStartDay,
         );
       case _:
         return orElse();
@@ -276,6 +288,7 @@ extension AppSettingsPatterns on AppSettings {
       bool biometricLockEnabled,
       String voiceLanguage,
       int? monthlyJoyTarget,
+      WeekStartDay weekStartDay,
     )
     $default,
   ) {
@@ -289,6 +302,7 @@ extension AppSettingsPatterns on AppSettings {
           _that.biometricLockEnabled,
           _that.voiceLanguage,
           _that.monthlyJoyTarget,
+          _that.weekStartDay,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -316,6 +330,7 @@ extension AppSettingsPatterns on AppSettings {
       bool biometricLockEnabled,
       String voiceLanguage,
       int? monthlyJoyTarget,
+      WeekStartDay weekStartDay,
     )?
     $default,
   ) {
@@ -329,6 +344,7 @@ extension AppSettingsPatterns on AppSettings {
           _that.biometricLockEnabled,
           _that.voiceLanguage,
           _that.monthlyJoyTarget,
+          _that.weekStartDay,
         );
       case _:
         return null;
@@ -346,6 +362,7 @@ class _AppSettings implements AppSettings {
     this.biometricLockEnabled = true,
     this.voiceLanguage = 'zh',
     this.monthlyJoyTarget,
+    this.weekStartDay = WeekStartDay.monday,
   });
   factory _AppSettings.fromJson(Map<String, dynamic> json) =>
       _$AppSettingsFromJson(json);
@@ -367,6 +384,9 @@ class _AppSettings implements AppSettings {
   final String voiceLanguage;
   @override
   final int? monthlyJoyTarget;
+  @override
+  @JsonKey()
+  final WeekStartDay weekStartDay;
 
   /// Create a copy of AppSettings
   /// with the given fields replaced by the non-null parameter values.
@@ -397,7 +417,9 @@ class _AppSettings implements AppSettings {
             (identical(other.voiceLanguage, voiceLanguage) ||
                 other.voiceLanguage == voiceLanguage) &&
             (identical(other.monthlyJoyTarget, monthlyJoyTarget) ||
-                other.monthlyJoyTarget == monthlyJoyTarget));
+                other.monthlyJoyTarget == monthlyJoyTarget) &&
+            (identical(other.weekStartDay, weekStartDay) ||
+                other.weekStartDay == weekStartDay));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -410,11 +432,12 @@ class _AppSettings implements AppSettings {
     biometricLockEnabled,
     voiceLanguage,
     monthlyJoyTarget,
+    weekStartDay,
   );
 
   @override
   String toString() {
-    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled, voiceLanguage: $voiceLanguage, monthlyJoyTarget: $monthlyJoyTarget)';
+    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled, voiceLanguage: $voiceLanguage, monthlyJoyTarget: $monthlyJoyTarget, weekStartDay: $weekStartDay)';
   }
 }
 
@@ -434,6 +457,7 @@ abstract mixin class _$AppSettingsCopyWith<$Res>
     bool biometricLockEnabled,
     String voiceLanguage,
     int? monthlyJoyTarget,
+    WeekStartDay weekStartDay,
   });
 }
 
@@ -455,6 +479,7 @@ class __$AppSettingsCopyWithImpl<$Res> implements _$AppSettingsCopyWith<$Res> {
     Object? biometricLockEnabled = null,
     Object? voiceLanguage = null,
     Object? monthlyJoyTarget = freezed,
+    Object? weekStartDay = null,
   }) {
     return _then(
       _AppSettings(
@@ -482,6 +507,10 @@ class __$AppSettingsCopyWithImpl<$Res> implements _$AppSettingsCopyWith<$Res> {
             ? _self.monthlyJoyTarget
             : monthlyJoyTarget // ignore: cast_nullable_to_non_nullable
                   as int?,
+        weekStartDay: null == weekStartDay
+            ? _self.weekStartDay
+            : weekStartDay // ignore: cast_nullable_to_non_nullable
+                  as WeekStartDay,
       ),
     );
   }

@@ -15,6 +15,9 @@ _AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => _AppSettings(
   biometricLockEnabled: json['biometricLockEnabled'] as bool? ?? true,
   voiceLanguage: json['voiceLanguage'] as String? ?? 'zh',
   monthlyJoyTarget: (json['monthlyJoyTarget'] as num?)?.toInt(),
+  weekStartDay:
+      $enumDecodeNullable(_$WeekStartDayEnumMap, json['weekStartDay']) ??
+      WeekStartDay.monday,
 );
 
 Map<String, dynamic> _$AppSettingsToJson(_AppSettings instance) =>
@@ -25,10 +28,16 @@ Map<String, dynamic> _$AppSettingsToJson(_AppSettings instance) =>
       'biometricLockEnabled': instance.biometricLockEnabled,
       'voiceLanguage': instance.voiceLanguage,
       'monthlyJoyTarget': instance.monthlyJoyTarget,
+      'weekStartDay': _$WeekStartDayEnumMap[instance.weekStartDay]!,
     };
 
 const _$AppThemeModeEnumMap = {
   AppThemeMode.system: 'system',
   AppThemeMode.light: 'light',
   AppThemeMode.dark: 'dark',
+};
+
+const _$WeekStartDayEnumMap = {
+  WeekStartDay.monday: 'monday',
+  WeekStartDay.sunday: 'sunday',
 };

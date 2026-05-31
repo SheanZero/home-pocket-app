@@ -294,6 +294,15 @@ class SJa extends S {
   String get themeDark => 'ダーク';
 
   @override
+  String get settingsWeekStart => '週の開始日';
+
+  @override
+  String get settingsWeekStartMonday => '月曜日';
+
+  @override
+  String get settingsWeekStartSunday => '日曜日';
+
+  @override
   String get security => 'セキュリティ';
 
   @override

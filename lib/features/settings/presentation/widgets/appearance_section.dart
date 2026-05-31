@@ -32,6 +32,12 @@ class AppearanceSection extends ConsumerWidget {
           onTap: () => _showThemeModeDialog(context, ref),
         ),
         _LanguageTile(settings: settings),
+        ListTile(
+          leading: const Icon(Icons.calendar_today),
+          title: Text(S.of(context).settingsWeekStart),
+          subtitle: Text(_weekStartLabel(settings.weekStartDay, context)),
+          onTap: () => _showWeekStartDialog(context, ref, settings.weekStartDay),
+        ),
       ],
     );
   }
@@ -64,6 +70,38 @@ class AppearanceSection extends ConsumerWidget {
     );
   }
 
+  void _showWeekStartDialog(
+    BuildContext context,
+    WidgetRef ref,
+    WeekStartDay current,
+  ) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(S.of(context).settingsWeekStart),
+        content: RadioGroup<WeekStartDay>(
+          groupValue: current,
+          onChanged: (value) async {
+            if (value != null) {
+              await ref.read(settingsRepositoryProvider).setWeekStartDay(value);
+              ref.invalidate(appSettingsProvider);
+              if (dialogContext.mounted) Navigator.pop(dialogContext);
+            }
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: WeekStartDay.values.map((day) {
+              return RadioListTile<WeekStartDay>(
+                title: Text(_weekStartLabel(day, context)),
+                value: day,
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
   String _getThemeModeLabel(AppThemeMode mode, BuildContext context) {
     switch (mode) {
       case AppThemeMode.system:
@@ -72,6 +110,15 @@ class AppearanceSection extends ConsumerWidget {
         return S.of(context).themeLight;
       case AppThemeMode.dark:
         return S.of(context).themeDark;
+    }
+  }
+
+  String _weekStartLabel(WeekStartDay day, BuildContext context) {
+    switch (day) {
+      case WeekStartDay.monday:
+        return S.of(context).settingsWeekStartMonday;
+      case WeekStartDay.sunday:
+        return S.of(context).settingsWeekStartSunday;
     }
   }
 }

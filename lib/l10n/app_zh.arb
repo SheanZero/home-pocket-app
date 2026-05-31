@@ -393,6 +393,18 @@
   "@themeDark": {
     "description": "Dark theme"
   },
+  "settingsWeekStart": "每周起始日",
+  "@settingsWeekStart": {
+    "description": "Week start day setting label"
+  },
+  "settingsWeekStartMonday": "周一",
+  "@settingsWeekStartMonday": {
+    "description": "Monday option for week start"
+  },
+  "settingsWeekStartSunday": "周日",
+  "@settingsWeekStartSunday": {
+    "description": "Sunday option for week start"
+  },
   "security": "安全",
   "@security": {
     "description": "Security section title"

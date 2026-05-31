@@ -7,6 +7,8 @@ import 'package:home_pocket/features/analytics/presentation/providers/repository
     show analyticsRepositoryProvider;
 import 'package:home_pocket/features/list/presentation/providers/state_list_filter.dart';
 import 'package:home_pocket/features/list/presentation/widgets/list_calendar_header.dart';
+import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
+import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -54,6 +56,9 @@ void main() {
 
       final container = ProviderContainer.test(overrides: [
         analyticsRepositoryProvider.overrideWithValue(mockRepo),
+        appSettingsProvider.overrideWith(
+          (_) async => const AppSettings(weekStartDay: WeekStartDay.monday),
+        ),
       ]);
 
       await _pumpCalendarHeader(tester, container);
@@ -91,6 +96,9 @@ void main() {
 
       final container = ProviderContainer.test(overrides: [
         analyticsRepositoryProvider.overrideWithValue(mockRepo),
+        appSettingsProvider.overrideWith(
+          (_) async => const AppSettings(weekStartDay: WeekStartDay.monday),
+        ),
       ]);
 
       await _pumpCalendarHeader(tester, container);

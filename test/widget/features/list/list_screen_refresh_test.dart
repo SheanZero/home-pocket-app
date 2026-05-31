@@ -21,8 +21,10 @@ import 'package:home_pocket/features/list/domain/models/list_filter_state.dart';
 import 'package:home_pocket/features/list/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/list/presentation/providers/state_list_filter.dart';
 import 'package:home_pocket/features/list/presentation/screens/list_screen.dart';
+import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_locale.dart'
     as locale_providers;
+import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
@@ -73,6 +75,9 @@ Future<ProviderContainer> _pumpScreen(
         shadowBooksProvider.overrideWith((_) async => const []),
         getListTransactionsUseCaseProvider.overrideWithValue(mockUseCase),
         analyticsRepositoryProvider.overrideWithValue(mockRepo),
+        appSettingsProvider.overrideWith(
+          (_) async => const AppSettings(weekStartDay: WeekStartDay.monday),
+        ),
       ],
       child: Builder(
         builder: (ctx) {

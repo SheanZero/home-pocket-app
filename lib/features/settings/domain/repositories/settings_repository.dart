@@ -19,4 +19,10 @@ abstract class SettingsRepository {
   ///
   /// Passing null clears the persisted key rather than storing a sentinel.
   Future<void> setMonthlyJoyTarget(int? value);
+
+  /// Reads the configured week start day (default: monday).
+  Future<WeekStartDay> getWeekStartDay();
+
+  /// Persists the week start day selection.
+  Future<void> setWeekStartDay(WeekStartDay day);
 }

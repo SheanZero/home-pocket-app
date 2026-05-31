@@ -6,6 +6,9 @@ part 'app_settings.g.dart';
 /// Theme mode for the app (domain-layer enum, no Flutter dependency).
 enum AppThemeMode { system, light, dark }
 
+/// Week start day for the calendar view (domain-layer enum, no Flutter dependency).
+enum WeekStartDay { monday, sunday }
+
 /// Application settings model.
 @freezed
 abstract class AppSettings with _$AppSettings {
@@ -16,6 +19,7 @@ abstract class AppSettings with _$AppSettings {
     @Default(true) bool biometricLockEnabled,
     @Default('zh') String voiceLanguage,
     int? monthlyJoyTarget,
+    @Default(WeekStartDay.monday) WeekStartDay weekStartDay,
   }) = _AppSettings;
 
   factory AppSettings.fromJson(Map<String, dynamic> json) =>

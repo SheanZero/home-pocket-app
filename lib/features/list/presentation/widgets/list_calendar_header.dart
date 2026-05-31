@@ -4,6 +4,8 @@ import 'package:table_calendar/table_calendar.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../features/settings/domain/models/app_settings.dart';
+import '../../../../features/settings/presentation/providers/state_settings.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
@@ -43,6 +45,9 @@ class CalendarHeaderWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
     final filter = ref.watch(listFilterProvider);
+    // Read weekStartDay from persisted settings (default: monday).
+    final settingsAsync = ref.watch(appSettingsProvider);
+    final weekStartDay = settingsAsync.value?.weekStartDay ?? WeekStartDay.monday;
     final calendarAsync = ref.watch(
       calendarDailyTotalsProvider(
         bookId: bookId,
@@ -67,7 +72,9 @@ class CalendarHeaderWidget extends ConsumerWidget {
           rowHeight: 52,
           daysOfWeekHeight: 20,
           locale: locale.toLanguageTag(),
-          startingDayOfWeek: StartingDayOfWeek.monday,
+          startingDayOfWeek: weekStartDay == WeekStartDay.monday
+              ? StartingDayOfWeek.monday
+              : StartingDayOfWeek.sunday,
           selectedDayPredicate: (day) => isSameDay(day, filter.activeDayFilter),
           onDaySelected: (selectedDay, focusedDay) =>
               _onDayTapped(ref, selectedDay),

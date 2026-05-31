@@ -15,6 +15,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   static const String _biometricLockKey = 'biometric_lock_enabled';
   static const String _voiceLanguageKey = 'voice_language';
   static const String _monthlyJoyTargetKey = 'monthly_joy_target';
+  static const String _weekStartDayKey = 'week_start_day';
 
   @override
   Future<AppSettings> getSettings() async {
@@ -25,6 +26,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       biometricLockEnabled: _prefs.getBool(_biometricLockKey) ?? true,
       voiceLanguage: _prefs.getString(_voiceLanguageKey) ?? 'zh',
       monthlyJoyTarget: _prefs.getInt(_monthlyJoyTargetKey),
+      weekStartDay: _getWeekStartDay(),
     );
   }
 
@@ -35,6 +37,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
     await _prefs.setBool(_notificationsKey, settings.notificationsEnabled);
     await _prefs.setBool(_biometricLockKey, settings.biometricLockEnabled);
     await _prefs.setString(_voiceLanguageKey, settings.voiceLanguage);
+    await _prefs.setString(_weekStartDayKey, settings.weekStartDay.name);
     if (settings.monthlyJoyTarget == null) {
       await _prefs.remove(_monthlyJoyTargetKey);
     } else {
@@ -81,11 +84,30 @@ class SettingsRepositoryImpl implements SettingsRepository {
     }
   }
 
+  @override
+  Future<WeekStartDay> getWeekStartDay() async {
+    return _getWeekStartDay();
+  }
+
+  @override
+  Future<void> setWeekStartDay(WeekStartDay day) async {
+    await _prefs.setString(_weekStartDayKey, day.name);
+  }
+
   AppThemeMode _getThemeMode() {
     final value = _prefs.getString(_themeModeKey);
     return AppThemeMode.values.firstWhere(
       (mode) => mode.name == value,
       orElse: () => AppThemeMode.system,
+    );
+  }
+
+  /// T-oqn-01 mitigation: malformed persisted value falls back to monday default.
+  WeekStartDay _getWeekStartDay() {
+    final v = _prefs.getString(_weekStartDayKey);
+    return WeekStartDay.values.firstWhere(
+      (d) => d.name == v,
+      orElse: () => WeekStartDay.monday,
     );
   }
 }

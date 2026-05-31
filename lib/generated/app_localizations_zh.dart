@@ -294,6 +294,15 @@ class SZh extends S {
   String get themeDark => '深色';
 
   @override
+  String get settingsWeekStart => '每周起始日';
+
+  @override
+  String get settingsWeekStartMonday => '周一';
+
+  @override
+  String get settingsWeekStartSunday => '周日';
+
+  @override
   String get security => '安全';
 
   @override

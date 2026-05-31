@@ -297,6 +297,15 @@ class SEn extends S {
   String get themeDark => 'Dark';
 
   @override
+  String get settingsWeekStart => 'Week starts on';
+
+  @override
+  String get settingsWeekStartMonday => 'Monday';
+
+  @override
+  String get settingsWeekStartSunday => 'Sunday';
+
+  @override
   String get security => 'Security';
 
   @override

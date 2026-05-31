@@ -121,7 +121,7 @@ final class ListTransactionsProvider
   }
 }
 
-String _$listTransactionsHash() => r'80a2d68fbbfe029e674db9eaaca5db10adaeedae';
+String _$listTransactionsHash() => r'b3986f6c4904f67742c780fb3e345b2f78c78a6c';
 
 /// The central behavioral provider for the transaction list feature.
 ///

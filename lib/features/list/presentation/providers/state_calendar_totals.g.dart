@@ -94,7 +94,7 @@ final class CalendarDailyTotalsProvider
 }
 
 String _$calendarDailyTotalsHash() =>
-    r'bbcbfc7de98b05ba3750b2b3797746aa976ed6a5';
+    r'064a979e1da1c779718ec9eba2ecb307e9f6f3a0';
 
 /// Per-day expense totals for the calendar header.
 ///

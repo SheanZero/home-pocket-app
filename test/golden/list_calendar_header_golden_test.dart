@@ -19,6 +19,8 @@ import 'package:home_pocket/features/list/domain/models/list_filter_state.dart';
 import 'package:home_pocket/features/list/presentation/providers/state_calendar_totals.dart';
 import 'package:home_pocket/features/list/presentation/providers/state_list_filter.dart';
 import 'package:home_pocket/features/list/presentation/widgets/list_calendar_header.dart';
+import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
+import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
 // January 2025 is always in the past relative to CI (2026+).
@@ -51,6 +53,10 @@ Widget _wrap({required Locale locale}) {
       ).overrideWith((_) async => <DateTime, int>{}),
       // Solo mode — no family member data needed.
       isGroupModeProvider.overrideWith((_) => false),
+      // Default settings: monday week start (deterministic for golden).
+      appSettingsProvider.overrideWith(
+        (_) async => const AppSettings(weekStartDay: WeekStartDay.monday),
+      ),
     ],
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
