@@ -305,8 +305,8 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2, parallel pair)*
 
-- [ ] 30-03-PLAN.md — Golden test files: list_transaction_tile, list_day_group_header, list_sort_filter_bar, list_empty_state (9 cases) + baselines (Wave 3)
-- [ ] 30-04-PLAN.md — Golden test files: list_calendar_header (determinism fix), list_category_filter_sheet + baselines (Wave 3)
+- [x] 30-03-PLAN.md — Golden test files: list_transaction_tile, list_day_group_header, list_sort_filter_bar, list_empty_state (9 cases) + baselines (Wave 3)
+- [x] 30-04-PLAN.md — Golden test files: list_calendar_header (determinism fix), list_category_filter_sheet + baselines (Wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -326,7 +326,7 @@ Plans:
 | 27. Calendar Header + Month Summary | 4/4 | Complete    | 2026-05-30 |
 | 28. Transaction Tile + Sort/Filter Bar | 6/7 | Complete    | 2026-05-30 |
 | 29. List Screen Assembly + Family | 4/4 | Complete    | 2026-05-30 |
-| 30. i18n + Empty States + Golden Polish | 2/5 | In Progress|  |
+| 30. i18n + Empty States + Golden Polish | 4/5 | In Progress|  |
 
 ---
 
