@@ -2149,7 +2149,7 @@
   "@listClearAll": {
     "description": "Clear all filters chip label in sort/filter bar (Phase 28)"
   },
-  "listMineOnly": "Mine only",
+  "listMineOnly": "自分のみ",
   "@listMineOnly": {
     "description": "Mine-only filter chip label in family group mode (Phase 29)"
   },
@@ -2194,7 +2194,7 @@
       }
     }
   },
-  "listEmptyMonth": "この月の記録はありません",
+  "listEmptyMonth": "この月にはまだ記録がありません",
   "@listEmptyMonth": {
     "description": "Empty state when no transactions in selected month (Phase 28)"
   },
@@ -2205,6 +2205,30 @@
   "listEmptyFilteredClear": "フィルターをクリア",
   "@listEmptyFilteredClear": {
     "description": "Clear filters action in filtered-empty state (Phase 28)"
+  },
+  "listEmptyDay": "この日の記録はありません",
+  "@listEmptyDay": {
+    "description": "Empty state when day filter active and no transactions on that day (Phase 30)"
+  },
+  "listEmptyDayClear": "月全体を表示",
+  "@listEmptyDayClear": {
+    "description": "Clear day filter action in day-empty state (Phase 30)"
+  },
+  "listLoadError": "データを読み込めません",
+  "@listLoadError": {
+    "description": "Error state when list data fails to load (Phase 30)"
+  },
+  "listCalNavPrev": "前の月",
+  "@listCalNavPrev": {
+    "description": "Semantics label for previous month button in calendar header (Phase 30)"
+  },
+  "listCalNavNext": "次の月",
+  "@listCalNavNext": {
+    "description": "Semantics label for next month button in calendar header (Phase 30)"
+  },
+  "listCalNavCurrentMonth": "今月に戻る",
+  "@listCalNavCurrentMonth": {
+    "description": "Semantics label for return to current month gesture in calendar header (Phase 30)"
   },
   "@@locale": "ja"
 }

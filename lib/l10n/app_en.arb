@@ -2194,17 +2194,41 @@
       }
     }
   },
-  "listEmptyMonth": "No entries this month",
+  "listEmptyMonth": "No records yet this month",
   "@listEmptyMonth": {
     "description": "Empty state when no transactions in selected month (Phase 28)"
   },
-  "listEmptyFiltered": "No entries match your filters",
+  "listEmptyFiltered": "No records match your filters",
   "@listEmptyFiltered": {
     "description": "Empty state when filters return no results (Phase 28)"
   },
   "listEmptyFilteredClear": "Clear filters",
   "@listEmptyFilteredClear": {
     "description": "Clear filters action in filtered-empty state (Phase 28)"
+  },
+  "listEmptyDay": "No records on this day",
+  "@listEmptyDay": {
+    "description": "Empty state when day filter active and no transactions on that day (Phase 30)"
+  },
+  "listEmptyDayClear": "Show full month",
+  "@listEmptyDayClear": {
+    "description": "Clear day filter action in day-empty state (Phase 30)"
+  },
+  "listLoadError": "Unable to load data",
+  "@listLoadError": {
+    "description": "Error state when list data fails to load (Phase 30)"
+  },
+  "listCalNavPrev": "Previous month",
+  "@listCalNavPrev": {
+    "description": "Semantics label for previous month button in calendar header (Phase 30)"
+  },
+  "listCalNavNext": "Next month",
+  "@listCalNavNext": {
+    "description": "Semantics label for next month button in calendar header (Phase 30)"
+  },
+  "listCalNavCurrentMonth": "Return to current month",
+  "@listCalNavCurrentMonth": {
+    "description": "Semantics label for return to current month gesture in calendar header (Phase 30)"
   },
   "@@locale": "en"
 }

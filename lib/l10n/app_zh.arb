@@ -2149,7 +2149,7 @@
   "@listClearAll": {
     "description": "Clear all filters chip label in sort/filter bar (Phase 28)"
   },
-  "listMineOnly": "Mine only",
+  "listMineOnly": "仅自己",
   "@listMineOnly": {
     "description": "Mine-only filter chip label in family group mode (Phase 29)"
   },
@@ -2194,7 +2194,7 @@
       }
     }
   },
-  "listEmptyMonth": "本月暂无记录",
+  "listEmptyMonth": "本月还没有记录",
   "@listEmptyMonth": {
     "description": "Empty state when no transactions in selected month (Phase 28)"
   },
@@ -2205,6 +2205,30 @@
   "listEmptyFilteredClear": "清除筛选",
   "@listEmptyFilteredClear": {
     "description": "Clear filters action in filtered-empty state (Phase 28)"
+  },
+  "listEmptyDay": "这一天没有记录",
+  "@listEmptyDay": {
+    "description": "Empty state when day filter active and no transactions on that day (Phase 30)"
+  },
+  "listEmptyDayClear": "显示整月",
+  "@listEmptyDayClear": {
+    "description": "Clear day filter action in day-empty state (Phase 30)"
+  },
+  "listLoadError": "无法加载数据",
+  "@listLoadError": {
+    "description": "Error state when list data fails to load (Phase 30)"
+  },
+  "listCalNavPrev": "上个月",
+  "@listCalNavPrev": {
+    "description": "Semantics label for previous month button in calendar header (Phase 30)"
+  },
+  "listCalNavNext": "下个月",
+  "@listCalNavNext": {
+    "description": "Semantics label for next month button in calendar header (Phase 30)"
+  },
+  "listCalNavCurrentMonth": "返回本月",
+  "@listCalNavCurrentMonth": {
+    "description": "Semantics label for return to current month gesture in calendar header (Phase 30)"
   },
   "@@locale": "zh"
 }
