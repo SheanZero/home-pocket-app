@@ -41,9 +41,10 @@ class CalendarHeaderWidget extends ConsumerWidget {
   final String currencyCode;
   final Locale locale;
 
-  /// Weekend numeral/header colors by true weekday — explicitly specified.
-  static const Color _saturdayColor = Color(0xFF1565C0); // Material Blue 800
-  static const Color _sundayColor = Color(0xFFD32F2F); // Material Red 700
+  /// Weekend (Sat + Sun) numeral/header color — explicitly specified blue.
+  static const Color _weekendColor = Color(0xFF1565C0); // Material Blue 800
+  /// Today's numeral color — red font marks the current day (no box, no dot).
+  static const Color _todayColor = Color(0xFFD32F2F); // Material Red 700
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -89,13 +90,12 @@ class CalendarHeaderWidget extends ConsumerWidget {
           },
           calendarBuilders: CalendarBuilders(
             // Color the day-of-week header labels to match the date numerals:
-            // Saturday blue, Sunday red, weekdays neutral (by true weekday).
+            // weekends (Sat + Sun) blue, weekdays neutral (by true weekday).
             dowBuilder: (context, day) {
-              final Color color = switch (day.weekday) {
-                DateTime.saturday => _saturdayColor,
-                DateTime.sunday => _sundayColor,
-                _ => AppColors.textSecondary,
-              };
+              final bool isWeekend = day.weekday == DateTime.saturday ||
+                  day.weekday == DateTime.sunday;
+              final Color color =
+                  isWeekend ? _weekendColor : AppColors.textSecondary;
               return Center(
                 child: Text(
                   DateFormatter.formatShortWeekday(day, locale),
@@ -146,13 +146,15 @@ class CalendarHeaderWidget extends ConsumerWidget {
           )
         : null;
 
-    // Weekend colors by true weekday (not column position)
-    final Color baseNumeralColor = switch (day.weekday) {
-      DateTime.saturday => _saturdayColor,
-      DateTime.sunday => _sundayColor,
-      _ => AppColors.textPrimary,
-    };
-    final numeralColor = isSelected ? AppColors.card : baseNumeralColor;
+    // Weekend (Sat + Sun) numerals are blue (by true weekday, not column).
+    final bool isWeekend =
+        day.weekday == DateTime.saturday || day.weekday == DateTime.sunday;
+    final Color baseNumeralColor =
+        isWeekend ? _weekendColor : AppColors.textPrimary;
+    // Precedence: selected chip > today (red) > weekend (blue) > default.
+    final numeralColor = isSelected
+        ? AppColors.card
+        : (isToday ? _todayColor : baseNumeralColor);
     final amountColor = isSelected ? AppColors.card : AppColors.textSecondary;
 
     return Opacity(
@@ -166,14 +168,14 @@ class CalendarHeaderWidget extends ConsumerWidget {
           children: [
             Text(
               '${day.day}',
-              // Today: lightweight marker — bold numeral (+ dot below), no box.
+              // Today: marked by bold red numeral (no box, no dot).
               style: AppTextStyles.bodySmall.copyWith(
                 color: numeralColor,
                 fontWeight: isToday ? FontWeight.w700 : null,
               ),
             ),
             // Fixed-height sub-slot so numerals align across the row regardless
-            // of whether a cell shows an amount / today dot / nothing.
+            // of whether a cell shows an amount.
             SizedBox(
               height: 14, // matches AppTextStyles.micro line height
               child: Center(
@@ -183,18 +185,7 @@ class CalendarHeaderWidget extends ConsumerWidget {
                         style:
                             AppTextStyles.micro.copyWith(color: amountColor),
                       )
-                    : isToday
-                        ? Container(
-                            width: 5,
-                            height: 5,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isSelected
-                                  ? AppColors.card
-                                  : AppColors.accentPrimary,
-                            ),
-                          )
-                        : null,
+                    : null,
               ),
             ),
           ],
