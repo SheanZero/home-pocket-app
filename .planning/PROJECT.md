@@ -163,13 +163,14 @@ A family accounting app users can trust with sensitive financial data — local-
 
 ## Current Milestone: v1.5 文案与配色统一 (Terminology & Color Unification)
 
-**Goal:** Unify the half-migrated dual-ledger vocabulary across all three locales *and* internal code identifiers, and consolidate scattered hardcoded colors into a single semantic design-token system — a brownfield consistency refactor with no new user features.
+**Goal:** Unify the half-migrated dual-ledger vocabulary across all three locales *and* internal code identifiers; explore and select a stronger global color palette (Pencil mockups, 4–5 options); then apply it through a single semantic design-token system that replaces scattered hardcoded colors — a brownfield terminology + palette/color refactor with no new user features.
 
 **Target features:**
 - Trilingual terminology rename (user-facing ARB values, all 3 locales) — 生存/Survival → 日常/Daily; 灵魂·魂/ソウル/Soul → 悦己/ときめき/Joy
 - Internal-identifier rename — ARB keys (`soulLedger`→`joyLedger`, `survival*`→`daily*`), `AppColors.survival`→`daily` / `soul`→`joy`, related symbols
-- Color consolidation — ~62 hardcoded `Color(0x…)` literals → centralized `AppColors` tokens
-- Ledger theme-color consistency audit — 日常 blue (`#5A9CC8`) / 悦己 green (`#47B88A`) applied uniformly
+- Palette exploration — mine design references (VoltAgent/awesome-design-md), propose 4–5 full color schemes rendered in Pencil, user selects one (recorded as ADR)
+- Color consolidation — ~62 hardcoded `Color(0x…)` literals → centralized `AppColors` tokens encoding the selected palette
+- Ledger theme-color consistency audit — selected 日常 / 悦己 ledger accents applied uniformly
 - Semantic design-token system — primary/ledger/surface/semantic + profile dark palette as single source of truth
 
 **Locale mapping (locked):**
