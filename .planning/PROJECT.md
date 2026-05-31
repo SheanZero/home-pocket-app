@@ -6,8 +6,9 @@
 **Shipped:** v1.1 Happiness Metric & Display (2026-05-05) — see `.planning/milestones/v1.1-ROADMAP.md`
 **Shipped:** v1.2 Happiness Metric Refresh (2026-05-21) — see `.planning/milestones/v1.2-ROADMAP.md` + `.planning/milestones/v1.2-MILESTONE-AUDIT.md`
 **Shipped:** v1.3 迭代帐本输入 (2026-05-26) — see `.planning/milestones/v1.3-ROADMAP.md` + `.planning/milestones/v1.3-MILESTONE-AUDIT.md`
+**Shipped:** v1.4 列表功能 (2026-05-31) — see `.planning/milestones/v1.4-ROADMAP.md` + `.planning/milestones/v1.4-MILESTONE-AUDIT.md`
 
-**Next milestone:** TBD. Candidate themes carried forward: MOD-005 OCR writer landing, FAMILY-V2-01/02/03 family privacy hardening, FUTURE-QA-01 release-readiness QA, FUTURE-DOC/TOOL cleanup, fl_chart 1.x upgrade (TOOL-V2-01), voice flow polish carry (VOICE-POLISH-V2-01..08), English voice parser (VOICE-EN-V2-01). Use `/gsd:new-milestone` to scope.
+**Next milestone:** TBD. Candidate themes carried forward: combined family-calendar totals + undo-on-delete (v1.4 deferrals), MOD-005 OCR writer landing, FAMILY-V2-01/02/03 family privacy hardening, FUTURE-QA-01 release-readiness QA, FUTURE-DOC/TOOL cleanup, fl_chart 1.x upgrade (TOOL-V2-01), voice flow polish carry (VOICE-POLISH-V2-01..08), English voice parser (VOICE-EN-V2-01). Use `/gsd:new-milestone` to scope.
 
 The v1.0 initiative was a pure-refactor cleanup. It delivered an operational hybrid audit pipeline, eliminated 50 catalogued findings (24 CRITICAL, 8 HIGH, 8 MEDIUM, 7 LOW + 3 layer-violation closures), aligned all architecture documentation with the post-refactor codebase, and locked 4 permanent CI guardrails.
 
@@ -16,6 +17,42 @@ The v1.1 milestone delivered the happiness metric domain, HomePage `HomeHeroCard
 The v1.2 milestone shipped the ADR-016 Joy migration (density → `Σ joy_contribution`), HomeHero target ring rebuild with user-configurable `monthly_joy_target` + 3-month median recommendation, AnalyticsScreen Variant ε with Custom Time Windows (week/month/quarter/year/arbitrary), Per-Category breakdown + Soul-vs-Survival comparison (anti-toxicity framed), and Manual-Only Joy sub-metric variant on Drift schema v17 (`entry_source` column). HomeHero isolation invariant (ADR-016 §3) is structurally enforced. Audit closed at `tech_debt` — Phase 13/17 lack VERIFICATION.md and 3 VALIDATION.md drafts have `nyquist_compliant: false`; documentation-grade debt only, all 11 v1.2 requirements satisfied in implementation.
 
 The v1.3 milestone transformed ledger entry into a single-screen, voice-trustworthy core experience. Shipped: single shared `TransactionDetailsForm` widget consumed by 4 hosts (manual, voice, edit, OCR review); `ManualOneStepScreen` replacing the prior 2-screen chain; SmartKeyboard 48dp touch-target floor; locale-aware zh + ja voice number parsing (state machines + `VoiceChunkMerger` 2.5s continued-listening window) at zh 96% + ja 100% corpus accuracy; `VoiceCategoryResolver` always-L2 contract with merchant DB + synonym dictionary (extensible without code changes); hold-to-record gesture with AnimatedContainer shape morph + caption swap (`<100ms` verified); edit-from-list path with `entry_source` verbatim preservation. Two BLOCKER gaps (G-01 recognizer self-termination, G-02 silent errors) closed in Phase 22. Phase 23 cleanup absorbed carried tech-debt (scanner allow-lists, 6 voice-flow surgical fixes, 4 mechanical polish items, REQUIREMENTS.md reconciliation, 9 device UATs run + passed, voice_input_screen.dart 838→776 LOC via mixin + helpers extraction). Audit closed at `tech_debt` — documentation-grade Nyquist debt only; all 15 v1.3 requirements satisfied and reconciled.
+
+The v1.4 milestone built the placeholder List tab into a full transaction overview (Japanese-kakeibo layout) in a new `lib/features/list/` module. Shipped: a `table_calendar` month header with per-day expense totals (own-book in v1.4), month navigation, tap-a-day-to-filter, and a current-month expense summary; a transaction list that is sortable (date / edit-time / amount ± direction), text-searchable (category · merchant · note), and filterable by ledger, multiple categories, and family member — all AND-composed with one-tap clear; rows that reuse the v1.3 edit path on tap and route swipe-delete through `DeleteTransactionUseCase` (soft-delete, hash-chain preserved); family-aware shadow-book merge with per-row owner attribution + "Mine only"; reactive updates + pull-to-refresh; 3-variant empty states; and full ja/zh/en ARB coverage (533 keys/locale) with golden baselines. A shared `DateBoundaries` util consolidated month-boundary arithmetic; `table_calendar ^3.2.0` was added (iOS build verified green). Audit closed at `tech_debt` — 22/22 requirements, 7/7 phases, 7/7 E2E flows; the one functional gap (GAP-1 calendar staleness after family-sync/FAB) was closed at milestone close via quick task 260531-u34; residual GAP-2 dead-code (`watchByBookIds` unused) + draft-Nyquist documentation debt accepted.
+
+<details>
+<summary>v1.4 列表功能 (archived)</summary>
+
+**Started:** 2026-05-29
+**Shipped:** 2026-05-31 (~3 days)
+**Phase numbering:** Phases 24-30
+**Trigger:** v1.3 closed the input axis; the List tab was still a placeholder — owner wanted a kakeibo-style transaction overview before any v1 release.
+
+**Goal:** Build the placeholder List tab into a full transaction overview — month calendar (per-day expense totals + tap-to-filter), sortable/searchable/filterable list, month summary — reusing the v1.3 edit path and surfacing family members' entries.
+
+**Delivered:**
+- **Data layer + shared util (Phase 24):** `findByBookIds` multi-book query + `watchByBookIds` stream; extracted `DateBoundaries` to `lib/shared/utils/` (consolidated 6 month-boundary call sites); `SortField`/`SortDirection` enums; 6 DAO tests.
+- **Domain + use case (Phase 25):** Freezed `ListFilterState`/`ListSortConfig`, repo interface, `GetListTransactionsUseCase` (execute Future+Result / watch Stream) + `GetListParams`; 8 Mocktail tests; pure-Dart.
+- **Providers + shell wiring (Phase 26):** list providers with `keepAlive`-under-`IndexedStack` filter persistence; `ListScreen` replaces shell placeholder.
+- **Calendar header (Phase 27):** `table_calendar` grid, `calendarDailyTotalsProvider` per-day totals (expense-only, `_dayKey` normalization, filter-isolated), month nav, day-tap filter, month summary; iOS build gate; human-approved render.
+- **Tile + sort/filter bar (Phase 28):** `ListTransactionTile` (swipe-delete via `DeleteTransactionUseCase`, tap-to-edit), day grouping, sort + text search + ledger + multi-category filters AND-composed.
+- **List screen + family (Phase 29):** full screen, `RefreshIndicator` pull-to-refresh (honest spinner, dual-invalidate), shadow-book merge, per-row member chip, member + "Mine only" filters; `anyFilterActive` 5-condition fix.
+- **i18n + empty states + golden polish (Phase 30):** 3-variant `ListEmptyState`, ja/zh/en ARB, golden baselines; closes LIST-03.
+
+**Out of v1.4 scope (carried to v1.5+):**
+- Combined family-calendar per-day totals (v1.4 calendar is own-book only; seam reserved)
+- Undo-on-delete SnackBar (needs `RestoreTransactionUseCase`)
+- Month settlement / month-lock (结账锁月), income tracking, amount-range filter, "New" badge
+- MOD-005 OCR writer landing; FAMILY-V2 privacy hardening; voice-polish + English-voice carries (unchanged from v1.3)
+
+**Known close debt** (documented in `.planning/milestones/v1.4-MILESTONE-AUDIT.md`):
+- GAP-2: LIST-02 `watchByBookIds` reactive stream is dead code (reactivity via manual `ref.invalidate`); either consume `useCase.watch()` or delete the 3-layer chain + fix stale shell comments
+- Draft-Nyquist documentation debt: Phases 25/26/27/29/30 `nyquist_compliant: false`; Phase 28 approved (`nyquist_compliant: true`)
+- GAP-1 (calendar staleness) was the one functional gap — **closed at milestone close** via quick task 260531-u34
+
+**Archive:** `.planning/milestones/v1.4-ROADMAP.md`, `.planning/milestones/v1.4-REQUIREMENTS.md`, `.planning/milestones/v1.4-MILESTONE-AUDIT.md`
+
+</details>
 
 <details>
 <summary>v1.3 迭代帐本输入 (archived)</summary>
@@ -118,26 +155,15 @@ A focused, audit-driven refactor of the Home Pocket (まもる家計簿) Flutter
 
 ## What This Is
 
-Home Pocket (まもる家計簿) is a local-first, privacy-focused family accounting app with a dual-ledger system (Survival ledger + Soul ledger). Zero-knowledge architecture with 4-layer encryption, P2P family sync, and offline-first design. Target: iOS 14+ / Android 7+ (API 24+). After three milestones, the app now ships a calculable Joy metric (`Σ joy_contribution` cumulative semantics), user-configurable monthly Joy targets, custom analytics time windows, per-category breakdown + Soul-vs-Survival comparison surfaces, and an audit lens (manual-only Joy variant) to scrutinize Joy data quality.
+Home Pocket (まもる家計簿) is a local-first, privacy-focused family accounting app with a dual-ledger system (Survival ledger + Soul ledger). Zero-knowledge architecture with 4-layer encryption, P2P family sync, and offline-first design. Target: iOS 14+ / Android 7+ (API 24+). After four milestones, the app ships a single-screen voice-capable ledger entry flow, a calculable Joy metric (`Σ joy_contribution` cumulative semantics) with user-configurable monthly targets, custom analytics time windows, per-category + Soul-vs-Survival comparison surfaces, an audit lens (manual-only Joy variant), and — as of v1.4 — a full kakeibo-style transaction list: month calendar with per-day expense totals + tap-to-filter, sortable/searchable/filterable rows, a month summary, and family-aware display of members' entries.
 
 ## Core Value
 
 A family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, with a dual-ledger system that distinguishes survival spending from soul spending so families can have honest money conversations.
 
-## Current Milestone: v1.4 列表功能 (Transaction List / 一覧)
+## Next Milestone: TBD
 
-**Goal:** Build out the currently-placeholder List tab into a full transaction overview matching the reference design — a month calendar (per-day expense totals + tap-a-day to filter), a sortable / searchable / filterable transaction list, a basic month-summary, reusing the v1.3 edit path, and surfacing family members' entries when a family is joined.
-
-**Target features:**
-- Calendar header — month switch + month grid with per-day expense totals + tap-a-day to filter the list to that day
-- Basic month summary — current-month total expense (expense-only basis)
-- Transaction list rows — category emoji + name, ledger-color tag (Survival/Soul), date, amount
-- Sorting — by transaction date / edit time / amount, with ascending/descending toggle
-- Search & filter — text search (category / merchant / note), filter by ledger (Survival/Soul), filter by category
-- Row interactions — tap → edit (reuse v1.3 `TransactionEditScreen` + shared details form), swipe-to-delete (confirmed)
-- Family-aware list — when a family is joined, include members' entries with per-row member attribution + member filter
-
-**Out of scope (v1.4):** month settlement / month-lock (结账锁月), income tracking, "New" badge, amount-range filter.
+v1.4 shipped 2026-05-31. No active milestone — run `/gsd-new-milestone` to scope the next one. Candidate themes: combined family-calendar totals + undo-on-delete (v1.4 deferrals), MOD-005 OCR writer landing, FAMILY-V2 privacy hardening, FUTURE-QA-01 release-readiness QA, fl_chart 1.x upgrade, voice-polish/English-voice carries, documentation/tooling guardrail cleanup before any user-facing v1 release.
 
 ## Requirements
 
@@ -214,16 +240,35 @@ A family accounting app users can trust with sensitive financial data — local-
 - ✓ **REC-02** Recording state: AnimatedContainer 180ms shape morph + AnimatedSwitcher caption swap to "录音中…"; Stopwatch test `<100ms` — v1.3 Phase 22
 - ✓ **INPUT-02** Voice-driven entry on same single screen as manual; parser fills amount/category/note/merchant in-place; edit any field before save — v1.3 Phase 22
 
+**Shipped in v1.4 (列表功能 / Transaction List):**
+
+- ✓ **CAL-01** Month switch (prev/next + picker) on the List tab — v1.4 Phase 27
+- ✓ **CAL-02** Month calendar grid with per-day expense totals (own-book in v1.4; family-combine seam reserved) — v1.4 Phase 27
+- ✓ **CAL-03** Tap a day to filter the list to that day; tap the selected day again to clear — v1.4 Phase 27
+- ✓ **CAL-04** Current-month expense summary (expense-only basis) on the List tab — v1.4 Phase 27
+- ✓ **LIST-01** Scrollable month transaction list; rows show category emoji + name, ledger-color tag, date, tabular-figure amount — v1.4 Phase 28
+- ✓ **LIST-02** List updates reactively after add/edit/delete/family-sync (via manual `ref.invalidate`; `watchByBookIds` stream exists but is dead code — GAP-2) — v1.4 Phases 24/26/29
+- ✓ **LIST-03** Clear 3-variant empty state when no transactions match month + filters — v1.4 Phase 30
+- ✓ **LIST-04** Pull-to-refresh (RefreshIndicator, honest spinner) — v1.4 Phase 29
+- ✓ **SORT-01/02/03/04** Sort by date / edit-time / amount + asc/desc toggle — v1.4 Phases 25/28
+- ✓ **FILTER-01/02/03/04** Text search (category·merchant·note) + ledger + multi-category filters, AND-composed with one-tap clear — v1.4 Phases 26/28
+- ✓ **ROW-01** Tap row → edit via v1.3 `TransactionEditScreen` + shared form (`entry_source` preserved) — v1.4 Phase 28
+- ✓ **ROW-02** Swipe-to-delete with confirmation; routes exclusively through `DeleteTransactionUseCase` (soft-delete, hash-chain-safe) — v1.4 Phase 28
+- ✓ **FAM-01/02/03/04** Family shadow-book merge + per-row owner attribution + member filter + "Mine only" — v1.4 Phase 29
+
 ### Active
 
-<!-- v1.4 列表功能 — requirements defined in .planning/REQUIREMENTS.md (LIST-*, CAL-*, FILTER-*, FAM-*). -->
+<!-- No active milestone. v1.4 shipped 2026-05-31. Run /gsd-new-milestone to scope the next. -->
 
-v1.4 列表功能 — see `.planning/REQUIREMENTS.md` for scoped requirements (calendar, list, sort, search/filter, row interactions, family-aware display).
+_(none — between milestones; see Next Milestone above)_
 
 ### Out of Scope
 
 <!-- Explicit boundaries carried forward. -->
 
+- **Combined family-calendar per-day totals** — v1.4 calendar is own-book only; combining members' per-day totals deferred to v1.5+ (seam reserved in `calendarDailyTotalsProvider`)
+- **Undo-on-delete SnackBar** — v1.4 swipe-delete is confirm-only soft-delete; undo needs a `RestoreTransactionUseCase` (deferred)
+- **Month settlement / month-lock (结账锁月), income tracking, amount-range filter, "New" badge** — explicit v1.4 list-feature exclusions; candidates for a later milestone
 - **`recoverFromSeed()` key-overwrite bug fix** — HIGH-severity per CONCERNS.md but security-architecture changes are out of scope; deferred to FUTURE-ARCH-04
 - **Riverpod 3.x upgrade** — confirmed `analyzer` version conflict with `json_serializable` (deferred to FUTURE-TOOL-01)
 - **`sqlite3_flutter_libs` adoption** — SQLCipher conflict; actively rejected by CI guardrail
@@ -249,7 +294,8 @@ v1.4 列表功能 — see `.planning/REQUIREMENTS.md` for scoped requirements (c
 
 ## Context
 
-- **Current state (post-v1.3):** v1.0 Codebase Cleanup shipped 2026-04-29; v1.1 Happiness Metric & Display shipped 2026-05-05; v1.2 Happiness Metric Refresh shipped 2026-05-21; **v1.3 迭代帐本输入 shipped 2026-05-26** (~5 days, 330 commits, 304 files changed, +64,157/-4,747 LOC; `lib/` +6,559/-2,197; `test/` +10,246/-836). Drift schema unchanged at v17 (no migration this milestone). Ledger entry is now single-screen for both manual and voice; voice parser zh+ja, hold-to-record gesture, edit-from-list path. ARB parity locked at 506 keys per locale.
+- **Current state (post-v1.4):** v1.0 shipped 2026-04-29; v1.1 2026-05-05; v1.2 2026-05-21; v1.3 2026-05-26; **v1.4 列表功能 shipped 2026-05-31** (~3 days, 283 commits, 316 files changed, +51,409/-2,207 LOC). New `lib/features/list/` module: kakeibo-style List tab — `table_calendar` month header (per-day expense totals, own-book), sortable/searchable/filterable transaction list, month summary, family-aware shadow-book merge + "Mine only", pull-to-refresh, 3-variant empty states. Shared `DateBoundaries` util; `table_calendar ^3.2.0` added. Drift schema unchanged at v17 (no migration). ARB parity now 533 keys per locale (+27 from v1.3's 506). GAP-1 (calendar staleness) closed at close via quick task 260531-u34; GAP-2 (`watchByBookIds` dead code) + draft-Nyquist docs carried as debt.
+- **Prior state (post-v1.3):** v1.3 迭代帐本输入 shipped 2026-05-26 (~5 days, 330 commits, 304 files, +64,157/-4,747 LOC). Ledger entry single-screen for manual + voice; voice parser zh+ja, hold-to-record, edit-from-list.
 - **Codebase map:** `.planning/codebase/` was last refreshed 2026-04-25 (`/gsd-map-codebase`). Contents: ARCHITECTURE.md, STACK.md, STRUCTURE.md, CONVENTIONS.md, INTEGRATIONS.md, TESTING.md, CONCERNS.md. **Stale — four milestones of drift.** Refresh via `/gsd:map-codebase` before next milestone planning.
 - **Tech stack:** Flutter, Riverpod 3.x (`@riverpod` code-gen, generator 4.x), Freezed, Drift + SQLCipher (schema v17), GoRouter, flutter_localizations (intl 0.20.2 pinned), Mocktail
 - **Active CI guardrails:** `import_guard` (custom_lint), `riverpod_lint`/`custom_lint`, `coverde` per-file ≥70% with `--deferred` mechanism, `sqlite3_flutter_libs` rejection, `very_good_coverage@v2` ≥70% global, `build_runner` clean-diff
@@ -310,6 +356,12 @@ v1.4 列表功能 — see `.planning/REQUIREMENTS.md` for scoped requirements (c
 | OCR slot hardcodes `EntrySource.manual` pending MOD-005 | Schema accepts 'ocr' literal already (v1.2); v1.3 reserves architectural slot only with `// MOD-005: flip when writer ships (D-12)` marker | — Pending — MOD-005 OCR writer landing (v1.4+) |
 | Plan 23-09 LOC-cap extraction (`voice_input_screen.dart` 838 → 776) | CLAUDE.md `<800` line cap; `VoiceLocaleReadinessMixin` + 3 pure helpers preserve behavior | ✓ Good — zero behavior change, cap re-cleared (v1.3) |
 | Phase 23 cleanup phase inline (vs carry to v1.4) | Same-milestone debt absorption: surgical fixes + documentation reconciliation + device UAT runbook in single phase | ✓ Good — 9/9 plans complete; 9/9 device UATs pass; LOC-cap closed (v1.3) |
+| v1.4 calendar own-book only (family-combine deferred) | Keep v1.4 list feature scoped; combining members' per-day totals adds multi-book aggregation cost | ✓ Good — `calendarDailyTotalsProvider` seam reserved; deferred to v1.5+ (v1.4) |
+| `keepAlive: true` filter/sort state under `IndexedStack` | Filter/search/sort must survive tab switches; natural under IndexedStack | ✓ Good — state persists across tabs (v1.4 Phase 26) |
+| Calendar provider isolated from filter state (`_dayKey` normalization) | Watching search/filter would re-render 31 day cells per keystroke | ✓ Good — provider watches only bookId/year/month (v1.4 Phase 27) |
+| Swipe-delete confirm-only soft-delete, no undo | Undo needs `RestoreTransactionUseCase`; soft-delete keeps hash-chain intact | — Pending — undo deferred to v1.5+ (v1.4) |
+| LIST-02 reactivity via manual `ref.invalidate` (not `watchByBookIds` stream) | Stream chain built but every mutation site already invalidates; stream went unconsumed | ⚠️ Revisit — GAP-2 dead-code debt: consume `useCase.watch()` or delete the 3-layer chain (v1.4) |
+| GAP-1 fixed inline at milestone close (quick task) vs carry to v1.5 | One small, precisely-diagnosed wiring gap; cheaper to close now than track | ✓ Good — quick task 260531-u34 invalidates `calendarDailyTotalsProvider` at sync + FAB sites (v1.4) |
 
 ## Evolution
 
@@ -329,4 +381,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-31 — v1.4 列表功能: Phase 29 (List Screen Assembly + Family) complete. List screen fully assembled with pull-to-refresh (RefreshIndicator invalidating list + calendar providers); family mode merges members' entries with per-row member attribution chips, a "Mine only" shortcut, and per-member filter chips (SQL-level narrowing, calendar totals isolated from member filter per D-06). Closes LIST-04 + FAM-01/02/03/04. Verification 14/14, human UAT 4/4 approved. Code review CR-01 (stale memberBookId → empty bookIds error state) fixed with regression test. Only Phase 30 (i18n + empty states + golden polish) remains in v1.4. Prior: Phase 28 (Transaction Tile + Sort/Filter Bar) complete.*
+*Last updated: 2026-05-31 after v1.4 列表功能 milestone — shipped + archived (7 phases, 29 plans, tag `v1.4`). Full kakeibo-style List tab: calendar month header, sortable/searchable/filterable transaction list, month summary, family-aware display. Audit `tech_debt` accepted (22/22 requirements, 7/7 phases, 7/7 flows); GAP-1 closed at close via quick task 260531-u34; GAP-2 dead-code + draft-Nyquist docs carried as debt. No active milestone — run `/gsd-new-milestone` to scope next.*

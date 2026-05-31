@@ -4,6 +4,58 @@ Historical record of shipped versions. Each entry links to its full archive in `
 
 ---
 
+## v1.4 — 列表功能 (Transaction List)
+
+**Shipped:** 2026-05-31
+**Phases:** 24-30 (7 phases, 29 plans, 33 tasks)
+**Duration:** 2026-05-29 → 2026-05-31 (~3 days; git range `v1.3..HEAD` spans 2026-05-26, including v1.3.x voice hotfix quick-tasks tagged after v1.3)
+**Tag:** `v1.4`
+**Audit Status at Close:** `tech_debt` — milestone goal achieved (22/22 requirements, 7/7 phases, 7/7 E2E flows). The one functional gap, GAP-1 (calendar staleness after family-sync / FAB), was closed at milestone close via quick task 260531-u34. Residual debt is non-blocking: GAP-2 (LIST-02 `watchByBookIds` reactive stream is dead code — reactivity achieved via manual `ref.invalidate`) and draft-Nyquist documentation debt (Phases 25/26/27/29/30 `nyquist_compliant: false`; Phase 28 approved). Mirrors v1.2/v1.3 close precedent. See `.planning/milestones/v1.4-MILESTONE-AUDIT.md`.
+**Known deferred items at close:** see `.planning/STATE.md` Deferred Items §v1.4.
+
+### Delivered
+
+The placeholder List tab is now a full transaction overview in a Japanese-kakeibo layout. A `table_calendar` month header shows per-day expense totals (expense-only, own-book in v1.4), supports month navigation and tap-a-day-to-filter, and carries a current-month expense summary. Below it, a transaction list is sortable (date / edit-time / amount, with direction toggle), text-searchable (category · merchant · note), and filterable by ledger, multiple categories, and — in family mode — by member, all composing with AND logic and a one-tap clear. Rows reuse the v1.3 edit path on tap and route swipe-delete exclusively through `DeleteTransactionUseCase` (soft-delete, hash-chain preserved). When a family is joined, members' transactions (shadow books) merge in with per-row owner attribution and a "Mine only" shortcut. The list updates reactively after add / edit / delete / family-sync and supports pull-to-refresh; empty states have three distinct variants; all new strings ship in ja/zh/en with golden baselines.
+
+### Key Accomplishments
+
+1. **Data foundation + shared month-boundary util** (Phase 24) — `TransactionDao.findByBookIds(...)` multi-book query + `watchByBookIds(...)` reactive stream; extracted `DateBoundaries` utility to `lib/shared/utils/` consolidating the `DateTime(y, m+1, 0, 23,59,59)` idiom (6 prior call sites); `SortField` + `SortDirection` enums; 6 SC#1 DAO tests.
+2. **Pure-Dart domain + use case** (Phase 25) — Freezed `ListFilterState` / `ListSortConfig` value objects, repository interface, and `GetListTransactionsUseCase` with `execute()` (Future + Result) and `watch()` (Stream) methods + `GetListParams` composite; 8 Mocktail tests covering SORT-01..04 forwarding, no Riverpod dependency.
+3. **Providers + shell wiring** (Phase 26) — all list Riverpod providers wired with an explicit `keepAlive`-under-`IndexedStack` policy so filter/sort state persists across tab switches; `ListScreen` replaces the `main_shell_screen.dart` text placeholder (loading state reachable).
+4. **Calendar header + month summary** (Phase 27) — `table_calendar` month grid with `calendarDailyTotalsProvider` per-day expense totals (`_dayKey` normalization contract, expense-only, isolated from filter state), month navigation, day-tap filter, and a `NumberFormatter`-formatted month summary; iOS build gate passed; human-approved render. (CAL-01..04)
+5. **Transaction tile + sort/filter bar** (Phase 28) — `ListTransactionTile` (Dismissible swipe-delete via `DeleteTransactionUseCase`, tap-to-edit into the v1.3 `TransactionEditScreen`, ledger-color tag, tabular-figure amounts) + `ListDayGroupHeader` day grouping; sort/filter bar wiring text search + ledger + multi-category filters with AND composition. (LIST-01, ROW-01/02, SORT/FILTER)
+6. **List screen assembly + family-aware** (Phase 29) — full screen with `RefreshIndicator` pull-to-refresh (honest spinner via dual-invalidate + `await .future.catchError`); shadow-book merge, per-row member chip attribution, per-member + "Mine only" filters guarded by `isGroupMode`; the `anyFilterActive` 5-condition fix (incl. `memberBookId`) mirrored across screen + bar. (LIST-04, FAM-01..04)
+7. **i18n + empty states + golden polish** (Phase 30) — 3-variant `ListEmptyState` (no-data / no-match / loading-error), full ja/zh/en ARB coverage, and golden baselines; closes LIST-03.
+
+Plus, at milestone close: **GAP-1 closed** (quick task 260531-u34) — `calendarDailyTotalsProvider(current month)` now invalidated at both shell sites (post-family-sync, post-FAB) so calendar totals + month summary refresh without pull-to-refresh.
+
+### Stats
+
+- **Commits since v1.3 tag:** 283
+- **Files changed:** 316 (+51,409 / -2,207 LOC)
+- **Commit categories:** docs 162, feat 50, test 26, fix 25, chore 15, refactor 2
+- **Requirements:** 22/22 v1.4 requirements complete (LIST-03 checkbox reconciled at close — Phase 30 VERIFICATION had it ✓ SATISFIED)
+- **ARB parity:** 533 keys per locale (ja=zh=en) — +27 from v1.3 baseline of 506
+- **Drift schema:** unchanged at v17 (no migration this milestone)
+- **New stack dep:** `table_calendar: ^3.2.0` (intl 0.20.2-compatible; no win32/native; iOS build verified green)
+
+### Notable Decisions
+
+- **Calendar per-day totals own-book only in v1.4** — combined family-calendar totals deferred to v1.5+ (CAL-02 family mode seam reserved; `bookId` is a single value in `calendarDailyTotalsProvider`).
+- **Swipe-delete is confirm-only soft-delete, no undo SnackBar** — undo deferred (needs `RestoreTransactionUseCase`); deletion stays on the hash-chain-safe `DeleteTransactionUseCase` path.
+- **Filter/sort state persists across tab switches** via `keepAlive: true` under `IndexedStack` (Phase 26 decision).
+- **Calendar provider isolated from filter state** (`_dayKey` normalization, watches only bookId/year/month) to avoid re-rendering 31 cells on every search keystroke.
+- **Scope held to expense-only** — no income tracking, no month settlement/lock, no amount-range filter, no "New" badge (all explicitly deferred).
+- **GAP-1 fixed inline as a quick task at close** rather than carried to v1.5; GAP-2 (dead `watchByBookIds` stream) and draft-Nyquist docs accepted as tracked debt.
+
+### Archive
+
+- `.planning/milestones/v1.4-ROADMAP.md` — full phase details
+- `.planning/milestones/v1.4-REQUIREMENTS.md` — final requirement status (22/22) + v1.5+ backlog
+- `.planning/milestones/v1.4-MILESTONE-AUDIT.md` — pre-close audit report (status: `tech_debt`; GAP-1 closed after audit was taken)
+
+---
+
 ## v1.3 — 迭代帐本输入
 
 **Shipped:** 2026-05-26

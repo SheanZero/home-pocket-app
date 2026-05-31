@@ -156,6 +156,54 @@
 
 ---
 
+## Milestone: v1.4 — 列表功能 (Transaction List)
+
+**Shipped:** 2026-05-31
+**Phases:** 7 (24-30) | **Plans:** 29 | **Duration:** ~3 days (2026-05-29 → 2026-05-31) | **Commits:** 283 (vs v1.3 tag) | **Diff:** 316 files, +51,409 / -2,207 LOC
+
+### What Was Built
+- **Data foundation** (Phase 24): `findByBookIds` multi-book query + `watchByBookIds` reactive stream; extracted shared `DateBoundaries` util (consolidated 6 month-boundary call sites); `SortField`/`SortDirection` enums.
+- **Pure-Dart domain + use case** (Phase 25): Freezed `ListFilterState`/`ListSortConfig`, `GetListTransactionsUseCase` (execute/watch) + `GetListParams`; 8 Mocktail tests, no Riverpod.
+- **Providers + shell wiring** (Phase 26): list providers with `keepAlive`-under-`IndexedStack` filter persistence; `ListScreen` replaces shell placeholder.
+- **Calendar header** (Phase 27): `table_calendar` grid, `calendarDailyTotalsProvider` per-day expense totals (filter-isolated, `_dayKey` normalization), month nav, day-tap filter, month summary.
+- **Tile + sort/filter bar** (Phase 28): `ListTransactionTile` (swipe-delete via `DeleteTransactionUseCase`, tap-to-edit), day grouping, sort + text search + ledger + multi-category filters AND-composed.
+- **List screen + family** (Phase 29): full screen, pull-to-refresh (honest spinner, dual-invalidate), shadow-book merge, per-row member chip, member + "Mine only" filters.
+- **i18n + empty states + golden polish** (Phase 30): 3-variant `ListEmptyState`, ja/zh/en ARB (533 keys/locale), golden baselines.
+
+### What Worked
+- **Strict bottom-up layer progression** (data → domain → providers → calendar → tile → assembly → polish) matched the Clean Architecture dependency flow; each phase was independently testable and the UI phases never blocked on shaky foundations.
+- **Reusing the v1.3 edit/soft-delete path wholesale** — ROW-01/02 cost almost nothing because `TransactionEditScreen` + `DeleteTransactionUseCase` + shared form already existed; no new write/delete logic, hash-chain integrity preserved by construction.
+- **Calendar provider isolation from filter state** (`calendarDailyTotalsProvider` watches only bookId/year/month) — deliberately NOT watching search/filter avoided re-rendering 31 day cells on every keystroke. Encoding the perf contract as a provider-dependency decision (D-06/D-09) beat optimizing later.
+- **Shared `DateBoundaries` util before the 7th call site** — consolidating the `DateTime(y, m+1, 0, 23,59,59)` idiom as a utility rather than copy-pasting it again.
+- **On-device visual pass batched at close** — running the release build on a physical iPhone and walking a 9-item checklist (incl. voice items needing a real mic) cleared a backlog of "Pending visual check" quick tasks in one sitting.
+
+### What Was Inefficient
+- **GAP-1 — incomplete invalidation set** (the headline issue): when Phase 26 added `listTransactionsProvider` invalidation at the two shell sites (post-sync, post-FAB) as "D-03 forward-wiring," it did NOT also invalidate `calendarDailyTotalsProvider` added in Phase 27. List refreshed; calendar totals + month summary stayed stale until pull-to-refresh. A clean Phase 26↔27 boundary bug that slipped every phase verification and was only caught by the milestone audit — then fixed as quick task 260531-u34 at close.
+- **GAP-2 — speculative reactive infrastructure**: `watchByBookIds` was built across DAO/repo/use-case in Phase 24 (LIST-02's "stated mechanism") but every mutation site achieves reactivity via manual `ref.invalidate`, so the stream has zero consumers and the shell comments describing it are stale. Building the reactive chain before deciding the reactivity strategy produced dead code.
+- **REQUIREMENTS.md LIST-03 drift — 5th consecutive milestone**: Phase 30 VERIFICATION marked LIST-03 ✓ SATISFIED but the REQUIREMENTS.md checkbox/traceability stayed `[ ]`/`Pending` until milestone-close reconciliation. Identical pattern to v1.0/v1.1/v1.2/v1.3.
+- **Pending-visual-check accumulation**: 9 quick tasks across ~2 weeks sat at "Pending visual check" because the manual device pass was never run inline — they piled up and surfaced as open items at milestone close (resolved in one batch pass, but a recurring "verify-later→never" smell).
+- **Draft-Nyquist VALIDATION.md — 5th consecutive milestone**: Phases 25/26/27/29/30 `nyquist_compliant: false`; documentation-grade debt accepted again.
+
+### Patterns Established
+- **Invalidation-set completeness check**: when adding a new reactive surface (e.g., a calendar provider), audit EVERY existing mutation/refresh site to ensure it invalidates the new provider too — a new read surface implicitly extends the contract of every writer. (Direct GAP-1 lesson.)
+- **Decide the reactivity strategy before building the stream**: manual-`invalidate` vs `watch()`-stream is an architecture choice; pick one and wire it, don't build both. (Direct GAP-2 lesson.)
+- **Provider-dependency narrowing as a perf contract**: for grid/aggregate providers, explicitly enumerate the minimal watched keys and document why broader state is excluded.
+- **Batch on-device visual pass at close**: stack "needs human eyes" quick tasks into one device session (release build, scripted checklist, voice items on real hardware) rather than per-task context switches — but ideally run inline to avoid accumulation.
+
+### Key Lessons
+1. **A new reactive read surface silently extends every writer's invalidation contract** — GAP-1 is the canonical failure. When introducing `calendarDailyTotalsProvider`, the two existing shell invalidation sites needed it added; nothing flagged the omission until audit. Make "audit all invalidation sites" a checklist item whenever a provider gains a new consumer surface.
+2. **Don't build reactive infrastructure you won't consume** — `watchByBookIds` (GAP-2) is 3 layers of dead code because the team defaulted to manual `ref.invalidate` everywhere. Decide the mechanism once.
+3. **REQUIREMENTS.md status drift is now a 5×-recurring close cost** — the per-plan status-flip discipline still isn't holding. This is the single most repeated inefficiency across all milestones; it warrants automation (a close-gate that diffs VERIFICATION ✓ against REQUIREMENTS checkboxes).
+4. **"Pending visual check" is a verify-later trap** — visual/device acceptance deferred inline tends to never happen until forced at close. Either run the device pass at each phase/quick-task close or explicitly track it as acknowledged debt.
+5. **Reuse pays off massively at the edges** — ROW-01/02 (tap-to-edit, swipe-delete) were near-free because v1.3 built the shared form + delete use case. Bottom-up layering + prior-milestone reuse is why a 22-requirement feature shipped in ~3 days.
+
+### Cost Observations
+- Model mix: not measured in local artifacts (profile `balanced`; planner/executor/checker/verifier all `sonnet` per config).
+- Sessions: multi-session GSD execution across Phases 24-30 + numerous quick tasks; executor worktree merges visible in git log.
+- Notable: 283 commits, docs-heavy (162 docs / 50 feat / 26 test / 25 fix / 15 chore / 2 refactor) — the high docs ratio reflects GSD planning artifacts per phase. Schema unchanged at v17 (no migration). One new pub dependency (`table_calendar ^3.2.0`), vetted intl-0.20.2-compatible + iOS-build-green.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -166,6 +214,7 @@
 | v1.1 | multi-session | 4 | Feature work resumed on top of cleanup baseline with ADR-first domain contracts and UI-specific verification. |
 | v1.2 | multi-session, 3 days | 5 | ADR-016 Joy migration in lockstep with v1.1-deferred backlog; type-system invariants for anti-toxicity; HomeHero isolation as structural test contract; orthogonal-provider-tuple composition (window × variant). |
 | v1.3 | multi-session, 5 days | 6 | Foundation-phase-first for multi-host widget convergence; parallel-safe phase split (voice parser ∥ manual UI); architecture invariant tests for resolver contracts; runtime extensibility tests as VOICE-06 proof; same-milestone cleanup phase (Phase 23) for debt absorption; code-review severity-bumping authority for production-risk gaps. |
+| v1.4 | multi-session, 3 days | 7 | Strict bottom-up layer progression (data→domain→providers→UI); heavy reuse of prior-milestone edit/delete path; provider-dependency narrowing as an explicit perf contract; batched on-device visual pass at close. Surfaced two wiring smells: incomplete invalidation set (GAP-1) + speculative unused reactive stream (GAP-2). |
 
 ### Cumulative Quality
 
@@ -175,6 +224,7 @@
 | v1.1 | full `flutter test` passed 1413 tests at Phase 12 close | not recomputed at milestone close | 0 new pub dependencies |
 | v1.2 | full suite `+1430 All tests passed!` at Phase 14 close (with `--concurrency=1`); 6 pre-existing failures in `family_insight_card_test.dart` from Phase 15 ARB drift accepted as deferred | not recomputed at milestone close; ~6.5k LOC test additions | 0 new pub dependencies |
 | v1.3 | corpus tests: zh 48/50 (96%), ja 50/50 (100%); voice category corpus zh 30/30 + ja 31/31 (100%); 15 pre-existing failures carried (7 home_hero_card_golden + 4 home_hero_card widget + 4 merchant_database); 9/9 device UATs (Phase 19+20+22 carry) pass in Phase 23 | not recomputed at milestone close; ~10.2k LOC test additions (1.56:1 test-to-code ratio) | 0 new pub dependencies |
+| v1.4 | 2238/2238 tests pass at quick-task checkpoints; golden baselines re-based for list/calendar/tile; 9 quick-task visual checks confirmed on-device 2026-05-31; `flutter analyze` 0 issues | not recomputed at milestone close | 1 new pub dependency (`table_calendar ^3.2.0`, intl-0.20.2-compatible, iOS-build-green) |
 
 ### Top Lessons
 
@@ -189,3 +239,7 @@
 9. **(v1.3)** Same-milestone cleanup phase (Phase 23 pattern) > carry-to-next for debt absorption — wave parallelism amortizes cleanup cost across one-day execution.
 10. **(v1.3)** Code review needs severity-bumping authority for production-risk gaps (G-01/G-02 elevation from advisory to BLOCKER worked); also needs counter-mechanism for advisory-queue growth (e.g., voice-flow polish phase scheduled when WR count > N).
 11. **(v1.3)** Architecture-scanner allow-lists must be co-developed with the code that legitimately triggers them — extend in same commit, not catch at audit.
+12. **(v1.4)** A new reactive read surface silently extends every writer's invalidation contract — when a provider gains a new consumer (e.g., a calendar grid), audit ALL existing `ref.invalidate` sites to add it (GAP-1). Make it a checklist item.
+13. **(v1.4)** Decide the reactivity mechanism (manual `invalidate` vs `watch()` stream) once, then wire only that — building both leaves dead code (GAP-2).
+14. **(v1.4)** REQUIREMENTS.md status drift is now 5×-recurring — escalate from "remember to flip it" to an automated close-gate diffing VERIFICATION ✓ against REQUIREMENTS checkboxes.
+15. **(v1.4)** "Pending visual check" is a verify-later trap — deferred device/visual acceptance accumulates until forced at close; run inline or track as acknowledged debt.

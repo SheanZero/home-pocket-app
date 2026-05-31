@@ -2,51 +2,45 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: 列表功能
-status: completed
+status: Awaiting next milestone
 stopped_at: Phase 30 context gathered
-last_updated: "2026-05-31T08:22:35.605Z"
-last_activity: 2026-05-31 -- Completed quick task 260531-u34: fix CAL-02/CAL-04 calendar staleness after family-sync + FAB (GAP-1)
+last_updated: "2026-05-31T13:02:36.654Z"
+last_activity: 2026-05-31 — Milestone v1.4 completed and archived
 progress:
   total_phases: 7
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 29
-  completed_plans: 28
-  percent: 86
+  completed_plans: 29
+  percent: 100
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-29 — v1.4 列表功能 milestone started)
+See: .planning/PROJECT.md (updated 2026-05-31 — v1.4 列表功能 shipped + archived)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes survival spending from soul spending
-**Current focus:** Phase 30 — i18n-empty-states-golden-polish
+**Current focus:** Between milestones — run `/gsd-new-milestone` to scope the next one
 
 ## Current Position
 
-Phase: 30 — COMPLETE
-Plan: 1 of 5
-Status: Phase 30 complete
-Last activity: 2026-05-31 -- Completed quick task 260531-u34: fix CAL-02/CAL-04 calendar staleness after family-sync + FAB (GAP-1)
+Phase: Milestone v1.4 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-05-31 — Milestone v1.4 completed and archived
 
-**Next action:** `/gsd:verify-work 29` — verify Phase 29 (last phase of v1.4)
+## Last Milestone Snapshot (v1.4)
 
-## Phase Overview (v1.4)
+- **Phases:** 7 (24-30)
+- **Plans:** 29
+- **Duration:** 2026-05-29 → 2026-05-31 (~3 days)
+- **Commits:** 283 (vs v1.3 tag); 316 files changed; +51,409 / -2,207 LOC
+- **Audit Status at Close:** `tech_debt` — accepted (22/22 requirements, 7/7 phases, 7/7 E2E flows; GAP-1 calendar-staleness closed at close via quick task 260531-u34; GAP-2 `watchByBookIds` dead-code + Phases 25/26/27/29/30 draft-Nyquist docs carried)
+- **Outcome:** Full kakeibo-style List tab in new `lib/features/list/` module — `table_calendar` month header (per-day expense totals, own-book), month nav + day-tap filter, sortable (date/edit-time/amount ± dir) · searchable (category·merchant·note) · filterable (ledger · multi-category · family-member, AND-composed) transaction list, current-month expense summary, family-aware shadow-book merge with per-row member attribution + "Mine only", reactive updates + pull-to-refresh reusing v1.3 edit / soft-delete path, 3-variant empty states. Shared `DateBoundaries` util; `table_calendar ^3.2.0` (iOS build green). ARB 533 keys/locale (+27 from v1.3). Schema unchanged at v17.
+- **Tag:** `v1.4`
 
-| Phase | Name | Requirements | Status |
-|-------|------|-------------|--------|
-| 24 | Data Layer Extension | LIST-02 | Not started |
-| 25 | Domain Models + Use Case | SORT-01, SORT-02, SORT-03, SORT-04 | Not started |
-| 26 | Providers + Shell Wiring | FILTER-01, FILTER-02, FILTER-03, FILTER-04 | Not started |
-| 27 | Calendar Header + Month Summary | CAL-01, CAL-02, CAL-03, CAL-04 | Not started |
-| 28 | Transaction Tile + Sort/Filter Bar | LIST-01, ROW-01, ROW-02, SORT-01–04, FILTER-01–04 | Not started |
-| 29 | List Screen Assembly + Family | LIST-04, FAM-01, FAM-02, FAM-03, FAM-04 | Complete (4/4 plans) — ready for verification |
-| 30 | i18n + Empty States + Golden Polish | LIST-03 | Not started |
-
-Note: SORT-01/02/03/04 and FILTER-01/02/03/04 are defined in Phases 25/26 respectively and first become fully user-observable in Phase 28. Their traceability maps to Phase 28 as the primary delivery phase per REQUIREMENTS.md.
-
-## Last Milestone Snapshot (v1.3)
+## Previous Milestone Snapshot (v1.3)
 
 - **Phases:** 6 (18-23)
 - **Plans:** 47
@@ -82,11 +76,14 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 + v1.
 
 ### Pending Todos
 
-Roadmap created. Ready to plan Phase 24.
+v1.4 shipped + archived. No active milestone — run `/gsd-new-milestone` to scope the next.
 
 ### Blockers / Concerns
 
-No active blockers for v1.4. Carried-forward debt (cross-milestone):
+No active blockers. Carried-forward debt (cross-milestone):
+
+- **v1.4 GAP-2** *(dead code)*: LIST-02 `watchByBookIds` stream unused; reactivity via manual `ref.invalidate` — consume or delete the 3-layer chain (defer to v1.5; see Deferred Items §v1.4)
+- **v1.4 Nyquist debt:** Phases 25/26/27/29/30 draft + `nyquist_compliant: false`; Phase 28 approved — documentation-grade only
 
 - **FUTURE-TOOL-03** *(coverage-baseline-review)*: Review 70% coverage threshold (triggered post-v1.2; still open)
 - **FUTURE-QA-01** *(smoke-test-owner-driven)*: Owner runs smoke tests before v1 release
@@ -98,13 +95,6 @@ No active blockers for v1.4. Carried-forward debt (cross-milestone):
 - **v1.3 voice-flow polish backlog:** Phase 22 advisory WR-02/03/06/07/NEW-02/NEW-03 + IN-01/02/03 on `voice_input_screen.dart`; Phase 23 WR-06 `_voiceLocaleId` reassignment functionally dead. Candidate for v1.4+ VOICE-POLISH-V2 phase.
 - **MOD-005 OCR slot:** `ocr_review_screen.dart:54,58` hardcodes `EntrySource.manual` pending writer landing — annotated with `// MOD-005: flip to EntrySource.ocr when OCR writer ships (D-12)`. Schema accepts 'ocr' literal already (v1.2 schema v17).
 - **VOICE-EN-V2-01:** English voice parser skeleton only (Plan 23-03 `voice_corpus_en.dart`); no production en voice parser.
-
-**v1.4-specific risks to watch:**
-
-- Shadow-book `note` decryption: `TransactionRepositoryImpl._toModel()` exception handling for undecryptable shadow notes — verify in Phase 24
-- Ledger color constants: verify `AppColors.soul` / `AppColors.survival` against `lib/core/theme/app_colors.dart` before Phase 28 tile implementation (never use hardcoded hex)
-- `ProviderException` wrapping: all provider error test assertions must use `throwsA(isA<ProviderException>().having(...))` — enforce in every phase adding providers
-- Dual-ledger total contamination: calendar + month summary must filter `WHERE type = 'expense'` only — verify in Phase 27
 
 ### Quick Tasks Completed
 
@@ -129,6 +119,15 @@ No active blockers for v1.4. Carried-forward debt (cross-milestone):
 | 260531-u34 | fix CAL-02/CAL-04 calendar staleness after family-sync + FAB (GAP-1) — invalidate `calendarDailyTotalsProvider(current month)` at the two shell sites (post-sync, post-FAB) alongside the existing `listTransactionsProvider` invalidation; calendar per-day totals + month summary now refresh without pull-to-refresh | 2026-05-31 | 291a9ff4 | Verified 2026-05-31 — closes milestone-audit GAP-1 | [260531-u34](./quick/260531-u34-fix-cal-02-cal-04-calendar-staleness-aft/) |
 
 ## Deferred Items
+
+### Items acknowledged and deferred at v1.4 milestone close on 2026-05-31
+
+| Category | Item | Status | Deferred At |
+|----------|------|--------|-------------|
+| dead_code | GAP-2: LIST-02 reactive stream `TransactionDao.watchByBookIds` exists at DAO/repo/use-case layers but has zero consumers — reactivity is achieved by manual `ref.invalidate` at every mutation site. Stated mechanism is unwired; shell comments (`main_shell_screen.dart` near the invalidation sites) are stale/misleading. Fix: either consume `useCase.watch()` or delete the 3-layer chain + fix comments | defer to v1.5 (accept as non-blocking; all verified flows work via manual invalidate) | v1.4 close |
+| nyquist_gap | Phases 25/26/27/29/30 VALIDATION.md draft + `nyquist_compliant: false`; Phase 28 approved (`nyquist_compliant: true`, `wave_0_complete: false`); Phase 24 compliant (final). Documentation-grade, mirrors accepted v1.2/v1.3 pattern. Run `/gsd-validate-phase {N}` per phase to close retroactively | accept (documentation-grade) | v1.4 close |
+| metadata_drift | `gsd-sdk audit-open` reports 17 quick tasks as `missing` status (their SUMMARY.md lack a `status: complete` frontmatter field — a convention this project never adopted) and 3 phases (26/28/29) with UAT files flagged though all are `passed`/`resolved` with 0 open scenarios; all quick tasks are recorded Verified in the Quick Tasks Completed table above (9 of them confirmed via on-device visual pass 2026-05-31). Cosmetic, no functional gap | cosmetic, no functional gap | v1.4 close |
+| forward_compat | GAP-1 (calendar staleness after family-sync / FAB) was **fixed at close**, not deferred — quick task 260531-u34 invalidates `calendarDailyTotalsProvider(current month)` at both shell sites. Recorded here for audit-trail completeness | resolved | v1.4 close |
 
 ### Items acknowledged and deferred at v1.3 milestone close on 2026-05-26
 
@@ -199,9 +198,4 @@ Stopped at: Phase 30 context gathered
 
 ## Operator Next Steps
 
-- `/gsd:verify-work 29` — verify Phase 29 (LIST-04, FAM-01–04 delivered + visually approved)
-- Phase 29 close notes:
-  - LIST-04 pull-to-refresh: RefreshIndicator on list screen, dual-invalidate (list + calendar), honest spinner (D-05/Pitfall F)
-  - FAM-01–04 all visually verified in solo + family mode (member chips, Mine-only, AND-composition, filtered-empty)
-  - Pre-existing out-of-scope debt: 11 golden pixel-diff failures in `home_hero_card_golden_test.dart` (home feature, from quick task 260522-fj5 — pending human re-baseline; NOT a Phase 29 regression)
-  - `const currencyCode = 'JPY'` seam in list_screen.dart left unchanged (deferred per RESEARCH.md)
+- Start the next milestone with /gsd-new-milestone
