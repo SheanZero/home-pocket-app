@@ -1,11 +1,12 @@
-// Widget tests for ListEmptyState (B3).
+// Widget tests for ListEmptyState — 3-state enum-driven variant API (Phase 30, D-04/D-05).
 //
 // ListEmptyState is defined in:
 //   lib/features/list/presentation/widgets/list_empty_state.dart
 //
-// These tests cover both render paths:
-//   - isFilterActive: false → receipt_long_outlined icon, no clearAll TextButton
-//   - isFilterActive: true  → search_off_outlined icon + clearAll TextButton
+// These tests cover all 3 render variants:
+//   - ListEmptyVariant.noData    → receipt_long_outlined icon, no TextButton
+//   - ListEmptyVariant.dayEmpty  → event_busy_outlined icon + TextButton
+//   - ListEmptyVariant.filtered  → search_off_outlined icon + TextButton
 //
 // Run: flutter test test/widget/features/list/list_empty_state_test.dart
 
@@ -17,11 +18,11 @@ import 'package:home_pocket/generated/app_localizations.dart';
 
 /// Pumps a ListEmptyState inside UncontrolledProviderScope + MaterialApp.
 ///
-/// [isFilterActive] controls which render path is exercised.
+/// [variant] controls which of the 3 render paths is exercised.
 Future<void> _pumpEmptyState(
   WidgetTester tester,
   ProviderContainer container, {
-  required bool isFilterActive,
+  required ListEmptyVariant variant,
 }) async {
   await tester.pumpWidget(
     UncontrolledProviderScope(
@@ -31,7 +32,7 @@ Future<void> _pumpEmptyState(
         supportedLocales: S.supportedLocales,
         home: Scaffold(
           body: Center(
-            child: ListEmptyState(isFilterActive: isFilterActive),
+            child: ListEmptyState(variant: variant),
           ),
         ),
       ),
@@ -43,26 +44,29 @@ Future<void> _pumpEmptyState(
 void main() {
   group('ListEmptyState', () {
     testWidgets(
-        'isFilterActive: false — shows receipt_long_outlined icon, no clearAll button',
+        'noData — receipt_long_outlined icon, no action button',
         (tester) async {
       final container = ProviderContainer.test();
-      await _pumpEmptyState(tester, container, isFilterActive: false);
-      expect(
-        find.byIcon(Icons.receipt_long_outlined),
-        findsOneWidget,
-      );
+      await _pumpEmptyState(tester, container, variant: ListEmptyVariant.noData);
+      expect(find.byIcon(Icons.receipt_long_outlined), findsOneWidget);
       expect(find.byType(TextButton), findsNothing);
     });
 
     testWidgets(
-        'isFilterActive: true — shows search_off_outlined icon and clearAll TextButton',
+        'dayEmpty — event_busy_outlined icon + "show full month" TextButton',
         (tester) async {
       final container = ProviderContainer.test();
-      await _pumpEmptyState(tester, container, isFilterActive: true);
-      expect(
-        find.byIcon(Icons.search_off_outlined),
-        findsOneWidget,
-      );
+      await _pumpEmptyState(tester, container, variant: ListEmptyVariant.dayEmpty);
+      expect(find.byIcon(Icons.event_busy_outlined), findsOneWidget);
+      expect(find.byType(TextButton), findsOneWidget);
+    });
+
+    testWidgets(
+        'filtered — search_off_outlined icon + "clear filters" TextButton',
+        (tester) async {
+      final container = ProviderContainer.test();
+      await _pumpEmptyState(tester, container, variant: ListEmptyVariant.filtered);
+      expect(find.byIcon(Icons.search_off_outlined), findsOneWidget);
       expect(find.byType(TextButton), findsOneWidget);
     });
   });

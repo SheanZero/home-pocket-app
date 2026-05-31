@@ -98,7 +98,7 @@ class ListScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '[data load error]',
+                  S.of(context).listLoadError,
                   style: AppTextStyles.caption.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -108,17 +108,23 @@ class ListScreen extends ConsumerWidget {
           ),
         ),
         data: (txs) {
-          final anyFilterActive = filter.activeDayFilter != null ||
-              filter.ledgerType != null ||
+          // D-05: "other" filters = non-day filters; anyOtherFilter takes priority over day filter
+          final anyOtherFilter = filter.ledgerType != null ||
               filter.categoryIds.isNotEmpty ||
               filter.searchQuery.isNotEmpty ||
-              filter.memberBookId != null; // FAM-03 fix (Pitfall B)
+              filter.memberBookId != null;
+
+          final variant = anyOtherFilter
+              ? ListEmptyVariant.filtered
+              : (filter.activeDayFilter != null
+                  ? ListEmptyVariant.dayEmpty
+                  : ListEmptyVariant.noData);
 
           if (txs.isEmpty) {
             // Wrap in scrollable so pull-to-refresh gesture fires when empty (Pitfall E)
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              child: ListEmptyState(isFilterActive: anyFilterActive),
+              child: ListEmptyState(variant: variant),
             );
           }
 
