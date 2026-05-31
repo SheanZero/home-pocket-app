@@ -134,6 +134,7 @@ class CalendarHeaderWidget extends ConsumerWidget {
   ) {
     final isSelected =
         activeDayFilter != null && isSameDay(day, activeDayFilter);
+    final isToday = !isOutside && isSameDay(day, DateTime.now());
     final dayTotal = isOutside ? 0 : (dailyMap[_dayKey(day)] ?? 0);
 
     // Decoration — only the actively selected day gets a filled chip.
@@ -165,17 +166,37 @@ class CalendarHeaderWidget extends ConsumerWidget {
           children: [
             Text(
               '${day.day}',
-              style: AppTextStyles.bodySmall.copyWith(color: numeralColor),
+              // Today: lightweight marker — bold numeral (+ dot below), no box.
+              style: AppTextStyles.bodySmall.copyWith(
+                color: numeralColor,
+                fontWeight: isToday ? FontWeight.w700 : null,
+              ),
             ),
-            // Always render an amount slot so numerals align vertically across
-            // all cells in a row regardless of whether an amount is present.
-            if (dayTotal > 0 && !isOutside)
-              Text(
-                NumberFormatter.formatCompact(dayTotal, locale),
-                style: AppTextStyles.micro.copyWith(color: amountColor),
-              )
-            else
-              const SizedBox(height: 14), // matches AppTextStyles.micro line height
+            // Fixed-height sub-slot so numerals align across the row regardless
+            // of whether a cell shows an amount / today dot / nothing.
+            SizedBox(
+              height: 14, // matches AppTextStyles.micro line height
+              child: Center(
+                child: dayTotal > 0 && !isOutside
+                    ? Text(
+                        NumberFormatter.formatCompact(dayTotal, locale),
+                        style:
+                            AppTextStyles.micro.copyWith(color: amountColor),
+                      )
+                    : isToday
+                        ? Container(
+                            width: 5,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isSelected
+                                  ? AppColors.card
+                                  : AppColors.accentPrimary,
+                            ),
+                          )
+                        : null,
+              ),
+            ),
           ],
         ),
       ),
