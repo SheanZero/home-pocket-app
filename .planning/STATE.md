@@ -5,7 +5,7 @@ milestone_name: 列表功能
 status: completed
 stopped_at: Phase 30 context gathered
 last_updated: "2026-05-31T08:22:35.605Z"
-last_activity: 2026-05-31 -- Completed quick task 260531-oqn: 日历列表页 UI 6 项调整
+last_activity: 2026-05-31 -- Completed quick task 260531-se5: 列表按金额排序全量排序、隐藏日期、标题改为日期+类目
 progress:
   total_phases: 7
   completed_phases: 6
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-05-29 — v1.4 列表功能 milestone st
 Phase: 30 — COMPLETE
 Plan: 1 of 5
 Status: Phase 30 complete
-Last activity: 2026-05-31 -- Completed quick task 260531-oqn: 日历列表页 UI 6 项调整
+Last activity: 2026-05-31 -- Completed quick task 260531-se5: 列表按金额排序全量排序、隐藏日期、标题改为日期+类目
 
 **Next action:** `/gsd:verify-work 29` — verify Phase 29 (last phase of v1.4)
 
