@@ -69,3 +69,17 @@ b0926be3 feat(260531-oqn-ui-01): ListScreen AppBar with month nav + empty-cell p
 
 **创建时间:** 2026-05-31 18:35
 **作者:** Claude (gsd-quick 260531-oqn)
+
+---
+
+## 追加修复（2026-05-31 19:45，真机反馈后）
+
+commit `8999a77e`：
+
+1. **周日数字改红色**（`0xFFD32F2F` Material Red 700）—— 原需求 #4 设的黑色，真机确认后改红；周六仍蓝（`0xFF1565C0`）。
+2. **列表项左侧重排**（`list_transaction_tile.dart`）：
+   - 一级类目图标移到 leading 位置，放大到 28dp 并垂直居中（跨主/副两行）。
+   - 灵魂/生存标记由纯文字改为**背景 badge**（`tagBgColor` 圆角 pill），且与二级类目标题**左对齐**（同一左边界，图标右侧）。
+   - 店名改为 badge 右侧的弱化文字（`textSecondary`）。
+- 验证：`flutter analyze` 0 问题；list widget + golden 共 69 测试通过；`list_calendar_header` / `list_transaction_tile` goldens 三语言 re-baseline。
+- 仍待真机视觉确认。
