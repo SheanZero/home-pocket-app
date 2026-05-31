@@ -57,7 +57,7 @@
 - [x] Phase 18: Shared Details Form Foundation (8/8 plans) — completed 2026-05-22
 - [x] Phase 19: Manual One-Step + Keypad Polish (5/5 plans) — completed 2026-05-23
 - [x] Phase 20: Voice Number Parser (zh + ja) (9/9 plans) — completed 2026-05-24
-- [x] Phase 21: Voice Category Resolver Level-2 Enforcement (6/6 plans) — completed 2026-05-24
+- [x] Phase 21: Voice Category Resolver Level-2 Enforcement (6/6 plans) — completed 2026-05-25
 - [x] Phase 22: Voice One-Step Integration + Record Button UX (10/10 plans) — completed 2026-05-25
 - [x] Phase 23: v1.3 Cleanup — Scanner Allow-Lists + Voice Flow Polish (9/9 plans) — completed 2026-05-26
 
@@ -293,7 +293,25 @@ Plans:
   3. When the user has applied filters that match no transactions, the user sees a distinct filtered-empty-state message (e.g. "条件に合う記録が見つかりません" in ja) with a "clear filters" inline action — distinct from the no-data empty state
   4. `flutter analyze` reports zero issues; `dart run custom_lint --no-fatal-infos` reports zero errors; `build_runner` diff is clean; global test coverage remains ≥70%
 
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+**Wave 1**
+
+- [ ] 30-01-PLAN.md — ARB key edits (6 new keys + 4 updated values) in all 3 locales + flutter gen-l10n (Wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 30-02-PLAN.md — ListEmptyState 3-state rework + list_screen.dart branching + list_calendar_header.dart Semantics + test updates + D-08 sweep (Wave 2)
+
+**Wave 3** *(blocked on Wave 2, parallel pair)*
+
+- [ ] 30-03-PLAN.md — Golden test files: list_transaction_tile, list_day_group_header, list_sort_filter_bar, list_empty_state (9 cases) + baselines (Wave 3)
+- [ ] 30-04-PLAN.md — Golden test files: list_calendar_header (determinism fix), list_category_filter_sheet + baselines (Wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 30-05-PLAN.md — CI green gate: analyze 0 + custom_lint 0 + build_runner clean + coverage ≥70% + human verify (Wave 4)
+
 **UI hint**: yes
 
 ---
@@ -308,7 +326,7 @@ Plans:
 | 27. Calendar Header + Month Summary | 4/4 | Complete    | 2026-05-30 |
 | 28. Transaction Tile + Sort/Filter Bar | 6/7 | Complete    | 2026-05-30 |
 | 29. List Screen Assembly + Family | 4/4 | Complete    | 2026-05-30 |
-| 30. i18n + Empty States + Golden Polish | 0/TBD | Not started | - |
+| 30. i18n + Empty States + Golden Polish | 0/5 | Not started | - |
 
 ---
 
