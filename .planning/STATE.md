@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: 文案与配色统一
-status: planning
-last_updated: "2026-05-31T13:44:43.592Z"
+status: roadmapped
+last_updated: "2026-05-31T14:00:00.000Z"
 last_activity: 2026-05-31
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -19,15 +19,17 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-05-31 — v1.4 列表功能 shipped + archived)
 
-**Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes survival spending from soul spending
-**Current focus:** Between milestones — run `/gsd-new-milestone` to scope the next one
+**Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
+**Current focus:** v1.5 文案与配色统一 — Phases 31-34 — Terminology & Color Unification
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 31 (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-31 — Milestone v1.5 started
+Status: Roadmap created — ready for Phase 31 planning
+Last activity: 2026-05-31 — Roadmap for v1.5 defined (4 phases, 15 requirements mapped)
+
+Progress: ░░░░░░░░░░ 0% (0/4 phases complete)
 
 ## Last Milestone Snapshot (v1.4)
 
@@ -59,7 +61,14 @@ Last activity: 2026-05-31 — Milestone v1.5 started
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 + v1.3 decisions captured there with outcomes.
+Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 + v1.3 + v1.4 decisions captured there with outcomes.
+
+**v1.5 roadmap decisions:**
+
+- Terminology workstream (Phases 31) runs before palette workstream (Phase 32) — TERMID-02 (AppColors.survival→daily / soul→joy symbol rename) lands first so the COLOR-03 semantic token system (Phase 33) is built on already-renamed symbols, eliminating churn
+- PALETTE-03 (user selects one of 4–5 Pencil mockup palettes) is a hard gate before Phase 33; Phase 32 explicitly ends at that user-selection checkpoint
+- Phase 34 is dedicated to golden re-baseline to keep visual verification isolated and clearly attributable to the palette change
+- Locale mapping locked: Survival→日常/日常(にちじょう)/Daily; Soul→悦己/ときめき/Joy (zh/ja/en)
 
 **v1.4 locked product decisions (pre-implementation):**
 
@@ -75,13 +84,14 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 + v1.
 
 ### Pending Todos
 
-v1.4 shipped + archived. No active milestone — run `/gsd-new-milestone` to scope the next.
+- Run `/gsd-plan-phase 31` to begin Phase 31 (Terminology Rename)
+- Phase 32 ends with a user-selection checkpoint (PALETTE-03) — plan execution must pause for human approval of Pencil palette before Phase 33 can start
 
 ### Blockers / Concerns
 
 No active blockers. Carried-forward debt (cross-milestone):
 
-- **v1.4 GAP-2** *(dead code)*: LIST-02 `watchByBookIds` stream unused; reactivity via manual `ref.invalidate` — consume or delete the 3-layer chain (defer to v1.5; see Deferred Items §v1.4)
+- **v1.4 GAP-2** *(dead code)*: LIST-02 `watchByBookIds` stream unused; reactivity via manual `ref.invalidate` — consume or delete the 3-layer chain (defer to v1.6; see Deferred Items §v1.4)
 - **v1.4 Nyquist debt:** Phases 25/26/27/29/30 draft + `nyquist_compliant: false`; Phase 28 approved — documentation-grade only
 
 - **FUTURE-TOOL-03** *(coverage-baseline-review)*: Review 70% coverage threshold (triggered post-v1.2; still open)
@@ -91,7 +101,7 @@ No active blockers. Carried-forward debt (cross-milestone):
 - **v1.1 verification debt:** Phase 11 device/simulator UAT for AnalyticsScreen month chip + pull-to-refresh (human_needed)
 - **v1.2 verification debt:** Phase 13 + 17 missing VERIFICATION.md (live code wired + integration-verified at milestone close)
 - **v1.3 Nyquist debt:** Phase 18 + 21 missing VALIDATION.md; Phase 19 + 20 draft + `nyquist_compliant: false`; Phase 22 draft + `nyquist_compliant: true` — documentation-grade only
-- **v1.3 voice-flow polish backlog:** Phase 22 advisory WR-02/03/06/07/NEW-02/NEW-03 + IN-01/02/03 on `voice_input_screen.dart`; Phase 23 WR-06 `_voiceLocaleId` reassignment functionally dead. Candidate for v1.4+ VOICE-POLISH-V2 phase.
+- **v1.3 voice-flow polish backlog:** Phase 22 advisory WR-02/03/06/07/NEW-02/NEW-03 + IN-01/02/03 on `voice_input_screen.dart`; Phase 23 WR-06 `_voiceLocaleId` reassignment functionally dead. Candidate for VOICE-POLISH-V2 phase.
 - **MOD-005 OCR slot:** `ocr_review_screen.dart:54,58` hardcodes `EntrySource.manual` pending writer landing — annotated with `// MOD-005: flip to EntrySource.ocr when OCR writer ships (D-12)`. Schema accepts 'ocr' literal already (v1.2 schema v17).
 - **VOICE-EN-V2-01:** English voice parser skeleton only (Plan 23-03 `voice_corpus_en.dart`); no production en voice parser.
 
@@ -123,7 +133,7 @@ No active blockers. Carried-forward debt (cross-milestone):
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| dead_code | GAP-2: LIST-02 reactive stream `TransactionDao.watchByBookIds` exists at DAO/repo/use-case layers but has zero consumers — reactivity is achieved by manual `ref.invalidate` at every mutation site. Stated mechanism is unwired; shell comments (`main_shell_screen.dart` near the invalidation sites) are stale/misleading. Fix: either consume `useCase.watch()` or delete the 3-layer chain + fix comments | defer to v1.5 (accept as non-blocking; all verified flows work via manual invalidate) | v1.4 close |
+| dead_code | GAP-2: LIST-02 reactive stream `TransactionDao.watchByBookIds` exists at DAO/repo/use-case layers but has zero consumers — reactivity is achieved by manual `ref.invalidate` at every mutation site. Stated mechanism is unwired; shell comments (`main_shell_screen.dart` near the invalidation sites) are stale/misleading. Fix: either consume `useCase.watch()` or delete the 3-layer chain + fix comments | defer to v1.5+ (accept as non-blocking; all verified flows work via manual invalidate) | v1.4 close |
 | nyquist_gap | Phases 25/26/27/29/30 VALIDATION.md draft + `nyquist_compliant: false`; Phase 28 approved (`nyquist_compliant: true`, `wave_0_complete: false`); Phase 24 compliant (final). Documentation-grade, mirrors accepted v1.2/v1.3 pattern. Run `/gsd-validate-phase {N}` per phase to close retroactively | accept (documentation-grade) | v1.4 close |
 | metadata_drift | `gsd-sdk audit-open` reports 17 quick tasks as `missing` status (their SUMMARY.md lack a `status: complete` frontmatter field — a convention this project never adopted) and 3 phases (26/28/29) with UAT files flagged though all are `passed`/`resolved` with 0 open scenarios; all quick tasks are recorded Verified in the Quick Tasks Completed table above (9 of them confirmed via on-device visual pass 2026-05-31). Cosmetic, no functional gap | cosmetic, no functional gap | v1.4 close |
 | forward_compat | GAP-1 (calendar staleness after family-sync / FAB) was **fixed at close**, not deferred — quick task 260531-u34 invalidates `calendarDailyTotalsProvider(current month)` at both shell sites. Recorded here for audit-trail completeness | resolved | v1.4 close |
@@ -190,11 +200,11 @@ No active blockers. Carried-forward debt (cross-milestone):
 
 ## Session Continuity
 
-Last session: 2026-05-31T05:19:09.770Z
-Stopped at: Phase 30 context gathered
+Last session: 2026-05-31T14:00:00.000Z
+Stopped at: v1.5 roadmap created (4 phases, 15 requirements mapped)
 
-**Planned Next:** `/gsd:verify-work 29` — verify Phase 29 (last phase of v1.4 列表功能)
+**Planned Next:** `/gsd-plan-phase 31` — plan Phase 31 (Terminology Rename)
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Run `/gsd-plan-phase 31` to begin planning Phase 31: Terminology Rename

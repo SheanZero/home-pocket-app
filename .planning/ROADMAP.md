@@ -7,6 +7,7 @@
 - ✅ **v1.2 Happiness Metric Refresh** — Phases 13-17 (shipped 2026-05-21) — see [archive](milestones/v1.2-ROADMAP.md)
 - ✅ **v1.3 迭代帐本输入** — Phases 18-23 (shipped 2026-05-26) — see [archive](milestones/v1.3-ROADMAP.md)
 - ✅ **v1.4 列表功能** — Phases 24-30 (shipped 2026-05-31) — see [archive](milestones/v1.4-ROADMAP.md)
+- 🚧 **v1.5 文案与配色统一** — Phases 31-34 (in progress)
 
 ## Phases
 
@@ -80,6 +81,60 @@
 
 </details>
 
+### v1.5 文案与配色统一 (Active)
+
+- [ ] **Phase 31: Terminology Rename** — Unify all user-facing ARB values (zh/ja/en) and rename internal identifiers (ARB keys, AppColors symbols, Dart call sites); close with analyze-clean gate and ADR-015 update
+- [ ] **Phase 32: Palette Exploration & Selection** — Mine design references, produce 4–5 Pencil color-scheme mockups, user selects one canonical palette recorded as ADR
+- [ ] **Phase 33: Color Token System & Consolidation** — Build semantic design-token system encoding the selected palette; replace ~62 hardcoded Color(0x…) literals; apply palette uniformly across surfaces
+- [ ] **Phase 34: Golden Re-baseline & Verification** — Regenerate all golden/visual baselines to the new palette; confirm full test suite green; verify no stale vocabulary or color literals remain
+
+## Phase Details
+
+### Phase 31: Terminology Rename
+**Goal**: The app's vocabulary for the two ledgers is unified across all three locales — user-facing ARB values read 日常/悦己/ときめき/Daily/Joy everywhere, and internal Dart/ARB identifiers (keys, AppColors symbols, dependent call sites) are renamed to match
+**Depends on**: Phase 30
+**Requirements**: TERM-01, TERM-02, TERM-03, TERM-04, TERMID-01, TERMID-02, TERMID-03, TERMID-04
+**Success Criteria** (what must be TRUE):
+  1. `grep -r 'soulLedger\|survival[A-Z]\|soul[A-Z]' lib/l10n/` returns zero hits in ARB key names; `flutter gen-l10n` completes without warnings
+  2. `grep -rn 'AppColors\.survival\|AppColors\.soul' lib/` returns zero hits in non-generated source
+  3. `grep -rn '生存\|灵魂\|魂\|ソウル\|Survival\|Soul' lib/l10n/*.arb` returns zero hits in user-facing value strings (excluding @description metadata)
+  4. `flutter analyze` reports 0 issues; `dart run custom_lint --no-fatal-infos` reports 0 errors; `build_runner` clean-diff (AUDIT-10 guardrail green)
+  5. ADR-015 (or successor) contains an appended section documenting the canonical 日常/悦己/ときめき/Daily/Joy mapping as the locked lexical hierarchy
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 32: Palette Exploration & Selection
+**Goal**: A canonical color palette is selected from 4–5 concrete Pencil mockup proposals, with the decision and exact hex values recorded in an ADR as the single authoritative reference for all subsequent color work
+**Depends on**: Phase 31
+**Requirements**: PALETTE-01, PALETTE-02, PALETTE-03
+**Success Criteria** (what must be TRUE):
+  1. Design references (VoltAgent/awesome-design-md brand palettes, dual-ledger family-finance context) are synthesized into written candidate directions with rationale — at least 4 distinct mood/palette directions identified
+  2. Exactly 4–5 full color-scheme proposals exist as Pencil mockups covering representative screens (e.g. home hero, transaction list, analytics), each defining primary + 日常/悦己 ledger accents + surface + semantic roles
+  3. The user has reviewed the Pencil proposals and designated one (or a named hybrid) as the selected palette, with that selection recorded as an accepted ADR containing the final hex values for every semantic color role
+**Plans**: TBD
+
+### Phase 33: Color Token System & Consolidation
+**Goal**: The selected palette is encoded as the single source of truth in a complete semantic design-token system; every hardcoded color literal in feature/UI code is replaced by an `AppColors` token; the correct 日常/悦己 ledger accents are applied uniformly across all surfaces
+**Depends on**: Phase 32
+**Requirements**: COLOR-01, COLOR-02, COLOR-03
+**Success Criteria** (what must be TRUE):
+  1. `grep -rn 'Color(0x\|Color(0X' lib/features/ lib/application/ lib/shared/` returns zero hits — no raw hex color literals remain outside the theme layer
+  2. The theme layer (`lib/core/theme/`) contains a single semantic design-token system (primary / ledger / surface / semantic groups + profile dark palette) with no duplicate constant definitions (e.g. `_joyTargetStartColor`, repeated profile-dark constants are consolidated)
+  3. Every screen that surfaces a 日常 or 悦己 ledger context uses the correct token from the selected palette — no mismatched or stale pre-selection colors remain
+  4. `flutter analyze` reports 0 issues after all token replacements; `build_runner` clean-diff
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 34: Golden Re-baseline & Verification
+**Goal**: All visual/golden baselines are regenerated and passing against the new palette; the full test suite is green; and a final vocabulary + color-literal audit confirms zero stale hits — closing the milestone with no residual terminology or color debt
+**Depends on**: Phase 33
+**Requirements**: COLOR-04
+**Success Criteria** (what must be TRUE):
+  1. All golden test files regenerated; `flutter test` completes with 0 failures and 0 golden mismatches; diffs confirm the palette change is the only visual delta (no unexpected layout or text changes)
+  2. Final cross-check: `grep -rn '生存\|灵魂\|魂\|ソウル\|Survival\|Soul' lib/l10n/*.arb` returns zero hits; `grep -rn 'Color(0x\|Color(0X' lib/features/ lib/application/ lib/shared/` returns zero hits
+  3. `flutter analyze` reports 0 issues; coverage gate ≥70% global remains green
+**Plans**: TBD
+
 ## Milestone Progress
 
 | Milestone | Phases | Plans Complete | Status | Shipped |
@@ -89,3 +144,4 @@
 | v1.2 Happiness Metric Refresh | 13-17 | 37/37 | Complete | 2026-05-21 |
 | v1.3 迭代帐本输入 | 18-23 | 47/47 | Complete | 2026-05-26 |
 | v1.4 列表功能 | 24-30 | 29/29 | Complete | 2026-05-31 |
+| v1.5 文案与配色统一 | 31-34 | 0/TBD | In progress | — |

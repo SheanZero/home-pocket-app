@@ -63,27 +63,27 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TERM-01 | TBD | Pending |
-| TERM-02 | TBD | Pending |
-| TERM-03 | TBD | Pending |
-| TERM-04 | TBD | Pending |
-| TERMID-01 | TBD | Pending |
-| TERMID-02 | TBD | Pending |
-| TERMID-03 | TBD | Pending |
-| TERMID-04 | TBD | Pending |
-| PALETTE-01 | TBD | Pending |
-| PALETTE-02 | TBD | Pending |
-| PALETTE-03 | TBD | Pending |
-| COLOR-01 | TBD | Pending |
-| COLOR-02 | TBD | Pending |
-| COLOR-03 | TBD | Pending |
-| COLOR-04 | TBD | Pending |
+| TERM-01 | Phase 31 | Pending |
+| TERM-02 | Phase 31 | Pending |
+| TERM-03 | Phase 31 | Pending |
+| TERM-04 | Phase 31 | Pending |
+| TERMID-01 | Phase 31 | Pending |
+| TERMID-02 | Phase 31 | Pending |
+| TERMID-03 | Phase 31 | Pending |
+| TERMID-04 | Phase 31 | Pending |
+| PALETTE-01 | Phase 32 | Pending |
+| PALETTE-02 | Phase 32 | Pending |
+| PALETTE-03 | Phase 32 | Pending |
+| COLOR-01 | Phase 33 | Pending |
+| COLOR-02 | Phase 33 | Pending |
+| COLOR-03 | Phase 33 | Pending |
+| COLOR-04 | Phase 34 | Pending |
 
 **Coverage:**
 - v1 requirements: 15 total
-- Mapped to phases: 0 (filled by roadmap)
-- Unmapped: 15 ⚠️ (filled by roadmap)
+- Mapped to phases: 15
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-05-31*
-*Last updated: 2026-05-31 — milestone v1.5 文案与配色统一 scoping*
+*Last updated: 2026-05-31 — traceability filled by roadmap (15/15 mapped)*
