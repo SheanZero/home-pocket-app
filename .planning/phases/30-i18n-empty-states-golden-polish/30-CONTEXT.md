@@ -41,6 +41,8 @@ Final polish + QA pass that closes out milestone v1.4 列表功能. The list fea
 - **D-07:** `listMineOnly` (currently English "Mine only" in all 3 locale files) → **ja: 自分のみ · zh: 仅自己 · en: Mine only**.
 - **D-08:** Hardcoded-string sweep scope = **fix only within `lib/features/list/`**. Additionally run an app-wide grep and **document** every leak found elsewhere as a deferred inventory (do NOT fix outside the list tab — keeps the phase boundary clean). See Deferred Ideas.
 - **D-09:** Preserve exact 3-locale key parity (currently 1199 each) — every key added/renamed must land in all of `app_ja.arb`, `app_zh.arb`, `app_en.arb`, then `flutter gen-l10n` with no warnings.
+- **D-12:** (resolved 2026-05-31 from RESEARCH open question) Localize the `[data load error]` string at `list_screen.dart:101` — a user-visible error state. Add `listLoadError` key (×3 locales): ja: データを読み込めません · zh: 无法加载数据 · en: Unable to load data.
+- **D-13:** (resolved 2026-05-31 from RESEARCH open question) Localize the 3 hardcoded calendar-nav `Semantics` accessibility labels in `list_calendar_header.dart` ("Previous month", "Next month", "Return to current month"). Add 3 keys (×3 locales): `listCalNavPrev`, `listCalNavNext`, `listCalNavCurrentMonth`.
 
 ### CI Gate
 - **D-10:** Coverage gate = **≥70%** — the Phase 30 roadmap SC#4 governs over the 80% global CLAUDE.md default for this polish phase (mostly goldens + ARB keys, not heavy logic).
