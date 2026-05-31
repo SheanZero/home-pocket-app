@@ -8,6 +8,7 @@ import '../../../accounting/presentation/screens/manual_one_step_screen.dart';
 import '../../../analytics/presentation/providers/state_analytics.dart';
 import '../../../analytics/presentation/providers/state_happiness.dart';
 import '../../../analytics/presentation/screens/analytics_screen.dart';
+import '../../../list/presentation/providers/state_calendar_totals.dart';
 import '../../../list/presentation/providers/state_list_transactions.dart';
 import '../../../list/presentation/screens/list_screen.dart';
 import '../../../family_sync/domain/models/sync_status_model.dart';
@@ -91,6 +92,13 @@ class MainShellScreen extends ConsumerWidget {
         }
         // D-03: forward-wiring; no visible effect this phase (ListScreen is loading-only)
         ref.invalidate(listTransactionsProvider(bookId: bookId));
+        ref.invalidate(
+          calendarDailyTotalsProvider(
+            bookId: bookId,
+            year: now.year,
+            month: now.month,
+          ),
+        );
       }
     });
 
@@ -170,6 +178,13 @@ class MainShellScreen extends ConsumerWidget {
                   }
                   // D-03: forward-wiring; no visible effect this phase (ListScreen is loading-only)
                   ref.invalidate(listTransactionsProvider(bookId: bookId));
+                  ref.invalidate(
+                    calendarDailyTotalsProvider(
+                      bookId: bookId,
+                      year: now.year,
+                      month: now.month,
+                    ),
+                  );
                 },
               ),
             ),
