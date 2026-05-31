@@ -161,6 +161,8 @@ class ListScreen extends ConsumerWidget {
             // Wrap in scrollable so pull-to-refresh gesture fires when empty (Pitfall E)
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
+              // Breathing room below the sort/filter bar when there are no records.
+              padding: const EdgeInsets.only(top: 80),
               child: ListEmptyState(variant: variant),
             );
           }
