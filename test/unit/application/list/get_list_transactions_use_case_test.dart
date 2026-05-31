@@ -19,7 +19,7 @@ void main() {
   setUpAll(() {
     // Register fallback values for mocktail `any(named:)` matchers
     registerFallbackValue(DateTime(2026));
-    registerFallbackValue(SortField.updatedAt);
+    registerFallbackValue(SortField.timestamp);
     registerFallbackValue(SortDirection.desc);
   });
 
@@ -63,7 +63,8 @@ void main() {
     });
 
     // SC#3 + SORT-02: valid params forwarded to repo with default sort
-    test('execute() forwards params to repository with default updatedAt/desc sort',
+    // Note: default sort changed from updatedAt to timestamp in quick task 260531-oqn.
+    test('execute() forwards params to repository with default timestamp/desc sort',
         () async {
       final txList = [makeTransaction('tx1', 100)];
       when(
@@ -88,7 +89,7 @@ void main() {
           ['b1'],
           startDate: any(named: 'startDate'),
           endDate: any(named: 'endDate'),
-          sortField: SortField.updatedAt,
+          sortField: SortField.timestamp,
           sortDirection: SortDirection.desc,
         ),
       ).called(1);

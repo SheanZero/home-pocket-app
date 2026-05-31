@@ -163,7 +163,9 @@ void main() {
       expect(amounts, equals([100, 500, 1000]));
     });
 
-    test('sortField=updatedAt orders by COALESCE(updated_at, created_at)', () async {
+    // Note: SortField.updatedAt was removed in quick task 260531-oqn.
+    // This test was verifying updatedAt sort order; updated to use timestamp sort.
+    test('sortField=timestamp orders by transaction timestamp desc', () async {
       final t1 = DateTime(2026, 1, 10);
       final t2 = DateTime(2026, 2, 10);
       final t3 = DateTime(2026, 3, 10);
@@ -171,17 +173,16 @@ void main() {
       await insertTx(id: 'tx_a', bookId: 'book_001', amount: 100, timestamp: t1);
       await insertTx(id: 'tx_b', bookId: 'book_001', amount: 200, timestamp: t2);
 
-      // With updatedAt sort desc, newest updated (or created) comes first.
-      // No explicit updatedAt set, so falls back to createdAt (= timestamp).
+      // With timestamp sort desc, newest timestamp comes first.
       final results = await dao.findByBookIds(
         ['book_001'],
         startDate: start,
         endDate: end,
-        sortField: SortField.updatedAt,
+        sortField: SortField.timestamp,
         sortDirection: SortDirection.desc,
       );
 
-      // tx_c has the latest createdAt (t3), so it should come first.
+      // tx_c has the latest timestamp (t3), so it should come first.
       expect(results.first.id, 'tx_c');
     });
 

@@ -92,7 +92,7 @@ class _FixedListFilter extends ListFilter {
 
 void main() {
   setUpAll(() {
-    registerFallbackValue(SortField.updatedAt);
+    registerFallbackValue(SortField.timestamp);
     registerFallbackValue(SortDirection.desc);
     registerFallbackValue(DateTime(2026));
     registerFallbackValue(const GetListParams(

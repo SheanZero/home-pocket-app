@@ -53,18 +53,18 @@ void main() {
     testWidgets(
         'SC#4: sort chip label reflects current field name (not generic Sort)',
         (tester) async {
-      // Initial state: SortField.updatedAt — label should be '更新日時' (ja),
-      // NOT a generic 'Sort' string.
+      // Initial state: SortField.timestamp (updated from updatedAt in quick task 260531-oqn)
+      // — label should be '日付' (ja), NOT a generic 'Sort' string.
       final container = await _pumpBar(tester);
 
       // Verify active-field label is present
-      expect(find.text('更新日時'), findsOneWidget);
+      expect(find.text('日付'), findsOneWidget);
       // Generic 'Sort' must not appear
       expect(find.text('Sort'), findsNothing);
 
       // Suppress unused variable warning
       expect(container.read(listFilterProvider).sortConfig.sortField,
-          equals(SortField.updatedAt));
+          equals(SortField.timestamp));
     });
 
     testWidgets('FILTER-02: tapping ledger chip sets ledgerFilter',
