@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 
 /// STATSUI-05 — Themed-group H3 header using U+2501 glyphs.
 class AnalyticsScreenSectionHeader extends StatelessWidget {
@@ -19,7 +19,7 @@ class AnalyticsScreenSectionHeader extends StatelessWidget {
         header,
         style: AppTextStyles.caption.copyWith(
           fontWeight: FontWeight.w700,
-          color: context.wmTextSecondary,
+          color: context.palette.textSecondary,
         ),
       ),
     );

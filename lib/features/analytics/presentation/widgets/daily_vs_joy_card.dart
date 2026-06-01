@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../domain/models/ledger_snapshot.dart';
@@ -72,7 +71,7 @@ class DailyVsJoyCard extends ConsumerWidget {
     final l10n = S.of(context);
 
     return Card(
-      color: context.wmCard,
+      color: context.palette.card,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -83,7 +82,7 @@ class DailyVsJoyCard extends ConsumerWidget {
             Text(
               l10n.analyticsCardTitleLedgerThisWindow,
               style: AppTextStyles.titleLarge.copyWith(
-                color: context.wmTextPrimary,
+                color: context.palette.textPrimary,
               ),
             ),
             const SizedBox(height: 12),
@@ -130,7 +129,7 @@ class _EmptyBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       S.of(context).analyticsLedgerEmpty,
-      style: AppTextStyles.caption.copyWith(color: context.wmTextSecondary),
+      style: AppTextStyles.caption.copyWith(color: context.palette.textSecondary),
     );
   }
 }
@@ -160,7 +159,7 @@ class _SoloTwoColumn extends StatelessWidget {
               label: null,
             ),
           ),
-          VerticalDivider(width: 1, color: context.wmBorderDivider),
+          VerticalDivider(width: 1, color: context.palette.borderDivider),
           Expanded(
             child: _DailyCell(
               daily: data.daily,
@@ -209,7 +208,7 @@ class _GroupGrid extends StatelessWidget {
                     label: null,
                   ),
                 ),
-                VerticalDivider(width: 1, color: context.wmBorderDivider),
+                VerticalDivider(width: 1, color: context.palette.borderDivider),
                 Expanded(
                   child: _DailyCell(
                     daily: you.daily,
@@ -222,7 +221,7 @@ class _GroupGrid extends StatelessWidget {
             ),
           ),
         ),
-        Divider(height: 1, color: context.wmBorderDivider),
+        Divider(height: 1, color: context.palette.borderDivider),
         // Row 2: Family — branches per AsyncValue (Plan 16-08 Task 1 step 4c)
         familyAsync.when(
           loading: () => _LabeledRow(
@@ -254,7 +253,7 @@ class _GroupGrid extends StatelessWidget {
                         label: null,
                       ),
                     ),
-                    VerticalDivider(width: 1, color: context.wmBorderDivider),
+                    VerticalDivider(width: 1, color: context.palette.borderDivider),
                     Expanded(
                       child: _DailyCell(
                         daily: data.daily,
@@ -295,7 +294,7 @@ class _LabeledRow extends StatelessWidget {
               child: Text(
                 label,
                 style: AppTextStyles.bodyMedium.copyWith(
-                  color: context.wmTextSecondary,
+                  color: context.palette.textSecondary,
                 ),
               ),
             ),
@@ -324,7 +323,7 @@ class _JoyCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     return Container(
-      color: context.wmSoulTagBg,
+      color: context.palette.joyLight,
       padding: const EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -334,20 +333,20 @@ class _JoyCell extends StatelessWidget {
             Text(
               label!,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: context.wmTextSecondary,
+                color: context.palette.textSecondary,
               ),
             ),
             const SizedBox(height: 4),
           ],
           Text(
             l10n.analyticsLedgerColumnJoy,
-            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.joy),
+            style: AppTextStyles.bodyMedium.copyWith(color: context.palette.joy),
           ),
           const SizedBox(height: 8),
           Text(
             l10n.analyticsLedgerCellEntries(joy.entryCount),
             style: AppTextStyles.amountMedium.copyWith(
-              color: context.wmTextPrimary,
+              color: context.palette.textPrimary,
             ),
           ),
           const SizedBox(height: 4),
@@ -358,7 +357,7 @@ class _JoyCell extends StatelessWidget {
               locale,
             ),
             style: AppTextStyles.amountMedium.copyWith(
-              color: context.wmTextPrimary,
+              color: context.palette.textPrimary,
             ),
           ),
           const SizedBox(height: 4),
@@ -369,7 +368,7 @@ class _JoyCell extends StatelessWidget {
               joy.avgSatisfaction.toStringAsFixed(1),
             ),
             style: AppTextStyles.amountMedium.copyWith(
-              color: context.wmTextPrimary,
+              color: context.palette.textPrimary,
             ),
           ),
         ],
@@ -395,7 +394,7 @@ class _DailyCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     return Container(
-      color: context.wmSurvivalTagBg,
+      color: context.palette.dailyLight,
       padding: const EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -405,20 +404,20 @@ class _DailyCell extends StatelessWidget {
             Text(
               label!,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: context.wmTextSecondary,
+                color: context.palette.textSecondary,
               ),
             ),
             const SizedBox(height: 4),
           ],
           Text(
             l10n.analyticsLedgerColumnDaily,
-            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.daily),
+            style: AppTextStyles.bodyMedium.copyWith(color: context.palette.daily),
           ),
           const SizedBox(height: 8),
           Text(
             l10n.analyticsLedgerCellEntries(daily.entryCount),
             style: AppTextStyles.amountMedium.copyWith(
-              color: context.wmTextPrimary,
+              color: context.palette.textPrimary,
             ),
           ),
           const SizedBox(height: 4),
@@ -429,7 +428,7 @@ class _DailyCell extends StatelessWidget {
               locale,
             ),
             style: AppTextStyles.amountMedium.copyWith(
-              color: context.wmTextPrimary,
+              color: context.palette.textPrimary,
             ),
           ),
           // D-04: DailyLedgerSnapshot has no avgSatisfaction. No row here.
@@ -465,7 +464,7 @@ class _FamilyCaptionBody extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       child: Text(
         message,
-        style: AppTextStyles.caption.copyWith(color: context.wmTextSecondary),
+        style: AppTextStyles.caption.copyWith(color: context.palette.textSecondary),
       ),
     );
   }

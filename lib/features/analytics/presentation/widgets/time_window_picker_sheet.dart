@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/i18n/formatter_service.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/time_window.dart';
 import '../providers/state_time_window.dart';
@@ -78,7 +77,7 @@ class _SheetBodyState extends State<_SheetBody> {
             Text(
               l10n.analyticsTimeWindowSheetTitle,
               style: AppTextStyles.titleSmall.copyWith(
-                color: context.wmTextPrimary,
+                color: context.palette.textPrimary,
               ),
             ),
             const SizedBox(height: 16),
@@ -364,13 +363,13 @@ class _TimeWindowTypeRow extends StatelessWidget {
             ChoiceChip(
               label: Text(item.$2),
               selected: item.$1 == selectedType,
-              selectedColor: AppColors.accentPrimary,
+              selectedColor: context.palette.accentPrimary,
               backgroundColor: Colors.transparent,
-              side: BorderSide(color: context.wmBorderDefault),
+              side: BorderSide(color: context.palette.borderDefault),
               labelStyle: AppTextStyles.titleSmall.copyWith(
                 color: item.$1 == selectedType
                     ? Colors.white
-                    : context.wmTextPrimary,
+                    : context.palette.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
               onSelected: (_) => onSelected(item.$1),
@@ -398,11 +397,11 @@ class _WindowListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       selected: selected,
-      selectedColor: AppColors.accentPrimary,
+      selectedColor: context.palette.accentPrimary,
       title: Text(
         title,
         style: AppTextStyles.bodyMedium.copyWith(
-          color: selected ? AppColors.accentPrimary : context.wmTextPrimary,
+          color: selected ? context.palette.accentPrimary : context.palette.textPrimary,
           fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
         ),
       ),

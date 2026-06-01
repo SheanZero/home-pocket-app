@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../application/accounting/category_localization_service.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/family_happiness.dart';
 import '../../domain/models/metric_result.dart';
@@ -30,10 +29,10 @@ class FamilyInsightCard extends StatelessWidget {
 
     final l10n = S.of(context);
     return Card(
-      color: AppColors.olive.withValues(alpha: 0.10),
+      color: context.palette.success.withValues(alpha: 0.10),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: AppColors.olive.withValues(alpha: 0.30)),
+        side: BorderSide(color: context.palette.success.withValues(alpha: 0.30)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -42,20 +41,20 @@ class FamilyInsightCard extends StatelessWidget {
           children: [
             Text(
               l10n.analyticsCardTitleFamilyInsight,
-              style: AppTextStyles.titleLarge.copyWith(color: AppColors.olive),
+              style: AppTextStyles.titleLarge.copyWith(color: context.palette.success),
             ),
             const SizedBox(height: 8),
             Text(
               _highlightsText(l10n),
               style: AppTextStyles.bodyMedium.copyWith(
-                color: context.wmTextPrimary,
+                color: context.palette.textPrimary,
               ),
             ),
             const SizedBox(height: 6),
             Text(
               _sharedJoyText(l10n),
               style: AppTextStyles.bodyMedium.copyWith(
-                color: context.wmTextPrimary,
+                color: context.palette.textPrimary,
               ),
             ),
           ],

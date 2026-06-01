@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 
 /// Wa-Modern section divider: label ─── thin line
 /// Used between content sections on the home screen.
@@ -18,11 +18,11 @@ class SectionDivider extends StatelessWidget {
         Text(
           label,
           style: AppTextStyles.dividerLabel.copyWith(
-            color: context.wmTextSecondary,
+            color: context.palette.textSecondary,
           ),
         ),
         const SizedBox(width: 8),
-        Expanded(child: Container(height: 1, color: context.wmBorderDivider)),
+        Expanded(child: Container(height: 1, color: context.palette.borderDivider)),
       ],
     );
   }

@@ -1,9 +1,8 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/monthly_report.dart';
 
@@ -24,6 +23,7 @@ class CategorySpendDonutChart extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final palette = context.palette;
     final slices = _buildSlices(context);
 
     return Column(
@@ -38,10 +38,10 @@ class CategorySpendDonutChart extends StatelessWidget {
                   PieChartSectionData(
                     value: entry.value.amount.toDouble(),
                     title: '${entry.value.percentage.round()}%',
-                    color: _colorFor(entry.key, slices.length),
+                    color: _colorFor(entry.key, slices.length, palette),
                     radius: 72,
                     titleStyle: AppTextStyles.caption.copyWith(
-                      color: AppColors.card,
+                      color: palette.card,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -58,7 +58,7 @@ class CategorySpendDonutChart extends StatelessWidget {
           children: [
             for (final entry in slices.asMap().entries)
               _LegendItem(
-                color: _colorFor(entry.key, slices.length),
+                color: _colorFor(entry.key, slices.length, palette),
                 label:
                     '${entry.value.categoryName} ${entry.value.percentage.round()}%',
               ),
@@ -102,10 +102,10 @@ class CategorySpendDonutChart extends StatelessWidget {
     return slices;
   }
 
-  Color _colorFor(int index, int total) {
-    if (total <= 1) return AppColors.daily;
+  Color _colorFor(int index, int total, AppPalette palette) {
+    if (total <= 1) return palette.daily;
     final t = index / (total - 1);
-    return Color.lerp(AppColors.daily, AppColors.joy, t)!;
+    return Color.lerp(palette.daily, palette.joy, t)!;
   }
 }
 
@@ -140,7 +140,7 @@ class _LegendItem extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           label,
-          style: AppTextStyles.caption.copyWith(color: context.wmTextSecondary),
+          style: AppTextStyles.caption.copyWith(color: context.palette.textSecondary),
         ),
       ],
     );

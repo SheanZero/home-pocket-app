@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../application/i18n/formatter_service.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../domain/models/analytics_aggregate.dart';
@@ -30,10 +29,10 @@ class LargestExpenseStoryCard extends StatelessWidget {
     final expense = this.expense;
 
     return Card(
-      color: AppColors.daily.withValues(alpha: 0.08),
+      color: context.palette.daily.withValues(alpha: 0.08),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: AppColors.daily.withValues(alpha: 0.20)),
+        side: BorderSide(color: context.palette.daily.withValues(alpha: 0.20)),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -46,7 +45,7 @@ class LargestExpenseStoryCard extends StatelessWidget {
               Text(
                 l10n.analyticsCardTitleLargestExpense,
                 style: AppTextStyles.titleLarge.copyWith(
-                  color: AppColors.daily,
+                  color: context.palette.daily,
                 ),
               ),
               const SizedBox(height: 8),
@@ -54,7 +53,7 @@ class LargestExpenseStoryCard extends StatelessWidget {
                 Text(
                   l10n.analyticsCardEmptyLargestExpense,
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: context.wmTextSecondary,
+                    color: context.palette.textSecondary,
                   ),
                 )
               else
@@ -108,7 +107,7 @@ class _LargestExpenseBody extends StatelessWidget {
           amountText,
           dateLabel,
         ),
-        style: AppTextStyles.bodyMedium.copyWith(color: context.wmTextPrimary),
+        style: AppTextStyles.bodyMedium.copyWith(color: context.palette.textPrimary),
       ),
     );
   }

@@ -1,9 +1,8 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/analytics_aggregate.dart';
 
@@ -16,6 +15,7 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
+    final palette = context.palette;
     final normalized = _normalize();
     final total = normalized.fold<int>(0, (sum, item) => sum + item.count);
     final maxCount = normalized.fold<int>(
@@ -66,7 +66,7 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
                             return Text(
                               '$score',
                               style: AppTextStyles.caption.copyWith(
-                                color: context.wmTextSecondary,
+                                color: context.palette.textSecondary,
                               ),
                             );
                           },
@@ -82,7 +82,7 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
                               toY: bucket.count == 0
                                   ? 1
                                   : bucket.count.toDouble(),
-                              color: _colorForScore(bucket.score),
+                              color: _colorForScore(bucket.score, palette),
                               width: 14,
                               borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(4),
@@ -100,7 +100,7 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
                           return BarTooltipItem(
                             '$score/10\n$count',
                             AppTextStyles.caption.copyWith(
-                              color: AppColors.card,
+                              color: palette.card,
                             ),
                           );
                         },
@@ -112,10 +112,10 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
                   alignment: const Alignment(-0.12, -1),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: context.wmCard,
+                      color: context.palette.card,
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
-                        color: AppColors.joy.withValues(alpha: 0.32),
+                        color: palette.joy.withValues(alpha: 0.32),
                       ),
                     ),
                     child: Padding(
@@ -129,7 +129,7 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
                           'analytics_histogram_bar_5_annotation',
                         ),
                         style: AppTextStyles.caption.copyWith(
-                          color: AppColors.joy,
+                          color: palette.joy,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -143,7 +143,7 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
           Text(
             l10n.analyticsHistogramColorCaption,
             style: AppTextStyles.caption.copyWith(
-              color: context.wmTextSecondary,
+              color: context.palette.textSecondary,
             ),
           ),
         ],
@@ -159,13 +159,13 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
     ];
   }
 
-  Color _colorForScore(int score) {
+  Color _colorForScore(int score, AppPalette palette) {
     if (score <= 5) {
-      return Color.lerp(AppColors.daily, AppColors.joy, (score - 1) / 4)!;
+      return Color.lerp(palette.daily, palette.joy, (score - 1) / 4)!;
     }
     return Color.lerp(
-      AppColors.joy,
-      AppColors.accentPrimary,
+      palette.joy,
+      palette.accentPrimary,
       (score - 5) / 5,
     )!;
   }

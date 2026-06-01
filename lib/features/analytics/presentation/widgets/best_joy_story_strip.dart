@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../application/i18n/formatter_service.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../domain/models/best_joy_moment_row.dart';
@@ -32,10 +31,10 @@ class BestJoyStoryStrip extends StatelessWidget {
     final l10n = S.of(context);
 
     return Card(
-      color: AppColors.joy.withValues(alpha: 0.08),
+      color: context.palette.joy.withValues(alpha: 0.08),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: AppColors.joy.withValues(alpha: 0.20)),
+        side: BorderSide(color: context.palette.joy.withValues(alpha: 0.20)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -44,7 +43,7 @@ class BestJoyStoryStrip extends StatelessWidget {
           children: [
             Text(
               l10n.analyticsCardTitleBestJoy,
-              style: AppTextStyles.titleLarge.copyWith(color: AppColors.joy),
+              style: AppTextStyles.titleLarge.copyWith(color: context.palette.joy),
             ),
             const SizedBox(height: 8),
             switch (bestJoy) {
@@ -68,7 +67,7 @@ class BestJoyStoryStrip extends StatelessWidget {
   Widget _buildEmpty(BuildContext context, S l10n) {
     return Text(
       l10n.analyticsCardEmptyBestJoy,
-      style: AppTextStyles.bodyMedium.copyWith(color: context.wmTextSecondary),
+      style: AppTextStyles.bodyMedium.copyWith(color: context.palette.textSecondary),
     );
   }
 }
@@ -113,7 +112,7 @@ class _BestJoyValue extends StatelessWidget {
               Text(
                 l10n.analyticsCardBestJoyBig(categoryName, dateLabel),
                 style: AppTextStyles.bodyMedium.copyWith(
-                  color: context.wmTextPrimary,
+                  color: context.palette.textPrimary,
                 ),
               ),
               const SizedBox(height: 4),
@@ -123,7 +122,7 @@ class _BestJoyValue extends StatelessWidget {
                   row.joyFullness,
                 ),
                 style: AppTextStyles.caption.copyWith(
-                  color: context.wmTextSecondary,
+                  color: context.palette.textSecondary,
                 ),
               ),
             ],

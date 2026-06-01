@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 
 /// Vertical invite card with overlapping avatar circles and coral CTA button.
@@ -20,9 +19,9 @@ class FamilyInviteBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: context.wmCard,
+        color: context.palette.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.wmBorderDefault),
+        border: Border.all(color: context.palette.borderDefault),
       ),
       child: Column(
         children: [
@@ -36,13 +35,13 @@ class FamilyInviteBanner extends StatelessWidget {
                   left: 0,
                   child: _avatarCircle(
                     context,
-                    AppColors.accentPrimary,
+                    context.palette.accentPrimary,
                     Icons.face,
                   ),
                 ),
                 Positioned(
                   left: 36, // 46 - 10
-                  child: _avatarCircle(context, AppColors.olive, Icons.face_2),
+                  child: _avatarCircle(context, context.palette.success, Icons.face_2),
                 ),
               ],
             ),
@@ -54,7 +53,7 @@ class FamilyInviteBanner extends StatelessWidget {
             style: AppTextStyles.titleMedium.copyWith(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: context.wmTextPrimary,
+              color: context.palette.textPrimary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -63,7 +62,7 @@ class FamilyInviteBanner extends StatelessWidget {
           Text(
             l10n.homeFamilyBannerSubtitle,
             style: AppTextStyles.bodySmall.copyWith(
-              color: context.wmTextSecondary,
+              color: context.palette.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -75,7 +74,7 @@ class FamilyInviteBanner extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 10),
               decoration: BoxDecoration(
-                color: AppColors.accentPrimary,
+                color: context.palette.accentPrimary,
                 borderRadius: BorderRadius.circular(12),
               ),
               alignment: Alignment.center,
@@ -108,7 +107,7 @@ class FamilyInviteBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: bgColor,
         shape: BoxShape.circle,
-        border: Border.all(color: context.wmCard, width: 2.5),
+        border: Border.all(color: context.palette.card, width: 2.5),
       ),
       child: Icon(icon, size: 24, color: Colors.white),
     );

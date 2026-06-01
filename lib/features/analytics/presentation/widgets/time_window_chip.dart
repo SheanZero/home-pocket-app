@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/i18n/formatter_service.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/time_window.dart';
 import '../providers/state_time_window.dart';
@@ -37,8 +37,8 @@ class TimeWindowChip extends ConsumerWidget {
             constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: context.wmCard,
-                border: Border.all(color: context.wmBorderDefault),
+                color: context.palette.card,
+                border: Border.all(color: context.palette.borderDefault),
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Padding(
@@ -50,14 +50,14 @@ class TimeWindowChip extends ConsumerWidget {
                     Text(
                       label,
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: context.wmTextPrimary,
+                        color: context.palette.textPrimary,
                       ),
                     ),
                     const SizedBox(width: 4),
                     Text(
                       '▼',
                       style: AppTextStyles.caption.copyWith(
-                        color: context.wmTextSecondary,
+                        color: context.palette.textSecondary,
                       ),
                     ),
                   ],
