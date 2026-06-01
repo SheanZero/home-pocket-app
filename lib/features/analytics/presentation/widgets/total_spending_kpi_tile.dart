@@ -33,7 +33,7 @@ class TotalSpendingKpiTile extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: context.wmSurvivalTagBg,
-        border: Border.all(color: AppColors.survival.withValues(alpha: 0.20)),
+        border: Border.all(color: AppColors.daily.withValues(alpha: 0.20)),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -42,7 +42,7 @@ class TotalSpendingKpiTile extends StatelessWidget {
         children: [
           Text(
             l10n.analyticsKpiTotalLabel,
-            style: AppTextStyles.caption.copyWith(color: AppColors.survival),
+            style: AppTextStyles.caption.copyWith(color: AppColors.daily),
           ),
           const SizedBox(height: 4),
           Text(

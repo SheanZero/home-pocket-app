@@ -252,11 +252,11 @@ class ListScreen extends ConsumerWidget {
         ? S.of(context).listLedgerDaily
         : S.of(context).listLedgerJoy;
     final tagBgColor = ledgerType == LedgerType.daily
-        ? AppColors.survivalLight
-        : AppColors.soulLight;
+        ? AppColors.dailyLight
+        : AppColors.joyLight;
     final tagTextColor = ledgerType == LedgerType.daily
-        ? AppColors.survival
-        : AppColors.soul;
+        ? AppColors.daily
+        : AppColors.joy;
     // Category label uses same color as ledger tag per UI-SPEC Typography table
     final categoryColor = tagTextColor;
 

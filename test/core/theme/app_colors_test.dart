@@ -14,10 +14,10 @@ void main() {
       expect(AppColors.textPrimary, const Color(0xFF1E2432));
     });
     test('survival is blue', () {
-      expect(AppColors.survival, const Color(0xFF5A9CC8));
+      expect(AppColors.daily, const Color(0xFF5A9CC8));
     });
     test('soul is green', () {
-      expect(AppColors.soul, const Color(0xFF47B88A));
+      expect(AppColors.joy, const Color(0xFF47B88A));
     });
     test('border default is light gray', () {
       expect(AppColors.borderDefault, const Color(0xFFEFEFEF));

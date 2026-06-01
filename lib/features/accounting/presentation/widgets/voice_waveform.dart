@@ -20,7 +20,7 @@ class VoiceWaveform extends StatelessWidget {
     super.key,
     required this.soundLevel,
     this.isActive = false,
-    this.color = AppColors.survival,
+    this.color = AppColors.daily,
   });
 
   @override

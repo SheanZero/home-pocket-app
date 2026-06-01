@@ -182,7 +182,7 @@ class SmartKeyboard extends StatelessWidget {
               onTap: onDelete,
               child: Icon(
                 Icons.backspace_outlined,
-                color: AppColors.survival,
+                color: AppColors.daily,
                 size: 22,
               ),
             ),
@@ -323,7 +323,7 @@ class _CurrencyKey extends StatelessWidget {
             style: AppTextStyles.amountMedium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: AppColors.survival,
+              color: AppColors.daily,
             ),
           ),
           const SizedBox(width: 4),
@@ -332,7 +332,7 @@ class _CurrencyKey extends StatelessWidget {
             style: AppTextStyles.bodySmall.copyWith(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: AppColors.survival,
+              color: AppColors.daily,
             ),
           ),
         ],

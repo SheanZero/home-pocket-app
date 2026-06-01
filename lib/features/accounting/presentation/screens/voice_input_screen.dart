@@ -692,7 +692,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
                     child: VoiceWaveform(
                       soundLevel: _soundLevel,
                       isActive: _isRecording,
-                      color: AppColors.survival,
+                      color: AppColors.daily,
                     ),
                   ),
 

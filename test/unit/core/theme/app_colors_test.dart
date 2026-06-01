@@ -10,11 +10,11 @@ void main() {
     });
 
     test('survival is #5A9CC8', () {
-      expect(AppColors.survival, const Color(0xFF5A9CC8));
+      expect(AppColors.daily, const Color(0xFF5A9CC8));
     });
 
     test('soul is #47B88A', () {
-      expect(AppColors.soul, const Color(0xFF47B88A));
+      expect(AppColors.joy, const Color(0xFF47B88A));
     });
 
     test('background is #FCFBF9', () {

@@ -68,7 +68,7 @@ class OcrScannerScreen extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: AppColors.survival.withValues(alpha: 0.5),
+                      color: AppColors.daily.withValues(alpha: 0.5),
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(16),

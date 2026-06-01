@@ -30,10 +30,10 @@ class LargestExpenseStoryCard extends StatelessWidget {
     final expense = this.expense;
 
     return Card(
-      color: AppColors.survival.withValues(alpha: 0.08),
+      color: AppColors.daily.withValues(alpha: 0.08),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: AppColors.survival.withValues(alpha: 0.20)),
+        side: BorderSide(color: AppColors.daily.withValues(alpha: 0.20)),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -46,7 +46,7 @@ class LargestExpenseStoryCard extends StatelessWidget {
               Text(
                 l10n.analyticsCardTitleLargestExpense,
                 style: AppTextStyles.titleLarge.copyWith(
-                  color: AppColors.survival,
+                  color: AppColors.daily,
                 ),
               ),
               const SizedBox(height: 8),

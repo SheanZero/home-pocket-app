@@ -390,7 +390,7 @@ class TransactionDetailsFormState
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(
               context,
-            ).colorScheme.copyWith(primary: AppColors.survival),
+            ).colorScheme.copyWith(primary: AppColors.daily),
           ),
           child: child!,
         );

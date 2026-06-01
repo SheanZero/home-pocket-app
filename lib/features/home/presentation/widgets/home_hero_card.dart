@@ -212,14 +212,14 @@ class HomeHeroCard extends StatelessWidget {
           children: [
             _splitLabel(
               context,
-              AppColors.soul,
+              AppColors.joy,
               l10n.joyLedger,
               soulText,
               leading: true,
             ),
             _splitLabel(
               context,
-              AppColors.survival,
+              AppColors.daily,
               l10n.dailyLedger,
               survivalText,
               leading: false,
@@ -231,7 +231,7 @@ class HomeHeroCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           child: Stack(
             children: [
-              Container(height: 6, color: AppColors.survival),
+              Container(height: 6, color: AppColors.daily),
               FractionallySizedBox(
                 widthFactor: ratio,
                 child: Container(
@@ -241,8 +241,8 @@ class HomeHeroCard extends StatelessWidget {
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                       colors: [
-                        AppColors.soul.withValues(alpha: 0.6),
-                        AppColors.soul,
+                        AppColors.joy.withValues(alpha: 0.6),
+                        AppColors.joy,
                       ],
                     ),
                   ),
@@ -308,7 +308,7 @@ class HomeHeroCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.auto_awesome, size: 16, color: AppColors.soul),
+            const Icon(Icons.auto_awesome, size: 16, color: AppColors.joy),
             const SizedBox(width: 6),
             Text(
               title,
@@ -511,7 +511,7 @@ class HomeHeroCard extends StatelessWidget {
       children: [
         _legendRow(
           context,
-          AppColors.soul,
+          AppColors.joy,
           l10n.homeJoyContributionLegend,
           switch (happiness.joyContribution) {
             Empty() => empty,
@@ -632,7 +632,7 @@ class HomeHeroCard extends StatelessWidget {
   Widget _bestJoyTitleRow(BuildContext context, String title) {
     return Row(
       children: [
-        const Icon(Icons.favorite, size: 16, color: AppColors.soul),
+        const Icon(Icons.favorite, size: 16, color: AppColors.joy),
         const SizedBox(width: 6),
         Text(
           title,
@@ -678,7 +678,7 @@ class HomeHeroCard extends StatelessWidget {
                   splitResult.$1,
                   style: AppTextStyles.amountSmall.copyWith(
                     fontSize: 20,
-                    color: AppColors.soul,
+                    color: AppColors.joy,
                   ),
                 ),
                 const SizedBox(width: 6),
@@ -687,7 +687,7 @@ class HomeHeroCard extends StatelessWidget {
                   style: AppTextStyles.amountLarge.copyWith(
                     fontSize: 32,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.soul,
+                    color: AppColors.joy,
                     letterSpacing: -0.5,
                   ),
                 ),

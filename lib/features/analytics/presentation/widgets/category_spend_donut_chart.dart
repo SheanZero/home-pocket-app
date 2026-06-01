@@ -103,9 +103,9 @@ class CategorySpendDonutChart extends StatelessWidget {
   }
 
   Color _colorFor(int index, int total) {
-    if (total <= 1) return AppColors.survival;
+    if (total <= 1) return AppColors.daily;
     final t = index / (total - 1);
-    return Color.lerp(AppColors.survival, AppColors.soul, t)!;
+    return Color.lerp(AppColors.daily, AppColors.joy, t)!;
   }
 }
 

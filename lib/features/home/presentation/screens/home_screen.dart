@@ -299,8 +299,8 @@ class HomeScreen extends ConsumerWidget {
                             ? context.wmSoulTagBg
                             : context.wmSurvivalTagBg,
                         tagTextColor: isSoul
-                            ? AppColors.soul
-                            : AppColors.survival,
+                            ? AppColors.joy
+                            : AppColors.daily,
                         merchant:
                             tx.merchant ??
                             CategoryLocalizationService.resolveFromId(
@@ -314,7 +314,7 @@ class HomeScreen extends ConsumerWidget {
                         // Soul rows use brand green for category + amount (user decision 260518-v4v).
                         // Survival rows use neutral text colors.
                         categoryColor: isSoul
-                            ? AppColors.soul
+                            ? AppColors.joy
                             : context.wmTextSecondary,
                         formattedAmount: _formatAmount(
                           tx,
@@ -322,7 +322,7 @@ class HomeScreen extends ConsumerWidget {
                           locale,
                         ),
                         amountColor: isSoul
-                            ? AppColors.soul
+                            ? AppColors.joy
                             : context.wmTextPrimary,
                         satisfactionIcon: _satisfactionIcon(tx),
                         onTap: () => Navigator.of(context).push(

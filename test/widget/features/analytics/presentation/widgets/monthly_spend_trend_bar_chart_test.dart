@@ -88,7 +88,7 @@ void main() {
     final currentRod = chart.data.barGroups[5].barRods.single;
     final previousRod = chart.data.barGroups[4].barRods.single;
 
-    expect(currentRod.color, AppColors.survival);
+    expect(currentRod.color, AppColors.daily);
     expect(
       currentRod.borderSide.width,
       greaterThan(previousRod.borderSide.width),

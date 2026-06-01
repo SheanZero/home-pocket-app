@@ -98,10 +98,10 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
         scrolledUnderElevation: 0,
         leading: TextButton.icon(
           onPressed: () => Navigator.pop(context), // D-10 — silent discard
-          icon: const Icon(Icons.chevron_left, color: AppColors.survival),
+          icon: const Icon(Icons.chevron_left, color: AppColors.daily),
           label: Text(l10n.back,
               style: AppTextStyles.titleMedium.copyWith(
-                color: AppColors.survival,
+                color: AppColors.daily,
               )),
         ),
         leadingWidth: 100,

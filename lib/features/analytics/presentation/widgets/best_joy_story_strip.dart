@@ -32,10 +32,10 @@ class BestJoyStoryStrip extends StatelessWidget {
     final l10n = S.of(context);
 
     return Card(
-      color: AppColors.soul.withValues(alpha: 0.08),
+      color: AppColors.joy.withValues(alpha: 0.08),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: AppColors.soul.withValues(alpha: 0.20)),
+        side: BorderSide(color: AppColors.joy.withValues(alpha: 0.20)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -44,7 +44,7 @@ class BestJoyStoryStrip extends StatelessWidget {
           children: [
             Text(
               l10n.analyticsCardTitleBestJoy,
-              style: AppTextStyles.titleLarge.copyWith(color: AppColors.soul),
+              style: AppTextStyles.titleLarge.copyWith(color: AppColors.joy),
             ),
             const SizedBox(height: 8),
             switch (bestJoy) {
