@@ -36,9 +36,9 @@
 
 ### Color — Token System & Consolidation (COLOR)
 
-- [ ] **COLOR-01**: All hardcoded `Color(0x…)` literals in non-theme, non-generated source (~62 occurrences) are replaced by references to centralized `AppColors`/design tokens; no raw hex color literals remain in feature/UI code.
-- [ ] **COLOR-02**: The **selected** palette (PALETTE-03) is applied consistently across all surfaces — primary, 日常 (daily) ledger accent, 悦己 (joy) ledger accent, surfaces, and semantic colors — with any mismatched or stale-color usages corrected.
-- [ ] **COLOR-03**: A complete semantic design-token system exists in the theme layer (primary / ledger / surface / semantic groups + the profile dark palette) encoding the selected palette as the single source of truth, with duplicate constant definitions (e.g. `_joyTargetStartColor`, repeated profile dark constants) removed.
+- [x] **COLOR-01**: All hardcoded `Color(0x…)` literals in non-theme, non-generated source (~62 occurrences) are replaced by references to centralized `AppColors`/design tokens; no raw hex color literals remain in feature/UI code.
+- [x] **COLOR-02**: The **selected** palette (PALETTE-03) is applied consistently across all surfaces — primary, 日常 (daily) ledger accent, 悦己 (joy) ledger accent, surfaces, and semantic colors — with any mismatched or stale-color usages corrected.
+- [x] **COLOR-03**: A complete semantic design-token system exists in the theme layer (primary / ledger / surface / semantic groups + the profile dark palette) encoding the selected palette as the single source of truth, with duplicate constant definitions (e.g. `_joyTargetStartColor`, repeated profile dark constants) removed.
 - [ ] **COLOR-04**: Golden / visual baselines are regenerated to the new palette and passing, with diffs confirmed as intended (the palette change is the only visual delta); full test suite green.
 
 ## v2 Requirements
@@ -74,9 +74,9 @@
 | PALETTE-01 | Phase 32 | Complete |
 | PALETTE-02 | Phase 32 | Complete |
 | PALETTE-03 | Phase 32 | Complete |
-| COLOR-01 | Phase 33 | Pending |
-| COLOR-02 | Phase 33 | Pending |
-| COLOR-03 | Phase 33 | Pending |
+| COLOR-01 | Phase 33 | Complete |
+| COLOR-02 | Phase 33 | Complete |
+| COLOR-03 | Phase 33 | Complete |
 | COLOR-04 | Phase 34 | Pending |
 | THEME-V2-02 | Phase 33 | Pulled forward (D-07) |
 

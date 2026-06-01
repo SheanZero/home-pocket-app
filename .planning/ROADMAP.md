@@ -85,7 +85,7 @@
 
 - [x] **Phase 31: Terminology Rename** (6 plans) — Unify all user-facing ARB values (zh/ja/en) and rename internal identifiers (ARB keys, AppColors symbols, LedgerType enum + v18 migration, soul*/survival* files/classes, soul_satisfaction→joy_fullness column); close with analyze-clean gate + ADR-017 (completed 2026-06-01)
 - [x] **Phase 32: Palette Exploration & Selection** — Mine design references, produce 4–5 Pencil color-scheme mockups, user selects one canonical palette recorded as ADR (completed 2026-06-01)
-- [ ] **Phase 33: Color Token System & Consolidation** (7 plans) — Build ThemeExtension<AppPalette> token system encoding ADR-018 Teal Clarity; replace 61 Color(0x…) literals; full dark-mode rollout (D-07/THEME-V2-02 absorbed)
+- [x] **Phase 33: Color Token System & Consolidation** (7 plans) — Build ThemeExtension<AppPalette> token system encoding ADR-018 Teal Clarity; replace 61 Color(0x…) literals; full dark-mode rollout (D-07/THEME-V2-02 absorbed) (completed 2026-06-01)
 - [ ] **Phase 34: Golden Re-baseline & Verification** — Regenerate all golden/visual baselines to the new palette; confirm full test suite green; verify no stale vocabulary or color literals remain
 
 ## Phase Details
