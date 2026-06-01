@@ -188,3 +188,7 @@ Future revisions to this ADR (e.g., v1.2 register polish, new family-mode lexica
 ## 12. 下次Review
 
 **下次Review:** v1.2 milestone start
+
+## Update 2026-06-01: Extended by ADR-017
+
+词汇统一 v1.5 (ADR-017) 在本 ADR 确立的 lexical hierarchy 框架基础上，锁定了 v1.5 canonical locale vocab mapping、identifier convention（survival→daily, soul→joy, soulSatisfaction→joyFullness）、以及 LedgerType enum-rename-with-v18-migration schema 决策。参见 `docs/arch/03-adr/ADR-017_Terminology_Unification_v1_5.md`。
