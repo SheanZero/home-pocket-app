@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/settings/domain/models/app_settings.dart';
 import '../../../../features/settings/presentation/providers/state_settings.dart';
@@ -41,13 +41,9 @@ class CalendarHeaderWidget extends ConsumerWidget {
   final String currencyCode;
   final Locale locale;
 
-  /// Weekend (Sat + Sun) numeral/header color — explicitly specified blue.
-  static const Color _weekendColor = Color(0xFF1565C0); // Material Blue 800
-  /// Today's numeral color — red font marks the current day (no box, no dot).
-  static const Color _todayColor = Color(0xFFD32F2F); // Material Red 700
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final palette = context.palette;
     final l10n = S.of(context);
     final filter = ref.watch(listFilterProvider);
     // Read weekStartDay from persisted settings (default: monday).
@@ -95,7 +91,7 @@ class CalendarHeaderWidget extends ConsumerWidget {
               final bool isWeekend = day.weekday == DateTime.saturday ||
                   day.weekday == DateTime.sunday;
               final Color color =
-                  isWeekend ? _weekendColor : AppColors.textSecondary;
+                  isWeekend ? context.palette.info : context.palette.textSecondary;
               return Center(
                 child: Text(
                   DateFormatter.formatShortWeekday(day, locale),
@@ -104,13 +100,13 @@ class CalendarHeaderWidget extends ConsumerWidget {
               );
             },
             defaultBuilder: (context, day, focusedDay) =>
-                _buildDayCell(day, dailyMap, filter.activeDayFilter, false),
+                _buildDayCell(palette, day, dailyMap, filter.activeDayFilter, false),
             todayBuilder: (context, day, focusedDay) =>
-                _buildDayCell(day, dailyMap, filter.activeDayFilter, false),
+                _buildDayCell(palette, day, dailyMap, filter.activeDayFilter, false),
             selectedBuilder: (context, day, focusedDay) =>
-                _buildDayCell(day, dailyMap, filter.activeDayFilter, false),
+                _buildDayCell(palette, day, dailyMap, filter.activeDayFilter, false),
             outsideBuilder: (context, day, focusedDay) =>
-                _buildDayCell(day, dailyMap, filter.activeDayFilter, true),
+                _buildDayCell(palette, day, dailyMap, filter.activeDayFilter, true),
           ),
         ),
         _SummaryRow(
@@ -127,6 +123,7 @@ class CalendarHeaderWidget extends ConsumerWidget {
 
   /// Builds a custom day cell widget.
   Widget _buildDayCell(
+    AppPalette palette,
     DateTime day,
     Map<DateTime, int> dailyMap,
     DateTime? activeDayFilter,
@@ -141,21 +138,21 @@ class CalendarHeaderWidget extends ConsumerWidget {
     // No "today" frame/background (removed per request).
     final BoxDecoration? decoration = isSelected
         ? BoxDecoration(
-            color: AppColors.accentPrimary,
+            color: palette.accentPrimary,
             borderRadius: BorderRadius.circular(6),
           )
         : null;
 
-    // Weekend (Sat + Sun) numerals are blue (by true weekday, not column).
+    // Weekend (Sat + Sun) numerals use palette.info (Bucket F → D-07).
     final bool isWeekend =
         day.weekday == DateTime.saturday || day.weekday == DateTime.sunday;
     final Color baseNumeralColor =
-        isWeekend ? _weekendColor : AppColors.textPrimary;
-    // Precedence: selected chip > today (red) > weekend (blue) > default.
+        isWeekend ? palette.info : palette.textPrimary;
+    // Precedence: selected chip > today (error/red) > weekend (info/blue) > default.
     final numeralColor = isSelected
-        ? AppColors.card
-        : (isToday ? _todayColor : baseNumeralColor);
-    final amountColor = isSelected ? AppColors.card : AppColors.textSecondary;
+        ? palette.card
+        : (isToday ? palette.error : baseNumeralColor);
+    final amountColor = isSelected ? palette.card : palette.textSecondary;
 
     return Opacity(
       opacity: isOutside ? 0.35 : 1.0,
@@ -226,10 +223,11 @@ class _SummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(color: AppColors.borderDivider, width: 1),
+          top: BorderSide(color: palette.borderDivider, width: 1),
         ),
       ),
       child: Padding(
@@ -246,13 +244,13 @@ class _SummaryRow extends StatelessWidget {
                   style: AppTextStyles.caption,
                 ),
                 calendarAsync.when(
-                  loading: () => const SizedBox(
+                  loading: () => SizedBox(
                     width: 60,
                     height: 15,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: AppColors.backgroundMuted,
-                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                        color: palette.backgroundMuted,
+                        borderRadius: const BorderRadius.all(Radius.circular(4)),
                       ),
                     ),
                   ),

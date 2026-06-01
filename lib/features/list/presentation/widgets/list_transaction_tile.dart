@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart'
@@ -82,6 +82,7 @@ class ListTransactionTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final palette = context.palette;
     return Dismissible(
       key: ValueKey(taggedTx.transaction.id),
       direction: DismissDirection.endToStart,
@@ -89,7 +90,7 @@ class ListTransactionTile extends ConsumerWidget {
         color: Colors.red,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 16),
-        child: const Icon(Icons.delete, color: AppColors.card, size: 20),
+        child: Icon(Icons.delete, color: palette.card, size: 20),
       ),
       confirmDismiss: (_) => showDialog<bool>(
         context: context,
@@ -101,7 +102,7 @@ class ListTransactionTile extends ConsumerWidget {
           content: Text(
             S.of(context).listDeleteConfirmBody,
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
+              color: palette.textSecondary,
               height: 1.5,
             ),
           ),
@@ -111,7 +112,7 @@ class ListTransactionTile extends ConsumerWidget {
               child: Text(
                 S.of(context).listDeleteCancelButton,
                 style: AppTextStyles.titleSmall.copyWith(
-                  color: AppColors.textSecondary,
+                  color: palette.textSecondary,
                 ),
               ),
             ),
@@ -172,7 +173,7 @@ class ListTransactionTile extends ConsumerWidget {
                           Icon(
                             satisfactionIcon,
                             size: 14,
-                            color: AppColors.joy,
+                            color: palette.joy,
                           ),
                         ],
                       ],
@@ -205,7 +206,7 @@ class ListTransactionTile extends ConsumerWidget {
                             child: Text(
                               merchant!,
                               style: AppTextStyles.micro.copyWith(
-                                color: AppColors.textSecondary,
+                                color: palette.textSecondary,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -225,7 +226,7 @@ class ListTransactionTile extends ConsumerWidget {
                   constraints: const BoxConstraints(maxWidth: 72),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppColors.sharedLight,
+                      color: palette.sharedLight,
                       borderRadius: BorderRadius.circular(3),
                     ),
                     padding: const EdgeInsets.symmetric(
@@ -235,7 +236,7 @@ class ListTransactionTile extends ConsumerWidget {
                     child: Text(
                       '${tag.emoji} ${tag.name}',
                       style: AppTextStyles.micro.copyWith(
-                        color: AppColors.shared,
+                        color: palette.sharedText,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -245,10 +246,11 @@ class ListTransactionTile extends ConsumerWidget {
                 const SizedBox(width: 8),
               ],
               // Amount — amountSmall with tabular figures (SC#1)
+              // Uses palette.textPrimary (general text, not ledger-coloured amount context)
               Text(
                 formattedAmount,
                 style: AppTextStyles.amountSmall.copyWith(
-                  color: AppColors.textPrimary,
+                  color: palette.textPrimary,
                 ),
               ),
             ],
