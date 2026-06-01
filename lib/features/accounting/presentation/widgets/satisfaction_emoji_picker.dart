@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
 class SatisfactionEmojiPicker extends StatelessWidget {
@@ -38,14 +38,8 @@ class SatisfactionEmojiPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.palette;
     final selectedIndex = _selectedIndex;
-    final baseTileColor = isDark
-        ? AppColorsDark.backgroundMuted
-        : AppColors.backgroundMuted;
-    final labelColor = isDark
-        ? AppColorsDark.textTertiary
-        : AppColors.textTertiary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,9 +50,7 @@ class SatisfactionEmojiPicker extends StatelessWidget {
               title,
               style: AppTextStyles.titleMedium.copyWith(
                 fontSize: 13,
-                color: isDark
-                    ? AppColorsDark.textPrimary
-                    : AppColors.textPrimary,
+                color: palette.textPrimary,
               ),
             ),
             const Spacer(),
@@ -67,7 +59,7 @@ class SatisfactionEmojiPicker extends StatelessWidget {
               style: AppTextStyles.bodySmall.copyWith(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.joy,
+                color: palette.joy,
               ),
             ),
           ],
@@ -84,23 +76,17 @@ class SatisfactionEmojiPicker extends StatelessWidget {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? (isDark ? AppColorsDark.tagGreen : AppColors.tagGreen)
-                      : baseTileColor,
+                  color: isSelected ? palette.joyLight : palette.backgroundMuted,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: isSelected ? AppColors.joy : Colors.transparent,
+                    color: isSelected ? palette.joy : Colors.transparent,
                     width: isSelected ? 2 : 1,
                   ),
                 ),
                 child: Icon(
                   _icons[index],
                   size: 24,
-                  color: isSelected
-                      ? AppColors.joy
-                      : (isDark
-                            ? AppColorsDark.textSecondary
-                            : AppColors.textSecondary),
+                  color: isSelected ? palette.joy : palette.textSecondary,
                 ),
               ),
             );
@@ -115,7 +101,7 @@ class SatisfactionEmojiPicker extends StatelessWidget {
                 style: AppTextStyles.bodySmall.copyWith(
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
-                  color: labelColor,
+                  color: palette.textTertiary,
                 ),
               ),
             ),
@@ -126,7 +112,7 @@ class SatisfactionEmojiPicker extends StatelessWidget {
                 style: AppTextStyles.bodySmall.copyWith(
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
-                  color: labelColor,
+                  color: palette.textTertiary,
                 ),
               ),
             ),
@@ -137,7 +123,7 @@ class SatisfactionEmojiPicker extends StatelessWidget {
                 style: AppTextStyles.bodySmall.copyWith(
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
-                  color: labelColor,
+                  color: palette.textTertiary,
                 ),
               ),
             ),

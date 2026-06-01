@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/ocr_parse_draft.dart';
@@ -21,9 +21,10 @@ class OcrScannerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
+    final palette = context.palette;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1A2530),
+      backgroundColor: palette.card,
       body: SafeArea(
         child: Column(
           children: [
@@ -68,7 +69,7 @@ class OcrScannerScreen extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: AppColors.daily.withValues(alpha: 0.5),
+                      color: palette.daily.withValues(alpha: 0.5),
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(16),

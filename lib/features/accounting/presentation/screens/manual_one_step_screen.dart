@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
@@ -320,7 +320,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
     final l10n = S.of(context);
     // Watch locale provider to trigger rebuild on locale change.
     ref.watch(currentLocaleProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.palette;
 
     final viewInsetsBottom = MediaQuery.of(context).viewInsets.bottom;
     // Item 3 (260526-j98): bottom padding clears IME only — the SmartKeyboard
@@ -332,24 +332,22 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
       key: const ValueKey('manual-one-step-screen'),
       // D-13: manual control prevents layout jitter during AnimatedSlide.
       resizeToAvoidBottomInset: false,
-      backgroundColor: isDark
-          ? AppColorsDark.background
-          : AppColors.backgroundWarm,
+      backgroundColor: palette.background,
       appBar: AppBar(
-        backgroundColor: isDark ? AppColorsDark.card : AppColors.card,
+        backgroundColor: palette.card,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.close,
-            color: isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
+            color: palette.textPrimary,
           ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           l10n.addTransaction,
           style: AppTextStyles.headlineMedium.copyWith(
-            color: isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
+            color: palette.textPrimary,
           ),
         ),
         centerTitle: true,

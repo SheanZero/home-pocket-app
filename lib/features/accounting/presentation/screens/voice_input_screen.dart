@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../generated/app_localizations.dart';
@@ -537,7 +537,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.palette;
     // Watch locale to trigger rebuild on locale change (formatting downstream).
     ref.watch(currentLocaleProvider);
 
@@ -559,24 +559,22 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
         : null;
 
     return Scaffold(
-      backgroundColor: isDark
-          ? AppColorsDark.background
-          : AppColors.backgroundWarm,
+      backgroundColor: palette.background,
       appBar: AppBar(
-        backgroundColor: isDark ? AppColorsDark.card : AppColors.card,
+        backgroundColor: palette.card,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.close,
-            color: isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
+            color: palette.textPrimary,
           ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           l10n.addTransaction,
           style: AppTextStyles.headlineMedium.copyWith(
-            color: isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
+            color: palette.textPrimary,
           ),
         ),
         centerTitle: true,
@@ -638,12 +636,10 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
           Container(
             margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             decoration: BoxDecoration(
-              color: isDark ? AppColorsDark.card : AppColors.card,
+              color: palette.card,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: isDark
-                    ? AppColorsDark.borderDefault
-                    : AppColors.borderDefault,
+                color: palette.borderDefault,
               ),
             ),
             child: Padding(
@@ -674,12 +670,8 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
                           textAlign: TextAlign.center,
                           style: AppTextStyles.caption.copyWith(
                             color: _partialText.isNotEmpty
-                                ? (isDark
-                                      ? AppColorsDark.textTertiary
-                                      : AppColors.textTertiary)
-                                : (isDark
-                                      ? AppColorsDark.textPrimary
-                                      : AppColors.textPrimary),
+                                ? palette.textTertiary
+                                : palette.textPrimary,
                           ),
                         ),
                       ),
@@ -692,7 +684,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
                     child: VoiceWaveform(
                       soundLevel: _soundLevel,
                       isActive: _isRecording,
-                      color: AppColors.daily,
+                      color: palette.daily,
                     ),
                   ),
 
@@ -734,20 +726,20 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: _isRecording
-                              ? const [
-                                  AppColors.recordingGradientStart,
-                                  AppColors.recordingGradientEnd,
+                              ? [
+                                  palette.recordingGradientStart,
+                                  palette.recordingGradientEnd,
                                 ]
-                              : const [
-                                  AppColors.actionGradientStart,
-                                  AppColors.actionGradientEnd,
+                              : [
+                                  palette.fabGradientStart,
+                                  palette.fabGradientEnd,
                                 ],
                         ),
-                        boxShadow: const [
+                        boxShadow: [
                           BoxShadow(
-                            color: AppColors.actionShadow,
+                            color: palette.actionShadow,
                             blurRadius: 16,
-                            offset: Offset(0, 4),
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
@@ -769,9 +761,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
                       _isRecording ? l10n.recording : l10n.holdToRecord,
                       key: ValueKey(_isRecording),
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: isDark
-                            ? AppColorsDark.textTertiary
-                            : AppColors.textTertiary,
+                        color: palette.textTertiary,
                       ),
                     ),
                   ),
@@ -790,20 +780,20 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: _canSave
-                      ? const LinearGradient(
+                      ? LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            AppColors.actionGradientStart,
-                            AppColors.actionGradientEnd,
+                            palette.fabGradientStart,
+                            palette.fabGradientEnd,
                           ],
                         )
                       : LinearGradient(
                           colors: [
-                            AppColors.actionGradientStart.withValues(
+                            palette.fabGradientStart.withValues(
                               alpha: 0.4,
                             ),
-                            AppColors.actionGradientEnd.withValues(alpha: 0.4),
+                            palette.fabGradientEnd.withValues(alpha: 0.4),
                           ],
                         ),
                   borderRadius: BorderRadius.circular(14),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 
@@ -36,21 +36,19 @@ class KeyboardToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.palette;
 
     return TapRegion(
       groupId: kKeyboardToolbarTapRegionGroup,
       child: Material(
-        color: isDark ? AppColorsDark.card : AppColors.card,
+        color: palette.card,
         elevation: 0,
         child: Container(
           height: 44,
           decoration: BoxDecoration(
             border: Border(
               top: BorderSide(
-                color: isDark
-                    ? AppColorsDark.borderDefault
-                    : AppColors.borderDefault,
+                color: palette.borderDefault,
               ),
             ),
           ),
@@ -65,11 +63,9 @@ class KeyboardToolbar extends StatelessWidget {
                   ),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: isDark ? AppColorsDark.card : AppColors.card,
+                      color: palette.card,
                       border: Border.all(
-                        color: isDark
-                            ? AppColorsDark.borderDefault
-                            : AppColors.borderDefault,
+                        color: palette.borderDefault,
                         width: 1,
                       ),
                       borderRadius: BorderRadius.circular(10),
@@ -83,9 +79,7 @@ class KeyboardToolbar extends StatelessWidget {
                           child: Text(
                             S.of(context).keyboardToolbarDone,
                             style: AppTextStyles.bodyMedium.copyWith(
-                              color: isDark
-                                  ? AppColorsDark.textPrimary
-                                  : AppColors.textPrimary,
+                              color: palette.textPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -104,12 +98,12 @@ class KeyboardToolbar extends StatelessWidget {
                   ),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
+                      gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          AppColors.actionGradientStart,
-                          AppColors.actionGradientEnd,
+                          palette.fabGradientStart,
+                          palette.fabGradientEnd,
                         ],
                       ),
                       borderRadius: BorderRadius.circular(10),

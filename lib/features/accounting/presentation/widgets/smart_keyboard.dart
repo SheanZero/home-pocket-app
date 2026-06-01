@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
 /// Custom numpad with 4 digit rows + action row for transaction entry.
@@ -48,7 +48,7 @@ class SmartKeyboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.palette;
     final mq = MediaQuery.of(context);
 
     // D-06: responsive key height — ~40% of screen height distributed over 5
@@ -61,12 +61,10 @@ class SmartKeyboard extends StatelessWidget {
     return Container(
       key: const ValueKey('smart_keyboard_root'),
       decoration: BoxDecoration(
-        color: isDark ? AppColorsDark.card : AppColors.card,
+        color: palette.card,
         border: Border(
           top: BorderSide(
-            color: isDark
-                ? AppColorsDark.borderDefault
-                : AppColors.borderDefault,
+            color: palette.borderDefault,
           ),
         ),
       ),
@@ -74,15 +72,15 @@ class SmartKeyboard extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildDigitRow(context, ['1', '2', '3'], keyHeight),
+          _buildDigitRow(context, ['1', '2', '3'], keyHeight, palette),
           const SizedBox(height: 12), // D-07: 8 -> 12 dp inter-row gap
-          _buildDigitRow(context, ['4', '5', '6'], keyHeight),
+          _buildDigitRow(context, ['4', '5', '6'], keyHeight, palette),
           const SizedBox(height: 12),
-          _buildDigitRow(context, ['7', '8', '9'], keyHeight),
+          _buildDigitRow(context, ['7', '8', '9'], keyHeight, palette),
           const SizedBox(height: 12),
-          _buildExtraRow(context, keyHeight),
+          _buildExtraRow(context, keyHeight, palette),
           const SizedBox(height: 12),
-          _buildActionRow(context, isDark, keyHeight),
+          _buildActionRow(context, palette, keyHeight),
         ],
       ),
     );
@@ -92,9 +90,8 @@ class SmartKeyboard extends StatelessWidget {
     BuildContext context,
     List<String> keys,
     double keyHeight,
+    AppPalette palette,
   ) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Row(
       children: keys
           .map(
@@ -105,7 +102,7 @@ class SmartKeyboard extends StatelessWidget {
                 child: _DigitKey(
                   label: key,
                   onTap: () => onDigit(key),
-                  isDark: isDark,
+                  palette: palette,
                   height: keyHeight,
                 ),
               ),
@@ -116,9 +113,7 @@ class SmartKeyboard extends StatelessWidget {
   }
 
   /// Row 4: 00, 0, .
-  Widget _buildExtraRow(BuildContext context, double keyHeight) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
+  Widget _buildExtraRow(BuildContext context, double keyHeight, AppPalette palette) {
     return Row(
       children: [
         Expanded(
@@ -128,7 +123,7 @@ class SmartKeyboard extends StatelessWidget {
             child: _DigitKey(
               label: '00',
               onTap: () => onDoubleZero?.call(),
-              isDark: isDark,
+              palette: palette,
               height: keyHeight,
             ),
           ),
@@ -140,7 +135,7 @@ class SmartKeyboard extends StatelessWidget {
             child: _DigitKey(
               label: '0',
               onTap: () => onDigit('0'),
-              isDark: isDark,
+              palette: palette,
               height: keyHeight,
             ),
           ),
@@ -152,7 +147,7 @@ class SmartKeyboard extends StatelessWidget {
             child: _DigitKey(
               label: '.',
               onTap: () => onDot?.call(),
-              isDark: isDark,
+              palette: palette,
               height: keyHeight,
             ),
           ),
@@ -164,7 +159,7 @@ class SmartKeyboard extends StatelessWidget {
   /// Action Row: backspace, currency label, Save — all equal width (D-08)
   Widget _buildActionRow(
     BuildContext context,
-    bool isDark,
+    AppPalette palette,
     double keyHeight,
   ) {
     return Row(
@@ -175,14 +170,12 @@ class SmartKeyboard extends StatelessWidget {
             // P19 D-07: 3 dp per side -> 6 dp total visible gap between adjacent keys.
             padding: const EdgeInsets.symmetric(horizontal: 3),
             child: _ActionKey(
-              color: isDark
-                  ? AppColorsDark.backgroundMuted
-                  : AppColors.backgroundMuted,
+              color: palette.backgroundMuted,
               height: keyHeight, // D-08: same responsive height as digit keys
               onTap: onDelete,
               child: Icon(
                 Icons.backspace_outlined,
-                color: AppColors.daily,
+                color: palette.daily,
                 size: 22,
               ),
             ),
@@ -196,7 +189,7 @@ class SmartKeyboard extends StatelessWidget {
             child: _CurrencyKey(
               symbol: currencySymbol,
               label: currencyLabel,
-              isDark: isDark,
+              palette: palette,
               height: keyHeight, // D-08: same responsive height as digit keys
             ),
           ),
@@ -209,6 +202,7 @@ class SmartKeyboard extends StatelessWidget {
             child: _GradientKey(
               label: actionLabel,
               onTap: onNext,
+              palette: palette,
               height: keyHeight, // D-08: same responsive height as digit keys
             ),
           ),
@@ -222,19 +216,19 @@ class _DigitKey extends StatelessWidget {
   const _DigitKey({
     required this.label,
     required this.onTap,
-    required this.isDark,
+    required this.palette,
     required this.height,
   });
 
   final String label;
   final VoidCallback onTap;
-  final bool isDark;
+  final AppPalette palette;
   final double height;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: isDark ? AppColorsDark.backgroundMuted : AppColors.backgroundMuted,
+      color: palette.backgroundMuted,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -249,7 +243,7 @@ class _DigitKey extends StatelessWidget {
               fontWeight: FontWeight.w500,
               // UI-SPEC Typography: tabular figures so digit glyphs align like AmountDisplay
               fontFeatures: const [FontFeature.tabularFigures()],
-              color: isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
+              color: palette.textPrimary,
             ),
           ),
         ),
@@ -293,13 +287,13 @@ class _CurrencyKey extends StatelessWidget {
   const _CurrencyKey({
     required this.symbol,
     required this.label,
-    required this.isDark,
+    required this.palette,
     required this.height,
   });
 
   final String symbol;
   final String label;
-  final bool isDark;
+  final AppPalette palette;
   final double height;
 
   @override
@@ -308,9 +302,7 @@ class _CurrencyKey extends StatelessWidget {
       key: const ValueKey('smart_keyboard_currency_key'),
       height: height,
       decoration: BoxDecoration(
-        color: isDark
-            ? AppColorsDark.backgroundMuted
-            : AppColors.backgroundMuted,
+        color: palette.backgroundMuted,
         borderRadius: BorderRadius.circular(12),
       ),
       alignment: Alignment.center,
@@ -323,7 +315,7 @@ class _CurrencyKey extends StatelessWidget {
             style: AppTextStyles.amountMedium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: AppColors.daily,
+              color: palette.daily,
             ),
           ),
           const SizedBox(width: 4),
@@ -332,7 +324,7 @@ class _CurrencyKey extends StatelessWidget {
             style: AppTextStyles.bodySmall.copyWith(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: AppColors.daily,
+              color: palette.daily,
             ),
           ),
         ],
@@ -345,11 +337,13 @@ class _GradientKey extends StatelessWidget {
   const _GradientKey({
     required this.label,
     required this.onTap,
+    required this.palette,
     required this.height,
   });
 
   final String label;
   final VoidCallback onTap;
+  final AppPalette palette;
   final double height;
 
   @override
@@ -362,20 +356,20 @@ class _GradientKey extends StatelessWidget {
         onTap: onTap,
         child: Ink(
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                AppColors.actionGradientStart,
-                AppColors.actionGradientEnd,
+                palette.fabGradientStart,
+                palette.fabGradientEnd,
               ],
             ),
             borderRadius: BorderRadius.circular(14),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                color: AppColors.actionShadow,
+                color: palette.actionShadow,
                 blurRadius: 14,
-                offset: Offset(0, 4),
+                offset: const Offset(0, 4),
               ),
             ],
           ),

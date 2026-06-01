@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import 'amount_display.dart';
 import 'smart_keyboard.dart';
@@ -68,7 +68,7 @@ class AmountEditBottomSheet extends StatelessWidget {
 
     return StatefulBuilder(
       builder: (context, setSheetState) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final palette = context.palette;
 
         void onDigit(String digit) {
           final dotIndex = editStr.indexOf('.');
@@ -134,7 +134,7 @@ class AmountEditBottomSheet extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: isDark ? AppColorsDark.card : AppColors.card,
+            color: palette.card,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: SafeArea(
@@ -146,9 +146,7 @@ class AmountEditBottomSheet extends StatelessWidget {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: isDark
-                        ? AppColorsDark.borderDefault
-                        : AppColors.borderDefault,
+                    color: palette.borderDefault,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),

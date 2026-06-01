@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Animated voice waveform visualization.
 ///
@@ -13,18 +13,20 @@ class VoiceWaveform extends StatelessWidget {
   /// Whether the waveform is currently active (recording in progress).
   final bool isActive;
 
-  /// Color of the waveform bars.
-  final Color color;
+  /// Color of the waveform bars. Defaults to [AppPalette.light.daily] when
+  /// no color is provided by the caller.
+  final Color? color;
 
   const VoiceWaveform({
     super.key,
     required this.soundLevel,
     this.isActive = false,
-    this.color = AppColors.daily,
+    this.color,
   });
 
   @override
   Widget build(BuildContext context) {
+    final effectiveColor = color ?? context.palette.daily;
     return SizedBox(
       height: 48,
       child: Row(
@@ -43,7 +45,7 @@ class VoiceWaveform extends StatelessWidget {
             height: height,
             margin: const EdgeInsets.symmetric(horizontal: 1.5),
             decoration: BoxDecoration(
-              color: color.withValues(
+              color: effectiveColor.withValues(
                 alpha: isActive ? 0.4 + 0.6 * soundLevel : 0.2,
               ),
               borderRadius: BorderRadius.circular(2),
