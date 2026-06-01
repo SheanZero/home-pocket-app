@@ -42,7 +42,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   @override
   MigrationStrategy get migration {
@@ -279,6 +279,68 @@ class AppDatabase extends _$AppDatabase {
             '''ALTER TABLE transactions ADD COLUMN entry_source TEXT NOT NULL '''
             '''DEFAULT 'manual' CHECK(entry_source IN ('manual', 'voice', 'ocr'))''',
           );
+        }
+        if (from < 18) {
+          // D-02 + D-16: terminology rename (survival→daily, soul→joy) and
+          // soul_satisfaction column rename to joy_fullness.
+          // Three sub-steps, wrapped in a transaction for atomicity (T-31-04).
+          // Sub-step ordering is critical (RESEARCH Pitfall 2): category_ledger_configs
+          // table-recreate FIRST (old CHECK rejects 'daily'/'joy'), then UPDATE
+          // transactions.ledger_type, then RENAME COLUMN.
+          await transaction(() async {
+            // Sub-step 1: recreate category_ledger_configs with new CHECK IN('daily','joy').
+            // SQLite cannot ALTER a CHECK; the old CHECK IN('survival','soul') rejects
+            // 'daily'/'joy', so recreate must precede the value INSERT.
+            // Drop old indices first — RENAME TABLE keeps index names live, causing
+            // CREATE INDEX to fail if IF NOT EXISTS is omitted (Plan 01 deviation fix).
+            await customStatement(
+              'DROP INDEX IF EXISTS idx_category_ledger_configs_ledger_type',
+            );
+            await customStatement(
+              'DROP INDEX IF EXISTS idx_category_ledger_configs_updated_at',
+            );
+            await customStatement(
+              'ALTER TABLE category_ledger_configs RENAME TO category_ledger_configs_old',
+            );
+            await migrator.createTable(categoryLedgerConfigs);
+            // A5 safeguard: re-issue indices unconditionally in case createTable
+            // does not re-apply customIndices (cheap + idempotent).
+            await customStatement(
+              'CREATE INDEX IF NOT EXISTS idx_category_ledger_configs_ledger_type '
+              'ON category_ledger_configs (ledger_type)',
+            );
+            await customStatement(
+              'CREATE INDEX IF NOT EXISTS idx_category_ledger_configs_updated_at '
+              'ON category_ledger_configs (updated_at)',
+            );
+            await customStatement('''
+              INSERT INTO category_ledger_configs (category_id, ledger_type, updated_at)
+              SELECT category_id,
+                     CASE ledger_type
+                       WHEN 'survival' THEN 'daily'
+                       WHEN 'soul'     THEN 'joy'
+                       ELSE ledger_type
+                     END,
+                     updated_at
+              FROM category_ledger_configs_old
+            ''');
+            await customStatement('DROP TABLE category_ledger_configs_old');
+
+            // Sub-step 2: rewrite transactions.ledger_type values.
+            // No CHECK on transactions.ledger_type — plain UPDATE suffices.
+            await customStatement(
+              "UPDATE transactions SET ledger_type = 'daily' WHERE ledger_type = 'survival'",
+            );
+            await customStatement(
+              "UPDATE transactions SET ledger_type = 'joy' WHERE ledger_type = 'soul'",
+            );
+
+            // Sub-step 3: rename soul_satisfaction column to joy_fullness (D-16).
+            // SQLite preserves integer data through RENAME COLUMN.
+            await customStatement(
+              'ALTER TABLE transactions RENAME COLUMN soul_satisfaction TO joy_fullness',
+            );
+          });
         }
       },
     );
