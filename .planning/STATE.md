@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: 文案与配色统一
-status: executing
-stopped_at: "Phase 31: 01-03 shipped; 04-06 re-planned (D-19) + plan-checker PASS — ready to resume execution at plan 04"
-last_updated: "2026-06-01T02:49:36.400Z"
+status: ready_to_plan
+stopped_at: Phase 31 complete (6/6) — ready to discuss Phase 32
+last_updated: 2026-06-01T04:34:40.829Z
 last_activity: 2026-06-01 -- Phase 31 execution started
 progress:
   total_phases: 4
-  completed_phases: 0
-  total_plans: 6
-  completed_plans: 3
-  percent: 0
+  completed_phases: 5
+  total_plans: 201
+  completed_plans: 6
+  percent: 125
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-31 — v1.4 列表功能 shipped + archived)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 31 — terminology-rename
+**Current focus:** Phase 32 — palette exploration & selection
 
 ## Current Position
 
-Phase: 31 (terminology-rename) — EXECUTING
-Plan: 1 of 6
-Status: Executing Phase 31
-Last activity: 2026-06-01 -- Phase 31 execution started
+Phase: 32
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-06-01
 
 Progress: [█████░░░░░] 50%
 
