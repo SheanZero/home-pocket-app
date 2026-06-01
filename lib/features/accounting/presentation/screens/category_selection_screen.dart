@@ -158,7 +158,7 @@ class _CategorySelectionScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(S.of(context).orderSaveFailed),
-          backgroundColor: Colors.red,
+          backgroundColor: context.palette.error,
         ),
       );
     }
@@ -177,7 +177,9 @@ class _CategorySelectionScreenState
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(
+              foregroundColor: context.palette.error,
+            ),
             child: Text(l10n.discard),
           ),
         ],

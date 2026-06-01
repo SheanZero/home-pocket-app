@@ -87,7 +87,7 @@ class ListTransactionTile extends ConsumerWidget {
       key: ValueKey(taggedTx.transaction.id),
       direction: DismissDirection.endToStart,
       background: Container(
-        color: Colors.red,
+        color: palette.error,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 16),
         child: Icon(Icons.delete, color: palette.card, size: 20),
@@ -117,11 +117,11 @@ class ListTransactionTile extends ConsumerWidget {
               ),
             ),
             TextButton(
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              style: TextButton.styleFrom(foregroundColor: palette.error),
               onPressed: () => Navigator.pop(ctx, true),
               child: Text(
                 S.of(context).listDeleteConfirmButton,
-                style: AppTextStyles.titleSmall.copyWith(color: Colors.red),
+                style: AppTextStyles.titleSmall.copyWith(color: palette.error),
               ),
             ),
           ],

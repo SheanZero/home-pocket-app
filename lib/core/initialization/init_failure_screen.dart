@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import '../../generated/app_localizations.dart';
 import '../theme/app_palette.dart';
 import '../theme/app_text_styles.dart';
+import '../theme/app_theme.dart';
 
 /// Localized fallback screen rendered by main() when AppInitializer.initialize()
 /// returns InitFailure. Runs before ProviderScope is mounted — no Riverpod.
@@ -108,6 +109,8 @@ class InitFailureApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
       localizationsDelegates: const [
         S.delegate,
         GlobalMaterialLocalizations.delegate,

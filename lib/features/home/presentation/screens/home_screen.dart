@@ -385,7 +385,7 @@ class _ErrorText extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Text(
         'Error: $message',
-        style: AppTextStyles.bodySmall.copyWith(color: Colors.red),
+        style: AppTextStyles.bodySmall.copyWith(color: context.palette.error),
       ),
     );
   }

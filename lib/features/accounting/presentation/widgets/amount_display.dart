@@ -77,7 +77,7 @@ class AmountDisplay extends StatelessWidget {
                 Text(
                   currencySymbol,
                   style: AppTextStyles.amountMedium.copyWith(
-                    color: palette.daily,
+                    color: palette.dailyText,
                     fontSize: 14,
                   ),
                 ),
@@ -85,7 +85,7 @@ class AmountDisplay extends StatelessWidget {
                 Text(
                   currencyLabel,
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: palette.daily,
+                    color: palette.dailyText,
                     fontWeight: FontWeight.w600,
                     fontSize: 10,
                   ),

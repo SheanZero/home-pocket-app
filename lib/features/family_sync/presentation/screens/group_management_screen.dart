@@ -352,7 +352,7 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
           // Member card
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: palette.card,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
