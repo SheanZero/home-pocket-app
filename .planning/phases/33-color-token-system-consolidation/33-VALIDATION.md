@@ -3,7 +3,7 @@ phase: 33
 slug: color-token-system-consolidation
 status: approved
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-06-01
 ---
 
