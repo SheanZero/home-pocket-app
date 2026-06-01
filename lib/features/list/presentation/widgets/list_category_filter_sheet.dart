@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/accounting/category_localization_service.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../accounting/domain/models/category.dart';
@@ -111,11 +111,12 @@ class _CategoryFilterSheetState extends ConsumerState<CategoryFilterSheet> {
     final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
     final screenHeight = MediaQuery.of(context).size.height;
 
+    final palette = context.palette;
     return Container(
       height: screenHeight * 0.65,
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      decoration: BoxDecoration(
+        color: palette.background,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: Column(
         children: [
@@ -127,7 +128,7 @@ class _CategoryFilterSheetState extends ConsumerState<CategoryFilterSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.borderDivider,
+                  color: palette.borderDivider,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -151,17 +152,17 @@ class _CategoryFilterSheetState extends ConsumerState<CategoryFilterSheet> {
                   child: Text(
                     S.of(context).listCategorySheetClear,
                     style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textSecondary,
+                      color: palette.textSecondary,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          const Divider(
+          Divider(
             height: 1,
             thickness: 1,
-            color: AppColors.borderDivider,
+            color: palette.borderDivider,
           ),
           // Category list
           Expanded(
@@ -243,10 +244,10 @@ class _CategoryFilterSheetState extends ConsumerState<CategoryFilterSheet> {
                             );
                           }),
                           if (index < _l1Categories.length - 1)
-                            const Divider(
+                            Divider(
                               height: 1,
                               thickness: 1,
-                              color: AppColors.borderDivider,
+                              color: palette.borderDivider,
                               indent: 16,
                               endIndent: 16,
                             ),
@@ -258,9 +259,9 @@ class _CategoryFilterSheetState extends ConsumerState<CategoryFilterSheet> {
           // Apply bar
           Container(
             height: 56,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(
-                top: BorderSide(color: AppColors.borderDivider, width: 1),
+                top: BorderSide(color: palette.borderDivider, width: 1),
               ),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -271,7 +272,7 @@ class _CategoryFilterSheetState extends ConsumerState<CategoryFilterSheet> {
                   child: Text(
                     S.of(context).listDeleteCancelButton,
                     style: AppTextStyles.titleSmall.copyWith(
-                      color: AppColors.textSecondary,
+                      color: palette.textSecondary,
                     ),
                   ),
                 ),
@@ -279,7 +280,7 @@ class _CategoryFilterSheetState extends ConsumerState<CategoryFilterSheet> {
                 Expanded(
                   child: FilledButton(
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.accentPrimary,
+                      backgroundColor: palette.accentPrimary,
                     ),
                     onPressed: () {
                       ref
@@ -292,7 +293,7 @@ class _CategoryFilterSheetState extends ConsumerState<CategoryFilterSheet> {
                           ? S.of(context).listCategorySheetApply
                           : S.of(context).listCategorySheetApplyN(_localSelected.length),
                       style: AppTextStyles.titleSmall.copyWith(
-                        color: AppColors.card,
+                        color: palette.card,
                       ),
                     ),
                   ),

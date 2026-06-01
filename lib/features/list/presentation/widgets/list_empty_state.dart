@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../providers/state_list_filter.dart';
@@ -58,18 +58,19 @@ class ListEmptyState extends ConsumerWidget {
         ),
     };
 
+    final palette = context.palette;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 48, color: AppColors.textTertiary),
+            Icon(icon, size: 48, color: palette.textTertiary),
             const SizedBox(height: 16),
             Text(
               message,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+                color: palette.textSecondary,
                 height: 1.5,
               ),
               textAlign: TextAlign.center,
@@ -81,7 +82,7 @@ class ListEmptyState extends ConsumerWidget {
                 child: Text(
                   actionLabel,
                   style: AppTextStyles.caption.copyWith(
-                    color: AppColors.accentPrimary,
+                    color: palette.accentPrimary,
                   ),
                 ),
               ),
