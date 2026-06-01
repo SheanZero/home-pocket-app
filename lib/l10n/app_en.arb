@@ -152,19 +152,19 @@
   },
   "dailyLedger": "Daily",
   "@dailyLedger": {
-    "description": "Survival ledger label"
+    "description": "Daily ledger label"
   },
   "joyLedger": "Joy",
   "@joyLedger": {
-    "description": "Soul ledger label"
+    "description": "Joy ledger label"
   },
-  "daily": "Survival",
+  "daily": "Daily",
   "@daily": {
-    "description": "Short survival label"
+    "description": "Short daily label"
   },
-  "joy": "Soul",
+  "joy": "Joy",
   "@joy": {
-    "description": "Short soul label"
+    "description": "Short joy label"
   },
   "save": "Save",
   "@save": {
@@ -599,13 +599,13 @@
   "@homeMonthlyExpense": {
     "description": "Home card title for monthly expense overview"
   },
-  "homeDailyExpense": "Living Expenses",
+  "homeDailyExpense": "Daily Expenses",
   "@homeDailyExpense": {
-    "description": "Survival ledger expense label"
+    "description": "Daily ledger expense label"
   },
   "homeJoyExpense": "Joy Expenses",
   "@homeJoyExpense": {
-    "description": "Soul ledger expense label"
+    "description": "Joy ledger expense label"
   },
   "homeMonthComparison": "vs Last Month",
   "@homeMonthComparison": {
@@ -622,11 +622,11 @@
   },
   "homeDailyLedgerTag": "S",
   "@homeDailyLedgerTag": {
-    "description": "Compact home ledger row tag for survival ledger"
+    "description": "Compact home ledger row tag for daily ledger"
   },
   "homeJoyLedgerTag": "J",
   "@homeJoyLedgerTag": {
-    "description": "Compact home ledger row tag for soul/joy ledger"
+    "description": "Compact home ledger row tag for joy ledger"
   },
   "homeSharedLedgerTag": "G",
   "@homeSharedLedgerTag": {
@@ -643,11 +643,11 @@
   },
   "homeJoyFullness": "Joy Index",
   "@homeJoyFullness": {
-    "description": "Soul fullness section title"
+    "description": "Joy fullness section title"
   },
-  "homeJoyPercentLabel": "Soul spending ratio",
+  "homeJoyPercentLabel": "Joy spending ratio",
   "@homeJoyPercentLabel": {
-    "description": "Soul spending percentage metric label"
+    "description": "Joy spending percentage metric label"
   },
   "homeFamilyInviteTitle": "Invite Family",
   "@homeFamilyInviteTitle": {
@@ -725,7 +725,7 @@
   },
   "homeRecentJoyTransaction": "Recent: {merchant} ¥{amount}",
   "@homeRecentJoyTransaction": {
-    "description": "Recent soul transaction summary",
+    "description": "Recent joy transaction summary",
     "placeholders": {
       "merchant": {
         "type": "String"
@@ -735,9 +735,9 @@
       }
     }
   },
-  "homeJoyChargeStatus": "Soul Fullness {fullness}% · Joy Index {roi}",
+  "homeJoyChargeStatus": "Joy Fullness {fullness}% · Joy Index {roi}",
   "@homeJoyChargeStatus": {
-    "description": "Soul charge card status line",
+    "description": "Joy charge card status line",
     "placeholders": {
       "fullness": {
         "type": "int"
@@ -749,7 +749,7 @@
   },
   "homeMonthBadge": "This month {percent}%",
   "@homeMonthBadge": {
-    "description": "Soul fullness month badge",
+    "description": "Joy fullness month badge",
     "placeholders": {
       "percent": {
         "type": "int"
@@ -804,7 +804,7 @@
   },
   "homeRingSectionTitleSingle": "Joy Index",
   "@homeRingSectionTitleSingle": {
-    "description": "Ring section title — single mode (fallback if reusing homeSoulFullness is rejected)"
+    "description": "Ring section title — single mode (fallback if reusing homeJoyFullness is rejected)"
   },
   "homeRingSectionTitleGroup": "Family Joy",
   "@homeRingSectionTitleGroup": {
@@ -836,7 +836,7 @@
   },
   "homeNoJoyDataLegend": "No data yet",
   "@homeNoJoyDataLegend": {
-    "description": "Legend rows when totalSoulTx == 0 (D-09)"
+    "description": "Legend rows when totalJoyTx == 0 (D-09)"
   },
   "homeBestJoyEmptyTagPrimary": "Top of the Month",
   "@homeBestJoyEmptyTagPrimary": {
@@ -844,15 +844,15 @@
   },
   "homeBestJoyEmptyBig": "Record your first soul-ledger entry",
   "@homeBestJoyEmptyBig": {
-    "description": "Best Joy BIG line — totalSoulTx == 0 empty state (D-09)"
+    "description": "Best Joy BIG line — totalJoyTx == 0 empty state (D-09)"
   },
   "homeBestJoyEmptySmall": "Your monthly favorite will appear here →",
   "@homeBestJoyEmptySmall": {
-    "description": "Best Joy small line — totalSoulTx == 0 empty state (D-09)"
+    "description": "Best Joy small line — totalJoyTx == 0 empty state (D-09)"
   },
   "homeBestJoyAllNeutralBig": "Rate your biggest spend",
   "@homeBestJoyAllNeutralBig": {
-    "description": "Best Joy BIG line — all-neutral state (topJoy soulSatisfaction <= 2) (D-09)"
+    "description": "Best Joy BIG line — all-neutral state (topJoy joyFullness <= 2) (D-09)"
   },
   "homeBestJoyAllNeutralSmall": "Make it your monthly favorite",
   "@homeBestJoyAllNeutralSmall": {
@@ -934,17 +934,17 @@
   "@expenseClassification": {
     "description": "Ledger type section title"
   },
-  "dailyExpense": "Survival",
+  "dailyExpense": "Daily",
   "@dailyExpense": {
-    "description": "Survival ledger chip label"
+    "description": "Daily ledger chip label"
   },
-  "joyExpense": "Soul",
+  "joyExpense": "Joy",
   "@joyExpense": {
-    "description": "Soul ledger chip label"
+    "description": "Joy ledger chip label"
   },
-  "joyFullness": "Soul Fullness",
+  "joyFullness": "Joy Fullness",
   "@joyFullness": {
-    "description": "Soul satisfaction slider label"
+    "description": "Joy fullness slider label"
   },
   "addPhoto": "Add photo",
   "@addPhoto": {
@@ -1649,9 +1649,9 @@
   "@homeViewAllTransactions": {
     "description": "Button label to view all transactions from home"
   },
-  "homeRecentJoyExpense": "Recent Soul Expense",
+  "homeRecentJoyExpense": "Recent Joy Expense",
   "@homeRecentJoyExpense": {
-    "description": "Soul card label for the most recent soul ledger expense"
+    "description": "Joy card label for the most recent joy ledger expense"
   },
   "voiceMicrophonePermissionRequired": "Please allow microphone access",
   "@voiceMicrophonePermissionRequired": {
@@ -1718,9 +1718,9 @@
   "@analyticsNoLedgerData": {
     "description": "Analytics empty state shown when ledger data is unavailable"
   },
-  "analyticsDailyVsJoy": "Survival vs Soul",
+  "analyticsDailyVsJoy": "Daily vs Joy",
   "@analyticsDailyVsJoy": {
-    "description": "Analytics label comparing survival and soul ledger spending"
+    "description": "Analytics label comparing daily and joy ledger spending"
   },
   "analyticsSixMonthTrend": "Six-month Trend",
   "@analyticsSixMonthTrend": {
@@ -2055,8 +2055,8 @@
   "analyticsPerCategoryShowAll": "Show all",
   "analyticsPerCategoryShowLess": "Show less",
   "analyticsCardTitleLedgerThisWindow": "Ledger · This window",
-  "analyticsLedgerColumnJoy": "Soul",
-  "analyticsLedgerColumnDaily": "Survival",
+  "analyticsLedgerColumnJoy": "Joy",
+  "analyticsLedgerColumnDaily": "Daily",
   "analyticsLedgerRowYou": "You",
   "analyticsLedgerRowFamily": "Family",
   "analyticsLedgerCellEntries": "{count} entries",
@@ -2070,7 +2070,7 @@
   },
   "analyticsLedgerCellAvgSat": "{avgSat} avg satisfaction",
   "@analyticsLedgerCellAvgSat": {
-    "description": "Ledger card cell metric: average satisfaction (Soul column only). avgSat is a pre-formatted decimal string.",
+    "description": "Ledger card cell metric: average satisfaction (Joy column only). avgSat is a pre-formatted decimal string.",
     "placeholders": {
       "avgSat": {
         "type": "String"
@@ -2132,13 +2132,13 @@
   "@listLedgerAll": {
     "description": "Ledger filter chip: show all ledger types (Phase 28)"
   },
-  "listLedgerDaily": "Survival",
+  "listLedgerDaily": "Daily",
   "@listLedgerDaily": {
-    "description": "Ledger filter chip: show Survival ledger only (Phase 28)"
+    "description": "Ledger filter chip: show Daily ledger only (Phase 28)"
   },
-  "listLedgerJoy": "Soul",
+  "listLedgerJoy": "Joy",
   "@listLedgerJoy": {
-    "description": "Ledger filter chip: show Soul ledger only (Phase 28)"
+    "description": "Ledger filter chip: show Joy ledger only (Phase 28)"
   },
   "listCategoryChip": "Categories",
   "@listCategoryChip": {

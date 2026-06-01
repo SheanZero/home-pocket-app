@@ -303,28 +303,28 @@ abstract class S {
   /// **'Other'**
   String get categoryOther;
 
-  /// Survival ledger label
+  /// Daily ledger label
   ///
   /// In en, this message translates to:
   /// **'Daily'**
   String get dailyLedger;
 
-  /// Soul ledger label
+  /// Joy ledger label
   ///
   /// In en, this message translates to:
   /// **'Joy'**
   String get joyLedger;
 
-  /// Short survival label
+  /// Short daily label
   ///
   /// In en, this message translates to:
-  /// **'Survival'**
+  /// **'Daily'**
   String get daily;
 
-  /// Short soul label
+  /// Short joy label
   ///
   /// In en, this message translates to:
-  /// **'Soul'**
+  /// **'Joy'**
   String get joy;
 
   /// Save action
@@ -1041,13 +1041,13 @@ abstract class S {
   /// **'Monthly Expenses'**
   String get homeMonthlyExpense;
 
-  /// Survival ledger expense label
+  /// Daily ledger expense label
   ///
   /// In en, this message translates to:
-  /// **'Living Expenses'**
+  /// **'Daily Expenses'**
   String get homeDailyExpense;
 
-  /// Soul ledger expense label
+  /// Joy ledger expense label
   ///
   /// In en, this message translates to:
   /// **'Joy Expenses'**
@@ -1065,13 +1065,13 @@ abstract class S {
   /// **'Last month {amount}'**
   String homePreviousMonthAmount(String amount);
 
-  /// Compact home ledger row tag for survival ledger
+  /// Compact home ledger row tag for daily ledger
   ///
   /// In en, this message translates to:
   /// **'S'**
   String get homeDailyLedgerTag;
 
-  /// Compact home ledger row tag for soul/joy ledger
+  /// Compact home ledger row tag for joy ledger
   ///
   /// In en, this message translates to:
   /// **'J'**
@@ -1089,16 +1089,16 @@ abstract class S {
   /// **'{memberName}\'s Ledger'**
   String homeShadowBookTitle(String memberName);
 
-  /// Soul fullness section title
+  /// Joy fullness section title
   ///
   /// In en, this message translates to:
   /// **'Joy Index'**
   String get homeJoyFullness;
 
-  /// Soul spending percentage metric label
+  /// Joy spending percentage metric label
   ///
   /// In en, this message translates to:
-  /// **'Soul spending ratio'**
+  /// **'Joy spending ratio'**
   String get homeJoyPercentLabel;
 
   /// Family invite banner title
@@ -1185,19 +1185,19 @@ abstract class S {
   /// **'M{month}'**
   String homeMonthLabel(int month);
 
-  /// Recent soul transaction summary
+  /// Recent joy transaction summary
   ///
   /// In en, this message translates to:
   /// **'Recent: {merchant} ¥{amount}'**
   String homeRecentJoyTransaction(String merchant, int amount);
 
-  /// Soul charge card status line
+  /// Joy charge card status line
   ///
   /// In en, this message translates to:
-  /// **'Soul Fullness {fullness}% · Joy Index {roi}'**
+  /// **'Joy Fullness {fullness}% · Joy Index {roi}'**
   String homeJoyChargeStatus(int fullness, double roi);
 
-  /// Soul fullness month badge
+  /// Joy fullness month badge
   ///
   /// In en, this message translates to:
   /// **'This month {percent}%'**
@@ -1245,7 +1245,7 @@ abstract class S {
   /// **'Last month {amount}'**
   String homeHeroPreviousMonthSubline(String amount);
 
-  /// Ring section title — single mode (fallback if reusing homeSoulFullness is rejected)
+  /// Ring section title — single mode (fallback if reusing homeJoyFullness is rejected)
   ///
   /// In en, this message translates to:
   /// **'Joy Index'**
@@ -1281,7 +1281,7 @@ abstract class S {
   /// **'Members'**
   String get homeMembersSectionTitle;
 
-  /// Legend rows when totalSoulTx == 0 (D-09)
+  /// Legend rows when totalJoyTx == 0 (D-09)
   ///
   /// In en, this message translates to:
   /// **'No data yet'**
@@ -1293,19 +1293,19 @@ abstract class S {
   /// **'Top of the Month'**
   String get homeBestJoyEmptyTagPrimary;
 
-  /// Best Joy BIG line — totalSoulTx == 0 empty state (D-09)
+  /// Best Joy BIG line — totalJoyTx == 0 empty state (D-09)
   ///
   /// In en, this message translates to:
   /// **'Record your first soul-ledger entry'**
   String get homeBestJoyEmptyBig;
 
-  /// Best Joy small line — totalSoulTx == 0 empty state (D-09)
+  /// Best Joy small line — totalJoyTx == 0 empty state (D-09)
   ///
   /// In en, this message translates to:
   /// **'Your monthly favorite will appear here →'**
   String get homeBestJoyEmptySmall;
 
-  /// Best Joy BIG line — all-neutral state (topJoy soulSatisfaction <= 2) (D-09)
+  /// Best Joy BIG line — all-neutral state (topJoy joyFullness <= 2) (D-09)
   ///
   /// In en, this message translates to:
   /// **'Rate your biggest spend'**
@@ -1431,22 +1431,22 @@ abstract class S {
   /// **'Purpose'**
   String get expenseClassification;
 
-  /// Survival ledger chip label
+  /// Daily ledger chip label
   ///
   /// In en, this message translates to:
-  /// **'Survival'**
+  /// **'Daily'**
   String get dailyExpense;
 
-  /// Soul ledger chip label
+  /// Joy ledger chip label
   ///
   /// In en, this message translates to:
-  /// **'Soul'**
+  /// **'Joy'**
   String get joyExpense;
 
-  /// Soul satisfaction slider label
+  /// Joy fullness slider label
   ///
   /// In en, this message translates to:
-  /// **'Soul Fullness'**
+  /// **'Joy Fullness'**
   String get joyFullness;
 
   /// Add photo button label
@@ -2505,10 +2505,10 @@ abstract class S {
   /// **'View All'**
   String get homeViewAllTransactions;
 
-  /// Soul card label for the most recent soul ledger expense
+  /// Joy card label for the most recent joy ledger expense
   ///
   /// In en, this message translates to:
-  /// **'Recent Soul Expense'**
+  /// **'Recent Joy Expense'**
   String get homeRecentJoyExpense;
 
   /// Voice input permission message shown when microphone access is unavailable
@@ -2601,10 +2601,10 @@ abstract class S {
   /// **'No ledger data'**
   String get analyticsNoLedgerData;
 
-  /// Analytics label comparing survival and soul ledger spending
+  /// Analytics label comparing daily and joy ledger spending
   ///
   /// In en, this message translates to:
-  /// **'Survival vs Soul'**
+  /// **'Daily vs Joy'**
   String get analyticsDailyVsJoy;
 
   /// Analytics six-month trend chart title
@@ -3058,13 +3058,13 @@ abstract class S {
   /// No description provided for @analyticsLedgerColumnJoy.
   ///
   /// In en, this message translates to:
-  /// **'Soul'**
+  /// **'Joy'**
   String get analyticsLedgerColumnJoy;
 
   /// No description provided for @analyticsLedgerColumnDaily.
   ///
   /// In en, this message translates to:
-  /// **'Survival'**
+  /// **'Daily'**
   String get analyticsLedgerColumnDaily;
 
   /// No description provided for @analyticsLedgerRowYou.
@@ -3085,7 +3085,7 @@ abstract class S {
   /// **'{count} entries'**
   String analyticsLedgerCellEntries(int count);
 
-  /// Ledger card cell metric: average satisfaction (Soul column only). avgSat is a pre-formatted decimal string.
+  /// Ledger card cell metric: average satisfaction (Joy column only). avgSat is a pre-formatted decimal string.
   ///
   /// In en, this message translates to:
   /// **'{avgSat} avg satisfaction'**
@@ -3169,16 +3169,16 @@ abstract class S {
   /// **'All'**
   String get listLedgerAll;
 
-  /// Ledger filter chip: show Survival ledger only (Phase 28)
+  /// Ledger filter chip: show Daily ledger only (Phase 28)
   ///
   /// In en, this message translates to:
-  /// **'Survival'**
+  /// **'Daily'**
   String get listLedgerDaily;
 
-  /// Ledger filter chip: show Soul ledger only (Phase 28)
+  /// Ledger filter chip: show Joy ledger only (Phase 28)
   ///
   /// In en, this message translates to:
-  /// **'Soul'**
+  /// **'Joy'**
   String get listLedgerJoy;
 
   /// Category filter chip label when no categories selected (Phase 28)

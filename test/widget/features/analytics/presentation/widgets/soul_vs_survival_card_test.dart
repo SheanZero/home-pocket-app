@@ -79,7 +79,7 @@ void main() {
       expect(find.text('今期の家計簿'), findsOneWidget);
       // Column headers
       expect(find.text('ときめき'), findsOneWidget);
-      expect(find.text('生活'), findsOneWidget);
+      expect(find.text('日常'), findsOneWidget);
       // Soul entries text + Survival entries text
       expect(find.text('5 件'), findsOneWidget);
       expect(find.text('8 件'), findsOneWidget);

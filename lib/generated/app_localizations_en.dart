@@ -125,10 +125,10 @@ class SEn extends S {
   String get joyLedger => 'Joy';
 
   @override
-  String get daily => 'Survival';
+  String get daily => 'Daily';
 
   @override
-  String get joy => 'Soul';
+  String get joy => 'Joy';
 
   @override
   String get save => 'Save';
@@ -499,7 +499,7 @@ class SEn extends S {
   String get homeMonthlyExpense => 'Monthly Expenses';
 
   @override
-  String get homeDailyExpense => 'Living Expenses';
+  String get homeDailyExpense => 'Daily Expenses';
 
   @override
   String get homeJoyExpense => 'Joy Expenses';
@@ -530,7 +530,7 @@ class SEn extends S {
   String get homeJoyFullness => 'Joy Index';
 
   @override
-  String get homeJoyPercentLabel => 'Soul spending ratio';
+  String get homeJoyPercentLabel => 'Joy spending ratio';
 
   @override
   String get homeFamilyInviteTitle => 'Invite Family';
@@ -588,7 +588,7 @@ class SEn extends S {
 
   @override
   String homeJoyChargeStatus(int fullness, double roi) {
-    return 'Soul Fullness $fullness% · Joy Index $roi';
+    return 'Joy Fullness $fullness% · Joy Index $roi';
   }
 
   @override
@@ -722,13 +722,13 @@ class SEn extends S {
   String get expenseClassification => 'Purpose';
 
   @override
-  String get dailyExpense => 'Survival';
+  String get dailyExpense => 'Daily';
 
   @override
-  String get joyExpense => 'Soul';
+  String get joyExpense => 'Joy';
 
   @override
-  String get joyFullness => 'Soul Fullness';
+  String get joyFullness => 'Joy Fullness';
 
   @override
   String get addPhoto => 'Add photo';
@@ -1309,7 +1309,7 @@ class SEn extends S {
   String get homeViewAllTransactions => 'View All';
 
   @override
-  String get homeRecentJoyExpense => 'Recent Soul Expense';
+  String get homeRecentJoyExpense => 'Recent Joy Expense';
 
   @override
   String get voiceMicrophonePermissionRequired =>
@@ -1363,7 +1363,7 @@ class SEn extends S {
   String get analyticsNoLedgerData => 'No ledger data';
 
   @override
-  String get analyticsDailyVsJoy => 'Survival vs Soul';
+  String get analyticsDailyVsJoy => 'Daily vs Joy';
 
   @override
   String get analyticsSixMonthTrend => 'Six-month Trend';
@@ -1653,10 +1653,10 @@ class SEn extends S {
   String get analyticsCardTitleLedgerThisWindow => 'Ledger · This window';
 
   @override
-  String get analyticsLedgerColumnJoy => 'Soul';
+  String get analyticsLedgerColumnJoy => 'Joy';
 
   @override
-  String get analyticsLedgerColumnDaily => 'Survival';
+  String get analyticsLedgerColumnDaily => 'Daily';
 
   @override
   String get analyticsLedgerRowYou => 'You';
@@ -1721,10 +1721,10 @@ class SEn extends S {
   String get listLedgerAll => 'All';
 
   @override
-  String get listLedgerDaily => 'Survival';
+  String get listLedgerDaily => 'Daily';
 
   @override
-  String get listLedgerJoy => 'Soul';
+  String get listLedgerJoy => 'Joy';
 
   @override
   String get listCategoryChip => 'Categories';

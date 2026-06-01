@@ -123,10 +123,10 @@ class SZh extends S {
   String get joyLedger => '悦己';
 
   @override
-  String get daily => '生存';
+  String get daily => '日常';
 
   @override
-  String get joy => '灵魂';
+  String get joy => '悦己';
 
   @override
   String get save => '保存';
@@ -494,10 +494,10 @@ class SZh extends S {
   String get homeMonthlyExpense => '本月支出';
 
   @override
-  String get homeDailyExpense => '生存支出';
+  String get homeDailyExpense => '日常支出';
 
   @override
-  String get homeJoyExpense => '灵魂支出';
+  String get homeJoyExpense => '悦己支出';
 
   @override
   String get homeMonthComparison => '较上月';
@@ -525,7 +525,7 @@ class SZh extends S {
   String get homeJoyFullness => '悦己充盈';
 
   @override
-  String get homeJoyPercentLabel => '本月灵魂支出占比';
+  String get homeJoyPercentLabel => '本月悦己支出占比';
 
   @override
   String get homeFamilyInviteTitle => '邀请家人';
@@ -582,7 +582,7 @@ class SZh extends S {
 
   @override
   String homeJoyChargeStatus(int fullness, double roi) {
-    return '灵魂充盈度 $fullness% · 悦己指数 $roi';
+    return '悦己充盈度 $fullness% · 悦己指数 $roi';
   }
 
   @override
@@ -644,7 +644,7 @@ class SZh extends S {
   String get homeBestJoyEmptyTagPrimary => '本月最爱';
 
   @override
-  String get homeBestJoyEmptyBig => '记录第一笔魂账';
+  String get homeBestJoyEmptyBig => '记录第一笔悦己账';
 
   @override
   String get homeBestJoyEmptySmall => '你的本月最爱会出现在这里 →';
@@ -713,13 +713,13 @@ class SZh extends S {
   String get expenseClassification => '用途';
 
   @override
-  String get dailyExpense => '生存支出';
+  String get dailyExpense => '日常支出';
 
   @override
-  String get joyExpense => '灵魂支出';
+  String get joyExpense => '悦己支出';
 
   @override
-  String get joyFullness => '灵魂充盈度';
+  String get joyFullness => '悦己充盈度';
 
   @override
   String get addPhoto => '添加照片';
@@ -1290,7 +1290,7 @@ class SZh extends S {
   String get homeViewAllTransactions => '查看全部';
 
   @override
-  String get homeRecentJoyExpense => '最近灵魂支出';
+  String get homeRecentJoyExpense => '最近悦己支出';
 
   @override
   String get voiceMicrophonePermissionRequired => '请允许访问麦克风';
@@ -1340,7 +1340,7 @@ class SZh extends S {
   String get analyticsNoLedgerData => '暂无账本数据';
 
   @override
-  String get analyticsDailyVsJoy => '生存 vs 灵魂';
+  String get analyticsDailyVsJoy => '日常 vs 悦己';
 
   @override
   String get analyticsSixMonthTrend => '六个月趋势';
@@ -1457,7 +1457,7 @@ class SZh extends S {
   String get analyticsKpiJoyIndexLabel => '悦己指数';
 
   @override
-  String get analyticsKpiJoyIndexEmptyCaption => '给魂账条目标记满足度后，会显示悦己指数。';
+  String get analyticsKpiJoyIndexEmptyCaption => '给悦己账条目标记满足度后，会显示悦己指数。';
 
   @override
   String analyticsKpiJoyIndexSemantics(
@@ -1564,10 +1564,10 @@ class SZh extends S {
   }
 
   @override
-  String get analyticsFamilyEmpty => '还没有共同最爱品类——多记几笔魂账试试';
+  String get analyticsFamilyEmpty => '还没有共同最爱品类——多记几笔悦己账试试';
 
   @override
-  String get analyticsThinSampleFallbackHeading => '魂账记录不足 5 笔';
+  String get analyticsThinSampleFallbackHeading => '悦己账记录不足 5 笔';
 
   @override
   String get analyticsThinSampleFallbackBody => '多记录一周后回来看 Joy 趋势';
@@ -1617,10 +1617,10 @@ class SZh extends S {
   String get analyticsCardTitleLedgerThisWindow => '本期账本描述';
 
   @override
-  String get analyticsLedgerColumnJoy => '灵魂';
+  String get analyticsLedgerColumnJoy => '悦己';
 
   @override
-  String get analyticsLedgerColumnDaily => '生存';
+  String get analyticsLedgerColumnDaily => '日常';
 
   @override
   String get analyticsLedgerRowYou => '你';
@@ -1684,10 +1684,10 @@ class SZh extends S {
   String get listLedgerAll => '全部';
 
   @override
-  String get listLedgerDaily => '生存';
+  String get listLedgerDaily => '日常';
 
   @override
-  String get listLedgerJoy => '灵魂';
+  String get listLedgerJoy => '悦己';
 
   @override
   String get listCategoryChip => '分类';

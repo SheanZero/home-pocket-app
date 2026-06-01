@@ -71,8 +71,8 @@ void main() {
         (tester) async {
       final container = await _pumpBar(tester);
 
-      // Tap the '生存' chip
-      await tester.tap(find.text('生存').first);
+      // Tap the '日常' chip
+      await tester.tap(find.text('日常').first);
       await tester.pumpAndSettle();
 
       expect(

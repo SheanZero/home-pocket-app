@@ -55,7 +55,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('魂の記録に満足度をつけると、ときめき指数が表示されます。'), findsOneWidget);
+      expect(find.text('ときめきの記録に満足度をつけると、ときめき指数が表示されます。'), findsOneWidget);
     });
 
     testWidgets('renders cumulative joyContribution as primary value', (

@@ -123,10 +123,10 @@ class SJa extends S {
   String get joyLedger => 'ときめき帳';
 
   @override
-  String get daily => '生存';
+  String get daily => '日常';
 
   @override
-  String get joy => '魂';
+  String get joy => 'ときめき';
 
   @override
   String get save => '保存';
@@ -494,7 +494,7 @@ class SJa extends S {
   String get homeMonthlyExpense => '今月の出費';
 
   @override
-  String get homeDailyExpense => '暮らしの支出';
+  String get homeDailyExpense => '日常の支出';
 
   @override
   String get homeJoyExpense => 'ときめき支出';
@@ -525,7 +525,7 @@ class SJa extends S {
   String get homeJoyFullness => 'ときめき度';
 
   @override
-  String get homeJoyPercentLabel => '今月の魂支出の割合';
+  String get homeJoyPercentLabel => '今月のときめき支出の割合';
 
   @override
   String get homeFamilyInviteTitle => '家族を招待する';
@@ -582,7 +582,7 @@ class SJa extends S {
 
   @override
   String homeJoyChargeStatus(int fullness, double roi) {
-    return '魂の充実度 $fullness% · ときめき指数 $roi';
+    return 'ときめきの充実度 $fullness% · ときめき指数 $roi';
   }
 
   @override
@@ -715,13 +715,13 @@ class SJa extends S {
   String get expenseClassification => '用途';
 
   @override
-  String get dailyExpense => '生存支出';
+  String get dailyExpense => '日常支出';
 
   @override
-  String get joyExpense => '魂支出';
+  String get joyExpense => 'ときめき支出';
 
   @override
-  String get joyFullness => '魂の充盈度';
+  String get joyFullness => 'ときめき充盈度';
 
   @override
   String get addPhoto => '写真を追加';
@@ -1295,7 +1295,7 @@ class SJa extends S {
   String get homeViewAllTransactions => 'すべて見る';
 
   @override
-  String get homeRecentJoyExpense => '最近の魂支出';
+  String get homeRecentJoyExpense => '最近のときめき支出';
 
   @override
   String get voiceMicrophonePermissionRequired => 'マイクへのアクセスを許可してください';
@@ -1345,7 +1345,7 @@ class SJa extends S {
   String get analyticsNoLedgerData => '帳簿データがありません';
 
   @override
-  String get analyticsDailyVsJoy => '生存 vs 魂';
+  String get analyticsDailyVsJoy => '日常 vs ときめき';
 
   @override
   String get analyticsSixMonthTrend => '6か月推移';
@@ -1462,7 +1462,8 @@ class SJa extends S {
   String get analyticsKpiJoyIndexLabel => 'ときめき指数';
 
   @override
-  String get analyticsKpiJoyIndexEmptyCaption => '魂の記録に満足度をつけると、ときめき指数が表示されます。';
+  String get analyticsKpiJoyIndexEmptyCaption =>
+      'ときめきの記録に満足度をつけると、ときめき指数が表示されます。';
 
   @override
   String analyticsKpiJoyIndexSemantics(
@@ -1573,7 +1574,7 @@ class SJa extends S {
   String get analyticsFamilyEmpty => '共通のお気に入り品目はまだ集計できません — もう少し記録してみよう';
 
   @override
-  String get analyticsThinSampleFallbackHeading => '魂帳の記録がまだ少ないよ';
+  String get analyticsThinSampleFallbackHeading => 'ときめき帳の記録がまだ少ないよ';
 
   @override
   String get analyticsThinSampleFallbackBody => 'あと数日記録を続けたら、Joy の流れが見えてくる';
@@ -1626,7 +1627,7 @@ class SJa extends S {
   String get analyticsLedgerColumnJoy => 'ときめき';
 
   @override
-  String get analyticsLedgerColumnDaily => '生活';
+  String get analyticsLedgerColumnDaily => '日常';
 
   @override
   String get analyticsLedgerRowYou => 'あなた';
@@ -1690,10 +1691,10 @@ class SJa extends S {
   String get listLedgerAll => 'すべて';
 
   @override
-  String get listLedgerDaily => '生存';
+  String get listLedgerDaily => '日常';
 
   @override
-  String get listLedgerJoy => '魂';
+  String get listLedgerJoy => 'ときめき';
 
   @override
   String get listCategoryChip => 'カテゴリ';

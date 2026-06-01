@@ -152,19 +152,19 @@
   },
   "dailyLedger": "日常",
   "@dailyLedger": {
-    "description": "Survival ledger label"
+    "description": "Daily ledger label"
   },
   "joyLedger": "悦己",
   "@joyLedger": {
-    "description": "Soul ledger label"
+    "description": "Joy ledger label"
   },
-  "daily": "生存",
+  "daily": "日常",
   "@daily": {
-    "description": "Short survival label"
+    "description": "Short daily label"
   },
-  "joy": "灵魂",
+  "joy": "悦己",
   "@joy": {
-    "description": "Short soul label"
+    "description": "Short joy label"
   },
   "save": "保存",
   "@save": {
@@ -599,13 +599,13 @@
   "@homeMonthlyExpense": {
     "description": "Home card title for monthly expense overview"
   },
-  "homeDailyExpense": "生存支出",
+  "homeDailyExpense": "日常支出",
   "@homeDailyExpense": {
-    "description": "Survival ledger expense label"
+    "description": "Daily ledger expense label"
   },
-  "homeJoyExpense": "灵魂支出",
+  "homeJoyExpense": "悦己支出",
   "@homeJoyExpense": {
-    "description": "Soul ledger expense label"
+    "description": "Joy ledger expense label"
   },
   "homeMonthComparison": "较上月",
   "@homeMonthComparison": {
@@ -622,11 +622,11 @@
   },
   "homeDailyLedgerTag": "生",
   "@homeDailyLedgerTag": {
-    "description": "Compact home ledger row tag for survival ledger"
+    "description": "Compact home ledger row tag for daily ledger"
   },
   "homeJoyLedgerTag": "灵",
   "@homeJoyLedgerTag": {
-    "description": "Compact home ledger row tag for soul/joy ledger"
+    "description": "Compact home ledger row tag for joy ledger"
   },
   "homeSharedLedgerTag": "共",
   "@homeSharedLedgerTag": {
@@ -643,11 +643,11 @@
   },
   "homeJoyFullness": "悦己充盈",
   "@homeJoyFullness": {
-    "description": "Soul fullness section title"
+    "description": "Joy fullness section title"
   },
-  "homeJoyPercentLabel": "本月灵魂支出占比",
+  "homeJoyPercentLabel": "本月悦己支出占比",
   "@homeJoyPercentLabel": {
-    "description": "Soul spending percentage metric label"
+    "description": "Joy spending percentage metric label"
   },
   "homeFamilyInviteTitle": "邀请家人",
   "@homeFamilyInviteTitle": {
@@ -725,7 +725,7 @@
   },
   "homeRecentJoyTransaction": "最近一笔: {merchant} ¥{amount}",
   "@homeRecentJoyTransaction": {
-    "description": "Recent soul transaction summary",
+    "description": "Recent joy transaction summary",
     "placeholders": {
       "merchant": {
         "type": "String"
@@ -735,9 +735,9 @@
       }
     }
   },
-  "homeJoyChargeStatus": "灵魂充盈度 {fullness}% · 悦己指数 {roi}",
+  "homeJoyChargeStatus": "悦己充盈度 {fullness}% · 悦己指数 {roi}",
   "@homeJoyChargeStatus": {
-    "description": "Soul charge card status line",
+    "description": "Joy charge card status line",
     "placeholders": {
       "fullness": {
         "type": "int"
@@ -749,7 +749,7 @@
   },
   "homeMonthBadge": "本月 {percent}%",
   "@homeMonthBadge": {
-    "description": "Soul fullness month badge",
+    "description": "Joy fullness month badge",
     "placeholders": {
       "percent": {
         "type": "int"
@@ -804,7 +804,7 @@
   },
   "homeRingSectionTitleSingle": "悦己充盈",
   "@homeRingSectionTitleSingle": {
-    "description": "Ring section title — single mode (fallback if reusing homeSoulFullness is rejected)"
+    "description": "Ring section title — single mode (fallback if reusing homeJoyFullness is rejected)"
   },
   "homeRingSectionTitleGroup": "家族的小确幸",
   "@homeRingSectionTitleGroup": {
@@ -836,23 +836,23 @@
   },
   "homeNoJoyDataLegend": "尚未记录",
   "@homeNoJoyDataLegend": {
-    "description": "Legend rows when totalSoulTx == 0 (D-09)"
+    "description": "Legend rows when totalJoyTx == 0 (D-09)"
   },
   "homeBestJoyEmptyTagPrimary": "本月最爱",
   "@homeBestJoyEmptyTagPrimary": {
     "description": "Best Joy CTA variant tag (same copy as homeBestJoyTagSingle but separate key)"
   },
-  "homeBestJoyEmptyBig": "记录第一笔魂账",
+  "homeBestJoyEmptyBig": "记录第一笔悦己账",
   "@homeBestJoyEmptyBig": {
-    "description": "Best Joy BIG line — totalSoulTx == 0 empty state (D-09)"
+    "description": "Best Joy BIG line — totalJoyTx == 0 empty state (D-09)"
   },
   "homeBestJoyEmptySmall": "你的本月最爱会出现在这里 →",
   "@homeBestJoyEmptySmall": {
-    "description": "Best Joy small line — totalSoulTx == 0 empty state (D-09)"
+    "description": "Best Joy small line — totalJoyTx == 0 empty state (D-09)"
   },
   "homeBestJoyAllNeutralBig": "回去给最大那笔评个分",
   "@homeBestJoyAllNeutralBig": {
-    "description": "Best Joy BIG line — all-neutral state (topJoy soulSatisfaction <= 2) (D-09)"
+    "description": "Best Joy BIG line — all-neutral state (topJoy joyFullness <= 2) (D-09)"
   },
   "homeBestJoyAllNeutralSmall": "让它变成你的本月最爱",
   "@homeBestJoyAllNeutralSmall": {
@@ -934,17 +934,17 @@
   "@expenseClassification": {
     "description": "Ledger type section title"
   },
-  "dailyExpense": "生存支出",
+  "dailyExpense": "日常支出",
   "@dailyExpense": {
-    "description": "Survival ledger chip label"
+    "description": "Daily ledger chip label"
   },
-  "joyExpense": "灵魂支出",
+  "joyExpense": "悦己支出",
   "@joyExpense": {
-    "description": "Soul ledger chip label"
+    "description": "Joy ledger chip label"
   },
-  "joyFullness": "灵魂充盈度",
+  "joyFullness": "悦己充盈度",
   "@joyFullness": {
-    "description": "Soul satisfaction slider label"
+    "description": "Joy fullness slider label"
   },
   "addPhoto": "添加照片",
   "@addPhoto": {
@@ -1649,9 +1649,9 @@
   "@homeViewAllTransactions": {
     "description": "Button label to view all transactions from home"
   },
-  "homeRecentJoyExpense": "最近灵魂支出",
+  "homeRecentJoyExpense": "最近悦己支出",
   "@homeRecentJoyExpense": {
-    "description": "Soul card label for the most recent soul ledger expense"
+    "description": "Joy card label for the most recent joy ledger expense"
   },
   "voiceMicrophonePermissionRequired": "请允许访问麦克风",
   "@voiceMicrophonePermissionRequired": {
@@ -1718,9 +1718,9 @@
   "@analyticsNoLedgerData": {
     "description": "Analytics empty state shown when ledger data is unavailable"
   },
-  "analyticsDailyVsJoy": "生存 vs 灵魂",
+  "analyticsDailyVsJoy": "日常 vs 悦己",
   "@analyticsDailyVsJoy": {
-    "description": "Analytics label comparing survival and soul ledger spending"
+    "description": "Analytics label comparing daily and joy ledger spending"
   },
   "analyticsSixMonthTrend": "六个月趋势",
   "@analyticsSixMonthTrend": {
@@ -1895,7 +1895,7 @@
   "@analyticsKpiJoyIndexLabel": {
     "description": "Analytics KPI label for cumulative Joy Index"
   },
-  "analyticsKpiJoyIndexEmptyCaption": "给魂账条目标记满足度后，会显示悦己指数。",
+  "analyticsKpiJoyIndexEmptyCaption": "给悦己账条目标记满足度后，会显示悦己指数。",
   "@analyticsKpiJoyIndexEmptyCaption": {
     "description": "Empty state caption for Analytics Joy Index KPI"
   },
@@ -2015,8 +2015,8 @@
       }
     }
   },
-  "analyticsFamilyEmpty": "还没有共同最爱品类——多记几笔魂账试试",
-  "analyticsThinSampleFallbackHeading": "魂账记录不足 5 笔",
+  "analyticsFamilyEmpty": "还没有共同最爱品类——多记几笔悦己账试试",
+  "analyticsThinSampleFallbackHeading": "悦己账记录不足 5 笔",
   "analyticsThinSampleFallbackBody": "多记录一周后回来看 Joy 趋势",
   "analyticsThinSampleFallbackCta": "去记录 »",
   "analyticsCardErrorHeading": "数据加载失败",
@@ -2055,8 +2055,8 @@
   "analyticsPerCategoryShowAll": "展开全部",
   "analyticsPerCategoryShowLess": "收起",
   "analyticsCardTitleLedgerThisWindow": "本期账本描述",
-  "analyticsLedgerColumnJoy": "灵魂",
-  "analyticsLedgerColumnDaily": "生存",
+  "analyticsLedgerColumnJoy": "悦己",
+  "analyticsLedgerColumnDaily": "日常",
   "analyticsLedgerRowYou": "你",
   "analyticsLedgerRowFamily": "家庭",
   "analyticsLedgerCellEntries": "{count} 条",
@@ -2070,7 +2070,7 @@
   },
   "analyticsLedgerCellAvgSat": "平均满意 {avgSat}",
   "@analyticsLedgerCellAvgSat": {
-    "description": "Ledger card cell metric: average satisfaction (Soul column only). avgSat is a pre-formatted decimal string.",
+    "description": "Ledger card cell metric: average satisfaction (Joy column only). avgSat is a pre-formatted decimal string.",
     "placeholders": {
       "avgSat": {
         "type": "String"
@@ -2132,13 +2132,13 @@
   "@listLedgerAll": {
     "description": "Ledger filter chip: show all ledger types (Phase 28)"
   },
-  "listLedgerDaily": "生存",
+  "listLedgerDaily": "日常",
   "@listLedgerDaily": {
-    "description": "Ledger filter chip: show Survival ledger only (Phase 28)"
+    "description": "Ledger filter chip: show Daily ledger only (Phase 28)"
   },
-  "listLedgerJoy": "灵魂",
+  "listLedgerJoy": "悦己",
   "@listLedgerJoy": {
-    "description": "Ledger filter chip: show Soul ledger only (Phase 28)"
+    "description": "Ledger filter chip: show Joy ledger only (Phase 28)"
   },
   "listCategoryChip": "分类",
   "@listCategoryChip": {

@@ -152,19 +152,19 @@
   },
   "dailyLedger": "日々の帳",
   "@dailyLedger": {
-    "description": "Survival ledger label"
+    "description": "Daily ledger label"
   },
   "joyLedger": "ときめき帳",
   "@joyLedger": {
-    "description": "Soul ledger label"
+    "description": "Joy ledger label"
   },
-  "daily": "生存",
+  "daily": "日常",
   "@daily": {
-    "description": "Short survival label"
+    "description": "Short daily label"
   },
-  "joy": "魂",
+  "joy": "ときめき",
   "@joy": {
-    "description": "Short soul label"
+    "description": "Short joy label"
   },
   "save": "保存",
   "@save": {
@@ -599,13 +599,13 @@
   "@homeMonthlyExpense": {
     "description": "Home card title for monthly expense overview"
   },
-  "homeDailyExpense": "暮らしの支出",
+  "homeDailyExpense": "日常の支出",
   "@homeDailyExpense": {
-    "description": "Survival ledger expense label"
+    "description": "Daily ledger expense label"
   },
   "homeJoyExpense": "ときめき支出",
   "@homeJoyExpense": {
-    "description": "Soul ledger expense label"
+    "description": "Joy ledger expense label"
   },
   "homeMonthComparison": "先月比",
   "@homeMonthComparison": {
@@ -622,11 +622,11 @@
   },
   "homeDailyLedgerTag": "生",
   "@homeDailyLedgerTag": {
-    "description": "Compact home ledger row tag for survival ledger"
+    "description": "Compact home ledger row tag for daily ledger"
   },
   "homeJoyLedgerTag": "灵",
   "@homeJoyLedgerTag": {
-    "description": "Compact home ledger row tag for soul/joy ledger"
+    "description": "Compact home ledger row tag for joy ledger"
   },
   "homeSharedLedgerTag": "共",
   "@homeSharedLedgerTag": {
@@ -643,11 +643,11 @@
   },
   "homeJoyFullness": "ときめき度",
   "@homeJoyFullness": {
-    "description": "Soul fullness section title"
+    "description": "Joy fullness section title"
   },
-  "homeJoyPercentLabel": "今月の魂支出の割合",
+  "homeJoyPercentLabel": "今月のときめき支出の割合",
   "@homeJoyPercentLabel": {
-    "description": "Soul spending percentage metric label"
+    "description": "Joy spending percentage metric label"
   },
   "homeFamilyInviteTitle": "家族を招待する",
   "@homeFamilyInviteTitle": {
@@ -725,7 +725,7 @@
   },
   "homeRecentJoyTransaction": "直近: {merchant} ¥{amount}",
   "@homeRecentJoyTransaction": {
-    "description": "Recent soul transaction summary",
+    "description": "Recent joy transaction summary",
     "placeholders": {
       "merchant": {
         "type": "String"
@@ -735,9 +735,9 @@
       }
     }
   },
-  "homeJoyChargeStatus": "魂の充実度 {fullness}% · ときめき指数 {roi}",
+  "homeJoyChargeStatus": "ときめきの充実度 {fullness}% · ときめき指数 {roi}",
   "@homeJoyChargeStatus": {
-    "description": "Soul charge card status line",
+    "description": "Joy charge card status line",
     "placeholders": {
       "fullness": {
         "type": "int"
@@ -749,7 +749,7 @@
   },
   "homeMonthBadge": "今月 {percent}%",
   "@homeMonthBadge": {
-    "description": "Soul fullness month badge",
+    "description": "Joy fullness month badge",
     "placeholders": {
       "percent": {
         "type": "int"
@@ -804,7 +804,7 @@
   },
   "homeRingSectionTitleSingle": "ときめき度",
   "@homeRingSectionTitleSingle": {
-    "description": "Ring section title — single mode (fallback if reusing homeSoulFullness is rejected)"
+    "description": "Ring section title — single mode (fallback if reusing homeJoyFullness is rejected)"
   },
   "homeRingSectionTitleGroup": "家族の小確幸",
   "@homeRingSectionTitleGroup": {
@@ -836,7 +836,7 @@
   },
   "homeNoJoyDataLegend": "まだ記録なし",
   "@homeNoJoyDataLegend": {
-    "description": "Legend rows when totalSoulTx == 0 (D-09)"
+    "description": "Legend rows when totalJoyTx == 0 (D-09)"
   },
   "homeBestJoyEmptyTagPrimary": "今月の最愛",
   "@homeBestJoyEmptyTagPrimary": {
@@ -844,15 +844,15 @@
   },
   "homeBestJoyEmptyBig": "初めての灵账を記録しよう",
   "@homeBestJoyEmptyBig": {
-    "description": "Best Joy BIG line — totalSoulTx == 0 empty state (D-09)"
+    "description": "Best Joy BIG line — totalJoyTx == 0 empty state (D-09)"
   },
   "homeBestJoyEmptySmall": "今月の最愛がここに表示されます →",
   "@homeBestJoyEmptySmall": {
-    "description": "Best Joy small line — totalSoulTx == 0 empty state (D-09)"
+    "description": "Best Joy small line — totalJoyTx == 0 empty state (D-09)"
   },
   "homeBestJoyAllNeutralBig": "一番大きな支出を評価して",
   "@homeBestJoyAllNeutralBig": {
-    "description": "Best Joy BIG line — all-neutral state (topJoy soulSatisfaction <= 2) (D-09)"
+    "description": "Best Joy BIG line — all-neutral state (topJoy joyFullness <= 2) (D-09)"
   },
   "homeBestJoyAllNeutralSmall": "あなたの今月の最愛にしよう",
   "@homeBestJoyAllNeutralSmall": {
@@ -934,17 +934,17 @@
   "@expenseClassification": {
     "description": "Ledger type section title"
   },
-  "dailyExpense": "生存支出",
+  "dailyExpense": "日常支出",
   "@dailyExpense": {
-    "description": "Survival ledger chip label"
+    "description": "Daily ledger chip label"
   },
-  "joyExpense": "魂支出",
+  "joyExpense": "ときめき支出",
   "@joyExpense": {
-    "description": "Soul ledger chip label"
+    "description": "Joy ledger chip label"
   },
-  "joyFullness": "魂の充盈度",
+  "joyFullness": "ときめき充盈度",
   "@joyFullness": {
-    "description": "Soul satisfaction slider label"
+    "description": "Joy fullness slider label"
   },
   "addPhoto": "写真を追加",
   "@addPhoto": {
@@ -1649,9 +1649,9 @@
   "@homeViewAllTransactions": {
     "description": "Button label to view all transactions from home"
   },
-  "homeRecentJoyExpense": "最近の魂支出",
+  "homeRecentJoyExpense": "最近のときめき支出",
   "@homeRecentJoyExpense": {
-    "description": "Soul card label for the most recent soul ledger expense"
+    "description": "Joy card label for the most recent joy ledger expense"
   },
   "voiceMicrophonePermissionRequired": "マイクへのアクセスを許可してください",
   "@voiceMicrophonePermissionRequired": {
@@ -1718,9 +1718,9 @@
   "@analyticsNoLedgerData": {
     "description": "Analytics empty state shown when ledger data is unavailable"
   },
-  "analyticsDailyVsJoy": "生存 vs 魂",
+  "analyticsDailyVsJoy": "日常 vs ときめき",
   "@analyticsDailyVsJoy": {
-    "description": "Analytics label comparing survival and soul ledger spending"
+    "description": "Analytics label comparing daily and joy ledger spending"
   },
   "analyticsSixMonthTrend": "6か月推移",
   "@analyticsSixMonthTrend": {
@@ -1895,7 +1895,7 @@
   "@analyticsKpiJoyIndexLabel": {
     "description": "Analytics KPI label for cumulative Joy Index"
   },
-  "analyticsKpiJoyIndexEmptyCaption": "魂の記録に満足度をつけると、ときめき指数が表示されます。",
+  "analyticsKpiJoyIndexEmptyCaption": "ときめきの記録に満足度をつけると、ときめき指数が表示されます。",
   "@analyticsKpiJoyIndexEmptyCaption": {
     "description": "Empty state caption for Analytics Joy Index KPI"
   },
@@ -2016,7 +2016,7 @@
     }
   },
   "analyticsFamilyEmpty": "共通のお気に入り品目はまだ集計できません — もう少し記録してみよう",
-  "analyticsThinSampleFallbackHeading": "魂帳の記録がまだ少ないよ",
+  "analyticsThinSampleFallbackHeading": "ときめき帳の記録がまだ少ないよ",
   "analyticsThinSampleFallbackBody": "あと数日記録を続けたら、Joy の流れが見えてくる",
   "analyticsThinSampleFallbackCta": "記録する »",
   "analyticsCardErrorHeading": "データが読み込めなかった",
@@ -2056,7 +2056,7 @@
   "analyticsPerCategoryShowLess": "折りたたむ",
   "analyticsCardTitleLedgerThisWindow": "今期の家計簿",
   "analyticsLedgerColumnJoy": "ときめき",
-  "analyticsLedgerColumnDaily": "生活",
+  "analyticsLedgerColumnDaily": "日常",
   "analyticsLedgerRowYou": "あなた",
   "analyticsLedgerRowFamily": "家族",
   "analyticsLedgerCellEntries": "{count} 件",
@@ -2070,7 +2070,7 @@
   },
   "analyticsLedgerCellAvgSat": "平均満足 {avgSat}",
   "@analyticsLedgerCellAvgSat": {
-    "description": "Ledger card cell metric: average satisfaction (Soul column only). avgSat is a pre-formatted decimal string.",
+    "description": "Ledger card cell metric: average satisfaction (Joy column only). avgSat is a pre-formatted decimal string.",
     "placeholders": {
       "avgSat": {
         "type": "String"
@@ -2132,13 +2132,13 @@
   "@listLedgerAll": {
     "description": "Ledger filter chip: show all ledger types (Phase 28)"
   },
-  "listLedgerDaily": "生存",
+  "listLedgerDaily": "日常",
   "@listLedgerDaily": {
-    "description": "Ledger filter chip: show Survival ledger only (Phase 28)"
+    "description": "Ledger filter chip: show Daily ledger only (Phase 28)"
   },
-  "listLedgerJoy": "魂",
+  "listLedgerJoy": "ときめき",
   "@listLedgerJoy": {
-    "description": "Ledger filter chip: show Soul ledger only (Phase 28)"
+    "description": "Ledger filter chip: show Joy ledger only (Phase 28)"
   },
   "listCategoryChip": "カテゴリ",
   "@listCategoryChip": {
