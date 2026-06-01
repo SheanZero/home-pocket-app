@@ -85,7 +85,7 @@
 
 - [x] **Phase 31: Terminology Rename** (6 plans) — Unify all user-facing ARB values (zh/ja/en) and rename internal identifiers (ARB keys, AppColors symbols, LedgerType enum + v18 migration, soul*/survival* files/classes, soul_satisfaction→joy_fullness column); close with analyze-clean gate + ADR-017 (completed 2026-06-01)
 - [x] **Phase 32: Palette Exploration & Selection** — Mine design references, produce 4–5 Pencil color-scheme mockups, user selects one canonical palette recorded as ADR (completed 2026-06-01)
-- [ ] **Phase 33: Color Token System & Consolidation** — Build semantic design-token system encoding the selected palette; replace ~62 hardcoded Color(0x…) literals; apply palette uniformly across surfaces
+- [ ] **Phase 33: Color Token System & Consolidation** (7 plans) — Build ThemeExtension<AppPalette> token system encoding ADR-018 Teal Clarity; replace 61 Color(0x…) literals; full dark-mode rollout (D-07/THEME-V2-02 absorbed)
 - [ ] **Phase 34: Golden Re-baseline & Verification** — Regenerate all golden/visual baselines to the new palette; confirm full test suite green; verify no stale vocabulary or color literals remain
 
 ## Phase Details
@@ -132,7 +132,14 @@
   2. The theme layer (`lib/core/theme/`) contains a single semantic design-token system (primary / ledger / surface / semantic groups + profile dark palette) with no duplicate constant definitions (e.g. `_joyTargetStartColor`, repeated profile-dark constants are consolidated)
   3. Every screen that surfaces a 日常 or 悦己 ledger context uses the correct token from the selected palette — no mismatched or stale pre-selection colors remain
   4. `flutter analyze` reports 0 issues after all token replacements; `build_runner` clean-diff
-**Plans**: TBD
+**Plans**: 7 plans
+- [ ] 33-01-PLAN.md — Wave-0 RED tests (color_literal_scan, app_palette_test, theme_dark_mode_coverage)
+- [ ] 33-02-PLAN.md — AppPalette ThemeExtension + app_theme.dart registration + app_text_styles.dart fix
+- [ ] 33-03-PLAN.md — home/ + analytics/ migration (D-05 hero gradient, D-06 olive→success)
+- [ ] 33-04-PLAN.md — accounting/ migration (isDark removal, Bucket E error family, Bucket A)
+- [ ] 33-05-PLAN.md — family_sync/ + settings/ + list/ migration (Bucket B/C, Bucket F)
+- [ ] 33-06-PLAN.md — profile/ migration (Bucket A delete, avatar D-04 re-hue)
+- [ ] 33-07-PLAN.md — Shim deletion + REQUIREMENTS/ROADMAP THEME-V2-02 amend + full suite GREEN
 **UI hint**: yes
 
 ### Phase 34: Golden Re-baseline & Verification
@@ -154,4 +161,4 @@
 | v1.2 Happiness Metric Refresh | 13-17 | 37/37 | Complete | 2026-05-21 |
 | v1.3 迭代帐本输入 | 18-23 | 47/47 | Complete | 2026-05-26 |
 | v1.4 列表功能 | 24-30 | 29/29 | Complete | 2026-05-31 |
-| v1.5 文案与配色统一 | 31-34 | 6/9 (P31 done, P32 planned) | In progress | — |
+| v1.5 文案与配色统一 | 31-34 | 9/16 (P31+P32 done, P33 planned) | In progress | — |
