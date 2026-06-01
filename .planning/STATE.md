@@ -4,8 +4,8 @@ milestone: v1.5
 milestone_name: 文案与配色统一
 status: executing
 stopped_at: "Phase 31: 01-03 shipped; 04-06 re-planned (D-19) + plan-checker PASS — ready to resume execution at plan 04"
-last_updated: "2026-06-01T02:41:23.169Z"
-last_activity: 2026-06-01
+last_updated: "2026-06-01T02:49:36.400Z"
+last_activity: 2026-06-01 -- Phase 31 execution started
 progress:
   total_phases: 4
   completed_phases: 0
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-05-31 — v1.4 列表功能 shipped + ar
 ## Current Position
 
 Phase: 31 (terminology-rename) — EXECUTING
-Plan: 4 of 6
-Status: Ready to execute
-Last activity: 2026-06-01
+Plan: 1 of 6
+Status: Executing Phase 31
+Last activity: 2026-06-01 -- Phase 31 execution started
 
 Progress: [█████░░░░░] 50%
 
