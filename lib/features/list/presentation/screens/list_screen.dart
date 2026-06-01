@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/accounting/category_localization_service.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../generated/app_localizations.dart';
@@ -107,9 +107,10 @@ class ListScreen extends ConsumerWidget {
     ListFilterState filter,
     Locale locale,
   ) {
+    final palette = context.palette;
     final txsAsync = ref.watch(listTransactionsProvider(bookId: bookId));
     return RefreshIndicator(
-      color: AppColors.accentPrimary,
+      color: palette.accentPrimary,
       onRefresh: () async {
         ref.invalidate(listTransactionsProvider(bookId: bookId));
         ref.invalidate(
@@ -128,8 +129,8 @@ class ListScreen extends ConsumerWidget {
         loading: () => SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Center(
-            child: const CircularProgressIndicator(
-              color: AppColors.accentPrimary,
+            child: CircularProgressIndicator(
+              color: palette.accentPrimary,
               strokeWidth: 2,
             ),
           ),
@@ -140,16 +141,16 @@ class ListScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.error_outline,
                   size: 40,
-                  color: AppColors.textTertiary,
+                  color: palette.textTertiary,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   S.of(context).listLoadError,
                   style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textSecondary,
+                    color: palette.textSecondary,
                   ),
                 ),
               ],
@@ -244,19 +245,20 @@ class ListScreen extends ConsumerWidget {
     int index, {
     bool showDate = false,
   }) {
+    final palette = context.palette;
     final transaction = tx.transaction;
     final ledgerType = transaction.ledgerType;
 
-    // Ledger tag colors (AppColors constants — never hardcoded hex)
+    // Ledger tag colors resolved via palette (COLOR-02 / D-07 dark-mode support)
     final tagText = ledgerType == LedgerType.daily
         ? S.of(context).listLedgerDaily
         : S.of(context).listLedgerJoy;
     final tagBgColor = ledgerType == LedgerType.daily
-        ? AppColors.dailyLight
-        : AppColors.joyLight;
+        ? palette.dailyLight
+        : palette.joyLight;
     final tagTextColor = ledgerType == LedgerType.daily
-        ? AppColors.daily
-        : AppColors.joy;
+        ? palette.daily
+        : palette.joy;
     // Category label uses same color as ledger tag per UI-SPEC Typography table
     final categoryColor = tagTextColor;
 
@@ -346,7 +348,7 @@ class ListScreen extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           tile,
-          const Divider(height: 1, thickness: 1, color: AppColors.borderList),
+          Divider(height: 1, thickness: 1, color: palette.borderList),
         ],
       );
     }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
@@ -72,6 +72,7 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
       offset.dy + renderBox.size.height + 8,
     );
 
+    final palette = context.palette;
     final selected = await showMenu<SortField>(
       context: context,
       position: rect,
@@ -82,14 +83,14 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
           child: Row(
             children: [
               if (isActive)
-                const Icon(Icons.check, size: 16, color: AppColors.accentPrimary)
+                Icon(Icons.check, size: 16, color: palette.accentPrimary)
               else
                 const SizedBox(width: 16),
               const SizedBox(width: 8),
               Text(
                 _sortFieldLabel(field, context),
                 style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textPrimary,
+                  color: palette.textPrimary,
                   fontWeight:
                       isActive ? FontWeight.w600 : FontWeight.w500,
                 ),
@@ -121,6 +122,7 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final filter = ref.watch(listFilterProvider);
     final l10n = S.of(context);
     final sortConfig = filter.sortConfig;
@@ -137,10 +139,10 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
 
     return Container(
       height: 44,
-      decoration: const BoxDecoration(
-        color: AppColors.background,
+      decoration: BoxDecoration(
+        color: palette.background,
         border: Border(
-          bottom: BorderSide(color: AppColors.borderDivider, width: 1),
+          bottom: BorderSide(color: palette.borderDivider, width: 1),
         ),
       ),
       child: SingleChildScrollView(
@@ -154,21 +156,21 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
               label: 'Sort by',
               child: ActionChip(
                 key: _sortChipKey,
-                avatar: const Icon(
+                avatar: Icon(
                   Icons.sort,
                   size: 14,
-                  color: AppColors.textSecondary,
+                  color: palette.textSecondary,
                 ),
                 label: Text(
                   _sortFieldLabel(sortConfig.sortField, context),
                   style: AppTextStyles.caption
-                      .copyWith(color: AppColors.textPrimary),
+                      .copyWith(color: palette.textPrimary),
                 ),
                 onPressed: () =>
                     _showSortMenu(context, sortConfig),
-                side: const BorderSide(
-                    color: AppColors.accentPrimary, width: 1),
-                backgroundColor: AppColors.card,
+                side: BorderSide(
+                    color: palette.accentPrimary, width: 1),
+                backgroundColor: palette.card,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -186,7 +188,7 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                       ? Icons.arrow_downward
                       : Icons.arrow_upward,
                   size: 18,
-                  color: AppColors.textPrimary,
+                  color: palette.textPrimary,
                 ),
                 onPressed: () =>
                     ref.read(listFilterProvider.notifier).setSort(
@@ -212,17 +214,15 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                   l10n.listLedgerAll,
                   style: AppTextStyles.caption.copyWith(
                     color: filter.ledgerType == null
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
+                        ? palette.textPrimary
+                        : palette.textSecondary,
                   ),
                 ),
                 backgroundColor: filter.ledgerType == null
-                    ? AppColors.backgroundMuted
-                    : AppColors.card,
+                    ? palette.backgroundMuted
+                    : palette.card,
                 side: BorderSide(
-                  color: filter.ledgerType == null
-                      ? AppColors.borderDefault
-                      : AppColors.borderDefault,
+                  color: palette.borderDefault,
                   width: 1,
                 ),
                 onPressed: () =>
@@ -240,17 +240,17 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                   l10n.listLedgerDaily,
                   style: AppTextStyles.caption.copyWith(
                     color: filter.ledgerType == LedgerType.daily
-                        ? AppColors.daily
-                        : AppColors.textSecondary,
+                        ? palette.daily
+                        : palette.textSecondary,
                   ),
                 ),
                 backgroundColor: filter.ledgerType == LedgerType.daily
-                    ? AppColors.dailyLight
-                    : AppColors.card,
+                    ? palette.dailyLight
+                    : palette.card,
                 side: BorderSide(
                   color: filter.ledgerType == LedgerType.daily
-                      ? AppColors.daily
-                      : AppColors.borderDefault,
+                      ? palette.daily
+                      : palette.borderDefault,
                   width: 1,
                 ),
                 onPressed: () => ref
@@ -273,17 +273,17 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                   l10n.listLedgerJoy,
                   style: AppTextStyles.caption.copyWith(
                     color: filter.ledgerType == LedgerType.joy
-                        ? AppColors.joy
-                        : AppColors.textSecondary,
+                        ? palette.joy
+                        : palette.textSecondary,
                   ),
                 ),
                 backgroundColor: filter.ledgerType == LedgerType.joy
-                    ? AppColors.joyLight
-                    : AppColors.card,
+                    ? palette.joyLight
+                    : palette.card,
                 side: BorderSide(
                   color: filter.ledgerType == LedgerType.joy
-                      ? AppColors.joy
-                      : AppColors.borderDefault,
+                      ? palette.joy
+                      : palette.borderDefault,
                   width: 1,
                 ),
                 onPressed: () => ref
@@ -301,10 +301,10 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
             Semantics(
               label: 'Filter by category',
               child: ActionChip(
-                avatar: const Icon(
+                avatar: Icon(
                   Icons.category_outlined,
                   size: 14,
-                  color: AppColors.textSecondary,
+                  color: palette.textSecondary,
                 ),
                 label: Text(
                   filter.categoryIds.isEmpty
@@ -312,17 +312,15 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                       : l10n.listCategoryChipN(filter.categoryIds.length),
                   style: AppTextStyles.caption.copyWith(
                     color: filter.categoryIds.isEmpty
-                        ? AppColors.textSecondary
-                        : AppColors.textPrimary,
+                        ? palette.textSecondary
+                        : palette.textPrimary,
                   ),
                 ),
                 backgroundColor: filter.categoryIds.isEmpty
-                    ? AppColors.card
-                    : AppColors.backgroundMuted,
+                    ? palette.card
+                    : palette.backgroundMuted,
                 side: BorderSide(
-                  color: filter.categoryIds.isEmpty
-                      ? AppColors.borderDefault
-                      : AppColors.borderDefault,
+                  color: palette.borderDefault,
                   width: 1,
                 ),
                 onPressed: () =>
@@ -349,18 +347,18 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                         }
                       },
                       style: AppTextStyles.caption
-                          .copyWith(color: AppColors.textPrimary),
+                          .copyWith(color: palette.textPrimary),
                       decoration: InputDecoration(
                         hintText: l10n.listSearchHint,
                         hintStyle: AppTextStyles.caption
-                            .copyWith(color: AppColors.textSecondary),
+                            .copyWith(color: palette.textSecondary),
                         isDense: true,
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
-                        prefixIcon: const Icon(
+                        prefixIcon: Icon(
                           Icons.search,
                           size: 16,
-                          color: AppColors.textSecondary,
+                          color: palette.textSecondary,
                         ),
                         prefixIconConstraints: const BoxConstraints(
                           minWidth: 28,
@@ -377,10 +375,10 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                                     _searchController.clear();
                                   });
                                 },
-                                child: const Icon(
+                                child: Icon(
                                   Icons.close,
                                   size: 16,
-                                  color: AppColors.textSecondary,
+                                  color: palette.textSecondary,
                                 ),
                               )
                             : null,
@@ -390,18 +388,18 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(
-                              color: AppColors.borderDefault, width: 1),
+                          borderSide: BorderSide(
+                              color: palette.borderDefault, width: 1),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(
-                              color: AppColors.borderDefault, width: 1),
+                          borderSide: BorderSide(
+                              color: palette.borderDefault, width: 1),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(
-                              color: AppColors.accentPrimary, width: 1),
+                          borderSide: BorderSide(
+                              color: palette.accentPrimary, width: 1),
                         ),
                       ),
                     ),
@@ -409,10 +407,10 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                 : Semantics(
                     label: 'Search transactions',
                     child: IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.search,
                         size: 20,
-                        color: AppColors.textSecondary,
+                        color: palette.textSecondary,
                       ),
                       onPressed: () =>
                           setState(() => _searchExpanded = true),
@@ -430,17 +428,17 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                   Icons.person_outline,
                   size: 14,
                   color: filter.memberBookId == widget.bookId
-                      ? AppColors.textPrimary
-                      : AppColors.textSecondary,
+                      ? palette.textPrimary
+                      : palette.textSecondary,
                 ),
                 label: Text(
                   S.of(context).listMineOnly,
                   style: AppTextStyles.caption
-                      .copyWith(color: AppColors.textPrimary),
+                      .copyWith(color: palette.textPrimary),
                 ),
-                backgroundColor: AppColors.backgroundMuted,
-                side: const BorderSide(
-                    color: AppColors.borderDefault, width: 1),
+                backgroundColor: palette.backgroundMuted,
+                side: BorderSide(
+                    color: palette.borderDefault, width: 1),
                 onPressed: () => ref
                     .read(listFilterProvider.notifier)
                     .setMemberFilter(
@@ -462,16 +460,16 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                         '${info.memberAvatarEmoji} ${info.memberDisplayName}',
                         style: AppTextStyles.caption.copyWith(
                           color: isSelected
-                              ? AppColors.shared
-                              : AppColors.textSecondary,
+                              ? palette.shared
+                              : palette.textSecondary,
                         ),
                       ),
                       backgroundColor:
-                          isSelected ? AppColors.sharedLight : AppColors.card,
+                          isSelected ? palette.sharedLight : palette.card,
                       side: BorderSide(
                         color: isSelected
-                            ? AppColors.sharedBorder
-                            : AppColors.borderDefault,
+                            ? palette.sharedBorder
+                            : palette.borderDefault,
                         width: 1,
                       ),
                       onPressed: () => ref
@@ -493,19 +491,19 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
               Semantics(
                 label: 'Clear all filters',
                 child: ActionChip(
-                  avatar: const Icon(
+                  avatar: Icon(
                     Icons.clear_all,
                     size: 14,
-                    color: AppColors.textSecondary,
+                    color: palette.textSecondary,
                   ),
                   label: Text(
                     l10n.listClearAll,
                     style: AppTextStyles.caption
-                        .copyWith(color: AppColors.textSecondary),
+                        .copyWith(color: palette.textSecondary),
                   ),
-                  backgroundColor: AppColors.backgroundMuted,
-                  side: const BorderSide(
-                      color: AppColors.borderDefault, width: 1),
+                  backgroundColor: palette.backgroundMuted,
+                  side: BorderSide(
+                      color: palette.borderDefault, width: 1),
                   onPressed: () {
                     ref.read(listFilterProvider.notifier).clearAll();
                     setState(() {

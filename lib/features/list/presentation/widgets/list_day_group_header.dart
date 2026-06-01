@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../domain/models/tagged_transaction.dart';
@@ -8,7 +8,7 @@ import '../../../../shared/constants/sort_config.dart';
 
 /// Day section header rendered above each day's tile group in the [ListView].
 ///
-/// Layout per C-02 (UI-SPEC): 32dp height, [AppColors.backgroundMuted] background,
+/// Layout per C-02 (UI-SPEC): 32dp height, [AppPalette.backgroundMuted] background,
 /// date formatted via [DateFormatter.formatDate] at [AppTextStyles.caption] style.
 class ListDayGroupHeader extends StatelessWidget {
   const ListDayGroupHeader({
@@ -22,8 +22,9 @@ class ListDayGroupHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
-      color: AppColors.backgroundMuted,
+      color: palette.backgroundMuted,
       height: 32,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Align(
@@ -31,7 +32,7 @@ class ListDayGroupHeader extends StatelessWidget {
         child: Text(
           DateFormatter.formatDate(date, locale),
           style: AppTextStyles.caption.copyWith(
-            color: AppColors.textSecondary,
+            color: palette.textSecondary,
           ),
         ),
       ),
