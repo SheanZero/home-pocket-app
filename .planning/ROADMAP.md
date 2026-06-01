@@ -152,7 +152,13 @@
   1. All golden test files regenerated; `flutter test` completes with 0 failures and 0 golden mismatches; diffs confirm the palette change is the only visual delta (no unexpected layout or text changes)
   2. Final cross-check: `grep -rn '生存\|灵魂\|魂\|ソウル\|Survival\|Soul' lib/l10n/*.arb` returns zero hits; `grep -rn 'Color(0x\|Color(0X' lib/features/ lib/application/ lib/shared/` returns zero hits
   3. `flutter analyze` reports 0 issues; coverage gate ≥70% global remains green
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] 34-01-PLAN.md — Wave 0: add dark variants to 7 light-only golden test files + delete orphaned summary_cards PNGs
+- [ ] 34-02-PLAN.md — Wave 1: selective re-baseline with diff attribution (D-02/D-04 protocol) + generate 27 new dark masters
+- [ ] 34-03-PLAN.md — Wave 2: D-03a comprehensive audit + stale Color literal remediation + success-criteria greps
+- [ ] 34-04-PLAN.md — Wave 2 (parallel): D-03b best-effort .pen sync to ADR-018 (non-blocking)
+- [ ] 34-05-PLAN.md — Wave 3: final full-suite gate (flutter test 0 failures, analyze 0 issues, coverage ≥70%, both greps empty)
 
 ## Milestone Progress
 
@@ -163,4 +169,4 @@
 | v1.2 Happiness Metric Refresh | 13-17 | 37/37 | Complete | 2026-05-21 |
 | v1.3 迭代帐本输入 | 18-23 | 47/47 | Complete | 2026-05-26 |
 | v1.4 列表功能 | 24-30 | 29/29 | Complete | 2026-05-31 |
-| v1.5 文案与配色统一 | 31-34 | 9/16 (P31+P32 done, P33 planned) | In progress | — |
+| v1.5 文案与配色统一 | 31-34 | 0/5 (P31+P32+P33 done, P34 planned) | In progress | — |
