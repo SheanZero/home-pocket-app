@@ -56,7 +56,7 @@
 | Changing ledger semantics or behavior | Only labels/colors change; daily/joy logic untouched |
 | Shipping more than one selectable theme | Exactly ONE palette is chosen and applied; runtime theme-switching is THEME-V2 |
 | Typography / spacing / component redesign | Palette explores color only; references may surface type/layout but those are out of scope |
-| Migrating database column names (e.g. `entry_source` values) | Identifier rename is source-level (ARB keys, Dart symbols), not schema |
+| Migrating database column names (e.g. `entry_source` values) beyond the v1.5 terminology scope | **Qualified (D-06/D-02/D-16/ADR-017):** The v1.5 terminology rename DOES migrate `ledger_type` stored values (`survival→daily`, `soul→joy`) and renames the `soul_satisfaction` column to `joy_fullness` (v17→v18 migration, per D-02/D-16/ADR-017). Other DB column changes (e.g. `entry_source`) remain out of scope. |
 | English voice / MOD-005 OCR / family-calendar deferrals | Tracked separately; unrelated to terminology/color |
 
 ## Traceability
@@ -70,7 +70,7 @@
 | TERMID-01 | Phase 31 | Complete |
 | TERMID-02 | Phase 31 | Complete |
 | TERMID-03 | Phase 31 | Complete |
-| TERMID-04 | Phase 31 | Pending |
+| TERMID-04 | Phase 31 | Complete |
 | PALETTE-01 | Phase 32 | Pending |
 | PALETTE-02 | Phase 32 | Pending |
 | PALETTE-03 | Phase 32 | Pending |
