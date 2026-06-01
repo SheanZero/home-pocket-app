@@ -719,7 +719,7 @@ border: Border.all(color: const Color(0x26FFFFFF), width: 2),  // alpha-only, OK
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Profile screen dark background hex (`#141418` vs `#0C1719`)**
    - What we know: profile screens hard-coded `#141418` before a unified dark palette existed

@@ -1,11 +1,13 @@
 ---
 phase: 33
 slug: color-token-system-consolidation
-status: draft
-nyquist_compliant: false
+status: approved
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-06-01
 ---
+
+> **Compliance note:** `nyquist_compliant: true` means the validation *strategy* is Nyquist-compliant by design (sampling continuity via per-commit `flutter analyze`; Wave 0 covers all MISSING references; feedback latency < 60s). `wave_0_complete` stays `false` until the three Wave 0 test files (Plan 33-01) actually land during execution — it is a runtime fact, flipped by execute-phase, not a plan-time claim.
 
 # Phase 33 — Validation Strategy
 
@@ -74,11 +76,12 @@ created: 2026-06-01
 
 ## Validation Sign-Off
 
-- [ ] All tasks have automated verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify (`flutter analyze` runs every commit)
-- [ ] Wave 0 covers all MISSING references (3 test files above)
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 60s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have automated verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify (`flutter analyze` runs every commit)
+- [x] Wave 0 covers all MISSING references (3 test files above)
+- [x] No watch-mode flags
+- [x] Feedback latency < 60s
+- [x] `nyquist_compliant: true` set in frontmatter
+- [ ] `wave_0_complete: true` — flipped by execute-phase once Plan 33-01's three test files land (runtime fact)
 
-**Approval:** pending
+**Approval:** approved 2026-06-01 (strategy); Wave 0 completion confirmed at execution
