@@ -56,7 +56,20 @@ class AppDatabase extends _$AppDatabase {
           );
         }
         if (from < 4) {
-          await migrator.addColumn(transactions, transactions.joyFullness);
+          // CR-01: add the satisfaction column under its ORIGINAL name
+          // `soul_satisfaction`, NOT the v18-renamed `joy_fullness`. The
+          // unconditional `from < 18` step below runs RENAME COLUMN
+          // soul_satisfaction TO joy_fullness; for v1–v3 → v18 upgrades that
+          // rename has no source unless this step creates `soul_satisfaction`.
+          // A mechanical Phase-31 rename to `transactions.joyFullness` (which
+          // generates the column `joy_fullness`) made the from<18 rename crash
+          // (no soul_satisfaction; joy_fullness already present). A raw
+          // statement reproduces exactly what `addColumn(soulSatisfaction)`
+          // emitted historically: INTEGER NOT NULL DEFAULT 2, no table-level
+          // CHECK (migrator.addColumn never applied customConstraints).
+          await customStatement(
+            'ALTER TABLE transactions ADD COLUMN soul_satisfaction INTEGER NOT NULL DEFAULT 2',
+          );
         }
         if (from < 5) {
           // Category model v2: add isArchived, updatedAt; create ledger configs

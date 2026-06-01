@@ -475,4 +475,151 @@ void main() {
       },
     );
   });
+
+  // ─── CR-01 regression: v1–v3 → v18 satisfaction-column chain ────────────────
+  //
+  // The satisfaction column is ADDED at the onUpgrade `from < 4` step and
+  // RENAMED (soul_satisfaction → joy_fullness) at the unconditional `from < 18`
+  // step. For databases created at v1–v3, BOTH steps run in one upgrade. The
+  // from<4 step MUST add the column under its original name `soul_satisfaction`
+  // so the from<18 RENAME has a source to rename. A Phase-31 mechanical rename
+  // of the from<4 step to `transactions.joyFullness` (column `joy_fullness`)
+  // broke this: the rename then found no `soul_satisfaction` and an already
+  // existing `joy_fullness`, crashing onUpgrade for every v1–v3 → v18 upgrade.
+  //
+  // CONTRACT: these tests mirror the satisfaction-column SQL in
+  // app_database.dart's onUpgrade (from<4 ADD COLUMN, from<18 RENAME COLUMN).
+  // Keep them in lockstep with that file.
+  group('CR-01 — v1–v3 → v18 satisfaction-column rename chain', () {
+    late Database rawDb;
+
+    setUp(() {
+      rawDb = sqlite3.openInMemory();
+      _createV3TransactionsTable(rawDb);
+    });
+
+    tearDown(() {
+      rawDb.dispose();
+    });
+
+    test(
+      'from<4 adds soul_satisfaction so the from<18 rename composes without crashing',
+      () {
+        // Seed a v3 row (no satisfaction column yet).
+        _insertV3Tx(rawDb, 'tx_v3', ledgerType: 'survival');
+
+        // from<4 step (app_database.dart): ADD COLUMN soul_satisfaction.
+        rawDb.execute(
+          'ALTER TABLE transactions ADD COLUMN soul_satisfaction INTEGER NOT NULL DEFAULT 2',
+        );
+        // from<18 step (app_database.dart): RENAME COLUMN soul_satisfaction -> joy_fullness.
+        expect(
+          () => rawDb.execute(
+            'ALTER TABLE transactions RENAME COLUMN soul_satisfaction TO joy_fullness',
+          ),
+          returnsNormally,
+          reason:
+              'The from<4 column name must be soul_satisfaction so the from<18 '
+              'rename has a source (CR-01).',
+        );
+
+        final columns = rawDb
+            .select('PRAGMA table_info(transactions)')
+            .map((r) => r['name'] as String)
+            .toList();
+        expect(columns, contains('joy_fullness'));
+        expect(columns, isNot(contains('soul_satisfaction')));
+
+        // Backfilled default preserved through the rename.
+        final value = rawDb
+            .select("SELECT joy_fullness FROM transactions WHERE id = 'tx_v3'")
+            .first['joy_fullness'];
+        expect(value, equals(2));
+      },
+    );
+
+    test(
+      'TRAP: adding the column as joy_fullness at from<4 makes the from<18 rename crash',
+      () {
+        // This documents the exact CR-01 regression. If the from<4 step ever
+        // emits `joy_fullness` again, the from<18 rename below cannot find
+        // `soul_satisfaction` (and `joy_fullness` already exists) → SQLite throws.
+        rawDb.execute(
+          'ALTER TABLE transactions ADD COLUMN joy_fullness INTEGER NOT NULL DEFAULT 2',
+        );
+        expect(
+          () => rawDb.execute(
+            'ALTER TABLE transactions RENAME COLUMN soul_satisfaction TO joy_fullness',
+          ),
+          throwsA(isA<SqliteException>()),
+          reason:
+              'No soul_satisfaction to rename and joy_fullness already present — '
+              'this is the onUpgrade crash CR-01 guards against.',
+        );
+      },
+    );
+  });
+}
+
+// ─── CR-01 helpers ──────────────────────────────────────────────────────────
+
+/// Create a v3-era transactions table: BEFORE soul_satisfaction (added at the
+/// onUpgrade `from < 4` step) and BEFORE entry_source (added at `from < 17`)
+/// existed. This is the on-disk state of a database originally created at v1–v3.
+void _createV3TransactionsTable(Database db) {
+  db.execute('''
+    CREATE TABLE transactions (
+      id TEXT NOT NULL PRIMARY KEY,
+      book_id TEXT NOT NULL,
+      device_id TEXT NOT NULL,
+      amount INTEGER NOT NULL,
+      type TEXT NOT NULL,
+      category_id TEXT NOT NULL,
+      ledger_type TEXT NOT NULL,
+      timestamp INTEGER NOT NULL,
+      note TEXT,
+      photo_hash TEXT,
+      merchant TEXT,
+      metadata TEXT,
+      prev_hash TEXT,
+      current_hash TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER,
+      is_private INTEGER NOT NULL DEFAULT 0 CHECK ("is_private" IN (0, 1)),
+      is_synced INTEGER NOT NULL DEFAULT 0 CHECK ("is_synced" IN (0, 1)),
+      is_deleted INTEGER NOT NULL DEFAULT 0 CHECK ("is_deleted" IN (0, 1))
+    )
+  ''');
+}
+
+void _insertV3Tx(
+  Database db,
+  String id, {
+  String ledgerType = 'survival',
+}) {
+  final now = DateTime(2026, 6, 1).millisecondsSinceEpoch;
+  db.execute(
+    '''
+    INSERT INTO transactions (
+      id, book_id, device_id, amount, type, category_id, ledger_type,
+      timestamp, current_hash, created_at,
+      is_private, is_synced, is_deleted
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''',
+    [
+      id,
+      'book_v3',
+      'device_v3',
+      1000,
+      'expense',
+      'cat_food',
+      ledgerType,
+      now,
+      'hash_$id',
+      now,
+      0,
+      0,
+      0,
+    ],
+  );
 }
