@@ -1068,7 +1068,7 @@ abstract class S {
   /// Compact home ledger row tag for daily ledger
   ///
   /// In en, this message translates to:
-  /// **'S'**
+  /// **'D'**
   String get homeDailyLedgerTag;
 
   /// Compact home ledger row tag for joy ledger
@@ -1296,7 +1296,7 @@ abstract class S {
   /// Best Joy BIG line — totalJoyTx == 0 empty state (D-09)
   ///
   /// In en, this message translates to:
-  /// **'Record your first soul-ledger entry'**
+  /// **'Record your first joy-ledger entry'**
   String get homeBestJoyEmptyBig;
 
   /// Best Joy small line — totalJoyTx == 0 empty state (D-09)
@@ -2801,13 +2801,13 @@ abstract class S {
   /// Empty state caption for Analytics Joy Index KPI
   ///
   /// In en, this message translates to:
-  /// **'Joy Index appears after you rate soul-ledger entries.'**
+  /// **'Joy Index appears after you rate joy-ledger entries.'**
   String get analyticsKpiJoyIndexEmptyCaption;
 
   /// Screen reader label for Analytics Joy Index KPI
   ///
   /// In en, this message translates to:
-  /// **'{label} {value}, {ratedCount} rated of {totalCount} soul entries'**
+  /// **'{label} {value}, {ratedCount} rated of {totalCount} joy entries'**
   String analyticsKpiJoyIndexSemantics(
     String label,
     String value,

@@ -16,14 +16,14 @@
 
 ### Terminology — User-Facing Copy (TERM)
 
-- [ ] **TERM-01**: Every user-facing Chinese (zh) string for the two ledgers reads 日常 (never 生存) and 悦己 (never 灵魂/魂) — across home, analytics, list, settings, and accounting surfaces, including compound terms (e.g. 悦己支出, 悦己充盈度).
-- [ ] **TERM-02**: Every user-facing Japanese (ja) string reads 日常 (never 生存) and ときめき (never 魂/ソウル) consistently, coherent with the existing ときめき指数 joy-index term.
-- [ ] **TERM-03**: Every user-facing English (en) string reads Daily (never Survival) and Joy (never Soul) consistently, including short labels and metric labels.
-- [ ] **TERM-04**: No old-vocabulary term (生存/灵魂/魂/ソウル/Survival/Soul) appears in any rendered UI string across all three ARB files; verified by an exhaustive grep over `lib/l10n/*.arb` values returning zero stale hits (excluding intentional historical references in `@description` metadata if any).
+- [x] **TERM-01**: Every user-facing Chinese (zh) string for the two ledgers reads 日常 (never 生存) and 悦己 (never 灵魂/魂) — across home, analytics, list, settings, and accounting surfaces, including compound terms (e.g. 悦己支出, 悦己充盈度).
+- [x] **TERM-02**: Every user-facing Japanese (ja) string reads 日常 (never 生存) and ときめき (never 魂/ソウル) consistently, coherent with the existing ときめき指数 joy-index term.
+- [x] **TERM-03**: Every user-facing English (en) string reads Daily (never Survival) and Joy (never Soul) consistently, including short labels and metric labels.
+- [x] **TERM-04**: No old-vocabulary term (生存/灵魂/魂/ソウル/Survival/Soul) appears in any rendered UI string across all three ARB files; verified by an exhaustive grep over `lib/l10n/*.arb` values returning zero stale hits (excluding intentional historical references in `@description` metadata if any).
 
 ### Terminology — Internal Identifiers (TERMID)
 
-- [ ] **TERMID-01**: ARB keys are renamed to the new vocabulary (e.g. `soulLedger`→`joyLedger`, `survival*`→`daily*`, `soul*`→`joy*`) with every Dart call site updated and `flutter gen-l10n` regenerated cleanly.
+- [x] **TERMID-01**: ARB keys are renamed to the new vocabulary (e.g. `soulLedger`→`joyLedger`, `survival*`→`daily*`, `soul*`→`joy*`) with every Dart call site updated and `flutter gen-l10n` regenerated cleanly.
 - [x] **TERMID-02**: Theme/color symbols and related Dart identifiers are renamed (`AppColors.survival`→`daily`, `AppColors.soul`→`joy`, and dependent variable/field names) with no stale references remaining in non-generated source.
 - [x] **TERMID-03**: The codebase builds and `flutter analyze` reports 0 issues after the identifier rename; generated files (`.g.dart`, `S` localizations) are regenerated and consistent (AUDIT-10 guardrail green).
 - [ ] **TERMID-04**: The governing lexical-hierarchy decision record (ADR-015 or successor) is updated to document the locked 日常/悦己/ときめき/Daily/Joy mapping as the canonical vocabulary.
@@ -63,11 +63,11 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TERM-01 | Phase 31 | Pending |
-| TERM-02 | Phase 31 | Pending |
-| TERM-03 | Phase 31 | Pending |
-| TERM-04 | Phase 31 | Pending |
-| TERMID-01 | Phase 31 | Pending |
+| TERM-01 | Phase 31 | Complete |
+| TERM-02 | Phase 31 | Complete |
+| TERM-03 | Phase 31 | Complete |
+| TERM-04 | Phase 31 | Complete |
+| TERMID-01 | Phase 31 | Complete |
 | TERMID-02 | Phase 31 | Complete |
 | TERMID-03 | Phase 31 | Complete |
 | TERMID-04 | Phase 31 | Pending |

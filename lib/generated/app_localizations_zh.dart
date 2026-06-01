@@ -508,10 +508,10 @@ class SZh extends S {
   }
 
   @override
-  String get homeDailyLedgerTag => '生';
+  String get homeDailyLedgerTag => '日';
 
   @override
-  String get homeJoyLedgerTag => '灵';
+  String get homeJoyLedgerTag => '悦';
 
   @override
   String get homeSharedLedgerTag => '共';

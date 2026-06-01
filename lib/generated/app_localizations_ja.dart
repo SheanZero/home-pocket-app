@@ -508,10 +508,10 @@ class SJa extends S {
   }
 
   @override
-  String get homeDailyLedgerTag => '生';
+  String get homeDailyLedgerTag => '日';
 
   @override
-  String get homeJoyLedgerTag => '灵';
+  String get homeJoyLedgerTag => '悦';
 
   @override
   String get homeSharedLedgerTag => '共';
@@ -646,7 +646,7 @@ class SJa extends S {
   String get homeBestJoyEmptyTagPrimary => '今月の最愛';
 
   @override
-  String get homeBestJoyEmptyBig => '初めての灵账を記録しよう';
+  String get homeBestJoyEmptyBig => '初めてのときめき記録をつけよう';
 
   @override
   String get homeBestJoyEmptySmall => '今月の最愛がここに表示されます →';

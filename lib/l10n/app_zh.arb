@@ -620,11 +620,11 @@
       }
     }
   },
-  "homeDailyLedgerTag": "生",
+  "homeDailyLedgerTag": "日",
   "@homeDailyLedgerTag": {
     "description": "Compact home ledger row tag for daily ledger"
   },
-  "homeJoyLedgerTag": "灵",
+  "homeJoyLedgerTag": "悦",
   "@homeJoyLedgerTag": {
     "description": "Compact home ledger row tag for joy ledger"
   },

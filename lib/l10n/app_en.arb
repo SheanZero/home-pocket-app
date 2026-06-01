@@ -620,7 +620,7 @@
       }
     }
   },
-  "homeDailyLedgerTag": "S",
+  "homeDailyLedgerTag": "D",
   "@homeDailyLedgerTag": {
     "description": "Compact home ledger row tag for daily ledger"
   },
@@ -842,7 +842,7 @@
   "@homeBestJoyEmptyTagPrimary": {
     "description": "Best Joy CTA variant tag (same copy as homeBestJoyTagSingle but separate key)"
   },
-  "homeBestJoyEmptyBig": "Record your first soul-ledger entry",
+  "homeBestJoyEmptyBig": "Record your first joy-ledger entry",
   "@homeBestJoyEmptyBig": {
     "description": "Best Joy BIG line — totalJoyTx == 0 empty state (D-09)"
   },
@@ -1895,11 +1895,11 @@
   "@analyticsKpiJoyIndexLabel": {
     "description": "Analytics KPI label for cumulative Joy Index"
   },
-  "analyticsKpiJoyIndexEmptyCaption": "Joy Index appears after you rate soul-ledger entries.",
+  "analyticsKpiJoyIndexEmptyCaption": "Joy Index appears after you rate joy-ledger entries.",
   "@analyticsKpiJoyIndexEmptyCaption": {
     "description": "Empty state caption for Analytics Joy Index KPI"
   },
-  "analyticsKpiJoyIndexSemantics": "{label} {value}, {ratedCount} rated of {totalCount} soul entries",
+  "analyticsKpiJoyIndexSemantics": "{label} {value}, {ratedCount} rated of {totalCount} joy entries",
   "@analyticsKpiJoyIndexSemantics": {
     "description": "Screen reader label for Analytics Joy Index KPI",
     "placeholders": {

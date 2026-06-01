@@ -513,7 +513,7 @@ class SEn extends S {
   }
 
   @override
-  String get homeDailyLedgerTag => 'S';
+  String get homeDailyLedgerTag => 'D';
 
   @override
   String get homeJoyLedgerTag => 'J';
@@ -652,7 +652,7 @@ class SEn extends S {
   String get homeBestJoyEmptyTagPrimary => 'Top of the Month';
 
   @override
-  String get homeBestJoyEmptyBig => 'Record your first soul-ledger entry';
+  String get homeBestJoyEmptyBig => 'Record your first joy-ledger entry';
 
   @override
   String get homeBestJoyEmptySmall =>
@@ -1486,7 +1486,7 @@ class SEn extends S {
 
   @override
   String get analyticsKpiJoyIndexEmptyCaption =>
-      'Joy Index appears after you rate soul-ledger entries.';
+      'Joy Index appears after you rate joy-ledger entries.';
 
   @override
   String analyticsKpiJoyIndexSemantics(
@@ -1495,7 +1495,7 @@ class SEn extends S {
     int ratedCount,
     int totalCount,
   ) {
-    return '$label $value, $ratedCount rated of $totalCount soul entries';
+    return '$label $value, $ratedCount rated of $totalCount joy entries';
   }
 
   @override

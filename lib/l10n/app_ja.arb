@@ -620,11 +620,11 @@
       }
     }
   },
-  "homeDailyLedgerTag": "生",
+  "homeDailyLedgerTag": "日",
   "@homeDailyLedgerTag": {
     "description": "Compact home ledger row tag for daily ledger"
   },
-  "homeJoyLedgerTag": "灵",
+  "homeJoyLedgerTag": "悦",
   "@homeJoyLedgerTag": {
     "description": "Compact home ledger row tag for joy ledger"
   },
@@ -842,7 +842,7 @@
   "@homeBestJoyEmptyTagPrimary": {
     "description": "Best Joy CTA variant tag (same copy as homeBestJoyTagSingle but separate key)"
   },
-  "homeBestJoyEmptyBig": "初めての灵账を記録しよう",
+  "homeBestJoyEmptyBig": "初めてのときめき記録をつけよう",
   "@homeBestJoyEmptyBig": {
     "description": "Best Joy BIG line — totalJoyTx == 0 empty state (D-09)"
   },

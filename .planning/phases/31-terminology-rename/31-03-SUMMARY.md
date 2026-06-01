@@ -190,3 +190,32 @@ Acceptance criteria:
 - `flutter test` → 2244/2244 pass ✓
 
 ## Self-Check: PASSED
+
+## Amendment 2026-06-01: 6 missed stale ARB VALUE strings
+
+An exhaustive grep over ARB **values** (excluding @description) surfaced 6 stale-vocabulary hits that the original Task 2 verification missed — they escaped the earlier grep because standalone `灵`/`生` do not match `灵魂`/`生存`, and the single-letter `S` tag matches no Soul/Survival pattern. TERM-03 explicitly covers these short labels / metric labels.
+
+Stale values fixed (canonical D-07/D-08):
+
+| Key | Locale | Old → New |
+|-----|--------|-----------|
+| `homeDailyLedgerTag` | zh, ja | 生 → 日 |
+| `homeDailyLedgerTag` | en | S → D |
+| `homeJoyLedgerTag` | zh, ja | 灵 → 悦 (en already "J") |
+| `homeBestJoyEmptyBig` | ja | 初めての灵账を記録しよう → 初めてのときめき記録をつけよう |
+| `homeBestJoyEmptyBig` | en | Record your first soul-ledger entry → Record your first joy-ledger entry |
+| `analyticsKpiJoyIndexEmptyCaption` | en | ...rate soul-ledger entries. → ...rate joy-ledger entries. |
+| `analyticsKpiJoyIndexSemantics` | en | ...of {totalCount} soul entries → ...of {totalCount} joy entries |
+
+Re-verification (exhaustive value grep, all 3 locales):
+```
+for f in zh ja en; do grep -nE '"[a-zA-Z0-9_]+":' lib/l10n/app_$f.arb | grep -v '"@' | grep -iE '生存|灵|魂|ソウル|サバイバル|soul|survival'; done
+```
+→ **0 hits** across all 3 files; en "S" daily tag confirmed gone (now "D").
+
+- `flutter gen-l10n` → clean; regenerated 4 generated files
+- `flutter analyze` → 0 new issues (same 4 pre-existing)
+- `flutter test` → 2244/2244 pass (no golden re-baseline needed — compact tags do not render in any committed golden)
+- REQUIREMENTS.md TERM-01..04 / TERMID-01 completion tracking committed (now accurate after this fix)
+
+**Amendment commit:** `fix(31-03): rename 6 missed stale ARB value strings (compact tags + en/ja phrases) to daily/joy vocab`
