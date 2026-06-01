@@ -6,29 +6,29 @@ import '../../features/analytics/domain/models/metric_result.dart';
 import '../../features/analytics/domain/repositories/analytics_repository.dart';
 import '_time_window_validation.dart';
 
-/// STATSUI-V2-01 / D-01..D-05 — Soul-vs-Survival engagement snapshot.
+/// STATSUI-V2-01 / D-01..D-05 — Daily-vs-Joy engagement snapshot.
 ///
 /// Single-book variant. Fetches the per-ledger `(count, totalSpend)` rows from
-/// `getLedgerSnapshot` in parallel with the soul-scoped satisfaction average
-/// from `getSoulSatisfactionOverview`. D-04 type-system gate:
-/// `SurvivalLedgerSnapshot` has no `avgSatisfaction` field, and the soul-side
-/// avg is sourced ONLY from `getSoulSatisfactionOverview` (the DAO filters
-/// that query via `_soulExpenseFilter`). The survival row's amount/count never
-/// touches the soul satisfaction value.
+/// `getLedgerSnapshot` in parallel with the joy-scoped satisfaction average
+/// from `getJoyFullnessOverview`. D-04 type-system gate:
+/// `DailyLedgerSnapshot` has no `avgSatisfaction` field, and the joy-side
+/// avg is sourced ONLY from `getJoyFullnessOverview` (the DAO filters
+/// that query via `_joyExpenseFilter`). The daily row's amount/count never
+/// touches the joy satisfaction value.
 ///
-/// D-05 either-ledger-zero gate: if EITHER the soul row OR the survival row
+/// D-05 either-ledger-zero gate: if EITHER the joy row OR the daily row
 /// is missing/zero, the entire snapshot returns [Empty]. The compare card
 /// renders the global empty state rather than a half-populated comparison
 /// (one-sided cards are confusing — "is the other ledger broken or just
 /// empty?").
-class GetSoulVsSurvivalSnapshotUseCase {
-  GetSoulVsSurvivalSnapshotUseCase({
+class GetDailyVsJoySnapshotUseCase {
+  GetDailyVsJoySnapshotUseCase({
     required AnalyticsRepository analyticsRepository,
   }) : _repo = analyticsRepository;
 
   final AnalyticsRepository _repo;
 
-  Future<MetricResult<SoulVsSurvivalSnapshot>> execute({
+  Future<MetricResult<DailyVsJoySnapshot>> execute({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
@@ -44,43 +44,43 @@ class GetSoulVsSurvivalSnapshotUseCase {
       endDate: endDate,
       entrySourceFilter: entrySourceFilter,
     );
-    final overviewFuture = _repo.getSoulSatisfactionOverview(
+    final overviewFuture = _repo.getJoyFullnessOverview(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
       entrySourceFilter: entrySourceFilter,
     );
     final ledgerRows = await ledgerFuture;
-    final soulOverview = await overviewFuture;
+    final joyOverview = await overviewFuture;
 
-    final soulRow = ledgerRows.firstWhereOrNull((r) => r.ledgerType == 'soul');
-    final survivalRow = ledgerRows.firstWhereOrNull(
-      (r) => r.ledgerType == 'survival',
+    final joyRow = ledgerRows.firstWhereOrNull((r) => r.ledgerType == 'joy');
+    final dailyRow = ledgerRows.firstWhereOrNull(
+      (r) => r.ledgerType == 'daily',
     );
 
     // D-05 either-ledger-zero gate: any side missing or zero-count → Empty.
-    if (soulRow == null ||
-        soulRow.entryCount == 0 ||
-        survivalRow == null ||
-        survivalRow.entryCount == 0) {
+    if (joyRow == null ||
+        joyRow.entryCount == 0 ||
+        dailyRow == null ||
+        dailyRow.entryCount == 0) {
       return const Empty();
     }
 
-    final snapshot = SoulVsSurvivalSnapshot(
-      soul: SoulLedgerSnapshot(
-        entryCount: soulRow.entryCount,
-        totalSpend: soulRow.totalAmount,
-        // D-04 provenance: soul-scoped avg ONLY. Survival amount/count never
-        // touches this value — type-system also enforces it (SurvivalLedger-
+    final snapshot = DailyVsJoySnapshot(
+      joy: JoyLedgerSnapshot(
+        entryCount: joyRow.entryCount,
+        totalSpend: joyRow.totalAmount,
+        // D-04 provenance: joy-scoped avg ONLY. Daily amount/count never
+        // touches this value — type-system also enforces it (DailyLedger-
         // Snapshot has no avgSatisfaction field).
-        avgSatisfaction: soulOverview.avgSatisfaction,
+        avgSatisfaction: joyOverview.avgSatisfaction,
       ),
-      survival: SurvivalLedgerSnapshot(
-        entryCount: survivalRow.entryCount,
-        totalSpend: survivalRow.totalAmount,
+      daily: DailyLedgerSnapshot(
+        entryCount: dailyRow.entryCount,
+        totalSpend: dailyRow.totalAmount,
       ),
     );
 
-    return Value(snapshot, soulRow.entryCount + survivalRow.entryCount);
+    return Value(snapshot, joyRow.entryCount + dailyRow.entryCount);
   }
 }

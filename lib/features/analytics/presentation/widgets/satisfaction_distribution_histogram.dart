@@ -7,7 +7,7 @@ import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/analytics_aggregate.dart';
 
-/// STATSUI-02: 1-10 soul satisfaction distribution histogram.
+/// STATSUI-02: 1-10 joy fullness distribution histogram.
 class SatisfactionDistributionHistogram extends StatelessWidget {
   const SatisfactionDistributionHistogram({super.key, required this.buckets});
 

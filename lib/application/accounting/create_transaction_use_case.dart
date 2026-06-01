@@ -110,7 +110,7 @@ class CreateTransactionUseCase {
       resolvedLedgerType = classification.ledgerType;
     }
 
-    // 4.5 Resolve & validate soul satisfaction
+    // 4.5 Resolve & validate joy fullness
     final int joyFullness;
     if (resolvedLedgerType == LedgerType.joy) {
       joyFullness = params.joyFullness ?? 2;
@@ -120,7 +120,7 @@ class CreateTransactionUseCase {
         );
       }
     } else {
-      // Non-soul transactions always get default
+      // Non-joy transactions always get default
       joyFullness = 2;
     }
 

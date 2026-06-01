@@ -186,7 +186,7 @@ class VoiceSatisfactionEstimator {
   /// positive signal (sentiment words, louder/livelier delivery); negative
   /// sentiment dips it to 1. Without this anchor a neutral utterance scored
   /// ~0.3 and mapped to the middle faces (~5–6), pre-filling the picker too
-  /// high (bug: voice soul entries defaulted to the middle instead of 2).
+  /// high (bug: voice joy entries defaulted to the middle instead of 2).
   ///
   /// Anchored on the estimator's own signal band:
   ///   neutral utterance   score ≈ 0.26 → 2

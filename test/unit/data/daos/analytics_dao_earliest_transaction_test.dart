@@ -32,7 +32,7 @@ void main() {
             amount: 1000,
             type: 'expense',
             categoryId: 'cat_food',
-            ledgerType: 'survival',
+            ledgerType: 'daily',
             timestamp: timestamp,
             currentHash: 'hash_$id',
             createdAt: timestamp,

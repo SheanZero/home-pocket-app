@@ -10,47 +10,47 @@ void main() {
   });
 
   group('RuleEngine', () {
-    group('default survival rules', () {
-      test('classifies food categories as survival', () {
+    group('default daily rules', () {
+      test('classifies food categories as daily', () {
         expect(engine.classify('cat_food'), LedgerType.daily);
         expect(engine.classify('cat_food_dining_out'), LedgerType.daily);
         expect(engine.classify('cat_food_snack'), LedgerType.daily);
       });
 
-      test('classifies transport as survival', () {
+      test('classifies transport as daily', () {
         expect(engine.classify('cat_transport'), LedgerType.daily);
         expect(engine.classify('cat_transport_public'), LedgerType.daily);
         expect(engine.classify('cat_transport_taxi'), LedgerType.daily);
       });
 
-      test('classifies housing and medical as survival', () {
+      test('classifies housing and medical as daily', () {
         expect(engine.classify('cat_housing'), LedgerType.daily);
         expect(engine.classify('cat_medical'), LedgerType.daily);
       });
 
-      test('classifies daily necessities as survival', () {
+      test('classifies daily necessities as daily', () {
         expect(engine.classify('cat_daily'), LedgerType.daily);
       });
 
-      test('classifies other_expense as survival', () {
+      test('classifies other_expense as daily', () {
         expect(engine.classify('cat_other_expense'), LedgerType.daily);
       });
     });
 
-    group('default soul rules', () {
-      test('classifies entertainment as soul', () {
+    group('default joy rules', () {
+      test('classifies entertainment as joy', () {
         expect(engine.classify('cat_entertainment'), LedgerType.joy);
       });
 
-      test('classifies shopping as soul', () {
+      test('classifies shopping as joy', () {
         expect(engine.classify('cat_shopping'), LedgerType.joy);
       });
 
-      test('classifies education as soul', () {
+      test('classifies education as joy', () {
         expect(engine.classify('cat_education'), LedgerType.joy);
       });
 
-      test('classifies social as soul', () {
+      test('classifies social as joy', () {
         expect(engine.classify('cat_social'), LedgerType.joy);
       });
     });

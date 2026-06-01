@@ -24,7 +24,7 @@ class GetHappinessReportUseCase {
   /// D-04: Kahneman & Tversky 1979 PTVF empirical fit.
   static const double _ptvfAlpha = 0.88;
 
-  /// D-05: Highlights are "Good or better" soul transactions.
+  /// D-05: Highlights are "Good or better" joy transactions.
   static const int _highlightsThreshold = 6;
 
   Future<HappinessReport> execute({
@@ -37,7 +37,7 @@ class GetHappinessReportUseCase {
     TimeWindowValidation.assertValid(startDate, endDate);
 
     final results = await Future.wait([
-      _repo.getSoulSatisfactionOverview(
+      _repo.getJoyFullnessOverview(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
@@ -49,7 +49,7 @@ class GetHappinessReportUseCase {
         endDate: endDate,
         entrySourceFilter: entrySourceFilter,
       ),
-      _repo.getSoulRowsForJoyContribution(
+      _repo.getJoyRowsForJoyContribution(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
@@ -63,9 +63,9 @@ class GetHappinessReportUseCase {
       ),
     ]);
 
-    final overview = results[0] as SoulSatisfactionOverview;
+    final overview = results[0] as JoyFullnessOverview;
     final distribution = results[1] as List<SatisfactionScoreBucket>;
-    final ptvfRows = results[2] as List<SoulRowSample>;
+    final ptvfRows = results[2] as List<JoyRowSample>;
     final topJoy = results[3] as BestJoyMomentRow?;
     final totalSoulTx = overview.count;
 
@@ -103,7 +103,7 @@ class GetHappinessReportUseCase {
   }
 
   /// ADR-016 §2: joy_contribution = Σ(sat × (amount/base)^α).
-  double _computeJoyContribution(List<SoulRowSample> rows, double base) {
+  double _computeJoyContribution(List<JoyRowSample> rows, double base) {
     if (rows.isEmpty) return 0;
     var sum = 0.0;
     for (final r in rows) {

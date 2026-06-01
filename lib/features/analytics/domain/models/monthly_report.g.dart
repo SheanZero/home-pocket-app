@@ -40,8 +40,8 @@ _MonthlyReport _$MonthlyReportFromJson(Map<String, dynamic> json) =>
       totalExpenses: (json['totalExpenses'] as num).toInt(),
       savings: (json['savings'] as num).toInt(),
       savingsRate: (json['savingsRate'] as num).toDouble(),
-      survivalTotal: (json['survivalTotal'] as num).toInt(),
-      soulTotal: (json['soulTotal'] as num).toInt(),
+      dailyTotal: (json['dailyTotal'] as num).toInt(),
+      joyTotal: (json['joyTotal'] as num).toInt(),
       categoryBreakdowns: (json['categoryBreakdowns'] as List<dynamic>)
           .map((e) => CategoryBreakdown.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -63,8 +63,8 @@ Map<String, dynamic> _$MonthlyReportToJson(_MonthlyReport instance) =>
       'totalExpenses': instance.totalExpenses,
       'savings': instance.savings,
       'savingsRate': instance.savingsRate,
-      'survivalTotal': instance.survivalTotal,
-      'soulTotal': instance.soulTotal,
+      'dailyTotal': instance.dailyTotal,
+      'joyTotal': instance.joyTotal,
       'categoryBreakdowns': instance.categoryBreakdowns
           .map((e) => e.toJson())
           .toList(),

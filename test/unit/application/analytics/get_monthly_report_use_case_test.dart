@@ -366,8 +366,8 @@ void main() {
 
       final report = await executeWindow();
 
-      expect(report.survivalTotal, 50000);
-      expect(report.soulTotal, 20000);
+      expect(report.dailyTotal, 50000);
+      expect(report.joyTotal, 20000);
     });
 
     test('uses endDate month as display anchor for yearly windows', () async {

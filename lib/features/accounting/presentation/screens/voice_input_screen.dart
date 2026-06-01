@@ -405,8 +405,8 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(S.of(context).transactionSaved)),
           );
-          // Phase 23 D-08 / WR-04: soul-ledger save defers Navigator.popUntil
-          // until SoulCelebrationOverlay's onDismissed fires so the joy moment
+          // Phase 23 D-08 / WR-04: joy-ledger save defers Navigator.popUntil
+          // until JoyCelebrationOverlay's onDismissed fires so the joy moment
           // is visible. Survival-ledger save pops immediately (no overlay).
           if (tx.ledgerType == LedgerType.joy) {
             _formKey.currentState?.waitForCelebrationDismissed().then((_) {
@@ -511,7 +511,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
 
     var parseResult = result.data!;
 
-    // For soul ledger transactions, estimate satisfaction from audio features.
+    // For joy ledger transactions, estimate satisfaction from audio features.
     // BLOCKER B-1: this estimator output is the source of
     // _parseResult.estimatedSatisfaction that _stopRecordingAndCommit later
     // pushes into the form via state.updateSatisfaction(...).

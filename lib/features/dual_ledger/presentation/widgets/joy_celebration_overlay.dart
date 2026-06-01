@@ -2,20 +2,20 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-/// A purple-themed celebration overlay shown when a soul transaction is saved.
+/// A purple-themed celebration overlay shown when a joy transaction is saved.
 ///
 /// Displays animated sparkle icons that scale up and fade out over 1.5 seconds,
 /// then auto-dismisses by calling [onDismissed].
-class SoulCelebrationOverlay extends StatefulWidget {
-  const SoulCelebrationOverlay({super.key, this.onDismissed});
+class JoyCelebrationOverlay extends StatefulWidget {
+  const JoyCelebrationOverlay({super.key, this.onDismissed});
 
   final VoidCallback? onDismissed;
 
   @override
-  State<SoulCelebrationOverlay> createState() => _SoulCelebrationOverlayState();
+  State<JoyCelebrationOverlay> createState() => _JoyCelebrationOverlayState();
 }
 
-class _SoulCelebrationOverlayState extends State<SoulCelebrationOverlay>
+class _JoyCelebrationOverlayState extends State<JoyCelebrationOverlay>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _scaleAnimation;
@@ -118,7 +118,7 @@ class _SoulCelebrationOverlayState extends State<SoulCelebrationOverlay>
                       Icon(Icons.auto_awesome, size: 48, color: Colors.purple),
                       SizedBox(height: 8),
                       Text(
-                        'Soul!',
+                        'Joy!',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,

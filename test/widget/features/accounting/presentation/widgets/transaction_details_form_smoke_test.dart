@@ -157,7 +157,7 @@ Transaction _fakeSoulSeedTransaction() => Transaction(
   entrySource: EntrySource.manual,
 );
 
-final _soulCategory = Category(
+final _joyCategory = Category(
   id: 'cat-hobby',
   name: 'Hobby',
   icon: 'sports_tennis',
@@ -302,7 +302,7 @@ void main() {
   );
 
   testWidgets(
-    '.edit mode renders all rows + soul satisfaction picker when seed is soul',
+    '.edit mode renders all rows + joy satisfaction picker when seed is joy',
     (tester) async {
       tester.view.physicalSize = const Size(402, 874);
       tester.view.devicePixelRatio = 1;
@@ -319,13 +319,13 @@ void main() {
             ),
           ),
           overrides: _baseOverrides(
-            categoryRepo: SingleCategoryRepository(_soulCategory),
+            categoryRepo: SingleCategoryRepository(_joyCategory),
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      // seed.ledgerType == soul → SatisfactionEmojiPicker renders.
+      // seed.ledgerType == joy → SatisfactionEmojiPicker renders.
       // This verifies the .edit init branch loads seed.ledgerType verbatim (W3).
       expect(find.byType(SatisfactionEmojiPicker), findsOneWidget);
     },

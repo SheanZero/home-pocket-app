@@ -68,8 +68,8 @@ void main() {
         totalExpenses: 200000,
         savings: 100000,
         savingsRate: 33.3,
-        survivalTotal: 150000,
-        soulTotal: 50000,
+        dailyTotal: 150000,
+        joyTotal: 50000,
         categoryBreakdowns: const [],
         dailyExpenses: const [],
       );
@@ -80,8 +80,8 @@ void main() {
       expect(report.totalExpenses, 200000);
       expect(report.savings, 100000);
       expect(report.savingsRate, 33.3);
-      expect(report.survivalTotal, 150000);
-      expect(report.soulTotal, 50000);
+      expect(report.dailyTotal, 150000);
+      expect(report.joyTotal, 50000);
       expect(report.previousMonthComparison, isNull);
     });
 
@@ -93,8 +93,8 @@ void main() {
         totalExpenses: 200000,
         savings: 100000,
         savingsRate: 33.3,
-        survivalTotal: 150000,
-        soulTotal: 50000,
+        dailyTotal: 150000,
+        joyTotal: 50000,
         categoryBreakdowns: const [],
         dailyExpenses: const [],
         previousMonthComparison: const MonthComparison(
@@ -119,8 +119,8 @@ void main() {
         totalExpenses: 200000,
         savings: 100000,
         savingsRate: 33.3,
-        survivalTotal: 150000,
-        soulTotal: 50000,
+        dailyTotal: 150000,
+        joyTotal: 50000,
         categoryBreakdowns: const [],
         dailyExpenses: const [],
       );

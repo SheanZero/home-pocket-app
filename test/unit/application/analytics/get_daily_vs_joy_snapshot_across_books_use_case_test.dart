@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/application/analytics/get_soul_vs_survival_snapshot_across_books_use_case.dart';
+import 'package:home_pocket/application/analytics/get_daily_vs_joy_snapshot_across_books_use_case.dart';
 import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
 import 'package:home_pocket/features/analytics/domain/models/ledger_snapshot.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
@@ -13,14 +13,14 @@ LedgerSnapshotRow _ledger(String type, int total, int count) =>
 
 void main() {
   late _MockAnalyticsRepository repository;
-  late GetSoulVsSurvivalSnapshotAcrossBooksUseCase useCase;
+  late GetDailyVsJoySnapshotAcrossBooksUseCase useCase;
 
   final startDate = DateTime(2026, 4);
   final endDate = DateTime(2026, 4, 30, 23, 59, 59);
 
   setUp(() {
     repository = _MockAnalyticsRepository();
-    useCase = GetSoulVsSurvivalSnapshotAcrossBooksUseCase(
+    useCase = GetDailyVsJoySnapshotAcrossBooksUseCase(
       analyticsRepository: repository,
     );
   });
@@ -37,13 +37,13 @@ void main() {
 
   void stubOverview(String bookId, double avg, int count) {
     when(
-      () => repository.getSoulSatisfactionOverview(
+      () => repository.getJoyFullnessOverview(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
       ),
     ).thenAnswer(
-      (_) async => SoulSatisfactionOverview(avgSatisfaction: avg, count: count),
+      (_) async => JoyFullnessOverview(avgSatisfaction: avg, count: count),
     );
   }
 
@@ -55,7 +55,7 @@ void main() {
         endDate: endDate,
       );
 
-      expect(result, isA<Empty<SoulVsSurvivalSnapshot>>());
+      expect(result, isA<Empty<DailyVsJoySnapshot>>());
       verifyNever(
         () => repository.getLedgerSnapshotAcrossBooks(
           bookIds: any(named: 'bookIds'),
@@ -64,7 +64,7 @@ void main() {
         ),
       );
       verifyNever(
-        () => repository.getSoulSatisfactionOverview(
+        () => repository.getJoyFullnessOverview(
           bookId: any(named: 'bookId'),
           startDate: any(named: 'startDate'),
           endDate: any(named: 'endDate'),
@@ -79,8 +79,8 @@ void main() {
       () async {
         final bookIds = ['b1', 'b2'];
         stubLedgersAcross(bookIds, [
-          _ledger('soul', 3000, 7),
-          _ledger('survival', 25000, 12),
+          _ledger('joy', 3000, 7),
+          _ledger('daily', 25000, 12),
         ]);
         stubOverview('b1', 8.0, 3);
         stubOverview('b2', 6.0, 4);
@@ -91,26 +91,26 @@ void main() {
                   startDate: startDate,
                   endDate: endDate,
                 )
-                as Value<SoulVsSurvivalSnapshot>;
+                as Value<DailyVsJoySnapshot>;
 
-        expect(result.data.soul.entryCount, 7);
-        expect(result.data.soul.totalSpend, 3000);
+        expect(result.data.joy.entryCount, 7);
+        expect(result.data.joy.totalSpend, 3000);
         // weighted family avg = (8*3 + 6*4) / (3+4) = (24+24)/7 = 48/7
-        expect(result.data.soul.avgSatisfaction, closeTo(48 / 7, 1e-9));
-        expect(result.data.survival.entryCount, 12);
-        expect(result.data.survival.totalSpend, 25000);
-        // sampleSize = soul + survival entries
+        expect(result.data.joy.avgSatisfaction, closeTo(48 / 7, 1e-9));
+        expect(result.data.daily.entryCount, 12);
+        expect(result.data.daily.totalSpend, 25000);
+        // sampleSize = joy + daily entries
         expect(result.sampleSize, 19);
       },
     );
   });
 
   group('D-05 either-ledger-zero gate at family scope', () {
-    test('family soul has 0 entries → Empty', () async {
+    test('family joy has 0 entries → Empty', () async {
       final bookIds = ['b1', 'b2'];
       stubLedgersAcross(bookIds, [
-        _ledger('soul', 0, 0),
-        _ledger('survival', 25000, 12),
+        _ledger('joy', 0, 0),
+        _ledger('daily', 25000, 12),
       ]);
       stubOverview('b1', 0, 0);
       stubOverview('b2', 0, 0);
@@ -121,14 +121,14 @@ void main() {
         endDate: endDate,
       );
 
-      expect(result, isA<Empty<SoulVsSurvivalSnapshot>>());
+      expect(result, isA<Empty<DailyVsJoySnapshot>>());
     });
 
-    test('family survival has 0 entries → Empty', () async {
+    test('family daily has 0 entries → Empty', () async {
       final bookIds = ['b1', 'b2'];
       stubLedgersAcross(bookIds, [
-        _ledger('soul', 3000, 7),
-        _ledger('survival', 0, 0),
+        _ledger('joy', 3000, 7),
+        _ledger('daily', 0, 0),
       ]);
       stubOverview('b1', 8.0, 3);
       stubOverview('b2', 6.0, 4);
@@ -139,7 +139,7 @@ void main() {
         endDate: endDate,
       );
 
-      expect(result, isA<Empty<SoulVsSurvivalSnapshot>>());
+      expect(result, isA<Empty<DailyVsJoySnapshot>>());
     });
   });
 
@@ -149,8 +149,8 @@ void main() {
       () async {
         final bookIds = ['b1', 'b2'];
         stubLedgersAcross(bookIds, [
-          _ledger('soul', 1500, 5),
-          _ledger('survival', 10000, 6),
+          _ledger('joy', 1500, 5),
+          _ledger('daily', 10000, 6),
         ]);
         stubOverview('b1', 8.0, 3);
         stubOverview('b2', 6.0, 2);
@@ -161,19 +161,19 @@ void main() {
                   startDate: startDate,
                   endDate: endDate,
                 )
-                as Value<SoulVsSurvivalSnapshot>;
+                as Value<DailyVsJoySnapshot>;
 
-        expect(result.data.soul.avgSatisfaction, closeTo(7.2, 1e-9));
+        expect(result.data.joy.avgSatisfaction, closeTo(7.2, 1e-9));
       },
     );
 
     test('zero sample sizes across books → avg falls back to 0', () async {
       final bookIds = ['b1', 'b2'];
       stubLedgersAcross(bookIds, [
-        // soul has aggregate entries from raw ledger snapshot, but per-book
-        // overviews report zero soul-rated samples (no satisfaction ratings).
-        _ledger('soul', 100, 1),
-        _ledger('survival', 10000, 6),
+        // joy has aggregate entries from raw ledger snapshot, but per-book
+        // overviews report zero joy-rated samples (no satisfaction ratings).
+        _ledger('joy', 100, 1),
+        _ledger('daily', 10000, 6),
       ]);
       stubOverview('b1', 0, 0);
       stubOverview('b2', 0, 0);
@@ -184,9 +184,9 @@ void main() {
                 startDate: startDate,
                 endDate: endDate,
               )
-              as Value<SoulVsSurvivalSnapshot>;
+              as Value<DailyVsJoySnapshot>;
 
-      expect(result.data.soul.avgSatisfaction, 0);
+      expect(result.data.joy.avgSatisfaction, 0);
     });
   });
 

@@ -118,7 +118,7 @@ Widget _buildSubject({
 }
 
 /// Group structure mirrors requirement / decision IDs from
-/// `.planning/phases/10-homepage-soulfullnesscard-redesign/10-CONTEXT.md`:
+/// `.planning/phases/10-homepage-joyfullnesscard-redesign/10-CONTEXT.md`:
 ///   - HOMEUI-01..07 = HomeHeroCard rendering requirements
 ///   - FAMILY-03    = group-mode member rows
 ///   - D-09         = empty / all-neutral state behavior
@@ -243,7 +243,7 @@ void main() {
       },
     );
 
-    testWidgets('split bar renders 魂帳 / 生存帳 absolute amounts (no % glyph)', (
+    testWidgets('split bar renders ときめき帳 / 日々の帳 absolute amounts (no % glyph)', (
       tester,
     ) async {
       await tester.pumpWidget(_buildSubject(snapshot: _singleRich()));
@@ -252,10 +252,10 @@ void main() {
       expect(find.textContaining('40,600'), findsWidgets);
       expect(find.textContaining('102,200'), findsWidgets);
       // The trend chip is the only element with `%`; no `%` glyph appears in
-      // the soul / survival amount strings.
-      final soulText = find.textContaining('40,600');
-      expect(soulText, findsWidgets);
-      tester.widgetList<Text>(soulText).forEach((t) {
+      // the joy / daily amount strings.
+      final joyText = find.textContaining('40,600');
+      expect(joyText, findsWidgets);
+      tester.widgetList<Text>(joyText).forEach((t) {
         expect(t.data ?? '', isNot(contains('%')));
       });
       final survText = find.textContaining('102,200');

@@ -26,7 +26,7 @@ Color joyTargetProgressColor(double ratio) {
 }
 
 /// Integrated hero card (Phase 10) replacing the previous trio of legacy
-/// cards: month-overview, ledger-comparison, and soul-fullness. Pure
+/// cards: month-overview, ledger-comparison, and joy-fullness. Pure
 /// StatelessWidget — parent resolves AsyncValue.when() and passes Freezed
 /// aggregates (UI-SPEC line 277).
 ///
@@ -35,7 +35,7 @@ Color joyTargetProgressColor(double ratio) {
 /// - `MetricResult<T>` consumed via sealed `switch` only.
 /// - Exactly 2 info-icon placeholders (HOMEUI-04).
 /// - Whole-card single onTap; ⓘ icons absorb taps in 10-07b (Pitfall #3).
-/// - 魂/生存 split bar shows ABSOLUTE amounts (D-02).
+/// - ときめき/日常 split bar shows ABSOLUTE amounts (D-02).
 /// - No gamification chips of any kind (ADR-012).
 ///
 /// Plans 10-07a + 10-07b deliver Regions 1-8 (hero header → split bar →
@@ -196,14 +196,14 @@ class HomeHeroCard extends StatelessWidget {
     );
   }
 
-  // ─── Region 2: 魂/生存 split bar (ABSOLUTE amounts only — D-02) ────────────
+  // ─── Region 2: ときめき/日常 split bar (ABSOLUTE amounts only — D-02) ────────────
   Widget _splitBar(BuildContext context, S l10n) {
-    final soul = report.soulTotal;
-    final survival = report.survivalTotal;
-    final combined = soul + survival;
-    final ratio = combined > 0 ? (soul / combined).clamp(0.0, 1.0) : 0.0;
-    final soulText = _fmt.formatCurrency(soul, currencyCode, locale);
-    final survivalText = _fmt.formatCurrency(survival, currencyCode, locale);
+    final joy = report.joyTotal;
+    final daily = report.dailyTotal;
+    final combined = joy + daily;
+    final ratio = combined > 0 ? (joy / combined).clamp(0.0, 1.0) : 0.0;
+    final joyText = _fmt.formatCurrency(joy, currencyCode, locale);
+    final dailyText = _fmt.formatCurrency(daily, currencyCode, locale);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -214,14 +214,14 @@ class HomeHeroCard extends StatelessWidget {
               context,
               AppColors.joy,
               l10n.joyLedger,
-              soulText,
+              joyText,
               leading: true,
             ),
             _splitLabel(
               context,
               AppColors.daily,
               l10n.dailyLedger,
-              survivalText,
+              dailyText,
               leading: false,
             ),
           ],

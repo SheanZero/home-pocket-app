@@ -40,9 +40,9 @@ void main() {
     });
 
     test('calm voice with neutral text -> rests near the default (1-3)', () {
-      // Neutral/weak-signal speech must rest at ~2 (the soul-ledger form
+      // Neutral/weak-signal speech must rest at ~2 (the joy-ledger form
       // default), not drift to the middle faces. Was 4-6 before the
-      // _mapToSatisfaction re-anchor (voice-soul default bug fix).
+      // _mapToSatisfaction re-anchor (voice-joy default bug fix).
       final features = VoiceAudioFeatures(
         soundLevels: [0.3, 0.35, 0.3, 0.32, 0.3],
         timestamps: _generateTimestamps(5, intervalMs: 400),

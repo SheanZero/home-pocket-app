@@ -24,13 +24,13 @@ void main() {
   });
 
   void stubReportInputs({
-    required SoulSatisfactionOverview overview,
+    required JoyFullnessOverview overview,
     required List<SatisfactionScoreBucket> distribution,
-    required List<SoulRowSample> ptvfRows,
+    required List<JoyRowSample> ptvfRows,
     BestJoyMomentRow? bestJoyMoment,
   }) {
     when(
-      () => repository.getSoulSatisfactionOverview(
+      () => repository.getJoyFullnessOverview(
         bookId: 'book-1',
         startDate: startDate,
         endDate: endDate,
@@ -44,7 +44,7 @@ void main() {
       ),
     ).thenAnswer((_) async => distribution);
     when(
-      () => repository.getSoulRowsForJoyContribution(
+      () => repository.getJoyRowsForJoyContribution(
         bookId: 'book-1',
         startDate: startDate,
         endDate: endDate,
@@ -81,7 +81,7 @@ void main() {
   group('empty (n=0)', () {
     test('overview count zero returns Empty() for all five metrics', () async {
       stubReportInputs(
-        overview: const SoulSatisfactionOverview(avgSatisfaction: 0, count: 0),
+        overview: const JoyFullnessOverview(avgSatisfaction: 0, count: 0),
         distribution: const [],
         ptvfRows: const [],
       );
@@ -102,12 +102,12 @@ void main() {
   group('Avg Satisfaction (HAPPY-01)', () {
     test('overview average and count become Value sample', () async {
       stubReportInputs(
-        overview: const SoulSatisfactionOverview(
+        overview: const JoyFullnessOverview(
           avgSatisfaction: 8.5,
           count: 4,
         ),
         distribution: const [SatisfactionScoreBucket(score: 8, count: 4)],
-        ptvfRows: const [SoulRowSample(amount: 1000, joyFullness: 8)],
+        ptvfRows: const [JoyRowSample(amount: 1000, joyFullness: 8)],
       );
 
       final report = await execute();
@@ -121,9 +121,9 @@ void main() {
   group('Joy contribution (ADR-016 / HAPPY-02)', () {
     test('single JPY row uses alpha 0.88 and base 500', () async {
       stubReportInputs(
-        overview: const SoulSatisfactionOverview(avgSatisfaction: 8, count: 1),
+        overview: const JoyFullnessOverview(avgSatisfaction: 8, count: 1),
         distribution: const [SatisfactionScoreBucket(score: 8, count: 1)],
-        ptvfRows: const [SoulRowSample(amount: 3000, joyFullness: 8)],
+        ptvfRows: const [JoyRowSample(amount: 3000, joyFullness: 8)],
       );
 
       final report = await execute();
@@ -138,7 +138,7 @@ void main() {
       'mixed JPY rows sum contribution without amount denominator',
       () async {
         stubReportInputs(
-          overview: const SoulSatisfactionOverview(
+          overview: const JoyFullnessOverview(
             avgSatisfaction: 8,
             count: 2,
           ),
@@ -147,8 +147,8 @@ void main() {
             SatisfactionScoreBucket(score: 10, count: 1),
           ],
           ptvfRows: const [
-            SoulRowSample(amount: 10000, joyFullness: 10),
-            SoulRowSample(amount: 500, joyFullness: 6),
+            JoyRowSample(amount: 10000, joyFullness: 10),
+            JoyRowSample(amount: 500, joyFullness: 6),
           ],
         );
 
@@ -165,14 +165,14 @@ void main() {
       'all post-migration default sat 2 rows compute non-zero contribution',
       () async {
         stubReportInputs(
-          overview: const SoulSatisfactionOverview(
+          overview: const JoyFullnessOverview(
             avgSatisfaction: 2,
             count: 2,
           ),
           distribution: const [SatisfactionScoreBucket(score: 2, count: 2)],
           ptvfRows: const [
-            SoulRowSample(amount: 1000, joyFullness: 2),
-            SoulRowSample(amount: 2000, joyFullness: 2),
+            JoyRowSample(amount: 1000, joyFullness: 2),
+            JoyRowSample(amount: 2000, joyFullness: 2),
           ],
         );
 
@@ -188,14 +188,14 @@ void main() {
       'all sat 10 rows keep high-amount row dominant under alpha less than 1',
       () async {
         stubReportInputs(
-          overview: const SoulSatisfactionOverview(
+          overview: const JoyFullnessOverview(
             avgSatisfaction: 10,
             count: 2,
           ),
           distribution: const [SatisfactionScoreBucket(score: 10, count: 2)],
           ptvfRows: const [
-            SoulRowSample(amount: 500, joyFullness: 10),
-            SoulRowSample(amount: 10000, joyFullness: 10),
+            JoyRowSample(amount: 500, joyFullness: 10),
+            JoyRowSample(amount: 10000, joyFullness: 10),
           ],
         );
 
@@ -216,12 +216,12 @@ void main() {
       'JPY and CNY bases produce contributions with base ratio direction',
       () async {
         stubReportInputs(
-          overview: const SoulSatisfactionOverview(
+          overview: const JoyFullnessOverview(
             avgSatisfaction: 8,
             count: 1,
           ),
           distribution: const [SatisfactionScoreBucket(score: 8, count: 1)],
-          ptvfRows: const [SoulRowSample(amount: 1000, joyFullness: 8)],
+          ptvfRows: const [JoyRowSample(amount: 1000, joyFullness: 8)],
         );
 
         final jpy = await execute(currencyCode: 'JPY');
@@ -239,9 +239,9 @@ void main() {
 
     test('EUR falls back to JPY base without throwing', () async {
       stubReportInputs(
-        overview: const SoulSatisfactionOverview(avgSatisfaction: 7, count: 1),
+        overview: const JoyFullnessOverview(avgSatisfaction: 7, count: 1),
         distribution: const [SatisfactionScoreBucket(score: 7, count: 1)],
-        ptvfRows: const [SoulRowSample(amount: 1000, joyFullness: 7)],
+        ptvfRows: const [JoyRowSample(amount: 1000, joyFullness: 7)],
       );
 
       final jpy = await execute(currencyCode: 'JPY');
@@ -252,12 +252,12 @@ void main() {
       expect(eurJoy.data, closeTo(jpyJoy.data, 0.0001));
     });
 
-    test('uses repository-filtered PTVF soul rows only', () async {
+    test('uses repository-filtered PTVF joy rows only', () async {
       stubReportInputs(
-        overview: const SoulSatisfactionOverview(avgSatisfaction: 8, count: 1),
+        overview: const JoyFullnessOverview(avgSatisfaction: 8, count: 1),
         distribution: const [SatisfactionScoreBucket(score: 8, count: 1)],
         // Survival rows are excluded upstream by the DAO/repository contract.
-        ptvfRows: const [SoulRowSample(amount: 3000, joyFullness: 8)],
+        ptvfRows: const [JoyRowSample(amount: 3000, joyFullness: 8)],
       );
 
       final report = await execute();
@@ -266,7 +266,7 @@ void main() {
 
       expect(joy.data, closeTo(expected, 0.0001));
       verify(
-        () => repository.getSoulRowsForJoyContribution(
+        () => repository.getJoyRowsForJoyContribution(
           bookId: 'book-1',
           startDate: startDate,
           endDate: endDate,
@@ -278,14 +278,14 @@ void main() {
   group('Highlights count (HAPPY-03 / D-05)', () {
     test('counts all satisfaction buckets at sat six or higher', () async {
       stubReportInputs(
-        overview: const SoulSatisfactionOverview(avgSatisfaction: 6, count: 7),
+        overview: const JoyFullnessOverview(avgSatisfaction: 6, count: 7),
         distribution: const [
           SatisfactionScoreBucket(score: 2, count: 3),
           SatisfactionScoreBucket(score: 6, count: 2),
           SatisfactionScoreBucket(score: 8, count: 1),
           SatisfactionScoreBucket(score: 10, count: 1),
         ],
-        ptvfRows: const [SoulRowSample(amount: 1000, joyFullness: 6)],
+        ptvfRows: const [JoyRowSample(amount: 1000, joyFullness: 6)],
       );
 
       final report = await execute();
@@ -299,7 +299,7 @@ void main() {
       'all satisfaction buckets at sat five or lower produce zero value',
       () async {
         stubReportInputs(
-          overview: const SoulSatisfactionOverview(
+          overview: const JoyFullnessOverview(
             avgSatisfaction: 3,
             count: 4,
           ),
@@ -308,7 +308,7 @@ void main() {
             SatisfactionScoreBucket(score: 4, count: 1),
             SatisfactionScoreBucket(score: 5, count: 1),
           ],
-          ptvfRows: const [SoulRowSample(amount: 1000, joyFullness: 2)],
+          ptvfRows: const [JoyRowSample(amount: 1000, joyFullness: 2)],
         );
 
         final report = await execute();
@@ -325,7 +325,7 @@ void main() {
       'odd distribution count walks cumulative buckets to median score',
       () async {
         stubReportInputs(
-          overview: const SoulSatisfactionOverview(
+          overview: const JoyFullnessOverview(
             avgSatisfaction: 5.2,
             count: 5,
           ),
@@ -334,7 +334,7 @@ void main() {
             SatisfactionScoreBucket(score: 6, count: 2),
             SatisfactionScoreBucket(score: 10, count: 1),
           ],
-          ptvfRows: const [SoulRowSample(amount: 1000, joyFullness: 6)],
+          ptvfRows: const [JoyRowSample(amount: 1000, joyFullness: 6)],
         );
 
         final report = await execute();
@@ -348,7 +348,7 @@ void main() {
       'even distribution count averages lower and upper median scores',
       () async {
         stubReportInputs(
-          overview: const SoulSatisfactionOverview(
+          overview: const JoyFullnessOverview(
             avgSatisfaction: 4,
             count: 4,
           ),
@@ -356,7 +356,7 @@ void main() {
             SatisfactionScoreBucket(score: 2, count: 2),
             SatisfactionScoreBucket(score: 6, count: 2),
           ],
-          ptvfRows: const [SoulRowSample(amount: 1000, joyFullness: 6)],
+          ptvfRows: const [JoyRowSample(amount: 1000, joyFullness: 6)],
         );
 
         final report = await execute();
@@ -372,12 +372,12 @@ void main() {
       'null best joy row returns Empty even when overview has count',
       () async {
         stubReportInputs(
-          overview: const SoulSatisfactionOverview(
+          overview: const JoyFullnessOverview(
             avgSatisfaction: 7,
             count: 2,
           ),
           distribution: const [SatisfactionScoreBucket(score: 7, count: 2)],
-          ptvfRows: const [SoulRowSample(amount: 1000, joyFullness: 7)],
+          ptvfRows: const [JoyRowSample(amount: 1000, joyFullness: 7)],
         );
 
         final report = await execute();
@@ -395,9 +395,9 @@ void main() {
         timestamp: DateTime(2026, 5, 20, 12),
       );
       stubReportInputs(
-        overview: const SoulSatisfactionOverview(avgSatisfaction: 10, count: 1),
+        overview: const JoyFullnessOverview(avgSatisfaction: 10, count: 1),
         distribution: const [SatisfactionScoreBucket(score: 10, count: 1)],
-        ptvfRows: const [SoulRowSample(amount: 3000, joyFullness: 10)],
+        ptvfRows: const [JoyRowSample(amount: 3000, joyFullness: 10)],
         bestJoyMoment: row,
       );
 
@@ -419,7 +419,7 @@ void main() {
         timestamp: DateTime(2026, 5, 20, 12),
       );
       stubReportInputs(
-        overview: const SoulSatisfactionOverview(
+        overview: const JoyFullnessOverview(
           avgSatisfaction: 8.5,
           count: 4,
         ),
@@ -429,9 +429,9 @@ void main() {
           SatisfactionScoreBucket(score: 10, count: 1),
         ],
         ptvfRows: const [
-          SoulRowSample(amount: 1000, joyFullness: 6),
-          SoulRowSample(amount: 2000, joyFullness: 8),
-          SoulRowSample(amount: 3000, joyFullness: 10),
+          JoyRowSample(amount: 1000, joyFullness: 6),
+          JoyRowSample(amount: 2000, joyFullness: 8),
+          JoyRowSample(amount: 3000, joyFullness: 10),
         ],
         bestJoyMoment: row,
       );

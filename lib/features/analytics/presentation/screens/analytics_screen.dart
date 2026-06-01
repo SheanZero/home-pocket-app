@@ -24,7 +24,7 @@ import '../widgets/largest_expense_story_card.dart';
 import '../widgets/monthly_spend_trend_bar_chart.dart';
 import '../widgets/per_category_breakdown_card.dart';
 import '../widgets/satisfaction_distribution_histogram.dart';
-import '../widgets/soul_vs_survival_card.dart';
+import '../widgets/daily_vs_joy_card.dart';
 import '../widgets/joy_metric_variant_chip.dart';
 import '../widgets/time_window_chip.dart';
 
@@ -125,7 +125,7 @@ class AnalyticsScreen extends ConsumerWidget {
               const SizedBox(height: 8),
               // D-13: STATSUI-V2-01 Soul-vs-Survival card between donut and
               // satisfaction histogram in the Distribution section.
-              SoulVsSurvivalCard(
+              DailyVsJoyCard(
                 bookId: bookId,
                 startDate: startDate,
                 endDate: endDate,
@@ -160,7 +160,7 @@ class AnalyticsScreen extends ConsumerWidget {
                 const SizedBox(height: 8),
                 // D-17: group-mode adds a second stacked PerCategoryBreakdownCard
                 // for the family-aggregate scope. PerCategoryScope.family reads
-                // perCategorySoulBreakdownFamilyProvider (no bookId arg).
+                // perCategoryJoyBreakdownFamilyProvider (no bookId arg).
                 PerCategoryBreakdownCard(
                   bookId: bookId,
                   startDate: startDate,
@@ -278,7 +278,7 @@ class AnalyticsScreen extends ConsumerWidget {
     // keys as the build context so HomeHero's month-anchored provider instances
     // remain untouched (D-12).
     ref.invalidate(
-      perCategorySoulBreakdownProvider(
+      perCategoryJoyBreakdownProvider(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
@@ -286,7 +286,7 @@ class AnalyticsScreen extends ConsumerWidget {
       ),
     );
     ref.invalidate(
-      soulVsSurvivalSnapshotProvider(
+      dailyVsJoySnapshotProvider(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
@@ -305,14 +305,14 @@ class AnalyticsScreen extends ConsumerWidget {
       // Phase 16 — D-17 / D-18 family-aggregate variants. Drop bookId because
       // these providers derive ids from shadowBooksProvider.
       ref.invalidate(
-        perCategorySoulBreakdownFamilyProvider(
+        perCategoryJoyBreakdownFamilyProvider(
           startDate: startDate,
           endDate: endDate,
           joyMetricVariant: variant,
         ),
       );
       ref.invalidate(
-        soulVsSurvivalSnapshotFamilyProvider(
+        dailyVsJoySnapshotFamilyProvider(
           startDate: startDate,
           endDate: endDate,
           joyMetricVariant: variant,

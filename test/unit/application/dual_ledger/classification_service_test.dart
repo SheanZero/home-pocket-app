@@ -14,7 +14,7 @@ void main() {
   });
 
   group('ClassificationService', () {
-    test('uses rule engine when category has a rule (survival)', () async {
+    test('uses rule engine when category has a rule (daily)', () async {
       final result = await service.classify(categoryId: 'cat_food');
 
       expect(result.ledgerType, LedgerType.daily);
@@ -22,7 +22,7 @@ void main() {
       expect(result.confidence, 1.0);
     });
 
-    test('uses rule engine when category has a rule (soul)', () async {
+    test('uses rule engine when category has a rule (joy)', () async {
       final result = await service.classify(categoryId: 'cat_entertainment');
 
       expect(result.ledgerType, LedgerType.joy);
@@ -30,7 +30,7 @@ void main() {
       expect(result.confidence, 1.0);
     });
 
-    test('falls back to default survival for unknown category', () async {
+    test('falls back to default daily for unknown category', () async {
       final result = await service.classify(categoryId: 'cat_unknown_xyz');
 
       expect(result.ledgerType, LedgerType.daily);

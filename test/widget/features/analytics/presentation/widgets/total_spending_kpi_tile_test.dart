@@ -15,8 +15,8 @@ MonthlyReport _monthlyReport({double? expenseChange}) {
     totalExpenses: 41200,
     savings: 0,
     savingsRate: 0,
-    survivalTotal: 30000,
-    soulTotal: 11200,
+    dailyTotal: 30000,
+    joyTotal: 11200,
     categoryBreakdowns: const [],
     dailyExpenses: const [],
     previousMonthComparison: expenseChange == null

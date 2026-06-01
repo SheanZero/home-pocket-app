@@ -25,7 +25,7 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
 import 'package:home_pocket/features/accounting/presentation/screens/voice_input_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/soft_toast.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/transaction_details_form.dart';
-import 'package:home_pocket/features/dual_ledger/presentation/widgets/soul_celebration_overlay.dart';
+import 'package:home_pocket/features/dual_ledger/presentation/widgets/joy_celebration_overlay.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/shared/utils/result.dart';
@@ -187,7 +187,7 @@ class FakeVoiceSatisfactionEstimator implements VoiceSatisfactionEstimator {
 }
 
 /// Fake [CategoryLedgerConfigRepository] used to back a real [CategoryService]
-/// in tests. Returns a survival-ledger config for every known category id so
+/// in tests. Returns a daily-ledger config for every known category id so
 /// `TransactionDetailsFormState._resolveLedgerType` succeeds during voice
 /// batch-fill.
 class FakeCategoryLedgerConfigRepository
@@ -296,7 +296,7 @@ class FakeCategoryRepository implements CategoryRepository {
 // ── D-08 fakes: CreateTransactionUseCase stub ────────────────────────────────
 
 /// Returns a predetermined transaction on execute(). Used for D-08 tests that
-/// need to control whether the save result is soul or survival ledger.
+/// need to control whether the save result is joy or daily ledger.
 class FakeCreateTransactionUseCase implements CreateTransactionUseCase {
   FakeCreateTransactionUseCase(this._transaction);
 
@@ -330,10 +330,10 @@ class _FakeMerchantCategoryPreferenceRepository
   Future<String?> suggestCategoryId(String merchantKey) async => null;
 }
 
-/// A soul-ledger transaction returned by [FakeCreateTransactionUseCase] in
-/// the D-08 soul test.
-final _soulTransaction = Transaction(
-  id: 'tx-soul-d08',
+/// A joy-ledger transaction returned by [FakeCreateTransactionUseCase] in
+/// the D-08 joy test.
+final _joyTransaction = Transaction(
+  id: 'tx-joy-d08',
   bookId: 'book-1',
   deviceId: 'device-1',
   amount: 1000,
@@ -341,16 +341,16 @@ final _soulTransaction = Transaction(
   categoryId: 'dining',
   ledgerType: LedgerType.joy,
   timestamp: DateTime(2026, 5, 25),
-  currentHash: 'hash-soul',
+  currentHash: 'hash-joy',
   createdAt: DateTime(2026, 5, 25),
   joyFullness: 7,
   entrySource: EntrySource.voice,
 );
 
-/// A survival-ledger transaction returned by [FakeCreateTransactionUseCase] in
-/// the D-08 survival test.
-final _survivalTransaction = Transaction(
-  id: 'tx-survival-d08',
+/// A daily-ledger transaction returned by [FakeCreateTransactionUseCase] in
+/// the D-08 daily test.
+final _dailyTransaction = Transaction(
+  id: 'tx-daily-d08',
   bookId: 'book-1',
   deviceId: 'device-1',
   amount: 1840,
@@ -358,7 +358,7 @@ final _survivalTransaction = Transaction(
   categoryId: 'dining',
   ledgerType: LedgerType.daily,
   timestamp: DateTime(2026, 5, 25),
-  currentHash: 'hash-survival',
+  currentHash: 'hash-daily',
   createdAt: DateTime(2026, 5, 25),
   entrySource: EntrySource.voice,
 );
@@ -1294,7 +1294,7 @@ void main() {
 
   // ── D-08 popUntil deferral (Phase 23 WR-04) ──────────────────────────────────
   //
-  // Soul-ledger save: Navigator.popUntil deferred until SoulCelebrationOverlay
+  // Soul-ledger save: Navigator.popUntil deferred until JoyCelebrationOverlay
   // dismisses (animation ≈ 1.5 s). Survival-ledger save: pop fires immediately.
   //
   // Helper: builds a voice screen with a predetermined create-transaction result.
@@ -1410,9 +1410,9 @@ void main() {
     }
 
     testWidgets(
-      'D-08: soul-ledger save defers Navigator.pop until SoulCelebrationOverlay dismisses',
+      'D-08: joy-ledger save defers Navigator.pop until JoyCelebrationOverlay dismisses',
       (tester) async {
-        // The parse result maps to a soul category (dining with soul ledger).
+        // The parse result maps to a joy category (dining with joy ledger).
         const voiceText = 'ラテ 1千';
         final parseResult = VoiceParseResult(
           rawText: voiceText,
@@ -1428,7 +1428,7 @@ void main() {
         );
 
         final subject = buildSubjectForSave(
-          createResult: _soulTransaction,
+          createResult: _joyTransaction,
           voiceText: voiceText,
           parseResult: parseResult,
         );
@@ -1450,11 +1450,11 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 50));
 
-        // D-08: SoulCelebrationOverlay must be in the tree after soul save.
+        // D-08: JoyCelebrationOverlay must be in the tree after joy save.
         expect(
-          find.byType(SoulCelebrationOverlay),
+          find.byType(JoyCelebrationOverlay),
           findsOneWidget,
-          reason: 'D-08: SoulCelebrationOverlay must appear on soul-ledger save',
+          reason: 'D-08: JoyCelebrationOverlay must appear on joy-ledger save',
         );
 
         // Navigation must NOT have fired yet (Navigator still on voice screen).
@@ -1478,7 +1478,7 @@ void main() {
     );
 
     testWidgets(
-      'D-08: survival-ledger save pops immediately, no overlay',
+      'D-08: daily-ledger save pops immediately, no overlay',
       (tester) async {
         const voiceText = '星巴克 1千8百';
         final parseResult = VoiceParseResult(
@@ -1495,7 +1495,7 @@ void main() {
         );
 
         final subject = buildSubjectForSave(
-          createResult: _survivalTransaction,
+          createResult: _dailyTransaction,
           voiceText: voiceText,
           parseResult: parseResult,
         );
@@ -1512,18 +1512,18 @@ void main() {
         await tester.tap(saveButtonFinder);
         await tester.pumpAndSettle();
 
-        // D-08: no SoulCelebrationOverlay for survival save.
+        // D-08: no JoyCelebrationOverlay for daily save.
         expect(
-          find.byType(SoulCelebrationOverlay),
+          find.byType(JoyCelebrationOverlay),
           findsNothing,
-          reason: 'D-08: SoulCelebrationOverlay must NOT appear on survival-ledger save',
+          reason: 'D-08: JoyCelebrationOverlay must NOT appear on daily-ledger save',
         );
 
         // D-08: pop fires immediately — VoiceInputScreen is no longer in tree.
         expect(
           find.byType(VoiceInputScreen),
           findsNothing,
-          reason: 'D-08: Navigator.popUntil must fire immediately on survival-ledger save',
+          reason: 'D-08: Navigator.popUntil must fire immediately on daily-ledger save',
         );
       },
     );

@@ -22,7 +22,7 @@ import '../../../../application/accounting/update_transaction_use_case.dart';
 import '../../../../application/i18n/formatter_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../features/dual_ledger/presentation/widgets/soul_celebration_overlay.dart';
+import '../../../../features/dual_ledger/presentation/widgets/joy_celebration_overlay.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/models/category.dart';
@@ -89,7 +89,7 @@ class TransactionDetailsFormState
   // Drives the celebration Stack overlay; only mutated by .new branch (D-15).
   bool _showCelebration = false;
 
-  /// Phase 23 D-08 / WR-04: completion future for the soul celebration overlay.
+  /// Phase 23 D-08 / WR-04: completion future for the joy celebration overlay.
   /// Initialized just before the overlay mounts; completed in [onDismissed].
   /// [waitForCelebrationDismissed] returns this future so the voice screen can
   /// defer Navigator.popUntil until the animation finishes (RESEARCH §Pattern 3
@@ -264,13 +264,13 @@ class TransactionDetailsFormState
   }
 
   /// Phase 22 D-07 / RESEARCH §Open Q2 — host pushes the voice-estimated
-  /// soul-ledger satisfaction value via this method on batch fill. Preserves
+  /// joy-ledger satisfaction value via this method on batch fill. Preserves
   /// the Phase 11 `VoiceSatisfactionEstimator` → `_parseResult.estimatedSatisfaction`
   /// pipeline through the Phase 22 single-screen rewrite (deletion of
   /// `_navigateToConfirm` in Plan 04 removes the previous handoff via
   /// `initialSatisfaction:`).
   ///
-  /// Soul-ledger only — for survival-ledger categories the satisfaction field
+  /// Joy-ledger only — for daily-ledger categories the satisfaction field
   /// is not rendered; calling this method is harmless (state is still mutated
   /// but never read at submit() time).
   ///
@@ -283,7 +283,7 @@ class TransactionDetailsFormState
   }
 
   /// Phase 23 D-08 / WR-04: host-await accessor used by the voice screen to
-  /// defer Navigator.popUntil until the soul celebration animation finishes
+  /// defer Navigator.popUntil until the joy celebration animation finishes
   /// (RESEARCH §Pattern 3 Option A). Returns immediately if no celebration
   /// is pending.
   Future<void> waitForCelebrationDismissed() {
@@ -411,7 +411,7 @@ class TransactionDetailsFormState
   /// null (user has not selected a category), without calling any use case.
   ///
   /// On success:
-  /// - `.new` mode: may show [SoulCelebrationOverlay] if saved as soul (D-15).
+  /// - `.new` mode: may show [JoyCelebrationOverlay] if saved as joy (D-15).
   /// - `.edit` mode: never shows celebration overlay (D-15 invariant).
   ///
   /// Host is responsible for post-save navigation and snackbars.
@@ -486,7 +486,7 @@ class TransactionDetailsFormState
                     );
               }
 
-              // D-15: celebration only for .new soul saves. .edit branch never
+              // D-15: celebration only for .new joy saves. .edit branch never
               // touches _showCelebration.
               // Phase 23 D-08: initialize the completer before showing the overlay
               // so waitForCelebrationDismissed() returns a pending future.
@@ -737,7 +737,7 @@ class TransactionDetailsFormState
 
             const SizedBox(height: 16),
 
-            // Card B: 用途 (Purpose) header + ledger + (soul) satisfaction.
+            // Card B: 用途 (Purpose) header + ledger + (joy) satisfaction.
             _formCard(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -746,7 +746,7 @@ class TransactionDetailsFormState
                   children: [
                     // 260529-e5f: 用途 title and the ledger pills share one
                     // row (pills on the right) so Card B is shorter and the
-                    // soul satisfaction picker below gets more vertical room.
+                    // joy satisfaction picker below gets more vertical room.
                     // Flexible wraps the title so a long localized label
                     // ellipsises instead of overflowing the row.
                     Row(
@@ -767,8 +767,8 @@ class TransactionDetailsFormState
                           selected: _ledgerType,
                           onChanged: (type) =>
                               setState(() => _ledgerType = type),
-                          survivalLabel: l10n.dailyExpense,
-                          soulLabel: l10n.joyExpense,
+                          dailyLabel: l10n.dailyExpense,
+                          joyLabel: l10n.joyExpense,
                         ),
                       ],
                     ),
@@ -813,11 +813,11 @@ class TransactionDetailsFormState
     return Stack(
       children: [
         formBody,
-        // D-15: soul-celebration overlay — .new mode only; dismissed on
+        // D-15: joy-celebration overlay — .new mode only; dismissed on
         // animation completion. .edit branch never sets _showCelebration.
         if (_showCelebration)
           Positioned.fill(
-            child: SoulCelebrationOverlay(
+            child: JoyCelebrationOverlay(
               onDismissed: () {
                 // Phase 23 D-08: complete the host-await future FIRST so the
                 // voice screen's deferred pop fires before the overlay clears.

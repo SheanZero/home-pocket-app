@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
-import 'package:home_pocket/features/analytics/domain/models/per_category_soul_breakdown.dart';
+import 'package:home_pocket/features/analytics/domain/models/per_category_joy_breakdown.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_ledger_snapshot.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/analytics_card_error_state.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/per_category_breakdown_card.dart';
@@ -16,20 +16,20 @@ const _bookId = 'book_a';
 final _startDate = DateTime(2026, 5, 1);
 final _endDate = DateTime(2026, 6, 1);
 
-PerCategorySoulBreakdownItem _item(String id, double avg, int count) =>
-    PerCategorySoulBreakdownItem(
+PerCategoryJoyBreakdownItem _item(String id, double avg, int count) =>
+    PerCategoryJoyBreakdownItem(
       categoryId: id,
       avgSatisfaction: avg,
       totalCount: count,
     );
 
-PerCategorySoulBreakdown _breakdown({
-  required List<PerCategorySoulBreakdownItem> items,
+PerCategoryJoyBreakdown _breakdown({
+  required List<PerCategoryJoyBreakdownItem> items,
   int otherCount = 0,
   int otherCategoryCount = 0,
 }) {
   final qualifyingTotal = items.fold<int>(0, (s, r) => s + r.totalCount);
-  return PerCategorySoulBreakdown(
+  return PerCategoryJoyBreakdown(
     items: items,
     totalCount: qualifyingTotal + otherCount,
     otherCount: otherCount,
@@ -56,11 +56,11 @@ Widget _buildSubject({
 
 void main() {
   testWidgets('loading state — shows placeholder, no row text', (tester) async {
-    final completer = Completer<MetricResult<PerCategorySoulBreakdown>>();
+    final completer = Completer<MetricResult<PerCategoryJoyBreakdown>>();
     await tester.pumpWidget(
       _buildSubject(
         overrides: [
-          perCategorySoulBreakdownProvider(
+          perCategoryJoyBreakdownProvider(
             bookId: _bookId,
             startDate: _startDate,
             endDate: _endDate,
@@ -79,7 +79,7 @@ void main() {
     expect(find.text('すべて表示'), findsNothing);
     expect(find.text('折りたたむ'), findsNothing);
 
-    completer.complete(const Empty<PerCategorySoulBreakdown>());
+    completer.complete(const Empty<PerCategoryJoyBreakdown>());
     await tester.pumpAndSettle();
   });
 
@@ -88,12 +88,12 @@ void main() {
     await tester.pumpWidget(
       _buildSubject(
         overrides: [
-          perCategorySoulBreakdownProvider(
+          perCategoryJoyBreakdownProvider(
             bookId: _bookId,
             startDate: _startDate,
             endDate: _endDate,
           ).overrideWith(
-            (_) async => const Empty<PerCategorySoulBreakdown>(),
+            (_) async => const Empty<PerCategoryJoyBreakdown>(),
           ),
         ],
       ),
@@ -113,7 +113,7 @@ void main() {
     await tester.pumpWidget(
       _buildSubject(
         overrides: [
-          perCategorySoulBreakdownProvider(
+          perCategoryJoyBreakdownProvider(
             bookId: _bookId,
             startDate: _startDate,
             endDate: _endDate,
@@ -140,7 +140,7 @@ void main() {
     await tester.pumpWidget(
       _buildSubject(
         overrides: [
-          perCategorySoulBreakdownProvider(
+          perCategoryJoyBreakdownProvider(
             bookId: _bookId,
             startDate: _startDate,
             endDate: _endDate,
@@ -174,7 +174,7 @@ void main() {
     await tester.pumpWidget(
       _buildSubject(
         overrides: [
-          perCategorySoulBreakdownProvider(
+          perCategoryJoyBreakdownProvider(
             bookId: _bookId,
             startDate: _startDate,
             endDate: _endDate,
@@ -222,7 +222,7 @@ void main() {
       _buildSubject(
         scope: PerCategoryScope.family,
         overrides: [
-          perCategorySoulBreakdownFamilyProvider(
+          perCategoryJoyBreakdownFamilyProvider(
             startDate: _startDate,
             endDate: _endDate,
           ).overrideWith((_) async => Value(breakdown, 11)),
@@ -242,7 +242,7 @@ void main() {
     await tester.pumpWidget(
       _buildSubject(
         overrides: [
-          perCategorySoulBreakdownProvider(
+          perCategoryJoyBreakdownProvider(
             bookId: _bookId,
             startDate: _startDate,
             endDate: _endDate,
@@ -274,7 +274,7 @@ void main() {
     await tester.pumpWidget(
       _buildSubject(
         overrides: [
-          perCategorySoulBreakdownProvider(
+          perCategoryJoyBreakdownProvider(
             bookId: _bookId,
             startDate: _startDate,
             endDate: _endDate,

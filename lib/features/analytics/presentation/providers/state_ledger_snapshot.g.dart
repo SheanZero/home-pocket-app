@@ -8,38 +8,38 @@ part of 'state_ledger_snapshot.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// HAPPY-V2-01 single-book per-category soul satisfaction breakdown.
+/// HAPPY-V2-01 single-book per-category joy satisfaction breakdown.
 ///
 /// Window-keyed Future provider that delegates to
-/// [GetPerCategorySoulBreakdownUseCase]. The use case owns the D-07 sort and
+/// [GetPerCategoryJoyBreakdownUseCase]. The use case owns the D-07 sort and
 /// D-08 min-N/Other rollup — the provider is plumbing only.
 
-@ProviderFor(perCategorySoulBreakdown)
-final perCategorySoulBreakdownProvider = PerCategorySoulBreakdownFamily._();
+@ProviderFor(perCategoryJoyBreakdown)
+final perCategoryJoyBreakdownProvider = PerCategoryJoyBreakdownFamily._();
 
-/// HAPPY-V2-01 single-book per-category soul satisfaction breakdown.
+/// HAPPY-V2-01 single-book per-category joy satisfaction breakdown.
 ///
 /// Window-keyed Future provider that delegates to
-/// [GetPerCategorySoulBreakdownUseCase]. The use case owns the D-07 sort and
+/// [GetPerCategoryJoyBreakdownUseCase]. The use case owns the D-07 sort and
 /// D-08 min-N/Other rollup — the provider is plumbing only.
 
-final class PerCategorySoulBreakdownProvider
+final class PerCategoryJoyBreakdownProvider
     extends
         $FunctionalProvider<
-          AsyncValue<MetricResult<PerCategorySoulBreakdown>>,
-          MetricResult<PerCategorySoulBreakdown>,
-          FutureOr<MetricResult<PerCategorySoulBreakdown>>
+          AsyncValue<MetricResult<PerCategoryJoyBreakdown>>,
+          MetricResult<PerCategoryJoyBreakdown>,
+          FutureOr<MetricResult<PerCategoryJoyBreakdown>>
         >
     with
-        $FutureModifier<MetricResult<PerCategorySoulBreakdown>>,
-        $FutureProvider<MetricResult<PerCategorySoulBreakdown>> {
-  /// HAPPY-V2-01 single-book per-category soul satisfaction breakdown.
+        $FutureModifier<MetricResult<PerCategoryJoyBreakdown>>,
+        $FutureProvider<MetricResult<PerCategoryJoyBreakdown>> {
+  /// HAPPY-V2-01 single-book per-category joy satisfaction breakdown.
   ///
   /// Window-keyed Future provider that delegates to
-  /// [GetPerCategorySoulBreakdownUseCase]. The use case owns the D-07 sort and
+  /// [GetPerCategoryJoyBreakdownUseCase]. The use case owns the D-07 sort and
   /// D-08 min-N/Other rollup — the provider is plumbing only.
-  PerCategorySoulBreakdownProvider._({
-    required PerCategorySoulBreakdownFamily super.from,
+  PerCategoryJoyBreakdownProvider._({
+    required PerCategoryJoyBreakdownFamily super.from,
     required ({
       String bookId,
       DateTime startDate,
@@ -49,30 +49,30 @@ final class PerCategorySoulBreakdownProvider
     super.argument,
   }) : super(
          retry: null,
-         name: r'perCategorySoulBreakdownProvider',
+         name: r'perCategoryJoyBreakdownProvider',
          isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$perCategorySoulBreakdownHash();
+  String debugGetCreateSourceHash() => _$perCategoryJoyBreakdownHash();
 
   @override
   String toString() {
-    return r'perCategorySoulBreakdownProvider'
+    return r'perCategoryJoyBreakdownProvider'
         ''
         '$argument';
   }
 
   @$internal
   @override
-  $FutureProviderElement<MetricResult<PerCategorySoulBreakdown>> $createElement(
+  $FutureProviderElement<MetricResult<PerCategoryJoyBreakdown>> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<MetricResult<PerCategorySoulBreakdown>> create(Ref ref) {
+  FutureOr<MetricResult<PerCategoryJoyBreakdown>> create(Ref ref) {
     final argument =
         this.argument
             as ({
@@ -81,7 +81,7 @@ final class PerCategorySoulBreakdownProvider
               DateTime endDate,
               JoyMetricVariant joyMetricVariant,
             });
-    return perCategorySoulBreakdown(
+    return perCategoryJoyBreakdown(
       ref,
       bookId: argument.bookId,
       startDate: argument.startDate,
@@ -92,7 +92,7 @@ final class PerCategorySoulBreakdownProvider
 
   @override
   bool operator ==(Object other) {
-    return other is PerCategorySoulBreakdownProvider &&
+    return other is PerCategoryJoyBreakdownProvider &&
         other.argument == argument;
   }
 
@@ -102,19 +102,19 @@ final class PerCategorySoulBreakdownProvider
   }
 }
 
-String _$perCategorySoulBreakdownHash() =>
-    r'4161e0a42a2fcac03e00c5f14fbc86371310d040';
+String _$perCategoryJoyBreakdownHash() =>
+    r'02b126ffc55bea5574c17c779b651f18b79ea137';
 
-/// HAPPY-V2-01 single-book per-category soul satisfaction breakdown.
+/// HAPPY-V2-01 single-book per-category joy satisfaction breakdown.
 ///
 /// Window-keyed Future provider that delegates to
-/// [GetPerCategorySoulBreakdownUseCase]. The use case owns the D-07 sort and
+/// [GetPerCategoryJoyBreakdownUseCase]. The use case owns the D-07 sort and
 /// D-08 min-N/Other rollup — the provider is plumbing only.
 
-final class PerCategorySoulBreakdownFamily extends $Family
+final class PerCategoryJoyBreakdownFamily extends $Family
     with
         $FunctionalFamilyOverride<
-          FutureOr<MetricResult<PerCategorySoulBreakdown>>,
+          FutureOr<MetricResult<PerCategoryJoyBreakdown>>,
           ({
             String bookId,
             DateTime startDate,
@@ -122,27 +122,27 @@ final class PerCategorySoulBreakdownFamily extends $Family
             JoyMetricVariant joyMetricVariant,
           })
         > {
-  PerCategorySoulBreakdownFamily._()
+  PerCategoryJoyBreakdownFamily._()
     : super(
         retry: null,
-        name: r'perCategorySoulBreakdownProvider',
+        name: r'perCategoryJoyBreakdownProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
 
-  /// HAPPY-V2-01 single-book per-category soul satisfaction breakdown.
+  /// HAPPY-V2-01 single-book per-category joy satisfaction breakdown.
   ///
   /// Window-keyed Future provider that delegates to
-  /// [GetPerCategorySoulBreakdownUseCase]. The use case owns the D-07 sort and
+  /// [GetPerCategoryJoyBreakdownUseCase]. The use case owns the D-07 sort and
   /// D-08 min-N/Other rollup — the provider is plumbing only.
 
-  PerCategorySoulBreakdownProvider call({
+  PerCategoryJoyBreakdownProvider call({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
     JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
-  }) => PerCategorySoulBreakdownProvider._(
+  }) => PerCategoryJoyBreakdownProvider._(
     argument: (
       bookId: bookId,
       startDate: startDate,
@@ -153,7 +153,7 @@ final class PerCategorySoulBreakdownFamily extends $Family
   );
 
   @override
-  String toString() => r'perCategorySoulBreakdownProvider';
+  String toString() => r'perCategoryJoyBreakdownProvider';
 }
 
 /// HAPPY-V2-01 D-17, D-20 — family-aggregate variant for group-mode
@@ -164,9 +164,9 @@ final class PerCategorySoulBreakdownFamily extends $Family
 /// the card renders "Family data not available" instead of a misleading
 /// single-book result.
 
-@ProviderFor(perCategorySoulBreakdownFamily)
-final perCategorySoulBreakdownFamilyProvider =
-    PerCategorySoulBreakdownFamilyFamily._();
+@ProviderFor(perCategoryJoyBreakdownFamily)
+final perCategoryJoyBreakdownFamilyProvider =
+    PerCategoryJoyBreakdownFamilyFamily._();
 
 /// HAPPY-V2-01 D-17, D-20 — family-aggregate variant for group-mode
 /// "Family · Top categories" card.
@@ -176,16 +176,16 @@ final perCategorySoulBreakdownFamilyProvider =
 /// the card renders "Family data not available" instead of a misleading
 /// single-book result.
 
-final class PerCategorySoulBreakdownFamilyProvider
+final class PerCategoryJoyBreakdownFamilyProvider
     extends
         $FunctionalProvider<
-          AsyncValue<MetricResult<PerCategorySoulBreakdown>>,
-          MetricResult<PerCategorySoulBreakdown>,
-          FutureOr<MetricResult<PerCategorySoulBreakdown>>
+          AsyncValue<MetricResult<PerCategoryJoyBreakdown>>,
+          MetricResult<PerCategoryJoyBreakdown>,
+          FutureOr<MetricResult<PerCategoryJoyBreakdown>>
         >
     with
-        $FutureModifier<MetricResult<PerCategorySoulBreakdown>>,
-        $FutureProvider<MetricResult<PerCategorySoulBreakdown>> {
+        $FutureModifier<MetricResult<PerCategoryJoyBreakdown>>,
+        $FutureProvider<MetricResult<PerCategoryJoyBreakdown>> {
   /// HAPPY-V2-01 D-17, D-20 — family-aggregate variant for group-mode
   /// "Family · Top categories" card.
   ///
@@ -193,8 +193,8 @@ final class PerCategorySoulBreakdownFamilyProvider
   /// `groupBookIds`): when fewer than 2 shadow books exist, return [Empty] so
   /// the card renders "Family data not available" instead of a misleading
   /// single-book result.
-  PerCategorySoulBreakdownFamilyProvider._({
-    required PerCategorySoulBreakdownFamilyFamily super.from,
+  PerCategoryJoyBreakdownFamilyProvider._({
+    required PerCategoryJoyBreakdownFamilyFamily super.from,
     required ({
       DateTime startDate,
       DateTime endDate,
@@ -203,30 +203,30 @@ final class PerCategorySoulBreakdownFamilyProvider
     super.argument,
   }) : super(
          retry: null,
-         name: r'perCategorySoulBreakdownFamilyProvider',
+         name: r'perCategoryJoyBreakdownFamilyProvider',
          isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$perCategorySoulBreakdownFamilyHash();
+  String debugGetCreateSourceHash() => _$perCategoryJoyBreakdownFamilyHash();
 
   @override
   String toString() {
-    return r'perCategorySoulBreakdownFamilyProvider'
+    return r'perCategoryJoyBreakdownFamilyProvider'
         ''
         '$argument';
   }
 
   @$internal
   @override
-  $FutureProviderElement<MetricResult<PerCategorySoulBreakdown>> $createElement(
+  $FutureProviderElement<MetricResult<PerCategoryJoyBreakdown>> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<MetricResult<PerCategorySoulBreakdown>> create(Ref ref) {
+  FutureOr<MetricResult<PerCategoryJoyBreakdown>> create(Ref ref) {
     final argument =
         this.argument
             as ({
@@ -234,7 +234,7 @@ final class PerCategorySoulBreakdownFamilyProvider
               DateTime endDate,
               JoyMetricVariant joyMetricVariant,
             });
-    return perCategorySoulBreakdownFamily(
+    return perCategoryJoyBreakdownFamily(
       ref,
       startDate: argument.startDate,
       endDate: argument.endDate,
@@ -244,7 +244,7 @@ final class PerCategorySoulBreakdownFamilyProvider
 
   @override
   bool operator ==(Object other) {
-    return other is PerCategorySoulBreakdownFamilyProvider &&
+    return other is PerCategoryJoyBreakdownFamilyProvider &&
         other.argument == argument;
   }
 
@@ -254,8 +254,8 @@ final class PerCategorySoulBreakdownFamilyProvider
   }
 }
 
-String _$perCategorySoulBreakdownFamilyHash() =>
-    r'7925a639e37c6d1ebf203a1cb12b47ab697a9ddf';
+String _$perCategoryJoyBreakdownFamilyHash() =>
+    r'6de555fe103df3430d8e5a54aa1f3732463d09ad';
 
 /// HAPPY-V2-01 D-17, D-20 — family-aggregate variant for group-mode
 /// "Family · Top categories" card.
@@ -265,20 +265,20 @@ String _$perCategorySoulBreakdownFamilyHash() =>
 /// the card renders "Family data not available" instead of a misleading
 /// single-book result.
 
-final class PerCategorySoulBreakdownFamilyFamily extends $Family
+final class PerCategoryJoyBreakdownFamilyFamily extends $Family
     with
         $FunctionalFamilyOverride<
-          FutureOr<MetricResult<PerCategorySoulBreakdown>>,
+          FutureOr<MetricResult<PerCategoryJoyBreakdown>>,
           ({
             DateTime startDate,
             DateTime endDate,
             JoyMetricVariant joyMetricVariant,
           })
         > {
-  PerCategorySoulBreakdownFamilyFamily._()
+  PerCategoryJoyBreakdownFamilyFamily._()
     : super(
         retry: null,
-        name: r'perCategorySoulBreakdownFamilyProvider',
+        name: r'perCategoryJoyBreakdownFamilyProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
@@ -292,11 +292,11 @@ final class PerCategorySoulBreakdownFamilyFamily extends $Family
   /// the card renders "Family data not available" instead of a misleading
   /// single-book result.
 
-  PerCategorySoulBreakdownFamilyProvider call({
+  PerCategoryJoyBreakdownFamilyProvider call({
     required DateTime startDate,
     required DateTime endDate,
     JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
-  }) => PerCategorySoulBreakdownFamilyProvider._(
+  }) => PerCategoryJoyBreakdownFamilyProvider._(
     argument: (
       startDate: startDate,
       endDate: endDate,
@@ -306,41 +306,41 @@ final class PerCategorySoulBreakdownFamilyFamily extends $Family
   );
 
   @override
-  String toString() => r'perCategorySoulBreakdownFamilyProvider';
+  String toString() => r'perCategoryJoyBreakdownFamilyProvider';
 }
 
-/// STATSUI-V2-01 single-book Soul-vs-Survival engagement snapshot.
+/// STATSUI-V2-01 single-book Daily-vs-Joy engagement snapshot.
 ///
 /// Window-keyed Future provider that delegates to
-/// [GetSoulVsSurvivalSnapshotUseCase]. The use case enforces the D-05
+/// [GetDailyVsJoySnapshotUseCase]. The use case enforces the D-05
 /// either-ledger-zero gate (any side missing/zero → [Empty]).
 
-@ProviderFor(soulVsSurvivalSnapshot)
-final soulVsSurvivalSnapshotProvider = SoulVsSurvivalSnapshotFamily._();
+@ProviderFor(dailyVsJoySnapshot)
+final dailyVsJoySnapshotProvider = DailyVsJoySnapshotFamily._();
 
-/// STATSUI-V2-01 single-book Soul-vs-Survival engagement snapshot.
+/// STATSUI-V2-01 single-book Daily-vs-Joy engagement snapshot.
 ///
 /// Window-keyed Future provider that delegates to
-/// [GetSoulVsSurvivalSnapshotUseCase]. The use case enforces the D-05
+/// [GetDailyVsJoySnapshotUseCase]. The use case enforces the D-05
 /// either-ledger-zero gate (any side missing/zero → [Empty]).
 
-final class SoulVsSurvivalSnapshotProvider
+final class DailyVsJoySnapshotProvider
     extends
         $FunctionalProvider<
-          AsyncValue<MetricResult<SoulVsSurvivalSnapshot>>,
-          MetricResult<SoulVsSurvivalSnapshot>,
-          FutureOr<MetricResult<SoulVsSurvivalSnapshot>>
+          AsyncValue<MetricResult<DailyVsJoySnapshot>>,
+          MetricResult<DailyVsJoySnapshot>,
+          FutureOr<MetricResult<DailyVsJoySnapshot>>
         >
     with
-        $FutureModifier<MetricResult<SoulVsSurvivalSnapshot>>,
-        $FutureProvider<MetricResult<SoulVsSurvivalSnapshot>> {
-  /// STATSUI-V2-01 single-book Soul-vs-Survival engagement snapshot.
+        $FutureModifier<MetricResult<DailyVsJoySnapshot>>,
+        $FutureProvider<MetricResult<DailyVsJoySnapshot>> {
+  /// STATSUI-V2-01 single-book Daily-vs-Joy engagement snapshot.
   ///
   /// Window-keyed Future provider that delegates to
-  /// [GetSoulVsSurvivalSnapshotUseCase]. The use case enforces the D-05
+  /// [GetDailyVsJoySnapshotUseCase]. The use case enforces the D-05
   /// either-ledger-zero gate (any side missing/zero → [Empty]).
-  SoulVsSurvivalSnapshotProvider._({
-    required SoulVsSurvivalSnapshotFamily super.from,
+  DailyVsJoySnapshotProvider._({
+    required DailyVsJoySnapshotFamily super.from,
     required ({
       String bookId,
       DateTime startDate,
@@ -350,30 +350,30 @@ final class SoulVsSurvivalSnapshotProvider
     super.argument,
   }) : super(
          retry: null,
-         name: r'soulVsSurvivalSnapshotProvider',
+         name: r'dailyVsJoySnapshotProvider',
          isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$soulVsSurvivalSnapshotHash();
+  String debugGetCreateSourceHash() => _$dailyVsJoySnapshotHash();
 
   @override
   String toString() {
-    return r'soulVsSurvivalSnapshotProvider'
+    return r'dailyVsJoySnapshotProvider'
         ''
         '$argument';
   }
 
   @$internal
   @override
-  $FutureProviderElement<MetricResult<SoulVsSurvivalSnapshot>> $createElement(
+  $FutureProviderElement<MetricResult<DailyVsJoySnapshot>> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<MetricResult<SoulVsSurvivalSnapshot>> create(Ref ref) {
+  FutureOr<MetricResult<DailyVsJoySnapshot>> create(Ref ref) {
     final argument =
         this.argument
             as ({
@@ -382,7 +382,7 @@ final class SoulVsSurvivalSnapshotProvider
               DateTime endDate,
               JoyMetricVariant joyMetricVariant,
             });
-    return soulVsSurvivalSnapshot(
+    return dailyVsJoySnapshot(
       ref,
       bookId: argument.bookId,
       startDate: argument.startDate,
@@ -393,8 +393,7 @@ final class SoulVsSurvivalSnapshotProvider
 
   @override
   bool operator ==(Object other) {
-    return other is SoulVsSurvivalSnapshotProvider &&
-        other.argument == argument;
+    return other is DailyVsJoySnapshotProvider && other.argument == argument;
   }
 
   @override
@@ -403,19 +402,19 @@ final class SoulVsSurvivalSnapshotProvider
   }
 }
 
-String _$soulVsSurvivalSnapshotHash() =>
-    r'25ba40374bf172a8f009da2555cc76699c27edd3';
+String _$dailyVsJoySnapshotHash() =>
+    r'29d41e5fb28976b2831021ae1acd88d8abf858bb';
 
-/// STATSUI-V2-01 single-book Soul-vs-Survival engagement snapshot.
+/// STATSUI-V2-01 single-book Daily-vs-Joy engagement snapshot.
 ///
 /// Window-keyed Future provider that delegates to
-/// [GetSoulVsSurvivalSnapshotUseCase]. The use case enforces the D-05
+/// [GetDailyVsJoySnapshotUseCase]. The use case enforces the D-05
 /// either-ledger-zero gate (any side missing/zero → [Empty]).
 
-final class SoulVsSurvivalSnapshotFamily extends $Family
+final class DailyVsJoySnapshotFamily extends $Family
     with
         $FunctionalFamilyOverride<
-          FutureOr<MetricResult<SoulVsSurvivalSnapshot>>,
+          FutureOr<MetricResult<DailyVsJoySnapshot>>,
           ({
             String bookId,
             DateTime startDate,
@@ -423,27 +422,27 @@ final class SoulVsSurvivalSnapshotFamily extends $Family
             JoyMetricVariant joyMetricVariant,
           })
         > {
-  SoulVsSurvivalSnapshotFamily._()
+  DailyVsJoySnapshotFamily._()
     : super(
         retry: null,
-        name: r'soulVsSurvivalSnapshotProvider',
+        name: r'dailyVsJoySnapshotProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
 
-  /// STATSUI-V2-01 single-book Soul-vs-Survival engagement snapshot.
+  /// STATSUI-V2-01 single-book Daily-vs-Joy engagement snapshot.
   ///
   /// Window-keyed Future provider that delegates to
-  /// [GetSoulVsSurvivalSnapshotUseCase]. The use case enforces the D-05
+  /// [GetDailyVsJoySnapshotUseCase]. The use case enforces the D-05
   /// either-ledger-zero gate (any side missing/zero → [Empty]).
 
-  SoulVsSurvivalSnapshotProvider call({
+  DailyVsJoySnapshotProvider call({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
     JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
-  }) => SoulVsSurvivalSnapshotProvider._(
+  }) => DailyVsJoySnapshotProvider._(
     argument: (
       bookId: bookId,
       startDate: startDate,
@@ -454,45 +453,44 @@ final class SoulVsSurvivalSnapshotFamily extends $Family
   );
 
   @override
-  String toString() => r'soulVsSurvivalSnapshotProvider';
+  String toString() => r'dailyVsJoySnapshotProvider';
 }
 
-/// STATSUI-V2-01 D-18, D-20 — family-aggregate Soul-vs-Survival snapshot.
+/// STATSUI-V2-01 D-18, D-20 — family-aggregate Daily-vs-Joy snapshot.
 ///
 /// D-20 gate (defense in depth — the use case also short-circuits on empty
 /// `groupBookIds`): when fewer than 2 shadow books exist, return [Empty] so
 /// the Family compare card renders the empty state rather than a half-
 /// populated family aggregate.
 
-@ProviderFor(soulVsSurvivalSnapshotFamily)
-final soulVsSurvivalSnapshotFamilyProvider =
-    SoulVsSurvivalSnapshotFamilyFamily._();
+@ProviderFor(dailyVsJoySnapshotFamily)
+final dailyVsJoySnapshotFamilyProvider = DailyVsJoySnapshotFamilyFamily._();
 
-/// STATSUI-V2-01 D-18, D-20 — family-aggregate Soul-vs-Survival snapshot.
+/// STATSUI-V2-01 D-18, D-20 — family-aggregate Daily-vs-Joy snapshot.
 ///
 /// D-20 gate (defense in depth — the use case also short-circuits on empty
 /// `groupBookIds`): when fewer than 2 shadow books exist, return [Empty] so
 /// the Family compare card renders the empty state rather than a half-
 /// populated family aggregate.
 
-final class SoulVsSurvivalSnapshotFamilyProvider
+final class DailyVsJoySnapshotFamilyProvider
     extends
         $FunctionalProvider<
-          AsyncValue<MetricResult<SoulVsSurvivalSnapshot>>,
-          MetricResult<SoulVsSurvivalSnapshot>,
-          FutureOr<MetricResult<SoulVsSurvivalSnapshot>>
+          AsyncValue<MetricResult<DailyVsJoySnapshot>>,
+          MetricResult<DailyVsJoySnapshot>,
+          FutureOr<MetricResult<DailyVsJoySnapshot>>
         >
     with
-        $FutureModifier<MetricResult<SoulVsSurvivalSnapshot>>,
-        $FutureProvider<MetricResult<SoulVsSurvivalSnapshot>> {
-  /// STATSUI-V2-01 D-18, D-20 — family-aggregate Soul-vs-Survival snapshot.
+        $FutureModifier<MetricResult<DailyVsJoySnapshot>>,
+        $FutureProvider<MetricResult<DailyVsJoySnapshot>> {
+  /// STATSUI-V2-01 D-18, D-20 — family-aggregate Daily-vs-Joy snapshot.
   ///
   /// D-20 gate (defense in depth — the use case also short-circuits on empty
   /// `groupBookIds`): when fewer than 2 shadow books exist, return [Empty] so
   /// the Family compare card renders the empty state rather than a half-
   /// populated family aggregate.
-  SoulVsSurvivalSnapshotFamilyProvider._({
-    required SoulVsSurvivalSnapshotFamilyFamily super.from,
+  DailyVsJoySnapshotFamilyProvider._({
+    required DailyVsJoySnapshotFamilyFamily super.from,
     required ({
       DateTime startDate,
       DateTime endDate,
@@ -501,30 +499,30 @@ final class SoulVsSurvivalSnapshotFamilyProvider
     super.argument,
   }) : super(
          retry: null,
-         name: r'soulVsSurvivalSnapshotFamilyProvider',
+         name: r'dailyVsJoySnapshotFamilyProvider',
          isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$soulVsSurvivalSnapshotFamilyHash();
+  String debugGetCreateSourceHash() => _$dailyVsJoySnapshotFamilyHash();
 
   @override
   String toString() {
-    return r'soulVsSurvivalSnapshotFamilyProvider'
+    return r'dailyVsJoySnapshotFamilyProvider'
         ''
         '$argument';
   }
 
   @$internal
   @override
-  $FutureProviderElement<MetricResult<SoulVsSurvivalSnapshot>> $createElement(
+  $FutureProviderElement<MetricResult<DailyVsJoySnapshot>> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<MetricResult<SoulVsSurvivalSnapshot>> create(Ref ref) {
+  FutureOr<MetricResult<DailyVsJoySnapshot>> create(Ref ref) {
     final argument =
         this.argument
             as ({
@@ -532,7 +530,7 @@ final class SoulVsSurvivalSnapshotFamilyProvider
               DateTime endDate,
               JoyMetricVariant joyMetricVariant,
             });
-    return soulVsSurvivalSnapshotFamily(
+    return dailyVsJoySnapshotFamily(
       ref,
       startDate: argument.startDate,
       endDate: argument.endDate,
@@ -542,7 +540,7 @@ final class SoulVsSurvivalSnapshotFamilyProvider
 
   @override
   bool operator ==(Object other) {
-    return other is SoulVsSurvivalSnapshotFamilyProvider &&
+    return other is DailyVsJoySnapshotFamilyProvider &&
         other.argument == argument;
   }
 
@@ -552,47 +550,47 @@ final class SoulVsSurvivalSnapshotFamilyProvider
   }
 }
 
-String _$soulVsSurvivalSnapshotFamilyHash() =>
-    r'0a14bb9c18a5d3c4fd3784bf9655c3ca18fb403b';
+String _$dailyVsJoySnapshotFamilyHash() =>
+    r'296fe2d7b25e9f41e48161150eaebdb1ba390887';
 
-/// STATSUI-V2-01 D-18, D-20 — family-aggregate Soul-vs-Survival snapshot.
+/// STATSUI-V2-01 D-18, D-20 — family-aggregate Daily-vs-Joy snapshot.
 ///
 /// D-20 gate (defense in depth — the use case also short-circuits on empty
 /// `groupBookIds`): when fewer than 2 shadow books exist, return [Empty] so
 /// the Family compare card renders the empty state rather than a half-
 /// populated family aggregate.
 
-final class SoulVsSurvivalSnapshotFamilyFamily extends $Family
+final class DailyVsJoySnapshotFamilyFamily extends $Family
     with
         $FunctionalFamilyOverride<
-          FutureOr<MetricResult<SoulVsSurvivalSnapshot>>,
+          FutureOr<MetricResult<DailyVsJoySnapshot>>,
           ({
             DateTime startDate,
             DateTime endDate,
             JoyMetricVariant joyMetricVariant,
           })
         > {
-  SoulVsSurvivalSnapshotFamilyFamily._()
+  DailyVsJoySnapshotFamilyFamily._()
     : super(
         retry: null,
-        name: r'soulVsSurvivalSnapshotFamilyProvider',
+        name: r'dailyVsJoySnapshotFamilyProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
 
-  /// STATSUI-V2-01 D-18, D-20 — family-aggregate Soul-vs-Survival snapshot.
+  /// STATSUI-V2-01 D-18, D-20 — family-aggregate Daily-vs-Joy snapshot.
   ///
   /// D-20 gate (defense in depth — the use case also short-circuits on empty
   /// `groupBookIds`): when fewer than 2 shadow books exist, return [Empty] so
   /// the Family compare card renders the empty state rather than a half-
   /// populated family aggregate.
 
-  SoulVsSurvivalSnapshotFamilyProvider call({
+  DailyVsJoySnapshotFamilyProvider call({
     required DateTime startDate,
     required DateTime endDate,
     JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
-  }) => SoulVsSurvivalSnapshotFamilyProvider._(
+  }) => DailyVsJoySnapshotFamilyProvider._(
     argument: (
       startDate: startDate,
       endDate: endDate,
@@ -602,5 +600,5 @@ final class SoulVsSurvivalSnapshotFamilyFamily extends $Family
   );
 
   @override
-  String toString() => r'soulVsSurvivalSnapshotFamilyProvider';
+  String toString() => r'dailyVsJoySnapshotFamilyProvider';
 }

@@ -61,7 +61,7 @@ Future<MetricResult<BestJoyMomentRow>> bestJoyMoment(
 
 /// JOYMIG-02 / D-04 — recommended monthlyJoyTarget from past 3 months.
 ///
-/// Returns Empty when fewer than 3 past months have soul transaction data.
+/// Returns Empty when fewer than 3 past months have joy transaction data.
 @riverpod
 Future<MetricResult<int>> monthlyJoyTargetRecommendation(
   Ref ref, {

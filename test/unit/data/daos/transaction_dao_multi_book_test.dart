@@ -24,7 +24,7 @@ void main() {
     required String bookId,
     required int amount,
     required DateTime timestamp,
-    String ledgerType = 'survival',
+    String ledgerType = 'daily',
     String categoryId = 'cat_misc',
     String currentHash = 'hash_default',
     String? prevHash,
@@ -90,30 +90,30 @@ void main() {
     test('ledgerType filter returns only matching rows', () async {
       final ts = DateTime(2026, 3, 1);
       await insertTx(
-        id: 'tx_survival',
+        id: 'tx_daily',
         bookId: 'book_001',
         amount: 100,
         timestamp: ts,
-        ledgerType: 'survival',
+        ledgerType: 'daily',
       );
       await insertTx(
-        id: 'tx_soul',
+        id: 'tx_joy',
         bookId: 'book_001',
         amount: 200,
         timestamp: ts,
-        ledgerType: 'soul',
+        ledgerType: 'joy',
       );
 
       final results = await dao.findByBookIds(
         ['book_001'],
         startDate: start,
         endDate: end,
-        ledgerType: 'survival',
+        ledgerType: 'daily',
       );
 
       final ids = results.map((r) => r.id).toList();
-      expect(ids, contains('tx_survival'));
-      expect(ids, isNot(contains('tx_soul')));
+      expect(ids, contains('tx_daily'));
+      expect(ids, isNot(contains('tx_joy')));
     });
 
     test('categoryId filter returns only matching rows', () async {
@@ -278,7 +278,7 @@ void main() {
         amount: 1500,
         type: 'expense',
         categoryId: 'cat_misc',
-        ledgerType: 'survival',
+        ledgerType: 'daily',
         timestamp: ts,
         currentHash: 'hash_updated',
         createdAt: ts,

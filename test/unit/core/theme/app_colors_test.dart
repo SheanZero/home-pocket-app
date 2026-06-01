@@ -9,11 +9,11 @@ void main() {
       expect(AppColors.accentPrimary, const Color(0xFFE85A4F));
     });
 
-    test('survival is #5A9CC8', () {
+    test('daily is #5A9CC8', () {
       expect(AppColors.daily, const Color(0xFF5A9CC8));
     });
 
-    test('soul is #47B88A', () {
+    test('joy is #47B88A', () {
       expect(AppColors.joy, const Color(0xFF47B88A));
     });
 

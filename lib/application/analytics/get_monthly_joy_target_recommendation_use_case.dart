@@ -38,7 +38,7 @@ class GetMonthlyJoyTargetRecommendationUseCase {
 
     final results = await Future.wait(
       windows.map(
-        (window) => _repo.getSoulRowsForJoyContribution(
+        (window) => _repo.getJoyRowsForJoyContribution(
           bookId: bookId,
           startDate: window.start,
           endDate: window.end,
@@ -61,7 +61,7 @@ class GetMonthlyJoyTargetRecommendationUseCase {
     return Value(median.ceil(), 3);
   }
 
-  double _foldContribution(List<SoulRowSample> rows, double base) {
+  double _foldContribution(List<JoyRowSample> rows, double base) {
     if (rows.isEmpty) return 0;
 
     var sum = 0.0;

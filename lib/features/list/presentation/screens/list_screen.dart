@@ -276,7 +276,7 @@ class ListScreen extends ConsumerWidget {
     // L1 icon resolved from category ID
     final l1Icon = _resolveL1IconForCategory(transaction.categoryId);
 
-    // Satisfaction icon: soul transactions only (ADR-014 mapping from home_screen.dart)
+    // Satisfaction icon: joy transactions only (ADR-014 mapping from home_screen.dart)
     final satisfactionIcon = _satisfactionIcon(transaction);
 
     // Invalidate list + calendar totals together. Both the edit-save and the
@@ -353,9 +353,9 @@ class ListScreen extends ConsumerWidget {
     return tile;
   }
 
-  /// ADR-014 satisfaction icon mapping for soul-ledger transactions.
+  /// ADR-014 satisfaction icon mapping for joy-ledger transactions.
   ///
-  /// Returns null for survival transactions (ledgerType != soul).
+  /// Returns null for daily transactions (ledgerType != joy).
   /// Mirrors the mapping in [HomeScreen._satisfactionIcon].
   static IconData? _satisfactionIcon(Transaction tx) {
     if (tx.ledgerType != LedgerType.joy) return null;

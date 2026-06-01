@@ -57,7 +57,7 @@ void main() {
       () => mockDeviceIdentityRepo.getDeviceId(),
     ).thenAnswer((_) async => 'device_test_001');
 
-    // Default classification stub: survival
+    // Default classification stub: daily
     when(
       () => mockClassificationService.classify(
         categoryId: any(named: 'categoryId'),
@@ -281,7 +281,7 @@ void main() {
           timestamp: any(named: 'timestamp'),
           previousHash: any(named: 'previousHash'),
         ),
-      ).thenReturn('hash_soul');
+      ).thenReturn('hash_joy');
       when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
 
       final result = await useCase.execute(
@@ -299,7 +299,7 @@ void main() {
       expect(result.data!.ledgerType, LedgerType.joy);
     });
 
-    test('uses default soul satisfaction 2 for soul transactions', () async {
+    test('uses default joy satisfaction 2 for joy transactions', () async {
       when(
         () => mockClassificationService.classify(
           categoryId: any(named: 'categoryId'),
@@ -324,7 +324,7 @@ void main() {
           timestamp: any(named: 'timestamp'),
           previousHash: any(named: 'previousHash'),
         ),
-      ).thenReturn('hash_soul_default');
+      ).thenReturn('hash_joy_default');
       when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
 
       final result = await useCase.execute(

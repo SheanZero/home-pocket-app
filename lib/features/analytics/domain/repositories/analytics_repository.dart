@@ -2,7 +2,7 @@ import '../../../accounting/domain/models/entry_source.dart';
 import '../models/analytics_aggregate.dart';
 import '../models/best_joy_moment_row.dart';
 import '../models/ledger_snapshot.dart';
-import '../models/per_category_soul_breakdown.dart';
+import '../models/per_category_joy_breakdown.dart';
 
 /// Abstract repository for analytics aggregate queries.
 abstract class AnalyticsRepository {
@@ -38,15 +38,15 @@ abstract class AnalyticsRepository {
     EntrySource? entrySourceFilter,
   });
 
-  /// HAPPY-01 / D-03 — average soul satisfaction + sample count over MTD.
-  Future<SoulSatisfactionOverview> getSoulSatisfactionOverview({
+  /// HAPPY-01 / D-03 — average joy fullness + sample count over MTD.
+  Future<JoyFullnessOverview> getJoyFullnessOverview({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
     EntrySource? entrySourceFilter,
   });
 
-  /// HAPPY-03 / D-05 — distribution of soul satisfaction scores 1-10.
+  /// HAPPY-03 / D-05 — distribution of joy fullness scores 1-10.
   Future<List<SatisfactionScoreBucket>> getSatisfactionDistribution({
     required String bookId,
     required DateTime startDate,
@@ -55,14 +55,14 @@ abstract class AnalyticsRepository {
   });
 
   /// ADR-016 §2 — row-wise tuples for Dart-layer Joy contribution fold.
-  Future<List<SoulRowSample>> getSoulRowsForJoyContribution({
+  Future<List<JoyRowSample>> getJoyRowsForJoyContribution({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
     EntrySource? entrySourceFilter,
   });
 
-  /// HAPPY-04 / D-06 — argmax soul tx by sat DESC, amount DESC, timestamp DESC.
+  /// HAPPY-04 / D-06 — argmax joy tx by fullness DESC, amount DESC, timestamp DESC.
   Future<BestJoyMomentRow?> getBestJoyMoment({
     required String bookId,
     required DateTime startDate,
@@ -86,14 +86,14 @@ abstract class AnalyticsRepository {
     EntrySource? entrySourceFilter,
   });
 
-  /// HAPPY-V2-01 / D-07 — per-category soul satisfaction aggregate (returns
+  /// HAPPY-V2-01 / D-07 — per-category joy satisfaction aggregate (returns
   /// ALL categories as domain items; use case applies min-N=3 + Other rollup).
-  /// Returns domain [PerCategorySoulBreakdownItem]; the data-layer transient
+  /// Returns domain [PerCategoryJoyBreakdownItem]; the data-layer transient
   /// row tuple (a `(categoryId, avgSatisfaction, totalCount)` triple defined
   /// inside the analytics DAO) is converted at the impl boundary in the
   /// concrete repository (CLAUDE.md Pitfall #2 — Domain MUST NOT import the
   /// DAO row type).
-  Future<List<PerCategorySoulBreakdownItem>> getPerCategorySoulBreakdown({
+  Future<List<PerCategoryJoyBreakdownItem>> getPerCategoryJoyBreakdown({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
@@ -102,9 +102,9 @@ abstract class AnalyticsRepository {
 
   /// HAPPY-V2-01 / D-16, D-17 — family-aggregate variant using
   /// `book_id IN (...)` (NEVER per-member group per ADR-012 §6). Returns
-  /// domain [PerCategorySoulBreakdownItem]s pooled across all member books.
-  Future<List<PerCategorySoulBreakdownItem>>
-  getPerCategorySoulBreakdownAcrossBooks({
+  /// domain [PerCategoryJoyBreakdownItem]s pooled across all member books.
+  Future<List<PerCategoryJoyBreakdownItem>>
+  getPerCategoryJoyBreakdownAcrossBooks({
     required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,

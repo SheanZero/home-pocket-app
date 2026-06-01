@@ -49,7 +49,7 @@ class LedgerTotalResult {
   });
 }
 
-/// Aggregate result for soul satisfaction overview.
+/// Aggregate result for joy fullness overview.
 class SatisfactionOverviewResult {
   final double avgSatisfaction;
   final int count;
@@ -71,21 +71,21 @@ class SatisfactionDistributionResult {
   });
 }
 
-/// DAO-only transient row tuple for `getPerCategorySoulBreakdown*` queries.
+/// DAO-only transient row tuple for `getPerCategoryJoyBreakdown*` queries.
 ///
 /// Repository impl in `lib/data/repositories/analytics_repository_impl.dart`
-/// converts each row to the domain `PerCategorySoulBreakdownItem`
-/// (see `lib/features/analytics/domain/models/per_category_soul_breakdown.dart`).
+/// converts each row to the domain `PerCategoryJoyBreakdownItem`
+/// (see `lib/features/analytics/domain/models/per_category_joy_breakdown.dart`).
 /// The `Raw` suffix marks this as a transient data-layer row — DO NOT export
 /// across the data → domain boundary. The domain interface MUST return
-/// `List<PerCategorySoulBreakdownItem>`, not `List<PerCategorySoulRowRaw>`
+/// `List<PerCategoryJoyBreakdownItem>`, not `List<PerCategoryJoyRowRaw>`
 /// (CLAUDE.md Pitfall #2 — Domain → Data forbidden, enforced by `import_guard`).
-class PerCategorySoulRowRaw {
+class PerCategoryJoyRowRaw {
   final String categoryId;
   final double avgSatisfaction;
   final int totalCount;
 
-  const PerCategorySoulRowRaw({
+  const PerCategoryJoyRowRaw({
     required this.categoryId,
     required this.avgSatisfaction,
     required this.totalCount,
@@ -102,16 +102,16 @@ class AnalyticsDao {
 
   /// D-01 / HAPPY-05: ledger + lifecycle filter ONLY. NO satisfaction predicate.
   /// Single source of truth: every joy aggregator MUST compose via interpolation.
-  static const String _soulExpenseFilter =
+  static const String _joyExpenseFilter =
       "ledger_type = 'joy' AND type = 'expense' AND is_deleted = 0";
 
-  /// Mirror of [_soulExpenseFilter] for daily ledger.
+  /// Mirror of [_joyExpenseFilter] for daily ledger.
   ///
   /// Defined as a constant to prevent predicate drift (per RESEARCH
   /// §Established Patterns). NEVER aggregate `joy_fullness` over rows
   /// matching this filter — `transactions.joy_fullness` defaults to `2`
   /// for daily rows (ADR-014 D-10 / Phase 16 D-04 type-system gate).
-  static const String _survivalExpenseFilter =
+  static const String _dailyExpenseFilter =
       "ledger_type = 'daily' AND type = 'expense' AND is_deleted = 0";
 
   /// Earliest non-deleted transaction timestamp for a book.
@@ -300,8 +300,8 @@ class AnalyticsDao {
         .toList();
   }
 
-  /// Get average satisfaction and count for soul transactions in a date range.
-  Future<SatisfactionOverviewResult> getSoulSatisfactionOverview({
+  /// Get average satisfaction and count for joy transactions in a date range.
+  Future<SatisfactionOverviewResult> getJoyFullnessOverview({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
@@ -314,7 +314,7 @@ class AnalyticsDao {
         .customSelect(
           'SELECT AVG(joy_fullness) as avg_sat, COUNT(*) as cnt '
           'FROM transactions '
-          'WHERE book_id = ? AND $_soulExpenseFilter '
+          'WHERE book_id = ? AND $_joyExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ?'
           '$entrySourceClause',
           variables: [
@@ -338,7 +338,7 @@ class AnalyticsDao {
     );
   }
 
-  /// Get satisfaction score distribution for soul transactions.
+  /// Get satisfaction score distribution for joy transactions.
   Future<List<SatisfactionDistributionResult>> getSatisfactionDistribution({
     required String bookId,
     required DateTime startDate,
@@ -352,7 +352,7 @@ class AnalyticsDao {
         .customSelect(
           'SELECT joy_fullness as score, COUNT(*) as cnt '
           'FROM transactions '
-          'WHERE book_id = ? AND $_soulExpenseFilter '
+          'WHERE book_id = ? AND $_joyExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ?'
           '$entrySourceClause '
           'GROUP BY joy_fullness '
@@ -419,7 +419,7 @@ class AnalyticsDao {
   }
 
   /// HAPPY-04 / D-06: pure sat-sort argmax, amount DESC tiebreak, no JPY 500 floor.
-  /// Returns null when no soul tx exists in the window.
+  /// Returns null when no joy tx exists in the window.
   Future<BestJoyMomentRow?> getBestJoyMoment({
     required String bookId,
     required DateTime startDate,
@@ -433,7 +433,7 @@ class AnalyticsDao {
         .customSelect(
           'SELECT id, amount, joy_fullness, category_id, timestamp '
           'FROM transactions '
-          'WHERE book_id = ? AND $_soulExpenseFilter '
+          'WHERE book_id = ? AND $_joyExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ?'
           '$entrySourceClause '
           'ORDER BY joy_fullness DESC, amount DESC, timestamp DESC '
@@ -462,8 +462,8 @@ class AnalyticsDao {
 
   /// ADR-016 §2: row-wise (amount, sat) pull for Dart-layer Joy contribution.
   /// Performance trade-off accepted vs SUM/GROUP BY (D-04, ADR-013); typical
-  /// monthly soul tx count 10-100 per book: negligible row volume.
-  Future<List<SoulRowSample>> getSoulRowsForJoyContribution({
+  /// monthly joy tx count 10-100 per book: negligible row volume.
+  Future<List<JoyRowSample>> getJoyRowsForJoyContribution({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
@@ -476,7 +476,7 @@ class AnalyticsDao {
         .customSelect(
           'SELECT amount, joy_fullness '
           'FROM transactions '
-          'WHERE book_id = ? AND $_soulExpenseFilter '
+          'WHERE book_id = ? AND $_joyExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ?'
           '$entrySourceClause',
           variables: [
@@ -491,7 +491,7 @@ class AnalyticsDao {
 
     return results
         .map(
-          (row) => SoulRowSample(
+          (row) => JoyRowSample(
             amount: row.read<int>('amount'),
             joyFullness: row.read<int>('joy_fullness'),
           ),
@@ -518,7 +518,7 @@ class AnalyticsDao {
         .customSelect(
           'SELECT category_id, AVG(joy_fullness) as avg_sat, COUNT(*) as cnt '
           'FROM transactions '
-          'WHERE book_id IN ($placeholders) AND $_soulExpenseFilter '
+          'WHERE book_id IN ($placeholders) AND $_joyExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ?'
           '$entrySourceClause '
           'GROUP BY category_id '
@@ -545,7 +545,7 @@ class AnalyticsDao {
     );
   }
 
-  /// HAPPY-V2-01 / D-07: per-category soul satisfaction aggregate for one book.
+  /// HAPPY-V2-01 / D-07: per-category joy satisfaction aggregate for one book.
   ///
   /// Returns ALL categories (NO HAVING) sorted by `avg_sat DESC, cnt DESC,
   /// category_id ASC`. Low-N rows (count < 3) are intentionally included so
@@ -555,10 +555,10 @@ class AnalyticsDao {
   /// Mirrors [getSharedJoyCategoryInsight] (analytics_dao.dart line 410-444)
   /// minus `HAVING COUNT(*) >= 3` and `LIMIT 1`.
   ///
-  /// Returns the DAO-only row type [PerCategorySoulRowRaw]; the repository
-  /// impl converts to the domain `PerCategorySoulBreakdownItem` at the layer
+  /// Returns the DAO-only row type [PerCategoryJoyRowRaw]; the repository
+  /// impl converts to the domain `PerCategoryJoyBreakdownItem` at the layer
   /// boundary (CLAUDE.md Pitfall #2).
-  Future<List<PerCategorySoulRowRaw>> getPerCategorySoulBreakdown({
+  Future<List<PerCategoryJoyRowRaw>> getPerCategoryJoyBreakdown({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
@@ -571,7 +571,7 @@ class AnalyticsDao {
         .customSelect(
           'SELECT category_id, AVG(joy_fullness) as avg_sat, COUNT(*) as cnt '
           'FROM transactions '
-          'WHERE book_id = ? AND $_soulExpenseFilter '
+          'WHERE book_id = ? AND $_joyExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ?'
           '$entrySourceClause '
           'GROUP BY category_id '
@@ -588,7 +588,7 @@ class AnalyticsDao {
 
     return results
         .map(
-          (row) => PerCategorySoulRowRaw(
+          (row) => PerCategoryJoyRowRaw(
             categoryId: row.read<String>('category_id'),
             avgSatisfaction: row.read<double>('avg_sat'),
             totalCount: row.read<int>('cnt'),
@@ -598,12 +598,12 @@ class AnalyticsDao {
   }
 
   /// HAPPY-V2-01 / D-16, D-17: family-aggregate variant of
-  /// [getPerCategorySoulBreakdown] using `book_id IN (...)`.
+  /// [getPerCategoryJoyBreakdown] using `book_id IN (...)`.
   ///
   /// NEVER groups by `book_id` per ADR-012 §6 — rows are pooled across all
   /// member books and only grouped by `category_id`. Empty `bookIds`
   /// short-circuits to `const []` (no DB call).
-  Future<List<PerCategorySoulRowRaw>> getPerCategorySoulBreakdownAcrossBooks({
+  Future<List<PerCategoryJoyRowRaw>> getPerCategoryJoyBreakdownAcrossBooks({
     required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,
@@ -619,7 +619,7 @@ class AnalyticsDao {
         .customSelect(
           'SELECT category_id, AVG(joy_fullness) as avg_sat, COUNT(*) as cnt '
           'FROM transactions '
-          'WHERE book_id IN ($placeholders) AND $_soulExpenseFilter '
+          'WHERE book_id IN ($placeholders) AND $_joyExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ?'
           '$entrySourceClause '
           'GROUP BY category_id '
@@ -636,7 +636,7 @@ class AnalyticsDao {
 
     return results
         .map(
-          (row) => PerCategorySoulRowRaw(
+          (row) => PerCategoryJoyRowRaw(
             categoryId: row.read<String>('category_id'),
             avgSatisfaction: row.read<double>('avg_sat'),
             totalCount: row.read<int>('cnt'),
@@ -648,13 +648,13 @@ class AnalyticsDao {
   /// STATSUI-V2-01 / D-01..D-04: per-ledger `(count, total spend)` snapshot.
   ///
   /// Mirrors [getLedgerTotals] (analytics_dao.dart line 214-241) but adds
-  /// `COUNT(*)` so the use case can build [SoulLedgerSnapshot] +
-  /// [SurvivalLedgerSnapshot] from one DB round-trip (per RESEARCH A5).
+  /// `COUNT(*)` so the use case can build [JoyLedgerSnapshot] +
+  /// [DailyLedgerSnapshot] from one DB round-trip (per RESEARCH A5).
   ///
-  /// Does NOT aggregate `joy_fullness` — survival rows default-2 would
+  /// Does NOT aggregate `joy_fullness` — daily rows default-2 would
   /// poison the aggregate (D-04 anti-toxicity reverse pattern). The Soul
   /// column's `avgSatisfaction` is computed separately via
-  /// [getSoulSatisfactionOverview].
+  /// [getJoyFullnessOverview].
   ///
   /// Returns the domain [LedgerSnapshotRow] (Data → Domain import allowed).
   Future<List<LedgerSnapshotRow>> getLedgerSnapshot({
@@ -671,7 +671,7 @@ class AnalyticsDao {
           'SELECT ledger_type, SUM(amount) as total, COUNT(*) as cnt '
           'FROM transactions '
           'WHERE book_id = ? '
-          'AND ($_soulExpenseFilter OR $_survivalExpenseFilter) '
+          'AND ($_joyExpenseFilter OR $_dailyExpenseFilter) '
           'AND timestamp >= ? AND timestamp <= ?'
           '$entrySourceClause '
           'GROUP BY ledger_type',
@@ -719,7 +719,7 @@ class AnalyticsDao {
           'SELECT ledger_type, SUM(amount) as total, COUNT(*) as cnt '
           'FROM transactions '
           'WHERE book_id IN ($placeholders) '
-          'AND ($_soulExpenseFilter OR $_survivalExpenseFilter) '
+          'AND ($_joyExpenseFilter OR $_dailyExpenseFilter) '
           'AND timestamp >= ? AND timestamp <= ?'
           '$entrySourceClause '
           'GROUP BY ledger_type',

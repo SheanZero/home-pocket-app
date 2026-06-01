@@ -19,7 +19,7 @@ import 'list_category_filter_sheet.dart';
 /// [TextEditingController] for the search field.
 ///
 /// Chip order (left-to-right, per UI-SPEC C-03):
-/// Sort chip → Direction arrow → All / 生存 / 魂 → カテゴリ → Search → [Clear]
+/// Sort chip → Direction arrow → All / 日常 / ときめき → カテゴリ → Search → [Clear]
 class ListSortFilterBar extends ConsumerStatefulWidget {
   const ListSortFilterBar({super.key, required this.bookId});
 
@@ -231,7 +231,7 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
               ),
             ),
             const SizedBox(width: 4),
-            // ── Ledger: 生存 chip (C-03c) ─────────────────────────────────
+            // ── Ledger: 日常 chip (C-03c) ─────────────────────────────────
             Semantics(
               label: 'Survival ledger',
               selected: filter.ledgerType == LedgerType.daily,
@@ -264,7 +264,7 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
               ),
             ),
             const SizedBox(width: 4),
-            // ── Ledger: 魂 chip (C-03c) ───────────────────────────────────
+            // ── Ledger: ときめき chip (C-03c) ───────────────────────────────────
             Semantics(
               label: 'Soul ledger',
               selected: filter.ledgerType == LedgerType.joy,

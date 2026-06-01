@@ -5,26 +5,26 @@ import '../../../family_sync/presentation/providers/state_active_group.dart';
 import '../../../home/presentation/providers/state_shadow_books.dart';
 import '../../domain/models/ledger_snapshot.dart';
 import '../../domain/models/metric_result.dart';
-import '../../domain/models/per_category_soul_breakdown.dart';
+import '../../domain/models/per_category_joy_breakdown.dart';
 import 'repository_providers.dart';
 import 'state_joy_metric_variant.dart';
 
 part 'state_ledger_snapshot.g.dart';
 
-/// HAPPY-V2-01 single-book per-category soul satisfaction breakdown.
+/// HAPPY-V2-01 single-book per-category joy satisfaction breakdown.
 ///
 /// Window-keyed Future provider that delegates to
-/// [GetPerCategorySoulBreakdownUseCase]. The use case owns the D-07 sort and
+/// [GetPerCategoryJoyBreakdownUseCase]. The use case owns the D-07 sort and
 /// D-08 min-N/Other rollup — the provider is plumbing only.
 @riverpod
-Future<MetricResult<PerCategorySoulBreakdown>> perCategorySoulBreakdown(
+Future<MetricResult<PerCategoryJoyBreakdown>> perCategoryJoyBreakdown(
   Ref ref, {
   required String bookId,
   required DateTime startDate,
   required DateTime endDate,
   JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
 }) async {
-  final useCase = ref.watch(getPerCategorySoulBreakdownUseCaseProvider);
+  final useCase = ref.watch(getPerCategoryJoyBreakdownUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
   final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
       ? EntrySource.manual
@@ -45,7 +45,7 @@ Future<MetricResult<PerCategorySoulBreakdown>> perCategorySoulBreakdown(
 /// the card renders "Family data not available" instead of a misleading
 /// single-book result.
 @riverpod
-Future<MetricResult<PerCategorySoulBreakdown>> perCategorySoulBreakdownFamily(
+Future<MetricResult<PerCategoryJoyBreakdown>> perCategoryJoyBreakdownFamily(
   Ref ref, {
   required DateTime startDate,
   required DateTime endDate,
@@ -59,7 +59,7 @@ Future<MetricResult<PerCategorySoulBreakdown>> perCategorySoulBreakdownFamily(
   if (groupBookIds.length < 2) return const Empty(); // D-20 gate
 
   final useCase = ref.watch(
-    getPerCategorySoulBreakdownAcrossBooksUseCaseProvider,
+    getPerCategoryJoyBreakdownAcrossBooksUseCaseProvider,
   );
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
   final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
@@ -73,20 +73,20 @@ Future<MetricResult<PerCategorySoulBreakdown>> perCategorySoulBreakdownFamily(
   );
 }
 
-/// STATSUI-V2-01 single-book Soul-vs-Survival engagement snapshot.
+/// STATSUI-V2-01 single-book Daily-vs-Joy engagement snapshot.
 ///
 /// Window-keyed Future provider that delegates to
-/// [GetSoulVsSurvivalSnapshotUseCase]. The use case enforces the D-05
+/// [GetDailyVsJoySnapshotUseCase]. The use case enforces the D-05
 /// either-ledger-zero gate (any side missing/zero → [Empty]).
 @riverpod
-Future<MetricResult<SoulVsSurvivalSnapshot>> soulVsSurvivalSnapshot(
+Future<MetricResult<DailyVsJoySnapshot>> dailyVsJoySnapshot(
   Ref ref, {
   required String bookId,
   required DateTime startDate,
   required DateTime endDate,
   JoyMetricVariant joyMetricVariant = JoyMetricVariant.all,
 }) async {
-  final useCase = ref.watch(getSoulVsSurvivalSnapshotUseCaseProvider);
+  final useCase = ref.watch(getDailyVsJoySnapshotUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
   final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
       ? EntrySource.manual
@@ -99,14 +99,14 @@ Future<MetricResult<SoulVsSurvivalSnapshot>> soulVsSurvivalSnapshot(
   );
 }
 
-/// STATSUI-V2-01 D-18, D-20 — family-aggregate Soul-vs-Survival snapshot.
+/// STATSUI-V2-01 D-18, D-20 — family-aggregate Daily-vs-Joy snapshot.
 ///
 /// D-20 gate (defense in depth — the use case also short-circuits on empty
 /// `groupBookIds`): when fewer than 2 shadow books exist, return [Empty] so
 /// the Family compare card renders the empty state rather than a half-
 /// populated family aggregate.
 @riverpod
-Future<MetricResult<SoulVsSurvivalSnapshot>> soulVsSurvivalSnapshotFamily(
+Future<MetricResult<DailyVsJoySnapshot>> dailyVsJoySnapshotFamily(
   Ref ref, {
   required DateTime startDate,
   required DateTime endDate,
@@ -120,7 +120,7 @@ Future<MetricResult<SoulVsSurvivalSnapshot>> soulVsSurvivalSnapshotFamily(
   if (groupBookIds.length < 2) return const Empty(); // D-20 gate
 
   final useCase = ref.watch(
-    getSoulVsSurvivalSnapshotAcrossBooksUseCaseProvider,
+    getDailyVsJoySnapshotAcrossBooksUseCaseProvider,
   );
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
   final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly

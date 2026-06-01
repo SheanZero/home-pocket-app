@@ -51,33 +51,33 @@ void main() {
         );
   }
 
-  group('getPerCategorySoulBreakdown (single book)', () {
-    test('returns row type PerCategorySoulRowRaw', () async {
-      await seedTx(id: 'soul_1', categoryId: 'cat_a', joyFullness: 8);
+  group('getPerCategoryJoyBreakdown (single book)', () {
+    test('returns row type PerCategoryJoyRowRaw', () async {
+      await seedTx(id: 'joy_1', categoryId: 'cat_a', joyFullness: 8);
 
-      final rows = await dao.getPerCategorySoulBreakdown(
+      final rows = await dao.getPerCategoryJoyBreakdown(
         bookId: 'book_joy',
         startDate: windowStart,
         endDate: windowEnd,
       );
 
-      expect(rows, isA<List<PerCategorySoulRowRaw>>());
+      expect(rows, isA<List<PerCategoryJoyRowRaw>>());
       expect(rows, hasLength(1));
       expect(rows.first.categoryId, 'cat_a');
       expect(rows.first.avgSatisfaction, 8.0);
       expect(rows.first.totalCount, 1);
     });
 
-    test('excludes survival rows (soul-only filter)', () async {
-      await seedTx(id: 'soul_a', categoryId: 'cat_a', joyFullness: 8);
+    test('excludes daily rows (joy-only filter)', () async {
+      await seedTx(id: 'joy_a', categoryId: 'cat_a', joyFullness: 8);
       await seedTx(
-        id: 'survival_a',
+        id: 'daily_a',
         categoryId: 'cat_a',
         ledgerType: 'daily',
         joyFullness: 10,
       );
 
-      final rows = await dao.getPerCategorySoulBreakdown(
+      final rows = await dao.getPerCategoryJoyBreakdown(
         bookId: 'book_joy',
         startDate: windowStart,
         endDate: windowEnd,
@@ -89,7 +89,7 @@ void main() {
     });
 
     test('excludes income rows (type=expense filter)', () async {
-      await seedTx(id: 'soul_a', categoryId: 'cat_a', joyFullness: 8);
+      await seedTx(id: 'joy_a', categoryId: 'cat_a', joyFullness: 8);
       await seedTx(
         id: 'income_a',
         categoryId: 'cat_a',
@@ -97,7 +97,7 @@ void main() {
         joyFullness: 10,
       );
 
-      final rows = await dao.getPerCategorySoulBreakdown(
+      final rows = await dao.getPerCategoryJoyBreakdown(
         bookId: 'book_joy',
         startDate: windowStart,
         endDate: windowEnd,
@@ -108,7 +108,7 @@ void main() {
     });
 
     test('excludes soft-deleted rows', () async {
-      await seedTx(id: 'soul_a', categoryId: 'cat_a', joyFullness: 8);
+      await seedTx(id: 'joy_a', categoryId: 'cat_a', joyFullness: 8);
       await seedTx(
         id: 'deleted_a',
         categoryId: 'cat_a',
@@ -116,7 +116,7 @@ void main() {
         joyFullness: 10,
       );
 
-      final rows = await dao.getPerCategorySoulBreakdown(
+      final rows = await dao.getPerCategoryJoyBreakdown(
         bookId: 'book_joy',
         startDate: windowStart,
         endDate: windowEnd,
@@ -154,7 +154,7 @@ void main() {
         joyFullness: 10,
       );
 
-      final rows = await dao.getPerCategorySoulBreakdown(
+      final rows = await dao.getPerCategoryJoyBreakdown(
         bookId: 'book_joy',
         startDate: windowStart,
         endDate: windowEnd,
@@ -204,7 +204,7 @@ void main() {
         }
         await seedTx(id: 'c_only', categoryId: 'cat_c', joyFullness: 9);
 
-        final rows = await dao.getPerCategorySoulBreakdown(
+        final rows = await dao.getPerCategoryJoyBreakdown(
           bookId: 'book_joy',
           startDate: windowStart,
           endDate: windowEnd,
@@ -234,7 +234,7 @@ void main() {
         await seedTx(id: 'b_$i', categoryId: 'cat_b', joyFullness: 7);
       }
 
-      final rows = await dao.getPerCategorySoulBreakdown(
+      final rows = await dao.getPerCategoryJoyBreakdown(
         bookId: 'book_joy',
         startDate: windowStart,
         endDate: windowEnd,
@@ -256,7 +256,7 @@ void main() {
         await seedTx(id: 'a_$i', categoryId: 'cat_a', joyFullness: 7);
       }
 
-      final rows = await dao.getPerCategorySoulBreakdown(
+      final rows = await dao.getPerCategoryJoyBreakdown(
         bookId: 'book_joy',
         startDate: windowStart,
         endDate: windowEnd,
@@ -268,7 +268,7 @@ void main() {
     });
 
     test('empty window → empty list (not null)', () async {
-      final rows = await dao.getPerCategorySoulBreakdown(
+      final rows = await dao.getPerCategoryJoyBreakdown(
         bookId: 'book_joy',
         startDate: windowStart,
         endDate: windowEnd,
@@ -279,7 +279,7 @@ void main() {
     });
   });
 
-  group('getPerCategorySoulBreakdownAcrossBooks (family pool)', () {
+  group('getPerCategoryJoyBreakdownAcrossBooks (family pool)', () {
     test(
       'pools rows across books WITHOUT GROUP BY book_id (one row per category)',
       () async {
@@ -310,7 +310,7 @@ void main() {
           joyFullness: 8,
         );
 
-        final rows = await dao.getPerCategorySoulBreakdownAcrossBooks(
+        final rows = await dao.getPerCategoryJoyBreakdownAcrossBooks(
           bookIds: ['book_a', 'book_b'],
           startDate: windowStart,
           endDate: windowEnd,
@@ -326,9 +326,9 @@ void main() {
 
     test('empty bookIds → empty list, no DB call', () async {
       // Seed data that would otherwise match — verify NOT returned
-      await seedTx(id: 'soul_a', categoryId: 'cat_a', joyFullness: 8);
+      await seedTx(id: 'joy_a', categoryId: 'cat_a', joyFullness: 8);
 
-      final rows = await dao.getPerCategorySoulBreakdownAcrossBooks(
+      final rows = await dao.getPerCategoryJoyBreakdownAcrossBooks(
         bookIds: const [],
         startDate: windowStart,
         endDate: windowEnd,

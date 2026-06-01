@@ -12,7 +12,7 @@ void main() {
   });
 
   group('LedgerType', () {
-    test('has survival and soul values', () {
+    test('has daily and joy values', () {
       expect(LedgerType.values.length, 2);
       expect(LedgerType.daily, isNotNull);
       expect(LedgerType.joy, isNotNull);

@@ -4,20 +4,20 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/models/transaction.dart';
 
-/// Toggle chips for selecting Survival or Soul ledger type.
+/// Toggle chips for selecting Daily or Joy ledger type.
 class LedgerTypeSelector extends StatelessWidget {
   const LedgerTypeSelector({
     super.key,
     required this.selected,
     required this.onChanged,
-    required this.survivalLabel,
-    required this.soulLabel,
+    required this.dailyLabel,
+    required this.joyLabel,
   });
 
   final LedgerType selected;
   final ValueChanged<LedgerType> onChanged;
-  final String survivalLabel;
-  final String soulLabel;
+  final String dailyLabel;
+  final String joyLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -27,20 +27,20 @@ class LedgerTypeSelector extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _chip(
-          label: survivalLabel,
+          label: dailyLabel,
           icon: Icons.shield_outlined,
           type: LedgerType.daily,
-          key: const ValueKey('ledger_type_survival_chip'),
+          key: const ValueKey('ledger_type_daily_chip'),
           isDark: isDark,
           activeColor: AppColors.daily,
           activeBg: AppColors.dailyLight,
         ),
         const SizedBox(width: 10),
         _chip(
-          label: soulLabel,
+          label: joyLabel,
           icon: Icons.auto_awesome,
           type: LedgerType.joy,
-          key: const ValueKey('ledger_type_soul_chip'),
+          key: const ValueKey('ledger_type_joy_chip'),
           isDark: isDark,
           activeColor: AppColors.joy,
           activeBg: AppColors.joyLight,

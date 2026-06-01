@@ -1,20 +1,20 @@
 import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/analytics/domain/models/metric_result.dart';
-import '../../features/analytics/domain/models/per_category_soul_breakdown.dart';
+import '../../features/analytics/domain/models/per_category_joy_breakdown.dart';
 import '../../features/analytics/domain/repositories/analytics_repository.dart';
 import '_time_window_validation.dart';
 
-/// HAPPY-V2-01 / D-07 / D-08 / D-10 — per-category soul satisfaction breakdown.
+/// HAPPY-V2-01 / D-07 / D-08 / D-10 — per-category joy satisfaction breakdown.
 ///
 /// Single-book variant. Reads the domain-typed
-/// `List<PerCategorySoulBreakdownItem>` returned by the repository (the DAO
+/// `List<PerCategoryJoyBreakdownItem>` returned by the repository (the DAO
 /// row tuple is converted at the impl boundary — the use case never imports
 /// `lib/data/`, per CLAUDE.md Pitfall #2 and the layer-purity contract).
 ///
 /// Owns the business rules between data and presentation:
 /// - Min-N = 3 filter (D-08): categories with `totalCount < 3` collapse into a
-///   single aggregate `Other` carried by [PerCategorySoulBreakdown.otherCount]
-///   and [PerCategorySoulBreakdown.otherCategoryCount]. D-10: NO averaged
+///   single aggregate `Other` carried by [PerCategoryJoyBreakdown.otherCount]
+///   and [PerCategoryJoyBreakdown.otherCategoryCount]. D-10: NO averaged
 ///   satisfaction across heterogeneous low-N categories — Other is plain ints.
 /// - Defensive re-sort (D-07): `avg DESC, count DESC, categoryId ASC`. The DAO
 ///   already orders, but the use case re-sorts so a future DAO refactor cannot
@@ -23,8 +23,8 @@ import '_time_window_validation.dart';
 ///   returned `[]` OR every row was low-N and folded with zero counts. A
 ///   window with only sub-min-N data is still data; the card renders
 ///   "Other only" rather than the global empty state.
-class GetPerCategorySoulBreakdownUseCase {
-  GetPerCategorySoulBreakdownUseCase({
+class GetPerCategoryJoyBreakdownUseCase {
+  GetPerCategoryJoyBreakdownUseCase({
     required AnalyticsRepository analyticsRepository,
   }) : _repo = analyticsRepository;
 
@@ -32,7 +32,7 @@ class GetPerCategorySoulBreakdownUseCase {
 
   static const int _minN = 3;
 
-  Future<MetricResult<PerCategorySoulBreakdown>> execute({
+  Future<MetricResult<PerCategoryJoyBreakdown>> execute({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
@@ -40,7 +40,7 @@ class GetPerCategorySoulBreakdownUseCase {
   }) async {
     TimeWindowValidation.assertValid(startDate, endDate);
 
-    final items = await _repo.getPerCategorySoulBreakdown(
+    final items = await _repo.getPerCategoryJoyBreakdown(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
@@ -53,16 +53,16 @@ class GetPerCategorySoulBreakdownUseCase {
 
 /// Shared partition + sort + Other-rollup for both the single-book and
 /// across-books per-category use cases (DRY — both apply the same D-07/D-08/
-/// D-09 business rules). Uses [GetPerCategorySoulBreakdownUseCase] as the
+/// D-09 business rules). Uses [GetPerCategoryJoyBreakdownUseCase] as the
 /// canonical source of the min-N constant so the value is defined once.
-MetricResult<PerCategorySoulBreakdown> aggregatePerCategoryBreakdown(
-  List<PerCategorySoulBreakdownItem> items,
+MetricResult<PerCategoryJoyBreakdown> aggregatePerCategoryBreakdown(
+  List<PerCategoryJoyBreakdownItem> items,
 ) {
   if (items.isEmpty) {
     return const Empty();
   }
 
-  final minN = GetPerCategorySoulBreakdownUseCase._minN;
+  final minN = GetPerCategoryJoyBreakdownUseCase._minN;
   final qualifying = items
       .where((r) => r.totalCount >= minN)
       .toList(growable: false);
@@ -91,7 +91,7 @@ MetricResult<PerCategorySoulBreakdown> aggregatePerCategoryBreakdown(
   }
 
   return Value(
-    PerCategorySoulBreakdown(
+    PerCategoryJoyBreakdown(
       items: sortedQualifying,
       totalCount: totalCount,
       otherCount: otherCount,

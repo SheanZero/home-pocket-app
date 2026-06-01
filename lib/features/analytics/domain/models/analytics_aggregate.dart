@@ -32,9 +32,9 @@ class LedgerTotal {
   final int totalAmount;
 }
 
-/// HAPPY-01 overview row - average + count over MTD soul ledger.
-class SoulSatisfactionOverview {
-  const SoulSatisfactionOverview({
+/// HAPPY-01 overview row - average + count over MTD joy ledger.
+class JoyFullnessOverview {
+  const JoyFullnessOverview({
     required this.avgSatisfaction,
     required this.count,
   });
@@ -44,16 +44,17 @@ class SoulSatisfactionOverview {
 }
 
 /// HAPPY-02 row-wise PTVF input row.
-class SoulRowSample {
-  const SoulRowSample({required this.amount, required this.joyFullness});
+class JoyRowSample {
+  const JoyRowSample({required this.amount, required this.joyFullness});
 
   final int amount;
   final int joyFullness;
 }
 
 /// STATSUI-01 row-wise daily PTVF input row.
-class DailySoulRowSampleWithDay {
-  const DailySoulRowSampleWithDay({
+/// Note: the leading "Daily" refers to calendar-day granularity, not the daily ledger.
+class DailyJoyRowSampleWithDay {
+  const DailyJoyRowSampleWithDay({
     required this.day,
     required this.amount,
     required this.joyFullness,

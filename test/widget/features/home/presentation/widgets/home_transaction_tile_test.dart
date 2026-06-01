@@ -77,20 +77,20 @@ void main() {
       expect(find.text('F'), findsOneWidget);
     });
 
-    testWidgets('soul type uses green color for category label', (
+    testWidgets('joy type uses green color for category label', (
       tester,
     ) async {
-      const soulGreen = Color(0xFF47B88A);
+      const joyGreen = Color(0xFF47B88A);
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
             body: HomeTransactionTile(
               tagText: '\u9b42',
               tagBgColor: Color(0xFFE5F5ED),
-              tagTextColor: soulGreen,
+              tagTextColor: joyGreen,
               merchant: '\u30e8\u30c9\u30d0\u30b7\u30ab\u30e1\u30e9',
               category: '\u8da3\u5473 \u00b7 \u970a\u9b42',
-              categoryColor: soulGreen,
+              categoryColor: joyGreen,
               formattedAmount: '-\u00a512,800',
               amountColor: Color(0xFF1E2432),
             ),
@@ -101,7 +101,7 @@ void main() {
       final categoryText = tester.widget<Text>(
         find.text('\u8da3\u5473 \u00b7 \u970a\u9b42'),
       );
-      expect(categoryText.style?.color, soulGreen);
+      expect(categoryText.style?.color, joyGreen);
     });
   });
 }

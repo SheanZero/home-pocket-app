@@ -5,10 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/analytics/domain/models/ledger_snapshot.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_ledger_snapshot.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/soul_vs_survival_card.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/daily_vs_joy_card.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
-/// Golden tests for SoulVsSurvivalCard (STATSUI-V2-01).
+/// Golden tests for DailyVsJoyCard (STATSUI-V2-01).
 ///
 /// Captures 4 variants:
 /// - solo + light + ja
@@ -22,22 +22,22 @@ final _startDate = DateTime(2026, 5, 1);
 final _endDate = DateTime(2026, 6, 1);
 const _bookId = 'book-1';
 
-SoulVsSurvivalSnapshot _youSnapshot() => const SoulVsSurvivalSnapshot(
-  soul: SoulLedgerSnapshot(
+DailyVsJoySnapshot _youSnapshot() => const DailyVsJoySnapshot(
+  joy: JoyLedgerSnapshot(
     entryCount: 5,
     totalSpend: 1500,
     avgSatisfaction: 7.4,
   ),
-  survival: SurvivalLedgerSnapshot(entryCount: 8, totalSpend: 12000),
+  daily: DailyLedgerSnapshot(entryCount: 8, totalSpend: 12000),
 );
 
-SoulVsSurvivalSnapshot _familySnapshot() => const SoulVsSurvivalSnapshot(
-  soul: SoulLedgerSnapshot(
+DailyVsJoySnapshot _familySnapshot() => const DailyVsJoySnapshot(
+  joy: JoyLedgerSnapshot(
     entryCount: 12,
     totalSpend: 3500,
     avgSatisfaction: 6.8,
   ),
-  survival: SurvivalLedgerSnapshot(entryCount: 18, totalSpend: 24000),
+  daily: DailyLedgerSnapshot(entryCount: 18, totalSpend: 24000),
 );
 
 Widget _wrap({
@@ -48,13 +48,13 @@ Widget _wrap({
 }) {
   return ProviderScope(
     overrides: [
-      soulVsSurvivalSnapshotProvider(
+      dailyVsJoySnapshotProvider(
         bookId: _bookId,
         startDate: _startDate,
         endDate: _endDate,
       ).overrideWith((ref) async => Value(_youSnapshot(), 13)),
       if (isGroupMode)
-        soulVsSurvivalSnapshotFamilyProvider(
+        dailyVsJoySnapshotFamilyProvider(
           startDate: _startDate,
           endDate: _endDate,
         ).overrideWith((ref) async => Value(_familySnapshot(), 30)),
@@ -78,7 +78,7 @@ Widget _wrap({
             width: width,
             height: height,
             child: SingleChildScrollView(
-              child: SoulVsSurvivalCard(
+              child: DailyVsJoyCard(
                 bookId: _bookId,
                 startDate: _startDate,
                 endDate: _endDate,
@@ -95,15 +95,15 @@ Widget _wrap({
 }
 
 void main() {
-  group('SoulVsSurvivalCard golden', () {
+  group('DailyVsJoyCard golden', () {
     testWidgets('solo light ja', (tester) async {
       await tester.pumpWidget(
         _wrap(isGroupMode: false, themeMode: ThemeMode.light),
       );
       await tester.pumpAndSettle();
       await expectLater(
-        find.byType(SoulVsSurvivalCard),
-        matchesGoldenFile('goldens/soul_vs_survival_card_light_ja.png'),
+        find.byType(DailyVsJoyCard),
+        matchesGoldenFile('goldens/daily_vs_joy_card_light_ja.png'),
       );
     });
 
@@ -113,8 +113,8 @@ void main() {
       );
       await tester.pumpAndSettle();
       await expectLater(
-        find.byType(SoulVsSurvivalCard),
-        matchesGoldenFile('goldens/soul_vs_survival_card_dark_ja.png'),
+        find.byType(DailyVsJoyCard),
+        matchesGoldenFile('goldens/daily_vs_joy_card_dark_ja.png'),
       );
     });
 
@@ -124,8 +124,8 @@ void main() {
       );
       await tester.pumpAndSettle();
       await expectLater(
-        find.byType(SoulVsSurvivalCard),
-        matchesGoldenFile('goldens/soul_vs_survival_card_group_light_ja.png'),
+        find.byType(DailyVsJoyCard),
+        matchesGoldenFile('goldens/daily_vs_joy_card_group_light_ja.png'),
       );
     });
 
@@ -135,8 +135,8 @@ void main() {
       );
       await tester.pumpAndSettle();
       await expectLater(
-        find.byType(SoulVsSurvivalCard),
-        matchesGoldenFile('goldens/soul_vs_survival_card_group_dark_ja.png'),
+        find.byType(DailyVsJoyCard),
+        matchesGoldenFile('goldens/daily_vs_joy_card_group_dark_ja.png'),
       );
     });
   });

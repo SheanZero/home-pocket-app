@@ -132,7 +132,7 @@ void main() {
         builder: (context) => Scaffold(
           body: Center(
             child: HomeTransactionTile(
-              tagText: '魂',
+              tagText: 'ときめき',
               tagBgColor: Colors.purple.shade100,
               tagTextColor: Colors.purple,
               merchant: seedTx.merchant!,
