@@ -42,7 +42,10 @@ class _FixedListFilter extends ListFilter {
       );
 }
 
-Widget _wrap({required Locale locale}) {
+Widget _wrap({
+  required Locale locale,
+  ThemeMode themeMode = ThemeMode.light,
+}) {
   return ProviderScope(
     overrides: [
       // REQUIRED: prevents DateTime.now() flake in _buildDayCell (line 142).
@@ -72,6 +75,8 @@ Widget _wrap({required Locale locale}) {
       ],
       supportedLocales: S.supportedLocales,
       theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: themeMode,
       home: Scaffold(
         body: SizedBox(
           width: 390,
@@ -98,6 +103,17 @@ void main() {
       );
     });
 
+    testWidgets('locale ja dark — January 2025 (deterministic)', (tester) async {
+      await tester.pumpWidget(
+        _wrap(locale: const Locale('ja'), themeMode: ThemeMode.dark),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(CalendarHeaderWidget),
+        matchesGoldenFile('goldens/list_calendar_header_dark_ja.png'),
+      );
+    });
+
     testWidgets('locale zh — January 2025 (deterministic)', (tester) async {
       await tester.pumpWidget(_wrap(locale: const Locale('zh')));
       await tester.pumpAndSettle();
@@ -107,12 +123,34 @@ void main() {
       );
     });
 
+    testWidgets('locale zh dark — January 2025 (deterministic)', (tester) async {
+      await tester.pumpWidget(
+        _wrap(locale: const Locale('zh'), themeMode: ThemeMode.dark),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(CalendarHeaderWidget),
+        matchesGoldenFile('goldens/list_calendar_header_dark_zh.png'),
+      );
+    });
+
     testWidgets('locale en — January 2025 (deterministic)', (tester) async {
       await tester.pumpWidget(_wrap(locale: const Locale('en')));
       await tester.pumpAndSettle();
       await expectLater(
         find.byType(CalendarHeaderWidget),
         matchesGoldenFile('goldens/list_calendar_header_en.png'),
+      );
+    });
+
+    testWidgets('locale en dark — January 2025 (deterministic)', (tester) async {
+      await tester.pumpWidget(
+        _wrap(locale: const Locale('en'), themeMode: ThemeMode.dark),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(CalendarHeaderWidget),
+        matchesGoldenFile('goldens/list_calendar_header_dark_en.png'),
       );
     });
   });

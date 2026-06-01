@@ -43,7 +43,24 @@ TaggedTransaction _makeTx() {
 /// ProviderScope is required because [ListTransactionTile] is a [ConsumerWidget]
 /// (deleteTransactionUseCaseProvider read in onDismissed — not called during build,
 /// so no override is needed for the golden render).
-Widget _wrap({required Locale locale}) {
+///
+/// [themeMode] controls light vs dark. For dark mode, pass [AppPalette.dark.*]
+/// values for [tagBgColor], [tagTextColor], and [categoryColor] to match what
+/// production renders (Pitfall 4 — tile accepts explicit color params bypassing
+/// context.palette resolution).
+Widget _wrap({
+  required Locale locale,
+  ThemeMode themeMode = ThemeMode.light,
+  Color? tagBgColor,
+  Color? tagTextColor,
+  Color? categoryColor,
+}) {
+  final effectiveTagBgColor =
+      tagBgColor ?? AppPalette.light.dailyLight;
+  final effectiveTagTextColor =
+      tagTextColor ?? AppPalette.light.daily;
+  final effectiveCategoryColor =
+      categoryColor ?? AppPalette.light.daily;
   return ProviderScope(
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -56,6 +73,8 @@ Widget _wrap({required Locale locale}) {
       ],
       supportedLocales: S.supportedLocales,
       theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: themeMode,
       home: Scaffold(
         body: SizedBox(
           width: 390,
@@ -66,10 +85,10 @@ Widget _wrap({required Locale locale}) {
             onTap: () {},
             onDeleted: () {},
             tagText: 'Survival',
-            tagBgColor: AppPalette.light.dailyLight,
-            tagTextColor: AppPalette.light.daily,
+            tagBgColor: effectiveTagBgColor,
+            tagTextColor: effectiveTagTextColor,
             category: 'Food',
-            categoryColor: AppPalette.light.daily,
+            categoryColor: effectiveCategoryColor,
             formattedAmount: '¥1,234',
             l1Icon: Icons.restaurant,
             locale: const Locale('ja'),
@@ -93,6 +112,23 @@ void main() {
       );
     });
 
+    testWidgets('locale ja dark', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          locale: const Locale('ja'),
+          themeMode: ThemeMode.dark,
+          tagBgColor: AppPalette.dark.dailyLight,
+          tagTextColor: AppPalette.dark.daily,
+          categoryColor: AppPalette.dark.daily,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(ListTransactionTile),
+        matchesGoldenFile('goldens/list_transaction_tile_dark_ja.png'),
+      );
+    });
+
     testWidgets('locale zh', (tester) async {
       await tester.pumpWidget(_wrap(locale: const Locale('zh')));
       await tester.pumpAndSettle();
@@ -102,12 +138,46 @@ void main() {
       );
     });
 
+    testWidgets('locale zh dark', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          locale: const Locale('zh'),
+          themeMode: ThemeMode.dark,
+          tagBgColor: AppPalette.dark.dailyLight,
+          tagTextColor: AppPalette.dark.daily,
+          categoryColor: AppPalette.dark.daily,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(ListTransactionTile),
+        matchesGoldenFile('goldens/list_transaction_tile_dark_zh.png'),
+      );
+    });
+
     testWidgets('locale en', (tester) async {
       await tester.pumpWidget(_wrap(locale: const Locale('en')));
       await tester.pumpAndSettle();
       await expectLater(
         find.byType(ListTransactionTile),
         matchesGoldenFile('goldens/list_transaction_tile_en.png'),
+      );
+    });
+
+    testWidgets('locale en dark', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          locale: const Locale('en'),
+          themeMode: ThemeMode.dark,
+          tagBgColor: AppPalette.dark.dailyLight,
+          tagTextColor: AppPalette.dark.daily,
+          categoryColor: AppPalette.dark.daily,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(ListTransactionTile),
+        matchesGoldenFile('goldens/list_transaction_tile_dark_en.png'),
       );
     });
   });
