@@ -1,7 +1,8 @@
 # Phase 31: Terminology Rename - Context
 
 **Gathered:** 2026-06-01
-**Status:** Ready for planning
+**Updated:** 2026-06-01 — re-plan of 04–06 mid-execution (01–03 shipped); added D-19 (golden re-baseline timing). Decisions D-01…D-18 unchanged.
+**Status:** Ready for re-planning 31-04 / 31-05 / 31-06
 
 <domain>
 ## Phase Boundary
@@ -52,9 +53,17 @@ Internal identifiers are English-token based: `survival → daily`, `soul → jo
 - **D-17:** **Normalize already-acceptable non-literal phrasings to the literal vocab** (research A4): rewrite ja `暮らし`/`生活` and en `"Living Expenses"`-style values to the canonical `日常`/`Daily`. No grep gate depends on this; it's done for full vocab consistency per the D-07 spirit.
 - **D-18:** **Rewrite ARB `@description` metadata too** (research A3): update description texts (e.g. "Soul ledger label" → "Joy ledger label") so the literal ROADMAP success-criterion #3 grep is unambiguously zero-hit even in its naive form, not just under a value-line filter.
 
+### Golden Re-baseline Timing (added 2026-06-01, re-plan of 04–06)
+- **D-19:** **Pull the terminology-driven golden pixel re-baseline INTO Phase 31 (31-05)** — overrides the prior "defer all golden re-baseline to Phase 34" stance. Rationale: the only golden pixel changes in Phase 31 come from the **text/vocab rename** (31-03 changed ja card labels 生存/魂 → 日常/ときめき), NOT from colors (31-04 is a pure identifier rename, Color values unchanged → zero pixel delta). Attributing text-driven golden changes to Phase 31 and palette-driven changes to Phase 34 is *cleaner* attribution, not messier.
+  - **Scope = only the terminology-affected goldens** (e.g. the `daily_vs_joy_card` ja goldens, `joy_celebration_overlay` goldens — the ones 31-05 owns and currently defers). **NOT** a full-suite re-baseline (a full re-baseline now would freeze the pre-palette state and be redundantly redone in Phase 34, and could mask unrelated pixel drift).
+  - **Execution = autonomous + strict assertion** (31-05 stays `autonomous: true`, no human checkpoint): the executor runs `flutter test --update-goldens` for the **specific affected golden tests only**, and the plan MUST assert the resulting diff is **only the expected text-vocab change** (no layout/color drift) and surface the PNG `git diff` pixel-change description in 31-05-SUMMARY.md. Human PNG review happens later at PR time, not as an inline gate.
+  - **Supersedes** the old 31-05 "rename golden FILES only / accept temp baselines / skip deferred goldens" approach → 31-05 now truly re-baselines and leaves the suite **fully green with no skipped terminology goldens**.
+  - **Phase 34 seam updated:** Phase 34 now re-baselines **palette-driven** golden changes ONLY — the terminology-driven re-baseline is completed in Phase 31. 31-04 is unaffected (pure symbol rename, zero pixel change).
+
 ### Claude's Discretion
 - **Migration / commit sequencing** is delegated to the planner — big-bang vs staged (e.g. `LedgerType`+migration as its own commit, then ARB keys, then colors) is a planner call based on the dependency graph. **Hard constraint:** every step must keep the build green (`flutter analyze` 0 issues, `build_runner` clean-diff, tests pass).
-- Test fixtures / golden handling: tests hardcoding `'survival'/'soul'` strings and any golden baselines affected will need updating to keep the suite green; the full golden re-baseline is Phase 34's job, but Phase 31 must not leave the suite red.
+- Test fixtures: tests hardcoding `'survival'/'soul'` strings will need flipping to keep the suite green.
+- Golden handling: per **D-19**, the **terminology-affected** golden pixels are re-baselined within Phase 31 (31-05, autonomous + strict assertion); only **palette-driven** re-baseline remains Phase 34's job. Phase 31 must leave the suite fully green with no skipped/deferred terminology goldens.
 
 </decisions>
 
@@ -108,7 +117,7 @@ Internal identifiers are English-token based: `survival → daily`, `soul → jo
 - DB: `transactions.ledger_type`, `category_ledger_configs.ledger_type` (+ CHECK), schema version bump, `migrations` test.
 - Generated: `S` localizations (gen-l10n), `.g.dart`/`.freezed.dart` regen after enum + ARB renames (build_runner).
 - Phase 33 seam: derived color symbols renamed here; Phase 33 consolidates, does not re-rename (D-12).
-- Phase 34 seam: golden re-baseline is Phase 34; Phase 31 only keeps the suite green.
+- Phase 34 seam (updated per D-19): **palette-driven** golden re-baseline is Phase 34; **terminology-driven** golden re-baseline is done in Phase 31 (31-05). Phase 31 leaves the suite fully green.
 
 </code_context>
 

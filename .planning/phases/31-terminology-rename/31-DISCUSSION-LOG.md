@@ -121,3 +121,24 @@
 - Global ARB key retaxonomy (all ~533 keys) — own phase, not Phase 31.
 - P2P sync backward-compat dual-string read path — revisit before public release.
 - Color token consolidation (duplicate constant dedup) — Phase 33's job.
+
+---
+
+## Session 2 — 2026-06-01 (re-plan of 04–06, mid-execution)
+
+**Context:** Phase 31 was mid-execution (Waves 0–2 / plans 01–03 shipped + green on main) when the user invoked `/gsd-plan-phase 31`. Confirmed intent → pause execution, re-plan remaining 04–06 only. Routed to discuss-phase because a scope decision changed. Decisions D-01…D-18 left unchanged (01–03 already implement them).
+
+### Area: Golden re-baseline timing
+
+**Question 1 — Re-baseline scope in 31-05:**
+- Options: only terminology-affected goldens / full-suite re-baseline now
+- **User's choice:** 只重做受文案影响的 golden (only terminology-affected goldens; palette-driven stays Phase 34)
+
+**Question 2 — Verification rigor (execution is autonomous, no checkpoint):**
+- Options: insert human visual-review checkpoint / autonomous re-do + strict assertion
+- **User's choice:** 自动重做 + 严格断言 (autonomous `--update-goldens` on affected goldens + plan asserts diff is text-only, attaches PNG git-diff note; PR-time human review)
+
+**Question 3 — scope of this re-plan:**
+- **User's choice:** 就这一处 (golden timing only; colors / file-class renames / ADR scope unchanged)
+
+→ Captured as **D-19**. Supersedes the old "defer all golden re-baseline to Phase 34" stance for terminology-driven changes; Phase 34 now palette-only.
