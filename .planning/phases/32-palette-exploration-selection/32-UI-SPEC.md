@@ -1,10 +1,11 @@
 ---
 phase: 32
 slug: palette-exploration-selection
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-06-01
+reviewed_at: 2026-06-01
 ---
 
 # Phase 32 — UI Design Contract
