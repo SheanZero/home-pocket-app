@@ -20,8 +20,8 @@ abstract class Book with _$Book {
 
     // Denormalized stats for performance
     @Default(0) int transactionCount,
-    @Default(0) int dailyBalance,
-    @Default(0) int joyBalance,
+    @Default(0) int survivalBalance,
+    @Default(0) int soulBalance,
   }) = _Book;
 
   factory Book.fromJson(Map<String, dynamic> json) => _$BookFromJson(json);

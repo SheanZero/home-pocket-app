@@ -22,8 +22,8 @@ void main() {
       expect(book.ownerDeviceId, isNull);
       expect(book.ownerDeviceName, isNull);
       expect(book.transactionCount, 0);
-      expect(book.dailyBalance, 0);
-      expect(book.joyBalance, 0);
+      expect(book.survivalBalance, 0);
+      expect(book.soulBalance, 0);
       expect(book.updatedAt, isNull);
     });
 
@@ -40,8 +40,8 @@ void main() {
         ownerDeviceId: 'partner-device',
         ownerDeviceName: 'Partner Phone',
         transactionCount: 5,
-        dailyBalance: 50000,
-        joyBalance: 20000,
+        survivalBalance: 50000,
+        soulBalance: 20000,
       );
 
       final json = book.toJson();

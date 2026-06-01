@@ -17,8 +17,8 @@ class Books extends Table {
 
   // Denormalized stats
   IntColumn get transactionCount => integer().withDefault(const Constant(0))();
-  IntColumn get dailyBalance => integer().withDefault(const Constant(0))();
-  IntColumn get joyBalance => integer().withDefault(const Constant(0))();
+  IntColumn get survivalBalance => integer().withDefault(const Constant(0))();
+  IntColumn get soulBalance => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

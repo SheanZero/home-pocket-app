@@ -13,8 +13,8 @@ abstract class BookRepository {
   Future<void> updateBalances({
     required String bookId,
     required int transactionCount,
-    required int dailyBalance,
-    required int joyBalance,
+    required int survivalBalance,
+    required int soulBalance,
   });
 
   /// Delete all books (for backup restore).

@@ -92,8 +92,8 @@ void main() {
           updated_at INTEGER,
           is_archived INTEGER NOT NULL DEFAULT 0,
           transaction_count INTEGER NOT NULL DEFAULT 0,
-          daily_balance INTEGER NOT NULL DEFAULT 0,
-          joy_balance INTEGER NOT NULL DEFAULT 0
+          survival_balance INTEGER NOT NULL DEFAULT 0,
+          soul_balance INTEGER NOT NULL DEFAULT 0
         );
       ''');
         rawDb.execute('''
@@ -139,7 +139,7 @@ void main() {
           is_private INTEGER NOT NULL DEFAULT 0,
           is_synced INTEGER NOT NULL DEFAULT 0,
           is_deleted INTEGER NOT NULL DEFAULT 0,
-          joy_fullness INTEGER NOT NULL DEFAULT 5
+          soul_satisfaction INTEGER NOT NULL DEFAULT 5
         );
       ''');
         rawDb.execute('PRAGMA user_version = 5');

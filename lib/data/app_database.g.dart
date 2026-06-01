@@ -636,24 +636,24 @@ class $BooksTable extends Books with TableInfo<$BooksTable, BookRow> {
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
-  static const VerificationMeta _dailyBalanceMeta = const VerificationMeta(
-    'dailyBalance',
+  static const VerificationMeta _survivalBalanceMeta = const VerificationMeta(
+    'survivalBalance',
   );
   @override
-  late final GeneratedColumn<int> dailyBalance = GeneratedColumn<int>(
-    'daily_balance',
+  late final GeneratedColumn<int> survivalBalance = GeneratedColumn<int>(
+    'survival_balance',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
-  static const VerificationMeta _joyBalanceMeta = const VerificationMeta(
-    'joyBalance',
+  static const VerificationMeta _soulBalanceMeta = const VerificationMeta(
+    'soulBalance',
   );
   @override
-  late final GeneratedColumn<int> joyBalance = GeneratedColumn<int>(
-    'joy_balance',
+  late final GeneratedColumn<int> soulBalance = GeneratedColumn<int>(
+    'soul_balance',
     aliasedName,
     false,
     type: DriftSqlType.int,
@@ -674,8 +674,8 @@ class $BooksTable extends Books with TableInfo<$BooksTable, BookRow> {
     ownerDeviceId,
     ownerDeviceName,
     transactionCount,
-    dailyBalance,
-    joyBalance,
+    survivalBalance,
+    soulBalance,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -777,19 +777,22 @@ class $BooksTable extends Books with TableInfo<$BooksTable, BookRow> {
         ),
       );
     }
-    if (data.containsKey('daily_balance')) {
+    if (data.containsKey('survival_balance')) {
       context.handle(
-        _dailyBalanceMeta,
-        dailyBalance.isAcceptableOrUnknown(
-          data['daily_balance']!,
-          _dailyBalanceMeta,
+        _survivalBalanceMeta,
+        survivalBalance.isAcceptableOrUnknown(
+          data['survival_balance']!,
+          _survivalBalanceMeta,
         ),
       );
     }
-    if (data.containsKey('joy_balance')) {
+    if (data.containsKey('soul_balance')) {
       context.handle(
-        _joyBalanceMeta,
-        joyBalance.isAcceptableOrUnknown(data['joy_balance']!, _joyBalanceMeta),
+        _soulBalanceMeta,
+        soulBalance.isAcceptableOrUnknown(
+          data['soul_balance']!,
+          _soulBalanceMeta,
+        ),
       );
     }
     return context;
@@ -849,13 +852,13 @@ class $BooksTable extends Books with TableInfo<$BooksTable, BookRow> {
         DriftSqlType.int,
         data['${effectivePrefix}transaction_count'],
       )!,
-      dailyBalance: attachedDatabase.typeMapping.read(
+      survivalBalance: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
-        data['${effectivePrefix}daily_balance'],
+        data['${effectivePrefix}survival_balance'],
       )!,
-      joyBalance: attachedDatabase.typeMapping.read(
+      soulBalance: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
-        data['${effectivePrefix}joy_balance'],
+        data['${effectivePrefix}soul_balance'],
       )!,
     );
   }
@@ -879,8 +882,8 @@ class BookRow extends DataClass implements Insertable<BookRow> {
   final String? ownerDeviceId;
   final String? ownerDeviceName;
   final int transactionCount;
-  final int dailyBalance;
-  final int joyBalance;
+  final int survivalBalance;
+  final int soulBalance;
   const BookRow({
     required this.id,
     required this.name,
@@ -894,8 +897,8 @@ class BookRow extends DataClass implements Insertable<BookRow> {
     this.ownerDeviceId,
     this.ownerDeviceName,
     required this.transactionCount,
-    required this.dailyBalance,
-    required this.joyBalance,
+    required this.survivalBalance,
+    required this.soulBalance,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -920,8 +923,8 @@ class BookRow extends DataClass implements Insertable<BookRow> {
       map['owner_device_name'] = Variable<String>(ownerDeviceName);
     }
     map['transaction_count'] = Variable<int>(transactionCount);
-    map['daily_balance'] = Variable<int>(dailyBalance);
-    map['joy_balance'] = Variable<int>(joyBalance);
+    map['survival_balance'] = Variable<int>(survivalBalance);
+    map['soul_balance'] = Variable<int>(soulBalance);
     return map;
   }
 
@@ -947,8 +950,8 @@ class BookRow extends DataClass implements Insertable<BookRow> {
           ? const Value.absent()
           : Value(ownerDeviceName),
       transactionCount: Value(transactionCount),
-      dailyBalance: Value(dailyBalance),
-      joyBalance: Value(joyBalance),
+      survivalBalance: Value(survivalBalance),
+      soulBalance: Value(soulBalance),
     );
   }
 
@@ -970,8 +973,8 @@ class BookRow extends DataClass implements Insertable<BookRow> {
       ownerDeviceId: serializer.fromJson<String?>(json['ownerDeviceId']),
       ownerDeviceName: serializer.fromJson<String?>(json['ownerDeviceName']),
       transactionCount: serializer.fromJson<int>(json['transactionCount']),
-      dailyBalance: serializer.fromJson<int>(json['dailyBalance']),
-      joyBalance: serializer.fromJson<int>(json['joyBalance']),
+      survivalBalance: serializer.fromJson<int>(json['survivalBalance']),
+      soulBalance: serializer.fromJson<int>(json['soulBalance']),
     );
   }
   @override
@@ -990,8 +993,8 @@ class BookRow extends DataClass implements Insertable<BookRow> {
       'ownerDeviceId': serializer.toJson<String?>(ownerDeviceId),
       'ownerDeviceName': serializer.toJson<String?>(ownerDeviceName),
       'transactionCount': serializer.toJson<int>(transactionCount),
-      'dailyBalance': serializer.toJson<int>(dailyBalance),
-      'joyBalance': serializer.toJson<int>(joyBalance),
+      'survivalBalance': serializer.toJson<int>(survivalBalance),
+      'soulBalance': serializer.toJson<int>(soulBalance),
     };
   }
 
@@ -1008,8 +1011,8 @@ class BookRow extends DataClass implements Insertable<BookRow> {
     Value<String?> ownerDeviceId = const Value.absent(),
     Value<String?> ownerDeviceName = const Value.absent(),
     int? transactionCount,
-    int? dailyBalance,
-    int? joyBalance,
+    int? survivalBalance,
+    int? soulBalance,
   }) => BookRow(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -1027,8 +1030,8 @@ class BookRow extends DataClass implements Insertable<BookRow> {
         ? ownerDeviceName.value
         : this.ownerDeviceName,
     transactionCount: transactionCount ?? this.transactionCount,
-    dailyBalance: dailyBalance ?? this.dailyBalance,
-    joyBalance: joyBalance ?? this.joyBalance,
+    survivalBalance: survivalBalance ?? this.survivalBalance,
+    soulBalance: soulBalance ?? this.soulBalance,
   );
   BookRow copyWithCompanion(BooksCompanion data) {
     return BookRow(
@@ -1052,12 +1055,12 @@ class BookRow extends DataClass implements Insertable<BookRow> {
       transactionCount: data.transactionCount.present
           ? data.transactionCount.value
           : this.transactionCount,
-      dailyBalance: data.dailyBalance.present
-          ? data.dailyBalance.value
-          : this.dailyBalance,
-      joyBalance: data.joyBalance.present
-          ? data.joyBalance.value
-          : this.joyBalance,
+      survivalBalance: data.survivalBalance.present
+          ? data.survivalBalance.value
+          : this.survivalBalance,
+      soulBalance: data.soulBalance.present
+          ? data.soulBalance.value
+          : this.soulBalance,
     );
   }
 
@@ -1076,8 +1079,8 @@ class BookRow extends DataClass implements Insertable<BookRow> {
           ..write('ownerDeviceId: $ownerDeviceId, ')
           ..write('ownerDeviceName: $ownerDeviceName, ')
           ..write('transactionCount: $transactionCount, ')
-          ..write('dailyBalance: $dailyBalance, ')
-          ..write('joyBalance: $joyBalance')
+          ..write('survivalBalance: $survivalBalance, ')
+          ..write('soulBalance: $soulBalance')
           ..write(')'))
         .toString();
   }
@@ -1096,8 +1099,8 @@ class BookRow extends DataClass implements Insertable<BookRow> {
     ownerDeviceId,
     ownerDeviceName,
     transactionCount,
-    dailyBalance,
-    joyBalance,
+    survivalBalance,
+    soulBalance,
   );
   @override
   bool operator ==(Object other) =>
@@ -1115,8 +1118,8 @@ class BookRow extends DataClass implements Insertable<BookRow> {
           other.ownerDeviceId == this.ownerDeviceId &&
           other.ownerDeviceName == this.ownerDeviceName &&
           other.transactionCount == this.transactionCount &&
-          other.dailyBalance == this.dailyBalance &&
-          other.joyBalance == this.joyBalance);
+          other.survivalBalance == this.survivalBalance &&
+          other.soulBalance == this.soulBalance);
 }
 
 class BooksCompanion extends UpdateCompanion<BookRow> {
@@ -1132,8 +1135,8 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
   final Value<String?> ownerDeviceId;
   final Value<String?> ownerDeviceName;
   final Value<int> transactionCount;
-  final Value<int> dailyBalance;
-  final Value<int> joyBalance;
+  final Value<int> survivalBalance;
+  final Value<int> soulBalance;
   final Value<int> rowid;
   const BooksCompanion({
     this.id = const Value.absent(),
@@ -1148,8 +1151,8 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
     this.ownerDeviceId = const Value.absent(),
     this.ownerDeviceName = const Value.absent(),
     this.transactionCount = const Value.absent(),
-    this.dailyBalance = const Value.absent(),
-    this.joyBalance = const Value.absent(),
+    this.survivalBalance = const Value.absent(),
+    this.soulBalance = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   BooksCompanion.insert({
@@ -1165,8 +1168,8 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
     this.ownerDeviceId = const Value.absent(),
     this.ownerDeviceName = const Value.absent(),
     this.transactionCount = const Value.absent(),
-    this.dailyBalance = const Value.absent(),
-    this.joyBalance = const Value.absent(),
+    this.survivalBalance = const Value.absent(),
+    this.soulBalance = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
@@ -1186,8 +1189,8 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
     Expression<String>? ownerDeviceId,
     Expression<String>? ownerDeviceName,
     Expression<int>? transactionCount,
-    Expression<int>? dailyBalance,
-    Expression<int>? joyBalance,
+    Expression<int>? survivalBalance,
+    Expression<int>? soulBalance,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1203,8 +1206,8 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
       if (ownerDeviceId != null) 'owner_device_id': ownerDeviceId,
       if (ownerDeviceName != null) 'owner_device_name': ownerDeviceName,
       if (transactionCount != null) 'transaction_count': transactionCount,
-      if (dailyBalance != null) 'daily_balance': dailyBalance,
-      if (joyBalance != null) 'joy_balance': joyBalance,
+      if (survivalBalance != null) 'survival_balance': survivalBalance,
+      if (soulBalance != null) 'soul_balance': soulBalance,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1222,8 +1225,8 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
     Value<String?>? ownerDeviceId,
     Value<String?>? ownerDeviceName,
     Value<int>? transactionCount,
-    Value<int>? dailyBalance,
-    Value<int>? joyBalance,
+    Value<int>? survivalBalance,
+    Value<int>? soulBalance,
     Value<int>? rowid,
   }) {
     return BooksCompanion(
@@ -1239,8 +1242,8 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
       ownerDeviceId: ownerDeviceId ?? this.ownerDeviceId,
       ownerDeviceName: ownerDeviceName ?? this.ownerDeviceName,
       transactionCount: transactionCount ?? this.transactionCount,
-      dailyBalance: dailyBalance ?? this.dailyBalance,
-      joyBalance: joyBalance ?? this.joyBalance,
+      survivalBalance: survivalBalance ?? this.survivalBalance,
+      soulBalance: soulBalance ?? this.soulBalance,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1284,11 +1287,11 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
     if (transactionCount.present) {
       map['transaction_count'] = Variable<int>(transactionCount.value);
     }
-    if (dailyBalance.present) {
-      map['daily_balance'] = Variable<int>(dailyBalance.value);
+    if (survivalBalance.present) {
+      map['survival_balance'] = Variable<int>(survivalBalance.value);
     }
-    if (joyBalance.present) {
-      map['joy_balance'] = Variable<int>(joyBalance.value);
+    if (soulBalance.present) {
+      map['soul_balance'] = Variable<int>(soulBalance.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1311,8 +1314,8 @@ class BooksCompanion extends UpdateCompanion<BookRow> {
           ..write('ownerDeviceId: $ownerDeviceId, ')
           ..write('ownerDeviceName: $ownerDeviceName, ')
           ..write('transactionCount: $transactionCount, ')
-          ..write('dailyBalance: $dailyBalance, ')
-          ..write('joyBalance: $joyBalance, ')
+          ..write('survivalBalance: $survivalBalance, ')
+          ..write('soulBalance: $soulBalance, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -6635,8 +6638,8 @@ typedef $$BooksTableCreateCompanionBuilder =
       Value<String?> ownerDeviceId,
       Value<String?> ownerDeviceName,
       Value<int> transactionCount,
-      Value<int> dailyBalance,
-      Value<int> joyBalance,
+      Value<int> survivalBalance,
+      Value<int> soulBalance,
       Value<int> rowid,
     });
 typedef $$BooksTableUpdateCompanionBuilder =
@@ -6653,8 +6656,8 @@ typedef $$BooksTableUpdateCompanionBuilder =
       Value<String?> ownerDeviceId,
       Value<String?> ownerDeviceName,
       Value<int> transactionCount,
-      Value<int> dailyBalance,
-      Value<int> joyBalance,
+      Value<int> survivalBalance,
+      Value<int> soulBalance,
       Value<int> rowid,
     });
 
@@ -6726,13 +6729,13 @@ class $$BooksTableFilterComposer extends Composer<_$AppDatabase, $BooksTable> {
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get dailyBalance => $composableBuilder(
-    column: $table.dailyBalance,
+  ColumnFilters<int> get survivalBalance => $composableBuilder(
+    column: $table.survivalBalance,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get joyBalance => $composableBuilder(
-    column: $table.joyBalance,
+  ColumnFilters<int> get soulBalance => $composableBuilder(
+    column: $table.soulBalance,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -6806,13 +6809,13 @@ class $$BooksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get dailyBalance => $composableBuilder(
-    column: $table.dailyBalance,
+  ColumnOrderings<int> get survivalBalance => $composableBuilder(
+    column: $table.survivalBalance,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get joyBalance => $composableBuilder(
-    column: $table.joyBalance,
+  ColumnOrderings<int> get soulBalance => $composableBuilder(
+    column: $table.soulBalance,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -6870,13 +6873,13 @@ class $$BooksTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get dailyBalance => $composableBuilder(
-    column: $table.dailyBalance,
+  GeneratedColumn<int> get survivalBalance => $composableBuilder(
+    column: $table.survivalBalance,
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get joyBalance => $composableBuilder(
-    column: $table.joyBalance,
+  GeneratedColumn<int> get soulBalance => $composableBuilder(
+    column: $table.soulBalance,
     builder: (column) => column,
   );
 }
@@ -6921,8 +6924,8 @@ class $$BooksTableTableManager
                 Value<String?> ownerDeviceId = const Value.absent(),
                 Value<String?> ownerDeviceName = const Value.absent(),
                 Value<int> transactionCount = const Value.absent(),
-                Value<int> dailyBalance = const Value.absent(),
-                Value<int> joyBalance = const Value.absent(),
+                Value<int> survivalBalance = const Value.absent(),
+                Value<int> soulBalance = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => BooksCompanion(
                 id: id,
@@ -6937,8 +6940,8 @@ class $$BooksTableTableManager
                 ownerDeviceId: ownerDeviceId,
                 ownerDeviceName: ownerDeviceName,
                 transactionCount: transactionCount,
-                dailyBalance: dailyBalance,
-                joyBalance: joyBalance,
+                survivalBalance: survivalBalance,
+                soulBalance: soulBalance,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6955,8 +6958,8 @@ class $$BooksTableTableManager
                 Value<String?> ownerDeviceId = const Value.absent(),
                 Value<String?> ownerDeviceName = const Value.absent(),
                 Value<int> transactionCount = const Value.absent(),
-                Value<int> dailyBalance = const Value.absent(),
-                Value<int> joyBalance = const Value.absent(),
+                Value<int> survivalBalance = const Value.absent(),
+                Value<int> soulBalance = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => BooksCompanion.insert(
                 id: id,
@@ -6971,8 +6974,8 @@ class $$BooksTableTableManager
                 ownerDeviceId: ownerDeviceId,
                 ownerDeviceName: ownerDeviceName,
                 transactionCount: transactionCount,
-                dailyBalance: dailyBalance,
-                joyBalance: joyBalance,
+                survivalBalance: survivalBalance,
+                soulBalance: soulBalance,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
