@@ -157,7 +157,7 @@ Plans:
 - [x] 34-01-PLAN.md — Wave 0: add dark variants to 7 light-only golden test files + delete orphaned summary_cards PNGs
 - [x] 34-02-PLAN.md — Wave 1: selective re-baseline with diff attribution (D-02/D-04 protocol) + generate 27 new dark masters
 - [x] 34-03-PLAN.md — Wave 2: D-03a comprehensive audit + stale Color literal remediation + success-criteria greps
-- [ ] 34-04-PLAN.md — Wave 2 (parallel): D-03b best-effort .pen sync to ADR-018 (non-blocking)
+- [x] 34-04-PLAN.md — Wave 2 (parallel): D-03b best-effort .pen sync to ADR-018 (non-blocking)
 - [ ] 34-05-PLAN.md — Wave 3: final full-suite gate (flutter test 0 failures, analyze 0 issues, coverage ≥70%, both greps empty)
 
 ## Milestone Progress
