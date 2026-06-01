@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../application/accounting/category_localization_service.dart';
@@ -194,29 +194,27 @@ class _CategorySelectionScreenState
     final localeAsync = ref.watch(currentLocaleProvider);
     final locale = localeAsync.value ?? const Locale('ja');
     final filteredL1 = _getFilteredL1(locale);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.palette;
     final reorderState = ref.watch(categoryReorderProvider);
     final isEditing = reorderState.isEditing;
 
     return Scaffold(
-      backgroundColor: isDark
-          ? AppColorsDark.background
-          : AppColors.backgroundWarm,
+      backgroundColor: palette.background,
       appBar: AppBar(
-        backgroundColor: isDark ? AppColorsDark.card : AppColors.card,
+        backgroundColor: palette.card,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.close,
-            color: isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
+            color: palette.textPrimary,
           ),
           onPressed: () => _onLeadingTap(context, reorderState),
         ),
         title: Text(
           isEditing ? l10n.editCategoryOrder : l10n.selectCategory,
           style: AppTextStyles.headlineMedium.copyWith(
-            color: isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
+            color: palette.textPrimary,
           ),
         ),
         centerTitle: true,
@@ -227,7 +225,7 @@ class _CategorySelectionScreenState
                   child: Text(
                     l10n.save,
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.accentPrimary,
+                      color: palette.accentPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -237,9 +235,7 @@ class _CategorySelectionScreenState
                 IconButton(
                   icon: Icon(
                     Icons.reorder,
-                    color: isDark
-                        ? AppColorsDark.textSecondary
-                        : AppColors.textSecondary,
+                    color: palette.textSecondary,
                   ),
                   onPressed: _onEnterReorderMode,
                 ),
@@ -251,7 +247,7 @@ class _CategorySelectionScreenState
               children: [
                 if (!isEditing)
                   Container(
-                    color: isDark ? AppColorsDark.card : AppColors.card,
+                    color: palette.card,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 12,
@@ -262,16 +258,14 @@ class _CategorySelectionScreenState
                       decoration: InputDecoration(
                         hintText: l10n.searchCategory,
                         hintStyle: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
+                          color: palette.textSecondary,
                         ),
-                        prefixIcon: const Icon(
+                        prefixIcon: Icon(
                           Icons.search,
-                          color: AppColors.textSecondary,
+                          color: palette.textSecondary,
                         ),
                         filled: true,
-                        fillColor: isDark
-                            ? AppColorsDark.backgroundMuted
-                            : AppColors.backgroundMuted,
+                        fillColor: palette.backgroundMuted,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -285,8 +279,8 @@ class _CategorySelectionScreenState
                   ),
                 Expanded(
                   child: isEditing
-                      ? _buildReorderBody(reorderState, locale, isDark)
-                      : _buildReadBody(filteredL1, locale, isDark, l10n),
+                      ? _buildReorderBody(reorderState, locale)
+                      : _buildReadBody(filteredL1, locale, l10n),
                 ),
                 if (!isEditing)
                   Padding(
@@ -296,12 +290,10 @@ class _CategorySelectionScreenState
                       child: Container(
                         height: 48,
                         decoration: BoxDecoration(
-                          color: isDark ? AppColorsDark.card : AppColors.card,
+                          color: palette.card,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: isDark
-                                ? AppColorsDark.borderDefault
-                                : AppColors.borderDefault,
+                            color: palette.borderDefault,
                           ),
                         ),
                         child: Row(
@@ -310,17 +302,13 @@ class _CategorySelectionScreenState
                             Icon(
                               Icons.add_circle_outline,
                               size: 18,
-                              color: isDark
-                                  ? AppColorsDark.textSecondary
-                                  : AppColors.textSecondary,
+                              color: palette.textSecondary,
                             ),
                             const SizedBox(width: 6),
                             Text(
                               l10n.addCategory,
                               style: AppTextStyles.bodyMedium.copyWith(
-                                color: isDark
-                                    ? AppColorsDark.textSecondary
-                                    : AppColors.textSecondary,
+                                color: palette.textSecondary,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 13,
                               ),
@@ -338,7 +326,6 @@ class _CategorySelectionScreenState
   Widget _buildReadBody(
     List<Category> filteredL1,
     Locale locale,
-    bool isDark,
     S l10n,
   ) {
     return ListView.builder(
@@ -359,7 +346,6 @@ class _CategorySelectionScreenState
           onChildSelected: (child) {
             Navigator.pop(context, child);
           },
-          isDark: isDark,
           addSubcategoryLabel: l10n.addSubcategory,
           resolveIcon: resolveCategoryIcon,
           parseColor: _parseColor,
@@ -373,11 +359,10 @@ class _CategorySelectionScreenState
   Widget _buildReorderBody(
     CategoryReorderState state,
     Locale locale,
-    bool isDark,
   ) {
     return Column(
       children: [
-        _buildHintBanner(isDark),
+        _buildHintBanner(),
         Expanded(
           child: CustomScrollView(
             slivers: [
@@ -407,7 +392,6 @@ class _CategorySelectionScreenState
                         .read(categoryReorderProvider.notifier)
                         .reorderL2(l1.id, o, n),
                     locale: locale,
-                    isDark: isDark,
                   );
                 },
               ),
@@ -418,22 +402,21 @@ class _CategorySelectionScreenState
     );
   }
 
-  Widget _buildHintBanner(bool isDark) {
+  Widget _buildHintBanner() {
+    final palette = context.palette;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      color: isDark ? AppColorsDark.backgroundMuted : AppColors.backgroundMuted,
+      color: palette.backgroundMuted,
       child: Row(
         children: [
-          Icon(Icons.drag_indicator, size: 18, color: AppColors.accentPrimary),
+          Icon(Icons.drag_indicator, size: 18, color: palette.accentPrimary),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               S.of(context).dragToReorder,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: isDark
-                    ? AppColorsDark.textSecondary
-                    : AppColors.textSecondary,
+                color: palette.textSecondary,
               ),
             ),
           ),
@@ -461,7 +444,6 @@ class _L1ReorderTile extends StatelessWidget {
     required this.onToggle,
     required this.onReorderChild,
     required this.locale,
-    required this.isDark,
   });
 
   final int index;
@@ -473,7 +455,6 @@ class _L1ReorderTile extends StatelessWidget {
   final VoidCallback onToggle;
   final void Function(int, int) onReorderChild;
   final Locale locale;
-  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
@@ -502,7 +483,8 @@ class _L1ReorderTile extends StatelessWidget {
             onReorder: onReorderChild,
             itemBuilder: (ctx, i) {
               final child = children[i];
-              final childColor = l2Colors[child.id] ?? const Color(0xFFABABAB);
+              final palette = ctx.palette;
+              final childColor = l2Colors[child.id] ?? palette.textSecondary;
               return Padding(
                 key: ValueKey('l2_${child.id}'),
                 padding: const EdgeInsets.only(left: 24, bottom: 4),
@@ -534,7 +516,6 @@ class _CategoryGroup extends StatelessWidget {
     required this.selectedCategoryId,
     required this.onToggle,
     required this.onChildSelected,
-    required this.isDark,
     required this.addSubcategoryLabel,
     required this.resolveIcon,
     required this.parseColor,
@@ -547,7 +528,6 @@ class _CategoryGroup extends StatelessWidget {
   final String? selectedCategoryId;
   final VoidCallback onToggle;
   final ValueChanged<Category> onChildSelected;
-  final bool isDark;
   final String addSubcategoryLabel;
   final IconData Function(String) resolveIcon;
   final Color Function(String) parseColor;
@@ -556,18 +536,15 @@ class _CategoryGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = parseColor(category.color);
+    final palette = context.palette;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: isDark ? AppColorsDark.card : AppColors.card,
+        color: palette.card,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: isExpanded
-              ? color
-              : (isDark
-                    ? AppColorsDark.borderDefault
-                    : AppColors.borderDefault),
+          color: isExpanded ? color : palette.borderDefault,
           width: isExpanded ? 1.5 : 1,
         ),
       ),
@@ -599,17 +576,13 @@ class _CategoryGroup extends StatelessWidget {
                     child: Text(
                       resolveName(category.name),
                       style: AppTextStyles.titleMedium.copyWith(
-                        color: isDark
-                            ? AppColorsDark.textPrimary
-                            : AppColors.textPrimary,
+                        color: palette.textPrimary,
                       ),
                     ),
                   ),
                   Icon(
                     isExpanded ? Icons.expand_less : Icons.chevron_right,
-                    color: isDark
-                        ? AppColorsDark.textSecondary
-                        : AppColors.textSecondary,
+                    color: palette.textSecondary,
                     size: 20,
                   ),
                 ],
@@ -659,9 +632,7 @@ class _CategoryGroup extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: isDark
-                              ? AppColorsDark.borderDefault
-                              : AppColors.borderDefault,
+                          color: palette.borderDefault,
                         ),
                       ),
                       child: Row(
@@ -670,17 +641,13 @@ class _CategoryGroup extends StatelessWidget {
                           Icon(
                             Icons.add,
                             size: 14,
-                            color: isDark
-                                ? AppColorsDark.textSecondary
-                                : AppColors.textSecondary,
+                            color: palette.textSecondary,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             addSubcategoryLabel,
                             style: AppTextStyles.bodySmall.copyWith(
-                              color: isDark
-                                  ? AppColorsDark.textSecondary
-                                  : AppColors.textSecondary,
+                              color: palette.textSecondary,
                               fontSize: 12,
                             ),
                           ),

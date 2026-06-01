@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/transaction.dart';
@@ -88,26 +88,25 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.palette;
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColorsDark.background : AppColors.backgroundWarm,
+      backgroundColor: palette.background,
       appBar: AppBar(
-        backgroundColor: isDark ? AppColorsDark.card : AppColors.card,
+        backgroundColor: palette.card,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: TextButton.icon(
           onPressed: () => Navigator.pop(context), // D-10 — silent discard
-          icon: const Icon(Icons.chevron_left, color: AppColors.daily),
+          icon: Icon(Icons.chevron_left, color: palette.daily),
           label: Text(l10n.back,
               style: AppTextStyles.titleMedium.copyWith(
-                color: AppColors.daily,
+                color: palette.daily,
               )),
         ),
         leadingWidth: 100,
         title: Text(l10n.transactionEditTitle,
             style: AppTextStyles.headlineMedium.copyWith(
-              color: isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
+              color: palette.textPrimary,
             )),
         centerTitle: true,
       ),
@@ -138,27 +137,27 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
         SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-            child: _buildSaveButton(l10n),
+            child: _buildSaveButton(l10n, palette),
           ),
         ),
       ]),
     );
   }
 
-  Widget _buildSaveButton(S l10n) {
+  Widget _buildSaveButton(S l10n, AppPalette palette) {
     return SizedBox(
       width: double.infinity,
       height: 52,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppColors.actionGradientStart, AppColors.actionGradientEnd],
+            colors: [palette.fabGradientStart, palette.fabGradientEnd],
           ),
           borderRadius: BorderRadius.circular(14),
-          boxShadow: const [
-            BoxShadow(color: AppColors.actionShadow, blurRadius: 14, offset: Offset(0, 4)),
+          boxShadow: [
+            BoxShadow(color: palette.actionShadow, blurRadius: 14, offset: const Offset(0, 4)),
           ],
         ),
         child: Material(
