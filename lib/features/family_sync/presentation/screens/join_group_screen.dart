@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../application/family_sync/join_group_use_case.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../profile/domain/models/user_profile.dart';
 import '../../../profile/presentation/providers/state_user_profile.dart';
@@ -14,11 +14,6 @@ import '../../../profile/presentation/widgets/avatar_display.dart';
 import '../providers/repository_providers.dart';
 import 'confirm_join_screen.dart';
 
-const _purpleGradient = [
-  Color(0xFFE8D5F5),
-  Color(0xFFF3EAF9),
-  Color(0xFFFAF5FD),
-];
 
 class JoinGroupScreen extends ConsumerStatefulWidget {
   const JoinGroupScreen({super.key});
@@ -101,8 +96,10 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
     final l10n = S.of(context);
     final profile = _profile;
 
+    final palette = context.palette;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: palette.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 42),
@@ -118,27 +115,31 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
                   emoji: profile.avatarEmoji,
                   imagePath: profile.avatarImagePath,
                   size: 90,
-                  gradientColors: _purpleGradient,
+                  gradientColors: [
+                    palette.memberGradientA,
+                    palette.memberGradientB,
+                    palette.memberGradientC,
+                  ],
                 ),
                 const SizedBox(height: 12),
                 Text(
                   profile.displayName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Outfit',
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: palette.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   l10n.groupMyName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Outfit',
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
-                    color: AppColors.textSecondary,
+                    color: palette.textSecondary,
                   ),
                 ),
               ],
@@ -182,14 +183,14 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
                                 i == _code.length.clamp(0, 5),
                           ),
                         ],
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
                           child: Text(
                             '\u{2022}',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.textTertiary,
+                              color: palette.textTertiary,
                             ),
                           ),
                         ),
@@ -212,11 +213,11 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
               // Hint text
               Text(
                 l10n.groupCodeHint,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Outfit',
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
-                  color: AppColors.textSecondary,
+                  color: palette.textSecondary,
                 ),
               ),
 
@@ -225,11 +226,11 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
                 Text(
                   _errorMessage!,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Outfit',
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.accentPrimary,
+                    color: palette.accentPrimary,
                   ),
                 ),
               ],
@@ -259,6 +260,7 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
+    final palette = context.palette;
 
     return Row(
       children: [
@@ -267,19 +269,19 @@ class _Header extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 LucideIcons.chevronLeft,
                 size: 20,
-                color: AppColors.textSecondary,
+                color: palette.textSecondary,
               ),
               const SizedBox(width: 4),
               Text(
                 l10n.groupBack,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Outfit',
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
+                  color: palette.textSecondary,
                 ),
               ),
             ],
@@ -288,11 +290,11 @@ class _Header extends StatelessWidget {
         const Spacer(),
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Outfit',
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: palette.textPrimary,
           ),
         ),
         const Spacer(),
@@ -312,6 +314,7 @@ class _DigitDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasText = digit.isNotEmpty;
 
+    final palette = context.palette;
     return Container(
       width: 44,
       height: 56,
@@ -319,19 +322,19 @@ class _DigitDisplay extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: hasText || isFocused
-              ? AppColors.accentPrimary
-              : AppColors.borderDefault,
+              ? palette.accentPrimary
+              : palette.borderDefault,
           width: isFocused ? 2 : 1,
         ),
       ),
       alignment: Alignment.center,
       child: Text(
         digit,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'Outfit',
           fontSize: 22,
           fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
+          color: palette.textPrimary,
         ),
       ),
     );
@@ -353,6 +356,7 @@ class _GradientButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final isDisabled = onTap == null;
 
     return GestureDetector(
@@ -365,14 +369,14 @@ class _GradientButton extends StatelessWidget {
           height: 52,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            gradient: const LinearGradient(
-              colors: [Color(0xFFE85A4F), Color(0xFFF08070)],
+            gradient: LinearGradient(
+              colors: [palette.fabGradientEnd, palette.fabGradientStart],
             ),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                color: Color(0x28E85A4F),
+                color: palette.actionShadow,
                 blurRadius: 20,
-                offset: Offset(0, 6),
+                offset: const Offset(0, 6),
               ),
             ],
           ),

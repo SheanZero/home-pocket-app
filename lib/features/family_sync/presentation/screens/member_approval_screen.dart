@@ -9,7 +9,7 @@ import '../../../../application/family_sync/notify_member_approval_use_case.dart
 import '../../../../application/family_sync/remove_member_use_case.dart';
 import '../../../../application/family_sync/repository_providers.dart'
     show WebSocketEventType, notifyMemberApprovalUseCaseProvider;
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/group_info.dart';
 import '../../domain/models/group_member.dart';
@@ -21,11 +21,6 @@ import '../providers/repository_providers.dart'
         removeMemberUseCaseProvider;
 import 'group_management_screen.dart';
 
-const _purpleGradient = [
-  Color(0xFFE8D5F5),
-  Color(0xFFF3EAF9),
-  Color(0xFFFAF5FD),
-];
 
 class MemberApprovalScreen extends ConsumerStatefulWidget {
   const MemberApprovalScreen({super.key, this.groupId});
@@ -155,10 +150,11 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
+    final palette = context.palette;
 
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: palette.background,
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -172,7 +168,7 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
     final applicant = pendingMembers.isNotEmpty ? pendingMembers.first : null;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: palette.background,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -187,23 +183,24 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
   }
 
   Widget _buildApplicantView(S l10n, GroupMember applicant, GroupInfo group) {
+    final palette = context.palette;
     final isBusy = _approvingMemberId != null || _rejectingMemberId != null;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         // Bell icon
-        Icon(LucideIcons.bellRing, size: 32, color: AppColors.accentPrimary),
+        Icon(LucideIcons.bellRing, size: 32, color: palette.accentPrimary),
         const SizedBox(height: 16),
 
         // Title
         Text(
           l10n.groupJoinRequest,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Outfit',
             fontSize: 20,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: palette.textPrimary,
           ),
         ),
         const SizedBox(height: 24),
@@ -215,11 +212,11 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                color: Color(0x14000000),
+                color: palette.surfaceScrimLight,
                 blurRadius: 24,
-                offset: Offset(0, 8),
+                offset: const Offset(0, 8),
               ),
             ],
           ),
@@ -228,27 +225,31 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
               AvatarDisplay(
                 emoji: applicant.avatarEmoji,
                 size: 80,
-                gradientColors: _purpleGradient,
+                gradientColors: [
+                  palette.memberGradientA,
+                  palette.memberGradientB,
+                  palette.memberGradientC,
+                ],
               ),
               const SizedBox(height: 14),
               Text(
                 applicant.displayName,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Outfit',
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: palette.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 l10n.groupJoinRequestDesc(applicant.displayName),
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Outfit',
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
-                  color: AppColors.textSecondary,
+                  color: palette.textSecondary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -259,7 +260,7 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.background,
+                  color: palette.background,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -269,11 +270,11 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
                     const SizedBox(width: 4),
                     Text(
                       group.groupName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Outfit',
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
+                        color: palette.textPrimary,
                       ),
                     ),
                   ],
@@ -294,34 +295,34 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
                   height: 52,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.borderDefault),
+                    border: Border.all(color: palette.borderDefault),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       if (_rejectingMemberId == applicant.deviceId)
-                        const SizedBox(
+                        SizedBox(
                           width: 18,
                           height: 18,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: AppColors.textSecondary,
+                            color: palette.textSecondary,
                           ),
                         )
                       else ...[
-                        const Icon(
+                        Icon(
                           LucideIcons.x,
                           size: 16,
-                          color: AppColors.textSecondary,
+                          color: palette.textSecondary,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           l10n.groupReject,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Outfit',
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
+                            color: palette.textSecondary,
                           ),
                         ),
                       ],
@@ -338,14 +339,14 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
                   height: 52,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFE85A4F), Color(0xFFF08070)],
+                    gradient: LinearGradient(
+                      colors: [palette.fabGradientEnd, palette.fabGradientStart],
                     ),
-                    boxShadow: const [
+                    boxShadow: [
                       BoxShadow(
-                        color: Color(0x28E85A4F),
+                        color: palette.actionShadow,
                         blurRadius: 20,
-                        offset: Offset(0, 6),
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),
@@ -390,18 +391,19 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
   }
 
   Widget _buildEmptyView(S l10n) {
+    final palette = context.palette;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(LucideIcons.bellRing, size: 32, color: AppColors.textTertiary),
+        Icon(LucideIcons.bellRing, size: 32, color: palette.textTertiary),
         const SizedBox(height: 16),
         Text(
           l10n.familySyncApprovalTip,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Outfit',
             fontSize: 14,
-            color: AppColors.textSecondary,
+            color: palette.textSecondary,
           ),
         ),
       ],

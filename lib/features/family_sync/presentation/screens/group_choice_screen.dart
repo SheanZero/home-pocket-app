@@ -2,19 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
 import 'create_group_screen.dart';
 import 'join_group_screen.dart';
 
-const _purpleGradient = [
-  Color(0xFFE8D5F5),
-  Color(0xFFF3EAF9),
-  Color(0xFFFAF5FD),
-];
-
-const _greenGradient = [Color(0xFFD4E8CC), Color(0xFFF0F8EC)];
 
 class GroupChoiceScreen extends ConsumerWidget {
   const GroupChoiceScreen({super.key});
@@ -22,9 +15,10 @@ class GroupChoiceScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
+    final palette = context.palette;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: palette.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 42),
@@ -37,29 +31,29 @@ class GroupChoiceScreen extends ConsumerWidget {
               const SizedBox(height: 24),
               Text(
                 l10n.groupChoiceTitle,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Outfit',
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: palette.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 l10n.groupChoiceSubtitle,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Outfit',
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
-                  color: AppColors.textSecondary,
+                  color: palette.textSecondary,
                 ),
               ),
               const SizedBox(height: 32),
               _ActionCard(
                 icon: LucideIcons.plusCircle,
-                iconBackgroundColor: const Color(0xFFFEF5F4),
-                iconColor: AppColors.accentPrimary,
+                iconBackgroundColor: palette.accentPrimaryLight,
+                iconColor: palette.accentPrimary,
                 title: l10n.groupCreate,
                 description: l10n.groupCreateDesc,
                 onTap: () => Navigator.push(
@@ -72,8 +66,8 @@ class GroupChoiceScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               _ActionCard(
                 icon: LucideIcons.logIn,
-                iconBackgroundColor: AppColors.dailyLight,
-                iconColor: AppColors.daily,
+                iconBackgroundColor: palette.dailyLight,
+                iconColor: palette.daily,
                 title: l10n.familySyncEnterPartnerCode,
                 description: l10n.groupJoinDesc,
                 onTap: () => Navigator.push(
@@ -102,6 +96,7 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
+    final palette = context.palette;
 
     return Row(
       children: [
@@ -110,19 +105,19 @@ class _Header extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 LucideIcons.chevronLeft,
                 size: 20,
-                color: AppColors.textSecondary,
+                color: palette.textSecondary,
               ),
               const SizedBox(width: 4),
               Text(
                 l10n.groupBack,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Outfit',
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
+                  color: palette.textSecondary,
                 ),
               ),
             ],
@@ -131,11 +126,11 @@ class _Header extends StatelessWidget {
         const Spacer(),
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Outfit',
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: palette.textPrimary,
           ),
         ),
         const Spacer(),
@@ -151,6 +146,7 @@ class _HeroAvatars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return SizedBox(
       width: 140,
       height: 64,
@@ -165,7 +161,11 @@ class _HeroAvatars extends StatelessWidget {
             child: _BorderedAvatar(
               emoji: '\u{1F338}',
               size: 56,
-              gradientColors: _purpleGradient,
+              gradientColors: [
+                palette.memberGradientA,
+                palette.memberGradientB,
+                palette.memberGradientC,
+              ],
             ),
           ),
           Positioned(
@@ -173,7 +173,7 @@ class _HeroAvatars extends StatelessWidget {
             child: _BorderedAvatar(
               emoji: '\u{1F43B}',
               size: 56,
-              gradientColors: _greenGradient,
+              gradientColors: [palette.successLight, palette.card],
             ),
           ),
         ],
@@ -228,6 +228,7 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -235,12 +236,12 @@ class _ActionCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.borderDefault),
-          boxShadow: const [
+          border: Border.all(color: palette.borderDefault),
+          boxShadow: [
             BoxShadow(
-              color: Color(0x0A000000),
+              color: palette.surfaceScrimMedium,
               blurRadius: 8,
-              offset: Offset(0, 2),
+              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -262,31 +263,31 @@ class _ActionCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Outfit',
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: palette.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     description,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Outfit',
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
-                      color: AppColors.textSecondary,
+                      color: palette.textSecondary,
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(
+            Icon(
               LucideIcons.chevronRight,
               size: 18,
-              color: AppColors.textTertiary,
+              color: palette.textTertiary,
             ),
           ],
         ),
@@ -302,13 +303,14 @@ class _E2eeHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(
           LucideIcons.shield,
           size: 14,
-          color: AppColors.textSecondary.withValues(alpha: 0.6),
+          color: palette.textSecondary.withValues(alpha: 0.6),
         ),
         const SizedBox(width: 6),
         Text(
@@ -317,7 +319,7 @@ class _E2eeHint extends StatelessWidget {
             fontFamily: 'Outfit',
             fontSize: 11,
             fontWeight: FontWeight.w400,
-            color: AppColors.textSecondary.withValues(alpha: 0.6),
+            color: palette.textSecondary.withValues(alpha: 0.6),
           ),
         ),
       ],

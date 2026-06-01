@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/group_info.dart';
 import '../../domain/models/group_member.dart';
@@ -190,8 +190,9 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
     final syncStatusAsync = ref.watch(syncStatusStreamProvider);
     final syncState = syncStatusAsync.value?.state ?? SyncState.noGroup;
 
+    final palette = context.palette;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: palette.background,
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -203,6 +204,7 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
   }
 
   Widget _buildGroupContent(SyncState syncState) {
+    final palette = context.palette;
     final group = _activeGroup!;
     final isOwner = group.role == 'owner';
     final hasPendingMembers = group.members.any(
@@ -227,19 +229,19 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       LucideIcons.chevronLeft,
                       size: 20,
-                      color: AppColors.textSecondary,
+                      color: palette.textSecondary,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       l10n.groupBack,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Outfit',
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondary,
+                        color: palette.textSecondary,
                       ),
                     ),
                   ],
@@ -261,19 +263,19 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
                 const SizedBox(width: 8),
                 Text(
                   group.groupName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Outfit',
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: palette.textPrimary,
                   ),
                 ),
                 if (isOwner) ...[
                   const SizedBox(width: 8),
-                  const Icon(
+                  Icon(
                     LucideIcons.pencil,
                     size: 16,
-                    color: AppColors.textSecondary,
+                    color: palette.textSecondary,
                   ),
                 ],
               ],
@@ -299,33 +301,33 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.accentPrimaryLight,
+                  color: palette.accentPrimaryLight,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.accentPrimaryBorder),
+                  border: Border.all(color: palette.accentPrimaryBorder),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       LucideIcons.bellRing,
                       size: 18,
-                      color: AppColors.accentPrimary,
+                      color: palette.accentPrimary,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         l10n.familySyncApprovalTitle,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Outfit',
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.accentPrimary,
+                          color: palette.accentPrimary,
                         ),
                       ),
                     ),
-                    const Icon(
+                    Icon(
                       LucideIcons.chevronRight,
                       size: 16,
-                      color: AppColors.accentPrimary,
+                      color: palette.accentPrimary,
                     ),
                   ],
                 ),
@@ -337,12 +339,12 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
           // Member section label
           Text(
             l10n.familySyncMembers,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Outfit',
               fontSize: 12,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
-              color: AppColors.textSecondary,
+              color: palette.textSecondary,
             ),
           ),
           const SizedBox(height: 12),
@@ -352,11 +354,11 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
-                  color: Color(0x0A000000),
+                  color: palette.surfaceScrimMedium,
                   blurRadius: 8,
-                  offset: Offset(0, 2),
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
@@ -374,9 +376,9 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
                         : null,
                   ),
                   if (index < activeMembers.length - 1)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Divider(height: 1, color: AppColors.borderDivider),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Divider(height: 1, color: palette.borderDivider),
                     ),
                 ],
               ],
@@ -397,24 +399,24 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
                 height: 48,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.borderDefault),
+                  border: Border.all(color: palette.borderDefault),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
+                    Icon(
                       LucideIcons.userPlus,
                       size: 16,
-                      color: AppColors.textPrimary,
+                      color: palette.textPrimary,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       l10n.groupInviteMembers,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Outfit',
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: palette.textPrimary,
                       ),
                     ),
                   ],
@@ -434,11 +436,11 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
                   group.role == 'owner'
                       ? l10n.groupDisband
                       : l10n.familySyncLeaveGroup,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Outfit',
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary,
+                    color: palette.textSecondary,
                   ),
                 ),
               ),
@@ -451,6 +453,7 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
   }
 
   Widget _buildSyncStatusRow(SyncState syncState) {
+    final palette = context.palette;
     final isBusy =
         syncState == SyncState.syncing || syncState == SyncState.initialSyncing;
     return Row(
@@ -461,10 +464,10 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
           const SizedBox(width: 4),
           GestureDetector(
             onTap: () => ref.read(syncEngineProvider).onManualSync(),
-            child: const Icon(
+            child: Icon(
               LucideIcons.refreshCw,
               size: 16,
-              color: AppColors.textSecondary,
+              color: palette.textSecondary,
             ),
           ),
         ],
@@ -473,28 +476,29 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
   }
 
   Widget _buildEmptyState() {
+    final palette = context.palette;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(LucideIcons.users, size: 64, color: AppColors.textTertiary),
+          Icon(LucideIcons.users, size: 64, color: palette.textTertiary),
           const SizedBox(height: 16),
           Text(
             l10n.familySyncNoDevicePaired,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Outfit',
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: palette.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             l10n.familySyncPairPrompt,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Outfit',
               fontSize: 14,
-              color: AppColors.textSecondary,
+              color: palette.textSecondary,
             ),
           ),
         ],

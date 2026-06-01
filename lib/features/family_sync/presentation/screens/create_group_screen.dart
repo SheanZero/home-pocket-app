@@ -10,7 +10,7 @@ import '../../../../application/family_sync/notify_member_approval_use_case.dart
 import '../../../../application/family_sync/rename_group_use_case.dart';
 import '../../../../application/family_sync/repository_providers.dart'
     show WebSocketEventType, notifyMemberApprovalUseCaseProvider;
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../profile/domain/models/user_profile.dart';
 import '../../../profile/presentation/providers/state_user_profile.dart';
@@ -181,9 +181,10 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
+    final palette = context.palette;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: palette.background,
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -195,6 +196,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   }
 
   Widget _buildError(S l10n) {
+    final palette = context.palette;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 42),
@@ -204,16 +206,16 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
             Icon(
               LucideIcons.alertCircle,
               size: 48,
-              color: AppColors.accentPrimary,
+              color: palette.accentPrimary,
             ),
             const SizedBox(height: 16),
             Text(
               _errorMessage ?? '',
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Outfit',
                 fontSize: 14,
-                color: AppColors.textSecondary,
+                color: palette.textSecondary,
               ),
             ),
           ],
@@ -223,6 +225,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   }
 
   Widget _buildContent(S l10n) {
+    final palette = context.palette;
     final profile = _profile;
     if (profile == null) return const SizedBox.shrink();
 
@@ -247,22 +250,22 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
           const SizedBox(height: 12),
           Text(
             profile.displayName,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Outfit',
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: palette.textPrimary,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             l10n.groupOwner,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Outfit',
               fontSize: 12,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
-              color: AppColors.accentPrimary,
+              color: palette.accentPrimary,
             ),
           ),
           const SizedBox(height: 28),
@@ -277,18 +280,18 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
                 const SizedBox(width: 8),
                 Text(
                   _groupName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Outfit',
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: palette.textPrimary,
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(
+                Icon(
                   LucideIcons.pencil,
                   size: 16,
-                  color: AppColors.textSecondary,
+                  color: palette.textSecondary,
                 ),
               ],
             ),
@@ -302,12 +305,12 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.borderDefault),
-              boxShadow: const [
+              border: Border.all(color: palette.borderDefault),
+              boxShadow: [
                 BoxShadow(
-                  color: Color(0x0A000000),
+                  color: palette.surfaceScrimMedium,
                   blurRadius: 16,
-                  offset: Offset(0, 4),
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
@@ -315,12 +318,12 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
               children: [
                 Text(
                   l10n.groupInviteCode,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Outfit',
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
-                    color: AppColors.textSecondary,
+                    color: palette.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -329,22 +332,22 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
                   children: [
                     Text(
                       firstHalf,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Outfit',
                         fontSize: 36,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.accentPrimary,
+                        color: palette.accentPrimary,
                         letterSpacing: 6,
                       ),
                     ),
                     const SizedBox(width: 12),
                     Text(
                       secondHalf,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Outfit',
                         fontSize: 36,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.accentPrimary,
+                        color: palette.accentPrimary,
                         letterSpacing: 6,
                       ),
                     ),
@@ -380,6 +383,7 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
+    final palette = context.palette;
 
     return Row(
       children: [
@@ -388,19 +392,19 @@ class _Header extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 LucideIcons.chevronLeft,
                 size: 20,
-                color: AppColors.textSecondary,
+                color: palette.textSecondary,
               ),
               const SizedBox(width: 4),
               Text(
                 l10n.groupBack,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Outfit',
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
+                  color: palette.textSecondary,
                 ),
               ),
             ],
@@ -409,11 +413,11 @@ class _Header extends StatelessWidget {
         const Spacer(),
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Outfit',
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: palette.textPrimary,
           ),
         ),
         const Spacer(),
@@ -431,6 +435,7 @@ class _TimerRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
+    final palette = context.palette;
     final expiresDateTime = DateTime.fromMillisecondsSinceEpoch(
       expiresAt * 1000,
     );
@@ -440,15 +445,15 @@ class _TimerRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(LucideIcons.clock, size: 14, color: AppColors.textSecondary),
+        Icon(LucideIcons.clock, size: 14, color: palette.textSecondary),
         const SizedBox(width: 6),
         Text(
           l10n.groupInviteExpiry(minutes),
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Outfit',
             fontSize: 12,
             fontWeight: FontWeight.w400,
-            color: AppColors.textSecondary,
+            color: palette.textSecondary,
           ),
         ),
       ],
@@ -469,6 +474,7 @@ class _GradientButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -476,14 +482,14 @@ class _GradientButton extends StatelessWidget {
         height: 52,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          gradient: const LinearGradient(
-            colors: [Color(0xFFE85A4F), Color(0xFFF08070)],
+          gradient: LinearGradient(
+            colors: [palette.fabGradientEnd, palette.fabGradientStart],
           ),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color(0x28E85A4F),
+              color: palette.actionShadow,
               blurRadius: 20,
-              offset: Offset(0, 6),
+              offset: const Offset(0, 6),
             ),
           ],
         ),
