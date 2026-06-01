@@ -84,7 +84,7 @@
 ### v1.5 文案与配色统一 (Active)
 
 - [x] **Phase 31: Terminology Rename** (6 plans) — Unify all user-facing ARB values (zh/ja/en) and rename internal identifiers (ARB keys, AppColors symbols, LedgerType enum + v18 migration, soul*/survival* files/classes, soul_satisfaction→joy_fullness column); close with analyze-clean gate + ADR-017 (completed 2026-06-01)
-- [ ] **Phase 32: Palette Exploration & Selection** — Mine design references, produce 4–5 Pencil color-scheme mockups, user selects one canonical palette recorded as ADR
+- [x] **Phase 32: Palette Exploration & Selection** — Mine design references, produce 4–5 Pencil color-scheme mockups, user selects one canonical palette recorded as ADR (completed 2026-06-01)
 - [ ] **Phase 33: Color Token System & Consolidation** — Build semantic design-token system encoding the selected palette; replace ~62 hardcoded Color(0x…) literals; apply palette uniformly across surfaces
 - [ ] **Phase 34: Golden Re-baseline & Verification** — Regenerate all golden/visual baselines to the new palette; confirm full test suite green; verify no stale vocabulary or color literals remain
 
@@ -120,7 +120,7 @@
 **Plans**: 3 plans
 - [x] 32-01-PLAN.md — PALETTE-01 synthesis doc: mine VoltAgent brand DESIGN.md refs → ≥4 distinct named directions across the D-04×D-05 axis matrix (rationale + lineage + anchor hex + WCAG flags)
 - [x] 32-02-PLAN.md — PALETTE-02 Pencil mockups: fresh `.pen`, get_guidelines-first, 4–5 scheme groups × 6 frames (home-hero/list/analytics × light/dark), palette-as-variables, every taxonomy role + per-scheme WCAG pass
-- [ ] 32-03-PLAN.md — PALETTE-03 human-selection checkpoint (autonomous:false) → ratify ADR-018 (post-selection only) with full light+dark hex-per-role table keyed to AppColors symbols + ADR-000_INDEX update
+- [x] 32-03-PLAN.md — PALETTE-03 human-selection checkpoint (autonomous:false) → ratify ADR-018 (post-selection only) with full light+dark hex-per-role table keyed to AppColors symbols + ADR-000_INDEX update
 **UI hint**: yes
 
 ### Phase 33: Color Token System & Consolidation
