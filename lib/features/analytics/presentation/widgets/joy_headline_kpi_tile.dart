@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/joy_cumulative_formatter.dart';
 import '../../domain/models/happiness_report.dart';
@@ -55,8 +54,8 @@ class JoyHeadlineKpiTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: context.wmSoulTagBg,
-          border: Border.all(color: AppColors.joy.withValues(alpha: 0.20)),
+          color: context.palette.joyLight,
+          border: Border.all(color: context.palette.joy.withValues(alpha: 0.20)),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Column(
@@ -65,7 +64,7 @@ class JoyHeadlineKpiTile extends StatelessWidget {
           children: [
             Text(
               l10n.analyticsKpiJoyIndexLabel,
-              style: AppTextStyles.caption.copyWith(color: AppColors.joy),
+              style: AppTextStyles.caption.copyWith(color: context.palette.joy),
             ),
             const SizedBox(height: 4),
             Text(
@@ -74,7 +73,7 @@ class JoyHeadlineKpiTile extends StatelessWidget {
                   (hasJoyContribution
                           ? AppTextStyles.amountLarge
                           : AppTextStyles.caption)
-                      .copyWith(color: context.wmTextPrimary),
+                      .copyWith(color: context.palette.textPrimary),
             ),
             if (hasJoyContribution || report.totalSoulTx > 0) ...[
               const SizedBox(height: 4),
@@ -85,7 +84,7 @@ class JoyHeadlineKpiTile extends StatelessWidget {
                   report.totalSoulTx,
                 ),
                 style: AppTextStyles.caption.copyWith(
-                  color: context.wmTextSecondary,
+                  color: context.palette.textSecondary,
                 ),
               ),
             ],

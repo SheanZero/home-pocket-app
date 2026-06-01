@@ -4,9 +4,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../application/i18n/formatter_service.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/expense_trend.dart';
 
@@ -32,6 +31,7 @@ class MonthlySpendTrendBarChart extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final palette = context.palette;
     final l10n = S.of(context);
     const formatter = FormatterService();
     final maxAmount = months.map((month) => month.totalExpenses).reduce(max);
@@ -72,7 +72,7 @@ class MonthlySpendTrendBarChart extends StatelessWidget {
                     child: Text(
                       l10n.analyticsMonthNumberLabel(months[index].month),
                       style: AppTextStyles.caption.copyWith(
-                        color: context.wmTextSecondary,
+                        color: context.palette.textSecondary,
                       ),
                     ),
                   );
@@ -91,7 +91,7 @@ class MonthlySpendTrendBarChart extends StatelessWidget {
                   return Text(
                     formatter.formatCompact(value, locale),
                     style: AppTextStyles.amountSmall.copyWith(
-                      color: context.wmTextSecondary,
+                      color: context.palette.textSecondary,
                     ),
                   );
                 },
@@ -100,7 +100,7 @@ class MonthlySpendTrendBarChart extends StatelessWidget {
           ),
           barGroups: [
             for (final entry in months.asMap().entries)
-              _barGroupFor(entry.key, entry.value),
+              _barGroupFor(entry.key, entry.value, palette),
           ],
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
@@ -109,7 +109,7 @@ class MonthlySpendTrendBarChart extends StatelessWidget {
                 return BarTooltipItem(
                   '${month.year}/${month.month}\n'
                   '${formatter.formatCompact(month.totalExpenses, locale)}',
-                  AppTextStyles.amountSmall.copyWith(color: AppColors.card),
+                  AppTextStyles.amountSmall.copyWith(color: palette.card),
                 );
               },
             ),
@@ -119,7 +119,7 @@ class MonthlySpendTrendBarChart extends StatelessWidget {
     );
   }
 
-  BarChartGroupData _barGroupFor(int index, MonthlyTrend month) {
+  BarChartGroupData _barGroupFor(int index, MonthlyTrend month, AppPalette palette) {
     final isCurrent =
         month.year == selectedYear && month.month == selectedMonth;
 
@@ -129,10 +129,10 @@ class MonthlySpendTrendBarChart extends StatelessWidget {
         BarChartRodData(
           toY: month.totalExpenses.toDouble(),
           color: isCurrent
-              ? AppColors.daily
-              : AppColors.daily.withValues(alpha: 0.30),
+              ? palette.daily
+              : palette.daily.withValues(alpha: 0.30),
           borderSide: BorderSide(
-            color: AppColors.daily,
+            color: palette.daily,
             width: isCurrent ? 2 : 1,
           ),
           width: 18,

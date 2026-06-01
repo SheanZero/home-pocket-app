@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/accounting/category_localization_service.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/metric_result.dart';
 import '../../domain/models/per_category_joy_breakdown.dart';
@@ -104,7 +104,7 @@ class _PerCategoryBreakdownCardState
           );
 
     return Card(
-      color: context.wmCard,
+      color: context.palette.card,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -114,7 +114,7 @@ class _PerCategoryBreakdownCardState
             Text(
               title,
               style: AppTextStyles.titleLarge.copyWith(
-                color: context.wmTextPrimary,
+                color: context.palette.textPrimary,
               ),
             ),
             const SizedBox(height: 12),
@@ -165,7 +165,7 @@ class _PerCategoryBreakdownCardState
     return switch (result) {
       Empty<PerCategoryJoyBreakdown>() => Text(
         S.of(context).analyticsPerCategoryEmpty,
-        style: AppTextStyles.caption.copyWith(color: context.wmTextSecondary),
+        style: AppTextStyles.caption.copyWith(color: context.palette.textSecondary),
       ),
       Value<PerCategoryJoyBreakdown>(:final data) => _renderValue(data),
     };
@@ -201,7 +201,7 @@ class _PerCategoryBreakdownCardState
       // rather than an empty card body if it slips through.
       return Text(
         l10n.analyticsPerCategoryEmpty,
-        style: AppTextStyles.caption.copyWith(color: context.wmTextSecondary),
+        style: AppTextStyles.caption.copyWith(color: context.palette.textSecondary),
       );
     }
 
@@ -224,7 +224,7 @@ class _PerCategoryBreakdownCardState
     );
     return Text(
       rowText,
-      style: AppTextStyles.amountMedium.copyWith(color: context.wmTextPrimary),
+      style: AppTextStyles.amountMedium.copyWith(color: context.palette.textPrimary),
     );
   }
 
@@ -234,7 +234,7 @@ class _PerCategoryBreakdownCardState
         data.otherCount,
         data.otherCategoryCount,
       ),
-      style: AppTextStyles.caption.copyWith(color: context.wmTextSecondary),
+      style: AppTextStyles.caption.copyWith(color: context.palette.textSecondary),
     );
   }
 

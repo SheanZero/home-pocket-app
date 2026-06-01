@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 
 /// Floating pill-style bottom navigation bar with 4 tabs and a FAB.
@@ -49,14 +48,14 @@ class HomeBottomNavBar extends StatelessWidget {
             child: Container(
               height: 62,
               decoration: BoxDecoration(
-                color: context.wmCard,
+                color: context.palette.card,
                 borderRadius: BorderRadius.circular(32),
-                border: Border.all(color: context.wmBorderDefault),
+                border: Border.all(color: context.palette.borderDefault),
                 boxShadow: [
                   BoxShadow(
                     offset: const Offset(0, 4),
                     blurRadius: 20,
-                    color: context.wmNavShadow,
+                    color: context.palette.navShadow,
                   ),
                 ],
               ),
@@ -72,7 +71,7 @@ class HomeBottomNavBar extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           // FAB
-          _buildFab(),
+          _buildFab(context),
         ],
       ),
     );
@@ -88,7 +87,7 @@ class HomeBottomNavBar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: isActive
             ? BoxDecoration(
-                color: AppColors.accentPrimary,
+                color: context.palette.accentPrimary,
                 borderRadius: BorderRadius.circular(14),
               )
             : null,
@@ -98,7 +97,7 @@ class HomeBottomNavBar extends StatelessWidget {
             Icon(
               _icons[index],
               size: 20,
-              color: isActive ? Colors.white : context.wmTextTertiary,
+              color: isActive ? Colors.white : context.palette.textTertiary,
             ),
             const SizedBox(height: 4),
             Text(
@@ -106,7 +105,7 @@ class HomeBottomNavBar extends StatelessWidget {
               style: isActive
                   ? AppTextStyles.navLabelActive
                   : AppTextStyles.navLabel.copyWith(
-                      color: context.wmTextTertiary,
+                      color: context.palette.textTertiary,
                     ),
             ),
           ],
@@ -115,7 +114,8 @@ class HomeBottomNavBar extends StatelessWidget {
     );
   }
 
-  Widget _buildFab() {
+  Widget _buildFab(BuildContext context) {
+    final palette = context.palette;
     return GestureDetector(
       onTap: onFabTap,
       child: Container(
@@ -123,16 +123,16 @@ class HomeBottomNavBar extends StatelessWidget {
         height: 62,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(31),
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppColors.fabGradientStart, AppColors.fabGradientEnd],
+            colors: [palette.fabGradientStart, palette.fabGradientEnd],
           ),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              offset: Offset(0, 4),
+              offset: const Offset(0, 4),
               blurRadius: 14,
-              color: AppColors.fabShadow,
+              color: palette.fabShadow,
             ),
           ],
         ),

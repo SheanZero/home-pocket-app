@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../providers/state_joy_metric_variant.dart';
 
@@ -30,8 +29,8 @@ class JoyMetricVariantChip extends ConsumerWidget {
             constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: context.wmCard,
-                border: Border.all(color: context.wmBorderDefault),
+                color: context.palette.card,
+                border: Border.all(color: context.palette.borderDefault),
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Padding(
@@ -43,14 +42,14 @@ class JoyMetricVariantChip extends ConsumerWidget {
                     Text(
                       label,
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: context.wmTextPrimary,
+                        color: context.palette.textPrimary,
                       ),
                     ),
                     const SizedBox(width: 4),
                     Text(
                       '▼',
                       style: AppTextStyles.caption.copyWith(
-                        color: context.wmTextSecondary,
+                        color: context.palette.textSecondary,
                       ),
                     ),
                   ],
@@ -88,7 +87,7 @@ class JoyMetricVariantChip extends ConsumerWidget {
                 Text(
                   l10n.analyticsJoyMetricVariantSheetTitle,
                   style: AppTextStyles.titleSmall.copyWith(
-                    color: context.wmTextPrimary,
+                    color: context.palette.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -139,11 +138,11 @@ class _VariantOptionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       selected: selected,
-      selectedColor: AppColors.accentPrimary,
+      selectedColor: context.palette.accentPrimary,
       title: Text(
         title,
         style: AppTextStyles.bodyMedium.copyWith(
-          color: selected ? AppColors.accentPrimary : context.wmTextPrimary,
+          color: selected ? context.palette.accentPrimary : context.palette.textPrimary,
           fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
         ),
       ),
@@ -152,7 +151,7 @@ class _VariantOptionTile extends StatelessWidget {
           : Text(
               subtitle!,
               style: AppTextStyles.caption.copyWith(
-                color: context.wmTextSecondary,
+                color: context.palette.textSecondary,
               ),
             ),
       onTap: onTap,

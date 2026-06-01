@@ -6,9 +6,8 @@ import '../../../../generated/app_localizations.dart';
 import '../../../../application/analytics/get_monthly_joy_target_recommendation_use_case.dart';
 import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../application/i18n/formatter_service.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart';
 import '../../../../features/analytics/domain/models/family_happiness.dart';
@@ -254,7 +253,7 @@ class HomeScreen extends ConsumerWidget {
                   Text(
                     l10n.homeRecentTransactions,
                     style: AppTextStyles.titleSmall.copyWith(
-                      color: context.wmTextPrimary,
+                      color: context.palette.textPrimary,
                     ),
                   ),
                   GestureDetector(
@@ -264,7 +263,7 @@ class HomeScreen extends ConsumerWidget {
                     child: Text(
                       l10n.homeViewAllTransactions,
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.accentPrimary,
+                        color: context.palette.accentPrimary,
                       ),
                     ),
                   ),
@@ -282,7 +281,7 @@ class HomeScreen extends ConsumerWidget {
                         child: Text(
                           l10n.noTransactionsYet,
                           style: AppTextStyles.bodySmall.copyWith(
-                            color: context.wmTextSecondary,
+                            color: context.palette.textSecondary,
                           ),
                         ),
                       ),
@@ -296,11 +295,11 @@ class HomeScreen extends ConsumerWidget {
                             ? _memberInitial(tx)
                             : (isSoul ? '\u9b42' : '\u751f'),
                         tagBgColor: isSoul
-                            ? context.wmSoulTagBg
-                            : context.wmSurvivalTagBg,
+                            ? context.palette.joyLight
+                            : context.palette.dailyLight,
                         tagTextColor: isSoul
-                            ? AppColors.joy
-                            : AppColors.daily,
+                            ? context.palette.joy
+                            : context.palette.daily,
                         merchant:
                             tx.merchant ??
                             CategoryLocalizationService.resolveFromId(
@@ -314,16 +313,16 @@ class HomeScreen extends ConsumerWidget {
                         // Soul rows use brand green for category + amount (user decision 260518-v4v).
                         // Survival rows use neutral text colors.
                         categoryColor: isSoul
-                            ? AppColors.joy
-                            : context.wmTextSecondary,
+                            ? context.palette.joy
+                            : context.palette.textSecondary,
                         formattedAmount: _formatAmount(
                           tx,
                           outerCurrencyCode,
                           locale,
                         ),
                         amountColor: isSoul
-                            ? AppColors.joy
-                            : context.wmTextPrimary,
+                            ? context.palette.joyText
+                            : context.palette.textPrimary,
                         satisfactionIcon: _satisfactionIcon(tx),
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute<bool>(

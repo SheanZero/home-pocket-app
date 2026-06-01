@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 
 /// Individual transaction row showing a colored tag, merchant, category,
 /// and formatted amount.
@@ -85,7 +84,7 @@ class HomeTransactionTile extends StatelessWidget {
                   Text(
                     merchant,
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: context.wmTextPrimary,
+                      color: context.palette.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -100,7 +99,7 @@ class HomeTransactionTile extends StatelessWidget {
                       ),
                       if (satisfactionIcon != null) ...[
                         const SizedBox(width: 4),
-                        Icon(satisfactionIcon, size: 14, color: AppColors.joy),
+                        Icon(satisfactionIcon, size: 14, color: context.palette.joy),
                       ],
                     ],
                   ),

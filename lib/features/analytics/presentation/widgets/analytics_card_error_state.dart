@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 
 /// Per-card error shell.
@@ -31,7 +31,7 @@ class AnalyticsCardErrorState extends StatelessWidget {
             Text(
               l10n.analyticsCardErrorBody,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: context.wmTextSecondary,
+                color: context.palette.textSecondary,
               ),
             ),
             const SizedBox(height: 8),

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 
 /// Flat header row with month picker, mode badge, and settings icon.
@@ -39,14 +38,14 @@ class HeroHeader extends StatelessWidget {
               Text(
                 l10n.homeMonthFormat(year, month),
                 style: AppTextStyles.headlineMedium.copyWith(
-                  color: context.wmTextPrimary,
+                  color: context.palette.textPrimary,
                 ),
               ),
               const SizedBox(width: 6),
               Icon(
                 Icons.keyboard_arrow_down,
                 size: 20,
-                color: context.wmTextSecondary,
+                color: context.palette.textSecondary,
               ),
             ],
           ),
@@ -64,7 +63,7 @@ class HeroHeader extends StatelessWidget {
           child: Icon(
             Icons.settings_outlined,
             size: 22,
-            color: context.wmTextPrimary,
+            color: context.palette.textPrimary,
           ),
         ),
       ],
@@ -82,11 +81,11 @@ class _ModeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final backgroundColor = isGroupMode
-        ? context.wmFamilyBadgeBg
-        : context.wmSurvivalTagBg;
+        ? context.palette.familyBadgeBg
+        : context.palette.dailyLight;
     final foregroundColor = isGroupMode
-        ? AppColors.accentPrimary
-        : AppColors.daily;
+        ? context.palette.accentPrimary
+        : context.palette.daily;
     final label = isGroupMode ? l10n.homeFamilyMode : l10n.homePersonalMode;
     final icon = isGroupMode ? Icons.people : Icons.person;
 
