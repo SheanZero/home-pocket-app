@@ -8,7 +8,7 @@ import 'package:home_pocket/core/theme/app_theme.dart';
 /// Pumps minimal Builder widgets under ThemeMode.dark and asserts:
 ///   (a) no exception is thrown during build
 ///   (b) Theme.of(context).brightness == Brightness.dark
-///   (c) Theme.of(context).extension<AppPalette>() is not null
+///   (c) `Theme.of(context).extension<AppPalette>()` is not null
 ///
 /// This test is specifically checking ThemeExtension registration in
 /// AppTheme.dark, not visual correctness (visual coverage = Phase 34 golden).

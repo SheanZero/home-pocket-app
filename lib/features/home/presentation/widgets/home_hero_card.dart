@@ -17,8 +17,8 @@ import '../providers/state_shadow_books.dart';
 import 'painter/happiness_rings_painter.dart';
 
 /// D-05: Lerps daily → joy to produce the progress indicator color on the
-/// inner ring. Replaces the old hardcoded _joyTargetStartColor / _joyTargetEndColor
-/// constants (COLOR-03 duplicate removal).
+/// inner ring. Replaces the old hardcoded start/end gradient constants
+/// (COLOR-03 duplicate removal).
 Color joyTargetProgressColor(double ratio, AppPalette palette) {
   final clamped = ratio.clamp(0.0, 1.0).toDouble();
   return Color.lerp(palette.daily, palette.joy, clamped)!;
