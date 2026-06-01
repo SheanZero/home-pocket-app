@@ -56,7 +56,7 @@ class JoyHeadlineKpiTile extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: context.wmSoulTagBg,
-          border: Border.all(color: AppColors.soul.withValues(alpha: 0.20)),
+          border: Border.all(color: AppColors.joy.withValues(alpha: 0.20)),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Column(
@@ -65,7 +65,7 @@ class JoyHeadlineKpiTile extends StatelessWidget {
           children: [
             Text(
               l10n.analyticsKpiJoyIndexLabel,
-              style: AppTextStyles.caption.copyWith(color: AppColors.soul),
+              style: AppTextStyles.caption.copyWith(color: AppColors.joy),
             ),
             const SizedBox(height: 4),
             Text(

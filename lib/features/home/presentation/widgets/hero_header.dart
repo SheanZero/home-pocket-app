@@ -86,7 +86,7 @@ class _ModeBadge extends StatelessWidget {
         : context.wmSurvivalTagBg;
     final foregroundColor = isGroupMode
         ? AppColors.accentPrimary
-        : AppColors.survival;
+        : AppColors.daily;
     final label = isGroupMode ? l10n.homeFamilyMode : l10n.homePersonalMode;
     final icon = isGroupMode ? Icons.people : Icons.person;
 

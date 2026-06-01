@@ -32,8 +32,8 @@ class LedgerTypeSelector extends StatelessWidget {
           type: LedgerType.daily,
           key: const ValueKey('ledger_type_survival_chip'),
           isDark: isDark,
-          activeColor: AppColors.survival,
-          activeBg: AppColors.survivalLight,
+          activeColor: AppColors.daily,
+          activeBg: AppColors.dailyLight,
         ),
         const SizedBox(width: 10),
         _chip(
@@ -42,8 +42,8 @@ class LedgerTypeSelector extends StatelessWidget {
           type: LedgerType.joy,
           key: const ValueKey('ledger_type_soul_chip'),
           isDark: isDark,
-          activeColor: AppColors.soul,
-          activeBg: AppColors.soulLight,
+          activeColor: AppColors.joy,
+          activeBg: AppColors.joyLight,
         ),
       ],
     );

@@ -240,16 +240,16 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                   l10n.listLedgerDaily,
                   style: AppTextStyles.caption.copyWith(
                     color: filter.ledgerType == LedgerType.daily
-                        ? AppColors.survival
+                        ? AppColors.daily
                         : AppColors.textSecondary,
                   ),
                 ),
                 backgroundColor: filter.ledgerType == LedgerType.daily
-                    ? AppColors.survivalLight
+                    ? AppColors.dailyLight
                     : AppColors.card,
                 side: BorderSide(
                   color: filter.ledgerType == LedgerType.daily
-                      ? AppColors.survival
+                      ? AppColors.daily
                       : AppColors.borderDefault,
                   width: 1,
                 ),
@@ -273,16 +273,16 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                   l10n.listLedgerJoy,
                   style: AppTextStyles.caption.copyWith(
                     color: filter.ledgerType == LedgerType.joy
-                        ? AppColors.soul
+                        ? AppColors.joy
                         : AppColors.textSecondary,
                   ),
                 ),
                 backgroundColor: filter.ledgerType == LedgerType.joy
-                    ? AppColors.soulLight
+                    ? AppColors.joyLight
                     : AppColors.card,
                 side: BorderSide(
                   color: filter.ledgerType == LedgerType.joy
-                      ? AppColors.soul
+                      ? AppColors.joy
                       : AppColors.borderDefault,
                   width: 1,
                 ),

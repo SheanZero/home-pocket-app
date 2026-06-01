@@ -6,7 +6,7 @@ import 'app_colors.dart';
 ///
 /// Use `context.wmCard` instead of `AppColors.card` for theme-dependent colors.
 /// Keep using `AppColors.*` directly for accent colors that stay the same in
-/// both themes (e.g. `AppColors.accentPrimary`, `AppColors.survival`).
+/// both themes (e.g. `AppColors.accentPrimary`, `AppColors.daily`).
 extension AppThemeColors on BuildContext {
   bool get _isDark => Theme.of(this).brightness == Brightness.dark;
 
@@ -41,15 +41,15 @@ extension AppThemeColors on BuildContext {
   Color get wmNavShadow =>
       _isDark ? AppColorsDark.navShadow : AppColors.navShadow;
 
-  // ── Soul card (satisfaction / ROI) ──
+  // ── Joy card (satisfaction / ROI) ──
   Color get wmSatisfactionBg =>
       _isDark ? AppColorsDark.joyFullnessBg : AppColors.accentPrimaryLight;
   Color get wmSatisfactionBorder => _isDark
       ? AppColorsDark.joyFullnessBorder
       : AppColors.accentPrimaryBorder;
-  Color get wmRoiBg => _isDark ? AppColorsDark.soulRoiBg : AppColors.oliveLight;
+  Color get wmRoiBg => _isDark ? AppColorsDark.joyRoiBg : AppColors.oliveLight;
   Color get wmRoiBorder =>
-      _isDark ? AppColorsDark.soulRoiBorder : AppColors.oliveBorder;
+      _isDark ? AppColorsDark.joyRoiBorder : AppColors.oliveBorder;
 
   // ── Family badge ──
   Color get wmFamilyBadgeBg =>
@@ -57,9 +57,9 @@ extension AppThemeColors on BuildContext {
 
   // ── Ledger tag tints ──
   Color get wmSurvivalTagBg =>
-      _isDark ? AppColorsDark.tagBlue : AppColors.survivalLight;
+      _isDark ? AppColorsDark.tagBlue : AppColors.dailyLight;
   Color get wmSoulTagBg =>
-      _isDark ? AppColorsDark.tagGreen : AppColors.soulLight;
+      _isDark ? AppColorsDark.tagGreen : AppColors.joyLight;
   Color get wmSharedTagBg =>
       _isDark ? AppColorsDark.tagOrange : AppColors.sharedLight;
 }

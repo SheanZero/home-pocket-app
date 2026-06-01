@@ -172,7 +172,7 @@ class ListTransactionTile extends ConsumerWidget {
                           Icon(
                             satisfactionIcon,
                             size: 14,
-                            color: AppColors.soul,
+                            color: AppColors.joy,
                           ),
                         ],
                       ],

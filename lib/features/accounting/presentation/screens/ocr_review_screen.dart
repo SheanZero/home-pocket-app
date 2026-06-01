@@ -116,9 +116,9 @@ class _OcrReviewScreenState extends ConsumerState<OcrReviewScreen> {
         scrolledUnderElevation: 0,
         leading: TextButton.icon(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.chevron_left, color: AppColors.survival),
+          icon: const Icon(Icons.chevron_left, color: AppColors.daily),
           label: Text(l10n.back,
-              style: AppTextStyles.titleMedium.copyWith(color: AppColors.survival)),
+              style: AppTextStyles.titleMedium.copyWith(color: AppColors.daily)),
         ),
         leadingWidth: 100,
         title: Text(l10n.ocrReviewTitle,

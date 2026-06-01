@@ -36,14 +36,14 @@ abstract final class AppColors {
   static const recordingGradientStart = Color(0xFFE05050);
   static const recordingGradientEnd = Color(0xFFC03030);
 
-  // ── Accent — Survival (Blue) ──
-  static const survival = Color(0xFF5A9CC8);
-  static const survivalLight = Color(0xFFE8F0F8);
+  // ── Accent — Daily (Blue) ──
+  static const daily = Color(0xFF5A9CC8);
+  static const dailyLight = Color(0xFFE8F0F8);
 
-  // ── Accent — Soul (Green) ──
-  static const soul = Color(0xFF47B88A);
-  static const soulLight = Color(0xFFE5F5ED);
-  static const tagGreen = soulLight;
+  // ── Accent — Joy (Green) ──
+  static const joy = Color(0xFF47B88A);
+  static const joyLight = Color(0xFFE5F5ED);
+  static const tagGreen = joyLight;
 
   // ── Accent — Olive (Trends) ──
   static const olive = Color(0xFF8A9178);
@@ -99,11 +99,11 @@ abstract final class AppColorsDark {
   static const tagGreen = Color(0xFF1E3028);
   static const tagOrange = Color(0xFF3D2D1E);
 
-  // ── Soul card ──
+  // ── Joy card ──
   static const joyFullnessBg = Color(0xFF3D2525);
   static const joyFullnessBorder = Color(0xFF5A3535);
-  static const soulRoiBg = Color(0xFF1E3028);
-  static const soulRoiBorder = Color(0xFF2D4D3A);
+  static const joyRoiBg = Color(0xFF1E3028);
+  static const joyRoiBorder = Color(0xFF2D4D3A);
 
   // ── Family badge ──
   static const familyBadgeBg = Color(0xFF3D2525);

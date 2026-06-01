@@ -100,7 +100,7 @@ class HomeTransactionTile extends StatelessWidget {
                       ),
                       if (satisfactionIcon != null) ...[
                         const SizedBox(width: 4),
-                        Icon(satisfactionIcon, size: 14, color: AppColors.soul),
+                        Icon(satisfactionIcon, size: 14, color: AppColors.joy),
                       ],
                     ],
                   ),

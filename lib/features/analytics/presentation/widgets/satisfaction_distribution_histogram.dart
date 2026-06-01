@@ -115,7 +115,7 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
                       color: context.wmCard,
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
-                        color: AppColors.soul.withValues(alpha: 0.32),
+                        color: AppColors.joy.withValues(alpha: 0.32),
                       ),
                     ),
                     child: Padding(
@@ -129,7 +129,7 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
                           'analytics_histogram_bar_5_annotation',
                         ),
                         style: AppTextStyles.caption.copyWith(
-                          color: AppColors.soul,
+                          color: AppColors.joy,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -161,10 +161,10 @@ class SatisfactionDistributionHistogram extends StatelessWidget {
 
   Color _colorForScore(int score) {
     if (score <= 5) {
-      return Color.lerp(AppColors.survival, AppColors.soul, (score - 1) / 4)!;
+      return Color.lerp(AppColors.daily, AppColors.joy, (score - 1) / 4)!;
     }
     return Color.lerp(
-      AppColors.soul,
+      AppColors.joy,
       AppColors.accentPrimary,
       (score - 5) / 5,
     )!;

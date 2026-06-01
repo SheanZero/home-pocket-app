@@ -68,7 +68,7 @@ class AmountDisplay extends StatelessWidget {
             key: const ValueKey('amount_currency_badge'),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.survivalLight,
+              color: AppColors.dailyLight,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -77,7 +77,7 @@ class AmountDisplay extends StatelessWidget {
                 Text(
                   currencySymbol,
                   style: AppTextStyles.amountMedium.copyWith(
-                    color: AppColors.survival,
+                    color: AppColors.daily,
                     fontSize: 14,
                   ),
                 ),
@@ -85,7 +85,7 @@ class AmountDisplay extends StatelessWidget {
                 Text(
                   currencyLabel,
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.survival,
+                    color: AppColors.daily,
                     fontWeight: FontWeight.w600,
                     fontSize: 10,
                   ),

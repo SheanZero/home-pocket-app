@@ -72,8 +72,8 @@ class GroupChoiceScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               _ActionCard(
                 icon: LucideIcons.logIn,
-                iconBackgroundColor: AppColors.survivalLight,
-                iconColor: AppColors.survival,
+                iconBackgroundColor: AppColors.dailyLight,
+                iconColor: AppColors.daily,
                 title: l10n.familySyncEnterPartnerCode,
                 description: l10n.groupJoinDesc,
                 onTap: () => Navigator.push(

@@ -129,10 +129,10 @@ class MonthlySpendTrendBarChart extends StatelessWidget {
         BarChartRodData(
           toY: month.totalExpenses.toDouble(),
           color: isCurrent
-              ? AppColors.survival
-              : AppColors.survival.withValues(alpha: 0.30),
+              ? AppColors.daily
+              : AppColors.daily.withValues(alpha: 0.30),
           borderSide: BorderSide(
-            color: AppColors.survival,
+            color: AppColors.daily,
             width: isCurrent ? 2 : 1,
           ),
           width: 18,

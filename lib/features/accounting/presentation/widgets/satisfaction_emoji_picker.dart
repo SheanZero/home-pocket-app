@@ -67,7 +67,7 @@ class SatisfactionEmojiPicker extends StatelessWidget {
               style: AppTextStyles.bodySmall.copyWith(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.soul,
+                color: AppColors.joy,
               ),
             ),
           ],
@@ -89,7 +89,7 @@ class SatisfactionEmojiPicker extends StatelessWidget {
                       : baseTileColor,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: isSelected ? AppColors.soul : Colors.transparent,
+                    color: isSelected ? AppColors.joy : Colors.transparent,
                     width: isSelected ? 2 : 1,
                   ),
                 ),
@@ -97,7 +97,7 @@ class SatisfactionEmojiPicker extends StatelessWidget {
                   _icons[index],
                   size: 24,
                   color: isSelected
-                      ? AppColors.soul
+                      ? AppColors.joy
                       : (isDark
                             ? AppColorsDark.textSecondary
                             : AppColors.textSecondary),
