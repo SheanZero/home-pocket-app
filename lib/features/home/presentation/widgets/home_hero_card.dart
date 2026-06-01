@@ -3,9 +3,8 @@ import 'package:intl/intl.dart';
 
 import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../application/i18n/formatter_service.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/joy_cumulative_formatter.dart';
@@ -17,12 +16,12 @@ import '../../../analytics/domain/models/monthly_report.dart';
 import '../providers/state_shadow_books.dart';
 import 'painter/happiness_rings_painter.dart';
 
-const Color _joyTargetStartColor = Color(0xFF47B88A);
-const Color _joyTargetEndColor = Color(0xFFD9A441);
-
-Color joyTargetProgressColor(double ratio) {
+/// D-05: Lerps daily → joy to produce the progress indicator color on the
+/// inner ring. Replaces the old hardcoded _joyTargetStartColor / _joyTargetEndColor
+/// constants (COLOR-03 duplicate removal).
+Color joyTargetProgressColor(double ratio, AppPalette palette) {
   final clamped = ratio.clamp(0.0, 1.0).toDouble();
-  return Color.lerp(_joyTargetStartColor, _joyTargetEndColor, clamped)!;
+  return Color.lerp(palette.daily, palette.joy, clamped)!;
 }
 
 /// Integrated hero card (Phase 10) replacing the previous trio of legacy
@@ -78,6 +77,7 @@ class HomeHeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
+    final palette = context.palette;
     final showMembers = isGroupMode && (shadowBooks?.isNotEmpty ?? false);
     return GestureDetector(
       onTap: onTap,
@@ -85,31 +85,31 @@ class HomeHeroCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: context.wmCard,
+          color: palette.card,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: context.wmBorderDefault),
+          border: Border.all(color: palette.borderDefault),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _hero(context, l10n),
+            _hero(context, l10n, palette),
             const SizedBox(height: 16),
-            _splitBar(context, l10n),
+            _splitBar(context, l10n, palette),
             const SizedBox(height: 12),
-            _divider(context),
+            _divider(palette),
             const SizedBox(height: 12),
-            _ringSection(context, l10n),
+            _ringSection(context, l10n, palette),
             const SizedBox(height: 12),
-            _divider(context),
+            _divider(palette),
             const SizedBox(height: 12),
             // Region 6: Best Joy strip.
-            _buildBestJoyStrip(context, l10n),
+            _buildBestJoyStrip(context, l10n, palette),
             if (showMembers) ...[
               const SizedBox(height: 12),
-              _divider(context),
+              _divider(palette),
               const SizedBox(height: 12),
               // Region 8: Members section (group mode + non-empty shadowBooks).
-              _buildMembersSection(context, l10n),
+              _buildMembersSection(context, l10n, palette),
             ],
           ],
         ),
@@ -118,7 +118,7 @@ class HomeHeroCard extends StatelessWidget {
   }
 
   // ─── Region 1: Hero header ─────────────────────────────────────────────────
-  Widget _hero(BuildContext context, S l10n) {
+  Widget _hero(BuildContext context, S l10n, AppPalette palette) {
     final extra = isGroupMode ? (shadowAggregate?.totalExpenses ?? 0) : 0;
     final prevExtra = isGroupMode
         ? (shadowAggregate?.prevTotalExpenses ?? 0)
@@ -137,7 +137,7 @@ class HomeHeroCard extends StatelessWidget {
         Text(
           label,
           style: AppTextStyles.bodyMedium.copyWith(
-            color: context.wmTextSecondary,
+            color: palette.textSecondary,
           ),
         ),
         const SizedBox(height: 8),
@@ -147,11 +147,11 @@ class HomeHeroCard extends StatelessWidget {
               child: Text(
                 _fmt.formatCurrency(total, currencyCode, locale),
                 style: AppTextStyles.amountLarge.copyWith(
-                  color: context.wmTextPrimary,
+                  color: palette.textPrimary,
                 ),
               ),
             ),
-            if (hasAny) _trendChip(trend),
+            if (hasAny) _trendChip(palette, trend),
           ],
         ),
         const SizedBox(height: 8),
@@ -160,19 +160,19 @@ class HomeHeroCard extends StatelessWidget {
             _fmt.formatCurrency(prev, currencyCode, locale),
           ),
           style: AppTextStyles.bodySmall.copyWith(
-            color: context.wmTextSecondary,
+            color: palette.textSecondary,
           ),
         ),
       ],
     );
   }
 
-  Widget _trendChip(int trend) {
+  Widget _trendChip(AppPalette palette, int trend) {
     final text = trend <= 0 ? '$trend%' : '+$trend%';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.oliveLight,
+        color: palette.successLight,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -181,14 +181,14 @@ class HomeHeroCard extends StatelessWidget {
           Icon(
             trend <= 0 ? Icons.trending_down : Icons.trending_up,
             size: 14,
-            color: AppColors.olive,
+            color: palette.success,
           ),
           const SizedBox(width: 4),
           Text(
             text,
             style: AppTextStyles.bodySmall.copyWith(
               fontWeight: FontWeight.w600,
-              color: AppColors.olive,
+              color: palette.success,
             ),
           ),
         ],
@@ -197,7 +197,7 @@ class HomeHeroCard extends StatelessWidget {
   }
 
   // ─── Region 2: ときめき/日常 split bar (ABSOLUTE amounts only — D-02) ────────────
-  Widget _splitBar(BuildContext context, S l10n) {
+  Widget _splitBar(BuildContext context, S l10n, AppPalette palette) {
     final joy = report.joyTotal;
     final daily = report.dailyTotal;
     final combined = joy + daily;
@@ -211,17 +211,19 @@ class HomeHeroCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _splitLabel(
-              context,
-              AppColors.joy,
-              l10n.joyLedger,
-              joyText,
+              palette,
+              dotColor: palette.joy,
+              amountColor: palette.joyText,
+              label: l10n.joyLedger,
+              amount: joyText,
               leading: true,
             ),
             _splitLabel(
-              context,
-              AppColors.daily,
-              l10n.dailyLedger,
-              dailyText,
+              palette,
+              dotColor: palette.daily,
+              amountColor: palette.dailyText,
+              label: l10n.dailyLedger,
+              amount: dailyText,
               leading: false,
             ),
           ],
@@ -231,7 +233,7 @@ class HomeHeroCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           child: Stack(
             children: [
-              Container(height: 6, color: AppColors.daily),
+              Container(height: 6, color: palette.daily),
               FractionallySizedBox(
                 widthFactor: ratio,
                 child: Container(
@@ -241,8 +243,8 @@ class HomeHeroCard extends StatelessWidget {
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                       colors: [
-                        AppColors.joy.withValues(alpha: 0.6),
-                        AppColors.joy,
+                        palette.joy.withValues(alpha: 0.6),
+                        palette.joy,
                       ],
                     ),
                   ),
@@ -256,24 +258,25 @@ class HomeHeroCard extends StatelessWidget {
   }
 
   Widget _splitLabel(
-    BuildContext context,
-    Color color,
-    String label,
-    String amount, {
+    AppPalette palette, {
+    required Color dotColor,
+    required Color amountColor,
+    required String label,
+    required String amount,
     required bool leading,
   }) {
     final dot = Container(
       width: 8,
       height: 8,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
     );
     final labelText = Text(
       label,
-      style: AppTextStyles.bodySmall.copyWith(color: context.wmTextSecondary),
+      style: AppTextStyles.bodySmall.copyWith(color: palette.textSecondary),
     );
     final amountText = Text(
       amount,
-      style: AppTextStyles.amountSmall.copyWith(color: color),
+      style: AppTextStyles.amountSmall.copyWith(color: amountColor),
     );
     return Row(
       children: leading
@@ -295,11 +298,11 @@ class HomeHeroCard extends StatelessWidget {
   }
 
   // ─── Region 3+5+7: Divider ────────────────────────────────────────────────
-  Widget _divider(BuildContext context) =>
-      Container(height: 1, color: context.wmBackgroundDivider);
+  Widget _divider(AppPalette palette) =>
+      Container(height: 1, color: palette.backgroundDivider);
 
   // ─── Region 4: Ring section ───────────────────────────────────────────────
-  Widget _ringSection(BuildContext context, S l10n) {
+  Widget _ringSection(BuildContext context, S l10n, AppPalette palette) {
     final title = isGroupMode
         ? l10n.homeRingSectionTitleGroup
         : l10n.homeRingSectionTitleSingle;
@@ -308,12 +311,12 @@ class HomeHeroCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.auto_awesome, size: 16, color: AppColors.joy),
+            Icon(Icons.auto_awesome, size: 16, color: palette.joy),
             const SizedBox(width: 6),
             Text(
               title,
               style: AppTextStyles.bodyLarge.copyWith(
-                color: context.wmTextPrimary,
+                color: palette.textPrimary,
               ),
             ),
             const SizedBox(width: 4),
@@ -332,37 +335,37 @@ class HomeHeroCard extends StatelessWidget {
                   children: [
                     CustomPaint(
                       size: const Size(120, 120),
-                      painter: _painter(context),
+                      painter: _painter(palette),
                     ),
-                    _centerContent(context, l10n),
+                    _centerContent(context, l10n, palette),
                   ],
                 ),
               ),
             ),
             const SizedBox(width: 16),
-            Expanded(child: _legend(context, l10n)),
+            Expanded(child: _legend(context, l10n, palette)),
           ],
         ),
       ],
     );
   }
 
-  HappinessRingsPainter _painter(BuildContext context) {
-    final track = context.wmBackgroundDivider;
+  HappinessRingsPainter _painter(AppPalette palette) {
+    final track = palette.backgroundDivider;
     if (isGroupMode) {
       final f = family;
       return HappinessRingsPainter(
         outerSweepRatio: f == null ? null : _familyHighlightsRatio(f.familyHighlightsSum),
         middleSweepRatio: f == null ? null : _sharedJoyRatio(f.sharedJoyInsight),
         innerSweepRatio: f == null ? null : _medianSatisfactionRatio(f.medianSatisfaction),
-        outerGradient: const SweepGradient(
-          colors: [AppColors.sharedLight, AppColors.shared],
+        outerGradient: SweepGradient(
+          colors: [palette.sharedLight, palette.shared],
         ),
-        middleGradient: const SweepGradient(
-          colors: [AppColors.accentPrimaryLight, AppColors.accentPrimary],
+        middleGradient: SweepGradient(
+          colors: [palette.accentPrimaryLight, palette.accentPrimary],
         ),
-        innerGradient: const SweepGradient(
-          colors: [AppColors.oliveLight, AppColors.olive],
+        innerGradient: SweepGradient(
+          colors: [palette.successLight, palette.success],
         ),
         trackColor: track,
       );
@@ -371,14 +374,14 @@ class HomeHeroCard extends StatelessWidget {
       outerSweepRatio: _highlightsRatio(happiness.highlightsCount),
       middleSweepRatio: _avgSatisfactionRatio(happiness.avgSatisfaction),
       innerSweepRatio: _joyContributionRatio(happiness.joyContribution),
-      outerGradient: const SweepGradient(
-        colors: [AppColors.accentPrimary, AppColors.accentPrimary],
+      outerGradient: SweepGradient(
+        colors: [palette.accentPrimary, palette.accentPrimary],
       ),
-      middleGradient: const SweepGradient(
-        colors: [AppColors.olive, AppColors.olive],
+      middleGradient: SweepGradient(
+        colors: [palette.success, palette.success],
       ),
       innerGradient: SweepGradient(
-        colors: [_singleProgressColor(), _singleProgressColor()],
+        colors: [_singleProgressColor(palette), _singleProgressColor(palette)],
       ),
       trackColor: track,
     );
@@ -398,8 +401,8 @@ class HomeHeroCard extends StatelessWidget {
           ? (data / activeMonthlyJoyTarget).clamp(0.0, 1.0)
           : 0.0,
   };
-  Color _singleProgressColor() =>
-      joyTargetProgressColor(_singleProgressRatioForColor());
+  Color _singleProgressColor(AppPalette palette) =>
+      joyTargetProgressColor(_singleProgressRatioForColor(), palette);
   double? _avgSatisfactionRatio(MetricResult<double> r) => switch (r) {
     Empty() => null,
     Value(:final data) => (data / 10.0).clamp(0.0, 1.0),
@@ -421,12 +424,12 @@ class HomeHeroCard extends StatelessWidget {
     Value(:final data) => (data / 10.0).clamp(0.0, 1.0),
   };
 
-  Widget _centerContent(BuildContext context, S l10n) {
+  Widget _centerContent(BuildContext context, S l10n, AppPalette palette) {
     if (isGroupMode) {
       return Text(
         _groupCenterText(),
         style: AppTextStyles.amountMedium.copyWith(
-          color: context.wmTextPrimary,
+          color: palette.textPrimary,
         ),
       );
     }
@@ -435,8 +438,8 @@ class HomeHeroCard extends StatelessWidget {
       Value(:final data) => formatJoyCumulative(data, currencyCode),
     };
     final valueColor = switch (happiness.joyContribution) {
-      Empty() => context.wmTextPrimary,
-      Value() => _singleProgressColor(),
+      Empty() => palette.textPrimary,
+      Value() => _singleProgressColor(palette),
     };
     return Semantics(
       label: l10n.homeJoyTargetSemantics(valueText, activeMonthlyJoyTarget),
@@ -456,20 +459,20 @@ class HomeHeroCard extends StatelessWidget {
     };
   }
 
-  Widget _legend(BuildContext context, S l10n) {
-    if (isGroupMode) return _legendGroup(context, l10n);
-    return _legendSingle(context, l10n);
+  Widget _legend(BuildContext context, S l10n, AppPalette palette) {
+    if (isGroupMode) return _legendGroup(context, l10n, palette);
+    return _legendSingle(context, l10n, palette);
   }
 
-  Widget _legendGroup(BuildContext context, S l10n) {
+  Widget _legendGroup(BuildContext context, S l10n, AppPalette palette) {
     final f = family;
     final empty = l10n.homeNoJoyDataLegend;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _legendRow(
-          context,
-          AppColors.shared,
+          palette,
+          palette.shared,
           l10n.homeFamilyHighlightsLegend,
           switch (f?.familyHighlightsSum) {
             null || Empty() => empty,
@@ -478,8 +481,8 @@ class HomeHeroCard extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         _legendRow(
-          context,
-          AppColors.accentPrimary,
+          palette,
+          palette.accentPrimary,
           l10n.homeSharedJoyLegend,
           switch (f?.sharedJoyInsight) {
             null || Empty() => empty,
@@ -488,8 +491,8 @@ class HomeHeroCard extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         _legendRow(
-          context,
-          AppColors.olive,
+          palette,
+          palette.success,
           l10n.homeMedianSatisfactionLegend,
           switch (f?.medianSatisfaction) {
             null || Empty() => empty,
@@ -500,7 +503,7 @@ class HomeHeroCard extends StatelessWidget {
     );
   }
 
-  Widget _legendSingle(BuildContext context, S l10n) {
+  Widget _legendSingle(BuildContext context, S l10n, AppPalette palette) {
     final empty = l10n.homeNoJoyDataLegend;
     final highlights = switch (happiness.highlightsCount) {
       Empty() => 0,
@@ -510,8 +513,8 @@ class HomeHeroCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _legendRow(
-          context,
-          AppColors.joy,
+          palette,
+          palette.joy,
           l10n.homeJoyContributionLegend,
           switch (happiness.joyContribution) {
             Empty() => empty,
@@ -523,8 +526,8 @@ class HomeHeroCard extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         _legendRow(
-          context,
-          AppColors.olive,
+          palette,
+          palette.success,
           l10n.homeAvgSatisfactionLegend,
           switch (happiness.avgSatisfaction) {
             Empty() => empty,
@@ -533,8 +536,8 @@ class HomeHeroCard extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         _legendRow(
-          context,
-          AppColors.accentPrimary,
+          palette,
+          palette.accentPrimary,
           l10n.homeHighlightsCountLegend,
           '$highlights',
         ),
@@ -543,7 +546,7 @@ class HomeHeroCard extends StatelessWidget {
   }
 
   Widget _legendRow(
-    BuildContext context,
+    AppPalette palette,
     Color dot,
     String label,
     String value, {
@@ -566,7 +569,7 @@ class HomeHeroCard extends StatelessWidget {
                 child: Text(
                   label,
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: context.wmTextSecondary,
+                    color: palette.textSecondary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -583,7 +586,7 @@ class HomeHeroCard extends StatelessWidget {
             value,
             style: AppTextStyles.bodyMedium.copyWith(
               fontWeight: FontWeight.w600,
-              color: context.wmTextPrimary,
+              color: palette.textPrimary,
             ),
           ),
         if (trailing != null) ...[const SizedBox(width: 4), trailing],
@@ -596,31 +599,31 @@ class HomeHeroCard extends StatelessWidget {
   // 3-row cream card: Row 1 = title + satisfaction pill; Row 2 = hero amount;
   // Row 3 = merchant/category + date. Replaces old 3-line text layout.
   // homeBestJoyEmptyBig/AllNeutralBig ARB keys unused after Variant A — see v4v worklog.
-  Widget _buildBestJoyStrip(BuildContext context, S l10n) {
+  Widget _buildBestJoyStrip(BuildContext context, S l10n, AppPalette palette) {
     final titleText = isGroupMode
         ? l10n.homeBestJoyTagGroup
         : l10n.homeBestJoyTagSingle;
     return switch (bestJoy) {
-      Empty() => _bestJoyEmpty(context, titleText, l10n.homeBestJoyEmptySmall),
+      Empty() => _bestJoyEmpty(palette, titleText, l10n.homeBestJoyEmptySmall),
       Value(:final data) when data.joyFullness <= 2 => _bestJoyEmpty(
-        context,
+        palette,
         titleText,
         l10n.homeBestJoyAllNeutralSmall,
       ),
-      Value(:final data) => _bestJoyValue(context, l10n, titleText, data),
+      Value(:final data) => _bestJoyValue(context, l10n, palette, titleText, data),
     };
   }
 
-  Widget _bestJoyEmpty(BuildContext context, String title, String mutedLine) {
+  Widget _bestJoyEmpty(AppPalette palette, String title, String mutedLine) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _bestJoyTitleRow(context, title),
+        _bestJoyTitleRow(palette, title),
         const SizedBox(height: 12),
         Text(
           mutedLine,
           style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.textMutedGold,
+            color: palette.textMutedGold,
           ),
         ),
       ],
@@ -629,14 +632,14 @@ class HomeHeroCard extends StatelessWidget {
 
   /// Section title row matching `_ringSection` style: icon + bodyLarge text,
   /// left-aligned, transparent background (no card chrome).
-  Widget _bestJoyTitleRow(BuildContext context, String title) {
+  Widget _bestJoyTitleRow(AppPalette palette, String title) {
     return Row(
       children: [
-        const Icon(Icons.favorite, size: 16, color: AppColors.joy),
+        Icon(Icons.favorite, size: 16, color: palette.joy),
         const SizedBox(width: 6),
         Text(
           title,
-          style: AppTextStyles.bodyLarge.copyWith(color: context.wmTextPrimary),
+          style: AppTextStyles.bodyLarge.copyWith(color: palette.textPrimary),
         ),
       ],
     );
@@ -645,6 +648,7 @@ class HomeHeroCard extends StatelessWidget {
   Widget _bestJoyValue(
     BuildContext context,
     S l10n,
+    AppPalette palette,
     String title,
     BestJoyMomentRow row,
   ) {
@@ -662,7 +666,7 @@ class HomeHeroCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Row 1: title only — left-aligned (pill moved to amount row)
-        _bestJoyTitleRow(context, title),
+        _bestJoyTitleRow(palette, title),
         const SizedBox(height: 12),
         // Row 2: hero amount left + enlarged satisfaction pill right
         // (pill vertically centered on amount center line per user 260518-v4v r2)
@@ -678,7 +682,7 @@ class HomeHeroCard extends StatelessWidget {
                   splitResult.$1,
                   style: AppTextStyles.amountSmall.copyWith(
                     fontSize: 20,
-                    color: AppColors.joy,
+                    color: palette.joyText,
                   ),
                 ),
                 const SizedBox(width: 6),
@@ -687,13 +691,13 @@ class HomeHeroCard extends StatelessWidget {
                   style: AppTextStyles.amountLarge.copyWith(
                     fontSize: 32,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.joy,
+                    color: palette.joyText,
                     letterSpacing: -0.5,
                   ),
                 ),
               ],
             ),
-            _satisfactionPill(l10n, row.joyFullness),
+            _satisfactionPill(l10n, palette, row.joyFullness),
           ],
         ),
         const SizedBox(height: 10),
@@ -706,21 +710,21 @@ class HomeHeroCard extends StatelessWidget {
               child: Text(
                 category,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Outfit',
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textMutedGold,
+                  color: palette.textMutedGold,
                 ),
               ),
             ),
             Text(
               dateLabel,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Outfit',
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textMutedGold,
+                color: palette.textMutedGold,
               ),
             ),
           ],
@@ -731,11 +735,11 @@ class HomeHeroCard extends StatelessWidget {
 
   /// Satisfaction pill widget (Variant A — pill with icon + tier label).
   /// Enlarged per user 260518-v4v r2: icon 16→20, text 11→14, padding (8,4)→(12,7).
-  Widget _satisfactionPill(S l10n, int sat) {
+  Widget _satisfactionPill(S l10n, AppPalette palette, int sat) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: AppColors.satisfactionPillBg,
+        color: palette.satisfactionPillBg,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -744,16 +748,16 @@ class HomeHeroCard extends StatelessWidget {
           Icon(
             _satisfactionPillIcon(sat),
             size: 20,
-            color: AppColors.satisfactionPillRose,
+            color: palette.satisfactionPillRose,
           ),
           const SizedBox(width: 6),
           Text(
             _satisfactionPillLabel(l10n, sat),
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Outfit',
               fontSize: 14,
               fontWeight: FontWeight.w800,
-              color: AppColors.satisfactionPillRose,
+              color: palette.satisfactionPillRose,
             ),
           ),
         ],
@@ -788,7 +792,7 @@ class HomeHeroCard extends StatelessWidget {
   }
 
   // ─── Region 8: Members section (group mode + non-empty shadowBooks) ───────
-  Widget _buildMembersSection(BuildContext context, S l10n) {
+  Widget _buildMembersSection(BuildContext context, S l10n, AppPalette palette) {
     // FAMILY-03 minimum gate.
     final books = shadowBooks;
     if (!isGroupMode || books == null || books.isEmpty) {
@@ -804,17 +808,17 @@ class HomeHeroCard extends StatelessWidget {
             l10n.homeMembersSectionTitle,
             style: AppTextStyles.bodyMedium.copyWith(
               fontWeight: FontWeight.w600,
-              color: context.wmTextPrimary,
+              color: palette.textPrimary,
             ),
           ),
         ),
-        for (final m in books) _memberRow(context, m, reports[m.book.id]),
+        for (final m in books) _memberRow(palette, m, reports[m.book.id]),
       ],
     );
   }
 
   Widget _memberRow(
-    BuildContext context,
+    AppPalette palette,
     ShadowBookInfo member,
     MonthlyReport? report,
   ) {
@@ -834,13 +838,13 @@ class HomeHeroCard extends StatelessWidget {
             height: 24,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: context.wmBorderDefault,
+              color: palette.borderDefault,
             ),
             alignment: Alignment.center,
             child: Text(
               initial,
               style: AppTextStyles.bodySmall.copyWith(
-                color: context.wmTextSecondary,
+                color: palette.textSecondary,
               ),
             ),
           ),
@@ -849,7 +853,7 @@ class HomeHeroCard extends StatelessWidget {
             child: Text(
               member.memberDisplayName,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: context.wmTextPrimary,
+                color: palette.textPrimary,
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -857,7 +861,7 @@ class HomeHeroCard extends StatelessWidget {
           Text(
             amountText,
             style: AppTextStyles.amountSmall.copyWith(
-              color: context.wmTextPrimary,
+              color: palette.textPrimary,
             ),
           ),
         ],
@@ -879,6 +883,7 @@ class _InfoIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return GestureDetector(
       // Pitfall #3 — absorb tap; do NOT propagate to the whole-card onTap.
       behavior: HitTestBehavior.opaque,
@@ -889,7 +894,7 @@ class _InfoIcon extends StatelessWidget {
         child: Icon(
           Icons.info_outline,
           size: 16,
-          color: context.wmTextSecondary,
+          color: palette.textSecondary,
         ),
       ),
     );
