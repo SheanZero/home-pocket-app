@@ -103,7 +103,7 @@
 **Plans**: 6 plans
 - [x] 31-01-PLAN.md — Wave-0 RED v18 migration test (D-02/D-16 contract: enum-value rewrite + CHECK recreate + soul_satisfaction→joy_fullness)
 - [x] 31-02-PLAN.md — LedgerType enum rename + v17→v18 migration + soul_satisfaction column rename + persistence literals (turns Wave-0 GREEN)
-- [ ] 31-03-PLAN.md — ARB keys (25 roots) + values + @description rewrite (3 locales) + gen-l10n + call sites
+- [x] 31-03-PLAN.md — ARB keys (25 roots) + values + @description rewrite (3 locales) + gen-l10n + call sites
 - [ ] 31-04-PLAN.md — AppColors survival/soul + derived symbols rename + ~60 call sites
 - [ ] 31-05-PLAN.md — soul*/survival* file + class + snapshot-field renames (git mv + Serena)
 - [ ] 31-06-PLAN.md — ADR-017 Terminology Unification + ADR-015 pointer + INDEX + REQUIREMENTS Out-of-Scope amend (D-06)
