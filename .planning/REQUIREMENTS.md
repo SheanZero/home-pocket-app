@@ -24,7 +24,7 @@
 ### Terminology — Internal Identifiers (TERMID)
 
 - [ ] **TERMID-01**: ARB keys are renamed to the new vocabulary (e.g. `soulLedger`→`joyLedger`, `survival*`→`daily*`, `soul*`→`joy*`) with every Dart call site updated and `flutter gen-l10n` regenerated cleanly.
-- [ ] **TERMID-02**: Theme/color symbols and related Dart identifiers are renamed (`AppColors.survival`→`daily`, `AppColors.soul`→`joy`, and dependent variable/field names) with no stale references remaining in non-generated source.
+- [x] **TERMID-02**: Theme/color symbols and related Dart identifiers are renamed (`AppColors.survival`→`daily`, `AppColors.soul`→`joy`, and dependent variable/field names) with no stale references remaining in non-generated source.
 - [x] **TERMID-03**: The codebase builds and `flutter analyze` reports 0 issues after the identifier rename; generated files (`.g.dart`, `S` localizations) are regenerated and consistent (AUDIT-10 guardrail green).
 - [ ] **TERMID-04**: The governing lexical-hierarchy decision record (ADR-015 or successor) is updated to document the locked 日常/悦己/ときめき/Daily/Joy mapping as the canonical vocabulary.
 
@@ -68,7 +68,7 @@
 | TERM-03 | Phase 31 | Pending |
 | TERM-04 | Phase 31 | Pending |
 | TERMID-01 | Phase 31 | Pending |
-| TERMID-02 | Phase 31 | Pending |
+| TERMID-02 | Phase 31 | Complete |
 | TERMID-03 | Phase 31 | Complete |
 | TERMID-04 | Phase 31 | Pending |
 | PALETTE-01 | Phase 32 | Pending |
