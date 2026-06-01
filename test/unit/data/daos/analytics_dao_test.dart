@@ -28,7 +28,7 @@ void main() {
     int amount = 1000,
     String type = 'expense',
     String categoryId = 'cat_joy',
-    String ledgerType = 'soul',
+    String ledgerType = 'joy',
     DateTime? timestamp,
     bool isDeleted = false,
     int joyFullness = 6,
@@ -209,7 +209,7 @@ void main() {
   });
 
   group('predicate drift guardrails', () {
-    test('soul and survival predicate constants remain byte-identical', () {
+    test('joy and daily predicate constants remain byte-identical', () {
       final source = File(
         'lib/data/daos/analytics_dao.dart',
       ).readAsStringSync();
@@ -217,13 +217,13 @@ void main() {
       expect(
         source,
         contains(
-          '"ledger_type = \'soul\' AND type = \'expense\' AND is_deleted = 0"',
+          '"ledger_type = \'joy\' AND type = \'expense\' AND is_deleted = 0"',
         ),
       );
       expect(
         source,
         contains(
-          '"ledger_type = \'survival\' AND type = \'expense\' AND is_deleted = 0"',
+          '"ledger_type = \'daily\' AND type = \'expense\' AND is_deleted = 0"',
         ),
       );
     });

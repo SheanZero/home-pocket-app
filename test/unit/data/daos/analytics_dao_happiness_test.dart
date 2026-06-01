@@ -25,7 +25,7 @@ void main() {
     int amount = 1000,
     String type = 'expense',
     String categoryId = 'cat_joy',
-    String ledgerType = 'soul',
+    String ledgerType = 'joy',
     DateTime? timestamp,
     bool isDeleted = false,
     int joyFullness = 6,
@@ -58,13 +58,13 @@ void main() {
       await seedTx(
         id: 'survival_1',
         amount: 3000,
-        ledgerType: 'survival',
+        ledgerType: 'daily',
         joyFullness: 10,
       );
       await seedTx(
         id: 'survival_2',
         amount: 4000,
-        ledgerType: 'survival',
+        ledgerType: 'daily',
         joyFullness: 10,
       );
       await seedTx(
@@ -161,7 +161,7 @@ void main() {
       await seedTx(
         id: 'huge_survival',
         amount: 1000000,
-        ledgerType: 'survival',
+        ledgerType: 'daily',
         joyFullness: 10,
       );
       await seedTx(id: 'modest_soul', amount: 2000, joyFullness: 8);

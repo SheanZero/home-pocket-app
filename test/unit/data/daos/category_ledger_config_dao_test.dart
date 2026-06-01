@@ -20,13 +20,13 @@ void main() {
       final now = DateTime(2026, 2, 18);
       await dao.upsert(
         categoryId: 'cat_food',
-        ledgerType: 'survival',
+        ledgerType: 'daily',
         updatedAt: now,
       );
 
       final config = await dao.findById('cat_food');
       expect(config, isNotNull);
-      expect(config!.ledgerType, 'survival');
+      expect(config!.ledgerType, 'daily');
     });
 
     test('upsert overwrites existing entry', () async {
@@ -35,29 +35,29 @@ void main() {
 
       await dao.upsert(
         categoryId: 'cat_food',
-        ledgerType: 'survival',
+        ledgerType: 'daily',
         updatedAt: t1,
       );
       await dao.upsert(
         categoryId: 'cat_food',
-        ledgerType: 'soul',
+        ledgerType: 'joy',
         updatedAt: t2,
       );
 
       final config = await dao.findById('cat_food');
-      expect(config!.ledgerType, 'soul');
+      expect(config!.ledgerType, 'joy');
     });
 
     test('findAll returns all configs', () async {
       final now = DateTime(2026, 2, 18);
       await dao.upsert(
         categoryId: 'cat_food',
-        ledgerType: 'survival',
+        ledgerType: 'daily',
         updatedAt: now,
       );
       await dao.upsert(
         categoryId: 'cat_entertainment',
-        ledgerType: 'soul',
+        ledgerType: 'joy',
         updatedAt: now,
       );
 
@@ -69,7 +69,7 @@ void main() {
       final now = DateTime(2026, 2, 18);
       await dao.upsert(
         categoryId: 'cat_food',
-        ledgerType: 'survival',
+        ledgerType: 'daily',
         updatedAt: now,
       );
 
@@ -82,12 +82,12 @@ void main() {
       final now = DateTime(2026, 2, 18);
       await dao.upsert(
         categoryId: 'cat_food',
-        ledgerType: 'survival',
+        ledgerType: 'daily',
         updatedAt: now,
       );
       await dao.upsert(
         categoryId: 'cat_fun',
-        ledgerType: 'soul',
+        ledgerType: 'joy',
         updatedAt: now,
       );
 
@@ -101,12 +101,12 @@ void main() {
       await dao.upsertBatch([
         LedgerConfigInsertData(
           categoryId: 'cat_food',
-          ledgerType: 'survival',
+          ledgerType: 'daily',
           updatedAt: now,
         ),
         LedgerConfigInsertData(
           categoryId: 'cat_fun',
-          ledgerType: 'soul',
+          ledgerType: 'joy',
           updatedAt: now,
         ),
       ]);

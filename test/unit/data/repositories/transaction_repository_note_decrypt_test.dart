@@ -59,7 +59,7 @@ void main() {
           amount: 1000,
           type: 'expense',
           categoryId: 'cat_food',
-          ledgerType: 'survival',
+          ledgerType: 'daily',
           timestamp: DateTime(2026, 5, 29, 10, 0),
           currentHash: 'hash_abc',
           createdAt: DateTime(2026, 5, 29, 10, 0),

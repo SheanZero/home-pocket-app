@@ -26,7 +26,7 @@ void main() {
     int amount = 1000,
     String type = 'expense',
     String categoryId = 'cat_joy',
-    String ledgerType = 'soul',
+    String ledgerType = 'joy',
     DateTime? timestamp,
     bool isDeleted = false,
     int joyFullness = 6,
@@ -59,12 +59,12 @@ void main() {
   group('getLedgerSnapshot (single book)', () {
     test('per-ledger COUNT + SUM correctness', () async {
       // Soul: 3 rows summing to 600
-      await seedTx(id: 'soul_1', amount: 100, ledgerType: 'soul');
-      await seedTx(id: 'soul_2', amount: 200, ledgerType: 'soul');
-      await seedTx(id: 'soul_3', amount: 300, ledgerType: 'soul');
+      await seedTx(id: 'soul_1', amount: 100, ledgerType: 'joy');
+      await seedTx(id: 'soul_2', amount: 200, ledgerType: 'joy');
+      await seedTx(id: 'soul_3', amount: 300, ledgerType: 'joy');
       // Survival: 2 rows summing to 900
-      await seedTx(id: 'surv_1', amount: 400, ledgerType: 'survival');
-      await seedTx(id: 'surv_2', amount: 500, ledgerType: 'survival');
+      await seedTx(id: 'surv_1', amount: 400, ledgerType: 'daily');
+      await seedTx(id: 'surv_2', amount: 500, ledgerType: 'daily');
 
       final rows = await dao.getLedgerSnapshot(
         bookId: 'book_joy',
@@ -76,18 +76,18 @@ void main() {
       expect(rows, hasLength(2));
 
       final indexed = indexByLedger(rows);
-      expect(indexed['soul']!.totalAmount, 600);
-      expect(indexed['soul']!.entryCount, 3);
-      expect(indexed['survival']!.totalAmount, 900);
-      expect(indexed['survival']!.entryCount, 2);
+      expect(indexed['joy']!.totalAmount, 600);
+      expect(indexed['joy']!.entryCount, 3);
+      expect(indexed['daily']!.totalAmount, 900);
+      expect(indexed['daily']!.entryCount, 2);
     });
 
     test('excludes soft-deleted rows', () async {
-      await seedTx(id: 'soul_a', amount: 100, ledgerType: 'soul');
+      await seedTx(id: 'soul_a', amount: 100, ledgerType: 'joy');
       await seedTx(
         id: 'soul_del',
         amount: 999,
-        ledgerType: 'soul',
+        ledgerType: 'joy',
         isDeleted: true,
       );
 
@@ -98,16 +98,16 @@ void main() {
       );
 
       final indexed = indexByLedger(rows);
-      expect(indexed['soul']!.totalAmount, 100);
-      expect(indexed['soul']!.entryCount, 1);
+      expect(indexed['joy']!.totalAmount, 100);
+      expect(indexed['joy']!.entryCount, 1);
     });
 
     test('excludes income rows', () async {
-      await seedTx(id: 'soul_a', amount: 100, ledgerType: 'soul');
+      await seedTx(id: 'soul_a', amount: 100, ledgerType: 'joy');
       await seedTx(
         id: 'income_a',
         amount: 9999,
-        ledgerType: 'soul',
+        ledgerType: 'joy',
         type: 'income',
       );
 
@@ -118,8 +118,8 @@ void main() {
       );
 
       final indexed = indexByLedger(rows);
-      expect(indexed['soul']!.totalAmount, 100);
-      expect(indexed['soul']!.entryCount, 1);
+      expect(indexed['joy']!.totalAmount, 100);
+      expect(indexed['joy']!.entryCount, 1);
     });
 
     test('respects window boundaries', () async {
@@ -127,26 +127,26 @@ void main() {
       await seedTx(
         id: 'inside_start',
         amount: 100,
-        ledgerType: 'soul',
+        ledgerType: 'joy',
         timestamp: windowStart,
       );
       await seedTx(
         id: 'inside_end',
         amount: 200,
-        ledgerType: 'soul',
+        ledgerType: 'joy',
         timestamp: windowEnd,
       );
       // Outside
       await seedTx(
         id: 'before',
         amount: 999,
-        ledgerType: 'soul',
+        ledgerType: 'joy',
         timestamp: DateTime(2026, 4, 30),
       );
       await seedTx(
         id: 'after',
         amount: 999,
-        ledgerType: 'soul',
+        ledgerType: 'joy',
         timestamp: DateTime(2026, 6, 1),
       );
 
@@ -157,8 +157,8 @@ void main() {
       );
 
       final indexed = indexByLedger(rows);
-      expect(indexed['soul']!.totalAmount, 300);
-      expect(indexed['soul']!.entryCount, 2);
+      expect(indexed['joy']!.totalAmount, 300);
+      expect(indexed['joy']!.entryCount, 2);
     });
 
     test('empty window → empty list', () async {
@@ -175,11 +175,11 @@ void main() {
   group('getLedgerSnapshotAcrossBooks (family pool)', () {
     test('pools rows across books per ledger_type (no GROUP BY book_id)', () async {
       // bookA: 2 soul rows summing to 300
-      await seedTx(id: 'a_soul_1', bookId: 'book_a', amount: 100, ledgerType: 'soul');
-      await seedTx(id: 'a_soul_2', bookId: 'book_a', amount: 200, ledgerType: 'soul');
+      await seedTx(id: 'a_soul_1', bookId: 'book_a', amount: 100, ledgerType: 'joy');
+      await seedTx(id: 'a_soul_2', bookId: 'book_a', amount: 200, ledgerType: 'joy');
       // bookB: 1 soul row + 1 survival row
-      await seedTx(id: 'b_soul_1', bookId: 'book_b', amount: 50, ledgerType: 'soul');
-      await seedTx(id: 'b_surv_1', bookId: 'book_b', amount: 700, ledgerType: 'survival');
+      await seedTx(id: 'b_soul_1', bookId: 'book_b', amount: 50, ledgerType: 'joy');
+      await seedTx(id: 'b_surv_1', bookId: 'book_b', amount: 700, ledgerType: 'daily');
 
       final rows = await dao.getLedgerSnapshotAcrossBooks(
         bookIds: ['book_a', 'book_b'],
@@ -190,15 +190,15 @@ void main() {
       // Pool: one row per ledger_type — soul (count=3, total=350), survival (count=1, total=700)
       expect(rows, hasLength(2));
       final indexed = indexByLedger(rows);
-      expect(indexed['soul']!.entryCount, 3);
-      expect(indexed['soul']!.totalAmount, 350);
-      expect(indexed['survival']!.entryCount, 1);
-      expect(indexed['survival']!.totalAmount, 700);
+      expect(indexed['joy']!.entryCount, 3);
+      expect(indexed['joy']!.totalAmount, 350);
+      expect(indexed['daily']!.entryCount, 1);
+      expect(indexed['daily']!.totalAmount, 700);
     });
 
     test('empty bookIds → empty list, no DB call', () async {
       // Seed data that would otherwise match — verify NOT returned
-      await seedTx(id: 'soul_a', amount: 1000, ledgerType: 'soul');
+      await seedTx(id: 'soul_a', amount: 1000, ledgerType: 'joy');
 
       final rows = await dao.getLedgerSnapshotAcrossBooks(
         bookIds: const [],

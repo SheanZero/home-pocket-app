@@ -2,7 +2,7 @@ import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
 
-const _targetSchemaVersion = 17;
+const _targetSchemaVersion = 18;
 
 void main() {
   late AppDatabase db;

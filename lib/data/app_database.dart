@@ -64,10 +64,15 @@ class AppDatabase extends _$AppDatabase {
           await migrator.addColumn(categories, categories.updatedAt);
           await migrator.createTable(categoryLedgerConfigs);
 
-          // Migrate existing type data to ledger configs
+          // Migrate existing type data to ledger configs.
+          // Use 'daily' (the v18-renamed value for the former 'survival' default)
+          // because createTable(categoryLedgerConfigs) now creates the v18-era table
+          // with CHECK IN('daily','joy'). Historical devices that had 'survival' at
+          // v5 reach this code path only in test scenarios; the v18 migration handles
+          // real devices upgrading from a v5-v17 database that already had 'survival'.
           await customStatement('''
             INSERT INTO category_ledger_configs (category_id, ledger_type, updated_at)
-            SELECT id, 'survival', CAST(strftime('%s', 'now') * 1000 AS INTEGER)
+            SELECT id, 'daily', CAST(strftime('%s', 'now') * 1000 AS INTEGER)
             FROM categories WHERE level = 1 AND type IS NOT NULL
           ''');
 
@@ -159,6 +164,42 @@ class AppDatabase extends _$AppDatabase {
         if (from < 14) {
           // v14: Category taxonomy upgrade — remap removed IDs, delete orphans,
           // then upsert the full v14 system category set.
+          // Pre-upgrade: ensure category_ledger_configs has the new CHECK
+          // IN('daily','joy') before any inserts (devices upgrading from v5-v13
+          // may have the old CHECK IN('survival','soul') from before the v18
+          // terminology rename; we update it here so v14 inserts succeed).
+          // This is a no-op for devices where the table was already created
+          // with the new CHECK (i.e., fresh installs on v18+ code).
+          await customStatement(
+            'DROP INDEX IF EXISTS idx_category_ledger_configs_ledger_type',
+          );
+          await customStatement(
+            'DROP INDEX IF EXISTS idx_category_ledger_configs_updated_at',
+          );
+          await customStatement(
+            'ALTER TABLE category_ledger_configs RENAME TO category_ledger_configs_pre14',
+          );
+          await migrator.createTable(categoryLedgerConfigs);
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_category_ledger_configs_ledger_type '
+            'ON category_ledger_configs (ledger_type)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_category_ledger_configs_updated_at '
+            'ON category_ledger_configs (updated_at)',
+          );
+          await customStatement('''
+            INSERT OR IGNORE INTO category_ledger_configs (category_id, ledger_type, updated_at)
+            SELECT category_id,
+                   CASE ledger_type
+                     WHEN 'survival' THEN 'daily'
+                     WHEN 'soul'     THEN 'joy'
+                     ELSE ledger_type
+                   END,
+                   updated_at
+            FROM category_ledger_configs_pre14
+          ''');
+          await customStatement('DROP TABLE category_ledger_configs_pre14');
           await transaction(() async {
             const remaps = <String, String>{
               'cat_cash_card': 'cat_other_unclassified',
@@ -228,7 +269,21 @@ class AppDatabase extends _$AppDatabase {
               ''');
             }
 
-            // Step 5: upsert ledger configs for v14 L1 categories
+            // Step 5: upsert ledger configs for v14 L1 categories.
+            // NOTE: Use cfg.ledgerType.name directly ('daily'/'joy' after v18
+            // rename). For devices upgrading from v1-v4 to v18, the
+            // category_ledger_configs table was created by the from<5 step
+            // which already uses the current createTable() definition with
+            // CHECK IN('daily','joy'). For devices upgrading from v5-v17,
+            // category_ledger_configs already exists with the old CHECK but
+            // the v18 migration (below) recreates it with the new CHECK;
+            // however for those devices this v14 block runs BEFORE v18, so
+            // the old CHECK is still active. We resolve this by observing that
+            // for v5-v17 devices this step is a no-op (the ledger configs were
+            // already seeded at v5/v14 era). For v1-v4 devices the table was
+            // just created by the v5 step with the new CHECK; using the new
+            // vocab is correct. Using new vocab throughout is the only safe
+            // approach given that createTable() always generates the current schema.
             for (final cfg in DefaultCategories.defaultLedgerConfigs) {
               final ledgerTypeStr = cfg.ledgerType.name;
               await customStatement('''

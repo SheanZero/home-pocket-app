@@ -104,8 +104,8 @@ void _createV16TransactionsTable(Database db) {
       is_private INTEGER NOT NULL DEFAULT 0 CHECK ("is_private" IN (0, 1)),
       is_synced INTEGER NOT NULL DEFAULT 0 CHECK ("is_synced" IN (0, 1)),
       is_deleted INTEGER NOT NULL DEFAULT 0 CHECK ("is_deleted" IN (0, 1)),
-      joy_fullness INTEGER NOT NULL DEFAULT 2,
-      CHECK(joy_fullness BETWEEN 1 AND 10)
+      soul_satisfaction INTEGER NOT NULL DEFAULT 2,
+      CHECK(soul_satisfaction BETWEEN 1 AND 10)
     )
   ''');
 }
@@ -132,7 +132,7 @@ void _insertV16Row(Database db, String id) {
         timestamp,
         current_hash,
         created_at,
-        joy_fullness
+        soul_satisfaction
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''',
     [
@@ -166,7 +166,7 @@ void _insertV17Row(Database db, String id, String entrySource) {
         timestamp,
         current_hash,
         created_at,
-        joy_fullness,
+        soul_satisfaction,
         entry_source
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''',

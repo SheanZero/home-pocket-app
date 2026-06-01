@@ -180,11 +180,11 @@ Future<void> _runV14MigrationSteps(AppDatabase db) async {
   // Step 5: upsert ledger configs for new L1s
   await db.customStatement('''
     INSERT OR REPLACE INTO category_ledger_configs (category_id, ledger_type, updated_at)
-    VALUES ('cat_pet', 'joy', )
+    VALUES ('cat_pet', 'joy', $now)
   ''');
   await db.customStatement('''
     INSERT OR REPLACE INTO category_ledger_configs (category_id, ledger_type, updated_at)
-    VALUES ('cat_allowance', 'joy', )
+    VALUES ('cat_allowance', 'joy', $now)
   ''');
 }
 
@@ -606,7 +606,7 @@ void main() {
   // ─── Ledger config tests ─────────────────────────────────────────────────────
 
   group('v14 migration — category_ledger_configs', () {
-    test('category_ledger_configs has cat_pet → soul after migration', () async {
+    test('category_ledger_configs has cat_pet → joy after migration', () async {
       await _runV14MigrationSteps(db);
 
       final ledgerType = await _queryString(
