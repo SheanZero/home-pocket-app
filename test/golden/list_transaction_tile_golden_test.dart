@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/core/theme/app_colors.dart';
+import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/list/domain/models/tagged_transaction.dart';
@@ -66,10 +66,10 @@ Widget _wrap({required Locale locale}) {
             onTap: () {},
             onDeleted: () {},
             tagText: 'Survival',
-            tagBgColor: AppColors.dailyLight,
-            tagTextColor: AppColors.daily,
+            tagBgColor: AppPalette.light.dailyLight,
+            tagTextColor: AppPalette.light.daily,
             category: 'Food',
-            categoryColor: AppColors.daily,
+            categoryColor: AppPalette.light.daily,
             formattedAmount: '¥1,234',
             l1Icon: Icons.restaurant,
             locale: const Locale('ja'),

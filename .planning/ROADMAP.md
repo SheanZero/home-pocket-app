@@ -124,7 +124,7 @@
 **UI hint**: yes
 
 ### Phase 33: Color Token System & Consolidation
-**Goal**: The selected palette is encoded as the single source of truth in a complete semantic design-token system; every hardcoded color literal in feature/UI code is replaced by an `AppColors` token; the correct 日常/悦己 ledger accents are applied uniformly across all surfaces
+**Goal**: The selected palette is encoded as the single source of truth in a complete semantic design-token system (`AppPalette` ThemeExtension); every hardcoded color literal in feature/UI code is replaced by an `AppPalette` token; the correct 日常/悦己 ledger accents are applied uniformly across all surfaces
 **Depends on**: Phase 32
 **Requirements**: COLOR-01, COLOR-02, COLOR-03
 **Success Criteria** (what must be TRUE):
@@ -132,14 +132,16 @@
   2. The theme layer (`lib/core/theme/`) contains a single semantic design-token system (primary / ledger / surface / semantic groups + profile dark palette) with no duplicate constant definitions (e.g. `_joyTargetStartColor`, repeated profile-dark constants are consolidated)
   3. Every screen that surfaces a 日常 or 悦己 ledger context uses the correct token from the selected palette — no mismatched or stale pre-selection colors remain
   4. `flutter analyze` reports 0 issues after all token replacements; `build_runner` clean-diff
-**Plans**: 7 plans
+  5. Full dark-mode rollout (D-07, absorbs THEME-V2-02): every screen responds to dark mode via `context.palette.*` — no `isDark` ternaries and no `AppColorsDark.*` direct refs remain in `lib/features/`
+**Plans**: 8 plans
 - [x] 33-01-PLAN.md — Wave-0 RED tests (color_literal_scan, app_palette_test, theme_dark_mode_coverage)
 - [x] 33-02-PLAN.md — AppPalette ThemeExtension + app_theme.dart registration + app_text_styles.dart fix
 - [x] 33-03-PLAN.md — home/ + analytics/ migration (D-05 hero gradient, D-06 olive→success)
 - [x] 33-04-PLAN.md — accounting/ migration (isDark removal, Bucket E error family, Bucket A)
-- [ ] 33-05-PLAN.md — family_sync/ + settings/ + list/ migration (Bucket B/C, Bucket F)
+- [x] 33-05a-PLAN.md — family_sync/ migration (Bucket B coral→teal gradients, Bucket C member gradients D-04)
+- [x] 33-05b-PLAN.md — settings/ + list/ migration (Bucket F info/error, WCAG amount-text variants, dark-mode)
 - [x] 33-06-PLAN.md — profile/ migration (Bucket A delete, avatar D-04 re-hue)
-- [ ] 33-07-PLAN.md — Shim deletion + REQUIREMENTS/ROADMAP THEME-V2-02 amend + full suite GREEN
+- [x] 33-07-PLAN.md — Shim deletion + REQUIREMENTS/ROADMAP THEME-V2-02 amend + full suite GREEN
 **UI hint**: yes
 
 ### Phase 34: Golden Re-baseline & Verification

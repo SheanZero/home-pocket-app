@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/core/initialization/init_failure_screen.dart';
+import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
 Widget _wrap(InitFailureScreen screen, {Locale locale = const Locale('en')}) {
@@ -128,12 +129,14 @@ void main() {
       );
     });
 
-    testWidgets('scaffold background is warm ivory (#FCFBF9)', (tester) async {
+    testWidgets('scaffold background resolves palette.background (ADR-018)', (
+      tester,
+    ) async {
       await tester.pumpWidget(_wrap(InitFailureScreen(onRetry: () async {})));
       await tester.pumpAndSettle();
 
       final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
-      expect(scaffold.backgroundColor, equals(const Color(0xFFFCFBF9)));
+      expect(scaffold.backgroundColor, equals(AppPalette.light.background));
     });
 
     testWidgets('retry button re-enables after onRetry completes', (

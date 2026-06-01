@@ -9,7 +9,7 @@ void main() {
       expect(theme.useMaterial3, isTrue);
     });
 
-    test('scaffold background is AppColors.background', () {
+    test('scaffold background is AppPalette.light.background', () {
       final theme = AppTheme.light;
       expect(theme.scaffoldBackgroundColor, AppPalette.light.background);
     });

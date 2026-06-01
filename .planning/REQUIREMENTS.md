@@ -46,7 +46,7 @@
 ### Theming (THEME)
 
 - **THEME-V2-01**: Runtime theming / user-selectable accent palettes built on the new token system.
-- **THEME-V2-02**: Full dark-mode rollout beyond the profile screens, using the semantic tokens.
+- ~~**THEME-V2-02**: Full dark-mode rollout beyond the profile screens, using the semantic tokens.~~ *(Pulled forward into Phase 33 per D-07 decision — full dark rollout delivered as part of Color Token System consolidation. No longer a v2 future item.)*
 
 ## Out of Scope
 
@@ -78,6 +78,7 @@
 | COLOR-02 | Phase 33 | Pending |
 | COLOR-03 | Phase 33 | Pending |
 | COLOR-04 | Phase 34 | Pending |
+| THEME-V2-02 | Phase 33 | Pulled forward (D-07) |
 
 **Coverage:**
 - v1 requirements: 15 total
