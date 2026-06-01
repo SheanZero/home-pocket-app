@@ -20,7 +20,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../application/accounting/create_transaction_use_case.dart';
 import '../../../../application/accounting/update_transaction_use_case.dart';
 import '../../../../application/i18n/formatter_service.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/dual_ledger/presentation/widgets/joy_celebration_overlay.dart';
 import '../../../../generated/app_localizations.dart';
@@ -390,7 +390,7 @@ class TransactionDetailsFormState
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(
               context,
-            ).colorScheme.copyWith(primary: AppColors.daily),
+            ).colorScheme.copyWith(primary: context.palette.daily),
           ),
           child: child!,
         );
@@ -549,16 +549,11 @@ class TransactionDetailsFormState
     );
   }
 
-  Widget _buildMerchantRow(S l10n, bool isDark) {
-    final secondaryColor = isDark
-        ? AppColorsDark.textSecondary
-        : AppColors.textSecondary;
-    final tertiaryColor = isDark
-        ? AppColorsDark.textTertiary
-        : AppColors.textTertiary;
-    final primaryColor = isDark
-        ? AppColorsDark.textPrimary
-        : AppColors.textPrimary;
+  Widget _buildMerchantRow(S l10n) {
+    final palette = context.palette;
+    final secondaryColor = palette.textSecondary;
+    final tertiaryColor = palette.textTertiary;
+    final primaryColor = palette.textPrimary;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -610,16 +605,11 @@ class TransactionDetailsFormState
     );
   }
 
-  Widget _buildNoteSection(S l10n, bool isDark) {
-    final secondaryColor = isDark
-        ? AppColorsDark.textSecondary
-        : AppColors.textSecondary;
-    final tertiaryColor = isDark
-        ? AppColorsDark.textTertiary
-        : AppColors.textTertiary;
-    final primaryColor = isDark
-        ? AppColorsDark.textPrimary
-        : AppColors.textPrimary;
+  Widget _buildNoteSection(S l10n) {
+    final palette = context.palette;
+    final secondaryColor = palette.textSecondary;
+    final tertiaryColor = palette.textTertiary;
+    final primaryColor = palette.textPrimary;
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -645,9 +635,7 @@ class TransactionDetailsFormState
             height: 72,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: isDark
-                  ? AppColorsDark.backgroundMuted
-                  : AppColors.backgroundMuted,
+              color: palette.backgroundMuted,
               borderRadius: BorderRadius.circular(12),
             ),
             child: TextField(
@@ -683,13 +671,13 @@ class TransactionDetailsFormState
   /// satisfaction) and Card C (note). Dedupes the inline Container decoration
   /// previously used only for Card B.
   Widget _formCard({required Widget child}) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.palette;
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppColorsDark.card : AppColors.card,
+        color: palette.card,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: isDark ? AppColorsDark.borderDefault : AppColors.borderDefault,
+          color: palette.borderDefault,
         ),
       ),
       child: child,
@@ -701,7 +689,7 @@ class TransactionDetailsFormState
     final l10n = S.of(context);
     final localeAsync = ref.watch(currentLocaleProvider);
     final locale = localeAsync.value ?? const Locale('ja');
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.palette;
     final displayCategory = _parentCategory ?? _category;
 
     // AbsorbPointer prevents field interaction while submit is in progress.
@@ -732,7 +720,7 @@ class TransactionDetailsFormState
                   onTap: _editDate,
                 ),
               ],
-              trailing: _buildMerchantRow(l10n, isDark),
+              trailing: _buildMerchantRow(l10n),
             ),
 
             const SizedBox(height: 16),
@@ -756,9 +744,7 @@ class TransactionDetailsFormState
                           child: Text(
                             l10n.expenseClassification,
                             style: AppTextStyles.titleMedium.copyWith(
-                              color: isDark
-                                  ? AppColorsDark.textPrimary
-                                  : AppColors.textPrimary,
+                              color: palette.textPrimary,
                             ),
                           ),
                         ),
@@ -801,7 +787,7 @@ class TransactionDetailsFormState
 
             // Card C: 备注 (note) — extracted from Card A's trailing so the
             // note has its own rounded card per Item 1 (260526-j98).
-            _formCard(child: _buildNoteSection(l10n, isDark)),
+            _formCard(child: _buildNoteSection(l10n)),
 
             const SizedBox(height: 16),
           ],

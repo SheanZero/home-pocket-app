@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
 class DetailInfoRow {
@@ -33,39 +33,33 @@ class DetailInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final borderColor = isDark
-        ? AppColorsDark.borderDefault
-        : AppColors.borderDefault;
-    final dividerColor = isDark
-        ? AppColorsDark.backgroundDivider
-        : AppColors.backgroundDivider;
+    final palette = context.palette;
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppColorsDark.card : AppColors.card,
+        color: palette.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor),
+        border: Border.all(color: palette.borderDefault),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           for (var index = 0; index < rows.length; index++) ...[
-            _DetailInfoCardRow(key: rows[index].key, row: rows[index], isDark: isDark),
+            _DetailInfoCardRow(key: rows[index].key, row: rows[index]),
             if (index < rows.length - 1)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
                   key: ValueKey('detail_info_divider_$index'),
                   height: 1,
-                  color: dividerColor,
+                  color: palette.backgroundDivider,
                 ),
               ),
           ],
           if (trailing != null) ...[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Container(height: 1, color: dividerColor),
+              child: Container(height: 1, color: palette.backgroundDivider),
             ),
             trailing!,
           ],
@@ -76,22 +70,16 @@ class DetailInfoCard extends StatelessWidget {
 }
 
 class _DetailInfoCardRow extends StatelessWidget {
-  const _DetailInfoCardRow({super.key, required this.row, required this.isDark});
+  const _DetailInfoCardRow({super.key, required this.row});
 
   final DetailInfoRow row;
-  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    final labelColor = isDark
-        ? AppColorsDark.textSecondary
-        : AppColors.textSecondary;
-    final valueColor = isDark
-        ? AppColorsDark.textPrimary
-        : AppColors.textPrimary;
-    final iconColor = isDark
-        ? AppColorsDark.textTertiary
-        : AppColors.textTertiary;
+    final palette = context.palette;
+    final labelColor = palette.textSecondary;
+    final valueColor = palette.textPrimary;
+    final iconColor = palette.textTertiary;
 
     final content = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

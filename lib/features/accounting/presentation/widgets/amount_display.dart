@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
 /// Displays the current amount with currency label and clear button.
@@ -58,7 +58,7 @@ class AmountDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.palette;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -68,7 +68,7 @@ class AmountDisplay extends StatelessWidget {
             key: const ValueKey('amount_currency_badge'),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.dailyLight,
+              color: palette.dailyLight,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -77,7 +77,7 @@ class AmountDisplay extends StatelessWidget {
                 Text(
                   currencySymbol,
                   style: AppTextStyles.amountMedium.copyWith(
-                    color: AppColors.daily,
+                    color: palette.daily,
                     fontSize: 14,
                   ),
                 ),
@@ -85,7 +85,7 @@ class AmountDisplay extends StatelessWidget {
                 Text(
                   currencyLabel,
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.daily,
+                    color: palette.daily,
                     fontWeight: FontWeight.w600,
                     fontSize: 10,
                   ),
@@ -104,9 +104,7 @@ class AmountDisplay extends StatelessWidget {
                 style: AppTextStyles.amountLarge.copyWith(
                   fontSize: 32,
                   fontWeight: FontWeight.w700,
-                  color: isDark
-                      ? AppColorsDark.textPrimary
-                      : AppColors.textPrimary,
+                  color: palette.textPrimary,
                 ),
                 maxLines: 1,
               ),
@@ -121,17 +119,13 @@ class AmountDisplay extends StatelessWidget {
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? AppColorsDark.backgroundMuted
-                      : AppColors.backgroundMuted,
+                  color: palette.backgroundMuted,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   Icons.close,
                   size: 14,
-                  color: isDark
-                      ? AppColorsDark.textSecondary
-                      : AppColors.textSecondary,
+                  color: palette.textSecondary,
                 ),
               ),
             ),

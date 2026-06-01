@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
 /// Size variant for [CategoryReorderRow].
@@ -24,7 +24,7 @@ class CategoryReorderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.palette;
     final isL1 = variant == CategoryReorderRowVariant.l1;
     final rowHeight = isL1 ? 60.0 : 46.0;
     final iconBoxSize = isL1 ? 32.0 : 0.0;
@@ -35,10 +35,10 @@ class CategoryReorderRow extends StatelessWidget {
       height: rowHeight,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        color: isDark ? AppColorsDark.card : AppColors.card,
+        color: palette.card,
         borderRadius: BorderRadius.circular(isL1 ? 14 : 10),
         border: Border.all(
-          color: isDark ? AppColorsDark.borderDefault : AppColors.borderDefault,
+          color: palette.borderDefault,
         ),
       ),
       child: Row(
@@ -46,9 +46,7 @@ class CategoryReorderRow extends StatelessWidget {
           Icon(
             Icons.drag_indicator,
             size: 22,
-            color: isDark
-                ? AppColorsDark.textSecondary
-                : AppColors.textSecondary,
+            color: palette.textSecondary,
           ),
           const SizedBox(width: 10),
           if (isL1) ...[
@@ -70,9 +68,7 @@ class CategoryReorderRow extends StatelessWidget {
               style: AppTextStyles.titleMedium.copyWith(
                 fontSize: labelSize,
                 fontWeight: FontWeight.w600,
-                color: isDark
-                    ? AppColorsDark.textPrimary
-                    : AppColors.textPrimary,
+                color: palette.textPrimary,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_palette.dart';
+
 /// A floating capsule-style soft toast for inline error/warning feedback.
 ///
 /// Displays a pill-shaped message with icon, text, and optional close button.
@@ -75,6 +77,7 @@ class _SoftToastState extends State<SoftToast>
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return SlideTransition(
       position: _slideAnimation,
       child: FadeTransition(
@@ -84,29 +87,29 @@ class _SoftToastState extends State<SoftToast>
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFFFEF2F2),
+              color: palette.errorSurface,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFFECACA)),
-              boxShadow: const [
+              border: Border.all(color: palette.errorBorder),
+              boxShadow: [
                 BoxShadow(
-                  color: Color(0x15E53E3E),
+                  color: palette.errorShadow,
                   blurRadius: 12,
-                  offset: Offset(0, 2),
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: Row(
               children: [
-                Icon(widget.icon, size: 18, color: const Color(0xFFDC2626)),
+                Icon(widget.icon, size: 18, color: palette.error),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     widget.message,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'IBM Plex Sans',
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFFDC2626),
+                      color: palette.error,
                     ),
                   ),
                 ),
@@ -117,13 +120,13 @@ class _SoftToastState extends State<SoftToast>
                     width: 20,
                     height: 20,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFECACA),
+                      color: palette.errorBorder,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.close,
                       size: 12,
-                      color: Color(0xFFDC2626),
+                      color: palette.error,
                     ),
                   ),
                 ),
