@@ -4,13 +4,13 @@ milestone: v1.5
 milestone_name: 文案与配色统一
 status: executing
 stopped_at: Phase 31 context gathered
-last_updated: "2026-06-01T00:48:48.174Z"
-last_activity: 2026-06-01 -- Phase 31 planning complete
+last_updated: "2026-06-01T00:57:53.468Z"
+last_activity: 2026-06-01
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 6
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-31 — v1.4 列表功能 shipped + archived)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** v1.5 文案与配色统一 — Phases 31-34 — Terminology & Color Unification
+**Current focus:** Phase 31 — terminology-rename
 
 ## Current Position
 
-Phase: 31 (not started)
-Plan: —
+Phase: 31 (terminology-rename) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-06-01 -- Phase 31 planning complete
+Last activity: 2026-06-01
 
-Progress: ░░░░░░░░░░ 0% (0/4 phases complete)
+Progress: [██░░░░░░░░] 17%
 
 ## Last Milestone Snapshot (v1.4)
 
@@ -201,7 +201,7 @@ No active blockers. Carried-forward debt (cross-milestone):
 
 ## Session Continuity
 
-Last session: 2026-06-01T00:07:14.194Z
+Last session: 2026-06-01T00:57:53.463Z
 Stopped at: Phase 31 context gathered
 
 **Planned Next:** `/gsd-plan-phase 31` — plan Phase 31 (Terminology Rename)

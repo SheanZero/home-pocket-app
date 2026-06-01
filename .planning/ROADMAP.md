@@ -101,7 +101,7 @@
   4. `flutter analyze` reports 0 issues; `dart run custom_lint --no-fatal-infos` reports 0 errors; `build_runner` clean-diff (AUDIT-10 guardrail green)
   5. ADR-015 (or successor) contains an appended section documenting the canonical 日常/悦己/ときめき/Daily/Joy mapping as the locked lexical hierarchy
 **Plans**: 6 plans
-- [ ] 31-01-PLAN.md — Wave-0 RED v18 migration test (D-02/D-16 contract: enum-value rewrite + CHECK recreate + soul_satisfaction→joy_fullness)
+- [x] 31-01-PLAN.md — Wave-0 RED v18 migration test (D-02/D-16 contract: enum-value rewrite + CHECK recreate + soul_satisfaction→joy_fullness)
 - [ ] 31-02-PLAN.md — LedgerType enum rename + v17→v18 migration + soul_satisfaction column rename + persistence literals (turns Wave-0 GREEN)
 - [ ] 31-03-PLAN.md — ARB keys (25 roots) + values + @description rewrite (3 locales) + gen-l10n + call sites
 - [ ] 31-04-PLAN.md — AppColors survival/soul + derived symbols rename + ~60 call sites
