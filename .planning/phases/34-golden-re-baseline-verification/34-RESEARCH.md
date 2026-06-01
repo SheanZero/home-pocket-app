@@ -624,7 +624,12 @@ The following test infrastructure changes are required before implementation tas
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+> All three are functionally answered by locked decisions / mechanical gates — none block planning:
+> 1. `amount_display` visibility → resolved by **D-01b** (add dark variant regardless; expect identical output if color-agnostic) — Plan 34-01.
+> 2. Coverage delta from +27 dark PNGs → mechanical, measured by Plan 34-05's `flutter test --coverage` gate.
+> 3. `home_hero_card` exclusion → answered by **CONTEXT.md D-01**'s explicit 7-file list (`home_hero_card` is intentionally NOT in it; it already iterates dark).
 
 1. **`amount_display` dark variant visibility**
    - What we know: `AmountDisplay` uses `AppTextStyles.amountLarge` etc. These styles read `color` from the calling context or are plain `TextStyle` with no color.
