@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/sync_status_model.dart';
 import '../../../../application/family_sync/check_group_use_case.dart';
@@ -116,8 +116,9 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
 
+    final palette = context.palette;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: palette.background,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -133,11 +134,11 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                     const SizedBox(width: 8),
                     Text(
                       widget.groupName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Outfit',
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: palette.textPrimary,
                       ),
                     ),
                   ],
@@ -150,8 +151,8 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                   height: 64,
                   child: CircularProgressIndicator(
                     strokeWidth: 4,
-                    color: AppColors.accentPrimary,
-                    backgroundColor: AppColors.borderDefault,
+                    color: palette.accentPrimary,
+                    backgroundColor: palette.borderDefault,
                   ),
                 ),
                 const SizedBox(height: 28),
@@ -160,11 +161,11 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                 Text(
                   l10n.groupWaitingApproval,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Outfit',
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: palette.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -173,11 +174,11 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                 Text(
                   l10n.groupWaitingDesc(widget.ownerDisplayName),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Outfit',
                     fontSize: 13,
                     fontWeight: FontWeight.w400,
-                    color: AppColors.textSecondary,
+                    color: palette.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -185,21 +186,21 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                 // Hint lines
                 Text(
                   l10n.groupWaitingHint1,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Outfit',
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
-                    color: AppColors.textSecondary,
+                    color: palette.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   l10n.groupWaitingHint2,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Outfit',
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
-                    color: AppColors.textSecondary,
+                    color: palette.textSecondary,
                   ),
                 ),
               ],

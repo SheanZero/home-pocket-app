@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
 
-const _purpleGradient = [
-  Color(0xFFE8D5F5),
-  Color(0xFFF3EAF9),
-  Color(0xFFFAF5FD),
-];
 
 class MemberListTile extends StatelessWidget {
   const MemberListTile({
@@ -33,6 +28,7 @@ class MemberListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final name = isCurrentUser ? '$displayName$youSuffix' : displayName;
 
     return Padding(
@@ -43,7 +39,13 @@ class MemberListTile extends StatelessWidget {
             emoji: avatarEmoji,
             imagePath: avatarImagePath,
             size: 44,
-            gradientColors: isOwner ? null : _purpleGradient,
+            gradientColors: isOwner
+                ? null
+                : [
+                    palette.memberGradientA,
+                    palette.memberGradientB,
+                    palette.memberGradientC,
+                  ],
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -52,11 +54,11 @@ class MemberListTile extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Outfit',
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: palette.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -67,8 +69,8 @@ class MemberListTile extends StatelessWidget {
                     fontSize: 12,
                     fontWeight: isOwner ? FontWeight.w500 : FontWeight.w400,
                     color: isOwner
-                        ? AppColors.accentPrimary
-                        : AppColors.textSecondary,
+                        ? palette.accentPrimary
+                        : palette.textSecondary,
                   ),
                 ),
               ],
