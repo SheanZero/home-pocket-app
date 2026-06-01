@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../../generated/app_localizations.dart';
-import '../theme/app_colors.dart';
+import '../theme/app_palette.dart';
 import '../theme/app_text_styles.dart';
 
 /// Localized fallback screen rendered by main() when AppInitializer.initialize()
@@ -31,8 +31,9 @@ class _InitFailureScreenState extends State<InitFailureScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
+    final palette = context.palette;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: palette.background,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -42,10 +43,10 @@ class _InitFailureScreenState extends State<InitFailureScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.error_outline,
                     size: 64,
-                    color: AppColors.textSecondary,
+                    color: palette.textSecondary,
                   ),
                   const SizedBox(height: 24),
                   Text(
@@ -57,7 +58,7 @@ class _InitFailureScreenState extends State<InitFailureScreen> {
                   Text(
                     l10n.initFailedMessage,
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textPrimary,
+                      color: palette.textPrimary,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -65,24 +66,24 @@ class _InitFailureScreenState extends State<InitFailureScreen> {
                   ElevatedButton(
                     onPressed: _isRetrying ? null : _handleRetry,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF8AB8DA),
-                      foregroundColor: AppColors.textPrimary,
+                      backgroundColor: palette.accentPrimary,
+                      foregroundColor: palette.textPrimary,
                     ),
                     child: _isRetrying
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.0,
                               valueColor: AlwaysStoppedAnimation(
-                                AppColors.textPrimary,
+                                palette.textPrimary,
                               ),
                             ),
                           )
                         : Text(
                             l10n.initFailedRetry,
                             style: AppTextStyles.titleSmall.copyWith(
-                              color: AppColors.textPrimary,
+                              color: palette.textPrimary,
                             ),
                           ),
                   ),
