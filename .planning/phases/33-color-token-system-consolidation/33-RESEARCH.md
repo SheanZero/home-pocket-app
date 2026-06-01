@@ -725,16 +725,19 @@ border: Border.all(color: const Color(0x26FFFFFF), width: 2),  // alpha-only, OK
    - What we know: profile screens hard-coded `#141418` before a unified dark palette existed
    - What's unclear: whether `#141418` (near-black) vs `#0C1719` (teal-dark) is a meaningful design choice for the profile context, or an accident of history
    - Recommendation: treat as intentional alignment to ADR-018 (use `#0C1719`); document in Phase 34 golden expectations
+   - **RESOLVED** (Plan 33-06): `#141418` is an accident of history — profile screens pre-dated `AppColorsDark`. Plan 33-06 intentionally migrates all 3 profile screens to `palette.background #0C1719` (ADR-018 teal-dark). This is a documented intentional visual change captured in Phase 34 golden expectations.
 
 2. **`surfaceCream`/`satisfactionPillBg`/`satisfactionPillRose` in `AppColors` — no ADR-018 counterpart**
    - What we know: these three "Best Joy strip" tokens (`0xFFFFFDF8`, `0xFFF1F1F1`, `0xFFD45F65`) are in `AppColors` but have no listed role in ADR-018's hex table
    - What's unclear: `satisfactionPillRose #D45F65` is coral-red — does this map to `error`, or does it map to `joy` in the new palette? The satisfaction pill is a UI affordance expressing "high joy score," not an error state.
    - Recommendation: `satisfactionPillBg` → derived from `joyLight #FBEFCF`; `satisfactionPillRose` → `joy #F0A81E` (joy affordance context; not amount text). Planner should confirm.
+   - **RESOLVED** (Plan 33-02): `satisfactionPillRose` maps to `joy #F0A81E` (ADR-016 §5 anti-gamification constraint: 悦己 gold is a distinct positive affordance, NOT an error state). `satisfactionPillBg` = `#FBEFCF` (joyLight). Both are defined as named tokens in `AppPalette` (not decorative literals) so COLOR-01 compliance is maintained.
 
 3. **Recording gradient (`recordingGradientStart #E05050`, `recordingGradientEnd #C03030`) — not in ADR-018 hex table**
    - What we know: recording state (mic button) uses red gradients independent of accent color (Phase 22 D-04)
    - What's unclear: should recording gradient stay red (as a distinct functional affordance) or adopt `error #E5484D` family?
    - Recommendation: recording gradient = `error` semantic family (`#E5484D`/`#F0676B` dark). Recording = "active/live" state which benefits from the universal red-danger signal.
+   - **RESOLVED** (Plan 33-02): Recording gradient adopts the `error` semantic family: `recordingGradientStart = #E5484D` (light) / `#F0676B` (dark), `recordingGradientEnd = #C93040` (light) / `#D44050` (dark). Red = live/active danger signal; no separate recording-red identity needed under Teal Clarity.
 
 ---
 
