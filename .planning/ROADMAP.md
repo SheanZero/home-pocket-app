@@ -117,7 +117,11 @@
   1. Design references (VoltAgent/awesome-design-md brand palettes, dual-ledger family-finance context) are synthesized into written candidate directions with rationale — at least 4 distinct mood/palette directions identified
   2. Exactly 4–5 full color-scheme proposals exist as Pencil mockups covering representative screens (e.g. home hero, transaction list, analytics), each defining primary + 日常/悦己 ledger accents + surface + semantic roles
   3. The user has reviewed the Pencil proposals and designated one (or a named hybrid) as the selected palette, with that selection recorded as an accepted ADR containing the final hex values for every semantic color role
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 32-01-PLAN.md — PALETTE-01 synthesis doc: mine VoltAgent brand DESIGN.md refs → ≥4 distinct named directions across the D-04×D-05 axis matrix (rationale + lineage + anchor hex + WCAG flags)
+- [ ] 32-02-PLAN.md — PALETTE-02 Pencil mockups: fresh `.pen`, get_guidelines-first, 4–5 scheme groups × 6 frames (home-hero/list/analytics × light/dark), palette-as-variables, every taxonomy role + per-scheme WCAG pass
+- [ ] 32-03-PLAN.md — PALETTE-03 human-selection checkpoint (autonomous:false) → ratify ADR-018 (post-selection only) with full light+dark hex-per-role table keyed to AppColors symbols + ADR-000_INDEX update
+**UI hint**: yes
 
 ### Phase 33: Color Token System & Consolidation
 **Goal**: The selected palette is encoded as the single source of truth in a complete semantic design-token system; every hardcoded color literal in feature/UI code is replaced by an `AppColors` token; the correct 日常/悦己 ledger accents are applied uniformly across all surfaces
@@ -150,4 +154,4 @@
 | v1.2 Happiness Metric Refresh | 13-17 | 37/37 | Complete | 2026-05-21 |
 | v1.3 迭代帐本输入 | 18-23 | 47/47 | Complete | 2026-05-26 |
 | v1.4 列表功能 | 24-30 | 29/29 | Complete | 2026-05-31 |
-| v1.5 文案与配色统一 | 31-34 | 0/6 (P31 planned) | In progress | — |
+| v1.5 文案与配色统一 | 31-34 | 6/9 (P31 done, P32 planned) | In progress | — |
