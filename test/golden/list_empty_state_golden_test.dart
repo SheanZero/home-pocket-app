@@ -20,7 +20,11 @@ import 'package:home_pocket/generated/app_localizations.dart';
 /// ProviderScope is required because [ListEmptyState] is a [ConsumerWidget]
 /// (ref.read in onPressed callbacks). No provider overrides needed — button
 /// callbacks only fire on tap, not during pumpAndSettle render.
-Widget _wrap({required Locale locale, required ListEmptyVariant variant}) {
+Widget _wrap({
+  required Locale locale,
+  required ListEmptyVariant variant,
+  ThemeMode themeMode = ThemeMode.light,
+}) {
   return ProviderScope(
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -33,6 +37,8 @@ Widget _wrap({required Locale locale, required ListEmptyVariant variant}) {
       ],
       supportedLocales: S.supportedLocales,
       theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: themeMode,
       home: Scaffold(
         body: Center(
           child: SizedBox(
@@ -61,6 +67,24 @@ void main() {
             find.byType(ListEmptyState),
             matchesGoldenFile(
               'goldens/list_empty_state_${variant.name}_${locale.languageCode}.png',
+            ),
+          );
+        });
+
+        testWidgets(
+            '${variant.name} — ${locale.languageCode} dark', (tester) async {
+          await tester.pumpWidget(
+            _wrap(
+              locale: locale,
+              variant: variant,
+              themeMode: ThemeMode.dark,
+            ),
+          );
+          await tester.pumpAndSettle();
+          await expectLater(
+            find.byType(ListEmptyState),
+            matchesGoldenFile(
+              'goldens/list_empty_state_${variant.name}_dark_${locale.languageCode}.png',
             ),
           );
         });

@@ -19,7 +19,11 @@ final _date = DateTime(2026, 5, 15);
 /// Wraps a widget for golden tests with a fixed-size SizedBox.
 ///
 /// No ProviderScope needed — [ListDayGroupHeader] is a pure [StatelessWidget].
-Widget _wrap({required Locale locale, required Widget child}) {
+Widget _wrap({
+  required Locale locale,
+  required Widget child,
+  ThemeMode themeMode = ThemeMode.light,
+}) {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
     locale: locale,
@@ -31,6 +35,8 @@ Widget _wrap({required Locale locale, required Widget child}) {
     ],
     supportedLocales: S.supportedLocales,
     theme: ThemeData.light(),
+    darkTheme: ThemeData.dark(),
+    themeMode: themeMode,
     home: Scaffold(
       body: Center(child: SizedBox(width: 390, height: 32, child: child)),
     ),
@@ -56,6 +62,24 @@ void main() {
       );
     });
 
+    testWidgets('locale ja dark', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          locale: const Locale('ja'),
+          themeMode: ThemeMode.dark,
+          child: ListDayGroupHeader(
+            date: _date,
+            locale: const Locale('ja'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(ListDayGroupHeader),
+        matchesGoldenFile('goldens/list_day_group_header_dark_ja.png'),
+      );
+    });
+
     testWidgets('locale zh', (tester) async {
       await tester.pumpWidget(
         _wrap(
@@ -73,6 +97,24 @@ void main() {
       );
     });
 
+    testWidgets('locale zh dark', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          locale: const Locale('zh'),
+          themeMode: ThemeMode.dark,
+          child: ListDayGroupHeader(
+            date: _date,
+            locale: const Locale('zh'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(ListDayGroupHeader),
+        matchesGoldenFile('goldens/list_day_group_header_dark_zh.png'),
+      );
+    });
+
     testWidgets('locale en', (tester) async {
       await tester.pumpWidget(
         _wrap(
@@ -87,6 +129,24 @@ void main() {
       await expectLater(
         find.byType(ListDayGroupHeader),
         matchesGoldenFile('goldens/list_day_group_header_en.png'),
+      );
+    });
+
+    testWidgets('locale en dark', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          locale: const Locale('en'),
+          themeMode: ThemeMode.dark,
+          child: ListDayGroupHeader(
+            date: _date,
+            locale: const Locale('en'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(ListDayGroupHeader),
+        matchesGoldenFile('goldens/list_day_group_header_dark_en.png'),
       );
     });
   });
