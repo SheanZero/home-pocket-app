@@ -86,7 +86,7 @@
 - [x] **Phase 31: Terminology Rename** (6 plans) — Unify all user-facing ARB values (zh/ja/en) and rename internal identifiers (ARB keys, AppColors symbols, LedgerType enum + v18 migration, soul*/survival* files/classes, soul_satisfaction→joy_fullness column); close with analyze-clean gate + ADR-017 (completed 2026-06-01)
 - [x] **Phase 32: Palette Exploration & Selection** — Mine design references, produce 4–5 Pencil color-scheme mockups, user selects one canonical palette recorded as ADR (completed 2026-06-01)
 - [x] **Phase 33: Color Token System & Consolidation** (7 plans) — Build ThemeExtension<AppPalette> token system encoding ADR-018 Teal Clarity; replace 61 Color(0x…) literals; full dark-mode rollout (D-07/THEME-V2-02 absorbed) (completed 2026-06-01)
-- [ ] **Phase 34: Golden Re-baseline & Verification** — Regenerate all golden/visual baselines to the new palette; confirm full test suite green; verify no stale vocabulary or color literals remain
+- [x] **Phase 34: Golden Re-baseline & Verification** — Regenerate all golden/visual baselines to the new palette; confirm full test suite green; verify no stale vocabulary or color literals remain (completed 2026-06-01)
 
 ## Phase Details
 
@@ -158,7 +158,7 @@ Plans:
 - [x] 34-02-PLAN.md — Wave 1: selective re-baseline with diff attribution (D-02/D-04 protocol) + generate 27 new dark masters
 - [x] 34-03-PLAN.md — Wave 2: D-03a comprehensive audit + stale Color literal remediation + success-criteria greps
 - [x] 34-04-PLAN.md — Wave 2 (parallel): D-03b best-effort .pen sync to ADR-018 (non-blocking)
-- [ ] 34-05-PLAN.md — Wave 3: final full-suite gate (flutter test 0 failures, analyze 0 issues, coverage ≥70%, both greps empty)
+- [x] 34-05-PLAN.md — Wave 3: final full-suite gate (flutter test 0 failures, analyze 0 issues, coverage ≥70%, both greps empty)
 
 ## Milestone Progress
 
