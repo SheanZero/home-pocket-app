@@ -134,7 +134,7 @@
   4. `flutter analyze` reports 0 issues after all token replacements; `build_runner` clean-diff
 **Plans**: 7 plans
 - [x] 33-01-PLAN.md — Wave-0 RED tests (color_literal_scan, app_palette_test, theme_dark_mode_coverage)
-- [ ] 33-02-PLAN.md — AppPalette ThemeExtension + app_theme.dart registration + app_text_styles.dart fix
+- [x] 33-02-PLAN.md — AppPalette ThemeExtension + app_theme.dart registration + app_text_styles.dart fix
 - [ ] 33-03-PLAN.md — home/ + analytics/ migration (D-05 hero gradient, D-06 olive→success)
 - [ ] 33-04-PLAN.md — accounting/ migration (isDark removal, Bucket E error family, Bucket A)
 - [ ] 33-05-PLAN.md — family_sync/ + settings/ + list/ migration (Bucket B/C, Bucket F)
