@@ -266,7 +266,7 @@ final class BestJoyMomentFamily extends $Family
 
 /// JOYMIG-02 / D-04 — recommended monthlyJoyTarget from past 3 months.
 ///
-/// Returns Empty when fewer than 3 past months have soul transaction data.
+/// Returns Empty when fewer than 3 past months have joy transaction data.
 
 @ProviderFor(monthlyJoyTargetRecommendation)
 final monthlyJoyTargetRecommendationProvider =
@@ -274,7 +274,7 @@ final monthlyJoyTargetRecommendationProvider =
 
 /// JOYMIG-02 / D-04 — recommended monthlyJoyTarget from past 3 months.
 ///
-/// Returns Empty when fewer than 3 past months have soul transaction data.
+/// Returns Empty when fewer than 3 past months have joy transaction data.
 
 final class MonthlyJoyTargetRecommendationProvider
     extends
@@ -288,7 +288,7 @@ final class MonthlyJoyTargetRecommendationProvider
         $FutureProvider<MetricResult<int>> {
   /// JOYMIG-02 / D-04 — recommended monthlyJoyTarget from past 3 months.
   ///
-  /// Returns Empty when fewer than 3 past months have soul transaction data.
+  /// Returns Empty when fewer than 3 past months have joy transaction data.
   MonthlyJoyTargetRecommendationProvider._({
     required MonthlyJoyTargetRecommendationFamily super.from,
     required ({String bookId, String currencyCode}) super.argument,
@@ -343,7 +343,7 @@ String _$monthlyJoyTargetRecommendationHash() =>
 
 /// JOYMIG-02 / D-04 — recommended monthlyJoyTarget from past 3 months.
 ///
-/// Returns Empty when fewer than 3 past months have soul transaction data.
+/// Returns Empty when fewer than 3 past months have joy transaction data.
 
 final class MonthlyJoyTargetRecommendationFamily extends $Family
     with
@@ -362,7 +362,7 @@ final class MonthlyJoyTargetRecommendationFamily extends $Family
 
   /// JOYMIG-02 / D-04 — recommended monthlyJoyTarget from past 3 months.
   ///
-  /// Returns Empty when fewer than 3 past months have soul transaction data.
+  /// Returns Empty when fewer than 3 past months have joy transaction data.
 
   MonthlyJoyTargetRecommendationProvider call({
     required String bookId,

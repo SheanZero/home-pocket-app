@@ -27,7 +27,7 @@ void main() {
       expect(find.text('やること'), findsOneWidget);
     });
 
-    testWidgets('active tab uses survival color', (tester) async {
+    testWidgets('active tab uses daily color', (tester) async {
       await tester.pumpWidget(
         testLocalizedApp(
           child: Scaffold(

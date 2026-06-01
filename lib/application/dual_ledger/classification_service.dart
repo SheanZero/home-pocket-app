@@ -4,7 +4,7 @@ import 'rule_engine.dart';
 
 /// 3-layer classification engine for dual ledger.
 ///
-/// Priority: Rule Engine → (Merchant DB → ML Classifier) → Default survival.
+/// Priority: Rule Engine → (Merchant DB → ML Classifier) → Default daily.
 /// Layers 2 and 3 are stubbed for MVP.
 class ClassificationService {
   ClassificationService({required RuleEngine ruleEngine})
@@ -12,7 +12,7 @@ class ClassificationService {
 
   final RuleEngine _ruleEngine;
 
-  /// Classify a transaction into survival or soul ledger.
+  /// Classify a transaction into daily or joy ledger.
   Future<ClassificationResult> classify({
     required String categoryId,
     String? merchant,
@@ -35,7 +35,7 @@ class ClassificationService {
     // Layer 3: ML Classifier (stub for MVP)
     // TODO: Implement TFLiteClassifier when model is available
 
-    // Default fallback: survival
+    // Default fallback: daily
     return ClassificationResult(
       ledgerType: LedgerType.daily,
       confidence: 0.5,

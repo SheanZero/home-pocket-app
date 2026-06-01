@@ -127,7 +127,7 @@ class _NullLedgerConfigRepository implements CategoryLedgerConfigRepository {
 
 // ── Test data ──────────────────────────────────────────────────────────────────
 
-final _survivalCategory = Category(
+final _dailyCategory = Category(
   id: 'cat-food',
   name: 'Food',
   icon: 'restaurant',
@@ -278,12 +278,12 @@ void main() {
           TransactionDetailsFormConfig.$new(
             bookId: 'book-1',
             entrySource: EntrySource.manual,
-            initialCategory: _survivalCategory,
+            initialCategory: _dailyCategory,
             // category pre-seeded so submit() passes category null check
           ),
           formKey: formKey,
           overrides: _overrides(
-            categoryRepo: _SingleCategoryRepository(_survivalCategory),
+            categoryRepo: _SingleCategoryRepository(_dailyCategory),
             createUseCase: mockCreate,
           ),
         ),
@@ -330,11 +330,11 @@ void main() {
           TransactionDetailsFormConfig.$new(
             bookId: 'book-1',
             entrySource: EntrySource.manual,
-            initialCategory: _survivalCategory,
+            initialCategory: _dailyCategory,
           ),
           formKey: formKey,
           overrides: _overrides(
-            categoryRepo: _SingleCategoryRepository(_survivalCategory),
+            categoryRepo: _SingleCategoryRepository(_dailyCategory),
             createUseCase: mockCreate,
           ),
         ),

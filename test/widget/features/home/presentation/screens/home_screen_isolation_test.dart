@@ -10,10 +10,10 @@ import 'package:home_pocket/application/analytics/get_best_joy_moment_use_case.d
 import 'package:home_pocket/application/analytics/get_family_happiness_use_case.dart';
 import 'package:home_pocket/application/analytics/get_happiness_report_use_case.dart';
 import 'package:home_pocket/application/analytics/get_monthly_report_use_case.dart';
-import 'package:home_pocket/application/analytics/get_per_category_soul_breakdown_across_books_use_case.dart';
-import 'package:home_pocket/application/analytics/get_per_category_soul_breakdown_use_case.dart';
-import 'package:home_pocket/application/analytics/get_soul_vs_survival_snapshot_across_books_use_case.dart';
-import 'package:home_pocket/application/analytics/get_soul_vs_survival_snapshot_use_case.dart';
+import 'package:home_pocket/application/analytics/get_per_category_joy_breakdown_across_books_use_case.dart';
+import 'package:home_pocket/application/analytics/get_per_category_joy_breakdown_use_case.dart';
+import 'package:home_pocket/application/analytics/get_daily_vs_joy_snapshot_across_books_use_case.dart';
+import 'package:home_pocket/application/analytics/get_daily_vs_joy_snapshot_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
     as accounting_providers;
@@ -50,17 +50,17 @@ class _MockBestJoyMomentUseCase extends Mock
 class _MockFamilyHappinessUseCase extends Mock
     implements GetFamilyHappinessUseCase {}
 
-class _MockGetPerCategorySoulBreakdownUseCase extends Mock
-    implements GetPerCategorySoulBreakdownUseCase {}
+class _MockGetPerCategoryJoyBreakdownUseCase extends Mock
+    implements GetPerCategoryJoyBreakdownUseCase {}
 
-class _MockGetPerCategorySoulBreakdownAcrossBooksUseCase extends Mock
-    implements GetPerCategorySoulBreakdownAcrossBooksUseCase {}
+class _MockGetPerCategoryJoyBreakdownAcrossBooksUseCase extends Mock
+    implements GetPerCategoryJoyBreakdownAcrossBooksUseCase {}
 
-class _MockGetSoulVsSurvivalSnapshotUseCase extends Mock
-    implements GetSoulVsSurvivalSnapshotUseCase {}
+class _MockGetDailyVsJoySnapshotUseCase extends Mock
+    implements GetDailyVsJoySnapshotUseCase {}
 
-class _MockGetSoulVsSurvivalSnapshotAcrossBooksUseCase extends Mock
-    implements GetSoulVsSurvivalSnapshotAcrossBooksUseCase {}
+class _MockGetDailyVsJoySnapshotAcrossBooksUseCase extends Mock
+    implements GetDailyVsJoySnapshotAcrossBooksUseCase {}
 
 class _TestSelectedTimeWindow extends SelectedTimeWindow {
   @override
@@ -98,12 +98,12 @@ void main() {
   late _MockHappinessReportUseCase happinessReportUseCase;
   late _MockBestJoyMomentUseCase bestJoyMomentUseCase;
   late _MockFamilyHappinessUseCase familyHappinessUseCase;
-  late _MockGetPerCategorySoulBreakdownUseCase perCategorySoulBreakdownUseCase;
-  late _MockGetPerCategorySoulBreakdownAcrossBooksUseCase
-  perCategorySoulBreakdownAcrossBooksUseCase;
-  late _MockGetSoulVsSurvivalSnapshotUseCase soulVsSurvivalSnapshotUseCase;
-  late _MockGetSoulVsSurvivalSnapshotAcrossBooksUseCase
-  soulVsSurvivalSnapshotAcrossBooksUseCase;
+  late _MockGetPerCategoryJoyBreakdownUseCase perCategoryJoyBreakdownUseCase;
+  late _MockGetPerCategoryJoyBreakdownAcrossBooksUseCase
+  perCategoryJoyBreakdownAcrossBooksUseCase;
+  late _MockGetDailyVsJoySnapshotUseCase dailyVsJoySnapshotUseCase;
+  late _MockGetDailyVsJoySnapshotAcrossBooksUseCase
+  dailyVsJoySnapshotAcrossBooksUseCase;
 
   setUp(() {
     final now = DateTime.now();
@@ -113,12 +113,12 @@ void main() {
     happinessReportUseCase = _MockHappinessReportUseCase();
     bestJoyMomentUseCase = _MockBestJoyMomentUseCase();
     familyHappinessUseCase = _MockFamilyHappinessUseCase();
-    perCategorySoulBreakdownUseCase = _MockGetPerCategorySoulBreakdownUseCase();
-    perCategorySoulBreakdownAcrossBooksUseCase =
-        _MockGetPerCategorySoulBreakdownAcrossBooksUseCase();
-    soulVsSurvivalSnapshotUseCase = _MockGetSoulVsSurvivalSnapshotUseCase();
-    soulVsSurvivalSnapshotAcrossBooksUseCase =
-        _MockGetSoulVsSurvivalSnapshotAcrossBooksUseCase();
+    perCategoryJoyBreakdownUseCase = _MockGetPerCategoryJoyBreakdownUseCase();
+    perCategoryJoyBreakdownAcrossBooksUseCase =
+        _MockGetPerCategoryJoyBreakdownAcrossBooksUseCase();
+    dailyVsJoySnapshotUseCase = _MockGetDailyVsJoySnapshotUseCase();
+    dailyVsJoySnapshotAcrossBooksUseCase =
+        _MockGetDailyVsJoySnapshotAcrossBooksUseCase();
 
     when(
       () => monthlyReportUseCase.execute(
@@ -153,28 +153,28 @@ void main() {
     // keeps any accidental call from throwing (which would mask the
     // verifyNever signal below) — the assertion proper is verifyNever(...).
     when(
-      () => perCategorySoulBreakdownUseCase.execute(
+      () => perCategoryJoyBreakdownUseCase.execute(
         bookId: any(named: 'bookId'),
         startDate: any(named: 'startDate'),
         endDate: any(named: 'endDate'),
       ),
     ).thenAnswer((_) async => const Empty());
     when(
-      () => perCategorySoulBreakdownAcrossBooksUseCase.execute(
+      () => perCategoryJoyBreakdownAcrossBooksUseCase.execute(
         groupBookIds: any(named: 'groupBookIds'),
         startDate: any(named: 'startDate'),
         endDate: any(named: 'endDate'),
       ),
     ).thenAnswer((_) async => const Empty());
     when(
-      () => soulVsSurvivalSnapshotUseCase.execute(
+      () => dailyVsJoySnapshotUseCase.execute(
         bookId: any(named: 'bookId'),
         startDate: any(named: 'startDate'),
         endDate: any(named: 'endDate'),
       ),
     ).thenAnswer((_) async => const Empty());
     when(
-      () => soulVsSurvivalSnapshotAcrossBooksUseCase.execute(
+      () => dailyVsJoySnapshotAcrossBooksUseCase.execute(
         groupBookIds: any(named: 'groupBookIds'),
         startDate: any(named: 'startDate'),
         endDate: any(named: 'endDate'),
@@ -223,17 +223,17 @@ void main() {
         // Phase 16: provider overrides so a stray HomeHero read (if any
         // regression occurred) would land on these mocks — letting verifyNever
         // detect it instead of throwing on a missing override.
-        getPerCategorySoulBreakdownUseCaseProvider.overrideWith(
-          (_) => perCategorySoulBreakdownUseCase,
+        getPerCategoryJoyBreakdownUseCaseProvider.overrideWith(
+          (_) => perCategoryJoyBreakdownUseCase,
         ),
-        getPerCategorySoulBreakdownAcrossBooksUseCaseProvider.overrideWith(
-          (_) => perCategorySoulBreakdownAcrossBooksUseCase,
+        getPerCategoryJoyBreakdownAcrossBooksUseCaseProvider.overrideWith(
+          (_) => perCategoryJoyBreakdownAcrossBooksUseCase,
         ),
-        getSoulVsSurvivalSnapshotUseCaseProvider.overrideWith(
-          (_) => soulVsSurvivalSnapshotUseCase,
+        getDailyVsJoySnapshotUseCaseProvider.overrideWith(
+          (_) => dailyVsJoySnapshotUseCase,
         ),
-        getSoulVsSurvivalSnapshotAcrossBooksUseCaseProvider.overrideWith(
-          (_) => soulVsSurvivalSnapshotAcrossBooksUseCase,
+        getDailyVsJoySnapshotAcrossBooksUseCaseProvider.overrideWith(
+          (_) => dailyVsJoySnapshotAcrossBooksUseCase,
         ),
         accounting_providers
             .bookByIdProvider(bookId: _bookId)
@@ -335,28 +335,28 @@ void main() {
       // consume them). verifyNever with any() proves zero invocations across
       // every parameter shape.
       verifyNever(
-        () => perCategorySoulBreakdownUseCase.execute(
+        () => perCategoryJoyBreakdownUseCase.execute(
           bookId: any(named: 'bookId'),
           startDate: any(named: 'startDate'),
           endDate: any(named: 'endDate'),
         ),
       );
       verifyNever(
-        () => perCategorySoulBreakdownAcrossBooksUseCase.execute(
+        () => perCategoryJoyBreakdownAcrossBooksUseCase.execute(
           groupBookIds: any(named: 'groupBookIds'),
           startDate: any(named: 'startDate'),
           endDate: any(named: 'endDate'),
         ),
       );
       verifyNever(
-        () => soulVsSurvivalSnapshotUseCase.execute(
+        () => dailyVsJoySnapshotUseCase.execute(
           bookId: any(named: 'bookId'),
           startDate: any(named: 'startDate'),
           endDate: any(named: 'endDate'),
         ),
       );
       verifyNever(
-        () => soulVsSurvivalSnapshotAcrossBooksUseCase.execute(
+        () => dailyVsJoySnapshotAcrossBooksUseCase.execute(
           groupBookIds: any(named: 'groupBookIds'),
           startDate: any(named: 'startDate'),
           endDate: any(named: 'endDate'),

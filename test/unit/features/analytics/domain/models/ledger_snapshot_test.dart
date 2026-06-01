@@ -2,14 +2,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/analytics/domain/models/ledger_snapshot.dart';
 
 void main() {
-  group('SoulLedgerSnapshot (Freezed value semantics)', () {
+  group('JoyLedgerSnapshot (Freezed value semantics)', () {
     test('two snapshots with identical fields are == and share hashCode', () {
-      const a = SoulLedgerSnapshot(
+      const a = JoyLedgerSnapshot(
         entryCount: 4,
         totalSpend: 12000,
         avgSatisfaction: 7.5,
       );
-      const b = SoulLedgerSnapshot(
+      const b = JoyLedgerSnapshot(
         entryCount: 4,
         totalSpend: 12000,
         avgSatisfaction: 7.5,
@@ -20,7 +20,7 @@ void main() {
     });
 
     test('snapshot is immutable: copyWith returns a fresh instance', () {
-      const original = SoulLedgerSnapshot(
+      const original = JoyLedgerSnapshot(
         entryCount: 4,
         totalSpend: 12000,
         avgSatisfaction: 7.5,
@@ -34,115 +34,115 @@ void main() {
     });
   });
 
-  group('SurvivalLedgerSnapshot (Freezed value semantics)', () {
+  group('DailyLedgerSnapshot (Freezed value semantics)', () {
     test('two snapshots with identical fields are == and share hashCode', () {
-      const a = SurvivalLedgerSnapshot(entryCount: 10, totalSpend: 45000);
-      const b = SurvivalLedgerSnapshot(entryCount: 10, totalSpend: 45000);
+      const a = DailyLedgerSnapshot(entryCount: 10, totalSpend: 45000);
+      const b = DailyLedgerSnapshot(entryCount: 10, totalSpend: 45000);
 
       expect(a, equals(b));
       expect(a.hashCode, equals(b.hashCode));
     });
 
     test(
-      'D-04 type-system gate: SurvivalLedgerSnapshot.toString() MUST NOT '
+      'D-04 type-system gate: DailyLedgerSnapshot.toString() MUST NOT '
       "expose the 'avgSatisfaction' field name — the field literally cannot "
       'exist (compile-time gate). transactions.joy_fullness defaults to '
-      '2 and the picker only renders for soul-ledger entries (ADR-014 D-10), '
-      'so AVG over survival rows is default-2-dominated and reads as '
-      '"survival = always neutral/unhappy". Adding avgSatisfaction here is '
+      '2 and the picker only renders for joy-ledger entries (ADR-014 D-10), '
+      'so AVG over daily rows is default-2-dominated and reads as '
+      '"daily = always neutral/unhappy". Adding avgSatisfaction here is '
       'the regression mode this gate prevents.',
       () {
-        const survival = SurvivalLedgerSnapshot(
+        const daily = DailyLedgerSnapshot(
           entryCount: 10,
           totalSpend: 45000,
         );
 
-        expect(survival.toString(), isNot(contains('avgSatisfaction')));
+        expect(daily.toString(), isNot(contains('avgSatisfaction')));
       },
     );
   });
 
-  group('SoulVsSurvivalSnapshot composition', () {
+  group('DailyVsJoySnapshot composition', () {
     test('solo-mode construction: family fields are null', () {
-      const soul = SoulLedgerSnapshot(
+      const joy = JoyLedgerSnapshot(
         entryCount: 4,
         totalSpend: 12000,
         avgSatisfaction: 7.5,
       );
-      const survival = SurvivalLedgerSnapshot(
+      const daily = DailyLedgerSnapshot(
         entryCount: 10,
         totalSpend: 45000,
       );
 
-      const snapshot = SoulVsSurvivalSnapshot(soul: soul, survival: survival);
+      const snapshot = DailyVsJoySnapshot(joy: joy, daily: daily);
 
-      expect(snapshot.soul, soul);
-      expect(snapshot.survival, survival);
-      expect(snapshot.familySoul, isNull);
-      expect(snapshot.familySurvival, isNull);
+      expect(snapshot.joy, joy);
+      expect(snapshot.daily, daily);
+      expect(snapshot.familyJoy, isNull);
+      expect(snapshot.familyDaily, isNull);
     });
 
     test('group-mode construction: all four sub-snapshots populated', () {
-      const soul = SoulLedgerSnapshot(
+      const joy = JoyLedgerSnapshot(
         entryCount: 4,
         totalSpend: 12000,
         avgSatisfaction: 7.5,
       );
-      const survival = SurvivalLedgerSnapshot(
+      const daily = DailyLedgerSnapshot(
         entryCount: 10,
         totalSpend: 45000,
       );
-      const familySoul = SoulLedgerSnapshot(
+      const familyJoy = JoyLedgerSnapshot(
         entryCount: 12,
         totalSpend: 36000,
         avgSatisfaction: 8.1,
       );
-      const familySurvival = SurvivalLedgerSnapshot(
+      const familyDaily = DailyLedgerSnapshot(
         entryCount: 32,
         totalSpend: 140000,
       );
 
-      const snapshot = SoulVsSurvivalSnapshot(
-        soul: soul,
-        survival: survival,
-        familySoul: familySoul,
-        familySurvival: familySurvival,
+      const snapshot = DailyVsJoySnapshot(
+        joy: joy,
+        daily: daily,
+        familyJoy: familyJoy,
+        familyDaily: familyDaily,
       );
 
-      expect(snapshot.soul, soul);
-      expect(snapshot.survival, survival);
-      expect(snapshot.familySoul, familySoul);
-      expect(snapshot.familySurvival, familySurvival);
+      expect(snapshot.joy, joy);
+      expect(snapshot.daily, daily);
+      expect(snapshot.familyJoy, familyJoy);
+      expect(snapshot.familyDaily, familyDaily);
     });
 
     test('copyWith clears family fields back to solo mode', () {
-      const snapshot = SoulVsSurvivalSnapshot(
-        soul: SoulLedgerSnapshot(
+      const snapshot = DailyVsJoySnapshot(
+        joy: JoyLedgerSnapshot(
           entryCount: 4,
           totalSpend: 12000,
           avgSatisfaction: 7.5,
         ),
-        survival: SurvivalLedgerSnapshot(entryCount: 10, totalSpend: 45000),
-        familySoul: SoulLedgerSnapshot(
+        daily: DailyLedgerSnapshot(entryCount: 10, totalSpend: 45000),
+        familyJoy: JoyLedgerSnapshot(
           entryCount: 12,
           totalSpend: 36000,
           avgSatisfaction: 8.1,
         ),
-        familySurvival: SurvivalLedgerSnapshot(
+        familyDaily: DailyLedgerSnapshot(
           entryCount: 32,
           totalSpend: 140000,
         ),
       );
 
       final cleared = snapshot.copyWith(
-        familySoul: null,
-        familySurvival: null,
+        familyJoy: null,
+        familyDaily: null,
       );
 
-      expect(cleared.familySoul, isNull);
-      expect(cleared.familySurvival, isNull);
-      expect(cleared.soul, snapshot.soul);
-      expect(cleared.survival, snapshot.survival);
+      expect(cleared.familyJoy, isNull);
+      expect(cleared.familyDaily, isNull);
+      expect(cleared.joy, snapshot.joy);
+      expect(cleared.daily, snapshot.daily);
     });
   });
 }

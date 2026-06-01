@@ -119,14 +119,14 @@ void main() {
       await dao.updateBalances(
         bookId: 'book_001',
         transactionCount: 10,
-        survivalBalance: 50000,
-        soulBalance: 20000,
+        dailyBalance: 50000,
+        joyBalance: 20000,
       );
 
       final book = await dao.findById('book_001');
       expect(book!.transactionCount, 10);
-      expect(book.survivalBalance, 50000);
-      expect(book.soulBalance, 20000);
+      expect(book.dailyBalance, 50000);
+      expect(book.joyBalance, 20000);
     });
 
     test('insertShadowBook and findShadowBookByDeviceId', () async {

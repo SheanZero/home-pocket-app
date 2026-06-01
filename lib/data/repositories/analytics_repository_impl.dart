@@ -2,7 +2,7 @@ import '../../features/accounting/domain/models/entry_source.dart';
 import '../../features/analytics/domain/models/analytics_aggregate.dart';
 import '../../features/analytics/domain/models/best_joy_moment_row.dart';
 import '../../features/analytics/domain/models/ledger_snapshot.dart';
-import '../../features/analytics/domain/models/per_category_soul_breakdown.dart';
+import '../../features/analytics/domain/models/per_category_joy_breakdown.dart';
 import '../../features/analytics/domain/repositories/analytics_repository.dart';
 import '../daos/analytics_dao.dart';
 
@@ -110,20 +110,20 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   }
 
   @override
-  Future<SoulSatisfactionOverview> getSoulSatisfactionOverview({
+  Future<JoyFullnessOverview> getJoyFullnessOverview({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
     EntrySource? entrySourceFilter,
   }) async {
-    final result = await _dao.getSoulSatisfactionOverview(
+    final result = await _dao.getJoyFullnessOverview(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
       entrySourceFilter: entrySourceFilter,
     );
 
-    return SoulSatisfactionOverview(
+    return JoyFullnessOverview(
       avgSatisfaction: result.avgSatisfaction,
       count: result.count,
     );
@@ -151,13 +151,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   }
 
   @override
-  Future<List<SoulRowSample>> getSoulRowsForJoyContribution({
+  Future<List<JoyRowSample>> getJoyRowsForJoyContribution({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
     EntrySource? entrySourceFilter,
   }) {
-    return _dao.getSoulRowsForJoyContribution(
+    return _dao.getJoyRowsForJoyContribution(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
@@ -211,13 +211,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   }
 
   @override
-  Future<List<PerCategorySoulBreakdownItem>> getPerCategorySoulBreakdown({
+  Future<List<PerCategoryJoyBreakdownItem>> getPerCategoryJoyBreakdown({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
     EntrySource? entrySourceFilter,
   }) async {
-    final raws = await _dao.getPerCategorySoulBreakdown(
+    final raws = await _dao.getPerCategoryJoyBreakdown(
       bookId: bookId,
       startDate: startDate,
       endDate: endDate,
@@ -225,7 +225,7 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     );
     return raws
         .map(
-          (r) => PerCategorySoulBreakdownItem(
+          (r) => PerCategoryJoyBreakdownItem(
             categoryId: r.categoryId,
             avgSatisfaction: r.avgSatisfaction,
             totalCount: r.totalCount,
@@ -235,14 +235,14 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   }
 
   @override
-  Future<List<PerCategorySoulBreakdownItem>>
-  getPerCategorySoulBreakdownAcrossBooks({
+  Future<List<PerCategoryJoyBreakdownItem>>
+  getPerCategoryJoyBreakdownAcrossBooks({
     required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,
     EntrySource? entrySourceFilter,
   }) async {
-    final raws = await _dao.getPerCategorySoulBreakdownAcrossBooks(
+    final raws = await _dao.getPerCategoryJoyBreakdownAcrossBooks(
       bookIds: bookIds,
       startDate: startDate,
       endDate: endDate,
@@ -250,7 +250,7 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     );
     return raws
         .map(
-          (r) => PerCategorySoulBreakdownItem(
+          (r) => PerCategoryJoyBreakdownItem(
             categoryId: r.categoryId,
             avgSatisfaction: r.avgSatisfaction,
             totalCount: r.totalCount,

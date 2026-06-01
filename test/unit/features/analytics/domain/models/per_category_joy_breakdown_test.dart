@@ -1,15 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/features/analytics/domain/models/per_category_soul_breakdown.dart';
+import 'package:home_pocket/features/analytics/domain/models/per_category_joy_breakdown.dart';
 
 void main() {
-  group('PerCategorySoulBreakdownItem equality (Freezed value semantics)', () {
+  group('PerCategoryJoyBreakdownItem equality (Freezed value semantics)', () {
     test('two items with identical fields are == and share hashCode', () {
-      const a = PerCategorySoulBreakdownItem(
+      const a = PerCategoryJoyBreakdownItem(
         categoryId: 'cat_a',
         avgSatisfaction: 7.5,
         totalCount: 4,
       );
-      const b = PerCategorySoulBreakdownItem(
+      const b = PerCategoryJoyBreakdownItem(
         categoryId: 'cat_a',
         avgSatisfaction: 7.5,
         totalCount: 4,
@@ -20,22 +20,22 @@ void main() {
     });
 
     test('items differing in any single field are not equal', () {
-      const base = PerCategorySoulBreakdownItem(
+      const base = PerCategoryJoyBreakdownItem(
         categoryId: 'cat_a',
         avgSatisfaction: 7.5,
         totalCount: 4,
       );
-      const diffId = PerCategorySoulBreakdownItem(
+      const diffId = PerCategoryJoyBreakdownItem(
         categoryId: 'cat_b',
         avgSatisfaction: 7.5,
         totalCount: 4,
       );
-      const diffSat = PerCategorySoulBreakdownItem(
+      const diffSat = PerCategoryJoyBreakdownItem(
         categoryId: 'cat_a',
         avgSatisfaction: 7.6,
         totalCount: 4,
       );
-      const diffCount = PerCategorySoulBreakdownItem(
+      const diffCount = PerCategoryJoyBreakdownItem(
         categoryId: 'cat_a',
         avgSatisfaction: 7.5,
         totalCount: 5,
@@ -47,10 +47,10 @@ void main() {
     });
   });
 
-  group('PerCategorySoulBreakdownItem copyWith (immutability)', () {
+  group('PerCategoryJoyBreakdownItem copyWith (immutability)', () {
     test('copyWith(totalCount: 99) produces a new instance with the new value '
         'and preserves other fields; original is untouched', () {
-      const original = PerCategorySoulBreakdownItem(
+      const original = PerCategoryJoyBreakdownItem(
         categoryId: 'cat_a',
         avgSatisfaction: 7.5,
         totalCount: 4,
@@ -67,28 +67,28 @@ void main() {
     });
   });
 
-  group('PerCategorySoulBreakdown equality across list members', () {
+  group('PerCategoryJoyBreakdown equality across list members', () {
     test('two breakdowns with identical items + counts are equal', () {
       const items = [
-        PerCategorySoulBreakdownItem(
+        PerCategoryJoyBreakdownItem(
           categoryId: 'cat_a',
           avgSatisfaction: 8.0,
           totalCount: 5,
         ),
-        PerCategorySoulBreakdownItem(
+        PerCategoryJoyBreakdownItem(
           categoryId: 'cat_b',
           avgSatisfaction: 7.0,
           totalCount: 7,
         ),
       ];
 
-      const a = PerCategorySoulBreakdown(
+      const a = PerCategoryJoyBreakdown(
         items: items,
         totalCount: 15,
         otherCount: 3,
         otherCategoryCount: 2,
       );
-      const b = PerCategorySoulBreakdown(
+      const b = PerCategoryJoyBreakdown(
         items: items,
         totalCount: 15,
         otherCount: 3,
@@ -100,14 +100,14 @@ void main() {
     });
 
     test('breakdown with different otherCount is not equal', () {
-      const items = <PerCategorySoulBreakdownItem>[];
-      const a = PerCategorySoulBreakdown(
+      const items = <PerCategoryJoyBreakdownItem>[];
+      const a = PerCategoryJoyBreakdown(
         items: items,
         totalCount: 0,
         otherCount: 0,
         otherCategoryCount: 0,
       );
-      const b = PerCategorySoulBreakdown(
+      const b = PerCategoryJoyBreakdown(
         items: items,
         totalCount: 0,
         otherCount: 1,
@@ -118,11 +118,11 @@ void main() {
     });
   });
 
-  group('PerCategorySoulBreakdown empty construction', () {
+  group('PerCategoryJoyBreakdown empty construction', () {
     test('empty items + zero counts is allowed (use case wraps Empty separately)',
         () {
-      const breakdown = PerCategorySoulBreakdown(
-        items: <PerCategorySoulBreakdownItem>[],
+      const breakdown = PerCategoryJoyBreakdown(
+        items: <PerCategoryJoyBreakdownItem>[],
         totalCount: 0,
         otherCount: 0,
         otherCategoryCount: 0,
@@ -137,18 +137,18 @@ void main() {
     test('manual constructor allows mixed item + Other totals to add up '
         '(12 qualifying + 3 other = 15)', () {
       const items = [
-        PerCategorySoulBreakdownItem(
+        PerCategoryJoyBreakdownItem(
           categoryId: 'cat_a',
           avgSatisfaction: 8.0,
           totalCount: 5,
         ),
-        PerCategorySoulBreakdownItem(
+        PerCategoryJoyBreakdownItem(
           categoryId: 'cat_b',
           avgSatisfaction: 7.0,
           totalCount: 7,
         ),
       ];
-      const breakdown = PerCategorySoulBreakdown(
+      const breakdown = PerCategoryJoyBreakdown(
         items: items,
         totalCount: 15,
         otherCount: 3,

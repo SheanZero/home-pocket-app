@@ -16,7 +16,7 @@ import '../../domain/models/tagged_transaction.dart';
 ///
 /// Layout:
 /// - LEADING: enlarged, vertically-centered L1 category icon
-/// - LEFT primary row: L2 category name + optional soul emoji
+/// - LEFT primary row: L2 category name + optional joy emoji
 /// - LEFT secondary row: ledger type badge (background pill) + optional merchant
 /// - RIGHT: amount only (no time label)
 ///
@@ -73,7 +73,7 @@ class ListTransactionTile extends ConsumerWidget {
   /// Locale used for date formatting when [showDate] is true.
   final Locale locale;
 
-  /// Optional satisfaction icon for soul-ledger rows (ADR-014 mapping).
+  /// Optional satisfaction icon for joy-ledger rows (ADR-014 mapping).
   final IconData? satisfactionIcon;
 
   /// When true, the tile title shows "short date + L2 category" (amount-sort
@@ -153,7 +153,7 @@ class ListTransactionTile extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Primary: L2 category name + optional soul emoji
+                    // Primary: L2 category name + optional joy emoji
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [

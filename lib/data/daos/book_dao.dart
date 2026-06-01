@@ -133,14 +133,14 @@ class BookDao {
   Future<void> updateBalances({
     required String bookId,
     required int transactionCount,
-    required int survivalBalance,
-    required int soulBalance,
+    required int dailyBalance,
+    required int joyBalance,
   }) async {
     await (_db.update(_db.books)..where((t) => t.id.equals(bookId))).write(
       BooksCompanion(
         transactionCount: Value(transactionCount),
-        survivalBalance: Value(survivalBalance),
-        soulBalance: Value(soulBalance),
+        dailyBalance: Value(dailyBalance),
+        joyBalance: Value(joyBalance),
       ),
     );
   }

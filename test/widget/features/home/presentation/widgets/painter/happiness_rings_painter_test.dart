@@ -8,7 +8,7 @@ import 'package:mocktail/mocktail.dart';
 /// Unit tests for [HappinessRingsPainter].
 ///
 /// The mock-canvas idiom mirrors the pattern in
-/// `.planning/phases/10-homepage-soulfullnesscard-redesign/10-PATTERNS.md`
+/// `.planning/phases/10-homepage-joyfullnesscard-redesign/10-PATTERNS.md`
 /// (lines 626-712): use `mocktail.Mock implements Canvas` and `verify(...)` to
 /// assert the exact `drawArc` call counts + sweep angles instead of pixel
 /// inspection.

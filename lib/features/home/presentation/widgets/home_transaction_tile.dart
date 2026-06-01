@@ -48,7 +48,7 @@ class HomeTransactionTile extends StatelessWidget {
   /// Colour of the amount text.
   final Color amountColor;
 
-  /// Optional satisfaction icon for soul-ledger rows (ADR-014 mapping).
+  /// Optional satisfaction icon for joy-ledger rows (ADR-014 mapping).
   final IconData? satisfactionIcon;
 
   /// Optional tap callback.
@@ -77,7 +77,7 @@ class HomeTransactionTile extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             // Info column — satisfactionIcon is inline-right of category text
-            // (not after amount) to keep soul and survival row heights identical.
+            // (not after amount) to keep joy and daily row heights identical.
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

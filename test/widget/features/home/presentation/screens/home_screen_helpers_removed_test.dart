@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 ///   - `_computeSatisfaction` was an intraday-only metric superseded by
 ///     `HappinessReport.avgSatisfaction` (Phase 9 D-15).
 ///   - `_buildLedgerRows` is no longer needed (`HomeHeroCard` consumes
-///     `MonthlyReport.soulTotal/survivalTotal` directly).
+///     `MonthlyReport.joyTotal/dailyTotal` directly).
 ///
 /// This test asserts none of those identifiers reappear in the source. If a
 /// future refactor reintroduces them, this test fails — and the planner must

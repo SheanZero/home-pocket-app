@@ -78,22 +78,22 @@ void main() {
     });
 
     test(
-      'getSoulRowsForJoyContribution preserves DAO row order and values',
+      'getJoyRowsForJoyContribution preserves DAO row order and values',
       () async {
         const rows = [
-          SoulRowSample(amount: 500, joyFullness: 6),
-          SoulRowSample(amount: 1500, joyFullness: 8),
-          SoulRowSample(amount: 3000, joyFullness: 10),
+          JoyRowSample(amount: 500, joyFullness: 6),
+          JoyRowSample(amount: 1500, joyFullness: 8),
+          JoyRowSample(amount: 3000, joyFullness: 10),
         ];
         when(
-          () => dao.getSoulRowsForJoyContribution(
+          () => dao.getJoyRowsForJoyContribution(
             bookId: 'book-1',
             startDate: startDate,
             endDate: endDate,
           ),
         ).thenAnswer((_) async => rows);
 
-        final result = await repository.getSoulRowsForJoyContribution(
+        final result = await repository.getJoyRowsForJoyContribution(
           bookId: 'book-1',
           startDate: startDate,
           endDate: endDate,
@@ -103,7 +103,7 @@ void main() {
         expect(result.map((row) => row.amount), [500, 1500, 3000]);
         expect(result.map((row) => row.joyFullness), [6, 8, 10]);
         verify(
-          () => dao.getSoulRowsForJoyContribution(
+          () => dao.getJoyRowsForJoyContribution(
             bookId: 'book-1',
             startDate: startDate,
             endDate: endDate,
@@ -113,10 +113,10 @@ void main() {
     );
 
     test(
-      'getSoulSatisfactionOverview maps DAO result to domain type',
+      'getJoyFullnessOverview maps DAO result to domain type',
       () async {
         when(
-          () => dao.getSoulSatisfactionOverview(
+          () => dao.getJoyFullnessOverview(
             bookId: 'book-1',
             startDate: startDate,
             endDate: endDate,
@@ -126,7 +126,7 @@ void main() {
               const SatisfactionOverviewResult(avgSatisfaction: 7.5, count: 8),
         );
 
-        final result = await repository.getSoulSatisfactionOverview(
+        final result = await repository.getJoyFullnessOverview(
           bookId: 'book-1',
           startDate: startDate,
           endDate: endDate,
@@ -135,7 +135,7 @@ void main() {
         expect(result.avgSatisfaction, 7.5);
         expect(result.count, 8);
         verify(
-          () => dao.getSoulSatisfactionOverview(
+          () => dao.getJoyFullnessOverview(
             bookId: 'book-1',
             startDate: startDate,
             endDate: endDate,

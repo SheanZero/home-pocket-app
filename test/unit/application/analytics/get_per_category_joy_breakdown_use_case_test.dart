@@ -1,15 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/application/analytics/get_per_category_soul_breakdown_use_case.dart';
+import 'package:home_pocket/application/analytics/get_per_category_joy_breakdown_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
-import 'package:home_pocket/features/analytics/domain/models/per_category_soul_breakdown.dart';
+import 'package:home_pocket/features/analytics/domain/models/per_category_joy_breakdown.dart';
 import 'package:home_pocket/features/analytics/domain/repositories/analytics_repository.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockAnalyticsRepository extends Mock implements AnalyticsRepository {}
 
-PerCategorySoulBreakdownItem _item(String id, double avg, int count) =>
-    PerCategorySoulBreakdownItem(
+PerCategoryJoyBreakdownItem _item(String id, double avg, int count) =>
+    PerCategoryJoyBreakdownItem(
       categoryId: id,
       avgSatisfaction: avg,
       totalCount: count,
@@ -17,7 +17,7 @@ PerCategorySoulBreakdownItem _item(String id, double avg, int count) =>
 
 void main() {
   late _MockAnalyticsRepository repository;
-  late GetPerCategorySoulBreakdownUseCase useCase;
+  late GetPerCategoryJoyBreakdownUseCase useCase;
 
   final startDate = DateTime(2026, 4);
   final endDate = DateTime(2026, 4, 30, 23, 59, 59);
@@ -25,17 +25,17 @@ void main() {
 
   setUp(() {
     repository = _MockAnalyticsRepository();
-    useCase = GetPerCategorySoulBreakdownUseCase(
+    useCase = GetPerCategoryJoyBreakdownUseCase(
       analyticsRepository: repository,
     );
   });
 
   void stubBreakdown(
-    List<PerCategorySoulBreakdownItem> items, {
+    List<PerCategoryJoyBreakdownItem> items, {
     EntrySource? entrySourceFilter,
   }) {
     when(
-      () => repository.getPerCategorySoulBreakdown(
+      () => repository.getPerCategoryJoyBreakdown(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
@@ -44,7 +44,7 @@ void main() {
     ).thenAnswer((_) async => items);
   }
 
-  Future<MetricResult<PerCategorySoulBreakdown>> execute({
+  Future<MetricResult<PerCategoryJoyBreakdown>> execute({
     EntrySource? entrySourceFilter,
   }) {
     return useCase.execute(
@@ -56,12 +56,12 @@ void main() {
   }
 
   group('empty repo result', () {
-    test('returns Empty<PerCategorySoulBreakdown>', () async {
+    test('returns Empty<PerCategoryJoyBreakdown>', () async {
       stubBreakdown(const []);
 
       final result = await execute();
 
-      expect(result, isA<Empty<PerCategorySoulBreakdown>>());
+      expect(result, isA<Empty<PerCategoryJoyBreakdown>>());
     });
   });
 
@@ -75,7 +75,7 @@ void main() {
           _item('cat_c', 8.0, 2),
         ]);
 
-        final result = await execute() as Value<PerCategorySoulBreakdown>;
+        final result = await execute() as Value<PerCategoryJoyBreakdown>;
 
         expect(result.data.items, isEmpty);
         expect(result.data.otherCount, 5); // 2 + 1 + 2
@@ -94,7 +94,7 @@ void main() {
         _item('cat_c', 9.0, 2), // low-N
       ]);
 
-      final result = await execute() as Value<PerCategorySoulBreakdown>;
+      final result = await execute() as Value<PerCategoryJoyBreakdown>;
 
       // items pre-sorted: avg DESC: cat_a(8.0,4) then cat_b(6.5,3).
       expect(result.data.items.map((i) => i.categoryId).toList(), [
@@ -120,7 +120,7 @@ void main() {
         _item('cat_z', 7.0, 5),
       ]);
 
-      final result = await execute() as Value<PerCategorySoulBreakdown>;
+      final result = await execute() as Value<PerCategoryJoyBreakdown>;
 
       expect(result.data.items.map((i) => i.categoryId).toList(), [
         'cat_x',
@@ -139,7 +139,7 @@ void main() {
         _item('cat_d', 5.0, 2),
       ]);
 
-      final result = await execute() as Value<PerCategorySoulBreakdown>;
+      final result = await execute() as Value<PerCategoryJoyBreakdown>;
 
       final qualifyingSum = result.data.items.fold<int>(
         0,
@@ -158,11 +158,11 @@ void main() {
         final items = [_item('cat_a', 8.0, 3)];
         stubBreakdown(items, entrySourceFilter: null);
 
-        final result = await execute() as Value<PerCategorySoulBreakdown>;
+        final result = await execute() as Value<PerCategoryJoyBreakdown>;
 
         expect(result.data.items.single.categoryId, 'cat_a');
         verify(
-          () => repository.getPerCategorySoulBreakdown(
+          () => repository.getPerCategoryJoyBreakdown(
             bookId: bookId,
             startDate: startDate,
             endDate: endDate,
@@ -180,11 +180,11 @@ void main() {
 
         final result =
             await execute(entrySourceFilter: EntrySource.manual)
-                as Value<PerCategorySoulBreakdown>;
+                as Value<PerCategoryJoyBreakdown>;
 
         expect(result.data.items.single.categoryId, 'cat_manual');
         verify(
-          () => repository.getPerCategorySoulBreakdown(
+          () => repository.getPerCategoryJoyBreakdown(
             bookId: bookId,
             startDate: startDate,
             endDate: endDate,

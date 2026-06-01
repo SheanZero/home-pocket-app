@@ -12,18 +12,18 @@ part of 'ledger_snapshot.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
-mixin _$SoulLedgerSnapshot {
+mixin _$JoyLedgerSnapshot {
   int get entryCount;
   int get totalSpend;
   double get avgSatisfaction;
 
-  /// Create a copy of SoulLedgerSnapshot
+  /// Create a copy of JoyLedgerSnapshot
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $SoulLedgerSnapshotCopyWith<SoulLedgerSnapshot> get copyWith =>
-      _$SoulLedgerSnapshotCopyWithImpl<SoulLedgerSnapshot>(
-        this as SoulLedgerSnapshot,
+  $JoyLedgerSnapshotCopyWith<JoyLedgerSnapshot> get copyWith =>
+      _$JoyLedgerSnapshotCopyWithImpl<JoyLedgerSnapshot>(
+        this as JoyLedgerSnapshot,
         _$identity,
       );
 
@@ -31,7 +31,7 @@ mixin _$SoulLedgerSnapshot {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is SoulLedgerSnapshot &&
+            other is JoyLedgerSnapshot &&
             (identical(other.entryCount, entryCount) ||
                 other.entryCount == entryCount) &&
             (identical(other.totalSpend, totalSpend) ||
@@ -46,29 +46,29 @@ mixin _$SoulLedgerSnapshot {
 
   @override
   String toString() {
-    return 'SoulLedgerSnapshot(entryCount: $entryCount, totalSpend: $totalSpend, avgSatisfaction: $avgSatisfaction)';
+    return 'JoyLedgerSnapshot(entryCount: $entryCount, totalSpend: $totalSpend, avgSatisfaction: $avgSatisfaction)';
   }
 }
 
 /// @nodoc
-abstract mixin class $SoulLedgerSnapshotCopyWith<$Res> {
-  factory $SoulLedgerSnapshotCopyWith(
-    SoulLedgerSnapshot value,
-    $Res Function(SoulLedgerSnapshot) _then,
-  ) = _$SoulLedgerSnapshotCopyWithImpl;
+abstract mixin class $JoyLedgerSnapshotCopyWith<$Res> {
+  factory $JoyLedgerSnapshotCopyWith(
+    JoyLedgerSnapshot value,
+    $Res Function(JoyLedgerSnapshot) _then,
+  ) = _$JoyLedgerSnapshotCopyWithImpl;
   @useResult
   $Res call({int entryCount, int totalSpend, double avgSatisfaction});
 }
 
 /// @nodoc
-class _$SoulLedgerSnapshotCopyWithImpl<$Res>
-    implements $SoulLedgerSnapshotCopyWith<$Res> {
-  _$SoulLedgerSnapshotCopyWithImpl(this._self, this._then);
+class _$JoyLedgerSnapshotCopyWithImpl<$Res>
+    implements $JoyLedgerSnapshotCopyWith<$Res> {
+  _$JoyLedgerSnapshotCopyWithImpl(this._self, this._then);
 
-  final SoulLedgerSnapshot _self;
-  final $Res Function(SoulLedgerSnapshot) _then;
+  final JoyLedgerSnapshot _self;
+  final $Res Function(JoyLedgerSnapshot) _then;
 
-  /// Create a copy of SoulLedgerSnapshot
+  /// Create a copy of JoyLedgerSnapshot
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -96,8 +96,8 @@ class _$SoulLedgerSnapshotCopyWithImpl<$Res>
   }
 }
 
-/// Adds pattern-matching-related methods to [SoulLedgerSnapshot].
-extension SoulLedgerSnapshotPatterns on SoulLedgerSnapshot {
+/// Adds pattern-matching-related methods to [JoyLedgerSnapshot].
+extension JoyLedgerSnapshotPatterns on JoyLedgerSnapshot {
   /// A variant of `map` that fallback to returning `orElse`.
   ///
   /// It is equivalent to doing:
@@ -112,12 +112,12 @@ extension SoulLedgerSnapshotPatterns on SoulLedgerSnapshot {
 
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>(
-    TResult Function(_SoulLedgerSnapshot value)? $default, {
+    TResult Function(_JoyLedgerSnapshot value)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
-      case _SoulLedgerSnapshot() when $default != null:
+      case _JoyLedgerSnapshot() when $default != null:
         return $default(_that);
       case _:
         return orElse();
@@ -139,11 +139,11 @@ extension SoulLedgerSnapshotPatterns on SoulLedgerSnapshot {
 
   @optionalTypeArgs
   TResult map<TResult extends Object?>(
-    TResult Function(_SoulLedgerSnapshot value) $default,
+    TResult Function(_JoyLedgerSnapshot value) $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _SoulLedgerSnapshot():
+      case _JoyLedgerSnapshot():
         return $default(_that);
       case _:
         throw StateError('Unexpected subclass');
@@ -164,11 +164,11 @@ extension SoulLedgerSnapshotPatterns on SoulLedgerSnapshot {
 
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_SoulLedgerSnapshot value)? $default,
+    TResult? Function(_JoyLedgerSnapshot value)? $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _SoulLedgerSnapshot() when $default != null:
+      case _JoyLedgerSnapshot() when $default != null:
         return $default(_that);
       case _:
         return null;
@@ -195,7 +195,7 @@ extension SoulLedgerSnapshotPatterns on SoulLedgerSnapshot {
   }) {
     final _that = this;
     switch (_that) {
-      case _SoulLedgerSnapshot() when $default != null:
+      case _JoyLedgerSnapshot() when $default != null:
         return $default(
           _that.entryCount,
           _that.totalSpend,
@@ -226,7 +226,7 @@ extension SoulLedgerSnapshotPatterns on SoulLedgerSnapshot {
   ) {
     final _that = this;
     switch (_that) {
-      case _SoulLedgerSnapshot():
+      case _JoyLedgerSnapshot():
         return $default(
           _that.entryCount,
           _that.totalSpend,
@@ -256,7 +256,7 @@ extension SoulLedgerSnapshotPatterns on SoulLedgerSnapshot {
   ) {
     final _that = this;
     switch (_that) {
-      case _SoulLedgerSnapshot() when $default != null:
+      case _JoyLedgerSnapshot() when $default != null:
         return $default(
           _that.entryCount,
           _that.totalSpend,
@@ -270,8 +270,8 @@ extension SoulLedgerSnapshotPatterns on SoulLedgerSnapshot {
 
 /// @nodoc
 
-class _SoulLedgerSnapshot implements SoulLedgerSnapshot {
-  const _SoulLedgerSnapshot({
+class _JoyLedgerSnapshot implements JoyLedgerSnapshot {
+  const _JoyLedgerSnapshot({
     required this.entryCount,
     required this.totalSpend,
     required this.avgSatisfaction,
@@ -284,19 +284,19 @@ class _SoulLedgerSnapshot implements SoulLedgerSnapshot {
   @override
   final double avgSatisfaction;
 
-  /// Create a copy of SoulLedgerSnapshot
+  /// Create a copy of JoyLedgerSnapshot
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  _$SoulLedgerSnapshotCopyWith<_SoulLedgerSnapshot> get copyWith =>
-      __$SoulLedgerSnapshotCopyWithImpl<_SoulLedgerSnapshot>(this, _$identity);
+  _$JoyLedgerSnapshotCopyWith<_JoyLedgerSnapshot> get copyWith =>
+      __$JoyLedgerSnapshotCopyWithImpl<_JoyLedgerSnapshot>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _SoulLedgerSnapshot &&
+            other is _JoyLedgerSnapshot &&
             (identical(other.entryCount, entryCount) ||
                 other.entryCount == entryCount) &&
             (identical(other.totalSpend, totalSpend) ||
@@ -311,31 +311,31 @@ class _SoulLedgerSnapshot implements SoulLedgerSnapshot {
 
   @override
   String toString() {
-    return 'SoulLedgerSnapshot(entryCount: $entryCount, totalSpend: $totalSpend, avgSatisfaction: $avgSatisfaction)';
+    return 'JoyLedgerSnapshot(entryCount: $entryCount, totalSpend: $totalSpend, avgSatisfaction: $avgSatisfaction)';
   }
 }
 
 /// @nodoc
-abstract mixin class _$SoulLedgerSnapshotCopyWith<$Res>
-    implements $SoulLedgerSnapshotCopyWith<$Res> {
-  factory _$SoulLedgerSnapshotCopyWith(
-    _SoulLedgerSnapshot value,
-    $Res Function(_SoulLedgerSnapshot) _then,
-  ) = __$SoulLedgerSnapshotCopyWithImpl;
+abstract mixin class _$JoyLedgerSnapshotCopyWith<$Res>
+    implements $JoyLedgerSnapshotCopyWith<$Res> {
+  factory _$JoyLedgerSnapshotCopyWith(
+    _JoyLedgerSnapshot value,
+    $Res Function(_JoyLedgerSnapshot) _then,
+  ) = __$JoyLedgerSnapshotCopyWithImpl;
   @override
   @useResult
   $Res call({int entryCount, int totalSpend, double avgSatisfaction});
 }
 
 /// @nodoc
-class __$SoulLedgerSnapshotCopyWithImpl<$Res>
-    implements _$SoulLedgerSnapshotCopyWith<$Res> {
-  __$SoulLedgerSnapshotCopyWithImpl(this._self, this._then);
+class __$JoyLedgerSnapshotCopyWithImpl<$Res>
+    implements _$JoyLedgerSnapshotCopyWith<$Res> {
+  __$JoyLedgerSnapshotCopyWithImpl(this._self, this._then);
 
-  final _SoulLedgerSnapshot _self;
-  final $Res Function(_SoulLedgerSnapshot) _then;
+  final _JoyLedgerSnapshot _self;
+  final $Res Function(_JoyLedgerSnapshot) _then;
 
-  /// Create a copy of SoulLedgerSnapshot
+  /// Create a copy of JoyLedgerSnapshot
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
@@ -345,7 +345,7 @@ class __$SoulLedgerSnapshotCopyWithImpl<$Res>
     Object? avgSatisfaction = null,
   }) {
     return _then(
-      _SoulLedgerSnapshot(
+      _JoyLedgerSnapshot(
         entryCount: null == entryCount
             ? _self.entryCount
             : entryCount // ignore: cast_nullable_to_non_nullable
@@ -364,17 +364,17 @@ class __$SoulLedgerSnapshotCopyWithImpl<$Res>
 }
 
 /// @nodoc
-mixin _$SurvivalLedgerSnapshot {
+mixin _$DailyLedgerSnapshot {
   int get entryCount;
   int get totalSpend;
 
-  /// Create a copy of SurvivalLedgerSnapshot
+  /// Create a copy of DailyLedgerSnapshot
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $SurvivalLedgerSnapshotCopyWith<SurvivalLedgerSnapshot> get copyWith =>
-      _$SurvivalLedgerSnapshotCopyWithImpl<SurvivalLedgerSnapshot>(
-        this as SurvivalLedgerSnapshot,
+  $DailyLedgerSnapshotCopyWith<DailyLedgerSnapshot> get copyWith =>
+      _$DailyLedgerSnapshotCopyWithImpl<DailyLedgerSnapshot>(
+        this as DailyLedgerSnapshot,
         _$identity,
       );
 
@@ -382,7 +382,7 @@ mixin _$SurvivalLedgerSnapshot {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is SurvivalLedgerSnapshot &&
+            other is DailyLedgerSnapshot &&
             (identical(other.entryCount, entryCount) ||
                 other.entryCount == entryCount) &&
             (identical(other.totalSpend, totalSpend) ||
@@ -394,29 +394,29 @@ mixin _$SurvivalLedgerSnapshot {
 
   @override
   String toString() {
-    return 'SurvivalLedgerSnapshot(entryCount: $entryCount, totalSpend: $totalSpend)';
+    return 'DailyLedgerSnapshot(entryCount: $entryCount, totalSpend: $totalSpend)';
   }
 }
 
 /// @nodoc
-abstract mixin class $SurvivalLedgerSnapshotCopyWith<$Res> {
-  factory $SurvivalLedgerSnapshotCopyWith(
-    SurvivalLedgerSnapshot value,
-    $Res Function(SurvivalLedgerSnapshot) _then,
-  ) = _$SurvivalLedgerSnapshotCopyWithImpl;
+abstract mixin class $DailyLedgerSnapshotCopyWith<$Res> {
+  factory $DailyLedgerSnapshotCopyWith(
+    DailyLedgerSnapshot value,
+    $Res Function(DailyLedgerSnapshot) _then,
+  ) = _$DailyLedgerSnapshotCopyWithImpl;
   @useResult
   $Res call({int entryCount, int totalSpend});
 }
 
 /// @nodoc
-class _$SurvivalLedgerSnapshotCopyWithImpl<$Res>
-    implements $SurvivalLedgerSnapshotCopyWith<$Res> {
-  _$SurvivalLedgerSnapshotCopyWithImpl(this._self, this._then);
+class _$DailyLedgerSnapshotCopyWithImpl<$Res>
+    implements $DailyLedgerSnapshotCopyWith<$Res> {
+  _$DailyLedgerSnapshotCopyWithImpl(this._self, this._then);
 
-  final SurvivalLedgerSnapshot _self;
-  final $Res Function(SurvivalLedgerSnapshot) _then;
+  final DailyLedgerSnapshot _self;
+  final $Res Function(DailyLedgerSnapshot) _then;
 
-  /// Create a copy of SurvivalLedgerSnapshot
+  /// Create a copy of DailyLedgerSnapshot
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -436,8 +436,8 @@ class _$SurvivalLedgerSnapshotCopyWithImpl<$Res>
   }
 }
 
-/// Adds pattern-matching-related methods to [SurvivalLedgerSnapshot].
-extension SurvivalLedgerSnapshotPatterns on SurvivalLedgerSnapshot {
+/// Adds pattern-matching-related methods to [DailyLedgerSnapshot].
+extension DailyLedgerSnapshotPatterns on DailyLedgerSnapshot {
   /// A variant of `map` that fallback to returning `orElse`.
   ///
   /// It is equivalent to doing:
@@ -452,12 +452,12 @@ extension SurvivalLedgerSnapshotPatterns on SurvivalLedgerSnapshot {
 
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>(
-    TResult Function(_SurvivalLedgerSnapshot value)? $default, {
+    TResult Function(_DailyLedgerSnapshot value)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
-      case _SurvivalLedgerSnapshot() when $default != null:
+      case _DailyLedgerSnapshot() when $default != null:
         return $default(_that);
       case _:
         return orElse();
@@ -479,11 +479,11 @@ extension SurvivalLedgerSnapshotPatterns on SurvivalLedgerSnapshot {
 
   @optionalTypeArgs
   TResult map<TResult extends Object?>(
-    TResult Function(_SurvivalLedgerSnapshot value) $default,
+    TResult Function(_DailyLedgerSnapshot value) $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _SurvivalLedgerSnapshot():
+      case _DailyLedgerSnapshot():
         return $default(_that);
       case _:
         throw StateError('Unexpected subclass');
@@ -504,11 +504,11 @@ extension SurvivalLedgerSnapshotPatterns on SurvivalLedgerSnapshot {
 
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_SurvivalLedgerSnapshot value)? $default,
+    TResult? Function(_DailyLedgerSnapshot value)? $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _SurvivalLedgerSnapshot() when $default != null:
+      case _DailyLedgerSnapshot() when $default != null:
         return $default(_that);
       case _:
         return null;
@@ -534,7 +534,7 @@ extension SurvivalLedgerSnapshotPatterns on SurvivalLedgerSnapshot {
   }) {
     final _that = this;
     switch (_that) {
-      case _SurvivalLedgerSnapshot() when $default != null:
+      case _DailyLedgerSnapshot() when $default != null:
         return $default(_that.entryCount, _that.totalSpend);
       case _:
         return orElse();
@@ -560,7 +560,7 @@ extension SurvivalLedgerSnapshotPatterns on SurvivalLedgerSnapshot {
   ) {
     final _that = this;
     switch (_that) {
-      case _SurvivalLedgerSnapshot():
+      case _DailyLedgerSnapshot():
         return $default(_that.entryCount, _that.totalSpend);
       case _:
         throw StateError('Unexpected subclass');
@@ -585,7 +585,7 @@ extension SurvivalLedgerSnapshotPatterns on SurvivalLedgerSnapshot {
   ) {
     final _that = this;
     switch (_that) {
-      case _SurvivalLedgerSnapshot() when $default != null:
+      case _DailyLedgerSnapshot() when $default != null:
         return $default(_that.entryCount, _that.totalSpend);
       case _:
         return null;
@@ -595,8 +595,8 @@ extension SurvivalLedgerSnapshotPatterns on SurvivalLedgerSnapshot {
 
 /// @nodoc
 
-class _SurvivalLedgerSnapshot implements SurvivalLedgerSnapshot {
-  const _SurvivalLedgerSnapshot({
+class _DailyLedgerSnapshot implements DailyLedgerSnapshot {
+  const _DailyLedgerSnapshot({
     required this.entryCount,
     required this.totalSpend,
   });
@@ -606,13 +606,13 @@ class _SurvivalLedgerSnapshot implements SurvivalLedgerSnapshot {
   @override
   final int totalSpend;
 
-  /// Create a copy of SurvivalLedgerSnapshot
+  /// Create a copy of DailyLedgerSnapshot
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  _$SurvivalLedgerSnapshotCopyWith<_SurvivalLedgerSnapshot> get copyWith =>
-      __$SurvivalLedgerSnapshotCopyWithImpl<_SurvivalLedgerSnapshot>(
+  _$DailyLedgerSnapshotCopyWith<_DailyLedgerSnapshot> get copyWith =>
+      __$DailyLedgerSnapshotCopyWithImpl<_DailyLedgerSnapshot>(
         this,
         _$identity,
       );
@@ -621,7 +621,7 @@ class _SurvivalLedgerSnapshot implements SurvivalLedgerSnapshot {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _SurvivalLedgerSnapshot &&
+            other is _DailyLedgerSnapshot &&
             (identical(other.entryCount, entryCount) ||
                 other.entryCount == entryCount) &&
             (identical(other.totalSpend, totalSpend) ||
@@ -633,37 +633,37 @@ class _SurvivalLedgerSnapshot implements SurvivalLedgerSnapshot {
 
   @override
   String toString() {
-    return 'SurvivalLedgerSnapshot(entryCount: $entryCount, totalSpend: $totalSpend)';
+    return 'DailyLedgerSnapshot(entryCount: $entryCount, totalSpend: $totalSpend)';
   }
 }
 
 /// @nodoc
-abstract mixin class _$SurvivalLedgerSnapshotCopyWith<$Res>
-    implements $SurvivalLedgerSnapshotCopyWith<$Res> {
-  factory _$SurvivalLedgerSnapshotCopyWith(
-    _SurvivalLedgerSnapshot value,
-    $Res Function(_SurvivalLedgerSnapshot) _then,
-  ) = __$SurvivalLedgerSnapshotCopyWithImpl;
+abstract mixin class _$DailyLedgerSnapshotCopyWith<$Res>
+    implements $DailyLedgerSnapshotCopyWith<$Res> {
+  factory _$DailyLedgerSnapshotCopyWith(
+    _DailyLedgerSnapshot value,
+    $Res Function(_DailyLedgerSnapshot) _then,
+  ) = __$DailyLedgerSnapshotCopyWithImpl;
   @override
   @useResult
   $Res call({int entryCount, int totalSpend});
 }
 
 /// @nodoc
-class __$SurvivalLedgerSnapshotCopyWithImpl<$Res>
-    implements _$SurvivalLedgerSnapshotCopyWith<$Res> {
-  __$SurvivalLedgerSnapshotCopyWithImpl(this._self, this._then);
+class __$DailyLedgerSnapshotCopyWithImpl<$Res>
+    implements _$DailyLedgerSnapshotCopyWith<$Res> {
+  __$DailyLedgerSnapshotCopyWithImpl(this._self, this._then);
 
-  final _SurvivalLedgerSnapshot _self;
-  final $Res Function(_SurvivalLedgerSnapshot) _then;
+  final _DailyLedgerSnapshot _self;
+  final $Res Function(_DailyLedgerSnapshot) _then;
 
-  /// Create a copy of SurvivalLedgerSnapshot
+  /// Create a copy of DailyLedgerSnapshot
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $Res call({Object? entryCount = null, Object? totalSpend = null}) {
     return _then(
-      _SurvivalLedgerSnapshot(
+      _DailyLedgerSnapshot(
         entryCount: null == entryCount
             ? _self.entryCount
             : entryCount // ignore: cast_nullable_to_non_nullable
@@ -678,19 +678,19 @@ class __$SurvivalLedgerSnapshotCopyWithImpl<$Res>
 }
 
 /// @nodoc
-mixin _$SoulVsSurvivalSnapshot {
-  SoulLedgerSnapshot get soul;
-  SurvivalLedgerSnapshot get survival;
-  SoulLedgerSnapshot? get familySoul;
-  SurvivalLedgerSnapshot? get familySurvival;
+mixin _$DailyVsJoySnapshot {
+  JoyLedgerSnapshot get joy;
+  DailyLedgerSnapshot get daily;
+  JoyLedgerSnapshot? get familyJoy;
+  DailyLedgerSnapshot? get familyDaily;
 
-  /// Create a copy of SoulVsSurvivalSnapshot
+  /// Create a copy of DailyVsJoySnapshot
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $SoulVsSurvivalSnapshotCopyWith<SoulVsSurvivalSnapshot> get copyWith =>
-      _$SoulVsSurvivalSnapshotCopyWithImpl<SoulVsSurvivalSnapshot>(
-        this as SoulVsSurvivalSnapshot,
+  $DailyVsJoySnapshotCopyWith<DailyVsJoySnapshot> get copyWith =>
+      _$DailyVsJoySnapshotCopyWithImpl<DailyVsJoySnapshot>(
+        this as DailyVsJoySnapshot,
         _$identity,
       );
 
@@ -698,139 +698,136 @@ mixin _$SoulVsSurvivalSnapshot {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is SoulVsSurvivalSnapshot &&
-            (identical(other.soul, soul) || other.soul == soul) &&
-            (identical(other.survival, survival) ||
-                other.survival == survival) &&
-            (identical(other.familySoul, familySoul) ||
-                other.familySoul == familySoul) &&
-            (identical(other.familySurvival, familySurvival) ||
-                other.familySurvival == familySurvival));
+            other is DailyVsJoySnapshot &&
+            (identical(other.joy, joy) || other.joy == joy) &&
+            (identical(other.daily, daily) || other.daily == daily) &&
+            (identical(other.familyJoy, familyJoy) ||
+                other.familyJoy == familyJoy) &&
+            (identical(other.familyDaily, familyDaily) ||
+                other.familyDaily == familyDaily));
   }
 
   @override
   int get hashCode =>
-      Object.hash(runtimeType, soul, survival, familySoul, familySurvival);
+      Object.hash(runtimeType, joy, daily, familyJoy, familyDaily);
 
   @override
   String toString() {
-    return 'SoulVsSurvivalSnapshot(soul: $soul, survival: $survival, familySoul: $familySoul, familySurvival: $familySurvival)';
+    return 'DailyVsJoySnapshot(joy: $joy, daily: $daily, familyJoy: $familyJoy, familyDaily: $familyDaily)';
   }
 }
 
 /// @nodoc
-abstract mixin class $SoulVsSurvivalSnapshotCopyWith<$Res> {
-  factory $SoulVsSurvivalSnapshotCopyWith(
-    SoulVsSurvivalSnapshot value,
-    $Res Function(SoulVsSurvivalSnapshot) _then,
-  ) = _$SoulVsSurvivalSnapshotCopyWithImpl;
+abstract mixin class $DailyVsJoySnapshotCopyWith<$Res> {
+  factory $DailyVsJoySnapshotCopyWith(
+    DailyVsJoySnapshot value,
+    $Res Function(DailyVsJoySnapshot) _then,
+  ) = _$DailyVsJoySnapshotCopyWithImpl;
   @useResult
   $Res call({
-    SoulLedgerSnapshot soul,
-    SurvivalLedgerSnapshot survival,
-    SoulLedgerSnapshot? familySoul,
-    SurvivalLedgerSnapshot? familySurvival,
+    JoyLedgerSnapshot joy,
+    DailyLedgerSnapshot daily,
+    JoyLedgerSnapshot? familyJoy,
+    DailyLedgerSnapshot? familyDaily,
   });
 
-  $SoulLedgerSnapshotCopyWith<$Res> get soul;
-  $SurvivalLedgerSnapshotCopyWith<$Res> get survival;
-  $SoulLedgerSnapshotCopyWith<$Res>? get familySoul;
-  $SurvivalLedgerSnapshotCopyWith<$Res>? get familySurvival;
+  $JoyLedgerSnapshotCopyWith<$Res> get joy;
+  $DailyLedgerSnapshotCopyWith<$Res> get daily;
+  $JoyLedgerSnapshotCopyWith<$Res>? get familyJoy;
+  $DailyLedgerSnapshotCopyWith<$Res>? get familyDaily;
 }
 
 /// @nodoc
-class _$SoulVsSurvivalSnapshotCopyWithImpl<$Res>
-    implements $SoulVsSurvivalSnapshotCopyWith<$Res> {
-  _$SoulVsSurvivalSnapshotCopyWithImpl(this._self, this._then);
+class _$DailyVsJoySnapshotCopyWithImpl<$Res>
+    implements $DailyVsJoySnapshotCopyWith<$Res> {
+  _$DailyVsJoySnapshotCopyWithImpl(this._self, this._then);
 
-  final SoulVsSurvivalSnapshot _self;
-  final $Res Function(SoulVsSurvivalSnapshot) _then;
+  final DailyVsJoySnapshot _self;
+  final $Res Function(DailyVsJoySnapshot) _then;
 
-  /// Create a copy of SoulVsSurvivalSnapshot
+  /// Create a copy of DailyVsJoySnapshot
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? soul = null,
-    Object? survival = null,
-    Object? familySoul = freezed,
-    Object? familySurvival = freezed,
+    Object? joy = null,
+    Object? daily = null,
+    Object? familyJoy = freezed,
+    Object? familyDaily = freezed,
   }) {
     return _then(
       _self.copyWith(
-        soul: null == soul
-            ? _self.soul
-            : soul // ignore: cast_nullable_to_non_nullable
-                  as SoulLedgerSnapshot,
-        survival: null == survival
-            ? _self.survival
-            : survival // ignore: cast_nullable_to_non_nullable
-                  as SurvivalLedgerSnapshot,
-        familySoul: freezed == familySoul
-            ? _self.familySoul
-            : familySoul // ignore: cast_nullable_to_non_nullable
-                  as SoulLedgerSnapshot?,
-        familySurvival: freezed == familySurvival
-            ? _self.familySurvival
-            : familySurvival // ignore: cast_nullable_to_non_nullable
-                  as SurvivalLedgerSnapshot?,
+        joy: null == joy
+            ? _self.joy
+            : joy // ignore: cast_nullable_to_non_nullable
+                  as JoyLedgerSnapshot,
+        daily: null == daily
+            ? _self.daily
+            : daily // ignore: cast_nullable_to_non_nullable
+                  as DailyLedgerSnapshot,
+        familyJoy: freezed == familyJoy
+            ? _self.familyJoy
+            : familyJoy // ignore: cast_nullable_to_non_nullable
+                  as JoyLedgerSnapshot?,
+        familyDaily: freezed == familyDaily
+            ? _self.familyDaily
+            : familyDaily // ignore: cast_nullable_to_non_nullable
+                  as DailyLedgerSnapshot?,
       ),
     );
   }
 
-  /// Create a copy of SoulVsSurvivalSnapshot
+  /// Create a copy of DailyVsJoySnapshot
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $SoulLedgerSnapshotCopyWith<$Res> get soul {
-    return $SoulLedgerSnapshotCopyWith<$Res>(_self.soul, (value) {
-      return _then(_self.copyWith(soul: value));
+  $JoyLedgerSnapshotCopyWith<$Res> get joy {
+    return $JoyLedgerSnapshotCopyWith<$Res>(_self.joy, (value) {
+      return _then(_self.copyWith(joy: value));
     });
   }
 
-  /// Create a copy of SoulVsSurvivalSnapshot
+  /// Create a copy of DailyVsJoySnapshot
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $SurvivalLedgerSnapshotCopyWith<$Res> get survival {
-    return $SurvivalLedgerSnapshotCopyWith<$Res>(_self.survival, (value) {
-      return _then(_self.copyWith(survival: value));
+  $DailyLedgerSnapshotCopyWith<$Res> get daily {
+    return $DailyLedgerSnapshotCopyWith<$Res>(_self.daily, (value) {
+      return _then(_self.copyWith(daily: value));
     });
   }
 
-  /// Create a copy of SoulVsSurvivalSnapshot
+  /// Create a copy of DailyVsJoySnapshot
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $SoulLedgerSnapshotCopyWith<$Res>? get familySoul {
-    if (_self.familySoul == null) {
+  $JoyLedgerSnapshotCopyWith<$Res>? get familyJoy {
+    if (_self.familyJoy == null) {
       return null;
     }
 
-    return $SoulLedgerSnapshotCopyWith<$Res>(_self.familySoul!, (value) {
-      return _then(_self.copyWith(familySoul: value));
+    return $JoyLedgerSnapshotCopyWith<$Res>(_self.familyJoy!, (value) {
+      return _then(_self.copyWith(familyJoy: value));
     });
   }
 
-  /// Create a copy of SoulVsSurvivalSnapshot
+  /// Create a copy of DailyVsJoySnapshot
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $SurvivalLedgerSnapshotCopyWith<$Res>? get familySurvival {
-    if (_self.familySurvival == null) {
+  $DailyLedgerSnapshotCopyWith<$Res>? get familyDaily {
+    if (_self.familyDaily == null) {
       return null;
     }
 
-    return $SurvivalLedgerSnapshotCopyWith<$Res>(_self.familySurvival!, (
-      value,
-    ) {
-      return _then(_self.copyWith(familySurvival: value));
+    return $DailyLedgerSnapshotCopyWith<$Res>(_self.familyDaily!, (value) {
+      return _then(_self.copyWith(familyDaily: value));
     });
   }
 }
 
-/// Adds pattern-matching-related methods to [SoulVsSurvivalSnapshot].
-extension SoulVsSurvivalSnapshotPatterns on SoulVsSurvivalSnapshot {
+/// Adds pattern-matching-related methods to [DailyVsJoySnapshot].
+extension DailyVsJoySnapshotPatterns on DailyVsJoySnapshot {
   /// A variant of `map` that fallback to returning `orElse`.
   ///
   /// It is equivalent to doing:
@@ -845,12 +842,12 @@ extension SoulVsSurvivalSnapshotPatterns on SoulVsSurvivalSnapshot {
 
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>(
-    TResult Function(_SoulVsSurvivalSnapshot value)? $default, {
+    TResult Function(_DailyVsJoySnapshot value)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
-      case _SoulVsSurvivalSnapshot() when $default != null:
+      case _DailyVsJoySnapshot() when $default != null:
         return $default(_that);
       case _:
         return orElse();
@@ -872,11 +869,11 @@ extension SoulVsSurvivalSnapshotPatterns on SoulVsSurvivalSnapshot {
 
   @optionalTypeArgs
   TResult map<TResult extends Object?>(
-    TResult Function(_SoulVsSurvivalSnapshot value) $default,
+    TResult Function(_DailyVsJoySnapshot value) $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _SoulVsSurvivalSnapshot():
+      case _DailyVsJoySnapshot():
         return $default(_that);
       case _:
         throw StateError('Unexpected subclass');
@@ -897,11 +894,11 @@ extension SoulVsSurvivalSnapshotPatterns on SoulVsSurvivalSnapshot {
 
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_SoulVsSurvivalSnapshot value)? $default,
+    TResult? Function(_DailyVsJoySnapshot value)? $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _SoulVsSurvivalSnapshot() when $default != null:
+      case _DailyVsJoySnapshot() when $default != null:
         return $default(_that);
       case _:
         return null;
@@ -923,22 +920,22 @@ extension SoulVsSurvivalSnapshotPatterns on SoulVsSurvivalSnapshot {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-      SoulLedgerSnapshot soul,
-      SurvivalLedgerSnapshot survival,
-      SoulLedgerSnapshot? familySoul,
-      SurvivalLedgerSnapshot? familySurvival,
+      JoyLedgerSnapshot joy,
+      DailyLedgerSnapshot daily,
+      JoyLedgerSnapshot? familyJoy,
+      DailyLedgerSnapshot? familyDaily,
     )?
     $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
-      case _SoulVsSurvivalSnapshot() when $default != null:
+      case _DailyVsJoySnapshot() when $default != null:
         return $default(
-          _that.soul,
-          _that.survival,
-          _that.familySoul,
-          _that.familySurvival,
+          _that.joy,
+          _that.daily,
+          _that.familyJoy,
+          _that.familyDaily,
         );
       case _:
         return orElse();
@@ -961,21 +958,21 @@ extension SoulVsSurvivalSnapshotPatterns on SoulVsSurvivalSnapshot {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-      SoulLedgerSnapshot soul,
-      SurvivalLedgerSnapshot survival,
-      SoulLedgerSnapshot? familySoul,
-      SurvivalLedgerSnapshot? familySurvival,
+      JoyLedgerSnapshot joy,
+      DailyLedgerSnapshot daily,
+      JoyLedgerSnapshot? familyJoy,
+      DailyLedgerSnapshot? familyDaily,
     )
     $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _SoulVsSurvivalSnapshot():
+      case _DailyVsJoySnapshot():
         return $default(
-          _that.soul,
-          _that.survival,
-          _that.familySoul,
-          _that.familySurvival,
+          _that.joy,
+          _that.daily,
+          _that.familyJoy,
+          _that.familyDaily,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -997,21 +994,21 @@ extension SoulVsSurvivalSnapshotPatterns on SoulVsSurvivalSnapshot {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-      SoulLedgerSnapshot soul,
-      SurvivalLedgerSnapshot survival,
-      SoulLedgerSnapshot? familySoul,
-      SurvivalLedgerSnapshot? familySurvival,
+      JoyLedgerSnapshot joy,
+      DailyLedgerSnapshot daily,
+      JoyLedgerSnapshot? familyJoy,
+      DailyLedgerSnapshot? familyDaily,
     )?
     $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _SoulVsSurvivalSnapshot() when $default != null:
+      case _DailyVsJoySnapshot() when $default != null:
         return $default(
-          _that.soul,
-          _that.survival,
-          _that.familySoul,
-          _that.familySurvival,
+          _that.joy,
+          _that.daily,
+          _that.familyJoy,
+          _that.familyDaily,
         );
       case _:
         return null;
@@ -1021,171 +1018,165 @@ extension SoulVsSurvivalSnapshotPatterns on SoulVsSurvivalSnapshot {
 
 /// @nodoc
 
-class _SoulVsSurvivalSnapshot implements SoulVsSurvivalSnapshot {
-  const _SoulVsSurvivalSnapshot({
-    required this.soul,
-    required this.survival,
-    this.familySoul,
-    this.familySurvival,
+class _DailyVsJoySnapshot implements DailyVsJoySnapshot {
+  const _DailyVsJoySnapshot({
+    required this.joy,
+    required this.daily,
+    this.familyJoy,
+    this.familyDaily,
   });
 
   @override
-  final SoulLedgerSnapshot soul;
+  final JoyLedgerSnapshot joy;
   @override
-  final SurvivalLedgerSnapshot survival;
+  final DailyLedgerSnapshot daily;
   @override
-  final SoulLedgerSnapshot? familySoul;
+  final JoyLedgerSnapshot? familyJoy;
   @override
-  final SurvivalLedgerSnapshot? familySurvival;
+  final DailyLedgerSnapshot? familyDaily;
 
-  /// Create a copy of SoulVsSurvivalSnapshot
+  /// Create a copy of DailyVsJoySnapshot
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  _$SoulVsSurvivalSnapshotCopyWith<_SoulVsSurvivalSnapshot> get copyWith =>
-      __$SoulVsSurvivalSnapshotCopyWithImpl<_SoulVsSurvivalSnapshot>(
-        this,
-        _$identity,
-      );
+  _$DailyVsJoySnapshotCopyWith<_DailyVsJoySnapshot> get copyWith =>
+      __$DailyVsJoySnapshotCopyWithImpl<_DailyVsJoySnapshot>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _SoulVsSurvivalSnapshot &&
-            (identical(other.soul, soul) || other.soul == soul) &&
-            (identical(other.survival, survival) ||
-                other.survival == survival) &&
-            (identical(other.familySoul, familySoul) ||
-                other.familySoul == familySoul) &&
-            (identical(other.familySurvival, familySurvival) ||
-                other.familySurvival == familySurvival));
+            other is _DailyVsJoySnapshot &&
+            (identical(other.joy, joy) || other.joy == joy) &&
+            (identical(other.daily, daily) || other.daily == daily) &&
+            (identical(other.familyJoy, familyJoy) ||
+                other.familyJoy == familyJoy) &&
+            (identical(other.familyDaily, familyDaily) ||
+                other.familyDaily == familyDaily));
   }
 
   @override
   int get hashCode =>
-      Object.hash(runtimeType, soul, survival, familySoul, familySurvival);
+      Object.hash(runtimeType, joy, daily, familyJoy, familyDaily);
 
   @override
   String toString() {
-    return 'SoulVsSurvivalSnapshot(soul: $soul, survival: $survival, familySoul: $familySoul, familySurvival: $familySurvival)';
+    return 'DailyVsJoySnapshot(joy: $joy, daily: $daily, familyJoy: $familyJoy, familyDaily: $familyDaily)';
   }
 }
 
 /// @nodoc
-abstract mixin class _$SoulVsSurvivalSnapshotCopyWith<$Res>
-    implements $SoulVsSurvivalSnapshotCopyWith<$Res> {
-  factory _$SoulVsSurvivalSnapshotCopyWith(
-    _SoulVsSurvivalSnapshot value,
-    $Res Function(_SoulVsSurvivalSnapshot) _then,
-  ) = __$SoulVsSurvivalSnapshotCopyWithImpl;
+abstract mixin class _$DailyVsJoySnapshotCopyWith<$Res>
+    implements $DailyVsJoySnapshotCopyWith<$Res> {
+  factory _$DailyVsJoySnapshotCopyWith(
+    _DailyVsJoySnapshot value,
+    $Res Function(_DailyVsJoySnapshot) _then,
+  ) = __$DailyVsJoySnapshotCopyWithImpl;
   @override
   @useResult
   $Res call({
-    SoulLedgerSnapshot soul,
-    SurvivalLedgerSnapshot survival,
-    SoulLedgerSnapshot? familySoul,
-    SurvivalLedgerSnapshot? familySurvival,
+    JoyLedgerSnapshot joy,
+    DailyLedgerSnapshot daily,
+    JoyLedgerSnapshot? familyJoy,
+    DailyLedgerSnapshot? familyDaily,
   });
 
   @override
-  $SoulLedgerSnapshotCopyWith<$Res> get soul;
+  $JoyLedgerSnapshotCopyWith<$Res> get joy;
   @override
-  $SurvivalLedgerSnapshotCopyWith<$Res> get survival;
+  $DailyLedgerSnapshotCopyWith<$Res> get daily;
   @override
-  $SoulLedgerSnapshotCopyWith<$Res>? get familySoul;
+  $JoyLedgerSnapshotCopyWith<$Res>? get familyJoy;
   @override
-  $SurvivalLedgerSnapshotCopyWith<$Res>? get familySurvival;
+  $DailyLedgerSnapshotCopyWith<$Res>? get familyDaily;
 }
 
 /// @nodoc
-class __$SoulVsSurvivalSnapshotCopyWithImpl<$Res>
-    implements _$SoulVsSurvivalSnapshotCopyWith<$Res> {
-  __$SoulVsSurvivalSnapshotCopyWithImpl(this._self, this._then);
+class __$DailyVsJoySnapshotCopyWithImpl<$Res>
+    implements _$DailyVsJoySnapshotCopyWith<$Res> {
+  __$DailyVsJoySnapshotCopyWithImpl(this._self, this._then);
 
-  final _SoulVsSurvivalSnapshot _self;
-  final $Res Function(_SoulVsSurvivalSnapshot) _then;
+  final _DailyVsJoySnapshot _self;
+  final $Res Function(_DailyVsJoySnapshot) _then;
 
-  /// Create a copy of SoulVsSurvivalSnapshot
+  /// Create a copy of DailyVsJoySnapshot
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? soul = null,
-    Object? survival = null,
-    Object? familySoul = freezed,
-    Object? familySurvival = freezed,
+    Object? joy = null,
+    Object? daily = null,
+    Object? familyJoy = freezed,
+    Object? familyDaily = freezed,
   }) {
     return _then(
-      _SoulVsSurvivalSnapshot(
-        soul: null == soul
-            ? _self.soul
-            : soul // ignore: cast_nullable_to_non_nullable
-                  as SoulLedgerSnapshot,
-        survival: null == survival
-            ? _self.survival
-            : survival // ignore: cast_nullable_to_non_nullable
-                  as SurvivalLedgerSnapshot,
-        familySoul: freezed == familySoul
-            ? _self.familySoul
-            : familySoul // ignore: cast_nullable_to_non_nullable
-                  as SoulLedgerSnapshot?,
-        familySurvival: freezed == familySurvival
-            ? _self.familySurvival
-            : familySurvival // ignore: cast_nullable_to_non_nullable
-                  as SurvivalLedgerSnapshot?,
+      _DailyVsJoySnapshot(
+        joy: null == joy
+            ? _self.joy
+            : joy // ignore: cast_nullable_to_non_nullable
+                  as JoyLedgerSnapshot,
+        daily: null == daily
+            ? _self.daily
+            : daily // ignore: cast_nullable_to_non_nullable
+                  as DailyLedgerSnapshot,
+        familyJoy: freezed == familyJoy
+            ? _self.familyJoy
+            : familyJoy // ignore: cast_nullable_to_non_nullable
+                  as JoyLedgerSnapshot?,
+        familyDaily: freezed == familyDaily
+            ? _self.familyDaily
+            : familyDaily // ignore: cast_nullable_to_non_nullable
+                  as DailyLedgerSnapshot?,
       ),
     );
   }
 
-  /// Create a copy of SoulVsSurvivalSnapshot
+  /// Create a copy of DailyVsJoySnapshot
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $SoulLedgerSnapshotCopyWith<$Res> get soul {
-    return $SoulLedgerSnapshotCopyWith<$Res>(_self.soul, (value) {
-      return _then(_self.copyWith(soul: value));
+  $JoyLedgerSnapshotCopyWith<$Res> get joy {
+    return $JoyLedgerSnapshotCopyWith<$Res>(_self.joy, (value) {
+      return _then(_self.copyWith(joy: value));
     });
   }
 
-  /// Create a copy of SoulVsSurvivalSnapshot
+  /// Create a copy of DailyVsJoySnapshot
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $SurvivalLedgerSnapshotCopyWith<$Res> get survival {
-    return $SurvivalLedgerSnapshotCopyWith<$Res>(_self.survival, (value) {
-      return _then(_self.copyWith(survival: value));
+  $DailyLedgerSnapshotCopyWith<$Res> get daily {
+    return $DailyLedgerSnapshotCopyWith<$Res>(_self.daily, (value) {
+      return _then(_self.copyWith(daily: value));
     });
   }
 
-  /// Create a copy of SoulVsSurvivalSnapshot
+  /// Create a copy of DailyVsJoySnapshot
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $SoulLedgerSnapshotCopyWith<$Res>? get familySoul {
-    if (_self.familySoul == null) {
+  $JoyLedgerSnapshotCopyWith<$Res>? get familyJoy {
+    if (_self.familyJoy == null) {
       return null;
     }
 
-    return $SoulLedgerSnapshotCopyWith<$Res>(_self.familySoul!, (value) {
-      return _then(_self.copyWith(familySoul: value));
+    return $JoyLedgerSnapshotCopyWith<$Res>(_self.familyJoy!, (value) {
+      return _then(_self.copyWith(familyJoy: value));
     });
   }
 
-  /// Create a copy of SoulVsSurvivalSnapshot
+  /// Create a copy of DailyVsJoySnapshot
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $SurvivalLedgerSnapshotCopyWith<$Res>? get familySurvival {
-    if (_self.familySurvival == null) {
+  $DailyLedgerSnapshotCopyWith<$Res>? get familyDaily {
+    if (_self.familyDaily == null) {
       return null;
     }
 
-    return $SurvivalLedgerSnapshotCopyWith<$Res>(_self.familySurvival!, (
-      value,
-    ) {
-      return _then(_self.copyWith(familySurvival: value));
+    return $DailyLedgerSnapshotCopyWith<$Res>(_self.familyDaily!, (value) {
+      return _then(_self.copyWith(familyDaily: value));
     });
   }
 }

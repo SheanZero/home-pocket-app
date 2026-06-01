@@ -25,8 +25,8 @@ mixin _$Book {
   String? get ownerDeviceId;
   String? get ownerDeviceName; // Denormalized stats for performance
   int get transactionCount;
-  int get survivalBalance;
-  int get soulBalance;
+  int get dailyBalance;
+  int get joyBalance;
 
   /// Create a copy of Book
   /// with the given fields replaced by the non-null parameter values.
@@ -64,10 +64,10 @@ mixin _$Book {
                 other.ownerDeviceName == ownerDeviceName) &&
             (identical(other.transactionCount, transactionCount) ||
                 other.transactionCount == transactionCount) &&
-            (identical(other.survivalBalance, survivalBalance) ||
-                other.survivalBalance == survivalBalance) &&
-            (identical(other.soulBalance, soulBalance) ||
-                other.soulBalance == soulBalance));
+            (identical(other.dailyBalance, dailyBalance) ||
+                other.dailyBalance == dailyBalance) &&
+            (identical(other.joyBalance, joyBalance) ||
+                other.joyBalance == joyBalance));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -86,13 +86,13 @@ mixin _$Book {
     ownerDeviceId,
     ownerDeviceName,
     transactionCount,
-    survivalBalance,
-    soulBalance,
+    dailyBalance,
+    joyBalance,
   );
 
   @override
   String toString() {
-    return 'Book(id: $id, name: $name, currency: $currency, deviceId: $deviceId, createdAt: $createdAt, updatedAt: $updatedAt, isArchived: $isArchived, isShadow: $isShadow, groupId: $groupId, ownerDeviceId: $ownerDeviceId, ownerDeviceName: $ownerDeviceName, transactionCount: $transactionCount, survivalBalance: $survivalBalance, soulBalance: $soulBalance)';
+    return 'Book(id: $id, name: $name, currency: $currency, deviceId: $deviceId, createdAt: $createdAt, updatedAt: $updatedAt, isArchived: $isArchived, isShadow: $isShadow, groupId: $groupId, ownerDeviceId: $ownerDeviceId, ownerDeviceName: $ownerDeviceName, transactionCount: $transactionCount, dailyBalance: $dailyBalance, joyBalance: $joyBalance)';
   }
 }
 
@@ -114,8 +114,8 @@ abstract mixin class $BookCopyWith<$Res> {
     String? ownerDeviceId,
     String? ownerDeviceName,
     int transactionCount,
-    int survivalBalance,
-    int soulBalance,
+    int dailyBalance,
+    int joyBalance,
   });
 }
 
@@ -143,8 +143,8 @@ class _$BookCopyWithImpl<$Res> implements $BookCopyWith<$Res> {
     Object? ownerDeviceId = freezed,
     Object? ownerDeviceName = freezed,
     Object? transactionCount = null,
-    Object? survivalBalance = null,
-    Object? soulBalance = null,
+    Object? dailyBalance = null,
+    Object? joyBalance = null,
   }) {
     return _then(
       _self.copyWith(
@@ -196,13 +196,13 @@ class _$BookCopyWithImpl<$Res> implements $BookCopyWith<$Res> {
             ? _self.transactionCount
             : transactionCount // ignore: cast_nullable_to_non_nullable
                   as int,
-        survivalBalance: null == survivalBalance
-            ? _self.survivalBalance
-            : survivalBalance // ignore: cast_nullable_to_non_nullable
+        dailyBalance: null == dailyBalance
+            ? _self.dailyBalance
+            : dailyBalance // ignore: cast_nullable_to_non_nullable
                   as int,
-        soulBalance: null == soulBalance
-            ? _self.soulBalance
-            : soulBalance // ignore: cast_nullable_to_non_nullable
+        joyBalance: null == joyBalance
+            ? _self.joyBalance
+            : joyBalance // ignore: cast_nullable_to_non_nullable
                   as int,
       ),
     );
@@ -313,8 +313,8 @@ extension BookPatterns on Book {
       String? ownerDeviceId,
       String? ownerDeviceName,
       int transactionCount,
-      int survivalBalance,
-      int soulBalance,
+      int dailyBalance,
+      int joyBalance,
     )?
     $default, {
     required TResult orElse(),
@@ -335,8 +335,8 @@ extension BookPatterns on Book {
           _that.ownerDeviceId,
           _that.ownerDeviceName,
           _that.transactionCount,
-          _that.survivalBalance,
-          _that.soulBalance,
+          _that.dailyBalance,
+          _that.joyBalance,
         );
       case _:
         return orElse();
@@ -371,8 +371,8 @@ extension BookPatterns on Book {
       String? ownerDeviceId,
       String? ownerDeviceName,
       int transactionCount,
-      int survivalBalance,
-      int soulBalance,
+      int dailyBalance,
+      int joyBalance,
     )
     $default,
   ) {
@@ -392,8 +392,8 @@ extension BookPatterns on Book {
           _that.ownerDeviceId,
           _that.ownerDeviceName,
           _that.transactionCount,
-          _that.survivalBalance,
-          _that.soulBalance,
+          _that.dailyBalance,
+          _that.joyBalance,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -427,8 +427,8 @@ extension BookPatterns on Book {
       String? ownerDeviceId,
       String? ownerDeviceName,
       int transactionCount,
-      int survivalBalance,
-      int soulBalance,
+      int dailyBalance,
+      int joyBalance,
     )?
     $default,
   ) {
@@ -448,8 +448,8 @@ extension BookPatterns on Book {
           _that.ownerDeviceId,
           _that.ownerDeviceName,
           _that.transactionCount,
-          _that.survivalBalance,
-          _that.soulBalance,
+          _that.dailyBalance,
+          _that.joyBalance,
         );
       case _:
         return null;
@@ -473,8 +473,8 @@ class _Book implements Book {
     this.ownerDeviceId,
     this.ownerDeviceName,
     this.transactionCount = 0,
-    this.survivalBalance = 0,
-    this.soulBalance = 0,
+    this.dailyBalance = 0,
+    this.joyBalance = 0,
   });
   factory _Book.fromJson(Map<String, dynamic> json) => _$BookFromJson(json);
 
@@ -508,10 +508,10 @@ class _Book implements Book {
   final int transactionCount;
   @override
   @JsonKey()
-  final int survivalBalance;
+  final int dailyBalance;
   @override
   @JsonKey()
-  final int soulBalance;
+  final int joyBalance;
 
   /// Create a copy of Book
   /// with the given fields replaced by the non-null parameter values.
@@ -552,10 +552,10 @@ class _Book implements Book {
                 other.ownerDeviceName == ownerDeviceName) &&
             (identical(other.transactionCount, transactionCount) ||
                 other.transactionCount == transactionCount) &&
-            (identical(other.survivalBalance, survivalBalance) ||
-                other.survivalBalance == survivalBalance) &&
-            (identical(other.soulBalance, soulBalance) ||
-                other.soulBalance == soulBalance));
+            (identical(other.dailyBalance, dailyBalance) ||
+                other.dailyBalance == dailyBalance) &&
+            (identical(other.joyBalance, joyBalance) ||
+                other.joyBalance == joyBalance));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -574,13 +574,13 @@ class _Book implements Book {
     ownerDeviceId,
     ownerDeviceName,
     transactionCount,
-    survivalBalance,
-    soulBalance,
+    dailyBalance,
+    joyBalance,
   );
 
   @override
   String toString() {
-    return 'Book(id: $id, name: $name, currency: $currency, deviceId: $deviceId, createdAt: $createdAt, updatedAt: $updatedAt, isArchived: $isArchived, isShadow: $isShadow, groupId: $groupId, ownerDeviceId: $ownerDeviceId, ownerDeviceName: $ownerDeviceName, transactionCount: $transactionCount, survivalBalance: $survivalBalance, soulBalance: $soulBalance)';
+    return 'Book(id: $id, name: $name, currency: $currency, deviceId: $deviceId, createdAt: $createdAt, updatedAt: $updatedAt, isArchived: $isArchived, isShadow: $isShadow, groupId: $groupId, ownerDeviceId: $ownerDeviceId, ownerDeviceName: $ownerDeviceName, transactionCount: $transactionCount, dailyBalance: $dailyBalance, joyBalance: $joyBalance)';
   }
 }
 
@@ -603,8 +603,8 @@ abstract mixin class _$BookCopyWith<$Res> implements $BookCopyWith<$Res> {
     String? ownerDeviceId,
     String? ownerDeviceName,
     int transactionCount,
-    int survivalBalance,
-    int soulBalance,
+    int dailyBalance,
+    int joyBalance,
   });
 }
 
@@ -632,8 +632,8 @@ class __$BookCopyWithImpl<$Res> implements _$BookCopyWith<$Res> {
     Object? ownerDeviceId = freezed,
     Object? ownerDeviceName = freezed,
     Object? transactionCount = null,
-    Object? survivalBalance = null,
-    Object? soulBalance = null,
+    Object? dailyBalance = null,
+    Object? joyBalance = null,
   }) {
     return _then(
       _Book(
@@ -685,13 +685,13 @@ class __$BookCopyWithImpl<$Res> implements _$BookCopyWith<$Res> {
             ? _self.transactionCount
             : transactionCount // ignore: cast_nullable_to_non_nullable
                   as int,
-        survivalBalance: null == survivalBalance
-            ? _self.survivalBalance
-            : survivalBalance // ignore: cast_nullable_to_non_nullable
+        dailyBalance: null == dailyBalance
+            ? _self.dailyBalance
+            : dailyBalance // ignore: cast_nullable_to_non_nullable
                   as int,
-        soulBalance: null == soulBalance
-            ? _self.soulBalance
-            : soulBalance // ignore: cast_nullable_to_non_nullable
+        joyBalance: null == joyBalance
+            ? _self.joyBalance
+            : joyBalance // ignore: cast_nullable_to_non_nullable
                   as int,
       ),
     );

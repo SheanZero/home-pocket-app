@@ -9,11 +9,11 @@ import '../../../../application/analytics/get_happiness_report_use_case.dart';
 import '../../../../application/analytics/get_largest_monthly_expense_use_case.dart';
 import '../../../../application/analytics/get_monthly_joy_target_recommendation_use_case.dart';
 import '../../../../application/analytics/get_monthly_report_use_case.dart';
-import '../../../../application/analytics/get_per_category_soul_breakdown_across_books_use_case.dart';
-import '../../../../application/analytics/get_per_category_soul_breakdown_use_case.dart';
+import '../../../../application/analytics/get_per_category_joy_breakdown_across_books_use_case.dart';
+import '../../../../application/analytics/get_per_category_joy_breakdown_use_case.dart';
 import '../../../../application/analytics/get_satisfaction_distribution_use_case.dart';
-import '../../../../application/analytics/get_soul_vs_survival_snapshot_across_books_use_case.dart';
-import '../../../../application/analytics/get_soul_vs_survival_snapshot_use_case.dart';
+import '../../../../application/analytics/get_daily_vs_joy_snapshot_across_books_use_case.dart';
+import '../../../../application/analytics/get_daily_vs_joy_snapshot_use_case.dart';
 import '../../../../application/analytics/repository_providers.dart'
     as app_analytics;
 import '../../../../data/daos/analytics_dao.dart';
@@ -109,36 +109,36 @@ GetFamilyHappinessUseCase getFamilyHappinessUseCase(Ref ref) {
   );
 }
 
-/// HAPPY-V2-01 / D-07: per-category soul satisfaction breakdown use case provider.
+/// HAPPY-V2-01 / D-07: per-category joy satisfaction breakdown use case provider.
 @riverpod
-GetPerCategorySoulBreakdownUseCase getPerCategorySoulBreakdownUseCase(Ref ref) {
-  return GetPerCategorySoulBreakdownUseCase(
+GetPerCategoryJoyBreakdownUseCase getPerCategoryJoyBreakdownUseCase(Ref ref) {
+  return GetPerCategoryJoyBreakdownUseCase(
     analyticsRepository: ref.watch(analyticsRepositoryProvider),
   );
 }
 
 /// HAPPY-V2-01 / D-16, D-17: family-aggregate per-category breakdown use case provider.
 @riverpod
-GetPerCategorySoulBreakdownAcrossBooksUseCase
-getPerCategorySoulBreakdownAcrossBooksUseCase(Ref ref) {
-  return GetPerCategorySoulBreakdownAcrossBooksUseCase(
+GetPerCategoryJoyBreakdownAcrossBooksUseCase
+getPerCategoryJoyBreakdownAcrossBooksUseCase(Ref ref) {
+  return GetPerCategoryJoyBreakdownAcrossBooksUseCase(
     analyticsRepository: ref.watch(analyticsRepositoryProvider),
   );
 }
 
-/// STATSUI-V2-01 / D-01..D-05: Soul-vs-Survival engagement snapshot use case provider.
+/// STATSUI-V2-01 / D-01..D-05: Daily-vs-Joy engagement snapshot use case provider.
 @riverpod
-GetSoulVsSurvivalSnapshotUseCase getSoulVsSurvivalSnapshotUseCase(Ref ref) {
-  return GetSoulVsSurvivalSnapshotUseCase(
+GetDailyVsJoySnapshotUseCase getDailyVsJoySnapshotUseCase(Ref ref) {
+  return GetDailyVsJoySnapshotUseCase(
     analyticsRepository: ref.watch(analyticsRepositoryProvider),
   );
 }
 
-/// STATSUI-V2-01 / D-18, D-20: family-aggregate Soul-vs-Survival snapshot use case provider.
+/// STATSUI-V2-01 / D-18, D-20: family-aggregate Daily-vs-Joy snapshot use case provider.
 @riverpod
-GetSoulVsSurvivalSnapshotAcrossBooksUseCase
-getSoulVsSurvivalSnapshotAcrossBooksUseCase(Ref ref) {
-  return GetSoulVsSurvivalSnapshotAcrossBooksUseCase(
+GetDailyVsJoySnapshotAcrossBooksUseCase
+getDailyVsJoySnapshotAcrossBooksUseCase(Ref ref) {
+  return GetDailyVsJoySnapshotAcrossBooksUseCase(
     analyticsRepository: ref.watch(analyticsRepositoryProvider),
   );
 }

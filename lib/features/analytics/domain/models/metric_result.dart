@@ -1,7 +1,7 @@
 /// Sealed envelope for happiness metric results (HAPPY-06 / D-13).
 ///
 /// Two variants:
-///   - Empty: window had no qualifying soul-ledger transactions.
+///   - Empty: window had no qualifying joy-ledger transactions.
 ///   - Value: a real metric value with the sample size that produced it.
 ///
 /// UI consumers use Dart 3 pattern matching:

@@ -24,13 +24,13 @@ void main() {
 
   void stubOverview(String bookId, int count, {double avg = 0}) {
     when(
-      () => repository.getSoulSatisfactionOverview(
+      () => repository.getJoyFullnessOverview(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
       ),
     ).thenAnswer(
-      (_) async => SoulSatisfactionOverview(avgSatisfaction: avg, count: count),
+      (_) async => JoyFullnessOverview(avgSatisfaction: avg, count: count),
     );
   }
 
@@ -74,7 +74,7 @@ void main() {
         expect(report.sharedJoyInsight, isA<Empty<SharedJoyInsight>>());
         expect(report.medianSatisfaction, isA<Empty<double>>());
         verifyNever(
-          () => repository.getSoulSatisfactionOverview(
+          () => repository.getJoyFullnessOverview(
             bookId: any(named: 'bookId'),
             startDate: any(named: 'startDate'),
             endDate: any(named: 'endDate'),
@@ -148,14 +148,14 @@ void main() {
 
         expect(report.totalGroupSoulTx, 8);
         verify(
-          () => repository.getSoulSatisfactionOverview(
+          () => repository.getJoyFullnessOverview(
             bookId: 'b1',
             startDate: startDate,
             endDate: endDate,
           ),
         ).called(1);
         verify(
-          () => repository.getSoulSatisfactionOverview(
+          () => repository.getJoyFullnessOverview(
             bookId: 'b2',
             startDate: startDate,
             endDate: endDate,

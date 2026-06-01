@@ -26,7 +26,7 @@ void main() {
       'returns Empty when overview.count == 0 and short-circuits DAO',
       () async {
         when(
-          () => repo.getSoulSatisfactionOverview(
+          () => repo.getJoyFullnessOverview(
             bookId: 'book-1',
             startDate: startDate,
             endDate: endDate,
@@ -34,7 +34,7 @@ void main() {
           ),
         ).thenAnswer(
           (_) async =>
-              const SoulSatisfactionOverview(avgSatisfaction: 0, count: 0),
+              const JoyFullnessOverview(avgSatisfaction: 0, count: 0),
         );
 
         final result = await useCase.execute(
@@ -60,7 +60,7 @@ void main() {
       'returns Empty when overview.count > 0 and best joy row is null',
       () async {
         when(
-          () => repo.getSoulSatisfactionOverview(
+          () => repo.getJoyFullnessOverview(
             bookId: 'book-1',
             startDate: startDate,
             endDate: endDate,
@@ -68,7 +68,7 @@ void main() {
           ),
         ).thenAnswer(
           (_) async =>
-              const SoulSatisfactionOverview(avgSatisfaction: 7.2, count: 5),
+              const JoyFullnessOverview(avgSatisfaction: 7.2, count: 5),
         );
         when(
           () => repo.getBestJoyMoment(
@@ -99,7 +99,7 @@ void main() {
         timestamp: DateTime(2026, 5, 20, 18, 30),
       );
       when(
-        () => repo.getSoulSatisfactionOverview(
+        () => repo.getJoyFullnessOverview(
           bookId: 'book-1',
           startDate: startDate,
           endDate: endDate,
@@ -107,7 +107,7 @@ void main() {
         ),
       ).thenAnswer(
         (_) async =>
-            const SoulSatisfactionOverview(avgSatisfaction: 7.2, count: 5),
+            const JoyFullnessOverview(avgSatisfaction: 7.2, count: 5),
       );
       when(
         () => repo.getBestJoyMoment(
@@ -142,7 +142,7 @@ void main() {
         timestamp: DateTime(2026, 5, 21, 19),
       );
       when(
-        () => repo.getSoulSatisfactionOverview(
+        () => repo.getJoyFullnessOverview(
           bookId: 'book-1',
           startDate: startDate,
           endDate: endDate,
@@ -150,7 +150,7 @@ void main() {
         ),
       ).thenAnswer(
         (_) async =>
-            const SoulSatisfactionOverview(avgSatisfaction: 6.4, count: 11),
+            const JoyFullnessOverview(avgSatisfaction: 6.4, count: 11),
       );
       when(
         () => repo.getBestJoyMoment(
@@ -183,7 +183,7 @@ void main() {
           timestamp: DateTime(2026, 5, 21, 19),
         );
         when(
-          () => repo.getSoulSatisfactionOverview(
+          () => repo.getJoyFullnessOverview(
             bookId: 'book-1',
             startDate: startDate,
             endDate: endDate,
@@ -191,7 +191,7 @@ void main() {
           ),
         ).thenAnswer(
           (_) async =>
-              const SoulSatisfactionOverview(avgSatisfaction: 7.1, count: 3),
+              const JoyFullnessOverview(avgSatisfaction: 7.1, count: 3),
         );
         when(
           () => repo.getBestJoyMoment(
@@ -231,7 +231,7 @@ void main() {
           timestamp: DateTime(2026, 5, 21, 19),
         );
         when(
-          () => repo.getSoulSatisfactionOverview(
+          () => repo.getJoyFullnessOverview(
             bookId: 'book-1',
             startDate: startDate,
             endDate: endDate,
@@ -239,7 +239,7 @@ void main() {
           ),
         ).thenAnswer(
           (_) async =>
-              const SoulSatisfactionOverview(avgSatisfaction: 8.2, count: 4),
+              const JoyFullnessOverview(avgSatisfaction: 8.2, count: 4),
         );
         when(
           () => repo.getBestJoyMoment(
@@ -259,7 +259,7 @@ void main() {
 
         expect(result, isA<Value<BestJoyMomentRow>>());
         verify(
-          () => repo.getSoulSatisfactionOverview(
+          () => repo.getJoyFullnessOverview(
             bookId: 'book-1',
             startDate: startDate,
             endDate: endDate,

@@ -263,15 +263,15 @@ void main() {
         'AND-composition with ledger filter (FILTER-02 + FILTER-04): '
         'use case receives ledgerType; text search applied Dart-side', () async {
       final mock = _MockGetListTransactionsUseCase();
-      // Use case already returns pre-filtered (soul-only) transactions;
+      // Use case already returns pre-filtered (joy-only) transactions;
       // we verify text search then AND-composes
-      final soulTx = _makeTransaction(
-        id: 'soul-tx',
+      final joyTx = _makeTransaction(
+        id: 'joy-tx',
         categoryId: 'cat_food',
         ledgerType: LedgerType.joy,
       );
       when(() => mock.execute(any())).thenAnswer(
-        (_) async => Result.success([soulTx]),
+        (_) async => Result.success([joyTx]),
       );
 
       final container = _makeContainer(

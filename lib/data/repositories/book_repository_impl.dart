@@ -83,14 +83,14 @@ class BookRepositoryImpl implements BookRepository {
   Future<void> updateBalances({
     required String bookId,
     required int transactionCount,
-    required int survivalBalance,
-    required int soulBalance,
+    required int dailyBalance,
+    required int joyBalance,
   }) async {
     await _dao.updateBalances(
       bookId: bookId,
       transactionCount: transactionCount,
-      survivalBalance: survivalBalance,
-      soulBalance: soulBalance,
+      dailyBalance: dailyBalance,
+      joyBalance: joyBalance,
     );
   }
 
@@ -108,8 +108,8 @@ class BookRepositoryImpl implements BookRepository {
       ownerDeviceId: row.ownerDeviceId,
       ownerDeviceName: row.ownerDeviceName,
       transactionCount: row.transactionCount,
-      survivalBalance: row.survivalBalance,
-      soulBalance: row.soulBalance,
+      dailyBalance: row.dailyBalance,
+      joyBalance: row.joyBalance,
     );
   }
 }

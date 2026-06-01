@@ -1,14 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/application/analytics/get_per_category_soul_breakdown_across_books_use_case.dart';
+import 'package:home_pocket/application/analytics/get_per_category_joy_breakdown_across_books_use_case.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
-import 'package:home_pocket/features/analytics/domain/models/per_category_soul_breakdown.dart';
+import 'package:home_pocket/features/analytics/domain/models/per_category_joy_breakdown.dart';
 import 'package:home_pocket/features/analytics/domain/repositories/analytics_repository.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockAnalyticsRepository extends Mock implements AnalyticsRepository {}
 
-PerCategorySoulBreakdownItem _item(String id, double avg, int count) =>
-    PerCategorySoulBreakdownItem(
+PerCategoryJoyBreakdownItem _item(String id, double avg, int count) =>
+    PerCategoryJoyBreakdownItem(
       categoryId: id,
       avgSatisfaction: avg,
       totalCount: count,
@@ -16,24 +16,24 @@ PerCategorySoulBreakdownItem _item(String id, double avg, int count) =>
 
 void main() {
   late _MockAnalyticsRepository repository;
-  late GetPerCategorySoulBreakdownAcrossBooksUseCase useCase;
+  late GetPerCategoryJoyBreakdownAcrossBooksUseCase useCase;
 
   final startDate = DateTime(2026, 4);
   final endDate = DateTime(2026, 4, 30, 23, 59, 59);
 
   setUp(() {
     repository = _MockAnalyticsRepository();
-    useCase = GetPerCategorySoulBreakdownAcrossBooksUseCase(
+    useCase = GetPerCategoryJoyBreakdownAcrossBooksUseCase(
       analyticsRepository: repository,
     );
   });
 
   void stubAcrossBooks(
     List<String> bookIds,
-    List<PerCategorySoulBreakdownItem> items,
+    List<PerCategoryJoyBreakdownItem> items,
   ) {
     when(
-      () => repository.getPerCategorySoulBreakdownAcrossBooks(
+      () => repository.getPerCategoryJoyBreakdownAcrossBooks(
         bookIds: bookIds,
         startDate: startDate,
         endDate: endDate,
@@ -49,9 +49,9 @@ void main() {
         endDate: endDate,
       );
 
-      expect(result, isA<Empty<PerCategorySoulBreakdown>>());
+      expect(result, isA<Empty<PerCategoryJoyBreakdown>>());
       verifyNever(
-        () => repository.getPerCategorySoulBreakdownAcrossBooks(
+        () => repository.getPerCategoryJoyBreakdownAcrossBooks(
           bookIds: any(named: 'bookIds'),
           startDate: any(named: 'startDate'),
           endDate: any(named: 'endDate'),
@@ -72,7 +72,7 @@ void main() {
       );
 
       verify(
-        () => repository.getPerCategorySoulBreakdownAcrossBooks(
+        () => repository.getPerCategoryJoyBreakdownAcrossBooks(
           bookIds: bookIds,
           startDate: startDate,
           endDate: endDate,
@@ -95,7 +95,7 @@ void main() {
                 startDate: startDate,
                 endDate: endDate,
               )
-              as Value<PerCategorySoulBreakdown>;
+              as Value<PerCategoryJoyBreakdown>;
 
       expect(result.data.items.map((i) => i.categoryId).toList(), [
         'cat_a',
@@ -116,7 +116,7 @@ void main() {
         endDate: endDate,
       );
 
-      expect(result, isA<Empty<PerCategorySoulBreakdown>>());
+      expect(result, isA<Empty<PerCategoryJoyBreakdown>>());
     });
   });
 

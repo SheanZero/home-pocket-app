@@ -40,8 +40,8 @@ abstract class MonthlyReport with _$MonthlyReport {
     required int totalExpenses,
     required int savings,
     required double savingsRate,
-    required int survivalTotal,
-    required int soulTotal,
+    required int dailyTotal,
+    required int joyTotal,
     required List<CategoryBreakdown> categoryBreakdowns,
     required List<DailyExpense> dailyExpenses,
 

@@ -6,7 +6,7 @@ import 'package:home_pocket/features/analytics/domain/models/ledger_snapshot.dar
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_ledger_snapshot.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/analytics_card_error_state.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/soul_vs_survival_card.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/daily_vs_joy_card.dart';
 
 import '../../../../../helpers/test_localizations.dart';
 
@@ -16,35 +16,35 @@ final _startDate = DateTime(2026, 5, 1);
 final _endDate = DateTime(2026, 6, 1);
 const _bookId = 'book-1';
 
-SoulLedgerSnapshot _soul({
+JoyLedgerSnapshot _joy({
   int entryCount = 5,
   int totalSpend = 1500,
   double avgSat = 7.4,
-}) => SoulLedgerSnapshot(
+}) => JoyLedgerSnapshot(
   entryCount: entryCount,
   totalSpend: totalSpend,
   avgSatisfaction: avgSat,
 );
 
-SurvivalLedgerSnapshot _survival({
+DailyLedgerSnapshot _daily({
   int entryCount = 8,
   int totalSpend = 12000,
-}) => SurvivalLedgerSnapshot(entryCount: entryCount, totalSpend: totalSpend);
+}) => DailyLedgerSnapshot(entryCount: entryCount, totalSpend: totalSpend);
 
-SoulVsSurvivalSnapshot _snapshot({
-  SoulLedgerSnapshot? soul,
-  SurvivalLedgerSnapshot? survival,
-  SoulLedgerSnapshot? familySoul,
-  SurvivalLedgerSnapshot? familySurvival,
-}) => SoulVsSurvivalSnapshot(
-  soul: soul ?? _soul(),
-  survival: survival ?? _survival(),
-  familySoul: familySoul,
-  familySurvival: familySurvival,
+DailyVsJoySnapshot _snapshot({
+  JoyLedgerSnapshot? joy,
+  DailyLedgerSnapshot? daily,
+  JoyLedgerSnapshot? familyJoy,
+  DailyLedgerSnapshot? familyDaily,
+}) => DailyVsJoySnapshot(
+  joy: joy ?? _joy(),
+  daily: daily ?? _daily(),
+  familyJoy: familyJoy,
+  familyDaily: familyDaily,
 );
 
 Widget _buildSubject({required bool isGroupMode}) {
-  return SoulVsSurvivalCard(
+  return DailyVsJoyCard(
     bookId: _bookId,
     startDate: _startDate,
     endDate: _endDate,
@@ -55,7 +55,7 @@ Widget _buildSubject({required bool isGroupMode}) {
 }
 
 void main() {
-  group('SoulVsSurvivalCard', () {
+  group('DailyVsJoyCard', () {
     testWidgets('renders solo two-column layout with Soul + Survival metrics',
         (tester) async {
       await tester.pumpWidget(
@@ -63,7 +63,7 @@ void main() {
           _buildSubject(isGroupMode: false),
           locale: _locale,
           overrides: [
-            soulVsSurvivalSnapshotProvider(
+            dailyVsJoySnapshotProvider(
               bookId: _bookId,
               startDate: _startDate,
               endDate: _endDate,
@@ -96,12 +96,12 @@ void main() {
           _buildSubject(isGroupMode: false),
           locale: _locale,
           overrides: [
-            soulVsSurvivalSnapshotProvider(
+            dailyVsJoySnapshotProvider(
               bookId: _bookId,
               startDate: _startDate,
               endDate: _endDate,
             ).overrideWith(
-              (ref) async => const Empty<SoulVsSurvivalSnapshot>(),
+              (ref) async => const Empty<DailyVsJoySnapshot>(),
             ),
           ],
         ),
@@ -118,22 +118,22 @@ void main() {
     testWidgets('renders 2x2 grid in group mode when family is populated',
         (tester) async {
       final familySnapshot = _snapshot(
-        soul: _soul(entryCount: 12, totalSpend: 3500, avgSat: 6.8),
-        survival: _survival(entryCount: 18, totalSpend: 24000),
+        joy: _joy(entryCount: 12, totalSpend: 3500, avgSat: 6.8),
+        daily: _daily(entryCount: 18, totalSpend: 24000),
       );
       await tester.pumpWidget(
         createLocalizedWidget(
           _buildSubject(isGroupMode: true),
           locale: _locale,
           overrides: [
-            soulVsSurvivalSnapshotProvider(
+            dailyVsJoySnapshotProvider(
               bookId: _bookId,
               startDate: _startDate,
               endDate: _endDate,
             ).overrideWith(
               (ref) async => Value(_snapshot(), 13),
             ),
-            soulVsSurvivalSnapshotFamilyProvider(
+            dailyVsJoySnapshotFamilyProvider(
               startDate: _startDate,
               endDate: _endDate,
             ).overrideWith(
@@ -166,18 +166,18 @@ void main() {
           _buildSubject(isGroupMode: true),
           locale: _locale,
           overrides: [
-            soulVsSurvivalSnapshotProvider(
+            dailyVsJoySnapshotProvider(
               bookId: _bookId,
               startDate: _startDate,
               endDate: _endDate,
             ).overrideWith(
               (ref) async => Value(_snapshot(), 13),
             ),
-            soulVsSurvivalSnapshotFamilyProvider(
+            dailyVsJoySnapshotFamilyProvider(
               startDate: _startDate,
               endDate: _endDate,
             ).overrideWith(
-              (ref) async => const Empty<SoulVsSurvivalSnapshot>(),
+              (ref) async => const Empty<DailyVsJoySnapshot>(),
             ),
           ],
         ),
@@ -203,14 +203,14 @@ void main() {
             _buildSubject(isGroupMode: true),
             locale: _locale,
             overrides: [
-              soulVsSurvivalSnapshotProvider(
+              dailyVsJoySnapshotProvider(
                 bookId: _bookId,
                 startDate: _startDate,
                 endDate: _endDate,
               ).overrideWith(
-                (ref) async => const Empty<SoulVsSurvivalSnapshot>(),
+                (ref) async => const Empty<DailyVsJoySnapshot>(),
               ),
-              soulVsSurvivalSnapshotFamilyProvider(
+              dailyVsJoySnapshotFamilyProvider(
                 startDate: _startDate,
                 endDate: _endDate,
               ).overrideWith(
@@ -230,13 +230,13 @@ void main() {
 
     testWidgets('renders Loading placeholder while provider is loading',
         (tester) async {
-      final completer = Completer<MetricResult<SoulVsSurvivalSnapshot>>();
+      final completer = Completer<MetricResult<DailyVsJoySnapshot>>();
       await tester.pumpWidget(
         createLocalizedWidget(
           _buildSubject(isGroupMode: false),
           locale: _locale,
           overrides: [
-            soulVsSurvivalSnapshotProvider(
+            dailyVsJoySnapshotProvider(
               bookId: _bookId,
               startDate: _startDate,
               endDate: _endDate,
@@ -253,7 +253,7 @@ void main() {
       expect(find.text('生活'), findsNothing);
       expect(find.text('今期はデータがありません'), findsNothing);
 
-      completer.complete(const Empty<SoulVsSurvivalSnapshot>());
+      completer.complete(const Empty<DailyVsJoySnapshot>());
     });
 
     testWidgets('renders AnalyticsCardErrorState on error',
@@ -263,7 +263,7 @@ void main() {
           _buildSubject(isGroupMode: false),
           locale: _locale,
           overrides: [
-            soulVsSurvivalSnapshotProvider(
+            dailyVsJoySnapshotProvider(
               bookId: _bookId,
               startDate: _startDate,
               endDate: _endDate,
@@ -284,7 +284,7 @@ void main() {
             _buildSubject(isGroupMode: false),
             locale: _locale,
             overrides: [
-              soulVsSurvivalSnapshotProvider(
+              dailyVsJoySnapshotProvider(
                 bookId: _bookId,
                 startDate: _startDate,
                 endDate: _endDate,
@@ -306,20 +306,20 @@ void main() {
       'group + family LOADING: family row shows skeleton, not Empty caption',
       (tester) async {
         final familyCompleter =
-            Completer<MetricResult<SoulVsSurvivalSnapshot>>();
+            Completer<MetricResult<DailyVsJoySnapshot>>();
         await tester.pumpWidget(
           createLocalizedWidget(
             _buildSubject(isGroupMode: true),
             locale: _locale,
             overrides: [
-              soulVsSurvivalSnapshotProvider(
+              dailyVsJoySnapshotProvider(
                 bookId: _bookId,
                 startDate: _startDate,
                 endDate: _endDate,
               ).overrideWith(
                 (ref) async => Value(_snapshot(), 13),
               ),
-              soulVsSurvivalSnapshotFamilyProvider(
+              dailyVsJoySnapshotFamilyProvider(
                 startDate: _startDate,
                 endDate: _endDate,
               ).overrideWith((ref) => familyCompleter.future),
@@ -338,7 +338,7 @@ void main() {
         // Loading is NOT empty
         expect(find.text('今期は家族データがありません'), findsNothing);
 
-        familyCompleter.complete(const Empty<SoulVsSurvivalSnapshot>());
+        familyCompleter.complete(const Empty<DailyVsJoySnapshot>());
       },
     );
 
@@ -350,14 +350,14 @@ void main() {
             _buildSubject(isGroupMode: true),
             locale: _locale,
             overrides: [
-              soulVsSurvivalSnapshotProvider(
+              dailyVsJoySnapshotProvider(
                 bookId: _bookId,
                 startDate: _startDate,
                 endDate: _endDate,
               ).overrideWith(
                 (ref) async => Value(_snapshot(), 13),
               ),
-              soulVsSurvivalSnapshotFamilyProvider(
+              dailyVsJoySnapshotFamilyProvider(
                 startDate: _startDate,
                 endDate: _endDate,
               ).overrideWith(

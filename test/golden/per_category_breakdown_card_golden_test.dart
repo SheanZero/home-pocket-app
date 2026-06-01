@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
-import 'package:home_pocket/features/analytics/domain/models/per_category_soul_breakdown.dart';
+import 'package:home_pocket/features/analytics/domain/models/per_category_joy_breakdown.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_ledger_snapshot.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/per_category_breakdown_card.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
@@ -23,8 +23,8 @@ const _bookId = 'book_a';
 final _startDate = DateTime(2026, 5, 1);
 final _endDate = DateTime(2026, 6, 1);
 
-PerCategorySoulBreakdownItem _item(String id, double avg, int count) =>
-    PerCategorySoulBreakdownItem(
+PerCategoryJoyBreakdownItem _item(String id, double avg, int count) =>
+    PerCategoryJoyBreakdownItem(
       categoryId: id,
       avgSatisfaction: avg,
       totalCount: count,
@@ -32,7 +32,7 @@ PerCategorySoulBreakdownItem _item(String id, double avg, int count) =>
 
 /// Deterministic 5-category fixture with otherCount=2 — exercises top-5 surface
 /// with an Other fold row (no Show all affordance because <=5 items qualify).
-PerCategorySoulBreakdown _fixtureFiveWithOther() {
+PerCategoryJoyBreakdown _fixtureFiveWithOther() {
   final items = [
     _item('cat_food', 9.0, 8),
     _item('cat_transport', 8.5, 7),
@@ -40,7 +40,7 @@ PerCategorySoulBreakdown _fixtureFiveWithOther() {
     _item('cat_entertainment', 7.5, 5),
     _item('cat_education', 7.0, 4),
   ];
-  return PerCategorySoulBreakdown(
+  return PerCategoryJoyBreakdown(
     items: items,
     totalCount: items.fold<int>(0, (s, r) => s + r.totalCount) + 2,
     otherCount: 2,
@@ -96,7 +96,7 @@ void main() {
         _wrap(
           locale: const Locale('ja'),
           overrides: [
-            perCategorySoulBreakdownProvider(
+            perCategoryJoyBreakdownProvider(
               bookId: _bookId,
               startDate: _startDate,
               endDate: _endDate,
@@ -119,7 +119,7 @@ void main() {
           locale: const Locale('ja'),
           theme: ThemeData.dark(),
           overrides: [
-            perCategorySoulBreakdownProvider(
+            perCategoryJoyBreakdownProvider(
               bookId: _bookId,
               startDate: _startDate,
               endDate: _endDate,
@@ -143,7 +143,7 @@ void main() {
           locale: const Locale('ja'),
           scope: PerCategoryScope.family,
           overrides: [
-            perCategorySoulBreakdownFamilyProvider(
+            perCategoryJoyBreakdownFamilyProvider(
               startDate: _startDate,
               endDate: _endDate,
             ).overrideWith((_) async => Value(breakdown, breakdown.totalCount)),

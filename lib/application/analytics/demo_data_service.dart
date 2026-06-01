@@ -125,14 +125,14 @@ class DemoDataService {
               pattern.minAmount +
               _random.nextInt(pattern.maxAmount - pattern.minAmount);
 
-          // Classify as survival or soul
+          // Classify as daily or joy
           final ledgerType = _classifyLedger(pattern.categoryId);
 
-          // Soul transactions get random satisfaction (1-10), survival gets neutral 2
+          // Joy transactions get random satisfaction (1-10), daily gets neutral 2
           final satisfaction = ledgerType == 'joy'
               ? 1 +
                     _random.nextInt(10) // 1..10
-              : 2; // D-10: survival baseline = neutral
+              : 2; // D-10: daily baseline = neutral
 
           final hash = 'demo_hash_${year}_${month}_$txCount';
           await transactionDao.insertTransaction(
@@ -163,13 +163,13 @@ class DemoDataService {
   }
 
   String _classifyLedger(String categoryId) {
-    const soulCategories = {
+    const joyCategories = {
       'cat_entertainment',
       'cat_shopping',
       'cat_education',
       'cat_social',
     };
-    return soulCategories.contains(categoryId) ? 'joy' : 'daily';
+    return joyCategories.contains(categoryId) ? 'joy' : 'daily';
   }
 }
 

@@ -123,12 +123,12 @@ void main() {
     });
 
     testWidgets('integrates the legacy month-overview, ledger-comparison, '
-        'and soul-fullness cards into a single HomeHeroCard', (tester) async {
+        'and joy-fullness cards into a single HomeHeroCard', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
       // The 3 legacy cards (month-overview / ledger-comparison /
-      // soul-fullness) were collapsed into ONE HomeHeroCard composition.
+      // joy-fullness) were collapsed into ONE HomeHeroCard composition.
       expect(find.byType(HomeHeroCard), findsOneWidget);
     });
 

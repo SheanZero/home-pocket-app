@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/application/analytics/get_soul_vs_survival_snapshot_use_case.dart';
+import 'package:home_pocket/application/analytics/get_daily_vs_joy_snapshot_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/analytics/domain/models/analytics_aggregate.dart';
 import 'package:home_pocket/features/analytics/domain/models/ledger_snapshot.dart';
@@ -14,7 +14,7 @@ LedgerSnapshotRow _ledger(String type, int total, int count) =>
 
 void main() {
   late _MockAnalyticsRepository repository;
-  late GetSoulVsSurvivalSnapshotUseCase useCase;
+  late GetDailyVsJoySnapshotUseCase useCase;
 
   final startDate = DateTime(2026, 4);
   final endDate = DateTime(2026, 4, 30, 23, 59, 59);
@@ -22,7 +22,7 @@ void main() {
 
   setUp(() {
     repository = _MockAnalyticsRepository();
-    useCase = GetSoulVsSurvivalSnapshotUseCase(analyticsRepository: repository);
+    useCase = GetDailyVsJoySnapshotUseCase(analyticsRepository: repository);
   });
 
   void stubLedgers(
@@ -41,18 +41,18 @@ void main() {
 
   void stubOverview(double avg, int count, {EntrySource? entrySourceFilter}) {
     when(
-      () => repository.getSoulSatisfactionOverview(
+      () => repository.getJoyFullnessOverview(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
         entrySourceFilter: entrySourceFilter,
       ),
     ).thenAnswer(
-      (_) async => SoulSatisfactionOverview(avgSatisfaction: avg, count: count),
+      (_) async => JoyFullnessOverview(avgSatisfaction: avg, count: count),
     );
   }
 
-  Future<MetricResult<SoulVsSurvivalSnapshot>> execute({
+  Future<MetricResult<DailyVsJoySnapshot>> execute({
     EntrySource? entrySourceFilter,
   }) {
     return useCase.execute(
@@ -65,76 +65,76 @@ void main() {
 
   group('happy path', () {
     test(
-      'both ledgers populated → Value with soul-only avg provenance',
+      'both ledgers populated → Value with joy-only avg provenance',
       () async {
-        stubLedgers([_ledger('soul', 1500, 5), _ledger('survival', 12000, 8)]);
+        stubLedgers([_ledger('joy', 1500, 5), _ledger('daily', 12000, 8)]);
         stubOverview(7.4, 5);
 
-        final result = await execute() as Value<SoulVsSurvivalSnapshot>;
+        final result = await execute() as Value<DailyVsJoySnapshot>;
 
-        // D-04 provenance: Soul.avgSatisfaction comes from the soul-scoped
-        // getSoulSatisfactionOverview mock — NEVER from survival ledger.
-        expect(result.data.soul.avgSatisfaction, 7.4);
-        expect(result.data.soul.entryCount, 5);
-        expect(result.data.soul.totalSpend, 1500);
-        expect(result.data.survival.entryCount, 8);
-        expect(result.data.survival.totalSpend, 12000);
-        expect(result.data.familySoul, isNull);
-        expect(result.data.familySurvival, isNull);
-        // sampleSize = soul.entryCount + survival.entryCount
+        // D-04 provenance: Joy.avgSatisfaction comes from the joy-scoped
+        // getJoyFullnessOverview mock — NEVER from daily ledger.
+        expect(result.data.joy.avgSatisfaction, 7.4);
+        expect(result.data.joy.entryCount, 5);
+        expect(result.data.joy.totalSpend, 1500);
+        expect(result.data.daily.entryCount, 8);
+        expect(result.data.daily.totalSpend, 12000);
+        expect(result.data.familyJoy, isNull);
+        expect(result.data.familyDaily, isNull);
+        // sampleSize = joy.entryCount + daily.entryCount
         expect(result.sampleSize, 13);
       },
     );
   });
 
   group('D-05 either-ledger-zero gate', () {
-    test('soul entryCount=0 → Empty', () async {
-      stubLedgers([_ledger('soul', 0, 0), _ledger('survival', 12000, 8)]);
+    test('joy entryCount=0 → Empty', () async {
+      stubLedgers([_ledger('joy', 0, 0), _ledger('daily', 12000, 8)]);
       stubOverview(0, 0);
 
-      expect(await execute(), isA<Empty<SoulVsSurvivalSnapshot>>());
+      expect(await execute(), isA<Empty<DailyVsJoySnapshot>>());
     });
 
-    test('survival entryCount=0 → Empty', () async {
-      stubLedgers([_ledger('soul', 1500, 5), _ledger('survival', 0, 0)]);
+    test('daily entryCount=0 → Empty', () async {
+      stubLedgers([_ledger('joy', 1500, 5), _ledger('daily', 0, 0)]);
       stubOverview(7.4, 5);
 
-      expect(await execute(), isA<Empty<SoulVsSurvivalSnapshot>>());
+      expect(await execute(), isA<Empty<DailyVsJoySnapshot>>());
     });
 
-    test('soul row absent from list → Empty', () async {
-      stubLedgers([_ledger('survival', 12000, 8)]);
+    test('joy row absent from list → Empty', () async {
+      stubLedgers([_ledger('daily', 12000, 8)]);
       stubOverview(0, 0);
 
-      expect(await execute(), isA<Empty<SoulVsSurvivalSnapshot>>());
+      expect(await execute(), isA<Empty<DailyVsJoySnapshot>>());
     });
 
-    test('survival row absent from list → Empty', () async {
-      stubLedgers([_ledger('soul', 1500, 5)]);
+    test('daily row absent from list → Empty', () async {
+      stubLedgers([_ledger('joy', 1500, 5)]);
       stubOverview(7.4, 5);
 
-      expect(await execute(), isA<Empty<SoulVsSurvivalSnapshot>>());
+      expect(await execute(), isA<Empty<DailyVsJoySnapshot>>());
     });
 
     test('both ledgers absent → Empty', () async {
       stubLedgers(const []);
       stubOverview(0, 0);
 
-      expect(await execute(), isA<Empty<SoulVsSurvivalSnapshot>>());
+      expect(await execute(), isA<Empty<DailyVsJoySnapshot>>());
     });
   });
 
-  group('soul-only avg provenance (D-04 type-system gate)', () {
+  group('joy-only avg provenance (D-04 type-system gate)', () {
     test(
-      'getSoulSatisfactionOverview called with same window as getLedgerSnapshot',
+      'getJoyFullnessOverview called with same window as getLedgerSnapshot',
       () async {
-        stubLedgers([_ledger('soul', 1500, 5), _ledger('survival', 12000, 8)]);
+        stubLedgers([_ledger('joy', 1500, 5), _ledger('daily', 12000, 8)]);
         stubOverview(7.4, 5);
 
         await execute();
 
         verify(
-          () => repository.getSoulSatisfactionOverview(
+          () => repository.getJoyFullnessOverview(
             bookId: bookId,
             startDate: startDate,
             endDate: endDate,
@@ -158,14 +158,14 @@ void main() {
       'execute with entrySourceFilter = null forwards null to both repo calls',
       () async {
         stubLedgers([
-          _ledger('soul', 1500, 5),
-          _ledger('survival', 12000, 8),
+          _ledger('joy', 1500, 5),
+          _ledger('daily', 12000, 8),
         ], entrySourceFilter: null);
         stubOverview(7.4, 5, entrySourceFilter: null);
 
-        final result = await execute() as Value<SoulVsSurvivalSnapshot>;
+        final result = await execute() as Value<DailyVsJoySnapshot>;
 
-        expect(result.data.soul.entryCount, 5);
+        expect(result.data.joy.entryCount, 5);
         verify(
           () => repository.getLedgerSnapshot(
             bookId: bookId,
@@ -175,7 +175,7 @@ void main() {
           ),
         ).called(1);
         verify(
-          () => repository.getSoulSatisfactionOverview(
+          () => repository.getJoyFullnessOverview(
             bookId: bookId,
             startDate: startDate,
             endDate: endDate,
@@ -189,17 +189,17 @@ void main() {
       'execute with entrySourceFilter = EntrySource.manual forwards filter to both columns',
       () async {
         stubLedgers([
-          _ledger('soul', 900, 3),
-          _ledger('survival', 7000, 4),
+          _ledger('joy', 900, 3),
+          _ledger('daily', 7000, 4),
         ], entrySourceFilter: EntrySource.manual);
         stubOverview(8.0, 3, entrySourceFilter: EntrySource.manual);
 
         final result =
             await execute(entrySourceFilter: EntrySource.manual)
-                as Value<SoulVsSurvivalSnapshot>;
+                as Value<DailyVsJoySnapshot>;
 
-        expect(result.data.soul.entryCount, 3);
-        expect(result.data.survival.entryCount, 4);
+        expect(result.data.joy.entryCount, 3);
+        expect(result.data.daily.entryCount, 4);
         verify(
           () => repository.getLedgerSnapshot(
             bookId: bookId,
@@ -209,7 +209,7 @@ void main() {
           ),
         ).called(1);
         verify(
-          () => repository.getSoulSatisfactionOverview(
+          () => repository.getJoyFullnessOverview(
             bookId: bookId,
             startDate: startDate,
             endDate: endDate,

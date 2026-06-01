@@ -93,13 +93,13 @@ class GetMonthlyReportUseCase {
     );
 
     // Ledger splits
-    int survivalTotal = 0;
-    int soulTotal = 0;
+    int dailyTotal = 0;
+    int joyTotal = 0;
     for (final lt in ledgerTotals) {
       if (lt.ledgerType == 'daily') {
-        survivalTotal = lt.totalAmount;
+        dailyTotal = lt.totalAmount;
       } else if (lt.ledgerType == 'joy') {
-        soulTotal = lt.totalAmount;
+        joyTotal = lt.totalAmount;
       }
     }
 
@@ -120,8 +120,8 @@ class GetMonthlyReportUseCase {
       totalExpenses: totals.totalExpenses,
       savings: savings,
       savingsRate: savingsRate,
-      survivalTotal: survivalTotal,
-      soulTotal: soulTotal,
+      dailyTotal: dailyTotal,
+      joyTotal: joyTotal,
       categoryBreakdowns: categoryBreakdowns,
       dailyExpenses: dailyExpenses,
       previousMonthComparison: comparison,

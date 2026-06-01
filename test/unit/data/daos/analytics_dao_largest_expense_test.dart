@@ -25,7 +25,7 @@ void main() {
     int amount = 1000,
     String type = 'expense',
     String categoryId = 'cat_food',
-    String ledgerType = 'soul',
+    String ledgerType = 'joy',
     DateTime? timestamp,
     bool isDeleted = false,
     int joyFullness = 6,
@@ -56,23 +56,23 @@ void main() {
       'uses total-ledger expense ordering by amount then latest timestamp',
       () async {
         await seedTx(
-          id: 'large_soul_old',
+          id: 'large_joy_old',
           amount: 8000,
           categoryId: 'cat_hobby',
-          ledgerType: 'soul',
+          ledgerType: 'joy',
           timestamp: DateTime(2026, 5, 15, 8),
         );
         await seedTx(
-          id: 'large_survival_new',
+          id: 'large_daily_new',
           amount: 8000,
           categoryId: 'cat_rent',
-          ledgerType: 'survival',
+          ledgerType: 'daily',
           timestamp: DateTime(2026, 5, 15, 20),
         );
         await seedTx(
-          id: 'smaller_survival',
+          id: 'smaller_daily',
           amount: 7000,
-          ledgerType: 'survival',
+          ledgerType: 'daily',
         );
 
         final largest = await dao.getLargestMonthlyExpense(
@@ -82,7 +82,7 @@ void main() {
         );
 
         expect(largest, isNotNull);
-        expect(largest!.transactionId, 'large_survival_new');
+        expect(largest!.transactionId, 'large_daily_new');
         expect(largest.amount, 8000);
         expect(largest.categoryId, 'cat_rent');
         expect(largest.timestamp, DateTime(2026, 5, 15, 20));

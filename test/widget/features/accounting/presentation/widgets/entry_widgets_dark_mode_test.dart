@@ -108,14 +108,14 @@ void main() {
         LedgerTypeSelector(
           selected: LedgerType.daily,
           onChanged: (_) {},
-          survivalLabel: '生存支出',
-          soulLabel: '魂支出',
+          dailyLabel: '日常支出',
+          joyLabel: 'ときめき支出',
         ),
       ),
     );
 
     final inactiveChip = tester.widget<AnimatedContainer>(
-      find.byKey(const ValueKey('ledger_type_soul_chip')),
+      find.byKey(const ValueKey('ledger_type_joy_chip')),
     );
     final decoration = inactiveChip.decoration! as BoxDecoration;
     expect(decoration.color, AppColorsDark.backgroundMuted);

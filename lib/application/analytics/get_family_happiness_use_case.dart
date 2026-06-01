@@ -43,7 +43,7 @@ class GetFamilyHappinessUseCase {
 
     final overviews = await Future.wait(
       groupBookIds.map(
-        (id) => _repo.getSoulSatisfactionOverview(
+        (id) => _repo.getJoyFullnessOverview(
           bookId: id,
           startDate: startDate,
           endDate: endDate,

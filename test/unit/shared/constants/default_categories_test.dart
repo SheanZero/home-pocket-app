@@ -133,7 +133,7 @@ void main() {
         }
       });
 
-      test('cat_pet and cat_allowance are soul ledger', () {
+      test('cat_pet and cat_allowance are joy ledger', () {
         final configs = DefaultCategories.defaultLedgerConfigs;
         expect(
           configs.firstWhere((c) => c.categoryId == 'cat_pet').ledgerType,
@@ -145,7 +145,7 @@ void main() {
         );
       });
 
-      test('L2 clothing overrides to survival', () {
+      test('L2 clothing overrides to daily', () {
         final configs = DefaultCategories.defaultLedgerConfigs;
         const overrides = {
           'cat_clothing_clothes',
@@ -161,12 +161,12 @@ void main() {
           expect(
             c.ledgerType,
             LedgerType.daily,
-            reason: '$id should override to survival',
+            reason: '$id should override to daily',
           );
         }
       });
 
-      test('L2 social drinks/gifts override to soul', () {
+      test('L2 social drinks/gifts override to joy', () {
         final configs = DefaultCategories.defaultLedgerConfigs;
         for (final id in ['cat_social_drinks', 'cat_social_gifts']) {
           final c = configs.firstWhere(
@@ -177,7 +177,7 @@ void main() {
         }
       });
 
-      test('L2 special wedding/movement/newyear override to soul', () {
+      test('L2 special wedding/movement/newyear override to joy', () {
         final configs = DefaultCategories.defaultLedgerConfigs;
         for (final id in [
           'cat_special_wedding',

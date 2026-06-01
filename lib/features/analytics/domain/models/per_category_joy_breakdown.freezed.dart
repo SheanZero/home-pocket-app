@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'per_category_soul_breakdown.dart';
+part of 'per_category_joy_breakdown.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -12,19 +12,19 @@ part of 'per_category_soul_breakdown.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
-mixin _$PerCategorySoulBreakdownItem {
+mixin _$PerCategoryJoyBreakdownItem {
   String get categoryId;
   double get avgSatisfaction;
   int get totalCount;
 
-  /// Create a copy of PerCategorySoulBreakdownItem
+  /// Create a copy of PerCategoryJoyBreakdownItem
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $PerCategorySoulBreakdownItemCopyWith<PerCategorySoulBreakdownItem>
+  $PerCategoryJoyBreakdownItemCopyWith<PerCategoryJoyBreakdownItem>
   get copyWith =>
-      _$PerCategorySoulBreakdownItemCopyWithImpl<PerCategorySoulBreakdownItem>(
-        this as PerCategorySoulBreakdownItem,
+      _$PerCategoryJoyBreakdownItemCopyWithImpl<PerCategoryJoyBreakdownItem>(
+        this as PerCategoryJoyBreakdownItem,
         _$identity,
       );
 
@@ -32,7 +32,7 @@ mixin _$PerCategorySoulBreakdownItem {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is PerCategorySoulBreakdownItem &&
+            other is PerCategoryJoyBreakdownItem &&
             (identical(other.categoryId, categoryId) ||
                 other.categoryId == categoryId) &&
             (identical(other.avgSatisfaction, avgSatisfaction) ||
@@ -47,29 +47,29 @@ mixin _$PerCategorySoulBreakdownItem {
 
   @override
   String toString() {
-    return 'PerCategorySoulBreakdownItem(categoryId: $categoryId, avgSatisfaction: $avgSatisfaction, totalCount: $totalCount)';
+    return 'PerCategoryJoyBreakdownItem(categoryId: $categoryId, avgSatisfaction: $avgSatisfaction, totalCount: $totalCount)';
   }
 }
 
 /// @nodoc
-abstract mixin class $PerCategorySoulBreakdownItemCopyWith<$Res> {
-  factory $PerCategorySoulBreakdownItemCopyWith(
-    PerCategorySoulBreakdownItem value,
-    $Res Function(PerCategorySoulBreakdownItem) _then,
-  ) = _$PerCategorySoulBreakdownItemCopyWithImpl;
+abstract mixin class $PerCategoryJoyBreakdownItemCopyWith<$Res> {
+  factory $PerCategoryJoyBreakdownItemCopyWith(
+    PerCategoryJoyBreakdownItem value,
+    $Res Function(PerCategoryJoyBreakdownItem) _then,
+  ) = _$PerCategoryJoyBreakdownItemCopyWithImpl;
   @useResult
   $Res call({String categoryId, double avgSatisfaction, int totalCount});
 }
 
 /// @nodoc
-class _$PerCategorySoulBreakdownItemCopyWithImpl<$Res>
-    implements $PerCategorySoulBreakdownItemCopyWith<$Res> {
-  _$PerCategorySoulBreakdownItemCopyWithImpl(this._self, this._then);
+class _$PerCategoryJoyBreakdownItemCopyWithImpl<$Res>
+    implements $PerCategoryJoyBreakdownItemCopyWith<$Res> {
+  _$PerCategoryJoyBreakdownItemCopyWithImpl(this._self, this._then);
 
-  final PerCategorySoulBreakdownItem _self;
-  final $Res Function(PerCategorySoulBreakdownItem) _then;
+  final PerCategoryJoyBreakdownItem _self;
+  final $Res Function(PerCategoryJoyBreakdownItem) _then;
 
-  /// Create a copy of PerCategorySoulBreakdownItem
+  /// Create a copy of PerCategoryJoyBreakdownItem
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -97,8 +97,8 @@ class _$PerCategorySoulBreakdownItemCopyWithImpl<$Res>
   }
 }
 
-/// Adds pattern-matching-related methods to [PerCategorySoulBreakdownItem].
-extension PerCategorySoulBreakdownItemPatterns on PerCategorySoulBreakdownItem {
+/// Adds pattern-matching-related methods to [PerCategoryJoyBreakdownItem].
+extension PerCategoryJoyBreakdownItemPatterns on PerCategoryJoyBreakdownItem {
   /// A variant of `map` that fallback to returning `orElse`.
   ///
   /// It is equivalent to doing:
@@ -113,12 +113,12 @@ extension PerCategorySoulBreakdownItemPatterns on PerCategorySoulBreakdownItem {
 
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>(
-    TResult Function(_PerCategorySoulBreakdownItem value)? $default, {
+    TResult Function(_PerCategoryJoyBreakdownItem value)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
-      case _PerCategorySoulBreakdownItem() when $default != null:
+      case _PerCategoryJoyBreakdownItem() when $default != null:
         return $default(_that);
       case _:
         return orElse();
@@ -140,11 +140,11 @@ extension PerCategorySoulBreakdownItemPatterns on PerCategorySoulBreakdownItem {
 
   @optionalTypeArgs
   TResult map<TResult extends Object?>(
-    TResult Function(_PerCategorySoulBreakdownItem value) $default,
+    TResult Function(_PerCategoryJoyBreakdownItem value) $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _PerCategorySoulBreakdownItem():
+      case _PerCategoryJoyBreakdownItem():
         return $default(_that);
       case _:
         throw StateError('Unexpected subclass');
@@ -165,11 +165,11 @@ extension PerCategorySoulBreakdownItemPatterns on PerCategorySoulBreakdownItem {
 
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_PerCategorySoulBreakdownItem value)? $default,
+    TResult? Function(_PerCategoryJoyBreakdownItem value)? $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _PerCategorySoulBreakdownItem() when $default != null:
+      case _PerCategoryJoyBreakdownItem() when $default != null:
         return $default(_that);
       case _:
         return null;
@@ -196,7 +196,7 @@ extension PerCategorySoulBreakdownItemPatterns on PerCategorySoulBreakdownItem {
   }) {
     final _that = this;
     switch (_that) {
-      case _PerCategorySoulBreakdownItem() when $default != null:
+      case _PerCategoryJoyBreakdownItem() when $default != null:
         return $default(
           _that.categoryId,
           _that.avgSatisfaction,
@@ -227,7 +227,7 @@ extension PerCategorySoulBreakdownItemPatterns on PerCategorySoulBreakdownItem {
   ) {
     final _that = this;
     switch (_that) {
-      case _PerCategorySoulBreakdownItem():
+      case _PerCategoryJoyBreakdownItem():
         return $default(
           _that.categoryId,
           _that.avgSatisfaction,
@@ -261,7 +261,7 @@ extension PerCategorySoulBreakdownItemPatterns on PerCategorySoulBreakdownItem {
   ) {
     final _that = this;
     switch (_that) {
-      case _PerCategorySoulBreakdownItem() when $default != null:
+      case _PerCategoryJoyBreakdownItem() when $default != null:
         return $default(
           _that.categoryId,
           _that.avgSatisfaction,
@@ -275,8 +275,8 @@ extension PerCategorySoulBreakdownItemPatterns on PerCategorySoulBreakdownItem {
 
 /// @nodoc
 
-class _PerCategorySoulBreakdownItem implements PerCategorySoulBreakdownItem {
-  const _PerCategorySoulBreakdownItem({
+class _PerCategoryJoyBreakdownItem implements PerCategoryJoyBreakdownItem {
+  const _PerCategoryJoyBreakdownItem({
     required this.categoryId,
     required this.avgSatisfaction,
     required this.totalCount,
@@ -289,22 +289,23 @@ class _PerCategorySoulBreakdownItem implements PerCategorySoulBreakdownItem {
   @override
   final int totalCount;
 
-  /// Create a copy of PerCategorySoulBreakdownItem
+  /// Create a copy of PerCategoryJoyBreakdownItem
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  _$PerCategorySoulBreakdownItemCopyWith<_PerCategorySoulBreakdownItem>
+  _$PerCategoryJoyBreakdownItemCopyWith<_PerCategoryJoyBreakdownItem>
   get copyWith =>
-      __$PerCategorySoulBreakdownItemCopyWithImpl<
-        _PerCategorySoulBreakdownItem
-      >(this, _$identity);
+      __$PerCategoryJoyBreakdownItemCopyWithImpl<_PerCategoryJoyBreakdownItem>(
+        this,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _PerCategorySoulBreakdownItem &&
+            other is _PerCategoryJoyBreakdownItem &&
             (identical(other.categoryId, categoryId) ||
                 other.categoryId == categoryId) &&
             (identical(other.avgSatisfaction, avgSatisfaction) ||
@@ -319,31 +320,31 @@ class _PerCategorySoulBreakdownItem implements PerCategorySoulBreakdownItem {
 
   @override
   String toString() {
-    return 'PerCategorySoulBreakdownItem(categoryId: $categoryId, avgSatisfaction: $avgSatisfaction, totalCount: $totalCount)';
+    return 'PerCategoryJoyBreakdownItem(categoryId: $categoryId, avgSatisfaction: $avgSatisfaction, totalCount: $totalCount)';
   }
 }
 
 /// @nodoc
-abstract mixin class _$PerCategorySoulBreakdownItemCopyWith<$Res>
-    implements $PerCategorySoulBreakdownItemCopyWith<$Res> {
-  factory _$PerCategorySoulBreakdownItemCopyWith(
-    _PerCategorySoulBreakdownItem value,
-    $Res Function(_PerCategorySoulBreakdownItem) _then,
-  ) = __$PerCategorySoulBreakdownItemCopyWithImpl;
+abstract mixin class _$PerCategoryJoyBreakdownItemCopyWith<$Res>
+    implements $PerCategoryJoyBreakdownItemCopyWith<$Res> {
+  factory _$PerCategoryJoyBreakdownItemCopyWith(
+    _PerCategoryJoyBreakdownItem value,
+    $Res Function(_PerCategoryJoyBreakdownItem) _then,
+  ) = __$PerCategoryJoyBreakdownItemCopyWithImpl;
   @override
   @useResult
   $Res call({String categoryId, double avgSatisfaction, int totalCount});
 }
 
 /// @nodoc
-class __$PerCategorySoulBreakdownItemCopyWithImpl<$Res>
-    implements _$PerCategorySoulBreakdownItemCopyWith<$Res> {
-  __$PerCategorySoulBreakdownItemCopyWithImpl(this._self, this._then);
+class __$PerCategoryJoyBreakdownItemCopyWithImpl<$Res>
+    implements _$PerCategoryJoyBreakdownItemCopyWith<$Res> {
+  __$PerCategoryJoyBreakdownItemCopyWithImpl(this._self, this._then);
 
-  final _PerCategorySoulBreakdownItem _self;
-  final $Res Function(_PerCategorySoulBreakdownItem) _then;
+  final _PerCategoryJoyBreakdownItem _self;
+  final $Res Function(_PerCategoryJoyBreakdownItem) _then;
 
-  /// Create a copy of PerCategorySoulBreakdownItem
+  /// Create a copy of PerCategoryJoyBreakdownItem
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
@@ -353,7 +354,7 @@ class __$PerCategorySoulBreakdownItemCopyWithImpl<$Res>
     Object? totalCount = null,
   }) {
     return _then(
-      _PerCategorySoulBreakdownItem(
+      _PerCategoryJoyBreakdownItem(
         categoryId: null == categoryId
             ? _self.categoryId
             : categoryId // ignore: cast_nullable_to_non_nullable
@@ -372,19 +373,19 @@ class __$PerCategorySoulBreakdownItemCopyWithImpl<$Res>
 }
 
 /// @nodoc
-mixin _$PerCategorySoulBreakdown {
-  List<PerCategorySoulBreakdownItem> get items;
+mixin _$PerCategoryJoyBreakdown {
+  List<PerCategoryJoyBreakdownItem> get items;
   int get totalCount;
   int get otherCount;
   int get otherCategoryCount;
 
-  /// Create a copy of PerCategorySoulBreakdown
+  /// Create a copy of PerCategoryJoyBreakdown
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $PerCategorySoulBreakdownCopyWith<PerCategorySoulBreakdown> get copyWith =>
-      _$PerCategorySoulBreakdownCopyWithImpl<PerCategorySoulBreakdown>(
-        this as PerCategorySoulBreakdown,
+  $PerCategoryJoyBreakdownCopyWith<PerCategoryJoyBreakdown> get copyWith =>
+      _$PerCategoryJoyBreakdownCopyWithImpl<PerCategoryJoyBreakdown>(
+        this as PerCategoryJoyBreakdown,
         _$identity,
       );
 
@@ -392,7 +393,7 @@ mixin _$PerCategorySoulBreakdown {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is PerCategorySoulBreakdown &&
+            other is PerCategoryJoyBreakdown &&
             const DeepCollectionEquality().equals(other.items, items) &&
             (identical(other.totalCount, totalCount) ||
                 other.totalCount == totalCount) &&
@@ -413,19 +414,19 @@ mixin _$PerCategorySoulBreakdown {
 
   @override
   String toString() {
-    return 'PerCategorySoulBreakdown(items: $items, totalCount: $totalCount, otherCount: $otherCount, otherCategoryCount: $otherCategoryCount)';
+    return 'PerCategoryJoyBreakdown(items: $items, totalCount: $totalCount, otherCount: $otherCount, otherCategoryCount: $otherCategoryCount)';
   }
 }
 
 /// @nodoc
-abstract mixin class $PerCategorySoulBreakdownCopyWith<$Res> {
-  factory $PerCategorySoulBreakdownCopyWith(
-    PerCategorySoulBreakdown value,
-    $Res Function(PerCategorySoulBreakdown) _then,
-  ) = _$PerCategorySoulBreakdownCopyWithImpl;
+abstract mixin class $PerCategoryJoyBreakdownCopyWith<$Res> {
+  factory $PerCategoryJoyBreakdownCopyWith(
+    PerCategoryJoyBreakdown value,
+    $Res Function(PerCategoryJoyBreakdown) _then,
+  ) = _$PerCategoryJoyBreakdownCopyWithImpl;
   @useResult
   $Res call({
-    List<PerCategorySoulBreakdownItem> items,
+    List<PerCategoryJoyBreakdownItem> items,
     int totalCount,
     int otherCount,
     int otherCategoryCount,
@@ -433,14 +434,14 @@ abstract mixin class $PerCategorySoulBreakdownCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$PerCategorySoulBreakdownCopyWithImpl<$Res>
-    implements $PerCategorySoulBreakdownCopyWith<$Res> {
-  _$PerCategorySoulBreakdownCopyWithImpl(this._self, this._then);
+class _$PerCategoryJoyBreakdownCopyWithImpl<$Res>
+    implements $PerCategoryJoyBreakdownCopyWith<$Res> {
+  _$PerCategoryJoyBreakdownCopyWithImpl(this._self, this._then);
 
-  final PerCategorySoulBreakdown _self;
-  final $Res Function(PerCategorySoulBreakdown) _then;
+  final PerCategoryJoyBreakdown _self;
+  final $Res Function(PerCategoryJoyBreakdown) _then;
 
-  /// Create a copy of PerCategorySoulBreakdown
+  /// Create a copy of PerCategoryJoyBreakdown
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -455,7 +456,7 @@ class _$PerCategorySoulBreakdownCopyWithImpl<$Res>
         items: null == items
             ? _self.items
             : items // ignore: cast_nullable_to_non_nullable
-                  as List<PerCategorySoulBreakdownItem>,
+                  as List<PerCategoryJoyBreakdownItem>,
         totalCount: null == totalCount
             ? _self.totalCount
             : totalCount // ignore: cast_nullable_to_non_nullable
@@ -473,8 +474,8 @@ class _$PerCategorySoulBreakdownCopyWithImpl<$Res>
   }
 }
 
-/// Adds pattern-matching-related methods to [PerCategorySoulBreakdown].
-extension PerCategorySoulBreakdownPatterns on PerCategorySoulBreakdown {
+/// Adds pattern-matching-related methods to [PerCategoryJoyBreakdown].
+extension PerCategoryJoyBreakdownPatterns on PerCategoryJoyBreakdown {
   /// A variant of `map` that fallback to returning `orElse`.
   ///
   /// It is equivalent to doing:
@@ -489,12 +490,12 @@ extension PerCategorySoulBreakdownPatterns on PerCategorySoulBreakdown {
 
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>(
-    TResult Function(_PerCategorySoulBreakdown value)? $default, {
+    TResult Function(_PerCategoryJoyBreakdown value)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
-      case _PerCategorySoulBreakdown() when $default != null:
+      case _PerCategoryJoyBreakdown() when $default != null:
         return $default(_that);
       case _:
         return orElse();
@@ -516,11 +517,11 @@ extension PerCategorySoulBreakdownPatterns on PerCategorySoulBreakdown {
 
   @optionalTypeArgs
   TResult map<TResult extends Object?>(
-    TResult Function(_PerCategorySoulBreakdown value) $default,
+    TResult Function(_PerCategoryJoyBreakdown value) $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _PerCategorySoulBreakdown():
+      case _PerCategoryJoyBreakdown():
         return $default(_that);
       case _:
         throw StateError('Unexpected subclass');
@@ -541,11 +542,11 @@ extension PerCategorySoulBreakdownPatterns on PerCategorySoulBreakdown {
 
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_PerCategorySoulBreakdown value)? $default,
+    TResult? Function(_PerCategoryJoyBreakdown value)? $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _PerCategorySoulBreakdown() when $default != null:
+      case _PerCategoryJoyBreakdown() when $default != null:
         return $default(_that);
       case _:
         return null;
@@ -567,7 +568,7 @@ extension PerCategorySoulBreakdownPatterns on PerCategorySoulBreakdown {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-      List<PerCategorySoulBreakdownItem> items,
+      List<PerCategoryJoyBreakdownItem> items,
       int totalCount,
       int otherCount,
       int otherCategoryCount,
@@ -577,7 +578,7 @@ extension PerCategorySoulBreakdownPatterns on PerCategorySoulBreakdown {
   }) {
     final _that = this;
     switch (_that) {
-      case _PerCategorySoulBreakdown() when $default != null:
+      case _PerCategoryJoyBreakdown() when $default != null:
         return $default(
           _that.items,
           _that.totalCount,
@@ -605,7 +606,7 @@ extension PerCategorySoulBreakdownPatterns on PerCategorySoulBreakdown {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-      List<PerCategorySoulBreakdownItem> items,
+      List<PerCategoryJoyBreakdownItem> items,
       int totalCount,
       int otherCount,
       int otherCategoryCount,
@@ -614,7 +615,7 @@ extension PerCategorySoulBreakdownPatterns on PerCategorySoulBreakdown {
   ) {
     final _that = this;
     switch (_that) {
-      case _PerCategorySoulBreakdown():
+      case _PerCategoryJoyBreakdown():
         return $default(
           _that.items,
           _that.totalCount,
@@ -641,7 +642,7 @@ extension PerCategorySoulBreakdownPatterns on PerCategorySoulBreakdown {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-      List<PerCategorySoulBreakdownItem> items,
+      List<PerCategoryJoyBreakdownItem> items,
       int totalCount,
       int otherCount,
       int otherCategoryCount,
@@ -650,7 +651,7 @@ extension PerCategorySoulBreakdownPatterns on PerCategorySoulBreakdown {
   ) {
     final _that = this;
     switch (_that) {
-      case _PerCategorySoulBreakdown() when $default != null:
+      case _PerCategoryJoyBreakdown() when $default != null:
         return $default(
           _that.items,
           _that.totalCount,
@@ -665,17 +666,17 @@ extension PerCategorySoulBreakdownPatterns on PerCategorySoulBreakdown {
 
 /// @nodoc
 
-class _PerCategorySoulBreakdown implements PerCategorySoulBreakdown {
-  const _PerCategorySoulBreakdown({
-    required final List<PerCategorySoulBreakdownItem> items,
+class _PerCategoryJoyBreakdown implements PerCategoryJoyBreakdown {
+  const _PerCategoryJoyBreakdown({
+    required final List<PerCategoryJoyBreakdownItem> items,
     required this.totalCount,
     required this.otherCount,
     required this.otherCategoryCount,
   }) : _items = items;
 
-  final List<PerCategorySoulBreakdownItem> _items;
+  final List<PerCategoryJoyBreakdownItem> _items;
   @override
-  List<PerCategorySoulBreakdownItem> get items {
+  List<PerCategoryJoyBreakdownItem> get items {
     if (_items is EqualUnmodifiableListView) return _items;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_items);
@@ -688,13 +689,13 @@ class _PerCategorySoulBreakdown implements PerCategorySoulBreakdown {
   @override
   final int otherCategoryCount;
 
-  /// Create a copy of PerCategorySoulBreakdown
+  /// Create a copy of PerCategoryJoyBreakdown
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  _$PerCategorySoulBreakdownCopyWith<_PerCategorySoulBreakdown> get copyWith =>
-      __$PerCategorySoulBreakdownCopyWithImpl<_PerCategorySoulBreakdown>(
+  _$PerCategoryJoyBreakdownCopyWith<_PerCategoryJoyBreakdown> get copyWith =>
+      __$PerCategoryJoyBreakdownCopyWithImpl<_PerCategoryJoyBreakdown>(
         this,
         _$identity,
       );
@@ -703,7 +704,7 @@ class _PerCategorySoulBreakdown implements PerCategorySoulBreakdown {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _PerCategorySoulBreakdown &&
+            other is _PerCategoryJoyBreakdown &&
             const DeepCollectionEquality().equals(other._items, _items) &&
             (identical(other.totalCount, totalCount) ||
                 other.totalCount == totalCount) &&
@@ -724,21 +725,21 @@ class _PerCategorySoulBreakdown implements PerCategorySoulBreakdown {
 
   @override
   String toString() {
-    return 'PerCategorySoulBreakdown(items: $items, totalCount: $totalCount, otherCount: $otherCount, otherCategoryCount: $otherCategoryCount)';
+    return 'PerCategoryJoyBreakdown(items: $items, totalCount: $totalCount, otherCount: $otherCount, otherCategoryCount: $otherCategoryCount)';
   }
 }
 
 /// @nodoc
-abstract mixin class _$PerCategorySoulBreakdownCopyWith<$Res>
-    implements $PerCategorySoulBreakdownCopyWith<$Res> {
-  factory _$PerCategorySoulBreakdownCopyWith(
-    _PerCategorySoulBreakdown value,
-    $Res Function(_PerCategorySoulBreakdown) _then,
-  ) = __$PerCategorySoulBreakdownCopyWithImpl;
+abstract mixin class _$PerCategoryJoyBreakdownCopyWith<$Res>
+    implements $PerCategoryJoyBreakdownCopyWith<$Res> {
+  factory _$PerCategoryJoyBreakdownCopyWith(
+    _PerCategoryJoyBreakdown value,
+    $Res Function(_PerCategoryJoyBreakdown) _then,
+  ) = __$PerCategoryJoyBreakdownCopyWithImpl;
   @override
   @useResult
   $Res call({
-    List<PerCategorySoulBreakdownItem> items,
+    List<PerCategoryJoyBreakdownItem> items,
     int totalCount,
     int otherCount,
     int otherCategoryCount,
@@ -746,14 +747,14 @@ abstract mixin class _$PerCategorySoulBreakdownCopyWith<$Res>
 }
 
 /// @nodoc
-class __$PerCategorySoulBreakdownCopyWithImpl<$Res>
-    implements _$PerCategorySoulBreakdownCopyWith<$Res> {
-  __$PerCategorySoulBreakdownCopyWithImpl(this._self, this._then);
+class __$PerCategoryJoyBreakdownCopyWithImpl<$Res>
+    implements _$PerCategoryJoyBreakdownCopyWith<$Res> {
+  __$PerCategoryJoyBreakdownCopyWithImpl(this._self, this._then);
 
-  final _PerCategorySoulBreakdown _self;
-  final $Res Function(_PerCategorySoulBreakdown) _then;
+  final _PerCategoryJoyBreakdown _self;
+  final $Res Function(_PerCategoryJoyBreakdown) _then;
 
-  /// Create a copy of PerCategorySoulBreakdown
+  /// Create a copy of PerCategoryJoyBreakdown
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
@@ -764,11 +765,11 @@ class __$PerCategorySoulBreakdownCopyWithImpl<$Res>
     Object? otherCategoryCount = null,
   }) {
     return _then(
-      _PerCategorySoulBreakdown(
+      _PerCategoryJoyBreakdown(
         items: null == items
             ? _self._items
             : items // ignore: cast_nullable_to_non_nullable
-                  as List<PerCategorySoulBreakdownItem>,
+                  as List<PerCategoryJoyBreakdownItem>,
         totalCount: null == totalCount
             ? _self.totalCount
             : totalCount // ignore: cast_nullable_to_non_nullable

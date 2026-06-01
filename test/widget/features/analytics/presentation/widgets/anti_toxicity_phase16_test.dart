@@ -3,16 +3,16 @@ import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/analytics/domain/models/ledger_snapshot.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
-import 'package:home_pocket/features/analytics/domain/models/per_category_soul_breakdown.dart';
+import 'package:home_pocket/features/analytics/domain/models/per_category_joy_breakdown.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_ledger_snapshot.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/per_category_breakdown_card.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/soul_vs_survival_card.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/daily_vs_joy_card.dart';
 
 import '../../../../../helpers/test_localizations.dart';
 
 /// D-14 anti-toxicity widget sweep — verifies that Phase 16's two new
 /// AnalyticsScreen Distribution-group cards (PerCategoryBreakdownCard +
-/// SoulVsSurvivalCard) never leak forbidden value-judgment / comparison
+/// DailyVsJoyCard) never leak forbidden value-judgment / comparison
 /// substrings into rendered output in any of the three supported locales
 /// (en / ja / zh) across the canonical user-visible state matrix.
 ///
@@ -104,21 +104,21 @@ final _endDate = DateTime(2026, 6, 1);
 // Fixture helpers.
 // ---------------------------------------------------------------------------
 
-PerCategorySoulBreakdownItem _item(String id, double avg, int count) =>
-    PerCategorySoulBreakdownItem(
+PerCategoryJoyBreakdownItem _item(String id, double avg, int count) =>
+    PerCategoryJoyBreakdownItem(
       categoryId: id,
       avgSatisfaction: avg,
       totalCount: count,
     );
 
-PerCategorySoulBreakdown _breakdownSubMinN() => const PerCategorySoulBreakdown(
+PerCategoryJoyBreakdown _breakdownSubMinN() => const PerCategoryJoyBreakdown(
       items: [],
       totalCount: 5,
       otherCount: 5,
       otherCategoryCount: 2,
     );
 
-PerCategorySoulBreakdown _breakdownValue() => PerCategorySoulBreakdown(
+PerCategoryJoyBreakdown _breakdownValue() => PerCategoryJoyBreakdown(
       items: [
         _item('cat_a', 9.0, 4),
         _item('cat_b', 8.0, 3),
@@ -129,27 +129,27 @@ PerCategorySoulBreakdown _breakdownValue() => PerCategorySoulBreakdown(
       otherCategoryCount: 1,
     );
 
-SoulLedgerSnapshot _soul({
+JoyLedgerSnapshot _joy({
   int entryCount = 5,
   int totalSpend = 1500,
   double avgSat = 7.4,
-}) => SoulLedgerSnapshot(
+}) => JoyLedgerSnapshot(
       entryCount: entryCount,
       totalSpend: totalSpend,
       avgSatisfaction: avgSat,
     );
 
-SurvivalLedgerSnapshot _survival({
+DailyLedgerSnapshot _daily({
   int entryCount = 8,
   int totalSpend = 12000,
-}) => SurvivalLedgerSnapshot(entryCount: entryCount, totalSpend: totalSpend);
+}) => DailyLedgerSnapshot(entryCount: entryCount, totalSpend: totalSpend);
 
-SoulVsSurvivalSnapshot _snapshotValueSolo() =>
-    SoulVsSurvivalSnapshot(soul: _soul(), survival: _survival());
+DailyVsJoySnapshot _snapshotValueSolo() =>
+    DailyVsJoySnapshot(joy: _joy(), daily: _daily());
 
-SoulVsSurvivalSnapshot _snapshotValueGroupFamily() => SoulVsSurvivalSnapshot(
-      soul: _soul(entryCount: 12, totalSpend: 3500, avgSat: 6.8),
-      survival: _survival(entryCount: 18, totalSpend: 24000),
+DailyVsJoySnapshot _snapshotValueGroupFamily() => DailyVsJoySnapshot(
+      joy: _joy(entryCount: 12, totalSpend: 3500, avgSat: 6.8),
+      daily: _daily(entryCount: 18, totalSpend: 24000),
     );
 
 // ---------------------------------------------------------------------------
@@ -168,11 +168,11 @@ Widget _buildPerCategoryCard({
       scope: scope,
     );
 
-Widget _buildSoulVsSurvivalCard({
+Widget _buildDailyVsJoyCard({
   required Locale locale,
   required bool isGroupMode,
 }) =>
-    SoulVsSurvivalCard(
+    DailyVsJoyCard(
       bookId: _bookId,
       startDate: _startDate,
       endDate: _endDate,
@@ -188,15 +188,15 @@ Widget _buildSoulVsSurvivalCard({
 // ---------------------------------------------------------------------------
 
 List<Override> _perCategoryEmptyOverrides() => [
-      perCategorySoulBreakdownProvider(
+      perCategoryJoyBreakdownProvider(
         bookId: _bookId,
         startDate: _startDate,
         endDate: _endDate,
-      ).overrideWith((_) async => const Empty<PerCategorySoulBreakdown>()),
+      ).overrideWith((_) async => const Empty<PerCategoryJoyBreakdown>()),
     ];
 
 List<Override> _perCategorySubMinNOverrides() => [
-      perCategorySoulBreakdownProvider(
+      perCategoryJoyBreakdownProvider(
         bookId: _bookId,
         startDate: _startDate,
         endDate: _endDate,
@@ -204,7 +204,7 @@ List<Override> _perCategorySubMinNOverrides() => [
     ];
 
 List<Override> _perCategoryValueSoloOverrides() => [
-      perCategorySoulBreakdownProvider(
+      perCategoryJoyBreakdownProvider(
         bookId: _bookId,
         startDate: _startDate,
         endDate: _endDate,
@@ -212,35 +212,35 @@ List<Override> _perCategoryValueSoloOverrides() => [
     ];
 
 List<Override> _perCategoryValueGroupOverrides() => [
-      perCategorySoulBreakdownFamilyProvider(
+      perCategoryJoyBreakdownFamilyProvider(
         startDate: _startDate,
         endDate: _endDate,
       ).overrideWith((_) async => Value(_breakdownValue(), 12)),
     ];
 
-List<Override> _soulVsSurvivalEmptyOverrides() => [
-      soulVsSurvivalSnapshotProvider(
+List<Override> _dailyVsJoyEmptyOverrides() => [
+      dailyVsJoySnapshotProvider(
         bookId: _bookId,
         startDate: _startDate,
         endDate: _endDate,
-      ).overrideWith((_) async => const Empty<SoulVsSurvivalSnapshot>()),
+      ).overrideWith((_) async => const Empty<DailyVsJoySnapshot>()),
     ];
 
-List<Override> _soulVsSurvivalValueSoloOverrides() => [
-      soulVsSurvivalSnapshotProvider(
+List<Override> _dailyVsJoyValueSoloOverrides() => [
+      dailyVsJoySnapshotProvider(
         bookId: _bookId,
         startDate: _startDate,
         endDate: _endDate,
       ).overrideWith((_) async => Value(_snapshotValueSolo(), 13)),
     ];
 
-List<Override> _soulVsSurvivalValueGroupCompleteOverrides() => [
-      soulVsSurvivalSnapshotProvider(
+List<Override> _dailyVsJoyValueGroupCompleteOverrides() => [
+      dailyVsJoySnapshotProvider(
         bookId: _bookId,
         startDate: _startDate,
         endDate: _endDate,
       ).overrideWith((_) async => Value(_snapshotValueSolo(), 13)),
-      soulVsSurvivalSnapshotFamilyProvider(
+      dailyVsJoySnapshotFamilyProvider(
         startDate: _startDate,
         endDate: _endDate,
       ).overrideWith(
@@ -248,16 +248,16 @@ List<Override> _soulVsSurvivalValueGroupCompleteOverrides() => [
       ),
     ];
 
-List<Override> _soulVsSurvivalValueGroupFamilyEmptyOverrides() => [
-      soulVsSurvivalSnapshotProvider(
+List<Override> _dailyVsJoyValueGroupFamilyEmptyOverrides() => [
+      dailyVsJoySnapshotProvider(
         bookId: _bookId,
         startDate: _startDate,
         endDate: _endDate,
       ).overrideWith((_) async => Value(_snapshotValueSolo(), 13)),
-      soulVsSurvivalSnapshotFamilyProvider(
+      dailyVsJoySnapshotFamilyProvider(
         startDate: _startDate,
         endDate: _endDate,
-      ).overrideWith((_) async => const Empty<SoulVsSurvivalSnapshot>()),
+      ).overrideWith((_) async => const Empty<DailyVsJoySnapshot>()),
     ];
 
 // ---------------------------------------------------------------------------
@@ -385,85 +385,85 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  // SoulVsSurvivalCard — 3 locales × 4 states.
+  // DailyVsJoyCard — 3 locales × 4 states.
   // -------------------------------------------------------------------------
-  group('D-14 / SoulVsSurvivalCard / forbidden substring sweep', () {
+  group('D-14 / DailyVsJoyCard / forbidden substring sweep', () {
     for (final locale in locales) {
       testWidgets(
-        'SoulVsSurvivalCard / ${locale.languageCode} / empty',
+        'DailyVsJoyCard / ${locale.languageCode} / empty',
         (tester) async {
           await tester.pumpWidget(
             createLocalizedWidget(
-              _buildSoulVsSurvivalCard(locale: locale, isGroupMode: false),
+              _buildDailyVsJoyCard(locale: locale, isGroupMode: false),
               locale: locale,
-              overrides: _soulVsSurvivalEmptyOverrides(),
+              overrides: _dailyVsJoyEmptyOverrides(),
             ),
           );
           await tester.pumpAndSettle();
 
           _sweepForbiddenSubstrings(
             locale: locale,
-            card: 'SoulVsSurvivalCard',
+            card: 'DailyVsJoyCard',
             state: 'empty',
           );
         },
       );
 
       testWidgets(
-        'SoulVsSurvivalCard / ${locale.languageCode} / value_solo',
+        'DailyVsJoyCard / ${locale.languageCode} / value_solo',
         (tester) async {
           await tester.pumpWidget(
             createLocalizedWidget(
-              _buildSoulVsSurvivalCard(locale: locale, isGroupMode: false),
+              _buildDailyVsJoyCard(locale: locale, isGroupMode: false),
               locale: locale,
-              overrides: _soulVsSurvivalValueSoloOverrides(),
+              overrides: _dailyVsJoyValueSoloOverrides(),
             ),
           );
           await tester.pumpAndSettle();
 
           _sweepForbiddenSubstrings(
             locale: locale,
-            card: 'SoulVsSurvivalCard',
+            card: 'DailyVsJoyCard',
             state: 'value_solo',
           );
         },
       );
 
       testWidgets(
-        'SoulVsSurvivalCard / ${locale.languageCode} / value_group_complete',
+        'DailyVsJoyCard / ${locale.languageCode} / value_group_complete',
         (tester) async {
           await tester.pumpWidget(
             createLocalizedWidget(
-              _buildSoulVsSurvivalCard(locale: locale, isGroupMode: true),
+              _buildDailyVsJoyCard(locale: locale, isGroupMode: true),
               locale: locale,
-              overrides: _soulVsSurvivalValueGroupCompleteOverrides(),
+              overrides: _dailyVsJoyValueGroupCompleteOverrides(),
             ),
           );
           await tester.pumpAndSettle();
 
           _sweepForbiddenSubstrings(
             locale: locale,
-            card: 'SoulVsSurvivalCard',
+            card: 'DailyVsJoyCard',
             state: 'value_group_complete',
           );
         },
       );
 
       testWidgets(
-        'SoulVsSurvivalCard / ${locale.languageCode} / value_group_family_empty',
+        'DailyVsJoyCard / ${locale.languageCode} / value_group_family_empty',
         (tester) async {
           await tester.pumpWidget(
             createLocalizedWidget(
-              _buildSoulVsSurvivalCard(locale: locale, isGroupMode: true),
+              _buildDailyVsJoyCard(locale: locale, isGroupMode: true),
               locale: locale,
-              overrides: _soulVsSurvivalValueGroupFamilyEmptyOverrides(),
+              overrides: _dailyVsJoyValueGroupFamilyEmptyOverrides(),
             ),
           );
           await tester.pumpAndSettle();
 
           _sweepForbiddenSubstrings(
             locale: locale,
-            card: 'SoulVsSurvivalCard',
+            card: 'DailyVsJoyCard',
             state: 'value_group_family_empty',
           );
         },

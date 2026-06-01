@@ -6,7 +6,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme_colors.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/metric_result.dart';
-import '../../domain/models/per_category_soul_breakdown.dart';
+import '../../domain/models/per_category_joy_breakdown.dart';
 import '../providers/state_joy_metric_variant.dart';
 import '../providers/state_ledger_snapshot.dart';
 import 'analytics_card_error_state.dart';
@@ -18,20 +18,20 @@ import 'analytics_card_error_state.dart';
 ///   `analyticsCardTitlePerCategorySoulYou`.
 /// - [family]: group mode family-aggregate card (across shadow books) →
 ///   `analyticsCardTitlePerCategorySoulFamily`. Reads
-///   `perCategorySoulBreakdownFamilyProvider` (no `bookId` parameter — the
+///   `perCategoryJoyBreakdownFamilyProvider` (no `bookId` parameter — the
 ///   provider derives book ids from `shadowBooksProvider`).
 enum PerCategoryScope { solo, you, family }
 
-/// HAPPY-V2-01 per-category soul-ledger satisfaction breakdown card.
+/// HAPPY-V2-01 per-category joy-ledger satisfaction breakdown card.
 ///
-/// Renders a ranked list of soul categories within the active window
+/// Renders a ranked list of joy categories within the active window
 /// (`startDate`/`endDate`), folding sub-min-N categories into an aggregate
 /// "Other" row (D-08). Default view is top-5; tapping the "Show all"
 /// affordance expands to the full list (and toggles back to "Show less").
 ///
 /// State matrix per UI-SPEC §State Matrix:
 /// - Loading: skeleton placeholder.
-/// - Empty: provider returned `Empty<PerCategorySoulBreakdown>()` → localized
+/// - Empty: provider returned `Empty<PerCategoryJoyBreakdown>()` → localized
 ///   `analyticsPerCategoryEmpty` body, no rows.
 /// - Sub-min-N only: `items` empty but `otherCount > 0` → 0 ranked rows + Other
 ///   fold.
@@ -88,14 +88,14 @@ class _PerCategoryBreakdownCardState
 
     final asyncResult = widget.scope == PerCategoryScope.family
         ? ref.watch(
-            perCategorySoulBreakdownFamilyProvider(
+            perCategoryJoyBreakdownFamilyProvider(
               startDate: widget.startDate,
               endDate: widget.endDate,
               joyMetricVariant: widget.joyMetricVariant,
             ),
           )
         : ref.watch(
-            perCategorySoulBreakdownProvider(
+            perCategoryJoyBreakdownProvider(
               bookId: widget.bookId,
               startDate: widget.startDate,
               endDate: widget.endDate,
@@ -143,7 +143,7 @@ class _PerCategoryBreakdownCardState
   void _invalidate() {
     if (widget.scope == PerCategoryScope.family) {
       ref.invalidate(
-        perCategorySoulBreakdownFamilyProvider(
+        perCategoryJoyBreakdownFamilyProvider(
           startDate: widget.startDate,
           endDate: widget.endDate,
           joyMetricVariant: widget.joyMetricVariant,
@@ -151,7 +151,7 @@ class _PerCategoryBreakdownCardState
       );
     } else {
       ref.invalidate(
-        perCategorySoulBreakdownProvider(
+        perCategoryJoyBreakdownProvider(
           bookId: widget.bookId,
           startDate: widget.startDate,
           endDate: widget.endDate,
@@ -161,17 +161,17 @@ class _PerCategoryBreakdownCardState
     }
   }
 
-  Widget _renderResult(MetricResult<PerCategorySoulBreakdown> result) {
+  Widget _renderResult(MetricResult<PerCategoryJoyBreakdown> result) {
     return switch (result) {
-      Empty<PerCategorySoulBreakdown>() => Text(
+      Empty<PerCategoryJoyBreakdown>() => Text(
         S.of(context).analyticsPerCategoryEmpty,
         style: AppTextStyles.caption.copyWith(color: context.wmTextSecondary),
       ),
-      Value<PerCategorySoulBreakdown>(:final data) => _renderValue(data),
+      Value<PerCategoryJoyBreakdown>(:final data) => _renderValue(data),
     };
   }
 
-  Widget _renderValue(PerCategorySoulBreakdown data) {
+  Widget _renderValue(PerCategoryJoyBreakdown data) {
     final l10n = S.of(context);
     final hasOverflow = data.items.length > _defaultTop;
     final visibleItems = _isExpanded || !hasOverflow
@@ -211,7 +211,7 @@ class _PerCategoryBreakdownCardState
     );
   }
 
-  Widget _buildRow(S l10n, PerCategorySoulBreakdownItem item) {
+  Widget _buildRow(S l10n, PerCategoryJoyBreakdownItem item) {
     final categoryName = CategoryLocalizationService.resolveFromId(
       item.categoryId,
       widget.locale,
@@ -228,7 +228,7 @@ class _PerCategoryBreakdownCardState
     );
   }
 
-  Widget _buildOtherRow(S l10n, PerCategorySoulBreakdown data) {
+  Widget _buildOtherRow(S l10n, PerCategoryJoyBreakdown data) {
     return Text(
       l10n.analyticsPerCategoryOtherFold(
         data.otherCount,

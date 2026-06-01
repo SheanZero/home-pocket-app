@@ -12,22 +12,22 @@ import '../providers/state_joy_metric_variant.dart';
 import '../providers/state_ledger_snapshot.dart';
 import 'analytics_card_error_state.dart';
 
-/// STATSUI-V2-01 Soul-vs-Survival "Ledger · This window" engagement snapshot.
+/// STATSUI-V2-01 Daily-vs-Joy "Ledger · This window" engagement snapshot.
 ///
 /// The widget reframes the ROADMAP's "satisfaction comparison" idea into a
-/// descriptive engagement axis (entry count + total spend). The Soul column
+/// descriptive engagement axis (entry count + total spend). The Joy column
 /// additionally renders avg satisfaction (D-03 — single-sided by design;
-/// `SurvivalLedgerSnapshot` literally lacks the field per D-04 type-system
+/// `DailyLedgerSnapshot` literally lacks the field per D-04 type-system
 /// gate). No "vs" / "compare" / "winner" copy anywhere (D-12, D-14).
 ///
 /// Two layouts:
-/// - Solo mode: side-by-side two-column (Soul | Survival), equal-height via
+/// - Solo mode: side-by-side two-column (Joy | Daily), equal-height via
 ///   IntrinsicHeight.
-/// - Group mode: 2×2 grid — rows = You/Family, columns = Soul/Survival. The
+/// - Group mode: 2×2 grid — rows = You/Family, columns = Joy/Daily. The
 ///   Family row honors the AsyncValue split (loading/error/Empty/Value) per
 ///   Plan 16-08 Task 1 step 4c.
-class SoulVsSurvivalCard extends ConsumerWidget {
-  const SoulVsSurvivalCard({
+class DailyVsJoyCard extends ConsumerWidget {
+  const DailyVsJoyCard({
     super.key,
     required this.bookId,
     required this.startDate,
@@ -49,7 +49,7 @@ class SoulVsSurvivalCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncSnapshot = ref.watch(
-      soulVsSurvivalSnapshotProvider(
+      dailyVsJoySnapshotProvider(
         bookId: bookId,
         startDate: startDate,
         endDate: endDate,
@@ -59,14 +59,14 @@ class SoulVsSurvivalCard extends ConsumerWidget {
 
     final familyAsyncSnapshot = isGroupMode
         ? ref.watch(
-            soulVsSurvivalSnapshotFamilyProvider(
+            dailyVsJoySnapshotFamilyProvider(
               startDate: startDate,
               endDate: endDate,
               joyMetricVariant: joyMetricVariant,
             ),
           )
-        : const AsyncValue<MetricResult<SoulVsSurvivalSnapshot>>.data(
-            Empty<SoulVsSurvivalSnapshot>(),
+        : const AsyncValue<MetricResult<DailyVsJoySnapshot>>.data(
+            Empty<DailyVsJoySnapshot>(),
           );
 
     final l10n = S.of(context);
@@ -91,7 +91,7 @@ class SoulVsSurvivalCard extends ConsumerWidget {
               loading: () => const SizedBox(height: 200),
               error: (_, _) => AnalyticsCardErrorState(
                 onRetry: () => ref.invalidate(
-                  soulVsSurvivalSnapshotProvider(
+                  dailyVsJoySnapshotProvider(
                     bookId: bookId,
                     startDate: startDate,
                     endDate: endDate,
@@ -100,8 +100,8 @@ class SoulVsSurvivalCard extends ConsumerWidget {
                 ),
               ),
               data: (result) => switch (result) {
-                Empty<SoulVsSurvivalSnapshot>() => _EmptyBody(),
-                Value<SoulVsSurvivalSnapshot>(:final data) =>
+                Empty<DailyVsJoySnapshot>() => _EmptyBody(),
+                Value<DailyVsJoySnapshot>(:final data) =>
                   isGroupMode
                       ? _GroupGrid(
                           you: data,
@@ -142,7 +142,7 @@ class _SoloTwoColumn extends StatelessWidget {
     required this.locale,
   });
 
-  final SoulVsSurvivalSnapshot data;
+  final DailyVsJoySnapshot data;
   final String currencyCode;
   final Locale locale;
 
@@ -153,8 +153,8 @@ class _SoloTwoColumn extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: _SoulCell(
-              soul: data.soul,
+            child: _JoyCell(
+              joy: data.joy,
               currencyCode: currencyCode,
               locale: locale,
               label: null,
@@ -162,8 +162,8 @@ class _SoloTwoColumn extends StatelessWidget {
           ),
           VerticalDivider(width: 1, color: context.wmBorderDivider),
           Expanded(
-            child: _SurvivalCell(
-              survival: data.survival,
+            child: _DailyCell(
+              daily: data.daily,
               currencyCode: currencyCode,
               locale: locale,
               label: null,
@@ -183,8 +183,8 @@ class _GroupGrid extends StatelessWidget {
     required this.locale,
   });
 
-  final SoulVsSurvivalSnapshot you;
-  final AsyncValue<MetricResult<SoulVsSurvivalSnapshot>> familyAsync;
+  final DailyVsJoySnapshot you;
+  final AsyncValue<MetricResult<DailyVsJoySnapshot>> familyAsync;
   final String currencyCode;
   final Locale locale;
 
@@ -202,8 +202,8 @@ class _GroupGrid extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
-                  child: _SoulCell(
-                    soul: you.soul,
+                  child: _JoyCell(
+                    joy: you.joy,
                     currencyCode: currencyCode,
                     locale: locale,
                     label: null,
@@ -211,8 +211,8 @@ class _GroupGrid extends StatelessWidget {
                 ),
                 VerticalDivider(width: 1, color: context.wmBorderDivider),
                 Expanded(
-                  child: _SurvivalCell(
-                    survival: you.survival,
+                  child: _DailyCell(
+                    daily: you.daily,
                     currencyCode: currencyCode,
                     locale: locale,
                     label: null,
@@ -234,21 +234,21 @@ class _GroupGrid extends StatelessWidget {
             child: _FamilyCaptionBody(message: l10n.analyticsLedgerFamilyError),
           ),
           data: (result) => switch (result) {
-            Empty<SoulVsSurvivalSnapshot>() => _LabeledRow(
+            Empty<DailyVsJoySnapshot>() => _LabeledRow(
               label: l10n.analyticsLedgerRowFamily,
               child: _FamilyCaptionBody(
                 message: l10n.analyticsLedgerFamilyEmpty,
               ),
             ),
-            Value<SoulVsSurvivalSnapshot>(:final data) => _LabeledRow(
+            Value<DailyVsJoySnapshot>(:final data) => _LabeledRow(
               label: l10n.analyticsLedgerRowFamily,
               child: IntrinsicHeight(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Expanded(
-                      child: _SoulCell(
-                        soul: data.soul,
+                      child: _JoyCell(
+                        joy: data.joy,
                         currencyCode: currencyCode,
                         locale: locale,
                         label: null,
@@ -256,8 +256,8 @@ class _GroupGrid extends StatelessWidget {
                     ),
                     VerticalDivider(width: 1, color: context.wmBorderDivider),
                     Expanded(
-                      child: _SurvivalCell(
-                        survival: data.survival,
+                      child: _DailyCell(
+                        daily: data.daily,
                         currencyCode: currencyCode,
                         locale: locale,
                         label: null,
@@ -307,15 +307,15 @@ class _LabeledRow extends StatelessWidget {
   }
 }
 
-class _SoulCell extends StatelessWidget {
-  const _SoulCell({
-    required this.soul,
+class _JoyCell extends StatelessWidget {
+  const _JoyCell({
+    required this.joy,
     required this.currencyCode,
     required this.locale,
     required this.label,
   });
 
-  final SoulLedgerSnapshot soul;
+  final JoyLedgerSnapshot joy;
   final String currencyCode;
   final Locale locale;
   final String? label;
@@ -345,7 +345,7 @@ class _SoulCell extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            l10n.analyticsLedgerCellEntries(soul.entryCount),
+            l10n.analyticsLedgerCellEntries(joy.entryCount),
             style: AppTextStyles.amountMedium.copyWith(
               color: context.wmTextPrimary,
             ),
@@ -353,7 +353,7 @@ class _SoulCell extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             NumberFormatter.formatCurrency(
-              soul.totalSpend,
+              joy.totalSpend,
               currencyCode,
               locale,
             ),
@@ -362,11 +362,11 @@ class _SoulCell extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          // Soul-only avg satisfaction row (D-03). D-04 ensures the symmetric
-          // Survival cell has no such field — compile-time invariant.
+          // Joy-only avg satisfaction row (D-03). D-04 ensures the symmetric
+          // Daily cell has no such field — compile-time invariant.
           Text(
             l10n.analyticsLedgerCellAvgSat(
-              soul.avgSatisfaction.toStringAsFixed(1),
+              joy.avgSatisfaction.toStringAsFixed(1),
             ),
             style: AppTextStyles.amountMedium.copyWith(
               color: context.wmTextPrimary,
@@ -378,15 +378,15 @@ class _SoulCell extends StatelessWidget {
   }
 }
 
-class _SurvivalCell extends StatelessWidget {
-  const _SurvivalCell({
-    required this.survival,
+class _DailyCell extends StatelessWidget {
+  const _DailyCell({
+    required this.daily,
     required this.currencyCode,
     required this.locale,
     required this.label,
   });
 
-  final SurvivalLedgerSnapshot survival;
+  final DailyLedgerSnapshot daily;
   final String currencyCode;
   final Locale locale;
   final String? label;
@@ -416,7 +416,7 @@ class _SurvivalCell extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            l10n.analyticsLedgerCellEntries(survival.entryCount),
+            l10n.analyticsLedgerCellEntries(daily.entryCount),
             style: AppTextStyles.amountMedium.copyWith(
               color: context.wmTextPrimary,
             ),
@@ -424,7 +424,7 @@ class _SurvivalCell extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             NumberFormatter.formatCurrency(
-              survival.totalSpend,
+              daily.totalSpend,
               currencyCode,
               locale,
             ),
@@ -432,7 +432,7 @@ class _SurvivalCell extends StatelessWidget {
               color: context.wmTextPrimary,
             ),
           ),
-          // D-04: SurvivalLedgerSnapshot has no avgSatisfaction. No row here.
+          // D-04: DailyLedgerSnapshot has no avgSatisfaction. No row here.
         ],
       ),
     );

@@ -578,8 +578,8 @@ mixin _$MonthlyReport {
   int get totalExpenses;
   int get savings;
   double get savingsRate;
-  int get survivalTotal;
-  int get soulTotal;
+  int get dailyTotal;
+  int get joyTotal;
   List<CategoryBreakdown> get categoryBreakdowns;
   List<DailyExpense> get dailyExpenses;
 
@@ -615,10 +615,10 @@ mixin _$MonthlyReport {
             (identical(other.savings, savings) || other.savings == savings) &&
             (identical(other.savingsRate, savingsRate) ||
                 other.savingsRate == savingsRate) &&
-            (identical(other.survivalTotal, survivalTotal) ||
-                other.survivalTotal == survivalTotal) &&
-            (identical(other.soulTotal, soulTotal) ||
-                other.soulTotal == soulTotal) &&
+            (identical(other.dailyTotal, dailyTotal) ||
+                other.dailyTotal == dailyTotal) &&
+            (identical(other.joyTotal, joyTotal) ||
+                other.joyTotal == joyTotal) &&
             const DeepCollectionEquality().equals(
               other.categoryBreakdowns,
               categoryBreakdowns,
@@ -644,8 +644,8 @@ mixin _$MonthlyReport {
     totalExpenses,
     savings,
     savingsRate,
-    survivalTotal,
-    soulTotal,
+    dailyTotal,
+    joyTotal,
     const DeepCollectionEquality().hash(categoryBreakdowns),
     const DeepCollectionEquality().hash(dailyExpenses),
     previousMonthComparison,
@@ -653,7 +653,7 @@ mixin _$MonthlyReport {
 
   @override
   String toString() {
-    return 'MonthlyReport(year: $year, month: $month, totalIncome: $totalIncome, totalExpenses: $totalExpenses, savings: $savings, savingsRate: $savingsRate, survivalTotal: $survivalTotal, soulTotal: $soulTotal, categoryBreakdowns: $categoryBreakdowns, dailyExpenses: $dailyExpenses, previousMonthComparison: $previousMonthComparison)';
+    return 'MonthlyReport(year: $year, month: $month, totalIncome: $totalIncome, totalExpenses: $totalExpenses, savings: $savings, savingsRate: $savingsRate, dailyTotal: $dailyTotal, joyTotal: $joyTotal, categoryBreakdowns: $categoryBreakdowns, dailyExpenses: $dailyExpenses, previousMonthComparison: $previousMonthComparison)';
   }
 }
 
@@ -671,8 +671,8 @@ abstract mixin class $MonthlyReportCopyWith<$Res> {
     int totalExpenses,
     int savings,
     double savingsRate,
-    int survivalTotal,
-    int soulTotal,
+    int dailyTotal,
+    int joyTotal,
     List<CategoryBreakdown> categoryBreakdowns,
     List<DailyExpense> dailyExpenses,
     MonthComparison? previousMonthComparison,
@@ -700,8 +700,8 @@ class _$MonthlyReportCopyWithImpl<$Res>
     Object? totalExpenses = null,
     Object? savings = null,
     Object? savingsRate = null,
-    Object? survivalTotal = null,
-    Object? soulTotal = null,
+    Object? dailyTotal = null,
+    Object? joyTotal = null,
     Object? categoryBreakdowns = null,
     Object? dailyExpenses = null,
     Object? previousMonthComparison = freezed,
@@ -732,13 +732,13 @@ class _$MonthlyReportCopyWithImpl<$Res>
             ? _self.savingsRate
             : savingsRate // ignore: cast_nullable_to_non_nullable
                   as double,
-        survivalTotal: null == survivalTotal
-            ? _self.survivalTotal
-            : survivalTotal // ignore: cast_nullable_to_non_nullable
+        dailyTotal: null == dailyTotal
+            ? _self.dailyTotal
+            : dailyTotal // ignore: cast_nullable_to_non_nullable
                   as int,
-        soulTotal: null == soulTotal
-            ? _self.soulTotal
-            : soulTotal // ignore: cast_nullable_to_non_nullable
+        joyTotal: null == joyTotal
+            ? _self.joyTotal
+            : joyTotal // ignore: cast_nullable_to_non_nullable
                   as int,
         categoryBreakdowns: null == categoryBreakdowns
             ? _self.categoryBreakdowns
@@ -873,8 +873,8 @@ extension MonthlyReportPatterns on MonthlyReport {
       int totalExpenses,
       int savings,
       double savingsRate,
-      int survivalTotal,
-      int soulTotal,
+      int dailyTotal,
+      int joyTotal,
       List<CategoryBreakdown> categoryBreakdowns,
       List<DailyExpense> dailyExpenses,
       MonthComparison? previousMonthComparison,
@@ -892,8 +892,8 @@ extension MonthlyReportPatterns on MonthlyReport {
           _that.totalExpenses,
           _that.savings,
           _that.savingsRate,
-          _that.survivalTotal,
-          _that.soulTotal,
+          _that.dailyTotal,
+          _that.joyTotal,
           _that.categoryBreakdowns,
           _that.dailyExpenses,
           _that.previousMonthComparison,
@@ -925,8 +925,8 @@ extension MonthlyReportPatterns on MonthlyReport {
       int totalExpenses,
       int savings,
       double savingsRate,
-      int survivalTotal,
-      int soulTotal,
+      int dailyTotal,
+      int joyTotal,
       List<CategoryBreakdown> categoryBreakdowns,
       List<DailyExpense> dailyExpenses,
       MonthComparison? previousMonthComparison,
@@ -943,8 +943,8 @@ extension MonthlyReportPatterns on MonthlyReport {
           _that.totalExpenses,
           _that.savings,
           _that.savingsRate,
-          _that.survivalTotal,
-          _that.soulTotal,
+          _that.dailyTotal,
+          _that.joyTotal,
           _that.categoryBreakdowns,
           _that.dailyExpenses,
           _that.previousMonthComparison,
@@ -975,8 +975,8 @@ extension MonthlyReportPatterns on MonthlyReport {
       int totalExpenses,
       int savings,
       double savingsRate,
-      int survivalTotal,
-      int soulTotal,
+      int dailyTotal,
+      int joyTotal,
       List<CategoryBreakdown> categoryBreakdowns,
       List<DailyExpense> dailyExpenses,
       MonthComparison? previousMonthComparison,
@@ -993,8 +993,8 @@ extension MonthlyReportPatterns on MonthlyReport {
           _that.totalExpenses,
           _that.savings,
           _that.savingsRate,
-          _that.survivalTotal,
-          _that.soulTotal,
+          _that.dailyTotal,
+          _that.joyTotal,
           _that.categoryBreakdowns,
           _that.dailyExpenses,
           _that.previousMonthComparison,
@@ -1015,8 +1015,8 @@ class _MonthlyReport implements MonthlyReport {
     required this.totalExpenses,
     required this.savings,
     required this.savingsRate,
-    required this.survivalTotal,
-    required this.soulTotal,
+    required this.dailyTotal,
+    required this.joyTotal,
     required final List<CategoryBreakdown> categoryBreakdowns,
     required final List<DailyExpense> dailyExpenses,
     this.previousMonthComparison,
@@ -1043,9 +1043,9 @@ class _MonthlyReport implements MonthlyReport {
   @override
   final double savingsRate;
   @override
-  final int survivalTotal;
+  final int dailyTotal;
   @override
-  final int soulTotal;
+  final int joyTotal;
   final List<CategoryBreakdown> _categoryBreakdowns;
   @override
   List<CategoryBreakdown> get categoryBreakdowns {
@@ -1096,10 +1096,10 @@ class _MonthlyReport implements MonthlyReport {
             (identical(other.savings, savings) || other.savings == savings) &&
             (identical(other.savingsRate, savingsRate) ||
                 other.savingsRate == savingsRate) &&
-            (identical(other.survivalTotal, survivalTotal) ||
-                other.survivalTotal == survivalTotal) &&
-            (identical(other.soulTotal, soulTotal) ||
-                other.soulTotal == soulTotal) &&
+            (identical(other.dailyTotal, dailyTotal) ||
+                other.dailyTotal == dailyTotal) &&
+            (identical(other.joyTotal, joyTotal) ||
+                other.joyTotal == joyTotal) &&
             const DeepCollectionEquality().equals(
               other._categoryBreakdowns,
               _categoryBreakdowns,
@@ -1125,8 +1125,8 @@ class _MonthlyReport implements MonthlyReport {
     totalExpenses,
     savings,
     savingsRate,
-    survivalTotal,
-    soulTotal,
+    dailyTotal,
+    joyTotal,
     const DeepCollectionEquality().hash(_categoryBreakdowns),
     const DeepCollectionEquality().hash(_dailyExpenses),
     previousMonthComparison,
@@ -1134,7 +1134,7 @@ class _MonthlyReport implements MonthlyReport {
 
   @override
   String toString() {
-    return 'MonthlyReport(year: $year, month: $month, totalIncome: $totalIncome, totalExpenses: $totalExpenses, savings: $savings, savingsRate: $savingsRate, survivalTotal: $survivalTotal, soulTotal: $soulTotal, categoryBreakdowns: $categoryBreakdowns, dailyExpenses: $dailyExpenses, previousMonthComparison: $previousMonthComparison)';
+    return 'MonthlyReport(year: $year, month: $month, totalIncome: $totalIncome, totalExpenses: $totalExpenses, savings: $savings, savingsRate: $savingsRate, dailyTotal: $dailyTotal, joyTotal: $joyTotal, categoryBreakdowns: $categoryBreakdowns, dailyExpenses: $dailyExpenses, previousMonthComparison: $previousMonthComparison)';
   }
 }
 
@@ -1154,8 +1154,8 @@ abstract mixin class _$MonthlyReportCopyWith<$Res>
     int totalExpenses,
     int savings,
     double savingsRate,
-    int survivalTotal,
-    int soulTotal,
+    int dailyTotal,
+    int joyTotal,
     List<CategoryBreakdown> categoryBreakdowns,
     List<DailyExpense> dailyExpenses,
     MonthComparison? previousMonthComparison,
@@ -1184,8 +1184,8 @@ class __$MonthlyReportCopyWithImpl<$Res>
     Object? totalExpenses = null,
     Object? savings = null,
     Object? savingsRate = null,
-    Object? survivalTotal = null,
-    Object? soulTotal = null,
+    Object? dailyTotal = null,
+    Object? joyTotal = null,
     Object? categoryBreakdowns = null,
     Object? dailyExpenses = null,
     Object? previousMonthComparison = freezed,
@@ -1216,13 +1216,13 @@ class __$MonthlyReportCopyWithImpl<$Res>
             ? _self.savingsRate
             : savingsRate // ignore: cast_nullable_to_non_nullable
                   as double,
-        survivalTotal: null == survivalTotal
-            ? _self.survivalTotal
-            : survivalTotal // ignore: cast_nullable_to_non_nullable
+        dailyTotal: null == dailyTotal
+            ? _self.dailyTotal
+            : dailyTotal // ignore: cast_nullable_to_non_nullable
                   as int,
-        soulTotal: null == soulTotal
-            ? _self.soulTotal
-            : soulTotal // ignore: cast_nullable_to_non_nullable
+        joyTotal: null == joyTotal
+            ? _self.joyTotal
+            : joyTotal // ignore: cast_nullable_to_non_nullable
                   as int,
         categoryBreakdowns: null == categoryBreakdowns
             ? _self._categoryBreakdowns

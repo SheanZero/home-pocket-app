@@ -21,8 +21,8 @@ _Book _$BookFromJson(Map<String, dynamic> json) => _Book(
   ownerDeviceId: json['ownerDeviceId'] as String?,
   ownerDeviceName: json['ownerDeviceName'] as String?,
   transactionCount: (json['transactionCount'] as num?)?.toInt() ?? 0,
-  survivalBalance: (json['survivalBalance'] as num?)?.toInt() ?? 0,
-  soulBalance: (json['soulBalance'] as num?)?.toInt() ?? 0,
+  dailyBalance: (json['dailyBalance'] as num?)?.toInt() ?? 0,
+  joyBalance: (json['joyBalance'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$BookToJson(_Book instance) => <String, dynamic>{
@@ -38,6 +38,6 @@ Map<String, dynamic> _$BookToJson(_Book instance) => <String, dynamic>{
   'ownerDeviceId': instance.ownerDeviceId,
   'ownerDeviceName': instance.ownerDeviceName,
   'transactionCount': instance.transactionCount,
-  'survivalBalance': instance.survivalBalance,
-  'soulBalance': instance.soulBalance,
+  'dailyBalance': instance.dailyBalance,
+  'joyBalance': instance.joyBalance,
 };

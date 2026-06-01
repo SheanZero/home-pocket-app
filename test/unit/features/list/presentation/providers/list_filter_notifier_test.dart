@@ -108,7 +108,7 @@ void main() {
       expect(state.sortConfig, equals(newSort));
     });
 
-    test('setLedgerFilter sets ledgerType to soul', () {
+    test('setLedgerFilter sets ledgerType to joy', () {
       final container = ProviderContainer.test();
       final notifier = container.read(listFilterProvider.notifier);
 

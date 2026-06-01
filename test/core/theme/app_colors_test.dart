@@ -13,10 +13,10 @@ void main() {
     test('text primary is dark', () {
       expect(AppColors.textPrimary, const Color(0xFF1E2432));
     });
-    test('survival is blue', () {
+    test('daily is blue', () {
       expect(AppColors.daily, const Color(0xFF5A9CC8));
     });
-    test('soul is green', () {
+    test('joy is green', () {
       expect(AppColors.joy, const Color(0xFF47B88A));
     });
     test('border default is light gray', () {

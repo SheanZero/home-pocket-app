@@ -116,14 +116,14 @@ void main() {
       await repo.updateBalances(
         bookId: 'book_001',
         transactionCount: 42,
-        survivalBalance: 100000,
-        soulBalance: 50000,
+        dailyBalance: 100000,
+        joyBalance: 50000,
       );
 
       final book = await repo.findById('book_001');
       expect(book!.transactionCount, 42);
-      expect(book.survivalBalance, 100000);
-      expect(book.soulBalance, 50000);
+      expect(book.dailyBalance, 100000);
+      expect(book.joyBalance, 50000);
     });
 
     test('findShadowBookByDeviceId returns shadow book', () async {

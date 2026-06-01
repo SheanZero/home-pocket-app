@@ -541,29 +541,29 @@ final class GetFamilyHappinessUseCaseProvider
 String _$getFamilyHappinessUseCaseHash() =>
     r'3b15f9eed8685f06f2e98a20b4c92bff4c96a0f4';
 
-/// HAPPY-V2-01 / D-07: per-category soul satisfaction breakdown use case provider.
+/// HAPPY-V2-01 / D-07: per-category joy satisfaction breakdown use case provider.
 
-@ProviderFor(getPerCategorySoulBreakdownUseCase)
-final getPerCategorySoulBreakdownUseCaseProvider =
-    GetPerCategorySoulBreakdownUseCaseProvider._();
+@ProviderFor(getPerCategoryJoyBreakdownUseCase)
+final getPerCategoryJoyBreakdownUseCaseProvider =
+    GetPerCategoryJoyBreakdownUseCaseProvider._();
 
-/// HAPPY-V2-01 / D-07: per-category soul satisfaction breakdown use case provider.
+/// HAPPY-V2-01 / D-07: per-category joy satisfaction breakdown use case provider.
 
-final class GetPerCategorySoulBreakdownUseCaseProvider
+final class GetPerCategoryJoyBreakdownUseCaseProvider
     extends
         $FunctionalProvider<
-          GetPerCategorySoulBreakdownUseCase,
-          GetPerCategorySoulBreakdownUseCase,
-          GetPerCategorySoulBreakdownUseCase
+          GetPerCategoryJoyBreakdownUseCase,
+          GetPerCategoryJoyBreakdownUseCase,
+          GetPerCategoryJoyBreakdownUseCase
         >
-    with $Provider<GetPerCategorySoulBreakdownUseCase> {
-  /// HAPPY-V2-01 / D-07: per-category soul satisfaction breakdown use case provider.
-  GetPerCategorySoulBreakdownUseCaseProvider._()
+    with $Provider<GetPerCategoryJoyBreakdownUseCase> {
+  /// HAPPY-V2-01 / D-07: per-category joy satisfaction breakdown use case provider.
+  GetPerCategoryJoyBreakdownUseCaseProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'getPerCategorySoulBreakdownUseCaseProvider',
+        name: r'getPerCategoryJoyBreakdownUseCaseProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
@@ -571,56 +571,56 @@ final class GetPerCategorySoulBreakdownUseCaseProvider
 
   @override
   String debugGetCreateSourceHash() =>
-      _$getPerCategorySoulBreakdownUseCaseHash();
+      _$getPerCategoryJoyBreakdownUseCaseHash();
 
   @$internal
   @override
-  $ProviderElement<GetPerCategorySoulBreakdownUseCase> $createElement(
+  $ProviderElement<GetPerCategoryJoyBreakdownUseCase> $createElement(
     $ProviderPointer pointer,
   ) => $ProviderElement(pointer);
 
   @override
-  GetPerCategorySoulBreakdownUseCase create(Ref ref) {
-    return getPerCategorySoulBreakdownUseCase(ref);
+  GetPerCategoryJoyBreakdownUseCase create(Ref ref) {
+    return getPerCategoryJoyBreakdownUseCase(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(GetPerCategorySoulBreakdownUseCase value) {
+  Override overrideWithValue(GetPerCategoryJoyBreakdownUseCase value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<GetPerCategorySoulBreakdownUseCase>(
+      providerOverride: $SyncValueProvider<GetPerCategoryJoyBreakdownUseCase>(
         value,
       ),
     );
   }
 }
 
-String _$getPerCategorySoulBreakdownUseCaseHash() =>
-    r'7933f5f2ee3ba02078800f9eb5036fe2ac5c6c0f';
+String _$getPerCategoryJoyBreakdownUseCaseHash() =>
+    r'9c3a3db204ce7fc69cb53cc5fc07c2446cbbed1c';
 
 /// HAPPY-V2-01 / D-16, D-17: family-aggregate per-category breakdown use case provider.
 
-@ProviderFor(getPerCategorySoulBreakdownAcrossBooksUseCase)
-final getPerCategorySoulBreakdownAcrossBooksUseCaseProvider =
-    GetPerCategorySoulBreakdownAcrossBooksUseCaseProvider._();
+@ProviderFor(getPerCategoryJoyBreakdownAcrossBooksUseCase)
+final getPerCategoryJoyBreakdownAcrossBooksUseCaseProvider =
+    GetPerCategoryJoyBreakdownAcrossBooksUseCaseProvider._();
 
 /// HAPPY-V2-01 / D-16, D-17: family-aggregate per-category breakdown use case provider.
 
-final class GetPerCategorySoulBreakdownAcrossBooksUseCaseProvider
+final class GetPerCategoryJoyBreakdownAcrossBooksUseCaseProvider
     extends
         $FunctionalProvider<
-          GetPerCategorySoulBreakdownAcrossBooksUseCase,
-          GetPerCategorySoulBreakdownAcrossBooksUseCase,
-          GetPerCategorySoulBreakdownAcrossBooksUseCase
+          GetPerCategoryJoyBreakdownAcrossBooksUseCase,
+          GetPerCategoryJoyBreakdownAcrossBooksUseCase,
+          GetPerCategoryJoyBreakdownAcrossBooksUseCase
         >
-    with $Provider<GetPerCategorySoulBreakdownAcrossBooksUseCase> {
+    with $Provider<GetPerCategoryJoyBreakdownAcrossBooksUseCase> {
   /// HAPPY-V2-01 / D-16, D-17: family-aggregate per-category breakdown use case provider.
-  GetPerCategorySoulBreakdownAcrossBooksUseCaseProvider._()
+  GetPerCategoryJoyBreakdownAcrossBooksUseCaseProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'getPerCategorySoulBreakdownAcrossBooksUseCaseProvider',
+        name: r'getPerCategoryJoyBreakdownAcrossBooksUseCaseProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
@@ -628,114 +628,113 @@ final class GetPerCategorySoulBreakdownAcrossBooksUseCaseProvider
 
   @override
   String debugGetCreateSourceHash() =>
-      _$getPerCategorySoulBreakdownAcrossBooksUseCaseHash();
+      _$getPerCategoryJoyBreakdownAcrossBooksUseCaseHash();
 
   @$internal
   @override
-  $ProviderElement<GetPerCategorySoulBreakdownAcrossBooksUseCase>
-  $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
+  $ProviderElement<GetPerCategoryJoyBreakdownAcrossBooksUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
 
   @override
-  GetPerCategorySoulBreakdownAcrossBooksUseCase create(Ref ref) {
-    return getPerCategorySoulBreakdownAcrossBooksUseCase(ref);
+  GetPerCategoryJoyBreakdownAcrossBooksUseCase create(Ref ref) {
+    return getPerCategoryJoyBreakdownAcrossBooksUseCase(ref);
   }
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(
-    GetPerCategorySoulBreakdownAcrossBooksUseCase value,
+    GetPerCategoryJoyBreakdownAcrossBooksUseCase value,
   ) {
     return $ProviderOverride(
       origin: this,
       providerOverride:
-          $SyncValueProvider<GetPerCategorySoulBreakdownAcrossBooksUseCase>(
+          $SyncValueProvider<GetPerCategoryJoyBreakdownAcrossBooksUseCase>(
             value,
           ),
     );
   }
 }
 
-String _$getPerCategorySoulBreakdownAcrossBooksUseCaseHash() =>
-    r'bfad27cc1be228b7e594f463d73644466a45e32f';
+String _$getPerCategoryJoyBreakdownAcrossBooksUseCaseHash() =>
+    r'81ed071d7120510661339cf3744ce51dca7b6e5f';
 
-/// STATSUI-V2-01 / D-01..D-05: Soul-vs-Survival engagement snapshot use case provider.
+/// STATSUI-V2-01 / D-01..D-05: Daily-vs-Joy engagement snapshot use case provider.
 
-@ProviderFor(getSoulVsSurvivalSnapshotUseCase)
-final getSoulVsSurvivalSnapshotUseCaseProvider =
-    GetSoulVsSurvivalSnapshotUseCaseProvider._();
+@ProviderFor(getDailyVsJoySnapshotUseCase)
+final getDailyVsJoySnapshotUseCaseProvider =
+    GetDailyVsJoySnapshotUseCaseProvider._();
 
-/// STATSUI-V2-01 / D-01..D-05: Soul-vs-Survival engagement snapshot use case provider.
+/// STATSUI-V2-01 / D-01..D-05: Daily-vs-Joy engagement snapshot use case provider.
 
-final class GetSoulVsSurvivalSnapshotUseCaseProvider
+final class GetDailyVsJoySnapshotUseCaseProvider
     extends
         $FunctionalProvider<
-          GetSoulVsSurvivalSnapshotUseCase,
-          GetSoulVsSurvivalSnapshotUseCase,
-          GetSoulVsSurvivalSnapshotUseCase
+          GetDailyVsJoySnapshotUseCase,
+          GetDailyVsJoySnapshotUseCase,
+          GetDailyVsJoySnapshotUseCase
         >
-    with $Provider<GetSoulVsSurvivalSnapshotUseCase> {
-  /// STATSUI-V2-01 / D-01..D-05: Soul-vs-Survival engagement snapshot use case provider.
-  GetSoulVsSurvivalSnapshotUseCaseProvider._()
+    with $Provider<GetDailyVsJoySnapshotUseCase> {
+  /// STATSUI-V2-01 / D-01..D-05: Daily-vs-Joy engagement snapshot use case provider.
+  GetDailyVsJoySnapshotUseCaseProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'getSoulVsSurvivalSnapshotUseCaseProvider',
+        name: r'getDailyVsJoySnapshotUseCaseProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$getSoulVsSurvivalSnapshotUseCaseHash();
+  String debugGetCreateSourceHash() => _$getDailyVsJoySnapshotUseCaseHash();
 
   @$internal
   @override
-  $ProviderElement<GetSoulVsSurvivalSnapshotUseCase> $createElement(
+  $ProviderElement<GetDailyVsJoySnapshotUseCase> $createElement(
     $ProviderPointer pointer,
   ) => $ProviderElement(pointer);
 
   @override
-  GetSoulVsSurvivalSnapshotUseCase create(Ref ref) {
-    return getSoulVsSurvivalSnapshotUseCase(ref);
+  GetDailyVsJoySnapshotUseCase create(Ref ref) {
+    return getDailyVsJoySnapshotUseCase(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(GetSoulVsSurvivalSnapshotUseCase value) {
+  Override overrideWithValue(GetDailyVsJoySnapshotUseCase value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<GetSoulVsSurvivalSnapshotUseCase>(
-        value,
-      ),
+      providerOverride: $SyncValueProvider<GetDailyVsJoySnapshotUseCase>(value),
     );
   }
 }
 
-String _$getSoulVsSurvivalSnapshotUseCaseHash() =>
-    r'a63ead3d204acaa7a12ee97a2258984595a1a70a';
+String _$getDailyVsJoySnapshotUseCaseHash() =>
+    r'd4d4d8bf0517e3e51bbfe7841dc0f01e306880ec';
 
-/// STATSUI-V2-01 / D-18, D-20: family-aggregate Soul-vs-Survival snapshot use case provider.
+/// STATSUI-V2-01 / D-18, D-20: family-aggregate Daily-vs-Joy snapshot use case provider.
 
-@ProviderFor(getSoulVsSurvivalSnapshotAcrossBooksUseCase)
-final getSoulVsSurvivalSnapshotAcrossBooksUseCaseProvider =
-    GetSoulVsSurvivalSnapshotAcrossBooksUseCaseProvider._();
+@ProviderFor(getDailyVsJoySnapshotAcrossBooksUseCase)
+final getDailyVsJoySnapshotAcrossBooksUseCaseProvider =
+    GetDailyVsJoySnapshotAcrossBooksUseCaseProvider._();
 
-/// STATSUI-V2-01 / D-18, D-20: family-aggregate Soul-vs-Survival snapshot use case provider.
+/// STATSUI-V2-01 / D-18, D-20: family-aggregate Daily-vs-Joy snapshot use case provider.
 
-final class GetSoulVsSurvivalSnapshotAcrossBooksUseCaseProvider
+final class GetDailyVsJoySnapshotAcrossBooksUseCaseProvider
     extends
         $FunctionalProvider<
-          GetSoulVsSurvivalSnapshotAcrossBooksUseCase,
-          GetSoulVsSurvivalSnapshotAcrossBooksUseCase,
-          GetSoulVsSurvivalSnapshotAcrossBooksUseCase
+          GetDailyVsJoySnapshotAcrossBooksUseCase,
+          GetDailyVsJoySnapshotAcrossBooksUseCase,
+          GetDailyVsJoySnapshotAcrossBooksUseCase
         >
-    with $Provider<GetSoulVsSurvivalSnapshotAcrossBooksUseCase> {
-  /// STATSUI-V2-01 / D-18, D-20: family-aggregate Soul-vs-Survival snapshot use case provider.
-  GetSoulVsSurvivalSnapshotAcrossBooksUseCaseProvider._()
+    with $Provider<GetDailyVsJoySnapshotAcrossBooksUseCase> {
+  /// STATSUI-V2-01 / D-18, D-20: family-aggregate Daily-vs-Joy snapshot use case provider.
+  GetDailyVsJoySnapshotAcrossBooksUseCaseProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'getSoulVsSurvivalSnapshotAcrossBooksUseCaseProvider',
+        name: r'getDailyVsJoySnapshotAcrossBooksUseCaseProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
@@ -743,32 +742,28 @@ final class GetSoulVsSurvivalSnapshotAcrossBooksUseCaseProvider
 
   @override
   String debugGetCreateSourceHash() =>
-      _$getSoulVsSurvivalSnapshotAcrossBooksUseCaseHash();
+      _$getDailyVsJoySnapshotAcrossBooksUseCaseHash();
 
   @$internal
   @override
-  $ProviderElement<GetSoulVsSurvivalSnapshotAcrossBooksUseCase> $createElement(
+  $ProviderElement<GetDailyVsJoySnapshotAcrossBooksUseCase> $createElement(
     $ProviderPointer pointer,
   ) => $ProviderElement(pointer);
 
   @override
-  GetSoulVsSurvivalSnapshotAcrossBooksUseCase create(Ref ref) {
-    return getSoulVsSurvivalSnapshotAcrossBooksUseCase(ref);
+  GetDailyVsJoySnapshotAcrossBooksUseCase create(Ref ref) {
+    return getDailyVsJoySnapshotAcrossBooksUseCase(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(
-    GetSoulVsSurvivalSnapshotAcrossBooksUseCase value,
-  ) {
+  Override overrideWithValue(GetDailyVsJoySnapshotAcrossBooksUseCase value) {
     return $ProviderOverride(
       origin: this,
       providerOverride:
-          $SyncValueProvider<GetSoulVsSurvivalSnapshotAcrossBooksUseCase>(
-            value,
-          ),
+          $SyncValueProvider<GetDailyVsJoySnapshotAcrossBooksUseCase>(value),
     );
   }
 }
 
-String _$getSoulVsSurvivalSnapshotAcrossBooksUseCaseHash() =>
-    r'87ac59dce5e2a7ddf69df3f328bb731ff5319ed6';
+String _$getDailyVsJoySnapshotAcrossBooksUseCaseHash() =>
+    r'cebe2f2b1d220a763360740ba985f38cd2d50400';

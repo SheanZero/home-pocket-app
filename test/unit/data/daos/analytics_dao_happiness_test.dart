@@ -51,30 +51,30 @@ void main() {
         );
   }
 
-  group('_soulOnly filter / survival rows excluded', () {
-    test('overview counts only active soul expenses', () async {
-      await seedTx(id: 'soul_1', amount: 1000, joyFullness: 4);
-      await seedTx(id: 'soul_2', amount: 2000, joyFullness: 8);
+  group('_joyOnly filter / daily rows excluded', () {
+    test('overview counts only active joy expenses', () async {
+      await seedTx(id: 'joy_1', amount: 1000, joyFullness: 4);
+      await seedTx(id: 'joy_2', amount: 2000, joyFullness: 8);
       await seedTx(
-        id: 'survival_1',
+        id: 'daily_1',
         amount: 3000,
         ledgerType: 'daily',
         joyFullness: 10,
       );
       await seedTx(
-        id: 'survival_2',
+        id: 'daily_2',
         amount: 4000,
         ledgerType: 'daily',
         joyFullness: 10,
       );
       await seedTx(
-        id: 'deleted_soul',
+        id: 'deleted_joy',
         amount: 5000,
         isDeleted: true,
         joyFullness: 10,
       );
 
-      final result = await dao.getSoulSatisfactionOverview(
+      final result = await dao.getJoyFullnessOverview(
         bookId: 'book_joy',
         startDate: windowStart,
         endDate: windowEnd,
@@ -91,7 +91,7 @@ void main() {
       await seedTx(id: 'row_2', amount: 2500, joyFullness: 8);
       await seedTx(id: 'row_3', amount: 700, joyFullness: 10);
 
-      final rows = await dao.getSoulRowsForJoyContribution(
+      final rows = await dao.getJoyRowsForJoyContribution(
         bookId: 'book_joy',
         startDate: windowStart,
         endDate: windowEnd,
@@ -147,7 +147,7 @@ void main() {
       },
     );
 
-    test('returns null when no soul rows exist in the window', () async {
+    test('returns null when no joy rows exist in the window', () async {
       final best = await dao.getBestJoyMoment(
         bookId: 'book_joy',
         startDate: windowStart,
@@ -157,14 +157,14 @@ void main() {
       expect(best, isNull);
     });
 
-    test('excludes survival rows from best joy selection', () async {
+    test('excludes daily rows from best joy selection', () async {
       await seedTx(
-        id: 'huge_survival',
+        id: 'huge_daily',
         amount: 1000000,
         ledgerType: 'daily',
         joyFullness: 10,
       );
-      await seedTx(id: 'modest_soul', amount: 2000, joyFullness: 8);
+      await seedTx(id: 'modest_joy', amount: 2000, joyFullness: 8);
 
       final best = await dao.getBestJoyMoment(
         bookId: 'book_joy',
@@ -173,7 +173,7 @@ void main() {
       );
 
       expect(best, isNotNull);
-      expect(best!.transactionId, 'modest_soul');
+      expect(best!.transactionId, 'modest_joy');
     });
   });
 

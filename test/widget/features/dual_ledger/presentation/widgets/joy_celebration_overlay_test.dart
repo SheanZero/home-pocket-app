@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/features/dual_ledger/presentation/widgets/soul_celebration_overlay.dart';
+import 'package:home_pocket/features/dual_ledger/presentation/widgets/joy_celebration_overlay.dart';
 
 void main() {
-  group('SoulCelebrationOverlay', () {
+  group('JoyCelebrationOverlay', () {
     testWidgets('renders without error', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: SoulCelebrationOverlay())),
+        const MaterialApp(home: Scaffold(body: JoyCelebrationOverlay())),
       );
 
-      expect(find.byType(SoulCelebrationOverlay), findsOneWidget);
+      expect(find.byType(JoyCelebrationOverlay), findsOneWidget);
     });
 
     testWidgets('shows sparkle icons', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: SoulCelebrationOverlay())),
+        const MaterialApp(home: Scaffold(body: JoyCelebrationOverlay())),
       );
 
       // Pump a few frames to let animation start
@@ -29,7 +29,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: SoulCelebrationOverlay(onDismissed: () => dismissed = true),
+            body: JoyCelebrationOverlay(onDismissed: () => dismissed = true),
           ),
         ),
       );

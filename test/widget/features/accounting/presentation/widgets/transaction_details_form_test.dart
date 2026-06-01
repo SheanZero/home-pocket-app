@@ -1,7 +1,7 @@
 /// Widget tests for TransactionDetailsForm covering:
 /// - SC-1: single shared form widget renders in both .new and .edit modes
 /// - D-09: voice-correction gate (structural: .edit mode branch is unreachable)
-/// - D-15: soul celebration shows only on .new soul saves, never on .edit
+/// - D-15: joy celebration shows only on .new joy saves, never on .edit
 /// - D-02: submit() returns sealed-union result; validationError on null category
 /// - D-07: Phase 22 public setter surface (updateCategory / updateMerchant /
 ///         updateNote / updateSatisfaction) — host (VoiceInputScreen) batch-fill
@@ -28,7 +28,7 @@ import 'package:home_pocket/features/accounting/domain/repositories/merchant_cat
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/satisfaction_emoji_picker.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/transaction_details_form.dart';
-import 'package:home_pocket/features/dual_ledger/presentation/widgets/soul_celebration_overlay.dart';
+import 'package:home_pocket/features/dual_ledger/presentation/widgets/joy_celebration_overlay.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -192,7 +192,7 @@ Transaction _makeSurvivalSeedTx({String bookId = 'book-1'}) => Transaction(
   categoryId: 'cat-food',
   ledgerType: LedgerType.daily,
   timestamp: DateTime(2026, 5, 1),
-  currentHash: 'hash-survival',
+  currentHash: 'hash-daily',
   createdAt: DateTime(2026, 5, 1),
   merchant: 'Café',
   note: 'Test note',
@@ -208,13 +208,13 @@ Transaction _makeSoulSeedTx() => Transaction(
   categoryId: 'cat-hobby',
   ledgerType: LedgerType.joy,
   timestamp: DateTime(2026, 5, 1),
-  currentHash: 'hash-soul',
+  currentHash: 'hash-joy',
   createdAt: DateTime(2026, 5, 1),
   joyFullness: 7,
   entrySource: EntrySource.voice,
 );
 
-final _soulCategory = Category(
+final _joyCategory = Category(
   id: 'cat-hobby',
   name: 'Hobby',
   icon: 'sports_tennis',
@@ -225,7 +225,7 @@ final _soulCategory = Category(
   createdAt: DateTime(2026, 5, 1),
 );
 
-final _survivalCategory = Category(
+final _dailyCategory = Category(
   id: 'cat-food',
   name: 'Food',
   icon: 'restaurant',
@@ -343,7 +343,7 @@ void main() {
           buildForm(
             TransactionDetailsFormConfig.edit(seed: seed),
             overrides: _baseOverrides(
-              categoryRepo: _StubCategoryRepository(_survivalCategory),
+              categoryRepo: _StubCategoryRepository(_dailyCategory),
             ),
           ),
         );
@@ -361,7 +361,7 @@ void main() {
     );
 
     testWidgets(
-      '.new mode renders with a pre-seeded soul category (SC-1 initial config)',
+      '.new mode renders with a pre-seeded joy category (SC-1 initial config)',
       (tester) async {
         tester.view.physicalSize = const Size(402, 874);
         tester.view.devicePixelRatio = 1;
@@ -373,10 +373,10 @@ void main() {
             TransactionDetailsFormConfig.$new(
               bookId: 'b1',
               entrySource: EntrySource.manual,
-              initialCategory: _soulCategory,
+              initialCategory: _joyCategory,
             ),
             overrides: _baseOverrides(
-              categoryRepo: _StubCategoryRepository(_soulCategory),
+              categoryRepo: _StubCategoryRepository(_joyCategory),
             ),
           ),
         );
@@ -387,10 +387,10 @@ void main() {
       },
     );
 
-    // ── D-15: soul celebration only on .new soul saves ───────────────────────
+    // ── D-15: joy celebration only on .new joy saves ───────────────────────
 
     testWidgets(
-      '.new mode soul save shows SoulCelebrationOverlay (D-15 positive case)',
+      '.new mode joy save shows JoyCelebrationOverlay (D-15 positive case)',
       (tester) async {
         tester.view.physicalSize = const Size(402, 874);
         tester.view.devicePixelRatio = 1;
@@ -400,7 +400,7 @@ void main() {
         final mockCreate = _MockCreateTransactionUseCase();
         final formKey = GlobalKey<TransactionDetailsFormState>();
 
-        // Return a soul transaction on create
+        // Return a joy transaction on create
         final savedSoulTx = _makeSoulSeedTx();
         when(() => mockCreate.execute(any())).thenAnswer(
           (_) async => Result.success(savedSoulTx),
@@ -412,10 +412,10 @@ void main() {
               bookId: 'book-1',
               entrySource: EntrySource.manual,
               // Soul category pre-seeded so _category is not null
-              initialCategory: _soulCategory,
+              initialCategory: _joyCategory,
             ),
             overrides: _baseOverrides(
-              categoryRepo: _StubCategoryRepository(_soulCategory),
+              categoryRepo: _StubCategoryRepository(_joyCategory),
               createUseCase: mockCreate,
             ),
             formKey: formKey,
@@ -423,21 +423,21 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // Trigger submit — .new mode with soul result should show celebration
+        // Trigger submit — .new mode with joy result should show celebration
         await formKey.currentState!.submit();
         await tester.pump();
 
-        // D-15: .new soul save MUST show SoulCelebrationOverlay
+        // D-15: .new joy save MUST show JoyCelebrationOverlay
         expect(
-          find.byType(SoulCelebrationOverlay),
+          find.byType(JoyCelebrationOverlay),
           findsOneWidget,
-          reason: '.new soul save must trigger SoulCelebrationOverlay (D-15)',
+          reason: '.new joy save must trigger JoyCelebrationOverlay (D-15)',
         );
       },
     );
 
     testWidgets(
-      '.edit mode does NOT show SoulCelebrationOverlay on soul seed save (D-15 invariant)',
+      '.edit mode does NOT show JoyCelebrationOverlay on joy seed save (D-15 invariant)',
       (tester) async {
         tester.view.physicalSize = const Size(402, 874);
         tester.view.devicePixelRatio = 1;
@@ -456,7 +456,7 @@ void main() {
           buildForm(
             TransactionDetailsFormConfig.edit(seed: seed),
             overrides: _baseOverrides(
-              categoryRepo: _StubCategoryRepository(_soulCategory),
+              categoryRepo: _StubCategoryRepository(_joyCategory),
               updateUseCase: mockUpdate,
             ),
             formKey: formKey,
@@ -469,11 +469,11 @@ void main() {
         await formKey.currentState!.submit();
         await tester.pump();
 
-        // D-15: .edit mode must NEVER show SoulCelebrationOverlay
+        // D-15: .edit mode must NEVER show JoyCelebrationOverlay
         expect(
-          find.byType(SoulCelebrationOverlay),
+          find.byType(JoyCelebrationOverlay),
           findsNothing,
-          reason: 'SoulCelebrationOverlay must NOT appear in .edit mode (D-15)',
+          reason: 'JoyCelebrationOverlay must NOT appear in .edit mode (D-15)',
         );
       },
     );
@@ -493,7 +493,7 @@ void main() {
           buildForm(
             TransactionDetailsFormConfig.edit(seed: seed),
             overrides: _baseOverrides(
-              categoryRepo: _StubCategoryRepository(_survivalCategory),
+              categoryRepo: _StubCategoryRepository(_dailyCategory),
             ),
           ),
         );
@@ -756,8 +756,8 @@ void main() {
       );
 
       testWidgets(
-        'Test 3: updateCategory with soul-mapped category flips ledger toggle '
-        'to soul — submit() produces params.ledgerType == LedgerType.joy',
+        'Test 3: updateCategory with joy-mapped category flips ledger toggle '
+        'to joy — submit() produces params.ledgerType == LedgerType.joy',
         (tester) async {
           tester.view.physicalSize = const Size(402, 874);
           tester.view.devicePixelRatio = 1;
@@ -777,7 +777,7 @@ void main() {
             ),
           );
 
-          // CategoryService wired to a stub that returns soul for catHobbiesL1.
+          // CategoryService wired to a stub that returns joy for catHobbiesL1.
           await tester.pumpWidget(
             buildForm(
               TransactionDetailsFormConfig.$new(
@@ -797,8 +797,8 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          // Push soul-mapped category; updateCategory triggers _resolveLedgerType
-          // which flips _ledgerType to soul.
+          // Push joy-mapped category; updateCategory triggers _resolveLedgerType
+          // which flips _ledgerType to joy.
           formKey.currentState!.updateCategory(catHobbiesL1, null);
           formKey.currentState!.updateAmount(3000);
           await tester.pumpAndSettle();
@@ -810,7 +810,7 @@ void main() {
           expect(captured.length, 1);
           final params = captured.first as CreateTransactionParams;
           expect(params.ledgerType, LedgerType.joy,
-              reason: 'updateCategory must trigger ledger resolution → soul');
+              reason: 'updateCategory must trigger ledger resolution → joy');
 
           final isSuccess = result.maybeWhen(
             success: (_) => true,
@@ -844,10 +844,10 @@ void main() {
               TransactionDetailsFormConfig.$new(
                 bookId: 'b1',
                 entrySource: EntrySource.manual,
-                initialCategory: _survivalCategory,
+                initialCategory: _dailyCategory,
               ),
               overrides: _baseOverrides(
-                categoryRepo: _StubCategoryRepository(_survivalCategory),
+                categoryRepo: _StubCategoryRepository(_dailyCategory),
                 createUseCase: mockCreate,
               ),
               formKey: formKey,
@@ -889,10 +889,10 @@ void main() {
               TransactionDetailsFormConfig.$new(
                 bookId: 'b1',
                 entrySource: EntrySource.manual,
-                initialCategory: _survivalCategory,
+                initialCategory: _dailyCategory,
               ),
               overrides: _baseOverrides(
-                categoryRepo: _StubCategoryRepository(_survivalCategory),
+                categoryRepo: _StubCategoryRepository(_dailyCategory),
               ),
               formKey: formKey,
             ),
@@ -992,10 +992,10 @@ void main() {
               TransactionDetailsFormConfig.$new(
                 bookId: 'b1',
                 entrySource: EntrySource.manual,
-                initialCategory: _survivalCategory,
+                initialCategory: _dailyCategory,
               ),
               overrides: _baseOverrides(
-                categoryRepo: _StubCategoryRepository(_survivalCategory),
+                categoryRepo: _StubCategoryRepository(_dailyCategory),
                 createUseCase: mockCreate,
               ),
               formKey: formKey,
@@ -1037,10 +1037,10 @@ void main() {
               TransactionDetailsFormConfig.$new(
                 bookId: 'b1',
                 entrySource: EntrySource.manual,
-                initialCategory: _survivalCategory,
+                initialCategory: _dailyCategory,
               ),
               overrides: _baseOverrides(
-                categoryRepo: _StubCategoryRepository(_survivalCategory),
+                categoryRepo: _StubCategoryRepository(_dailyCategory),
               ),
               formKey: formKey,
             ),
@@ -1084,10 +1084,10 @@ void main() {
               TransactionDetailsFormConfig.$new(
                 bookId: 'b1',
                 entrySource: EntrySource.manual,
-                initialCategory: _survivalCategory,
+                initialCategory: _dailyCategory,
               ),
               overrides: _baseOverrides(
-                categoryRepo: _StubCategoryRepository(_survivalCategory),
+                categoryRepo: _StubCategoryRepository(_dailyCategory),
               ),
               formKey: formKey,
             ),
@@ -1113,7 +1113,7 @@ void main() {
 
     group('updateSatisfaction', () {
       testWidgets(
-        'Test 10: updateSatisfaction(5) on soul-ledger picker — mutation + '
+        'Test 10: updateSatisfaction(5) on joy-ledger picker — mutation + '
         'picker rebuild + idempotency + submit round-trip '
         '(RESEARCH Open Q2 / BLOCKER B-1)',
         (tester) async {
@@ -1128,7 +1128,7 @@ void main() {
             (_) async => Result.success(
               fakeTx(
                 amount: 2500,
-                categoryId: _soulCategory.id,
+                categoryId: _joyCategory.id,
                 ledgerType: LedgerType.joy,
                 joyFullness: 5,
               ),
@@ -1136,20 +1136,20 @@ void main() {
           );
 
           // Soul-ledger initial category so SatisfactionEmojiPicker renders.
-          // CategoryService wired to resolve soulCategory → soul so
+          // CategoryService wired to resolve joyCategory → joy so
           // _ledgerType flips on the initial post-frame _resolveLedgerType.
           await tester.pumpWidget(
             buildForm(
               TransactionDetailsFormConfig.$new(
                 bookId: 'b1',
                 entrySource: EntrySource.manual,
-                initialCategory: _soulCategory,
+                initialCategory: _joyCategory,
               ),
               overrides: _baseOverrides(
-                categoryRepo: _StubCategoryRepository(_soulCategory),
-                categoryServiceRepo: _StubCategoryRepository(_soulCategory),
+                categoryRepo: _StubCategoryRepository(_joyCategory),
+                categoryServiceRepo: _StubCategoryRepository(_joyCategory),
                 categoryServiceLedgerRepo: _StubLedgerConfigRepository(
-                  _soulCategory.id,
+                  _joyCategory.id,
                   LedgerType.joy,
                 ),
                 createUseCase: mockCreate,
@@ -1159,9 +1159,9 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          // Picker must be visible because ledger flipped to soul.
+          // Picker must be visible because ledger flipped to joy.
           expect(find.byType(SatisfactionEmojiPicker), findsOneWidget,
-              reason: 'soul ledger must render SatisfactionEmojiPicker');
+              reason: 'joy ledger must render SatisfactionEmojiPicker');
 
           // (a) Push satisfaction = 5 via the new D-07 setter.
           formKey.currentState!.updateSatisfaction(5);
@@ -1201,7 +1201,7 @@ void main() {
                   'submit() must propagate updateSatisfaction(5) to CreateTransactionParams (Open Q2 resolution)');
           expect(params.ledgerType, LedgerType.joy,
               reason:
-                  'soul-ledger satisfaction wiring intact after Phase 22 rewrite');
+                  'joy-ledger satisfaction wiring intact after Phase 22 rewrite');
         },
       );
     });

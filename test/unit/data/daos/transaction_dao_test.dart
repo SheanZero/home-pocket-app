@@ -26,7 +26,7 @@ void main() {
         amount: 10000,
         type: 'expense',
         categoryId: 'cat_food',
-        ledgerType: 'survival',
+        ledgerType: 'daily',
         timestamp: now,
         currentHash: 'hash_abc',
         createdAt: now,
@@ -53,7 +53,7 @@ void main() {
           amount: 1000,
           type: 'expense',
           categoryId: 'cat_food',
-          ledgerType: 'survival',
+          ledgerType: 'daily',
           timestamp: t1,
           currentHash: 'h1',
           createdAt: t1,
@@ -68,7 +68,7 @@ void main() {
           amount: 2000,
           type: 'income',
           categoryId: 'cat_food_dining_out',
-          ledgerType: 'survival',
+          ledgerType: 'daily',
           timestamp: t2,
           currentHash: 'h2',
           createdAt: t2,
@@ -92,7 +92,7 @@ void main() {
         amount: 1000,
         type: 'expense',
         categoryId: 'cat_food',
-        ledgerType: 'survival',
+        ledgerType: 'daily',
         timestamp: now,
         currentHash: 'h1',
         createdAt: now,
@@ -117,7 +117,7 @@ void main() {
         amount: 1000,
         type: 'expense',
         categoryId: 'cat_food',
-        ledgerType: 'survival',
+        ledgerType: 'daily',
         timestamp: t1,
         currentHash: 'h1',
         createdAt: t1,
@@ -132,7 +132,7 @@ void main() {
         amount: 2000,
         type: 'expense',
         categoryId: 'cat_transport',
-        ledgerType: 'soul',
+        ledgerType: 'joy',
         timestamp: t2,
         currentHash: 'h2',
         createdAt: t2,
@@ -141,9 +141,9 @@ void main() {
       );
 
       // Filter by ledger type
-      final soul = await dao.findByBookId('book_001', ledgerType: 'soul');
-      expect(soul.length, 1);
-      expect(soul.first.id, 'tx_002');
+      final joy = await dao.findByBookId('book_001', ledgerType: 'joy');
+      expect(joy.length, 1);
+      expect(joy.first.id, 'tx_002');
 
       // Filter by date range
       final feb = await dao.findByBookId(
@@ -166,7 +166,7 @@ void main() {
           amount: (i + 1) * 1000,
           type: 'expense',
           categoryId: 'cat_food',
-          ledgerType: 'survival',
+          ledgerType: 'daily',
           timestamp: now.add(Duration(hours: i)),
           currentHash: 'h$i',
           createdAt: now,
@@ -196,7 +196,7 @@ void main() {
         amount: 1000,
         type: 'expense',
         categoryId: 'cat_food',
-        ledgerType: 'survival',
+        ledgerType: 'daily',
         timestamp: t1,
         currentHash: 'first_hash',
         createdAt: t1,
@@ -211,7 +211,7 @@ void main() {
         amount: 2000,
         type: 'expense',
         categoryId: 'cat_food',
-        ledgerType: 'survival',
+        ledgerType: 'daily',
         timestamp: t2,
         currentHash: 'latest_hash',
         createdAt: t2,
@@ -239,7 +239,7 @@ void main() {
         amount: 1000,
         type: 'expense',
         categoryId: 'cat_food',
-        ledgerType: 'survival',
+        ledgerType: 'daily',
         timestamp: now,
         currentHash: 'h1',
         createdAt: now,
@@ -254,7 +254,7 @@ void main() {
         amount: 2000,
         type: 'expense',
         categoryId: 'cat_food',
-        ledgerType: 'survival',
+        ledgerType: 'daily',
         timestamp: now,
         currentHash: 'h2',
         createdAt: now,

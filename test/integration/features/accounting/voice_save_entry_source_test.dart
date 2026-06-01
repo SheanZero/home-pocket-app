@@ -220,7 +220,7 @@ void main() {
       ),
     ).thenAnswer((_) async {});
 
-    // Voice parser fake: emit a survival result with amount=500, cafe category.
+    // Voice parser fake: emit a daily result with amount=500, cafe category.
     // The screen's _stopRecordingAndCommit consumes data.amount and
     // data.categoryMatch.categoryId to batch-fill the embedded form.
     final parsedResult = VoiceParseResult(

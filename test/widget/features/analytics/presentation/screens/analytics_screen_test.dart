@@ -11,7 +11,7 @@ import 'package:home_pocket/features/analytics/domain/models/happiness_report.da
 import 'package:home_pocket/features/analytics/domain/models/ledger_snapshot.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
 import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
-import 'package:home_pocket/features/analytics/domain/models/per_category_soul_breakdown.dart';
+import 'package:home_pocket/features/analytics/domain/models/per_category_joy_breakdown.dart';
 import 'package:home_pocket/features/analytics/domain/models/time_window.dart';
 import 'package:home_pocket/features/analytics/domain/repositories/analytics_repository.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/repository_providers.dart'
@@ -105,28 +105,28 @@ Widget _buildSubject({
         startDate: _windowStart,
         endDate: _windowEnd,
       ).overrideWith((_) async => fixtureFamilyHappinessRich()),
-      perCategorySoulBreakdownProvider(
+      perCategoryJoyBreakdownProvider(
         bookId: _bookId,
         startDate: _windowStart,
         endDate: _windowEnd,
         joyMetricVariant: JoyMetricVariant.all,
-      ).overrideWith((_) async => const Empty<PerCategorySoulBreakdown>()),
-      perCategorySoulBreakdownFamilyProvider(
+      ).overrideWith((_) async => const Empty<PerCategoryJoyBreakdown>()),
+      perCategoryJoyBreakdownFamilyProvider(
         startDate: _windowStart,
         endDate: _windowEnd,
         joyMetricVariant: JoyMetricVariant.all,
-      ).overrideWith((_) async => const Empty<PerCategorySoulBreakdown>()),
-      soulVsSurvivalSnapshotProvider(
+      ).overrideWith((_) async => const Empty<PerCategoryJoyBreakdown>()),
+      dailyVsJoySnapshotProvider(
         bookId: _bookId,
         startDate: _windowStart,
         endDate: _windowEnd,
         joyMetricVariant: JoyMetricVariant.all,
-      ).overrideWith((_) async => const Empty<SoulVsSurvivalSnapshot>()),
-      soulVsSurvivalSnapshotFamilyProvider(
+      ).overrideWith((_) async => const Empty<DailyVsJoySnapshot>()),
+      dailyVsJoySnapshotFamilyProvider(
         startDate: _windowStart,
         endDate: _windowEnd,
         joyMetricVariant: JoyMetricVariant.all,
-      ).overrideWith((_) async => const Empty<SoulVsSurvivalSnapshot>()),
+      ).overrideWith((_) async => const Empty<DailyVsJoySnapshot>()),
       activeGroupProvider.overrideWith(
         (_) => Stream.value(groupMode ? _groupInfo : null),
       ),
@@ -290,8 +290,8 @@ const _monthlyReport = MonthlyReport(
   totalExpenses: 142800,
   savings: 157200,
   savingsRate: 52.4,
-  survivalTotal: 102200,
-  soulTotal: 40600,
+  dailyTotal: 102200,
+  joyTotal: 40600,
   categoryBreakdowns: [
     CategoryBreakdown(
       categoryId: 'cat_food',
@@ -477,7 +477,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
   }
 
   @override
-  Future<SoulSatisfactionOverview> getSoulSatisfactionOverview({
+  Future<JoyFullnessOverview> getJoyFullnessOverview({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
@@ -487,7 +487,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
   }
 
   @override
-  Future<List<SoulRowSample>> getSoulRowsForJoyContribution({
+  Future<List<JoyRowSample>> getJoyRowsForJoyContribution({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
@@ -497,7 +497,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
   }
 
   @override
-  Future<List<PerCategorySoulBreakdownItem>> getPerCategorySoulBreakdown({
+  Future<List<PerCategoryJoyBreakdownItem>> getPerCategoryJoyBreakdown({
     required String bookId,
     required DateTime startDate,
     required DateTime endDate,
@@ -507,8 +507,8 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
   }
 
   @override
-  Future<List<PerCategorySoulBreakdownItem>>
-  getPerCategorySoulBreakdownAcrossBooks({
+  Future<List<PerCategoryJoyBreakdownItem>>
+  getPerCategoryJoyBreakdownAcrossBooks({
     required List<String> bookIds,
     required DateTime startDate,
     required DateTime endDate,

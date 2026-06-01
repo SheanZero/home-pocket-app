@@ -193,7 +193,7 @@ void main() {
           entrySource: 'manual',
         );
 
-        final rows = await dao.getPerCategorySoulBreakdownAcrossBooks(
+        final rows = await dao.getPerCategoryJoyBreakdownAcrossBooks(
           bookIds: ['book_a', 'book_b'],
           startDate: windowStart,
           endDate: windowEnd,

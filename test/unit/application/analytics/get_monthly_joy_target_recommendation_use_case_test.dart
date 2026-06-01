@@ -42,10 +42,10 @@ void main() {
   void stubMonth({
     required int year,
     required int month,
-    required List<SoulRowSample> rows,
+    required List<JoyRowSample> rows,
   }) {
     when(
-      () => repository.getSoulRowsForJoyContribution(
+      () => repository.getJoyRowsForJoyContribution(
         bookId: 'book-1',
         startDate: DateTime(year, month, 1),
         endDate: DateTime(year, month + 1, 0, 23, 59, 59),
@@ -54,19 +54,19 @@ void main() {
   }
 
   void stubDefaultPastMonths({
-    required List<SoulRowSample> m1,
-    required List<SoulRowSample> m2,
-    required List<SoulRowSample> m3,
+    required List<JoyRowSample> m1,
+    required List<JoyRowSample> m2,
+    required List<JoyRowSample> m3,
   }) {
     stubMonth(year: 2026, month: 4, rows: m1);
     stubMonth(year: 2026, month: 3, rows: m2);
     stubMonth(year: 2026, month: 2, rows: m3);
   }
 
-  List<SoulRowSample> repeatedBaseRows(int count, {int satisfaction = 1}) {
+  List<JoyRowSample> repeatedBaseRows(int count, {int satisfaction = 1}) {
     return List.generate(
       count,
-      (_) => SoulRowSample(amount: 500, joyFullness: satisfaction),
+      (_) => JoyRowSample(amount: 500, joyFullness: satisfaction),
     );
   }
 
@@ -140,7 +140,7 @@ void main() {
         m1: repeatedBaseRows(40),
         m2: [
           ...repeatedBaseRows(50),
-          const SoulRowSample(amount: 100, joyFullness: 1),
+          const JoyRowSample(amount: 100, joyFullness: 1),
         ],
         m3: repeatedBaseRows(80),
       );
@@ -153,9 +153,9 @@ void main() {
 
     test('uses currency-specific PTVF base for CNY', () async {
       stubDefaultPastMonths(
-        m1: const [SoulRowSample(amount: 25, joyFullness: 10)],
-        m2: const [SoulRowSample(amount: 50, joyFullness: 10)],
-        m3: const [SoulRowSample(amount: 75, joyFullness: 10)],
+        m1: const [JoyRowSample(amount: 25, joyFullness: 10)],
+        m2: const [JoyRowSample(amount: 50, joyFullness: 10)],
+        m3: const [JoyRowSample(amount: 75, joyFullness: 10)],
       );
 
       final result = await execute(currencyCode: 'CNY');
@@ -174,21 +174,21 @@ void main() {
 
       expect(value.data, 20);
       verify(
-        () => repository.getSoulRowsForJoyContribution(
+        () => repository.getJoyRowsForJoyContribution(
           bookId: 'book-1',
           startDate: DateTime(2026),
           endDate: DateTime(2026, 2, 0, 23, 59, 59),
         ),
       ).called(1);
       verify(
-        () => repository.getSoulRowsForJoyContribution(
+        () => repository.getJoyRowsForJoyContribution(
           bookId: 'book-1',
           startDate: DateTime(2025, 12),
           endDate: DateTime(2026, 1, 0, 23, 59, 59),
         ),
       ).called(1);
       verify(
-        () => repository.getSoulRowsForJoyContribution(
+        () => repository.getJoyRowsForJoyContribution(
           bookId: 'book-1',
           startDate: DateTime(2025, 11),
           endDate: DateTime(2025, 12, 0, 23, 59, 59),

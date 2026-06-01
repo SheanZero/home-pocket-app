@@ -88,7 +88,7 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(height: 24),
 
               // ── Home hero card (Phase 10 — integrates the legacy
-              //    month-overview, ledger-comparison, and soul-fullness cards
+              //    month-overview, ledger-comparison, and joy-fullness cards
               //    into a single composition). ──
               Builder(
                 builder: (context) {

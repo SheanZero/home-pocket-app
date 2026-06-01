@@ -191,7 +191,7 @@ void main() {
   }
 
   group('ManualOneStepScreen merchant learning hook (via TransactionDetailsForm)', () {
-    testWidgets('shows emoji picker for soul ledger transactions', (
+    testWidgets('shows emoji picker for joy ledger transactions', (
       tester,
     ) async {
       when(
