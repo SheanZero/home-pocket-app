@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: 文案与配色统一
-status: ready_to_plan
-stopped_at: Phase 31 complete (6/6) — ready to discuss Phase 32
-last_updated: 2026-06-01T04:34:40.829Z
-last_activity: 2026-06-01 -- Phase 31 execution started
+status: planning
+stopped_at: Phase 32 context gathered
+last_updated: "2026-06-01T06:45:58.124Z"
+last_activity: 2026-06-01
 progress:
   total_phases: 4
-  completed_phases: 5
-  total_plans: 201
+  completed_phases: 1
+  total_plans: 6
   completed_plans: 6
-  percent: 125
+  percent: 25
 ---
 
 # Project State
@@ -201,8 +201,8 @@ No active blockers. Carried-forward debt (cross-milestone):
 
 ## Session Continuity
 
-Last session: 2026-06-01T02:41:23.163Z
-Stopped at: Phase 31: 01-03 shipped; 04-06 re-planned (D-19) + plan-checker PASS — ready to resume execution at plan 04
+Last session: 2026-06-01T06:45:58.118Z
+Stopped at: Phase 32 context gathered
 
 **Planned Next:** `/gsd-plan-phase 31` — plan Phase 31 (Terminology Rename)
 
