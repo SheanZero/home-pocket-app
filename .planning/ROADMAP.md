@@ -83,7 +83,7 @@
 
 ### v1.5 文案与配色统一 (Active)
 
-- [ ] **Phase 31: Terminology Rename** (6 plans) — Unify all user-facing ARB values (zh/ja/en) and rename internal identifiers (ARB keys, AppColors symbols, LedgerType enum + v18 migration, soul*/survival* files/classes, soul_satisfaction→joy_fullness column); close with analyze-clean gate + ADR-017
+- [x] **Phase 31: Terminology Rename** (6 plans) — Unify all user-facing ARB values (zh/ja/en) and rename internal identifiers (ARB keys, AppColors symbols, LedgerType enum + v18 migration, soul*/survival* files/classes, soul_satisfaction→joy_fullness column); close with analyze-clean gate + ADR-017 (completed 2026-06-01)
 - [ ] **Phase 32: Palette Exploration & Selection** — Mine design references, produce 4–5 Pencil color-scheme mockups, user selects one canonical palette recorded as ADR
 - [ ] **Phase 33: Color Token System & Consolidation** — Build semantic design-token system encoding the selected palette; replace ~62 hardcoded Color(0x…) literals; apply palette uniformly across surfaces
 - [ ] **Phase 34: Golden Re-baseline & Verification** — Regenerate all golden/visual baselines to the new palette; confirm full test suite green; verify no stale vocabulary or color literals remain
@@ -106,7 +106,7 @@
 - [x] 31-03-PLAN.md — ARB keys (25 roots) + values + @description rewrite (3 locales) + gen-l10n + call sites
 - [x] 31-04-PLAN.md — AppColors survival/soul + derived symbols rename + ~60 call sites
 - [x] 31-05-PLAN.md — soul*/survival* file + class + snapshot-field renames (git mv + Serena)
-- [ ] 31-06-PLAN.md — ADR-017 Terminology Unification + ADR-015 pointer + INDEX + REQUIREMENTS Out-of-Scope amend (D-06)
+- [x] 31-06-PLAN.md — ADR-017 Terminology Unification + ADR-015 pointer + INDEX + REQUIREMENTS Out-of-Scope amend (D-06)
 **UI hint**: yes
 
 ### Phase 32: Palette Exploration & Selection
