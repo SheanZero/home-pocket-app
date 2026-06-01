@@ -273,6 +273,14 @@ A family accounting app users can trust with sensitive financial data — local-
 - ✓ **ROW-02** Swipe-to-delete with confirmation; routes exclusively through `DeleteTransactionUseCase` (soft-delete, hash-chain-safe) — v1.4 Phase 28
 - ✓ **FAM-01/02/03/04** Family shadow-book merge + per-row owner attribution + member filter + "Mine only" — v1.4 Phase 29
 
+**Shipped in v1.5 (文案与配色统一 / Terminology & Color Unification) — in progress:**
+
+- ✓ **TERM-01/02/03/04** Trilingual ledger-vocab rename — user-facing ARB values read 日常/悦己 (zh), 日常/ときめき (ja), Daily/Joy (en) everywhere; soul_satisfaction surface → joyFullness; D-17 non-literal phrasings normalized — v1.5 Phase 31 (Plans 31-02/03)
+- ✓ **TERMID-01** ARB key roots renamed (`soulLedger`→`joyLedger`, `survival*`→`daily*`, `soulSatisfaction`→`joyFullness`) + call sites regenerated — v1.5 Phase 31 Plan 03
+- ✓ **TERMID-02** `AppColors` ledger symbols renamed (survival→daily, soul→joy + dark-derived joyFullness/joyRoi); `tagGreen` repointed to `joyLight`; ~79 call sites — v1.5 Phase 31 Plan 04
+- ✓ **TERMID-03** `LedgerType` enum rename + Drift v17→v18 migration (value rewrite + CHECK recreate + `soul_satisfaction`→`joy_fullness` column) + ~9 soul*/survival* files/classes renamed (history-preserving `git mv`); analyze-clean + custom_lint-clean gates green; terminology golden re-baseline (0 pixel drift, D-19) — v1.5 Phase 31 Plans 02/05. CR-01 migration regression (from<4 column-name collision) found in code review and fixed in-phase with regression tests.
+- ✓ **TERMID-04** ADR-017 Terminology Unification records canonical locale mapping + identifier convention + v18 migration decision; ADR-015 append-only pointer; REQUIREMENTS.md out-of-scope amended (D-06) — v1.5 Phase 31 Plan 06
+
 ### Active
 
 <!-- No active milestone. v1.4 shipped 2026-05-31. Run /gsd-new-milestone to scope the next. -->
@@ -398,6 +406,8 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-31 — started milestone v1.5 文案与配色统一 (Terminology & Color Unification). Brownfield consistency refactor: unify 日常/悦己/ときめき/Daily/Joy vocabulary across ja/zh/en + internal identifiers, consolidate ~62 hardcoded colors into a semantic design-token system. Locale mapping locked; rename depth = strings + internal symbols. Defining requirements next.*
+*Last updated: 2026-06-01 — Phase 31 (Terminology Rename) complete: trilingual ledger vocab + all internal identifiers (ARB keys, AppColors symbols, LedgerType enum + Drift v18 migration, soul*/survival* files/classes, soul_satisfaction→joy_fullness column) unified to 日常/悦己/ときめき/Daily/Joy. 5/5 success criteria verified; ADR-017 accepted. Code review found + fixed CR-01 (v1–v3→v18 migration crash) in-phase with regression tests; 3 WARNING quality-debt items (WR-01/02/03 stale symbol/theme/doc names) carried non-blocking. Next: Phase 32 palette exploration.*
+
+*Prior: 2026-05-31 — started milestone v1.5 文案与配色统一 (Terminology & Color Unification). Brownfield consistency refactor: unify 日常/悦己/ときめき/Daily/Joy vocabulary across ja/zh/en + internal identifiers, consolidate ~62 hardcoded colors into a semantic design-token system. Locale mapping locked; rename depth = strings + internal symbols. Defining requirements next.*
 
 *Prior: 2026-05-31 after v1.4 列表功能 milestone — shipped + archived (7 phases, 29 plans, tag `v1.4`). Full kakeibo-style List tab. Audit `tech_debt` accepted (22/22 requirements, 7/7 phases, 7/7 flows); GAP-1 closed via quick task 260531-u34; GAP-2 dead-code + draft-Nyquist docs carried as debt.*
