@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/core/theme/app_colors.dart';
+import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/features/home/presentation/widgets/transaction_list_card.dart';
 
 void main() {
@@ -77,9 +77,9 @@ void main() {
       expect(container.clipBehavior, Clip.hardEdge);
 
       final decoration = container.decoration! as BoxDecoration;
-      expect(decoration.color, AppColors.card);
+      expect(decoration.color, AppPalette.light.card);
       expect(decoration.borderRadius, BorderRadius.circular(12));
-      expect(decoration.border, Border.all(color: AppColors.borderList));
+      expect(decoration.border, Border.all(color: AppPalette.light.borderList));
     });
   });
 }

@@ -1,3 +1,6 @@
+@Tags(['golden'])
+library;
+
 // Golden tests for ListTransactionTile — 3 locales × light theme (D-01/D-02/D-03).
 //
 // Baselines: test/golden/goldens/list_transaction_tile_{ja,zh,en}.png

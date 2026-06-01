@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/core/theme/app_colors.dart';
+import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_bottom_nav_bar.dart';
 
 import '../../helpers/test_localizations.dart';
@@ -61,7 +61,7 @@ void main() {
       );
 
       final text = tester.widget<Text>(find.text('一覧'));
-      expect(text.style?.color, AppColors.textTertiary);
+      expect(text.style?.color, AppPalette.light.textTertiary);
     });
 
     testWidgets('FAB calls onFabTap', (tester) async {

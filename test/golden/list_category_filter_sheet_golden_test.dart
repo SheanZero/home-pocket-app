@@ -1,3 +1,6 @@
+@Tags(['golden'])
+library;
+
 // Golden tests for [CategoryFilterSheet] (Phase 30, D-01/D-02/D-03).
 //
 // Covers: 3 locales (ja, zh, en), light theme.

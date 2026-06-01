@@ -1,7 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/core/theme/app_colors.dart';
+import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/features/analytics/domain/models/expense_trend.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/monthly_spend_trend_bar_chart.dart';
 
@@ -88,7 +88,7 @@ void main() {
     final currentRod = chart.data.barGroups[5].barRods.single;
     final previousRod = chart.data.barGroups[4].barRods.single;
 
-    expect(currentRod.color, AppColors.daily);
+    expect(currentRod.color, AppPalette.light.daily);
     expect(
       currentRod.borderSide.width,
       greaterThan(previousRod.borderSide.width),

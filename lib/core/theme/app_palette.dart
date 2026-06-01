@@ -605,5 +605,13 @@ final class AppPalette extends ThemeExtension<AppPalette> {
 ///
 /// Usage: `context.palette.card` (replaces `context.wmCard`)
 extension AppPaletteContext on BuildContext {
-  AppPalette get palette => Theme.of(this).extension<AppPalette>()!;
+  /// Resolves the [AppPalette] ThemeExtension. [AppTheme] always registers it
+  /// in production; the brightness-aware fallback keeps widgets renderable
+  /// under any theme that omits the extension (e.g. lightweight test harnesses)
+  /// instead of throwing on a null extension.
+  AppPalette get palette =>
+      Theme.of(this).extension<AppPalette>() ??
+      (Theme.of(this).brightness == Brightness.dark
+          ? AppPalette.dark
+          : AppPalette.light);
 }

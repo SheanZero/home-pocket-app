@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/core/theme/app_colors.dart';
+import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_display.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_edit_bottom_sheet.dart';
@@ -69,7 +69,7 @@ void main() {
       find.byKey(const ValueKey('smart_keyboard_root')),
     );
     final decoration = container.decoration! as BoxDecoration;
-    expect(decoration.color, AppColorsDark.card);
+    expect(decoration.color, AppPalette.dark.card);
   });
 
   testWidgets('amount display renders a currency badge in dark mode', (
@@ -97,7 +97,7 @@ void main() {
       find.byKey(const ValueKey('input_mode_tabs_root')),
     );
     final decoration = container.decoration! as BoxDecoration;
-    expect(decoration.color, AppColorsDark.backgroundMuted);
+    expect(decoration.color, AppPalette.dark.backgroundMuted);
   });
 
   testWidgets('ledger type selector uses dark inactive surface', (
@@ -118,7 +118,7 @@ void main() {
       find.byKey(const ValueKey('ledger_type_joy_chip')),
     );
     final decoration = inactiveChip.decoration! as BoxDecoration;
-    expect(decoration.color, AppColorsDark.backgroundMuted);
+    expect(decoration.color, AppPalette.dark.backgroundMuted);
   });
 
   // ── CR-02: AmountEditBottomSheet dark-mode color regression ───────────────
@@ -150,9 +150,9 @@ void main() {
     final decoration = sheetContainer.decoration! as BoxDecoration;
     expect(
       decoration.color,
-      AppColorsDark.card,
+      AppPalette.dark.card,
       reason:
-          'AmountEditBottomSheet background must use AppColorsDark.card in dark mode (CR-02)',
+          'AmountEditBottomSheet background must use AppPalette.dark.card in dark mode (CR-02)',
     );
   });
 
@@ -180,9 +180,9 @@ void main() {
     final decoration = sheetContainer.decoration! as BoxDecoration;
     expect(
       decoration.color,
-      AppColors.card,
+      AppPalette.light.card,
       reason:
-          'AmountEditBottomSheet background must use AppColors.card in light mode (CR-02)',
+          'AmountEditBottomSheet background must use AppPalette.light.card in light mode (CR-02)',
     );
   });
 }

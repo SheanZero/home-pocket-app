@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_bottom_nav_bar.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
@@ -78,7 +79,7 @@ void main() {
     await tester.pumpAndSettle();
     // Tab index 1 (list) is inactive when currentIndex is 0
     final listIcon = tester.widget<Icon>(find.byIcon(Icons.list));
-    expect(listIcon.color, const Color(0xFFC4C4C4));
+    expect(listIcon.color, AppPalette.light.textTertiary);
   });
 
   testWidgets('renders all 4 tab labels', (tester) async {

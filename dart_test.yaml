@@ -1,0 +1,4 @@
+tags:
+  golden:
+    description: Golden image (visual baseline) comparison tests. Excluded during
+      palette migration (Phase 33); re-baselined in Phase 34 (COLOR-04).

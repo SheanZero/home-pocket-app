@@ -1,3 +1,6 @@
+@Tags(['golden'])
+library;
+
 // Golden tests for ListEmptyState — 9 cases (3 variants × 3 locales) light theme
 // (D-01/D-02/D-03/D-04).
 //

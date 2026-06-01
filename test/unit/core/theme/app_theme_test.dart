@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/core/theme/app_colors.dart';
+import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/core/theme/app_theme.dart';
 
 void main() {
@@ -11,7 +11,7 @@ void main() {
 
     test('scaffold background is AppColors.background', () {
       final theme = AppTheme.light;
-      expect(theme.scaffoldBackgroundColor, AppColors.background);
+      expect(theme.scaffoldBackgroundColor, AppPalette.light.background);
     });
 
     test('text theme uses Outfit via default body style', () {

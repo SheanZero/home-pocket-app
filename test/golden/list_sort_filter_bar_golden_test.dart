@@ -1,3 +1,6 @@
+@Tags(['golden'])
+library;
+
 // Golden tests for ListSortFilterBar — 3 locales × light theme (D-01/D-02/D-03).
 //
 // Baselines: test/golden/goldens/list_sort_filter_bar_{ja,zh,en}.png
