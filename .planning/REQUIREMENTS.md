@@ -30,9 +30,9 @@
 
 ### Palette — Design Exploration & Selection (PALETTE)
 
-- [ ] **PALETTE-01**: Design references are mined — brand DESIGN.md files from VoltAgent/awesome-design-md (Linear, Notion, Stripe, Claude, etc.) plus the dual-ledger family-finance context — and synthesized into candidate global color directions (mood, primary, dual-ledger accents) with rationale.
-- [ ] **PALETTE-02**: 4–5 distinct full color-scheme proposals are produced — each defining primary + 日常/悦己 ledger accents + surface + semantic roles — and rendered as Pencil mockups of representative screens (e.g. home hero, transaction list, analytics) for side-by-side comparison.
-- [ ] **PALETTE-03**: The user reviews the 4–5 Pencil schemes and selects one (or a hybrid) as the canonical palette; the decision and final hex values are recorded as an ADR.
+- [x] **PALETTE-01**: Design references are mined — brand DESIGN.md files from VoltAgent/awesome-design-md (Linear, Notion, Stripe, Claude, etc.) plus the dual-ledger family-finance context — and synthesized into candidate global color directions (mood, primary, dual-ledger accents) with rationale.
+- [x] **PALETTE-02**: 4–5 distinct full color-scheme proposals are produced — each defining primary + 日常/悦己 ledger accents + surface + semantic roles — and rendered as Pencil mockups of representative screens (e.g. home hero, transaction list, analytics) for side-by-side comparison.
+- [x] **PALETTE-03**: The user reviews the 4–5 Pencil schemes and selects one (or a hybrid) as the canonical palette; the decision and final hex values are recorded as an ADR.
 
 ### Color — Token System & Consolidation (COLOR)
 
@@ -71,9 +71,9 @@
 | TERMID-02 | Phase 31 | Complete |
 | TERMID-03 | Phase 31 | Complete |
 | TERMID-04 | Phase 31 | Complete |
-| PALETTE-01 | Phase 32 | Pending |
-| PALETTE-02 | Phase 32 | Pending |
-| PALETTE-03 | Phase 32 | Pending |
+| PALETTE-01 | Phase 32 | Complete |
+| PALETTE-02 | Phase 32 | Complete |
+| PALETTE-03 | Phase 32 | Complete |
 | COLOR-01 | Phase 33 | Pending |
 | COLOR-02 | Phase 33 | Pending |
 | COLOR-03 | Phase 33 | Pending |
