@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/profile/save_user_profile_use_case.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../features/home/presentation/screens/main_shell_screen.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/constants/warm_emojis.dart';
@@ -11,11 +11,6 @@ import '../providers/state_user_profile.dart';
 import '../widgets/avatar_display.dart';
 import '../widgets/scattered_emoji_background.dart';
 import 'avatar_picker_screen.dart';
-
-const _onboardingDarkBackground = Color(0xFF141418);
-const _onboardingDarkSurface = Color(0xFF2A2A32);
-const _onboardingDarkTextPrimary = Color(0xFFF0F0F5);
-const _onboardingDarkTextSecondary = Color(0xFF6B6B78);
 
 class ProfileOnboardingScreen extends ConsumerStatefulWidget {
   const ProfileOnboardingScreen({super.key, required this.bookId});
@@ -110,22 +105,10 @@ class _ProfileOnboardingScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary = isDark
-        ? _onboardingDarkTextPrimary
-        : AppColors.textPrimary;
-    final textSecondary = isDark
-        ? _onboardingDarkTextSecondary
-        : AppColors.textSecondary;
-    final inputFill = isDark ? _onboardingDarkSurface : AppColors.card;
-    final inputBorder = isDark
-        ? _onboardingDarkSurface
-        : AppColors.borderDefault;
+    final palette = context.palette;
 
     return Scaffold(
-      backgroundColor: isDark
-          ? _onboardingDarkBackground
-          : AppColors.background,
+      backgroundColor: palette.background,
       body: ScatteredEmojiBackground(
         pattern: ScatteredEmojiPattern.onboarding,
         child: SafeArea(
@@ -146,7 +129,7 @@ class _ProfileOnboardingScreenState
                             fontFamily: 'Outfit',
                             fontSize: 26,
                             fontWeight: FontWeight.w700,
-                            color: textPrimary,
+                            color: palette.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -156,7 +139,7 @@ class _ProfileOnboardingScreenState
                           style: TextStyle(
                             fontFamily: 'Outfit',
                             fontSize: 14,
-                            color: textSecondary,
+                            color: palette.textSecondary,
                           ),
                         ),
                       ],
@@ -182,7 +165,7 @@ class _ProfileOnboardingScreenState
                                 '✏️',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: textSecondary,
+                                  color: palette.textSecondary,
                                 ),
                               ),
                               const SizedBox(width: 4),
@@ -192,7 +175,7 @@ class _ProfileOnboardingScreenState
                                   fontFamily: 'Outfit',
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
-                                  color: textSecondary,
+                                  color: palette.textSecondary,
                                 ),
                               ),
                             ],
@@ -213,7 +196,7 @@ class _ProfileOnboardingScreenState
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.5,
-                            color: textSecondary,
+                            color: palette.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -224,16 +207,14 @@ class _ProfileOnboardingScreenState
                             fontFamily: 'Outfit',
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: textPrimary,
+                            color: palette.textPrimary,
                           ),
                           decoration: InputDecoration(
                             hintText: l10n.profileNicknamePlaceholder,
                             hintStyle: TextStyle(
                               fontFamily: 'Outfit',
                               fontSize: 14,
-                              color: isDark
-                                  ? _onboardingDarkTextSecondary
-                                  : AppColors.textTertiary,
+                              color: palette.textTertiary,
                             ),
                             prefixIcon: Padding(
                               padding: const EdgeInsetsDirectional.only(
@@ -246,7 +227,7 @@ class _ProfileOnboardingScreenState
                                   '📝',
                                   style: TextStyle(
                                     fontSize: 18,
-                                    color: textPrimary,
+                                    color: palette.textPrimary,
                                   ),
                                 ),
                               ),
@@ -256,22 +237,22 @@ class _ProfileOnboardingScreenState
                               minHeight: 0,
                             ),
                             filled: true,
-                            fillColor: inputFill,
+                            fillColor: palette.card,
                             contentPadding: const EdgeInsets.symmetric(
                               vertical: 14,
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: inputBorder),
+                              borderSide: BorderSide(color: palette.borderDefault),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: inputBorder),
+                              borderSide: BorderSide(color: palette.borderDefault),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(
-                                color: AppColors.accentPrimary,
+                              borderSide: BorderSide(
+                                color: palette.accentPrimary,
                                 width: 2,
                               ),
                             ),
@@ -321,20 +302,21 @@ class _ProfileGradientButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
           colors: enabled
-              ? const [AppColors.accentPrimary, AppColors.fabGradientStart]
+              ? [palette.accentPrimary, palette.fabGradientStart]
               : [
-                  AppColors.accentPrimary.withValues(alpha: 0.45),
-                  AppColors.fabGradientStart.withValues(alpha: 0.45),
+                  palette.accentPrimary.withValues(alpha: 0.45),
+                  palette.fabGradientStart.withValues(alpha: 0.45),
                 ],
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.accentPrimary.withValues(
+            color: palette.accentPrimary.withValues(
               alpha: enabled ? 0.16 : 0.08,
             ),
             blurRadius: 20,
