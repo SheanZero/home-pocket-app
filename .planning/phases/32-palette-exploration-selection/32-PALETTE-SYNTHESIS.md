@@ -309,6 +309,8 @@ Each `## Direction` states: mood; mined lineage; its **D-04** warm-coexistence r
 
 **Cross-scheme rule (Pitfall 2):** every bright/warm accent (amber, gold, terracotta, honey, coral-tint) is split into a light tint (background/tag) + a darker `*Text` variant. Amount glyphs ALWAYS use the `*Text` variant. No direction has an un-fixable load-bearing contrast failure, so **no direction is a selection-disqualifier** at synthesis time. Final ratios are re-verified per scheme in Plan 32-02.
 
+**Pencil render confirmation (Plan 32-02):** all 5 directions were rendered in `home-pocket-palette.pen` (4–5 scheme groups × 6 frames: home-hero / txn-list / analytics × light/dark) with each scheme's palette stored as a `get_variables`-readable variable collection keyed by the exact `AppColors`/`AppColorsDark` symbol names (light + dark per the `{scheme}×{mode}` theme axes) — seeded from the hex above, so the variable record IS this table. `get_screenshot` per scheme confirmed: amounts use the dark `*Text` variant and read legibly on `card`; coral is present every scheme (satisfaction tile + active tab); Daily reads cool/neutral and Joy warm/bright with clear separation (D-02); the analytics Joy KPI shows an ambient number only — no glow/sparkle/badge/>100% (D-03). No new disqualifiers surfaced during rendering.
+
 ---
 
 ## Distinctness Check
