@@ -169,10 +169,14 @@ class HomeHeroCard extends StatelessWidget {
 
   Widget _trendChip(AppPalette palette, int trend) {
     final text = trend <= 0 ? '$trend%' : '+$trend%';
+    final chipColor = trend > 0
+        ? palette.warning.withValues(alpha: 0.15)
+        : palette.successLight;
+    final contentColor = trend > 0 ? palette.warning : palette.success;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: palette.successLight,
+        color: chipColor,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -181,14 +185,14 @@ class HomeHeroCard extends StatelessWidget {
           Icon(
             trend <= 0 ? Icons.trending_down : Icons.trending_up,
             size: 14,
-            color: palette.success,
+            color: contentColor,
           ),
           const SizedBox(width: 4),
           Text(
             text,
             style: AppTextStyles.bodySmall.copyWith(
               fontWeight: FontWeight.w600,
-              color: palette.success,
+              color: contentColor,
             ),
           ),
         ],

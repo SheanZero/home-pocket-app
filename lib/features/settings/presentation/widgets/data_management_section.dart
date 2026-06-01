@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../providers/repository_providers.dart';
 import 'password_dialog.dart';
@@ -171,7 +172,7 @@ class DataManagementSection extends ConsumerWidget {
                 );
               }
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: context.palette.error),
             child: Text(S.of(context).delete),
           ),
         ],

@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-/// A purple-themed celebration overlay shown when a joy transaction is saved.
+import '../../../../core/theme/app_palette.dart';
+
+/// A joy-themed celebration overlay shown when a joy transaction is saved.
 ///
 /// Displays animated sparkle icons that scale up and fade out over 1.5 seconds,
 /// then auto-dismisses by calling [onDismissed].
@@ -69,6 +71,7 @@ class _JoyCelebrationOverlayState extends State<JoyCelebrationOverlay>
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -76,15 +79,15 @@ class _JoyCelebrationOverlayState extends State<JoyCelebrationOverlay>
           opacity: _opacityAnimation.value,
           child: Stack(
             children: [
-              // Purple gradient background
+              // Joy gradient background
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.purple.withValues(alpha: 0.3),
-                      Colors.deepPurple.withValues(alpha: 0.1),
+                      palette.joy.withValues(alpha: 0.3),
+                      palette.joy.withValues(alpha: 0.1),
                     ],
                   ),
                 ),
@@ -103,7 +106,7 @@ class _JoyCelebrationOverlayState extends State<JoyCelebrationOverlay>
                     child: Icon(
                       Icons.auto_awesome,
                       size: sparkle.size,
-                      color: Colors.purple.shade300,
+                      color: palette.joyLight,
                     ),
                   ),
                 );
@@ -112,17 +115,17 @@ class _JoyCelebrationOverlayState extends State<JoyCelebrationOverlay>
               Center(
                 child: Transform.scale(
                   scale: _scaleAnimation.value,
-                  child: const Column(
+                  child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.auto_awesome, size: 48, color: Colors.purple),
-                      SizedBox(height: 8),
+                      Icon(Icons.auto_awesome, size: 48, color: palette.joy),
+                      const SizedBox(height: 8),
                       Text(
                         'Joy!',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.purple,
+                          color: palette.joy,
                         ),
                       ),
                     ],

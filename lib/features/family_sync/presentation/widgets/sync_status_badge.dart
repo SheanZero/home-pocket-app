@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/sync_status_model.dart';
 
@@ -43,40 +44,41 @@ class SyncStatusBadge extends StatelessWidget {
 
   _StatusConfig _stateConfig(SyncState state, BuildContext context) {
     final l10n = S.of(context);
+    final palette = context.palette;
     return switch (state) {
       SyncState.noGroup => _StatusConfig(
         icon: Icons.link_off,
-        color: Colors.grey,
+        color: palette.textTertiary,
         label: l10n.familySyncBadgeUnpaired,
       ),
       SyncState.idle => _StatusConfig(
         icon: Icons.check_circle_outline,
-        color: Colors.grey,
+        color: palette.textTertiary,
         label: l10n.familySyncBadgeSynced,
       ),
       SyncState.initialSyncing => _StatusConfig(
         icon: Icons.sync,
-        color: Colors.blue,
+        color: palette.info,
         label: l10n.syncInitialProgress,
       ),
       SyncState.syncing => _StatusConfig(
         icon: Icons.sync,
-        color: Colors.blue,
+        color: palette.info,
         label: l10n.familySyncBadgeSyncing,
       ),
       SyncState.synced => _StatusConfig(
         icon: Icons.check_circle,
-        color: Colors.green,
+        color: palette.success,
         label: l10n.familySyncBadgeSynced,
       ),
       SyncState.error => _StatusConfig(
         icon: Icons.error,
-        color: Colors.red,
+        color: palette.error,
         label: l10n.familySyncBadgeError,
       ),
       SyncState.queuedOffline => _StatusConfig(
         icon: Icons.cloud_off,
-        color: Colors.orange,
+        color: palette.warning,
         label: l10n.familySyncBadgeOffline,
       ),
     };
