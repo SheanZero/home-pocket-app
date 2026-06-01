@@ -6,7 +6,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../application/family_sync/confirm_join_use_case.dart';
 import '../../../../application/family_sync/join_group_use_case.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../profile/presentation/providers/state_user_profile.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
@@ -65,10 +65,11 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
+    final palette = context.palette;
     final r = widget.result;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: palette.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 42),
@@ -83,19 +84,19 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         LucideIcons.chevronLeft,
                         size: 20,
-                        color: AppColors.textSecondary,
+                        color: palette.textSecondary,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         l10n.groupBack,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Outfit',
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.textSecondary,
+                          color: palette.textSecondary,
                         ),
                       ),
                     ],
@@ -107,12 +108,12 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
               // Group info label
               Text(
                 l10n.groupJoinTarget,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Outfit',
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.5,
-                  color: AppColors.textSecondary,
+                  color: palette.textSecondary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -125,11 +126,11 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                   const SizedBox(width: 8),
                   Text(
                     r.groupName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Outfit',
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: palette.textPrimary,
                     ),
                   ),
                 ],
@@ -146,11 +147,11 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x0A000000),
+                      color: palette.surfaceScrimMedium,
                       blurRadius: 16,
-                      offset: Offset(0, 4),
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -163,7 +164,7 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.accentPrimaryLight,
+                        color: palette.accentPrimaryLight,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
@@ -172,16 +173,16 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                           Icon(
                             LucideIcons.crown,
                             size: 14,
-                            color: AppColors.accentPrimary,
+                            color: palette.accentPrimary,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             l10n.groupOwner,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'Outfit',
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.accentPrimary,
+                              color: palette.accentPrimary,
                             ),
                           ),
                         ],
@@ -196,11 +197,11 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                     // Owner name
                     Text(
                       r.ownerDisplayName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Outfit',
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: palette.textPrimary,
                       ),
                     ),
                   ],
@@ -216,14 +217,14 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                   height: 52,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFE85A4F), Color(0xFFF08070)],
+                    gradient: LinearGradient(
+                      colors: [palette.fabGradientEnd, palette.fabGradientStart],
                     ),
-                    boxShadow: const [
+                    boxShadow: [
                       BoxShadow(
-                        color: Color(0x28E85A4F),
+                        color: palette.actionShadow,
                         blurRadius: 20,
-                        offset: Offset(0, 6),
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),
@@ -267,11 +268,11 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                 onTap: () => Navigator.maybePop(context),
                 child: Text(
                   l10n.groupCancel,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Outfit',
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary,
+                    color: palette.textSecondary,
                   ),
                 ),
               ),
