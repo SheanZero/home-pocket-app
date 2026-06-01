@@ -24,7 +24,7 @@ void main() {
     test('upsert and findById', () async {
       final config = CategoryLedgerConfig(
         categoryId: 'cat_food',
-        ledgerType: LedgerType.survival,
+        ledgerType: LedgerType.daily,
         updatedAt: DateTime(2026, 2, 18),
       );
 
@@ -33,7 +33,7 @@ void main() {
 
       expect(result, isNotNull);
       expect(result!.categoryId, 'cat_food');
-      expect(result.ledgerType, LedgerType.survival);
+      expect(result.ledgerType, LedgerType.daily);
     });
 
     test('findAll returns all configs', () async {
@@ -41,14 +41,14 @@ void main() {
       await repo.upsert(
         CategoryLedgerConfig(
           categoryId: 'cat_food',
-          ledgerType: LedgerType.survival,
+          ledgerType: LedgerType.daily,
           updatedAt: now,
         ),
       );
       await repo.upsert(
         CategoryLedgerConfig(
           categoryId: 'cat_fun',
-          ledgerType: LedgerType.soul,
+          ledgerType: LedgerType.joy,
           updatedAt: now,
         ),
       );
@@ -61,7 +61,7 @@ void main() {
       await repo.upsert(
         CategoryLedgerConfig(
           categoryId: 'cat_food',
-          ledgerType: LedgerType.survival,
+          ledgerType: LedgerType.daily,
           updatedAt: DateTime(2026, 2, 18),
         ),
       );
@@ -76,12 +76,12 @@ void main() {
       await repo.upsertBatch([
         CategoryLedgerConfig(
           categoryId: 'cat_food',
-          ledgerType: LedgerType.survival,
+          ledgerType: LedgerType.daily,
           updatedAt: now,
         ),
         CategoryLedgerConfig(
           categoryId: 'cat_fun',
-          ledgerType: LedgerType.soul,
+          ledgerType: LedgerType.joy,
           updatedAt: now,
         ),
       ]);
@@ -95,14 +95,14 @@ void main() {
       await repo.upsert(
         CategoryLedgerConfig(
           categoryId: 'cat_food',
-          ledgerType: LedgerType.survival,
+          ledgerType: LedgerType.daily,
           updatedAt: now,
         ),
       );
       await repo.upsert(
         CategoryLedgerConfig(
           categoryId: 'cat_fun',
-          ledgerType: LedgerType.soul,
+          ledgerType: LedgerType.joy,
           updatedAt: now,
         ),
       );

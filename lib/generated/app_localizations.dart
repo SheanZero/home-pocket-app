@@ -1305,7 +1305,7 @@ abstract class S {
   /// **'Your monthly favorite will appear here →'**
   String get homeBestJoyEmptySmall;
 
-  /// Best Joy BIG line — all-neutral state (topJoy soulSatisfaction <= 2) (D-09)
+  /// Best Joy BIG line — all-neutral state (topJoy joyFullness <= 2) (D-09)
   ///
   /// In en, this message translates to:
   /// **'Rate your biggest spend'**
@@ -1447,7 +1447,7 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Soul Fullness'**
-  String get soulSatisfaction;
+  String get joyFullness;
 
   /// Add photo button label
   ///

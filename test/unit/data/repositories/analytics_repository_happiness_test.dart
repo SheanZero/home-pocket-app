@@ -24,7 +24,7 @@ void main() {
       final expected = BestJoyMomentRow(
         transactionId: 'tx-best',
         amount: 3000,
-        soulSatisfaction: 10,
+        joyFullness: 10,
         categoryId: 'cat-coffee',
         timestamp: DateTime(2026, 5, 20, 18, 30),
       );
@@ -81,9 +81,9 @@ void main() {
       'getSoulRowsForJoyContribution preserves DAO row order and values',
       () async {
         const rows = [
-          SoulRowSample(amount: 500, soulSatisfaction: 6),
-          SoulRowSample(amount: 1500, soulSatisfaction: 8),
-          SoulRowSample(amount: 3000, soulSatisfaction: 10),
+          SoulRowSample(amount: 500, joyFullness: 6),
+          SoulRowSample(amount: 1500, joyFullness: 8),
+          SoulRowSample(amount: 3000, joyFullness: 10),
         ];
         when(
           () => dao.getSoulRowsForJoyContribution(
@@ -101,7 +101,7 @@ void main() {
 
         expect(result.length, 3);
         expect(result.map((row) => row.amount), [500, 1500, 3000]);
-        expect(result.map((row) => row.soulSatisfaction), [6, 8, 10]);
+        expect(result.map((row) => row.joyFullness), [6, 8, 10]);
         verify(
           () => dao.getSoulRowsForJoyContribution(
             bookId: 'book-1',

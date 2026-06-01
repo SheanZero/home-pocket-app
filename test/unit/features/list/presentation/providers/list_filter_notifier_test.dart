@@ -74,7 +74,7 @@ void main() {
         final notifier = container.read(listFilterProvider.notifier);
 
         // Set all non-day filters to non-default values
-        notifier.setLedgerFilter(LedgerType.soul);
+        notifier.setLedgerFilter(LedgerType.joy);
         notifier.setCategories({'cat_food'});
         notifier.setSearch('ランチ');
         notifier.setMemberFilter('book_member_01');
@@ -87,7 +87,7 @@ void main() {
         // Day filter cleared
         expect(state.activeDayFilter, isNull);
         // All other filters preserved (D-05 requirement)
-        expect(state.ledgerType, equals(LedgerType.soul));
+        expect(state.ledgerType, equals(LedgerType.joy));
         expect(state.categoryIds, equals({'cat_food'}));
         expect(state.searchQuery, equals('ランチ'));
         expect(state.memberBookId, equals('book_member_01'));
@@ -112,17 +112,17 @@ void main() {
       final container = ProviderContainer.test();
       final notifier = container.read(listFilterProvider.notifier);
 
-      notifier.setLedgerFilter(LedgerType.soul);
+      notifier.setLedgerFilter(LedgerType.joy);
       final state = container.read(listFilterProvider);
 
-      expect(state.ledgerType, equals(LedgerType.soul));
+      expect(state.ledgerType, equals(LedgerType.joy));
     });
 
     test('setLedgerFilter with null clears ledgerType', () {
       final container = ProviderContainer.test();
       final notifier = container.read(listFilterProvider.notifier);
 
-      notifier.setLedgerFilter(LedgerType.soul);
+      notifier.setLedgerFilter(LedgerType.joy);
       notifier.setLedgerFilter(null);
 
       expect(container.read(listFilterProvider).ledgerType, isNull);
@@ -186,7 +186,7 @@ void main() {
         // Set all filter fields to non-default values
         notifier.selectMonth(2025, 6);
         notifier.selectDay(DateTime(2025, 6, 10));
-        notifier.setLedgerFilter(LedgerType.soul);
+        notifier.setLedgerFilter(LedgerType.joy);
         notifier.setCategories({'cat_food'});
         notifier.setSearch('ランチ');
         notifier.setMemberFilter('book_abc');
@@ -200,7 +200,7 @@ void main() {
         // Verify all were set
         final before = container.read(listFilterProvider);
         expect(before.selectedYear, equals(2025));
-        expect(before.ledgerType, equals(LedgerType.soul));
+        expect(before.ledgerType, equals(LedgerType.joy));
         expect(before.searchQuery, equals('ランチ'));
 
         // Now clear all
@@ -225,7 +225,7 @@ void main() {
         final container = ProviderContainer.test();
         final notifier = container.read(listFilterProvider.notifier);
 
-        notifier.setLedgerFilter(LedgerType.survival);
+        notifier.setLedgerFilter(LedgerType.daily);
         notifier.clearAll();
 
         expect(container.read(listFilterProvider).ledgerType, isNull);

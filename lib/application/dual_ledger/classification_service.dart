@@ -37,7 +37,7 @@ class ClassificationService {
 
     // Default fallback: survival
     return ClassificationResult(
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
       confidence: 0.5,
       method: ClassificationMethod.rule,
       reason: 'Default fallback',

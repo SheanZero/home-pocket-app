@@ -248,13 +248,13 @@ class ListScreen extends ConsumerWidget {
     final ledgerType = transaction.ledgerType;
 
     // Ledger tag colors (AppColors constants — never hardcoded hex)
-    final tagText = ledgerType == LedgerType.survival
+    final tagText = ledgerType == LedgerType.daily
         ? S.of(context).listLedgerSurvival
         : S.of(context).listLedgerSoul;
-    final tagBgColor = ledgerType == LedgerType.survival
+    final tagBgColor = ledgerType == LedgerType.daily
         ? AppColors.survivalLight
         : AppColors.soulLight;
-    final tagTextColor = ledgerType == LedgerType.survival
+    final tagTextColor = ledgerType == LedgerType.daily
         ? AppColors.survival
         : AppColors.soul;
     // Category label uses same color as ledger tag per UI-SPEC Typography table
@@ -358,8 +358,8 @@ class ListScreen extends ConsumerWidget {
   /// Returns null for survival transactions (ledgerType != soul).
   /// Mirrors the mapping in [HomeScreen._satisfactionIcon].
   static IconData? _satisfactionIcon(Transaction tx) {
-    if (tx.ledgerType != LedgerType.soul) return null;
-    final v = tx.soulSatisfaction;
+    if (tx.ledgerType != LedgerType.joy) return null;
+    final v = tx.joyFullness;
     if (v <= 2) return Icons.sentiment_neutral_outlined;
     if (v <= 4) return Icons.sentiment_satisfied_outlined;
     if (v <= 6) return Icons.sentiment_satisfied_alt_outlined;

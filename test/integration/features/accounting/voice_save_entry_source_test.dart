@@ -233,7 +233,7 @@ void main() {
         confidence: 0.95,
         source: MatchSource.merchant,
       ),
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
     );
     parseUseCase = _FakeParseVoiceInputUseCase({
       'スターバックスで500円': parsedResult,

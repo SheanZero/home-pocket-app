@@ -124,11 +124,11 @@ void main() {
     amount: 1200,
     type: TransactionType.expense,
     categoryId: 'cat_food_groceries',
-    ledgerType: LedgerType.survival,
+    ledgerType: LedgerType.daily,
     timestamp: DateTime(2026, 2, 22),
     currentHash: 'hash_001',
     createdAt: DateTime(2026, 2, 22),
-    soulSatisfaction: 5,
+    joyFullness: 5,
   );
 
   setUpAll(() {
@@ -142,7 +142,7 @@ void main() {
 
     when(
       () => mockCategoryService.resolveLedgerType(any()),
-    ).thenAnswer((_) async => LedgerType.survival);
+    ).thenAnswer((_) async => LedgerType.daily);
 
     when(
       () => mockLearningService.recordSelection(
@@ -196,7 +196,7 @@ void main() {
     ) async {
       when(
         () => mockCategoryService.resolveLedgerType(any()),
-      ).thenAnswer((_) async => LedgerType.soul);
+      ).thenAnswer((_) async => LedgerType.joy);
 
       await pumpScreen(tester);
 

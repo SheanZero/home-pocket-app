@@ -10,7 +10,7 @@ class CategoryLedgerConfigs extends Table {
   // runtime. Generated table classes cover the executable behavior.
   TextColumn get categoryId => text().references(Categories, #id)();
   TextColumn get ledgerType => text().customConstraint(
-    "NOT NULL CHECK(ledger_type IN ('survival', 'soul'))",
+    "NOT NULL CHECK(ledger_type IN ('daily', 'joy'))",
   )();
   DateTimeColumn get updatedAt => dateTime()();
 

@@ -100,8 +100,8 @@ abstract final class AppColorsDark {
   static const tagOrange = Color(0xFF3D2D1E);
 
   // ── Soul card ──
-  static const soulSatisfactionBg = Color(0xFF3D2525);
-  static const soulSatisfactionBorder = Color(0xFF5A3535);
+  static const joyFullnessBg = Color(0xFF3D2525);
+  static const joyFullnessBorder = Color(0xFF5A3535);
   static const soulRoiBg = Color(0xFF1E3028);
   static const soulRoiBorder = Color(0xFF2D4D3A);
 

@@ -22,7 +22,7 @@ void main() {
       expect(match!.merchantName, 'Amazon');
       // Phase 21 D-04 ID-drift fix: was cat_shopping → now cat_daily_other (L2)
       expect(match.categoryId, 'cat_daily_other');
-      expect(match.ledgerType, LedgerType.soul);
+      expect(match.ledgerType, LedgerType.joy);
       expect(match.confidence, 0.90);
     });
 
@@ -33,7 +33,7 @@ void main() {
       expect(match!.merchantName, 'マクドナルド');
       // Phase 21 D-04 ID-drift fix: was cat_food → now cat_food_dining_out (L2)
       expect(match.categoryId, 'cat_food_dining_out');
-      expect(match.ledgerType, LedgerType.survival);
+      expect(match.ledgerType, LedgerType.daily);
     });
 
     test('findMerchant matches query substrings against names', () {
@@ -43,7 +43,7 @@ void main() {
       expect(match!.merchantName, 'スターバックス');
       // Phase 21 D-04 ID-drift fix: was cat_food → now cat_food_cafe (L2)
       expect(match.categoryId, 'cat_food_cafe');
-      expect(match.ledgerType, LedgerType.survival);
+      expect(match.ledgerType, LedgerType.daily);
     });
 
     test('findMerchant matches query substrings against aliases', () {
@@ -53,7 +53,7 @@ void main() {
       expect(match!.merchantName, 'Netflix');
       // Phase 21 D-04 ID-drift fix: was cat_entertainment → now cat_hobbies_subscription (L2)
       expect(match.categoryId, 'cat_hobbies_subscription');
-      expect(match.ledgerType, LedgerType.soul);
+      expect(match.ledgerType, LedgerType.joy);
     });
 
     // D-13 tests: 3-char min-length guard for substring pass

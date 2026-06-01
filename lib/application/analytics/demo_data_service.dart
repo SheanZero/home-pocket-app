@@ -107,7 +107,7 @@ class DemoDataService {
           amount: 300000 + _random.nextInt(100000),
           type: 'income',
           categoryId: 'cat_income',
-          ledgerType: 'survival',
+          ledgerType: 'daily',
           timestamp: DateTime(year, month, day, 9, 0),
           currentHash: hash,
           prevHash: prevHash.isEmpty ? null : prevHash,
@@ -129,7 +129,7 @@ class DemoDataService {
           final ledgerType = _classifyLedger(pattern.categoryId);
 
           // Soul transactions get random satisfaction (1-10), survival gets neutral 2
-          final satisfaction = ledgerType == 'soul'
+          final satisfaction = ledgerType == 'joy'
               ? 1 +
                     _random.nextInt(10) // 1..10
               : 2; // D-10: survival baseline = neutral
@@ -143,7 +143,7 @@ class DemoDataService {
             type: 'expense',
             categoryId: pattern.categoryId,
             ledgerType: ledgerType,
-            soulSatisfaction: satisfaction,
+            joyFullness: satisfaction,
             timestamp: DateTime(
               year,
               month,
@@ -169,7 +169,7 @@ class DemoDataService {
       'cat_education',
       'cat_social',
     };
-    return soulCategories.contains(categoryId) ? 'soul' : 'survival';
+    return soulCategories.contains(categoryId) ? 'joy' : 'daily';
   }
 }
 

@@ -29,7 +29,7 @@ class LedgerTypeSelector extends StatelessWidget {
         _chip(
           label: survivalLabel,
           icon: Icons.shield_outlined,
-          type: LedgerType.survival,
+          type: LedgerType.daily,
           key: const ValueKey('ledger_type_survival_chip'),
           isDark: isDark,
           activeColor: AppColors.survival,
@@ -39,7 +39,7 @@ class LedgerTypeSelector extends StatelessWidget {
         _chip(
           label: soulLabel,
           icon: Icons.auto_awesome,
-          type: LedgerType.soul,
+          type: LedgerType.joy,
           key: const ValueKey('ledger_type_soul_chip'),
           isDark: isDark,
           activeColor: AppColors.soul,

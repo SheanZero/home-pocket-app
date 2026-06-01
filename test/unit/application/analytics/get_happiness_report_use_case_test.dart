@@ -107,7 +107,7 @@ void main() {
           count: 4,
         ),
         distribution: const [SatisfactionScoreBucket(score: 8, count: 4)],
-        ptvfRows: const [SoulRowSample(amount: 1000, soulSatisfaction: 8)],
+        ptvfRows: const [SoulRowSample(amount: 1000, joyFullness: 8)],
       );
 
       final report = await execute();
@@ -123,7 +123,7 @@ void main() {
       stubReportInputs(
         overview: const SoulSatisfactionOverview(avgSatisfaction: 8, count: 1),
         distribution: const [SatisfactionScoreBucket(score: 8, count: 1)],
-        ptvfRows: const [SoulRowSample(amount: 3000, soulSatisfaction: 8)],
+        ptvfRows: const [SoulRowSample(amount: 3000, joyFullness: 8)],
       );
 
       final report = await execute();
@@ -147,8 +147,8 @@ void main() {
             SatisfactionScoreBucket(score: 10, count: 1),
           ],
           ptvfRows: const [
-            SoulRowSample(amount: 10000, soulSatisfaction: 10),
-            SoulRowSample(amount: 500, soulSatisfaction: 6),
+            SoulRowSample(amount: 10000, joyFullness: 10),
+            SoulRowSample(amount: 500, joyFullness: 6),
           ],
         );
 
@@ -171,8 +171,8 @@ void main() {
           ),
           distribution: const [SatisfactionScoreBucket(score: 2, count: 2)],
           ptvfRows: const [
-            SoulRowSample(amount: 1000, soulSatisfaction: 2),
-            SoulRowSample(amount: 2000, soulSatisfaction: 2),
+            SoulRowSample(amount: 1000, joyFullness: 2),
+            SoulRowSample(amount: 2000, joyFullness: 2),
           ],
         );
 
@@ -194,8 +194,8 @@ void main() {
           ),
           distribution: const [SatisfactionScoreBucket(score: 10, count: 2)],
           ptvfRows: const [
-            SoulRowSample(amount: 500, soulSatisfaction: 10),
-            SoulRowSample(amount: 10000, soulSatisfaction: 10),
+            SoulRowSample(amount: 500, joyFullness: 10),
+            SoulRowSample(amount: 10000, joyFullness: 10),
           ],
         );
 
@@ -221,7 +221,7 @@ void main() {
             count: 1,
           ),
           distribution: const [SatisfactionScoreBucket(score: 8, count: 1)],
-          ptvfRows: const [SoulRowSample(amount: 1000, soulSatisfaction: 8)],
+          ptvfRows: const [SoulRowSample(amount: 1000, joyFullness: 8)],
         );
 
         final jpy = await execute(currencyCode: 'JPY');
@@ -241,7 +241,7 @@ void main() {
       stubReportInputs(
         overview: const SoulSatisfactionOverview(avgSatisfaction: 7, count: 1),
         distribution: const [SatisfactionScoreBucket(score: 7, count: 1)],
-        ptvfRows: const [SoulRowSample(amount: 1000, soulSatisfaction: 7)],
+        ptvfRows: const [SoulRowSample(amount: 1000, joyFullness: 7)],
       );
 
       final jpy = await execute(currencyCode: 'JPY');
@@ -257,7 +257,7 @@ void main() {
         overview: const SoulSatisfactionOverview(avgSatisfaction: 8, count: 1),
         distribution: const [SatisfactionScoreBucket(score: 8, count: 1)],
         // Survival rows are excluded upstream by the DAO/repository contract.
-        ptvfRows: const [SoulRowSample(amount: 3000, soulSatisfaction: 8)],
+        ptvfRows: const [SoulRowSample(amount: 3000, joyFullness: 8)],
       );
 
       final report = await execute();
@@ -285,7 +285,7 @@ void main() {
           SatisfactionScoreBucket(score: 8, count: 1),
           SatisfactionScoreBucket(score: 10, count: 1),
         ],
-        ptvfRows: const [SoulRowSample(amount: 1000, soulSatisfaction: 6)],
+        ptvfRows: const [SoulRowSample(amount: 1000, joyFullness: 6)],
       );
 
       final report = await execute();
@@ -308,7 +308,7 @@ void main() {
             SatisfactionScoreBucket(score: 4, count: 1),
             SatisfactionScoreBucket(score: 5, count: 1),
           ],
-          ptvfRows: const [SoulRowSample(amount: 1000, soulSatisfaction: 2)],
+          ptvfRows: const [SoulRowSample(amount: 1000, joyFullness: 2)],
         );
 
         final report = await execute();
@@ -334,7 +334,7 @@ void main() {
             SatisfactionScoreBucket(score: 6, count: 2),
             SatisfactionScoreBucket(score: 10, count: 1),
           ],
-          ptvfRows: const [SoulRowSample(amount: 1000, soulSatisfaction: 6)],
+          ptvfRows: const [SoulRowSample(amount: 1000, joyFullness: 6)],
         );
 
         final report = await execute();
@@ -356,7 +356,7 @@ void main() {
             SatisfactionScoreBucket(score: 2, count: 2),
             SatisfactionScoreBucket(score: 6, count: 2),
           ],
-          ptvfRows: const [SoulRowSample(amount: 1000, soulSatisfaction: 6)],
+          ptvfRows: const [SoulRowSample(amount: 1000, joyFullness: 6)],
         );
 
         final report = await execute();
@@ -377,7 +377,7 @@ void main() {
             count: 2,
           ),
           distribution: const [SatisfactionScoreBucket(score: 7, count: 2)],
-          ptvfRows: const [SoulRowSample(amount: 1000, soulSatisfaction: 7)],
+          ptvfRows: const [SoulRowSample(amount: 1000, joyFullness: 7)],
         );
 
         final report = await execute();
@@ -390,14 +390,14 @@ void main() {
       final row = BestJoyMomentRow(
         transactionId: 'tx-best',
         amount: 3000,
-        soulSatisfaction: 10,
+        joyFullness: 10,
         categoryId: 'cat-book',
         timestamp: DateTime(2026, 5, 20, 12),
       );
       stubReportInputs(
         overview: const SoulSatisfactionOverview(avgSatisfaction: 10, count: 1),
         distribution: const [SatisfactionScoreBucket(score: 10, count: 1)],
-        ptvfRows: const [SoulRowSample(amount: 3000, soulSatisfaction: 10)],
+        ptvfRows: const [SoulRowSample(amount: 3000, joyFullness: 10)],
         bestJoyMoment: row,
       );
 
@@ -414,7 +414,7 @@ void main() {
       final row = BestJoyMomentRow(
         transactionId: 'tx-best',
         amount: 3000,
-        soulSatisfaction: 10,
+        joyFullness: 10,
         categoryId: 'cat-book',
         timestamp: DateTime(2026, 5, 20, 12),
       );
@@ -429,9 +429,9 @@ void main() {
           SatisfactionScoreBucket(score: 10, count: 1),
         ],
         ptvfRows: const [
-          SoulRowSample(amount: 1000, soulSatisfaction: 6),
-          SoulRowSample(amount: 2000, soulSatisfaction: 8),
-          SoulRowSample(amount: 3000, soulSatisfaction: 10),
+          SoulRowSample(amount: 1000, joyFullness: 6),
+          SoulRowSample(amount: 2000, joyFullness: 8),
+          SoulRowSample(amount: 3000, joyFullness: 10),
         ],
         bestJoyMoment: row,
       );

@@ -48,77 +48,77 @@ class MerchantDatabase {
       name: 'マクドナルド',
       aliases: ['マック', 'Mac', 'McDonald', 'mcdonalds'],
       categoryId: 'cat_food_dining_out',
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
     ),
     _MerchantEntry(
       name: 'スターバックス',
       aliases: ['スタバ', 'Starbucks', 'starbucks'],
       categoryId: 'cat_food_cafe',
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
     ),
     _MerchantEntry(
       name: '吉野家',
       aliases: ['Yoshinoya', 'yoshinoya'],
       categoryId: 'cat_food_dining_out',
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
     ),
     _MerchantEntry(
       name: 'セブンイレブン',
       aliases: ['セブン', '7-Eleven', '7-11', '7eleven'],
       categoryId: 'cat_food_groceries',
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
     ),
     _MerchantEntry(
       name: 'ファミリーマート',
       aliases: ['ファミマ', 'FamilyMart', 'familymart'],
       categoryId: 'cat_food_groceries',
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
     ),
     _MerchantEntry(
       name: 'ローソン',
       aliases: ['Lawson', 'lawson'],
       categoryId: 'cat_food_groceries',
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
     ),
     _MerchantEntry(
       name: 'ユニクロ',
       aliases: ['Uniqlo', 'UNIQLO', 'uniqlo'],
       // D-04 ID drift fix: prior id was a non-existent L1 (shopping bucket) → silently null on findById. Now points at L2 cat_clothing_clothes.
       categoryId: 'cat_clothing_clothes',
-      ledgerType: LedgerType.soul,
+      ledgerType: LedgerType.joy,
     ),
     _MerchantEntry(
       name: 'ニトリ',
       aliases: ['Nitori', 'nitori'],
       categoryId: 'cat_housing_furniture',
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
     ),
     _MerchantEntry(
       name: 'ヤマダ電機',
       aliases: ['ヤマダ', 'Yamada', 'yamada'],
       // D-04 ID drift fix: prior id was a non-existent L1 (shopping bucket) → silently null on findById. Now points at L2 cat_housing_appliances.
       categoryId: 'cat_housing_appliances',
-      ledgerType: LedgerType.soul,
+      ledgerType: LedgerType.joy,
     ),
     _MerchantEntry(
       name: 'すき家',
       aliases: ['Sukiya', 'sukiya'],
       categoryId: 'cat_food_dining_out',
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
     ),
     _MerchantEntry(
       name: 'Amazon',
       aliases: ['アマゾン', 'amazon'],
       // D-04 ID drift fix: prior id was a non-existent L1 (shopping bucket) → silently null on findById. Now points at L2 cat_daily_other.
       categoryId: 'cat_daily_other',
-      ledgerType: LedgerType.soul,
+      ledgerType: LedgerType.joy,
     ),
     _MerchantEntry(
       name: 'Netflix',
       aliases: ['ネットフリックス', 'netflix'],
       // D-04 ID drift fix: prior id was a non-existent L1 (entertainment bucket) → silently null on findById. Now points at L2 cat_hobbies_subscription.
       categoryId: 'cat_hobbies_subscription',
-      ledgerType: LedgerType.soul,
+      ledgerType: LedgerType.joy,
     ),
   ];
 

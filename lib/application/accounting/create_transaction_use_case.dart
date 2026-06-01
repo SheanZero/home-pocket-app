@@ -21,7 +21,7 @@ class CreateTransactionParams {
   final DateTime? timestamp;
   final String? note;
   final String? merchant;
-  final int? soulSatisfaction; // null = use default 2
+  final int? joyFullness; // null = use default 2
   final LedgerType? ledgerType; // null = auto-classify
   final EntrySource entrySource;
 
@@ -33,7 +33,7 @@ class CreateTransactionParams {
     this.timestamp,
     this.note,
     this.merchant,
-    this.soulSatisfaction,
+    this.joyFullness,
     this.ledgerType,
     // D-06: required, no default — every push site MUST specify.
     required this.entrySource,
@@ -111,17 +111,17 @@ class CreateTransactionUseCase {
     }
 
     // 4.5 Resolve & validate soul satisfaction
-    final int soulSatisfaction;
-    if (resolvedLedgerType == LedgerType.soul) {
-      soulSatisfaction = params.soulSatisfaction ?? 2;
-      if (soulSatisfaction < 1 || soulSatisfaction > 10) {
+    final int joyFullness;
+    if (resolvedLedgerType == LedgerType.joy) {
+      joyFullness = params.joyFullness ?? 2;
+      if (joyFullness < 1 || joyFullness > 10) {
         return Result.error(
-          'soulSatisfaction must be between 1 and 10, got $soulSatisfaction',
+          'joyFullness must be between 1 and 10, got $joyFullness',
         );
       }
     } else {
       // Non-soul transactions always get default
-      soulSatisfaction = 2;
+      joyFullness = 2;
     }
 
     // 5. Get previous hash for chain
@@ -159,7 +159,7 @@ class CreateTransactionUseCase {
       createdAt: now,
       note: params.note,
       merchant: params.merchant,
-      soulSatisfaction: soulSatisfaction,
+      joyFullness: joyFullness,
       entrySource: params.entrySource,
     );
 

@@ -22,7 +22,4 @@ Map<String, dynamic> _$CategoryLedgerConfigToJson(
   'updatedAt': instance.updatedAt.toIso8601String(),
 };
 
-const _$LedgerTypeEnumMap = {
-  LedgerType.survival: 'survival',
-  LedgerType.soul: 'soul',
-};
+const _$LedgerTypeEnumMap = {LedgerType.daily: 'daily', LedgerType.joy: 'joy'};

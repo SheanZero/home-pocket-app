@@ -131,7 +131,7 @@ final _successTransaction = Transaction(
   amount: 111,
   type: TransactionType.expense,
   categoryId: 'convenience',
-  ledgerType: LedgerType.survival,
+  ledgerType: LedgerType.daily,
   timestamp: DateTime(2026, 2, 22),
   currentHash: 'hash_001',
   createdAt: DateTime(2026, 2, 22),
@@ -179,7 +179,7 @@ void main() {
     mockCategoryService = MockCategoryService();
     when(
       () => mockCategoryService.resolveLedgerType(any()),
-    ).thenAnswer((_) async => LedgerType.survival);
+    ).thenAnswer((_) async => LedgerType.daily);
   });
 
   // ── SC-1: single screen, no Next button, all six field surfaces ─────────────

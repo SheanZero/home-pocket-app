@@ -10,7 +10,7 @@ Transaction _makeTransaction({String id = 'tx-1'}) => Transaction(
       amount: 1000,
       type: TransactionType.expense,
       categoryId: 'food',
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
       timestamp: DateTime(2026, 5, 1),
       currentHash: 'hash-abc',
       createdAt: DateTime(2026, 5, 1),

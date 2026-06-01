@@ -219,7 +219,7 @@ void _createV4Schema(Database db) {
       is_private INTEGER NOT NULL DEFAULT 0,
       is_synced INTEGER NOT NULL DEFAULT 0,
       is_deleted INTEGER NOT NULL DEFAULT 0,
-      soul_satisfaction INTEGER NOT NULL DEFAULT 5
+      joy_fullness INTEGER NOT NULL DEFAULT 5
     )
   ''');
   db.execute('''

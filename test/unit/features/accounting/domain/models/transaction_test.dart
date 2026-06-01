@@ -14,8 +14,8 @@ void main() {
   group('LedgerType', () {
     test('has survival and soul values', () {
       expect(LedgerType.values.length, 2);
-      expect(LedgerType.survival, isNotNull);
-      expect(LedgerType.soul, isNotNull);
+      expect(LedgerType.daily, isNotNull);
+      expect(LedgerType.joy, isNotNull);
     });
   });
 
@@ -29,7 +29,7 @@ void main() {
         amount: 10000,
         type: TransactionType.expense,
         categoryId: 'cat_food',
-        ledgerType: LedgerType.survival,
+        ledgerType: LedgerType.daily,
         timestamp: now,
         currentHash: 'abc123',
         createdAt: now,
@@ -38,7 +38,7 @@ void main() {
       expect(tx.id, 'tx_001');
       expect(tx.amount, 10000);
       expect(tx.type, TransactionType.expense);
-      expect(tx.ledgerType, LedgerType.survival);
+      expect(tx.ledgerType, LedgerType.daily);
       expect(tx.isPrivate, false);
       expect(tx.isSynced, false);
       expect(tx.isDeleted, false);
@@ -56,7 +56,7 @@ void main() {
         amount: 10000,
         type: TransactionType.expense,
         categoryId: 'cat_food',
-        ledgerType: LedgerType.survival,
+        ledgerType: LedgerType.daily,
         timestamp: now,
         currentHash: 'hash1',
         createdAt: now,
@@ -78,7 +78,7 @@ void main() {
         amount: 10000,
         type: TransactionType.expense,
         categoryId: 'cat_food',
-        ledgerType: LedgerType.survival,
+        ledgerType: LedgerType.daily,
         timestamp: now,
         currentHash: 'hash1',
         createdAt: now,
@@ -106,7 +106,7 @@ void main() {
         amount: 10000,
         type: TransactionType.expense,
         categoryId: 'cat_food',
-        ledgerType: LedgerType.survival,
+        ledgerType: LedgerType.daily,
         timestamp: now,
         currentHash: 'hash1',
         createdAt: now,
@@ -127,7 +127,7 @@ void main() {
         amount: 100,
         type: TransactionType.expense,
         categoryId: 'cat_1',
-        ledgerType: LedgerType.survival,
+        ledgerType: LedgerType.daily,
         timestamp: now,
         currentHash: 'h1',
         createdAt: now,
@@ -139,7 +139,7 @@ void main() {
         amount: 100,
         type: TransactionType.expense,
         categoryId: 'cat_1',
-        ledgerType: LedgerType.survival,
+        ledgerType: LedgerType.daily,
         timestamp: now,
         currentHash: 'h1',
         createdAt: now,

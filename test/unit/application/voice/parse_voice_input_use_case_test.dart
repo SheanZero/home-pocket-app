@@ -55,7 +55,7 @@ void main() {
       );
       when(
         () => mockResolver.resolveLedgerType(any()),
-      ).thenAnswer((_) async => LedgerType.survival);
+      ).thenAnswer((_) async => LedgerType.daily);
 
       final result = await useCase.execute('昼ごはんに680円');
 
@@ -73,7 +73,7 @@ void main() {
           merchantName: 'マクドナルド',
           categoryId: 'cat_food_dining_out',
           confidence: 0.95,
-          ledgerType: LedgerType.survival,
+          ledgerType: LedgerType.daily,
         );
         when(
           () => mockMerchantDatabase.findMerchant(any()),
@@ -98,7 +98,7 @@ void main() {
         // the resolver's hard-coded 0.90 for canonical-name re-match)
         expect(result.data!.categoryMatch!.confidence, equals(0.95));
         // merchant-specific ledgerType wins
-        expect(result.data!.ledgerType, equals(LedgerType.survival));
+        expect(result.data!.ledgerType, equals(LedgerType.daily));
         // resolve() MUST NOT be consulted on the merchant branch — only
         // normalizeToL2 is.
         verifyNever(() => mockResolver.resolve(any()));
@@ -116,7 +116,7 @@ void main() {
           merchantName: 'マクドナルド',
           categoryId: 'cat_food_dining_out',
           confidence: 0.95,
-          ledgerType: LedgerType.survival,
+          ledgerType: LedgerType.daily,
         );
         when(
           () => mockMerchantDatabase.findMerchant(any()),
@@ -139,7 +139,7 @@ void main() {
           equals(MatchSource.merchant),
         );
         // ledgerType still wins from merchantMatch
-        expect(result.data!.ledgerType, equals(LedgerType.survival));
+        expect(result.data!.ledgerType, equals(LedgerType.daily));
       },
     );
 
@@ -154,7 +154,7 @@ void main() {
       );
       when(
         () => mockResolver.resolveLedgerType(any()),
-      ).thenAnswer((_) async => LedgerType.survival);
+      ).thenAnswer((_) async => LedgerType.daily);
 
       final result = await useCase.execute('電車代320円');
 
@@ -167,7 +167,7 @@ void main() {
         result.data!.categoryMatch!.categoryId,
         equals('cat_transport_train'),
       );
-      expect(result.data!.ledgerType, equals(LedgerType.survival));
+      expect(result.data!.ledgerType, equals(LedgerType.daily));
     });
 
     test(
@@ -236,7 +236,7 @@ void main() {
           merchantName: '星巴克',
           categoryId: 'cat_food_cafe',
           confidence: 0.92,
-          ledgerType: LedgerType.survival,
+          ledgerType: LedgerType.daily,
         );
         when(
           () => mockMerchantDatabase.findMerchant(any()),
@@ -293,7 +293,7 @@ void main() {
         );
         when(
           () => mockResolver.resolveLedgerType(any()),
-        ).thenAnswer((_) async => LedgerType.survival);
+        ).thenAnswer((_) async => LedgerType.daily);
 
         final result = await useCase.execute(
           '昼ごはんに680円',
@@ -308,7 +308,7 @@ void main() {
           result.data!.categoryMatch!.categoryId,
           equals('cat_food_dining_out'),
         );
-        expect(result.data!.ledgerType, equals(LedgerType.survival));
+        expect(result.data!.ledgerType, equals(LedgerType.daily));
         // NEW field also populated.
         expect(result.data!.resolvedKeyword, isNotNull);
         expect(result.data!.resolvedKeyword!.isNotEmpty, isTrue);

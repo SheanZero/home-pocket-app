@@ -96,9 +96,9 @@ class GetMonthlyReportUseCase {
     int survivalTotal = 0;
     int soulTotal = 0;
     for (final lt in ledgerTotals) {
-      if (lt.ledgerType == 'survival') {
+      if (lt.ledgerType == 'daily') {
         survivalTotal = lt.totalAmount;
-      } else if (lt.ledgerType == 'soul') {
+      } else if (lt.ledgerType == 'joy') {
         soulTotal = lt.totalAmount;
       }
     }

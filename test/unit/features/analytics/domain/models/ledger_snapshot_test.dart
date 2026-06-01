@@ -46,7 +46,7 @@ void main() {
     test(
       'D-04 type-system gate: SurvivalLedgerSnapshot.toString() MUST NOT '
       "expose the 'avgSatisfaction' field name — the field literally cannot "
-      'exist (compile-time gate). transactions.soul_satisfaction defaults to '
+      'exist (compile-time gate). transactions.joy_fullness defaults to '
       '2 and the picker only renders for soul-ledger entries (ADR-014 D-10), '
       'so AVG over survival rows is default-2-dominated and reads as '
       '"survival = always neutral/unhappy". Adding avgSatisfaction here is '

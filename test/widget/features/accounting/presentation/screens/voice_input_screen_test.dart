@@ -205,7 +205,7 @@ class FakeCategoryLedgerConfigRepository
   Future<CategoryLedgerConfig?> findById(String categoryId) async {
     return CategoryLedgerConfig(
       categoryId: categoryId,
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
       updatedAt: DateTime(2026),
     );
   }
@@ -339,11 +339,11 @@ final _soulTransaction = Transaction(
   amount: 1000,
   type: TransactionType.expense,
   categoryId: 'dining',
-  ledgerType: LedgerType.soul,
+  ledgerType: LedgerType.joy,
   timestamp: DateTime(2026, 5, 25),
   currentHash: 'hash-soul',
   createdAt: DateTime(2026, 5, 25),
-  soulSatisfaction: 7,
+  joyFullness: 7,
   entrySource: EntrySource.voice,
 );
 
@@ -356,7 +356,7 @@ final _survivalTransaction = Transaction(
   amount: 1840,
   type: TransactionType.expense,
   categoryId: 'dining',
-  ledgerType: LedgerType.survival,
+  ledgerType: LedgerType.daily,
   timestamp: DateTime(2026, 5, 25),
   currentHash: 'hash-survival',
   createdAt: DateTime(2026, 5, 25),
@@ -693,7 +693,7 @@ void main() {
               confidence: 0.91,
               source: MatchSource.keyword,
             ),
-            ledgerType: LedgerType.survival,
+            ledgerType: LedgerType.daily,
           ),
         });
 
@@ -829,7 +829,7 @@ void main() {
               confidence: 0.91,
               source: MatchSource.keyword,
             ),
-            ledgerType: LedgerType.survival,
+            ledgerType: LedgerType.daily,
           ),
         });
 
@@ -913,7 +913,7 @@ void main() {
               confidence: 0.92,
               source: MatchSource.keyword,
             ),
-            ledgerType: LedgerType.survival,
+            ledgerType: LedgerType.daily,
           ),
         });
 
@@ -1424,7 +1424,7 @@ void main() {
             confidence: 0.91,
             source: MatchSource.keyword,
           ),
-          ledgerType: LedgerType.soul,
+          ledgerType: LedgerType.joy,
         );
 
         final subject = buildSubjectForSave(
@@ -1491,7 +1491,7 @@ void main() {
             confidence: 0.91,
             source: MatchSource.keyword,
           ),
-          ledgerType: LedgerType.survival,
+          ledgerType: LedgerType.daily,
         );
 
         final subject = buildSubjectForSave(
@@ -1721,7 +1721,7 @@ void main() {
             confidence: 0.85,
             source: MatchSource.keyword,
           ),
-          ledgerType: LedgerType.survival,
+          ledgerType: LedgerType.daily,
           resolvedKeyword: '去外食',
         );
         final speechService = CapturingStartSpeechRecognitionUseCase();

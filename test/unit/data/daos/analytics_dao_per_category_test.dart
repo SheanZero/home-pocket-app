@@ -28,7 +28,7 @@ void main() {
     String ledgerType = 'soul',
     DateTime? timestamp,
     bool isDeleted = false,
-    int soulSatisfaction = 6,
+    int joyFullness = 6,
   }) {
     final effectiveTimestamp = timestamp ?? DateTime(2026, 5, 10, 12);
     return db
@@ -46,14 +46,14 @@ void main() {
             currentHash: 'hash_$id',
             createdAt: effectiveTimestamp,
             isDeleted: Value(isDeleted),
-            soulSatisfaction: Value(soulSatisfaction),
+            joyFullness: Value(joyFullness),
           ),
         );
   }
 
   group('getPerCategorySoulBreakdown (single book)', () {
     test('returns row type PerCategorySoulRowRaw', () async {
-      await seedTx(id: 'soul_1', categoryId: 'cat_a', soulSatisfaction: 8);
+      await seedTx(id: 'soul_1', categoryId: 'cat_a', joyFullness: 8);
 
       final rows = await dao.getPerCategorySoulBreakdown(
         bookId: 'book_joy',
@@ -69,12 +69,12 @@ void main() {
     });
 
     test('excludes survival rows (soul-only filter)', () async {
-      await seedTx(id: 'soul_a', categoryId: 'cat_a', soulSatisfaction: 8);
+      await seedTx(id: 'soul_a', categoryId: 'cat_a', joyFullness: 8);
       await seedTx(
         id: 'survival_a',
         categoryId: 'cat_a',
         ledgerType: 'survival',
-        soulSatisfaction: 10,
+        joyFullness: 10,
       );
 
       final rows = await dao.getPerCategorySoulBreakdown(
@@ -89,12 +89,12 @@ void main() {
     });
 
     test('excludes income rows (type=expense filter)', () async {
-      await seedTx(id: 'soul_a', categoryId: 'cat_a', soulSatisfaction: 8);
+      await seedTx(id: 'soul_a', categoryId: 'cat_a', joyFullness: 8);
       await seedTx(
         id: 'income_a',
         categoryId: 'cat_a',
         type: 'income',
-        soulSatisfaction: 10,
+        joyFullness: 10,
       );
 
       final rows = await dao.getPerCategorySoulBreakdown(
@@ -108,12 +108,12 @@ void main() {
     });
 
     test('excludes soft-deleted rows', () async {
-      await seedTx(id: 'soul_a', categoryId: 'cat_a', soulSatisfaction: 8);
+      await seedTx(id: 'soul_a', categoryId: 'cat_a', joyFullness: 8);
       await seedTx(
         id: 'deleted_a',
         categoryId: 'cat_a',
         isDeleted: true,
-        soulSatisfaction: 10,
+        joyFullness: 10,
       );
 
       final rows = await dao.getPerCategorySoulBreakdown(
@@ -132,26 +132,26 @@ void main() {
         id: 'inside_start',
         categoryId: 'cat_a',
         timestamp: windowStart,
-        soulSatisfaction: 5,
+        joyFullness: 5,
       );
       await seedTx(
         id: 'inside_end',
         categoryId: 'cat_a',
         timestamp: windowEnd,
-        soulSatisfaction: 5,
+        joyFullness: 5,
       );
       // Outside window — excluded
       await seedTx(
         id: 'before_start',
         categoryId: 'cat_a',
         timestamp: DateTime(2026, 4, 30, 23, 59, 59),
-        soulSatisfaction: 10,
+        joyFullness: 10,
       );
       await seedTx(
         id: 'after_end',
         categoryId: 'cat_a',
         timestamp: DateTime(2026, 6, 1),
-        soulSatisfaction: 10,
+        joyFullness: 10,
       );
 
       final rows = await dao.getPerCategorySoulBreakdown(
@@ -173,7 +173,7 @@ void main() {
           await seedTx(
             id: 'cat_a_$i',
             categoryId: 'cat_a',
-            soulSatisfaction: 8,
+            joyFullness: 8,
           );
         }
         // cat_b: avgSat=6.0, count=2
@@ -181,28 +181,28 @@ void main() {
           await seedTx(
             id: 'cat_b_$i',
             categoryId: 'cat_b',
-            soulSatisfaction: 6,
+            joyFullness: 6,
           );
         }
         // cat_c: avgSat=9.5, count=1 (low-N — MUST still appear; no HAVING)
-        await seedTx(id: 'cat_c_0', categoryId: 'cat_c', soulSatisfaction: 9);
+        await seedTx(id: 'cat_c_0', categoryId: 'cat_c', joyFullness: 9);
         // Need avgSat=9.5 → two rows of 9 + 10
         await db.delete(db.transactions).go();
         for (var i = 0; i < 3; i += 1) {
           await seedTx(
             id: 'a_$i',
             categoryId: 'cat_a',
-            soulSatisfaction: 8,
+            joyFullness: 8,
           );
         }
         for (var i = 0; i < 2; i += 1) {
           await seedTx(
             id: 'b_$i',
             categoryId: 'cat_b',
-            soulSatisfaction: 6,
+            joyFullness: 6,
           );
         }
-        await seedTx(id: 'c_only', categoryId: 'cat_c', soulSatisfaction: 9);
+        await seedTx(id: 'c_only', categoryId: 'cat_c', joyFullness: 9);
 
         final rows = await dao.getPerCategorySoulBreakdown(
           bookId: 'book_joy',
@@ -227,11 +227,11 @@ void main() {
     test('tie-break on AVG: COUNT DESC wins', () async {
       // cat_a: avgSat=7.0, count=5
       for (var i = 0; i < 5; i += 1) {
-        await seedTx(id: 'a_$i', categoryId: 'cat_a', soulSatisfaction: 7);
+        await seedTx(id: 'a_$i', categoryId: 'cat_a', joyFullness: 7);
       }
       // cat_b: avgSat=7.0, count=3
       for (var i = 0; i < 3; i += 1) {
-        await seedTx(id: 'b_$i', categoryId: 'cat_b', soulSatisfaction: 7);
+        await seedTx(id: 'b_$i', categoryId: 'cat_b', joyFullness: 7);
       }
 
       final rows = await dao.getPerCategorySoulBreakdown(
@@ -250,10 +250,10 @@ void main() {
     test('tie-break on AVG + COUNT: categoryId ASC wins', () async {
       // Both: avgSat=7.0, count=5 → categoryId ASC ('cat_a' < 'cat_b')
       for (var i = 0; i < 5; i += 1) {
-        await seedTx(id: 'b_$i', categoryId: 'cat_b', soulSatisfaction: 7);
+        await seedTx(id: 'b_$i', categoryId: 'cat_b', joyFullness: 7);
       }
       for (var i = 0; i < 5; i += 1) {
-        await seedTx(id: 'a_$i', categoryId: 'cat_a', soulSatisfaction: 7);
+        await seedTx(id: 'a_$i', categoryId: 'cat_a', joyFullness: 7);
       }
 
       final rows = await dao.getPerCategorySoulBreakdown(
@@ -288,26 +288,26 @@ void main() {
           id: 'a1',
           bookId: 'book_a',
           categoryId: 'cat_a',
-          soulSatisfaction: 8,
+          joyFullness: 8,
         );
         await seedTx(
           id: 'a2',
           bookId: 'book_a',
           categoryId: 'cat_a',
-          soulSatisfaction: 8,
+          joyFullness: 8,
         );
         // bookB: cat_a count=2, avg=8
         await seedTx(
           id: 'b1',
           bookId: 'book_b',
           categoryId: 'cat_a',
-          soulSatisfaction: 8,
+          joyFullness: 8,
         );
         await seedTx(
           id: 'b2',
           bookId: 'book_b',
           categoryId: 'cat_a',
-          soulSatisfaction: 8,
+          joyFullness: 8,
         );
 
         final rows = await dao.getPerCategorySoulBreakdownAcrossBooks(
@@ -326,7 +326,7 @@ void main() {
 
     test('empty bookIds → empty list, no DB call', () async {
       // Seed data that would otherwise match — verify NOT returned
-      await seedTx(id: 'soul_a', categoryId: 'cat_a', soulSatisfaction: 8);
+      await seedTx(id: 'soul_a', categoryId: 'cat_a', joyFullness: 8);
 
       final rows = await dao.getPerCategorySoulBreakdownAcrossBooks(
         bookIds: const [],

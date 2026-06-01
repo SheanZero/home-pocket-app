@@ -31,7 +31,7 @@ void main() {
     String ledgerType = 'soul',
     DateTime? timestamp,
     bool isDeleted = false,
-    int soulSatisfaction = 6,
+    int joyFullness = 6,
     String entrySource = 'manual',
   }) {
     final effectiveTimestamp = timestamp ?? DateTime(2026, 5, 10, 12);
@@ -50,7 +50,7 @@ void main() {
             currentHash: 'hash_$id',
             createdAt: effectiveTimestamp,
             isDeleted: Value(isDeleted),
-            soulSatisfaction: Value(soulSatisfaction),
+            joyFullness: Value(joyFullness),
             entrySource: Value(entrySource),
           ),
         );
@@ -60,17 +60,17 @@ void main() {
     test('null filter keeps all entry sources in ordering', () async {
       await seedTx(
         id: 'voice_best',
-        soulSatisfaction: 10,
+        joyFullness: 10,
         entrySource: 'voice',
       );
       await seedTx(
         id: 'manual_second',
-        soulSatisfaction: 9,
+        joyFullness: 9,
         entrySource: 'manual',
       );
       await seedTx(
         id: 'manual_third',
-        soulSatisfaction: 7,
+        joyFullness: 7,
         entrySource: 'manual',
       );
 
@@ -83,23 +83,23 @@ void main() {
 
       expect(best, isNotNull);
       expect(best!.transactionId, 'voice_best');
-      expect(best.soulSatisfaction, 10);
+      expect(best.joyFullness, 10);
     });
 
     test('manual filter excludes voice rows from ordering', () async {
       await seedTx(
         id: 'voice_best',
-        soulSatisfaction: 10,
+        joyFullness: 10,
         entrySource: 'voice',
       );
       await seedTx(
         id: 'manual_second',
-        soulSatisfaction: 9,
+        joyFullness: 9,
         entrySource: 'manual',
       );
       await seedTx(
         id: 'manual_third',
-        soulSatisfaction: 7,
+        joyFullness: 7,
         entrySource: 'manual',
       );
 
@@ -112,7 +112,7 @@ void main() {
 
       expect(best, isNotNull);
       expect(best!.transactionId, 'manual_second');
-      expect(best.soulSatisfaction, 9);
+      expect(best.joyFullness, 9);
     });
   });
 
@@ -173,7 +173,7 @@ void main() {
           bookId: 'book_a',
           amount: 100,
           categoryId: 'cat_music',
-          soulSatisfaction: 8,
+          joyFullness: 8,
           entrySource: 'manual',
         );
         await seedTx(
@@ -181,7 +181,7 @@ void main() {
           bookId: 'book_a',
           amount: 100,
           categoryId: 'cat_music',
-          soulSatisfaction: 10,
+          joyFullness: 10,
           entrySource: 'voice',
         );
         await seedTx(
@@ -189,7 +189,7 @@ void main() {
           bookId: 'book_b',
           amount: 100,
           categoryId: 'cat_music',
-          soulSatisfaction: 6,
+          joyFullness: 6,
           entrySource: 'manual',
         );
 

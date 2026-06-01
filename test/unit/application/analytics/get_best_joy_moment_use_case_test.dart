@@ -94,7 +94,7 @@ void main() {
       final row = BestJoyMomentRow(
         transactionId: 'tx-best',
         amount: 3000,
-        soulSatisfaction: 10,
+        joyFullness: 10,
         categoryId: 'cat-coffee',
         timestamp: DateTime(2026, 5, 20, 18, 30),
       );
@@ -137,7 +137,7 @@ void main() {
       final row = BestJoyMomentRow(
         transactionId: 'tx-best',
         amount: 4500,
-        soulSatisfaction: 9,
+        joyFullness: 9,
         categoryId: 'cat-books',
         timestamp: DateTime(2026, 5, 21, 19),
       );
@@ -178,7 +178,7 @@ void main() {
         final row = BestJoyMomentRow(
           transactionId: 'tx-null',
           amount: 3200,
-          soulSatisfaction: 8,
+          joyFullness: 8,
           categoryId: 'cat-null',
           timestamp: DateTime(2026, 5, 21, 19),
         );
@@ -226,7 +226,7 @@ void main() {
         final row = BestJoyMomentRow(
           transactionId: 'tx-manual',
           amount: 4500,
-          soulSatisfaction: 9,
+          joyFullness: 9,
           categoryId: 'cat-manual',
           timestamp: DateTime(2026, 5, 21, 19),
         );

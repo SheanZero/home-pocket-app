@@ -66,7 +66,7 @@ void main() {
       ),
     ).thenAnswer(
       (_) async => const ClassificationResult(
-        ledgerType: LedgerType.survival,
+        ledgerType: LedgerType.daily,
         confidence: 1.0,
         method: ClassificationMethod.rule,
         reason: 'Default stub',
@@ -253,7 +253,7 @@ void main() {
         ),
       ).thenAnswer(
         (_) async => const ClassificationResult(
-          ledgerType: LedgerType.soul,
+          ledgerType: LedgerType.joy,
           confidence: 1.0,
           method: ClassificationMethod.rule,
           reason: 'Entertainment category',
@@ -296,7 +296,7 @@ void main() {
       );
 
       expect(result.isSuccess, isTrue);
-      expect(result.data!.ledgerType, LedgerType.soul);
+      expect(result.data!.ledgerType, LedgerType.joy);
     });
 
     test('uses default soul satisfaction 2 for soul transactions', () async {
@@ -308,7 +308,7 @@ void main() {
         ),
       ).thenAnswer(
         (_) async => const ClassificationResult(
-          ledgerType: LedgerType.soul,
+          ledgerType: LedgerType.joy,
           confidence: 1.0,
           method: ClassificationMethod.rule,
           reason: 'Entertainment category',
@@ -339,7 +339,7 @@ void main() {
       );
 
       expect(result.isSuccess, isTrue);
-      expect(result.data!.soulSatisfaction, 2);
+      expect(result.data!.joyFullness, 2);
     });
 
     test('passes merchant and note to classification service', () async {

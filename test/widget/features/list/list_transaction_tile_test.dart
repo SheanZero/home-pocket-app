@@ -33,7 +33,7 @@ TaggedTransaction _makeTx({String id = 'tx-1'}) {
       amount: 1500,
       type: TransactionType.expense,
       categoryId: 'cat_food',
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
       timestamp: now,
       currentHash: 'stub_hash',
       createdAt: now,

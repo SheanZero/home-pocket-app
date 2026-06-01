@@ -137,11 +137,11 @@ void main() {
         final configs = DefaultCategories.defaultLedgerConfigs;
         expect(
           configs.firstWhere((c) => c.categoryId == 'cat_pet').ledgerType,
-          LedgerType.soul,
+          LedgerType.joy,
         );
         expect(
           configs.firstWhere((c) => c.categoryId == 'cat_allowance').ledgerType,
-          LedgerType.soul,
+          LedgerType.joy,
         );
       });
 
@@ -160,7 +160,7 @@ void main() {
           );
           expect(
             c.ledgerType,
-            LedgerType.survival,
+            LedgerType.daily,
             reason: '$id should override to survival',
           );
         }
@@ -173,7 +173,7 @@ void main() {
             (x) => x.categoryId == id,
             orElse: () => throw StateError('Missing ledger override for $id'),
           );
-          expect(c.ledgerType, LedgerType.soul);
+          expect(c.ledgerType, LedgerType.joy);
         }
       });
 
@@ -188,7 +188,7 @@ void main() {
             (x) => x.categoryId == id,
             orElse: () => throw StateError('Missing ledger override for $id'),
           );
-          expect(c.ledgerType, LedgerType.soul);
+          expect(c.ledgerType, LedgerType.joy);
         }
       });
     });

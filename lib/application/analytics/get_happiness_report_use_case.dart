@@ -108,7 +108,7 @@ class GetHappinessReportUseCase {
     var sum = 0.0;
     for (final r in rows) {
       final scaled = math.pow(r.amount / base, _ptvfAlpha).toDouble();
-      sum += r.soulSatisfaction * scaled;
+      sum += r.joyFullness * scaled;
     }
     return sum;
   }

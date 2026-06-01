@@ -17,7 +17,7 @@ void main() {
     test('uses rule engine when category has a rule (survival)', () async {
       final result = await service.classify(categoryId: 'cat_food');
 
-      expect(result.ledgerType, LedgerType.survival);
+      expect(result.ledgerType, LedgerType.daily);
       expect(result.method, ClassificationMethod.rule);
       expect(result.confidence, 1.0);
     });
@@ -25,7 +25,7 @@ void main() {
     test('uses rule engine when category has a rule (soul)', () async {
       final result = await service.classify(categoryId: 'cat_entertainment');
 
-      expect(result.ledgerType, LedgerType.soul);
+      expect(result.ledgerType, LedgerType.joy);
       expect(result.method, ClassificationMethod.rule);
       expect(result.confidence, 1.0);
     });
@@ -33,7 +33,7 @@ void main() {
     test('falls back to default survival for unknown category', () async {
       final result = await service.classify(categoryId: 'cat_unknown_xyz');
 
-      expect(result.ledgerType, LedgerType.survival);
+      expect(result.ledgerType, LedgerType.daily);
       expect(result.confidence, lessThan(1.0));
     });
 

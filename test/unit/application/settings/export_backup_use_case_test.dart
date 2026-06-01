@@ -71,7 +71,7 @@ void main() {
           amount: 1000,
           type: TransactionType.expense,
           categoryId: 'cat-1',
-          ledgerType: LedgerType.survival,
+          ledgerType: LedgerType.daily,
           timestamp: now,
           currentHash: 'hash1',
           createdAt: now,

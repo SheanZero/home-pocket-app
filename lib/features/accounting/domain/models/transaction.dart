@@ -7,7 +7,7 @@ part 'transaction.g.dart';
 
 enum TransactionType { expense, income, transfer }
 
-enum LedgerType { survival, soul }
+enum LedgerType { daily, joy }
 
 @freezed
 abstract class Transaction with _$Transaction {
@@ -40,8 +40,8 @@ abstract class Transaction with _$Transaction {
     @Default(false) bool isSynced,
     @Default(false) bool isDeleted,
 
-    // Soul ledger satisfaction score (1-10, default 2)
-    @Default(2) int soulSatisfaction,
+    // Joy ledger fullness score (1-10, default 2)
+    @Default(2) int joyFullness,
 
     // Entry-path provenance (D-01 / D-09). Default 'manual' applies for older
     // sync payloads / DB rows where the column DEFAULT triggered.

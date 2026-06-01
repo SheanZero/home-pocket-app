@@ -145,7 +145,7 @@ Transaction _fakeSuccessTx({int amount = 1500}) => Transaction(
   amount: amount,
   type: TransactionType.expense,
   categoryId: 'cat-food',
-  ledgerType: LedgerType.survival,
+  ledgerType: LedgerType.daily,
   timestamp: DateTime(2026, 5, 1),
   currentHash: 'hash001',
   createdAt: DateTime(2026, 5, 1),

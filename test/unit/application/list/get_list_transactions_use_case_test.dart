@@ -36,7 +36,7 @@ void main() {
       amount: amount,
       type: TransactionType.expense,
       categoryId: 'cat_food',
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
       timestamp: DateTime(2026, 5, 29),
       currentHash: 'hash_$id',
       createdAt: DateTime(2026, 5, 29),

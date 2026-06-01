@@ -50,7 +50,7 @@ class BestJoyStoryStrip extends StatelessWidget {
             switch (bestJoy) {
               Empty<BestJoyMomentRow>() => _buildEmpty(context, l10n),
               Value<BestJoyMomentRow>(:final data)
-                  when data.soulSatisfaction <= 2 =>
+                  when data.joyFullness <= 2 =>
                 _buildEmpty(context, l10n),
               Value<BestJoyMomentRow>(:final data) => _BestJoyValue(
                 row: data,
@@ -102,7 +102,7 @@ class _BestJoyValue extends StatelessWidget {
     );
 
     return Semantics(
-      label: '$categoryName ${row.soulSatisfaction}/10 $amountText $dateLabel',
+      label: '$categoryName ${row.joyFullness}/10 $amountText $dateLabel',
       child: InkWell(
         onTap: onTap == null ? null : () => onTap!(row.transactionId),
         child: Padding(
@@ -120,7 +120,7 @@ class _BestJoyValue extends StatelessWidget {
               Text(
                 l10n.analyticsCardSmallBestJoy(
                   amountText,
-                  row.soulSatisfaction,
+                  row.joyFullness,
                 ),
                 style: AppTextStyles.caption.copyWith(
                   color: context.wmTextSecondary,

@@ -67,7 +67,7 @@ class GetMonthlyJoyTargetRecommendationUseCase {
     var sum = 0.0;
     for (final row in rows) {
       sum +=
-          row.soulSatisfaction *
+          row.joyFullness *
           math.pow(row.amount / base, _ptvfAlpha).toDouble();
     }
     return sum;

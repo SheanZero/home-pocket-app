@@ -9,7 +9,7 @@ abstract class BestJoyMomentRow with _$BestJoyMomentRow {
   const factory BestJoyMomentRow({
     required String transactionId,
     required int amount,
-    required int soulSatisfaction,
+    required int joyFullness,
     required String categoryId,
     required DateTime timestamp,
   }) = _BestJoyMomentRow;

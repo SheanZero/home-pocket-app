@@ -41,9 +41,9 @@ Future<void> _insertTransaction(
     INSERT INTO transactions (
       id, book_id, device_id, amount, type, category_id, ledger_type,
       timestamp, current_hash, created_at,
-      is_private, is_synced, is_deleted, soul_satisfaction
+      is_private, is_synced, is_deleted, joy_fullness
     ) VALUES (
-      ?, 'book_test', 'dev_test', 1000, 'expense', ?, 'survival',
+      ?, 'book_test', 'dev_test', 1000, 'expense', ?, 'daily',
       $now, 'hash_$id', $now,
       0, 0, 0, 5
     )
@@ -180,11 +180,11 @@ Future<void> _runV14MigrationSteps(AppDatabase db) async {
   // Step 5: upsert ledger configs for new L1s
   await db.customStatement('''
     INSERT OR REPLACE INTO category_ledger_configs (category_id, ledger_type, updated_at)
-    VALUES ('cat_pet', 'soul', $now)
+    VALUES ('cat_pet', 'joy', )
   ''');
   await db.customStatement('''
     INSERT OR REPLACE INTO category_ledger_configs (category_id, ledger_type, updated_at)
-    VALUES ('cat_allowance', 'soul', $now)
+    VALUES ('cat_allowance', 'joy', )
   ''');
 }
 
@@ -566,7 +566,7 @@ void main() {
       'categories table does not contain cat_cash_card after migration',
       () async {
         await _insertCategory(db, 'cat_cash_card', 'Cash / Card');
-        await _insertLedgerConfig(db, 'cat_cash_card', 'survival');
+        await _insertLedgerConfig(db, 'cat_cash_card', 'daily');
 
         await _runV14MigrationSteps(db);
 
@@ -586,7 +586,7 @@ void main() {
       'categories table does not contain cat_uncategorized after migration',
       () async {
         await _insertCategory(db, 'cat_uncategorized', 'Uncategorized');
-        await _insertLedgerConfig(db, 'cat_uncategorized', 'survival');
+        await _insertLedgerConfig(db, 'cat_uncategorized', 'daily');
 
         await _runV14MigrationSteps(db);
 
@@ -613,11 +613,11 @@ void main() {
         db,
         "SELECT ledger_type FROM category_ledger_configs WHERE category_id = 'cat_pet'",
       );
-      expect(ledgerType, 'soul', reason: 'cat_pet should be soul ledger');
+      expect(ledgerType, 'joy', reason: 'cat_pet should be joy ledger');
     });
 
     test(
-      'category_ledger_configs has cat_allowance → soul after migration',
+      'category_ledger_configs has cat_allowance → joy after migration',
       () async {
         await _runV14MigrationSteps(db);
 
@@ -627,8 +627,8 @@ void main() {
         );
         expect(
           ledgerType,
-          'soul',
-          reason: 'cat_allowance should be soul ledger',
+          'joy',
+          reason: 'cat_allowance should be joy ledger',
         );
       },
     );
@@ -637,7 +637,7 @@ void main() {
       'orphan ledger config for cat_cash_card is deleted after migration',
       () async {
         await _insertCategory(db, 'cat_cash_card', 'Cash / Card');
-        await _insertLedgerConfig(db, 'cat_cash_card', 'survival');
+        await _insertLedgerConfig(db, 'cat_cash_card', 'daily');
 
         await _runV14MigrationSteps(db);
 
@@ -657,7 +657,7 @@ void main() {
       'orphan ledger config for cat_uncategorized is deleted after migration',
       () async {
         await _insertCategory(db, 'cat_uncategorized', 'Uncategorized');
-        await _insertLedgerConfig(db, 'cat_uncategorized', 'survival');
+        await _insertLedgerConfig(db, 'cat_uncategorized', 'daily');
 
         await _runV14MigrationSteps(db);
 

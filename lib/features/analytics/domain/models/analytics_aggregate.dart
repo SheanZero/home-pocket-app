@@ -45,10 +45,10 @@ class SoulSatisfactionOverview {
 
 /// HAPPY-02 row-wise PTVF input row.
 class SoulRowSample {
-  const SoulRowSample({required this.amount, required this.soulSatisfaction});
+  const SoulRowSample({required this.amount, required this.joyFullness});
 
   final int amount;
-  final int soulSatisfaction;
+  final int joyFullness;
 }
 
 /// STATSUI-01 row-wise daily PTVF input row.
@@ -56,12 +56,12 @@ class DailySoulRowSampleWithDay {
   const DailySoulRowSampleWithDay({
     required this.day,
     required this.amount,
-    required this.soulSatisfaction,
+    required this.joyFullness,
   });
 
   final DateTime day;
   final int amount;
-  final int soulSatisfaction;
+  final int joyFullness;
 }
 
 /// HAPPY-03 distribution bucket - score to count.

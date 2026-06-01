@@ -112,7 +112,7 @@ void main() {
 final _lowRatedJoy = BestJoyMomentRow(
   transactionId: 'joy-low',
   amount: 10,
-  soulSatisfaction: 2,
+  joyFullness: 2,
   categoryId: 'cat_food',
   timestamp: DateTime(2026, 5, 15),
 );
@@ -120,7 +120,7 @@ final _lowRatedJoy = BestJoyMomentRow(
 final _highRatedJoy = BestJoyMomentRow(
   transactionId: 'joy-high',
   amount: 3000,
-  soulSatisfaction: 8,
+  joyFullness: 8,
   categoryId: 'cat_food',
   timestamp: DateTime(2026, 5, 15),
 );

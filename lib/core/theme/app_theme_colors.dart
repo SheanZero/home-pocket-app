@@ -43,9 +43,9 @@ extension AppThemeColors on BuildContext {
 
   // ── Soul card (satisfaction / ROI) ──
   Color get wmSatisfactionBg =>
-      _isDark ? AppColorsDark.soulSatisfactionBg : AppColors.accentPrimaryLight;
+      _isDark ? AppColorsDark.joyFullnessBg : AppColors.accentPrimaryLight;
   Color get wmSatisfactionBorder => _isDark
-      ? AppColorsDark.soulSatisfactionBorder
+      ? AppColorsDark.joyFullnessBorder
       : AppColors.accentPrimaryBorder;
   Color get wmRoiBg => _isDark ? AppColorsDark.soulRoiBg : AppColors.oliveLight;
   Color get wmRoiBorder =>

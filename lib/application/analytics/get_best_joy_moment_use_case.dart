@@ -8,7 +8,7 @@ import '_time_window_validation.dart';
 ///
 /// Returns Empty when no soul tx exists in the window OR (defensively) when
 /// the argmax query returns null. Returns Value(row, totalSoulTx) otherwise.
-/// Phase 10 UI inspects `topJoy.data.soulSatisfaction <= 2` for the
+/// Phase 10 UI inspects `topJoy.data.joyFullness <= 2` for the
 /// "all neutral / go rate one" CTA — Phase 9 does not encode that logic.
 class GetBestJoyMomentUseCase {
   GetBestJoyMomentUseCase({required AnalyticsRepository analyticsRepository})

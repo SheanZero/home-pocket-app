@@ -21,7 +21,7 @@ void main() {
         merchantName: 'スターバックス',
         categoryId: 'cat_food',
         confidence: 0.90,
-        ledgerType: LedgerType.survival,
+        ledgerType: LedgerType.daily,
       );
       when(() => mockDatabase.findMerchant('スターバックス')).thenReturn(expected);
 

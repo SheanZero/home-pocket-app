@@ -62,7 +62,7 @@ Transaction _buildTx({
     amount: amount,
     type: TransactionType.expense,
     categoryId: 'cat_food',
-    ledgerType: LedgerType.survival,
+    ledgerType: LedgerType.daily,
     timestamp: timestamp,
     prevHash: prevHash,
     currentHash: currentHash,

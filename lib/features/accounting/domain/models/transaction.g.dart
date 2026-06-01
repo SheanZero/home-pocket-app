@@ -28,7 +28,7 @@ _Transaction _$TransactionFromJson(Map<String, dynamic> json) => _Transaction(
   isPrivate: json['isPrivate'] as bool? ?? false,
   isSynced: json['isSynced'] as bool? ?? false,
   isDeleted: json['isDeleted'] as bool? ?? false,
-  soulSatisfaction: (json['soulSatisfaction'] as num?)?.toInt() ?? 2,
+  joyFullness: (json['joyFullness'] as num?)?.toInt() ?? 2,
   entrySource:
       $enumDecodeNullable(_$EntrySourceEnumMap, json['entrySource']) ??
       EntrySource.manual,
@@ -55,7 +55,7 @@ Map<String, dynamic> _$TransactionToJson(_Transaction instance) =>
       'isPrivate': instance.isPrivate,
       'isSynced': instance.isSynced,
       'isDeleted': instance.isDeleted,
-      'soulSatisfaction': instance.soulSatisfaction,
+      'joyFullness': instance.joyFullness,
       'entrySource': _$EntrySourceEnumMap[instance.entrySource]!,
     };
 
@@ -65,10 +65,7 @@ const _$TransactionTypeEnumMap = {
   TransactionType.transfer: 'transfer',
 };
 
-const _$LedgerTypeEnumMap = {
-  LedgerType.survival: 'survival',
-  LedgerType.soul: 'soul',
-};
+const _$LedgerTypeEnumMap = {LedgerType.daily: 'daily', LedgerType.joy: 'joy'};
 
 const _$EntrySourceEnumMap = {
   EntrySource.manual: 'manual',

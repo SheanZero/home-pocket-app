@@ -48,7 +48,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
       prevHash: transaction.prevHash,
       isPrivate: transaction.isPrivate,
       isSynced: transaction.isSynced,
-      soulSatisfaction: transaction.soulSatisfaction,
+      joyFullness: transaction.joyFullness,
       entrySource: transaction.entrySource.name,
     );
   }
@@ -110,7 +110,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
       prevHash: transaction.prevHash,
       isPrivate: transaction.isPrivate,
       isSynced: transaction.isSynced,
-      soulSatisfaction: transaction.soulSatisfaction,
+      joyFullness: transaction.joyFullness,
       entrySource: transaction.entrySource.name,
       updatedAt: transaction.updatedAt,
     );
@@ -214,7 +214,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
       isPrivate: row.isPrivate,
       isSynced: row.isSynced,
       isDeleted: row.isDeleted,
-      soulSatisfaction: row.soulSatisfaction,
+      joyFullness: row.joyFullness,
       entrySource: EntrySource.values.byName(row.entrySource),
     );
   }

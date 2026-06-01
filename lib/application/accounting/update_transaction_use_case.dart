@@ -19,7 +19,7 @@ import '../family_sync/transaction_change_tracker.dart';
 /// satisfying EDIT-02 ("user can modify any editable field").
 ///
 /// **Coalesce fields (`amount`, `categoryId`, `timestamp`, `ledgerType`,
-/// `soulSatisfaction`):** These use `?? seed.field` because `null` means
+/// `joyFullness`):** These use `?? seed.field` because `null` means
 /// "form did not send an override for this field — keep the seed value". These
 /// fields are never user-clearable via the form; they always have a value when
 /// set by the user.
@@ -36,7 +36,7 @@ class UpdateTransactionParams {
   final String? merchant;
 
   final LedgerType? ledgerType;
-  final int? soulSatisfaction;
+  final int? joyFullness;
 
   const UpdateTransactionParams({
     required this.seed,
@@ -46,7 +46,7 @@ class UpdateTransactionParams {
     this.note,
     this.merchant,
     this.ledgerType,
-    this.soulSatisfaction,
+    this.joyFullness,
   });
 }
 
@@ -57,7 +57,7 @@ class UpdateTransactionParams {
 ///
 /// Key invariants:
 /// - Seven mutable fields: `amount`, `categoryId`, `timestamp`, `note`,
-///   `merchant`, `ledgerType`, `soulSatisfaction` (D-07).
+///   `merchant`, `ledgerType`, `joyFullness` (D-07).
 /// - Seven immutable fields re-saved verbatim via [copyWith] default:
 ///   `id`, `bookId`, `deviceId`, `prevHash`, `currentHash`, `createdAt`,
 ///   `entrySource` (D-07 / D-08 / SC-3).
@@ -98,7 +98,7 @@ class UpdateTransactionUseCase {
       note: params.note, // pass-through: no ?? — null clears the field (B1/EDIT-02)
       merchant: params.merchant, // pass-through: no ?? — null clears the field (B1/EDIT-02)
       ledgerType: params.ledgerType ?? params.seed.ledgerType,
-      soulSatisfaction: params.soulSatisfaction ?? params.seed.soulSatisfaction,
+      joyFullness: params.joyFullness ?? params.seed.joyFullness,
       updatedAt: DateTime.now(), // D-07: stamp on every save
       // entrySource, id, bookId, deviceId, prevHash, currentHash, createdAt
       // are preserved by copyWith default (D-07/D-08/SC-3).

@@ -22,7 +22,7 @@ TaggedTransaction _makeTx(String id, DateTime timestamp) {
       amount: 1000,
       type: TransactionType.expense,
       categoryId: 'cat_food',
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
       timestamp: timestamp,
       currentHash: 'stub_hash',
       createdAt: timestamp,

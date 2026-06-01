@@ -99,7 +99,7 @@ final _testTransaction = Transaction(
   amount: 1500,
   type: TransactionType.expense,
   categoryId: 'cat-food',
-  ledgerType: LedgerType.survival,
+  ledgerType: LedgerType.daily,
   timestamp: DateTime(2026, 5, 1),
   currentHash: 'hash-001',
   createdAt: DateTime(2026, 5, 1),

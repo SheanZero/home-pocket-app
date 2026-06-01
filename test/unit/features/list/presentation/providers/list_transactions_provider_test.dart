@@ -32,7 +32,7 @@ Transaction _makeTransaction({
   String categoryId = 'cat_food',
   String? merchant,
   String? note,
-  LedgerType ledgerType = LedgerType.survival,
+  LedgerType ledgerType = LedgerType.daily,
   DateTime? timestamp,
 }) {
   return Transaction(
@@ -268,7 +268,7 @@ void main() {
       final soulTx = _makeTransaction(
         id: 'soul-tx',
         categoryId: 'cat_food',
-        ledgerType: LedgerType.soul,
+        ledgerType: LedgerType.joy,
       );
       when(() => mock.execute(any())).thenAnswer(
         (_) async => Result.success([soulTx]),
@@ -279,7 +279,7 @@ void main() {
         filterState: ListFilterState(
           selectedYear: 2026,
           selectedMonth: 5,
-          ledgerType: LedgerType.soul,
+          ledgerType: LedgerType.joy,
           searchQuery: '食費', // matches cat_food → 食費 (ja)
         ),
       );
@@ -294,7 +294,7 @@ void main() {
       // Verify use case was called with the ledgerType filter
       final captured = verify(() => mock.execute(captureAny())).captured;
       final params = captured.first as GetListParams;
-      expect(params.filter.ledgerType, equals(LedgerType.soul),
+      expect(params.filter.ledgerType, equals(LedgerType.joy),
           reason: 'FILTER-02: ledgerType forwarded to use case');
     });
 

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$BestJoyMomentRow {
   String get transactionId;
   int get amount;
-  int get soulSatisfaction;
+  int get joyFullness;
   String get categoryId;
   DateTime get timestamp;
 
@@ -37,8 +37,8 @@ mixin _$BestJoyMomentRow {
             (identical(other.transactionId, transactionId) ||
                 other.transactionId == transactionId) &&
             (identical(other.amount, amount) || other.amount == amount) &&
-            (identical(other.soulSatisfaction, soulSatisfaction) ||
-                other.soulSatisfaction == soulSatisfaction) &&
+            (identical(other.joyFullness, joyFullness) ||
+                other.joyFullness == joyFullness) &&
             (identical(other.categoryId, categoryId) ||
                 other.categoryId == categoryId) &&
             (identical(other.timestamp, timestamp) ||
@@ -50,14 +50,14 @@ mixin _$BestJoyMomentRow {
     runtimeType,
     transactionId,
     amount,
-    soulSatisfaction,
+    joyFullness,
     categoryId,
     timestamp,
   );
 
   @override
   String toString() {
-    return 'BestJoyMomentRow(transactionId: $transactionId, amount: $amount, soulSatisfaction: $soulSatisfaction, categoryId: $categoryId, timestamp: $timestamp)';
+    return 'BestJoyMomentRow(transactionId: $transactionId, amount: $amount, joyFullness: $joyFullness, categoryId: $categoryId, timestamp: $timestamp)';
   }
 }
 
@@ -71,7 +71,7 @@ abstract mixin class $BestJoyMomentRowCopyWith<$Res> {
   $Res call({
     String transactionId,
     int amount,
-    int soulSatisfaction,
+    int joyFullness,
     String categoryId,
     DateTime timestamp,
   });
@@ -92,7 +92,7 @@ class _$BestJoyMomentRowCopyWithImpl<$Res>
   $Res call({
     Object? transactionId = null,
     Object? amount = null,
-    Object? soulSatisfaction = null,
+    Object? joyFullness = null,
     Object? categoryId = null,
     Object? timestamp = null,
   }) {
@@ -106,9 +106,9 @@ class _$BestJoyMomentRowCopyWithImpl<$Res>
             ? _self.amount
             : amount // ignore: cast_nullable_to_non_nullable
                   as int,
-        soulSatisfaction: null == soulSatisfaction
-            ? _self.soulSatisfaction
-            : soulSatisfaction // ignore: cast_nullable_to_non_nullable
+        joyFullness: null == joyFullness
+            ? _self.joyFullness
+            : joyFullness // ignore: cast_nullable_to_non_nullable
                   as int,
         categoryId: null == categoryId
             ? _self.categoryId
@@ -219,7 +219,7 @@ extension BestJoyMomentRowPatterns on BestJoyMomentRow {
     TResult Function(
       String transactionId,
       int amount,
-      int soulSatisfaction,
+      int joyFullness,
       String categoryId,
       DateTime timestamp,
     )?
@@ -232,7 +232,7 @@ extension BestJoyMomentRowPatterns on BestJoyMomentRow {
         return $default(
           _that.transactionId,
           _that.amount,
-          _that.soulSatisfaction,
+          _that.joyFullness,
           _that.categoryId,
           _that.timestamp,
         );
@@ -259,7 +259,7 @@ extension BestJoyMomentRowPatterns on BestJoyMomentRow {
     TResult Function(
       String transactionId,
       int amount,
-      int soulSatisfaction,
+      int joyFullness,
       String categoryId,
       DateTime timestamp,
     )
@@ -271,7 +271,7 @@ extension BestJoyMomentRowPatterns on BestJoyMomentRow {
         return $default(
           _that.transactionId,
           _that.amount,
-          _that.soulSatisfaction,
+          _that.joyFullness,
           _that.categoryId,
           _that.timestamp,
         );
@@ -297,7 +297,7 @@ extension BestJoyMomentRowPatterns on BestJoyMomentRow {
     TResult? Function(
       String transactionId,
       int amount,
-      int soulSatisfaction,
+      int joyFullness,
       String categoryId,
       DateTime timestamp,
     )?
@@ -309,7 +309,7 @@ extension BestJoyMomentRowPatterns on BestJoyMomentRow {
         return $default(
           _that.transactionId,
           _that.amount,
-          _that.soulSatisfaction,
+          _that.joyFullness,
           _that.categoryId,
           _that.timestamp,
         );
@@ -325,7 +325,7 @@ class _BestJoyMomentRow implements BestJoyMomentRow {
   const _BestJoyMomentRow({
     required this.transactionId,
     required this.amount,
-    required this.soulSatisfaction,
+    required this.joyFullness,
     required this.categoryId,
     required this.timestamp,
   });
@@ -335,7 +335,7 @@ class _BestJoyMomentRow implements BestJoyMomentRow {
   @override
   final int amount;
   @override
-  final int soulSatisfaction;
+  final int joyFullness;
   @override
   final String categoryId;
   @override
@@ -357,8 +357,8 @@ class _BestJoyMomentRow implements BestJoyMomentRow {
             (identical(other.transactionId, transactionId) ||
                 other.transactionId == transactionId) &&
             (identical(other.amount, amount) || other.amount == amount) &&
-            (identical(other.soulSatisfaction, soulSatisfaction) ||
-                other.soulSatisfaction == soulSatisfaction) &&
+            (identical(other.joyFullness, joyFullness) ||
+                other.joyFullness == joyFullness) &&
             (identical(other.categoryId, categoryId) ||
                 other.categoryId == categoryId) &&
             (identical(other.timestamp, timestamp) ||
@@ -370,14 +370,14 @@ class _BestJoyMomentRow implements BestJoyMomentRow {
     runtimeType,
     transactionId,
     amount,
-    soulSatisfaction,
+    joyFullness,
     categoryId,
     timestamp,
   );
 
   @override
   String toString() {
-    return 'BestJoyMomentRow(transactionId: $transactionId, amount: $amount, soulSatisfaction: $soulSatisfaction, categoryId: $categoryId, timestamp: $timestamp)';
+    return 'BestJoyMomentRow(transactionId: $transactionId, amount: $amount, joyFullness: $joyFullness, categoryId: $categoryId, timestamp: $timestamp)';
   }
 }
 
@@ -393,7 +393,7 @@ abstract mixin class _$BestJoyMomentRowCopyWith<$Res>
   $Res call({
     String transactionId,
     int amount,
-    int soulSatisfaction,
+    int joyFullness,
     String categoryId,
     DateTime timestamp,
   });
@@ -414,7 +414,7 @@ class __$BestJoyMomentRowCopyWithImpl<$Res>
   $Res call({
     Object? transactionId = null,
     Object? amount = null,
-    Object? soulSatisfaction = null,
+    Object? joyFullness = null,
     Object? categoryId = null,
     Object? timestamp = null,
   }) {
@@ -428,9 +428,9 @@ class __$BestJoyMomentRowCopyWithImpl<$Res>
             ? _self.amount
             : amount // ignore: cast_nullable_to_non_nullable
                   as int,
-        soulSatisfaction: null == soulSatisfaction
-            ? _self.soulSatisfaction
-            : soulSatisfaction // ignore: cast_nullable_to_non_nullable
+        joyFullness: null == joyFullness
+            ? _self.joyFullness
+            : joyFullness // ignore: cast_nullable_to_non_nullable
                   as int,
         categoryId: null == categoryId
             ? _self.categoryId

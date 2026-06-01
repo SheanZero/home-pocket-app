@@ -135,7 +135,7 @@ Transaction _fakeSurvivalTransaction(String bookId) => Transaction(
   amount: 1000,
   type: TransactionType.expense,
   categoryId: 'cat-food',
-  ledgerType: LedgerType.survival,
+  ledgerType: LedgerType.daily,
   timestamp: DateTime(2026, 5, 22),
   currentHash: 'hash001',
   createdAt: DateTime(2026, 5, 22),
@@ -149,11 +149,11 @@ Transaction _fakeSoulSeedTransaction() => Transaction(
   amount: 2500,
   type: TransactionType.expense,
   categoryId: 'cat-hobby',
-  ledgerType: LedgerType.soul,
+  ledgerType: LedgerType.joy,
   timestamp: DateTime(2026, 5, 22),
   currentHash: 'hash002',
   createdAt: DateTime(2026, 5, 22),
-  soulSatisfaction: 7,
+  joyFullness: 7,
   entrySource: EntrySource.manual,
 );
 

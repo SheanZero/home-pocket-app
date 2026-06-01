@@ -719,7 +719,7 @@ class SZh extends S {
   String get soulExpense => '灵魂支出';
 
   @override
-  String get soulSatisfaction => '灵魂充盈度';
+  String get joyFullness => '灵魂充盈度';
 
   @override
   String get addPhoto => '添加照片';

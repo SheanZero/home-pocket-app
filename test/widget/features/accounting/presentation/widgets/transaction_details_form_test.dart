@@ -153,7 +153,7 @@ class _NoopMerchantCategoryPreferenceRepository
 }
 
 /// Returns a fixed ledger type for a given category id; used by D-07
-/// updateCategory tests to drive `_resolveLedgerType` toward LedgerType.soul.
+/// updateCategory tests to drive `_resolveLedgerType` toward LedgerType.joy.
 class _StubLedgerConfigRepository implements CategoryLedgerConfigRepository {
   _StubLedgerConfigRepository(this._categoryId, this._ledgerType);
   final String _categoryId;
@@ -190,7 +190,7 @@ Transaction _makeSurvivalSeedTx({String bookId = 'book-1'}) => Transaction(
   amount: 1234,
   type: TransactionType.expense,
   categoryId: 'cat-food',
-  ledgerType: LedgerType.survival,
+  ledgerType: LedgerType.daily,
   timestamp: DateTime(2026, 5, 1),
   currentHash: 'hash-survival',
   createdAt: DateTime(2026, 5, 1),
@@ -206,11 +206,11 @@ Transaction _makeSoulSeedTx() => Transaction(
   amount: 2500,
   type: TransactionType.expense,
   categoryId: 'cat-hobby',
-  ledgerType: LedgerType.soul,
+  ledgerType: LedgerType.joy,
   timestamp: DateTime(2026, 5, 1),
   currentHash: 'hash-soul',
   createdAt: DateTime(2026, 5, 1),
-  soulSatisfaction: 7,
+  joyFullness: 7,
   entrySource: EntrySource.voice,
 );
 
@@ -628,10 +628,10 @@ void main() {
     Transaction fakeTx({
       int amount = 1234,
       String categoryId = 'cat_food',
-      LedgerType ledgerType = LedgerType.survival,
+      LedgerType ledgerType = LedgerType.daily,
       String? merchant,
       String? note,
-      int soulSatisfaction = 2,
+      int joyFullness = 2,
     }) => Transaction(
       id: 'tx-d07',
       bookId: 'b1',
@@ -645,7 +645,7 @@ void main() {
       createdAt: DateTime(2026, 5, 1),
       merchant: merchant,
       note: note,
-      soulSatisfaction: soulSatisfaction,
+      joyFullness: joyFullness,
       entrySource: EntrySource.manual,
     );
 
@@ -757,7 +757,7 @@ void main() {
 
       testWidgets(
         'Test 3: updateCategory with soul-mapped category flips ledger toggle '
-        'to soul — submit() produces params.ledgerType == LedgerType.soul',
+        'to soul — submit() produces params.ledgerType == LedgerType.joy',
         (tester) async {
           tester.view.physicalSize = const Size(402, 874);
           tester.view.devicePixelRatio = 1;
@@ -771,8 +771,8 @@ void main() {
               fakeTx(
                 amount: 3000,
                 categoryId: catHobbiesL1.id,
-                ledgerType: LedgerType.soul,
-                soulSatisfaction: 6,
+                ledgerType: LedgerType.joy,
+                joyFullness: 6,
               ),
             ),
           );
@@ -789,7 +789,7 @@ void main() {
                 categoryServiceRepo: _StubCategoryRepository(catHobbiesL1),
                 categoryServiceLedgerRepo: _StubLedgerConfigRepository(
                   catHobbiesL1.id,
-                  LedgerType.soul,
+                  LedgerType.joy,
                 ),
               ),
               formKey: formKey,
@@ -809,7 +809,7 @@ void main() {
               verify(() => mockCreate.execute(captureAny())).captured;
           expect(captured.length, 1);
           final params = captured.first as CreateTransactionParams;
-          expect(params.ledgerType, LedgerType.soul,
+          expect(params.ledgerType, LedgerType.joy,
               reason: 'updateCategory must trigger ledger resolution → soul');
 
           final isSuccess = result.maybeWhen(
@@ -1129,8 +1129,8 @@ void main() {
               fakeTx(
                 amount: 2500,
                 categoryId: _soulCategory.id,
-                ledgerType: LedgerType.soul,
-                soulSatisfaction: 5,
+                ledgerType: LedgerType.joy,
+                joyFullness: 5,
               ),
             ),
           );
@@ -1150,7 +1150,7 @@ void main() {
                 categoryServiceRepo: _StubCategoryRepository(_soulCategory),
                 categoryServiceLedgerRepo: _StubLedgerConfigRepository(
                   _soulCategory.id,
-                  LedgerType.soul,
+                  LedgerType.joy,
                 ),
                 createUseCase: mockCreate,
               ),
@@ -1187,7 +1187,7 @@ void main() {
               reason:
                   'idempotent updateSatisfaction(5) must keep picker value at 5');
 
-          // (d) Submit round-trip — use case receives soulSatisfaction == 5.
+          // (d) Submit round-trip — use case receives joyFullness == 5.
           formKey.currentState!.updateAmount(2500);
           await tester.pump();
           await formKey.currentState!.submit();
@@ -1196,10 +1196,10 @@ void main() {
               verify(() => mockCreate.execute(captureAny())).captured;
           expect(captured.length, 1);
           final params = captured.first as CreateTransactionParams;
-          expect(params.soulSatisfaction, 5,
+          expect(params.joyFullness, 5,
               reason:
                   'submit() must propagate updateSatisfaction(5) to CreateTransactionParams (Open Q2 resolution)');
-          expect(params.ledgerType, LedgerType.soul,
+          expect(params.ledgerType, LedgerType.joy,
               reason:
                   'soul-ledger satisfaction wiring intact after Phase 22 rewrite');
         },

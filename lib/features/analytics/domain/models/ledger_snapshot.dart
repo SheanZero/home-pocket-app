@@ -5,8 +5,8 @@ part 'ledger_snapshot.freezed.dart';
 /// STATSUI-V2-01 Soul-vs-Survival comparison surface (engagement axis).
 ///
 /// Re-framed from "satisfaction axis" to "engagement axis" per CONTEXT D-01..D-04:
-/// `transactions.soul_satisfaction` defaults to `2` and the picker only renders
-/// for soul-ledger entries (ADR-014 D-10) — so a raw `AVG(soul_satisfaction)`
+/// `transactions.joy_fullness` defaults to `2` and the picker only renders
+/// for soul-ledger entries (ADR-014 D-10) — so a raw `AVG(joy_fullness)`
 /// over survival rows would be default-2-dominated and read as
 /// "survival = always neutral/unhappy". Phase 16 honors that asymmetry
 /// structurally rather than papering over it with a misleading number.
@@ -29,7 +29,7 @@ abstract class SoulLedgerSnapshot with _$SoulLedgerSnapshot {
 
 /// D-04 type-system gate — NO avgSatisfaction field.
 ///
-/// `transactions.soul_satisfaction` defaults to `2` and the picker only
+/// `transactions.joy_fullness` defaults to `2` and the picker only
 /// renders for soul-ledger entries (ADR-014 D-10), so AVG over survival rows
 /// is default-2-dominated and reads as "survival = always neutral/unhappy".
 /// Adding avgSatisfaction here is the regression mode this gate prevents.

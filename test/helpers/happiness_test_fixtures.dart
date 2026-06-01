@@ -166,12 +166,12 @@ FamilyHappiness fixtureFamilyHappinessEmpty() {
 // BestJoyMomentRow fixtures
 // ---------------------------------------------------------------------------
 
-/// Rich best-joy moment — ¥3,000 coffee with soulSatisfaction=10.
+/// Rich best-joy moment — ¥3,000 coffee with joyFullness=10.
 BestJoyMomentRow fixtureBestJoyMomentRich() {
   return BestJoyMomentRow(
     transactionId: 'tx_best_001',
     amount: 3000,
-    soulSatisfaction: 10,
+    joyFullness: 10,
     categoryId: 'cat_coffee',
     timestamp: DateTime.utc(2026, 4, 15, 14, 30),
   );
@@ -182,7 +182,7 @@ BestJoyMomentRow fixtureBestJoyMomentAllNeutral() {
   return BestJoyMomentRow(
     transactionId: 'tx_neutral_001',
     amount: 10000,
-    soulSatisfaction: 2,
+    joyFullness: 2,
     categoryId: 'cat_shopping',
     timestamp: DateTime.utc(2026, 4, 20, 10, 0),
   );

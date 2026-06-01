@@ -26,7 +26,7 @@ TaggedTransaction _makeTx() {
       amount: 1234,
       type: TransactionType.expense,
       categoryId: 'cat_food',
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
       timestamp: now,
       currentHash: 'stub_hash',
       createdAt: now,

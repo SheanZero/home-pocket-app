@@ -101,18 +101,18 @@ class AnalyticsDao {
   final AppDatabase _db;
 
   /// D-01 / HAPPY-05: ledger + lifecycle filter ONLY. NO satisfaction predicate.
-  /// Single source of truth: every soul aggregator MUST compose via interpolation.
+  /// Single source of truth: every joy aggregator MUST compose via interpolation.
   static const String _soulExpenseFilter =
-      "ledger_type = 'soul' AND type = 'expense' AND is_deleted = 0";
+      "ledger_type = 'joy' AND type = 'expense' AND is_deleted = 0";
 
-  /// Mirror of [_soulExpenseFilter] for survival ledger.
+  /// Mirror of [_soulExpenseFilter] for daily ledger.
   ///
   /// Defined as a constant to prevent predicate drift (per RESEARCH
-  /// §Established Patterns). NEVER aggregate `soul_satisfaction` over rows
-  /// matching this filter — `transactions.soul_satisfaction` defaults to `2`
-  /// for survival rows (ADR-014 D-10 / Phase 16 D-04 type-system gate).
+  /// §Established Patterns). NEVER aggregate `joy_fullness` over rows
+  /// matching this filter — `transactions.joy_fullness` defaults to `2`
+  /// for daily rows (ADR-014 D-10 / Phase 16 D-04 type-system gate).
   static const String _survivalExpenseFilter =
-      "ledger_type = 'survival' AND type = 'expense' AND is_deleted = 0";
+      "ledger_type = 'daily' AND type = 'expense' AND is_deleted = 0";
 
   /// Earliest non-deleted transaction timestamp for a book.
   Future<DateTime?> getEarliestTransactionTimestamp({
@@ -312,7 +312,7 @@ class AnalyticsDao {
         : '';
     final results = await _db
         .customSelect(
-          'SELECT AVG(soul_satisfaction) as avg_sat, COUNT(*) as cnt '
+          'SELECT AVG(joy_fullness) as avg_sat, COUNT(*) as cnt '
           'FROM transactions '
           'WHERE book_id = ? AND $_soulExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ?'
@@ -350,13 +350,13 @@ class AnalyticsDao {
         : '';
     final results = await _db
         .customSelect(
-          'SELECT soul_satisfaction as score, COUNT(*) as cnt '
+          'SELECT joy_fullness as score, COUNT(*) as cnt '
           'FROM transactions '
           'WHERE book_id = ? AND $_soulExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ?'
           '$entrySourceClause '
-          'GROUP BY soul_satisfaction '
-          'ORDER BY soul_satisfaction ASC',
+          'GROUP BY joy_fullness '
+          'ORDER BY joy_fullness ASC',
           variables: [
             Variable.withString(bookId),
             Variable.withDateTime(startDate),
@@ -431,12 +431,12 @@ class AnalyticsDao {
         : '';
     final results = await _db
         .customSelect(
-          'SELECT id, amount, soul_satisfaction, category_id, timestamp '
+          'SELECT id, amount, joy_fullness, category_id, timestamp '
           'FROM transactions '
           'WHERE book_id = ? AND $_soulExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ?'
           '$entrySourceClause '
-          'ORDER BY soul_satisfaction DESC, amount DESC, timestamp DESC '
+          'ORDER BY joy_fullness DESC, amount DESC, timestamp DESC '
           'LIMIT 1',
           variables: [
             Variable.withString(bookId),
@@ -454,7 +454,7 @@ class AnalyticsDao {
     return BestJoyMomentRow(
       transactionId: row.read<String>('id'),
       amount: row.read<int>('amount'),
-      soulSatisfaction: row.read<int>('soul_satisfaction'),
+      joyFullness: row.read<int>('joy_fullness'),
       categoryId: row.read<String>('category_id'),
       timestamp: row.read<DateTime>('timestamp'),
     );
@@ -474,7 +474,7 @@ class AnalyticsDao {
         : '';
     final results = await _db
         .customSelect(
-          'SELECT amount, soul_satisfaction '
+          'SELECT amount, joy_fullness '
           'FROM transactions '
           'WHERE book_id = ? AND $_soulExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ?'
@@ -493,7 +493,7 @@ class AnalyticsDao {
         .map(
           (row) => SoulRowSample(
             amount: row.read<int>('amount'),
-            soulSatisfaction: row.read<int>('soul_satisfaction'),
+            joyFullness: row.read<int>('joy_fullness'),
           ),
         )
         .toList();
@@ -516,7 +516,7 @@ class AnalyticsDao {
     final placeholders = List.filled(bookIds.length, '?').join(', ');
     final results = await _db
         .customSelect(
-          'SELECT category_id, AVG(soul_satisfaction) as avg_sat, COUNT(*) as cnt '
+          'SELECT category_id, AVG(joy_fullness) as avg_sat, COUNT(*) as cnt '
           'FROM transactions '
           'WHERE book_id IN ($placeholders) AND $_soulExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ?'
@@ -569,7 +569,7 @@ class AnalyticsDao {
         : '';
     final results = await _db
         .customSelect(
-          'SELECT category_id, AVG(soul_satisfaction) as avg_sat, COUNT(*) as cnt '
+          'SELECT category_id, AVG(joy_fullness) as avg_sat, COUNT(*) as cnt '
           'FROM transactions '
           'WHERE book_id = ? AND $_soulExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ?'
@@ -617,7 +617,7 @@ class AnalyticsDao {
     final placeholders = List.filled(bookIds.length, '?').join(', ');
     final results = await _db
         .customSelect(
-          'SELECT category_id, AVG(soul_satisfaction) as avg_sat, COUNT(*) as cnt '
+          'SELECT category_id, AVG(joy_fullness) as avg_sat, COUNT(*) as cnt '
           'FROM transactions '
           'WHERE book_id IN ($placeholders) AND $_soulExpenseFilter '
           'AND timestamp >= ? AND timestamp <= ?'
@@ -651,7 +651,7 @@ class AnalyticsDao {
   /// `COUNT(*)` so the use case can build [SoulLedgerSnapshot] +
   /// [SurvivalLedgerSnapshot] from one DB round-trip (per RESEARCH A5).
   ///
-  /// Does NOT aggregate `soul_satisfaction` — survival rows default-2 would
+  /// Does NOT aggregate `joy_fullness` — survival rows default-2 would
   /// poison the aggregate (D-04 anti-toxicity reverse pattern). The Soul
   /// column's `avgSatisfaction` is computed separately via
   /// [getSoulSatisfactionOverview].

@@ -41,7 +41,7 @@ void main() {
           BestJoyMomentRow(
             transactionId: 'tx1',
             amount: 3000,
-            soulSatisfaction: 10,
+            joyFullness: 10,
             categoryId: 'gift',
             timestamp: DateTime(2026, 5, 2),
           ),
@@ -94,14 +94,14 @@ void main() {
       final row = BestJoyMomentRow(
         transactionId: 'tx1',
         amount: 3000,
-        soulSatisfaction: 10,
+        joyFullness: 10,
         categoryId: 'gift',
         timestamp: timestamp,
       );
 
       expect(row.transactionId, 'tx1');
       expect(row.amount, 3000);
-      expect(row.soulSatisfaction, 10);
+      expect(row.joyFullness, 10);
       expect(row.categoryId, 'gift');
       expect(row.timestamp, timestamp);
     });

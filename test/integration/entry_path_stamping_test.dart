@@ -132,7 +132,7 @@ Future<TransactionRow> _createAndFind(
       amount: 1000,
       type: TransactionType.expense,
       categoryId: 'cat_food',
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
       timestamp: DateTime.utc(2026, 5, 21, 12),
       entrySource: entrySource,
     ),

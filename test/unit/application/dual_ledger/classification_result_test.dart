@@ -6,13 +6,13 @@ void main() {
   group('ClassificationResult', () {
     test('creates with all required fields', () {
       final result = ClassificationResult(
-        ledgerType: LedgerType.soul,
+        ledgerType: LedgerType.joy,
         confidence: 0.95,
         method: ClassificationMethod.rule,
         reason: 'Entertainment category',
       );
 
-      expect(result.ledgerType, LedgerType.soul);
+      expect(result.ledgerType, LedgerType.joy);
       expect(result.confidence, 0.95);
       expect(result.method, ClassificationMethod.rule);
       expect(result.reason, 'Entertainment category');

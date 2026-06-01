@@ -29,7 +29,7 @@ class TransactionSyncMapper {
         'sourceBookName': sourceBookName,
         'sourceBookType': sourceBookType,
       },
-      'soulSatisfaction': transaction.soulSatisfaction,
+      'joyFullness': transaction.joyFullness,
       'entrySource': transaction.entrySource.name,
       'isPrivate': transaction.isPrivate,
     };
@@ -57,7 +57,7 @@ class TransactionSyncMapper {
       createdAt: DateTime.parse(data['createdAt'] as String),
       isPrivate: data['isPrivate'] as bool? ?? false,
       isSynced: true,
-      soulSatisfaction: data['soulSatisfaction'] as int? ?? 2,
+      joyFullness: data['joyFullness'] as int? ?? 2,
       // D-09: absent field falls back to 'manual' (older v16 peers do not send entrySource).
       entrySource: EntrySource.values.byName((data['entrySource'] as String?) ?? 'manual'),
     );

@@ -77,7 +77,7 @@ void main() {
 
       expect(
         container.read(listFilterProvider).ledgerType,
-        equals(LedgerType.survival),
+        equals(LedgerType.daily),
       );
     });
 
@@ -91,14 +91,14 @@ void main() {
       // Set a ledger filter → clear chip should appear.
       container
           .read(listFilterProvider.notifier)
-          .setLedgerFilter(LedgerType.soul);
+          .setLedgerFilter(LedgerType.joy);
       await tester.pump();
       expect(find.text('クリア'), findsOneWidget);
 
       // Provider state reflects the change.
       expect(
         container.read(listFilterProvider).ledgerType,
-        equals(LedgerType.soul),
+        equals(LedgerType.joy),
       );
     });
   });

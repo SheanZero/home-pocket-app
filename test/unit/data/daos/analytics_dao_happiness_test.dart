@@ -28,7 +28,7 @@ void main() {
     String ledgerType = 'soul',
     DateTime? timestamp,
     bool isDeleted = false,
-    int soulSatisfaction = 6,
+    int joyFullness = 6,
   }) {
     final effectiveTimestamp = timestamp ?? DateTime(2026, 5, 10, 12);
     return db
@@ -46,32 +46,32 @@ void main() {
             currentHash: 'hash_$id',
             createdAt: effectiveTimestamp,
             isDeleted: Value(isDeleted),
-            soulSatisfaction: Value(soulSatisfaction),
+            joyFullness: Value(joyFullness),
           ),
         );
   }
 
   group('_soulOnly filter / survival rows excluded', () {
     test('overview counts only active soul expenses', () async {
-      await seedTx(id: 'soul_1', amount: 1000, soulSatisfaction: 4);
-      await seedTx(id: 'soul_2', amount: 2000, soulSatisfaction: 8);
+      await seedTx(id: 'soul_1', amount: 1000, joyFullness: 4);
+      await seedTx(id: 'soul_2', amount: 2000, joyFullness: 8);
       await seedTx(
         id: 'survival_1',
         amount: 3000,
         ledgerType: 'survival',
-        soulSatisfaction: 10,
+        joyFullness: 10,
       );
       await seedTx(
         id: 'survival_2',
         amount: 4000,
         ledgerType: 'survival',
-        soulSatisfaction: 10,
+        joyFullness: 10,
       );
       await seedTx(
         id: 'deleted_soul',
         amount: 5000,
         isDeleted: true,
-        soulSatisfaction: 10,
+        joyFullness: 10,
       );
 
       final result = await dao.getSoulSatisfactionOverview(
@@ -87,9 +87,9 @@ void main() {
 
   group('row-wise PTVF query', () {
     test('returns row-wise amount and satisfaction tuples', () async {
-      await seedTx(id: 'row_1', amount: 1000, soulSatisfaction: 4);
-      await seedTx(id: 'row_2', amount: 2500, soulSatisfaction: 8);
-      await seedTx(id: 'row_3', amount: 700, soulSatisfaction: 10);
+      await seedTx(id: 'row_1', amount: 1000, joyFullness: 4);
+      await seedTx(id: 'row_2', amount: 2500, joyFullness: 8);
+      await seedTx(id: 'row_3', amount: 700, joyFullness: 10);
 
       final rows = await dao.getSoulRowsForJoyContribution(
         bookId: 'book_joy',
@@ -99,7 +99,7 @@ void main() {
 
       expect(rows, hasLength(3));
       expect(
-        rows.map((row) => '${row.amount}:${row.soulSatisfaction}'),
+        rows.map((row) => '${row.amount}:${row.joyFullness}'),
         unorderedEquals(['1000:4', '2500:8', '700:10']),
       );
     });
@@ -112,25 +112,25 @@ void main() {
         await seedTx(
           id: 'trip_sat_8',
           amount: 10000,
-          soulSatisfaction: 8,
+          joyFullness: 8,
           timestamp: DateTime(2026, 5, 10, 10),
         );
         await seedTx(
           id: 'candy_sat_10',
           amount: 500,
-          soulSatisfaction: 10,
+          joyFullness: 10,
           timestamp: DateTime(2026, 5, 11, 10),
         );
         await seedTx(
           id: 'concert_sat_10_old',
           amount: 3000,
-          soulSatisfaction: 10,
+          joyFullness: 10,
           timestamp: DateTime(2026, 5, 12, 9),
         );
         await seedTx(
           id: 'concert_sat_10_new',
           amount: 3000,
-          soulSatisfaction: 10,
+          joyFullness: 10,
           timestamp: DateTime(2026, 5, 12, 12),
         );
 
@@ -143,7 +143,7 @@ void main() {
         expect(best, isNotNull);
         expect(best!.transactionId, 'concert_sat_10_new');
         expect(best.amount, 3000);
-        expect(best.soulSatisfaction, 10);
+        expect(best.joyFullness, 10);
       },
     );
 
@@ -162,9 +162,9 @@ void main() {
         id: 'huge_survival',
         amount: 1000000,
         ledgerType: 'survival',
-        soulSatisfaction: 10,
+        joyFullness: 10,
       );
-      await seedTx(id: 'modest_soul', amount: 2000, soulSatisfaction: 8);
+      await seedTx(id: 'modest_soul', amount: 2000, joyFullness: 8);
 
       final best = await dao.getBestJoyMoment(
         bookId: 'book_joy',
@@ -184,7 +184,7 @@ void main() {
           id: 'qualified_$i',
           bookId: i.isEven ? 'book_joy' : 'book_partner',
           categoryId: 'cat_qualified',
-          soulSatisfaction: 8,
+          joyFullness: 8,
         );
       }
       for (var i = 0; i < 2; i += 1) {
@@ -192,7 +192,7 @@ void main() {
           id: 'too_small_$i',
           bookId: i.isEven ? 'book_joy' : 'book_partner',
           categoryId: 'cat_too_small',
-          soulSatisfaction: 10,
+          joyFullness: 10,
         );
       }
 
@@ -214,7 +214,7 @@ void main() {
           await seedTx(
             id: '${categoryId}_$i',
             categoryId: categoryId,
-            soulSatisfaction: 9,
+            joyFullness: 9,
           );
         }
       }
@@ -233,14 +233,14 @@ void main() {
         await seedTx(
           id: 'count_winner_$i',
           categoryId: 'cat_b_count_wins',
-          soulSatisfaction: 8,
+          joyFullness: 8,
         );
       }
       for (var i = 0; i < 4; i += 1) {
         await seedTx(
           id: 'count_loser_$i',
           categoryId: 'cat_a_count_loses',
-          soulSatisfaction: 8,
+          joyFullness: 8,
         );
       }
 
@@ -260,7 +260,7 @@ void main() {
           await seedTx(
             id: '${categoryId}_tie_$i',
             categoryId: categoryId,
-            soulSatisfaction: 8,
+            joyFullness: 8,
           );
         }
       }

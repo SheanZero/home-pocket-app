@@ -32,7 +32,7 @@ class Transactions extends Table {
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
 
   // Soul ledger satisfaction (1-10, default 2; D-10 unipolar positive scale)
-  IntColumn get soulSatisfaction => integer().withDefault(const Constant(2))();
+  IntColumn get joyFullness => integer().withDefault(const Constant(2))();
 
   // Entry-path provenance (D-01). Default 'manual' backfills pre-launch rows;
   // CHECK in customConstraints enforces the 3-value domain on fresh installs;
@@ -44,7 +44,7 @@ class Transactions extends Table {
 
   @override
   List<String> get customConstraints => [
-    'CHECK(soul_satisfaction BETWEEN 1 AND 10)',
+    'CHECK(joy_fullness BETWEEN 1 AND 10)',
     "CHECK(entry_source IN ('manual', 'voice', 'ocr'))",
   ];
 

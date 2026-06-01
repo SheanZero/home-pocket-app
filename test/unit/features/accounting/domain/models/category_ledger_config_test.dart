@@ -8,12 +8,12 @@ void main() {
       final now = DateTime(2026, 2, 18);
       final config = CategoryLedgerConfig(
         categoryId: 'cat_food',
-        ledgerType: LedgerType.survival,
+        ledgerType: LedgerType.daily,
         updatedAt: now,
       );
 
       expect(config.categoryId, 'cat_food');
-      expect(config.ledgerType, LedgerType.survival);
+      expect(config.ledgerType, LedgerType.daily);
       expect(config.updatedAt, now);
     });
 
@@ -21,7 +21,7 @@ void main() {
       final now = DateTime(2026, 2, 18);
       final config = CategoryLedgerConfig(
         categoryId: 'cat_entertainment',
-        ledgerType: LedgerType.soul,
+        ledgerType: LedgerType.joy,
         updatedAt: now,
       );
 
@@ -35,12 +35,12 @@ void main() {
     test('copyWith creates new instance', () {
       final config = CategoryLedgerConfig(
         categoryId: 'cat_food',
-        ledgerType: LedgerType.survival,
+        ledgerType: LedgerType.daily,
         updatedAt: DateTime(2026, 2, 18),
       );
 
-      final updated = config.copyWith(ledgerType: LedgerType.soul);
-      expect(updated.ledgerType, LedgerType.soul);
+      final updated = config.copyWith(ledgerType: LedgerType.joy);
+      expect(updated.ledgerType, LedgerType.joy);
       expect(updated.categoryId, 'cat_food');
     });
   });

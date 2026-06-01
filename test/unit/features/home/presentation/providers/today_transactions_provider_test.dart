@@ -16,7 +16,7 @@ class _MockTransactionRepository extends Mock
 Transaction _makeTransaction(
   String id, {
   bool isDeleted = false,
-  LedgerType ledgerType = LedgerType.survival,
+  LedgerType ledgerType = LedgerType.daily,
 }) {
   return Transaction(
     id: id,

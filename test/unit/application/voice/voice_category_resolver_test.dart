@@ -86,7 +86,7 @@ void main() {
           merchantName: 'スターバックス',
           categoryId: 'cat_food_cafe',
           confidence: 0.90,
-          ledgerType: LedgerType.survival,
+          ledgerType: LedgerType.daily,
         ),
       );
       when(() => mockCategoryRepo.findById('cat_food_cafe')).thenAnswer(
@@ -111,7 +111,7 @@ void main() {
           merchantName: 'マクドナルド',
           categoryId: 'cat_food', // L1 — must be demoted.
           confidence: 0.90,
-          ledgerType: LedgerType.survival,
+          ledgerType: LedgerType.daily,
         ),
       );
       when(() => mockCategoryRepo.findById('cat_food')).thenAnswer(
@@ -142,7 +142,7 @@ void main() {
             merchantName: 'X',
             categoryId: 'cat_nonexistent',
             confidence: 0.9,
-            ledgerType: LedgerType.survival,
+            ledgerType: LedgerType.daily,
           ),
         );
         when(
@@ -357,11 +357,11 @@ void main() {
   group('resolveLedgerType pass-through', () {
     test('forwards categoryId to CategoryService.resolveLedgerType', () async {
       when(() => mockCategoryService.resolveLedgerType('cat_food_cafe'))
-          .thenAnswer((_) async => LedgerType.survival);
+          .thenAnswer((_) async => LedgerType.daily);
 
       final ledger = await resolver.resolveLedgerType('cat_food_cafe');
 
-      expect(ledger, LedgerType.survival);
+      expect(ledger, LedgerType.daily);
       verify(() => mockCategoryService.resolveLedgerType('cat_food_cafe'))
           .called(1);
     });

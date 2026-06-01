@@ -602,7 +602,7 @@ class HomeHeroCard extends StatelessWidget {
         : l10n.homeBestJoyTagSingle;
     return switch (bestJoy) {
       Empty() => _bestJoyEmpty(context, titleText, l10n.homeBestJoyEmptySmall),
-      Value(:final data) when data.soulSatisfaction <= 2 => _bestJoyEmpty(
+      Value(:final data) when data.joyFullness <= 2 => _bestJoyEmpty(
         context,
         titleText,
         l10n.homeBestJoyAllNeutralSmall,
@@ -693,7 +693,7 @@ class HomeHeroCard extends StatelessWidget {
                 ),
               ],
             ),
-            _satisfactionPill(l10n, row.soulSatisfaction),
+            _satisfactionPill(l10n, row.joyFullness),
           ],
         ),
         const SizedBox(height: 10),

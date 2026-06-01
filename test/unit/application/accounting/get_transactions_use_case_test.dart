@@ -24,7 +24,7 @@ void main() {
       amount: amount,
       type: TransactionType.expense,
       categoryId: 'cat_food',
-      ledgerType: LedgerType.survival,
+      ledgerType: LedgerType.daily,
       timestamp: DateTime(2026, 2, 6),
       currentHash: 'hash_$id',
       createdAt: DateTime(2026, 2, 6),
@@ -54,7 +54,7 @@ void main() {
       when(
         () => mockRepo.findByBookId(
           'book_001',
-          ledgerType: LedgerType.survival,
+          ledgerType: LedgerType.daily,
           categoryId: 'cat_food',
           startDate: any(named: 'startDate'),
           endDate: any(named: 'endDate'),
@@ -66,7 +66,7 @@ void main() {
       await useCase.execute(
         GetTransactionsParams(
           bookId: 'book_001',
-          ledgerType: LedgerType.survival,
+          ledgerType: LedgerType.daily,
           categoryId: 'cat_food',
           startDate: DateTime(2026, 1, 1),
           endDate: DateTime(2026, 2, 1),
@@ -78,7 +78,7 @@ void main() {
       verify(
         () => mockRepo.findByBookId(
           'book_001',
-          ledgerType: LedgerType.survival,
+          ledgerType: LedgerType.daily,
           categoryId: 'cat_food',
           startDate: DateTime(2026, 1, 1),
           endDate: DateTime(2026, 2, 1),

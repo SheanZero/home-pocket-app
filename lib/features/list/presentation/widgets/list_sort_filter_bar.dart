@@ -234,21 +234,21 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
             // ── Ledger: 生存 chip (C-03c) ─────────────────────────────────
             Semantics(
               label: 'Survival ledger',
-              selected: filter.ledgerType == LedgerType.survival,
+              selected: filter.ledgerType == LedgerType.daily,
               child: ActionChip(
                 label: Text(
                   l10n.listLedgerSurvival,
                   style: AppTextStyles.caption.copyWith(
-                    color: filter.ledgerType == LedgerType.survival
+                    color: filter.ledgerType == LedgerType.daily
                         ? AppColors.survival
                         : AppColors.textSecondary,
                   ),
                 ),
-                backgroundColor: filter.ledgerType == LedgerType.survival
+                backgroundColor: filter.ledgerType == LedgerType.daily
                     ? AppColors.survivalLight
                     : AppColors.card,
                 side: BorderSide(
-                  color: filter.ledgerType == LedgerType.survival
+                  color: filter.ledgerType == LedgerType.daily
                       ? AppColors.survival
                       : AppColors.borderDefault,
                   width: 1,
@@ -256,9 +256,9 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                 onPressed: () => ref
                     .read(listFilterProvider.notifier)
                     .setLedgerFilter(
-                      filter.ledgerType == LedgerType.survival
+                      filter.ledgerType == LedgerType.daily
                           ? null
-                          : LedgerType.survival,
+                          : LedgerType.daily,
                     ),
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
@@ -267,21 +267,21 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
             // ── Ledger: 魂 chip (C-03c) ───────────────────────────────────
             Semantics(
               label: 'Soul ledger',
-              selected: filter.ledgerType == LedgerType.soul,
+              selected: filter.ledgerType == LedgerType.joy,
               child: ActionChip(
                 label: Text(
                   l10n.listLedgerSoul,
                   style: AppTextStyles.caption.copyWith(
-                    color: filter.ledgerType == LedgerType.soul
+                    color: filter.ledgerType == LedgerType.joy
                         ? AppColors.soul
                         : AppColors.textSecondary,
                   ),
                 ),
-                backgroundColor: filter.ledgerType == LedgerType.soul
+                backgroundColor: filter.ledgerType == LedgerType.joy
                     ? AppColors.soulLight
                     : AppColors.card,
                 side: BorderSide(
-                  color: filter.ledgerType == LedgerType.soul
+                  color: filter.ledgerType == LedgerType.joy
                       ? AppColors.soul
                       : AppColors.borderDefault,
                   width: 1,
@@ -289,9 +289,9 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
                 onPressed: () => ref
                     .read(listFilterProvider.notifier)
                     .setLedgerFilter(
-                      filter.ledgerType == LedgerType.soul
+                      filter.ledgerType == LedgerType.joy
                           ? null
-                          : LedgerType.soul,
+                          : LedgerType.joy,
                     ),
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),

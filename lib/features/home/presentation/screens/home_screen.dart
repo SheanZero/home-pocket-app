@@ -290,7 +290,7 @@ class HomeScreen extends ConsumerWidget {
                   }
                   return TransactionListCard(
                     children: transactions.map((tx) {
-                      final isSoul = tx.ledgerType == LedgerType.soul;
+                      final isSoul = tx.ledgerType == LedgerType.joy;
                       return HomeTransactionTile(
                         tagText: isGroupMode
                             ? _memberInitial(tx)
@@ -358,8 +358,8 @@ class HomeScreen extends ConsumerWidget {
       _fmt.formatCurrency(tx.amount, currencyCode, locale);
 
   IconData? _satisfactionIcon(Transaction tx) {
-    if (tx.ledgerType != LedgerType.soul) return null;
-    final v = tx.soulSatisfaction;
+    if (tx.ledgerType != LedgerType.joy) return null;
+    final v = tx.joyFullness;
     if (v <= 2) return Icons.sentiment_neutral_outlined;
     if (v <= 4) return Icons.sentiment_satisfied_outlined;
     if (v <= 6) return Icons.sentiment_satisfied_alt_outlined;

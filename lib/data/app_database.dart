@@ -56,7 +56,7 @@ class AppDatabase extends _$AppDatabase {
           );
         }
         if (from < 4) {
-          await migrator.addColumn(transactions, transactions.soulSatisfaction);
+          await migrator.addColumn(transactions, transactions.joyFullness);
         }
         if (from < 5) {
           // Category model v2: add isArchived, updatedAt; create ledger configs
@@ -261,10 +261,10 @@ class AppDatabase extends _$AppDatabase {
           );
         }
         if (from < 16) {
-          // v16: transactions.soul_satisfaction default 5 -> 2 (D-02 / D-10
+          // v16: transactions.joy_fullness default 5 -> 2 (D-02 / D-10
           // unipolar positive scale). No DDL needed: Drift expresses defaults
           // at the companion-class layer, not as SQL DEFAULT constraints.
-          // CHECK(soul_satisfaction BETWEEN 1 AND 10) survives unchanged.
+          // CHECK(joy_fullness BETWEEN 1 AND 10) survives unchanged.
           // Pre-launch project: no backfill required (D-02).
         }
         if (from < 17) {

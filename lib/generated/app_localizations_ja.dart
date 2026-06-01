@@ -721,7 +721,7 @@ class SJa extends S {
   String get soulExpense => '魂支出';
 
   @override
-  String get soulSatisfaction => '魂の充盈度';
+  String get joyFullness => '魂の充盈度';
 
   @override
   String get addPhoto => '写真を追加';

@@ -27,7 +27,7 @@ class TransactionDao {
     String? prevHash,
     bool isPrivate = false,
     bool isSynced = false,
-    int soulSatisfaction = 2,
+    int joyFullness = 2,
     required String entrySource,
   }) async {
     await _db
@@ -51,7 +51,7 @@ class TransactionDao {
             prevHash: Value(prevHash),
             isPrivate: Value(isPrivate),
             isSynced: Value(isSynced),
-            soulSatisfaction: Value(soulSatisfaction),
+            joyFullness: Value(joyFullness),
             entrySource: Value(entrySource),
           ),
         );
@@ -133,7 +133,7 @@ class TransactionDao {
     String? prevHash,
     bool isPrivate = false,
     bool isSynced = false,
-    int soulSatisfaction = 2,
+    int joyFullness = 2,
     String? entrySource,
     DateTime? updatedAt,
   }) async {
@@ -155,7 +155,7 @@ class TransactionDao {
         prevHash: Value(prevHash),
         isPrivate: Value(isPrivate),
         isSynced: Value(isSynced),
-        soulSatisfaction: Value(soulSatisfaction),
+        joyFullness: Value(joyFullness),
         entrySource: entrySource != null
             ? Value(entrySource)
             : const Value.absent(),

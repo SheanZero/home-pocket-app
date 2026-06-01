@@ -29,7 +29,7 @@ void main() {
     String ledgerType = 'soul',
     DateTime? timestamp,
     bool isDeleted = false,
-    int soulSatisfaction = 6,
+    int joyFullness = 6,
   }) {
     final effectiveTimestamp = timestamp ?? DateTime(2026, 5, 10, 12);
     return db
@@ -47,7 +47,7 @@ void main() {
             currentHash: 'hash_$id',
             createdAt: effectiveTimestamp,
             isDeleted: Value(isDeleted),
-            soulSatisfaction: Value(soulSatisfaction),
+            joyFullness: Value(joyFullness),
           ),
         );
   }

@@ -186,13 +186,13 @@ void main() {
         amount: 2500,
         type: TransactionType.expense,
         categoryId: 'cat-dining',
-        ledgerType: LedgerType.soul,
+        ledgerType: LedgerType.joy,
         timestamp: DateTime.utc(2026, 3, 15, 12),
         currentHash: 'local-hash',
         createdAt: DateTime.utc(2026, 3, 15, 12),
         note: 'Dinner',
         merchant: 'Restaurant',
-        soulSatisfaction: 8,
+        joyFullness: 8,
       );
 
       final syncOp = TransactionSyncMapper.toCreateOperation(
@@ -312,11 +312,11 @@ void main() {
           amount: 4200,
           type: TransactionType.expense,
           categoryId: 'cat-dining',
-          ledgerType: LedgerType.soul,
+          ledgerType: LedgerType.joy,
           timestamp: DateTime.utc(2026, 5, 21, 10),
           currentHash: 'hash-entry-source-voice',
           createdAt: DateTime.utc(2026, 5, 21, 10),
-          soulSatisfaction: 8,
+          joyFullness: 8,
           entrySource: EntrySource.voice,
         );
         final operation = TransactionSyncMapper.toCreateOperation(
@@ -345,7 +345,7 @@ void main() {
           amount: 1800,
           type: TransactionType.expense,
           categoryId: 'cat-food',
-          ledgerType: LedgerType.survival,
+          ledgerType: LedgerType.daily,
           timestamp: DateTime.utc(2026, 5, 21, 11),
           currentHash: 'hash-entry-source-missing',
           createdAt: DateTime.utc(2026, 5, 21, 11),

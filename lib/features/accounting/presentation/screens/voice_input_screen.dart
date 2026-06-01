@@ -408,7 +408,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
           // Phase 23 D-08 / WR-04: soul-ledger save defers Navigator.popUntil
           // until SoulCelebrationOverlay's onDismissed fires so the joy moment
           // is visible. Survival-ledger save pops immediately (no overlay).
-          if (tx.ledgerType == LedgerType.soul) {
+          if (tx.ledgerType == LedgerType.joy) {
             _formKey.currentState?.waitForCelebrationDismissed().then((_) {
               // RESEARCH Pitfall 4: app may background mid-celebration;
               // check mounted before accessing Navigator.
@@ -515,7 +515,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     // BLOCKER B-1: this estimator output is the source of
     // _parseResult.estimatedSatisfaction that _stopRecordingAndCommit later
     // pushes into the form via state.updateSatisfaction(...).
-    if (parseResult.ledgerType == LedgerType.soul) {
+    if (parseResult.ledgerType == LedgerType.joy) {
       final features = buildVoiceAudioFeatures(
         soundLevels: _soundLevels,
         timestamps: _timestamps,

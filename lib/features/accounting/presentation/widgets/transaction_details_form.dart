@@ -82,8 +82,8 @@ class TransactionDetailsFormState
   Category? _parentCategory;
   late DateTime _date;
   String? _initialCategoryId;
-  LedgerType _ledgerType = LedgerType.survival;
-  int _soulSatisfaction = 2;
+  LedgerType _ledgerType = LedgerType.daily;
+  int _joyFullness = 2;
   bool _isSubmitting = false;
 
   // Drives the celebration Stack overlay; only mutated by .new branch (D-15).
@@ -124,7 +124,7 @@ class TransactionDetailsFormState
               _storeController.text = initialMerchant;
             }
             if (initialSatisfaction != null) {
-              _soulSatisfaction = initialSatisfaction.clamp(1, 10);
+              _joyFullness = initialSatisfaction.clamp(1, 10);
             }
             // Resolve ledger type from category if one was pre-seeded.
             if (_category != null) {
@@ -139,7 +139,7 @@ class TransactionDetailsFormState
         _amount = seed.amount;
         _date = seed.timestamp;
         _ledgerType = seed.ledgerType;
-        _soulSatisfaction = seed.soulSatisfaction;
+        _joyFullness = seed.joyFullness;
         _storeController.text = seed.merchant ?? '';
         _memoController.text = seed.note ?? '';
         _initialCategoryId = seed.categoryId;
@@ -275,11 +275,11 @@ class TransactionDetailsFormState
   /// but never read at submit() time).
   ///
   /// Idempotency: short-circuits when the new value equals the current
-  /// `_soulSatisfaction`.
+  /// `_joyFullness`.
   void updateSatisfaction(int satisfaction) {
     if (!mounted) return;
-    if (satisfaction == _soulSatisfaction) return;
-    setState(() => _soulSatisfaction = satisfaction.clamp(1, 10));
+    if (satisfaction == _joyFullness) return;
+    setState(() => _joyFullness = satisfaction.clamp(1, 10));
   }
 
   /// Phase 23 D-08 / WR-04: host-await accessor used by the voice screen to
@@ -451,8 +451,8 @@ class TransactionDetailsFormState
                       merchant: _storeController.text.trim().isEmpty
                           ? null
                           : _storeController.text.trim(),
-                      soulSatisfaction: _ledgerType == LedgerType.soul
-                          ? _soulSatisfaction
+                      joyFullness: _ledgerType == LedgerType.joy
+                          ? _joyFullness
                           : null,
                       ledgerType: _ledgerType,
                       entrySource: entrySource,
@@ -490,7 +490,7 @@ class TransactionDetailsFormState
               // touches _showCelebration.
               // Phase 23 D-08: initialize the completer before showing the overlay
               // so waitForCelebrationDismissed() returns a pending future.
-              if (tx.ledgerType == LedgerType.soul && mounted) {
+              if (tx.ledgerType == LedgerType.joy && mounted) {
                 _celebrationCompleter = Completer<void>();
                 setState(() => _showCelebration = true);
               }
@@ -512,8 +512,8 @@ class TransactionDetailsFormState
                       ? null
                       : _storeController.text.trim(),
                   ledgerType: _ledgerType,
-                  soulSatisfaction: _ledgerType == LedgerType.soul
-                      ? _soulSatisfaction
+                  joyFullness: _ledgerType == LedgerType.joy
+                      ? _joyFullness
                       : null,
                 ),
               );
@@ -772,11 +772,11 @@ class TransactionDetailsFormState
                         ),
                       ],
                     ),
-                    if (_ledgerType == LedgerType.soul) ...[
+                    if (_ledgerType == LedgerType.joy) ...[
                       const SizedBox(height: 20),
                       SatisfactionEmojiPicker(
-                        value: _soulSatisfaction,
-                        onChanged: (v) => setState(() => _soulSatisfaction = v),
+                        value: _joyFullness,
+                        onChanged: (v) => setState(() => _joyFullness = v),
                         title: l10n.satisfactionLevel,
                         levelLabels: [
                           l10n.satisfactionBad,

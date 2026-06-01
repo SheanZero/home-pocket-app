@@ -728,7 +728,7 @@ class SEn extends S {
   String get soulExpense => 'Soul';
 
   @override
-  String get soulSatisfaction => 'Soul Fullness';
+  String get joyFullness => 'Soul Fullness';
 
   @override
   String get addPhoto => 'Add photo';

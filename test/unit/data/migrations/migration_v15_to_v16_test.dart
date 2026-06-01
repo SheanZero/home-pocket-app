@@ -2,7 +2,7 @@ import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
 
-const _targetSchemaVersion = 17;
+const _targetSchemaVersion = 18;
 
 void main() {
   late AppDatabase db;
@@ -17,7 +17,7 @@ void main() {
 
   group('v16 soul satisfaction default migration', () {
     // D-02: default soul satisfaction moves from 5 to 2 while preserving
-    // the existing inclusive CHECK(soul_satisfaction BETWEEN 1 AND 10).
+    // the existing inclusive CHECK(joy_fullness BETWEEN 1 AND 10).
     test(
       'AppDatabase schemaVersion includes v16 migration and later migrations',
       () {
@@ -25,20 +25,20 @@ void main() {
       },
     );
 
-    test('omitted soulSatisfaction stores default 2', () async {
+    test('omitted joyFullness stores default 2', () async {
       await _insertTransaction(db, id: 'tx_default');
 
       final row = await _findTransaction(db, 'tx_default');
 
-      expect(row.soulSatisfaction, equals(2));
+      expect(row.joyFullness, equals(2));
     });
 
-    test('rejects soulSatisfaction above 10', () async {
+    test('rejects joyFullness above 10', () async {
       expect(
         () => _insertTransaction(
           db,
           id: 'tx_invalid_high',
-          soulSatisfaction: const Value(11),
+          joyFullness: const Value(11),
         ),
         throwsA(isA<Object>()),
       );
@@ -48,17 +48,17 @@ void main() {
       await _insertTransaction(
         db,
         id: 'tx_min',
-        soulSatisfaction: const Value(1),
+        joyFullness: const Value(1),
       );
       await _insertTransaction(
         db,
         id: 'tx_max',
-        soulSatisfaction: const Value(10),
+        joyFullness: const Value(10),
       );
 
       final rows = await db.select(db.transactions).get();
 
-      expect(rows.map((row) => row.soulSatisfaction), containsAll([1, 10]));
+      expect(rows.map((row) => row.joyFullness), containsAll([1, 10]));
     });
   });
 }
@@ -66,7 +66,7 @@ void main() {
 Future<void> _insertTransaction(
   AppDatabase db, {
   required String id,
-  Value<int> soulSatisfaction = const Value.absent(),
+  Value<int> joyFullness = const Value.absent(),
 }) async {
   final now = DateTime(2026, 5, 2, 12);
   await db
@@ -79,11 +79,11 @@ Future<void> _insertTransaction(
           amount: 1200,
           type: 'expense',
           categoryId: 'cat_joy',
-          ledgerType: 'soul',
+          ledgerType: 'joy',
           timestamp: now,
           currentHash: 'hash_$id',
           createdAt: now,
-          soulSatisfaction: soulSatisfaction,
+          joyFullness: joyFullness,
         ),
       );
 }

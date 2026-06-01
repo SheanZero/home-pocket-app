@@ -106,7 +106,7 @@ void main() {
     await tester.pumpWidget(
       buildDark(
         LedgerTypeSelector(
-          selected: LedgerType.survival,
+          selected: LedgerType.daily,
           onChanged: (_) {},
           survivalLabel: '生存支出',
           soulLabel: '魂支出',

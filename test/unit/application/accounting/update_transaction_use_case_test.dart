@@ -30,8 +30,8 @@ void main() {
     String deviceId = 'device-001',
     int amount = 1000,
     String categoryId = 'cat-food',
-    LedgerType ledgerType = LedgerType.survival,
-    int soulSatisfaction = 2,
+    LedgerType ledgerType = LedgerType.daily,
+    int joyFullness = 2,
     String? note,
     String? merchant,
     EntrySource entrySource = EntrySource.manual,
@@ -53,7 +53,7 @@ void main() {
       createdAt: now,
       note: note,
       merchant: merchant,
-      soulSatisfaction: soulSatisfaction,
+      joyFullness: joyFullness,
       entrySource: entrySource,
     );
   }
@@ -210,13 +210,13 @@ void main() {
       });
 
       test('coalesce semantics: null ledgerType keeps seed.ledgerType', () async {
-        final seed = makeSeed(ledgerType: LedgerType.soul);
+        final seed = makeSeed(ledgerType: LedgerType.joy);
 
         final result = await useCase.execute(
           UpdateTransactionParams(seed: seed, amount: 1000),
         );
 
-        expect(result.data!.ledgerType, LedgerType.soul);
+        expect(result.data!.ledgerType, LedgerType.joy);
       });
 
       test('wires sync push when changeTracker and syncEngine are provided', () async {
@@ -301,7 +301,7 @@ void main() {
         expect(params.note, isNull);
         expect(params.merchant, isNull);
         expect(params.ledgerType, isNull);
-        expect(params.soulSatisfaction, isNull);
+        expect(params.joyFullness, isNull);
       });
     });
 

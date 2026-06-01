@@ -66,7 +66,7 @@ void main() {
   List<SoulRowSample> repeatedBaseRows(int count, {int satisfaction = 1}) {
     return List.generate(
       count,
-      (_) => SoulRowSample(amount: 500, soulSatisfaction: satisfaction),
+      (_) => SoulRowSample(amount: 500, joyFullness: satisfaction),
     );
   }
 
@@ -140,7 +140,7 @@ void main() {
         m1: repeatedBaseRows(40),
         m2: [
           ...repeatedBaseRows(50),
-          const SoulRowSample(amount: 100, soulSatisfaction: 1),
+          const SoulRowSample(amount: 100, joyFullness: 1),
         ],
         m3: repeatedBaseRows(80),
       );
@@ -153,9 +153,9 @@ void main() {
 
     test('uses currency-specific PTVF base for CNY', () async {
       stubDefaultPastMonths(
-        m1: const [SoulRowSample(amount: 25, soulSatisfaction: 10)],
-        m2: const [SoulRowSample(amount: 50, soulSatisfaction: 10)],
-        m3: const [SoulRowSample(amount: 75, soulSatisfaction: 10)],
+        m1: const [SoulRowSample(amount: 25, joyFullness: 10)],
+        m2: const [SoulRowSample(amount: 50, joyFullness: 10)],
+        m3: const [SoulRowSample(amount: 75, joyFullness: 10)],
       );
 
       final result = await execute(currencyCode: 'CNY');

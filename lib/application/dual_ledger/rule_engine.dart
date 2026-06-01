@@ -13,22 +13,22 @@ class RuleEngine {
 
   void _initializeDefaultRules() {
     // Survival (必要支出)
-    _categoryRules['cat_food'] = LedgerType.survival;
-    _categoryRules['cat_food_dining_out'] = LedgerType.survival;
-    _categoryRules['cat_food_snack'] = LedgerType.survival;
-    _categoryRules['cat_transport'] = LedgerType.survival;
-    _categoryRules['cat_transport_public'] = LedgerType.survival;
-    _categoryRules['cat_transport_taxi'] = LedgerType.survival;
-    _categoryRules['cat_housing'] = LedgerType.survival;
-    _categoryRules['cat_medical'] = LedgerType.survival;
-    _categoryRules['cat_daily'] = LedgerType.survival;
-    _categoryRules['cat_other_expense'] = LedgerType.survival;
+    _categoryRules['cat_food'] = LedgerType.daily;
+    _categoryRules['cat_food_dining_out'] = LedgerType.daily;
+    _categoryRules['cat_food_snack'] = LedgerType.daily;
+    _categoryRules['cat_transport'] = LedgerType.daily;
+    _categoryRules['cat_transport_public'] = LedgerType.daily;
+    _categoryRules['cat_transport_taxi'] = LedgerType.daily;
+    _categoryRules['cat_housing'] = LedgerType.daily;
+    _categoryRules['cat_medical'] = LedgerType.daily;
+    _categoryRules['cat_daily'] = LedgerType.daily;
+    _categoryRules['cat_other_expense'] = LedgerType.daily;
 
     // Soul (享受型支出)
-    _categoryRules['cat_entertainment'] = LedgerType.soul;
-    _categoryRules['cat_shopping'] = LedgerType.soul;
-    _categoryRules['cat_education'] = LedgerType.soul;
-    _categoryRules['cat_social'] = LedgerType.soul;
+    _categoryRules['cat_entertainment'] = LedgerType.joy;
+    _categoryRules['cat_shopping'] = LedgerType.joy;
+    _categoryRules['cat_education'] = LedgerType.joy;
+    _categoryRules['cat_social'] = LedgerType.joy;
   }
 
   /// Classify a category ID. Returns null if no rule matches.
