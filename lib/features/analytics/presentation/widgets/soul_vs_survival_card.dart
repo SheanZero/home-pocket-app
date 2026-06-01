@@ -340,7 +340,7 @@ class _SoulCell extends StatelessWidget {
             const SizedBox(height: 4),
           ],
           Text(
-            l10n.analyticsLedgerColumnSoul,
+            l10n.analyticsLedgerColumnJoy,
             style: AppTextStyles.bodyMedium.copyWith(color: AppColors.soul),
           ),
           const SizedBox(height: 8),
@@ -411,7 +411,7 @@ class _SurvivalCell extends StatelessWidget {
             const SizedBox(height: 4),
           ],
           Text(
-            l10n.analyticsLedgerColumnSurvival,
+            l10n.analyticsLedgerColumnDaily,
             style: AppTextStyles.bodyMedium.copyWith(color: AppColors.survival),
           ),
           const SizedBox(height: 8),

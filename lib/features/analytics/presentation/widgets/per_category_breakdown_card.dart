@@ -132,11 +132,11 @@ class _PerCategoryBreakdownCardState
   String _titleFor(S l10n, PerCategoryScope scope) {
     switch (scope) {
       case PerCategoryScope.solo:
-        return l10n.analyticsCardTitlePerCategorySoul;
+        return l10n.analyticsCardTitlePerCategoryJoy;
       case PerCategoryScope.you:
-        return l10n.analyticsCardTitlePerCategorySoulYou;
+        return l10n.analyticsCardTitlePerCategoryJoyYou;
       case PerCategoryScope.family:
-        return l10n.analyticsCardTitlePerCategorySoulFamily;
+        return l10n.analyticsCardTitlePerCategoryJoyFamily;
     }
   }
 

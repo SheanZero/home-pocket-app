@@ -119,16 +119,16 @@ class SEn extends S {
   String get categoryOther => 'Other';
 
   @override
-  String get survivalLedger => 'Daily';
+  String get dailyLedger => 'Daily';
 
   @override
-  String get soulLedger => 'Joy';
+  String get joyLedger => 'Joy';
 
   @override
-  String get survival => 'Survival';
+  String get daily => 'Survival';
 
   @override
-  String get soul => 'Soul';
+  String get joy => 'Soul';
 
   @override
   String get save => 'Save';
@@ -499,10 +499,10 @@ class SEn extends S {
   String get homeMonthlyExpense => 'Monthly Expenses';
 
   @override
-  String get homeSurvivalExpense => 'Living Expenses';
+  String get homeDailyExpense => 'Living Expenses';
 
   @override
-  String get homeSoulExpense => 'Joy Expenses';
+  String get homeJoyExpense => 'Joy Expenses';
 
   @override
   String get homeMonthComparison => 'vs Last Month';
@@ -513,10 +513,10 @@ class SEn extends S {
   }
 
   @override
-  String get homeSurvivalLedgerTag => 'S';
+  String get homeDailyLedgerTag => 'S';
 
   @override
-  String get homeSoulLedgerTag => 'J';
+  String get homeJoyLedgerTag => 'J';
 
   @override
   String get homeSharedLedgerTag => 'G';
@@ -527,10 +527,10 @@ class SEn extends S {
   }
 
   @override
-  String get homeSoulFullness => 'Joy Index';
+  String get homeJoyFullness => 'Joy Index';
 
   @override
-  String get homeSoulPercentLabel => 'Soul spending ratio';
+  String get homeJoyPercentLabel => 'Soul spending ratio';
 
   @override
   String get homeFamilyInviteTitle => 'Invite Family';
@@ -582,12 +582,12 @@ class SEn extends S {
   }
 
   @override
-  String homeRecentSoulTransaction(String merchant, int amount) {
+  String homeRecentJoyTransaction(String merchant, int amount) {
     return 'Recent: $merchant ¥$amount';
   }
 
   @override
-  String homeSoulChargeStatus(int fullness, double roi) {
+  String homeJoyChargeStatus(int fullness, double roi) {
     return 'Soul Fullness $fullness% · Joy Index $roi';
   }
 
@@ -646,7 +646,7 @@ class SEn extends S {
   String get homeMembersSectionTitle => 'Members';
 
   @override
-  String get homeNoSoulDataLegend => 'No data yet';
+  String get homeNoJoyDataLegend => 'No data yet';
 
   @override
   String get homeBestJoyEmptyTagPrimary => 'Top of the Month';
@@ -722,10 +722,10 @@ class SEn extends S {
   String get expenseClassification => 'Purpose';
 
   @override
-  String get survivalExpense => 'Survival';
+  String get dailyExpense => 'Survival';
 
   @override
-  String get soulExpense => 'Soul';
+  String get joyExpense => 'Soul';
 
   @override
   String get joyFullness => 'Soul Fullness';
@@ -1309,7 +1309,7 @@ class SEn extends S {
   String get homeViewAllTransactions => 'View All';
 
   @override
-  String get homeRecentSoulExpense => 'Recent Soul Expense';
+  String get homeRecentJoyExpense => 'Recent Soul Expense';
 
   @override
   String get voiceMicrophonePermissionRequired =>
@@ -1363,7 +1363,7 @@ class SEn extends S {
   String get analyticsNoLedgerData => 'No ledger data';
 
   @override
-  String get analyticsSurvivalVsSoul => 'Survival vs Soul';
+  String get analyticsDailyVsJoy => 'Survival vs Soul';
 
   @override
   String get analyticsSixMonthTrend => 'Six-month Trend';
@@ -1620,13 +1620,13 @@ class SEn extends S {
   String get analyticsCardErrorRetry => 'Retry';
 
   @override
-  String get analyticsCardTitlePerCategorySoul => 'Joy · Categories';
+  String get analyticsCardTitlePerCategoryJoy => 'Joy · Categories';
 
   @override
-  String get analyticsCardTitlePerCategorySoulYou => 'Joy · Your categories';
+  String get analyticsCardTitlePerCategoryJoyYou => 'Joy · Your categories';
 
   @override
-  String get analyticsCardTitlePerCategorySoulFamily =>
+  String get analyticsCardTitlePerCategoryJoyFamily =>
       'Joy · Family categories';
 
   @override
@@ -1653,10 +1653,10 @@ class SEn extends S {
   String get analyticsCardTitleLedgerThisWindow => 'Ledger · This window';
 
   @override
-  String get analyticsLedgerColumnSoul => 'Soul';
+  String get analyticsLedgerColumnJoy => 'Soul';
 
   @override
-  String get analyticsLedgerColumnSurvival => 'Survival';
+  String get analyticsLedgerColumnDaily => 'Survival';
 
   @override
   String get analyticsLedgerRowYou => 'You';
@@ -1721,10 +1721,10 @@ class SEn extends S {
   String get listLedgerAll => 'All';
 
   @override
-  String get listLedgerSurvival => 'Survival';
+  String get listLedgerDaily => 'Survival';
 
   @override
-  String get listLedgerSoul => 'Soul';
+  String get listLedgerJoy => 'Soul';
 
   @override
   String get listCategoryChip => 'Categories';

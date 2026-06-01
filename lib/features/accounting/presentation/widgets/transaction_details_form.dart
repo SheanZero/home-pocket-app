@@ -767,8 +767,8 @@ class TransactionDetailsFormState
                           selected: _ledgerType,
                           onChanged: (type) =>
                               setState(() => _ledgerType = type),
-                          survivalLabel: l10n.survivalExpense,
-                          soulLabel: l10n.soulExpense,
+                          survivalLabel: l10n.dailyExpense,
+                          soulLabel: l10n.joyExpense,
                         ),
                       ],
                     ),

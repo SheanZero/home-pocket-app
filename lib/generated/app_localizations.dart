@@ -307,25 +307,25 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Daily'**
-  String get survivalLedger;
+  String get dailyLedger;
 
   /// Soul ledger label
   ///
   /// In en, this message translates to:
   /// **'Joy'**
-  String get soulLedger;
+  String get joyLedger;
 
   /// Short survival label
   ///
   /// In en, this message translates to:
   /// **'Survival'**
-  String get survival;
+  String get daily;
 
   /// Short soul label
   ///
   /// In en, this message translates to:
   /// **'Soul'**
-  String get soul;
+  String get joy;
 
   /// Save action
   ///
@@ -1045,13 +1045,13 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Living Expenses'**
-  String get homeSurvivalExpense;
+  String get homeDailyExpense;
 
   /// Soul ledger expense label
   ///
   /// In en, this message translates to:
   /// **'Joy Expenses'**
-  String get homeSoulExpense;
+  String get homeJoyExpense;
 
   /// Month-over-month comparison header
   ///
@@ -1069,13 +1069,13 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'S'**
-  String get homeSurvivalLedgerTag;
+  String get homeDailyLedgerTag;
 
   /// Compact home ledger row tag for soul/joy ledger
   ///
   /// In en, this message translates to:
   /// **'J'**
-  String get homeSoulLedgerTag;
+  String get homeJoyLedgerTag;
 
   /// Compact home ledger row tag for shared family ledger
   ///
@@ -1093,13 +1093,13 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Joy Index'**
-  String get homeSoulFullness;
+  String get homeJoyFullness;
 
   /// Soul spending percentage metric label
   ///
   /// In en, this message translates to:
   /// **'Soul spending ratio'**
-  String get homeSoulPercentLabel;
+  String get homeJoyPercentLabel;
 
   /// Family invite banner title
   ///
@@ -1189,13 +1189,13 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Recent: {merchant} ¥{amount}'**
-  String homeRecentSoulTransaction(String merchant, int amount);
+  String homeRecentJoyTransaction(String merchant, int amount);
 
   /// Soul charge card status line
   ///
   /// In en, this message translates to:
   /// **'Soul Fullness {fullness}% · Joy Index {roi}'**
-  String homeSoulChargeStatus(int fullness, double roi);
+  String homeJoyChargeStatus(int fullness, double roi);
 
   /// Soul fullness month badge
   ///
@@ -1285,7 +1285,7 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'No data yet'**
-  String get homeNoSoulDataLegend;
+  String get homeNoJoyDataLegend;
 
   /// Best Joy CTA variant tag (same copy as homeBestJoyTagSingle but separate key)
   ///
@@ -1305,7 +1305,7 @@ abstract class S {
   /// **'Your monthly favorite will appear here →'**
   String get homeBestJoyEmptySmall;
 
-  /// Best Joy BIG line — all-neutral state (topJoy joyFullness <= 2) (D-09)
+  /// Best Joy BIG line — all-neutral state (topJoy soulSatisfaction <= 2) (D-09)
   ///
   /// In en, this message translates to:
   /// **'Rate your biggest spend'**
@@ -1435,13 +1435,13 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Survival'**
-  String get survivalExpense;
+  String get dailyExpense;
 
   /// Soul ledger chip label
   ///
   /// In en, this message translates to:
   /// **'Soul'**
-  String get soulExpense;
+  String get joyExpense;
 
   /// Soul satisfaction slider label
   ///
@@ -2509,7 +2509,7 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Recent Soul Expense'**
-  String get homeRecentSoulExpense;
+  String get homeRecentJoyExpense;
 
   /// Voice input permission message shown when microphone access is unavailable
   ///
@@ -2605,7 +2605,7 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Survival vs Soul'**
-  String get analyticsSurvivalVsSoul;
+  String get analyticsDailyVsJoy;
 
   /// Analytics six-month trend chart title
   ///
@@ -3007,23 +3007,23 @@ abstract class S {
   /// **'Retry'**
   String get analyticsCardErrorRetry;
 
-  /// No description provided for @analyticsCardTitlePerCategorySoul.
+  /// No description provided for @analyticsCardTitlePerCategoryJoy.
   ///
   /// In en, this message translates to:
   /// **'Joy · Categories'**
-  String get analyticsCardTitlePerCategorySoul;
+  String get analyticsCardTitlePerCategoryJoy;
 
-  /// No description provided for @analyticsCardTitlePerCategorySoulYou.
+  /// No description provided for @analyticsCardTitlePerCategoryJoyYou.
   ///
   /// In en, this message translates to:
   /// **'Joy · Your categories'**
-  String get analyticsCardTitlePerCategorySoulYou;
+  String get analyticsCardTitlePerCategoryJoyYou;
 
-  /// No description provided for @analyticsCardTitlePerCategorySoulFamily.
+  /// No description provided for @analyticsCardTitlePerCategoryJoyFamily.
   ///
   /// In en, this message translates to:
   /// **'Joy · Family categories'**
-  String get analyticsCardTitlePerCategorySoulFamily;
+  String get analyticsCardTitlePerCategoryJoyFamily;
 
   /// Per-category breakdown row format: category name, average satisfaction, entry count
   ///
@@ -3055,17 +3055,17 @@ abstract class S {
   /// **'Ledger · This window'**
   String get analyticsCardTitleLedgerThisWindow;
 
-  /// No description provided for @analyticsLedgerColumnSoul.
+  /// No description provided for @analyticsLedgerColumnJoy.
   ///
   /// In en, this message translates to:
   /// **'Soul'**
-  String get analyticsLedgerColumnSoul;
+  String get analyticsLedgerColumnJoy;
 
-  /// No description provided for @analyticsLedgerColumnSurvival.
+  /// No description provided for @analyticsLedgerColumnDaily.
   ///
   /// In en, this message translates to:
   /// **'Survival'**
-  String get analyticsLedgerColumnSurvival;
+  String get analyticsLedgerColumnDaily;
 
   /// No description provided for @analyticsLedgerRowYou.
   ///
@@ -3173,13 +3173,13 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Survival'**
-  String get listLedgerSurvival;
+  String get listLedgerDaily;
 
   /// Ledger filter chip: show Soul ledger only (Phase 28)
   ///
   /// In en, this message translates to:
   /// **'Soul'**
-  String get listLedgerSoul;
+  String get listLedgerJoy;
 
   /// Category filter chip label when no categories selected (Phase 28)
   ///

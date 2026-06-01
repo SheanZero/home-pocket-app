@@ -249,8 +249,8 @@ class ListScreen extends ConsumerWidget {
 
     // Ledger tag colors (AppColors constants — never hardcoded hex)
     final tagText = ledgerType == LedgerType.daily
-        ? S.of(context).listLedgerSurvival
-        : S.of(context).listLedgerSoul;
+        ? S.of(context).listLedgerDaily
+        : S.of(context).listLedgerJoy;
     final tagBgColor = ledgerType == LedgerType.daily
         ? AppColors.survivalLight
         : AppColors.soulLight;

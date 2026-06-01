@@ -150,20 +150,20 @@
   "@categoryOther": {
     "description": "Other category"
   },
-  "survivalLedger": "Daily",
-  "@survivalLedger": {
+  "dailyLedger": "Daily",
+  "@dailyLedger": {
     "description": "Survival ledger label"
   },
-  "soulLedger": "Joy",
-  "@soulLedger": {
+  "joyLedger": "Joy",
+  "@joyLedger": {
     "description": "Soul ledger label"
   },
-  "survival": "Survival",
-  "@survival": {
+  "daily": "Survival",
+  "@daily": {
     "description": "Short survival label"
   },
-  "soul": "Soul",
-  "@soul": {
+  "joy": "Soul",
+  "@joy": {
     "description": "Short soul label"
   },
   "save": "Save",
@@ -599,12 +599,12 @@
   "@homeMonthlyExpense": {
     "description": "Home card title for monthly expense overview"
   },
-  "homeSurvivalExpense": "Living Expenses",
-  "@homeSurvivalExpense": {
+  "homeDailyExpense": "Living Expenses",
+  "@homeDailyExpense": {
     "description": "Survival ledger expense label"
   },
-  "homeSoulExpense": "Joy Expenses",
-  "@homeSoulExpense": {
+  "homeJoyExpense": "Joy Expenses",
+  "@homeJoyExpense": {
     "description": "Soul ledger expense label"
   },
   "homeMonthComparison": "vs Last Month",
@@ -620,12 +620,12 @@
       }
     }
   },
-  "homeSurvivalLedgerTag": "S",
-  "@homeSurvivalLedgerTag": {
+  "homeDailyLedgerTag": "S",
+  "@homeDailyLedgerTag": {
     "description": "Compact home ledger row tag for survival ledger"
   },
-  "homeSoulLedgerTag": "J",
-  "@homeSoulLedgerTag": {
+  "homeJoyLedgerTag": "J",
+  "@homeJoyLedgerTag": {
     "description": "Compact home ledger row tag for soul/joy ledger"
   },
   "homeSharedLedgerTag": "G",
@@ -641,12 +641,12 @@
       }
     }
   },
-  "homeSoulFullness": "Joy Index",
-  "@homeSoulFullness": {
+  "homeJoyFullness": "Joy Index",
+  "@homeJoyFullness": {
     "description": "Soul fullness section title"
   },
-  "homeSoulPercentLabel": "Soul spending ratio",
-  "@homeSoulPercentLabel": {
+  "homeJoyPercentLabel": "Soul spending ratio",
+  "@homeJoyPercentLabel": {
     "description": "Soul spending percentage metric label"
   },
   "homeFamilyInviteTitle": "Invite Family",
@@ -723,8 +723,8 @@
       }
     }
   },
-  "homeRecentSoulTransaction": "Recent: {merchant} ¥{amount}",
-  "@homeRecentSoulTransaction": {
+  "homeRecentJoyTransaction": "Recent: {merchant} ¥{amount}",
+  "@homeRecentJoyTransaction": {
     "description": "Recent soul transaction summary",
     "placeholders": {
       "merchant": {
@@ -735,8 +735,8 @@
       }
     }
   },
-  "homeSoulChargeStatus": "Soul Fullness {fullness}% · Joy Index {roi}",
-  "@homeSoulChargeStatus": {
+  "homeJoyChargeStatus": "Soul Fullness {fullness}% · Joy Index {roi}",
+  "@homeJoyChargeStatus": {
     "description": "Soul charge card status line",
     "placeholders": {
       "fullness": {
@@ -834,8 +834,8 @@
   "@homeMembersSectionTitle": {
     "description": "Group-mode member rows subheader"
   },
-  "homeNoSoulDataLegend": "No data yet",
-  "@homeNoSoulDataLegend": {
+  "homeNoJoyDataLegend": "No data yet",
+  "@homeNoJoyDataLegend": {
     "description": "Legend rows when totalSoulTx == 0 (D-09)"
   },
   "homeBestJoyEmptyTagPrimary": "Top of the Month",
@@ -934,16 +934,16 @@
   "@expenseClassification": {
     "description": "Ledger type section title"
   },
-  "survivalExpense": "Survival",
-  "@survivalExpense": {
+  "dailyExpense": "Survival",
+  "@dailyExpense": {
     "description": "Survival ledger chip label"
   },
-  "soulExpense": "Soul",
-  "@soulExpense": {
+  "joyExpense": "Soul",
+  "@joyExpense": {
     "description": "Soul ledger chip label"
   },
-  "soulSatisfaction": "Soul Fullness",
-  "@soulSatisfaction": {
+  "joyFullness": "Soul Fullness",
+  "@joyFullness": {
     "description": "Soul satisfaction slider label"
   },
   "addPhoto": "Add photo",
@@ -1649,8 +1649,8 @@
   "@homeViewAllTransactions": {
     "description": "Button label to view all transactions from home"
   },
-  "homeRecentSoulExpense": "Recent Soul Expense",
-  "@homeRecentSoulExpense": {
+  "homeRecentJoyExpense": "Recent Soul Expense",
+  "@homeRecentJoyExpense": {
     "description": "Soul card label for the most recent soul ledger expense"
   },
   "voiceMicrophonePermissionRequired": "Please allow microphone access",
@@ -1718,8 +1718,8 @@
   "@analyticsNoLedgerData": {
     "description": "Analytics empty state shown when ledger data is unavailable"
   },
-  "analyticsSurvivalVsSoul": "Survival vs Soul",
-  "@analyticsSurvivalVsSoul": {
+  "analyticsDailyVsJoy": "Survival vs Soul",
+  "@analyticsDailyVsJoy": {
     "description": "Analytics label comparing survival and soul ledger spending"
   },
   "analyticsSixMonthTrend": "Six-month Trend",
@@ -2022,9 +2022,9 @@
   "analyticsCardErrorHeading": "Could not load data",
   "analyticsCardErrorBody": "Please try again in a moment",
   "analyticsCardErrorRetry": "Retry",
-  "analyticsCardTitlePerCategorySoul": "Joy · Categories",
-  "analyticsCardTitlePerCategorySoulYou": "Joy · Your categories",
-  "analyticsCardTitlePerCategorySoulFamily": "Joy · Family categories",
+  "analyticsCardTitlePerCategoryJoy": "Joy · Categories",
+  "analyticsCardTitlePerCategoryJoyYou": "Joy · Your categories",
+  "analyticsCardTitlePerCategoryJoyFamily": "Joy · Family categories",
   "analyticsPerCategoryRow": "{categoryName} · {avgSat} avg / {count} entries",
   "@analyticsPerCategoryRow": {
     "description": "Per-category breakdown row format: category name, average satisfaction, entry count",
@@ -2055,8 +2055,8 @@
   "analyticsPerCategoryShowAll": "Show all",
   "analyticsPerCategoryShowLess": "Show less",
   "analyticsCardTitleLedgerThisWindow": "Ledger · This window",
-  "analyticsLedgerColumnSoul": "Soul",
-  "analyticsLedgerColumnSurvival": "Survival",
+  "analyticsLedgerColumnJoy": "Soul",
+  "analyticsLedgerColumnDaily": "Survival",
   "analyticsLedgerRowYou": "You",
   "analyticsLedgerRowFamily": "Family",
   "analyticsLedgerCellEntries": "{count} entries",
@@ -2132,12 +2132,12 @@
   "@listLedgerAll": {
     "description": "Ledger filter chip: show all ledger types (Phase 28)"
   },
-  "listLedgerSurvival": "Survival",
-  "@listLedgerSurvival": {
+  "listLedgerDaily": "Survival",
+  "@listLedgerDaily": {
     "description": "Ledger filter chip: show Survival ledger only (Phase 28)"
   },
-  "listLedgerSoul": "Soul",
-  "@listLedgerSoul": {
+  "listLedgerJoy": "Soul",
+  "@listLedgerJoy": {
     "description": "Ledger filter chip: show Soul ledger only (Phase 28)"
   },
   "listCategoryChip": "Categories",

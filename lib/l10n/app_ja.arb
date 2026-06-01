@@ -150,20 +150,20 @@
   "@categoryOther": {
     "description": "Other category"
   },
-  "survivalLedger": "日々の帳",
-  "@survivalLedger": {
+  "dailyLedger": "日々の帳",
+  "@dailyLedger": {
     "description": "Survival ledger label"
   },
-  "soulLedger": "ときめき帳",
-  "@soulLedger": {
+  "joyLedger": "ときめき帳",
+  "@joyLedger": {
     "description": "Soul ledger label"
   },
-  "survival": "生存",
-  "@survival": {
+  "daily": "生存",
+  "@daily": {
     "description": "Short survival label"
   },
-  "soul": "魂",
-  "@soul": {
+  "joy": "魂",
+  "@joy": {
     "description": "Short soul label"
   },
   "save": "保存",
@@ -599,12 +599,12 @@
   "@homeMonthlyExpense": {
     "description": "Home card title for monthly expense overview"
   },
-  "homeSurvivalExpense": "暮らしの支出",
-  "@homeSurvivalExpense": {
+  "homeDailyExpense": "暮らしの支出",
+  "@homeDailyExpense": {
     "description": "Survival ledger expense label"
   },
-  "homeSoulExpense": "ときめき支出",
-  "@homeSoulExpense": {
+  "homeJoyExpense": "ときめき支出",
+  "@homeJoyExpense": {
     "description": "Soul ledger expense label"
   },
   "homeMonthComparison": "先月比",
@@ -620,12 +620,12 @@
       }
     }
   },
-  "homeSurvivalLedgerTag": "生",
-  "@homeSurvivalLedgerTag": {
+  "homeDailyLedgerTag": "生",
+  "@homeDailyLedgerTag": {
     "description": "Compact home ledger row tag for survival ledger"
   },
-  "homeSoulLedgerTag": "灵",
-  "@homeSoulLedgerTag": {
+  "homeJoyLedgerTag": "灵",
+  "@homeJoyLedgerTag": {
     "description": "Compact home ledger row tag for soul/joy ledger"
   },
   "homeSharedLedgerTag": "共",
@@ -641,12 +641,12 @@
       }
     }
   },
-  "homeSoulFullness": "ときめき度",
-  "@homeSoulFullness": {
+  "homeJoyFullness": "ときめき度",
+  "@homeJoyFullness": {
     "description": "Soul fullness section title"
   },
-  "homeSoulPercentLabel": "今月の魂支出の割合",
-  "@homeSoulPercentLabel": {
+  "homeJoyPercentLabel": "今月の魂支出の割合",
+  "@homeJoyPercentLabel": {
     "description": "Soul spending percentage metric label"
   },
   "homeFamilyInviteTitle": "家族を招待する",
@@ -723,8 +723,8 @@
       }
     }
   },
-  "homeRecentSoulTransaction": "直近: {merchant} ¥{amount}",
-  "@homeRecentSoulTransaction": {
+  "homeRecentJoyTransaction": "直近: {merchant} ¥{amount}",
+  "@homeRecentJoyTransaction": {
     "description": "Recent soul transaction summary",
     "placeholders": {
       "merchant": {
@@ -735,8 +735,8 @@
       }
     }
   },
-  "homeSoulChargeStatus": "魂の充実度 {fullness}% · ときめき指数 {roi}",
-  "@homeSoulChargeStatus": {
+  "homeJoyChargeStatus": "魂の充実度 {fullness}% · ときめき指数 {roi}",
+  "@homeJoyChargeStatus": {
     "description": "Soul charge card status line",
     "placeholders": {
       "fullness": {
@@ -834,8 +834,8 @@
   "@homeMembersSectionTitle": {
     "description": "Group-mode member rows subheader"
   },
-  "homeNoSoulDataLegend": "まだ記録なし",
-  "@homeNoSoulDataLegend": {
+  "homeNoJoyDataLegend": "まだ記録なし",
+  "@homeNoJoyDataLegend": {
     "description": "Legend rows when totalSoulTx == 0 (D-09)"
   },
   "homeBestJoyEmptyTagPrimary": "今月の最愛",
@@ -934,16 +934,16 @@
   "@expenseClassification": {
     "description": "Ledger type section title"
   },
-  "survivalExpense": "生存支出",
-  "@survivalExpense": {
+  "dailyExpense": "生存支出",
+  "@dailyExpense": {
     "description": "Survival ledger chip label"
   },
-  "soulExpense": "魂支出",
-  "@soulExpense": {
+  "joyExpense": "魂支出",
+  "@joyExpense": {
     "description": "Soul ledger chip label"
   },
-  "soulSatisfaction": "魂の充盈度",
-  "@soulSatisfaction": {
+  "joyFullness": "魂の充盈度",
+  "@joyFullness": {
     "description": "Soul satisfaction slider label"
   },
   "addPhoto": "写真を追加",
@@ -1649,8 +1649,8 @@
   "@homeViewAllTransactions": {
     "description": "Button label to view all transactions from home"
   },
-  "homeRecentSoulExpense": "最近の魂支出",
-  "@homeRecentSoulExpense": {
+  "homeRecentJoyExpense": "最近の魂支出",
+  "@homeRecentJoyExpense": {
     "description": "Soul card label for the most recent soul ledger expense"
   },
   "voiceMicrophonePermissionRequired": "マイクへのアクセスを許可してください",
@@ -1718,8 +1718,8 @@
   "@analyticsNoLedgerData": {
     "description": "Analytics empty state shown when ledger data is unavailable"
   },
-  "analyticsSurvivalVsSoul": "生存 vs 魂",
-  "@analyticsSurvivalVsSoul": {
+  "analyticsDailyVsJoy": "生存 vs 魂",
+  "@analyticsDailyVsJoy": {
     "description": "Analytics label comparing survival and soul ledger spending"
   },
   "analyticsSixMonthTrend": "6か月推移",
@@ -2022,9 +2022,9 @@
   "analyticsCardErrorHeading": "データが読み込めなかった",
   "analyticsCardErrorBody": "しばらくしてから、もう一度試してください",
   "analyticsCardErrorRetry": "再試行",
-  "analyticsCardTitlePerCategorySoul": "ときめき · カテゴリ",
-  "analyticsCardTitlePerCategorySoulYou": "ときめき · あなたのカテゴリ",
-  "analyticsCardTitlePerCategorySoulFamily": "ときめき · 家族のカテゴリ",
+  "analyticsCardTitlePerCategoryJoy": "ときめき · カテゴリ",
+  "analyticsCardTitlePerCategoryJoyYou": "ときめき · あなたのカテゴリ",
+  "analyticsCardTitlePerCategoryJoyFamily": "ときめき · 家族のカテゴリ",
   "analyticsPerCategoryRow": "{categoryName} · 平均 {avgSat} / {count} 件",
   "@analyticsPerCategoryRow": {
     "description": "Per-category breakdown row format: category name, average satisfaction, entry count",
@@ -2055,8 +2055,8 @@
   "analyticsPerCategoryShowAll": "すべて表示",
   "analyticsPerCategoryShowLess": "折りたたむ",
   "analyticsCardTitleLedgerThisWindow": "今期の家計簿",
-  "analyticsLedgerColumnSoul": "ときめき",
-  "analyticsLedgerColumnSurvival": "生活",
+  "analyticsLedgerColumnJoy": "ときめき",
+  "analyticsLedgerColumnDaily": "生活",
   "analyticsLedgerRowYou": "あなた",
   "analyticsLedgerRowFamily": "家族",
   "analyticsLedgerCellEntries": "{count} 件",
@@ -2132,12 +2132,12 @@
   "@listLedgerAll": {
     "description": "Ledger filter chip: show all ledger types (Phase 28)"
   },
-  "listLedgerSurvival": "生存",
-  "@listLedgerSurvival": {
+  "listLedgerDaily": "生存",
+  "@listLedgerDaily": {
     "description": "Ledger filter chip: show Survival ledger only (Phase 28)"
   },
-  "listLedgerSoul": "魂",
-  "@listLedgerSoul": {
+  "listLedgerJoy": "魂",
+  "@listLedgerJoy": {
     "description": "Ledger filter chip: show Soul ledger only (Phase 28)"
   },
   "listCategoryChip": "カテゴリ",

@@ -117,16 +117,16 @@ class SZh extends S {
   String get categoryOther => '其他';
 
   @override
-  String get survivalLedger => '日常';
+  String get dailyLedger => '日常';
 
   @override
-  String get soulLedger => '悦己';
+  String get joyLedger => '悦己';
 
   @override
-  String get survival => '生存';
+  String get daily => '生存';
 
   @override
-  String get soul => '灵魂';
+  String get joy => '灵魂';
 
   @override
   String get save => '保存';
@@ -494,10 +494,10 @@ class SZh extends S {
   String get homeMonthlyExpense => '本月支出';
 
   @override
-  String get homeSurvivalExpense => '生存支出';
+  String get homeDailyExpense => '生存支出';
 
   @override
-  String get homeSoulExpense => '灵魂支出';
+  String get homeJoyExpense => '灵魂支出';
 
   @override
   String get homeMonthComparison => '较上月';
@@ -508,10 +508,10 @@ class SZh extends S {
   }
 
   @override
-  String get homeSurvivalLedgerTag => '生';
+  String get homeDailyLedgerTag => '生';
 
   @override
-  String get homeSoulLedgerTag => '灵';
+  String get homeJoyLedgerTag => '灵';
 
   @override
   String get homeSharedLedgerTag => '共';
@@ -522,10 +522,10 @@ class SZh extends S {
   }
 
   @override
-  String get homeSoulFullness => '悦己充盈';
+  String get homeJoyFullness => '悦己充盈';
 
   @override
-  String get homeSoulPercentLabel => '本月灵魂支出占比';
+  String get homeJoyPercentLabel => '本月灵魂支出占比';
 
   @override
   String get homeFamilyInviteTitle => '邀请家人';
@@ -576,12 +576,12 @@ class SZh extends S {
   }
 
   @override
-  String homeRecentSoulTransaction(String merchant, int amount) {
+  String homeRecentJoyTransaction(String merchant, int amount) {
     return '最近一笔: $merchant ¥$amount';
   }
 
   @override
-  String homeSoulChargeStatus(int fullness, double roi) {
+  String homeJoyChargeStatus(int fullness, double roi) {
     return '灵魂充盈度 $fullness% · 悦己指数 $roi';
   }
 
@@ -638,7 +638,7 @@ class SZh extends S {
   String get homeMembersSectionTitle => '群组成员';
 
   @override
-  String get homeNoSoulDataLegend => '尚未记录';
+  String get homeNoJoyDataLegend => '尚未记录';
 
   @override
   String get homeBestJoyEmptyTagPrimary => '本月最爱';
@@ -713,10 +713,10 @@ class SZh extends S {
   String get expenseClassification => '用途';
 
   @override
-  String get survivalExpense => '生存支出';
+  String get dailyExpense => '生存支出';
 
   @override
-  String get soulExpense => '灵魂支出';
+  String get joyExpense => '灵魂支出';
 
   @override
   String get joyFullness => '灵魂充盈度';
@@ -1290,7 +1290,7 @@ class SZh extends S {
   String get homeViewAllTransactions => '查看全部';
 
   @override
-  String get homeRecentSoulExpense => '最近灵魂支出';
+  String get homeRecentJoyExpense => '最近灵魂支出';
 
   @override
   String get voiceMicrophonePermissionRequired => '请允许访问麦克风';
@@ -1340,7 +1340,7 @@ class SZh extends S {
   String get analyticsNoLedgerData => '暂无账本数据';
 
   @override
-  String get analyticsSurvivalVsSoul => '生存 vs 灵魂';
+  String get analyticsDailyVsJoy => '生存 vs 灵魂';
 
   @override
   String get analyticsSixMonthTrend => '六个月趋势';
@@ -1585,13 +1585,13 @@ class SZh extends S {
   String get analyticsCardErrorRetry => '重试';
 
   @override
-  String get analyticsCardTitlePerCategorySoul => '悦己 · 类别';
+  String get analyticsCardTitlePerCategoryJoy => '悦己 · 类别';
 
   @override
-  String get analyticsCardTitlePerCategorySoulYou => '悦己 · 你的类别';
+  String get analyticsCardTitlePerCategoryJoyYou => '悦己 · 你的类别';
 
   @override
-  String get analyticsCardTitlePerCategorySoulFamily => '悦己 · 家庭类别';
+  String get analyticsCardTitlePerCategoryJoyFamily => '悦己 · 家庭类别';
 
   @override
   String analyticsPerCategoryRow(
@@ -1617,10 +1617,10 @@ class SZh extends S {
   String get analyticsCardTitleLedgerThisWindow => '本期账本描述';
 
   @override
-  String get analyticsLedgerColumnSoul => '灵魂';
+  String get analyticsLedgerColumnJoy => '灵魂';
 
   @override
-  String get analyticsLedgerColumnSurvival => '生存';
+  String get analyticsLedgerColumnDaily => '生存';
 
   @override
   String get analyticsLedgerRowYou => '你';
@@ -1684,10 +1684,10 @@ class SZh extends S {
   String get listLedgerAll => '全部';
 
   @override
-  String get listLedgerSurvival => '生存';
+  String get listLedgerDaily => '生存';
 
   @override
-  String get listLedgerSoul => '灵魂';
+  String get listLedgerJoy => '灵魂';
 
   @override
   String get listCategoryChip => '分类';

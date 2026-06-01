@@ -117,16 +117,16 @@ class SJa extends S {
   String get categoryOther => 'その他';
 
   @override
-  String get survivalLedger => '日々の帳';
+  String get dailyLedger => '日々の帳';
 
   @override
-  String get soulLedger => 'ときめき帳';
+  String get joyLedger => 'ときめき帳';
 
   @override
-  String get survival => '生存';
+  String get daily => '生存';
 
   @override
-  String get soul => '魂';
+  String get joy => '魂';
 
   @override
   String get save => '保存';
@@ -494,10 +494,10 @@ class SJa extends S {
   String get homeMonthlyExpense => '今月の出費';
 
   @override
-  String get homeSurvivalExpense => '暮らしの支出';
+  String get homeDailyExpense => '暮らしの支出';
 
   @override
-  String get homeSoulExpense => 'ときめき支出';
+  String get homeJoyExpense => 'ときめき支出';
 
   @override
   String get homeMonthComparison => '先月比';
@@ -508,10 +508,10 @@ class SJa extends S {
   }
 
   @override
-  String get homeSurvivalLedgerTag => '生';
+  String get homeDailyLedgerTag => '生';
 
   @override
-  String get homeSoulLedgerTag => '灵';
+  String get homeJoyLedgerTag => '灵';
 
   @override
   String get homeSharedLedgerTag => '共';
@@ -522,10 +522,10 @@ class SJa extends S {
   }
 
   @override
-  String get homeSoulFullness => 'ときめき度';
+  String get homeJoyFullness => 'ときめき度';
 
   @override
-  String get homeSoulPercentLabel => '今月の魂支出の割合';
+  String get homeJoyPercentLabel => '今月の魂支出の割合';
 
   @override
   String get homeFamilyInviteTitle => '家族を招待する';
@@ -576,12 +576,12 @@ class SJa extends S {
   }
 
   @override
-  String homeRecentSoulTransaction(String merchant, int amount) {
+  String homeRecentJoyTransaction(String merchant, int amount) {
     return '直近: $merchant ¥$amount';
   }
 
   @override
-  String homeSoulChargeStatus(int fullness, double roi) {
+  String homeJoyChargeStatus(int fullness, double roi) {
     return '魂の充実度 $fullness% · ときめき指数 $roi';
   }
 
@@ -640,7 +640,7 @@ class SJa extends S {
   String get homeMembersSectionTitle => 'メンバー';
 
   @override
-  String get homeNoSoulDataLegend => 'まだ記録なし';
+  String get homeNoJoyDataLegend => 'まだ記録なし';
 
   @override
   String get homeBestJoyEmptyTagPrimary => '今月の最愛';
@@ -715,10 +715,10 @@ class SJa extends S {
   String get expenseClassification => '用途';
 
   @override
-  String get survivalExpense => '生存支出';
+  String get dailyExpense => '生存支出';
 
   @override
-  String get soulExpense => '魂支出';
+  String get joyExpense => '魂支出';
 
   @override
   String get joyFullness => '魂の充盈度';
@@ -1295,7 +1295,7 @@ class SJa extends S {
   String get homeViewAllTransactions => 'すべて見る';
 
   @override
-  String get homeRecentSoulExpense => '最近の魂支出';
+  String get homeRecentJoyExpense => '最近の魂支出';
 
   @override
   String get voiceMicrophonePermissionRequired => 'マイクへのアクセスを許可してください';
@@ -1345,7 +1345,7 @@ class SJa extends S {
   String get analyticsNoLedgerData => '帳簿データがありません';
 
   @override
-  String get analyticsSurvivalVsSoul => '生存 vs 魂';
+  String get analyticsDailyVsJoy => '生存 vs 魂';
 
   @override
   String get analyticsSixMonthTrend => '6か月推移';
@@ -1591,13 +1591,13 @@ class SJa extends S {
   String get analyticsCardErrorRetry => '再試行';
 
   @override
-  String get analyticsCardTitlePerCategorySoul => 'ときめき · カテゴリ';
+  String get analyticsCardTitlePerCategoryJoy => 'ときめき · カテゴリ';
 
   @override
-  String get analyticsCardTitlePerCategorySoulYou => 'ときめき · あなたのカテゴリ';
+  String get analyticsCardTitlePerCategoryJoyYou => 'ときめき · あなたのカテゴリ';
 
   @override
-  String get analyticsCardTitlePerCategorySoulFamily => 'ときめき · 家族のカテゴリ';
+  String get analyticsCardTitlePerCategoryJoyFamily => 'ときめき · 家族のカテゴリ';
 
   @override
   String analyticsPerCategoryRow(
@@ -1623,10 +1623,10 @@ class SJa extends S {
   String get analyticsCardTitleLedgerThisWindow => '今期の家計簿';
 
   @override
-  String get analyticsLedgerColumnSoul => 'ときめき';
+  String get analyticsLedgerColumnJoy => 'ときめき';
 
   @override
-  String get analyticsLedgerColumnSurvival => '生活';
+  String get analyticsLedgerColumnDaily => '生活';
 
   @override
   String get analyticsLedgerRowYou => 'あなた';
@@ -1690,10 +1690,10 @@ class SJa extends S {
   String get listLedgerAll => 'すべて';
 
   @override
-  String get listLedgerSurvival => '生存';
+  String get listLedgerDaily => '生存';
 
   @override
-  String get listLedgerSoul => '魂';
+  String get listLedgerJoy => '魂';
 
   @override
   String get listCategoryChip => 'カテゴリ';

@@ -213,14 +213,14 @@ class HomeHeroCard extends StatelessWidget {
             _splitLabel(
               context,
               AppColors.soul,
-              l10n.soulLedger,
+              l10n.joyLedger,
               soulText,
               leading: true,
             ),
             _splitLabel(
               context,
               AppColors.survival,
-              l10n.survivalLedger,
+              l10n.dailyLedger,
               survivalText,
               leading: false,
             ),
@@ -463,7 +463,7 @@ class HomeHeroCard extends StatelessWidget {
 
   Widget _legendGroup(BuildContext context, S l10n) {
     final f = family;
-    final empty = l10n.homeNoSoulDataLegend;
+    final empty = l10n.homeNoJoyDataLegend;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -501,7 +501,7 @@ class HomeHeroCard extends StatelessWidget {
   }
 
   Widget _legendSingle(BuildContext context, S l10n) {
-    final empty = l10n.homeNoSoulDataLegend;
+    final empty = l10n.homeNoJoyDataLegend;
     final highlights = switch (happiness.highlightsCount) {
       Empty() => 0,
       Value(:final data) => data,

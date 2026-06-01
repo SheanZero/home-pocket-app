@@ -237,7 +237,7 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
               selected: filter.ledgerType == LedgerType.daily,
               child: ActionChip(
                 label: Text(
-                  l10n.listLedgerSurvival,
+                  l10n.listLedgerDaily,
                   style: AppTextStyles.caption.copyWith(
                     color: filter.ledgerType == LedgerType.daily
                         ? AppColors.survival
@@ -270,7 +270,7 @@ class _ListSortFilterBarState extends ConsumerState<ListSortFilterBar> {
               selected: filter.ledgerType == LedgerType.joy,
               child: ActionChip(
                 label: Text(
-                  l10n.listLedgerSoul,
+                  l10n.listLedgerJoy,
                   style: AppTextStyles.caption.copyWith(
                     color: filter.ledgerType == LedgerType.joy
                         ? AppColors.soul
