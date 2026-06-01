@@ -1,35 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_transaction_tile.dart';
 
 void main() {
   group('HomeTransactionTile', () {
     testWidgets('shows tag, merchant, category, and amount', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: HomeTransactionTile(
-              tagText: '\u592a',
-              tagBgColor: Color(0xFFE8F0F8),
-              tagTextColor: Color(0xFF5A9CC8),
+              tagText: '太',
+              tagBgColor: const Color(0xFFE8F0F8),
+              tagTextColor: AppPalette.light.daily,
               merchant:
-                  '\u30b9\u30fc\u30d1\u30fc\u30de\u30fc\u30b1\u30c3\u30c8',
-              category: '\u98df\u8cbb',
-              categoryColor: Color(0xFFABABAB),
-              formattedAmount: '-\u00a53,480',
-              amountColor: Color(0xFF1E2432),
+                  'スーパーマーケット',
+              category: '食費',
+              categoryColor: const Color(0xFFABABAB),
+              formattedAmount: '-¥3,480',
+              amountColor: const Color(0xFF1E2432),
             ),
           ),
         ),
       );
 
-      expect(find.text('\u592a'), findsOneWidget);
+      expect(find.text('太'), findsOneWidget);
       expect(
-        find.text('\u30b9\u30fc\u30d1\u30fc\u30de\u30fc\u30b1\u30c3\u30c8'),
+        find.text('スーパーマーケット'),
         findsOneWidget,
       );
-      expect(find.text('\u98df\u8cbb'), findsOneWidget);
-      expect(find.text('-\u00a53,480'), findsOneWidget);
+      expect(find.text('食費'), findsOneWidget);
+      expect(find.text('-¥3,480'), findsOneWidget);
     });
 
     testWidgets('triggers onTap callback', (tester) async {
@@ -40,11 +41,11 @@ void main() {
             body: HomeTransactionTile(
               tagText: 'T',
               tagBgColor: const Color(0xFFE8F0F8),
-              tagTextColor: const Color(0xFF5A9CC8),
+              tagTextColor: AppPalette.light.daily,
               merchant: 'Test',
               category: 'Food',
               categoryColor: const Color(0xFFABABAB),
-              formattedAmount: '-\u00a51,000',
+              formattedAmount: '-¥1,000',
               amountColor: const Color(0xFF1E2432),
               onTap: () => tapped = true,
             ),
@@ -57,34 +58,34 @@ void main() {
     });
 
     testWidgets('applies tag background and text colours', (tester) async {
-      const bgColor = Color(0xFFE5F5ED);
-      const textColor = Color(0xFF47B88A);
+      final bgColor = const Color(0xFFE5F5ED);
+      final textColor = AppPalette.light.joy;
 
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: HomeTransactionTile(
-              tagText: '\u9b42',
+              tagText: '魂',
               tagBgColor: bgColor,
               tagTextColor: textColor,
               merchant: 'Bookstore',
               category: 'Education',
-              categoryColor: Color(0xFFABABAB),
-              formattedAmount: '-\u00a52,500',
-              amountColor: Color(0xFF1E2432),
+              categoryColor: const Color(0xFFABABAB),
+              formattedAmount: '-¥2,500',
+              amountColor: const Color(0xFF1E2432),
             ),
           ),
         ),
       );
 
       // Verify tag text widget has the correct colour
-      final tagWidget = tester.widget<Text>(find.text('\u9b42'));
+      final tagWidget = tester.widget<Text>(find.text('魂'));
       expect(tagWidget.style?.color, textColor);
 
       // Verify tag container has the correct background
       final container = tester.widget<Container>(
         find
-            .ancestor(of: find.text('\u9b42'), matching: find.byType(Container))
+            .ancestor(of: find.text('魂'), matching: find.byType(Container))
             .first,
       );
       final decoration = container.decoration! as BoxDecoration;
@@ -92,20 +93,20 @@ void main() {
     });
 
     testWidgets('applies category colour', (tester) async {
-      const catColor = Color(0xFF47B88A);
+      final catColor = AppPalette.light.joy;
 
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: HomeTransactionTile(
               tagText: 'S',
-              tagBgColor: Color(0xFFE5F5ED),
-              tagTextColor: Color(0xFF47B88A),
+              tagBgColor: const Color(0xFFE5F5ED),
+              tagTextColor: AppPalette.light.joy,
               merchant: 'Shop',
               category: 'Hobby',
               categoryColor: catColor,
-              formattedAmount: '-\u00a5800',
-              amountColor: Color(0xFF1E2432),
+              formattedAmount: '-¥800',
+              amountColor: const Color(0xFF1E2432),
             ),
           ),
         ),
@@ -116,26 +117,26 @@ void main() {
     });
 
     testWidgets('applies amount colour', (tester) async {
-      const amtColor = Color(0xFFE85A4F);
+      final amtColor = AppPalette.light.error;
 
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: HomeTransactionTile(
               tagText: 'A',
-              tagBgColor: Color(0xFFE8F0F8),
-              tagTextColor: Color(0xFF5A9CC8),
+              tagBgColor: const Color(0xFFE8F0F8),
+              tagTextColor: AppPalette.light.daily,
               merchant: 'Cafe',
               category: 'Dining',
-              categoryColor: Color(0xFFABABAB),
-              formattedAmount: '+\u00a51,200',
+              categoryColor: const Color(0xFFABABAB),
+              formattedAmount: '+¥1,200',
               amountColor: amtColor,
             ),
           ),
         ),
       );
 
-      final amountWidget = tester.widget<Text>(find.text('+\u00a51,200'));
+      final amountWidget = tester.widget<Text>(find.text('+¥1,200'));
       expect(amountWidget.style?.color, amtColor);
     });
   });

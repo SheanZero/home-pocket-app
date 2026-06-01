@@ -8,6 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/application/accounting/delete_transaction_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
@@ -64,9 +65,9 @@ Future<void> _pumpTile(
             onDeleted: onDeleted ?? () {},
             tagText: '日常',
             tagBgColor: const Color(0xFFE8F0F8),
-            tagTextColor: const Color(0xFF5A9CC8),
+            tagTextColor: AppPalette.light.daily, // ADR-018 daily teal-navy
             category: '食費',
-            categoryColor: const Color(0xFF5A9CC8),
+            categoryColor: AppPalette.light.daily, // ADR-018 daily teal-navy
             formattedAmount: '¥1,500',
             l1Icon: Icons.restaurant,
             locale: const Locale('ja'),
