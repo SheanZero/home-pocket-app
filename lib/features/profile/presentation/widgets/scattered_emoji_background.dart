@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 
 enum ScatteredEmojiPattern { onboarding, avatarPicker, profileEdit }
 
@@ -18,8 +18,7 @@ class ScatteredEmojiBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final emojiColor = isDark ? const Color(0xFFF0F0F5) : AppColors.textPrimary;
+    final emojiColor = context.palette.textPrimary;
     final decorations = switch (pattern) {
       ScatteredEmojiPattern.onboarding => _onboardingDecorations,
       ScatteredEmojiPattern.avatarPicker => _avatarPickerDecorations,

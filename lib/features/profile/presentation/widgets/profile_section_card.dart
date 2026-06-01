@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../providers/state_user_profile.dart';
 import '../screens/profile_edit_screen.dart';
@@ -13,7 +13,7 @@ class ProfileSectionCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(userProfileProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.palette;
 
     return profileAsync.when(
       data: (profile) {
@@ -37,12 +37,10 @@ class ProfileSectionCard extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark ? AppColorsDark.card : AppColors.card,
+                color: palette.card,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: isDark
-                      ? AppColorsDark.borderDefault
-                      : AppColors.borderDefault,
+                  color: palette.borderDefault,
                 ),
               ),
               child: Row(
@@ -71,9 +69,7 @@ class ProfileSectionCard extends ConsumerWidget {
                           style: TextStyle(
                             fontFamily: 'Outfit',
                             fontSize: 12,
-                            color: isDark
-                                ? AppColorsDark.textSecondary
-                                : AppColors.textSecondary,
+                            color: palette.textSecondary,
                           ),
                         ),
                       ],
@@ -82,9 +78,7 @@ class ProfileSectionCard extends ConsumerWidget {
                   Icon(
                     Icons.chevron_right,
                     size: 20,
-                    color: isDark
-                        ? AppColorsDark.textTertiary
-                        : AppColors.textTertiary,
+                    color: palette.textTertiary,
                   ),
                 ],
               ),

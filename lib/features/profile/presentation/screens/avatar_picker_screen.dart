@@ -4,16 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/constants/warm_emojis.dart';
 import '../widgets/avatar_display.dart';
 import '../widgets/scattered_emoji_background.dart';
-
-const _profileDarkBackground = Color(0xFF141418);
-const _profileDarkSurface = Color(0xFF2A2A32);
-const _profileDarkTextPrimary = Color(0xFFF0F0F5);
-const _profileDarkTextSecondary = Color(0xFF6B6B78);
 
 class AvatarPickerResult {
   const AvatarPickerResult({required this.emoji, this.imagePath});
@@ -113,16 +108,10 @@ class _AvatarPickerScreenState extends State<AvatarPickerScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary = isDark
-        ? _profileDarkTextPrimary
-        : AppColors.textPrimary;
-    final textSecondary = isDark
-        ? _profileDarkTextSecondary
-        : AppColors.textSecondary;
+    final palette = context.palette;
 
     return Scaffold(
-      backgroundColor: isDark ? _profileDarkBackground : AppColors.background,
+      backgroundColor: palette.background,
       body: ScatteredEmojiBackground(
         pattern: ScatteredEmojiPattern.avatarPicker,
         child: SafeArea(
@@ -144,7 +133,7 @@ class _AvatarPickerScreenState extends State<AvatarPickerScreen>
                           fontFamily: 'Outfit',
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: textSecondary,
+                          color: palette.textSecondary,
                         ),
                       ),
                     ),
@@ -154,18 +143,18 @@ class _AvatarPickerScreenState extends State<AvatarPickerScreen>
                         fontFamily: 'Outfit',
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: textPrimary,
+                        color: palette.textPrimary,
                       ),
                     ),
                     GestureDetector(
                       onTap: _submit,
                       child: Text(
                         '${l10n.profileDone} ✓',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Outfit',
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.accentPrimary,
+                          color: palette.accentPrimary,
                         ),
                       ),
                     ),
@@ -191,7 +180,7 @@ class _AvatarPickerScreenState extends State<AvatarPickerScreen>
                               fontFamily: 'Outfit',
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
-                              color: textSecondary,
+                              color: palette.textSecondary,
                             ),
                           ),
                         ],
@@ -202,20 +191,18 @@ class _AvatarPickerScreenState extends State<AvatarPickerScreen>
                         decoration: BoxDecoration(
                           border: Border(
                             bottom: BorderSide(
-                              color: isDark
-                                  ? _profileDarkSurface
-                                  : AppColors.borderDefault,
+                              color: palette.borderDefault,
                             ),
                           ),
                         ),
                         child: TabBar(
                           controller: _tabController,
-                          indicatorColor: AppColors.accentPrimary,
+                          indicatorColor: palette.accentPrimary,
                           indicatorWeight: 2,
                           indicatorSize: TabBarIndicatorSize.tab,
                           dividerColor: Colors.transparent,
-                          labelColor: AppColors.accentPrimary,
-                          unselectedLabelColor: textSecondary,
+                          labelColor: palette.accentPrimary,
+                          unselectedLabelColor: palette.textSecondary,
                           labelStyle: const TextStyle(
                             fontFamily: 'Outfit',
                             fontSize: 14,
@@ -240,7 +227,6 @@ class _AvatarPickerScreenState extends State<AvatarPickerScreen>
                             _EmojiGrid(
                               selectedEmoji: _selectedEmoji,
                               hasSelectedImage: _selectedImagePath != null,
-                              isDark: isDark,
                               onSelected: (emoji) {
                                 setState(() {
                                   _selectedEmoji = emoji;
@@ -249,7 +235,6 @@ class _AvatarPickerScreenState extends State<AvatarPickerScreen>
                               },
                             ),
                             _PhotoTab(
-                              isDark: isDark,
                               label: l10n.profileUploadPhoto,
                               onPickPhoto: _pickPhoto,
                               hasSelectedImage: _selectedImagePath != null,
@@ -273,19 +258,16 @@ class _EmojiGrid extends StatelessWidget {
   const _EmojiGrid({
     required this.selectedEmoji,
     required this.hasSelectedImage,
-    required this.isDark,
     required this.onSelected,
   });
 
   final String selectedEmoji;
   final bool hasSelectedImage;
-  final bool isDark;
   final ValueChanged<String> onSelected;
 
   @override
   Widget build(BuildContext context) {
-    final tileColor = isDark ? _profileDarkSurface : AppColors.backgroundMuted;
-    final tileText = isDark ? _profileDarkTextPrimary : AppColors.textPrimary;
+    final palette = context.palette;
 
     return GridView.builder(
       itemCount: warmEmojis.length,
@@ -303,16 +285,16 @@ class _EmojiGrid extends StatelessWidget {
           onTap: () => onSelected(emoji),
           child: Container(
             decoration: BoxDecoration(
-              color: isSelected && !isDark ? Colors.white : tileColor,
+              color: isSelected ? palette.card : palette.backgroundMuted,
               borderRadius: BorderRadius.circular(12),
               border: isSelected
-                  ? Border.all(color: AppColors.accentPrimary, width: 2)
+                  ? Border.all(color: palette.accentPrimary, width: 2)
                   : null,
             ),
             alignment: Alignment.center,
             child: Text(
               emoji,
-              style: TextStyle(fontSize: 28, height: 1, color: tileText),
+              style: TextStyle(fontSize: 28, height: 1, color: palette.textPrimary),
             ),
           ),
         );
@@ -323,23 +305,18 @@ class _EmojiGrid extends StatelessWidget {
 
 class _PhotoTab extends StatelessWidget {
   const _PhotoTab({
-    required this.isDark,
     required this.label,
     required this.onPickPhoto,
     required this.hasSelectedImage,
   });
 
-  final bool isDark;
   final String label;
   final VoidCallback onPickPhoto;
   final bool hasSelectedImage;
 
   @override
   Widget build(BuildContext context) {
-    final textSecondary = isDark
-        ? _profileDarkTextSecondary
-        : AppColors.textSecondary;
-    final surfaceColor = isDark ? _profileDarkSurface : AppColors.card;
+    final palette = context.palette;
 
     return Center(
       child: GestureDetector(
@@ -348,10 +325,10 @@ class _PhotoTab extends StatelessWidget {
           width: 220,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           decoration: BoxDecoration(
-            color: surfaceColor,
+            color: palette.card,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isDark ? _profileDarkSurface : AppColors.borderDefault,
+              color: palette.borderDefault,
             ),
           ),
           child: Column(
@@ -361,7 +338,7 @@ class _PhotoTab extends StatelessWidget {
                 hasSelectedImage
                     ? Icons.check_circle_outline
                     : Icons.add_photo_alternate_outlined,
-                color: AppColors.accentPrimary,
+                color: palette.accentPrimary,
                 size: 42,
               ),
               const SizedBox(height: 12),
@@ -379,7 +356,7 @@ class _PhotoTab extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: 'Outfit',
                   fontSize: 12,
-                  color: textSecondary,
+                  color: palette.textSecondary,
                 ),
               ),
             ],
