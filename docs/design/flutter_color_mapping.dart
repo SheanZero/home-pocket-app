@@ -1,3 +1,8 @@
+// SUPERSEDED: This file documents the pre-v1.5 Wa-Modern coral palette (generated 2026-04-01).
+// Current palette: ADR-018 「Teal Clarity」(docs/arch/03-adr/ADR-018_Palette_Selection_v1_5.md).
+// The canonical token system is lib/core/theme/app_palette.dart (AppPalette.light / AppPalette.dark).
+// Retained for historical reference only — do NOT import or use in production code.
+//
 // Home Pocket — Wa-Modern Design Token Mapping
 // Generated from untitled.pen design file (2026-04-01)
 //

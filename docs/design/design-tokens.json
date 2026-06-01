@@ -1,4 +1,5 @@
 {
+  "_superseded_note": "Pre-v1.5 Wa-Modern coral palette tokens. Superseded by ADR-018 「Teal Clarity」(2026-06-01). See docs/arch/03-adr/ADR-018_Palette_Selection_v1_5.md for the current token system (lib/core/theme/app_palette.dart). Retained for historical reference only.",
   "version": "2.0",
   "style": "wa-modern",
   "date": "2026-04-01",

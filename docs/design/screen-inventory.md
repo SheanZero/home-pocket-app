@@ -1,3 +1,8 @@
+> **SUPERSEDED by ADR-018 Palette Selection v1.5 (2026-06-01).** The hex color references in this
+> document describe the pre-v1.5 Wa-Modern coral palette. For the current palette, see
+> `docs/arch/03-adr/ADR-018_Palette_Selection_v1_5.md` (ADR-018「Teal Clarity」).
+> The canonical token system is `lib/core/theme/app_palette.dart` (AppPalette.light / AppPalette.dark).
+
 # Screen Inventory — Pencil Design File
 
 **Source:** untitled.pen
