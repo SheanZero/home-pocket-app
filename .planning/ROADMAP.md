@@ -154,7 +154,7 @@
   3. `flutter analyze` reports 0 issues; coverage gate ≥70% global remains green
 **Plans**: 5 plans
 Plans:
-- [ ] 34-01-PLAN.md — Wave 0: add dark variants to 7 light-only golden test files + delete orphaned summary_cards PNGs
+- [x] 34-01-PLAN.md — Wave 0: add dark variants to 7 light-only golden test files + delete orphaned summary_cards PNGs
 - [ ] 34-02-PLAN.md — Wave 1: selective re-baseline with diff attribution (D-02/D-04 protocol) + generate 27 new dark masters
 - [ ] 34-03-PLAN.md — Wave 2: D-03a comprehensive audit + stale Color literal remediation + success-criteria greps
 - [ ] 34-04-PLAN.md — Wave 2 (parallel): D-03b best-effort .pen sync to ADR-018 (non-blocking)
