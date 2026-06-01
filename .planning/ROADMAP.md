@@ -119,7 +119,7 @@
   3. The user has reviewed the Pencil proposals and designated one (or a named hybrid) as the selected palette, with that selection recorded as an accepted ADR containing the final hex values for every semantic color role
 **Plans**: 3 plans
 - [x] 32-01-PLAN.md — PALETTE-01 synthesis doc: mine VoltAgent brand DESIGN.md refs → ≥4 distinct named directions across the D-04×D-05 axis matrix (rationale + lineage + anchor hex + WCAG flags)
-- [ ] 32-02-PLAN.md — PALETTE-02 Pencil mockups: fresh `.pen`, get_guidelines-first, 4–5 scheme groups × 6 frames (home-hero/list/analytics × light/dark), palette-as-variables, every taxonomy role + per-scheme WCAG pass
+- [x] 32-02-PLAN.md — PALETTE-02 Pencil mockups: fresh `.pen`, get_guidelines-first, 4–5 scheme groups × 6 frames (home-hero/list/analytics × light/dark), palette-as-variables, every taxonomy role + per-scheme WCAG pass
 - [ ] 32-03-PLAN.md — PALETTE-03 human-selection checkpoint (autonomous:false) → ratify ADR-018 (post-selection only) with full light+dark hex-per-role table keyed to AppColors symbols + ADR-000_INDEX update
 **UI hint**: yes
 
