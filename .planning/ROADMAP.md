@@ -83,7 +83,7 @@
 
 ### v1.5 文案与配色统一 (Active)
 
-- [ ] **Phase 31: Terminology Rename** — Unify all user-facing ARB values (zh/ja/en) and rename internal identifiers (ARB keys, AppColors symbols, Dart call sites); close with analyze-clean gate and ADR-015 update
+- [ ] **Phase 31: Terminology Rename** (6 plans) — Unify all user-facing ARB values (zh/ja/en) and rename internal identifiers (ARB keys, AppColors symbols, LedgerType enum + v18 migration, soul*/survival* files/classes, soul_satisfaction→joy_fullness column); close with analyze-clean gate + ADR-017
 - [ ] **Phase 32: Palette Exploration & Selection** — Mine design references, produce 4–5 Pencil color-scheme mockups, user selects one canonical palette recorded as ADR
 - [ ] **Phase 33: Color Token System & Consolidation** — Build semantic design-token system encoding the selected palette; replace ~62 hardcoded Color(0x…) literals; apply palette uniformly across surfaces
 - [ ] **Phase 34: Golden Re-baseline & Verification** — Regenerate all golden/visual baselines to the new palette; confirm full test suite green; verify no stale vocabulary or color literals remain
@@ -100,7 +100,13 @@
   3. `grep -rn '生存\|灵魂\|魂\|ソウル\|Survival\|Soul' lib/l10n/*.arb` returns zero hits in user-facing value strings (excluding @description metadata)
   4. `flutter analyze` reports 0 issues; `dart run custom_lint --no-fatal-infos` reports 0 errors; `build_runner` clean-diff (AUDIT-10 guardrail green)
   5. ADR-015 (or successor) contains an appended section documenting the canonical 日常/悦己/ときめき/Daily/Joy mapping as the locked lexical hierarchy
-**Plans**: TBD
+**Plans**: 6 plans
+- [ ] 31-01-PLAN.md — Wave-0 RED v18 migration test (D-02/D-16 contract: enum-value rewrite + CHECK recreate + soul_satisfaction→joy_fullness)
+- [ ] 31-02-PLAN.md — LedgerType enum rename + v17→v18 migration + soul_satisfaction column rename + persistence literals (turns Wave-0 GREEN)
+- [ ] 31-03-PLAN.md — ARB keys (25 roots) + values + @description rewrite (3 locales) + gen-l10n + call sites
+- [ ] 31-04-PLAN.md — AppColors survival/soul + derived symbols rename + ~60 call sites
+- [ ] 31-05-PLAN.md — soul*/survival* file + class + snapshot-field renames (git mv + Serena)
+- [ ] 31-06-PLAN.md — ADR-017 Terminology Unification + ADR-015 pointer + INDEX + REQUIREMENTS Out-of-Scope amend (D-06)
 **UI hint**: yes
 
 ### Phase 32: Palette Exploration & Selection
@@ -144,4 +150,4 @@
 | v1.2 Happiness Metric Refresh | 13-17 | 37/37 | Complete | 2026-05-21 |
 | v1.3 迭代帐本输入 | 18-23 | 47/47 | Complete | 2026-05-26 |
 | v1.4 列表功能 | 24-30 | 29/29 | Complete | 2026-05-31 |
-| v1.5 文案与配色统一 | 31-34 | 0/TBD | In progress | — |
+| v1.5 文案与配色统一 | 31-34 | 0/6 (P31 planned) | In progress | — |
