@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>首页三色圆环 · 5 种重设计方案</title>
+<style>
+  :root{
+    --page:#eef2f3; --card:#ffffff; --surface:#f6fbfb; --line:#e3eaeb;
+    --ink:#14333a; --sub:#56707a; --muted:#8da0a6; --track:#e6eef0;
+    --daily:#1c7a86; --daily-soft:#37b0a6;
+    --joy:#e59512;  --joy-soft:#f7c254;
+    --shared:#5b8ac4;--shared-soft:#7ba6d6;
+    --green:#2fa37a;--green-soft:#5fbf7a;
+    --chip:#eef3f3; --chip-ink:#46606a;
+    --shadow:0 10px 28px -8px rgba(28,122,134,.18);
+  }
+  body.dark{
+    --page:#0b1518; --card:#16282e; --surface:#102025; --line:#27393f;
+    --ink:#eaf4f4; --sub:#a7bcc1; --muted:#6f868c; --track:#26383d;
+    --daily:#3fc2ce; --daily-soft:#6fdbe2;
+    --joy:#f0b54a;  --joy-soft:#ffd27a;
+    --shared:#7ea9d8;--shared-soft:#a3c4e8;
+    --green:#56c79b;--green-soft:#86dab8;
+    --chip:#1c3036; --chip-ink:#a7bcc1;
+    --shadow:0 12px 30px -10px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Inter,"PingFang SC","Hiragino Sans","Microsoft YaHei",sans-serif;
+    transition:background .25s,color .25s;}
+  .wrap{max-width:1320px;margin:0 auto;padding:40px 32px 80px;}
+  header.top{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:8px;flex-wrap:wrap}
+  h1{font-size:28px;font-weight:800;margin:0 0 6px}
+  .lede{color:var(--sub);font-size:15px;line-height:1.55;max-width:760px;margin:0}
+  .toggle{flex:none;display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);
+    border-radius:999px;padding:8px 14px;cursor:pointer;color:var(--ink);font-size:13px;font-weight:600;box-shadow:var(--shadow)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:26px;margin-top:30px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:var(--shadow);
+    display:flex;flex-direction:column;gap:14px}
+  .chead{display:flex;align-items:center;gap:10px}
+  .badge{background:var(--daily);color:#fff;font-weight:800;font-size:13px;border-radius:8px;padding:4px 10px;letter-spacing:.5px}
+  .badge.j{background:var(--joy)} .badge.s{background:var(--shared)} .badge.g{background:var(--green)}
+  .chead h3{margin:0;font-size:20px;font-weight:700}
+  .stage{position:relative;height:236px;background:var(--surface);border-radius:18px;display:flex;align-items:center;justify-content:center}
+  .stage svg{display:block}
+  .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;pointer-events:none}
+  .ctr .big{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+  .ctr .emoji{font-size:30px;line-height:1}
+  .ctr .lbl{font-size:13px;font-weight:700;color:var(--daily)}
+  .ctr .sm{font-size:10px;color:var(--muted)}
+  .legend{display:flex;gap:16px;justify-content:center}
+  .legend span{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--sub)}
+  .dot{width:11px;height:11px;border-radius:50%}
+  .idea{font-size:13.5px;line-height:1.5;color:var(--sub);margin:0}
+  .note{background:var(--chip);color:var(--chip-ink);border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.45}
+  .meta{display:flex;flex-wrap:wrap;gap:6px}
+  .tag{font-size:11px;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:999px;padding:3px 9px}
+  table{width:100%;border-collapse:collapse;margin-top:40px;font-size:13.5px;background:var(--card);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)}
+  th{background:var(--surface);font-weight:700;font-size:12px;color:var(--sub);text-transform:uppercase;letter-spacing:.4px}
+  td:first-child{font-weight:700}
+  tr:last-child td{border-bottom:none}
+  .rec{margin-top:36px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--daily);
+    border-radius:14px;padding:18px 22px;box-shadow:var(--shadow)}
+  .rec h2{margin:0 0 8px;font-size:17px}
+  .rec p{margin:6px 0;font-size:14px;line-height:1.6;color:var(--sub)}
+  .src{margin-top:30px;font-size:12px;color:var(--muted);line-height:1.7}
+  a{color:var(--daily)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>首页三色圆环 · 5 种重设计方案</h1>
+      <p class="lede">目标：<b>更有亲和度</b>（圆头端点 / 粉彩 / 暖心圆心 / 有机形态）与 <b>颜色过渡更自然</b>（OKLCH 类比色渐变、接缝柔和）。
+      全部基于 ADR-018「Teal Clarity」调色板，三类沿用 日常&nbsp;<b style="color:var(--daily)">teal</b> / 悦己&nbsp;<b style="color:var(--joy)">gold</b> / 共享&nbsp;<b style="color:var(--shared)">blue</b>。点击右上切换深色模式自查暗色表现。</p>
+    </div>
+    <button class="toggle" onclick="document.body.classList.toggle('dark')">◐ 切换深/浅色</button>
+  </header>
+
+  <div class="grid" id="grid"></div>
+
+  <table>
+    <thead><tr><th>方案</th><th>隐喻</th><th>亲和度</th><th>信息精度</th><th>色觉友好</th><th>改造成本</th></tr></thead>
+    <tbody id="cmp"></tbody>
+  </table>
+
+  <div class="rec">
+    <h2>推荐路径</h2>
+    <p><b>低风险首选 → D1 柔光三环。</b>保留现有「三独立预算」语义（与代码 <code>HappinessRingsPainter</code> 一一对应），只把纯色换成同色系 2 段 OKLCH 渐变 + 圆头端点 + 暖心圆心。改动最小、可直接落到现有 <code>CustomPainter</code>，立刻提升亲和度与过渡自然度。</p>
+    <p><b>体验跃迁 → D2 一盘渐变甜甜圈 或 D5 堆叠进度+吉祥物。</b>若愿意从「三独立目标」转向「一个月度整体」的叙事，单环更平静、过渡最顺；D5 用吉祥物承载温度，情感最强。两者都需要同步调整中心文案与图例。</p>
+    <p><b>注意：</b>D2/D3 的连续渐变会弱化「各类别占比」的精确比较；若强调精确性，保留 D1/D5 的清晰分段。所有方案都需保证三类在<b>明度</b>上拉开（非仅靠色相），以通过色盲与 120dp 小尺寸可读性。</p>
+  </div>
+
+  <div class="src">
+    研究来源（节选）：Apple Fitness Activity Rings · Apple Card 色块 · Copilot Money / Emma / Monzo 支出甜甜圈 · Cleo 角色化设计 ·
+    OKLCH/LCH 感知均匀插值（colorfyi.com, alanzucconi.com）· 锥形/range-palette 渐变（AnyChart, CSS-Tricks）· Wong 色盲安全配色（davidmathlogic.com）。
+    <br>说明：本文件为可在浏览器查看的设计探索稿。Pencil（home-pocket-palette.pen）在当前环境无法落盘（已知限制 D-03b），故以 HTML/SVG 交付以保证可查看、可评审、可入库。
+  </div>
+</div>
+
+<script>
+const C=v=>getComputedStyle(document.body).getPropertyValue(v);
+// angle: 0 = top, clockwise positive (degrees)
+function pt(cx,cy,r,a){const t=a*Math.PI/180;return [cx+r*Math.sin(t), cy-r*Math.cos(t)];}
+function arc(cx,cy,r,a0,a1){
+  const [x0,y0]=pt(cx,cy,r,a0),[x1,y1]=pt(cx,cy,r,a1);
+  const large=Math.abs(a1-a0)>180?1:0, sweep=a1>a0?1:0;
+  return `M ${x0.toFixed(2)} ${y0.toFixed(2)} A ${r} ${r} 0 ${large} ${sweep} ${x1.toFixed(2)} ${y1.toFixed(2)}`;
+}
+function strokeArc(cx,cy,r,a0,a1,grad,w,cap='round'){
+  return `<path d="${arc(cx,cy,r,a0,a1)}" fill="none" stroke="${grad}" stroke-width="${w}" stroke-linecap="${cap}"/>`;
+}
+function track(cx,cy,r,w){return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--track)" stroke-width="${w}"/>`;}
+function lg(id,c1,c2,vert){
+  const v=vert?'x1="0" y1="0" x2="0" y2="1"':'x1="0" y1="0" x2="1" y2="1"';
+  return `<linearGradient id="${id}" ${v}><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>`;
+}
+
+// ---- D1: 柔光三环 (concentric, round caps, per-hue soft->deep gradient) ----
+function d1(){
+  const cx=100,cy=100,w=15;
+  const defs=`<defs>${lg('d1o','var(--shared-soft)','var(--shared)')}${lg('d1m','var(--daily-soft)','var(--daily)')}${lg('d1i','var(--joy-soft)','var(--joy)')}</defs>`;
+  let s='';
+  [[86,'url(#d1o)',.72],[64,'url(#d1m)',.60],[42,'url(#d1i)',.85]].forEach(([r,g,p])=>{
+    s+=track(cx,cy,r,w)+strokeArc(cx,cy,r,0,p*360-0.01,g,w);
+  });
+  return {svg:`<svg width="200" height="200" viewBox="0 0 200 200">${defs}${s}</svg>`,
+    ctr:`<span class="emoji">🌱</span><span class="lbl">充足</span><span class="sm">还剩 12 天</span>`};
+}
+// ---- D2: 一盘渐变甜甜圈 (single ring, segments blend at seams) ----
+function d2(){
+  const cx=100,cy=100,r=80,w=24,gap=5;
+  // shared->daily->joy clockwise from top; gap (non-analogous joy->shared) sits at top
+  const segs=[['var(--shared-soft)','var(--daily-soft)',.34],['var(--daily-soft)','var(--green-soft)',.43],['var(--green-soft)','var(--joy)',.23]];
+  let defs='<defs>',body='',a=gap/2,i=0;
+  for(const [c1,c2,f] of segs){
+    const id='d2'+i++;
+    // gradient roughly along the segment direction
+    defs+=lg(id,c1,c2);
+    const a0=a, a1=a+f*360-gap;
+    body+=strokeArc(cx,cy,r,a0,a1,`url(#${id})`,w);
+    a+=f*360;
+  }
+  defs+='</defs>';
+  return {svg:`<svg width="200" height="200" viewBox="0 0 200 200">${defs}${track(cx,cy,r,w)}${body}</svg>`,
+    ctr:`<span class="big">¥248,500</span><span class="sm">本月支出 · 点按展开</span>`};
+}
+// ---- D3: 日出仪表弧 (270 deg gauge, continuous sunrise gradient, marker) ----
+function d3(){
+  const cx=100,cy=104,r=80,w=18,start=-135,end=135; // open at bottom
+  const defs=`<defs><linearGradient id="d3g" x1="0" y1="1" x2="1" y2="0">
+    <stop offset="0" stop-color="var(--daily)"/><stop offset=".5" stop-color="var(--green)"/><stop offset="1" stop-color="var(--joy)"/></linearGradient></defs>`;
+  const tdash=`<path d="${arc(cx,cy,r,start,end)}" fill="none" stroke="var(--track)" stroke-width="${w}" stroke-linecap="round"/>`;
+  const prog=start+(end-start)*0.78;
+  const val=`<path d="${arc(cx,cy,r,start,prog)}" fill="none" stroke="url(#d3g)" stroke-width="${w}" stroke-linecap="round"/>`;
+  const [mx,my]=pt(cx,cy,r,prog);
+  const marker=`<circle cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" r="9" fill="var(--card)" stroke="var(--joy)" stroke-width="4"/>`;
+  // category ticks
+  let ticks='';
+  [[-135,'var(--daily)'],[0,'var(--green)'],[135,'var(--joy)']].forEach(([a,c])=>{
+    const [tx,ty]=pt(cx,cy,r,a);ticks+=`<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="3.2" fill="#fff" stroke="${c}" stroke-width="2"/>`;
+  });
+  return {svg:`<svg width="200" height="200" viewBox="0 0 200 200">${defs}${tdash}${val}${ticks}${marker}</svg>`,
+    ctr:`<span class="big">78</span><span class="lbl">预算健康度</span><span class="sm">↑ 良好</span>`};
+}
+// ---- D4: 流体花瓣环 (organic blurred blobs merging) ----
+function d4(){
+  const cx=100,cy=100;
+  const defs=`<defs><filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b"/>
+    <feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="g"/>
+    <feBlend in="SourceGraphic" in2="g"/></filter></defs>`;
+  let blobs='<g filter="url(#goo)">';
+  [['var(--daily-soft)',-90,44],['var(--joy-soft)',30,40],['var(--shared-soft)',150,38]].forEach(([c,a,rr])=>{
+    const [bx,by]=pt(cx,cy,30,a);
+    blobs+=`<circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="${rr}" fill="${c}" opacity="0.9"/>`;
+  });
+  blobs+='</g>';
+  const hole=`<circle cx="${cx}" cy="${cy}" r="34" fill="var(--surface)"/>`;
+  return {svg:`<svg width="200" height="200" viewBox="0 0 200 200">${defs}${blobs}${hole}</svg>`,
+    ctr:`<span class="emoji">🪻</span><span class="sm" style="margin-top:2px">日常 · 悦己 · 共享</span>`};
+}
+// ---- D5: 堆叠进度 + 吉祥物 (stacked progress ring + mascot center) ----
+function d5(){
+  const cx=100,cy=100,r=80,w=20,gap=4;
+  const defs=`<defs>${lg('d5a','var(--daily-soft)','var(--daily)')}${lg('d5b','var(--joy-soft)','var(--joy)')}${lg('d5c','var(--shared-soft)','var(--shared)')}</defs>`;
+  const stack=[['url(#d5a)',.40],['url(#d5b)',.18],['url(#d5c)',.20]]; // used = 78%
+  let a=0,body=track(cx,cy,r,w);
+  for(const [g,f] of stack){const a0=a+gap/2,a1=a+f*360-gap/2;body+=strokeArc(cx,cy,r,a0,a1,g,w);a+=f*360;}
+  return {svg:`<svg width="200" height="200" viewBox="0 0 200 200">${defs}${body}</svg>`,
+    ctr:`<span class="emoji">😊</span><span class="big" style="font-size:18px;margin-top:2px">78%</span><span class="sm">预算已用</span>`};
+}
+
+const designs=[
+  {id:'D1',cls:'',zh:'柔光三环',blds:d1,
+   idea:'沿用 Apple-Watch 同心三环，但改为粉彩调 + 圆头端点 + 暖心圆心，去除临床感。语义不变：三类各自独立目标。',
+   note:'过渡：每环为同色系 2 段 OKLCH 渐变（teal→mint 等），呈柔光而非死板纯色。',
+   tags:['隐喻：三独立预算','圆头端点','暖心圆心','改造成本：低']},
+  {id:'D2',cls:'s',zh:'一盘渐变甜甜圈',blds:d2,
+   idea:'收为单环按金额分段，相邻段在接缝处用类比色互相过渡，圆头 + 微间隙；点按展开子类。',
+   note:'过渡：相邻段端色相接（共享末≈日常首），非类比的金↔蓝跳变被放到顶部间隙处。',
+   tags:['隐喻：一个整体','接缝柔和','可点按展开','改造成本：中']},
+  {id:'D3',cls:'g',zh:'日出仪表弧',blds:d3,
+   idea:'270° 开口仪表弧，一条暖色连续渐变表示整体预算健康，三类用小标记骑在弧上，底部留白放文案。',
+   note:'过渡：整弧单条 teal→green→gold 渐变，全程无接缝，最顺滑。',
+   tags:['隐喻：健康度仪表','零接缝','底部留白','改造成本：中']},
+  {id:'D4',cls:'',zh:'流体花瓣环',blds:d4,
+   idea:'三枚柔软花瓣按支出大小环绕，边缘羽化相互融合，呼应 Apple Card 的有机色块，最具生命感。',
+   note:'过渡：花瓣交叠处模糊互溶（metaball），全图无硬边界——亲和力最强，精度最弱。',
+   tags:['隐喻：有机色块','边缘羽化','需配数字标签','改造成本：高']},
+  {id:'D5',cls:'j',zh:'堆叠进度 + 吉祥物',blds:d5,
+   idea:'单环作堆叠进度条，三类首尾相接占满月度预算，圆心放表情吉祥物随预算健康变化。',
+   note:'过渡：粉彩类比色相邻柔和；温度由吉祥物表情承载，而非弧本身。',
+   tags:['隐喻：堆叠进度','角色化','圆头起点','改造成本：中']},
+];
+
+const cols=['var(--daily)','var(--joy)','var(--shared)'];
+const grid=document.getElementById('grid');
+for(const d of designs){
+  const r=d.blds();
+  const card=document.createElement('section');card.className='card';
+  card.innerHTML=`
+    <div class="chead"><span class="badge ${d.cls}">${d.id}</span><h3>${d.zh}</h3></div>
+    <div class="stage">${r.svg}<div class="ctr">${r.ctr}</div></div>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--daily)"></i>日常</span>
+      <span><i class="dot" style="background:var(--joy)"></i>悦己</span>
+      <span><i class="dot" style="background:var(--shared)"></i>共享</span>
+    </div>
+    <p class="idea">${d.idea}</p>
+    <div class="note">${d.note}</div>
+    <div class="meta">${d.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`;
+  grid.appendChild(card);
+}
+
+const cmp=[
+  ['D1 柔光三环','三独立预算','★★★☆☆','★★★★★','★★★★☆','低'],
+  ['D2 渐变甜甜圈','一个整体','★★★★☆','★★★☆☆','★★★☆☆','中'],
+  ['D3 日出仪表弧','健康度仪表','★★★★☆','★★☆☆☆','★★★★☆','中'],
+  ['D4 流体花瓣环','有机色块','★★★★★','★★☆☆☆','★★☆☆☆','高'],
+  ['D5 堆叠+吉祥物','堆叠进度','★★★★★','★★★★☆','★★★★☆','中'],
+];
+document.getElementById('cmp').innerHTML=cmp.map(r=>'<tr>'+r.map(c=>`<td>${c}</td>`).join('')+'</tr>').join('');
+</script>
+</body>
+</html>

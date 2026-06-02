@@ -4,8 +4,8 @@ milestone: v1.5
 milestone_name: 文案与配色统一
 status: Awaiting next milestone
 stopped_at: Milestone v1.5 complete (archived 2026-06-02)
-last_updated: "2026-06-02T01:53:21.261Z"
-last_activity: 2026-06-02 — Milestone v1.5 completed and archived
+last_updated: "2026-06-02T03:56:24.054Z"
+last_activity: 2026-06-02 — Completed quick task 260602-hz0: 首页三色圆环重设计（5 方案 HTML/SVG 设计稿）
 progress:
   total_phases: 5
   completed_phases: 5
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-02 — v1.5 文案与配色统一 shi
 Phase: Milestone v1.5 complete
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-06-02 — Completed quick task 260602-h29: 与上个月对比改为同期对比
+Last activity: 2026-06-02 — Completed quick task 260602-hz0: 首页三色圆环重设计（5 方案 HTML/SVG 设计稿）
 
 ## Last Milestone Snapshot (v1.5)
 
@@ -134,6 +134,7 @@ No active blockers. Carried-forward debt (cross-milestone):
 | 260531-se5 | 按金额排序时全量排序、隐藏日期分组、标题改为「日期+二级类目」 | 2026-05-31 | ae85734e | Verified 2026-05-31 (analyze 0 issues, 2238/2238 tests pass) | [260531-se5](./quick/260531-se5-amount-sort-flat-date-title/) |
 | 260531-u34 | fix CAL-02/CAL-04 calendar staleness after family-sync + FAB (GAP-1) — invalidate `calendarDailyTotalsProvider(current month)` at the two shell sites (post-sync, post-FAB) alongside the existing `listTransactionsProvider` invalidation; calendar per-day totals + month summary now refresh without pull-to-refresh | 2026-05-31 | 291a9ff4 | Verified 2026-05-31 — closes milestone-audit GAP-1 | [260531-u34](./quick/260531-u34-fix-cal-02-cal-04-calendar-staleness-aft/) |
 | 260602-h29 | 与上个月对比改为同期对比：`_getPreviousMonthComparison` 加可选 `asOf` 参数，当报表月份==当前日历月时上月按「截止今天 day-of-month」截断（短月钳制防 DateTime 溢出，当月最后一天→上月全月），历史月份保持整月 vs 整月；首页副标题 `homeHeroPreviousMonthSubline` 改为「上月同期/先月同期/last month (same period)」三 ARB + gen-l10n；5 个 TDD 用例（月中/月末/短月钳制/历史/跨年），9 个 home_hero golden re-baseline。analyze 0 新增 issue，21/21 单测 + 77/77 golden + 2209/2209 通过 | 2026-06-02 | 666190c3 | Verified 2026-06-02 (independent: analyze 0 new, 21/21 use-case tests green) | [260602-h29](./quick/260602-h29-fix-month-over-month-expense-comparison-/) |
+| 260602-hz0 | 首页三色圆环重设计（设计探索）：调研市面 ring/donut 实现（Apple Fitness/Card、Copilot/Emma/Monzo、Cleo），提炼自然过渡（OKLCH 类比色 / 接缝端色相接 / 锥形渐变）与亲和度（圆头端点 / 粉彩 / 暖心圆心 / 有机形态）技法；产出 5 个差异化方案 D1 柔光三环 / D2 一盘渐变甜甜圈 / D3 日出仪表弧 / D4 流体花瓣环 / D5 堆叠进度+吉祥物，交付为 `docs/design/home-ring-redesign.html`（浅/深色切换 + 对比表 + 推荐路径，基于 ADR-018 token）。**偏离：** Pencil MCP 本环境无法落盘（D-03b）+ executor 被剥离 MCP（claude-code#13898），改 HTML/SVG 交付以保可验证持久；浏览器实测 0 console error、浅深色双验证 | 2026-06-02 | (docs) | Verified 2026-06-02 (chrome-devtools 渲染截图，浅+深色，0 console error) | [260602-hz0](./quick/260602-hz0-pencil-5/) |
 
 ## Deferred Items
 
