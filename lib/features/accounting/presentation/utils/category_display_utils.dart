@@ -46,6 +46,39 @@ IconData categoryIconFromId(String categoryId) {
   return resolveCategoryIcon(matches.first.icon);
 }
 
+/// Parent-aware sibling of [categoryIconFromId] used by the home Best Joy
+/// strip's leading icon, which shows the L1 (parent) category icon rather
+/// than the more specific L2 icon.
+///
+/// Resolution chain (never throws):
+/// 1. No match in [DefaultCategories.all] → [Icons.favorite_border] (mirrors
+///    [categoryIconFromId]'s joy-flavored fallback for custom/unknown ids).
+/// 2. Matched and L1 (level == 1) or no parentId → the category's own icon.
+/// 3. Matched L2 with a parentId → the parent's icon when the parent exists
+///    in defaults; otherwise the category's OWN icon (graceful fallback).
+IconData parentCategoryIconFromId(String categoryId) {
+  final matches = DefaultCategories.all.where((c) => c.id == categoryId);
+  if (matches.isEmpty) return Icons.favorite_border;
+  return parentCategoryIconForCategory(matches.first);
+}
+
+/// Resolves the parent-aware leading icon for a concrete [Category].
+///
+/// L1 (or parent-less) categories map to their own icon. L2 categories map to
+/// their parent's icon, falling back to their own icon when the parent is not
+/// present in [DefaultCategories.all]. Pure and provider-free; never throws.
+IconData parentCategoryIconForCategory(Category category) {
+  final parentId = category.parentId;
+  if (category.level == 1 || parentId == null) {
+    return resolveCategoryIcon(category.icon);
+  }
+  final parents = DefaultCategories.all.where((c) => c.id == parentId);
+  if (parents.isEmpty) {
+    return resolveCategoryIcon(category.icon);
+  }
+  return resolveCategoryIcon(parents.first.icon);
+}
+
 IconData resolveCategoryIcon(String iconName) {
   const iconMap = <String, IconData>{
     'restaurant': Icons.restaurant,

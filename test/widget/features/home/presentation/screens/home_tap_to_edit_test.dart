@@ -132,6 +132,7 @@ void main() {
         builder: (context) => Scaffold(
           body: Center(
             child: HomeTransactionTile(
+              l1Icon: Icons.sports_esports,
               tagText: 'ときめき',
               tagBgColor: Colors.purple.shade100,
               tagTextColor: Colors.purple,

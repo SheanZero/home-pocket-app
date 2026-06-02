@@ -69,5 +69,51 @@ void main() {
         );
       });
     });
+
+    group('parentCategoryIconFromId', () {
+      test('resolves an L2 id to its PARENT L1 icon, not the L2 icon', () {
+        // cat_hobbies_games icon = videogame_asset; parent cat_hobbies =
+        // sports_esports. The parent-aware resolver must pick the L1 icon.
+        expect(
+          parentCategoryIconFromId('cat_hobbies_games'),
+          Icons.sports_esports,
+        );
+        expect(
+          parentCategoryIconFromId('cat_hobbies_games'),
+          isNot(Icons.videogame_asset),
+        );
+      });
+
+      test('passes an L1 id through to its own icon', () {
+        expect(parentCategoryIconFromId('cat_food'), Icons.restaurant);
+      });
+
+      test('returns Icons.favorite_border for an unknown / custom id', () {
+        expect(
+          parentCategoryIconFromId('unknown_or_custom_id'),
+          Icons.favorite_border,
+        );
+      });
+
+      test(
+        'falls back to the category own icon when the parent is missing '
+        'from defaults',
+        () {
+          // Exercises the parent-missing branch: an L2 whose parentId points
+          // at a non-default id resolves to its OWN icon (menu_book), never
+          // throwing.
+          final orphan = Category(
+            id: 'custom_orphan_l2',
+            name: 'custom',
+            icon: 'menu_book',
+            color: '#9C27B0',
+            parentId: 'cat_nonexistent_parent',
+            level: 2,
+            createdAt: DateTime(2026, 1, 1),
+          );
+          expect(parentCategoryIconForCategory(orphan), Icons.menu_book);
+        },
+      );
+    });
   });
 }

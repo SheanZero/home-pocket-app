@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../application/i18n/formatter_service.dart';
@@ -7,7 +6,6 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/happiness_ring_palette.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/joy_cumulative_formatter.dart';
 import '../../../accounting/presentation/utils/category_display_utils.dart';
 import '../../../analytics/domain/models/best_joy_moment_row.dart';
@@ -613,29 +611,27 @@ class HomeHeroCard extends StatelessWidget {
     );
   }
 
-  // ─── Region 6: Best Joy strip (tinted Joy strip — quick 260602-nb2) ──────
+  // ─── Region 6: Best Joy strip (flat Joy strip — quick 260602-s9g) ────────
   //
-  // Tinted container (joy-tinted bg + border) holding a category-icon tile,
-  // category-name + date(weekday) subtitle, and an amount-over-pill right
-  // column. Design contract: docs/design/best-joy-redesign.html (AFTER strip).
-  // Empty / all-neutral states reuse the same chrome with a muted placeholder
-  // row. ARCH-002: primary line is category name only — no merchant/note.
+  // Flat strip rendered directly on the card surface (no tinted box/border),
+  // with a ring-matching header (auto_awesome + textPrimary title), a parent
+  // (L1) category-icon tile, the L2 category name sized to match the amount
+  // (17) and centered with it, and an amount-over-pill right column. Empty /
+  // all-neutral states reuse the same chrome with a muted placeholder row.
+  // ARCH-002: primary line is category name only — no merchant/note/date.
   // homeBestJoyEmptyBig/AllNeutralBig ARB keys unused since Variant A.
   Widget _buildBestJoyStrip(BuildContext context, S l10n, AppPalette palette) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final titleText = isGroupMode
         ? l10n.homeBestJoyTagGroup
         : l10n.homeBestJoyTagSingle;
     return switch (bestJoy) {
       Empty() => _bestJoyEmpty(
         palette,
-        isDark,
         titleText,
         l10n.homeBestJoyEmptySmall,
       ),
       Value(:final data) when data.joyFullness <= 2 => _bestJoyEmpty(
         palette,
-        isDark,
         titleText,
         l10n.homeBestJoyAllNeutralSmall,
       ),
@@ -643,42 +639,41 @@ class HomeHeroCard extends StatelessWidget {
         context,
         l10n,
         palette,
-        isDark,
         titleText,
         data,
       ),
     };
   }
 
-  /// Shared tinted-strip chrome for both value + empty states.
+  /// Shared flat-strip chrome for both value + empty states (quick 260602-s9g).
+  ///
+  /// No tinted box or border — the strip renders directly on the card surface
+  /// and relies on the parent card's padding, matching the ring section. The
+  /// header mirrors `_ringSection`'s header exactly (auto_awesome + textPrimary
+  /// title) minus the info icon (the strip has no tooltip).
   Widget _bestJoyStripContainer({
     required AppPalette palette,
-    required bool isDark,
     required String title,
     required Widget row,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: palette.joy.withValues(alpha: isDark ? 0.13 : 0.08),
-        border: Border.all(color: palette.joy.withValues(alpha: 0.22)),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: AppTextStyles.bodyLarge.copyWith(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: palette.joy,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.auto_awesome, size: 16, color: palette.joy),
+            const SizedBox(width: 6),
+            Text(
+              title,
+              style: AppTextStyles.bodyLarge.copyWith(
+                color: palette.textPrimary,
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          row,
-        ],
-      ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        row,
+      ],
     );
   }
 
@@ -698,13 +693,11 @@ class HomeHeroCard extends StatelessWidget {
 
   Widget _bestJoyEmpty(
     AppPalette palette,
-    bool isDark,
     String title,
     String mutedLine,
   ) {
     return _bestJoyStripContainer(
       palette: palette,
-      isDark: isDark,
       title: title,
       row: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -730,7 +723,6 @@ class HomeHeroCard extends StatelessWidget {
     BuildContext context,
     S l10n,
     AppPalette palette,
-    bool isDark,
     String title,
     BestJoyMomentRow row,
   ) {
@@ -738,44 +730,26 @@ class HomeHeroCard extends StatelessWidget {
       row.categoryId,
       locale,
     );
-    final dateShort = DateFormatter.formatShortMonthDay(row.timestamp, locale);
-    final dayOfWeek = DateFormat('E', locale.toString()).format(row.timestamp);
-    final dateLabel = '$dateShort($dayOfWeek)';
     final amount = _fmt.formatCurrency(row.amount, currencyCode, locale);
 
     return _bestJoyStripContainer(
       palette: palette,
-      isDark: isDark,
       title: title,
       row: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _bestJoyIconTile(palette, categoryIconFromId(row.categoryId)),
+          _bestJoyIconTile(palette, parentCategoryIconFromId(row.categoryId)),
           const SizedBox(width: 11),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  category,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: palette.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  dateLabel,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    fontSize: 11.5,
-                    color: palette.textSecondary,
-                  ),
-                ),
-              ],
+            child: Text(
+              category,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: palette.textPrimary,
+              ),
             ),
           ),
           const SizedBox(width: 11),
@@ -802,10 +776,12 @@ class HomeHeroCard extends StatelessWidget {
   }
 
   /// Satisfaction pill widget (Variant A — pill with icon + tier label).
-  /// Enlarged per user 260518-v4v r2: icon 16→20, text 11→14, padding (8,4)→(12,7).
+  /// Shrunk per user 260602-s9g: icon 20→16, text 14→12, padding (12,7)→(8,4) —
+  /// reads as a secondary badge beside the now amount-sized (17) L2 title,
+  /// restoring the proportions used before the 260518-v4v r2 enlargement.
   Widget _satisfactionPill(S l10n, AppPalette palette, int sat) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: palette.satisfactionPillBg,
         borderRadius: BorderRadius.circular(999),
@@ -815,7 +791,7 @@ class HomeHeroCard extends StatelessWidget {
         children: [
           Icon(
             _satisfactionPillIcon(sat),
-            size: 20,
+            size: 16,
             color: palette.satisfactionPillRose,
           ),
           const SizedBox(width: 6),
@@ -823,7 +799,7 @@ class HomeHeroCard extends StatelessWidget {
             _satisfactionPillLabel(l10n, sat),
             style: TextStyle(
               fontFamily: 'Outfit',
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.w800,
               color: palette.satisfactionPillRose,
             ),
