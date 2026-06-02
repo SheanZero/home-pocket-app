@@ -74,10 +74,9 @@
 <div class="wrap">
   <div class="top">
     <div>
-      <h1>悦己充盈环 · <em>配色方案探索</em></h1>
-      <p class="lede">固定 <b>② 扫掠尾迹</b>（comet）+ <b>⑥ 充盈光晕</b>（glow）两种过渡。本轮转向 <b>浅色系</b>：
-      <b>不用任何红 / 玫 / 品红</b>，全部柔和粉彩，延续 app 的 Teal Clarity 清透气质。三套都在
-      安全色族（青 / 绿 / 蓝 / 薰衣草 / 浅金）里选色，色相 + 明度拉开；内环统一用暖浅金呼应"悦己"。各 ②/⑥ 两版对照。</p>
+      <h1>青瓷 · 薰衣草 · 浅金 · <em>金环位置对比</em></h1>
+      <p class="lede">就你选的 <b>H 青瓷·薰衣草·浅金</b>，试把 <b>浅金</b> 从内环挪到<b>中环</b>。三色不变，只换它们的内/中/外位置。
+      关键：<b>圆心「悦己指数」颜色 = 内环色</b>，所以金移走后圆心数字会变色（薰衣草偏浅，已加深保证可读）。各 ②/⑥ 两版对照。</p>
     </div>
     <button class="toggle" onclick="document.body.classList.toggle('dark');render()">◐ 深 / 浅色</button>
   </div>
@@ -134,15 +133,16 @@ function renderRing(style,deeps,track,uid){
   return `<svg width="${box}" height="${box}" viewBox="0 0 ${box} ${box}">${filter}${body}</svg>`;
 }
 
-/* ---- 浅色系配色 (light hex: [小确幸, 满足度, 悦己目标]); dark[] = 深色专属 ----
-   规则：无红/玫/品红色系；延续 Teal Clarity 清透感；内环(headline)统一落在暖浅金家族以呼应"悦己"。*/
+/* ---- 方案 H「青瓷·薰衣草·浅金」金环位置对比 ----
+   三色固定（青 #3BBDB8 / 薰衣草 #9D9CE6 / 浅金 #F0C04E），变的是它们落在 外/中/内 哪一环。
+   注意：圆心「悦己指数」颜色 = 内环色，所以金移走会改变圆心数字的颜色。*/
 const SCHEMES=[
-  {id:'H',name:'青瓷 · 薰衣草 · 浅金',en:'CELADON / LAVENDER / GOLD',hex:['#3BBDB8','#9D9CE6','#F0C04E'],dark:['#4FD3CE','#B4B2F2','#F5CE6A'],
-   note:'冷青打底、薰衣草过渡、暖浅金收尾——延续 Teal Clarity 清透感，柔和不刺眼；青 / 紫 / 金三向分开，最贴 app 气质。'},
-  {id:'I',name:'鼠尾草 · 天蓝 · 杏',en:'SAGE / SKY / APRICOT',hex:['#6FC09A','#7DB6DF','#F2B96E'],dark:['#8AD3B0','#95C5EA','#F7C985'],
-   note:'自然系柔彩（鼠尾草绿 / 天蓝 / 杏），像晨雾，温润亲和；绿-蓝靠明度错开，杏黄做暖收尾。无红、不喧闹。'},
-  {id:'J',name:'湖水 · 雾蓝 · 奶黄',en:'AQUA / PERIWINKLE / BUTTER',hex:['#56C9C8','#93A6EE','#F2D777'],dark:['#6FDAD9','#A8B6F5','#F7E08C'],
-   note:'最浅最透的一组（湖水青 / 雾霾蓝紫 / 奶油黄），清爽空气感；整体偏冷 + 一抹奶黄，干净现代。'},
+  {id:'H',name:'原版 · 金在内环',en:'GOLD = INNER (current)',hex:['#3BBDB8','#9D9CE6','#F0C04E'],dark:['#4FD3CE','#B4B2F2','#F5CE6A'],
+   note:'外青 · 中薰衣草 · 内浅金。圆心悦己指数 = 金，最暖、最像"目标达成"的高光时刻。'},
+  {id:'H₂',name:'金在中环 · 内薰衣草',en:'GOLD = MIDDLE / VIOLET INNER',hex:['#3BBDB8','#F0C04E','#9D9CE6'],dark:['#4FD3CE','#F5CE6A','#B4B2F2'],
+   note:'外青 · 中浅金 · 内薰衣草。金移到中环（满足度），暖色居中更聚焦；圆心指数 = 薰衣草（已加深保证可读）。'},
+  {id:'H₃',name:'金在中环 · 内青',en:'GOLD = MIDDLE / TEAL INNER',hex:['#9D9CE6','#F0C04E','#3BBDB8'],dark:['#B4B2F2','#F5CE6A','#4FD3CE'],
+   note:'外薰衣草 · 中浅金 · 内青。金做暖核居中；圆心指数 = 品牌青，最易读、最稳，与全局色最统一。'},
 ];
 function deepsFor(s,dark){return dark?(s.dark||s.hex.map(h=>lighten(h,.26))):s.hex;}
 
@@ -158,7 +158,7 @@ function phone(style,scheme,c){
     <div class="vname">${styleName}<small>${styleEn}</small></div>
     <div class="hero"><div class="htitle">✨ 悦己充盈<span class="info">i</span></div>
       <div class="ringrow">
-        <div class="ringwrap">${ring}<div class="ctr"><span class="v" style="color:${deeps[2]}">¥12,400</span><span class="l">悦己指数</span></div></div>
+        <div class="ringwrap">${ring}<div class="ctr"><span class="v" style="color:${c.dark?deeps[2]:mix(deeps[2],'#202020',.36)}">¥12,400</span><span class="l">悦己指数</span></div></div>
         <div class="legend">${legend}</div>
       </div></div>
   </div></div>`;
