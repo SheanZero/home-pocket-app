@@ -75,9 +75,9 @@
   <div class="top">
     <div>
       <h1>悦己充盈环 · <em>配色方案探索</em></h1>
-      <p class="lede">固定上一轮你选的两种过渡风格——<b>② 扫掠尾迹</b>（comet）与 <b>⑥ 充盈光晕</b>（glow）。
-      本轮专攻配色：原 <b>小确幸(青) 与 满足度(绿) 太接近</b>，三指标都是悦己、且独立展示，所以三色<b>单独设计、拉开色相</b>，
-      同时保持与全局一致的<b>对比度/饱和度</b>。每个配色都给出 ② 和 ⑥ 两版对照。</p>
+      <p class="lede">固定 <b>② 扫掠尾迹</b>（comet）+ <b>⑥ 充盈光晕</b>（glow）两种过渡。本轮<b>大胆换色</b>：
+      保留已认可的 <b>A 蓝绿金</b> 做对照，另给 3 套<b>整组替换</b>的新配色（调研了 Apple Fitness 三环、Headspace、
+      Pantone 趋势色与色盲安全 Okabe-Ito）。每套三色都<b>整组重设、色相+明度双重拉开</b>，各 ②/⑥ 两版对照。</p>
     </div>
     <button class="toggle" onclick="document.body.classList.toggle('dark');render()">◐ 深 / 浅色</button>
   </div>
@@ -134,21 +134,22 @@ function renderRing(style,deeps,track,uid){
   return `<svg width="${box}" height="${box}" viewBox="0 0 ${box} ${box}">${filter}${body}</svg>`;
 }
 
-/* ---- color schemes (light hex: [小确幸, 满足度, 悦己目标]) ---- */
+/* ---- color schemes (light hex: [小确幸, 满足度, 悦己目标]); optional dark[] overrides ---- */
 const SCHEMES=[
-  {id:'A',name:'蓝 · 绿 · 金',en:'AZURE / GREEN / GOLD',hex:['#2E7BD6','#2FA37A','#F0A81E'],roles:['azure','green','gold'],
-   note:'最小改动版：把小确幸从青挪到更蓝的 azure，与满足度的绿明显拉开；其余沿用全局绿/金。最贴近现状、最稳。'},
-  {id:'B',name:'青 · 紫 · 金',en:'TEAL / VIOLET / GOLD',hex:['#0E9AA7','#7A5AF0','#F0A81E'],roles:['teal','violet','gold'],
-   note:'保留品牌青做小确幸，中环换成紫罗兰——三色近似三等分色相环，分得最开、最有"悦己/小确幸"的灵动感。'},
-  {id:'C',name:'靛 · 翠 · 橘',en:'INDIGO / EMERALD / TANGERINE',hex:['#5C6BE0','#13A66A','#F5862A'],roles:['indigo','emerald','tangerine'],
-   note:'保留绿，但邻居换成靛蓝与橘——绿不再夹在两个蓝绿之间，立刻分明；整体更鲜活、暖意更足。'},
-  {id:'D',name:'蓝 · 玫 · 金',en:'BLUE / ROSE / GOLD',hex:['#3E8FD0','#E5568F','#F0A81E'],roles:['blue','rose','gold'],
-   note:'玫红做满足度，冷蓝—暖玫—暖金交替，对比最强、最有少女/温柔的悦己气质；注意玫红与全局 error 红需留距离。'},
+  {id:'A',name:'蓝 · 绿 · 金',en:'AZURE / GREEN / GOLD · 已认可·参考',hex:['#2E7BD6','#2FA37A','#F0A81E'],
+   note:'上一轮已认可的方向，留作对照基准。最小改动、最稳。'},
+  {id:'E',name:'落日焦糖',en:'SUNSET PRALINE',hex:['#FFBE5C','#F2668B','#6C3FB5'],dark:['#FFCE7E','#F57F9E','#9568D8'],
+   note:'金→玫→紫的"黄金时刻"配色，最宠爱自己。明度 83/62/40 拉满落差，紫罗兰做悦己目标的锚点；暖金与玫粉靠明度差分开（参考 Pantone Peach Fuzz / 落日趋势色）。'},
+  {id:'F',name:'宝石灯笼',en:'JEWEL LANTERN',hex:['#2FB6C4','#E7A220','#C0277E'],dark:['#4ACEDC','#F2B53A','#DB479A'],
+   note:'青 / 琥珀 / 品红——接近三等分色相，沿用 Apple 三环"最大分离"逻辑，高级又节庆。青-橘是色盲最安全的一对；品红做醒目的目标色。最稳的大胆之选。'},
+  {id:'G',name:'极光绽放',en:'AURORA BLOOM',hex:['#5FCFC4','#B27BE6','#E0457B'],dark:['#7FD9D0','#BC8EEA','#E85C8C'],
+   note:'薄荷 → 数字薰衣草 → 树莓粉，最潮、最柔的自我关怀气质（digital-lavender 趋势）。色相横跨最广、零浑浊；树莓粉偏品红，与全局 error 红留了距离。'},
 ];
+function deepsFor(s,dark){return dark?(s.dark||s.hex.map(h=>lighten(h,.26))):s.hex;}
 
 let UID=0;
 function phone(style,scheme,c){
-  const deeps=scheme.hex.map(h=>c.dark?lighten(h,.26):h);
+  const deeps=deepsFor(scheme,c.dark);
   const uid=UID++; const ring=renderRing(style,deeps,c.track,uid);
   const styleName=style==='comet'?'② 扫掠尾迹':'⑥ 充盈光晕';
   const styleEn=style==='comet'?'COMET SWEEP':'INNER GLOW';
@@ -170,7 +171,8 @@ function render(){
   UID=0;
   const root=document.getElementById('root'); root.innerHTML='';
   SCHEMES.forEach(sc=>{
-    const sw=sc.hex.map((h,i)=>`<span class="sw"><i style="background:${dark?lighten(h,.26):h}"></i><b>${MET[i].label}</b><code>${h}</code></span>`).join('');
+    const dd=deepsFor(sc,dark);
+    const sw=sc.hex.map((h,i)=>`<span class="sw"><i style="background:${dd[i]}"></i><b>${MET[i].label}</b><code>${dark?dd[i]:h}</code></span>`).join('');
     const sec=document.createElement('section'); sec.className='scheme';
     sec.innerHTML=`<div class="scheme-head"><h2><b>${sc.id}</b> · ${sc.name} <span style="font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:14px;color:var(--muted)">${sc.en}</span></h2>
       <div class="swatches">${sw}</div><p class="scheme-note">${sc.note}</p></div>

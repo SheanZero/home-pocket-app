@@ -17,6 +17,20 @@ date: 2026-06-02
 
 → 因此「单环分占比 / 单仪表 / 堆叠求和」皆不成立，已重做 5 方案（commit 7312e183）。
 
+## Iteration 5 (大胆换色 — 调研市面配色，整组替换三色)
+
+用户反馈：除 A 外不满意，要大胆、整组替换三色，并调研市面配色。固定 ②comet + ⑥glow。
+调研（Apple Fitness 三环 #FA114F/#92E82A/#1EEAEF、Headspace、WHOOP、Pantone Peach Fuzz/Mocha、
+digital-lavender 趋势、色盲安全 Okabe-Ito）后，保留 A 做对照 + 3 套整组替换的大胆配色：
+
+- **A 蓝·绿·金**（参考）`#2E7BD6 / #2FA37A / #F0A81E`
+- **E 落日焦糖 Sunset Praline** 金→玫→紫 `#FFBE5C / #F2668B / #6C3FB5`（dark `#FFCE7E/#F57F9E/#9568D8`）— 黄金时刻、最宠爱自己；明度 83/62/40 拉满。
+- **F 宝石灯笼 Jewel Lantern** 青/琥珀/品红 `#2FB6C4 / #E7A220 / #C0277E`（dark `#4ACEDC/#F2B53A/#DB479A`）— 近三等分（Apple 三环逻辑），青-橘色盲最安全。**最稳的大胆之选。**
+- **G 极光绽放 Aurora Bloom** 薄荷/数字薰衣草/树莓粉 `#5FCFC4 / #B27BE6 / #E0457B`（dark `#7FD9D0/#BC8EEA/#E85C8C`）— 最潮最柔，色相跨度最广。
+
+三色按色相+明度双重拉开（解决青/绿太近、过色盲）；深色用调研给的专属 dark hex（非简单提亮）。
+4 套 × {②,⑥} = 8 部手机对照，带 hex 色板。浏览器实测浅/深双验证、0 console error。
+
 ## Iteration 4 (配色方案探索 — 固定 ② / ⑥ 两种过渡)
 
 用户反馈：小确幸(青) 与 满足度(绿) 太接近；三指标都是悦己、独立展示，三色可单独设计、拉开色相，
