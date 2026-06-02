@@ -48,5 +48,26 @@ void main() {
     test('resolveCategoryIcon maps icon name to material icon', () {
       expect(resolveCategoryIcon('restaurant'), Icons.restaurant);
     });
+
+    group('categoryIconFromId', () {
+      test('resolves an L1 id (cat_hobbies) to its icon', () {
+        expect(categoryIconFromId('cat_hobbies'), Icons.sports_esports);
+      });
+
+      test('resolves an L1 id (cat_food) to its icon', () {
+        expect(categoryIconFromId('cat_food'), Icons.restaurant);
+      });
+
+      test('resolves an L2 id (cat_food_groceries) to its L2 icon', () {
+        expect(categoryIconFromId('cat_food_groceries'), Icons.shopping_basket);
+      });
+
+      test('returns Icons.favorite_border for an unknown / custom id', () {
+        expect(
+          categoryIconFromId('unknown_or_custom_id'),
+          Icons.favorite_border,
+        );
+      });
+    });
   });
 }

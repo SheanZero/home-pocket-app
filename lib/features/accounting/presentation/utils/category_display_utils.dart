@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../application/accounting/category_localization_service.dart';
+import '../../../../shared/constants/default_categories.dart';
 import '../../domain/models/category.dart';
 
 String formatCategoryPath({
@@ -28,6 +29,21 @@ Category? resolveParentCategory(
   final parentId = category.parentId;
   if (parentId == null) return null;
   return categoryById[parentId];
+}
+
+/// Pure, provider-free resolver from a category id to a Material [IconData].
+///
+/// Looks the id up in [DefaultCategories.all] (both L1 and L2) and feeds the
+/// matched category's icon-name string into [resolveCategoryIcon]. On no match
+/// (custom / unknown id) returns [Icons.favorite_border] — a joy-flavored
+/// fallback chosen for the Best Joy strip rather than [resolveCategoryIcon]'s
+/// generic `help_outline` default.
+///
+/// Safe by construction: never throws on an unknown id.
+IconData categoryIconFromId(String categoryId) {
+  final matches = DefaultCategories.all.where((c) => c.id == categoryId);
+  if (matches.isEmpty) return Icons.favorite_border;
+  return resolveCategoryIcon(matches.first.icon);
 }
 
 IconData resolveCategoryIcon(String iconName) {
