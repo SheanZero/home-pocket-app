@@ -5,7 +5,6 @@ import 'package:home_pocket/features/analytics/domain/models/family_happiness.da
 import 'package:home_pocket/features/analytics/domain/models/happiness_report.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
 import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
-import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_hero_card.dart';
 
@@ -127,19 +126,6 @@ Widget _buildSubject({
 ///   - D-11         = card tap target
 ///   - D-12         = currency resolution from constructor
 void main() {
-  group('HomeHeroCard — Joy target progress color', () {
-    test('interpolates from daily teal to joy gold and clamps overflow', () {
-      final palette = AppPalette.light;
-      expect(joyTargetProgressColor(0, palette), palette.daily);
-      expect(joyTargetProgressColor(1, palette), palette.joy);
-      expect(joyTargetProgressColor(1.6, palette), palette.joy);
-
-      final midpoint = joyTargetProgressColor(0.5, palette);
-      expect(midpoint, isNot(palette.daily));
-      expect(midpoint, isNot(palette.joy));
-    });
-  });
-
   group('HomeHeroCard — single mode (HOMEUI-01, HOMEUI-05, HOMEUI-06)', () {
     testWidgets(
       'shows zero cumulative Joy and target reference without percentage',

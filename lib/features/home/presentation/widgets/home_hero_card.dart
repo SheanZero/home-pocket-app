@@ -17,14 +17,6 @@ import '../../../analytics/domain/models/monthly_report.dart';
 import '../providers/state_shadow_books.dart';
 import 'painter/happiness_rings_painter.dart';
 
-/// D-05: Lerps daily → joy to produce the progress indicator color on the
-/// inner ring. Replaces the old hardcoded start/end gradient constants
-/// (COLOR-03 duplicate removal).
-Color joyTargetProgressColor(double ratio, AppPalette palette) {
-  final clamped = ratio.clamp(0.0, 1.0).toDouble();
-  return Color.lerp(palette.daily, palette.joy, clamped)!;
-}
-
 /// Integrated hero card (Phase 10) replacing the previous trio of legacy
 /// cards: month-overview, ledger-comparison, and joy-fullness. Pure
 /// StatelessWidget — parent resolves AsyncValue.when() and passes Freezed

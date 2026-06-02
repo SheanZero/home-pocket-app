@@ -138,6 +138,21 @@ void main() {
       );
     });
 
+    testWidgets('single mode dark ja', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          locale: const Locale('ja'),
+          snapshot: _singleRich(),
+          themeMode: ThemeMode.dark,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(HomeHeroCard),
+        matchesGoldenFile('goldens/home_hero_card_single_dark_ja.png'),
+      );
+    });
+
     testWidgets('single mode target 0 light ja', (tester) async {
       await tester.pumpWidget(
         _wrap(locale: const Locale('ja'), snapshot: _singleWithJoy(0)),
