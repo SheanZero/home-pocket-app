@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../application/i18n/formatter_service.dart';
@@ -6,6 +7,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/happiness_ring_palette.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/joy_cumulative_formatter.dart';
 import '../../../accounting/presentation/utils/category_display_utils.dart';
 import '../../../analytics/domain/models/best_joy_moment_row.dart';
@@ -730,6 +732,9 @@ class HomeHeroCard extends StatelessWidget {
       row.categoryId,
       locale,
     );
+    final dateShort = DateFormatter.formatShortMonthDay(row.timestamp, locale);
+    final dayOfWeek = DateFormat('E', locale.toString()).format(row.timestamp);
+    final dateLabel = '$dateShort($dayOfWeek)';
     final amount = _fmt.formatCurrency(row.amount, currencyCode, locale);
 
     return _bestJoyStripContainer(
@@ -741,15 +746,29 @@ class HomeHeroCard extends StatelessWidget {
           _bestJoyIconTile(palette, parentCategoryIconFromId(row.categoryId)),
           const SizedBox(width: 11),
           Expanded(
-            child: Text(
-              category,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.bodyMedium.copyWith(
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: palette.textPrimary,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  category,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: palette.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  dateLabel,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    fontSize: 11.5,
+                    color: palette.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 11),

@@ -295,7 +295,9 @@ class HomeScreen extends ConsumerWidget {
                         l1Icon: parentCategoryIconFromId(tx.categoryId),
                         tagText: isGroupMode
                             ? _memberInitial(tx)
-                            : (isSoul ? '\u9b42' : '\u751f'),
+                            : (isSoul
+                                  ? l10n.listLedgerJoy
+                                  : l10n.listLedgerDaily),
                         tagBgColor: isSoul
                             ? context.palette.joyLight
                             : context.palette.dailyLight,
