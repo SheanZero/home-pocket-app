@@ -9,6 +9,7 @@ import '../../../../core/theme/happiness_ring_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/joy_cumulative_formatter.dart';
+import '../../../accounting/presentation/utils/category_display_utils.dart';
 import '../../../analytics/domain/models/best_joy_moment_row.dart';
 import '../../../analytics/domain/models/family_happiness.dart';
 import '../../../analytics/domain/models/happiness_report.dart';
@@ -152,9 +153,7 @@ class HomeHeroCard extends StatelessWidget {
           l10n.homeHeroPreviousMonthSubline(
             _fmt.formatCurrency(prev, currencyCode, locale),
           ),
-          style: AppTextStyles.bodySmall.copyWith(
-            color: palette.textSecondary,
-          ),
+          style: AppTextStyles.bodySmall.copyWith(color: palette.textSecondary),
         ),
       ],
     );
@@ -239,10 +238,7 @@ class HomeHeroCard extends StatelessWidget {
                     gradient: LinearGradient(
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
-                      colors: [
-                        palette.joy.withValues(alpha: 0.6),
-                        palette.joy,
-                      ],
+                      colors: [palette.joy.withValues(alpha: 0.6), palette.joy],
                     ),
                   ),
                 ),
@@ -362,14 +358,23 @@ class HomeHeroCard extends StatelessWidget {
     );
   }
 
-  HappinessRingsPainter _painter(AppPalette palette, HappinessRingPalette ring) {
+  HappinessRingsPainter _painter(
+    AppPalette palette,
+    HappinessRingPalette ring,
+  ) {
     final track = palette.backgroundDivider;
     if (isGroupMode) {
       final f = family;
       return HappinessRingsPainter(
-        outerSweepRatio: f == null ? null : _familyHighlightsRatio(f.familyHighlightsSum),
-        middleSweepRatio: f == null ? null : _sharedJoyRatio(f.sharedJoyInsight),
-        innerSweepRatio: f == null ? null : _medianSatisfactionRatio(f.medianSatisfaction),
+        outerSweepRatio: f == null
+            ? null
+            : _familyHighlightsRatio(f.familyHighlightsSum),
+        middleSweepRatio: f == null
+            ? null
+            : _sharedJoyRatio(f.sharedJoyInsight),
+        innerSweepRatio: f == null
+            ? null
+            : _medianSatisfactionRatio(f.medianSatisfaction),
         outerGradient: SweepGradient(
           colors: [palette.sharedLight, palette.shared],
         ),
@@ -388,15 +393,11 @@ class HomeHeroCard extends StatelessWidget {
       outerSweepRatio: _highlightsRatio(happiness.highlightsCount),
       middleSweepRatio: _avgSatisfactionRatio(happiness.avgSatisfaction),
       innerSweepRatio: _joyContributionRatio(happiness.joyContribution),
-      outerGradient: SweepGradient(
-        colors: [ring.highlights, ring.highlights],
-      ),
+      outerGradient: SweepGradient(colors: [ring.highlights, ring.highlights]),
       middleGradient: SweepGradient(
         colors: [ring.satisfaction, ring.satisfaction],
       ),
-      innerGradient: SweepGradient(
-        colors: [ring.target, ring.target],
-      ),
+      innerGradient: SweepGradient(colors: [ring.target, ring.target]),
       trackColor: ring.track,
     );
   }
@@ -438,9 +439,7 @@ class HomeHeroCard extends StatelessWidget {
     if (isGroupMode) {
       return Text(
         _groupCenterText(),
-        style: AppTextStyles.amountMedium.copyWith(
-          color: palette.textPrimary,
-        ),
+        style: AppTextStyles.amountMedium.copyWith(color: palette.textPrimary),
       );
     }
     final valueText = switch (happiness.joyContribution) {
@@ -614,54 +613,116 @@ class HomeHeroCard extends StatelessWidget {
     );
   }
 
-  // ─── Region 6: Best Joy strip (Variant A — Pencil mock n6VVd) ────────────
+  // ─── Region 6: Best Joy strip (tinted Joy strip — quick 260602-nb2) ──────
   //
-  // 3-row cream card: Row 1 = title + satisfaction pill; Row 2 = hero amount;
-  // Row 3 = merchant/category + date. Replaces old 3-line text layout.
-  // homeBestJoyEmptyBig/AllNeutralBig ARB keys unused after Variant A — see v4v worklog.
+  // Tinted container (joy-tinted bg + border) holding a category-icon tile,
+  // category-name + date(weekday) subtitle, and an amount-over-pill right
+  // column. Design contract: docs/design/best-joy-redesign.html (AFTER strip).
+  // Empty / all-neutral states reuse the same chrome with a muted placeholder
+  // row. ARCH-002: primary line is category name only — no merchant/note.
+  // homeBestJoyEmptyBig/AllNeutralBig ARB keys unused since Variant A.
   Widget _buildBestJoyStrip(BuildContext context, S l10n, AppPalette palette) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final titleText = isGroupMode
         ? l10n.homeBestJoyTagGroup
         : l10n.homeBestJoyTagSingle;
     return switch (bestJoy) {
-      Empty() => _bestJoyEmpty(palette, titleText, l10n.homeBestJoyEmptySmall),
+      Empty() => _bestJoyEmpty(
+        palette,
+        isDark,
+        titleText,
+        l10n.homeBestJoyEmptySmall,
+      ),
       Value(:final data) when data.joyFullness <= 2 => _bestJoyEmpty(
         palette,
+        isDark,
         titleText,
         l10n.homeBestJoyAllNeutralSmall,
       ),
-      Value(:final data) => _bestJoyValue(context, l10n, palette, titleText, data),
+      Value(:final data) => _bestJoyValue(
+        context,
+        l10n,
+        palette,
+        isDark,
+        titleText,
+        data,
+      ),
     };
   }
 
-  Widget _bestJoyEmpty(AppPalette palette, String title, String mutedLine) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _bestJoyTitleRow(palette, title),
-        const SizedBox(height: 12),
-        Text(
-          mutedLine,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: palette.textMutedGold,
+  /// Shared tinted-strip chrome for both value + empty states.
+  Widget _bestJoyStripContainer({
+    required AppPalette palette,
+    required bool isDark,
+    required String title,
+    required Widget row,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: palette.joy.withValues(alpha: isDark ? 0.13 : 0.08),
+        border: Border.all(color: palette.joy.withValues(alpha: 0.22)),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: AppTextStyles.bodyLarge.copyWith(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: palette.joy,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 10),
+          row,
+        ],
+      ),
     );
   }
 
-  /// Section title row matching `_ringSection` style: icon + bodyLarge text,
-  /// left-aligned, transparent background (no card chrome).
-  Widget _bestJoyTitleRow(AppPalette palette, String title) {
-    return Row(
-      children: [
-        Icon(Icons.favorite, size: 16, color: palette.joy),
-        const SizedBox(width: 6),
-        Text(
-          title,
-          style: AppTextStyles.bodyLarge.copyWith(color: palette.textPrimary),
-        ),
-      ],
+  /// 36x36 joyLight category-icon tile.
+  Widget _bestJoyIconTile(AppPalette palette, IconData icon) {
+    return Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        color: palette.joyLight,
+        borderRadius: BorderRadius.circular(11),
+      ),
+      alignment: Alignment.center,
+      child: Icon(icon, size: 19, color: palette.joyText),
+    );
+  }
+
+  Widget _bestJoyEmpty(
+    AppPalette palette,
+    bool isDark,
+    String title,
+    String mutedLine,
+  ) {
+    return _bestJoyStripContainer(
+      palette: palette,
+      isDark: isDark,
+      title: title,
+      row: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _bestJoyIconTile(palette, Icons.auto_awesome),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Text(
+              mutedLine,
+              softWrap: true,
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontSize: 13,
+                color: palette.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -669,87 +730,74 @@ class HomeHeroCard extends StatelessWidget {
     BuildContext context,
     S l10n,
     AppPalette palette,
+    bool isDark,
     String title,
     BestJoyMomentRow row,
   ) {
-    final formatted = _fmt.formatCurrency(row.amount, currencyCode, locale);
-    final splitResult = _splitCurrencySymbol(formatted);
     final category = CategoryLocalizationService.resolveFromId(
       row.categoryId,
       locale,
     );
     final dateShort = DateFormatter.formatShortMonthDay(row.timestamp, locale);
     final dayOfWeek = DateFormat('E', locale.toString()).format(row.timestamp);
-    final dateLabel = '$dateShort · $dayOfWeek';
+    final dateLabel = '$dateShort($dayOfWeek)';
+    final amount = _fmt.formatCurrency(row.amount, currencyCode, locale);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Row 1: title only — left-aligned (pill moved to amount row)
-        _bestJoyTitleRow(palette, title),
-        const SizedBox(height: 12),
-        // Row 2: hero amount left + enlarged satisfaction pill right
-        // (pill vertically centered on amount center line per user 260518-v4v r2)
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
+    return _bestJoyStripContainer(
+      palette: palette,
+      isDark: isDark,
+      title: title,
+      row: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _bestJoyIconTile(palette, categoryIconFromId(row.categoryId)),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  splitResult.$1,
-                  style: AppTextStyles.amountSmall.copyWith(
-                    fontSize: 20,
-                    color: palette.joyText,
+                  category,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: palette.textPrimary,
                   ),
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(height: 2),
                 Text(
-                  splitResult.$2,
-                  style: AppTextStyles.amountLarge.copyWith(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w800,
-                    color: palette.joyText,
-                    letterSpacing: -0.5,
+                  dateLabel,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    fontSize: 11.5,
+                    color: palette.textSecondary,
                   ),
                 ),
               ],
             ),
-            _satisfactionPill(l10n, palette, row.joyFullness),
-          ],
-        ),
-        const SizedBox(height: 10),
-        // Row 3: category/merchant left + date right
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Text(
-                category,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: 'Outfit',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: palette.textMutedGold,
+          ),
+          const SizedBox(width: 11),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                amount,
+                style: AppTextStyles.amountSmall.copyWith(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  color: palette.joyText,
+                  letterSpacing: -0.3,
                 ),
               ),
-            ),
-            Text(
-              dateLabel,
-              style: TextStyle(
-                fontFamily: 'Outfit',
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: palette.textMutedGold,
-              ),
-            ),
-          ],
-        ),
-      ],
+              const SizedBox(height: 5),
+              _satisfactionPill(l10n, palette, row.joyFullness),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -803,16 +851,12 @@ class HomeHeroCard extends StatelessWidget {
     return l10n.satisfactionLabelAmazing;
   }
 
-  /// Splits a formatted currency string into (symbol, number) pair.
-  /// e.g. "¥4,200" → ("¥", "4,200"), "$4.20" → ("$", "4.20")
-  (String, String) _splitCurrencySymbol(String formatted) {
-    final idx = formatted.indexOf(RegExp(r'\d'));
-    if (idx <= 0) return ('', formatted);
-    return (formatted.substring(0, idx), formatted.substring(idx));
-  }
-
   // ─── Region 8: Members section (group mode + non-empty shadowBooks) ───────
-  Widget _buildMembersSection(BuildContext context, S l10n, AppPalette palette) {
+  Widget _buildMembersSection(
+    BuildContext context,
+    S l10n,
+    AppPalette palette,
+  ) {
     // FAMILY-03 minimum gate.
     final books = shadowBooks;
     if (!isGroupMode || books == null || books.isEmpty) {
@@ -911,11 +955,7 @@ class _InfoIcon extends StatelessWidget {
       child: Padding(
         // Visual stays 16px; padding expands the touchable hit area.
         padding: const EdgeInsets.all(4),
-        child: Icon(
-          Icons.info_outline,
-          size: 16,
-          color: palette.textSecondary,
-        ),
+        child: Icon(Icons.info_outline, size: 16, color: palette.textSecondary),
       ),
     );
   }
