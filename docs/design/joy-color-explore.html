@@ -96,12 +96,13 @@
   <div class="grid" id="grid"></div>
 
   <div class="reco">
-    <h2>推奨の見立て（teal アンカーとの相性 × 悦己の"自分へのご褒美"らしさ）</h2>
+    <h2>推奨の見立て（低彩度・くすみ系 — teal と静かに対比しつつ大人びた悦己感）</h2>
     <ul>
-      <li><b>テラコッタ / 赤陶</b> — teal の定番相方。暖かく落ち着いた高級感、黄より大人。<b>最も安全な"映える暖色"。</b></li>
-      <li><b>蘭紫 / Orchid</b> — teal の補色寄りで最もコントラストが立つ。digital-lavender 的な wellness/self-care 感が悦己テーマに直結。<b>"脱・黄色"を最も強く出せる。</b></li>
-      <li><b>玫红 / Magenta</b> — 最も祝祭的で華やか。teal と冷暖で強対比。ただし error 赤との距離に注意。</li>
-      <li>杏橙 / Tangerine・珊瑚 / Coral は暖色だが赤/旧コーラル identity に寄るため中庸。莓紫 / Plum は上品だが沈みがち。</li>
+      <li><b>霧紫 / Dusty Lavender</b> — 残した Orchid を素直に脱彩度した版。<b>「蘭紫は良いが派手」への直球の答え。</b>上品で teal と静かに対比、wellness 感も維持。</li>
+      <li><b>陶土 / Muted Clay</b> — Terracotta のくすみ版。最も大人で温かく、teal と古典的相性。<b>低彩度の暖色枠の本命。</b></li>
+      <li><b>丁香 / Mauve・豆沙粉 / Dusty Rose</b> — 紫〜ピンクのくすみ。落ち着いた華やぎ。甘すぎず error 赤とも分離。</li>
+      <li>柔珊瑚 / Dusty Coral は暖かいが赤寄り、紫藤 / Heather は最も静かだが teal・shared 青に寄るので個性は控えめ。</li>
+      <li style="color:var(--muted)">※ くすみ色は彩度が低いぶん、金額テキスト(joyText) は AA を満たすよう各候補とも濃いめに振っています（各列の AA 比を参照）。</li>
     </ul>
   </div>
 
@@ -119,26 +120,39 @@ function ratio(fg,bg){const a=lum(fg),b=lum(bg);const hi=Math.max(a,b),lo=Math.m
 
 // each candidate: light {joy,text,light}  dark {joy,text,light}
 const CANDS = [
-  { ref:true, name:"Gold", cn:"金（現状）", tag:"ADR-018 の warm pop。ユーザー所感「good-looking でない」＝今回の出発点。",
+  // ── 参照 / 基準 ──
+  { group:"参照 — 現状 + 高彩度の基準", ref:true, name:"Gold", cn:"金（現状）",
+    tag:"ADR-018 の warm pop。ユーザー所感「good-looking でない」＝今回の出発点。",
     light:{joy:"#F0A81E",text:"#9A6500",lt:"#FBEFCF"}, dark:{joy:"#F0C13A",text:"#F0C13A",lt:"#33290F"} },
 
-  { name:"Terracotta", cn:"赤陶", tag:"teal の古典的相方。暖かく大人びた、土の高級感。",
-    light:{joy:"#D9734E",text:"#A6492A",lt:"#FBEDE7"}, dark:{joy:"#E8916E",text:"#E8916E",lt:"#33211A"} },
-
-  { name:"Coral", cn:"珊瑚", tag:"明るく親しみやすい暖色。赤寄りなので error との距離に留意。",
-    light:{joy:"#F2785C",text:"#B43E2A",lt:"#FCEDE9"}, dark:{joy:"#F2937C",text:"#F2937C",lt:"#33201B"} },
-
-  { name:"Tangerine", cn:"杏橙", tag:"はっきりオレンジ＝黄色からの脱却。元気で食欲的。",
-    light:{joy:"#F2944A",text:"#9E4E15",lt:"#FCEEE2"}, dark:{joy:"#F2A968",text:"#F2A968",lt:"#33260F"} },
-
-  { name:"Magenta", cn:"玫红", tag:"最も祝祭的・華やか。teal と冷暖で強対比。",
-    light:{joy:"#D6457F",text:"#A82C63",lt:"#FBE9F1"}, dark:{joy:"#E86FA0",text:"#E86FA0",lt:"#33121F"} },
-
-  { name:"Orchid", cn:"蘭紫", tag:"teal の補色寄り。wellness / self-care の lavender 感、悦己テーマ直結。",
+  { group:"参照 — 現状 + 高彩度の基準", name:"Orchid", cn:"蘭紫（高彩度・残）",
+    tag:"teal の補色寄り。wellness/self-care の lavender 感＝悦己テーマ直結。下段の低彩度版と見比べる基準。",
     light:{joy:"#8B6FE0",text:"#5B3DB0",lt:"#EFEAFB"}, dark:{joy:"#A98FEE",text:"#A98FEE",lt:"#1F1633"} },
 
-  { name:"Plum", cn:"莓紫", tag:"上品なベリー。深く落ち着くが小さい面では沈みがち。",
-    light:{joy:"#A14E9B",text:"#7E3577",lt:"#F5E9F4"}, dark:{joy:"#C173B8",text:"#C173B8",lt:"#2B1429"} },
+  // ── 低彩度・くすみ系（今回の主役）──
+  { group:"低彩度・くすみ系（今回の主役）", name:"Dusty Lavender", cn:"霧紫",
+    tag:"Orchid を素直に脱彩度。やわらかく上品、teal と静かに対比。蘭紫の最有力代替。",
+    light:{joy:"#9D8AC9",text:"#574396",lt:"#EFEBF7"}, dark:{joy:"#B3A2DC",text:"#B3A2DC",lt:"#241E33"} },
+
+  { group:"低彩度・くすみ系（今回の主役）", name:"Mauve", cn:"丁香 / 煙紫",
+    tag:"紫×ピンクの中間のくすみ。落ち着いた華やぎ、女性的すぎず大人。",
+    light:{joy:"#A586B0",text:"#6B4877",lt:"#F2ECF4"}, dark:{joy:"#C0A3CA",text:"#C0A3CA",lt:"#2A2030"} },
+
+  { group:"低彩度・くすみ系（今回の主役）", name:"Dusty Rose", cn:"豆沙粉",
+    tag:"くすみローズ。温かく親しみやすいが甘すぎない。赤ではなくピンク寄りで error と分離。",
+    light:{joy:"#C58B9A",text:"#8A4456",lt:"#F8ECEF"}, dark:{joy:"#D7A3B0",text:"#D7A3B0",lt:"#301C22"} },
+
+  { group:"低彩度・くすみ系（今回の主役）", name:"Muted Clay", cn:"陶土（柔）",
+    tag:"Terracotta を脱彩度。土のニュアンス、最も大人で温かい。teal と古典的相性。",
+    light:{joy:"#C89279",text:"#854E32",lt:"#F7EDE7"}, dark:{joy:"#D9A98F",text:"#D9A98F",lt:"#2E211A"} },
+
+  { group:"低彩度・くすみ系（今回の主役）", name:"Dusty Coral", cn:"柔珊瑚",
+    tag:"くすみコーラル。暖かく優しい、彩度を抑えて赤らしさを消した珊瑚。",
+    light:{joy:"#D69585",text:"#974838",lt:"#FAEDE9"}, dark:{joy:"#E2A998",text:"#E2A998",lt:"#301F1A"} },
+
+  { group:"低彩度・くすみ系（今回の主役）", name:"Heather", cn:"紫藤 / 霧青紫",
+    tag:"青み寄りのくすみ紫。teal と同じクール域で馴染みつつ別人格。最も静か。",
+    light:{joy:"#9590C0",text:"#504B88",lt:"#ECEBF5"}, dark:{joy:"#ABA6D4",text:"#ABA6D4",lt:"#22202F"} },
 ];
 
 let MODE = "light";
@@ -153,7 +167,17 @@ function render(){
   const tealLight = dark ? "#173032" : "#E0F0F2";
   const tealText  = dark ? "#4FB0BC" : "#145E68";
 
+  let lastGroup = null;
   CANDS.forEach(c=>{
+    if(c.group && c.group !== lastGroup){
+      lastGroup = c.group;
+      const h = document.createElement('div');
+      h.className = "grouphead";
+      h.style.cssText = "grid-column:1/-1;font-size:13px;font-weight:700;color:var(--muted);"
+        + "margin:8px 0 -4px;padding-top:8px;border-top:1px solid var(--line)";
+      h.textContent = c.group;
+      grid.appendChild(h);
+    }
     const p = dark ? c.dark : c.light;
     const r = ratio(p.text, cardBg);
     const pass = r >= 4.5;

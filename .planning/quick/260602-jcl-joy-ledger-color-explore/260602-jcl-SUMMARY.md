@@ -38,11 +38,25 @@ date: 2026-06-02
 
 全候補 light/dark とも joyText が AA ≥4.5:1 を満たすことを live 計測で確認。
 
-## 推奨
+## Iteration 2 — 低彩度・くすみ系（ユーザー指示「Orchid 残し + 低彩度を数案」）
 
-- **最安全な"映える暖色" → テラコッタ/赤陶**：teal の古典的相方、黄より大人の高級感。
-- **"脱・黄色"を最も強く → 蘭紫/Orchid**：teal 補色寄りで対比最大、wellness/self-care 感が悦己テーマ直結。
-- **最も華やか → 玫红/Magenta**（error 赤との距離に留意）。
+第1版（高彩度 6 案）からユーザーは **Orchid 蘭紫を残しつつ、より低彩度の色を追加要望**。
+HTML を 2 グループ構成に再編：
+- **参照群**: Gold（現状）+ Orchid 蘭紫（高彩度・基準として残置）。
+- **低彩度・くすみ系（主役）**: Dusty Lavender 霧紫 `#9D8AC9` / Mauve 丁香 `#A586B0` /
+  Dusty Rose 豆沙粉 `#C58B9A` / Muted Clay 陶土柔 `#C89279` / Dusty Coral 柔珊瑚 `#D69585` /
+  Heather 紫藤 `#9590C0`。
+
+くすみ色は彩度が低いぶん joyText を濃いめに調整。light/dark とも全候補 AA 余裕で合格
+（live 計測: light 5.0〜7.9:1、dark 5.9〜9.3:1）。
+
+## 推奨（Iteration 2 時点）
+
+- **霧紫 / Dusty Lavender**：残した Orchid を素直に脱彩度 ＝「蘭紫は良いが派手」への直球の答え。
+- **陶土 / Muted Clay**：Terracotta のくすみ版、低彩度の暖色枠の本命、teal と古典的相性。
+- 丁香 / 豆沙粉 は紫〜ピンクのくすみで落ち着いた華やぎ。
+
+（参考: 第1版 高彩度群 Terracotta/Coral/Tangerine/Magenta/Plum はコミット履歴 a4ba49a8 に記録）
 
 ## 検証（evidence）
 
