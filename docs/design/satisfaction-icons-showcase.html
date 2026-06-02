@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>满意度 icon 候选展示 · 260602-vo8</title>
+<style>
+  :root{
+    --bg:#F8FCFD; --bgMuted:#ECF4F5; --surface:#FFFFFF;
+    --textPrimary:#112025; --textSecondary:#5A7176; --textTertiary:#ABC2C6;
+    --joy:#A586B0; --joyText:#6B4877; --joyLight:#F2ECF4; --joyBorder:#CBB4D2;
+    --daily:#1C7A86; --line:#E2EEF0;
+  }
+  .dark{
+    --bg:#0C1719; --bgMuted:#213537; --surface:#0F2022;
+    --textPrimary:#E8F2F3; --textSecondary:#82989B; --textTertiary:#54686A;
+    --joy:#C0A3CA; --joyText:#C0A3CA; --joyLight:#2A2030; --joyBorder:#3E3247;
+    --daily:#3FC2CE; --line:#213537;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Hiragino Sans",sans-serif;background:#dfe9ea;color:#112025;padding:32px 16px 80px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto}
+  h1{font-size:22px;margin-bottom:6px}
+  .sub{color:#5A7176;font-size:13px;margin-bottom:4px;line-height:1.6}
+  .legend{font-size:12px;color:#5A7176;background:#fff;border:1px solid #d4e3e5;border-radius:10px;padding:10px 14px;margin:14px 0 28px;line-height:1.7}
+  h2{font-size:15px;margin:34px 0 4px;color:#0d3b42}
+  h2 .tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;vertical-align:middle;margin-left:8px}
+  .tag.color{background:#e4f4ee;color:#1C7A86}
+  .tag.mono{background:#F2ECF4;color:#6B4877}
+  .hint{font-size:12px;color:#5A7176;margin:2px 0 14px;line-height:1.6}
+  .star{color:#C98A00}
+
+  /* picker card — replica of the real 满足度 widget */
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 18px 14px;margin-bottom:14px;transition:.2s}
+  .card.dark{background:var(--surface)}
+  .setname{font-size:12px;font-weight:700;color:var(--textSecondary);margin-bottom:2px;letter-spacing:.02em}
+  .setmeta{font-size:11px;color:var(--textTertiary);margin-bottom:12px}
+  .row{display:flex;justify-content:space-between;gap:8px}
+  .chip{flex:1;aspect-ratio:1/1;max-width:56px;border-radius:14px;background:var(--bgMuted);border:1px solid transparent;display:flex;align-items:center;justify-content:center;position:relative}
+  .chip.sel{background:var(--joyLight);border:2px solid var(--joy)}
+  .chip img{width:30px;height:30px;display:block}
+  /* monochrome tint via mask — mirrors palette染色 (selected=joy, else=textSecondary) */
+  .tint{width:26px;height:26px;background-color:var(--textSecondary);
+        -webkit-mask:var(--src) center/contain no-repeat;mask:var(--src) center/contain no-repeat}
+  .chip.sel .tint{background-color:var(--joy)}
+  .native{font-size:28px;line-height:1}
+  .labels{display:flex;justify-content:space-between;margin-top:8px;font-size:10px;font-weight:500;color:var(--textTertiary)}
+  .labels span{flex:1}
+  .labels span:nth-child(2){text-align:center}
+  .labels span:nth-child(3){text-align:right}
+
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.pair{grid-template-columns:1fr}}
+  .modecap{font-size:11px;font-weight:600;color:#5A7176;text-align:center;margin:-4px 0 8px}
+  .foot{font-size:11px;color:#5A7176;margin-top:8px;line-height:1.7}
+  code{background:#eef5f6;padding:1px 5px;border-radius:5px;font-size:11px}
+  .reco{border-color:var(--joyBorder);box-shadow:0 0 0 3px rgba(165,134,176,.12)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>满意度 icon 候选展示</h1>
+  <div class="sub">Quick 260602-vo8 · 卡片配色 = ADR-018 实际 palette（日常 teal / 悦己 Mauve）<br>
+  梯度映射：<b>平和 🐱 → 😺 → 😸 不错 → 😹 → 😻 最爱</b>（Unicode 自带的猫脸满意度递增组，终点爱心眼=最爱）</div>
+  <div class="legend">
+    彩色 emoji 通过 CDN 实时加载真实 SVG（OpenMoji / Twemoji / Noto / Fluent）。<br>
+    单色行用 CSS <code>mask</code> 染色，<b>完全复刻 App 的染色逻辑</b>：选中=悦己 Mauve，未选=灰。<br>
+    ⭐ 关键：<b>OpenMoji 同一套猫脸有彩色 + 黑色线性两版</b> → 单色路线也能要猫，且保留染色。
+  </div>
+
+  <!-- ===================== 彩色全猫梯度 ===================== -->
+  <h2>路线 A · 彩色全猫梯度 <span class="tag color">colorful · 放弃染色</span></h2>
+  <div class="hint">真·猫脸 emoji，最可爱。代价：彩色固定配色，需 <code>flutter_svg</code> + 5 个 SVG 资源，深色模式另验对比度。</div>
+
+  <!-- System / Apple native (always renders on macOS) -->
+  <div class="card">
+    <div class="setname">系统原生 emoji（你此刻看到的就是 Apple Color Emoji）</div>
+    <div class="setmeta">零依赖 · 但各平台画风不可控（iOS=Apple, Android=Noto）→ 仅作基准参考</div>
+    <div class="row">
+      <div class="chip sel"><span class="native">🐱</span></div>
+      <div class="chip"><span class="native">😺</span></div>
+      <div class="chip"><span class="native">😸</span></div>
+      <div class="chip"><span class="native">😹</span></div>
+      <div class="chip"><span class="native">😻</span></div>
+    </div>
+    <div class="labels"><span>平和</span><span>不错</span><span>最爱!</span></div>
+  </div>
+
+  <!-- OpenMoji color -->
+  <div class="card reco">
+    <div class="setname">⭐ OpenMoji（彩色）— 风格最克制，与 App 调性最搭 · CC BY-SA 4.0</div>
+    <div class="setmeta">openmoji.org · 黑描线+淡彩</div>
+    <div class="row" id="openmoji-color"></div>
+    <div class="labels"><span>平和</span><span>不错</span><span>最爱!</span></div>
+  </div>
+
+  <!-- Twemoji -->
+  <div class="card">
+    <div class="setname">Twemoji / catmoji — 圆润卡通，最「萌」· CC-BY 4.0</div>
+    <div class="setmeta">jdecked/twemoji · catmoji=全 emoji 换猫</div>
+    <div class="row" id="twemoji"></div>
+    <div class="labels"><span>平和</span><span>不错</span><span>最爱!</span></div>
+  </div>
+
+  <!-- Fluent flat -->
+  <div class="card">
+    <div class="setname">Fluent Emoji（Flat）— 现代扁平，许可证最宽松 · MIT</div>
+    <div class="setmeta">microsoft/fluentui-emoji（若某格空缺=该 CDN 路径含空格未命中，回退系统 emoji）</div>
+    <div class="row" id="fluent"></div>
+    <div class="labels"><span>平和</span><span>不错</span><span>最爱!</span></div>
+  </div>
+
+  <!-- Noto -->
+  <div class="card">
+    <div class="setname">Noto Emoji — Google 写实 · Apache 2.0</div>
+    <div class="setmeta">googlefonts/noto-emoji · 细节多，24px 下略糊</div>
+    <div class="row" id="noto"></div>
+    <div class="labels"><span>平和</span><span>不错</span><span>最爱!</span></div>
+  </div>
+
+  <!-- ===================== 单色线性（可染色） ===================== -->
+  <h2>路线 B · 单色线性，可被 palette 染色 <span class="tag mono">monochrome · 保留现状观感</span></h2>
+  <div class="hint">改动小、深浅色自动适配（跟随 <code>palette.joy</code>）。下面每行选中态=Mauve，未选=灰，和真 App 一致。</div>
+
+  <!-- OpenMoji black — the killer option: cats + tintable -->
+  <div class="card reco">
+    <div class="setname">⭐⭐ OpenMoji（黑色线性）— <span class="star">单色 + 全猫梯度 + 可染色，三者兼得</span> · CC BY-SA 4.0</div>
+    <div class="setmeta">openmoji.org/data/black · 同一套猫脸的线性版，下方已用 Mauve 染色</div>
+    <div class="row" id="openmoji-black"></div>
+    <div class="labels"><span>平和</span><span>不错</span><span>最爱!</span></div>
+  </div>
+
+  <!-- Tabler mood + cat -->
+  <div class="card">
+    <div class="setname">Tabler「mood-* + cat」— 改动最小，最高档放 cat 当彩蛋 · MIT</div>
+    <div class="setmeta">tabler_icons 字体包 · mood-neutral/smile/happy/crazy-happy + cat</div>
+    <div class="row" id="tabler"></div>
+    <div class="labels"><span>平和</span><span>不错</span><span>最爱!</span></div>
+  </div>
+
+  <!-- Material current (baseline) -->
+  <div class="card">
+    <div class="setname">Material（现状基准）— 当前线上版本</div>
+    <div class="setmeta">Flutter 内置 · sentiment_* + favorite</div>
+    <div class="row" id="material"></div>
+    <div class="labels"><span>平和</span><span>不错</span><span>最爱!</span></div>
+  </div>
+
+  <!-- ===================== 深色模式预览 ===================== -->
+  <h2>深色模式预览（两个推荐项）</h2>
+  <div class="hint">验证彩色 emoji vs 单色染色在深色背景下的可读性。</div>
+  <div class="pair">
+    <div>
+      <div class="modecap">OpenMoji 彩色（深色）</div>
+      <div class="card dark">
+        <div class="row" id="openmoji-color-dark"></div>
+        <div class="labels"><span>平和</span><span>不错</span><span>最爱!</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="modecap">OpenMoji 黑线·染色（深色）</div>
+      <div class="card dark">
+        <div class="row" id="openmoji-black-dark"></div>
+        <div class="labels"><span>平和</span><span>不错</span><span>最爱!</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    完整对比（许可证 / 集成成本 / golden 重拍量）见同目录调研文档
+    <code>.planning/quick/260602-vo8-icon-icon-4-5/260602-vo8-RESEARCH.md</code><br>
+    选定方向后再开后续 quick 任务做实际替换 + golden 重拍。
+  </div>
+</div>
+
+<script>
+  // Unicode 猫脸满意度梯度
+  const CP = ['1F431','1F63A','1F638','1F639','1F63B'];   // 🐱😺😸😹😻
+  const NATIVE = ['🐱','😺','😸','😹','😻'];
+  const SEL = 0; // 选中第 1 档（平和）以呼应原截图
+
+  // Fluent 文件夹名（含空格，URL 编码）
+  const FLUENT = [
+    'Cat face/Flat/cat_face_flat.svg',
+    'Grinning cat/Flat/grinning_cat_flat.svg',
+    'Grinning cat with smiling eyes/Flat/grinning_cat_with_smiling_eyes_flat.svg',
+    'Cat with tears of joy/Flat/cat_with_tears_of_joy_flat.svg',
+    'Smiling cat with heart-eyes/Flat/smiling_cat_with_heart-eyes_flat.svg',
+  ];
+  // Tabler outline / Material(MDI) 名（用 MDI CDN 近似 Material sentiment 系列）
+  const TABLER = ['mood-neutral','mood-smile','mood-happy','mood-crazy-happy','cat'];
+  const MDI    = ['emoticon-neutral-outline','emoticon-happy-outline','emoticon-outline','emoticon-excited-outline','heart-outline'];
+
+  function chip(i, inner){
+    const sel = i===SEL ? ' sel' : '';
+    return `<div class="chip${sel}">${inner}</div>`;
+  }
+  function imgChip(i, url){
+    return chip(i, `<img src="${url}" alt="${NATIVE[i]}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'native',textContent:'${NATIVE[i]}'}))">`);
+  }
+  function tintChip(i, url){
+    return chip(i, `<div class="tint" style="--src:url('${url}')"></div>`);
+  }
+
+  function fill(id, fn){ const el=document.getElementById(id); if(el) el.innerHTML=CP.map((_,i)=>fn(i)).join(''); }
+
+  // 彩色
+  fill('openmoji-color', i=>imgChip(i, `https://openmoji.org/data/color/svg/${CP[i]}.svg`));
+  fill('twemoji',        i=>imgChip(i, `https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/${CP[i].toLowerCase()}.svg`));
+  fill('noto',           i=>imgChip(i, `https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u${CP[i].toLowerCase()}.svg`));
+  fill('fluent',         i=>imgChip(i, `https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/${encodeURI(FLUENT[i])}`));
+  fill('openmoji-color-dark', i=>imgChip(i, `https://openmoji.org/data/color/svg/${CP[i]}.svg`));
+
+  // 单色染色
+  fill('openmoji-black',      i=>tintChip(i, `https://openmoji.org/data/black/svg/${CP[i]}.svg`));
+  fill('openmoji-black-dark', i=>tintChip(i, `https://openmoji.org/data/black/svg/${CP[i]}.svg`));
+  fill('tabler',   i=>tintChip(i, `https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icons/outline/${TABLER[i]}.svg`));
+  fill('material', i=>tintChip(i, `https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/${MDI[i]}.svg`));
+</script>
+</body>
+</html>
