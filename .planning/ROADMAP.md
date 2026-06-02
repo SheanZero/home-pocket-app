@@ -7,7 +7,7 @@
 - ✅ **v1.2 Happiness Metric Refresh** — Phases 13-17 (shipped 2026-05-21) — see [archive](milestones/v1.2-ROADMAP.md)
 - ✅ **v1.3 迭代帐本输入** — Phases 18-23 (shipped 2026-05-26) — see [archive](milestones/v1.3-ROADMAP.md)
 - ✅ **v1.4 列表功能** — Phases 24-30 (shipped 2026-05-31) — see [archive](milestones/v1.4-ROADMAP.md)
-- 🚧 **v1.5 文案与配色统一** — Phases 31-34 (in progress)
+- 🚧 **v1.5 文案与配色统一** — Phases 31-35 (in progress)
 
 ## Phases
 
@@ -160,6 +160,17 @@ Plans:
 - [x] 34-04-PLAN.md — Wave 2 (parallel): D-03b best-effort .pen sync to ADR-018 (non-blocking)
 - [x] 34-05-PLAN.md — Wave 3: final full-suite gate (flutter test 0 failures, analyze 0 issues, coverage ≥70%, both greps empty)
 
+### Phase 35: Close vocab leaks: a11y Semantics labels (W1) + totalSoulTx identifiers (W2)
+
+**Goal:** The two residual vocabulary leaks discovered by the v1.5 milestone audit are closed — W1: hardcoded 'Survival ledger'/'Soul ledger' Semantics a11y labels replaced with l10n-backed values; W2: totalSoulTx/totalGroupSoulTx internal identifiers renamed to totalJoyTx/totalGroupJoyTx across all source and test files
+**Requirements**: None (tech-debt closure against TERM-01/TERM-03 W1 and TERMID-02 W2 from v1.5 audit)
+**Depends on:** Phase 34
+**Plans:** 2 plans
+
+Plans:
+- [ ] 35-01-PLAN.md — W1: Replace hardcoded Semantics a11y labels with l10n.listLedgerDaily / l10n.listLedgerJoy in list_sort_filter_bar.dart
+- [ ] 35-02-PLAN.md — W2: Rename totalSoulTx→totalJoyTx and totalGroupSoulTx→totalGroupJoyTx across Freezed models (build_runner regen), use-case consumers, and 9 test files
+
 ## Milestone Progress
 
 | Milestone | Phases | Plans Complete | Status | Shipped |
@@ -169,4 +180,4 @@ Plans:
 | v1.2 Happiness Metric Refresh | 13-17 | 37/37 | Complete | 2026-05-21 |
 | v1.3 迭代帐本输入 | 18-23 | 47/47 | Complete | 2026-05-26 |
 | v1.4 列表功能 | 24-30 | 29/29 | Complete | 2026-05-31 |
-| v1.5 文案与配色统一 | 31-34 | 0/5 (P31+P32+P33 done, P34 planned) | In progress | — |
+| v1.5 文案与配色统一 | 31-35 | 0/5 (P31–P34 done, P35 planned 2 plans) | In progress | — |
