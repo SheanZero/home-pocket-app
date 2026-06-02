@@ -87,13 +87,13 @@ MonthlyReport fixtureMonthlyReportEmpty({String bookId = 'book_001'}) {
 // HappinessReport fixtures
 // ---------------------------------------------------------------------------
 
-/// Rich personal happiness report — totalSoulTx=31, all 4 metrics Value.
+/// Rich personal happiness report — totalJoyTx=31, all 4 metrics Value.
 HappinessReport fixtureHappinessReportRich({String bookId = 'book_001'}) {
   return HappinessReport(
     year: 2026,
     month: 4,
     bookId: bookId,
-    totalSoulTx: 31,
+    totalJoyTx: 31,
     avgSatisfaction: const Value(7.8, 23),
     medianSatisfaction: const Value(8.0, 23),
     joyContribution: const Value(78.4, 23),
@@ -102,14 +102,14 @@ HappinessReport fixtureHappinessReportRich({String bookId = 'book_001'}) {
   );
 }
 
-/// Thin-sample happiness report — totalSoulTx=3, sample size 3 across the
+/// Thin-sample happiness report — totalJoyTx=3, sample size 3 across the
 /// MetricResult.Value cases. Drives the n<5 coverage caption test.
 HappinessReport fixtureHappinessReportThin({String bookId = 'book_001'}) {
   return HappinessReport(
     year: 2026,
     month: 4,
     bookId: bookId,
-    totalSoulTx: 3,
+    totalJoyTx: 3,
     avgSatisfaction: const Value(7.8, 3),
     medianSatisfaction: const Value(8.0, 3),
     joyContribution: const Value(12.0, 3),
@@ -118,13 +118,13 @@ HappinessReport fixtureHappinessReportThin({String bookId = 'book_001'}) {
   );
 }
 
-/// Empty happiness report — totalSoulTx=0; all 5 MetricResult fields Empty.
+/// Empty happiness report — totalJoyTx=0; all 5 MetricResult fields Empty.
 HappinessReport fixtureHappinessReportEmpty({String bookId = 'book_001'}) {
   return HappinessReport(
     year: 2026,
     month: 4,
     bookId: bookId,
-    totalSoulTx: 0,
+    totalJoyTx: 0,
     avgSatisfaction: const Empty(),
     medianSatisfaction: const Empty(),
     joyContribution: const Empty(),
@@ -143,7 +143,7 @@ FamilyHappiness fixtureFamilyHappinessRich() {
   return FamilyHappiness(
     year: 2026,
     month: 4,
-    totalGroupSoulTx: 18,
+    totalGroupJoyTx: 18,
     familyHighlightsSum: const Value(27, 18),
     sharedJoyInsight: Value(fixtureSharedJoyInsightRich(), 18),
     medianSatisfaction: const Value(8.0, 18),
@@ -155,7 +155,7 @@ FamilyHappiness fixtureFamilyHappinessEmpty() {
   return const FamilyHappiness(
     year: 2026,
     month: 4,
-    totalGroupSoulTx: 0,
+    totalGroupJoyTx: 0,
     familyHighlightsSum: Empty(),
     sharedJoyInsight: Empty(),
     medianSatisfaction: Empty(),

@@ -69,7 +69,7 @@ void main() {
 
         expect(report.year, endDate.year);
         expect(report.month, endDate.month);
-        expect(report.totalGroupSoulTx, 0);
+        expect(report.totalGroupJoyTx, 0);
         expect(report.familyHighlightsSum, isA<Empty<int>>());
         expect(report.sharedJoyInsight, isA<Empty<SharedJoyInsight>>());
         expect(report.medianSatisfaction, isA<Empty<double>>());
@@ -111,7 +111,7 @@ void main() {
         endDate: endDate,
       );
 
-      expect(report.totalGroupSoulTx, 0);
+      expect(report.totalGroupJoyTx, 0);
       expect(report.familyHighlightsSum, isA<Empty<int>>());
       expect(report.sharedJoyInsight, isA<Empty<SharedJoyInsight>>());
       expect(report.medianSatisfaction, isA<Empty<double>>());
@@ -146,7 +146,7 @@ void main() {
           endDate: endDate,
         );
 
-        expect(report.totalGroupSoulTx, 8);
+        expect(report.totalGroupJoyTx, 8);
         verify(
           () => repository.getJoyFullnessOverview(
             bookId: 'b1',

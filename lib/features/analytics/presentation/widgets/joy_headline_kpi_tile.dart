@@ -49,7 +49,7 @@ class JoyHeadlineKpiTile extends StatelessWidget {
         l10n.analyticsKpiJoyIndexLabel,
         primaryText,
         ratedCount,
-        report.totalSoulTx,
+        report.totalJoyTx,
       ),
       child: Container(
         padding: const EdgeInsets.all(14),
@@ -75,13 +75,13 @@ class JoyHeadlineKpiTile extends StatelessWidget {
                           : AppTextStyles.caption)
                       .copyWith(color: context.palette.textPrimary),
             ),
-            if (hasJoyContribution || report.totalSoulTx > 0) ...[
+            if (hasJoyContribution || report.totalJoyTx > 0) ...[
               const SizedBox(height: 4),
               Text(
                 l10n.analyticsKpiJoyIndexSubMedianCoverage(
                   medianText,
                   ratedCount,
-                  report.totalSoulTx,
+                  report.totalJoyTx,
                 ),
                 style: AppTextStyles.caption.copyWith(
                   color: context.palette.textSecondary,

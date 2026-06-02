@@ -67,15 +67,15 @@ class GetHappinessReportUseCase {
     final distribution = results[1] as List<SatisfactionScoreBucket>;
     final ptvfRows = results[2] as List<JoyRowSample>;
     final topJoy = results[3] as BestJoyMomentRow?;
-    final totalSoulTx = overview.count;
+    final totalJoyTx = overview.count;
 
-    // D-16: all personal metrics co-empty under totalSoulTx == 0.
-    if (totalSoulTx == 0) {
+    // D-16: all personal metrics co-empty under totalJoyTx == 0.
+    if (totalJoyTx == 0) {
       return HappinessReport(
         year: endDate.year,
         month: endDate.month,
         bookId: bookId,
-        totalSoulTx: 0,
+        totalJoyTx: 0,
         avgSatisfaction: const Empty(),
         joyContribution: const Empty(),
         medianSatisfaction: const Empty(),
@@ -93,12 +93,12 @@ class GetHappinessReportUseCase {
       year: endDate.year,
       month: endDate.month,
       bookId: bookId,
-      totalSoulTx: totalSoulTx,
-      avgSatisfaction: Value(overview.avgSatisfaction, totalSoulTx),
-      joyContribution: Value(joyContribution, totalSoulTx),
-      medianSatisfaction: Value(median, totalSoulTx),
-      highlightsCount: Value(highlights, totalSoulTx),
-      topJoy: topJoy == null ? const Empty() : Value(topJoy, totalSoulTx),
+      totalJoyTx: totalJoyTx,
+      avgSatisfaction: Value(overview.avgSatisfaction, totalJoyTx),
+      joyContribution: Value(joyContribution, totalJoyTx),
+      medianSatisfaction: Value(median, totalJoyTx),
+      highlightsCount: Value(highlights, totalJoyTx),
+      topJoy: topJoy == null ? const Empty() : Value(topJoy, totalJoyTx),
     );
   }
 

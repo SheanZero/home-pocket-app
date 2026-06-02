@@ -526,7 +526,7 @@ class _SatisfactionHistogramOrFallback extends ConsumerWidget {
 
     return happinessAsync.when(
       data: (report) {
-        if (report.totalSoulTx < 5) {
+        if (report.totalJoyTx < 5) {
           return const SizedBox.shrink();
         }
         return distributionAsync.when(

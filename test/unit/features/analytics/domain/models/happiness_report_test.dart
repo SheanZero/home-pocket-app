@@ -12,7 +12,7 @@ void main() {
         year: 2026,
         month: 5,
         bookId: 'b1',
-        totalSoulTx: 0,
+        totalJoyTx: 0,
         avgSatisfaction: Empty<double>(),
         joyContribution: Empty<double>(),
         medianSatisfaction: Empty<double>(),
@@ -20,7 +20,7 @@ void main() {
         topJoy: Empty<BestJoyMomentRow>(),
       );
 
-      expect(report.totalSoulTx, 0);
+      expect(report.totalJoyTx, 0);
       expect(report.avgSatisfaction, isA<MetricResult<double>>());
       expect(report.topJoy, isA<MetricResult<BestJoyMomentRow>>());
     });
@@ -32,7 +32,7 @@ void main() {
         year: 2026,
         month: 5,
         bookId: 'b1',
-        totalSoulTx: 8,
+        totalJoyTx: 8,
         avgSatisfaction: const Value<double>(0.75, 8),
         joyContribution: const Value<double>(24.69, 8),
         medianSatisfaction: const Value<double>(8, 8),
@@ -62,13 +62,13 @@ void main() {
       const report = FamilyHappiness(
         year: 2026,
         month: 5,
-        totalGroupSoulTx: 0,
+        totalGroupJoyTx: 0,
         familyHighlightsSum: Empty<int>(),
         sharedJoyInsight: Empty<SharedJoyInsight>(),
         medianSatisfaction: Empty<double>(),
       );
 
-      expect(report.totalGroupSoulTx, 0);
+      expect(report.totalGroupJoyTx, 0);
       expect(report.familyHighlightsSum, isA<MetricResult<int>>());
       expect(report.sharedJoyInsight, isA<MetricResult<SharedJoyInsight>>());
     });

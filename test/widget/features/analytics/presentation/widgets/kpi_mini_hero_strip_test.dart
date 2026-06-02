@@ -27,7 +27,7 @@ const _happinessReport = HappinessReport(
   year: 2026,
   month: 5,
   bookId: 'book_001',
-  totalSoulTx: 15,
+  totalJoyTx: 15,
   avgSatisfaction: Value(7.83, 12),
   medianSatisfaction: Value(8.0, 12),
   joyContribution: Value(1234.0, 12),

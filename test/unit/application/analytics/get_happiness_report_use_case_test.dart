@@ -90,7 +90,7 @@ void main() {
 
       expect(report.year, endDate.year);
       expect(report.month, endDate.month);
-      expect(report.totalSoulTx, 0);
+      expect(report.totalJoyTx, 0);
       await emptyMetric<double>(report.avgSatisfaction);
       await emptyMetric<double>(report.joyContribution);
       await emptyMetric<double>(report.medianSatisfaction);

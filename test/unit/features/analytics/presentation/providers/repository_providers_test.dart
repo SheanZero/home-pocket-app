@@ -90,7 +90,7 @@ void main() {
         );
         final data = result.requireValue;
 
-        expect(data.totalGroupSoulTx, 0);
+        expect(data.totalGroupJoyTx, 0);
         expect(data.familyHighlightsSum, isA<Empty<int>>());
         expect(data.sharedJoyInsight, isA<Empty>());
         expect(data.medianSatisfaction, isA<Empty<double>>());
@@ -115,7 +115,7 @@ void main() {
         );
         final data = result.requireValue;
 
-        expect(data.totalGroupSoulTx, 0);
+        expect(data.totalGroupJoyTx, 0);
         expect(data.familyHighlightsSum, isA<Empty<int>>());
         expect(data.sharedJoyInsight, isA<Empty>());
         expect(data.medianSatisfaction, isA<Empty<double>>());

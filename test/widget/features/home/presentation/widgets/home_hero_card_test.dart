@@ -351,7 +351,7 @@ void main() {
     );
 
     testWidgets(
-      'totalSoulTx == 0: rings track-only, legend "No data yet", Best Joy CTA empty variant',
+      'totalJoyTx == 0: rings track-only, legend "No data yet", Best Joy CTA empty variant',
       (tester) async {
         await tester.pumpWidget(_buildSubject(snapshot: _singleEmpty()));
         await tester.pumpAndSettle();

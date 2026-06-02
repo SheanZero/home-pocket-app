@@ -138,7 +138,7 @@ FamilyHappiness _emptyFamilyHappiness({required DateTime endDate}) {
   return FamilyHappiness(
     year: endDate.year,
     month: endDate.month,
-    totalGroupSoulTx: 0,
+    totalGroupJoyTx: 0,
     familyHighlightsSum: const Empty(),
     sharedJoyInsight: const Empty(),
     medianSatisfaction: const Empty(),

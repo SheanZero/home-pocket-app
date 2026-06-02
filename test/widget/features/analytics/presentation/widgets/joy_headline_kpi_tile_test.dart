@@ -11,13 +11,13 @@ HappinessReport _happinessReport({
   MetricResult<double> avgSatisfaction = const Value(7.83, 12),
   MetricResult<double> medianSatisfaction = const Value(8.0, 12),
   MetricResult<double> joyContribution = const Value(1234.0, 12),
-  int totalSoulTx = 15,
+  int totalJoyTx = 15,
 }) {
   return HappinessReport(
     year: 2026,
     month: 5,
     bookId: 'book_001',
-    totalSoulTx: totalSoulTx,
+    totalJoyTx: totalJoyTx,
     avgSatisfaction: avgSatisfaction,
     medianSatisfaction: medianSatisfaction,
     joyContribution: joyContribution,
@@ -49,7 +49,7 @@ void main() {
           _happinessReport(
             joyContribution: const Empty(),
             medianSatisfaction: const Empty(),
-            totalSoulTx: 0,
+            totalJoyTx: 0,
           ),
         ),
       );

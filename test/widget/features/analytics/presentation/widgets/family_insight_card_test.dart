@@ -144,7 +144,7 @@ const _shadowBook = Object();
 const _familyWithSharedJoy = FamilyHappiness(
   year: 2026,
   month: 5,
-  totalGroupSoulTx: 30,
+  totalGroupJoyTx: 30,
   familyHighlightsSum: Value<int>(23, 30),
   sharedJoyInsight: Value<SharedJoyInsight>(
     SharedJoyInsight(
@@ -160,7 +160,7 @@ const _familyWithSharedJoy = FamilyHappiness(
 const _familyWithoutSharedJoy = FamilyHappiness(
   year: 2026,
   month: 5,
-  totalGroupSoulTx: 30,
+  totalGroupJoyTx: 30,
   familyHighlightsSum: Value<int>(23, 30),
   sharedJoyInsight: Empty<SharedJoyInsight>(),
   medianSatisfaction: Value<double>(8, 30),

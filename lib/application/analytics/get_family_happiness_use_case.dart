@@ -34,7 +34,7 @@ class GetFamilyHappinessUseCase {
       return FamilyHappiness(
         year: endDate.year,
         month: endDate.month,
-        totalGroupSoulTx: 0,
+        totalGroupJoyTx: 0,
         familyHighlightsSum: const Empty(),
         sharedJoyInsight: const Empty(),
         medianSatisfaction: const Empty(),
@@ -68,17 +68,17 @@ class GetFamilyHappinessUseCase {
       entrySourceFilter: entrySourceFilter,
     );
 
-    final totalGroupSoulTx = overviews.fold<int>(
+    final totalGroupJoyTx = overviews.fold<int>(
       0,
       (sum, overview) => sum + overview.count,
     );
 
     // D-16 family alignment: zero group sample means all main metrics Empty.
-    if (totalGroupSoulTx == 0) {
+    if (totalGroupJoyTx == 0) {
       return FamilyHappiness(
         year: endDate.year,
         month: endDate.month,
-        totalGroupSoulTx: 0,
+        totalGroupJoyTx: 0,
         familyHighlightsSum: const Empty(),
         sharedJoyInsight: const Empty(),
         medianSatisfaction: const Empty(),
@@ -97,16 +97,16 @@ class GetFamilyHappinessUseCase {
               avgSatisfaction: sharedJoyAgg.avgSatisfaction,
               totalCount: sharedJoyAgg.totalCount,
             ),
-            totalGroupSoulTx,
+            totalGroupJoyTx,
           );
 
     return FamilyHappiness(
       year: endDate.year,
       month: endDate.month,
-      totalGroupSoulTx: totalGroupSoulTx,
-      familyHighlightsSum: Value(highlightsSum, totalGroupSoulTx),
+      totalGroupJoyTx: totalGroupJoyTx,
+      familyHighlightsSum: Value(highlightsSum, totalGroupJoyTx),
       sharedJoyInsight: sharedJoyResult,
-      medianSatisfaction: Value(groupMedian, totalGroupSoulTx),
+      medianSatisfaction: Value(groupMedian, totalGroupJoyTx),
     );
   }
 
