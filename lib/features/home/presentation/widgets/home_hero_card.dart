@@ -7,6 +7,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/happiness_ring_palette.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/joy_cumulative_formatter.dart';
 import '../../../accounting/presentation/utils/category_display_utils.dart';
 import '../../../analytics/domain/models/best_joy_moment_row.dart';
@@ -738,7 +739,9 @@ class HomeHeroCard extends StatelessWidget {
     String? day,
     String? weekday,
   }) {
-    final monthBandText = isDark ? const Color(0xFF0C1719) : Colors.white;
+    // Month-band text reads as the page background sitting on the joy band:
+    // near-white in light, near-black in dark — both supplied by palette.background.
+    final monthBandText = palette.background;
     final isPlaceholder = month == null && weekday == null;
     return Container(
       width: 48,
@@ -845,17 +848,6 @@ class HomeHeroCard extends StatelessWidget {
     );
   }
 
-  /// Month band text for the calendar tile: ja/zh use the "M月" form, every
-  /// other locale uses the abbreviated month name ("MMM"). Mirrors the ja/zh
-  /// vs en branch in DateFormatter so the tile stays locale-correct.
-  String _bestJoyMonthLabel(DateTime when) {
-    final pattern = switch (locale.languageCode) {
-      'ja' || 'zh' => 'M月',
-      _ => 'MMM',
-    };
-    return DateFormat(pattern, locale.toString()).format(when);
-  }
-
   Widget _bestJoyValue(
     BuildContext context,
     S l10n,
@@ -868,8 +860,8 @@ class HomeHeroCard extends StatelessWidget {
       row.categoryId,
       locale,
     );
-    final month = _bestJoyMonthLabel(row.timestamp);
-    final day = DateFormat('d', locale.toString()).format(row.timestamp);
+    final month = DateFormatter.formatCalendarMonth(row.timestamp, locale);
+    final day = DateFormatter.formatCalendarDay(row.timestamp, locale);
     final weekday = DateFormat('E', locale.toString()).format(row.timestamp);
     final amount = _fmt.formatCurrency(row.amount, currencyCode, locale);
 
