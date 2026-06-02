@@ -10,6 +10,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: HomeTransactionTile(
+              l1Icon: Icons.restaurant,
               tagText: '太',
               tagBgColor: const Color(0xFFE8F0F8),
               tagTextColor: AppPalette.light.daily,
@@ -39,6 +40,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: HomeTransactionTile(
+              l1Icon: Icons.restaurant,
               tagText: 'T',
               tagBgColor: const Color(0xFFE8F0F8),
               tagTextColor: AppPalette.light.daily,
@@ -65,6 +67,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: HomeTransactionTile(
+              l1Icon: Icons.menu_book,
               tagText: '魂',
               tagBgColor: bgColor,
               tagTextColor: textColor,
@@ -92,13 +95,16 @@ void main() {
       expect(decoration.color, bgColor);
     });
 
-    testWidgets('applies category colour', (tester) async {
+    testWidgets('applies category colour to the leading L1 icon', (
+      tester,
+    ) async {
       final catColor = AppPalette.light.joy;
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: HomeTransactionTile(
+              l1Icon: Icons.sports_esports,
               tagText: 'S',
               tagBgColor: const Color(0xFFE5F5ED),
               tagTextColor: AppPalette.light.joy,
@@ -112,8 +118,11 @@ void main() {
         ),
       );
 
-      final categoryWidget = tester.widget<Text>(find.text('Hobby'));
-      expect(categoryWidget.style?.color, catColor);
+      // categoryColor now tints the leading L1 icon (matches the list tile).
+      final iconWidget = tester.widget<Icon>(
+        find.byIcon(Icons.sports_esports),
+      );
+      expect(iconWidget.color, catColor);
     });
 
     testWidgets('applies amount colour', (tester) async {
@@ -123,6 +132,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: HomeTransactionTile(
+              l1Icon: Icons.restaurant,
               tagText: 'A',
               tagBgColor: const Color(0xFFE8F0F8),
               tagTextColor: AppPalette.light.daily,

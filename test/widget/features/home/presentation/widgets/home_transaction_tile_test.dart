@@ -12,6 +12,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: HomeTransactionTile(
+              l1Icon: Icons.restaurant,
               tagText: '生',
               tagBgColor: const Color(0xFFE8F0F8),
               tagTextColor: AppPalette.light.daily,
@@ -39,6 +40,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: HomeTransactionTile(
+              l1Icon: Icons.restaurant,
               tagText: 'T',
               tagBgColor: const Color(0xFFE8F0F8),
               tagTextColor: AppPalette.light.daily,
@@ -62,6 +64,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: HomeTransactionTile(
+              l1Icon: Icons.restaurant,
               tagText: 'F',
               tagBgColor: const Color(0xFFE8F0F8),
               tagTextColor: AppPalette.light.daily,
@@ -78,7 +81,7 @@ void main() {
       expect(find.text('F'), findsOneWidget);
     });
 
-    testWidgets('joy type uses joy color for category label', (
+    testWidgets('joy type tints the leading L1 icon with joy color', (
       tester,
     ) async {
       final joyColor = AppPalette.light.joy;
@@ -86,6 +89,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: HomeTransactionTile(
+              l1Icon: Icons.sports_esports,
               tagText: '魂',
               tagBgColor: const Color(0xFFE5F5ED),
               tagTextColor: joyColor,
@@ -99,10 +103,11 @@ void main() {
         ),
       );
 
-      final categoryText = tester.widget<Text>(
-        find.text('趣味 · 霊魂'),
+      // categoryColor now drives the leading L1 icon tint (matches list tile).
+      final iconWidget = tester.widget<Icon>(
+        find.byIcon(Icons.sports_esports),
       );
-      expect(categoryText.style?.color, joyColor);
+      expect(iconWidget.color, joyColor);
     });
   });
 }
