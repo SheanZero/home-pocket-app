@@ -4,6 +4,29 @@ Historical record of shipped versions. Each entry links to its full archive in `
 
 ---
 
+## v1.5 — 文案与配色统一 (Vocabulary & Palette Unification)
+
+**Shipped:** 2026-06-02
+**Phases:** 31-35 (5 phases, 24 plans, 42 tasks)
+**Duration:** 2026-05-31 → 2026-06-02 (~2 days; git range `v1.4..HEAD` = 155 commits, 550 files, +43,552 / −4,650 LOC)
+**Tag:** `v1.5`
+**Audit Status at Close:** `tech_debt` — milestone goal achieved (15/15 requirements, 5/5 phases verified `passed`, 6/6 cross-phase integration seams wired). The two leaks that held the initial 2026-06-01 audit at `tech_debt` — W1 (user-facing a11y Semantics labels) and W2 (internal `totalSoulTx` identifiers) — were closed by Phase 35 and independently re-verified at re-audit. Residual debt is non-blocking: one pending on-device screen-reader UAT (Phase 35 Truth 1; code grep-verified), draft-Nyquist docs (Phases 31/32/34/35 `nyquist_compliant: false`; Phase 33 approved/compliant), and the documented out-of-scope `Book.survivalBalance`/`soulBalance` DB-column carve-out (Research A1 / D-06). See `.planning/milestones/v1.5-MILESTONE-AUDIT.md`.
+**Known deferred items at close:** 8 acknowledged (2 UAT/verification gaps, 1 a11y backlog, 1 vocab residual, 1 Nyquist, 1 metadata drift covering 17 stale quick-task stubs, 1 test-fidelity) — see `.planning/STATE.md` Deferred Items §v1.5.
+
+### Delivered
+
+Brownfield consistency refactor — no new user-facing features. The half-migrated dual-ledger vocabulary is now unified across all three locales **and** internal code identifiers, and every scattered hardcoded color is consolidated into a single semantic design-token system. Users see 日常/悦己 (zh), 日常/ときめき (ja), Daily/Joy (en) everywhere; the codebase carries one `LedgerType { daily, joy }` enum, one set of `daily*`/`joy*` ARB keys, one `AppPalette` ThemeExtension (ADR-018 "Teal Clarity"), and full dark-mode support — with no `Color(0x…)` literals, no `AppColors`/`AppColorsDark` shims, and no stale Survival/Soul vocabulary in any rendered string.
+
+### Key Accomplishments
+
+1. **Terminology rename across copy + code** (Phase 31) — `LedgerType` enum renamed survival→daily / soul→joy across 242 call sites; `Transaction.joyFullness` replaces `soulSatisfaction`; 25 ledger-vocab ARB key roots + zh/ja/en values rewritten to canonical 日常/悦己/ときめき/Daily/Joy; v17→v18 Drift migration (atomic stored enum-value rewrite + `soul_satisfaction`→`joy_fullness` column) with a Wave-0 raw-sqlite3 contract test; ADR-017 accepted. (TERM-01..04, TERMID-01..04)
+2. **Palette exploration → selection** (Phase 32) — 5 candidate directions mined from 7 VoltAgent brand DESIGN.md refs → `home-pocket-palette.pen` with 5 schemes × 6 frames (home-hero / list / analytics × light+dark) → user selected Scheme D "Teal Clarity" (teal primary #0E9AA7, Daily teal-navy ↔ Joy gold) after rejecting all coral-anchored options; ADR-018 ratified post-selection with a full light+dark hex-per-role contract. (PALETTE-01..03)
+3. **Semantic token system + dark rollout** (Phase 33) — `AppPalette` ThemeExtension built as the single source of truth encoding ADR-018; all `Color(0x…)` literals replaced; AppColors/AppColorsDark shims deleted; full dark-mode rollout via `context.palette.*` (zero `isDark` ternaries), absorbing THEME-V2-02 (D-07); 11 on-device visual items human-approved. (COLOR-01..03, THEME-V2-02)
+4. **Golden re-baseline** (Phase 34) — 50 golden masters re-baselined to the teal palette + 27 new dark masters added (77 total, 34 dark), with diff-attribution confirming the palette change as the only visual delta; full suite 2281/2281 green, 79.0% filtered coverage. (COLOR-04)
+5. **Residual leak closure** (Phase 35) — W1: hardcoded `'Survival ledger'`/`'Soul ledger'` Semantics a11y labels → `l10n.listLedgerDaily`/`listLedgerJoy`; W2: `totalSoulTx`/`totalGroupSoulTx` → `totalJoyTx`/`totalGroupJoyTx` across Freezed models (build_runner regen), use-case consumers, and 9 test files. Both re-verified at milestone re-audit (grep exit 1).
+
+---
+
 ## v1.4 — 列表功能 (Transaction List)
 
 **Shipped:** 2026-05-31

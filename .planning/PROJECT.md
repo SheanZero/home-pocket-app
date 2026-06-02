@@ -7,8 +7,9 @@
 **Shipped:** v1.2 Happiness Metric Refresh (2026-05-21) — see `.planning/milestones/v1.2-ROADMAP.md` + `.planning/milestones/v1.2-MILESTONE-AUDIT.md`
 **Shipped:** v1.3 迭代帐本输入 (2026-05-26) — see `.planning/milestones/v1.3-ROADMAP.md` + `.planning/milestones/v1.3-MILESTONE-AUDIT.md`
 **Shipped:** v1.4 列表功能 (2026-05-31) — see `.planning/milestones/v1.4-ROADMAP.md` + `.planning/milestones/v1.4-MILESTONE-AUDIT.md`
+**Shipped:** v1.5 文案与配色统一 (2026-06-02) — see `.planning/milestones/v1.5-ROADMAP.md` + `.planning/milestones/v1.5-MILESTONE-AUDIT.md`
 
-**Next milestone:** TBD. Candidate themes carried forward: combined family-calendar totals + undo-on-delete (v1.4 deferrals), MOD-005 OCR writer landing, FAMILY-V2-01/02/03 family privacy hardening, FUTURE-QA-01 release-readiness QA, FUTURE-DOC/TOOL cleanup, fl_chart 1.x upgrade (TOOL-V2-01), voice flow polish carry (VOICE-POLISH-V2-01..08), English voice parser (VOICE-EN-V2-01). Use `/gsd:new-milestone` to scope.
+**Next milestone:** TBD. Candidate themes carried forward: combined family-calendar totals + undo-on-delete (v1.4 deferrals), MOD-005 OCR writer landing, FAMILY-V2-01/02/03 family privacy hardening, runtime theme-switching / selectable palettes (THEME-V2-01, now unblocked by the v1.5 token system), `Book.survivalBalance`/`soulBalance` DB-column rename (v1.5 out-of-scope carve-out), remaining hardcoded a11y Semantics labels (v1.5 IN-02), FUTURE-QA-01 release-readiness QA, FUTURE-DOC/TOOL cleanup, fl_chart 1.x upgrade (TOOL-V2-01), voice flow polish carry (VOICE-POLISH-V2-01..08), English voice parser (VOICE-EN-V2-01). Use `/gsd:new-milestone` to scope.
 
 The v1.0 initiative was a pure-refactor cleanup. It delivered an operational hybrid audit pipeline, eliminated 50 catalogued findings (24 CRITICAL, 8 HIGH, 8 MEDIUM, 7 LOW + 3 layer-violation closures), aligned all architecture documentation with the post-refactor codebase, and locked 4 permanent CI guardrails.
 
@@ -19,6 +20,40 @@ The v1.2 milestone shipped the ADR-016 Joy migration (density → `Σ joy_contri
 The v1.3 milestone transformed ledger entry into a single-screen, voice-trustworthy core experience. Shipped: single shared `TransactionDetailsForm` widget consumed by 4 hosts (manual, voice, edit, OCR review); `ManualOneStepScreen` replacing the prior 2-screen chain; SmartKeyboard 48dp touch-target floor; locale-aware zh + ja voice number parsing (state machines + `VoiceChunkMerger` 2.5s continued-listening window) at zh 96% + ja 100% corpus accuracy; `VoiceCategoryResolver` always-L2 contract with merchant DB + synonym dictionary (extensible without code changes); hold-to-record gesture with AnimatedContainer shape morph + caption swap (`<100ms` verified); edit-from-list path with `entry_source` verbatim preservation. Two BLOCKER gaps (G-01 recognizer self-termination, G-02 silent errors) closed in Phase 22. Phase 23 cleanup absorbed carried tech-debt (scanner allow-lists, 6 voice-flow surgical fixes, 4 mechanical polish items, REQUIREMENTS.md reconciliation, 9 device UATs run + passed, voice_input_screen.dart 838→776 LOC via mixin + helpers extraction). Audit closed at `tech_debt` — documentation-grade Nyquist debt only; all 15 v1.3 requirements satisfied and reconciled.
 
 The v1.4 milestone built the placeholder List tab into a full transaction overview (Japanese-kakeibo layout) in a new `lib/features/list/` module. Shipped: a `table_calendar` month header with per-day expense totals (own-book in v1.4), month navigation, tap-a-day-to-filter, and a current-month expense summary; a transaction list that is sortable (date / edit-time / amount ± direction), text-searchable (category · merchant · note), and filterable by ledger, multiple categories, and family member — all AND-composed with one-tap clear; rows that reuse the v1.3 edit path on tap and route swipe-delete through `DeleteTransactionUseCase` (soft-delete, hash-chain preserved); family-aware shadow-book merge with per-row owner attribution + "Mine only"; reactive updates + pull-to-refresh; 3-variant empty states; and full ja/zh/en ARB coverage (533 keys/locale) with golden baselines. A shared `DateBoundaries` util consolidated month-boundary arithmetic; `table_calendar ^3.2.0` was added (iOS build verified green). Audit closed at `tech_debt` — 22/22 requirements, 7/7 phases, 7/7 E2E flows; the one functional gap (GAP-1 calendar staleness after family-sync/FAB) was closed at milestone close via quick task 260531-u34; residual GAP-2 dead-code (`watchByBookIds` unused) + draft-Nyquist documentation debt accepted.
+
+The v1.5 milestone was a brownfield consistency refactor — no new user features. It unified the half-migrated dual-ledger vocabulary across all three locales **and** internal code identifiers (`LedgerType { daily, joy }` enum + 242 call sites, 25 ARB key roots + values to 日常/悦己/ときめき/Daily/Joy, v17→v18 Drift migration rewriting stored enum values + `soul_satisfaction`→`joy_fullness`, ADR-017), then explored 5 palette directions → user-selected ADR-018 "Teal Clarity" → encoded it in a single `AppPalette` ThemeExtension that replaced every `Color(0x…)` literal and the AppColors/AppColorsDark shims, with full dark-mode rollout (THEME-V2-02 pulled forward, D-07). Goldens were re-baselined to teal (77 masters, 34 dark; suite 2281/2281 green). A follow-up Phase 35 closed two residual leaks found by the milestone audit (W1 hardcoded a11y Semantics labels → l10n; W2 `totalSoulTx`→`totalJoyTx`). Audit closed at `tech_debt` — 15/15 requirements, 5/5 phases, 6/6 integration seams wired; residual is one pending on-device screen-reader UAT, draft-Nyquist docs (P31/32/34/35), and the documented out-of-scope `Book.*Balance` DB-column carve-out.
+
+<details>
+<summary>v1.5 文案与配色统一 (archived)</summary>
+
+**Started:** 2026-05-31
+**Shipped:** 2026-06-02 (~2 days)
+**Phase numbering:** Phases 31-35
+**Trigger:** Half-migrated dual-ledger vocabulary (生存/灵魂/Survival/Soul leaking through ARB values + code identifiers) and scattered hardcoded `Color(0x…)` literals — owner wanted one consistent vocabulary + one semantic palette before any v1 release.
+
+**Goal:** Unify the dual-ledger vocabulary across zh/ja/en + internal identifiers; explore/select a stronger palette (ADR); apply it through a single semantic design-token system replacing scattered hardcoded colors. No new user features.
+
+**Delivered:**
+- **Terminology rename (Phase 31):** `LedgerType` enum survival→daily / soul→joy across 242 call sites; `Transaction.joyFullness` replaces `soulSatisfaction`; 25 ARB key roots + zh/ja/en values rewritten to 日常/悦己/ときめき/Daily/Joy; v17→v18 Drift migration (atomic stored enum-value rewrite + `soul_satisfaction`→`joy_fullness`) with Wave-0 raw-sqlite3 contract test; ADR-017 accepted. CR-01 migration regression (from<4 column collision) found in review + fixed in-phase.
+- **Palette selection (Phase 32):** 5 directions mined from 7 VoltAgent DESIGN.md refs → 5 Pencil schemes × 6 frames → user-selected Scheme D "Teal Clarity" (teal primary #0E9AA7, Daily teal-navy ↔ Joy gold); ADR-018 ratified post-selection with full light+dark hex-per-role table.
+- **Token system + dark rollout (Phase 33):** `AppPalette` ThemeExtension as single source of truth; all `Color(0x…)` literals replaced; AppColors/AppColorsDark shims deleted; full dark mode via `context.palette.*` (zero `isDark` ternaries); 11 on-device visual items human-approved.
+- **Golden re-baseline (Phase 34):** 50 masters re-based to teal + 27 new dark masters (77 total, 34 dark); diff-attribution confirms palette-only delta; suite 2281/2281 green, 79.0% filtered coverage.
+- **Residual leak closure (Phase 35):** W1 a11y Semantics labels → `l10n.listLedgerDaily`/`listLedgerJoy`; W2 `totalSoulTx`/`totalGroupSoulTx` → `totalJoyTx`/`totalGroupJoyTx` across Freezed models + use-cases + 9 tests.
+
+**Out of v1.5 scope (carried forward):**
+- `Book.survivalBalance`/`soulBalance` DB-column rename — out-of-scope per Research A1 / D-06 (would change Drift SQLite column names; needs a further DB migration); defer to a future DB-migration phase before public release
+- Remaining hardcoded English a11y `Semantics(label:)` on 5 sort/filter/search/clear controls (IN-02) — no ARB keys exist; defer to a v1.6+ a11y/i18n pass
+- Runtime theme-switching / multiple selectable palettes (THEME-V2-01) — exactly one palette applied; now unblocked by the token system
+- `home-pocket-palette.pen` v2 sync (Pencil MCP cannot flush to disk in this env) — ADR-018 is authoritative; D-03b contractually deferred
+
+**Known close debt** (documented in `.planning/milestones/v1.5-MILESTONE-AUDIT.md`):
+- One pending on-device screen-reader UAT (Phase 35 Truth 1; code grep-verified, tracked in 35-HUMAN-UAT.md)
+- Draft-Nyquist documentation debt: Phases 31/32/34/35 `nyquist_compliant: false`; Phase 33 approved/compliant
+- 17 stale quick-task tracking stubs from v1.3/v1.4 (metadata drift; all recorded Verified in STATE.md)
+
+**Archive:** `.planning/milestones/v1.5-ROADMAP.md`, `.planning/milestones/v1.5-REQUIREMENTS.md`, `.planning/milestones/v1.5-MILESTONE-AUDIT.md`
+
+</details>
 
 <details>
 <summary>v1.4 列表功能 (archived)</summary>
@@ -155,32 +190,11 @@ A focused, audit-driven refactor of the Home Pocket (まもる家計簿) Flutter
 
 ## What This Is
 
-Home Pocket (まもる家計簿) is a local-first, privacy-focused family accounting app with a dual-ledger system (Survival ledger + Soul ledger). Zero-knowledge architecture with 4-layer encryption, P2P family sync, and offline-first design. Target: iOS 14+ / Android 7+ (API 24+). After four milestones, the app ships a single-screen voice-capable ledger entry flow, a calculable Joy metric (`Σ joy_contribution` cumulative semantics) with user-configurable monthly targets, custom analytics time windows, per-category + Soul-vs-Survival comparison surfaces, an audit lens (manual-only Joy variant), and — as of v1.4 — a full kakeibo-style transaction list: month calendar with per-day expense totals + tap-to-filter, sortable/searchable/filterable rows, a month summary, and family-aware display of members' entries.
+Home Pocket (まもる家計簿) is a local-first, privacy-focused family accounting app with a dual-ledger system — the 日常 (Daily) ledger for everyday spending and the 悦己 (Joy / ときめき) ledger for self-investment. Zero-knowledge architecture with 4-layer encryption, P2P family sync, and offline-first design. Target: iOS 14+ / Android 7+ (API 24+). After five milestones, the app ships a single-screen voice-capable ledger entry flow, a calculable Joy metric (`Σ joy_contribution` cumulative semantics) with user-configurable monthly targets, custom analytics time windows, per-category + Daily-vs-Joy comparison surfaces, an audit lens (manual-only Joy variant), a full kakeibo-style transaction list (month calendar with per-day expense totals + tap-to-filter, sortable/searchable/filterable rows, month summary, family-aware display), and — as of v1.5 — a unified 日常/悦己/ときめき/Daily/Joy vocabulary across all three locales plus a single semantic design-token system (`AppPalette`, ADR-018 "Teal Clarity") with full light/dark theming.
 
 ## Core Value
 
-A family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, with a dual-ledger system that distinguishes survival spending from soul spending so families can have honest money conversations.
-
-## Current Milestone: v1.5 文案与配色统一 (Terminology & Color Unification)
-
-**Goal:** Unify the half-migrated dual-ledger vocabulary across all three locales *and* internal code identifiers; explore and select a stronger global color palette (Pencil mockups, 4–5 options); then apply it through a single semantic design-token system that replaces scattered hardcoded colors — a brownfield terminology + palette/color refactor with no new user features.
-
-**Target features:**
-- Trilingual terminology rename (user-facing ARB values, all 3 locales) — 生存/Survival → 日常/Daily; 灵魂·魂/ソウル/Soul → 悦己/ときめき/Joy
-- Internal-identifier rename — ARB keys (`soulLedger`→`joyLedger`, `survival*`→`daily*`), `AppColors.survival`→`daily` / `soul`→`joy`, related symbols
-- Palette exploration — mine design references (VoltAgent/awesome-design-md), propose 4–5 full color schemes rendered in Pencil, user selects one (recorded as ADR)
-- Color consolidation — ~62 hardcoded `Color(0x…)` literals → centralized `AppColors` tokens encoding the selected palette
-- Ledger theme-color consistency audit — selected 日常 / 悦己 ledger accents applied uniformly
-- Semantic design-token system — primary/ledger/surface/semantic + profile dark palette as single source of truth
-
-**Locale mapping (locked):**
-
-| Concept | zh | ja | en |
-|---|---|---|---|
-| Survival ledger | 日常 | 日常 (にちじょう) | Daily |
-| Soul ledger | 悦己 | ときめき | Joy |
-
-**Key context:** Risk concentrated in the ARB-key + `AppColors` symbol rename (ripples into `.g.dart` generation and golden baselines). May warrant an ADR update if ADR-015 governs the lexical hierarchy. `ときめき` reuses the existing ja joy-index term (`ときめき指数`) for vocabulary coherence.
+A family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, with a dual-ledger system that distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations.
 
 ## Requirements
 
@@ -273,17 +287,26 @@ A family accounting app users can trust with sensitive financial data — local-
 - ✓ **ROW-02** Swipe-to-delete with confirmation; routes exclusively through `DeleteTransactionUseCase` (soft-delete, hash-chain-safe) — v1.4 Phase 28
 - ✓ **FAM-01/02/03/04** Family shadow-book merge + per-row owner attribution + member filter + "Mine only" — v1.4 Phase 29
 
-**Shipped in v1.5 (文案与配色统一 / Terminology & Color Unification) — in progress:**
+**Shipped in v1.5 (文案与配色统一 / Terminology & Color Unification):**
 
 - ✓ **TERM-01/02/03/04** Trilingual ledger-vocab rename — user-facing ARB values read 日常/悦己 (zh), 日常/ときめき (ja), Daily/Joy (en) everywhere; soul_satisfaction surface → joyFullness; D-17 non-literal phrasings normalized — v1.5 Phase 31 (Plans 31-02/03)
 - ✓ **TERMID-01** ARB key roots renamed (`soulLedger`→`joyLedger`, `survival*`→`daily*`, `soulSatisfaction`→`joyFullness`) + call sites regenerated — v1.5 Phase 31 Plan 03
 - ✓ **TERMID-02** `AppColors` ledger symbols renamed (survival→daily, soul→joy + dark-derived joyFullness/joyRoi); `tagGreen` repointed to `joyLight`; ~79 call sites — v1.5 Phase 31 Plan 04
 - ✓ **TERMID-03** `LedgerType` enum rename + Drift v17→v18 migration (value rewrite + CHECK recreate + `soul_satisfaction`→`joy_fullness` column) + ~9 soul*/survival* files/classes renamed (history-preserving `git mv`); analyze-clean + custom_lint-clean gates green; terminology golden re-baseline (0 pixel drift, D-19) — v1.5 Phase 31 Plans 02/05. CR-01 migration regression (from<4 column-name collision) found in code review and fixed in-phase with regression tests.
 - ✓ **TERMID-04** ADR-017 Terminology Unification records canonical locale mapping + identifier convention + v18 migration decision; ADR-015 append-only pointer; REQUIREMENTS.md out-of-scope amended (D-06) — v1.5 Phase 31 Plan 06
+- ✓ **PALETTE-01** Design references mined from 7 VoltAgent brand DESIGN.md files → 5 distinct candidate palette directions with mood/lineage/per-role hex + WCAG flags — v1.5 Phase 32 Plan 01
+- ✓ **PALETTE-02** 5 full color schemes × 6 frames (home-hero / list / analytics × light+dark) rendered as Pencil mockups with per-scheme WCAG pass — v1.5 Phase 32 Plan 02
+- ✓ **PALETTE-03** User selected Scheme D "Teal Clarity" (rejecting all coral-anchored options); ADR-018 ratified post-selection with full light+dark hex-per-role table — v1.5 Phase 32 Plan 03
+- ✓ **COLOR-01** All `Color(0x…)` literals removed from `lib/features/`, `lib/application/`, `lib/shared/` (grep gate empty; architecture scan test green) — v1.5 Phase 33
+- ✓ **COLOR-02** ADR-018 palette applied consistently across all surfaces (correct 日常 teal-navy / 悦己 gold accents; no stale coral/purple); 11 on-device visual items human-approved — v1.5 Phase 33
+- ✓ **COLOR-03** Single semantic token system — `AppPalette` ThemeExtension is sole source; AppColors/AppColorsDark shims deleted; duplicate constants removed — v1.5 Phase 33
+- ✓ **COLOR-04** Goldens re-baselined to teal (77 masters, 34 dark) with diff-attribution; full suite 2281/2281 green, 79.0% filtered coverage — v1.5 Phase 34
+- ✓ **THEME-V2-02** Full dark-mode rollout pulled forward (D-07) — every feature surface resolves dark via `context.palette.*`; zero `isDark` ternaries in `lib/features/` — v1.5 Phase 33
+- ✓ **v1.5 audit W1/W2 closure** (Phase 35) — W1: hardcoded 'Survival ledger'/'Soul ledger' a11y Semantics labels → `l10n.listLedgerDaily`/`listLedgerJoy`; W2: `totalSoulTx`/`totalGroupSoulTx` → `totalJoyTx`/`totalGroupJoyTx` across Freezed models + use-cases + 9 tests
 
 ### Active
 
-<!-- No active milestone. v1.4 shipped 2026-05-31. Run /gsd-new-milestone to scope the next. -->
+<!-- No active milestone. v1.5 shipped 2026-06-02. Run /gsd-new-milestone to scope the next. -->
 
 _(none — between milestones; see Next Milestone above)_
 
@@ -294,6 +317,9 @@ _(none — between milestones; see Next Milestone above)_
 - **Combined family-calendar per-day totals** — v1.4 calendar is own-book only; combining members' per-day totals deferred to v1.5+ (seam reserved in `calendarDailyTotalsProvider`)
 - **Undo-on-delete SnackBar** — v1.4 swipe-delete is confirm-only soft-delete; undo needs a `RestoreTransactionUseCase` (deferred)
 - **Month settlement / month-lock (结账锁月), income tracking, amount-range filter, "New" badge** — explicit v1.4 list-feature exclusions; candidates for a later milestone
+- **`Book.survivalBalance`/`soulBalance` DB-column rename** — v1.5 terminology rename deliberately carved these out (Research A1 / D-06); renaming changes Drift SQLite column names (`survival_balance`/`soul_balance`) and needs a further DB migration. Model↔repo↔DAO↔table are internally consistent on the old name; defer to a future DB-migration phase before public release
+- **Remaining hardcoded a11y `Semantics(label:)` strings** — 5 sort/filter/search/clear controls in `list_sort_filter_bar.dart` (v1.5 IN-02); same leak class as the W1 fix but no ARB keys exist; defer to a v1.6+ a11y/i18n pass
+- **Runtime theme-switching / multiple selectable palettes (THEME-V2-01)** — v1.5 applies exactly one palette (ADR-018); runtime accent-switching now unblocked by the `AppPalette` token system but remains a future item
 - **`recoverFromSeed()` key-overwrite bug fix** — HIGH-severity per CONCERNS.md but security-architecture changes are out of scope; deferred to FUTURE-ARCH-04
 - **Riverpod 3.x upgrade** — confirmed `analyzer` version conflict with `json_serializable` (deferred to FUTURE-TOOL-01)
 - **`sqlite3_flutter_libs` adoption** — SQLCipher conflict; actively rejected by CI guardrail
@@ -319,18 +345,19 @@ _(none — between milestones; see Next Milestone above)_
 
 ## Context
 
-- **Current state (post-v1.4):** v1.0 shipped 2026-04-29; v1.1 2026-05-05; v1.2 2026-05-21; v1.3 2026-05-26; **v1.4 列表功能 shipped 2026-05-31** (~3 days, 283 commits, 316 files changed, +51,409/-2,207 LOC). New `lib/features/list/` module: kakeibo-style List tab — `table_calendar` month header (per-day expense totals, own-book), sortable/searchable/filterable transaction list, month summary, family-aware shadow-book merge + "Mine only", pull-to-refresh, 3-variant empty states. Shared `DateBoundaries` util; `table_calendar ^3.2.0` added. Drift schema unchanged at v17 (no migration). ARB parity now 533 keys per locale (+27 from v1.3's 506). GAP-1 (calendar staleness) closed at close via quick task 260531-u34; GAP-2 (`watchByBookIds` dead code) + draft-Nyquist docs carried as debt.
-- **Prior state (post-v1.3):** v1.3 迭代帐本输入 shipped 2026-05-26 (~5 days, 330 commits, 304 files, +64,157/-4,747 LOC). Ledger entry single-screen for manual + voice; voice parser zh+ja, hold-to-record, edit-from-list.
-- **Codebase map:** `.planning/codebase/` was last refreshed 2026-04-25 (`/gsd-map-codebase`). Contents: ARCHITECTURE.md, STACK.md, STRUCTURE.md, CONVENTIONS.md, INTEGRATIONS.md, TESTING.md, CONCERNS.md. **Stale — four milestones of drift.** Refresh via `/gsd:map-codebase` before next milestone planning.
-- **Tech stack:** Flutter, Riverpod 3.x (`@riverpod` code-gen, generator 4.x), Freezed, Drift + SQLCipher (schema v17), GoRouter, flutter_localizations (intl 0.20.2 pinned), Mocktail
+- **Current state (post-v1.5):** v1.0 shipped 2026-04-29; v1.1 2026-05-05; v1.2 2026-05-21; v1.3 2026-05-26; v1.4 2026-05-31; **v1.5 文案与配色统一 shipped 2026-06-02** (~2 days, 155 commits vs v1.4, 550 files changed, +43,552/-4,650 LOC). Brownfield consistency refactor: unified 日常/悦己/ときめき/Daily/Joy vocabulary across zh/ja/en + internal identifiers (`LedgerType { daily, joy }`, `joyFullness`), v17→v18 Drift migration (stored enum-value rewrite + `soul_satisfaction`→`joy_fullness`), `AppPalette` ThemeExtension (ADR-018 "Teal Clarity") replacing all `Color(0x…)` literals + AppColors/AppColorsDark shims, full dark-mode rollout, 77 golden masters re-baselined to teal. Suite 2281/2281 green. ADR-017 + ADR-018 accepted.
+- **Prior state (post-v1.4):** v1.4 列表功能 shipped 2026-05-31 (~3 days, 283 commits, 316 files, +51,409/-2,207 LOC). New `lib/features/list/` kakeibo-style List tab; `table_calendar ^3.2.0`; schema v17.
+- **Codebase map:** `.planning/codebase/` was last refreshed 2026-04-25 (`/gsd-map-codebase`). Contents: ARCHITECTURE.md, STACK.md, STRUCTURE.md, CONVENTIONS.md, INTEGRATIONS.md, TESTING.md, CONCERNS.md. **Stale — five milestones of drift** (notably the v1.5 vocabulary/palette rename and schema v18). Refresh via `/gsd:map-codebase` before next milestone planning.
+- **Tech stack:** Flutter, Riverpod 3.x (`@riverpod` code-gen, generator 4.x), Freezed, Drift + SQLCipher (schema v18), GoRouter, flutter_localizations (intl 0.20.2 pinned), Mocktail. Theme layer: single `AppPalette` ThemeExtension (`lib/core/theme/app_palette.dart`) encoding ADR-018; accessed via `context.palette.*`.
 - **Active CI guardrails:** `import_guard` (custom_lint), `riverpod_lint`/`custom_lint`, `coverde` per-file ≥70% with `--deferred` mechanism, `sqlite3_flutter_libs` rejection, `very_good_coverage@v2` ≥70% global, `build_runner` clean-diff
 - **Coverage:** Global ~74.6% baseline (last measured post-v1.0); v1.2 + v1.3 added substantial test code (~17k LOC), expect coverage at or above baseline. Re-measure during next milestone planning.
 - **Known issues / debt carried forward:**
+  - **v1.5 close debt** (per `.planning/milestones/v1.5-MILESTONE-AUDIT.md`): one pending on-device screen-reader UAT (Phase 35 W1 a11y labels; code grep-verified, in 35-HUMAN-UAT.md); Phases 31/32/34/35 VALIDATION.md draft + `nyquist_compliant: false` (Phase 33 approved/compliant); `Book.survivalBalance`/`soulBalance` DB-column rename deliberately out-of-scope (Research A1/D-06); 5 remaining hardcoded a11y Semantics labels (IN-02); `home-pocket-palette.pen` v2 not flushed to disk (Pencil MCP env limitation, D-03b; ADR-018 authoritative); test-fidelity item in `list_transaction_tile_golden_test.dart` (tagText:'Survival' + ja-locale not threaded)
   - **v1.3 close debt** (per `.planning/milestones/v1.3-MILESTONE-AUDIT.md`): Phase 18/21 missing VALIDATION.md; Phase 19/20 VALIDATION.md draft + `nyquist_compliant: false`; Phase 22 VALIDATION.md draft + `nyquist_compliant: true`; Phase 22 advisory WR-02/03/06/07/NEW-02/NEW-03 + IN-01/02/03 on `voice_input_screen.dart` (voice-flow polish backlog); Phase 23 WR-06 build-side `_voiceLocaleId` reassignment functionally dead; OCR slot hardcodes `EntrySource.manual` pending MOD-005 writer
   - **v1.2 close debt** (per `.planning/milestones/v1.2-MILESTONE-AUDIT.md`): Phase 13/17 missing VERIFICATION.md; Phase 13/14/17 VALIDATION.md status draft + `nyquist_compliant: false`; 6 pre-existing `family_insight_card_test.dart` failures from Phase 15 ARB drift; `EntrySource.ocr` schema-accepted but no writer yet (now also reserved at OCR review screen layer in v1.3)
   - **v1.1 close debt:** 1 Phase 11 human/device UAT verification item (AnalyticsScreen month chip + pull-to-refresh on device)
   - **v1.0 close debt:** 2 INFO-level analyzer warnings in `shadow_books_provider_characterization_test.dart`; MOD-numbering drift in MOD-002/006/007/008; ARCH-008 cites ADR-006 instead of ADR-007; doc-sweep verifiers exist but not in CI; 12 architecture tests run only transitively via coverage job; Phase 03/06/08 missing canonical VERIFICATION.md; Phase 02/04 missing VALIDATION.md; Phase 07 `nyquist_compliant: false`
-- **Why next:** v1.3 closed the input-flow axis. Next-wave candidates: **MOD-005 OCR writer landing** (architectural slot reserved in v1.3, ready to consume; schema accepts 'ocr' literal), **VOICE-POLISH-V2** (consolidate Phase 22 advisory WR-* into a focused polish phase if voice work continues), **FAMILY-V2-01/02/03** family privacy hardening, **FUTURE-QA-01** release-readiness QA, **VOICE-EN-V2-01** English voice parser, **TOOL-V2-01** fl_chart 1.x upgrade, or documentation/tooling guardrail cleanup (FUTURE-DOC/TOOL) before any user-facing v1 release.
+- **Why next:** v1.5 closed the vocabulary + palette/token-system consistency axis (the last brownfield-debt refactor before feature work resumes). Next-wave candidates: **MOD-005 OCR writer landing** (architectural slot reserved since v1.3; schema accepts 'ocr' literal), **THEME-V2-01** runtime theme-switching / selectable palettes (now unblocked by the `AppPalette` token system), **`Book.*Balance` DB-column rename** (the one remaining vocabulary residual; needs a DB migration), **FAMILY-V2-01/02/03** family privacy hardening, **combined family-calendar totals** + **undo-on-delete** (v1.4 deferrals), **FUTURE-QA-01** release-readiness QA, **VOICE-POLISH-V2 / VOICE-EN-V2-01**, **TOOL-V2-01** fl_chart 1.x upgrade, or documentation/tooling guardrail cleanup (FUTURE-DOC/TOOL) before any user-facing v1 release. **Refresh `.planning/codebase/` first** — it's five milestones stale.
 
 ## Constraints
 
@@ -339,7 +366,9 @@ _(none — between milestones; see Next Milestone above)_
 - **Coverage threshold:** Active 70% (lowered from 80% on 2026-04-28 per Phase 8 amendment; FUTURE-TOOL-03 to revisit)
 - **Documentation:** ADRs are append-only after status `✅ 已接受`; new context appended via `## Update YYYY-MM-DD: <topic>` at file end
 - **Architecture:** 5-layer Clean Architecture with "Thin Feature" rule, structurally enforced by `import_guard`
-- **Internationalization:** All UI text via `S.of(context)`; ARB key parity locked across ja/zh/en (487 keys per locale at v1.2 close); `flutter gen-l10n` must succeed without warnings
+- **Theme tokens (ADR-018):** All feature/UI colors via the single `AppPalette` ThemeExtension (`context.palette.*`); no `Color(0x…)` literals outside `lib/core/theme/` (architecture scan test enforces); no `isDark` ternaries or `AppColors`/`AppColorsDark` refs in `lib/features/`. Canonical ledger vocabulary is `daily`/`joy` (ADR-017) — no `survival`/`soul` identifiers in non-generated source
+- **Internationalization:** All UI text via `S.of(context)`; ARB key parity locked across ja/zh/en; `flutter gen-l10n` must succeed without warnings; no old-vocabulary terms (生存/灵魂/魂/ソウル/Survival/Soul) in rendered ARB values (grep gate, ADR-017)
+- **Database schema:** Drift schema at v18 (v17→v18 migrated `ledger_type` stored values survival→daily/soul→joy + renamed `soul_satisfaction`→`joy_fullness`); SQLCipher AES-256
 - **Joy metric semantics (ADR-016):** `Σ joy_contribution = Σ (soul_satisfaction × (amount / base)^0.88)` is the single Joy expression. Density (Joy/¥) is retired permanently.
 - **No-gamification (ADR-012):** no streaks, no badges, no achievement unlocks, no cross-period delta surfaces, no leaderboards, no public sharing — applies cross-milestone.
 - **HomeHero isolation (ADR-016 §3):** HomeHero ring is single-month accumulation, anchored to current calendar month; never affected by AnalyticsScreen time-window selector or Joy-variant audit-lens toggles. Structurally enforced by `home_screen_isolation_test.dart`.
@@ -387,6 +416,14 @@ _(none — between milestones; see Next Milestone above)_
 | Swipe-delete confirm-only soft-delete, no undo | Undo needs `RestoreTransactionUseCase`; soft-delete keeps hash-chain intact | — Pending — undo deferred to v1.5+ (v1.4) |
 | LIST-02 reactivity via manual `ref.invalidate` (not `watchByBookIds` stream) | Stream chain built but every mutation site already invalidates; stream went unconsumed | ⚠️ Revisit — GAP-2 dead-code debt: consume `useCase.watch()` or delete the 3-layer chain (v1.4) |
 | GAP-1 fixed inline at milestone close (quick task) vs carry to v1.5 | One small, precisely-diagnosed wiring gap; cheaper to close now than track | ✓ Good — quick task 260531-u34 invalidates `calendarDailyTotalsProvider` at sync + FAB sites (v1.4) |
+| Terminology workstream (P31) before palette workstream (P32-34) | Land `AppColors.survival→daily`/`soul→joy` symbol rename first so the COLOR token system is built on already-renamed symbols, eliminating churn | ✓ Good — Phase 33 AppPalette consumed renamed vocabulary with no rework (v1.5) |
+| v18 migration rewrites stored `ledger_type` values + renames `soul_satisfaction`→`joy_fullness` (D-02/D-16) | Vocabulary must be consistent in persisted data, not just code; CHECK constraint recreate keeps DB honest | ✓ Good — Wave-0 contract test + CR-01 regression test green; round-trip serializes `.name` → 'daily'/'joy' (v1.5) |
+| `Book.survivalBalance`/`soulBalance` carved out of v1.5 (Research A1 / D-06) | Renaming Drift columns is a separate DB migration; v1.5 scoped to `transactions.ledger_type` + `soul_satisfaction` only | — Pending — deferred to a future DB-migration phase before public release (v1.5) |
+| PALETTE-03 hard user-selection gate before Phase 33 | One palette must be human-chosen before encoding it as the token contract; ADR ratified only post-selection | ✓ Good — user picked Scheme D after rejecting coral; ADR-018 flipped to 已接受 only post-selection (v1.5) |
+| Single `AppPalette` ThemeExtension as sole color source (delete AppColors/AppColorsDark shims) | One semantic token system prevents color drift; `context.palette.*` resolves light/dark via the registered extension | ✓ Good — 0 `Color(0x…)` literals, 0 shim refs, 0 `isDark` ternaries in features (v1.5) |
+| Full dark-mode rollout pulled forward into Phase 33 (D-07, absorbs THEME-V2-02) | Dark mode is cheapest to land while every surface is already being re-tokenized | ✓ Good — every feature surface resolves dark via tokens; THEME-V2-02 no longer a v2 item (v1.5) |
+| Phase 34 dedicated to golden re-baseline (isolated from token migration) | Keep visual verification clearly attributable to the palette change; diff-attribution catches unintended deltas | ✓ Good — 77 masters re-based, palette-only delta confirmed, suite 2281/2281 (v1.5) |
+| Phase 35 inserted to close audit-found W1/W2 leaks (vs accept as debt) | W1 (a11y labels) is genuinely user-facing via screen readers; W2 is milestone-goal-adjacent internal identifiers — cheap to close cleanly | ✓ Good — both re-verified at re-audit (grep exit 1); audit returned tech_debt with W1/W2 closed (v1.5) |
 
 ## Evolution
 
@@ -406,8 +443,8 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-02 — Phase 35 (Close vocab leaks) complete: the two residual vocabulary leaks from the v1.5 milestone audit are closed — W1 hardcoded 'Survival ledger'/'Soul ledger' Semantics a11y labels in list_sort_filter_bar.dart now route through l10n.listLedgerDaily/listLedgerJoy; W2 internal identifiers totalSoulTx→totalJoyTx and totalGroupSoulTx→totalGroupJoyTx renamed across Freezed models (build_runner regen), 6 consumers, and 9 test files. flutter analyze clean (0 new), full suite 2281/2281 green, code review 0 blockers/0 warnings. Verifier: 6/7 automated must-haves; 1 human-UAT item (device VoiceOver/TalkBack announcement of localized chip labels) deferred and tracked in 35-HUMAN-UAT.md. Known out-of-scope residual: pre-existing `savedSoulTx` test var (phase 18-08). All 5 v1.5 phases (31–35) now complete — milestone ready to close (/gsd-complete-milestone). Prior: Phase 34 golden re-baseline (teal, 70 masters), Phase 33 AppPalette token system, Phase 32 palette ADR-018, Phase 31 terminology.*
+*Last updated: 2026-06-02 after v1.5 文案与配色统一 milestone — shipped + archived (5 phases, 24 plans, tag `v1.5`). Brownfield consistency refactor: unified 日常/悦己/ときめき/Daily/Joy vocabulary across zh/ja/en + internal identifiers (`LedgerType { daily, joy }`, v17→v18 migration), and consolidated all hardcoded colors into a single `AppPalette` ThemeExtension (ADR-018 "Teal Clarity") with full dark-mode rollout. Audit `tech_debt` accepted (15/15 requirements, 5/5 phases, 6/6 integration seams); residual is one pending on-device screen-reader UAT, draft-Nyquist docs (P31/32/34/35), and the out-of-scope `Book.*Balance` DB-column carve-out. ADR-017 + ADR-018 accepted.*
 
-*Prior: 2026-05-31 — started milestone v1.5 文案与配色统一 (Terminology & Color Unification). Brownfield consistency refactor: unify 日常/悦己/ときめき/Daily/Joy vocabulary across ja/zh/en + internal identifiers, consolidate ~62 hardcoded colors into a semantic design-token system. Locale mapping locked; rename depth = strings + internal symbols. Defining requirements next.*
+*Prior: 2026-06-02 — Phase 35 (Close vocab leaks) complete: W1 a11y Semantics labels → l10n, W2 totalSoulTx→totalJoyTx. Prior: Phase 34 golden re-baseline (teal), Phase 33 AppPalette token system, Phase 32 palette ADR-018, Phase 31 terminology + v18 migration. Started 2026-05-31.*
 
 *Prior: 2026-05-31 after v1.4 列表功能 milestone — shipped + archived (7 phases, 29 plans, tag `v1.4`). Full kakeibo-style List tab. Audit `tech_debt` accepted (22/22 requirements, 7/7 phases, 7/7 flows); GAP-1 closed via quick task 260531-u34; GAP-2 dead-code + draft-Nyquist docs carried as debt.*

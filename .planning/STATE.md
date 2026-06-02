@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: 文案与配色统一
-status: milestone_complete
-stopped_at: Milestone complete (Phase 35 was final phase)
-last_updated: 2026-06-02T01:32:41.910Z
-last_activity: 2026-06-02
+status: Awaiting next milestone
+stopped_at: Milestone v1.5 complete (archived 2026-06-02)
+last_updated: "2026-06-02T01:53:21.261Z"
+last_activity: 2026-06-02 — Milestone v1.5 completed and archived
 progress:
   total_phases: 5
   completed_phases: 5
-  total_plans: 201
+  total_plans: 24
   completed_plans: 24
   percent: 100
 ---
@@ -18,42 +18,41 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-31 — v1.4 列表功能 shipped + archived)
+See: .planning/PROJECT.md (updated 2026-06-02 — v1.5 文案与配色统一 shipped + archived)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Milestone complete
+**Current focus:** Planning next milestone (`/gsd-new-milestone`)
 
 ## Current Position
 
-Phase: 35
-Plan: Not started
-Status: Milestone complete
-Last activity: 2026-06-02
+Phase: Milestone v1.5 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-06-02 — Milestone v1.5 completed and archived
 
-Progress: [██████████] 100%
+## Last Milestone Snapshot (v1.5)
 
-## Last Milestone Snapshot (v1.4)
+- **Phases:** 5 (31-35)
+- **Plans:** 24
+- **Duration:** 2026-05-31 → 2026-06-02 (~2 days)
+- **Commits:** 155 (vs v1.4 tag); 550 files changed; +43,552 / -4,650 LOC
+- **Audit Status at Close:** `tech_debt` — accepted (15/15 requirements, 5/5 phases verified `passed`, 6/6 cross-phase integration seams wired). Re-audit after Phase 35 closed the W1/W2 leaks the initial 2026-06-01 audit found. Residual: 1 pending on-device screen-reader UAT (P35 W1); Phases 31/32/34/35 draft-Nyquist (`nyquist_compliant: false`, Phase 33 approved/compliant); out-of-scope `Book.*Balance` DB-column carve-out (A1/D-06); 5 remaining hardcoded a11y labels (IN-02); `.pen` v2 not flushed (D-03b)
+- **Outcome:** Brownfield consistency refactor — unified 日常/悦己/ときめき/Daily/Joy vocabulary across zh/ja/en + internal identifiers (`LedgerType { daily, joy }` + 242 call sites, 25 ARB key roots, v17→v18 Drift migration rewriting stored enum values + `soul_satisfaction`→`joy_fullness`, ADR-017); selected ADR-018 "Teal Clarity" palette from 5 Pencil schemes; encoded it in a single `AppPalette` ThemeExtension replacing all `Color(0x…)` literals + AppColors/AppColorsDark shims with full dark-mode rollout (THEME-V2-02 pulled forward, D-07); re-baselined 77 golden masters (34 dark) to teal; Phase 35 closed audit-found W1 (a11y labels → l10n) + W2 (totalSoulTx→totalJoyTx). Suite 2281/2281 green. Schema at v18.
+- **Tag:** `v1.5`
+
+## Previous Milestone Snapshot (v1.4)
 
 - **Phases:** 7 (24-30)
 - **Plans:** 29
 - **Duration:** 2026-05-29 → 2026-05-31 (~3 days)
 - **Commits:** 283 (vs v1.3 tag); 316 files changed; +51,409 / -2,207 LOC
 - **Audit Status at Close:** `tech_debt` — accepted (22/22 requirements, 7/7 phases, 7/7 E2E flows; GAP-1 calendar-staleness closed at close via quick task 260531-u34; GAP-2 `watchByBookIds` dead-code + Phases 25/26/27/29/30 draft-Nyquist docs carried)
-- **Outcome:** Full kakeibo-style List tab in new `lib/features/list/` module — `table_calendar` month header (per-day expense totals, own-book), month nav + day-tap filter, sortable (date/edit-time/amount ± dir) · searchable (category·merchant·note) · filterable (ledger · multi-category · family-member, AND-composed) transaction list, current-month expense summary, family-aware shadow-book merge with per-row member attribution + "Mine only", reactive updates + pull-to-refresh reusing v1.3 edit / soft-delete path, 3-variant empty states. Shared `DateBoundaries` util; `table_calendar ^3.2.0` (iOS build green). ARB 533 keys/locale (+27 from v1.3). Schema unchanged at v17.
+- **Outcome:** Full kakeibo-style List tab in new `lib/features/list/` module — `table_calendar` month header (per-day expense totals, own-book), month nav + day-tap filter, sortable · searchable · filterable transaction list, family-aware shadow-book merge + "Mine only", pull-to-refresh, 3-variant empty states. `table_calendar ^3.2.0` (iOS build green). Schema unchanged at v17.
 - **Tag:** `v1.4`
-
-## Previous Milestone Snapshot (v1.3)
-
-- **Phases:** 6 (18-23)
-- **Plans:** 47
-- **Duration:** 2026-05-22 → 2026-05-26 (~5 days)
-- **Commits:** 330 (vs v1.2 tag); 304 files changed; +64,157 / -4,747 LOC
-- **Audit Status at Close:** `tech_debt` — accepted (Phase 18/21 missing VALIDATION.md; Phase 19/20 draft + `nyquist_compliant: false`; Phase 22 draft + `nyquist_compliant: true`; documentation-grade debt only)
-- **Outcome:** Single shared `TransactionDetailsForm` widget across 4 hosts (manual/voice/edit/OCR review); `ManualOneStepScreen` single-screen manual entry; SmartKeyboard 48dp touch-target floor + 6 golden baselines; voice number parser zh + ja (zh 96% + ja 100% corpus accuracy) with `VoiceChunkMerger` 2.5s continued-listening window; `VoiceCategoryResolver` always-L2 contract with extensible merchant DB + synonym dictionary; hold-to-record gesture with `<100ms` perceived state change; edit-from-list path with `entry_source` verbatim preservation; 2 BLOCKER gaps (G-01/G-02) closed; Phase 23 cleanup absorbed carried tech-debt (scanner allow-lists, 6 voice-flow surgical fixes, 4 mechanical polish items, REQUIREMENTS.md reconciliation, 9 device UATs run + passed, `voice_input_screen.dart` 838→776 LOC)
-- **Tag:** `v1.3`
 
 ## Previous Milestone Snapshots
 
+- **v1.3** (6 phases, 47 plans, 2026-05-22 → 2026-05-26, audit `tech_debt` accepted) — 迭代帐本输入 (single-screen voice-capable ledger entry)
 - **v1.2** (5 phases, 37 plans, 2026-05-19 → 2026-05-21, audit `tech_debt` accepted) — Happiness Metric Refresh
 - **v1.1** (4 phases, 40 plans, 2026-05-01 → 2026-05-05, audit `known_debt` accepted) — Happiness Metric & Display
 - **v1.0** (8 phases, 48 plans, 2026-04-24 → 2026-04-29, audit `passed`) — Codebase Cleanup Initiative
@@ -66,7 +65,7 @@ Progress: [██████████] 100%
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 + v1.3 + v1.4 decisions captured there with outcomes.
+Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 + v1.3 + v1.4 + v1.5 decisions captured there with outcomes.
 
 **v1.5 roadmap decisions:**
 
@@ -89,13 +88,16 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 + v1.
 
 ### Pending Todos
 
-- Run `/gsd-plan-phase 31` to begin Phase 31 (Terminology Rename)
-- Phase 32 ends with a user-selection checkpoint (PALETTE-03) — plan execution must pause for human approval of Pencil palette before Phase 33 can start
+- Run `/gsd-new-milestone` to scope the next milestone (v1.5 shipped 2026-06-02)
+- Refresh `.planning/codebase/` via `/gsd-map-codebase` before next-milestone planning — it is five milestones stale (notably the v1.5 vocabulary/palette rename + schema v18)
 
 ### Blockers / Concerns
 
 No active blockers. Carried-forward debt (cross-milestone):
 
+- **v1.5 a11y UAT:** Phase 35 W1 on-device screen-reader announcement of localized ledger-chip labels (code grep-verified; tracked in 35-HUMAN-UAT.md) — human_needed
+- **v1.5 vocab residual** *(out-of-scope carve-out)*: `Book.survivalBalance`/`soulBalance` DB columns (Research A1/D-06) — needs a DB-migration phase before public release; 5 hardcoded a11y Semantics labels (IN-02) needing ARB keys
+- **v1.5 Nyquist debt:** Phases 31/32/34/35 draft + `nyquist_compliant: false`; Phase 33 approved/compliant — documentation-grade only
 - **v1.4 GAP-2** *(dead code)*: LIST-02 `watchByBookIds` stream unused; reactivity via manual `ref.invalidate` — consume or delete the 3-layer chain (defer to v1.6; see Deferred Items §v1.4)
 - **v1.4 Nyquist debt:** Phases 25/26/27/29/30 draft + `nyquist_compliant: false`; Phase 28 approved — documentation-grade only
 
@@ -133,6 +135,19 @@ No active blockers. Carried-forward debt (cross-milestone):
 | 260531-u34 | fix CAL-02/CAL-04 calendar staleness after family-sync + FAB (GAP-1) — invalidate `calendarDailyTotalsProvider(current month)` at the two shell sites (post-sync, post-FAB) alongside the existing `listTransactionsProvider` invalidation; calendar per-day totals + month summary now refresh without pull-to-refresh | 2026-05-31 | 291a9ff4 | Verified 2026-05-31 — closes milestone-audit GAP-1 | [260531-u34](./quick/260531-u34-fix-cal-02-cal-04-calendar-staleness-aft/) |
 
 ## Deferred Items
+
+### Items acknowledged and deferred at v1.5 milestone close on 2026-06-02
+
+| Category | Item | Status | Deferred At |
+|----------|------|--------|-------------|
+| uat_gap | Phase 35 `35-HUMAN-UAT.md` [partial] — 1 pending scenario: on-device screen-reader (VoiceOver/TalkBack) announcement of the localized ledger-filter chip a11y labels (W1 fix). Code grep-verified to route through `l10n.listLedgerDaily`/`listLedgerJoy` (list_sort_filter_bar.dart:233/266); no widget test asserts Semantics.label. Quality-confirmation step, not a defect | human_needed | v1.5 close |
+| verification_gap | Phase 35 `35-VERIFICATION.md` [human_needed] — Truth 1 (screen-reader announcement) same root cause as the UAT gap above; 6/7 automated truths VERIFIED | accept (documentation-grade; pairs with the UAT item) | v1.5 close |
+| uat_gap | Phase 33 `33-HUMAN-UAT.md` [passed] — 11 scenario checkboxes never ticked, but VERIFICATION frontmatter records `human_verification_result: approved 2026-06-01 (all 11 on-device visual items confirmed)`. Tracking artifact, not an open gap | resolved (approved; checkboxes cosmetic) | v1.5 close |
+| a11y_backlog | IN-02 (Phase 35 REVIEW): 5 sort/filter/search/clear controls in `list_sort_filter_bar.dart` (lines 158/210/299/412/496) still use hardcoded English `Semantics(label:)` — same leak class as W1 but no ARB keys exist for them; outside Phase 35 contract | defer to v1.6+ a11y/i18n pass | v1.5 close |
+| vocab_residual | WARNING-01 (integration checker): `Book.survivalBalance`/`soulBalance` live identifiers (books_table.dart, book.dart, book_repository[_impl].dart, book_dao.dart) — explicitly out-of-scope per Research A1 / D-06; renaming changes Drift SQLite column names and needs a further DB migration. Seam internally consistent | defer to a future DB-migration phase before public release | v1.5 close |
+| nyquist_gap | Phases 31/32/34/35 VALIDATION.md draft + `nyquist_compliant: false`; Phase 33 approved/compliant. Phase 32 artifact-only (Nyquist N/A in practice). Documentation-grade, mirrors accepted v1.2/v1.3/v1.4 pattern. Run `/gsd-validate-phase {N}` per phase to close retroactively | accept (documentation-grade) | v1.5 close |
+| metadata_drift | `gsd-sdk audit-open` reports 17 quick tasks as `missing` status (their SUMMARY.md lack a `status: complete` frontmatter field — a convention this project never adopted). All predate v1.5 (v1.3/v1.4 era, slugs 260518–260531) and are recorded Verified in the Quick Tasks Completed table above (e.g. 260531-u34 closed v1.4 GAP-1 at close). Cosmetic, no functional gap | cosmetic, no functional gap | v1.5 close |
+| test_fidelity | `test/golden/list_transaction_tile_golden_test.dart`: tagText:'Survival' (line 87) + `Locale('ja')` not threaded to tile (line 94, WR-01 in 34-REVIEW.md). zh/en dark goldens render tile-internal date in Japanese; goldens pass because masters generated with same defect. Test-fidelity only, not user-facing | accept | v1.5 close |
 
 ### Items acknowledged and deferred at v1.4 milestone close on 2026-05-31
 
@@ -205,11 +220,12 @@ No active blockers. Carried-forward debt (cross-milestone):
 
 ## Session Continuity
 
-Last session: 2026-06-02T01:23:20.469Z
-Stopped at: Phase 34 context gathered
+Last session: 2026-06-02 — Milestone v1.5 audited (`tech_debt`, re-audit after Phase 35) and completed/archived (tag `v1.5`).
+Stopped at: Milestone v1.5 complete — awaiting next milestone.
 
-**Planned Next:** `/gsd-plan-phase 31` — plan Phase 31 (Terminology Rename)
+**Planned Next:** `/gsd-new-milestone` — scope the next milestone.
 
 ## Operator Next Steps
 
-- Run `/gsd-plan-phase 31` to begin planning Phase 31: Terminology Rename
+- Start the next milestone with `/gsd-new-milestone`
+- Refresh `.planning/codebase/` via `/gsd-map-codebase` before planning (five milestones stale)

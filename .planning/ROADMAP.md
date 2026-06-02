@@ -7,7 +7,7 @@
 - ✅ **v1.2 Happiness Metric Refresh** — Phases 13-17 (shipped 2026-05-21) — see [archive](milestones/v1.2-ROADMAP.md)
 - ✅ **v1.3 迭代帐本输入** — Phases 18-23 (shipped 2026-05-26) — see [archive](milestones/v1.3-ROADMAP.md)
 - ✅ **v1.4 列表功能** — Phases 24-30 (shipped 2026-05-31) — see [archive](milestones/v1.4-ROADMAP.md)
-- 🚧 **v1.5 文案与配色统一** — Phases 31-35 (in progress)
+- ✅ **v1.5 文案与配色统一** — Phases 31-35 (shipped 2026-06-02) — see [archive](milestones/v1.5-ROADMAP.md)
 
 ## Phases
 
@@ -81,95 +81,18 @@
 
 </details>
 
-### v1.5 文案与配色统一 (Active)
+<details>
+<summary>✅ v1.5 文案与配色统一 (Phases 31-35) — SHIPPED 2026-06-02</summary>
 
-- [x] **Phase 31: Terminology Rename** (6 plans) — Unify all user-facing ARB values (zh/ja/en) and rename internal identifiers (ARB keys, AppColors symbols, LedgerType enum + v18 migration, soul*/survival* files/classes, soul_satisfaction→joy_fullness column); close with analyze-clean gate + ADR-017 (completed 2026-06-01)
-- [x] **Phase 32: Palette Exploration & Selection** — Mine design references, produce 4–5 Pencil color-scheme mockups, user selects one canonical palette recorded as ADR (completed 2026-06-01)
-- [x] **Phase 33: Color Token System & Consolidation** (7 plans) — Build ThemeExtension<AppPalette> token system encoding ADR-018 Teal Clarity; replace 61 Color(0x…) literals; full dark-mode rollout (D-07/THEME-V2-02 absorbed) (completed 2026-06-01)
-- [x] **Phase 34: Golden Re-baseline & Verification** — Regenerate all golden/visual baselines to the new palette; confirm full test suite green; verify no stale vocabulary or color literals remain (completed 2026-06-01)
+- [x] Phase 31: Terminology Rename (6/6 plans) — completed 2026-06-01
+- [x] Phase 32: Palette Exploration & Selection (3/3 plans) — completed 2026-06-01
+- [x] Phase 33: Color Token System & Consolidation (8/8 plans) — completed 2026-06-01
+- [x] Phase 34: Golden Re-baseline & Verification (5/5 plans) — completed 2026-06-01
+- [x] Phase 35: Close Vocab Leaks — a11y Semantics labels (W1) + totalSoulTx identifiers (W2) (2/2 plans) — completed 2026-06-02
 
-## Phase Details
+**Outcome:** Brownfield consistency refactor unifying the half-migrated dual-ledger vocabulary across all 3 locales + internal code, and consolidating scattered colors into a single semantic token system. Phase 31 renamed the `LedgerType` enum (survival→daily, soul→joy) across 242 call sites, all 25 ledger-vocab ARB key roots + values to canonical 日常/悦己/ときめき/Daily/Joy, and ran the v17→v18 Drift migration (stored enum-value rewrite + `soul_satisfaction`→`joy_fullness`), recorded in ADR-017. Phase 32 mined 5 candidate palette directions → 5 Pencil schemes × 6 frames → user-selected Scheme D "Teal Clarity" (teal primary, Daily teal-navy ↔ Joy gold), recorded in ADR-018 with a full light+dark hex-per-role table. Phase 33 built the `AppPalette` ThemeExtension as the single source of truth, replaced all `Color(0x…)` literals, deleted the AppColors/AppColorsDark shims, and rolled out full dark mode (THEME-V2-02 pulled forward, D-07). Phase 34 re-baselined 50 golden masters + added 27 dark masters (77 total) to the teal palette with full suite 2281/2281 green. Phase 35 closed two residual leaks found by the milestone audit (W1 hardcoded a11y Semantics labels → l10n; W2 `totalSoulTx`→`totalJoyTx` across Freezed models + use-cases + 9 tests). Audit `tech_debt` accepted at close — 15/15 requirements, 5/5 phases, 6/6 integration seams wired; residual is one pending on-device screen-reader UAT, draft-Nyquist docs (P31/32/34/35), and the documented out-of-scope `Book.*Balance` DB-column carve-out. Full details: `.planning/milestones/v1.5-ROADMAP.md` + `.planning/milestones/v1.5-MILESTONE-AUDIT.md`.
 
-### Phase 31: Terminology Rename
-**Goal**: The app's vocabulary for the two ledgers is unified across all three locales — user-facing ARB values read 日常/悦己/ときめき/Daily/Joy everywhere, and internal Dart/ARB identifiers (keys, AppColors symbols, dependent call sites) are renamed to match
-**Depends on**: Phase 30
-**Requirements**: TERM-01, TERM-02, TERM-03, TERM-04, TERMID-01, TERMID-02, TERMID-03, TERMID-04
-**Success Criteria** (what must be TRUE):
-  1. `grep -r 'soulLedger\|survival[A-Z]\|soul[A-Z]' lib/l10n/` returns zero hits in ARB key names; `flutter gen-l10n` completes without warnings
-  2. `grep -rn 'AppColors\.survival\|AppColors\.soul' lib/` returns zero hits in non-generated source
-  3. `grep -rn '生存\|灵魂\|魂\|ソウル\|Survival\|Soul' lib/l10n/*.arb` returns zero hits in user-facing value strings (excluding @description metadata)
-  4. `flutter analyze` reports 0 issues; `dart run custom_lint --no-fatal-infos` reports 0 errors; `build_runner` clean-diff (AUDIT-10 guardrail green)
-  5. ADR-015 (or successor) contains an appended section documenting the canonical 日常/悦己/ときめき/Daily/Joy mapping as the locked lexical hierarchy
-**Plans**: 6 plans
-- [x] 31-01-PLAN.md — Wave-0 RED v18 migration test (D-02/D-16 contract: enum-value rewrite + CHECK recreate + soul_satisfaction→joy_fullness)
-- [x] 31-02-PLAN.md — LedgerType enum rename + v17→v18 migration + soul_satisfaction column rename + persistence literals (turns Wave-0 GREEN)
-- [x] 31-03-PLAN.md — ARB keys (25 roots) + values + @description rewrite (3 locales) + gen-l10n + call sites
-- [x] 31-04-PLAN.md — AppColors survival/soul + derived symbols rename + ~60 call sites
-- [x] 31-05-PLAN.md — soul*/survival* file + class + snapshot-field renames (git mv + Serena)
-- [x] 31-06-PLAN.md — ADR-017 Terminology Unification + ADR-015 pointer + INDEX + REQUIREMENTS Out-of-Scope amend (D-06)
-**UI hint**: yes
-
-### Phase 32: Palette Exploration & Selection
-**Goal**: A canonical color palette is selected from 4–5 concrete Pencil mockup proposals, with the decision and exact hex values recorded in an ADR as the single authoritative reference for all subsequent color work
-**Depends on**: Phase 31
-**Requirements**: PALETTE-01, PALETTE-02, PALETTE-03
-**Success Criteria** (what must be TRUE):
-  1. Design references (VoltAgent/awesome-design-md brand palettes, dual-ledger family-finance context) are synthesized into written candidate directions with rationale — at least 4 distinct mood/palette directions identified
-  2. Exactly 4–5 full color-scheme proposals exist as Pencil mockups covering representative screens (e.g. home hero, transaction list, analytics), each defining primary + 日常/悦己 ledger accents + surface + semantic roles
-  3. The user has reviewed the Pencil proposals and designated one (or a named hybrid) as the selected palette, with that selection recorded as an accepted ADR containing the final hex values for every semantic color role
-**Plans**: 3 plans
-- [x] 32-01-PLAN.md — PALETTE-01 synthesis doc: mine VoltAgent brand DESIGN.md refs → ≥4 distinct named directions across the D-04×D-05 axis matrix (rationale + lineage + anchor hex + WCAG flags)
-- [x] 32-02-PLAN.md — PALETTE-02 Pencil mockups: fresh `.pen`, get_guidelines-first, 4–5 scheme groups × 6 frames (home-hero/list/analytics × light/dark), palette-as-variables, every taxonomy role + per-scheme WCAG pass
-- [x] 32-03-PLAN.md — PALETTE-03 human-selection checkpoint (autonomous:false) → ratify ADR-018 (post-selection only) with full light+dark hex-per-role table keyed to AppColors symbols + ADR-000_INDEX update
-**UI hint**: yes
-
-### Phase 33: Color Token System & Consolidation
-**Goal**: The selected palette is encoded as the single source of truth in a complete semantic design-token system (`AppPalette` ThemeExtension); every hardcoded color literal in feature/UI code is replaced by an `AppPalette` token; the correct 日常/悦己 ledger accents are applied uniformly across all surfaces
-**Depends on**: Phase 32
-**Requirements**: COLOR-01, COLOR-02, COLOR-03
-**Success Criteria** (what must be TRUE):
-  1. `grep -rn 'Color(0x\|Color(0X' lib/features/ lib/application/ lib/shared/` returns zero hits — no raw hex color literals remain outside the theme layer
-  2. The theme layer (`lib/core/theme/`) contains a single semantic design-token system (primary / ledger / surface / semantic groups + profile dark palette) with no duplicate constant definitions (e.g. `_joyTargetStartColor`, repeated profile-dark constants are consolidated)
-  3. Every screen that surfaces a 日常 or 悦己 ledger context uses the correct token from the selected palette — no mismatched or stale pre-selection colors remain
-  4. `flutter analyze` reports 0 issues after all token replacements; `build_runner` clean-diff
-  5. Full dark-mode rollout (D-07, absorbs THEME-V2-02): every screen responds to dark mode via `context.palette.*` — no `isDark` ternaries and no `AppColorsDark.*` direct refs remain in `lib/features/`
-**Plans**: 8 plans
-- [x] 33-01-PLAN.md — Wave-0 RED tests (color_literal_scan, app_palette_test, theme_dark_mode_coverage)
-- [x] 33-02-PLAN.md — AppPalette ThemeExtension + app_theme.dart registration + app_text_styles.dart fix
-- [x] 33-03-PLAN.md — home/ + analytics/ migration (D-05 hero gradient, D-06 olive→success)
-- [x] 33-04-PLAN.md — accounting/ migration (isDark removal, Bucket E error family, Bucket A)
-- [x] 33-05a-PLAN.md — family_sync/ migration (Bucket B coral→teal gradients, Bucket C member gradients D-04)
-- [x] 33-05b-PLAN.md — settings/ + list/ migration (Bucket F info/error, WCAG amount-text variants, dark-mode)
-- [x] 33-06-PLAN.md — profile/ migration (Bucket A delete, avatar D-04 re-hue)
-- [x] 33-07-PLAN.md — Shim deletion + REQUIREMENTS/ROADMAP THEME-V2-02 amend + full suite GREEN
-**UI hint**: yes
-
-### Phase 34: Golden Re-baseline & Verification
-**Goal**: All visual/golden baselines are regenerated and passing against the new palette; the full test suite is green; and a final vocabulary + color-literal audit confirms zero stale hits — closing the milestone with no residual terminology or color debt
-**Depends on**: Phase 33
-**Requirements**: COLOR-04
-**Success Criteria** (what must be TRUE):
-  1. All golden test files regenerated; `flutter test` completes with 0 failures and 0 golden mismatches; diffs confirm the palette change is the only visual delta (no unexpected layout or text changes)
-  2. Final cross-check: `grep -rn '生存\|灵魂\|魂\|ソウル\|Survival\|Soul' lib/l10n/*.arb` returns zero hits; `grep -rn 'Color(0x\|Color(0X' lib/features/ lib/application/ lib/shared/` returns zero hits
-  3. `flutter analyze` reports 0 issues; coverage gate ≥70% global remains green
-**Plans**: 5 plans
-Plans:
-- [x] 34-01-PLAN.md — Wave 0: add dark variants to 7 light-only golden test files + delete orphaned summary_cards PNGs
-- [x] 34-02-PLAN.md — Wave 1: selective re-baseline with diff attribution (D-02/D-04 protocol) + generate 27 new dark masters
-- [x] 34-03-PLAN.md — Wave 2: D-03a comprehensive audit + stale Color literal remediation + success-criteria greps
-- [x] 34-04-PLAN.md — Wave 2 (parallel): D-03b best-effort .pen sync to ADR-018 (non-blocking)
-- [x] 34-05-PLAN.md — Wave 3: final full-suite gate (flutter test 0 failures, analyze 0 issues, coverage ≥70%, both greps empty)
-
-### Phase 35: Close vocab leaks: a11y Semantics labels (W1) + totalSoulTx identifiers (W2)
-
-**Goal:** The two residual vocabulary leaks discovered by the v1.5 milestone audit are closed — W1: hardcoded 'Survival ledger'/'Soul ledger' Semantics a11y labels replaced with l10n-backed values; W2: totalSoulTx/totalGroupSoulTx internal identifiers renamed to totalJoyTx/totalGroupJoyTx across all source and test files
-**Requirements**: None (tech-debt closure against TERM-01/TERM-03 W1 and TERMID-02 W2 from v1.5 audit)
-**Depends on:** Phase 34
-**Plans:** 2/2 plans complete
-
-Plans:
-- [x] 35-01-PLAN.md — W1: Replace hardcoded Semantics a11y labels with l10n.listLedgerDaily / l10n.listLedgerJoy in list_sort_filter_bar.dart
-- [x] 35-02-PLAN.md — W2: Rename totalSoulTx→totalJoyTx and totalGroupSoulTx→totalGroupJoyTx across Freezed models (build_runner regen), use-case consumers, and 9 test files
+</details>
 
 ## Milestone Progress
 
@@ -180,4 +103,4 @@ Plans:
 | v1.2 Happiness Metric Refresh | 13-17 | 37/37 | Complete | 2026-05-21 |
 | v1.3 迭代帐本输入 | 18-23 | 47/47 | Complete | 2026-05-26 |
 | v1.4 列表功能 | 24-30 | 29/29 | Complete | 2026-05-31 |
-| v1.5 文案与配色统一 | 31-35 | 0/5 (P31–P34 done, P35 planned 2 plans) | In progress | — |
+| v1.5 文案与配色统一 | 31-35 | 24/24 | Complete | 2026-06-02 |
