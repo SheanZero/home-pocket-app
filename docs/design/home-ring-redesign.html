@@ -75,9 +75,9 @@
   <div class="top">
     <div>
       <h1>悦己充盈环 · <em>配色方案探索</em></h1>
-      <p class="lede">固定 <b>② 扫掠尾迹</b>（comet）+ <b>⑥ 充盈光晕</b>（glow）两种过渡。本轮<b>大胆换色</b>：
-      保留已认可的 <b>A 蓝绿金</b> 做对照，另给 3 套<b>整组替换</b>的新配色（调研了 Apple Fitness 三环、Headspace、
-      Pantone 趋势色与色盲安全 Okabe-Ito）。每套三色都<b>整组重设、色相+明度双重拉开</b>，各 ②/⑥ 两版对照。</p>
+      <p class="lede">固定 <b>② 扫掠尾迹</b>（comet）+ <b>⑥ 充盈光晕</b>（glow）两种过渡。本轮转向 <b>浅色系</b>：
+      <b>不用任何红 / 玫 / 品红</b>，全部柔和粉彩，延续 app 的 Teal Clarity 清透气质。三套都在
+      安全色族（青 / 绿 / 蓝 / 薰衣草 / 浅金）里选色，色相 + 明度拉开；内环统一用暖浅金呼应"悦己"。各 ②/⑥ 两版对照。</p>
     </div>
     <button class="toggle" onclick="document.body.classList.toggle('dark');render()">◐ 深 / 浅色</button>
   </div>
@@ -114,7 +114,7 @@ const solidArc=(cx,cy,r,prog,col,w)=>`<path d="${arcD(cx,cy,r,0,prog*360-0.01)}"
 function sweepArc(cx,cy,r,prog,cTail,cHead,w,fade){
   const total=prog*360; if(total<=0.5) return '';
   const N=Math.max(3,Math.ceil(total/9)); let s='';
-  for(let i=0;i<N;i++){const t1=(i+1)/N;const a0=(i/N)*total;const a1=t1*total+0.8;const col=mix(cTail,cHead,t1);const op=fade?(0.34+0.66*t1).toFixed(2):1;
+  for(let i=0;i<N;i++){const t1=(i+1)/N;const a0=(i/N)*total;const a1=t1*total+0.8;const col=mix(cTail,cHead,t1);const op=fade?(0.44+0.56*t1).toFixed(2):1;
     s+=`<path d="${arcD(cx,cy,r,a0,a1)}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="butt" opacity="${op}"/>`;}
   const [hx,hy]=pt(cx,cy,r,total);s+=`<circle cx="${hx.toFixed(1)}" cy="${hy.toFixed(1)}" r="${(w/2).toFixed(1)}" fill="${cHead}"/>`;
   if(!fade){const [sx,sy]=pt(cx,cy,r,0);s+=`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${(w/2).toFixed(1)}" fill="${cTail}"/>`;}
@@ -127,23 +127,22 @@ function renderRing(style,deeps,track,uid){
   const {cx,cy,w,radii,box}=GEO; let body='';
   radii.forEach((r,i)=>{body+=trackC(cx,cy,r,track,w);});
   radii.forEach((r,i)=>{const deep=deeps[i],p=MET[i].p;
-    if(style==='comet'){ body+=sweepArc(cx,cy,r,p,lighten(deep,.45),deep,w,true); }
-    else { body+=`<g filter="url(#g${uid}_${i})" opacity="0.6">${solidArc(cx,cy,r,p,deep,w)}</g>`+sweepArc(cx,cy,r,p,lighten(deep,.4),deep,w,false); }
+    if(style==='comet'){ body+=sweepArc(cx,cy,r,p,lighten(deep,.32),deep,w,true); }
+    else { body+=`<g filter="url(#g${uid}_${i})" opacity="0.55">${solidArc(cx,cy,r,p,deep,w)}</g>`+sweepArc(cx,cy,r,p,lighten(deep,.22),deep,w,false); }
   });
   const filter=style==='glow'?`<defs>${radii.map((_,i)=>`<filter id="g${uid}_${i}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.2"/></filter>`).join('')}</defs>`:'';
   return `<svg width="${box}" height="${box}" viewBox="0 0 ${box} ${box}">${filter}${body}</svg>`;
 }
 
-/* ---- color schemes (light hex: [小确幸, 满足度, 悦己目标]); optional dark[] overrides ---- */
+/* ---- 浅色系配色 (light hex: [小确幸, 满足度, 悦己目标]); dark[] = 深色专属 ----
+   规则：无红/玫/品红色系；延续 Teal Clarity 清透感；内环(headline)统一落在暖浅金家族以呼应"悦己"。*/
 const SCHEMES=[
-  {id:'A',name:'蓝 · 绿 · 金',en:'AZURE / GREEN / GOLD · 已认可·参考',hex:['#2E7BD6','#2FA37A','#F0A81E'],
-   note:'上一轮已认可的方向，留作对照基准。最小改动、最稳。'},
-  {id:'E',name:'落日焦糖',en:'SUNSET PRALINE',hex:['#FFBE5C','#F2668B','#6C3FB5'],dark:['#FFCE7E','#F57F9E','#9568D8'],
-   note:'金→玫→紫的"黄金时刻"配色，最宠爱自己。明度 83/62/40 拉满落差，紫罗兰做悦己目标的锚点；暖金与玫粉靠明度差分开（参考 Pantone Peach Fuzz / 落日趋势色）。'},
-  {id:'F',name:'宝石灯笼',en:'JEWEL LANTERN',hex:['#2FB6C4','#E7A220','#C0277E'],dark:['#4ACEDC','#F2B53A','#DB479A'],
-   note:'青 / 琥珀 / 品红——接近三等分色相，沿用 Apple 三环"最大分离"逻辑，高级又节庆。青-橘是色盲最安全的一对；品红做醒目的目标色。最稳的大胆之选。'},
-  {id:'G',name:'极光绽放',en:'AURORA BLOOM',hex:['#5FCFC4','#B27BE6','#E0457B'],dark:['#7FD9D0','#BC8EEA','#E85C8C'],
-   note:'薄荷 → 数字薰衣草 → 树莓粉，最潮、最柔的自我关怀气质（digital-lavender 趋势）。色相横跨最广、零浑浊；树莓粉偏品红，与全局 error 红留了距离。'},
+  {id:'H',name:'青瓷 · 薰衣草 · 浅金',en:'CELADON / LAVENDER / GOLD',hex:['#3BBDB8','#9D9CE6','#F0C04E'],dark:['#4FD3CE','#B4B2F2','#F5CE6A'],
+   note:'冷青打底、薰衣草过渡、暖浅金收尾——延续 Teal Clarity 清透感，柔和不刺眼；青 / 紫 / 金三向分开，最贴 app 气质。'},
+  {id:'I',name:'鼠尾草 · 天蓝 · 杏',en:'SAGE / SKY / APRICOT',hex:['#6FC09A','#7DB6DF','#F2B96E'],dark:['#8AD3B0','#95C5EA','#F7C985'],
+   note:'自然系柔彩（鼠尾草绿 / 天蓝 / 杏），像晨雾，温润亲和；绿-蓝靠明度错开，杏黄做暖收尾。无红、不喧闹。'},
+  {id:'J',name:'湖水 · 雾蓝 · 奶黄',en:'AQUA / PERIWINKLE / BUTTER',hex:['#56C9C8','#93A6EE','#F2D777'],dark:['#6FDAD9','#A8B6F5','#F7E08C'],
+   note:'最浅最透的一组（湖水青 / 雾霾蓝紫 / 奶油黄），清爽空气感；整体偏冷 + 一抹奶黄，干净现代。'},
 ];
 function deepsFor(s,dark){return dark?(s.dark||s.hex.map(h=>lighten(h,.26))):s.hex;}
 
