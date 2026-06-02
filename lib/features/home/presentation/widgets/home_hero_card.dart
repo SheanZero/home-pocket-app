@@ -715,7 +715,7 @@ class HomeHeroCard extends StatelessWidget {
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 13, 6, 13),
+                  padding: const EdgeInsets.fromLTRB(14, 13, 16, 13),
                   child: content,
                 ),
               ),
@@ -916,8 +916,9 @@ class HomeHeroCard extends StatelessWidget {
             ],
           ),
         ),
-        _DashedVLine(color: palette.joy.withValues(alpha: 0.38)),
         const SizedBox(width: 8),
+        _DashedVLine(color: palette.joy.withValues(alpha: 0.38)),
+        const SizedBox(width: 14),
         Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
