@@ -149,7 +149,7 @@ abstract final class AppTextStyles {
 
   // ── Amount styles (tabular figures for numeric alignment) ──
   // Apply ledger color via .copyWith(color: context.palette.dailyText) at call site.
-  // NEVER use palette.joy directly for amount text — use palette.joyText (#9A6500 light).
+  // NEVER use palette.joy directly for amount text — use palette.joyText (#6B4877 light).
 
   static const amountLarge = TextStyle(
     fontFamily: _fontFamily,

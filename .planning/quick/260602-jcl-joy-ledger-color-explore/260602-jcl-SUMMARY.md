@@ -63,13 +63,42 @@ HTML を 2 グループ構成に再編：
 - chrome-devtools (file://) 実測、light + dark 両レンダリング正常、**0 console error**。
 - スクショ: `_joy_light.png` / `_joy_dark.png`（全 7 列・両モード確認用、入库後削除可）。
 
+## Iteration 3 — LANDED ✅（ユーザー選定: 丁香 Mauve `#A586B0`）
+
+ユーザー拍板「采用 丁香 Mauve #A586B0 作为最终方案」→ コードに落とし込み完了。
+
+**監査して切り分け**（gold→mauve は joy identity のみ。緑 ROI / teal cream / 環パレットは保持）:
+- 変更: `joy/joyText/joyLight/joyFullnessBg/joyFullnessBorder/satisfactionPillBg/satisfactionPillRose/
+  textMutedGold`（light+dark 各 8 token）。
+- 保持: `joyRoiBg/Border`（success/ROI 緑）、`surfaceCream*`（teal-white）、`happiness_ring_palette`（青瓷/薰衣草/奶油黄, hz0 確定）。
+
+**token 値:**
+
+| role | light 旧→新 | dark 旧→新 |
+|---|---|---|
+| joy | #F0A81E → **#A586B0** | #F0C13A → **#C0A3CA** |
+| joyText | #9A6500 → **#6B4877** (7.5:1) | #F0C13A → **#C0A3CA** (7.0:1) |
+| joyLight / joyFullnessBg / satisfactionPillBg | #FBEFCF → **#F2ECF4** | #33290F → **#2A2030** |
+| joyFullnessBorder | #F0C97A → **#CBB4D2** | #4D4015 → **#3E3247** |
+| satisfactionPillRose | #F0A81E → **#A586B0** | #F0C13A → **#C0A3CA** |
+| textMutedGold | #C98A00 → **#8A6E92** | #E5B53A → **#B79EC4** |
+
+**変更ファイル:** `lib/core/theme/app_palette.dart`、`app_text_styles.dart`(コメント hex)、
+`test/core/theme/app_palette_test.dart`(契約 3 件)、ADR-018(Update 章節追記)。
+
+**検証（evidence）:**
+- `flutter analyze`：私の変更由来 **0 issue**（残 4 件は既存・無関係: firebase build artifact ×2 + 既存 onReorder deprecation ×2）。
+- golden re-baseline **14 枚**＝全て `daily_vs_joy_card`(4) + `home_hero_card`(10)。**他 golden は無変化 → スコープ精確**。
+- 全量テスト **2286/2286 緑**。
+- 目視確認: daily_vs_joy 左パネル＝mauve / 右＝teal、home_hero の joy バー・進捗・本月最爱 strip が mauve、
+  充盈環は Butter gold のまま（意図通り）。
+
 ## gsd-quick 標準フローからの逸脱
 
 - **gsd-planner→executor 子代理チェーンを未使用。** hz0(260602-hz0) と同理由: 産物が設計稿でコードでない /
   Pencil 落盤不可(D-03b) / executor は MCP 剥離(claude-code#13898)。HTML/SVG 交付で可検証+持久+入库を担保。
 
-## Follow-ups（未実施・選定後の別タスク）
+## Follow-ups
 
-- 色決定 → `app_palette.dart` の joy 系トークン(light+dark: joy/joyText/joyLight/joyFullnessBorder/
-  satisfactionPillRose 等) 更新 → golden re-baseline → ADR-018 に `## Update` 追記。
-- 本タスクでは **コード未変更**（探索のみ）。
+- ~~色決定 → app_palette.dart 更新 → golden re-baseline → ADR-018 追記~~ → **Iteration 3 で完了**。
+- （任意）実機での明暗両モード目視 UAT。`home-pocket-palette.pen` の同期は D-03b（Pencil 落盤不可）で据え置き継続。

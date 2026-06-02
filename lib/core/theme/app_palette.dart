@@ -245,10 +245,10 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     daily: Color(0xFF1C7A86),
     dailyText: Color(0xFF145E68),
     dailyLight: Color(0xFFE0F0F2),
-    // Ledger — Joy
-    joy: Color(0xFFF0A81E),
-    joyText: Color(0xFF9A6500),
-    joyLight: Color(0xFFFBEFCF),
+    // Ledger — Joy (丁香 Mauve — quick 260602-jcl, supersedes gold #F0A81E)
+    joy: Color(0xFFA586B0),
+    joyText: Color(0xFF6B4877),
+    joyLight: Color(0xFFF2ECF4),
     // Ledger — Shared
     shared: Color(0xFF5B8AC4),
     sharedText: Color(0xFF3A6396),
@@ -268,19 +268,19 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     // Shadows
     fabShadow: Color(0x330E9AA7),
     navShadow: Color(0x08000000),
-    // Joy card
-    joyFullnessBg: Color(0xFFFBEFCF),
-    joyFullnessBorder: Color(0xFFF0C97A),
+    // Joy card (Mauve tints — joyRoi* stays green = success/ROI semantic)
+    joyFullnessBg: Color(0xFFF2ECF4),
+    joyFullnessBorder: Color(0xFFCBB4D2),
     joyRoiBg: Color(0xFFE4F4EE),
     joyRoiBorder: Color(0xFFB8E4D6),
     // Family
     familyBadgeBg: Color(0xFFE0F4F5),
-    // Best Joy strip
+    // Best Joy strip (surfaceCream* stays teal-white surface)
     surfaceCream: Color(0xFFF8FEFF),
     surfaceCreamBorder: Color(0xFFD4EFF1),
-    textMutedGold: Color(0xFFC98A00),
-    satisfactionPillBg: Color(0xFFFBEFCF),
-    satisfactionPillRose: Color(0xFFF0A81E),
+    textMutedGold: Color(0xFF8A6E92),
+    satisfactionPillBg: Color(0xFFF2ECF4),
+    satisfactionPillRose: Color(0xFFA586B0),
     // Decorative — avatar (teal-light family, D-04)
     avatarGradientStart: Color(0xFFD4EFF1),
     avatarGradientMid: Color(0xFFE4F6F7),
@@ -327,10 +327,10 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     daily: Color(0xFF4FB0BC),
     dailyText: Color(0xFF4FB0BC),
     dailyLight: Color(0xFF173032),
-    // Ledger — Joy
-    joy: Color(0xFFF0C13A),
-    joyText: Color(0xFFF0C13A),
-    joyLight: Color(0xFF33290F),
+    // Ledger — Joy (丁香 Mauve dark — quick 260602-jcl, supersedes gold #F0C13A)
+    joy: Color(0xFFC0A3CA),
+    joyText: Color(0xFFC0A3CA),
+    joyLight: Color(0xFF2A2030),
     // Ledger — Shared
     shared: Color(0xFF7FA8D8),
     sharedText: Color(0xFF7FA8D8),
@@ -350,19 +350,19 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     // Shadows
     fabShadow: Color(0x333FC2CE),
     navShadow: Color(0x20000000),
-    // Joy card
-    joyFullnessBg: Color(0xFF33290F),
-    joyFullnessBorder: Color(0xFF4D4015),
+    // Joy card (Mauve dark tints — joyRoi* stays green = success/ROI semantic)
+    joyFullnessBg: Color(0xFF2A2030),
+    joyFullnessBorder: Color(0xFF3E3247),
     joyRoiBg: Color(0xFF173330),
     joyRoiBorder: Color(0xFF2D4D45),
     // Family
     familyBadgeBg: Color(0xFF1E2A3A),
-    // Best Joy strip
+    // Best Joy strip (surfaceCream* stays teal-dark surface)
     surfaceCream: Color(0xFF0F2022),
     surfaceCreamBorder: Color(0xFF213537),
-    textMutedGold: Color(0xFFE5B53A),
-    satisfactionPillBg: Color(0xFF33290F),
-    satisfactionPillRose: Color(0xFFF0C13A),
+    textMutedGold: Color(0xFFB79EC4),
+    satisfactionPillBg: Color(0xFF2A2030),
+    satisfactionPillRose: Color(0xFFC0A3CA),
     // Decorative — avatar (teal-dark family, D-04)
     avatarGradientStart: Color(0xFF1B3438),
     avatarGradientMid: Color(0xFF172E31),

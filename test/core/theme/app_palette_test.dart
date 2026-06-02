@@ -29,16 +29,16 @@ void main() {
       expect(AppPalette.light.daily, const Color(0xFF1C7A86));
     });
 
-    test('joy is warm gold #F0A81E', () {
-      expect(AppPalette.light.joy, const Color(0xFFF0A81E));
+    test('joy is 丁香 Mauve #A586B0 (quick 260602-jcl)', () {
+      expect(AppPalette.light.joy, const Color(0xFFA586B0));
     });
 
     test('dailyText (WCAG amount) is #145E68', () {
       expect(AppPalette.light.dailyText, const Color(0xFF145E68));
     });
 
-    test('joyText (WCAG amount) is #9A6500', () {
-      expect(AppPalette.light.joyText, const Color(0xFF9A6500));
+    test('joyText (WCAG amount) is #6B4877', () {
+      expect(AppPalette.light.joyText, const Color(0xFF6B4877));
     });
 
     test('success is emerald #2FA37A', () {
@@ -63,8 +63,8 @@ void main() {
       expect(AppPalette.dark.daily, const Color(0xFF4FB0BC));
     });
 
-    test('joy is #F0C13A (brightened gold)', () {
-      expect(AppPalette.dark.joy, const Color(0xFFF0C13A));
+    test('joy is #C0A3CA (丁香 Mauve dark — quick 260602-jcl)', () {
+      expect(AppPalette.dark.joy, const Color(0xFFC0A3CA));
     });
 
     test('textPrimary is #E8F2F3 (light text on dark background)', () {

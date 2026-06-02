@@ -170,7 +170,40 @@ Phase 33 (Color Token System) 将散落的 ~62 个硬编码色值整合到统一
 |------|------|---------|------|
 | 2026-06-01 | 1.0-draft | 初版起草（珊瑚锚点 5 方案），状态 📝 草稿/Proposed | Claude planning agent |
 | 2026-06-01 | 1.0 | 用户在 PALETTE-03 否决珊瑚方案并重定向；改为 5 个非珊瑚 primary 新方案；用户选定 **Scheme D「Teal Clarity」**；填入完整明暗 hex 表；状态 ✅ 已接受 | Claude planning agent + zxsheanjp |
+| 2026-06-02 | 1.1 | Joy ledger identity 由金 `#F0A81E` 改为 **丁香 Mauve `#A586B0`**（见下方 Update 章节） | zxsheanjp + Claude (quick 260602-jcl) |
 
 ---
 
 **下次 Review:** v1.5 milestone close 或 Phase 33 (Color Token System) 开始时（验证 hex 表落 token 的执行情况）
+
+---
+
+## Update 2026-06-02: Joy ledger identity 改丁香 Mauve（quick 260602-jcl）
+
+**背景:** Teal Clarity 落地后，用户反馈 **悦己(Joy) 的金/黄系 `#F0A81E` 与日常(teal) 配在一起「不好看」**
+（尤其首页「本月最爱」Best Joy strip）。要求探索更适合悦己的配色。
+
+**探索:** `docs/design/joy-color-explore.html` — 以 teal `#1C7A86` 为锚，排除黄/金（不满）与红（error 专用），
+先出 6 个高饱和候选（Terracotta/Coral/Tangerine/Magenta/Orchid/Plum），用户保留 Orchid 并要求低饱和方向；
+再出 6 个低饱和·烟熏系（霧紫/丁香/豆沙粉/陶土柔/柔珊瑚/紫藤），各候选在「悦己 pill × 日常 pill 横排 +
+金额 + 本月最爱 strip」实面对比、明暗双验、joyText live WCAG ≥4.5:1。
+
+**决策:** 用户选定 **丁香 Mauve** 作为悦己 ledger identity 色。
+
+| 角色 | Light（旧 → 新） | Dark（旧 → 新） |
+|------|------------------|------------------|
+| `joy` | `#F0A81E` → **`#A586B0`** | `#F0C13A` → **`#C0A3CA`** |
+| `joyText`（金额，WCAG AA on #FFFFFF / 暗卡） | `#9A6500` → **`#6B4877`**（7.5:1） | `#F0C13A` → **`#C0A3CA`**（7.0:1） |
+| `joyLight` / `joyFullnessBg` / `satisfactionPillBg` | `#FBEFCF` → **`#F2ECF4`** | `#33290F` → **`#2A2030`** |
+| `joyFullnessBorder` | `#F0C97A` → **`#CBB4D2`** | `#4D4015` → **`#3E3247`** |
+| `satisfactionPillRose`（悦己强调） | `#F0A81E` → **`#A586B0`** | `#F0C13A` → **`#C0A3CA`** |
+| `textMutedGold`（悦己区次要文字） | `#C98A00` → **`#8A6E92`** | `#E5B53A` → **`#B79EC4`** |
+
+**不变（刻意保留）:**
+- `joyRoiBg/joyRoiBorder` 仍为绿（= success/ROI 语义，非 joy 身份色）。
+- `surfaceCream/surfaceCreamBorder` 仍为 teal-white 表面。
+- **悦己充盈环**（`happiness_ring_palette.dart` 青瓷/薰衣草/奶油黄 Butter）独立配色，hz0 已定，不在本次范围。
+
+**落地:** `lib/core/theme/app_palette.dart`（明+暗 joy 系 token）+ `app_palette_test.dart` 契约更新；
+14 张 golden re-baseline（全部 `daily_vs_joy_card` + `home_hero_card`，无其它 golden 受影响 = 范围精确）；
+`flutter analyze` 0 新增 issue；全量 2286/2286 测试绿。Best Joy strip 因走 `joy` token 自动随之变 Mauve。
