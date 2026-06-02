@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-02 — v1.5 文案与配色统一 shi
 Phase: Milestone v1.5 complete
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-06-02 — Milestone v1.5 completed and archived
+Last activity: 2026-06-02 — Completed quick task 260602-h29: 与上个月对比改为同期对比
 
 ## Last Milestone Snapshot (v1.5)
 
@@ -133,6 +133,7 @@ No active blockers. Carried-forward debt (cross-milestone):
 | 260531-oqn | 日历列表页 UI 6 项调整：(1) ListScreen 加 Scaffold+AppBar，月份移到标题（中心，可点击跳当月）+ 左右 chevron 翻月，删除 `_MonthNavBar`，解决「头部无月份」+「顶太高」；(2) 无金额日期格加 `SizedBox(height:14)` 占位，数字垂直对齐；(3) 新增 `WeekStartDay` 设置（默认周一，SharedPreferences 持久化，外观设置页选择器，3 ARB key）；(4) 周六数字蓝色 `0xFF1565C0`、周日黑色，按 `day.weekday` 判定不随列；(5) `SortField` 删 `updatedAt` 仅留 timestamp+amount，默认 timestamp-desc，同步 DAO/UI/默认值；(6) 列表项重构：L1 图标+L2 类目名（灵魂加满足度 emoji）主标题，账本类型+店名副标题，金额右侧，去时间。build_runner+gen-l10n+analyze 0 issue，2238/2238 测试通过，goldens re-baseline | 2026-05-31 | 002ac6b3 | Verified 2026-05-31 | [260531-oqn-ui](./quick/260531-oqn-ui/) |
 | 260531-se5 | 按金额排序时全量排序、隐藏日期分组、标题改为「日期+二级类目」 | 2026-05-31 | ae85734e | Verified 2026-05-31 (analyze 0 issues, 2238/2238 tests pass) | [260531-se5](./quick/260531-se5-amount-sort-flat-date-title/) |
 | 260531-u34 | fix CAL-02/CAL-04 calendar staleness after family-sync + FAB (GAP-1) — invalidate `calendarDailyTotalsProvider(current month)` at the two shell sites (post-sync, post-FAB) alongside the existing `listTransactionsProvider` invalidation; calendar per-day totals + month summary now refresh without pull-to-refresh | 2026-05-31 | 291a9ff4 | Verified 2026-05-31 — closes milestone-audit GAP-1 | [260531-u34](./quick/260531-u34-fix-cal-02-cal-04-calendar-staleness-aft/) |
+| 260602-h29 | 与上个月对比改为同期对比：`_getPreviousMonthComparison` 加可选 `asOf` 参数，当报表月份==当前日历月时上月按「截止今天 day-of-month」截断（短月钳制防 DateTime 溢出，当月最后一天→上月全月），历史月份保持整月 vs 整月；首页副标题 `homeHeroPreviousMonthSubline` 改为「上月同期/先月同期/last month (same period)」三 ARB + gen-l10n；5 个 TDD 用例（月中/月末/短月钳制/历史/跨年），9 个 home_hero golden re-baseline。analyze 0 新增 issue，21/21 单测 + 77/77 golden + 2209/2209 通过 | 2026-06-02 | 666190c3 | Verified 2026-06-02 (independent: analyze 0 new, 21/21 use-case tests green) | [260602-h29](./quick/260602-h29-fix-month-over-month-expense-comparison-/) |
 
 ## Deferred Items
 
