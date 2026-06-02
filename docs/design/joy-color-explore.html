@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>悦己(Joy) 配色探索 — teal と対で映える色</title>
+<style>
+  :root{
+    --teal:#1C7A86; --teal-text:#145E68; --teal-light:#E0F0F2;
+    --ink:#1A2B2D; --muted:#5E7174; --line:#E2ECED; --card:#FFFFFF; --bg:#F4F8F9;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Hiragino Sans",system-ui,sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.5;padding:32px 24px 80px}
+  h1{font-size:24px;font-weight:700;letter-spacing:-.01em}
+  h1 .sub{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-top:6px;letter-spacing:0}
+  .toolbar{display:flex;gap:10px;align-items:center;margin:20px 0 8px;flex-wrap:wrap}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{border:0;background:transparent;padding:8px 16px;font-size:13px;font-weight:600;
+              color:var(--muted);cursor:pointer}
+  .seg button.on{background:var(--teal);color:#fff}
+  .note{font-size:12.5px;color:var(--muted);max-width:980px;margin:8px 0 0}
+  .note b{color:var(--ink)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-top:24px}
+  .col{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 16px 16px;
+       box-shadow:0 1px 3px rgba(20,60,65,.04)}
+  .col.ref{outline:2px dashed #cdb35a;outline-offset:-2px}
+  .badge-ref{display:inline-block;font-size:10px;font-weight:700;color:#9A6500;background:#FBEFCF;
+             border-radius:6px;padding:2px 7px;margin-bottom:8px;letter-spacing:.04em}
+  .name{font-size:16px;font-weight:700}
+  .name .cn{color:var(--muted);font-weight:600;font-size:13px;margin-left:6px}
+  .tagline{font-size:12px;color:var(--muted);margin:4px 0 12px;min-height:32px}
+
+  .swatches{display:flex;gap:6px;margin-bottom:14px}
+  .sw{flex:1;height:42px;border-radius:9px;display:flex;align-items:flex-end;justify-content:center;
+      padding-bottom:3px;font-size:9px;font-weight:700;font-family:ui-monospace,monospace}
+  .sw small{opacity:.85}
+
+  /* ledger pill */
+  .pillrow{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+  .pill{font-size:12px;font-weight:700;border-radius:999px;padding:5px 12px}
+  .vs{font-size:11px;color:var(--muted)}
+
+  /* amount */
+  .amt{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";font-weight:700;
+       font-size:26px;letter-spacing:-.01em;display:flex;align-items:baseline;gap:10px}
+  .aa{font-size:10px;font-weight:700;font-family:ui-monospace,monospace;border-radius:6px;
+      padding:2px 7px;align-self:center}
+  .aa.pass{background:#E4F4EE;color:#1F7A55}
+  .aa.fail{background:#FDE7E7;color:#B4302F}
+
+  /* best joy strip */
+  .strip{border-radius:14px;padding:14px;margin-top:14px}
+  .strip .t{font-size:14px;font-weight:700;margin-bottom:8px}
+  .strip .item{display:flex;align-items:center;gap:10px}
+  .strip .ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;
+              justify-content:center;font-size:17px}
+  .strip .meta{flex:1}
+  .strip .meta .k{font-size:13px;font-weight:600;color:var(--ink)}
+  .strip .meta .s{font-size:11px;color:var(--muted)}
+  .strip .pillsat{font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px}
+
+  .reco{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin-top:32px;max-width:1080px}
+  .reco h2{font-size:16px;margin-bottom:10px}
+  .reco ul{margin:0 0 0 18px;font-size:13.5px}
+  .reco li{margin:5px 0}
+  .reco b{color:var(--teal-text)}
+
+  /* dark mode */
+  body.dark{--ink:#E8F2F3;--muted:#82989B;--line:#213537;--card:#162527;--bg:#0C1719;
+            --teal:#4FB0BC;--teal-text:#4FB0BC;--teal-light:#173032}
+  body.dark .col{box-shadow:none}
+  body.dark .aa.pass{background:#1E3329;color:#5FD3A0}
+  body.dark .aa.fail{background:#3A1A1A;color:#F08A8A}
+  body.dark .badge-ref{background:#33290F;color:#F0C13A}
+  body.dark .reco{background:var(--card);border-color:var(--line)}
+  body.dark .reco b{color:#4FB0BC}
+  body.dark .seg{background:var(--card)}
+  body.dark .seg button.on{background:var(--teal);color:#0C1719}
+</style>
+</head>
+<body>
+  <h1>悦己 (Joy) 配色探索
+    <span class="sub">teal #1C7A86 と対で映える identity 色を探す｜赤は error 専用で除外・黄/金は不満につき除外｜金額テキストは白カード上 WCAG AA ≥4.5:1 必須</span>
+  </h1>
+
+  <div class="toolbar">
+    <div class="seg" id="mode">
+      <button data-m="light" class="on">☀ Light</button>
+      <button data-m="dark">🌙 Dark</button>
+    </div>
+    <span class="note" style="margin:0">下段「本月最爱」ストリップ／悦己 pill／金額 が実際の波及面。各候補は <b>日常(teal) と横並び</b>で対比。</span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="reco">
+    <h2>推奨の見立て（teal アンカーとの相性 × 悦己の"自分へのご褒美"らしさ）</h2>
+    <ul>
+      <li><b>テラコッタ / 赤陶</b> — teal の定番相方。暖かく落ち着いた高級感、黄より大人。<b>最も安全な"映える暖色"。</b></li>
+      <li><b>蘭紫 / Orchid</b> — teal の補色寄りで最もコントラストが立つ。digital-lavender 的な wellness/self-care 感が悦己テーマに直結。<b>"脱・黄色"を最も強く出せる。</b></li>
+      <li><b>玫红 / Magenta</b> — 最も祝祭的で華やか。teal と冷暖で強対比。ただし error 赤との距離に注意。</li>
+      <li>杏橙 / Tangerine・珊瑚 / Coral は暖色だが赤/旧コーラル identity に寄るため中庸。莓紫 / Plum は上品だが沈みがち。</li>
+    </ul>
+  </div>
+
+<script>
+const CARD_LIGHT = "#FFFFFF", CARD_DARK = "#162527";
+
+// hue contrast ratio (WCAG) of fg on bg
+function lum(hex){
+  const c = hex.replace('#','');
+  const r=parseInt(c.substr(0,2),16)/255, g=parseInt(c.substr(2,2),16)/255, b=parseInt(c.substr(4,2),16)/255;
+  const f=x=> x<=0.03928 ? x/12.92 : Math.pow((x+0.055)/1.055,2.4);
+  return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b);
+}
+function ratio(fg,bg){const a=lum(fg),b=lum(bg);const hi=Math.max(a,b),lo=Math.min(a,b);return (hi+0.05)/(lo+0.05);}
+
+// each candidate: light {joy,text,light}  dark {joy,text,light}
+const CANDS = [
+  { ref:true, name:"Gold", cn:"金（現状）", tag:"ADR-018 の warm pop。ユーザー所感「good-looking でない」＝今回の出発点。",
+    light:{joy:"#F0A81E",text:"#9A6500",lt:"#FBEFCF"}, dark:{joy:"#F0C13A",text:"#F0C13A",lt:"#33290F"} },
+
+  { name:"Terracotta", cn:"赤陶", tag:"teal の古典的相方。暖かく大人びた、土の高級感。",
+    light:{joy:"#D9734E",text:"#A6492A",lt:"#FBEDE7"}, dark:{joy:"#E8916E",text:"#E8916E",lt:"#33211A"} },
+
+  { name:"Coral", cn:"珊瑚", tag:"明るく親しみやすい暖色。赤寄りなので error との距離に留意。",
+    light:{joy:"#F2785C",text:"#B43E2A",lt:"#FCEDE9"}, dark:{joy:"#F2937C",text:"#F2937C",lt:"#33201B"} },
+
+  { name:"Tangerine", cn:"杏橙", tag:"はっきりオレンジ＝黄色からの脱却。元気で食欲的。",
+    light:{joy:"#F2944A",text:"#9E4E15",lt:"#FCEEE2"}, dark:{joy:"#F2A968",text:"#F2A968",lt:"#33260F"} },
+
+  { name:"Magenta", cn:"玫红", tag:"最も祝祭的・華やか。teal と冷暖で強対比。",
+    light:{joy:"#D6457F",text:"#A82C63",lt:"#FBE9F1"}, dark:{joy:"#E86FA0",text:"#E86FA0",lt:"#33121F"} },
+
+  { name:"Orchid", cn:"蘭紫", tag:"teal の補色寄り。wellness / self-care の lavender 感、悦己テーマ直結。",
+    light:{joy:"#8B6FE0",text:"#5B3DB0",lt:"#EFEAFB"}, dark:{joy:"#A98FEE",text:"#A98FEE",lt:"#1F1633"} },
+
+  { name:"Plum", cn:"莓紫", tag:"上品なベリー。深く落ち着くが小さい面では沈みがち。",
+    light:{joy:"#A14E9B",text:"#7E3577",lt:"#F5E9F4"}, dark:{joy:"#C173B8",text:"#C173B8",lt:"#2B1429"} },
+];
+
+let MODE = "light";
+
+function render(){
+  const dark = MODE==="dark";
+  const cardBg = dark ? CARD_DARK : CARD_LIGHT;
+  const grid = document.getElementById('grid');
+  grid.innerHTML = "";
+
+  const tealJoy   = dark ? "#4FB0BC" : "#1C7A86";
+  const tealLight = dark ? "#173032" : "#E0F0F2";
+  const tealText  = dark ? "#4FB0BC" : "#145E68";
+
+  CANDS.forEach(c=>{
+    const p = dark ? c.dark : c.light;
+    const r = ratio(p.text, cardBg);
+    const pass = r >= 4.5;
+    const col = document.createElement('div');
+    col.className = "col" + (c.ref ? " ref" : "");
+    col.innerHTML = `
+      ${c.ref ? '<span class="badge-ref">現状 BEFORE</span>' : ''}
+      <div class="name">${c.name}<span class="cn">${c.cn}</span></div>
+      <div class="tagline">${c.tag}</div>
+
+      <div class="swatches">
+        <div class="sw" style="background:${p.joy};color:${pickFg(p.joy)}">joy<small><br>${p.joy}</small></div>
+        <div class="sw" style="background:${p.text};color:${pickFg(p.text)}">text<small><br>${p.text}</small></div>
+        <div class="sw" style="background:${p.lt};color:${pickFg(p.lt)}">light<small><br>${p.lt}</small></div>
+      </div>
+
+      <div class="pillrow">
+        <span class="pill" style="background:${p.lt};color:${p.text};border:1px solid ${p.joy}55">悦己</span>
+        <span class="vs">vs</span>
+        <span class="pill" style="background:${tealLight};color:${tealText};border:1px solid ${tealJoy}55">日常</span>
+      </div>
+
+      <div class="amt" style="color:${p.text}">¥1,235
+        <span class="aa ${pass?'pass':'fail'}">AA ${r.toFixed(1)}:1 ${pass?'✓':'✗'}</span>
+      </div>
+
+      <div class="strip" style="background:${hexA(p.joy,dark?0.13:0.08)};border:1px solid ${hexA(p.joy,0.22)}">
+        <div class="t" style="color:${p.joy}">本月最爱</div>
+        <div class="item">
+          <div class="ico" style="background:${p.lt};color:${p.text}">🎮</div>
+          <div class="meta">
+            <div class="k">Switch ゲームソフト</div>
+            <div class="s">悦己・趣味 ・ 5/28</div>
+          </div>
+          <div style="text-align:right">
+            <div class="amt" style="font-size:16px;color:${p.text}">¥6,980</div>
+            <span class="pillsat" style="background:${hexA(p.joy,dark?0.18:0.12)};color:${p.text};margin-top:4px;display:inline-block">満足度 9</span>
+          </div>
+        </div>
+      </div>
+    `;
+    grid.appendChild(col);
+  });
+}
+
+function hexA(hex,a){
+  const c=hex.replace('#','');
+  return `rgba(${parseInt(c.substr(0,2),16)},${parseInt(c.substr(2,2),16)},${parseInt(c.substr(4,2),16)},${a})`;
+}
+function pickFg(hex){ return lum(hex) > 0.45 ? "#222" : "#fff"; }
+
+document.getElementById('mode').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  MODE=b.dataset.m;
+  document.body.classList.toggle('dark', MODE==="dark");
+  [...document.querySelectorAll('#mode button')].forEach(x=>x.classList.toggle('on',x===b));
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
