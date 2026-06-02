@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>本月最爱 — 票根 × 日历瓦片 融合</title>
+<style>
+  :root{
+    --joy:#A586B0; --joyText:#6B4877; --joyLight:#F2ECF4;
+    --ink:#1A2B2D; --muted:#5E7174; --line:#E2ECED; --divider:#EEF3F4;
+    --card:#FFFFFF; --bg:#F4F8F9;
+  }
+  body.dark{
+    --joy:#C0A3CA; --joyText:#C0A3CA; --joyLight:#2A2030;
+    --ink:#E8F2F3; --muted:#82989B; --line:#213537; --divider:#1B2A2C;
+    --card:#162527; --bg:#0C1719;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Hiragino Sans",system-ui,sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.5;padding:32px 24px 80px;
+       transition:background .2s,color .2s}
+  h1{font-size:22px;font-weight:700;letter-spacing:-.01em}
+  h1 .sub{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-top:6px}
+  .toolbar{display:flex;gap:10px;align-items:center;margin:18px 0 4px;flex-wrap:wrap}
+  .seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{border:0;background:transparent;padding:7px 15px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+  .seg button.on{background:var(--joy);color:#fff}
+  body.dark .seg button.on{color:#0C1719}
+  .amt{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+  .row{display:grid;gap:24px;max-width:1180px}
+  .row.refs{grid-template-columns:1fr 1fr;margin-top:26px}
+  .row.fuse{grid-template-columns:1fr 1fr;margin-top:24px}
+  .panel h2{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .panel .cap{font-size:11.5px;color:var(--muted);margin-bottom:10px}
+  .num{font-size:10px;font-weight:800;border-radius:6px;padding:2px 8px;background:var(--joyLight);color:var(--joyText)}
+  .num.star{background:var(--joy);color:#fff} body.dark .num.star{color:#0C1719}
+
+  .host{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+  .ctx{font-size:11px;color:var(--muted)}
+  .divider{height:1px;background:var(--divider);margin:14px 0}
+  .secttl{display:flex;align-items:center;gap:7px;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:12px}
+  .secttl .i{color:var(--joy);font-size:15px}
+
+  /* 票根底 */
+  .tk{position:relative;display:flex;align-items:stretch;border-radius:14px;overflow:hidden;
+      background:color-mix(in srgb,var(--joy) 7%,transparent);
+      border:1px solid color-mix(in srgb,var(--joy) 22%,transparent)}
+  body.dark .tk{background:color-mix(in srgb,var(--joy) 13%,transparent)}
+  .tk .accent{width:6px;background:var(--joy);flex-shrink:0}
+  .ico{width:40px;height:40px;border-radius:12px;flex-shrink:0;background:var(--joyLight);color:var(--joyText);
+       display:flex;align-items:center;justify-content:center;font-size:20px}
+  .k{font-size:15px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .a{font-size:18px;font-weight:800;color:var(--joyText);letter-spacing:-.3px}
+  .satchip{display:inline-flex;align-items:center;gap:4px;background:var(--joyLight);color:var(--joyText);
+           border-radius:999px;padding:3px 9px;font-size:11px;font-weight:800}
+
+  /* 日历瓦片 */
+  .cal{width:48px;flex-shrink:0;border-radius:11px;overflow:hidden;background:var(--joyLight);text-align:center;
+       box-shadow:0 2px 6px color-mix(in srgb,var(--joy) 18%,transparent)}
+  .cal .mo{background:var(--joy);color:#fff;font-size:10px;font-weight:800;padding:3px 0;letter-spacing:.04em}
+  body.dark .cal .mo{color:#0C1719}
+  .cal .dd{font-size:22px;font-weight:800;color:var(--joyText);line-height:1.1;padding-top:3px;font-variant-numeric:tabular-nums}
+  .cal .wk{font-size:9.5px;font-weight:700;color:var(--muted);padding-bottom:4px}
+
+  /* 右侧封印（圆形虚线） */
+  .seal{width:50px;height:50px;border-radius:50%;background:var(--joyLight);flex-shrink:0;
+        border:1.5px dashed color-mix(in srgb,var(--joy) 48%,transparent);
+        display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;color:var(--joyText)}
+  .seal .e{font-size:19px}
+  .seal .w{font-size:8px;font-weight:800;margin-top:2px}
+  .perf{width:0;border-left:2px dashed color-mix(in srgb,var(--joy) 38%,transparent);margin:12px 0;flex-shrink:0}
+
+  /* ── 参考：原 V2 ── */
+  .v2 .main{flex:1;display:flex;align-items:center;gap:12px;padding:13px 14px;min-width:0}
+  .v2 .meta{flex:1;min-width:0}
+  .v2 .meta .s{font-size:11px;color:var(--muted);margin-top:2px}
+  .v2 .stub{display:flex;align-items:center;padding-right:14px}
+
+  /* ── 参考：日历瓦片 B ── */
+  .vb .main{flex:1;display:flex;align-items:center;gap:12px;padding:13px 14px;min-width:0}
+  .vb .meta{flex:1;min-width:0}.vb .meta .k{margin-bottom:5px}
+  .vb .right{flex-shrink:0;text-align:right;padding-left:8px}
+
+  /* ── 融合 F1：日历(左) + 类型/金额(中) + 封印(右) ── */
+  .f .main{flex:1;display:flex;align-items:center;gap:13px;padding:13px 6px 13px 14px;min-width:0}
+  .f .meta{flex:1;min-width:0}
+  .f .meta .k{display:flex;align-items:center;gap:7px}
+  .f .meta .k .mi{font-size:15px;flex-shrink:0}
+  .f .meta .a{margin-top:4px}
+  .f .stub{display:flex;align-items:center;padding-right:14px}
+  .notch{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--card)}
+
+  .notes{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-top:30px;max-width:1180px}
+  .notes h3{font-size:14px;margin-bottom:10px}
+  .notes ul{margin:0 0 0 18px;font-size:13px}
+  .notes li{margin:6px 0}
+  .notes b{color:var(--joyText)}
+</style>
+</head>
+<body>
+  <h1>本月最爱 — 票根 × 日历瓦片 融合
+    <span class="sub">日期 → 左侧日历瓦片｜满足度 emoji → 右侧封印（票根存根）｜类型 + 金额居中｜配色 Mauve（ADR-018）</span>
+  </h1>
+
+  <div class="toolbar">
+    <div class="seg" id="mode">
+      <button data-m="light" class="on">☀ Light</button>
+      <button data-m="dark">🌙 Dark</button>
+    </div>
+  </div>
+
+  <!-- 两个父稿 -->
+  <div class="row refs">
+    <div class="panel">
+      <h2><span class="num">父 1</span> 票根（现稿）</h2>
+      <div class="cap">右侧圆封印 emoji ✓ · 但日期堆在中列</div>
+      <div class="host">
+        <div class="ctx">⋯ 悦己充盈环区 ⋯</div><div class="divider"></div>
+        <div class="secttl"><span class="i">✦</span>本月最爱</div>
+        <div class="tk v2">
+          <div class="accent"></div>
+          <div class="main">
+            <div class="ico">🎮</div>
+            <div class="meta"><div class="k">ゲーム・娯楽</div><div class="a amt" style="margin-top:3px">¥6,980</div><div class="s">5/28(木)</div></div>
+          </div>
+          <div class="perf"></div>
+          <div class="stub"><div class="seal"><span class="e">😍</span><span class="w">最愛</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="num">父 2</span> 日历瓦片 B</h2>
+      <div class="cap">左侧日历块 = 日期 ✓ · 满足度只是小 chip</div>
+      <div class="host">
+        <div class="ctx">⋯ 悦己充盈环区 ⋯</div><div class="divider"></div>
+        <div class="secttl"><span class="i">✦</span>本月最爱</div>
+        <div class="tk vb">
+          <div class="accent"></div>
+          <div class="main">
+            <div class="cal"><div class="mo">5月</div><div class="dd amt">28</div><div class="wk">木</div></div>
+            <div class="meta"><div class="k">🎮 ゲーム・娯楽</div><span class="satchip">😍 最愛</span></div>
+            <div class="right"><div class="a amt">¥6,980</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 融合 -->
+  <div class="row fuse">
+    <div class="panel">
+      <h2><span class="num star">融合 ★</span> 日历(左) + 类型/金额(中) + 封印(右)</h2>
+      <div class="cap">日历瓦片(日期) ｜ 品类图标+类型名 / 金额 ｜ 撕口 + 圆封印 emoji</div>
+      <div class="host">
+        <div class="ctx">⋯ 悦己充盈环区 ⋯</div><div class="divider"></div>
+        <div class="secttl"><span class="i">✦</span>本月最爱</div>
+        <div class="tk f">
+          <div class="accent"></div>
+          <span class="notch" style="right:78px;top:-6px"></span>
+          <span class="notch" style="right:78px;bottom:-6px"></span>
+          <div class="main">
+            <div class="cal"><div class="mo">5月</div><div class="dd amt">28</div><div class="wk">木</div></div>
+            <div class="meta">
+              <div class="k"><span class="mi">🎮</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">ゲーム・娯楽</span></div>
+              <div class="a amt">¥6,980</div>
+            </div>
+          </div>
+          <div class="perf"></div>
+          <div class="stub"><div class="seal"><span class="e">😍</span><span class="w">最愛</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="num">融合 · 轻</span> 右侧 emoji 不加圆框</h2>
+      <div class="cap">同上，但右侧满足度 = 大 emoji + 档位词（去虚线圆，更轻）</div>
+      <div class="host">
+        <div class="ctx">⋯ 悦己充盈环区 ⋯</div><div class="divider"></div>
+        <div class="secttl"><span class="i">✦</span>本月最爱</div>
+        <div class="tk f">
+          <div class="accent"></div>
+          <span class="notch" style="right:70px;top:-6px"></span>
+          <span class="notch" style="right:70px;bottom:-6px"></span>
+          <div class="main">
+            <div class="cal"><div class="mo">5月</div><div class="dd amt">28</div><div class="wk">木</div></div>
+            <div class="meta">
+              <div class="k"><span class="mi">🎮</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">ゲーム・娯楽</span></div>
+              <div class="a amt">¥6,980</div>
+            </div>
+          </div>
+          <div class="perf"></div>
+          <div class="stub" style="padding-right:16px">
+            <div style="display:flex;flex-direction:column;align-items:center;line-height:1.1;color:var(--joyText)">
+              <span style="font-size:24px">😍</span>
+              <span style="font-size:10px;font-weight:800;margin-top:3px">最愛</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <h3>融合要点 & Flutter 落地（_bestJoyValue）</h3>
+    <ul>
+      <li><b>左：日历瓦片</b> = 日期。48px 宽，joyLight 底；顶 joy 色月条「5月」，大日号「28」(joyText, tabular)，底周字「木」。取自 B，日期从副标题升级成视觉锚。</li>
+      <li><b>中：类型 + 金额</b>。品类名前缀 <b>一级父类目</b>图标（parentCategoryIconFromId，缩小到 15px 内联），下方金额 18px joyText。类型/金额不再和日期挤在一起。</li>
+      <li><b>右：满足度 emoji</b>（取自现稿 V2）。撕口虚线竖线 + 圆封印（😍 + 档位词）。「融合·轻」版去掉虚线圆，只留大 emoji + 档位词，更克制。</li>
+      <li><b>票根识别</b>：保留左 6px joy 强调条 + 上下打孔缺口（2 个 card 色圆，贴在撕口处）。</li>
+      <li>约束不变：数据层不动（ARCH-002）；日期用 DateFormatter 拆「月/日/周」三段渲染；字符串走 S.of(context)；金额 AppTextStyles.amount* tabular；满足度档位走 ADR-014。</li>
+      <li>占高 ≈ 现状（单行高 + 瓦片高），不会显著下推交易列表。空状态：瓦片显「—」、类型显引导语、右侧封印用灰 ✦。</li>
+    </ul>
+  </div>
+
+<script>
+  document.getElementById('mode').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    document.body.classList.toggle('dark', b.dataset.m==='dark');
+    [...document.querySelectorAll('#mode button')].forEach(x=>x.classList.toggle('on',x===b));
+  });
+</script>
+</body>
+</html>

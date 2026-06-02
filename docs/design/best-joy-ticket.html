@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>本月最爱 — 票根方向 · 日期处理探索</title>
+<style>
+  :root{
+    --joy:#A586B0; --joyText:#6B4877; --joyLight:#F2ECF4;
+    --ink:#1A2B2D; --muted:#5E7174; --line:#E2ECED; --divider:#EEF3F4;
+    --card:#FFFFFF; --bg:#F4F8F9;
+  }
+  body.dark{
+    --joy:#C0A3CA; --joyText:#C0A3CA; --joyLight:#2A2030;
+    --ink:#E8F2F3; --muted:#82989B; --line:#213537; --divider:#1B2A2C;
+    --card:#162527; --bg:#0C1719;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Hiragino Sans",system-ui,sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.5;padding:32px 24px 80px;
+       transition:background .2s,color .2s}
+  h1{font-size:22px;font-weight:700;letter-spacing:-.01em}
+  h1 .sub{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-top:6px}
+  .toolbar{display:flex;gap:10px;align-items:center;margin:18px 0 4px;flex-wrap:wrap}
+  .seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{border:0;background:transparent;padding:7px 15px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+  .seg button.on{background:var(--joy);color:#fff}
+  body.dark .seg button.on{color:#0C1719}
+  .amt{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+  .stage{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px;margin-top:28px;max-width:1180px}
+  .panel h2{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .panel .cap{font-size:11.5px;color:var(--muted);margin-bottom:10px}
+  .num{font-size:10px;font-weight:800;border-radius:6px;padding:2px 8px;background:var(--joyLight);color:var(--joyText)}
+
+  .host{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+  .ctx{font-size:11px;color:var(--muted)}
+  .divider{height:1px;background:var(--divider);margin:14px 0}
+  .secttl{display:flex;align-items:center;gap:7px;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:12px}
+  .secttl .i{color:var(--joy);font-size:15px}
+
+  /* ── 共用票根底（淡彩 + 左强调条）── */
+  .tk{position:relative;display:flex;border-radius:14px;background:color-mix(in srgb,var(--joy) 7%,transparent);
+      border:1px solid color-mix(in srgb,var(--joy) 22%,transparent)}
+  body.dark .tk{background:color-mix(in srgb,var(--joy) 13%,transparent)}
+  .tk .accent{width:6px;background:var(--joy);border-radius:14px 0 0 14px;flex-shrink:0}
+  .ico{width:40px;height:40px;border-radius:12px;flex-shrink:0;background:var(--joyLight);color:var(--joyText);
+       display:flex;align-items:center;justify-content:center;font-size:20px}
+  .k{font-size:15px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .a{font-size:18px;font-weight:800;color:var(--joyText);letter-spacing:-.3px}
+  .satchip{display:inline-flex;align-items:center;gap:4px;background:var(--joyLight);color:var(--joyText);
+           border-radius:999px;padding:3px 9px;font-size:11px;font-weight:800}
+
+  /* ───────── A · 登机牌（主体 + 存根日期栏）───────── */
+  .A .main{flex:1;display:flex;align-items:center;gap:12px;padding:14px;min-width:0}
+  .A .body{flex:1;min-width:0}
+  .A .body .top{display:flex;align-items:center;gap:8px}
+  .A .body .a{margin-top:4px}
+  .A .perf{position:relative;width:0;border-left:2px dashed color-mix(in srgb,var(--joy) 38%,transparent);margin:10px 0}
+  .A .stub{flex-shrink:0;width:92px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+  .A .stub .lbl{font-size:8.5px;font-weight:800;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .A .stub .d{font-size:20px;font-weight:800;color:var(--joyText);line-height:1.05;font-variant-numeric:tabular-nums}
+  .A .stub .w{font-size:11px;font-weight:700;color:var(--muted)}
+  /* 票根打孔（上下半圆缺口，色同 card）*/
+  .A .notch{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--card);right:92px;transform:translateX(6px)}
+  .A .notch.t{top:-6px} .A .notch.b{bottom:-6px}
+
+  /* ───────── B · 日历瓦片（date 升为主块）───────── */
+  .B{align-items:stretch}
+  .B .main{flex:1;display:flex;align-items:center;gap:12px;padding:13px 14px;min-width:0}
+  .B .cal{width:48px;flex-shrink:0;border-radius:11px;overflow:hidden;background:var(--joyLight);text-align:center;
+          box-shadow:0 2px 6px color-mix(in srgb,var(--joy) 18%,transparent)}
+  .B .cal .mo{background:var(--joy);color:#fff;font-size:10px;font-weight:800;padding:3px 0;letter-spacing:.04em}
+  body.dark .B .cal .mo{color:#0C1719}
+  .B .cal .dd{font-size:22px;font-weight:800;color:var(--joyText);line-height:1.1;padding-top:3px;font-variant-numeric:tabular-nums}
+  .B .cal .wk{font-size:9.5px;font-weight:700;color:var(--muted);padding-bottom:4px}
+  .B .meta{flex:1;min-width:0}
+  .B .meta .k{margin-bottom:5px}
+  .B .right{flex-shrink:0;text-align:right;padding-left:8px}
+
+  /* ───────── C · 邮戳（date = 盖戳，角落）───────── */
+  .C .main{flex:1;display:flex;align-items:center;gap:12px;padding:14px;min-width:0;position:relative}
+  .C .body{flex:1;min-width:0;padding-right:64px}
+  .C .body .a{margin-top:4px}
+  .C .body .sc{margin-top:7px}
+  .C .stamp{position:absolute;right:12px;top:50%;transform:translateY(-50%) rotate(-9deg);
+            width:58px;height:58px;border-radius:50%;border:2px dashed color-mix(in srgb,var(--joy) 55%,transparent);
+            background:color-mix(in srgb,var(--joy) 10%,transparent);
+            display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;color:var(--joyText)}
+  .C .stamp .dd{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+  .C .stamp .wk{font-size:9px;font-weight:800;margin-top:2px;letter-spacing:.05em;opacity:.85}
+
+  /* ───────── D · 撕票两层（date 与类型同层，金额独立层）───────── */
+  .D{flex-direction:column}
+  .D .accent{position:absolute;left:0;top:0;bottom:0;width:6px;border-radius:14px 0 0 14px}
+  .D .row1{display:flex;align-items:center;gap:11px;padding:12px 14px 11px 18px}
+  .D .row1 .k{flex:1}
+  .D .row1 .date{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--muted)}
+  .D .row1 .date .cd{font-size:13px}
+  .D .tear{position:relative;height:0;border-top:2px dashed color-mix(in srgb,var(--joy) 35%,transparent);margin:0 10px}
+  .D .tear .n{position:absolute;top:-7px;width:12px;height:12px;border-radius:50%;background:var(--card)}
+  .D .tear .n.l{left:-16px} .D .tear .n.r{right:-16px}
+  .D .row2{display:flex;align-items:center;justify-content:space-between;padding:11px 14px 13px 18px}
+  .D .row2 .a{font-size:21px}
+
+  .notes{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-top:30px;max-width:1180px}
+  .notes h3{font-size:14px;margin-bottom:12px}
+  .notes table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .notes th,.notes td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--divider);vertical-align:top}
+  .notes th{color:var(--muted);font-weight:700}
+  .notes b{color:var(--joyText)}
+</style>
+</head>
+<body>
+  <h1>本月最爱 — 票根方向 · 日期处理探索
+    <span class="sub">基于 V2 票根再发散｜核心问题：类型/金额/日期堆在中列、日期沦为副标题｜目标：给「日期」独立而契合票根隐喻的位置</span>
+  </h1>
+
+  <div class="toolbar">
+    <div class="seg" id="mode">
+      <button data-m="light" class="on">☀ Light</button>
+      <button data-m="dark">🌙 Dark</button>
+    </div>
+  </div>
+
+  <div class="stage">
+
+    <!-- 参考：原 V2 -->
+    <div class="panel">
+      <h2><span class="num">原 V2</span> 票根（现稿）</h2>
+      <div class="cap">问题：类型/金额/日期三行堆在中列</div>
+      <div class="host">
+        <div class="ctx">⋯ 悦己充盈环区 ⋯</div><div class="divider"></div>
+        <div class="secttl"><span class="i">✦</span>本月最爱</div>
+        <div class="tk" style="overflow:hidden">
+          <div class="accent"></div>
+          <div style="flex:1;display:flex;align-items:center;gap:12px;padding:13px 14px;min-width:0">
+            <div class="ico">🎮</div>
+            <div style="flex:1;min-width:0">
+              <div class="k">ゲーム・娯楽</div>
+              <div class="a amt" style="margin-top:3px">¥6,980</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">5/28(木)</div>
+            </div>
+            <div style="padding-left:14px;border-left:2px dashed color-mix(in srgb,var(--joy) 35%,transparent)">
+              <div class="satchip" style="flex-direction:column;width:46px;height:46px;border-radius:50%;gap:1px;border:1.5px dashed color-mix(in srgb,var(--joy) 45%,transparent);background:var(--joyLight)">😍<span style="font-size:8px">最愛</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A · 登机牌 -->
+    <div class="panel">
+      <h2><span class="num">A</span> 登机牌 · 存根日期栏</h2>
+      <div class="cap">日期 = 右侧撕口存根的「字段」（带 DATE 小标签）</div>
+      <div class="host">
+        <div class="ctx">⋯ 悦己充盈环区 ⋯</div><div class="divider"></div>
+        <div class="secttl"><span class="i">✦</span>本月最爱</div>
+        <div class="tk A" style="overflow:hidden">
+          <div class="accent"></div>
+          <span class="notch t"></span><span class="notch b"></span>
+          <div class="main">
+            <div class="ico">🎮</div>
+            <div class="body">
+              <div class="top"><span class="k">ゲーム・娯楽</span><span class="satchip">😍 最愛</span></div>
+              <div class="a amt">¥6,980</div>
+            </div>
+          </div>
+          <div class="perf"></div>
+          <div class="stub">
+            <div class="lbl">DATE</div>
+            <div class="d amt">5/28</div>
+            <div class="w">木</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- B · 日历瓦片 -->
+    <div class="panel">
+      <h2><span class="num">B</span> 日历瓦片 · 日期升为主块</h2>
+      <div class="cap">日期 = 左侧日历瓦片（月/日/周），取代图标位</div>
+      <div class="host">
+        <div class="ctx">⋯ 悦己充盈环区 ⋯</div><div class="divider"></div>
+        <div class="secttl"><span class="i">✦</span>本月最爱</div>
+        <div class="tk B" style="overflow:hidden">
+          <div class="accent"></div>
+          <div class="main">
+            <div class="cal">
+              <div class="mo">5月</div>
+              <div class="dd amt">28</div>
+              <div class="wk">木</div>
+            </div>
+            <div class="meta">
+              <div class="k">🎮 ゲーム・娯楽</div>
+              <span class="satchip">😍 最愛</span>
+            </div>
+            <div class="right"><div class="a amt">¥6,980</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C · 邮戳 -->
+    <div class="panel">
+      <h2><span class="num">C</span> 邮戳 · 日期盖戳</h2>
+      <div class="cap">日期 = 右上角虚线邮戳（盖在票面上，记忆感）</div>
+      <div class="host">
+        <div class="ctx">⋯ 悦己充盈环区 ⋯</div><div class="divider"></div>
+        <div class="secttl"><span class="i">✦</span>本月最爱</div>
+        <div class="tk C" style="overflow:hidden">
+          <div class="accent"></div>
+          <div class="main">
+            <div class="ico">🎮</div>
+            <div class="body">
+              <div class="k">ゲーム・娯楽</div>
+              <div class="a amt">¥6,980</div>
+              <div class="sc"><span class="satchip">😍 最愛</span></div>
+            </div>
+            <div class="stamp">
+              <div class="dd amt">5.28</div>
+              <div class="wk">木</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D · 撕票两层 -->
+    <div class="panel">
+      <h2><span class="num">D</span> 撕票两层 · 上信息 / 下金额</h2>
+      <div class="cap">日期与类型同在上层（右对齐），金额独占下层</div>
+      <div class="host">
+        <div class="ctx">⋯ 悦己充盈环区 ⋯</div><div class="divider"></div>
+        <div class="secttl"><span class="i">✦</span>本月最爱</div>
+        <div class="tk D" style="overflow:hidden">
+          <div class="accent" style="background:var(--joy)"></div>
+          <div class="row1">
+            <div class="ico" style="width:34px;height:34px;font-size:17px">🎮</div>
+            <span class="k">ゲーム・娯楽</span>
+            <span class="date"><span class="cd">📅</span>5/28(木)</span>
+          </div>
+          <div class="tear"><span class="n l"></span><span class="n r"></span></div>
+          <div class="row2">
+            <div class="a amt">¥6,980</div>
+            <span class="satchip">😍 最愛</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="notes">
+    <h3>日期处理对比 · Flutter 落地（_bestJoyValue）</h3>
+    <table>
+      <tr><th>变体</th><th>日期落点</th><th>解决「堆叠」</th><th>落地 / 风险</th></tr>
+      <tr><td><b>A 登机牌</b></td><td>右侧撕口存根的字段（DATE 标签 + 5/28 + 木）</td><td>金额留主体、日期移到存根，彻底分区</td><td>中。需打孔缺口（2 个 card 色圆）+ 虚线竖线。存根固定宽，ja/zh 周字短，安全。最像「票」。</td></tr>
+      <tr><td><b>B 日历瓦片</b></td><td>左侧日历块（月条+大日号+周），替代图标位</td><td>日期升级为视觉锚，三元素横向排开不再堆</td><td>低中。瓦片是纯绘制（Container+Column）。代价：左侧不再显示品类图标——可把品类图标缩小并入标题前（如稿中 🎮 前缀）。信息层级最清晰。</td></tr>
+      <tr><td><b>C 邮戳</b></td><td>右上角旋转虚线圆戳（5.28 / 木）</td><td>日期脱离文字流、盖到票面，最有记忆/收藏感</td><td>中高。Stack + Transform.rotate；dark 下虚线对比要调。body 需留右padding 避让戳。情绪最强但最「重」。</td></tr>
+      <tr><td><b>D 撕票两层</b></td><td>上层与类型同行、右对齐（带 📅）</td><td>纵向撕成两层：上=类型+日期，下=金额+满足度</td><td>低。横虚线 + 两侧缺口即可。金额获得独立大号空间（21px）。最稳、最易落地，仍保留票根味。</td></tr>
+    </table>
+    <p style="font-size:12px;color:var(--muted);margin-top:12px">
+      共同：左 6px joy 强调条保留票根识别；满足度统一为 <b>档位词+表情 chip</b>（ADR-014）；日期格式沿用 <b>DateFormatter.formatShortMonthDay + 周</b>（A/C 拆成日号与周字分行渲染，需在 presentation 切串、数据层不动）；品类图标 = <b>一级父类目</b>（parentCategoryIconFromId，B 变体作标题前缀）；字符串走 S.of(context)；金额 AppTextStyles.amount* tabular。
+    </p>
+  </div>
+
+<script>
+  document.getElementById('mode').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    document.body.classList.toggle('dark', b.dataset.m==='dark');
+    [...document.querySelectorAll('#mode button')].forEach(x=>x.classList.toggle('on',x===b));
+  });
+</script>
+</body>
+</html>
