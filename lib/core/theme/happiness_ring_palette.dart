@@ -33,7 +33,7 @@ class HappinessRingPalette {
 
   static const HappinessRingPalette light = HappinessRingPalette(
     highlights: Color(0xFF3BBDB8), // 青瓷 teal
-    satisfaction: Color(0xFF9D9CE6), // 薰衣草 lavender
+    satisfaction: Color(0xFF97CA98), // 柔绿 sage
     target: Color(0xFFF2D777), // 奶油黄 butter
     targetText: Color(0xFF8A7320), // deepened butter — legible on light card
     track: Color(0xFFE9F0F0),
@@ -41,7 +41,7 @@ class HappinessRingPalette {
 
   static const HappinessRingPalette dark = HappinessRingPalette(
     highlights: Color(0xFF4FD3CE),
-    satisfaction: Color(0xFFB4B2F2),
+    satisfaction: Color(0xFFAFDCA8),
     target: Color(0xFFF7E08C),
     targetText: Color(0xFFF7E08C), // butter reads well on dark surface
     track: Color(0xFF22343A),
