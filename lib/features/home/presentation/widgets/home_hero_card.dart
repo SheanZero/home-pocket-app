@@ -7,7 +7,6 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/happiness_ring_palette.dart';
 import '../../../../generated/app_localizations.dart';
-import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/joy_cumulative_formatter.dart';
 import '../../../accounting/presentation/utils/category_display_utils.dart';
 import '../../../analytics/domain/models/best_joy_moment_row.dart';
@@ -613,14 +612,19 @@ class HomeHeroCard extends StatelessWidget {
     );
   }
 
-  // ─── Region 6: Best Joy strip (flat Joy strip — quick 260602-s9g) ────────
+  // ─── Region 6: Best Joy strip (ticket × calendar fusion — quick 260602-u5x) ─
   //
-  // Flat strip rendered directly on the card surface (no tinted box/border),
-  // with a ring-matching header (auto_awesome + textPrimary title), a parent
-  // (L1) category-icon tile, the L2 category name sized to match the amount
-  // (17) and centered with it, and an amount-over-pill right column. Empty /
-  // all-neutral states reuse the same chrome with a muted placeholder row.
-  // ARCH-002: primary line is category name only — no merchant/note/date.
+  // Reverses the s9g flat-strip decision (user-approved): the VALUE state is now
+  // a ticket card (票根) — a full-height 6px joy accent bar down the left edge, a
+  // tinted joy body with a thin uniform joy border (radius 14). Inside: a left
+  // calendar tile carrying the date (joy month band / big tabular day number /
+  // weekday) as a visual anchor, a middle column with the parent (L1)
+  // category-icon + L2 category name over the amount (joyText), and a right
+  // frameless satisfaction seal (icon over tier word) separated by a dashed
+  // vertical perforation (撕口). Empty / all-neutral states reuse the same ticket
+  // chrome with a muted "—" calendar placeholder and no seal.
+  // ARCH-002: primary line is category name only — no merchant/note. ADR-014
+  // tier mapping reused via _satisfactionPillIcon/_satisfactionPillLabel.
   // homeBestJoyEmptyBig/AllNeutralBig ARB keys unused since Variant A.
   Widget _buildBestJoyStrip(BuildContext context, S l10n, AppPalette palette) {
     final titleText = isGroupMode
@@ -628,11 +632,13 @@ class HomeHeroCard extends StatelessWidget {
         : l10n.homeBestJoyTagSingle;
     return switch (bestJoy) {
       Empty() => _bestJoyEmpty(
+        context,
         palette,
         titleText,
         l10n.homeBestJoyEmptySmall,
       ),
       Value(:final data) when data.joyFullness <= 2 => _bestJoyEmpty(
+        context,
         palette,
         titleText,
         l10n.homeBestJoyAllNeutralSmall,
@@ -676,20 +682,6 @@ class HomeHeroCard extends StatelessWidget {
         const SizedBox(height: 10),
         row,
       ],
-    );
-  }
-
-  /// 36x36 joyLight category-icon tile.
-  Widget _bestJoyIconTile(AppPalette palette, IconData icon) {
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        color: palette.joyLight,
-        borderRadius: BorderRadius.circular(11),
-      ),
-      alignment: Alignment.center,
-      child: Icon(icon, size: 19, color: palette.joyText),
     );
   }
 
@@ -823,31 +815,45 @@ class HomeHeroCard extends StatelessWidget {
   }
 
   Widget _bestJoyEmpty(
+    BuildContext context,
     AppPalette palette,
     String title,
     String mutedLine,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final content = Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _bestJoyCalendarTile(palette: palette, isDark: isDark, day: '—'),
+        const SizedBox(width: 13),
+        Expanded(
+          child: Text(
+            mutedLine,
+            softWrap: true,
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontSize: 13,
+              color: palette.textSecondary,
+            ),
+          ),
+        ),
+      ],
+    );
     return _bestJoyStripContainer(
       palette: palette,
       title: title,
-      row: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _bestJoyIconTile(palette, Icons.auto_awesome),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Text(
-              mutedLine,
-              softWrap: true,
-              style: AppTextStyles.bodyMedium.copyWith(
-                fontSize: 13,
-                color: palette.textSecondary,
-              ),
-            ),
-          ),
-        ],
-      ),
+      row: _bestJoyTicket(palette: palette, isDark: isDark, content: content),
     );
+  }
+
+  /// Month band text for the calendar tile: ja/zh use the "M月" form, every
+  /// other locale uses the abbreviated month name ("MMM"). Mirrors the ja/zh
+  /// vs en branch in DateFormatter so the tile stays locale-correct.
+  String _bestJoyMonthLabel(DateTime when) {
+    final pattern = switch (locale.languageCode) {
+      'ja' || 'zh' => 'M月',
+      _ => 'MMM',
+    };
+    return DateFormat(pattern, locale.toString()).format(when);
   }
 
   Widget _bestJoyValue(
@@ -857,103 +863,97 @@ class HomeHeroCard extends StatelessWidget {
     String title,
     BestJoyMomentRow row,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final category = CategoryLocalizationService.resolveFromId(
       row.categoryId,
       locale,
     );
-    final dateShort = DateFormatter.formatShortMonthDay(row.timestamp, locale);
-    final dayOfWeek = DateFormat('E', locale.toString()).format(row.timestamp);
-    final dateLabel = '$dateShort($dayOfWeek)';
+    final month = _bestJoyMonthLabel(row.timestamp);
+    final day = DateFormat('d', locale.toString()).format(row.timestamp);
+    final weekday = DateFormat('E', locale.toString()).format(row.timestamp);
     final amount = _fmt.formatCurrency(row.amount, currencyCode, locale);
 
-    return _bestJoyStripContainer(
-      palette: palette,
-      title: title,
-      row: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _bestJoyIconTile(palette, parentCategoryIconFromId(row.categoryId)),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  category,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    color: palette.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  dateLabel,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    fontSize: 11.5,
-                    color: palette.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 11),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+    final content = Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _bestJoyCalendarTile(
+          palette: palette,
+          isDark: isDark,
+          month: month,
+          day: day,
+          weekday: weekday,
+        ),
+        const SizedBox(width: 13),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              Row(
+                children: [
+                  Icon(
+                    parentCategoryIconFromId(row.categoryId),
+                    size: 15,
+                    color: palette.joyText,
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      category,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: palette.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
               Text(
                 amount,
                 style: AppTextStyles.amountSmall.copyWith(
-                  fontSize: 17,
+                  fontSize: 18,
                   fontWeight: FontWeight.w800,
                   color: palette.joyText,
                   letterSpacing: -0.3,
                 ),
               ),
-              const SizedBox(height: 5),
-              _satisfactionPill(l10n, palette, row.joyFullness),
             ],
           ),
-        ],
-      ),
-    );
-  }
-
-  /// Satisfaction pill widget (Variant A — pill with icon + tier label).
-  /// Shrunk per user 260602-s9g: icon 20→16, text 14→12, padding (12,7)→(8,4) —
-  /// reads as a secondary badge beside the now amount-sized (17) L2 title,
-  /// restoring the proportions used before the 260518-v4v r2 enlargement.
-  Widget _satisfactionPill(S l10n, AppPalette palette, int sat) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: palette.satisfactionPillBg,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            _satisfactionPillIcon(sat),
-            size: 16,
-            color: palette.satisfactionPillRose,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            _satisfactionPillLabel(l10n, sat),
-            style: TextStyle(
-              fontFamily: 'Outfit',
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
+        ),
+        _DashedVLine(color: palette.joy.withValues(alpha: 0.38)),
+        const SizedBox(width: 8),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              _satisfactionPillIcon(row.joyFullness),
+              size: 24,
               color: palette.satisfactionPillRose,
             ),
-          ),
-        ],
-      ),
+            const SizedBox(height: 3),
+            Text(
+              _satisfactionPillLabel(l10n, row.joyFullness),
+              style: TextStyle(
+                fontFamily: 'Outfit',
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: palette.satisfactionPillRose,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    return _bestJoyStripContainer(
+      palette: palette,
+      title: title,
+      row: _bestJoyTicket(palette: palette, isDark: isDark, content: content),
     );
   }
 
