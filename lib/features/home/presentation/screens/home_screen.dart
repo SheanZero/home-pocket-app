@@ -10,6 +10,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart';
+import '../../../../features/accounting/presentation/utils/category_display_utils.dart';
 import '../../../../features/analytics/domain/models/family_happiness.dart';
 import '../../../../features/analytics/domain/models/metric_result.dart';
 import '../../../../features/analytics/presentation/providers/state_analytics.dart';
@@ -291,6 +292,7 @@ class HomeScreen extends ConsumerWidget {
                     children: transactions.map((tx) {
                       final isSoul = tx.ledgerType == LedgerType.joy;
                       return HomeTransactionTile(
+                        l1Icon: parentCategoryIconFromId(tx.categoryId),
                         tagText: isGroupMode
                             ? _memberInitial(tx)
                             : (isSoul ? '\u9b42' : '\u751f'),
@@ -300,12 +302,7 @@ class HomeScreen extends ConsumerWidget {
                         tagTextColor: isSoul
                             ? context.palette.joy
                             : context.palette.daily,
-                        merchant:
-                            tx.merchant ??
-                            CategoryLocalizationService.resolveFromId(
-                              tx.categoryId,
-                              locale,
-                            ),
+                        merchant: tx.merchant,
                         category: CategoryLocalizationService.resolveFromId(
                           tx.categoryId,
                           locale,
