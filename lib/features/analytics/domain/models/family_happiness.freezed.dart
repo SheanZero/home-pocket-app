@@ -21,7 +21,7 @@ mixin _$FamilyHappiness {
   /// Display anchor: the month of the active window's endDate (Phase 15+).
   /// See use-case (startDate, endDate) for the queried range.
   int get month;
-  int get totalGroupSoulTx; // main metrics
+  int get totalGroupJoyTx; // main metrics
   MetricResult<int> get familyHighlightsSum;
   MetricResult<SharedJoyInsight> get sharedJoyInsight;
   MetricResult<double> get medianSatisfaction;
@@ -43,8 +43,8 @@ mixin _$FamilyHappiness {
             other is FamilyHappiness &&
             (identical(other.year, year) || other.year == year) &&
             (identical(other.month, month) || other.month == month) &&
-            (identical(other.totalGroupSoulTx, totalGroupSoulTx) ||
-                other.totalGroupSoulTx == totalGroupSoulTx) &&
+            (identical(other.totalGroupJoyTx, totalGroupJoyTx) ||
+                other.totalGroupJoyTx == totalGroupJoyTx) &&
             (identical(other.familyHighlightsSum, familyHighlightsSum) ||
                 other.familyHighlightsSum == familyHighlightsSum) &&
             (identical(other.sharedJoyInsight, sharedJoyInsight) ||
@@ -58,7 +58,7 @@ mixin _$FamilyHappiness {
     runtimeType,
     year,
     month,
-    totalGroupSoulTx,
+    totalGroupJoyTx,
     familyHighlightsSum,
     sharedJoyInsight,
     medianSatisfaction,
@@ -66,7 +66,7 @@ mixin _$FamilyHappiness {
 
   @override
   String toString() {
-    return 'FamilyHappiness(year: $year, month: $month, totalGroupSoulTx: $totalGroupSoulTx, familyHighlightsSum: $familyHighlightsSum, sharedJoyInsight: $sharedJoyInsight, medianSatisfaction: $medianSatisfaction)';
+    return 'FamilyHappiness(year: $year, month: $month, totalGroupJoyTx: $totalGroupJoyTx, familyHighlightsSum: $familyHighlightsSum, sharedJoyInsight: $sharedJoyInsight, medianSatisfaction: $medianSatisfaction)';
   }
 }
 
@@ -80,7 +80,7 @@ abstract mixin class $FamilyHappinessCopyWith<$Res> {
   $Res call({
     int year,
     int month,
-    int totalGroupSoulTx,
+    int totalGroupJoyTx,
     MetricResult<int> familyHighlightsSum,
     MetricResult<SharedJoyInsight> sharedJoyInsight,
     MetricResult<double> medianSatisfaction,
@@ -102,7 +102,7 @@ class _$FamilyHappinessCopyWithImpl<$Res>
   $Res call({
     Object? year = null,
     Object? month = null,
-    Object? totalGroupSoulTx = null,
+    Object? totalGroupJoyTx = null,
     Object? familyHighlightsSum = null,
     Object? sharedJoyInsight = null,
     Object? medianSatisfaction = null,
@@ -117,9 +117,9 @@ class _$FamilyHappinessCopyWithImpl<$Res>
             ? _self.month
             : month // ignore: cast_nullable_to_non_nullable
                   as int,
-        totalGroupSoulTx: null == totalGroupSoulTx
-            ? _self.totalGroupSoulTx
-            : totalGroupSoulTx // ignore: cast_nullable_to_non_nullable
+        totalGroupJoyTx: null == totalGroupJoyTx
+            ? _self.totalGroupJoyTx
+            : totalGroupJoyTx // ignore: cast_nullable_to_non_nullable
                   as int,
         familyHighlightsSum: null == familyHighlightsSum
             ? _self.familyHighlightsSum
@@ -234,7 +234,7 @@ extension FamilyHappinessPatterns on FamilyHappiness {
     TResult Function(
       int year,
       int month,
-      int totalGroupSoulTx,
+      int totalGroupJoyTx,
       MetricResult<int> familyHighlightsSum,
       MetricResult<SharedJoyInsight> sharedJoyInsight,
       MetricResult<double> medianSatisfaction,
@@ -248,7 +248,7 @@ extension FamilyHappinessPatterns on FamilyHappiness {
         return $default(
           _that.year,
           _that.month,
-          _that.totalGroupSoulTx,
+          _that.totalGroupJoyTx,
           _that.familyHighlightsSum,
           _that.sharedJoyInsight,
           _that.medianSatisfaction,
@@ -276,7 +276,7 @@ extension FamilyHappinessPatterns on FamilyHappiness {
     TResult Function(
       int year,
       int month,
-      int totalGroupSoulTx,
+      int totalGroupJoyTx,
       MetricResult<int> familyHighlightsSum,
       MetricResult<SharedJoyInsight> sharedJoyInsight,
       MetricResult<double> medianSatisfaction,
@@ -289,7 +289,7 @@ extension FamilyHappinessPatterns on FamilyHappiness {
         return $default(
           _that.year,
           _that.month,
-          _that.totalGroupSoulTx,
+          _that.totalGroupJoyTx,
           _that.familyHighlightsSum,
           _that.sharedJoyInsight,
           _that.medianSatisfaction,
@@ -316,7 +316,7 @@ extension FamilyHappinessPatterns on FamilyHappiness {
     TResult? Function(
       int year,
       int month,
-      int totalGroupSoulTx,
+      int totalGroupJoyTx,
       MetricResult<int> familyHighlightsSum,
       MetricResult<SharedJoyInsight> sharedJoyInsight,
       MetricResult<double> medianSatisfaction,
@@ -329,7 +329,7 @@ extension FamilyHappinessPatterns on FamilyHappiness {
         return $default(
           _that.year,
           _that.month,
-          _that.totalGroupSoulTx,
+          _that.totalGroupJoyTx,
           _that.familyHighlightsSum,
           _that.sharedJoyInsight,
           _that.medianSatisfaction,
@@ -346,7 +346,7 @@ class _FamilyHappiness implements FamilyHappiness {
   const _FamilyHappiness({
     required this.year,
     required this.month,
-    required this.totalGroupSoulTx,
+    required this.totalGroupJoyTx,
     required this.familyHighlightsSum,
     required this.sharedJoyInsight,
     required this.medianSatisfaction,
@@ -363,7 +363,7 @@ class _FamilyHappiness implements FamilyHappiness {
   @override
   final int month;
   @override
-  final int totalGroupSoulTx;
+  final int totalGroupJoyTx;
   // main metrics
   @override
   final MetricResult<int> familyHighlightsSum;
@@ -387,8 +387,8 @@ class _FamilyHappiness implements FamilyHappiness {
             other is _FamilyHappiness &&
             (identical(other.year, year) || other.year == year) &&
             (identical(other.month, month) || other.month == month) &&
-            (identical(other.totalGroupSoulTx, totalGroupSoulTx) ||
-                other.totalGroupSoulTx == totalGroupSoulTx) &&
+            (identical(other.totalGroupJoyTx, totalGroupJoyTx) ||
+                other.totalGroupJoyTx == totalGroupJoyTx) &&
             (identical(other.familyHighlightsSum, familyHighlightsSum) ||
                 other.familyHighlightsSum == familyHighlightsSum) &&
             (identical(other.sharedJoyInsight, sharedJoyInsight) ||
@@ -402,7 +402,7 @@ class _FamilyHappiness implements FamilyHappiness {
     runtimeType,
     year,
     month,
-    totalGroupSoulTx,
+    totalGroupJoyTx,
     familyHighlightsSum,
     sharedJoyInsight,
     medianSatisfaction,
@@ -410,7 +410,7 @@ class _FamilyHappiness implements FamilyHappiness {
 
   @override
   String toString() {
-    return 'FamilyHappiness(year: $year, month: $month, totalGroupSoulTx: $totalGroupSoulTx, familyHighlightsSum: $familyHighlightsSum, sharedJoyInsight: $sharedJoyInsight, medianSatisfaction: $medianSatisfaction)';
+    return 'FamilyHappiness(year: $year, month: $month, totalGroupJoyTx: $totalGroupJoyTx, familyHighlightsSum: $familyHighlightsSum, sharedJoyInsight: $sharedJoyInsight, medianSatisfaction: $medianSatisfaction)';
   }
 }
 
@@ -426,7 +426,7 @@ abstract mixin class _$FamilyHappinessCopyWith<$Res>
   $Res call({
     int year,
     int month,
-    int totalGroupSoulTx,
+    int totalGroupJoyTx,
     MetricResult<int> familyHighlightsSum,
     MetricResult<SharedJoyInsight> sharedJoyInsight,
     MetricResult<double> medianSatisfaction,
@@ -448,7 +448,7 @@ class __$FamilyHappinessCopyWithImpl<$Res>
   $Res call({
     Object? year = null,
     Object? month = null,
-    Object? totalGroupSoulTx = null,
+    Object? totalGroupJoyTx = null,
     Object? familyHighlightsSum = null,
     Object? sharedJoyInsight = null,
     Object? medianSatisfaction = null,
@@ -463,9 +463,9 @@ class __$FamilyHappinessCopyWithImpl<$Res>
             ? _self.month
             : month // ignore: cast_nullable_to_non_nullable
                   as int,
-        totalGroupSoulTx: null == totalGroupSoulTx
-            ? _self.totalGroupSoulTx
-            : totalGroupSoulTx // ignore: cast_nullable_to_non_nullable
+        totalGroupJoyTx: null == totalGroupJoyTx
+            ? _self.totalGroupJoyTx
+            : totalGroupJoyTx // ignore: cast_nullable_to_non_nullable
                   as int,
         familyHighlightsSum: null == familyHighlightsSum
             ? _self.familyHighlightsSum

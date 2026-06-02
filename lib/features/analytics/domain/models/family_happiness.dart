@@ -16,7 +16,7 @@ abstract class FamilyHappiness with _$FamilyHappiness {
     /// Display anchor: the month of the active window's endDate (Phase 15+).
     /// See use-case (startDate, endDate) for the queried range.
     required int month,
-    required int totalGroupSoulTx,
+    required int totalGroupJoyTx,
 
     // main metrics
     required MetricResult<int> familyHighlightsSum,

@@ -22,7 +22,7 @@ mixin _$HappinessReport {
   /// See use-case (startDate, endDate) for the queried range.
   int get month;
   String get bookId;
-  int get totalSoulTx; // main metrics (MetricResult-wrapped)
+  int get totalJoyTx; // main metrics (MetricResult-wrapped)
   MetricResult<double> get avgSatisfaction;
   MetricResult<double> get joyContribution;
   MetricResult<double> get medianSatisfaction;
@@ -47,8 +47,8 @@ mixin _$HappinessReport {
             (identical(other.year, year) || other.year == year) &&
             (identical(other.month, month) || other.month == month) &&
             (identical(other.bookId, bookId) || other.bookId == bookId) &&
-            (identical(other.totalSoulTx, totalSoulTx) ||
-                other.totalSoulTx == totalSoulTx) &&
+            (identical(other.totalJoyTx, totalJoyTx) ||
+                other.totalJoyTx == totalJoyTx) &&
             (identical(other.avgSatisfaction, avgSatisfaction) ||
                 other.avgSatisfaction == avgSatisfaction) &&
             (identical(other.joyContribution, joyContribution) ||
@@ -66,7 +66,7 @@ mixin _$HappinessReport {
     year,
     month,
     bookId,
-    totalSoulTx,
+    totalJoyTx,
     avgSatisfaction,
     joyContribution,
     medianSatisfaction,
@@ -76,7 +76,7 @@ mixin _$HappinessReport {
 
   @override
   String toString() {
-    return 'HappinessReport(year: $year, month: $month, bookId: $bookId, totalSoulTx: $totalSoulTx, avgSatisfaction: $avgSatisfaction, joyContribution: $joyContribution, medianSatisfaction: $medianSatisfaction, highlightsCount: $highlightsCount, topJoy: $topJoy)';
+    return 'HappinessReport(year: $year, month: $month, bookId: $bookId, totalJoyTx: $totalJoyTx, avgSatisfaction: $avgSatisfaction, joyContribution: $joyContribution, medianSatisfaction: $medianSatisfaction, highlightsCount: $highlightsCount, topJoy: $topJoy)';
   }
 }
 
@@ -91,7 +91,7 @@ abstract mixin class $HappinessReportCopyWith<$Res> {
     int year,
     int month,
     String bookId,
-    int totalSoulTx,
+    int totalJoyTx,
     MetricResult<double> avgSatisfaction,
     MetricResult<double> joyContribution,
     MetricResult<double> medianSatisfaction,
@@ -116,7 +116,7 @@ class _$HappinessReportCopyWithImpl<$Res>
     Object? year = null,
     Object? month = null,
     Object? bookId = null,
-    Object? totalSoulTx = null,
+    Object? totalJoyTx = null,
     Object? avgSatisfaction = null,
     Object? joyContribution = null,
     Object? medianSatisfaction = null,
@@ -137,9 +137,9 @@ class _$HappinessReportCopyWithImpl<$Res>
             ? _self.bookId
             : bookId // ignore: cast_nullable_to_non_nullable
                   as String,
-        totalSoulTx: null == totalSoulTx
-            ? _self.totalSoulTx
-            : totalSoulTx // ignore: cast_nullable_to_non_nullable
+        totalJoyTx: null == totalJoyTx
+            ? _self.totalJoyTx
+            : totalJoyTx // ignore: cast_nullable_to_non_nullable
                   as int,
         avgSatisfaction: null == avgSatisfaction
             ? _self.avgSatisfaction
@@ -263,7 +263,7 @@ extension HappinessReportPatterns on HappinessReport {
       int year,
       int month,
       String bookId,
-      int totalSoulTx,
+      int totalJoyTx,
       MetricResult<double> avgSatisfaction,
       MetricResult<double> joyContribution,
       MetricResult<double> medianSatisfaction,
@@ -280,7 +280,7 @@ extension HappinessReportPatterns on HappinessReport {
           _that.year,
           _that.month,
           _that.bookId,
-          _that.totalSoulTx,
+          _that.totalJoyTx,
           _that.avgSatisfaction,
           _that.joyContribution,
           _that.medianSatisfaction,
@@ -311,7 +311,7 @@ extension HappinessReportPatterns on HappinessReport {
       int year,
       int month,
       String bookId,
-      int totalSoulTx,
+      int totalJoyTx,
       MetricResult<double> avgSatisfaction,
       MetricResult<double> joyContribution,
       MetricResult<double> medianSatisfaction,
@@ -327,7 +327,7 @@ extension HappinessReportPatterns on HappinessReport {
           _that.year,
           _that.month,
           _that.bookId,
-          _that.totalSoulTx,
+          _that.totalJoyTx,
           _that.avgSatisfaction,
           _that.joyContribution,
           _that.medianSatisfaction,
@@ -357,7 +357,7 @@ extension HappinessReportPatterns on HappinessReport {
       int year,
       int month,
       String bookId,
-      int totalSoulTx,
+      int totalJoyTx,
       MetricResult<double> avgSatisfaction,
       MetricResult<double> joyContribution,
       MetricResult<double> medianSatisfaction,
@@ -373,7 +373,7 @@ extension HappinessReportPatterns on HappinessReport {
           _that.year,
           _that.month,
           _that.bookId,
-          _that.totalSoulTx,
+          _that.totalJoyTx,
           _that.avgSatisfaction,
           _that.joyContribution,
           _that.medianSatisfaction,
@@ -393,7 +393,7 @@ class _HappinessReport implements HappinessReport {
     required this.year,
     required this.month,
     required this.bookId,
-    required this.totalSoulTx,
+    required this.totalJoyTx,
     required this.avgSatisfaction,
     required this.joyContribution,
     required this.medianSatisfaction,
@@ -414,7 +414,7 @@ class _HappinessReport implements HappinessReport {
   @override
   final String bookId;
   @override
-  final int totalSoulTx;
+  final int totalJoyTx;
   // main metrics (MetricResult-wrapped)
   @override
   final MetricResult<double> avgSatisfaction;
@@ -443,8 +443,8 @@ class _HappinessReport implements HappinessReport {
             (identical(other.year, year) || other.year == year) &&
             (identical(other.month, month) || other.month == month) &&
             (identical(other.bookId, bookId) || other.bookId == bookId) &&
-            (identical(other.totalSoulTx, totalSoulTx) ||
-                other.totalSoulTx == totalSoulTx) &&
+            (identical(other.totalJoyTx, totalJoyTx) ||
+                other.totalJoyTx == totalJoyTx) &&
             (identical(other.avgSatisfaction, avgSatisfaction) ||
                 other.avgSatisfaction == avgSatisfaction) &&
             (identical(other.joyContribution, joyContribution) ||
@@ -462,7 +462,7 @@ class _HappinessReport implements HappinessReport {
     year,
     month,
     bookId,
-    totalSoulTx,
+    totalJoyTx,
     avgSatisfaction,
     joyContribution,
     medianSatisfaction,
@@ -472,7 +472,7 @@ class _HappinessReport implements HappinessReport {
 
   @override
   String toString() {
-    return 'HappinessReport(year: $year, month: $month, bookId: $bookId, totalSoulTx: $totalSoulTx, avgSatisfaction: $avgSatisfaction, joyContribution: $joyContribution, medianSatisfaction: $medianSatisfaction, highlightsCount: $highlightsCount, topJoy: $topJoy)';
+    return 'HappinessReport(year: $year, month: $month, bookId: $bookId, totalJoyTx: $totalJoyTx, avgSatisfaction: $avgSatisfaction, joyContribution: $joyContribution, medianSatisfaction: $medianSatisfaction, highlightsCount: $highlightsCount, topJoy: $topJoy)';
   }
 }
 
@@ -489,7 +489,7 @@ abstract mixin class _$HappinessReportCopyWith<$Res>
     int year,
     int month,
     String bookId,
-    int totalSoulTx,
+    int totalJoyTx,
     MetricResult<double> avgSatisfaction,
     MetricResult<double> joyContribution,
     MetricResult<double> medianSatisfaction,
@@ -514,7 +514,7 @@ class __$HappinessReportCopyWithImpl<$Res>
     Object? year = null,
     Object? month = null,
     Object? bookId = null,
-    Object? totalSoulTx = null,
+    Object? totalJoyTx = null,
     Object? avgSatisfaction = null,
     Object? joyContribution = null,
     Object? medianSatisfaction = null,
@@ -535,9 +535,9 @@ class __$HappinessReportCopyWithImpl<$Res>
             ? _self.bookId
             : bookId // ignore: cast_nullable_to_non_nullable
                   as String,
-        totalSoulTx: null == totalSoulTx
-            ? _self.totalSoulTx
-            : totalSoulTx // ignore: cast_nullable_to_non_nullable
+        totalJoyTx: null == totalJoyTx
+            ? _self.totalJoyTx
+            : totalJoyTx // ignore: cast_nullable_to_non_nullable
                   as int,
         avgSatisfaction: null == avgSatisfaction
             ? _self.avgSatisfaction

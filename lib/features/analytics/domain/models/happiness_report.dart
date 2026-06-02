@@ -17,7 +17,7 @@ abstract class HappinessReport with _$HappinessReport {
     /// See use-case (startDate, endDate) for the queried range.
     required int month,
     required String bookId,
-    required int totalSoulTx,
+    required int totalJoyTx,
 
     // main metrics (MetricResult-wrapped)
     required MetricResult<double> avgSatisfaction,
