@@ -17,6 +17,22 @@ date: 2026-06-02
 
 → 因此「单环分占比 / 单仪表 / 堆叠求和」皆不成立，已重做 5 方案（commit 7312e183）。
 
+## Iteration 9 — LANDED ✅ (COMET SWEEP + D Butter 落地到代码)
+
+用户拍板：**COMET SWEEP（扫掠尾迹）+ D 奶油黄 Butter** 方案落地。
+
+实现：
+- 新增 `lib/core/theme/happiness_ring_palette.dart`：单模式三环配色（青瓷 `#3BBDB8` / 薰衣草 `#9D9CE6` /
+  奶油黄 `#F2D777`，圆心数字 `targetText #8A7320`，含 dark 变体），集中在 core/theme（非 feature 内字面量）。
+- `happiness_rings_painter.dart`：`ringGap` 默认 4→0（三环相切无间距）；填充改为 **沿弧重锚的 SweepGradient**
+  （startAngle→head），配合 `StrokeCap.round` = 扫掠尾迹彗星效果。drawArc 几何不变 → painter 单测全通过。
+- `home_hero_card.dart`：单模式三环渐变改 comet `[head@30%α, head]`、track=ring.track；圆心值色 = ring.targetText；
+  图例三点同步改 ring 配色；删除已无用的 `_singleProgressColor`/`_singleProgressRatioForColor`（保留公有 `joyTargetProgressColor` 及其测试）。
+- 重生成 9 张 home_hero golden（single/joy_target×4/family×2/thin/all-neutral）。
+
+验证：改动文件 `dart analyze` 0 issue；home_hero 单测 35/35、golden + home widget 142/142 全绿。
+（group/family 模式沿用原语义色，仅随 painter 获得 comet 风格。）
+
 ## Iteration 8 (方案 H · 暖色第三色候选)
 
 用户问：金色有没有更好的替代。青 #3BBDB8 + 薰衣草 #9D9CE6 固定，只换暖色第三色（守"无红"，限暖黄带）：

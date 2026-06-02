@@ -33,7 +33,7 @@ class HappinessRingsPainter extends CustomPainter {
     required this.innerGradient,
     required this.trackColor,
     this.strokeWidth = 8,
-    this.ringGap = 4,
+    this.ringGap = 0,
   });
 
   /// Outer-ring sweep ratio in `[0, 1]`; `null` = Empty (track only).
@@ -60,7 +60,8 @@ class HappinessRingsPainter extends CustomPainter {
   /// Stroke width of each ring in logical pixels (CONTEXT spec: 8).
   final double strokeWidth;
 
-  /// Gap between adjacent rings in logical pixels (CONTEXT spec: 4).
+  /// Gap between adjacent rings in logical pixels. v1.5 ring redesign:
+  /// `0` → rings touch (no white gap) for a continuous band.
   final double ringGap;
 
   @override
@@ -97,13 +98,26 @@ class HappinessRingsPainter extends CustomPainter {
       // Fill arc only renders when ratio is a Value > 0.
       final ratio = ratios[i];
       if (ratio != null && ratio > 0) {
+        const startAngle = -pi / 2; // 12 o'clock
+        final sweepAngle = ratio.clamp(0.0, 1.0) * 2 * pi;
+
+        // COMET SWEEP: re-anchor the supplied gradient's stops to span exactly
+        // this arc (startAngle → head), so the faded tail sits at 12 o'clock
+        // and the full-strength head lands at the leading edge regardless of
+        // sweep length. StrokeCap.round gives the soft comet head/tail.
+        final src = gradients[i];
         final fillPaint = Paint()
-          ..shader = gradients[i].createShader(rect)
+          ..shader = SweepGradient(
+            startAngle: startAngle,
+            endAngle: startAngle + sweepAngle,
+            colors: src.colors,
+            stops: src.stops,
+            tileMode: src.tileMode,
+            transform: src.transform,
+          ).createShader(rect)
           ..style = PaintingStyle.stroke
           ..strokeWidth = strokeWidth
           ..strokeCap = StrokeCap.round;
-        const startAngle = -pi / 2; // 12 o'clock
-        final sweepAngle = ratio.clamp(0.0, 1.0) * 2 * pi;
         canvas.drawArc(rect, startAngle, sweepAngle, false, fillPaint);
       }
     }

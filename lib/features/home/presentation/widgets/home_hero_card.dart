@@ -5,6 +5,7 @@ import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../application/i18n/formatter_service.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/happiness_ring_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/joy_cumulative_formatter.dart';
@@ -339,22 +340,37 @@ class HomeHeroCard extends StatelessWidget {
                   children: [
                     CustomPaint(
                       size: const Size(120, 120),
-                      painter: _painter(palette),
+                      painter: _painter(
+                        palette,
+                        HappinessRingPalette.of(Theme.of(context).brightness),
+                      ),
                     ),
-                    _centerContent(context, l10n, palette),
+                    _centerContent(
+                      context,
+                      l10n,
+                      palette,
+                      HappinessRingPalette.of(Theme.of(context).brightness),
+                    ),
                   ],
                 ),
               ),
             ),
             const SizedBox(width: 16),
-            Expanded(child: _legend(context, l10n, palette)),
+            Expanded(
+              child: _legend(
+                context,
+                l10n,
+                palette,
+                HappinessRingPalette.of(Theme.of(context).brightness),
+              ),
+            ),
           ],
         ),
       ],
     );
   }
 
-  HappinessRingsPainter _painter(AppPalette palette) {
+  HappinessRingsPainter _painter(AppPalette palette, HappinessRingPalette ring) {
     final track = palette.backgroundDivider;
     if (isGroupMode) {
       final f = family;
@@ -374,20 +390,23 @@ class HomeHeroCard extends StatelessWidget {
         trackColor: track,
       );
     }
+    // Single mode — COMET SWEEP + "Butter" scheme. Each ring fades from a
+    // 30%-alpha tail at 12 o'clock to its full-strength head at the leading
+    // edge (painter re-anchors the stops to the arc).
     return HappinessRingsPainter(
       outerSweepRatio: _highlightsRatio(happiness.highlightsCount),
       middleSweepRatio: _avgSatisfactionRatio(happiness.avgSatisfaction),
       innerSweepRatio: _joyContributionRatio(happiness.joyContribution),
       outerGradient: SweepGradient(
-        colors: [palette.accentPrimary, palette.accentPrimary],
+        colors: [ring.highlights.withValues(alpha: 0.30), ring.highlights],
       ),
       middleGradient: SweepGradient(
-        colors: [palette.success, palette.success],
+        colors: [ring.satisfaction.withValues(alpha: 0.30), ring.satisfaction],
       ),
       innerGradient: SweepGradient(
-        colors: [_singleProgressColor(palette), _singleProgressColor(palette)],
+        colors: [ring.target.withValues(alpha: 0.30), ring.target],
       ),
-      trackColor: track,
+      trackColor: ring.track,
     );
   }
 
@@ -398,15 +417,6 @@ class HomeHeroCard extends StatelessWidget {
           ? (data / activeMonthlyJoyTarget).clamp(0.0, 1.0)
           : null,
   };
-  double _singleProgressRatioForColor() => switch (happiness.joyContribution) {
-    Empty() => 0.0,
-    Value(:final data) =>
-      activeMonthlyJoyTarget > 0
-          ? (data / activeMonthlyJoyTarget).clamp(0.0, 1.0)
-          : 0.0,
-  };
-  Color _singleProgressColor(AppPalette palette) =>
-      joyTargetProgressColor(_singleProgressRatioForColor(), palette);
   double? _avgSatisfactionRatio(MetricResult<double> r) => switch (r) {
     Empty() => null,
     Value(:final data) => (data / 10.0).clamp(0.0, 1.0),
@@ -428,7 +438,12 @@ class HomeHeroCard extends StatelessWidget {
     Value(:final data) => (data / 10.0).clamp(0.0, 1.0),
   };
 
-  Widget _centerContent(BuildContext context, S l10n, AppPalette palette) {
+  Widget _centerContent(
+    BuildContext context,
+    S l10n,
+    AppPalette palette,
+    HappinessRingPalette ring,
+  ) {
     if (isGroupMode) {
       return Text(
         _groupCenterText(),
@@ -443,7 +458,7 @@ class HomeHeroCard extends StatelessWidget {
     };
     final valueColor = switch (happiness.joyContribution) {
       Empty() => palette.textPrimary,
-      Value() => _singleProgressColor(palette),
+      Value() => ring.targetText,
     };
     return Semantics(
       label: l10n.homeJoyTargetSemantics(valueText, activeMonthlyJoyTarget),
@@ -463,9 +478,14 @@ class HomeHeroCard extends StatelessWidget {
     };
   }
 
-  Widget _legend(BuildContext context, S l10n, AppPalette palette) {
+  Widget _legend(
+    BuildContext context,
+    S l10n,
+    AppPalette palette,
+    HappinessRingPalette ring,
+  ) {
     if (isGroupMode) return _legendGroup(context, l10n, palette);
-    return _legendSingle(context, l10n, palette);
+    return _legendSingle(context, l10n, palette, ring);
   }
 
   Widget _legendGroup(BuildContext context, S l10n, AppPalette palette) {
@@ -507,7 +527,12 @@ class HomeHeroCard extends StatelessWidget {
     );
   }
 
-  Widget _legendSingle(BuildContext context, S l10n, AppPalette palette) {
+  Widget _legendSingle(
+    BuildContext context,
+    S l10n,
+    AppPalette palette,
+    HappinessRingPalette ring,
+  ) {
     final empty = l10n.homeNoJoyDataLegend;
     final highlights = switch (happiness.highlightsCount) {
       Empty() => 0,
@@ -518,7 +543,7 @@ class HomeHeroCard extends StatelessWidget {
       children: [
         _legendRow(
           palette,
-          palette.joy,
+          ring.target,
           l10n.homeJoyContributionLegend,
           switch (happiness.joyContribution) {
             Empty() => empty,
@@ -531,7 +556,7 @@ class HomeHeroCard extends StatelessWidget {
         const SizedBox(height: 6),
         _legendRow(
           palette,
-          palette.success,
+          ring.satisfaction,
           l10n.homeAvgSatisfactionLegend,
           switch (happiness.avgSatisfaction) {
             Empty() => empty,
@@ -541,7 +566,7 @@ class HomeHeroCard extends StatelessWidget {
         const SizedBox(height: 6),
         _legendRow(
           palette,
-          palette.accentPrimary,
+          ring.highlights,
           l10n.homeHighlightsCountLegend,
           '$highlights',
         ),
