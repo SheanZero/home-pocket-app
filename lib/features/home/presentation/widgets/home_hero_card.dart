@@ -693,6 +693,135 @@ class HomeHeroCard extends StatelessWidget {
     );
   }
 
+  /// Ticket chrome (票根) shared by the Best Joy value + empty states
+  /// (quick 260602-u5x). A full-height 6px joy accent bar down the left edge,
+  /// a tinted joy body with a thin uniform joy border, rounded to radius 14.
+  ///
+  /// Flutter forbids combining `borderRadius` with a non-uniform `Border`, so
+  /// the rounding is done by an outer ClipRRect while the body keeps a uniform
+  /// border only. IntrinsicHeight + Row(stretch) lets the accent bar match the
+  /// content height.
+  Widget _bestJoyTicket({
+    required AppPalette palette,
+    required bool isDark,
+    required Widget content,
+  }) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(width: 6, color: palette.joy),
+            Expanded(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: palette.joy.withValues(alpha: isDark ? 0.13 : 0.07),
+                  border: Border.all(
+                    color: palette.joy.withValues(alpha: 0.22),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 13, 6, 13),
+                  child: content,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Calendar tile (日历瓦片) carrying the Best Joy date as a visual anchor
+  /// (quick 260602-u5x). ~48px wide, joyLight body, radius 11, soft joy shadow.
+  /// A joy month band sits on top, a big tabular day number in the middle, and
+  /// a muted weekday at the bottom. For the empty-state placeholder, pass
+  /// [day] "—" with [month]/[weekday] null → a single centered muted glyph with
+  /// no month band, keeping the tile size stable.
+  Widget _bestJoyCalendarTile({
+    required AppPalette palette,
+    required bool isDark,
+    String? month,
+    String? day,
+    String? weekday,
+  }) {
+    final monthBandText = isDark ? const Color(0xFF0C1719) : Colors.white;
+    final isPlaceholder = month == null && weekday == null;
+    return Container(
+      width: 48,
+      decoration: BoxDecoration(
+        color: palette.joyLight,
+        borderRadius: BorderRadius.circular(11),
+        boxShadow: [
+          BoxShadow(
+            color: palette.joy.withValues(alpha: 0.18),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(11),
+        child: isPlaceholder
+            ? Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Center(
+                  child: Text(
+                    day ?? '—',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: palette.textSecondary,
+                      height: 1.1,
+                    ),
+                  ),
+                ),
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    color: palette.joy,
+                    padding: const EdgeInsets.symmetric(vertical: 3),
+                    alignment: Alignment.center,
+                    child: Text(
+                      month ?? '',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: monthBandText,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    day ?? '',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: palette.joyText,
+                      height: 1.1,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                  Text(
+                    weekday ?? '',
+                    style: TextStyle(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w700,
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                ],
+              ),
+      ),
+    );
+  }
+
   Widget _bestJoyEmpty(
     AppPalette palette,
     String title,
@@ -974,4 +1103,55 @@ class _InfoIcon extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Vertical dashed perforation (撕口) separating the Best Joy middle column from
+/// the satisfaction seal (quick 260602-u5x). Dash 3 / gap 3, strokeWidth 1.5,
+/// hosted in a 2px-wide box with vertical margin so it reads as a ticket tear
+/// line rather than a full divider.
+class _DashedVLine extends StatelessWidget {
+  const _DashedVLine({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: SizedBox(
+        width: 2,
+        child: CustomPaint(
+          painter: _DashedVLinePainter(color: color),
+          child: const SizedBox.expand(),
+        ),
+      ),
+    );
+  }
+}
+
+class _DashedVLinePainter extends CustomPainter {
+  const _DashedVLinePainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const dash = 3.0;
+    const gap = 3.0;
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round;
+    final x = size.width / 2;
+    var y = 0.0;
+    while (y < size.height) {
+      canvas.drawLine(Offset(x, y), Offset(x, (y + dash).clamp(0, size.height)),
+          paint);
+      y += dash + gap;
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedVLinePainter oldDelegate) =>
+      oldDelegate.color != color;
 }
