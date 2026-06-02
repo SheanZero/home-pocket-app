@@ -614,7 +614,7 @@ class SZh extends S {
 
   @override
   String homeHeroPreviousMonthSubline(String amount) {
-    return '上月 $amount';
+    return '上月同期 $amount';
   }
 
   @override

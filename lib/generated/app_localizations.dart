@@ -1242,7 +1242,7 @@ abstract class S {
   /// Hero header previous-month sub-line
   ///
   /// In en, this message translates to:
-  /// **'Last month {amount}'**
+  /// **'Last month (same period) {amount}'**
   String homeHeroPreviousMonthSubline(String amount);
 
   /// Ring section title — single mode (fallback if reusing homeJoyFullness is rejected)

@@ -616,7 +616,7 @@ class SJa extends S {
 
   @override
   String homeHeroPreviousMonthSubline(String amount) {
-    return '先月 $amount';
+    return '先月同期 $amount';
   }
 
   @override

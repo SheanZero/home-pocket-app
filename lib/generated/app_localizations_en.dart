@@ -622,7 +622,7 @@ class SEn extends S {
 
   @override
   String homeHeroPreviousMonthSubline(String amount) {
-    return 'Last month $amount';
+    return 'Last month (same period) $amount';
   }
 
   @override

@@ -793,7 +793,7 @@
   "@homeHeroCardLabelGroup": {
     "description": "Hero header label — group mode (D-02)"
   },
-  "homeHeroPreviousMonthSubline": "先月 {amount}",
+  "homeHeroPreviousMonthSubline": "先月同期 {amount}",
   "@homeHeroPreviousMonthSubline": {
     "description": "Hero header previous-month sub-line",
     "placeholders": {
