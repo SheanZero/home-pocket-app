@@ -90,6 +90,19 @@ void main() {
       );
     }
 
+    Future<MonthlyReport> executeWindowWithAsOf({
+      required DateTime asOf,
+      DateTime? startDate,
+      DateTime? endDate,
+    }) {
+      return useCase.execute(
+        bookId: 'book1',
+        startDate: startDate ?? DateTime(2026, 2),
+        endDate: endDate ?? DateTime(2026, 2, 28, 23, 59, 59),
+        asOf: asOf,
+      );
+    }
+
     test('returns zero totals for empty month', () async {
       final report = await executeWindow();
 
@@ -461,6 +474,169 @@ void main() {
         expect(report.previousMonthComparison!.previousYear, 2026);
         expect(report.previousMonthComparison!.previousMonth, 3);
         expect(report.previousMonthComparison!.previousExpenses, 120000);
+      },
+    );
+
+    // -------------------------------------------------------------------------
+    // Same-period comparison tests (asOf parameter)
+    // -------------------------------------------------------------------------
+
+    test(
+      'same-period mid-month: asOf=Jun-2, report=June → prev covers May 1–2 only',
+      () async {
+        // Insert expense on May 1 (within the same-period window)
+        await insertExpense(
+          id: 'tx_may_01',
+          amount: 10000,
+          timestamp: DateTime(2026, 5, 1),
+        );
+        // Insert expense on May 3 (OUTSIDE the same-period window)
+        await insertExpense(
+          id: 'tx_may_03',
+          amount: 20000,
+          timestamp: DateTime(2026, 5, 3),
+          prevHash: 'hash_tx_may_01',
+        );
+        // Insert expense on May 2 (within the same-period window)
+        await insertExpense(
+          id: 'tx_may_02',
+          amount: 5000,
+          timestamp: DateTime(2026, 5, 2),
+          prevHash: 'hash_tx_may_03',
+        );
+
+        // Report covers June (past month for assertValid), asOf=2026-06-02
+        final report = await executeWindowWithAsOf(
+          asOf: DateTime(2026, 6, 2),
+          startDate: DateTime(2026, 6, 1),
+          endDate: DateTime(2026, 6, 2, 23, 59, 59),
+        );
+
+        expect(report.previousMonthComparison, isNotNull);
+        expect(report.previousMonthComparison!.previousMonth, 5);
+        expect(report.previousMonthComparison!.previousYear, 2026);
+        // Only May 1 (10000) + May 2 (5000) should be included, NOT May 3 (20000)
+        expect(report.previousMonthComparison!.previousExpenses, 15000);
+      },
+    );
+
+    test(
+      'same-period last-day-of-month: asOf=Apr-30, report=April → prev covers full March',
+      () async {
+        // April has 30 days; asOf on last day → full previous month (March)
+        await insertExpense(
+          id: 'tx_mar_01',
+          amount: 8000,
+          timestamp: DateTime(2026, 3, 1),
+        );
+        await insertExpense(
+          id: 'tx_mar_31',
+          amount: 4000,
+          timestamp: DateTime(2026, 3, 31),
+          prevHash: 'hash_tx_mar_01',
+        );
+
+        final report = await executeWindowWithAsOf(
+          asOf: DateTime(2026, 4, 30),
+          startDate: DateTime(2026, 4, 1),
+          endDate: DateTime(2026, 4, 30, 23, 59, 59),
+        );
+
+        expect(report.previousMonthComparison, isNotNull);
+        expect(report.previousMonthComparison!.previousMonth, 3);
+        // Full March: 8000 + 4000 = 12000
+        expect(report.previousMonthComparison!.previousExpenses, 12000);
+      },
+    );
+
+    test(
+      'short-month clamp: asOf=Mar-30, prev=Feb (28 days) → prevEnd=Feb-28, not Mar-2',
+      () async {
+        // February 2026 has 28 days; asOf=Mar-30 should clamp to Feb-28
+        await insertExpense(
+          id: 'tx_feb_28',
+          amount: 7000,
+          timestamp: DateTime(2026, 2, 28),
+        );
+        // This would appear if we accidentally overflow to March
+        await insertExpense(
+          id: 'tx_mar_01_check',
+          amount: 9999,
+          timestamp: DateTime(2026, 3, 1),
+          prevHash: 'hash_tx_feb_28',
+        );
+
+        final report = await executeWindowWithAsOf(
+          asOf: DateTime(2026, 3, 30),
+          startDate: DateTime(2026, 3, 1),
+          endDate: DateTime(2026, 3, 30, 23, 59, 59),
+        );
+
+        expect(report.previousMonthComparison, isNotNull);
+        expect(report.previousMonthComparison!.previousMonth, 2);
+        // Only Feb data (7000), NOT the March data (9999)
+        expect(report.previousMonthComparison!.previousExpenses, 7000);
+      },
+    );
+
+    test(
+      'historical month: asOf in later month → full-vs-full comparison unchanged',
+      () async {
+        // Viewing January 2026 while asOf is June 2026 → full Jan vs full Dec
+        await insertExpense(
+          id: 'tx_dec_15',
+          amount: 50000,
+          timestamp: DateTime(2025, 12, 15),
+        );
+        await insertExpense(
+          id: 'tx_dec_31',
+          amount: 20000,
+          timestamp: DateTime(2025, 12, 31),
+          prevHash: 'hash_tx_dec_15',
+        );
+
+        final report = await executeWindowWithAsOf(
+          asOf: DateTime(2026, 6, 2),
+          startDate: DateTime(2026, 1, 1),
+          endDate: DateTime(2026, 1, 31, 23, 59, 59),
+        );
+
+        expect(report.previousMonthComparison, isNotNull);
+        expect(report.previousMonthComparison!.previousMonth, 12);
+        expect(report.previousMonthComparison!.previousYear, 2025);
+        // Full December: 50000 + 20000 = 70000
+        expect(report.previousMonthComparison!.previousExpenses, 70000);
+      },
+    );
+
+    test(
+      'cross-year boundary: asOf=Jan-15 2026, report=January 2026 → prev=Dec 2025 day 15',
+      () async {
+        // Report month=Jan 2026, asOf=Jan 15 2026 → prev covers Dec 1–15 2025
+        await insertExpense(
+          id: 'tx_dec_10',
+          amount: 30000,
+          timestamp: DateTime(2025, 12, 10),
+        );
+        // Dec 20 is outside the same-period window (day > 15)
+        await insertExpense(
+          id: 'tx_dec_20',
+          amount: 15000,
+          timestamp: DateTime(2025, 12, 20),
+          prevHash: 'hash_tx_dec_10',
+        );
+
+        final report = await executeWindowWithAsOf(
+          asOf: DateTime(2026, 1, 15),
+          startDate: DateTime(2026, 1, 1),
+          endDate: DateTime(2026, 1, 15, 23, 59, 59),
+        );
+
+        expect(report.previousMonthComparison, isNotNull);
+        expect(report.previousMonthComparison!.previousMonth, 12);
+        expect(report.previousMonthComparison!.previousYear, 2025);
+        // Only Dec 10 (30000), NOT Dec 20 (15000)
+        expect(report.previousMonthComparison!.previousExpenses, 30000);
       },
     );
   });

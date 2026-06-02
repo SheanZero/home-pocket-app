@@ -27,6 +27,7 @@ class GetMonthlyReportUseCase {
     required DateTime startDate,
     required DateTime endDate,
     EntrySource? entrySourceFilter,
+    DateTime? asOf,
   }) async {
     TimeWindowValidation.assertValid(startDate, endDate);
     final anchorYear = endDate.year;
@@ -111,6 +112,7 @@ class GetMonthlyReportUseCase {
       currentIncome: totals.totalIncome,
       currentExpenses: totals.totalExpenses,
       entrySourceFilter: entrySourceFilter,
+      asOf: asOf ?? DateTime.now(),
     );
 
     return MonthlyReport(
@@ -179,6 +181,7 @@ class GetMonthlyReportUseCase {
     required int currentMonth,
     required int currentIncome,
     required int currentExpenses,
+    required DateTime asOf,
     EntrySource? entrySourceFilter,
   }) async {
     int prevYear = currentYear;
@@ -189,7 +192,26 @@ class GetMonthlyReportUseCase {
     }
 
     final prevStart = DateTime(prevYear, prevMonth, 1);
-    final prevEnd = DateTime(prevYear, prevMonth + 1, 0, 23, 59, 59);
+
+    final daysInPrevMonth = DateTime(prevYear, prevMonth + 1, 0).day;
+    final daysInCurMonth = DateTime(currentYear, currentMonth + 1, 0).day;
+
+    final isCurrentMonth =
+        asOf.year == currentYear && asOf.month == currentMonth;
+
+    final int effectiveDay;
+    if (isCurrentMonth) {
+      final isLastDayOfMonth = asOf.day >= daysInCurMonth;
+      if (isLastDayOfMonth) {
+        effectiveDay = daysInPrevMonth;
+      } else {
+        effectiveDay = asOf.day > daysInPrevMonth ? daysInPrevMonth : asOf.day;
+      }
+    } else {
+      effectiveDay = daysInPrevMonth;
+    }
+
+    final prevEnd = DateTime(prevYear, prevMonth, effectiveDay, 23, 59, 59);
 
     final prevTotals = await _analyticsRepository.getMonthlyTotals(
       bookId: bookId,
