@@ -57,6 +57,26 @@ class DateFormatter {
     return DateFormat.E(locale.toString()).format(date);
   }
 
+  /// Month-only band label for the Best Joy calendar tile (quick 260602-u5x):
+  /// ja/zh render the "M月" form, every other locale the abbreviated month
+  /// ("MMM"). Kept here so the CJK pattern lives in the i18n formatter rather
+  /// than a UI widget.
+  static String formatCalendarMonth(DateTime date, Locale locale) {
+    switch (locale.languageCode) {
+      case 'ja':
+      case 'zh':
+        return DateFormat('M月', locale.toString()).format(date);
+      case 'en':
+      default:
+        return DateFormat('MMM', locale.toString()).format(date);
+    }
+  }
+
+  /// Day-of-month numeral for the Best Joy calendar tile (locale-stable digits).
+  static String formatCalendarDay(DateTime date, Locale locale) {
+    return DateFormat('d', locale.toString()).format(date);
+  }
+
   static String formatRelative(DateTime date, Locale locale) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
