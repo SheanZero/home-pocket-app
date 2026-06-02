@@ -3,273 +3,228 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>悦己充盈环 · 5 种重设计方案</title>
+<title>悦己充盈环 · 无间隙三环 · 配色过渡风格探索</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --page:#eef2f3; --card:#ffffff; --surface:#f6fbfb; --line:#e3eaeb;
-    --ink:#14333a; --sub:#56707a; --muted:#8da0a6;
-    /* 小确幸 highlights = teal */
-    --hl-d:#0E9AA7; --hl-s:#45C2C8; --hl-t:#DCF1F2;
-    /* 满足度 satisfaction = green */
-    --st-d:#2FA37A; --st-s:#62C994; --st-t:#DDF1E9;
-    /* 悦己目标 joy-target = gold */
-    --tg-d:#E59512; --tg-s:#F7C254; --tg-t:#FBEBC9;
-    --val:#C9810F;
-    --chip:#eef3f3; --chip-ink:#46606a;
-    --shadow:0 10px 28px -8px rgba(28,122,134,.18);
+    --bg:#F2EEE6; --ink:#2A2622; --sub:#6B6358; --muted:#9A9082; --line:#E2DACd;
+    --card:#FFFFFF; --screen:#ECE6DA; --bezel:#1d1c1a; --track:#E9F0F0;
+    --val:#B5790E;
+    --paper-accent:#0E9AA7;
   }
   body.dark{
-    --page:#0b1518; --card:#16282e; --surface:#102025; --line:#27393f;
-    --ink:#eaf4f4; --sub:#a7bcc1; --muted:#6f868c;
-    --hl-d:#3FC2CE; --hl-s:#6FE0E8; --hl-t:#173238;
-    --st-d:#56C79B; --st-s:#86DAB8; --st-t:#163029;
-    --tg-d:#F0B54A; --tg-s:#FFD27A; --tg-t:#3A2F15;
+    --bg:#13181A; --ink:#ECEFEF; --sub:#A6B2B4; --muted:#6E7C7E; --line:#26343a;
+    --card:#1A282E; --screen:#0E1416; --bezel:#000000; --track:#22343A;
     --val:#F0B54A;
-    --chip:#1c3036; --chip-ink:#a7bcc1;
-    --shadow:0 12px 30px -10px rgba(0,0,0,.5);
+    --paper-accent:#3FC2CE;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--page);color:var(--ink);
-    font-family:-apple-system,"Segoe UI",Inter,"PingFang SC","Hiragino Sans","Microsoft YaHei",sans-serif;
-    transition:background .25s,color .25s;}
-  .wrap{max-width:1320px;margin:0 auto;padding:40px 32px 80px;}
-  header.top{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:8px;flex-wrap:wrap}
-  h1{font-size:28px;font-weight:800;margin:0 0 6px}
-  .lede{color:var(--sub);font-size:15px;line-height:1.55;max-width:820px;margin:0}
-  .callout{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-size:13.5px;line-height:1.55;color:var(--sub)}
-  .callout b{color:var(--ink)}
+  body{margin:0;background:
+      radial-gradient(120% 80% at 12% -10%, color-mix(in oklab, var(--paper-accent) 9%, transparent), transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,"Segoe UI",sans-serif;
+    transition:background .3s,color .3s;}
+  .wrap{max-width:1280px;margin:0 auto;padding:44px 30px 90px;}
+  .top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:6px}
+  h1{font-family:"Fraunces",Georgia,serif;font-weight:700;font-size:34px;line-height:1.1;margin:0;letter-spacing:-.5px}
+  h1 em{font-style:italic;color:var(--paper-accent)}
+  .lede{color:var(--sub);font-size:14.5px;line-height:1.6;max-width:760px;margin:12px 0 0}
+  .lede b{color:var(--ink)}
+  .pill{font-family:"Fraunces",serif;font-style:italic}
   .toggle{flex:none;display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);
-    border-radius:999px;padding:8px 14px;cursor:pointer;color:var(--ink);font-size:13px;font-weight:600;box-shadow:var(--shadow)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:26px;margin-top:26px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:var(--shadow);
-    display:flex;flex-direction:column;gap:14px}
-  .chead{display:flex;align-items:center;gap:10px}
-  .badge{background:var(--tg-d);color:#fff;font-weight:800;font-size:13px;border-radius:8px;padding:4px 10px;letter-spacing:.5px}
-  .chead h3{margin:0;font-size:20px;font-weight:700}
-  .stage{position:relative;height:236px;background:var(--surface);border-radius:18px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-  .stage svg{display:block}
-  .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;pointer-events:none}
-  .ctr.off{position:static;inset:auto}
-  .ctr .big{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.5px;color:var(--val)}
-  .ctr .emoji{font-size:24px;line-height:1.1}
-  .ctr .sm{font-size:10px;color:var(--muted)}
-  .legend{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-  .legend span{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--sub)}
-  .legend b{color:var(--ink);font-variant-numeric:tabular-nums}
-  .dot{width:10px;height:10px;border-radius:50%}
-  .idea{font-size:13.5px;line-height:1.5;color:var(--sub);margin:0}
-  .note{background:var(--chip);color:var(--chip-ink);border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.45}
-  .meta{display:flex;flex-wrap:wrap;gap:6px}
-  .tag{font-size:11px;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:999px;padding:3px 9px}
-  table{width:100%;border-collapse:collapse;margin-top:40px;font-size:13.5px;background:var(--card);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
-  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)}
-  th{background:var(--surface);font-weight:700;font-size:12px;color:var(--sub);text-transform:uppercase;letter-spacing:.4px}
-  td:first-child{font-weight:700}
-  tr:last-child td{border-bottom:none}
-  .rec{margin-top:36px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--tg-d);
-    border-radius:14px;padding:18px 22px;box-shadow:var(--shadow)}
-  .rec h2{margin:0 0 8px;font-size:17px}
-  .rec p{margin:6px 0;font-size:14px;line-height:1.6;color:var(--sub)}
-  .rec code{background:var(--chip);padding:1px 5px;border-radius:5px;font-size:12.5px}
-  .src{margin-top:30px;font-size:12px;color:var(--muted);line-height:1.7}
+    border-radius:999px;padding:9px 16px;cursor:pointer;color:var(--ink);font-size:13px;font-weight:600}
+  .spec{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+  .spec span{font-size:12.5px;color:var(--sub);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 13px}
+  .spec b{color:var(--ink)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(344px,1fr));gap:34px 26px;margin-top:38px;justify-items:center}
+  /* phone */
+  .phone{width:344px;background:var(--bezel);border-radius:44px;padding:10px;box-shadow:0 24px 50px -20px rgba(20,40,44,.45),0 4px 12px rgba(0,0,0,.15)}
+  .screen{background:var(--screen);border-radius:34px;padding:14px 13px 18px;overflow:hidden;position:relative}
+  .statusbar{display:flex;justify-content:space-between;align-items:center;padding:2px 8px 12px;font-size:12px;color:var(--sub);font-weight:600}
+  .statusbar .dots{display:flex;gap:3px}
+  .statusbar .dots i{width:5px;height:5px;border-radius:50%;background:var(--muted);display:block}
+  .vname{font-family:"Fraunces",serif;font-weight:700;font-size:15px;margin:0 4px 10px;color:var(--ink);display:flex;align-items:baseline;gap:7px}
+  .vname small{font-family:"PingFang SC",sans-serif;font-weight:600;font-size:11px;color:var(--paper-accent);letter-spacing:.3px}
+  /* hero card (mirrors app Region 4) */
+  .hero{background:var(--card);border-radius:20px;padding:16px 15px;box-shadow:0 2px 10px rgba(20,40,44,.05)}
+  .hero .htitle{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--ink);margin-bottom:12px}
+  .hero .htitle .info{margin-left:auto;width:15px;height:15px;border-radius:50%;border:1.4px solid var(--muted);color:var(--muted);font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700}
+  .ringrow{display:flex;align-items:center;gap:12px}
+  .ringwrap{position:relative;width:128px;height:128px;flex:none}
+  .ringwrap .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+  .ringwrap .ctr .v{font-size:12px;font-weight:800;color:var(--val);font-variant-numeric:tabular-nums;letter-spacing:-.4px}
+  .ringwrap .ctr .l{font-size:8px;color:var(--muted);margin-top:1px}
+  .legend{display:flex;flex-direction:column;gap:9px;flex:1}
+  .legend .row{display:flex;align-items:center;gap:7px;font-size:12.5px}
+  .legend .row .dot{width:9px;height:9px;border-radius:50%;flex:none}
+  .legend .row .lab{color:var(--sub);font-weight:600;white-space:nowrap}
+  .legend .row .val{margin-left:auto;color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
+  .note{margin:11px 4px 2px;font-size:11.5px;line-height:1.5;color:var(--muted)}
+  .note b{color:var(--sub)}
+  footer{margin-top:56px;border-top:1px solid var(--line);padding-top:22px;color:var(--muted);font-size:12.5px;line-height:1.7}
+  footer b{color:var(--sub)}
+  .rec{margin-top:26px;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--paper-accent);border-radius:12px;padding:16px 20px}
+  .rec h2{font-family:"Fraunces",serif;margin:0 0 6px;font-size:17px}
+  .rec p{margin:5px 0;font-size:13.5px;line-height:1.6;color:var(--sub)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="top">
+  <div class="top">
     <div>
-      <h1>悦己充盈环 · 5 种重设计方案</h1>
-      <p class="lede">首页「悦己充盈」环展示的是 <b>三个相互独立的悦己指标</b>（各有各的标度，<b>不构成占比、不相加</b>），
-      与 Apple Fitness 三环同理。重设计目标：<b>更有亲和度</b>（圆头端点 / 粉彩 / 暖心圆心 / 有机形态）与
-      <b>颜色过渡更自然</b>（环内 OKLCH 柔光 + 三色按明度错开的类比族）。</p>
-      <div class="callout">
-        三个指标（沿用现有 <b>HappinessRingsPainter</b> 语义与配色）：
-        <span style="color:var(--hl-d)">● 小确幸</span> highlights 数量（标度 /10）·
-        <span style="color:var(--st-d)">● 满足度</span> 满足度均值（0–10）·
-        <span style="color:var(--tg-d)">● 悦己目标</span> 累计 ¥ ÷ 月目标（0–100%）。
-        圆心 = 悦己指数（累计值）+ 目标。<b>因此任何「单环分占比 / 单仪表 / 堆叠求和」都不成立——5 个方案均保持三指标独立。</b>
-        示例数据：小确幸 7/10、满足度 8.4、悦己目标 62%（¥12,400 / ¥20,000）。
-      </div>
+      <h1>悦己充盈环 · <em>无间隙三环</em></h1>
+      <p class="lede">锁定 <b>D1 同心三环</b> 结构（三个相互独立的悦己指标，非占比）。本轮只动两件事：
+      <b>① 去掉环与环之间的留白</b>（三环相切成一条连续带）；<b>② 在配色过渡上给出 6 种风格</b>，
+      全部用 <b>OKLCH</b> 感知均匀插值，避免脏灰中点。按真机尺寸放进手机里看（环 ≈ 120–148px）。</p>
     </div>
-    <button class="toggle" onclick="document.body.classList.toggle('dark')">◐ 切换深/浅色</button>
-  </header>
+    <button class="toggle" onclick="document.body.classList.toggle('dark');render()">◐ 深 / 浅色</button>
+  </div>
+  <div class="spec">
+    <span>外环 <b style="color:#0E9AA7">小确幸</b> 7/10</span>
+    <span>中环 <b style="color:#2FA37A">满足度</b> 8.4</span>
+    <span>内环 <b style="color:#E59512">悦己目标</b> 62%</span>
+    <span>圆心 <b>悦己指数 ¥12,400</b></span>
+    <span>环间距 <b>0（相切）</b></span>
+    <span>端点 <b>圆头</b></span>
+  </div>
 
   <div class="grid" id="grid"></div>
 
-  <table>
-    <thead><tr><th>方案</th><th>三指标独立</th><th>读数清晰</th><th>亲和度</th><th>色觉友好</th><th>改造成本</th></tr></thead>
-    <tbody id="cmp"></tbody>
-  </table>
-
   <div class="rec">
-    <h2>推荐路径</h2>
-    <p><b>低风险首选 → D1 柔光三环。</b>与现有 <code>HappinessRingsPainter</code>（三同心环 + SweepGradient + 圆头）一一对应，
-    只把纯色换成同色系 2 段 OKLCH 柔光、三色按明度错开、圆心加暖意。改动最小，可直接落到现有 <code>CustomPainter</code>。</p>
-    <p><b>读数最佳 → D2 标签同心环</b>（每环起点放图标、弧尖挂数值胶囊，解决「圆环看不出具体数字」的老问题，且图标/标签是非颜色冗余编码，天然色盲友好）；
-    <b>最贴主题 → D4 悦己之花</b>（三花瓣长度=各指标进度，"绽放即充盈"，情感最强）。</p>
-    <p><b>都满足：</b>三指标各自独立（半径/扇区/独立仪表区隔），三色 teal→green→gold 按<b>明度</b>错开（非仅色相）以过色盲与 120dp，
-    环内柔光不跨环、环间留白，避免被误读成"一个整体"。</p>
+    <h2>怎么选</h2>
+    <p><b>最稳 → ① 柔光渐变 / ⑤ 粉彩扁平</b>：与现有 <code>HappinessRingsPainter</code> 改动最小，只换渐变/纯色 + 去间距。</p>
+    <p><b>最有「充盈感」→ ② 扫掠尾迹 / ⑥ 充盈光晕</b>：弧头亮、向尾渐隐或外发光，悦己「点亮」的情绪最强；② 与 Flutter `SweepGradient` 天然契合。</p>
+    <p><b>过渡最融合 → ③ 冷暖贯通</b>：三环取自同一条 teal→green→gold 渐变带，相切后读作一条从外到内的暖意流动。<b>④ 双色相位</b>介于其间，每环在同family内做色相位移，更活泼。</p>
   </div>
 
-  <div class="src">
-    研究来源（节选）：Apple HIG Activity Rings（三独立目标 + 用颜色&半径&标签区隔）· Apple「Differentiate Without Color」·
-    Gentler Streak（把数据翻译成温度）· radial-bar 最佳实践（chartengine.io）· small-multiples 径向（flerlagetwins）·
-    petal/spoke 长度编码（statalist）· OKLCH 感知均匀渐变（css-tricks, uploadcare）· 色盲安全（datawrapper, Apple）。
-    <br>说明：Pencil（home-pocket-palette.pen）在当前环境无法落盘（已知限制 D-03b），故以可在浏览器查看/入库的 HTML/SVG 交付。
-  </div>
+  <footer>
+    全部方案：三指标各自独立（半径区隔，去间距不改变"三个独立环"的读法）；三色按<b>明度</b>错开以过色盲与小尺寸；
+    OKLCH 环内插值；圆头端点。Pencil 当前环境无法落盘（D-03b），故以可入库的 HTML/SVG 交付，已按真机尺寸 + 手机外框呈现。
+  </footer>
 </div>
 
 <script>
-// angle: 0 = top, clockwise positive (deg)
-function pt(cx,cy,r,a){const t=a*Math.PI/180;return [cx+r*Math.sin(t), cy-r*Math.cos(t)];}
-function arc(cx,cy,r,a0,a1){
-  const [x0,y0]=pt(cx,cy,r,a0),[x1,y1]=pt(cx,cy,r,a1);
-  const large=Math.abs(a1-a0)>180?1:0, sweep=a1>a0?1:0;
-  return `M ${x0.toFixed(2)} ${y0.toFixed(2)} A ${r} ${r} 0 ${large} ${sweep} ${x1.toFixed(2)} ${y1.toFixed(2)}`;
-}
-function sArc(cx,cy,r,a0,a1,stroke,w,cap='round'){
-  return `<path d="${arc(cx,cy,r,a0,a1)}" fill="none" stroke="${stroke}" stroke-width="${w}" stroke-linecap="${cap}"/>`;
-}
-function trackCircle(cx,cy,r,col,w){return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="${w}"/>`;}
-function lg(id,c1,c2,vert){
-  const v=vert?'x1="0" y1="0" x2="0" y2="1"':'x1="0" y1="0" x2="1" y2="1"';
-  return `<linearGradient id="${id}" ${v}><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>`;
-}
-// metric trio (outer->inner): 小确幸 teal, 满足度 green, 悦己目标 gold
-const M=[
-  {k:'hl',icon:'🍀',label:'小确幸',val:'7',chip:'7/10',p:.70},
-  {k:'st',icon:'⭐',label:'满足度',val:'8.4',chip:'8.4',p:.84},
-  {k:'tg',icon:'🎯',label:'悦己目标',val:'62%',chip:'62%',p:.62},
-];
-const D=k=>`var(--${k}-d)`, S=k=>`var(--${k}-s)`, T=k=>`var(--${k}-t)`;
-const RADII=[86,64,44];
-const centerHTML=`<span class="emoji">🌸</span><span class="big">¥12,400</span><span class="sm">悦己指数 · 目标 ¥20,000</span>`;
-const centerNoEmoji=`<span class="big">¥12,400</span><span class="sm">目标 ¥20,000</span>`;
+/* ---------- OKLCH / OKLab interpolation ---------- */
+function hex2rgb(h){
+  if(h[0]!=='#'){const m=h.match(/\d+(\.\d+)?/g);return [m[0],m[1],m[2]].map(v=>(+v)/255);}
+  h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)].map(v=>v/255);}
+const s2l=c=>c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4);
+const l2s=c=>c<=0.0031308?12.92*c:1.055*Math.pow(c,1/2.4)-0.055;
+function rgb2oklab([r,g,b]){r=s2l(r);g=s2l(g);b=s2l(b);
+  const l=Math.cbrt(0.4122214708*r+0.5363325363*g+0.0514459929*b);
+  const m=Math.cbrt(0.2119034982*r+0.6806995451*g+0.1073969566*b);
+  const s=Math.cbrt(0.0883024619*r+0.2817188376*g+0.6299787005*b);
+  return [0.2104542553*l+0.7936177850*m-0.0040720468*s,
+          1.9779984951*l-2.4285922050*m+0.4505937099*s,
+          0.0259040371*l+0.7827717662*m-0.8086757660*s];}
+function oklab2rgb([L,a,b]){const l=(L+0.3963377774*a+0.2158037573*b)**3,
+  m=(L-0.1055613458*a-0.0638541728*b)**3, s=(L-0.0894841775*a-1.2914855480*b)**3;
+  return [4.0767416621*l-3.3077115913*m+0.2309699292*s,
+         -1.2684380046*l+2.6097574011*m-0.3413193965*s,
+         -0.0041960863*l-0.7034186147*m+1.7076147010*s]
+         .map(c=>Math.round(Math.max(0,Math.min(1,l2s(c)))*255));}
+function mix(h1,h2,t){const a=rgb2oklab(hex2rgb(h1)),b=rgb2oklab(hex2rgb(h2));
+  const [r,g,bb]=oklab2rgb([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]);
+  return `rgb(${r},${g},${bb})`;}
+function lighten(h,t){return mix(h,'#ffffff',t);}    // toward white
+// teal->green->gold ramp sample
+function ramp(t,c){return t<.5?mix(c.hl.d,c.st.d,t*2):mix(c.st.d,c.tg.d,(t-.5)*2);}
 
-// ---------- D1 柔光三环 ----------
-function d1(){
-  const cx=100,cy=100,w=14;
-  let defs='<defs>',body='';
-  M.forEach((m,i)=>{const id='d1'+m.k;defs+=lg(id,S(m.k),D(m.k));
-    body+=trackCircle(cx,cy,RADII[i],T(m.k),w)+sArc(cx,cy,RADII[i],0,m.p*360-0.01,`url(#${id})`,w);});
-  defs+='</defs>';
-  return {svg:`<svg width="200" height="200" viewBox="0 0 200 200">${defs}${body}</svg>`,ctr:centerHTML};
-}
-// ---------- D2 标签同心环 (icon at start + value chip at tip) ----------
-function d2(){
-  const cx=100,cy=100,w=13;
-  let defs='<defs>',body='',deco='';
-  M.forEach((m,i)=>{const r=RADII[i],id='d2'+m.k;defs+=lg(id,S(m.k),D(m.k));
-    body+=trackCircle(cx,cy,r,T(m.k),w)+sArc(cx,cy,r,0,m.p*360-0.01,`url(#${id})`,w);
-    const [ix,iy]=pt(cx,cy,r,0);
-    deco+=`<text x="${ix}" y="${iy+4}" text-anchor="middle" font-size="11">${m.icon}</text>`;
-    const [tx,ty]=pt(cx,cy,r,m.p*360);
-    const cw=m.chip.length*7+12, ch=16, rx=Math.min(Math.max(tx,cw/2+2),198-cw/2);
-    deco+=`<g><rect x="${rx-cw/2}" y="${ty-ch/2}" width="${cw}" height="${ch}" rx="8" fill="var(--card)" stroke="${D(m.k)}" stroke-width="1.2"/>`
-      +`<text x="${rx}" y="${ty+3.5}" text-anchor="middle" font-size="10" font-weight="700" fill="${D(m.k)}">${m.chip}</text></g>`;
-  });
-  defs+='</defs>';
-  return {svg:`<svg width="200" height="200" viewBox="0 0 200 200">${defs}${body}${deco}</svg>`,
-    ctr:`<span class="big">¥12,400</span><span class="sm">悦己指数</span>`};
-}
-// ---------- D3 三连小仪表 (small-multiple gauges) ----------
-function d3(){
-  const cy=86,r=40,w=10,a0=-130,a1=130;
-  const xs=[58,160,262];
-  let defs='<defs>',body='';
-  M.forEach((m,i)=>{const cx=xs[i],id='d3'+m.k;defs+=lg(id,S(m.k),D(m.k));
-    body+=`<path d="${arc(cx,cy,r,a0,a1)}" fill="none" stroke="${T(m.k)}" stroke-width="${w}" stroke-linecap="round"/>`;
-    body+=`<path d="${arc(cx,cy,r,a0,a0+(a1-a0)*m.p)}" fill="none" stroke="url(#${id})" stroke-width="${w}" stroke-linecap="round"/>`;
-    body+=`<text x="${cx}" y="${cy+2}" text-anchor="middle" font-size="22" font-weight="800" fill="${D(m.k)}">${m.val}</text>`;
-    body+=`<text x="${cx}" y="${cy+24}" text-anchor="middle" font-size="11" fill="var(--muted)">本月</text>`;
-    body+=`<text x="${cx}" y="${cy+r+34}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--sub)">${m.icon} ${m.label}</text>`;
-  });
-  defs+='</defs>';
-  return {svg:`<svg width="320" height="180" viewBox="0 0 320 180">${defs}${body}</svg>`,
-    ctr:`<span class="big" style="position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:16px">悦己指数 ¥12,400 / 目标 ¥20,000</span>`,
-    ctrCls:'off'};
-}
-// ---------- D4 悦己之花 (petals, length = progress) ----------
-function d4(){
-  const cx=100,cy=100,bud=22,maxLen=62,base=10;
-  let defs='<defs>',petals='',icons='';
-  M.forEach((m,i)=>{const A=i*120,id='d4'+m.k;defs+=lg(id,S(m.k),D(m.k),true);
-    const tl=base+maxLen, len=base+m.p*maxLen;
-    const trackY=cy-(bud+tl/2), fillY=cy-(bud+len/2);
-    petals+=`<g transform="rotate(${A} ${cx} ${cy})">`
-      +`<ellipse cx="${cx}" cy="${trackY}" rx="15" ry="${tl/2}" fill="${T(m.k)}"/>`
-      +`<ellipse cx="${cx}" cy="${fillY}" rx="15" ry="${len/2}" fill="url(#${id})"/></g>`;
-    const [ix,iy]=pt(cx,cy,bud+len+10,A);
-    icons+=`<text x="${ix.toFixed(1)}" y="${(iy+4).toFixed(1)}" text-anchor="middle" font-size="12">${m.icon}</text>`;
-  });
-  defs+='</defs>';
-  const center=`<circle cx="${cx}" cy="${cy}" r="${bud}" fill="var(--surface)"/>`;
-  return {svg:`<svg width="200" height="200" viewBox="0 0 200 200">${defs}${petals}${center}${icons}</svg>`,
-    ctr:`<span class="emoji">🌼</span><span class="big" style="font-size:15px">¥12,400</span>`};
-}
-// ---------- D5 点阵充能环 (segmented energy rings) ----------
-function d5(){
-  const cx=100,cy=100,w=12,n=10,gap=11;
-  let defs='<defs>',body='';
-  M.forEach((m,i)=>{const r=RADII[i],id='d5'+m.k;defs+=lg(id,S(m.k),D(m.k));
-    const lit=Math.round(m.p*n), step=360/n;
-    for(let j=0;j<n;j++){const a0=j*step+gap/2,a1=(j+1)*step-gap/2;
-      const col=j<lit?`url(#${id})`:T(m.k);
-      body+=sArc(cx,cy,r,a0,a1,col,w);}
-  });
-  defs+='</defs>';
-  return {svg:`<svg width="200" height="200" viewBox="0 0 200 200">${defs}${body}</svg>`,ctr:centerNoEmoji};
+/* ---------- geometry ---------- */
+function pt(cx,cy,r,a){const t=a*Math.PI/180;return [cx+r*Math.sin(t),cy-r*Math.cos(t)];}
+function arcD(cx,cy,r,a0,a1){const [x0,y0]=pt(cx,cy,r,a0),[x1,y1]=pt(cx,cy,r,a1);
+  const large=Math.abs(a1-a0)>180?1:0,sweep=a1>a0?1:0;
+  return `M ${x0.toFixed(2)} ${y0.toFixed(2)} A ${r} ${r} 0 ${large} ${sweep} ${x1.toFixed(2)} ${y1.toFixed(2)}`;}
+function trackC(cx,cy,r,col,w){return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="${w}"/>`;}
+function solidArc(cx,cy,r,prog,col,w){return `<path d="${arcD(cx,cy,r,0,prog*360-0.01)}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`;}
+// sweep along the arc, OKLCH cTail->cHead, optional alpha fade tail
+function sweepArc(cx,cy,r,prog,cTail,cHead,w,fade){
+  const total=prog*360; if(total<=0.5) return '';
+  const N=Math.max(3,Math.ceil(total/9)); let s='';
+  for(let i=0;i<N;i++){const t1=(i+1)/N;const a0=(i/N)*total;const a1=t1*total+0.8;
+    const col=mix(cTail,cHead,t1);const op=fade?(0.34+0.66*t1).toFixed(2):1;
+    s+=`<path d="${arcD(cx,cy,r,a0,a1)}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="butt" opacity="${op}"/>`;}
+  const [hx,hy]=pt(cx,cy,r,total);s+=`<circle cx="${hx.toFixed(1)}" cy="${hy.toFixed(1)}" r="${(w/2).toFixed(1)}" fill="${cHead}"/>`;
+  if(!fade){const [sx,sy]=pt(cx,cy,r,0);s+=`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${(w/2).toFixed(1)}" fill="${cTail}"/>`;}
+  return s;}
+
+/* ---------- metric model ---------- */
+const METRICS=[{k:'hl',label:'小确幸',val:'7',p:.70},{k:'st',label:'满足度',val:'8.4',p:.84},{k:'tg',label:'悦己目标',val:'62%',p:.62}];
+const GEO={box:128,cx:64,cy:64,w:13,radii:[51,38,25]}; // spacing 13 == w -> rings touch (no gap)
+
+function themeColors(){
+  const dark=document.body.classList.contains('dark');
+  return dark?{
+    hl:{d:'#3FC2CE'},st:{d:'#56C79B'},tg:{d:'#F0B54A'},
+    track:'#22343A',shift:{hl:'#5BE0D2',st:'#39B7C0',tg:'#F58A5B'}
+  }:{
+    hl:{d:'#0E9AA7'},st:{d:'#2FA37A'},tg:{d:'#E59512'},
+    track:'#E9F0F0',shift:{hl:'#19C0C6',st:'#2BB58A',tg:'#F4A33F'}
+  };
 }
 
-const designs=[
-  {id:'D1',zh:'柔光三环',blds:d1,
-   idea:'沿用三同心环（半径差=独立指标），换粉彩柔光 + 圆头端点 + 暖心圆心。语义/结构与现状一致，最稳。',
-   note:'过渡：每环同色系 2 段 OKLCH 柔光；三色 teal→green→gold 由外到内冷→暖、按明度错开。',
-   tags:['三环独立','圆头端点','暖心圆心','改造成本：低']},
-  {id:'D2',zh:'标签同心环',blds:d2,
-   idea:'同心三环 + 每环起点图标（🍀/⭐/🎯）+ 弧尖数值胶囊（7/10、8.4、62%），一眼读出每项确切值。',
-   note:'过渡：同 D1 柔光；图标 + 数值是非颜色冗余编码 → 天然色盲友好，解决"环读不出数字"。',
-   tags:['三环独立','行内数值','色盲友好','改造成本：中']},
-  {id:'D3',zh:'三连小仪表',blds:d3,
-   idea:'三个相互独立的 270° 小仪表并排，各自图标 + 大数字 + 标题。物理分离 = 最强"独立"信号。',
-   note:'过渡：每表单色 2 段柔光；并排无共享几何，绝不会被误读为占比。',
-   tags:['物理独立','读数最清','失去"一体感"','改造成本：中']},
-  {id:'D4',zh:'悦己之花',blds:d4,
-   idea:'三花瓣自暖心绽放，花瓣长度=各指标进度（独立扇区，向外生长不绕圈），绽放即"充盈"，最贴主题。',
-   note:'过渡：花瓣 OKLCH 尖端柔光；窄花瓣按长度编码（非面积），瓣尖图标标识三项。',
-   tags:['花瓣独立','最具温度','需瓣尖标签','改造成本：高']},
-  {id:'D5',zh:'点阵充能环',blds:d5,
-   idea:'三同心环改为点阵格（各 10 格），按进度点亮——小确幸 7/10 可直接数格子，像充能/游戏。',
-   note:'过渡：点亮格 OKLCH 柔光、暗格淡色；格数本身是非颜色冗余线索，色盲友好。',
-   tags:['三环独立','可数格','略繁忙','改造成本：中']},
+/* ---------- 6 transition styles ---------- */
+function renderRing(style,c){
+  const {cx,cy,w,radii,box}=GEO; const M=[c.hl.d,c.st.d,c.tg.d];
+  let defs='',body='';
+  // tracks first (full circles, touching)
+  METRICS.forEach((m,i)=>{body+=trackC(cx,cy,radii[i],c.track,w);});
+  METRICS.forEach((m,i)=>{const r=radii[i],deep=M[i],soft=lighten(deep,.42),p=m.p;
+    if(style==='soft'){            // ① 柔光渐变: per-ring linear soft->deep
+      const id='g'+style+i;defs+=`<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${lighten(deep,.30)}"/><stop offset="1" stop-color="${deep}"/></linearGradient>`;
+      body+=solidArc(cx,cy,r,p,`url(#${id})`,w);
+    }else if(style==='comet'){      // ② 扫掠尾迹: sweep soft->deep with alpha fade tail
+      body+=sweepArc(cx,cy,r,p,lighten(deep,.45),deep,w,true);
+    }else if(style==='ramp'){       // ③ 冷暖贯通: each ring sampled from one teal->green->gold ramp
+      const pos=i/2, base=ramp(pos,c); const tail=lighten(base,.3);
+      body+=sweepArc(cx,cy,r,p,tail,base,w,false);
+    }else if(style==='shift'){      // ④ 双色相位: in-family hue shift along arc
+      body+=sweepArc(cx,cy,r,p,c.shift[m.k],deep,w,false);
+    }else if(style==='flat'){       // ⑤ 粉彩扁平: flat pastel solid
+      body+=solidArc(cx,cy,r,p,lighten(deep,.18),w);
+    }else if(style==='glow'){       // ⑥ 充盈光晕: deep sweep + outer glow halo
+      body+=`<g filter="url(#glow)" opacity="0.55">${solidArc(cx,cy,r,p,deep,w)}</g>`;
+      body+=sweepArc(cx,cy,r,p,lighten(deep,.4),deep,w,false);
+    }
+  });
+  const filter=style==='glow'?'<defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.4"/></filter></defs>':'';
+  return `<svg width="${box}" height="${box}" viewBox="0 0 ${box} ${box}">${filter}${defs}${body}</svg>`;
+}
+
+const VARIANTS=[
+  {s:'soft', n:'柔光渐变', en:'SOFT GRADIENT', note:'每环同色系 <b>OKLCH 两段</b>渐变（淡→浓），稳重；改动最小。'},
+  {s:'comet',n:'扫掠尾迹', en:'COMET SWEEP', note:'弧头亮、向尾渐隐（alpha+色相），像被「点亮」；<b>与 Flutter SweepGradient 天然契合</b>。'},
+  {s:'ramp', n:'冷暖贯通', en:'TEMPERATURE RAMP', note:'三环取自<b>同一条 teal→green→gold</b> 渐变带，相切后读作由外到内的暖意流动，过渡最融合。'},
+  {s:'shift',n:'双色相位', en:'HUE SHIFT', note:'每环在同 family 内做<b>色相位移</b>（如 teal→cyan），比单色更活泼，仍各自独立。'},
+  {s:'flat', n:'粉彩扁平', en:'FLAT PASTEL', note:'无渐变、柔和<b>纯色</b>，零间距 + 圆头，最干净平静；极简实现。'},
+  {s:'glow', n:'充盈光晕', en:'INNER GLOW', note:'浓色弧 + 同色<b>外发光晕</b>，强调「充盈发光」的情绪，深色下尤其出彩。'},
 ];
 
-const grid=document.getElementById('grid');
-for(const d of designs){
-  const r=d.blds();
-  const card=document.createElement('section');card.className='card';
-  const legend=M.map(m=>`<span><i class="dot" style="background:${D(m.k)}"></i>${m.label} <b>${m.chip}</b></span>`).join('');
-  const ctrBlock = r.ctrCls==='off'
-    ? r.ctr
-    : `<div class="ctr">${r.ctr}</div>`;
-  card.innerHTML=`
-    <div class="chead"><span class="badge">${d.id}</span><h3>${d.zh}</h3></div>
-    <div class="stage">${r.svg}${ctrBlock}</div>
-    <div class="legend">${legend}</div>
-    <p class="idea">${d.idea}</p>
-    <div class="note">${d.note}</div>
-    <div class="meta">${d.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`;
-  grid.appendChild(card);
+function render(){
+  const c=themeColors(); const grid=document.getElementById('grid'); grid.innerHTML='';
+  VARIANTS.forEach((v,idx)=>{
+    const ring=renderRing(v.s,c);
+    const legend=METRICS.map(m=>`<div class="row"><span class="dot" style="background:${c[m.k].d}"></span><span class="lab">${m.label}</span><span class="val">${m.val}</span></div>`).join('');
+    const phone=document.createElement('div'); phone.className='phone';
+    phone.innerHTML=`
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <div class="vname">${'①②③④⑤⑥'[idx]} ${v.n}<small>${v.en}</small></div>
+        <div class="hero">
+          <div class="htitle">✨ 悦己充盈<span class="info">i</span></div>
+          <div class="ringrow">
+            <div class="ringwrap">${ring}<div class="ctr"><span class="v">¥12,400</span><span class="l">悦己指数</span></div></div>
+            <div class="legend">${legend}</div>
+          </div>
+        </div>
+        <div class="note"><b>过渡：</b>${v.note}</div>
+      </div>`;
+    grid.appendChild(phone);
+  });
 }
-
-const cmp=[
-  ['D1 柔光三环','✓ 半径区隔','★★★☆☆','★★★★☆','★★★★☆','低'],
-  ['D2 标签同心环','✓ 半径+标签','★★★★★','★★★★☆','★★★★★','中'],
-  ['D3 三连小仪表','✓ 物理分离','★★★★★','★★★☆☆','★★★★☆','中'],
-  ['D4 悦己之花','✓ 扇区+长度','★★★☆☆','★★★★★','★★★☆☆','高'],
-  ['D5 点阵充能环','✓ 半径+格数','★★★★☆','★★★★☆','★★★★★','中'],
-];
-document.getElementById('cmp').innerHTML=cmp.map(r=>'<tr>'+r.map(c=>`<td>${c}</td>`).join('')+'</tr>').join('');
+render();
 </script>
 </body>
 </html>
