@@ -34,6 +34,7 @@ class HappinessRingsPainter extends CustomPainter {
     required this.trackColor,
     this.strokeWidth = 8,
     this.ringGap = 0,
+    this.glowSigma = 3.0,
   });
 
   /// Outer-ring sweep ratio in `[0, 1]`; `null` = Empty (track only).
@@ -63,6 +64,9 @@ class HappinessRingsPainter extends CustomPainter {
   /// Gap between adjacent rings in logical pixels. v1.5 ring redesign:
   /// `0` → rings touch (no white gap) for a continuous band.
   final double ringGap;
+
+  /// Gaussian blur sigma for the INNER GLOW halo drawn behind each fill arc.
+  final double glowSigma;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -100,21 +104,23 @@ class HappinessRingsPainter extends CustomPainter {
       if (ratio != null && ratio > 0) {
         const startAngle = -pi / 2; // 12 o'clock
         final sweepAngle = ratio.clamp(0.0, 1.0) * 2 * pi;
+        final gradient = gradients[i];
 
-        // COMET SWEEP: re-anchor the supplied gradient's stops to span exactly
-        // this arc (startAngle → head), so the faded tail sits at 12 o'clock
-        // and the full-strength head lands at the leading edge regardless of
-        // sweep length. StrokeCap.round gives the soft comet head/tail.
-        final src = gradients[i];
+        // INNER GLOW: a soft blurred halo of the ring's colour sits behind the
+        // crisp arc for a luminous「充盈发光」feel. Chosen over the comet sweep
+        // because it is iOS/Impeller-safe — it uses only MaskFilter.blur and a
+        // standard full-sweep gradient, avoiding the custom-angle SweepGradient
+        // shader that mis-rendered under Impeller.
+        final glowPaint = Paint()
+          ..color = gradient.colors.last.withValues(alpha: 0.5)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, glowSigma);
+        canvas.drawArc(rect, startAngle, sweepAngle, false, glowPaint);
+
         final fillPaint = Paint()
-          ..shader = SweepGradient(
-            startAngle: startAngle,
-            endAngle: startAngle + sweepAngle,
-            colors: src.colors,
-            stops: src.stops,
-            tileMode: src.tileMode,
-            transform: src.transform,
-          ).createShader(rect)
+          ..shader = gradient.createShader(rect)
           ..style = PaintingStyle.stroke
           ..strokeWidth = strokeWidth
           ..strokeCap = StrokeCap.round;

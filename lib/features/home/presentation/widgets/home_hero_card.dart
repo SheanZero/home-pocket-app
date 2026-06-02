@@ -382,21 +382,20 @@ class HomeHeroCard extends StatelessWidget {
         trackColor: track,
       );
     }
-    // Single mode — COMET SWEEP + "Butter" scheme. Each ring fades from a
-    // 30%-alpha tail at 12 o'clock to its full-strength head at the leading
-    // edge (painter re-anchors the stops to the arc).
+    // Single mode — INNER GLOW + "Butter" scheme: each ring is a solid arc
+    // with a soft blurred halo rendered by the painter (iOS/Impeller-safe).
     return HappinessRingsPainter(
       outerSweepRatio: _highlightsRatio(happiness.highlightsCount),
       middleSweepRatio: _avgSatisfactionRatio(happiness.avgSatisfaction),
       innerSweepRatio: _joyContributionRatio(happiness.joyContribution),
       outerGradient: SweepGradient(
-        colors: [ring.highlights.withValues(alpha: 0.30), ring.highlights],
+        colors: [ring.highlights, ring.highlights],
       ),
       middleGradient: SweepGradient(
-        colors: [ring.satisfaction.withValues(alpha: 0.30), ring.satisfaction],
+        colors: [ring.satisfaction, ring.satisfaction],
       ),
       innerGradient: SweepGradient(
-        colors: [ring.target.withValues(alpha: 0.30), ring.target],
+        colors: [ring.target, ring.target],
       ),
       trackColor: ring.track,
     );

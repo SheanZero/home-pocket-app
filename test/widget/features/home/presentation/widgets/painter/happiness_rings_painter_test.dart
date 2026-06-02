@@ -45,7 +45,7 @@ void main() {
     });
 
     test(
-      'Mixed Empty/Value rings: 3 track arcs + 1 fill arc (only Value renders fill)',
+      'Mixed Empty/Value rings: 3 track arcs + 2 fill arcs (glow + crisp on the Value ring)',
       () {
         final canvas = _MockCanvas();
         const gradient = SweepGradient(
@@ -61,15 +61,15 @@ void main() {
           trackColor: const Color(0xFFEFEFEF),
         );
         painter.paint(canvas, const Size(120, 120));
-        // 3 track arcs (sweep = 2 * pi) + 1 fill arc (sweep = 0.5 * 2 * pi = pi)
+        // 3 track arcs (sweep = 2 * pi) + glow + crisp fill arcs (sweep = pi)
         verify(() => canvas.drawArc(any(), 0, 2 * pi, false, any())).called(3);
         verify(
           () => canvas.drawArc(any(), -pi / 2, pi, false, any()),
-        ).called(1);
+        ).called(2);
       },
     );
 
-    test('All Value rings: 3 track arcs + 3 fill arcs', () {
+    test('All Value rings: 3 track arcs + 6 fill arcs (glow + crisp each)', () {
       final canvas = _MockCanvas();
       const gradient = SweepGradient(
         colors: [Colors.green, Colors.greenAccent],
@@ -84,8 +84,8 @@ void main() {
         trackColor: const Color(0xFFEFEFEF),
       );
       painter.paint(canvas, const Size(120, 120));
-      // 3 track arcs + 3 fill arcs at full sweep = 6 total
-      verify(() => canvas.drawArc(any(), any(), any(), false, any())).called(6);
+      // 3 track arcs + (glow + crisp) * 3 fill arcs = 9 total
+      verify(() => canvas.drawArc(any(), any(), any(), false, any())).called(9);
     });
 
     test('Sweep ratio of 0.5 produces sweepAngle = pi (half circle)', () {
@@ -103,7 +103,8 @@ void main() {
         trackColor: const Color(0xFFEFEFEF),
       );
       painter.paint(canvas, const Size(120, 120));
-      verify(() => canvas.drawArc(any(), -pi / 2, pi, false, any())).called(1);
+      // glow + crisp arcs both sweep pi (half circle)
+      verify(() => canvas.drawArc(any(), -pi / 2, pi, false, any())).called(2);
     });
 
     test(
@@ -123,10 +124,10 @@ void main() {
           trackColor: const Color(0xFFEFEFEF),
         );
         painter.paint(canvas, const Size(120, 120));
-        // Fill arc should sweep 2 * pi (clamped from 1.5 * 2 * pi)
+        // glow + crisp arcs both sweep 2 * pi (clamped from 1.5 * 2 * pi)
         verify(
           () => canvas.drawArc(any(), -pi / 2, 2 * pi, false, any()),
-        ).called(1);
+        ).called(2);
       },
     );
 
