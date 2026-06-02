@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>本月最爱卡片 改稿 — Best Joy strip redesign</title>
+<style>
+  :root{
+    /* Joy = Mauve（已决定 ADR-018 / 260602-jcl）*/
+    --joy:#A586B0; --joyText:#6B4877; --joyLight:#F2ECF4;
+    /* teal 日常（对比参考）*/
+    --teal:#1C7A86; --tealText:#145E68; --tealLight:#E0F0F2;
+    --ink:#1A2B2D; --muted:#5E7174; --line:#E2ECED; --divider:#EEF3F4;
+    --card:#FFFFFF; --bg:#F4F8F9;
+  }
+  body.dark{
+    --joy:#C0A3CA; --joyText:#C0A3CA; --joyLight:#2A2030;
+    --teal:#4FB0BC; --tealText:#4FB0BC; --tealLight:#173032;
+    --ink:#E8F2F3; --muted:#82989B; --line:#213537; --divider:#1B2A2C;
+    --card:#162527; --bg:#0C1719;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Hiragino Sans",system-ui,sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.5;padding:32px 24px 80px;
+       transition:background .2s,color .2s}
+  h1{font-size:22px;font-weight:700;letter-spacing:-.01em}
+  h1 .sub{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-top:6px}
+  .toolbar{display:flex;gap:10px;align-items:center;margin:18px 0 4px;flex-wrap:wrap}
+  .seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{border:0;background:transparent;padding:7px 15px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+  .seg button.on{background:var(--joy);color:#fff}
+  body.dark .seg button.on{color:#0C1719}
+
+  .stage{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px;margin-top:28px;max-width:1100px}
+  .panel{}
+  .panel h2{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.02em;
+            display:flex;align-items:center;gap:8px}
+  .tag{font-size:10px;font-weight:700;border-radius:6px;padding:2px 8px;letter-spacing:.04em}
+  .tag.before{background:#FBEFCF;color:#9A6500}
+  .tag.after{background:var(--joyLight);color:var(--joyText)}
+  body.dark .tag.before{background:#33290F;color:#F0C13A}
+
+  /* host card (= HomeHeroCard 区域上下文) */
+  .host{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .ctx{font-size:11px;color:var(--muted);margin-bottom:10px}
+  .divider{height:1px;background:var(--divider);margin:14px 0}
+
+  /* ── BEFORE：当前 3 行布局 ── */
+  .b-title{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+  .b-title .ico{font-size:15px;color:var(--joy)}
+  .b-title .t{font-size:15px;font-weight:600;color:var(--ink)}
+  .b-amtrow{display:flex;justify-content:space-between;align-items:center}
+  .b-amt{font-variant-numeric:tabular-nums;color:var(--joyText);display:flex;align-items:baseline;gap:6px}
+  .b-amt .sym{font-size:20px;font-weight:700}
+  .b-amt .num{font-size:32px;font-weight:800;letter-spacing:-.5px}
+  .b-pill{display:inline-flex;align-items:center;gap:6px;background:var(--joyLight);color:var(--joyText);
+          border-radius:999px;padding:7px 12px;font-size:14px;font-weight:800}
+  .b-meta{display:flex;justify-content:space-between;margin-top:10px;font-size:12px;font-weight:600;color:var(--muted)}
+
+  /* ── AFTER：新 strip 布局（来自 joy-color-explore.html）── */
+  .strip{border-radius:14px;padding:14px;background:color-mix(in srgb,var(--joy) 8%,transparent);
+         border:1px solid color-mix(in srgb,var(--joy) 22%,transparent)}
+  body.dark .strip{background:color-mix(in srgb,var(--joy) 13%,transparent)}
+  .strip .t{font-size:14px;font-weight:700;color:var(--joy);margin-bottom:10px}
+  .strip .item{display:flex;align-items:center;gap:11px}
+  .strip .ico{width:36px;height:36px;border-radius:11px;flex-shrink:0;background:var(--joyLight);color:var(--joyText);
+              display:flex;align-items:center;justify-content:center;font-size:19px}
+  .strip .meta{flex:1;min-width:0}
+  .strip .meta .k{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .strip .meta .s{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .strip .right{text-align:right;flex-shrink:0}
+  .strip .right .a{font-variant-numeric:tabular-nums;font-size:17px;font-weight:800;color:var(--joyText);letter-spacing:-.3px}
+  .strip .sat{display:inline-block;margin-top:5px;font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px;
+              background:color-mix(in srgb,var(--joy) 13%,transparent);color:var(--joyText)}
+
+  /* empty state（新容器风格）*/
+  .strip.empty .ph{display:flex;align-items:center;gap:11px;color:var(--muted)}
+  .strip.empty .ico{background:var(--joyLight);opacity:.5}
+  .strip.empty .k{font-size:13px;color:var(--muted)}
+
+  .notes{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-top:30px;max-width:1100px}
+  .notes h3{font-size:14px;margin-bottom:10px}
+  .notes ul{margin:0 0 0 18px;font-size:13px}
+  .notes li{margin:6px 0}
+  .notes b{color:var(--joyText)}
+  .notes .warn{color:#B4302F;font-weight:700}
+  body.dark .notes .warn{color:#F08A8A}
+</style>
+</head>
+<body>
+  <h1>本月最爱卡片 — 内容改稿
+    <span class="sub">设计源：docs/design/joy-color-explore.html「本月最爱」strip ｜ 配色：悦己 = Mauve 丁香（已决定）｜ 落地位置：HomeHeroCard Region 6</span>
+  </h1>
+
+  <div class="toolbar">
+    <div class="seg" id="mode">
+      <button data-m="light" class="on">☀ Light</button>
+      <button data-m="dark">🌙 Dark</button>
+    </div>
+  </div>
+
+  <div class="stage">
+    <!-- BEFORE -->
+    <div class="panel">
+      <h2><span class="tag before">BEFORE 现状</span> 当前 3 行布局</h2>
+      <div class="host">
+        <div class="ctx">⋯ 充盈环区 ⋯</div>
+        <div class="divider"></div>
+        <div class="b-title"><span class="ico">❤</span><span class="t">本月最爱</span></div>
+        <div class="b-amtrow">
+          <div class="b-amt"><span class="sym">¥</span><span class="num">6,980</span></div>
+          <span class="b-pill">😍 最爱</span>
+        </div>
+        <div class="b-meta"><span>ゲーム・娯楽</span><span>5/28 · 木</span></div>
+      </div>
+    </div>
+
+    <!-- AFTER -->
+    <div class="panel">
+      <h2><span class="tag after">AFTER 改稿</span> 新 strip 布局</h2>
+      <div class="host">
+        <div class="ctx">⋯ 充盈环区 ⋯</div>
+        <div class="divider"></div>
+        <div class="strip">
+          <div class="t">本月最爱</div>
+          <div class="item">
+            <div class="ico">🎮</div>
+            <div class="meta">
+              <div class="k">ゲーム・娯楽</div>
+              <div class="s">5/28(木)</div>
+            </div>
+            <div class="right">
+              <div class="a">¥6,980</div>
+              <span class="sat">😍 最爱</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AFTER empty -->
+    <div class="panel">
+      <h2><span class="tag after">AFTER 改稿</span> 空状态 / 全中性</h2>
+      <div class="host">
+        <div class="ctx">⋯ 充盈环区 ⋯</div>
+        <div class="divider"></div>
+        <div class="strip empty">
+          <div class="t">本月最爱</div>
+          <div class="ph item">
+            <div class="ico">✦</div>
+            <div class="meta"><div class="k">あなたの今月の最愛がここに表示されます →</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <h3>改动要点（决策已锁定 ✓ — 等布局微调反馈）</h3>
+    <ul>
+      <li><b>容器化</b>：从「裸排版」改为带 <b>Joy 淡彩底 + 描边</b>的 strip（圆角 14 / 内距 14），与卡片其余区块有明显区隔。</li>
+      <li><b>标题</b>：去掉 ❤ 图标，标题文字改用 <b>Joy 色</b>（现状是 textPrimary）。</li>
+      <li><b>新增图标块</b>：左侧 36×36 圆角图标块 = <b>品类图标</b>（resolveCategoryIcon，按 categoryId 查品类取 icon），底色 joyLight。</li>
+      <li>✓ <b>主标题 = 品类名</b>（如「ゲーム・娯楽」），副标题 = <b>日期(周)</b>（已去掉「悦己 ・」前缀）。零知识安全，不动数据层（ARCH-002）。</li>
+      <li><b>金额</b>：右侧、缩小到 17px（现状左侧 32px 大字），颜色 joyText。</li>
+      <li>✓ <b>满足度 pill = 档位词 + 表情</b>（如「😍 最爱」，ADR-014 tier），沿用现状语义，置于金额下方。</li>
+    </ul>
+  </div>
+
+<script>
+  document.getElementById('mode').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    document.body.classList.toggle('dark', b.dataset.m==='dark');
+    [...document.querySelectorAll('#mode button')].forEach(x=>x.classList.toggle('on',x===b));
+  });
+</script>
+</body>
+</html>
