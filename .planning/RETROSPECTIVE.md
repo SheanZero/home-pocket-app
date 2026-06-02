@@ -204,6 +204,53 @@
 
 ---
 
+## Milestone: v1.5 — 文案与配色统一 (Vocabulary & Palette Unification)
+
+**Shipped:** 2026-06-02
+**Phases:** 5 (31-35) | **Plans:** 24 | **Duration:** ~2 days (2026-05-31 → 2026-06-02) | **Commits:** 155 (vs v1.4 tag) | **Diff:** 550 files, +43,552 / -4,650 LOC
+
+### What Was Built
+- **Terminology rename** (Phase 31): `LedgerType { daily, joy }` enum + 242 call sites; `Transaction.joyFullness` replaces `soulSatisfaction`; 25 ARB key roots + zh/ja/en values to 日常/悦己/ときめき/Daily/Joy; v17→v18 Drift migration (atomic stored enum-value rewrite + `soul_satisfaction`→`joy_fullness`) with a Wave-0 raw-sqlite3 contract test; ADR-017.
+- **Palette selection** (Phase 32, artifact-only): 5 directions mined from 7 VoltAgent DESIGN.md refs → 5 Pencil schemes × 6 frames → user-selected Scheme D "Teal Clarity"; ADR-018 ratified post-selection with a full light+dark hex-per-role table.
+- **Token system + dark rollout** (Phase 33): `AppPalette` ThemeExtension as sole color source; all `Color(0x…)` literals replaced; AppColors/AppColorsDark shims deleted; full dark mode via `context.palette.*`; 11 on-device visual items approved.
+- **Golden re-baseline** (Phase 34): 50 masters re-based + 27 new dark (77 total, 34 dark); diff-attribution confirmed palette-only delta; suite 2281/2281, 79.0% coverage.
+- **Residual leak closure** (Phase 35): W1 a11y Semantics labels → l10n; W2 `totalSoulTx`→`totalJoyTx` across Freezed models + use-cases + 9 tests — both found by the initial milestone audit.
+
+### What Worked
+- **Terminology-before-palette workstream ordering** (P31 → P32-34): landing the `survival→daily`/`soul→joy` symbol rename first meant the Phase 33 token system was built on already-renamed symbols — zero rename churn in the color work. The dependency was identified at roadmap time (D-12 seam) and paid off exactly as planned.
+- **Single `AppPalette` ThemeExtension as the consolidation target**: collapsing two shims (AppColors + AppColorsDark) + scattered literals into one `context.palette.*` source made the grep gates trivially enforceable (0 literals, 0 shim refs, 0 `isDark` ternaries) and the dark rollout near-free (THEME-V2-02 pulled forward).
+- **The audit→Phase-35 closure loop**: the milestone audit (not any phase verification) caught W1/W2 — vocabulary leaks that every phase gate had passed. Inserting a small dedicated closure phase rather than accepting them as debt produced a genuinely clean vocabulary surface, re-verified at re-audit (grep exit 1).
+- **Golden diff-attribution protocol** (D-04): re-baselining 77 masters with an explicit "palette change is the ONLY delta" check (halt-on-suspected-regression) made a large visual churn safe and reviewable.
+- **Migration contract test as Wave-0 RED** (Phase 31): pinning the v18 migration behavior in a raw-sqlite3 test before implementation caught the CR-01 `from<4` column-collision regression in review, not in production.
+
+### What Was Inefficient
+- **Grep gates under-scoped → an entire extra phase (W1/W2)**: the milestone's "no stale vocabulary" gates only covered ARB *values* (`lib/l10n/*.arb`) and lower-case `soul[A-Z]` identifiers. They missed (a) hardcoded English `Semantics(label:)` Dart string literals (W1, genuinely user-facing via screen readers) and (b) capital-S `totalSoulTx`/`SoulTx` identifiers (W2). Both evaded every Phase 31-34 gate and surfaced only at milestone audit, forcing Phase 35. A leak surface the gate doesn't scan reads as "clean."
+- **Pencil MCP cannot flush `.pen` to disk in this env — recurring**: the committed `home-pocket-palette.pen` still holds v1 coral content; the v2 Teal schemes live only in ADR-018. Documented as D-03b best-effort/non-blocking across Phases 32 and 34, but it's a standing tooling limitation that makes the design file untrustworthy as a source of truth.
+- **Draft-Nyquist VALIDATION.md — 6th consecutive milestone**: Phases 31/32/34/35 `nyquist_compliant: false` (only Phase 33 approved). Documentation-grade debt accepted yet again.
+- **Sparse SUMMARY `requirements_completed` frontmatter — recurring**: most plan SUMMARYs list `[]`; REQs are attributed only to closing plans. The 3-source cross-reference fell back to VERIFICATION.md tables (which were complete) — but the frontmatter source remains unreliable.
+- **`Book.*Balance` carve-out is real but deferred indefinitely**: the milestone unified vocabulary "everywhere except the books balance columns." Internally consistent, but the app still carries `survival_balance`/`soul_balance` DB columns — the vocabulary job isn't 100% done, it's 100%-of-scope done.
+
+### Patterns Established
+- **Scope grep gates to EVERY leak surface, not just the obvious one**: a vocabulary/identifier rename gate must cover ARB values + ARB keys + Dart string literals (incl. a11y labels) + identifiers in all letter-cases (`soul`, `Soul`, `SoulTx`). Enumerate the surfaces up front; a single-surface grep gives false confidence. (Direct W1/W2 lesson.)
+- **ThemeExtension single-source as the canonical color-consolidation pattern**: one `AppPalette` accessed via `context.palette.*`, registered for both light+dark, with an architecture scan test forbidding `Color(0x…)` outside the theme layer — this is the repeatable recipe for killing scattered color literals.
+- **Closing audit→fix phase for brownfield refactors**: when the milestone goal is "consistency," a dedicated post-implementation audit phase (or the milestone audit itself) is the only thing that reliably finds gate-evading residuals; budget for a small closure phase.
+- **Re-audit after a closure phase**: re-run the milestone audit after the fix phase and re-verify the original gates live, rather than trusting the phase's own verification.
+
+### Key Lessons
+1. **A grep gate is only as good as its surface coverage** — W1/W2 passed every phase gate because the gates scanned ARB values + lower-case identifiers only. User-facing a11y string literals and capital-case identifiers were invisible. When defining a "zero stale X" success criterion, list all the file types and case variants X can hide in.
+2. **The milestone audit is a real backstop, not a formality** — it caught what 5 phases of verification missed. The audit→Phase-35→re-audit loop is the pattern that actually produced a clean surface.
+3. **Workstream ordering by dependency pays compounding dividends** — terminology-before-palette eliminated rename churn entirely; identifying the seam at roadmap time was worth more than any in-phase optimization.
+4. **Draft-Nyquist is now 6×-recurring and the team has structurally accepted it** — either wire `/gsd-validate-phase` into the close flow or formally drop the Nyquist artifact expectation; carrying it as "debt" every milestone is noise.
+5. **"Out of scope" carve-outs should carry an explicit exit plan** — `Book.*Balance` is correctly deferred, but without a scheduled DB-migration phase the residual vocabulary will linger indefinitely; deferral needs a destination.
+6. **Tooling that can't persist its output isn't a source of truth** — the Pencil `.pen` flush failure means ADR-018's hex table is authoritative and the design file is decorative; recognize and route around non-persisting tools early.
+
+### Cost Observations
+- Model mix: not measured in local artifacts (profile `balanced`; planner/executor/checker/verifier per config).
+- Sessions: multi-session GSD execution across Phases 31-35 + a milestone-audit → Phase-35 → re-audit close loop.
+- Notable: 155 commits; one schema migration (v17→v18, with contract test + CR-01 regression fix); 0 new pub dependencies; the largest single source of churn was the 77-master golden re-baseline (Phase 34) and the 242-call-site enum rename (Phase 31).
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -215,6 +262,7 @@
 | v1.2 | multi-session, 3 days | 5 | ADR-016 Joy migration in lockstep with v1.1-deferred backlog; type-system invariants for anti-toxicity; HomeHero isolation as structural test contract; orthogonal-provider-tuple composition (window × variant). |
 | v1.3 | multi-session, 5 days | 6 | Foundation-phase-first for multi-host widget convergence; parallel-safe phase split (voice parser ∥ manual UI); architecture invariant tests for resolver contracts; runtime extensibility tests as VOICE-06 proof; same-milestone cleanup phase (Phase 23) for debt absorption; code-review severity-bumping authority for production-risk gaps. |
 | v1.4 | multi-session, 3 days | 7 | Strict bottom-up layer progression (data→domain→providers→UI); heavy reuse of prior-milestone edit/delete path; provider-dependency narrowing as an explicit perf contract; batched on-device visual pass at close. Surfaced two wiring smells: incomplete invalidation set (GAP-1) + speculative unused reactive stream (GAP-2). |
+| v1.5 | multi-session, 2 days | 5 | First pure consistency/refactor milestone since v1.0. Dependency-ordered workstreams (terminology→palette→tokens→goldens) eliminated rename churn; ThemeExtension single-source consolidation; migration contract test as Wave-0 RED. Milestone audit caught two gate-evading vocabulary leaks (W1 a11y string literals, W2 capital-case identifiers) → dedicated Phase-35 closure + re-audit. |
 
 ### Cumulative Quality
 
@@ -225,6 +273,7 @@
 | v1.2 | full suite `+1430 All tests passed!` at Phase 14 close (with `--concurrency=1`); 6 pre-existing failures in `family_insight_card_test.dart` from Phase 15 ARB drift accepted as deferred | not recomputed at milestone close; ~6.5k LOC test additions | 0 new pub dependencies |
 | v1.3 | corpus tests: zh 48/50 (96%), ja 50/50 (100%); voice category corpus zh 30/30 + ja 31/31 (100%); 15 pre-existing failures carried (7 home_hero_card_golden + 4 home_hero_card widget + 4 merchant_database); 9/9 device UATs (Phase 19+20+22 carry) pass in Phase 23 | not recomputed at milestone close; ~10.2k LOC test additions (1.56:1 test-to-code ratio) | 0 new pub dependencies |
 | v1.4 | 2238/2238 tests pass at quick-task checkpoints; golden baselines re-based for list/calendar/tile; 9 quick-task visual checks confirmed on-device 2026-05-31; `flutter analyze` 0 issues | not recomputed at milestone close | 1 new pub dependency (`table_calendar ^3.2.0`, intl-0.20.2-compatible, iOS-build-green) |
+| v1.5 | 2281/2281 tests pass (full suite, golden incl.); 77 golden masters re-baselined to teal (34 dark) with diff-attribution; `flutter analyze` 4 pre-existing infos (0 regressions); v18 migration contract test + CR-01 regression test green | 79.0% filtered coverage (≥70% gate) | 0 new pub dependencies |
 
 ### Top Lessons
 
@@ -243,3 +292,8 @@
 13. **(v1.4)** Decide the reactivity mechanism (manual `invalidate` vs `watch()` stream) once, then wire only that — building both leaves dead code (GAP-2).
 14. **(v1.4)** REQUIREMENTS.md status drift is now 5×-recurring — escalate from "remember to flip it" to an automated close-gate diffing VERIFICATION ✓ against REQUIREMENTS checkboxes.
 15. **(v1.4)** "Pending visual check" is a verify-later trap — deferred device/visual acceptance accumulates until forced at close; run inline or track as acknowledged debt.
+16. **(v1.5)** A "zero stale X" grep gate is only as good as its surface coverage — scope it to every file type and case variant X can hide in (ARB values + keys + Dart string literals + identifiers in all letter-cases). W1/W2 passed 5 phases of gates because the gates scanned ARB values + lower-case identifiers only.
+17. **(v1.5)** The milestone audit is a genuine backstop — it caught W1/W2 when every phase verification missed them; the audit→closure-phase→re-audit loop is what produced a clean surface. Don't treat the audit as a formality.
+18. **(v1.5)** Dependency-ordered workstreams beat in-phase optimization — terminology-before-palette eliminated rename churn entirely; identify the cross-phase seam at roadmap time.
+19. **(v1.5)** Draft-Nyquist is now 6×-recurring and structurally accepted — either wire `/gsd-validate-phase` into the close flow or formally drop the artifact expectation.
+20. **(v1.5)** "Out of scope" carve-outs need a scheduled destination — `Book.*Balance` is correctly deferred but will linger indefinitely without a planned DB-migration phase.
