@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: 文案与配色统一
-status: milestone_complete
-stopped_at: Milestone complete (Phase 34 was final phase)
-last_updated: 2026-06-01T14:14:56.865Z
-last_activity: 2026-06-01
+status: executing
+stopped_at: Phase 34 context gathered
+last_updated: "2026-06-02T01:10:29.197Z"
+last_activity: 2026-06-02 -- Phase 35 planning complete
 progress:
-  total_phases: 4
-  completed_phases: 5
-  total_plans: 201
+  total_phases: 5
+  completed_phases: 4
+  total_plans: 24
   completed_plans: 22
-  percent: 125
+  percent: 80
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-31 — v1.4 列表功能 shipped + archived)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Milestone complete
+**Current focus:** Phase 35 — close vocab leaks (W1/W2)
 
 ## Current Position
 
-Phase: 34
-Plan: Not started
-Status: Milestone complete
-Last activity: 2026-06-01
+Phase: 35
+Plan: Not planned yet
+Status: Ready to execute
+Last activity: 2026-06-02 -- Phase 35 planning complete
 
 Progress: [██████████] 100%
 
@@ -59,6 +59,10 @@ Progress: [██████████] 100%
 - **v1.0** (8 phases, 48 plans, 2026-04-24 → 2026-04-29, audit `passed`) — Codebase Cleanup Initiative
 
 ## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 35 added: Close vocab leaks: a11y Semantics labels (W1) + totalSoulTx identifiers (W2)
 
 ### Decisions
 
