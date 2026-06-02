@@ -74,9 +74,9 @@
 <div class="wrap">
   <div class="top">
     <div>
-      <h1>青瓷 · 薰衣草 · 浅金 · <em>金环位置对比</em></h1>
-      <p class="lede">就你选的 <b>H 青瓷·薰衣草·浅金</b>，试把 <b>浅金</b> 从内环挪到<b>中环</b>。三色不变，只换它们的内/中/外位置。
-      关键：<b>圆心「悦己指数」颜色 = 内环色</b>，所以金移走后圆心数字会变色（薰衣草偏浅，已加深保证可读）。各 ②/⑥ 两版对照。</p>
+      <h1>青瓷 · 薰衣草 · <em>暖色第三色候选</em></h1>
+      <p class="lede"><b>青 #3BBDB8</b> 与 <b>薰衣草 #9D9CE6</b> 固定，只替换"金"那一色（在内环＝圆心数字色）。
+      暖色仍守"无红"原则——只在 <b>金 / 琥珀 / 杏橙 / 香槟 / 奶油黄</b> 这条暖黄带里挑。圆心数字会按可读性自动加深。各 ②/⑥ 两版对照。</p>
     </div>
     <button class="toggle" onclick="document.body.classList.toggle('dark');render()">◐ 深 / 浅色</button>
   </div>
@@ -133,16 +133,19 @@ function renderRing(style,deeps,track,uid){
   return `<svg width="${box}" height="${box}" viewBox="0 0 ${box} ${box}">${filter}${body}</svg>`;
 }
 
-/* ---- 方案 H「青瓷·薰衣草·浅金」金环位置对比 ----
-   三色固定（青 #3BBDB8 / 薰衣草 #9D9CE6 / 浅金 #F0C04E），变的是它们落在 外/中/内 哪一环。
-   注意：圆心「悦己指数」颜色 = 内环色，所以金移走会改变圆心数字的颜色。*/
+/* ---- 方案 H 暖色第三色候选：青 + 薰衣草固定，只换"金"那一色（内环 = 圆心数字色）---- */
+const TEAL=['#3BBDB8','#4FD3CE'], LAV=['#9D9CE6','#B4B2F2'];
 const SCHEMES=[
-  {id:'H',name:'原版 · 金在内环',en:'GOLD = INNER (current)',hex:['#3BBDB8','#9D9CE6','#F0C04E'],dark:['#4FD3CE','#B4B2F2','#F5CE6A'],
-   note:'外青 · 中薰衣草 · 内浅金。圆心悦己指数 = 金，最暖、最像"目标达成"的高光时刻。'},
-  {id:'H₂',name:'金在中环 · 内薰衣草',en:'GOLD = MIDDLE / VIOLET INNER',hex:['#3BBDB8','#F0C04E','#9D9CE6'],dark:['#4FD3CE','#F5CE6A','#B4B2F2'],
-   note:'外青 · 中浅金 · 内薰衣草。金移到中环（满足度），暖色居中更聚焦；圆心指数 = 薰衣草（已加深保证可读）。'},
-  {id:'H₃',name:'金在中环 · 内青',en:'GOLD = MIDDLE / TEAL INNER',hex:['#9D9CE6','#F0C04E','#3BBDB8'],dark:['#B4B2F2','#F5CE6A','#4FD3CE'],
-   note:'外薰衣草 · 中浅金 · 内青。金做暖核居中；圆心指数 = 品牌青，最易读、最稳，与全局色最统一。'},
+  {id:'原',name:'浅金 Gold',en:'GOLD #F0C04E · 现状参考',hex:[TEAL[0],LAV[0],'#F0C04E'],dark:[TEAL[1],LAV[1],'#F5CE6A'],
+   note:'现状基准。明快像"高光"，但偏亮黄、略显大众，是 H 里最可优化的一色。'},
+  {id:'A',name:'蜜琥珀 Amber',en:'AMBER #E6A12E',hex:[TEAL[0],LAV[0],'#E6A12E'],dark:[TEAL[1],LAV[1],'#F2B844'],
+   note:'更深更醇的琥珀蜜糖色，最有高级 / 笃定感，作圆心数字对比也最强。＝ 我的首选。'},
+  {id:'B',name:'杏橙 Apricot',en:'APRICOT #F4A868',hex:[TEAL[0],LAV[0],'#F4A868'],dark:[TEAL[1],LAV[1],'#F8BC85'],
+   note:'偏橙的杏色，最暖最亲和，与薰衣草是经典暖冷撞色；属橙非红，仍在安全色族内。'},
+  {id:'C',name:'香槟 Champagne',en:'CHAMPAGNE #E4C58F',hex:[TEAL[0],LAV[0],'#E4C58F'],dark:[TEAL[1],LAV[1],'#EED3A6'],
+   note:'低饱和暖金，最雅、最"奢简"高级；但对比偏弱，圆心读数依赖加深。'},
+  {id:'D',name:'奶油黄 Butter',en:'BUTTER #F2D777',hex:[TEAL[0],LAV[0],'#F2D777'],dark:[TEAL[1],LAV[1],'#F7E08C'],
+   note:'最浅最透的暖黄，空气感最强、最配浅色系；但作 headline 偏淡，适合搭更深的圆心字色。'},
 ];
 function deepsFor(s,dark){return dark?(s.dark||s.hex.map(h=>lighten(h,.26))):s.hex;}
 
