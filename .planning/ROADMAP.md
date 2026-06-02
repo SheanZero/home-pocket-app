@@ -165,11 +165,11 @@ Plans:
 **Goal:** The two residual vocabulary leaks discovered by the v1.5 milestone audit are closed — W1: hardcoded 'Survival ledger'/'Soul ledger' Semantics a11y labels replaced with l10n-backed values; W2: totalSoulTx/totalGroupSoulTx internal identifiers renamed to totalJoyTx/totalGroupJoyTx across all source and test files
 **Requirements**: None (tech-debt closure against TERM-01/TERM-03 W1 and TERMID-02 W2 from v1.5 audit)
 **Depends on:** Phase 34
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 35-01-PLAN.md — W1: Replace hardcoded Semantics a11y labels with l10n.listLedgerDaily / l10n.listLedgerJoy in list_sort_filter_bar.dart
-- [ ] 35-02-PLAN.md — W2: Rename totalSoulTx→totalJoyTx and totalGroupSoulTx→totalGroupJoyTx across Freezed models (build_runner regen), use-case consumers, and 9 test files
+- [x] 35-02-PLAN.md — W2: Rename totalSoulTx→totalJoyTx and totalGroupSoulTx→totalGroupJoyTx across Freezed models (build_runner regen), use-case consumers, and 9 test files
 
 ## Milestone Progress
 
