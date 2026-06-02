@@ -3,20 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>悦己充盈环 · 无间隙三环 · 配色过渡风格探索</title>
+<title>悦己充盈环 · 配色方案探索（扫掠尾迹 + 充盈光晕）</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#F2EEE6; --ink:#2A2622; --sub:#6B6358; --muted:#9A9082; --line:#E2DACd;
     --card:#FFFFFF; --screen:#ECE6DA; --bezel:#1d1c1a; --track:#E9F0F0;
-    --val:#B5790E;
     --paper-accent:#0E9AA7;
   }
   body.dark{
     --bg:#13181A; --ink:#ECEFEF; --sub:#A6B2B4; --muted:#6E7C7E; --line:#26343a;
     --card:#1A282E; --screen:#0E1416; --bezel:#000000; --track:#22343A;
-    --val:#F0B54A;
     --paper-accent:#3FC2CE;
   }
   *{box-sizing:border-box}
@@ -26,202 +24,158 @@
     color:var(--ink);
     font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,"Segoe UI",sans-serif;
     transition:background .3s,color .3s;}
-  .wrap{max-width:1280px;margin:0 auto;padding:44px 30px 90px;}
+  .wrap{max-width:1320px;margin:0 auto;padding:44px 30px 90px;}
   .top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:6px}
   h1{font-family:"Fraunces",Georgia,serif;font-weight:700;font-size:34px;line-height:1.1;margin:0;letter-spacing:-.5px}
   h1 em{font-style:italic;color:var(--paper-accent)}
-  .lede{color:var(--sub);font-size:14.5px;line-height:1.6;max-width:760px;margin:12px 0 0}
+  .lede{color:var(--sub);font-size:14.5px;line-height:1.6;max-width:780px;margin:12px 0 0}
   .lede b{color:var(--ink)}
-  .pill{font-family:"Fraunces",serif;font-style:italic}
   .toggle{flex:none;display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);
     border-radius:999px;padding:9px 16px;cursor:pointer;color:var(--ink);font-size:13px;font-weight:600}
-  .spec{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
-  .spec span{font-size:12.5px;color:var(--sub);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 13px}
-  .spec b{color:var(--ink)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(344px,1fr));gap:34px 26px;margin-top:38px;justify-items:center}
-  /* phone */
-  .phone{width:344px;background:var(--bezel);border-radius:44px;padding:10px;box-shadow:0 24px 50px -20px rgba(20,40,44,.45),0 4px 12px rgba(0,0,0,.15)}
+
+  .scheme{margin-top:42px}
+  .scheme-head{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+  .scheme-head h2{font-family:"Fraunces",serif;font-weight:700;font-size:21px;margin:0}
+  .scheme-head h2 b{color:var(--paper-accent);font-weight:700}
+  .swatches{display:flex;gap:8px;flex-wrap:wrap}
+  .sw{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 11px 5px 6px;font-size:12px;color:var(--sub)}
+  .sw i{width:16px;height:16px;border-radius:50%;display:block}
+  .sw b{color:var(--ink);font-weight:600}
+  .sw code{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--muted)}
+  .scheme-note{flex-basis:100%;font-size:13px;color:var(--sub);line-height:1.55;margin:2px 0 0}
+  .pair{display:flex;gap:24px;flex-wrap:wrap}
+
+  .phone{width:340px;background:var(--bezel);border-radius:44px;padding:10px;box-shadow:0 24px 50px -20px rgba(20,40,44,.45),0 4px 12px rgba(0,0,0,.15)}
   .screen{background:var(--screen);border-radius:34px;padding:14px 13px 18px;overflow:hidden;position:relative}
   .statusbar{display:flex;justify-content:space-between;align-items:center;padding:2px 8px 12px;font-size:12px;color:var(--sub);font-weight:600}
   .statusbar .dots{display:flex;gap:3px}
   .statusbar .dots i{width:5px;height:5px;border-radius:50%;background:var(--muted);display:block}
-  .vname{font-family:"Fraunces",serif;font-weight:700;font-size:15px;margin:0 4px 10px;color:var(--ink);display:flex;align-items:baseline;gap:7px}
+  .vname{font-family:"Fraunces",serif;font-weight:700;font-size:14px;margin:0 4px 10px;color:var(--ink);display:flex;align-items:baseline;gap:7px}
   .vname small{font-family:"PingFang SC",sans-serif;font-weight:600;font-size:11px;color:var(--paper-accent);letter-spacing:.3px}
-  /* hero card (mirrors app Region 4) */
   .hero{background:var(--card);border-radius:20px;padding:16px 15px;box-shadow:0 2px 10px rgba(20,40,44,.05)}
   .hero .htitle{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--ink);margin-bottom:12px}
   .hero .htitle .info{margin-left:auto;width:15px;height:15px;border-radius:50%;border:1.4px solid var(--muted);color:var(--muted);font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700}
-  .ringrow{display:flex;align-items:center;gap:12px}
+  .ringrow{display:flex;align-items:center;gap:14px}
   .ringwrap{position:relative;width:128px;height:128px;flex:none}
   .ringwrap .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
-  .ringwrap .ctr .v{font-size:12px;font-weight:800;color:var(--val);font-variant-numeric:tabular-nums;letter-spacing:-.4px}
+  .ringwrap .ctr .v{font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.4px}
   .ringwrap .ctr .l{font-size:8px;color:var(--muted);margin-top:1px}
   .legend{display:flex;flex-direction:column;gap:9px;flex:1}
   .legend .row{display:flex;align-items:center;gap:7px;font-size:12.5px}
   .legend .row .dot{width:9px;height:9px;border-radius:50%;flex:none}
   .legend .row .lab{color:var(--sub);font-weight:600;white-space:nowrap}
   .legend .row .val{margin-left:auto;color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
-  .note{margin:11px 4px 2px;font-size:11.5px;line-height:1.5;color:var(--muted)}
-  .note b{color:var(--sub)}
+
   footer{margin-top:56px;border-top:1px solid var(--line);padding-top:22px;color:var(--muted);font-size:12.5px;line-height:1.7}
   footer b{color:var(--sub)}
-  .rec{margin-top:26px;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--paper-accent);border-radius:12px;padding:16px 20px}
-  .rec h2{font-family:"Fraunces",serif;margin:0 0 6px;font-size:17px}
-  .rec p{margin:5px 0;font-size:13.5px;line-height:1.6;color:var(--sub)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top">
     <div>
-      <h1>悦己充盈环 · <em>无间隙三环</em></h1>
-      <p class="lede">锁定 <b>D1 同心三环</b> 结构（三个相互独立的悦己指标，非占比）。本轮只动两件事：
-      <b>① 去掉环与环之间的留白</b>（三环相切成一条连续带）；<b>② 在配色过渡上给出 6 种风格</b>，
-      全部用 <b>OKLCH</b> 感知均匀插值，避免脏灰中点。按真机尺寸放进手机里看（环 ≈ 120–148px）。</p>
+      <h1>悦己充盈环 · <em>配色方案探索</em></h1>
+      <p class="lede">固定上一轮你选的两种过渡风格——<b>② 扫掠尾迹</b>（comet）与 <b>⑥ 充盈光晕</b>（glow）。
+      本轮专攻配色：原 <b>小确幸(青) 与 满足度(绿) 太接近</b>，三指标都是悦己、且独立展示，所以三色<b>单独设计、拉开色相</b>，
+      同时保持与全局一致的<b>对比度/饱和度</b>。每个配色都给出 ② 和 ⑥ 两版对照。</p>
     </div>
     <button class="toggle" onclick="document.body.classList.toggle('dark');render()">◐ 深 / 浅色</button>
   </div>
-  <div class="spec">
-    <span>外环 <b style="color:#0E9AA7">小确幸</b> 7/10</span>
-    <span>中环 <b style="color:#2FA37A">满足度</b> 8.4</span>
-    <span>内环 <b style="color:#E59512">悦己目标</b> 62%</span>
-    <span>圆心 <b>悦己指数 ¥12,400</b></span>
-    <span>环间距 <b>0（相切）</b></span>
-    <span>端点 <b>圆头</b></span>
-  </div>
 
-  <div class="grid" id="grid"></div>
-
-  <div class="rec">
-    <h2>怎么选</h2>
-    <p><b>最稳 → ① 柔光渐变 / ⑤ 粉彩扁平</b>：与现有 <code>HappinessRingsPainter</code> 改动最小，只换渐变/纯色 + 去间距。</p>
-    <p><b>最有「充盈感」→ ② 扫掠尾迹 / ⑥ 充盈光晕</b>：弧头亮、向尾渐隐或外发光，悦己「点亮」的情绪最强；② 与 Flutter `SweepGradient` 天然契合。</p>
-    <p><b>过渡最融合 → ③ 冷暖贯通</b>：三环取自同一条 teal→green→gold 渐变带，相切后读作一条从外到内的暖意流动。<b>④ 双色相位</b>介于其间，每环在同family内做色相位移，更活泼。</p>
-  </div>
+  <div id="root"></div>
 
   <footer>
-    全部方案：三指标各自独立（半径区隔，去间距不改变"三个独立环"的读法）；三色按<b>明度</b>错开以过色盲与小尺寸；
-    OKLCH 环内插值；圆头端点。Pencil 当前环境无法落盘（D-03b），故以可入库的 HTML/SVG 交付，已按真机尺寸 + 手机外框呈现。
+    三色映射：外环 <b>小确幸</b> · 中环 <b>满足度</b> · 内环 <b>悦己目标</b>（= 圆心悦己指数色）。
+    三环相切无间距、圆头端点、OKLCH 环内插值；三色按<b>色相 + 明度</b>双重拉开 → 既解决"中外环太近"，也过色盲与小尺寸。
+    Pencil 当前环境无法落盘（D-03b），故以可入库的 HTML/SVG 交付，已按真机尺寸 + 手机外框呈现。
   </footer>
 </div>
 
 <script>
-/* ---------- OKLCH / OKLab interpolation ---------- */
-function hex2rgb(h){
-  if(h[0]!=='#'){const m=h.match(/\d+(\.\d+)?/g);return [m[0],m[1],m[2]].map(v=>(+v)/255);}
-  h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)].map(v=>v/255);}
+/* ---- OKLab interpolation ---- */
+function hex2rgb(h){if(h[0]!=='#'){const m=h.match(/\d+(\.\d+)?/g);return [m[0],m[1],m[2]].map(v=>(+v)/255);}h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)].map(v=>v/255);}
 const s2l=c=>c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4);
 const l2s=c=>c<=0.0031308?12.92*c:1.055*Math.pow(c,1/2.4)-0.055;
 function rgb2oklab([r,g,b]){r=s2l(r);g=s2l(g);b=s2l(b);
   const l=Math.cbrt(0.4122214708*r+0.5363325363*g+0.0514459929*b);
   const m=Math.cbrt(0.2119034982*r+0.6806995451*g+0.1073969566*b);
   const s=Math.cbrt(0.0883024619*r+0.2817188376*g+0.6299787005*b);
-  return [0.2104542553*l+0.7936177850*m-0.0040720468*s,
-          1.9779984951*l-2.4285922050*m+0.4505937099*s,
-          0.0259040371*l+0.7827717662*m-0.8086757660*s];}
-function oklab2rgb([L,a,b]){const l=(L+0.3963377774*a+0.2158037573*b)**3,
-  m=(L-0.1055613458*a-0.0638541728*b)**3, s=(L-0.0894841775*a-1.2914855480*b)**3;
-  return [4.0767416621*l-3.3077115913*m+0.2309699292*s,
-         -1.2684380046*l+2.6097574011*m-0.3413193965*s,
-         -0.0041960863*l-0.7034186147*m+1.7076147010*s]
-         .map(c=>Math.round(Math.max(0,Math.min(1,l2s(c)))*255));}
-function mix(h1,h2,t){const a=rgb2oklab(hex2rgb(h1)),b=rgb2oklab(hex2rgb(h2));
-  const [r,g,bb]=oklab2rgb([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]);
-  return `rgb(${r},${g},${bb})`;}
-function lighten(h,t){return mix(h,'#ffffff',t);}    // toward white
-// teal->green->gold ramp sample
-function ramp(t,c){return t<.5?mix(c.hl.d,c.st.d,t*2):mix(c.st.d,c.tg.d,(t-.5)*2);}
+  return [0.2104542553*l+0.7936177850*m-0.0040720468*s,1.9779984951*l-2.4285922050*m+0.4505937099*s,0.0259040371*l+0.7827717662*m-0.8086757660*s];}
+function oklab2rgb([L,a,b]){const l=(L+0.3963377774*a+0.2158037573*b)**3,m=(L-0.1055613458*a-0.0638541728*b)**3,s=(L-0.0894841775*a-1.2914855480*b)**3;
+  return [4.0767416621*l-3.3077115913*m+0.2309699292*s,-1.2684380046*l+2.6097574011*m-0.3413193965*s,-0.0041960863*l-0.7034186147*m+1.7076147010*s].map(c=>Math.round(Math.max(0,Math.min(1,l2s(c)))*255));}
+function mix(h1,h2,t){const a=rgb2oklab(hex2rgb(h1)),b=rgb2oklab(hex2rgb(h2));const [r,g,bb]=oklab2rgb([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]);return `rgb(${r},${g},${bb})`;}
+const lighten=(h,t)=>mix(h,'#ffffff',t);
 
-/* ---------- geometry ---------- */
+/* ---- geometry ---- */
 function pt(cx,cy,r,a){const t=a*Math.PI/180;return [cx+r*Math.sin(t),cy-r*Math.cos(t)];}
-function arcD(cx,cy,r,a0,a1){const [x0,y0]=pt(cx,cy,r,a0),[x1,y1]=pt(cx,cy,r,a1);
-  const large=Math.abs(a1-a0)>180?1:0,sweep=a1>a0?1:0;
-  return `M ${x0.toFixed(2)} ${y0.toFixed(2)} A ${r} ${r} 0 ${large} ${sweep} ${x1.toFixed(2)} ${y1.toFixed(2)}`;}
-function trackC(cx,cy,r,col,w){return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="${w}"/>`;}
-function solidArc(cx,cy,r,prog,col,w){return `<path d="${arcD(cx,cy,r,0,prog*360-0.01)}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`;}
-// sweep along the arc, OKLCH cTail->cHead, optional alpha fade tail
+function arcD(cx,cy,r,a0,a1){const [x0,y0]=pt(cx,cy,r,a0),[x1,y1]=pt(cx,cy,r,a1);const large=Math.abs(a1-a0)>180?1:0,sweep=a1>a0?1:0;return `M ${x0.toFixed(2)} ${y0.toFixed(2)} A ${r} ${r} 0 ${large} ${sweep} ${x1.toFixed(2)} ${y1.toFixed(2)}`;}
+const trackC=(cx,cy,r,col,w)=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="${w}"/>`;
+const solidArc=(cx,cy,r,prog,col,w)=>`<path d="${arcD(cx,cy,r,0,prog*360-0.01)}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`;
 function sweepArc(cx,cy,r,prog,cTail,cHead,w,fade){
   const total=prog*360; if(total<=0.5) return '';
   const N=Math.max(3,Math.ceil(total/9)); let s='';
-  for(let i=0;i<N;i++){const t1=(i+1)/N;const a0=(i/N)*total;const a1=t1*total+0.8;
-    const col=mix(cTail,cHead,t1);const op=fade?(0.34+0.66*t1).toFixed(2):1;
+  for(let i=0;i<N;i++){const t1=(i+1)/N;const a0=(i/N)*total;const a1=t1*total+0.8;const col=mix(cTail,cHead,t1);const op=fade?(0.34+0.66*t1).toFixed(2):1;
     s+=`<path d="${arcD(cx,cy,r,a0,a1)}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="butt" opacity="${op}"/>`;}
   const [hx,hy]=pt(cx,cy,r,total);s+=`<circle cx="${hx.toFixed(1)}" cy="${hy.toFixed(1)}" r="${(w/2).toFixed(1)}" fill="${cHead}"/>`;
   if(!fade){const [sx,sy]=pt(cx,cy,r,0);s+=`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${(w/2).toFixed(1)}" fill="${cTail}"/>`;}
   return s;}
 
-/* ---------- metric model ---------- */
-const METRICS=[{k:'hl',label:'小确幸',val:'7',p:.70},{k:'st',label:'满足度',val:'8.4',p:.84},{k:'tg',label:'悦己目标',val:'62%',p:.62}];
-const GEO={box:128,cx:64,cy:64,w:13,radii:[51,38,25]}; // spacing 13 == w -> rings touch (no gap)
+const GEO={box:128,cx:64,cy:64,w:13,radii:[51,38,25]}; // touching, no gap
+const MET=[{label:'小确幸',val:'7',p:.70},{label:'满足度',val:'8.4',p:.84},{label:'悦己目标',val:'62%',p:.62}];
 
-function themeColors(){
-  const dark=document.body.classList.contains('dark');
-  return dark?{
-    hl:{d:'#3FC2CE'},st:{d:'#56C79B'},tg:{d:'#F0B54A'},
-    track:'#22343A',shift:{hl:'#5BE0D2',st:'#39B7C0',tg:'#F58A5B'}
-  }:{
-    hl:{d:'#0E9AA7'},st:{d:'#2FA37A'},tg:{d:'#E59512'},
-    track:'#E9F0F0',shift:{hl:'#19C0C6',st:'#2BB58A',tg:'#F4A33F'}
-  };
-}
-
-/* ---------- 6 transition styles ---------- */
-function renderRing(style,c){
-  const {cx,cy,w,radii,box}=GEO; const M=[c.hl.d,c.st.d,c.tg.d];
-  let defs='',body='';
-  // tracks first (full circles, touching)
-  METRICS.forEach((m,i)=>{body+=trackC(cx,cy,radii[i],c.track,w);});
-  METRICS.forEach((m,i)=>{const r=radii[i],deep=M[i],soft=lighten(deep,.42),p=m.p;
-    if(style==='soft'){            // ① 柔光渐变: per-ring linear soft->deep
-      const id='g'+style+i;defs+=`<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${lighten(deep,.30)}"/><stop offset="1" stop-color="${deep}"/></linearGradient>`;
-      body+=solidArc(cx,cy,r,p,`url(#${id})`,w);
-    }else if(style==='comet'){      // ② 扫掠尾迹: sweep soft->deep with alpha fade tail
-      body+=sweepArc(cx,cy,r,p,lighten(deep,.45),deep,w,true);
-    }else if(style==='ramp'){       // ③ 冷暖贯通: each ring sampled from one teal->green->gold ramp
-      const pos=i/2, base=ramp(pos,c); const tail=lighten(base,.3);
-      body+=sweepArc(cx,cy,r,p,tail,base,w,false);
-    }else if(style==='shift'){      // ④ 双色相位: in-family hue shift along arc
-      body+=sweepArc(cx,cy,r,p,c.shift[m.k],deep,w,false);
-    }else if(style==='flat'){       // ⑤ 粉彩扁平: flat pastel solid
-      body+=solidArc(cx,cy,r,p,lighten(deep,.18),w);
-    }else if(style==='glow'){       // ⑥ 充盈光晕: deep sweep + outer glow halo
-      body+=`<g filter="url(#glow)" opacity="0.55">${solidArc(cx,cy,r,p,deep,w)}</g>`;
-      body+=sweepArc(cx,cy,r,p,lighten(deep,.4),deep,w,false);
-    }
+function renderRing(style,deeps,track,uid){
+  const {cx,cy,w,radii,box}=GEO; let body='';
+  radii.forEach((r,i)=>{body+=trackC(cx,cy,r,track,w);});
+  radii.forEach((r,i)=>{const deep=deeps[i],p=MET[i].p;
+    if(style==='comet'){ body+=sweepArc(cx,cy,r,p,lighten(deep,.45),deep,w,true); }
+    else { body+=`<g filter="url(#g${uid}_${i})" opacity="0.6">${solidArc(cx,cy,r,p,deep,w)}</g>`+sweepArc(cx,cy,r,p,lighten(deep,.4),deep,w,false); }
   });
-  const filter=style==='glow'?'<defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.4"/></filter></defs>':'';
-  return `<svg width="${box}" height="${box}" viewBox="0 0 ${box} ${box}">${filter}${defs}${body}</svg>`;
+  const filter=style==='glow'?`<defs>${radii.map((_,i)=>`<filter id="g${uid}_${i}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.2"/></filter>`).join('')}</defs>`:'';
+  return `<svg width="${box}" height="${box}" viewBox="0 0 ${box} ${box}">${filter}${body}</svg>`;
 }
 
-const VARIANTS=[
-  {s:'soft', n:'柔光渐变', en:'SOFT GRADIENT', note:'每环同色系 <b>OKLCH 两段</b>渐变（淡→浓），稳重；改动最小。'},
-  {s:'comet',n:'扫掠尾迹', en:'COMET SWEEP', note:'弧头亮、向尾渐隐（alpha+色相），像被「点亮」；<b>与 Flutter SweepGradient 天然契合</b>。'},
-  {s:'ramp', n:'冷暖贯通', en:'TEMPERATURE RAMP', note:'三环取自<b>同一条 teal→green→gold</b> 渐变带，相切后读作由外到内的暖意流动，过渡最融合。'},
-  {s:'shift',n:'双色相位', en:'HUE SHIFT', note:'每环在同 family 内做<b>色相位移</b>（如 teal→cyan），比单色更活泼，仍各自独立。'},
-  {s:'flat', n:'粉彩扁平', en:'FLAT PASTEL', note:'无渐变、柔和<b>纯色</b>，零间距 + 圆头，最干净平静；极简实现。'},
-  {s:'glow', n:'充盈光晕', en:'INNER GLOW', note:'浓色弧 + 同色<b>外发光晕</b>，强调「充盈发光」的情绪，深色下尤其出彩。'},
+/* ---- color schemes (light hex: [小确幸, 满足度, 悦己目标]) ---- */
+const SCHEMES=[
+  {id:'A',name:'蓝 · 绿 · 金',en:'AZURE / GREEN / GOLD',hex:['#2E7BD6','#2FA37A','#F0A81E'],roles:['azure','green','gold'],
+   note:'最小改动版：把小确幸从青挪到更蓝的 azure，与满足度的绿明显拉开；其余沿用全局绿/金。最贴近现状、最稳。'},
+  {id:'B',name:'青 · 紫 · 金',en:'TEAL / VIOLET / GOLD',hex:['#0E9AA7','#7A5AF0','#F0A81E'],roles:['teal','violet','gold'],
+   note:'保留品牌青做小确幸，中环换成紫罗兰——三色近似三等分色相环，分得最开、最有"悦己/小确幸"的灵动感。'},
+  {id:'C',name:'靛 · 翠 · 橘',en:'INDIGO / EMERALD / TANGERINE',hex:['#5C6BE0','#13A66A','#F5862A'],roles:['indigo','emerald','tangerine'],
+   note:'保留绿，但邻居换成靛蓝与橘——绿不再夹在两个蓝绿之间，立刻分明；整体更鲜活、暖意更足。'},
+  {id:'D',name:'蓝 · 玫 · 金',en:'BLUE / ROSE / GOLD',hex:['#3E8FD0','#E5568F','#F0A81E'],roles:['blue','rose','gold'],
+   note:'玫红做满足度，冷蓝—暖玫—暖金交替，对比最强、最有少女/温柔的悦己气质；注意玫红与全局 error 红需留距离。'},
 ];
 
+let UID=0;
+function phone(style,scheme,c){
+  const deeps=scheme.hex.map(h=>c.dark?lighten(h,.26):h);
+  const uid=UID++; const ring=renderRing(style,deeps,c.track,uid);
+  const styleName=style==='comet'?'② 扫掠尾迹':'⑥ 充盈光晕';
+  const styleEn=style==='comet'?'COMET SWEEP':'INNER GLOW';
+  const legend=MET.map((m,i)=>`<div class="row"><span class="dot" style="background:${deeps[i]}"></span><span class="lab">${m.label}</span><span class="val">${m.val}</span></div>`).join('');
+  return `<div class="phone"><div class="screen">
+    <div class="statusbar"><span>9:41</span><span class="dots"><i></i><i></i><i></i></span></div>
+    <div class="vname">${styleName}<small>${styleEn}</small></div>
+    <div class="hero"><div class="htitle">✨ 悦己充盈<span class="info">i</span></div>
+      <div class="ringrow">
+        <div class="ringwrap">${ring}<div class="ctr"><span class="v" style="color:${deeps[2]}">¥12,400</span><span class="l">悦己指数</span></div></div>
+        <div class="legend">${legend}</div>
+      </div></div>
+  </div></div>`;
+}
+
 function render(){
-  const c=themeColors(); const grid=document.getElementById('grid'); grid.innerHTML='';
-  VARIANTS.forEach((v,idx)=>{
-    const ring=renderRing(v.s,c);
-    const legend=METRICS.map(m=>`<div class="row"><span class="dot" style="background:${c[m.k].d}"></span><span class="lab">${m.label}</span><span class="val">${m.val}</span></div>`).join('');
-    const phone=document.createElement('div'); phone.className='phone';
-    phone.innerHTML=`
-      <div class="screen">
-        <div class="statusbar"><span>9:41</span><span class="dots"><i></i><i></i><i></i></span></div>
-        <div class="vname">${'①②③④⑤⑥'[idx]} ${v.n}<small>${v.en}</small></div>
-        <div class="hero">
-          <div class="htitle">✨ 悦己充盈<span class="info">i</span></div>
-          <div class="ringrow">
-            <div class="ringwrap">${ring}<div class="ctr"><span class="v">¥12,400</span><span class="l">悦己指数</span></div></div>
-            <div class="legend">${legend}</div>
-          </div>
-        </div>
-        <div class="note"><b>过渡：</b>${v.note}</div>
-      </div>`;
-    grid.appendChild(phone);
+  const dark=document.body.classList.contains('dark');
+  const c={dark, track:dark?'#22343A':'#E9F0F0'};
+  UID=0;
+  const root=document.getElementById('root'); root.innerHTML='';
+  SCHEMES.forEach(sc=>{
+    const sw=sc.hex.map((h,i)=>`<span class="sw"><i style="background:${dark?lighten(h,.26):h}"></i><b>${MET[i].label}</b><code>${h}</code></span>`).join('');
+    const sec=document.createElement('section'); sec.className='scheme';
+    sec.innerHTML=`<div class="scheme-head"><h2><b>${sc.id}</b> · ${sc.name} <span style="font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:14px;color:var(--muted)">${sc.en}</span></h2>
+      <div class="swatches">${sw}</div><p class="scheme-note">${sc.note}</p></div>
+      <div class="pair">${phone('comet',sc,c)}${phone('glow',sc,c)}</div>`;
+    root.appendChild(sec);
   });
 }
 render();
