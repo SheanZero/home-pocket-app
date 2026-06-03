@@ -77,11 +77,11 @@ class SatisfactionEmojiPicker extends StatelessWidget {
               key: ValueKey('face_$index'),
               onTap: () => onChanged(_faceValues[index]),
               child: Container(
-                width: 52,
-                height: 52,
+                width: 58,
+                height: 58,
                 decoration: BoxDecoration(
                   color: isSelected ? palette.joyLight : palette.backgroundMuted,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: isSelected ? palette.joy : Colors.transparent,
                     width: isSelected ? 2 : 1,
@@ -89,8 +89,8 @@ class SatisfactionEmojiPicker extends StatelessWidget {
                 ),
                 child: SvgPicture.asset(
                   _icons[index],
-                  width: 30,
-                  height: 30,
+                  width: 46,
+                  height: 46,
                   colorFilter: ColorFilter.mode(
                     isSelected ? palette.joy : palette.textSecondary,
                     BlendMode.srcIn,
