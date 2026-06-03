@@ -14,6 +14,7 @@ import 'package:home_pocket/features/family_sync/domain/repositories/group_repos
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/member_approval_screen.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
+import 'package:home_pocket/shared/widgets/soft_toast.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../../helpers/test_localizations.dart';
@@ -205,7 +206,12 @@ void main() {
     await tester.tap(find.text('Reject'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(SnackBar), findsOneWidget);
+    expect(find.byType(SoftToast), findsOneWidget);
+
+    // SoftToast schedules an auto-hide Timer; advance past it so teardown
+    // does not fail with "A Timer is still pending".
+    await tester.pump(const Duration(seconds: 6));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('disables both buttons while approving', (tester) async {

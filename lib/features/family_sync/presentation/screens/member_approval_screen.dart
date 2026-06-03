@@ -13,6 +13,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../domain/models/group_info.dart';
 import '../../domain/models/group_member.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
 import '../providers/repository_providers.dart'
     show
@@ -20,7 +21,6 @@ import '../providers/repository_providers.dart'
         confirmMemberUseCaseProvider,
         removeMemberUseCaseProvider;
 import 'group_management_screen.dart';
-
 
 class MemberApprovalScreen extends ConsumerStatefulWidget {
   const MemberApprovalScreen({super.key, this.groupId});
@@ -112,9 +112,7 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
     }
 
     if (result is ConfirmMemberError) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(result.message)));
+      showErrorFeedback(context, result.message);
     }
   }
 
@@ -137,12 +135,9 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
     }
 
     if (result is RemoveMemberError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            S.of(context).familySyncRemoveMemberFailed(result.message),
-          ),
-        ),
+      showErrorFeedback(
+        context,
+        S.of(context).familySyncRemoveMemberFailed(result.message),
       );
     }
   }
@@ -340,7 +335,10 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     gradient: LinearGradient(
-                      colors: [palette.fabGradientEnd, palette.fabGradientStart],
+                      colors: [
+                        palette.fabGradientEnd,
+                        palette.fabGradientStart,
+                      ],
                     ),
                     boxShadow: [
                       BoxShadow(

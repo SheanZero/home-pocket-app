@@ -6,6 +6,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../features/home/presentation/screens/main_shell_screen.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/constants/warm_emojis.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
 import '../providers/repository_providers.dart';
 import '../providers/state_user_profile.dart';
 import '../widgets/avatar_display.dart';
@@ -97,9 +98,7 @@ class _ProfileOnboardingScreenState
     setState(() => _isSaving = false);
 
     final message = _messageForError(l10n, result.error);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    showErrorFeedback(context, message);
   }
 
   @override
@@ -243,11 +242,15 @@ class _ProfileOnboardingScreenState
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: palette.borderDefault),
+                              borderSide: BorderSide(
+                                color: palette.borderDefault,
+                              ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: palette.borderDefault),
+                              borderSide: BorderSide(
+                                color: palette.borderDefault,
+                              ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),

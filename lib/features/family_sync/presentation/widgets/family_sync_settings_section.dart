@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
 import '../../domain/models/sync_status_model.dart';
 import '../../../../application/family_sync/check_group_use_case.dart';
 import '../providers/repository_providers.dart';
@@ -125,9 +126,7 @@ class FamilySyncSettingsSection extends ConsumerWidget {
           MaterialPageRoute<void>(builder: (_) => const GroupChoiceScreen()),
         );
       case CheckGroupError(:final message):
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.familySyncCheckFailed(message))),
-        );
+        showErrorFeedback(context, l10n.familySyncCheckFailed(message));
         await Navigator.of(context).push(
           MaterialPageRoute<void>(builder: (_) => const GroupChoiceScreen()),
         );

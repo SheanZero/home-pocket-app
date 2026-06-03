@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../application/profile/save_user_profile_use_case.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
 import '../../domain/models/user_profile.dart';
 import '../providers/repository_providers.dart';
 import '../providers/state_user_profile.dart';
@@ -95,9 +96,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     setState(() => _isSaving = false);
 
     final message = _profileEditMessageForError(l10n, result.error);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    showErrorFeedback(context, message);
   }
 
   @override
@@ -226,11 +225,15 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(color: palette.borderDefault),
+                            borderSide: BorderSide(
+                              color: palette.borderDefault,
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(color: palette.borderDefault),
+                            borderSide: BorderSide(
+                              color: palette.borderDefault,
+                            ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),

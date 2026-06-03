@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
+import '../../../../shared/widgets/soft_confirm_dialog.dart';
 import '../providers/repository_providers.dart';
 import 'password_dialog.dart';
 
@@ -78,15 +79,11 @@ class DataManagementSection extends ConsumerWidget {
         ShareParams(files: [XFile(result.data!.path)]),
       );
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(S.of(context).backupExportedSuccessfully)),
-        );
+        showSuccessFeedback(context, S.of(context).backupExportedSuccessfully);
       }
     } else {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result.error ?? S.of(context).exportFailed)),
-        );
+        showErrorFeedback(context, result.error ?? S.of(context).exportFailed);
       }
     }
   }
@@ -128,55 +125,38 @@ class DataManagementSection extends ConsumerWidget {
 
     if (importResult.isSuccess) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(S.of(context).backupImportedSuccessfully)),
-        );
+        showSuccessFeedback(context, S.of(context).backupImportedSuccessfully);
       }
     } else {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(importResult.error ?? S.of(context).importFailed),
-          ),
+        showErrorFeedback(
+          context,
+          importResult.error ?? S.of(context).importFailed,
         );
       }
     }
   }
 
-  void _showDeleteAllDataDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(S.of(context).deleteAllData),
-        content: Text(S.of(context).deleteAllDataConfirmation),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(S.of(context).cancel),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-              final result = await ref
-                  .read(clearAllDataUseCaseProvider)
-                  .execute();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      result.isSuccess
-                          ? S.of(context).allDataDeleted
-                          : (result.error ?? S.of(context).deleteFailed),
-                    ),
-                  ),
-                );
-              }
-            },
-            style: TextButton.styleFrom(foregroundColor: context.palette.error),
-            child: Text(S.of(context).delete),
-          ),
-        ],
-      ),
+  Future<void> _showDeleteAllDataDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final confirmed = await showSoftConfirmDialog(
+      context,
+      title: S.of(context).deleteAllData,
+      body: S.of(context).deleteAllDataConfirmation,
+      confirmLabel: S.of(context).delete,
+      cancelLabel: S.of(context).cancel,
     );
+    if (!confirmed || !context.mounted) return;
+
+    final result = await ref.read(clearAllDataUseCaseProvider).execute();
+    if (!context.mounted) return;
+
+    if (result.isSuccess) {
+      showSuccessFeedback(context, S.of(context).allDataDeleted);
+    } else {
+      showErrorFeedback(context, result.error ?? S.of(context).deleteFailed);
+    }
   }
 }

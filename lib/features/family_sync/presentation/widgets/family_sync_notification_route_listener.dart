@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
 import '../providers/state_notification_navigation.dart';
 import '../screens/group_management_screen.dart';
 import '../screens/member_approval_screen.dart';
@@ -73,9 +74,7 @@ class _FamilySyncNotificationRouteListenerState
         case PushNavigationDestination.groupDissolved:
           // SyncEngine manages status automatically via HandleMemberLeft/HandleGroupDissolved
           Navigator.of(context).popUntil((route) => route.isFirst);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(S.of(context).familySyncStatusUnpaired)),
-          );
+          showErrorFeedback(context, S.of(context).familySyncStatusUnpaired);
           break;
       }
     });

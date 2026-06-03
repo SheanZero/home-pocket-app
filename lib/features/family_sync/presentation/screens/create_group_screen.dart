@@ -15,6 +15,7 @@ import '../../../../generated/app_localizations.dart';
 import '../../../profile/domain/models/user_profile.dart';
 import '../../../profile/presentation/providers/state_user_profile.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
 import '../providers/repository_providers.dart';
 import '../widgets/group_rename_dialog.dart';
 import '../../../../application/family_sync/check_group_use_case.dart';
@@ -166,9 +167,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
       case RenameGroupSuccess(:final groupName):
         setState(() => _groupName = groupName);
       case RenameGroupError(:final message):
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(message)));
+        showErrorFeedback(context, message);
     }
   }
 

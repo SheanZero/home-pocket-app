@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/constants/warm_emojis.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
 import '../widgets/avatar_display.dart';
 import '../widgets/scattered_emoji_background.dart';
 
@@ -93,9 +94,7 @@ class _AvatarPickerScreenState extends State<AvatarPickerScreen>
         return;
       }
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.profilePhotoFailed)));
+      showErrorFeedback(context, l10n.profilePhotoFailed);
     }
   }
 
@@ -190,9 +189,7 @@ class _AvatarPickerScreenState extends State<AvatarPickerScreen>
                         height: 44,
                         decoration: BoxDecoration(
                           border: Border(
-                            bottom: BorderSide(
-                              color: palette.borderDefault,
-                            ),
+                            bottom: BorderSide(color: palette.borderDefault),
                           ),
                         ),
                         child: TabBar(
@@ -294,7 +291,11 @@ class _EmojiGrid extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               emoji,
-              style: TextStyle(fontSize: 28, height: 1, color: palette.textPrimary),
+              style: TextStyle(
+                fontSize: 28,
+                height: 1,
+                color: palette.textPrimary,
+              ),
             ),
           ),
         );
@@ -327,9 +328,7 @@ class _PhotoTab extends StatelessWidget {
           decoration: BoxDecoration(
             color: palette.card,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: palette.borderDefault,
-            ),
+            border: Border.all(color: palette.borderDefault),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,

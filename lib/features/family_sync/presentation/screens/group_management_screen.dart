@@ -11,6 +11,8 @@ import '../../../../application/family_sync/rename_group_use_case.dart';
 import '../../../../application/family_sync/deactivate_group_use_case.dart';
 import '../../../../application/family_sync/leave_group_use_case.dart';
 import '../../../../application/family_sync/remove_member_use_case.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
+import '../../../../shared/widgets/soft_confirm_dialog.dart';
 import '../providers/repository_providers.dart';
 import '../providers/state_sync.dart';
 import '../widgets/group_rename_dialog.dart';
@@ -69,9 +71,7 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
           _activeGroup = group.copyWith(groupName: groupName);
         });
       case RenameGroupError():
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.groupRenameFailed)));
+        showErrorFeedback(context, l10n.groupRenameFailed);
     }
   }
 
@@ -80,38 +80,21 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
     if (group == null) return;
 
     final isOwner = group.role == 'owner';
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          isOwner ? l10n.familySyncDeactivateGroup : l10n.familySyncLeaveGroup,
-        ),
-        content: Text(
-          isOwner
-              ? l10n.familySyncDeactivateGroupConfirm
-              : l10n.familySyncLeaveGroupConfirm,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: Text(
-              isOwner
-                  ? l10n.familySyncDeactivateGroup
-                  : l10n.familySyncLeaveGroup,
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await showSoftConfirmDialog(
+      context,
+      title: isOwner
+          ? l10n.familySyncDeactivateGroup
+          : l10n.familySyncLeaveGroup,
+      body: isOwner
+          ? l10n.familySyncDeactivateGroupConfirm
+          : l10n.familySyncLeaveGroupConfirm,
+      confirmLabel: isOwner
+          ? l10n.familySyncDeactivateGroup
+          : l10n.familySyncLeaveGroup,
+      cancelLabel: l10n.cancel,
     );
 
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     final result = isOwner
         ? await ref.read(deactivateGroupUseCaseProvider).execute(group.groupId)
@@ -132,37 +115,22 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
       ),
       _ => l10n.familySyncStatusError,
     };
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    showErrorFeedback(context, message);
   }
 
   Future<void> _handleRemoveMember(GroupMember member) async {
     final group = _activeGroup;
     if (group == null) return;
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.familySyncRemoveMember),
-        content: Text(l10n.familySyncRemoveMemberConfirm(member.deviceName)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: Text(l10n.familySyncRemoveMember),
-          ),
-        ],
-      ),
+    final confirmed = await showSoftConfirmDialog(
+      context,
+      title: l10n.familySyncRemoveMember,
+      body: l10n.familySyncRemoveMemberConfirm(member.deviceName),
+      confirmLabel: l10n.familySyncRemoveMember,
+      cancelLabel: l10n.cancel,
     );
 
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     final result = await ref
         .read(removeMemberUseCaseProvider)
@@ -175,10 +143,9 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
     }
 
     if (result is RemoveMemberError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.familySyncRemoveMemberFailed(result.message)),
-        ),
+      showErrorFeedback(
+        context,
+        l10n.familySyncRemoveMemberFailed(result.message),
       );
     }
   }

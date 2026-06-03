@@ -10,6 +10,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../profile/presentation/providers/state_user_profile.dart';
 import '../../../profile/presentation/widgets/avatar_display.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
 import '../providers/repository_providers.dart';
 import 'waiting_approval_screen.dart';
 
@@ -56,9 +57,7 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
         );
       case ConfirmJoinError(:final message):
         setState(() => _isConfirming = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(message)));
+        showErrorFeedback(context, message);
     }
   }
 
@@ -218,7 +217,10 @@ class _ConfirmJoinScreenState extends ConsumerState<ConfirmJoinScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     gradient: LinearGradient(
-                      colors: [palette.fabGradientEnd, palette.fabGradientStart],
+                      colors: [
+                        palette.fabGradientEnd,
+                        palette.fabGradientStart,
+                      ],
                     ),
                     boxShadow: [
                       BoxShadow(

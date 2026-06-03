@@ -4,6 +4,7 @@ import 'package:home_pocket/application/family_sync/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/widgets/family_sync_notification_route_listener.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
+import 'package:home_pocket/shared/widgets/soft_toast.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../../helpers/test_localizations.dart';
@@ -212,7 +213,12 @@ void main() {
 
     // After memberRemoved, should pop back to first route
     expect(find.text('details-screen'), findsNothing);
-    // Snackbar with "unpaired" message should be visible
-    expect(find.byType(SnackBar), findsOneWidget);
+    // Top toast with "unpaired" message should be visible
+    expect(find.byType(SoftToast), findsOneWidget);
+
+    // SoftToast schedules an auto-hide Timer; advance past it so teardown
+    // does not fail with "A Timer is still pending".
+    await tester.pump(const Duration(seconds: 6));
+    await tester.pumpAndSettle();
   });
 }
