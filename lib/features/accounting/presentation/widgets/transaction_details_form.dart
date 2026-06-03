@@ -86,6 +86,13 @@ class TransactionDetailsFormState
   int _joyFullness = 2;
   bool _isSubmitting = false;
 
+  // Joy-save celebration temporarily disabled per user request (2026-06-03,
+  // quick-260603-nr1 follow-up): "先不要了，后续再看如何添加".
+  // Flip to true to restore the joy save sparkle animation — all scaffolding
+  // (overlay widget, completer machinery, waitForCelebrationDismissed) is left
+  // intact so re-enabling is a one-line change. See joy_celebration_overlay.dart.
+  static const bool _kJoyCelebrationEnabled = false;
+
   // Drives the celebration Stack overlay; only mutated by .new branch (D-15).
   bool _showCelebration = false;
 
@@ -490,7 +497,9 @@ class TransactionDetailsFormState
               // touches _showCelebration.
               // Phase 23 D-08: initialize the completer before showing the overlay
               // so waitForCelebrationDismissed() returns a pending future.
-              if (tx.ledgerType == LedgerType.joy && mounted) {
+              if (_kJoyCelebrationEnabled &&
+                  tx.ledgerType == LedgerType.joy &&
+                  mounted) {
                 _celebrationCompleter = Completer<void>();
                 setState(() => _showCelebration = true);
               }

@@ -1410,7 +1410,9 @@ void main() {
     }
 
     testWidgets(
-      'D-08: joy-ledger save defers Navigator.pop until JoyCelebrationOverlay dismisses',
+      'joy-ledger save pops immediately while celebration disabled '
+      '(quick-260603-nr1: _kJoyCelebrationEnabled=false). Restore the D-08 '
+      'deferred-pop assertions when the flag is flipped back to true',
       (tester) async {
         // The parse result maps to a joy category (dining with joy ledger).
         const voiceText = 'ラテ 1千';
@@ -1444,35 +1446,22 @@ void main() {
         final saveButtonFinder = find.byKey(const ValueKey('voice-save-button'));
         expect(saveButtonFinder, findsOneWidget);
         await tester.tap(saveButtonFinder);
+        await tester.pumpAndSettle();
 
-        // pump() without settling — let the save flow start but NOT run
-        // the full animation so we can check the intermediate state.
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 50));
-
-        // D-08: JoyCelebrationOverlay must be in the tree after joy save.
+        // Celebration temporarily disabled (quick-260603-nr1): joy save now
+        // behaves like daily — no overlay, and Navigator.popUntil fires
+        // immediately because waitForCelebrationDismissed() resolves instantly
+        // (no pending completer). Restore the deferred-pop assertions above
+        // when _kJoyCelebrationEnabled flips back to true.
         expect(
           find.byType(JoyCelebrationOverlay),
-          findsOneWidget,
-          reason: 'D-08: JoyCelebrationOverlay must appear on joy-ledger save',
+          findsNothing,
+          reason: 'celebration disabled — no overlay on joy save (nr1)',
         );
-
-        // Navigation must NOT have fired yet (Navigator still on voice screen).
-        expect(
-          find.byType(VoiceInputScreen),
-          findsOneWidget,
-          reason: 'D-08: Navigator.popUntil must NOT fire before overlay dismisses',
-        );
-
-        // Let the 1.5 s animation run to completion — overlay dismisses →
-        // waitForCelebrationDismissed future completes → popUntil fires.
-        await tester.pumpAndSettle(const Duration(seconds: 3));
-
-        // After animation completes, the route is popped.
         expect(
           find.byType(VoiceInputScreen),
           findsNothing,
-          reason: 'D-08: Navigator.popUntil must fire after overlay dismisses',
+          reason: 'celebration disabled — joy save pops immediately (nr1)',
         );
       },
     );

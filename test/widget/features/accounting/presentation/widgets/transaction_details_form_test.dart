@@ -390,7 +390,9 @@ void main() {
     // ── D-15: joy celebration only on .new joy saves ───────────────────────
 
     testWidgets(
-      '.new mode joy save shows JoyCelebrationOverlay (D-15 positive case)',
+      '.new mode joy save does NOT show JoyCelebrationOverlay while disabled '
+      '(quick-260603-nr1: _kJoyCelebrationEnabled=false). When the flag is '
+      'flipped back to true, restore this to findsOneWidget (D-15 positive case)',
       (tester) async {
         tester.view.physicalSize = const Size(402, 874);
         tester.view.devicePixelRatio = 1;
@@ -427,11 +429,13 @@ void main() {
         await formKey.currentState!.submit();
         await tester.pump();
 
-        // D-15: .new joy save MUST show JoyCelebrationOverlay
+        // Celebration temporarily disabled (quick-260603-nr1): the overlay must
+        // NOT appear even on a .new joy save. Flip _kJoyCelebrationEnabled back
+        // to true (and this back to findsOneWidget) to restore D-15.
         expect(
           find.byType(JoyCelebrationOverlay),
-          findsOneWidget,
-          reason: '.new joy save must trigger JoyCelebrationOverlay (D-15)',
+          findsNothing,
+          reason: 'celebration disabled — no overlay on joy save (nr1)',
         );
       },
     );
