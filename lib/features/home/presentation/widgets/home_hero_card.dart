@@ -233,16 +233,9 @@ class HomeHeroCard extends StatelessWidget {
               Container(height: 6, color: palette.daily),
               FractionallySizedBox(
                 widthFactor: ratio,
-                child: Container(
-                  height: 6,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [palette.joy.withValues(alpha: 0.6), palette.joy],
-                    ),
-                  ),
-                ),
+                // 260603-nr1 #3: solid joy fill (no gradient) to match the
+                // daily segment's flat colour.
+                child: Container(height: 6, color: palette.joy),
               ),
             ],
           ),
@@ -305,7 +298,8 @@ class HomeHeroCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.auto_awesome, size: 16, color: palette.joy),
+            // 260603-nr1 #2: leaf icon for the 悦己充盈 (joy fullness) header.
+            Icon(Icons.eco, size: 16, color: palette.joy),
             const SizedBox(width: 6),
             Text(
               title,
@@ -659,7 +653,7 @@ class HomeHeroCard extends StatelessWidget {
   ///
   /// No tinted box or border — the strip renders directly on the card surface
   /// and relies on the parent card's padding, matching the ring section. The
-  /// header mirrors `_ringSection`'s header exactly (auto_awesome + textPrimary
+  /// header mirrors `_ringSection`'s header (workspace_premium + textPrimary
   /// title) minus the info icon (the strip has no tooltip).
   Widget _bestJoyStripContainer({
     required AppPalette palette,
@@ -671,7 +665,8 @@ class HomeHeroCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.auto_awesome, size: 16, color: palette.joy),
+            // 260603-nr1 #2: medal icon for the 本月最爱 (best joy) header.
+            Icon(Icons.workspace_premium, size: 16, color: palette.joy),
             const SizedBox(width: 6),
             Text(
               title,
