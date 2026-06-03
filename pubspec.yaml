@@ -71,6 +71,7 @@ dependencies:
   lucide_icons_flutter: ^3.1.14
   web_socket_channel: ^3.0.0
   collection: ^1.19.1
+  flutter_svg: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -100,3 +101,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+
+  assets:
+    - assets/satisfaction/

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -14,12 +15,15 @@ class SatisfactionEmojiPicker extends StatelessWidget {
   });
 
   static const _faceValues = [2, 4, 6, 8, 10];
+
+  /// Satisfaction faces (cat set), ordered low → high satisfaction.
+  /// Monochrome SVGs — tinted via [ColorFilter] to match the picker state.
   static const _icons = [
-    Icons.sentiment_neutral_outlined,
-    Icons.sentiment_satisfied_outlined,
-    Icons.sentiment_satisfied_alt_outlined,
-    Icons.sentiment_very_satisfied_outlined,
-    Icons.favorite_border,
+    'assets/satisfaction/sat_01.svg',
+    'assets/satisfaction/sat_02.svg',
+    'assets/satisfaction/sat_03.svg',
+    'assets/satisfaction/sat_04.svg',
+    'assets/satisfaction/sat_05.svg',
   ];
 
   final int value;
@@ -83,10 +87,14 @@ class SatisfactionEmojiPicker extends StatelessWidget {
                     width: isSelected ? 2 : 1,
                   ),
                 ),
-                child: Icon(
+                child: SvgPicture.asset(
                   _icons[index],
-                  size: 24,
-                  color: isSelected ? palette.joy : palette.textSecondary,
+                  width: 30,
+                  height: 30,
+                  colorFilter: ColorFilter.mode(
+                    isSelected ? palette.joy : palette.textSecondary,
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
             );

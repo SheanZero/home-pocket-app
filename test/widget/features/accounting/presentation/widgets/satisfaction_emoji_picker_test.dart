@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/satisfaction_emoji_picker.dart';
 
@@ -29,6 +30,13 @@ void main() {
       for (var i = 0; i < 5; i++) {
         expect(find.byKey(ValueKey('face_$i')), findsOneWidget);
       }
+    });
+
+    testWidgets('renders the 5 satisfaction face SVGs', (tester) async {
+      await tester.pumpWidget(buildTestWidget(value: 6, onChanged: (_) {}));
+
+      final svgs = tester.widgetList<SvgPicture>(find.byType(SvgPicture));
+      expect(svgs.length, 5);
     });
 
     testWidgets('renders satisfaction labels', (tester) async {
