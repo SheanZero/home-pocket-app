@@ -77,3 +77,78 @@ abstract class _$SelectedTabIndex extends $Notifier<int> {
     element.handleCreate(ref, build);
   }
 }
+
+/// Selected month/year for the home dashboard.
+///
+/// Defaults to the current month. Kept alive so the selected month
+/// persists across tab switches. State is a named record
+/// `({int year, int month})` so callers use `state.year` / `state.month`.
+
+@ProviderFor(HomeSelectedMonth)
+final homeSelectedMonthProvider = HomeSelectedMonthProvider._();
+
+/// Selected month/year for the home dashboard.
+///
+/// Defaults to the current month. Kept alive so the selected month
+/// persists across tab switches. State is a named record
+/// `({int year, int month})` so callers use `state.year` / `state.month`.
+final class HomeSelectedMonthProvider
+    extends $NotifierProvider<HomeSelectedMonth, ({int month, int year})> {
+  /// Selected month/year for the home dashboard.
+  ///
+  /// Defaults to the current month. Kept alive so the selected month
+  /// persists across tab switches. State is a named record
+  /// `({int year, int month})` so callers use `state.year` / `state.month`.
+  HomeSelectedMonthProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'homeSelectedMonthProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$homeSelectedMonthHash();
+
+  @$internal
+  @override
+  HomeSelectedMonth create() => HomeSelectedMonth();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(({int month, int year}) value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<({int month, int year})>(value),
+    );
+  }
+}
+
+String _$homeSelectedMonthHash() => r'2845c9acd9f0228ba86814a0f9b75f0f30f374b5';
+
+/// Selected month/year for the home dashboard.
+///
+/// Defaults to the current month. Kept alive so the selected month
+/// persists across tab switches. State is a named record
+/// `({int year, int month})` so callers use `state.year` / `state.month`.
+
+abstract class _$HomeSelectedMonth extends $Notifier<({int month, int year})> {
+  ({int month, int year}) build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref as $Ref<({int month, int year}), ({int month, int year})>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<({int month, int year}), ({int month, int year})>,
+              ({int month, int year}),
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
