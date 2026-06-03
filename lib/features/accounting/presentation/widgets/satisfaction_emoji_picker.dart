@@ -89,8 +89,8 @@ class SatisfactionEmojiPicker extends StatelessWidget {
                 ),
                 child: SvgPicture.asset(
                   _icons[index],
-                  width: 42,
-                  height: 42,
+                  width: 34,
+                  height: 34,
                   colorFilter: ColorFilter.mode(
                     isSelected ? palette.joy : palette.textSecondary,
                     BlendMode.srcIn,
