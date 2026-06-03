@@ -358,10 +358,65 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
 
-    // After category loads, _canSave should be true
-    // (category chip should now show something other than "Please select...")
-    expect(find.byKey(const ValueKey('category-chip')), findsOneWidget);
+    // After category loads, _canSave should be true and the chip must show the
+    // resolved default (food → コンビニ), not the "Please select" placeholder.
+    final chip = find.byKey(const ValueKey('category-chip'));
+    expect(chip, findsOneWidget);
+    expect(
+      find.descendant(of: chip, matching: find.textContaining('コンビニ')),
+      findsOneWidget,
+      reason: 'default category must be visible in the chip after async load',
+    );
   });
+
+  // ── 260603-ti2: default category must auto-fill the form on initial load ──
+  // Regression: the embedded TransactionDetailsForm reads `initialCategory`
+  // only in its own initState, which runs (with null) BEFORE the host's async
+  // default-category load resolves. A host setState/rebuild alone never reaches
+  // the form (its GlobalKey state persists), so the form stays on "Please
+  // select a category" forever. The fix pushes the resolved default into the
+  // form via its imperative updateCategory() API — mirroring the already-
+  // working _resetForContinuousEntry path.
+  testWidgets(
+    '260603-ti2: default category auto-fills into the form after async init',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        _pumpScreen(
+          mockCreateUseCase: mockCreateUseCase,
+          fakeCategoryRepo: FakeCategoryRepository(_fakeCategories),
+          mockCategoryService: mockCategoryService,
+          // No initialCategory — exercise the async default-resolution path.
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final chip = find.byKey(const ValueKey('category-chip'));
+      expect(chip, findsOneWidget);
+
+      // The chip must show the resolved default (food → コンビニ), NOT the
+      // "Please select a category" placeholder.
+      expect(
+        find.descendant(of: chip, matching: find.textContaining('コンビニ')),
+        findsOneWidget,
+        reason:
+            'default L2 category should auto-fill the form on initial load, '
+            'not stay on the please-select placeholder',
+      );
+      expect(
+        find.descendant(
+          of: chip,
+          matching: find.textContaining('Please select'),
+        ),
+        findsNothing,
+        reason: 'placeholder must be gone once the default resolves',
+      );
+    },
+  );
 
   // ── P19-W1: Toolbar Save disabled when category null ──────────────────────
 

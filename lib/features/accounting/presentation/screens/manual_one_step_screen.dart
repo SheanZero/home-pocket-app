@@ -163,6 +163,17 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
     });
     // P19-W1: _canSave flips to true here (assuming !_isSubmitting) — the
     // SmartKeyboard Save key and KeyboardToolbar Save button become tappable.
+    //
+    // 260603-ti2: the embedded form reads `initialCategory` only in its own
+    // initState, which already ran (with null) before this async load resolved
+    // — so the setState rebuild above never reaches it and the chip would stay
+    // on "请选择类别". Push the resolved default in via the form's imperative API
+    // (idempotent + resolves ledger type), mirroring the picker-result and
+    // voice-fill paths. `_formKey.currentState` is non-null here because the
+    // first build completed during the awaited repo read above.
+    if (defaultL2 != null) {
+      _formKey.currentState?.updateCategory(defaultL2, defaultL1);
+    }
   }
 
   // ── FocusNode listener (P19-W3 — per-host FocusNodes, no Focus walker) ──
@@ -328,17 +339,11 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
     formState?.updateMerchant('');
     formState?.updateNote('');
     formState?.updateDate(DateTime.now());
-    // Re-seed the default category and push it into the form so the next entry
-    // starts from a clean slate (the form's GlobalKey preserves its own state
-    // across rebuilds, so a config change alone would not reset it).
+    // Re-seed the default category for the next entry. _initializeDefaultCategory
+    // now pushes the resolved default into the form itself (260603-ti2), so the
+    // form's GlobalKey-preserved state is reset to the default category too.
     await _initializeDefaultCategory();
     if (!mounted) return;
-    if (_selectedCategory != null) {
-      _formKey.currentState?.updateCategory(
-        _selectedCategory!,
-        _selectedParentCategory,
-      );
-    }
     _restoreKeypadFocus();
   }
 
