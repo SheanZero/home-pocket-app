@@ -49,7 +49,7 @@ class _FixedListFilter extends ListFilter {
 /// Provides the minimum overrides needed to render the screen without
 /// triggering DB or network calls:
 /// - currentLocaleProvider: synchronous ja
-/// - listFilterProvider: fixed state for 2026/5
+/// - listFilterProvider: fixed state for the given year/month (default 2026/5)
 /// - isGroupModeProvider: false (solo mode for basic refresh tests)
 /// - shadowBooksProvider: empty (not in group mode)
 /// - getListTransactionsUseCaseProvider: mockUseCase returning empty list
@@ -57,8 +57,10 @@ class _FixedListFilter extends ListFilter {
 Future<ProviderContainer> _pumpScreen(
   WidgetTester tester,
   _MockGetListTransactionsUseCase mockUseCase,
-  _MockAnalyticsRepository mockRepo,
-) async {
+  _MockAnalyticsRepository mockRepo, {
+  int year = 2026,
+  int month = 5,
+}) async {
   late ProviderContainer container;
   await tester.pumpWidget(
     ProviderScope(
@@ -66,9 +68,9 @@ Future<ProviderContainer> _pumpScreen(
         locale_providers.currentLocaleProvider
             .overrideWith((_) async => const Locale('ja')),
         listFilterProvider.overrideWith(
-          () => _FixedListFilter(const ListFilterState(
-            selectedYear: 2026,
-            selectedMonth: 5,
+          () => _FixedListFilter(ListFilterState(
+            selectedYear: year,
+            selectedMonth: month,
           )),
         ),
         isGroupModeProvider.overrideWithValue(false),
@@ -108,6 +110,69 @@ void main() {
       ),
     ));
     registerFallbackValue(DateTime(2026));
+  });
+
+  group('ListScreen right chevron visibility', () {
+    testWidgets(
+      'right chevron absent when on current month',
+      (tester) async {
+        final mockUseCase = _MockGetListTransactionsUseCase();
+        final mockRepo = _MockAnalyticsRepository();
+        final now = DateTime.now();
+
+        when(() => mockUseCase.execute(any())).thenAnswer(
+          (_) async => Result.success(<Transaction>[]),
+        );
+        when(
+          () => mockRepo.getDailyTotals(
+            bookId: any(named: 'bookId'),
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+          ),
+        ).thenAnswer((_) async => []);
+
+        await _pumpScreen(
+          tester,
+          mockUseCase,
+          mockRepo,
+          year: now.year,
+          month: now.month,
+        );
+
+        // When on the current month, the right chevron must not be present.
+        expect(find.byIcon(Icons.chevron_right), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'right chevron present when on a past month',
+      (tester) async {
+        final mockUseCase = _MockGetListTransactionsUseCase();
+        final mockRepo = _MockAnalyticsRepository();
+
+        when(() => mockUseCase.execute(any())).thenAnswer(
+          (_) async => Result.success(<Transaction>[]),
+        );
+        when(
+          () => mockRepo.getDailyTotals(
+            bookId: any(named: 'bookId'),
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+          ),
+        ).thenAnswer((_) async => []);
+
+        // May 2026 is a past month (current is June 2026)
+        await _pumpScreen(
+          tester,
+          mockUseCase,
+          mockRepo,
+          year: 2026,
+          month: 5,
+        );
+
+        expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+      },
+    );
   });
 
   group('ListScreen pull-to-refresh (LIST-04)', () {
