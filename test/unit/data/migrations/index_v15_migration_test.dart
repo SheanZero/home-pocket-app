@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-const _targetSchemaVersion = 18;
+const _targetSchemaVersion = 15; // minimum version including v15 migration
 
 void main() {
   test(
@@ -11,7 +11,7 @@ void main() {
       final db = AppDatabase.forTesting();
       addTearDown(db.close);
 
-      expect(db.schemaVersion, _targetSchemaVersion);
+      expect(db.schemaVersion, greaterThanOrEqualTo(_targetSchemaVersion));
     },
   );
 

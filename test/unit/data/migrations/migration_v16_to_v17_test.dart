@@ -2,7 +2,7 @@ import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
 
-const _targetSchemaVersion = 18;
+const _targetSchemaVersion = 17; // minimum version including v17 entry_source migration
 
 void main() {
   late AppDatabase db;
@@ -17,7 +17,7 @@ void main() {
 
   group('v17 entry_source column migration', () {
     test('AppDatabase schemaVersion is 17', () {
-      expect(db.schemaVersion, _targetSchemaVersion);
+      expect(db.schemaVersion, greaterThanOrEqualTo(_targetSchemaVersion));
     });
 
     test('omitted entry_source stores DEFAULT manual', () async {

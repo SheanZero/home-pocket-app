@@ -42,7 +42,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
 
   @override
   MigrationStrategy get migration {
@@ -409,6 +409,17 @@ class AppDatabase extends _$AppDatabase {
               'ALTER TABLE transactions RENAME COLUMN soul_satisfaction TO joy_fullness',
             );
           });
+        }
+        if (from < 19) {
+          // 260603-ti2: promote cat_food_dining_out to first sub-category of cat_food.
+          // sortOrder: dining_out 2→1, groceries 1→2.
+          // Only touches system categories (is_system=1); user-created categories unaffected.
+          await customStatement(
+            "UPDATE categories SET sort_order = 1 WHERE id = 'cat_food_dining_out' AND is_system = 1",
+          );
+          await customStatement(
+            "UPDATE categories SET sort_order = 2 WHERE id = 'cat_food_groceries' AND is_system = 1",
+          );
         }
       },
     );
