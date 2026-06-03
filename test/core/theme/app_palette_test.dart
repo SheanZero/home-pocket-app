@@ -27,16 +27,16 @@ void main() {
       expect(AppPalette.light.daily, const Color(0xFF5FAE72));
     });
 
-    test('joy is 桜餅 Amber #C8841A (quick soqks, Mauve removed)', () {
-      expect(AppPalette.light.joy, const Color(0xFFC8841A));
+    test('joy is 樱粉 Sakura Pink #D98CA0 (quick 260603-lr5b, Amber → Sakura)', () {
+      expect(AppPalette.light.joy, const Color(0xFFD98CA0));
     });
 
     test('dailyText (WCAG amount) is #2E6B3A', () {
       expect(AppPalette.light.dailyText, const Color(0xFF2E6B3A));
     });
 
-    test('joyText (WCAG amount) is #A15C00 (deep amber ≥4.5:1 on #FFF)', () {
-      expect(AppPalette.light.joyText, const Color(0xFFA15C00));
+    test('joyText (WCAG amount) is #A53D5E (deep rose ≥4.5:1 on #FFF)', () {
+      expect(AppPalette.light.joyText, const Color(0xFFA53D5E));
     });
 
     test('success is emerald #2FA37A (unchanged from ADR-018)', () {
@@ -61,8 +61,8 @@ void main() {
       expect(AppPalette.dark.daily, const Color(0xFF7DC88D));
     });
 
-    test('joy is #E0A040 (bright amber on dark — Mauve removed)', () {
-      expect(AppPalette.dark.joy, const Color(0xFFE0A040));
+    test('joy is #E89BB0 (bright sakura pink on dark — Amber → Sakura)', () {
+      expect(AppPalette.dark.joy, const Color(0xFFE89BB0));
     });
 
     test('textPrimary is #F0EBE6 (warm near-white on dark background)', () {

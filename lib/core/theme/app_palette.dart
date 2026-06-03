@@ -245,10 +245,10 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     daily: Color(0xFF5FAE72),
     dailyText: Color(0xFF2E6B3A),
     dailyLight: Color(0xFFEEF6EC),
-    // Ledger — Joy (桜餅 Amber — quick soqks, supersedes 丁香 Mauve)
-    joy: Color(0xFFC8841A),
-    joyText: Color(0xFFA15C00),
-    joyLight: Color(0xFFFFF0D6),
+    // Ledger — Joy (樱粉 Sakura Pink — quick 260603-lr5b, user-directed)
+    joy: Color(0xFFD98CA0),
+    joyText: Color(0xFFA53D5E),
+    joyLight: Color(0xFFFBEAEF),
     // Ledger — Shared
     shared: Color(0xFF5B8AC4),
     sharedText: Color(0xFF3A6396),
@@ -268,9 +268,9 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     // Shadows
     fabShadow: Color(0x33D98CA0),
     navShadow: Color(0x08000000),
-    // Joy card (amber tints — joyRoi* stays green = success/ROI semantic)
-    joyFullnessBg: Color(0xFFFFF0D6),
-    joyFullnessBorder: Color(0xFFE8C07A),
+    // Joy card (sakura pink tints — joyRoi* stays green = success/ROI semantic)
+    joyFullnessBg: Color(0xFFFBEAEF),
+    joyFullnessBorder: Color(0xFFE7B9C6),
     joyRoiBg: Color(0xFFE4F4EE),
     joyRoiBorder: Color(0xFFB8E4D6),
     // Family
@@ -278,9 +278,9 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     // Best Joy strip (warm cream surface)
     surfaceCream: Color(0xFFFFFAF6),
     surfaceCreamBorder: Color(0xFFE6DDD8),
-    textMutedGold: Color(0xFFA15C00),
-    satisfactionPillBg: Color(0xFFFFF0D6),
-    satisfactionPillRose: Color(0xFFC8841A),
+    textMutedGold: Color(0xFFA53D5E),
+    satisfactionPillBg: Color(0xFFFBEAEF),
+    satisfactionPillRose: Color(0xFFD98CA0),
     // Decorative — avatar (wakaba/leaf-green family, D-04)
     avatarGradientStart: Color(0xFFCFE6CF),
     avatarGradientMid: Color(0xFFE2F0E2),
@@ -327,10 +327,10 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     daily: Color(0xFF7DC88D),
     dailyText: Color(0xFF7DC88D),
     dailyLight: Color(0xFF1A2E1A),
-    // Ledger — Joy (bright amber on dark — supersedes 丁香 Mauve dark)
-    joy: Color(0xFFE0A040),
-    joyText: Color(0xFFE0A040),
-    joyLight: Color(0xFF2E2010),
+    // Ledger — Joy (bright sakura pink on dark — quick 260603-lr5b, user-directed)
+    joy: Color(0xFFE89BB0),
+    joyText: Color(0xFFE89BB0),
+    joyLight: Color(0xFF2E1820),
     // Ledger — Shared
     shared: Color(0xFF7FA8D8),
     sharedText: Color(0xFF7FA8D8),
@@ -350,9 +350,9 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     // Shadows
     fabShadow: Color(0x33E09DB4),
     navShadow: Color(0x20000000),
-    // Joy card (amber dark tints — joyRoi* stays green = success/ROI semantic)
-    joyFullnessBg: Color(0xFF2E2010),
-    joyFullnessBorder: Color(0xFF4A3818),
+    // Joy card (sakura pink dark tints — joyRoi* stays green = success/ROI semantic)
+    joyFullnessBg: Color(0xFF2E1820),
+    joyFullnessBorder: Color(0xFF4A2834),
     joyRoiBg: Color(0xFF173330),
     joyRoiBorder: Color(0xFF2D4D45),
     // Family
@@ -360,9 +360,9 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     // Best Joy strip (warm-dark surface)
     surfaceCream: Color(0xFF1A1512),
     surfaceCreamBorder: Color(0xFF2E2723),
-    textMutedGold: Color(0xFFC89050),
-    satisfactionPillBg: Color(0xFF2E2010),
-    satisfactionPillRose: Color(0xFFE0A040),
+    textMutedGold: Color(0xFFD98CA0),
+    satisfactionPillBg: Color(0xFF2E1820),
+    satisfactionPillRose: Color(0xFFE89BB0),
     // Decorative — avatar (leaf-green dark family, D-04)
     avatarGradientStart: Color(0xFF1F3020),
     avatarGradientMid: Color(0xFF1A2A1B),

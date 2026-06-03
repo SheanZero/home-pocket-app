@@ -200,3 +200,37 @@ ADR-018 确立了以青色 `#0E9AA7` 为主色的 Teal Clarity 调色板，在 P
 ---
 
 **下次 Review:** v1.6 milestone close 或下一次配色调整时
+
+---
+
+## Update 2026-06-03: Joy 全族转樱粉
+
+**触发:** Quick task 260603-lr5b — 用户要求将悦己 (Joy) 所有颜色从初始暖琥珀系 (#A15C00 家族) 全面替换为 **樱粉 sakura pink #D98CA0 及其变体**。
+
+**变更范围 (app_palette.dart):**
+
+| Token | Light 旧值 | Light 新值 | Dark 旧值 | Dark 新值 |
+|-------|-----------|-----------|---------|---------|
+| `joy` | `#C8841A` (amber) | `#D98CA0` (sakura) | `#E0A040` (amber) | `#E89BB0` (sakura) |
+| `joyText` | `#A15C00` (deep amber) | `#A53D5E` (deep rose, WCAG AA ~6.1:1 on white) | `#E0A040` | `#E89BB0` (WCAG AA ~7.6:1 on dark card) |
+| `joyLight` | `#FFF0D6` (amber tint) | `#FBEA EF` (pink tint) | `#2E2010` | `#2E1820` |
+| `joyFullnessBg` | `#FFF0D6` | `#FBEAEF` | `#2E2010` | `#2E1820` |
+| `joyFullnessBorder` | `#E8C07A` | `#E7B9C6` | `#4A3818` | `#4A2834` |
+| `satisfactionPillBg` | `#FFF0D6` | `#FBEAEF` | `#2E2010` | `#2E1820` |
+| `satisfactionPillRose` | `#C8841A` | `#D98CA0` | `#E0A040` | `#E89BB0` |
+| `textMutedGold` | `#A15C00` | `#A53D5E` | `#C89050` | `#D98CA0` |
+
+**变更范围 (happiness_ring_palette.dart):**
+
+内圈 `target` (悦己目标) 从奶油黄 butter 改为樱粉 sakura，外圈 highlights (青瓷 teal) 和中圈 satisfaction (柔绿 sage) 保持不变，三环色盲安全区分继续成立。调色方案描述从 "青瓷/薰衣草/奶油黄" 更新为 "青瓷/柔绿/樱粉"。
+
+| Token | Light 旧值 | Light 新值 | Dark 旧值 | Dark 新值 |
+|-------|-----------|-----------|---------|---------|
+| `target` | `#F2D777` (butter) | `#D98CA0` (sakura) | `#F7E08C` (butter) | `#E89BB0` (sakura) |
+| `targetText` | `#8A7320` | `#A53D5E` | `#F7E08C` | `#E89BB0` |
+
+**注意事项:**
+- 悦己 Joy 与 FAB 添加按钮现在共享樱粉色调 (intentional, user-directed)。此举覆盖了 ADR-019 原始约束 D-fab-sakura 中"粉色仅限 FAB"的指导 — 用户明确要求 Joy 全族转樱粉。
+- `joyRoiBg`/`joyRoiBorder` 保持绿色 (ROI/success 语义，非 Joy 身份色)，不受本次影响。
+- 所有 golden master 已同步 re-baseline (73 张，全通过)。
+- `app_palette_test.dart` 合约断言同步更新至新樱粉值。
