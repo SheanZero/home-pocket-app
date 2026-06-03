@@ -15,6 +15,7 @@ class SatisfactionEmojiPicker extends StatelessWidget {
   });
 
   static const _faceValues = [2, 4, 6, 8, 10];
+  static const _chipSize = 56.0;
 
   /// Satisfaction faces (cat set), ordered low → high satisfaction.
   /// Monochrome SVGs — tinted via [ColorFilter] to match the picker state.
@@ -77,8 +78,8 @@ class SatisfactionEmojiPicker extends StatelessWidget {
               key: ValueKey('face_$index'),
               onTap: () => onChanged(_faceValues[index]),
               child: Container(
-                width: 56,
-                height: 56,
+                width: _chipSize,
+                height: _chipSize,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: isSelected ? palette.joyLight : palette.backgroundMuted,
@@ -102,21 +103,26 @@ class SatisfactionEmojiPicker extends StatelessWidget {
           }),
         ),
         const SizedBox(height: 8),
+        // Labels sit in fixed-width columns matching the icon row (same
+        // spaceBetween), so 平和/不错/最爱 center under icons 1 / 3 / 5
+        // instead of hugging the card edges.
         Row(
-          children: [
-            Expanded(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(_icons.length, (index) {
+            final String label;
+            if (index == 0) {
+              label = bottomLabels[0];
+            } else if (index == 2) {
+              label = bottomLabels[1];
+            } else if (index == _icons.length - 1) {
+              label = bottomLabels[2];
+            } else {
+              label = '';
+            }
+            return SizedBox(
+              width: _chipSize,
               child: Text(
-                bottomLabels[0],
-                style: AppTextStyles.bodySmall.copyWith(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                  color: palette.textTertiary,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Text(
-                bottomLabels[1],
+                label,
                 textAlign: TextAlign.center,
                 style: AppTextStyles.bodySmall.copyWith(
                   fontSize: 10,
@@ -124,19 +130,8 @@ class SatisfactionEmojiPicker extends StatelessWidget {
                   color: palette.textTertiary,
                 ),
               ),
-            ),
-            Expanded(
-              child: Text(
-                bottomLabels[2],
-                textAlign: TextAlign.right,
-                style: AppTextStyles.bodySmall.copyWith(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                  color: palette.textTertiary,
-                ),
-              ),
-            ),
-          ],
+            );
+          }),
         ),
       ],
     );

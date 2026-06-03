@@ -68,7 +68,7 @@ class LedgerTypeSelector extends StatelessWidget {
       child: AnimatedContainer(
         key: key,
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
         decoration: BoxDecoration(
           color: isActive ? activeBg : palette.backgroundMuted,
           borderRadius: BorderRadius.circular(20),

@@ -744,6 +744,7 @@ class TransactionDetailsFormState
                           child: Text(
                             l10n.expenseClassification,
                             style: AppTextStyles.titleMedium.copyWith(
+                              fontSize: 13,
                               color: palette.textPrimary,
                             ),
                           ),
@@ -759,7 +760,7 @@ class TransactionDetailsFormState
                       ],
                     ),
                     if (_ledgerType == LedgerType.joy) ...[
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12),
                       SatisfactionEmojiPicker(
                         value: _joyFullness,
                         onChanged: (v) => setState(() => _joyFullness = v),
