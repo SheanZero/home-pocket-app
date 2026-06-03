@@ -216,6 +216,24 @@ Use `AppTextStyles.amountLarge/amountMedium/amountSmall` (`lib/core/theme/app_te
 
 ---
 
+## App Color Scheme (v1.6 — ADR-019 桜餅×若葉)
+
+**v1.6 palette DECIDED — ADR-019 "Sakura Mochi × Wakaba" (2026-06-03).** Supersedes ADR-018 Teal Clarity entirely.
+
+- **Primary (nav/tab/CTA/borderInputActive):** leaf green `#6FA36F` (dark `#8DC68D`) — NOT teal/coral. Red reserved exclusively for `error`.
+- **FAB / add-entry:** sakura pink `#D98CA0` (dark `#E09DB4`) — ONE place pink appears. Do NOT spread it.
+- **日常 Daily:** `#5FAE72`, amount text `#2E6B3A` (WCAG AA ≈7.0:1 on white)
+- **悦己 Joy:** warm amber `#C8841A`, amount text `#A15C00` (WCAG AA ≈5.9:1). Dark joy/joyText `#E0A040`. Mauve `#A586B0` is gone.
+- **Shared:** steel-blue `#5B8AC4` (unchanged — keeps green+amber+blue three-ledger distinction)
+- **Background:** warm cream `#FBF7F4`; borders/dividers warm-family `#E6DDD8`/`#EAE1DC`
+- **Semantic (unchanged):** success `#2FA37A` / warning `#C98A00` / error `#E5484D` / info `#2A8FB8`
+- **joyRoiBg/joyRoiBorder:** keep green (ROI/success semantic, not joy identity)
+- **happiness_ring_palette.dart:** out of scope — separate Butter palette for 悦己充盈环
+
+Full light+dark hex-per-role table: `docs/arch/03-adr/ADR-019_Palette_Selection_v1_6.md`
+
+---
+
 ## Widget Parameter Pattern
 
 Use nullable parameters with provider fallback — never hardcode defaults:

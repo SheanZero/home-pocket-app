@@ -3,45 +3,43 @@ import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/core/theme/app_palette.dart';
 
-/// Unit test for AppPalette ThemeExtension — ADR-018 hex contract.
+/// Unit test for AppPalette ThemeExtension — ADR-019 hex contract.
 ///
-/// This test file is the machine-readable specification for which ADR-018 hex
+/// This test file is the machine-readable specification for which ADR-019 hex
 /// values app_palette.dart must encode. All expected Color values are sourced
-/// directly from ADR-018's "逐角色 Hex 表" (Light / Dark columns).
+/// directly from ADR-019's "逐角色 Hex 表" (Light / Dark columns).
 ///
-/// Expected state:
-///   BEFORE Plan 33-02 creates app_palette.dart → FAILS (compile error)
-///   AFTER  Plan 33-02 lands                    → PASSES
+/// ADR-019 Sakura Mochi × Wakaba replaces ADR-018 Teal Clarity.
 ///
 /// Run: flutter test test/core/theme/app_palette_test.dart
 
 void main() {
-  group('AppPalette.light — ADR-018 contract', () {
-    test('background matches ADR-018 light #F8FCFD', () {
-      expect(AppPalette.light.background, const Color(0xFFF8FCFD));
+  group('AppPalette.light — ADR-019 contract', () {
+    test('background is warm cream #FBF7F4', () {
+      expect(AppPalette.light.background, const Color(0xFFFBF7F4));
     });
 
-    test('accentPrimary is teal #0E9AA7 (not coral)', () {
-      expect(AppPalette.light.accentPrimary, const Color(0xFF0E9AA7));
+    test('accentPrimary is leaf green #6FA36F (not teal)', () {
+      expect(AppPalette.light.accentPrimary, const Color(0xFF6FA36F));
     });
 
-    test('daily is teal-navy #1C7A86', () {
-      expect(AppPalette.light.daily, const Color(0xFF1C7A86));
+    test('daily is leaf-green #5FAE72', () {
+      expect(AppPalette.light.daily, const Color(0xFF5FAE72));
     });
 
-    test('joy is 丁香 Mauve #A586B0 (quick 260602-jcl)', () {
-      expect(AppPalette.light.joy, const Color(0xFFA586B0));
+    test('joy is 桜餅 Amber #C8841A (quick soqks, Mauve removed)', () {
+      expect(AppPalette.light.joy, const Color(0xFFC8841A));
     });
 
-    test('dailyText (WCAG amount) is #145E68', () {
-      expect(AppPalette.light.dailyText, const Color(0xFF145E68));
+    test('dailyText (WCAG amount) is #2E6B3A', () {
+      expect(AppPalette.light.dailyText, const Color(0xFF2E6B3A));
     });
 
-    test('joyText (WCAG amount) is #6B4877', () {
-      expect(AppPalette.light.joyText, const Color(0xFF6B4877));
+    test('joyText (WCAG amount) is #A15C00 (deep amber ≥4.5:1 on #FFF)', () {
+      expect(AppPalette.light.joyText, const Color(0xFFA15C00));
     });
 
-    test('success is emerald #2FA37A', () {
+    test('success is emerald #2FA37A (unchanged from ADR-018)', () {
       expect(AppPalette.light.success, const Color(0xFF2FA37A));
     });
 
@@ -50,26 +48,25 @@ void main() {
     });
   });
 
-  group('AppPalette.dark — ADR-018 contract', () {
-    test('background matches ADR-018 dark #0C1719', () {
-      expect(AppPalette.dark.background, const Color(0xFF0C1719));
+  group('AppPalette.dark — ADR-019 contract', () {
+    test('background is warm-dark #171210', () {
+      expect(AppPalette.dark.background, const Color(0xFF171210));
     });
 
-    test('accentPrimary is brightened teal #3FC2CE', () {
-      expect(AppPalette.dark.accentPrimary, const Color(0xFF3FC2CE));
+    test('accentPrimary is bright leaf green #8DC68D on dark', () {
+      expect(AppPalette.dark.accentPrimary, const Color(0xFF8DC68D));
     });
 
-    test('daily is #4FB0BC (brightened teal-navy)', () {
-      expect(AppPalette.dark.daily, const Color(0xFF4FB0BC));
+    test('daily is #7DC88D (bright leaf on dark)', () {
+      expect(AppPalette.dark.daily, const Color(0xFF7DC88D));
     });
 
-    test('joy is #C0A3CA (丁香 Mauve dark — quick 260602-jcl)', () {
-      expect(AppPalette.dark.joy, const Color(0xFFC0A3CA));
+    test('joy is #E0A040 (bright amber on dark — Mauve removed)', () {
+      expect(AppPalette.dark.joy, const Color(0xFFE0A040));
     });
 
-    test('textPrimary is #E8F2F3 (light text on dark background)', () {
-      // Also used by scattered_emoji_background.dart (D-07 dark adaptation)
-      expect(AppPalette.dark.textPrimary, const Color(0xFFE8F2F3));
+    test('textPrimary is #F0EBE6 (warm near-white on dark background)', () {
+      expect(AppPalette.dark.textPrimary, const Color(0xFFF0EBE6));
     });
   });
 

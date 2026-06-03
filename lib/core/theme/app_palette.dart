@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Semantic color token system for Home Pocket — ADR-018 Teal Clarity palette.
+/// Semantic color token system for Home Pocket — ADR-019 Sakura Mochi × Wakaba palette.
 ///
 /// Use [AppPalette.light] and [AppPalette.dark] as the authoritative source
 /// for all color tokens. Access via [BuildContext.palette] in widget trees.
@@ -33,7 +33,7 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     required this.borderDivider,
     required this.borderList,
     required this.borderInputActive,
-    // ── Accent primary (Teal) ──
+    // ── Accent primary (Leaf Green) ──
     required this.accentPrimary,
     required this.accentPrimaryLight,
     required this.accentPrimaryBorder,
@@ -83,7 +83,7 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     required this.textMutedGold,
     required this.satisfactionPillBg,
     required this.satisfactionPillRose,
-    // ── Decorative — avatar (D-04 teal-family re-hue) ──
+    // ── Decorative — avatar (leaf-green family) ──
     required this.avatarGradientStart,
     required this.avatarGradientMid,
     required this.avatarGradientEnd,
@@ -91,7 +91,7 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     // light = Color(0x80FFFFFF), dark = Color(0x26FFFFFF).
     // Call site uses palette.avatarBorderAlpha with NO isDark check (D-04).
     required this.avatarBorderAlpha,
-    // ── Decorative — member tile (D-04 teal-family re-hue) ──
+    // ── Decorative — member tile (leaf-green family) ──
     required this.memberGradientA,
     required this.memberGradientB,
     required this.memberGradientC,
@@ -121,7 +121,7 @@ final class AppPalette extends ThemeExtension<AppPalette> {
   final Color borderList;
   final Color borderInputActive;
 
-  // ── Accent primary (Teal) ──
+  // ── Accent primary (Leaf Green) ──
   final Color accentPrimary;
   final Color accentPrimaryLight;
   final Color accentPrimaryBorder;
@@ -214,41 +214,41 @@ final class AppPalette extends ThemeExtension<AppPalette> {
 
   // ── Static instances ──
 
-  /// ADR-018 Light palette — Teal Clarity.
+  /// ADR-019 Light palette — Sakura Mochi × Wakaba.
   static const light = AppPalette(
     // Backgrounds
-    background: Color(0xFFF8FCFD),
+    background: Color(0xFFFBF7F4),
     card: Color(0xFFFFFFFF),
-    backgroundMuted: Color(0xFFECF4F5),
-    backgroundSubtle: Color(0xFFF8FCFD),
-    backgroundDivider: Color(0xFFE5F0F1),
+    backgroundMuted: Color(0xFFF3EDE8),
+    backgroundSubtle: Color(0xFFFBF7F4),
+    backgroundDivider: Color(0xFFEAE1DC),
     // Text
-    textPrimary: Color(0xFF112025),
-    textSecondary: Color(0xFF5A7176),
-    textTertiary: Color(0xFFABC2C6),
+    textPrimary: Color(0xFF20352B),
+    textSecondary: Color(0xFF71877A),
+    textTertiary: Color(0xFFA8BCB2),
     // Borders
-    borderDefault: Color(0xFFE5F0F1),
-    borderDivider: Color(0xFFECF4F5),
-    borderList: Color(0xFFDBEAEC),
-    borderInputActive: Color(0xFF0E9AA7),
-    // Accent primary
-    accentPrimary: Color(0xFF0E9AA7),
-    accentPrimaryLight: Color(0xFFE0F4F5),
-    accentPrimaryBorder: Color(0xFFB8E4E7),
-    fabGradientStart: Color(0xFF2BB6C2),
-    fabGradientEnd: Color(0xFF0E9AA7),
-    actionShadow: Color(0x330E9AA7),
+    borderDefault: Color(0xFFE6DDD8),
+    borderDivider: Color(0xFFEAE1DC),
+    borderList: Color(0xFFDDD4CE),
+    borderInputActive: Color(0xFF6FA36F),
+    // Accent primary (leaf-green family)
+    accentPrimary: Color(0xFF6FA36F),
+    accentPrimaryLight: Color(0xFFEEF6EC),
+    accentPrimaryBorder: Color(0xFFCFE6CF),
+    fabGradientStart: Color(0xFFE09DB4),
+    fabGradientEnd: Color(0xFFD98CA0),
+    actionShadow: Color(0x33D98CA0),
     // Recording (error semantic family — red = live/active danger signal)
     recordingGradientStart: Color(0xFFE5484D),
     recordingGradientEnd: Color(0xFFC93040),
-    // Ledger — Daily
-    daily: Color(0xFF1C7A86),
-    dailyText: Color(0xFF145E68),
-    dailyLight: Color(0xFFE0F0F2),
-    // Ledger — Joy (丁香 Mauve — quick 260602-jcl, supersedes gold #F0A81E)
-    joy: Color(0xFFA586B0),
-    joyText: Color(0xFF6B4877),
-    joyLight: Color(0xFFF2ECF4),
+    // Ledger — Daily (leaf-green family)
+    daily: Color(0xFF5FAE72),
+    dailyText: Color(0xFF2E6B3A),
+    dailyLight: Color(0xFFEEF6EC),
+    // Ledger — Joy (桜餅 Amber — quick soqks, supersedes 丁香 Mauve)
+    joy: Color(0xFFC8841A),
+    joyText: Color(0xFFA15C00),
+    joyLight: Color(0xFFFFF0D6),
     // Ledger — Shared
     shared: Color(0xFF5B8AC4),
     sharedText: Color(0xFF3A6396),
@@ -266,71 +266,71 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     errorBorder: Color(0xFFFECACA),
     errorShadow: Color(0x15E5484D),
     // Shadows
-    fabShadow: Color(0x330E9AA7),
+    fabShadow: Color(0x33D98CA0),
     navShadow: Color(0x08000000),
-    // Joy card (Mauve tints — joyRoi* stays green = success/ROI semantic)
-    joyFullnessBg: Color(0xFFF2ECF4),
-    joyFullnessBorder: Color(0xFFCBB4D2),
+    // Joy card (amber tints — joyRoi* stays green = success/ROI semantic)
+    joyFullnessBg: Color(0xFFFFF0D6),
+    joyFullnessBorder: Color(0xFFE8C07A),
     joyRoiBg: Color(0xFFE4F4EE),
     joyRoiBorder: Color(0xFFB8E4D6),
     // Family
-    familyBadgeBg: Color(0xFFE0F4F5),
-    // Best Joy strip (surfaceCream* stays teal-white surface)
-    surfaceCream: Color(0xFFF8FEFF),
-    surfaceCreamBorder: Color(0xFFD4EFF1),
-    textMutedGold: Color(0xFF8A6E92),
-    satisfactionPillBg: Color(0xFFF2ECF4),
-    satisfactionPillRose: Color(0xFFA586B0),
-    // Decorative — avatar (teal-light family, D-04)
-    avatarGradientStart: Color(0xFFD4EFF1),
-    avatarGradientMid: Color(0xFFE4F6F7),
-    avatarGradientEnd: Color(0xFFF0FAFA),
+    familyBadgeBg: Color(0xFFEEF6EC),
+    // Best Joy strip (warm cream surface)
+    surfaceCream: Color(0xFFFFFAF6),
+    surfaceCreamBorder: Color(0xFFE6DDD8),
+    textMutedGold: Color(0xFFA15C00),
+    satisfactionPillBg: Color(0xFFFFF0D6),
+    satisfactionPillRose: Color(0xFFC8841A),
+    // Decorative — avatar (wakaba/leaf-green family, D-04)
+    avatarGradientStart: Color(0xFFCFE6CF),
+    avatarGradientMid: Color(0xFFE2F0E2),
+    avatarGradientEnd: Color(0xFFF0F7F0),
     // Single brightness-resolved alpha border
     avatarBorderAlpha: Color(0x80FFFFFF),
-    // Decorative — member tile (teal-light family, D-04)
-    memberGradientA: Color(0xFFD4EEF4),
-    memberGradientB: Color(0xFFE5F5F7),
-    memberGradientC: Color(0xFFF0F9FA),
+    // Decorative — member tile (leaf-green family, D-04)
+    memberGradientA: Color(0xFFCFE6CF),
+    memberGradientB: Color(0xFFE2F0E2),
+    memberGradientC: Color(0xFFF0F7F0),
     // Alpha overlays
     surfaceScrimLight: Color(0x14000000),
     surfaceScrimMedium: Color(0x0A000000),
   );
 
-  /// ADR-018 Dark palette — Teal Clarity.
+  /// ADR-019 Dark palette — Sakura Mochi × Wakaba.
   static const dark = AppPalette(
-    // Backgrounds
-    background: Color(0xFF0C1719),
-    card: Color(0xFF162527),
-    backgroundMuted: Color(0xFF213537),
-    backgroundSubtle: Color(0xFF102023),
-    backgroundDivider: Color(0xFF213537),
+    // Backgrounds (warm-dark)
+    background: Color(0xFF171210),
+    card: Color(0xFF231E1B),
+    backgroundMuted: Color(0xFF2E2723),
+    backgroundSubtle: Color(0xFF1E1916),
+    backgroundDivider: Color(0xFF2E2723),
     // Text
-    textPrimary: Color(0xFFE8F2F3),
-    textSecondary: Color(0xFF82989B),
-    textTertiary: Color(0xFF54686A),
+    textPrimary: Color(0xFFF0EBE6),
+    textSecondary: Color(0xFF9A8E87),
+    textTertiary: Color(0xFF6B5F58),
     // Borders
-    borderDefault: Color(0xFF213537),
-    borderDivider: Color(0xFF213537),
-    borderList: Color(0xFF213537),
-    borderInputActive: Color(0xFF3FC2CE),
-    // Accent primary
-    accentPrimary: Color(0xFF3FC2CE),
-    accentPrimaryLight: Color(0xFF123034),
-    accentPrimaryBorder: Color(0xFF1E4850),
-    fabGradientStart: Color(0xFF4FCDD9),
-    fabGradientEnd: Color(0xFF3FC2CE),
-    actionShadow: Color(0x333FC2CE),
+    borderDefault: Color(0xFF2E2723),
+    borderDivider: Color(0xFF2E2723),
+    borderList: Color(0xFF2E2723),
+    borderInputActive: Color(0xFF8DC68D),
+    // Accent primary (bright leaf green on dark)
+    accentPrimary: Color(0xFF8DC68D),
+    accentPrimaryLight: Color(0xFF1A2E1A),
+    accentPrimaryBorder: Color(0xFF283E28),
+    fabGradientStart: Color(0xFFEDB8CA),
+    fabGradientEnd: Color(0xFFE09DB4),
+    actionShadow: Color(0x33E09DB4),
     // Recording (error semantic family — dark variant)
     recordingGradientStart: Color(0xFFF0676B),
     recordingGradientEnd: Color(0xFFD44050),
-    // Ledger — Daily
-    daily: Color(0xFF4FB0BC),
-    dailyText: Color(0xFF4FB0BC),
-    dailyLight: Color(0xFF173032),
-    // Ledger — Joy (丁香 Mauve dark — quick 260602-jcl, supersedes gold #F0C13A)
-    joy: Color(0xFFC0A3CA),
-    joyText: Color(0xFFC0A3CA),
-    joyLight: Color(0xFF2A2030),
+    // Ledger — Daily (bright leaf on dark)
+    daily: Color(0xFF7DC88D),
+    dailyText: Color(0xFF7DC88D),
+    dailyLight: Color(0xFF1A2E1A),
+    // Ledger — Joy (bright amber on dark — supersedes 丁香 Mauve dark)
+    joy: Color(0xFFE0A040),
+    joyText: Color(0xFFE0A040),
+    joyLight: Color(0xFF2E2010),
     // Ledger — Shared
     shared: Color(0xFF7FA8D8),
     sharedText: Color(0xFF7FA8D8),
@@ -348,31 +348,31 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     errorBorder: Color(0xFF4D2020),
     errorShadow: Color(0x15F0676B),
     // Shadows
-    fabShadow: Color(0x333FC2CE),
+    fabShadow: Color(0x33E09DB4),
     navShadow: Color(0x20000000),
-    // Joy card (Mauve dark tints — joyRoi* stays green = success/ROI semantic)
-    joyFullnessBg: Color(0xFF2A2030),
-    joyFullnessBorder: Color(0xFF3E3247),
+    // Joy card (amber dark tints — joyRoi* stays green = success/ROI semantic)
+    joyFullnessBg: Color(0xFF2E2010),
+    joyFullnessBorder: Color(0xFF4A3818),
     joyRoiBg: Color(0xFF173330),
     joyRoiBorder: Color(0xFF2D4D45),
     // Family
-    familyBadgeBg: Color(0xFF1E2A3A),
-    // Best Joy strip (surfaceCream* stays teal-dark surface)
-    surfaceCream: Color(0xFF0F2022),
-    surfaceCreamBorder: Color(0xFF213537),
-    textMutedGold: Color(0xFFB79EC4),
-    satisfactionPillBg: Color(0xFF2A2030),
-    satisfactionPillRose: Color(0xFFC0A3CA),
-    // Decorative — avatar (teal-dark family, D-04)
-    avatarGradientStart: Color(0xFF1B3438),
-    avatarGradientMid: Color(0xFF172E31),
-    avatarGradientEnd: Color(0xFF13282B),
+    familyBadgeBg: Color(0xFF1A2E1A),
+    // Best Joy strip (warm-dark surface)
+    surfaceCream: Color(0xFF1A1512),
+    surfaceCreamBorder: Color(0xFF2E2723),
+    textMutedGold: Color(0xFFC89050),
+    satisfactionPillBg: Color(0xFF2E2010),
+    satisfactionPillRose: Color(0xFFE0A040),
+    // Decorative — avatar (leaf-green dark family, D-04)
+    avatarGradientStart: Color(0xFF1F3020),
+    avatarGradientMid: Color(0xFF1A2A1B),
+    avatarGradientEnd: Color(0xFF162416),
     // Single brightness-resolved alpha border
     avatarBorderAlpha: Color(0x26FFFFFF),
-    // Decorative — member tile (teal-dark family, D-04)
-    memberGradientA: Color(0xFF1B3438),
-    memberGradientB: Color(0xFF172E31),
-    memberGradientC: Color(0xFF13282B),
+    // Decorative — member tile (leaf-green dark family, D-04)
+    memberGradientA: Color(0xFF1F3020),
+    memberGradientB: Color(0xFF1A2A1B),
+    memberGradientC: Color(0xFF162416),
     // Alpha overlays
     surfaceScrimLight: Color(0x14000000),
     surfaceScrimMedium: Color(0x0A000000),

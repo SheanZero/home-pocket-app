@@ -75,7 +75,7 @@ void main() {
     );
 
     testWidgets(
-      'AppPalette.dark background resolves correct ADR-018 hex under dark theme',
+      'AppPalette.dark background resolves correct ADR-019 hex under dark theme',
       (tester) async {
         Color? capturedBackground;
 
@@ -91,8 +91,8 @@ void main() {
           ),
         );
 
-        // ADR-018 dark background is #0C1719 (deep teal-black)
-        expect(capturedBackground, const Color(0xFF0C1719));
+        // ADR-019 dark background is #171210 (warm dark)
+        expect(capturedBackground, const Color(0xFF171210));
       },
     );
   });
