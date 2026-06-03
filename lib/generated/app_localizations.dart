@@ -2523,18 +2523,6 @@ abstract class S {
   /// **'View All'**
   String get homeViewAllTransactions;
 
-  /// Title of the month-year picker dialog on the home screen
-  ///
-  /// In en, this message translates to:
-  /// **'Select Month'**
-  String get homeMonthPickerTitle;
-
-  /// Close button label for the month-year picker dialog
-  ///
-  /// In en, this message translates to:
-  /// **'Close'**
-  String get homeMonthPickerClose;
-
   /// Joy card label for the most recent joy ledger expense
   ///
   /// In en, this message translates to:

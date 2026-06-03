@@ -1319,12 +1319,6 @@ class SEn extends S {
   String get homeViewAllTransactions => 'View All';
 
   @override
-  String get homeMonthPickerTitle => 'Select Month';
-
-  @override
-  String get homeMonthPickerClose => 'Close';
-
-  @override
   String get homeRecentJoyExpense => 'Recent Joy Expense';
 
   @override

@@ -1661,14 +1661,6 @@
   "@homeViewAllTransactions": {
     "description": "Button label to view all transactions from home"
   },
-  "homeMonthPickerTitle": "月を選択",
-  "@homeMonthPickerTitle": {
-    "description": "Title of the month-year picker dialog on the home screen"
-  },
-  "homeMonthPickerClose": "閉じる",
-  "@homeMonthPickerClose": {
-    "description": "Close button label for the month-year picker dialog"
-  },
   "homeRecentJoyExpense": "最近のときめき支出",
   "@homeRecentJoyExpense": {
     "description": "Joy card label for the most recent joy ledger expense"

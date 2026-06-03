@@ -78,7 +78,6 @@ class HomeScreen extends ConsumerWidget {
                     ref.read(homeSelectedMonthProvider.notifier).prevMonth(),
                 onNextMonth: () =>
                     ref.read(homeSelectedMonthProvider.notifier).nextMonth(),
-                onDateTap: () => _showMonthPicker(context, ref, year, month),
               ),
               // 24 (not 16) to visually match AnalyticsScreen's AppBar+padding stack (user decision 260518-v4v).
               // Analytics has a 56px opaque AppBar creating structural visual weight absent on home
@@ -367,30 +366,6 @@ class HomeScreen extends ConsumerWidget {
     // Use device ID first character as fallback; real member data TBD
     return tx.deviceId.isNotEmpty ? tx.deviceId[0].toUpperCase() : '?';
   }
-
-  /// Shows the month-year picker dialog.
-  ///
-  /// Clamps the dialog year to [2000, 2099] (T-s07-02) to prevent
-  /// DateTime overflow from rapid year navigation.
-  static Future<void> _showMonthPicker(
-    BuildContext context,
-    WidgetRef ref,
-    int currentYear,
-    int currentMonth,
-  ) async {
-    final result = await showDialog<({int year, int month})?>(
-      context: context,
-      builder: (dialogCtx) => _MonthPickerDialog(
-        selectedYear: currentYear,
-        selectedMonth: currentMonth,
-      ),
-    );
-    if (result != null && context.mounted) {
-      ref
-          .read(homeSelectedMonthProvider.notifier)
-          .selectMonth(result.year, result.month);
-    }
-  }
 }
 
 /// Reusable error text widget for async error states.
@@ -407,136 +382,6 @@ class _ErrorText extends StatelessWidget {
         'Error: $message',
         style: AppTextStyles.bodySmall.copyWith(color: context.palette.error),
       ),
-    );
-  }
-}
-
-/// Month-year picker dialog.
-///
-/// Shows a year-navigation row and a 4×3 month grid. Tapping a month
-/// chip pops the dialog with `(year, month)`. The year is clamped to
-/// [2000, 2099] (T-s07-02 — DoS mitigation for DateTime overflow).
-class _MonthPickerDialog extends StatefulWidget {
-  const _MonthPickerDialog({
-    required this.selectedYear,
-    required this.selectedMonth,
-  });
-
-  final int selectedYear;
-  final int selectedMonth;
-
-  @override
-  State<_MonthPickerDialog> createState() => _MonthPickerDialogState();
-}
-
-class _MonthPickerDialogState extends State<_MonthPickerDialog> {
-  static const int _minYear = 2000;
-  static const int _maxYear = 2099;
-
-  late int _dialogYear;
-
-  @override
-  void initState() {
-    super.initState();
-    _dialogYear = widget.selectedYear.clamp(_minYear, _maxYear);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = S.of(context);
-
-    return AlertDialog(
-      title: Text(l10n.homeMonthPickerTitle),
-      contentPadding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Year navigation row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.chevron_left),
-                onPressed: _dialogYear > _minYear
-                    ? () => setState(() => _dialogYear--)
-                    : null,
-              ),
-              Text(
-                '$_dialogYear',
-                style: AppTextStyles.titleMedium,
-              ),
-              IconButton(
-                icon: const Icon(Icons.chevron_right),
-                onPressed: _dialogYear < _maxYear
-                    ? () => setState(() => _dialogYear++)
-                    : null,
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          // 4×3 month grid
-          GridView.count(
-            crossAxisCount: 4,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 4,
-            crossAxisSpacing: 4,
-            children: List.generate(12, (i) {
-              final chipMonth = i + 1;
-              final isSelected = _dialogYear == widget.selectedYear &&
-                  chipMonth == widget.selectedMonth;
-              return _MonthChip(
-                month: chipMonth,
-                isSelected: isSelected,
-                onTap: () => Navigator.of(context)
-                    .pop((year: _dialogYear, month: chipMonth)),
-              );
-            }),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(null),
-          child: Text(l10n.homeMonthPickerClose),
-        ),
-      ],
-    );
-  }
-}
-
-/// A single month chip in the picker grid.
-class _MonthChip extends StatelessWidget {
-  const _MonthChip({
-    required this.month,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final int month;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final label = month.toString().padLeft(2, '0');
-    if (isSelected) {
-      return FilledButton.tonal(
-        onPressed: onTap,
-        style: FilledButton.styleFrom(
-          padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        child: Text(label),
-      );
-    }
-    return OutlinedButton(
-      onPressed: onTap,
-      style: OutlinedButton.styleFrom(
-        padding: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-      child: Text(label),
     );
   }
 }

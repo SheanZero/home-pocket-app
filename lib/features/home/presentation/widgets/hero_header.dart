@@ -4,7 +4,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 
-/// Flat header row with month navigation (prev/next chevrons + label tap),
+/// Flat header row with month navigation (prev/next chevrons),
 /// mode badge, and settings icon.
 ///
 /// Pure UI component -- no providers, no navigation.
@@ -16,7 +16,6 @@ class HeroHeader extends StatelessWidget {
     required this.month,
     required this.isGroupMode,
     required this.onSettingsTap,
-    required this.onDateTap,
     required this.onPrevMonth,
     required this.onNextMonth,
   });
@@ -25,9 +24,6 @@ class HeroHeader extends StatelessWidget {
   final int month;
   final bool isGroupMode;
   final VoidCallback onSettingsTap;
-
-  /// Tapping the month label opens the month-year picker dialog.
-  final VoidCallback onDateTap;
 
   /// Tapping the left chevron navigates to the previous month.
   final VoidCallback onPrevMonth;
@@ -52,25 +48,11 @@ class HeroHeader extends StatelessWidget {
           onPressed: onPrevMonth,
         ),
 
-        // Centre: month label tap → dialog
-        GestureDetector(
-          onTap: onDateTap,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                l10n.homeMonthFormat(year, month),
-                style: AppTextStyles.headlineMedium.copyWith(
-                  color: context.palette.textPrimary,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Icon(
-                Icons.keyboard_arrow_down,
-                size: 20,
-                color: context.palette.textSecondary,
-              ),
-            ],
+        // Centre: month label (static — not tappable; months switch via chevrons)
+        Text(
+          l10n.homeMonthFormat(year, month),
+          style: AppTextStyles.headlineMedium.copyWith(
+            color: context.palette.textPrimary,
           ),
         ),
 

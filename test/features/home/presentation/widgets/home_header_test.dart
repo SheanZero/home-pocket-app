@@ -21,7 +21,6 @@ void main() {
           month: 3,
           isGroupMode: false,
           onSettingsTap: () {},
-          onDateTap: () {},
           onPrevMonth: () {},
           onNextMonth: () {},
         ),
@@ -42,7 +41,6 @@ void main() {
           month: 3,
           isGroupMode: false,
           onSettingsTap: () => tapped = true,
-          onDateTap: () {},
           onPrevMonth: () {},
           onNextMonth: () {},
         ),
@@ -53,7 +51,7 @@ void main() {
     expect(tapped, isTrue);
   });
 
-  testWidgets('HomeHeader shows chevron down for date picker', (tester) async {
+  testWidgets('HomeHeader month label has no dropdown arrow', (tester) async {
     await tester.pumpWidget(
       buildTestWidget(
         HeroHeader(
@@ -61,18 +59,18 @@ void main() {
           month: 3,
           isGroupMode: false,
           onSettingsTap: () {},
-          onDateTap: () {},
           onPrevMonth: () {},
           onNextMonth: () {},
         ),
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+    expect(find.byIcon(Icons.keyboard_arrow_down), findsNothing);
   });
 
-  testWidgets('HomeHeader date tap fires callback', (tester) async {
-    var dateTapped = false;
+  testWidgets('HomeHeader prev/next chevrons fire callbacks', (tester) async {
+    var prev = false;
+    var next = false;
     await tester.pumpWidget(
       buildTestWidget(
         HeroHeader(
@@ -80,16 +78,16 @@ void main() {
           month: 3,
           isGroupMode: false,
           onSettingsTap: () {},
-          onDateTap: () => dateTapped = true,
-          onPrevMonth: () {},
-          onNextMonth: () {},
+          onPrevMonth: () => prev = true,
+          onNextMonth: () => next = true,
         ),
       ),
     );
     await tester.pumpAndSettle();
-    // Tap on the month text area (which includes the chevron)
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
-    expect(dateTapped, isTrue);
+    await tester.tap(find.byIcon(Icons.chevron_left));
+    await tester.tap(find.byIcon(Icons.chevron_right));
+    expect(prev, isTrue);
+    expect(next, isTrue);
   });
 
   testWidgets('HomeHeader shows family badge in group mode', (tester) async {
@@ -100,7 +98,6 @@ void main() {
           month: 3,
           isGroupMode: true,
           onSettingsTap: () {},
-          onDateTap: () {},
           onPrevMonth: () {},
           onNextMonth: () {},
         ),
@@ -119,7 +116,6 @@ void main() {
           month: 3,
           isGroupMode: false,
           onSettingsTap: () {},
-          onDateTap: () {},
           onPrevMonth: () {},
           onNextMonth: () {},
         ),
@@ -137,7 +133,6 @@ void main() {
           month: 3,
           isGroupMode: false,
           onSettingsTap: () {},
-          onDateTap: () {},
           onPrevMonth: () {},
           onNextMonth: () {},
         ),

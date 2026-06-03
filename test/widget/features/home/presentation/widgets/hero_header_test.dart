@@ -9,7 +9,6 @@ void main() {
     required int year,
     required int month,
     required VoidCallback onSettingsTap,
-    required VoidCallback onDateTap,
     VoidCallback? onPrevMonth,
     VoidCallback? onNextMonth,
     bool isGroupMode = false,
@@ -23,7 +22,6 @@ void main() {
             month: month,
             isGroupMode: isGroupMode,
             onSettingsTap: onSettingsTap,
-            onDateTap: onDateTap,
             onPrevMonth: onPrevMonth ?? () {},
             onNextMonth: onNextMonth ?? () {},
           ),
@@ -39,7 +37,6 @@ void main() {
           year: 2026,
           month: 2,
           onSettingsTap: () {},
-          onDateTap: () {},
         ),
       );
 
@@ -54,7 +51,6 @@ void main() {
           year: 2026,
           month: 2,
           onSettingsTap: () => tapped = true,
-          onDateTap: () {},
         ),
       );
 
@@ -62,32 +58,38 @@ void main() {
       expect(tapped, isTrue);
     });
 
-    testWidgets('date tap triggers callback', (tester) async {
-      bool tapped = false;
+    testWidgets('month label is not tappable (no dropdown arrow)', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         buildTestWidget(
           year: 2026,
           month: 2,
           onSettingsTap: () {},
-          onDateTap: () => tapped = true,
         ),
       );
 
-      await tester.tap(find.text('2026年2月'));
-      expect(tapped, isTrue);
+      // The down-arrow affordance was removed; the month label is static.
+      expect(find.byIcon(Icons.keyboard_arrow_down), findsNothing);
     });
 
-    testWidgets('shows dropdown arrow icon', (tester) async {
+    testWidgets('prev/next chevrons switch months', (tester) async {
+      var prev = false;
+      var next = false;
       await tester.pumpWidget(
         buildTestWidget(
           year: 2026,
           month: 2,
           onSettingsTap: () {},
-          onDateTap: () {},
+          onPrevMonth: () => prev = true,
+          onNextMonth: () => next = true,
         ),
       );
 
-      expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.chevron_left));
+      await tester.tap(find.byIcon(Icons.chevron_right));
+      expect(prev, isTrue);
+      expect(next, isTrue);
     });
   });
 }
