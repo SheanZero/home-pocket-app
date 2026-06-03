@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/widgets/soft_confirm_dialog.dart';
 import '../../domain/models/transaction.dart';
 import '../../domain/models/transaction_details_form_config.dart';
+import '../providers/repository_providers.dart' show deleteTransactionUseCaseProvider;
 import '../widgets/amount_display.dart';
 import '../widgets/amount_edit_bottom_sheet.dart';
 import '../widgets/transaction_details_form.dart';
@@ -70,6 +72,36 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
     );
   }
 
+  /// 260603-nr1 #6: confirm + delete the seed transaction, then pop with
+  /// `true` so the caller (list_screen) runs its reactive invalidation (the
+  /// shared invalidateTransactionDependents — Home + Analytics + list).
+  ///
+  /// The edit screen has no active year/month, so it relies on the caller's
+  /// pop-with-result path rather than invalidating providers directly.
+  Future<void> _onDelete() async {
+    if (_isSubmitting) return;
+    final l10n = S.of(context);
+    final confirmed = await showSoftConfirmDialog(
+      context,
+      title: l10n.listDeleteConfirmTitle,
+      body: l10n.listDeleteConfirmBody,
+      confirmLabel: l10n.listDeleteConfirmButton,
+      cancelLabel: l10n.listDeleteCancelButton,
+    );
+    if (!confirmed || !mounted) return;
+
+    setState(() => _isSubmitting = true);
+    try {
+      await ref
+          .read(deleteTransactionUseCaseProvider)
+          .execute(widget.transaction.id);
+      if (!mounted) return;
+      Navigator.of(context).pop(true); // caller invalidates dependents.
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
   /// Opens [AmountEditBottomSheet] for amount editing (D-14 spillover modal-sheet UX).
   ///
   /// On confirm: updates host display state AND pushes value to form via [updateAmount].
@@ -109,6 +141,13 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
               color: palette.textPrimary,
             )),
         centerTitle: true,
+        actions: [
+          // 260603-nr1 #6: delete the transaction from the edit screen.
+          IconButton(
+            icon: Icon(Icons.delete_outline, color: palette.error),
+            onPressed: _isSubmitting ? null : _onDelete,
+          ),
+        ],
       ),
       body: Column(children: [
         // D-14 spillover: host renders AmountDisplay above the form.

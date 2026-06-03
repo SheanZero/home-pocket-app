@@ -118,7 +118,7 @@ class ListTransactionTile extends ConsumerWidget {
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
               // Leading: enlarged, vertically-centered L1 category icon
@@ -227,6 +227,14 @@ class ListTransactionTile extends ConsumerWidget {
                 style: AppTextStyles.amountSmall.copyWith(
                   color: palette.textPrimary,
                 ),
+              ),
+              // 260603-nr1 #4: static tap affordance after the amount. Coexists
+              // with the Dismissible swipe (it does not intercept the gesture).
+              const SizedBox(width: 6),
+              Icon(
+                Icons.chevron_right,
+                size: 18,
+                color: palette.textSecondary,
               ),
             ],
           ),

@@ -11,6 +11,7 @@ import '../../../../features/settings/presentation/providers/state_locale.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../../shared/constants/sort_config.dart';
+import '../../../../shared/utils/invalidate_transaction_dependents.dart';
 import '../../domain/models/list_filter_state.dart';
 import '../../domain/models/tagged_transaction.dart';
 import '../providers/state_calendar_totals.dart';
@@ -283,18 +284,16 @@ class ListScreen extends ConsumerWidget {
         ? transaction.joyFullness
         : null;
 
-    // Invalidate list + calendar totals together. Both the edit-save and the
-    // swipe-delete paths must refresh the calendar header (CR-01 / UI-SPEC C-04
-    // step 5) — the calendar reads calendarDailyTotalsProvider, which the tile
-    // cannot invalidate itself because it lacks the active year/month.
+    // 260603-nr1 #5: refresh every transaction-dependent provider after an
+    // edit-save or swipe-delete — list + calendar (keyed) AND the Home today
+    // summary + Analytics reports (whole families). Previously only list +
+    // calendar were invalidated, leaving Home/Analytics stale in solo mode.
     void invalidateAfterMutation() {
-      ref.invalidate(listTransactionsProvider(bookId: bookId));
-      ref.invalidate(
-        calendarDailyTotalsProvider(
-          bookId: bookId,
-          year: filter.selectedYear,
-          month: filter.selectedMonth,
-        ),
+      invalidateTransactionDependents(
+        ref,
+        bookId: bookId,
+        year: filter.selectedYear,
+        month: filter.selectedMonth,
       );
     }
 
