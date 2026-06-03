@@ -207,3 +207,11 @@ Phase 33 (Color Token System) 将散落的 ~62 个硬编码色值整合到统一
 **落地:** `lib/core/theme/app_palette.dart`（明+暗 joy 系 token）+ `app_palette_test.dart` 契约更新；
 14 张 golden re-baseline（全部 `daily_vs_joy_card` + `home_hero_card`，无其它 golden 受影响 = 范围精确）；
 `flutter analyze` 0 新增 issue；全量 2286/2286 测试绿。Best Joy strip 因走 `joy` token 自动随之变 Mauve。
+
+---
+
+## Update 2026-06-03: Superseded by ADR-019 桜餅×若葉
+
+**本 ADR (ADR-018 Teal Clarity) 已被 ADR-019 取代。** ADR-019 将整体配色从青色清晰迁移至 桜餅×若葉 (Sakura Mochi × Wakaba) v1.6：primary/daily → 若葉绿 `#6FA36F`，FAB → 桜粉 `#D98CA0`，joy → 暖琥珀 `#A15C00`（撤回 Mauve），背景 → 暖奶油 `#FBF7F4`。
+
+参见 `docs/arch/03-adr/ADR-019_Palette_Selection_v1_6.md`。
