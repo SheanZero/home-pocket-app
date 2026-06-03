@@ -23,7 +23,7 @@ import 'package:home_pocket/features/accounting/domain/repositories/category_rep
 import 'package:home_pocket/features/accounting/domain/repositories/merchant_category_preference_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/voice_input_screen.dart';
-import 'package:home_pocket/features/accounting/presentation/widgets/soft_toast.dart';
+import 'package:home_pocket/shared/widgets/soft_toast.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/transaction_details_form.dart';
 import 'package:home_pocket/features/dual_ledger/presentation/widgets/joy_celebration_overlay.dart';
 import 'package:home_pocket/features/settings/presentation/providers/state_settings.dart';

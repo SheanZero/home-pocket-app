@@ -537,7 +537,7 @@ abstract class S {
   /// **'Note (optional)'**
   String get noteOptional;
 
-  /// Error feedback shown when saving with an empty or zero amount
+  /// Amount prompt
   ///
   /// In en, this message translates to:
   /// **'Please enter an amount'**
@@ -558,8 +558,14 @@ abstract class S {
   /// Success feedback shown after saving when the entry screen stays open for continuous entry
   ///
   /// In en, this message translates to:
-  /// **'Saved · keep going'**
+  /// **'Saved — you can keep recording'**
   String get successKeepGoing;
+
+  /// Inline link in the success toast that exits the entry screen back to the page before recording
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get recordingExitLink;
 
   /// Empty transaction list
   ///

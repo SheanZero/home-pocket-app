@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../generated/app_localizations.dart';
-import 'soft_toast.dart';
+import '../../../../shared/widgets/soft_toast.dart';
 
 /// G-02 / WR-05: surface a localized SoftToast for speech-recognition
 /// failures reported via VoiceInputScreen._onError.

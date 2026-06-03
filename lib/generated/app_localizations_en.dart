@@ -251,7 +251,10 @@ class SEn extends S {
   String get pleaseSelectCategory => 'Please select a category';
 
   @override
-  String get successKeepGoing => 'Saved · keep going';
+  String get successKeepGoing => 'Saved — you can keep recording';
+
+  @override
+  String get recordingExitLink => 'Exit';
 
   @override
   String get noTransactionsYet => 'No transactions yet';

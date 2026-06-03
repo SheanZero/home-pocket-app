@@ -249,7 +249,10 @@ class SJa extends S {
   String get pleaseSelectCategory => 'カテゴリを選択してください';
 
   @override
-  String get successKeepGoing => '記録しました・続けて入力';
+  String get successKeepGoing => '記録しました。続けて記録できます';
+
+  @override
+  String get recordingExitLink => '記録を終了';
 
   @override
   String get noTransactionsYet => '取引がまだありません';

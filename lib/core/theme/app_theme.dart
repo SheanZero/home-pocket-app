@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_palette.dart';
+import 'app_text_styles.dart';
 
 abstract final class AppTheme {
   static ThemeData get light => ThemeData(
@@ -23,6 +24,24 @@ abstract final class AppTheme {
         side: BorderSide(color: AppPalette.light.borderDefault), // #E6DDD8 (ADR-019)
       ),
     ),
+    // Soft rounded warm dialog chrome — every AlertDialog (input/picker/info
+    // dialogs) inherits this so they match the soft-confirm / soft-toast family
+    // without per-dialog rewrites (260603-nr1 global-feedback sweep).
+    dialogTheme: DialogThemeData(
+      backgroundColor: AppPalette.light.card,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: const BorderRadius.all(Radius.circular(20)),
+        side: BorderSide(color: AppPalette.light.borderDefault),
+      ),
+      titleTextStyle: AppTextStyles.titleSmall.copyWith(
+        color: AppPalette.light.textPrimary,
+      ),
+      contentTextStyle: AppTextStyles.bodyMedium.copyWith(
+        color: AppPalette.light.textSecondary,
+        height: 1.5,
+      ),
+    ),
   );
 
   static ThemeData get dark => ThemeData(
@@ -43,6 +62,21 @@ abstract final class AppTheme {
       shape: RoundedRectangleBorder(
         borderRadius: const BorderRadius.all(Radius.circular(14)),
         side: BorderSide(color: AppPalette.dark.borderDefault), // #2E2723 (ADR-019)
+      ),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: AppPalette.dark.card,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: const BorderRadius.all(Radius.circular(20)),
+        side: BorderSide(color: AppPalette.dark.borderDefault),
+      ),
+      titleTextStyle: AppTextStyles.titleSmall.copyWith(
+        color: AppPalette.dark.textPrimary,
+      ),
+      contentTextStyle: AppTextStyles.bodyMedium.copyWith(
+        color: AppPalette.dark.textSecondary,
+        height: 1.5,
       ),
     ),
   );

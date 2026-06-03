@@ -13,8 +13,8 @@ import '../../domain/models/transaction_details_form_config.dart';
 import '../providers/repository_providers.dart';
 import '../widgets/amount_display.dart';
 import '../widgets/entry_mode_switcher.dart';
-import '../widgets/feedback_toast.dart';
 import '../widgets/input_mode_tabs.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
 import '../widgets/keyboard_toolbar.dart';
 import '../widgets/smart_keyboard.dart';
 import '../widgets/transaction_details_form.dart';
@@ -287,7 +287,18 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
         success: (_) {
           // 260603-nr1 #1: keep the page open for continuous entry — show a
           // top success toast and reset the form instead of popping.
-          showSuccessFeedback(context, S.of(context).successKeepGoing);
+          // Ask 2 follow-up: longer-lived toast that reads "可以继续记账" plus an
+          // inline "退出记账" link returning to the page before recording.
+          showSuccessFeedback(
+            context,
+            S.of(context).successKeepGoing,
+            duration: const Duration(seconds: 5),
+            actionLabel: S.of(context).recordingExitLink,
+            onAction: () {
+              if (!mounted) return;
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+          );
           _resetForContinuousEntry();
         },
         validationError: (msg) {

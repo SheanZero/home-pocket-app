@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_palette.dart';
+import '../../core/theme/app_palette.dart';
 
 /// Visual tone of a [SoftToast] — drives surface/border/shadow/foreground
 /// colour family and the default leading icon.
@@ -31,6 +31,8 @@ class SoftToast extends StatefulWidget {
     this.icon,
     this.duration = const Duration(seconds: 3),
     this.onDismissed,
+    this.actionLabel,
+    this.onAction,
   });
 
   final String message;
@@ -44,6 +46,14 @@ class SoftToast extends StatefulWidget {
 
   final Duration duration;
   final VoidCallback? onDismissed;
+
+  /// Optional inline action link (e.g. "退出记账"). When non-null, an underlined
+  /// link button is rendered before the close button; tapping it dismisses the
+  /// toast and then invokes [onAction] (260603-nr1 follow-up Ask 2).
+  final String? actionLabel;
+
+  /// Invoked after the toast dismisses when the [actionLabel] link is tapped.
+  final VoidCallback? onAction;
 
   @override
   State<SoftToast> createState() => _SoftToastState();
@@ -89,6 +99,14 @@ class _SoftToastState extends State<SoftToast>
         widget.onDismissed?.call();
       }
     });
+  }
+
+  /// Tapping the inline action link: stop the auto-hide, invoke the action
+  /// (e.g. navigate away), then animate the toast out / remove its overlay.
+  void _handleAction() {
+    _autoHideTimer?.cancel();
+    widget.onAction?.call();
+    _dismiss();
   }
 
   @override
@@ -156,6 +174,23 @@ class _SoftToastState extends State<SoftToast>
                     ),
                   ),
                 ),
+                if (widget.actionLabel != null) ...[
+                  const SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: _handleAction,
+                    child: Text(
+                      widget.actionLabel!,
+                      style: TextStyle(
+                        fontFamily: 'IBM Plex Sans',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: foreground,
+                        decoration: TextDecoration.underline,
+                        decorationColor: foreground,
+                      ),
+                    ),
+                  ),
+                ],
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: _dismiss,

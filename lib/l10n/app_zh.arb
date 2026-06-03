@@ -333,13 +333,13 @@
   "@pleaseSelectCategory": {
     "description": "Placeholder shown when no category is selected in confirm screen"
   },
-  "pleaseEnterAmount": "请先输入金额",
-  "@pleaseEnterAmount": {
-    "description": "Error feedback shown when saving with an empty or zero amount"
-  },
-  "successKeepGoing": "已记录·继续记账",
+  "successKeepGoing": "已记录，可以继续记账",
   "@successKeepGoing": {
     "description": "Success feedback shown after saving when the entry screen stays open for continuous entry"
+  },
+  "recordingExitLink": "退出记账",
+  "@recordingExitLink": {
+    "description": "Inline link in the success toast that exits the entry screen back to the page before recording"
   },
   "noTransactionsYet": "暂无交易记录",
   "@noTransactionsYet": {
