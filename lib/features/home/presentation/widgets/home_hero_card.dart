@@ -740,7 +740,7 @@ class HomeHeroCard extends StatelessWidget {
     final monthBandText = palette.background;
     final isPlaceholder = month == null && weekday == null;
     return Container(
-      width: 48,
+      width: 58,
       decoration: BoxDecoration(
         color: palette.joyLight,
         borderRadius: BorderRadius.circular(11),
@@ -760,8 +760,11 @@ class HomeHeroCard extends StatelessWidget {
                 child: Center(
                   child: Text(
                     day ?? '—',
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.visible,
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 19,
                       fontWeight: FontWeight.w800,
                       color: palette.textSecondary,
                       height: 1.1,
@@ -779,19 +782,25 @@ class HomeHeroCard extends StatelessWidget {
                     alignment: Alignment.center,
                     child: Text(
                       month ?? '',
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.visible,
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: 9,
                         fontWeight: FontWeight.w800,
                         color: monthBandText,
-                        letterSpacing: 0.4,
+                        letterSpacing: 0.3,
                       ),
                     ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     day ?? '',
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.visible,
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 19,
                       fontWeight: FontWeight.w800,
                       color: palette.joyText,
                       height: 1.1,
@@ -800,8 +809,11 @@ class HomeHeroCard extends StatelessWidget {
                   ),
                   Text(
                     weekday ?? '',
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.visible,
                     style: TextStyle(
-                      fontSize: 9.5,
+                      fontSize: 9,
                       fontWeight: FontWeight.w700,
                       color: palette.textSecondary,
                     ),
