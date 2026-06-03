@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
+import '../../../../shared/widgets/soft_confirm_dialog.dart';
 import '../../../../application/accounting/category_localization_service.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/models/category.dart';
@@ -150,42 +152,23 @@ class _CategorySelectionScreenState
       await ref.read(categoryReorderProvider.notifier).save();
       await _loadCategories();
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(S.of(context).orderUpdated)));
+      showSuccessFeedback(context, S.of(context).orderUpdated);
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(S.of(context).orderSaveFailed),
-          backgroundColor: context.palette.error,
-        ),
-      );
+      showErrorFeedback(context, S.of(context).orderSaveFailed);
     }
   }
 
   Future<void> _showDiscardDialog() async {
     final l10n = S.of(context);
-    final discard = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.discardUnsavedChanges),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.keepEditing),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(
-              foregroundColor: context.palette.error,
-            ),
-            child: Text(l10n.discard),
-          ),
-        ],
-      ),
+    final discard = await showSoftConfirmDialog(
+      context,
+      title: l10n.discardUnsavedChanges,
+      body: l10n.discardUnsavedChangesBody,
+      confirmLabel: l10n.discard,
+      cancelLabel: l10n.keepEditing,
     );
-    if (discard == true) {
+    if (discard) {
       ref.read(categoryReorderProvider.notifier).cancel();
     }
   }

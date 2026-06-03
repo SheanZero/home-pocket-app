@@ -1050,6 +1050,10 @@
   "@discardUnsavedChanges": {
     "description": "Dialog title when cancelling reorder with unsaved changes"
   },
+  "discardUnsavedChangesBody": "Your reordering will not be saved and will revert.",
+  "@discardUnsavedChangesBody": {
+    "description": "Dialog body when cancelling reorder with unsaved changes"
+  },
   "keepEditing": "Keep editing",
   "@keepEditing": {
     "description": "Dialog cancel button: keep editing"

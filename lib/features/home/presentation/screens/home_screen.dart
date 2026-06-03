@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../generated/app_localizations.dart';
 
+import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../application/analytics/get_monthly_joy_target_recommendation_use_case.dart';
 import '../../../../application/accounting/category_localization_service.dart';
 import '../../../../application/i18n/formatter_service.dart';
@@ -73,11 +74,10 @@ class HomeScreen extends ConsumerWidget {
                 isGroupMode: isGroupMode,
                 onSettingsTap: onSettingsTap ?? () {},
                 onDateTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(S.of(context).datePickerComingSoon),
-                      duration: const Duration(seconds: 1),
-                    ),
+                  showSuccessFeedback(
+                    context,
+                    S.of(context).datePickerComingSoon,
+                    duration: const Duration(seconds: 1),
                   );
                 },
               ),

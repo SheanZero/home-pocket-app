@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/soft_confirm_dialog.dart';
 import '../../domain/models/transaction.dart';
 import '../../domain/models/transaction_details_form_config.dart';
@@ -60,15 +61,11 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
     setState(() => _isSubmitting = false);
     result.when(
       success: (_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(S.of(context).transactionUpdated)),
-        );
+        showSuccessFeedback(context, S.of(context).transactionUpdated);
         Navigator.of(context).pop(true); // D-18: pop-with-result, not popUntil
       },
-      validationError: (msg) => ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(msg))),
-      persistError: (msg) => ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(msg))),
+      validationError: (msg) => showErrorFeedback(context, msg),
+      persistError: (msg) => showErrorFeedback(context, msg),
     );
   }
 

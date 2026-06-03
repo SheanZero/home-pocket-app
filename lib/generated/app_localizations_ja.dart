@@ -802,6 +802,9 @@ class SJa extends S {
   String get discardUnsavedChanges => '未保存の変更を破棄しますか？';
 
   @override
+  String get discardUnsavedChangesBody => '並び替えた内容は保存されず、元に戻ります。';
+
+  @override
   String get keepEditing => '編集を続ける';
 
   @override

@@ -1666,18 +1666,23 @@ void main() {
         expect(saveBtnFinder, findsOneWidget);
 
         // Tap save with no category set. The form's submit() returns
-        // validationError, which the host routes to ScaffoldMessenger.
+        // validationError, which the host routes to showErrorFeedback (SoftToast).
         await tester.tap(saveBtnFinder);
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 50));
 
         expect(
-          find.byType(SnackBar),
+          find.byType(SoftToast),
           findsOneWidget,
           reason:
               'l0o Issue 5: tapping save with no category must surface the '
-              'pleaseSelectCategory snackbar via form.submit() validation',
+              'pleaseSelectCategory error toast via form.submit() validation',
         );
+
+        // Let the SoftToast auto-dismiss timer settle so teardown is clean
+        // (SoftToast.duration default = 3s).
+        await tester.pump(const Duration(seconds: 6));
+        await tester.pumpAndSettle();
       },
     );
   });

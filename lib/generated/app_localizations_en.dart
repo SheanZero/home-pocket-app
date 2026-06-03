@@ -809,6 +809,10 @@ class SEn extends S {
   String get discardUnsavedChanges => 'Discard unsaved changes?';
 
   @override
+  String get discardUnsavedChangesBody =>
+      'Your reordering will not be saved and will revert.';
+
+  @override
   String get keepEditing => 'Keep editing';
 
   @override

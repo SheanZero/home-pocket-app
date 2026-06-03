@@ -10,6 +10,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../application/voice/repository_providers.dart'
     show
         appSpeechRecognitionServiceProvider,
@@ -402,9 +403,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
       if (!mounted) return;
       result.when(
         success: (tx) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(S.of(context).transactionSaved)),
-          );
+          showSuccessFeedback(context, S.of(context).transactionSaved);
           // Phase 23 D-08 / WR-04: joy-ledger save defers Navigator.popUntil
           // until JoyCelebrationOverlay's onDismissed fires so the joy moment
           // is visible. Survival-ledger save pops immediately (no overlay).
@@ -420,14 +419,10 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
           }
         },
         validationError: (msg) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(msg)));
+          showErrorFeedback(context, msg);
         },
         persistError: (msg) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(msg)));
+          showErrorFeedback(context, msg);
         },
       );
     } finally {

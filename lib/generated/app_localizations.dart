@@ -1605,6 +1605,12 @@ abstract class S {
   /// **'Discard unsaved changes?'**
   String get discardUnsavedChanges;
 
+  /// Dialog body when cancelling reorder with unsaved changes
+  ///
+  /// In en, this message translates to:
+  /// **'Your reordering will not be saved and will revert.'**
+  String get discardUnsavedChangesBody;
+
   /// Dialog cancel button: keep editing
   ///
   /// In en, this message translates to:

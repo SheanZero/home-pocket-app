@@ -800,6 +800,9 @@ class SZh extends S {
   String get discardUnsavedChanges => '放弃未保存的修改？';
 
   @override
+  String get discardUnsavedChangesBody => '排序的修改将不会保存，并恢复原状。';
+
+  @override
   String get keepEditing => '继续编辑';
 
   @override

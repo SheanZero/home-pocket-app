@@ -1050,6 +1050,10 @@
   "@discardUnsavedChanges": {
     "description": "Dialog title when cancelling reorder with unsaved changes"
   },
+  "discardUnsavedChangesBody": "排序的修改将不会保存，并恢复原状。",
+  "@discardUnsavedChangesBody": {
+    "description": "Dialog body when cancelling reorder with unsaved changes"
+  },
   "keepEditing": "继续编辑",
   "@keepEditing": {
     "description": "Dialog cancel button: keep editing"

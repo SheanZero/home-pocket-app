@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/satisfaction_face_icon.dart';
 import '../../../../shared/widgets/soft_confirm_dialog.dart';
 import '../../../../generated/app_localizations.dart';
@@ -103,10 +104,8 @@ class ListTransactionTile extends ConsumerWidget {
         cancelLabel: S.of(context).listDeleteCancelButton,
       ),
       onDismissed: (_) {
-        // CRITICAL order: ScaffoldMessenger BEFORE any provider calls (context still valid here)
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(S.of(context).listDeletedSnackBar)),
-        );
+        // CRITICAL order: feedback toast BEFORE any provider calls (context still valid here)
+        showSuccessFeedback(context, S.of(context).listDeletedSnackBar);
         // Fire-and-forget: do NOT await inside onDismissed
         ref
             .read(deleteTransactionUseCaseProvider)

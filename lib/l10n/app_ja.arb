@@ -1050,6 +1050,10 @@
   "@discardUnsavedChanges": {
     "description": "Dialog title when cancelling reorder with unsaved changes"
   },
+  "discardUnsavedChangesBody": "並び替えた内容は保存されず、元に戻ります。",
+  "@discardUnsavedChangesBody": {
+    "description": "Dialog body when cancelling reorder with unsaved changes"
+  },
   "keepEditing": "編集を続ける",
   "@keepEditing": {
     "description": "Dialog cancel button: keep editing"
