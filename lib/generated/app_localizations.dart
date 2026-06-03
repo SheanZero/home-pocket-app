@@ -537,7 +537,7 @@ abstract class S {
   /// **'Note (optional)'**
   String get noteOptional;
 
-  /// Amount prompt
+  /// Error feedback shown when saving with an empty or zero amount
   ///
   /// In en, this message translates to:
   /// **'Please enter an amount'**
@@ -554,6 +554,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Please select a category'**
   String get pleaseSelectCategory;
+
+  /// Success feedback shown after saving when the entry screen stays open for continuous entry
+  ///
+  /// In en, this message translates to:
+  /// **'Saved · keep going'**
+  String get successKeepGoing;
 
   /// Empty transaction list
   ///

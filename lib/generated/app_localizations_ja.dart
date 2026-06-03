@@ -249,6 +249,9 @@ class SJa extends S {
   String get pleaseSelectCategory => 'カテゴリを選択してください';
 
   @override
+  String get successKeepGoing => '記録しました・続けて入力';
+
+  @override
   String get noTransactionsYet => '取引がまだありません';
 
   @override

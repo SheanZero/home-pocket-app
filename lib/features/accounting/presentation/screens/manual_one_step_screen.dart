@@ -13,10 +13,10 @@ import '../../domain/models/transaction_details_form_config.dart';
 import '../providers/repository_providers.dart';
 import '../widgets/amount_display.dart';
 import '../widgets/entry_mode_switcher.dart';
+import '../widgets/feedback_toast.dart';
 import '../widgets/input_mode_tabs.dart';
 import '../widgets/keyboard_toolbar.dart';
 import '../widgets/smart_keyboard.dart';
-import '../widgets/soft_toast.dart';
 import '../widgets/transaction_details_form.dart';
 
 /// Single-screen manual transaction entry replacing the legacy two-screen flow
@@ -80,7 +80,6 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
   Category? _selectedParentCategory;
   Map<String, Category> _categoryById = {};
   late DateTime _selectedDate;
-  String? _toastMessage;
 
   // P19-W1: safe guard — both save entry points are disabled until category
   // resolves. Callers pass `isSubmitting: _isSubmitting || !_canSave` to
@@ -200,7 +199,6 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
   // ── Digit handlers (ported verbatim from transaction_entry_screen.dart:84-129) ──
 
   void _onDigit(String digit) {
-    _dismissToast();
     final dotIndex = _amount.indexOf('.');
     if (dotIndex >= 0) {
       final decimals = _amount.length - dotIndex - 1;
@@ -253,26 +251,20 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
     _formKey.currentState?.updateAmount(0);
   }
 
-  // ── Toast helpers (ported verbatim from transaction_entry_screen.dart:196-204) ──
-
-  void _showToast(String message) {
-    setState(() => _toastMessage = message);
-  }
-
-  void _dismissToast() {
-    if (mounted) {
-      setState(() => _toastMessage = null);
-    }
-  }
-
   // ── Save path ──
 
-  /// P19-W1: short-circuits with toast when category hasn't loaded yet.
-  /// Both SmartKeyboard.onNext and KeyboardToolbar.onSave point here.
+  /// P19-W1: short-circuits with a top error toast when category hasn't loaded
+  /// yet or the amount is empty/zero. Both SmartKeyboard.onNext and
+  /// KeyboardToolbar.onSave point here.
   Future<void> _trySave() async {
+    // 260603-nr1 #1: reject empty / zero amount before any save attempt.
+    if (_amount.isEmpty || (double.tryParse(_amount) ?? 0) <= 0) {
+      showErrorFeedback(context, S.of(context).pleaseEnterAmount);
+      return;
+    }
     if (!_canSave) {
       if (_selectedCategory == null) {
-        _showToast(S.of(context).pleaseSelectCategory);
+        showErrorFeedback(context, S.of(context).pleaseSelectCategory);
       }
       return;
     }
@@ -293,26 +285,50 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
       if (!mounted) return;
       result.when(
         success: (_) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(S.of(context).transactionSaved)),
-          );
-          // Pop all the way back to main shell (D-04 preserved).
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          // 260603-nr1 #1: keep the page open for continuous entry — show a
+          // top success toast and reset the form instead of popping.
+          showSuccessFeedback(context, S.of(context).successKeepGoing);
+          _resetForContinuousEntry();
         },
         validationError: (msg) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(msg)));
+          showErrorFeedback(context, msg);
         },
         persistError: (msg) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(msg)));
+          showErrorFeedback(context, msg);
         },
       );
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
+  }
+
+  /// 260603-nr1 #1: reset the form in place after a successful save so the user
+  /// can keep entering without the page closing. Clears the amount (mirrors
+  /// [_onClear]), resets merchant/note, resets the date to today, re-seeds the
+  /// default category, and reclaims amount focus so the SmartKeyboard reappears.
+  Future<void> _resetForContinuousEntry() async {
+    if (!mounted) return;
+    setState(() {
+      _amount = '';
+      _selectedDate = DateTime.now();
+    });
+    final formState = _formKey.currentState;
+    formState?.updateAmount(0);
+    formState?.updateMerchant('');
+    formState?.updateNote('');
+    formState?.updateDate(DateTime.now());
+    // Re-seed the default category and push it into the form so the next entry
+    // starts from a clean slate (the form's GlobalKey preserves its own state
+    // across rebuilds, so a config change alone would not reset it).
+    await _initializeDefaultCategory();
+    if (!mounted) return;
+    if (_selectedCategory != null) {
+      _formKey.currentState?.updateCategory(
+        _selectedCategory!,
+        _selectedParentCategory,
+      );
+    }
+    _restoreKeypadFocus();
   }
 
   @override
@@ -373,17 +389,6 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
                 behavior: HitTestBehavior.opaque,
                 child: AmountDisplay(amount: _amount, onClear: _onClear),
               ),
-
-              // Inline toast below AmountDisplay
-              if (_toastMessage != null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: SoftToast(
-                    key: ValueKey(_toastMessage),
-                    message: _toastMessage!,
-                    onDismissed: _dismissToast,
-                  ),
-                ),
 
               // Scrollable details section with smart bottom padding (D-13)
               Expanded(

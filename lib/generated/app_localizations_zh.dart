@@ -240,13 +240,16 @@ class SZh extends S {
   String get noteOptional => '备注（可选）';
 
   @override
-  String get pleaseEnterAmount => '请输入金额';
+  String get pleaseEnterAmount => '请先输入金额';
 
   @override
   String get amountMustBeGreaterThanZero => '金额必须大于零';
 
   @override
   String get pleaseSelectCategory => '请选择类别';
+
+  @override
+  String get successKeepGoing => '已记录·继续记账';
 
   @override
   String get noTransactionsYet => '暂无交易记录';

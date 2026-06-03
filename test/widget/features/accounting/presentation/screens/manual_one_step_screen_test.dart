@@ -551,12 +551,14 @@ void main() {
       // — so verify(...).called(1) sees zero calls.
       verify(() => mockCreateUseCase.execute(any())).called(1);
 
-      // After save, Navigator pops back to the home route.
+      // 260603-nr1 #1: the screen now stays open for continuous entry — it must
+      // NOT pop after a successful save (the legacy Navigator.popUntil was
+      // removed). A top success toast is shown and the form resets in place.
       expect(
         find.byKey(const ValueKey('manual-one-step-screen')),
-        findsNothing,
+        findsOneWidget,
         reason:
-            'screen must pop after toolbar 记录 save (Navigator.popUntil((r) => r.isFirst))',
+            'screen must stay open after save for continuous entry (popUntil removed, 260603-nr1 #1)',
       );
     },
   );

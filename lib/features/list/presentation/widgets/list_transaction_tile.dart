@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../shared/widgets/satisfaction_face_icon.dart';
+import '../../../../shared/widgets/soft_confirm_dialog.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart'
     show deleteTransactionUseCaseProvider;
@@ -94,40 +95,12 @@ class ListTransactionTile extends ConsumerWidget {
         padding: const EdgeInsets.only(right: 16),
         child: Icon(Icons.delete, color: palette.card, size: 20),
       ),
-      confirmDismiss: (_) => showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(
-            S.of(context).listDeleteConfirmTitle,
-            style: AppTextStyles.titleSmall,
-          ),
-          content: Text(
-            S.of(context).listDeleteConfirmBody,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: palette.textSecondary,
-              height: 1.5,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(
-                S.of(context).listDeleteCancelButton,
-                style: AppTextStyles.titleSmall.copyWith(
-                  color: palette.textSecondary,
-                ),
-              ),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(foregroundColor: palette.error),
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(
-                S.of(context).listDeleteConfirmButton,
-                style: AppTextStyles.titleSmall.copyWith(color: palette.error),
-              ),
-            ),
-          ],
-        ),
+      confirmDismiss: (_) => showSoftConfirmDialog(
+        context,
+        title: S.of(context).listDeleteConfirmTitle,
+        body: S.of(context).listDeleteConfirmBody,
+        confirmLabel: S.of(context).listDeleteConfirmButton,
+        cancelLabel: S.of(context).listDeleteCancelButton,
       ),
       onDismissed: (_) {
         // CRITICAL order: ScaffoldMessenger BEFORE any provider calls (context still valid here)

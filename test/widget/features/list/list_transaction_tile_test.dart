@@ -127,7 +127,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(AlertDialog), findsOneWidget);
+      // 260603-nr1 #1: swipe-delete now uses the shared warm rounded
+      // showSoftConfirmDialog (a Dialog), not the default Material AlertDialog.
+      expect(find.byType(Dialog), findsOneWidget);
+      // Both confirm + cancel actions render inside the soft dialog.
+      expect(find.byType(TextButton), findsNWidgets(2));
     });
   });
 
