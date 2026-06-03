@@ -41,7 +41,10 @@ class HomeSelectedMonth extends _$HomeSelectedMonth {
   }
 
   /// Navigates to the next month.
+  /// No-op when already on the current real-world month (clamp guard).
   void nextMonth() {
+    final now = DateTime.now();
+    if (state.year == now.year && state.month == now.month) return; // clamp
     final d = DateTime(state.year, state.month + 1);
     selectMonth(d.year, d.month);
   }

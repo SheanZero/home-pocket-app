@@ -23,6 +23,7 @@ void main() {
           onSettingsTap: () {},
           onPrevMonth: () {},
           onNextMonth: () {},
+          showNextChevron: true,
         ),
       ),
     );
@@ -43,6 +44,7 @@ void main() {
           onSettingsTap: () => tapped = true,
           onPrevMonth: () {},
           onNextMonth: () {},
+          showNextChevron: true,
         ),
       ),
     );
@@ -61,6 +63,7 @@ void main() {
           onSettingsTap: () {},
           onPrevMonth: () {},
           onNextMonth: () {},
+          showNextChevron: true,
         ),
       ),
     );
@@ -80,6 +83,7 @@ void main() {
           onSettingsTap: () {},
           onPrevMonth: () => prev = true,
           onNextMonth: () => next = true,
+          showNextChevron: true,
         ),
       ),
     );
@@ -88,6 +92,26 @@ void main() {
     await tester.tap(find.byIcon(Icons.chevron_right));
     expect(prev, isTrue);
     expect(next, isTrue);
+  });
+
+  testWidgets('HomeHeader hides right chevron when showNextChevron is false', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      buildTestWidget(
+        HeroHeader(
+          year: 2026,
+          month: 6,
+          isGroupMode: false,
+          onSettingsTap: () {},
+          onPrevMonth: () {},
+          onNextMonth: () {},
+          showNextChevron: false,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.chevron_right), findsNothing);
   });
 
   testWidgets('HomeHeader shows family badge in group mode', (tester) async {
@@ -100,6 +124,7 @@ void main() {
           onSettingsTap: () {},
           onPrevMonth: () {},
           onNextMonth: () {},
+          showNextChevron: true,
         ),
       ),
     );
@@ -118,6 +143,7 @@ void main() {
           onSettingsTap: () {},
           onPrevMonth: () {},
           onNextMonth: () {},
+          showNextChevron: true,
         ),
       ),
     );
@@ -135,6 +161,7 @@ void main() {
           onSettingsTap: () {},
           onPrevMonth: () {},
           onNextMonth: () {},
+          showNextChevron: true,
         ),
       ),
     );

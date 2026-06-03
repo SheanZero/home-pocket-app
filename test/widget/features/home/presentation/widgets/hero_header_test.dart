@@ -12,6 +12,7 @@ void main() {
     VoidCallback? onPrevMonth,
     VoidCallback? onNextMonth,
     bool isGroupMode = false,
+    bool showNextChevron = true,
   }) {
     return testLocalizedApp(
       child: Theme(
@@ -24,6 +25,7 @@ void main() {
             onSettingsTap: onSettingsTap,
             onPrevMonth: onPrevMonth ?? () {},
             onNextMonth: onNextMonth ?? () {},
+            showNextChevron: showNextChevron,
           ),
         ),
       ),
@@ -83,6 +85,7 @@ void main() {
           onSettingsTap: () {},
           onPrevMonth: () => prev = true,
           onNextMonth: () => next = true,
+          showNextChevron: true,
         ),
       );
 
@@ -90,6 +93,21 @@ void main() {
       await tester.tap(find.byIcon(Icons.chevron_right));
       expect(prev, isTrue);
       expect(next, isTrue);
+    });
+
+    testWidgets('right chevron absent when showNextChevron is false', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildTestWidget(
+          year: 2026,
+          month: 6,
+          onSettingsTap: () {},
+          showNextChevron: false,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.chevron_right), findsNothing);
     });
   });
 }
