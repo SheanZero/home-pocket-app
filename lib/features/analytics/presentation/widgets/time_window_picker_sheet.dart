@@ -5,6 +5,7 @@ import '../../../../application/i18n/formatter_service.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
 import '../../domain/models/time_window.dart';
 import '../providers/state_time_window.dart';
 
@@ -243,9 +244,7 @@ class _SheetBodyState extends State<_SheetBody> {
   }
 
   void _showError(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), duration: const Duration(seconds: 3)),
-    );
+    showErrorFeedback(context, message);
   }
 
   List<DateTime> _weekStarts() {

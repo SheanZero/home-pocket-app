@@ -246,6 +246,10 @@ void main() {
 
       expect(find.text('Start date must be before end date.'), findsOneWidget);
       expect(_TestSelectedTimeWindow.setWindowCalls, 0);
+      // Error now surfaces via SoftToast (overlay) — advance past its auto-hide
+      // timer so teardown has no pending Timer.
+      await tester.pump(const Duration(seconds: 6));
+      await tester.pumpAndSettle();
     });
 
     testWidgets('Custom longer than 12 months shows localized error', (
@@ -273,6 +277,8 @@ void main() {
         findsOneWidget,
       );
       expect(_TestSelectedTimeWindow.setWindowCalls, 0);
+      await tester.pump(const Duration(seconds: 6));
+      await tester.pumpAndSettle();
     });
 
     testWidgets('Custom future end shows localized error', (tester) async {
@@ -295,6 +301,8 @@ void main() {
 
       expect(find.text('End date cannot be in the future.'), findsOneWidget);
       expect(_TestSelectedTimeWindow.setWindowCalls, 0);
+      await tester.pump(const Duration(seconds: 6));
+      await tester.pumpAndSettle();
     });
 
     testWidgets('cancel via backdrop dismisses without commit', (tester) async {
