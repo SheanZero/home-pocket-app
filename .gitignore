@@ -1,6 +1,9 @@
 # Worktrees
 .worktrees/
 
+# Serena MCP project cache
+.serena/
+
 # Miscellaneous
 *.class
 *.log
