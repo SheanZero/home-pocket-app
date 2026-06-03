@@ -1299,6 +1299,12 @@ class SZh extends S {
   String get homeViewAllTransactions => '查看全部';
 
   @override
+  String get homeMonthPickerTitle => '选择月份';
+
+  @override
+  String get homeMonthPickerClose => '关闭';
+
+  @override
   String get homeRecentJoyExpense => '最近悦己支出';
 
   @override

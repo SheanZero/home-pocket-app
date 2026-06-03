@@ -1661,6 +1661,14 @@
   "@homeViewAllTransactions": {
     "description": "Button label to view all transactions from home"
   },
+  "homeMonthPickerTitle": "Select Month",
+  "@homeMonthPickerTitle": {
+    "description": "Title of the month-year picker dialog on the home screen"
+  },
+  "homeMonthPickerClose": "Close",
+  "@homeMonthPickerClose": {
+    "description": "Close button label for the month-year picker dialog"
+  },
   "homeRecentJoyExpense": "Recent Joy Expense",
   "@homeRecentJoyExpense": {
     "description": "Joy card label for the most recent joy ledger expense"
