@@ -4,7 +4,8 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 
-/// Flat header row with month picker, mode badge, and settings icon.
+/// Flat header row with month navigation (prev/next chevrons + label tap),
+/// mode badge, and settings icon.
 ///
 /// Pure UI component -- no providers, no navigation.
 /// Sits on the warm ivory page background (no blue container, no SafeArea).
@@ -16,20 +17,42 @@ class HeroHeader extends StatelessWidget {
     required this.isGroupMode,
     required this.onSettingsTap,
     required this.onDateTap,
+    required this.onPrevMonth,
+    required this.onNextMonth,
   });
 
   final int year;
   final int month;
   final bool isGroupMode;
   final VoidCallback onSettingsTap;
+
+  /// Tapping the month label opens the month-year picker dialog.
   final VoidCallback onDateTap;
+
+  /// Tapping the left chevron navigates to the previous month.
+  final VoidCallback onPrevMonth;
+
+  /// Tapping the right chevron navigates to the next month.
+  final VoidCallback onNextMonth;
 
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     return Row(
       children: [
-        // Left: month picker
+        // Left: prev-month chevron
+        IconButton(
+          icon: Icon(
+            Icons.chevron_left,
+            size: 20,
+            color: context.palette.textSecondary,
+          ),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+          onPressed: onPrevMonth,
+        ),
+
+        // Centre: month label tap → dialog
         GestureDetector(
           onTap: onDateTap,
           child: Row(
@@ -49,6 +72,18 @@ class HeroHeader extends StatelessWidget {
               ),
             ],
           ),
+        ),
+
+        // Right: next-month chevron
+        IconButton(
+          icon: Icon(
+            Icons.chevron_right,
+            size: 20,
+            color: context.palette.textSecondary,
+          ),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+          onPressed: onNextMonth,
         ),
 
         const Spacer(),

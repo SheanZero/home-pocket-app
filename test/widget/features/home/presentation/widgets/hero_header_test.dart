@@ -10,6 +10,8 @@ void main() {
     required int month,
     required VoidCallback onSettingsTap,
     required VoidCallback onDateTap,
+    VoidCallback? onPrevMonth,
+    VoidCallback? onNextMonth,
     bool isGroupMode = false,
   }) {
     return testLocalizedApp(
@@ -22,6 +24,8 @@ void main() {
             isGroupMode: isGroupMode,
             onSettingsTap: onSettingsTap,
             onDateTap: onDateTap,
+            onPrevMonth: onPrevMonth ?? () {},
+            onNextMonth: onNextMonth ?? () {},
           ),
         ),
       ),

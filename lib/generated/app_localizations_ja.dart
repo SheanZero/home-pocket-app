@@ -1304,6 +1304,12 @@ class SJa extends S {
   String get homeViewAllTransactions => 'すべて見る';
 
   @override
+  String get homeMonthPickerTitle => '月を選択';
+
+  @override
+  String get homeMonthPickerClose => '閉じる';
+
+  @override
   String get homeRecentJoyExpense => '最近のときめき支出';
 
   @override

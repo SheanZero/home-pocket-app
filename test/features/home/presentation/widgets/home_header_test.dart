@@ -22,6 +22,8 @@ void main() {
           isGroupMode: false,
           onSettingsTap: () {},
           onDateTap: () {},
+          onPrevMonth: () {},
+          onNextMonth: () {},
         ),
       ),
     );
@@ -41,6 +43,8 @@ void main() {
           isGroupMode: false,
           onSettingsTap: () => tapped = true,
           onDateTap: () {},
+          onPrevMonth: () {},
+          onNextMonth: () {},
         ),
       ),
     );
@@ -58,6 +62,8 @@ void main() {
           isGroupMode: false,
           onSettingsTap: () {},
           onDateTap: () {},
+          onPrevMonth: () {},
+          onNextMonth: () {},
         ),
       ),
     );
@@ -75,6 +81,8 @@ void main() {
           isGroupMode: false,
           onSettingsTap: () {},
           onDateTap: () => dateTapped = true,
+          onPrevMonth: () {},
+          onNextMonth: () {},
         ),
       ),
     );
@@ -93,6 +101,8 @@ void main() {
           isGroupMode: true,
           onSettingsTap: () {},
           onDateTap: () {},
+          onPrevMonth: () {},
+          onNextMonth: () {},
         ),
       ),
     );
@@ -110,6 +120,8 @@ void main() {
           isGroupMode: false,
           onSettingsTap: () {},
           onDateTap: () {},
+          onPrevMonth: () {},
+          onNextMonth: () {},
         ),
       ),
     );
@@ -126,6 +138,8 @@ void main() {
           isGroupMode: false,
           onSettingsTap: () {},
           onDateTap: () {},
+          onPrevMonth: () {},
+          onNextMonth: () {},
         ),
       ),
     );
