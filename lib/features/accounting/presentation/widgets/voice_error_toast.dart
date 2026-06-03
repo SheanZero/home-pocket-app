@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../generated/app_localizations.dart';
-import '../../../../shared/widgets/soft_toast.dart';
+import '../../../../shared/widgets/feedback_toast.dart';
 
 /// G-02 / WR-05: surface a localized SoftToast for speech-recognition
 /// failures reported via VoiceInputScreen._onError.
@@ -45,19 +45,8 @@ void showVoiceRecognitionErrorToast(BuildContext context, String errorMsg) {
       break;
   }
 
-  final overlay = Overlay.of(context);
-  late OverlayEntry entry;
-  entry = OverlayEntry(
-    builder: (_) => Positioned(
-      top: MediaQuery.of(context).padding.top + 16,
-      left: 0,
-      right: 0,
-      child: SoftToast(
-        message: message,
-        icon: Icons.error_outline,
-        onDismissed: () => entry.remove(),
-      ),
-    ),
-  );
-  overlay.insert(entry);
+  // Route through the shared error-feedback entry so this participates in the
+  // app-wide single-toast suppression (FeedbackTone.error already defaults to
+  // Icons.error_outline, matching the previous explicit icon).
+  showErrorFeedback(context, message);
 }

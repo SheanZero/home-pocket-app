@@ -5,6 +5,21 @@ import 'soft_toast.dart';
 /// Default visible duration for a feedback toast.
 const Duration _kDefaultFeedbackDuration = Duration(seconds: 3);
 
+/// The single currently-visible feedback toast, app-wide. Tracked so a new
+/// toast suppresses (replaces) any still-visible one instead of stacking at the
+/// same top anchor (260603-nr1 follow-up: 单例 toast 抑制堆叠).
+OverlayEntry? _activeToast;
+
+/// Immediately removes the active toast (if any) without an exit animation.
+/// Safe to call when none is showing or when its overlay was already disposed.
+void _dismissActiveToast() {
+  final prev = _activeToast;
+  _activeToast = null;
+  if (prev != null && prev.mounted) {
+    prev.remove();
+  }
+}
+
 /// Unified top-of-screen feedback entry point for success / error toasts.
 ///
 /// This is the SINGLE entry for both success and error feedback app-wide
@@ -13,7 +28,9 @@ const Duration _kDefaultFeedbackDuration = Duration(seconds: 3);
 /// (voice_error_toast.dart): a top-anchored [SoftToast] inserted as an
 /// [OverlayEntry] that removes itself on dismissal.
 ///
-/// Prefer [showSuccessFeedback] / [showErrorFeedback]; both delegate here.
+/// Only ONE feedback toast is visible at a time — showing a new one instantly
+/// replaces the previous (no stacking). Prefer [showSuccessFeedback] /
+/// [showErrorFeedback]; both delegate here.
 ///
 /// [actionLabel] + [onAction] render an optional inline link (e.g. "退出记账").
 void showFeedbackToast(
@@ -24,6 +41,9 @@ void showFeedbackToast(
   String? actionLabel,
   VoidCallback? onAction,
 }) {
+  // Singleton: drop any toast still on screen before inserting the new one.
+  _dismissActiveToast();
+
   final overlay = Overlay.of(context);
   final topInset = MediaQuery.of(context).padding.top + 16;
 
@@ -39,10 +59,16 @@ void showFeedbackToast(
         duration: duration,
         actionLabel: actionLabel,
         onAction: onAction,
-        onDismissed: () => entry.remove(),
+        onDismissed: () {
+          if (entry.mounted) entry.remove();
+          // Only clear the slot if this entry is still the active one — a newer
+          // toast may have already claimed it.
+          if (identical(_activeToast, entry)) _activeToast = null;
+        },
       ),
     ),
   );
+  _activeToast = entry;
   overlay.insert(entry);
 }
 
