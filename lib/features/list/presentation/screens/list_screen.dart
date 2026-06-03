@@ -40,6 +40,9 @@ class ListScreen extends ConsumerWidget {
     // Phase 29: resolve currencyCode from bookByIdProvider
     const currencyCode = 'JPY';
     final filter = ref.watch(listFilterProvider);
+    final now = DateTime.now();
+    final isCurrentMonth =
+        filter.selectedYear == now.year && filter.selectedMonth == now.month;
 
     return Scaffold(
       appBar: AppBar(
@@ -73,19 +76,20 @@ class ListScreen extends ConsumerWidget {
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            tooltip: S.of(context).listCalNavNext,
-            onPressed: () {
-              final next = DateTime(
-                filter.selectedYear,
-                filter.selectedMonth + 1,
-              );
-              ref
-                  .read(listFilterProvider.notifier)
-                  .selectMonth(next.year, next.month);
-            },
-          ),
+          if (!isCurrentMonth)
+            IconButton(
+              icon: const Icon(Icons.chevron_right),
+              tooltip: S.of(context).listCalNavNext,
+              onPressed: () {
+                final next = DateTime(
+                  filter.selectedYear,
+                  filter.selectedMonth + 1,
+                );
+                ref
+                    .read(listFilterProvider.notifier)
+                    .selectMonth(next.year, next.month);
+              },
+            ),
         ],
       ),
       body: Column(

@@ -18,6 +18,7 @@ class HeroHeader extends StatelessWidget {
     required this.onSettingsTap,
     required this.onPrevMonth,
     required this.onNextMonth,
+    required this.showNextChevron,
   });
 
   final int year;
@@ -30,6 +31,10 @@ class HeroHeader extends StatelessWidget {
 
   /// Tapping the right chevron navigates to the next month.
   final VoidCallback onNextMonth;
+
+  /// Whether to show the right chevron. False when already on the current month
+  /// (prevents navigating into the future and triggering analytics date errors).
+  final bool showNextChevron;
 
   @override
   Widget build(BuildContext context) {
@@ -56,17 +61,20 @@ class HeroHeader extends StatelessWidget {
           ),
         ),
 
-        // Right: next-month chevron
-        IconButton(
-          icon: Icon(
-            Icons.chevron_right,
-            size: 20,
-            color: context.palette.textSecondary,
-          ),
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-          onPressed: onNextMonth,
-        ),
+        // Right: next-month chevron — hidden when already on current month
+        if (showNextChevron)
+          IconButton(
+            icon: Icon(
+              Icons.chevron_right,
+              size: 20,
+              color: context.palette.textSecondary,
+            ),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+            onPressed: onNextMonth,
+          )
+        else
+          const SizedBox(width: 28, height: 28),
 
         const Spacer(),
 

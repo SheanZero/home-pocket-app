@@ -54,6 +54,8 @@ class HomeScreen extends ConsumerWidget {
     final month = selectedMonth.month;
     final currentMonthStart = DateTime(year, month, 1);
     final currentMonthEnd = DateTime(year, month + 1, 0, 23, 59, 59);
+    final now = DateTime.now();
+    final isCurrentMonth = year == now.year && month == now.month;
 
     final todayTxAsync = ref.watch(todayTransactionsProvider(bookId: bookId));
     // Used for currency code in the transaction list formatter (WR-01 fix).
@@ -78,6 +80,7 @@ class HomeScreen extends ConsumerWidget {
                     ref.read(homeSelectedMonthProvider.notifier).prevMonth(),
                 onNextMonth: () =>
                     ref.read(homeSelectedMonthProvider.notifier).nextMonth(),
+                showNextChevron: !isCurrentMonth,
               ),
               // 24 (not 16) to visually match AnalyticsScreen's AppBar+padding stack (user decision 260518-v4v).
               // Analytics has a 56px opaque AppBar creating structural visual weight absent on home
