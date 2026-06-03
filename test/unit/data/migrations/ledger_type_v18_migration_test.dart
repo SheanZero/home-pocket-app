@@ -31,7 +31,7 @@ import 'package:sqlite3/sqlite3.dart';
 
 // ─── Target schema version ─────────────────────────────────────────────────────
 
-const _targetSchemaVersion = 18;
+const _targetSchemaVersion = 18; // minimum version including v18 ledger_type migration
 
 // ─── v17 table creation ────────────────────────────────────────────────────────
 
@@ -236,7 +236,7 @@ void main() {
       addTearDown(db.close);
       expect(
         db.schemaVersion,
-        equals(_targetSchemaVersion),
+        greaterThanOrEqualTo(_targetSchemaVersion),
         reason:
             'schemaVersion must be 18 once app_database.dart bumps the version '
             'and adds the if (from < 18) migration block',

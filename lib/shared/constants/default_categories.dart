@@ -58,7 +58,7 @@ abstract final class DefaultCategories {
       'shopping_basket',
       '#FF5722',
       'cat_food',
-      1,
+      2,
     ),
     _l2(
       'cat_food_dining_out',
@@ -66,7 +66,7 @@ abstract final class DefaultCategories {
       'restaurant_menu',
       '#FF5722',
       'cat_food',
-      2,
+      1,
     ),
     _l2(
       'cat_food_cafe',
