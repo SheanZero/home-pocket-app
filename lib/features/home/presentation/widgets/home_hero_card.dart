@@ -9,6 +9,7 @@ import '../../../../core/theme/happiness_ring_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/joy_cumulative_formatter.dart';
+import '../../../../shared/widgets/satisfaction_face_icon.dart';
 import '../../../accounting/presentation/utils/category_display_utils.dart';
 import '../../../analytics/domain/models/best_joy_moment_row.dart';
 import '../../../analytics/domain/models/family_happiness.dart';
@@ -923,8 +924,8 @@ class HomeHeroCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(
-              _satisfactionPillIcon(row.joyFullness),
+            SatisfactionFaceIcon(
+              value: row.joyFullness,
               size: 24,
               color: palette.satisfactionPillRose,
             ),
@@ -948,15 +949,6 @@ class HomeHeroCard extends StatelessWidget {
       title: title,
       row: _bestJoyTicket(palette: palette, isDark: isDark, content: content),
     );
-  }
-
-  /// ADR-014 satisfaction value → icon mapping (unipolar positive scale).
-  IconData _satisfactionPillIcon(int sat) {
-    if (sat <= 2) return Icons.sentiment_neutral_outlined;
-    if (sat <= 4) return Icons.sentiment_satisfied_outlined;
-    if (sat <= 6) return Icons.sentiment_satisfied_alt_outlined;
-    if (sat <= 8) return Icons.sentiment_very_satisfied_outlined;
-    return Icons.favorite_border;
   }
 
   /// ADR-014 satisfaction value → tier label mapping (Variant A pill).

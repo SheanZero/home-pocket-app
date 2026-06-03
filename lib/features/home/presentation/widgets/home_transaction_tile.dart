@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/satisfaction_face_icon.dart';
 
 /// Read-only home recent-transaction row mirroring the monthly list tile
 /// (`ListTransactionTile`) layout: a leading L1 category icon, an info column
@@ -26,7 +27,7 @@ class HomeTransactionTile extends StatelessWidget {
     required this.formattedAmount,
     required this.amountColor,
     this.merchant,
-    this.satisfactionIcon,
+    this.satisfactionValue,
     this.onTap,
   });
 
@@ -57,8 +58,9 @@ class HomeTransactionTile extends StatelessWidget {
   /// Optional merchant / payee name shown beside the ledger badge.
   final String? merchant;
 
-  /// Optional satisfaction icon for joy-ledger rows (ADR-014 mapping).
-  final IconData? satisfactionIcon;
+  /// Optional satisfaction value (1–10) for joy-ledger rows; null hides the
+  /// face. Rendered as the shared [SatisfactionFaceIcon] (ADR-014 mapping).
+  final int? satisfactionValue;
 
   /// Optional tap callback.
   final VoidCallback? onTap;
@@ -93,10 +95,10 @@ class HomeTransactionTile extends StatelessWidget {
                           maxLines: 1,
                         ),
                       ),
-                      if (satisfactionIcon != null) ...[
+                      if (satisfactionValue != null) ...[
                         const SizedBox(width: 6),
-                        Icon(
-                          satisfactionIcon,
+                        SatisfactionFaceIcon(
+                          value: satisfactionValue!,
                           size: 14,
                           color: palette.joy,
                         ),

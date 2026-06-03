@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/satisfaction_face_icon.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../features/accounting/presentation/providers/repository_providers.dart'
     show deleteTransactionUseCaseProvider;
@@ -40,7 +41,7 @@ class ListTransactionTile extends ConsumerWidget {
     required this.l1Icon,
     required this.locale,
     this.merchant,
-    this.satisfactionIcon,
+    this.satisfactionValue,
     this.showDate = false,
   });
 
@@ -73,8 +74,9 @@ class ListTransactionTile extends ConsumerWidget {
   /// Locale used for date formatting when [showDate] is true.
   final Locale locale;
 
-  /// Optional satisfaction icon for joy-ledger rows (ADR-014 mapping).
-  final IconData? satisfactionIcon;
+  /// Optional satisfaction value (1–10) for joy-ledger rows; null hides the
+  /// face. Rendered as the shared [SatisfactionFaceIcon] (ADR-014 mapping).
+  final int? satisfactionValue;
 
   /// When true, the tile title shows "short date + L2 category" (amount-sort
   /// flat mode). When false (default), the title shows the L2 category only.
@@ -168,10 +170,10 @@ class ListTransactionTile extends ConsumerWidget {
                             maxLines: 1,
                           ),
                         ),
-                        if (satisfactionIcon != null) ...[
+                        if (satisfactionValue != null) ...[
                           const SizedBox(width: 6),
-                          Icon(
-                            satisfactionIcon,
+                          SatisfactionFaceIcon(
+                            value: satisfactionValue!,
                             size: 14,
                             color: palette.joy,
                           ),

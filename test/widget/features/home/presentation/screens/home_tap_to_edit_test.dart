@@ -141,7 +141,7 @@ void main() {
               categoryColor: Colors.purple,
               formattedAmount: '¥2,500',
               amountColor: Colors.purple,
-              satisfactionIcon: null,
+              satisfactionValue: null,
               // onTap: exactly reproduces the Plan 07 home_screen.dart wiring
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<bool>(

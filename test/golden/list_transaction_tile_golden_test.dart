@@ -93,7 +93,7 @@ Widget _wrap({
             l1Icon: Icons.restaurant,
             locale: const Locale('ja'),
             merchant: null,
-            satisfactionIcon: null,
+            satisfactionValue: null,
           ),
         ),
       ),

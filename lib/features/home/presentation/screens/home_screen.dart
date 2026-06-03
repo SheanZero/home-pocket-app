@@ -322,7 +322,9 @@ class HomeScreen extends ConsumerWidget {
                         amountColor: isSoul
                             ? context.palette.joyText
                             : context.palette.textPrimary,
-                        satisfactionIcon: _satisfactionIcon(tx),
+                        satisfactionValue: tx.ledgerType == LedgerType.joy
+                            ? tx.joyFullness
+                            : null,
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute<bool>(
                             builder: (_) =>
@@ -355,15 +357,6 @@ class HomeScreen extends ConsumerWidget {
   String _formatAmount(Transaction tx, String currencyCode, Locale locale) =>
       _fmt.formatCurrency(tx.amount, currencyCode, locale);
 
-  IconData? _satisfactionIcon(Transaction tx) {
-    if (tx.ledgerType != LedgerType.joy) return null;
-    final v = tx.joyFullness;
-    if (v <= 2) return Icons.sentiment_neutral_outlined;
-    if (v <= 4) return Icons.sentiment_satisfied_outlined;
-    if (v <= 6) return Icons.sentiment_satisfied_alt_outlined;
-    if (v <= 8) return Icons.sentiment_very_satisfied_outlined;
-    return Icons.favorite_border;
-  }
 
   /// Extracts the first character of a member identifier for group mode.
   String _memberInitial(Transaction tx) {
