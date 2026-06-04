@@ -764,7 +764,7 @@ class HomeHeroCard extends StatelessWidget {
                     softWrap: false,
                     overflow: TextOverflow.visible,
                     style: TextStyle(
-                      fontSize: 19,
+                      fontSize: 17,
                       fontWeight: FontWeight.w800,
                       color: palette.textSecondary,
                       height: 1.1,
@@ -778,7 +778,7 @@ class HomeHeroCard extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     color: palette.joy,
-                    padding: const EdgeInsets.symmetric(vertical: 3),
+                    padding: const EdgeInsets.symmetric(vertical: 4),
                     alignment: Alignment.center,
                     child: Text(
                       month ?? '',
@@ -793,14 +793,14 @@ class HomeHeroCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 7),
                   Text(
                     day ?? '',
                     maxLines: 1,
                     softWrap: false,
                     overflow: TextOverflow.visible,
                     style: TextStyle(
-                      fontSize: 19,
+                      fontSize: 17,
                       fontWeight: FontWeight.w800,
                       color: palette.joyText,
                       height: 1.1,
@@ -927,26 +927,29 @@ class HomeHeroCard extends StatelessWidget {
         const SizedBox(width: 8),
         _DashedVLine(color: palette.joy.withValues(alpha: 0.38)),
         const SizedBox(width: 14),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SatisfactionFaceIcon(
-              value: row.joyFullness,
-              size: 24,
-              color: palette.satisfactionPillRose,
-            ),
-            const SizedBox(height: 3),
-            Text(
-              _satisfactionPillLabel(l10n, row.joyFullness),
-              style: TextStyle(
-                fontFamily: 'Outfit',
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SatisfactionFaceIcon(
+                value: row.joyFullness,
+                size: 30,
                 color: palette.satisfactionPillRose,
               ),
-            ),
-          ],
+              const SizedBox(height: 6),
+              Text(
+                _satisfactionPillLabel(l10n, row.joyFullness),
+                style: TextStyle(
+                  fontFamily: 'Outfit',
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  color: palette.satisfactionPillRose,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -1137,8 +1140,11 @@ class _DashedVLinePainter extends CustomPainter {
     final x = size.width / 2;
     var y = 0.0;
     while (y < size.height) {
-      canvas.drawLine(Offset(x, y), Offset(x, (y + dash).clamp(0, size.height)),
-          paint);
+      canvas.drawLine(
+        Offset(x, y),
+        Offset(x, (y + dash).clamp(0, size.height)),
+        paint,
+      );
       y += dash + gap;
     }
   }
