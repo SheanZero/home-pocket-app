@@ -7,6 +7,7 @@ import 'core/initialization/app_initializer.dart';
 import 'core/initialization/init_failure_screen.dart';
 import 'core/initialization/init_result.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/text_scale_clamp.dart';
 import 'data/app_database.dart';
 import 'application/seed/seed_providers.dart';
 import 'features/accounting/presentation/providers/repository_providers.dart'
@@ -160,6 +161,9 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
+      // Cap iOS/Android Dynamic Type so large accessibility font sizes don't
+      // overflow fixed horizontal Rows (quick 260604-fyd — ceiling 1.2).
+      builder: clampTextScaling,
       home: Builder(builder: (context) => _buildHome(context)),
     );
   }
