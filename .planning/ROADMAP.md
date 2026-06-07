@@ -117,7 +117,7 @@
   4. `ShoppingItem`, `ShoppingListFilter`, and `ShoppingItemParams` Freezed models exist at `lib/features/shopping_list/domain/models/`; `ShoppingItemRepository` interface exists at `lib/features/shopping_list/domain/repositories/` with no Drift imports; all new `lib/features/shopping_list/` subdirectories have `import_guard.yaml` files mirroring the `lib/features/list/` pattern; `flutter analyze` reports 0 issues
   5. `LedgerTypeSelector` widget is moved from `lib/features/accounting/presentation/widgets/` to `lib/shared/widgets/` and all existing import sites updated; `CategorySelectionScreen` is allow-listed in `lib/features/shopping_list/presentation/import_guard.yaml`; `dart run custom_lint --no-fatal-infos` passes with zero new violations
 
-**Plans:** 5/7 plans executed
+**Plans:** 6/7 plans executed
 
 Plans:
 **Wave 1**
@@ -130,7 +130,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 36-05-PLAN.md — ShoppingItemDao implementation (reactive watchByListType, soft-delete, upsert, reorder)
+- [x] 36-05-PLAN.md — ShoppingItemDao implementation (reactive watchByListType, soft-delete, upsert, reorder)
 - [ ] 36-06-PLAN.md — ShoppingItemRepositoryImpl (note encryption + JSON tags at boundary)
 
 **Cross-cutting constraints:**
@@ -199,7 +199,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 36. Data Layer + Domain + Import Guard | 5/7 | In Progress|  |
+| 36. Data Layer + Domain + Import Guard | 6/7 | In Progress|  |
 | 37. Application Use Cases + Sync Integration | 0/TBD | Not started | - |
 | 38. Presentation Shell + UI Widgets | 0/TBD | Not started | - |
 | 39. i18n + Golden Re-baseline + Smoke Test | 0/TBD | Not started | - |
