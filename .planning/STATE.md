@@ -2,9 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: 购物清单
-status: roadmap_ready
-last_updated: "2026-06-07"
-last_activity: 2026-06-07
+status: planning
+stopped_at: Phase 36 context gathered
+last_updated: "2026-06-07T10:12:14.832Z"
+last_activity: 2026-06-07 — v1.6 roadmap consolidated from 7 phases to 4 phases (36-39)
 progress:
   total_phases: 4
   completed_phases: 0
@@ -267,7 +268,7 @@ No active blockers. Carried-forward debt (cross-milestone):
 
 ## Session Continuity
 
-Last session: 2026-06-07 — v1.6 roadmap consolidated from 7 phases (36-42) to 4 phases (36-39) per user direction.
-Stopped at: Roadmap revised; STATE.md and REQUIREMENTS.md traceability updated.
+Last session: 2026-06-07T10:12:14.825Z
+Stopped at: Phase 36 context gathered
 
 **Next:** `/gsd-plan-phase 36` — plan Phase 36: Data Layer + Domain + Import Guard
