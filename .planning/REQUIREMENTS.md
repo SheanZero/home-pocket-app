@@ -23,7 +23,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (see Tra
 
 ### List & Structure (SHOP)
 
-- [ ] **SHOP-01**: User can switch between 公共 (public) and 私人 (private) shopping lists via a top segmented control; each segment is a fully independent list.
+- [x] **SHOP-01**: User can switch between 公共 (public) and 私人 (private) shopping lists via a top segmented control; each segment is a fully independent list.
 - [ ] **SHOP-02**: User sees shopping items in a scrollable list; each tile shows the item name as primary text, a category emoji, and — when set — quantity and estimated price as secondary text.
 - [ ] **SHOP-03**: User sees a dual-ledger color accent (日常/悦己 left border via `palette.daily`/`palette.joy`) on each tile when a ledger is set; a neutral accent when none is set. *(differentiator)*
 - [ ] **SHOP-04**: User sees a clear empty state per list with a next-step CTA — three variants: empty private list, empty public list (solo), empty public list (family joined).
@@ -31,7 +31,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (see Tra
 ### Completion (DONE)
 
 - [ ] **DONE-01**: User can tap an item row to toggle its completed state, with an animated strikethrough + fade.
-- [ ] **DONE-02**: Completed items sort to the bottom of the current list, below a visual divider; active items remain on top (enforced by DAO query order, not client sort).
+- [x] **DONE-02**: Completed items sort to the bottom of the current list, below a visual divider; active items remain on top (enforced by DAO query order, not client sort).
 - [ ] **DONE-03**: User can one-tap "clear all completed" (with confirmation); it clears every completed item in the current list regardless of any active filter, and the control appears only when the completed section is non-empty.
 
 ### Add / Edit Item (ITEM)
@@ -40,7 +40,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (see Tra
 - [ ] **ITEM-02**: User can optionally set ledger (日常/悦己), category, tags, note, quantity, and estimated price on an item.
 - [ ] **ITEM-03**: The add/edit form reuses the existing category tree, tag system, and ledger selector (no forked pickers).
 - [ ] **ITEM-04**: User can edit any existing item via the same form, pre-populated with its current values.
-- [ ] **ITEM-05**: Estimated price is stored as integer sub-units and rendered locale-aware via `NumberFormatter`; the note field is encrypted at the repository boundary (mirrors `TransactionRepositoryImpl`).
+- [x] **ITEM-05**: Estimated price is stored as integer sub-units and rendered locale-aware via `NumberFormatter`; the note field is encrypted at the repository boundary (mirrors `TransactionRepositoryImpl`).
 
 ### Filter (FILT)
 
@@ -60,7 +60,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (see Tra
 - [ ] **SYNC-02**: Items on the private list NEVER enter the sync pipeline — the change tracker enqueues only public items, enforced at the use-case boundary and verified by a dedicated test gate. *(privacy-critical)*
 - [ ] **SYNC-03**: An item's public/private attribute is fixed at creation and cannot be changed afterward (D6) — eliminates the public→private sync-tombstone edge case.
 - [ ] **SYNC-04**: On the public list, each item shows which family member added it (avatar emoji + display name from shadow books); the private list shows no attribution. *(differentiator)*
-- [ ] **SYNC-05**: Concurrent family edits to the same item resolve via sticky-complete rule (D-03 overrides D7): when `completedAt > incoming.updatedAt`, `isCompleted: true` is preserved; a soft-deleted (tombstoned) item is not resurrected by a remote update op. Phase 36 delivers the `completedAt DateTime?` column; Phase 37 implements the merge algorithm in `ApplySyncOperationsUseCase`.
+- [x] **SYNC-05**: Concurrent family edits to the same item resolve via sticky-complete rule (D-03 overrides D7): when `completedAt > incoming.updatedAt`, `isCompleted: true` is preserved; a soft-deleted (tombstoned) item is not resurrected by a remote update op. Phase 36 delivers the `completedAt DateTime?` column; Phase 37 implements the merge algorithm in `ApplySyncOperationsUseCase`.
 - [ ] **SYNC-06**: Public-list changes synced from family members appear reactively via a Drift `.watch()` stream (`readsFrom:` the shopping table) without manual refresh (applies the v1.4 GAP-2 lesson).
 
 ### Navigation & Rename (NAV)
@@ -122,18 +122,18 @@ Which phases cover which requirements. Updated for 4-phase consolidated roadmap 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SHOP-01 | Phase 36 | Pending |
+| SHOP-01 | Phase 36 | Complete |
 | SHOP-02 | Phase 38 | Pending |
 | SHOP-03 | Phase 38 | Pending |
 | SHOP-04 | Phase 38 | Pending |
 | DONE-01 | Phase 38 | Pending |
-| DONE-02 | Phase 36 | Pending |
+| DONE-02 | Phase 36 | Complete |
 | DONE-03 | Phase 38 | Pending |
 | ITEM-01 | Phase 38 | Pending |
 | ITEM-02 | Phase 38 | Pending |
 | ITEM-03 | Phase 36 | Pending |
 | ITEM-04 | Phase 38 | Pending |
-| ITEM-05 | Phase 36 | Pending |
+| ITEM-05 | Phase 36 | Complete |
 | FILT-01 | Phase 38 | Pending |
 | FILT-02 | Phase 38 | Pending |
 | FILT-03 | Phase 38 | Pending |
@@ -144,7 +144,7 @@ Which phases cover which requirements. Updated for 4-phase consolidated roadmap 
 | SYNC-02 | Phase 37 | Pending |
 | SYNC-03 | Phase 37 | Pending |
 | SYNC-04 | Phase 38 | Pending |
-| SYNC-05 | Phase 37 | Pending |
+| SYNC-05 | Phase 37 | Complete |
 | SYNC-06 | Phase 37 | Pending |
 | NAV-01 | Phase 38 | Pending |
 | NAV-02 | Phase 38 | Pending |

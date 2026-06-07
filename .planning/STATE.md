@@ -4,13 +4,13 @@ milestone: v1.6
 milestone_name: 购物清单
 status: executing
 stopped_at: Phase 36 context gathered
-last_updated: "2026-06-07T11:15:08.951Z"
-last_activity: 2026-06-07 -- Phase 36 planning complete
+last_updated: "2026-06-07T11:55:35.858Z"
+last_activity: 2026-06-07
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 7
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07 — v1.6 购物清单 started)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** v1.6 购物清单 — roadmap consolidated to 4 phases (36-39), awaiting `/gsd-plan-phase 36`
+**Current focus:** Phase 36 — data-layer-domain-import-guard
 
 ## Current Position
 
-Phase: 36 (not started — roadmap revised, planning next)
-Plan: —
+Phase: 36 (data-layer-domain-import-guard) — EXECUTING
+Plan: 2 of 7
 Status: Ready to execute
-Last activity: 2026-06-07 -- Phase 36 planning complete
+Last activity: 2026-06-07
 
 ```
 v1.6 progress: [░░░░] 0% — Phase 36-39 defined, 0/4 complete
@@ -268,7 +268,7 @@ No active blockers. Carried-forward debt (cross-milestone):
 
 ## Session Continuity
 
-Last session: 2026-06-07T10:12:14.825Z
+Last session: 2026-06-07T11:55:35.848Z
 Stopped at: Phase 36 context gathered
 
 **Next:** `/gsd-plan-phase 36` — plan Phase 36: Data Layer + Domain + Import Guard
