@@ -38,7 +38,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (see Tra
 
 - [ ] **ITEM-01**: User can add a shopping item; only the item name is required, all other fields optional.
 - [ ] **ITEM-02**: User can optionally set ledger (日常/悦己), category, tags, note, quantity, and estimated price on an item.
-- [ ] **ITEM-03**: The add/edit form reuses the existing category tree, tag system, and ledger selector (no forked pickers).
+- [x] **ITEM-03**: The add/edit form reuses the existing category tree, tag system, and ledger selector (no forked pickers).
 - [ ] **ITEM-04**: User can edit any existing item via the same form, pre-populated with its current values.
 - [x] **ITEM-05**: Estimated price is stored as integer sub-units and rendered locale-aware via `NumberFormatter`; the note field is encrypted at the repository boundary (mirrors `TransactionRepositoryImpl`).
 
@@ -131,7 +131,7 @@ Which phases cover which requirements. Updated for 4-phase consolidated roadmap 
 | DONE-03 | Phase 38 | Pending |
 | ITEM-01 | Phase 38 | Pending |
 | ITEM-02 | Phase 38 | Pending |
-| ITEM-03 | Phase 36 | Pending |
+| ITEM-03 | Phase 36 | Complete |
 | ITEM-04 | Phase 38 | Pending |
 | ITEM-05 | Phase 36 | Complete |
 | FILT-01 | Phase 38 | Pending |
