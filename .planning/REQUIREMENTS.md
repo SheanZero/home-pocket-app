@@ -12,7 +12,7 @@
 - **D4** — Add-item form: name (required) + optional ledger (日常/悦己), category, tags, note, quantity, estimated price.
 - **D5** (filter scope) — Filter state is **shared** across both segments and **resets** when switching public↔private.
 - **D6** (visibility mutability) — An item's public/private attribute is **immutable after creation**.
-- **D7** (completion merge) — Concurrent completion edits resolve **last-write-wins** (no `completedAt` column).
+- **D7** (completion merge) — **SUPERSEDED by D-03** (2026-06-07 planning session): `completedAt DateTime?` nullable column added to v20 schema. Sticky-complete merge rule: when `completedAt > incoming.updatedAt`, `isCompleted: true` is preserved and NOT overwritten by a later non-completion edit. Phase 36 adds the column; Phase 37 implements the merge algorithm in `ApplySyncOperationsUseCase`. Original D7 ("no completedAt / pure LWW") is withdrawn.
 - **D8** (differentiators in scope) — **per-item family attribution** + **dual-ledger color accent** are IN; running subtotal, name-autocomplete, category-grouping, tag-filter, and duplicate-detection are deferred.
 
 ---
@@ -60,7 +60,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (see Tra
 - [ ] **SYNC-02**: Items on the private list NEVER enter the sync pipeline — the change tracker enqueues only public items, enforced at the use-case boundary and verified by a dedicated test gate. *(privacy-critical)*
 - [ ] **SYNC-03**: An item's public/private attribute is fixed at creation and cannot be changed afterward (D6) — eliminates the public→private sync-tombstone edge case.
 - [ ] **SYNC-04**: On the public list, each item shows which family member added it (avatar emoji + display name from shadow books); the private list shows no attribution. *(differentiator)*
-- [ ] **SYNC-05**: Concurrent family edits to the same item resolve last-write-wins (D7); a soft-deleted (tombstoned) item is not resurrected by a remote update op.
+- [ ] **SYNC-05**: Concurrent family edits to the same item resolve via sticky-complete rule (D-03 overrides D7): when `completedAt > incoming.updatedAt`, `isCompleted: true` is preserved; a soft-deleted (tombstoned) item is not resurrected by a remote update op. Phase 36 delivers the `completedAt DateTime?` column; Phase 37 implements the merge algorithm in `ApplySyncOperationsUseCase`.
 - [ ] **SYNC-06**: Public-list changes synced from family members appear reactively via a Drift `.watch()` stream (`readsFrom:` the shopping table) without manual refresh (applies the v1.4 GAP-2 lesson).
 
 ### Navigation & Rename (NAV)
@@ -164,4 +164,4 @@ Which phases cover which requirements. Updated for 4-phase consolidated roadmap 
 
 ---
 *Requirements defined: 2026-06-07 (milestone v1.6 购物清单)*
-*Last updated: 2026-06-07 — traceability revised for 4-phase consolidated roadmap (Phases 36-39); all 27 requirements mapped*
+*Last updated: 2026-06-07 — traceability revised for 4-phase consolidated roadmap (Phases 36-39); all 27 requirements mapped; SYNC-05/D7 reconciled with D-03 (completedAt column override, sticky-complete merge rule)*

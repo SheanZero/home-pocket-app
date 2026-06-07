@@ -109,12 +109,21 @@
 **Depends on:** Nothing (column names and domain interface must be locked before all other phases)
 **Requirements:** DONE-02, ITEM-05, SYNC-05, SHOP-01, ITEM-03
 **Success Criteria** (what must be TRUE):
-  1. A `ShoppingItems` Drift table exists at `lib/data/tables/` with all D4 fields (name, listType, ledgerType, categoryId, tags, note, estimatedPrice, quantity, isCompleted, sortOrder, addedByBookId, isDeleted, createdAt, updatedAt); `estimatedPrice` is `IntColumn` nullable; `note` is `TEXT NOT NULL`; Drift schema version is `20` (not 19) with an `if (from < 20)` migration block calling `migrator.createTable(shoppingItems)`
+  1. A `ShoppingItems` Drift table exists at `lib/data/tables/` with all 15 business fields (name, listType, ledgerType, categoryId, tags, note, estimatedPrice, quantity, isCompleted, completedAt, sortOrder, addedByBookId, isDeleted, createdAt, updatedAt); `completedAt DateTime?` is nullable (D-03: sticky-complete merge timestamp, added per 2026-06-07 planning session overriding D7); `estimatedPrice` is `IntColumn` nullable; `note` is `TEXT NOT NULL`; Drift schema version is `20` (not 19) with an `if (from < 20)` migration block calling `migrator.createTable(shoppingItems)`
   2. `ShoppingItemDao` has `watchByListType(listType)` returning a reactive `Stream` via `.watch()` with `readsFrom:` the shopping table — completed items sort to the bottom via SQL `ORDER BY is_completed ASC, sort_order ASC, created_at ASC`; soft-delete and upsert behavior is tested (deleted item has `isDeleted=true`, not physically removed)
   3. A Wave-0 raw-sqlite3 contract test opens the v20 database and verifies the `shopping_items` table structure (column names, types, NOT NULL constraints) without going through the Drift ORM
   4. `ShoppingItem`, `ShoppingListFilter`, and `ShoppingItemParams` Freezed models exist at `lib/features/shopping_list/domain/models/`; `ShoppingItemRepository` interface exists at `lib/features/shopping_list/domain/repositories/` with no Drift imports; all new `lib/features/shopping_list/` subdirectories have `import_guard.yaml` files mirroring the `lib/features/list/` pattern; `flutter analyze` reports 0 issues
   5. `LedgerTypeSelector` widget is moved from `lib/features/accounting/presentation/widgets/` to `lib/shared/widgets/` and all existing import sites updated; `CategorySelectionScreen` is allow-listed in `lib/features/shopping_list/presentation/import_guard.yaml`; `dart run custom_lint --no-fatal-infos` passes with zero new violations
-**Plans:** TBD
+**Plans:** 7 plans
+
+Plans:
+- [ ] 36-01-PLAN.md — Wave-0 test scaffolds (contract, DAO, repo)
+- [ ] 36-02-PLAN.md — ShoppingItems table + app_database v19→v20 migration + build_runner
+- [ ] 36-03-PLAN.md — LedgerTypeSelector move to shared/widgets/ + import_guard YAMLs
+- [ ] 36-04-PLAN.md — Domain Freezed models (ShoppingItem, ShoppingListFilter, ShoppingItemParams) + repository interface
+- [ ] 36-05-PLAN.md — ShoppingItemDao implementation (reactive watchByListType, soft-delete, upsert, reorder)
+- [ ] 36-06-PLAN.md — ShoppingItemRepositoryImpl (note encryption + JSON tags at boundary)
+- [ ] 36-07-PLAN.md — Documentation reconciliation (D-03 ripple: REQUIREMENTS.md/ROADMAP/CLAUDE.md)
 
 ### Phase 37: Application Use Cases + Sync Integration
 **Goal:** Every shopping list mutation is mediated by a use case that enforces the private-item privacy contract, and public items sync bidirectionally through the existing family_sync pipeline with reactive delivery and tombstone safety
