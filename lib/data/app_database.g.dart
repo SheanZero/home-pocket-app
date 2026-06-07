@@ -4287,6 +4287,1025 @@ class MerchantCategoryPreferencesCompanion
   }
 }
 
+class $ShoppingItemsTable extends ShoppingItems
+    with TableInfo<$ShoppingItemsTable, ShoppingItemRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ShoppingItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deviceIdMeta = const VerificationMeta(
+    'deviceId',
+  );
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+    'device_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _listTypeMeta = const VerificationMeta(
+    'listType',
+  );
+  @override
+  late final GeneratedColumn<String> listType = GeneratedColumn<String>(
+    'list_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('private'),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 200,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ledgerTypeMeta = const VerificationMeta(
+    'ledgerType',
+  );
+  @override
+  late final GeneratedColumn<String> ledgerType = GeneratedColumn<String>(
+    'ledger_type',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _tagsMeta = const VerificationMeta('tags');
+  @override
+  late final GeneratedColumn<String> tags = GeneratedColumn<String>(
+    'tags',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<int> quantity = GeneratedColumn<int>(
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _estimatedPriceMeta = const VerificationMeta(
+    'estimatedPrice',
+  );
+  @override
+  late final GeneratedColumn<int> estimatedPrice = GeneratedColumn<int>(
+    'estimated_price',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _completedAtMeta = const VerificationMeta(
+    'completedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> completedAt = GeneratedColumn<DateTime>(
+    'completed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isCompletedMeta = const VerificationMeta(
+    'isCompleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isCompleted = GeneratedColumn<bool>(
+    'is_completed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_completed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _isSyncedMeta = const VerificationMeta(
+    'isSynced',
+  );
+  @override
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+    'is_synced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_synced" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _addedByBookIdMeta = const VerificationMeta(
+    'addedByBookId',
+  );
+  @override
+  late final GeneratedColumn<String> addedByBookId = GeneratedColumn<String>(
+    'added_by_book_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    deviceId,
+    listType,
+    name,
+    ledgerType,
+    categoryId,
+    tags,
+    note,
+    quantity,
+    estimatedPrice,
+    completedAt,
+    isCompleted,
+    sortOrder,
+    isSynced,
+    isDeleted,
+    addedByBookId,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'shopping_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ShoppingItemRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('device_id')) {
+      context.handle(
+        _deviceIdMeta,
+        deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_deviceIdMeta);
+    }
+    if (data.containsKey('list_type')) {
+      context.handle(
+        _listTypeMeta,
+        listType.isAcceptableOrUnknown(data['list_type']!, _listTypeMeta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('ledger_type')) {
+      context.handle(
+        _ledgerTypeMeta,
+        ledgerType.isAcceptableOrUnknown(data['ledger_type']!, _ledgerTypeMeta),
+      );
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    }
+    if (data.containsKey('tags')) {
+      context.handle(
+        _tagsMeta,
+        tags.isAcceptableOrUnknown(data['tags']!, _tagsMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    }
+    if (data.containsKey('estimated_price')) {
+      context.handle(
+        _estimatedPriceMeta,
+        estimatedPrice.isAcceptableOrUnknown(
+          data['estimated_price']!,
+          _estimatedPriceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('completed_at')) {
+      context.handle(
+        _completedAtMeta,
+        completedAt.isAcceptableOrUnknown(
+          data['completed_at']!,
+          _completedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_completed')) {
+      context.handle(
+        _isCompletedMeta,
+        isCompleted.isAcceptableOrUnknown(
+          data['is_completed']!,
+          _isCompletedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    if (data.containsKey('is_synced')) {
+      context.handle(
+        _isSyncedMeta,
+        isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    if (data.containsKey('added_by_book_id')) {
+      context.handle(
+        _addedByBookIdMeta,
+        addedByBookId.isAcceptableOrUnknown(
+          data['added_by_book_id']!,
+          _addedByBookIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ShoppingItemRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ShoppingItemRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      deviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_id'],
+      )!,
+      listType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}list_type'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      ledgerType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ledger_type'],
+      ),
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_id'],
+      ),
+      tags: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tags'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quantity'],
+      )!,
+      estimatedPrice: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}estimated_price'],
+      ),
+      completedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}completed_at'],
+      ),
+      isCompleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_completed'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      isSynced: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_synced'],
+      )!,
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+      addedByBookId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}added_by_book_id'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+    );
+  }
+
+  @override
+  $ShoppingItemsTable createAlias(String alias) {
+    return $ShoppingItemsTable(attachedDatabase, alias);
+  }
+}
+
+class ShoppingItemRow extends DataClass implements Insertable<ShoppingItemRow> {
+  final String id;
+  final String deviceId;
+  final String listType;
+  final String name;
+  final String? ledgerType;
+  final String? categoryId;
+  final String? tags;
+  final String? note;
+  final int quantity;
+  final int? estimatedPrice;
+  final DateTime? completedAt;
+  final bool isCompleted;
+  final int sortOrder;
+  final bool isSynced;
+  final bool isDeleted;
+  final String? addedByBookId;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+  const ShoppingItemRow({
+    required this.id,
+    required this.deviceId,
+    required this.listType,
+    required this.name,
+    this.ledgerType,
+    this.categoryId,
+    this.tags,
+    this.note,
+    required this.quantity,
+    this.estimatedPrice,
+    this.completedAt,
+    required this.isCompleted,
+    required this.sortOrder,
+    required this.isSynced,
+    required this.isDeleted,
+    this.addedByBookId,
+    required this.createdAt,
+    this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['device_id'] = Variable<String>(deviceId);
+    map['list_type'] = Variable<String>(listType);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || ledgerType != null) {
+      map['ledger_type'] = Variable<String>(ledgerType);
+    }
+    if (!nullToAbsent || categoryId != null) {
+      map['category_id'] = Variable<String>(categoryId);
+    }
+    if (!nullToAbsent || tags != null) {
+      map['tags'] = Variable<String>(tags);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['quantity'] = Variable<int>(quantity);
+    if (!nullToAbsent || estimatedPrice != null) {
+      map['estimated_price'] = Variable<int>(estimatedPrice);
+    }
+    if (!nullToAbsent || completedAt != null) {
+      map['completed_at'] = Variable<DateTime>(completedAt);
+    }
+    map['is_completed'] = Variable<bool>(isCompleted);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['is_synced'] = Variable<bool>(isSynced);
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    if (!nullToAbsent || addedByBookId != null) {
+      map['added_by_book_id'] = Variable<String>(addedByBookId);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    return map;
+  }
+
+  ShoppingItemsCompanion toCompanion(bool nullToAbsent) {
+    return ShoppingItemsCompanion(
+      id: Value(id),
+      deviceId: Value(deviceId),
+      listType: Value(listType),
+      name: Value(name),
+      ledgerType: ledgerType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ledgerType),
+      categoryId: categoryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(categoryId),
+      tags: tags == null && nullToAbsent ? const Value.absent() : Value(tags),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      quantity: Value(quantity),
+      estimatedPrice: estimatedPrice == null && nullToAbsent
+          ? const Value.absent()
+          : Value(estimatedPrice),
+      completedAt: completedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completedAt),
+      isCompleted: Value(isCompleted),
+      sortOrder: Value(sortOrder),
+      isSynced: Value(isSynced),
+      isDeleted: Value(isDeleted),
+      addedByBookId: addedByBookId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(addedByBookId),
+      createdAt: Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
+  }
+
+  factory ShoppingItemRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ShoppingItemRow(
+      id: serializer.fromJson<String>(json['id']),
+      deviceId: serializer.fromJson<String>(json['deviceId']),
+      listType: serializer.fromJson<String>(json['listType']),
+      name: serializer.fromJson<String>(json['name']),
+      ledgerType: serializer.fromJson<String?>(json['ledgerType']),
+      categoryId: serializer.fromJson<String?>(json['categoryId']),
+      tags: serializer.fromJson<String?>(json['tags']),
+      note: serializer.fromJson<String?>(json['note']),
+      quantity: serializer.fromJson<int>(json['quantity']),
+      estimatedPrice: serializer.fromJson<int?>(json['estimatedPrice']),
+      completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
+      isCompleted: serializer.fromJson<bool>(json['isCompleted']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      isSynced: serializer.fromJson<bool>(json['isSynced']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      addedByBookId: serializer.fromJson<String?>(json['addedByBookId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'deviceId': serializer.toJson<String>(deviceId),
+      'listType': serializer.toJson<String>(listType),
+      'name': serializer.toJson<String>(name),
+      'ledgerType': serializer.toJson<String?>(ledgerType),
+      'categoryId': serializer.toJson<String?>(categoryId),
+      'tags': serializer.toJson<String?>(tags),
+      'note': serializer.toJson<String?>(note),
+      'quantity': serializer.toJson<int>(quantity),
+      'estimatedPrice': serializer.toJson<int?>(estimatedPrice),
+      'completedAt': serializer.toJson<DateTime?>(completedAt),
+      'isCompleted': serializer.toJson<bool>(isCompleted),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'isSynced': serializer.toJson<bool>(isSynced),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+      'addedByBookId': serializer.toJson<String?>(addedByBookId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+    };
+  }
+
+  ShoppingItemRow copyWith({
+    String? id,
+    String? deviceId,
+    String? listType,
+    String? name,
+    Value<String?> ledgerType = const Value.absent(),
+    Value<String?> categoryId = const Value.absent(),
+    Value<String?> tags = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    int? quantity,
+    Value<int?> estimatedPrice = const Value.absent(),
+    Value<DateTime?> completedAt = const Value.absent(),
+    bool? isCompleted,
+    int? sortOrder,
+    bool? isSynced,
+    bool? isDeleted,
+    Value<String?> addedByBookId = const Value.absent(),
+    DateTime? createdAt,
+    Value<DateTime?> updatedAt = const Value.absent(),
+  }) => ShoppingItemRow(
+    id: id ?? this.id,
+    deviceId: deviceId ?? this.deviceId,
+    listType: listType ?? this.listType,
+    name: name ?? this.name,
+    ledgerType: ledgerType.present ? ledgerType.value : this.ledgerType,
+    categoryId: categoryId.present ? categoryId.value : this.categoryId,
+    tags: tags.present ? tags.value : this.tags,
+    note: note.present ? note.value : this.note,
+    quantity: quantity ?? this.quantity,
+    estimatedPrice: estimatedPrice.present
+        ? estimatedPrice.value
+        : this.estimatedPrice,
+    completedAt: completedAt.present ? completedAt.value : this.completedAt,
+    isCompleted: isCompleted ?? this.isCompleted,
+    sortOrder: sortOrder ?? this.sortOrder,
+    isSynced: isSynced ?? this.isSynced,
+    isDeleted: isDeleted ?? this.isDeleted,
+    addedByBookId: addedByBookId.present
+        ? addedByBookId.value
+        : this.addedByBookId,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+  );
+  ShoppingItemRow copyWithCompanion(ShoppingItemsCompanion data) {
+    return ShoppingItemRow(
+      id: data.id.present ? data.id.value : this.id,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+      listType: data.listType.present ? data.listType.value : this.listType,
+      name: data.name.present ? data.name.value : this.name,
+      ledgerType: data.ledgerType.present
+          ? data.ledgerType.value
+          : this.ledgerType,
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      tags: data.tags.present ? data.tags.value : this.tags,
+      note: data.note.present ? data.note.value : this.note,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      estimatedPrice: data.estimatedPrice.present
+          ? data.estimatedPrice.value
+          : this.estimatedPrice,
+      completedAt: data.completedAt.present
+          ? data.completedAt.value
+          : this.completedAt,
+      isCompleted: data.isCompleted.present
+          ? data.isCompleted.value
+          : this.isCompleted,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      addedByBookId: data.addedByBookId.present
+          ? data.addedByBookId.value
+          : this.addedByBookId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShoppingItemRow(')
+          ..write('id: $id, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('listType: $listType, ')
+          ..write('name: $name, ')
+          ..write('ledgerType: $ledgerType, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('tags: $tags, ')
+          ..write('note: $note, ')
+          ..write('quantity: $quantity, ')
+          ..write('estimatedPrice: $estimatedPrice, ')
+          ..write('completedAt: $completedAt, ')
+          ..write('isCompleted: $isCompleted, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('addedByBookId: $addedByBookId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    deviceId,
+    listType,
+    name,
+    ledgerType,
+    categoryId,
+    tags,
+    note,
+    quantity,
+    estimatedPrice,
+    completedAt,
+    isCompleted,
+    sortOrder,
+    isSynced,
+    isDeleted,
+    addedByBookId,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ShoppingItemRow &&
+          other.id == this.id &&
+          other.deviceId == this.deviceId &&
+          other.listType == this.listType &&
+          other.name == this.name &&
+          other.ledgerType == this.ledgerType &&
+          other.categoryId == this.categoryId &&
+          other.tags == this.tags &&
+          other.note == this.note &&
+          other.quantity == this.quantity &&
+          other.estimatedPrice == this.estimatedPrice &&
+          other.completedAt == this.completedAt &&
+          other.isCompleted == this.isCompleted &&
+          other.sortOrder == this.sortOrder &&
+          other.isSynced == this.isSynced &&
+          other.isDeleted == this.isDeleted &&
+          other.addedByBookId == this.addedByBookId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItemRow> {
+  final Value<String> id;
+  final Value<String> deviceId;
+  final Value<String> listType;
+  final Value<String> name;
+  final Value<String?> ledgerType;
+  final Value<String?> categoryId;
+  final Value<String?> tags;
+  final Value<String?> note;
+  final Value<int> quantity;
+  final Value<int?> estimatedPrice;
+  final Value<DateTime?> completedAt;
+  final Value<bool> isCompleted;
+  final Value<int> sortOrder;
+  final Value<bool> isSynced;
+  final Value<bool> isDeleted;
+  final Value<String?> addedByBookId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> updatedAt;
+  final Value<int> rowid;
+  const ShoppingItemsCompanion({
+    this.id = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.listType = const Value.absent(),
+    this.name = const Value.absent(),
+    this.ledgerType = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.tags = const Value.absent(),
+    this.note = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.estimatedPrice = const Value.absent(),
+    this.completedAt = const Value.absent(),
+    this.isCompleted = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.addedByBookId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ShoppingItemsCompanion.insert({
+    required String id,
+    required String deviceId,
+    this.listType = const Value.absent(),
+    required String name,
+    this.ledgerType = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.tags = const Value.absent(),
+    this.note = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.estimatedPrice = const Value.absent(),
+    this.completedAt = const Value.absent(),
+    this.isCompleted = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.addedByBookId = const Value.absent(),
+    required DateTime createdAt,
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       deviceId = Value(deviceId),
+       name = Value(name),
+       createdAt = Value(createdAt);
+  static Insertable<ShoppingItemRow> custom({
+    Expression<String>? id,
+    Expression<String>? deviceId,
+    Expression<String>? listType,
+    Expression<String>? name,
+    Expression<String>? ledgerType,
+    Expression<String>? categoryId,
+    Expression<String>? tags,
+    Expression<String>? note,
+    Expression<int>? quantity,
+    Expression<int>? estimatedPrice,
+    Expression<DateTime>? completedAt,
+    Expression<bool>? isCompleted,
+    Expression<int>? sortOrder,
+    Expression<bool>? isSynced,
+    Expression<bool>? isDeleted,
+    Expression<String>? addedByBookId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (deviceId != null) 'device_id': deviceId,
+      if (listType != null) 'list_type': listType,
+      if (name != null) 'name': name,
+      if (ledgerType != null) 'ledger_type': ledgerType,
+      if (categoryId != null) 'category_id': categoryId,
+      if (tags != null) 'tags': tags,
+      if (note != null) 'note': note,
+      if (quantity != null) 'quantity': quantity,
+      if (estimatedPrice != null) 'estimated_price': estimatedPrice,
+      if (completedAt != null) 'completed_at': completedAt,
+      if (isCompleted != null) 'is_completed': isCompleted,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (isSynced != null) 'is_synced': isSynced,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (addedByBookId != null) 'added_by_book_id': addedByBookId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ShoppingItemsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? deviceId,
+    Value<String>? listType,
+    Value<String>? name,
+    Value<String?>? ledgerType,
+    Value<String?>? categoryId,
+    Value<String?>? tags,
+    Value<String?>? note,
+    Value<int>? quantity,
+    Value<int?>? estimatedPrice,
+    Value<DateTime?>? completedAt,
+    Value<bool>? isCompleted,
+    Value<int>? sortOrder,
+    Value<bool>? isSynced,
+    Value<bool>? isDeleted,
+    Value<String?>? addedByBookId,
+    Value<DateTime>? createdAt,
+    Value<DateTime?>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return ShoppingItemsCompanion(
+      id: id ?? this.id,
+      deviceId: deviceId ?? this.deviceId,
+      listType: listType ?? this.listType,
+      name: name ?? this.name,
+      ledgerType: ledgerType ?? this.ledgerType,
+      categoryId: categoryId ?? this.categoryId,
+      tags: tags ?? this.tags,
+      note: note ?? this.note,
+      quantity: quantity ?? this.quantity,
+      estimatedPrice: estimatedPrice ?? this.estimatedPrice,
+      completedAt: completedAt ?? this.completedAt,
+      isCompleted: isCompleted ?? this.isCompleted,
+      sortOrder: sortOrder ?? this.sortOrder,
+      isSynced: isSynced ?? this.isSynced,
+      isDeleted: isDeleted ?? this.isDeleted,
+      addedByBookId: addedByBookId ?? this.addedByBookId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
+    if (listType.present) {
+      map['list_type'] = Variable<String>(listType.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (ledgerType.present) {
+      map['ledger_type'] = Variable<String>(ledgerType.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (tags.present) {
+      map['tags'] = Variable<String>(tags.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<int>(quantity.value);
+    }
+    if (estimatedPrice.present) {
+      map['estimated_price'] = Variable<int>(estimatedPrice.value);
+    }
+    if (completedAt.present) {
+      map['completed_at'] = Variable<DateTime>(completedAt.value);
+    }
+    if (isCompleted.present) {
+      map['is_completed'] = Variable<bool>(isCompleted.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (addedByBookId.present) {
+      map['added_by_book_id'] = Variable<String>(addedByBookId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShoppingItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('listType: $listType, ')
+          ..write('name: $name, ')
+          ..write('ledgerType: $ledgerType, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('tags: $tags, ')
+          ..write('note: $note, ')
+          ..write('quantity: $quantity, ')
+          ..write('estimatedPrice: $estimatedPrice, ')
+          ..write('completedAt: $completedAt, ')
+          ..write('isCompleted: $isCompleted, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('addedByBookId: $addedByBookId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncQueueTable extends SyncQueue
     with TableInfo<$SyncQueueTable, SyncQueueData> {
   @override
@@ -6368,6 +7387,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $GroupsTable groups = $GroupsTable(this);
   late final $MerchantCategoryPreferencesTable merchantCategoryPreferences =
       $MerchantCategoryPreferencesTable(this);
+  late final $ShoppingItemsTable shoppingItems = $ShoppingItemsTable(this);
   late final $SyncQueueTable syncQueue = $SyncQueueTable(this);
   late final $TransactionsTable transactions = $TransactionsTable(this);
   late final $UserProfilesTable userProfiles = $UserProfilesTable(this);
@@ -6384,6 +7404,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     groupMembers,
     groups,
     merchantCategoryPreferences,
+    shoppingItems,
     syncQueue,
     transactions,
     userProfiles,
@@ -8883,6 +9904,465 @@ typedef $$MerchantCategoryPreferencesTableProcessedTableManager =
       MerchantCategoryPreferenceRow,
       PrefetchHooks Function()
     >;
+typedef $$ShoppingItemsTableCreateCompanionBuilder =
+    ShoppingItemsCompanion Function({
+      required String id,
+      required String deviceId,
+      Value<String> listType,
+      required String name,
+      Value<String?> ledgerType,
+      Value<String?> categoryId,
+      Value<String?> tags,
+      Value<String?> note,
+      Value<int> quantity,
+      Value<int?> estimatedPrice,
+      Value<DateTime?> completedAt,
+      Value<bool> isCompleted,
+      Value<int> sortOrder,
+      Value<bool> isSynced,
+      Value<bool> isDeleted,
+      Value<String?> addedByBookId,
+      required DateTime createdAt,
+      Value<DateTime?> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$ShoppingItemsTableUpdateCompanionBuilder =
+    ShoppingItemsCompanion Function({
+      Value<String> id,
+      Value<String> deviceId,
+      Value<String> listType,
+      Value<String> name,
+      Value<String?> ledgerType,
+      Value<String?> categoryId,
+      Value<String?> tags,
+      Value<String?> note,
+      Value<int> quantity,
+      Value<int?> estimatedPrice,
+      Value<DateTime?> completedAt,
+      Value<bool> isCompleted,
+      Value<int> sortOrder,
+      Value<bool> isSynced,
+      Value<bool> isDeleted,
+      Value<String?> addedByBookId,
+      Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$ShoppingItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $ShoppingItemsTable> {
+  $$ShoppingItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get listType => $composableBuilder(
+    column: $table.listType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ledgerType => $composableBuilder(
+    column: $table.ledgerType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tags => $composableBuilder(
+    column: $table.tags,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get estimatedPrice => $composableBuilder(
+    column: $table.estimatedPrice,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get addedByBookId => $composableBuilder(
+    column: $table.addedByBookId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ShoppingItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ShoppingItemsTable> {
+  $$ShoppingItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get listType => $composableBuilder(
+    column: $table.listType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ledgerType => $composableBuilder(
+    column: $table.ledgerType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tags => $composableBuilder(
+    column: $table.tags,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get estimatedPrice => $composableBuilder(
+    column: $table.estimatedPrice,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get addedByBookId => $composableBuilder(
+    column: $table.addedByBookId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ShoppingItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ShoppingItemsTable> {
+  $$ShoppingItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
+
+  GeneratedColumn<String> get listType =>
+      $composableBuilder(column: $table.listType, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get ledgerType => $composableBuilder(
+    column: $table.ledgerType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get tags =>
+      $composableBuilder(column: $table.tags, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<int> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<int> get estimatedPrice => $composableBuilder(
+    column: $table.estimatedPrice,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  GeneratedColumn<String> get addedByBookId => $composableBuilder(
+    column: $table.addedByBookId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$ShoppingItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ShoppingItemsTable,
+          ShoppingItemRow,
+          $$ShoppingItemsTableFilterComposer,
+          $$ShoppingItemsTableOrderingComposer,
+          $$ShoppingItemsTableAnnotationComposer,
+          $$ShoppingItemsTableCreateCompanionBuilder,
+          $$ShoppingItemsTableUpdateCompanionBuilder,
+          (
+            ShoppingItemRow,
+            BaseReferences<_$AppDatabase, $ShoppingItemsTable, ShoppingItemRow>,
+          ),
+          ShoppingItemRow,
+          PrefetchHooks Function()
+        > {
+  $$ShoppingItemsTableTableManager(_$AppDatabase db, $ShoppingItemsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ShoppingItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ShoppingItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ShoppingItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                Value<String> listType = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> ledgerType = const Value.absent(),
+                Value<String?> categoryId = const Value.absent(),
+                Value<String?> tags = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<int> quantity = const Value.absent(),
+                Value<int?> estimatedPrice = const Value.absent(),
+                Value<DateTime?> completedAt = const Value.absent(),
+                Value<bool> isCompleted = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<String?> addedByBookId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ShoppingItemsCompanion(
+                id: id,
+                deviceId: deviceId,
+                listType: listType,
+                name: name,
+                ledgerType: ledgerType,
+                categoryId: categoryId,
+                tags: tags,
+                note: note,
+                quantity: quantity,
+                estimatedPrice: estimatedPrice,
+                completedAt: completedAt,
+                isCompleted: isCompleted,
+                sortOrder: sortOrder,
+                isSynced: isSynced,
+                isDeleted: isDeleted,
+                addedByBookId: addedByBookId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String deviceId,
+                Value<String> listType = const Value.absent(),
+                required String name,
+                Value<String?> ledgerType = const Value.absent(),
+                Value<String?> categoryId = const Value.absent(),
+                Value<String?> tags = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<int> quantity = const Value.absent(),
+                Value<int?> estimatedPrice = const Value.absent(),
+                Value<DateTime?> completedAt = const Value.absent(),
+                Value<bool> isCompleted = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<String?> addedByBookId = const Value.absent(),
+                required DateTime createdAt,
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ShoppingItemsCompanion.insert(
+                id: id,
+                deviceId: deviceId,
+                listType: listType,
+                name: name,
+                ledgerType: ledgerType,
+                categoryId: categoryId,
+                tags: tags,
+                note: note,
+                quantity: quantity,
+                estimatedPrice: estimatedPrice,
+                completedAt: completedAt,
+                isCompleted: isCompleted,
+                sortOrder: sortOrder,
+                isSynced: isSynced,
+                isDeleted: isDeleted,
+                addedByBookId: addedByBookId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ShoppingItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ShoppingItemsTable,
+      ShoppingItemRow,
+      $$ShoppingItemsTableFilterComposer,
+      $$ShoppingItemsTableOrderingComposer,
+      $$ShoppingItemsTableAnnotationComposer,
+      $$ShoppingItemsTableCreateCompanionBuilder,
+      $$ShoppingItemsTableUpdateCompanionBuilder,
+      (
+        ShoppingItemRow,
+        BaseReferences<_$AppDatabase, $ShoppingItemsTable, ShoppingItemRow>,
+      ),
+      ShoppingItemRow,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncQueueTableCreateCompanionBuilder =
     SyncQueueCompanion Function({
       required String id,
@@ -9896,6 +11376,8 @@ class $AppDatabaseManager {
         _db,
         _db.merchantCategoryPreferences,
       );
+  $$ShoppingItemsTableTableManager get shoppingItems =>
+      $$ShoppingItemsTableTableManager(_db, _db.shoppingItems);
   $$SyncQueueTableTableManager get syncQueue =>
       $$SyncQueueTableTableManager(_db, _db.syncQueue);
   $$TransactionsTableTableManager get transactions =>

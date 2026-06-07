@@ -10,6 +10,7 @@ import 'tables/category_ledger_configs_table.dart';
 import 'tables/group_members_table.dart';
 import 'tables/groups_table.dart';
 import 'tables/merchant_category_preferences_table.dart';
+import 'tables/shopping_items_table.dart';
 import 'tables/sync_queue_table.dart';
 import 'tables/transactions_table.dart';
 import 'tables/user_profiles_table.dart';
@@ -30,6 +31,7 @@ part 'app_database.g.dart';
     GroupMembers,
     Groups,
     MerchantCategoryPreferences,
+    ShoppingItems,
     SyncQueue,
     Transactions,
     UserProfiles,
@@ -42,7 +44,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 19;
+  int get schemaVersion => 20;
 
   @override
   MigrationStrategy get migration {
@@ -420,6 +422,11 @@ class AppDatabase extends _$AppDatabase {
           await customStatement(
             "UPDATE categories SET sort_order = 2 WHERE id = 'cat_food_groceries' AND is_system = 1",
           );
+        }
+        if (from < 20) {
+          // Phase 36: shopping list — create the shopping_items table (v19→v20).
+          // migrator.createTable emits full DDL including customConstraints and customIndices.
+          await migrator.createTable(shoppingItems);
         }
       },
     );

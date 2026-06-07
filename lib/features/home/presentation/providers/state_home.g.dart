@@ -126,7 +126,7 @@ final class HomeSelectedMonthProvider
   }
 }
 
-String _$homeSelectedMonthHash() => r'2845c9acd9f0228ba86814a0f9b75f0f30f374b5';
+String _$homeSelectedMonthHash() => r'74681ee3335eb69f5442a3f184f2dd9319725a1b';
 
 /// Selected month/year for the home dashboard.
 ///
