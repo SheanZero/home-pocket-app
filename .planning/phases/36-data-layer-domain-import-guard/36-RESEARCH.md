@@ -780,17 +780,19 @@ All other claims are [VERIFIED] from direct codebase reads on 2026-06-07.
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **`sortOrder` initial-value strategy for new items**
    - What we know: `sortOrder` defaults to `0` in the schema; the DAO `ORDER BY` uses `sort_order ASC` within active items.
    - What's unclear: Should new items be inserted with `sortOrder = 0` (always added to top of active items) or `sortOrder = max(sortOrder) + 1` (appended to bottom of active items)?
    - Recommendation: Claude's discretion — the project convention in similar features inserts at `sortOrder = 0` with a stable secondary sort (`created_at ASC`) acting as tiebreaker. New items appear at top; existing items maintain relative order. This avoids a `MAX(sort_order)` query on every insert. The DAO can expose a `maxSortOrder(String listType)` helper for Phase 37 reorder use case if needed.
+   - **RESOLVED: insert at sortOrder=0 with created_at ASC tiebreaker (Claude's Discretion per CONTEXT.md)**
 
 2. **`note` field nullability in the Dart companion vs Drift table**
    - What we know: The CONTEXT.md says `note` is `TEXT NOT NULL`; the table design in ARCHITECTURE.md uses `text().nullable()`.
    - What's unclear: Whether `note` should be `text().nullable()()` (nullable in Dart, no NOT NULL constraint in SQL) or `text()()` with `withDefault(Constant(''))`.
    - Recommendation: Use `text().nullable()()` — consistent with how `TransactionRepositoryImpl` handles note encryption (encrypts only when `note != null && note!.isNotEmpty`). An empty note is represented as `null` in the domain model and `null` in the database; no empty string sentinel needed.
+   - **RESOLVED: note uses text().nullable()() consistent with transactions_table.dart**
 
 ---
 
