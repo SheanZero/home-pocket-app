@@ -4,8 +4,12 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 
-/// Flat header row with month navigation (prev/next chevrons),
-/// mode badge, and settings icon.
+/// Flat header row with a tap-to-open month picker, mode badge, and settings
+/// icon.
+///
+/// The month label is followed by a downward `⌄` affordance; tapping the
+/// label+arrow group fires [onMonthTap], which the caller wires to open the
+/// centered month-grid picker dialog (quick 260607-jrz). No prev/next chevrons.
 ///
 /// Pure UI component -- no providers, no navigation.
 /// Sits on the warm ivory page background (no blue container, no SafeArea).
@@ -16,9 +20,7 @@ class HeroHeader extends StatelessWidget {
     required this.month,
     required this.isGroupMode,
     required this.onSettingsTap,
-    required this.onPrevMonth,
-    required this.onNextMonth,
-    required this.showNextChevron,
+    required this.onMonthTap,
   });
 
   final int year;
@@ -26,66 +28,37 @@ class HeroHeader extends StatelessWidget {
   final bool isGroupMode;
   final VoidCallback onSettingsTap;
 
-  /// Tapping the left chevron navigates to the previous month.
-  final VoidCallback onPrevMonth;
-
-  /// Tapping the right chevron navigates to the next month.
-  final VoidCallback onNextMonth;
-
-  /// Whether to show the right chevron. False when already on the current month
-  /// (prevents navigating into the future and triggering analytics date errors).
-  final bool showNextChevron;
+  /// Tapping the month label + down-chevron opens the month picker dialog.
+  final VoidCallback onMonthTap;
 
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     return Row(
       children: [
-        // Left: prev-month chevron — optical arrow aligned to the card's left
-        // border (x=28). The chevron glyph carries intrinsic left padding, so a
-        // small negative translate pulls the visible stroke onto the border;
-        // the IconButton box stays in the layout to preserve the tap target.
-        // (260607)
-        Transform.translate(
-          offset: const Offset(-6, 0),
-          child: IconButton(
-            icon: Icon(
-              Icons.chevron_left,
-              size: 20,
-              color: context.palette.textSecondary,
-            ),
-            padding: EdgeInsets.zero,
-            visualDensity: VisualDensity.compact,
-            alignment: Alignment.centerLeft,
-            constraints: const BoxConstraints(minWidth: 20, minHeight: 28),
-            onPressed: onPrevMonth,
-          ),
-        ),
-
-        // Month label (static — not tappable; months switch via chevrons).
+        // Tappable month label + down-chevron — opens the month-grid picker.
         // 260607: title-size 18, non-bold w500 (was headlineMedium 24/w700).
-        Text(
-          l10n.homeMonthFormat(year, month),
-          style: AppTextStyles.headlineSmall.copyWith(
-            fontWeight: FontWeight.w500,
-            color: context.palette.textPrimary,
+        InkWell(
+          onTap: onMonthTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.homeMonthFormat(year, month),
+                style: AppTextStyles.headlineSmall.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: context.palette.textPrimary,
+                ),
+              ),
+              Icon(
+                Icons.keyboard_arrow_down,
+                size: 20,
+                color: context.palette.textSecondary,
+              ),
+            ],
           ),
         ),
-
-        // Right: next-month chevron — hidden when already on current month
-        if (showNextChevron)
-          IconButton(
-            icon: Icon(
-              Icons.chevron_right,
-              size: 20,
-              color: context.palette.textSecondary,
-            ),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-            onPressed: onNextMonth,
-          )
-        else
-          const SizedBox(width: 28, height: 28),
 
         const Spacer(),
 

@@ -28,6 +28,7 @@ import '../../../accounting/presentation/screens/transaction_edit_screen.dart';
 import '../widgets/family_invite_banner.dart';
 import '../widgets/hero_header.dart';
 import '../widgets/home_hero_card.dart';
+import '../widgets/month_picker_dialog.dart';
 import '../widgets/home_transaction_tile.dart';
 import '../widgets/transaction_list_card.dart';
 
@@ -54,8 +55,6 @@ class HomeScreen extends ConsumerWidget {
     final month = selectedMonth.month;
     final currentMonthStart = DateTime(year, month, 1);
     final currentMonthEnd = DateTime(year, month + 1, 0, 23, 59, 59);
-    final now = DateTime.now();
-    final isCurrentMonth = year == now.year && month == now.month;
 
     final todayTxAsync = ref.watch(todayTransactionsProvider(bookId: bookId));
     // Used for currency code in the transaction list formatter (WR-01 fix).
@@ -76,11 +75,17 @@ class HomeScreen extends ConsumerWidget {
                 month: month,
                 isGroupMode: isGroupMode,
                 onSettingsTap: onSettingsTap ?? () {},
-                onPrevMonth: () =>
-                    ref.read(homeSelectedMonthProvider.notifier).prevMonth(),
-                onNextMonth: () =>
-                    ref.read(homeSelectedMonthProvider.notifier).nextMonth(),
-                showNextChevron: !isCurrentMonth,
+                onMonthTap: () async {
+                  final picked = await showMonthPickerDialog(
+                    context,
+                    selectedYear: year,
+                    selectedMonth: month,
+                  );
+                  if (picked == null || !context.mounted) return;
+                  ref
+                      .read(homeSelectedMonthProvider.notifier)
+                      .selectMonth(picked.year, picked.month);
+                },
               ),
               // 24 (not 16) to visually match AnalyticsScreen's AppBar+padding stack (user decision 260518-v4v).
               // Analytics has a 56px opaque AppBar creating structural visual weight absent on home
