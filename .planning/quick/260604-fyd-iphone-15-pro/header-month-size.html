@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8">
+<style>
+  :root{--bg:#FBF7F4;--card:#FFFFFF;--border:#E6DDD8;--textPrimary:#20352B;--textSecondary:#71877A;--daily:#5FAE72;--dailyLight:#EEF6EC}
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',-apple-system,'PingFang SC',sans-serif}
+  body{background:#2b2622;color:#eee;padding:24px}
+  h1{font-size:16px;margin-bottom:4px}
+  .hint{font-size:12px;color:#b7ada6;margin-bottom:16px}
+  .row{display:flex;gap:30px;flex-wrap:wrap}
+  .col{width:393px}
+  .tag{font-size:12px;color:#f4d35e;font-weight:700;margin-bottom:6px}
+  /* phone-width frame, content padding 28 (card border lives at x=28) */
+  .frame{width:393px;background:var(--bg);border-radius:16px;border:1px solid #000;
+    padding:14px 0 16px;position:relative;overflow:hidden}
+  .guide{position:absolute;left:28px;top:0;bottom:0;border-left:1px dashed rgba(240,106,106,.7);z-index:3}
+  .header{height:40px;display:flex;align-items:center;padding:0 28px}
+  /* chevron: optical arrow left edge pinned to x=28 (card border). The svg box
+     is positioned so the visible stroke starts exactly at the guide. */
+  .chev{width:13px;height:22px;flex:none;margin-left:-1px}
+  .chev svg{display:block}
+  .gap{width:6px;flex:none}
+  .month{color:var(--textPrimary);font-weight:500;white-space:nowrap}
+  .next{margin-left:6px;color:var(--textSecondary);font-size:20px;line-height:1}
+  .spacer{flex:1}
+  .badge{display:inline-flex;align-items:center;gap:4px;background:var(--dailyLight);
+    padding:4px 10px;border-radius:8px;color:var(--daily);font-size:13px;font-weight:500;flex:none}
+  .gear{font-size:20px;color:var(--textPrimary);margin-left:8px;flex:none}
+  /* the card below, left border at x=28 to show alignment */
+  .card{margin:10px 28px 0;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px}
+  .clabel{font-size:13px;color:var(--textSecondary)}
+  .camt{font-size:26px;font-weight:700;color:var(--textPrimary);margin-top:6px}
+</style></head><body>
+  <h1>月份字号 16 / 18 / 20（非黑体 w500）· 左箭头对齐卡片左边框（红线 x=28）</h1>
+  <div class="hint">红虚线 = 卡片左边框。箭头的可见笔画左端贴在红线上；月份字号你来选。</div>
+  <div class="row">
+    <div class="col">
+      <div class="tag">月份 16px</div>
+      <div class="frame">
+        <div class="guide"></div>
+        <div class="header">
+          <span class="chev"><svg width="13" height="22" viewBox="0 0 13 22"><polyline points="11,3 3,11 11,19" fill="none" stroke="#71877A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="gap"></span>
+          <span class="month" style="font-size:16px">2026年6月</span>
+          <span class="next">›</span>
+          <span class="spacer"></span>
+          <span class="badge">👤 个人模式</span><span class="gear">⚙</span>
+        </div>
+        <div class="card"><div class="clabel">今月の支出</div><div class="camt">¥0</div></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="tag">月份 18px（推荐）</div>
+      <div class="frame">
+        <div class="guide"></div>
+        <div class="header">
+          <span class="chev"><svg width="13" height="22" viewBox="0 0 13 22"><polyline points="11,3 3,11 11,19" fill="none" stroke="#71877A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="gap"></span>
+          <span class="month" style="font-size:18px">2026年6月</span>
+          <span class="next">›</span>
+          <span class="spacer"></span>
+          <span class="badge">👤 个人模式</span><span class="gear">⚙</span>
+        </div>
+        <div class="card"><div class="clabel">今月の支出</div><div class="camt">¥0</div></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="tag">月份 20px</div>
+      <div class="frame">
+        <div class="guide"></div>
+        <div class="header">
+          <span class="chev"><svg width="13" height="22" viewBox="0 0 13 22"><polyline points="11,3 3,11 11,19" fill="none" stroke="#71877A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="gap"></span>
+          <span class="month" style="font-size:20px">2026年6月</span>
+          <span class="next">›</span>
+          <span class="spacer"></span>
+          <span class="badge">👤 个人模式</span><span class="gear">⚙</span>
+        </div>
+        <div class="card"><div class="clabel">今月の支出</div><div class="camt">¥0</div></div>
+      </div>
+    </div>
+  </div>
+</body></html>
