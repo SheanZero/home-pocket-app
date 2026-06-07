@@ -1,13 +1,12 @@
-// Wave-0 repository test scaffold — RED state expected.
-// ShoppingItemDao, ShoppingItemRepositoryImpl, and ShoppingItem do not exist yet.
-// This file will fail to analyze/compile until Plans 02, 04, 05, 06 are complete.
-// Tests will turn GREEN after the full Phase 36 production implementation lands.
+// ShoppingItemRepositoryImpl test: note-field encryption at the repository
+// boundary, tags JSON round-trip, estimatedPrice integer storage, and
+// silent decrypt-failure handling.
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
-import 'package:home_pocket/data/daos/shopping_item_dao.dart'; // RED — does not exist yet
-import 'package:home_pocket/data/repositories/shopping_item_repository_impl.dart'; // RED
-import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart'; // RED
+import 'package:home_pocket/data/daos/shopping_item_dao.dart';
+import 'package:home_pocket/data/repositories/shopping_item_repository_impl.dart';
+import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:mocktail/mocktail.dart';
 

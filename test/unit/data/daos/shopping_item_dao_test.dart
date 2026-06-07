@@ -1,13 +1,10 @@
-// ignore_for_file: directives_ordering
-// Wave-0 DAO test scaffold — RED state expected.
-// ShoppingItemDao does not exist yet; this file will fail to analyze/compile
-// until Plan 05 creates lib/data/daos/shopping_item_dao.dart.
-// Tests will turn GREEN after Plans 02 (table + migration), 05 (DAO).
+// ShoppingItemDao data-layer test: DONE-02 ordering, soft-delete stream
+// exclusion, and upsert round-trip against an in-memory database.
 
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
-import 'package:home_pocket/data/daos/shopping_item_dao.dart'; // RED — does not exist yet
+import 'package:home_pocket/data/daos/shopping_item_dao.dart';
 
 void main() {
   late AppDatabase db;
