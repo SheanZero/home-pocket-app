@@ -97,7 +97,7 @@
 
 ### v1.6 购物清单 (Phases 36-39) — IN PROGRESS
 
-- [ ] **Phase 36: Data Layer + Domain + Import Guard** — ShoppingItems table (schema v20), DAO, repository impl, Wave-0 migration contract test, Freezed domain models, repository interface, LedgerTypeSelector move, import_guard files
+- [x] **Phase 36: Data Layer + Domain + Import Guard** — ShoppingItems table (schema v20), DAO, repository impl, Wave-0 migration contract test, Freezed domain models, repository interface, LedgerTypeSelector move, import_guard files (completed 2026-06-07)
 - [ ] **Phase 37: Application Use Cases + Sync Integration** — 6 use cases with private-item privacy gate, ShoppingItemChangeTracker, SyncOrchestrator extension, ApplySyncOperationsUseCase branch, reactive-stream integration test
 - [ ] **Phase 38: Presentation Shell + UI Widgets** — nav rename + shopping-bag icon, context-aware FAB, keepAlive providers, ShoppingListScreen shell, ShoppingItemTile, add/edit form, filter bar, swipe-delete, batch-select, empty states
 - [ ] **Phase 39: i18n + Golden Re-baseline + Smoke Test** — ARB key parity ja/zh/en, golden masters all states × locales × color modes, reactive-sync smoke test, analyze 0 + coverage ≥70%
@@ -117,7 +117,7 @@
   4. `ShoppingItem`, `ShoppingListFilter`, and `ShoppingItemParams` Freezed models exist at `lib/features/shopping_list/domain/models/`; `ShoppingItemRepository` interface exists at `lib/features/shopping_list/domain/repositories/` with no Drift imports; all new `lib/features/shopping_list/` subdirectories have `import_guard.yaml` files mirroring the `lib/features/list/` pattern; `flutter analyze` reports 0 issues
   5. `LedgerTypeSelector` widget is moved from `lib/features/accounting/presentation/widgets/` to `lib/shared/widgets/` and all existing import sites updated; `CategorySelectionScreen` is allow-listed in `lib/features/shopping_list/presentation/import_guard.yaml`; `dart run custom_lint --no-fatal-infos` passes with zero new violations
 
-**Plans:** 6/7 plans executed
+**Plans:** 7/7 plans complete
 
 Plans:
 **Wave 1**
@@ -131,7 +131,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 36-05-PLAN.md — ShoppingItemDao implementation (reactive watchByListType, soft-delete, upsert, reorder)
-- [ ] 36-06-PLAN.md — ShoppingItemRepositoryImpl (note encryption + JSON tags at boundary)
+- [x] 36-06-PLAN.md — ShoppingItemRepositoryImpl (note encryption + JSON tags at boundary)
 
 **Cross-cutting constraints:**
 
@@ -199,7 +199,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 36. Data Layer + Domain + Import Guard | 6/7 | In Progress|  |
+| 36. Data Layer + Domain + Import Guard | 7/7 | Complete   | 2026-06-07 |
 | 37. Application Use Cases + Sync Integration | 0/TBD | Not started | - |
 | 38. Presentation Shell + UI Widgets | 0/TBD | Not started | - |
 | 39. i18n + Golden Re-baseline + Smoke Test | 0/TBD | Not started | - |
