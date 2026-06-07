@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: 购物清单
-status: verifying
-stopped_at: Phase 36 context gathered
-last_updated: "2026-06-07T12:30:01.491Z"
+status: ready_to_plan
+stopped_at: Phase 36 complete (7/7) — ready to discuss Phase 37
+last_updated: 2026-06-07T12:57:15.739Z
 last_activity: 2026-06-07
 progress:
   total_phases: 4
-  completed_phases: 1
-  total_plans: 7
+  completed_phases: 6
+  total_plans: 225
   completed_plans: 7
-  percent: 25
+  percent: 150
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07 — v1.6 购物清单 started)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 36 — data-layer-domain-import-guard
+**Current focus:** Phase 37 — application use cases + sync integration
 
 ## Current Position
 
-Phase: 36 (data-layer-domain-import-guard) — EXECUTING
-Plan: 7 of 7
-Status: Phase complete — ready for verification
+Phase: 37
+Plan: Not started
+Status: Ready to plan
 Last activity: 2026-06-07
 
 ```
