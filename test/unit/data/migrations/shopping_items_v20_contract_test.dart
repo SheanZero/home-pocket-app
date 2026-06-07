@@ -9,6 +9,31 @@ void main() {
     expect(db.schemaVersion, equals(20));
   });
 
+  test('real Drift schema creates all shopping_items indices', () async {
+    // Guards CR-01: the customIndices getter is not consumed by Drift, so the
+    // indices are emitted by hand in app_database.dart. A fresh forTesting() DB
+    // runs onCreate, which must create them.
+    final db = AppDatabase.forTesting();
+    addTearDown(db.close);
+    final rows = await db
+        .customSelect(
+          'SELECT name FROM sqlite_master '
+          "WHERE type = 'index' AND tbl_name = 'shopping_items'",
+        )
+        .get();
+    final indexNames = rows.map((r) => r.read<String>('name')).toSet();
+    expect(
+      indexNames,
+      containsAll([
+        'idx_shopping_list_type',
+        'idx_shopping_list_deleted',
+        'idx_shopping_completed',
+        'idx_shopping_sort_order',
+        'idx_shopping_added_by_book',
+      ]),
+    );
+  });
+
   group('shopping_items v20 physical schema', () {
     late Database rawDb;
 

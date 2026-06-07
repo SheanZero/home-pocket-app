@@ -62,7 +62,10 @@ class ShoppingItems extends Table {
     'CHECK(estimated_price IS NULL OR estimated_price >= 0)',
   ];
 
-  // No @override on customIndices — CLAUDE.md pitfall #11
+  // Index declarations (no @override — CLAUDE.md pitfall #11). NOTE: Drift's
+  // migrator does NOT consume this getter; the indices are created explicitly
+  // in AppDatabase._createShoppingItemIndexes() (onCreate + onUpgrade). Keep
+  // this list and that method in sync.
   List<TableIndex> get customIndices => [
     TableIndex(name: 'idx_shopping_list_type', columns: {#listType}),
     TableIndex(

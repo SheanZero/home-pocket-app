@@ -49,6 +49,13 @@ class AppDatabase extends _$AppDatabase {
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
+      onCreate: (migrator) async {
+        await migrator.createAll();
+        // createAll() does not emit the customIndices getter (not a real Drift
+        // API), so shopping_items indices must be created explicitly on fresh
+        // installs too — not only on the v19→v20 upgrade path.
+        await _createShoppingItemIndexes();
+      },
       onUpgrade: (migrator, from, to) async {
         if (from < 3) {
           // Legacy: budgetAmount column was removed in v5, but older schemas
@@ -425,10 +432,41 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 20) {
           // Phase 36: shopping list — create the shopping_items table (v19→v20).
-          // migrator.createTable emits full DDL including customConstraints and customIndices.
+          // createTable emits the table DDL including customConstraints. The
+          // customIndices getter is NOT consumed by Drift's migrator, so each
+          // index must be created explicitly (mirrors every other table here).
           await migrator.createTable(shoppingItems);
+          await _createShoppingItemIndexes();
         }
       },
+    );
+  }
+
+  /// Creates the shopping_items indices declared on [ShoppingItems.customIndices].
+  ///
+  /// Drift's migrator does not consume the `customIndices` getter, so these must
+  /// be emitted by hand from both the onCreate (fresh install) and onUpgrade
+  /// (v19→v20) paths. Kept in one place so the two paths cannot drift apart.
+  Future<void> _createShoppingItemIndexes() async {
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_shopping_list_type '
+      'ON shopping_items (list_type)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_shopping_list_deleted '
+      'ON shopping_items (list_type, is_deleted)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_shopping_completed '
+      'ON shopping_items (is_completed)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_shopping_sort_order '
+      'ON shopping_items (sort_order)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_shopping_added_by_book '
+      'ON shopping_items (added_by_book_id)',
     );
   }
 }
