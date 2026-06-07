@@ -11,7 +11,7 @@ import 'package:home_pocket/features/accounting/domain/repositories/category_led
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/detail_info_card.dart';
-import 'package:home_pocket/features/accounting/presentation/widgets/ledger_type_selector.dart';
+import 'package:home_pocket/shared/widgets/ledger_type_selector.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/satisfaction_emoji_picker.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/transaction_details_form.dart';
 

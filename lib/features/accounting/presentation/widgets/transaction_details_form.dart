@@ -33,7 +33,7 @@ import '../screens/category_selection_screen.dart';
 import '../utils/category_display_utils.dart';
 import '../widgets/detail_info_card.dart';
 import '../widgets/keyboard_toolbar.dart' show kKeyboardToolbarTapRegionGroup;
-import '../widgets/ledger_type_selector.dart';
+import '../../../../shared/widgets/ledger_type_selector.dart';
 import '../widgets/satisfaction_emoji_picker.dart';
 
 /// Embeddable form for creating and editing transactions.

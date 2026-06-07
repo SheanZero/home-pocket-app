@@ -7,7 +7,7 @@ import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_display.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_edit_bottom_sheet.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/input_mode_tabs.dart';
-import 'package:home_pocket/features/accounting/presentation/widgets/ledger_type_selector.dart';
+import 'package:home_pocket/shared/widgets/ledger_type_selector.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/smart_keyboard.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 

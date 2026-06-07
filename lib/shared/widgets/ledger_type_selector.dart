@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_palette.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../domain/models/transaction.dart';
+import '../../core/theme/app_palette.dart';
+import '../../core/theme/app_text_styles.dart';
+import '../../features/accounting/domain/models/transaction.dart';
 
 /// Toggle chips for selecting Daily or Joy ledger type.
 class LedgerTypeSelector extends StatelessWidget {
