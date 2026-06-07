@@ -105,61 +105,82 @@
 ## Phase Details
 
 ### Phase 36: Data Layer + Domain + Import Guard
+
 **Goal:** The shopping list has a persistent, encrypted, migration-safe database foundation, a clearly defined domain contract, and enforced layer boundaries before any use-case or UI code is written
 **Depends on:** Nothing (column names and domain interface must be locked before all other phases)
 **Requirements:** DONE-02, ITEM-05, SYNC-05, SHOP-01, ITEM-03
 **Success Criteria** (what must be TRUE):
+
   1. A `ShoppingItems` Drift table exists at `lib/data/tables/` with all 15 business fields (name, listType, ledgerType, categoryId, tags, note, estimatedPrice, quantity, isCompleted, completedAt, sortOrder, addedByBookId, isDeleted, createdAt, updatedAt); `completedAt DateTime?` is nullable (D-03: sticky-complete merge timestamp, added per 2026-06-07 planning session overriding D7); `estimatedPrice` is `IntColumn` nullable; `note` is `TEXT NOT NULL`; Drift schema version is `20` (not 19) with an `if (from < 20)` migration block calling `migrator.createTable(shoppingItems)`
   2. `ShoppingItemDao` has `watchByListType(listType)` returning a reactive `Stream` via `.watch()` with `readsFrom:` the shopping table — completed items sort to the bottom via SQL `ORDER BY is_completed ASC, sort_order ASC, created_at ASC`; soft-delete and upsert behavior is tested (deleted item has `isDeleted=true`, not physically removed)
   3. A Wave-0 raw-sqlite3 contract test opens the v20 database and verifies the `shopping_items` table structure (column names, types, NOT NULL constraints) without going through the Drift ORM
   4. `ShoppingItem`, `ShoppingListFilter`, and `ShoppingItemParams` Freezed models exist at `lib/features/shopping_list/domain/models/`; `ShoppingItemRepository` interface exists at `lib/features/shopping_list/domain/repositories/` with no Drift imports; all new `lib/features/shopping_list/` subdirectories have `import_guard.yaml` files mirroring the `lib/features/list/` pattern; `flutter analyze` reports 0 issues
   5. `LedgerTypeSelector` widget is moved from `lib/features/accounting/presentation/widgets/` to `lib/shared/widgets/` and all existing import sites updated; `CategorySelectionScreen` is allow-listed in `lib/features/shopping_list/presentation/import_guard.yaml`; `dart run custom_lint --no-fatal-infos` passes with zero new violations
+
 **Plans:** 7 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 36-01-PLAN.md — Wave-0 test scaffolds (contract, DAO, repo)
 - [ ] 36-02-PLAN.md — ShoppingItems table + app_database v19→v20 migration + build_runner
 - [ ] 36-03-PLAN.md — LedgerTypeSelector move to shared/widgets/ + import_guard YAMLs
 - [ ] 36-04-PLAN.md — Domain Freezed models (ShoppingItem, ShoppingListFilter, ShoppingItemParams) + repository interface
-- [ ] 36-05-PLAN.md — ShoppingItemDao implementation (reactive watchByListType, soft-delete, upsert, reorder)
-- [ ] 36-06-PLAN.md — ShoppingItemRepositoryImpl (note encryption + JSON tags at boundary)
 - [ ] 36-07-PLAN.md — Documentation reconciliation (D-03 ripple: REQUIREMENTS.md/ROADMAP/CLAUDE.md)
 
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 36-05-PLAN.md — ShoppingItemDao implementation (reactive watchByListType, soft-delete, upsert, reorder)
+- [ ] 36-06-PLAN.md — ShoppingItemRepositoryImpl (note encryption + JSON tags at boundary)
+
+**Cross-cutting constraints:**
+
+- `flutter analyze` reports 0 issues
+
 ### Phase 37: Application Use Cases + Sync Integration
+
 **Goal:** Every shopping list mutation is mediated by a use case that enforces the private-item privacy contract, and public items sync bidirectionally through the existing family_sync pipeline with reactive delivery and tombstone safety
 **Depends on:** Phase 36 (repository interface and column names locked)
 **Requirements:** ITEM-01, ITEM-02, ITEM-04, DONE-01, DONE-03, MGMT-01, MGMT-02, MGMT-03, SYNC-01, SYNC-02, SYNC-03, SYNC-05, SYNC-06
 **Success Criteria** (what must be TRUE):
+
   1. Six use cases exist at `lib/application/shopping_list/`: `CreateShoppingItemUseCase`, `UpdateShoppingItemUseCase`, `DeleteShoppingItemUseCase`, `ToggleItemCompletedUseCase`, `ReorderShoppingItemsUseCase`, `ClearCompletedItemsUseCase`; a dedicated Mocktail test verifies that after inserting a private item via `CreateShoppingItemUseCase`, `ShoppingItemChangeTracker.pendingCount == 0`; after inserting a public item, `pendingCount == 1`
   2. `UpdateShoppingItemUseCase` rejects any attempt to change an item's `listType` field (immutable after creation per D6/SYNC-03), returning an error or no-op with a documented invariant; `ClearCompletedItemsUseCase` soft-deletes all completed items for the given `listType` regardless of active filter state
   3. `ShoppingItemChangeTracker` exists at `lib/application/family_sync/` mirroring `TransactionChangeTracker`; it accepts only public items (the `listType == 'public'` guard is enforced inside the tracker as a second safety net after the use-case gate); `SyncOrchestrator._executeIncrementalPush` is extended to push shopping item ops; `ApplySyncOperationsUseCase` has a `case 'shopping_item':` branch routing to a `_applyShoppingItemOp` handler; adding `ShoppingItemRepository` to `ApplySyncOperationsUseCase`'s constructor is done atomically with updating all existing construction sites
   4. A soft-deleted item (tombstone) is not resurrected by a subsequent remote update op arriving after the deletion — the apply handler checks `isDeleted` before applying updates
   5. A reactive-stream integration test verifies: a public item created by member A appears in member B's `watchByListType('public')` stream without manual refresh; a private item created by member A does NOT appear in the stream for any remote member; `flutter test test/application/shopping_list/` and the sync integration tests both pass
+
 **Plans:** TBD
 
 ### Phase 38: Presentation Shell + UI Widgets
+
 **Goal:** Users can fully manage their shopping lists — adding, completing, filtering, and batch-deleting items — through a complete, gesture-safe, accessibility-respecting UI on a correctly renamed and icon-updated nav tab with a context-aware FAB
 **Depends on:** Phase 36 (domain interfaces), Phase 37 (use cases available for provider wiring)
 **Requirements:** SHOP-02, SHOP-03, SHOP-04, DONE-01, DONE-03, ITEM-01, ITEM-02, ITEM-04, FILT-01, FILT-02, FILT-03, MGMT-01, MGMT-02, MGMT-03, NAV-01, NAV-02, SYNC-04
 **Success Criteria** (what must be TRUE):
+
   1. The 4th nav tab reads 购物清单 (zh) / 買い物リスト (ja) / Shopping List (en) with a shopping-bag icon; zero `待办`/`Todo` strings remain in any rendered UI; on the shopping tab the bottom-right FAB navigates to the add-shopping-item screen; on every other tab the FAB navigates to the transaction-entry flow with all existing post-entry provider invalidations intact — no accounting regression; a widget test confirms the FAB routes correctly for index 3 vs any other index
   2. `listTypeProvider` (public/private segment selection) and `shoppingFilterProvider` (filter state) both have `keepAlive: true`; filter state resets when the user switches between the public and private segments (D5); the reset is observed in a widget test using `ProviderContainer`; the `ShoppingListScreen` shell replaces the `Center(Text(l10n.todoTab))` placeholder and shows a loading state while the stream initializes
   3. `ShoppingItemTile` renders: item name as primary text; category emoji, quantity, and estimated price as secondary text (when set); a dual-ledger color accent left border (`palette.daily`/`palette.joy`, neutral when no ledger set); a family attribution chip (avatar emoji + display name) on public list tiles only (SYNC-04); animated strikethrough + fade when toggled completed (DONE-01)
   4. The add/edit form accepts all D4 fields — name (required, validated), optional ledger selector (reuses `LedgerTypeSelector` from `lib/shared/widgets/`), optional category (pushes to `CategorySelectionScreen`), optional tags, note (encrypted at repo boundary), quantity (plain numeric), and estimated price (integer yen via `NumberFormatter`); completed items sort exclusively below a visual divider; active items in a `SliverReorderableList`; swipe-to-delete uses `Dismissible` and is disabled while batch-select mode is active (MGMT-03)
   5. Long-pressing any item enters batch-select mode with a floating bottom action bar; "Select all" is available; the batch-delete confirmation fires `DeleteShoppingItemUseCase` for each selected item with soft-delete semantics; "Clear all completed" appears only when the completed section is non-empty and fires `ClearCompletedItemsUseCase` for the current segment regardless of active filters; all three empty state variants (empty private, empty public solo, empty public family) render correctly (SHOP-04)
+
 **Plans:** TBD
 **UI hint**: yes
 
 ### Phase 39: i18n + Golden Re-baseline + Smoke Test
+
 **Goal:** Every user-facing string in the shopping list is internationalized and pixel-verified across all three locales and both color modes; the end-to-end sync flow is confirmed to work reactively without manual refresh
 **Depends on:** Phase 38 (UI stable before goldens), Phase 37 (sync wired for smoke test)
 **Requirements:** NAV-03
 **Success Criteria** (what must be TRUE):
+
   1. All shopping list ARB keys exist across ja/zh/en in the same commit; `jq 'keys | length' lib/l10n/app_ja.arb` equals `jq 'keys | length' lib/l10n/app_zh.arb` equals `jq 'keys | length' lib/l10n/app_en.arb`; `flutter gen-l10n` succeeds with 0 warnings
   2. A `grep -rn 'homeTabTodo\|todoTab\|待办\|Todo' lib/l10n/` returns 0 hits confirming complete rename
   3. Golden masters cover all shopping list screen states × 3 locales (ja/zh/en) × 2 color modes (light/dark): empty state (3 variants), list with active items, list with completed items, filter bar active, batch-select mode; full test suite passes green
   4. A sync smoke test verifies that a public item written by a simulated family-sync operation (directly via `ApplySyncOperationsUseCase`) causes the `watchByListType('public')` `StreamProvider` to emit a new state without any `ref.invalidate` call — confirming the v1.4 GAP-2 lesson is applied
   5. `flutter analyze` reports 0 issues; `flutter test --coverage` passes with coverage ≥70% on all new files in `lib/features/shopping_list/` and `lib/application/shopping_list/`
+
 **Plans:** TBD
 
 ## Milestone Progress
