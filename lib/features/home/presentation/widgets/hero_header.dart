@@ -41,28 +41,32 @@ class HeroHeader extends StatelessWidget {
     final l10n = S.of(context);
     return Row(
       children: [
-        // Left: prev-month chevron — flush to the content edge and tight to the
-        // month label (260607: dropped the centring gap that left the month
-        // looking indented).
-        IconButton(
-          icon: Icon(
-            Icons.chevron_left,
-            size: 20,
-            color: context.palette.textSecondary,
+        // Left: prev-month chevron — optical arrow aligned to the card's left
+        // border (x=28). The chevron glyph carries intrinsic left padding, so a
+        // small negative translate pulls the visible stroke onto the border;
+        // the IconButton box stays in the layout to preserve the tap target.
+        // (260607)
+        Transform.translate(
+          offset: const Offset(-6, 0),
+          child: IconButton(
+            icon: Icon(
+              Icons.chevron_left,
+              size: 20,
+              color: context.palette.textSecondary,
+            ),
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            alignment: Alignment.centerLeft,
+            constraints: const BoxConstraints(minWidth: 20, minHeight: 28),
+            onPressed: onPrevMonth,
           ),
-          padding: EdgeInsets.zero,
-          visualDensity: VisualDensity.compact,
-          alignment: Alignment.centerLeft,
-          constraints: const BoxConstraints(minWidth: 20, minHeight: 28),
-          onPressed: onPrevMonth,
         ),
-        const SizedBox(width: 4),
 
         // Month label (static — not tappable; months switch via chevrons).
-        // 260607: title-size, non-bold (was headlineMedium 24/w700).
+        // 260607: title-size 18, non-bold w500 (was headlineMedium 24/w700).
         Text(
           l10n.homeMonthFormat(year, month),
-          style: AppTextStyles.titleMedium.copyWith(
+          style: AppTextStyles.headlineSmall.copyWith(
             fontWeight: FontWeight.w500,
             color: context.palette.textPrimary,
           ),
