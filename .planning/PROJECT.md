@@ -9,7 +9,9 @@
 **Shipped:** v1.4 列表功能 (2026-05-31) — see `.planning/milestones/v1.4-ROADMAP.md` + `.planning/milestones/v1.4-MILESTONE-AUDIT.md`
 **Shipped:** v1.5 文案与配色统一 (2026-06-02) — see `.planning/milestones/v1.5-ROADMAP.md` + `.planning/milestones/v1.5-MILESTONE-AUDIT.md`
 
-**Next milestone:** TBD. Candidate themes carried forward: combined family-calendar totals + undo-on-delete (v1.4 deferrals), MOD-005 OCR writer landing, FAMILY-V2-01/02/03 family privacy hardening, runtime theme-switching / selectable palettes (THEME-V2-01, now unblocked by the v1.5 token system), `Book.survivalBalance`/`soulBalance` DB-column rename (v1.5 out-of-scope carve-out), remaining hardcoded a11y Semantics labels (v1.5 IN-02), FUTURE-QA-01 release-readiness QA, FUTURE-DOC/TOOL cleanup, fl_chart 1.x upgrade (TOOL-V2-01), voice flow polish carry (VOICE-POLISH-V2-01..08), English voice parser (VOICE-EN-V2-01). Use `/gsd:new-milestone` to scope.
+**In progress:** v1.6 购物清单 (Shopping List) — started 2026-06-07. Builds the placeholder 4th nav tab (待办事项/Todo) into a full shopping-list feature: public/private lists (public family-syncs, private local-only), add-item with optional metadata + quantity + estimated price, filter, completed-to-bottom + one-click clear, edit/delete/batch-delete, FAB-contextual add entry, and 待办→购物清单 rename across zh/ja/en. See `## Current Milestone` below.
+
+**Candidate themes carried forward (post-v1.6):** combined family-calendar totals + undo-on-delete (v1.4 deferrals), MOD-005 OCR writer landing, FAMILY-V2-01/02/03 family privacy hardening, runtime theme-switching / selectable palettes (THEME-V2-01, now unblocked by the v1.5 token system), `Book.survivalBalance`/`soulBalance` DB-column rename (v1.5 out-of-scope carve-out), remaining hardcoded a11y Semantics labels (v1.5 IN-02), FUTURE-QA-01 release-readiness QA, FUTURE-DOC/TOOL cleanup, fl_chart 1.x upgrade (TOOL-V2-01), voice flow polish carry (VOICE-POLISH-V2-01..08), English voice parser (VOICE-EN-V2-01).
 
 The v1.0 initiative was a pure-refactor cleanup. It delivered an operational hybrid audit pipeline, eliminated 50 catalogued findings (24 CRITICAL, 8 HIGH, 8 MEDIUM, 7 LOW + 3 layer-violation closures), aligned all architecture documentation with the post-refactor codebase, and locked 4 permanent CI guardrails.
 
@@ -188,6 +190,27 @@ A focused, audit-driven refactor of the Home Pocket (まもる家計簿) Flutter
 
 </details>
 
+## Current Milestone: v1.6 购物清单 (Shopping List)
+
+**Goal:** Build the placeholder 4th nav tab (待办事项/Todo) into a complete shopping-list feature with public/private separation, rich add-item metadata, filtering, and batch management.
+
+**Target features:**
+- **Public/Private lists** — top segmented control switches between two independent lists「公共 / 私人」; the public list syncs through the existing `family_sync` pipeline once the user joins a family, the private list never syncs.
+- **Add shopping item** — required: item name; optional: 日常/悦己 (ledger), category, tags, note, **quantity**, **estimated price**.
+- **Filter** — filter items by visibility / ledger / category / tags.
+- **Completed handling** — completed items sort to the bottom; one-tap "clear all completed".
+- **Management** — edit, delete, and batch-delete items.
+- **Add entry point** — on the shopping-list tab the bottom-right + button (current FAB) is context-aware: it opens "add shopping item" and routes to the new-item screen; on other tabs it stays the transaction-entry FAB.
+- **Rename** — 待办/Todo → 购物清单 (zh) / 買い物リスト (ja) / Shopping List (en) across all UI and the nav-tab icon.
+
+**Locked decisions (from /gsd-new-milestone questioning, 2026-06-07):**
+- **D1 — list structure:** top segmented「公共/私人」, two independent lists (not a per-item visibility flag).
+- **D2 — add entry:** context-aware FAB (bottom-right +); on the shopping tab it = "add shopping item".
+- **D3 — completion:** pure list, **no transaction linkage** — completing an item only checks it off; it does not create an accounting entry.
+- **D4 — extra fields:** add both **quantity** and **estimated price** (alongside the user-requested name/ledger/category/tags/note).
+
+**Key context:** Current state is the placeholder `Center(Text(todoTab))` at `main_shell_screen.dart:124` plus the 4th tab in `home_bottom_nav_bar.dart`. New `lib/features/shopping_list/` module (thin-feature rule); new Drift table + DAO + repository impl in `lib/data/` (schema v18→v19); the public list reuses the existing family_sync pipeline; category/tags reuse the existing category tree. Phase numbering continues from v1.5 (starts at Phase 36). `.planning/codebase/` is five milestones stale — refresh before deep planning.
+
 ## What This Is
 
 Home Pocket (まもる家計簿) is a local-first, privacy-focused family accounting app with a dual-ledger system — the 日常 (Daily) ledger for everyday spending and the 悦己 (Joy / ときめき) ledger for self-investment. Zero-knowledge architecture with 4-layer encryption, P2P family sync, and offline-first design. Target: iOS 14+ / Android 7+ (API 24+). After five milestones, the app ships a single-screen voice-capable ledger entry flow, a calculable Joy metric (`Σ joy_contribution` cumulative semantics) with user-configurable monthly targets, custom analytics time windows, per-category + Daily-vs-Joy comparison surfaces, an audit lens (manual-only Joy variant), a full kakeibo-style transaction list (month calendar with per-day expense totals + tap-to-filter, sortable/searchable/filterable rows, month summary, family-aware display), and — as of v1.5 — a unified 日常/悦己/ときめき/Daily/Joy vocabulary across all three locales plus a single semantic design-token system (`AppPalette`, ADR-018 "Teal Clarity") with full light/dark theming.
@@ -306,9 +329,9 @@ A family accounting app users can trust with sensitive financial data — local-
 
 ### Active
 
-<!-- No active milestone. v1.5 shipped 2026-06-02. Run /gsd-new-milestone to scope the next. -->
+<!-- v1.6 购物清单 in progress (started 2026-06-07). Requirements defined in .planning/REQUIREMENTS.md; see ## Current Milestone above. -->
 
-_(none — between milestones; see Next Milestone above)_
+**v1.6 购物清单 (Shopping List)** — requirements live in `.planning/REQUIREMENTS.md`, mapped to phases in `.planning/ROADMAP.md`. Scope: public/private shopping lists, add-item with metadata + quantity + estimated price, filter, completed-to-bottom + one-click clear, edit/delete/batch-delete, context-aware FAB add entry, 待办→购物清单 rename. No transaction linkage (D3). Phase numbering from Phase 36.
 
 ### Out of Scope
 
@@ -443,7 +466,9 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-02 after v1.5 文案与配色统一 milestone — shipped + archived (5 phases, 24 plans, tag `v1.5`). Brownfield consistency refactor: unified 日常/悦己/ときめき/Daily/Joy vocabulary across zh/ja/en + internal identifiers (`LedgerType { daily, joy }`, v17→v18 migration), and consolidated all hardcoded colors into a single `AppPalette` ThemeExtension (ADR-018 "Teal Clarity") with full dark-mode rollout. Audit `tech_debt` accepted (15/15 requirements, 5/5 phases, 6/6 integration seams); residual is one pending on-device screen-reader UAT, draft-Nyquist docs (P31/32/34/35), and the out-of-scope `Book.*Balance` DB-column carve-out. ADR-017 + ADR-018 accepted.*
+*Last updated: 2026-06-07 — started milestone v1.6 购物清单 (Shopping List). Builds the placeholder 4th nav tab into a full shopping-list feature: public/private lists (public family-syncs, private local-only), add-item with optional ledger/category/tags/note + quantity + estimated price, filter, completed-to-bottom + one-click clear, edit/delete/batch-delete, context-aware FAB add entry, and 待办→购物清单 rename across zh/ja/en. Locked decisions: D1 segmented public/private lists, D2 context-aware FAB, D3 no transaction linkage, D4 quantity + estimated price both added. Phase numbering continues from Phase 36.*
+
+*Prior: 2026-06-02 after v1.5 文案与配色统一 milestone — shipped + archived (5 phases, 24 plans, tag `v1.5`). Brownfield consistency refactor: unified 日常/悦己/ときめき/Daily/Joy vocabulary across zh/ja/en + internal identifiers (`LedgerType { daily, joy }`, v17→v18 migration), and consolidated all hardcoded colors into a single `AppPalette` ThemeExtension (ADR-018 "Teal Clarity") with full dark-mode rollout. Audit `tech_debt` accepted (15/15 requirements, 5/5 phases, 6/6 integration seams); residual is one pending on-device screen-reader UAT, draft-Nyquist docs (P31/32/34/35), and the out-of-scope `Book.*Balance` DB-column carve-out. ADR-017 + ADR-018 accepted.*
 
 *Prior: 2026-06-02 — Phase 35 (Close vocab leaks) complete: W1 a11y Semantics labels → l10n, W2 totalSoulTx→totalJoyTx. Prior: Phase 34 golden re-baseline (teal), Phase 33 AppPalette token system, Phase 32 palette ADR-018, Phase 31 terminology + v18 migration. Started 2026-05-31.*
 
