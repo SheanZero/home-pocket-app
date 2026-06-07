@@ -12,7 +12,7 @@
 - **D4** — Add-item form: name (required) + optional ledger (日常/悦己), category, tags, note, quantity, estimated price.
 - **D5** (filter scope) — Filter state is **shared** across both segments and **resets** when switching public↔private.
 - **D6** (visibility mutability) — An item's public/private attribute is **immutable after creation**.
-- **D7** (completion merge) — **SUPERSEDED by D-03** (2026-06-07 planning session): `completedAt DateTime?` nullable column added to v20 schema. Sticky-complete merge rule: when `completedAt > incoming.updatedAt`, `isCompleted: true` is preserved and NOT overwritten by a later non-completion edit. Phase 36 adds the column; Phase 37 implements the merge algorithm in `ApplySyncOperationsUseCase`. Original D7 ("no completedAt / pure LWW") is withdrawn.
+- **D7** (completion merge) — **SUPERSEDED by D-03** (2026-06-07 planning session): `completedAt DateTime?` nullable column added to v20 schema. Sticky-complete merge rule: when `completedAt > incoming.updatedAt`, `isCompleted: true` is preserved and NOT overwritten by a later non-completion edit. Phase 36 adds the column; Phase 37 implements the merge algorithm in `ApplySyncOperationsUseCase`.
 - **D8** (differentiators in scope) — **per-item family attribution** + **dual-ledger color accent** are IN; running subtotal, name-autocomplete, category-grouping, tag-filter, and duplicate-detection are deferred.
 
 ---
