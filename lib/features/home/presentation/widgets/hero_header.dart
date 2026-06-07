@@ -41,7 +41,9 @@ class HeroHeader extends StatelessWidget {
     final l10n = S.of(context);
     return Row(
       children: [
-        // Left: prev-month chevron
+        // Left: prev-month chevron — flush to the content edge and tight to the
+        // month label (260607: dropped the centring gap that left the month
+        // looking indented).
         IconButton(
           icon: Icon(
             Icons.chevron_left,
@@ -49,14 +51,19 @@ class HeroHeader extends StatelessWidget {
             color: context.palette.textSecondary,
           ),
           padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+          visualDensity: VisualDensity.compact,
+          alignment: Alignment.centerLeft,
+          constraints: const BoxConstraints(minWidth: 20, minHeight: 28),
           onPressed: onPrevMonth,
         ),
+        const SizedBox(width: 4),
 
-        // Centre: month label (static — not tappable; months switch via chevrons)
+        // Month label (static — not tappable; months switch via chevrons).
+        // 260607: title-size, non-bold (was headlineMedium 24/w700).
         Text(
           l10n.homeMonthFormat(year, month),
-          style: AppTextStyles.headlineMedium.copyWith(
+          style: AppTextStyles.titleMedium.copyWith(
+            fontWeight: FontWeight.w500,
             color: context.palette.textPrimary,
           ),
         ),
