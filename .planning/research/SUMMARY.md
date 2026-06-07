@@ -1,61 +1,19 @@
 # Project Research Summary
 
-**Project:** Home Pocket v1.4 — 列表功能 (Transaction List Tab)
-**Domain:** Flutter local-first family accounting app — read-biased list/calendar feature on existing 5-layer Clean Architecture
-**Researched:** 2026-05-29
-**Confidence:** HIGH
-
-## Executive Summary
-
-The v1.4 List tab is a read-biased calendar + filterable list surface bolted onto an already mature 5-layer Clean Architecture. The primary design challenge is not the features themselves — competitor pattern analysis (Zaim, MoneyForward ME, おカネレコ) shows all patterns are well-understood — but rather integrating cleanly with the existing DAO, provider, and family-sync machinery without duplicating or violating the established conventions. The recommended approach is a new `lib/features/list/` module following the Thin Feature rule, one new `findByBookIds` DAO method (query extension, no migration), and reuse of `AnalyticsDao.getDailyTotals`, `DeleteTransactionUseCase`, `shadowBooksProvider`, and `TransactionEditScreen` as-is. The only external package addition is `table_calendar: ^3.2.0`, which is pin-safe and iOS-build-safe.
-
-The two biggest technical risks are both pre-existing architectural constraints, not new complexity: (1) the hash-chain integrity requirement means swipe-delete must exclusively use `DeleteTransactionUseCase` (soft-delete path) — any direct DAO delete breaks the chain and is unrecoverable without backup restore; (2) `IndexedStack` in `MainShellScreen` means provider auto-dispose does not fire on tab switch, requiring an explicit policy decision (keep-alive vs explicit reset) before any provider is written. Both are easily mitigated when addressed in the first phase rather than discovered late.
-
-The feature scope is well-bounded: calendar grid with per-day totals, scrollable month list with date-group dividers, sort/filter/search, swipe-to-delete with confirmation, tap-to-edit, family-aware unified list with member attribution, and i18n/empty states. Four items are explicitly out of scope (month settlement/lock, income tracking, "New" badge, amount-range filter). Post-v1.4 additions to plan for but not build now: sort by amount/edit-time, undo-delete SnackBar, loading skeleton, and pagination.
+**Project:** Home Pocket v1.6 — 购物清单 (Shopping List)
+**Domain:** Mobile shopping-list feature integrated into a local-first, E2EE family accounting app (Flutter + Riverpod 3 + Drift + SQLCipher)
+**Researched:** 2026-06-07
+**Confidence:** HIGH — all four research files draw exclusively from direct codebase reads; no training-data assertions made without file verification
 
 ---
 
-## Cross-File Divergence Resolutions
+## Executive Summary
 
-The following four divergences were identified across research files and are resolved here. The roadmapper must use these resolutions, not the raw per-file statements.
+The v1.6 shopping list is a net-new feature module built entirely on the existing locked stack — **zero new packages required**. Every capability (Drift table, Riverpod providers, drag-sort, public/private segmented control, family-sync integration, filter chips, swipe-delete, batch-select) already has a working primitive in the installed dependencies. The feature adds one Drift table (ShoppingItems), one DAO, one repository impl, six use cases, one ShoppingItemChangeTracker, and a presentation layer that mirrors the established lib/features/list/ thin-feature pattern. The Drift schema moves from **v19 to v20** — the v19 slot was already consumed by the v1.5 category sort-order reorder and must not be reused.
 
-### Resolution 1: Per-Day Calendar Totals Data Source
+The family sync pipeline is entity-agnostic at the wire level: adding shopping items requires only three targeted changes — ShoppingItemChangeTracker (mirrors TransactionChangeTracker), a case shopping_item: branch in ApplySyncOperationsUseCase, and a 4-line extension to SyncOrchestrator._executeIncrementalPush. No relay-server changes are needed. The most important invariant: **private items must never enter the change tracker**. The listType == public guard lives at the use-case boundary (not in the tracker or orchestrator), and is the single highest-severity privacy risk in the feature. A private item that reaches the tracker is encrypted and relayed to every family member, which constitutes a fundamental breach of the app zero-knowledge design philosophy.
 
-**Divergence:** FEATURES.md says a new `getDailyTotals` DAO method is required. STACK.md and ARCHITECTURE.md both say the existing `AnalyticsDao.getDailyTotals()` already exists and should be reused.
-
-**Resolution: Reuse the existing `AnalyticsDao.getDailyTotals()`. No new DAO method needed for the calendar.**
-
-Evidence: STACK.md and ARCHITECTURE.md both cite direct codebase inspection of `lib/data/daos/analytics_dao.dart`, confirming `getDailyTotals` performs `DATE(timestamp, 'unixepoch', 'localtime') GROUP BY day SUM(amount)` for a given book + date range. FEATURES.md was written without inspecting the DAO directly. The correct integration path is a new `listCalendarProvider({bookId, month})` that calls `analyticsRepositoryProvider.getDailyTotals(...)` — no new DAO surface required.
-
-**Note for roadmapper:** FEATURES.md also references a `GetMonthlyDailyTotalsUseCase` in `lib/application/accounting/` as a new artifact. This is unnecessary given direct `AnalyticsRepository` reuse. Eliminate from the backlog.
-
-### Resolution 2: Calendar Widget — `table_calendar` Package vs Custom Widget
-
-**Divergence:** STACK.md recommends `table_calendar: ^3.2.0`. ARCHITECTURE.md leans on existing custom widgets and does not mention the package.
-
-**Recommendation: Add `table_calendar: ^3.2.0`. Use `CalendarBuilders` for all visual customization.**
-
-Rationale: A calendar month grid requires ~350 lines of date arithmetic, DST-safe boundary handling, locale-aware day-of-week headers, and hit-test logic. `table_calendar` saves this entirely, is `intl: ^0.20.0` compatible (project pins `0.20.2`), has no win32 dependency, and requires no iOS CocoaPods changes. The `CalendarBuilders.defaultBuilder` API gives full cell rendering control, so the design system (`AppTextStyles`, `AppColors`, `context.wmCard`) is not compromised. The tradeoff is a package dependency vs ~350 lines of custom code with known edge cases — the package wins on risk-adjusted cost.
-
-**Design-system fit vs build speed:** Both are achievable with `table_calendar`. The `CalendarBuilders` API replaces the entire cell renderer — no visual chrome from the package leaks into the UI. This is a resolved decision; no further research needed.
-
-### Resolution 3: Calendar Daily Totals in Family Mode — Own-Book Only vs Combined
-
-**Divergence:** Multiple researchers flagged this as unresolved. ARCHITECTURE.md explicitly marks it "own-book only; family calendar aggregation is out-of-scope v1.4."
-
-**Recommended default for v1.4: Own-book only calendar totals.**
-
-Rationale: Combining all family members' daily spending in the calendar requires a new `AnalyticsDao` variant querying across multiple `book_id` values, is not in stated scope, and risks inconsistency with the unified list (which shows all members' transactions). The v1.4 default is own-book calendar totals. If users request combined calendar totals, add in v1.5 as a distinct enhancement.
-
-**Decision to surface in requirements:** Flag as an open product question — "Should the calendar show your own spending or combined family spending in family mode?" — and document the v1.4 default (own-book) explicitly so it is not re-litigated during implementation.
-
-### Resolution 4: Ledger Color Inversion Risk
-
-**Divergence:** MEMORY.md states Soul = `#47B88A` (green), Survival = `#5A9CC8` (blue). CLAUDE.md app overview says "Soul Ledger: Purple theme" and "Survival Ledger: Green theme". PITFALLS.md flags this inconsistency explicitly.
-
-**Resolution: Do not hardcode either description. Verify against `lib/core/theme/app_colors.dart` constants before writing any list tile color logic.**
-
-The ground truth is the constant file. The ledger color tag in `ListTransactionTile` must reference `AppColors.soul` and `AppColors.survival` by name — never by hex literal. Include "verify ledger color constants against `app_colors.dart`" as the first task of the list tile implementation phase.
+The competitive landscape (AnyList, Bring!, OurGroceries, Listonic) converges on a standard UX pattern: tap-to-complete, completed-to-bottom, clear-completed, swipe-to-delete, and a filter bar. Home Pocket differentiators are the **estimated running total** (the most-requested missing feature across all three top competitors), **dual-ledger item coloring** (unique to this app), and **privacy-first local-first sync** (no competitor is offline-first with E2EE). These are achievable without scope expansion. The locked decisions (D1-D4) are well-grounded: the public/private segmented model maps cleanly to the existing sync pipeline, the FAB context-awareness is a 4-line if (currentIndex == 3) guard, no transaction linkage keeps the feature scope clean, and quantity + estimated price are the enabling fields for the running-total differentiator.
 
 ---
 
@@ -63,190 +21,203 @@ The ground truth is the constant file. The ledger color tag in `ListTransactionT
 
 ### Recommended Stack
 
-The locked stack (Riverpod 3.1, Freezed 3, Drift 2.25, SQLCipher, GoRouter, Lucide Icons) covers all v1.4 capabilities without new additions except one package. The `table_calendar: ^3.2.0` package is the single addition: it handles the calendar month grid, month navigation, and day-selection state, saving ~350 lines of date arithmetic. All other capabilities — dynamic Drift query sorting, text search, `Dismissible` swipe-delete, family-aware multi-book queries, provider state composition — are built from the existing stack.
+**Zero new packages.** The entire feature is buildable on the installed stack. ReorderableListView (drag-sort, already used in CategorySelectionScreen) and Dismissible (swipe-to-delete, already used in the transaction list) cover all list interaction patterns. CupertinoSlidingSegmentedControl or SegmentedButton covers D1. FilterChip + Wrap covers the filter bar. showModalBottomSheet covers the add/edit form.
 
-The critical pin constraints to respect: `intl: 0.20.2` exact pin (compatible with `table_calendar ^3.2.0` which requires `^0.20.0`); `file_picker 11 / package_info_plus 9 / share_plus 12` trio must move together; `sqlcipher_flutter_libs ^0.6.7` (not `sqlite3_flutter_libs`). None are affected by the `table_calendar` addition.
+**Core technologies engaged by v1.6:**
 
-**Core technologies for v1.4:**
-- `table_calendar: ^3.2.0` — calendar grid with custom cell builder; only new dependency
-- `Drift 2.25` — new `findByBookIds` DAO method (query extension, no schema migration); reuse `AnalyticsDao.getDailyTotals` for calendar
-- `Riverpod 3.1 + @riverpod codegen` — `ListFilterNotifier`, `listTransactionsProvider`, `listCalendarProvider`; all with explicit keepAlive policy
-- `Freezed 3` — `ListFilterState`, `ListSortConfig`, `TaggedTransaction` value types
-- `Dismissible` (Flutter built-in) — swipe-to-delete; no external package needed
-- `NumberFormatter` + `AppTextStyles.amountSmall` — amount display with tabular figures; mandatory for all monetary values
+- **Drift ^2.25.0** — new ShoppingItems table + ShoppingItemDao; schema bump v19->v20 via migrator.createTable; .watch() stream mandatory (not FutureProvider + ref.invalidate)
+- **Riverpod 3 / riverpod_annotation ^4.0.0** — @riverpod providers: state_list_type (keepAlive), state_shopping_filter (keepAlive), state_shopping_items (StreamProvider); Riverpod 3 naming rules apply (ShoppingItemsNotifier -> shoppingItemsProvider)
+- **Freezed ^3.0.0** — ShoppingItem, ShoppingListFilter, ShoppingItemParams models; always copyWith, never mutate
+- **flutter_localizations / intl 0.20.2 (exact pin)** — rename homeTabTodo -> homeTabShoppingList in all three ARB files (ja/zh/en); all new string keys must be added atomically across all three locales
+- **uuid ^4.5.3** — item IDs; same as sync ops
+- **lucide_icons_flutter ^3.1.14** — checkbox, trash, drag-handle icons (existing icon set)
+- **collection ^1.19.1** — available for sortedBy/groupBy if needed, though SQL ordering is preferred
+
+**Version pins to leave alone:** intl: 0.20.2 (exact), sqlcipher_flutter_libs: ^0.6.7 (not sqlite3_flutter_libs), file_picker/package_info_plus/share_plus win32 trio (do not bump individually).
+
+---
 
 ### Expected Features
 
-**Must have (table stakes — all P1):**
-- Calendar grid with per-day expense totals + month nav (prev/next arrows; no future months)
-- Tap-a-day filter + "Show all" / clear-day control
-- Month expense-only summary line (reuse `GetMonthlyReportUseCase`)
-- Transaction list rows with date-group dividers
-- Sort: date asc/desc toggle (default desc is free from existing DAO)
-- Text search: merchant + note + category name
-- Filter by ledger (Survival / Soul / All) — core dual-ledger differentiator
-- Filter by category (bottom sheet; single-select for v1.4)
-- **Combined filter state + clear-all** (single `ListFilterState` Freezed object; all filters AND-composed; clear-all is a required escape hatch)
-- Tap row to `TransactionEditScreen` (reuse existing; pop(true) triggers invalidate)
-- Swipe-to-delete with confirmation dialog (AlertDialog; `DeleteTransactionUseCase` only — never direct DAO)
-- Empty states: no-entries-in-month and no-filter-match
-- Family-aware unified list with member attribution (shadow books via `shadowBooksProvider`)
-- Member filter + **"Mine only" shortcut toggle** ("自分のみ" / "仅我的" / "Mine only")
-- Pull-to-refresh + sync-triggered auto-refresh
+**Must have (table stakes) — all four agents agree these are non-negotiable for v1.6:**
 
-**Should have (P2 — post-v1.4):**
-- Sort by amount (high→low / low→high) — full-month load already done; add sort picker
-- Undo-delete SnackBar (5s) — requires `RestoreTransactionUseCase`; defer if scope tight
-- Loading skeleton / shimmer rows — polish only
+- Tap to check off item (animate strikethrough + smooth move to completed section)
+- Checked items sort to bottom + visual divider between active and completed sections
+- One-tap clear all completed with confirmation dialog
+- Add item: name (required) + optional ledger/category/tags/note/quantity/estimated price (D4)
+- Edit item (same form sheet as add)
+- Swipe-to-delete single item (confirm dialog; matches v1.4 pattern)
+- Batch delete via long-press -> selection mode -> floating bottom bar -> confirmation
+- Public / Private segmented control (D1)
+- Public list syncs via existing family_sync pipeline
+- Filter bar: ledger chips (All / daily / joy) + category + Active/All toggle + clear chip
+- Empty states — 3 variants per list type (empty private, empty public solo, empty public family)
+- Context-aware FAB (D2)
+- Todo->Shopping List rename across zh/ja/en ARB
+- Per-item family attribution chip on public list tile (who added)
+- Dual-ledger color accent (left border on tile — near-zero complexity)
+- Estimated total / running subtotal (sum of estimatedPrice x quantity for active items only)
 
-**Defer to v2+:**
-- Pagination / virtual scroll (only if family groups >2000 monthly entries cause jank)
-- Cross-month date range filter (AnalyticsScreen owns this)
-- Combined family calendar totals (v1.5+ enhancement)
-- Export filtered list to CSV/PDF
+**Should have (differentiators — include in v1.6 launch):**
 
-**Explicitly out of scope (owner-stated):**
-- Month settlement / month-lock
-- Income tracking in list
-- "New" badge on recently synced entries
-- Amount-range filter
+- Estimated total display with priced-item count — highest unmet competitor need
+- Dual-ledger item coloring with palette.daily/palette.joy — unique to this app, zero new infrastructure
+- Per-item family attribution (addedByBookId) on public list — no competitor does this
+
+**Defer to v1.x after validation:**
+
+- Name autocomplete from item history (P2) — add when users report friction re-adding common items
+- Sort by category with group headers (P2) — add when users have 15+ items
+- Tag filter chip (P2) — add when tags see active use on shopping items
+- Duplicate item detection / warn-on-same-name (P2)
+- Collapsible completed section (P2)
+
+**Explicitly skip (anti-features):**
+
+- Completion creates transaction — locked out by D3; violates pure-list contract
+- Gamification (streaks, badges, achievement unlocks) — hard-blocked by ADR-012
+- Drag-to-reorder items — conflicts with swipe-delete gestures; category grouping covers 80% of the use case
+- Voice-add shopping item, APNS push, barcode/QR scan, multiple lists beyond public/private, price history
+
+---
 
 ### Architecture Approach
 
-The feature lands in a new `lib/features/list/` module following the Thin Feature rule: `domain/` (models + repository interface) and `presentation/` (screens, widgets, providers). Application logic lives in `lib/application/list/` (new `GetListTransactionsUseCase`). The only data-layer change is adding `findByBookIds` to `TransactionDao` and `TransactionRepositoryImpl` — a query-only extension, no Drift migration. `TransactionRepositoryImpl` implements both `TransactionRepository` and `ListTransactionRepository`; no second implementation class.
+The shopping list slots cleanly into the existing 5-layer Clean Architecture following the Thin Feature pattern established by lib/features/list/. No new architectural layer is introduced. The file placement rule is strict: tables and DAOs go in lib/data/ (never inside lib/features/), use cases go in lib/application/shopping_list/, domain models and repository interfaces go in lib/features/shopping_list/domain/, and presentation code goes in lib/features/shopping_list/presentation/.
 
-The key architectural insight: the family sync model already stores each member's transactions in local shadow books under different `book_id` values. The list feature needs only to pass `[myBookId, ...shadowBookIds]` to `findByBookIds` — no merge service, no in-memory join, no additional sync logic. Calendar data stays own-book-only via `analyticsRepositoryProvider.getDailyTotals()`.
+Two cross-feature widget resolution actions are required before any shopping list UI is written: LedgerTypeSelector must be moved to lib/shared/widgets/ (it has no accounting-specific state), and CategorySelectionScreen must be explicitly allow-listed in shopping_list/presentation/import_guard.yaml (it cannot be moved to shared because it depends on accounting-feature providers).
 
-**Major new components:**
-1. `lib/features/list/` — new Thin Feature module (domain models + presentation)
-2. `lib/application/list/GetListTransactionsUseCase` — wraps `TransactionRepository.findByBookIds`; validates params; returns `Result<List<Transaction>>`
-3. `TransactionDao.findByBookIds()` — multi-book, date-range, ledger/category filter, SQL-level ORDER BY; Dart-side post-process for text search + day filter + member filter
-4. `listFilterStateProvider (Notifier)` — single coordination point for all filter state
-5. `listTransactionsProvider (FutureProvider)` — composes filter, shadow books, use case call, Dart-side post-processing
-6. `listCalendarProvider (FutureProvider, family {bookId, month})` — reuses `analyticsRepositoryProvider.getDailyTotals()`
+**Major components:**
 
-**Modified existing files:**
-- `main_shell_screen.dart:111` — replace placeholder with `ListScreen(bookId: bookId)`
-- `TransactionRepository` interface — add abstract `findByBookIds`
-- `TransactionRepositoryImpl` — add `findByBookIds` implementation
+1. **Data layer** (lib/data/) — ShoppingItems table, ShoppingItemDao, ShoppingItemRepositoryImpl; schema v19->v20 via migrator.createTable(shoppingItems)
+2. **Domain layer** (lib/features/shopping_list/domain/) — ShoppingItem (Freezed), ShoppingListFilter (Freezed), ShoppingItemParams (Freezed), ShoppingItemRepository (interface); all import_guard.yaml files mirroring the list/domain/ pattern
+3. **Application layer** (lib/application/shopping_list/) — 6 use cases: Create, Update, Delete, ToggleCompleted, Reorder, ClearCompleted; each guards listType == public before touching the change tracker
+4. **Sync integration** (lib/application/family_sync/) — ShoppingItemChangeTracker (mirrors TransactionChangeTracker), SyncOrchestrator 4-line extension, ApplySyncOperationsUseCase case branch + handler, SyncEngine.onShoppingItemChanged()
+5. **Presentation layer** (lib/features/shopping_list/presentation/) — ShoppingListScreen, 5 widgets, 4 providers; FAB context-awareness wired in MainShellScreen via if (currentIndex == 3) guard
 
-**Reused without modification:**
-- `TransactionEditScreen` (push + pop(true) invalidate pattern)
-- `DeleteTransactionUseCase` (soft-delete only; never bypass)
-- `shadowBooksProvider` (family shadow book IDs + member attribution)
-- `AnalyticsDao.getDailyTotals` (calendar per-day rollup)
-- `isGroupModeProvider` + `activeGroupProvider`
+**Key patterns:**
+
+- **Reactive stream mandatory:** watchByListType(listType).watch() wrapped in a StreamProvider — the v1.4 GAP-2 lesson (dead watchByBookIds) must not be repeated; pull-sync writes from family members must appear automatically without ref.invalidate
+- **keepAlive: true** for listTypeProvider (segment) and shoppingFilterProvider (filter) — state must survive IndexedStack tab switches
+- **Completed-to-bottom via SQL ordering only:** ORDER BY is_completed ASC, sort_order ASC, created_at ASC — no client-side grouping
+- **Two SliverList sections:** active items in SliverReorderableList, completed items in plain SliverList below a divider — never mix reorderable and non-reorderable items in one ReorderableListView
+- **estimatedPrice as IntColumn (nullable integer yen)** — matches Transaction.amount convention; never REAL/double
+- **Note field encrypted at repository boundary** — mirrors TransactionRepositoryImpl note encryption via FieldEncryptionService
+
+---
 
 ### Critical Pitfalls
 
-1. **Swipe-delete must use `DeleteTransactionUseCase` exclusively** — any direct DAO delete breaks the hash chain permanently. Wire to the use case in Phase 1 and write a `verifyChain()` test after soft-delete before any UI phase begins.
+The four research agents reached full agreement on these top pitfalls — ordered by combined severity:
 
-2. **IndexedStack does not trigger provider auto-dispose** — `MainShellScreen` uses `IndexedStack` (confirmed line 97). Decide the keepAlive vs reset policy for all filter providers before writing a single provider.
+1. **Private item leaks into family sync (PRIVACY-CRITICAL)** — The listType == public guard must live at the use-case boundary (Create/Update/Toggle/Reorder/Delete), not in the tracker or orchestrator. A private item that reaches ShoppingItemChangeTracker is encrypted and relayed to every family member. Test: tracker.pendingCount == 0 after private insert; == 1 after public insert.
 
-3. **Date-range boundary errors** — the codebase has a canonical idiom (`DateTime(y, m+1, 0, 23, 59, 59)` for month-end; `DateTime(y, m, d, 23, 59, 59)` for day-end). Extract a `DateBoundaries` utility in `lib/shared/utils/` in Phase 1.
+2. **Cross-feature widget import breaks the build immediately** — LedgerTypeSelector must be moved to lib/shared/widgets/ BEFORE any shopping list UI is written. CategorySelectionScreen must be explicitly allow-listed in shopping_list/presentation/import_guard.yaml. Run dart run custom_lint --no-fatal-infos after every new file.
 
-4. **Separate providers for calendar totals and filtered list** — if both derive from one provider, every search keystroke triggers full calendar re-render. Calendar watches only `(bookId, month)`. Use Drift `.watch()` stream for the transaction list so post-delete and post-sync updates propagate automatically. Note: no watch queries exist in `TransactionDao` today — adding one is a Phase 1 deliverable.
+3. **Drift migration number collision: v19 slot already taken** — The from < 19 block was added by a post-PROJECT.md quick task (category sort-order reorder). PROJECT.md says schema v18->v19 but the actual schemaVersion is 19. Shopping list migration MUST be if (from < 20) with schemaVersion => 20. Read app_database.dart directly — do not trust any cached schema-version claim.
 
-5. **Riverpod 3 `ProviderException` wrapping** — all provider error test assertions must use `throwsA(isA<ProviderException>().having(...))`. Use `ProviderContainer.test()` and `waitForFirstValue<T>()` from `test/helpers/test_provider_scope.dart` — never bare `await container.read(provider.future)`.
+4. **FutureProvider + ref.invalidate instead of StreamProvider** — The v1.4 GAP-2 dead-code debt (watchByBookIds never consumed) must not be repeated. Pull-sync writes from family members have no ref.invalidate call site. The shopping list MUST use watchByListType().watch() in a StreamProvider.
 
-6. **Shadow book `note` decryption** — shadow notes encrypted with originating device key are undecryptable locally. `_toModel()` must catch and return `note: null`. Text search must gracefully skip note for shadow rows. Verify in Phase 1.
+5. **ApplySyncOperationsUseCase constructor not updated atomically** — Adding ShoppingItemRepository as a new constructor parameter breaks every existing construction site. Run grep -rn ApplySyncOperationsUseCase lib/ before adding the parameter; update all sites in the same commit.
 
-7. **Ledger color constants** — verify `AppColors.soul` and `AppColors.survival` against `lib/core/theme/app_colors.dart` before writing list tile code. Do not reference hex values from CLAUDE.md or MEMORY.md.
+6. **Data layer files placed inside lib/features/** — Tables, DAOs, and repository impls inside lib/features/shopping_list/ trigger import_guard violations and prevent AppDatabase from importing them. Data layer lives at lib/data/tables/, lib/data/daos/, lib/data/repositories/.
+
+7. **FAB context-awareness regression** — The accounting FAB invalidates listTransactionsProvider, calendarDailyTotalsProvider, and three other providers. These must not be dropped when adding the shopping branch. Extract _onAccountingFabTap and _onShoppingFabTap as named private methods.
+
+8. **listTypeProvider auto-disposed on tab switch** — Without keepAlive: true, the segment selection (public/private) resets to default when the user switches tabs and returns. Apply keepAlive: true to listTypeProvider and shoppingFilterProvider.
 
 ---
 
 ## Implications for Roadmap
 
-Based on combined research, build order follows: data → application → domain → providers → calendar/list widgets → interactions → family → i18n/polish. 9 phases recommended.
+Based on research, the architecture dependency ordering maps to a 7-phase build sequence continuing from Phase 35 (v1.5 close). Phases 39 and 40 are independent and can be developed concurrently.
 
-### Phase 1: Data Layer Extension
-**Rationale:** All subsequent phases depend on the DAO. No schema migration means zero risk. Hash chain integrity and date boundary correctness must be established before any UI exists.
-**Delivers:** `SortField`/`SortDirection` enums in `lib/shared/constants/`; `TransactionDao.findByBookIds()`; `TransactionDao` watch query; `DateBoundaries` utility in `lib/shared/utils/`; repository abstract + impl.
-**Addresses:** Hash chain safety (verifyChain test), date boundary correctness, no-migration requirement.
-**Avoids:** Hash chain break; date boundary errors; shadow note decryption exceptions (verify here).
-**Research flag:** None — well-documented Drift patterns; standard extension.
+### Phase 36: Data Layer Foundation
+**Rationale:** All other layers depend on table column names and DAO API. Must be complete first. The Wave-0 contract test is the migration correctness gate.
+**Delivers:** shopping_items_table.dart (v20 schema), shopping_item_dao.dart, shopping_item_repository_impl.dart, app_database.dart v19->v20 migration, ARB rename homeTabTodo->homeTabShoppingList (ja/zh/en), DAO tests for watchByListType reactivity/softDelete/upsert/reorder
+**Features addressed:** Schema foundation for all table-stakes features
+**Pitfalls to avoid:** v19 migration collision (read actual schemaVersion first), data-layer files inside features/ directory, REAL column type for estimatedPrice (use IntColumn nullable)
 
-### Phase 2: Application Use Case
-**Rationale:** Thin boundary; separates DAO params from provider concerns; testable without Riverpod.
-**Delivers:** `lib/application/list/GetListTransactionsUseCase` + `GetListParams`; unit tests with `MockTransactionRepository`.
-**Avoids:** Family bookId assembly inside use case (provider responsibility).
-**Research flag:** None — standard Use Case pattern.
+### Phase 37: Domain Layer + Import Guard Setup
+**Rationale:** Domain interfaces and import_guard files must exist before use cases or presentation can be written. The LedgerTypeSelector move to lib/shared/widgets/ is a prerequisite for any shopping list form widget.
+**Delivers:** ShoppingItem Freezed, ShoppingListFilter Freezed, ShoppingItemParams Freezed, ShoppingItemRepository interface, all import_guard.yaml files, LedgerTypeSelector moved to lib/shared/widgets/ + accounting import updated, build_runner run
+**Pitfalls to avoid:** Cross-feature widget import (resolve before any UI code), missing import_guard YAML files for new subdirectories
 
-### Phase 3: Domain Models
-**Rationale:** `ListFilterState` is the coordination point for all filter composition; must exist before any provider.
-**Delivers:** `ListFilterState` (Freezed) + `ListSortConfig` (Freezed) + `ListTransactionRepository` interface + `TaggedTransaction` model; `build_runner`.
-**Avoids:** Scattered per-filter state; cross-feature domain imports (use `lib/shared/constants/` for `SortField`).
-**Research flag:** None — Freezed patterns established.
+### Phase 38: Application Layer (Use Cases)
+**Rationale:** Use cases are the privacy enforcement layer — the listType == public guard lives here. Must be complete and tested before sync wiring to verify the guard is correct.
+**Delivers:** 6 use cases (Create, Update, Delete, ToggleCompleted, Reorder, ClearCompleted), repository_providers.dart, Mocktail tests for each use case, test verifying tracker.pendingCount == 0 for private items
+**Pitfalls to avoid:** Private item leak (guard at every mutation use case), scope creep into D3 territory (no TransactionRepository calls)
 
-### Phase 4: Riverpod Providers + Shell Wiring
-**Rationale:** Provider topology must be designed as a unit. `keepAlive` policy for IndexedStack decided here. Shell wiring makes the feature reachable for integration testing.
-**Delivers:** All 4 providers (`repository_providers`, `state_list_filter`, `state_list_transactions`, `state_list_calendar`); shell wiring replacing placeholder at `main_shell_screen.dart:111`; `build_runner`.
-**Avoids:** IndexedStack keepAlive trap; `ProviderException` test errors; bare `container.read(provider.future)`.
-**Research flag:** Medium complexity — keepAlive policy requires a product decision (filter state persistence on tab switch). Flag for requirements sign-off before implementation.
+### Phase 39: Sync Integration (can run parallel to Phase 40)
+**Rationale:** Sync integration is independent of all presentation files. Must be complete before any public-list end-to-end test.
+**Delivers:** ShoppingItemChangeTracker, SyncOrchestrator 4-line extension, ApplySyncOperationsUseCase case branch + handler, SyncEngine.onShoppingItemChanged(), integration tests (public->tracker, private->no tracker, soft-delete-wins-over-update)
+**Pitfalls to avoid:** ApplySyncOperationsUseCase constructor not updated atomically, shopping delete using hard-delete instead of soft-delete, error in shopping handler aborting bill handler loop
 
-### Phase 5: Calendar Header Widget
-**Rationale:** Calendar is the visual anchor; must be isolated and testable before list assembly.
-**Delivers:** `list_calendar_header.dart` (table_calendar wrapper with `CalendarBuilders`, month nav, day-tap); `list_month_summary.dart`; widget tests + golden baselines (isolated cell only).
-**Uses:** `table_calendar: ^3.2.0` (add to pubspec.yaml here); `NumberFormatter`; `AppTextStyles.amountSmall`.
-**Avoids:** Calendar totals derived from filtered list provider; calendar including income; visual chrome leaking from package.
-**Research flag:** None — `CalendarBuilders` API verified.
+### Phase 40: Presentation Shell + Providers (can run parallel to Phase 39)
+**Rationale:** Shell wiring (FAB context-awareness, nav tab rename, placeholder replacement) and provider graph are independent of sync.
+**Delivers:** repository_providers.dart, state_list_type (keepAlive), state_shopping_filter (keepAlive), state_shopping_items (StreamProvider), MainShellScreen FAB context-aware wiring (_onShoppingFabTap / _onAccountingFabTap named methods), tab icon + label update, ShoppingListScreen shell, golden baselines for empty states
+**Pitfalls to avoid:** FAB invalidation regression, listTypeProvider without keepAlive, tab index hardcoded as literal 3 (use named constant), cross-segment filter contamination
 
-### Phase 6: Transaction Tile + Sort/Filter Bar
-**Rationale:** List row and filter UI are independent of calendar; can run in parallel with Phase 5.
-**Delivers:** `ListTransactionTile` (category emoji, ledger tag, date, amount, optional member tag; `Dismissible` delete, `onTap` edit); `list_sort_filter_bar.dart` (sort chip, ledger/category chips, search field with 300ms debounce); `list_empty_state.dart`.
-**Avoids:** Reusing `HomeTransactionTile` directly (lacks date column + member tag); `ref.watch` for SnackBar side effects (use `ref.listen`); hardcoded amount formatting.
-**Research flag:** None — standard widget patterns.
+### Phase 41: UI Widgets
+**Rationale:** All dependent layers must exist before widget development. Gesture interaction design must be settled before goldens.
+**Delivers:** ShoppingItemTile (checkbox, ValueKey(item.id), swipe-to-delete disabled in batch mode), ShoppingItemForm (all D4 fields, CategorySelectionScreen push, LedgerTypeSelector), ShoppingListSegmentControl (D1), ShoppingFilterBar, ShoppingEmptyState (3 variants per list type), RunningTotalRow (estimated total display), batch-select mode with floating bottom bar, human-approved render
+**Pitfalls to avoid:** Completed items inside ReorderableListView (use separate SliverList section), Dismissible not disabled during batch-select mode, estimatedPrice displayed as float, wrong currency from hardcoded symbol (derive from bookProvider.value?.currency ?? JPY)
 
-### Phase 7: List Screen Assembly + Full Integration
-**Rationale:** Assembles all components; integration tests cover all interactions.
-**Delivers:** `list_screen.dart` with `CustomScrollView`; pull-to-refresh; sync-triggered auto-refresh; post-edit/post-delete invalidation of list + calendar + home providers.
-**Avoids:** Missing home-screen invalidation after edit/delete; missing `SafeArea` bottom padding.
-**Research flag:** None — integration patterns established.
+### Phase 42: i18n + Golden Re-baseline + Smoke Test
+**Rationale:** Final polish phase after all UI is stable. Defer all goldens to this phase — baselines set during development require constant re-baselining.
+**Delivers:** All shopping list ARB keys x ja/zh/en parity (verify with jq keys length), golden tests for all screen states x locale x light/dark, sync integration smoke test (public item from family member appears automatically via stream), vocabulary grep gate
+**Pitfalls to avoid:** ARB key parity breakage (all three locales in same commit), stale homeTabTodo/todoTab call sites (grep before renaming), golden churn from premature baselines
 
-### Phase 8: Family-Aware List
-**Rationale:** Adds shadow-book multi-book queries and member attribution. Deferred until single-user list is stable.
-**Delivers:** `isGroupModeProvider` guard in `listTransactionsProvider`; `shadowBooksProvider` integration; `TaggedTransaction` member label resolution; member filter chips + "Mine only" shortcut; graceful unknown-member fallback.
-**Avoids:** Per-row DAO calls for member names (use in-memory `bookId → memberLabel` map); shadow note decrypt causing exceptions; member list changes triggering full list rebuild (separate `memberMapProvider`).
-**Research flag:** Medium complexity — shadow note decryption contract must be confirmed in Phase 1.
-
-### Phase 9: ARB + i18n + Golden Polish
-**Rationale:** ARB keys last avoids repeated `flutter gen-l10n` runs and golden churn during development.
-**Delivers:** ~20–25 new ARB keys across all 3 locale files (ja/zh/en); `flutter gen-l10n` clean; golden baselines for isolated widgets only; `flutter analyze` zero warnings.
-**Avoids:** Missing ARB key in one locale blocking CI; goldens baselined before layout is stable; >12 new golden PNG files.
-**Research flag:** None — ARB workflow established.
+---
 
 ### Phase Ordering Rationale
 
-- Phases 1–3 are pure Dart with no UI: fast, fully testable, establish all correctness invariants before any widget exists.
-- Phase 4 provider topology is designed as a unit: keepAlive policy, dependency graph, and shell wiring decided together.
-- Phases 5 and 6 can run in parallel (calendar header and tile/filter bar share no state).
-- Phase 7 integration deferred until widget components are stable.
-- Phase 8 family mode deliberately last: adds real complexity without blocking the single-user experience.
-- Phase 9 i18n last: prevents repeated gen-l10n runs and baseline churn.
+- Phase 36 must be first because column names from ShoppingItems table are referenced by mapper code in Phases 37-38.
+- Phase 37 (domain + import_guard + LedgerTypeSelector move) must precede Phase 38 (use cases need the repository interface) and any UI work (import_guard files must exist to enforce layer rules from the first file).
+- Phase 38 (use cases) must precede Phase 39 (sync wiring) because use cases are the call site for ShoppingItemChangeTracker.track*().
+- Phases 39 and 40 are independent: sync integration has no dependency on any presentation file, and the presentation shell has no dependency on sync being wired.
+- Phase 41 (widgets) depends on Phase 40 (providers and shell exist) and Phase 38 (use cases available for provider wiring).
+- Phase 42 (golden re-baseline) must be last — goldens set before layout is stable are wasted work.
+
+---
 
 ### Research Flags
 
-**Needs product decision before Phase 4:**
-- Filter state keepAlive policy: persist on tab switch (natural under IndexedStack) or reset? Document and encode in provider annotations.
-- Calendar family aggregation: v1.4 own-book only default confirmed; product team should verify this is acceptable UX.
+**None of the 7 phases require a --research-phase flag.** All patterns are directly verified from source files with HIGH confidence:
+- Phase 36: Drift table/DAO/migration pattern thoroughly documented from codebase; migrator.createTable is simplest form
+- Phase 37: Domain model + import_guard pattern is a direct mirror of lib/features/list/domain/
+- Phase 38: Use case pattern mirrors v1.4 Phase 25; Mocktail test patterns are established
+- Phase 39: Sync integration pattern thoroughly documented in STACK.md and ARCHITECTURE.md from direct source reads
+- Phase 40: Provider/shell patterns directly established by lib/features/list/presentation/
+- Phase 41: Widget patterns (tile, filter bar, empty state, bottom sheet form) all have established analogs in the transaction list feature
+- Phase 42: ARB + golden pattern established from v1.4 Phase 30 and v1.5 Phase 34
 
-**Needs implementation verification in Phase 1:**
-- Shadow book `note` decryption exception handling in `TransactionRepositoryImpl._toModel()` — MEDIUM confidence. Write an explicit test.
+---
 
-**Needs pre-implementation verification:**
-- Ledger color constants: `grep -n "survival\|soul" lib/core/theme/app_colors.dart` before Phase 6.
+### Open Questions — Must Be Decided Before or During Planning
 
-**Standard patterns (skip research-phase):**
-- Phases 1–3: Drift query extension + Freezed domain models — fully established.
-- Phases 5–6: `CalendarBuilders` API + `Dismissible` — verified against official docs.
-- Phase 9: ARB workflow — established in codebase.
+These three questions were raised by the Pitfalls researcher and left unresolved. They affect the data model and CRDT behavior. The discuss-phase or planner must close them before the relevant phase begins:
 
-### Open Questions for Requirements
+**OPEN-1: completedAt DateTime? column — merge-wins vs last-write-wins on completion state (decide by Phase 36)**
 
-1. **Undo-delete scope:** Is the undo SnackBar in or out of v1.4 scope? Requires `RestoreTransactionUseCase`. If in scope, add to Phase 7.
-2. **Calendar family aggregation:** Own-book only (recommended) or combined family? Product decision.
-3. **Mixed-currency compact formatting:** v1.4 assumes single currency — flag if family sync enables multi-currency books before list tab ships.
-4. **Filter state persistence on tab switch:** Keep-alive (most natural under IndexedStack) or reset (requires `ref.listen` on tab index)?
+CRDT race: Member A marks item completed at T1. Member B edits the item name at T2 > T1 with isCompleted: false. Last-write-wins on updatedAt would un-check the item.
+- Option A: Add completedAt DateTime? column to the v20 table. isCompleted: true is sticky if completedAt > incoming.updatedAt. Requires a new column in the v20 migration.
+- Option B: Accept last-write-wins on isCompleted (simpler). Document the race as a known eventual-consistency limitation. This is how Bring! and AnyList handle it.
+- Recommended: Option B (simpler; consistent with transaction CRDT; same behavior as all competitors).
+
+**OPEN-2: Per-segment filter policy (decide by Phase 40)**
+
+When the user switches from the public segment to the private segment, should the filter state persist or reset?
+- Option A: Independent filter per segment — two shoppingFilterProvider instances parameterized by listType.
+- Option B: Shared filter with explicit reset on ref.listen(listTypeProvider, (_, __) => clearFilters()).
+- Recommended: Option A (per-segment) — prevents cross-segment contamination; cleaner provider design.
+
+**OPEN-3: listType mutation from public -> private after creation (decide by Phase 38)**
+
+If a user changes an existing public item to private, should UpdateShoppingItemUseCase emit a sync delete tombstone to remove it from family members devices?
+- Option A: listType is immutable after creation — edit form prevents changing listType on an existing item. Simplest.
+- Option B: listType is mutable — detect public->private transitions in UpdateShoppingItemUseCase and emit a tombstone.
+- Recommended: Option A (immutable) — eliminates the edge case entirely; users who want a private item should delete the public one and re-add it privately.
 
 ---
 
@@ -254,51 +225,51 @@ Based on combined research, build order follows: data → application → domain
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All findings based on direct `pubspec.yaml`, `pubspec.lock`, and source file inspection. `table_calendar` compatibility verified via pub.dev + Context7 docs. |
-| Features | HIGH (codebase) / MEDIUM (competitor) | Table stakes from direct codebase analysis. Competitor landscape from web research. |
-| Architecture | HIGH | All claims verified against live `lib/` tree. Provider dependency graph traced from source. Shadow book pattern confirmed from `ShadowBookService` + `shadowBooksProvider` source. |
-| Pitfalls | HIGH | All pitfalls from actual codebase inspection + CLAUDE.md. Hash chain behavior read from `HashChainService` source. IndexedStack confirmed at line 97. |
+| Stack | HIGH | All conclusions from direct pubspec.yaml, source file, and app_database.dart reads. Zero new packages confirmed. Schema version confirmed at v19 (not v18 as PROJECT.md states). |
+| Features | HIGH | Dominant patterns verified across AnyList, OurGroceries, Bring!, Listonic. All locked decisions (D1-D4) are well-grounded. Differentiators (estimated total, dual-ledger accent) are achievable without scope expansion. |
+| Architecture | HIGH | All file-placement decisions derive from direct reads of lib/features/list/, lib/application/family_sync/, main_shell_screen.dart, and all import_guard YAML files. Migration pattern confirmed from 6 prior from < N blocks. |
+| Pitfalls | HIGH | All pitfalls derive from direct source inspection. Privacy pitfall (private item leak) verified against TransactionChangeTracker source — the risk is real and reproducible. GAP-2 lesson documented in PROJECT.md with exact symptom. |
 
-**Overall confidence:** HIGH
+**Overall confidence: HIGH**
 
 ### Gaps to Address
 
-- **Shadow note decryption contract (MEDIUM):** `TransactionRepositoryImpl._toModel()` exception handling for undecryptable shadow notes not explicitly verified. Phase 1 test requirement.
-- **ARB key exact count (MEDIUM):** Estimated ~20–25 new keys. Exact count emerges during Phase 9 widget design.
-- **Multi-currency handling:** Assumed out of scope for v1.4. Flag if family sync enables multi-currency books before list tab ships.
-- **`RestoreTransactionUseCase` existence:** Does not currently exist. Required only if undo-delete is in v1.4 scope.
+- **Schema version mismatch in PROJECT.md and CLAUDE.md:** Both say schema v18->v19 but actual schemaVersion is 19. The first action in Phase 36 must be a direct grep schemaVersion lib/data/app_database.dart read. CLAUDE.md stale reference should be updated in the same Phase 36 commit that bumps to v20.
+- **OPEN-1 / OPEN-2 / OPEN-3:** Three open questions above must be resolved before their respective phase begins. All have a recommended resolution (Option B, Option A, Option A respectively).
+- **addedByBookId shadow book availability:** Family attribution uses addedByBookId without a FK constraint. A pulled item may arrive before the shadow book is locally available. The repository impl attribution display must handle null gracefully (omit the member chip if book not found, rather than throwing).
 
 ---
 
 ## Sources
 
-### Primary (HIGH confidence — direct codebase inspection)
-- `lib/data/daos/analytics_dao.dart` — confirmed `getDailyTotals` with GROUP BY day pattern
-- `lib/data/daos/transaction_dao.dart` — confirmed `findByBookId` signature; no watch queries exist today
-- `lib/data/repositories/transaction_repository_impl.dart` — `_toModel` field decryption pattern
-- `lib/features/home/presentation/screens/main_shell_screen.dart` — IndexedStack at line 97; placeholder at line 111
-- `lib/features/home/presentation/providers/state_shadow_books.dart` — family shadow book + member attribution pattern
-- `lib/features/family_sync/presentation/providers/state_active_group.dart` — `activeGroupProvider` keepAlive confirmed
-- `lib/features/accounting/presentation/screens/transaction_edit_screen.dart` — pop(true) pattern confirmed
-- `lib/application/accounting/delete_transaction_use_case.dart` — soft-delete path confirmed
-- `lib/infrastructure/crypto/services/hash_chain_service.dart` — soft-delete safe; hard-delete breaks chain
-- `lib/features/analytics/domain/repositories/analytics_repository.dart` — `getDailyTotals` interface
-- `lib/core/theme/app_text_styles.dart` — `amountSmall/Medium/Large` with `FontFeature.tabularFigures()`
-- `lib/features/analytics/domain/models/time_window.dart` — canonical month-end boundary idiom
-- `lib/features/home/presentation/providers/state_today_transactions.dart` — canonical day-end boundary idiom
-- `pubspec.yaml` / `pubspec.lock` — all locked dependencies and win32 version verified
+### Primary (HIGH confidence — direct codebase reads, 2026-06-07)
 
-### Primary (HIGH confidence — official docs)
-- Context7 `/aleksanderwozniak/table_calendar` — `CalendarBuilders` API, `onDaySelected`, `focusedDay`, locale parameter
-- pub.dev/packages/table_calendar — version 3.2.0; deps `intl ^0.20.0`, `simple_gesture_detector ^0.2.0`; no win32
-- Context7 `/websites/drift_simonbinder_eu` — `OrderingTerm`, `customSelect`/`readsFrom`, `.watch()` stream pattern
+- lib/data/app_database.dart — schemaVersion => 19; from < 19 block is category sort-order; migrator.createTable pattern
+- lib/data/tables/transactions_table.dart — canonical @DataClassName, customConstraints, List<TableIndex> get customIndices with {#symbol} syntax
+- lib/data/daos/transaction_dao.dart — DAO method shapes, soft-delete pattern, readsFrom: reactivity requirement (GAP-2 source)
+- lib/application/family_sync/apply_sync_operations_use_case.dart — switch structure confirmed; default: continue safe for unknown entity types
+- lib/application/family_sync/transaction_change_tracker.dart — no listType guard; template for ShoppingItemChangeTracker
+- lib/application/family_sync/sync_orchestrator.dart — _executeIncrementalPush shape; pushedCount = txnOps.length only
+- lib/application/family_sync/sync_engine.dart — onTransactionChanged() scheduler reuse pattern
+- lib/features/home/presentation/screens/main_shell_screen.dart — FAB hardcoded; sync listener invalidates accounting providers only; shopping tab at index 3
+- lib/features/list/ — canonical thin-feature analog; all layer files mirrored directly
+- lib/features/accounting/presentation/widgets/ledger_type_selector.dart — zero accounting-specific dependencies; safe to move to lib/shared/widgets/
+- lib/features/accounting/presentation/screens/category_selection_screen.dart — full ConsumerStatefulWidget with categoryRepositoryProvider; cannot move to shared
+- lib/features/*/import_guard.yaml files — global deny rules do NOT block cross-feature presentation imports
+- lib/data/repositories/transaction_repository_impl.dart — note encryption via FieldEncryptionService at repository boundary
+- lib/features/list/presentation/providers/state_list_filter.dart — keepAlive: true precedent confirmed
+- lib/l10n/app_ja.arb, app_zh.arb, app_en.arb — homeTabTodo and todoTab keys confirmed in all three locales
+- pubspec.yaml — full dependency list; no reorder/drag/list-management package; schemaVersion: 19 confirmed
 
-### Secondary (MEDIUM confidence — competitor / web research)
-- Zaim Google Play listing — calendar per-day totals, tap-day filter patterns
-- MoneyForward ME UX (IGNITE blog) — calendar + month total display patterns
-- おカネレコ feature page — calendar/list duality, family version features
-- Money Manager (Okanemochi) App Store — swipe-to-delete, sort/filter options
+### Secondary (MEDIUM confidence — competitor analysis)
+
+- AnyList help docs — check-off UX, autocomplete (flagship feature), duplicate detection
+- OurGroceries user guide — sorting, crossed-off behavior, batch delete
+- Bring! feature docs — collaborative features, real-time sync patterns
+- SmartCart comparison — Listonic/Bring!/AnyList/OurGroceries feature matrix
+- Baymard Institute, Nielsen Norman Group, Eleken — autocomplete, checkboxes, bulk action UX guidelines
 
 ---
-*Research completed: 2026-05-29*
+
+*Research completed: 2026-06-07*
 *Ready for roadmap: yes*

@@ -1,269 +1,386 @@
 # Stack Research
 
-**Domain:** Flutter app — v1.4 列表功能 (Transaction List tab)
-**Researched:** 2026-05-29
-**Confidence:** HIGH — versions verified against pub.dev; pubspec.yaml + pubspec.lock inspected; Drift docs fetched via Context7; table_calendar pub.dev entry confirmed; existing DAO/widget surface read directly from source.
+**Domain:** Flutter app — v1.6 购物清单 (Shopping List tab)
+**Researched:** 2026-06-07
+**Confidence:** HIGH — all conclusions drawn from direct source-code reads; no training-data assertions about package capabilities made without verification.
 
 ---
 
 ## TL;DR (read this first)
 
-**Add exactly one package: `table_calendar: ^3.2.0`.** Everything else the List tab needs — Drift queries, Riverpod providers, swipe-to-delete, text search, sort/filter state, family-aware aggregation, GoRouter navigation — is already covered by the locked stack.
+**Zero new packages required.** The shopping-list feature is fully buildable on the existing locked stack. Every capability — Drift table + DAO, Riverpod providers, list rendering, drag-sort, filter state, public/private segmented control, family-sync integration — already has a working primitive in the installed dependencies.
 
-`table_calendar` requires `intl: ^0.20.0`, which is compatible with the pinned `intl: 0.20.2`. It has no win32 dependency and no transitive conflicts with the `file_picker 11` / `package_info_plus 9` / `share_plus 12` trio. iOS build stays green.
+The existing family_sync pipeline generalizes naturally to a new `shopping_item` entity type with two targeted additions: a `ShoppingItemChangeTracker` (mirrors `TransactionChangeTracker`) and a `case 'shopping_item':` branch in `ApplySyncOperationsUseCase.execute()`. No relay-server protocol changes are needed because the pipeline is entity-agnostic at the wire level — it encrypts arbitrary JSON operation arrays. No new `SyncMode` is required because `incrementalPush` already flushes any tracker's ops and `incrementalPull` already applies whatever entity types are in the received operations.
 
-The calendar can be wrapped in a `CalendarBuilders`-driven custom cell that injects per-day expense totals using the app's `AppTextStyles`, `AppColors`, and Wa-Modern dual-theme extension — so it fits the design system without fighting the widget internals.
+The schema moves from v19 → v20 (the v19 slot was already consumed by the category sort-order reorder). The migration adds one table via `migrator.createTable(shoppingItems)` inside a new `if (from < 20)` block.
 
 ---
 
-## What Is Already Installed (relevant to v1.4)
+## What Is Already Installed (relevant to v1.6)
 
-From `pubspec.yaml` (verified 2026-05-29):
+From `pubspec.yaml` (read 2026-06-07, schema version 19 confirmed):
 
-| Locked Dependency | Version | v1.4 Use |
+| Locked Dependency | Version | v1.6 Use |
 |---|---|---|
-| `flutter_riverpod` | `^3.1.0` | `@riverpod` providers for list state (filters, sort, selected day, search query) |
-| `riverpod_annotation` | `^4.0.0` | `@riverpod` code-gen on new list/calendar providers |
-| `freezed_annotation` | `^3.0.0` | Immutable filter/sort state models (`ListFilterState`, `SortOrder`) |
-| `drift` | `^2.25.0` | `findByBookId` (already exists with date range + ledger + category filters); `getDailyTotals` already exists in `AnalyticsDao`; new `findByBookIdForList` needed for dynamic sort + text search |
+| `flutter_riverpod` | `^3.1.0` | `@riverpod` providers for list visibility (public/private), filter state, item list stream |
+| `riverpod_annotation` | `^4.0.0` | `@riverpod` code-gen on new shopping-list providers |
+| `freezed_annotation` | `^3.0.0` | Immutable models: `ShoppingItem`, `ShoppingListFilter`, `ShoppingItemParams` |
+| `drift` | `^2.25.0` | New `ShoppingItems` table + `ShoppingItemDao`; typed queries, `.watch()` stream |
 | `sqlcipher_flutter_libs` | `^0.6.7` | Encrypted DB — unchanged |
-| `intl` | `0.20.2` (exact pin) | `DateFormatter` / `NumberFormatter` for calendar day labels and amount display |
-| `flutter_localizations` | sdk | ARB keys for list tab labels, empty states, filter chips, confirm-delete dialog |
-| `collection` | `^1.19.1` | `groupBy` for per-day transaction bucketing in the calendar cell builder |
-| `lucide_icons_flutter` | `^3.1.14` | Sort/filter icon assets already in the icon set |
+| `intl` | `0.20.2` (exact pin) | `NumberFormatter` for estimated-price display; `S.of(context)` for all UI strings |
+| `flutter_localizations` | sdk | ARB keys: list name, item fields, filter labels, segment control, clear-completed |
+| `collection` | `^1.19.1` | `sortedBy` / `groupBy` for completed-to-bottom reordering client-side if needed |
+| `lucide_icons_flutter` | `^3.1.14` | Existing icon set — checkbox, trash, drag-handle icons |
+| `uuid` | `^4.5.3` | `Uuid().v4()` for shopping item IDs (same as sync ops) |
 
-No new dev-dep additions required: `mocktail`, `build_runner`, `freezed`, `riverpod_generator`, `drift_dev`, `custom_lint`, `riverpod_lint`, `import_guard_custom_lint` are all current and cover v1.4's code-gen and test needs.
+Flutter SDK built-ins that cover remaining capabilities:
 
----
-
-## Recommended Stack by v1.4 Capability
-
-### Capability 1 — Month calendar grid with per-day expense totals
-
-**Recommendation: `table_calendar: ^3.2.0`.**
-
-Rationale for adding a package (not hand-building a GridView):
-
-- A calendar month grid has non-trivial interaction surface: month navigation (swipe + header chevrons), locale-aware day-of-week headers (ja Sunday-start vs ISO Monday-start), selected-day highlight state, correct date arithmetic across month boundaries, and RTL safety. Replicating this as a `GridView` requires ~300–400 lines of date arithmetic, hit-test handling, and layout edge-case code. The risk-adjusted cost exceeds the package.
-- `table_calendar` 3.2.0 exposes `CalendarBuilders.defaultBuilder` and `CalendarBuilders.markerBuilder`, giving complete control over the day cell — the per-day expense total, the selected-day ring, and empty-day styling can all use `AppTextStyles`, `AppColors`, and the `context.wmTextPrimary` / `context.wmCard` theme extension without the package dictating any visual chrome.
-- The package is `intl: ^0.20.0` — fully compatible with `0.20.2` pin. Its only other dep, `simple_gesture_detector ^0.2.0`, is a pure Flutter/Dart package with no win32 or native code.
-- No iOS CocoaPods changes; no Swift/Kotlin native surface; no capability conflicts with the Podfile `post_install` SQLCipher strip.
-
-Per-day expense totals come from the **existing** `AnalyticsDao.getDailyTotals()` — this method already does `DATE(timestamp, 'unixepoch', 'localtime') GROUP BY day SUM(amount)` for a date range. No new DAO query needed for the calendar data source.
-
-Integration point: a `@riverpod` provider `calendarDailyTotals(bookId, year, month)` reads from `AnalyticsRepository.getDailyTotals` and returns `Map<DateTime, int>` (date → total-expense in sub-units). The calendar passes this map to `CalendarBuilders.defaultBuilder` via a closure. When the user switches months, the focused-month `StateProvider` updates, the provider recomputes, and the calendar re-renders.
-
-**Design fit:** The custom day-cell builder injects the per-day amount using `AppTextStyles.micro` (10px bold) with tabular figures, coloured `AppColors.accentPrimary` if the amount is non-zero, muted `AppColors.textTertiary` otherwise. The selected-day ring reuses `AppColors.accentPrimary`. No `CalendarStyle` theming override needed — the builder replaces the entire cell.
-
-### Capability 2 — Sortable, text-searchable, filterable transaction list
-
-**Recommendation: extend `TransactionDao.findByBookId` with dynamic sort + text search.**
-
-The existing `findByBookId` already accepts `ledgerType`, `categoryId`, `startDate`, `endDate`, `limit`, `offset`. For v1.4 we need:
-
-1. **Dynamic sort:** `OrderingTerm` already accepts any `Expression` column and `.asc()` / `.desc()`. Adding a `SortField` enum (date / updatedAt / amount) and `SortDirection` enum (asc / desc) to the query is a pure DAO extension — no new library. The Drift query builder composes `orderBy` terms at runtime without string concatenation.
-
-2. **Text search (category name / merchant / note):** The `merchant` and `note` columns are on the `transactions` table — a `WHERE (merchant LIKE ? OR note LIKE ?)` clause maps to `query.where((t) => t.merchant.like('%$q%') | t.note.like('%$q%'))`. Category-name search requires a JOIN to `categories` table on `categories.name LIKE ?`. This is a Drift `innerJoin` / `leftOuterJoin` with an `OrderingTerm` on the joined table — the existing `AnalyticsDao` already demonstrates the `customSelect` + `readsFrom` pattern; the `TransactionDao` method can use the typed-Dart-query API with a join.
-
-3. **Debounce:** Text search debounce (300ms) is a plain `dart:async Timer` — the same pattern already used in `VoiceInputScreen` (`_parseDebounce`). No new package.
-
-4. **Filter chip state + sort state:** A `@freezed` class `TransactionListFilter` holds `ledgerType?`, `categoryId?`, `searchQuery?`, `sortField`, `sortDirection`, `selectedDay?`. A `@riverpod` `Notifier` holds this state. The provider for the list watches the filter notifier and calls the DAO.
-
-5. **Streaming vs. one-shot:** Drift's `query.watch()` returns a `Stream<List<...>>` that re-emits on any write to the `transactions` table. For the list tab, using `.watch()` means swipe-delete and any new entry from the FAB propagate to the list automatically. The Riverpod `StreamProvider` pattern is already used in the family sync feature; same approach here.
-
-Family-aware extension (Capability 4) adds `bookIds: List<String>` to the DAO query, which extends the `WHERE book_id = ?` to `WHERE book_id IN (?)` — a Drift `isIn` clause. No schema change.
-
-### Capability 3 — Swipe-to-delete rows
-
-**Recommendation: Flutter's built-in `Dismissible` widget.** No package needed.
-
-`Dismissible` covers the full v1.4 swipe-delete requirement:
-- Horizontal swipe to reveal a delete background (red with trash icon using `lucide_icons_flutter` which is already installed)
-- `confirmDismiss` callback to show an `AlertDialog` confirmation (matching the existing `showDialog` pattern used in Settings data-management)
-- `onDismissed` callback to call `softDelete` on the DAO via the existing `DeleteTransactionUseCase` (or call directly through the repository if a use case doesn't yet exist)
-- `DismissDirection.endToStart` only (right-to-left) to avoid accidental left-swipe dismissals
-
-`Dismissible` requires a `Key` per row — the transaction ID (a ULID string, already stored in `TransactionRow.id`) is the canonical key.
-
-Alternatives considered and rejected:
-- `flutter_slidable` (pub.dev) — adds persistent action trays, animated icon labels, and slidable configs that are heavier than required. The design spec is "swipe-to-delete with confirmation"; there are no secondary actions. `Dismissible` is the correct primitive for one-action swipe-delete.
-- Custom `GestureDetector` approach — no benefit over `Dismissible` and substantially more code for identical UX.
-
-### Capability 4 — Family-aware list with per-member attribution
-
-**Recommendation: extend the DAO query to accept `List<String> bookIds` + join `GroupMembers` for attribution. No new package.**
-
-The `transactions` table stores `device_id` per row. The `group_members` table stores `(group_id, device_id, display_name, avatar_emoji)`. The link is: `transactions.device_id = group_members.device_id`. This is the exact same logic used in `ShadowBookInfo` (the home tab's family aggregate), which resolves member attribution by matching `book.ownerDeviceId` to `group.members`.
-
-For the list tab, the family-aware query:
-1. Fetches personal book transactions (current bookId) + shadow books' bookIds from `shadowBooksProvider` (already exists)
-2. Passes `bookIds` list to the DAO (a Drift `isIn` clause)
-3. For each returned row, resolves member display from the in-memory `activeGroupProvider` member list (already loaded) — no JOIN needed at the DAO level since the member map is already in Riverpod state
-
-The member filter chip (show all / show only member X) is a client-side filter over the already-loaded `activeGroupProvider` member list. No new DAO method needed for this filter.
-
-Attribution display per row: small avatar emoji chip + display name label, visible only when a family is active. The `ShadowBookInfo` pattern is the template.
-
----
-
-## New Package Addition
-
-| Package | Version | Purpose | Why This One |
-|---------|---------|---------|-------------|
-| `table_calendar` | `^3.2.0` | Month calendar grid with day-selection and custom cell builder | Saves ~350 lines of date arithmetic + layout edge cases; custom builder API fits the design system; intl-compatible; no win32 / no iOS native code |
-
-### Dependency safety check
-
-| Concern | Status |
+| Built-in | v1.6 Use |
 |---|---|
-| `intl` compatibility | `table_calendar` requires `^0.20.0`; project pins `0.20.2` — compatible |
-| `simple_gesture_detector` (transitive) | Pure Flutter/Dart, no native code, no win32 |
-| `win32` conflict | `table_calendar` has no win32 dep; project's `win32: 5.15.0` (transitive from `file_picker 11`) is unaffected |
-| iOS CocoaPods | No new pods; no change to `post_install` strip |
-| `flutter build ios --debug --no-codesign` | No new platform code; build outcome unchanged |
+| `ReorderableListView` / `SliverReorderableList` | Manual drag-sort (already used in `CategorySelectionScreen` and `state_category_reorder.dart`) |
+| `Dismissible` | Swipe-to-delete on individual items (same pattern as transaction list rows) |
+| `CupertinoSlidingSegmentedControl` or `SegmentedButton` | Public/Private top control (D1) |
+| `Checkbox` / `ListTile` | Item rows with completion toggle |
+| `showModalBottomSheet` | Add/edit item form |
 
-### Installation
+No new dev-dependency additions required: `mocktail`, `build_runner`, `freezed`, `riverpod_generator`, `drift_dev`, `custom_lint`, `riverpod_lint`, `import_guard_custom_lint` are all current and cover v1.6's code-gen and test needs.
 
-```bash
-# Add to pubspec.yaml dependencies:
-#   table_calendar: ^3.2.0
+---
 
-flutter pub get
-# No build_runner changes for the package itself.
-# Run build_runner after adding @freezed / @riverpod annotated classes:
-flutter pub run build_runner build --delete-conflicting-outputs
+## Drift Schema Migration: v19 → v20
+
+### The v19 slot is already used
+
+`app_database.dart` line 45 shows `int get schemaVersion => 19`. The existing `if (from < 19)` block (lines 413–423) reorders `cat_food_dining_out` / `cat_food_groceries` sort orders — it is NOT the shopping list table. The shopping list table lands at **v20**.
+
+### New Table: `ShoppingItems`
+
+Convention follows `transactions_table.dart` and `categories_table.dart` verbatim — `@DataClassName`, `TextColumn`/`IntColumn`/`BoolColumn`/`DateTimeColumn`, `Set<Column> get primaryKey`, `List<TableIndex> get customIndices` with `{#columnSymbol}` syntax.
+
+```dart
+// lib/data/tables/shopping_items_table.dart
+
+import 'package:drift/drift.dart';
+
+/// Shopping items table — public/private lists with optional metadata.
+@DataClassName('ShoppingItemRow')
+class ShoppingItems extends Table {
+  // Identity
+  TextColumn get id => text()();
+  TextColumn get deviceId => text()();
+
+  // List visibility: 'public' | 'private'
+  TextColumn get listType => text().withDefault(const Constant('private'))();
+
+  // Required
+  TextColumn get name => text().withLength(min: 1, max: 200)();
+
+  // Optional accounting hints (no transaction linkage — D3)
+  TextColumn get ledgerType => text().nullable()();   // 'daily' | 'joy' | null
+  TextColumn get categoryId => text().nullable()();
+  TextColumn get tags => text().nullable()();          // JSON-encoded List<String>
+  TextColumn get note => text().nullable()();
+
+  // D4: quantity + estimated price
+  IntColumn get quantity => integer().withDefault(const Constant(1))();
+  IntColumn get estimatedPrice => integer().nullable()();   // in sub-units (yen)
+
+  // State
+  BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+
+  // Sync
+  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+
+  // Timestamps
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  @override
+  List<String> get customConstraints => [
+    "CHECK(list_type IN ('public', 'private'))",
+    "CHECK(quantity >= 1)",
+    "CHECK(ledger_type IN ('daily', 'joy') OR ledger_type IS NULL)",
+  ];
+
+  List<TableIndex> get customIndices => [
+    TableIndex(name: 'idx_shopping_list_type', columns: {#listType}),
+    TableIndex(name: 'idx_shopping_completed', columns: {#isCompleted}),
+    TableIndex(name: 'idx_shopping_sort_order', columns: {#sortOrder}),
+    TableIndex(name: 'idx_shopping_list_completed', columns: {#listType, #isCompleted}),
+    TableIndex(name: 'idx_shopping_deleted', columns: {#isDeleted}),
+  ];
+}
+```
+
+Design notes:
+- `tags` is stored as a JSON-encoded `List<String>` in a single TEXT column. This follows the existing `metadata` column convention in `transactions_table.dart` (JSON in TEXT). A separate tags junction table would be over-engineered for a list whose primary use is display + filter — client-side decode is trivial.
+- `estimatedPrice` is in sub-units (integer yen), matching `Transaction.amount` convention (already integer, already yen).
+- `sortOrder` is a client-managed integer. The DAO `reorder(id, newSortOrder)` method updates this column in a transaction; the UI calls it after `ReorderableListView.onReorder`. Completed items always sort to the bottom regardless of `sortOrder` — the DAO query applies `ORDER BY is_completed ASC, sort_order ASC`.
+- `isDeleted` is a soft-delete flag matching the transaction table pattern, which the sync pipeline already understands for conflict resolution.
+
+### Migration block in `app_database.dart`
+
+Add to `onUpgrade`:
+
+```dart
+if (from < 20) {
+  await migrator.createTable(shoppingItems);
+}
+```
+
+Add `ShoppingItems` to the `@DriftDatabase(tables: [...])` annotation and bump `schemaVersion` to 20. No data backfill required. No existing table touched.
+
+This is the simplest possible migration form — `migrator.createTable` is the established pattern for adding a net-new table (see `from < 6`, `from < 7`, `from < 12`).
+
+### `@DriftDatabase` annotation change
+
+```dart
+@DriftDatabase(
+  tables: [
+    AuditLogs,
+    Books,
+    Categories,
+    CategoryKeywordPreferences,
+    CategoryLedgerConfigs,
+    GroupMembers,
+    Groups,
+    MerchantCategoryPreferences,
+    ShoppingItems,   // ADD
+    SyncQueue,
+    Transactions,
+    UserProfiles,
+  ],
+)
+class AppDatabase extends _$AppDatabase {
+  // ...
+  @override
+  int get schemaVersion => 20;  // BUMP
 ```
 
 ---
 
-## Drift Query Patterns for v1.4
+## Family Sync Integration: Zero Protocol Changes
 
-### Pattern 1 — Dynamic sort on the transaction list
+### How the pipeline works today
+
+The sync pipeline is entity-agnostic at the wire level. `PushSyncUseCase.execute()` takes `List<Map<String, dynamic>> operations` and encrypts them as a JSON blob with `syncType`, `syncId`, `operations`, `vectorClock`. The server stores and relays this ciphertext without inspecting contents. `PullSyncUseCase` decrypts and passes the `operations` list to `ApplySyncOperationsUseCase.execute()`, which branches on `operation['entityType']`.
+
+Currently recognized entity types: `'bill'` (transactions), `'profile'` (group member profiles), `'avatar'` (avatar images). Unknown entity types fall through the `default: continue` branch silently — they are ACK'd (line: `ackedMessageIds.add(messageId)` after `await _applyOperations(operations)`) and discarded.
+
+### What v1.6 needs to add
+
+**On push side:** A `ShoppingItemChangeTracker` (identical structure to `TransactionChangeTracker`) that accumulates `create`/`update`/`delete` operations with `entityType: 'shopping_item'`. The `SyncOrchestrator._executeIncrementalPush()` method flushes `TransactionChangeTracker` — extend it to also flush `ShoppingItemChangeTracker` and call `_pushSync.execute(operations: shoppingOps, vectorClock: const {})`.
+
+Shopping items use the same `incrementalPush` debounce (10 seconds) already wired to `SyncEngine.onTransactionChanged()`. A parallel entry point `SyncEngine.onShoppingItemChanged()` calls `_scheduler.onTransactionChanged()` — or rename the callback to `onDataChanged()` to make it entity-agnostic. This is a small rename within `SyncEngine` and its call sites.
+
+**On pull side:** Add a `case 'shopping_item':` branch in `ApplySyncOperationsUseCase.execute()`:
 
 ```dart
-// In TransactionDao — add to findByBookId or add a new findByBookIdForList
-OrderingTerm _sortTerm(Transactions t, SortField field, bool descending) {
-  final expr = switch (field) {
-    SortField.date      => t.timestamp,
-    SortField.editTime  => t.updatedAt, // nullable; treat null as createdAt
-    SortField.amount    => t.amount,
-  };
-  return descending ? OrderingTerm.desc(expr) : OrderingTerm.asc(expr);
+case 'shopping_item':
+  await _applyShoppingItemOperation(operation);
+```
+
+`_applyShoppingItemOperation` receives `op` (create/update/delete), `entityId`, and `data` map, and calls `ShoppingItemRepository.insert/update/softDelete`.
+
+**Private items never enter the push path.** The `ShoppingItemChangeTracker` only tracks items where `listType == 'public'`. Private items are written directly to Drift and never enqueued in the change tracker. No server-side filtering or flag-based suppression is needed.
+
+**No relay server changes.** The server is a dumb encrypted-blob relay — it does not inspect `entityType`. The existing `/sync/push` and `/sync/pull` + `/sync/ack` endpoints handle shopping items without modification.
+
+**No new `SyncMode`.** Shopping item sync flows through `incrementalPush` (local changes out) and `incrementalPull` (remote changes in) — the same modes transactions use.
+
+### Sync payload shape for shopping items
+
+```json
+{
+  "op": "create",
+  "entityType": "shopping_item",
+  "entityId": "<ulid>",
+  "data": {
+    "id": "<ulid>",
+    "deviceId": "<device-id>",
+    "listType": "public",
+    "name": "牛奶",
+    "ledgerType": "daily",
+    "categoryId": "cat_food_groceries",
+    "tags": "[\"breakfast\"]",
+    "note": null,
+    "quantity": 2,
+    "estimatedPrice": 300,
+    "isCompleted": false,
+    "sortOrder": 0,
+    "isDeleted": false,
+    "createdAt": "2026-06-07T10:00:00.000Z",
+    "updatedAt": null
+  },
+  "timestamp": "2026-06-07T10:00:00.000Z"
 }
 ```
 
-For `updatedAt` (nullable): use Drift's `coalesce([t.updatedAt, t.createdAt])` expression so rows with no `updatedAt` fall back to `createdAt` — this avoids NULL sort instability.
+`delete` operations include only `entityId` (same as `TransactionSyncMapper.toDeleteOperation`). `update` includes the full `data` map (last-write-wins, consistent with the transaction CRDT pattern).
 
-### Pattern 2 — Text search with merchant + note (same table, no join needed)
+### CRDT conflict resolution
 
-```dart
-if (searchQuery.isNotEmpty) {
-  final q = '%${searchQuery.toLowerCase()}%';
-  query.where(
-    (t) => t.merchant.lower().like(q) | t.note.lower().like(q),
-  );
-}
-```
-
-For category-name search, use `customSelect` with a `LEFT JOIN categories ON ...` and a `readsFrom: {_db.transactions, _db.categories}` clause so the stream updates when either table changes.
-
-### Pattern 3 — Per-day expense rollup (already exists)
-
-`AnalyticsDao.getDailyTotals` does `DATE(timestamp, 'unixepoch', 'localtime') GROUP BY day` — reuse this for calendar data. The only change needed is to call it from the new list screen's calendar provider instead of only from the analytics screen.
-
-### Pattern 4 — Family multi-book query
-
-```dart
-// In TransactionDao — add bookIds parameter
-if (bookIds != null && bookIds.isNotEmpty) {
-  query.where((t) => t.bookId.isIn(bookIds));
-} else {
-  query.where((t) => t.bookId.equals(bookId));
-}
-```
-
-Use `.watch()` (not `.get()`) on the query so new synced entries from family members appear in the list automatically without a manual refresh.
-
-### Pattern 5 — Stream invalidation on swipe-delete
-
-`softDelete` writes `is_deleted = true` + `updated_at = NOW()` to the `transactions` table. Because the list query uses `.watch()`, Drift's table invalidation mechanism fires automatically — no manual `ref.invalidate(...)` needed. The deleted row disappears from the stream in the next emission.
+The existing pipeline uses last-write-wins on `updatedAt` timestamp, applied by `_handleUpdate` in `ApplySyncOperationsUseCase`. Shopping items use the same strategy: if a remote `update` arrives for an item that exists locally, overwrite with the remote data if `data['updatedAt'] > existing.updatedAt`. If the local item was deleted (`isDeleted = true`) and a remote update arrives, the delete wins (do not resurrect). This mirrors `_handleUpdate` / `_handleCreate` for transactions.
 
 ---
 
-## Riverpod Provider Architecture
+## Completed-to-Bottom Ordering: No New Package
 
-All new providers belong in `lib/features/list/presentation/providers/` (new feature directory). Use case classes belong in `lib/application/accounting/` (existing domain).
+This is purely a query-order concern. The DAO query uses:
+
+```sql
+ORDER BY is_completed ASC, sort_order ASC
+```
+
+Drift expression:
+
+```dart
+.orderBy([
+  (t) => OrderingTerm.asc(t.isCompleted),
+  (t) => OrderingTerm.asc(t.sortOrder),
+])
+```
+
+Active items (is_completed = false = 0) sort before completed items (is_completed = true = 1). Within the active group, `sort_order` determines manual ordering. Within the completed group, `sort_order` is irrelevant — they all appear at the bottom in created-at order (or the last `sort_order` they held before completion).
+
+This is a pure SQL ordering clause — no client-side grouping, no `collection.groupBy`, no new package. The `ReorderableListView.onReorder` callback updates `sort_order` for active items only (completed items are non-reorderable in the UI).
+
+---
+
+## Drag-Sort: Flutter Built-in, Already Used in This Codebase
+
+`ReorderableListView.builder` is Flutter's built-in widget. The project already uses it in `CategorySelectionScreen` and has `state_category_reorder.dart` as the established notifier pattern for handling `onReorder` index arithmetic.
+
+The shopping list will use the same pattern:
+- Wrap the active (non-completed) items in `ReorderableListView.builder`
+- Each item gets `key: ValueKey(item.id)` (required by `ReorderableListView`)
+- `onReorder` callback updates `sort_order` in the DAO via a use case
+- Completed items rendered below in a plain `ListView.builder` (non-reorderable)
+
+No `flutter_reorderable_list`, `drag_and_drop_lists`, or any third-party reorder package needed.
+
+---
+
+## Recommended Architecture for `lib/features/shopping_list/`
+
+Following the "Thin Feature" rule:
 
 ```
-lib/features/list/
+lib/features/shopping_list/
 ├── domain/
-│   └── models/
-│       └── transaction_list_filter.dart   # @freezed: ledgerType?, categoryId?, searchQuery, sortField, sortDirection, selectedDay?
-├── presentation/
-│   ├── providers/
-│   │   ├── repository_providers.dart      # single source of truth: transactionRepositoryProvider ref
-│   │   ├── state_list_filter.dart         # @riverpod Notifier<TransactionListFilter>
-│   │   ├── state_calendar_totals.dart     # @riverpod family provider: calendarDailyTotals(bookId, year, month)
-│   │   └── state_transaction_list.dart    # @riverpod StreamProvider: watches filter + calls DAO
-│   ├── screens/
-│   │   └── transaction_list_screen.dart
-│   └── widgets/
-│       ├── list_calendar_header.dart      # table_calendar wrapper
-│       ├── transaction_list_row.dart      # Dismissible + row content
-│       ├── list_filter_bar.dart           # search field + filter chips
-│       └── list_sort_sheet.dart           # bottom sheet for sort options
+│   ├── models/
+│   │   ├── shopping_item.dart              # @freezed: all fields
+│   │   ├── shopping_list_filter.dart       # @freezed: ledgerType?, categoryId?, tags?
+│   │   └── shopping_item_params.dart       # @freezed: CreateShoppingItemParams / UpdateShoppingItemParams
+│   └── repositories/
+│       └── shopping_item_repository.dart   # interface only
+└── presentation/
+    ├── providers/
+    │   ├── repository_providers.dart       # single source of truth for this feature
+    │   ├── state_list_type.dart            # public | private segmented control state
+    │   ├── state_shopping_filter.dart      # filter notifier
+    │   └── state_shopping_items.dart       # StreamProvider watching DAO
+    ├── screens/
+    │   └── shopping_list_screen.dart
+    └── widgets/
+        ├── shopping_list_segment_control.dart
+        ├── shopping_item_tile.dart
+        ├── shopping_item_form.dart         # add / edit bottom sheet
+        ├── shopping_filter_bar.dart
+        └── shopping_empty_state.dart
 ```
 
-The `state_transaction_list` provider composes: `selectedDayProvider` (from `state_list_filter`) → DAO date-range parameter. When `selectedDay` is set, start/end = that day 00:00–23:59. When null, start/end = the current focused month. Month switching from the calendar updates `focusedMonthProvider` and clears `selectedDay`.
+Data layer (in `lib/data/` per Thin Feature rule — never inside `lib/features/`):
 
-Provider naming follows the Riverpod 3 convention: `class ListFilterNotifier` generates `listFilterProvider` (not `listFilterNotifierProvider`).
+```
+lib/data/
+├── tables/
+│   └── shopping_items_table.dart           # new
+├── daos/
+│   └── shopping_item_dao.dart              # new
+└── repositories/
+    └── shopping_item_repository_impl.dart  # new
+```
+
+Application layer (use cases in `lib/application/shopping_list/`):
+
+```
+lib/application/shopping_list/
+├── create_shopping_item_use_case.dart
+├── update_shopping_item_use_case.dart
+├── delete_shopping_item_use_case.dart
+├── toggle_item_completed_use_case.dart
+├── reorder_shopping_items_use_case.dart
+├── clear_completed_items_use_case.dart
+└── repository_providers.dart
+```
+
+`lib/application/family_sync/` additions:
+- `shopping_item_change_tracker.dart` — mirrors `transaction_change_tracker.dart`
+- Extend `sync_orchestrator.dart` to flush the shopping change tracker in `_executeIncrementalPush`
+- Extend `apply_sync_operations_use_case.dart` with `case 'shopping_item':` branch
+
+---
+
+## Riverpod Provider Conventions
+
+Follow Riverpod 3 conventions from CLAUDE.md:
+
+- `class ShoppingItemsNotifier` (annotated `@riverpod`) generates `shoppingItemsProvider` (NOT `shoppingItemsNotifierProvider`)
+- Use `ProviderContainer.test()` in tests
+- `AsyncValue.value` (nullable) not `valueOrNull` (removed in Riverpod 3)
+- ONE `repository_providers.dart` per feature
+- Use `ref.watch` for derived state, `ref.listen` for side effects (navigation after save)
 
 ---
 
 ## What NOT to Add
 
-| Avoid | Why Tempting | Why Wrong for v1.4 | Use Instead |
+| Avoid | Why Tempting | Why Wrong | Use Instead |
 |---|---|---|---|
-| `flutter_slidable` | Polished swipe-action rows with icon labels | One-action delete only; `Dismissible` is the right primitive; `flutter_slidable` adds 300+ lines of config for no UX gain vs. spec | `Dismissible` (Flutter built-in) |
-| `infinite_scroll_pagination` | "Transaction lists get long" | Drift's `limit/offset` pattern is already in `findByBookId`; a typical month has <200 transactions; premature abstraction adds a non-trivial package to a list that fits in a `ListView.builder` | `ListView.builder` + Drift limit/offset |
-| `flutter_staggered_animations` | Animate list entry/exit | ADR-012 no-gamification constraint applies broadly to celebratory UI motion; simple `AnimatedList` if any animation is needed, but spec doesn't require it | Plain `ListView.builder` |
-| Any dedicated search package (`flutter_search_bar`, etc.) | "Native search bar widget" | `TextField` + `TextEditingController` + debounce timer is already the established pattern in `CategorySelectionScreen`; a search package adds API surface with no new capability at this scale | `TextField` + `Timer` debounce (existing pattern) |
-| `sticky_headers` / `grouped_list` | Section headers by date | A `SliverList` + `SliverStickyHeader` approach is tempting for "date section dividers" but is not in the v1.4 spec; simple date-label rows in `ListView.builder` suffice | `ListView.builder` with inline date divider rows |
-| `intl_utils` / `intl_translation` | "Calendar needs locale-aware day names" | `table_calendar` handles locale via `locale: Locale(...)` parameter; the app's `currentLocaleProvider` supplies this; no separate ARB pipeline needed for calendar | Existing `S.of(context)` + `DateFormatter` |
-| `sqflite` (direct) | "Simpler SQL for the per-day rollup" | The project is fully committed to Drift + SQLCipher; accessing the DB via sqflite directly bypasses the encryption layer and violates the layer rules | Drift `customSelect` with `readsFrom:` |
-| `rxdart` | "Combine filter stream + query stream" | Drift's `.watch()` already returns a `Stream`; Riverpod 3 handles stream combination via `ref.watch` on multiple providers; rxdart adds a dependency to replace primitives that already exist | Riverpod 3 `StreamProvider` |
-| `riverpod: 3.x` upgrade | "Cleaner API" | Already on Riverpod 3.1.0 (`flutter_riverpod: ^3.1.0` in pubspec) — project is already on v3 | Existing `flutter_riverpod: ^3.1.0` |
+| Any reorder/drag package (`flutter_reorderable_list`, `drag_and_drop_lists`) | "Cleaner drag UX" | `ReorderableListView` is Flutter built-in, already used in `CategorySelectionScreen`; adding a package duplicates tested platform primitives | `ReorderableListView.builder` (built-in) |
+| `hive` / `isar` / `sembast` | "Simpler for a list feature" | Project is fully Drift + SQLCipher; any secondary DB bypasses field encryption and violates layer rules | Drift — add one new table |
+| `provider_for_tags: flutter_chips_input` etc. | Tag input chips | `Wrap` + `FilterChip` are Flutter built-ins; existing `CategorySelectionScreen` demonstrates multi-select chip pattern | `FilterChip` + `Wrap` (built-in) |
+| A separate sync table for shopping items | "Decouple sync queue" | The existing `SyncQueue` table + `SyncQueueManager` is already entity-agnostic; shopping ops flow through the same queue | Extend `ShoppingItemChangeTracker` → same `SyncQueueManager` |
+| New relay server endpoint for shopping | "Cleaner API surface" | The relay server is a dumb blob relay; entity type lives in the encrypted payload; no server-side routing by entity type | Existing `/sync/push` + `/sync/pull` + `/sync/ack` |
+| `json_serializable` manual tags column | "Typed tags model" | Tags are a simple `List<String>`; `jsonEncode/jsonDecode` at the DAO boundary is sufficient; adding a generated model adds build-runner complexity for no gain | `jsonEncode(tags)` / `(jsonDecode(raw) as List).cast<String>()` |
+| Server-side filtering of private items | "Extra security" | Private items never enter the change tracker; they are never serialized into a sync payload; the relay never sees them | Change tracker only tracks `listType == 'public'` items |
 
 ---
 
 ## Version Compatibility (locked stack — do not touch)
 
-| Package | v1.4 Constraint | Notes |
+| Package | v1.6 Constraint | Notes |
 |---|---|---|
-| `intl: 0.20.2` | Exact pin — do not touch | `table_calendar ^3.2.0` requires `^0.20.0`; pin satisfies this |
-| `sqlcipher_flutter_libs: ^0.6.7` | Do not touch | CI guardrail rejects `sqlite3_flutter_libs`; no v1.4 schema change planned |
-| `flutter_riverpod: ^3.1.0` + `riverpod_annotation: ^4.0.0` + `riverpod_generator: ^4.0.0+1` + `riverpod_lint: ^3.1.0` | Move together | Already on Riverpod 3; do not mix 2.x idioms (`AsyncValue.valueOrNull` is gone) |
-| `file_picker: ^11.0.2` + `package_info_plus: ^9.0.1` + `share_plus: ^12.0.2` | Do not bump any of these alone | Tied via `win32 ^5.x` transitive constraint; `table_calendar` does not touch this graph |
-| `drift: ^2.25.0` + `drift_dev: ^2.25.0` | Keep in sync | DAOs extended in-place; no migration needed for v1.4 unless a new index is added |
-| `fl_chart: ^1.2.0` | Unchanged for v1.4 | fl_chart already upgraded to 1.x; not relevant to list tab |
+| `intl: 0.20.2` | Exact pin — do not touch | No new package needs a different `intl` version |
+| `sqlcipher_flutter_libs: ^0.6.7` | Do not touch | CI guardrail rejects `sqlite3_flutter_libs`; v20 migration only adds a table |
+| `flutter_riverpod: ^3.1.0` + `riverpod_annotation: ^4.0.0` + `riverpod_generator: ^4.0.0+1` | Keep together | Already on Riverpod 3; do not mix 2.x idioms |
+| `file_picker: ^11.0.2` + `package_info_plus: ^9.0.1` + `share_plus: ^12.0.2` | Do not bump any alone | win32 ^5.x transitive constraint; shopping list does not touch this graph |
+| `drift: ^2.25.0` + `drift_dev: ^2.25.0` | Keep in sync | New table added; no version change needed |
+| `table_calendar: ^3.2.0` | Unchanged | Shopping list has no calendar component |
 
 ---
 
 ## Sources
 
-- `pubspec.yaml` / `pubspec.lock` (read 2026-05-29) — verified all locked dependencies and win32 version (5.15.0).
-- `CLAUDE.md` (read 2026-05-29) — architecture constraints, Riverpod 3 conventions, Drift TableIndex syntax, iOS pin rules.
-- `.planning/PROJECT.md` (read 2026-05-29) — v1.4 scope, carried constraints, shadow-books family pattern.
-- `lib/data/daos/analytics_dao.dart` (read 2026-05-29) — confirmed `getDailyTotals` exists with `DATE(... 'unixepoch', 'localtime') GROUP BY day` pattern; reusable for calendar. HIGH confidence.
-- `lib/data/daos/transaction_dao.dart` (read 2026-05-29) — confirmed `findByBookId` signature with ledgerType/categoryId/date range; existing index `idx_tx_book_timestamp` covers the month-range query. HIGH confidence.
-- `lib/features/home/presentation/providers/state_shadow_books.dart` (read 2026-05-29) — confirmed family shadow-book + member-attribution pattern; v1.4 family list reuses this. HIGH confidence.
-- `lib/features/home/presentation/screens/main_shell_screen.dart` (read 2026-05-29) — confirmed List tab is `Center(child: Text(S.of(context).listTab))` placeholder at index 1 of `IndexedStack`. HIGH confidence.
-- Context7 `/aleksanderwozniak/table_calendar` docs — confirmed `CalendarBuilders` API, `onDaySelected` / `focusedDay` pattern, `selectedDayPredicate`. HIGH confidence.
-- [pub.dev/packages/table_calendar](https://pub.dev/packages/table_calendar) — confirmed version 3.2.0; deps: `intl ^0.20.0`, `simple_gesture_detector ^0.2.0`; no win32; Dart SDK `>=3.0.0`. HIGH confidence.
-- [pub.dev/packages/simple_gesture_detector](https://pub.dev/packages/simple_gesture_detector) — confirmed version 0.2.1; only dep is `flutter`; no native code. HIGH confidence.
-- Context7 `/websites/drift_simonbinder_eu` docs — confirmed `OrderingTerm`, `customSelect`/`readsFrom`, `watch()` stream patterns. HIGH confidence.
+- `lib/data/app_database.dart` (read 2026-06-07) — confirmed `schemaVersion => 19`; `from < 19` block is category sort-order reorder (NOT shopping list); migration pattern for new tables is `migrator.createTable` inside `if (from < N)`. HIGH confidence.
+- `lib/data/tables/transactions_table.dart` (read 2026-06-07) — canonical `@DataClassName`, `customConstraints`, `List<TableIndex> get customIndices` with `{#symbol}` syntax. HIGH confidence.
+- `lib/application/family_sync/apply_sync_operations_use_case.dart` (read 2026-06-07) — confirmed `switch (entityType)` with `'bill'`, `'profile'`, `'avatar'` branches; `default: continue` discards unknown types safely. Adding `'shopping_item'` case is the only pull-side change. HIGH confidence.
+- `lib/application/family_sync/transaction_change_tracker.dart` (read 2026-06-07) — confirmed in-memory tracker pattern; `flush()` returns and clears pending ops. `ShoppingItemChangeTracker` is a direct mirror. HIGH confidence.
+- `lib/application/family_sync/sync_orchestrator.dart` (read 2026-06-07) — confirmed `_executeIncrementalPush` calls `_changeTracker.flush()` then `_pushSync.execute(operations: txnOps)`; shopping ops slot in the same flow. HIGH confidence.
+- `lib/application/family_sync/push_sync_use_case.dart` (read 2026-06-07) — confirmed `execute(operations: List<Map<String, dynamic>>)` is entity-agnostic; no entity-type filtering at this layer. HIGH confidence.
+- `lib/application/family_sync/pull_sync_use_case.dart` (read 2026-06-07) — confirmed pipeline: pull → decrypt → `_applyOperations(operations)` → ack. Entity routing is entirely in `ApplySyncOperationsUseCase`. HIGH confidence.
+- `lib/infrastructure/sync/relay_api_client.dart` (read 2026-06-07) — confirmed `/sync/push` accepts arbitrary `payload` (base64 encrypted blob); no entity-type awareness at the HTTP layer. HIGH confidence.
+- `lib/features/accounting/presentation/screens/category_selection_screen.dart` + `state_category_reorder.dart` (filename confirmed 2026-06-07) — confirmed `ReorderableListView.builder` and `SliverReorderableList` already in use; no third-party reorder package present. HIGH confidence.
+- `pubspec.yaml` (read 2026-06-07) — confirmed full dependency list; no reorder/drag/list-management package present. HIGH confidence.
+- `CLAUDE.md` (read 2026-06-07) — Drift `TableIndex` `{#symbol}` syntax, Riverpod 3 naming conventions, iOS build pins, `sqlcipher_flutter_libs` rule. HIGH confidence.
 
 ---
 
-*Stack research for: v1.4 列表功能 (Transaction List tab) — Flutter / Dart / Riverpod 3 / Drift+SQLCipher / table_calendar*
-*Researched: 2026-05-29*
+*Stack research for: v1.6 购物清单 (Shopping List tab) — Flutter / Dart / Riverpod 3 / Drift+SQLCipher*
+*Researched: 2026-06-07*
