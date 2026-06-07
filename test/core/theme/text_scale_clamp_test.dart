@@ -4,7 +4,7 @@ import 'package:home_pocket/core/theme/text_scale_clamp.dart';
 
 void main() {
   group('clampTextScaling', () {
-    testWidgets('clamps an oversized ambient textScaler to kMaxTextScaleFactor', (
+    testWidgets('pins an oversized ambient textScaler down to the locked factor', (
       tester,
     ) async {
       late TextScaler captured;
@@ -25,17 +25,17 @@ void main() {
         ),
       );
 
-      // 3.0x ambient is capped to the 1.2x ceiling.
-      expect(captured.scale(10), kMaxTextScaleFactor * 10);
+      // 3.0x ambient is forced down to the 1.0x lock.
+      expect(captured.scale(10), kLockedTextScaleFactor * 10);
     });
 
-    testWidgets('passes through a textScaler below the ceiling unchanged', (
+    testWidgets('pins an undersized ambient textScaler up to the locked factor', (
       tester,
     ) async {
       late TextScaler captured;
       await tester.pumpWidget(
         MediaQuery(
-          data: const MediaQueryData(textScaler: TextScaler.linear(1.0)),
+          data: const MediaQueryData(textScaler: TextScaler.linear(0.5)),
           child: Builder(
             builder: (context) => clampTextScaling(
               context,
@@ -50,7 +50,9 @@ void main() {
         ),
       );
 
-      expect(captured.scale(10), 10);
+      // 0.5x ambient is forced up to the 1.0x lock — the system setting is
+      // fully ignored in both directions.
+      expect(captured.scale(10), kLockedTextScaleFactor * 10);
     });
 
     testWidgets('renders without throwing when child is null', (tester) async {
@@ -66,8 +68,8 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    test('ceiling matches the quick 260604-fyd decision', () {
-      expect(kMaxTextScaleFactor, 1.2);
+    test('locked factor is 1.0 (no scaling, per 260607 decision)', () {
+      expect(kLockedTextScaleFactor, 1.0);
     });
   });
 }
