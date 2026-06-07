@@ -1,0 +1,13 @@
+# Presentation layer — shopping_list feature.
+# CategorySelectionScreen is allow-listed: it has accounting-specific providers
+# and cannot move to shared/ without dragging accounting providers into shared.
+# The allow: entry makes the cross-feature dependency intentional and auditable (ITEM-03).
+allow:
+  - package:home_pocket/features/accounting/presentation/screens/category_selection_screen.dart
+
+deny:
+  - package:home_pocket/infrastructure/**
+  - package:home_pocket/data/daos/**
+  - package:home_pocket/data/tables/**
+
+inherit: true

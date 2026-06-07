@@ -1,0 +1,9 @@
+# Per-subdirectory whitelist (mirrors lib/features/list/domain/models/import_guard.yaml).
+# Inherits parent domain deny rules.
+# LedgerType enum is imported from accounting domain — same-layer cross-feature dependency.
+allow:
+  - dart:core
+  - package:freezed_annotation/**
+  - ../../../accounting/domain/models/transaction.dart
+
+inherit: true
