@@ -9,10 +9,8 @@ void main() {
     required int year,
     required int month,
     required VoidCallback onSettingsTap,
-    VoidCallback? onPrevMonth,
-    VoidCallback? onNextMonth,
+    VoidCallback? onMonthTap,
     bool isGroupMode = false,
-    bool showNextChevron = true,
   }) {
     return testLocalizedApp(
       child: Theme(
@@ -23,9 +21,7 @@ void main() {
             month: month,
             isGroupMode: isGroupMode,
             onSettingsTap: onSettingsTap,
-            onPrevMonth: onPrevMonth ?? () {},
-            onNextMonth: onNextMonth ?? () {},
-            showNextChevron: showNextChevron,
+            onMonthTap: onMonthTap ?? () {},
           ),
         ),
       ),
@@ -60,7 +56,7 @@ void main() {
       expect(tapped, isTrue);
     });
 
-    testWidgets('month label is not tappable (no dropdown arrow)', (
+    testWidgets('month label shows the down-chevron affordance', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -71,42 +67,35 @@ void main() {
         ),
       );
 
-      // The down-arrow affordance was removed; the month label is static.
-      expect(find.byIcon(Icons.keyboard_arrow_down), findsNothing);
+      // The down-arrow affordance signals the label is tappable.
+      expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
     });
 
-    testWidgets('prev/next chevrons switch months', (tester) async {
-      var prev = false;
-      var next = false;
+    testWidgets('tapping the month label fires onMonthTap', (tester) async {
+      var tapped = false;
       await tester.pumpWidget(
         buildTestWidget(
           year: 2026,
           month: 2,
           onSettingsTap: () {},
-          onPrevMonth: () => prev = true,
-          onNextMonth: () => next = true,
-          showNextChevron: true,
+          onMonthTap: () => tapped = true,
         ),
       );
 
-      await tester.tap(find.byIcon(Icons.chevron_left));
-      await tester.tap(find.byIcon(Icons.chevron_right));
-      expect(prev, isTrue);
-      expect(next, isTrue);
+      await tester.tap(find.text('2026年2月'));
+      expect(tapped, isTrue);
     });
 
-    testWidgets('right chevron absent when showNextChevron is false', (
-      tester,
-    ) async {
+    testWidgets('no prev/next month chevrons are rendered', (tester) async {
       await tester.pumpWidget(
         buildTestWidget(
           year: 2026,
-          month: 6,
+          month: 2,
           onSettingsTap: () {},
-          showNextChevron: false,
         ),
       );
-      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.chevron_left), findsNothing);
       expect(find.byIcon(Icons.chevron_right), findsNothing);
     });
   });

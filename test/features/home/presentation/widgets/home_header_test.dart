@@ -21,9 +21,7 @@ void main() {
           month: 3,
           isGroupMode: false,
           onSettingsTap: () {},
-          onPrevMonth: () {},
-          onNextMonth: () {},
-          showNextChevron: true,
+          onMonthTap: () {},
         ),
       ),
     );
@@ -42,9 +40,7 @@ void main() {
           month: 3,
           isGroupMode: false,
           onSettingsTap: () => tapped = true,
-          onPrevMonth: () {},
-          onNextMonth: () {},
-          showNextChevron: true,
+          onMonthTap: () {},
         ),
       ),
     );
@@ -53,50 +49,45 @@ void main() {
     expect(tapped, isTrue);
   });
 
-  testWidgets('HomeHeader month label has no dropdown arrow', (tester) async {
-    await tester.pumpWidget(
-      buildTestWidget(
-        HeroHeader(
-          year: 2026,
-          month: 3,
-          isGroupMode: false,
-          onSettingsTap: () {},
-          onPrevMonth: () {},
-          onNextMonth: () {},
-          showNextChevron: true,
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.keyboard_arrow_down), findsNothing);
-  });
-
-  testWidgets('HomeHeader prev/next chevrons fire callbacks', (tester) async {
-    var prev = false;
-    var next = false;
-    await tester.pumpWidget(
-      buildTestWidget(
-        HeroHeader(
-          year: 2026,
-          month: 3,
-          isGroupMode: false,
-          onSettingsTap: () {},
-          onPrevMonth: () => prev = true,
-          onNextMonth: () => next = true,
-          showNextChevron: true,
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.chevron_left));
-    await tester.tap(find.byIcon(Icons.chevron_right));
-    expect(prev, isTrue);
-    expect(next, isTrue);
-  });
-
-  testWidgets('HomeHeader hides right chevron when showNextChevron is false', (
+  testWidgets('HomeHeader month label shows the down-chevron affordance', (
     tester,
   ) async {
+    await tester.pumpWidget(
+      buildTestWidget(
+        HeroHeader(
+          year: 2026,
+          month: 3,
+          isGroupMode: false,
+          onSettingsTap: () {},
+          onMonthTap: () {},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+  });
+
+  testWidgets('HomeHeader tapping the month label fires onMonthTap', (
+    tester,
+  ) async {
+    var tapped = false;
+    await tester.pumpWidget(
+      buildTestWidget(
+        HeroHeader(
+          year: 2026,
+          month: 3,
+          isGroupMode: false,
+          onSettingsTap: () {},
+          onMonthTap: () => tapped = true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('2026年3月'));
+    expect(tapped, isTrue);
+  });
+
+  testWidgets('HomeHeader renders no prev/next chevrons', (tester) async {
     await tester.pumpWidget(
       buildTestWidget(
         HeroHeader(
@@ -104,13 +95,12 @@ void main() {
           month: 6,
           isGroupMode: false,
           onSettingsTap: () {},
-          onPrevMonth: () {},
-          onNextMonth: () {},
-          showNextChevron: false,
+          onMonthTap: () {},
         ),
       ),
     );
     await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.chevron_left), findsNothing);
     expect(find.byIcon(Icons.chevron_right), findsNothing);
   });
 
@@ -122,9 +112,7 @@ void main() {
           month: 3,
           isGroupMode: true,
           onSettingsTap: () {},
-          onPrevMonth: () {},
-          onNextMonth: () {},
-          showNextChevron: true,
+          onMonthTap: () {},
         ),
       ),
     );
@@ -141,9 +129,7 @@ void main() {
           month: 3,
           isGroupMode: false,
           onSettingsTap: () {},
-          onPrevMonth: () {},
-          onNextMonth: () {},
-          showNextChevron: true,
+          onMonthTap: () {},
         ),
       ),
     );
@@ -159,9 +145,7 @@ void main() {
           month: 3,
           isGroupMode: false,
           onSettingsTap: () {},
-          onPrevMonth: () {},
-          onNextMonth: () {},
-          showNextChevron: true,
+          onMonthTap: () {},
         ),
       ),
     );
