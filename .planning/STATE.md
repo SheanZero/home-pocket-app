@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: 购物清单
-status: planning
-last_updated: "2026-06-07T06:33:28.173Z"
+status: roadmap_ready
+last_updated: "2026-06-07"
 last_activity: 2026-06-07
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,17 +17,21 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-06-02 — v1.5 文案与配色统一 shipped + archived)
+See: .planning/PROJECT.md (updated 2026-06-07 — v1.6 购物清单 started)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Planning next milestone (`/gsd-new-milestone`)
+**Current focus:** v1.6 购物清单 — roadmap consolidated to 4 phases (36-39), awaiting `/gsd-plan-phase 36`
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 36 (not started — roadmap revised, planning next)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-06-07 — Milestone v1.6 started
+Status: Roadmap revised to 4 phases (36-39); ready to plan Phase 36
+Last activity: 2026-06-07 — v1.6 roadmap consolidated from 7 phases to 4 phases (36-39)
+
+```
+v1.6 progress: [░░░░] 0% — Phase 36-39 defined, 0/4 complete
+```
 
 ## Last Milestone Snapshot (v1.5)
 
@@ -36,7 +40,7 @@ Last activity: 2026-06-07 — Milestone v1.6 started
 - **Duration:** 2026-05-31 → 2026-06-02 (~2 days)
 - **Commits:** 155 (vs v1.4 tag); 550 files changed; +43,552 / -4,650 LOC
 - **Audit Status at Close:** `tech_debt` — accepted (15/15 requirements, 5/5 phases verified `passed`, 6/6 cross-phase integration seams wired). Re-audit after Phase 35 closed the W1/W2 leaks the initial 2026-06-01 audit found. Residual: 1 pending on-device screen-reader UAT (P35 W1); Phases 31/32/34/35 draft-Nyquist (`nyquist_compliant: false`, Phase 33 approved/compliant); out-of-scope `Book.*Balance` DB-column carve-out (A1/D-06); 5 remaining hardcoded a11y labels (IN-02); `.pen` v2 not flushed (D-03b)
-- **Outcome:** Brownfield consistency refactor — unified 日常/悦己/ときめき/Daily/Joy vocabulary across zh/ja/en + internal identifiers (`LedgerType { daily, joy }` + 242 call sites, 25 ARB key roots, v17→v18 Drift migration rewriting stored enum values + `soul_satisfaction`→`joy_fullness`, ADR-017); selected ADR-018 "Teal Clarity" palette from 5 Pencil schemes; encoded it in a single `AppPalette` ThemeExtension replacing all `Color(0x…)` literals + AppColors/AppColorsDark shims with full dark-mode rollout (THEME-V2-02 pulled forward, D-07); re-baselined 77 golden masters (34 dark) to teal; Phase 35 closed audit-found W1 (a11y labels → l10n) + W2 (totalSoulTx→totalJoyTx). Suite 2281/2281 green. Schema at v18.
+- **Outcome:** Brownfield consistency refactor — unified 日常/悦己/ときめき/Daily/Joy vocabulary across zh/ja/en + internal identifiers (`LedgerType { daily, joy }` + 242 call sites, 25 ARB key roots, v17→v18 Drift migration rewriting stored enum values + `soul_satisfaction`→`joy_fullness`, ADR-017); selected ADR-018 "Teal Clarity" palette from 5 Pencil schemes; encoded it in a single `AppPalette` ThemeExtension replacing all `Color(0x…)` literals + AppColors/AppColorsDark shims with full dark-mode rollout (THEME-V2-02 pulled forward, D-07); re-baselined 77 golden masters (34 dark) to teal; Phase 35 closed audit-found W1 (a11y labels → l10n) + W2 (totalSoulTx→totalJoyTx). Suite 2281/2281 green. Schema at v18. **Note:** Schema actually advanced to v19 (category sort-order quick task 260603-ti2) and then ADR-019 "Sakura Mochi × Wakaba" palette replaced ADR-018 "Teal Clarity" (quick task 260603-lr5) — `AppPalette` tokens fully re-valued; CLAUDE.md updated with v1.6 palette section.
 - **Tag:** `v1.5`
 
 ## Previous Milestone Snapshot (v1.4)
@@ -61,10 +65,37 @@ Last activity: 2026-06-07 — Milestone v1.6 started
 ### Roadmap Evolution
 
 - Phase 35 added: Close vocab leaks: a11y Semantics labels (W1) + totalSoulTx identifiers (W2)
+- v1.6 roadmap first written 2026-06-07 as 7 phases (36-42)
+- v1.6 roadmap revised 2026-06-07 to 4 phases (36-39) — user-directed consolidation merging data+domain+import_guard into Phase 36; use cases+sync into Phase 37; shell+widgets into Phase 38; i18n+goldens+smoke into Phase 39
 
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 + v1.3 + v1.4 + v1.5 decisions captured there with outcomes.
+
+**v1.6 locked product decisions (pre-implementation):**
+
+- D1: Public/Private as a top segmented control — two independent lists, not a per-item visibility flag
+- D2: Context-aware FAB — on the shopping tab routes to add-item screen; on other tabs stays transaction-entry FAB
+- D3: Pure list — completing an item only checks it off; NO transaction/accounting linkage
+- D4: Add-item form fields: name (required) + optional ledger, category, tags, note, quantity, estimated price
+- D5: Filter state shared across both segments and resets when switching public↔private
+- D6: An item's public/private attribute is immutable after creation (eliminates public→private sync-tombstone edge case)
+- D7: Concurrent completion edits resolve last-write-wins (no `completedAt` column — Option B from OPEN-1)
+- D8: Differentiators in scope: per-item family attribution + dual-ledger color accent; deferred: running subtotal, name-autocomplete, category-grouping, tag-filter, duplicate-detection
+
+**v1.6 architecture decisions (from research):**
+
+- Schema v19→v20 (NOT v18→v19; v19 was consumed by 260603-ti2 category sort-order quick task; actual `schemaVersion` in `lib/data/app_database.dart` confirmed at 19)
+- Reactive `.watch()` stream mandatory (Drift `readsFrom:` the shopping table) — NOT FutureProvider + ref.invalidate (v1.4 GAP-2 lesson)
+- `LedgerTypeSelector` must move to `lib/shared/widgets/` BEFORE any shopping list UI is written (Phase 36)
+- `CategorySelectionScreen` allow-listed in `shopping_list/presentation/import_guard.yaml` (cannot move to shared — depends on accounting providers)
+- Note field encrypted at repository boundary (mirrors `TransactionRepositoryImpl`)
+- Privacy gate: `listType == 'public'` guard lives at use-case boundary (primary) AND inside `ShoppingItemChangeTracker` (secondary safety net)
+- `listTypeProvider` and `shoppingFilterProvider` both `keepAlive: true` (IndexedStack tab-switch persistence)
+- Two SliverList sections: active items in `SliverReorderableList`, completed items in plain `SliverList` below a divider
+- OPEN-1 resolved: Option B (last-write-wins on isCompleted; no `completedAt` column)
+- OPEN-2 resolved: Option A (per-segment independent filter, reset on segment switch per D5)
+- OPEN-3 resolved: Option A (listType immutable after creation per D6)
 
 **v1.5 roadmap decisions:**
 
@@ -87,8 +118,11 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.0 + v1.1 + v1.2 + v1.
 
 ### Pending Todos
 
-- Run `/gsd-new-milestone` to scope the next milestone (v1.5 shipped 2026-06-02)
-- Refresh `.planning/codebase/` via `/gsd-map-codebase` before next-milestone planning — it is five milestones stale (notably the v1.5 vocabulary/palette rename + schema v18)
+- Run `/gsd-plan-phase 36` to begin Phase 36 (Data Layer + Domain + Import Guard)
+- First action in Phase 36: confirm `schemaVersion` in `lib/data/app_database.dart` is 19; shopping migration must be `if (from < 20)` with `schemaVersion => 20`
+- Phase 37 internal ordering: use cases before sync wiring (use cases are the call site for ShoppingItemChangeTracker)
+- Phase 38 depends on Phase 36 (domain interfaces) and Phase 37 (use cases for provider wiring)
+- Phase 39 is the final phase — defer all goldens here; no premature baselining during Phase 38
 
 ### Blockers / Concerns
 
@@ -97,7 +131,7 @@ No active blockers. Carried-forward debt (cross-milestone):
 - **v1.5 a11y UAT:** Phase 35 W1 on-device screen-reader announcement of localized ledger-chip labels (code grep-verified; tracked in 35-HUMAN-UAT.md) — human_needed
 - **v1.5 vocab residual** *(out-of-scope carve-out)*: `Book.survivalBalance`/`soulBalance` DB columns (Research A1/D-06) — needs a DB-migration phase before public release; 5 hardcoded a11y Semantics labels (IN-02) needing ARB keys
 - **v1.5 Nyquist debt:** Phases 31/32/34/35 draft + `nyquist_compliant: false`; Phase 33 approved/compliant — documentation-grade only
-- **v1.4 GAP-2** *(dead code)*: LIST-02 `watchByBookIds` stream unused; reactivity via manual `ref.invalidate` — consume or delete the 3-layer chain (defer to v1.6; see Deferred Items §v1.4)
+- **v1.4 GAP-2** *(dead code)*: LIST-02 `watchByBookIds` stream unused; reactivity via manual `ref.invalidate` — consume or delete the 3-layer chain (defer; see Deferred Items §v1.4)
 - **v1.4 Nyquist debt:** Phases 25/26/27/29/30 draft + `nyquist_compliant: false`; Phase 28 approved — documentation-grade only
 
 - **FUTURE-TOOL-03** *(coverage-baseline-review)*: Review 70% coverage threshold (triggered post-v1.2; still open)
@@ -122,7 +156,7 @@ No active blockers. Carried-forward debt (cross-milestone):
 | 260526-i9a | 添加账目 tab 切换改为只换 tag 下面的内容区（MaterialPageRoute → zero-duration PageRouteBuilder，AppBar/tab 不再整页滑动） | 2026-05-26 | 2a7d6ce | Verified | [260526-i9a-tab-switch-inner-content-only](./quick/260526-i9a-tab-switch-inner-content-only/) |
 | 260526-inb | IME 收起后恢复数字键盘（TextField 加 textInputAction.done + onTapOutside；fixup: `_handleFocusChange` 把 `_amountFocused` 镜像到 `!hasTextFocus` 才能让 `_showSmartKeypad` 真正变 true）+ KeyboardToolbar elevation 0 + 完成按钮加 outlined frame | 2026-05-26 | 91b401a | Verified | [260526-inb-ime-dismiss-restore-keypad-and-action-ba](./quick/260526-inb-ime-dismiss-restore-keypad-and-action-ba/) |
 | 260526-j98 | 添加账目 4 项 polish：(1) 备注 拆独立卡片放分类后；(2) 支出分类 → 用途/用途/Purpose（ARB 单 key）；(3) 底部 scrollPaddingBottom 从全键盘高改 32dp（删 `_computeSmartKeypadHeight`）；(4) freezed 加 `onPickerDismissed` 回调，date/category picker dismiss 后 `_restoreKeypadFocus()` 让 SmartKeyboard 回来；voice mic golden 同步 re-baseline | 2026-05-26 | fedf995 | Verified | [260526-j98-form-restructure-note-card-rename-paddin](./quick/260526-j98-form-restructure-note-card-rename-paddin/) |
-| 260526-k92 | 语音 tab 4-fix：(1) ARB `manualInput` zh=手动/ja=手動 与 OCR/语音 长度对齐；(2) CRITICAL 保存按钮永久灰 — voice screen 没像 manual 那样 seed 默认 category，加 `_initializeDefaultCategory()` postFrame 调用 + `_canSave` 不再 gate `_hostAmount > 0`（无金额时点 submit 由 snackbar 兜底）；(3) 加固定 40dp transcript 区域显示 `_partialText` / `_finalText`；(4) `extractDate` 已存在但 `parsedDate` 没消费，加 `updateDate` setter + LAST-wins 多次提及规则 + zh/ja 各 5 条 date corpus | 2026-05-26 | f6fa621 | Superseded by 260526-l0o (real-world test surfaced 5 regressions/bugs) | [260526-k92-voice-tab-fixes-save-transcript-date-cat](./quick/260526-k92-voice-tab-fixes-save-transcript-date-cat/) |
+| 260526-k92 | 语音 tab 4-fix：(1) ARB `manualInput` zh=手动/ja=手動 与 OCR/语音 长度对齐；(2) CRITICAL 保存按钮永久灰 — voice screen 没像 manual 那样 seed 默认 category，加 `_initializeDefaultCategory()` postFrame 调用 + `_canSave` 不再 gate `_hostAmount > 0`（无金额时点 submit 由 snackbar 兜底）；(3) 加固定 40dp transcript 区域显示 `_partialText` / `_finalText`；(4) `extractDate` 已存在但 `parsedDate` 没消费，加 `updateDate` setter + LAST-wins 多次提及规则 + zh/ja 各 5 条 date corpus | 2026-05-26 | 2a7d6ce | Superseded by 260526-l0o (real-world test surfaced 5 regressions/bugs) | [260526-k92-voice-tab-fixes-save-transcript-date-cat](./quick/260526-k92-voice-tab-fixes-save-transcript-date-cat/) |
 | 260526-l0o | Voice follow-up 5-fix（k92 真机回归）：(1) `12,450日元 → 450` — `日元` 不在 `VoiceCurrencySuffixes.all` 导致 comma-aware regex miss 退回 `\d{3,7}` fallback；加 `日元/日圓/日币`；(2) `新干线 → 交际费/聚会饮酒` — `default_synonyms.dart` 没 Shinkansen 词条 + resolver 缺 substring fallback；加 13 个交通同义词 + resolver 增 substring 兜底；(3+5) 反转 voice 默认 category seed（manual 仍保留）+ `_canSave = !_isSubmitting`（去掉 `_hostCategory` gate，submit 时 snackbar 兜底）+ guard `_stopRecordingAndCommit` 不让 null 覆盖 host category；(4) transcript 从 bodyMedium/40dp → caption/28dp single-line ellipsis | 2026-05-26 | 5f94743 | Verified 2026-05-31 | [260526-l0o-voice-followup-amount-parse-loss-categor](./quick/260526-l0o-voice-followup-amount-parse-loss-categor/) |
 | 260526-n7b | 语音 amount parser 直接修复（无 plan/summary，单 commit）：「上周二交公交卡用了¥5240」→ 0 — 两个叠加 bug：(a) 周二 的 二 触发 `_numeralHintPattern` → 路由到 state machine → 失败但**不 fallthrough 到 arabic regex**（docstring 承诺了但 code 没做）；(b) `[¥￥]\s*(\d{1,3}...)` 的 \d{1,3} 贪婪匹配 "524" 出自 "5240"，无 `(?!\d)` 锚，alternation 永不试 `\d{4,9}`。加 fallthrough + 加 `(?!\d)` + 2 个 corpus 测试 | 2026-05-26 | (hotfix) | Verified 2026-05-31 | (no plan dir) |
 | 260526-pg6 | Option F active-learning（v1.3.1 quick win，研究报告推荐路径之一）：发现 write/read 用两个 keyword extractor 导致 learned row **silent orphan**（write 留 `日元` 后缀，read 剥掉 → 永不重命中）。加 `VoiceParseResult.resolvedKeyword` 共享 canonical key；learned row `hitCount ≥ 3` 自动 promote 到 substring fallback；`tool/dump_learned_keywords.dart` CLI inspection。Schema v17 不变。350/350 测试通过，zh/ja corpus 100% | 2026-05-26 | 6ff4ea3 | Verified 2026-05-31 (round-trip 学习) | [260526-pg6-voice-active-learning-record-full-keywor](./quick/260526-pg6-voice-active-learning-record-full-keywor/) |
@@ -134,18 +168,18 @@ No active blockers. Carried-forward debt (cross-milestone):
 | 260531-u34 | fix CAL-02/CAL-04 calendar staleness after family-sync + FAB (GAP-1) — invalidate `calendarDailyTotalsProvider(current month)` at the two shell sites (post-sync, post-FAB) alongside the existing `listTransactionsProvider` invalidation; calendar per-day totals + month summary now refresh without pull-to-refresh | 2026-05-31 | 291a9ff4 | Verified 2026-05-31 — closes milestone-audit GAP-1 | [260531-u34](./quick/260531-u34-fix-cal-02-cal-04-calendar-staleness-aft/) |
 | 260602-h29 | 与上个月对比改为同期对比：`_getPreviousMonthComparison` 加可选 `asOf` 参数，当报表月份==当前日历月时上月按「截止今天 day-of-month」截断（短月钳制防 DateTime 溢出，当月最后一天→上月全月），历史月份保持整月 vs 整月；首页副标题 `homeHeroPreviousMonthSubline` 改为「上月同期/先月同期/last month (same period)」三 ARB + gen-l10n；5 个 TDD 用例（月中/月末/短月钳制/历史/跨年），9 个 home_hero golden re-baseline。analyze 0 新增 issue，21/21 单测 + 77/77 golden + 2209/2209 通过 | 2026-06-02 | 666190c3 | Verified 2026-06-02 (independent: analyze 0 new, 21/21 use-case tests green) | [260602-h29](./quick/260602-h29-fix-month-over-month-expense-comparison-/) |
 | 260602-hz0 | 首页三色圆环重设计（设计探索）：调研市面 ring/donut 实现（Apple Fitness/Card、Copilot/Emma/Monzo、Cleo），提炼自然过渡（OKLCH 类比色 / 接缝端色相接 / 锥形渐变）与亲和度（圆头端点 / 粉彩 / 暖心圆心 / 有机形态）技法；产出 5 个差异化方案 D1 柔光三环 / D2 一盘渐变甜甜圈 / D3 日出仪表弧 / D4 流体花瓣环 / D5 堆叠进度+吉祥物，交付为 `docs/design/home-ring-redesign.html`（浅/深色切换 + 对比表 + 推荐路径，基于 ADR-018 token）。**偏离：** Pencil MCP 本环境无法落盘（D-03b）+ executor 被剥离 MCP（claude-code#13898），改 HTML/SVG 交付以保可验证持久；浏览器实测 0 console error、浅深色双验证 | 2026-06-02 | (docs) | Verified 2026-06-02 (chrome-devtools 渲染截图，浅+深色，0 console error) | [260602-hz0](./quick/260602-hz0-pencil-5/) |
-| 260602-jcl | 悦己(Joy) ledger identity 色の代替探索（设计探索）：现状 `joy: #F0A81E`（gold）が「黄色系で good-looking でない」との所感を受け、teal #1C7A86 と対で映える Joy 候补 6 种（Terracotta/Coral/Tangerine/Magenta/Orchid/Plum）を现状 gold 参照列と并べて视覚提示。各候补で悦己 pill×日常 pill 横并び・金额 + live WCAG 比・「本月最爱」ストリップを再现、light/dark 両対応。交付 `docs/design/joy-color-explore.html`。全候补 light/dark とも joyText AA ≥4.5:1。推奨: Terracotta（安全な映える暖色）/ Orchid（脱黄色・teal 补色 wellness 感）。**偏离 hz0 と同理由**（设计稿でコードでない / Pencil 落盘不可 D-03b / executor MCP 剥离）。**已落地（Iteration 3）**：用户选定 **丁香 Mauve #A586B0**，更新 `app_palette.dart` joy 系 token（明+暗各 8 个：joy→#A586B0/joyText→#6B4877/joyLight→#F2ECF4/satisfactionPillRose/textMutedGold 等；joyRoi* 绿与 surfaceCream* teal 及悦己充盈环 Butter 保持不变），契约测试 3 件 + ADR-018 Update 章节；14 golden re-baseline（全部 daily_vs_joy_card + home_hero_card，无其它受影响）；analyze 0 新增、2286/2286 绿 | 2026-06-02 | a4ba49a8→(landing) | Verified 2026-06-02 (analyze 0 新增 + 2286/2286 + golden 目视：joy=mauve/daily=teal/环=Butter) | [260602-jcl](./quick/260602-jcl-joy-ledger-color-explore/) |
-| 260602-nb2 | 本月最爱卡片改用新 strip 布局：HomeHeroCard Region 6 由裸排版（❤+大金额+档位 pill）改为 **Joy 淡彩 strip 容器**（joy bg α0.08 浅/0.13 深 + 0.22 描边，r14 pad14）——标题去❤改 Joy 色，左 36×36 joyLight 图标块（新增 `categoryIconFromId(id)` 纯解析：`DefaultCategories.all` 查 `.icon`→`resolveCategoryIcon`，未知 id fallback `Icons.favorite_border`），中 品类名 + `日期(周)` 副标题（去掉「悦己 ・」前缀），右 金额(joyText 17px) over 复用的档位满足度 pill。ARCH-002 守恒（BestJoyMomentRow 不动，主标题只用品类名）；AppPalette token 不改。设计稿 `docs/design/best-joy-redesign.html` 用户确认（品类名+档位词+去前缀）。TDD 4 测；10 个 home_hero_card_*_ja golden re-baseline（Best Joy 为常驻区，全部 shift 含 4 joy_target 变体）；analyze 0、2290/2290 绿 | 2026-06-02 | ba93d9da | Verified 2026-06-02 (analyze 0 + 2290/2290 + golden 目视 light+dark：Mauve strip/图标块/名+日期/金额 over pill) | [260602-nb2](./quick/260602-nb2-strip-joy-pill/) |
-| 260602-s9g | 主页 4 项 UI 修复：(1) Best Joy strip 去淡彩底框/描边，标题改 `auto_awesome` + bodyLarge/textPrimary 与悦己充盈一致；(2) 左侧图标改用**一级（父）类目**图标——新增 `parentCategoryIconFromId(id)` 纯解析（`DefaultCategories.all` 查父 `.parentId`→父 `.icon`，父缺→自身图标，未知→`favorite_border`），strip 与 recent-tx 都改用它；(3) 二级类目标题放大到 17 与金额同号并与金额垂直居中（去掉日期副标题成单行），满足度 pill 缩小 icon20→16/文 14→12/pad(12,7)→(8,4)；(4) HomeTransactionTile 重构对齐月度 ListTransactionTile（前导 28px L1 图标 → L2 名/账本徽章+商户列 → 金额，去 swipe/member chip），home_screen 传 l1Icon + nullable merchant。TDD 4 测；10 个 home_hero_card golden re-baseline（list_transaction_tile 未漂移）；analyze 0、2294/2294 绿 + **follow-up (dfb36c54)**：用户回归 2 修——(a) Best Joy strip 恢复日期副标题（17px 品类名 over `日期(周)`，居中需求下保留信息）；(b) recent-tx 账本徽章 魂/生→`listLedgerJoy/listLedgerDaily`（悦己/日常）与月度 ListTransactionTile 一致；9 golden re-baseline | 2026-06-02 | 8bee5a0e (+dfb36c54) | Verified 2026-06-02 (analyze 0 + 2294/2294 + golden 目视 light+dark) | [260602-s9g](./quick/260602-s9g-ui-icon/) |
-| 260602-u5x | 本月最爱 → 「票根×日历瓦片」融合布局（融合·轻，用户在 `docs/design/best-joy-fusion.html` 确认）：VALUE 态改为票根 chrome（`_bestJoyTicket`：`ClipRRect(14)`+`IntrinsicHeight`+`Row(stretch)`，左 6px joy 强调条 + 淡彩 joy 底/描边）包裹 `日历瓦片(月条+大日号+周) → 中(父类目图标@15+L2名@15 / 金额@18 joyText) → _DashedVLine 撕口 → 无框 seal(满足度图标@24 over 档位词@10)`；EMPTY/all-neutral 同 chrome + 「—」占位+引导语。CJK 月/日格式收进 `DateFormatter.formatCalendarMonth/Day`（i18n 白名单），dark 月条文字用 `palette.background` 不留裸色。**逆转 s9g「去框」决定**（用户确认票根观感）；满足度沿用 ADR-014 Material 图标（非 HTML emoji，golden 稳定）；数据层不动（ARCH-002）。punch-hole 缺口 OPTIONAL→deferred（虚线撕口已够票根感）。10 golden re-baseline（list_transaction_tile 未漂移）；analyze 0、2294/2294 绿 + **follow-up (70c77ba3, approved)**：放宽满足度 seal 间距——票根右内距 6→16、虚线前加 8px、虚线→图标 8→14，让图标左右更宽松、虚线左移；10 golden re-baseline | 2026-06-02 | be0b00bf (+70c77ba3) | Verified 2026-06-02 (analyze 0 + 2294/2294 + golden 目视 light+dark：票根/日历瓦片/无框 seal；间距 follow-up user-approved) | [260602-u5x](./quick/260602-u5x-over/) |
-| 260602-vo8 | 调研外部开源 icon 库的满意度 icon 候选（≥4-5 组，优先猫猫元素）。核心发现：Unicode 自带「猫脸满意度递增梯度」🐱→😺→😸→😹→😻（终点爱心眼=最爱），4 个开源 emoji 项目（OpenMoji/Twemoji/Noto/Fluent）均覆盖。产出 5 组候选：彩色全猫梯度（OpenMoji-CC / Fluent Flat-MIT / Twemoji-CC / Noto-Apache）+ 单色可染色（Tabler mood+cat-MIT）；关键洞察 **OpenMoji 同套猫脸有彩色+黑色线性两版** → 单色路线也能要猫且保留 palette 染色。交付 `260602-vo8-RESEARCH.md`（横向对比+许可证+集成成本）+ `docs/design/satisfaction-icons-showcase.html`（CDN 实时渲染真实 SVG，含彩色/单色/深色三态，27 个 URL 全 200 校验）+ 渲染截图。**纯调研产出，未改代码**；待用户选定方向后再开后续替换任务 | 2026-06-02 → 06-03 | e0279710 (final) | Complete — 5 line-art emoji 脸 SVG 全站统一(picker + home/list tile + hero seal),共享 SatisfactionFaceIcon,2297/2297 绿 | [260602-vo8-icon-icon-4-5](./quick/260602-vo8-icon-icon-4-5/) |
-| 260603-lr5 | 根据 Pencil node `soqKs`「桜餅×若葉 (Sakura Mochi × Wakaba)」配色全面替换 ADR-018 Teal Clarity（v1.6）。`AppPalette` light+dark 全 ~60 token 重估：primary/nav/tab/button/link + daily → **若叶绿 #6FA36F**；FAB/中央添加入口 → **樱粉 #D98CA0**（仅此处出现粉）；joy 全族 Mauve→**暖琥珀 #A15C00**（joy/joyText/joyLight/joyFullnessBg/satisfactionPill*/textMutedGold）；背景 → **暖米白 #FBF7F4**；文字 #20352B/#71877A；描边 #E6DDD8 暖族；avatar/member 装饰渐变 → 若叶/米白族。**保留**：shared 钢蓝 #5B8AC4、semantic(success/warning/error/info)、joyRoi* 绿(ROI)、悦己充盈环 Butter(`happiness_ring_palette.dart`)。dark 同步派生（暖深底 #171210/card #231E1B，*Text WCAG AA≥4.5:1）。新建 **ADR-019**（superseding ADR-018，全 light+dark 逐角色 hex 表）+ ADR-000 INDEX + CLAUDE.md「App Color Scheme v1.6」。**偏离自动修复(Rule 1)**：`app_theme.dart` 残留硬编码 ADR-018 色→改 `AppPalette.*` 动态引用；`theme_dark_mode_coverage_test` 硬编码 dark bg #0C1719→#171210；7 个 `test/widget/` golden 一并重拍。80 golden master 全重拍；analyze 0 新增（仅 4 处遗留非本次文件）、golden 73/73、全量 **2297/2297 绿**。先经 `--discuss` 锁定 4 项决策（dark 同步派生/joy 转琥珀/shared 保留/semantic 保留）。.pen 落盘 D-03b 仍 deferred（Pencil MCP 本环境不可落盘） | 2026-06-03 | 0e37262e+d148f6e7 (+lr5b 19a14552) | Complete — analyze 0 new + 2297/2297 + golden 目视 light+dark（若叶绿主色/樱粉 FAB/暖米白底）。**follow-up lr5b**：应用户要求 Joy 全族 amber→樱粉 #D98CA0+变体（joyText 深玫瑰 #A53D5E/#E89BB0 保 AA）+ 充盈环内环 target(悦己目标) butter→樱粉（外/中环 teal/sage 留）；级联进度条/最爱/list；20 golden re-baseline、2297/2297 绿；Joy 与 FAB 现共用樱粉(user-directed) | [260603-lr5-pencil-soqks-app](./quick/260603-lr5-pencil-soqks-app/) |
-| 260603-nr1 | 记账/首页 UI 6 项（HTML 设计稿确认后落地）：(1) **记账反馈重设计**——方案 A 顶部统一吐司（成功绿/错误红，复用 voice overlay 范式 + `SoftToast` 加 `FeedbackTone.success` + 新 `feedback_toast.dart`），新增空/零金额校验，成功后**不关页**（移除 `popUntil(first)` + 表单复位 → 连续记账），并把确认删除弹窗抽成共享暖色圆角 `lib/shared/widgets/soft_confirm_dialog.dart`（列表滑删 + 编辑页删除复用）；三语新增 `pleaseEnterAmount`/`successKeepGoing` + gen-l10n。(2) 首页标题图标 `auto_awesome`→`Icons.eco`（悦己充盈，选项 F）/`Icons.workspace_premium`（本月最爱，选项 I）。(3) 悦己vs日常 bar 去 `LinearGradient` 改纯色 `palette.joy`。(4) 月度列表项 padding 10→16 + 尾部 `Icons.chevron_right` 与 `Dismissible(endToStart)` 共存（iOS Mail 模式）。(5) **修复删除/编辑后首页+分析页不刷新**——新 `lib/shared/utils/invalidate_transaction_dependents.dart` 普通函数失效 list+calendar(keyed) / today+monthly+happiness+bestJoy(family)，接入 list_screen 滑删与编辑保存返回。(6) 编辑页 AppBar 加红色删除按钮 → 共享确认 → delete use-case → 共享失效 → pop(true)。**偏离(Rule 1)**：2 处测试断言随码更新（保存后页面保持打开；确认对话框 AlertDialog→Dialog）。analyze 0 新增（仅遗留 onReorder info×2，非本次文件）、gen-l10n 通过、**2297/2297 全绿**（10 home_hero + 6 list_tile golden re-baseline）。先 HTML mockup `mockups/01-feedback`+`02-icons` 经用户确认 4 决策 | 2026-06-03 | 92227367+bea205f8+618ba6cf | Verified 2026-06-03 (independent: analyze 0 新增 on touched + 三 commit 落地确认 + 全量 2297/2297) | [260603-nr1](./quick/260603-nr1-ui-feedback-icons-list-fixes/) |
-| 260603-s07 | 补全首页两项功能：(1) **月份切换**——新增 `HomeSelectedMonth` Riverpod 3 keepAlive notifier（`({int year,int month})` 记录态，`selectMonth`/`prevMonth`/`nextMonth`）→ 生成 `homeSelectedMonthProvider`；`home_screen.dart` 用它替换硬编码 `DateTime.now()` 的 year/month（`monthlyReport`/`happinessReport`/`bestJoy`/heroCard 全部随选中月响应；`todayTransactionsProvider` 保持永远显示当天）；`hero_header.dart` 月份标签两侧加 `Icons.chevron_left/right` `IconButton`（新 `onPrevMonth`/`onNextMonth` 必填回调），点击标签开 `_MonthPickerDialog`（年份导航 2000–2099 clamp + 4×3 月份网格，三语新增 `homeMonthPickerTitle`/`homeMonthPickerClose`）。(2) **最近交易查看全部**——原 TODO stub → `ref.read(listFilterProvider.notifier).selectMonth(now.year, now.month)` + `ref.read(selectedTabIndexProvider.notifier).select(1)`，切到 List tab 并定位本月（`MainShellScreen` 已是 IndexedStack，无需新路由）。**偏离(Rule 1)**：2 个 HeroHeader 测试 helper 补 `onPrevMonth`/`onNextMonth`（解 8 个 analyzer 错）。2 atomic commit、analyze 0、gen-l10n 通过、**2299/2299 全绿** | 2026-06-03 | baa2f927+2f6e93ca | Verified 2026-06-03 (independent: 主树 grep 确认 5 符号落地 + `flutter analyze lib/features/home/` 0 issues + 三语 ARB key 各 2 行) | [260603-s07-1-2](./quick/260603-s07-1-2/) |
-| 260603-stw | 修复未来月份越界 crash（用户截图：处于本月时点「›」前进到下个月触发 analytics `endDate must not be in the future`）：当显示月=当前真实年月时**隐藏向右箭头**，首页与月度列表页同治。(1) `HeroHeader` 新增必填 `showNextChevron: bool`，false 时用 `SizedBox(28×28)` 占位替换右 `IconButton` 保持布局稳定；`home_screen.dart` 派生 `isCurrentMonth = year==now.year && month==now.month` 传 `showNextChevron: !isCurrentMonth`。(2) `HomeSelectedMonth.nextMonth()` 加 clamp 守卫（已在本月则 early-return no-op，防任何代码路径越界）。(3) `list_screen.dart` AppBar `actions:` 用 collection-if `if(!isCurrentMonth)` 省略右 chevron（基于 `listFilterProvider` 的 `selectedYear/Month`）。两处 HeroHeader 测试补 `showNextChevron`（过去月用 true）+ 新增「本月隐藏 chevron」用例；`list_screen_refresh_test` 参数化 + 新增「本月隐藏/过去月显示」2 用例。无 golden 受影响（AppBar/HeroHeader 不在 golden 套件内）。3 atomic commit、analyze 0 新增、**2303/2303 全绿**（+4 新测试） | 2026-06-03 | 18e62888+c0cc3786 | Verified 2026-06-03 (independent: 主树 grep 确认 showNextChevron/isCurrentMonth/nextMonth clamp/list collection-if 落地 + analyze 0 + 41 home/list 测试绿含新增 chevron 可见性用例) | [260603-stw](./quick/260603-stw-analytics-enddate-must-not-be-in-the-fut/) |
-| 260603-ti2 | 将「外出就餐」调为食费一级类目下第一个二级类目 + 手动记账默认类目落在「食费→外出就餐」。**关键发现**：`ManualOneStepScreen._initializeDefaultCategory` 已正确按 `sortOrder ASC` 取第一个 L1 的第一个 L2，无需改代码——仅需修正数据排序。(1) `default_categories.dart` `_expenseL2` §Food 块：`cat_food_dining_out` sortOrder 2→1、`cat_food_groceries` 1→2（fresh install 路径，cafe=3/other=4/delivery=5/drinks=6 不变）。(2) `app_database.dart` `schemaVersion` 18→19 + `if(from<19)` 迁移块两条 `UPDATE categories SET sort_order=N WHERE id=... AND is_system=1`（仅系统类目，幂等，不碰用户自定义类目；升级路径）。(3) 新增 `category_v19_dining_out_first_test.dart`（静态断言 + 迁移断言，9 测试）。**偏离(Rule 1)**：5 个既有迁移测试硬编码 `equals(18)` schemaVersion guard 随升版失效→改 `greaterThanOrEqualTo(该迁移最低版本)`，对齐 v14 测试既有模式。验证 `cat_food` 确为第一个 L1 支出类目（两需求一致无冲突）。2 atomic commit、analyze 0 新增、**2312/2312 全绿**（+9 测试） | 2026-06-03 | 77a4833a+9a555830 | Verified 2026-06-03 (independent: 主树 grep 确认 dining_out sortOrder=1/groceries=2 + schemaVersion=>19 + v19 UPDATE 块落地 + 全量 2312/2312) | [260603-ti2-category](./quick/260603-ti2-category/) |
-| 260604-fyd | 修复 iPhone 15 Pro 选大字体时首页布局溢出（用户截图）。**根因**：`MaterialApp`（`lib/main.dart`）无 `builder:`，全工程零 `textScaler` 处理（`grep textScaler\|textScaleFactor lib/`=0），iOS 大字体最高 ~3.1×（AX5）无上限放大撑爆首页固定横向 `Row`——最先出事是 `home_hero_card.dart` ときめき/日常 分账条（两组「文字+金额」左右对开 nowrap）。先产出 4 档对比 HTML（`textscale-preview.html`+`.png`，按真实 393pt 宽裁切、Row=nowrap/Expanded=flex:1+min-width:0 建模 Flutter）：1.0/1.15/1.20/1.30 显示 1.30 切「日常」字、1.20 偏紧、1.15 几乎不放大。**用户选 1.2**（不加固分账条，最小改动）。改动：新建 `lib/core/theme/text_scale_clamp.dart`（`const kMaxTextScaleFactor=1.2` + `clampTextScaling` builder=`MediaQuery.withClampedTextScaling`，child==null→`SizedBox.shrink()`）；`lib/main.dart` 加 `builder: clampTextScaling`。TDD：先 RED（符号未定义）→ 新建 `test/core/theme/text_scale_clamp_test.dart`(4 测试：3.0×→钳1.2/1.0×透传/null child 不抛/常量=1.2) GREEN。1 atomic commit、analyze 0、主树 8/8 app-boot 测试未回归 | 2026-06-04 | f156d721 | Verified 2026-06-04 (clamp 测试 4/4 + main_characterization 8/8 + analyze 改动文件 0 issues) | [260604-fyd-iphone-15-pro](./quick/260604-fyd-iphone-15-pro/) |
-| 260607-jrz | 首页月份选择从 header 左右翻月 chevron 改为「点月份标签 → 弹窗式月份网格」。**前置纠正**：现状无 swipe/PageView，是 `hero_header.dart` 左右 chevron 逐月步进 + 标签不可点；首页无网格弹窗（仅 analytics bottom-sheet）。**用户锁定决策**（--discuss 式澄清）：(1) 完全去掉 header 左右 ‹ › chevron，月份标签右侧恢复向下箭头 `⌄`，点标签整体开弹窗；(2) 未来月份置灰不可点 + 年导航 `›` 在当年禁用（保持 `nextMonth()` 现有 clamp 语义）。改动：新建 `lib/features/home/presentation/widgets/month_picker_dialog.dart`（`showMonthPickerDialog(ctx,{selectedYear,selectedMonth})→({int year,int month})?`，居中圆角卡 `palette.background`/r16，`‹ YYYY年 ›` 年导航=accentPrimary/上一年常开·下一年当年禁用，3×4 网格 `homeMonthLabel`，选中 `backgroundMuted` 胶囊，未来月 `textTertiary`+不可点）；`hero_header.dart` 去 `onPrevMonth`/`onNextMonth`/`showNextChevron`+两 chevron，加必填 `onMonthTap`，标签+`keyboard_arrow_down` 包一个 InkWell（保持纯 UI 组件）；`home_screen.dart` `onMonthTap` 开弹窗（`context.mounted` 守卫）→`homeSelectedMonthProvider.notifier.selectMonth`，删未用 `now`/`isCurrentMonth` 局部。复用既有 ARB `homeMonthLabel`/`analyticsTimeWindowChipLabelYear`（无新 key、无 gen-l10n）。无硬编码 hex（grep=0）、全 `S.of(context)`。TDD：弹窗 7 测试 RED→GREEN；两处旧 header 测试改用新 API（删 chevron 用例、翻转「无下箭头」断言、补 tap 触发回调）。3 atomic commit（80b16179/15d11f73/99debfc6）+worklog（635ded0e），analyze 改动文件 0、`test/widget/features/home/ test/features/home/` 112/112 绿、无 golden 受影响 | 2026-06-07 | 80b16179 | Verified 2026-06-07 (弹窗 7/7 + home 112/112 + analyze 改动文件 0) | [260607-jrz-month-picker-dialog](./quick/260607-jrz-month-picker-dialog/) |
+| 260602-jcl | 悦己(Joy) ledger identity 色の代替探索（设计探索） — 最终落地：用户选定 **丁香 Mauve #A586B0**，更新 `app_palette.dart` joy 系 token | 2026-06-02 | a4ba49a8 | Verified 2026-06-02 | [260602-jcl](./quick/260602-jcl-joy-ledger-color-explore/) |
+| 260602-nb2 | 本月最爱卡片改用新 strip 布局 | 2026-06-02 | ba93d9da | Verified 2026-06-02 | [260602-nb2](./quick/260602-nb2-strip-joy-pill/) |
+| 260602-s9g | 主页 4 项 UI 修复 | 2026-06-02 | 8bee5a0e | Verified 2026-06-02 | [260602-s9g](./quick/260602-s9g-ui-icon/) |
+| 260602-u5x | 本月最爱 → 「票根×日历瓦片」融合布局 | 2026-06-02 | be0b00bf | Verified 2026-06-02 | [260602-u5x](./quick/260602-u5x-over/) |
+| 260602-vo8 | 调研外部开源 icon 库的满意度 icon 候选 — 最终落地：5 line-art emoji 脸 SVG 全站统一，2297/2297 绿 | 2026-06-02 | e0279710 | Complete | [260602-vo8-icon-icon-4-5](./quick/260602-vo8-icon-icon-4-5/) |
+| 260603-lr5 | ADR-019 "桜餅×若葉 (Sakura Mochi × Wakaba)" palette — `AppPalette` full re-value; 80 golden master re-baseline; 2297/2297 green | 2026-06-03 | 0e37262e | Complete | [260603-lr5-pencil-soqks-app](./quick/260603-lr5-pencil-soqks-app/) |
+| 260603-nr1 | 记账/首页 UI 6 项（HTML 设计稿确认后落地）：记账反馈重设计 + 首页标题图标 + 悦己vs日常 bar + 月度列表项 padding + 删除/编辑后首页刷新 + 编辑页删除按钮 | 2026-06-03 | 92227367 | Verified 2026-06-03 | [260603-nr1](./quick/260603-nr1-ui-feedback-icons-list-fixes/) |
+| 260603-s07 | 补全首页两项功能：月份切换（keepAlive notifier + HeroHeader chevron + MonthPickerDialog）+ 最近交易查看全部（切换到 List tab + 定位本月） | 2026-06-03 | baa2f927 | Verified 2026-06-03 | [260603-s07-1-2](./quick/260603-s07-1-2/) |
+| 260603-stw | 修复未来月份越界 crash — hide right chevron when displaying current month; nextMonth() clamp guard | 2026-06-03 | 18e62888 | Verified 2026-06-03 | [260603-stw](./quick/260603-stw-analytics-enddate-must-not-be-in-the-fut/) |
+| 260603-ti2 | 将「外出就餐」调为食费一级类目下第一个二级类目 + schema v18→v19 migration | 2026-06-03 | 77a4833a | Verified 2026-06-03 | [260603-ti2-category](./quick/260603-ti2-category/) |
+| 260604-fyd | 修复 iPhone 15 Pro 选大字体时首页布局溢出 — `textScaleClamp` builder clamping at 1.2× | 2026-06-04 | f156d721 | Verified 2026-06-04 | [260604-fyd-iphone-15-pro](./quick/260604-fyd-iphone-15-pro/) |
+| 260607-jrz | 首页月份选择从 header 左右翻月 chevron 改为「点月份标签 → 弹窗式月份网格」 | 2026-06-07 | 80b16179 | Verified 2026-06-07 | [260607-jrz-month-picker-dialog](./quick/260607-jrz-month-picker-dialog/) |
 
 ## Deferred Items
 
@@ -233,12 +267,7 @@ No active blockers. Carried-forward debt (cross-milestone):
 
 ## Session Continuity
 
-Last session: 2026-06-02 — Milestone v1.5 audited (`tech_debt`, re-audit after Phase 35) and completed/archived (tag `v1.5`).
-Stopped at: Milestone v1.5 complete — awaiting next milestone.
+Last session: 2026-06-07 — v1.6 roadmap consolidated from 7 phases (36-42) to 4 phases (36-39) per user direction.
+Stopped at: Roadmap revised; STATE.md and REQUIREMENTS.md traceability updated.
 
-**Planned Next:** `/gsd-new-milestone` — scope the next milestone.
-
-## Operator Next Steps
-
-- Start the next milestone with `/gsd-new-milestone`
-- Refresh `.planning/codebase/` via `/gsd-map-codebase` before planning (five milestones stale)
+**Next:** `/gsd-plan-phase 36` — plan Phase 36: Data Layer + Domain + Import Guard

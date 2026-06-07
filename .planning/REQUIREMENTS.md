@@ -118,43 +118,50 @@ Explicitly excluded for v1.6. Documented to prevent scope creep.
 
 ## Traceability
 
-Which phases cover which requirements. Populated during roadmap creation.
+Which phases cover which requirements. Updated for 4-phase consolidated roadmap (36-39).
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SHOP-01 | TBD | Pending |
-| SHOP-02 | TBD | Pending |
-| SHOP-03 | TBD | Pending |
-| SHOP-04 | TBD | Pending |
-| DONE-01 | TBD | Pending |
-| DONE-02 | TBD | Pending |
-| DONE-03 | TBD | Pending |
-| ITEM-01 | TBD | Pending |
-| ITEM-02 | TBD | Pending |
-| ITEM-03 | TBD | Pending |
-| ITEM-04 | TBD | Pending |
-| ITEM-05 | TBD | Pending |
-| FILT-01 | TBD | Pending |
-| FILT-02 | TBD | Pending |
-| FILT-03 | TBD | Pending |
-| MGMT-01 | TBD | Pending |
-| MGMT-02 | TBD | Pending |
-| MGMT-03 | TBD | Pending |
-| SYNC-01 | TBD | Pending |
-| SYNC-02 | TBD | Pending |
-| SYNC-03 | TBD | Pending |
-| SYNC-04 | TBD | Pending |
-| SYNC-05 | TBD | Pending |
-| SYNC-06 | TBD | Pending |
-| NAV-01 | TBD | Pending |
-| NAV-02 | TBD | Pending |
-| NAV-03 | TBD | Pending |
+| SHOP-01 | Phase 36 | Pending |
+| SHOP-02 | Phase 38 | Pending |
+| SHOP-03 | Phase 38 | Pending |
+| SHOP-04 | Phase 38 | Pending |
+| DONE-01 | Phase 38 | Pending |
+| DONE-02 | Phase 36 | Pending |
+| DONE-03 | Phase 38 | Pending |
+| ITEM-01 | Phase 38 | Pending |
+| ITEM-02 | Phase 38 | Pending |
+| ITEM-03 | Phase 36 | Pending |
+| ITEM-04 | Phase 38 | Pending |
+| ITEM-05 | Phase 36 | Pending |
+| FILT-01 | Phase 38 | Pending |
+| FILT-02 | Phase 38 | Pending |
+| FILT-03 | Phase 38 | Pending |
+| MGMT-01 | Phase 38 | Pending |
+| MGMT-02 | Phase 38 | Pending |
+| MGMT-03 | Phase 38 | Pending |
+| SYNC-01 | Phase 37 | Pending |
+| SYNC-02 | Phase 37 | Pending |
+| SYNC-03 | Phase 37 | Pending |
+| SYNC-04 | Phase 38 | Pending |
+| SYNC-05 | Phase 37 | Pending |
+| SYNC-06 | Phase 37 | Pending |
+| NAV-01 | Phase 38 | Pending |
+| NAV-02 | Phase 38 | Pending |
+| NAV-03 | Phase 39 | Pending |
 
 **Coverage:**
 - v1 requirements: 27 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 27 ⚠️ (filled by roadmapper)
+- Mapped to phases: 27 ✓
+- Unmapped: 0 ✓
+
+| Phase | Requirements assigned |
+|-------|----------------------|
+| Phase 36 | DONE-02, ITEM-03, ITEM-05, SHOP-01, SYNC-05 (data layer + domain + import guard) |
+| Phase 37 | DONE-01 (use-case logic), DONE-03 (use-case logic), ITEM-01, ITEM-02, ITEM-04, MGMT-01 (use-case logic), MGMT-02 (use-case logic), MGMT-03 (use-case logic), SYNC-01, SYNC-02, SYNC-03, SYNC-05 (sync apply), SYNC-06 (use cases + sync integration) |
+| Phase 38 | SHOP-02, SHOP-03, SHOP-04, DONE-01 (UI animation), DONE-03 (UI button), FILT-01, FILT-02, FILT-03, ITEM-01 (form UI), ITEM-02 (form UI), ITEM-04 (form UI), MGMT-01 (swipe UI), MGMT-02 (batch UI), MGMT-03 (gesture gate UI), NAV-01, NAV-02, SYNC-04 (presentation shell + UI widgets) |
+| Phase 39 | NAV-03 (i18n parity + goldens + smoke test) |
 
 ---
 *Requirements defined: 2026-06-07 (milestone v1.6 购物清单)*
-*Last updated: 2026-06-07 after /gsd-new-milestone questioning + 4-agent domain research*
+*Last updated: 2026-06-07 — traceability revised for 4-phase consolidated roadmap (Phases 36-39); all 27 requirements mapped*
