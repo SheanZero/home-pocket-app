@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8">
+<style>
+  :root{--bg:#FBF7F4;--textPrimary:#20352B;--textSecondary:#71877A;--daily:#5FAE72;--dailyLight:#EEF6EC}
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',-apple-system,'PingFang SC',sans-serif}
+  body{background:#2b2622;color:#eee;padding:26px}
+  h1{font-size:17px;margin-bottom:16px}
+  .lbl{font-size:12px;color:#b7ada6;margin:14px 0 6px}
+  .bar{width:393px;background:var(--bg);border-radius:14px;border:1px solid #000;
+    height:60px;display:flex;align-items:center;padding:0 28px;position:relative}
+  .edge{position:absolute;left:28px;top:0;bottom:0;border-left:1px dashed rgba(240,106,106,.45)}
+  .chev{color:var(--textSecondary);font-size:20px;line-height:1}
+  /* before: chevron centered in 28px box (4px indent), month 24/700 */
+  .b .chevbox{width:28px;display:flex;justify-content:center}
+  .b .month{font-size:24px;font-weight:700;color:var(--textPrimary)}
+  /* after: chevron flush-left (20px box, left-aligned), 4px gap, month 15/500 */
+  .a .chevbox{width:20px;display:flex;justify-content:flex-start}
+  .a .gap{width:4px}
+  .a .month{font-size:15px;font-weight:500;color:var(--textPrimary)}
+  .next{color:var(--textSecondary);font-size:20px;margin-left:6px}
+  .spacer{flex:1}
+  .badge{display:inline-flex;align-items:center;gap:4px;background:var(--dailyLight);
+    padding:4px 10px;border-radius:8px;color:var(--daily);font-size:13px;font-weight:500}
+  .gear{font-size:20px;color:var(--textPrimary);margin-left:8px}
+  .note{font-size:11px;color:#b7ada6;margin-top:4px}
+</style></head><body>
+  <h1>首页头部 — 改前 / 改后（红虚线 = 内容左缘 x=28pt）</h1>
+
+  <div class="lbl">改之前</div>
+  <div class="bar b">
+    <div class="edge"></div>
+    <div class="chevbox"><span class="chev">‹</span></div>
+    <div class="month">2026年6月</div>
+    <span class="next">›</span>
+    <div class="spacer"></div>
+    <span class="badge">👤 个人模式</span><span class="gear">⚙</span>
+  </div>
+  <div class="note">箭头在 28px 框里居中 → 离左缘缩进 ~4px；月份 24px 黑体(w700)，整体偏大偏重，左侧显空。</div>
+
+  <div class="lbl">改之后</div>
+  <div class="bar a">
+    <div class="edge"></div>
+    <div class="chevbox"><span class="chev">‹</span></div>
+    <div class="gap"></div>
+    <div class="month">2026年6月</div>
+    <span class="next">›</span>
+    <div class="spacer"></div>
+    <span class="badge">👤 个人模式</span><span class="gear">⚙</span>
+  </div>
+  <div class="note">箭头贴内容左缘(x=28)、与月份间距收到 4px；月份 15px / w500（去黑体，与标题大小一致）。</div>
+</body></html>
