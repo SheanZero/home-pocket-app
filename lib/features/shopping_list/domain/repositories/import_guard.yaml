@@ -1,0 +1,8 @@
+# Per-subdirectory whitelist for shopping_list domain/repositories/ (mirrors
+# lib/features/accounting/domain/repositories/import_guard.yaml).
+# Inherits parent domain deny rules.
+allow:
+  - dart:core
+  - ../models/shopping_item.dart
+
+inherit: true
