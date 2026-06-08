@@ -1,7 +1,4 @@
-// ignore_for_file: unused_import
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/shopping_list/clear_completed_items_use_case.dart';
 import 'package:home_pocket/application/shopping_list/create_shopping_item_use_case.dart';
 import 'package:home_pocket/application/shopping_list/delete_shopping_item_use_case.dart';
