@@ -192,7 +192,7 @@ Plans:
   4. The add/edit form accepts all D4 fields — name (required, validated), optional ledger selector (reuses `LedgerTypeSelector` from `lib/shared/widgets/`), optional category (pushes to `CategorySelectionScreen`), optional tags, note (encrypted at repo boundary), quantity (plain numeric), and estimated price (integer yen via `NumberFormatter`); completed items sort exclusively below a visual divider; active items in a `SliverReorderableList`; swipe-to-delete uses `Dismissible` and is disabled while batch-select mode is active (MGMT-03)
   5. Long-pressing any item enters batch-select mode with a floating bottom action bar; "Select all" is available; the batch-delete confirmation fires `DeleteShoppingItemUseCase` for each selected item with soft-delete semantics; "Clear all completed" appears only when the completed section is non-empty and fires `ClearCompletedItemsUseCase` for the current segment regardless of active filters; all three empty state variants (empty private, empty public solo, empty public family) render correctly (SHOP-04)
 
-**Plans:** 1/8 plans executed
+**Plans:** 3/8 plans executed
 
 Plans:
 **Wave 0** *(model fix + test infra — blocks all other plans)*
@@ -201,8 +201,8 @@ Plans:
 
 **Wave 1** *(provider graph + nav rename — parallel, no file conflicts)*
 
-- [ ] 38-02-PLAN.md — Provider graph: listTypeProvider + shoppingFilterProvider (keepAlive) + batchSelectModeProvider + 6 use-case providers + filteredShoppingItemsProvider
-- [ ] 38-03-PLAN.md — Nav rename: home_bottom_nav_bar.dart shopping-bag icon + ARB homeTabTodo value update + import_guard.yaml files
+- [x] 38-02-PLAN.md — Provider graph: listTypeProvider + shoppingFilterProvider (keepAlive) + batchSelectModeProvider + 6 use-case providers + filteredShoppingItemsProvider
+- [x] 38-03-PLAN.md — Nav rename: home_bottom_nav_bar.dart shopping-bag icon + ARB homeTabTodo value update + import_guard.yaml files
 
 **Wave 2** *(tile + filter widgets — parallel, no file conflicts)*
 
@@ -253,5 +253,5 @@ Plans:
 |-------|----------------|--------|-----------|
 | 36. Data Layer + Domain + Import Guard | 7/7 | Complete    | 2026-06-07 |
 | 37. Application Use Cases + Sync Integration | 6/6 | Complete    | 2026-06-08 |
-| 38. Presentation Shell + UI Widgets | 1/8 | In Progress|  |
+| 38. Presentation Shell + UI Widgets | 3/8 | In Progress|  |
 | 39. i18n + Golden Re-baseline + Smoke Test | 0/TBD | Not started | - |
