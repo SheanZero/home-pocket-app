@@ -41,7 +41,6 @@ Project 8pt convention (locked). Declared scale values are all multiples of 4:
 |-------|-------|---------------------|
 | xs | 4px | Chip corner radius `BorderRadius.circular(4)`; smallest grid step |
 | sm | 8px | Compact element spacing; gap between trailing affordances (edit chevron ↔ drag handle) |
-| — | 12px | Leading-icon ↔ text-block gap (`SizedBox(width: 12)`, tile template) |
 | md | 16px | Tile horizontal padding (`EdgeInsets.symmetric(horizontal: 16)`); screen edge padding; filter-bar horizontal padding |
 | lg | 24px | Empty-state vertical rhythm (icon→heading→body→CTA); section padding |
 | xl | 32px | Empty-state top inset / large layout gaps |
@@ -51,6 +50,7 @@ Project 8pt convention (locked). Declared scale values are all multiples of 4:
 
 - **6px — inline icon↔text gaps** *(off-grid)*: used for the in-row icon↔text spacing inside a tile (`SizedBox(width: 6)`). Kept verbatim for visual parity with `list_transaction_tile.dart` (golden-mastered). Not a multiple of 4; accepted deviation, not a new spacing decision.
 - **14px — tile vertical padding** *(off-grid)*: used for `EdgeInsets.symmetric(vertical: 14)` on the tile row. Kept verbatim for visual parity with `list_transaction_tile.dart` (golden-mastered). Not a multiple of 4; accepted deviation, not a new spacing decision.
+- **12px — leading icon↔text-block gap** *(off standard set, multiple of 4)*: used for `SizedBox(width: 12)` between the tile's leading icon and text block. Kept verbatim for visual parity with `list_transaction_tile.dart` (golden-mastered). A multiple of 4 but not in the standard 8pt set {4, 8, 16, 24, 32, 48, 64}; accepted deviation, not a new spacing decision.
 - **4px left-border accent** *(border, not spacing)*: the ledger-stripe is a 4px solid border (SHOP-03) — narrower than a spacing token by design (it is a border width, not a gap).
 - **Touch targets:** every interactive target (toggle row, edit chevron, drag handle, swipe action, batch checkbox, filter chip, FAB) MUST be ≥ 48×48px (project SmartKeyboard floor, v1.3). The drag handle and edit chevron in the trailing cluster (D38-01/D38-02) each need their own ≥44px hit area and must not overlap the `Dismissible` swipe target on the row body.
 
@@ -200,7 +200,7 @@ Not applicable — Flutter project, no shadcn / third-party component registry. 
 - [x] Dimension 2 Visuals: PASS
 - [x] Dimension 3 Color: PASS
 - [x] Dimension 4 Typography: PASS (locked design-system exception — ACCEPTED)
-- [x] Dimension 5 Spacing: PASS (6px / 14px off-grid — ACCEPTED in Exceptions)
+- [x] Dimension 5 Spacing: PASS (6px / 12px / 14px off standard-set — ACCEPTED in Exceptions)
 - [x] Dimension 6 Registry Safety: PASS
 
 **Approval:** approved (gsd-ui-checker, 2026-06-08)
