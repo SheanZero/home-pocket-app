@@ -6,7 +6,7 @@ import '../../../../../widget/features/home/helpers/test_localizations.dart';
 
 void main() {
   group('HomeBottomNavBar — shopping list tab (NAV-02)', () {
-    testWidgets('4th tab shows 買い物リスト in Japanese locale', (tester) async {
+    testWidgets('4th tab shows 買い物 in Japanese locale', (tester) async {
       await tester.pumpWidget(
         testLocalizedApp(
           locale: const Locale('ja'),
@@ -20,11 +20,11 @@ void main() {
         ),
       );
 
-      expect(find.text('買い物リスト'), findsOneWidget);
+      expect(find.text('買い物'), findsOneWidget);
       expect(find.text('やること'), findsNothing);
     });
 
-    testWidgets('4th tab shows 购物清单 in Chinese locale', (tester) async {
+    testWidgets('4th tab shows 购物 in Chinese locale', (tester) async {
       await tester.pumpWidget(
         testLocalizedApp(
           locale: const Locale('zh'),
@@ -38,11 +38,11 @@ void main() {
         ),
       );
 
-      expect(find.text('购物清单'), findsOneWidget);
+      expect(find.text('购物'), findsOneWidget);
       expect(find.text('待办事项'), findsNothing);
     });
 
-    testWidgets('4th tab shows Shopping List in English locale', (tester) async {
+    testWidgets('4th tab shows Shopping in English locale', (tester) async {
       await tester.pumpWidget(
         testLocalizedApp(
           locale: const Locale('en'),
@@ -56,7 +56,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Shopping List'), findsOneWidget);
+      expect(find.text('Shopping'), findsOneWidget);
       expect(find.text('Todo'), findsNothing);
     });
 

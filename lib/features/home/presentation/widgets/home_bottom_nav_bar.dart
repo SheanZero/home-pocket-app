@@ -42,7 +42,7 @@ class HomeBottomNavBar extends StatelessWidget {
       l10n.homeTabHome,
       l10n.homeTabList,
       l10n.homeTabChart,
-      l10n.homeTabTodo,
+      l10n.homeTabShopping,
     ];
 
     return Container(
