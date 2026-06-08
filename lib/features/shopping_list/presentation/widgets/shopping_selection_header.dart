@@ -54,7 +54,7 @@ class ShoppingSelectionHeader extends ConsumerWidget {
           const Spacer(),
           // Selection count
           Text(
-            '${batch.selectedIds.length} 件',
+            l10n.shoppingSelectionCount(batch.selectedIds.length),
             style: AppTextStyles.titleLarge,
           ),
           const Spacer(),

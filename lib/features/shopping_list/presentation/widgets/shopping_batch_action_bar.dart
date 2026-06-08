@@ -45,7 +45,7 @@ class ShoppingBatchActionBar extends ConsumerWidget {
       child: Row(
         children: [
           Text(
-            '${batch.selectedIds.length} 件選択中',
+            l10n.shoppingBatchSelectingCount(batch.selectedIds.length),
             style: AppTextStyles.titleSmall.copyWith(
               color: palette.textSecondary,
             ),

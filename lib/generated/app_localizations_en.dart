@@ -1917,6 +1917,16 @@ class SEn extends S {
   String get shoppingBatchSelectAll => 'Select All';
 
   @override
+  String shoppingSelectionCount(int count) {
+    return '$count';
+  }
+
+  @override
+  String shoppingBatchSelectingCount(int count) {
+    return '$count selected';
+  }
+
+  @override
   String get shoppingFormAddTitle => 'Add item';
 
   @override

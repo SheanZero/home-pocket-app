@@ -2396,6 +2396,16 @@
   "@shoppingBatchSelectAll": {
     "description": "Select-all button in the batch selection header (Phase 38)"
   },
+  "shoppingSelectionCount": "{count}项",
+  "@shoppingSelectionCount": {
+    "description": "Selected item count shown in the batch selection header (Phase 38)",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "shoppingBatchSelectingCount": "已选{count}项",
+  "@shoppingBatchSelectingCount": {
+    "description": "Selected item count label in the batch action bar (Phase 38)",
+    "placeholders": { "count": { "type": "int" } }
+  },
   "shoppingFormAddTitle": "添加商品",
   "@shoppingFormAddTitle": {
     "description": "AppBar title for the shopping item form in create mode (Phase 38-07)"

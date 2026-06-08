@@ -19,6 +19,8 @@ import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.d
 import 'package:home_pocket/features/shopping_list/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_batch.dart';
 import 'package:home_pocket/features/shopping_list/presentation/screens/shopping_list_screen.dart';
+import 'package:home_pocket/features/shopping_list/presentation/widgets/shopping_batch_action_bar.dart';
+import 'package:home_pocket/features/shopping_list/presentation/widgets/shopping_selection_header.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
@@ -207,9 +209,10 @@ void main() {
         ],
       );
 
-      // ShoppingSelectionHeader renders a container with 件 count text
-      // and Cancel / Select All buttons
-      expect(find.textContaining('件'), findsAny);
+      // ShoppingSelectionHeader renders the selection count (locale-dependent)
+      // and Cancel / Select All buttons — assert on widget type so the test
+      // is locale-independent.
+      expect(find.byType(ShoppingSelectionHeader), findsOneWidget);
     });
 
     testWidgets(
@@ -228,8 +231,9 @@ void main() {
         ],
       );
 
-      // ShoppingBatchActionBar shows "N 件選択中"
-      expect(find.textContaining('件'), findsAny);
+      // ShoppingBatchActionBar shows the selecting-count (locale-dependent) —
+      // assert on widget type so the test is locale-independent.
+      expect(find.byType(ShoppingBatchActionBar), findsOneWidget);
     });
 
     testWidgets(
@@ -238,8 +242,9 @@ void main() {
       final activeItem = _makeItem(id: 'a-1', isCompleted: false);
       await _pumpScreen(tester, items: [activeItem]);
 
-      // With default batch state (inactive), "件選択中" should not appear
-      expect(find.text('1 件選択中'), findsNothing);
+      // With default batch state (inactive), the batch chrome must be absent.
+      expect(find.byType(ShoppingBatchActionBar), findsNothing);
+      expect(find.byType(ShoppingSelectionHeader), findsNothing);
     });
   });
 

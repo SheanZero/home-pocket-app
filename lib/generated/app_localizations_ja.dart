@@ -1883,6 +1883,16 @@ class SJa extends S {
   String get shoppingBatchSelectAll => 'すべて選択';
 
   @override
+  String shoppingSelectionCount(int count) {
+    return '$count件';
+  }
+
+  @override
+  String shoppingBatchSelectingCount(int count) {
+    return '$count件選択中';
+  }
+
+  @override
   String get shoppingFormAddTitle => 'アイテムを追加';
 
   @override

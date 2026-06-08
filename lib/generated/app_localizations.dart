@@ -3541,6 +3541,18 @@ abstract class S {
   /// **'Select All'**
   String get shoppingBatchSelectAll;
 
+  /// Selected item count shown in the batch selection header (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'{count}'**
+  String shoppingSelectionCount(int count);
+
+  /// Selected item count label in the batch action bar (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String shoppingBatchSelectingCount(int count);
+
   /// AppBar title for the shopping item form in create mode (Phase 38-07)
   ///
   /// In en, this message translates to:

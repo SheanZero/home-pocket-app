@@ -1876,6 +1876,16 @@ class SZh extends S {
   String get shoppingBatchSelectAll => '全选';
 
   @override
+  String shoppingSelectionCount(int count) {
+    return '$count项';
+  }
+
+  @override
+  String shoppingBatchSelectingCount(int count) {
+    return '已选$count项';
+  }
+
+  @override
   String get shoppingFormAddTitle => '添加商品';
 
   @override
