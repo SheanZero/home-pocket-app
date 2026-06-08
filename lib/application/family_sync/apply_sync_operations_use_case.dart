@@ -39,27 +39,30 @@ class ApplySyncOperationsUseCase {
     for (final operation in operations) {
       final entityType = operation['entityType'] as String?;
 
-      switch (entityType) {
-        case 'bill':
-          await _applyBillOperation(operation);
-        case 'profile':
-          await _applyProfileOperation(operation, groupId: groupId);
-        case 'avatar':
-          await _applyAvatarOperation(operation, groupId: groupId);
-        case 'shopping_item':
-          // D37-05: fault isolation — bad shopping op must not abort bill ops
-          try {
+      // WR-04 / D37-05: per-operation fault isolation around EVERY entity type.
+      // A single poison op (e.g. an unguarded DateTime.parse in a bill op, or
+      // any repository throw) must not abort the remaining ops in the pulled
+      // batch. Skip-and-continue; the next fullSync reconciles dropped ops.
+      try {
+        switch (entityType) {
+          case 'bill':
+            await _applyBillOperation(operation);
+          case 'profile':
+            await _applyProfileOperation(operation, groupId: groupId);
+          case 'avatar':
+            await _applyAvatarOperation(operation, groupId: groupId);
+          case 'shopping_item':
             await _applyShoppingItemOp(operation);
-          } catch (e, st) {
-            if (kDebugMode) {
-              debugPrint(
-                '[ApplySyncOps] shopping_item op failed, skipping: $e\n$st',
-              );
-            }
-            continue; // skip-and-continue; next fullSync reconciles
-          }
-        default:
-          continue;
+          default:
+            continue;
+        }
+      } catch (e, st) {
+        if (kDebugMode) {
+          debugPrint(
+            '[ApplySyncOps] $entityType op failed, skipping: $e\n$st',
+          );
+        }
+        continue; // skip-and-continue; next fullSync reconciles
       }
     }
   }
