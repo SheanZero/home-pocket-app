@@ -40,7 +40,7 @@ void main() {
       final container = ProviderContainer.test();
 
       // Read the provider to materialize it.
-      final sub = container.listen(listTypeProvider, (_, __) {});
+      final sub = container.listen(listTypeProvider, (_, _) {});
       container.read(listTypeProvider.notifier).setListType('public');
 
       // Close the only subscriber.
@@ -62,7 +62,7 @@ void main() {
       final container = ProviderContainer.test();
 
       // Put the filter in a custom state.
-      final sub = container.listen(shoppingFilterProvider, (_, __) {});
+      final sub = container.listen(shoppingFilterProvider, (_, _) {});
       container
           .read(shoppingFilterProvider.notifier)
           .setStatusFilter('active');
