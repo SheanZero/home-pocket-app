@@ -26,7 +26,13 @@ class ShoppingItemSyncMapper {
       'ledgerType': item.ledgerType?.name, // nullable enum → string ('daily'/'joy'/null)
       'categoryId': item.categoryId,
       'tags': jsonEncode(item.tags), // JSON string; empty list → '[]'
-      'note': item.note, // plaintext; ShoppingItemRepositoryImpl encrypts at write boundary
+      // WR-06: note is emitted as PLAINTEXT on the sync wire. The field-level
+      // ChaCha20 encryption in ShoppingItemRepositoryImpl._encryptNote applies
+      // only on the LOCAL DB write path; this sync push path serializes the
+      // domain model directly and never passes through the repository. Wire
+      // confidentiality of note therefore depends entirely on the transport-layer
+      // E2EE wrapping the whole payload — NOT on field encryption.
+      'note': item.note,
       'quantity': item.quantity,
       'estimatedPrice': item.estimatedPrice,
       'isCompleted': item.isCompleted,
@@ -71,12 +77,20 @@ class ShoppingItemSyncMapper {
     Map<String, dynamic> data, {
     String? fromDeviceId,
   }) {
+    // WR-05: coerce tags field-by-field. A malformed tags payload (non-JSON
+    // string, or JSON that is not a list) must NOT throw and discard the entire
+    // record — keep the rest of the item and fall back to an empty tag list.
+    List<String> tags = const [];
     final rawTags = data['tags'];
-    final List<String> tags;
-    if (rawTags != null && rawTags is String && rawTags.isNotEmpty) {
-      tags = List<String>.from(jsonDecode(rawTags) as List);
-    } else {
-      tags = const [];
+    if (rawTags is String && rawTags.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(rawTags);
+        if (decoded is List) {
+          tags = decoded.map((e) => e.toString()).toList();
+        }
+      } catch (_) {
+        tags = const []; // corrupt tag payload — keep the rest of the item
+      }
     }
 
     return ShoppingItem(
