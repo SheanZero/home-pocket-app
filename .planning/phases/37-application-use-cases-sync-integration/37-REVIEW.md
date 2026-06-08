@@ -2,7 +2,7 @@
 phase: 37-application-use-cases-sync-integration
 reviewed: 2026-06-08T00:00:00Z
 depth: standard
-files_reviewed: 13
+files_reviewed: 26
 files_reviewed_list:
   - lib/application/family_sync/apply_sync_operations_use_case.dart
   - lib/application/family_sync/shopping_item_change_tracker.dart
@@ -17,11 +17,23 @@ files_reviewed_list:
   - lib/features/family_sync/presentation/providers/state_sync.dart
   - lib/features/shopping_list/domain/models/shopping_item_sync_mapper.dart
   - lib/features/shopping_list/presentation/providers/repository_providers.dart
+  - test/integration/sync/bill_sync_round_trip_test.dart
+  - test/integration/sync/shopping_sync_round_trip_test.dart
+  - test/unit/application/family_sync/apply_sync_operations_use_case_test.dart
+  - test/unit/application/family_sync/phase6_sync_coverage_test.dart
+  - test/unit/application/family_sync/shopping_item_change_tracker_test.dart
+  - test/unit/application/shopping_list/clear_completed_items_use_case_test.dart
+  - test/unit/application/shopping_list/create_shopping_item_use_case_test.dart
+  - test/unit/application/shopping_list/delete_shopping_item_use_case_test.dart
+  - test/unit/application/shopping_list/reorder_shopping_items_use_case_test.dart
+  - test/unit/application/shopping_list/toggle_item_completed_use_case_test.dart
+  - test/unit/application/shopping_list/update_shopping_item_use_case_test.dart
+  - test/unit/features/family_sync/presentation/providers/sync_providers_characterization_test.dart
 findings:
-  critical: 2
-  warning: 5
-  info: 3
-  total: 10
+  critical: 1
+  warning: 6
+  info: 4
+  total: 11
 status: issues_found
 ---
 
@@ -29,138 +41,160 @@ status: issues_found
 
 **Reviewed:** 2026-06-08
 **Depth:** standard
-**Files Reviewed:** 13
+**Files Reviewed:** 26
 **Status:** issues_found
 
 ## Summary
 
-Phase 37 wires shopping-list use cases into the P2P sync pipeline. The privacy gate
-(D37-06), listType immutability (D37-04), and reorder-local-only (D37-01 at the
-use-case layer) invariants are correctly enforced at the boundaries I traced. The
-deliberate-un-complete null-stamping (D37-02) is implemented as documented.
+Phase 37 wires the shopping-list use cases into the family-sync pipeline:
+`ShoppingItemChangeTracker`, the sync mapper, the apply-side merge in
+`ApplySyncOperationsUseCase`, and orchestrator flushing. This re-review reflects
+code **after** the committed `CR-01` fix (`4eb5d763 fix(37): preserve local
+sortOrder on remote shopping update`). That fix is confirmed present at
+`apply_sync_operations_use_case.dart:234-241` (`copyWith(..., sortOrder:
+existing.sortOrder)`) and is covered by a regression test — the prior
+"sortOrder clobbered to 0" BLOCKER is **resolved** and is not re-raised here.
 
-However, the **apply side silently destroys the local-only `sortOrder` field every
-time a remote update is applied**, defeating the same D37-01 invariant the mapper and
-reorder use case worked to protect. There is also a tombstone-resurrection gap on the
-"unknown-ID update" path. Both are correctness/data-integrity BLOCKERs. The remaining
-findings are robustness and reporting-accuracy issues.
+The privacy gate (D37-06), listType immutability (D37-04), tombstone-wins for
+existing rows (SC-4), deliberate-un-complete null-stamping (D37-02), and
+local-sortOrder preservation (CR-01) are all implemented with tests.
 
-No structural-findings block was provided, so all findings below are narrative.
+The remaining dominant concern is the **conflict-resolution model in
+`_handleShoppingUpdate`**: it is last-writer-*applies* (the incoming op always
+overwrites local fields) with only a single completion-specific guard and no
+general timestamp/staleness comparison. A stale remote op therefore silently
+clobbers newer local edits for every field, and a stale remote *completion* can
+revert a newer local *un-complete*. Combined with the still-present
+unknown-ID-update resurrection gap, these are the data-correctness issues that
+must be addressed for a multi-device feature.
+
+No structural-findings block was provided, so the `## Structural Findings`
+section is omitted and all findings below are narrative.
 
 ## Narrative Findings (AI reviewer)
 
 ## Critical Issues
 
-### CR-01: Applying a remote update clobbers the local-only `sortOrder` to 0 (breaks D37-01)
+### CR-01: `_handleShoppingUpdate` applies stale remote ops, clobbering newer local edits (no last-writer-wins guard)
 
-**File:** `lib/application/family_sync/apply_sync_operations_use_case.dart:213-250`
-(root cause spans `lib/features/shopping_list/domain/models/shopping_item_sync_mapper.dart:70-106`
-and `lib/data/daos/shopping_item_dao.dart:96-98`)
-
+**File:** `lib/application/family_sync/apply_sync_operations_use_case.dart:213-255`
 **Issue:**
-D37-01 declares `sortOrder` local-per-device and the mapper deliberately *excludes* it
-from the wire (`toSyncMap`, mapper:38). Consequently `fromSyncMap` never sets
-`sortOrder`, so the reconstructed `ShoppingItem` carries the Freezed default
-`sortOrder: 0` (shopping_item.dart:28).
+`_handleShoppingUpdate` rebuilds the item entirely from incoming wire data and
+`upsert`s it. The ONLY staleness protection is the completion-specific guard at
+lines 245-252:
 
-`_handleShoppingUpdate` then persists that object via `_shoppingItemRepository.upsert`,
-which calls `insertOnConflictUpdate` → `INSERT OR REPLACE` (dao:96-98). `INSERT OR
-REPLACE` rewrites **every** column, so the existing row's locally-chosen `sortOrder` is
-overwritten with `0`. Any remote edit (rename, quantity change, complete toggle) to an
-item the local user has dragged into a custom position silently resets that item to the
-top/`0` bucket. This is exactly the data loss D37-01 + the mapper exclusion were meant
-to prevent.
-
-The sticky-complete merge branch (lines 244-248) does not save this either — it
-`copyWith`s only `isCompleted`/`completedAt` onto the same `sortOrder: 0` object.
-
-The create path (`_handleShoppingCreate`) is fine for brand-new items (sortOrder 0 is a
-correct default), but the *update* path must preserve the existing local value.
-
-**Fix:** Read the existing row's `sortOrder` and re-apply it before upsert (the update
-path already fetched `existing`):
 ```dart
-ShoppingItem updated = ShoppingItemSyncMapper.fromSyncMap(
-  data,
-  fromDeviceId: null,
-).copyWith(
-  id: entityId,
-  sortOrder: existing.sortOrder, // D37-01: never let sync clobber local order
-);
-```
-Apply the same `sortOrder: existing.sortOrder` inside the sticky-complete branch.
-Note the unknown-ID create-via-update branch (line 220-222) correctly keeps the default
-0, so only the `existing != null` path needs the fix.
-
-### CR-02: "Unknown-ID update" path resurrects deleted items / writes un-tombstoned ghosts
-
-**File:** `lib/application/family_sync/apply_sync_operations_use_case.dart:217-223`
-
-**Issue:**
-When an `update` op arrives for an `entityId` not present locally, the handler treats it
-as a create and upserts the item. But the SC-4 "tombstone wins" guard (line 227,
-`if (existing.isDeleted) return;`) only runs on the `existing != null` branch — it is
-*skipped entirely* on the unknown-ID branch.
-
-This opens a resurrection window: if a delete op and a later (higher-clock but stale)
-update op for the same item are delivered out of order, or if the delete op was dropped
-by the D37-05 fault-isolation `catch/continue` (lines 52-61), the update will recreate a
-"live" (`isDeleted = false`) row from `fromSyncMap`, which always sets
-`isDeleted: false` (mapper never serializes/parses `isDeleted`). The deleted item comes
-back. This directly undermines the tombstone-wins guarantee the `existing.isDeleted`
-check is built to provide.
-
-**Fix:** Do not synthesize a live row from an update op for an unknown ID. Either skip
-(let the next fullSync reconcile a legitimately-missing create), or persist as a
-tombstone-respecting create only when no tombstone could exist. Simplest safe option:
-```dart
-if (existing == null) {
-  // An update for an ID we've never seen: defer to fullSync rather than
-  // fabricate a live row that could resurrect a dropped/stale tombstone.
-  return;
+if (existing.completedAt != null &&
+    existing.completedAt!.isAfter(incomingUpdatedAt)) {
+  updated = updated.copyWith(isCompleted: true, completedAt: existing.completedAt);
 }
 ```
-If create-on-update is genuinely required, route it through the same create handler
-and ensure a prior delete can still win (e.g. consult a tombstone table) before writing
-`isDeleted: false`.
+
+There is no comparison of `incomingUpdatedAt` against `existing.updatedAt` for
+any other field. Two concrete failure modes follow:
+
+1. **Stale edit overwrites a newer local edit (all non-completion fields).**
+   Device A renames "Milk" → "Oat Milk" locally at T2. A stale remote update
+   (name="Whole Milk", updatedAt=T1 < T2) then arrives and is applied
+   unconditionally → the newer local "Oat Milk" is lost. `name`, `quantity`,
+   `ledgerType`, `categoryId`, `tags`, `note`, and `estimatedPrice` all have the
+   same exposure; the sticky-complete guard protects none of them.
+
+2. **Asymmetric completion hole: a stale remote completion reverts a newer local
+   un-complete.** Per `ToggleItemCompletedUseCase` (D37-02), a deliberate
+   un-complete sets `completedAt = null`. A *stale* remote op
+   (`isCompleted=true, completedAt=T1, updatedAt=T1`, T1 < local un-complete T2)
+   then arrives. Because `existing.completedAt == null`, the guard at line 245 is
+   skipped and the incoming `isCompleted=true` is applied — the older remote
+   completion overrides the newer local un-check. This is the exact inverse of
+   the case the guard protects and is **not covered by any test** (existing tests
+   only exercise completed-local + stale-incomplete-remote).
+
+The merge needs a symmetric, timestamp-based decision: drop the whole incoming
+op when it is strictly older than the local row, rather than applying it and
+patching one field.
+
+**Fix:**
+```dart
+final existing = await _shoppingItemRepository.findById(entityId);
+...
+if (existing.isDeleted) return; // SC-4 unchanged
+
+final incomingUpdatedAt = data['updatedAt'] != null
+    ? DateTime.parse(data['updatedAt'] as String)
+    : DateTime.now();
+
+// Last-writer-wins: drop the entire stale op before merging any field.
+final localUpdatedAt = existing.updatedAt ?? existing.createdAt;
+if (incomingUpdatedAt.isBefore(localUpdatedAt)) {
+  return; // local is newer — remote op is stale, ignore
+}
+
+final updated = ShoppingItemSyncMapper
+    .fromSyncMap(data, fromDeviceId: null)
+    .copyWith(id: entityId, sortOrder: existing.sortOrder);
+await _shoppingItemRepository.upsert(updated);
+```
+(If a vector clock is the intended convergence mechanism, thread it through and
+compare on it instead of `updatedAt` — the current code uses neither.)
 
 ## Warnings
 
-### WR-01: Un-complete can be reverted by an arbitrarily stale remote `complete` op
+### WR-01: "Unknown-ID update" path resurrects deleted items (tombstone guard skipped)
 
-**File:** `lib/application/family_sync/apply_sync_operations_use_case.dart:239-248`
-and `lib/application/shopping_list/toggle_item_completed_use_case.dart:43-47`
-
+**File:** `lib/application/family_sync/apply_sync_operations_use_case.dart:217-223`
 **Issue:**
-D37-02 clears `completedAt` to null on a deliberate un-complete so the sticky guard
-skips. But because the guard *only* fires when `existing.completedAt != null`, once a
-user un-completes (completedAt = null), **any** incoming op — including a `complete`
-whose `updatedAt` is older than the un-complete — passes the guard and is applied
-verbatim, re-completing the item. The guard has no last-writer-wins comparison on the
-un-complete side; it relies entirely on `completedAt` presence. A late-arriving stale
-"complete" silently reverts an intentional un-check. This matches the literal
-documented behavior, but it is a real convergence hole worth flagging.
+When an `update` op arrives for an `entityId` not present locally, the handler
+treats it as a create and upserts a live row. The SC-4 tombstone guard
+(`if (existing.isDeleted) return;`, line 227) only runs on the
+`existing != null` branch — it is skipped entirely on the unknown-ID branch.
+`ShoppingItemSyncMapper.fromSyncMap` never parses `isDeleted` (defaults to
+`false`), so the synthesized row is always live.
 
-**Fix:** Compare `existing.updatedAt` against `incomingUpdatedAt` regardless of
-completion state, and drop the incoming op when the local row is strictly newer:
+If a `delete` op is dropped (e.g. by the D37-05 fault-isolation `catch/continue`
+at lines 52-61) or arrives after the `update` (out-of-order best-effort relay),
+this path recreates a deleted item as a live row. The tombstone-wins guarantee
+the `existing.isDeleted` check provides for known rows does not extend to rows
+that were never created locally.
+
+**Fix:** Do not fabricate a live row from an unknown-ID update; defer to fullSync:
 ```dart
-if (existing.updatedAt != null &&
-    existing.updatedAt!.isAfter(incomingUpdatedAt)) {
-  return; // local edit (including un-complete) is newer — ignore stale remote
+if (existing == null) {
+  return; // update for an ID we've never seen — let fullSync reconcile,
+          // rather than fabricate a row that could resurrect a dropped tombstone
+}
+```
+If create-on-update is genuinely required, gate it through a tombstone store that
+survives row absence.
+
+### WR-02: Delete / toggle / update operate on already-tombstoned rows (no `isDeleted` guard)
+
+**File:** `lib/application/shopping_list/delete_shopping_item_use_case.dart:29-42`
+(also `toggle_item_completed_use_case.dart:30-58`, `update_shopping_item_use_case.dart:70-111`)
+**Issue:**
+`findById` returns soft-deleted rows. None of these use cases check
+`existing.isDeleted`. Deleting an already-deleted public item re-soft-deletes and
+re-emits a `trackDelete` op; toggling/updating a tombstoned item logically
+"revives" it (fresh `updatedAt`/`completedAt`/field values) and enqueues an
+update op that the remote SC-4 guard will then reject — wasted sync traffic plus
+a locally inconsistent row (`isDeleted=true` carrying a fresh `updatedAt`). The
+fresh local `updatedAt` also interacts badly with CR-01's proposed LWW guard.
+**Fix:** Treat a tombstoned row as not-actionable after fetch:
+```dart
+if (existing == null || existing.isDeleted) {
+  return Result.error('ShoppingItem not found');
 }
 ```
 
-### WR-02: `incrementalPush` under-reports `pushedCount` (omits shopping + profile ops)
+### WR-03: `incrementalPush` under-reports `pushedCount` (omits shopping + profile ops)
 
 **File:** `lib/application/family_sync/sync_orchestrator.dart:167-191`
-
 **Issue:**
-`_executeIncrementalPush` flushes and pushes `shoppingOps` (line 167-175) and
-`profileOps` (178-182), but the success result returns only
-`SyncOrchestratorSuccess(pushedCount: txnOps.length)` (line 191). Callers/telemetry
-relying on `pushedCount` will believe shopping-item pushes never happened, masking sync
-activity and complicating diagnosis.
-
+`_executeIncrementalPush` flushes and pushes `txnOps`, `shoppingOps`, and
+`profileOps`, but returns `SyncOrchestratorSuccess(pushedCount: txnOps.length)`
+(line 191). When a push round contains shopping items and/or a profile change but
+no transactions, `pushedCount` is `0` despite real work — any UI/telemetry
+consuming it misreports "nothing synced."
 **Fix:**
 ```dart
 return SyncOrchestratorSuccess(
@@ -168,61 +202,32 @@ return SyncOrchestratorSuccess(
 );
 ```
 
-### WR-03: Delete / toggle / update operate on already-tombstoned rows (no `isDeleted` guard)
+### WR-04: Fault isolation applied to shopping ops only — bill/profile/avatar ops still abort the whole pull batch
 
-**File:** `lib/application/shopping_list/delete_shopping_item_use_case.dart:30-42`
-(also `toggle_item_completed_use_case.dart:31-58`, `update_shopping_item_use_case.dart:71-111`)
-
+**File:** `lib/application/family_sync/apply_sync_operations_use_case.dart:43-65`
 **Issue:**
-`findById` returns soft-deleted rows (dao:57-61, repo:99-103). None of these use cases
-check `existing.isDeleted`. Deleting an already-deleted public item re-soft-deletes and
-re-emits a tracker `trackDelete` op (delete:40-41); toggling/updating a tombstoned item
-"revives" it logically (sets new `updatedAt`, new field values) and enqueues an update
-op that the remote SC-4 guard will reject — wasted sync traffic and locally-inconsistent
-state (a row that is `isDeleted=true` but just got a fresh `updatedAt`/`completedAt`).
+Only the `shopping_item` case wraps its handler in try/catch + `continue` (D37-05).
+The `bill`, `profile`, and `avatar` cases have no isolation. A single malformed
+bill op — e.g. the un-guarded `DateTime.parse(data['updatedAt'])` at line 169, or
+any repository throw — propagates out of `execute` and aborts every remaining
+operation in the pulled batch, including later shopping ops. The fault-isolation
+rationale ("bad op must not abort other ops; next fullSync reconciles") applies
+equally to bills, yet only shopping is protected. One poison record drops the
+whole batch.
+**Fix:** Hoist a per-operation try/catch around the entire `switch` body so every
+entity type gets the same skip-and-continue isolation.
 
-**Fix:** After fetching `existing`, treat a tombstoned row as not-actionable:
-```dart
-if (existing == null || existing.isDeleted) {
-  return Result.error('ShoppingItem not found');
-}
-```
-
-### WR-04: `_handleShoppingUpdate` create-via-update branch trusts wire `id` from `data` then overrides — inconsistent source of truth
-
-**File:** `lib/application/family_sync/apply_sync_operations_use_case.dart:219-222`
-
-**Issue:**
-`fromSyncMap(data)` reads `data['id']` (mapper:83) to build the item, then the handler
-immediately `copyWith(id: entityId)` to override it. If `data['id']` and the envelope
-`entityId` ever disagree (malformed/tampered op), the item is silently coerced to
-`entityId` while every other field still comes from `data`. There is no validation that
-the envelope and payload refer to the same entity. For a privacy/E2EE sync surface,
-mismatched envelope-vs-payload identity should be rejected, not silently merged.
-
-**Fix:** Validate consistency and reject on mismatch:
-```dart
-final payloadId = data['id'] as String?;
-if (payloadId != null && payloadId != entityId) {
-  return; // envelope/payload id mismatch — drop, let fullSync reconcile
-}
-```
-
-### WR-05: `fromSyncMap` will throw on malformed `tags` JSON, defeating per-op fault isolation only partially
+### WR-05: `fromSyncMap` throws on malformed `tags` JSON, discarding the whole record
 
 **File:** `lib/features/shopping_list/domain/models/shopping_item_sync_mapper.dart:74-80`
-
 **Issue:**
-`jsonDecode(rawTags as List)` runs without a try/catch. A malformed `tags` string (or a
-JSON value that is not a list) throws `FormatException`/`TypeError`. For shopping ops
-this is caught by the D37-05 `try/catch/continue` in `execute` (apply:52-61), so a
-single bad op is skipped — acceptable. But the same `fromSyncMap` is also invoked from
-`_handleShoppingCreate`/`_handleShoppingUpdate` and the result is that *valid* fields in
-that op are discarded wholesale because of one bad sub-field, with only a debug print.
-Input from the network boundary should be validated/coerced field-by-field rather than
-letting one corrupt field nuke the whole record.
-
-**Fix:** Wrap the tag decode defensively and fall back to empty:
+`jsonDecode(rawTags as List)` runs without try/catch. A malformed `tags` string
+(or a JSON value that is not a list) throws `FormatException`/`TypeError`. On the
+shopping path this is caught by the D37-05 isolation in `execute`, but the effect
+is that *all* valid fields in that op are discarded wholesale because of one bad
+sub-field, with only a debug print. Network-boundary input should be
+coerced field-by-field, not let one corrupt field nuke the record.
+**Fix:**
 ```dart
 List<String> tags = const [];
 final rawTags = data['tags'];
@@ -236,41 +241,58 @@ if (rawTags is String && rawTags.isNotEmpty) {
 }
 ```
 
+### WR-06: Misleading "encrypts at write boundary" comment — `note` is plaintext on the sync wire
+
+**File:** `lib/features/shopping_list/domain/models/shopping_item_sync_mapper.dart:29`
+**Issue:**
+`toSyncMap` emits `'note': item.note` with the inline comment
+"plaintext; ShoppingItemRepositoryImpl encrypts at write boundary." That
+encryption boundary is the *local DB* path (`ShoppingItemRepositoryImpl._encryptNote`,
+repo impl lines ~146-152). The sync push path serializes the domain model
+directly and never passes through that repository, so the field-level ChaCha20
+encryption the comment alludes to is NOT applied here. Confidentiality on the
+wire depends entirely on the E2EE transport wrapping the whole payload. The
+comment asserts protection this code path does not provide — exactly the false
+reassurance that leads a maintainer to assume the note is already encrypted.
+**Fix:** Correct the comment to state that `note` confidentiality relies on
+transport-layer E2EE, not field encryption, and add an integration assertion that
+a pushed shopping op is E2EE-wrapped before leaving the device.
+
 ## Info
 
-### IN-01: `CreateShoppingItemParams.ledgerType` typed as `dynamic` defeats type safety
+### IN-01: `CreateShoppingItemParams.ledgerType` / `UpdateShoppingItemParams.ledgerType` typed as `dynamic`
 
-**File:** `lib/application/shopping_list/create_shopping_item_use_case.dart:15`
-(also `update_shopping_item_use_case.dart:28`)
+**File:** `lib/application/shopping_list/create_shopping_item_use_case.dart:15`, `lib/application/shopping_list/update_shopping_item_use_case.dart:28`
+**Issue:** Both declare `final dynamic ledgerType; // LedgerType? — nullable enum`.
+`dynamic` silently accepts any value (e.g. a `String`), which only blows up later
+at `params.ledgerType?.name` deep in the mapper. The domain type is known and
+already imported via `shopping_item.dart`.
+**Fix:** Type both as `LedgerType? ledgerType;` and import the enum.
 
-**Issue:** `final dynamic ledgerType; // LedgerType? — nullable enum`. The comment admits
-the intended type is `LedgerType?`. Using `dynamic` silently accepts any value (e.g. a
-`String`), which would only blow up later at `params.ledgerType?.name` deep in the
-mapper. The domain model already imports `LedgerType` (shopping_item.dart:2).
+### IN-02: Misleading sync-trigger name `onTransactionChanged()` used for shopping changes
 
-**Fix:** Type it as `LedgerType? ledgerType;` and import the enum.
+**File:** all six shopping use cases (e.g. `create_shopping_item_use_case.dart:88`, `clear_completed_items_use_case.dart:48`)
+**Issue:** Shopping use cases call `_syncEngine?.onTransactionChanged()` to
+schedule a debounced push. The name implies a *financial transaction* change. It
+works because the scheduler is entity-agnostic, but the name misleads future
+maintainers into thinking shopping changes are not wired.
+**Fix:** Add an entity-neutral alias (`onLocalChanged()` / `onSyncableChanged()`)
+on `SyncEngine`, or document at the call sites that the trigger is intentionally
+shared.
 
-### IN-02: Misleading sync trigger name `onTransactionChanged()` used for shopping changes
+### IN-03: Duplicated profile-operation map construction
 
-**File:** all six shopping use cases (e.g. `create_shopping_item_use_case.dart:88`,
-`clear_completed_items_use_case.dart:48`)
+**File:** `lib/application/family_sync/sync_orchestrator.dart:218-230` and `271-283`
+**Issue:** `_executeProfileSync` and `_buildProfileOperationsIfChanged` build the
+identical profile-op envelope (`op/entityType/entityId/data/fromDeviceId/timestamp`).
+Divergence risk on a future schema change.
+**Fix:** Extract a private `_buildProfileOp(deviceId, displayName, avatarEmoji)`
+helper and call it from both sites.
 
-**Issue:** Shopping-item use cases call `_syncEngine?.onTransactionChanged()` to schedule
-a debounced push. The name implies a *transaction* (financial ledger) change. It works
-because the scheduler is entity-agnostic, but the name will mislead future maintainers
-into thinking shopping changes are not wired. Consider a neutral `onLocalChanged()` /
-`onSyncableChanged()` alias.
-
-**Fix:** Add/rename to an entity-neutral method on `SyncEngine`, or document at the call
-sites that it is intentionally shared.
-
-### IN-03: `flush()` debug log nests two `if`s where one `&&` suffices
+### IN-04: `flush()` debug log nests two `if`s where one `&&` suffices
 
 **File:** `lib/application/family_sync/shopping_item_change_tracker.dart:66-72`
-
-**Issue:** Minor readability — `if (kDebugMode) { if (ops.isNotEmpty) { ... } }`. Flatten
-to `if (kDebugMode && ops.isNotEmpty)`.
-
+**Issue:** Minor readability — `if (kDebugMode) { if (ops.isNotEmpty) { ... } }`.
 **Fix:** `if (kDebugMode && ops.isNotEmpty) debugPrint(...)`.
 
 ---
