@@ -1831,4 +1831,54 @@ class SJa extends S {
 
   @override
   String get shoppingFilterCategory => 'カテゴリ';
+
+  @override
+  String get shoppingSegmentPublic => '公開';
+
+  @override
+  String get shoppingSegmentPrivate => 'プライベート';
+
+  @override
+  String get shoppingCompletedDivider => '完了済み';
+
+  @override
+  String get shoppingClearCompletedTitle => '完了済みをすべて削除しますか？';
+
+  @override
+  String get shoppingClearCompletedBody => '完了済みのすべてのアイテムを削除します。';
+
+  @override
+  String get shoppingClearCompletedConfirm => '削除';
+
+  @override
+  String get shoppingClearCompletedSnackBar => '完了済みアイテムを削除しました';
+
+  @override
+  String get shoppingListLoadError => 'リストを読み込めませんでした';
+
+  @override
+  String get shoppingRetry => '再試行';
+
+  @override
+  String get shoppingBatchDeleteTitle => 'アイテムを削除しますか？';
+
+  @override
+  String shoppingBatchDeleteBody(int count) {
+    return '$count 件のアイテムを削除します。';
+  }
+
+  @override
+  String get shoppingBatchDeleteConfirm => '削除';
+
+  @override
+  String get shoppingBatchDeletedSnackBar => 'アイテムを削除しました';
+
+  @override
+  String get shoppingBatchDeleteAction => '削除';
+
+  @override
+  String get shoppingBatchCancel => 'キャンセル';
+
+  @override
+  String get shoppingBatchSelectAll => 'すべて選択';
 }

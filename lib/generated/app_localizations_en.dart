@@ -1864,4 +1864,55 @@ class SEn extends S {
 
   @override
   String get shoppingFilterCategory => 'Category';
+
+  @override
+  String get shoppingSegmentPublic => 'Public';
+
+  @override
+  String get shoppingSegmentPrivate => 'Private';
+
+  @override
+  String get shoppingCompletedDivider => 'Completed';
+
+  @override
+  String get shoppingClearCompletedTitle => 'Clear all completed?';
+
+  @override
+  String get shoppingClearCompletedBody =>
+      'All completed items will be removed from the list.';
+
+  @override
+  String get shoppingClearCompletedConfirm => 'Clear';
+
+  @override
+  String get shoppingClearCompletedSnackBar => 'Completed items cleared';
+
+  @override
+  String get shoppingListLoadError => 'Couldn\'t load your list';
+
+  @override
+  String get shoppingRetry => 'Retry';
+
+  @override
+  String get shoppingBatchDeleteTitle => 'Delete items?';
+
+  @override
+  String shoppingBatchDeleteBody(int count) {
+    return 'Delete $count selected items?';
+  }
+
+  @override
+  String get shoppingBatchDeleteConfirm => 'Delete';
+
+  @override
+  String get shoppingBatchDeletedSnackBar => 'Items deleted';
+
+  @override
+  String get shoppingBatchDeleteAction => 'Delete';
+
+  @override
+  String get shoppingBatchCancel => 'Cancel';
+
+  @override
+  String get shoppingBatchSelectAll => 'Select All';
 }

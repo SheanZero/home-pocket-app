@@ -2326,5 +2326,75 @@
   "@shoppingFilterCategory": {
     "description": "Shopping filter bar — category chip label (Phase 38)"
   },
+  "shoppingSegmentPublic": "公開",
+  "@shoppingSegmentPublic": {
+    "description": "Shopping list segmented control — public segment label (Phase 38)"
+  },
+  "shoppingSegmentPrivate": "プライベート",
+  "@shoppingSegmentPrivate": {
+    "description": "Shopping list segmented control — private segment label (Phase 38)"
+  },
+  "shoppingCompletedDivider": "完了済み",
+  "@shoppingCompletedDivider": {
+    "description": "Divider label between active and completed shopping items (Phase 38)"
+  },
+  "shoppingClearCompletedTitle": "完了済みをすべて削除しますか？",
+  "@shoppingClearCompletedTitle": {
+    "description": "Confirmation dialog title for clear-all-completed shopping items (Phase 38)"
+  },
+  "shoppingClearCompletedBody": "完了済みのすべてのアイテムを削除します。",
+  "@shoppingClearCompletedBody": {
+    "description": "Confirmation dialog body for clear-all-completed shopping items (Phase 38)"
+  },
+  "shoppingClearCompletedConfirm": "削除",
+  "@shoppingClearCompletedConfirm": {
+    "description": "Confirmation button label for clear-all-completed shopping items (Phase 38)"
+  },
+  "shoppingClearCompletedSnackBar": "完了済みアイテムを削除しました",
+  "@shoppingClearCompletedSnackBar": {
+    "description": "Success toast shown after clearing all completed shopping items (Phase 38)"
+  },
+  "shoppingListLoadError": "リストを読み込めませんでした",
+  "@shoppingListLoadError": {
+    "description": "Error message shown when shopping list fails to load (Phase 38)"
+  },
+  "shoppingRetry": "再試行",
+  "@shoppingRetry": {
+    "description": "Retry button label for shopping list load error (Phase 38)"
+  },
+  "shoppingBatchDeleteTitle": "アイテムを削除しますか？",
+  "@shoppingBatchDeleteTitle": {
+    "description": "Batch delete confirmation dialog title (Phase 38)"
+  },
+  "shoppingBatchDeleteBody": "{count} 件のアイテムを削除します。",
+  "@shoppingBatchDeleteBody": {
+    "description": "Batch delete confirmation dialog body with item count (Phase 38)",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "shoppingBatchDeleteConfirm": "削除",
+  "@shoppingBatchDeleteConfirm": {
+    "description": "Confirm button label for batch delete (Phase 38)"
+  },
+  "shoppingBatchDeletedSnackBar": "アイテムを削除しました",
+  "@shoppingBatchDeletedSnackBar": {
+    "description": "Success toast shown after batch deleting shopping items (Phase 38)"
+  },
+  "shoppingBatchDeleteAction": "削除",
+  "@shoppingBatchDeleteAction": {
+    "description": "Batch action bar delete button label (Phase 38)"
+  },
+  "shoppingBatchCancel": "キャンセル",
+  "@shoppingBatchCancel": {
+    "description": "Cancel button in the batch selection header (Phase 38)"
+  },
+  "shoppingBatchSelectAll": "すべて選択",
+  "@shoppingBatchSelectAll": {
+    "description": "Select-all button in the batch selection header (Phase 38)"
+  },
   "@@locale": "ja"
 }

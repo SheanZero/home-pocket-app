@@ -3444,6 +3444,102 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Category'**
   String get shoppingFilterCategory;
+
+  /// Shopping list segmented control — public segment label (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get shoppingSegmentPublic;
+
+  /// Shopping list segmented control — private segment label (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get shoppingSegmentPrivate;
+
+  /// Divider label between active and completed shopping items (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get shoppingCompletedDivider;
+
+  /// Confirmation dialog title for clear-all-completed shopping items (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all completed?'**
+  String get shoppingClearCompletedTitle;
+
+  /// Confirmation dialog body for clear-all-completed shopping items (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'All completed items will be removed from the list.'**
+  String get shoppingClearCompletedBody;
+
+  /// Confirmation button label for clear-all-completed shopping items (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get shoppingClearCompletedConfirm;
+
+  /// Success toast shown after clearing all completed shopping items (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Completed items cleared'**
+  String get shoppingClearCompletedSnackBar;
+
+  /// Error message shown when shopping list fails to load (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your list'**
+  String get shoppingListLoadError;
+
+  /// Retry button label for shopping list load error (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get shoppingRetry;
+
+  /// Batch delete confirmation dialog title (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Delete items?'**
+  String get shoppingBatchDeleteTitle;
+
+  /// Batch delete confirmation dialog body with item count (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count} selected items?'**
+  String shoppingBatchDeleteBody(int count);
+
+  /// Confirm button label for batch delete (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get shoppingBatchDeleteConfirm;
+
+  /// Success toast shown after batch deleting shopping items (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Items deleted'**
+  String get shoppingBatchDeletedSnackBar;
+
+  /// Batch action bar delete button label (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get shoppingBatchDeleteAction;
+
+  /// Cancel button in the batch selection header (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get shoppingBatchCancel;
+
+  /// Select-all button in the batch selection header (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get shoppingBatchSelectAll;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

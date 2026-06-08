@@ -2326,5 +2326,75 @@
   "@shoppingFilterCategory": {
     "description": "Shopping filter bar — category chip label (Phase 38)"
   },
+  "shoppingSegmentPublic": "Public",
+  "@shoppingSegmentPublic": {
+    "description": "Shopping list segmented control — public segment label (Phase 38)"
+  },
+  "shoppingSegmentPrivate": "Private",
+  "@shoppingSegmentPrivate": {
+    "description": "Shopping list segmented control — private segment label (Phase 38)"
+  },
+  "shoppingCompletedDivider": "Completed",
+  "@shoppingCompletedDivider": {
+    "description": "Divider label between active and completed shopping items (Phase 38)"
+  },
+  "shoppingClearCompletedTitle": "Clear all completed?",
+  "@shoppingClearCompletedTitle": {
+    "description": "Confirmation dialog title for clear-all-completed shopping items (Phase 38)"
+  },
+  "shoppingClearCompletedBody": "All completed items will be removed from the list.",
+  "@shoppingClearCompletedBody": {
+    "description": "Confirmation dialog body for clear-all-completed shopping items (Phase 38)"
+  },
+  "shoppingClearCompletedConfirm": "Clear",
+  "@shoppingClearCompletedConfirm": {
+    "description": "Confirmation button label for clear-all-completed shopping items (Phase 38)"
+  },
+  "shoppingClearCompletedSnackBar": "Completed items cleared",
+  "@shoppingClearCompletedSnackBar": {
+    "description": "Success toast shown after clearing all completed shopping items (Phase 38)"
+  },
+  "shoppingListLoadError": "Couldn't load your list",
+  "@shoppingListLoadError": {
+    "description": "Error message shown when shopping list fails to load (Phase 38)"
+  },
+  "shoppingRetry": "Retry",
+  "@shoppingRetry": {
+    "description": "Retry button label for shopping list load error (Phase 38)"
+  },
+  "shoppingBatchDeleteTitle": "Delete items?",
+  "@shoppingBatchDeleteTitle": {
+    "description": "Batch delete confirmation dialog title (Phase 38)"
+  },
+  "shoppingBatchDeleteBody": "Delete {count} selected items?",
+  "@shoppingBatchDeleteBody": {
+    "description": "Batch delete confirmation dialog body with item count (Phase 38)",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "shoppingBatchDeleteConfirm": "Delete",
+  "@shoppingBatchDeleteConfirm": {
+    "description": "Confirm button label for batch delete (Phase 38)"
+  },
+  "shoppingBatchDeletedSnackBar": "Items deleted",
+  "@shoppingBatchDeletedSnackBar": {
+    "description": "Success toast shown after batch deleting shopping items (Phase 38)"
+  },
+  "shoppingBatchDeleteAction": "Delete",
+  "@shoppingBatchDeleteAction": {
+    "description": "Batch action bar delete button label (Phase 38)"
+  },
+  "shoppingBatchCancel": "Cancel",
+  "@shoppingBatchCancel": {
+    "description": "Cancel button in the batch selection header (Phase 38)"
+  },
+  "shoppingBatchSelectAll": "Select All",
+  "@shoppingBatchSelectAll": {
+    "description": "Select-all button in the batch selection header (Phase 38)"
+  },
   "@@locale": "en"
 }
