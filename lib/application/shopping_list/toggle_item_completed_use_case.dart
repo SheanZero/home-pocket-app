@@ -27,9 +27,12 @@ class ToggleItemCompletedUseCase {
   final SyncEngine? _syncEngine;
 
   Future<Result<ShoppingItem>> execute(String itemId) async {
-    // 1. Fetch existing item
+    // 1. Fetch existing item — a tombstoned row is not actionable (WR-02).
+    //    findById returns soft-deleted rows; toggling one would "revive" it with
+    //    a fresh updatedAt/completedAt and enqueue an update op the remote SC-4
+    //    guard rejects.
     final existing = await _repo.findById(itemId);
-    if (existing == null) {
+    if (existing == null || existing.isDeleted) {
       return Result.error('ShoppingItem not found');
     }
 

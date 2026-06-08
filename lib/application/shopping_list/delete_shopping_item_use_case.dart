@@ -26,9 +26,11 @@ class DeleteShoppingItemUseCase {
       return Result.error('itemId must not be empty');
     }
 
-    // 2. Verify item exists (MGMT-02)
+    // 2. Verify item exists and is not already tombstoned (MGMT-02, WR-02).
+    //    findById returns soft-deleted rows; deleting an already-deleted item
+    //    would re-soft-delete and re-emit a redundant trackDelete op.
     final existing = await _repo.findById(itemId);
-    if (existing == null) {
+    if (existing == null || existing.isDeleted) {
       return Result.error('ShoppingItem not found');
     }
 

@@ -67,9 +67,12 @@ class UpdateShoppingItemUseCase {
   final SyncEngine? _syncEngine;
 
   Future<Result<ShoppingItem>> execute(UpdateShoppingItemParams params) async {
-    // 1. Verify item exists (MGMT-02)
+    // 1. Verify item exists and is not already tombstoned (MGMT-02, WR-02).
+    //    findById returns soft-deleted rows; updating one would "revive" it with
+    //    fresh field values and enqueue an update op the remote SC-4 guard
+    //    rejects (and the fresh local updatedAt interacts badly with CR-01 LWW).
     final existing = await _repo.findById(params.itemId);
-    if (existing == null) {
+    if (existing == null || existing.isDeleted) {
       return Result.error('ShoppingItem not found');
     }
 
