@@ -706,9 +706,9 @@
   "@homeTabChart": {
     "description": "Bottom nav charts tab label"
   },
-  "homeTabTodo": "购物清单",
-  "@homeTabTodo": {
-    "description": "Bottom nav todo tab label"
+  "homeTabShopping": "购物",
+  "@homeTabShopping": {
+    "description": "Bottom nav shopping tab label"
   },
   "homeMonthFormat": "{year}年{month}月",
   "@homeMonthFormat": {
@@ -1620,10 +1620,6 @@
   "listTab": "列表",
   "@listTab": {
     "description": "List tab label in bottom navigation"
-  },
-  "todoTab": "待办",
-  "@todoTab": {
-    "description": "Todo tab label in bottom navigation"
   },
   "datePickerComingSoon": "日期选择即将推出",
   "@datePickerComingSoon": {
