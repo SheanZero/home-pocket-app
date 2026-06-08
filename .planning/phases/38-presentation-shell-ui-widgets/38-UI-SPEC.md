@@ -1,10 +1,11 @@
 ---
 phase: 38
 slug: presentation-shell-ui-widgets
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-06-08
+reviewed_at: 2026-06-08
 ---
 
 # Phase 38 — UI Design Contract
@@ -195,11 +196,11 @@ Not applicable — Flutter project, no shadcn / third-party component registry. 
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS (locked design-system exception — ACCEPTED)
-- [ ] Dimension 5 Spacing: PASS (6px / 14px off-grid — ACCEPTED in Exceptions)
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS (locked design-system exception — ACCEPTED)
+- [x] Dimension 5 Spacing: PASS (6px / 14px off-grid — ACCEPTED in Exceptions)
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved (gsd-ui-checker, 2026-06-08)
