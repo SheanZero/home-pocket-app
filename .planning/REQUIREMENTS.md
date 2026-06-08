@@ -30,16 +30,16 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (see Tra
 
 ### Completion (DONE)
 
-- [ ] **DONE-01**: User can tap an item row to toggle its completed state, with an animated strikethrough + fade.
+- [x] **DONE-01**: User can tap an item row to toggle its completed state, with an animated strikethrough + fade.
 - [x] **DONE-02**: Completed items sort to the bottom of the current list, below a visual divider; active items remain on top (enforced by DAO query order, not client sort).
-- [ ] **DONE-03**: User can one-tap "clear all completed" (with confirmation); it clears every completed item in the current list regardless of any active filter, and the control appears only when the completed section is non-empty.
+- [x] **DONE-03**: User can one-tap "clear all completed" (with confirmation); it clears every completed item in the current list regardless of any active filter, and the control appears only when the completed section is non-empty.
 
 ### Add / Edit Item (ITEM)
 
-- [ ] **ITEM-01**: User can add a shopping item; only the item name is required, all other fields optional.
-- [ ] **ITEM-02**: User can optionally set ledger (日常/悦己), category, tags, note, quantity, and estimated price on an item.
+- [x] **ITEM-01**: User can add a shopping item; only the item name is required, all other fields optional.
+- [x] **ITEM-02**: User can optionally set ledger (日常/悦己), category, tags, note, quantity, and estimated price on an item.
 - [x] **ITEM-03**: The add/edit form reuses the existing category tree, tag system, and ledger selector (no forked pickers).
-- [ ] **ITEM-04**: User can edit any existing item via the same form, pre-populated with its current values.
+- [x] **ITEM-04**: User can edit any existing item via the same form, pre-populated with its current values.
 - [x] **ITEM-05**: Estimated price is stored as integer sub-units and rendered locale-aware via `NumberFormatter`; the note field is encrypted at the repository boundary (mirrors `TransactionRepositoryImpl`).
 
 ### Filter (FILT)
@@ -50,18 +50,18 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (see Tra
 
 ### Management (MGMT)
 
-- [ ] **MGMT-01**: User can swipe an item to delete it (with confirmation), matching the v1.4 list swipe-delete convention.
-- [ ] **MGMT-02**: User can long-press to enter batch-select mode, select multiple items (including select-all), and batch-delete with a confirmation dialog.
-- [ ] **MGMT-03**: Swipe-to-delete is disabled while batch-select mode is active; user can cancel selection mode via tap-outside or an explicit Cancel control.
+- [x] **MGMT-01**: User can swipe an item to delete it (with confirmation), matching the v1.4 list swipe-delete convention.
+- [x] **MGMT-02**: User can long-press to enter batch-select mode, select multiple items (including select-all), and batch-delete with a confirmation dialog.
+- [x] **MGMT-03**: Swipe-to-delete is disabled while batch-select mode is active; user can cancel selection mode via tap-outside or an explicit Cancel control.
 
 ### Sync & Privacy (SYNC)
 
-- [ ] **SYNC-01**: Items on the public list sync to family members through the existing family_sync E2EE pipeline once a family is joined.
-- [ ] **SYNC-02**: Items on the private list NEVER enter the sync pipeline — the change tracker enqueues only public items, enforced at the use-case boundary and verified by a dedicated test gate. *(privacy-critical)*
-- [ ] **SYNC-03**: An item's public/private attribute is fixed at creation and cannot be changed afterward (D6) — eliminates the public→private sync-tombstone edge case.
+- [x] **SYNC-01**: Items on the public list sync to family members through the existing family_sync E2EE pipeline once a family is joined.
+- [x] **SYNC-02**: Items on the private list NEVER enter the sync pipeline — the change tracker enqueues only public items, enforced at the use-case boundary and verified by a dedicated test gate. *(privacy-critical)*
+- [x] **SYNC-03**: An item's public/private attribute is fixed at creation and cannot be changed afterward (D6) — eliminates the public→private sync-tombstone edge case.
 - [ ] **SYNC-04**: On the public list, each item shows which family member added it (avatar emoji + display name from shadow books); the private list shows no attribution. *(differentiator)*
 - [x] **SYNC-05**: Concurrent family edits to the same item resolve via sticky-complete rule (D-03 overrides D7): when `completedAt > incoming.updatedAt`, `isCompleted: true` is preserved; a soft-deleted (tombstoned) item is not resurrected by a remote update op. Phase 36 delivers the `completedAt DateTime?` column; Phase 37 implements the merge algorithm in `ApplySyncOperationsUseCase`.
-- [ ] **SYNC-06**: Public-list changes synced from family members appear reactively via a Drift `.watch()` stream (`readsFrom:` the shopping table) without manual refresh (applies the v1.4 GAP-2 lesson).
+- [x] **SYNC-06**: Public-list changes synced from family members appear reactively via a Drift `.watch()` stream (`readsFrom:` the shopping table) without manual refresh (applies the v1.4 GAP-2 lesson).
 
 ### Navigation & Rename (NAV)
 
@@ -126,26 +126,26 @@ Which phases cover which requirements. Updated for 4-phase consolidated roadmap 
 | SHOP-02 | Phase 38 | Pending |
 | SHOP-03 | Phase 38 | Pending |
 | SHOP-04 | Phase 38 | Pending |
-| DONE-01 | Phase 38 | Pending |
+| DONE-01 | Phase 38 | Complete |
 | DONE-02 | Phase 36 | Complete |
-| DONE-03 | Phase 38 | Pending |
-| ITEM-01 | Phase 38 | Pending |
-| ITEM-02 | Phase 38 | Pending |
+| DONE-03 | Phase 38 | Complete |
+| ITEM-01 | Phase 38 | Complete |
+| ITEM-02 | Phase 38 | Complete |
 | ITEM-03 | Phase 36 | Complete |
-| ITEM-04 | Phase 38 | Pending |
+| ITEM-04 | Phase 38 | Complete |
 | ITEM-05 | Phase 36 | Complete |
 | FILT-01 | Phase 38 | Pending |
 | FILT-02 | Phase 38 | Pending |
 | FILT-03 | Phase 38 | Pending |
-| MGMT-01 | Phase 38 | Pending |
-| MGMT-02 | Phase 38 | Pending |
-| MGMT-03 | Phase 38 | Pending |
-| SYNC-01 | Phase 37 | Pending |
-| SYNC-02 | Phase 37 | Pending |
-| SYNC-03 | Phase 37 | Pending |
+| MGMT-01 | Phase 38 | Complete |
+| MGMT-02 | Phase 38 | Complete |
+| MGMT-03 | Phase 38 | Complete |
+| SYNC-01 | Phase 37 | Complete |
+| SYNC-02 | Phase 37 | Complete |
+| SYNC-03 | Phase 37 | Complete |
 | SYNC-04 | Phase 38 | Pending |
 | SYNC-05 | Phase 37 | Complete |
-| SYNC-06 | Phase 37 | Pending |
+| SYNC-06 | Phase 37 | Complete |
 | NAV-01 | Phase 38 | Pending |
 | NAV-02 | Phase 38 | Pending |
 | NAV-03 | Phase 39 | Pending |
