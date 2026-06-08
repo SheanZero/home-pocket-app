@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: 购物清单
-status: executing
-stopped_at: Phase 38 UI-SPEC re-verified (Dimension 5 fix)
-last_updated: "2026-06-08T12:37:18.519Z"
+status: ready_to_plan
+stopped_at: Phase 38 complete (8/8) — ready to discuss Phase 39
+last_updated: 2026-06-08T13:07:02.030Z
 last_activity: 2026-06-08 -- Phase 38 execution started
 progress:
   total_phases: 4
-  completed_phases: 2
-  total_plans: 21
-  completed_plans: 20
-  percent: 50
+  completed_phases: 6
+  total_plans: 246
+  completed_plans: 21
+  percent: 150
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07 — v1.6 购物清单 started)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 38 — presentation-shell-ui-widgets
+**Current focus:** Phase 39 — i18n + golden re baseline + smoke test
 
 ## Current Position
 
-Phase: 38 (presentation-shell-ui-widgets) — EXECUTING
-Plan: 1 of 8
-Status: Executing Phase 38
-Last activity: 2026-06-08 -- Phase 38 execution started
+Phase: 39
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-06-08
 
 ```
 v1.6 progress: [░░░░] 0% — Phase 36-39 defined, 0/4 complete

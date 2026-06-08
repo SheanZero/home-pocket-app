@@ -24,9 +24,9 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (see Tra
 ### List & Structure (SHOP)
 
 - [x] **SHOP-01**: User can switch between 公共 (public) and 私人 (private) shopping lists via a top segmented control; each segment is a fully independent list.
-- [ ] **SHOP-02**: User sees shopping items in a scrollable list; each tile shows the item name as primary text, a category emoji, and — when set — quantity and estimated price as secondary text.
-- [ ] **SHOP-03**: User sees a dual-ledger color accent (日常/悦己 left border via `palette.daily`/`palette.joy`) on each tile when a ledger is set; a neutral accent when none is set. *(differentiator)*
-- [ ] **SHOP-04**: User sees a clear empty state per list with a next-step CTA — three variants: empty private list, empty public list (solo), empty public list (family joined).
+- [x] **SHOP-02**: User sees shopping items in a scrollable list; each tile shows the item name as primary text, a category emoji, and — when set — quantity and estimated price as secondary text.
+- [x] **SHOP-03**: User sees a dual-ledger color accent (日常/悦己 left border via `palette.daily`/`palette.joy`) on each tile when a ledger is set; a neutral accent when none is set. *(differentiator)*
+- [x] **SHOP-04**: User sees a clear empty state per list with a next-step CTA — three variants: empty private list, empty public list (solo), empty public list (family joined).
 
 ### Completion (DONE)
 
@@ -44,9 +44,9 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (see Tra
 
 ### Filter (FILT)
 
-- [ ] **FILT-01**: User can filter the current list by ledger (All / 日常 / 悦己), category, and status (active / all), using a chip bar consistent with the v1.4 `ListSortFilterBar`.
-- [ ] **FILT-02**: Filter state is shared across both segments and resets when switching public↔private (D5).
-- [ ] **FILT-03**: User can clear all active filters in one tap; the active/completed split is preserved within any filtered view.
+- [x] **FILT-01**: User can filter the current list by ledger (All / 日常 / 悦己), category, and status (active / all), using a chip bar consistent with the v1.4 `ListSortFilterBar`.
+- [x] **FILT-02**: Filter state is shared across both segments and resets when switching public↔private (D5).
+- [x] **FILT-03**: User can clear all active filters in one tap; the active/completed split is preserved within any filtered view.
 
 ### Management (MGMT)
 
@@ -59,14 +59,14 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (see Tra
 - [x] **SYNC-01**: Items on the public list sync to family members through the existing family_sync E2EE pipeline once a family is joined.
 - [x] **SYNC-02**: Items on the private list NEVER enter the sync pipeline — the change tracker enqueues only public items, enforced at the use-case boundary and verified by a dedicated test gate. *(privacy-critical)*
 - [x] **SYNC-03**: An item's public/private attribute is fixed at creation and cannot be changed afterward (D6) — eliminates the public→private sync-tombstone edge case.
-- [ ] **SYNC-04**: On the public list, each item shows which family member added it (avatar emoji + display name from shadow books); the private list shows no attribution. *(differentiator)*
+- [x] **SYNC-04**: On the public list, each item shows which family member added it (avatar emoji + display name from shadow books); the private list shows no attribution. *(differentiator)*
 - [x] **SYNC-05**: Concurrent family edits to the same item resolve via sticky-complete rule (D-03 overrides D7): when `completedAt > incoming.updatedAt`, `isCompleted: true` is preserved; a soft-deleted (tombstoned) item is not resurrected by a remote update op. Phase 36 delivers the `completedAt DateTime?` column; Phase 37 implements the merge algorithm in `ApplySyncOperationsUseCase`.
 - [x] **SYNC-06**: Public-list changes synced from family members appear reactively via a Drift `.watch()` stream (`readsFrom:` the shopping table) without manual refresh (applies the v1.4 GAP-2 lesson).
 
 ### Navigation & Rename (NAV)
 
-- [ ] **NAV-01**: On the shopping-list tab, the bottom-right FAB opens the add-shopping-item screen; on every other tab it remains the transaction-entry FAB with its existing post-entry invalidations intact (no accounting regression). *(D2)*
-- [ ] **NAV-02**: The 4th nav tab and all user-facing strings read 购物清单 (zh) / 買い物リスト (ja) / Shopping List (en); no 待办/Todo strings remain anywhere, and the tab icon changes from `check_box_outlined` to a shopping icon.
+- [x] **NAV-01**: On the shopping-list tab, the bottom-right FAB opens the add-shopping-item screen; on every other tab it remains the transaction-entry FAB with its existing post-entry invalidations intact (no accounting regression). *(D2)*
+- [x] **NAV-02**: The 4th nav tab and all user-facing strings read 购物清单 (zh) / 買い物リスト (ja) / Shopping List (en); no 待办/Todo strings remain anywhere, and the tab icon changes from `check_box_outlined` to a shopping icon.
 - [ ] **NAV-03**: ARB key parity holds across ja/zh/en and `flutter gen-l10n` succeeds without warnings.
 
 ---
@@ -123,9 +123,9 @@ Which phases cover which requirements. Updated for 4-phase consolidated roadmap 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | SHOP-01 | Phase 36 | Complete |
-| SHOP-02 | Phase 38 | Pending |
-| SHOP-03 | Phase 38 | Pending |
-| SHOP-04 | Phase 38 | Pending |
+| SHOP-02 | Phase 38 | Complete |
+| SHOP-03 | Phase 38 | Complete |
+| SHOP-04 | Phase 38 | Complete |
 | DONE-01 | Phase 38 | Complete |
 | DONE-02 | Phase 36 | Complete |
 | DONE-03 | Phase 38 | Complete |
@@ -134,20 +134,20 @@ Which phases cover which requirements. Updated for 4-phase consolidated roadmap 
 | ITEM-03 | Phase 36 | Complete |
 | ITEM-04 | Phase 38 | Complete |
 | ITEM-05 | Phase 36 | Complete |
-| FILT-01 | Phase 38 | Pending |
-| FILT-02 | Phase 38 | Pending |
-| FILT-03 | Phase 38 | Pending |
+| FILT-01 | Phase 38 | Complete |
+| FILT-02 | Phase 38 | Complete |
+| FILT-03 | Phase 38 | Complete |
 | MGMT-01 | Phase 38 | Complete |
 | MGMT-02 | Phase 38 | Complete |
 | MGMT-03 | Phase 38 | Complete |
 | SYNC-01 | Phase 37 | Complete |
 | SYNC-02 | Phase 37 | Complete |
 | SYNC-03 | Phase 37 | Complete |
-| SYNC-04 | Phase 38 | Pending |
+| SYNC-04 | Phase 38 | Complete |
 | SYNC-05 | Phase 37 | Complete |
 | SYNC-06 | Phase 37 | Complete |
-| NAV-01 | Phase 38 | Pending |
-| NAV-02 | Phase 38 | Pending |
+| NAV-01 | Phase 38 | Complete |
+| NAV-02 | Phase 38 | Complete |
 | NAV-03 | Phase 39 | Pending |
 
 **Coverage:**
