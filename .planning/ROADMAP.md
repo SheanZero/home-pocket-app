@@ -99,7 +99,7 @@
 
 - [x] **Phase 36: Data Layer + Domain + Import Guard** — ShoppingItems table (schema v20), DAO, repository impl, Wave-0 migration contract test, Freezed domain models, repository interface, LedgerTypeSelector move, import_guard files (completed 2026-06-07)
 - [x] **Phase 37: Application Use Cases + Sync Integration** — 6 use cases with private-item privacy gate, ShoppingItemChangeTracker, SyncOrchestrator extension, ApplySyncOperationsUseCase branch, reactive-stream integration test (completed 2026-06-08)
-- [ ] **Phase 38: Presentation Shell + UI Widgets** — nav rename + shopping-bag icon, context-aware FAB, keepAlive providers, ShoppingListScreen shell, ShoppingItemTile, add/edit form, filter bar, swipe-delete, batch-select, empty states
+- [x] **Phase 38: Presentation Shell + UI Widgets** — nav rename + shopping-bag icon, context-aware FAB, keepAlive providers, ShoppingListScreen shell, ShoppingItemTile, add/edit form, filter bar, swipe-delete, batch-select, empty states (completed 2026-06-08)
 - [ ] **Phase 39: i18n + Golden Re-baseline + Smoke Test** — ARB key parity ja/zh/en, golden masters all states × locales × color modes, reactive-sync smoke test, analyze 0 + coverage ≥70%
 
 ## Phase Details
@@ -192,7 +192,7 @@ Plans:
   4. The add/edit form accepts all D4 fields — name (required, validated), optional ledger selector (reuses `LedgerTypeSelector` from `lib/shared/widgets/`), optional category (pushes to `CategorySelectionScreen`), optional tags, note (encrypted at repo boundary), quantity (plain numeric), and estimated price (integer yen via `NumberFormatter`); completed items sort exclusively below a visual divider; active items in a `SliverReorderableList`; swipe-to-delete uses `Dismissible` and is disabled while batch-select mode is active (MGMT-03)
   5. Long-pressing any item enters batch-select mode with a floating bottom action bar; "Select all" is available; the batch-delete confirmation fires `DeleteShoppingItemUseCase` for each selected item with soft-delete semantics; "Clear all completed" appears only when the completed section is non-empty and fires `ClearCompletedItemsUseCase` for the current segment regardless of active filters; all three empty state variants (empty private, empty public solo, empty public family) render correctly (SHOP-04)
 
-**Plans:** 7/8 plans executed
+**Plans:** 8/8 plans complete
 
 Plans:
 **Wave 0** *(model fix + test infra — blocks all other plans)*
@@ -216,7 +216,7 @@ Plans:
 
 **Wave 4** *(main shell integration — highest-risk, last)*
 
-- [ ] 38-08-PLAN.md — MainShellScreen: replace placeholder + context-aware FAB + batchSelectMode guard (SC1 accounting regression gate)
+- [x] 38-08-PLAN.md — MainShellScreen: replace placeholder + context-aware FAB + batchSelectMode guard (SC1 accounting regression gate)
 
 **UI hint**: yes
 
@@ -253,5 +253,5 @@ Plans:
 |-------|----------------|--------|-----------|
 | 36. Data Layer + Domain + Import Guard | 7/7 | Complete    | 2026-06-07 |
 | 37. Application Use Cases + Sync Integration | 6/6 | Complete    | 2026-06-08 |
-| 38. Presentation Shell + UI Widgets | 7/8 | In Progress|  |
+| 38. Presentation Shell + UI Widgets | 8/8 | Complete   | 2026-06-08 |
 | 39. i18n + Golden Re-baseline + Smoke Test | 0/TBD | Not started | - |
