@@ -1824,4 +1824,46 @@ class SZh extends S {
 
   @override
   String get shoppingFilterCategory => '分类';
+
+  @override
+  String get shoppingFormAddTitle => '添加商品';
+
+  @override
+  String get shoppingFormEditTitle => '编辑商品';
+
+  @override
+  String get shoppingFormSave => '保存';
+
+  @override
+  String get shoppingFormNameLabel => '商品名称';
+
+  @override
+  String get shoppingFormNameRequired => '请输入名称';
+
+  @override
+  String get shoppingFormLedgerLabel => '账本';
+
+  @override
+  String get shoppingFormCategoryLabel => '分类';
+
+  @override
+  String get shoppingFormNoCategorySelected => '未选择分类';
+
+  @override
+  String get shoppingFormChangeCategory => '更改';
+
+  @override
+  String get shoppingFormTagsLabel => '标签（逗号分隔）';
+
+  @override
+  String get shoppingFormNoteLabel => '备注';
+
+  @override
+  String get shoppingFormQuantityLabel => '数量';
+
+  @override
+  String get shoppingFormPrice => '预估价格';
+
+  @override
+  String get shoppingFormSaveError => '保存失败，请重试。';
 }

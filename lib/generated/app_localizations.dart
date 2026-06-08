@@ -3444,6 +3444,90 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Category'**
   String get shoppingFilterCategory;
+
+  /// AppBar title for the shopping item form in create mode (Phase 38-07)
+  ///
+  /// In en, this message translates to:
+  /// **'Add item'**
+  String get shoppingFormAddTitle;
+
+  /// AppBar title for the shopping item form in edit mode (Phase 38-07)
+  ///
+  /// In en, this message translates to:
+  /// **'Edit item'**
+  String get shoppingFormEditTitle;
+
+  /// Save button label in the shopping item form (Phase 38-07)
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get shoppingFormSave;
+
+  /// Label for the item name field in the shopping item form (Phase 38-07)
+  ///
+  /// In en, this message translates to:
+  /// **'Item name'**
+  String get shoppingFormNameLabel;
+
+  /// Validation error when item name is empty in the shopping item form (Phase 38-07)
+  ///
+  /// In en, this message translates to:
+  /// **'Name is required'**
+  String get shoppingFormNameRequired;
+
+  /// Section label for the ledger type selector in the shopping item form (Phase 38-07)
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger'**
+  String get shoppingFormLedgerLabel;
+
+  /// Label for the category field in the shopping item form (Phase 38-07)
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get shoppingFormCategoryLabel;
+
+  /// Placeholder when no category is selected in the shopping item form (Phase 38-07)
+  ///
+  /// In en, this message translates to:
+  /// **'No category'**
+  String get shoppingFormNoCategorySelected;
+
+  /// Button label to open the category picker in the shopping item form (Phase 38-07)
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get shoppingFormChangeCategory;
+
+  /// Label for the tags field in the shopping item form (Phase 38-07)
+  ///
+  /// In en, this message translates to:
+  /// **'Tags (comma-separated)'**
+  String get shoppingFormTagsLabel;
+
+  /// Label for the note field in the shopping item form (Phase 38-07)
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get shoppingFormNoteLabel;
+
+  /// Label for the quantity field in the shopping item form (Phase 38-07)
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get shoppingFormQuantityLabel;
+
+  /// Label for the estimated price field in the shopping item form (Phase 38-07)
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated price'**
+  String get shoppingFormPrice;
+
+  /// Error message shown when saving a shopping item fails (Phase 38-07)
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save. Please try again.'**
+  String get shoppingFormSaveError;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

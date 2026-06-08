@@ -2326,5 +2326,61 @@
   "@shoppingFilterCategory": {
     "description": "Shopping filter bar — category chip label (Phase 38)"
   },
+  "shoppingFormAddTitle": "添加商品",
+  "@shoppingFormAddTitle": {
+    "description": "AppBar title for the shopping item form in create mode (Phase 38-07)"
+  },
+  "shoppingFormEditTitle": "编辑商品",
+  "@shoppingFormEditTitle": {
+    "description": "AppBar title for the shopping item form in edit mode (Phase 38-07)"
+  },
+  "shoppingFormSave": "保存",
+  "@shoppingFormSave": {
+    "description": "Save button label in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormNameLabel": "商品名称",
+  "@shoppingFormNameLabel": {
+    "description": "Label for the item name field in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormNameRequired": "请输入名称",
+  "@shoppingFormNameRequired": {
+    "description": "Validation error when item name is empty in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormLedgerLabel": "账本",
+  "@shoppingFormLedgerLabel": {
+    "description": "Section label for the ledger type selector in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormCategoryLabel": "分类",
+  "@shoppingFormCategoryLabel": {
+    "description": "Label for the category field in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormNoCategorySelected": "未选择分类",
+  "@shoppingFormNoCategorySelected": {
+    "description": "Placeholder when no category is selected in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormChangeCategory": "更改",
+  "@shoppingFormChangeCategory": {
+    "description": "Button label to open the category picker in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormTagsLabel": "标签（逗号分隔）",
+  "@shoppingFormTagsLabel": {
+    "description": "Label for the tags field in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormNoteLabel": "备注",
+  "@shoppingFormNoteLabel": {
+    "description": "Label for the note field in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormQuantityLabel": "数量",
+  "@shoppingFormQuantityLabel": {
+    "description": "Label for the quantity field in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormPrice": "预估价格",
+  "@shoppingFormPrice": {
+    "description": "Label for the estimated price field in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormSaveError": "保存失败，请重试。",
+  "@shoppingFormSaveError": {
+    "description": "Error message shown when saving a shopping item fails (Phase 38-07)"
+  },
   "@@locale": "zh"
 }
