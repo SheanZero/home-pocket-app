@@ -4,8 +4,8 @@ milestone: v1.6
 milestone_name: 购物清单
 status: executing
 stopped_at: Phase 39 context gathered
-last_updated: "2026-06-08T14:27:00.954Z"
-last_activity: 2026-06-08 -- Phase 39 planning complete
+last_updated: "2026-06-08T14:29:28.882Z"
+last_activity: 2026-06-08 -- Phase 39 execution started
 progress:
   total_phases: 4
   completed_phases: 3
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07 — v1.6 购物清单 started)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 39 — i18n + golden re baseline + smoke test
+**Current focus:** Phase 39 — i18n-golden-re-baseline-smoke-test
 
 ## Current Position
 
-Phase: 39
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-06-08 -- Phase 39 planning complete
+Phase: 39 (i18n-golden-re-baseline-smoke-test) — EXECUTING
+Plan: 1 of 6
+Status: Executing Phase 39
+Last activity: 2026-06-08 -- Phase 39 execution started
 
 ```
 v1.6 progress: [░░░░] 0% — Phase 36-39 defined, 0/4 complete

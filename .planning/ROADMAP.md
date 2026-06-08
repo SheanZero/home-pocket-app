@@ -100,7 +100,7 @@
 - [x] **Phase 36: Data Layer + Domain + Import Guard** — ShoppingItems table (schema v20), DAO, repository impl, Wave-0 migration contract test, Freezed domain models, repository interface, LedgerTypeSelector move, import_guard files (completed 2026-06-07)
 - [x] **Phase 37: Application Use Cases + Sync Integration** — 6 use cases with private-item privacy gate, ShoppingItemChangeTracker, SyncOrchestrator extension, ApplySyncOperationsUseCase branch, reactive-stream integration test (completed 2026-06-08)
 - [x] **Phase 38: Presentation Shell + UI Widgets** — nav rename + shopping-bag icon, context-aware FAB, keepAlive providers, ShoppingListScreen shell, ShoppingItemTile, add/edit form, filter bar, swipe-delete, batch-select, empty states (completed 2026-06-08)
-- [ ] **Phase 39: i18n + Golden Re-baseline + Smoke Test** — ARB key parity ja/zh/en, golden masters all states × locales × color modes, reactive-sync smoke test, analyze 0 + coverage ≥70%
+- [x] **Phase 39: i18n + Golden Re-baseline + Smoke Test** — ARB key parity ja/zh/en, golden masters all states × locales × color modes, reactive-sync smoke test, analyze 0 + coverage ≥70% (completed 2026-06-08)
 
 ## Phase Details
 
@@ -233,20 +233,20 @@ Plans:
   4. A sync smoke test verifies that a public item written by a simulated family-sync operation (directly via `ApplySyncOperationsUseCase`) causes the `watchByListType('public')` `StreamProvider` to emit a new state without any `ref.invalidate` call — confirming the v1.4 GAP-2 lesson is applied
   5. `flutter analyze` reports 0 issues; `flutter test --coverage` passes with coverage ≥70% on all new files in `lib/features/shopping_list/` and `lib/application/shopping_list/`
 
-**Plans:** 6 plans
+**Plans:** 6/6 plans complete
 
 Plans:
 **Wave 1** *(all parallel — no file conflicts)*
 
-- [ ] 39-01-PLAN.md — ARB key rename homeTabTodo→homeTabShopping + stale todoTab deletion + nav widget + test update + flutter gen-l10n
-- [ ] 39-02-PLAN.md — ShoppingEmptyState goldens (3 variants × 3 locales × 2 modes = 18 PNGs)
-- [ ] 39-03-PLAN.md — ShoppingItemTile goldens (active + completed + attribution × 3 locales × 2 modes = 18 PNGs)
-- [ ] 39-04-PLAN.md — ShoppingFilterBar + batch chrome goldens (filter active + selection header + batch action bar = 18 PNGs)
-- [ ] 39-05-PLAN.md — Presentation-layer smoke test (D39-06 SC4 reactive emit + privacy re-assertion)
+- [x] 39-01-PLAN.md — ARB key rename homeTabTodo→homeTabShopping + stale todoTab deletion + nav widget + test update + flutter gen-l10n
+- [x] 39-02-PLAN.md — ShoppingEmptyState goldens (3 variants × 3 locales × 2 modes = 18 PNGs)
+- [x] 39-03-PLAN.md — ShoppingItemTile goldens (active + completed + attribution × 3 locales × 2 modes = 18 PNGs)
+- [x] 39-04-PLAN.md — ShoppingFilterBar + batch chrome goldens (filter active + selection header + batch action bar = 18 PNGs)
+- [x] 39-05-PLAN.md — Presentation-layer smoke test (D39-06 SC4 reactive emit + privacy re-assertion)
 
 **Wave 2** *(depends on all Wave 1 plans)*
 
-- [ ] 39-06-PLAN.md — Quality gate: flutter analyze 0 + full flutter test + coverage ≥70% on shopping modules
+- [x] 39-06-PLAN.md — Quality gate: flutter analyze 0 + full flutter test + coverage ≥70% on shopping modules
 
 ## Milestone Progress
 
@@ -267,4 +267,4 @@ Plans:
 | 36. Data Layer + Domain + Import Guard | 7/7 | Complete    | 2026-06-07 |
 | 37. Application Use Cases + Sync Integration | 6/6 | Complete    | 2026-06-08 |
 | 38. Presentation Shell + UI Widgets | 8/8 | Complete    | 2026-06-08 |
-| 39. i18n + Golden Re-baseline + Smoke Test | 0/6 | Not started | - |
+| 39. i18n + Golden Re-baseline + Smoke Test | 6/6 | Complete   | 2026-06-08 |
