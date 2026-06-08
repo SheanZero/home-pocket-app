@@ -3336,6 +3336,48 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Return to current month'**
   String get listCalNavCurrentMonth;
+
+  /// Title of the confirm dialog when swiping to delete a shopping item (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this item?'**
+  String get shoppingDeleteConfirmTitle;
+
+  /// Body text of the confirm dialog when swiping to delete a shopping item (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'This item will be removed from your shopping list.'**
+  String get shoppingDeleteConfirmBody;
+
+  /// Confirm button label in the delete shopping item dialog (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get shoppingDeleteConfirmButton;
+
+  /// Cancel button label in the delete shopping item dialog (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get shoppingDeleteCancelButton;
+
+  /// Success toast shown after deleting a shopping item (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Item deleted'**
+  String get shoppingDeletedSnackBar;
+
+  /// Semantics label for the edit chevron button on a shopping item tile (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Edit item'**
+  String get shoppingEditItem;
+
+  /// Semantics label for the drag handle on a shopping item tile (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder item'**
+  String get shoppingReorderItem;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

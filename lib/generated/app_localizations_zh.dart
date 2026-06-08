@@ -1770,4 +1770,25 @@ class SZh extends S {
 
   @override
   String get listCalNavCurrentMonth => '返回本月';
+
+  @override
+  String get shoppingDeleteConfirmTitle => '删除此商品？';
+
+  @override
+  String get shoppingDeleteConfirmBody => '该商品将从购物清单中移除。';
+
+  @override
+  String get shoppingDeleteConfirmButton => '删除';
+
+  @override
+  String get shoppingDeleteCancelButton => '取消';
+
+  @override
+  String get shoppingDeletedSnackBar => '已删除商品';
+
+  @override
+  String get shoppingEditItem => '编辑商品';
+
+  @override
+  String get shoppingReorderItem => '重新排序';
 }

@@ -2254,5 +2254,33 @@
   "@listCalNavCurrentMonth": {
     "description": "Semantics label for return to current month gesture in calendar header (Phase 30)"
   },
+  "shoppingDeleteConfirmTitle": "Delete this item?",
+  "@shoppingDeleteConfirmTitle": {
+    "description": "Title of the confirm dialog when swiping to delete a shopping item (Phase 38)"
+  },
+  "shoppingDeleteConfirmBody": "This item will be removed from your shopping list.",
+  "@shoppingDeleteConfirmBody": {
+    "description": "Body text of the confirm dialog when swiping to delete a shopping item (Phase 38)"
+  },
+  "shoppingDeleteConfirmButton": "Delete",
+  "@shoppingDeleteConfirmButton": {
+    "description": "Confirm button label in the delete shopping item dialog (Phase 38)"
+  },
+  "shoppingDeleteCancelButton": "Cancel",
+  "@shoppingDeleteCancelButton": {
+    "description": "Cancel button label in the delete shopping item dialog (Phase 38)"
+  },
+  "shoppingDeletedSnackBar": "Item deleted",
+  "@shoppingDeletedSnackBar": {
+    "description": "Success toast shown after deleting a shopping item (Phase 38)"
+  },
+  "shoppingEditItem": "Edit item",
+  "@shoppingEditItem": {
+    "description": "Semantics label for the edit chevron button on a shopping item tile (Phase 38)"
+  },
+  "shoppingReorderItem": "Reorder item",
+  "@shoppingReorderItem": {
+    "description": "Semantics label for the drag handle on a shopping item tile (Phase 38)"
+  },
   "@@locale": "en"
 }
