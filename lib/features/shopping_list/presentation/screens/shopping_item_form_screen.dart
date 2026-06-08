@@ -5,6 +5,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/ledger_type_selector.dart';
+import '../../../accounting/domain/models/category.dart';
 import '../../../accounting/domain/models/transaction.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart'
     show deviceIdentityRepositoryProvider;
@@ -151,18 +152,16 @@ class _ShoppingItemFormScreenState
   }
 
   Future<void> _pickCategory() async {
-    final selected = await Navigator.push<dynamic>(
+    final selected = await Navigator.push<Category>(
       context,
-      MaterialPageRoute<dynamic>(
+      MaterialPageRoute<Category>(
         builder: (_) =>
             CategorySelectionScreen(selectedCategoryId: _categoryId),
       ),
     );
     if (selected != null && mounted) {
       setState(() {
-        // CategorySelectionScreen pops with the Category object or its id string
-        _categoryId =
-            selected is String ? selected : (selected.id as String?) ?? _categoryId;
+        _categoryId = selected.id;
       });
     }
   }
