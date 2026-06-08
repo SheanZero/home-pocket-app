@@ -17,6 +17,7 @@ mixin _$ShoppingListFilter {
   LedgerType? get ledgerType;
   String get statusFilter;
   String get searchQuery;
+  Set<String> get categoryIds;
 
   /// Create a copy of ShoppingListFilter
   /// with the given fields replaced by the non-null parameter values.
@@ -40,16 +41,26 @@ mixin _$ShoppingListFilter {
             (identical(other.statusFilter, statusFilter) ||
                 other.statusFilter == statusFilter) &&
             (identical(other.searchQuery, searchQuery) ||
-                other.searchQuery == searchQuery));
+                other.searchQuery == searchQuery) &&
+            const DeepCollectionEquality().equals(
+              other.categoryIds,
+              categoryIds,
+            ));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, listType, ledgerType, statusFilter, searchQuery);
+  int get hashCode => Object.hash(
+    runtimeType,
+    listType,
+    ledgerType,
+    statusFilter,
+    searchQuery,
+    const DeepCollectionEquality().hash(categoryIds),
+  );
 
   @override
   String toString() {
-    return 'ShoppingListFilter(listType: $listType, ledgerType: $ledgerType, statusFilter: $statusFilter, searchQuery: $searchQuery)';
+    return 'ShoppingListFilter(listType: $listType, ledgerType: $ledgerType, statusFilter: $statusFilter, searchQuery: $searchQuery, categoryIds: $categoryIds)';
   }
 }
 
@@ -65,6 +76,7 @@ abstract mixin class $ShoppingListFilterCopyWith<$Res> {
     LedgerType? ledgerType,
     String statusFilter,
     String searchQuery,
+    Set<String> categoryIds,
   });
 }
 
@@ -85,6 +97,7 @@ class _$ShoppingListFilterCopyWithImpl<$Res>
     Object? ledgerType = freezed,
     Object? statusFilter = null,
     Object? searchQuery = null,
+    Object? categoryIds = null,
   }) {
     return _then(
       _self.copyWith(
@@ -104,6 +117,10 @@ class _$ShoppingListFilterCopyWithImpl<$Res>
             ? _self.searchQuery
             : searchQuery // ignore: cast_nullable_to_non_nullable
                   as String,
+        categoryIds: null == categoryIds
+            ? _self.categoryIds
+            : categoryIds // ignore: cast_nullable_to_non_nullable
+                  as Set<String>,
       ),
     );
   }
@@ -207,6 +224,7 @@ extension ShoppingListFilterPatterns on ShoppingListFilter {
       LedgerType? ledgerType,
       String statusFilter,
       String searchQuery,
+      Set<String> categoryIds,
     )?
     $default, {
     required TResult orElse(),
@@ -219,6 +237,7 @@ extension ShoppingListFilterPatterns on ShoppingListFilter {
           _that.ledgerType,
           _that.statusFilter,
           _that.searchQuery,
+          _that.categoryIds,
         );
       case _:
         return orElse();
@@ -245,6 +264,7 @@ extension ShoppingListFilterPatterns on ShoppingListFilter {
       LedgerType? ledgerType,
       String statusFilter,
       String searchQuery,
+      Set<String> categoryIds,
     )
     $default,
   ) {
@@ -256,6 +276,7 @@ extension ShoppingListFilterPatterns on ShoppingListFilter {
           _that.ledgerType,
           _that.statusFilter,
           _that.searchQuery,
+          _that.categoryIds,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -281,6 +302,7 @@ extension ShoppingListFilterPatterns on ShoppingListFilter {
       LedgerType? ledgerType,
       String statusFilter,
       String searchQuery,
+      Set<String> categoryIds,
     )?
     $default,
   ) {
@@ -292,6 +314,7 @@ extension ShoppingListFilterPatterns on ShoppingListFilter {
           _that.ledgerType,
           _that.statusFilter,
           _that.searchQuery,
+          _that.categoryIds,
         );
       case _:
         return null;
@@ -307,7 +330,8 @@ class _ShoppingListFilter implements ShoppingListFilter {
     this.ledgerType,
     this.statusFilter = 'all',
     this.searchQuery = '',
-  });
+    final Set<String> categoryIds = const <String>{},
+  }) : _categoryIds = categoryIds;
 
   @override
   @JsonKey()
@@ -320,6 +344,14 @@ class _ShoppingListFilter implements ShoppingListFilter {
   @override
   @JsonKey()
   final String searchQuery;
+  final Set<String> _categoryIds;
+  @override
+  @JsonKey()
+  Set<String> get categoryIds {
+    if (_categoryIds is EqualUnmodifiableSetView) return _categoryIds;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableSetView(_categoryIds);
+  }
 
   /// Create a copy of ShoppingListFilter
   /// with the given fields replaced by the non-null parameter values.
@@ -341,16 +373,26 @@ class _ShoppingListFilter implements ShoppingListFilter {
             (identical(other.statusFilter, statusFilter) ||
                 other.statusFilter == statusFilter) &&
             (identical(other.searchQuery, searchQuery) ||
-                other.searchQuery == searchQuery));
+                other.searchQuery == searchQuery) &&
+            const DeepCollectionEquality().equals(
+              other._categoryIds,
+              _categoryIds,
+            ));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, listType, ledgerType, statusFilter, searchQuery);
+  int get hashCode => Object.hash(
+    runtimeType,
+    listType,
+    ledgerType,
+    statusFilter,
+    searchQuery,
+    const DeepCollectionEquality().hash(_categoryIds),
+  );
 
   @override
   String toString() {
-    return 'ShoppingListFilter(listType: $listType, ledgerType: $ledgerType, statusFilter: $statusFilter, searchQuery: $searchQuery)';
+    return 'ShoppingListFilter(listType: $listType, ledgerType: $ledgerType, statusFilter: $statusFilter, searchQuery: $searchQuery, categoryIds: $categoryIds)';
   }
 }
 
@@ -368,6 +410,7 @@ abstract mixin class _$ShoppingListFilterCopyWith<$Res>
     LedgerType? ledgerType,
     String statusFilter,
     String searchQuery,
+    Set<String> categoryIds,
   });
 }
 
@@ -388,6 +431,7 @@ class __$ShoppingListFilterCopyWithImpl<$Res>
     Object? ledgerType = freezed,
     Object? statusFilter = null,
     Object? searchQuery = null,
+    Object? categoryIds = null,
   }) {
     return _then(
       _ShoppingListFilter(
@@ -407,6 +451,10 @@ class __$ShoppingListFilterCopyWithImpl<$Res>
             ? _self.searchQuery
             : searchQuery // ignore: cast_nullable_to_non_nullable
                   as String,
+        categoryIds: null == categoryIds
+            ? _self._categoryIds
+            : categoryIds // ignore: cast_nullable_to_non_nullable
+                  as Set<String>,
       ),
     );
   }

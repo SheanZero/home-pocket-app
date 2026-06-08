@@ -18,6 +18,7 @@ abstract class ShoppingListFilter with _$ShoppingListFilter {
     LedgerType? ledgerType,
     @Default('all') String statusFilter,
     @Default('') String searchQuery,
+    @Default(<String>{}) Set<String> categoryIds,
   }) = _ShoppingListFilter;
 
   /// Creates a filter state with all defaults (private list, no filters).

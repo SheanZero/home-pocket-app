@@ -314,7 +314,7 @@ final class ApplySyncOperationsUseCaseProvider
 }
 
 String _$applySyncOperationsUseCaseHash() =>
-    r'29da0bc6a10c3bd6960c4eec6769cd0058052e57';
+    r'0ceec58a183d481cf3d103b1f7986fb57da20daf';
 
 /// PushSyncUseCase provider.
 
