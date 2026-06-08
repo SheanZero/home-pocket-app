@@ -575,7 +575,7 @@ class SEn extends S {
   String get homeTabChart => 'Charts';
 
   @override
-  String get homeTabTodo => 'Shopping List';
+  String get homeTabShopping => 'Shopping';
 
   @override
   String homeMonthFormat(int year, int month) {
@@ -1286,9 +1286,6 @@ class SEn extends S {
 
   @override
   String get listTab => 'List';
-
-  @override
-  String get todoTab => 'Todo';
 
   @override
   String get datePickerComingSoon => 'Date picker coming soon';

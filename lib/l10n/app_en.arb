@@ -706,9 +706,9 @@
   "@homeTabChart": {
     "description": "Bottom nav charts tab label"
   },
-  "homeTabTodo": "Shopping List",
-  "@homeTabTodo": {
-    "description": "Bottom nav todo tab label"
+  "homeTabShopping": "Shopping",
+  "@homeTabShopping": {
+    "description": "Bottom nav shopping tab label"
   },
   "homeMonthFormat": "{year}/{month}",
   "@homeMonthFormat": {
@@ -1620,10 +1620,6 @@
   "listTab": "List",
   "@listTab": {
     "description": "List tab label in bottom navigation"
-  },
-  "todoTab": "Todo",
-  "@todoTab": {
-    "description": "Todo tab label in bottom navigation"
   },
   "datePickerComingSoon": "Date picker coming soon",
   "@datePickerComingSoon": {

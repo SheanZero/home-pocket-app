@@ -1179,11 +1179,11 @@ abstract class S {
   /// **'Charts'**
   String get homeTabChart;
 
-  /// Bottom nav todo tab label
+  /// Bottom nav shopping tab label
   ///
   /// In en, this message translates to:
-  /// **'Shopping List'**
-  String get homeTabTodo;
+  /// **'Shopping'**
+  String get homeTabShopping;
 
   /// Year and month display format
   ///
@@ -2462,12 +2462,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'List'**
   String get listTab;
-
-  /// Todo tab label in bottom navigation
-  ///
-  /// In en, this message translates to:
-  /// **'Todo'**
-  String get todoTab;
 
   /// Placeholder message for date picker feature
   ///

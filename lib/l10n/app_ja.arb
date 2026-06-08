@@ -706,9 +706,9 @@
   "@homeTabChart": {
     "description": "Bottom nav charts tab label"
   },
-  "homeTabTodo": "買い物リスト",
-  "@homeTabTodo": {
-    "description": "Bottom nav todo tab label"
+  "homeTabShopping": "買い物",
+  "@homeTabShopping": {
+    "description": "Bottom nav shopping tab label"
   },
   "homeMonthFormat": "{year}年{month}月",
   "@homeMonthFormat": {
@@ -1620,10 +1620,6 @@
   "listTab": "リスト",
   "@listTab": {
     "description": "List tab label in bottom navigation"
-  },
-  "todoTab": "やること",
-  "@todoTab": {
-    "description": "Todo tab label in bottom navigation"
   },
   "datePickerComingSoon": "日付選択は近日公開",
   "@datePickerComingSoon": {
