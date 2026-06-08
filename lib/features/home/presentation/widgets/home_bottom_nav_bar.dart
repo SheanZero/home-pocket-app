@@ -25,7 +25,14 @@ class HomeBottomNavBar extends StatelessWidget {
     Icons.home_outlined,
     Icons.list,
     Icons.bar_chart,
-    Icons.check_box_outlined,
+    Icons.shopping_bag_outlined,
+  ];
+
+  static const _activeIcons = [
+    Icons.home,
+    Icons.list,
+    Icons.bar_chart,
+    Icons.shopping_bag,
   ];
 
   @override
@@ -95,7 +102,7 @@ class HomeBottomNavBar extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              _icons[index],
+              isActive ? _activeIcons[index] : _icons[index],
               size: 20,
               color: isActive ? Colors.white : context.palette.textTertiary,
             ),
