@@ -41,11 +41,12 @@ void main() {
       changeTracker: tracker,
     );
 
+    // any() registered first so specific stubs registered after it win (mocktail lastWhere)
+    when(() => mockRepo.findById(any())).thenAnswer((_) async => null);
     when(() => mockRepo.findById('item-pub')).thenAnswer((_) async => publicItem);
     when(
       () => mockRepo.findById('item-priv'),
     ).thenAnswer((_) async => privateItem);
-    when(() => mockRepo.findById(any())).thenAnswer((_) async => null);
     when(() => mockRepo.softDelete(any())).thenAnswer((_) async {});
   });
 
