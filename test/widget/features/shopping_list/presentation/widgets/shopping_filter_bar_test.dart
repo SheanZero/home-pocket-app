@@ -26,7 +26,6 @@ Future<ProviderContainer> _pumpFilterBar(
   ShoppingListFilter? filter,
 }) async {
   late ProviderContainer container;
-  final initialFilter = filter ?? ShoppingListFilter.initial();
 
   await tester.pumpWidget(
     ProviderScope(

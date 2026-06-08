@@ -9,7 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/shopping_list/delete_shopping_item_use_case.dart';
 import 'package:home_pocket/application/shopping_list/toggle_item_completed_use_case.dart';
-import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/repository_providers.dart';
@@ -62,7 +61,7 @@ Future<void> _pumpTile(
           body: CustomScrollView(
             slivers: [
               SliverReorderableList(
-                onReorder: (_, __) {},
+                onReorder: (_, _) {},
                 itemCount: 1,
                 itemBuilder: (ctx, i) => ReorderableDelayedDragStartListener(
                   key: ValueKey('swipe-tile-$i'),
