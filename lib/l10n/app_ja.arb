@@ -2254,5 +2254,49 @@
   "@listCalNavCurrentMonth": {
     "description": "Semantics label for return to current month gesture in calendar header (Phase 30)"
   },
+  "shoppingEmptyPrivateHeading": "買うものリストは空です",
+  "@shoppingEmptyPrivateHeading": {
+    "description": "Shopping empty state heading — private list (Phase 38; values Phase 39)"
+  },
+  "shoppingEmptyPrivateBody": "「+」で最初のアイテムを追加",
+  "@shoppingEmptyPrivateBody": {
+    "description": "Shopping empty state body — private list (Phase 38)"
+  },
+  "shoppingEmptyPublicSoloHeading": "公開リストは空です",
+  "@shoppingEmptyPublicSoloHeading": {
+    "description": "Shopping empty state heading — public list, no family group (Phase 38)"
+  },
+  "shoppingEmptyPublicSoloBody": "家族と共有する買い物を追加",
+  "@shoppingEmptyPublicSoloBody": {
+    "description": "Shopping empty state body — public list, no family (Phase 38)"
+  },
+  "shoppingEmptyPublicFamilyHeading": "まだアイテムがありません",
+  "@shoppingEmptyPublicFamilyHeading": {
+    "description": "Shopping empty state heading — public list, family joined (Phase 38)"
+  },
+  "shoppingEmptyPublicFamilyBody": "誰でも追加できます。最初の1つをどうぞ",
+  "@shoppingEmptyPublicFamilyBody": {
+    "description": "Shopping empty state body — public list, family joined (Phase 38)"
+  },
+  "shoppingEmptyCta": "アイテムを追加",
+  "@shoppingEmptyCta": {
+    "description": "Shopping empty state CTA button label (Phase 38)"
+  },
+  "shoppingFilterLedgerAll": "すべて",
+  "@shoppingFilterLedgerAll": {
+    "description": "Shopping filter bar — show all ledger types chip (Phase 38)"
+  },
+  "shoppingFilterStatusActive": "アクティブのみ",
+  "@shoppingFilterStatusActive": {
+    "description": "Shopping filter bar — active items only chip (Phase 38)"
+  },
+  "shoppingFilterStatusAll": "すべてのアイテム",
+  "@shoppingFilterStatusAll": {
+    "description": "Shopping filter bar — all items including completed (Phase 38)"
+  },
+  "shoppingFilterCategory": "カテゴリ",
+  "@shoppingFilterCategory": {
+    "description": "Shopping filter bar — category chip label (Phase 38)"
+  },
   "@@locale": "ja"
 }

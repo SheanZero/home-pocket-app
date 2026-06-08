@@ -1770,4 +1770,37 @@ class SZh extends S {
 
   @override
   String get listCalNavCurrentMonth => '返回本月';
+
+  @override
+  String get shoppingEmptyPrivateHeading => '购物清单是空的';
+
+  @override
+  String get shoppingEmptyPrivateBody => '点「+」添加第一个商品';
+
+  @override
+  String get shoppingEmptyPublicSoloHeading => '公共清单是空的';
+
+  @override
+  String get shoppingEmptyPublicSoloBody => '添加要和家人共享的商品';
+
+  @override
+  String get shoppingEmptyPublicFamilyHeading => '还没有商品';
+
+  @override
+  String get shoppingEmptyPublicFamilyBody => '谁都可以添加，来加第一个吧';
+
+  @override
+  String get shoppingEmptyCta => '添加商品';
+
+  @override
+  String get shoppingFilterLedgerAll => '全部';
+
+  @override
+  String get shoppingFilterStatusActive => '仅活跃';
+
+  @override
+  String get shoppingFilterStatusAll => '所有商品';
+
+  @override
+  String get shoppingFilterCategory => '分类';
 }

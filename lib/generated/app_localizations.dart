@@ -3336,6 +3336,72 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Return to current month'**
   String get listCalNavCurrentMonth;
+
+  /// Shopping empty state heading — private list (Phase 38; values Phase 39)
+  ///
+  /// In en, this message translates to:
+  /// **'Your shopping list is empty'**
+  String get shoppingEmptyPrivateHeading;
+
+  /// Shopping empty state body — private list (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to add your first item'**
+  String get shoppingEmptyPrivateBody;
+
+  /// Shopping empty state heading — public list, no family group (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Your public list is empty'**
+  String get shoppingEmptyPublicSoloHeading;
+
+  /// Shopping empty state body — public list, no family (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Add items to share with family'**
+  String get shoppingEmptyPublicSoloBody;
+
+  /// Shopping empty state heading — public list, family joined (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here yet'**
+  String get shoppingEmptyPublicFamilyHeading;
+
+  /// Shopping empty state body — public list, family joined (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone can add — be the first'**
+  String get shoppingEmptyPublicFamilyBody;
+
+  /// Shopping empty state CTA button label (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Add an item'**
+  String get shoppingEmptyCta;
+
+  /// Shopping filter bar — show all ledger types chip (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get shoppingFilterLedgerAll;
+
+  /// Shopping filter bar — active items only chip (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Active only'**
+  String get shoppingFilterStatusActive;
+
+  /// Shopping filter bar — all items including completed (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'All items'**
+  String get shoppingFilterStatusAll;
+
+  /// Shopping filter bar — category chip label (Phase 38)
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get shoppingFilterCategory;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

@@ -1809,4 +1809,37 @@ class SEn extends S {
 
   @override
   String get listCalNavCurrentMonth => 'Return to current month';
+
+  @override
+  String get shoppingEmptyPrivateHeading => 'Your shopping list is empty';
+
+  @override
+  String get shoppingEmptyPrivateBody => 'Tap + to add your first item';
+
+  @override
+  String get shoppingEmptyPublicSoloHeading => 'Your public list is empty';
+
+  @override
+  String get shoppingEmptyPublicSoloBody => 'Add items to share with family';
+
+  @override
+  String get shoppingEmptyPublicFamilyHeading => 'Nothing here yet';
+
+  @override
+  String get shoppingEmptyPublicFamilyBody => 'Anyone can add — be the first';
+
+  @override
+  String get shoppingEmptyCta => 'Add an item';
+
+  @override
+  String get shoppingFilterLedgerAll => 'All';
+
+  @override
+  String get shoppingFilterStatusActive => 'Active only';
+
+  @override
+  String get shoppingFilterStatusAll => 'All items';
+
+  @override
+  String get shoppingFilterCategory => 'Category';
 }

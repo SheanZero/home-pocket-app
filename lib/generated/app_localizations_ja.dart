@@ -1777,4 +1777,37 @@ class SJa extends S {
 
   @override
   String get listCalNavCurrentMonth => '今月に戻る';
+
+  @override
+  String get shoppingEmptyPrivateHeading => '買うものリストは空です';
+
+  @override
+  String get shoppingEmptyPrivateBody => '「+」で最初のアイテムを追加';
+
+  @override
+  String get shoppingEmptyPublicSoloHeading => '公開リストは空です';
+
+  @override
+  String get shoppingEmptyPublicSoloBody => '家族と共有する買い物を追加';
+
+  @override
+  String get shoppingEmptyPublicFamilyHeading => 'まだアイテムがありません';
+
+  @override
+  String get shoppingEmptyPublicFamilyBody => '誰でも追加できます。最初の1つをどうぞ';
+
+  @override
+  String get shoppingEmptyCta => 'アイテムを追加';
+
+  @override
+  String get shoppingFilterLedgerAll => 'すべて';
+
+  @override
+  String get shoppingFilterStatusActive => 'アクティブのみ';
+
+  @override
+  String get shoppingFilterStatusAll => 'すべてのアイテム';
+
+  @override
+  String get shoppingFilterCategory => 'カテゴリ';
 }
