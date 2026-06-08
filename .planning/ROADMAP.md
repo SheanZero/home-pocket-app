@@ -233,7 +233,20 @@ Plans:
   4. A sync smoke test verifies that a public item written by a simulated family-sync operation (directly via `ApplySyncOperationsUseCase`) causes the `watchByListType('public')` `StreamProvider` to emit a new state without any `ref.invalidate` call — confirming the v1.4 GAP-2 lesson is applied
   5. `flutter analyze` reports 0 issues; `flutter test --coverage` passes with coverage ≥70% on all new files in `lib/features/shopping_list/` and `lib/application/shopping_list/`
 
-**Plans:** TBD
+**Plans:** 6 plans
+
+Plans:
+**Wave 1** *(all parallel — no file conflicts)*
+
+- [ ] 39-01-PLAN.md — ARB key rename homeTabTodo→homeTabShopping + stale todoTab deletion + nav widget + test update + flutter gen-l10n
+- [ ] 39-02-PLAN.md — ShoppingEmptyState goldens (3 variants × 3 locales × 2 modes = 18 PNGs)
+- [ ] 39-03-PLAN.md — ShoppingItemTile goldens (active + completed + attribution × 3 locales × 2 modes = 18 PNGs)
+- [ ] 39-04-PLAN.md — ShoppingFilterBar + batch chrome goldens (filter active + selection header + batch action bar = 18 PNGs)
+- [ ] 39-05-PLAN.md — Presentation-layer smoke test (D39-06 SC4 reactive emit + privacy re-assertion)
+
+**Wave 2** *(depends on all Wave 1 plans)*
+
+- [ ] 39-06-PLAN.md — Quality gate: flutter analyze 0 + full flutter test + coverage ≥70% on shopping modules
 
 ## Milestone Progress
 
@@ -245,7 +258,7 @@ Plans:
 | v1.3 迭代帐本输入 | 18-23 | 47/47 | Complete | 2026-05-26 |
 | v1.4 列表功能 | 24-30 | 29/29 | Complete | 2026-05-31 |
 | v1.5 文案与配色统一 | 31-35 | 24/24 | Complete | 2026-06-02 |
-| v1.6 购物清单 | 36-39 | 13/21 | In progress | — |
+| v1.6 购物清单 | 36-39 | 13/27 | In progress | — |
 
 ## Phase Progress (v1.6)
 
@@ -254,4 +267,4 @@ Plans:
 | 36. Data Layer + Domain + Import Guard | 7/7 | Complete    | 2026-06-07 |
 | 37. Application Use Cases + Sync Integration | 6/6 | Complete    | 2026-06-08 |
 | 38. Presentation Shell + UI Widgets | 8/8 | Complete    | 2026-06-08 |
-| 39. i18n + Golden Re-baseline + Smoke Test | 0/TBD | Not started | - |
+| 39. i18n + Golden Re-baseline + Smoke Test | 0/6 | Not started | - |
