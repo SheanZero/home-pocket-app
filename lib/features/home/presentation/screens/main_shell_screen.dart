@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../generated/app_localizations.dart';
-
 import '../../../accounting/presentation/providers/repository_providers.dart';
 import '../../../accounting/presentation/screens/manual_one_step_screen.dart';
 import '../../../analytics/presentation/providers/state_analytics.dart';
@@ -15,6 +13,10 @@ import '../../../family_sync/domain/models/sync_status_model.dart';
 import '../../../family_sync/presentation/providers/state_sync.dart';
 import '../../../family_sync/presentation/widgets/family_sync_notification_route_listener.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
+import '../../../shopping_list/presentation/providers/state_shopping_batch.dart';
+import '../../../shopping_list/presentation/providers/state_shopping_filter.dart';
+import '../../../shopping_list/presentation/screens/shopping_item_form_screen.dart';
+import '../../../shopping_list/presentation/screens/shopping_list_screen.dart';
 import '../providers/state_home.dart';
 import '../providers/state_shadow_books.dart';
 import '../providers/state_today_transactions.dart';
@@ -102,6 +104,8 @@ class MainShellScreen extends ConsumerWidget {
       }
     });
 
+    final batchActive = ref.watch(batchSelectModeProvider).isActive;
+
     return FamilySyncNotificationRouteListener(
       child: Scaffold(
         body: Stack(
@@ -121,73 +125,85 @@ class MainShellScreen extends ConsumerWidget {
                 ),
                 ListScreen(bookId: bookId),
                 AnalyticsScreen(bookId: bookId),
-                // Placeholder for Todo tab
-                Center(child: Text(S.of(context).todoTab)),
+                const ShoppingListScreen(),
               ],
             ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: HomeBottomNavBar(
-                currentIndex: currentIndex,
-                onTap: (index) =>
-                    ref.read(selectedTabIndexProvider.notifier).select(index),
-                onFabTap: () async {
-                  await Navigator.of(context).push<void>(
-                    MaterialPageRoute<void>(
-                      builder: (_) => ManualOneStepScreen(bookId: bookId),
-                    ),
-                  );
-                  // Refresh data after returning from entry flow
-                  final now = DateTime.now();
-                  final currentMonthStart = DateTime(now.year, now.month, 1);
-                  final currentMonthEnd = DateTime(
-                    now.year,
-                    now.month + 1,
-                    0,
-                    23,
-                    59,
-                    59,
-                  );
-                  ref.invalidate(
-                    monthlyReportProvider(
-                      bookId: bookId,
-                      startDate: currentMonthStart,
-                      endDate: currentMonthEnd,
-                    ),
-                  );
-                  ref.invalidate(todayTransactionsProvider(bookId: bookId));
-                  ref.invalidate(
-                    bestJoyMomentProvider(
-                      bookId: bookId,
-                      startDate: currentMonthStart,
-                      endDate: currentMonthEnd,
-                    ),
-                  );
-                  final bookAsync = ref.read(bookByIdProvider(bookId: bookId));
-                  if (bookAsync.hasValue) {
-                    ref.invalidate(
-                      happinessReportProvider(
-                        bookId: bookId,
-                        startDate: currentMonthStart,
-                        endDate: currentMonthEnd,
-                        currencyCode: bookAsync.value?.currency ?? 'JPY',
-                      ),
-                    );
-                  }
-                  // D-03: forward-wiring; no visible effect this phase (ListScreen is loading-only)
-                  ref.invalidate(listTransactionsProvider(bookId: bookId));
-                  ref.invalidate(
-                    calendarDailyTotalsProvider(
-                      bookId: bookId,
-                      year: now.year,
-                      month: now.month,
-                    ),
-                  );
-                },
+            if (!batchActive)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: HomeBottomNavBar(
+                  currentIndex: currentIndex,
+                  onTap: (index) =>
+                      ref.read(selectedTabIndexProvider.notifier).select(index),
+                  onFabTap: () async {
+                    if (currentIndex == 3) {
+                      // NAV-01: shopping tab → add-shopping-item screen
+                      await Navigator.of(context).push<void>(
+                        MaterialPageRoute<void>(
+                          builder: (_) => ShoppingItemFormScreen(
+                            listType: ref.read(listTypeProvider),
+                          ),
+                        ),
+                      );
+                      // Shopping items reactive via .watch() — NO invalidate needed here
+                    } else {
+                      await Navigator.of(context).push<void>(
+                        MaterialPageRoute<void>(
+                          builder: (_) => ManualOneStepScreen(bookId: bookId),
+                        ),
+                      );
+                      // Refresh data after returning from entry flow
+                      final now = DateTime.now();
+                      final currentMonthStart = DateTime(now.year, now.month, 1);
+                      final currentMonthEnd = DateTime(
+                        now.year,
+                        now.month + 1,
+                        0,
+                        23,
+                        59,
+                        59,
+                      );
+                      ref.invalidate(
+                        monthlyReportProvider(
+                          bookId: bookId,
+                          startDate: currentMonthStart,
+                          endDate: currentMonthEnd,
+                        ),
+                      );
+                      ref.invalidate(todayTransactionsProvider(bookId: bookId));
+                      ref.invalidate(
+                        bestJoyMomentProvider(
+                          bookId: bookId,
+                          startDate: currentMonthStart,
+                          endDate: currentMonthEnd,
+                        ),
+                      );
+                      final bookAsync = ref.read(bookByIdProvider(bookId: bookId));
+                      if (bookAsync.hasValue) {
+                        ref.invalidate(
+                          happinessReportProvider(
+                            bookId: bookId,
+                            startDate: currentMonthStart,
+                            endDate: currentMonthEnd,
+                            currencyCode: bookAsync.value?.currency ?? 'JPY',
+                          ),
+                        );
+                      }
+                      // D-03: forward-wiring; no visible effect this phase (ListScreen is loading-only)
+                      ref.invalidate(listTransactionsProvider(bookId: bookId));
+                      ref.invalidate(
+                        calendarDailyTotalsProvider(
+                          bookId: bookId,
+                          year: now.year,
+                          month: now.month,
+                        ),
+                      );
+                    }
+                  },
+                ),
               ),
-            ),
           ],
         ),
       ),
