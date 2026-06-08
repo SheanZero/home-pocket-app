@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: 购物清单
 status: executing
-stopped_at: Phase 38 UI-SPEC approved
-last_updated: "2026-06-08T10:59:05.624Z"
-last_activity: 2026-06-08 -- Phase 38 planning complete
+stopped_at: Phase 38 UI-SPEC re-verified (Dimension 5 fix)
+last_updated: "2026-06-08T11:26:44.574Z"
+last_activity: 2026-06-08 -- Phase 38 execution started
 progress:
   total_phases: 4
   completed_phases: 2
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07 — v1.6 购物清单 started)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 38 — presentation shell + ui widgets
+**Current focus:** Phase 38 — presentation-shell-ui-widgets
 
 ## Current Position
 
-Phase: 38
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-06-08 -- Phase 38 planning complete
+Phase: 38 (presentation-shell-ui-widgets) — EXECUTING
+Plan: 1 of 8
+Status: Executing Phase 38
+Last activity: 2026-06-08 -- Phase 38 execution started
 
 ```
 v1.6 progress: [░░░░] 0% — Phase 36-39 defined, 0/4 complete
@@ -268,7 +268,7 @@ No active blockers. Carried-forward debt (cross-milestone):
 
 ## Session Continuity
 
-Last session: 2026-06-08T10:17:32.839Z
-Stopped at: Phase 38 UI-SPEC approved
+Last session: 2026-06-08T11:06:10.483Z
+Stopped at: Phase 38 UI-SPEC re-verified (Dimension 5 fix)
 
 **Next:** `/gsd-plan-phase 36` — plan Phase 36: Data Layer + Domain + Import Guard
