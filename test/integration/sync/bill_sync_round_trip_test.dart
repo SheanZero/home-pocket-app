@@ -12,6 +12,7 @@ import 'package:home_pocket/features/accounting/domain/models/transaction_sync_m
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
+import 'package:home_pocket/features/shopping_list/domain/repositories/shopping_item_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -19,6 +20,9 @@ class _MockFieldEncryptionService extends Mock
     implements FieldEncryptionService {}
 
 class _MockGroupRepository extends Mock implements GroupRepository {}
+
+class _MockShoppingItemRepository extends Mock
+    implements ShoppingItemRepository {}
 
 void main() {
   late AppDatabase db;
@@ -29,6 +33,7 @@ void main() {
   late BookRepositoryImpl bookRepo;
   late _MockFieldEncryptionService mockEncryption;
   late _MockGroupRepository mockGroupRepository;
+  late _MockShoppingItemRepository mockShoppingItemRepository;
 
   setUp(() async {
     db = AppDatabase.forTesting();
@@ -36,6 +41,7 @@ void main() {
     txDao = TransactionDao(db);
     mockEncryption = _MockFieldEncryptionService();
     mockGroupRepository = _MockGroupRepository();
+    mockShoppingItemRepository = _MockShoppingItemRepository();
 
     when(() => mockEncryption.encryptField(any())).thenAnswer(
       (invocation) async => invocation.positionalArguments.first as String,
@@ -80,6 +86,7 @@ void main() {
 
     applyOps = ApplySyncOperationsUseCase(
       transactionRepository: txRepo,
+      shoppingItemRepository: mockShoppingItemRepository,
       shadowBookService: shadowBookService,
       groupRepository: mockGroupRepository,
     );

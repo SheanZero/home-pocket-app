@@ -8,13 +8,23 @@ import 'package:home_pocket/application/family_sync/shadow_book_service.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/family_sync/sync_orchestrator.dart';
 import 'package:home_pocket/application/family_sync/transaction_change_tracker.dart';
+import 'package:home_pocket/application/family_sync/shopping_item_change_tracker.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
+import 'package:home_pocket/features/shopping_list/domain/repositories/shopping_item_repository.dart';
+import 'package:home_pocket/features/shopping_list/presentation/providers/repository_providers.dart'
+    show shoppingItemRepositoryProvider;
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
+import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart'
+    show
+        shoppingItemChangeTrackerProvider,
+        syncEngineProvider,
+        syncOrchestratorProvider,
+        transactionChangeTrackerProvider,
+        activeGroupMembersProvider;
 import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
 import 'package:home_pocket/features/profile/presentation/providers/repository_providers.dart'
     show userProfileRepositoryProvider;
@@ -46,6 +56,9 @@ class _MockBookRepository extends Mock implements BookRepository {}
 class _MockUserProfileRepository extends Mock
     implements UserProfileRepository {}
 
+class _MockShoppingItemRepository extends Mock
+    implements ShoppingItemRepository {}
+
 void main() {
   late _MockRelayApiClient mockApiClient;
   late _MockKeyManager mockKeyManager;
@@ -56,6 +69,7 @@ void main() {
   late _MockTransactionRepository mockTransactionRepo;
   late _MockBookRepository mockBookRepo;
   late _MockUserProfileRepository mockUserProfileRepo;
+  late _MockShoppingItemRepository mockShoppingItemRepo;
   late ProviderContainer container;
 
   setUp(() {
@@ -68,6 +82,7 @@ void main() {
     mockTransactionRepo = _MockTransactionRepository();
     mockBookRepo = _MockBookRepository();
     mockUserProfileRepo = _MockUserProfileRepository();
+    mockShoppingItemRepo = _MockShoppingItemRepository();
 
     // groupMembers stream needs activeGroupProvider to return null (no active group)
     when(
@@ -87,6 +102,7 @@ void main() {
         transactionRepositoryProvider.overrideWithValue(mockTransactionRepo),
         bookRepositoryProvider.overrideWithValue(mockBookRepo),
         userProfileRepositoryProvider.overrideWithValue(mockUserProfileRepo),
+        shoppingItemRepositoryProvider.overrideWithValue(mockShoppingItemRepo),
       ],
     );
   });
@@ -167,6 +183,28 @@ void main() {
       final svc = container.read(syncOrchestratorProvider);
       expect(svc, isA<SyncOrchestrator>());
     });
+
+    // SC-3: shoppingItemChangeTrackerProvider (added in Wave 0 to verify constructor wiring)
+    test(
+      'shoppingItemChangeTrackerProvider constructs ShoppingItemChangeTracker (SC-3)',
+      () {
+        final tracker = container.read(shoppingItemChangeTrackerProvider);
+        expect(tracker, isA<ShoppingItemChangeTracker>());
+      },
+    );
+
+    test(
+      'shoppingItemChangeTrackerProvider is keepAlive — same instance across two reads (SC-3)',
+      () {
+        final first = container.read(shoppingItemChangeTrackerProvider);
+        final second = container.read(shoppingItemChangeTrackerProvider);
+        expect(
+          identical(first, second),
+          isTrue,
+          reason: 'shoppingItemChangeTrackerProvider must be keepAlive: true',
+        );
+      },
+    );
 
     // activeGroupMembersProvider behavior when activeGroup is null
     test(

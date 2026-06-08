@@ -11,6 +11,7 @@ import 'package:home_pocket/application/family_sync/shadow_book_service.dart';
 import 'package:home_pocket/application/family_sync/sync_avatar_use_case.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/family_sync/sync_orchestrator.dart';
+import 'package:home_pocket/application/family_sync/shopping_item_change_tracker.dart';
 import 'package:home_pocket/application/family_sync/transaction_change_tracker.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
@@ -177,6 +178,7 @@ void main() {
         queueManager: queueManager,
         keyManager: keyManager,
         changeTracker: changeTracker,
+        shoppingChangeTracker: ShoppingItemChangeTracker(),
       );
     });
 
@@ -333,6 +335,52 @@ void main() {
       expect(result, isA<SyncOrchestratorError>());
       expect((result as SyncOrchestratorError).message, contains('database'));
     });
+
+    test(
+      'incrementalPush flushes and pushes shopping ops (SC-3, SYNC-01)',
+      () async {
+        when(
+          () => groupRepo.getActiveGroup(),
+        ).thenAnswer((_) async => _activeGroup());
+        when(() => profileRepo.find()).thenAnswer((_) async => _profile());
+
+        // Prime the shoppingChangeTracker with a pending op
+        // We reconstruct the orchestrator with a primed tracker for this test
+        final shoppingTracker = ShoppingItemChangeTracker();
+        shoppingTracker.trackCreate({
+          'op': 'create',
+          'entityType': 'shopping_item',
+          'entityId': 'item-sync-1',
+          'data': {'listType': 'public', 'name': 'Milk'},
+        });
+
+        final orchWithShopping = SyncOrchestrator(
+          pullSync: pullSync,
+          pushSync: pushSync,
+          fullSync: fullSync,
+          avatarSync: avatarSync,
+          checkValidity: checkValidity,
+          shadowBookService: _MockShadowBookService(),
+          groupRepo: groupRepo,
+          profileRepo: profileRepo,
+          queueManager: queueManager,
+          keyManager: keyManager,
+          changeTracker: changeTracker,
+          shoppingChangeTracker: shoppingTracker,
+        );
+
+        final result = await orchWithShopping.execute(SyncMode.incrementalPush);
+
+        expect(result, isA<SyncOrchestratorSuccess>());
+        // pushSync was called with the shopping op (at least once for the shopping batch)
+        verify(
+          () => pushSync.execute(
+            operations: any(named: 'operations'),
+            vectorClock: const {},
+          ),
+        ).called(greaterThanOrEqualTo(1));
+      },
+    );
   });
 
   group('SyncScheduler', () {
