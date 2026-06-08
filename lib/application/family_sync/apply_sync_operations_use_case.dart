@@ -4,7 +4,6 @@ import '../../features/accounting/domain/models/transaction_sync_mapper.dart';
 import '../../features/accounting/domain/models/book.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
 import '../../features/family_sync/domain/repositories/group_repository.dart';
-import '../../features/shopping_list/domain/models/shopping_item.dart';
 import '../../features/shopping_list/domain/models/shopping_item_sync_mapper.dart';
 import '../../features/shopping_list/domain/repositories/shopping_item_repository.dart';
 import 'shadow_book_service.dart';
@@ -216,9 +215,13 @@ class ApplySyncOperationsUseCase {
   ) async {
     final existing = await _shoppingItemRepository.findById(entityId);
     if (existing == null) {
-      // Upsert: treat unknown-ID update as create (analog _handleUpdate)
-      final item = ShoppingItemSyncMapper.fromSyncMap(data, fromDeviceId: null);
-      await _shoppingItemRepository.upsert(item.copyWith(id: entityId));
+      // WR-01: do NOT fabricate a live row from an unknown-ID update. The SC-4
+      // tombstone guard (existing.isDeleted) only protects rows that exist
+      // locally; fromSyncMap never parses isDeleted (defaults to false), so a
+      // synthesized row is always live. If a 'delete' op was dropped (D37-05
+      // fault-isolation skip) or arrives out-of-order after this 'update',
+      // creating a live row here would resurrect a deleted item. Defer to the
+      // next fullSync to reconcile rows we have never seen.
       return;
     }
 
@@ -226,30 +229,31 @@ class ApplySyncOperationsUseCase {
     // MUST be first check, before any field merging
     if (existing.isDeleted) return;
 
-    // D-03/D37-02 sticky-complete merge
     final incomingUpdatedAt = data['updatedAt'] != null
         ? DateTime.parse(data['updatedAt'] as String)
         : DateTime.now();
 
-    // CR-01: sortOrder is a local-only field excluded from the sync wire
+    // CR-01: last-writer-wins — drop the ENTIRE incoming op when it is strictly
+    // older than the local row, instead of applying it and patching a single
+    // field. This is symmetric across all fields and closes the asymmetric
+    // completion hole (a stale remote completion can no longer revert a newer
+    // local un-complete, and a stale remote edit can no longer clobber a newer
+    // local rename/quantity/note/etc.). The previous completion-only guard only
+    // protected completedAt and left every other field exposed.
+    final localUpdatedAt = existing.updatedAt ?? existing.createdAt;
+    if (incomingUpdatedAt.isBefore(localUpdatedAt)) {
+      // Local row is newer — remote op is stale, ignore it entirely.
+      return;
+    }
+
+    // sortOrder is a local-only field excluded from the sync wire
     // (ShoppingItemSyncMapper). fromSyncMap therefore rebuilds it with the
     // Freezed default (0); preserve the local order so a remote edit does not
     // reset a locally-reordered item to position 0 (defeats D37-01).
-    ShoppingItem updated = ShoppingItemSyncMapper.fromSyncMap(
+    final updated = ShoppingItemSyncMapper.fromSyncMap(
       data,
       fromDeviceId: null,
     ).copyWith(id: entityId, sortOrder: existing.sortOrder);
-
-    // Guard: only fire when completedAt exists AND is newer than incoming op
-    // (D37-02: deliberate un-complete has completedAt=null → guard skips → applies)
-    if (existing.completedAt != null &&
-        existing.completedAt!.isAfter(incomingUpdatedAt)) {
-      // Stale edit: preserve local completion state
-      updated = updated.copyWith(
-        isCompleted: true,
-        completedAt: existing.completedAt,
-      );
-    }
 
     await _shoppingItemRepository.upsert(updated);
   }
