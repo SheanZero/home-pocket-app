@@ -201,7 +201,7 @@ class ShoppingFilterBar extends ConsumerWidget {
             if (anyFilterActive) ...[
               const SizedBox(width: 8),
               Semantics(
-                label: 'Clear all filters',
+                label: l10n.listClearAll,
                 child: ActionChip(
                   avatar: Icon(
                     Icons.clear_all,

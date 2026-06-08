@@ -8,7 +8,7 @@ import '../../../../shared/widgets/ledger_type_selector.dart';
 import '../../../accounting/domain/models/category.dart';
 import '../../../accounting/domain/models/transaction.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart'
-    show deviceIdentityRepositoryProvider;
+    show categoryRepositoryProvider, deviceIdentityRepositoryProvider;
 import '../../../accounting/presentation/screens/category_selection_screen.dart';
 import '../../domain/models/shopping_item.dart';
 import '../providers/repository_providers.dart'
@@ -54,6 +54,9 @@ class _ShoppingItemFormScreenState
 
   LedgerType? _ledgerType;
   String? _categoryId;
+  // Human-readable category label (CR-01). The model stores only categoryId,
+  // so in edit mode the name is resolved asynchronously from the repository.
+  String? _categoryName;
 
   @override
   void initState() {
@@ -73,6 +76,9 @@ class _ShoppingItemFormScreenState
       );
       _ledgerType = item.ledgerType;
       _categoryId = item.categoryId;
+      if (item.categoryId != null) {
+        _resolveCategoryName(item.categoryId!);
+      }
     } else {
       // Create mode — empty controllers
       _nameController = TextEditingController();
@@ -105,6 +111,17 @@ class _ShoppingItemFormScreenState
         .where((t) => t.isNotEmpty)
         .toList();
 
+    // Sanitize numeric inputs (WR-03): quantity is at least 1; a negative or
+    // zero entry falls back to 1. Estimated price must be non-negative; a
+    // negative entry is treated as "not provided".
+    final parsedQuantity = int.tryParse(_quantityController.text);
+    final quantity = (parsedQuantity == null || parsedQuantity < 1)
+        ? 1
+        : parsedQuantity;
+    final parsedPrice = int.tryParse(_priceController.text);
+    final estimatedPrice =
+        (parsedPrice == null || parsedPrice < 0) ? null : parsedPrice;
+
     try {
       if (widget.item == null) {
         // Create mode — obtain deviceId from device identity repository
@@ -119,8 +136,8 @@ class _ShoppingItemFormScreenState
           categoryId: _categoryId,
           tags: parsedTags,
           note: _noteController.text.isEmpty ? null : _noteController.text,
-          quantity: int.tryParse(_quantityController.text) ?? 1,
-          estimatedPrice: int.tryParse(_priceController.text),
+          quantity: quantity,
+          estimatedPrice: estimatedPrice,
         );
         final result =
             await ref.read(createShoppingItemUseCaseProvider).execute(params);
@@ -134,8 +151,8 @@ class _ShoppingItemFormScreenState
           categoryId: _categoryId,
           tags: parsedTags,
           note: _noteController.text.isEmpty ? null : _noteController.text,
-          quantity: int.tryParse(_quantityController.text) ?? 1,
-          estimatedPrice: int.tryParse(_priceController.text),
+          quantity: quantity,
+          estimatedPrice: estimatedPrice,
         );
         final result =
             await ref.read(updateShoppingItemUseCaseProvider).execute(params);
@@ -162,7 +179,19 @@ class _ShoppingItemFormScreenState
     if (selected != null && mounted) {
       setState(() {
         _categoryId = selected.id;
+        _categoryName = selected.name;
       });
+    }
+  }
+
+  /// Resolves a category's display name from its id (edit-mode pre-population).
+  /// The ShoppingItem model stores only categoryId, so the name must be looked
+  /// up to avoid rendering a raw UUID to the user (CR-01).
+  Future<void> _resolveCategoryName(String categoryId) async {
+    final category =
+        await ref.read(categoryRepositoryProvider).findById(categoryId);
+    if (category != null && mounted) {
+      setState(() => _categoryName = category.name);
     }
   }
 
@@ -227,7 +256,7 @@ class _ShoppingItemFormScreenState
               children: [
                 Expanded(
                   child: Text(
-                    _categoryId ?? l.shoppingFormNoCategorySelected,
+                    _categoryName ?? l.shoppingFormNoCategorySelected,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
