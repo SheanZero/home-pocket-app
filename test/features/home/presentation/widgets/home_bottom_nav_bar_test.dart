@@ -93,7 +93,7 @@ void main() {
     expect(find.text('ホーム'), findsOneWidget);
     expect(find.text('一覧'), findsOneWidget);
     expect(find.text('チャート'), findsOneWidget);
-    expect(find.text('やること'), findsOneWidget);
+    expect(find.text('買い物リスト'), findsOneWidget);
   });
 
   testWidgets('pill container has white background and rounded corners', (

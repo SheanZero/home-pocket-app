@@ -1,0 +1,5 @@
+# Presentation widgets — shopping_list feature.
+# Inherits deny rules from parent presentation/import_guard.yaml (infrastructure/daos/tables denied).
+# Widgets MUST NOT reach the data layer directly.
+
+inherit: true

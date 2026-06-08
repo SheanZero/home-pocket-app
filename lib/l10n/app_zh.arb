@@ -706,7 +706,7 @@
   "@homeTabChart": {
     "description": "Bottom nav charts tab label"
   },
-  "homeTabTodo": "待办事项",
+  "homeTabTodo": "购物清单",
   "@homeTabTodo": {
     "description": "Bottom nav todo tab label"
   },

@@ -706,7 +706,7 @@
   "@homeTabChart": {
     "description": "Bottom nav charts tab label"
   },
-  "homeTabTodo": "やること",
+  "homeTabTodo": "買い物リスト",
   "@homeTabTodo": {
     "description": "Bottom nav todo tab label"
   },
