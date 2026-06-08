@@ -231,10 +231,14 @@ class ApplySyncOperationsUseCase {
         ? DateTime.parse(data['updatedAt'] as String)
         : DateTime.now();
 
+    // CR-01: sortOrder is a local-only field excluded from the sync wire
+    // (ShoppingItemSyncMapper). fromSyncMap therefore rebuilds it with the
+    // Freezed default (0); preserve the local order so a remote edit does not
+    // reset a locally-reordered item to position 0 (defeats D37-01).
     ShoppingItem updated = ShoppingItemSyncMapper.fromSyncMap(
       data,
       fromDeviceId: null,
-    ).copyWith(id: entityId);
+    ).copyWith(id: entityId, sortOrder: existing.sortOrder);
 
     // Guard: only fire when completedAt exists AND is newer than incoming op
     // (D37-02: deliberate un-complete has completedAt=null → guard skips → applies)

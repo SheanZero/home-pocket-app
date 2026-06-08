@@ -543,5 +543,59 @@ void main() {
         );
       },
     );
+
+    test(
+      'remote update preserves local sortOrder (CR-01, D37-01)',
+      () async {
+        // sortOrder is a local-only field excluded from the sync wire, so an
+        // incoming update payload never carries it. The apply handler must
+        // preserve the existing local sortOrder instead of letting fromSyncMap's
+        // default (0) clobber a locally-reordered item back to position 0.
+        final existing = ShoppingItem(
+          id: 'item-reordered',
+          deviceId: 'local-device',
+          listType: 'public',
+          name: 'Milk',
+          sortOrder: 7,
+          createdAt: DateTime.parse('2026-06-08T10:00:00.000Z'),
+        );
+        when(
+          () => mockShoppingItemRepository.findById('item-reordered'),
+        ).thenAnswer((_) async => existing);
+        when(
+          () => mockShoppingItemRepository.upsert(any()),
+        ).thenAnswer((_) async {});
+
+        await useCase.execute([
+          {
+            'op': 'update',
+            'entityType': 'shopping_item',
+            'entityId': 'item-reordered',
+            'fromDeviceId': 'partner-device',
+            'data': {
+              'id': 'item-reordered',
+              'listType': 'public',
+              'name': 'Whole Milk', // rename via remote update
+              'quantity': 1,
+              'isCompleted': false,
+              'createdAt': '2026-06-08T10:00:00.000Z',
+              'updatedAt': '2026-06-08T11:00:00.000Z',
+            },
+          },
+        ]);
+
+        final captured =
+            verify(() => mockShoppingItemRepository.upsert(captureAny()))
+                .captured
+                .single as ShoppingItem;
+        expect(
+          captured.sortOrder,
+          7,
+          reason:
+              'remote update must preserve local sortOrder, not reset to 0',
+        );
+        expect(captured.name, 'Whole Milk');
+      },
+    );
   });
 }
