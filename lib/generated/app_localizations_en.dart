@@ -1809,4 +1809,26 @@ class SEn extends S {
 
   @override
   String get listCalNavCurrentMonth => 'Return to current month';
+
+  @override
+  String get shoppingDeleteConfirmTitle => 'Delete this item?';
+
+  @override
+  String get shoppingDeleteConfirmBody =>
+      'This item will be removed from your shopping list.';
+
+  @override
+  String get shoppingDeleteConfirmButton => 'Delete';
+
+  @override
+  String get shoppingDeleteCancelButton => 'Cancel';
+
+  @override
+  String get shoppingDeletedSnackBar => 'Item deleted';
+
+  @override
+  String get shoppingEditItem => 'Edit item';
+
+  @override
+  String get shoppingReorderItem => 'Reorder item';
 }

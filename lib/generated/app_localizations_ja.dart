@@ -1777,4 +1777,25 @@ class SJa extends S {
 
   @override
   String get listCalNavCurrentMonth => '今月に戻る';
+
+  @override
+  String get shoppingDeleteConfirmTitle => 'アイテムを削除しますか？';
+
+  @override
+  String get shoppingDeleteConfirmBody => 'このアイテムを買い物リストから削除します。';
+
+  @override
+  String get shoppingDeleteConfirmButton => '削除';
+
+  @override
+  String get shoppingDeleteCancelButton => 'キャンセル';
+
+  @override
+  String get shoppingDeletedSnackBar => 'アイテムを削除しました';
+
+  @override
+  String get shoppingEditItem => 'アイテムを編集';
+
+  @override
+  String get shoppingReorderItem => 'アイテムを並べ替え';
 }
