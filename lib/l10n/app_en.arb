@@ -2282,5 +2282,49 @@
   "@shoppingReorderItem": {
     "description": "Semantics label for the drag handle on a shopping item tile (Phase 38)"
   },
+  "shoppingEmptyPrivateHeading": "Your shopping list is empty",
+  "@shoppingEmptyPrivateHeading": {
+    "description": "Shopping empty state heading — private list (Phase 38; values Phase 39)"
+  },
+  "shoppingEmptyPrivateBody": "Tap + to add your first item",
+  "@shoppingEmptyPrivateBody": {
+    "description": "Shopping empty state body — private list (Phase 38)"
+  },
+  "shoppingEmptyPublicSoloHeading": "Your public list is empty",
+  "@shoppingEmptyPublicSoloHeading": {
+    "description": "Shopping empty state heading — public list, no family group (Phase 38)"
+  },
+  "shoppingEmptyPublicSoloBody": "Add items to share with family",
+  "@shoppingEmptyPublicSoloBody": {
+    "description": "Shopping empty state body — public list, no family (Phase 38)"
+  },
+  "shoppingEmptyPublicFamilyHeading": "Nothing here yet",
+  "@shoppingEmptyPublicFamilyHeading": {
+    "description": "Shopping empty state heading — public list, family joined (Phase 38)"
+  },
+  "shoppingEmptyPublicFamilyBody": "Anyone can add — be the first",
+  "@shoppingEmptyPublicFamilyBody": {
+    "description": "Shopping empty state body — public list, family joined (Phase 38)"
+  },
+  "shoppingEmptyCta": "Add an item",
+  "@shoppingEmptyCta": {
+    "description": "Shopping empty state CTA button label (Phase 38)"
+  },
+  "shoppingFilterLedgerAll": "All",
+  "@shoppingFilterLedgerAll": {
+    "description": "Shopping filter bar — show all ledger types chip (Phase 38)"
+  },
+  "shoppingFilterStatusActive": "Active only",
+  "@shoppingFilterStatusActive": {
+    "description": "Shopping filter bar — active items only chip (Phase 38)"
+  },
+  "shoppingFilterStatusAll": "All items",
+  "@shoppingFilterStatusAll": {
+    "description": "Shopping filter bar — all items including completed (Phase 38)"
+  },
+  "shoppingFilterCategory": "Category",
+  "@shoppingFilterCategory": {
+    "description": "Shopping filter bar — category chip label (Phase 38)"
+  },
   "@@locale": "en"
 }

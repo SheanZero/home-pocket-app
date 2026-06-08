@@ -13,13 +13,29 @@ import '../providers/state_list_filter.dart';
 
 /// Multi-select category filter bottom sheet (D-02: L1→L2 cascade + tristate).
 ///
-/// Pre-populated from [listFilterProvider]'s current [categoryIds].
-/// Writes via [listFilterProvider.notifier.setCategories()] only on "Apply".
-/// Cancel closes without touching the provider.
+/// Pre-populated from [initialSelected].
+/// On "Apply":
+/// - When [onApply] is provided, passes selected IDs to [onApply] and does NOT
+///   write to [listFilterProvider] — the caller owns the write target (L3 fix).
+/// - When [onApply] is null (default), writes directly to [listFilterProvider]
+///   (backwards-compatible with all existing call sites).
+/// Cancel closes without touching any provider.
 class CategoryFilterSheet extends ConsumerStatefulWidget {
-  const CategoryFilterSheet({super.key, required this.initialSelected});
+  const CategoryFilterSheet({
+    super.key,
+    required this.initialSelected,
+    this.onApply,
+  });
 
   final Set<String> initialSelected;
+
+  /// Optional callback invoked when the user taps Apply.
+  ///
+  /// When provided, the selected category IDs are passed to [onApply] and
+  /// [listFilterProvider] is NOT written — the caller owns the write target.
+  /// When null (default), the sheet writes directly to [listFilterProvider]
+  /// as before (backwards-compatible).
+  final ValueChanged<Set<String>>? onApply;
 
   @override
   ConsumerState<CategoryFilterSheet> createState() =>
@@ -283,9 +299,15 @@ class _CategoryFilterSheetState extends ConsumerState<CategoryFilterSheet> {
                       backgroundColor: palette.accentPrimary,
                     ),
                     onPressed: () {
-                      ref
-                          .read(listFilterProvider.notifier)
-                          .setCategories(Set<String>.unmodifiable(_localSelected));
+                      if (widget.onApply != null) {
+                        // L3 fix: caller owns the write target (e.g. shoppingFilterProvider)
+                        widget.onApply!(Set<String>.unmodifiable(_localSelected));
+                      } else {
+                        // Default: backwards-compatible write to listFilterProvider
+                        ref
+                            .read(listFilterProvider.notifier)
+                            .setCategories(Set<String>.unmodifiable(_localSelected));
+                      }
                       Navigator.pop(context);
                     },
                     child: Text(

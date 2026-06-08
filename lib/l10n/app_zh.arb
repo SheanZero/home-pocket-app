@@ -2282,5 +2282,49 @@
   "@shoppingReorderItem": {
     "description": "Semantics label for the drag handle on a shopping item tile (Phase 38)"
   },
+  "shoppingEmptyPrivateHeading": "购物清单是空的",
+  "@shoppingEmptyPrivateHeading": {
+    "description": "Shopping empty state heading — private list (Phase 38; values Phase 39)"
+  },
+  "shoppingEmptyPrivateBody": "点「+」添加第一个商品",
+  "@shoppingEmptyPrivateBody": {
+    "description": "Shopping empty state body — private list (Phase 38)"
+  },
+  "shoppingEmptyPublicSoloHeading": "公共清单是空的",
+  "@shoppingEmptyPublicSoloHeading": {
+    "description": "Shopping empty state heading — public list, no family group (Phase 38)"
+  },
+  "shoppingEmptyPublicSoloBody": "添加要和家人共享的商品",
+  "@shoppingEmptyPublicSoloBody": {
+    "description": "Shopping empty state body — public list, no family (Phase 38)"
+  },
+  "shoppingEmptyPublicFamilyHeading": "还没有商品",
+  "@shoppingEmptyPublicFamilyHeading": {
+    "description": "Shopping empty state heading — public list, family joined (Phase 38)"
+  },
+  "shoppingEmptyPublicFamilyBody": "谁都可以添加，来加第一个吧",
+  "@shoppingEmptyPublicFamilyBody": {
+    "description": "Shopping empty state body — public list, family joined (Phase 38)"
+  },
+  "shoppingEmptyCta": "添加商品",
+  "@shoppingEmptyCta": {
+    "description": "Shopping empty state CTA button label (Phase 38)"
+  },
+  "shoppingFilterLedgerAll": "全部",
+  "@shoppingFilterLedgerAll": {
+    "description": "Shopping filter bar — show all ledger types chip (Phase 38)"
+  },
+  "shoppingFilterStatusActive": "仅活跃",
+  "@shoppingFilterStatusActive": {
+    "description": "Shopping filter bar — active items only chip (Phase 38)"
+  },
+  "shoppingFilterStatusAll": "所有商品",
+  "@shoppingFilterStatusAll": {
+    "description": "Shopping filter bar — all items including completed (Phase 38)"
+  },
+  "shoppingFilterCategory": "分类",
+  "@shoppingFilterCategory": {
+    "description": "Shopping filter bar — category chip label (Phase 38)"
+  },
   "@@locale": "zh"
 }
