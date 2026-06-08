@@ -1,0 +1,5 @@
+# Presentation screens — shopping_list feature.
+# Inherits deny rules from parent presentation/import_guard.yaml (infrastructure/daos/tables denied).
+# Screens are UI entry points; they MUST NOT reach the data layer directly.
+
+inherit: true

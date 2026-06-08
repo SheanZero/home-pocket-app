@@ -1182,7 +1182,7 @@ abstract class S {
   /// Bottom nav todo tab label
   ///
   /// In en, this message translates to:
-  /// **'Todo'**
+  /// **'Shopping List'**
   String get homeTabTodo;
 
   /// Year and month display format

@@ -569,7 +569,7 @@ class SJa extends S {
   String get homeTabChart => 'チャート';
 
   @override
-  String get homeTabTodo => 'やること';
+  String get homeTabTodo => '買い物リスト';
 
   @override
   String homeMonthFormat(int year, int month) {

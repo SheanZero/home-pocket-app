@@ -569,7 +569,7 @@ class SZh extends S {
   String get homeTabChart => '图表';
 
   @override
-  String get homeTabTodo => '待办事项';
+  String get homeTabTodo => '购物清单';
 
   @override
   String homeMonthFormat(int year, int month) {
