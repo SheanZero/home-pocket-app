@@ -2326,5 +2326,75 @@
   "@shoppingFilterCategory": {
     "description": "Shopping filter bar — category chip label (Phase 38)"
   },
+  "shoppingSegmentPublic": "公共",
+  "@shoppingSegmentPublic": {
+    "description": "Shopping list segmented control — public segment label (Phase 38)"
+  },
+  "shoppingSegmentPrivate": "私人",
+  "@shoppingSegmentPrivate": {
+    "description": "Shopping list segmented control — private segment label (Phase 38)"
+  },
+  "shoppingCompletedDivider": "已完成",
+  "@shoppingCompletedDivider": {
+    "description": "Divider label between active and completed shopping items (Phase 38)"
+  },
+  "shoppingClearCompletedTitle": "清除所有已完成？",
+  "@shoppingClearCompletedTitle": {
+    "description": "Confirmation dialog title for clear-all-completed shopping items (Phase 38)"
+  },
+  "shoppingClearCompletedBody": "将删除所有已完成的商品。",
+  "@shoppingClearCompletedBody": {
+    "description": "Confirmation dialog body for clear-all-completed shopping items (Phase 38)"
+  },
+  "shoppingClearCompletedConfirm": "删除",
+  "@shoppingClearCompletedConfirm": {
+    "description": "Confirmation button label for clear-all-completed shopping items (Phase 38)"
+  },
+  "shoppingClearCompletedSnackBar": "已删除完成的商品",
+  "@shoppingClearCompletedSnackBar": {
+    "description": "Success toast shown after clearing all completed shopping items (Phase 38)"
+  },
+  "shoppingListLoadError": "无法加载清单，请重试",
+  "@shoppingListLoadError": {
+    "description": "Error message shown when shopping list fails to load (Phase 38)"
+  },
+  "shoppingRetry": "重试",
+  "@shoppingRetry": {
+    "description": "Retry button label for shopping list load error (Phase 38)"
+  },
+  "shoppingBatchDeleteTitle": "删除商品？",
+  "@shoppingBatchDeleteTitle": {
+    "description": "Batch delete confirmation dialog title (Phase 38)"
+  },
+  "shoppingBatchDeleteBody": "将删除选中的 {count} 个商品。",
+  "@shoppingBatchDeleteBody": {
+    "description": "Batch delete confirmation dialog body with item count (Phase 38)",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "shoppingBatchDeleteConfirm": "删除",
+  "@shoppingBatchDeleteConfirm": {
+    "description": "Confirm button label for batch delete (Phase 38)"
+  },
+  "shoppingBatchDeletedSnackBar": "已删除选中商品",
+  "@shoppingBatchDeletedSnackBar": {
+    "description": "Success toast shown after batch deleting shopping items (Phase 38)"
+  },
+  "shoppingBatchDeleteAction": "删除",
+  "@shoppingBatchDeleteAction": {
+    "description": "Batch action bar delete button label (Phase 38)"
+  },
+  "shoppingBatchCancel": "取消",
+  "@shoppingBatchCancel": {
+    "description": "Cancel button in the batch selection header (Phase 38)"
+  },
+  "shoppingBatchSelectAll": "全选",
+  "@shoppingBatchSelectAll": {
+    "description": "Select-all button in the batch selection header (Phase 38)"
+  },
   "@@locale": "zh"
 }

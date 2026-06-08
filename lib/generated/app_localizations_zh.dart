@@ -1824,4 +1824,54 @@ class SZh extends S {
 
   @override
   String get shoppingFilterCategory => '分类';
+
+  @override
+  String get shoppingSegmentPublic => '公共';
+
+  @override
+  String get shoppingSegmentPrivate => '私人';
+
+  @override
+  String get shoppingCompletedDivider => '已完成';
+
+  @override
+  String get shoppingClearCompletedTitle => '清除所有已完成？';
+
+  @override
+  String get shoppingClearCompletedBody => '将删除所有已完成的商品。';
+
+  @override
+  String get shoppingClearCompletedConfirm => '删除';
+
+  @override
+  String get shoppingClearCompletedSnackBar => '已删除完成的商品';
+
+  @override
+  String get shoppingListLoadError => '无法加载清单，请重试';
+
+  @override
+  String get shoppingRetry => '重试';
+
+  @override
+  String get shoppingBatchDeleteTitle => '删除商品？';
+
+  @override
+  String shoppingBatchDeleteBody(int count) {
+    return '将删除选中的 $count 个商品。';
+  }
+
+  @override
+  String get shoppingBatchDeleteConfirm => '删除';
+
+  @override
+  String get shoppingBatchDeletedSnackBar => '已删除选中商品';
+
+  @override
+  String get shoppingBatchDeleteAction => '删除';
+
+  @override
+  String get shoppingBatchCancel => '取消';
+
+  @override
+  String get shoppingBatchSelectAll => '全选';
 }
