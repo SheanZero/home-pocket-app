@@ -98,7 +98,7 @@
 ### v1.6 购物清单 (Phases 36-39) — IN PROGRESS
 
 - [x] **Phase 36: Data Layer + Domain + Import Guard** — ShoppingItems table (schema v20), DAO, repository impl, Wave-0 migration contract test, Freezed domain models, repository interface, LedgerTypeSelector move, import_guard files (completed 2026-06-07)
-- [ ] **Phase 37: Application Use Cases + Sync Integration** — 6 use cases with private-item privacy gate, ShoppingItemChangeTracker, SyncOrchestrator extension, ApplySyncOperationsUseCase branch, reactive-stream integration test
+- [x] **Phase 37: Application Use Cases + Sync Integration** — 6 use cases with private-item privacy gate, ShoppingItemChangeTracker, SyncOrchestrator extension, ApplySyncOperationsUseCase branch, reactive-stream integration test (completed 2026-06-08)
 - [ ] **Phase 38: Presentation Shell + UI Widgets** — nav rename + shopping-bag icon, context-aware FAB, keepAlive providers, ShoppingListScreen shell, ShoppingItemTile, add/edit form, filter bar, swipe-delete, batch-select, empty states
 - [ ] **Phase 39: i18n + Golden Re-baseline + Smoke Test** — ARB key parity ja/zh/en, golden masters all states × locales × color modes, reactive-sync smoke test, analyze 0 + coverage ≥70%
 
@@ -150,7 +150,7 @@ Plans:
   4. A soft-deleted item (tombstone) is not resurrected by a subsequent remote update op arriving after the deletion — the apply handler checks `isDeleted` before applying updates
   5. A reactive-stream integration test verifies: a public item created by member A appears in member B's `watchByListType('public')` stream without manual refresh; a private item created by member A does NOT appear in the stream for any remote member; `flutter test test/application/shopping_list/` and the sync integration tests both pass
 
-**Plans:** 5/6 plans executed
+**Plans:** 6/6 plans complete
 
 Plans:
 **Wave 0** *(TDD contract — all test scaffolds before production code)*
@@ -172,7 +172,7 @@ Plans:
 
 **Wave 4** *(integration gate — depends on Wave 3)*
 
-- [ ] 37-06-PLAN.md — shopping_sync_round_trip_test implementation (SC-5 reactive delivery) + phase gate
+- [x] 37-06-PLAN.md — shopping_sync_round_trip_test implementation (SC-5 reactive delivery) + phase gate
 
 **Cross-cutting constraints:**
 
@@ -227,6 +227,6 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 36. Data Layer + Domain + Import Guard | 7/7 | Complete    | 2026-06-07 |
-| 37. Application Use Cases + Sync Integration | 5/6 | In Progress|  |
+| 37. Application Use Cases + Sync Integration | 6/6 | Complete   | 2026-06-08 |
 | 38. Presentation Shell + UI Widgets | 0/TBD | Not started | - |
 | 39. i18n + Golden Re-baseline + Smoke Test | 0/TBD | Not started | - |
