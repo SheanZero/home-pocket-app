@@ -150,7 +150,7 @@ Plans:
   4. A soft-deleted item (tombstone) is not resurrected by a subsequent remote update op arriving after the deletion — the apply handler checks `isDeleted` before applying updates
   5. A reactive-stream integration test verifies: a public item created by member A appears in member B's `watchByListType('public')` stream without manual refresh; a private item created by member A does NOT appear in the stream for any remote member; `flutter test test/application/shopping_list/` and the sync integration tests both pass
 
-**Plans:** 3/6 plans executed
+**Plans:** 4/6 plans executed
 
 Plans:
 **Wave 0** *(TDD contract — all test scaffolds before production code)*
@@ -164,7 +164,7 @@ Plans:
 **Wave 2** *(use cases, parallel; both depend on Wave 1)*
 
 - [x] 37-03-PLAN.md — Use cases A: CreateShoppingItemUseCase, DeleteShoppingItemUseCase, ToggleItemCompletedUseCase, ReorderShoppingItemsUseCase
-- [ ] 37-04-PLAN.md — Use cases B: UpdateShoppingItemUseCase (D37-04 guard), ClearCompletedItemsUseCase
+- [x] 37-04-PLAN.md — Use cases B: UpdateShoppingItemUseCase (D37-04 guard), ClearCompletedItemsUseCase
 
 **Wave 3** *(sync integration — atomic constructor change across all 6 sites)*
 
@@ -227,6 +227,6 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 36. Data Layer + Domain + Import Guard | 7/7 | Complete    | 2026-06-07 |
-| 37. Application Use Cases + Sync Integration | 3/6 | In Progress|  |
+| 37. Application Use Cases + Sync Integration | 4/6 | In Progress|  |
 | 38. Presentation Shell + UI Widgets | 0/TBD | Not started | - |
 | 39. i18n + Golden Re-baseline + Smoke Test | 0/TBD | Not started | - |
