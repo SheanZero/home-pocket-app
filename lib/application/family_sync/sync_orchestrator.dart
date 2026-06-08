@@ -14,6 +14,7 @@ import 'pull_sync_use_case.dart';
 import 'push_sync_use_case.dart';
 import 'shadow_book_service.dart';
 import 'sync_avatar_use_case.dart';
+import 'shopping_item_change_tracker.dart';
 import 'transaction_change_tracker.dart';
 
 /// Result of an orchestrated sync operation.
@@ -52,6 +53,7 @@ class SyncOrchestrator {
     required SyncQueueManager queueManager,
     required KeyManager keyManager,
     required TransactionChangeTracker changeTracker,
+    required ShoppingItemChangeTracker shoppingChangeTracker,
   }) : _pullSync = pullSync,
        _pushSync = pushSync,
        _fullSync = fullSync,
@@ -61,7 +63,8 @@ class SyncOrchestrator {
        _profileRepo = profileRepo,
        _queueManager = queueManager,
        _keyManager = keyManager,
-       _changeTracker = changeTracker;
+       _changeTracker = changeTracker,
+       _shoppingChangeTracker = shoppingChangeTracker;
 
   final PullSyncUseCase _pullSync;
   final PushSyncUseCase _pushSync;
@@ -73,6 +76,7 @@ class SyncOrchestrator {
   final SyncQueueManager _queueManager;
   final KeyManager _keyManager;
   final TransactionChangeTracker _changeTracker;
+  final ShoppingItemChangeTracker _shoppingChangeTracker;
 
   /// Tracks last pushed profile hash to avoid redundant profile operations.
   String? _lastPushedProfileHash;
@@ -157,6 +161,17 @@ class SyncOrchestrator {
         );
       }
       await _pushSync.execute(operations: txnOps, vectorClock: const {});
+    }
+
+    // Flush pending shopping item changes (SC-3, SYNC-01)
+    final shoppingOps = _shoppingChangeTracker.flush();
+    if (shoppingOps.isNotEmpty) {
+      if (kDebugMode) {
+        debugPrint(
+          '[SyncOrchestrator] incrementalPush: pushing ${shoppingOps.length} shopping ops',
+        );
+      }
+      await _pushSync.execute(operations: shoppingOps, vectorClock: const {});
     }
 
     // Build profile operation if changed

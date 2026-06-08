@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../application/family_sync/shopping_item_change_tracker.dart';
 import '../../../../application/family_sync/sync_engine.dart';
 import '../../../../application/family_sync/sync_orchestrator.dart';
 import '../../../../application/family_sync/transaction_change_tracker.dart';
@@ -16,6 +17,15 @@ part 'state_sync.g.dart';
 @Riverpod(keepAlive: true)
 TransactionChangeTracker transactionChangeTracker(Ref ref) {
   return TransactionChangeTracker();
+}
+
+/// ShoppingItemChangeTracker provider — keepAlive so tracker persists across screens.
+///
+/// Mirrors [transactionChangeTrackerProvider]. Used by [SyncOrchestrator] to flush
+/// pending shopping item operations during incrementalPush (SC-3, SYNC-01).
+@Riverpod(keepAlive: true)
+ShoppingItemChangeTracker shoppingItemChangeTracker(Ref ref) {
+  return ShoppingItemChangeTracker();
 }
 
 /// SyncOrchestrator provider.
@@ -36,6 +46,7 @@ SyncOrchestrator syncOrchestrator(Ref ref) {
     queueManager: ref.watch(syncQueueManagerProvider),
     keyManager: ref.watch(keyManagerProvider),
     changeTracker: ref.watch(transactionChangeTrackerProvider),
+    shoppingChangeTracker: ref.watch(shoppingItemChangeTrackerProvider),
   );
 }
 

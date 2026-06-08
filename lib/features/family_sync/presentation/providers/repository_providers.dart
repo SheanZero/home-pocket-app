@@ -35,6 +35,8 @@ import '../../../accounting/presentation/providers/repository_providers.dart'
     as accounting;
 import '../../../profile/presentation/providers/repository_providers.dart'
     as profile;
+import '../../../shopping_list/presentation/providers/repository_providers.dart'
+    show shoppingItemRepositoryProvider;
 import '../../domain/repositories/group_repository.dart';
 import '../../domain/repositories/sync_repository.dart';
 
@@ -129,6 +131,7 @@ ShadowBookService shadowBookService(Ref ref) {
 ApplySyncOperationsUseCase applySyncOperationsUseCase(Ref ref) {
   return ApplySyncOperationsUseCase(
     transactionRepository: ref.watch(accounting.transactionRepositoryProvider),
+    shoppingItemRepository: ref.watch(shoppingItemRepositoryProvider),
     shadowBookService: ref.watch(shadowBookServiceProvider),
     groupRepository: ref.watch(groupRepositoryProvider),
     syncAvatarUseCase: ref.watch(syncAvatarUseCaseProvider),

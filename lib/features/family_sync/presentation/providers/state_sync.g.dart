@@ -61,6 +61,68 @@ final class TransactionChangeTrackerProvider
 String _$transactionChangeTrackerHash() =>
     r'bb8c0d635d1ac2f56fb060cfe714b679d99b00dd';
 
+/// ShoppingItemChangeTracker provider — keepAlive so tracker persists across screens.
+///
+/// Mirrors [transactionChangeTrackerProvider]. Used by [SyncOrchestrator] to flush
+/// pending shopping item operations during incrementalPush (SC-3, SYNC-01).
+
+@ProviderFor(shoppingItemChangeTracker)
+final shoppingItemChangeTrackerProvider = ShoppingItemChangeTrackerProvider._();
+
+/// ShoppingItemChangeTracker provider — keepAlive so tracker persists across screens.
+///
+/// Mirrors [transactionChangeTrackerProvider]. Used by [SyncOrchestrator] to flush
+/// pending shopping item operations during incrementalPush (SC-3, SYNC-01).
+
+final class ShoppingItemChangeTrackerProvider
+    extends
+        $FunctionalProvider<
+          ShoppingItemChangeTracker,
+          ShoppingItemChangeTracker,
+          ShoppingItemChangeTracker
+        >
+    with $Provider<ShoppingItemChangeTracker> {
+  /// ShoppingItemChangeTracker provider — keepAlive so tracker persists across screens.
+  ///
+  /// Mirrors [transactionChangeTrackerProvider]. Used by [SyncOrchestrator] to flush
+  /// pending shopping item operations during incrementalPush (SC-3, SYNC-01).
+  ShoppingItemChangeTrackerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'shoppingItemChangeTrackerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$shoppingItemChangeTrackerHash();
+
+  @$internal
+  @override
+  $ProviderElement<ShoppingItemChangeTracker> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ShoppingItemChangeTracker create(Ref ref) {
+    return shoppingItemChangeTracker(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ShoppingItemChangeTracker value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ShoppingItemChangeTracker>(value),
+    );
+  }
+}
+
+String _$shoppingItemChangeTrackerHash() =>
+    r'776c3905408ac2d3426733710420881b221be1c2';
+
 /// SyncOrchestrator provider.
 ///
 /// Placed in state_sync.dart rather than repository_providers.dart to avoid
@@ -122,7 +184,7 @@ final class SyncOrchestratorProvider
   }
 }
 
-String _$syncOrchestratorHash() => r'756a454762bc84c10e125588156461d195c462a6';
+String _$syncOrchestratorHash() => r'724e1396b840476444bb9d90ca9d6e2375216931';
 
 /// SyncEngine provider — keepAlive because it manages timers and lifecycle.
 
