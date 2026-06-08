@@ -188,7 +188,12 @@ class SyncOrchestrator {
     // Drain offline queue
     await _queueManager.drainQueue();
 
-    return SyncOrchestratorSuccess(pushedCount: txnOps.length);
+    // WR-03: include shopping + profile ops so pushedCount reflects all work
+    // pushed this round, not just transactions (a shopping/profile-only round
+    // previously reported 0).
+    return SyncOrchestratorSuccess(
+      pushedCount: txnOps.length + shoppingOps.length + profileOps.length,
+    );
   }
 
   Future<SyncOrchestratorResult> _executeIncrementalPull() async {
