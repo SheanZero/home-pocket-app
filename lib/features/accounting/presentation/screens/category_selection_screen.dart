@@ -353,7 +353,7 @@ class _CategorySelectionScreenState
             slivers: [
               SliverReorderableList(
                 itemCount: state.l1.length,
-                onReorder: (o, n) =>
+                onReorderItem: (o, n) =>
                     ref.read(categoryReorderProvider.notifier).reorderL1(o, n),
                 itemBuilder: (context, index) {
                   final l1 = state.l1[index];
@@ -465,7 +465,7 @@ class _L1ReorderTile extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: children.length,
             buildDefaultDragHandles: false,
-            onReorder: onReorderChild,
+            onReorderItem: onReorderChild,
             itemBuilder: (ctx, i) {
               final child = children[i];
               final palette = ctx.palette;

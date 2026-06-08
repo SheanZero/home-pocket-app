@@ -26,12 +26,11 @@ class CategoryReorderNotifier extends _$CategoryReorderNotifier {
     );
   }
 
-  /// Reorder an L1 row (`ReorderableListView` semantics: `newIndex` may equal
-  /// `list.length` when dropped at the bottom; adjust by -1 if moving down).
+  /// Reorder an L1 row (`onReorderItem` semantics: `newIndex` is already
+  /// adjusted for the removed item — no manual `newIndex -= 1` needed).
   void reorderL1(int oldIndex, int newIndex) {
     if (!state.isEditing) return;
     final updated = List<Category>.of(state.l1);
-    if (newIndex > oldIndex) newIndex -= 1;
     final moved = updated.removeAt(oldIndex);
     updated.insert(newIndex, moved);
     state = state.copyWith(l1: updated, isDirty: true);
@@ -41,7 +40,6 @@ class CategoryReorderNotifier extends _$CategoryReorderNotifier {
   void reorderL2(String parentId, int oldIndex, int newIndex) {
     if (!state.isEditing) return;
     final children = List<Category>.of(state.l2ByParent[parentId] ?? const []);
-    if (newIndex > oldIndex) newIndex -= 1;
     final moved = children.removeAt(oldIndex);
     children.insert(newIndex, moved);
     final updatedMap = Map<String, List<Category>>.of(state.l2ByParent);
