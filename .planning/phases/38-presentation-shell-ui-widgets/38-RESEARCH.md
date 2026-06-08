@@ -699,22 +699,22 @@ Then in the shopping filter bar, pass `onApply: (ids) => ref.read(shoppingFilter
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **`ShoppingItemChangeTracker` and `SyncEngine` provider names from Phase 37**
    - What we know: Phase 37 wired `ShoppingItemChangeTracker` + extended `SyncOrchestrator`; providers live in `lib/features/family_sync/presentation/providers/state_sync.dart`
    - What's unclear: Exact Riverpod provider names (do they follow the `@riverpod` suffix-strip rule?)
-   - Recommendation: Executor reads `state_sync.dart` before wiring use-case providers
+   - **RESOLVED:** PATTERNS.md confirmed the names from source — `shoppingItemChangeTrackerProvider` (state_sync.dart:27) and `syncEngineProvider` (state_sync.dart:55). Executor still reads `state_sync.dart` before wiring use-case providers (Plan 38-02 read_first).
 
 2. **categoryIds addition to ShoppingListFilter — Wave ordering**
    - What we know: The field is missing and needed for the filter bar
    - What's unclear: Should this be Wave 0 (before any filter bar code) or Wave 1?
-   - Recommendation: Wave 0 task — add `categoryIds` to `ShoppingListFilter` + run build_runner before any other work, so all Wave 1+ code can assume the field exists
+   - **RESOLVED:** Wave 0 (Plan 38-01, Task 1) — add `categoryIds: Set<String>` to `ShoppingListFilter` + run build_runner before any other work, so all Wave 1+ code can assume the field exists.
 
 3. **`homeTabTodo` ARB key rename vs new key**
    - What we know: SC1 requires zero "Todo" strings in rendered UI; Phase 39 is the full ARB pass (NAV-03)
    - What's unclear: Whether to rename `homeTabTodo` to `homeTabShopping` in Phase 38 (changing the ARB key name) or just update its value
-   - Recommendation: Safest approach is update the VALUE in all 3 ARB files (keep key name `homeTabTodo` for now, Phase 39 can rename the key if needed). The SC1 check is about rendered string content, not key names.
+   - **RESOLVED:** Update the VALUE in all 3 ARB files (Plan 38-03); keep key name `homeTabTodo` for now. Phase 39 renames the key. SC1 checks rendered string content, not key names.
 
 ---
 
