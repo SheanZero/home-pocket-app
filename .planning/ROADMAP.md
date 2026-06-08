@@ -192,7 +192,32 @@ Plans:
   4. The add/edit form accepts all D4 fields — name (required, validated), optional ledger selector (reuses `LedgerTypeSelector` from `lib/shared/widgets/`), optional category (pushes to `CategorySelectionScreen`), optional tags, note (encrypted at repo boundary), quantity (plain numeric), and estimated price (integer yen via `NumberFormatter`); completed items sort exclusively below a visual divider; active items in a `SliverReorderableList`; swipe-to-delete uses `Dismissible` and is disabled while batch-select mode is active (MGMT-03)
   5. Long-pressing any item enters batch-select mode with a floating bottom action bar; "Select all" is available; the batch-delete confirmation fires `DeleteShoppingItemUseCase` for each selected item with soft-delete semantics; "Clear all completed" appears only when the completed section is non-empty and fires `ClearCompletedItemsUseCase` for the current segment regardless of active filters; all three empty state variants (empty private, empty public solo, empty public family) render correctly (SHOP-04)
 
-**Plans:** TBD
+**Plans:** 8 plans
+
+Plans:
+**Wave 0** *(model fix + test infra — blocks all other plans)*
+
+- [ ] 38-01-PLAN.md — ShoppingListFilter.categoryIds field + build_runner + test infra scaffolds + mock use-case helpers
+
+**Wave 1** *(provider graph + nav rename — parallel, no file conflicts)*
+
+- [ ] 38-02-PLAN.md — Provider graph: listTypeProvider + shoppingFilterProvider (keepAlive) + batchSelectModeProvider + 6 use-case providers + filteredShoppingItemsProvider
+- [ ] 38-03-PLAN.md — Nav rename: home_bottom_nav_bar.dart shopping-bag icon + ARB homeTabTodo value update + import_guard.yaml files
+
+**Wave 2** *(tile + filter widgets — parallel, no file conflicts)*
+
+- [ ] 38-04-PLAN.md — ShoppingItemTile: Dismissible + animated toggle + dual-ledger border + attribution chip + drag handle (L2 fix)
+- [ ] 38-05-PLAN.md — ShoppingEmptyState (3 variants) + ShoppingFilterBar (D38-04) + CategoryFilterSheet onApply fix (L3)
+
+**Wave 3** *(screen assembly — parallel, no file conflicts)*
+
+- [ ] 38-06-PLAN.md — ShoppingListScreen shell + ShoppingBatchActionBar + ShoppingSelectionHeader
+- [ ] 38-07-PLAN.md — ShoppingItemFormScreen: add/edit form with all D4 fields
+
+**Wave 4** *(main shell integration — highest-risk, last)*
+
+- [ ] 38-08-PLAN.md — MainShellScreen: replace placeholder + context-aware FAB + batchSelectMode guard (SC1 accounting regression gate)
+
 **UI hint**: yes
 
 ### Phase 39: i18n + Golden Re-baseline + Smoke Test
@@ -220,7 +245,7 @@ Plans:
 | v1.3 迭代帐本输入 | 18-23 | 47/47 | Complete | 2026-05-26 |
 | v1.4 列表功能 | 24-30 | 29/29 | Complete | 2026-05-31 |
 | v1.5 文案与配色统一 | 31-35 | 24/24 | Complete | 2026-06-02 |
-| v1.6 购物清单 | 36-39 | 0/0 | In progress | — |
+| v1.6 购物清单 | 36-39 | 13/21 | In progress | — |
 
 ## Phase Progress (v1.6)
 
@@ -228,5 +253,5 @@ Plans:
 |-------|----------------|--------|-----------|
 | 36. Data Layer + Domain + Import Guard | 7/7 | Complete    | 2026-06-07 |
 | 37. Application Use Cases + Sync Integration | 6/6 | Complete    | 2026-06-08 |
-| 38. Presentation Shell + UI Widgets | 0/TBD | Not started | - |
+| 38. Presentation Shell + UI Widgets | 0/8 | Not started | - |
 | 39. i18n + Golden Re-baseline + Smoke Test | 0/TBD | Not started | - |
