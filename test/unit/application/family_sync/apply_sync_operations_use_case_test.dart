@@ -9,6 +9,7 @@ import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
+import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
 import 'package:home_pocket/features/shopping_list/domain/repositories/shopping_item_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:mocktail/mocktail.dart';
@@ -21,7 +22,12 @@ class _MockGroupRepository extends Mock implements GroupRepository {}
 class _MockShoppingItemRepository extends Mock
     implements ShoppingItemRepository {}
 
+class _FakeShoppingItem extends Fake implements ShoppingItem {}
+
 void main() {
+  setUpAll(() {
+    registerFallbackValue(_FakeShoppingItem());
+  });
   late AppDatabase db;
   late ApplySyncOperationsUseCase useCase;
   late ShadowBookService shadowBookService;

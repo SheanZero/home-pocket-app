@@ -1,7 +1,12 @@
+import 'package:flutter/foundation.dart';
+
 import '../../features/accounting/domain/models/transaction_sync_mapper.dart';
 import '../../features/accounting/domain/models/book.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
 import '../../features/family_sync/domain/repositories/group_repository.dart';
+import '../../features/shopping_list/domain/models/shopping_item.dart';
+import '../../features/shopping_list/domain/models/shopping_item_sync_mapper.dart';
+import '../../features/shopping_list/domain/repositories/shopping_item_repository.dart';
 import 'shadow_book_service.dart';
 import 'sync_avatar_use_case.dart';
 
@@ -9,17 +14,20 @@ import 'sync_avatar_use_case.dart';
 class ApplySyncOperationsUseCase {
   ApplySyncOperationsUseCase({
     required TransactionRepository transactionRepository,
+    required ShoppingItemRepository shoppingItemRepository,
     required ShadowBookService shadowBookService,
     required GroupRepository groupRepository,
     SyncAvatarUseCase? syncAvatarUseCase,
     String? appDirectory,
   }) : _transactionRepository = transactionRepository,
+       _shoppingItemRepository = shoppingItemRepository,
        _shadowBookService = shadowBookService,
        _groupRepository = groupRepository,
        _syncAvatarUseCase = syncAvatarUseCase,
        _appDirectory = appDirectory;
 
   final TransactionRepository _transactionRepository;
+  final ShoppingItemRepository _shoppingItemRepository;
   final ShadowBookService _shadowBookService;
   final GroupRepository _groupRepository;
   final SyncAvatarUseCase? _syncAvatarUseCase;
@@ -39,6 +47,18 @@ class ApplySyncOperationsUseCase {
           await _applyProfileOperation(operation, groupId: groupId);
         case 'avatar':
           await _applyAvatarOperation(operation, groupId: groupId);
+        case 'shopping_item':
+          // D37-05: fault isolation — bad shopping op must not abort bill ops
+          try {
+            await _applyShoppingItemOp(operation);
+          } catch (e, st) {
+            if (kDebugMode) {
+              debugPrint(
+                '[ApplySyncOps] shopping_item op failed, skipping: $e\n$st',
+              );
+            }
+            continue; // skip-and-continue; next fullSync reconciles
+          }
         default:
           continue;
       }
@@ -150,6 +170,84 @@ class ApplySyncOperationsUseCase {
               : DateTime.now(),
         );
     await _transactionRepository.update(updated);
+  }
+
+  Future<void> _applyShoppingItemOp(Map<String, dynamic> operation) async {
+    final op = operation['op'] as String?;
+    final entityId = operation['entityId'] as String?;
+    final fromDeviceId = operation['fromDeviceId'] as String?;
+    final data = operation['data'] as Map<String, dynamic>?;
+    if (op == null || entityId == null) return;
+
+    switch (op) {
+      case 'create':
+      case 'insert':
+        if (data == null) return;
+        await _handleShoppingCreate(entityId, fromDeviceId, data);
+      case 'delete':
+        // Soft-delete (tombstone) — never hard-delete
+        await _shoppingItemRepository.softDelete(entityId);
+      case 'update':
+        if (data == null) return;
+        await _handleShoppingUpdate(entityId, data);
+    }
+  }
+
+  Future<void> _handleShoppingCreate(
+    String entityId,
+    String? fromDeviceId,
+    Map<String, dynamic> data,
+  ) async {
+    // Idempotent: skip if already exists (analog _handleCreate)
+    final existing = await _shoppingItemRepository.findById(entityId);
+    if (existing != null) return;
+
+    // No shadow-book concept for shopping items — they belong to the shared list
+    final item = ShoppingItemSyncMapper.fromSyncMap(
+      data,
+      fromDeviceId: fromDeviceId,
+    );
+    await _shoppingItemRepository.upsert(item);
+  }
+
+  Future<void> _handleShoppingUpdate(
+    String entityId,
+    Map<String, dynamic> data,
+  ) async {
+    final existing = await _shoppingItemRepository.findById(entityId);
+    if (existing == null) {
+      // Upsert: treat unknown-ID update as create (analog _handleUpdate)
+      final item = ShoppingItemSyncMapper.fromSyncMap(data, fromDeviceId: null);
+      await _shoppingItemRepository.upsert(item.copyWith(id: entityId));
+      return;
+    }
+
+    // SC-4: tombstone wins — soft-deleted item never resurrected
+    // MUST be first check, before any field merging
+    if (existing.isDeleted) return;
+
+    // D-03/D37-02 sticky-complete merge
+    final incomingUpdatedAt = data['updatedAt'] != null
+        ? DateTime.parse(data['updatedAt'] as String)
+        : DateTime.now();
+
+    ShoppingItem updated = ShoppingItemSyncMapper.fromSyncMap(
+      data,
+      fromDeviceId: null,
+    ).copyWith(id: entityId);
+
+    // Guard: only fire when completedAt exists AND is newer than incoming op
+    // (D37-02: deliberate un-complete has completedAt=null → guard skips → applies)
+    if (existing.completedAt != null &&
+        existing.completedAt!.isAfter(incomingUpdatedAt)) {
+      // Stale edit: preserve local completion state
+      updated = updated.copyWith(
+        isCompleted: true,
+        completedAt: existing.completedAt,
+      );
+    }
+
+    await _shoppingItemRepository.upsert(updated);
   }
 
   Future<Book?> _createShadowBookForSender(String fromDeviceId) async {
