@@ -61,7 +61,7 @@ Future<void> _pumpTile(
           body: CustomScrollView(
             slivers: [
               SliverReorderableList(
-                onReorder: (_, _) {},
+                onReorderItem: (_, _) {},
                 itemCount: 1,
                 itemBuilder: (ctx, i) => ReorderableDelayedDragStartListener(
                   key: ValueKey('swipe-tile-$i'),
