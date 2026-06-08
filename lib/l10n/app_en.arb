@@ -2396,5 +2396,61 @@
   "@shoppingBatchSelectAll": {
     "description": "Select-all button in the batch selection header (Phase 38)"
   },
+  "shoppingFormAddTitle": "Add item",
+  "@shoppingFormAddTitle": {
+    "description": "AppBar title for the shopping item form in create mode (Phase 38-07)"
+  },
+  "shoppingFormEditTitle": "Edit item",
+  "@shoppingFormEditTitle": {
+    "description": "AppBar title for the shopping item form in edit mode (Phase 38-07)"
+  },
+  "shoppingFormSave": "Save",
+  "@shoppingFormSave": {
+    "description": "Save button label in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormNameLabel": "Item name",
+  "@shoppingFormNameLabel": {
+    "description": "Label for the item name field in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormNameRequired": "Name is required",
+  "@shoppingFormNameRequired": {
+    "description": "Validation error when item name is empty in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormLedgerLabel": "Ledger",
+  "@shoppingFormLedgerLabel": {
+    "description": "Section label for the ledger type selector in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormCategoryLabel": "Category",
+  "@shoppingFormCategoryLabel": {
+    "description": "Label for the category field in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormNoCategorySelected": "No category",
+  "@shoppingFormNoCategorySelected": {
+    "description": "Placeholder when no category is selected in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormChangeCategory": "Change",
+  "@shoppingFormChangeCategory": {
+    "description": "Button label to open the category picker in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormTagsLabel": "Tags (comma-separated)",
+  "@shoppingFormTagsLabel": {
+    "description": "Label for the tags field in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormNoteLabel": "Note",
+  "@shoppingFormNoteLabel": {
+    "description": "Label for the note field in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormQuantityLabel": "Quantity",
+  "@shoppingFormQuantityLabel": {
+    "description": "Label for the quantity field in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormPrice": "Estimated price",
+  "@shoppingFormPrice": {
+    "description": "Label for the estimated price field in the shopping item form (Phase 38-07)"
+  },
+  "shoppingFormSaveError": "Failed to save. Please try again.",
+  "@shoppingFormSaveError": {
+    "description": "Error message shown when saving a shopping item fails (Phase 38-07)"
+  },
   "@@locale": "en"
 }

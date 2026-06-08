@@ -1881,4 +1881,46 @@ class SJa extends S {
 
   @override
   String get shoppingBatchSelectAll => 'すべて選択';
+
+  @override
+  String get shoppingFormAddTitle => 'アイテムを追加';
+
+  @override
+  String get shoppingFormEditTitle => 'アイテムを編集';
+
+  @override
+  String get shoppingFormSave => '保存';
+
+  @override
+  String get shoppingFormNameLabel => 'アイテム名';
+
+  @override
+  String get shoppingFormNameRequired => '名前を入力してください';
+
+  @override
+  String get shoppingFormLedgerLabel => '帳簿';
+
+  @override
+  String get shoppingFormCategoryLabel => 'カテゴリ';
+
+  @override
+  String get shoppingFormNoCategorySelected => 'カテゴリなし';
+
+  @override
+  String get shoppingFormChangeCategory => '変更';
+
+  @override
+  String get shoppingFormTagsLabel => 'タグ（カンマ区切り）';
+
+  @override
+  String get shoppingFormNoteLabel => 'メモ';
+
+  @override
+  String get shoppingFormQuantityLabel => '数量';
+
+  @override
+  String get shoppingFormPrice => '参考価格';
+
+  @override
+  String get shoppingFormSaveError => '保存に失敗しました。もう一度お試しください。';
 }

@@ -1915,4 +1915,46 @@ class SEn extends S {
 
   @override
   String get shoppingBatchSelectAll => 'Select All';
+
+  @override
+  String get shoppingFormAddTitle => 'Add item';
+
+  @override
+  String get shoppingFormEditTitle => 'Edit item';
+
+  @override
+  String get shoppingFormSave => 'Save';
+
+  @override
+  String get shoppingFormNameLabel => 'Item name';
+
+  @override
+  String get shoppingFormNameRequired => 'Name is required';
+
+  @override
+  String get shoppingFormLedgerLabel => 'Ledger';
+
+  @override
+  String get shoppingFormCategoryLabel => 'Category';
+
+  @override
+  String get shoppingFormNoCategorySelected => 'No category';
+
+  @override
+  String get shoppingFormChangeCategory => 'Change';
+
+  @override
+  String get shoppingFormTagsLabel => 'Tags (comma-separated)';
+
+  @override
+  String get shoppingFormNoteLabel => 'Note';
+
+  @override
+  String get shoppingFormQuantityLabel => 'Quantity';
+
+  @override
+  String get shoppingFormPrice => 'Estimated price';
+
+  @override
+  String get shoppingFormSaveError => 'Failed to save. Please try again.';
 }
