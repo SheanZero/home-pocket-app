@@ -353,8 +353,9 @@ class _CategorySelectionScreenState
             slivers: [
               SliverReorderableList(
                 itemCount: state.l1.length,
-                onReorder: (o, n) =>
-                    ref.read(categoryReorderProvider.notifier).reorderL1(o, n),
+                onReorderItem: (o, n) => ref
+                    .read(categoryReorderProvider.notifier)
+                    .reorderL1(o, n > o ? n + 1 : n),
                 itemBuilder: (context, index) {
                   final l1 = state.l1[index];
                   final expanded = _expandedL1IdInEdit == l1.id;
@@ -465,7 +466,7 @@ class _L1ReorderTile extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: children.length,
             buildDefaultDragHandles: false,
-            onReorder: onReorderChild,
+            onReorderItem: (o, n) => onReorderChild(o, n > o ? n + 1 : n),
             itemBuilder: (ctx, i) {
               final child = children[i];
               final palette = ctx.palette;
