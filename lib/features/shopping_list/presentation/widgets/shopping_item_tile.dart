@@ -455,23 +455,25 @@ class ShoppingItemTile extends ConsumerWidget {
       );
 
       // Drag handle — instant drag affordance for users targeting the handle.
+      // No Tooltip: a Tooltip fires on long-press, which is exactly the gesture
+      // used to start a drag — it popped "重新排序" instead of dragging
+      // (quick-260609-pmc-05). Semantics keeps the accessible label.
+      // Icon is Icons.reorder (three lines, matches the filter-bar reorder glyph);
+      // a wide 56px hit target makes the handle easy to grab.
       children.add(
         Semantics(
           label: S.of(context).shoppingReorderItem,
           button: true,
-          child: Tooltip(
-            message: S.of(context).shoppingReorderItem,
-            child: ReorderableDragStartListener(
-              index: index,
-              child: SizedBox(
-                width: 44,
-                height: 44,
-                child: Center(
-                  child: Icon(
-                    Icons.drag_handle,
-                    size: 20,
-                    color: palette.textTertiary,
-                  ),
+          child: ReorderableDragStartListener(
+            index: index,
+            child: SizedBox(
+              width: 56,
+              height: 44,
+              child: Center(
+                child: Icon(
+                  Icons.reorder,
+                  size: 24,
+                  color: palette.textTertiary,
                 ),
               ),
             ),

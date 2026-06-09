@@ -335,7 +335,7 @@ void main() {
       final item = _makeItem();
       await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
 
-      expect(find.byIcon(Icons.drag_handle), findsNothing);
+      expect(find.byIcon(Icons.reorder), findsNothing);
     });
 
     testWidgets('reorder mode on (active item) → drag handle visible',
@@ -353,7 +353,12 @@ void main() {
         ],
       );
 
-      expect(find.byIcon(Icons.drag_handle), findsOneWidget);
+      // quick-260609-pmc-05: handle is Icons.reorder (three lines), and its
+      // long-press Tooltip ("重新排序") was removed because it fired on the
+      // drag long-press. No Tooltip should carry the reorder-item message.
+      expect(find.byIcon(Icons.reorder), findsOneWidget);
+      final ctx = tester.element(find.byType(ShoppingItemTile));
+      expect(find.byTooltip(S.of(ctx).shoppingReorderItem), findsNothing);
     });
 
     testWidgets('reorder mode on → tapping circle does NOT toggle',
