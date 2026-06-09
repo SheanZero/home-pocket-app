@@ -110,6 +110,8 @@ abstract class _$ListType extends $Notifier<String> {
 /// Kept alive across IndexedStack tab switches (SC2) so that filter selections
 /// persist when the user navigates away from the shopping tab and returns.
 /// [resetForNewSegment] is called automatically when the list type switches (D5).
+/// [setPrivateFilter] toggles the 私有 filter chip (G8Z) — always visible
+/// regardless of group membership.
 
 @ProviderFor(ShoppingFilter)
 final shoppingFilterProvider = ShoppingFilterProvider._();
@@ -119,6 +121,8 @@ final shoppingFilterProvider = ShoppingFilterProvider._();
 /// Kept alive across IndexedStack tab switches (SC2) so that filter selections
 /// persist when the user navigates away from the shopping tab and returns.
 /// [resetForNewSegment] is called automatically when the list type switches (D5).
+/// [setPrivateFilter] toggles the 私有 filter chip (G8Z) — always visible
+/// regardless of group membership.
 final class ShoppingFilterProvider
     extends $NotifierProvider<ShoppingFilter, ShoppingListFilter> {
   /// Holds the filter state for the shopping list view.
@@ -126,6 +130,8 @@ final class ShoppingFilterProvider
   /// Kept alive across IndexedStack tab switches (SC2) so that filter selections
   /// persist when the user navigates away from the shopping tab and returns.
   /// [resetForNewSegment] is called automatically when the list type switches (D5).
+  /// [setPrivateFilter] toggles the 私有 filter chip (G8Z) — always visible
+  /// regardless of group membership.
   ShoppingFilterProvider._()
     : super(
         from: null,
@@ -153,13 +159,15 @@ final class ShoppingFilterProvider
   }
 }
 
-String _$shoppingFilterHash() => r'0220080ab663141f52c2f1ad923bbb6ba7855224';
+String _$shoppingFilterHash() => r'37a9805bd1184fb40f046dd524ecf6de57a7cfb8';
 
 /// Holds the filter state for the shopping list view.
 ///
 /// Kept alive across IndexedStack tab switches (SC2) so that filter selections
 /// persist when the user navigates away from the shopping tab and returns.
 /// [resetForNewSegment] is called automatically when the list type switches (D5).
+/// [setPrivateFilter] toggles the 私有 filter chip (G8Z) — always visible
+/// regardless of group membership.
 
 abstract class _$ShoppingFilter extends $Notifier<ShoppingListFilter> {
   ShoppingListFilter build();

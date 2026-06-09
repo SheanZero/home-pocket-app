@@ -107,5 +107,93 @@ void main() {
         reason: 'setLedgerFilter(null) clears the ledger filter',
       );
     });
+
+    test('setPrivateFilter(true) sets showPrivateOnly to true', () {
+      final container = ProviderContainer.test();
+
+      container
+          .read(shoppingFilterProvider.notifier)
+          .setPrivateFilter(true);
+
+      expect(
+        container.read(shoppingFilterProvider).showPrivateOnly,
+        isTrue,
+        reason: 'setPrivateFilter(true) must set showPrivateOnly to true',
+      );
+    });
+
+    test('setPrivateFilter(false) sets showPrivateOnly to false', () {
+      final container = ProviderContainer.test();
+
+      // First set to true
+      container
+          .read(shoppingFilterProvider.notifier)
+          .setPrivateFilter(true);
+      // Then set to false
+      container
+          .read(shoppingFilterProvider.notifier)
+          .setPrivateFilter(false);
+
+      expect(
+        container.read(shoppingFilterProvider).showPrivateOnly,
+        isFalse,
+        reason: 'setPrivateFilter(false) must set showPrivateOnly to false',
+      );
+    });
+
+    test('clearAll() with showPrivateOnly=true resets to initial (showPrivateOnly=false)',
+        () {
+      final container = ProviderContainer.test();
+
+      container
+          .read(shoppingFilterProvider.notifier)
+          .setPrivateFilter(true);
+      expect(
+        container.read(shoppingFilterProvider).showPrivateOnly,
+        isTrue,
+        reason: 'Precondition: showPrivateOnly is true before clearAll',
+      );
+
+      container.read(shoppingFilterProvider.notifier).clearAll();
+
+      expect(
+        container.read(shoppingFilterProvider),
+        ShoppingListFilter.initial(),
+        reason: 'clearAll must reset showPrivateOnly to false (via initial())',
+      );
+    });
+
+    test('setListType() resets shoppingFilterProvider including showPrivateOnly',
+        () {
+      final container = ProviderContainer.test();
+
+      // Set both a status filter and the private filter
+      container
+          .read(shoppingFilterProvider.notifier)
+          .setStatusFilter('active');
+      container
+          .read(shoppingFilterProvider.notifier)
+          .setPrivateFilter(true);
+      expect(
+        container.read(shoppingFilterProvider).showPrivateOnly,
+        isTrue,
+        reason: 'Precondition: showPrivateOnly is true before segment switch',
+      );
+
+      // Switching the list type should reset the filter (D5/FILT-02)
+      container.read(listTypeProvider.notifier).setListType('public');
+
+      expect(
+        container.read(shoppingFilterProvider),
+        ShoppingListFilter.initial(),
+        reason:
+            'setListType must reset shoppingFilterProvider to initial, including showPrivateOnly',
+      );
+      expect(
+        container.read(shoppingFilterProvider).showPrivateOnly,
+        isFalse,
+        reason: 'showPrivateOnly must be false after list type switch',
+      );
+    });
   });
 }

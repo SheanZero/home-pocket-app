@@ -9,6 +9,8 @@ part 'shopping_list_filter.freezed.dart';
 /// - [ledgerType]: null = show all ledger types
 /// - [statusFilter]: 'all' | 'active' (completed items always visible in their section)
 /// - [searchQuery]: text search token
+/// - [showPrivateOnly]: when true, forces the view to show only private items
+///   regardless of the [listTypeProvider] value (私有 chip — G8Z)
 ///
 /// No Drift imports — pure domain type.
 @freezed
@@ -19,6 +21,7 @@ abstract class ShoppingListFilter with _$ShoppingListFilter {
     @Default('all') String statusFilter,
     @Default('') String searchQuery,
     @Default(<String>{}) Set<String> categoryIds,
+    @Default(false) bool showPrivateOnly,
   }) = _ShoppingListFilter;
 
   /// Creates a filter state with all defaults (private list, no filters).
