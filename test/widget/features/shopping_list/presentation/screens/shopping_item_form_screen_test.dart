@@ -1,7 +1,9 @@
 // Widget tests for ShoppingItemFormScreen.
 //
 // Covers: ITEM-01 (name required validation), ITEM-02 (D4 optional fields),
-//         ITEM-04 (edit mode pre-population), G8Z2 (list-type selector fixes).
+//         ITEM-04 (edit mode pre-population), G8Z2 (list-type selector fixes),
+//         STEPPER-01 (quantity default), LEDGER-NO-NULL-01 (no null toggle),
+//         TAGS-D2-01 (edit save passes original item.tags).
 //
 // Run: flutter test test/widget/features/shopping_list/presentation/screens/shopping_item_form_screen_test.dart
 
@@ -55,6 +57,7 @@ ShoppingItem _makeItem({
   int quantity = 2,
   int? estimatedPrice = 350,
   String? note = 'from the bakery',
+  List<String> tags = const [],
 }) {
   return ShoppingItem(
     id: id,
@@ -66,6 +69,7 @@ ShoppingItem _makeItem({
     quantity: quantity,
     estimatedPrice: estimatedPrice,
     note: note,
+    tags: tags,
     createdAt: DateTime(2026, 6, 8),
   );
 }
@@ -233,7 +237,8 @@ void main() {
       );
     });
 
-    testWidgets('note and tags fields are present', (tester) async {
+    testWidgets('note field is present; tags field is hidden (D-2)',
+        (tester) async {
       await _pumpForm(
         tester,
         createUseCase: mockCreate,
@@ -241,17 +246,20 @@ void main() {
         deviceIdentityRepo: mockDeviceIdentityRepo,
       );
 
+      // Note field must be present
       expect(
         find.byKey(const Key('shopping_form_note_field')),
         findsOneWidget,
       );
+
+      // Tags field hidden per D-2; data passes through transparently.
       expect(
         find.byKey(const Key('shopping_form_tags_field')),
-        findsOneWidget,
+        findsNothing,
       );
     });
 
-    testWidgets('category picker button is present', (tester) async {
+    testWidgets('category row (InkWell with label) is present', (tester) async {
       await _pumpForm(
         tester,
         createUseCase: mockCreate,
@@ -259,10 +267,9 @@ void main() {
         deviceIdentityRepo: mockDeviceIdentityRepo,
       );
 
-      expect(
-        find.byKey(const Key('shopping_form_category_button')),
-        findsOneWidget,
-      );
+      // Old OutlinedButton replaced by full-row InkWell.
+      // Verify via label text presence instead of the old button key.
+      expect(find.text('Category'), findsOneWidget);
     });
   });
 
@@ -651,6 +658,88 @@ void main() {
         );
         expect(ledgerOffset.dy, lessThan(listTypeOffset.dy),
             reason: 'Ledger selector must appear above the list-type selector');
+      },
+    );
+  });
+
+  // ── New tests for redesigned UI ───────────────────────────────────────────
+
+  group('Stepper', () {
+    testWidgets('STEPPER-01: create mode quantity defaults to 1', (tester) async {
+      await _pumpForm(
+        tester,
+        createUseCase: mockCreate,
+        updateUseCase: mockUpdate,
+        deviceIdentityRepo: mockDeviceIdentityRepo,
+      );
+      await tester.pumpAndSettle();
+
+      final qField = tester.widget<TextField>(
+        find.byKey(const Key('shopping_form_quantity_field')),
+      );
+      expect(qField.controller?.text, equals('1'));
+    });
+  });
+
+  group('Ledger non-null invariant', () {
+    testWidgets(
+      'LEDGER-NO-NULL-01: tapping active daily chip keeps ledger = daily (no null toggle)',
+      (tester) async {
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+        );
+        await tester.pumpAndSettle();
+
+        // Tap daily chip (already selected)
+        await tester.tap(find.byKey(const ValueKey('ledger_type_daily_chip')));
+        await tester.pump();
+
+        final sel = tester.widget<LedgerTypeSelector>(
+          find.byKey(const Key('shopping_form_ledger_selector')),
+        );
+        expect(
+          sel.selected,
+          equals(LedgerType.daily),
+          reason: 'Tapping active chip must not toggle to null',
+        );
+      },
+    );
+  });
+
+  group('Tags D-2 passthrough', () {
+    testWidgets(
+      'TAGS-D2-01: edit save passes original item.tags through',
+      (tester) async {
+        late UpdateShoppingItemParams capturedParams;
+        when(() => mockUpdate.execute(any())).thenAnswer((inv) async {
+          capturedParams =
+              inv.positionalArguments.first as UpdateShoppingItemParams;
+          return Result.success(_makeItem());
+        });
+
+        // Use an item with a non-empty tags list for a meaningful assertion.
+        final editItem = _makeItem(name: 'Bread', tags: ['organic', 'bakery']);
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+          item: editItem,
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Save'));
+        await tester.pumpAndSettle();
+
+        verify(() => mockUpdate.execute(any())).called(1);
+        expect(
+          capturedParams.tags,
+          equals(editItem.tags),
+          reason: 'Edit save must pass original item.tags through (D-2)',
+        );
       },
     );
   });
