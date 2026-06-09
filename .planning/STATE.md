@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-07 — v1.6 购物清单 started)
 Phase: 39
 Plan: Not started
 Status: Milestone complete
-Last activity: 2026-06-09 - Completed quick task 260609-ec2: shopping list UI upgrade (leading toggle circle, tap-to-edit, right-side quantity, drag-reorder mode)
+Last activity: 2026-06-09 - Completed quick task 260609-g8z: shopping private/public feature (always-on 私有 filter chip, public/private form selector, private-no-sync) + 3 follow-up fixes (daily default, ledger badge → 私有 marker, joy accent restored, default public)
 
 ```
 v1.6 progress: [░░░░] 0% — Phase 36-39 defined, 0/4 complete
@@ -183,6 +183,7 @@ No active blockers. Carried-forward debt (cross-milestone):
 | 260607-jrz | 首页月份选择从 header 左右翻月 chevron 改为「点月份标签 → 弹窗式月份网格」 | 2026-06-07 | 80b16179 | Verified 2026-06-07 | [260607-jrz-month-picker-dialog](./quick/260607-jrz-month-picker-dialog/) |
 | 260609-dnp | 购物筛选栏增强：日常\|悦己 合并为单个分段控件（可点击取消）+ 全部 改为「重置」入口（仅无筛选时高亮、点击 clearAll）+ 删除清除 chip；新建 shopping 专用 L1-only 分类弹窗 `ShoppingCategoryFilterSheet`（共享 `CategoryFilterSheet` 不动）；修复 L1 行把图标名 `restaurant` 当文本渲染的 bug → 改用 `Icon(resolveCategoryIcon(l1.icon))`。analyze 0 issues，13/13 scoped 测试（7 widget + 6 golden re-baseline）通过 | 2026-06-09 | 3f96e9be | Verified 2026-06-09 (analyze 0 issues, 13/13 scoped tests green) | [260609-dnp-enhance-shopping-list-filter-combine-dai](./quick/260609-dnp-enhance-shopping-list-filter-combine-dai/) |
 | 260609-ec2 | 购物清单交互+样式升级（参考第三方 to-do）：①item 左侧圆形完成图标（点击 toggle，ledger accent 填充）②点击整行进入编辑（移除 chevron）③数量挪到右侧（quantity>1 才显示 `×N`）④新增 `shoppingReorderModeProvider`，filter bar 左对齐 chips + 右侧 ≡/✓ 排序入口，拖拽手柄仅排序模式显示、排序模式禁用 toggle/编辑/滑动删除。无 Drift migration（quantity 已存在，schema v20）；颜色全走 context.palette（0 硬编码 hex）；3 ARB + gen-l10n。analyze 0 issues，tile 19/19 + filter 9/9 测试通过，24 golden re-baseline | 2026-06-09 | 8d08819d | Verified 2026-06-09 (analyze 0 issues; tile 19/19, filter 9/9 green; 24 goldens re-baselined; provider_graph_hygiene + hardcoded_cjk_ui_scan green) | [260609-ec2-shopping-list-ui-upgrade](./quick/260609-ec2-shopping-list-ui-upgrade/) |
+| 260609-g8z | 购物私有/公共功能（2 plan）。Plan 01：filter bar 在 日常/悦己 后加 always-on 私有 chip（`showPrivateOnly` → `watchByListType('private')`，不论是否入 group）；表单公私选择器在所有模式显示（创建可改/编辑只读）；个人→私有 label 改名；私有项不 sync（D37-06 既有 gate，未改）。Plan 02 三处修复（用户反馈）：①新建默认日常账本；去掉 tile 的 日常/悦己 badge；恢复悦己左侧 accent 线 ②公私选择器重做成与 日常/悦己 同款 pill chip（`ListTypeSelector`），放在账本选择器后，顺序 公共→私有，默认公共；所有 create 入口默认 public ③tile 在原 badge 位置给私有项加 私有 标识、公共项不标。无 schema/ARB/codegen 改动；listType 创建后不可变（D37-04）保持。analyze 0 issues；受影响 widget 测试 50/50 绿 + ListTypeSelector 新测试；18 tile golden re-baseline（私有标识/accent/去 badge，视觉已确认）；全量非 golden 套件唯一 3 红为 `test/scripts/{merge_findings,coverage_gate}`（subprocess 工具测试，与购物无关，隔离运行全绿） | 2026-06-09 | 0fb224ad | Verified 2026-06-09 (analyze 0 issues; 50/50 shopping widget tests + new ListTypeSelector tests green; 18 tile goldens re-baselined & visually confirmed; 3 full-suite reds are flaky subprocess tooling tests, green in isolation) | [260609-g8z-group-filter-filter-group-sync](./quick/260609-g8z-group-filter-filter-group-sync/) |
 
 ## Deferred Items
 

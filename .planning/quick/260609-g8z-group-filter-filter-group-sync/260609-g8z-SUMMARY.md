@@ -97,3 +97,41 @@ None — all changes are wired to real data (ShoppingListFilter.showPrivateOnly,
 No new security-relevant surfaces introduced. D37-06 and D37-04 invariants verified unchanged.
 
 ## Self-Check: PASSED
+
+---
+
+# Plan 02 — follow-up fixes (3 bugs)
+
+**Date:** 2026-06-09 · **Status:** complete
+
+User-reported refinements to the plan-01 delivery. Three fixes:
+
+## FIX 1 — defaults + tile cleanup
+- New items default to **日常 (daily)** ledger in create mode (`_ledgerType = LedgerType.daily` in initState; toggle-off still allowed).
+- Removed the 日常/悦己 ledger badge from list tiles (deleted `_buildLedgerBadge`).
+- Restored the **悦己 (joy)** 4px left accent bar (`LedgerType.joy => palette.joy`, was `Colors.transparent`).
+
+## FIX 2 — public/private selector restyle + default public
+- New `ListTypeSelector` widget (`lib/shared/widgets/list_type_selector.dart`) mirroring `LedgerTypeSelector`'s pill-chip style; order **公共 → 私有**, single shared steel-blue accent, `enabled` flag for read-only edit mode.
+- Form: replaced the SegmentedButton with `ListTypeSelector`, moved it to sit **after** the ledger selector. Default **public**; edit mode read-only (enabled:false) + locked hint — D37-04/SYNC-03 immutability untouched.
+- Create entry points default to `'public'`: `main_shell_screen` FAB + `shopping_empty_state` CTA (was `'private'`).
+
+## FIX 3 — private marker in tiles
+- In the old badge position, tiles now show a **私有 marker** (lock + `shoppingSegmentPrivate`, `palette.sharedLight/sharedText`) only for `listType=='private'`. Public items show no marker.
+
+## Decisions / notes
+- No schema change, no new ARB keys, no codegen (reused `shoppingSegmentPublic/Private`, `shoppingListTypeLockedHint`, `shoppingFormListTypeLabel`).
+- Tasks 1–2 ran via a worktree executor; Tasks 3–5 were completed inline after the executor connection dropped/stalled (infra, not logic).
+
+## Verification
+- `flutter analyze` — **0 issues**.
+- Affected widget tests — **50/50 green** (tile, form, ListTypeSelector, empty-state).
+- Re-baselined **18** `shopping_item_tile` goldens (3 variants × 3 locales × 2 modes); filter-bar/empty-state/batch-chrome goldens unaffected. Visually confirmed: private marker present, public none, joy accent restored.
+- Full non-golden suite: 2398 passing; the only 3 reds were `test/scripts/{merge_findings,coverage_gate}_test.dart` — flaky subprocess tooling tests (zero shopping refs) that **pass green in isolation**.
+
+## Commits (plan 02)
+- `ded92073` ListTypeSelector widget
+- `f843db07` form: daily default, selector after ledger, default public, edit read-only
+- `fe3e18eb` tile: joy accent restored, ledger badge dropped, 私有 marker
+- `2de7f9fa` create entries default to public
+- `0fb224ad` re-baseline 18 tile goldens + warnIfMissed on disabled-tap test
