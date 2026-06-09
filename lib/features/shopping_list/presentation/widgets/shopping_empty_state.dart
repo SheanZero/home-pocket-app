@@ -48,9 +48,10 @@ class ShoppingEmptyState extends ConsumerWidget {
         : (isGroupMode
             ? ShoppingEmptyVariant.publicFamily
             : ShoppingEmptyVariant.publicSolo);
-    // Create-target for the CTA: 'all' is a view, not a storable list_type —
-    // adding from it defaults to a private item (user can switch in the form).
-    final createListType = listType == 'public' ? 'public' : 'private';
+    // Create-target for the CTA: new items default to 'public' (G8Z2 FIX-2),
+    // independent of the current view ('all'/'private' are views, not storable
+    // list_types). Private is opt-in via the form's public/private selector.
+    const createListType = 'public';
 
     final l10n = S.of(context);
     final (icon, heading, body) = switch (variant) {

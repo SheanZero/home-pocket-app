@@ -139,13 +139,14 @@ class MainShellScreen extends ConsumerWidget {
                   onFabTap: () async {
                     if (currentIndex == 3) {
                       // NAV-01: shopping tab → add-shopping-item screen.
-                      // New items default to 'private'; the form exposes a
-                      // private/public switch in group mode (the view toggle
-                      // value, which can be 'all', is not a storable list_type).
+                      // New items default to 'public' (G8Z2 FIX-2); the form
+                      // exposes a public/private switch in every mode (private is
+                      // opt-in). The view toggle value, which can be 'all', is
+                      // not a storable list_type.
                       await Navigator.of(context).push<void>(
                         MaterialPageRoute<void>(
                           builder: (_) => const ShoppingItemFormScreen(
-                            listType: 'private',
+                            listType: 'public',
                           ),
                         ),
                       );
