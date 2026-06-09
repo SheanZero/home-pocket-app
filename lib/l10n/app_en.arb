@@ -2290,6 +2290,14 @@
   "@shoppingExitReorderMode": {
     "description": "Semantics/tooltip for the filter-bar reorder exit (✓) that leaves manual drag-reorder mode (EC2 D-2)"
   },
+  "shoppingMoveToTop": "Move to top",
+  "@shoppingMoveToTop": {
+    "description": "Tooltip/semantics label for the move-item-to-top button in sort mode (quick-260609-pmc)"
+  },
+  "shoppingMoveToBottom": "Move to bottom",
+  "@shoppingMoveToBottom": {
+    "description": "Tooltip/semantics label for the move-item-to-bottom button in sort mode (quick-260609-pmc)"
+  },
   "shoppingEmptyPrivateHeading": "Your shopping list is empty",
   "@shoppingEmptyPrivateHeading": {
     "description": "Shopping empty state heading — private list (Phase 38; values Phase 39)"

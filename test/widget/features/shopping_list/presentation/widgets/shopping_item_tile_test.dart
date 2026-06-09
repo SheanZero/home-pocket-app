@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/shopping_list/delete_shopping_item_use_case.dart';
+import 'package:home_pocket/application/shopping_list/reorder_shopping_items_use_case.dart';
 import 'package:home_pocket/application/shopping_list/toggle_item_completed_use_case.dart';
 import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
@@ -24,12 +25,15 @@ import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
 
-// Mocktail mocks for the two use cases referenced by the tile
+// Mocktail mocks for the use cases referenced by the tile
 class MockDeleteShoppingItemUseCase extends Mock
     implements DeleteShoppingItemUseCase {}
 
 class MockToggleItemCompletedUseCase extends Mock
     implements ToggleItemCompletedUseCase {}
+
+class MockReorderShoppingItemsUseCase extends Mock
+    implements ReorderShoppingItemsUseCase {}
 
 /// Minimal ShoppingItem fixture for widget tests.
 ShoppingItem _makeItem({
@@ -501,6 +505,86 @@ void main() {
         findsNothing,
         reason: 'Private tiles must not show attribution chip (T-38-04-01)',
       );
+    });
+  });
+
+  group('ShoppingItemTile — reorder mode move buttons (quick-260609-pmc Fix 4)', () {
+    testWidgets(
+        'reorder mode on (active item) → keyboard_arrow_up and keyboard_arrow_down visible',
+        (tester) async {
+      final item = _makeItem();
+      await _pumpTile(
+        tester,
+        item: item,
+        delete: mockDelete,
+        toggle: mockToggle,
+        extraOverrides: [
+          shoppingReorderModeProvider.overrideWith(
+            () => _FixedReorderMode(true),
+          ),
+        ],
+      );
+
+      expect(find.byIcon(Icons.keyboard_arrow_up), findsOneWidget);
+      expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+    });
+
+    testWidgets(
+        'reorder mode off → no move-to-top or move-to-bottom buttons',
+        (tester) async {
+      final item = _makeItem();
+      await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
+
+      expect(find.byIcon(Icons.keyboard_arrow_up), findsNothing);
+      expect(find.byIcon(Icons.keyboard_arrow_down), findsNothing);
+    });
+
+    testWidgets(
+        'tap move-to-top button calls reorder use case with sortOrder = -1',
+        (tester) async {
+      final mockReorder = MockReorderShoppingItemsUseCase();
+      when(() => mockReorder.execute(any(), any()))
+          .thenAnswer((_) async => Result.success(null));
+
+      final item = _makeItem(id: 'item-move-top');
+      await _pumpTile(
+        tester,
+        item: item,
+        delete: mockDelete,
+        toggle: mockToggle,
+        extraOverrides: [
+          shoppingReorderModeProvider.overrideWith(
+            () => _FixedReorderMode(true),
+          ),
+          reorderShoppingItemsUseCaseProvider.overrideWithValue(mockReorder),
+        ],
+      );
+
+      await tester.tap(find.byIcon(Icons.keyboard_arrow_up));
+      await tester.pump();
+
+      verify(() => mockReorder.execute('item-move-top', -1)).called(1);
+    });
+
+    testWidgets(
+        'completed item in reorder mode → no move buttons (isActive=false)',
+        (tester) async {
+      final item = _makeItem(isCompleted: true);
+      await _pumpTile(
+        tester,
+        item: item,
+        delete: mockDelete,
+        toggle: mockToggle,
+        isActive: false,
+        extraOverrides: [
+          shoppingReorderModeProvider.overrideWith(
+            () => _FixedReorderMode(true),
+          ),
+        ],
+      );
+
+      expect(find.byIcon(Icons.keyboard_arrow_up), findsNothing);
+      expect(find.byIcon(Icons.keyboard_arrow_down), findsNothing);
     });
   });
 }

@@ -1806,6 +1806,12 @@ class SJa extends S {
   String get shoppingExitReorderMode => '完了';
 
   @override
+  String get shoppingMoveToTop => '一番上に移動';
+
+  @override
+  String get shoppingMoveToBottom => '一番下に移動';
+
+  @override
   String get shoppingEmptyPrivateHeading => '買うものリストは空です';
 
   @override
