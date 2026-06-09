@@ -2278,6 +2278,18 @@
   "@shoppingReorderItem": {
     "description": "Semantics label for the drag handle on a shopping item tile (Phase 38)"
   },
+  "shoppingToggleComplete": "Toggle complete",
+  "@shoppingToggleComplete": {
+    "description": "Semantics label for the leading circular completion toggle on a shopping item tile (EC2)"
+  },
+  "shoppingEnterReorderMode": "Reorder list",
+  "@shoppingEnterReorderMode": {
+    "description": "Semantics/tooltip for the filter-bar reorder entry (≡) that enters manual drag-reorder mode (EC2 D-2)"
+  },
+  "shoppingExitReorderMode": "Done reordering",
+  "@shoppingExitReorderMode": {
+    "description": "Semantics/tooltip for the filter-bar reorder exit (✓) that leaves manual drag-reorder mode (EC2 D-2)"
+  },
   "shoppingEmptyPrivateHeading": "Your shopping list is empty",
   "@shoppingEmptyPrivateHeading": {
     "description": "Shopping empty state heading — private list (Phase 38; values Phase 39)"

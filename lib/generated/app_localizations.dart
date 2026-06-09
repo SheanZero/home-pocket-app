@@ -3373,6 +3373,24 @@ abstract class S {
   /// **'Reorder item'**
   String get shoppingReorderItem;
 
+  /// Semantics label for the leading circular completion toggle on a shopping item tile (EC2)
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle complete'**
+  String get shoppingToggleComplete;
+
+  /// Semantics/tooltip for the filter-bar reorder entry (≡) that enters manual drag-reorder mode (EC2 D-2)
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder list'**
+  String get shoppingEnterReorderMode;
+
+  /// Semantics/tooltip for the filter-bar reorder exit (✓) that leaves manual drag-reorder mode (EC2 D-2)
+  ///
+  /// In en, this message translates to:
+  /// **'Done reordering'**
+  String get shoppingExitReorderMode;
+
   /// Shopping empty state heading — private list (Phase 38; values Phase 39)
   ///
   /// In en, this message translates to:

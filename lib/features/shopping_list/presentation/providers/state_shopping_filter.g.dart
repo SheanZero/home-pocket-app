@@ -8,7 +8,11 @@ part of 'state_shopping_filter.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Holds the current segment ('public' | 'private') for the shopping list.
+/// Holds the current shopping-list view segment.
+///
+/// Values: 'all' (全部 — merges private + public) | 'private' (个人 — private only).
+/// Default is 'all'. The toggle is only shown in group mode; when solo, the view
+/// stays 'all' (which is identical to private since no shared items exist).
 ///
 /// Kept alive across IndexedStack tab switches (D38, SC2) so that the
 /// selected segment persists when the user navigates away and returns.
@@ -19,7 +23,11 @@ part of 'state_shopping_filter.dart';
 @ProviderFor(ListType)
 final listTypeProvider = ListTypeProvider._();
 
-/// Holds the current segment ('public' | 'private') for the shopping list.
+/// Holds the current shopping-list view segment.
+///
+/// Values: 'all' (全部 — merges private + public) | 'private' (个人 — private only).
+/// Default is 'all'. The toggle is only shown in group mode; when solo, the view
+/// stays 'all' (which is identical to private since no shared items exist).
 ///
 /// Kept alive across IndexedStack tab switches (D38, SC2) so that the
 /// selected segment persists when the user navigates away and returns.
@@ -27,7 +35,11 @@ final listTypeProvider = ListTypeProvider._();
 /// reset filter state (D5/FILT-02 — filter shared across both segments
 /// but resets on switch).
 final class ListTypeProvider extends $NotifierProvider<ListType, String> {
-  /// Holds the current segment ('public' | 'private') for the shopping list.
+  /// Holds the current shopping-list view segment.
+  ///
+  /// Values: 'all' (全部 — merges private + public) | 'private' (个人 — private only).
+  /// Default is 'all'. The toggle is only shown in group mode; when solo, the view
+  /// stays 'all' (which is identical to private since no shared items exist).
   ///
   /// Kept alive across IndexedStack tab switches (D38, SC2) so that the
   /// selected segment persists when the user navigates away and returns.
@@ -61,9 +73,13 @@ final class ListTypeProvider extends $NotifierProvider<ListType, String> {
   }
 }
 
-String _$listTypeHash() => r'057d9f655956c105ec05d14d32ae36d49c5bd70b';
+String _$listTypeHash() => r'068dc3a138ddd6a980a926c8bab16b4f1f1fc1d4';
 
-/// Holds the current segment ('public' | 'private') for the shopping list.
+/// Holds the current shopping-list view segment.
+///
+/// Values: 'all' (全部 — merges private + public) | 'private' (个人 — private only).
+/// Default is 'all'. The toggle is only shown in group mode; when solo, the view
+/// stays 'all' (which is identical to private since no shared items exist).
 ///
 /// Kept alive across IndexedStack tab switches (D38, SC2) so that the
 /// selected segment persists when the user navigates away and returns.

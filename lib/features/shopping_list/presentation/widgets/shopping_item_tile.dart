@@ -12,21 +12,30 @@ import '../../../../shared/widgets/soft_confirm_dialog.dart';
 import '../../domain/models/shopping_item.dart';
 import '../providers/repository_providers.dart';
 import '../providers/state_shopping_batch.dart';
+import '../providers/state_shopping_reorder.dart';
 import '../screens/shopping_item_form_screen.dart';
 import '../../../home/presentation/providers/state_shadow_books.dart';
 
-/// Shopping list item tile implementing all D38 interaction affordances.
+/// Shopping list item tile implementing the EC2 interaction model.
 ///
 /// Covers:
 /// - SHOP-02: item.name as primary text
 /// - SHOP-03: 4px left-border with dual-ledger accent colour
-/// - DONE-01: animated toggle (strikethrough + opacity) on tap; calls [ToggleItemCompletedUseCase]
-/// - MGMT-01: swipe-delete with [showSoftConfirmDialog]; [showSuccessFeedback] BEFORE use-case call
+/// - DONE-01: leading circular toggle (strikethrough + opacity); tapping the
+///   circle calls [ToggleItemCompletedUseCase] (EC2 D-domain#1 — was full-row)
+/// - EC2 D-domain#3: tapping the tile BODY opens [ShoppingItemFormScreen]
+///   (replaces the removed edit chevron, EC2 D-1)
+/// - EC2 D-1: quantity moved to the trailing edge as a badge (quantity > 1 only);
+///   the edit chevron is gone
+/// - MGMT-01: swipe-delete with [showSoftConfirmDialog]; [showSuccessFeedback]
+///   BEFORE use-case call
 /// - MGMT-02: long-press enters batch mode
 /// - MGMT-03: swipe and drag handle disabled in batch mode
 /// - SYNC-04: attribution chip on public tiles when shadow book resolves
-/// - D38-01: edit chevron in trailing cluster
-/// - D38-02: drag handle via [ReorderableDragStartListener] (L2 fix for `buildDefaultDragHandles:false`)
+/// - EC2 D-2: drag handle via [ReorderableDragStartListener] is gated on
+///   [shoppingReorderModeProvider] — rendered ONLY in reorder mode (was always
+///   shown for active items). In reorder mode toggle / body-edit / swipe-delete
+///   are all suppressed so the only available gesture is dragging.
 class ShoppingItemTile extends ConsumerWidget {
   const ShoppingItemTile({
     super.key,
@@ -42,18 +51,22 @@ class ShoppingItemTile extends ConsumerWidget {
   final int index;
 
   /// `true` for active (uncompleted) items; `false` for completed items.
-  /// Controls trailing cluster: active shows edit + drag handle; completed
-  /// shows edit only (no drag).
+  /// Only active items render a drag handle (and only in reorder mode).
   final bool isActive;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final palette = context.palette;
     final batchActive = ref.watch(batchSelectModeProvider).isActive;
+    final reorderMode = ref.watch(shoppingReorderModeProvider);
+
+    // Reorder mode suppresses every gesture except dragging (EC2 D-2 /
+    // Claude's Discretion). Batch mode keeps its existing guard (MGMT-03).
+    final gesturesLocked = batchActive || reorderMode;
 
     return Dismissible(
       key: ValueKey(item.id),
-      direction: batchActive
+      direction: gesturesLocked
           ? DismissDirection.none
           : DismissDirection.endToStart,
       background: Container(
@@ -75,16 +88,26 @@ class ShoppingItemTile extends ConsumerWidget {
         ref.read(deleteShoppingItemUseCaseProvider).execute(item.id);
       },
       child: GestureDetector(
-        onTap: () =>
-            ref.read(toggleItemCompletedUseCaseProvider).execute(item.id),
-        onLongPress: batchActive
+        // EC2 D-domain#3: tapping the tile body opens the edit form
+        // (replaces the old full-row toggle). Suppressed while gestures locked.
+        onTap: gesturesLocked
+            ? null
+            : () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => ShoppingItemFormScreen(
+                      listType: item.listType,
+                      item: item,
+                    ),
+                  ),
+                ),
+        onLongPress: gesturesLocked
             ? null
             : () {
                 ref.read(batchSelectModeProvider.notifier).enter();
                 ref.read(batchSelectModeProvider.notifier).toggle(item.id);
               },
         behavior: HitTestBehavior.opaque,
-        child: _buildTileContent(context, ref, palette, batchActive),
+        child: _buildTileContent(context, ref, palette, reorderMode),
       ),
     );
   }
@@ -93,7 +116,7 @@ class ShoppingItemTile extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     AppPalette palette,
-    bool batchActive,
+    bool reorderMode,
   ) {
     final locale = Localizations.localeOf(context);
 
@@ -115,6 +138,9 @@ class ShoppingItemTile extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
+            // Leading circular completion toggle (EC2 D-domain#1)
+            _buildCompletionToggle(context, ref, palette, reorderMode),
+            const SizedBox(width: 12),
             // Expanded text block
             Expanded(
               child: Column(
@@ -136,37 +162,25 @@ class ShoppingItemTile extends ConsumerWidget {
                       child: Text(item.name),
                     ),
                   ),
-                  // Secondary row: quantity + estimated price (bodySmall)
-                  if (item.quantity > 1 || item.estimatedPrice != null)
+                  // Secondary row: estimated price only (quantity moved to
+                  // trailing edge per EC2 D-1).
+                  if (item.estimatedPrice != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (item.quantity > 1)
-                            Text(
-                              '${item.quantity}×',
-                              style: AppTextStyles.bodySmall,
-                            ),
-                          if (item.quantity > 1 && item.estimatedPrice != null)
-                            const SizedBox(width: 6),
-                          if (item.estimatedPrice != null)
-                            Text(
-                              NumberFormatter.formatCurrency(
-                                item.estimatedPrice!,
-                                'JPY',
-                                locale,
-                              ),
-                              style: AppTextStyles.amountSmall.copyWith(
-                                color: switch (item.ledgerType) {
-                                  LedgerType.daily => palette.dailyText,
-                                  // NEVER raw palette.joy — fails WCAG AA
-                                  LedgerType.joy => palette.joyText,
-                                  null => palette.textSecondary,
-                                },
-                              ),
-                            ),
-                        ],
+                      child: Text(
+                        NumberFormatter.formatCurrency(
+                          item.estimatedPrice!,
+                          'JPY',
+                          locale,
+                        ),
+                        style: AppTextStyles.amountSmall.copyWith(
+                          color: switch (item.ledgerType) {
+                            LedgerType.daily => palette.dailyText,
+                            // NEVER raw palette.joy — fails WCAG AA
+                            LedgerType.joy => palette.joyText,
+                            null => palette.textSecondary,
+                          },
+                        ),
                       ),
                     ),
                 ],
@@ -209,81 +223,138 @@ class ShoppingItemTile extends ConsumerWidget {
                   ],
                 );
               }),
-            // Trailing cluster: edit chevron + optional drag handle
-            _buildTrailingCluster(context, batchActive),
+            // Trailing cluster: quantity badge (quantity > 1) + reorder-mode
+            // drag handle (active items only).
+            _buildTrailingCluster(context, palette, reorderMode),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTrailingCluster(BuildContext context, bool batchActive) {
-    final palette = context.palette;
-    final editAffordance = Semantics(
-      label: S.of(context).shoppingEditItem,
-      button: true,
-      child: Tooltip(
-        message: S.of(context).shoppingEditItem,
-        child: GestureDetector(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => ShoppingItemFormScreen(
-                listType: item.listType,
-                item: item,
-              ),
-            ),
-          ),
-          // ≥44px hit target (WCAG 2.1 SC 2.5.5)
-          child: SizedBox(
-            width: 44,
-            height: 44,
-            child: Center(
-              child: Icon(
-                Icons.chevron_right,
-                size: 18,
-                color: palette.textSecondary,
-              ),
-            ),
-          ),
+  /// Leading circular completion toggle (EC2 D-domain#1).
+  ///
+  /// Unfilled (incomplete): neutral outline circle with a faint check.
+  /// Filled (complete): ledger-accent fill + white check.
+  /// Tapping toggles completion via [ToggleItemCompletedUseCase]; the onTap is
+  /// suppressed in reorder mode (gestures locked — drag only).
+  Widget _buildCompletionToggle(
+    BuildContext context,
+    WidgetRef ref,
+    AppPalette palette,
+    bool reorderMode,
+  ) {
+    // Filled colour uses the item's ledger accent; null ledger falls back to
+    // the neutral daily green (EC2 Claude's Discretion).
+    final fillColor = switch (item.ledgerType) {
+      LedgerType.daily => palette.daily,
+      LedgerType.joy => palette.joy,
+      null => palette.daily,
+    };
+
+    final circle = AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: item.isCompleted ? fillColor : Colors.transparent,
+        border: Border.all(
+          color: item.isCompleted ? fillColor : palette.borderDefault,
+          width: 2,
         ),
+      ),
+      child: Icon(
+        Icons.check,
+        size: 16,
+        color: item.isCompleted
+            ? palette.card
+            : palette.textTertiary.withValues(alpha: 0.4),
       ),
     );
 
-    if (!isActive) {
-      // Completed items: edit chevron only, no drag handle
-      return editAffordance;
+    return Semantics(
+      label: S.of(context).shoppingToggleComplete,
+      button: true,
+      checked: item.isCompleted,
+      child: GestureDetector(
+        // ValueKey for stable test targeting.
+        key: ValueKey('toggle-${item.id}'),
+        onTap: reorderMode
+            ? null
+            : () =>
+                ref.read(toggleItemCompletedUseCaseProvider).execute(item.id),
+        behavior: HitTestBehavior.opaque,
+        // ≥44px hit target (WCAG 2.1 SC 2.5.5)
+        child: SizedBox(
+          width: 44,
+          height: 44,
+          child: Center(child: circle),
+        ),
+      ),
+    );
+  }
+
+  /// Trailing cluster (EC2 D-1 / D-2):
+  /// - quantity badge — only when `item.quantity > 1`
+  /// - drag handle — only in reorder mode AND for active items
+  Widget _buildTrailingCluster(
+    BuildContext context,
+    AppPalette palette,
+    bool reorderMode,
+  ) {
+    final children = <Widget>[];
+
+    // Quantity badge on the right edge (EC2 D-1) — hidden when quantity == 1.
+    if (item.quantity > 1) {
+      children.add(
+        Text(
+          '${item.quantity}×',
+          style: AppTextStyles.amountSmall.copyWith(
+            color: palette.textSecondary,
+          ),
+        ),
+      );
     }
 
-    // Active items: edit chevron + optional drag handle (hidden in batch mode)
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        editAffordance,
-        if (!batchActive) ...[
-          const SizedBox(width: 8),
-          Semantics(
-            label: S.of(context).shoppingReorderItem,
-            button: true,
-            child: Tooltip(
-              message: S.of(context).shoppingReorderItem,
-              child: ReorderableDragStartListener(
-                index: index,
-                child: SizedBox(
-                  width: 44,
-                  height: 44,
-                  child: Center(
-                    child: Icon(
-                      Icons.drag_handle,
-                      size: 20,
-                      color: palette.textTertiary,
-                    ),
+    // Drag handle — reorder mode only, active items only (EC2 D-2).
+    if (reorderMode && isActive) {
+      if (children.isNotEmpty) {
+        children.add(const SizedBox(width: 8));
+      }
+      children.add(
+        Semantics(
+          label: S.of(context).shoppingReorderItem,
+          button: true,
+          child: Tooltip(
+            message: S.of(context).shoppingReorderItem,
+            child: ReorderableDragStartListener(
+              index: index,
+              child: SizedBox(
+                width: 44,
+                height: 44,
+                child: Center(
+                  child: Icon(
+                    Icons.drag_handle,
+                    size: 20,
+                    color: palette.textTertiary,
                   ),
                 ),
               ),
             ),
           ),
-        ],
-      ],
+        ),
+      );
+    }
+
+    if (children.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: children,
     );
   }
 }
