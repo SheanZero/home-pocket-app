@@ -165,8 +165,8 @@ class ShoppingListScreen extends ConsumerWidget {
             // Active items — SliverReorderableList (D38-02).
             // Fix 2: ReorderableDelayedDragStartListener wraps the full tile so
             // a long-press anywhere on the row initiates drag (not just the handle).
-            // Fix 3: proxyDecorator adds animated elevation + leaf-green left border
-            // to the item being dragged for clear visual feedback.
+            // Fix 3: proxyDecorator wraps the dragged item in an opaque card surface
+            // (palette.card) with an animated elevation shadow (0→6) for visual lift.
             // onReorderItem provides the already-adjusted newIndex (item removed before insertion).
             SliverReorderableList(
               itemCount: activeItems.length,
@@ -183,18 +183,8 @@ class ShoppingListScreen extends ConsumerWidget {
                             .value;
                     return Material(
                       elevation: elevation,
-                      color: Colors.transparent,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            left: BorderSide(
-                              color: ctx.palette.borderInputActive,
-                              width: 6,
-                            ),
-                          ),
-                        ),
-                        child: child,
-                      ),
+                      color: ctx.palette.card,
+                      child: child,
                     );
                   },
                 );
