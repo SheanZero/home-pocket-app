@@ -15,6 +15,8 @@ import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/device_identity_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
     show deviceIdentityRepositoryProvider;
+import 'package:home_pocket/features/family_sync/presentation/providers/state_active_group.dart'
+    show isGroupModeProvider;
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/shopping_list/presentation/screens/shopping_item_form_screen.dart';
@@ -75,6 +77,7 @@ Future<void> _pumpForm(
   required _MockDeviceIdentityRepository deviceIdentityRepo,
   String listType = 'private',
   ShoppingItem? item,
+  bool isGroupMode = false,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
@@ -82,6 +85,7 @@ Future<void> _pumpForm(
         createShoppingItemUseCaseProvider.overrideWithValue(createUseCase),
         updateShoppingItemUseCaseProvider.overrideWithValue(updateUseCase),
         deviceIdentityRepositoryProvider.overrideWithValue(deviceIdentityRepo),
+        isGroupModeProvider.overrideWith((_) => isGroupMode),
       ],
       child: MaterialApp(
         localizationsDelegates: const [
@@ -202,9 +206,22 @@ void main() {
         deviceIdentityRepo: mockDeviceIdentityRepo,
       );
 
+      // Scroll down to ensure quantity and price fields are visible
+      // (form is taller now that the list-type selector is always shown).
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('shopping_form_quantity_field')),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(
         find.byKey(const Key('shopping_form_quantity_field')),
         findsOneWidget,
+      );
+
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('shopping_form_price_field')),
+        100,
+        scrollable: find.byType(Scrollable).first,
       );
       expect(
         find.byKey(const Key('shopping_form_price_field')),
@@ -315,5 +332,177 @@ void main() {
       // CreateShoppingItemUseCase must NOT be called in edit mode
       verifyNever(() => mockCreate.execute(any()));
     });
+  });
+
+  // ── List-type selector (G8Z) ──────────────────────────────────────────
+
+  group('List-type selector', () {
+    // FORM-SELECTOR-01: selector renders interactive in create mode — solo.
+    testWidgets(
+      'FORM-SELECTOR-01: selector renders interactive in create mode (isGroupMode=false)',
+      (tester) async {
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+          listType: 'private',
+          isGroupMode: false,
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const Key('shopping_form_list_type_selector')),
+          findsOneWidget,
+          reason: 'Selector must render in create mode (solo)',
+        );
+      },
+    );
+
+    // FORM-SELECTOR-02: selector renders interactive in create mode — group.
+    testWidgets(
+      'FORM-SELECTOR-02: selector renders interactive in create mode (isGroupMode=true)',
+      (tester) async {
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+          listType: 'private',
+          isGroupMode: true,
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const Key('shopping_form_list_type_selector')),
+          findsOneWidget,
+          reason: 'Selector must render in create mode (group)',
+        );
+      },
+    );
+
+    // FORM-SELECTOR-03: selector present but DISABLED in edit mode.
+    testWidgets(
+      'FORM-SELECTOR-03: selector present but disabled in edit mode (reflects stored listType, tap is no-op)',
+      (tester) async {
+        final editItem = _makeItem(listType: 'public');
+
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+          listType: 'public',
+          item: editItem,
+        );
+        await tester.pumpAndSettle();
+
+        // a) Selector present
+        expect(
+          find.byKey(const Key('shopping_form_list_type_selector')),
+          findsOneWidget,
+          reason: 'Selector must be present in edit mode',
+        );
+
+        // b) Reflects stored listType: 'public' segment is selected
+        final button = tester.widget<SegmentedButton<String>>(
+          find.byKey(const Key('shopping_form_list_type_selector')),
+        );
+        expect(button.selected, contains('public'),
+            reason: 'Edit mode must show stored listType as selected');
+
+        // c) Non-interactive: tap 'Private' segment, selection unchanged
+        await tester.tap(find.text('Private'));
+        await tester.pumpAndSettle();
+
+        final buttonAfterTap = tester.widget<SegmentedButton<String>>(
+          find.byKey(const Key('shopping_form_list_type_selector')),
+        );
+        expect(buttonAfterTap.selected, contains('public'),
+            reason: 'Selection must remain public after tapping disabled selector');
+      },
+    );
+
+    // FORM-SELECTOR-04: locked-hint caption present in edit mode, absent in create mode.
+    testWidgets(
+      'FORM-SELECTOR-04: locked-hint caption present in edit mode, absent in create mode',
+      (tester) async {
+        final editItem = _makeItem(listType: 'private');
+
+        // Edit mode
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+          listType: 'private',
+          item: editItem,
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('Cannot be changed after creation'),
+          findsOneWidget,
+          reason: 'Locked-hint caption must be present in edit mode',
+        );
+
+        // Create mode
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+          listType: 'private',
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('Cannot be changed after creation'),
+          findsNothing,
+          reason: 'Locked-hint caption must be absent in create mode',
+        );
+      },
+    );
+
+    // FORM-SELECTOR-05: tapping public segment in create mode calls createUseCase with listType=public.
+    testWidgets(
+      'FORM-SELECTOR-05: tapping public segment in create mode submits listType=public',
+      (tester) async {
+        late CreateShoppingItemParams capturedParams;
+        when(() => mockCreate.execute(any())).thenAnswer((inv) async {
+          capturedParams = inv.positionalArguments.first as CreateShoppingItemParams;
+          return Result.success(_makeItem(listType: 'public'));
+        });
+
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+          listType: 'private',
+          isGroupMode: false,
+        );
+        await tester.pumpAndSettle();
+
+        // Tap 'Public' segment
+        await tester.tap(find.text('Public'));
+        await tester.pumpAndSettle();
+
+        // Enter a name and save
+        await tester.enterText(
+          find.byKey(const Key('shopping_form_name_field')),
+          'Test Item',
+        );
+        await tester.tap(find.text('Save'));
+        await tester.pumpAndSettle();
+
+        verify(() => mockCreate.execute(any())).called(1);
+        expect(
+          capturedParams.listType,
+          equals('public'),
+          reason: 'createUseCase must be called with listType=public',
+        );
+      },
+    );
   });
 }

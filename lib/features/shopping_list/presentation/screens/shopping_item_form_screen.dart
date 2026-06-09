@@ -10,7 +10,7 @@ import '../../../accounting/domain/models/transaction.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart'
     show categoryRepositoryProvider, deviceIdentityRepositoryProvider;
 import '../../../accounting/presentation/screens/category_selection_screen.dart';
-import '../../../family_sync/presentation/providers/state_active_group.dart';
+// isGroupModeProvider import removed — selector no longer gated on group mode (G8Z)
 import '../../domain/models/shopping_item.dart';
 import '../providers/repository_providers.dart'
     show createShoppingItemUseCaseProvider, updateShoppingItemUseCaseProvider;
@@ -21,7 +21,10 @@ import '../../../../application/shopping_list/update_shopping_item_use_case.dart
 ///
 /// - Create mode: [item] is null; calls [CreateShoppingItemUseCase].
 /// - Edit mode: [item] is non-null; pre-populates all fields; calls [UpdateShoppingItemUseCase].
-/// - [listType] is immutable (D6/SYNC-03); it is NEVER rendered as a UI control.
+/// - List-type selector shown in ALL modes: interactive in create mode (default 'private'),
+///   read-only in edit mode — reflects stored [listType] and cannot be changed
+///   (D6/SYNC-03 immutability; the update path never alters it). Always shown
+///   regardless of group membership (G8Z).
 /// - Note field is passed as plaintext; encryption is applied at the repository
 ///   boundary (Phase 36). Do NOT add encryption code here.
 class ShoppingItemFormScreen extends ConsumerStatefulWidget {
@@ -204,9 +207,8 @@ class _ShoppingItemFormScreenState
   Widget build(BuildContext context) {
     final l = S.of(context);
     final isEditMode = widget.item != null;
-    // Private/Public switch only matters when creating an item inside a family
-    // group. Solo users have no public list; edit mode keeps listType immutable.
-    final showListTypeSelector = !isEditMode && ref.watch(isGroupModeProvider);
+    // List-type selector shown in BOTH create and edit (read-only on edit — G8Z).
+    const showListTypeSelector = true;
 
     return Scaffold(
       appBar: AppBar(
@@ -223,30 +225,49 @@ class _ShoppingItemFormScreenState
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
-            // List-type selector — create mode + group mode only.
-            // Private (个人) = personal; Public (公共) = shared with the family.
+            // List-type selector — shown in ALL modes (G8Z).
+            // Create mode: interactive (default 'private').
+            // Edit mode: read-only — reflects stored listType and cannot be
+            // changed (D6/SYNC-03 immutability; update path never alters it).
             if (showListTypeSelector) ...[
               Text(
                 l.shoppingFormListTypeLabel,
                 style: Theme.of(context).textTheme.labelMedium,
               ),
               const SizedBox(height: 8),
-              SegmentedButton<String>(
-                key: const Key('shopping_form_list_type_selector'),
-                segments: [
-                  ButtonSegment(
-                    value: 'private',
-                    label: Text(l.shoppingSegmentPrivate),
+              Opacity(
+                opacity: isEditMode ? 0.6 : 1.0,
+                child: IgnorePointer(
+                  ignoring: isEditMode,
+                  child: SegmentedButton<String>(
+                    key: const Key('shopping_form_list_type_selector'),
+                    segments: [
+                      ButtonSegment(
+                        value: 'private',
+                        label: Text(l.shoppingSegmentPrivate),
+                      ),
+                      ButtonSegment(
+                        value: 'public',
+                        label: Text(l.shoppingSegmentPublic),
+                      ),
+                    ],
+                    selected: {_listType == 'public' ? 'public' : 'private'},
+                    // Edit mode: null onSelectionChanged disables interaction.
+                    onSelectionChanged: isEditMode
+                        ? null
+                        : (s) => setState(() => _listType = s.first),
                   ),
-                  ButtonSegment(
-                    value: 'public',
-                    label: Text(l.shoppingSegmentPublic),
-                  ),
-                ],
-                selected: {_listType == 'public' ? 'public' : 'private'},
-                onSelectionChanged: (s) =>
-                    setState(() => _listType = s.first),
+                ),
               ),
+              if (isEditMode) ...[
+                const SizedBox(height: 4),
+                Text(
+                  l.shoppingListTypeLockedHint,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).hintColor,
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
             ],
 
