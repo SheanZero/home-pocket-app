@@ -3391,6 +3391,18 @@ abstract class S {
   /// **'Done reordering'**
   String get shoppingExitReorderMode;
 
+  /// Tooltip/semantics label for the move-item-to-top button in sort mode (quick-260609-pmc)
+  ///
+  /// In en, this message translates to:
+  /// **'Move to top'**
+  String get shoppingMoveToTop;
+
+  /// Tooltip/semantics label for the move-item-to-bottom button in sort mode (quick-260609-pmc)
+  ///
+  /// In en, this message translates to:
+  /// **'Move to bottom'**
+  String get shoppingMoveToBottom;
+
   /// Shopping empty state heading — private list (Phase 38; values Phase 39)
   ///
   /// In en, this message translates to:

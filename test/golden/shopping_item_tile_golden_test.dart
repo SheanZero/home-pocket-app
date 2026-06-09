@@ -1,12 +1,13 @@
 @Tags(['golden'])
 library;
 
-// Golden tests for ShoppingItemTile — 3 variants × 3 locales × 2 modes = 18 PNGs.
+// Golden tests for ShoppingItemTile — 4 variants × 3 locales × 2 modes = 24 PNGs.
 //
 // Variants:
-//   active:      daily-ledger item, not completed (daily green left border)
-//   completed:   joy-ledger item, completed (joy sakura-pink border + strikethrough+fade)
-//   attribution: daily-ledger item, public list, with family attribution chip
+//   active:       daily-ledger item, not completed (daily green left border)
+//   completed:    joy-ledger item, completed (joy sakura-pink border + strikethrough+fade)
+//   attribution:  daily-ledger item, public list, with family attribution chip
+//   reorder_mode: daily-ledger item, reorder mode on (shows ↑↓ + drag handle)
 //
 // Baselines: test/golden/goldens/shopping_item_tile_{variant}[_dark]_{locale}.png
 // Run:       flutter test test/golden/shopping_item_tile_golden_test.dart --tags golden
@@ -25,6 +26,7 @@ import 'package:home_pocket/features/settings/presentation/providers/state_local
     as locale_providers;
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_reorder.dart';
 import 'package:home_pocket/features/shopping_list/presentation/widgets/shopping_item_tile.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/shared/utils/result.dart';
@@ -32,6 +34,15 @@ import 'package:mocktail/mocktail.dart';
 
 class MockDeleteShoppingItemUseCase extends Mock
     implements DeleteShoppingItemUseCase {}
+
+/// Fixed reorder-mode notifier for golden tests.
+class _FixedReorderMode extends ShoppingReorderMode {
+  _FixedReorderMode(this._fixed);
+  final bool _fixed;
+
+  @override
+  bool build() => _fixed;
+}
 
 class MockToggleItemCompletedUseCase extends Mock
     implements ToggleItemCompletedUseCase {}
@@ -299,6 +310,150 @@ void main() {
           find.byType(ShoppingItemTile),
           matchesGoldenFile(
             'goldens/shopping_item_tile_attribution_dark_$lang.png',
+          ),
+        );
+      });
+    }
+  });
+
+  group('ShoppingItemTile golden — reorder_mode variant (quick-260609-pmc Fix 4)', () {
+    for (final locale in [
+      const Locale('ja'),
+      const Locale('zh'),
+      const Locale('en'),
+    ]) {
+      final lang = locale.languageCode;
+
+      testWidgets('reorder_mode — $lang light', (tester) async {
+        final item = _makeItem(
+          ledgerType: LedgerType.daily,
+          isCompleted: false,
+          listType: 'private',
+        );
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              locale_providers.currentLocaleProvider.overrideWith(
+                (_) async => locale,
+              ),
+              deleteShoppingItemUseCaseProvider.overrideWithValue(mockDelete),
+              toggleItemCompletedUseCaseProvider.overrideWithValue(mockToggle),
+              shadowBooksProvider.overrideWith((_) async => const []),
+              shoppingReorderModeProvider.overrideWith(
+                () => _FixedReorderMode(true),
+              ),
+            ],
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              locale: locale,
+              localizationsDelegates: const [
+                S.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: S.supportedLocales,
+              theme: ThemeData.light(),
+              darkTheme: ThemeData.dark(),
+              themeMode: ThemeMode.light,
+              home: Scaffold(
+                body: SizedBox(
+                  width: 390,
+                  height: 80,
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverReorderableList(
+                        onReorderItem: (_, _) {},
+                        itemCount: 1,
+                        itemBuilder: (ctx, i) => ReorderableDelayedDragStartListener(
+                          key: ValueKey('tile-$i'),
+                          index: i,
+                          child: ShoppingItemTile(
+                            item: item,
+                            index: i,
+                            isActive: true,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(ShoppingItemTile),
+          matchesGoldenFile(
+            'goldens/shopping_item_tile_reorder_mode_$lang.png',
+          ),
+        );
+      });
+
+      testWidgets('reorder_mode — $lang dark', (tester) async {
+        final item = _makeItem(
+          ledgerType: LedgerType.daily,
+          isCompleted: false,
+          listType: 'private',
+        );
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              locale_providers.currentLocaleProvider.overrideWith(
+                (_) async => locale,
+              ),
+              deleteShoppingItemUseCaseProvider.overrideWithValue(mockDelete),
+              toggleItemCompletedUseCaseProvider.overrideWithValue(mockToggle),
+              shadowBooksProvider.overrideWith((_) async => const []),
+              shoppingReorderModeProvider.overrideWith(
+                () => _FixedReorderMode(true),
+              ),
+            ],
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              locale: locale,
+              localizationsDelegates: const [
+                S.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: S.supportedLocales,
+              theme: ThemeData.light(),
+              darkTheme: ThemeData.dark(),
+              themeMode: ThemeMode.dark,
+              home: Scaffold(
+                body: SizedBox(
+                  width: 390,
+                  height: 80,
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverReorderableList(
+                        onReorderItem: (_, _) {},
+                        itemCount: 1,
+                        itemBuilder: (ctx, i) => ReorderableDelayedDragStartListener(
+                          key: ValueKey('tile-$i'),
+                          index: i,
+                          child: ShoppingItemTile(
+                            item: item,
+                            index: i,
+                            isActive: true,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(ShoppingItemTile),
+          matchesGoldenFile(
+            'goldens/shopping_item_tile_reorder_mode_dark_$lang.png',
           ),
         );
       });

@@ -27,8 +27,8 @@ import 'shopping_category_filter_sheet.dart';
 ///   mutually-exclusive, re-tappable-to-deselect segments (D-1).
 /// - Category opens the shopping-only [ShoppingCategoryFilterSheet] (D-3).
 /// - The trailing ≡/✓ button toggles [shoppingReorderModeProvider] (EC2 D-2):
-///   ≡ enters manual drag-reorder mode, ✓ (red) exits it. In reorder mode each
-///   chip gains a small ≡ prefix to echo the reference design.
+///   ≡ enters manual drag-reorder mode, ✓ (red) exits it. The chip row layout
+///   is identical in both modes — no drag-indicator prefix on any chip (Fix 1).
 class ShoppingFilterBar extends ConsumerWidget {
   const ShoppingFilterBar({super.key});
 
@@ -47,15 +47,6 @@ class ShoppingFilterBar extends ConsumerWidget {
     final joySelected = filter.ledgerType == LedgerType.joy;
     // 私有 chip — always visible, active when showPrivateOnly is true (G8Z).
     final privateOnly = filter.showPrivateOnly;
-
-    // Small ≡ prefix shown before each chip while in reorder mode (EC2 D-2).
-    Widget? reorderPrefix() => reorderMode
-        ? Icon(
-            Icons.drag_indicator,
-            size: 14,
-            color: palette.textTertiary,
-          )
-        : null;
 
     return Container(
       height: 44,
@@ -77,7 +68,6 @@ class ShoppingFilterBar extends ConsumerWidget {
                 children: [
                   // ── 全部 standalone reset control (D-2) ──────────────────
                   ActionChip(
-                    avatar: reorderPrefix(),
                     label: Text(
                       l10n.shoppingFilterLedgerAll,
                       style: AppTextStyles.labelMedium.copyWith(
@@ -113,16 +103,6 @@ class ShoppingFilterBar extends ConsumerWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // ≡ prefix for the whole segmented control in reorder mode
-                          if (reorderMode)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: Icon(
-                                Icons.drag_indicator,
-                                size: 14,
-                                color: palette.textTertiary,
-                              ),
-                            ),
                           // 日常 segment
                           _SegmentButton(
                             label: l10n.listLedgerDaily,
@@ -164,7 +144,6 @@ class ShoppingFilterBar extends ConsumerWidget {
                   // ── 私有 chip — always visible, scopes to private list (G8Z) ──
                   ActionChip(
                     key: const Key('shopping_filter_private_chip'),
-                    avatar: reorderPrefix(),
                     label: Text(
                       l10n.shoppingFilterPrivate,
                       style: AppTextStyles.labelMedium.copyWith(
@@ -190,7 +169,6 @@ class ShoppingFilterBar extends ConsumerWidget {
 
                   // ── Category chip (D-3) ──────────────────────────────────
                   ActionChip(
-                    avatar: reorderPrefix(),
                     label: Text(
                       l10n.shoppingFilterCategory,
                       style: AppTextStyles.labelMedium.copyWith(

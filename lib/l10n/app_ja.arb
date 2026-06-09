@@ -2290,6 +2290,14 @@
   "@shoppingExitReorderMode": {
     "description": "Semantics/tooltip for the filter-bar reorder exit (✓) that leaves manual drag-reorder mode (EC2 D-2)"
   },
+  "shoppingMoveToTop": "一番上に移動",
+  "@shoppingMoveToTop": {
+    "description": "Tooltip/semantics label for the move-item-to-top button in sort mode (quick-260609-pmc)"
+  },
+  "shoppingMoveToBottom": "一番下に移動",
+  "@shoppingMoveToBottom": {
+    "description": "Tooltip/semantics label for the move-item-to-bottom button in sort mode (quick-260609-pmc)"
+  },
   "shoppingEmptyPrivateHeading": "買うものリストは空です",
   "@shoppingEmptyPrivateHeading": {
     "description": "Shopping empty state heading — private list (Phase 38; values Phase 39)"

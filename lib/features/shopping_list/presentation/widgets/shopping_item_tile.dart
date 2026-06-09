@@ -239,8 +239,8 @@ class ShoppingItemTile extends ConsumerWidget {
                 );
               }),
             // Trailing cluster: quantity badge (quantity > 1) + reorder-mode
-            // drag handle (active items only).
-            _buildTrailingCluster(context, palette, reorderMode),
+            // move-to-top/bottom buttons + drag handle (active items only).
+            _buildTrailingCluster(context, ref, palette, reorderMode),
           ],
         ),
       ),
@@ -338,11 +338,13 @@ class ShoppingItemTile extends ConsumerWidget {
     );
   }
 
-  /// Trailing cluster (EC2 D-1 / D-2):
+  /// Trailing cluster (EC2 D-1 / D-2 / Fix 4):
   /// - quantity — number only (no ×), shown for every item with a right margin
+  /// - move-to-top / move-to-bottom buttons — only in reorder mode, active items only
   /// - drag handle — only in reorder mode AND for active items
   Widget _buildTrailingCluster(
     BuildContext context,
+    WidgetRef ref,
     AppPalette palette,
     bool reorderMode,
   ) {
@@ -365,11 +367,74 @@ class ShoppingItemTile extends ConsumerWidget {
       );
     }
 
-    // Drag handle — reorder mode only, active items only (EC2 D-2).
+    // Move-to-top + move-to-bottom + drag handle — reorder mode only, active items only.
     if (reorderMode && isActive) {
       if (children.isNotEmpty) {
-        children.add(const SizedBox(width: 8));
+        children.add(const SizedBox(width: 4));
       }
+
+      // Move-to-top button (Fix 4): sort_order = -1 guarantees first position.
+      children.add(
+        Semantics(
+          label: S.of(context).shoppingMoveToTop,
+          button: true,
+          child: Tooltip(
+            message: S.of(context).shoppingMoveToTop,
+            child: InkWell(
+              onTap: () => ref
+                  .read(reorderShoppingItemsUseCaseProvider)
+                  .execute(item.id, -1),
+              customBorder: const CircleBorder(),
+              child: SizedBox(
+                width: 36,
+                height: 44,
+                child: Center(
+                  child: Icon(
+                    Icons.keyboard_arrow_up,
+                    size: 20,
+                    color: palette.textSecondary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Move-to-bottom button (Fix 4): sort_order = activeCount places item last.
+      children.add(
+        Semantics(
+          label: S.of(context).shoppingMoveToBottom,
+          button: true,
+          child: Tooltip(
+            message: S.of(context).shoppingMoveToBottom,
+            child: InkWell(
+              onTap: () {
+                final items =
+                    ref.read(filteredShoppingItemsProvider).value ?? const [];
+                final activeCount = items.where((i) => !i.isCompleted).length;
+                ref
+                    .read(reorderShoppingItemsUseCaseProvider)
+                    .execute(item.id, activeCount);
+              },
+              customBorder: const CircleBorder(),
+              child: SizedBox(
+                width: 36,
+                height: 44,
+                child: Center(
+                  child: Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 20,
+                    color: palette.textSecondary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Drag handle — instant drag affordance for users targeting the handle.
       children.add(
         Semantics(
           label: S.of(context).shoppingReorderItem,
