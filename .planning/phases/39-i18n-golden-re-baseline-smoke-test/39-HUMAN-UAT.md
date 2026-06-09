@@ -1,5 +1,5 @@
 ---
-status: partial
+status: resolved
 phase: 39-i18n-golden-re-baseline-smoke-test
 source: [39-VERIFICATION.md]
 started: 2026-06-09T00:00:00Z
@@ -20,14 +20,14 @@ expected: The 54 first-time golden PNGs under `test/golden/goldens/shopping_*.pn
 - Strikethrough + 50% fade on completed tiles
 - Attribution chip (🐱 Alice) on public-list tiles
 - Filter bar active-chip state and batch selection header/action-bar chrome
-result: [pending]
+result: [passed] Human-approved 2026-06-09 — golden baselines visually confirmed (border colors, dark mode, strikethrough, attribution chip, locale text).
 
 ## Summary
 
 total: 1
-passed: 0
+passed: 1
 issues: 0
-pending: 1
+pending: 0
 skipped: 0
 blocked: 0
 

@@ -67,7 +67,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase (see Tra
 
 - [x] **NAV-01**: On the shopping-list tab, the bottom-right FAB opens the add-shopping-item screen; on every other tab it remains the transaction-entry FAB with its existing post-entry invalidations intact (no accounting regression). *(D2)*
 - [x] **NAV-02**: The 4th nav tab and all user-facing strings read 购物清单 (zh) / 買い物リスト (ja) / Shopping List (en); no 待办/Todo strings remain anywhere, and the tab icon changes from `check_box_outlined` to a shopping icon.
-- [ ] **NAV-03**: ARB key parity holds across ja/zh/en and `flutter gen-l10n` succeeds without warnings.
+- [x] **NAV-03**: ARB key parity holds across ja/zh/en and `flutter gen-l10n` succeeds without warnings.
 
 ---
 
@@ -148,7 +148,7 @@ Which phases cover which requirements. Updated for 4-phase consolidated roadmap 
 | SYNC-06 | Phase 37 | Complete |
 | NAV-01 | Phase 38 | Complete |
 | NAV-02 | Phase 38 | Complete |
-| NAV-03 | Phase 39 | Pending |
+| NAV-03 | Phase 39 | Complete |
 
 **Coverage:**
 - v1 requirements: 27 total

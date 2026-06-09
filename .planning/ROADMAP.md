@@ -267,4 +267,4 @@ Plans:
 | 36. Data Layer + Domain + Import Guard | 7/7 | Complete    | 2026-06-07 |
 | 37. Application Use Cases + Sync Integration | 6/6 | Complete    | 2026-06-08 |
 | 38. Presentation Shell + UI Widgets | 8/8 | Complete    | 2026-06-08 |
-| 39. i18n + Golden Re-baseline + Smoke Test | 6/6 | Complete   | 2026-06-08 |
+| 39. i18n + Golden Re-baseline + Smoke Test | 6/6 | Complete    | 2026-06-09 |

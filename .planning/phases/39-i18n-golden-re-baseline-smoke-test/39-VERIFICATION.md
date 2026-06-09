@@ -1,8 +1,9 @@
 ---
 phase: 39-i18n-golden-re-baseline-smoke-test
 verified: 2026-06-08T15:29:24Z
-status: human_needed
+status: passed
 score: 5/5 must-haves verified
+human_verification_resolved: 2026-06-09 — user visually approved 54 golden baselines
 overrides_applied: 0
 human_verification:
   - test: "Visually inspect the 54 shopping golden PNG baselines in test/golden/goldens/shopping_*.png"
