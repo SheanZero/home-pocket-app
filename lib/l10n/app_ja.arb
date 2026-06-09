@@ -2342,13 +2342,21 @@
   "@shoppingSegmentAll": {
     "description": "Shopping list view toggle — All segment (merges private + public)"
   },
-  "shoppingSegmentPrivate": "個人",
+  "shoppingSegmentPrivate": "私有",
   "@shoppingSegmentPrivate": {
-    "description": "Shopping list view toggle — Personal (private) segment label"
+    "description": "Shopping filter chip and form selector — private (local-only) list label"
+  },
+  "shoppingFilterPrivate": "私有",
+  "@shoppingFilterPrivate": {
+    "description": "Shopping filter bar chip — shows only private (local-only) items"
   },
   "shoppingFormListTypeLabel": "リスト",
   "@shoppingFormListTypeLabel": {
     "description": "Shopping item form — list-type (private/public) selector label"
+  },
+  "shoppingListTypeLockedHint": "作成後は変更できません",
+  "@shoppingListTypeLockedHint": {
+    "description": "Shopping item form — caption shown under the disabled list-type selector in edit mode"
   },
   "shoppingCompletedDivider": "完了済み",
   "@shoppingCompletedDivider": {

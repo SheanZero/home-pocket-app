@@ -2342,13 +2342,21 @@
   "@shoppingSegmentAll": {
     "description": "Shopping list view toggle — All segment (merges private + public)"
   },
-  "shoppingSegmentPrivate": "Personal",
+  "shoppingSegmentPrivate": "Private",
   "@shoppingSegmentPrivate": {
-    "description": "Shopping list view toggle — Personal (private) segment label"
+    "description": "Shopping filter chip and form selector — private (local-only) list label"
+  },
+  "shoppingFilterPrivate": "Private",
+  "@shoppingFilterPrivate": {
+    "description": "Shopping filter bar chip — shows only private (local-only) items"
   },
   "shoppingFormListTypeLabel": "List",
   "@shoppingFormListTypeLabel": {
     "description": "Shopping item form — list-type (private/public) selector label"
+  },
+  "shoppingListTypeLockedHint": "Cannot be changed after creation",
+  "@shoppingListTypeLockedHint": {
+    "description": "Shopping item form — caption shown under the disabled list-type selector in edit mode"
   },
   "shoppingCompletedDivider": "Completed",
   "@shoppingCompletedDivider": {

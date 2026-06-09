@@ -3469,17 +3469,29 @@ abstract class S {
   /// **'All'**
   String get shoppingSegmentAll;
 
-  /// Shopping list view toggle — Personal (private) segment label
+  /// Shopping filter chip and form selector — private (local-only) list label
   ///
   /// In en, this message translates to:
-  /// **'Personal'**
+  /// **'Private'**
   String get shoppingSegmentPrivate;
+
+  /// Shopping filter bar chip — shows only private (local-only) items
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get shoppingFilterPrivate;
 
   /// Shopping item form — list-type (private/public) selector label
   ///
   /// In en, this message translates to:
   /// **'List'**
   String get shoppingFormListTypeLabel;
+
+  /// Shopping item form — caption shown under the disabled list-type selector in edit mode
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot be changed after creation'**
+  String get shoppingListTypeLockedHint;
 
   /// Divider label between active and completed shopping items (Phase 38)
   ///

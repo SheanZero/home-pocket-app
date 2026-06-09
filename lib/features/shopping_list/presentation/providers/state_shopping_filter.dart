@@ -37,6 +37,8 @@ class ListType extends _$ListType {
 /// Kept alive across IndexedStack tab switches (SC2) so that filter selections
 /// persist when the user navigates away from the shopping tab and returns.
 /// [resetForNewSegment] is called automatically when the list type switches (D5).
+/// [setPrivateFilter] toggles the 私有 filter chip (G8Z) — always visible
+/// regardless of group membership.
 @Riverpod(keepAlive: true)
 class ShoppingFilter extends _$ShoppingFilter {
   @override
@@ -45,6 +47,14 @@ class ShoppingFilter extends _$ShoppingFilter {
   /// Filters by ledger type (or clears the ledger filter when [type] is null).
   void setLedgerFilter(LedgerType? type) {
     state = state.copyWith(ledgerType: type);
+  }
+
+  /// Activates or deactivates the private-only view (私有 chip — G8Z).
+  ///
+  /// When [isPrivate] is true, [filteredShoppingItems] routes to
+  /// `watchByListType('private')` regardless of the [listTypeProvider] value.
+  void setPrivateFilter(bool isPrivate) {
+    state = state.copyWith(showPrivateOnly: isPrivate);
   }
 
   /// Filters by status ('all' | 'active').

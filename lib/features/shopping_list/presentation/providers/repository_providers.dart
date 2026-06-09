@@ -111,10 +111,14 @@ Stream<List<ShoppingItem>> filteredShoppingItems(Ref ref) {
   final filter = ref.watch(shoppingFilterProvider);
   final listType = ref.watch(listTypeProvider);
   final repository = ref.watch(shoppingItemRepositoryProvider);
+  // When private-only filter is active, always scope to 'private' list
+  // regardless of the top-level listType toggle (私有 chip — G8Z).
   // 'all' (全部) merges private + public; otherwise scope to one list type.
-  final source = listType == 'all'
-      ? repository.watchAll()
-      : repository.watchByListType(listType);
+  final source = filter.showPrivateOnly
+      ? repository.watchByListType('private')
+      : (listType == 'all'
+          ? repository.watchAll()
+          : repository.watchByListType(listType));
   return source
       .map(
         (items) =>

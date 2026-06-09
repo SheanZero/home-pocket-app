@@ -260,4 +260,71 @@ void main() {
       },
     );
   });
+
+  group('ShoppingFilterBar — 私有 chip', () {
+    // FILTER-PRIVATE-01: chip renders with correct label in ja locale.
+    testWidgets(
+      'FILTER-PRIVATE-01: 私有 chip renders with correct label in ja locale',
+      (tester) async {
+        await _pumpFilterBar(tester);
+
+        expect(find.byKey(const Key('shopping_filter_private_chip')), findsOneWidget);
+        expect(find.text('私有'), findsOneWidget);
+      },
+    );
+
+    // FILTER-PRIVATE-02: tapping chip when inactive sets showPrivateOnly=true.
+    testWidgets(
+      'FILTER-PRIVATE-02: tapping 私有 chip sets showPrivateOnly=true',
+      (tester) async {
+        final container = await _pumpFilterBar(tester);
+
+        await tester.tap(find.byKey(const Key('shopping_filter_private_chip')));
+        await tester.pumpAndSettle();
+
+        expect(
+          container.read(shoppingFilterProvider).showPrivateOnly,
+          isTrue,
+          reason: 'Tapping inactive chip must set showPrivateOnly to true',
+        );
+      },
+    );
+
+    // FILTER-PRIVATE-03: tapping active chip deactivates (toggle off).
+    testWidgets(
+      'FILTER-PRIVATE-03: tapping active 私有 chip deactivates showPrivateOnly',
+      (tester) async {
+        final container = await _pumpFilterBar(tester);
+
+        // Pre-set showPrivateOnly = true
+        container.read(shoppingFilterProvider.notifier).setPrivateFilter(true);
+        await tester.pumpAndSettle();
+
+        // Tap the active chip to toggle off
+        await tester.tap(find.byKey(const Key('shopping_filter_private_chip')));
+        await tester.pumpAndSettle();
+
+        expect(
+          container.read(shoppingFilterProvider).showPrivateOnly,
+          isFalse,
+          reason: 'Tapping active chip must toggle showPrivateOnly to false',
+        );
+      },
+    );
+
+    // FILTER-PRIVATE-04: chip present regardless of group mode.
+    testWidgets(
+      'FILTER-PRIVATE-04: 私有 chip present regardless of group mode (solo)',
+      (tester) async {
+        // No isGroupModeProvider override — defaults to solo (false).
+        await _pumpFilterBar(tester);
+
+        expect(
+          find.byKey(const Key('shopping_filter_private_chip')),
+          findsOneWidget,
+          reason: 'Chip must render in solo mode (no group)',
+        );
+      },
+    );
+  });
 }
