@@ -2346,6 +2346,10 @@
   "@shoppingSegmentPublic": {
     "description": "Shopping item form — public (shared) list option label"
   },
+  "shoppingListScreenTitle": "買い物リスト",
+  "@shoppingListScreenTitle": {
+    "description": "Shopping list tab — screen title heading (T1T-01)"
+  },
   "shoppingSegmentAll": "すべて",
   "@shoppingSegmentAll": {
     "description": "Shopping list view toggle — All segment (merges private + public)"

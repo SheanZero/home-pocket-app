@@ -454,9 +454,9 @@ void main() {
       },
     );
 
-    // FORM-SELECTOR-04: locked-hint caption present in edit mode, absent in create mode.
+    // FORM-SELECTOR-04: locked-hint caption present in BOTH edit and create modes (T1T-02).
     testWidgets(
-      'FORM-SELECTOR-04: locked-hint caption present in edit mode, absent in create mode',
+      'FORM-SELECTOR-04: locked-hint caption present in both edit and create modes',
       (tester) async {
         final editItem = _makeItem(listType: 'private');
 
@@ -477,7 +477,7 @@ void main() {
           reason: 'Locked-hint caption must be present in edit mode',
         );
 
-        // Create mode
+        // Create mode — hint is now ALSO shown (T1T-02)
         await _pumpForm(
           tester,
           createUseCase: mockCreate,
@@ -489,8 +489,8 @@ void main() {
 
         expect(
           find.text('Cannot be changed after creation'),
-          findsNothing,
-          reason: 'Locked-hint caption must be absent in create mode',
+          findsOneWidget,
+          reason: 'Locked-hint caption must also be present in create mode (T1T-02)',
         );
       },
     );

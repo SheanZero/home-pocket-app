@@ -527,16 +527,30 @@ class _ShoppingItemFormScreenState
                     ),
                   ),
 
-                  if (isEditMode)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-                      child: Text(
-                        l.shoppingListTypeLockedHint,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).hintColor,
+                  // Type-locked hint (T1T-02) — always shown (add + edit),
+                  // red (palette.error), with a lock icon, right-aligned.
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Icon(
+                          Icons.lock_outline,
+                          size: 14,
+                          color: palette.error,
                         ),
-                      ),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            l.shoppingListTypeLockedHint,
+                            textAlign: TextAlign.end,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: palette.error),
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
                 ],
               ),
             ),
