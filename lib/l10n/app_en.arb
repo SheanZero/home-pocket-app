@@ -2324,11 +2324,19 @@
   },
   "shoppingSegmentPublic": "Public",
   "@shoppingSegmentPublic": {
-    "description": "Shopping list segmented control — public segment label (Phase 38)"
+    "description": "Shopping item form — public (shared) list option label"
   },
-  "shoppingSegmentPrivate": "Private",
+  "shoppingSegmentAll": "All",
+  "@shoppingSegmentAll": {
+    "description": "Shopping list view toggle — All segment (merges private + public)"
+  },
+  "shoppingSegmentPrivate": "Personal",
   "@shoppingSegmentPrivate": {
-    "description": "Shopping list segmented control — private segment label (Phase 38)"
+    "description": "Shopping list view toggle — Personal (private) segment label"
+  },
+  "shoppingFormListTypeLabel": "List",
+  "@shoppingFormListTypeLabel": {
+    "description": "Shopping item form — list-type (private/public) selector label"
   },
   "shoppingCompletedDivider": "Completed",
   "@shoppingCompletedDivider": {

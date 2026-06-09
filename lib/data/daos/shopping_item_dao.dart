@@ -89,6 +89,27 @@ class ShoppingItemDao {
         );
   }
 
+  /// Reactive stream of ALL non-deleted items, regardless of `list_type`.
+  ///
+  /// Backs the "全部" (All) view, which merges private + public items into a
+  /// single list. Same ordering contract as [watchByListType]; same MANDATORY
+  /// `readsFrom: {_db.shoppingItems}` so the stream re-emits on table writes.
+  Stream<List<ShoppingItemRow>> watchAll() {
+    return _db
+        .customSelect(
+          'SELECT * FROM shopping_items '
+          'WHERE is_deleted = 0 '
+          'ORDER BY is_completed ASC, sort_order ASC, created_at ASC',
+          variables: const [],
+          readsFrom: {_db.shoppingItems},
+        )
+        .watch()
+        .map(
+          (rows) =>
+              rows.map((r) => _db.shoppingItems.map(r.data)).toList(),
+        );
+  }
+
   /// Insert or update a row by primary key conflict.
   ///
   /// Uses Drift's built-in `insertOnConflictUpdate` which performs an

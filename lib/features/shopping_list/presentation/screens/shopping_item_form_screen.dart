@@ -10,6 +10,7 @@ import '../../../accounting/domain/models/transaction.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart'
     show categoryRepositoryProvider, deviceIdentityRepositoryProvider;
 import '../../../accounting/presentation/screens/category_selection_screen.dart';
+import '../../../family_sync/presentation/providers/state_active_group.dart';
 import '../../domain/models/shopping_item.dart';
 import '../providers/repository_providers.dart'
     show createShoppingItemUseCaseProvider, updateShoppingItemUseCaseProvider;
@@ -54,6 +55,9 @@ class _ShoppingItemFormScreenState
 
   LedgerType? _ledgerType;
   String? _categoryId;
+  // Target list for a NEW item ('private' | 'public'). Mutable only in create
+  // mode via the group-only selector; immutable in edit mode (D6/SYNC-03).
+  late String _listType;
   // Human-readable category label (CR-01). The model stores only categoryId,
   // so in edit mode the name is resolved asynchronously from the repository.
   String? _categoryName;
@@ -61,6 +65,7 @@ class _ShoppingItemFormScreenState
   @override
   void initState() {
     super.initState();
+    _listType = widget.listType;
     final item = widget.item;
     if (item != null) {
       // Edit mode — pre-populate from existing item (ITEM-04)
@@ -130,7 +135,7 @@ class _ShoppingItemFormScreenState
                 '';
         final params = CreateShoppingItemParams(
           deviceId: deviceId,
-          listType: widget.listType,
+          listType: _listType,
           name: _nameController.text.trim(),
           ledgerType: _ledgerType,
           categoryId: _categoryId,
@@ -199,6 +204,9 @@ class _ShoppingItemFormScreenState
   Widget build(BuildContext context) {
     final l = S.of(context);
     final isEditMode = widget.item != null;
+    // Private/Public switch only matters when creating an item inside a family
+    // group. Solo users have no public list; edit mode keeps listType immutable.
+    final showListTypeSelector = !isEditMode && ref.watch(isGroupModeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -215,6 +223,33 @@ class _ShoppingItemFormScreenState
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
+            // List-type selector — create mode + group mode only.
+            // Private (个人) = personal; Public (公共) = shared with the family.
+            if (showListTypeSelector) ...[
+              Text(
+                l.shoppingFormListTypeLabel,
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+              const SizedBox(height: 8),
+              SegmentedButton<String>(
+                key: const Key('shopping_form_list_type_selector'),
+                segments: [
+                  ButtonSegment(
+                    value: 'private',
+                    label: Text(l.shoppingSegmentPrivate),
+                  ),
+                  ButtonSegment(
+                    value: 'public',
+                    label: Text(l.shoppingSegmentPublic),
+                  ),
+                ],
+                selected: {_listType == 'public' ? 'public' : 'private'},
+                onSelectionChanged: (s) =>
+                    setState(() => _listType = s.first),
+              ),
+              const SizedBox(height: 16),
+            ],
+
             // Name field — required (ITEM-01)
             TextFormField(
               key: const Key('shopping_form_name_field'),

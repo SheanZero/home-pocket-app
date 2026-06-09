@@ -12,6 +12,10 @@ abstract class ShoppingItemRepository {
   Future<void> softDeleteAllCompleted(String listType);
   Future<ShoppingItem?> findById(String id);
   Stream<List<ShoppingItem>> watchByListType(String listType);
+
+  /// Reactive stream of ALL non-deleted items regardless of list type
+  /// (backs the "全部" / All view, merging private + public).
+  Stream<List<ShoppingItem>> watchAll();
   Future<void> upsert(ShoppingItem item);
   Future<void> reorder(String id, int newSortOrder);
 }

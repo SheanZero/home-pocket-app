@@ -1826,7 +1826,13 @@ class SZh extends S {
   String get shoppingSegmentPublic => '公共';
 
   @override
-  String get shoppingSegmentPrivate => '私人';
+  String get shoppingSegmentAll => '全部';
+
+  @override
+  String get shoppingSegmentPrivate => '个人';
+
+  @override
+  String get shoppingFormListTypeLabel => '清单';
 
   @override
   String get shoppingCompletedDivider => '已完成';

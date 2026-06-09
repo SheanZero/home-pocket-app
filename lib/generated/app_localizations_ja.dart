@@ -1833,7 +1833,13 @@ class SJa extends S {
   String get shoppingSegmentPublic => '公開';
 
   @override
-  String get shoppingSegmentPrivate => 'プライベート';
+  String get shoppingSegmentAll => 'すべて';
+
+  @override
+  String get shoppingSegmentPrivate => '個人';
+
+  @override
+  String get shoppingFormListTypeLabel => 'リスト';
 
   @override
   String get shoppingCompletedDivider => '完了済み';

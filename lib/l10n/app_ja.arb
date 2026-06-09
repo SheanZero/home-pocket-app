@@ -2324,11 +2324,19 @@
   },
   "shoppingSegmentPublic": "公開",
   "@shoppingSegmentPublic": {
-    "description": "Shopping list segmented control — public segment label (Phase 38)"
+    "description": "Shopping item form — public (shared) list option label"
   },
-  "shoppingSegmentPrivate": "プライベート",
+  "shoppingSegmentAll": "すべて",
+  "@shoppingSegmentAll": {
+    "description": "Shopping list view toggle — All segment (merges private + public)"
+  },
+  "shoppingSegmentPrivate": "個人",
   "@shoppingSegmentPrivate": {
-    "description": "Shopping list segmented control — private segment label (Phase 38)"
+    "description": "Shopping list view toggle — Personal (private) segment label"
+  },
+  "shoppingFormListTypeLabel": "リスト",
+  "@shoppingFormListTypeLabel": {
+    "description": "Shopping item form — list-type (private/public) selector label"
   },
   "shoppingCompletedDivider": "完了済み",
   "@shoppingCompletedDivider": {

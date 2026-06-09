@@ -1866,7 +1866,13 @@ class SEn extends S {
   String get shoppingSegmentPublic => 'Public';
 
   @override
-  String get shoppingSegmentPrivate => 'Private';
+  String get shoppingSegmentAll => 'All';
+
+  @override
+  String get shoppingSegmentPrivate => 'Personal';
+
+  @override
+  String get shoppingFormListTypeLabel => 'List';
 
   @override
   String get shoppingCompletedDivider => 'Completed';

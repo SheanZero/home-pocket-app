@@ -5,7 +5,11 @@ import '../../domain/models/shopping_list_filter.dart';
 
 part 'state_shopping_filter.g.dart';
 
-/// Holds the current segment ('public' | 'private') for the shopping list.
+/// Holds the current shopping-list view segment.
+///
+/// Values: 'all' (全部 — merges private + public) | 'private' (个人 — private only).
+/// Default is 'all'. The toggle is only shown in group mode; when solo, the view
+/// stays 'all' (which is identical to private since no shared items exist).
 ///
 /// Kept alive across IndexedStack tab switches (D38, SC2) so that the
 /// selected segment persists when the user navigates away and returns.
@@ -14,8 +18,9 @@ part 'state_shopping_filter.g.dart';
 /// but resets on switch).
 @Riverpod(keepAlive: true)
 class ListType extends _$ListType {
+  // Default to the merged All view (全部).
   @override
-  String build() => 'private'; // Default to private list (T-38-02-01)
+  String build() => 'all';
 
   /// Switches the active list segment and resets the filter state (D5/SC2).
   ///

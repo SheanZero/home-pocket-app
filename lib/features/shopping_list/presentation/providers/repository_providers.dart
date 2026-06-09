@@ -110,9 +110,12 @@ ClearCompletedItemsUseCase clearCompletedItemsUseCase(Ref ref) =>
 Stream<List<ShoppingItem>> filteredShoppingItems(Ref ref) {
   final filter = ref.watch(shoppingFilterProvider);
   final listType = ref.watch(listTypeProvider);
-  return ref
-      .watch(shoppingItemRepositoryProvider)
-      .watchByListType(listType)
+  final repository = ref.watch(shoppingItemRepositoryProvider);
+  // 'all' (全部) merges private + public; otherwise scope to one list type.
+  final source = listType == 'all'
+      ? repository.watchAll()
+      : repository.watchByListType(listType);
+  return source
       .map(
         (items) =>
             items.where((item) {

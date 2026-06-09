@@ -3439,17 +3439,29 @@ abstract class S {
   /// **'Category'**
   String get shoppingFilterCategory;
 
-  /// Shopping list segmented control — public segment label (Phase 38)
+  /// Shopping item form — public (shared) list option label
   ///
   /// In en, this message translates to:
   /// **'Public'**
   String get shoppingSegmentPublic;
 
-  /// Shopping list segmented control — private segment label (Phase 38)
+  /// Shopping list view toggle — All segment (merges private + public)
   ///
   /// In en, this message translates to:
-  /// **'Private'**
+  /// **'All'**
+  String get shoppingSegmentAll;
+
+  /// Shopping list view toggle — Personal (private) segment label
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
   String get shoppingSegmentPrivate;
+
+  /// Shopping item form — list-type (private/public) selector label
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get shoppingFormListTypeLabel;
 
   /// Divider label between active and completed shopping items (Phase 38)
   ///

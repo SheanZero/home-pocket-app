@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/soft_confirm_dialog.dart';
@@ -35,25 +36,34 @@ class ShoppingListScreen extends ConsumerWidget {
     final palette = context.palette;
     final listType = ref.watch(listTypeProvider);
     final batchActive = ref.watch(batchSelectModeProvider).isActive;
+    // Only family-group members see the 全部 / 个人 view toggle. When solo,
+    // 个人 IS 全部, so the toggle would be meaningless (and is hidden).
+    final isGroupMode = ref.watch(isGroupModeProvider);
 
     return Scaffold(
       backgroundColor: palette.background,
-      body: Column(
-        children: [
-          // Public/Private segmented control (SHOP-01)
-          _buildSegmentedControl(context, ref, palette, listType),
-          // Chip filter bar (D38-04)
-          const ShoppingFilterBar(),
-          // Batch chrome — selection header (D38-03, MGMT-02)
-          if (batchActive)
-            // Pass active item IDs via a watch to avoid prop drilling issues;
-            // ShoppingSelectionHeader receives allItemIds from the parent build context.
-            _BatchHeaderWrapper(),
-          // Main body
-          Expanded(child: _buildBody(context, ref, palette, listType)),
-          // Batch chrome — bottom action bar (D38-03, MGMT-02)
-          if (batchActive) const ShoppingBatchActionBar(),
-        ],
+      // SafeArea(top) keeps the toggle/filter bar clear of the iOS status bar
+      // and Dynamic Island; bottom is owned by the floating nav bar.
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            // All/Personal segmented control — group mode only (SHOP-01)
+            if (isGroupMode)
+              _buildSegmentedControl(context, ref, palette, listType),
+            // Chip filter bar (D38-04)
+            const ShoppingFilterBar(),
+            // Batch chrome — selection header (D38-03, MGMT-02)
+            if (batchActive)
+              // Pass active item IDs via a watch to avoid prop drilling issues;
+              // ShoppingSelectionHeader receives allItemIds from the parent build context.
+              _BatchHeaderWrapper(),
+            // Main body
+            Expanded(child: _buildBody(context, ref, palette, listType)),
+            // Batch chrome — bottom action bar (D38-03, MGMT-02)
+            if (batchActive) const ShoppingBatchActionBar(),
+          ],
+        ),
       ),
     );
   }
@@ -69,17 +79,18 @@ class ShoppingListScreen extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: SegmentedButton<String>(
         segments: [
+          // 全部 (All) first and default; then 个人 (Personal).
           ButtonSegment(
-            value: 'private',
+            value: 'all',
             label: Text(
-              l10n.shoppingSegmentPrivate,
+              l10n.shoppingSegmentAll,
               style: AppTextStyles.titleSmall,
             ),
           ),
           ButtonSegment(
-            value: 'public',
+            value: 'private',
             label: Text(
-              l10n.shoppingSegmentPublic,
+              l10n.shoppingSegmentPrivate,
               style: AppTextStyles.titleSmall,
             ),
           ),

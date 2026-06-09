@@ -41,11 +41,16 @@ class ShoppingEmptyState extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isGroupMode = ref.watch(isGroupModeProvider);
-    final variant = listType == 'private'
+    // 'all' (全部) and 'private' (个人) both show the generic empty placeholder.
+    // The public-specific variants only apply to an explicit 'public' list.
+    final variant = (listType == 'private' || listType == 'all')
         ? ShoppingEmptyVariant.privateEmpty
         : (isGroupMode
             ? ShoppingEmptyVariant.publicFamily
             : ShoppingEmptyVariant.publicSolo);
+    // Create-target for the CTA: 'all' is a view, not a storable list_type —
+    // adding from it defaults to a private item (user can switch in the form).
+    final createListType = listType == 'public' ? 'public' : 'private';
 
     final l10n = S.of(context);
     final (icon, heading, body) = switch (variant) {
@@ -97,7 +102,8 @@ class ShoppingEmptyState extends ConsumerWidget {
               ),
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => ShoppingItemFormScreen(listType: listType),
+                  builder: (_) =>
+                      ShoppingItemFormScreen(listType: createListType),
                 ),
               ),
               child: Text(

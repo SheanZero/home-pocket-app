@@ -14,7 +14,6 @@ import '../../../family_sync/presentation/providers/state_sync.dart';
 import '../../../family_sync/presentation/widgets/family_sync_notification_route_listener.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
 import '../../../shopping_list/presentation/providers/state_shopping_batch.dart';
-import '../../../shopping_list/presentation/providers/state_shopping_filter.dart';
 import '../../../shopping_list/presentation/screens/shopping_item_form_screen.dart';
 import '../../../shopping_list/presentation/screens/shopping_list_screen.dart';
 import '../providers/state_home.dart';
@@ -139,11 +138,14 @@ class MainShellScreen extends ConsumerWidget {
                       ref.read(selectedTabIndexProvider.notifier).select(index),
                   onFabTap: () async {
                     if (currentIndex == 3) {
-                      // NAV-01: shopping tab → add-shopping-item screen
+                      // NAV-01: shopping tab → add-shopping-item screen.
+                      // New items default to 'private'; the form exposes a
+                      // private/public switch in group mode (the view toggle
+                      // value, which can be 'all', is not a storable list_type).
                       await Navigator.of(context).push<void>(
                         MaterialPageRoute<void>(
-                          builder: (_) => ShoppingItemFormScreen(
-                            listType: ref.read(listTypeProvider),
+                          builder: (_) => const ShoppingItemFormScreen(
+                            listType: 'private',
                           ),
                         ),
                       );

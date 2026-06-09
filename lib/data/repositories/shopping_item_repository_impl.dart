@@ -110,6 +110,13 @@ class ShoppingItemRepositoryImpl implements ShoppingItemRepository {
   }
 
   @override
+  Stream<List<ShoppingItem>> watchAll() {
+    return _dao
+        .watchAll()
+        .asyncMap((rows) => Future.wait(rows.map(_toModel)));
+  }
+
+  @override
   Future<void> upsert(ShoppingItem item) async {
     final encryptedNote = await _encryptNote(item.note);
     final encodedTags = _encodeTags(item.tags);
