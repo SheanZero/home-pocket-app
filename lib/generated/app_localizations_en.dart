@@ -1881,6 +1881,9 @@ class SEn extends S {
   String get shoppingSegmentPublic => 'Public';
 
   @override
+  String get shoppingListScreenTitle => 'Shopping List';
+
+  @override
   String get shoppingSegmentAll => 'All';
 
   @override

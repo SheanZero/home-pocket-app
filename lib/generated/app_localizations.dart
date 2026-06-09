@@ -3475,6 +3475,12 @@ abstract class S {
   /// **'Public'**
   String get shoppingSegmentPublic;
 
+  /// Shopping list tab — screen title heading (T1T-01)
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping List'**
+  String get shoppingListScreenTitle;
+
   /// Shopping list view toggle — All segment (merges private + public)
   ///
   /// In en, this message translates to:

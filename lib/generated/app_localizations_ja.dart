@@ -1848,6 +1848,9 @@ class SJa extends S {
   String get shoppingSegmentPublic => '公開';
 
   @override
+  String get shoppingListScreenTitle => '買い物リスト';
+
+  @override
   String get shoppingSegmentAll => 'すべて';
 
   @override
