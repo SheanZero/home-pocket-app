@@ -27,7 +27,8 @@ import '../../../home/presentation/providers/state_shadow_books.dart';
 ///   (replaces the removed edit chevron, EC2 D-1)
 /// - EC2 D-1: quantity at the trailing edge — number only (no ×), shown for
 ///   every item; the edit chevron is gone
-/// - 日常/悦己 ledger badge to the right of the title (dual-ledger identity)
+/// - G8Z2 FIX-3: 私有 marker to the right of the title for private items only
+///   (the 日常/悦己 ledger badge was removed); public items show no marker
 /// - MGMT-01: swipe-delete with [showSoftConfirmDialog]; [showSuccessFeedback]
 ///   BEFORE use-case call
 /// - MGMT-02: long-press enters batch mode
@@ -121,12 +122,11 @@ class ShoppingItemTile extends ConsumerWidget {
   ) {
     final locale = Localizations.localeOf(context);
 
-    // Left-border accent colour per SHOP-03. 悦己 (joy) intentionally has NO
-    // visible bar (user request) — kept transparent so the 4px inset still
-    // aligns its text with daily/unset tiles.
+    // Left-border accent colour per SHOP-03. 悦己 (joy) shows its accent bar
+    // again (G8Z2 FIX-1, restored from the earlier transparent treatment).
     final borderColor = switch (item.ledgerType) {
       LedgerType.daily => palette.daily,
-      LedgerType.joy => Colors.transparent,
+      LedgerType.joy => palette.joy,
       null => palette.borderList,
     };
 
@@ -173,10 +173,11 @@ class ShoppingItemTile extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  // 日常/悦己 ledger identity badge — right of the title.
-                  if (item.ledgerType != null) ...[
+                  // 私有 marker — right of the title, private items only
+                  // (G8Z2 FIX-3). Public items render nothing here.
+                  if (item.listType == 'private') ...[
                     const SizedBox(width: 8),
-                    _buildLedgerBadge(context, palette),
+                    _buildPrivateMarker(context, palette),
                   ],
                   // Estimated price (when set) trails the badge.
                   if (item.estimatedPrice != null) ...[
@@ -310,35 +311,30 @@ class ShoppingItemTile extends ConsumerWidget {
     );
   }
 
-  /// 日常 / 悦己 ledger identity badge shown to the right of the item title.
+  /// 私有 marker shown to the right of the item title for private (local-only)
+  /// items (G8Z2 FIX-3). Public items render nothing.
   ///
-  /// Reuses the existing `listLedgerDaily` / `listLedgerJoy` strings and the
-  /// dual-ledger palette tokens (daily green / joy — joyText, never raw joy,
-  /// to satisfy WCAG AA). Renders nothing for a null ledger type.
-  Widget _buildLedgerBadge(BuildContext context, AppPalette palette) {
-    final l10n = S.of(context);
-    final (String label, Color bg, Color fg) = switch (item.ledgerType) {
-      LedgerType.daily => (
-          l10n.listLedgerDaily,
-          palette.dailyLight,
-          palette.dailyText,
-        ),
-      LedgerType.joy => (
-          l10n.listLedgerJoy,
-          palette.joyLight,
-          palette.joyText,
-        ),
-      null => ('', palette.card, palette.textSecondary),
-    };
-    if (item.ledgerType == null) return const SizedBox.shrink();
-
+  /// Mirrors the removed ledger badge's container shape but uses the shared
+  /// (steel-blue) scope palette and a small lock glyph — consistent with the
+  /// filter-bar 私有 chip. Label reuses `shoppingSegmentPrivate`.
+  Widget _buildPrivateMarker(BuildContext context, AppPalette palette) {
     return Container(
       decoration: BoxDecoration(
-        color: bg,
+        color: palette.sharedLight,
         borderRadius: BorderRadius.circular(3),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-      child: Text(label, style: AppTextStyles.micro.copyWith(color: fg)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.lock_outline, size: 11, color: palette.sharedText),
+          const SizedBox(width: 3),
+          Text(
+            S.of(context).shoppingSegmentPrivate,
+            style: AppTextStyles.micro.copyWith(color: palette.sharedText),
+          ),
+        ],
+      ),
     );
   }
 

@@ -205,32 +205,22 @@ void main() {
           reason: 'Container with left BorderSide(color:borderList, width:4) not found');
     });
 
-    testWidgets('joy ledger: left border is transparent (no visible bar)',
+    testWidgets('joy ledger: left border shows the joy accent bar (restored, G8Z2 FIX-1)',
         (tester) async {
       final item = _makeItem(ledgerType: LedgerType.joy);
       await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
 
       final containers = tester.widgetList<Container>(find.byType(Container));
-      // The 4px inset is kept (for text alignment) but painted transparent.
-      final found = containers.any((c) {
-        final deco = c.decoration;
-        if (deco is BoxDecoration && deco.border is Border) {
-          final left = (deco.border! as Border).left;
-          return left.color == Colors.transparent && left.width == 4;
-        }
-        return false;
-      });
-      expect(found, isTrue,
-          reason: 'Container with transparent left BorderSide(width:4) not found');
-      // And there must be NO joy-coloured left bar anymore.
       final hasJoyBar = containers.any((c) {
         final deco = c.decoration;
         if (deco is BoxDecoration && deco.border is Border) {
-          return (deco.border! as Border).left.color == AppPalette.light.joy;
+          final left = (deco.border! as Border).left;
+          return left.color == AppPalette.light.joy && left.width == 4;
         }
         return false;
       });
-      expect(hasJoyBar, isFalse);
+      expect(hasJoyBar, isTrue,
+          reason: 'joy tile must render a 4px joy-coloured left accent bar');
     });
   });
 
@@ -299,28 +289,36 @@ void main() {
     });
   });
 
-  group('ShoppingItemTile — ledger badge under title', () {
+  group('ShoppingItemTile — 私有 marker (G8Z2 FIX-3)', () {
     // Default test locale resolves to 'en' (first supported locale), so the
-    // dual-ledger labels render as 'Daily' / 'Joy' (listLedgerDaily/Joy).
-    testWidgets('daily ledger shows the Daily badge', (tester) async {
-      final item = _makeItem(ledgerType: LedgerType.daily);
+    // private label renders as 'Private' (shoppingSegmentPrivate).
+    testWidgets('private item shows the 私有 marker (lock + label)',
+        (tester) async {
+      final item = _makeItem(listType: 'private');
       await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
 
-      expect(find.text('Daily'), findsOneWidget);
+      expect(find.byIcon(Icons.lock_outline), findsOneWidget);
+      expect(find.text('Private'), findsOneWidget);
     });
 
-    testWidgets('joy ledger shows the Joy badge', (tester) async {
-      final item = _makeItem(ledgerType: LedgerType.joy);
+    testWidgets('public item shows NO 私有 marker', (tester) async {
+      final item = _makeItem(listType: 'public');
       await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
 
-      expect(find.text('Joy'), findsOneWidget);
+      expect(find.byIcon(Icons.lock_outline), findsNothing);
+      expect(find.text('Private'), findsNothing);
     });
 
-    testWidgets('null ledger shows neither badge', (tester) async {
-      final item = _makeItem(ledgerType: null);
-      await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
-
+    testWidgets('ledger badge is gone — no Daily/Joy badge text under title',
+        (tester) async {
+      final dailyItem = _makeItem(ledgerType: LedgerType.daily);
+      await _pumpTile(tester,
+          item: dailyItem, delete: mockDelete, toggle: mockToggle);
       expect(find.text('Daily'), findsNothing);
+
+      final joyItem = _makeItem(ledgerType: LedgerType.joy);
+      await _pumpTile(tester,
+          item: joyItem, delete: mockDelete, toggle: mockToggle);
       expect(find.text('Joy'), findsNothing);
     });
   });
