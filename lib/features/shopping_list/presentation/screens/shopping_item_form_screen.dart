@@ -5,6 +5,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/ledger_type_selector.dart';
+import '../../../../shared/widgets/list_type_selector.dart';
 import '../../../accounting/domain/models/category.dart';
 import '../../../accounting/domain/models/transaction.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart'
@@ -20,11 +21,14 @@ import '../../../../application/shopping_list/update_shopping_item_use_case.dart
 /// Full-screen add/edit form for a shopping list item.
 ///
 /// - Create mode: [item] is null; calls [CreateShoppingItemUseCase].
+///   Default ledger: [LedgerType.daily] (user may toggle to joy or null).
+///   Default list type: 'public' (user may switch to 'private' via selector).
 /// - Edit mode: [item] is non-null; pre-populates all fields; calls [UpdateShoppingItemUseCase].
-/// - List-type selector shown in ALL modes: interactive in create mode (default 'private'),
-///   read-only in edit mode — reflects stored [listType] and cannot be changed
-///   (D6/SYNC-03 immutability; the update path never alters it). Always shown
-///   regardless of group membership (G8Z).
+/// - List-type selector (public/private, styled like ledger chips) shown in ALL modes:
+///   interactive in create mode, read-only in edit mode — reflects stored [listType]
+///   and cannot be changed (D37-04/SYNC-03 immutability; the update path never alters it).
+///   Placed AFTER the ledger selector (order: name → ledger → list-type → category → ...).
+///   Always shown regardless of group membership (G8Z).
 /// - Note field is passed as plaintext; encryption is applied at the repository
 ///   boundary (Phase 36). Do NOT add encryption code here.
 class ShoppingItemFormScreen extends ConsumerStatefulWidget {
@@ -88,7 +92,8 @@ class _ShoppingItemFormScreenState
         _resolveCategoryName(item.categoryId!);
       }
     } else {
-      // Create mode — empty controllers
+      // Create mode — empty controllers; daily ledger pre-selected (G8Z2).
+      _ledgerType = LedgerType.daily;
       _nameController = TextEditingController();
       _quantityController = TextEditingController();
       _priceController = TextEditingController();
@@ -225,52 +230,6 @@ class _ShoppingItemFormScreenState
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
-            // List-type selector — shown in ALL modes (G8Z).
-            // Create mode: interactive (default 'private').
-            // Edit mode: read-only — reflects stored listType and cannot be
-            // changed (D6/SYNC-03 immutability; update path never alters it).
-            if (showListTypeSelector) ...[
-              Text(
-                l.shoppingFormListTypeLabel,
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-              const SizedBox(height: 8),
-              Opacity(
-                opacity: isEditMode ? 0.6 : 1.0,
-                child: IgnorePointer(
-                  ignoring: isEditMode,
-                  child: SegmentedButton<String>(
-                    key: const Key('shopping_form_list_type_selector'),
-                    segments: [
-                      ButtonSegment(
-                        value: 'private',
-                        label: Text(l.shoppingSegmentPrivate),
-                      ),
-                      ButtonSegment(
-                        value: 'public',
-                        label: Text(l.shoppingSegmentPublic),
-                      ),
-                    ],
-                    selected: {_listType == 'public' ? 'public' : 'private'},
-                    // Edit mode: null onSelectionChanged disables interaction.
-                    onSelectionChanged: isEditMode
-                        ? null
-                        : (s) => setState(() => _listType = s.first),
-                  ),
-                ),
-              ),
-              if (isEditMode) ...[
-                const SizedBox(height: 4),
-                Text(
-                  l.shoppingListTypeLockedHint,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).hintColor,
-                  ),
-                ),
-              ],
-              const SizedBox(height: 16),
-            ],
-
             // Name field — required (ITEM-01)
             TextFormField(
               key: const Key('shopping_form_name_field'),
@@ -284,7 +243,8 @@ class _ShoppingItemFormScreenState
             ),
             const SizedBox(height: 16),
 
-            // Ledger type selector — optional (D4, ITEM-02)
+            // Ledger type selector — optional (D4, ITEM-02). Defaults to daily
+            // in create mode (G8Z2). Toggle off (tap same chip again → null).
             Text(
               l.shoppingFormLedgerLabel,
               style: Theme.of(context).textTheme.labelMedium,
@@ -301,6 +261,37 @@ class _ShoppingItemFormScreenState
               joyLabel: l.listLedgerJoy,
             ),
             const SizedBox(height: 16),
+
+            // List-type selector (G8Z / G8Z2) — shown in ALL modes.
+            // Placed AFTER the ledger selector (order: name → ledger → list-type → category).
+            // Create mode: interactive (default 'public').
+            // Edit mode: read-only — reflects stored listType and cannot be
+            // changed (D37-04/SYNC-03 immutability; update path never alters it).
+            if (showListTypeSelector) ...[
+              Text(
+                l.shoppingFormListTypeLabel,
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+              const SizedBox(height: 8),
+              ListTypeSelector(
+                key: const Key('shopping_form_list_type_selector'),
+                selected: _listType == 'public' ? 'public' : 'private',
+                onChanged: (v) => setState(() => _listType = v),
+                publicLabel: l.shoppingSegmentPublic,
+                privateLabel: l.shoppingSegmentPrivate,
+                enabled: !isEditMode,
+              ),
+              if (isEditMode) ...[
+                const SizedBox(height: 4),
+                Text(
+                  l.shoppingListTypeLockedHint,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).hintColor,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 16),
+            ],
 
             // Category field — optional (D4, ITEM-02)
             Text(
