@@ -1857,7 +1857,7 @@ class SJa extends S {
   String get shoppingFilterPrivate => '私有';
 
   @override
-  String get shoppingFormListTypeLabel => 'リスト';
+  String get shoppingFormListTypeLabel => 'タイプ';
 
   @override
   String get shoppingListTypeLockedHint => '作成後は変更できません';

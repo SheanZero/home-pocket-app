@@ -1850,7 +1850,7 @@ class SZh extends S {
   String get shoppingFilterPrivate => '私有';
 
   @override
-  String get shoppingFormListTypeLabel => '清单';
+  String get shoppingFormListTypeLabel => '类型';
 
   @override
   String get shoppingListTypeLockedHint => '创建后不可更改';

@@ -3496,7 +3496,7 @@ abstract class S {
   /// Shopping item form — list-type (private/public) selector label
   ///
   /// In en, this message translates to:
-  /// **'List'**
+  /// **'Type'**
   String get shoppingFormListTypeLabel;
 
   /// Shopping item form — caption shown under the disabled list-type selector in edit mode

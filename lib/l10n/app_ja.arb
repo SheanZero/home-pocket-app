@@ -2358,7 +2358,7 @@
   "@shoppingFilterPrivate": {
     "description": "Shopping filter bar chip — shows only private (local-only) items"
   },
-  "shoppingFormListTypeLabel": "リスト",
+  "shoppingFormListTypeLabel": "タイプ",
   "@shoppingFormListTypeLabel": {
     "description": "Shopping item form — list-type (private/public) selector label"
   },

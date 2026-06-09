@@ -1890,7 +1890,7 @@ class SEn extends S {
   String get shoppingFilterPrivate => 'Private';
 
   @override
-  String get shoppingFormListTypeLabel => 'List';
+  String get shoppingFormListTypeLabel => 'Type';
 
   @override
   String get shoppingListTypeLockedHint => 'Cannot be changed after creation';
