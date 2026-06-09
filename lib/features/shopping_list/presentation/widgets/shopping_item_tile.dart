@@ -390,7 +390,7 @@ class ShoppingItemTile extends ConsumerWidget {
                 height: 44,
                 child: Center(
                   child: Icon(
-                    Icons.keyboard_arrow_up,
+                    Icons.vertical_align_top,
                     size: 20,
                     color: palette.textSecondary,
                   ),
@@ -423,7 +423,7 @@ class ShoppingItemTile extends ConsumerWidget {
                 height: 44,
                 child: Center(
                   child: Icon(
-                    Icons.keyboard_arrow_down,
+                    Icons.vertical_align_bottom,
                     size: 20,
                     color: palette.textSecondary,
                   ),

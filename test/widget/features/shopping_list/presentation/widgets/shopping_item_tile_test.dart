@@ -510,7 +510,7 @@ void main() {
 
   group('ShoppingItemTile — reorder mode move buttons (quick-260609-pmc Fix 4)', () {
     testWidgets(
-        'reorder mode on (active item) → keyboard_arrow_up and keyboard_arrow_down visible',
+        'reorder mode on (active item) → vertical_align_top and vertical_align_bottom visible',
         (tester) async {
       final item = _makeItem();
       await _pumpTile(
@@ -525,8 +525,8 @@ void main() {
         ],
       );
 
-      expect(find.byIcon(Icons.keyboard_arrow_up), findsOneWidget);
-      expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+      expect(find.byIcon(Icons.vertical_align_top), findsOneWidget);
+      expect(find.byIcon(Icons.vertical_align_bottom), findsOneWidget);
     });
 
     testWidgets(
@@ -535,8 +535,8 @@ void main() {
       final item = _makeItem();
       await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
 
-      expect(find.byIcon(Icons.keyboard_arrow_up), findsNothing);
-      expect(find.byIcon(Icons.keyboard_arrow_down), findsNothing);
+      expect(find.byIcon(Icons.vertical_align_top), findsNothing);
+      expect(find.byIcon(Icons.vertical_align_bottom), findsNothing);
     });
 
     testWidgets(
@@ -560,7 +560,7 @@ void main() {
         ],
       );
 
-      await tester.tap(find.byIcon(Icons.keyboard_arrow_up));
+      await tester.tap(find.byIcon(Icons.vertical_align_top));
       await tester.pump();
 
       verify(() => mockReorder.execute('item-move-top', -1)).called(1);
@@ -583,8 +583,8 @@ void main() {
         ],
       );
 
-      expect(find.byIcon(Icons.keyboard_arrow_up), findsNothing);
-      expect(find.byIcon(Icons.keyboard_arrow_down), findsNothing);
+      expect(find.byIcon(Icons.vertical_align_top), findsNothing);
+      expect(find.byIcon(Icons.vertical_align_bottom), findsNothing);
     });
   });
 }
