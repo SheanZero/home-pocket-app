@@ -43,26 +43,18 @@ class ShoppingListScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: palette.background,
+      // Screen title via standard AppBar (T1T-01) — matches AnalyticsScreen,
+      // the sibling tab in MainShellScreen's IndexedStack, for cross-tab
+      // title consistency. Title text style is owned by the app's appBarTheme.
+      appBar: AppBar(
+        title: Text(S.of(context).shoppingListScreenTitle),
+      ),
       // SafeArea(top) keeps the toggle/filter bar clear of the iOS status bar
       // and Dynamic Island; bottom is owned by the floating nav bar.
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
-            // Screen title heading (T1T-01) — always visible, above the
-            // segmented control / filter bar, independent of isGroupMode.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  S.of(context).shoppingListScreenTitle,
-                  style: AppTextStyles.headlineSmall.copyWith(
-                    color: palette.textPrimary,
-                  ),
-                ),
-              ),
-            ),
             // All/Personal segmented control — group mode only (SHOP-01)
             if (isGroupMode)
               _buildSegmentedControl(context, ref, palette, listType),
