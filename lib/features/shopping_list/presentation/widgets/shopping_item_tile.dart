@@ -25,8 +25,9 @@ import '../../../home/presentation/providers/state_shadow_books.dart';
 ///   circle calls [ToggleItemCompletedUseCase] (EC2 D-domain#1 — was full-row)
 /// - EC2 D-domain#3: tapping the tile BODY opens [ShoppingItemFormScreen]
 ///   (replaces the removed edit chevron, EC2 D-1)
-/// - EC2 D-1: quantity moved to the trailing edge as a badge (quantity > 1 only);
-///   the edit chevron is gone
+/// - EC2 D-1: quantity moved to the trailing edge as a badge (shown for every
+///   item, quantity >= 1); the edit chevron is gone
+/// - 日常/悦己 ledger badge under the title (dual-ledger identity indicator)
 /// - MGMT-01: swipe-delete with [showSoftConfirmDialog]; [showSuccessFeedback]
 ///   BEFORE use-case call
 /// - MGMT-02: long-press enters batch mode
@@ -162,25 +163,37 @@ class ShoppingItemTile extends ConsumerWidget {
                       child: Text(item.name),
                     ),
                   ),
-                  // Secondary row: estimated price only (quantity moved to
-                  // trailing edge per EC2 D-1).
-                  if (item.estimatedPrice != null)
+                  // Secondary row: 日常/悦己 ledger badge + estimated price.
+                  // The badge is the dual-ledger identity indicator under the
+                  // title (per user request); price (when set) sits after it.
+                  if (item.ledgerType != null || item.estimatedPrice != null)
                     Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(
-                        NumberFormatter.formatCurrency(
-                          item.estimatedPrice!,
-                          'JPY',
-                          locale,
-                        ),
-                        style: AppTextStyles.amountSmall.copyWith(
-                          color: switch (item.ledgerType) {
-                            LedgerType.daily => palette.dailyText,
-                            // NEVER raw palette.joy — fails WCAG AA
-                            LedgerType.joy => palette.joyText,
-                            null => palette.textSecondary,
-                          },
-                        ),
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (item.ledgerType != null)
+                            _buildLedgerBadge(context, palette),
+                          if (item.ledgerType != null &&
+                              item.estimatedPrice != null)
+                            const SizedBox(width: 6),
+                          if (item.estimatedPrice != null)
+                            Text(
+                              NumberFormatter.formatCurrency(
+                                item.estimatedPrice!,
+                                'JPY',
+                                locale,
+                              ),
+                              style: AppTextStyles.amountSmall.copyWith(
+                                color: switch (item.ledgerType) {
+                                  LedgerType.daily => palette.dailyText,
+                                  // NEVER raw palette.joy — fails WCAG AA
+                                  LedgerType.joy => palette.joyText,
+                                  null => palette.textSecondary,
+                                },
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                 ],
@@ -296,8 +309,42 @@ class ShoppingItemTile extends ConsumerWidget {
     );
   }
 
+  /// 日常 / 悦己 ledger identity badge shown under the item title.
+  ///
+  /// Reuses the existing `listLedgerDaily` / `listLedgerJoy` strings and the
+  /// dual-ledger palette tokens (daily green / joy — joyText, never raw joy,
+  /// to satisfy WCAG AA). Renders nothing for a null ledger type.
+  Widget _buildLedgerBadge(BuildContext context, AppPalette palette) {
+    final l10n = S.of(context);
+    final (String label, Color bg, Color fg) = switch (item.ledgerType) {
+      LedgerType.daily => (
+          l10n.listLedgerDaily,
+          palette.dailyLight,
+          palette.dailyText,
+        ),
+      LedgerType.joy => (
+          l10n.listLedgerJoy,
+          palette.joyLight,
+          palette.joyText,
+        ),
+      null => ('', palette.card, palette.textSecondary),
+    };
+    if (item.ledgerType == null) return const SizedBox.shrink();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(3),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+      child: Text(label, style: AppTextStyles.micro.copyWith(color: fg)),
+    );
+  }
+
   /// Trailing cluster (EC2 D-1 / D-2):
-  /// - quantity badge — only when `item.quantity > 1`
+  /// - quantity badge — shown whenever `item.quantity >= 1` (always, since the
+  ///   column is NOT NULL with a default of 1; user opted to display every
+  ///   quantity rather than gate on > 1)
   /// - drag handle — only in reorder mode AND for active items
   Widget _buildTrailingCluster(
     BuildContext context,
@@ -306,8 +353,9 @@ class ShoppingItemTile extends ConsumerWidget {
   ) {
     final children = <Widget>[];
 
-    // Quantity badge on the right edge (EC2 D-1) — hidden when quantity == 1.
-    if (item.quantity > 1) {
+    // Quantity badge on the right edge (EC2 D-1) — shown for every item
+    // (quantity is always >= 1; user opted to always display the entered count).
+    if (item.quantity >= 1) {
       children.add(
         Text(
           '${item.quantity}×',

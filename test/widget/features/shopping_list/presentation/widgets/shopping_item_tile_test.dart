@@ -278,11 +278,38 @@ void main() {
       expect(find.text('3×'), findsOneWidget);
     });
 
-    testWidgets('quantity == 1 hides the quantity badge', (tester) async {
+    testWidgets('quantity == 1 still shows the ×1 badge (always shown)',
+        (tester) async {
       final item = _makeItem(quantity: 1);
       await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
 
-      expect(find.textContaining('×'), findsNothing);
+      expect(find.text('1×'), findsOneWidget);
+    });
+  });
+
+  group('ShoppingItemTile — ledger badge under title', () {
+    // Default test locale resolves to 'en' (first supported locale), so the
+    // dual-ledger labels render as 'Daily' / 'Joy' (listLedgerDaily/Joy).
+    testWidgets('daily ledger shows the Daily badge', (tester) async {
+      final item = _makeItem(ledgerType: LedgerType.daily);
+      await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
+
+      expect(find.text('Daily'), findsOneWidget);
+    });
+
+    testWidgets('joy ledger shows the Joy badge', (tester) async {
+      final item = _makeItem(ledgerType: LedgerType.joy);
+      await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
+
+      expect(find.text('Joy'), findsOneWidget);
+    });
+
+    testWidgets('null ledger shows neither badge', (tester) async {
+      final item = _makeItem(ledgerType: null);
+      await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
+
+      expect(find.text('Daily'), findsNothing);
+      expect(find.text('Joy'), findsNothing);
     });
   });
 
