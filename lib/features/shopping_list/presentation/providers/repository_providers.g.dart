@@ -490,4 +490,4 @@ final class FilteredShoppingItemsProvider
 }
 
 String _$filteredShoppingItemsHash() =>
-    r'9b541ae2cb1adcee577a3c097d1bd46f420b8b6e';
+    r'9fde5d6432fb1b9b65bde3202617ed28a377ade1';

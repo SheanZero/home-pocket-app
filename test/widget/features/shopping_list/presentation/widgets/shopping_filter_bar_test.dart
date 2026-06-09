@@ -16,6 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_list_filter.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_filter.dart';
+import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_reorder.dart';
 import 'package:home_pocket/features/shopping_list/presentation/widgets/shopping_filter_bar.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
@@ -217,6 +218,45 @@ void main() {
         state = container.read(shoppingFilterProvider);
         expect(state.ledgerType, isNull);
         expect(state.categoryIds, isEmpty);
+      },
+    );
+
+    // EC2 D-2: trailing reorder toggle renders ≡ by default and toggles the
+    // shoppingReorderModeProvider on tap (switching the icon to ✓).
+    testWidgets(
+      'EC2 D-2: trailing ≡ enters reorder mode and becomes ✓',
+      (tester) async {
+        final container = await _pumpFilterBar(tester);
+
+        // Default (non-reorder): reorder entry icon present, exit icon absent.
+        expect(find.byIcon(Icons.reorder), findsOneWidget);
+        expect(find.byIcon(Icons.check), findsNothing);
+        expect(container.read(shoppingReorderModeProvider), isFalse);
+
+        // Tap ≡ → reorder mode true, icon becomes ✓.
+        await tester.tap(find.byIcon(Icons.reorder));
+        await tester.pumpAndSettle();
+
+        expect(container.read(shoppingReorderModeProvider), isTrue);
+        expect(find.byIcon(Icons.check), findsOneWidget);
+        expect(find.byIcon(Icons.reorder), findsNothing);
+      },
+    );
+
+    // EC2 D-2: reorder mode adds a ≡ (drag_indicator) prefix to the chips.
+    testWidgets(
+      'EC2 D-2: reorder mode shows drag_indicator chip prefixes',
+      (tester) async {
+        final container = await _pumpFilterBar(tester);
+
+        // No prefixes in normal mode.
+        expect(find.byIcon(Icons.drag_indicator), findsNothing);
+
+        container.read(shoppingReorderModeProvider.notifier).toggle();
+        await tester.pumpAndSettle();
+
+        // 全部 + segmented control + category each gain a ≡ prefix.
+        expect(find.byIcon(Icons.drag_indicator), findsWidgets);
       },
     );
   });

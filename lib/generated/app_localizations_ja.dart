@@ -1797,6 +1797,15 @@ class SJa extends S {
   String get shoppingReorderItem => 'アイテムを並べ替え';
 
   @override
+  String get shoppingToggleComplete => '完了を切り替え';
+
+  @override
+  String get shoppingEnterReorderMode => '並べ替え';
+
+  @override
+  String get shoppingExitReorderMode => '完了';
+
+  @override
   String get shoppingEmptyPrivateHeading => '買うものリストは空です';
 
   @override

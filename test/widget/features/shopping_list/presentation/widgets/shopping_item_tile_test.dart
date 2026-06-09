@@ -17,6 +17,8 @@ import 'package:home_pocket/features/home/presentation/providers/state_shadow_bo
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_batch.dart';
+import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_reorder.dart';
+import 'package:home_pocket/features/shopping_list/presentation/screens/shopping_item_form_screen.dart';
 import 'package:home_pocket/features/shopping_list/presentation/widgets/shopping_item_tile.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/shared/utils/result.dart';
@@ -129,6 +131,15 @@ class _FixedBatchSelectMode extends BatchSelectMode {
   BatchSelectModeState build() => _fixedState;
 }
 
+/// Fixed-state [ShoppingReorderMode] notifier for injection in tests (EC2 D-2).
+class _FixedReorderMode extends ShoppingReorderMode {
+  _FixedReorderMode(this._fixed);
+  final bool _fixed;
+
+  @override
+  bool build() => _fixed;
+}
+
 void main() {
   late MockDeleteShoppingItemUseCase mockDelete;
   late MockToggleItemCompletedUseCase mockToggle;
@@ -213,16 +224,132 @@ void main() {
     });
   });
 
-  group('ShoppingItemTile — DONE-01: tap calls toggleItemCompletedUseCase', () {
-    testWidgets('tap row body calls execute(item.id)', (tester) async {
+  group('ShoppingItemTile — DONE-01: leading circle toggles completion (EC2)', () {
+    testWidgets('tap leading circle calls toggle.execute(item.id)',
+        (tester) async {
       final item = _makeItem(id: 'item-tap-test');
       await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
 
-      // Tap the outer GestureDetector (first is the tile's tap target)
-      await tester.tap(find.byType(GestureDetector).first);
+      // EC2 D-domain#1: the circle has a stable ValueKey('toggle-<id>').
+      await tester.tap(find.byKey(const ValueKey('toggle-item-tap-test')));
       await tester.pump();
 
       verify(() => mockToggle.execute('item-tap-test')).called(1);
+    });
+
+    testWidgets('tapping the tile body does NOT toggle (opens edit instead)',
+        (tester) async {
+      final item = _makeItem(id: 'item-body-test');
+      await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
+
+      // Tap the item name (body) — EC2 D-domain#3 routes this to edit, not toggle.
+      await tester.tap(find.text('Test Item'));
+      await tester.pump();
+
+      verifyNever(() => mockToggle.execute(any()));
+    });
+  });
+
+  group('ShoppingItemTile — EC2 D-domain#3: tile body opens edit form', () {
+    testWidgets('tapping the tile body navigates to ShoppingItemFormScreen',
+        (tester) async {
+      final item = _makeItem(id: 'item-edit-nav');
+      await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
+
+      await tester.tap(find.text('Test Item'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ShoppingItemFormScreen), findsOneWidget);
+    });
+  });
+
+  group('ShoppingItemTile — EC2 D-1: no chevron + trailing quantity badge', () {
+    testWidgets('edit chevron is removed', (tester) async {
+      final item = _makeItem();
+      await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
+
+      expect(find.byIcon(Icons.chevron_right), findsNothing);
+    });
+
+    testWidgets('quantity > 1 shows ×N badge in trailing area', (tester) async {
+      final item = _makeItem(quantity: 3);
+      await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
+
+      expect(find.text('3×'), findsOneWidget);
+    });
+
+    testWidgets('quantity == 1 hides the quantity badge', (tester) async {
+      final item = _makeItem(quantity: 1);
+      await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
+
+      expect(find.textContaining('×'), findsNothing);
+    });
+  });
+
+  group('ShoppingItemTile — EC2 D-2: drag handle gated on reorder mode', () {
+    testWidgets('default (reorder mode off) → no drag handle', (tester) async {
+      final item = _makeItem();
+      await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
+
+      expect(find.byIcon(Icons.drag_handle), findsNothing);
+    });
+
+    testWidgets('reorder mode on (active item) → drag handle visible',
+        (tester) async {
+      final item = _makeItem();
+      await _pumpTile(
+        tester,
+        item: item,
+        delete: mockDelete,
+        toggle: mockToggle,
+        extraOverrides: [
+          shoppingReorderModeProvider.overrideWith(
+            () => _FixedReorderMode(true),
+          ),
+        ],
+      );
+
+      expect(find.byIcon(Icons.drag_handle), findsOneWidget);
+    });
+
+    testWidgets('reorder mode on → tapping circle does NOT toggle',
+        (tester) async {
+      final item = _makeItem(id: 'item-reorder-lock');
+      await _pumpTile(
+        tester,
+        item: item,
+        delete: mockDelete,
+        toggle: mockToggle,
+        extraOverrides: [
+          shoppingReorderModeProvider.overrideWith(
+            () => _FixedReorderMode(true),
+          ),
+        ],
+      );
+
+      await tester.tap(find.byKey(const ValueKey('toggle-item-reorder-lock')));
+      await tester.pump();
+
+      verifyNever(() => mockToggle.execute(any()));
+    });
+
+    testWidgets('reorder mode on → Dismissible direction is none (swipe locked)',
+        (tester) async {
+      final item = _makeItem();
+      await _pumpTile(
+        tester,
+        item: item,
+        delete: mockDelete,
+        toggle: mockToggle,
+        extraOverrides: [
+          shoppingReorderModeProvider.overrideWith(
+            () => _FixedReorderMode(true),
+          ),
+        ],
+      );
+
+      final dismissible = tester.widget<Dismissible>(find.byType(Dismissible));
+      expect(dismissible.direction, equals(DismissDirection.none));
     });
   });
 

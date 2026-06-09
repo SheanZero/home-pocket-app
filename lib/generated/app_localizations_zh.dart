@@ -1790,6 +1790,15 @@ class SZh extends S {
   String get shoppingReorderItem => '重新排序';
 
   @override
+  String get shoppingToggleComplete => '切换完成';
+
+  @override
+  String get shoppingEnterReorderMode => '排序';
+
+  @override
+  String get shoppingExitReorderMode => '完成';
+
+  @override
   String get shoppingEmptyPrivateHeading => '购物清单是空的';
 
   @override

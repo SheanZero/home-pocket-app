@@ -1830,6 +1830,15 @@ class SEn extends S {
   String get shoppingReorderItem => 'Reorder item';
 
   @override
+  String get shoppingToggleComplete => 'Toggle complete';
+
+  @override
+  String get shoppingEnterReorderMode => 'Reorder list';
+
+  @override
+  String get shoppingExitReorderMode => 'Done reordering';
+
+  @override
   String get shoppingEmptyPrivateHeading => 'Your shopping list is empty';
 
   @override
