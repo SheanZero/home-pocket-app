@@ -73,6 +73,33 @@ void main() {
       expect(after, isNotNull);
       expect(after!.name, 'Updated Name');
     });
+
+    test(
+        'reorderBatch writes a contiguous 0..N-1 order so drag-to-top lands '
+        'first even when items hold stale non-contiguous values '
+        '(quick-260609-pmc-04)',
+        () async {
+      // Reproduce the bug precondition: item_a was previously "置顶" to a stale
+      // sort_order = -1; b and c are 0 and 1. Display order: a, b, c.
+      await dao.upsert(_makeItem(id: 'a', sortOrder: -1));
+      await dao.upsert(_makeItem(id: 'b', sortOrder: 0));
+      await dao.upsert(_makeItem(id: 'c', sortOrder: 1));
+
+      // "Drag c to the top" → persist the full new order c, a, b.
+      await dao.reorderBatch(['c', 'a', 'b']);
+
+      final items = await dao.watchByListType('private').first;
+      expect(items.map((r) => r.id).toList(), ['c', 'a', 'b']);
+      // Contiguous 0..N-1 — no stale negative left to sabotage the next op.
+      expect(items.map((r) => r.sortOrder).toList(), [0, 1, 2]);
+    });
+
+    test('reorderBatch with an empty list is a no-op', () async {
+      await dao.upsert(_makeItem(id: 'solo', sortOrder: 5));
+      await dao.reorderBatch(const []);
+      final row = await dao.findById('solo');
+      expect(row!.sortOrder, 5);
+    });
   });
 }
 

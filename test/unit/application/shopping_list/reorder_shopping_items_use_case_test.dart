@@ -19,6 +19,13 @@ void main() {
     when(
       () => mockRepo.reorder(any(), any()),
     ).thenAnswer((_) async {});
+    when(
+      () => mockRepo.reorderBatch(any()),
+    ).thenAnswer((_) async {});
+  });
+
+  setUpAll(() {
+    registerFallbackValue(<String>[]);
   });
 
   group('ReorderShoppingItemsUseCase', () {
@@ -53,6 +60,24 @@ void main() {
       await useCase.execute('item-abc', 10);
 
       verify(() => mockRepo.reorder('item-abc', 10)).called(1);
+    });
+
+    test(
+      'applyOrder persists the full contiguous order via repo.reorderBatch '
+      '(quick-260609-pmc-04)',
+      () async {
+        final result = await useCase.applyOrder(['c', 'a', 'b']);
+
+        expect(result.isSuccess, isTrue);
+        verify(() => mockRepo.reorderBatch(['c', 'a', 'b'])).called(1);
+      },
+    );
+
+    test('applyOrder with an empty id returns Result.error', () async {
+      final result = await useCase.applyOrder(['a', '', 'b']);
+
+      expect(result.isSuccess, isFalse);
+      verifyNever(() => mockRepo.reorderBatch(any()));
     });
   });
 }

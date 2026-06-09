@@ -373,10 +373,10 @@ class ShoppingItemTile extends ConsumerWidget {
         children.add(const SizedBox(width: 4));
       }
 
-      // Move-to-top button (Fix 4): assign a sort_order strictly below the
-      // current minimum so REPEATED taps keep working. A fixed value (e.g. -1)
-      // collides once two items share it — the `created_at` tiebreaker then makes
-      // further taps a no-op (the "多次点击后失效" bug). minOrder - 1 is monotonic.
+      // Move-to-top button (Fix 4): re-sequence the whole active list with this
+      // item moved to the front, persisting a contiguous 0..N-1 order. This is
+      // collision-free for repeated taps AND keeps the persisted order contiguous
+      // so a subsequent drag still lands correctly (quick-260609-pmc-04).
       children.add(
         Semantics(
           label: S.of(context).shoppingMoveToTop,
@@ -387,13 +387,15 @@ class ShoppingItemTile extends ConsumerWidget {
               onTap: () {
                 final items =
                     ref.read(filteredShoppingItemsProvider).value ?? const [];
-                final orders =
-                    items.where((i) => !i.isCompleted).map((i) => i.sortOrder);
-                final minOrder =
-                    orders.isEmpty ? 0 : orders.reduce((a, b) => a < b ? a : b);
+                final ids = items
+                    .where((i) => !i.isCompleted)
+                    .map((i) => i.id)
+                    .toList(growable: true);
+                ids.remove(item.id);
+                ids.insert(0, item.id);
                 ref
                     .read(reorderShoppingItemsUseCaseProvider)
-                    .execute(item.id, minOrder - 1);
+                    .applyOrder(ids);
               },
               customBorder: const CircleBorder(),
               child: SizedBox(
@@ -412,9 +414,9 @@ class ShoppingItemTile extends ConsumerWidget {
         ),
       );
 
-      // Move-to-bottom button (Fix 4): assign a sort_order strictly above the
-      // current maximum so REPEATED taps keep working. A fixed value (activeCount)
-      // collides once two items share it. maxOrder + 1 is monotonic.
+      // Move-to-bottom button (Fix 4): re-sequence the whole active list with this
+      // item moved to the back, persisting a contiguous 0..N-1 order (same
+      // rationale as move-to-top; quick-260609-pmc-04).
       children.add(
         Semantics(
           label: S.of(context).shoppingMoveToBottom,
@@ -425,13 +427,15 @@ class ShoppingItemTile extends ConsumerWidget {
               onTap: () {
                 final items =
                     ref.read(filteredShoppingItemsProvider).value ?? const [];
-                final orders =
-                    items.where((i) => !i.isCompleted).map((i) => i.sortOrder);
-                final maxOrder =
-                    orders.isEmpty ? 0 : orders.reduce((a, b) => a > b ? a : b);
+                final ids = items
+                    .where((i) => !i.isCompleted)
+                    .map((i) => i.id)
+                    .toList(growable: true);
+                ids.remove(item.id);
+                ids.add(item.id);
                 ref
                     .read(reorderShoppingItemsUseCaseProvider)
-                    .execute(item.id, maxOrder + 1);
+                    .applyOrder(ids);
               },
               customBorder: const CircleBorder(),
               child: SizedBox(

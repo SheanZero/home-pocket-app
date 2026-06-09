@@ -121,7 +121,7 @@ class ShoppingItemDao {
   /// Update the sort position of a single item.
   ///
   /// Only `sort_order` and `updated_at` are written — all other columns remain
-  /// unchanged. Used by the drag-to-reorder gesture in the UI layer.
+  /// unchanged.
   Future<void> reorder(String id, int newSortOrder) async {
     await (_db.update(_db.shoppingItems)..where((t) => t.id.equals(id))).write(
       ShoppingItemsCompanion(
@@ -129,5 +129,33 @@ class ShoppingItemDao {
         updatedAt: Value(DateTime.now()),
       ),
     );
+  }
+
+  /// Re-sequence a set of items to a contiguous `sort_order` = 0..N-1 matching
+  /// the order of [orderedIds].
+  ///
+  /// Writing a contiguous sequence (rather than a single row) is what keeps
+  /// drag-to-reorder and the move-to-top/bottom buttons correct: a lone
+  /// `sort_order` write leaves the column non-contiguous, so the next operation
+  /// computes a position that collides with — or sits the wrong side of —
+  /// another item's stale value (quick-260609-pmc-04: "drag to top lands second").
+  ///
+  /// Runs as a single batch so the list never observes a half-applied order.
+  /// Only `sort_order` and `updated_at` are written.
+  Future<void> reorderBatch(List<String> orderedIds) async {
+    if (orderedIds.isEmpty) return;
+    final now = DateTime.now();
+    await _db.batch((batch) {
+      for (var i = 0; i < orderedIds.length; i++) {
+        batch.update(
+          _db.shoppingItems,
+          ShoppingItemsCompanion(
+            sortOrder: Value(i),
+            updatedAt: Value(now),
+          ),
+          where: (t) => t.id.equals(orderedIds[i]),
+        );
+      }
+    });
   }
 }

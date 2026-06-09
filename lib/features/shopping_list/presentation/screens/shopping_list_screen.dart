@@ -168,6 +168,9 @@ class ShoppingListScreen extends ConsumerWidget {
             // Fix 3: proxyDecorator wraps the dragged item in an opaque card surface
             // (palette.card) with an animated elevation shadow (0→6) for visual lift.
             // onReorderItem provides the already-adjusted newIndex (item removed before insertion).
+            // We persist the FULL new order (contiguous 0..N-1) rather than a single
+            // sort_order, so a drag to the very top/bottom truly lands first/last even
+            // when other items hold non-contiguous values (quick-260609-pmc-04).
             SliverReorderableList(
               itemCount: activeItems.length,
               proxyDecorator: (child, index, animation) {
@@ -190,9 +193,13 @@ class ShoppingListScreen extends ConsumerWidget {
                 );
               },
               onReorderItem: (oldIndex, newIndex) {
+                final orderedIds =
+                    activeItems.map((e) => e.id).toList(growable: true);
+                final moved = orderedIds.removeAt(oldIndex);
+                orderedIds.insert(newIndex, moved);
                 ref
                     .read(reorderShoppingItemsUseCaseProvider)
-                    .execute(activeItems[oldIndex].id, newIndex);
+                    .applyOrder(orderedIds);
               },
               itemBuilder: (context, index) =>
                   ReorderableDelayedDragStartListener(

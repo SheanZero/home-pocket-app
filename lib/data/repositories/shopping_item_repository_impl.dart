@@ -150,6 +150,11 @@ class ShoppingItemRepositoryImpl implements ShoppingItemRepository {
     await _dao.reorder(id, newSortOrder);
   }
 
+  @override
+  Future<void> reorderBatch(List<String> orderedIds) async {
+    await _dao.reorderBatch(orderedIds);
+  }
+
   /// Encrypt [note] if non-null and non-empty; returns null otherwise.
   Future<String?> _encryptNote(String? note) async {
     if (note != null && note.isNotEmpty) {

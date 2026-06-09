@@ -22,4 +22,19 @@ class ReorderShoppingItemsUseCase {
     await _repo.reorder(itemId, newSortOrder);
     return Result.success(null);
   }
+
+  /// Persist a full ordering of active items as a contiguous sort sequence.
+  ///
+  /// [orderedActiveIds] is the desired top-to-bottom order. The repository
+  /// writes `sort_order` = 0..N-1, so drag-to-reorder and the move-to-top/bottom
+  /// buttons all stay correct regardless of prior values (quick-260609-pmc-04).
+  ///
+  /// D37-01: sortOrder is local-per-device — NOT synced.
+  Future<Result<void>> applyOrder(List<String> orderedActiveIds) async {
+    if (orderedActiveIds.any((id) => id.isEmpty)) {
+      return Result.error('orderedActiveIds must not contain empty ids');
+    }
+    await _repo.reorderBatch(orderedActiveIds);
+    return Result.success(null);
+  }
 }

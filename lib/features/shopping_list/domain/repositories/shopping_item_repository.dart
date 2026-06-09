@@ -18,4 +18,9 @@ abstract class ShoppingItemRepository {
   Stream<List<ShoppingItem>> watchAll();
   Future<void> upsert(ShoppingItem item);
   Future<void> reorder(String id, int newSortOrder);
+
+  /// Re-sequence the given items to a contiguous sort order (index 0..N-1)
+  /// matching [orderedIds]. Used by drag-to-reorder and move-to-top/bottom so
+  /// the persisted order never goes non-contiguous (quick-260609-pmc-04).
+  Future<void> reorderBatch(List<String> orderedIds);
 }

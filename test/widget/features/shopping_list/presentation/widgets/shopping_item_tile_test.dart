@@ -163,6 +163,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue('');
+    registerFallbackValue(<String>[]);
   });
 
   group('ShoppingItemTile — SHOP-02: renders item.name as primary text', () {
@@ -542,21 +543,21 @@ void main() {
     });
 
     testWidgets(
-        'tap move-to-top button calls reorder with (min sortOrder - 1) so '
-        'repeated taps never collide (quick-260609-pmc-03 bug fix)',
+        'tap move-to-top persists the full active order with this item first '
+        '(quick-260609-pmc-04: contiguous re-sequence, completed items excluded)',
         (tester) async {
       final mockReorder = MockReorderShoppingItemsUseCase();
-      when(() => mockReorder.execute(any(), any()))
+      when(() => mockReorder.applyOrder(any()))
           .thenAnswer((_) async => Result.success(null));
 
-      // Active list min sortOrder is 2 → move-to-top must target 2 - 1 = 1,
-      // NOT a fixed -1 (the old collision-prone value).
-      final item = _makeItem(id: 'item-move-top', sortOrder: 5);
+      // Display order: a, b, target, c (+ a completed item that must be excluded).
+      final item = _makeItem(id: 'target');
       final siblings = [
+        _makeItem(id: 'a'),
+        _makeItem(id: 'b'),
         item,
-        _makeItem(id: 'sib-a', sortOrder: 2),
-        _makeItem(id: 'sib-b', sortOrder: 7),
-        _makeItem(id: 'done', sortOrder: 0, isCompleted: true),
+        _makeItem(id: 'c'),
+        _makeItem(id: 'done', isCompleted: true),
       ];
       await _pumpTile(
         tester,
@@ -583,24 +584,25 @@ void main() {
       await tester.tap(find.byIcon(Icons.vertical_align_top));
       await tester.pump();
 
-      // min active sortOrder = 2 (completed item excluded) → 2 - 1 = 1
-      verify(() => mockReorder.execute('item-move-top', 1)).called(1);
+      verify(() => mockReorder.applyOrder(['target', 'a', 'b', 'c']))
+          .called(1);
     });
 
     testWidgets(
-        'tap move-to-bottom button calls reorder with (max sortOrder + 1) '
-        'so repeated taps never collide (quick-260609-pmc-03 bug fix)',
+        'tap move-to-bottom persists the full active order with this item last '
+        '(quick-260609-pmc-04: contiguous re-sequence, completed items excluded)',
         (tester) async {
       final mockReorder = MockReorderShoppingItemsUseCase();
-      when(() => mockReorder.execute(any(), any()))
+      when(() => mockReorder.applyOrder(any()))
           .thenAnswer((_) async => Result.success(null));
 
-      final item = _makeItem(id: 'item-move-bottom', sortOrder: 2);
+      // Display order: a, target, b (+ a completed item that must be excluded).
+      final item = _makeItem(id: 'target');
       final siblings = [
+        _makeItem(id: 'a'),
         item,
-        _makeItem(id: 'sib-a', sortOrder: 5),
-        _makeItem(id: 'sib-b', sortOrder: 7),
-        _makeItem(id: 'done', sortOrder: 99, isCompleted: true),
+        _makeItem(id: 'b'),
+        _makeItem(id: 'done', isCompleted: true),
       ];
       await _pumpTile(
         tester,
@@ -624,8 +626,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.vertical_align_bottom));
       await tester.pump();
 
-      // max active sortOrder = 7 (completed item with 99 excluded) → 7 + 1 = 8
-      verify(() => mockReorder.execute('item-move-bottom', 8)).called(1);
+      verify(() => mockReorder.applyOrder(['a', 'b', 'target'])).called(1);
     });
 
     testWidgets(
