@@ -243,20 +243,22 @@ void main() {
       },
     );
 
-    // EC2 D-2: reorder mode adds a ≡ (drag_indicator) prefix to the chips.
+    // EC2 D-2: reorder mode does NOT add drag_indicator prefixes to chips.
     testWidgets(
-      'EC2 D-2: reorder mode shows drag_indicator chip prefixes',
+      'EC2 D-2: reorder mode does NOT add drag_indicator to chip prefixes',
       (tester) async {
         final container = await _pumpFilterBar(tester);
 
-        // No prefixes in normal mode.
+        // No drag_indicator in normal mode.
         expect(find.byIcon(Icons.drag_indicator), findsNothing);
 
         container.read(shoppingReorderModeProvider.notifier).toggle();
         await tester.pumpAndSettle();
 
-        // 全部 + segmented control + category each gain a ≡ prefix.
-        expect(find.byIcon(Icons.drag_indicator), findsWidgets);
+        // Reorder mode must NOT add drag_indicator to any chip (Fix 1).
+        // The trailing reorder toggle uses Icons.reorder (not drag_indicator),
+        // so zero drag_indicator icons should appear in the entire filter bar.
+        expect(find.byIcon(Icons.drag_indicator), findsNothing);
       },
     );
   });
