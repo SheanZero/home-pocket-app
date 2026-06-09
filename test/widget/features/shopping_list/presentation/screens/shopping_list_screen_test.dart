@@ -18,6 +18,7 @@ import 'package:home_pocket/features/home/presentation/providers/state_shadow_bo
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_batch.dart';
+import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_reorder.dart';
 import 'package:home_pocket/features/shopping_list/presentation/screens/shopping_list_screen.dart';
 import 'package:home_pocket/features/shopping_list/presentation/widgets/shopping_batch_action_bar.dart';
 import 'package:home_pocket/features/shopping_list/presentation/widgets/shopping_selection_header.dart';
@@ -255,7 +256,50 @@ void main() {
 
       expect(find.byType(CustomScrollView), findsOneWidget);
     });
+
+    testWidgets(
+        'normal mode shows both active and completed items '
+        '(quick-260609-pmc-07 baseline)', (tester) async {
+      final items = [
+        _makeItem(id: 'a-1', name: 'Active One'),
+        _makeItem(id: 'c-1', name: 'Done One', isCompleted: true),
+      ];
+      await _pumpScreen(tester, items: items);
+
+      expect(find.text('Active One'), findsOneWidget);
+      expect(find.text('Done One'), findsOneWidget);
+    });
+
+    testWidgets(
+        'reorder mode hides the completed section; active stays visible '
+        '(quick-260609-pmc-07)', (tester) async {
+      final items = [
+        _makeItem(id: 'a-1', name: 'Active One'),
+        _makeItem(id: 'c-1', name: 'Done One', isCompleted: true),
+      ];
+      await _pumpScreen(
+        tester,
+        items: items,
+        extraOverrides: [
+          shoppingReorderModeProvider.overrideWith(
+            () => _FixedReorderMode(true),
+          ),
+        ],
+      );
+
+      expect(find.text('Active One'), findsOneWidget);
+      expect(find.text('Done One'), findsNothing);
+    });
   });
+}
+
+/// Fixed-state [ShoppingReorderMode] notifier for use in tests.
+class _FixedReorderMode extends ShoppingReorderMode {
+  _FixedReorderMode(this._fixed);
+  final bool _fixed;
+
+  @override
+  bool build() => _fixed;
 }
 
 /// Fixed-state [BatchSelectMode] notifier for use in tests.

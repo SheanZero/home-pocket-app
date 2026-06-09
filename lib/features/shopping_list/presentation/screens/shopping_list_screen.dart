@@ -10,6 +10,7 @@ import '../../../../shared/widgets/soft_confirm_dialog.dart';
 import '../providers/repository_providers.dart';
 import '../providers/state_shopping_batch.dart';
 import '../providers/state_shopping_filter.dart';
+import '../providers/state_shopping_reorder.dart';
 import '../widgets/shopping_batch_action_bar.dart';
 import '../widgets/shopping_empty_state.dart';
 import '../widgets/shopping_filter_bar.dart';
@@ -117,6 +118,10 @@ class ShoppingListScreen extends ConsumerWidget {
   ) {
     final l10n = S.of(context);
     final itemsAsync = ref.watch(filteredShoppingItemsProvider);
+    // Hide the completed section while reordering — the user is focused on
+    // arranging active items, and completed rows are not draggable
+    // (quick-260609-pmc-07). It reappears on exiting reorder mode.
+    final reorderMode = ref.watch(shoppingReorderModeProvider);
 
     return itemsAsync.when(
       loading: () => Center(
@@ -212,8 +217,8 @@ class ShoppingListScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            // Completed section
-            if (completedItems.isNotEmpty) ...[
+            // Completed section — hidden during reorder mode (pmc-07)
+            if (completedItems.isNotEmpty && !reorderMode) ...[
               // Clear-all-completed button + divider row (DONE-03)
               SliverToBoxAdapter(
                 child: _CompletedSectionHeader(
