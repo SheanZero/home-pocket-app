@@ -44,6 +44,7 @@ ShoppingItem _makeItem({
   String? addedByBookId,
   int? estimatedPrice,
   int quantity = 1,
+  int sortOrder = 0,
 }) {
   final now = DateTime(2026, 6, 8, 10, 0);
   return ShoppingItem(
@@ -56,6 +57,7 @@ ShoppingItem _makeItem({
     addedByBookId: addedByBookId,
     estimatedPrice: estimatedPrice,
     quantity: quantity,
+    sortOrder: sortOrder,
     createdAt: now,
   );
 }
@@ -540,13 +542,22 @@ void main() {
     });
 
     testWidgets(
-        'tap move-to-top button calls reorder use case with sortOrder = -1',
+        'tap move-to-top button calls reorder with (min sortOrder - 1) so '
+        'repeated taps never collide (quick-260609-pmc-03 bug fix)',
         (tester) async {
       final mockReorder = MockReorderShoppingItemsUseCase();
       when(() => mockReorder.execute(any(), any()))
           .thenAnswer((_) async => Result.success(null));
 
-      final item = _makeItem(id: 'item-move-top');
+      // Active list min sortOrder is 2 → move-to-top must target 2 - 1 = 1,
+      // NOT a fixed -1 (the old collision-prone value).
+      final item = _makeItem(id: 'item-move-top', sortOrder: 5);
+      final siblings = [
+        item,
+        _makeItem(id: 'sib-a', sortOrder: 2),
+        _makeItem(id: 'sib-b', sortOrder: 7),
+        _makeItem(id: 'done', sortOrder: 0, isCompleted: true),
+      ];
       await _pumpTile(
         tester,
         item: item,
@@ -557,13 +568,64 @@ void main() {
             () => _FixedReorderMode(true),
           ),
           reorderShoppingItemsUseCaseProvider.overrideWithValue(mockReorder),
+          filteredShoppingItemsProvider.overrideWith(
+            (ref) => Stream.value(siblings),
+          ),
         ],
       );
+      // Pre-warm the lazy StreamProvider so its value is available when the
+      // button's onTap reads it synchronously (a bare ref.read at tap time
+      // would otherwise see AsyncLoading → null).
+      ProviderScope.containerOf(tester.element(find.byType(ShoppingItemTile)))
+          .listen(filteredShoppingItemsProvider, (_, _) {});
+      await tester.pump(); // let the stream emit
 
       await tester.tap(find.byIcon(Icons.vertical_align_top));
       await tester.pump();
 
-      verify(() => mockReorder.execute('item-move-top', -1)).called(1);
+      // min active sortOrder = 2 (completed item excluded) → 2 - 1 = 1
+      verify(() => mockReorder.execute('item-move-top', 1)).called(1);
+    });
+
+    testWidgets(
+        'tap move-to-bottom button calls reorder with (max sortOrder + 1) '
+        'so repeated taps never collide (quick-260609-pmc-03 bug fix)',
+        (tester) async {
+      final mockReorder = MockReorderShoppingItemsUseCase();
+      when(() => mockReorder.execute(any(), any()))
+          .thenAnswer((_) async => Result.success(null));
+
+      final item = _makeItem(id: 'item-move-bottom', sortOrder: 2);
+      final siblings = [
+        item,
+        _makeItem(id: 'sib-a', sortOrder: 5),
+        _makeItem(id: 'sib-b', sortOrder: 7),
+        _makeItem(id: 'done', sortOrder: 99, isCompleted: true),
+      ];
+      await _pumpTile(
+        tester,
+        item: item,
+        delete: mockDelete,
+        toggle: mockToggle,
+        extraOverrides: [
+          shoppingReorderModeProvider.overrideWith(
+            () => _FixedReorderMode(true),
+          ),
+          reorderShoppingItemsUseCaseProvider.overrideWithValue(mockReorder),
+          filteredShoppingItemsProvider.overrideWith(
+            (ref) => Stream.value(siblings),
+          ),
+        ],
+      );
+      ProviderScope.containerOf(tester.element(find.byType(ShoppingItemTile)))
+          .listen(filteredShoppingItemsProvider, (_, _) {});
+      await tester.pump();
+
+      await tester.tap(find.byIcon(Icons.vertical_align_bottom));
+      await tester.pump();
+
+      // max active sortOrder = 7 (completed item with 99 excluded) → 7 + 1 = 8
+      verify(() => mockReorder.execute('item-move-bottom', 8)).called(1);
     });
 
     testWidgets(

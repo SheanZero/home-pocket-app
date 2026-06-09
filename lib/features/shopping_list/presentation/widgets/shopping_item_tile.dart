@@ -373,7 +373,10 @@ class ShoppingItemTile extends ConsumerWidget {
         children.add(const SizedBox(width: 4));
       }
 
-      // Move-to-top button (Fix 4): sort_order = -1 guarantees first position.
+      // Move-to-top button (Fix 4): assign a sort_order strictly below the
+      // current minimum so REPEATED taps keep working. A fixed value (e.g. -1)
+      // collides once two items share it — the `created_at` tiebreaker then makes
+      // further taps a no-op (the "多次点击后失效" bug). minOrder - 1 is monotonic.
       children.add(
         Semantics(
           label: S.of(context).shoppingMoveToTop,
@@ -381,9 +384,17 @@ class ShoppingItemTile extends ConsumerWidget {
           child: Tooltip(
             message: S.of(context).shoppingMoveToTop,
             child: InkWell(
-              onTap: () => ref
-                  .read(reorderShoppingItemsUseCaseProvider)
-                  .execute(item.id, -1),
+              onTap: () {
+                final items =
+                    ref.read(filteredShoppingItemsProvider).value ?? const [];
+                final orders =
+                    items.where((i) => !i.isCompleted).map((i) => i.sortOrder);
+                final minOrder =
+                    orders.isEmpty ? 0 : orders.reduce((a, b) => a < b ? a : b);
+                ref
+                    .read(reorderShoppingItemsUseCaseProvider)
+                    .execute(item.id, minOrder - 1);
+              },
               customBorder: const CircleBorder(),
               child: SizedBox(
                 width: 36,
@@ -401,7 +412,9 @@ class ShoppingItemTile extends ConsumerWidget {
         ),
       );
 
-      // Move-to-bottom button (Fix 4): sort_order = activeCount places item last.
+      // Move-to-bottom button (Fix 4): assign a sort_order strictly above the
+      // current maximum so REPEATED taps keep working. A fixed value (activeCount)
+      // collides once two items share it. maxOrder + 1 is monotonic.
       children.add(
         Semantics(
           label: S.of(context).shoppingMoveToBottom,
@@ -412,10 +425,13 @@ class ShoppingItemTile extends ConsumerWidget {
               onTap: () {
                 final items =
                     ref.read(filteredShoppingItemsProvider).value ?? const [];
-                final activeCount = items.where((i) => !i.isCompleted).length;
+                final orders =
+                    items.where((i) => !i.isCompleted).map((i) => i.sortOrder);
+                final maxOrder =
+                    orders.isEmpty ? 0 : orders.reduce((a, b) => a > b ? a : b);
                 ref
                     .read(reorderShoppingItemsUseCaseProvider)
-                    .execute(item.id, activeCount);
+                    .execute(item.id, maxOrder + 1);
               },
               customBorder: const CircleBorder(),
               child: SizedBox(
