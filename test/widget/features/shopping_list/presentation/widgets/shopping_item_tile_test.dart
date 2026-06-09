@@ -271,19 +271,21 @@ void main() {
       expect(find.byIcon(Icons.chevron_right), findsNothing);
     });
 
-    testWidgets('quantity > 1 shows ×N badge in trailing area', (tester) async {
+    testWidgets('quantity > 1 shows the number (no ×) in trailing area',
+        (tester) async {
       final item = _makeItem(quantity: 3);
       await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
 
-      expect(find.text('3×'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.textContaining('×'), findsNothing);
     });
 
-    testWidgets('quantity == 1 still shows the ×1 badge (always shown)',
+    testWidgets('quantity == 1 still shows the number 1 (always shown)',
         (tester) async {
       final item = _makeItem(quantity: 1);
       await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
 
-      expect(find.text('1×'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
     });
   });
 

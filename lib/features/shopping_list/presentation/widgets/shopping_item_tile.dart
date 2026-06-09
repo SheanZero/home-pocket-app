@@ -25,9 +25,9 @@ import '../../../home/presentation/providers/state_shadow_books.dart';
 ///   circle calls [ToggleItemCompletedUseCase] (EC2 D-domain#1 — was full-row)
 /// - EC2 D-domain#3: tapping the tile BODY opens [ShoppingItemFormScreen]
 ///   (replaces the removed edit chevron, EC2 D-1)
-/// - EC2 D-1: quantity moved to the trailing edge as a badge (shown for every
-///   item, quantity >= 1); the edit chevron is gone
-/// - 日常/悦己 ledger badge under the title (dual-ledger identity indicator)
+/// - EC2 D-1: quantity at the trailing edge — number only (no ×), shown for
+///   every item; the edit chevron is gone
+/// - 日常/悦己 ledger badge to the right of the title (dual-ledger identity)
 /// - MGMT-01: swipe-delete with [showSoftConfirmDialog]; [showSuccessFeedback]
 ///   BEFORE use-case call
 /// - MGMT-02: long-press enters batch mode
@@ -142,60 +142,59 @@ class ShoppingItemTile extends ConsumerWidget {
             // Leading circular completion toggle (EC2 D-domain#1)
             _buildCompletionToggle(context, ref, palette, reorderMode),
             const SizedBox(width: 12),
-            // Expanded text block
+            // Title + 日常/悦己 badge inline. The badge sits to the RIGHT of
+            // the title; the Row's default center cross-axis alignment keeps the
+            // title vertically centred now that nothing stacks below it.
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  // Primary: animated strikethrough + fade (DONE-01)
-                  AnimatedDefaultTextStyle(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                    style: item.isCompleted
-                        ? AppTextStyles.bodyLarge.copyWith(
-                            decoration: TextDecoration.lineThrough,
-                            color: palette.textTertiary,
-                          )
-                        : AppTextStyles.bodyLarge,
-                    child: AnimatedOpacity(
+                  // Primary: animated strikethrough + fade (DONE-01). Flexible
+                  // so a long name ellipsizes before crowding the badge.
+                  Flexible(
+                    child: AnimatedDefaultTextStyle(
                       duration: const Duration(milliseconds: 200),
-                      opacity: item.isCompleted ? 0.5 : 1.0,
-                      child: Text(item.name),
-                    ),
-                  ),
-                  // Secondary row: 日常/悦己 ledger badge + estimated price.
-                  // The badge is the dual-ledger identity indicator under the
-                  // title (per user request); price (when set) sits after it.
-                  if (item.ledgerType != null || item.estimatedPrice != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (item.ledgerType != null)
-                            _buildLedgerBadge(context, palette),
-                          if (item.ledgerType != null &&
-                              item.estimatedPrice != null)
-                            const SizedBox(width: 6),
-                          if (item.estimatedPrice != null)
-                            Text(
-                              NumberFormatter.formatCurrency(
-                                item.estimatedPrice!,
-                                'JPY',
-                                locale,
-                              ),
-                              style: AppTextStyles.amountSmall.copyWith(
-                                color: switch (item.ledgerType) {
-                                  LedgerType.daily => palette.dailyText,
-                                  // NEVER raw palette.joy — fails WCAG AA
-                                  LedgerType.joy => palette.joyText,
-                                  null => palette.textSecondary,
-                                },
-                              ),
-                            ),
-                        ],
+                      curve: Curves.easeInOut,
+                      style: item.isCompleted
+                          ? AppTextStyles.bodyLarge.copyWith(
+                              decoration: TextDecoration.lineThrough,
+                              color: palette.textTertiary,
+                            )
+                          : AppTextStyles.bodyLarge,
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 200),
+                        opacity: item.isCompleted ? 0.5 : 1.0,
+                        child: Text(
+                          item.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ),
+                  ),
+                  // 日常/悦己 ledger identity badge — right of the title.
+                  if (item.ledgerType != null) ...[
+                    const SizedBox(width: 8),
+                    _buildLedgerBadge(context, palette),
+                  ],
+                  // Estimated price (when set) trails the badge.
+                  if (item.estimatedPrice != null) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      NumberFormatter.formatCurrency(
+                        item.estimatedPrice!,
+                        'JPY',
+                        locale,
+                      ),
+                      style: AppTextStyles.amountSmall.copyWith(
+                        color: switch (item.ledgerType) {
+                          LedgerType.daily => palette.dailyText,
+                          // NEVER raw palette.joy — fails WCAG AA
+                          LedgerType.joy => palette.joyText,
+                          null => palette.textSecondary,
+                        },
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -309,7 +308,7 @@ class ShoppingItemTile extends ConsumerWidget {
     );
   }
 
-  /// 日常 / 悦己 ledger identity badge shown under the item title.
+  /// 日常 / 悦己 ledger identity badge shown to the right of the item title.
   ///
   /// Reuses the existing `listLedgerDaily` / `listLedgerJoy` strings and the
   /// dual-ledger palette tokens (daily green / joy — joyText, never raw joy,
@@ -342,9 +341,7 @@ class ShoppingItemTile extends ConsumerWidget {
   }
 
   /// Trailing cluster (EC2 D-1 / D-2):
-  /// - quantity badge — shown whenever `item.quantity >= 1` (always, since the
-  ///   column is NOT NULL with a default of 1; user opted to display every
-  ///   quantity rather than gate on > 1)
+  /// - quantity — number only (no ×), shown for every item with a right margin
   /// - drag handle — only in reorder mode AND for active items
   Widget _buildTrailingCluster(
     BuildContext context,
@@ -353,14 +350,18 @@ class ShoppingItemTile extends ConsumerWidget {
   ) {
     final children = <Widget>[];
 
-    // Quantity badge on the right edge (EC2 D-1) — shown for every item
-    // (quantity is always >= 1; user opted to always display the entered count).
+    // Quantity on the right edge — number only (no ×), shown for every item.
+    // Right padding gives the count margin from the screen edge (and from the
+    // drag handle when it appears in reorder mode).
     if (item.quantity >= 1) {
       children.add(
-        Text(
-          '${item.quantity}×',
-          style: AppTextStyles.amountSmall.copyWith(
-            color: palette.textSecondary,
+        Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: Text(
+            '${item.quantity}',
+            style: AppTextStyles.amountSmall.copyWith(
+              color: palette.textSecondary,
+            ),
           ),
         ),
       );
