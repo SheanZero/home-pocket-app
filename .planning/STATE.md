@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-07 — v1.6 购物清单 started)
 Phase: 39
 Plan: Not started
 Status: Milestone complete
-Last activity: 2026-06-09
+Last activity: 2026-06-09 - Completed quick task 260609-dnp: enhance shopping list filter (segmented ledger group, 全部 reset, L1-only category sheet, icon-name bug fix)
 
 ```
 v1.6 progress: [░░░░] 0% — Phase 36-39 defined, 0/4 complete
@@ -181,6 +181,7 @@ No active blockers. Carried-forward debt (cross-milestone):
 | 260603-ti2 | 将「外出就餐」调为食费一级类目下第一个二级类目 + schema v18→v19 migration | 2026-06-03 | 77a4833a | Verified 2026-06-03 | [260603-ti2-category](./quick/260603-ti2-category/) |
 | 260604-fyd | 修复 iPhone 15 Pro 选大字体时首页布局溢出 — `textScaleClamp` builder clamping at 1.2× | 2026-06-04 | f156d721 | Verified 2026-06-04 | [260604-fyd-iphone-15-pro](./quick/260604-fyd-iphone-15-pro/) |
 | 260607-jrz | 首页月份选择从 header 左右翻月 chevron 改为「点月份标签 → 弹窗式月份网格」 | 2026-06-07 | 80b16179 | Verified 2026-06-07 | [260607-jrz-month-picker-dialog](./quick/260607-jrz-month-picker-dialog/) |
+| 260609-dnp | 购物筛选栏增强：日常\|悦己 合并为单个分段控件（可点击取消）+ 全部 改为「重置」入口（仅无筛选时高亮、点击 clearAll）+ 删除清除 chip；新建 shopping 专用 L1-only 分类弹窗 `ShoppingCategoryFilterSheet`（共享 `CategoryFilterSheet` 不动）；修复 L1 行把图标名 `restaurant` 当文本渲染的 bug → 改用 `Icon(resolveCategoryIcon(l1.icon))`。analyze 0 issues，13/13 scoped 测试（7 widget + 6 golden re-baseline）通过 | 2026-06-09 | 3f96e9be | Verified 2026-06-09 (analyze 0 issues, 13/13 scoped tests green) | [260609-dnp-enhance-shopping-list-filter-combine-dai](./quick/260609-dnp-enhance-shopping-list-filter-combine-dai/) |
 
 ## Deferred Items
 
