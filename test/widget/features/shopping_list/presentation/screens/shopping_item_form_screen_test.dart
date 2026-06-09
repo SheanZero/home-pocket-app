@@ -13,10 +13,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/shopping_list/create_shopping_item_use_case.dart';
 import 'package:home_pocket/application/shopping_list/update_shopping_item_use_case.dart';
+import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
+import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/device_identity_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
-    show deviceIdentityRepositoryProvider;
+    show categoryRepositoryProvider, deviceIdentityRepositoryProvider;
 import 'package:home_pocket/features/family_sync/presentation/providers/state_active_group.dart'
     show isGroupModeProvider;
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
@@ -38,6 +40,8 @@ class _MockUpdateShoppingItemUseCase extends Mock
 
 class _MockDeviceIdentityRepository extends Mock
     implements DeviceIdentityRepository {}
+
+class _MockCategoryRepository extends Mock implements CategoryRepository {}
 
 // Fallback values needed by Mocktail for any() matching
 class _FakeCreateShoppingItemParams extends Fake
@@ -81,6 +85,7 @@ Future<void> _pumpForm(
   required _MockCreateShoppingItemUseCase createUseCase,
   required _MockUpdateShoppingItemUseCase updateUseCase,
   required _MockDeviceIdentityRepository deviceIdentityRepo,
+  _MockCategoryRepository? categoryRepo,
   String listType = 'public',
   ShoppingItem? item,
   bool isGroupMode = false,
@@ -92,6 +97,8 @@ Future<void> _pumpForm(
         updateShoppingItemUseCaseProvider.overrideWithValue(updateUseCase),
         deviceIdentityRepositoryProvider.overrideWithValue(deviceIdentityRepo),
         isGroupModeProvider.overrideWith((_) => isGroupMode),
+        if (categoryRepo != null)
+          categoryRepositoryProvider.overrideWithValue(categoryRepo),
       ],
       child: MaterialApp(
         localizationsDelegates: const [
@@ -739,6 +746,52 @@ void main() {
           capturedParams.tags,
           equals(editItem.tags),
           reason: 'Edit save must pass original item.tags through (D-2)',
+        );
+      },
+    );
+  });
+
+  // ── Category display — localized name, NOT the raw key/id ─────────────────
+  group('Category display localization', () {
+    testWidgets(
+      'CATEGORY-DISPLAY-01: built-in category renders localized name, not the raw key',
+      (tester) async {
+        // A system category stores a localization KEY in `name` (e.g.
+        // 'category_food'); the form must resolve it via
+        // CategoryLocalizationService — never render the raw key/id (the bug).
+        final mockCategoryRepo = _MockCategoryRepository();
+        when(() => mockCategoryRepo.findById('cat_food')).thenAnswer(
+          (_) async => Category(
+            id: 'cat_food',
+            name: 'category_food', // localization key, not display text
+            icon: 'restaurant',
+            color: '#FF5722',
+            level: 1,
+            isSystem: true,
+            createdAt: DateTime(2026, 6, 8),
+          ),
+        );
+
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+          categoryRepo: mockCategoryRepo,
+          item: _makeItem(categoryId: 'cat_food'),
+        );
+        await tester.pumpAndSettle();
+
+        // Default test locale is ja → 'category_food' resolves to '食費'.
+        expect(
+          find.text('食費'),
+          findsOneWidget,
+          reason: 'Category must show the localized display name',
+        );
+        expect(
+          find.text('category_food'),
+          findsNothing,
+          reason: 'Raw localization key/id must NEVER be rendered',
         );
       },
     );

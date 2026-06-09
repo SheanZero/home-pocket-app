@@ -7,11 +7,13 @@ import '../../../../generated/app_localizations.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/ledger_type_selector.dart';
 import '../../../../shared/widgets/list_type_selector.dart';
+import '../../../../application/accounting/category_localization_service.dart';
 import '../../../accounting/domain/models/category.dart';
 import '../../../accounting/domain/models/transaction.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart'
     show categoryRepositoryProvider, deviceIdentityRepositoryProvider;
 import '../../../accounting/presentation/screens/category_selection_screen.dart';
+import '../../../settings/presentation/providers/state_locale.dart';
 // isGroupModeProvider import removed — selector no longer gated on group mode (G8Z)
 import '../../domain/models/shopping_item.dart';
 import '../providers/repository_providers.dart'
@@ -71,9 +73,11 @@ class _ShoppingItemFormScreenState
   // Target list for a NEW item ('private' | 'public'). Mutable only in create
   // mode via selector; immutable in edit mode (D6/SYNC-03).
   late String _listType;
-  // Human-readable category label (CR-01). The model stores only categoryId,
-  // so in edit mode the name is resolved asynchronously from the repository.
-  String? _categoryName;
+  // Raw category name KEY (e.g. a localization key for built-in categories),
+  // resolved to a display string at build time via CategoryLocalizationService
+  // (mirrors transaction_details_form — fixes raw key/id showing in the UI).
+  // The model stores only categoryId, so in edit mode the key is loaded async.
+  String? _categoryNameKey;
 
   // Focus node for the name field; autofocus only in create mode (D-4).
   late final FocusNode _nameFocusNode;
@@ -201,19 +205,19 @@ class _ShoppingItemFormScreenState
     if (selected != null && mounted) {
       setState(() {
         _categoryId = selected.id;
-        _categoryName = selected.name;
+        _categoryNameKey = selected.name;
       });
     }
   }
 
-  /// Resolves a category's display name from its id (edit-mode pre-population).
-  /// The ShoppingItem model stores only categoryId, so the name must be looked
-  /// up to avoid rendering a raw UUID to the user (CR-01).
+  /// Loads a category's raw name key from its id (edit-mode pre-population).
+  /// The ShoppingItem model stores only categoryId; the key is resolved to a
+  /// localized display string at build time (CR-01).
   Future<void> _resolveCategoryName(String categoryId) async {
     final category =
         await ref.read(categoryRepositoryProvider).findById(categoryId);
     if (category != null && mounted) {
-      setState(() => _categoryName = category.name);
+      setState(() => _categoryNameKey = category.name);
     }
   }
 
@@ -358,6 +362,12 @@ class _ShoppingItemFormScreenState
     final l = S.of(context);
     final palette = context.palette;
     final isEditMode = widget.item != null;
+    final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
+    // Resolve the raw category name key to a localized display string at build
+    // time (mirrors transaction_details_form — never render the raw key/id).
+    final categoryDisplay = _categoryNameKey == null
+        ? null
+        : CategoryLocalizationService.resolve(_categoryNameKey!, locale);
 
     return Scaffold(
       appBar: AppBar(
@@ -554,11 +564,11 @@ class _ShoppingItemFormScreenState
                           ),
                           const Spacer(),
                           Text(
-                            _categoryName ?? l.shoppingFormNoCategorySelected,
+                            categoryDisplay ?? l.shoppingFormNoCategorySelected,
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: _categoryName != null
+                              color: categoryDisplay != null
                                   ? palette.textPrimary
                                   : palette.textSecondary,
                             ),
