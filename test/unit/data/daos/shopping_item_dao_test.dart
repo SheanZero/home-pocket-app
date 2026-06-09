@@ -39,6 +39,42 @@ void main() {
       expect(items[2].isCompleted, isTrue);
     });
 
+    test(
+        'watchByListType orders completed items by completed_at DESC '
+        '(most recently completed first) while active stay by sort_order '
+        '(quick-260609-pmc-06)',
+        () async {
+      // Two active items (sort_order 0,1) + three completed with distinct
+      // completed_at. Completed must appear newest-first regardless of sort_order.
+      await dao.upsert(_makeItem(id: 'active_0', sortOrder: 0));
+      await dao.upsert(_makeItem(id: 'active_1', sortOrder: 1));
+      await dao.upsert(_makeItem(
+        id: 'done_old',
+        isCompleted: true,
+        sortOrder: 5,
+        completedAt: DateTime(2026, 6, 9, 8),
+      ));
+      await dao.upsert(_makeItem(
+        id: 'done_new',
+        isCompleted: true,
+        sortOrder: 99,
+        completedAt: DateTime(2026, 6, 9, 12),
+      ));
+      await dao.upsert(_makeItem(
+        id: 'done_mid',
+        isCompleted: true,
+        sortOrder: 1,
+        completedAt: DateTime(2026, 6, 9, 10),
+      ));
+
+      final items = await dao.watchByListType('private').first;
+
+      expect(
+        items.map((r) => r.id).toList(),
+        ['active_0', 'active_1', 'done_new', 'done_mid', 'done_old'],
+      );
+    });
+
     test('watchByListType excludes soft-deleted items', () async {
       await dao.upsert(_makeItem(id: 'item_visible'));
       await dao.upsert(_makeItem(id: 'item_deleted'));
@@ -108,6 +144,8 @@ ShoppingItemsCompanion _makeItem({
   bool isCompleted = false,
   int sortOrder = 0,
   String listType = 'private',
+  DateTime? completedAt,
+  DateTime? createdAt,
 }) {
   return ShoppingItemsCompanion(
     id: Value(id),
@@ -116,6 +154,7 @@ ShoppingItemsCompanion _makeItem({
     name: Value('Item $id'),
     isCompleted: Value(isCompleted),
     sortOrder: Value(sortOrder),
-    createdAt: Value(DateTime.now()),
+    completedAt: Value(completedAt),
+    createdAt: Value(createdAt ?? DateTime.now()),
   );
 }

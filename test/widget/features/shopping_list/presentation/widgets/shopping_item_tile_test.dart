@@ -244,6 +244,27 @@ void main() {
       verify(() => mockToggle.execute('item-tap-test')).called(1);
     });
 
+    testWidgets(
+        'tap leading circle on a COMPLETED item restores it (un-complete) '
+        '(quick-260609-pmc-06)',
+        (tester) async {
+      final item =
+          _makeItem(id: 'item-done-tap', isCompleted: true);
+      await _pumpTile(
+        tester,
+        item: item,
+        delete: mockDelete,
+        toggle: mockToggle,
+        isActive: false,
+      );
+
+      await tester.tap(find.byKey(const ValueKey('toggle-item-done-tap')));
+      await tester.pump();
+
+      // The toggle use case flips isCompleted=false + clears completedAt.
+      verify(() => mockToggle.execute('item-done-tap')).called(1);
+    });
+
     testWidgets('tapping the tile body does NOT toggle (opens edit instead)',
         (tester) async {
       final item = _makeItem(id: 'item-body-test');

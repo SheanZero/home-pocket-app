@@ -66,10 +66,13 @@ class ShoppingItemDao {
   /// Drift cannot observe table writes and the stream will never re-emit after
   /// insert/update/delete operations (v1.4 GAP-2 lesson; DONE-02/SYNC-06).
   ///
-  /// SQL ORDER: `is_completed ASC, sort_order ASC, created_at ASC` (DONE-02):
-  /// active items come before completed items; within each group, items are
-  /// ordered by their explicit sort position, then by insertion time as
-  /// a stable tiebreaker.
+  /// SQL ORDER (DONE-02 + quick-260609-pmc-06):
+  /// - active items first (`is_completed ASC`);
+  /// - ACTIVE group ordered by explicit `sort_order ASC`, then `created_at ASC`;
+  /// - COMPLETED group ordered by `completed_at DESC` (most recently completed
+  ///   first), `created_at DESC` as a fallback for legacy null `completed_at`.
+  /// The `CASE WHEN is_completed = 0 THEN …` wrappers null-out the sort_order /
+  /// created_at keys for completed rows so they fall through to `completed_at`.
   ///
   /// [listType] is bound via [Variable.withString] — never string-interpolated
   /// into the SQL string (T-36-09 SQL injection prevention).
@@ -78,7 +81,10 @@ class ShoppingItemDao {
         .customSelect(
           'SELECT * FROM shopping_items '
           'WHERE list_type = ? AND is_deleted = 0 '
-          'ORDER BY is_completed ASC, sort_order ASC, created_at ASC',
+          'ORDER BY is_completed ASC, '
+          'CASE WHEN is_completed = 0 THEN sort_order END ASC, '
+          'CASE WHEN is_completed = 0 THEN created_at END ASC, '
+          'completed_at DESC, created_at DESC',
           variables: [Variable.withString(listType)],
           readsFrom: {_db.shoppingItems},
         )
@@ -99,7 +105,10 @@ class ShoppingItemDao {
         .customSelect(
           'SELECT * FROM shopping_items '
           'WHERE is_deleted = 0 '
-          'ORDER BY is_completed ASC, sort_order ASC, created_at ASC',
+          'ORDER BY is_completed ASC, '
+          'CASE WHEN is_completed = 0 THEN sort_order END ASC, '
+          'CASE WHEN is_completed = 0 THEN created_at END ASC, '
+          'completed_at DESC, created_at DESC',
           variables: const [],
           readsFrom: {_db.shoppingItems},
         )
