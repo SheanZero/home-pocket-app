@@ -205,22 +205,32 @@ void main() {
           reason: 'Container with left BorderSide(color:borderList, width:4) not found');
     });
 
-    testWidgets('joy ledger: left border color = palette.joy', (tester) async {
+    testWidgets('joy ledger: left border is transparent (no visible bar)',
+        (tester) async {
       final item = _makeItem(ledgerType: LedgerType.joy);
       await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
 
       final containers = tester.widgetList<Container>(find.byType(Container));
-      final expected = AppPalette.light.joy;
+      // The 4px inset is kept (for text alignment) but painted transparent.
       final found = containers.any((c) {
         final deco = c.decoration;
         if (deco is BoxDecoration && deco.border is Border) {
           final left = (deco.border! as Border).left;
-          return left.color == expected && left.width == 4;
+          return left.color == Colors.transparent && left.width == 4;
         }
         return false;
       });
       expect(found, isTrue,
-          reason: 'Container with left BorderSide(color:joy, width:4) not found');
+          reason: 'Container with transparent left BorderSide(width:4) not found');
+      // And there must be NO joy-coloured left bar anymore.
+      final hasJoyBar = containers.any((c) {
+        final deco = c.decoration;
+        if (deco is BoxDecoration && deco.border is Border) {
+          return (deco.border! as Border).left.color == AppPalette.light.joy;
+        }
+        return false;
+      });
+      expect(hasJoyBar, isFalse);
     });
   });
 

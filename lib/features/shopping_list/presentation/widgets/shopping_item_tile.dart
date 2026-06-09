@@ -121,10 +121,12 @@ class ShoppingItemTile extends ConsumerWidget {
   ) {
     final locale = Localizations.localeOf(context);
 
-    // Left-border accent colour per SHOP-03
+    // Left-border accent colour per SHOP-03. 悦己 (joy) intentionally has NO
+    // visible bar (user request) — kept transparent so the 4px inset still
+    // aligns its text with daily/unset tiles.
     final borderColor = switch (item.ledgerType) {
       LedgerType.daily => palette.daily,
-      LedgerType.joy => palette.joy,
+      LedgerType.joy => Colors.transparent,
       null => palette.borderList,
     };
 
