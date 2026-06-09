@@ -7,12 +7,12 @@ import '../../../../generated/app_localizations.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/ledger_type_selector.dart';
 import '../../../../shared/widgets/list_type_selector.dart';
-import '../../../../application/accounting/category_localization_service.dart';
 import '../../../accounting/domain/models/category.dart';
 import '../../../accounting/domain/models/transaction.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart'
     show categoryRepositoryProvider, deviceIdentityRepositoryProvider;
 import '../../../accounting/presentation/screens/category_selection_screen.dart';
+import '../../../accounting/presentation/utils/category_display_utils.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 // isGroupModeProvider import removed — selector no longer gated on group mode (G8Z)
 import '../../domain/models/shopping_item.dart';
@@ -73,11 +73,11 @@ class _ShoppingItemFormScreenState
   // Target list for a NEW item ('private' | 'public'). Mutable only in create
   // mode via selector; immutable in edit mode (D6/SYNC-03).
   late String _listType;
-  // Raw category name KEY (e.g. a localization key for built-in categories),
-  // resolved to a display string at build time via CategoryLocalizationService
-  // (mirrors transaction_details_form — fixes raw key/id showing in the UI).
-  // The model stores only categoryId, so in edit mode the key is loaded async.
-  String? _categoryNameKey;
+  // Selected category + its parent, so the form can render the full
+  // "parent > child" path via formatCategoryPath (mirrors transaction_details_form).
+  // The model stores only categoryId, so both are loaded async in edit mode.
+  Category? _category;
+  Category? _parentCategory;
 
   // Focus node for the name field; autofocus only in create mode (D-4).
   late final FocusNode _nameFocusNode;
@@ -103,7 +103,7 @@ class _ShoppingItemFormScreenState
       _ledgerType = item.ledgerType ?? LedgerType.daily;
       _categoryId = item.categoryId;
       if (item.categoryId != null) {
-        _resolveCategoryName(item.categoryId!);
+        _loadCategory(item.categoryId!);
       }
     } else {
       // Create mode — quantity defaults to '1' (D-3); daily ledger pre-selected (D-1).
@@ -202,23 +202,36 @@ class _ShoppingItemFormScreenState
             CategorySelectionScreen(selectedCategoryId: _categoryId),
       ),
     );
-    if (selected != null && mounted) {
-      setState(() {
-        _categoryId = selected.id;
-        _categoryNameKey = selected.name;
-      });
-    }
+    if (selected == null || !mounted) return;
+    final parent = await _resolveParent(selected);
+    if (!mounted) return;
+    setState(() {
+      _categoryId = selected.id;
+      _category = selected;
+      _parentCategory = parent;
+    });
   }
 
-  /// Loads a category's raw name key from its id (edit-mode pre-population).
-  /// The ShoppingItem model stores only categoryId; the key is resolved to a
-  /// localized display string at build time (CR-01).
-  Future<void> _resolveCategoryName(String categoryId) async {
+  /// Loads the category AND its parent from a stored id (edit-mode
+  /// pre-population), so the form can render the full "parent > child" path
+  /// at build time via [formatCategoryPath] (CR-01; mirrors transaction form).
+  Future<void> _loadCategory(String categoryId) async {
     final category =
         await ref.read(categoryRepositoryProvider).findById(categoryId);
-    if (category != null && mounted) {
-      setState(() => _categoryNameKey = category.name);
-    }
+    if (category == null || !mounted) return;
+    final parent = await _resolveParent(category);
+    if (!mounted) return;
+    setState(() {
+      _category = category;
+      _parentCategory = parent;
+    });
+  }
+
+  /// Fetches the parent category for an L2 category (null for L1 / orphaned).
+  Future<Category?> _resolveParent(Category category) async {
+    final parentId = category.parentId;
+    if (category.level == 1 || parentId == null) return null;
+    return ref.read(categoryRepositoryProvider).findById(parentId);
   }
 
   Widget _buildSaveButton(S l) {
@@ -363,11 +376,15 @@ class _ShoppingItemFormScreenState
     final palette = context.palette;
     final isEditMode = widget.item != null;
     final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
-    // Resolve the raw category name key to a localized display string at build
-    // time (mirrors transaction_details_form — never render the raw key/id).
-    final categoryDisplay = _categoryNameKey == null
+    // Render the full "parent > child" localized path at build time (mirrors
+    // transaction_details_form — never render the raw key/id).
+    final categoryDisplay = _category == null
         ? null
-        : CategoryLocalizationService.resolve(_categoryNameKey!, locale);
+        : formatCategoryPath(
+            category: _category!,
+            parentCategory: _parentCategory,
+            locale: locale,
+          );
 
     return Scaffold(
       appBar: AppBar(

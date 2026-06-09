@@ -783,6 +783,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Default test locale is ja → 'category_food' resolves to '食費'.
+        // L1 category has no parent → path is just the child name.
         expect(
           find.text('食費'),
           findsOneWidget,
@@ -792,6 +793,53 @@ void main() {
           find.text('category_food'),
           findsNothing,
           reason: 'Raw localization key/id must NEVER be rendered',
+        );
+      },
+    );
+
+    testWidgets(
+      'CATEGORY-DISPLAY-02: L2 category renders full "parent > child" path',
+      (tester) async {
+        // L2 category: parent resolved from parentId → "食費 > 食料品" (ja).
+        final mockCategoryRepo = _MockCategoryRepository();
+        when(() => mockCategoryRepo.findById('cat_food_groceries')).thenAnswer(
+          (_) async => Category(
+            id: 'cat_food_groceries',
+            name: 'category_food_groceries', // ja → 食料品
+            icon: 'shopping_basket',
+            color: '#FF5722',
+            parentId: 'cat_food',
+            level: 2,
+            isSystem: true,
+            createdAt: DateTime(2026, 6, 8),
+          ),
+        );
+        when(() => mockCategoryRepo.findById('cat_food')).thenAnswer(
+          (_) async => Category(
+            id: 'cat_food',
+            name: 'category_food', // ja → 食費
+            icon: 'restaurant',
+            color: '#FF5722',
+            level: 1,
+            isSystem: true,
+            createdAt: DateTime(2026, 6, 8),
+          ),
+        );
+
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+          categoryRepo: mockCategoryRepo,
+          item: _makeItem(categoryId: 'cat_food_groceries'),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('食費 > 食料品'),
+          findsOneWidget,
+          reason: 'L2 category must render the full parent > child path',
         );
       },
     );
