@@ -1,11 +1,12 @@
-// Widget tests for ShoppingFilterBar (FILT-01, FILT-03).
+// Widget tests for ShoppingFilterBar (FILT-01, D-1, D-2).
 //
 // ShoppingFilterBar is defined in:
 //   lib/features/shopping_list/presentation/widgets/shopping_filter_bar.dart
 //
-// Tests:
-//   FILT-01: filter bar renders ledger chips (All/日常/悦己) and status chip
-//   FILT-03: clear-all chip visible when any filter active; tapping calls clearAll()
+// Layout under test (D-1, D-2):
+//   [全部 standalone reset] [日常 | 悦己 connected segmented control] [Category]
+//   - 全部 highlights only when nothing filtered; tapping calls clearAll().
+//   - The old conditional clear-all chip is gone permanently.
 //
 // Run: flutter test test/widget/features/shopping_list/presentation/widgets/shopping_filter_bar_test.dart
 
@@ -30,12 +31,7 @@ Future<ProviderContainer> _pumpFilterBar(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        shoppingFilterProvider.overrideWith(() {
-          final n = ShoppingFilter();
-          // We set the initial state after the provider is built via a listener,
-          // but it is simpler to just pump with a known override.
-          return n;
-        }),
+        shoppingFilterProvider.overrideWith(ShoppingFilter.new),
       ],
       child: Builder(
         builder: (ctx) {
@@ -79,50 +75,63 @@ Future<ProviderContainer> _pumpFilterBar(
 
 void main() {
   group('ShoppingFilterBar', () {
-    // FILT-01: filter bar renders ledger chips and status chip
+    // FILT-01: filter bar renders 全部 reset + 日常|悦己 segmented + category.
     testWidgets(
-      'FILT-01: renders All / 日常 / 悦己 ledger chips and status chip',
+      'FILT-01: renders 全部 reset, 日常 / 悦己 segments and category chip',
       (tester) async {
         await _pumpFilterBar(tester);
 
-        // Ledger: "All" chip should appear (shoppingFilterLedgerAll = 'すべて' in ja)
-        expect(find.text('すべて'), findsWidgets);
+        // 全部 standalone reset (shoppingFilterLedgerAll = 'すべて' in ja).
+        expect(find.text('すべて'), findsOneWidget);
 
-        // Ledger: 日常 chip
+        // 日常 / 悦己 segment labels (ja 悦己 = 'ときめき').
         expect(find.text('日常'), findsOneWidget);
-
-        // Ledger: 悦己 chip (ja = 'ときめき')
         expect(find.text('ときめき'), findsOneWidget);
 
-        // Status chip (ja = 'すべてのアイテム' for all / 'アクティブのみ' for active)
-        // Initial state: statusFilter='all' → 'すべてのアイテム'
-        expect(find.text('すべてのアイテム'), findsOneWidget);
+        // Status chip removed — must NOT be present.
+        expect(find.text('すべてのアイテム'), findsNothing);
+        expect(find.text('アクティブのみ'), findsNothing);
 
-        // Category chip
+        // Category chip.
         expect(find.text('カテゴリ'), findsOneWidget);
 
-        // No clear-all chip on initial state (no active filters)
+        // The clear-all chip is gone PERMANENTLY (D-2) — not state-conditional.
         expect(find.byIcon(Icons.clear_all), findsNothing);
       },
     );
 
-    // FILT-03: clear-all chip appears when ledger filter is active; tapping calls clearAll
+    // D-2: clear-all chip is permanently absent even when a filter is active.
     testWidgets(
-      'FILT-03: clear-all chip visible when ledger filter active, tap calls clearAll()',
+      'D-2: no clear-all chip even when a ledger filter is active',
       (tester) async {
-        final container = await _pumpFilterBar(
+        await _pumpFilterBar(
           tester,
           filter: const ShoppingListFilter(ledgerType: LedgerType.daily),
         );
 
-        // Clear-all chip should be visible
-        expect(find.byIcon(Icons.clear_all), findsOneWidget);
+        expect(find.byIcon(Icons.clear_all), findsNothing);
+      },
+    );
 
-        // Tap the clear-all chip
-        await tester.tap(find.byIcon(Icons.clear_all));
+    // D-2: tapping 全部 resets everything via clearAll().
+    testWidgets(
+      'D-2: tapping 全部 calls clearAll() and resets all filter fields',
+      (tester) async {
+        final container = await _pumpFilterBar(
+          tester,
+          filter: const ShoppingListFilter(
+            ledgerType: LedgerType.daily,
+            categoryIds: {'food_dining'},
+          ),
+        );
+
+        // Sanity: filter is non-default before the reset.
+        expect(container.read(shoppingFilterProvider).ledgerType,
+            equals(LedgerType.daily));
+
+        await tester.tap(find.text('すべて'));
         await tester.pumpAndSettle();
 
-        // Filter should be reset
         final state = container.read(shoppingFilterProvider);
         expect(state.ledgerType, isNull);
         expect(state.categoryIds, isEmpty);
@@ -130,19 +139,9 @@ void main() {
       },
     );
 
-    // FILT-03: clear-all not shown when no filter active
+    // D-1: tapping 日常 segment sets ledger filter to daily.
     testWidgets(
-      'FILT-03: clear-all chip hidden when no filter active',
-      (tester) async {
-        await _pumpFilterBar(tester);
-
-        expect(find.byIcon(Icons.clear_all), findsNothing);
-      },
-    );
-
-    // Tapping 日常 chip sets ledger filter to daily
-    testWidgets(
-      'tapping 日常 chip sets ledgerType to daily',
+      'D-1: tapping 日常 segment sets ledgerType to daily',
       (tester) async {
         final container = await _pumpFilterBar(tester);
 
@@ -156,9 +155,9 @@ void main() {
       },
     );
 
-    // Tapping active 日常 chip clears ledger filter (toggle)
+    // D-1: tapping the active 日常 segment toggles back to null (deselect).
     testWidgets(
-      'tapping active 日常 chip toggles back to null (clear)',
+      'D-1: tapping active 日常 segment toggles back to null',
       (tester) async {
         final container = await _pumpFilterBar(
           tester,
@@ -169,6 +168,55 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(container.read(shoppingFilterProvider).ledgerType, isNull);
+      },
+    );
+
+    // D-1: 悦己 and 日常 are mutually exclusive (single ledgerType field).
+    testWidgets(
+      'D-1: tapping 悦己 after 日常 switches ledgerType to joy',
+      (tester) async {
+        final container = await _pumpFilterBar(
+          tester,
+          filter: const ShoppingListFilter(ledgerType: LedgerType.daily),
+        );
+
+        await tester.tap(find.text('ときめき'));
+        await tester.pumpAndSettle();
+
+        expect(
+          container.read(shoppingFilterProvider).ledgerType,
+          equals(LedgerType.joy),
+        );
+      },
+    );
+
+    // D-2: 全部 is active only when nothing is filtered — asserted behaviorally
+    // via the reset being a no-op-equivalent on default state and a true reset
+    // when a filter is active.
+    testWidgets(
+      'D-2: 全部 active state tracks "nothing filtered"',
+      (tester) async {
+        final container = await _pumpFilterBar(tester);
+
+        // Default state: nothing filtered → 全部 is the active control.
+        var state = container.read(shoppingFilterProvider);
+        expect(state.ledgerType, isNull);
+        expect(state.categoryIds, isEmpty);
+
+        // Activating a ledger filter means 全部 is no longer the active one.
+        container
+            .read(shoppingFilterProvider.notifier)
+            .setLedgerFilter(LedgerType.daily);
+        await tester.pumpAndSettle();
+        state = container.read(shoppingFilterProvider);
+        expect(state.ledgerType, equals(LedgerType.daily));
+
+        // Tapping 全部 returns to the nothing-filtered (全部-active) state.
+        await tester.tap(find.text('すべて'));
+        await tester.pumpAndSettle();
+        state = container.read(shoppingFilterProvider);
+        expect(state.ledgerType, isNull);
+        expect(state.categoryIds, isEmpty);
       },
     );
   });
