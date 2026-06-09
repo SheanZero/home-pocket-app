@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>添加商品页 — 重新设计</title>
+<style>
+  :root{
+    --bg:#FBF7F4; --card:#FFFFFF; --muted:#F3EDE8; --divider:#EAE1DC;
+    --textPrimary:#20352B; --textSecondary:#71877A; --textTertiary:#A8BCB2;
+    --border:#E6DDD8;
+    --daily:#5FAE72; --dailyText:#2E6B3A; --dailyLight:#EEF6EC;
+    --joy:#D98CA0; --joyText:#A53D5E; --joyLight:#FBEAEF;
+    --shared:#5B8AC4; --sharedText:#3A6396; --sharedLight:#E8EFF7; --sharedBorder:#CBDBEC;
+    --primary:#6FA36F;
+    --fabStart:#E09DB4; --fabEnd:#D98CA0; --fabShadow:rgba(217,140,160,.32);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,"PingFang SC","Hiragino Sans",sans-serif;}
+  body{background:#ece5df;padding:28px;display:flex;gap:36px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .col{display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .col h3{font-size:14px;color:#5a5048;font-weight:600;}
+  .phone{
+    width:360px;height:760px;background:var(--bg);border-radius:38px;
+    box-shadow:0 18px 50px rgba(0,0,0,.18);overflow:hidden;display:flex;flex-direction:column;
+    border:1px solid #ddd3cc;position:relative;
+  }
+  /* AppBar */
+  .appbar{height:52px;background:var(--card);display:flex;align-items:center;
+    padding:0 8px;border-bottom:1px solid var(--divider);flex-shrink:0;}
+  .appbar .back{display:flex;align-items:center;color:var(--daily);font-size:15px;font-weight:600;gap:2px;width:88px;}
+  .appbar .title{flex:1;text-align:center;font-size:16px;font-weight:700;color:var(--textPrimary);}
+  .appbar .spacer{width:88px;}
+  /* body */
+  .scroll{flex:1;overflow-y:auto;padding:14px 16px 12px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:16px;overflow:hidden;}
+  .region-tag{font-size:11px;color:#b09a72;font-weight:700;letter-spacing:.5px;margin:0 2px 6px;display:flex;align-items:center;gap:6px;}
+  .region-tag .num{background:#b09a72;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;}
+
+  /* region 1: name */
+  .name-card{padding:6px 16px;}
+  .name-input{width:100%;border:none;outline:none;font-size:18px;font-weight:600;color:var(--textPrimary);padding:14px 0;background:transparent;}
+  .name-input::placeholder{color:#c4b5ac;font-weight:500;}
+  .name-focus{box-shadow:0 0 0 2px rgba(111,163,111,.35);border-color:var(--primary)!important;}
+  .focus-badge{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:10px;background:var(--primary);color:#fff;padding:2px 7px;border-radius:8px;}
+  .name-wrap{position:relative;}
+
+  /* generic row inside card */
+  .row{display:flex;align-items:center;padding:14px 16px;gap:8px;}
+  .row + .row{border-top:1px solid var(--divider);}
+  .row .ic{width:16px;height:16px;color:var(--textTertiary);font-size:15px;}
+  .row .lbl{font-size:13px;font-weight:500;color:var(--textSecondary);}
+  .row .grow{flex:1;}
+
+  /* stepper */
+  .stepper{display:flex;align-items:center;gap:0;border:1px solid var(--border);border-radius:11px;overflow:hidden;}
+  .stepper button{width:38px;height:38px;border:none;background:var(--muted);font-size:20px;color:var(--dailyText);cursor:pointer;font-weight:500;}
+  .stepper button:active{background:var(--dailyLight);}
+  .stepper .qty{width:48px;height:38px;border:none;outline:none;text-align:center;font-size:16px;font-weight:700;color:var(--textPrimary);
+    border-left:1px solid var(--border);border-right:1px solid var(--border);background:var(--card);
+    font-variant-numeric:tabular-nums;}
+
+  /* pill selectors */
+  .pills{display:flex;gap:10px;}
+  .pill{display:flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);
+    background:var(--muted);font-size:13px;font-weight:600;color:var(--textSecondary);cursor:pointer;}
+  .pill .pic{font-size:14px;}
+  .pill.daily.on{background:var(--dailyLight);border-color:var(--daily);color:var(--dailyText);}
+  .pill.joy.on{background:var(--joyLight);border-color:var(--joy);color:var(--joyText);}
+  .pill.shared.on{background:var(--sharedLight);border-color:var(--shared);color:var(--sharedText);}
+
+  /* category row (DetailInfoCard style) */
+  .cat-val{font-size:14px;font-weight:600;color:var(--textPrimary);}
+  .chev{color:var(--textSecondary);font-size:16px;}
+  .placeholder-val{color:var(--textSecondary);font-weight:500;}
+
+  /* price */
+  .price-input{flex:1;text-align:right;border:none;outline:none;font-size:16px;font-weight:600;color:var(--textPrimary);background:transparent;font-variant-numeric:tabular-nums;}
+  .yen{color:var(--textSecondary);font-size:15px;}
+
+  /* note */
+  .note-wrap{padding:14px 16px;}
+  .note-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .note-box{background:var(--muted);border-radius:12px;min-height:64px;padding:12px 14px;font-size:13px;color:#c4b5ac;}
+
+  /* save button */
+  .save-bar{padding:8px 20px 18px;flex-shrink:0;}
+  .save-btn{width:100%;height:52px;border-radius:14px;border:none;cursor:pointer;
+    background:linear-gradient(to bottom,var(--fabStart),var(--fabEnd));
+    box-shadow:0 4px 14px var(--fabShadow);
+    color:#fff;font-size:16px;font-weight:700;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:8px;}
+
+  .note-cmt{max-width:330px;font-size:12.5px;color:#6a5f56;line-height:1.7;background:#fff;border-radius:12px;padding:14px 16px;border:1px solid #e3dad2;}
+  .note-cmt b{color:#3a3833;}
+  .note-cmt .k{color:#b08838;font-weight:700;}
+  .strike{text-decoration:line-through;color:#b9a89c;}
+</style>
+</head>
+<body>
+
+<div class="col">
+  <h3>新设计 — 添加商品（create）</h3>
+  <div class="phone">
+    <div class="appbar">
+      <span class="back">‹ 返回</span>
+      <span class="title">添加商品</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="scroll">
+
+      <!-- ① 商品名称 -->
+      <div class="region-tag"><span class="num">1</span>商品名称</div>
+      <div class="card name-card name-focus name-wrap">
+        <input class="name-input" placeholder="输入商品名称…" value="" autofocus>
+        <span class="focus-badge">⌨ 自动聚焦</span>
+      </div>
+
+      <!-- ② 数量 / 用途 / 类型 -->
+      <div class="region-tag"><span class="num">2</span>数量 · 用途 · 类型</div>
+      <div class="card">
+        <div class="row">
+          <span class="lbl">数量</span>
+          <span class="grow"></span>
+          <div class="stepper">
+            <button>−</button>
+            <input class="qty" value="1" inputmode="numeric">
+            <button>＋</button>
+          </div>
+        </div>
+        <div class="row">
+          <span class="lbl">用途</span>
+          <span class="grow"></span>
+          <div class="pills">
+            <div class="pill daily on"><span class="pic">🛡</span>日常支出</div>
+            <div class="pill joy"><span class="pic">✦</span>悦己支出</div>
+          </div>
+        </div>
+        <div class="row">
+          <span class="lbl">类型</span>
+          <span class="grow"></span>
+          <div class="pills">
+            <div class="pill shared on"><span class="pic">👥</span>公共</div>
+            <div class="pill shared"><span class="pic">🔒</span>私有</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ③ 分类 / 预估价格 / 备注 -->
+      <div class="region-tag"><span class="num">3</span>分类 · 预估价格 · 备注</div>
+      <div class="card">
+        <div class="row">
+          <span class="ic">🏷</span>
+          <span class="lbl">分类</span>
+          <span class="grow"></span>
+          <span class="cat-val placeholder-val">请选择分类</span>
+          <span class="chev">›</span>
+        </div>
+        <div class="row">
+          <span class="ic">¥</span>
+          <span class="lbl">预估价格</span>
+          <span class="grow"></span>
+          <input class="price-input" placeholder="0" inputmode="numeric">
+        </div>
+        <div class="note-wrap" style="border-top:1px solid var(--divider);">
+          <div class="note-head"><span class="ic">✎</span><span class="lbl">备注</span></div>
+          <div class="note-box">添加备注…</div>
+        </div>
+      </div>
+
+    </div>
+    <!-- 保存按钮：位置不变（底部），但醒目大按钮 -->
+    <div class="save-bar">
+      <button class="save-btn">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- annotations -->
+<div class="col">
+  <h3>设计说明 · 对照 8 项需求</h3>
+  <div class="note-cmt">
+    <p><span class="k">①三区域结构</span> — 与「添加账目」一致的卡片式布局：<br>
+    <b>区域1</b> 商品名称单独成卡；<b>区域2</b> 数量/用途/类型；<b>区域3</b> 分类/预估价格/备注。</p>
+    <br>
+    <p><span class="k">②「帐本」→「用途」</span> — 标题改为「用途」，选项 <b>日常支出 / 悦己支出</b>，沿用 LedgerTypeSelector 药丸（🛡绿 / ✦樱粉）。</p>
+    <br>
+    <p><span class="k">③「清单」→「类型」</span> — 标题改为「类型」，与「用途」同款药丸（钢蓝 公共/私有）。编辑模式下只读（0.6 透明、不可点）。</p>
+    <br>
+    <p><span class="k">④隐藏标签</span> — <span class="strike">标签字段</span> 暂时不显示（保留底层数据，编辑时原标签不丢失）。</p>
+    <br>
+    <p><span class="k">⑤分类选择</span> — 与「添加账目」一致：图标+「分类」+值+「›」整行点击，跳 CategorySelectionScreen。</p>
+    <br>
+    <p><span class="k">⑥数量步进器</span> — 最小值 1，进入即填 <b>1</b>；<b>[−] [1] [＋]</b> 快速加减，中间数字仍可手动输入。</p>
+    <br>
+    <p><span class="k">⑦自动聚焦</span> — 进入添加商品默认聚焦「商品名称」，键盘弹起可立即输入。</p>
+    <br>
+    <p><span class="k">⑧保存按钮</span> — 位置不变（底部），改为<b>全宽渐变大按钮</b>（樱粉渐变 + 阴影，高 52，与账目保存键一致），更醒目易点。</p>
+  </div>
+</div>
+
+</body>
+</html>
