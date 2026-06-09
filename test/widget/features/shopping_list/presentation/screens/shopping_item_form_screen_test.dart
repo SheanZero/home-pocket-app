@@ -1,7 +1,7 @@
 // Widget tests for ShoppingItemFormScreen.
 //
 // Covers: ITEM-01 (name required validation), ITEM-02 (D4 optional fields),
-//         ITEM-04 (edit mode pre-population).
+//         ITEM-04 (edit mode pre-population), G8Z2 (list-type selector fixes).
 //
 // Run: flutter test test/widget/features/shopping_list/presentation/screens/shopping_item_form_screen_test.dart
 
@@ -22,6 +22,8 @@ import 'package:home_pocket/features/shopping_list/presentation/providers/reposi
 import 'package:home_pocket/features/shopping_list/presentation/screens/shopping_item_form_screen.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/shared/utils/result.dart';
+import 'package:home_pocket/shared/widgets/ledger_type_selector.dart';
+import 'package:home_pocket/shared/widgets/list_type_selector.dart';
 import 'package:mocktail/mocktail.dart';
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
@@ -75,7 +77,7 @@ Future<void> _pumpForm(
   required _MockCreateShoppingItemUseCase createUseCase,
   required _MockUpdateShoppingItemUseCase updateUseCase,
   required _MockDeviceIdentityRepository deviceIdentityRepo,
-  String listType = 'private',
+  String listType = 'public',
   ShoppingItem? item,
   bool isGroupMode = false,
 }) async {
@@ -166,7 +168,8 @@ void main() {
       );
 
       // Enter a non-empty name
-      await tester.enterText(find.byKey(const Key('shopping_form_name_field')), 'Test Item');
+      await tester.enterText(
+          find.byKey(const Key('shopping_form_name_field')), 'Test Item');
       await tester.pump();
 
       // Tap Save
@@ -198,7 +201,8 @@ void main() {
       );
     });
 
-    testWidgets('quantity and estimated price fields are present', (tester) async {
+    testWidgets('quantity and estimated price fields are present',
+        (tester) async {
       await _pumpForm(
         tester,
         createUseCase: mockCreate,
@@ -334,19 +338,19 @@ void main() {
     });
   });
 
-  // ── List-type selector (G8Z) ──────────────────────────────────────────
+  // ── List-type selector (G8Z / G8Z2) ──────────────────────────────────────
 
   group('List-type selector', () {
-    // FORM-SELECTOR-01: selector renders interactive in create mode — solo.
+    // FORM-SELECTOR-01: selector renders in create mode — solo.
     testWidgets(
-      'FORM-SELECTOR-01: selector renders interactive in create mode (isGroupMode=false)',
+      'FORM-SELECTOR-01: selector renders as ListTypeSelector in create mode (isGroupMode=false)',
       (tester) async {
         await _pumpForm(
           tester,
           createUseCase: mockCreate,
           updateUseCase: mockUpdate,
           deviceIdentityRepo: mockDeviceIdentityRepo,
-          listType: 'private',
+          listType: 'public',
           isGroupMode: false,
         );
         await tester.pumpAndSettle();
@@ -354,21 +358,26 @@ void main() {
         expect(
           find.byKey(const Key('shopping_form_list_type_selector')),
           findsOneWidget,
-          reason: 'Selector must render in create mode (solo)',
+          reason: 'ListTypeSelector must render in create mode (solo)',
+        );
+        // Must be a ListTypeSelector widget (not SegmentedButton)
+        expect(
+          find.byType(ListTypeSelector),
+          findsOneWidget,
         );
       },
     );
 
-    // FORM-SELECTOR-02: selector renders interactive in create mode — group.
+    // FORM-SELECTOR-02: selector renders in create mode — group.
     testWidgets(
-      'FORM-SELECTOR-02: selector renders interactive in create mode (isGroupMode=true)',
+      'FORM-SELECTOR-02: selector renders as ListTypeSelector in create mode (isGroupMode=true)',
       (tester) async {
         await _pumpForm(
           tester,
           createUseCase: mockCreate,
           updateUseCase: mockUpdate,
           deviceIdentityRepo: mockDeviceIdentityRepo,
-          listType: 'private',
+          listType: 'public',
           isGroupMode: true,
         );
         await tester.pumpAndSettle();
@@ -376,8 +385,9 @@ void main() {
         expect(
           find.byKey(const Key('shopping_form_list_type_selector')),
           findsOneWidget,
-          reason: 'Selector must render in create mode (group)',
+          reason: 'ListTypeSelector must render in create mode (group)',
         );
+        expect(find.byType(ListTypeSelector), findsOneWidget);
       },
     );
 
@@ -397,28 +407,35 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // a) Selector present
+        // a) Selector present as ListTypeSelector
         expect(
           find.byKey(const Key('shopping_form_list_type_selector')),
           findsOneWidget,
           reason: 'Selector must be present in edit mode',
         );
 
-        // b) Reflects stored listType: 'public' segment is selected
-        final button = tester.widget<SegmentedButton<String>>(
+        // b) Reflects stored listType: public chip is visually selected
+        final widget = tester.widget<ListTypeSelector>(
           find.byKey(const Key('shopping_form_list_type_selector')),
         );
-        expect(button.selected, contains('public'),
+        expect(widget.selected, equals('public'),
             reason: 'Edit mode must show stored listType as selected');
+        expect(widget.enabled, isFalse,
+            reason: 'Edit mode must disable the selector');
 
-        // c) Non-interactive: tap 'Private' segment, selection unchanged
-        await tester.tap(find.text('Private'));
+        // c) Non-interactive: tap 'Private' chip, selection unchanged
+        // (IgnorePointer absorbs the tap — no onChanged fired)
+        await tester.tap(
+          find.byKey(const ValueKey('list_type_private_chip')),
+          warnIfMissed: false,
+        );
         await tester.pumpAndSettle();
 
-        final buttonAfterTap = tester.widget<SegmentedButton<String>>(
+        // Widget still reflects 'public' (no state change from tap)
+        final widgetAfter = tester.widget<ListTypeSelector>(
           find.byKey(const Key('shopping_form_list_type_selector')),
         );
-        expect(buttonAfterTap.selected, contains('public'),
+        expect(widgetAfter.selected, equals('public'),
             reason: 'Selection must remain public after tapping disabled selector');
       },
     );
@@ -452,7 +469,7 @@ void main() {
           createUseCase: mockCreate,
           updateUseCase: mockUpdate,
           deviceIdentityRepo: mockDeviceIdentityRepo,
-          listType: 'private',
+          listType: 'public',
         );
         await tester.pumpAndSettle();
 
@@ -464,29 +481,38 @@ void main() {
       },
     );
 
-    // FORM-SELECTOR-05: tapping public segment in create mode calls createUseCase with listType=public.
+    // FORM-SELECTOR-05: default selection in create mode is 'public'.
     testWidgets(
-      'FORM-SELECTOR-05: tapping public segment in create mode submits listType=public',
+      'FORM-SELECTOR-05: create mode default selection is public; tapping private then saving submits listType=private',
       (tester) async {
         late CreateShoppingItemParams capturedParams;
         when(() => mockCreate.execute(any())).thenAnswer((inv) async {
-          capturedParams = inv.positionalArguments.first as CreateShoppingItemParams;
-          return Result.success(_makeItem(listType: 'public'));
+          capturedParams =
+              inv.positionalArguments.first as CreateShoppingItemParams;
+          return Result.success(_makeItem(listType: 'private'));
         });
 
+        // Create mode with default listType='public'
         await _pumpForm(
           tester,
           createUseCase: mockCreate,
           updateUseCase: mockUpdate,
           deviceIdentityRepo: mockDeviceIdentityRepo,
-          listType: 'private',
+          listType: 'public',
           isGroupMode: false,
         );
         await tester.pumpAndSettle();
 
-        // Tap 'Public' segment
-        await tester.tap(find.text('Public'));
-        await tester.pumpAndSettle();
+        // Default selection: 'public'
+        final selectorBefore = tester.widget<ListTypeSelector>(
+          find.byKey(const Key('shopping_form_list_type_selector')),
+        );
+        expect(selectorBefore.selected, equals('public'),
+            reason: 'Default selection in create mode must be "public"');
+
+        // Tap 'Private' chip to switch
+        await tester.tap(find.byKey(const ValueKey('list_type_private_chip')));
+        await tester.pump();
 
         // Enter a name and save
         await tester.enterText(
@@ -499,9 +525,132 @@ void main() {
         verify(() => mockCreate.execute(any())).called(1);
         expect(
           capturedParams.listType,
-          equals('public'),
-          reason: 'createUseCase must be called with listType=public',
+          equals('private'),
+          reason: 'After tapping private, createUseCase must be called with listType=private',
         );
+      },
+    );
+
+    // FORM-SELECTOR-06: saving without changing list type submits listType='public'.
+    testWidgets(
+      'FORM-SELECTOR-06: saving in create mode without changing selector submits listType=public',
+      (tester) async {
+        late CreateShoppingItemParams capturedParams;
+        when(() => mockCreate.execute(any())).thenAnswer((inv) async {
+          capturedParams =
+              inv.positionalArguments.first as CreateShoppingItemParams;
+          return Result.success(_makeItem(listType: 'public'));
+        });
+
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+          listType: 'public',
+        );
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.byKey(const Key('shopping_form_name_field')),
+          'Default Item',
+        );
+        await tester.tap(find.text('Save'));
+        await tester.pumpAndSettle();
+
+        verify(() => mockCreate.execute(any())).called(1);
+        expect(
+          capturedParams.listType,
+          equals('public'),
+          reason: 'Default save (no tap) must submit listType=public',
+        );
+      },
+    );
+  });
+
+  // ── Ledger default (G8Z2) ─────────────────────────────────────────────────
+
+  group('Ledger default', () {
+    testWidgets(
+      'LEDGER-DEFAULT-01: create mode ledger chip daily is pre-selected',
+      (tester) async {
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+          listType: 'public',
+        );
+        await tester.pumpAndSettle();
+
+        // LedgerTypeSelector must exist and have daily pre-selected
+        final ledgerSelector = tester.widget<LedgerTypeSelector>(
+          find.byKey(const Key('shopping_form_ledger_selector')),
+        );
+        expect(ledgerSelector.selected, equals(LedgerType.daily),
+            reason: 'Create mode must pre-select daily ledger');
+      },
+    );
+
+    testWidgets(
+      'LEDGER-DEFAULT-02: save without changing ledger calls createUseCase with ledgerType=daily',
+      (tester) async {
+        late CreateShoppingItemParams capturedParams;
+        when(() => mockCreate.execute(any())).thenAnswer((inv) async {
+          capturedParams =
+              inv.positionalArguments.first as CreateShoppingItemParams;
+          return Result.success(_makeItem());
+        });
+
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+          listType: 'public',
+        );
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.byKey(const Key('shopping_form_name_field')),
+          'Milk',
+        );
+        await tester.tap(find.text('Save'));
+        await tester.pumpAndSettle();
+
+        verify(() => mockCreate.execute(any())).called(1);
+        expect(
+          capturedParams.ledgerType,
+          equals(LedgerType.daily),
+          reason: 'Default save must submit ledgerType=daily',
+        );
+      },
+    );
+  });
+
+  // ── Selector ordering (G8Z2) ──────────────────────────────────────────────
+
+  group('Selector ordering', () {
+    testWidgets(
+      'ORDER-01: ListTypeSelector appears after LedgerTypeSelector in the form',
+      (tester) async {
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+          listType: 'public',
+        );
+        await tester.pumpAndSettle();
+
+        final ledgerOffset = tester.getTopLeft(
+          find.byKey(const Key('shopping_form_ledger_selector')),
+        );
+        final listTypeOffset = tester.getTopLeft(
+          find.byKey(const Key('shopping_form_list_type_selector')),
+        );
+        expect(ledgerOffset.dy, lessThan(listTypeOffset.dy),
+            reason: 'Ledger selector must appear above the list-type selector');
       },
     );
   });
