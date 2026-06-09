@@ -2342,13 +2342,21 @@
   "@shoppingSegmentAll": {
     "description": "Shopping list view toggle — All segment (merges private + public)"
   },
-  "shoppingSegmentPrivate": "个人",
+  "shoppingSegmentPrivate": "私有",
   "@shoppingSegmentPrivate": {
-    "description": "Shopping list view toggle — Personal (private) segment label"
+    "description": "Shopping filter chip and form selector — private (local-only) list label"
+  },
+  "shoppingFilterPrivate": "私有",
+  "@shoppingFilterPrivate": {
+    "description": "Shopping filter bar chip — shows only private (local-only) items"
   },
   "shoppingFormListTypeLabel": "清单",
   "@shoppingFormListTypeLabel": {
     "description": "Shopping item form — list-type (private/public) selector label"
+  },
+  "shoppingListTypeLockedHint": "创建后不可更改",
+  "@shoppingListTypeLockedHint": {
+    "description": "Shopping item form — caption shown under the disabled list-type selector in edit mode"
   },
   "shoppingCompletedDivider": "已完成",
   "@shoppingCompletedDivider": {
