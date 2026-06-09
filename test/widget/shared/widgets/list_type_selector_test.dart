@@ -106,10 +106,13 @@ void main() {
       );
       await tester.pump();
 
-      // Tapping either chip must not call onChanged (IgnorePointer active)
-      await tester.tap(find.byKey(const ValueKey('list_type_private_chip')));
+      // Tapping either chip must not call onChanged (IgnorePointer active).
+      // warnIfMissed:false — the tap intentionally lands on an IgnorePointer.
+      await tester.tap(find.byKey(const ValueKey('list_type_private_chip')),
+          warnIfMissed: false);
       await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('list_type_public_chip')));
+      await tester.tap(find.byKey(const ValueKey('list_type_public_chip')),
+          warnIfMissed: false);
       await tester.pump();
 
       expect(called, isFalse,
