@@ -9,13 +9,13 @@ import '../providers/state_shopping_filter.dart';
 import '../providers/state_shopping_reorder.dart';
 import 'shopping_category_filter_sheet.dart';
 
-/// Shopping-specific filter bar (FILT-01, D-1, D-2, D-3, EC2 D-2).
+/// Shopping-specific filter bar (FILT-01, D-1, D-2, D-3, EC2 D-2, G8Z).
 ///
 /// Reads from [shoppingFilterProvider] — NOT [listFilterProvider] (the category
 /// sheet writes back via its [onApply] callback).
 ///
 /// Layout (left-to-right):
-///   [ left-aligned scrollable chips: 全部 | 日常·悦己 | Category ] [ ≡ / ✓ ]
+///   [ left-aligned scrollable chips: 全部 | 日常·悦己 | 私有 | Category ] [ ≡ / ✓ ]
 ///
 /// - The chip cluster is wrapped in an [Expanded] horizontal scroll view so it
 ///   stays left-aligned and the reorder toggle pins to the right edge (EC2 D-2).
@@ -45,6 +45,8 @@ class ShoppingFilterBar extends ConsumerWidget {
 
     final dailySelected = filter.ledgerType == LedgerType.daily;
     final joySelected = filter.ledgerType == LedgerType.joy;
+    // 私有 chip — always visible, active when showPrivateOnly is true (G8Z).
+    final privateOnly = filter.showPrivateOnly;
 
     // Small ≡ prefix shown before each chip while in reorder mode (EC2 D-2).
     Widget? reorderPrefix() => reorderMode
@@ -156,6 +158,33 @@ class ShoppingFilterBar extends ConsumerWidget {
                         ],
                       ),
                     ),
+                  ),
+                  const SizedBox(width: 8),
+
+                  // ── 私有 chip — always visible, scopes to private list (G8Z) ──
+                  ActionChip(
+                    key: const Key('shopping_filter_private_chip'),
+                    avatar: reorderPrefix(),
+                    label: Text(
+                      l10n.shoppingFilterPrivate,
+                      style: AppTextStyles.labelMedium.copyWith(
+                        color: privateOnly
+                            ? palette.sharedText
+                            : palette.textSecondary,
+                      ),
+                    ),
+                    backgroundColor:
+                        privateOnly ? palette.sharedLight : palette.card,
+                    side: BorderSide(
+                      color: privateOnly
+                          ? palette.shared
+                          : palette.borderDefault,
+                      width: 1,
+                    ),
+                    onPressed: () => ref
+                        .read(shoppingFilterProvider.notifier)
+                        .setPrivateFilter(!privateOnly),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   const SizedBox(width: 8),
 
