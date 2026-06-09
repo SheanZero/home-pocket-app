@@ -163,21 +163,56 @@ class ShoppingListScreen extends ConsumerWidget {
         return CustomScrollView(
           slivers: [
             // Active items — SliverReorderableList (D38-02).
-            // Drag is initiated via ReorderableDragStartListener in ShoppingItemTile
-            // (Flutter 3.44 API — buildDefaultDragHandles parameter no longer exists).
+            // Fix 2: ReorderableDelayedDragStartListener wraps the full tile so
+            // a long-press anywhere on the row initiates drag (not just the handle).
+            // Fix 3: proxyDecorator adds animated elevation + leaf-green left border
+            // to the item being dragged for clear visual feedback.
             // onReorderItem provides the already-adjusted newIndex (item removed before insertion).
             SliverReorderableList(
               itemCount: activeItems.length,
+              proxyDecorator: (child, index, animation) {
+                return AnimatedBuilder(
+                  animation: animation,
+                  builder: (ctx, _) {
+                    final double elevation =
+                        Tween<double>(begin: 0, end: 6)
+                            .animate(CurvedAnimation(
+                              parent: animation,
+                              curve: Curves.easeOut,
+                            ))
+                            .value;
+                    return Material(
+                      elevation: elevation,
+                      color: Colors.transparent,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: Border(
+                            left: BorderSide(
+                              color: ctx.palette.borderInputActive,
+                              width: 6,
+                            ),
+                          ),
+                        ),
+                        child: child,
+                      ),
+                    );
+                  },
+                );
+              },
               onReorderItem: (oldIndex, newIndex) {
                 ref
                     .read(reorderShoppingItemsUseCaseProvider)
                     .execute(activeItems[oldIndex].id, newIndex);
               },
-              itemBuilder: (context, index) => ShoppingItemTile(
+              itemBuilder: (context, index) =>
+                  ReorderableDelayedDragStartListener(
                 key: ValueKey(activeItems[index].id),
-                item: activeItems[index],
                 index: index,
-                isActive: true,
+                child: ShoppingItemTile(
+                  item: activeItems[index],
+                  index: index,
+                  isActive: true,
+                ),
               ),
             ),
             // Completed section
