@@ -35,7 +35,9 @@ iOS 启动停在通用「初始化失败」屏。崩溃发生在已含今天 18:
 - `grep first_unlock lib/ test/` = 0
 
 ## 待办 / 边界
-- [ ] 设备侧确认：重新 build → 正常启动且数据恢复。
+- [x] 设备侧确认（2026-06-10 Verified）：release 覆盖安装（=升级路径）到「Xin Zhang」的
+  iPhone（签名 team 6Y64KR8RLP 不变 → keychain access group 不变）→ 正常启动越过初始化
+  失败屏 + 数据保留。回退 ② 使旧 key 重新可读，原 bug（升级丢数据）确认修复。
 - 若该设备 key 因过往开发期重装致 keychain access group 变化而物理不可达，回退也救不回
   （非 accessibility 不匹配，而是 item 真不可达）→ 另议 recovery kit。
 - 后续（沿用 18:33 worklog）：①「key 不可读但 DB 存在」专门 UI（recovery / deliberate

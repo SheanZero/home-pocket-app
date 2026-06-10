@@ -63,7 +63,10 @@ at `:462`，且无忽略 accessibility 的回退路径）。
 - [x] 受影响套件 `test/infrastructure/security/` + `test/core/initialization/` 105/105 通过
 - [x] 全量 `flutter test` **2565/2565** 通过，无回归
 - [x] `grep first_unlock lib/ test/` = 0（无残留）
-- [ ] **设备侧待确认**：用户重新 build → 应正常启动且数据恢复
+- [x] **设备侧已确认（Verified 2026-06-10）**：`flutter run --release` 两次安装到「Xin
+  Zhang」的 iPhone（00008130，签名 team 6Y64KR8RLP 不变 → keychain access group 不变）；
+  第二次为**覆盖安装=升级路径**（未卸载）→ 正常启动越过初始化失败屏 + 数据保留。回退 ②
+  使旧 key 重新可读，原 bug（升级丢数据 + 启动初始化失败）确认修复。
 
 ---
 
