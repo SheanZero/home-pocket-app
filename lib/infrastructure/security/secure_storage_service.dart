@@ -69,6 +69,11 @@ class SecureStorageService {
   final FlutterSecureStorage _storage;
 
   /// iOS Keychain: unlocked + this device only (no iCloud sync).
+  /// MUST stay `unlocked_this_device` to match existing stored items —
+  /// flutter_secure_storage 10.x includes `kSecAttrAccessible` in the read
+  /// query, so changing it makes pre-existing items unreadable and trips the
+  /// AppInitializer data-loss guard. See [flutterSecureStorageProvider] in
+  /// security/providers.dart for the full rationale.
   static const _iosOptions = IOSOptions(
     accessibility: KeychainAccessibility.unlocked_this_device,
   );

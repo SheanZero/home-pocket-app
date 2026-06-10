@@ -41,12 +41,13 @@ void main() {
       expect((failure as InitFailure).stackTrace, isNull);
     });
 
-    test('InitFailureType has 4 variants', () {
-      expect(InitFailureType.values, hasLength(4));
+    test('InitFailureType has 5 variants', () {
+      expect(InitFailureType.values, hasLength(5));
       expect(
         InitFailureType.values,
         containsAll([
           InitFailureType.masterKey,
+          InitFailureType.masterKeyMissingWithData,
           InitFailureType.database,
           InitFailureType.seed,
           InitFailureType.unknown,

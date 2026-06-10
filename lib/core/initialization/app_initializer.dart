@@ -14,19 +14,26 @@ typedef ProviderContainerFactory =
 typedef AppDatabaseFactory =
     Future<AppDatabase> Function(MasterKeyRepository masterKeyRepo);
 
+/// Whether an encrypted database already exists on disk. Injected so the
+/// data-loss guard stays unit-testable without touching path_provider.
+typedef EncryptedDatabaseExists = Future<bool> Function();
+
 typedef SeedRunner = Future<void> Function(ProviderContainer container);
 
 class AppInitializer {
   AppInitializer({
     required ProviderContainerFactory containerFactory,
     required AppDatabaseFactory databaseFactory,
+    required EncryptedDatabaseExists databaseExists,
     required SeedRunner seedRunner,
   }) : _containerFactory = containerFactory,
        _databaseFactory = databaseFactory,
+       _databaseExists = databaseExists,
        _seedRunner = seedRunner;
 
   final ProviderContainerFactory _containerFactory;
   final AppDatabaseFactory _databaseFactory;
+  final EncryptedDatabaseExists _databaseExists;
   final SeedRunner _seedRunner;
 
   Future<InitResult> initialize() async {
@@ -43,6 +50,18 @@ class AppInitializer {
 
       try {
         if (!await masterKeyRepo.hasMasterKey()) {
+          // CRITICAL data-loss guard: a missing master key normally means
+          // "first launch", but if an encrypted database already exists the key
+          // read failed for another reason (locked device, changed keychain
+          // access group, transient keychain error). Generating a new random
+          // key here would permanently orphan the existing data, so fail loud
+          // instead of overwriting the key.
+          if (await _databaseExists()) {
+            return InitResult.failure(
+              type: InitFailureType.masterKeyMissingWithData,
+              error: const MasterKeyMissingWithExistingDataError(),
+            );
+          }
           await masterKeyRepo.initializeMasterKey();
         }
 

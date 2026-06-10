@@ -398,6 +398,7 @@ void main() {
             }
             return AppDatabase.forTesting();
           },
+          databaseExists: () async => false,
           seedRunner: (_) async {},
         );
       }

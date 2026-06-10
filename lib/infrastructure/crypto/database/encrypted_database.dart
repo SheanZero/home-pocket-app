@@ -61,13 +61,31 @@ Future<String> _deriveDatabaseKey(
   return keyBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join('');
 }
 
-Future<File> _getDatabaseFile() async {
+Future<String> _databaseFilePath() async {
   final dir = await getApplicationDocumentsDirectory();
-  final dbDir = Directory(p.join(dir.path, 'databases'));
+  return p.join(dir.path, 'databases', 'home_pocket.db');
+}
+
+Future<File> _getDatabaseFile() async {
+  final path = await _databaseFilePath();
+  final dbDir = Directory(p.dirname(path));
   if (!await dbDir.exists()) {
     await dbDir.create(recursive: true);
   }
-  return File(p.join(dbDir.path, 'home_pocket.db'));
+  return File(path);
+}
+
+/// Whether the on-disk encrypted database file already exists.
+///
+/// Used by AppInitializer to distinguish a genuine first launch (no master key
+/// AND no database) from a dangerous state where the master key is missing but
+/// an encrypted database is still present. In the latter case a new random
+/// master key must NOT be generated — it would permanently orphan the existing
+/// (still-encrypted) data. This check is read-only: it never creates the
+/// `databases/` directory.
+Future<bool> encryptedDatabaseExists() async {
+  final path = await _databaseFilePath();
+  return File(path).exists();
 }
 
 /// Load SQLCipher native library for the current platform.

@@ -57,6 +57,10 @@ AppInitializer _createAppInitializer() {
       final executor = await createEncryptedExecutor(masterKeyRepo);
       return AppDatabase(executor);
     },
+    // Data-loss guard: never mint a new master key when an encrypted DB
+    // already exists on disk (see AppInitializer / encryptedDatabaseExists).
+    databaseExists: () =>
+        _useInMemoryDatabase ? Future.value(false) : encryptedDatabaseExists(),
     // Seeding (categories, default book) runs inside HomePocketApp._initialize().
     seedRunner: (_) async {},
   );

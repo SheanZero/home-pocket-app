@@ -71,6 +71,7 @@ void main() {
   AppInitializer makeInitializer({
     AppDatabaseFactory? databaseFactory,
     SeedRunner? seedRunner,
+    EncryptedDatabaseExists? databaseExists,
   }) {
     return AppInitializer(
       containerFactory: _makeContainerFactory(
@@ -78,6 +79,7 @@ void main() {
         keyRepo: fakeKeyRepo,
       ),
       databaseFactory: databaseFactory ?? _successDatabaseFactory(),
+      databaseExists: databaseExists ?? (() async => false),
       seedRunner: seedRunner ?? _noopSeedRunner(),
     );
   }
@@ -145,6 +147,7 @@ void main() {
           keyRepo: fakeKeyRepo,
         ),
         databaseFactory: _successDatabaseFactory(),
+        databaseExists: () async => false,
         seedRunner: (container) async {
           captured = container;
         },
@@ -154,6 +157,63 @@ void main() {
       addTearDown(success.container.dispose);
       expect(captured, same(success.container));
     });
+  });
+
+  group('AppInitializer — missing key with existing data guard', () {
+    test(
+      'does NOT mint a new key when an encrypted DB already exists',
+      () async {
+        when(
+          () => fakeMasterKeyRepo.hasMasterKey(),
+        ).thenAnswer((_) async => false);
+
+        final result = await makeInitializer(
+          databaseExists: () async => true,
+        ).initialize();
+
+        expect(result, isA<InitFailure>());
+        expect(
+          (result as InitFailure).type,
+          equals(InitFailureType.masterKeyMissingWithData),
+        );
+        verifyNever(() => fakeMasterKeyRepo.initializeMasterKey());
+      },
+    );
+
+    test(
+      'InitFailure(masterKeyMissingWithData) carries the guard error',
+      () async {
+        when(
+          () => fakeMasterKeyRepo.hasMasterKey(),
+        ).thenAnswer((_) async => false);
+
+        final result = await makeInitializer(
+          databaseExists: () async => true,
+        ).initialize();
+
+        expect(
+          (result as InitFailure).error,
+          isA<MasterKeyMissingWithExistingDataError>(),
+        );
+      },
+    );
+
+    test(
+      'still mints a key on a genuine first launch (no key, no DB)',
+      () async {
+        when(
+          () => fakeMasterKeyRepo.hasMasterKey(),
+        ).thenAnswer((_) async => false);
+
+        final result = await makeInitializer(
+          databaseExists: () async => false,
+        ).initialize();
+
+        expect(result, isA<InitSuccess>());
+        (result as InitSuccess).container.dispose();
+        verify(() => fakeMasterKeyRepo.initializeMasterKey()).called(1);
+      },
+    );
   });
 
   group('AppInitializer — masterKey failure', () {

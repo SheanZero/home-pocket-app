@@ -10,6 +10,23 @@ import 'secure_storage_service.dart';
 part 'providers.g.dart';
 
 /// Single source of truth for secure storage instance + platform options.
+///
+/// iOS accessibility MUST stay `unlocked_this_device`
+/// (`kSecAttrAccessibleWhenUnlockedThisDeviceOnly`) to match how existing keys
+/// were stored. flutter_secure_storage 10.x (darwin 0.3.1) injects
+/// `kSecAttrAccessible` into the *read* query (`FlutterSecureStorage.swift`
+/// `baseQuery`, used by `read()`), so changing this value makes a master key
+/// stored under the old accessibility unreadable on existing installs
+/// (`SecItemCopyMatching` → `errSecItemNotFound`) — which then trips the
+/// AppInitializer data-loss guard and bricks startup. Do NOT change this without
+/// a read-then-rewrite keychain migration.
+///
+/// The lock-screen background-relaunch case (push wake-up / background refresh
+/// while locked) that motivated AfterFirstUnlock is now handled safely by the
+/// AppInitializer guard: a failed read fails loud and lets the user retry after
+/// unlock instead of minting a new key, so the stronger accessibility is
+/// unnecessary. `ThisDeviceOnly` is intentional (zero-knowledge: the key never
+/// goes to iCloud backup; cross-device recovery is via the BIP39 recovery kit).
 final flutterSecureStorageProvider = Provider<FlutterSecureStorage>((ref) {
   return const FlutterSecureStorage(
     iOptions: IOSOptions(
