@@ -2,19 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
+import 'package:home_pocket/features/accounting/domain/models/entry_source.dart';
+import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_analytics.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_happiness.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/home/presentation/providers/state_home.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_today_transactions.dart';
 import 'package:home_pocket/features/home/presentation/screens/home_screen.dart';
 import 'package:home_pocket/features/home/presentation/widgets/family_invite_banner.dart';
 import 'package:home_pocket/features/home/presentation/widgets/hero_header.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_bottom_nav_bar.dart';
 import 'package:home_pocket/features/home/presentation/widgets/home_hero_card.dart';
+import 'package:home_pocket/features/home/presentation/widgets/home_transaction_tile.dart';
 import 'package:home_pocket/features/home/presentation/widgets/transaction_list_card.dart';
+import 'package:home_pocket/features/list/presentation/providers/state_list_filter.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -48,7 +53,10 @@ void main() {
       ).thenAnswer((_) => Stream.value(null));
     });
 
-    Widget buildSubject({Locale locale = const Locale('ja')}) {
+    Widget buildSubject({
+      Locale locale = const Locale('ja'),
+      List<Transaction> transactions = const [],
+    }) {
       return ProviderScope(
         overrides: [
           monthlyReportProvider(
@@ -72,7 +80,7 @@ void main() {
           ).overrideWith((ref) async => _mockBook),
           todayTransactionsProvider(
             bookId: 'book_001',
-          ).overrideWith((ref) async => []),
+          ).overrideWith((ref) async => transactions),
           groupRepositoryProvider.overrideWithValue(groupRepository),
         ],
         child: testLocalizedApp(
@@ -209,7 +217,79 @@ void main() {
         findsOneWidget,
       );
     });
+
+    testWidgets('renders transaction tiles for daily and joy entries', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildSubject(transactions: [_buildTx(daily: true), _buildTx()]),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TransactionListCard), findsOneWidget);
+      expect(find.byType(HomeTransactionTile), findsNWidgets(2));
+      // Merchant text from the fixture is rendered through the tile.
+      expect(find.text('Supermarket'), findsOneWidget);
+      expect(find.text('Cinema'), findsOneWidget);
+    });
+
+    testWidgets('group mode tags tiles with member initial from device id', (
+      tester,
+    ) async {
+      when(
+        () => groupRepository.watchActiveGroup(),
+      ).thenAnswer((_) => Stream.value(_buildActiveGroup()));
+
+      await tester.pumpWidget(
+        buildSubject(transactions: [_buildTx(daily: true)]),
+      );
+      await tester.pumpAndSettle();
+
+      // _memberInitial: first char of deviceId, uppercased.
+      expect(find.byType(HomeTransactionTile), findsOneWidget);
+      expect(find.text('D'), findsOneWidget);
+    });
+
+    testWidgets('view-all tap selects list tab and current month filter', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      final element = tester.element(find.byType(HomeScreen));
+      final container = ProviderScope.containerOf(element, listen: false);
+      final l10n = S.of(element);
+      final viewAll = find.text(l10n.homeViewAllTransactions);
+      await tester.ensureVisible(viewAll);
+      await tester.pumpAndSettle();
+      await tester.tap(viewAll);
+      await tester.pumpAndSettle();
+
+      expect(container.read(selectedTabIndexProvider), 1);
+      final filter = container.read(listFilterProvider);
+      expect(filter.selectedYear, now.year);
+      expect(filter.selectedMonth, now.month);
+    });
   });
+}
+
+Transaction _buildTx({bool daily = false}) {
+  return Transaction(
+    id: daily ? 'tx-daily' : 'tx-joy',
+    bookId: 'book_001',
+    deviceId: 'device_local',
+    amount: daily ? 1200 : 3400,
+    type: TransactionType.expense,
+    categoryId: daily ? 'cat-food' : 'cat-hobby',
+    ledgerType: daily ? LedgerType.daily : LedgerType.joy,
+    timestamp: DateTime(2026, 6, 10, 12),
+    merchant: daily ? 'Supermarket' : 'Cinema',
+    joyFullness: daily ? 2 : 7,
+    prevHash: 'prev',
+    currentHash: 'curr',
+    createdAt: DateTime(2026, 6, 10, 12),
+    entrySource: EntrySource.manual,
+  );
 }
 
 GroupInfo _buildActiveGroup() {

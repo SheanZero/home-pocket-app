@@ -98,4 +98,18 @@ void main() {
       expect(a, equals(b));
     });
   });
+
+  group('MasterKeyMissingWithExistingDataError', () {
+    test('toString explains the data-loss guard', () {
+      const error = MasterKeyMissingWithExistingDataError();
+
+      expect(
+        error.toString(),
+        allOf(
+          contains('MasterKeyMissingWithExistingDataError'),
+          contains('refusing to generate a new key'),
+        ),
+      );
+    });
+  });
 }
