@@ -1,10 +1,8 @@
 import 'package:flutter/foundation.dart';
 
-/// Entity type constant for shopping items in the sync protocol.
-///
-/// Defined exactly ONCE here — import this everywhere; never inline the string
-/// literal. This prevents typo mismatches ('shopping-item' vs 'shopping_item').
-const kShoppingItemEntityType = 'shopping_item';
+// kShoppingItemEntityType moved to the domain model (shopping_item.dart) so the
+// domain sync-mapper can reference it without an upward application import.
+import '../../features/shopping_list/domain/models/shopping_item.dart';
 
 /// Tracks shopping item operations pending sync push.
 ///

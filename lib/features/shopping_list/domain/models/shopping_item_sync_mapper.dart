@@ -1,13 +1,12 @@
 import 'dart:convert';
 
-import '../../../../application/family_sync/shopping_item_change_tracker.dart';
 import '../../../accounting/domain/models/transaction.dart';
 import 'shopping_item.dart';
 
 /// Maps [ShoppingItem] to and from the sync protocol payload.
 ///
 /// All methods are static — no constructor, no state (mirrors TransactionSyncMapper).
-/// [kShoppingItemEntityType] is imported from shopping_item_change_tracker.dart;
+/// [kShoppingItemEntityType] is defined in shopping_item.dart (same domain layer);
 /// it is NOT redefined here.
 class ShoppingItemSyncMapper {
   ShoppingItemSyncMapper._();

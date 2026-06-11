@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/apply_sync_operations_use_case.dart';
 import 'package:home_pocket/application/family_sync/shadow_book_service.dart';
-import 'package:home_pocket/application/family_sync/shopping_item_change_tracker.dart';
+import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/data/daos/book_dao.dart';
 import 'package:home_pocket/data/daos/shopping_item_dao.dart';

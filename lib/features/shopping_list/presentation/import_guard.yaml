@@ -1,10 +1,10 @@
 # Presentation layer — shopping_list feature.
-# CategorySelectionScreen is allow-listed: it has accounting-specific providers
-# and cannot move to shared/ without dragging accounting providers into shared.
-# The allow: entry makes the cross-feature dependency intentional and auditable (ITEM-03).
-allow:
-  - package:home_pocket/features/accounting/presentation/screens/category_selection_screen.dart
-
+# Intentional cross-feature dependency (ITEM-03): shopping_item_form_screen imports
+# accounting's CategorySelectionScreen (it carries accounting-specific providers and
+# cannot move to shared/ without dragging those providers along). This presentation→
+# presentation import is NOT denied by any inherited rule, so no allow entry is needed.
+# NOTE: do NOT add an `allow:` block here — import_guard treats any allow entry as
+# whitelist mode (deny everything not listed), which would reject flutter/riverpod/etc.
 deny:
   - package:home_pocket/infrastructure/**
   - package:home_pocket/data/daos/**

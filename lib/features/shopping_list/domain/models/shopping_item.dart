@@ -3,6 +3,13 @@ import '../../../accounting/domain/models/transaction.dart';
 
 part 'shopping_item.freezed.dart';
 
+/// Entity type constant for shopping items in the sync protocol.
+///
+/// Defined exactly ONCE here (domain — the inner layer everyone may depend on);
+/// import this everywhere, never inline the string literal. This prevents typo
+/// mismatches ('shopping-item' vs 'shopping_item').
+const kShoppingItemEntityType = 'shopping_item';
+
 /// Immutable domain model representing a single shopping list item.
 ///
 /// Fields mirror the v20 `shopping_items` Drift table column order.

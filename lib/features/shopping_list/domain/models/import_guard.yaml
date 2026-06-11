@@ -3,7 +3,9 @@
 # LedgerType enum is imported from accounting domain — same-layer cross-feature dependency.
 allow:
   - dart:core
+  - dart:convert # ShoppingItemSyncMapper JSON-encodes the tags list for the sync wire
   - package:freezed_annotation/**
+  - shopping_item.dart # intra-domain sibling (model + kShoppingItemEntityType)
   - ../../../accounting/domain/models/transaction.dart
 
 inherit: true
