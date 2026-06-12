@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: 多币种支持
 status: executing
-stopped_at: Completed 41-01-PLAN.md
-last_updated: "2026-06-12T15:36:18.087Z"
+stopped_at: Completed 41-02-PLAN.md
+last_updated: "2026-06-12T23:55:57.457Z"
 last_activity: 2026-06-12 -- Phase 41 execution started
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 11
-  completed_plans: 7
+  completed_plans: 8
   percent: 33
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 ## Current Position
 
 Phase: 41 (exchange-rate-service) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-06-12 -- Phase 41 execution started
 
@@ -127,8 +127,8 @@ No active blockers for v1.7. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-12T15:36:18.084Z
-Stopped at: Completed 41-01-PLAN.md
+Last session: 2026-06-12T23:55:57.453Z
+Stopped at: Completed 41-02-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -136,7 +136,9 @@ Resume file: None
 | Phase | Plan | Duration | Notes |
 |-------|------|----------|-------|
 | Phase 41 P01 | 6min | 2 tasks | 6 files |
+| Phase 41 P02 | 5min | 2 tasks | 2 files |
 
 ## Decisions
 
 - [Phase ?]: 41-01: ExchangeRateRepository extended with findLatestNonManual (D-07), deleteOlderThan (D-09 TTL), findAll (D-10); TTL delete uses UtcEpochDateTimeConverter().toSql() before isSmallerThanValue (TypeConverter-aware)
+- [Phase ?]: 41-02: connectivity_plus ^7.1.1 added (D-05 gate); flutter pub get clean, all pins intact (file_picker 11.0.2 / package_info_plus 9.0.1 / share_plus 12.0.2 / win32 5.15.0 / intl 0.20.2 / sqlcipher 0.6.8); iOS debug build human-verified green (no sqlite3 symbol conflict)
