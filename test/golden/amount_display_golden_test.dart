@@ -105,13 +105,13 @@ void main() {
       );
     });
 
-    testWidgets('CNY ¥1,235.00 — locale zh', (tester) async {
+    testWidgets('CNY CN¥1,235.00 — locale zh', (tester) async {
       await tester.pumpWidget(
         _wrap(
           locale: const Locale('zh'),
           child: const AmountDisplay(
             amount: '123500',
-            currencySymbol: '¥',
+            currencySymbol: 'CN¥',
             currencyLabel: 'CNY',
           ),
         ),
@@ -122,14 +122,14 @@ void main() {
       );
     });
 
-    testWidgets('CNY ¥1,235.00 — locale zh dark', (tester) async {
+    testWidgets('CNY CN¥1,235.00 — locale zh dark', (tester) async {
       await tester.pumpWidget(
         _wrap(
           locale: const Locale('zh'),
           themeMode: ThemeMode.dark,
           child: const AmountDisplay(
             amount: '123500',
-            currencySymbol: '¥',
+            currencySymbol: 'CN¥',
             currencyLabel: 'CNY',
           ),
         ),
