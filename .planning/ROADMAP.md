@@ -128,7 +128,14 @@
   3. CNY amounts display as `CN¥` (not `¥`) across all locales; JPY amounts continue to display `¥`; the shared JPY integer rounding utility `(originalAmount × appliedRate).round()` is the single conversion site; amount golden tests reflect the new symbol
   4. `Transaction.originalCurrency`, `.originalAmount`, `.appliedRate` exist as nullable Freezed fields and `TransactionSyncMapper` round-trips them null-safely — verified by tests: new-to-old wire (extra keys silently ignored), old-to-new wire (absent keys → JPY row); `build_runner` clean
   5. The partial-triple domain invariant holds: if exactly one or two of the three currency fields are non-null, `CreateTransactionParams` validation returns `Result.error` before any DB write; `ExchangeRateDao` supports exact-date and latest-for-currency queries and all new code passes `import_guard`
-**Plans**: TBD
+**Plans**: 6 plans
+Plans:
+- [ ] 40-01-PLAN.md — Wave 0 test scaffolds (migration/DAO/conversion/sync mapper stubs, RED)
+- [ ] 40-02-PLAN.md — Three ADRs (ADR-020/021/022) + index update
+- [ ] 40-03-PLAN.md — NumberFormatter disambiguation table + golden re-baseline (STORE-05)
+- [ ] 40-04-PLAN.md — Drift v20→v21 migration + ExchangeRates table + ExchangeRateDao + repository stub
+- [ ] 40-05-PLAN.md — ExchangeRate domain model + repository interface + currency_conversion utility + Riverpod wiring
+- [ ] 40-06-PLAN.md — Transaction Freezed extension + TransactionSyncMapper + partial-triple invariant + full test suite
 
 ### Phase 41: 汇率服务 (Exchange Rate Service)
 **Goal**: A fully tested, offline-safe exchange rate service — dual-source fetch (Frankfurter primary, fawazahmed0 fallback), Drift-backed per-(date, currency) cache, weekend/holiday date transparency, manual override and date-change semantics enforced through application use cases — with the hard invariant that saving a transaction is never blocked on network.
