@@ -61,3 +61,18 @@ String? validateAppliedRate(String raw) {
   }
   return null;
 }
+
+/// Minor units per major unit for an ISO 4217 currency code.
+///
+/// JPY/KRW have no sub-unit (D-08); every other code the app handles uses
+/// 2 decimals (mirrors NumberFormatter._getCurrencyDecimals). When Phase 41
+/// introduces a richer currency metadata source, route this through it.
+int subunitToUnitFor(String currencyCode) {
+  switch (currencyCode.toUpperCase()) {
+    case 'JPY':
+    case 'KRW':
+      return 1;
+    default:
+      return 100;
+  }
+}

@@ -131,6 +131,22 @@ class CreateTransactionUseCase {
           'originalCurrency must be a 3-letter ISO 4217 code',
         );
       }
+      // 1e. amount ↔ triple consistency (Phase 40 review WR-04): the hashed
+      // JPY amount MUST be the canonical conversion of the triple. Callers
+      // must derive amount via convertToJpy (ADR-020 Pitfall 1 — inline
+      // arithmetic divergence is undetectable once persisted, because the
+      // triple is excluded from the hash chain per ADR-021).
+      final expectedAmount = convertToJpy(
+        originalMinorUnits: params.originalAmount!,
+        appliedRate: params.appliedRate!,
+        subunitToUnit: subunitToUnitFor(params.originalCurrency!),
+      );
+      if (params.amount != expectedAmount) {
+        return Result.error(
+          'amount (${params.amount}) does not match convertToJpy of the '
+          'foreign-currency triple (expected $expectedAmount)',
+        );
+      }
     }
 
     // 2. Verify category exists

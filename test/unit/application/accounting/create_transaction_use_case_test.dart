@@ -466,10 +466,12 @@ void main() {
       when(() => mockCategoryRepo.findById('cat_food'))
           .thenAnswer((_) async => null); // category not found — expected
       final result = await useCase.execute(
+        // WR-04: amount (1000) must equal convertToJpy of the triple —
+        // 5000 cents / 100 × 20.00 = 1000 JPY.
         makeParams(
           originalCurrency: 'USD',
           originalAmount: 5000,
-          appliedRate: '149.30',
+          appliedRate: '20.00',
         ),
       );
       // Should reach category check (error is 'category not found', not validation)
@@ -586,15 +588,33 @@ void main() {
       when(() => mockCategoryRepo.findById('cat_food'))
           .thenAnswer((_) async => null); // category not found — expected
       final result = await useCase.execute(
+        // WR-04: amount (1000) must equal convertToJpy of the triple —
+        // 1000000 × 0.001 = 1000 JPY (JPY subunitToUnit = 1).
         makeParams(
           originalCurrency: 'JPY',
-          originalAmount: 100,
+          originalAmount: 1000000,
           appliedRate: '0.001',
         ),
       );
       // Should reach category check (not a validation error)
       expect(result.isError, isTrue);
       expect(result.error, contains('category'));
+    });
+
+    test(
+        'amount inconsistent with foreign-currency triple → Result.error (WR-04)',
+        () async {
+      final result = await useCase.execute(
+        // makeParams amount is 1000, but USD 5000 cents at 149.30 = 7465 JPY.
+        makeParams(
+          originalCurrency: 'USD',
+          originalAmount: 5000,
+          appliedRate: '149.30',
+        ),
+      );
+      expect(result.isError, isTrue);
+      expect(result.error, contains('does not match convertToJpy'));
+      verifyNever(() => mockTransactionRepo.insert(any()));
     });
   });
 
