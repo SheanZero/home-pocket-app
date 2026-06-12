@@ -82,6 +82,9 @@ class CreateTransactionUseCase {
   static const _genesisHash =
       '0000000000000000000000000000000000000000000000000000000000000000';
 
+  /// ISO 4217 currency code shape: exactly 3 uppercase ASCII letters.
+  static final _iso4217 = RegExp(r'^[A-Z]{3}$');
+
   Future<Result<Transaction>> execute(CreateTransactionParams params) async {
     // 1. Validate input
     if (params.bookId.isEmpty) {
@@ -116,6 +119,17 @@ class CreateTransactionUseCase {
       final rateError = validateAppliedRate(params.appliedRate!);
       if (rateError != null) {
         return Result.error(rateError);
+      }
+      // 1d. originalAmount / originalCurrency validity (Phase 40 review WR-03).
+      // An empty/malformed currency code would defeat the
+      // `originalCurrency != null` foreign-row discriminator (ADR-022 D-01).
+      if (params.originalAmount! <= 0) {
+        return Result.error('originalAmount must be greater than 0');
+      }
+      if (!_iso4217.hasMatch(params.originalCurrency!)) {
+        return Result.error(
+          'originalCurrency must be a 3-letter ISO 4217 code',
+        );
       }
     }
 

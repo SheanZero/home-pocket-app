@@ -597,4 +597,58 @@ void main() {
       expect(result.error, contains('category'));
     });
   });
+
+  group('originalAmount / originalCurrency validity (WR-03)', () {
+    test('originalAmount=0 → Result.error', () async {
+      final result = await useCase.execute(
+        makeParams(
+          originalCurrency: 'USD',
+          originalAmount: 0,
+          appliedRate: '149.30',
+        ),
+      );
+      expect(result.isError, isTrue);
+      expect(result.error, contains('originalAmount'));
+      verifyNever(() => mockTransactionRepo.insert(any()));
+    });
+
+    test('originalAmount=-5000 → Result.error', () async {
+      final result = await useCase.execute(
+        makeParams(
+          originalCurrency: 'USD',
+          originalAmount: -5000,
+          appliedRate: '149.30',
+        ),
+      );
+      expect(result.isError, isTrue);
+      expect(result.error, contains('originalAmount'));
+      verifyNever(() => mockTransactionRepo.insert(any()));
+    });
+
+    test("originalCurrency='' → Result.error", () async {
+      final result = await useCase.execute(
+        makeParams(
+          originalCurrency: '',
+          originalAmount: 5000,
+          appliedRate: '149.30',
+        ),
+      );
+      expect(result.isError, isTrue);
+      expect(result.error, contains('ISO 4217'));
+      verifyNever(() => mockTransactionRepo.insert(any()));
+    });
+
+    test("originalCurrency='usd' (lowercase) → Result.error", () async {
+      final result = await useCase.execute(
+        makeParams(
+          originalCurrency: 'usd',
+          originalAmount: 5000,
+          appliedRate: '149.30',
+        ),
+      );
+      expect(result.isError, isTrue);
+      expect(result.error, contains('ISO 4217'));
+      verifyNever(() => mockTransactionRepo.insert(any()));
+    });
+  });
 }
