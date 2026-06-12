@@ -70,6 +70,7 @@ dependencies:
   qr_flutter: ^4.1.0
   lucide_icons_flutter: ^3.1.14
   web_socket_channel: ^3.0.0
+  connectivity_plus: ^7.1.1
   collection: ^1.19.1
   flutter_svg: ^2.3.0
 
