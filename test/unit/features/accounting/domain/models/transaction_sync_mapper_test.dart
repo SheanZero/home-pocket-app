@@ -332,5 +332,122 @@ void main() {
         expect(restored.appliedRate, equals('149.30'));
       });
     });
+
+    // CR-01 (Phase 40 review): the sync wire is untrusted input. fromSyncMap
+    // must enforce the partial-triple invariant (ADR-021's sole integrity
+    // mechanism for currency fields) and degrade invalid triples to
+    // JPY-native (all three null) without throwing.
+    group('CR-01 sync-boundary partial-triple enforcement', () {
+      Map<String, dynamic> basePayload() => <String, dynamic>{
+            'id': 'tx-cr01',
+            'amount': 7465,
+            'type': 'expense',
+            'categoryId': 'cat-food',
+            'ledgerType': 'daily',
+            'timestamp': DateTime.utc(2026, 6, 12).toIso8601String(),
+            'createdAt': DateTime.utc(2026, 6, 12).toIso8601String(),
+            'joyFullness': 5,
+            'entrySource': 'manual',
+            'isPrivate': false,
+          };
+
+      Transaction restore(Map<String, dynamic> payload) =>
+          TransactionSyncMapper.fromSyncMap(
+            payload,
+            bookId: 'shadow-book-1',
+            deviceId: 'partner-device',
+          );
+
+      void expectJpyNative(Transaction t) {
+        expect(t.originalCurrency, isNull);
+        expect(t.originalAmount, isNull);
+        expect(t.appliedRate, isNull);
+      }
+
+      test('partial triple (only originalCurrency) degrades to JPY-native',
+          () {
+        final t = restore(basePayload()..['originalCurrency'] = 'USD');
+        expectJpyNative(t);
+        expect(t.amount, 7465); // hashed JPY amount preserved
+      });
+
+      test('partial triple (currency + amount, no rate) degrades to JPY-native',
+          () {
+        final t = restore(
+          basePayload()
+            ..['originalCurrency'] = 'USD'
+            ..['originalAmount'] = 5000,
+        );
+        expectJpyNative(t);
+      });
+
+      for (final badRate in ['0', '-1', 'abc', 'NaN', '1.493e2', ' 149.30 ']) {
+        test("invalid appliedRate '$badRate' degrades to JPY-native", () {
+          final t = restore(
+            basePayload()
+              ..['originalCurrency'] = 'USD'
+              ..['originalAmount'] = 5000
+              ..['appliedRate'] = badRate,
+          );
+          expectJpyNative(t);
+        });
+      }
+
+      test('numeric (non-string) appliedRate does not throw, degrades', () {
+        final t = restore(
+          basePayload()
+            ..['originalCurrency'] = 'USD'
+            ..['originalAmount'] = 5000
+            ..['appliedRate'] = 149.30,
+        );
+        expectJpyNative(t);
+      });
+
+      test('string (non-int) originalAmount does not throw, degrades', () {
+        final t = restore(
+          basePayload()
+            ..['originalCurrency'] = 'USD'
+            ..['originalAmount'] = '5000'
+            ..['appliedRate'] = '149.30',
+        );
+        expectJpyNative(t);
+      });
+
+      test('non-positive originalAmount degrades to JPY-native', () {
+        for (final badAmount in [0, -5000]) {
+          final t = restore(
+            basePayload()
+              ..['originalCurrency'] = 'USD'
+              ..['originalAmount'] = badAmount
+              ..['appliedRate'] = '149.30',
+          );
+          expectJpyNative(t);
+        }
+      });
+
+      test('malformed originalCurrency degrades to JPY-native', () {
+        for (final badCurrency in ['', 'usd', 'US', 'DOLLAR', 'U5D']) {
+          final t = restore(
+            basePayload()
+              ..['originalCurrency'] = badCurrency
+              ..['originalAmount'] = 5000
+              ..['appliedRate'] = '149.30',
+          );
+          expectJpyNative(t);
+        }
+      });
+
+      test('valid triple from peer is preserved unchanged', () {
+        final t = restore(
+          basePayload()
+            ..['originalCurrency'] = 'USD'
+            ..['originalAmount'] = 5000
+            ..['appliedRate'] = '149.30',
+        );
+        expect(t.originalCurrency, 'USD');
+        expect(t.originalAmount, 5000);
+        expect(t.appliedRate, '149.30');
+      });
+    });
   });
 }

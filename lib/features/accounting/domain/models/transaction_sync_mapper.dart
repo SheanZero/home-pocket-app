@@ -45,6 +45,29 @@ class TransactionSyncMapper {
     required String bookId,
     required String deviceId,
   }) {
+    // CR-01 (Phase 40 review): the sync wire is untrusted input. ADR-021
+    // designates the partial-triple invariant as the sole integrity mechanism
+    // for the currency provenance fields (they are excluded from the hash
+    // chain), so it must hold at the sync ingestion boundary too — not only
+    // in CreateTransactionUseCase. Policy: a partial or invalid triple
+    // degrades to JPY-native (all three null) instead of persisting invalid
+    // domain state or dropping the whole operation — the hashed JPY `amount`
+    // stays authoritative; only provenance metadata is discarded.
+    // `is` checks (not `as` casts) so a peer sending wrong JSON types (e.g.
+    // numeric appliedRate) cannot throw here.
+    final rawCurrency = data['originalCurrency'];
+    final rawOriginalAmount = data['originalAmount'];
+    final rawAppliedRate = data['appliedRate'];
+    final originalCurrency = rawCurrency is String ? rawCurrency : null;
+    final originalAmount = rawOriginalAmount is int ? rawOriginalAmount : null;
+    final appliedRate = rawAppliedRate is String ? rawAppliedRate : null;
+    final tripleValid = originalCurrency != null &&
+        originalAmount != null &&
+        appliedRate != null &&
+        originalAmount > 0 &&
+        _iso4217.hasMatch(originalCurrency) &&
+        _isValidRate(appliedRate);
+
     return Transaction(
       id: data['id'] as String,
       bookId: bookId,
@@ -58,9 +81,9 @@ class TransactionSyncMapper {
       photoHash: data['photoHash'] as String?,
       merchant: data['merchant'] as String?,
       metadata: data['metadata'] as Map<String, dynamic>?,
-      originalCurrency: data['originalCurrency'] as String?,
-      originalAmount: data['originalAmount'] as int?,
-      appliedRate: data['appliedRate'] as String?,
+      originalCurrency: tripleValid ? originalCurrency : null,
+      originalAmount: tripleValid ? originalAmount : null,
+      appliedRate: tripleValid ? appliedRate : null,
       currentHash: '',
       createdAt: DateTime.parse(data['createdAt'] as String),
       isPrivate: data['isPrivate'] as bool? ?? false,
@@ -69,6 +92,22 @@ class TransactionSyncMapper {
       // D-09: absent field falls back to 'manual' (older v16 peers do not send entrySource).
       entrySource: EntrySource.values.byName((data['entrySource'] as String?) ?? 'manual'),
     );
+  }
+
+  /// ISO 4217 currency code shape: exactly 3 uppercase ASCII letters.
+  static final _iso4217 = RegExp(r'^[A-Z]{3}$');
+
+  /// Plain positive decimal literal (no sign, exponent, or whitespace —
+  /// ADR-020 D-05). Mirrors `validateAppliedRate` in
+  /// `lib/shared/utils/currency_conversion.dart`; the domain-models import
+  /// guard (intra-domain-only allow list) prevents importing it here, so the
+  /// shape rule is duplicated as a private wire-boundary check.
+  static final _plainDecimal = RegExp(r'^\d+(\.\d+)?$');
+
+  static bool _isValidRate(String raw) {
+    if (!_plainDecimal.hasMatch(raw)) return false;
+    final rate = double.tryParse(raw);
+    return rate != null && rate.isFinite && rate > 0;
   }
 
   static Map<String, dynamic> toCreateOperation(
