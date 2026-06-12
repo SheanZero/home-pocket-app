@@ -68,29 +68,6 @@ Future<bool> _waitForItemInStream(
   return completer.future.whenComplete(sub.close);
 }
 
-/// Waits for filteredShoppingItemsProvider to emit the next settled value after
-/// a write. Uses a Completer that fires on the second (or later) hasValue
-/// emission, skipping the initial cached state.
-Future<AsyncValue<List<ShoppingItem>>> _waitForSettledEmission(
-  ProviderContainer container,
-  ProviderListenable<AsyncValue<List<ShoppingItem>>> provider,
-) {
-  final completer = Completer<AsyncValue<List<ShoppingItem>>>();
-  var emissionCount = 0;
-  final sub = container.listen<AsyncValue<List<ShoppingItem>>>(
-    provider,
-    (_, next) {
-      emissionCount++;
-      // Skip the first (cached/initial) emission; resolve on the second one.
-      if (!completer.isCompleted && next.hasValue && emissionCount > 1) {
-        completer.complete(next);
-      }
-    },
-    fireImmediately: true,
-  );
-  return completer.future.whenComplete(sub.close);
-}
-
 class _MockFieldEncryptionService extends Mock
     implements FieldEncryptionService {}
 
@@ -215,20 +192,15 @@ void main() {
     test(
       'D39-06: private item never appears in public filteredShoppingItemsProvider',
       () async {
-        // For D39-06 privacy: write a private item and then verify the public
-        // stream does NOT contain it.
+        // For D39-06 privacy: apply an inbound private-item op and verify it
+        // never reaches the public stream.
         //
-        // Subscribe BEFORE the write (subscribe-before-write pattern). Then
-        // await the post-write emission using waitForFirstValue. Since the
-        // private item is excluded by the DAO-level WHERE clause, the stream
-        // will emit an empty list after the write. We verify the private item
-        // ID is absent.
-        //
-        // waitForFirstValue resolves on the FIRST hasValue emission. We need
-        // to call it after the write so it catches the post-write emission.
-        // To handle both cases (pre-write and post-write emission), we use
-        // _waitForSettledEmissionAfterWrite which waits for the stream to
-        // settle after the write and checks that the item is absent.
+        // Since quick task 260612-daz (W2/SYNC-02 receiver gate), an inbound
+        // shopping_item op with a non-public listType is dropped at
+        // ApplySyncOperationsUseCase before any DB write — receiver-side
+        // enforcement, stronger than the original DAO-level exclusion. So no
+        // post-write emission occurs at all: we assert the op left no trace
+        // in EITHER list and the public provider state stayed empty.
 
         // Step 1: establish subscription (keeps provider alive).
         final sub = container.listen(
@@ -245,7 +217,7 @@ void main() {
         expect(initial.value, isEmpty,
             reason: 'Initial state must be empty before any write');
 
-        // Step 3: write private item — stream re-emits after DB write.
+        // Step 3: apply inbound private op — dropped by the W2 receiver gate.
         await applyOps.execute([
           {
             'op': 'create',
@@ -263,17 +235,28 @@ void main() {
           },
         ]);
 
-        // Step 4: wait for post-write emission by waiting for a state change.
-        // Since 'private-smoke' is excluded, the stream emits an empty list
-        // again. We use _waitForSettledEmission to catch the post-write value.
-        final postWrite = await _waitForSettledEmission(
-          container,
-          filteredShoppingItemsProvider,
-        ).timeout(const Duration(seconds: 5));
-
-        expect(postWrite.hasValue, isTrue);
+        // Step 4: the gate drops the op before any DB write, so no new stream
+        // emission is expected. Assert no trace in either list, then confirm
+        // the public provider state is still the settled empty list.
+        final privateItems =
+            await shoppingItemRepo.watchByListType('private').first;
         expect(
-          postWrite.value!.any((i) => i.id == 'private-smoke'),
+          privateItems.any((i) => i.id == 'private-smoke'),
+          isFalse,
+          reason:
+              'Inbound private op must be dropped entirely by the W2 receiver '
+              'gate — not written to the private list (SYNC-02)',
+        );
+
+        final publicItems =
+            await shoppingItemRepo.watchByListType('public').first;
+        expect(publicItems, isEmpty,
+            reason: 'Dropped op must not be coerced into the public list');
+
+        final current = container.read(filteredShoppingItemsProvider);
+        expect(current.hasValue, isTrue);
+        expect(
+          current.value!.any((i) => i.id == 'private-smoke'),
           isFalse,
           reason:
               'Private item must never appear in public stream (D39-06, presentation layer)',
