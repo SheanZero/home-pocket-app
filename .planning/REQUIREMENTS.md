@@ -26,11 +26,11 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### 存储与转换 (Storage & Conversion)
 
-- [ ] **STORE-01**: Foreign-currency transactions store the JPY-converted amount in the existing `amount` column (drives ALL lists/analytics/sorting unchanged) plus three new nullable fields: original currency code, original amount (minor units), applied conversion rate — Drift schema v20→v21; NULL fields = native-JPY row
-- [ ] **STORE-02**: JPY conversion follows the integer contract: `(originalAmount × appliedRate).round()` — fractional yen never stored or displayed anywhere
-- [ ] **STORE-03**: The three new fields transit family sync null-safely in both directions — older-format payloads (fields absent) apply cleanly as JPY rows; new-format payloads round-trip losslessly
-- [ ] **STORE-04**: Hash-chain scope decision recorded as an ADR before migration work: new currency fields are excluded from the transaction hash (existing chains stay valid); rationale documented
-- [ ] **STORE-05**: CNY and JPY currency symbols are disambiguated in NumberFormatter (both currently render `¥` — pre-existing bug); foreign-currency amounts display with unambiguous symbols/codes across all locales
+- [x] **STORE-01**: Foreign-currency transactions store the JPY-converted amount in the existing `amount` column (drives ALL lists/analytics/sorting unchanged) plus three new nullable fields: original currency code, original amount (minor units), applied conversion rate — Drift schema v20→v21; NULL fields = native-JPY row
+- [x] **STORE-02**: JPY conversion follows the integer contract: `(originalAmount × appliedRate).round()` — fractional yen never stored or displayed anywhere
+- [x] **STORE-03**: The three new fields transit family sync null-safely in both directions — older-format payloads (fields absent) apply cleanly as JPY rows; new-format payloads round-trip losslessly
+- [x] **STORE-04**: Hash-chain scope decision recorded as an ADR before migration work: new currency fields are excluded from the transaction hash (existing chains stay valid); rationale documented
+- [x] **STORE-05**: CNY and JPY currency symbols are disambiguated in NumberFormatter (both currently render `¥` — pre-existing bug); foreign-currency amounts display with unambiguous symbols/codes across all locales
 
 ### 展示 (Display)
 
@@ -74,11 +74,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| STORE-01 | Phase 40 | Pending |
-| STORE-02 | Phase 40 | Pending |
-| STORE-03 | Phase 40 | Pending |
-| STORE-04 | Phase 40 | Pending |
-| STORE-05 | Phase 40 | Pending |
+| STORE-01 | Phase 40 | Complete |
+| STORE-02 | Phase 40 | Complete |
+| STORE-03 | Phase 40 | Complete |
+| STORE-04 | Phase 40 | Complete |
+| STORE-05 | Phase 40 | Complete |
 | RATE-01 | Phase 41 | Pending |
 | RATE-02 | Phase 41 | Pending |
 | RATE-03 | Phase 41 | Pending |
