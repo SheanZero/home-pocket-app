@@ -1,773 +1,571 @@
-# Architecture Research
+# Architecture Research — v1.7 Multi-Currency Integration
 
-**Domain:** Shopping List feature integration — Flutter / Drift / Riverpod 3 / Clean Architecture
-**Researched:** 2026-06-07
-**Confidence:** HIGH — all conclusions drawn from direct source-code reads of the existing codebase
-
----
-
-## Standard Architecture
-
-### System Overview
-
-The shopping_list feature slots into the existing 5-layer Clean Architecture. No new layer is introduced. The layer order and import-direction rules are unchanged.
-
-```
-+-----------------------------------------------------------------------+
-|  PRESENTATION  lib/features/shopping_list/presentation/               |
-|  ShoppingListScreen | ShoppingItemTile | ShoppingItemForm             |
-|  ShoppingListSegmentControl | ShoppingFilterBar | ShoppingEmptyState  |
-|  providers: repository_providers / state_list_type /                  |
-|             state_shopping_filter / state_shopping_items              |
-+-----------------------------------------------------------------------+
-|  APPLICATION   lib/application/shopping_list/                         |
-|  CreateShoppingItemUseCase | UpdateShoppingItemUseCase                |
-|  DeleteShoppingItemUseCase | ToggleItemCompletedUseCase               |
-|  ReorderShoppingItemsUseCase | ClearCompletedItemsUseCase            |
-|                                                                       |
-|  lib/application/family_sync/  (MODIFIED — minimal additions)         |
-|  + ShoppingItemChangeTracker                                          |
-|  + SyncOrchestrator._executeIncrementalPush (4-line extension)        |
-|  + ApplySyncOperationsUseCase case 'shopping_item':                   |
-+-----------------------------------------------------------------------+
-|  DOMAIN   lib/features/shopping_list/domain/                          |
-|  models: ShoppingItem | ShoppingListFilter | ShoppingItemParams       |
-|  repositories: ShoppingItemRepository (interface only)                |
-+-----------------------------------------------------------------------+
-|  DATA   lib/data/  (SHARED per Thin Feature rule)                     |
-|  tables/shopping_items_table.dart                                     |
-|  daos/shopping_item_dao.dart                                          |
-|  repositories/shopping_item_repository_impl.dart                     |
-|  app_database.dart  (MODIFIED — table added, version 19 -> 20)        |
-+-----------------------------------------------------------------------+
-|  INFRASTRUCTURE   lib/infrastructure/  (unchanged)                    |
-|  crypto/ | sync/ | security/ | i18n/ | platform/                     |
-+-----------------------------------------------------------------------+
-```
-
-Dependency flow (no changes from existing rules):
-
-```
-Presentation -> Application -> Domain <- Data <- Infrastructure
-```
+**Domain:** Multi-currency transaction entry on existing Home Pocket 5-layer Clean Architecture
+**Researched:** 2026-06-12
+**Confidence:** HIGH — all conclusions drawn from direct source-code inspection across all 7 integration surfaces
 
 ---
 
-## Complete File Manifest
+## Integration Map Overview
 
-### New files
-
-**Domain layer** (`lib/features/shopping_list/domain/`):
+Seven integration surfaces. Five require code changes; two require zero changes and are confirmed safe.
 
 ```
-lib/features/shopping_list/
-  domain/
-    import_guard.yaml                         (NEW — mirrors list/domain/import_guard.yaml)
-    models/
-      import_guard.yaml                       (NEW — per-subdirectory allow-list)
-      shopping_item.dart                      (NEW — @freezed domain model)
-      shopping_item.freezed.dart              (GENERATED)
-      shopping_list_filter.dart               (NEW — @freezed filter state)
-      shopping_list_filter.freezed.dart       (GENERATED)
-      shopping_item_params.dart               (NEW — @freezed Create/UpdateParams)
-      shopping_item_params.freezed.dart       (GENERATED)
-    repositories/
-      shopping_item_repository.dart           (NEW — abstract interface)
-```
-
-**Data layer** (`lib/data/`):
-
-```
+NEW components (v1.7)                     EXISTING components (modified)
+──────────────────────────────────────    ──────────────────────────────────────────────────
+lib/infrastructure/
+  exchange_rate/                           lib/data/tables/transactions_table.dart
+    exchange_rate_api_client.dart            ← 3 nullable columns added (v20→v21)
+    exchange_rate_cache_service.dart        lib/data/app_database.dart
+                                              ← schemaVersion 20→21, new migration block
 lib/data/
-  tables/
-    shopping_items_table.dart                 (NEW)
-  daos/
-    shopping_item_dao.dart                    (NEW)
-  repositories/
-    shopping_item_repository_impl.dart        (NEW)
+  tables/exchange_rates_table.dart         lib/features/accounting/domain/models/
+  daos/exchange_rate_dao.dart                transaction.dart
+  repositories/                              ← 3 optional nullable fields
+    exchange_rate_repository_impl.dart       transaction_sync_mapper.dart
+                                              ← conditional emit + null-safe read
+
+lib/features/currency/domain/             lib/application/accounting/
+  models/exchange_rate.dart                 create_transaction_use_case.dart
+  repositories/                              ← 3 optional params in CreateTransactionParams
+    exchange_rate_repository.dart
+
+lib/application/currency/                 lib/application/voice/
+  get_exchange_rate_use_case.dart            voice_text_parser.dart (minor: no direct change)
+  resolve_rate_for_date_use_case.dart        parse_voice_input_use_case.dart
+  repository_providers.dart                   ← _extractCurrencyCode + VoiceParseResult field
+                                             lib/shared/constants/voice_currency_suffixes.dart
+lib/features/accounting/presentation/       ← new tokens appended
+  widgets/
+    smart_keyboard.dart                    ZERO CHANGES:
+      ← onCurrencyTap callback added        lib/data/daos/analytics_dao.dart
+    currency_selector_sheet.dart (NEW)      lib/features/list/  (all list widgets/DAOs)
+    transaction_details_form.dart           lib/application/analytics/ (all use cases)
+      ← currency state + preview row        lib/core/initialization/app_initializer.dart
+  screens/                                  lib/application/family_sync/
+    manual_one_step_screen.dart               apply_sync_operations_use_case.dart
+      ← passes onCurrencyTap                  transaction_change_tracker.dart
+    voice_input_screen.dart
+      ← passes initialCurrency from parse
 ```
 
-**Application layer** (`lib/application/shopping_list/`):
+---
 
-```
-lib/application/shopping_list/
-  create_shopping_item_use_case.dart          (NEW)
-  update_shopping_item_use_case.dart          (NEW)
-  delete_shopping_item_use_case.dart          (NEW — soft-delete only)
-  toggle_item_completed_use_case.dart         (NEW)
-  reorder_shopping_items_use_case.dart        (NEW)
-  clear_completed_items_use_case.dart         (NEW — batch soft-delete completed)
+## (a) Exchange-Rate Client and Rate Use Cases — Placement Decision
 
-lib/application/family_sync/
-  shopping_item_change_tracker.dart           (NEW — mirrors transaction_change_tracker.dart)
-```
+### Infrastructure layer: `lib/infrastructure/exchange_rate/`
 
-**Presentation layer** (`lib/features/shopping_list/presentation/`):
+Create a new `exchange_rate/` subdirectory inside `lib/infrastructure/`. Do NOT create a generic `network/` subdirectory.
 
-```
-lib/features/shopping_list/
-  presentation/
-    import_guard.yaml                         (NEW — mirrors list/presentation/import_guard.yaml)
-    providers/
-      repository_providers.dart               (NEW — single source of truth for this feature)
-      repository_providers.g.dart             (GENERATED)
-      state_list_type.dart                    (NEW — public | private segmented control)
-      state_list_type.g.dart                  (GENERATED)
-      state_shopping_filter.dart              (NEW — filter notifier)
-      state_shopping_filter.g.dart            (GENERATED)
-      state_shopping_items.dart               (NEW — StreamProvider watching DAO)
-      state_shopping_items.g.dart             (GENERATED)
-    screens/
-      shopping_list_screen.dart               (NEW)
-    widgets/
-      shopping_list_segment_control.dart      (NEW — public/private top control, D1)
-      shopping_item_tile.dart                 (NEW — row with checkbox + swipe-delete)
-      shopping_item_form.dart                 (NEW — add/edit bottom sheet)
-      shopping_filter_bar.dart                (NEW)
-      shopping_empty_state.dart               (NEW)
+**Rationale:**
+
+`lib/infrastructure/sync/relay_api_client.dart` sets the precedent: a domain-specific subdirectory owns the HTTP client for that concern. The relay client is not in a generic `network/` folder; it is in `sync/`. Following the same convention keeps placement consistent.
+
+The `http` package (`^1.6.0`) is already in `pubspec.yaml`. No new HTTP dependency is needed.
+
+The `import_guard.yaml` for `lib/infrastructure/` (currently denying `features/**`, `application/**`, `data/**`) applies via `inherit: true` to any new subdirectory. No config change is required.
+
+The API client carries no user data: it sends only a date string and a currency pair (privacy constraint documented in PROJECT.md §Key context). No `KeyManager` or `RequestSigner` is needed, making the client simpler than `relay_api_client.dart`.
+
+**Two new files:**
+
+`lib/infrastructure/exchange_rate/exchange_rate_api_client.dart` — wraps a single endpoint on `api.frankfurter.app` (free, no API key). The method signature:
+
+```dart
+Future<double> fetchRate({
+  required String fromCurrency,
+  required DateTime date,
+}) async { ... }
+// GET https://api.frankfurter.app/YYYY-MM-DD?amount=1&from={from}&to=JPY
+// Returns: JPY per 1 unit of fromCurrency
 ```
 
-### Modified files
+Stateless. Injectable `http.Client` via constructor parameter — mirrors `RelayApiClient` exactly and enables unit testing with `MockClient`.
 
-| File | Change |
+`lib/infrastructure/exchange_rate/exchange_rate_cache_service.dart` — orchestrates cache-first logic: hit the `ExchangeRateDao`; on miss, call `ExchangeRateApiClient`; persist result; return rate. On network failure, return the most-recent cached rate for that currency (any date). Lives in infrastructure because it coordinates a platform capability (network) with a persistence operation. It is not a business use-case concern; use cases delegate rate resolution to this service.
+
+### Application layer: `lib/application/currency/`
+
+Create a new `currency/` subdirectory under `lib/application/`. Existing analogs: `accounting/`, `analytics/`, `voice/`.
+
+`lib/application/currency/get_exchange_rate_use_case.dart` — receives `(DateTime date, String fromCurrency)`, calls `ExchangeRateCacheService`, returns `Result<ExchangeRate>`. On cache-miss + network failure, delegates to `ResolveRateForDateUseCase`.
+
+`lib/application/currency/resolve_rate_for_date_use_case.dart` — encapsulates offline fallback + manual override merge. Returns a sealed `RateResult` with variants `RateResult.fetched` (fresh) and `RateResult.fallback({required DateTime cachedDate})` so the UI can display a "using cached rate from [date]" disclaimer.
+
+`lib/application/currency/repository_providers.dart` — Riverpod wiring. ONE file per feature (Riverpod hygiene rule).
+
+The `import_guard.yaml` for `lib/application/` (denying `data/tables/**`, `data/daos/**`, and `features/*/presentation/**`) constrains these use cases to go through the repository interface, not the DAO directly.
+
+---
+
+## (b) Rate Cache as a New Drift Table — Data Layer Placement
+
+### Table: `lib/data/tables/exchange_rates_table.dart`
+
+```dart
+@DataClassName('ExchangeRateRow')
+class ExchangeRates extends Table {
+  TextColumn get currency => text()();          // ISO 4217, e.g. 'USD'
+  DateTimeColumn get rateDate => dateTime()();  // midnight UTC of the exchange day
+  RealColumn get rate => real()();              // JPY per 1 unit of currency
+  DateTimeColumn get fetchedAt => dateTime()(); // when the row was cached
+
+  @override
+  Set<Column> get primaryKey => {currency, rateDate};
+}
+```
+
+The `(currency, rateDate)` composite primary key provides uniqueness and enables the "latest rate for currency X" fallback query:
+
+```sql
+SELECT * FROM exchange_rates WHERE currency = ? ORDER BY rate_date DESC LIMIT 1
+```
+
+**Explicit index** (per the v1.6 lesson — `customIndices` is decorative, `CREATE INDEX` must be emitted explicitly in `onCreate` and `onUpgrade`):
+
+```sql
+CREATE INDEX IF NOT EXISTS idx_exchange_rates_currency_date
+  ON exchange_rates (currency, rate_date);
+```
+
+The composite-key lookup is already indexed by the primary key in SQLite. The explicit index on `(currency, rate_date)` additionally accelerates the "latest for currency" query via `ORDER BY rate_date DESC`.
+
+### DAO: `lib/data/daos/exchange_rate_dao.dart`
+
+Three methods, all `Future`-based (not streams — rates are fetched on-demand per save, not watched reactively):
+
+- `Future<ExchangeRateRow?> findRate(String currency, DateTime date)` — exact date lookup
+- `Future<ExchangeRateRow?> findLatestRate(String currency)` — most-recent cached fallback
+- `Future<void> upsertRate(ExchangeRatesCompanion companion)` — insert-or-replace on composite PK conflict
+
+### Repository interface: `lib/features/currency/domain/repositories/exchange_rate_repository.dart`
+
+The "Thin Feature" rule: `lib/features/currency/domain/` holds only models and repository interfaces.
+
+```dart
+abstract interface class ExchangeRateRepository {
+  Future<ExchangeRate?> findByDate(String currency, DateTime date);
+  Future<ExchangeRate?> findLatest(String currency);
+  Future<void> upsert(ExchangeRate rate);
+}
+```
+
+### Repository implementation: `lib/data/repositories/exchange_rate_repository_impl.dart`
+
+ALL repository implementations live in `lib/data/repositories/` per the "ALL tables in lib/data/" rule (CLAUDE.md). The impl maps `ExchangeRateRow` ↔ `ExchangeRate` Freezed model and delegates to `ExchangeRateDao`.
+
+### Schema migration: v20 → v21
+
+In `app_database.dart`, `onUpgrade` gains a `from < 21` block:
+
+```dart
+if (from < 21) {
+  // New exchange_rates cache table
+  await migrator.createTable(exchangeRates);
+  await customStatement(
+    'CREATE INDEX IF NOT EXISTS idx_exchange_rates_currency_date '
+    'ON exchange_rates (currency, rate_date)',
+  );
+  // New nullable columns on transactions (foreign-currency provenance)
+  await customStatement('ALTER TABLE transactions ADD COLUMN original_currency TEXT');
+  await customStatement('ALTER TABLE transactions ADD COLUMN original_amount REAL');
+  await customStatement('ALTER TABLE transactions ADD COLUMN conversion_rate REAL');
+}
+```
+
+Also added to `onCreate` (after `createAll()` + `_createShoppingItemIndexes()`) for fresh installs. This mirrors exactly the `_createShoppingItemIndexes()` helper pattern from v1.6 — a private method `_createExchangeRateIndexes()` keeps `onCreate` and `onUpgrade` in sync.
+
+---
+
+## (c) Transactions Table Migration v20→v21 — Nullability Decision and Sync Round-Trip
+
+### New columns on `Transactions`
+
+```dart
+// All three nullable: JPY-native rows have NULL (amount IS already in JPY; no conversion).
+// Non-null only when the original currency was not JPY.
+TextColumn get originalCurrency => text().nullable()();  // ISO 4217, e.g. 'USD'
+RealColumn get originalAmount => real().nullable()();    // user-entered in originalCurrency
+RealColumn get conversionRate => real().nullable()();    // rate used: JPY per 1 unit
+```
+
+**Decision: all three columns nullable, no defaults.**
+
+`NULL` correctly means "no conversion was performed; amount is already in JPY." A default string `'JPY'` on `originalCurrency` would contaminate the idiomatic null-check for "is this a foreign-currency row?" across query filters and UI display logic. A default `0.0` on `conversionRate` is semantically wrong (a zero rate is an error state, not an absent state). Nullable with no default is the correct choice.
+
+The existing `amount` column (INT, NOT NULL) remains unchanged — it always stores the canonical JPY amount. All analytics, sorting, and list code touches only `amount`.
+
+### Migration statement rationale
+
+Use raw `customStatement` (not `migrator.addColumn`) for nullable columns without DEFAULT. The v17 `entry_source` migration used `customStatement` for the same reason (documented in `app_database.dart` line comment: "Cannot use migrator.addColumn here because table-level customConstraints are not applied by addColumn to existing rows"). For nullable columns the concern is slightly different (no CHECK to apply), but the pattern is established and consistent.
+
+### Impact on `TransactionSyncMapper`
+
+`toSyncMap` adds three conditional fields (matching the existing `if (x != null) 'field': x` pattern already used for `note`, `merchant`, `photoHash`):
+
+```dart
+if (transaction.originalCurrency != null)
+  'originalCurrency': transaction.originalCurrency,
+if (transaction.originalAmount != null)
+  'originalAmount': transaction.originalAmount,
+if (transaction.conversionRate != null)
+  'conversionRate': transaction.conversionRate,
+```
+
+`fromSyncMap` adds three nullable reads with explicit null defaults:
+
+```dart
+originalCurrency: data['originalCurrency'] as String?,
+originalAmount: (data['originalAmount'] as num?)?.toDouble(),
+conversionRate: (data['conversionRate'] as num?)?.toDouble(),
+```
+
+### Sync round-trip compatibility
+
+The sync payload is a JSON map. Extra keys in JSON are silently ignored by `fromSyncMap` because it only reads the keys it knows about. Absent keys read as `null` through the `as T?` cast. This gives clean bidirectional compatibility:
+
+| Scenario | What happens |
 |---|---|
-| `lib/data/app_database.dart` | Add `ShoppingItems` to `@DriftDatabase(tables:[...])` annotation; bump `schemaVersion` to 20; add `if (from < 20)` migration block |
-| `lib/application/family_sync/sync_orchestrator.dart` | Add `ShoppingItemChangeTracker` field + constructor param; flush shopping ops in `_executeIncrementalPush` (4 lines total) |
-| `lib/application/family_sync/apply_sync_operations_use_case.dart` | Add `ShoppingItemRepository` constructor param; add `case 'shopping_item':` branch in `execute()` switch + private handler method |
-| `lib/application/family_sync/sync_engine.dart` | Add `onShoppingItemChanged()` public method (2 lines) |
-| `lib/features/home/presentation/screens/main_shell_screen.dart` | Replace `Center(Text(S.of(context).todoTab))` with `ShoppingListScreen(bookId: bookId)`; make FAB context-aware (see FAB section) |
-| `lib/features/home/presentation/widgets/home_bottom_nav_bar.dart` | Change tab 4 icon from `Icons.check_box_outlined` to `Icons.shopping_cart_outlined`; update ARB key reference |
-| `lib/shared/widgets/ledger_type_selector.dart` | MOVED here from `lib/features/accounting/presentation/widgets/ledger_type_selector.dart` (see cross-feature resolution section) |
-| `lib/features/accounting/presentation/widgets/transaction_details_form.dart` | Update import path for `ledger_type_selector.dart` after the move |
-| `lib/l10n/app_ja.arb` / `app_zh.arb` / `app_en.arb` | Rename `homeTabTodo` -> `homeTabShoppingList`; add all shopping-list string keys |
+| v1.7 sends transaction with `originalCurrency='USD'` to older client (v1.6) | Older `fromSyncMap` ignores unknown keys; stores `amount` (JPY). Correct. |
+| v1.6 client sends JPY transaction to v1.7 | v1.7 `fromSyncMap` reads absent keys as `null`. All three fields null. Correct. |
+| v1.7 sends JPY transaction (null fields) | `if (x != null)` guard omits the three keys from the payload. Wire is identical to pre-v1.7. |
+| Manual rate override | `conversionRate` set by user, persisted verbatim; not re-fetched on receive. Correct. |
 
----
+No version negotiation or wire versioning is needed.
 
-## Drift Table Design: `ShoppingItems`
+### Impact on `TransactionChangeTracker` and `ApplySyncOperationsUseCase`
 
-Convention follows `transactions_table.dart` exactly: `@DataClassName`, `{#symbolSyntax}` for indices, `customConstraints` for CHECK, no `@override` on `customIndices`.
+**TransactionChangeTracker:** no change. It receives pre-serialized `Map<String, dynamic>` from `TransactionSyncMapper.toCreateOperation` / `toUpdateOperation`. The mapper update above is the only edit.
 
-```dart
-// lib/data/tables/shopping_items_table.dart
+**ApplySyncOperationsUseCase:** no change. The `_handleCreate` and `_handleUpdate` methods call `TransactionSyncMapper.fromSyncMap` directly. Backward-compat null defaults in the mapper handle field absence transparently.
 
-import 'package:drift/drift.dart';
+### Impact on `Transaction` Freezed model and `CreateTransactionParams`
 
-/// Shopping items table — public/private lists with optional metadata.
-///
-/// No transaction linkage (D3): completing an item only sets isCompleted.
-/// Private items (listType='private') are NEVER enqueued in
-/// ShoppingItemChangeTracker — guard enforced at use-case boundary.
-@DataClassName('ShoppingItemRow')
-class ShoppingItems extends Table {
-  // Identity
-  TextColumn get id => text()();
-  TextColumn get deviceId => text()();
-
-  // Visibility: 'public' syncs via family_sync; 'private' is local-only (D1)
-  TextColumn get listType => text().withDefault(const Constant('private'))();
-
-  // Required content
-  TextColumn get name => text().withLength(min: 1, max: 200)();
-
-  // Optional accounting hints (no FK constraint — D3 no linkage)
-  TextColumn get ledgerType => text().nullable()();   // 'daily' | 'joy' | null
-  TextColumn get categoryId => text().nullable()();
-
-  // JSON-encoded List<String>. Convention: same as transactions.metadata TEXT column.
-  // Decoded at DAO boundary: (jsonDecode(raw) as List).cast<String>()
-  TextColumn get tags => text().nullable()();
-
-  TextColumn get note => text().nullable()();
-
-  // D4: quantity + estimated price
-  IntColumn get quantity => integer().withDefault(const Constant(1))();
-  // Integer yen sub-units. Same convention as Transaction.amount. Nullable = not set.
-  IntColumn get estimatedPrice => integer().nullable()();
-
-  // State
-  BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
-  // Client-managed ordering among active items. Completed items always sort to
-  // the bottom via ORDER BY is_completed ASC, sort_order ASC regardless.
-  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
-
-  // Sync control (mirrors transactions_table.dart pattern)
-  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
-  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
-
-  // Family attribution: book that originally created this public item.
-  // Nullable TEXT (no FK) — shadow book may not exist locally when a pulled item arrives.
-  TextColumn get addedByBookId => text().nullable()();
-
-  // Timestamps
-  DateTimeColumn get createdAt => dateTime()();
-  DateTimeColumn get updatedAt => dateTime().nullable()();
-
-  @override
-  Set<Column> get primaryKey => {id};
-
-  @override
-  List<String> get customConstraints => [
-    "CHECK(list_type IN ('public', 'private'))",
-    'CHECK(quantity >= 1)',
-    "CHECK(ledger_type IN ('daily', 'joy') OR ledger_type IS NULL)",
-    'CHECK(estimated_price IS NULL OR estimated_price >= 0)',
-  ];
-
-  // Convention: TableIndex with {#columnName} symbol syntax (CLAUDE.md).
-  // Naming: idx_shopping_{columns}.
-  List<TableIndex> get customIndices => [
-    TableIndex(name: 'idx_shopping_list_type', columns: {#listType}),
-    TableIndex(name: 'idx_shopping_completed', columns: {#isCompleted}),
-    TableIndex(name: 'idx_shopping_sort_order', columns: {#sortOrder}),
-    TableIndex(name: 'idx_shopping_list_completed', columns: {#listType, #isCompleted}),
-    TableIndex(name: 'idx_shopping_deleted', columns: {#isDeleted}),
-    TableIndex(name: 'idx_shopping_added_by_book', columns: {#addedByBookId}),
-  ];
-}
-```
-
-**Column design decisions:**
-
-- `tags`: single TEXT column with `jsonEncode(List<String>)`. Mirrors `transactions.metadata` convention. A separate tags junction table is over-engineered for a list whose use is display + filter; client-side decode is trivial.
-- `estimatedPrice`: integer yen, nullable. Matches `Transaction.amount` convention. `null` = user left blank; `0` is valid for free items.
-- `sortOrder`: client-managed integer. `ReorderableListView.onReorder` calls `ReorderShoppingItemsUseCase` which updates this column in a Drift transaction. Completed items are non-reorderable (separate `SliverList` section rendered below).
-- `isDeleted`: soft-delete flag. The sync pipeline CRDT (delete wins over update) works identically to transactions.
-- `addedByBookId`: nullable TEXT without a SQLite FOREIGN KEY constraint. Shadow books may not exist locally when a public item arrives via pull sync. Used purely for per-item owner attribution display.
-
-**Migration block** (add to `app_database.dart` `onUpgrade`):
+`Transaction` gains three nullable Freezed fields (declared with Dart null types, no `@Default` annotation needed — nullable fields default to null in Freezed):
 
 ```dart
-if (from < 20) {
-  await migrator.createTable(shoppingItems);
-}
+String? originalCurrency,
+double? originalAmount,
+double? conversionRate,
 ```
 
-No backfill required. No existing table touched. `schemaVersion` bumped from 19 to 20.
-
----
-
-## DAO Design: `ShoppingItemDao`
-
-Mirrors `TransactionDao` structure. Key methods:
+`CreateTransactionParams` gains three optional constructor parameters:
 
 ```dart
-class ShoppingItemDao {
-  ShoppingItemDao(this._db);
-  final AppDatabase _db;
-
-  Future<void> insert(ShoppingItemsCompanion item) async { ... }
-  Future<void> update(ShoppingItemsCompanion item) async { ... }
-
-  // Sets isDeleted=true + updatedAt=now (soft-delete, mirrors TransactionDao.softDelete)
-  Future<void> softDelete(String id) async { ... }
-
-  // Batch soft-delete all completed items in a given listType (for clear-completed feature)
-  Future<void> softDeleteAllCompleted(String listType) async { ... }
-
-  Future<ShoppingItemRow?> findById(String id) async { ... }
-
-  /// Primary watch query for the screen.
-  /// ORDER BY is_completed ASC, sort_order ASC, created_at ASC.
-  /// Excludes soft-deleted rows (is_deleted = 0).
-  /// readsFrom: {_db.shoppingItems} is MANDATORY for reactivity.
-  Stream<List<ShoppingItemRow>> watchByListType(String listType) { ... }
-
-  /// For sync pull-side: insert-or-replace on conflict by id.
-  Future<void> upsert(ShoppingItemsCompanion item) async { ... }
-
-  /// Update sort_order for one item (used by ReorderShoppingItemsUseCase).
-  Future<void> reorder(String id, int newSortOrder) async { ... }
-}
+final String? originalCurrency;
+final double? originalAmount;
+final double? conversionRate;
 ```
 
-The `watchByListType` stream must use Drift's `.watch()` with `readsFrom: {_db.shoppingItems}`. This is the lesson from v1.4 GAP-2 (`watchByBookIds` was dead code because `readsFrom` was missing): without `readsFrom`, the stream never emits after writes. The shopping list MUST use `watchByListType().watch()` in the StreamProvider — do not fall back to `FutureProvider` + `ref.invalidate`.
+All existing call sites (manual, voice, OCR) omit these parameters and continue to work unchanged. Only the new multi-currency save path sets them.
 
 ---
 
-## Domain Model: `ShoppingItem`
+## (d) SmartKeyboard and TransactionDetailsForm — Currency State Location
+
+### SmartKeyboard: minimal change, new `onCurrencyTap` callback
+
+The currency cell in the action row currently renders `currencyLabel` / `currencySymbol` as static display (a `_CurrencyKey` private widget). For v1.7, tapping this cell opens the currency selector.
+
+The minimal change: add a nullable `onCurrencyTap` callback parameter. `_CurrencyKey` wraps its existing content in `GestureDetector` / `InkWell` when `onCurrencyTap != null`. `SmartKeyboard` remains a stateless `StatelessWidget` — no internal state added.
 
 ```dart
-// lib/features/shopping_list/domain/models/shopping_item.dart
-import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../../accounting/domain/models/transaction.dart'; // for LedgerType
-
-part 'shopping_item.freezed.dart';
-
-@freezed
-abstract class ShoppingItem with _$ShoppingItem {
-  const factory ShoppingItem({
-    required String id,
-    required String deviceId,
-    required String listType,        // 'public' | 'private'
-    required String name,
-    LedgerType? ledgerType,
-    String? categoryId,
-    @Default(<String>[]) List<String> tags,
-    String? note,
-    @Default(1) int quantity,
-    int? estimatedPrice,
-    @Default(false) bool isCompleted,
-    @Default(0) int sortOrder,
-    @Default(false) bool isSynced,
-    @Default(false) bool isDeleted,
-    String? addedByBookId,
-    required DateTime createdAt,
-    DateTime? updatedAt,
-  }) = _ShoppingItem;
-}
+SmartKeyboard(
+  ...
+  currencyLabel: 'USD',    // updated by host when user picks a currency
+  currencySymbol: '$',     // updated by host
+  onCurrencyTap: () => _openCurrencySelector(), // NEW — null = display-only
+)
 ```
 
-`ShoppingItem` imports `LedgerType` from `accounting/domain/models/transaction.dart`. This is a same-layer cross-feature domain model import. The existing `ListFilterState` in `lib/features/list/domain/models/list_filter_state.dart` already does this — the pattern is established and the `import_guard.yaml` subdirectory allow-list is the documented mechanism for it.
+### TransactionDetailsForm: local state fields (no new provider)
+
+Currency selection and the converted-amount preview belong to the form's existing local state. The form already manages `_amount`, `_date`, `_ledgerType`, `_joyFullness` as `late` instance fields on `TransactionDetailsFormState`. Multi-currency state follows the same pattern.
+
+New private fields added to `TransactionDetailsFormState`:
+
+```dart
+String? _originalCurrency;         // null = JPY (no conversion)
+double? _originalAmount;            // user-entered value in originalCurrency
+double? _conversionRate;            // rate fetched or manually overridden
+bool _rateIsManualOverride = false; // distinguishes fetched vs user-typed rate
+bool _rateFetchPending = false;     // drives loading indicator in preview row
+```
+
+No `StateNotifier`, `AsyncNotifier`, or separate Riverpod provider is needed. `setState(() {...})` drives all currency-state rebuilds — consistent with how `_date`, `_amount`, `_ledgerType` are already mutated.
+
+**Converted-amount preview row** (visible when `_originalCurrency != null`):
+
+```
+USD  50  ×  148.30  =  ¥7,415   [edit rate]
+```
+
+"Edit rate" tap sets `_rateIsManualOverride = true` and opens a numeric input dialog. A loading spinner replaces the rate when `_rateFetchPending = true`.
+
+**Rate fetch trigger:** when the user changes the form date OR changes the selected currency, the form calls `ref.read(getExchangeRateUseCaseProvider).execute(date, currency)` (a one-shot `Future` read, not a watch). The result updates `_conversionRate` via `setState`. If the fetch fails (network error or cache miss), `_conversionRate` retains its previous value and the preview shows "(using cached rate from [fallback date])".
+
+**TransactionDetailsFormConfig extension:** `$new(...)` gains two new optional fields:
+
+```dart
+final String? initialCurrency;       // from voice parser or OCR
+final double? initialOriginalAmount; // pre-filled original amount (OCR/voice)
+```
+
+These are null for the manual entry path, non-null when voice or OCR pre-detects a currency.
+
+### Currency selector: new modal bottom sheet
+
+```
+lib/features/accounting/presentation/widgets/currency_selector_sheet.dart
+```
+
+Structure: segmented header (常用 common / 全部 full ISO / search tab), `ListView` of tappable currency rows (ISO code + symbol + localized name), returns `String?` (ISO 4217 code). Opens via `showModalBottomSheet` from `ManualOneStepScreen` (through `onCurrencyTap`) or from the voice/OCR host.
+
+The full ISO currency list (170+ entries) is a static Dart constant — no network call needed for the list itself.
 
 ---
 
-## import_guard.yaml Files Required
+## (e) Voice Parser Extension for Currency Words
 
-**`lib/features/shopping_list/domain/import_guard.yaml`** (mirrors `list/domain/import_guard.yaml`):
+### State machines: unchanged
 
-```yaml
-deny:
-  - package:home_pocket/data/**
-  - package:home_pocket/infrastructure/**
-  - package:home_pocket/application/**
-  - package:home_pocket/features/**/presentation/**
-  - package:flutter/**
+`ChineseNumeralStateMachine.normalize()` maps unrecognized characters to nothing (they are simply dropped from the token list — see the `// Step 5: everything else silently dropped` comment in the source). Currency words like `美元`, `ドル` are dropped, which is correct: the number extraction still works because currency words are not numeric tokens.
 
-inherit: true
+No changes to `ChineseNumeralStateMachine`, `JapaneseNumeralStateMachine`, or `NumeralStateMachine`.
+
+### `VoiceCurrencySuffixes.all`: extend with multi-language currency words
+
+Ordering rule: longer tokens first (existing invariant — `日元` before `元`, `块钱` before `块`).
+
+New tokens to insert at the correct position (longest-first within their group):
+
+```dart
+// Multi-char zh (insert before bare single-char equivalents)
+'人民币',  // CNY zh (3 chars — longest first)
+'美元',    // USD zh
+'欧元',    // EUR zh
+'英镑',    // GBP zh
+'港币',    // HKD zh
+'澳元',    // AUD zh
+'加元',    // CAD zh
+'泰铢',    // THB zh
+'韩元',    // KRW zh
+
+// Multi-char ja (insert before 'ドル' which is already present)
+'ユーロ',  // EUR ja (3 chars)
+'ポンド',  // GBP ja (3 chars)
+'ウォン',  // KRW ja (3 chars)
+// 'ドル' already present (USD ja)
 ```
 
-**`lib/features/shopping_list/domain/models/import_guard.yaml`** (per-subdirectory allow-list):
+`regexAlternation` is auto-derived from `all`, so the `_extractArabicAmount` regex in `VoiceTextParser` expands automatically. No direct changes to `VoiceTextParser`.
 
-```yaml
-allow:
-  - dart:core
-  - package:freezed_annotation/**
-  - ../../../accounting/domain/models/transaction.dart   # for LedgerType enum
+### `ParseVoiceInputUseCase`: add `_extractCurrencyCode` + `VoiceParseResult` field
 
-inherit: true
+New private method on `ParseVoiceInputUseCase`:
+
+```dart
+/// Scans recognized text for a known currency word and returns the ISO 4217 code.
+/// Returns null if no currency word is detected (= JPY, no conversion needed).
+String? _extractCurrencyCode(String text) { ... }
 ```
 
-**`lib/features/shopping_list/presentation/import_guard.yaml`** (mirrors `list/presentation/import_guard.yaml`):
+Implementation: iterate `VoiceCurrencySuffixes.all`, check `text.contains(token)`, return the corresponding ISO code from a static `const Map<String, String> _currencyTokenToIso`.
 
-```yaml
-deny:
-  - package:home_pocket/infrastructure/**
-  - package:home_pocket/data/daos/**
-  - package:home_pocket/data/tables/**
+`VoiceParseResult` Freezed model gains one new optional field:
 
-inherit: true
+```dart
+final String? detectedCurrency; // null = JPY-native; 'USD', 'EUR', etc. otherwise
 ```
+
+Freezed nullable fields with no `@Default` annotation implicitly default to `null` — no existing callsites need changes.
+
+`VoiceInputScreen` reads `result.detectedCurrency` and passes it as `initialCurrency` in `TransactionDetailsFormConfig.$new(...)`.
 
 ---
 
-## Cross-Feature Widget Import Resolution (CRITICAL)
+## (f) Analytics and List Code Paths — Confirmed Zero Changes Required
 
-### The problem
+All analytics queries operate on the `amount` column (SQLite INTEGER, the converted JPY value). Confirmed by direct inspection of `analytics_dao.dart`:
 
-`CategorySelectionScreen` lives at `lib/features/accounting/presentation/screens/category_selection_screen.dart`.
-`LedgerTypeSelector` lives at `lib/features/accounting/presentation/widgets/ledger_type_selector.dart`.
+- `SUM(amount)` — expense totals, per-ledger totals, per-category totals
+- `ORDER BY amount DESC` — largest expense, best joy moment
+- `amount` field — joy contribution calculations (`Σ joy_contribution`)
+- Calendar day totals — `SUM(amount)` per day
 
-Currently both are only used by `transaction_details_form.dart` within the same accounting feature — no cross-feature violation today. `shopping_list/presentation/widgets/shopping_item_form.dart` will need both. If it imports them from `features/accounting/presentation/`, it creates a cross-feature presentation dependency.
+The v1.7 design principle is that `amount` always stores JPY. The three new nullable columns are additive and invisible to all query paths. Analytics and list use cases require **zero changes**.
 
-### Resolution for LedgerTypeSelector: move to `lib/shared/widgets/`
+**List tile decoration** for foreign-currency rows is purely additive: a conditional `Text` widget rendered when `transaction.originalCurrency != null`. This is a UI-only addition in `ListTransactionTile` — no DAO, repository, or use-case change.
 
-`LedgerTypeSelector` is a genuinely generic component: it takes `LedgerType selected` and `ValueChanged<LedgerType> onChanged`. Its only non-generic dependency is `LedgerType` (a domain enum), `AppPalette`, and `AppTextStyles` — all of which are already accessible from `lib/shared/`. It has zero accounting-specific state, no Riverpod providers, and no ConsumerWidget.
+**Detail view** (`TransactionDetailsForm` in edit mode): `initState` already seeds all fields from `seed` verbatim. The three new nullable fields on `Transaction` are naturally available via `seed.originalCurrency`, `seed.originalAmount`, `seed.conversionRate`. A read-only informational row is added to the build method when `_originalCurrency != null`.
 
-Action: move `ledger_type_selector.dart` to `lib/shared/widgets/ledger_type_selector.dart`. Update the import in `transaction_details_form.dart`. Both `transaction_details_form.dart` and `shopping_item_form.dart` then import from `lib/shared/widgets/ledger_type_selector.dart` — no cross-feature dependency.
+---
 
-### Resolution for CategorySelectionScreen: direct cross-feature import, allow-listed
+## (g) AppInitializer — Confirmed No Impact
 
-`CategorySelectionScreen` is a full ConsumerStatefulWidget (240+ lines) with:
-- `categoryRepositoryProvider` (from accounting feature)
-- `CategoryLocalizationService`
-- `state_category_reorder.dart` (from accounting feature)
-- `ReorderableListView.builder` with category reordering
+`AppInitializer` initializes `KeyManager → Database → other services`. Exchange-rate fetching is lazy: rates are fetched when the user selects a non-JPY currency during entry. No AppInitializer change is needed.
 
-Moving it to `lib/shared/` would drag accounting-specific providers into the shared layer — incorrect. It belongs in `lib/features/accounting/presentation/`.
+`ExchangeRateCacheService` and use cases are wired via Riverpod providers and instantiated on first `ref.read`. Boot time is unaffected.
 
-The correct pattern is the same that `transaction_details_form.dart` uses: `Navigator.of(context).push<Category>(MaterialPageRoute(builder: (_) => CategorySelectionScreen(...)))`. For `shopping_item_form.dart` to do this without a cross-feature import violation, it must explicitly allow the import.
+---
 
-Inspection of the actual import_guard rules confirms:
-- `lib/features/import_guard.yaml` (root) denies `features/*/use_cases/**`, `features/*/application/**`, `features/*/infrastructure/**`, `features/*/data/**` — does NOT deny cross-feature presentation imports.
-- `lib/features/shopping_list/presentation/import_guard.yaml` denies `infrastructure/**`, `data/daos/**`, `data/tables/**` — does NOT deny `features/accounting/presentation/**` by default.
+## (h) Suggested Build Order
 
-Therefore the import is not currently blocked. To make the dependency explicit and intentional (consistent with the project's import_guard philosophy: `allow:` as an opt-in declaration), add:
+Phases ordered by dependency. Each phase completes before the next starts, except Phases E and F which are independent and can run in parallel.
 
-```yaml
-# lib/features/shopping_list/presentation/import_guard.yaml
-allow:
-  - package:home_pocket/features/accounting/presentation/screens/category_selection_screen.dart
+### Phase A — Data Foundation (prerequisite for everything)
 
-deny:
-  - package:home_pocket/infrastructure/**
-  - package:home_pocket/data/daos/**
-  - package:home_pocket/data/tables/**
+1. Add `exchange_rates_table.dart` to `lib/data/tables/`
+2. Add `exchange_rate_dao.dart` to `lib/data/daos/`
+3. Add `exchange_rate_repository_impl.dart` to `lib/data/repositories/`
+4. Register `ExchangeRates` in `AppDatabase @DriftDatabase(tables:[...])`; bump `schemaVersion` to 21
+5. Add v20→v21 migration block (exchange_rates table + index + three transactions columns)
+6. Run `build_runner` — regenerates `app_database.g.dart`
 
-inherit: true
-```
+Gate: migration tests — verify v20→v21 executes without error; verify v1→v21 clean install works; verify existing transactions gain three null columns without data loss.
 
-### Summary of import resolution actions
+### Phase B — Domain Models and Sync Protocol
 
-| Action | File | What changes |
+7. Add three nullable fields to `Transaction` Freezed model
+8. Add `ExchangeRate` Freezed model to `lib/features/currency/domain/models/`
+9. Add `ExchangeRateRepository` interface to `lib/features/currency/domain/repositories/`
+10. Update `TransactionSyncMapper.toSyncMap` (conditional emit) and `fromSyncMap` (null-safe read)
+11. Add three optional fields to `CreateTransactionParams`
+12. Run `build_runner` — regenerates Freezed + JSON serialization
+
+Gate: sync round-trip unit tests — new-to-old wire (extra keys ignored), old-to-new wire (absent keys → null).
+
+### Phase C — Infrastructure Client
+
+13. Add `exchange_rate_api_client.dart` to `lib/infrastructure/exchange_rate/`
+14. Add `exchange_rate_cache_service.dart` to `lib/infrastructure/exchange_rate/`
+
+Gate: unit tests with injected `MockClient` — cache-hit path (no network call), cache-miss path (API called + DAO upserted + rate returned), offline-fallback path (API throws → latest cached row returned), privacy check (no device ID / user ID in HTTP request).
+
+### Phase D — Application Use Cases
+
+15. Add `get_exchange_rate_use_case.dart` to `lib/application/currency/`
+16. Add `resolve_rate_for_date_use_case.dart` to `lib/application/currency/`
+17. Add `repository_providers.dart` Riverpod wiring to `lib/application/currency/`
+
+Gate: unit tests with mocked `ExchangeRateRepository` and `ExchangeRateCacheService` — fresh fetch, offline fallback with `RateResult.fallback`, manual override pass-through.
+
+### Phase E — Voice Parser Extensions (parallel with F)
+
+18. Extend `VoiceCurrencySuffixes.all` with new multi-language currency tokens
+19. Add `_extractCurrencyCode` to `ParseVoiceInputUseCase`; add static `_currencyTokenToIso` map
+20. Add `detectedCurrency` field to `VoiceParseResult` Freezed model; run `build_runner`
+21. Wire `VoiceInputScreen` to pass `detectedCurrency` as `initialCurrency` in form config
+
+Gate: extend voice corpus tests — `「50ドル」` → `{amount: 50, detectedCurrency: 'USD'}`, `「五十美元」` → `{amount: 50, detectedCurrency: 'USD'}`, `「1000円」` → `{amount: 1000, detectedCurrency: null}`.
+
+### Phase F — Presentation (parallel with E, requires A-D)
+
+22. Add `onCurrencyTap` callback to `SmartKeyboard`
+23. Add `currency_selector_sheet.dart` (common + full ISO + search)
+24. Add four currency state fields to `TransactionDetailsFormState`
+25. Add converted-preview row to `TransactionDetailsForm.build`
+26. Wire rate fetch on date-change and currency-change callbacks
+27. Extend `TransactionDetailsFormConfig.$new` with `initialCurrency` / `initialOriginalAmount`
+28. Update `ManualOneStepScreen` to pass `onCurrencyTap` and handle currency state
+29. Add read-only currency info row to `TransactionDetailsForm` edit mode
+30. Add foreign-currency annotation subtitle to `ListTransactionTile`
+
+Gate: golden tests for keypad (tappable currency cell), form (converted-preview row in ja/zh/en × light/dark), list tile (annotation variant). Integration smoke test: manual flow saves USD 50 at rate 148.30, `amount = 7415`, `original_currency = 'USD'`, `original_amount = 50.0`, `conversion_rate = 148.30`.
+
+---
+
+## Component Boundaries Summary
+
+| New Component | Layer | Communicates With |
 |---|---|---|
-| Move widget | `ledger_type_selector.dart` | `lib/features/accounting/presentation/widgets/` -> `lib/shared/widgets/` |
-| Update import | `transaction_details_form.dart` | Import from `../../../../shared/widgets/ledger_type_selector.dart` |
-| Allow cross-feature | `shopping_list/presentation/import_guard.yaml` | Add explicit `allow:` for `CategorySelectionScreen` path |
-| No action | `CategorySelectionScreen` itself | Stays in `lib/features/accounting/presentation/screens/` |
+| `ExchangeRateApiClient` | infrastructure/exchange_rate | `http.Client` (external), no app imports |
+| `ExchangeRateCacheService` | infrastructure/exchange_rate | `ExchangeRateDao` (injected), `ExchangeRateApiClient` |
+| `ExchangeRates` table | data/tables | `AppDatabase` |
+| `ExchangeRateDao` | data/daos | `AppDatabase`, `ExchangeRates` table |
+| `ExchangeRateRepositoryImpl` | data/repositories | `ExchangeRateDao`, `ExchangeRate` Freezed model |
+| `ExchangeRate` Freezed model | features/currency/domain/models | (pure data, no imports) |
+| `ExchangeRateRepository` interface | features/currency/domain/repositories | `ExchangeRate` model |
+| `GetExchangeRateUseCase` | application/currency | `ExchangeRateCacheService` (injected), `ExchangeRateRepository` |
+| `ResolveRateForDateUseCase` | application/currency | `ExchangeRateRepository` |
+| `CurrencySelectorSheet` | features/accounting/presentation/widgets | static ISO list constant, `AppPalette` |
 
 ---
 
-## Family Sync Integration: Minimal Change Set
-
-The pipeline is entity-agnostic at the wire level. These are the only changes required.
-
-### New file: `ShoppingItemChangeTracker`
-
-```dart
-// lib/application/family_sync/shopping_item_change_tracker.dart
-
-import 'package:flutter/foundation.dart';
-
-/// Tracks shopping item operations (public items only) pending sync push.
-///
-/// Private items are NEVER passed to this tracker.
-/// The listType guard is enforced at the use-case boundary, not here.
-class ShoppingItemChangeTracker {
-  final _pendingOps = <Map<String, dynamic>>[];
-
-  void trackCreate(Map<String, dynamic> operation) {
-    _pendingOps.add(operation);
-  }
-
-  void trackUpdate(Map<String, dynamic> operation) {
-    _pendingOps.add(operation);
-  }
-
-  void trackDelete({required String itemId}) {
-    _pendingOps.add({
-      'op': 'delete',
-      'entityType': 'shopping_item',
-      'entityId': itemId,
-      'timestamp': DateTime.now().toUtc().toIso8601String(),
-    });
-  }
-
-  List<Map<String, dynamic>> flush() {
-    final ops = List<Map<String, dynamic>>.of(_pendingOps);
-    _pendingOps.clear();
-    if (kDebugMode && ops.isNotEmpty) {
-      debugPrint('[ShoppingChangeTracker] ${ops.length} ops flushed');
-    }
-    return ops;
-  }
-
-  int get pendingCount => _pendingOps.length;
-}
-```
-
-### Modified: `SyncOrchestrator._executeIncrementalPush`
-
-Add `ShoppingItemChangeTracker _shoppingChangeTracker` field (injected via constructor). In `_executeIncrementalPush`, after the existing transaction ops flush block, add:
-
-```dart
-// Flush pending shopping item changes (public items only — private guard at use-case boundary)
-final shoppingOps = _shoppingChangeTracker.flush();
-if (shoppingOps.isNotEmpty) {
-  await _pushSync.execute(operations: shoppingOps, vectorClock: const {});
-}
-```
-
-That is 4 lines total. No other changes to `SyncOrchestrator`.
-
-### Modified: `ApplySyncOperationsUseCase`
-
-Add `ShoppingItemRepository _shoppingItemRepository` constructor parameter. In `execute()`, add one switch case:
-
-```dart
-case 'shopping_item':
-  await _applyShoppingItemOperation(operation);
-```
-
-Add private method:
-
-```dart
-Future<void> _applyShoppingItemOperation(Map<String, dynamic> operation) async {
-  final op = operation['op'] as String?;
-  final entityId = operation['entityId'] as String?;
-  final data = operation['data'] as Map<String, dynamic>?;
-  if (op == null || entityId == null) return;
-
-  switch (op) {
-    case 'create':
-    case 'insert':
-      if (data == null) return;
-      await _handleShoppingCreate(entityId, data);
-    case 'update':
-      if (data == null) return;
-      await _handleShoppingUpdate(entityId, data);
-    case 'delete':
-      await _shoppingItemRepository.softDelete(entityId);
-  }
-}
-```
-
-`_handleShoppingCreate` checks for an existing item (idempotent) then calls `_shoppingItemRepository.upsert(...)`. `_handleShoppingUpdate` applies last-write-wins on `updatedAt` (same CRDT strategy as `_handleUpdate` for transactions).
-
-### Modified: `SyncEngine`
-
-Add one public method:
-
-```dart
-/// Shopping item created/updated/deleted (public items only).
-void onShoppingItemChanged() {
-  _scheduler.onTransactionChanged(); // reuses the existing 10s debounce trigger
-}
-```
-
-The scheduler's `onTransactionChanged` debounce is entity-agnostic — it triggers `incrementalPush`. Both use cases call their respective engine method; both flush through the same orchestrator.
-
-### Private item guard: enforced at use-case boundary
-
-`CreateShoppingItemUseCase` and `UpdateShoppingItemUseCase` check `params.listType`. If `listType == 'public'` AND a group is active: call `_changeTracker.trackCreate/Update(operation)` then `_syncEngine.onShoppingItemChanged()`. If `listType == 'private'`: write to DB only, tracker never called. This is simpler and more reliable than filtering at the tracker or orchestrator level — no parsing of operation maps required.
-
----
-
-## FAB Context-Awareness (D2)
-
-**Current state:** `onFabTap` in `main_shell_screen.dart` is a single unconditional `Navigator.push(ManualOneStepScreen)`. The `HomeBottomNavBar` is a stateless widget that accepts `VoidCallback onFabTap` — it has no knowledge of the current tab.
-
-**Recommended wiring:**
-
-`currentIndex` is already available in `MainShellScreen.build` via `ref.watch(selectedTabIndexProvider)`. The FAB callback becomes conditional on `currentIndex`:
-
-```dart
-onFabTap: () async {
-  if (currentIndex == 3) {
-    // Shopping list tab — D2: context-aware FAB opens add-item sheet
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => ShoppingItemAddSheet(
-        bookId: bookId,
-        // Pre-fill list type from the active segment control state
-        defaultListType: ref.read(selectedShoppingListTypeProvider).name,
-      ),
-    );
-    // No ref.invalidate needed — watchByListType stream reacts automatically
-  } else {
-    // All other tabs — existing transaction entry FAB
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
-        builder: (_) => ManualOneStepScreen(bookId: bookId),
-      ),
-    );
-    // ... existing ref.invalidate calls unchanged ...
-  }
-},
-```
-
-No changes to `HomeBottomNavBar` widget itself — the FAB callback logic stays in `MainShellScreen`, which already has `currentIndex`. The nav bar remains a pure UI component accepting `VoidCallback onFabTap`.
-
-`selectedShoppingListTypeProvider` is the `state_list_type.dart` keepAlive notifier. Passing `defaultListType` to the form means the FAB opens a new item pre-set to whichever segment is active (public or private).
-
----
-
-## Architectural Patterns
-
-### Pattern 1: DAO `.watch()` -> StreamProvider (reactive list)
-
-The lesson from v1.4 GAP-2 is clear: use Drift's `.watch()` directly, not `FutureProvider` + `ref.invalidate`. For shopping items this is especially important because pull-sync writes from family members must appear without user action.
-
-```dart
-// state_shopping_items.dart
-@riverpod
-Stream<List<ShoppingItem>> shoppingItems(Ref ref, {required String listType}) {
-  final dao = ref.watch(shoppingItemDaoProvider);
-  return dao
-      .watchByListType(listType)
-      .map((rows) => rows.map(ShoppingItemMapper.fromRow).toList());
-}
-```
-
-Filter notifiers (`state_shopping_filter.dart`, `state_list_type.dart`) use `keepAlive: true` so public/private segment selection and filter settings persist across tab switches in the IndexedStack.
-
-### Pattern 2: Completed-to-bottom via SQL ordering only
-
-No client-side sorting. The DAO query uses:
-
-```dart
-.orderBy([
-  (t) => OrderingTerm.asc(t.isCompleted),   // false=0 before true=1
-  (t) => OrderingTerm.asc(t.sortOrder),
-  (t) => OrderingTerm.asc(t.createdAt),     // tiebreaker within completed group
-])
-```
-
-`ReorderableListView.onReorder` updates `sortOrder` for active items only. Completed items are rendered in a non-reorderable `SliverList` section below a "Completed" divider. Split at the first row where `item.isCompleted == true` after the DAO query returns the ordered list.
-
-### Pattern 3: Public-item sync guard at use-case boundary
-
-The `listType` guard runs in application use cases, not in the tracker or orchestrator:
-
-```dart
-// In CreateShoppingItemUseCase.execute():
-await _repository.insert(item);
-if (params.listType == 'public' && await _isGroupActive()) {
-  _changeTracker.trackCreate(_toSyncOperation(item));
-  _syncEngine.onShoppingItemChanged();
-}
-```
-
-This keeps the tracker clean, avoids conditional logic in the orchestrator, and makes the privacy invariant directly testable: mock `_isGroupActive()` returning true/false and verify tracker is called/not called.
-
----
-
-## Data Flow
-
-### Add item (FAB on shopping tab)
+## Data Flow: Foreign-Currency Transaction Save
 
 ```
-User taps FAB (currentIndex == 3)
-  -> showModalBottomSheet(ShoppingItemAddSheet)
-     User fills name + optional D4 fields
-     -> CreateShoppingItemUseCase.execute(CreateShoppingItemParams)
-          -> ShoppingItemRepository.insert(item)
-               -> ShoppingItemDao.insert(companion) -> Drift -> SQLCipher DB
-          -> if public + group active:
-               ShoppingItemChangeTracker.trackCreate(op)
-               SyncEngine.onShoppingItemChanged()
-                 -> SyncScheduler debounce 10s
-                   -> SyncOrchestrator._executeIncrementalPush
-                     -> shoppingChangeTracker.flush() -> PushSyncUseCase
-          -> Navigator.pop (sheet dismissed)
-  <- ShoppingItemDao.watchByListType stream emits (Drift detects table write)
-  <- shoppingItemsProvider rebuilds
-  <- ShoppingListScreen rerenders with new item at correct sort position
-```
+User taps currency cell on SmartKeyboard
+  → SmartKeyboard.onCurrencyTap → ManualOneStepScreen._openCurrencySelector()
+    → showModalBottomSheet(CurrencySelectorSheet)
+    → returns 'USD'
+  → form setState: _originalCurrency = 'USD'
+  → form triggers GetExchangeRateUseCase.execute(date: _date, currency: 'USD')
+      → ExchangeRateCacheService.getRate(date, 'USD')
+          ├── ExchangeRateDao.findRate() → HIT → return cached ExchangeRate
+          └── MISS → ExchangeRateApiClient.fetchRate() → ExchangeRateDao.upsertRate()
+      → returns ExchangeRate(rate: 148.30)
+  → form setState: _conversionRate = 148.30, _rateFetchPending = false
+  → preview row renders: "USD  50  ×  148.30  =  ¥7,415"
 
-### Pull sync (public item from family member)
-
-```
-WebSocket/push: syncAvailable
-  -> SyncEngine.onSyncAvailable -> SyncOrchestrator.incrementalPull
-     -> PullSyncUseCase.execute -> RelayApiClient.pull -> decrypt
-        -> ApplySyncOperationsUseCase.execute(operations)
-           -> case 'shopping_item':
-              -> _applyShoppingItemOperation(op)
-                 -> ShoppingItemRepository.upsert(item)
-                    -> ShoppingItemDao.upsert -> Drift -> SQLCipher DB
-  <- ShoppingItemDao.watchByListType stream emits automatically
-  <- shoppingItemsProvider rebuilds (public list shows new item from family)
+User taps Save
+  → TransactionDetailsFormState.submit()
+  → jpyAmount = (_originalAmount × _conversionRate).round()  // 50 × 148.30 = 7415
+  → CreateTransactionParams(
+       amount: 7415,                // JPY canonical amount
+       originalCurrency: 'USD',
+       originalAmount: 50.0,
+       conversionRate: 148.30,
+       ...)
+  → CreateTransactionUseCase.execute(params)
+  → Transaction persisted: amount=7415, original_currency='USD',
+      original_amount=50.0, conversion_rate=148.30
+  → TransactionChangeTracker.trackCreate(TransactionSyncMapper.toCreateOperation(...))
+      // toSyncMap emits 'originalCurrency', 'originalAmount', 'conversionRate'
+      // because all three are non-null
+  → SyncEngine.onTransactionChanged() → debounced push
 ```
 
 ---
 
-## Phase Build Order
+## Architecture Constraints Verified
 
-Dependencies determine sequencing. Each phase must be complete before the next begins; phases 39 and 40 can run in parallel.
-
-| Phase | Content | Prerequisite |
-|---|---|---|
-| Phase 36 | **Data layer foundation.** `shopping_items_table.dart`, `shopping_item_dao.dart`, `shopping_item_repository_impl.dart`. `app_database.dart` v19->v20 migration. ARB rename `homeTabTodo->homeTabShoppingList` (ja/zh/en). DAO tests (watchByListType reactivity, softDelete, upsert, reorder). | None |
-| Phase 37 | **Domain layer.** `ShoppingItem` Freezed, `ShoppingListFilter` Freezed, `ShoppingItemParams` Freezed, `ShoppingItemRepository` interface. All `import_guard.yaml` files. `LedgerTypeSelector` move to `lib/shared/widgets/` + update accounting import. Run `build_runner`. | Phase 36 (table column names needed for mapping) |
-| Phase 38 | **Application layer.** 6 use cases in `lib/application/shopping_list/`. `repository_providers.dart` for use-case wiring. Mocktail tests for each use case (mirrors v1.4 Phase 25 approach). | Phase 37 (domain interfaces required) |
-| Phase 39 | **Sync integration.** `ShoppingItemChangeTracker`, `SyncOrchestrator` extension (4 lines), `ApplySyncOperationsUseCase` extension (case + handler), `SyncEngine.onShoppingItemChanged()`. Integration test: mock SyncEngine, verify public items enter tracker, private items do not. | Phase 38 (use cases call tracker) |
-| Phase 40 | **Presentation shell.** `repository_providers.dart`, `state_list_type`, `state_shopping_filter`, `state_shopping_items` providers. Replace placeholder in `main_shell_screen.dart` with `ShoppingListScreen`. Context-aware FAB wiring. Tab icon + label update. Golden baselines (empty state). | Phases 37-38 (domain models + use cases required) |
-| Phase 41 | **UI widgets.** `ShoppingItemTile` (checkbox toggle + swipe-delete via `DeleteShoppingItemUseCase`), `ShoppingItemForm` (add/edit bottom sheet with all D4 fields + `CategorySelectionScreen` push + `LedgerTypeSelector`), `ShoppingListSegmentControl` (D1 public/private), `ShoppingFilterBar`, `ShoppingEmptyState`. Human-approved render. | Phase 40 (screen + providers exist) |
-| Phase 42 | **i18n + golden re-baseline.** All ARB keys x ja/zh/en parity. Golden tests for all screen states x locale x light/dark. Final sync integration smoke test. | Phase 41 (all UI complete) |
-
-Phases 39 and 40 are independent: sync integration does not depend on any presentation file, and the presentation shell does not depend on sync being wired. They can be developed concurrently if resources allow.
-
----
-
-## Anti-Patterns
-
-### Anti-Pattern 1: `FutureProvider` + `ref.invalidate` instead of `StreamProvider`
-
-**What people do:** Use `FutureProvider.autoDispose` for the shopping item list and call `ref.invalidate` after each mutation.
-
-**Why it's wrong:** Creates the same dead-code debt as `watchByBookIds` in v1.4 (GAP-2). Pull-sync writes from family members cannot trigger a `ref.invalidate` — they happen inside `ApplySyncOperationsUseCase`, which has no access to Riverpod. Items added by family members will not appear in the public list until the user manually navigates away and back.
-
-**Do this instead:** `watchByListType(listType).watch()` wrapped in a `StreamProvider`. Drift table writes (from any source including sync) automatically trigger stream emission.
-
-### Anti-Pattern 2: Private item entering the change tracker
-
-**What people do:** Call `_changeTracker.trackCreate(op)` after every insert, relying on the orchestrator to filter by listType.
-
-**Why it's wrong:** The orchestrator sees only `List<Map<String, dynamic>>` after flush — it has no access to listType without parsing the JSON payload. This violates separation of concerns and is fragile (operation map structure is an internal implementation detail of the tracker, not the orchestrator).
-
-**Do this instead:** Guard at use-case boundary. Only call `_changeTracker.trackCreate` when `params.listType == 'public'`. Private items never reach the tracker, relay, or any other device.
-
-### Anti-Pattern 3: Cross-feature presentation import without explicit allow-list entry
-
-**What people do:** Import `CategorySelectionScreen` from `shopping_list/presentation/` and omit the `allow:` entry in `shopping_list/presentation/import_guard.yaml`.
-
-**Why it's wrong:** While the current `lib/features/import_guard.yaml` does not block cross-feature presentation imports, leaving the dependency implicit means it can silently become a violation if future import_guard rules tighten. The project's philosophy is opt-in allow-listing for intentional cross-boundary dependencies.
-
-**Do this instead:** Add the explicit `allow:` path. Make the dependency documented and intentional.
-
-### Anti-Pattern 4: Completed items inside `ReorderableListView`
-
-**What people do:** Include completed items in the same `ReorderableListView` as active items, with a different visual state, and filter drag handles away.
-
-**Why it's wrong:** `ReorderableListView` requires all items to be draggable. Mixing drag-enabled and drag-disabled items is not supported without custom drag-handle suppression that breaks keyboard accessibility and is undocumented behavior.
-
-**Do this instead:** Two separate sections: `SliverReorderableList` for active items (reorderable), then `SliverList` for completed items below a divider (non-reorderable). The DAO `ORDER BY is_completed ASC` returns them pre-sorted; split at the first `isCompleted == true` row.
-
-### Anti-Pattern 5: Moving `CategorySelectionScreen` to `lib/shared/`
-
-**What people do:** Attempt to move `CategorySelectionScreen` to `lib/shared/widgets/` or `lib/shared/screens/` to avoid cross-feature import.
-
-**Why it's wrong:** `CategorySelectionScreen` depends on `categoryRepositoryProvider` (defined in accounting feature's `presentation/providers/repository_providers.dart`) and `state_category_reorder.dart` (accounting-specific notifier). Moving the screen would drag accounting-feature-specific providers into the shared layer, which is a worse violation than a documented cross-feature import.
-
-**Do this instead:** Keep it in `lib/features/accounting/presentation/screens/` and allow-list the import explicitly.
-
----
-
-## Integration Points
-
-### Internal Boundaries
-
-| Boundary | Communication | Notes |
-|---|---|---|
-| `shopping_list` presentation <-> `application/shopping_list` | Use cases via Riverpod providers in `repository_providers.dart` | ONE `repository_providers.dart` per feature — Riverpod hygiene rule |
-| `application/shopping_list` <-> `data/repositories/shopping_item_repository_impl` | `ShoppingItemRepository` interface | Injected via feature `repository_providers.dart` |
-| `shopping_list` presentation -> `accounting` presentation | `CategorySelectionScreen` Navigator.push + return `Category?` | Allow-listed in `shopping_list/presentation/import_guard.yaml` |
-| `lib/shared/widgets/ledger_type_selector.dart` <-> both features | Direct import from `lib/shared/widgets/` | Generic widget, no feature-specific state; both accounting form and shopping form import it |
-| `application/shopping_list` use cases <-> `ShoppingItemChangeTracker` | Direct method calls (injected via constructor) | Only called when `listType == 'public'` AND group active |
-| `application/family_sync/sync_orchestrator` <-> shopping tracker | `_shoppingChangeTracker.flush()` in `_executeIncrementalPush` | 4-line addition after the existing transaction flush |
-| `application/family_sync/apply_sync_operations_use_case` <-> `ShoppingItemRepository` | Direct call in `case 'shopping_item':` branch | Repository injected via constructor |
-| `features/home/presentation` FAB <-> shopping list | `currentIndex == 3` guard in `MainShellScreen.onFabTap` | No changes to `HomeBottomNavBar` widget |
-
-### External Services
-
-| Service | Integration Pattern | Notes |
-|---|---|---|
-| WebSocket relay server | Existing `/sync/push` + `/sync/pull` + `/sync/ack` endpoints | Zero server changes — relay is entity-agnostic; `entityType: 'shopping_item'` lives inside the encrypted payload |
-| SQLCipher DB | Drift `ShoppingItems` table + `ShoppingItemDao` | Shopping item `note` field SHOULD be encrypted via `FieldEncryptionService` at the repository impl boundary, matching the transaction `note` encryption pattern |
+| Constraint | v1.7 Status |
+|---|---|
+| `import_guard`: infrastructure denies features/application/data | `exchange_rate/` inherits via `inherit: true` — compliant |
+| `import_guard`: application denies `data/tables/**` and `data/daos/**` | Currency use cases go through repository interface only — compliant |
+| `import_guard`: data denies application/presentation | `ExchangeRateRepositoryImpl` imports only DAO and domain model — compliant |
+| "ALL tables in `lib/data/tables/`" rule | `ExchangeRates` in `lib/data/tables/` — compliant |
+| "ALL DAOs in `lib/data/daos/`" rule | `ExchangeRateDao` in `lib/data/daos/` — compliant |
+| "ALL repository impls in `lib/data/repositories/`" rule | `ExchangeRateRepositoryImpl` in `lib/data/repositories/` — compliant |
+| "Thin Feature" rule: `features/` holds only domain models + repo interfaces + presentation | `lib/features/currency/domain/` has only model + interface — compliant |
+| Riverpod: ONE `repository_providers.dart` per feature | `lib/application/currency/repository_providers.dart` is the single wiring point — compliant |
+| Freezed immutability: always `copyWith`, never mutate | Three new `Transaction` fields are nullable Freezed fields — compliant |
+| Privacy: no user data in outbound API calls | `ExchangeRateApiClient` sends only date string + currency code — compliant |
+| AppInitializer: no eager initialization of optional services | Rate fetch is lazy, provider-driven — compliant |
+| Schema migration pattern: explicit `CREATE INDEX` | Exchange_rates index emitted explicitly in `onCreate` + `onUpgrade` — compliant |
+| Hash chain integrity: `amount` column is the canonical JPY value | `amount` untouched; three new columns are additive — compliant |
 
 ---
 
 ## Sources
 
-- `lib/features/list/` (read 2026-06-07) — canonical 5-layer analog for shopping_list; all layer files mirrored. HIGH confidence.
-- `lib/data/tables/transactions_table.dart` (read 2026-06-07) — `@DataClassName`, `customConstraints`, `List<TableIndex> get customIndices` with `{#symbol}` syntax confirmed. HIGH confidence.
-- `lib/data/daos/transaction_dao.dart` (read 2026-06-07) — DAO method shapes, soft-delete pattern, `watchByBookIds` reactivity lesson (`readsFrom:` required). HIGH confidence.
-- `lib/data/app_database.dart` (read 2026-06-07) — `schemaVersion => 19` confirmed; `from < 19` block is category sort-order (NOT shopping list); `migrator.createTable` is the established v-bump pattern. HIGH confidence.
-- `lib/application/family_sync/transaction_change_tracker.dart` (read 2026-06-07) — in-memory tracker shape; `flush()` returns-and-clears. `ShoppingItemChangeTracker` is a direct mirror. HIGH confidence.
-- `lib/application/family_sync/sync_orchestrator.dart` (read 2026-06-07) — `_executeIncrementalPush` calls `_changeTracker.flush()` then `_pushSync.execute(operations:...)`. Shopping ops slot in after transaction ops in 4 lines. HIGH confidence.
-- `lib/application/family_sync/apply_sync_operations_use_case.dart` (read 2026-06-07) — `switch (entityType)` with `'bill'`, `'profile'`, `'avatar'` cases; `default: continue` discards unknowns safely. HIGH confidence.
-- `lib/application/family_sync/sync_engine.dart` (read 2026-06-07) — `onTransactionChanged()` calls `_scheduler.onTransactionChanged()`. `onShoppingItemChanged()` reuses the same scheduler call. HIGH confidence.
-- `lib/features/accounting/presentation/widgets/ledger_type_selector.dart` (read 2026-06-07) — zero accounting-specific dependencies; safe to move to `lib/shared/widgets/`. HIGH confidence.
-- `lib/features/accounting/presentation/screens/category_selection_screen.dart` (read 2026-06-07) — full ConsumerStatefulWidget with `categoryRepositoryProvider` dependency; cannot move to shared. Must be accessed via cross-feature import with explicit allow-list. HIGH confidence.
-- `lib/features/home/presentation/screens/main_shell_screen.dart` (read 2026-06-07) — `currentIndex = ref.watch(selectedTabIndexProvider)` already available; FAB is `VoidCallback onFabTap`. Context-aware dispatch is a 4-line `if (currentIndex == 3)` guard. HIGH confidence.
-- `lib/features/home/presentation/providers/state_home.dart` (read 2026-06-07) — `SelectedTabIndex` notifier; `selectedTabIndexProvider` is `keepAlive: true`. Shopping list tab is index 3. HIGH confidence.
-- `lib/features/home/presentation/widgets/home_bottom_nav_bar.dart` (read 2026-06-07) — stateless widget with `VoidCallback onFabTap`; no changes to widget itself for FAB context-awareness. HIGH confidence.
-- `lib/features/list/domain/models/list_filter_state.dart` (read 2026-06-07) — confirmed precedent for cross-feature domain import (`LedgerType` from accounting); subdirectory allow-list is the established mechanism. HIGH confidence.
-- `lib/features/*/import_guard.yaml` files (read 2026-06-07) — confirmed features-root deny rules do NOT block cross-feature presentation imports; only `use_cases/`, `application/`, `infrastructure/`, `data/` inside features are denied. HIGH confidence.
-- `lib/data/repositories/transaction_repository_impl.dart` (read 2026-06-07) — `note` encryption pattern via `FieldEncryptionService` at repository boundary; shopping item `note` should mirror this. HIGH confidence.
+All conclusions from direct source inspection (2026-06-12):
 
----
-
-*Architecture research for: v1.6 购物清单 Shopping List integration into Home Pocket*
-*Researched: 2026-06-07*
+- `lib/data/tables/transactions_table.dart` — column types, nullability conventions, `customIndices` decorative (no-op), explicit `CREATE INDEX` required. HIGH confidence.
+- `lib/data/app_database.dart` — `schemaVersion = 20`, migration pattern (`from < N` blocks), `customStatement` vs `migrator.addColumn` choice for columns with constraints. HIGH confidence.
+- `lib/infrastructure/sync/relay_api_client.dart` — domain-specific subdirectory pattern, `http.Client` injectable constructor, `http ^1.6.0` already in pubspec. HIGH confidence.
+- `lib/infrastructure/import_guard.yaml` — denies `features/**`, `application/**`, `data/**`; `inherit: true` propagates to new subdirectories. HIGH confidence.
+- `lib/application/import_guard.yaml` — denies `data/tables/**`, `data/daos/**`, `features/*/presentation/**`. HIGH confidence.
+- `lib/features/accounting/domain/models/transaction_sync_mapper.dart` — `if (x != null)` conditional emit pattern, `as T?` null-safe reads, D-09 backward-compat `entrySource` fallback. HIGH confidence.
+- `lib/features/accounting/domain/models/transaction.dart` — Freezed field list, nullable field conventions. HIGH confidence.
+- `lib/application/accounting/create_transaction_use_case.dart` — `CreateTransactionParams` fields; `required this.entrySource` precedent for required-no-default pattern. HIGH confidence.
+- `lib/application/family_sync/transaction_change_tracker.dart` — in-memory tracker, `flush()` returns-and-clears. No changes needed. HIGH confidence.
+- `lib/application/family_sync/apply_sync_operations_use_case.dart` — `switch (entityType)` branching; `fromSyncMap` is the full mapper boundary; extra keys silently dropped. No changes needed. HIGH confidence.
+- `lib/infrastructure/voice/chinese_numeral_state_machine.dart` + `numeral_state_machine.dart` — Step 5 drops unrecognized characters; currency words become `Skip` tokens. State machines unchanged. HIGH confidence.
+- `lib/application/voice/voice_text_parser.dart` — `VoiceCurrencySuffixes.regexAlternation` drives `_extractArabicAmount`; extending the suffix list extends the regex automatically. HIGH confidence.
+- `lib/shared/constants/voice_currency_suffixes.dart` — longest-first ordering invariant documented; extension point is well-defined. HIGH confidence.
+- `lib/data/daos/analytics_dao.dart` — all SUM/ORDER BY queries use `amount` column only; three new columns are invisible to all analytics paths. HIGH confidence.
+- `lib/features/accounting/presentation/widgets/smart_keyboard.dart` — `currencyLabel`/`currencySymbol` are static display params; `_CurrencyKey` is private widget; `onCurrencyTap` callback addition is minimal. HIGH confidence.
+- `lib/features/accounting/presentation/widgets/transaction_details_form.dart` — local state pattern (`_amount`, `_date`, etc. as `late` instance fields + `setState`); `TransactionDetailsFormConfig.$new(...)` extensible. HIGH confidence.
+- `lib/core/initialization/app_initializer.dart` — `KeyManager → Database → others`; no rate fetch at boot. HIGH confidence.

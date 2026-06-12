@@ -1,19 +1,8 @@
-# Feature Research: Shopping List (v1.6)
+# Feature Research
 
-**Domain:** Shopping list / to-buy-list feature inside a local-first family accounting app (dual-ledger: 日常/悦己)
-**Researched:** 2026-06-07
-**Confidence:** HIGH — dominant patterns verified across AnyList, OurGroceries, Bring!, Listonic, and general mobile UX research
-
----
-
-## Locked Decisions (Do Not Re-Question)
-
-These are fixed by pre-research user decisions (D1–D4). Every feature below is evaluated with these as constraints:
-
-- **D1** — Public / Private as top segmented control (two independent lists, not a per-item visibility flag)
-- **D2** — Context-aware FAB on the shopping tab routes to add-item screen
-- **D3** — Pure list: completing an item only checks it off, no transaction linkage
-- **D4** — Add-item form includes: name (required), ledger (日常/悦己), category, tags, note, quantity, estimated price
+**Domain:** Multi-currency transaction entry for local-first family accounting app (v1.7)
+**Researched:** 2026-06-12
+**Confidence:** HIGH (core UX patterns, API behavior, rounding rules), MEDIUM (app-specific implementation details from competitors)
 
 ---
 
@@ -21,240 +10,138 @@ These are fixed by pre-research user decisions (D1–D4). Every feature below is
 
 ### Table Stakes (Users Expect These)
 
-Features users assume exist in any shopping list. Missing these makes the feature feel unfinished regardless of other qualities.
+Features users assume exist in any multi-currency accounting app. Missing these makes the feature feel unfinished.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| **Tap to check off item** | Every shopping list app uses single-tap on item row or checkbox; the primary gesture | LOW | Entire row tappable (not just a small checkbox). Animate the check (strikethrough + muted opacity). AnyList, Bring!, OurGroceries all use tap-to-complete. |
-| **Checked items sort to bottom** | Universal expectation in modern apps — completed items should not clutter active items. D locked this. | LOW | Already locked (D). Place a visual divider between active and completed sections. Completed section is collapsible (LOW complexity add-on). |
-| **One-tap "clear all completed"** | Standard affordance in every shopping app; users expect a bulk-remove button when the completed section has items | LOW | Already locked (D). Show only when completed section is non-empty. Require confirmation dialog (one-liner: "Clear X completed items?"). |
-| **Add item with name** | Core CRUD | LOW | Name is the only required field. All others optional (D4). |
-| **Edit item** | Tap-to-edit after creation; standard list management | LOW | Reuse same form sheet as add-item. |
-| **Swipe-to-delete single item** | iOS/Android convention for quick row removal | LOW | Destructive swipe (red background, trash icon). Confirm with "Delete item?" dialog or rely on swipe-and-release pattern. Match v1.4 list swipe-delete convention for app consistency. |
-| **Batch delete (multi-select)** | Users managing many items (post-shopping cleanup) expect select-all + delete | MEDIUM | Long-press to enter selection mode (industry standard: iOS Files, Apple Reminders, OurGroceries). Bottom action bar appears with "Delete (N)" button. "Select All" toggle at top. Confirm with dialog. |
-| **Public / Private segmented control** | Locked (D1). Users of family apps expect a clear public vs private split | LOW | Already locked. Top-of-screen segmented control. Each segment is a fully independent list. |
-| **Filter bar** | Users with many items expect filtering; mirrors the existing v1.4 list pattern in the app | MEDIUM | Filter dimensions: ledger (日常/悦己/All) + category + tags + completed/active. Chip bar pattern matches existing `ListSortFilterBar`. One-tap clear. |
-| **Empty state per list** | Both public and private lists start empty; clear guidance needed | LOW | Three variants: (1) empty private list, (2) empty public list (solo user), (3) empty public list (family joined). Each answers "what to do next" with a CTA. Matches v1.4 `ListEmptyState` 3-variant pattern. |
-| **Context-aware FAB** | Locked (D2). Tab-contextual FAB is the primary add-entry point | LOW | On shopping tab: FAB opens add-item screen. Other tabs: FAB opens transaction entry. Already decided. |
-| **Item name as primary display** | The item name must be the largest, most prominent text in the row | LOW | Category emoji + item name headline. Quantity and estimated price as secondary. Ledger color badge as tertiary. |
-| **Item quantity display** | Locked (D4). Users adding "3x milk" or "500g flour" expect quantity visible on the row | LOW | Show inline on tile: "×3" or just the number beside the item name. If quantity is 1 or null, omit the quantity display to reduce clutter. |
-| **Estimated price display** | Locked (D4). Users entering a price budget expect it visible on the tile | LOW | Show estimated price inline. Format via existing `NumberFormatter` (locale-aware ¥/$/€). |
+| Currency selector adjacent to amount | Every reference app (Toshl, Spendee, 随手记, 钱迹) places a tappable currency code/symbol directly next to the numeric input. Users expect to tap the code to switch — not navigate away | LOW | Tap currency code → bottom sheet or inline dropdown; must not require leaving the entry screen. SmartKeyboard already occupies the bottom; selector sits above the numpad |
+| Recently/commonly used currencies at top | Toshl shows 5 most-recently-used. Spendee and 随手记 both promote frequent currencies. Travelers transact in the same 2–3 foreign currencies repeatedly | LOW | 4–6 pinned entries before the full ISO list; JPY always pinned as home currency first; remaining slots = most-recently-used |
+| Full searchable ISO 4217 currency list behind "more" | All reference apps provide 160+ currency coverage with search. A short "frequent" list alone is insufficient | LOW | ISO 4217 alphabetical list with 3-letter code + currency name; text search filters by name or code in real time |
+| Live conversion preview below amount | Toshl explicitly shows the converted home-currency value below the entry field as user types. Spendee shows dual-currency on saved transactions. Users need "how much is this in yen" before saving | MEDIUM | Reactive to keypad input and date changes; uses cached rate; shows "取得中…" spinner while fetching; no action required from user |
+| Auto-fetch rate by transaction date | Toshl uses historical rates back to 1999; Lunch Money stores the historic rate per transaction. Users expect "the rate that day" not "today's rate" | MEDIUM | Frankfurter API: `GET /v1/{YYYY-MM-DD}?from={CURRENCY}&to=JPY` — free, no API key, ECB-sourced |
+| Manual rate override | Toshl (delete-and-retype), Spendee (popup before save), 钱迹, 随手记 all support per-transaction rate override. Users with actual bank/card rates want to record the real rate | LOW | Editable rate field on the entry screen; recalculates JPY preview immediately on change |
+| Offline / stale-rate graceful degradation | Rate fetch fails without network. Users must still be able to record the transaction | MEDIUM | Use last cached rate; show staleness date inline (e.g. "前回取得: 2026-06-10"); manual override always available as escape hatch |
+| Storage of original currency + original amount + applied rate | All reference apps (Toshl, Spendee, Lunch Money, 钱迹) preserve original amount and rate per transaction. Users expect to see "I paid $50 at ¥156.30/USD" in the detail/edit view | MEDIUM | Three new nullable columns on `transactions`; Drift schema migration v20→v21 |
+| JPY-converted amount drives all lists and analytics | 随手記, Toshl, Lunch Money all aggregate in home currency. Users cannot compare daily spending across currencies without a single unit | LOW | Existing `amount` INTEGER column in JPY remains the single source for sorting, summing, and analytics. No change to analytics layer |
+| Foreign amount annotation in list rows | Toshl and Spendee both show the original currency/amount as secondary text on foreign-currency rows. Users want to recall "that was $50" without opening detail view | LOW | Small secondary text on `ListTransactionTile` for non-JPY rows only; e.g. "USD 50.00"; domestic rows unchanged |
+| Full original-currency info in detail/edit | Spendee, 钱迹, and Toshl all display original amount + rate in the edit view. Users editing foreign transactions expect to see the complete record | MEDIUM | Edit screen: originalCurrency, originalAmount, appliedRate fields visible; originalAmount and appliedRate re-editable; jpyAmount shown as derived/read-only |
+| JPY integer rounding (no decimals) | JPY has 0 decimal digits per ISO 4217. All enterprise systems (NetSuite, Zuora, PeopleSoft) floor/round to integer. Users tracking in Japan expect whole-yen amounts | LOW | `(originalAmount * appliedRate).round()` — Dart `round()` is HALF_UP for positive values; result stored as INTEGER; fractional yen never displayed anywhere |
 
 ### Differentiators (Competitive Advantage)
 
-Features that go beyond the expected. Should align with the app's core privacy + family-trust values.
-
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| **Estimated total (per-list subtotal)** | A running total of estimated cost across all active (unchecked) items is the most-requested missing feature in Bring! and OurGroceries. Privacy-respecting — purely local calculation. | MEDIUM | Display at bottom of active section or in list header. Formula: `Σ (estimatedPrice × quantity)` for all active items. Update reactively. Omit items without an estimated price from the sum (show "estimated" label to set expectation). |
-| **Dual-ledger item coloring** | Items tagged 日常 vs 悦己 get ledger-color accents. Unique to this app — no competitor has this. Reinforces the app's core dual-ledger identity even in the shopping feature. | LOW | Use existing `palette.daily` / `palette.joy` accent colors as a left-border or dot badge on each item tile. Zero new infrastructure. |
-| **Category + tags from existing tree** | Reusing the app's 19-L1 category tree + tags makes shopping items first-class members of the accounting vocabulary. No competitor does this. | MEDIUM | Category selection reuses existing `CategorySelectionScreen`. Tags reuse existing tag system. Dependency: category tree and tag repository must be accessible from `shopping_list` feature domain. |
-| **Per-item family attribution (who added)** | On the public list, showing which family member added each item prevents duplication and builds trust. 68% of unstructured family list users report weekly duplication caused by unclear ownership. | MEDIUM | Tie each item's `addedByBookId` to the existing family member display name + avatar emoji (already in shadow books). Show attribution chip on item tile, public list only. Private list: no attribution. |
-| **Ledger filter maps to Joy/Daily budget intent** | Filtering the shopping list by ledger (悦己 = joy purchases I'm planning) directly connects shopping planning to the app's happiness metric. No competitor supports this. | LOW | Pure filter logic. UI reuses the ledger chip pattern from `ListSortFilterBar`. |
-| **Sort by category (group items)** | Grouping items by category (produce together, household together) is a shopping-efficiency win. AnyList and Listonic both support this. | MEDIUM | In-memory grouping by `categoryId` after fetch, similar to v1.4 day-group headers. Category groups displayed with collapsible group headers. Completed section remains unsorted (chronological). |
-| **Name autocomplete from item history** | Suggesting previously added item names as the user types reduces friction for repeat shoppers. AnyList's most-praised UX feature. | MEDIUM | Store a `shopping_item_names` local history (simple string list in SharedPreferences or a lightweight table). Suggest matching names on each keystroke in the name field. Max 8 suggestions. No network call — fully local and privacy-respecting. History is NOT shared across public/private lists. |
+| Date-aware historical rate (not just today's rate) | Most consumer apps (Spendee: "updated every 24 hours" = always today; 随手记: real-time-only) use today's rate regardless of transaction date, creating retroactive drift on past records. Fetching the actual ECB rate for the entered date makes the record permanently accurate | MEDIUM | Frankfurter `/v1/{date}` endpoint; re-fetch triggered automatically when user changes transaction date while in foreign-currency mode; cache keyed `(date, currencyCode)` |
+| Transparent weekend/holiday fallback with date label | Frankfurter silently returns the last ECB business day's rate for weekend/holiday dates. Most apps give no indication. Showing "レート: 2026-06-09 (直近の取引日)" makes the fallback explicit and trustworthy | LOW | Parse `date` field from Frankfurter JSON response; if `responseDate != requestedDate`, show inline note in muted secondary text. Low cost; high trust signal |
+| Voice currency words zh/ja | No competitor accounting app has voice input at all. Extending the existing zh/ja voice parser to understand 「50ドル」/「五十美元」is a unique capability reinforcing the app's voice-first positioning | MEDIUM | Zh: 美元/欧元/英镑/港币/澳元/加元; Ja: ドル/ユーロ/ポンド/香港ドル/豪ドル → ISO codes; amount parse logic unchanged; currency word resolved as a token before the amount state machine runs |
+| Per-day local rate cache | No consumer app explicitly advertises per-day caching with transparent staleness. Enables full offline use after the first fetch per (date, currency) pair; avoids redundant API calls when family members enter multiple transactions on the same trip date | MEDIUM | New Drift table: `exchange_rate_cache(date TEXT, currency_code TEXT, rate REAL, fetched_at INTEGER)`; past dates have permanent TTL (ECB never revises historical rates); today's rate has 1-hour TTL |
+| Active-currency persistence within session | Toshl's documented behavior: the currency selected for one entry becomes the suggested default for the next entry in the same session. Eliminates re-selecting "USD" for the 5th time on a travel expense session | LOW | Riverpod ephemeral provider holds last-used foreign currency; resets to JPY on app restart; no disk persistence needed in MVP |
 
-### Anti-Features (Explicitly Skip)
+### Anti-Features (Commonly Requested, Often Problematic)
 
-Features to deliberately not build for v1.6. Each has a reason grounded in locked decisions, ADRs, or scope discipline.
-
-| Feature | Why Requested | Why Skip | What to Do Instead |
-|---------|---------------|----------|--------------------|
-| **Completion creates transaction** | "I bought it, auto-record expense" seems logical | Locked out by D3. Would violate the pure-list contract and require amount-entry UX at check-off time — a different product entirely. | Keep lists pure. If user wants to record an expense, use the normal FAB on other tabs. |
-| **Gamification: streaks / badges** | "Completed 10 lists this week!" | Hard-blocked by ADR-012. No streaks, no badges, no achievement unlocks cross-milestone. | No shopping-list gamification whatsoever. |
-| **Quantity autocomplete with unit parsing ("500g")** | Voice or text parsing of "500 grams of flour" into quantity=500 + unit="g" + name="flour" | MEDIUM-HIGH complexity; unit normalization (g/kg/L/ml/個/本) requires locale-aware parsing similar to the voice number parser. No user has requested this explicitly. | Accept raw text in the quantity field as-is. Quantity is a free-text or numeric field only. Defer to a future voice-for-shopping feature. |
-| **Real-time push notifications when family member adds item** | "Notify me when 妈妈 adds milk" | Requires APNS/FCM notification payload routing for shopping events — a non-trivial addition to the sync pipeline. | Family member additions appear when user next opens the public list (sync on open). Same behavior as v1.4 transaction list. |
-| **Barcode / QR scan to add items** | OurGroceries offers barcode scanning | Requires camera + product database or network lookup. Breaks local-first + privacy values if calling a product API. | Name autocomplete + category selection for quick item identification. |
-| **Multiple shopping lists (beyond Public/Private)** | "I want a separate list for Costco vs Supermarket" | D1 locks the model to exactly two lists. Adding a third requires new list-management UI and a fundamentally different data model. | Users can use tags or categories to distinguish store-specific items within the public list. |
-| **List templates / recurring items** | "Auto-add milk every week" | Requires scheduled background tasks, template management, and conflict handling. High complexity for an unproven use case. | Name autocomplete history reduces re-add friction. |
-| **Sort by store / aisle** | Bring! and AnyList offer store-aisle mapping | Requires a store model + aisle assignment per item — a second metadata dimension on top of the existing category tree. Scope explosion. | Category grouping as a proxy for aisle-based sorting. |
-| **Price history / price tracking** | "Show me the price trend for milk" | No external data source; manual price history requires persistence layer. OurGroceries users have been requesting price tracking for 3+ years with no implementation — that reveals the complexity. | Estimated price field records the user's budget estimate at add-time only. Sufficient for running total. |
-| **"I'm going shopping" mode / streamlined checkout UI** | Some apps switch to a check-off-only mode | An extra UX mode adds cognitive overhead. The main list with completed-to-bottom IS the shopping mode. | Default list view is already optimized for the shopping experience. |
-| **Drag-to-reorder items (manual order)** | Users of Bring! and OurGroceries often drag items to match store layout | Drag-and-drop on mobile conflicts with swipe-delete gestures and must interact correctly with completed-to-bottom. High complexity, diminishing returns given category-grouping covers 80% of the use case. | Category grouping sort covers store-layout needs. |
-| **Item images / photos** | "Add a photo so I know what brand to buy" | Requires photo storage, display, and privacy handling for synced images in the E2EE pipeline. Out of proportion for v1.6. | Notes field handles brand guidance ("organic only", "Jake's favorite brand"). |
-| **Sharing list with non-family members (guest link)** | "Share my shopping list with a friend" | The public list syncs through the family_sync pipeline which is family-scoped (join code, not open link). | Public list is family-only. |
-| **Text search within shopping list** | Power users with 30+ items may want search | A single shopping list rarely exceeds 20-30 items; the filter bar handles category + ledger narrowing. Full-text search adds a text field to an already-dense chip bar. | Filter by category or tags. Defer search if users organically report finding items difficult. |
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Shopping list `estimatedPrice` multi-currency | Users may want to estimate items in foreign currency | Shopping list has no SmartKeyboard and no amount-entry flow; adding multi-currency to it is a separate feature with separate scope; high implementation cost for marginal use | Explicitly out of v1.7 scope. Carry as SHOP-CURRENCY-V2 |
+| Live intraday exchange rates | "The rate at the moment of purchase" | ECB publishes once per business day at ~16:00 CET. No free real-time source with adequate precision and no API key. Card-network rates are proprietary and inaccessible | Per-day historical rate matches how banks actually post transactions. Correct granularity for accounting |
+| Retroactive mass rate-update on all historical transactions | "Revalue everything with today's rate" or "update all USD transactions to match my statement" | Destroys hash-chain integrity; makes analytics non-reproducible; a single re-rate could silently alter months of JPY totals | Allow per-transaction rate override only; each transaction stores its own locked rate |
+| Per-user "home currency" different from JPY | "I think in USD, not JPY" | Requires rewriting analytics, summaries, and comparisons — an architectural rewrite, not an increment | Provide original-amount annotation on every foreign row so non-JPY thinkers see their reference number |
+| Automatic currency detection from voice alone | "I said 50 dollars, detect USD" | "Dollar" is ambiguous (US/AU/CA/HK). Resolving ambiguity requires a disambiguation prompt, adding friction for the 95%+ JPY-only case | Map explicit currency words to ISO codes; 美元 → USD unambiguous; ドル → USD as default (most common for Japan-based users); show currency selector for user to confirm/change |
+| Real-time conversion widget on home screen | "Show me how much my USD balance is in JPY" | Always-on network dependency on the home screen; distracts from the app's kakeibo philosophy; no concept of "USD balance" in this app (single JPY account) | Conversion preview appears only during foreign-currency entry, on demand |
+| Three-field bidirectional linked editing in MVP | "Let me type the JPY amount and back-calculate the rate" | Bidirectional binding creates circular update risk on MVP; requires careful input-focus state management to avoid infinite recalculation | MVP: one-way (originalAmount × appliedRate → jpyAmount). Bidirectional promoted to P2 differentiator for post-validation |
 
 ---
 
 ## Feature Dependencies
 
 ```
-[Public list tab]
-    └──requires──> [family_sync pipeline]  (existing — reuse)
-    └──requires──> [ShoppingItem Drift table + DAO]  (new in v1.6)
-    └──enhances──> [per-item family attribution]  (uses existing shadow books)
+[Currency selector on SmartKeyboard]
+    └──requires──> [ISO currency list + recently-used store (ephemeral Riverpod)]
+    └──requires──> [Bottom sheet / inline dropdown widget]
 
-[Private list tab]
-    └──requires──> [ShoppingItem Drift table + DAO]  (new in v1.6, same table, list_type column)
-    └──independent of──> [family_sync pipeline]  (private items never sync)
+[Auto rate fetch by transaction date]
+    └──requires──> [Frankfurter HTTP client (http package, already in pubspec)]
+    └──requires──> [exchange_rate_cache Drift table (v20→v21 migration)]
+    └──requires──> [Transaction date field (already exists)]
 
-[Add-item form]
-    └──requires──> [ShoppingItem Drift table + DAO]
-    └──requires──> [CategorySelectionScreen]  (existing — reuse)
-    └──requires──> [Tag system]  (existing — reuse)
-    └──requires──> [LedgerType selector]  (existing — reuse `LedgerTypeSelector` widget)
+[Live conversion preview]
+    └──requires──> [Auto rate fetch by transaction date]
+    └──requires──> [Currency selector on SmartKeyboard]
 
-[Estimated total / subtotal]
-    └──requires──> [quantity + estimated price fields on ShoppingItem]  (D4, locked)
-    └──computes──> [Σ (estimatedPrice × quantity) for active items only]
+[Manual rate override]
+    └──enhances──> [Auto rate fetch by transaction date]
+    └──requires──> [Live conversion preview] (override replaces fetched rate in same UI panel)
 
-[Filter bar]
-    └──requires──> [ShoppingItemFilterState Freezed model]  (new)
-    └──requires──> [ledger field on ShoppingItem]  (from D4)
-    └──enhances──> [category filter — requires category tree access]
-    └──mirrors──> [ListFilterState + ListSortFilterBar]  (reuse chip pattern)
+[Drift schema migration v20→v21]
+    └──creates──> [transactions.originalCurrency TEXT nullable]
+    └──creates──> [transactions.originalAmount REAL nullable]
+    └──creates──> [transactions.appliedRate REAL nullable]
+    └──creates──> [exchange_rate_cache table]
 
-[Batch delete]
-    └──requires──> [selection mode state — ephemeral provider]  (new)
-    └──requires──> [ShoppingItem DAO deleteMany]  (new DAO method)
-    └──conflicts with──> [swipe-to-delete]  (disable swipe while in selection mode)
+[Family sync transparent passthrough]
+    └──requires──> [Drift schema migration v20→v21]
+    └──extends──> [TransactionSyncMapper (existing)] with 3 new nullable fields
 
-[Name autocomplete history]
-    └──requires──> [item-name history store — SharedPreferences or lightweight table]  (new)
-    └──independent of──> [category/tag system]
+[Foreign amount annotation in list row]
+    └──requires──> [transactions.originalCurrency + originalAmount columns]
+    └──extends──> [ListTransactionTile (existing v1.4)]
 
-[Sort by category]
-    └──requires──> [category field on ShoppingItem]  (optional field, from D4)
-    └──enhances──> [group headers per category]  (mirrors v1.4 ListDayGroupHeader pattern)
+[Detail/edit: full original info]
+    └──requires──> [transactions.originalCurrency + originalAmount + appliedRate columns]
+    └──extends──> [TransactionDetailsForm (existing v1.3)]
 
-[Check-off / completed-to-bottom]
-    └──requires──> [isCompleted boolean + completedAt timestamp on ShoppingItem]  (new)
-    └──requires──> [completed section divider widget]  (new)
-    └──blocks──> [clear all completed]  (must exist before clear CTA is shown)
+[Weekend/holiday date label]
+    └──requires──> [Auto rate fetch — parse responseDate from Frankfurter JSON]
+    └──enhances──> [Live conversion preview] (adds date note below rate field)
+
+[Voice currency words zh/ja]
+    └──requires──> [ISO code mapping dictionary (new, small)]
+    └──extends──> [Existing zh/ja voice parsers (lib/infrastructure/voice/, v1.3)]
+    └──sets──> [Currency selector active currency after parse]
+
+[Active-currency persistence in session]
+    └──requires──> [Currency selector on SmartKeyboard]
+    └──implemented via──> [Ephemeral Riverpod provider — no disk persistence needed]
 ```
 
 ### Dependency Notes
 
-- **Public list requires family_sync pipeline:** The public list's items must be wrapped in the existing E2EE sync payload format. New `ShoppingItem` objects need a sync-compatible serialization path. This is the highest-risk dependency — verify that the existing sync pipeline's `apply` stage can accept a new entity type without breaking transaction sync.
-- **Filter bar mirrors v1.4 ListSortFilterBar:** Do not fork the chip pattern. The filter state model (`ShoppingItemFilterState`) should be a new Freezed class modeled on `ListFilterState` but scoped to shopping item fields.
-- **Batch delete conflicts with swipe-delete:** When selection mode is active (long-press triggered), disable all swipe-delete recognizers. Exit selection mode on tap-outside or explicit "Cancel" button.
-- **Estimated total requires null-safe quantity × price:** Many items will have neither quantity nor price. The subtotal calculation must handle partial metadata gracefully — skip items without estimated price; treat quantity=null as 1.
-- **Category selection reuses existing screen:** `CategorySelectionScreen` is currently accessed from `TransactionDetailsForm`. The shopping item form must be able to invoke the same screen. This is a presentation-layer dependency, not a domain one.
-
----
-
-## UX Patterns — Detailed Decisions
-
-These resolve non-obvious UX choices where research has a clear answer.
-
-### Check-Off Interaction
-
-**Decision: single tap on the item row triggers check-off.**
-
-- OurGroceries also offers a "press and hold" option to reduce accidental checks, but this is an advanced setting. AnyList uses simple tap. For v1.6: tap anywhere on the item row (except the edit icon area) = check off.
-- Animate: 200ms strikethrough appears on the item name, row fades to ~50% opacity, item smoothly slides to the bottom of the completed section.
-- Un-checking: tap a completed item → it animates back to the active section, inserted at top of active section.
-
-### Completed-to-Bottom Composition with Filters
-
-**Decision: completed items sort to bottom within the current filter view.**
-
-If a filter is active (e.g., ledger=joy), the completed section shows only completed Joy items, active section shows only active Joy items. The active/completed split is preserved regardless of filter state.
-
-"Clear all completed" clears ALL completed items in the current list (public or private), ignoring the current filter. The user's intent when tapping "clear all completed" is to wipe the done section entirely, not a filtered subset.
-
-### Batch-Select UX
-
-**Decision: long-press to enter selection mode; floating bottom bar for actions.**
-
-- Long-press any item row → enter selection mode. The long-pressed item is auto-selected (count = 1). All rows show checkboxes. A bottom action bar appears with "Select All" and "Delete (N)" CTA in error color.
-- "Delete (N)" requires confirmation dialog: "Delete 5 items? This cannot be undone." with Cancel / Delete buttons.
-- Tap-outside any item row OR explicit "Cancel" button in the action bar to exit selection mode.
-- Batch mode is delete-only. Batch check-off is deliberately excluded (adds confusion; check-off is a one-by-one action).
-
-### Filter Bar Structure
-
-**Chip order (left-to-right):** `All / 日常 / 悦己` → `Category` → `Active/All` → `[Clear]`
-
-- Ledger chips: same 3-chip pattern as `ListSortFilterBar` (All / 日常 / 悦己). Reuse existing chip widget.
-- Category: opens bottom sheet (same `CategoryFilterSheet` pattern from v1.4), scoped to categories present on at least one item in the current list.
-- Active/All toggle: by default shows ALL items (active at top, completed at bottom). Toggle to "Active only" to hide completed section.
-- Tags filter: deferred to P2 (not in v1.6 unless tags see heavy use on shopping items).
-- Clear chip: appears when any filter is active. One-tap clears all filters.
-- NO text search in v1.6 — shopping lists are rarely large enough to need full-text search. Defer if user requests it.
-- NO sort-field selector chip in v1.6 — default sort (insertion order for active, chronological for completed) is sufficient. Category-grouping as a toggle, not a sort chip.
-
-### Item Tile Layout
-
-```
-[ledger-color left border] [category emoji] Item Name                [edit icon]
-                           Qty: ×2 · Est. ¥450       [member chip if public]
-```
-
-- Left border color: `palette.daily` or `palette.joy` (if ledger set); neutral border if no ledger
-- Category emoji: from existing category tree (same as v1.4 `ListTransactionTile`)
-- Item name: primary text, `AppTextStyles.body` weight
-- Qty and estimated price: secondary text, `AppTextStyles.caption`; omit if both null
-- Completed: name gets strikethrough + full row at ~50% opacity
-- Member chip: public list only, visible when family is joined; shows `memberAvatarEmoji + memberDisplayName` (same shadow books data as v1.4)
-- Edit icon: right edge, tappable, does NOT trigger check-off
-
-### Running Estimated Total
-
-**Show as a sticky row at the top of the active section (or bottom of screen):**
-
-```
-見積合計 ¥3,200 (12 点のうち8点に価格あり)
-```
-
-- Include only active (unchecked) items in the sum
-- Show count of priced items vs total active items
-- Format via existing `NumberFormatter` (locale-aware ¥/$/€)
-- Show only when at least one active item has an estimated price
-- Hide when no active items exist or no prices are set
-
-### Duplicate Item Detection
-
-**Decision: warn, do not block.**
-
-When the user types a name that exactly matches (case-insensitive) an existing active item in the same list, show a non-blocking inline hint below the name field:
-
-`"牛乳" is already on your list`
-
-With two tappable options: "Add anyway" (proceeds) / "Go to item" (dismisses form, scrolls to the existing item).
-
-This matches AnyList's approach: prevent duplication via suggestion, not hard block.
+- **Both schema changes land in one migration**: The `exchange_rate_cache` table and the three new nullable columns on `transactions` must be in the same Drift schema migration (v20→v21). Splitting them would require two sequential schema bumps with no benefit.
+- **Family sync passthrough requires no new protocol**: The three new nullable fields on `transactions` are plain nullable columns. The existing `TransactionSyncMapper` serializes all non-ignored fields; adding the three fields is a low-risk extension.
+- **Voice currency resolution does not depend on rate fetch**: The voice parser maps a currency word to an ISO code. Rate fetch is triggered separately when the entry form initializes with that currency code.
+- **SmartKeyboard is the entry-point gate for all paths**: Manual entry, voice prefill (post-parse), and edit-from-list all converge at `TransactionDetailsForm`, which hosts SmartKeyboard. The currency selector on SmartKeyboard is therefore naturally available in all three paths.
+- **JPY-as-active-currency = domestic mode**: When JPY is selected (the default), no currency selector indicator is shown, no rate fetch occurs, no preview panel is shown, and no annotation appears on the list row. Domestic UX is unchanged.
 
 ---
 
 ## MVP Definition
 
-### Launch With (v1.6 — this milestone)
+### Launch With (v1.7)
 
-All table stakes plus high-value, low-to-medium complexity differentiators.
+Minimum feature set for a complete, coherent multi-currency entry experience.
 
-- [x] Tap to check off (animate + move to completed section)
-- [x] Checked items sort to bottom + visual divider between active and completed
-- [x] One-tap "clear all completed" (with confirmation) — locked D
-- [x] Add item: name + optional ledger/category/tags/note/quantity/estimated price (D4)
-- [x] Edit item (same form sheet)
-- [x] Swipe-to-delete single item (confirm, matches v1.4 pattern)
-- [x] Batch delete via long-press selection mode + bottom bar + confirmation
-- [x] Public / Private segmented control (D1)
-- [x] Public list syncs via existing family_sync pipeline
-- [x] Filter bar: ledger chips + category + active/all toggle + clear
-- [x] Empty states (3 variants per list type)
-- [x] Context-aware FAB (D2) — already locked
-- [x] 待办→购物清单 rename across zh/ja/en ARB
-- [x] Per-item family attribution chip on public list tile
-- [x] Dual-ledger color accent (left border on item tile — near-zero complexity)
-- [x] Estimated total / running subtotal (high value, main unmet need in all competitors)
+- [ ] **Currency selector on SmartKeyboard** — 4–6 common currencies pinned (JPY, USD, EUR, CNY, HKD, GBP) + "more" → full searchable ISO list; active currency persists within session
+- [ ] **Auto rate fetch by transaction date** — Frankfurter API, per-day local Drift cache; weekend/holiday → last ECB business day with inline date note
+- [ ] **Live conversion preview** — JPY result displayed below foreign amount field in real time; shows "取得中…" spinner during fetch; updates when date changes
+- [ ] **Manual rate override** — editable rate field inline; recalculates preview immediately; user's manual rate takes precedence over fetched rate
+- [ ] **Offline fallback** — use last cached rate; show "前回取得: YYYY-MM-DD" staleness label; manual override always available as escape hatch
+- [ ] **Drift schema v20→v21** — `originalCurrency TEXT`, `originalAmount REAL`, `appliedRate REAL` nullable on `transactions`; `exchange_rate_cache` table
+- [ ] **JPY rounding** — `(originalAmount * appliedRate).round()` integer; no fractional yen stored or displayed anywhere
+- [ ] **Foreign annotation in list row** — secondary text "USD 50.00" beneath JPY amount on `ListTransactionTile` for non-JPY rows; domestic rows unchanged
+- [ ] **Detail/edit: full original info** — `TransactionDetailsForm` shows originalCurrency, originalAmount, appliedRate for foreign transactions; originalAmount and appliedRate re-editable; jpyAmount shown as derived display
+- [ ] **Family sync passthrough** — three new nullable fields serialized/deserialized transparently in existing `TransactionSyncMapper`
+- [ ] **Voice currency words zh/ja** — 美元/欧元/英镑/港币/澳元/加元 (zh) and ドル/ユーロ/ポンド/香港ドル/豪ドル (ja) → ISO codes; existing amount state machines unchanged
 
 ### Add After Validation (v1.x)
 
-- [ ] Name autocomplete from item history — add when users report friction re-adding common items
-- [ ] Sort by category (group headers) — add when users have 15+ items and report list feels unordered
-- [ ] Tag filter chip — add when users actively use tags on shopping items
-- [ ] Duplicate item detection (warn on exact-match name) — add when duplicate complaints arise
-- [ ] Collapsible completed section — add if completed section grows large and clutters view
+- [ ] **Three-field linked editing** — in edit view, editing jpyAmount back-calculates appliedRate; bidirectional binding. Valuable for credit-card-statement reconcilers; validate basic flow works first
+- [ ] **"Remember this rate" option** — Spendee's approach: per-transaction rate remembered for next time; useful for users with fixed exchange relationships
+- [ ] **English voice currency words** — extend VOICE-EN-V2-01 when it ships
 
 ### Future Consideration (v2+)
 
-- [ ] Voice-add shopping item — requires voice pipeline extension to a new entity type
-- [ ] APNS push for family additions to public list — after family_sync is stable at scale
-- [ ] Category-group drag reorder — after category grouping is validated in use
-- [ ] Price history per item name — after estimatedPrice field has been used for 1+ months
+- [ ] **Shopping list estimated price in foreign currency** — needs SmartKeyboard on shopping form first (SHOP-CURRENCY-V2)
+- [ ] **Per-user foreign currency preference default** — family member Alice always defaults to USD; needs multi-profile settings
+- [ ] **Self-hosted Frankfurter instance** — if API availability becomes a concern; Frankfurter is open source and self-hostable
 
 ---
 
@@ -262,71 +149,138 @@ All table stakes plus high-value, low-to-medium complexity differentiators.
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| Tap to check off + completed-to-bottom | HIGH | LOW | P1 |
-| Clear all completed | HIGH | LOW | P1 |
-| Add item form (D4 fields) | HIGH | MEDIUM | P1 |
-| Public/Private segmented control | HIGH | LOW | P1 |
-| Public list sync (family_sync reuse) | HIGH | MEDIUM | P1 |
-| Filter bar (ledger + category + status) | HIGH | MEDIUM | P1 |
-| Empty states | HIGH | LOW | P1 |
-| Context-aware FAB | HIGH | LOW | P1 |
-| Batch delete (long-press mode) | MEDIUM | MEDIUM | P1 |
-| Swipe-to-delete | MEDIUM | LOW | P1 |
-| Estimated total / running subtotal | HIGH | MEDIUM | P1 |
-| Dual-ledger color accent on tiles | MEDIUM | LOW | P1 |
-| Per-item family attribution | MEDIUM | LOW | P1 |
-| 待办→购物清单 rename (ARB) | LOW | LOW | P1 |
-| Name autocomplete history | MEDIUM | MEDIUM | P2 |
-| Sort by category (group headers) | MEDIUM | MEDIUM | P2 |
-| Tag filter | LOW | LOW | P2 |
-| Duplicate item detection | LOW | LOW | P2 |
-| Voice add item | HIGH | HIGH | P3 |
-| Push notifications for family additions | LOW | HIGH | P3 |
-| Category-group drag reorder | LOW | HIGH | P3 |
-| Price history | LOW | HIGH | P3 |
+| Currency selector (common + full search) | HIGH | LOW | P1 |
+| Auto rate fetch by transaction date | HIGH | MEDIUM | P1 |
+| Live conversion preview | HIGH | MEDIUM | P1 |
+| Drift schema migration + sync passthrough | HIGH (prerequisite) | MEDIUM | P1 |
+| JPY integer rounding | HIGH (correctness) | LOW | P1 |
+| Offline fallback + staleness label | HIGH | MEDIUM | P1 |
+| Manual rate override | HIGH | LOW | P1 |
+| Foreign annotation in list row | MEDIUM | LOW | P1 |
+| Detail/edit: full original info | MEDIUM | MEDIUM | P1 |
+| Voice currency words zh/ja | MEDIUM | MEDIUM | P1 |
+| Weekend/holiday date label on preview | MEDIUM | LOW | P1 (piggybacks on rate fetch) |
+| Active-currency session persistence | MEDIUM | LOW | P1 |
+| Three-field linked editing | MEDIUM | HIGH | P2 |
+| "Remember this rate" option | LOW | LOW | P2 |
+| Shopping list multi-currency | LOW | HIGH | P3 |
 
 ---
 
 ## Competitor Feature Analysis
 
-| Feature | AnyList | Bring! | OurGroceries | Our Approach |
-|---------|---------|--------|--------------|--------------|
-| Check-off UX | Single tap (default); hold configurable | Tap | Configurable: tap / hold | Single tap; entire row is tap target |
-| Completed-to-bottom | Yes | Yes | Yes (configurable) | Yes, fixed to bottom (D locked) |
-| Clear all completed | Yes | Yes | Yes (batch delete crossed-off) | Yes with confirmation dialog |
-| Quantity | Yes | Yes (visual) | Yes | Yes (D4 locked) |
-| Estimated price | No (paid tier only) | No (missing for 3+ years) | No (most-requested missing feature) | Yes (D4) — differentiator |
-| Running total | Paid tier only | No | No | Yes — strongest differentiator vs competitors |
-| Batch delete | Yes (multi-select) | Limited | Yes | Yes via long-press selection mode |
-| Filter | By store, category | By category | By category | By ledger + category + status |
-| Sort by category | Yes | Yes (drag category order) | Yes | Yes (v1.6 sort option) |
-| Drag-to-reorder items | Yes | Yes (category level) | Yes | Deferred — category grouping covers it |
-| Family sharing | Yes (real-time) | Yes (real-time) | Yes (real-time) | Yes (family_sync pipeline, public list) |
-| Per-item attribution | No | No | No | Yes — differentiator |
-| Dual-ledger tagging | No | No | No | Yes — unique to this app |
-| Autocomplete history | Yes (flagship feature) | No | No | P2 (deferred from v1.6) |
-| Duplicate detection | Yes (scroll to existing) | No | No | P2 (warn, not block) |
-| Offline-first | No (requires internet) | No | No | Yes (SQLCipher + local Drift) — core differentiator |
-| Privacy | Cloud-dependent | Ad-supported, tracks users | Cloud-dependent | Local-first, E2EE sync — core differentiator |
+| Feature | Toshl | Spendee | 随手记/钱迹 | Home Pocket v1.7 |
+|---------|-------|---------|------------|-----------------|
+| Currency selector location | Adjacent to amount, tap to expand | Adjacent to amount, triggers popup | Per-account setting; inline per entry | Adjacent to amount on SmartKeyboard |
+| Recently used currencies | Top 5 in list | Not documented | Recent list | Top 4–6 pinned + JPY; full ISO searchable |
+| Rate source | ECB-based, refreshed hourly | "Updated every 24 hours" | Real-time (unspecified provider) | Frankfurter (ECB), per-day Drift cache |
+| Historical rate by transaction date | YES — back to 1999 | NO — today's rate only | Unclear | YES — Frankfurter `/v1/{date}` |
+| Weekend/holiday fallback behavior | Silent (returns nearest date) | Not documented | Not documented | Explicit: shows actual rate date inline |
+| Manual rate override | YES — edit rate field, 3-field linked | YES — popup before save | YES | YES — inline edit on entry + edit screens |
+| Offline behavior | Not documented | Not documented | Not documented | Last cached rate; staleness date label; override available |
+| Conversion preview during entry | YES — shown below amount as user types | YES — dual currency on saved view | Unclear | YES — live below foreign amount field |
+| List annotation of foreign rows | Not documented | YES — shows both currencies on tile | Unclear | Small secondary text "CURR amount" on tile |
+| JPY rounding | Standard integer | Standard integer | Standard integer | `.round()` to integer |
+| Voice input | NO | NO | NO | YES — zh/ja currency words (unique) |
+| Active-currency session memory | YES — becomes default for next entry | YES — "remember this rate" option | Unclear | YES — ephemeral Riverpod provider |
+
+---
+
+## Edge Cases and Behavioral Contracts
+
+### Currency Selection State Machine
+
+**Default on fresh open:** JPY (home). No currency UI shown; numpad behaves as before.
+**After selecting a foreign currency:** it becomes the active currency for subsequent entries this session (Toshl pattern). Subsequent entries open with that currency pre-selected.
+**Switching back to JPY:** removes conversion preview panel; rate fetch not triggered.
+**Cross-session:** last non-JPY currency is retained in the "recently used" list but JPY remains the initial default on fresh app open.
+
+### Rate Fetch Trigger Points
+
+1. User selects a foreign currency for the first time in the entry screen.
+2. User changes the transaction date while a foreign currency is active.
+3. User edits an existing foreign transaction (fetch triggered on screen open if no cached rate exists for that `(date, currencyCode)` pair).
+
+If `(date, currencyCode)` is already in cache within TTL → use cache immediately (no spinner).
+
+TTL rules: past dates → permanent (ECB rates are immutable historical data). Today's date → 1 hour.
+
+### Weekend / Holiday Rate Gap
+
+**Contract:** Frankfurter returns the last ECB business day's rate when the requested date is a weekend or an ECB closing day. The response JSON's `date` field will contain the actual rate date, which will differ from the requested date.
+
+**UX rule:** When `responseDate != requestedDate`, display beneath the rate field in small muted text:
+- ja: `レート: {responseDate}（直近の取引日）`
+- zh: `汇率: {responseDate}（最近交易日）`
+- en: `Rate: {responseDate} (latest trading day)`
+
+This is informational, not a warning. ECB behavior is correct.
+
+**Japan-specific note:** Japanese national holidays are NOT ECB holidays. Frankfurter will publish a rate on Japanese national holidays that fall on a weekday. No special handling needed for Japanese calendar.
+
+**ECB holidays:** New Year's Day, Good Friday, Easter Monday, Labour Day (May 1), Christmas Day (Dec 25–26). Rare edge case; transparent fallback is sufficient.
+
+### Offline Behavior
+
+**No network, no cache:** Rate field empty; conversion preview shows "—"; an inline prompt appears: "汇率未取得 — 手动输入" with the rate field focused. Transaction cannot be saved without either a fetched rate or a manually entered rate. The user is never blocked: they can always type the rate they saw on another app.
+
+**Cache exists but stale (past TTL):** Use the cached rate. Show `"前回取得: {cachedDate}"` as secondary text below the rate field. Manual override available.
+
+**No network, previous fetch available for same (date, currency):** Use cache silently. No indicator needed (rate for a past date is immutable; staleness is irrelevant).
+
+### Editing Existing Foreign Transactions
+
+**Editable fields:**
+- `originalAmount` — YES; user may have mis-typed
+- `appliedRate` — YES; user may want to match the credit card statement rate
+- `originalCurrency` — YES (currency selector in edit mode); changing currency triggers a new rate fetch for the stored transaction date
+- Transaction `date` — changing it triggers a rate re-fetch; preview updates; user must save to lock in the new derived jpyAmount
+
+**Derived display (not directly editable in MVP):**
+- `jpyAmount` (the stored `amount` INTEGER) — shown as a read-only derived display: "≈ ¥7,815". Recalculated on save from `round(originalAmount * appliedRate)`.
+
+**On save:** `amount = round(originalAmount * appliedRate)`. This is the only integer stored. Analytics, sorting, and list totals continue to use `amount` unchanged.
+
+### Rounding Contract
+
+`jpyAmount = (originalAmount * appliedRate).round()`
+
+Dart's `double.round()` is HALF_UP for positive values (rounds 0.5 up). Example: 50 USD × 156.305 = 7815.25 → stored as ¥7815.
+
+`appliedRate` is stored as REAL (64-bit double) at full precision. Display in UI: 4 significant decimal places (e.g. "156.3050").
+
+### JPY Selected as Foreign Currency
+
+If the user explicitly selects JPY (correcting a wrong currency): `originalCurrency = "JPY"`, `originalAmount = amount (REAL, same value)`, `appliedRate = 1.0`. Row is treated as domestic (no annotation in list).
+
+### Voice Currency Word Resolution
+
+**Ambiguous cases:**
+- ドル (ja) → USD (default; most common in Japan context). User sees currency selector pre-filled with USD; can change before saving.
+- "Dollar" in English voice (future) → USD default; same logic.
+- 澳元 (zh) / 豪ドル (ja) → AUD (unambiguous)
+- 港币 (zh) / 香港ドル (ja) → HKD (unambiguous)
+- 人民币/元 (zh) — interpreted as CNY only in multi-currency context; in JPY-only mode (current parser), 元 already maps to a JPY amount. When multi-currency is active: if a currency word precedes/follows the amount, treat as CNY; otherwise retain existing JPY parse.
+
+Voice sets the active currency on the entry form. Rate fetch is triggered after the form loads with that currency.
 
 ---
 
 ## Sources
 
-- [AnyList feature overview — Getting Started](https://help.anylist.com/articles/getting-started/)
-- [AnyList autocomplete icons](https://help.anylist.com/articles/autocomplete-icons/)
-- [AnyList recent items / history](https://help.anylist.com/articles/recent-items/)
-- [OurGroceries User Guide — sorting and crossed-off behavior](https://www.ourgroceries.com/user-guide)
-- [Bring! collaborative features](https://www.getbring.com/en/features/collaborative)
-- [SmartCart: comparison of Listonic, Bring!, AnyList, OurGroceries](https://smartcartfamily.com/en/blog/grocery-apps-comparison)
-- [Eleken: Bulk action UX guidelines](https://www.eleken.co/blog-posts/bulk-actions-ux)
-- [Baymard Institute: Autocomplete design patterns](https://baymard.com/blog/autocomplete-design)
-- [LogRocket: Swipe-to-delete UX](https://blog.logrocket.com/ux-design/accessible-swipe-contextual-action-triggers/)
-- [NNGroup: Checkboxes design guidelines](https://www.nngroup.com/articles/checkboxes-design-guidelines/)
-- [Family Tools App — per-item attribution](https://familytoolsapp.com/solutions/lists)
-- [ListAIse — real-time family sync patterns](https://www.listaise.com/docs/sharing-lists)
+- Toshl Finance currency UX (iOS): https://toshl.com/blog/currencies-in-toshl-finance-ounces-of-gold-welcome-ios/ — HIGH confidence
+- Spendee help center exchange rate: https://help.spendee.com/article/231-how-to-setchange-the-currency-and-exchange-rate — HIGH confidence
+- 钱迹 multi-currency guide: https://docs.qianjiapp.com/multiple_currency.html — MEDIUM confidence
+- V2EX multi-currency design discussion: https://v2ex.com/t/1172725 — MEDIUM confidence
+- Frankfurter API v1 docs: https://frankfurter.dev/v1/ — HIGH confidence
+- Frankfurter weekend/holiday behavior (last business day): search-verified across multiple sources — HIGH confidence
+- money2 Dart package (integer minor units, ISO 4217, JPY zero-decimal): https://pub.dev/packages/money2 — HIGH confidence
+- ISO 4217 zero-decimal currencies (JPY, KRW, VND): https://en.wikipedia.org/wiki/ISO_4217 — HIGH confidence
+- JPY rounding in enterprise systems (NetSuite, Zuora, PeopleSoft): multiple search-verified sources — HIGH confidence
+- YNAB multi-currency guide: https://support.ynab.com/en_us/using-multiple-currencies-in-ynab-a-guide-SyBF6PHno — MEDIUM confidence
+- Toshl currency feature overview: https://toshl.com/currencies/ — HIGH confidence
 
 ---
 
-*Feature research for: Shopping List feature (v1.6) inside Home Pocket (まもる家計簿)*
-*Researched: 2026-06-07*
+*Feature research for: Multi-currency transaction entry (Home Pocket v1.7)*
+*Researched: 2026-06-12*
