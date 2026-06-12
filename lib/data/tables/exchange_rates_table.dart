@@ -44,14 +44,22 @@ class ExchangeRates extends Table {
   TextColumn get rate => text()();
 
   /// UTC timestamp when this rate was fetched from the external API.
-  DateTimeColumn get fetchedAt => dateTime()();
+  ///
+  /// Stored as epoch seconds (INTEGER) via [UtcEpochDateTimeConverter] —
+  /// plain dateTime() would round-trip as a local-zone DateTime (WR-05).
+  Column<int> get fetchedAt =>
+      integer().map(const UtcEpochDateTimeConverter())();
 
   /// Source identifier for the rate (e.g. "frankfurter", "manual").
   TextColumn get source => text()();
 
   /// The actual date the API reported for this rate (may differ from rateDate
   /// on weekends/holidays). Nullable — null means rateDate is the actual date.
-  DateTimeColumn get actualRateDate => dateTime().nullable()();
+  ///
+  /// Stored as epoch seconds (INTEGER) via [UtcEpochDateTimeConverter] —
+  /// plain dateTime() would round-trip as a local-zone DateTime (WR-05).
+  Column<int> get actualRateDate =>
+      integer().map(const UtcEpochDateTimeConverter()).nullable()();
 
   @override
   Set<Column> get primaryKey => {currency, rateDate};

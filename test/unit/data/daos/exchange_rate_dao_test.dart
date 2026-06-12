@@ -97,5 +97,30 @@ void main() {
       expect(row, isNotNull);
       expect(double.parse(row!.rate), closeTo(150.0, 0.001));
     });
+
+    test(
+        'fetchedAt and actualRateDate round-trip as UTC DateTimes (WR-05)',
+        () async {
+      final fetchedAt = DateTime.utc(2026, 6, 12, 9, 30, 15);
+      final actualRateDate = DateTime.utc(2026, 6, 10);
+      await dao.upsert(
+        ExchangeRatesCompanion(
+          currency: const Value('USD'),
+          rateDate: Value(DateTime.utc(2026, 6, 12)),
+          rate: const Value('149.5'),
+          fetchedAt: Value(fetchedAt),
+          source: const Value('frankfurter'),
+          actualRateDate: Value(actualRateDate),
+        ),
+      );
+      final row = await dao.findByDate('USD', DateTime.utc(2026, 6, 12));
+      expect(row, isNotNull);
+      // DateTime.== requires matching isUtc — plain dateTime() columns would
+      // come back local-zone and fail these equality checks.
+      expect(row!.fetchedAt.isUtc, isTrue);
+      expect(row.fetchedAt, equals(fetchedAt));
+      expect(row.actualRateDate?.isUtc, isTrue);
+      expect(row.actualRateDate, equals(actualRateDate));
+    });
   });
 }

@@ -2639,17 +2639,15 @@ class $ExchangeRatesTable extends ExchangeRates
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _fetchedAtMeta = const VerificationMeta(
-    'fetchedAt',
-  );
   @override
-  late final GeneratedColumn<DateTime> fetchedAt = GeneratedColumn<DateTime>(
-    'fetched_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumnWithTypeConverter<DateTime, int> fetchedAt =
+      GeneratedColumn<int>(
+        'fetched_at',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<DateTime>($ExchangeRatesTable.$converterfetchedAt);
   static const VerificationMeta _sourceMeta = const VerificationMeta('source');
   @override
   late final GeneratedColumn<String> source = GeneratedColumn<String>(
@@ -2659,18 +2657,15 @@ class $ExchangeRatesTable extends ExchangeRates
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _actualRateDateMeta = const VerificationMeta(
-    'actualRateDate',
-  );
   @override
-  late final GeneratedColumn<DateTime> actualRateDate =
-      GeneratedColumn<DateTime>(
+  late final GeneratedColumnWithTypeConverter<DateTime?, int> actualRateDate =
+      GeneratedColumn<int>(
         'actual_rate_date',
         aliasedName,
         true,
-        type: DriftSqlType.dateTime,
+        type: DriftSqlType.int,
         requiredDuringInsert: false,
-      );
+      ).withConverter<DateTime?>($ExchangeRatesTable.$converteractualRateDaten);
   @override
   List<GeneratedColumn> get $columns => [
     currency,
@@ -2708,14 +2703,6 @@ class $ExchangeRatesTable extends ExchangeRates
     } else if (isInserting) {
       context.missing(_rateMeta);
     }
-    if (data.containsKey('fetched_at')) {
-      context.handle(
-        _fetchedAtMeta,
-        fetchedAt.isAcceptableOrUnknown(data['fetched_at']!, _fetchedAtMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_fetchedAtMeta);
-    }
     if (data.containsKey('source')) {
       context.handle(
         _sourceMeta,
@@ -2723,15 +2710,6 @@ class $ExchangeRatesTable extends ExchangeRates
       );
     } else if (isInserting) {
       context.missing(_sourceMeta);
-    }
-    if (data.containsKey('actual_rate_date')) {
-      context.handle(
-        _actualRateDateMeta,
-        actualRateDate.isAcceptableOrUnknown(
-          data['actual_rate_date']!,
-          _actualRateDateMeta,
-        ),
-      );
     }
     return context;
   }
@@ -2756,17 +2734,21 @@ class $ExchangeRatesTable extends ExchangeRates
         DriftSqlType.string,
         data['${effectivePrefix}rate'],
       )!,
-      fetchedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}fetched_at'],
-      )!,
+      fetchedAt: $ExchangeRatesTable.$converterfetchedAt.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}fetched_at'],
+        )!,
+      ),
       source: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}source'],
       )!,
-      actualRateDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}actual_rate_date'],
+      actualRateDate: $ExchangeRatesTable.$converteractualRateDaten.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}actual_rate_date'],
+        ),
       ),
     );
   }
@@ -2778,6 +2760,12 @@ class $ExchangeRatesTable extends ExchangeRates
 
   static TypeConverter<DateTime, int> $converterrateDate =
       const UtcEpochDateTimeConverter();
+  static TypeConverter<DateTime, int> $converterfetchedAt =
+      const UtcEpochDateTimeConverter();
+  static TypeConverter<DateTime, int> $converteractualRateDate =
+      const UtcEpochDateTimeConverter();
+  static TypeConverter<DateTime?, int?> $converteractualRateDaten =
+      NullAwareTypeConverter.wrap($converteractualRateDate);
 }
 
 class ExchangeRateRow extends DataClass implements Insertable<ExchangeRateRow> {
@@ -2796,6 +2784,9 @@ class ExchangeRateRow extends DataClass implements Insertable<ExchangeRateRow> {
   final String rate;
 
   /// UTC timestamp when this rate was fetched from the external API.
+  ///
+  /// Stored as epoch seconds (INTEGER) via [UtcEpochDateTimeConverter] —
+  /// plain dateTime() would round-trip as a local-zone DateTime (WR-05).
   final DateTime fetchedAt;
 
   /// Source identifier for the rate (e.g. "frankfurter", "manual").
@@ -2803,6 +2794,9 @@ class ExchangeRateRow extends DataClass implements Insertable<ExchangeRateRow> {
 
   /// The actual date the API reported for this rate (may differ from rateDate
   /// on weekends/holidays). Nullable — null means rateDate is the actual date.
+  ///
+  /// Stored as epoch seconds (INTEGER) via [UtcEpochDateTimeConverter] —
+  /// plain dateTime() would round-trip as a local-zone DateTime (WR-05).
   final DateTime? actualRateDate;
   const ExchangeRateRow({
     required this.currency,
@@ -2822,10 +2816,16 @@ class ExchangeRateRow extends DataClass implements Insertable<ExchangeRateRow> {
       );
     }
     map['rate'] = Variable<String>(rate);
-    map['fetched_at'] = Variable<DateTime>(fetchedAt);
+    {
+      map['fetched_at'] = Variable<int>(
+        $ExchangeRatesTable.$converterfetchedAt.toSql(fetchedAt),
+      );
+    }
     map['source'] = Variable<String>(source);
     if (!nullToAbsent || actualRateDate != null) {
-      map['actual_rate_date'] = Variable<DateTime>(actualRateDate);
+      map['actual_rate_date'] = Variable<int>(
+        $ExchangeRatesTable.$converteractualRateDaten.toSql(actualRateDate),
+      );
     }
     return map;
   }
@@ -2962,9 +2962,9 @@ class ExchangeRatesCompanion extends UpdateCompanion<ExchangeRateRow> {
     Expression<String>? currency,
     Expression<int>? rateDate,
     Expression<String>? rate,
-    Expression<DateTime>? fetchedAt,
+    Expression<int>? fetchedAt,
     Expression<String>? source,
-    Expression<DateTime>? actualRateDate,
+    Expression<int>? actualRateDate,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3013,13 +3013,19 @@ class ExchangeRatesCompanion extends UpdateCompanion<ExchangeRateRow> {
       map['rate'] = Variable<String>(rate.value);
     }
     if (fetchedAt.present) {
-      map['fetched_at'] = Variable<DateTime>(fetchedAt.value);
+      map['fetched_at'] = Variable<int>(
+        $ExchangeRatesTable.$converterfetchedAt.toSql(fetchedAt.value),
+      );
     }
     if (source.present) {
       map['source'] = Variable<String>(source.value);
     }
     if (actualRateDate.present) {
-      map['actual_rate_date'] = Variable<DateTime>(actualRateDate.value);
+      map['actual_rate_date'] = Variable<int>(
+        $ExchangeRatesTable.$converteractualRateDaten.toSql(
+          actualRateDate.value,
+        ),
+      );
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -9727,20 +9733,22 @@ class $$ExchangeRatesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get fetchedAt => $composableBuilder(
-    column: $table.fetchedAt,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get fetchedAt =>
+      $composableBuilder(
+        column: $table.fetchedAt,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<String> get source => $composableBuilder(
     column: $table.source,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get actualRateDate => $composableBuilder(
-    column: $table.actualRateDate,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, int> get actualRateDate =>
+      $composableBuilder(
+        column: $table.actualRateDate,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 }
 
 class $$ExchangeRatesTableOrderingComposer
@@ -9767,7 +9775,7 @@ class $$ExchangeRatesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get fetchedAt => $composableBuilder(
+  ColumnOrderings<int> get fetchedAt => $composableBuilder(
     column: $table.fetchedAt,
     builder: (column) => ColumnOrderings(column),
   );
@@ -9777,7 +9785,7 @@ class $$ExchangeRatesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get actualRateDate => $composableBuilder(
+  ColumnOrderings<int> get actualRateDate => $composableBuilder(
     column: $table.actualRateDate,
     builder: (column) => ColumnOrderings(column),
   );
@@ -9801,16 +9809,17 @@ class $$ExchangeRatesTableAnnotationComposer
   GeneratedColumn<String> get rate =>
       $composableBuilder(column: $table.rate, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get fetchedAt =>
+  GeneratedColumnWithTypeConverter<DateTime, int> get fetchedAt =>
       $composableBuilder(column: $table.fetchedAt, builder: (column) => column);
 
   GeneratedColumn<String> get source =>
       $composableBuilder(column: $table.source, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get actualRateDate => $composableBuilder(
-    column: $table.actualRateDate,
-    builder: (column) => column,
-  );
+  GeneratedColumnWithTypeConverter<DateTime?, int> get actualRateDate =>
+      $composableBuilder(
+        column: $table.actualRateDate,
+        builder: (column) => column,
+      );
 }
 
 class $$ExchangeRatesTableTableManager
