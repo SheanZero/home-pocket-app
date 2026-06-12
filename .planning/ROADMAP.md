@@ -140,8 +140,8 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 40-03-PLAN.md — NumberFormatter disambiguation table + golden re-baseline (STORE-05)
-- [ ] 40-04-PLAN.md — Drift v20→v21 migration + ExchangeRates table + ExchangeRateDao + repository stub
+- [x] 40-03-PLAN.md — NumberFormatter disambiguation table + golden re-baseline (STORE-05)
+- [x] 40-04-PLAN.md — Drift v20→v21 migration + ExchangeRates table + ExchangeRateDao + repository stub
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
