@@ -10,6 +10,19 @@
 **Shipped:** v1.5 文案与配色统一 (2026-06-02) — see `.planning/milestones/v1.5-ROADMAP.md` + `.planning/milestones/v1.5-MILESTONE-AUDIT.md`
 **Shipped:** v1.6 购物清单 (2026-06-12) — see `.planning/milestones/v1.6-ROADMAP.md` + `.planning/milestones/v1.6-MILESTONE-AUDIT.md`
 
+## Current Milestone: v1.7 多币种支持 (Multi-Currency)
+
+**Goal:** 记账支持外币输入——小键盘选币种、按账目日期自动取汇率转换成日元入账，原币种/原金额/汇率作为附加字段保留并在 UI 中可见。
+
+**Target features:**
+- **小键盘币种选择** — SmartKeyboard 上通过货币符号切换币种：常用币种直接显示，「更多」展开完整 ISO 货币列表（带搜索）
+- **汇率自动转换** — 免费汇率 API（无 API key）+ 本地按日缓存；按**账目日期**取历史汇率（改日期则重取重算）；离线/查询失败时回退最近缓存并允许手动修改汇率
+- **存储模型** — 转换后日元为记账金额（参与一切统计/排序/分析）；原币种 + 原输入金额 + 转换汇率为 transactions 新增附加字段（Drift schema 迁移 + 家庭同步透传）
+- **入口覆盖** — 手动键盘 + 编辑 + 语音（zh/ja 语音解析器扩展币种词汇，如「五十美元」/「50ドル」）；购物清单 estimatedPrice 本期不做
+- **展示** — 列表/统计一律日元，外币行附原币金额小字标注；详情/编辑页完整展示原币种、原金额、汇率
+
+**Key context:** 首次引入外部网络 API 依赖——必须与 local-first/隐私架构兼容（仅出站汇率查询，不携带任何用户数据；离线完全可用 via 缓存 + 手动汇率）。
+
 **Candidate themes carried forward (post-v1.6):** combined family-calendar totals + undo-on-delete (v1.4 deferrals), MOD-005 OCR writer landing, FAMILY-V2-01/02/03 family privacy hardening, runtime theme-switching / selectable palettes (THEME-V2-01, now unblocked by the v1.5 token system), `Book.survivalBalance`/`soulBalance` DB-column rename (v1.5 out-of-scope carve-out), remaining hardcoded a11y Semantics labels (v1.5 IN-02), FUTURE-QA-01 release-readiness QA, FUTURE-DOC/TOOL cleanup, fl_chart 1.x upgrade (TOOL-V2-01), voice flow polish carry (VOICE-POLISH-V2-01..08), English voice parser (VOICE-EN-V2-01).
 
 The v1.0 initiative was a pure-refactor cleanup. It delivered an operational hybrid audit pipeline, eliminated 50 catalogued findings (24 CRITICAL, 8 HIGH, 8 MEDIUM, 7 LOW + 3 layer-violation closures), aligned all architecture documentation with the post-refactor codebase, and locked 4 permanent CI guardrails.
@@ -349,9 +362,9 @@ A family accounting app users can trust with sensitive financial data — local-
 
 ### Active
 
-<!-- Next milestone not yet defined. Run /gsd-new-milestone to define requirements. -->
+<!-- v1.7 多币种支持 requirements being defined — see .planning/REQUIREMENTS.md once written. -->
 
-(None — v1.6 shipped 2026-06-12; next milestone requirements not yet defined. Candidate themes listed under Current State.)
+(v1.7 多币种支持 in definition — 2026-06-12. Scope: keypad currency selection, transaction-date exchange-rate lookup with local cache + manual override, JPY-converted booking amount + original currency/amount/rate fields, manual + edit + voice entry paths, list/detail display of original currency.)
 
 ### Out of Scope
 
@@ -497,7 +510,9 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-12 after v1.6 购物清单 milestone — shipped + archived (4 phases, 27 plans, tag `v1.6`). The placeholder 4th nav tab is a complete family shopping list: public/private segmented lists (D1/D6), rich optional item metadata (D4), filtering with segment-switch reset (D5), batch management, family sync for public items via the existing E2EE pipeline with three-layer privacy enforcement, schema v19→v20, ARB parity + 54 goldens. Audit `tech_debt` accepted (27/27 requirements, 4/4 phases, 6/6 seams, 10/10 flows); W1/W2 sync warnings closed at close via quick task 260612-daz; suite 2588/2588 green.*
+*Last updated: 2026-06-12 — Milestone v1.7 多币种支持 (Multi-Currency) started. Keypad currency selection (common currencies + searchable full ISO list), transaction-date exchange-rate lookup via free API with local daily cache + manual override fallback, JPY-converted booking amount with original currency/amount/rate stored as new transaction fields, manual + edit + voice entry coverage, list annotation + detail display. First external network API dependency — outbound rate queries only, no user data; offline fully usable via cache + manual rate.*
+
+*Prior: 2026-06-12 after v1.6 购物清单 milestone — shipped + archived (4 phases, 27 plans, tag `v1.6`). The placeholder 4th nav tab is a complete family shopping list: public/private segmented lists (D1/D6), rich optional item metadata (D4), filtering with segment-switch reset (D5), batch management, family sync for public items via the existing E2EE pipeline with three-layer privacy enforcement, schema v19→v20, ARB parity + 54 goldens. Audit `tech_debt` accepted (27/27 requirements, 4/4 phases, 6/6 seams, 10/10 flows); W1/W2 sync warnings closed at close via quick task 260612-daz; suite 2588/2588 green.*
 
 *Prior: Last updated: 2026-06-08 — Phase 38 (presentation shell + UI widgets) complete: shopping-list UI fully wired into the nav shell — tile, form, filter bar, empty states, batch-select, context-aware FAB (SC1 no accounting regression); suite 2445/2445 green, human-verify approved. Phase 37 (application use cases + sync integration) complete: 6 privacy-gated shopping-list use cases + reactive family-sync wiring. Phase 36 (data + domain + import guard) complete. Milestone v1.6 购物清单 (Shopping List). Builds the placeholder 4th nav tab into a full shopping-list feature: public/private lists (public family-syncs, private local-only), add-item with optional ledger/category/tags/note + quantity + estimated price, filter, completed-to-bottom + one-click clear, edit/delete/batch-delete, context-aware FAB add entry, and 待办→购物清单 rename across zh/ja/en. Locked decisions: D1 segmented public/private lists, D2 context-aware FAB, D3 no transaction linkage, D4 quantity + estimated price both added. Phase numbering continues from Phase 36.*
 

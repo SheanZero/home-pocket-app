@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.6
-milestone_name: 购物清单
-status: Awaiting next milestone
-stopped_at: v1.6 milestone closed
-last_updated: "2026-06-12T01:33:00.058Z"
-last_activity: 2026-06-12 — Milestone v1.6 completed and archived
+milestone: v1.7
+milestone_name: 多币种支持
+status: planning
+last_updated: "2026-06-12T03:24:24.654Z"
+last_activity: 2026-06-12
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 27
-  completed_plans: 27
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 
 ## Current Position
 
-Phase: Milestone v1.6 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-06-12 — Milestone v1.6 completed and archived
+Status: Defining requirements
+Last activity: 2026-06-12 — Milestone v1.7 started
 
 ## Last Milestone Snapshot (v1.6)
 
