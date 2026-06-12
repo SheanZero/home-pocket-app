@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
-// ignore: unused_import — HashChainService stub will be used in Plan 40-06
-// import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
+// HashChainService import will be added in Plan 40-06 when the STORE-04 test goes GREEN.
 
 void main() {
   test('AppDatabase schemaVersion is 21', () {
