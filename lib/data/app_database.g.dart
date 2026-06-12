@@ -2621,17 +2621,15 @@ class $ExchangeRatesTable extends ExchangeRates
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _rateDateMeta = const VerificationMeta(
-    'rateDate',
-  );
   @override
-  late final GeneratedColumn<DateTime> rateDate = GeneratedColumn<DateTime>(
-    'rate_date',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumnWithTypeConverter<DateTime, int> rateDate =
+      GeneratedColumn<int>(
+        'rate_date',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<DateTime>($ExchangeRatesTable.$converterrateDate);
   static const VerificationMeta _rateMeta = const VerificationMeta('rate');
   @override
   late final GeneratedColumn<String> rate = GeneratedColumn<String>(
@@ -2702,14 +2700,6 @@ class $ExchangeRatesTable extends ExchangeRates
     } else if (isInserting) {
       context.missing(_currencyMeta);
     }
-    if (data.containsKey('rate_date')) {
-      context.handle(
-        _rateDateMeta,
-        rateDate.isAcceptableOrUnknown(data['rate_date']!, _rateDateMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_rateDateMeta);
-    }
     if (data.containsKey('rate')) {
       context.handle(
         _rateMeta,
@@ -2756,10 +2746,12 @@ class $ExchangeRatesTable extends ExchangeRates
         DriftSqlType.string,
         data['${effectivePrefix}currency'],
       )!,
-      rateDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}rate_date'],
-      )!,
+      rateDate: $ExchangeRatesTable.$converterrateDate.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}rate_date'],
+        )!,
+      ),
       rate: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}rate'],
@@ -2783,13 +2775,20 @@ class $ExchangeRatesTable extends ExchangeRates
   $ExchangeRatesTable createAlias(String alias) {
     return $ExchangeRatesTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<DateTime, int> $converterrateDate =
+      const UtcEpochDateTimeConverter();
 }
 
 class ExchangeRateRow extends DataClass implements Insertable<ExchangeRateRow> {
   /// ISO 4217 currency code (e.g. "USD", "CNY").
   final String currency;
 
-  /// The date this rate applies to (UTC, time component is midnight).
+  /// The date this rate applies to (UTC midnight).
+  ///
+  /// Stored as epoch seconds (INTEGER). Uses [UtcEpochDateTimeConverter] to
+  /// return a UTC DateTime on read — Drift's default dateTime() returns local
+  /// time from epoch seconds, but the DAO test contract uses DateTime.utc(...).
   final DateTime rateDate;
 
   /// Exchange rate as a string literal (e.g. "157.3421") — TextColumn for full
@@ -2817,7 +2816,11 @@ class ExchangeRateRow extends DataClass implements Insertable<ExchangeRateRow> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['currency'] = Variable<String>(currency);
-    map['rate_date'] = Variable<DateTime>(rateDate);
+    {
+      map['rate_date'] = Variable<int>(
+        $ExchangeRatesTable.$converterrateDate.toSql(rateDate),
+      );
+    }
     map['rate'] = Variable<String>(rate);
     map['fetched_at'] = Variable<DateTime>(fetchedAt);
     map['source'] = Variable<String>(source);
@@ -2957,7 +2960,7 @@ class ExchangeRatesCompanion extends UpdateCompanion<ExchangeRateRow> {
        source = Value(source);
   static Insertable<ExchangeRateRow> custom({
     Expression<String>? currency,
-    Expression<DateTime>? rateDate,
+    Expression<int>? rateDate,
     Expression<String>? rate,
     Expression<DateTime>? fetchedAt,
     Expression<String>? source,
@@ -3002,7 +3005,9 @@ class ExchangeRatesCompanion extends UpdateCompanion<ExchangeRateRow> {
       map['currency'] = Variable<String>(currency.value);
     }
     if (rateDate.present) {
-      map['rate_date'] = Variable<DateTime>(rateDate.value);
+      map['rate_date'] = Variable<int>(
+        $ExchangeRatesTable.$converterrateDate.toSql(rateDate.value),
+      );
     }
     if (rate.present) {
       map['rate'] = Variable<String>(rate.value);
@@ -9711,10 +9716,11 @@ class $$ExchangeRatesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get rateDate => $composableBuilder(
-    column: $table.rateDate,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get rateDate =>
+      $composableBuilder(
+        column: $table.rateDate,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<String> get rate => $composableBuilder(
     column: $table.rate,
@@ -9751,7 +9757,7 @@ class $$ExchangeRatesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get rateDate => $composableBuilder(
+  ColumnOrderings<int> get rateDate => $composableBuilder(
     column: $table.rateDate,
     builder: (column) => ColumnOrderings(column),
   );
@@ -9789,7 +9795,7 @@ class $$ExchangeRatesTableAnnotationComposer
   GeneratedColumn<String> get currency =>
       $composableBuilder(column: $table.currency, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get rateDate =>
+  GeneratedColumnWithTypeConverter<DateTime, int> get rateDate =>
       $composableBuilder(column: $table.rateDate, builder: (column) => column);
 
   GeneratedColumn<String> get rate =>

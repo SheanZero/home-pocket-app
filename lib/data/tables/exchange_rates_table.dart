@@ -1,5 +1,22 @@
 import 'package:drift/drift.dart';
 
+/// TypeConverter that stores DateTime as epoch seconds (INTEGER) and always
+/// returns a UTC DateTime on read.
+///
+/// Drift's default DateTimeColumn uses epoch seconds but returns local DateTimes.
+/// This converter ensures UTC round-trip so that DateTime.utc(...) comparisons
+/// in tests and application code are correct (exchange_rate_dao_test.dart contract).
+class UtcEpochDateTimeConverter extends TypeConverter<DateTime, int> {
+  const UtcEpochDateTimeConverter();
+
+  @override
+  DateTime fromSql(int fromDb) =>
+      DateTime.fromMillisecondsSinceEpoch(fromDb * 1000, isUtc: true);
+
+  @override
+  int toSql(DateTime value) => value.millisecondsSinceEpoch ~/ 1000;
+}
+
 /// Exchange rates cache table — stores fetched rates keyed by (currency, rateDate).
 ///
 /// This table caches external API-fetched rates locally (per D-09). Rates are
@@ -14,8 +31,13 @@ class ExchangeRates extends Table {
   /// ISO 4217 currency code (e.g. "USD", "CNY").
   TextColumn get currency => text()();
 
-  /// The date this rate applies to (UTC, time component is midnight).
-  DateTimeColumn get rateDate => dateTime()();
+  /// The date this rate applies to (UTC midnight).
+  ///
+  /// Stored as epoch seconds (INTEGER). Uses [UtcEpochDateTimeConverter] to
+  /// return a UTC DateTime on read — Drift's default dateTime() returns local
+  /// time from epoch seconds, but the DAO test contract uses DateTime.utc(...).
+  Column<int> get rateDate =>
+      integer().map(const UtcEpochDateTimeConverter())();
 
   /// Exchange rate as a string literal (e.g. "157.3421") — TextColumn for full
   /// precision (ADR-020 D-04). Use double.parse(rate) for arithmetic.
