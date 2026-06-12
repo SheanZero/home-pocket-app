@@ -1,38 +1,57 @@
+import 'package:drift/drift.dart';
+
 import '../app_database.dart';
 import '../daos/exchange_rate_dao.dart';
+import '../../features/currency/domain/models/exchange_rate.dart';
+import '../../features/currency/domain/repositories/exchange_rate_repository.dart';
 
-// TODO(40-05): implements ExchangeRateRepository once interface lands
-// import '../../features/currency/domain/repositories/exchange_rate_repository.dart';
-
-// TODO(40-05): import ExchangeRate domain model once it lands
-// import '../../features/currency/domain/models/exchange_rate.dart';
-
-/// Stub implementation of the exchange rate repository.
+/// Concrete implementation of [ExchangeRateRepository].
 ///
-/// This file is created in Wave 2 (Plan 40-04) to establish the class shape and
-/// DAO wiring before the domain interface exists. The interface and Freezed model
-/// arrive in Plan 40-05; the [ExchangeRateRepositoryImpl] is connected there.
-///
-/// **Important constraints for this wave:**
-/// - No `implements ExchangeRateRepository` — the interface does not exist yet.
-///   Adding it here would cause a compile error. TODO(40-05) marks the upgrade point.
-/// - No `@riverpod` provider — providers are Plan 40-05's responsibility.
-/// - Methods pass through to the DAO returning raw rows until the ExchangeRate
-///   Freezed model lands in Plan 40-05 (HIGH-06 forbids UnimplementedError in lib/).
-class ExchangeRateRepositoryImpl {
+/// Bridges the [ExchangeRateDao] (Drift row access) to the domain interface
+/// (pure-Dart [ExchangeRate] model). All Drift types are contained here —
+/// the domain layer never sees them.
+class ExchangeRateRepositoryImpl implements ExchangeRateRepository {
   ExchangeRateRepositoryImpl({required ExchangeRateDao dao}) : _dao = dao;
 
   final ExchangeRateDao _dao;
 
-  // TODO(40-05): findByDate(String currency, DateTime date) → Result<ExchangeRate?>
-  Future<ExchangeRateRow?> findByDate(String currency, DateTime date) =>
-      _dao.findByDate(currency, date);
+  @override
+  Future<ExchangeRate?> findByDate(String currency, DateTime date) async {
+    final row = await _dao.findByDate(currency, date);
+    if (row == null) return null;
+    return _toModel(row);
+  }
 
-  // TODO(40-05): findLatest(String currency) → Result<ExchangeRate?>
-  Future<ExchangeRateRow?> findLatest(String currency) =>
-      _dao.findLatest(currency);
+  @override
+  Future<ExchangeRate?> findLatest(String currency) async {
+    final row = await _dao.findLatest(currency);
+    if (row == null) return null;
+    return _toModel(row);
+  }
 
-  // TODO(40-05): upsert(ExchangeRate rate) → Result<void>
-  Future<void> upsert(ExchangeRatesCompanion companion) =>
-      _dao.upsert(companion);
+  @override
+  Future<void> upsert(ExchangeRate rate) async {
+    await _dao.upsert(
+      ExchangeRatesCompanion(
+        currency: Value(rate.currency),
+        rateDate: Value(rate.rateDate),
+        rate: Value(rate.rate),
+        fetchedAt: Value(rate.fetchedAt),
+        source: Value(rate.source),
+        actualRateDate: Value(rate.actualRateDate),
+      ),
+    );
+  }
+
+  /// Map an [ExchangeRateRow] (Drift) to an [ExchangeRate] domain model.
+  ExchangeRate _toModel(ExchangeRateRow row) {
+    return ExchangeRate(
+      currency: row.currency,
+      rateDate: row.rateDate,
+      rate: row.rate,
+      fetchedAt: row.fetchedAt,
+      source: row.source,
+      actualRateDate: row.actualRateDate,
+    );
+  }
 }
