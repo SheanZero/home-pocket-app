@@ -7,6 +7,7 @@ import 'tables/books_table.dart';
 import 'tables/categories_table.dart';
 import 'tables/category_keyword_preferences_table.dart';
 import 'tables/category_ledger_configs_table.dart';
+import 'tables/exchange_rates_table.dart';
 import 'tables/group_members_table.dart';
 import 'tables/groups_table.dart';
 import 'tables/merchant_category_preferences_table.dart';
@@ -28,6 +29,7 @@ part 'app_database.g.dart';
     Categories,
     CategoryKeywordPreferences,
     CategoryLedgerConfigs,
+    ExchangeRates,
     GroupMembers,
     Groups,
     MerchantCategoryPreferences,
@@ -44,7 +46,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 20;
+  int get schemaVersion => 21;
 
   @override
   MigrationStrategy get migration {
@@ -55,6 +57,8 @@ class AppDatabase extends _$AppDatabase {
         // API), so shopping_items indices must be created explicitly on fresh
         // installs too — not only on the v19→v20 upgrade path.
         await _createShoppingItemIndexes();
+        // exchange_rates indices are also decorative on the table — create explicitly.
+        await _createExchangeRateIndexes();
       },
       onUpgrade: (migrator, from, to) async {
         if (from < 3) {
@@ -438,6 +442,25 @@ class AppDatabase extends _$AppDatabase {
           await migrator.createTable(shoppingItems);
           await _createShoppingItemIndexes();
         }
+        if (from < 21) {
+          // Phase 40: multi-currency — create exchange_rates table and add three
+          // nullable foreign-currency provenance columns to transactions (STORE-01/02).
+          //
+          // CRITICAL: applied_rate is TEXT (TextColumn per D-04 / ADR-020). No DEFAULT
+          // clause. No NOT NULL constraint. Nullable columns without DEFAULT must use
+          // customStatement, not migrator.addColumn.
+          await migrator.createTable(exchangeRates);
+          await _createExchangeRateIndexes();
+          await customStatement(
+            'ALTER TABLE transactions ADD COLUMN original_currency TEXT',
+          );
+          await customStatement(
+            'ALTER TABLE transactions ADD COLUMN original_amount INTEGER',
+          );
+          await customStatement(
+            'ALTER TABLE transactions ADD COLUMN applied_rate TEXT',
+          );
+        }
       },
     );
   }
@@ -467,6 +490,18 @@ class AppDatabase extends _$AppDatabase {
     await customStatement(
       'CREATE INDEX IF NOT EXISTS idx_shopping_added_by_book '
       'ON shopping_items (added_by_book_id)',
+    );
+  }
+
+  /// Creates the exchange_rates index declared on [ExchangeRates.customIndices].
+  ///
+  /// Drift's migrator does not consume the `customIndices` getter, so this index
+  /// must be created explicitly from both the onCreate (fresh install) and onUpgrade
+  /// (v20→v21) paths. Mirrors the _createShoppingItemIndexes pattern (CR-01 lesson).
+  Future<void> _createExchangeRateIndexes() async {
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_exchange_rates_currency_date '
+      'ON exchange_rates (currency, rate_date)',
     );
   }
 }
