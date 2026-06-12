@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/apply_sync_operations_use_case.dart';
 import 'package:home_pocket/application/family_sync/shadow_book_service.dart';
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
+import 'package:home_pocket/features/shopping_list/domain/models/shopping_item_sync_mapper.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/data/daos/book_dao.dart';
 import 'package:home_pocket/data/daos/shopping_item_dao.dart';
@@ -37,9 +38,9 @@ void main() {
     when(() => mockEncryption.decryptField(any())).thenAnswer(
       (invocation) async => invocation.positionalArguments.first as String,
     );
-    when(() => mockGroupRepository.getPendingGroup()).thenAnswer(
-      (_) async => null,
-    );
+    when(
+      () => mockGroupRepository.getPendingGroup(),
+    ).thenAnswer((_) async => null);
 
     shoppingItemDao = ShoppingItemDao(db);
     shoppingItemRepo = ShoppingItemRepositoryImpl(
@@ -83,7 +84,9 @@ void main() {
         // ref.invalidate (v1.4 GAP-2 lesson; SYNC-06, SC-5).
         final streamFuture = shoppingItemRepo
             .watchByListType('public')
-            .skip(1) // skip initial empty emission; wait for post-write re-emission
+            .skip(
+              1,
+            ) // skip initial empty emission; wait for post-write re-emission
             .first
             .timeout(const Duration(seconds: 5));
 
@@ -118,10 +121,10 @@ void main() {
     test(
       'private item NEVER appears in watchByListType("public") stream (SYNC-02, SC-5)',
       () async {
-        // Apply the private item write first, then check the stream state.
-        // The private item IS written to the DB (upsert via apply handler),
-        // but the SQL WHERE clause `WHERE list_type = 'public'` excludes it.
-        // This verifies the privacy gate holds at the DAO level (SYNC-02).
+        // Apply the private item op first, then check the stream state.
+        // Since W2 the receiver-side gate drops non-public ops before any DB
+        // write; even if a write slipped through, the SQL WHERE clause
+        // `WHERE list_type = 'public'` would exclude it (SYNC-02, two layers).
         await applyOps.execute([
           {
             'op': 'create',
@@ -206,7 +209,8 @@ void main() {
         expect(
           item!.isDeleted,
           isTrue,
-          reason: 'Tombstone must NOT be resurrected by a remote update op (SC-4)',
+          reason:
+              'Tombstone must NOT be resurrected by a remote update op (SC-4)',
         );
       },
     );
@@ -253,7 +257,8 @@ void main() {
               'listType': 'public',
               'name': 'Free Range Eggs', // stale rename
               'quantity': 1,
-              'isCompleted': false, // stale — must NOT override local completion
+              'isCompleted':
+                  false, // stale — must NOT override local completion
               'createdAt': '2026-06-08T08:00:00.000Z',
               'updatedAt': t0.toUtc().toIso8601String(), // T0 < T1 → stale
             },
@@ -270,6 +275,163 @@ void main() {
               'Stale remote rename must NOT un-check a locally-completed item '
               '(D-03/D37-02 sticky-complete merge, SC-4)',
         );
+      },
+    );
+
+    test(
+      'W1 full-sync round trip: public item synced, private item excluded (SYNC-01)',
+      () async {
+        // Seed the sender DB with one PUBLIC and one PRIVATE item
+        await shoppingItemRepo.upsert(
+          ShoppingItem(
+            id: 'fullsync-pub',
+            deviceId: 'device-A',
+            listType: 'public',
+            name: 'Milk',
+            createdAt: DateTime.parse('2026-06-08T10:00:00.000Z'),
+          ),
+        );
+        await shoppingItemRepo.upsert(
+          ShoppingItem(
+            id: 'fullsync-priv',
+            deviceId: 'device-A',
+            listType: 'private',
+            name: 'Secret Gift',
+            createdAt: DateTime.parse('2026-06-08T10:00:00.000Z'),
+          ),
+        );
+
+        // Build full-sync ops exactly as the fullSyncUseCase provider does
+        final publicItems = await shoppingItemRepo
+            .watchByListType('public')
+            .first;
+        final ops = publicItems
+            .map(ShoppingItemSyncMapper.toCreateOperation)
+            .toList();
+
+        expect(
+          ops.map((op) => op['entityId']).toList(),
+          ['fullsync-pub'],
+          reason:
+              'full-sync push payload must contain ONLY public items '
+              '(W1/SYNC-01, D37-06)',
+        );
+
+        // Fresh receiver state: a second in-memory DB
+        final receiverDb = AppDatabase.forTesting();
+        addTearDown(receiverDb.close);
+        final receiverShoppingRepo = ShoppingItemRepositoryImpl(
+          dao: ShoppingItemDao(receiverDb),
+          encryptionService: mockEncryption,
+        );
+        final receiverTxRepo = TransactionRepositoryImpl(
+          dao: TransactionDao(receiverDb),
+          encryptionService: mockEncryption,
+        );
+        final receiverApply = ApplySyncOperationsUseCase(
+          transactionRepository: receiverTxRepo,
+          shoppingItemRepository: receiverShoppingRepo,
+          shadowBookService: ShadowBookService(
+            bookRepository: BookRepositoryImpl(dao: BookDao(receiverDb)),
+            transactionRepository: receiverTxRepo,
+          ),
+          groupRepository: mockGroupRepository,
+        );
+
+        await receiverApply.execute(ops);
+
+        final receivedPublic = await receiverShoppingRepo.findById(
+          'fullsync-pub',
+        );
+        final receivedPrivate = await receiverShoppingRepo.findById(
+          'fullsync-priv',
+        );
+        expect(
+          receivedPublic,
+          isNotNull,
+          reason: 'public item must exist on the receiver after full sync',
+        );
+        expect(
+          receivedPrivate,
+          isNull,
+          reason: 'private item must never reach the receiver (SYNC-02)',
+        );
+      },
+    );
+
+    test(
+      'W2 end-to-end: inbound private ops are dropped by the receiver gate (SYNC-02/SYNC-03)',
+      () async {
+        // Inbound private CREATE → not persisted at all
+        await applyOps.execute([
+          {
+            'op': 'create',
+            'entityType': kShoppingItemEntityType,
+            'entityId': 'w2-private-create',
+            'fromDeviceId': 'partner-device',
+            'data': {
+              'id': 'w2-private-create',
+              'listType': 'private',
+              'name': 'Secret Gift',
+              'quantity': 1,
+              'isCompleted': false,
+              'createdAt': '2026-06-08T10:00:00.000Z',
+            },
+          },
+        ]);
+        expect(
+          await shoppingItemRepo.findById('w2-private-create'),
+          isNull,
+          reason:
+              'inbound private create must be dropped before any DB write '
+              '(W2/SYNC-02 receiver gate)',
+        );
+
+        // Persist a public item via sync, then attack it with a private update
+        await applyOps.execute([
+          {
+            'op': 'create',
+            'entityType': kShoppingItemEntityType,
+            'entityId': 'w2-public-target',
+            'fromDeviceId': 'partner-device',
+            'data': {
+              'id': 'w2-public-target',
+              'listType': 'public',
+              'name': 'Milk',
+              'quantity': 1,
+              'isCompleted': false,
+              'createdAt': '2026-06-08T10:00:00.000Z',
+            },
+          },
+        ]);
+
+        await applyOps.execute([
+          {
+            'op': 'update',
+            'entityType': kShoppingItemEntityType,
+            'entityId': 'w2-public-target',
+            'fromDeviceId': 'partner-device',
+            'data': {
+              'id': 'w2-public-target',
+              'listType': 'private', // non-public wire value → dropped
+              'name': 'Hijacked Name',
+              'quantity': 9,
+              'isCompleted': false,
+              'createdAt': '2026-06-08T10:00:00.000Z',
+              'updatedAt': '2026-06-08T12:00:00.000Z', // newer — gate must
+              // drop it BEFORE LWW would accept it
+            },
+          },
+        ]);
+
+        final item = await shoppingItemRepo.findById('w2-public-target');
+        expect(item, isNotNull);
+        expect(
+          item!.name,
+          'Milk',
+          reason: 'private update op must leave the public item unchanged',
+        );
+        expect(item.listType, 'public');
       },
     );
   });

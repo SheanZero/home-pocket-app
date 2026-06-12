@@ -209,9 +209,7 @@ FullSyncUseCase fullSyncUseCase(Ref ref) {
       // _handleShoppingCreate is idempotent (skips existing ids).
       final shoppingRepo = ref.read(shoppingItemRepositoryProvider);
       final publicItems = await shoppingRepo.watchByListType('public').first;
-      return publicItems
-          .map(ShoppingItemSyncMapper.toCreateOperation)
-          .toList();
+      return publicItems.map(ShoppingItemSyncMapper.toCreateOperation).toList();
     },
   );
 }

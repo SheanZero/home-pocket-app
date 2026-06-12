@@ -43,8 +43,8 @@ class FullSyncUseCase {
     // every op carries data.listType.
     final publicShoppingOps = allShoppingOps
         .where(
-          (op) => (op['data'] as Map<String, dynamic>?)?['listType'] ==
-              'public',
+          (op) =>
+              (op['data'] as Map<String, dynamic>?)?['listType'] == 'public',
         )
         .toList();
 

@@ -58,9 +58,7 @@ class ApplySyncOperationsUseCase {
         }
       } catch (e, st) {
         if (kDebugMode) {
-          debugPrint(
-            '[ApplySyncOps] $entityType op failed, skipping: $e\n$st',
-          );
+          debugPrint('[ApplySyncOps] $entityType op failed, skipping: $e\n$st');
         }
         continue; // skip-and-continue; next fullSync reconciles
       }
@@ -280,14 +278,12 @@ class ApplySyncOperationsUseCase {
     // reset a locally-reordered item to position 0 (defeats D37-01).
     // D37-04 / W2 (SYNC-03): listType can never change post-creation — pin the
     // existing value so a wire update can never flip an item public↔private.
-    final updated = ShoppingItemSyncMapper.fromSyncMap(
-      data,
-      fromDeviceId: null,
-    ).copyWith(
-      id: entityId,
-      sortOrder: existing.sortOrder,
-      listType: existing.listType,
-    );
+    final updated = ShoppingItemSyncMapper.fromSyncMap(data, fromDeviceId: null)
+        .copyWith(
+          id: entityId,
+          sortOrder: existing.sortOrder,
+          listType: existing.listType,
+        );
 
     await _shoppingItemRepository.upsert(updated);
   }

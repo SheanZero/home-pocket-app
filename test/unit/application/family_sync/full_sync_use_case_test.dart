@@ -34,8 +34,7 @@ void main() {
       ),
     ).thenAnswer((invocation) async {
       final ops =
-          invocation.namedArguments[#operations]
-              as List<Map<String, dynamic>>;
+          invocation.namedArguments[#operations] as List<Map<String, dynamic>>;
       return PushSyncResult.success(ops.length);
     });
   });
@@ -130,8 +129,7 @@ void main() {
       expect(
         total,
         1,
-        reason:
-            'empty-transactions early-exit must not swallow shopping ops',
+        reason: 'empty-transactions early-exit must not swallow shopping ops',
       );
       final pushed = capturedPushedOps();
       expect(pushed.single['entityId'], 'item-solo');
@@ -147,8 +145,7 @@ void main() {
       ),
     ).thenAnswer((invocation) async {
       final ops =
-          invocation.namedArguments[#operations]
-              as List<Map<String, dynamic>>;
+          invocation.namedArguments[#operations] as List<Map<String, dynamic>>;
       return PushSyncResult.queued(ops.length);
     });
 
