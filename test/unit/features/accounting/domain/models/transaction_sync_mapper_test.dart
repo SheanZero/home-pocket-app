@@ -179,5 +179,158 @@ void main() {
       expect(op['data'], isA<Map<String, dynamic>>());
       expect(op['timestamp'], isNotNull);
     });
+
+    // STORE-03: backward-compat and round-trip tests.
+    // RED in Wave 0 because Transaction does not yet have
+    // originalCurrency / originalAmount / appliedRate fields.
+    // These fields are added in Wave 1 (Plan 40-02).
+    group('STORE-03 backward-compat and round-trip', () {
+      test(
+          'fromSyncMap with v1.6 payload (no currency fields) → '
+          'originalCurrency null, originalAmount null, appliedRate null, '
+          'no exception',
+          () {
+        // A v1.6 sync payload lacks the three new currency fields entirely.
+        final payload = TransactionSyncMapper.toSyncMap(
+          sampleTransaction,
+          sourceBookId: 'book-1',
+          sourceBookName: 'Main Book',
+          sourceBookType: 'remote_book:book-1',
+        );
+        // Simulate v1.6 peer: remove the three new keys if they were present.
+        payload.remove('originalCurrency');
+        payload.remove('originalAmount');
+        payload.remove('appliedRate');
+
+        final transaction = TransactionSyncMapper.fromSyncMap(
+          payload,
+          bookId: 'shadow-book-1',
+          deviceId: 'partner-device',
+        );
+
+        // RED: Transaction.originalCurrency does not exist yet.
+        expect(transaction.originalCurrency, isNull);
+        expect(transaction.originalAmount, isNull);
+        expect(transaction.appliedRate, isNull);
+      });
+
+      test(
+          'fromSyncMap with v1.7 payload containing all three fields → '
+          'all three fields preserved',
+          () {
+        // A v1.7 sync payload includes the three new currency fields.
+        final payload = <String, dynamic>{
+          'id': 'tx-456',
+          'amount': 7465,
+          'type': 'expense',
+          'categoryId': 'cat-food',
+          'ledgerType': 'daily',
+          'timestamp': DateTime.utc(2026, 6, 12).toIso8601String(),
+          'createdAt': DateTime.utc(2026, 6, 12).toIso8601String(),
+          'joyFullness': 5,
+          'entrySource': 'manual',
+          'isPrivate': false,
+          'metadata': {
+            'sourceBookId': 'book-1',
+            'sourceBookName': 'Main Book',
+            'sourceBookType': 'remote_book:book-1',
+          },
+          // v1.7 new fields
+          'originalCurrency': 'USD',
+          'originalAmount': 5000,
+          'appliedRate': '149.30',
+        };
+
+        final transaction = TransactionSyncMapper.fromSyncMap(
+          payload,
+          bookId: 'shadow-book-1',
+          deviceId: 'partner-device',
+        );
+
+        // RED: Transaction.originalCurrency/originalAmount/appliedRate do not exist.
+        expect(transaction.originalCurrency, equals('USD'));
+        expect(transaction.originalAmount, equals(5000));
+        expect(transaction.appliedRate, equals('149.30'));
+      });
+
+      test(
+          'toSyncMap omits currency keys when all three are null '
+          '(JPY-native row)',
+          () {
+        // A JPY-native transaction has all three currency fields null.
+        // toSyncMap must NOT emit these keys so v1.6 peers can parse the payload.
+        final jpyTransaction = sampleTransaction.copyWith(
+          originalCurrency: null,
+          originalAmount: null,
+          appliedRate: null,
+        );
+
+        final map = TransactionSyncMapper.toSyncMap(
+          jpyTransaction,
+          sourceBookId: 'book-1',
+          sourceBookName: 'Main Book',
+          sourceBookType: 'remote_book:book-1',
+        );
+
+        // RED: Transaction.originalCurrency does not exist yet.
+        expect(map.containsKey('originalCurrency'), isFalse);
+        expect(map.containsKey('originalAmount'), isFalse);
+        expect(map.containsKey('appliedRate'), isFalse);
+      });
+
+      test(
+          'toSyncMap includes all three currency keys when non-null '
+          '(foreign-currency row)',
+          () {
+        // A foreign-currency transaction has all three fields non-null.
+        final usdTransaction = sampleTransaction.copyWith(
+          originalCurrency: 'USD',
+          originalAmount: 5000,
+          appliedRate: '149.30',
+        );
+
+        final map = TransactionSyncMapper.toSyncMap(
+          usdTransaction,
+          sourceBookId: 'book-1',
+          sourceBookName: 'Main Book',
+          sourceBookType: 'remote_book:book-1',
+        );
+
+        // RED: Transaction.originalCurrency does not exist yet.
+        expect(map['originalCurrency'], equals('USD'));
+        expect(map['originalAmount'], equals(5000));
+        expect(map['appliedRate'], equals('149.30'));
+      });
+
+      test(
+          "round-trip: Transaction with originalCurrency='USD', "
+          "originalAmount=5000, appliedRate='149.30' → "
+          'toSyncMap → fromSyncMap preserves all three values',
+          () {
+        // RED: Transaction.originalCurrency/originalAmount/appliedRate do not exist.
+        final usdTransaction = sampleTransaction.copyWith(
+          originalCurrency: 'USD',
+          originalAmount: 5000,
+          appliedRate: '149.30',
+        );
+
+        final map = TransactionSyncMapper.toSyncMap(
+          usdTransaction,
+          sourceBookId: 'book-1',
+          sourceBookName: 'Main Book',
+          sourceBookType: 'remote_book:book-1',
+        );
+
+        final restored = TransactionSyncMapper.fromSyncMap(
+          map,
+          bookId: 'shadow-book-1',
+          deviceId: 'partner-device',
+        );
+
+        expect(restored.originalCurrency, equals('USD'));
+        expect(restored.originalAmount, equals(5000));
+        expect(restored.appliedRate, equals('149.30'));
+      });
+    });
   });
 }
