@@ -15,4 +15,21 @@ abstract class ExchangeRateRepository {
 
   /// Insert or update a rate entry by composite key (currency, rateDate).
   Future<void> upsert(ExchangeRate rate);
+
+  /// Return the most-recent cached rate for [currency] where source != 'manual',
+  /// or null if no non-manual row exists.
+  ///
+  /// D-07: API-cached rows take priority over manual-override rows in the
+  /// offline fallback path.
+  Future<ExchangeRate?> findLatestNonManual(String currency);
+
+  /// Delete all rows where rateDate is strictly before [cutoff].
+  ///
+  /// D-09: called on every upsert to enforce the 2-year TTL.
+  Future<void> deleteOlderThan(DateTime cutoff);
+
+  /// Return all cached rate rows, unfiltered.
+  ///
+  /// D-10: used by the backup export to serialize the full rate cache.
+  Future<List<ExchangeRate>> findAll();
 }

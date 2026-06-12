@@ -43,6 +43,26 @@ class ExchangeRateRepositoryImpl implements ExchangeRateRepository {
     );
   }
 
+  @override
+  Future<ExchangeRate?> findLatestNonManual(String currency) async {
+    // No date normalization — this is a source-filtered latest lookup, not a
+    // composite-key lookup (D-07).
+    final row = await _dao.findLatestNonManual(currency);
+    if (row == null) return null;
+    return _toModel(row);
+  }
+
+  @override
+  Future<void> deleteOlderThan(DateTime cutoff) async {
+    await _dao.deleteOlderThan(_normalizeToUtcMidnight(cutoff));
+  }
+
+  @override
+  Future<List<ExchangeRate>> findAll() async {
+    final rows = await _dao.findAll();
+    return rows.map(_toModel).toList();
+  }
+
   /// Normalizes [d] to UTC midnight — the composite-key contract documented
   /// on the table and domain model (WR-06). Without this, a local-zone or
   /// non-midnight DateTime produces a different epoch second than
