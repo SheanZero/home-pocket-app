@@ -381,4 +381,164 @@ void main() {
       ).called(1);
     });
   });
+
+  // Helper to build base params without currency fields
+  CreateTransactionParams makeParams({
+    String? originalCurrency,
+    int? originalAmount,
+    String? appliedRate,
+  }) {
+    return CreateTransactionParams(
+      bookId: 'book_001',
+      amount: 1000,
+      type: TransactionType.expense,
+      categoryId: 'cat_food',
+      entrySource: EntrySource.manual,
+      originalCurrency: originalCurrency,
+      originalAmount: originalAmount,
+      appliedRate: appliedRate,
+    );
+  }
+
+  group('partial-triple invariant', () {
+    test('only originalCurrency set → Result.error', () async {
+      final result = await useCase.execute(
+        makeParams(originalCurrency: 'USD'),
+      );
+      expect(result.isError, isTrue);
+      expect(result.error, contains('partial foreign-currency data'));
+      verifyNever(() => mockTransactionRepo.insert(any()));
+    });
+
+    test('only originalAmount set → Result.error', () async {
+      final result = await useCase.execute(
+        makeParams(originalAmount: 5000),
+      );
+      expect(result.isError, isTrue);
+      expect(result.error, contains('partial foreign-currency data'));
+      verifyNever(() => mockTransactionRepo.insert(any()));
+    });
+
+    test('only appliedRate set → Result.error', () async {
+      final result = await useCase.execute(
+        makeParams(appliedRate: '149.30'),
+      );
+      expect(result.isError, isTrue);
+      expect(result.error, contains('partial foreign-currency data'));
+      verifyNever(() => mockTransactionRepo.insert(any()));
+    });
+
+    test('originalCurrency + originalAmount set, appliedRate null → Result.error',
+        () async {
+      final result = await useCase.execute(
+        makeParams(originalCurrency: 'USD', originalAmount: 5000),
+      );
+      expect(result.isError, isTrue);
+      expect(result.error, contains('partial foreign-currency data'));
+      verifyNever(() => mockTransactionRepo.insert(any()));
+    });
+
+    test('originalCurrency + appliedRate set, originalAmount null → Result.error',
+        () async {
+      final result = await useCase.execute(
+        makeParams(originalCurrency: 'USD', appliedRate: '149.30'),
+      );
+      expect(result.isError, isTrue);
+      expect(result.error, contains('partial foreign-currency data'));
+      verifyNever(() => mockTransactionRepo.insert(any()));
+    });
+
+    test('all three null → no error from partial-triple check (JPY-native)',
+        () async {
+      // No error from partial-triple; proceed to category lookup
+      when(() => mockCategoryRepo.findById('cat_food'))
+          .thenAnswer((_) async => null); // category not found — expected
+      final result = await useCase.execute(makeParams());
+      // Should reach category check (error is 'category not found', not partial-triple)
+      expect(result.isError, isTrue);
+      expect(result.error, contains('category'));
+    });
+
+    test(
+        'all three non-null with valid appliedRate → no error from partial-triple or appliedRate check',
+        () async {
+      // No error from partial-triple or appliedRate; proceed to category lookup
+      when(() => mockCategoryRepo.findById('cat_food'))
+          .thenAnswer((_) async => null); // category not found — expected
+      final result = await useCase.execute(
+        makeParams(
+          originalCurrency: 'USD',
+          originalAmount: 5000,
+          appliedRate: '149.30',
+        ),
+      );
+      // Should reach category check (error is 'category not found', not validation)
+      expect(result.isError, isTrue);
+      expect(result.error, contains('category'));
+    });
+  });
+
+  group('appliedRate validity (D-05)', () {
+    test("all three non-null, appliedRate='NaN' → Result.error (isNaN path)",
+        () async {
+      // Note: double.parse('NaN') succeeds in Dart returning double.nan,
+      // so FormatException is NOT thrown. The isNaN guard catches it.
+      final result = await useCase.execute(
+        makeParams(
+          originalCurrency: 'USD',
+          originalAmount: 5000,
+          appliedRate: 'NaN',
+        ),
+      );
+      expect(result.isError, isTrue);
+      expect(result.error, contains('positive number'));
+      verifyNever(() => mockTransactionRepo.insert(any()));
+    });
+
+    test("all three non-null, appliedRate='-1.5' → Result.error (rate <= 0)",
+        () async {
+      final result = await useCase.execute(
+        makeParams(
+          originalCurrency: 'USD',
+          originalAmount: 5000,
+          appliedRate: '-1.5',
+        ),
+      );
+      expect(result.isError, isTrue);
+      expect(result.error, contains('positive number'));
+      verifyNever(() => mockTransactionRepo.insert(any()));
+    });
+
+    test("all three non-null, appliedRate='0' → Result.error (rate <= 0)",
+        () async {
+      final result = await useCase.execute(
+        makeParams(
+          originalCurrency: 'USD',
+          originalAmount: 5000,
+          appliedRate: '0',
+        ),
+      );
+      expect(result.isError, isTrue);
+      expect(result.error, contains('positive number'));
+      verifyNever(() => mockTransactionRepo.insert(any()));
+    });
+
+    test(
+        "all three non-null, appliedRate='0.001' → passes validity check (small positive rate)",
+        () async {
+      // Passes validation; proceeds to category lookup
+      when(() => mockCategoryRepo.findById('cat_food'))
+          .thenAnswer((_) async => null); // category not found — expected
+      final result = await useCase.execute(
+        makeParams(
+          originalCurrency: 'JPY',
+          originalAmount: 100,
+          appliedRate: '0.001',
+        ),
+      );
+      // Should reach category check (not a validation error)
+      expect(result.isError, isTrue);
+      expect(result.error, contains('category'));
+    });
+  });
 }

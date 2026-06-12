@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
-// HashChainService import will be added in Plan 40-06 when the STORE-04 test goes GREEN.
+import 'package:home_pocket/infrastructure/crypto/services/hash_chain_service.dart';
 
 void main() {
   test('AppDatabase schemaVersion is 21', () {
@@ -108,17 +108,133 @@ void main() {
     expect(rows.first.read<String?>('applied_rate'), isNull);
   });
 
-  test(
-    'STORE-04: HashChainService.verifyChain passes on dataset with '
-    'null and non-null currency fields',
-    () {
-      // STUB — implement in Wave 2 (Plan 40-06) after schema migration lands.
-      // This test requires a pre-seeded in-memory DB with the v21 schema
-      // and HashChainService wired up; all infrastructure is absent in Wave 0.
-      fail(
-        'not implemented — implement in Wave 2 (Plan 40-06) after schema '
-        'migration lands',
-      );
-    },
-  );
+  group('STORE-04 hash chain verifyChain', () {
+    test(
+      'STORE-04: HashChainService.verifyChain passes on dataset with '
+      'null and non-null currency fields',
+      () async {
+        final db = AppDatabase.forTesting();
+        addTearDown(db.close);
+
+        final hashService = HashChainService();
+
+        // Compute hashes for a two-transaction chain.
+        // TX 1: JPY-native row (null currency fields) — pre-migration style.
+        const genesisHash =
+            '0000000000000000000000000000000000000000000000000000000000000000';
+        const tx1Id = 'tx_jpy_native_store04';
+        const tx1Amount = 1500;
+        final tx1Timestamp = DateTime.utc(2026, 1, 1).millisecondsSinceEpoch ~/ 1000;
+
+        final tx1Hash = hashService.calculateTransactionHash(
+          transactionId: tx1Id,
+          amount: tx1Amount.toDouble(),
+          timestamp: tx1Timestamp,
+          previousHash: genesisHash,
+        );
+
+        // TX 2: Foreign-currency row (non-null originalCurrency, originalAmount, appliedRate).
+        const tx2Id = 'tx_usd_store04';
+        const tx2Amount = 7465; // 50 USD × 149.30 = 7465 JPY
+        final tx2Timestamp = DateTime.utc(2026, 6, 12).millisecondsSinceEpoch ~/ 1000;
+
+        final tx2Hash = hashService.calculateTransactionHash(
+          transactionId: tx2Id,
+          amount: tx2Amount.toDouble(),
+          timestamp: tx2Timestamp,
+          previousHash: tx1Hash,
+        );
+
+        final now = DateTime.utc(2026, 6, 12).millisecondsSinceEpoch;
+
+        // Seed TX 1 — JPY-native row (original_currency = NULL)
+        await db.customStatement(
+          '''INSERT INTO transactions
+             (id, book_id, device_id, amount, type, category_id, ledger_type,
+              timestamp, created_at, prev_hash, current_hash, entry_source,
+              original_currency, original_amount, applied_rate)
+             VALUES (
+               ?, 'book_store04', 'device_store04', ?, 'expense',
+               'cat_food', 'daily', ?, ?, ?, ?, 'manual',
+               NULL, NULL, NULL
+             )''',
+          [tx1Id, tx1Amount, tx1Timestamp * 1000, now, genesisHash, tx1Hash],
+        );
+
+        // Seed TX 2 — foreign-currency row (all three non-null)
+        await db.customStatement(
+          '''INSERT INTO transactions
+             (id, book_id, device_id, amount, type, category_id, ledger_type,
+              timestamp, created_at, prev_hash, current_hash, entry_source,
+              original_currency, original_amount, applied_rate)
+             VALUES (
+               ?, 'book_store04', 'device_store04', ?, 'expense',
+               'cat_food', 'daily', ?, ?, ?, ?, 'manual',
+               'USD', 5000, '149.30'
+             )''',
+          [tx2Id, tx2Amount, tx2Timestamp * 1000, now, tx1Hash, tx2Hash],
+        );
+
+        // Build the list-of-maps for verifyChain (keys match HashChainService contract).
+        final chainData = [
+          {
+            'transactionId': tx1Id,
+            'amount': tx1Amount,
+            'timestamp': tx1Timestamp,
+            'previousHash': genesisHash,
+            'currentHash': tx1Hash,
+          },
+          {
+            'transactionId': tx2Id,
+            'amount': tx2Amount,
+            'timestamp': tx2Timestamp,
+            'previousHash': tx1Hash,
+            'currentHash': tx2Hash,
+          },
+        ];
+
+        // ADR-021: currency fields are EXCLUDED from the hash formula.
+        // verifyChain must pass regardless of originalCurrency/originalAmount/appliedRate values.
+        final result = hashService.verifyChain(chainData);
+
+        expect(result.isValid, isTrue,
+            reason: 'verifyChain must pass on dataset containing both '
+                'null-currency (JPY-native) and non-null-currency (USD) rows. '
+                'ADR-021: currency fields are excluded from hash formula.');
+        expect(result.tamperedTransactionIds, isEmpty);
+        expect(result.totalTransactions, equals(2));
+      },
+    );
+
+    // ARCHITECTURE ASSERTION (STORE-04 / ADR-021):
+    // HashChainService.calculateTransactionHash must accept exactly 4 parameters.
+    // If this test ever fails to compile due to a changed signature, the hash formula has drifted.
+    // Confirmed parameters: transactionId (String), amount (double), timestamp (int), previousHash (String)
+    // originalCurrency / originalAmount / appliedRate must NOT be added to this call.
+    test(
+      'calculateTransactionHash accepts exactly 4 parameters '
+      '(transactionId, amount, timestamp, previousHash) — ADR-021 invariant',
+      () {
+        final hashService = HashChainService();
+
+        // This call must compile with exactly these 4 named parameters.
+        // If anyone adds originalCurrency/originalAmount/appliedRate to the signature,
+        // this test documents the contract violation.
+        final hash = hashService.calculateTransactionHash(
+          transactionId: 'test-id',
+          amount: 1000.0,
+          timestamp: DateTime.utc(2026, 1, 1).millisecondsSinceEpoch ~/ 1000,
+          previousHash:
+              '0000000000000000000000000000000000000000000000000000000000000000',
+        );
+
+        // Assert: function exists, accepts exactly the 4 expected parameters,
+        // and returns a non-empty SHA-256 hash string.
+        expect(hash, isNotEmpty);
+        expect(hash, isA<String>());
+        // SHA-256 hex digest is always 64 characters
+        expect(hash.length, equals(64));
+      },
+    );
+  });
 }

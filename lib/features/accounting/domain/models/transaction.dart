@@ -27,6 +27,11 @@ abstract class Transaction with _$Transaction {
     String? merchant,
     Map<String, dynamic>? metadata,
 
+    // Foreign-currency provenance (all three null = JPY-native row per STORE-01)
+    String? originalCurrency, // ISO 4217 code, e.g. 'USD'; null = native JPY
+    int? originalAmount, // minor units (cents for USD: $12.50 → 1250); null = native JPY
+    String? appliedRate, // JPY per 1 whole unit as string (D-04 / ADR-020); null = native JPY
+
     // Hash chain
     String? prevHash,
     required String currentHash,

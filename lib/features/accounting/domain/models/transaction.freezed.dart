@@ -24,7 +24,14 @@ mixin _$Transaction {
   String? get note;
   String? get photoHash;
   String? get merchant;
-  Map<String, dynamic>? get metadata; // Hash chain
+  Map<String, dynamic>?
+  get metadata; // Foreign-currency provenance (all three null = JPY-native row per STORE-01)
+  String? get originalCurrency; // ISO 4217 code, e.g. 'USD'; null = native JPY
+  int?
+  get originalAmount; // minor units (cents for USD: $12.50 → 1250); null = native JPY
+  String?
+  get appliedRate; // JPY per 1 whole unit as string (D-04 / ADR-020); null = native JPY
+  // Hash chain
   String? get prevHash;
   String get currentHash; // Timestamps
   DateTime get createdAt;
@@ -71,6 +78,12 @@ mixin _$Transaction {
             (identical(other.merchant, merchant) ||
                 other.merchant == merchant) &&
             const DeepCollectionEquality().equals(other.metadata, metadata) &&
+            (identical(other.originalCurrency, originalCurrency) ||
+                other.originalCurrency == originalCurrency) &&
+            (identical(other.originalAmount, originalAmount) ||
+                other.originalAmount == originalAmount) &&
+            (identical(other.appliedRate, appliedRate) ||
+                other.appliedRate == appliedRate) &&
             (identical(other.prevHash, prevHash) ||
                 other.prevHash == prevHash) &&
             (identical(other.currentHash, currentHash) ||
@@ -107,6 +120,9 @@ mixin _$Transaction {
     photoHash,
     merchant,
     const DeepCollectionEquality().hash(metadata),
+    originalCurrency,
+    originalAmount,
+    appliedRate,
     prevHash,
     currentHash,
     createdAt,
@@ -120,7 +136,7 @@ mixin _$Transaction {
 
   @override
   String toString() {
-    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, metadata: $metadata, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, joyFullness: $joyFullness, entrySource: $entrySource)';
+    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, metadata: $metadata, originalCurrency: $originalCurrency, originalAmount: $originalAmount, appliedRate: $appliedRate, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, joyFullness: $joyFullness, entrySource: $entrySource)';
   }
 }
 
@@ -144,6 +160,9 @@ abstract mixin class $TransactionCopyWith<$Res> {
     String? photoHash,
     String? merchant,
     Map<String, dynamic>? metadata,
+    String? originalCurrency,
+    int? originalAmount,
+    String? appliedRate,
     String? prevHash,
     String currentHash,
     DateTime createdAt,
@@ -180,6 +199,9 @@ class _$TransactionCopyWithImpl<$Res> implements $TransactionCopyWith<$Res> {
     Object? photoHash = freezed,
     Object? merchant = freezed,
     Object? metadata = freezed,
+    Object? originalCurrency = freezed,
+    Object? originalAmount = freezed,
+    Object? appliedRate = freezed,
     Object? prevHash = freezed,
     Object? currentHash = null,
     Object? createdAt = null,
@@ -240,6 +262,18 @@ class _$TransactionCopyWithImpl<$Res> implements $TransactionCopyWith<$Res> {
             ? _self.metadata
             : metadata // ignore: cast_nullable_to_non_nullable
                   as Map<String, dynamic>?,
+        originalCurrency: freezed == originalCurrency
+            ? _self.originalCurrency
+            : originalCurrency // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        originalAmount: freezed == originalAmount
+            ? _self.originalAmount
+            : originalAmount // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        appliedRate: freezed == appliedRate
+            ? _self.appliedRate
+            : appliedRate // ignore: cast_nullable_to_non_nullable
+                  as String?,
         prevHash: freezed == prevHash
             ? _self.prevHash
             : prevHash // ignore: cast_nullable_to_non_nullable
@@ -387,6 +421,9 @@ extension TransactionPatterns on Transaction {
       String? photoHash,
       String? merchant,
       Map<String, dynamic>? metadata,
+      String? originalCurrency,
+      int? originalAmount,
+      String? appliedRate,
       String? prevHash,
       String currentHash,
       DateTime createdAt,
@@ -416,6 +453,9 @@ extension TransactionPatterns on Transaction {
           _that.photoHash,
           _that.merchant,
           _that.metadata,
+          _that.originalCurrency,
+          _that.originalAmount,
+          _that.appliedRate,
           _that.prevHash,
           _that.currentHash,
           _that.createdAt,
@@ -459,6 +499,9 @@ extension TransactionPatterns on Transaction {
       String? photoHash,
       String? merchant,
       Map<String, dynamic>? metadata,
+      String? originalCurrency,
+      int? originalAmount,
+      String? appliedRate,
       String? prevHash,
       String currentHash,
       DateTime createdAt,
@@ -487,6 +530,9 @@ extension TransactionPatterns on Transaction {
           _that.photoHash,
           _that.merchant,
           _that.metadata,
+          _that.originalCurrency,
+          _that.originalAmount,
+          _that.appliedRate,
           _that.prevHash,
           _that.currentHash,
           _that.createdAt,
@@ -529,6 +575,9 @@ extension TransactionPatterns on Transaction {
       String? photoHash,
       String? merchant,
       Map<String, dynamic>? metadata,
+      String? originalCurrency,
+      int? originalAmount,
+      String? appliedRate,
       String? prevHash,
       String currentHash,
       DateTime createdAt,
@@ -557,6 +606,9 @@ extension TransactionPatterns on Transaction {
           _that.photoHash,
           _that.merchant,
           _that.metadata,
+          _that.originalCurrency,
+          _that.originalAmount,
+          _that.appliedRate,
           _that.prevHash,
           _that.currentHash,
           _that.createdAt,
@@ -589,6 +641,9 @@ class _Transaction implements Transaction {
     this.photoHash,
     this.merchant,
     final Map<String, dynamic>? metadata,
+    this.originalCurrency,
+    this.originalAmount,
+    this.appliedRate,
     this.prevHash,
     required this.currentHash,
     required this.createdAt,
@@ -635,6 +690,16 @@ class _Transaction implements Transaction {
     return EqualUnmodifiableMapView(value);
   }
 
+  // Foreign-currency provenance (all three null = JPY-native row per STORE-01)
+  @override
+  final String? originalCurrency;
+  // ISO 4217 code, e.g. 'USD'; null = native JPY
+  @override
+  final int? originalAmount;
+  // minor units (cents for USD: $12.50 → 1250); null = native JPY
+  @override
+  final String? appliedRate;
+  // JPY per 1 whole unit as string (D-04 / ADR-020); null = native JPY
   // Hash chain
   @override
   final String? prevHash;
@@ -702,6 +767,12 @@ class _Transaction implements Transaction {
             (identical(other.merchant, merchant) ||
                 other.merchant == merchant) &&
             const DeepCollectionEquality().equals(other._metadata, _metadata) &&
+            (identical(other.originalCurrency, originalCurrency) ||
+                other.originalCurrency == originalCurrency) &&
+            (identical(other.originalAmount, originalAmount) ||
+                other.originalAmount == originalAmount) &&
+            (identical(other.appliedRate, appliedRate) ||
+                other.appliedRate == appliedRate) &&
             (identical(other.prevHash, prevHash) ||
                 other.prevHash == prevHash) &&
             (identical(other.currentHash, currentHash) ||
@@ -738,6 +809,9 @@ class _Transaction implements Transaction {
     photoHash,
     merchant,
     const DeepCollectionEquality().hash(_metadata),
+    originalCurrency,
+    originalAmount,
+    appliedRate,
     prevHash,
     currentHash,
     createdAt,
@@ -751,7 +825,7 @@ class _Transaction implements Transaction {
 
   @override
   String toString() {
-    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, metadata: $metadata, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, joyFullness: $joyFullness, entrySource: $entrySource)';
+    return 'Transaction(id: $id, bookId: $bookId, deviceId: $deviceId, amount: $amount, type: $type, categoryId: $categoryId, ledgerType: $ledgerType, timestamp: $timestamp, note: $note, photoHash: $photoHash, merchant: $merchant, metadata: $metadata, originalCurrency: $originalCurrency, originalAmount: $originalAmount, appliedRate: $appliedRate, prevHash: $prevHash, currentHash: $currentHash, createdAt: $createdAt, updatedAt: $updatedAt, isPrivate: $isPrivate, isSynced: $isSynced, isDeleted: $isDeleted, joyFullness: $joyFullness, entrySource: $entrySource)';
   }
 }
 
@@ -777,6 +851,9 @@ abstract mixin class _$TransactionCopyWith<$Res>
     String? photoHash,
     String? merchant,
     Map<String, dynamic>? metadata,
+    String? originalCurrency,
+    int? originalAmount,
+    String? appliedRate,
     String? prevHash,
     String currentHash,
     DateTime createdAt,
@@ -813,6 +890,9 @@ class __$TransactionCopyWithImpl<$Res> implements _$TransactionCopyWith<$Res> {
     Object? photoHash = freezed,
     Object? merchant = freezed,
     Object? metadata = freezed,
+    Object? originalCurrency = freezed,
+    Object? originalAmount = freezed,
+    Object? appliedRate = freezed,
     Object? prevHash = freezed,
     Object? currentHash = null,
     Object? createdAt = null,
@@ -873,6 +953,18 @@ class __$TransactionCopyWithImpl<$Res> implements _$TransactionCopyWith<$Res> {
             ? _self._metadata
             : metadata // ignore: cast_nullable_to_non_nullable
                   as Map<String, dynamic>?,
+        originalCurrency: freezed == originalCurrency
+            ? _self.originalCurrency
+            : originalCurrency // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        originalAmount: freezed == originalAmount
+            ? _self.originalAmount
+            : originalAmount // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        appliedRate: freezed == appliedRate
+            ? _self.appliedRate
+            : appliedRate // ignore: cast_nullable_to_non_nullable
+                  as String?,
         prevHash: freezed == prevHash
             ? _self.prevHash
             : prevHash // ignore: cast_nullable_to_non_nullable
