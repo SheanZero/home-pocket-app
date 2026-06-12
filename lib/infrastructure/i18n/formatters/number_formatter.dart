@@ -54,22 +54,36 @@ class NumberFormatter {
   static String _getCurrencySymbol(String currencyCode) {
     switch (currencyCode.toUpperCase()) {
       case 'JPY':
+        return '\u00a5'; // \u00a5
       case 'CNY':
-        return '\u00a5';
+        return 'CN\u00a5'; // CN\u00a5 \u2014 disambiguated from JPY (D-06)
+      case 'KRW':
+        return '\u20a9'; // \u20a9
       case 'USD':
         return r'$';
       case 'EUR':
-        return '\u20ac';
+        return '\u20ac'; // \u20ac
       case 'GBP':
-        return '\u00a3';
+        return '\u00a3'; // \u00a3
+      case 'HKD':
+        return 'HK\$'; // D-06
+      case 'AUD':
+        return 'A\$'; // D-06
+      case 'CAD':
+        return 'C\$'; // D-06
+      case 'TWD':
+        return 'NT\$'; // D-06
+      case 'SGD':
+        return 'S\$'; // D-06
       default:
-        return currencyCode;
+        return currencyCode; // ISO code prefix fallback (D-07)
     }
   }
 
   static int _getCurrencyDecimals(String currencyCode) {
     switch (currencyCode.toUpperCase()) {
       case 'JPY':
+      case 'KRW': // D-08: KRW uses 0 decimal places
         return 0;
       default:
         return 2;
