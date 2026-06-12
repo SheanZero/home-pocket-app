@@ -9,6 +9,7 @@
 - ✅ **v1.4 列表功能** — Phases 24-30 (shipped 2026-05-31) — see [archive](milestones/v1.4-ROADMAP.md)
 - ✅ **v1.5 文案与配色统一** — Phases 31-35 (shipped 2026-06-02) — see [archive](milestones/v1.5-ROADMAP.md)
 - ✅ **v1.6 购物清单** — Phases 36-39 (shipped 2026-06-12) — see [archive](milestones/v1.6-ROADMAP.md)
+- 🚧 **v1.7 多币种支持** — Phases 40-42 (in progress)
 
 ## Phases
 
@@ -63,7 +64,7 @@
 - [x] Phase 22: Voice One-Step Integration + Record Button UX (10/10 plans) — completed 2026-05-25
 - [x] Phase 23: v1.3 Cleanup — Scanner Allow-Lists + Voice Flow Polish (9/9 plans) — completed 2026-05-26
 
-**Outcome:** v1.3 transformed ledger entry into single-screen, voice-trustworthy core experience. Single shared `TransactionDetailsForm` widget powers 4 hosts (manual, voice, edit, OCR review). `ManualOneStepScreen` collapses 2-screen entry chain; SmartKeyboard 48dp non-negotiable touch-target floor with 6 golden baselines. Locale-aware zh+ja voice number parsing (state machines + `VoiceChunkMerger` 2.5s continued-listening window) at zh 96% + ja 100% corpus accuracy. `VoiceCategoryResolver` always-L2 contract with merchant DB + extensible synonym dictionary. Hold-to-record gesture with AnimatedContainer shape morph + caption swap (`<100ms` verified). 2 BLOCKER gaps (G-01/G-02) elevated and closed in Phase 22. Phase 23 cleanup absorbed carried tech-debt: scanner allow-lists, 6 voice-flow surgical fixes, 4 mechanical polish items, REQUIREMENTS.md reconciliation, 9/9 device UATs passed, `voice_input_screen.dart` slimmed 838→776 LOC via mixin + helpers extraction. Audit status `tech_debt` accepted at close — documentation-grade Nyquist debt only; all 15 v1.3 requirements satisfied and reconciled. Full details: `.planning/milestones/v1.3-ROADMAP.md` + `.planning/milestones/v1.3-MILESTONE-AUDIT.md`.
+**Outcome:** v1.3 transformed ledger entry into single-screen, voice-trustworthy core experience. Single shared `TransactionDetailsForm` widget powers 4 hosts (manual, voice, edit, OCR review). `ManualOneStepScreen` collapses 2-screen entry chain; SmartKeyboard 48dp non-negotiable touch-target floor with 6 golden baselines. Locale-aware zh+ja voice number parsing (state machines + `VoiceChunkMerger` 2.5s continued-listening window) at zh 96% + ja 100% corpus accuracy. `VoiceCategoryResolver` always-L2 contract with merchant DB + extensible synonym dictionary. Hold-to-record gesture with AnimatedContainer shape morph + caption swap (`<100ms` verified). 2 BLOCKER gaps (G-01/G-02) elevated and closed in Phase 22. Phase 23 cleanup absorbed carried tech-debt. Audit status `tech_debt` accepted at close. Full details: `.planning/milestones/v1.3-ROADMAP.md` + `.planning/milestones/v1.3-MILESTONE-AUDIT.md`.
 
 </details>
 
@@ -78,7 +79,7 @@
 - [x] Phase 29: List Screen Assembly + Family (4/4 plans) — completed 2026-05-30
 - [x] Phase 30: i18n + Empty States + Golden Polish (5/5 plans) — completed 2026-05-31
 
-**Outcome:** Built the placeholder List tab into a full transaction overview. New `lib/features/list/` module: `table_calendar` month header (per-day expense grid + month nav + day-tap filter + month summary), a sortable (date / edit-time / amount ± direction) · searchable (category·merchant·note) · filterable (ledger · multi-category · family-member, AND-composed) transaction list, family-aware shadow-book merge with per-row owner attribution + "Mine only", reactive updates + pull-to-refresh reusing the v1.3 edit / soft-delete (hash-chain-safe) path, 3-variant empty states, and ~20–25 new ARB keys × 3 locales with golden baselines. Shared `DateBoundaries` util consolidated month-boundary arithmetic. GAP-1 (calendar staleness after family-sync / FAB) closed at milestone close via quick task 260531-u34. Audit `tech_debt` accepted — 22/22 requirements, 7/7 phases, 7/7 E2E flows satisfied; residual GAP-2 dead-code + draft-Nyquist documentation debt only. Full details: `.planning/milestones/v1.4-ROADMAP.md` + `.planning/milestones/v1.4-MILESTONE-AUDIT.md`.
+**Outcome:** Built the placeholder List tab into a full transaction overview. Audit `tech_debt` accepted — 22/22 requirements, 7/7 phases, 7/7 E2E flows satisfied. Full details: `.planning/milestones/v1.4-ROADMAP.md` + `.planning/milestones/v1.4-MILESTONE-AUDIT.md`.
 
 </details>
 
@@ -91,7 +92,7 @@
 - [x] Phase 34: Golden Re-baseline & Verification (5/5 plans) — completed 2026-06-01
 - [x] Phase 35: Close Vocab Leaks — a11y Semantics labels (W1) + totalSoulTx identifiers (W2) (2/2 plans) — completed 2026-06-02
 
-**Outcome:** Brownfield consistency refactor unifying the half-migrated dual-ledger vocabulary across all 3 locales + internal code, and consolidating scattered colors into a single semantic token system. Phase 31 renamed the `LedgerType` enum (survival→daily, soul→joy) across 242 call sites, all 25 ledger-vocab ARB key roots + values to canonical 日常/悦己/ときめき/Daily/Joy, and ran the v17→v18 Drift migration (stored enum-value rewrite + `soul_satisfaction`→`joy_fullness`), recorded in ADR-017. Phase 32 mined 5 candidate palette directions → 5 Pencil schemes × 6 frames → user-selected Scheme D "Teal Clarity" (teal primary, Daily teal-navy ↔ Joy gold), recorded in ADR-018 with a full light+dark hex-per-role table. Phase 33 built the `AppPalette` ThemeExtension as the single source of truth, replaced all `Color(0x…)` literals, deleted the AppColors/AppColorsDark shims, and rolled out full dark mode (THEME-V2-02 pulled forward, D-07). Phase 34 re-baselined 50 golden masters + added 27 dark masters (77 total) to the teal palette with full suite 2281/2281 green. Phase 35 closed two residual leaks found by the milestone audit (W1 hardcoded a11y Semantics labels → l10n; W2 `totalSoulTx`→`totalJoyTx` across Freezed models + use-cases + 9 tests). Audit `tech_debt` accepted at close — 15/15 requirements, 5/5 phases, 6/6 integration seams wired; residual is one pending on-device screen-reader UAT, draft-Nyquist docs (P31/32/34/35), and the documented out-of-scope `Book.*Balance` DB-column carve-out. Full details: `.planning/milestones/v1.5-ROADMAP.md` + `.planning/milestones/v1.5-MILESTONE-AUDIT.md`.
+**Outcome:** Brownfield consistency refactor — unified 日常/悦己 vocabulary + `AppPalette` ThemeExtension (ADR-019 "Sakura Mochi × Wakaba" supersedes ADR-018). Audit `tech_debt` accepted at close — 15/15 requirements, 5/5 phases, 6/6 integration seams wired. Full details: `.planning/milestones/v1.5-ROADMAP.md` + `.planning/milestones/v1.5-MILESTONE-AUDIT.md`.
 
 </details>
 
@@ -103,9 +104,56 @@
 - [x] Phase 38: Presentation Shell + UI Widgets (8/8 plans) — completed 2026-06-08
 - [x] Phase 39: i18n + Golden Re-baseline + Smoke Test (6/6 plans) — completed 2026-06-09
 
-**Outcome:** The placeholder 4th nav tab is a complete family shopping list — public/private segmented lists (visibility immutable, D6), rich optional item metadata behind a name-only-required form reusing existing selectors, tap-to-complete with animated strikethrough + completed-to-bottom DAO ordering, chip-bar filtering with segment-switch reset (D5), swipe-delete, batch-select with select-all, clear-all-completed, 3-variant empty states, family sync for public items via the existing E2EE pipeline (attribution chips, sticky-complete, tombstone safety, reactive Drift delivery) while private items never enter the pipeline (use-case + tracker + receiver gates). ARB parity ja/zh/en, 54 golden baselines, schema v19→v20. Audit `tech_debt` accepted; W1/W2 sync warnings closed at close by quick task 260612-daz; suite 2588/2588 green. Full details: `.planning/milestones/v1.6-ROADMAP.md` + `.planning/milestones/v1.6-MILESTONE-AUDIT.md`.
+**Outcome:** The placeholder 4th nav tab is a complete family shopping list — public/private segmented lists, family sync for public items via the existing E2EE pipeline, private items never entering the pipeline (three-layer privacy enforcement). ARB parity ja/zh/en, 54 golden baselines, schema v19→v20. Audit `tech_debt` accepted; W1/W2 sync warnings closed at close by quick task 260612-daz; suite 2588/2588 green. Full details: `.planning/milestones/v1.6-ROADMAP.md` + `.planning/milestones/v1.6-MILESTONE-AUDIT.md`.
 
 </details>
+
+### 🚧 v1.7 多币种支持 (Phases 40-42)
+
+**Milestone Goal:** 记账支持外币输入——小键盘选币种、按账目日期自动取汇率转换成日元入账，原币种/原金额/汇率作为附加字段保留并在 UI 中可见。
+
+- [ ] **Phase 40: 数据与同步基础 (Data Foundation + Domain + Sync)** — ADRs (rate precision / hash scope / edit policy); CNY `¥` symbol fix; Drift v20→v21 migration (`exchange_rates` cache table + 3 nullable `transactions` columns); `ExchangeRateDao` + repository; `Transaction` Freezed extension; `TransactionSyncMapper` null-safe passthrough + round-trip tests; partial-triple domain invariant
+- [ ] **Phase 41: 汇率服务 (Exchange Rate Service)** — `ExchangeRateApiClient` (Frankfurter primary + fawazahmed0 fallback); `ExchangeRateCacheService` (cache-first, offline fallback, weekend date transparency); application use cases with sealed `RateResult`; manual override semantics; date-change re-fetch policy; never-block-save invariant; privacy verification
+- [ ] **Phase 42: 输入与展示 + 语音 (Entry UI + Display + Voice)** — SmartKeyboard currency selector + `CurrencySelectorSheet`; decimal input gate per ISO 4217 minor unit; live JPY conversion preview; foreign-currency list annotation; detail/edit full display + three-field bidirectional linked editing; zh/ja voice currency words (parallel wave inside the phase); i18n + goldens
+
+## Phase Details
+
+### Phase 40: 数据与同步基础 (Data Foundation + Domain + Sync)
+**Goal**: The complete data and domain substrate for multi-currency is live and sync-safe: three blocking ADR decisions recorded, the CNY/JPY `¥` collision fixed, Drift v20→v21 migrated (`exchange_rates` cache table + three nullable `transactions` columns), the `Transaction` Freezed model extended, and the family sync pipeline passing the new fields null-safely in both directions — unblocking all downstream work.
+**Depends on**: Phase 39 (v1.6 shipped, schema at v20)
+**Requirements**: STORE-01, STORE-02, STORE-03, STORE-04, STORE-05
+**Success Criteria** (what must be TRUE):
+  1. Drift migration runs cleanly from v20→v21: existing transactions gain three null columns without data loss, a clean install reaches v21 in one pass, and `HashChainService.verifyChain` passes on a dataset containing both pre-migration (null currency fields) and post-migration (populated currency fields) rows
+  2. Three ADRs are recorded covering: (a) `exchangeRate` stored as `TextColumn` (string, full precision), (b) new currency fields excluded from the hash formula (existing chains stay valid), (c) date-change re-fetch / edit policy with >1% JPY amount change confirmation — all before any migration code lands
+  3. CNY amounts display as `CN¥` (not `¥`) across all locales; JPY amounts continue to display `¥`; the shared JPY integer rounding utility `(originalAmount × appliedRate).round()` is the single conversion site; amount golden tests reflect the new symbol
+  4. `Transaction.originalCurrency`, `.originalAmount`, `.appliedRate` exist as nullable Freezed fields and `TransactionSyncMapper` round-trips them null-safely — verified by tests: new-to-old wire (extra keys silently ignored), old-to-new wire (absent keys → JPY row); `build_runner` clean
+  5. The partial-triple domain invariant holds: if exactly one or two of the three currency fields are non-null, `CreateTransactionParams` validation returns `Result.error` before any DB write; `ExchangeRateDao` supports exact-date and latest-for-currency queries and all new code passes `import_guard`
+**Plans**: TBD
+
+### Phase 41: 汇率服务 (Exchange Rate Service)
+**Goal**: A fully tested, offline-safe exchange rate service — dual-source fetch (Frankfurter primary, fawazahmed0 fallback), Drift-backed per-(date, currency) cache, weekend/holiday date transparency, manual override and date-change semantics enforced through application use cases — with the hard invariant that saving a transaction is never blocked on network.
+**Depends on**: Phase 40
+**Requirements**: RATE-01, RATE-02, RATE-03, RATE-04, RATE-05, RATE-06
+**Success Criteria** (what must be TRUE):
+  1. Cache behavior is correct: a second request for the same (date, currency) pair triggers zero network calls; a cache miss calls the API, persists the response to the `exchange_rates` Drift table, and returns the rate; historical rates are permanent while today's rate honors a short TTL
+  2. Offline / network-failure path: when all API calls throw, the service returns the most-recent cached rate for that currency as `RateResult.fallback` carrying the actual cached date for the staleness indicator; `GetExchangeRateUseCase` never throws to the caller
+  3. Weekend / holiday and coverage routing: when Frankfurter returns a rate for a different date than requested (e.g., Saturday request → Friday rate), the actual rate date is surfaced via `RateResult.fetched.actualDate`; a TWD request is correctly routed to fawazahmed0
+  4. Manual override and date-change semantics work per the Phase 40 ADR: a user-overridden rate is used for saving and is not clobbered by a subsequent date-change re-fetch unless the user explicitly changes the date after overriding; a date change causing >1% JPY amount difference surfaces a confirmation signal to the UI
+  5. The never-block-save invariant is enforced: `CreateTransactionUseCase` and `UpdateTransactionUseCase` contain zero HTTP calls (rate resolution is always pre-computed and passed in), and no URL constructed by `ExchangeRateApiClient` contains any string derived from user data
+**Plans**: TBD
+
+### Phase 42: 输入与展示 + 语音 (Entry UI + Display + Voice)
+**Goal**: Users can select a foreign currency on the SmartKeyboard (or speak it in zh/ja), enter a decimal amount per the currency's minor unit, watch a live JPY conversion preview, save, and see the original currency annotated in the list and fully editable in the detail/edit view with bidirectional three-field linked editing — while the JPY-only path remains completely untouched.
+**Depends on**: Phase 41 (voice work runs as a parallel wave inside the phase — independent of the keypad/display wave)
+**Requirements**: CURR-01, CURR-02, CURR-03, CURR-04, CURR-05, DISP-01, DISP-02, DISP-03, DISP-04, VOICE-CUR-01, VOICE-CUR-02, VOICE-CUR-03
+**Success Criteria** (what must be TRUE):
+  1. Tapping the currency symbol adjacent to the amount on `SmartKeyboard` opens `CurrencySelectorSheet` without leaving the entry screen; JPY is always first with common currencies re-ordered by recent use before a "more" affordance expanding the full ISO 4217 list with real-time search; the last-used foreign currency is the session default and resets to JPY on restart
+  2. When JPY is active, the entry UX is completely unchanged: no rate fetch, no preview panel, no list annotation; the dot key is enabled only for currencies with a minor unit (capped at the currency's decimals) and remains non-functional for JPY and KRW
+  3. During foreign-currency entry, a live JPY conversion preview appears below the amount and updates on every keypad tap, currency change, rate change, and date change; a loading state shows while fetching; the actual rate date / staleness label appears when it differs from the transaction date or a cached fallback rate is in use
+  4. Foreign-currency rows in the transaction list show a small secondary annotation (e.g., "USD 50.00") while JPY rows are unchanged; the detail/edit view shows original currency, original amount, and applied rate; in edit mode the three fields (original amount / rate / JPY amount) are linked — editing any one recalculates the others without circular-update loops; an integration smoke test confirms USD 50 at 148.30 → `amount=7415`, `original_currency='USD'`
+  5. zh voice "五十美元" and ja voice "50ドル" both parse to `{amount: 50, detectedCurrency: 'USD'}` with 欧元/英镑/港币/澳元/加元 and ユーロ/ポンド/香港ドル/豪ドル mapping to their ISO codes; bare 「元」 keeps its existing JPY-terminator behavior and bare 「ドル」 defaults to USD; the detected currency flows through the shared form (editable before save) and triggers the normal rate-fetch flow; voice corpus tests pass with ≥5 cases per currency per locale and all existing corpus tests unchanged
+**Plans**: TBD
+**UI hint**: yes
 
 ## Milestone Progress
 
@@ -118,4 +166,4 @@
 | v1.4 列表功能 | 24-30 | 29/29 | Complete | 2026-05-31 |
 | v1.5 文案与配色统一 | 31-35 | 24/24 | Complete | 2026-06-02 |
 | v1.6 购物清单 | 36-39 | 27/27 | Complete | 2026-06-12 |
-
+| v1.7 多币种支持 | 40-42 | 0/TBD | In progress | - |

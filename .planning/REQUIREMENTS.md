@@ -74,13 +74,35 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated by roadmapper) | | |
+| STORE-01 | Phase 40 | Pending |
+| STORE-02 | Phase 40 | Pending |
+| STORE-03 | Phase 40 | Pending |
+| STORE-04 | Phase 40 | Pending |
+| STORE-05 | Phase 40 | Pending |
+| RATE-01 | Phase 41 | Pending |
+| RATE-02 | Phase 41 | Pending |
+| RATE-03 | Phase 41 | Pending |
+| RATE-04 | Phase 41 | Pending |
+| RATE-05 | Phase 41 | Pending |
+| RATE-06 | Phase 41 | Pending |
+| CURR-01 | Phase 42 | Pending |
+| CURR-02 | Phase 42 | Pending |
+| CURR-03 | Phase 42 | Pending |
+| CURR-04 | Phase 42 | Pending |
+| CURR-05 | Phase 42 | Pending |
+| DISP-01 | Phase 42 | Pending |
+| DISP-02 | Phase 42 | Pending |
+| DISP-03 | Phase 42 | Pending |
+| DISP-04 | Phase 42 | Pending |
+| VOICE-CUR-01 | Phase 42 | Pending |
+| VOICE-CUR-02 | Phase 42 | Pending |
+| VOICE-CUR-03 | Phase 42 | Pending |
 
 **Coverage:**
 - v1.7 requirements: 21 total
-- Mapped to phases: 0
-- Unmapped: 21 ⚠️ (roadmap pending)
+- Mapped to phases: 21
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-06-12*
-*Last updated: 2026-06-12 after initial definition*
+*Last updated: 2026-06-12 — traceability revised by roadmapper (3-phase consolidation, Phases 40-42)*
