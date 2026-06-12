@@ -598,4 +598,216 @@ void main() {
       },
     );
   });
+
+  group('receiver-side listType gate + pin (W2, SYNC-02/SYNC-03, D37-04)', () {
+    test(
+      'inbound private create op is dropped; rest of batch still applies',
+      () async {
+        when(
+          () => mockShoppingItemRepository.findById(any()),
+        ).thenAnswer((_) async => null);
+        when(
+          () => mockShoppingItemRepository.upsert(any()),
+        ).thenAnswer((_) async {});
+
+        await useCase.execute([
+          {
+            'op': 'create',
+            'entityType': 'shopping_item',
+            'entityId': 'item-private-create',
+            'fromDeviceId': 'partner-device',
+            'data': {
+              'id': 'item-private-create',
+              'listType': 'private',
+              'name': 'Secret Gift',
+              'quantity': 1,
+              'isCompleted': false,
+              'createdAt': '2026-06-08T10:00:00.000Z',
+            },
+          },
+          {
+            'op': 'create',
+            'entityType': 'bill',
+            'entityId': 'tx-after-private-shopping',
+            'fromDeviceId': 'partner-device',
+            'data': {
+              'id': 'tx-after-private-shopping',
+              'amount': 4200,
+              'type': 'expense',
+              'categoryId': 'cat-1',
+              'ledgerType': 'daily',
+              'timestamp': '2026-06-08T10:00:00.000Z',
+              'createdAt': '2026-06-08T10:00:00.000Z',
+            },
+          },
+        ]);
+
+        // The private shopping op must never reach the repository
+        verifyNever(() => mockShoppingItemRepository.upsert(any()));
+        // Per-op skip, not abort — the bill op in the same batch still applies
+        final tx = await transactionDao.findById('tx-after-private-shopping');
+        expect(
+          tx,
+          isNotNull,
+          reason: 'private-op drop must be per-op skip, not batch abort',
+        );
+      },
+    );
+
+    test(
+      'inbound private update op is dropped; existing public item unchanged',
+      () async {
+        final existing = ShoppingItem(
+          id: 'item-pub-target',
+          deviceId: 'local-device',
+          listType: 'public',
+          name: 'Milk',
+          createdAt: DateTime.parse('2026-06-08T10:00:00.000Z'),
+        );
+        when(
+          () => mockShoppingItemRepository.findById('item-pub-target'),
+        ).thenAnswer((_) async => existing);
+        when(
+          () => mockShoppingItemRepository.upsert(any()),
+        ).thenAnswer((_) async {});
+
+        await useCase.execute([
+          {
+            'op': 'update',
+            'entityType': 'shopping_item',
+            'entityId': 'item-pub-target',
+            'fromDeviceId': 'partner-device',
+            'data': {
+              'id': 'item-pub-target',
+              'listType': 'private', // non-public wire value → must be dropped
+              'name': 'Hijacked Name',
+              'quantity': 1,
+              'isCompleted': false,
+              'createdAt': '2026-06-08T10:00:00.000Z',
+              'updatedAt': '2026-06-08T12:00:00.000Z', // newer than local
+            },
+          },
+        ]);
+
+        verifyNever(() => mockShoppingItemRepository.upsert(any()));
+      },
+    );
+
+    test(
+      'update op cannot flip listType — existing.listType is pinned (D37-04)',
+      () async {
+        final existing = ShoppingItem(
+          id: 'item-priv-pinned',
+          deviceId: 'local-device',
+          listType: 'private',
+          name: 'Old Name',
+          createdAt: DateTime.parse('2026-06-08T10:00:00.000Z'),
+        );
+        when(
+          () => mockShoppingItemRepository.findById('item-priv-pinned'),
+        ).thenAnswer((_) async => existing);
+        when(
+          () => mockShoppingItemRepository.upsert(any()),
+        ).thenAnswer((_) async {});
+
+        await useCase.execute([
+          {
+            'op': 'update',
+            'entityType': 'shopping_item',
+            'entityId': 'item-priv-pinned',
+            'fromDeviceId': 'partner-device',
+            'data': {
+              'id': 'item-priv-pinned',
+              'listType': 'public', // wire claims public — passes the gate
+              'name': 'New Name',
+              'quantity': 2,
+              'isCompleted': false,
+              'createdAt': '2026-06-08T10:00:00.000Z',
+              'updatedAt': '2026-06-08T12:00:00.000Z', // newer than local
+            },
+          },
+        ]);
+
+        final captured =
+            verify(() => mockShoppingItemRepository.upsert(captureAny()))
+                .captured
+                .single as ShoppingItem;
+        expect(
+          captured.listType,
+          'private',
+          reason:
+              'wire can never flip an item public↔private — '
+              'existing.listType must be pinned (D37-04, W2/SYNC-03)',
+        );
+        expect(
+          captured.name,
+          'New Name',
+          reason: 'non-listType fields must still take incoming values',
+        );
+      },
+    );
+
+    test('public create and public update still apply (regression)', () async {
+      when(
+        () => mockShoppingItemRepository.findById('item-pub-regression'),
+      ).thenAnswer((_) async => null);
+      when(
+        () => mockShoppingItemRepository.upsert(any()),
+      ).thenAnswer((_) async {});
+
+      await useCase.execute([
+        {
+          'op': 'create',
+          'entityType': 'shopping_item',
+          'entityId': 'item-pub-regression',
+          'fromDeviceId': 'partner-device',
+          'data': {
+            'id': 'item-pub-regression',
+            'listType': 'public',
+            'name': 'Butter',
+            'quantity': 1,
+            'isCompleted': false,
+            'createdAt': '2026-06-08T10:00:00.000Z',
+          },
+        },
+      ]);
+
+      final created =
+          verify(() => mockShoppingItemRepository.upsert(captureAny()))
+              .captured
+              .single as ShoppingItem;
+      expect(created.listType, 'public');
+      expect(created.name, 'Butter');
+
+      // Now an inbound public update against the (now existing) item
+      when(
+        () => mockShoppingItemRepository.findById('item-pub-regression'),
+      ).thenAnswer((_) async => created);
+
+      await useCase.execute([
+        {
+          'op': 'update',
+          'entityType': 'shopping_item',
+          'entityId': 'item-pub-regression',
+          'fromDeviceId': 'partner-device',
+          'data': {
+            'id': 'item-pub-regression',
+            'listType': 'public',
+            'name': 'Salted Butter',
+            'quantity': 2,
+            'isCompleted': false,
+            'createdAt': '2026-06-08T10:00:00.000Z',
+            'updatedAt': '2026-06-08T11:00:00.000Z',
+          },
+        },
+      ]);
+
+      final updated =
+          verify(() => mockShoppingItemRepository.upsert(captureAny()))
+              .captured
+              .single as ShoppingItem;
+      expect(updated.name, 'Salted Butter');
+      expect(updated.listType, 'public');
+    });
+  });
 }
