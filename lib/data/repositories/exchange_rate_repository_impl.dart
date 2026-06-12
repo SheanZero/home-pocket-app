@@ -17,7 +17,7 @@ class ExchangeRateRepositoryImpl implements ExchangeRateRepository {
 
   @override
   Future<ExchangeRate?> findByDate(String currency, DateTime date) async {
-    final row = await _dao.findByDate(currency, date);
+    final row = await _dao.findByDate(currency, _normalizeToUtcMidnight(date));
     if (row == null) return null;
     return _toModel(row);
   }
@@ -34,13 +34,23 @@ class ExchangeRateRepositoryImpl implements ExchangeRateRepository {
     await _dao.upsert(
       ExchangeRatesCompanion(
         currency: Value(rate.currency),
-        rateDate: Value(rate.rateDate),
+        rateDate: Value(_normalizeToUtcMidnight(rate.rateDate)),
         rate: Value(rate.rate),
         fetchedAt: Value(rate.fetchedAt),
         source: Value(rate.source),
         actualRateDate: Value(rate.actualRateDate),
       ),
     );
+  }
+
+  /// Normalizes [d] to UTC midnight — the composite-key contract documented
+  /// on the table and domain model (WR-06). Without this, a local-zone or
+  /// non-midnight DateTime produces a different epoch second than
+  /// DateTime.utc(y, m, d), causing silent cache misses on lookup and
+  /// near-duplicate rows on upsert.
+  DateTime _normalizeToUtcMidnight(DateTime d) {
+    final utc = d.toUtc();
+    return DateTime.utc(utc.year, utc.month, utc.day);
   }
 
   /// Map an [ExchangeRateRow] (Drift) to an [ExchangeRate] domain model.
