@@ -164,7 +164,24 @@ Plans:
   4. Manual override and date-change semantics work per the Phase 40 ADR: a user-overridden rate is used for saving and is not clobbered by a subsequent date-change re-fetch unless the user explicitly changes the date after overriding; a date change causing >1% JPY amount difference surfaces a confirmation signal to the UI
   5. The never-block-save invariant is enforced: `CreateTransactionUseCase` and `UpdateTransactionUseCase` contain zero HTTP calls (rate resolution is always pre-computed and passed in), and no URL constructed by `ExchangeRateApiClient` contains any string derived from user data
 
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+**Wave 1** *(parallel — no interdependencies)*
+
+- [ ] 41-01-PLAN.md — Repository interface extensions (findLatestNonManual, deleteOlderThan, findAll) + Wave 0 RED test scaffolds
+- [ ] 41-02-PLAN.md — connectivity_plus pubspec addition + iOS build verification (checkpoint)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 41-03-PLAN.md — ExchangeRateApiClient (dual-source HTTP) + RateResult sealed class
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 41-04-PLAN.md — ExchangeRateCacheService + GetExchangeRateUseCase + BackupData D-10 extension
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 41-05-PLAN.md — Riverpod provider wiring + full suite GREEN
 
 ### Phase 42: 输入与展示 + 语音 (Entry UI + Display + Voice)
 
