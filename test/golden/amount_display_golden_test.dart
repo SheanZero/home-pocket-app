@@ -75,7 +75,7 @@ void main() {
         _wrap(
           locale: const Locale('en'),
           child: const AmountDisplay(
-            amount: '123500',
+            amount: '1235.00',
             currencySymbol: r'$',
             currencyLabel: 'USD',
           ),
@@ -93,7 +93,7 @@ void main() {
           locale: const Locale('en'),
           themeMode: ThemeMode.dark,
           child: const AmountDisplay(
-            amount: '123500',
+            amount: '1235.00',
             currencySymbol: r'$',
             currencyLabel: 'USD',
           ),
@@ -110,7 +110,7 @@ void main() {
         _wrap(
           locale: const Locale('zh'),
           child: const AmountDisplay(
-            amount: '123500',
+            amount: '1235.00',
             currencySymbol: 'CN¥',
             currencyLabel: 'CNY',
           ),
@@ -128,7 +128,7 @@ void main() {
           locale: const Locale('zh'),
           themeMode: ThemeMode.dark,
           child: const AmountDisplay(
-            amount: '123500',
+            amount: '1235.00',
             currencySymbol: 'CN¥',
             currencyLabel: 'CNY',
           ),
@@ -138,6 +138,25 @@ void main() {
         find.byType(AmountDisplay),
         matchesGoldenFile('goldens/amount_display_cny_dark.png'),
       );
+    });
+
+    // WR-10 (Phase 40 review): AmountDisplay renders the raw string with
+    // comma grouping and does NO minor-unit conversion — callers must pass
+    // the major-unit display string ('1235.00', not '123500'). This pins the
+    // decimal rendering for 2-decimal currencies independent of pixels.
+    testWidgets('2-decimal currency renders grouped decimal text 1,235.00',
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          locale: const Locale('en'),
+          child: const AmountDisplay(
+            amount: '1235.00',
+            currencySymbol: r'$',
+            currencyLabel: 'USD',
+          ),
+        ),
+      );
+      expect(find.text('1,235.00'), findsOneWidget);
     });
   });
 }
