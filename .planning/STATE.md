@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: 多币种支持
 status: executing
-stopped_at: Phase 41 context gathered
-last_updated: "2026-06-12T13:23:39.491Z"
-last_activity: 2026-06-12 -- Phase 41 planning complete
+stopped_at: Completed 41-01-PLAN.md
+last_updated: "2026-06-12T15:36:18.087Z"
+last_activity: 2026-06-12 -- Phase 41 execution started
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 11
-  completed_plans: 6
+  completed_plans: 7
   percent: 33
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 41 — 汇率服务 (exchange rate service)
+**Current focus:** Phase 41 — exchange-rate-service
 
 ## Current Position
 
-Phase: 41
-Plan: Not started
+Phase: 41 (exchange-rate-service) — EXECUTING
+Plan: 2 of 5
 Status: Ready to execute
-Last activity: 2026-06-12 -- Phase 41 planning complete
+Last activity: 2026-06-12 -- Phase 41 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -127,6 +127,16 @@ No active blockers for v1.7. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-12T12:55:02.686Z
-Stopped at: Phase 41 context gathered
-Resume file: .planning/phases/41-exchange-rate-service/41-CONTEXT.md
+Last session: 2026-06-12T15:36:18.084Z
+Stopped at: Completed 41-01-PLAN.md
+Resume file: None
+
+## Performance Metrics
+
+| Phase | Plan | Duration | Notes |
+|-------|------|----------|-------|
+| Phase 41 P01 | 6min | 2 tasks | 6 files |
+
+## Decisions
+
+- [Phase ?]: 41-01: ExchangeRateRepository extended with findLatestNonManual (D-07), deleteOlderThan (D-09 TTL), findAll (D-10); TTL delete uses UtcEpochDateTimeConverter().toSql() before isSmallerThanValue (TypeConverter-aware)

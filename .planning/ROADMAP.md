@@ -168,7 +168,7 @@ Plans:
 Plans:
 **Wave 1** *(parallel — no interdependencies)*
 
-- [ ] 41-01-PLAN.md — Repository interface extensions (findLatestNonManual, deleteOlderThan, findAll) + Wave 0 RED test scaffolds
+- [x] 41-01-PLAN.md — Repository interface extensions (findLatestNonManual, deleteOlderThan, findAll) + Wave 0 RED test scaffolds
 - [ ] 41-02-PLAN.md — connectivity_plus pubspec addition + iOS build verification (checkpoint)
 
 **Wave 2** *(blocked on Wave 1 completion)*

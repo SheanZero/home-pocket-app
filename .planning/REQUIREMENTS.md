@@ -17,12 +17,12 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### 汇率 (Exchange Rate)
 
-- [ ] **RATE-01**: On foreign-currency entry, the app automatically fetches the exchange rate for the TRANSACTION DATE (historical rate, not today's) from a free no-key API (Frankfurter primary, fawazahmed0 fallback for uncovered currencies)
-- [ ] **RATE-02**: Fetched rates are cached locally per (date, currency) pair; repeat entries on the same date/currency hit the cache with zero network calls; historical rates are permanent (never revised), today's rate has a short TTL
-- [ ] **RATE-03**: When offline or the fetch fails, the app falls back to the most recent cached rate for that currency and shows the rate's actual date as a staleness indicator; saving is never blocked on network
-- [ ] **RATE-04**: User can manually override the rate on the entry/edit form; the JPY preview recalculates immediately
-- [ ] **RATE-05**: When the API returns a different date than requested (weekend/holiday — ECB publishes business days only), the actual rate date is shown inline (e.g. 「レート: 06-09 (直近の営業日)」)
-- [ ] **RATE-06**: Changing the transaction date on a foreign-currency entry re-fetches the rate for the new date and recalculates the JPY amount (manual-override rates are preserved, not clobbered)
+- [x] **RATE-01**: On foreign-currency entry, the app automatically fetches the exchange rate for the TRANSACTION DATE (historical rate, not today's) from a free no-key API (Frankfurter primary, fawazahmed0 fallback for uncovered currencies)
+- [x] **RATE-02**: Fetched rates are cached locally per (date, currency) pair; repeat entries on the same date/currency hit the cache with zero network calls; historical rates are permanent (never revised), today's rate has a short TTL
+- [x] **RATE-03**: When offline or the fetch fails, the app falls back to the most recent cached rate for that currency and shows the rate's actual date as a staleness indicator; saving is never blocked on network
+- [x] **RATE-04**: User can manually override the rate on the entry/edit form; the JPY preview recalculates immediately
+- [x] **RATE-05**: When the API returns a different date than requested (weekend/holiday — ECB publishes business days only), the actual rate date is shown inline (e.g. 「レート: 06-09 (直近の営業日)」)
+- [x] **RATE-06**: Changing the transaction date on a foreign-currency entry re-fetches the rate for the new date and recalculates the JPY amount (manual-override rates are preserved, not clobbered)
 
 ### 存储与转换 (Storage & Conversion)
 
@@ -79,12 +79,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STORE-03 | Phase 40 | Complete |
 | STORE-04 | Phase 40 | Complete |
 | STORE-05 | Phase 40 | Complete |
-| RATE-01 | Phase 41 | Pending |
-| RATE-02 | Phase 41 | Pending |
-| RATE-03 | Phase 41 | Pending |
-| RATE-04 | Phase 41 | Pending |
-| RATE-05 | Phase 41 | Pending |
-| RATE-06 | Phase 41 | Pending |
+| RATE-01 | Phase 41 | Complete |
+| RATE-02 | Phase 41 | Complete |
+| RATE-03 | Phase 41 | Complete |
+| RATE-04 | Phase 41 | Complete |
+| RATE-05 | Phase 41 | Complete |
+| RATE-06 | Phase 41 | Complete |
 | CURR-01 | Phase 42 | Pending |
 | CURR-02 | Phase 42 | Pending |
 | CURR-03 | Phase 42 | Pending |
@@ -99,6 +99,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VOICE-CUR-03 | Phase 42 | Pending |
 
 **Coverage:**
+
 - v1.7 requirements: 21 total
 - Mapped to phases: 21
 - Unmapped: 0 ✓
