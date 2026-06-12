@@ -4,8 +4,8 @@ milestone: v1.7
 milestone_name: 多币种支持
 status: executing
 stopped_at: Phase 40 context gathered
-last_updated: "2026-06-12T09:22:03.887Z"
-last_activity: 2026-06-12 -- Phase 40 planning complete
+last_updated: "2026-06-12T09:56:52.021Z"
+last_activity: 2026-06-12 -- Phase 40 execution started
 progress:
   total_phases: 3
   completed_phases: 0
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** v1.7 多币种支持 — Phase 40 ready to plan
+**Current focus:** Phase 40 — data-foundation-domain-sync
 
 ## Current Position
 
-Phase: 40 of 42 (数据与同步基础 / Data Foundation + Domain + Sync)
-Plan: — (not yet planned)
-Status: Ready to execute
-Last activity: 2026-06-12 -- Phase 40 planning complete
+Phase: 40 (data-foundation-domain-sync) — EXECUTING
+Plan: 1 of 6
+Status: Executing Phase 40
+Last activity: 2026-06-12 -- Phase 40 execution started
 
 Progress: [░░░░░░░░░░] 0%
 

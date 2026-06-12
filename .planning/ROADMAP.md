@@ -135,7 +135,7 @@
 Plans:
 **Wave 1**
 
-- [ ] 40-01-PLAN.md — Wave 0 test scaffolds (migration/DAO/conversion/sync mapper stubs, RED)
+- [x] 40-01-PLAN.md — Wave 0 test scaffolds (migration/DAO/conversion/sync mapper stubs, RED)
 - [ ] 40-02-PLAN.md — Three ADRs (ADR-020/021/022) + index update
 
 **Wave 2** *(blocked on Wave 1 completion)*
