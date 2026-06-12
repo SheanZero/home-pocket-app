@@ -210,3 +210,18 @@ hashService.calculateTransactionHash(
 
 **文档维护者:** 技术架构团队
 **下次Review:** Phase 40 实施完成后（schema_v21 架构测试通过时）
+
+---
+
+## Update 2026-06-12: original_amount 列类型修正（INTEGER，非 TEXT）
+
+> 依据本 ADR append-only 规则追加。来源：Phase 40 code review WR-09。
+
+「背景」一节将 `original_amount` 描述为 **(TEXT, nullable) — 原币金额字符串（如 "149.99"）**。该描述与实际实现不符，**以本节为准**：
+
+- **`original_amount` 的实际类型为 INTEGER (nullable)，存储 minor units**（最小货币单位整数，如 $50.00 → `5000`）。Drift 定义为 `IntColumn`（`lib/data/tables/transactions_table.dart`），v20→v21 迁移语句为 `ALTER TABLE transactions ADD COLUMN original_amount INTEGER`（`lib/data/app_database.dart`）。
+- Freezed 域模型字段为 `int? originalAmount`；sync wire 上 `originalAmount` 为 JSON int，`TransactionSyncMapper.fromSyncMap` 按 int 读取（非 int 类型的 payload 会按 CR-01 边界校验降级为 JPY-native）。
+- 三个新列中**只有 `applied_rate` 是 TEXT**（汇率字符串，见 ADR-020）；`original_currency` 为 TEXT（ISO 4217 代码），`original_amount` 为 INTEGER。
+- 任何 Phase 41/42 实施者或对端协议实现 MUST 以本节为准——按原文发送字符串金额（如 `"149.99"`）的 peer payload 不会被接受为有效 triple。
+
+本节不改变本 ADR 的核心决策（三新列排除在哈希公式外），仅修正背景描述中的列类型笔误。
