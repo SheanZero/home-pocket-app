@@ -3,8 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: 多币种支持
 status: planning
-last_updated: "2026-06-12"
-last_activity: 2026-06-12
+stopped_at: Phase 40 context gathered
+last_updated: "2026-06-12T08:33:10.081Z"
+last_activity: "2026-06-12 — Roadmap revised per user feedback: 6 phases consolidated to 3 (Phases 40-42)"
 progress:
   total_phases: 3
   completed_phases: 0
@@ -126,6 +127,6 @@ No active blockers for v1.7. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-12
-Stopped at: v1.7 roadmap revised to 3 phases (40-42) per user feedback; 21/21 requirements re-mapped; REQUIREMENTS.md traceability updated
-Resume file: None
+Last session: 2026-06-12T08:33:10.075Z
+Stopped at: Phase 40 context gathered
+Resume file: .planning/phases/40-data-foundation-domain-sync/40-CONTEXT.md
