@@ -119,46 +119,66 @@
 ## Phase Details
 
 ### Phase 40: 数据与同步基础 (Data Foundation + Domain + Sync)
+
 **Goal**: The complete data and domain substrate for multi-currency is live and sync-safe: three blocking ADR decisions recorded, the CNY/JPY `¥` collision fixed, Drift v20→v21 migrated (`exchange_rates` cache table + three nullable `transactions` columns), the `Transaction` Freezed model extended, and the family sync pipeline passing the new fields null-safely in both directions — unblocking all downstream work.
 **Depends on**: Phase 39 (v1.6 shipped, schema at v20)
 **Requirements**: STORE-01, STORE-02, STORE-03, STORE-04, STORE-05
 **Success Criteria** (what must be TRUE):
+
   1. Drift migration runs cleanly from v20→v21: existing transactions gain three null columns without data loss, a clean install reaches v21 in one pass, and `HashChainService.verifyChain` passes on a dataset containing both pre-migration (null currency fields) and post-migration (populated currency fields) rows
   2. Three ADRs are recorded covering: (a) `exchangeRate` stored as `TextColumn` (string, full precision), (b) new currency fields excluded from the hash formula (existing chains stay valid), (c) date-change re-fetch / edit policy with >1% JPY amount change confirmation — all before any migration code lands
   3. CNY amounts display as `CN¥` (not `¥`) across all locales; JPY amounts continue to display `¥`; the shared JPY integer rounding utility `(originalAmount × appliedRate).round()` is the single conversion site; amount golden tests reflect the new symbol
   4. `Transaction.originalCurrency`, `.originalAmount`, `.appliedRate` exist as nullable Freezed fields and `TransactionSyncMapper` round-trips them null-safely — verified by tests: new-to-old wire (extra keys silently ignored), old-to-new wire (absent keys → JPY row); `build_runner` clean
   5. The partial-triple domain invariant holds: if exactly one or two of the three currency fields are non-null, `CreateTransactionParams` validation returns `Result.error` before any DB write; `ExchangeRateDao` supports exact-date and latest-for-currency queries and all new code passes `import_guard`
+
 **Plans**: 6 plans
 Plans:
+**Wave 1**
+
 - [ ] 40-01-PLAN.md — Wave 0 test scaffolds (migration/DAO/conversion/sync mapper stubs, RED)
 - [ ] 40-02-PLAN.md — Three ADRs (ADR-020/021/022) + index update
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 40-03-PLAN.md — NumberFormatter disambiguation table + golden re-baseline (STORE-05)
 - [ ] 40-04-PLAN.md — Drift v20→v21 migration + ExchangeRates table + ExchangeRateDao + repository stub
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 40-05-PLAN.md — ExchangeRate domain model + repository interface + currency_conversion utility + Riverpod wiring
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 40-06-PLAN.md — Transaction Freezed extension + TransactionSyncMapper + partial-triple invariant + full test suite
 
 ### Phase 41: 汇率服务 (Exchange Rate Service)
+
 **Goal**: A fully tested, offline-safe exchange rate service — dual-source fetch (Frankfurter primary, fawazahmed0 fallback), Drift-backed per-(date, currency) cache, weekend/holiday date transparency, manual override and date-change semantics enforced through application use cases — with the hard invariant that saving a transaction is never blocked on network.
 **Depends on**: Phase 40
 **Requirements**: RATE-01, RATE-02, RATE-03, RATE-04, RATE-05, RATE-06
 **Success Criteria** (what must be TRUE):
+
   1. Cache behavior is correct: a second request for the same (date, currency) pair triggers zero network calls; a cache miss calls the API, persists the response to the `exchange_rates` Drift table, and returns the rate; historical rates are permanent while today's rate honors a short TTL
   2. Offline / network-failure path: when all API calls throw, the service returns the most-recent cached rate for that currency as `RateResult.fallback` carrying the actual cached date for the staleness indicator; `GetExchangeRateUseCase` never throws to the caller
   3. Weekend / holiday and coverage routing: when Frankfurter returns a rate for a different date than requested (e.g., Saturday request → Friday rate), the actual rate date is surfaced via `RateResult.fetched.actualDate`; a TWD request is correctly routed to fawazahmed0
   4. Manual override and date-change semantics work per the Phase 40 ADR: a user-overridden rate is used for saving and is not clobbered by a subsequent date-change re-fetch unless the user explicitly changes the date after overriding; a date change causing >1% JPY amount difference surfaces a confirmation signal to the UI
   5. The never-block-save invariant is enforced: `CreateTransactionUseCase` and `UpdateTransactionUseCase` contain zero HTTP calls (rate resolution is always pre-computed and passed in), and no URL constructed by `ExchangeRateApiClient` contains any string derived from user data
+
 **Plans**: TBD
 
 ### Phase 42: 输入与展示 + 语音 (Entry UI + Display + Voice)
+
 **Goal**: Users can select a foreign currency on the SmartKeyboard (or speak it in zh/ja), enter a decimal amount per the currency's minor unit, watch a live JPY conversion preview, save, and see the original currency annotated in the list and fully editable in the detail/edit view with bidirectional three-field linked editing — while the JPY-only path remains completely untouched.
 **Depends on**: Phase 41 (voice work runs as a parallel wave inside the phase — independent of the keypad/display wave)
 **Requirements**: CURR-01, CURR-02, CURR-03, CURR-04, CURR-05, DISP-01, DISP-02, DISP-03, DISP-04, VOICE-CUR-01, VOICE-CUR-02, VOICE-CUR-03
 **Success Criteria** (what must be TRUE):
+
   1. Tapping the currency symbol adjacent to the amount on `SmartKeyboard` opens `CurrencySelectorSheet` without leaving the entry screen; JPY is always first with common currencies re-ordered by recent use before a "more" affordance expanding the full ISO 4217 list with real-time search; the last-used foreign currency is the session default and resets to JPY on restart
   2. When JPY is active, the entry UX is completely unchanged: no rate fetch, no preview panel, no list annotation; the dot key is enabled only for currencies with a minor unit (capped at the currency's decimals) and remains non-functional for JPY and KRW
   3. During foreign-currency entry, a live JPY conversion preview appears below the amount and updates on every keypad tap, currency change, rate change, and date change; a loading state shows while fetching; the actual rate date / staleness label appears when it differs from the transaction date or a cached fallback rate is in use
   4. Foreign-currency rows in the transaction list show a small secondary annotation (e.g., "USD 50.00") while JPY rows are unchanged; the detail/edit view shows original currency, original amount, and applied rate; in edit mode the three fields (original amount / rate / JPY amount) are linked — editing any one recalculates the others without circular-update loops; an integration smoke test confirms USD 50 at 148.30 → `amount=7415`, `original_currency='USD'`
   5. zh voice "五十美元" and ja voice "50ドル" both parse to `{amount: 50, detectedCurrency: 'USD'}` with 欧元/英镑/港币/澳元/加元 and ユーロ/ポンド/香港ドル/豪ドル mapping to their ISO codes; bare 「元」 keeps its existing JPY-terminator behavior and bare 「ドル」 defaults to USD; the detected currency flows through the shared form (editable before save) and triggers the normal rate-fetch flow; voice corpus tests pass with ≥5 cases per currency per locale and all existing corpus tests unchanged
+
 **Plans**: TBD
 **UI hint**: yes
 
