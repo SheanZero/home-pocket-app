@@ -7,6 +7,7 @@ import '../../features/accounting/domain/repositories/category_repository.dart';
 import '../../features/accounting/domain/repositories/device_identity_repository.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
 import '../../infrastructure/crypto/services/hash_chain_service.dart';
+import '../../shared/utils/currency_conversion.dart';
 import '../../shared/utils/result.dart';
 import '../dual_ledger/classification_service.dart';
 import '../family_sync/sync_engine.dart';
@@ -107,15 +108,14 @@ class CreateTransactionUseCase {
       );
     }
 
-    // 1c. appliedRate validity check (D-05 per CONTEXT.md)
+    // 1c. appliedRate validity check (D-05 per CONTEXT.md / ADR-020):
+    // plain decimal literal only — scientific notation and untrimmed input
+    // are rejected. Validation is hosted in currency_conversion.dart so all
+    // appliedRate parsing stays at the single parse site.
     if (hasAllCurrencyFields) {
-      try {
-        final rate = double.parse(params.appliedRate!);
-        if (rate.isNaN || rate.isInfinite || rate <= 0) {
-          return Result.error('appliedRate must be a positive number');
-        }
-      } on FormatException {
-        return Result.error('appliedRate is not a valid number');
+      final rateError = validateAppliedRate(params.appliedRate!);
+      if (rateError != null) {
+        return Result.error(rateError);
       }
     }
 

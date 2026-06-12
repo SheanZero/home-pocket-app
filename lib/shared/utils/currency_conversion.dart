@@ -39,3 +39,25 @@ int convertToJpy({
   }
   return (originalMinorUnits / subunitToUnit * rate).round();
 }
+
+/// Plain positive decimal literal per ADR-020 D-05: digits with optional
+/// fraction — no sign, no exponent (scientific notation rejected), no
+/// whitespace (manual input must arrive pre-trimmed).
+final _plainDecimalLiteral = RegExp(r'^\d+(\.\d+)?$');
+
+/// Validates [raw] as an appliedRate literal per ADR-020 D-05.
+///
+/// Returns a human-readable error message, or null when valid.
+/// Hosted here so ALL appliedRate parsing stays in this one file
+/// (single-parse-site guarantee — do not duplicate this check inline).
+String? validateAppliedRate(String raw) {
+  if (raw != raw.trim() || !_plainDecimalLiteral.hasMatch(raw)) {
+    return 'appliedRate must be a positive number in plain decimal form '
+        '(no sign, exponent, or whitespace; ADR-020 D-05)';
+  }
+  final rate = double.parse(raw);
+  if (!rate.isFinite || rate <= 0) {
+    return 'appliedRate must be a positive number';
+  }
+  return null;
+}

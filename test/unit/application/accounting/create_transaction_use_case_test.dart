@@ -481,8 +481,8 @@ void main() {
   group('appliedRate validity (D-05)', () {
     test("all three non-null, appliedRate='NaN' → Result.error (isNaN path)",
         () async {
-      // Note: double.parse('NaN') succeeds in Dart returning double.nan,
-      // so FormatException is NOT thrown. The isNaN guard catches it.
+      // 'NaN' is not a plain decimal literal — rejected by the D-05 shape
+      // check in validateAppliedRate (currency_conversion.dart).
       final result = await useCase.execute(
         makeParams(
           originalCurrency: 'USD',
@@ -520,6 +520,62 @@ void main() {
       );
       expect(result.isError, isTrue);
       expect(result.error, contains('positive number'));
+      verifyNever(() => mockTransactionRepo.insert(any()));
+    });
+
+    test(
+        "appliedRate='1.493e2' (scientific notation) → Result.error (D-05 shape check)",
+        () async {
+      final result = await useCase.execute(
+        makeParams(
+          originalCurrency: 'USD',
+          originalAmount: 5000,
+          appliedRate: '1.493e2',
+        ),
+      );
+      expect(result.isError, isTrue);
+      expect(result.error, contains('plain decimal'));
+      verifyNever(() => mockTransactionRepo.insert(any()));
+    });
+
+    test(
+        "appliedRate=' 149.30 ' (untrimmed) → Result.error (D-05 trim requirement)",
+        () async {
+      final result = await useCase.execute(
+        makeParams(
+          originalCurrency: 'USD',
+          originalAmount: 5000,
+          appliedRate: ' 149.30 ',
+        ),
+      );
+      expect(result.isError, isTrue);
+      expect(result.error, contains('plain decimal'));
+      verifyNever(() => mockTransactionRepo.insert(any()));
+    });
+
+    test("appliedRate='abc' → Result.error (non-numeric)", () async {
+      final result = await useCase.execute(
+        makeParams(
+          originalCurrency: 'USD',
+          originalAmount: 5000,
+          appliedRate: 'abc',
+        ),
+      );
+      expect(result.isError, isTrue);
+      expect(result.error, contains('plain decimal'));
+      verifyNever(() => mockTransactionRepo.insert(any()));
+    });
+
+    test("appliedRate='' → Result.error (empty string)", () async {
+      final result = await useCase.execute(
+        makeParams(
+          originalCurrency: 'USD',
+          originalAmount: 5000,
+          appliedRate: '',
+        ),
+      );
+      expect(result.isError, isTrue);
+      expect(result.error, contains('plain decimal'));
       verifyNever(() => mockTransactionRepo.insert(any()));
     });
 
