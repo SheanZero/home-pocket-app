@@ -145,7 +145,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 40-05-PLAN.md — ExchangeRate domain model + repository interface + currency_conversion utility + Riverpod wiring
+- [x] 40-05-PLAN.md — ExchangeRate domain model + repository interface + currency_conversion utility + Riverpod wiring
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
