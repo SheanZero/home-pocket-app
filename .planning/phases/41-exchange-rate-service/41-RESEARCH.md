@@ -648,22 +648,25 @@ These are additive extensions; no existing method signatures change. Run `build_
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Connectivity_plus API surface at v7.1.1**
    - What we know: Package exists at 7.1.1; deps are clean; no intl conflict.
    - What's unclear: Exact API — `checkConnectivity()` returns `List<ConnectivityResult>` in v6+; confirm v7.1.1 maintains this shape.
    - Recommendation: Fetch via Context7 or `ctx7 docs connectivity_plus "check connectivity offline detection"` at Wave 1 start before writing the gate.
+   - **RESOLVED:** Plan 41-04 Task 1 codifies the expected behavior (`checkConnectivity()` → `List<ConnectivityResult>`); executor verifies the exact shape at Wave 1 start per the recommendation.
 
 2. **`ExchangeRateRepository.findLatestNonManual` — SQL filter approach**
    - What we know: `ExchangeRateDao.findLatest` is currently unfiltered by source.
    - What's unclear: Whether to add a new `findLatestNonManual` DAO method or add a `source` filter parameter to `findLatest`.
    - Recommendation: Add `findLatestNonManual(String currency)` as a separate method for clarity; mirrors the existing single-purpose method pattern in the DAO.
+   - **RESOLVED:** Plan 41-01 Task 1 implements `findLatestNonManual` as a separate DAO/interface/impl method per the recommendation.
 
 3. **D-03 correctable proxy — infinite re-fetch guard**
    - What we know: See Pitfall 4 above.
    - What's unclear: Exact implementation of "don't re-fetch the same row twice in a session" — need a light in-memory set or rely on `fetchedAt = today` logic.
    - Recommendation: Use `fetchedAt`-today check as the guard: a row re-fetched today has `fetchedAt >= today midnight`; skip correctable-proxy re-fetch for such rows.
+   - **RESOLVED:** Plan 41-04 Task 1 implements `_isCorrectableProxy` with the `fetchedAt.isBefore(today)` guard per the recommendation.
 
 ---
 
