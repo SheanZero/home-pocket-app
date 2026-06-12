@@ -10,9 +10,12 @@ import '../../features/shopping_list/domain/models/shopping_item.dart';
 /// is recorded here. On incrementalPush, all pending operations are flushed
 /// and pushed.
 ///
-/// In-memory only. If the app is killed before flush, pending ops are lost.
-/// This is acceptable because the 10s debounce means ops flush quickly,
-/// and fullSync on next launch will reconcile.
+/// In-memory only. The loss window is a hard kill INSIDE the 10s debounce:
+/// onAppPaused already flushes pending ops via incrementalPush, so normal
+/// backgrounding is safe. Ops lost to a hard kill are reconciled at the next
+/// FULL SYNC (pairing-time initialSync, or any future full-sync trigger),
+/// which pushes all local PUBLIC shopping items as idempotent create ops —
+/// full sync does NOT run on app launch.
 ///
 /// Privacy gate (D37-06): This tracker enforces a SECOND safety net —
 /// trackCreate and trackUpdate silently drop private items. The primary

@@ -35,6 +35,7 @@ import '../../../accounting/presentation/providers/repository_providers.dart'
     as accounting;
 import '../../../profile/presentation/providers/repository_providers.dart'
     as profile;
+import '../../../shopping_list/domain/models/shopping_item_sync_mapper.dart';
 import '../../../shopping_list/presentation/providers/repository_providers.dart'
     show shoppingItemRepositoryProvider;
 import '../../domain/repositories/group_repository.dart';
@@ -199,6 +200,16 @@ FullSyncUseCase fullSyncUseCase(Ref ref) {
         );
       }
       return operations;
+    },
+    fetchAllShoppingOps: () async {
+      // W1 / SYNC-01: full sync reconciles public shopping items too.
+      // watchByListType already filters list_type = 'public' AND is_deleted = 0
+      // at the DAO level (D37-06 primary gate); the use case re-filters
+      // defensively. Create ops are correct for reconcile: the receiver's
+      // _handleShoppingCreate is idempotent (skips existing ids).
+      final shoppingRepo = ref.read(shoppingItemRepositoryProvider);
+      final publicItems = await shoppingRepo.watchByListType('public').first;
+      return publicItems.map(ShoppingItemSyncMapper.toCreateOperation).toList();
     },
   );
 }
