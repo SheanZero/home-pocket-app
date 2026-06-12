@@ -37,12 +37,14 @@ void main() {
     expect(indexNames, contains('idx_exchange_rates_currency_date'));
   });
 
-  group('v20→v21 upgrade columns', () {
-    test('transactions table has original_currency column after v20→v21 upgrade',
-        () async {
+  // WR-07 (Phase 40 review): every test here uses AppDatabase.forTesting(),
+  // i.e. a FRESH INSTALL at schema 21 (onCreate path). The v20→v21 onUpgrade
+  // ALTER TABLE path is NOT exercised by this suite — the group name must not
+  // claim otherwise (repo convention: fresh-install schema assertions only).
+  group('v21 schema columns (fresh install)', () {
+    test('transactions table has original_currency column at v21', () async {
       final db = AppDatabase.forTesting();
       addTearDown(db.close);
-      // RED: column does not exist until Wave 1 migration lands.
       final cols = await db
           .customSelect('PRAGMA table_info(transactions)')
           .get();
@@ -50,11 +52,9 @@ void main() {
       expect(colNames, contains('original_currency'));
     });
 
-    test('transactions table has original_amount column after v20→v21 upgrade',
-        () async {
+    test('transactions table has original_amount column at v21', () async {
       final db = AppDatabase.forTesting();
       addTearDown(db.close);
-      // RED: column does not exist until Wave 1 migration lands.
       final cols = await db
           .customSelect('PRAGMA table_info(transactions)')
           .get();
@@ -62,16 +62,36 @@ void main() {
       expect(colNames, contains('original_amount'));
     });
 
-    test('transactions table has applied_rate column after v20→v21 upgrade',
-        () async {
+    test('transactions table has applied_rate column at v21', () async {
       final db = AppDatabase.forTesting();
       addTearDown(db.close);
-      // RED: column does not exist until Wave 1 migration lands.
       final cols = await db
           .customSelect('PRAGMA table_info(transactions)')
           .get();
       final colNames = cols.map((r) => r.read<String>('name')).toSet();
       expect(colNames, contains('applied_rate'));
+    });
+
+    test(
+        'applied_rate is TEXT (not REAL) and original_amount is INTEGER — '
+        'ADR-020 mandated type assertion', () async {
+      final db = AppDatabase.forTesting();
+      addTearDown(db.close);
+      final cols = await db
+          .customSelect('PRAGMA table_info(transactions)')
+          .get();
+      // ADR-020: "applied_rate 在 transactions 表中的列类型为 TEXT（不为 REAL）"
+      // — a regression to RealColumn is the exact failure mode ADR-020 exists
+      // to prevent (float precision drift in stored exchange rates).
+      final applied =
+          cols.firstWhere((r) => r.read<String>('name') == 'applied_rate');
+      expect(applied.read<String>('type'), equals('TEXT'));
+      final origAmount =
+          cols.firstWhere((r) => r.read<String>('name') == 'original_amount');
+      expect(origAmount.read<String>('type'), equals('INTEGER'));
+      final origCurrency =
+          cols.firstWhere((r) => r.read<String>('name') == 'original_currency');
+      expect(origCurrency.read<String>('type'), equals('TEXT'));
     });
   });
 
