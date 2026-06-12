@@ -1,19 +1,9 @@
-// Wave 0 RED scaffold — ExchangeRateApiClient (Phase 41).
+// GREEN tests for ExchangeRateApiClient (Phase 41, plan 41-03).
 //
 // Subject under test: lib/infrastructure/exchange_rate/exchange_rate_api_client.dart
-// (NOT YET CREATED — built in plan 41-04). This file fixes the behavioral
-// contract for RATE-01, RATE-05, and SC-5 (URL privacy) BEFORE production code
-// lands, per TDD discipline.
+// Fixes the behavioral contract for RATE-01, RATE-05, and SC-5 (URL privacy).
 //
-// Why the production import is commented out: Dart resolves imports at compile
-// time and cannot skip a `part`/`import` of a non-existent file. To keep this
-// scaffold compiling (so the test IDs register in discovery and `flutter test`
-// reports them as skipped rather than as a hard compilation failure), the import
-// of `exchange_rate_api_client.dart` stays commented until plan 41-04 creates it.
-// At that point: uncomment the import + the mock, and unfold each documented
-// `test(..., skip: ...)` into a live assertion.
-//
-// Expected ApiClient surface (RESEARCH.md Pattern 1):
+// ApiClient surface (RESEARCH.md Pattern 1):
 //   class ExchangeRateApiClient {
 //     ExchangeRateApiClient({http.Client? httpClient});
 //     Future<({String rate, DateTime? actualRateDate, String source})>
@@ -23,84 +13,204 @@
 //   - fawazahmed0 jsDelivr: GET https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{date}/v1/currencies/jpy.min.json
 //   - fawazahmed0 Cloudflare: GET https://{date}.currency-api.pages.dev/v1/currencies/jpy.min.json
 
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/infrastructure/exchange_rate/exchange_rate_api_client.dart';
 import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
 
-// import 'package:home_pocket/infrastructure/exchange_rate/exchange_rate_api_client.dart';
-
 /// Mock for the injectable http.Client (PATTERNS.md §Test: http.Response stubbing).
 class MockHttpClient extends Mock implements http.Client {}
-
-const _redScaffold = 'Wave 0 RED — ExchangeRateApiClient not yet created (plan 41-04)';
 
 void main() {
   setUpAll(() {
     registerFallbackValue(Uri.parse('https://api.frankfurter.dev/v1/'));
   });
 
+  late MockHttpClient httpClient;
+  late ExchangeRateApiClient apiClient;
+
+  setUp(() {
+    httpClient = MockHttpClient();
+    apiClient = ExchangeRateApiClient(httpClient: httpClient);
+  });
+
+  // Helper: stub the Frankfurter primary endpoint.
+  void stubFrankfurter(String dateStr, String currency, http.Response resp) {
+    when(
+      () => httpClient.get(
+        Uri.parse(
+          'https://api.frankfurter.dev/v1/$dateStr?from=JPY&to=$currency',
+        ),
+      ),
+    ).thenAnswer((_) async => resp);
+  }
+
   group('RATE-01: Frankfurter primary source', () {
     test(
       '200 response with business day → returns rate string and null actualRateDate',
-      () {
-        // GIVEN Frankfurter returns 200 for the requested business day:
-        //   body '{"amount":1.0,"base":"JPY","date":"2026-06-11","rates":{"USD":0.00623}}'
-        // WHEN apiClient.fetchRate('USD', DateTime.utc(2026, 6, 11))
-        // THEN result.rate is the inverted JPY-per-unit string (1/0.00623 ≈ 160.5)
-        //      result.actualRateDate is null (response date == requested date)
-        //      result.source == 'frankfurter'
+      () async {
+        stubFrankfurter(
+          '2026-06-11',
+          'USD',
+          http.Response(
+            '{"amount":1.0,"base":"JPY","date":"2026-06-11","rates":{"USD":0.00623}}',
+            200,
+          ),
+        );
+
+        final result = await apiClient.fetchRate('USD', DateTime.utc(2026, 6, 11));
+
+        expect(result.rate, (1.0 / 0.00623).toStringAsPrecision(7));
+        expect(result.actualRateDate, isNull);
+        expect(result.source, 'frankfurter');
       },
-      skip: _redScaffold,
     );
 
     test(
       'RATE-05: 200 with weekend (response date != requested date) → non-null actualRateDate',
-      () {
-        // GIVEN requested date is a Saturday (2026-06-13) but Frankfurter returns
-        //   body '{"amount":1.0,"base":"JPY","date":"2026-06-12","rates":{"USD":0.00623}}'
-        // WHEN apiClient.fetchRate('USD', DateTime.utc(2026, 6, 13))
-        // THEN result.actualRateDate == DateTime.utc(2026, 6, 12) (RATE-05 weekend surfacing)
+      () async {
+        // Requested Saturday 2026-06-13, Frankfurter returns Friday 2026-06-12.
+        stubFrankfurter(
+          '2026-06-13',
+          'USD',
+          http.Response(
+            '{"amount":1.0,"base":"JPY","date":"2026-06-12","rates":{"USD":0.00623}}',
+            200,
+          ),
+        );
+
+        final result = await apiClient.fetchRate('USD', DateTime.utc(2026, 6, 13));
+
+        expect(result.actualRateDate, DateTime.parse('2026-06-12'));
+        expect(result.source, 'frankfurter');
       },
-      skip: _redScaffold,
     );
   });
 
   group('RATE-01: fawazahmed0 fallback routing', () {
     test(
       'Frankfurter 404 → falls through to fawazahmed0 jsDelivr and returns rate (TWD)',
-      () {
-        // GIVEN Frankfurter returns 404 for TWD (currency not in source)
-        //   AND jsDelivr returns 200 body '{"date":"2026-06-12","jpy":{"twd":0.0304}}'
-        // WHEN apiClient.fetchRate('TWD', DateTime.utc(2026, 6, 12))
-        // THEN result.rate is the inverted JPY-per-TWD string, source == 'fawazahmed0'
-        //      (404 routes onward; it is NOT a fallback-to-cache trigger)
+      () async {
+        // Frankfurter 404 for TWD (not in source).
+        stubFrankfurter('2026-06-12', 'TWD', http.Response('Not Found', 404));
+        // jsDelivr returns the twd key.
+        when(
+          () => httpClient.get(
+            Uri.parse(
+              'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@2026-06-12/v1/currencies/jpy.min.json',
+            ),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response(
+            '{"date":"2026-06-12","jpy":{"twd":0.0304}}',
+            200,
+          ),
+        );
+
+        final result = await apiClient.fetchRate('TWD', DateTime.utc(2026, 6, 12));
+
+        expect(result.rate, (1.0 / 0.0304).toStringAsPrecision(7));
+        expect(result.actualRateDate, isNull);
+        expect(result.source, 'fawazahmed0');
       },
-      skip: _redScaffold,
     );
 
     test(
       'jsDelivr error → falls through to Cloudflare fallback and returns rate',
-      () {
-        // GIVEN Frankfurter 404, jsDelivr throws/times out,
-        //   AND Cloudflare ({date}.currency-api.pages.dev) returns 200 with twd key
-        // WHEN apiClient.fetchRate('TWD', DateTime.utc(2026, 6, 12))
-        // THEN result.rate is returned from the Cloudflare source
+      () async {
+        stubFrankfurter('2026-06-12', 'TWD', http.Response('Not Found', 404));
+        // jsDelivr times out.
+        when(
+          () => httpClient.get(
+            Uri.parse(
+              'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@2026-06-12/v1/currencies/jpy.min.json',
+            ),
+          ),
+        ).thenThrow(TimeoutException('jsDelivr slow'));
+        // Cloudflare returns the twd key.
+        when(
+          () => httpClient.get(
+            Uri.parse(
+              'https://2026-06-12.currency-api.pages.dev/v1/currencies/jpy.min.json',
+            ),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response(
+            '{"date":"2026-06-12","jpy":{"twd":0.0304}}',
+            200,
+          ),
+        );
+
+        final result = await apiClient.fetchRate('TWD', DateTime.utc(2026, 6, 12));
+
+        expect(result.rate, (1.0 / 0.0304).toStringAsPrecision(7));
+        expect(result.source, 'fawazahmed0');
       },
-      skip: _redScaffold,
+    );
+  });
+
+  group('All-sources-fail behavior', () {
+    test(
+      'every source fails → throws ExchangeRateApiException',
+      () async {
+        // All three sources return non-200 → chain exhausts.
+        when(() => httpClient.get(any())).thenAnswer(
+          (_) async => http.Response('Not Found', 404),
+        );
+
+        expect(
+          () => apiClient.fetchRate('TWD', DateTime.utc(2026, 6, 12)),
+          throwsA(isA<ExchangeRateApiException>()),
+        );
+      },
     );
   });
 
   group('SC-5: URL privacy (no user data in constructed URLs)', () {
     test(
       'constructed URLs contain only YYYY-MM-DD date and ISO currency code',
-      () {
-        // WHEN fetchRate is invoked, capture the Uri passed to httpClient.get
-        // THEN the URL contains only the YYYY-MM-DD date and the ISO 4217
-        //      currency code — no amount, no userId, no bookId, no device data.
-        //      Frankfurter: /v1/{date}?from=JPY&to={C}
-        //      fawazahmed0: @{date}/v1/currencies/jpy.min.json
+      () async {
+        final capturedUrls = <Uri>[];
+        when(() => httpClient.get(any())).thenAnswer((invocation) async {
+          capturedUrls.add(invocation.positionalArguments.first as Uri);
+          // Force the full chain so all three URL shapes are captured:
+          // Frankfurter 404 → jsDelivr 404 → Cloudflare 200.
+          final url = invocation.positionalArguments.first.toString();
+          if (url.contains('pages.dev')) {
+            return http.Response(
+              '{"date":"2026-06-12","jpy":{"twd":0.0304}}',
+              200,
+            );
+          }
+          return http.Response('Not Found', 404);
+        });
+
+        await apiClient.fetchRate('TWD', DateTime.utc(2026, 6, 12));
+
+        expect(capturedUrls, isNotEmpty);
+        final pattern = RegExp(
+          r'^https://(api\.frankfurter\.dev|cdn\.jsdelivr\.net|[0-9-]+\.currency-api\.pages\.dev)',
+        );
+        for (final uri in capturedUrls) {
+          final s = uri.toString();
+          expect(pattern.hasMatch(s), isTrue, reason: 'URL host not allowed: $s');
+          // No user-derived data leaks into the URL.
+          for (final forbidden in [
+            'userId',
+            'bookId',
+            'amount',
+            'deviceId',
+          ]) {
+            expect(
+              s.contains(forbidden),
+              isFalse,
+              reason: 'URL contains forbidden token "$forbidden": $s',
+            );
+          }
+        }
       },
-      skip: _redScaffold,
     );
   });
 }
