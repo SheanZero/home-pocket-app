@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: 购物清单
-status: completed
-stopped_at: Phase 39 context gathered
-last_updated: "2026-06-12T01:00:00.000Z"
-last_activity: "2026-06-12 - Completed quick task 260612-daz: closed v1.6 milestone-audit W1+W2 — FullSyncUseCase now pushes public shopping items (fetchAllShoppingOps callback + provider wiring, tracker comment corrected) and ApplySyncOperationsUseCase gates inbound shopping ops to listType=='public' + pins listType on update merge. analyze 0, full suite 2588/2588 green. Prior: 260610-ss7: fixed iOS startup 初始化失败 — reverted the keychain accessibility change (first_unlock_this_device → unlocked_this_device) that bricked existing installs (flutter_secure_storage 10.x filters reads by kSecAttrAccessible → existing master key unreadable → data-loss guard tripped), kept the ① re-mint guard. analyze 0, full test 2565/2565 green. On-device VERIFIED: release upgrade-install over existing app → startup OK + data persisted"
+status: Awaiting next milestone
+stopped_at: v1.6 milestone closed
+last_updated: "2026-06-12T01:33:00.058Z"
+last_activity: 2026-06-12 — Milestone v1.6 completed and archived
 progress:
   total_phases: 4
   completed_phases: 4
@@ -18,23 +18,29 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-06-07 — v1.6 购物清单 started)
+See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Milestone complete
+**Current focus:** v1.6 shipped — planning next milestone (run /gsd-new-milestone)
 
 ## Current Position
 
-Phase: 39
-Plan: Not started
-Status: Milestone complete
-Last activity: 2026-06-09 - Completed quick task 260609-t1t: shopping list title (new l10n key shoppingListScreenTitle) + public/private lock hint restyle (always-shown in add+edit, red palette.error, lock icon, right-aligned, reuses shoppingListTypeLockedHint) — analyze 0, shopping form 24/24 green, awaiting on-device confirm. Prior: 260609-pmc (+plan-02/03/04/05): shopping sort-mode UX — filter parity, long-press-anywhere drag, opaque-card drag highlight, bar-line move icons; reorder uses ONE mechanism (reorderBatch→contiguous 0..N-1 via applyOrder) fixing 多次点击失效 (p03) + 拖到顶/底落第二位 (p04); plan-05 removed the drag-handle "重新排序" Tooltip that popped on the drag long-press, switched handle to Icons.reorder (3 lines) with a bigger 56px hit area; plan-06 sorts completed items by completed_at DESC (newest-first) and locks in tap-to-un-complete (already worked) with a regression test; plan-07 hides the completed section while in reorder mode and restores it on exit — Verified on-device (approved 2026-06-09), all 7 plans green
+Phase: Milestone v1.6 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-06-12 — Milestone v1.6 completed and archived
 
-```
-v1.6 progress: [░░░░] 0% — Phase 36-39 defined, 0/4 complete
-```
+## Last Milestone Snapshot (v1.6)
 
-## Last Milestone Snapshot (v1.5)
+- **Phases:** 4 (36-39)
+- **Plans:** 27
+- **Duration:** 2026-06-07 → 2026-06-08 phase execution; quick-task hardening through 2026-06-12
+- **Commits:** 369 (vs v1.5 tag); 630 files changed; +58,316 / −3,400 LOC (range includes post-v1.5 ADR-019 palette re-value + 06-09/10 quick-task series)
+- **Audit Status at Close:** `tech_debt` — accepted (27/27 requirements, 4/4 phases verified `passed`, 6/6 seams wired, 10/10 E2E flows; integration checker executed 32/32 cross-phase tests). W1 (fullSync had no shopping reconcile despite tracker comment) + W2 (receiver trusted inbound listType) **closed at close** via quick task 260612-daz, re-verified analyze 0 + full suite 2588/2588. Residual: Phases 37/38/39 draft-Nyquist; 37-REVIEW advisories WR-02/IN-01/WR-05; 260609-ruu 待真机确认; note-plaintext-on-wire by design + accepted threat T-q260612-04 (inbound shopping delete ungated)
+- **Outcome:** Placeholder 4th nav tab → complete family shopping list in new `lib/features/shopping_list/` + `lib/application/shopping_list/`: public/private segmented lists (listType immutable, D6), name-only-required form with optional ledger/category/tags/encrypted-note/quantity/estimatedPrice reusing existing selectors, tap-to-complete + completed-to-bottom DAO ordering, chip filters with segment-switch reset (D5), swipe-delete + batch-select + clear-completed, 3-variant empty states, context-aware FAB (6 accounting invalidations intact), family sync for public items (attribution chips, sticky-complete D-03, tombstone safety, reactive readsFrom delivery) with three-layer privacy enforcement (use case + tracker + receiver), schema v19→v20, ARB parity + 54 goldens. Sort-mode UX rebuilt on single `reorderBatch`→`applyOrder` mechanism; iOS keychain-accessibility startup fix (260610-ss7)
+- **Tag:** `v1.6`
+
+## Previous Milestone Snapshot (v1.5)
 
 - **Phases:** 5 (31-35)
 - **Plans:** 24
@@ -44,18 +50,9 @@ v1.6 progress: [░░░░] 0% — Phase 36-39 defined, 0/4 complete
 - **Outcome:** Brownfield consistency refactor — unified 日常/悦己/ときめき/Daily/Joy vocabulary across zh/ja/en + internal identifiers (`LedgerType { daily, joy }` + 242 call sites, 25 ARB key roots, v17→v18 Drift migration rewriting stored enum values + `soul_satisfaction`→`joy_fullness`, ADR-017); selected ADR-018 "Teal Clarity" palette from 5 Pencil schemes; encoded it in a single `AppPalette` ThemeExtension replacing all `Color(0x…)` literals + AppColors/AppColorsDark shims with full dark-mode rollout (THEME-V2-02 pulled forward, D-07); re-baselined 77 golden masters (34 dark) to teal; Phase 35 closed audit-found W1 (a11y labels → l10n) + W2 (totalSoulTx→totalJoyTx). Suite 2281/2281 green. Schema at v18. **Note:** Schema actually advanced to v19 (category sort-order quick task 260603-ti2) and then ADR-019 "Sakura Mochi × Wakaba" palette replaced ADR-018 "Teal Clarity" (quick task 260603-lr5) — `AppPalette` tokens fully re-valued; CLAUDE.md updated with v1.6 palette section.
 - **Tag:** `v1.5`
 
-## Previous Milestone Snapshot (v1.4)
-
-- **Phases:** 7 (24-30)
-- **Plans:** 29
-- **Duration:** 2026-05-29 → 2026-05-31 (~3 days)
-- **Commits:** 283 (vs v1.3 tag); 316 files changed; +51,409 / -2,207 LOC
-- **Audit Status at Close:** `tech_debt` — accepted (22/22 requirements, 7/7 phases, 7/7 E2E flows; GAP-1 calendar-staleness closed at close via quick task 260531-u34; GAP-2 `watchByBookIds` dead-code + Phases 25/26/27/29/30 draft-Nyquist docs carried)
-- **Outcome:** Full kakeibo-style List tab in new `lib/features/list/` module — `table_calendar` month header (per-day expense totals, own-book), month nav + day-tap filter, sortable · searchable · filterable transaction list, family-aware shadow-book merge + "Mine only", pull-to-refresh, 3-variant empty states. `table_calendar ^3.2.0` (iOS build green). Schema unchanged at v17.
-- **Tag:** `v1.4`
-
 ## Previous Milestone Snapshots
 
+- **v1.4** (7 phases, 29 plans, 2026-05-29 → 2026-05-31, audit `tech_debt` accepted) — 列表功能 (kakeibo-style List tab, `table_calendar`)
 - **v1.3** (6 phases, 47 plans, 2026-05-22 → 2026-05-26, audit `tech_debt` accepted) — 迭代帐本输入 (single-screen voice-capable ledger entry)
 - **v1.2** (5 phases, 37 plans, 2026-05-19 → 2026-05-21, audit `tech_debt` accepted) — Happiness Metric Refresh
 - **v1.1** (4 phases, 40 plans, 2026-05-01 → 2026-05-05, audit `known_debt` accepted) — Happiness Metric & Display
@@ -192,6 +189,17 @@ No active blockers. Carried-forward debt (cross-milestone):
 
 ## Deferred Items
 
+### Items acknowledged and deferred at v1.6 milestone close on 2026-06-12
+
+| Category | Item | Status | Deferred At |
+|----------|------|--------|-------------|
+| nyquist_gap | Phases 37/38/39 VALIDATION.md draft + `nyquist_compliant: false`; Phase 36 validated/compliant. Documentation-grade, mirrors accepted v1.2–v1.5 pattern. Run `/gsd-validate-phase {N}` per phase to close retroactively | accept (documentation-grade) | v1.6 close |
+| review_advisory | 37-REVIEW advisories: WR-02 pushedCount telemetry accuracy (partially addressed by 260612-daz which made pushedCount include shopping ops); IN-01 `final dynamic ledgerType` in create_shopping_item_use_case.dart should be `LedgerType?`; WR-05 jsonDecode(rawTags) without local try/catch (covered by D37-05 per-op skip) | defer to v1.7+ cleanup | v1.6 close |
+| uat_pending | 260609-ruu (shopping form redesign): automated suite green, status "Implemented — 待真机确认" (on-device visual confirm pending) | human_needed | v1.6 close |
+| security_note | Shopping note plaintext on the sync wire by design (WR-06); confidentiality rests on transport E2EE. Accepted threat T-q260612-04: inbound shopping `delete` op ungated (wire carries no listType) | accept (recorded for security ledger) | v1.6 close |
+| metadata_drift | `gsd-sdk audit-open` reports 38 quick tasks as `missing` status (SUMMARY.md lack `status: complete` frontmatter — convention never adopted in this project) + Phase 39 UAT file flagged though `resolved` with 0 open scenarios. All 38 recorded Verified/Approved in the Quick Tasks Completed table above. Cosmetic, no functional gap | cosmetic, no functional gap | v1.6 close |
+| audit_w1_w2 | v1.6 audit W1 (fullSync shopping reconcile) + W2 (receiver listType gate) were **fixed at close** by quick task 260612-daz, not deferred — recorded for audit-trail completeness | resolved | v1.6 close |
+
 ### Items acknowledged and deferred at v1.5 milestone close on 2026-06-02
 
 | Category | Item | Status | Deferred At |
@@ -280,3 +288,7 @@ Last session: 2026-06-09T09:42:07.161Z
 Stopped at: Phase 39 context gathered
 
 **Next:** `/gsd-plan-phase 36` — plan Phase 36: Data Layer + Domain + Import Guard
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone

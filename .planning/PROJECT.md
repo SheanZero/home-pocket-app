@@ -8,11 +8,7 @@
 **Shipped:** v1.3 迭代帐本输入 (2026-05-26) — see `.planning/milestones/v1.3-ROADMAP.md` + `.planning/milestones/v1.3-MILESTONE-AUDIT.md`
 **Shipped:** v1.4 列表功能 (2026-05-31) — see `.planning/milestones/v1.4-ROADMAP.md` + `.planning/milestones/v1.4-MILESTONE-AUDIT.md`
 **Shipped:** v1.5 文案与配色统一 (2026-06-02) — see `.planning/milestones/v1.5-ROADMAP.md` + `.planning/milestones/v1.5-MILESTONE-AUDIT.md`
-
-**In progress:** v1.6 购物清单 (Shopping List) — started 2026-06-07. Builds the placeholder 4th nav tab (待办事项/Todo) into a full shopping-list feature: public/private lists (public family-syncs, private local-only), add-item with optional metadata + quantity + estimated price, filter, completed-to-bottom + one-click clear, edit/delete/batch-delete, FAB-contextual add entry, and 待办→购物清单 rename across zh/ja/en. See `## Current Milestone` below.
-  - Phase 36 complete (2026-06-07): data + domain + import-guard foundation — `ShoppingItems` Drift table at schema v20 (nullable `completedAt` per D-03), `ShoppingItemDao` (reactive `readsFrom:` stream, soft-delete, DONE-02 ordering), `ShoppingItemRepositoryImpl` (note encryption + JSON tags at boundary), 3 Freezed domain models + zero-Drift-import repository interface, `LedgerTypeSelector` moved to `lib/shared/widgets/`, and `import_guard.yaml` files for the new feature tree. Verified passed (5/5); suite 2340/2340 green.
-  - Phase 37 complete (2026-06-08): application use cases + sync integration — 6 shopping-list use cases (Create/Update/Delete/Toggle/Reorder/ClearCompleted) each enforcing the D37-06 private-item privacy gate at the use-case boundary, `ShoppingItemChangeTracker` (privacy gate as second safety net) + `ShoppingItemSyncMapper` (sortOrder-excluded wire), `ApplySyncOperationsUseCase` shopping branch (tombstone + sticky-complete guards, fault-isolated), `SyncOrchestrator` shopping flush+push, atomic construction-site wiring across 4 production + 4 test files. Reactive delivery (SC-5) proven via Drift `.watch()` readsFrom with NO manual `ref.invalidate`. TDD-structured (Wave 0 RED → Waves 1-4 GREEN). Code review fixed 1 BLOCKER (CR-01: remote update clobbering local `sortOrder`) + regression test. Verified passed (5/5); suite 2386/2386 green, `flutter analyze lib/` 0 new issues.
-  - Phase 38 complete (2026-06-08): presentation shell + UI widgets — the placeholder 4th nav tab is now a full shopping-list UI. Shipped across 8 plans / 5 waves: nav rename to 買い物リスト/购物清单/Shopping List + shopping-bag icon (NAV-02), keepAlive `listTypeProvider`/`shoppingFilterProvider` + transient `batchSelectModeProvider` + 6 use-case providers + client-side `filteredShoppingItemsProvider` (NAV-01..., FILT-*), `ShoppingItemTile` (animated toggle DONE-01, dual-ledger border SHOP-03, swipe-delete MGMT-01 w/ batch guard MGMT-03, attribution chip SYNC-04, drag handle), `ShoppingEmptyState` 3-variant (SHOP-04), `ShoppingFilterBar`, `ShoppingListScreen` shell (SliverReorderableList + completed-below-divider) + batch chrome (`ShoppingSelectionHeader`/`ShoppingBatchActionBar` MGMT-02), `ShoppingItemFormScreen` (all D4 fields, create/edit, validation ITEM-01/02/04), and the context-aware FAB wired into `main_shell_screen.dart` with ALL 6 post-entry `ref.invalidate` calls preserved (SC1 no accounting regression). Caught + fixed a phase-introduced i18n regression (hardcoded CJK batch-chrome counts → ARB) and code-review findings (CR-01 category-name display, WR-03 numeric validation, WR-04 a11y label); rejected CR-02 (DAO-in-presentation is the established convention across 6 features). Human-verify checkpoint approved on-device (10/10). Verified passed (5/5); suite 2445/2445 green, `flutter analyze` 0 phase-38 issues.
+**Shipped:** v1.6 购物清单 (2026-06-12) — see `.planning/milestones/v1.6-ROADMAP.md` + `.planning/milestones/v1.6-MILESTONE-AUDIT.md`
 
 **Candidate themes carried forward (post-v1.6):** combined family-calendar totals + undo-on-delete (v1.4 deferrals), MOD-005 OCR writer landing, FAMILY-V2-01/02/03 family privacy hardening, runtime theme-switching / selectable palettes (THEME-V2-01, now unblocked by the v1.5 token system), `Book.survivalBalance`/`soulBalance` DB-column rename (v1.5 out-of-scope carve-out), remaining hardcoded a11y Semantics labels (v1.5 IN-02), FUTURE-QA-01 release-readiness QA, FUTURE-DOC/TOOL cleanup, fl_chart 1.x upgrade (TOOL-V2-01), voice flow polish carry (VOICE-POLISH-V2-01..08), English voice parser (VOICE-EN-V2-01).
 
@@ -26,7 +22,38 @@ The v1.3 milestone transformed ledger entry into a single-screen, voice-trustwor
 
 The v1.4 milestone built the placeholder List tab into a full transaction overview (Japanese-kakeibo layout) in a new `lib/features/list/` module. Shipped: a `table_calendar` month header with per-day expense totals (own-book in v1.4), month navigation, tap-a-day-to-filter, and a current-month expense summary; a transaction list that is sortable (date / edit-time / amount ± direction), text-searchable (category · merchant · note), and filterable by ledger, multiple categories, and family member — all AND-composed with one-tap clear; rows that reuse the v1.3 edit path on tap and route swipe-delete through `DeleteTransactionUseCase` (soft-delete, hash-chain preserved); family-aware shadow-book merge with per-row owner attribution + "Mine only"; reactive updates + pull-to-refresh; 3-variant empty states; and full ja/zh/en ARB coverage (533 keys/locale) with golden baselines. A shared `DateBoundaries` util consolidated month-boundary arithmetic; `table_calendar ^3.2.0` was added (iOS build verified green). Audit closed at `tech_debt` — 22/22 requirements, 7/7 phases, 7/7 E2E flows; the one functional gap (GAP-1 calendar staleness after family-sync/FAB) was closed at milestone close via quick task 260531-u34; residual GAP-2 dead-code (`watchByBookIds` unused) + draft-Nyquist documentation debt accepted.
 
+The v1.6 milestone built the placeholder 4th nav tab (待办事项/Todo) into a complete family shopping list in a new `lib/features/shopping_list/` module. Shipped: public/private segmented lists (two independent lists, visibility immutable after creation — D1/D6); name-only-required add/edit form with optional ledger 日常/悦己, category, tags, encrypted note, quantity, and estimated price reusing the existing selectors (D4, ITEM-03); tap-to-complete with animated strikethrough and completed-to-bottom DAO ordering; chip-bar filtering shared across segments with reset-on-switch (D5); swipe-delete, long-press batch-select with select-all, clear-all-completed; 3-variant empty states; context-aware FAB preserving all 6 accounting post-entry invalidations (D2, NAV-01); family sync for public items through the existing E2EE pipeline (attribution chips, sticky-complete merge per D-03, tombstone safety, reactive Drift `readsFrom:` delivery — the v1.4 GAP-2 lesson applied), with private items excluded by gates at the use-case boundary, the change tracker, and (since quick task 260612-daz) the receiving end. Drift schema v19→v20; ARB parity ja/zh/en; 54 golden baselines; a 2026-06-09/10 quick-task series hardened sort-mode UX (single-mechanism `reorderBatch`→`applyOrder`), redesigned the form, and fixed an iOS startup keychain-accessibility brick. Audit closed at `tech_debt` — 27/27 requirements, 4/4 phases, 6/6 seams, 10/10 E2E flows; audit warnings W1 (fullSync shopping reconcile) + W2 (receiver listType trust) were closed at milestone close (260612-daz); residual is draft-Nyquist docs (P37/38/39), three 37-REVIEW advisories, and one pending on-device confirm (260609-ruu). Suite 2588/2588 green.
+
 The v1.5 milestone was a brownfield consistency refactor — no new user features. It unified the half-migrated dual-ledger vocabulary across all three locales **and** internal code identifiers (`LedgerType { daily, joy }` enum + 242 call sites, 25 ARB key roots + values to 日常/悦己/ときめき/Daily/Joy, v17→v18 Drift migration rewriting stored enum values + `soul_satisfaction`→`joy_fullness`, ADR-017), then explored 5 palette directions → user-selected ADR-018 "Teal Clarity" → encoded it in a single `AppPalette` ThemeExtension that replaced every `Color(0x…)` literal and the AppColors/AppColorsDark shims, with full dark-mode rollout (THEME-V2-02 pulled forward, D-07). Goldens were re-baselined to teal (77 masters, 34 dark; suite 2281/2281 green). A follow-up Phase 35 closed two residual leaks found by the milestone audit (W1 hardcoded a11y Semantics labels → l10n; W2 `totalSoulTx`→`totalJoyTx`). Audit closed at `tech_debt` — 15/15 requirements, 5/5 phases, 6/6 integration seams wired; residual is one pending on-device screen-reader UAT, draft-Nyquist docs (P31/32/34/35), and the documented out-of-scope `Book.*Balance` DB-column carve-out.
+
+<details>
+<summary>v1.6 购物清单 (archived)</summary>
+
+**Started:** 2026-06-07
+**Shipped:** 2026-06-12 (phases executed 2026-06-07→08; quick-task hardening through 06-12)
+**Phase numbering:** Phases 36-39
+**Trigger:** The 4th nav tab was still the placeholder `Center(Text(todoTab))`; owner wanted a family shopping list with privacy separation before any v1 release.
+
+**Goal:** Build the placeholder 4th nav tab into a complete shopping-list feature with public/private separation, rich add-item metadata, filtering, and batch management.
+
+**Delivered:**
+- **Data + domain foundation (Phase 36):** `shopping_items` Drift table (schema v19→v20, nullable `completedAt` per D-03, explicit `CREATE INDEX` after CR-01 exposed `customIndices` as a no-op), reactive `ShoppingItemDao`, `ShoppingItemRepositoryImpl` (note encryption + JSON tags at boundary), 3 Freezed models + zero-Drift repository interface, `LedgerTypeSelector` → `lib/shared/widgets/`, full `import_guard.yaml` coverage.
+- **Use cases + sync (Phase 37):** 6 privacy-gated use cases; `ShoppingItemChangeTracker` (second privacy gate) + `ShoppingItemSyncMapper`; `ApplySyncOperationsUseCase` shopping branch (tombstone + sticky-complete); `SyncOrchestrator` flush; reactive round-trip integration test, no `ref.invalidate`.
+- **UI shell (Phase 38):** nav rename + shopping-bag icon, keepAlive provider graph, `ShoppingItemTile`/`ShoppingFilterBar`/`ShoppingEmptyState` (3 variants)/batch chrome/`ShoppingItemFormScreen`, context-aware FAB with all 6 accounting invalidations intact (SC1 gate).
+- **i18n + goldens + smoke (Phase 39):** ARB parity, zero stale 待办/Todo, 54 golden baselines (user-approved), provider smoke test, 77.3% shopping coverage.
+- **Post-phase hardening (quick tasks 260609-*/260610-ss7/260612-daz):** group filter + private chip, tile/reorder UX (`reorderBatch`→`applyOrder`), form redesign, AppBar title, iOS keychain-accessibility startup fix, and audit W1/W2 closure (fullSync shopping push + receiver listType gate).
+
+**Out of v1.6 scope (carried forward):** running subtotal (SUBTOTAL-01), name autocomplete, category grouping, tag filter, duplicate detection, collapsible completed section, voice-add, APNS push for family additions, price history — see v2 requirements in `.planning/milestones/v1.6-REQUIREMENTS.md`.
+
+**Known close debt** (documented in `.planning/milestones/v1.6-MILESTONE-AUDIT.md`):
+- Draft-Nyquist docs: Phases 37/38/39 `nyquist_compliant: false`; Phase 36 validated/compliant
+- 37-REVIEW advisories WR-02 (pushedCount telemetry; partially addressed by 260612-daz) / IN-01 (`dynamic ledgerType`) / WR-05 (jsonDecode without local try/catch)
+- 260609-ruu form redesign pending on-device visual confirm
+- Shopping note plaintext on sync wire by design (transport E2EE); accepted threat T-q260612-04 (inbound shopping delete op ungated — wire carries no listType)
+
+**Archive:** `.planning/milestones/v1.6-ROADMAP.md`, `.planning/milestones/v1.6-REQUIREMENTS.md`, `.planning/milestones/v1.6-MILESTONE-AUDIT.md`, `.planning/milestones/v1.6-phases/`
+
+</details>
 
 <details>
 <summary>v1.5 文案与配色统一 (archived)</summary>
@@ -193,30 +220,9 @@ A focused, audit-driven refactor of the Home Pocket (まもる家計簿) Flutter
 
 </details>
 
-## Current Milestone: v1.6 购物清单 (Shopping List)
-
-**Goal:** Build the placeholder 4th nav tab (待办事项/Todo) into a complete shopping-list feature with public/private separation, rich add-item metadata, filtering, and batch management.
-
-**Target features:**
-- **Public/Private lists** — top segmented control switches between two independent lists「公共 / 私人」; the public list syncs through the existing `family_sync` pipeline once the user joins a family, the private list never syncs.
-- **Add shopping item** — required: item name; optional: 日常/悦己 (ledger), category, tags, note, **quantity**, **estimated price**.
-- **Filter** — filter items by visibility / ledger / category / tags.
-- **Completed handling** — completed items sort to the bottom; one-tap "clear all completed".
-- **Management** — edit, delete, and batch-delete items.
-- **Add entry point** — on the shopping-list tab the bottom-right + button (current FAB) is context-aware: it opens "add shopping item" and routes to the new-item screen; on other tabs it stays the transaction-entry FAB.
-- **Rename** — 待办/Todo → 购物清单 (zh) / 買い物リスト (ja) / Shopping List (en) across all UI and the nav-tab icon.
-
-**Locked decisions (from /gsd-new-milestone questioning, 2026-06-07):**
-- **D1 — list structure:** top segmented「公共/私人」, two independent lists (not a per-item visibility flag).
-- **D2 — add entry:** context-aware FAB (bottom-right +); on the shopping tab it = "add shopping item".
-- **D3 — completion:** pure list, **no transaction linkage** — completing an item only checks it off; it does not create an accounting entry.
-- **D4 — extra fields:** add both **quantity** and **estimated price** (alongside the user-requested name/ledger/category/tags/note).
-
-**Key context:** Current state is the placeholder `Center(Text(todoTab))` at `main_shell_screen.dart:124` plus the 4th tab in `home_bottom_nav_bar.dart`. New `lib/features/shopping_list/` module (thin-feature rule); new Drift table + DAO + repository impl in `lib/data/` (schema v19→v20); the public list reuses the existing family_sync pipeline; category/tags reuse the existing category tree. Phase numbering continues from v1.5 (starts at Phase 36). `.planning/codebase/` is five milestones stale — refresh before deep planning.
-
 ## What This Is
 
-Home Pocket (まもる家計簿) is a local-first, privacy-focused family accounting app with a dual-ledger system — the 日常 (Daily) ledger for everyday spending and the 悦己 (Joy / ときめき) ledger for self-investment. Zero-knowledge architecture with 4-layer encryption, P2P family sync, and offline-first design. Target: iOS 14+ / Android 7+ (API 24+). After five milestones, the app ships a single-screen voice-capable ledger entry flow, a calculable Joy metric (`Σ joy_contribution` cumulative semantics) with user-configurable monthly targets, custom analytics time windows, per-category + Daily-vs-Joy comparison surfaces, an audit lens (manual-only Joy variant), a full kakeibo-style transaction list (month calendar with per-day expense totals + tap-to-filter, sortable/searchable/filterable rows, month summary, family-aware display), and — as of v1.5 — a unified 日常/悦己/ときめき/Daily/Joy vocabulary across all three locales plus a single semantic design-token system (`AppPalette`, ADR-018 "Teal Clarity") with full light/dark theming.
+Home Pocket (まもる家計簿) is a local-first, privacy-focused family accounting app with a dual-ledger system — the 日常 (Daily) ledger for everyday spending and the 悦己 (Joy / ときめき) ledger for self-investment. Zero-knowledge architecture with 4-layer encryption, P2P family sync, and offline-first design. Target: iOS 14+ / Android 7+ (API 24+). After six milestones, the app ships a single-screen voice-capable ledger entry flow, a calculable Joy metric (`Σ joy_contribution` cumulative semantics) with user-configurable monthly targets, custom analytics time windows, per-category + Daily-vs-Joy comparison surfaces, an audit lens (manual-only Joy variant), a full kakeibo-style transaction list (month calendar with per-day expense totals + tap-to-filter, sortable/searchable/filterable rows, month summary, family-aware display), a unified 日常/悦己/ときめき/Daily/Joy vocabulary across all three locales plus a single semantic design-token system (`AppPalette` — re-valued post-v1.5 to ADR-019 "Sakura Mochi × Wakaba", superseding ADR-018) with full light/dark theming, and — as of v1.6 — a complete family shopping list on the 4th nav tab (public/private separation, family sync for public items with private items never entering the pipeline, rich item metadata, filtering, batch management).
 
 ## Core Value
 
@@ -330,16 +336,29 @@ A family accounting app users can trust with sensitive financial data — local-
 - ✓ **THEME-V2-02** Full dark-mode rollout pulled forward (D-07) — every feature surface resolves dark via `context.palette.*`; zero `isDark` ternaries in `lib/features/` — v1.5 Phase 33
 - ✓ **v1.5 audit W1/W2 closure** (Phase 35) — W1: hardcoded 'Survival ledger'/'Soul ledger' a11y Semantics labels → `l10n.listLedgerDaily`/`listLedgerJoy`; W2: `totalSoulTx`/`totalGroupSoulTx` → `totalJoyTx`/`totalGroupJoyTx` across Freezed models + use-cases + 9 tests
 
+**Shipped in v1.6 (购物清单 / Shopping List):**
+
+- ✓ **SHOP-01..04** Public/private segmented lists, item tiles (name + secondary metadata), dual-ledger accent border, 3-variant empty states — v1.6 Phases 36/38
+- ✓ **DONE-01..03** Tap-to-complete with animated strikethrough, completed-to-bottom via DAO ordering, clear-all-completed with confirmation — v1.6 Phases 36-38
+- ✓ **ITEM-01..05** Name-only-required add/edit form with optional ledger/category/tags/note/quantity/estimated price, reusing existing selectors; estimatedPrice integer + note encrypted at repository boundary — v1.6 Phases 36-38
+- ✓ **FILT-01..03** Ledger/category/status chip filtering, shared across segments with reset-on-switch (D5), one-tap clear — v1.6 Phase 38
+- ✓ **MGMT-01..03** Swipe-delete with confirmation, long-press batch-select with select-all + batch-delete, swipe disabled in batch mode — v1.6 Phases 37/38
+- ✓ **SYNC-01..06** Public items sync via existing E2EE family_sync (attribution chips, sticky-complete D-03, tombstone safety, reactive Drift delivery); private items excluded at use-case + tracker + receiver gates; listType immutable (D6) — v1.6 Phases 37/38 + quick task 260612-daz (receiver gate + fullSync reconcile)
+- ✓ **NAV-01..03** Context-aware FAB (accounting invalidations intact), 待办→购物清单/買い物リスト/Shopping List rename + shopping-bag icon, ARB parity ja/zh/en — v1.6 Phases 38/39
+- ✓ Drift schema v19→v20 (`shopping_items` table, explicit index creation); 54 shopping golden baselines; sort-mode UX (`reorderBatch`→`applyOrder` single mechanism) via quick-task series — v1.6
+
 ### Active
 
-<!-- v1.6 购物清单 in progress (started 2026-06-07). Requirements defined in .planning/REQUIREMENTS.md; see ## Current Milestone above. -->
+<!-- Next milestone not yet defined. Run /gsd-new-milestone to define requirements. -->
 
-**v1.6 购物清单 (Shopping List)** — requirements live in `.planning/REQUIREMENTS.md`, mapped to phases in `.planning/ROADMAP.md`. Scope: public/private shopping lists, add-item with metadata + quantity + estimated price, filter, completed-to-bottom + one-click clear, edit/delete/batch-delete, context-aware FAB add entry, 待办→购物清单 rename. No transaction linkage (D3). Phase numbering from Phase 36.
+(None — v1.6 shipped 2026-06-12; next milestone requirements not yet defined. Candidate themes listed under Current State.)
 
 ### Out of Scope
 
 <!-- Explicit boundaries carried forward. -->
 
+- **Shopping-list completion → transaction linkage** — locked out by v1.6 D3; completing an item only checks it off (record expenses via the normal FAB)
+- **Shopping v2 backlog** — running subtotal, name autocomplete, category grouping, tag filter, duplicate detection, collapsible completed section, voice-add, APNS push for family additions, price history (see `.planning/milestones/v1.6-REQUIREMENTS.md` v2 section)
 - **Combined family-calendar per-day totals** — v1.4 calendar is own-book only; combining members' per-day totals deferred to v1.5+ (seam reserved in `calendarDailyTotalsProvider`)
 - **Undo-on-delete SnackBar** — v1.4 swipe-delete is confirm-only soft-delete; undo needs a `RestoreTransactionUseCase` (deferred)
 - **Month settlement / month-lock (结账锁月), income tracking, amount-range filter, "New" badge** — explicit v1.4 list-feature exclusions; candidates for a later milestone
@@ -371,7 +390,8 @@ A family accounting app users can trust with sensitive financial data — local-
 
 ## Context
 
-- **Current state (post-v1.5):** v1.0 shipped 2026-04-29; v1.1 2026-05-05; v1.2 2026-05-21; v1.3 2026-05-26; v1.4 2026-05-31; **v1.5 文案与配色统一 shipped 2026-06-02** (~2 days, 155 commits vs v1.4, 550 files changed, +43,552/-4,650 LOC). Brownfield consistency refactor: unified 日常/悦己/ときめき/Daily/Joy vocabulary across zh/ja/en + internal identifiers (`LedgerType { daily, joy }`, `joyFullness`), v17→v18 Drift migration (stored enum-value rewrite + `soul_satisfaction`→`joy_fullness`), `AppPalette` ThemeExtension (ADR-018 "Teal Clarity") replacing all `Color(0x…)` literals + AppColors/AppColorsDark shims, full dark-mode rollout, 77 golden masters re-baselined to teal. Suite 2281/2281 green. ADR-017 + ADR-018 accepted.
+- **Current state (post-v1.6):** **v1.6 购物清单 shipped 2026-06-12** (369 commits vs v1.5, 630 files, +58,316/−3,400 LOC — includes the post-v1.5 ADR-019 palette re-value and the 06-09/10 shopping-UX + startup-fix quick-task series). New `lib/features/shopping_list/` module + `lib/application/shopping_list/` use cases; Drift schema v20; `AppPalette` now encodes ADR-019 "Sakura Mochi × Wakaba" (supersedes ADR-018 Teal Clarity); suite 2588/2588 green; analyze 0. Audit `tech_debt` accepted; W1/W2 sync warnings closed at close (260612-daz).
+- **Prior state (post-v1.5):** v1.0 shipped 2026-04-29; v1.1 2026-05-05; v1.2 2026-05-21; v1.3 2026-05-26; v1.4 2026-05-31; **v1.5 文案与配色统一 shipped 2026-06-02** (~2 days, 155 commits vs v1.4, 550 files changed, +43,552/-4,650 LOC). Brownfield consistency refactor: unified 日常/悦己/ときめき/Daily/Joy vocabulary across zh/ja/en + internal identifiers (`LedgerType { daily, joy }`, `joyFullness`), v17→v18 Drift migration (stored enum-value rewrite + `soul_satisfaction`→`joy_fullness`), `AppPalette` ThemeExtension (ADR-018 "Teal Clarity") replacing all `Color(0x…)` literals + AppColors/AppColorsDark shims, full dark-mode rollout, 77 golden masters re-baselined to teal. Suite 2281/2281 green. ADR-017 + ADR-018 accepted.
 - **Prior state (post-v1.4):** v1.4 列表功能 shipped 2026-05-31 (~3 days, 283 commits, 316 files, +51,409/-2,207 LOC). New `lib/features/list/` kakeibo-style List tab; `table_calendar ^3.2.0`; schema v17.
 - **Codebase map:** `.planning/codebase/` was last refreshed 2026-04-25 (`/gsd-map-codebase`). Contents: ARCHITECTURE.md, STACK.md, STRUCTURE.md, CONVENTIONS.md, INTEGRATIONS.md, TESTING.md, CONCERNS.md. **Stale — five milestones of drift** (notably the v1.5 vocabulary/palette rename and schema v18). Refresh via `/gsd:map-codebase` before next milestone planning.
 - **Tech stack:** Flutter, Riverpod 3.x (`@riverpod` code-gen, generator 4.x), Freezed, Drift + SQLCipher (schema v20 post-Phase-36), GoRouter, flutter_localizations (intl 0.20.2 pinned), Mocktail. Theme layer: single `AppPalette` ThemeExtension (`lib/core/theme/app_palette.dart`) encoding ADR-018; accessed via `context.palette.*`.
@@ -450,6 +470,14 @@ A family accounting app users can trust with sensitive financial data — local-
 | Full dark-mode rollout pulled forward into Phase 33 (D-07, absorbs THEME-V2-02) | Dark mode is cheapest to land while every surface is already being re-tokenized | ✓ Good — every feature surface resolves dark via tokens; THEME-V2-02 no longer a v2 item (v1.5) |
 | Phase 34 dedicated to golden re-baseline (isolated from token migration) | Keep visual verification clearly attributable to the palette change; diff-attribution catches unintended deltas | ✓ Good — 77 masters re-based, palette-only delta confirmed, suite 2281/2281 (v1.5) |
 | Phase 35 inserted to close audit-found W1/W2 leaks (vs accept as debt) | W1 (a11y labels) is genuinely user-facing via screen readers; W2 is milestone-goal-adjacent internal identifiers — cheap to close cleanly | ✓ Good — both re-verified at re-audit (grep exit 1); audit returned tech_debt with W1/W2 closed (v1.5) |
+| 4-phase consolidated roadmap for v1.6 (vs initial 7) | User-directed consolidation: data+domain+guard / use-cases+sync / shell+widgets / i18n+goldens+smoke | ✓ Good — 27 plans across 4 phases executed in ~2 days with wave parallelism (v1.6) |
+| D1 segmented public/private lists (not per-item flag) + D6 visibility immutable after creation | Two independent lists are simpler to reason about; immutability eliminates the public→private sync-tombstone edge case | ✓ Good — D37-04 invariant enforced at use case + (post-260612-daz) receiver merge (v1.6) |
+| D3 pure list — no transaction linkage on completion | Keeps the shopping list honest; expenses recorded via the normal entry flow | ✓ Good — zero accounting coupling; SC1 regression gate confirmed FAB invalidations intact (v1.6) |
+| D-03 `completedAt` column + sticky-complete merge (supersedes D7 LWW) | Concurrent family edits must not un-complete an item a member just checked off | ✓ Good — tombstone + sticky-complete guards tested in round-trip integration (v1.6) |
+| Reactive Drift `readsFrom:` stream mandated from Phase 36 (v1.4 GAP-2 lesson) | v1.4 shipped a dead stream + manual invalidate; v1.6 required reactivity proven by test with NO ref.invalidate | ✓ Good — SC-5/SC4 reactive tests green at repository AND provider layers (v1.6) |
+| Privacy enforced at THREE layers (use case → tracker → receiver) | Defense in depth for the privacy-critical SYNC-02; receiver gate added when audit W2 showed sender-only enforcement | ✓ Good — dual sender gates (Phase 37) + receiver gate/pin (260612-daz); integration-tested (v1.6) |
+| Close audit W1/W2 inline at milestone close (vs defer to v1.7) | Same pattern as v1.4 GAP-1 / v1.5 Phase 35: precisely-diagnosed, cheap to close now, privacy-relevant | ✓ Good — quick task 260612-daz, TDD, suite 2588/2588 green (v1.6) |
+| `customIndices` getter is decorative — explicit CREATE INDEX in onCreate+onUpgrade (CR-01) | Drift does not consume a `customIndices` getter; declared indices were silently never created | ✓ Good — real-Drift sqlite_master assertion test locks the contract (v1.6) |
 
 ## Evolution
 
@@ -469,7 +497,9 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-08 — Phase 38 (presentation shell + UI widgets) complete: shopping-list UI fully wired into the nav shell — tile, form, filter bar, empty states, batch-select, context-aware FAB (SC1 no accounting regression); suite 2445/2445 green, human-verify approved. Phase 37 (application use cases + sync integration) complete: 6 privacy-gated shopping-list use cases + reactive family-sync wiring. Phase 36 (data + domain + import guard) complete. Milestone v1.6 购物清单 (Shopping List). Builds the placeholder 4th nav tab into a full shopping-list feature: public/private lists (public family-syncs, private local-only), add-item with optional ledger/category/tags/note + quantity + estimated price, filter, completed-to-bottom + one-click clear, edit/delete/batch-delete, context-aware FAB add entry, and 待办→购物清单 rename across zh/ja/en. Locked decisions: D1 segmented public/private lists, D2 context-aware FAB, D3 no transaction linkage, D4 quantity + estimated price both added. Phase numbering continues from Phase 36.*
+*Last updated: 2026-06-12 after v1.6 购物清单 milestone — shipped + archived (4 phases, 27 plans, tag `v1.6`). The placeholder 4th nav tab is a complete family shopping list: public/private segmented lists (D1/D6), rich optional item metadata (D4), filtering with segment-switch reset (D5), batch management, family sync for public items via the existing E2EE pipeline with three-layer privacy enforcement, schema v19→v20, ARB parity + 54 goldens. Audit `tech_debt` accepted (27/27 requirements, 4/4 phases, 6/6 seams, 10/10 flows); W1/W2 sync warnings closed at close via quick task 260612-daz; suite 2588/2588 green.*
+
+*Prior: Last updated: 2026-06-08 — Phase 38 (presentation shell + UI widgets) complete: shopping-list UI fully wired into the nav shell — tile, form, filter bar, empty states, batch-select, context-aware FAB (SC1 no accounting regression); suite 2445/2445 green, human-verify approved. Phase 37 (application use cases + sync integration) complete: 6 privacy-gated shopping-list use cases + reactive family-sync wiring. Phase 36 (data + domain + import guard) complete. Milestone v1.6 购物清单 (Shopping List). Builds the placeholder 4th nav tab into a full shopping-list feature: public/private lists (public family-syncs, private local-only), add-item with optional ledger/category/tags/note + quantity + estimated price, filter, completed-to-bottom + one-click clear, edit/delete/batch-delete, context-aware FAB add entry, and 待办→购物清单 rename across zh/ja/en. Locked decisions: D1 segmented public/private lists, D2 context-aware FAB, D3 no transaction linkage, D4 quantity + estimated price both added. Phase numbering continues from Phase 36.*
 
 *Prior: 2026-06-02 after v1.5 文案与配色统一 milestone — shipped + archived (5 phases, 24 plans, tag `v1.5`). Brownfield consistency refactor: unified 日常/悦己/ときめき/Daily/Joy vocabulary across zh/ja/en + internal identifiers (`LedgerType { daily, joy }`, v17→v18 migration), and consolidated all hardcoded colors into a single `AppPalette` ThemeExtension (ADR-018 "Teal Clarity") with full dark-mode rollout. Audit `tech_debt` accepted (15/15 requirements, 5/5 phases, 6/6 integration seams); residual is one pending on-device screen-reader UAT, draft-Nyquist docs (P31/32/34/35), and the out-of-scope `Book.*Balance` DB-column carve-out. ADR-017 + ADR-018 accepted.*
 

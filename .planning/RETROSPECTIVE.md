@@ -251,6 +251,52 @@
 
 ---
 
+## Milestone: v1.6 — 购物清单 (Shopping List)
+
+**Shipped:** 2026-06-12
+**Phases:** 4 (36-39) | **Plans:** 27 | **Duration:** phases ~2 days (2026-06-07 → 2026-06-08), quick-task hardening through 2026-06-12 | **Commits:** 369 (vs v1.5 tag) | **Diff:** 630 files, +58,316 / −3,400 LOC (includes post-v1.5 ADR-019 palette re-value)
+
+### What Was Built
+- **Data + domain foundation** (Phase 36): `shopping_items` table at schema v20 (nullable `completedAt` per D-03), reactive DAO, repository with note-encryption boundary, Freezed models + zero-Drift interface, import-guard coverage, `LedgerTypeSelector` → shared. CR-01: declared `customIndices` were never created by Drift → explicit `CREATE INDEX` in onCreate+onUpgrade + real-Drift `sqlite_master` assertion.
+- **Use cases + sync** (Phase 37): 6 privacy-gated use cases; tracker + mapper; `ApplySyncOperationsUseCase` shopping branch (tombstone + sticky-complete); orchestrator flush; reactive round-trip integration test with no `ref.invalidate`.
+- **UI shell** (Phase 38): full shopping UI (tile, filter bar, empty states, batch chrome, form), nav rename + icon, context-aware FAB with the SC1 accounting-regression gate (all 6 invalidations preserved).
+- **i18n + goldens + smoke** (Phase 39): ARB parity, 54 golden baselines (user-approved), provider-layer reactive smoke test, 77.3% shopping coverage.
+- **Post-phase hardening** (quick tasks): sort-mode UX rebuilt on a single `reorderBatch`→`applyOrder` mechanism after two on-device reorder bugs; form redesign; iOS keychain-accessibility startup fix (260610-ss7); audit W1/W2 closure (260612-daz: fullSync shopping push + receiver listType gate).
+
+### What Worked
+- **The v1.4 GAP-2 lesson was applied structurally, not aspirationally**: reactive `readsFrom:` delivery was a Phase 36 success criterion and was proven by tests at BOTH the repository layer (Phase 37 round-trip) and the provider layer (Phase 39 smoke). v1.6 shipped zero dead reactive code.
+- **Three-layer privacy enforcement evolved through the audit loop**: Phase 37 shipped dual sender-side gates (use case + tracker); the milestone audit's integration checker found the receiver still trusted the wire (W2); 260612-daz added the receiver gate + listType pin. The audit→quick-task→re-verify loop (v1.5's Phase-35 pattern, now at quick-task granularity) again caught what phase gates missed.
+- **Integration checker with executed proof**: this audit ran 32/32 cross-phase tests rather than existence checks, which is exactly how W1 (a comment claiming a safety net that didn't exist) was caught — grep would have read the comment and believed it.
+- **Wave-0 TDD scaffolds across all 4 phases**: contract tests before production code caught CR-01 (Drift indices) and CR-01-P37 (remote update clobbering local sortOrder) in-phase.
+- **User-directed 7→4 phase consolidation** held up: 27 plans in ~2 days with wave parallelism and no inter-phase rework.
+
+### What Was Inefficient
+- **Reorder UX needed 4 on-device fix iterations** (260609-pmc plans 03/04/05): single-row sort_order writes + fixed extreme values + visible-position drag indices interacted badly with non-contiguous values; the eventual fix (transactional whole-table re-sequence) is what should have shipped first. Lesson: for orderable lists, a single batch "apply this exact order" primitive beats incremental single-row writes.
+- **A code comment asserted a nonexistent safety net** (W1): the tracker's "fullSync on next launch will reconcile" claim was wrong on three counts (no shopping support in fullSync, initialSync only fires on pairing, debounce already flushes on pause). Comments stating recovery guarantees need the same verification as code.
+- **Draft-Nyquist VALIDATION.md — 7th consecutive milestone** (Phases 37/38/39 `nyquist_compliant: false`). The artifact expectation is structurally ignored; v1.5's lesson ("wire it into close flow or drop it") remains unactioned.
+- **Quick-task `status:` frontmatter convention still never adopted** — audit-open now flags 38 cosmetic `missing` entries at every close; the noise grows each milestone.
+- **260609-ruu shipped with "待真机确认"** and was still pending at close — the v1.4 "pending visual check" trap recurring at quick-task scale.
+
+### Patterns Established
+- **Batch reorder primitive**: `reorderBatch(orderedIds)` writing contiguous 0..N-1 in a transaction, consumed by both drag and move-to-extreme actions — ONE mechanism for any future orderable list.
+- **Receiver-side validation for any synced entity with a privacy attribute**: never trust the wire; gate inbound ops on the privacy invariant and pin immutable fields to `existing.*` in merges.
+- **Audit warnings fixed inline at close via quick task** (vs deferred): W1/W2 closed same-day with TDD + full-suite verification — cheaper than a v1.7 carry and keeps the milestone audit honest.
+- **Integration checking must execute tests, not read code**: claims in comments and seams "wired by existence" both lie; the checker's executed-proof stance is the standard.
+
+### Key Lessons
+1. **Comments that promise recovery behavior are load-bearing and must be verified** — W1 existed because a comment asserted "fullSync will reconcile" and nobody checked; treat recovery/fallback claims in comments as testable specs.
+2. **Sender-side enforcement of a privacy invariant is half an invariant** — any peer can run different code; SYNC-02/03 became real only when the receiver started validating (W2). For E2EE-synced data, enforce invariants at every trust boundary.
+3. **For orderable lists, design the persistence primitive around "apply this exact order"** — incremental single-row sort_order writes accumulate non-contiguous values that break both drag and move-to-extreme semantics (4 fix iterations to learn this).
+4. **The executed-proof integration check is worth its cost** — it caught a phantom safety net and a wire-trust gap that 4 phases of verification + 2500 tests missed.
+5. **Behavior-changing fixes invalidate tests that encoded the old behavior** — the W2 receiver gate broke the D39-06 smoke test which awaited a DB write that no longer happens; when hardening changes a contract, sweep for tests asserting the old one (the failure mode is a hang/timeout, not an assertion diff).
+
+### Cost Observations
+- Model mix: profile `balanced` (planner/executor/checker/verifier = sonnet per config).
+- Sessions: multi-session GSD execution across Phases 36-39 + audit → quick-task-closure → re-verify close loop.
+- Notable: 369 commits; one schema migration (v20, with raw-sqlite3 contract test + real-Drift index assertion); 0 new pub dependencies; largest churn sources were the 54-golden baseline set (Phase 39) and the 8-plan UI phase (38).
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -263,6 +309,7 @@
 | v1.3 | multi-session, 5 days | 6 | Foundation-phase-first for multi-host widget convergence; parallel-safe phase split (voice parser ∥ manual UI); architecture invariant tests for resolver contracts; runtime extensibility tests as VOICE-06 proof; same-milestone cleanup phase (Phase 23) for debt absorption; code-review severity-bumping authority for production-risk gaps. |
 | v1.4 | multi-session, 3 days | 7 | Strict bottom-up layer progression (data→domain→providers→UI); heavy reuse of prior-milestone edit/delete path; provider-dependency narrowing as an explicit perf contract; batched on-device visual pass at close. Surfaced two wiring smells: incomplete invalidation set (GAP-1) + speculative unused reactive stream (GAP-2). |
 | v1.5 | multi-session, 2 days | 5 | First pure consistency/refactor milestone since v1.0. Dependency-ordered workstreams (terminology→palette→tokens→goldens) eliminated rename churn; ThemeExtension single-source consolidation; migration contract test as Wave-0 RED. Milestone audit caught two gate-evading vocabulary leaks (W1 a11y string literals, W2 capital-case identifiers) → dedicated Phase-35 closure + re-audit. |
+| v1.6 | multi-session, ~2 days + quick-task hardening | 4 | User-directed 7→4 phase consolidation; Wave-0 TDD scaffolds in all phases; reactive-stream delivery as a stated success criterion (v1.4 GAP-2 lesson applied structurally); executed-proof integration check at audit caught a phantom-comment safety net (W1) and receiver wire-trust (W2) → closed inline via quick task 260612-daz (audit→quick-task→re-verify loop at quick-task granularity). |
 
 ### Cumulative Quality
 
@@ -274,6 +321,7 @@
 | v1.3 | corpus tests: zh 48/50 (96%), ja 50/50 (100%); voice category corpus zh 30/30 + ja 31/31 (100%); 15 pre-existing failures carried (7 home_hero_card_golden + 4 home_hero_card widget + 4 merchant_database); 9/9 device UATs (Phase 19+20+22 carry) pass in Phase 23 | not recomputed at milestone close; ~10.2k LOC test additions (1.56:1 test-to-code ratio) | 0 new pub dependencies |
 | v1.4 | 2238/2238 tests pass at quick-task checkpoints; golden baselines re-based for list/calendar/tile; 9 quick-task visual checks confirmed on-device 2026-05-31; `flutter analyze` 0 issues | not recomputed at milestone close | 1 new pub dependency (`table_calendar ^3.2.0`, intl-0.20.2-compatible, iOS-build-green) |
 | v1.5 | 2281/2281 tests pass (full suite, golden incl.); 77 golden masters re-baselined to teal (34 dark) with diff-attribution; `flutter analyze` 4 pre-existing infos (0 regressions); v18 migration contract test + CR-01 regression test green | 79.0% filtered coverage (≥70% gate) | 0 new pub dependencies |
+| v1.6 | 2588/2588 tests pass at close (full suite incl. goldens); 54 new shopping golden baselines (user-approved); `flutter analyze` 0 issues; v20 migration contract test (raw-sqlite3 + real-Drift index assertion) green; 32/32 cross-phase integration tests executed at audit | 77.3% on shopping modules (≥70% gate); global not recomputed | 0 new pub dependencies |
 
 ### Top Lessons
 
@@ -297,3 +345,7 @@
 18. **(v1.5)** Dependency-ordered workstreams beat in-phase optimization — terminology-before-palette eliminated rename churn entirely; identify the cross-phase seam at roadmap time.
 19. **(v1.5)** Draft-Nyquist is now 6×-recurring and structurally accepted — either wire `/gsd-validate-phase` into the close flow or formally drop the artifact expectation.
 20. **(v1.5)** "Out of scope" carve-outs need a scheduled destination — `Book.*Balance` is correctly deferred but will linger indefinitely without a planned DB-migration phase.
+21. **(v1.6)** Comments promising recovery behavior are testable specs — the tracker's "fullSync will reconcile" claim was false on three counts and survived 4 phases of gates; verify fallback claims, don't read them.
+22. **(v1.6)** Privacy invariants on synced data must be enforced at every trust boundary — sender-side gates alone are half an invariant; the receiver must validate and pin immutable fields.
+23. **(v1.6)** Orderable-list persistence should be a batch "apply this exact order" primitive (`reorderBatch` → contiguous 0..N-1), not incremental single-row writes — learned over 4 on-device fix iterations.
+24. **(v1.6)** When a hardening fix changes a behavioral contract, sweep for tests encoding the old contract — the failure mode is a timeout/hang (awaiting an emission that no longer fires), not a clean assertion diff.

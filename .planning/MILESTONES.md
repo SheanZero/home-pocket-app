@@ -4,6 +4,30 @@ Historical record of shipped versions. Each entry links to its full archive in `
 
 ---
 
+## v1.6 — 购物清单 (Shopping List)
+
+**Shipped:** 2026-06-12
+**Phases:** 36-39 (4 phases, 27 plans)
+**Duration:** 2026-06-07 → 2026-06-08 phase execution, hardened through 2026-06-12 (git range `v1.5..HEAD` = 369 commits, 630 files, +58,316 / −3,400 LOC — includes the post-v1.5 ADR-019 palette quick tasks and the 2026-06-09/10 shopping UX + startup-fix quick-task series)
+**Tag:** `v1.6`
+**Audit Status at Close:** `tech_debt` — milestone goal achieved (27/27 requirements, 4/4 phases verified `passed`, 6/6 cross-phase seams wired, 10/10 E2E flows complete; integration checker executed 32/32 cross-phase tests). The two substantive warnings the 2026-06-11 audit found — W1 (fullSync had no shopping reconcile despite the tracker comment claiming it) and W2 (receiver trusted inbound `listType` on the wire) — were **closed at milestone close** via quick task 260612-daz and re-verified (analyze 0, full suite 2588/2588 green). Residual debt is documentation-grade: draft-Nyquist docs (Phases 37/38/39 `nyquist_compliant: false`; Phase 36 validated/compliant), three 37-REVIEW advisories, one pending on-device confirm (260609-ruu form redesign). See `.planning/milestones/v1.6-MILESTONE-AUDIT.md`.
+**Known deferred items at close:** 6 acknowledged (1 Nyquist, 1 review-advisory bundle, 1 UAT pending, 1 security note incl. accepted threat T-q260612-04, 1 metadata drift covering 38 stale quick-task status stubs, 1 resolved W1/W2 audit-trail entry) — see `.planning/STATE.md` Deferred Items §v1.6.
+
+### Delivered
+
+The placeholder 4th nav tab (待办/Todo) is now a complete family shopping list. A top segmented control switches between 公共 (public) and 私人 (private) lists — two fully independent lists with the visibility attribute immutable after creation (D6). Items carry rich optional metadata (ledger 日常/悦己, category, tags, encrypted note, quantity, estimated price) behind a name-only-required form that reuses the existing category tree, tag system, and ledger selector. The list supports tap-to-complete with animated strikethrough (completed items sort below a divider via DAO query order), chip-bar filtering (ledger/category/status, shared across segments and reset on switch), swipe-delete, long-press batch-select with select-all and batch-delete, clear-all-completed, and 3-variant empty states. Public items sync to family members through the existing E2EE family_sync pipeline with per-item attribution chips, sticky-complete merge, tombstone safety, and reactive Drift-stream delivery (no manual refresh); private items never enter the sync pipeline — enforced at the use-case boundary, the change tracker, and (since 260612-daz) the receiving end. All strings ship in ja/zh/en (ARB parity) with 54 golden baselines. Schema v19→v20.
+
+### Key Accomplishments
+
+1. **Encrypted, migration-safe data foundation + enforced layer boundaries** (Phase 36) — `shopping_items` Drift table (18 columns, 4 CHECK constraints, v19→v20 migration with explicit `CREATE INDEX` in onCreate+onUpgrade after CR-01 exposed `customIndices` as a no-op), reactive `ShoppingItemDao.watchByListType` (`readsFrom:`), `ShoppingItemRepositoryImpl` with note encryption at the boundary, Freezed domain models + repository interface with zero Drift imports, `import_guard.yaml` coverage for every shopping_list subdir, and `LedgerTypeSelector` promoted to `lib/shared/widgets/`. (SHOP-01, DONE-02, ITEM-03/05, SYNC-05 column)
+2. **Use-case layer with a dual privacy gate + family-sync integration** (Phase 37) — six use cases mediate every mutation; public-only tracking enforced at both the use-case boundary and `ShoppingItemChangeTracker`; `listType` immutability fail-fast (D37-04); `ApplySyncOperationsUseCase` gained a `shopping_item` branch with tombstone guard + sticky-complete merge; `SyncOrchestrator` flushes shopping ops in the incremental push; reactive round-trip proven by integration test without any `ref.invalidate`. (ITEM-01/02/04, DONE-01/03, MGMT-01/02, SYNC-01/02/03/05/06)
+3. **Complete gesture-safe shopping UI on a renamed nav tab** (Phase 38) — `ShoppingListScreen` + tile (dual-ledger 4px accent, attribution chip on public tiles only, animated strikethrough), filter chip bar, 3-variant empty states, batch-select chrome (selection header, floating action bar, swipe disabled via `DismissDirection.none`), create/edit form, shopping-bag tab icon, and a context-aware FAB that preserves all 6 accounting post-entry invalidations (no regression). (SHOP-02/03/04, FILT-01/02/03, MGMT-03, NAV-01/02, SYNC-04)
+4. **i18n parity + pixel verification + provider smoke test** (Phase 39) — ARB key parity across ja/zh/en, zero stale 待办/Todo strings, 54 golden baselines (4 widgets × 3 locales × 2 modes, user-approved), presentation-layer reactive smoke test, 77.3% shopping-module coverage, analyze 0. (NAV-03)
+5. **Post-phase UX hardening via quick-task series** (2026-06-09/10) — group filter + private chip + `ListTypeSelector` pill (260609-dnp/g8z), tile interaction + reorder-mode UX with single-mechanism `reorderBatch`→`applyOrder` contiguous re-sort (260609-ec2/pmc, 7 plans), form redesign matching the accounting entry screen (260609-ruu), AppBar title + lock-hint restyle (260609-t1t), and the iOS startup keychain-accessibility fix (260610-ss7, on-device verified).
+6. **Audit-gap closure at milestone close** (260612-daz, 2026-06-12) — `FullSyncUseCase` now pushes public shopping items (required `fetchAllShoppingOps` callback + provider wiring), and the receiver drops non-public inbound shopping ops + pins `listType` on update merge, closing audit W1/SYNC-01 and W2/SYNC-02/03 with TDD; full suite 2588/2588 green.
+
+---
+
 ## v1.5 — 文案与配色统一 (Vocabulary & Palette Unification)
 
 **Shipped:** 2026-06-02
