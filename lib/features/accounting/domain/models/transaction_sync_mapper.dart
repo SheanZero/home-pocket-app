@@ -24,6 +24,11 @@ class TransactionSyncMapper {
       if (transaction.note != null) 'note': transaction.note,
       if (transaction.merchant != null) 'merchant': transaction.merchant,
       if (transaction.photoHash != null) 'photoHash': transaction.photoHash,
+      if (transaction.originalCurrency != null)
+        'originalCurrency': transaction.originalCurrency,
+      if (transaction.originalAmount != null)
+        'originalAmount': transaction.originalAmount,
+      if (transaction.appliedRate != null) 'appliedRate': transaction.appliedRate,
       'metadata': {
         'sourceBookId': sourceBookId,
         'sourceBookName': sourceBookName,
@@ -53,6 +58,9 @@ class TransactionSyncMapper {
       photoHash: data['photoHash'] as String?,
       merchant: data['merchant'] as String?,
       metadata: data['metadata'] as Map<String, dynamic>?,
+      originalCurrency: data['originalCurrency'] as String?,
+      originalAmount: data['originalAmount'] as int?,
+      appliedRate: data['appliedRate'] as String?,
       currentHash: '',
       createdAt: DateTime.parse(data['createdAt'] as String),
       isPrivate: data['isPrivate'] as bool? ?? false,
