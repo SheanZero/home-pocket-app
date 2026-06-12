@@ -17,36 +17,22 @@ import '../daos/exchange_rate_dao.dart';
 /// - No `implements ExchangeRateRepository` — the interface does not exist yet.
 ///   Adding it here would cause a compile error. TODO(40-05) marks the upgrade point.
 /// - No `@riverpod` provider — providers are Plan 40-05's responsibility.
-///   This class is not provider-registered so `provider_graph_hygiene_test.dart`
-///   is not affected.
-/// - [UnimplementedError] stubs are intentional per the plan spec. They do NOT
-///   violate the CLAUDE.md "NEVER throw UnimplementedError in providers" rule
-///   because this class is not registered as a Riverpod provider.
+/// - Methods pass through to the DAO returning raw rows until the ExchangeRate
+///   Freezed model lands in Plan 40-05 (HIGH-06 forbids UnimplementedError in lib/).
 class ExchangeRateRepositoryImpl {
   ExchangeRateRepositoryImpl({required ExchangeRateDao dao}) : _dao = dao;
 
   final ExchangeRateDao _dao;
 
-  // TODO(40-05): remove stub and implement with ExchangeRate Freezed model
-  ExchangeRateRow? _toModel(ExchangeRateRow row) {
-    throw UnimplementedError('wired in Plan 40-05');
-  }
-
   // TODO(40-05): findByDate(String currency, DateTime date) → Result<ExchangeRate?>
-  Future<ExchangeRateRow?> findByDate(String currency, DateTime date) async {
-    final row = await _dao.findByDate(currency, date);
-    return _toModel(row ?? (throw UnimplementedError('wired in Plan 40-05')));
-  }
+  Future<ExchangeRateRow?> findByDate(String currency, DateTime date) =>
+      _dao.findByDate(currency, date);
 
   // TODO(40-05): findLatest(String currency) → Result<ExchangeRate?>
-  Future<ExchangeRateRow?> findLatest(String currency) async {
-    final row = await _dao.findLatest(currency);
-    return _toModel(row ?? (throw UnimplementedError('wired in Plan 40-05')));
-  }
+  Future<ExchangeRateRow?> findLatest(String currency) =>
+      _dao.findLatest(currency);
 
   // TODO(40-05): upsert(ExchangeRate rate) → Result<void>
-  Future<void> upsert(ExchangeRatesCompanion companion) async {
-    await _dao.upsert(companion);
-    throw UnimplementedError('wired in Plan 40-05');
-  }
+  Future<void> upsert(ExchangeRatesCompanion companion) =>
+      _dao.upsert(companion);
 }

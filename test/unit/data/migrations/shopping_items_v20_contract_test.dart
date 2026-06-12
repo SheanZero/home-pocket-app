@@ -3,10 +3,11 @@ import 'package:home_pocket/data/app_database.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
-  test('AppDatabase schemaVersion is 20', () {
+  test('AppDatabase schemaVersion is at least 20 (shopping_items era)', () {
     final db = AppDatabase.forTesting();
     addTearDown(db.close);
-    expect(db.schemaVersion, equals(20));
+    // v20 introduced shopping_items; later phases may bump further (v21: exchange_rates).
+    expect(db.schemaVersion, greaterThanOrEqualTo(20));
   });
 
   test('real Drift schema creates all shopping_items indices', () async {
