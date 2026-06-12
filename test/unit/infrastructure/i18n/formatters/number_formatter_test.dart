@@ -33,10 +33,52 @@ void main() {
         expect(result, contains('1,234.56'));
       });
 
-      test('formats CNY with yen symbol and 2 decimals', () {
+      test('formats CNY with CN\u00a5 symbol and 2 decimals', () {
         final result = NumberFormatter.formatCurrency(1234.56, 'CNY', zh);
-        expect(result, contains('\u00a5'));
+        expect(result, contains('CN\u00a5'));
         expect(result, contains('1,234.56'));
+      });
+
+      test('KRW returns \u20a9 with 0 decimals', () {
+        final result = NumberFormatter.formatCurrency(1000, 'KRW', ja);
+        expect(result, contains('\u20a9'));
+        expect(result.contains('.00'), isFalse);
+      });
+
+      test('HKD returns HK\$', () {
+        final result = NumberFormatter.formatCurrency(100.50, 'HKD', en);
+        expect(result, contains('HK\$'));
+      });
+
+      test('AUD returns A\$', () {
+        final result = NumberFormatter.formatCurrency(100.50, 'AUD', en);
+        expect(result, contains('A\$'));
+      });
+
+      test('CAD returns C\$', () {
+        final result = NumberFormatter.formatCurrency(100.50, 'CAD', en);
+        expect(result, contains('C\$'));
+      });
+
+      test('TWD returns NT\$', () {
+        final result = NumberFormatter.formatCurrency(100.50, 'TWD', en);
+        expect(result, contains('NT\$'));
+      });
+
+      test('SGD returns S\$', () {
+        final result = NumberFormatter.formatCurrency(100.50, 'SGD', en);
+        expect(result, contains('S\$'));
+      });
+
+      test('unknown currency code falls back to ISO prefix', () {
+        final result = NumberFormatter.formatCurrency(1000, 'XYZ', en);
+        expect(result, contains('XYZ'));
+      });
+
+      test('JPY still returns \u00a5 (regression guard)', () {
+        final result = NumberFormatter.formatCurrency(1000, 'JPY', ja);
+        expect(result, contains('\u00a5'));
+        expect(result, isNot(contains('CN\u00a5')));
       });
 
       test('formats EUR with euro symbol', () {
