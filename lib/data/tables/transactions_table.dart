@@ -39,6 +39,15 @@ class Transactions extends Table {
   // migration in app_database.dart applies the same CHECK to v16 rows.
   TextColumn get entrySource => text().withDefault(const Constant('manual'))();
 
+  // Foreign-currency provenance (all three null = JPY-native row per STORE-01)
+  // ISO 4217 code; null = native JPY
+  TextColumn get originalCurrency => text().nullable()();
+  // minor units; null = native JPY
+  IntColumn get originalAmount => integer().nullable()();
+  // JPY per 1 whole unit as string (D-04 / ADR-020); null = native JPY
+  // CRITICAL: TextColumn (not RealColumn) per D-04 and ADR-020. No default value. No NOT NULL constraint.
+  TextColumn get appliedRate => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 
