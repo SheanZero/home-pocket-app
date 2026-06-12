@@ -25,6 +25,11 @@ class CreateTransactionParams {
   final LedgerType? ledgerType; // null = auto-classify
   final EntrySource entrySource;
 
+  // Foreign-currency provenance (partial-triple invariant: all three or none)
+  final String? originalCurrency;
+  final int? originalAmount;
+  final String? appliedRate;
+
   const CreateTransactionParams({
     required this.bookId,
     required this.amount,
@@ -37,6 +42,9 @@ class CreateTransactionParams {
     this.ledgerType,
     // D-06: required, no default — every push site MUST specify.
     required this.entrySource,
+    this.originalCurrency,
+    this.originalAmount,
+    this.appliedRate,
   });
 }
 
@@ -83,6 +91,32 @@ class CreateTransactionUseCase {
     }
     if (params.categoryId.isEmpty) {
       return Result.error('categoryId must not be empty');
+    }
+
+    // 1b. Partial-triple invariant (STORE-04): all three currency fields or none
+    final hasCurrencyField = params.originalCurrency != null ||
+        params.originalAmount != null ||
+        params.appliedRate != null;
+    final hasAllCurrencyFields = params.originalCurrency != null &&
+        params.originalAmount != null &&
+        params.appliedRate != null;
+    if (hasCurrencyField && !hasAllCurrencyFields) {
+      return Result.error(
+        'partial foreign-currency data: all three of originalCurrency, '
+        'originalAmount, appliedRate must be non-null together',
+      );
+    }
+
+    // 1c. appliedRate validity check (D-05 per CONTEXT.md)
+    if (hasAllCurrencyFields) {
+      try {
+        final rate = double.parse(params.appliedRate!);
+        if (rate.isNaN || rate.isInfinite || rate <= 0) {
+          return Result.error('appliedRate must be a positive number');
+        }
+      } on FormatException {
+        return Result.error('appliedRate is not a valid number');
+      }
     }
 
     // 2. Verify category exists
@@ -161,6 +195,9 @@ class CreateTransactionUseCase {
       merchant: params.merchant,
       joyFullness: joyFullness,
       entrySource: params.entrySource,
+      originalCurrency: params.originalCurrency,
+      originalAmount: params.originalAmount,
+      appliedRate: params.appliedRate,
     );
 
     // 9. Persist
