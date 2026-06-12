@@ -185,14 +185,39 @@ class ApplySyncOperationsUseCase {
       case 'create':
       case 'insert':
         if (data == null) return;
+        if (!_isPublicShoppingOp(data, op: op, entityId: entityId)) return;
         await _handleShoppingCreate(entityId, fromDeviceId, data);
       case 'delete':
-        // Soft-delete (tombstone) — never hard-delete
+        // Soft-delete (tombstone) — never hard-delete.
+        // NOT gated on listType: delete ops carry no listType on the wire
+        // (tracker contract) and tombstones are id-addressed.
         await _shoppingItemRepository.softDelete(entityId);
       case 'update':
         if (data == null) return;
+        if (!_isPublicShoppingOp(data, op: op, entityId: entityId)) return;
         await _handleShoppingUpdate(entityId, data);
     }
+  }
+
+  /// W2 / SYNC-02: receiver-side privacy gate (D37-06 mirror).
+  ///
+  /// Sender-side gates (use case + tracker) do not protect against buggy or
+  /// older peers — the wire is untrusted input and must be validated at the
+  /// application boundary. Inbound create/update ops whose payload is not
+  /// explicitly public are dropped per-op (D37-05 skip pattern, not abort).
+  bool _isPublicShoppingOp(
+    Map<String, dynamic> data, {
+    required String op,
+    required String entityId,
+  }) {
+    if (data['listType'] == 'public') return true;
+    if (kDebugMode) {
+      debugPrint(
+        '[ApplySyncOps] shopping_item $op $entityId dropped: '
+        'non-public listType on wire (W2/SYNC-02 receiver gate)',
+      );
+    }
+    return false;
   }
 
   Future<void> _handleShoppingCreate(
@@ -253,10 +278,16 @@ class ApplySyncOperationsUseCase {
     // (ShoppingItemSyncMapper). fromSyncMap therefore rebuilds it with the
     // Freezed default (0); preserve the local order so a remote edit does not
     // reset a locally-reordered item to position 0 (defeats D37-01).
+    // D37-04 / W2 (SYNC-03): listType can never change post-creation — pin the
+    // existing value so a wire update can never flip an item public↔private.
     final updated = ShoppingItemSyncMapper.fromSyncMap(
       data,
       fromDeviceId: null,
-    ).copyWith(id: entityId, sortOrder: existing.sortOrder);
+    ).copyWith(
+      id: entityId,
+      sortOrder: existing.sortOrder,
+      listType: existing.listType,
+    );
 
     await _shoppingItemRepository.upsert(updated);
   }
