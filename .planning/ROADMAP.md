@@ -114,7 +114,7 @@
 
 - [x] **Phase 40: 数据与同步基础 (Data Foundation + Domain + Sync)** — ADRs (rate precision / hash scope / edit policy); CNY `¥` symbol fix; Drift v20→v21 migration (`exchange_rates` cache table + 3 nullable `transactions` columns); `ExchangeRateDao` + repository; `Transaction` Freezed extension; `TransactionSyncMapper` null-safe passthrough + round-trip tests; partial-triple domain invariant (completed 2026-06-12)
 - [x] **Phase 41: 汇率服务 (Exchange Rate Service)** — `ExchangeRateApiClient` (Frankfurter primary + fawazahmed0 fallback); `ExchangeRateCacheService` (cache-first, offline fallback, weekend date transparency); application use cases with sealed `RateResult`; manual override semantics; date-change re-fetch policy; never-block-save invariant; privacy verification (completed 2026-06-13)
-- [ ] **Phase 42: 输入与展示 + 语音 (Entry UI + Display + Voice)** — SmartKeyboard currency selector + `CurrencySelectorSheet`; decimal input gate per ISO 4217 minor unit; live JPY conversion preview; foreign-currency list annotation; detail/edit full display + three-field bidirectional linked editing; zh/ja voice currency words (parallel wave inside the phase); i18n + goldens
+- [ ] **Phase 42: 输入与展示 + 语音 (Entry UI + Display + Voice)** — SmartKeyboard currency selector + `CurrencySelectorSheet`; decimal input gate per ISO 4217 minor unit; live JPY conversion preview; foreign-currency list annotation; detail/edit full display + two-input/one-derived linked editing (ADR-022 D-01; JPY read-only); zh/ja voice currency words (parallel wave inside the phase); i18n + goldens
 
 ## Phase Details
 
@@ -196,7 +196,18 @@ Plans:
   4. Foreign-currency rows in the transaction list show a small secondary annotation (e.g., "USD 50.00") while JPY rows are unchanged; the detail/edit view shows original currency, original amount, and applied rate; in edit mode the three fields (original amount / rate / JPY amount) are linked — editing any one recalculates the others without circular-update loops; an integration smoke test confirms USD 50 at 148.30 → `amount=7415`, `original_currency='USD'`
   5. zh voice "五十美元" and ja voice "50ドル" both parse to `{amount: 50, detectedCurrency: 'USD'}` with 欧元/英镑/港币/澳元/加元 and ユーロ/ポンド/香港ドル/豪ドル mapping to their ISO codes; bare 「元」 keeps its existing JPY-terminator behavior and bare 「ドル」 defaults to USD; the detected currency flows through the shared form (editable before save) and triggers the normal rate-fetch flow; voice corpus tests pass with ≥5 cases per currency per locale and all existing corpus tests unchanged
 
-**Plans**: TBD
+**Planning note**: ROADMAP Goal + SC-4 "bidirectional three-field linked editing / editing any one recalculates the others" is **VOID** — superseded by ADR-022 D-01 (ratified 2026-06-12) and CONTEXT.md D-10: the edit host is **two-input / one-derived** (original amount + rate editable; JPY read-only derived via `convertToJpy()`, never directly assigned). Plans implement the two-input/one-derived model; three-field bidirectional editing is forbidden (circular-dependency risk).
+
+**Plans**: 9 plans in 5 waves
+- [ ] 42-01-PLAN.md — Wave 0 failing-test scaffolding (SC-5 smoke, D-07/D-08, voice corpus, ADR-022 edit, update-plumbing) [W1]
+- [ ] 42-02-PLAN.md — Shared foundation: per-currency decimals via intl currencyFractionDigits (convertToJpy unchanged) [W1]
+- [ ] 42-03-PLAN.md — Plumbing gap: UpdateTransactionParams + use case carry the currency triple, recompute JPY, no rehash (ADR-021) [W1]
+- [ ] 42-04-PLAN.md — Voice wave (parallel): zh/ja currency detection → VoiceParseResult.detectedCurrency (VOICE-CUR-01/02/03) [W1]
+- [ ] 42-05-PLAN.md — AmountInputController (D-07 cap / D-08 truncate) + SmartKeyboard dot-gating (D-06, 48dp) [W2]
+- [ ] 42-06-PLAN.md — CurrencySelectorSheet (JPY-first, search, more, flag rows) + recent-use session provider + ARB names [W2]
+- [ ] 42-07-PLAN.md — Live JPY ConversionPreviewPanel (D-03/D-04/D-05; ref.listen signals; convertToJpy single site) [W3]
+- [ ] 42-08-PLAN.md — Manual-entry host wiring (tappable currency key, controller, preview, triple → SC-5) + list foreign annotation [W4]
+- [ ] 42-09-PLAN.md — Edit-host two-input/one-derived (ADR-022 D-01/D-02/D-03) + voice confirmation surfacing [W5]
 **UI hint**: yes
 
 ## Milestone Progress
