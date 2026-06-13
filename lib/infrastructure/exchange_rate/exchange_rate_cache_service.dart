@@ -37,8 +37,12 @@ class ExchangeRateCacheService {
   final ExchangeRateApiClient _apiClient;
   final Connectivity _connectivity;
 
+  /// D-06: back-off window applied after an online all-sources-fail.
+  static const Duration _cooldownDuration = Duration(minutes: 1);
+
   /// D-06: in-memory only, no persistence — app restart clears it (acceptable
-  /// for ephemeral outages; T-41-09).
+  /// for ephemeral outages; T-41-09). Cleared on the next successful fetch
+  /// (WR-04) so a recovered API is not blocked for the full window.
   DateTime? _cooldownUntil;
 
   bool get _inCooldown =>
@@ -54,7 +58,8 @@ class ExchangeRateCacheService {
 
       // CACHE HIT (RATE-02): exact date+currency, not a correctable proxy.
       final cached = await _repository.findByDate(currency, normalized);
-      if (cached != null && !_isCorrectableProxy(cached)) {
+      final isCorrectableProxy = cached != null && _isCorrectableProxy(cached);
+      if (cached != null && !isCorrectableProxy) {
         return RateCached(
           rate: cached.rate,
           currency: currency,
@@ -64,10 +69,17 @@ class ExchangeRateCacheService {
         );
       }
 
-      // D-05 connectivity gate + D-06 cooldown: skip the network when offline
-      // or within the cooldown window, go straight to cache fallback.
-      if (_inCooldown || await _isOffline()) {
-        return _cacheFallback(currency);
+      // WR-04: consult connectivity BEFORE the cooldown. A regained connection
+      // must not be suppressed by an in-memory cooldown — and the cooldown is
+      // cleared on the next successful fetch below, so a recovered API isn't
+      // blocked for the full window once we're back online.
+      // D-05: fully offline → skip the network, go straight to cache fallback.
+      if (await _isOffline()) {
+        return _proxyAwareFallback(currency, cached, isCorrectableProxy);
+      }
+      // D-06: online but still inside the all-sources-fail cooldown → skip.
+      if (_inCooldown) {
+        return _proxyAwareFallback(currency, cached, isCorrectableProxy);
       }
 
       // FETCH (cache miss or correctable proxy).
@@ -82,6 +94,9 @@ class ExchangeRateCacheService {
           actualRateDate: result.actualRateDate,
         );
         await _repository.upsert(row);
+        // WR-04: a successful fetch proves the network/API recovered — clear
+        // any lingering cooldown so subsequent lookups aren't gated.
+        _cooldownUntil = null;
         // D-09: fire-and-forget TTL prune after persisting.
         unawaited(_pruneStaleCache());
         return RateFetched(
@@ -93,11 +108,13 @@ class ExchangeRateCacheService {
         );
       } catch (e) {
         // D-06: all sources failed — back off for ~1 min, then fall back.
-        _cooldownUntil = DateTime.now().add(const Duration(minutes: 1));
+        _cooldownUntil = DateTime.now().add(_cooldownDuration);
         if (kDebugMode) {
           debugPrint('[RateCache] fetch failed for $currency → cooldown');
         }
-        return _cacheFallback(currency);
+        // WR-02: if we already hold an exact-date proxy row that we could not
+        // refresh, prefer it over a latest-any-date fallback.
+        return _proxyAwareFallback(currency, cached, isCorrectableProxy);
       }
     } catch (e) {
       // RATE-03: never throw — unexpected error still resolves to a variant.
@@ -106,6 +123,26 @@ class ExchangeRateCacheService {
       }
       return _cacheFallback(currency);
     }
+  }
+
+  /// WR-02: when the requested date already had an exact-date correctable
+  /// proxy row that we could NOT refresh (offline / cooldown / fetch failed),
+  /// return that exact-date proxy rather than a latest-any-date fallback —
+  /// the proxy holds the rate for the date the caller actually asked for,
+  /// whereas [_cacheFallback] may surface a neighboring date's rate.
+  Future<RateResult> _proxyAwareFallback(
+    String currency,
+    ExchangeRate? cached,
+    bool isCorrectableProxy,
+  ) async {
+    if (isCorrectableProxy && cached != null) {
+      return RateFallback(
+        rate: cached.rate,
+        currency: currency,
+        cachedDate: cached.rateDate,
+      );
+    }
+    return _cacheFallback(currency);
   }
 
   /// CACHE FALLBACK priority (D-07 / D-08):
@@ -122,12 +159,16 @@ class ExchangeRateCacheService {
           cachedDate: nonManual.rateDate,
         );
       }
-      final latest = await _repository.findLatest(currency);
-      if (latest != null && latest.source == 'manual') {
+      // WR-03: query the latest MANUAL row directly rather than inferring it
+      // from findLatest (which returns the newest row of any source and only
+      // happens to be manual in some histories). Removes the dependency on
+      // which source is newest.
+      final manual = await _repository.findLatestManual(currency);
+      if (manual != null) {
         return RateManual(
-          rate: latest.rate,
+          rate: manual.rate,
           currency: currency,
-          cachedDate: latest.rateDate,
+          cachedDate: manual.rateDate,
         );
       }
     } catch (e) {

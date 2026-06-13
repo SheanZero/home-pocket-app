@@ -99,6 +99,50 @@ void main() {
     });
 
     test(
+        'WR-03: findLatestManual returns the newest manual row, ignoring '
+        'newer non-manual rows', () async {
+      await dao.upsert(
+        ExchangeRatesCompanion(
+          currency: const Value('USD'),
+          rateDate: Value(DateTime.utc(2026, 6, 1)),
+          rate: const Value('149.0'),
+          fetchedAt: Value(DateTime.now()),
+          source: const Value('manual'),
+        ),
+      );
+      // A newer NON-manual row must not shadow the manual lookup.
+      await dao.upsert(
+        ExchangeRatesCompanion(
+          currency: const Value('USD'),
+          rateDate: Value(DateTime.utc(2026, 6, 12)),
+          rate: const Value('151.0'),
+          fetchedAt: Value(DateTime.now()),
+          source: const Value('frankfurter'),
+        ),
+      );
+
+      final manual = await dao.findLatestManual('USD');
+      expect(manual, isNotNull);
+      expect(manual!.source, equals('manual'));
+      expect(manual.rateDate, equals(DateTime.utc(2026, 6, 1)));
+    });
+
+    test('WR-03: findLatestManual returns null when no manual row exists',
+        () async {
+      await dao.upsert(
+        ExchangeRatesCompanion(
+          currency: const Value('USD'),
+          rateDate: Value(DateTime.utc(2026, 6, 1)),
+          rate: const Value('149.0'),
+          fetchedAt: Value(DateTime.now()),
+          source: const Value('frankfurter'),
+        ),
+      );
+
+      expect(await dao.findLatestManual('USD'), isNull);
+    });
+
+    test(
         'fetchedAt and actualRateDate round-trip as UTC DateTimes (WR-05)',
         () async {
       final fetchedAt = DateTime.utc(2026, 6, 12, 9, 30, 15);

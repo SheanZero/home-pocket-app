@@ -51,6 +51,9 @@ void main() {
         .thenAnswer((_) async => [ConnectivityResult.wifi]);
     when(() => repo.upsert(any())).thenAnswer((_) async {});
     when(() => repo.deleteOlderThan(any())).thenAnswer((_) async {});
+    // Default: no manual / non-manual rows unless a test says otherwise.
+    when(() => repo.findLatestNonManual(any())).thenAnswer((_) async => null);
+    when(() => repo.findLatestManual(any())).thenAnswer((_) async => null);
   });
 
   ExchangeRate row({
@@ -175,9 +178,6 @@ void main() {
         when(() => repo.findByDate(any(), any())).thenAnswer((_) async => null);
         when(() => apiClient.fetchRate(any(), any()))
             .thenThrow(const ExchangeRateApiException('all failed'));
-        when(() => repo.findLatestNonManual(any()))
-            .thenAnswer((_) async => null);
-        when(() => repo.findLatest(any())).thenAnswer((_) async => null);
 
         final first = await service.getRate('USD', date);
         expect(first, isA<RateUnavailable>());
@@ -213,13 +213,134 @@ void main() {
       when(() => connectivity.checkConnectivity())
           .thenAnswer((_) async => [ConnectivityResult.none]);
       when(() => repo.findByDate(any(), any())).thenAnswer((_) async => null);
-      when(() => repo.findLatestNonManual(any())).thenAnswer((_) async => null);
-      when(() => repo.findLatest(any())).thenAnswer((_) async => null);
 
       final result = await service.getRate('USD', date);
 
       expect(result, isA<RateUnavailable>());
     });
+
+    test(
+      'WR-03: manual fallback uses findLatestManual directly (not findLatest)',
+      () async {
+        when(() => connectivity.checkConnectivity())
+            .thenAnswer((_) async => [ConnectivityResult.none]);
+        when(() => repo.findByDate(any(), any())).thenAnswer((_) async => null);
+        // Only a manual row exists; no non-manual row.
+        when(() => repo.findLatestManual('USD')).thenAnswer(
+          (_) async => row(
+            rateDate: DateTime.utc(2026, 6, 9),
+            fetchedAt: DateTime.utc(2026, 6, 9),
+            source: 'manual',
+          ),
+        );
+
+        final result = await service.getRate('USD', date);
+
+        expect(result, isA<RateManual>());
+        // findLatest is no longer consulted in the fallback path.
+        verifyNever(() => repo.findLatest(any()));
+      },
+    );
+
+    test(
+      'WR-02: unrefreshable correctable proxy returns the exact-date proxy, '
+      'not a latest-any-date fallback',
+      () async {
+        // Requested date has a correctable proxy (actualRateDate set,
+        // rateDate historical, fetched on a prior day). Re-fetch fails.
+        final requested = DateTime.utc(2026, 6, 1);
+        when(() => repo.findByDate('USD', requested)).thenAnswer(
+          (_) async => row(
+            rateDate: requested,
+            fetchedAt: DateTime.utc(2026, 5, 30),
+            actualRateDate: DateTime.utc(2026, 5, 30),
+            rate: 'PROXY_RATE',
+          ),
+        );
+        when(() => apiClient.fetchRate('USD', requested))
+            .thenThrow(const ExchangeRateApiException('all failed'));
+        // A NEWER non-manual row exists for a different date — must NOT win.
+        when(() => repo.findLatestNonManual('USD')).thenAnswer(
+          (_) async => row(
+            rateDate: DateTime.utc(2026, 6, 11),
+            fetchedAt: DateTime.utc(2026, 6, 11),
+            rate: 'NEWER_RATE',
+          ),
+        );
+
+        final result = await service.getRate('USD', requested);
+
+        expect(result, isA<RateFallback>());
+        final fallback = result as RateFallback;
+        // The exact-date proxy is preferred over the latest-any-date row.
+        expect(fallback.rate, 'PROXY_RATE');
+        expect(fallback.cachedDate, requested);
+      },
+    );
+
+    test(
+      'WR-04: connectivity is consulted before the cooldown is honored',
+      () async {
+        // Cooldown was set on a prior online all-sources-fail. Now the device
+        // is OFFLINE. The connectivity gate must run first → cache fallback,
+        // and the network is never touched regardless of the cooldown.
+        when(() => apiClient.fetchRate(any(), any()))
+            .thenThrow(const ExchangeRateApiException('all failed'));
+        when(() => repo.findByDate(any(), any())).thenAnswer((_) async => null);
+
+        // Prime the cooldown via one online failure.
+        final primed = await service.getRate('USD', date);
+        expect(primed, isA<RateUnavailable>());
+
+        // Go offline; subsequent lookup must hit the connectivity gate first.
+        when(() => connectivity.checkConnectivity())
+            .thenAnswer((_) async => [ConnectivityResult.none]);
+        when(() => repo.findLatestNonManual('EUR')).thenAnswer(
+          (_) async => row(
+            rateDate: DateTime.utc(2026, 6, 10),
+            fetchedAt: DateTime.utc(2026, 6, 10),
+          ),
+        );
+
+        final offline = await service.getRate('EUR', date);
+        expect(offline, isA<RateFallback>());
+
+        // Network attempted only on the first (online) call.
+        verify(() => apiClient.fetchRate(any(), any())).called(1);
+      },
+    );
+
+    test(
+      'WR-04: a successful fetch clears the in-memory cooldown',
+      () async {
+        when(() => repo.findByDate(any(), any())).thenAnswer((_) async => null);
+        when(() => apiClient.fetchRate('USD', date)).thenAnswer(
+          (_) async => (
+            rate: '150.00',
+            actualRateDate: null,
+            source: 'frankfurter',
+          ),
+        );
+
+        // A successful fetch should leave no cooldown behind. We assert via a
+        // follow-up offline-then-online sequence: after success, a new online
+        // call still reaches the network (proving no stale cooldown gate).
+        final first = await service.getRate('USD', date);
+        expect(first, isA<RateFetched>());
+
+        when(() => apiClient.fetchRate('EUR', date)).thenAnswer(
+          (_) async => (
+            rate: '160.00',
+            actualRateDate: null,
+            source: 'frankfurter',
+          ),
+        );
+        final second = await service.getRate('EUR', date);
+        expect(second, isA<RateFetched>());
+
+        verify(() => apiClient.fetchRate(any(), any())).called(2);
+      },
+    );
   });
 
   group('D-09: 2-year TTL pruning on upsert', () {

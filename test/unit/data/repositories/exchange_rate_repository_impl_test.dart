@@ -87,6 +87,40 @@ void main() {
     });
   });
 
+  group('WR-03: findLatestManual', () {
+    test('returns the latest manual row, ignoring newer non-manual rows',
+        () async {
+      await repository.upsert(
+        ExchangeRate(
+          currency: 'USD',
+          rateDate: DateTime.utc(2026, 6, 1),
+          rate: '149.0',
+          fetchedAt: DateTime.utc(2026, 6, 1),
+          source: 'manual',
+        ),
+      );
+      await repository.upsert(
+        ExchangeRate(
+          currency: 'USD',
+          rateDate: DateTime.utc(2026, 6, 12),
+          rate: '151.0',
+          fetchedAt: DateTime.utc(2026, 6, 12),
+          source: 'frankfurter',
+        ),
+      );
+
+      final manual = await repository.findLatestManual('USD');
+      expect(manual, isNotNull);
+      expect(manual!.source, equals('manual'));
+      expect(manual.rate, equals('149.0'));
+    });
+
+    test('returns null when there is no manual row', () async {
+      await repository.upsert(makeRate(rateDate: DateTime.utc(2026, 6, 1)));
+      expect(await repository.findLatestManual('USD'), isNull);
+    });
+  });
+
   group('CR-02: local-calendar-date key (no UTC skew)', () {
     test(
         'a local-midnight DateTime (e.g. the transaction picker output) keys '

@@ -53,6 +53,15 @@ class ExchangeRateRepositoryImpl implements ExchangeRateRepository {
   }
 
   @override
+  Future<ExchangeRate?> findLatestManual(String currency) async {
+    // No date normalization — source-filtered latest lookup, not a
+    // composite-key lookup (WR-03).
+    final row = await _dao.findLatestManual(currency);
+    if (row == null) return null;
+    return _toModel(row);
+  }
+
+  @override
   Future<void> deleteOlderThan(DateTime cutoff) async {
     await _dao.deleteOlderThan(_normalizeToUtcMidnight(cutoff));
   }

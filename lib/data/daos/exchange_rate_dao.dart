@@ -66,6 +66,21 @@ class ExchangeRateDao {
         .getSingleOrNull();
   }
 
+  /// Return the most-recent row for [currency] where source == 'manual',
+  /// or null if no manual row exists.
+  ///
+  /// WR-03: lets the offline fallback select the latest manual row directly
+  /// instead of inferring from [findLatest]. Ordered by rateDate DESC, limit 1.
+  Future<ExchangeRateRow?> findLatestManual(String currency) async {
+    return (_db.select(_db.exchangeRates)
+          ..where(
+            (t) => t.currency.equals(currency) & t.source.equals('manual'),
+          )
+          ..orderBy([(t) => OrderingTerm.desc(t.rateDate)])
+          ..limit(1))
+        .getSingleOrNull();
+  }
+
   /// Delete all rows where rateDate is strictly before [cutoff].
   ///
   /// D-09: enforces the 2-year TTL. rateDate uses a TypeConverter

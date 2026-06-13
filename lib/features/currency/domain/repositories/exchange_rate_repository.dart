@@ -23,6 +23,13 @@ abstract class ExchangeRateRepository {
   /// offline fallback path.
   Future<ExchangeRate?> findLatestNonManual(String currency);
 
+  /// Return the most-recent cached rate for [currency] where source ==
+  /// 'manual', or null if no manual row exists.
+  ///
+  /// WR-03: the offline fallback's manual branch queries this directly instead
+  /// of inferring "is the newest row manual?" from [findLatest].
+  Future<ExchangeRate?> findLatestManual(String currency);
+
   /// Delete all rows where rateDate is strictly before [cutoff].
   ///
   /// D-09: called on every upsert to enforce the 2-year TTL.
