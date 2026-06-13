@@ -92,6 +92,13 @@ class ChineseNumeralStateMachine extends NumeralStateMachine {
       }
       // Step 5: everything else silently dropped — _skipPattern chars and
       // any random text that the speech recognizer may have emitted.
+      //
+      // Phase 42 (VOICE-CUR-01): currency tokens (美元/欧元/英镑/港币/澳元/加元
+      // and the bare 元 terminator) are among the runes dropped here so the
+      // integer amount stays clean (T-42-07). Their DETECTION is handled
+      // separately by the inherited [detectCurrencyToken], which runs a
+      // longest-first scan over [VoiceCurrencySuffixes.all]; the use-case layer
+      // then maps the token → ISO (bare 元 → CNY in zh locale per D-08 locked).
     }
     return tokens;
   }

@@ -63,6 +63,14 @@ class JapaneseNumeralStateMachine extends NumeralStateMachine {
   };
 
   /// Characters that are currency/whitespace suffixes — emitted as Skip.
+  ///
+  /// Phase 42 (VOICE-CUR-02): these chars are still skipped from the amount
+  /// scan here, but the spoken currency token (ドル/ユーロ/ポンド/香港ドル/豪ドル,
+  /// plus the bare 円 JPY-native marker) is now detected SEPARATELY via the
+  /// inherited [detectCurrencyToken] — the skip-branch keeps the amount clean
+  /// (T-42-07) while detection runs over [VoiceCurrencySuffixes.all]. Native
+  /// 円/¥ keep their JPY-terminator/skip behavior; foreign tokens surface their
+  /// ISO at the use-case layer.
   static final _skipPattern = RegExp(r'[\s¥￥円えんyen]');
 
   @override

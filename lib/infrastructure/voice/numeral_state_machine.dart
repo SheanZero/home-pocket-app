@@ -17,6 +17,8 @@ library;
 
 import 'package:flutter/foundation.dart' show protected;
 
+import '../../shared/constants/voice_currency_suffixes.dart';
+
 // ---------------------------------------------------------------------------
 // Token taxonomy (D-07)
 // ---------------------------------------------------------------------------
@@ -88,6 +90,40 @@ abstract class NumeralStateMachine {
   /// Every recognized character/entry maps to a [NumeralToken].
   /// Non-numeric characters should map to [Skip].
   List<NumeralToken> normalize(String text);
+
+  /// Detects a spoken currency token in [text] and returns it as a raw token
+  /// (e.g. `美元`, `香港ドル`, or the bare `元`/`円`), or null if none present.
+  ///
+  /// Phase 42 (VOICE-CUR-01/02/03): the numeral path strips currency tokens
+  /// from the amount silently; this method runs the SAME longest-first scan
+  /// over [VoiceCurrencySuffixes.all] separately so the detected currency is
+  /// returned WITHOUT polluting the integer amount result (T-42-07). ISO-code
+  /// and bare-token/locale resolution is the caller's responsibility — the raw
+  /// token is returned so the use-case layer can disambiguate locale-dependent
+  /// bare `元` (zh→CNY, ja→JPY per D-08 locked) from explicit foreign tokens.
+  ///
+  /// Returns the FIRST (leftmost) longest match so `香港ドル` wins over the
+  /// `ドル` substring it contains, mirroring the [all] ordering invariant.
+  ///
+  /// Pure: [text] is not mutated; a new string token (or null) is returned.
+  String? detectCurrencyToken(String text) {
+    String? bestToken;
+    var bestIndex = -1;
+    for (final token in VoiceCurrencySuffixes.all) {
+      final idx = text.indexOf(token);
+      if (idx < 0) continue;
+      // Prefer the leftmost occurrence. A longer token that contains a shorter
+      // one (e.g. 香港ドル ⊃ ドル, 日元 ⊃ 元) always starts at an index ≤ the
+      // shorter token's index, so leftmost-wins resolves to the longest token.
+      // On an exact index tie, [all]'s longest-first ordering keeps the longer
+      // token (first-seen at that index is retained).
+      if (bestIndex < 0 || idx < bestIndex) {
+        bestIndex = idx;
+        bestToken = token;
+      }
+    }
+    return bestToken;
+  }
 
   /// Shared scanner (Pattern 1 in RESEARCH.md). Concrete classes call this.
   ///
