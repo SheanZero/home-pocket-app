@@ -20,7 +20,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../application/accounting/create_transaction_use_case.dart';
 import '../../../../application/accounting/update_transaction_use_case.dart';
 import '../../../../application/currency/get_exchange_rate_use_case.dart';
-import '../../../../application/currency/rate_result.dart';
 import '../../../../application/currency/repository_providers.dart';
 import '../../../../application/i18n/formatter_service.dart';
 import '../../../../core/theme/app_palette.dart';
@@ -36,6 +35,8 @@ import '../../domain/models/transaction_details_form_config.dart';
 import '../providers/repository_providers.dart';
 import '../screens/category_selection_screen.dart';
 import '../utils/category_display_utils.dart';
+import '../widgets/conversion_preview_panel.dart'
+    show rateStringOf, rateEffectiveDateOf, stalenessNoteFor;
 import '../widgets/currency_linked_edit_fields.dart';
 import '../widgets/detail_info_card.dart';
 import '../widgets/keyboard_toolbar.dart' show kKeyboardToolbarTapRegionGroup;
@@ -56,9 +57,18 @@ class TransactionDetailsForm extends ConsumerStatefulWidget {
     this.noteFocusNode,
     this.onPickerDismissed,
     this.onForeignChanged,
+    this.onDateChanged,
   });
 
   final TransactionDetailsFormConfig config;
+
+  /// Quick 260613-ufn (D-4): fired with the new transaction date whenever the
+  /// form's internal date changes via the date picker. The ADD screen
+  /// (ManualOneStepScreen) wires this to keep its own `_selectedDate` in
+  /// lock-step so the keyed `conversionRateProvider` re-resolves the rate for
+  /// the new date and the unified card's 汇率/日元/汇率日期/staleness update. Null
+  /// in hosts (edit) that own the date and the card together.
+  final ValueChanged<DateTime>? onDateChanged;
 
   /// Phase 42-09 / UAT fix: fired with the full [CurrencyLinkedEditValue]
   /// (original amount in minor units + applied rate + derived JPY) whenever a
@@ -115,6 +125,20 @@ class TransactionDetailsFormState
   // previous last-good amount (the edit host stops firing onChanged in that
   // state, so _originalAmount/_amount would otherwise retain stale values).
   bool _foreignAmountInvalid = false;
+
+  // Quick 260613-ufn (D-2/D-4): the ACTUAL effective rate date + pre-resolved
+  // staleness note fed into the unified card's non-clickable 汇率日期 row. Both
+  // are derived from the SAME RateResult via the shared single staleness site
+  // (conversion_preview_panel.dart). Null until a rate has been resolved for
+  // the current date.
+  DateTime? _foreignActualRateDate;
+  String? _foreignStalenessNote;
+
+  /// Card key (quick 260613-ufn D-4): lets the date-picker flow invoke the
+  /// card's retained ADR-022 D-02/D-03 logic via triggerDateChangeRefetch()
+  /// after the date changes — the in-card clickable trigger was removed (D-3).
+  final GlobalKey<CurrencyLinkedEditFieldsState> _currencyCardKey =
+      GlobalKey<CurrencyLinkedEditFieldsState>();
 
   String? _initialCategoryId;
   LedgerType _ledgerType = LedgerType.daily;
@@ -454,6 +478,9 @@ class TransactionDetailsFormState
     final current = DateTime(_date.year, _date.month, _date.day);
     if (normalized == current) return;
     setState(() => _date = normalized);
+    // Quick 260613-ufn (D-4): an external date push (voice/host) on a foreign
+    // row also auto-refetches the rate through the card's D-02/D-03 logic.
+    _onForeignDateChanged();
   }
 
   /// Item 4 (260526-j98): fires the host-supplied `onPickerDismissed` callback
@@ -551,6 +578,13 @@ class TransactionDetailsFormState
     );
     if (picked != null && mounted) {
       setState(() => _date = picked);
+      // Quick 260613-ufn (D-4): notify the host (add screen) so its
+      // `_selectedDate` + keyed rate provider re-resolve for the new date.
+      widget.onDateChanged?.call(picked);
+      // On an EDIT foreign row, the date-picker change auto-refetches the rate
+      // and runs ADR-022 D-02 dialog / D-03 toast via the card (replaces the
+      // removed in-card clickable trigger — D-3).
+      await _onForeignDateChanged();
     }
     // Item 4: fire dismissal callback on BOTH pick and cancel paths.
     _notifyPickerDismissed();
@@ -576,18 +610,38 @@ class TransactionDetailsFormState
     final withSignal = await useCase.execute(
       GetExchangeRateParams(currency: currency, date: _date),
     );
-    return _extractRate(withSignal.result);
+    final result = withSignal.result;
+
+    // Quick 260613-ufn (D-2): derive the actual effective rate date + staleness
+    // note from the SAME RateResult via the shared single staleness site so the
+    // card's 汇率日期 row + amber note reflect this re-fetch. Side-effect of the
+    // re-fetch — kept in this one-shot read, never in a watch (Riverpod 3).
+    if (mounted) {
+      final locale = Localizations.localeOf(context);
+      setState(() {
+        _foreignActualRateDate = rateEffectiveDateOf(result, _date);
+        _foreignStalenessNote = stalenessNoteFor(
+          result: result,
+          requestedDate: _date,
+          l10n: S.of(context),
+          locale: locale,
+        );
+      });
+    }
+
+    return rateStringOf(result);
   }
 
-  /// Rate string for any rate-bearing variant; null for [RateUnavailable]
-  /// (mirrors the entry preview's extraction — never throws).
-  String? _extractRate(RateResult result) => switch (result) {
-    RateFetched(:final rate) => rate,
-    RateCached(:final rate) => rate,
-    RateFallback(:final rate) => rate,
-    RateManual(:final rate) => rate,
-    RateUnavailable() => null,
-  };
+  /// Quick 260613-ufn (D-4): the date-picker change handler for a FOREIGN edit
+  /// row. After [_editDate] / [updateDate] set the new `_date`, this routes the
+  /// re-fetch through the card's retained ADR-022 D-02 dialog / D-03 toast logic
+  /// (the in-card clickable trigger was removed — D-3). The card's
+  /// [DateChangeRefetchRateSource] reads the REAL use case (single fetch, which
+  /// also seeds `_foreignActualRateDate` / `_foreignStalenessNote`).
+  Future<void> _onForeignDateChanged() async {
+    if (_originalCurrency == null) return;
+    await _currencyCardKey.currentState?.triggerDateChangeRefetch();
+  }
 
   // ── Public submit() — invoked by host CTA via GlobalKey (D-02) ─────────────
 
@@ -918,14 +972,18 @@ class TransactionDetailsFormState
                 _appliedRate != null) ...[
               _formCard(
                 child: CurrencyLinkedEditFields(
-                  key: const ValueKey('currency-linked-edit-fields'),
+                  key: _currencyCardKey,
                   originalCurrency: _originalCurrency!,
                   originalAmount: _originalAmount!,
                   appliedRate: _appliedRate!,
                   manualOverride: false,
-                  // Quick 260613-n5c: the date-change trigger shows the txn's
-                  // actual date (DateFormatter), seeded from _date (seed.timestamp).
+                  // Quick 260613-ufn: requested txn date; the non-clickable
+                  // 汇率日期 row shows the ACTUAL effective date below.
                   rateDate: _date,
+                  // Quick 260613-ufn (D-2): actual effective rate date +
+                  // staleness note derived from the same re-fetch (shared site).
+                  actualRateDate: _foreignActualRateDate,
+                  stalenessNote: _foreignStalenessNote,
                   // GAP-CLOSURE: feed the host's REAL exchange-rate re-fetch into
                   // the edit host's D-02/D-03 logic (drops the 160.00 stub).
                   dateChangeRefetchRate: _refetchRateForCurrentDate,

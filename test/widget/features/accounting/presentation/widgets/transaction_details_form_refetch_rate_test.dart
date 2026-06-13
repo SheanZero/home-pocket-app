@@ -1,11 +1,13 @@
 /// Phase 42 GAP-CLOSURE — proves the edit host's date-change re-fetch consumes
 /// the REAL `appGetExchangeRateUseCaseProvider` (no 160.00 stub).
 ///
-/// The edit host (`CurrencyLinkedEditFields`, mounted by `TransactionDetailsForm`
-/// for a FOREIGN edit row) routes its date-change trigger through a host-supplied
-/// rate source that reads the real exchange-rate use case. These tests override
-/// that provider with a fake returning a KNOWN rate and assert the resulting
-/// ADR-022 D-02 dialog / D-03 toast is driven by THAT rate — never a constant.
+/// Quick 260613-ufn (D-3/D-4): the in-card clickable `edit_date_change_trigger`
+/// TextButton was REMOVED. The date-change re-fetch now fires from the DATE
+/// PICKER flow — `TransactionDetailsForm.updateDate` (the same method the date
+/// picker / voice push route through) calls `_onForeignDateChanged`, which runs
+/// the card's retained ADR-022 D-02 dialog / D-03 toast logic via
+/// `triggerDateChangeRefetch()`. These tests drive that path through `updateDate`
+/// and assert the toast/undo are driven by the REAL fake-resolved rate.
 library;
 
 import 'package:flutter/material.dart';
@@ -26,6 +28,7 @@ import 'package:home_pocket/features/accounting/domain/repositories/category_rep
 import 'package:home_pocket/features/accounting/domain/repositories/merchant_category_preference_repository.dart';
 import 'package:home_pocket/application/accounting/merchant_category_learning_service.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/accounting/presentation/widgets/currency_linked_edit_fields.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/transaction_details_form.dart';
 
 import '../../../../../helpers/test_localizations.dart';
@@ -174,20 +177,20 @@ List<Override> _overrides(_FakeGetExchangeRateUseCase fakeRate) => [
 ];
 
 void main() {
-  Future<_FakeGetExchangeRateUseCase> pumpEditForm(
-    WidgetTester tester, {
-    required String fakeRate,
-  }) async {
+  Future<(_FakeGetExchangeRateUseCase, GlobalKey<TransactionDetailsFormState>)>
+  pumpEditForm(WidgetTester tester, {required String fakeRate}) async {
     tester.view.physicalSize = const Size(402, 1200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
     final fake = _FakeGetExchangeRateUseCase(fakeRate);
+    final formKey = GlobalKey<TransactionDetailsFormState>();
     await tester.pumpWidget(
       createLocalizedWidget(
         Scaffold(
           body: TransactionDetailsForm(
+            key: formKey,
             config: TransactionDetailsFormConfig.edit(seed: _foreignSeedTx()),
           ),
         ),
@@ -195,22 +198,26 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    return fake;
+    return (fake, formKey);
   }
 
   testWidgets(
-    'foreign-row date change consumes the REAL rate provider for D-03 toast',
+    'foreign-row DATE PICKER change consumes the REAL rate provider for D-03 toast',
     (tester) async {
       // Fake returns 160.00 for the new date → 5000c USD: 7415 → 8000 (+7.9%).
-      final fake = await pumpEditForm(tester, fakeRate: '160.00');
+      final (fake, formKey) = await pumpEditForm(tester, fakeRate: '160.00');
 
-      // The edit host renders for the foreign seed.
+      // The edit host renders for the foreign seed (D-3: no clickable trigger).
+      expect(find.byType(CurrencyLinkedEditFields), findsOneWidget);
       expect(
-        find.byKey(const ValueKey('currency-linked-edit-fields')),
-        findsOneWidget,
+        find.byKey(const Key('edit_date_change_trigger')),
+        findsNothing,
+        reason: 'the clickable date-change TextButton is removed (ufn D-3)',
       );
 
-      await tester.tap(find.byKey(const Key('edit_date_change_trigger')));
+      // A DATE-PICKER change routes through updateDate → _onForeignDateChanged →
+      // the card's retained D-02/D-03 logic (ufn D-4).
+      formKey.currentState!.updateDate(DateTime(2026, 5, 8));
       await tester.pumpAndSettle();
 
       // The REAL provider was consumed (not a stub constant).
@@ -218,8 +225,6 @@ void main() {
       expect(fake.lastParams?.currency, 'USD');
 
       // D-03: non-blocking toast driven by the fetched 160.00 → 8000 JPY.
-      // The toast text carries BOTH old (7,415) and new (8,000) JPY from the
-      // REAL re-fetch — proving the stub constant is gone.
       expect(find.byType(SnackBar), findsOneWidget);
       expect(
         find.textContaining('¥7,415 → ¥8,000'),
@@ -234,9 +239,9 @@ void main() {
   testWidgets(
     'toast Undo restores the OLD rate (JPY back to 7,415) using real provider',
     (tester) async {
-      await pumpEditForm(tester, fakeRate: '160.00');
+      final (_, formKey) = await pumpEditForm(tester, fakeRate: '160.00');
 
-      await tester.tap(find.byKey(const Key('edit_date_change_trigger')));
+      formKey.currentState!.updateDate(DateTime(2026, 5, 8));
       await tester.pumpAndSettle();
 
       final undo = find.byKey(const Key('toast_undo_button'));

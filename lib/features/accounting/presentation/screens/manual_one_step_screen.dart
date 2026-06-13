@@ -18,6 +18,7 @@ import '../providers/repository_providers.dart';
 import '../widgets/amount_display.dart';
 import '../widgets/amount_input_controller.dart';
 import '../widgets/conversion_preview_panel.dart';
+import '../widgets/currency_linked_edit_fields.dart';
 import '../widgets/currency_selector_sheet.dart';
 import '../widgets/entry_mode_switcher.dart';
 import '../widgets/input_mode_tabs.dart';
@@ -116,6 +117,14 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
   String _currency = 'JPY';
 
   bool get _isForeign => _currency.toUpperCase() != 'JPY';
+
+  // Quick 260613-ufn (D-1): the add screen now renders the unified
+  // CurrencyLinkedEditFields card whose 汇率 row is EDITABLE. When the user
+  // hand-edits the rate this holds the override string so `_pushForeignTriple`
+  // persists the edited rate (manual override) instead of the auto-resolved
+  // one. Cleared whenever the currency or date changes (the override is keyed
+  // to a specific currency+date rate; a fresh re-resolve supersedes it).
+  String? _manualForeignRate;
 
   /// Entered amount in the active currency's MINOR units (cents for USD,
   /// whole units for JPY). Derived from the controller text via the currency's
@@ -337,6 +346,26 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
       );
       return;
     }
+    // Quick 260613-ufn (D-1): a user-edited (manual-override) rate wins over the
+    // auto-resolved one. validateAppliedRate gates a malformed override out so
+    // we never persist garbage; an invalid override falls through to the
+    // auto-resolved rate (the card surfaces its own inline error).
+    final manualRate = _manualForeignRate;
+    if (manualRate != null && validateAppliedRate(manualRate) == null) {
+      final jpy = convertToJpy(
+        originalMinorUnits: minorUnits,
+        appliedRate: manualRate,
+        subunitToUnit: subunitToUnitFor(currency),
+      );
+      _formKey.currentState?.updateAmount(jpy);
+      _formKey.currentState?.updateCurrencyTriple(
+        originalCurrency: currency,
+        originalAmount: minorUnits,
+        appliedRate: manualRate,
+      );
+      return;
+    }
+
     final args = ConversionPreviewArgs(
       currency: currency,
       date: date,
@@ -421,6 +450,39 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
     // No-op on the entry screen (see doc comment). 42-09 wires the real UX.
   }
 
+  /// Quick 260613-ufn (D-4): the form's date picker changed the transaction
+  /// date. Update the screen's `_selectedDate` so the keyed
+  /// `conversionRateProvider(currency,date,amount)` re-resolves the rate for the
+  /// new date and the unified card's 汇率/日元/汇率日期/staleness all update. A
+  /// date change supersedes any manual override (the override was keyed to the
+  /// previous date's rate), then re-pushes the freshly-resolved triple.
+  void _onFormDateChanged(DateTime date) {
+    final normalized = DateTime(date.year, date.month, date.day);
+    if (normalized == DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+    )) {
+      return;
+    }
+    setState(() {
+      _selectedDate = normalized;
+      _manualForeignRate = null;
+    });
+    if (_isForeign) {
+      _pushForeignTriple();
+    }
+  }
+
+  /// Quick 260613-ufn (D-1): the user hand-edited the 汇率 row in the unified
+  /// card. Record the override so `_pushForeignTriple` persists the edited rate
+  /// (manual override) and immediately push the recomputed triple. The card's
+  /// own derived JPY row already reflects the edit (single convertToJpy site).
+  void _onForeignRateEdited(CurrencyLinkedEditValue value) {
+    setState(() => _manualForeignRate = value.appliedRate);
+    _pushForeignTriple();
+  }
+
   // ── Currency selection (CURR-01/03/05) ──
 
   /// CURR-01: open the currency selector without leaving the entry screen.
@@ -451,6 +513,9 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
       // D-08: truncate-not-round to the new minor unit; adopts the new cap.
       _controller.onCurrencyChange(newDecimals);
       _amount = _controller.text;
+      // Quick 260613-ufn: a currency change supersedes any manual rate override
+      // (the override was keyed to the previous currency's rate).
+      _manualForeignRate = null;
     });
     _syncAmountToForm();
   }
@@ -533,6 +598,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
       _controller.onCurrencyChange(currencyFractionDigitsFor(_currency));
       _amount = '';
       _selectedDate = DateTime.now();
+      _manualForeignRate = null;
     });
     final formState = _formKey.currentState;
     formState?.updateAmount(0);
@@ -623,21 +689,22 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
                 ),
               ),
 
-              // DISP-01 / CURR-04: live JPY conversion preview — mounted ONLY
-              // for foreign currencies AND only once an amount is entered. For
-              // JPY it is never built (no rate fetch, no panel), keeping the JPY
-              // path byte-identical.
+              // Quick 260613-ufn (D-1): the large ≈¥ ConversionPreviewPanel
+              // block was REMOVED. The unified CurrencyLinkedEditFields card
+              // (same as the edit screen) renders the foreign conversion area —
+              // 汇率 (editable) / 日元（换算）(derived) / 汇率日期 (non-clickable +
+              // staleness). Mounted ONLY for foreign rows with an amount; the
+              // JPY path stays byte-identical (CURR-04).
               if (_isForeign && _originalMinorUnits > 0)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: ConversionPreviewPanel(
-                      currency: _currency,
-                      date: _selectedDate,
-                      originalMinorUnits: _originalMinorUnits,
-                      onSignal: _onRateSignal,
-                    ),
+                  child: _AddScreenForeignCard(
+                    currency: _currency,
+                    date: _selectedDate,
+                    originalMinorUnits: _originalMinorUnits,
+                    manualRateOverride: _manualForeignRate,
+                    onRateEdited: _onForeignRateEdited,
+                    onSignal: _onRateSignal,
                   ),
                 ),
 
@@ -664,6 +731,10 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
                     // Item 4 (260526-j98): reclaim amount focus after date /
                     // category picker dismisses so SmartKeyboard reappears.
                     onPickerDismissed: _restoreKeypadFocus,
+                    // Quick 260613-ufn (D-4): keep the screen's _selectedDate in
+                    // lock-step with the form's date picker so the keyed rate
+                    // provider re-resolves the rate for the new date.
+                    onDateChanged: _onFormDateChanged,
                   ),
                 ),
               ),
@@ -708,6 +779,143 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Quick 260613-ufn (D-1): thin Consumer wrapper that mounts the unified
+/// [CurrencyLinkedEditFields] card on the ADD screen, fed by the keyed
+/// [conversionRateProvider]. It reuses the SAME card and the SAME single
+/// staleness-derivation site as the edit host — the two screens are now visually
+/// and interactively identical (no large ≈¥ preview block).
+///
+/// Date auto-refetch (D-4): because the provider is keyed on (currency, date,
+/// amount), the host bumping `_selectedDate` re-resolves the rate and re-seeds
+/// the card's 汇率 / 日元 / 汇率日期 / staleness. A user hand-edit of the 汇率 row
+/// flips manual override via [onRateEdited] (the host persists the edited rate).
+class _AddScreenForeignCard extends ConsumerWidget {
+  const _AddScreenForeignCard({
+    required this.currency,
+    required this.date,
+    required this.originalMinorUnits,
+    required this.manualRateOverride,
+    required this.onRateEdited,
+    required this.onSignal,
+  });
+
+  final String currency;
+  final DateTime date;
+  final int originalMinorUnits;
+
+  /// Active manual-override rate (null when the auto-resolved rate is in use).
+  /// When set it seeds the card so the user's edit survives provider re-reads.
+  final String? manualRateOverride;
+
+  /// Fired when the user hand-edits the 汇率 row (manual override).
+  final ValueChanged<CurrencyLinkedEditValue> onRateEdited;
+
+  /// ADR-022 RateSignal sink (D-02/D-03), forwarded via ref.listen only.
+  final void Function(RateSignal signal) onSignal;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = S.of(context);
+    final locale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
+
+    final args = ConversionPreviewArgs(
+      currency: currency,
+      date: date,
+      originalMinorUnits: originalMinorUnits,
+    );
+
+    // RateSignal side-effects (D-02 dialog / D-03 toast) belong in ref.listen,
+    // NEVER ref.watch (Riverpod 3 — CLAUDE.md side-effect rule).
+    ref.listen<AsyncValue<RateResultWithSignal>>(
+      conversionRateProvider(args),
+      (previous, next) {
+        final signal = next.value?.signal;
+        if (signal != null) onSignal(signal);
+      },
+    );
+
+    final rateAsync = ref.watch(conversionRateProvider(args));
+
+    return rateAsync.when(
+      loading: () => const SizedBox(
+        height: kAddScreenForeignCardLoadingHeight,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      ),
+      error: (_, _) => _RateRequiredRow(l10n: l10n, palette: context.palette),
+      data: (withSignal) {
+        final result = withSignal.result;
+        final resolvedRate = rateStringOf(result);
+        // RateUnavailable (P41 D-08): prompt for a manual rate; the host's
+        // _pushForeignTriple already withholds the triple so save is gated.
+        if (resolvedRate == null && manualRateOverride == null) {
+          return _RateRequiredRow(l10n: l10n, palette: context.palette);
+        }
+        // A user-edited (manual) rate wins over the auto-resolved one as the
+        // seed, so the edit survives provider re-reads.
+        final seedRate = manualRateOverride ?? resolvedRate!;
+        final actualRateDate = rateEffectiveDateOf(result, date);
+        final stalenessNote = manualRateOverride != null
+            ? null // manual override supersedes the auto-rate staleness
+            : stalenessNoteFor(
+                result: result,
+                requestedDate: date,
+                l10n: l10n,
+                locale: locale,
+              );
+
+        return CurrencyLinkedEditFields(
+          // Re-seed the card when the resolved/override rate changes (date
+          // re-resolve or currency switch) — a stable key preserves in-card
+          // edits within the same seed.
+          key: ValueKey('add-foreign-card-$currency-$seedRate'),
+          originalCurrency: currency,
+          originalAmount: originalMinorUnits,
+          appliedRate: seedRate,
+          manualOverride: manualRateOverride != null,
+          rateDate: date,
+          actualRateDate: actualRateDate,
+          stalenessNote: stalenessNote,
+          onChanged: onRateEdited,
+        );
+      },
+    );
+  }
+}
+
+/// Fixed loading height so the add-screen card area does not jump while the
+/// keyed rate provider resolves.
+const double kAddScreenForeignCardLoadingHeight = 56;
+
+/// Mandatory-manual-rate prompt row (P41 D-08 / RateUnavailable) for the add
+/// screen. Error color — save is gated on a present rate by the host.
+class _RateRequiredRow extends StatelessWidget {
+  const _RateRequiredRow({required this.l10n, required this.palette});
+
+  final S l10n;
+  final AppPalette palette;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          l10n.conversionRateRequired,
+          style: AppTextStyles.labelMedium.copyWith(color: palette.error),
+        ),
       ),
     );
   }
