@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: 多币种支持
-status: executing
+status: verifying
 stopped_at: Completed 41-02-PLAN.md
-last_updated: "2026-06-13T00:10:39.170Z"
+last_updated: "2026-06-13T00:19:38.783Z"
 last_activity: 2026-06-12 -- Phase 41 execution started
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 11
-  completed_plans: 10
-  percent: 33
+  completed_plans: 11
+  percent: 67
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 
 Phase: 41 (exchange-rate-service) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-06-12 -- Phase 41 execution started
 
 Progress: [░░░░░░░░░░] 0%
@@ -127,7 +127,7 @@ No active blockers for v1.7. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-13T00:10:22.917Z
+Last session: 2026-06-13T00:19:21.599Z
 Stopped at: Completed 41-02-PLAN.md
 Resume file: None
 
@@ -139,6 +139,7 @@ Resume file: None
 | Phase 41 P02 | 5min | 2 tasks | 2 files |
 | Phase 41 P03 | 2min | 2 tasks | 3 files |
 | Phase 41 P04 | 6min | 3 tasks | 13 files |
+| Phase 41 P05 | 7min | 2 tasks | 4 files |
 
 ## Decisions
 
@@ -146,3 +147,4 @@ Resume file: None
 - [Phase ?]: 41-02: connectivity_plus ^7.1.1 added (D-05 gate); flutter pub get clean, all pins intact (file_picker 11.0.2 / package_info_plus 9.0.1 / share_plus 12.0.2 / win32 5.15.0 / intl 0.20.2 / sqlcipher 0.6.8); iOS debug build human-verified green (no sqlite3 symbol conflict)
 - [Phase ?]: 41-03: ExchangeRateApiClient three-source fallback (Frankfurter→fawazahmed0 jsDelivr→Cloudflare); 404/timeout/non-200 route onward, all-fail throws; rate inversion 1/raw toStringAsPrecision(7); actualRateDate surfaces weekend/holiday (RATE-05); RateResult sealed union (5 variants) + RateSignal/RateResultWithSignal
 - [Phase 41]: 41-04: ExchangeRateCacheService cache-first orchestration (D-01/D-03/D-05/D-06/D-07/D-08/D-09), getRate never throws; GetExchangeRateUseCase adds ADR-022 D-02 dialog/D-03 toast + RATE-04 manual override; BackupData.exchangeRates D-10 export+import; SC-5 verified (0 HTTP in accounting)
+- [Phase ?]: 41-05: Three @riverpod providers wired (appExchangeRateApiClient/CacheService/GetExchangeRateUseCase); build_runner regenerated .g.dart; full suite 2705/2705 GREEN, analyze 0, architecture 47/47; SC-5 holds. Phase 42 can ref.watch(appGetExchangeRateUseCaseProvider). Fixed 2 carry regressions (logging-privacy scanner false-positive in api_client; backup characterization test missing appExchangeRateRepositoryProvider override)

@@ -113,7 +113,7 @@
 **Milestone Goal:** 记账支持外币输入——小键盘选币种、按账目日期自动取汇率转换成日元入账，原币种/原金额/汇率作为附加字段保留并在 UI 中可见。
 
 - [x] **Phase 40: 数据与同步基础 (Data Foundation + Domain + Sync)** — ADRs (rate precision / hash scope / edit policy); CNY `¥` symbol fix; Drift v20→v21 migration (`exchange_rates` cache table + 3 nullable `transactions` columns); `ExchangeRateDao` + repository; `Transaction` Freezed extension; `TransactionSyncMapper` null-safe passthrough + round-trip tests; partial-triple domain invariant (completed 2026-06-12)
-- [ ] **Phase 41: 汇率服务 (Exchange Rate Service)** — `ExchangeRateApiClient` (Frankfurter primary + fawazahmed0 fallback); `ExchangeRateCacheService` (cache-first, offline fallback, weekend date transparency); application use cases with sealed `RateResult`; manual override semantics; date-change re-fetch policy; never-block-save invariant; privacy verification
+- [x] **Phase 41: 汇率服务 (Exchange Rate Service)** — `ExchangeRateApiClient` (Frankfurter primary + fawazahmed0 fallback); `ExchangeRateCacheService` (cache-first, offline fallback, weekend date transparency); application use cases with sealed `RateResult`; manual override semantics; date-change re-fetch policy; never-block-save invariant; privacy verification (completed 2026-06-13)
 - [ ] **Phase 42: 输入与展示 + 语音 (Entry UI + Display + Voice)** — SmartKeyboard currency selector + `CurrencySelectorSheet`; decimal input gate per ISO 4217 minor unit; live JPY conversion preview; foreign-currency list annotation; detail/edit full display + three-field bidirectional linked editing; zh/ja voice currency words (parallel wave inside the phase); i18n + goldens
 
 ## Phase Details
@@ -181,7 +181,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 41-05-PLAN.md — Riverpod provider wiring + full suite GREEN
+- [x] 41-05-PLAN.md — Riverpod provider wiring + full suite GREEN
 
 ### Phase 42: 输入与展示 + 语音 (Entry UI + Display + Voice)
 
