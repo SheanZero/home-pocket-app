@@ -149,7 +149,15 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
   /// Opens [AmountEditBottomSheet] for amount editing (D-14 spillover modal-sheet UX).
   ///
   /// On confirm: updates host display state AND pushes value to form via [updateAmount].
+  ///
+  /// Quick 260613-n5c (改动2): pressing the keypad 保存/record action key now
+  /// completes the WHOLE-entry save (delegates to the existing [_save] →
+  /// submit + success feedback + pop(true)), not just a write-back. The local
+  /// `confirmed` flag is set ONLY inside [AmountEditBottomSheet.onConfirm] (which
+  /// fires on the action key, never on swipe-dismiss), so swiping the sheet away
+  /// leaves `confirmed == false` and triggers no save.
   Future<void> _editAmount() async {
+    var confirmed = false;
     await AmountEditBottomSheet.show(
       context,
       initialAmount: _displayAmount,
@@ -157,8 +165,10 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
         if (!mounted) return;
         setState(() => _displayAmount = v);
         _formKey.currentState?.updateAmount(v);
+        confirmed = true;
       },
     );
+    if (confirmed && mounted) await _save();
   }
 
   /// The ISO currency symbol for [currency], stripped from a formatted zero the
@@ -180,6 +190,7 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
   Future<void> _editForeignAmount(String currency) async {
     final locale =
         ref.read(currentLocaleProvider).value ?? const Locale('ja');
+    var confirmed = false;
     await AmountEditBottomSheet.show(
       context,
       initialAmount: _displayOriginalMinor,
@@ -190,8 +201,14 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
         if (!mounted) return;
         setState(() => _displayOriginalMinor = minor);
         _formKey.currentState?.updateOriginalAmount(minor);
+        confirmed = true;
       },
     );
+    // Quick 260613-n5c (改动2): keypad 保存 → whole-entry save. onConfirm wrote
+    // the original-amount into form state synchronously (before show() resolved),
+    // so _save() submits the up-to-date triple. Swipe-dismiss → confirmed stays
+    // false → no save.
+    if (confirmed && mounted) await _save();
   }
 
   @override
