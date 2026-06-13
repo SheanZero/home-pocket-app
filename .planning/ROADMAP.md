@@ -197,17 +197,31 @@ Plans:
   5. zh voice "五十美元" and ja voice "50ドル" both parse to `{amount: 50, detectedCurrency: 'USD'}` with 欧元/英镑/港币/澳元/加元 and ユーロ/ポンド/香港ドル/豪ドル mapping to their ISO codes; bare 「元」 keeps its existing JPY-terminator behavior and bare 「ドル」 defaults to USD; the detected currency flows through the shared form (editable before save) and triggers the normal rate-fetch flow; voice corpus tests pass with ≥5 cases per currency per locale and all existing corpus tests unchanged
 
 **Planning note**: ROADMAP Goal + SC-4 "bidirectional three-field linked editing / editing any one recalculates the others" is **VOID** — superseded by ADR-022 D-01 (ratified 2026-06-12) and CONTEXT.md D-10: the edit host is **two-input / one-derived** (original amount + rate editable; JPY read-only derived via `convertToJpy()`, never directly assigned). Plans implement the two-input/one-derived model; three-field bidirectional editing is forbidden (circular-dependency risk).
-
 **Plans**: 9 plans in 5 waves
+**Wave 1**
+
 - [ ] 42-01-PLAN.md — Wave 0 failing-test scaffolding (SC-5 smoke, D-07/D-08, voice corpus, ADR-022 edit, update-plumbing) [W1]
 - [ ] 42-02-PLAN.md — Shared foundation: per-currency decimals via intl currencyFractionDigits (convertToJpy unchanged) [W1]
 - [ ] 42-03-PLAN.md — Plumbing gap: UpdateTransactionParams + use case carry the currency triple, recompute JPY, no rehash (ADR-021) [W1]
 - [ ] 42-04-PLAN.md — Voice wave (parallel): zh/ja currency detection → VoiceParseResult.detectedCurrency (VOICE-CUR-01/02/03) [W1]
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 42-05-PLAN.md — AmountInputController (D-07 cap / D-08 truncate) + SmartKeyboard dot-gating (D-06, 48dp) [W2]
 - [ ] 42-06-PLAN.md — CurrencySelectorSheet (JPY-first, search, more, flag rows) + recent-use session provider + ARB names [W2]
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 42-07-PLAN.md — Live JPY ConversionPreviewPanel (D-03/D-04/D-05; ref.listen signals; convertToJpy single site) [W3]
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 42-08-PLAN.md — Manual-entry host wiring (tappable currency key, controller, preview, triple → SC-5) + list foreign annotation [W4]
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
 - [ ] 42-09-PLAN.md — Edit-host two-input/one-derived (ADR-022 D-01/D-02/D-03) + voice confirmation surfacing [W5]
+
 **UI hint**: yes
 
 ## Milestone Progress
