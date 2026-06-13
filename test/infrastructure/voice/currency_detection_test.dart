@@ -142,6 +142,31 @@ void main() {
     });
   });
 
+  // ─── WR-03: bare-native token EARLIER than an explicit-foreign token ───
+  // Pure leftmost-wins mis-classified these as the bare-native currency. The
+  // explicit-foreign token must win regardless of position.
+  group('WR-03: bare-native-before-foreign prefers the explicit foreign token', () {
+    test('zh 元宝店买了美元 → USD (not CNY)', () async {
+      final r = await parseWith('元宝店买了美元', 'zh-CN');
+      expect(r.detectedCurrency, 'USD');
+    });
+
+    test('zh 五十块花了美元 → USD (块@2 must not beat 美元)', () async {
+      final r = await parseWith('五十块花了美元', 'zh-CN');
+      expect(r.detectedCurrency, 'USD');
+    });
+
+    test('ja 円高でも100ドル → USD (円@0 must not beat ドル)', () async {
+      final r = await parseWith('円高でも100ドル', 'ja-JP');
+      expect(r.detectedCurrency, 'USD');
+    });
+
+    test('containment preserved: ja 香港ドル still wins over ドル', () async {
+      final r = await parseWith('300香港ドル', 'ja-JP');
+      expect(r.detectedCurrency, 'HKD');
+    });
+  });
+
   // ─── Regression guard: existing non-currency extraction unchanged ───
   group('regression: existing non-currency corpus still parses', () {
     test('ja 昼ごはんに680円 → amount 680 (unchanged)', () async {

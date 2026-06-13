@@ -105,24 +105,44 @@ abstract class NumeralStateMachine {
   /// Returns the FIRST (leftmost) longest match so `香港ドル` wins over the
   /// `ドル` substring it contains, mirroring the [all] ordering invariant.
   ///
+  /// WR-03: an EXPLICIT-FOREIGN token (present in
+  /// [VoiceCurrencySuffixes.tokenToIso]) is preferred over a bare-native token
+  /// (元/円/块/ドル-as-native etc.) even when the bare-native token occurs
+  /// EARLIER in the string. Pure leftmost-wins mis-classified utterances like
+  /// `元宝店买了美元` (bare 元@0 beating 美元@4) as CNY; the explicit foreign
+  /// token is the user's actual currency intent. The leftmost/longest tie-break
+  /// is applied WITHIN each tier, so containment behavior (香港ドル ⊃ ドル) is
+  /// preserved (both are explicit-foreign, leftmost-wins picks 香港ドル).
+  ///
   /// Pure: [text] is not mutated; a new string token (or null) is returned.
   String? detectCurrencyToken(String text) {
-    String? bestToken;
-    var bestIndex = -1;
+    String? bestForeign;
+    var bestForeignIndex = -1;
+    String? bestNative;
+    var bestNativeIndex = -1;
+
     for (final token in VoiceCurrencySuffixes.all) {
       final idx = text.indexOf(token);
       if (idx < 0) continue;
-      // Prefer the leftmost occurrence. A longer token that contains a shorter
-      // one (e.g. 香港ドル ⊃ ドル, 日元 ⊃ 元) always starts at an index ≤ the
-      // shorter token's index, so leftmost-wins resolves to the longest token.
-      // On an exact index tie, [all]'s longest-first ordering keeps the longer
-      // token (first-seen at that index is retained).
-      if (bestIndex < 0 || idx < bestIndex) {
-        bestIndex = idx;
-        bestToken = token;
+      final isExplicitForeign =
+          VoiceCurrencySuffixes.tokenToIso.containsKey(token);
+      if (isExplicitForeign) {
+        // Leftmost-wins within the foreign tier; on an exact index tie [all]'s
+        // longest-first ordering keeps the longer token (first-seen retained).
+        if (bestForeignIndex < 0 || idx < bestForeignIndex) {
+          bestForeignIndex = idx;
+          bestForeign = token;
+        }
+      } else {
+        if (bestNativeIndex < 0 || idx < bestNativeIndex) {
+          bestNativeIndex = idx;
+          bestNative = token;
+        }
       }
     }
-    return bestToken;
+
+    // Prefer an explicit-foreign token over any bare-native token.
+    return bestForeign ?? bestNative;
   }
 
   /// Shared scanner (Pattern 1 in RESEARCH.md). Concrete classes call this.
