@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 Phase: 42 (entry-ui-display-voice) — EXECUTING
 Plan: 9 of 9
 Status: Phase complete — ready for verification
-Last activity: 2026-06-13 - Completed quick task 260613-wjx: 修复 Home 最近项编辑/删除后列表不刷新
+Last activity: 2026-06-13 - Completed quick task 260613-wuv: 外币输入时汇率/换算改为卡片样式（与编辑页一致），滚动时仅金额输入区置顶；外币金额输入增加防抖缓冲避免实时计算闪频
 
 Progress: [███████░░░] 65%
 
@@ -43,6 +43,7 @@ Progress: [███████░░░] 65%
 | 260613-ote | 长尾币种真实货币符号（NumberFormatter 新增 16 个：฿₹₱₫₽₺/Rp/RM/NZ$/R$/R/kr/MX$/zł；CHF/AED/SAR 保留三字码） | 2026-06-13 | e8ab6f82 | [260613-ote-longtail-currency-symbols](./quick/260613-ote-longtail-currency-symbols/) |
 | 260613-ufn | 统一外币添加/编辑两屏的汇率卡片（同一 CurrencyLinkedEditFields：汇率可编辑/日元只读/汇率日期不可点击+staleness；移除添加页 ≈¥ 预览块；改日期 picker 自动重查汇率两屏一致，编辑跑 ADR-022 D-02/D-03） | 2026-06-13 | 182241bd | [260613-ufn-unify-foreign-currency-card](./quick/260613-ufn-unify-foreign-currency-card/) |
 | 260613-wjx | 修复 Home 首页最近项编辑/删除后列表不刷新（onTap fire-and-forget → await pop 结果并 invalidateTransactionDependents，对齐 list_screen WR-03 契约；含回归测试） | 2026-06-13 | 72d52e15 | [260613-wjx-home-bug](./quick/260613-wjx-home-bug/) |
+| 260613-wuv | 外币输入时汇率/换算改为卡片样式（与编辑页一致），滚动时仅金额输入区置顶；外币金额输入增加防抖缓冲避免实时计算闪频 | 2026-06-13 | d98f7e92 | [260613-wuv-fx-input-card-debounce](./quick/260613-wuv-fx-input-card-debounce/) |
 
 ## Last Milestone Snapshot (v1.6)
 
