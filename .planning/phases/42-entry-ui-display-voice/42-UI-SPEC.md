@@ -50,14 +50,16 @@ Exceptions:
 
 ## Typography
 
-Roles below map to existing `AppTextStyles` constants (do not invent new sizes). 4 declared sizes for this phase's new surfaces, 2 weight tiers (semibold w600 / bold w700) consistent with the existing scale. Body/secondary text uses w500–w600.
+Roles below map to existing `AppTextStyles` constants (do not invent new sizes). 4 declared sizes for this phase's new surfaces, **exactly 2 weight tiers — w600 (body/caption) / w700 (display/heading)**. All secondary/caption text is w600; nothing in this phase uses w500.
+
+**Caption-weight note (brownfield, truthful mapping):** the default `AppTextStyles.caption` constant renders at **w500** (`app_text_styles.dart` line 88-93) and is used by other screens — changing it would risk unrelated golden baselines. This phase therefore maps its 12px caption/sub-row role to the existing **`AppTextStyles.labelMedium`** constant (12px, **w600**, `textSecondary`; line 121-126), which is already a w600 caption-sized role. This keeps the phase's declared scale a clean w600/w700 pair (NOT 3 weights) without mutating any shared constant.
 
 | Role | Size | Weight | Line Height | Maps to |
 |------|------|--------|-------------|---------|
 | Display (JPY preview main result `≈ ¥7,415`) | 30px | 700 | 0.9 | `AppTextStyles.amountLarge` (`.copyWith(color: palette.textPrimary)`) |
 | Heading (sheet title, edit-section title) | 18px | 700 | default | `AppTextStyles.headlineSmall` |
 | Body / selector row label (`USD 美元`) | 15px | 600 | default | `AppTextStyles.bodyLarge` / `titleMedium` |
-| Caption / sub-rows (preview rate sub-row, list annotation, staleness label) | 12px | 500 | default | `AppTextStyles.caption` |
+| Caption / sub-rows (preview rate sub-row, list annotation, staleness label) | 12px | 600 | default | `AppTextStyles.labelMedium` (12px w600 `textSecondary`) — NOT `AppTextStyles.caption` (w500) |
 
 Amount-bearing values everywhere (preview main row, list foreign annotation, edit-page read-only JPY) MUST use the `amount*` styles (tabular figures) — never plain `body*`.
 
