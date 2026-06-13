@@ -82,9 +82,6 @@ class CreateTransactionUseCase {
   static const _genesisHash =
       '0000000000000000000000000000000000000000000000000000000000000000';
 
-  /// ISO 4217 currency code shape: exactly 3 uppercase ASCII letters.
-  static final _iso4217 = RegExp(r'^[A-Z]{3}$');
-
   Future<Result<Transaction>> execute(CreateTransactionParams params) async {
     // 1. Validate input
     if (params.bookId.isEmpty) {
@@ -97,50 +94,25 @@ class CreateTransactionUseCase {
       return Result.error('categoryId must not be empty');
     }
 
-    // 1b. Partial-triple invariant (STORE-04): all three currency fields or none
-    final hasCurrencyField = params.originalCurrency != null ||
-        params.originalAmount != null ||
-        params.appliedRate != null;
-    final hasAllCurrencyFields = params.originalCurrency != null &&
-        params.originalAmount != null &&
-        params.appliedRate != null;
-    if (hasCurrencyField && !hasAllCurrencyFields) {
-      return Result.error(
-        'partial foreign-currency data: all three of originalCurrency, '
-        'originalAmount, appliedRate must be non-null together',
-      );
+    // 1b. Foreign-currency triple validation (STORE-04 partial-triple invariant,
+    // ADR-020 D-05 rate literal, WR-03 amount/currency shape) routed through the
+    // single shared validator in currency_conversion.dart — same site used by
+    // UpdateTransactionUseCase so the two never drift.
+    final tripleResult = validateCurrencyTriple(
+      originalCurrency: params.originalCurrency,
+      originalAmount: params.originalAmount,
+      appliedRate: params.appliedRate,
+    );
+    if (tripleResult.error != null) {
+      return Result.error(tripleResult.error!);
     }
-
-    // 1c. appliedRate validity check (D-05 per CONTEXT.md / ADR-020):
-    // plain decimal literal only — scientific notation and untrimmed input
-    // are rejected. Validation is hosted in currency_conversion.dart so all
-    // appliedRate parsing stays at the single parse site.
-    if (hasAllCurrencyFields) {
-      final rateError = validateAppliedRate(params.appliedRate!);
-      if (rateError != null) {
-        return Result.error(rateError);
-      }
-      // 1d. originalAmount / originalCurrency validity (Phase 40 review WR-03).
-      // An empty/malformed currency code would defeat the
-      // `originalCurrency != null` foreign-row discriminator (ADR-022 D-01).
-      if (params.originalAmount! <= 0) {
-        return Result.error('originalAmount must be greater than 0');
-      }
-      if (!_iso4217.hasMatch(params.originalCurrency!)) {
-        return Result.error(
-          'originalCurrency must be a 3-letter ISO 4217 code',
-        );
-      }
+    if (tripleResult.isForeign) {
       // 1e. amount ↔ triple consistency (Phase 40 review WR-04): the hashed
       // JPY amount MUST be the canonical conversion of the triple. Callers
       // must derive amount via convertToJpy (ADR-020 Pitfall 1 — inline
       // arithmetic divergence is undetectable once persisted, because the
       // triple is excluded from the hash chain per ADR-021).
-      final expectedAmount = convertToJpy(
-        originalMinorUnits: params.originalAmount!,
-        appliedRate: params.appliedRate!,
-        subunitToUnit: subunitToUnitFor(params.originalCurrency!),
-      );
+      final expectedAmount = tripleResult.jpyAmount!;
       if (params.amount != expectedAmount) {
         return Result.error(
           'amount (${params.amount}) does not match convertToJpy of the '

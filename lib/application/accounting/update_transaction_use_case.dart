@@ -1,6 +1,7 @@
 import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/models/transaction_sync_mapper.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
+import '../../shared/utils/currency_conversion.dart';
 import '../../shared/utils/result.dart';
 import '../family_sync/sync_engine.dart';
 import '../family_sync/transaction_change_tracker.dart';
@@ -38,6 +39,18 @@ class UpdateTransactionParams {
   final LedgerType? ledgerType;
   final int? joyFullness;
 
+  /// Foreign-currency provenance triple (originalCurrency / originalAmount /
+  /// appliedRate). Coalesce semantics (EDIT-02): `null` means "form did not
+  /// send an override — keep the seed's existing currency fields". When the
+  /// triple is supplied, [execute] recomputes [amount] via the single-site
+  /// `convertToJpy()` (ADR-020) and re-validates the partial-triple invariant.
+  ///
+  /// These fields are EXCLUDED from the hash chain (ADR-021) — editing them
+  /// never rehashes the row.
+  final String? originalCurrency;
+  final int? originalAmount;
+  final String? appliedRate;
+
   const UpdateTransactionParams({
     required this.seed,
     this.amount,
@@ -47,6 +60,9 @@ class UpdateTransactionParams {
     this.merchant,
     this.ledgerType,
     this.joyFullness,
+    this.originalCurrency,
+    this.originalAmount,
+    this.appliedRate,
   });
 }
 
@@ -86,19 +102,57 @@ class UpdateTransactionUseCase {
       return Result.error('categoryId must not be empty');
     }
 
+    // 1b. Foreign-currency triple (DISP-03/DISP-04). Coalesce each field from
+    //     the seed (EDIT-02 — omitted triple keeps the row's existing currency
+    //     provenance, does NOT null it out). The coalesced triple is then
+    //     validated and converted through the SAME shared site as
+    //     CreateTransactionUseCase (currency_conversion.dart), so the two paths
+    //     can never drift.
+    final originalCurrency =
+        params.originalCurrency ?? params.seed.originalCurrency;
+    final originalAmount = params.originalAmount ?? params.seed.originalAmount;
+    final appliedRate = params.appliedRate ?? params.seed.appliedRate;
+
+    final tripleResult = validateCurrencyTriple(
+      originalCurrency: originalCurrency,
+      originalAmount: originalAmount,
+      appliedRate: appliedRate,
+    );
+    if (tripleResult.error != null) {
+      return Result.error(tripleResult.error!);
+    }
+
+    // For a foreign row, the JPY `amount` is DERIVED from the triple via the
+    // single-site convertToJpy() (ADR-020 .round()) — never an inline product,
+    // and it overrides any explicit amount param so the stored amount always
+    // matches the triple. For a native (JPY) row, fall back to the normal
+    // amount coalesce.
+    final int resolvedAmount = tripleResult.isForeign
+        ? tripleResult.jpyAmount!
+        : (params.amount ?? params.seed.amount);
+
     // 2. Build updated row from seed.copyWith (CLAUDE.md Pitfall #4 — immutability)
     //    Coalesce fields: null param → keep seed value.
     //    Pass-through fields: note/merchant applied verbatim (null = user cleared).
     //    Immutable fields (id, bookId, deviceId, prevHash, currentHash, createdAt,
     //    entrySource) flow through copyWith default — D-07 / D-08 / SC-3.
+    //
+    //    Currency fields are EXCLUDED from the hash chain (ADR-021): editing
+    //    them recomputes `amount` but the row's prevHash/currentHash flow
+    //    through copyWith UNCHANGED — there is NO rehash on this path.
     final updated = params.seed.copyWith(
-      amount: params.amount ?? params.seed.amount,
+      amount: resolvedAmount,
       categoryId: params.categoryId ?? params.seed.categoryId,
       timestamp: params.timestamp ?? params.seed.timestamp,
-      note: params.note, // pass-through: no ?? — null clears the field (B1/EDIT-02)
-      merchant: params.merchant, // pass-through: no ?? — null clears the field (B1/EDIT-02)
+      note: params
+          .note, // pass-through: no ?? — null clears the field (B1/EDIT-02)
+      merchant: params
+          .merchant, // pass-through: no ?? — null clears the field (B1/EDIT-02)
       ledgerType: params.ledgerType ?? params.seed.ledgerType,
       joyFullness: params.joyFullness ?? params.seed.joyFullness,
+      originalCurrency: originalCurrency,
+      originalAmount: originalAmount,
+      appliedRate: appliedRate,
       updatedAt: DateTime.now(), // D-07: stamp on every save
       // entrySource, id, bookId, deviceId, prevHash, currentHash, createdAt
       // are preserved by copyWith default (D-07/D-08/SC-3).

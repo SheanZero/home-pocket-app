@@ -96,3 +96,102 @@ int currencyFractionDigitsFor(String currencyCode) {
 int subunitToUnitFor(String currencyCode) {
   return math.pow(10, currencyFractionDigitsFor(currencyCode)).toInt();
 }
+
+/// ISO 4217 currency code shape: exactly 3 uppercase ASCII letters.
+final _iso4217 = RegExp(r'^[A-Z]{3}$');
+
+/// Outcome of validating a foreign-currency triple (originalCurrency /
+/// originalAmount / appliedRate).
+///
+/// Mutually exclusive: exactly one of [error] / [jpyAmount] is non-null per
+/// instance, plus the [native] case where the row carries no currency fields.
+///
+/// - [CurrencyTripleResult.native]: no currency field set → JPY-native row.
+/// - [CurrencyTripleResult.invalid]: a validation rule failed → [error] set.
+/// - [CurrencyTripleResult.foreign]: full valid triple → [jpyAmount] is the
+///   canonical [convertToJpy] result (the value the hashed `amount` MUST equal).
+class CurrencyTripleResult {
+  const CurrencyTripleResult._({
+    this.error,
+    this.jpyAmount,
+    required this.isForeign,
+  });
+
+  /// No currency field present — JPY-native row.
+  const CurrencyTripleResult.native() : this._(isForeign: false);
+
+  /// A validation rule failed; [message] explains why.
+  const CurrencyTripleResult.invalid(String message)
+    : this._(error: message, isForeign: false);
+
+  /// Full valid triple; [amount] is the canonical converted JPY value.
+  const CurrencyTripleResult.foreign(int amount)
+    : this._(jpyAmount: amount, isForeign: true);
+
+  /// Non-null only on the invalid case.
+  final String? error;
+
+  /// Non-null only on the foreign case — the canonical [convertToJpy] result.
+  final int? jpyAmount;
+
+  /// True only on the foreign case (full valid triple present).
+  final bool isForeign;
+}
+
+/// Validates a foreign-currency triple and computes its canonical JPY amount.
+///
+/// This is the SINGLE validation+conversion site shared by
+/// `CreateTransactionUseCase` and `UpdateTransactionUseCase` (CLAUDE.md
+/// many-small-files: do not duplicate this block inline). It enforces, in
+/// order:
+/// 1. Partial-triple invariant (STORE-04): all three fields, or none.
+/// 2. [appliedRate] is a plain positive decimal literal (ADR-020 D-05).
+/// 3. [originalAmount] > 0 and [originalCurrency] is a 3-letter ISO 4217 code
+///    (Phase 40 review WR-03 — the foreign-row discriminator must be sound).
+///
+/// On a full valid triple it returns [CurrencyTripleResult.foreign] carrying
+/// `convertToJpy(...)` — the value the row's hashed `amount` MUST equal
+/// (ADR-020 Pitfall 1; inline arithmetic divergence is undetectable once
+/// persisted because the triple is excluded from the hash chain, ADR-021).
+CurrencyTripleResult validateCurrencyTriple({
+  required String? originalCurrency,
+  required int? originalAmount,
+  required String? appliedRate,
+}) {
+  final hasAny =
+      originalCurrency != null || originalAmount != null || appliedRate != null;
+  final hasAll =
+      originalCurrency != null && originalAmount != null && appliedRate != null;
+
+  if (!hasAny) {
+    return const CurrencyTripleResult.native();
+  }
+  if (!hasAll) {
+    return const CurrencyTripleResult.invalid(
+      'partial foreign-currency data: all three of originalCurrency, '
+      'originalAmount, appliedRate must be non-null together',
+    );
+  }
+
+  final rateError = validateAppliedRate(appliedRate);
+  if (rateError != null) {
+    return CurrencyTripleResult.invalid(rateError);
+  }
+  if (originalAmount <= 0) {
+    return const CurrencyTripleResult.invalid(
+      'originalAmount must be greater than 0',
+    );
+  }
+  if (!_iso4217.hasMatch(originalCurrency)) {
+    return const CurrencyTripleResult.invalid(
+      'originalCurrency must be a 3-letter ISO 4217 code',
+    );
+  }
+
+  final jpy = convertToJpy(
+    originalMinorUnits: originalAmount,
+    appliedRate: appliedRate,
+    subunitToUnit: subunitToUnitFor(originalCurrency),
+  );
+  return CurrencyTripleResult.foreign(jpy);
+}
