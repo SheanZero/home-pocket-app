@@ -33,7 +33,8 @@ findings:
   warning: 6
   info: 4
   total: 11
-status: issues_found
+status: resolved
+resolution: "CR-01 + 6 warnings fixed (2026-06-13); 4 Info items left as non-defects. Suite 2808/2808 green."
 ---
 
 # Phase 42: Code Review Report
@@ -270,3 +271,24 @@ A momentarily-empty field (user clearing to retype) sets `_originalAmount = -1`.
 _Reviewed: 2026-06-13T04:36:26Z_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
+
+---
+
+## Resolution (2026-06-13, user-approved)
+
+All findings were independently re-verified against the code by the orchestrator before fixing.
+**CR-01 + all 6 Warnings are FIXED**; full suite **2808/2808** green, `flutter analyze` 0 issues (+22 new tests).
+
+| ID | Status | Fix commit | Note |
+|----|--------|-----------|------|
+| CR-01 | ✅ Fixed | `f1e3b1ea` | Voice foreign save wired (`_pushVoiceForeignTriple` mirrors manual; complete triple or JPY-native fallback; localized) |
+| WR-01 | ✅ Fixed | `428b4d15` | `date` added to `foreignPushIsStale()` bail check |
+| WR-02 | ✅ Fixed | `428b4d15` | `updateAmount(0)` on RateUnavailable → stale-JPY save rejected |
+| WR-03 | ✅ Fixed | `41facf9a` | Explicit-foreign token preferred over earlier bare-native token |
+| WR-04 | ✅ Fixed | `7a38657b` | Second pass strips standalone suffix residue from keyword |
+| WR-05 | ✅ Fixed | `7e822993` | Edit host edits major-unit amount w/ decimal cap (reuses `AmountInputController`) |
+| WR-06 | ✅ Fixed | `7e822993` | `int?` instead of `-1` sentinel; inline amount error; Save gated (no silent desync) |
+
+**Info items (IN-01..04): deliberately NOT changed.** Per the reviewer's own notes these are non-defects
+or cosmetic (IN-01 harmless focus timing, IN-02 lone `dart:math` use, IN-03 redundant-but-correct
+category fallback, IN-04 stale comment on an intentional JPY-amount invariant). Left for optional future cleanup.
