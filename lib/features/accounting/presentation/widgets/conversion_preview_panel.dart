@@ -18,7 +18,7 @@ part 'conversion_preview_panel.g.dart';
 /// Fixed height of the preview block (main row + sub-row + gaps). The loading
 /// skeleton uses the SAME height so the panel does not jump when the rate
 /// resolves (D-04, RESEARCH Pitfall 5 — no text jump, no keyboard occlusion).
-const double _kPreviewBlockHeight = 56;
+const double kConversionPreviewBlockHeight = 56;
 
 /// Immutable key for [conversionRate]: the preview rate is recomputed only when
 /// one of (currency, date, original minor units) changes. Value equality keeps
@@ -199,7 +199,7 @@ class _PreviewSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     return SizedBox(
-      height: _kPreviewBlockHeight,
+      height: kConversionPreviewBlockHeight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -275,7 +275,7 @@ class _PreviewContent extends StatelessWidget {
     final staleness = _stalenessLabel(result, rateDate);
 
     return SizedBox(
-      height: staleness == null ? _kPreviewBlockHeight : null,
+      height: staleness == null ? kConversionPreviewBlockHeight : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -371,7 +371,7 @@ class _RateRequiredPrompt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: _kPreviewBlockHeight,
+      height: kConversionPreviewBlockHeight,
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
