@@ -412,11 +412,14 @@ Transitions:
 | A3 | Localized ja/zh currency names belong in ARB (no package supplies them) | Q1 | If a maintained ja/zh currency-name package is later found, could reduce ARB volume — low risk, ARB is the safe default. |
 | A4 | `feedback_toast.dart` `actionLabel`/`onAction` suffices for the D-03 undo toast | Don't Hand-Roll | Verified present; if the 5s-window + undo semantics need more, a thin wrapper may be needed (low risk). |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Recent-use ordering algorithm for the common zone (CURR-02):** "re-ordered by recent use" — LRU within the session? Recommendation: simple session LRU list (non-persisted), JPY pinned first regardless. Planner to confirm whether JPY participates in reordering (UI-SPEC says JPY always first → it does not reorder).
+   — RESOLVED: session LRU, JPY pinned first and does NOT reorder (implemented in 42-06).
 2. **"More" long-tail localized names:** ja/zh names for all ~150 ISO codes is heavy ARB volume. Recommendation: localize only the common zone; long-tail shows ISO code + English name. Confirm acceptable scope with planner.
+   — RESOLVED: localize common-zone currency names only; long-tail falls back to ISO code + English name (implemented in 42-06).
 3. **Dot-key replacement glyph (D-06):** what occupies the dot cell for 0-decimal currencies (blank disabled tile vs functional key)? Recommendation: disabled blank 48dp tile to preserve geometry; planner finalizes.
+   — RESOLVED: disabled blank 48dp tile, no layout collapse (implemented in 42-05).
 
 ## Environment Availability
 
