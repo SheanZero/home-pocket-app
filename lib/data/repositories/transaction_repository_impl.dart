@@ -50,6 +50,10 @@ class TransactionRepositoryImpl implements TransactionRepository {
       isSynced: transaction.isSynced,
       joyFullness: transaction.joyFullness,
       entrySource: transaction.entrySource.name,
+      // Phase 42 multi-currency triple — persist so foreign rows round-trip.
+      originalCurrency: transaction.originalCurrency,
+      originalAmount: transaction.originalAmount,
+      appliedRate: transaction.appliedRate,
     );
   }
 
@@ -113,6 +117,10 @@ class TransactionRepositoryImpl implements TransactionRepository {
       joyFullness: transaction.joyFullness,
       entrySource: transaction.entrySource.name,
       updatedAt: transaction.updatedAt,
+      // Phase 42 multi-currency triple — persist edited foreign values.
+      originalCurrency: transaction.originalCurrency,
+      originalAmount: transaction.originalAmount,
+      appliedRate: transaction.appliedRate,
     );
   }
 
@@ -216,6 +224,11 @@ class TransactionRepositoryImpl implements TransactionRepository {
       isDeleted: row.isDeleted,
       joyFullness: row.joyFullness,
       entrySource: EntrySource.values.byName(row.entrySource),
+      // Phase 42 multi-currency triple — map DB columns back so foreign rows
+      // read as foreign (edit host renders; list annotation shows). null = JPY.
+      originalCurrency: row.originalCurrency,
+      originalAmount: row.originalAmount,
+      appliedRate: row.appliedRate,
     );
   }
 }

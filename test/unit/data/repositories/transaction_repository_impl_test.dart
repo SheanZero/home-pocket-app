@@ -228,4 +228,77 @@ void main() {
       expect(count, 1);
     });
   });
+
+  // Phase 42 regression: the foreign-currency triple (originalCurrency /
+  // originalAmount / appliedRate) MUST round-trip through the real DAO + DB.
+  // Pre-fix, the repository dropped these on both write and read, so every
+  // foreign transaction read back JPY-native — the edit host showed JPY and the
+  // list annotation never appeared. These tests exercise the real persistence
+  // path (no mock repo), which the use-case mock tests could not catch.
+  group('multi-currency triple round-trip (Phase 42)', () {
+    Transaction foreignTx({
+      String id = 'tx_fx',
+      String? originalCurrency = 'USD',
+      int? originalAmount = 5000,
+      String? appliedRate = '148.30',
+      int amount = 7415,
+    }) => Transaction(
+      id: id,
+      bookId: 'book_001',
+      deviceId: 'dev_001',
+      amount: amount,
+      type: TransactionType.expense,
+      categoryId: 'cat_food',
+      ledgerType: LedgerType.daily,
+      timestamp: DateTime(2026, 6, 13, 10),
+      currentHash: 'hash_fx',
+      createdAt: DateTime(2026, 6, 13, 10),
+      originalCurrency: originalCurrency,
+      originalAmount: originalAmount,
+      appliedRate: appliedRate,
+    );
+
+    test('insert persists and findById reads back the full foreign triple',
+        () async {
+      await repo.insert(foreignTx());
+
+      final loaded = await repo.findById('tx_fx');
+      expect(loaded, isNotNull);
+      expect(loaded!.originalCurrency, 'USD');
+      expect(loaded.originalAmount, 5000);
+      expect(loaded.appliedRate, '148.30');
+      expect(loaded.amount, 7415); // derived JPY unchanged
+    });
+
+    test('update persists edited triple (changed rate)', () async {
+      await repo.insert(foreignTx());
+      await repo.update(
+        foreignTx(appliedRate: '150.00', amount: 7500),
+      );
+
+      final loaded = await repo.findById('tx_fx');
+      expect(loaded!.appliedRate, '150.00');
+      expect(loaded.originalAmount, 5000);
+      expect(loaded.amount, 7500);
+    });
+
+    test('JPY-native row round-trips with a null triple (CURR-04 regression)',
+        () async {
+      await repo.insert(
+        foreignTx(
+          id: 'tx_jpy',
+          originalCurrency: null,
+          originalAmount: null,
+          appliedRate: null,
+          amount: 1200,
+        ),
+      );
+
+      final loaded = await repo.findById('tx_jpy');
+      expect(loaded!.originalCurrency, isNull);
+      expect(loaded.originalAmount, isNull);
+      expect(loaded.appliedRate, isNull);
+      expect(loaded.amount, 1200);
+    });
+  });
 }

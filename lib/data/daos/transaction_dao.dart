@@ -29,6 +29,9 @@ class TransactionDao {
     bool isSynced = false,
     int joyFullness = 2,
     required String entrySource,
+    String? originalCurrency,
+    int? originalAmount,
+    String? appliedRate,
   }) async {
     await _db
         .into(_db.transactions)
@@ -53,6 +56,10 @@ class TransactionDao {
             isSynced: Value(isSynced),
             joyFullness: Value(joyFullness),
             entrySource: Value(entrySource),
+            // Phase 42 multi-currency triple (P40 columns; null = JPY-native).
+            originalCurrency: Value(originalCurrency),
+            originalAmount: Value(originalAmount),
+            appliedRate: Value(appliedRate),
           ),
         );
   }
@@ -136,6 +143,9 @@ class TransactionDao {
     int joyFullness = 2,
     String? entrySource,
     DateTime? updatedAt,
+    String? originalCurrency,
+    int? originalAmount,
+    String? appliedRate,
   }) async {
     await (_db.update(_db.transactions)..where((t) => t.id.equals(id))).write(
       TransactionsCompanion(
@@ -159,6 +169,10 @@ class TransactionDao {
         entrySource: entrySource != null
             ? Value(entrySource)
             : const Value.absent(),
+        // Phase 42 multi-currency triple (P40 columns; null = JPY-native).
+        originalCurrency: Value(originalCurrency),
+        originalAmount: Value(originalAmount),
+        appliedRate: Value(appliedRate),
         updatedAt: Value(updatedAt ?? DateTime.now()),
         isDeleted: const Value(false),
       ),
