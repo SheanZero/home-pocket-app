@@ -4,13 +4,13 @@ milestone: v1.7
 milestone_name: 多币种支持
 status: executing
 stopped_at: Completed 42-03-PLAN.md
-last_updated: "2026-06-13T03:02:48.277Z"
+last_updated: "2026-06-13T03:12:09.838Z"
 last_activity: 2026-06-13
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 20
-  completed_plans: 14
+  completed_plans: 15
   percent: 67
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 ## Current Position
 
 Phase: 42 (entry-ui-display-voice) — EXECUTING
-Plan: 4 of 9
+Plan: 5 of 9
 Status: Ready to execute
 Last activity: 2026-06-13
 
@@ -127,7 +127,7 @@ No active blockers for v1.7. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-13T03:02:43.429Z
+Last session: 2026-06-13T03:11:27.943Z
 Stopped at: Completed 42-03-PLAN.md
 Resume file: None
 
@@ -143,6 +143,7 @@ Resume file: None
 | Phase 42 P01 | ~18min | 2 tasks | 5 files |
 | Phase 42 P02 | 7min | 1 tasks | 2 files |
 | Phase Phase 42 P03 P03 | ~4min | 1 task tasks | 3 files files |
+| Phase 42 P04 | 25m | 2 tasks | 7 files |
 
 ## Decisions
 
@@ -154,3 +155,4 @@ Resume file: None
 - [Phase ?]: 41-05: Three @riverpod providers wired (appExchangeRateApiClient/CacheService/GetExchangeRateUseCase); build_runner regenerated .g.dart; full suite 2705/2705 GREEN, analyze 0, architecture 47/47; SC-5 holds. Phase 42 can ref.watch(appGetExchangeRateUseCaseProvider). Fixed 2 carry regressions (logging-privacy scanner false-positive in api_client; backup characterization test missing appExchangeRateRepositoryProvider override)
 - [Phase ?]: 42-02: Per-currency decimals routed through intl currencyFractionDigits via single shared helper currencyFractionDigitsFor(); subunitToUnitFor=pow(10,n) so BHD/JOD/KWD=3 yields 1000; KRW kept explicit 0-decimal (T-42-03); unknown code falls back to intl DEFAULT 2 (T-42-02); convertToJpy() byte-unchanged (ADR-020 single conversion site)
 - [Phase 42]: 42-03: UpdateTransactionParams gains the currency triple; execute() coalesces from seed (EDIT-02), recomputes JPY via single-site convertToJpy() (ADR-020) only for foreign rows, no rehash (ADR-021, prevHash/currentHash frozen). Extracted shared validateCurrencyTriple() into currency_conversion.dart; CreateTransactionUseCase refactored to reuse it (removed ~50 dup lines + dead _iso4217). update_transaction_currency_test GREEN; 56/56 use-case tests green; analyze 0.
+- [Phase 42]: 42-04: Voice currency detection — shared NumeralStateMachine.detectCurrencyToken (longest-first leftmost-wins scan over VoiceCurrencySuffixes.all) returns the token SEPARATELY from parse(), so the integer-amount path is byte-identical (T-42-07). VoiceCurrencySuffixes.tokenToIso maps zh 美元/欧元/英镑/港币/澳元/加元 + ja ドル/ユーロ/ポンド/香港ドル/豪ドル → ISO. VoiceParseResult gains nullable detectedCurrency (null=JPY-native, Pitfall 1 — no rate-fetch). ParseVoiceInputUseCase._detectCurrency locale-routes + resolves bare 元 by locale (zh→CNY, ja→JPY-native→null) via bareYuanToken const (keeps use case out of hardcoded_cjk_ui_scan). _extractKeyword strips new tokens (5美元的咖啡→咖啡, T-42-08). currency_detection_test GREEN (16); 400/400 voice + CJK-scan + analyze 0. Form surfacing/rate-fetch deferred to 42-09.

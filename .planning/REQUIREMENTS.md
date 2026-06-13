@@ -41,9 +41,9 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### 语音 (Voice)
 
-- [ ] **VOICE-CUR-01**: zh voice entry recognizes explicit currency words (美元/欧元/英镑/港币 etc.) and sets the entry currency (「五十美元」→ USD 50); bare 「元」 keeps its existing JPY-terminator behavior unchanged
-- [ ] **VOICE-CUR-02**: ja voice entry recognizes currency words (ドル/ユーロ/ポンド etc.); bare 「ドル」 defaults to USD; recognized currency is editable on the form before save
-- [ ] **VOICE-CUR-03**: Voice parse result carries the detected currency through to the shared form, which then triggers the normal rate-fetch flow; voice corpus tests extended per currency per locale
+- [x] **VOICE-CUR-01**: zh voice entry recognizes explicit currency words (美元/欧元/英镑/港币 etc.) and sets the entry currency (「五十美元」→ USD 50); bare 「元」 keeps its existing JPY-terminator behavior unchanged
+- [x] **VOICE-CUR-02**: ja voice entry recognizes currency words (ドル/ユーロ/ポンド etc.); bare 「ドル」 defaults to USD; recognized currency is editable on the form before save
+- [x] **VOICE-CUR-03**: Voice parse result carries the detected currency through to the shared form, which then triggers the normal rate-fetch flow; voice corpus tests extended per currency per locale
 
 ## v2 Requirements
 
@@ -94,9 +94,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DISP-02 | Phase 42 | Pending |
 | DISP-03 | Phase 42 | Complete |
 | DISP-04 | Phase 42 | Complete |
-| VOICE-CUR-01 | Phase 42 | Pending |
-| VOICE-CUR-02 | Phase 42 | Pending |
-| VOICE-CUR-03 | Phase 42 | Pending |
+| VOICE-CUR-01 | Phase 42 | Complete |
+| VOICE-CUR-02 | Phase 42 | Complete |
+| VOICE-CUR-03 | Phase 42 | Complete |
 
 **Coverage:**
 

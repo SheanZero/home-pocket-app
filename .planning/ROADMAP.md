@@ -203,7 +203,7 @@ Plans:
 - [x] 42-01-PLAN.md — Wave 0 failing-test scaffolding (SC-5 smoke, D-07/D-08, voice corpus, ADR-022 edit, update-plumbing) [W1] — ✅ 5 files (4 RED + SC-5 create smoke GREEN-on-arrival)
 - [x] 42-02-PLAN.md — Shared foundation: per-currency decimals via intl currencyFractionDigits (convertToJpy unchanged) [W1]
 - [x] 42-03-PLAN.md — Plumbing gap: UpdateTransactionParams + use case carry the currency triple, recompute JPY, no rehash (ADR-021) [W1]
-- [ ] 42-04-PLAN.md — Voice wave (parallel): zh/ja currency detection → VoiceParseResult.detectedCurrency (VOICE-CUR-01/02/03) [W1]
+- [x] 42-04-PLAN.md — Voice wave (parallel): zh/ja currency detection → VoiceParseResult.detectedCurrency (VOICE-CUR-01/02/03) [W1]
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
