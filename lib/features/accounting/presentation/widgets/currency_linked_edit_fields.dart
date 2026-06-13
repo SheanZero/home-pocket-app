@@ -50,10 +50,14 @@ class CurrencyLinkedEditValue {
   final bool manualOverride;
 }
 
-/// Default re-fetched rate used by the built-in date-change trigger when the
-/// host does not supply a real rate source. Chosen so the D-03 widget test
-/// (148.30 → this) moves JPY by > 1% (5000 cents USD: 7415 → 8000 ≈ +7.9%).
-const String _kStubRefetchRate = '160.00';
+/// Async source of the rate a date-change re-fetch should apply.
+///
+/// Returns the full-precision rate string (ADR-020) the host's exchange-rate
+/// service resolved for the new {currency, date}, or `null` when no rate could
+/// be resolved (offline / unavailable — the never-block-save invariant, P41).
+/// The host (TransactionDetailsForm) supplies a closure that reads the REAL
+/// `appGetExchangeRateUseCaseProvider`; no rate is ever hardcoded here.
+typedef DateChangeRefetchRateSource = Future<String?> Function();
 
 class CurrencyLinkedEditFields extends StatefulWidget {
   const CurrencyLinkedEditFields({
@@ -82,9 +86,10 @@ class CurrencyLinkedEditFields extends StatefulWidget {
   /// the host can keep its persistence triple in lock-step.
   final ValueChanged<CurrencyLinkedEditValue>? onChanged;
 
-  /// Production hook: the rate string a real date-change re-fetch would return.
-  /// When null the built-in [_kStubRefetchRate] is used (test default).
-  final String? dateChangeRefetchRate;
+  /// Async hook: resolves the REAL re-fetched rate for the host's new date via
+  /// the exchange-rate use case. When null (or it resolves null), the
+  /// date-change trigger is a no-op — there is NO fallback fake rate.
+  final DateChangeRefetchRateSource? dateChangeRefetchRate;
 
   @override
   State<CurrencyLinkedEditFields> createState() =>
@@ -164,11 +169,22 @@ class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
   }
 
   /// Built-in date-change trigger. Routes to D-02 (dialog) when a manual
-  /// override is active, else D-03 (>1% toast + undo). The threshold and the
-  /// re-fetched rate would come from the rate use case in production; here the
-  /// widget owns a deterministic stub so the linked-edit test is self-contained.
+  /// override is active, else D-03 (>1% toast + undo). The re-fetched rate is
+  /// resolved by the host-supplied [DateChangeRefetchRateSource] which reads the
+  /// REAL exchange-rate use case — no rate is ever hardcoded.
+  ///
+  /// never-block-save (P41): when no source is supplied OR it resolves null
+  /// (offline / RateUnavailable), this is a no-op — no dialog, no toast, the
+  /// existing rate stays. Save is never blocked.
   Future<void> _onDateChange() async {
-    final newRate = widget.dateChangeRefetchRate ?? _kStubRefetchRate;
+    final source = widget.dateChangeRefetchRate;
+    if (source == null) return;
+
+    final newRate = await source();
+    if (!mounted) return;
+    // never-block-save: the real service could not resolve a rate (offline /
+    // unavailable). Degrade gracefully — keep the current rate, no UI noise.
+    if (newRate == null) return;
 
     if (_manualOverride) {
       // D-02: two-choice dialog, NO default.

@@ -19,6 +19,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/accounting/create_transaction_use_case.dart';
 import '../../../../application/accounting/update_transaction_use_case.dart';
+import '../../../../application/currency/get_exchange_rate_use_case.dart';
+import '../../../../application/currency/rate_result.dart';
+import '../../../../application/currency/repository_providers.dart';
 import '../../../../application/i18n/formatter_service.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -509,6 +512,39 @@ class TransactionDetailsFormState
     _notifyPickerDismissed();
   }
 
+  /// Phase 42 GAP-CLOSURE: resolve the REAL re-fetched rate for a foreign edit
+  /// row's CURRENT date via the already-wired `appGetExchangeRateUseCaseProvider`
+  /// (same use case the entry preview consumes — `conversion_preview_panel`).
+  ///
+  /// Supplied to [CurrencyLinkedEditFields.dateChangeRefetchRate] so its
+  /// ADR-022 D-02 dialog / D-03 toast decision logic runs against the REAL rate
+  /// instead of a hardcoded stub.
+  ///
+  /// never-block-save (P41): returns null on [RateUnavailable] (offline /
+  /// no rate) so the edit host degrades gracefully — the existing rate stays,
+  /// nothing is blocked. Reads (not watches) the provider — this is a one-shot
+  /// side-effect, not a reactive dependency (Riverpod 3 / CLAUDE.md).
+  Future<String?> _refetchRateForCurrentDate() async {
+    final currency = _originalCurrency;
+    if (currency == null) return null;
+
+    final useCase = ref.read(appGetExchangeRateUseCaseProvider);
+    final withSignal = await useCase.execute(
+      GetExchangeRateParams(currency: currency, date: _date),
+    );
+    return _extractRate(withSignal.result);
+  }
+
+  /// Rate string for any rate-bearing variant; null for [RateUnavailable]
+  /// (mirrors the entry preview's extraction — never throws).
+  String? _extractRate(RateResult result) => switch (result) {
+    RateFetched(:final rate) => rate,
+    RateCached(:final rate) => rate,
+    RateFallback(:final rate) => rate,
+    RateManual(:final rate) => rate,
+    RateUnavailable() => null,
+  };
+
   // ── Public submit() — invoked by host CTA via GlobalKey (D-02) ─────────────
 
   /// Validates the form and persists via the appropriate use case.
@@ -861,6 +897,9 @@ class TransactionDetailsFormState
                   originalAmount: _originalAmount!,
                   appliedRate: _appliedRate!,
                   manualOverride: false,
+                  // GAP-CLOSURE: feed the host's REAL exchange-rate re-fetch into
+                  // the edit host's D-02/D-03 logic (drops the 160.00 stub).
+                  dateChangeRefetchRate: _refetchRateForCurrentDate,
                   onChanged: (value) {
                     // One direction only (ADR-022 D-01): original × rate → JPY.
                     // Keep the host triple + derived JPY in lock-step for submit.

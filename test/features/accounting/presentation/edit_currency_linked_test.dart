@@ -39,6 +39,7 @@ void main() {
     required int originalAmount,
     required String rate,
     required bool manualOverride,
+    DateChangeRefetchRateSource? refetchRate,
   }) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -49,6 +50,7 @@ void main() {
               originalAmount: originalAmount,
               appliedRate: rate,
               manualOverride: manualOverride,
+              dateChangeRefetchRate: refetchRate,
             ),
           ),
         ),
@@ -109,6 +111,8 @@ void main() {
         originalAmount: 5000,
         rate: '148.30',
         manualOverride: true,
+        // Real-rate source resolves a fresh rate for the new date.
+        refetchRate: () async => '160.00',
       );
 
       // Simulate a transaction-date change while a manual override is active.
@@ -131,6 +135,8 @@ void main() {
         originalAmount: 5000,
         rate: '148.30',
         manualOverride: false,
+        // Real-rate source returns 160.00 for the new date.
+        refetchRate: () async => '160.00',
       );
 
       // Date change auto-refetches a rate that moves JPY by >1% (148.30→160.00:
@@ -148,6 +154,49 @@ void main() {
       await tester.pumpAndSettle();
 
       // Undo restores the OLD rate → JPY returns to 7415.
+      expect(find.textContaining('7,415'), findsOneWidget);
+    });
+  });
+
+  group('never-block-save — real re-fetch resolves no rate', () {
+    testWidgets('null rate source → date change is a no-op (no dialog/toast)', (
+      tester,
+    ) async {
+      await pumpHost(
+        tester,
+        currency: 'USD',
+        originalAmount: 5000,
+        rate: '148.30',
+        manualOverride: true, // would normally trigger the D-02 dialog
+        refetchRate: null, // no source supplied
+      );
+
+      await tester.tap(find.byKey(const Key('edit_date_change_trigger')));
+      await tester.pumpAndSettle();
+
+      // Degrades gracefully: nothing surfaces, the existing rate stays.
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.byType(SnackBar), findsNothing);
+      expect(find.textContaining('7,415'), findsOneWidget);
+    });
+
+    testWidgets('source resolving null → no-op (RateUnavailable / offline)', (
+      tester,
+    ) async {
+      await pumpHost(
+        tester,
+        currency: 'USD',
+        originalAmount: 5000,
+        rate: '148.30',
+        manualOverride: false,
+        refetchRate: () async => null, // unavailable / offline
+      );
+
+      await tester.tap(find.byKey(const Key('edit_date_change_trigger')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.byType(SnackBar), findsNothing);
       expect(find.textContaining('7,415'), findsOneWidget);
     });
   });
