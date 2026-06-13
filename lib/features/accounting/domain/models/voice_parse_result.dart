@@ -36,6 +36,13 @@ abstract class VoiceParseResult with _$VoiceParseResult {
     // context, or amount-only utterances). Consumers MUST treat null/empty
     // as "fall back to legacy behavior" — see voice_input_screen_helpers.dart.
     String? resolvedKeyword,
+    // Phase 42 (VOICE-CUR-01/02/03): ISO 4217 code of a spoken foreign currency
+    // detected in the utterance (e.g. 「五十美元」 → 'USD', 「五十元」 in zh →
+    // 'CNY'). Null means JPY-native (「昼ごはんに680円」, bare 円) — no foreign
+    // conversion, preserving the pre-Phase-42 default. The shared form reads
+    // this to trigger the normal rate-fetch flow; null skips it entirely
+    // (Pitfall 1: JPY path must stay byte-identical).
+    String? detectedCurrency,
     @Default(5) int estimatedSatisfaction,
   }) = _VoiceParseResult;
 }

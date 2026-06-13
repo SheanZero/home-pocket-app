@@ -81,6 +81,14 @@ class VoiceCurrencySuffixes {
     'ドル': 'USD', // bare ドル → USD (default, D-08 locked)
   };
 
+  /// The bare locale-ambiguous Chinese yuan / Japanese yen token (`元`).
+  ///
+  /// D-08 (locked): in zh locale this resolves to CNY; in ja locale it is
+  /// JPY-native (no foreign conversion). Exposed as a named constant so the
+  /// use-case layer can resolve the ambiguity WITHOUT embedding a raw CJK
+  /// literal (keeps `ParseVoiceInputUseCase` out of the hardcoded-CJK scan).
+  static const String bareYuanToken = '元';
+
   /// Regex-alternation fragment for use inside a larger pattern, e.g.
   /// `RegExp(r'\d+\s*(?:' + VoiceCurrencySuffixes.regexAlternation + r')')`.
   static String get regexAlternation => all.join('|');

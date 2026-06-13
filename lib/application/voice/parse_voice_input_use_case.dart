@@ -1,6 +1,8 @@
 import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/models/voice_parse_result.dart';
 import '../../infrastructure/ml/merchant_database.dart';
+import '../../infrastructure/voice/chinese_numeral_state_machine.dart';
+import '../../infrastructure/voice/japanese_numeral_state_machine.dart';
 import '../../shared/constants/voice_currency_suffixes.dart';
 import '../../shared/utils/result.dart';
 import 'voice_category_resolver.dart';
@@ -25,6 +27,13 @@ class ParseVoiceInputUseCase {
   final VoiceCategoryResolver _voiceCategoryResolver;
   final MerchantDatabase _merchantDatabase;
 
+  /// Currency-token detectors (Phase 42, VOICE-CUR-01/02/03). Stateless — the
+  /// `detectCurrencyToken` scan is locale-routed identically to the amount path.
+  static const ChineseNumeralStateMachine _zhMachine =
+      ChineseNumeralStateMachine();
+  static final JapaneseNumeralStateMachine _jaMachine =
+      JapaneseNumeralStateMachine();
+
   ParseVoiceInputUseCase({
     required VoiceTextParser textParser,
     required VoiceCategoryResolver voiceCategoryResolver,
@@ -48,6 +57,12 @@ class ParseVoiceInputUseCase {
     try {
       // 1. Extract amount
       final amount = _textParser.extractAmount(recognizedText, localeId: localeId);
+
+      // 1b. Detect spoken currency (Phase 42, VOICE-CUR-01/02/03). Runs the
+      // longest-first token scan SEPARATELY from the amount path so the
+      // integer amount is never polluted (T-42-07). Locale resolves the
+      // bare 元/円 ambiguity (D-08 locked: zh→CNY, ja→JPY).
+      final detectedCurrency = _detectCurrency(recognizedText, localeId);
 
       // 2. Extract date
       final parsedDate = _textParser.extractDate(recognizedText);
@@ -110,11 +125,56 @@ class ParseVoiceInputUseCase {
           categoryMatch: categoryMatch,
           ledgerType: ledgerType,
           resolvedKeyword: resolvedKeyword,
+          detectedCurrency: detectedCurrency,
         ),
       );
     } catch (e) {
       return Result.error('Voice parse failed: $e');
     }
+  }
+
+  /// Resolves the spoken-currency ISO 4217 code for [text] (Phase 42).
+  ///
+  /// Returns null when no currency token is present OR the token is JPY-native
+  /// (`円`/`日元`/`えん`/`yen`/`块`/`塊`/`块钱`) — null means "no foreign
+  /// conversion", preserving the pre-Phase-42 JPY path (Pitfall 1).
+  ///
+  /// Token → ISO via [VoiceCurrencySuffixes.tokenToIso] for explicit foreign
+  /// tokens. The locale-ambiguous bare `元` resolves by [localeId] (D-08
+  /// locked): zh → 'CNY', ja → 'JPY' (which we surface as null = JPY-native).
+  ///
+  /// Locale routing mirrors [VoiceTextParser._runStateMachine]: ja-prefixed →
+  /// Japanese detector, zh-prefixed → Chinese detector, null → try ja then zh.
+  String? _detectCurrency(String text, String? localeId) {
+    final lower = (localeId ?? '').toLowerCase();
+    final isJa = lower.startsWith('ja');
+    final isZh = lower.startsWith('zh');
+
+    final String? token;
+    if (isJa) {
+      token = _jaMachine.detectCurrencyToken(text);
+    } else if (isZh) {
+      token = _zhMachine.detectCurrencyToken(text);
+    } else {
+      token =
+          _jaMachine.detectCurrencyToken(text) ??
+          _zhMachine.detectCurrencyToken(text);
+    }
+    if (token == null) return null;
+
+    // Explicit foreign token → its ISO directly.
+    final iso = VoiceCurrencySuffixes.tokenToIso[token];
+    if (iso != null) return iso;
+
+    // Bare locale-ambiguous yuan token (D-08): zh → CNY, ja → JPY (native →
+    // null). Compared against the named constant so no raw CJK literal lives
+    // in this file (keeps it out of the hardcoded-CJK architecture scan).
+    if (token == VoiceCurrencySuffixes.bareYuanToken) {
+      return isZh ? 'CNY' : null;
+    }
+
+    // All remaining tokens (円/日元/えん/yen/块/塊/块钱) are JPY-native → null.
+    return null;
   }
 
   /// Extracts the category-relevant keyword from voice input.

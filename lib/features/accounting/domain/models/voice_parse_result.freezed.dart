@@ -34,7 +34,14 @@ mixin _$VoiceParseResult {
   // Null when no extraction occurred (e.g. caller did not provide enough
   // context, or amount-only utterances). Consumers MUST treat null/empty
   // as "fall back to legacy behavior" — see voice_input_screen_helpers.dart.
-  String? get resolvedKeyword;
+  String?
+  get resolvedKeyword; // Phase 42 (VOICE-CUR-01/02/03): ISO 4217 code of a spoken foreign currency
+  // detected in the utterance (e.g. 「五十美元」 → 'USD', 「五十元」 in zh →
+  // 'CNY'). Null means JPY-native (「昼ごはんに680円」, bare 円) — no foreign
+  // conversion, preserving the pre-Phase-42 default. The shared form reads
+  // this to trigger the normal rate-fetch flow; null skips it entirely
+  // (Pitfall 1: JPY path must stay byte-identical).
+  String? get detectedCurrency;
   int get estimatedSatisfaction;
 
   /// Create a copy of VoiceParseResult
@@ -68,6 +75,8 @@ mixin _$VoiceParseResult {
                 other.ledgerType == ledgerType) &&
             (identical(other.resolvedKeyword, resolvedKeyword) ||
                 other.resolvedKeyword == resolvedKeyword) &&
+            (identical(other.detectedCurrency, detectedCurrency) ||
+                other.detectedCurrency == detectedCurrency) &&
             (identical(other.estimatedSatisfaction, estimatedSatisfaction) ||
                 other.estimatedSatisfaction == estimatedSatisfaction));
   }
@@ -84,12 +93,13 @@ mixin _$VoiceParseResult {
     categoryMatch,
     ledgerType,
     resolvedKeyword,
+    detectedCurrency,
     estimatedSatisfaction,
   );
 
   @override
   String toString() {
-    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, estimatedSatisfaction: $estimatedSatisfaction)';
+    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, estimatedSatisfaction: $estimatedSatisfaction)';
   }
 }
 
@@ -110,6 +120,7 @@ abstract mixin class $VoiceParseResultCopyWith<$Res> {
     CategoryMatchResult? categoryMatch,
     LedgerType? ledgerType,
     String? resolvedKeyword,
+    String? detectedCurrency,
     int estimatedSatisfaction,
   });
 
@@ -138,6 +149,7 @@ class _$VoiceParseResultCopyWithImpl<$Res>
     Object? categoryMatch = freezed,
     Object? ledgerType = freezed,
     Object? resolvedKeyword = freezed,
+    Object? detectedCurrency = freezed,
     Object? estimatedSatisfaction = null,
   }) {
     return _then(
@@ -177,6 +189,10 @@ class _$VoiceParseResultCopyWithImpl<$Res>
         resolvedKeyword: freezed == resolvedKeyword
             ? _self.resolvedKeyword
             : resolvedKeyword // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        detectedCurrency: freezed == detectedCurrency
+            ? _self.detectedCurrency
+            : detectedCurrency // ignore: cast_nullable_to_non_nullable
                   as String?,
         estimatedSatisfaction: null == estimatedSatisfaction
             ? _self.estimatedSatisfaction
@@ -304,6 +320,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       CategoryMatchResult? categoryMatch,
       LedgerType? ledgerType,
       String? resolvedKeyword,
+      String? detectedCurrency,
       int estimatedSatisfaction,
     )?
     $default, {
@@ -322,6 +339,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.categoryMatch,
           _that.ledgerType,
           _that.resolvedKeyword,
+          _that.detectedCurrency,
           _that.estimatedSatisfaction,
         );
       case _:
@@ -354,6 +372,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       CategoryMatchResult? categoryMatch,
       LedgerType? ledgerType,
       String? resolvedKeyword,
+      String? detectedCurrency,
       int estimatedSatisfaction,
     )
     $default,
@@ -371,6 +390,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.categoryMatch,
           _that.ledgerType,
           _that.resolvedKeyword,
+          _that.detectedCurrency,
           _that.estimatedSatisfaction,
         );
       case _:
@@ -402,6 +422,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
       CategoryMatchResult? categoryMatch,
       LedgerType? ledgerType,
       String? resolvedKeyword,
+      String? detectedCurrency,
       int estimatedSatisfaction,
     )?
     $default,
@@ -419,6 +440,7 @@ extension VoiceParseResultPatterns on VoiceParseResult {
           _that.categoryMatch,
           _that.ledgerType,
           _that.resolvedKeyword,
+          _that.detectedCurrency,
           _that.estimatedSatisfaction,
         );
       case _:
@@ -440,6 +462,7 @@ class _VoiceParseResult implements VoiceParseResult {
     this.categoryMatch,
     this.ledgerType,
     this.resolvedKeyword,
+    this.detectedCurrency,
     this.estimatedSatisfaction = 5,
   });
 
@@ -476,6 +499,14 @@ class _VoiceParseResult implements VoiceParseResult {
   // as "fall back to legacy behavior" — see voice_input_screen_helpers.dart.
   @override
   final String? resolvedKeyword;
+  // Phase 42 (VOICE-CUR-01/02/03): ISO 4217 code of a spoken foreign currency
+  // detected in the utterance (e.g. 「五十美元」 → 'USD', 「五十元」 in zh →
+  // 'CNY'). Null means JPY-native (「昼ごはんに680円」, bare 円) — no foreign
+  // conversion, preserving the pre-Phase-42 default. The shared form reads
+  // this to trigger the normal rate-fetch flow; null skips it entirely
+  // (Pitfall 1: JPY path must stay byte-identical).
+  @override
+  final String? detectedCurrency;
   @override
   @JsonKey()
   final int estimatedSatisfaction;
@@ -509,6 +540,8 @@ class _VoiceParseResult implements VoiceParseResult {
                 other.ledgerType == ledgerType) &&
             (identical(other.resolvedKeyword, resolvedKeyword) ||
                 other.resolvedKeyword == resolvedKeyword) &&
+            (identical(other.detectedCurrency, detectedCurrency) ||
+                other.detectedCurrency == detectedCurrency) &&
             (identical(other.estimatedSatisfaction, estimatedSatisfaction) ||
                 other.estimatedSatisfaction == estimatedSatisfaction));
   }
@@ -525,12 +558,13 @@ class _VoiceParseResult implements VoiceParseResult {
     categoryMatch,
     ledgerType,
     resolvedKeyword,
+    detectedCurrency,
     estimatedSatisfaction,
   );
 
   @override
   String toString() {
-    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, estimatedSatisfaction: $estimatedSatisfaction)';
+    return 'VoiceParseResult(rawText: $rawText, amount: $amount, parsedDate: $parsedDate, merchantName: $merchantName, merchantCategoryId: $merchantCategoryId, merchantLedgerType: $merchantLedgerType, categoryMatch: $categoryMatch, ledgerType: $ledgerType, resolvedKeyword: $resolvedKeyword, detectedCurrency: $detectedCurrency, estimatedSatisfaction: $estimatedSatisfaction)';
   }
 }
 
@@ -553,6 +587,7 @@ abstract mixin class _$VoiceParseResultCopyWith<$Res>
     CategoryMatchResult? categoryMatch,
     LedgerType? ledgerType,
     String? resolvedKeyword,
+    String? detectedCurrency,
     int estimatedSatisfaction,
   });
 
@@ -582,6 +617,7 @@ class __$VoiceParseResultCopyWithImpl<$Res>
     Object? categoryMatch = freezed,
     Object? ledgerType = freezed,
     Object? resolvedKeyword = freezed,
+    Object? detectedCurrency = freezed,
     Object? estimatedSatisfaction = null,
   }) {
     return _then(
@@ -621,6 +657,10 @@ class __$VoiceParseResultCopyWithImpl<$Res>
         resolvedKeyword: freezed == resolvedKeyword
             ? _self.resolvedKeyword
             : resolvedKeyword // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        detectedCurrency: freezed == detectedCurrency
+            ? _self.detectedCurrency
+            : detectedCurrency // ignore: cast_nullable_to_non_nullable
                   as String?,
         estimatedSatisfaction: null == estimatedSatisfaction
             ? _self.estimatedSatisfaction
