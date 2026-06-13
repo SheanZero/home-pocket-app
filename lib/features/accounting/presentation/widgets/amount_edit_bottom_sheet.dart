@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/utils/currency_conversion.dart'
+    show currencyFractionDigitsFor, subunitToUnitFor;
 import 'amount_display.dart';
 import 'smart_keyboard.dart';
 
@@ -27,19 +29,55 @@ import 'smart_keyboard.dart';
 /// **P19-B2 fix:** Uses the POST-rename `actionLabel:` SmartKeyboard API so
 /// Plan 02's constructor rename in smart_keyboard.dart does not break this
 /// caller when they land in the same wave.
+///
+/// **Quick task 260613-mgc:** an OPTIONAL currency-aware (major-unit decimal)
+/// mode. When [currency] is null (default), the sheet behaves byte-identically
+/// to the legacy JPY-integer mode: [initialAmount] is the integer JPY figure,
+/// [onConfirm] returns `parsed.round()`. When [currency] is non-null (a foreign
+/// edit row), [initialAmount] is interpreted as MINOR units (e.g. 11290 cents),
+/// the editStr is seeded as the MAJOR-unit decimal string ("112.90"), the
+/// decimal cap follows the currency's ISO 4217 minor-unit count, and [onConfirm]
+/// returns the value back in MINOR units. The keypad widget itself is reused —
+/// no new keyboard component is created.
 class AmountEditBottomSheet extends StatelessWidget {
   const AmountEditBottomSheet({
     super.key,
     required this.initialAmount,
     required this.onConfirm,
+    this.currency,
+    this.currencySymbol = '¥',
+    this.currencyLabel = 'JPY',
   });
 
-  /// Starting amount in the smallest currency unit (e.g. 3280 for ¥3,280).
+  /// Starting amount.
+  ///
+  /// - JPY (default) mode ([currency] == null): the integer JPY figure
+  ///   (e.g. 3280 for ¥3,280).
+  /// - Currency-aware mode ([currency] non-null): the amount in the currency's
+  ///   MINOR unit (e.g. 11290 for $112.90).
   final int initialAmount;
 
-  /// Called with the parsed and rounded amount when the user confirms.
+  /// Called with the confirmed amount when the user confirms.
+  ///
+  /// - JPY mode: the parsed-and-rounded integer JPY value.
+  /// - Currency-aware mode: the value in MINOR units (major decimal × subunit).
+  ///
   /// The sheet closes itself before invoking [onConfirm].
   final ValueChanged<int> onConfirm;
+
+  /// ISO 4217 code enabling the currency-aware (major-unit decimal) mode.
+  /// Null (or 'JPY') keeps the legacy JPY-integer behavior.
+  final String? currency;
+
+  /// Currency symbol shown in the [AmountDisplay] badge (e.g. "¥", "$", "€").
+  final String currencySymbol;
+
+  /// Currency code label shown in the [AmountDisplay] badge (e.g. "JPY", "USD").
+  final String currencyLabel;
+
+  /// True when the sheet runs in the currency-aware (major-unit decimal) mode.
+  bool get _isCurrencyAware =>
+      currency != null && currency!.toUpperCase() != 'JPY';
 
   /// Presents [AmountEditBottomSheet] modally.
   ///
@@ -48,6 +86,9 @@ class AmountEditBottomSheet extends StatelessWidget {
     BuildContext context, {
     required int initialAmount,
     required ValueChanged<int> onConfirm,
+    String? currency,
+    String currencySymbol = '¥',
+    String currencyLabel = 'JPY',
   }) {
     return showModalBottomSheet<void>(
       context: context,
@@ -56,15 +97,48 @@ class AmountEditBottomSheet extends StatelessWidget {
       builder: (_) => AmountEditBottomSheet(
         initialAmount: initialAmount,
         onConfirm: onConfirm,
+        currency: currency,
+        currencySymbol: currencySymbol,
+        currencyLabel: currencyLabel,
       ),
     );
   }
 
+  /// Seeds the initial editStr.
+  ///
+  /// - JPY mode: the integer string (blank when 0), matching legacy behavior.
+  /// - Currency-aware mode: the MAJOR-unit decimal string for the minor-unit
+  ///   [initialAmount] (e.g. 11290 cents → "112.90"; 5000 KRW → "5000").
+  String _initialEditStr(int decimals, int subunit) {
+    if (!_isCurrencyAware) {
+      return initialAmount > 0 ? initialAmount.toString() : '';
+    }
+    if (initialAmount <= 0) return '';
+    if (decimals == 0) return (initialAmount ~/ subunit).toString();
+    return (initialAmount / subunit).toStringAsFixed(decimals);
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Currency-aware metadata is derived ONCE from the single decimals source
+    // (currency_conversion.dart). In JPY mode these stay at their integer-mode
+    // defaults and never gate the dot key (CURR-04: JPY path unchanged).
+    final decimals = _isCurrencyAware
+        ? currencyFractionDigitsFor(currency!)
+        : 0;
+    final subunit = _isCurrencyAware ? subunitToUnitFor(currency!) : 1;
+
     // editStr holds the raw digit string being built by the user.
-    // Initialised from initialAmount; blank when initialAmount == 0.
-    var editStr = initialAmount > 0 ? initialAmount.toString() : '';
+    var editStr = _initialEditStr(decimals, subunit);
+
+    // The fractional cap for the editor. In JPY mode the legacy 4-place cap is
+    // preserved (decimal input is reachable but rounds to an integer on
+    // confirm). In currency-aware mode it is the currency's ISO minor unit.
+    final fractionalCap = _isCurrencyAware ? decimals : 4;
+
+    // In currency-aware mode the dot is disabled for 0-decimal currencies
+    // (JPY/KRW), mirroring the entry keypad. JPY default mode keeps the dot.
+    final dotEnabled = !_isCurrencyAware || decimals > 0;
 
     return StatefulBuilder(
       builder: (context, setSheetState) {
@@ -73,8 +147,8 @@ class AmountEditBottomSheet extends StatelessWidget {
         void onDigit(String digit) {
           final dotIndex = editStr.indexOf('.');
           if (dotIndex >= 0) {
-            final decimals = editStr.length - dotIndex - 1;
-            if (decimals >= 4) return;
+            final fractional = editStr.length - dotIndex - 1;
+            if (fractional >= fractionalCap) return;
           }
           if (editStr == '0' && digit != '0') {
             setSheetState(() => editStr = digit);
@@ -89,9 +163,9 @@ class AmountEditBottomSheet extends StatelessWidget {
           if (editStr.isEmpty || editStr == '0') return;
           final dotIndex = editStr.indexOf('.');
           if (dotIndex >= 0) {
-            final decimals = editStr.length - dotIndex - 1;
-            if (decimals >= 4) return;
-            final zerosToAdd = (4 - decimals).clamp(0, 2);
+            final fractional = editStr.length - dotIndex - 1;
+            if (fractional >= fractionalCap) return;
+            final zerosToAdd = (fractionalCap - fractional).clamp(0, 2);
             setSheetState(() => editStr += '0' * zerosToAdd);
           } else {
             setSheetState(() => editStr += '00');
@@ -126,7 +200,11 @@ class AmountEditBottomSheet extends StatelessWidget {
           final parsed = double.tryParse(cleaned);
           if (parsed != null && parsed > 0) {
             Navigator.pop(context);
-            onConfirm(parsed.round());
+            // Currency-aware mode returns MINOR units; JPY mode rounds to the
+            // integer JPY value (legacy path — byte-identical).
+            onConfirm(
+              _isCurrencyAware ? (parsed * subunit).round() : parsed.round(),
+            );
           } else {
             Navigator.pop(context);
           }
@@ -150,14 +228,26 @@ class AmountEditBottomSheet extends StatelessWidget {
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                AmountDisplay(amount: editStr, onClear: onClear),
+                AmountDisplay(
+                  amount: editStr,
+                  onClear: onClear,
+                  currencySymbol: currencySymbol,
+                  currencyLabel: currencyLabel,
+                ),
                 SmartKeyboard(
                   onDigit: onDigit,
                   onDoubleZero: onDoubleZero,
-                  onDot: onDot,
+                  // D-06: disabled dot tile for 0-decimal foreign currencies.
+                  onDot: dotEnabled ? onDot : null,
                   onDelete: onDelete,
                   onNext: onNext,
-                  actionLabel: S.of(context).record,
+                  // Foreign edit confirms with the 保存 (save) semantics; JPY
+                  // mode keeps the legacy record label (OCR/Voice/edit-JPY).
+                  actionLabel: _isCurrencyAware
+                      ? S.of(context).save
+                      : S.of(context).record,
+                  currencySymbol: currencySymbol,
+                  currencyLabel: currencyLabel,
                 ),
               ],
             ),
