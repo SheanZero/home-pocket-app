@@ -923,6 +923,9 @@ class TransactionDetailsFormState
                   originalAmount: _originalAmount!,
                   appliedRate: _appliedRate!,
                   manualOverride: false,
+                  // Quick 260613-n5c: the date-change trigger shows the txn's
+                  // actual date (DateFormatter), seeded from _date (seed.timestamp).
+                  rateDate: _date,
                   // GAP-CLOSURE: feed the host's REAL exchange-rate re-fetch into
                   // the edit host's D-02/D-03 logic (drops the 160.00 stub).
                   dateChangeRefetchRate: _refetchRateForCurrentDate,

@@ -42,6 +42,7 @@ Widget _wrap({required Locale locale, ThemeMode themeMode = ThemeMode.light}) {
             originalAmount: 11290, // 112.90 USD in minor units (injected)
             appliedRate: '160.2564',
             manualOverride: false,
+            rateDate: DateTime(2026, 6, 13),
             onChanged: (_) {},
           ),
         ),
@@ -88,6 +89,10 @@ void main() {
       expect(find.byKey(const Key('edit_rate_field')), findsOneWidget);
       expect(find.text('160.2564'), findsOneWidget);
       expect(find.textContaining('18,093'), findsOneWidget);
+
+      // Quick 260613-n5c: the date-change trigger now shows the formatted
+      // rateDate (en `06/13/2026`), pinning the new label contract.
+      expect(find.text('06/13/2026'), findsOneWidget);
     });
   });
 }

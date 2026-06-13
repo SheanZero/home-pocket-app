@@ -28,6 +28,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../../shared/utils/currency_conversion.dart';
 import 'change_rate_confirmation_dialog.dart';
@@ -71,6 +72,7 @@ class CurrencyLinkedEditFields extends StatefulWidget {
     required this.originalAmount,
     required this.appliedRate,
     required this.manualOverride,
+    required this.rateDate,
     this.onChanged,
     this.onAmountInvalid,
     this.dateChangeRefetchRate,
@@ -78,6 +80,11 @@ class CurrencyLinkedEditFields extends StatefulWidget {
 
   /// ISO 4217 code of the foreign currency (e.g. 'USD').
   final String originalCurrency;
+
+  /// The transaction's date — shown on the date-change trigger label, formatted
+  /// via [DateFormatter] (ja `2026/06/13`, en `06/13/2026`). Quick 260613-n5c:
+  /// the trigger now displays the ACTUAL date value, not the static word 「日期/Date」.
+  final DateTime rateDate;
 
   /// Initial original amount in minor units.
   final int originalAmount;
@@ -353,7 +360,7 @@ class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
             key: const Key('edit_date_change_trigger'),
             onPressed: _onDateChange,
             child: Text(
-              l10n.dateLabel,
+              DateFormatter.formatDate(widget.rateDate, locale),
               style: AppTextStyles.labelMedium.copyWith(color: palette.daily),
             ),
           ),

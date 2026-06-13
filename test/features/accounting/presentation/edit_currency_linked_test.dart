@@ -28,6 +28,7 @@ void main() {
     required int originalAmount,
     required String rate,
     required bool manualOverride,
+    DateTime? rateDate,
     DateChangeRefetchRateSource? refetchRate,
     ValueChanged<CurrencyLinkedEditValue>? onChanged,
     ValueChanged<bool>? onAmountInvalid,
@@ -41,6 +42,7 @@ void main() {
               originalAmount: originalAmount,
               appliedRate: rate,
               manualOverride: manualOverride,
+              rateDate: rateDate ?? DateTime(2026, 6, 13),
               dateChangeRefetchRate: refetchRate,
               onChanged: onChanged,
               onAmountInvalid: onAmountInvalid,
@@ -79,6 +81,25 @@ void main() {
         reason: 'the in-card original-amount input was removed (260613-mgc)',
       );
       expect(find.textContaining('7,415'), findsOneWidget);
+
+      // Quick 260613-n5c: the date-change trigger shows the FORMATTED actual
+      // date (en `06/13/2026`), not the static word 「日期/Date」.
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('edit_date_change_trigger')),
+          matching: find.text('06/13/2026'),
+        ),
+        findsOneWidget,
+        reason: 'date-change trigger must show DateFormatter(rateDate) (n5c)',
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('edit_date_change_trigger')),
+          matching: find.text('Date'),
+        ),
+        findsNothing,
+        reason: 'the static word Date must no longer appear (n5c)',
+      );
     });
 
     testWidgets('changing the rate recomputes the read-only JPY (D-12)', (

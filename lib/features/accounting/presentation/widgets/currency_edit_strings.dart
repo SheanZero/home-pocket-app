@@ -39,7 +39,6 @@ class CurrencyEditStrings {
   String get amountRequired => _s?.editAmountRequired ?? 'Please enter an amount';
   String get amountInvalid =>
       _s?.editAmountInvalid ?? 'Enter a positive number';
-  String get dateLabel => _s?.date ?? 'Date';
 
   String get dialogTitle => _s?.changeRateDialogTitle ?? 'Rate confirmation';
   String get dialogBody =>
