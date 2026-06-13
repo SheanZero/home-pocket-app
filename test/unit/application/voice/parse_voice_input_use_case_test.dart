@@ -359,4 +359,69 @@ void main() {
       },
     );
   });
+
+  // ─── WR-04: standalone currency-suffix residue must not pollute keyword ───
+  group('WR-04 — currency-suffix residue stripped from category keyword', () {
+    setUp(() {
+      when(() => mockMerchantDatabase.findMerchant(any())).thenReturn(null);
+      when(
+        () => mockResolver.resolveLedgerType(any()),
+      ).thenAnswer((_) async => LedgerType.daily);
+    });
+
+    test('"5块钱 拉面" → keyword 拉面 (no 块/钱 residue)', () async {
+      String? seen;
+      when(() => mockResolver.resolve(any())).thenAnswer((inv) async {
+        seen = inv.positionalArguments.first as String?;
+        return const CategoryMatchResult(
+          categoryId: 'cat_food_dining_out',
+          confidence: 0.5,
+          source: MatchSource.keyword,
+        );
+      });
+
+      final result = await useCase.execute('5块钱拉面', localeId: 'zh-CN');
+      expect(result.isSuccess, isTrue, reason: result.error);
+      expect(seen, equals('拉面'));
+      expect(result.data!.resolvedKeyword, equals('拉面'));
+    });
+
+    test('"50美元 咖啡" → keyword 咖啡 (no 美元 residue)', () async {
+      String? seen;
+      when(() => mockResolver.resolve(any())).thenAnswer((inv) async {
+        seen = inv.positionalArguments.first as String?;
+        return const CategoryMatchResult(
+          categoryId: 'cat_food_dining_out',
+          confidence: 0.5,
+          source: MatchSource.keyword,
+        );
+      });
+
+      final result = await useCase.execute('50美元咖啡', localeId: 'zh-CN');
+      expect(result.isSuccess, isTrue, reason: result.error);
+      expect(seen, equals('咖啡'));
+      expect(result.data!.resolvedKeyword, equals('咖啡'));
+    });
+
+    test('standalone foreign suffix residue stripped: 美元 not left in keyword',
+        () async {
+      // CJK numeral 五十 is NOT stripped (pre-existing keyword limitation,
+      // out of WR-04 scope) — but the standalone 美元 suffix MUST be removed by
+      // the WR-04 second pass, leaving no currency token in the keyword.
+      String? seen;
+      when(() => mockResolver.resolve(any())).thenAnswer((inv) async {
+        seen = inv.positionalArguments.first as String?;
+        return const CategoryMatchResult(
+          categoryId: 'cat_food_dining_out',
+          confidence: 0.5,
+          source: MatchSource.keyword,
+        );
+      });
+
+      final result = await useCase.execute('五十美元咖啡', localeId: 'zh-CN');
+      expect(result.isSuccess, isTrue, reason: result.error);
+      expect(seen, isNot(contains('美元')));
+      expect(seen, equals('五十咖啡'));
+    });
+  });
 }

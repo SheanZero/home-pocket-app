@@ -203,6 +203,17 @@ class ParseVoiceInputUseCase {
       '',
     );
 
+    // WR-04: the suffix group above is optional (`?`), so a currency-suffix
+    // token NOT directly attached to a number (e.g. a stray '元' after the
+    // amount was matched without its suffix) survives into the category
+    // keyword and degrades resolution. Strip any standalone currency-suffix
+    // token left behind. Longest-first ordering inside `regexAlternation`
+    // ensures multi-char tokens ('块钱', '日元') are consumed whole, not split.
+    remaining = remaining.replaceAll(
+      RegExp('(?:${VoiceCurrencySuffixes.regexAlternation})'),
+      '',
+    );
+
     final lower = (localeId ?? '').toLowerCase();
     final isJapanese = lower.startsWith('ja');
     final isChinese = lower.startsWith('zh');
