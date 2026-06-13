@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 Phase: 42 (entry-ui-display-voice) — EXECUTING
 Plan: 9 of 9
 Status: Phase complete — ready for verification
-Last activity: 2026-06-13 - Completed quick task 260613-ohz: 货币选择器去重列 + 长尾币种名称本地化
+Last activity: 2026-06-13 - Completed quick task 260613-ote: 长尾币种真实货币符号
 
 Progress: [███████░░░] 65%
 
@@ -40,6 +40,7 @@ Progress: [███████░░░] 65%
 | 260613-n5c | 外币编辑微调（汇率日期触发器显示实际日期2026/06/13；编辑页金额键盘保存键执行整条目保存） | 2026-06-13 | 08c87829 | [260613-n5c-fx-edit-date-and-save](./quick/260613-n5c-fx-edit-date-and-save/) |
 | 260613-njf | 撤销改动2（键盘动作键恢复纯write-back，不再整条目保存）；编辑页外币键盘动作键文案「保存」→「确认」 | 2026-06-13 | 8b274e08 | [260613-njf-revert-keypad-save-confirm-label](./quick/260613-njf-revert-keypad-save-confirm-label/) |
 | 260613-ohz | 货币选择器去除粗体三字码列（flag→symbol→name）；19个长尾币种名称支持zh/ja/en本地化 | 2026-06-13 | 72b2d788 | [260613-ohz-currency-picker-dedup-l10n](./quick/260613-ohz-currency-picker-dedup-l10n/) |
+| 260613-ote | 长尾币种真实货币符号（NumberFormatter 新增 16 个：฿₹₱₫₽₺/Rp/RM/NZ$/R$/R/kr/MX$/zł；CHF/AED/SAR 保留三字码） | 2026-06-13 | e8ab6f82 | [260613-ote-longtail-currency-symbols](./quick/260613-ote-longtail-currency-symbols/) |
 
 ## Last Milestone Snapshot (v1.6)
 
