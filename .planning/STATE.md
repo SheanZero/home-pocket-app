@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: 多币种支持
-status: verifying
-stopped_at: Completed 41-02-PLAN.md
+status: ready
+stopped_at: Completed Phase 41 (5/5 plans + verification passed 5/5)
 last_updated: "2026-06-13T00:48:24.581Z"
 last_activity: 2026-06-13
 progress:
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 41 — exchange-rate-service
+**Current focus:** Phase 42 — entry-ui-display-voice (not started — ready to plan)
 
 ## Current Position
 
 Phase: 42
 Plan: Not started
-Status: Phase complete — ready for verification
+Status: Phase 41 complete + verified (5/5 plans, verification 5/5); Phase 42 not started
 Last activity: 2026-06-13
 
 Progress: [░░░░░░░░░░] 0%
