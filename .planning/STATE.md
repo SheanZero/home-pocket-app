@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: 多币种支持
 status: executing
-stopped_at: Completed 42-01-PLAN.md (Wave 0 test scaffolds)
-last_updated: "2026-06-13T02:57:06.506Z"
+stopped_at: Completed 42-03-PLAN.md
+last_updated: "2026-06-13T03:02:48.277Z"
 last_activity: 2026-06-13
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 20
-  completed_plans: 13
-  percent: 65
+  completed_plans: 14
+  percent: 67
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 ## Current Position
 
 Phase: 42 (entry-ui-display-voice) — EXECUTING
-Plan: 3 of 9
+Plan: 4 of 9
 Status: Ready to execute
 Last activity: 2026-06-13
 
@@ -127,8 +127,8 @@ No active blockers for v1.7. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-13T02:56:50.372Z
-Stopped at: Completed 42-01-PLAN.md (Wave 0 test scaffolds)
+Last session: 2026-06-13T03:02:43.429Z
+Stopped at: Completed 42-03-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -142,6 +142,7 @@ Resume file: None
 | Phase 41 P05 | 7min | 2 tasks | 4 files |
 | Phase 42 P01 | ~18min | 2 tasks | 5 files |
 | Phase 42 P02 | 7min | 1 tasks | 2 files |
+| Phase Phase 42 P03 P03 | ~4min | 1 task tasks | 3 files files |
 
 ## Decisions
 
@@ -152,3 +153,4 @@ Resume file: None
 - [Phase 41]: 41-04: ExchangeRateCacheService cache-first orchestration (D-01/D-03/D-05/D-06/D-07/D-08/D-09), getRate never throws; GetExchangeRateUseCase adds ADR-022 D-02 dialog/D-03 toast + RATE-04 manual override; BackupData.exchangeRates D-10 export+import; SC-5 verified (0 HTTP in accounting)
 - [Phase ?]: 41-05: Three @riverpod providers wired (appExchangeRateApiClient/CacheService/GetExchangeRateUseCase); build_runner regenerated .g.dart; full suite 2705/2705 GREEN, analyze 0, architecture 47/47; SC-5 holds. Phase 42 can ref.watch(appGetExchangeRateUseCaseProvider). Fixed 2 carry regressions (logging-privacy scanner false-positive in api_client; backup characterization test missing appExchangeRateRepositoryProvider override)
 - [Phase ?]: 42-02: Per-currency decimals routed through intl currencyFractionDigits via single shared helper currencyFractionDigitsFor(); subunitToUnitFor=pow(10,n) so BHD/JOD/KWD=3 yields 1000; KRW kept explicit 0-decimal (T-42-03); unknown code falls back to intl DEFAULT 2 (T-42-02); convertToJpy() byte-unchanged (ADR-020 single conversion site)
+- [Phase 42]: 42-03: UpdateTransactionParams gains the currency triple; execute() coalesces from seed (EDIT-02), recomputes JPY via single-site convertToJpy() (ADR-020) only for foreign rows, no rehash (ADR-021, prevHash/currentHash frozen). Extracted shared validateCurrencyTriple() into currency_conversion.dart; CreateTransactionUseCase refactored to reuse it (removed ~50 dup lines + dead _iso4217). update_transaction_currency_test GREEN; 56/56 use-case tests green; analyze 0.
