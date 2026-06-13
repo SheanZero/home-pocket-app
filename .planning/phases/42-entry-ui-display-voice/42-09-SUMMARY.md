@@ -99,7 +99,8 @@ Each task was committed atomically (TDD: RED gate `a53353bd test(42-01)` from Wa
 
 ## Decisions Made
 - **JPY stays read-only derived (ADR-022 D-01).** The ROADMAP "three-field bidirectional" wording is void (circular-dependency risk). Implemented strictly as original × rate → JPY.
-- **D-02/D-03 logic colocated in `CurrencyLinkedEditFields`.** The widget owns the original amount needed to compute the >1% JPY delta, and the RED test exercises both signals via the widget's built-in date-change trigger (no provider plumbing required for the unit contract). Production hosts can supply a real re-fetch rate via `dateChangeRefetchRate`; the threshold itself is never recomputed in arithmetic that would diverge from `convertToJpy`.
+- **D-02/D-03 logic colocated in `CurrencyLinkedEditFields`.** The widget owns the original amount needed to compute the >1% JPY delta. Production hosts supply the re-fetched rate via `dateChangeRefetchRate`; the threshold itself is never recomputed in arithmetic that would diverge from `convertToJpy`.
+- **GAP-CLOSURE (2026-06-13): real exchange-rate re-fetch is now wired — the `160.00` stub is GONE.** `dateChangeRefetchRate` changed from a static `String?` to a `DateChangeRefetchRateSource` (`Future<String?> Function()?`). `TransactionDetailsForm` (which owns `ref` + the date) supplies `_refetchRateForCurrentDate`, reading the REAL `appGetExchangeRateUseCaseProvider` for `{_originalCurrency, _date}` (same use case as the entry `conversion_preview_panel`) via `ref.read` (one-shot side-effect, not `ref.watch`). never-block-save (P41): a null/`RateUnavailable` result is a graceful no-op — no dialog, no toast, existing rate kept. See commit referenced in "Next Phase Readiness".
 - **Hand-editing the rate flips manualOverride true** so the next date change routes to D-02 (dialog) rather than D-03 (silent recalculation), matching the ADR-022 override semantics.
 
 ## Deviations from Plan
@@ -135,7 +136,7 @@ None - no external service configuration required.
 
 ## Next Phase Readiness
 - Foreign-row edit semantics (DISP-03/04, ADR-022 D-01/D-02/D-03) are complete and test-locked.
-- Production wiring of a real date-change re-fetch rate (via `CurrencyLinkedEditFields.dateChangeRefetchRate` reading the rate use case's `RateResultWithSignal`) can be layered on without changing the widget's contract — the threshold is pre-computed by the use case and only rendered here.
+- Real date-change re-fetch is now WIRED (GAP-CLOSURE commit `3b59c127`): `TransactionDetailsForm._refetchRateForCurrentDate` reads the real `appGetExchangeRateUseCaseProvider` and feeds the resolved rate into `CurrencyLinkedEditFields.dateChangeRefetchRate`. The Phase-42 verification WARNING (hardcoded `_kStubRefetchRate = '160.00'`) is resolved — `grep '160.00' lib/` is empty. New tests: `transaction_details_form_refetch_rate_test.dart` (foreign-row date change consumes the REAL provider; toast/Undo driven by the fetched rate) + two never-block-save no-op cases in `edit_currency_linked_test.dart`. Full suite 2786/2786 green.
 - Verifier should confirm the JPY-native edit path remains byte-identical (CURR-04) and that the deferred provider-hygiene item is routed to a 42-06 follow-up.
 
 ---
