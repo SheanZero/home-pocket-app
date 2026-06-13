@@ -26,6 +26,29 @@ import '../widgets/keyboard_toolbar.dart';
 import '../widgets/smart_keyboard.dart';
 import '../widgets/transaction_details_form.dart';
 
+/// WR-01: returns true when a foreign rate-fetch's captured inputs no longer
+/// match the screen's current inputs — i.e. the user changed the currency,
+/// amount, or DATE while the rate fetch was in flight. The caller must then
+/// withhold the push so a STALE-date (or stale-currency/amount) rate is never
+/// persisted against a different timestamp (ADR-021 — currency fields are
+/// excluded from the hash chain, so such a mismatch is undetectable once saved).
+///
+/// Extracted as a pure top-level function (vs. an inline `||` chain) so the
+/// guard — especially the WR-01 date dimension — is independently testable.
+@visibleForTesting
+bool foreignPushIsStale({
+  required String capturedCurrency,
+  required String currentCurrency,
+  required int capturedMinorUnits,
+  required int currentMinorUnits,
+  required DateTime capturedDate,
+  required DateTime currentDate,
+}) {
+  return capturedCurrency != currentCurrency ||
+      capturedMinorUnits != currentMinorUnits ||
+      capturedDate != currentDate;
+}
+
 /// Single-screen manual transaction entry replacing the legacy two-screen flow
 /// (manual entry hub → confirmation screen).
 ///
@@ -321,16 +344,35 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
     );
     try {
       final withSignal = await ref.read(conversionRateProvider(args).future);
-      // Bail if the user changed currency/amount while awaiting.
+      // Bail if the user changed currency/amount/date while awaiting.
+      // WR-01: `date` is captured before the await; a date change mid-fetch
+      // would otherwise persist an OLD-date rate against the NEW-date timestamp
+      // (undetectable post-persist — the triple is excluded from the hash chain,
+      // ADR-021). The date guard makes the stale-date push impossible.
       if (!mounted ||
-          currency != _currency ||
-          minorUnits != _originalMinorUnits) {
+          foreignPushIsStale(
+            capturedCurrency: currency,
+            currentCurrency: _currency,
+            capturedMinorUnits: minorUnits,
+            currentMinorUnits: _originalMinorUnits,
+            capturedDate: date,
+            currentDate: _selectedDate,
+          )) {
         return;
       }
       final rate = _rateStringOf(withSignal.result);
       if (rate == null) {
         // RateUnavailable — no rate to persist yet. Withhold the triple; the
         // preview surfaces the mandatory-rate prompt.
+        //
+        // WR-02: a PRIOR successful push may have left `_amount = someJpy`.
+        // Clearing only the triple here would leave that stale JPY as a
+        // JPY-native row, so a Save in this window persists a stale converted
+        // amount. Reset the form amount to 0 FIRST so the create use case
+        // rejects the save (amount <= 0) instead. When the user later supplies
+        // a manual rate the normal push (mandatory-manual-rate, P41 D-08)
+        // re-computes the JPY amount.
+        _formKey.currentState?.updateAmount(0);
         _formKey.currentState?.updateCurrencyTriple(
           originalCurrency: null,
           originalAmount: null,
