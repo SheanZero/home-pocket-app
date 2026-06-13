@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -126,6 +127,15 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
   // to a specific currency+date rate; a fresh re-resolve supersedes it).
   String? _manualForeignRate;
 
+  // Quick 260613-wuv (WUV-02): debounced snapshot of [_originalMinorUnits] that
+  // feeds the FX card's mount guard + provider key. The card re-resolves the
+  // rate (and re-seeds the JPY换算) only ~300ms after the user pauses typing,
+  // killing the per-keystroke loading-spinner / JPY re-seed flicker. The SAVE
+  // path ([_pushForeignTriple]) keeps reading the LIVE [_originalMinorUnits] so
+  // an immediate save persists the freshly-entered amount, never this snapshot.
+  int _debouncedMinorUnits = 0;
+  Timer? _fxDebounce;
+
   /// Entered amount in the active currency's MINOR units (cents for USD,
   /// whole units for JPY). Derived from the controller text via the currency's
   /// subunit factor — the single input into [convertToJpy].
@@ -187,6 +197,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
 
   @override
   void dispose() {
+    _fxDebounce?.cancel();
     _merchantFocus.dispose();
     _noteFocus.dispose();
     super.dispose();
@@ -326,7 +337,35 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
       );
       return;
     }
+    // SAVE path stays LIVE: push the freshly-entered amount/triple immediately so
+    // an instant Save persists the correct figure and the staleness guard
+    // compares against live input (Quick 260613-wuv WUV-02).
     _pushForeignTriple();
+    _scheduleFxDebounce();
+  }
+
+  /// Quick 260613-wuv (WUV-02): debounce the value that drives the FX card's
+  /// provider key + JPY re-seed so it only re-resolves ~300ms after the user
+  /// pauses typing (mirrors voice_input_screen.dart's Timer precedent). The card
+  /// MOUNT GUARD + its `originalMinorUnits` arg read [_debouncedMinorUnits];
+  /// persistence ([_pushForeignTriple]) still reads the LIVE value.
+  void _scheduleFxDebounce() {
+    _fxDebounce?.cancel();
+    // Clearing to 0 should unmount the card promptly (no stale spinner) rather
+    // than waiting out the debounce window — collapse it synchronously.
+    if (_originalMinorUnits == 0) {
+      if (_debouncedMinorUnits != 0) {
+        setState(() => _debouncedMinorUnits = 0);
+      }
+      return;
+    }
+    _fxDebounce = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      final next = _originalMinorUnits;
+      if (next != _debouncedMinorUnits) {
+        setState(() => _debouncedMinorUnits = next);
+      }
+    });
   }
 
   /// Resolve the current rate (cache-first via the preview's keyed provider) and
@@ -689,52 +728,68 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
                 ),
               ),
 
-              // Quick 260613-ufn (D-1): the large ≈¥ ConversionPreviewPanel
-              // block was REMOVED. The unified CurrencyLinkedEditFields card
-              // (same as the edit screen) renders the foreign conversion area —
-              // 汇率 (editable) / 日元（换算）(derived) / 汇率日期 (non-clickable +
-              // staleness). Mounted ONLY for foreign rows with an amount; the
-              // JPY path stays byte-identical (CURR-04).
-              if (_isForeign && _originalMinorUnits > 0)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _AddScreenForeignCard(
-                    currency: _currency,
-                    date: _selectedDate,
-                    originalMinorUnits: _originalMinorUnits,
-                    manualRateOverride: _manualForeignRate,
-                    onRateEdited: _onForeignRateEdited,
-                    onSignal: _onRateSignal,
-                  ),
-                ),
-
               // Scrollable details section with smart bottom padding (D-13)
               Expanded(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.fromLTRB(16, 8, 16, scrollPaddingBottom),
-                  child: TransactionDetailsForm(
-                    key: _formKey,
-                    config: TransactionDetailsFormConfig.$new(
-                      bookId: widget.bookId,
-                      initialAmount: widget.initialAmount,
-                      initialCategory: _selectedCategory,
-                      initialParentCategory: _selectedParentCategory,
-                      initialDate: _selectedDate,
-                      initialMerchant: widget.initialMerchant,
-                      initialSatisfaction: widget.initialSatisfaction,
-                      voiceKeyword: widget.voiceKeyword,
-                      entrySource: widget.entrySource,
-                    ),
-                    // P19-W3: per-host FocusNodes so _handleFocusChange fires.
-                    merchantFocusNode: _merchantFocus,
-                    noteFocusNode: _noteFocus,
-                    // Item 4 (260526-j98): reclaim amount focus after date /
-                    // category picker dismisses so SmartKeyboard reappears.
-                    onPickerDismissed: _restoreKeypadFocus,
-                    // Quick 260613-ufn (D-4): keep the screen's _selectedDate in
-                    // lock-step with the form's date picker so the keyed rate
-                    // provider re-resolves the rate for the new date.
-                    onDateChanged: _onFormDateChanged,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Quick 260613-wuv (WUV-01): the foreign conversion card
+                      // now scrolls WITH the form (only AmountDisplay +
+                      // EntryModeSwitcher stay pinned) and is wrapped in the same
+                      // card chrome the EDIT screen uses (_formCard: palette.card
+                      // / radius 14 / palette.borderDefault). The unified
+                      // CurrencyLinkedEditFields renders 汇率 (editable) / 日元
+                      // （换算）(derived) / 汇率日期 (non-clickable + staleness).
+                      // Quick 260613-wuv (WUV-02): keyed on _debouncedMinorUnits
+                      // (not the live amount) so the card only re-resolves ~300ms
+                      // after the user pauses typing (no per-keystroke flash).
+                      // Mounted ONLY for foreign rows with an amount; the JPY
+                      // path stays byte-identical (CURR-04).
+                      if (_isForeign && _debouncedMinorUnits > 0) ...[
+                        Container(
+                          decoration: BoxDecoration(
+                            color: palette.card,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: palette.borderDefault),
+                          ),
+                          child: _AddScreenForeignCard(
+                            currency: _currency,
+                            date: _selectedDate,
+                            originalMinorUnits: _debouncedMinorUnits,
+                            manualRateOverride: _manualForeignRate,
+                            onRateEdited: _onForeignRateEdited,
+                            onSignal: _onRateSignal,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      TransactionDetailsForm(
+                        key: _formKey,
+                        config: TransactionDetailsFormConfig.$new(
+                          bookId: widget.bookId,
+                          initialAmount: widget.initialAmount,
+                          initialCategory: _selectedCategory,
+                          initialParentCategory: _selectedParentCategory,
+                          initialDate: _selectedDate,
+                          initialMerchant: widget.initialMerchant,
+                          initialSatisfaction: widget.initialSatisfaction,
+                          voiceKeyword: widget.voiceKeyword,
+                          entrySource: widget.entrySource,
+                        ),
+                        // P19-W3: per-host FocusNodes so _handleFocusChange fires.
+                        merchantFocusNode: _merchantFocus,
+                        noteFocusNode: _noteFocus,
+                        // Item 4 (260526-j98): reclaim amount focus after date /
+                        // category picker dismisses so SmartKeyboard reappears.
+                        onPickerDismissed: _restoreKeypadFocus,
+                        // Quick 260613-ufn (D-4): keep the screen's _selectedDate
+                        // in lock-step with the form's date picker so the keyed
+                        // rate provider re-resolves the rate for the new date.
+                        onDateChanged: _onFormDateChanged,
+                      ),
+                    ],
                   ),
                 ),
               ),
