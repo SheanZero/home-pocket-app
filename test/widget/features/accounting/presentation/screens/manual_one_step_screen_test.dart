@@ -740,9 +740,16 @@ void main() {
   });
 
   // ── CR-01: decimal-point parsing regression ────────────────────────────────
+  //
+  // Phase 42 (D-06): the default currency is JPY (0 decimals), so the dot key is
+  // now GATED OFF — `onDot:null` → a disabled blank tile, no '.' glyph (CURR-04).
+  // The original CR-01 concern (typing "123." must not collapse to 0) is now
+  // structurally impossible on the JPY path because the dot can't be typed at
+  // all. The regression intent — Record submits amount=123 — is preserved; the
+  // dot-tap step is replaced with an assertion that the dot is absent/gated.
 
   testWidgets(
-      'CR-01: typing 1,2,3,. then Record calls use case with amount=123 (not 0)',
+      'CR-01: typing 1,2,3 (dot gated for JPY) then Record submits amount=123',
       (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
@@ -787,14 +794,19 @@ void main() {
       await tester.pump();
     }
 
-    // Tap '.' — this previously caused int.tryParse("123.") = null → updateAmount(0)
-    final dotFinder = find.descendant(
-      of: keyboard,
-      matching: find.text('.'),
+    // Phase 42 D-06: JPY gates the dot key off — no '.' glyph is rendered, and
+    // the disabled tile is present instead. Typing a dot is impossible on the
+    // JPY path, so the old int.tryParse("123.") = null → 0 hazard cannot occur.
+    expect(
+      find.descendant(of: keyboard, matching: find.text('.')),
+      findsNothing,
+      reason: 'JPY (0 decimals) gates the dot key off (D-06 / CURR-04)',
     );
-    expect(dotFinder, findsOneWidget);
-    await tester.tap(dotFinder);
-    await tester.pump();
+    expect(
+      find.byKey(const ValueKey('smart_keyboard_dot_disabled')),
+      findsOneWidget,
+      reason: 'gated dot renders a disabled blank tile, not a tappable key',
+    );
 
     // Tap 'Record' — the form should submit with amount=123 (not 0)
     final recordFinder = find.descendant(
