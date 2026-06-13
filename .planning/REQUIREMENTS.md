@@ -12,8 +12,8 @@ Requirements for this milestone. Each maps to roadmap phases.
 - [ ] **CURR-01**: User can tap a currency symbol/code adjacent to the amount on the entry keypad (SmartKeyboard) to open the currency selector — without leaving the entry screen
 - [ ] **CURR-02**: Currency selector pins common currencies at top (JPY always first; USD/EUR/CNY/HKD/GBP, dynamically re-ordered by recent use) with a "more" affordance expanding the full ISO 4217 list with real-time search by code or name
 - [ ] **CURR-03**: Last-used foreign currency is remembered within the app session as the suggested default for the next entry; resets to JPY on app restart
-- [ ] **CURR-04**: When JPY is active (default), entry UX is unchanged — no rate fetch, no preview panel, no list annotation (domestic mode untouched)
-- [ ] **CURR-05**: Foreign-currency amount entry supports decimal input per the currency's ISO 4217 minor unit (e.g. USD 50.50; JPY/KRW remain 0-decimal)
+- [x] **CURR-04**: When JPY is active (default), entry UX is unchanged — no rate fetch, no preview panel, no list annotation (domestic mode untouched)
+- [x] **CURR-05**: Foreign-currency amount entry supports decimal input per the currency's ISO 4217 minor unit (e.g. USD 50.50; JPY/KRW remain 0-decimal)
 
 ### 汇率 (Exchange Rate)
 
@@ -88,8 +88,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CURR-01 | Phase 42 | Pending |
 | CURR-02 | Phase 42 | Pending |
 | CURR-03 | Phase 42 | Pending |
-| CURR-04 | Phase 42 | Pending |
-| CURR-05 | Phase 42 | Pending |
+| CURR-04 | Phase 42 | Complete |
+| CURR-05 | Phase 42 | Complete |
 | DISP-01 | Phase 42 | Pending |
 | DISP-02 | Phase 42 | Pending |
 | DISP-03 | Phase 42 | Complete |

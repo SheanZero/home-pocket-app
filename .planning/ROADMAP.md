@@ -207,7 +207,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 42-05-PLAN.md — AmountInputController (D-07 cap / D-08 truncate) + SmartKeyboard dot-gating (D-06, 48dp) [W2]
+- [x] 42-05-PLAN.md — AmountInputController (D-07 cap / D-08 truncate) + SmartKeyboard dot-gating (D-06, 48dp) [W2]
 - [ ] 42-06-PLAN.md — CurrencySelectorSheet (JPY-first, search, more, flag rows) + recent-use session provider + ARB names [W2]
 
 **Wave 3** *(blocked on Wave 2 completion)*
