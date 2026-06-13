@@ -340,6 +340,38 @@ class TransactionDetailsFormState
     });
   }
 
+  /// Quick task 260613-mgc — host (TransactionEditScreen headline keypad)
+  /// pushes the edited foreign ORIGINAL amount (in MINOR units) here after the
+  /// currency-aware [AmountEditBottomSheet] confirms. Mirrors [updateRate]'s
+  /// idempotency + single-site recompute: on a valid triple it recomputes the
+  /// derived JPY `_amount` via [convertToJpy] (D-12, one direction only —
+  /// original × rate → JPY; JPY never writes back) and clears the
+  /// [_foreignAmountInvalid] gate. The CurrencyLinkedEditFields card re-derives
+  /// its JPY row from the injected [_originalAmount] on the next rebuild.
+  void updateOriginalAmount(int minorUnits) {
+    if (!mounted) return;
+    if (minorUnits == _originalAmount) return;
+    setState(() {
+      _originalAmount = minorUnits;
+      final currency = _originalCurrency;
+      final rate = _appliedRate;
+      if (minorUnits > 0 &&
+          currency != null &&
+          rate != null &&
+          validateAppliedRate(rate) == null) {
+        _amount = convertToJpy(
+          originalMinorUnits: minorUnits,
+          appliedRate: rate,
+          subunitToUnit: subunitToUnitFor(currency),
+        );
+        _foreignAmountInvalid = false;
+      } else {
+        // Non-positive / invalid amount — gate save (WR-06).
+        _foreignAmountInvalid = minorUnits <= 0;
+      }
+    });
+  }
+
   /// Phase 22 D-07 — host (VoiceInputScreen) pushes voice-resolved category +
   /// parent via this method on `_stopRecordingAndCommit` batch fill. Mirrors
   /// the internal `_editCategory` write set + ledger resolution so behavior is
@@ -875,39 +907,15 @@ class TransactionDetailsFormState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            DetailInfoCard(
-              rows: [
-                DetailInfoRow(
-                  key: const ValueKey('category-chip'),
-                  icon: displayCategory != null
-                      ? resolveCategoryIcon(displayCategory.icon)
-                      : Icons.shopping_bag_outlined,
-                  label: l10n.category,
-                  value: _categoryLabel(locale, l10n),
-                  showChevron: true,
-                  onTap: _editCategory,
-                ),
-                DetailInfoRow(
-                  key: const ValueKey('date-chip'),
-                  icon: Icons.calendar_today_outlined,
-                  label: l10n.date,
-                  value: const FormatterService().formatDate(_date, locale),
-                  showChevron: true,
-                  onTap: _editDate,
-                ),
-              ],
-              trailing: _buildMerchantRow(l10n),
-            ),
-
-            // Phase 42-09 (DISP-03 / ADR-022 D-01): the foreign-currency edit
-            // host — three linked rows (original amount + rate editable; JPY
-            // read-only derived). Rendered only for foreign rows; JPY-native
-            // rows skip it entirely (CURR-04 regression protection).
+            // Quick task 260613-mgc: the foreign-currency card (rate + derived
+            // JPY) renders ABOVE the category/date card. Original-amount editing
+            // moved to the screen's top headline keypad; this card now carries
+            // only two rows. Rendered only for foreign rows; JPY-native rows
+            // skip it entirely (CURR-04 regression protection).
             if (_isEditMode &&
                 _originalCurrency != null &&
                 _originalAmount != null &&
                 _appliedRate != null) ...[
-              const SizedBox(height: 16),
               _formCard(
                 child: CurrencyLinkedEditFields(
                   key: const ValueKey('currency-linked-edit-fields'),
@@ -944,7 +952,32 @@ class TransactionDetailsFormState
                   },
                 ),
               ),
+              const SizedBox(height: 16),
             ],
+
+            DetailInfoCard(
+              rows: [
+                DetailInfoRow(
+                  key: const ValueKey('category-chip'),
+                  icon: displayCategory != null
+                      ? resolveCategoryIcon(displayCategory.icon)
+                      : Icons.shopping_bag_outlined,
+                  label: l10n.category,
+                  value: _categoryLabel(locale, l10n),
+                  showChevron: true,
+                  onTap: _editCategory,
+                ),
+                DetailInfoRow(
+                  key: const ValueKey('date-chip'),
+                  icon: Icons.calendar_today_outlined,
+                  label: l10n.date,
+                  value: const FormatterService().formatDate(_date, locale),
+                  showChevron: true,
+                  onTap: _editDate,
+                ),
+              ],
+              trailing: _buildMerchantRow(l10n),
+            ),
 
             const SizedBox(height: 16),
 

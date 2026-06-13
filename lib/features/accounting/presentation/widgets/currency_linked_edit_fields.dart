@@ -1,10 +1,15 @@
-/// CurrencyLinkedEditFields — the ADR-022 D-01 two-input / one-derived edit
-/// host for a foreign-currency transaction row (DISP-03 / DISP-04).
+/// CurrencyLinkedEditFields — the ADR-022 D-01 rate + derived-JPY card for a
+/// foreign-currency transaction row (DISP-03 / DISP-04).
 ///
-/// THREE rows, always visible (D-11 — rate is NEVER collapsed):
-///   1. original amount  — EDITABLE  (TextField)
-///   2. applied rate     — EDITABLE  (TextField, key `edit_rate_field`)
-///   3. JPY              — READ-ONLY derived `Text` (AppTextStyles.amount*)
+/// TWO rows, always visible (D-11 — rate is NEVER collapsed):
+///   1. applied rate     — EDITABLE  (TextField, key `edit_rate_field`)
+///   2. JPY              — READ-ONLY derived `Text` (AppTextStyles.amount*)
+///
+/// The ORIGINAL amount is NO LONGER an in-card input (quick 260613-mgc): it is
+/// edited from the screen's top headline via the existing keypad sheet and
+/// injected here through [originalAmount] (synced in [didUpdateWidget]). The
+/// card derives and displays the JPY from that injected original × the in-card
+/// rate.
 ///
 /// There is EXACTLY ONE data-flow direction: original × rate → JPY (D-12,
 /// single site `convertToJpy()`). JPY is NEVER an input, never editable, never
@@ -25,7 +30,6 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../../shared/utils/currency_conversion.dart';
-import 'amount_input_controller.dart';
 import 'change_rate_confirmation_dialog.dart';
 import 'currency_edit_strings.dart';
 
@@ -112,12 +116,14 @@ class CurrencyLinkedEditFields extends StatefulWidget {
 }
 
 class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
-  late final TextEditingController _amountController;
   late final TextEditingController _rateController;
 
-  /// Original amount in MINOR units (e.g. cents for USD). Null = the field is
-  /// cleared / non-positive / unparseable (WR-06: a nullable value replaces the
-  /// old `-1` sentinel so "cleared" is distinguishable from a real amount).
+  /// Original amount in MINOR units (e.g. cents for USD). Injected by the host
+  /// via [CurrencyLinkedEditFields.originalAmount] and refreshed in
+  /// [didUpdateWidget] — the in-card amount input was removed (quick 260613-mgc;
+  /// the headline keypad now owns original-amount editing). Null = the host
+  /// reports the amount as cleared / non-positive (WR-06: a nullable value so
+  /// "cleared" is distinguishable from a real amount).
   int? _originalAmount;
   late String _appliedRate;
   late bool _manualOverride;
@@ -125,61 +131,38 @@ class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
   /// Inline validation error for the rate field (null = valid). T-42-23.
   String? _rateError;
 
-  /// Inline validation error for the original-amount field (null = valid).
-  /// WR-06: surfaced exactly like [_rateError] so a cleared / invalid amount is
-  /// explained to the user instead of silently rendering JPY as `—`.
-  String? _amountError;
-
-  /// Last validity state pushed to [CurrencyLinkedEditFields.onAmountInvalid].
-  /// Used to fire the callback only on transitions (valid↔invalid).
-  bool _lastAmountInvalid = false;
-
-  /// ISO 4217 minor-unit decimals for the (fixed) original currency — the
-  /// decimal cap for the major-unit amount field (WR-05). Reused, not redefined.
-  int get _decimals => currencyFractionDigitsFor(widget.originalCurrency);
-
+  /// Minor units per major unit for the (fixed) original currency — used by the
+  /// single conversion site to derive JPY from the injected original amount.
   int get _subunitToUnit => subunitToUnitFor(widget.originalCurrency);
 
   @override
   void initState() {
     super.initState();
-    _originalAmount = widget.originalAmount;
+    _originalAmount = widget.originalAmount > 0 ? widget.originalAmount : null;
     _appliedRate = widget.appliedRate;
     _manualOverride = widget.manualOverride;
-    // WR-05: the field shows the MAJOR-unit value with the currency's decimal
-    // cap (e.g. USD 5000 minor → "50.00"; JPY 5000 minor → "5000"), matching the
-    // entry screen's major-unit input rather than raw minor units.
-    _amountController = TextEditingController(
-      text: _minorToMajorString(widget.originalAmount),
-    );
     _rateController = TextEditingController(text: _appliedRate);
   }
 
   @override
+  void didUpdateWidget(covariant CurrencyLinkedEditFields oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // The original amount is now an external prop (headline keypad owns it).
+    // Re-sync and re-derive the JPY row whenever the host pushes a new value.
+    if (oldWidget.originalAmount != widget.originalAmount) {
+      setState(() {
+        _originalAmount = widget.originalAmount > 0
+            ? widget.originalAmount
+            : null;
+      });
+      _emitAmountValidity(_originalAmount == null);
+    }
+  }
+
+  @override
   void dispose() {
-    _amountController.dispose();
     _rateController.dispose();
     super.dispose();
-  }
-
-  /// Formats a minor-unit amount as its major-unit string with the currency's
-  /// decimal cap (WR-05). 0-decimal currencies (JPY/KRW) render no fraction.
-  String _minorToMajorString(int minorUnits) {
-    if (_decimals == 0) return (minorUnits ~/ _subunitToUnit).toString();
-    return (minorUnits / _subunitToUnit).toStringAsFixed(_decimals);
-  }
-
-  /// Parses a major-unit input string to minor units, returning null when the
-  /// value is empty / non-positive / unparseable (WR-06). Truncates (never
-  /// rounds) any fractional overflow past the currency cap by reusing
-  /// [AmountInputController.truncateToDecimals] (WR-05, single decimal helper).
-  int? _majorStringToMinor(String raw) {
-    final trimmed = raw.trim();
-    if (trimmed.isEmpty) return null;
-    final capped = AmountInputController.truncateToDecimals(trimmed, _decimals);
-    final major = double.tryParse(capped);
-    if (major == null || !major.isFinite || major <= 0) return null;
-    return (major * _subunitToUnit).round();
   }
 
   /// The SINGLE conversion site (D-12). Returns null when inputs are invalid so
@@ -194,6 +177,10 @@ class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
       subunitToUnit: _subunitToUnit,
     );
   }
+
+  /// Last validity state pushed to [CurrencyLinkedEditFields.onAmountInvalid].
+  /// Used to fire the callback only on transitions (valid↔invalid).
+  bool _lastAmountInvalid = false;
 
   /// Pushes the current amount-validity to the host on transition only (WR-06).
   void _emitAmountValidity(bool invalid) {
@@ -219,19 +206,6 @@ class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
         manualOverride: _manualOverride,
       ),
     );
-  }
-
-  void _onAmountChanged(String raw) {
-    final trimmed = raw.trim();
-    final minor = _majorStringToMinor(trimmed);
-    final l10n = CurrencyEditStrings.of(context);
-    setState(() {
-      _originalAmount = minor;
-      _amountError = minor != null
-          ? null
-          : (trimmed.isEmpty ? l10n.amountRequired : l10n.amountInvalid);
-    });
-    _notify();
   }
 
   void _onRateChanged(String raw) {
@@ -326,56 +300,12 @@ class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
     final locale = Localizations.localeOf(context);
     final jpy = _deriveJpy();
 
-    // Phase 42 UAT fix: the original-amount row carries the currency symbol
-    // (e.g. '$') so the edited value reads as "$112.90" — consistent with the
-    // entry screen's currency presentation. Derived the same way the entry
-    // screen / headline strip it from a formatted zero (no hardcoded glyph).
-    final currencySymbol = NumberFormatter.formatCurrency(
-      0,
-      widget.originalCurrency,
-      locale,
-    ).replaceAll(RegExp(r'[\d.,\s]'), '');
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Row 1: original amount (editable) — prefixed with the currency symbol.
-        _LabeledField(
-          label: l10n.originalAmountLabel,
-          child: TextField(
-            key: const Key('edit_original_amount_field'),
-            controller: _amountController,
-            // WR-05: decimal input for currencies with minor units (USD/EUR…);
-            // disabled for 0-decimal currencies (JPY/KRW), mirroring the entry
-            // screen's currency-aware keypad.
-            keyboardType: TextInputType.numberWithOptions(
-              decimal: _decimals > 0,
-            ),
-            textAlign: TextAlign.end,
-            onChanged: _onAmountChanged,
-            decoration: InputDecoration(
-              isDense: true,
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.zero,
-              // Phase 42 UAT fix: show the currency symbol with the value so the
-              // editable original amount reads as e.g. "$112.90" (consistency).
-              prefixText: currencySymbol,
-              prefixStyle: AppTextStyles.bodyMedium.copyWith(
-                color: palette.textSecondary,
-              ),
-              // WR-06: surface the cleared/invalid amount inline, exactly like
-              // the rate field's _rateError, instead of a silent `—` JPY.
-              errorText: _amountError,
-              errorStyle: AppTextStyles.labelSmall.copyWith(
-                color: palette.error,
-              ),
-            ),
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: palette.textPrimary,
-            ),
-          ),
-        ),
-        // Row 2: applied rate (editable, NEVER collapsed — D-11).
+        // Row 1: applied rate (editable, NEVER collapsed — D-11). The original
+        // amount is no longer an in-card input (quick 260613-mgc): it is edited
+        // from the screen headline's keypad and injected via widget.originalAmount.
         _LabeledField(
           label: l10n.rateLabel,
           child: TextField(
@@ -402,7 +332,7 @@ class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
             ),
           ),
         ),
-        // Row 3: JPY (READ-ONLY derived — never an input, ADR-022 D-01).
+        // Row 2: JPY (READ-ONLY derived — never an input, ADR-022 D-01).
         _LabeledField(
           label: l10n.jpyDerivedLabel,
           child: Text(

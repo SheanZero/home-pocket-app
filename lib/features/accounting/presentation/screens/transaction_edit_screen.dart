@@ -68,12 +68,14 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
   late int _displayOriginalMinor;
   String? _displayCurrency;
 
-  /// Phase 42-09 (ADR-022 D-01): a foreign row's JPY amount is a READ-ONLY
-  /// derived value (original × rate). The top [AmountDisplay] must NOT open the
-  /// [AmountEditBottomSheet] for foreign rows — editing flows exclusively
-  /// through the linked rows inside the form's `.edit` host (two-input /
-  /// one-derived; JPY is never directly editable). JPY-native rows are
-  /// unchanged (CURR-04 regression protection).
+  /// Quick task 260613-mgc: a foreign row's top headline is now TAP-TO-EDIT.
+  /// Tapping it opens the EXISTING [AmountEditBottomSheet] keypad in its
+  /// currency-aware mode to edit the ORIGINAL amount (major-unit decimal). This
+  /// reverses the earlier ADR-022 D-01 UAT decision that made the foreign
+  /// headline non-tappable — user-directed ("点击头部数字弹出现有键盘修改"). The
+  /// single-direction conversion invariant is preserved: the keypad edits the
+  /// original amount, and `convertToJpy` (one site) re-derives the read-only JPY.
+  /// JPY-native rows keep their JPY-integer edit sheet unchanged (CURR-04).
   bool get _isForeignRow => widget.transaction.originalCurrency != null;
 
   @override
@@ -159,6 +161,39 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
     );
   }
 
+  /// The ISO currency symbol for [currency], stripped from a formatted zero the
+  /// same way the headline does (no hardcoded glyph). Shared by the headline
+  /// render and [_editForeignAmount] so the display + keypad agree.
+  String _symbolFor(String currency, Locale locale) {
+    return NumberFormatter.formatCurrency(
+      0,
+      currency,
+      locale,
+    ).replaceAll(RegExp(r'[\d.,\s]'), '');
+  }
+
+  /// Quick task 260613-mgc — foreign headline tap-to-edit. Opens the EXISTING
+  /// [AmountEditBottomSheet] in currency-aware mode (major-unit decimal) seeded
+  /// from the current ORIGINAL minor amount. On confirm: update the headline's
+  /// original-minor state and push it into the form via [updateOriginalAmount],
+  /// which re-derives the read-only JPY via the single `convertToJpy` site.
+  Future<void> _editForeignAmount(String currency) async {
+    final locale =
+        ref.read(currentLocaleProvider).value ?? const Locale('ja');
+    await AmountEditBottomSheet.show(
+      context,
+      initialAmount: _displayOriginalMinor,
+      currency: currency,
+      currencySymbol: _symbolFor(currency, locale),
+      currencyLabel: currency,
+      onConfirm: (minor) {
+        if (!mounted) return;
+        setState(() => _displayOriginalMinor = minor);
+        _formKey.currentState?.updateOriginalAmount(minor);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
@@ -176,11 +211,7 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
     final String topSymbol;
     final String topLabel;
     if (isForeign) {
-      topSymbol = NumberFormatter.formatCurrency(
-        0,
-        currency,
-        locale,
-      ).replaceAll(RegExp(r'[\d.,\s]'), '');
+      topSymbol = _symbolFor(currency, locale);
       topLabel = currency;
       topAmount = _minorToMajorString(_displayOriginalMinor, currency);
     } else {
@@ -221,12 +252,16 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
       body: Column(
         children: [
           // D-14 spillover: host renders AmountDisplay above the form.
-          // JPY-native: tapping opens AmountEditBottomSheet (modal-sheet UX).
-          // Foreign (ADR-022 D-01): the JPY figure is read-only derived — no
-          // tap-to-edit, no clear; edits flow through the form's linked rows.
+          // JPY-native: tapping opens AmountEditBottomSheet (JPY-integer mode).
+          // Foreign (quick 260613-mgc): tapping opens the SAME sheet in
+          // currency-aware mode to edit the ORIGINAL amount; the read-only JPY
+          // is re-derived via the single convertToJpy site. No clear button for
+          // foreign rows (original-zero is reachable by deleting in the keypad).
           GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: _isForeignRow ? null : _editAmount,
+            onTap: (_isForeignRow && currency != null)
+                ? () => _editForeignAmount(currency)
+                : _editAmount,
             child: AmountDisplay(
               amount: topAmount,
               currencySymbol: topSymbol,
