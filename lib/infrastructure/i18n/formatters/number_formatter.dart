@@ -2,6 +2,9 @@ import 'dart:ui';
 
 import 'package:intl/intl.dart';
 
+import '../../../shared/utils/currency_conversion.dart'
+    show currencyFractionDigitsFor;
+
 class NumberFormatter {
   NumberFormatter._();
 
@@ -80,13 +83,11 @@ class NumberFormatter {
     }
   }
 
-  static int _getCurrencyDecimals(String currencyCode) {
-    switch (currencyCode.toUpperCase()) {
-      case 'JPY':
-      case 'KRW': // D-08: KRW uses 0 decimal places
-        return 0;
-      default:
-        return 2;
-    }
-  }
+  /// ISO 4217 minor-unit decimals, sourced from intl's `currencyFractionDigits`
+  /// via the single shared helper [currencyFractionDigitsFor] (JPY/KRW=0,
+  /// USD/EUR/CNY=2, BHD/JOD/KWD=3). KRW stays an explicit 0-decimal case inside
+  /// the helper; unknown codes fall back to 2 there — never a hardcoded default
+  /// here (keeps decimals + subunit consistent with currency_conversion.dart).
+  static int _getCurrencyDecimals(String currencyCode) =>
+      currencyFractionDigitsFor(currencyCode);
 }

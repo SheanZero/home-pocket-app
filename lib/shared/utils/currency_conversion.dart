@@ -1,3 +1,7 @@
+import 'dart:math' as math;
+
+import 'package:intl/number_symbols_data.dart' show currencyFractionDigits;
+
 /// Single canonical JPY conversion site per STORE-02 and ADR-020.
 ///
 /// Formula: (originalMinorUnits / subunitToUnit * rate).round()
@@ -62,17 +66,33 @@ String? validateAppliedRate(String raw) {
   return null;
 }
 
+/// ISO 4217 minor-unit decimal count for [currencyCode] — the SINGLE
+/// authoritative decimals source for the app (used by both the subunit math
+/// below and `NumberFormatter._getCurrencyDecimals`).
+///
+/// Sourced from intl 0.20.2's `currencyFractionDigits` map (the canonical ISO
+/// 4217 minor-unit table — e.g. BHD/JOD/KWD=3, JPY=0), with a literal default
+/// of 2 only for codes the map omits (intl stores only deviations from 2).
+///
+/// KRW is kept as an explicit 0-decimal special case (T-42-03): the app's
+/// display convention is 0 decimals for KRW, and routing it through the map
+/// alone is intentionally not trusted given the documented subunit/ISO
+/// mismatch noted in STATE. An unknown / malformed code never throws here —
+/// it falls back to the safe default of 2 (T-42-02).
+int currencyFractionDigitsFor(String currencyCode) {
+  final code = currencyCode.toUpperCase();
+  // KRW: locked 0-decimal display convention — do not trust intl for KRW.
+  if (code == 'KRW') {
+    return 0;
+  }
+  return currencyFractionDigits[code] ?? currencyFractionDigits['DEFAULT'] ?? 2;
+}
+
 /// Minor units per major unit for an ISO 4217 currency code.
 ///
-/// JPY/KRW have no sub-unit (D-08); every other code the app handles uses
-/// 2 decimals (mirrors NumberFormatter._getCurrencyDecimals). When Phase 41
-/// introduces a richer currency metadata source, route this through it.
+/// `pow(10, fractionDigits)` from the single decimals source
+/// [currencyFractionDigitsFor]: JPY/KRW (0 decimals) → 1, USD/EUR/CNY
+/// (2 decimals) → 100, BHD/JOD/KWD (3 decimals) → 1000.
 int subunitToUnitFor(String currencyCode) {
-  switch (currencyCode.toUpperCase()) {
-    case 'JPY':
-    case 'KRW':
-      return 1;
-    default:
-      return 100;
-  }
+  return math.pow(10, currencyFractionDigitsFor(currencyCode)).toInt();
 }
