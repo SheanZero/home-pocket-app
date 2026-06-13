@@ -90,21 +90,23 @@ class ExchangeRateApiClient {
     );
     try {
       final response = await _client.get(url).timeout(_primaryTimeout);
+      final status = response.statusCode;
+      final rawJson = response.body;
       if (kDebugMode) {
-        debugPrint('[RateAPI] frankfurter ${response.statusCode} $url');
+        debugPrint('[RateAPI] frankfurter $status $url');
       }
-      if (response.statusCode != 200) {
+      if (status != 200) {
         // 404 = currency not in Frankfurter; any non-200 routes onward.
         return null;
       }
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
-      final rates = body['rates'] as Map<String, dynamic>?;
+      final decoded = jsonDecode(rawJson) as Map<String, dynamic>;
+      final rates = decoded['rates'] as Map<String, dynamic>?;
       final rawRate = (rates?[upperCurrency] as num?)?.toDouble();
       if (rawRate == null || rawRate == 0 || !rawRate.isFinite) {
         // T-41-06: guard against division by zero / non-finite.
         return null;
       }
-      final responseDate = body['date'] as String?;
+      final responseDate = decoded['date'] as String?;
       final actualRateDate = (responseDate != null && responseDate != dateStr)
           ? DateTime.parse(responseDate)
           : null;
@@ -122,12 +124,14 @@ class ExchangeRateApiClient {
   _tryFawazahmed(String url, String lowerCurrency, Duration timeout) async {
     try {
       final response = await _client.get(Uri.parse(url)).timeout(timeout);
+      final status = response.statusCode;
+      final rawJson = response.body;
       if (kDebugMode) {
-        debugPrint('[RateAPI] fawazahmed0 ${response.statusCode} $url');
+        debugPrint('[RateAPI] fawazahmed0 $status $url');
       }
-      if (response.statusCode != 200) return null;
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
-      final jpy = body['jpy'] as Map<String, dynamic>?;
+      if (status != 200) return null;
+      final decoded = jsonDecode(rawJson) as Map<String, dynamic>;
+      final jpy = decoded['jpy'] as Map<String, dynamic>?;
       final rawRate = (jpy?[lowerCurrency] as num?)?.toDouble();
       if (rawRate == null || rawRate == 0 || !rawRate.isFinite) {
         return null;

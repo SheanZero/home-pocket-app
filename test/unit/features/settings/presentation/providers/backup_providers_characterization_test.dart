@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/currency/repository_providers.dart';
 import 'package:home_pocket/application/settings/clear_all_data_use_case.dart';
 import 'package:home_pocket/application/settings/export_backup_use_case.dart';
 import 'package:home_pocket/application/settings/import_backup_use_case.dart';
@@ -7,6 +8,7 @@ import 'package:home_pocket/features/accounting/domain/repositories/book_reposit
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/currency/domain/repositories/exchange_rate_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
 import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart';
 import 'package:mocktail/mocktail.dart';
@@ -21,11 +23,15 @@ class _MockBookRepository extends Mock implements BookRepository {}
 
 class _MockSettingsRepository extends Mock implements SettingsRepository {}
 
+class _MockExchangeRateRepository extends Mock
+    implements ExchangeRateRepository {}
+
 void main() {
   late _MockTransactionRepository mockTransactionRepo;
   late _MockCategoryRepository mockCategoryRepo;
   late _MockBookRepository mockBookRepo;
   late _MockSettingsRepository mockSettingsRepo;
+  late _MockExchangeRateRepository mockExchangeRateRepo;
   late ProviderContainer container;
 
   setUp(() {
@@ -33,6 +39,7 @@ void main() {
     mockCategoryRepo = _MockCategoryRepository();
     mockBookRepo = _MockBookRepository();
     mockSettingsRepo = _MockSettingsRepository();
+    mockExchangeRateRepo = _MockExchangeRateRepository();
 
     container = ProviderContainer(
       overrides: [
@@ -40,6 +47,9 @@ void main() {
         categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
         bookRepositoryProvider.overrideWithValue(mockBookRepo),
         settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
+        appExchangeRateRepositoryProvider.overrideWithValue(
+          mockExchangeRateRepo,
+        ),
       ],
     );
   });
