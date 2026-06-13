@@ -2040,6 +2040,12 @@ class SJa extends S {
   String get editRateInvalid => '正の数を入力してください';
 
   @override
+  String get editAmountRequired => '金額を入力してください';
+
+  @override
+  String get editAmountInvalid => '正の数を入力してください';
+
+  @override
   String get changeRateDialogTitle => 'レート確認';
 
   @override

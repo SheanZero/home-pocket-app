@@ -2075,6 +2075,12 @@ class SEn extends S {
   String get editRateInvalid => 'Enter a positive number';
 
   @override
+  String get editAmountRequired => 'Please enter an amount';
+
+  @override
+  String get editAmountInvalid => 'Enter a positive number';
+
+  @override
   String get changeRateDialogTitle => 'Rate confirmation';
 
   @override

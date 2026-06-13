@@ -3835,6 +3835,18 @@ abstract class S {
   /// **'Enter a positive number'**
   String get editRateInvalid;
 
+  /// Inline error when the foreign-row original-amount field is empty (Phase 42 GAP, WR-06)
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an amount'**
+  String get editAmountRequired;
+
+  /// Inline validation error for a non-positive / unparseable original amount (Phase 42 GAP, WR-06)
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a positive number'**
+  String get editAmountInvalid;
+
   /// Title of the manual-override + date-change dialog (Phase 42-09, ADR-022 D-02)
   ///
   /// In en, this message translates to:

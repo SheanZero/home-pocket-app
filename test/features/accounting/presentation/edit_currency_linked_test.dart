@@ -40,6 +40,8 @@ void main() {
     required String rate,
     required bool manualOverride,
     DateChangeRefetchRateSource? refetchRate,
+    ValueChanged<CurrencyLinkedEditValue>? onChanged,
+    ValueChanged<bool>? onAmountInvalid,
   }) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -51,12 +53,22 @@ void main() {
               appliedRate: rate,
               manualOverride: manualOverride,
               dateChangeRefetchRate: refetchRate,
+              onChanged: onChanged,
+              onAmountInvalid: onAmountInvalid,
             ),
           ),
         ),
       ),
     );
     await tester.pumpAndSettle();
+  }
+
+  /// The current text of the original-amount field.
+  String amountFieldText(WidgetTester tester) {
+    final field = tester.widget<TextField>(
+      find.byKey(const Key('edit_original_amount_field')),
+    );
+    return field.controller!.text;
   }
 
   group('ADR-022 D-01 — JPY is read-only derived', () {
@@ -198,6 +210,188 @@ void main() {
       expect(find.byType(AlertDialog), findsNothing);
       expect(find.byType(SnackBar), findsNothing);
       expect(find.textContaining('7,415'), findsOneWidget);
+    });
+  });
+
+  // ── WR-05: amount field edits MAJOR units with the currency decimal cap ────
+  group('WR-05 — amount field is major-unit with decimal cap', () {
+    testWidgets('USD seed 5000 minor → field shows "50.00"', (tester) async {
+      await pumpHost(
+        tester,
+        currency: 'USD',
+        originalAmount: 5000, // minor units (cents)
+        rate: '148.30',
+        manualOverride: false,
+      );
+
+      expect(amountFieldText(tester), '50.00');
+    });
+
+    testWidgets('JPY seed 5000 minor → field shows "5000" (0-decimal)', (
+      tester,
+    ) async {
+      await pumpHost(
+        tester,
+        currency: 'JPY',
+        originalAmount: 5000, // JPY has no sub-unit: minor == major
+        rate: '1',
+        manualOverride: false,
+      );
+
+      expect(amountFieldText(tester), '5000');
+    });
+
+    testWidgets('typing "60" (USD) → stored 6000 minor → JPY recomputed', (
+      tester,
+    ) async {
+      CurrencyLinkedEditValue? last;
+      await pumpHost(
+        tester,
+        currency: 'USD',
+        originalAmount: 5000,
+        rate: '148.30',
+        manualOverride: false,
+        onChanged: (v) => last = v,
+      );
+
+      await tester.enterText(
+        find.byKey(const Key('edit_original_amount_field')),
+        '60',
+      );
+      await tester.pumpAndSettle();
+
+      // 60 major USD → 6000 minor; JPY = 6000/100 × 148.30 = 8898.
+      expect(last, isNotNull);
+      expect(last!.originalAmount, 6000);
+      expect(last!.jpyAmount, 8898);
+      expect(find.textContaining('8,898'), findsOneWidget);
+    });
+
+    testWidgets('typing "50.5" (USD) → 5050 minor (major-unit decimal parse)', (
+      tester,
+    ) async {
+      CurrencyLinkedEditValue? last;
+      await pumpHost(
+        tester,
+        currency: 'USD',
+        originalAmount: 5000,
+        rate: '148.30',
+        manualOverride: false,
+        onChanged: (v) => last = v,
+      );
+
+      await tester.enterText(
+        find.byKey(const Key('edit_original_amount_field')),
+        '50.5',
+      );
+      await tester.pumpAndSettle();
+
+      expect(last!.originalAmount, 5050); // 50.50 USD = 5050 cents
+    });
+  });
+
+  // ── WR-06: cleared/invalid amount → inline error + gated save (no desync) ──
+  group('WR-06 — cleared/invalid amount surfaces error and gates host', () {
+    testWidgets('clearing the amount shows an inline error', (tester) async {
+      await pumpHost(
+        tester,
+        currency: 'USD',
+        originalAmount: 5000,
+        rate: '148.30',
+        manualOverride: false,
+      );
+
+      await tester.enterText(
+        find.byKey(const Key('edit_original_amount_field')),
+        '',
+      );
+      await tester.pumpAndSettle();
+
+      // The amount field renders an inline error (English fallback in the
+      // delegate-less harness) and the JPY degrades to the em-dash.
+      expect(find.text('Please enter an amount'), findsOneWidget);
+      expect(find.textContaining('—'), findsOneWidget);
+    });
+
+    testWidgets('clearing fires onAmountInvalid(true) and NOT onChanged', (
+      tester,
+    ) async {
+      final invalidEvents = <bool>[];
+      var onChangedCalls = 0;
+      await pumpHost(
+        tester,
+        currency: 'USD',
+        originalAmount: 5000,
+        rate: '148.30',
+        manualOverride: false,
+        onChanged: (_) => onChangedCalls++,
+        onAmountInvalid: invalidEvents.add,
+      );
+
+      await tester.enterText(
+        find.byKey(const Key('edit_original_amount_field')),
+        '',
+      );
+      await tester.pumpAndSettle();
+
+      // WR-06: the host is told the value is INVALID (so it can gate save),
+      // rather than silently keeping the last-good amount via a stale onChanged.
+      expect(invalidEvents.last, isTrue);
+      expect(
+        onChangedCalls,
+        0,
+        reason: 'a cleared amount must not emit a value the host would persist',
+      );
+    });
+
+    testWidgets('non-positive amount ("0") is treated as invalid', (
+      tester,
+    ) async {
+      final invalidEvents = <bool>[];
+      await pumpHost(
+        tester,
+        currency: 'USD',
+        originalAmount: 5000,
+        rate: '148.30',
+        manualOverride: false,
+        onAmountInvalid: invalidEvents.add,
+      );
+
+      await tester.enterText(
+        find.byKey(const Key('edit_original_amount_field')),
+        '0',
+      );
+      await tester.pumpAndSettle();
+
+      expect(invalidEvents.last, isTrue);
+      expect(find.text('Enter a positive number'), findsOneWidget);
+    });
+
+    testWidgets('re-entering a valid amount clears the error and re-validates', (
+      tester,
+    ) async {
+      final invalidEvents = <bool>[];
+      CurrencyLinkedEditValue? last;
+      await pumpHost(
+        tester,
+        currency: 'USD',
+        originalAmount: 5000,
+        rate: '148.30',
+        manualOverride: false,
+        onChanged: (v) => last = v,
+        onAmountInvalid: invalidEvents.add,
+      );
+
+      final field = find.byKey(const Key('edit_original_amount_field'));
+      await tester.enterText(field, '');
+      await tester.pumpAndSettle();
+      await tester.enterText(field, '70');
+      await tester.pumpAndSettle();
+
+      // Transitions: invalid(true) then valid(false); onChanged carries 7000.
+      expect(invalidEvents.last, isFalse);
+      expect(find.text('Please enter an amount'), findsNothing);
+      expect(last!.originalAmount, 7000);
     });
   });
 }

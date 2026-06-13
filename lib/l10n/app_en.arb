@@ -2605,6 +2605,14 @@
   "@editRateInvalid": {
     "description": "Inline validation error for a non-positive / unparseable manual rate (Phase 42-09, validateAppliedRate / T-42-23)"
   },
+  "editAmountRequired": "Please enter an amount",
+  "@editAmountRequired": {
+    "description": "Inline error when the foreign-row original-amount field is empty (Phase 42 GAP, WR-06)"
+  },
+  "editAmountInvalid": "Enter a positive number",
+  "@editAmountInvalid": {
+    "description": "Inline validation error for a non-positive / unparseable original amount (Phase 42 GAP, WR-06)"
+  },
   "changeRateDialogTitle": "Rate confirmation",
   "@changeRateDialogTitle": {
     "description": "Title of the manual-override + date-change dialog (Phase 42-09, ADR-022 D-02)"

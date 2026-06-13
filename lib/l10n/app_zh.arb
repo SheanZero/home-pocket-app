@@ -2605,6 +2605,14 @@
   "@editRateInvalid": {
     "description": "Inline validation error for a non-positive / unparseable manual rate (Phase 42-09, validateAppliedRate / T-42-23)"
   },
+  "editAmountRequired": "请输入金额",
+  "@editAmountRequired": {
+    "description": "Inline error when the foreign-row original-amount field is empty (Phase 42 GAP, WR-06)"
+  },
+  "editAmountInvalid": "请输入正数",
+  "@editAmountInvalid": {
+    "description": "Inline validation error for a non-positive / unparseable original amount (Phase 42 GAP, WR-06)"
+  },
   "changeRateDialogTitle": "汇率确认",
   "@changeRateDialogTitle": {
     "description": "Title of the manual-override + date-change dialog (Phase 42-09, ADR-022 D-02)"

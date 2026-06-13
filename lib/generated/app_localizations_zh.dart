@@ -2033,6 +2033,12 @@ class SZh extends S {
   String get editRateInvalid => '请输入正数';
 
   @override
+  String get editAmountRequired => '请输入金额';
+
+  @override
+  String get editAmountInvalid => '请输入正数';
+
+  @override
   String get changeRateDialogTitle => '汇率确认';
 
   @override

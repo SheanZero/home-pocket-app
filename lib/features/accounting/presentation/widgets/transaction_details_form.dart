@@ -104,6 +104,14 @@ class TransactionDetailsFormState
   String? _originalCurrency;
   int? _originalAmount;
   String? _appliedRate;
+
+  // Phase 42 GAP (WR-06): true while the foreign edit host reports its original
+  // amount as cleared / non-positive / unparseable. Gates submit() so a Save
+  // taken while the amount field is visibly empty does NOT silently persist the
+  // previous last-good amount (the edit host stops firing onChanged in that
+  // state, so _originalAmount/_amount would otherwise retain stale values).
+  bool _foreignAmountInvalid = false;
+
   String? _initialCategoryId;
   LedgerType _ledgerType = LedgerType.daily;
   int _joyFullness = 2;
@@ -563,6 +571,14 @@ class TransactionDetailsFormState
         S.of(context).pleaseSelectCategory,
       );
     }
+    // WR-06: a foreign row whose original amount is cleared / invalid must NOT
+    // save with the stale last-good amount. Block it with the same affordance as
+    // an empty amount, rather than silently persisting _amount/_originalAmount.
+    if (_foreignAmountInvalid) {
+      return TransactionDetailsFormResult.validationError(
+        S.of(context).pleaseEnterAmount,
+      );
+    }
     setState(() => _isSubmitting = true);
     try {
       return await widget.config.when(
@@ -908,10 +924,19 @@ class TransactionDetailsFormState
                       _originalAmount = value.originalAmount;
                       _appliedRate = value.appliedRate;
                       _amount = value.jpyAmount;
+                      // A valid onChanged means the amount is valid again.
+                      _foreignAmountInvalid = false;
                     });
                     // Notify the screen so its read-only top display tracks the
                     // derived JPY (foreign rows only).
                     widget.onForeignJpyChanged?.call(value.jpyAmount);
+                  },
+                  // WR-06: the edit host reports a cleared/invalid amount here
+                  // (onChanged stays silent in that state). Track it so submit()
+                  // blocks rather than persisting the stale last-good amount.
+                  onAmountInvalid: (invalid) {
+                    if (!mounted) return;
+                    setState(() => _foreignAmountInvalid = invalid);
                   },
                 ),
               ),

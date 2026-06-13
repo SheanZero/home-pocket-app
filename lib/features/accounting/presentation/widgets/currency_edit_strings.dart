@@ -36,6 +36,9 @@ class CurrencyEditStrings {
   String get jpyDerivedLabel => _s?.editJpyDerivedLabel ?? 'JPY (derived)';
   String get rateRequired => _s?.editRateRequired ?? 'Please enter a rate';
   String get rateInvalid => _s?.editRateInvalid ?? 'Enter a positive number';
+  String get amountRequired => _s?.editAmountRequired ?? 'Please enter an amount';
+  String get amountInvalid =>
+      _s?.editAmountInvalid ?? 'Enter a positive number';
   String get dateLabel => _s?.date ?? 'Date';
 
   String get dialogTitle => _s?.changeRateDialogTitle ?? 'Rate confirmation';

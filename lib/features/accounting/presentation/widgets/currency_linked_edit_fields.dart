@@ -25,6 +25,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../../shared/utils/currency_conversion.dart';
+import 'amount_input_controller.dart';
 import 'change_rate_confirmation_dialog.dart';
 import 'currency_edit_strings.dart';
 
@@ -67,6 +68,7 @@ class CurrencyLinkedEditFields extends StatefulWidget {
     required this.appliedRate,
     required this.manualOverride,
     this.onChanged,
+    this.onAmountInvalid,
     this.dateChangeRefetchRate,
   });
 
@@ -84,7 +86,20 @@ class CurrencyLinkedEditFields extends StatefulWidget {
 
   /// Emitted on every committed change (original/rate edit, re-fetch, undo) so
   /// the host can keep its persistence triple in lock-step.
+  ///
+  /// Fires ONLY when the current original-amount + rate form a valid, derivable
+  /// triple. When the amount is cleared / non-positive / unparseable, [onChanged]
+  /// does NOT fire — instead [onAmountInvalid] is invoked so the host can gate
+  /// save rather than silently persisting the previous last-good value (WR-06).
   final ValueChanged<CurrencyLinkedEditValue>? onChanged;
+
+  /// Emitted when the original-amount input transitions between valid and
+  /// invalid (WR-06). `true` = the amount is cleared / non-positive /
+  /// unparseable, so the derived JPY cannot be computed and the host MUST block
+  /// save; `false` = the amount is valid again. Distinguishes "cleared" from a
+  /// real value so the host never persists a stale last-good amount while the
+  /// field is visibly empty.
+  final ValueChanged<bool>? onAmountInvalid;
 
   /// Async hook: resolves the REAL re-fetched rate for the host's new date via
   /// the exchange-rate use case. When null (or it resolves null), the
@@ -100,12 +115,30 @@ class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
   late final TextEditingController _amountController;
   late final TextEditingController _rateController;
 
-  late int _originalAmount;
+  /// Original amount in MINOR units (e.g. cents for USD). Null = the field is
+  /// cleared / non-positive / unparseable (WR-06: a nullable value replaces the
+  /// old `-1` sentinel so "cleared" is distinguishable from a real amount).
+  int? _originalAmount;
   late String _appliedRate;
   late bool _manualOverride;
 
   /// Inline validation error for the rate field (null = valid). T-42-23.
   String? _rateError;
+
+  /// Inline validation error for the original-amount field (null = valid).
+  /// WR-06: surfaced exactly like [_rateError] so a cleared / invalid amount is
+  /// explained to the user instead of silently rendering JPY as `—`.
+  String? _amountError;
+
+  /// Last validity state pushed to [CurrencyLinkedEditFields.onAmountInvalid].
+  /// Used to fire the callback only on transitions (valid↔invalid).
+  bool _lastAmountInvalid = false;
+
+  /// ISO 4217 minor-unit decimals for the (fixed) original currency — the
+  /// decimal cap for the major-unit amount field (WR-05). Reused, not redefined.
+  int get _decimals => currencyFractionDigitsFor(widget.originalCurrency);
+
+  int get _subunitToUnit => subunitToUnitFor(widget.originalCurrency);
 
   @override
   void initState() {
@@ -113,7 +146,12 @@ class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
     _originalAmount = widget.originalAmount;
     _appliedRate = widget.appliedRate;
     _manualOverride = widget.manualOverride;
-    _amountController = TextEditingController(text: _originalAmount.toString());
+    // WR-05: the field shows the MAJOR-unit value with the currency's decimal
+    // cap (e.g. USD 5000 minor → "50.00"; JPY 5000 minor → "5000"), matching the
+    // entry screen's major-unit input rather than raw minor units.
+    _amountController = TextEditingController(
+      text: _minorToMajorString(widget.originalAmount),
+    );
     _rateController = TextEditingController(text: _appliedRate);
   }
 
@@ -124,26 +162,58 @@ class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
     super.dispose();
   }
 
-  int get _subunitToUnit => subunitToUnitFor(widget.originalCurrency);
+  /// Formats a minor-unit amount as its major-unit string with the currency's
+  /// decimal cap (WR-05). 0-decimal currencies (JPY/KRW) render no fraction.
+  String _minorToMajorString(int minorUnits) {
+    if (_decimals == 0) return (minorUnits ~/ _subunitToUnit).toString();
+    return (minorUnits / _subunitToUnit).toStringAsFixed(_decimals);
+  }
+
+  /// Parses a major-unit input string to minor units, returning null when the
+  /// value is empty / non-positive / unparseable (WR-06). Truncates (never
+  /// rounds) any fractional overflow past the currency cap by reusing
+  /// [AmountInputController.truncateToDecimals] (WR-05, single decimal helper).
+  int? _majorStringToMinor(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return null;
+    final capped = AmountInputController.truncateToDecimals(trimmed, _decimals);
+    final major = double.tryParse(capped);
+    if (major == null || !major.isFinite || major <= 0) return null;
+    return (major * _subunitToUnit).round();
+  }
 
   /// The SINGLE conversion site (D-12). Returns null when inputs are invalid so
   /// the read-only row can degrade gracefully rather than throw.
   int? _deriveJpy() {
-    if (_originalAmount < 0) return null;
+    final amount = _originalAmount;
+    if (amount == null || amount <= 0) return null;
     if (validateAppliedRate(_appliedRate) != null) return null;
     return convertToJpy(
-      originalMinorUnits: _originalAmount,
+      originalMinorUnits: amount,
       appliedRate: _appliedRate,
       subunitToUnit: _subunitToUnit,
     );
   }
 
+  /// Pushes the current amount-validity to the host on transition only (WR-06).
+  void _emitAmountValidity(bool invalid) {
+    if (invalid == _lastAmountInvalid) return;
+    _lastAmountInvalid = invalid;
+    widget.onAmountInvalid?.call(invalid);
+  }
+
   void _notify() {
     final jpy = _deriveJpy();
-    if (jpy == null) return;
+    if (jpy == null) {
+      // WR-06: an invalid/cleared amount no longer silently keeps the host's
+      // last-good value. Tell the host the value is invalid so it can gate save.
+      _emitAmountValidity(true);
+      return;
+    }
+    _emitAmountValidity(false);
     widget.onChanged?.call(
       CurrencyLinkedEditValue(
-        originalAmount: _originalAmount,
+        originalAmount: _originalAmount!,
         appliedRate: _appliedRate,
         jpyAmount: jpy,
         manualOverride: _manualOverride,
@@ -152,8 +222,15 @@ class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
   }
 
   void _onAmountChanged(String raw) {
-    final parsed = int.tryParse(raw.trim());
-    setState(() => _originalAmount = parsed ?? -1);
+    final trimmed = raw.trim();
+    final minor = _majorStringToMinor(trimmed);
+    final l10n = CurrencyEditStrings.of(context);
+    setState(() {
+      _originalAmount = minor;
+      _amountError = minor != null
+          ? null
+          : (trimmed.isEmpty ? l10n.amountRequired : l10n.amountInvalid);
+    });
     _notify();
   }
 
@@ -258,13 +335,24 @@ class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
           child: TextField(
             key: const Key('edit_original_amount_field'),
             controller: _amountController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: false),
+            // WR-05: decimal input for currencies with minor units (USD/EUR…);
+            // disabled for 0-decimal currencies (JPY/KRW), mirroring the entry
+            // screen's currency-aware keypad.
+            keyboardType: TextInputType.numberWithOptions(
+              decimal: _decimals > 0,
+            ),
             textAlign: TextAlign.end,
             onChanged: _onAmountChanged,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               isDense: true,
               border: InputBorder.none,
               contentPadding: EdgeInsets.zero,
+              // WR-06: surface the cleared/invalid amount inline, exactly like
+              // the rate field's _rateError, instead of a silent `—` JPY.
+              errorText: _amountError,
+              errorStyle: AppTextStyles.labelSmall.copyWith(
+                color: palette.error,
+              ),
             ),
             style: AppTextStyles.bodyMedium.copyWith(
               color: palette.textPrimary,
