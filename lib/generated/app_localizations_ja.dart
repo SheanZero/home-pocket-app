@@ -2007,6 +2007,63 @@ class SJa extends S {
   String get currencyNameCad => 'カナダドル';
 
   @override
+  String get currencyNameChf => 'スイス・フラン';
+
+  @override
+  String get currencyNameThb => 'タイ・バーツ';
+
+  @override
+  String get currencyNameInr => 'インド・ルピー';
+
+  @override
+  String get currencyNameIdr => 'インドネシア・ルピア';
+
+  @override
+  String get currencyNameMyr => 'マレーシア・リンギット';
+
+  @override
+  String get currencyNamePhp => 'フィリピン・ペソ';
+
+  @override
+  String get currencyNameVnd => 'ベトナム・ドン';
+
+  @override
+  String get currencyNameNzd => 'ニュージーランド・ドル';
+
+  @override
+  String get currencyNameBrl => 'ブラジル・レアル';
+
+  @override
+  String get currencyNameRub => 'ロシア・ルーブル';
+
+  @override
+  String get currencyNameZar => '南アフリカ・ランド';
+
+  @override
+  String get currencyNameSek => 'スウェーデン・クローナ';
+
+  @override
+  String get currencyNameNok => 'ノルウェー・クローネ';
+
+  @override
+  String get currencyNameDkk => 'デンマーク・クローネ';
+
+  @override
+  String get currencyNameMxn => 'メキシコ・ペソ';
+
+  @override
+  String get currencyNameTry => 'トルコ・リラ';
+
+  @override
+  String get currencyNameAed => 'UAE ディルハム';
+
+  @override
+  String get currencyNameSar => 'サウジ・リヤル';
+
+  @override
+  String get currencyNamePln => 'ポーランド・ズウォティ';
+
+  @override
   String conversionPreviewRateRow(String code, String rate, String date) {
     return '$code 1 = ¥$rate · $date';
   }

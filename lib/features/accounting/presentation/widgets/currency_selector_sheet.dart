@@ -87,8 +87,9 @@ const List<_CurrencyEntry> _fullIsoList = <_CurrencyEntry>[
   _CurrencyEntry(code: 'PLN', flag: '🇵🇱', englishName: 'Polish Zloty'),
 ];
 
-/// Resolve the localized display name for a common-zone [code] via ARB.
-/// Returns null for codes outside the localized common zone (long-tail).
+/// Resolve the localized display name for a currency [code] via ARB. Covers
+/// both the common zone and the long-tail "more" list. Returns null only for
+/// codes with no ARB mapping, so the caller falls back to `englishName`.
 String? _localizedCommonZoneName(S s, String code) {
   switch (code) {
     case 'JPY':
@@ -113,6 +114,44 @@ String? _localizedCommonZoneName(S s, String code) {
       return s.currencyNameAud;
     case 'CAD':
       return s.currencyNameCad;
+    case 'CHF':
+      return s.currencyNameChf;
+    case 'THB':
+      return s.currencyNameThb;
+    case 'INR':
+      return s.currencyNameInr;
+    case 'IDR':
+      return s.currencyNameIdr;
+    case 'MYR':
+      return s.currencyNameMyr;
+    case 'PHP':
+      return s.currencyNamePhp;
+    case 'VND':
+      return s.currencyNameVnd;
+    case 'NZD':
+      return s.currencyNameNzd;
+    case 'BRL':
+      return s.currencyNameBrl;
+    case 'RUB':
+      return s.currencyNameRub;
+    case 'ZAR':
+      return s.currencyNameZar;
+    case 'SEK':
+      return s.currencyNameSek;
+    case 'NOK':
+      return s.currencyNameNok;
+    case 'DKK':
+      return s.currencyNameDkk;
+    case 'MXN':
+      return s.currencyNameMxn;
+    case 'TRY':
+      return s.currencyNameTry;
+    case 'AED':
+      return s.currencyNameAed;
+    case 'SAR':
+      return s.currencyNameSar;
+    case 'PLN':
+      return s.currencyNamePln;
     default:
       return null;
   }
@@ -127,9 +166,11 @@ String? _localizedCommonZoneName(S s, String code) {
 /// ISO code, records recent use, and pops (CURR-03) — selection never leaves the
 /// entry screen.
 ///
-/// Row format = flag emoji + currency symbol + ISO code + localized name
-/// (`🇺🇸 $ USD 米ドル`, D-01). [showFlags] is false in golden mode so the
-/// host-font-dependent flag glyph does not couple to the baseline (RESEARCH Q2).
+/// Row format = flag emoji + currency symbol/code + localized name
+/// (`🇺🇸 $ 米ドル`, D-01). The grey symbol cell falls back to the ISO code for
+/// currencies without a distinct glyph, so the code is never lost.
+/// [showFlags] is false in golden mode so the host-font-dependent flag glyph
+/// does not couple to the baseline (RESEARCH Q2).
 class CurrencySelectorSheet extends ConsumerStatefulWidget {
   const CurrencySelectorSheet({
     super.key,
@@ -339,7 +380,8 @@ class _CurrencySelectorSheetState
   }
 }
 
-/// A single 48dp currency row: flag + symbol + ISO code + localized name (D-01).
+/// A single 48dp currency row: flag + symbol/code + localized name (D-01).
+/// The grey symbol cell falls back to the ISO code for symbol-less currencies.
 class _CurrencyRow extends StatelessWidget {
   const _CurrencyRow({
     required this.entry,
@@ -394,20 +436,6 @@ class _CurrencyRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 4),
-            // ISO code
-            SizedBox(
-              width: 44,
-              child: Text(
-                entry.code,
-                style: AppTextStyles.bodyLarge.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: isSelected
-                      ? palette.accentPrimary
-                      : palette.textPrimary,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
             // Localized name
             Expanded(
               child: Text(

@@ -2041,6 +2041,63 @@ class SEn extends S {
   String get currencyNameCad => 'Canadian Dollar';
 
   @override
+  String get currencyNameChf => 'Swiss Franc';
+
+  @override
+  String get currencyNameThb => 'Thai Baht';
+
+  @override
+  String get currencyNameInr => 'Indian Rupee';
+
+  @override
+  String get currencyNameIdr => 'Indonesian Rupiah';
+
+  @override
+  String get currencyNameMyr => 'Malaysian Ringgit';
+
+  @override
+  String get currencyNamePhp => 'Philippine Peso';
+
+  @override
+  String get currencyNameVnd => 'Vietnamese Dong';
+
+  @override
+  String get currencyNameNzd => 'New Zealand Dollar';
+
+  @override
+  String get currencyNameBrl => 'Brazilian Real';
+
+  @override
+  String get currencyNameRub => 'Russian Ruble';
+
+  @override
+  String get currencyNameZar => 'South African Rand';
+
+  @override
+  String get currencyNameSek => 'Swedish Krona';
+
+  @override
+  String get currencyNameNok => 'Norwegian Krone';
+
+  @override
+  String get currencyNameDkk => 'Danish Krone';
+
+  @override
+  String get currencyNameMxn => 'Mexican Peso';
+
+  @override
+  String get currencyNameTry => 'Turkish Lira';
+
+  @override
+  String get currencyNameAed => 'UAE Dirham';
+
+  @override
+  String get currencyNameSar => 'Saudi Riyal';
+
+  @override
+  String get currencyNamePln => 'Polish Zloty';
+
+  @override
   String conversionPreviewRateRow(String code, String rate, String date) {
     return '$code 1 = ¥$rate · $date';
   }

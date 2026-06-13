@@ -3781,6 +3781,120 @@ abstract class S {
   /// **'Canadian Dollar'**
   String get currencyNameCad;
 
+  /// Localized currency name for CHF (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'Swiss Franc'**
+  String get currencyNameChf;
+
+  /// Localized currency name for THB (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'Thai Baht'**
+  String get currencyNameThb;
+
+  /// Localized currency name for INR (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'Indian Rupee'**
+  String get currencyNameInr;
+
+  /// Localized currency name for IDR (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'Indonesian Rupiah'**
+  String get currencyNameIdr;
+
+  /// Localized currency name for MYR (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'Malaysian Ringgit'**
+  String get currencyNameMyr;
+
+  /// Localized currency name for PHP (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'Philippine Peso'**
+  String get currencyNamePhp;
+
+  /// Localized currency name for VND (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'Vietnamese Dong'**
+  String get currencyNameVnd;
+
+  /// Localized currency name for NZD (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'New Zealand Dollar'**
+  String get currencyNameNzd;
+
+  /// Localized currency name for BRL (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'Brazilian Real'**
+  String get currencyNameBrl;
+
+  /// Localized currency name for RUB (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'Russian Ruble'**
+  String get currencyNameRub;
+
+  /// Localized currency name for ZAR (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'South African Rand'**
+  String get currencyNameZar;
+
+  /// Localized currency name for SEK (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'Swedish Krona'**
+  String get currencyNameSek;
+
+  /// Localized currency name for NOK (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'Norwegian Krone'**
+  String get currencyNameNok;
+
+  /// Localized currency name for DKK (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'Danish Krone'**
+  String get currencyNameDkk;
+
+  /// Localized currency name for MXN (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'Mexican Peso'**
+  String get currencyNameMxn;
+
+  /// Localized currency name for TRY (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'Turkish Lira'**
+  String get currencyNameTry;
+
+  /// Localized currency name for AED (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'UAE Dirham'**
+  String get currencyNameAed;
+
+  /// Localized currency name for SAR (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'Saudi Riyal'**
+  String get currencyNameSar;
+
+  /// Localized currency name for PLN (quick 260613-ohz)
+  ///
+  /// In en, this message translates to:
+  /// **'Polish Zloty'**
+  String get currencyNamePln;
+
   /// Preview rate sub-row: currency code, JPY-per-unit rate, rate date (Phase 42-07 D-03)
   ///
   /// In en, this message translates to:

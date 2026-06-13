@@ -2000,6 +2000,63 @@ class SZh extends S {
   String get currencyNameCad => '加元';
 
   @override
+  String get currencyNameChf => '瑞士法郎';
+
+  @override
+  String get currencyNameThb => '泰铢';
+
+  @override
+  String get currencyNameInr => '印度卢比';
+
+  @override
+  String get currencyNameIdr => '印尼盾';
+
+  @override
+  String get currencyNameMyr => '马来西亚林吉特';
+
+  @override
+  String get currencyNamePhp => '菲律宾比索';
+
+  @override
+  String get currencyNameVnd => '越南盾';
+
+  @override
+  String get currencyNameNzd => '新西兰元';
+
+  @override
+  String get currencyNameBrl => '巴西雷亚尔';
+
+  @override
+  String get currencyNameRub => '俄罗斯卢布';
+
+  @override
+  String get currencyNameZar => '南非兰特';
+
+  @override
+  String get currencyNameSek => '瑞典克朗';
+
+  @override
+  String get currencyNameNok => '挪威克朗';
+
+  @override
+  String get currencyNameDkk => '丹麦克朗';
+
+  @override
+  String get currencyNameMxn => '墨西哥比索';
+
+  @override
+  String get currencyNameTry => '土耳其里拉';
+
+  @override
+  String get currencyNameAed => '阿联酋迪拉姆';
+
+  @override
+  String get currencyNameSar => '沙特里亚尔';
+
+  @override
+  String get currencyNamePln => '波兰兹罗提';
+
+  @override
   String conversionPreviewRateRow(String code, String rate, String date) {
     return '$code 1 = ¥$rate · $date';
   }
