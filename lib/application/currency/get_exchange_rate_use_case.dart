@@ -158,8 +158,9 @@ class GetExchangeRateUseCase {
         RateUnavailable() => null,
       };
 
-  DateTime _normalizeToUtcMidnight(DateTime d) {
-    final utc = d.toUtc();
-    return DateTime.utc(utc.year, utc.month, utc.day);
-  }
+  /// CR-02: local Y/M/D as UTC midnight — agrees with the cache service, the
+  /// repo impl, and the API URL date. Do NOT `d.toUtc()` first (that shifted
+  /// JST-midnight keys to the previous day).
+  DateTime _normalizeToUtcMidnight(DateTime d) =>
+      DateTime.utc(d.year, d.month, d.day);
 }

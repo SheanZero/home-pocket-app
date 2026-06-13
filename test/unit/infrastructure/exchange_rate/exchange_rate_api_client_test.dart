@@ -83,7 +83,10 @@ void main() {
 
         final result = await apiClient.fetchRate('USD', DateTime.utc(2026, 6, 13));
 
-        expect(result.actualRateDate, DateTime.parse('2026-06-12'));
+        // CR-02 / IN-03: actualRateDate is parsed as UTC-midnight of the bare
+        // YYYY-MM-DD (not a local DateTime), sharing the rateDate key basis.
+        expect(result.actualRateDate, DateTime.utc(2026, 6, 12));
+        expect(result.actualRateDate!.isUtc, isTrue);
         expect(result.source, 'frankfurter');
       },
     );

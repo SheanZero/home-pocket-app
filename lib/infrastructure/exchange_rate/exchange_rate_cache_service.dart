@@ -161,10 +161,16 @@ class ExchangeRateCacheService {
     await _repository.deleteOlderThan(cutoff);
   }
 
-  /// Normalize [d] to UTC midnight — the composite-key contract shared with
-  /// [ExchangeRateRepositoryImpl].
-  DateTime _normalizeToUtcMidnight(DateTime d) {
-    final utc = d.toUtc();
-    return DateTime.utc(utc.year, utc.month, utc.day);
-  }
+  /// Normalize [d] to the canonical composite-key date: its LOCAL calendar
+  /// Y/M/D, stamped as a UTC midnight `DateTime` so the epoch second is
+  /// deterministic.
+  ///
+  /// CR-02: must use local Y/M/D (NOT `d.toUtc()` first), to agree with
+  /// [ExchangeRateApiClient._formatDate] which builds the URL date from local
+  /// components, and with the transaction date picker
+  /// (`DateTime(y, m, d)` — local midnight). Shifting to UTC first stored each
+  /// JST day's rate under the previous UTC day's key. Same contract shared
+  /// with [ExchangeRateRepositoryImpl].
+  DateTime _normalizeToUtcMidnight(DateTime d) =>
+      DateTime.utc(d.year, d.month, d.day);
 }

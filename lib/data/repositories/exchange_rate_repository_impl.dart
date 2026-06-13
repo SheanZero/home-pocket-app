@@ -63,15 +63,17 @@ class ExchangeRateRepositoryImpl implements ExchangeRateRepository {
     return rows.map(_toModel).toList();
   }
 
-  /// Normalizes [d] to UTC midnight — the composite-key contract documented
-  /// on the table and domain model (WR-06). Without this, a local-zone or
+  /// Normalizes [d] to the canonical composite-key date: its LOCAL calendar
+  /// Y/M/D stamped as UTC midnight (WR-06). Without this, a local-zone or
   /// non-midnight DateTime produces a different epoch second than
   /// DateTime.utc(y, m, d), causing silent cache misses on lookup and
   /// near-duplicate rows on upsert.
-  DateTime _normalizeToUtcMidnight(DateTime d) {
-    final utc = d.toUtc();
-    return DateTime.utc(utc.year, utc.month, utc.day);
-  }
+  ///
+  /// CR-02: uses local Y/M/D (NOT `d.toUtc()` first) so the key agrees with
+  /// the API URL date and the transaction date picker — see
+  /// ExchangeRateCacheService._normalizeToUtcMidnight.
+  DateTime _normalizeToUtcMidnight(DateTime d) =>
+      DateTime.utc(d.year, d.month, d.day);
 
   /// Map an [ExchangeRateRow] (Drift) to an [ExchangeRate] domain model.
   ExchangeRate _toModel(ExchangeRateRow row) {

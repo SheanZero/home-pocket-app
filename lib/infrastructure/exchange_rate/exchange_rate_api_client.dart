@@ -107,8 +107,12 @@ class ExchangeRateApiClient {
         return null;
       }
       final responseDate = decoded['date'] as String?;
+      // CR-02 / IN-03: parse the bare YYYY-MM-DD as a UTC-midnight DateTime
+      // (DateTime.parse would yield a LOCAL DateTime, re-introducing the
+      // one-day key skew on weekend/holiday rows). _parseUtcDate keeps
+      // actualRateDate on the same local-Y/M/D-as-UTC basis as rateDate.
       final actualRateDate = (responseDate != null && responseDate != dateStr)
-          ? DateTime.parse(responseDate)
+          ? _parseUtcDate(responseDate)
           : null;
       return (
         rate: _invert(rawRate),
@@ -152,6 +156,27 @@ class ExchangeRateApiClient {
   /// float bloat (RESEARCH.md).
   String _invert(double rawRate) =>
       (1.0 / rawRate).toStringAsPrecision(7);
+
+  /// Parse a bare `YYYY-MM-DD` API date string into a UTC-midnight [DateTime]
+  /// of those exact Y/M/D digits.
+  ///
+  /// CR-02 / IN-03: `DateTime.parse('2026-06-14')` returns a LOCAL DateTime,
+  /// which then inherits the cache-key skew. Building it explicitly via
+  /// [DateTime.utc] keeps `actualRateDate` on the same basis as the
+  /// `rateDate` composite key. Falls back to `DateTime.parse().toUtc()` only
+  /// if the string is not the expected bare-date shape.
+  DateTime _parseUtcDate(String yyyyMmDd) {
+    final parts = yyyyMmDd.split('-');
+    if (parts.length == 3) {
+      final y = int.tryParse(parts[0]);
+      final m = int.tryParse(parts[1]);
+      final d = int.tryParse(parts[2]);
+      if (y != null && m != null && d != null) {
+        return DateTime.utc(y, m, d);
+      }
+    }
+    return DateTime.parse(yyyyMmDd).toUtc();
+  }
 
   /// Local-date YYYY-MM-DD components — no timezone conversion (device local
   /// date matches the transaction date picker per CONTEXT.md).

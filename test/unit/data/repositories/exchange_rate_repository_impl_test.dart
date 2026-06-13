@@ -86,4 +86,36 @@ void main() {
       expect(rows.single.rate, equals('150.0'));
     });
   });
+
+  group('CR-02: local-calendar-date key (no UTC skew)', () {
+    test(
+        'a local-midnight DateTime (e.g. the transaction picker output) keys '
+        'under its own calendar date, not the previous day', () async {
+      // The transaction date picker produces DateTime(y, m, d) — a LOCAL
+      // midnight. Under the old .toUtc()-first normalizer this stored the
+      // rate under the previous UTC day for any UTC+ device (e.g. JST/UTC+9).
+      final picked = DateTime(2026, 6, 14); // local midnight
+
+      await repository.upsert(makeRate(rateDate: picked));
+
+      // Read-side uses the same local DateTime → must round-trip.
+      final found = await repository.findByDate('USD', picked);
+      expect(found, isNotNull);
+      // Stored rateDate carries the picked calendar digits, NOT day-1.
+      expect(found!.rateDate, equals(DateTime.utc(2026, 6, 14)));
+      expect(found.rateDate.day, equals(14));
+    });
+
+    test('write at local midnight and read at local noon hit the same row',
+        () async {
+      await repository.upsert(makeRate(rateDate: DateTime(2026, 6, 14)));
+
+      final found = await repository.findByDate(
+        'USD',
+        DateTime(2026, 6, 14, 12, 30), // same local calendar day, midday
+      );
+      expect(found, isNotNull);
+      expect(found!.rateDate, equals(DateTime.utc(2026, 6, 14)));
+    });
+  });
 }
