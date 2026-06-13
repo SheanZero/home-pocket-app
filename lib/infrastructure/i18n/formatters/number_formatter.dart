@@ -78,6 +78,44 @@ class NumberFormatter {
         return 'NT\$'; // D-06
       case 'SGD':
         return 'S\$'; // D-06
+      // Long-tail currencies with recognized glyphs (260613-ote).
+      // Non-ASCII glyphs written as \uXXXX escapes (matches the '¥' style
+      // above); readable symbol noted in the trailing comment.
+      case 'THB':
+        return '\u0e3f'; // ฿
+      case 'INR':
+        return '\u20b9'; // ₹
+      case 'IDR':
+        return 'Rp';
+      case 'MYR':
+        return 'RM';
+      case 'PHP':
+        return '\u20b1'; // ₱
+      case 'VND':
+        return '\u20ab'; // ₫
+      case 'NZD':
+        return 'NZ\$'; // D-06 style
+      case 'BRL':
+        return 'R\$';
+      case 'RUB':
+        return '\u20bd'; // ₽
+      case 'ZAR':
+        return 'R';
+      case 'SEK':
+        return 'kr';
+      case 'NOK':
+        return 'kr';
+      case 'DKK':
+        return 'kr';
+      case 'MXN':
+        return 'MX\$'; // D-06 style
+      case 'TRY':
+        return '\u20ba'; // ₺
+      case 'PLN':
+        return 'z\u0142'; // zł
+      // CHF / AED / SAR intentionally have no case: their conventional "symbol"
+      // is the ISO code itself (no common single glyph) — they fall through to
+      // the default ISO-code fallback below (D-07).
       default:
         return currencyCode; // ISO code prefix fallback (D-07)
     }
