@@ -34,8 +34,8 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### 展示 (Display)
 
-- [ ] **DISP-01**: During foreign-currency entry, a live JPY conversion preview appears below the amount, reacting to keypad input, currency change, rate change, and date change; shows a loading state while fetching
-- [ ] **DISP-02**: Foreign-currency rows in the transaction list show a small secondary annotation with the original currency and amount (e.g. "USD 50.00"); JPY rows are unchanged
+- [x] **DISP-01**: During foreign-currency entry, a live JPY conversion preview appears below the amount, reacting to keypad input, currency change, rate change, and date change; shows a loading state while fetching
+- [x] **DISP-02**: Foreign-currency rows in the transaction list show a small secondary annotation with the original currency and amount (e.g. "USD 50.00"); JPY rows are unchanged
 - [x] **DISP-03**: The detail/edit view shows the complete original record: original currency, original amount, and applied rate
 - [x] **DISP-04**: In edit mode, original amount / rate / JPY amount are three linked editable fields — editing any one recalculates the others without circular-update loops (bidirectional linked editing)
 
@@ -90,8 +90,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CURR-03 | Phase 42 | Complete |
 | CURR-04 | Phase 42 | Complete |
 | CURR-05 | Phase 42 | Complete |
-| DISP-01 | Phase 42 | Pending |
-| DISP-02 | Phase 42 | Pending |
+| DISP-01 | Phase 42 | Complete |
+| DISP-02 | Phase 42 | Complete |
 | DISP-03 | Phase 42 | Complete |
 | DISP-04 | Phase 42 | Complete |
 | VOICE-CUR-01 | Phase 42 | Complete |

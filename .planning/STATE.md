@@ -4,14 +4,14 @@ milestone: v1.7
 milestone_name: 多币种支持
 status: executing
 stopped_at: Completed 42-07-PLAN.md
-last_updated: "2026-06-13T00:00:00.000Z"
+last_updated: "2026-06-13T03:48:58.837Z"
 last_activity: 2026-06-13
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 20
-  completed_plans: 18
-  percent: 70
+  completed_plans: 19
+  percent: 67
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 ## Current Position
 
 Phase: 42 (entry-ui-display-voice) — EXECUTING
-Plan: 7 of 9
+Plan: 9 of 9
 Status: Ready to execute
 Last activity: 2026-06-13
 
@@ -127,7 +127,7 @@ No active blockers for v1.7. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-13T00:00:00.000Z
+Last session: 2026-06-13T03:48:58.833Z
 Stopped at: Completed 42-07-PLAN.md
 Resume file: None
 
@@ -147,6 +147,7 @@ Resume file: None
 | Phase 42 P05 | 10min | 2 tasks | 6 files |
 | Phase 42 P06 | ~12min | 2 tasks | 5 files |
 | Phase 42 P07 | ~18min | 2 tasks | 9 files |
+| Phase 42 P08 | ~35 min | 2 tasks | 6 files |
 
 ## Decisions
 
@@ -162,3 +163,5 @@ Resume file: None
 - [Phase 42]: 42-05: AmountInputController truncates-not-rounds decimals on currency switch (D-08, string op)
 - [Phase 42]: 42-06: CurrencySelectorSheet (JPY-pinned, code/name search, 'more' full-ISO, flag+symbol+code+name 48dp rows, accentPrimary selection) + non-persisted session recentCurrencyProvider (LRU, JPY excluded from reorder). Common-zone names localized in ARB; long-tail ISO+English. Goldens mask flag cell (6 macOS baselines). Sheet wiring to SmartKeyboard is 42-08.
 - [Phase 42]: 42-07: ConversionPreviewPanel (DISP-01) consumes P41 appGetExchangeRateUseCaseProvider via keyed conversionRateProvider(currency,date,amount); main row ≈¥{jpy} via single-site convertToJpy() (ADR-020, matches persisted 7415), sub-row {CODE} 1 = ¥{rate} · {date}. In-place fixed-height skeleton kConversionPreviewBlockHeight=56 (D-04 no-jump). Warning-amber staleness label for RateFallback (cached) OR fetched.actualDate≠txDate (weekend, D-05) — amber reserved. RateSignal D-02 dialog/D-03 toast surfaced via ref.listen→onSignal callback, never ref.watch (host renders in 42-08). JPY-guarded (assert, CURR-04). RateUnavailable/error → mandatory-rate prompt (P41 D-08). 4 new ARB keys ja/zh/en; 14 tests + 6 macOS goldens green; analyze 0. Host mounting is 42-08.
+- [Phase ?]: 42-08: foreign triple resolved via the preview's keyed conversionRateProvider so persisted JPY == previewed JPY (single convertToJpy site, ADR-020)
+- [Phase ?]: 42-08: onSignal is a documented no-op on the entry screen (no previousRate so no D-02/D-03 signal); full ADR-022 dialog/toast UX is 42-09

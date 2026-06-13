@@ -216,7 +216,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 42-08-PLAN.md — Manual-entry host wiring (tappable currency key, controller, preview, triple → SC-5) + list foreign annotation [W4]
+- [x] 42-08-PLAN.md — Manual-entry host wiring (tappable currency key, controller, preview, triple → SC-5) + list foreign annotation [W4]
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
