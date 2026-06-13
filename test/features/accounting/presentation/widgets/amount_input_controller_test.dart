@@ -27,7 +27,6 @@
 //      .planning/phases/42-entry-ui-display-voice/42-CONTEXT.md (D-07/D-08).
 
 import 'package:flutter_test/flutter_test.dart';
-// ignore: uri_does_not_exist
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_input_controller.dart';
 
 void main() {

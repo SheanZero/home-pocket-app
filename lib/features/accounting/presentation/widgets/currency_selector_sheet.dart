@@ -6,7 +6,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
-import '../providers/recent_currency_provider.dart';
+import '../providers/state_recent_currency.dart';
 
 /// One presentable currency row: ISO code + flag + display name.
 ///

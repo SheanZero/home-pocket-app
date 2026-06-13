@@ -13,7 +13,7 @@ import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/entry_source.dart';
 import '../../domain/models/transaction_details_form_config.dart';
-import '../providers/recent_currency_provider.dart';
+import '../providers/state_recent_currency.dart';
 import '../providers/repository_providers.dart';
 import '../widgets/amount_display.dart';
 import '../widgets/amount_input_controller.dart';

@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'recent_currency_provider.g.dart';
+part 'state_recent_currency.g.dart';
 
 /// Common-zone foreign currencies shown by default in [CurrencySelectorSheet],
 /// in their canonical (un-reordered) order. JPY is NOT in this list — it is

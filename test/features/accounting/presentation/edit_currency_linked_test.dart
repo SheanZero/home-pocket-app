@@ -30,7 +30,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-// ignore: uri_does_not_exist
 import 'package:home_pocket/features/accounting/presentation/widgets/currency_linked_edit_fields.dart';
 
 void main() {
