@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: 多币种支持
-status: executing
-stopped_at: Completed 42-07-PLAN.md
-last_updated: "2026-06-13T03:48:58.837Z"
+status: verifying
+stopped_at: Completed 42-09-PLAN.md (last plan; phase ready_for_verification)
+last_updated: "2026-06-13T04:05:17.754Z"
 last_activity: 2026-06-13
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 20
-  completed_plans: 19
-  percent: 67
+  completed_plans: 20
+  percent: 100
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 
 Phase: 42 (entry-ui-display-voice) — EXECUTING
 Plan: 9 of 9
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-06-13
 
 Progress: [███████░░░] 65%
@@ -127,8 +127,8 @@ No active blockers for v1.7. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-13T03:48:58.833Z
-Stopped at: Completed 42-07-PLAN.md
+Last session: 2026-06-13T04:05:17.751Z
+Stopped at: Completed 42-09-PLAN.md (last plan; phase ready_for_verification)
 Resume file: None
 
 ## Performance Metrics
@@ -148,6 +148,7 @@ Resume file: None
 | Phase 42 P06 | ~12min | 2 tasks | 5 files |
 | Phase 42 P07 | ~18min | 2 tasks | 9 files |
 | Phase 42 P08 | ~35 min | 2 tasks | 6 files |
+| Phase 42 P09 | 13min | 2 tasks | 9 files |
 
 ## Decisions
 
@@ -165,3 +166,7 @@ Resume file: None
 - [Phase 42]: 42-07: ConversionPreviewPanel (DISP-01) consumes P41 appGetExchangeRateUseCaseProvider via keyed conversionRateProvider(currency,date,amount); main row ≈¥{jpy} via single-site convertToJpy() (ADR-020, matches persisted 7415), sub-row {CODE} 1 = ¥{rate} · {date}. In-place fixed-height skeleton kConversionPreviewBlockHeight=56 (D-04 no-jump). Warning-amber staleness label for RateFallback (cached) OR fetched.actualDate≠txDate (weekend, D-05) — amber reserved. RateSignal D-02 dialog/D-03 toast surfaced via ref.listen→onSignal callback, never ref.watch (host renders in 42-08). JPY-guarded (assert, CURR-04). RateUnavailable/error → mandatory-rate prompt (P41 D-08). 4 new ARB keys ja/zh/en; 14 tests + 6 macOS goldens green; analyze 0. Host mounting is 42-08.
 - [Phase ?]: 42-08: foreign triple resolved via the preview's keyed conversionRateProvider so persisted JPY == previewed JPY (single convertToJpy site, ADR-020)
 - [Phase ?]: 42-08: onSignal is a documented no-op on the entry screen (no previousRate so no D-02/D-03 signal); full ADR-022 dialog/toast UX is 42-09
+- [Phase ?]: 42-09: JPY edit row is read-only derived (ADR-022 D-01); original × rate → JPY only (no bidirectional loop)
+- [Phase ?]: 42-09: D-02/D-03 date-change semantics colocated in CurrencyLinkedEditFields (owns the original amount for the JPY delta)
+- [Phase ?]: 42-09: hand-editing the rate flips manualOverride=true (next date change → D-02 dialog vs D-03 toast)
+- [Phase ?]: 42-09: CurrencyEditStrings null-safe l10n resolver keeps the delegate-less Wave-0 RED harness renderable

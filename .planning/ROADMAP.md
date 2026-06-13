@@ -114,7 +114,7 @@
 
 - [x] **Phase 40: 数据与同步基础 (Data Foundation + Domain + Sync)** — ADRs (rate precision / hash scope / edit policy); CNY `¥` symbol fix; Drift v20→v21 migration (`exchange_rates` cache table + 3 nullable `transactions` columns); `ExchangeRateDao` + repository; `Transaction` Freezed extension; `TransactionSyncMapper` null-safe passthrough + round-trip tests; partial-triple domain invariant (completed 2026-06-12)
 - [x] **Phase 41: 汇率服务 (Exchange Rate Service)** — `ExchangeRateApiClient` (Frankfurter primary + fawazahmed0 fallback); `ExchangeRateCacheService` (cache-first, offline fallback, weekend date transparency); application use cases with sealed `RateResult`; manual override semantics; date-change re-fetch policy; never-block-save invariant; privacy verification (completed 2026-06-13)
-- [ ] **Phase 42: 输入与展示 + 语音 (Entry UI + Display + Voice)** — SmartKeyboard currency selector + `CurrencySelectorSheet`; decimal input gate per ISO 4217 minor unit; live JPY conversion preview; foreign-currency list annotation; detail/edit full display + two-input/one-derived linked editing (ADR-022 D-01; JPY read-only); zh/ja voice currency words (parallel wave inside the phase); i18n + goldens
+- [x] **Phase 42: 输入与展示 + 语音 (Entry UI + Display + Voice)** — SmartKeyboard currency selector + `CurrencySelectorSheet`; decimal input gate per ISO 4217 minor unit; live JPY conversion preview; foreign-currency list annotation; detail/edit full display + two-input/one-derived linked editing (ADR-022 D-01; JPY read-only); zh/ja voice currency words (parallel wave inside the phase); i18n + goldens (completed 2026-06-13)
 
 ## Phase Details
 
@@ -220,7 +220,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 42-09-PLAN.md — Edit-host two-input/one-derived (ADR-022 D-01/D-02/D-03) + voice confirmation surfacing [W5]
+- [x] 42-09-PLAN.md — Edit-host two-input/one-derived (ADR-022 D-01/D-02/D-03) + voice confirmation surfacing [W5]
 
 **UI hint**: yes
 
