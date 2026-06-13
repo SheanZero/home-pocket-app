@@ -160,6 +160,34 @@ void main() {
         );
 
         expect(result.signal, isA<RateSignalToast>());
+        // WR-01: carries the actual rate strings + fractional change, not
+        // rounded int JPY amounts.
+        final toast = result.signal as RateSignalToast;
+        expect(toast.oldRate, '150.0');
+        expect(toast.newRate, '160.0');
+        expect(toast.changeFraction, closeTo(0.0667, 0.001));
+      },
+    );
+
+    test(
+      'WR-01: sub-1 rates produce a meaningful toast (not 0 → 0)',
+      () async {
+        // Foreign currency stronger than JPY: rate ≈ 0.0062, +~3.2%.
+        when(() => cacheService.getRate('USD', date))
+            .thenAnswer((_) async => cached('0.0064'));
+
+        final result = await useCase.execute(
+          GetExchangeRateParams(
+            currency: 'USD',
+            date: date,
+            previousRate: '0.0062',
+          ),
+        );
+
+        final toast = result.signal as RateSignalToast;
+        expect(toast.oldRate, '0.0062');
+        expect(toast.newRate, '0.0064');
+        expect(toast.changeFraction, greaterThan(0.01));
       },
     );
 

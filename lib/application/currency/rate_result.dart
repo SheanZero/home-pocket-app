@@ -142,15 +142,29 @@ final class RateSignalDialog extends RateSignal {
   final String newRate;
 }
 
-/// Surface a non-blocking toast about a JPY amount delta (ADR-022 D-03).
+/// Surface a non-blocking toast about a >1% rate change (ADR-022 D-03).
+///
+/// WR-01: carries the actual full-precision RATE strings (ADR-020) and the
+/// fractional change, NOT rounded int "JPY amounts". The previous design
+/// rounded sub-1 rates (e.g. 0.0062) to 0, rendering a meaningless "0 → 0"
+/// toast. Phase 42 computes the JPY-equivalent delta from these rates + the
+/// transaction amount it owns; the use case does not receive the amount.
 final class RateSignalToast extends RateSignal {
-  const RateSignalToast({required this.oldJpy, required this.newJpy});
+  const RateSignalToast({
+    required this.oldRate,
+    required this.newRate,
+    required this.changeFraction,
+  });
 
-  /// Previous JPY-equivalent amount.
-  final int oldJpy;
+  /// The rate string the user previously had (JPY-per-unit, ADR-020).
+  final String oldRate;
 
-  /// New JPY-equivalent amount.
-  final int newJpy;
+  /// The freshly resolved rate string (JPY-per-unit, ADR-020).
+  final String newRate;
+
+  /// Absolute fractional change `|new - old| / old` (e.g. 0.023 for +2.3%).
+  /// Always > 0.01 when this signal is emitted (the D-03 threshold).
+  final double changeFraction;
 }
 
 /// Wrapper pairing a [RateResult] with an optional [RateSignal].

@@ -135,17 +135,23 @@ class GetExchangeRateUseCase {
   /// Compares rate doubles for the threshold only (rates stay strings on the
   /// wire — ADR-020). Skips silently when either value is unparseable or the
   /// new result has no rate.
+  ///
+  /// WR-01: the toast carries the actual rate strings + the fractional change,
+  /// not rounded int JPY amounts (which collapsed sub-1 rates to "0 → 0").
   RateSignal? _maybeToast(String previousRate, RateResult result) {
     final oldRate = double.tryParse(previousRate);
     final newRateStr = _extractRate(result);
     final newRate = newRateStr == null ? null : double.tryParse(newRateStr);
     if (oldRate == null || oldRate <= 0 || newRate == null) return null;
 
-    final changePct = (newRate - oldRate).abs() / oldRate;
-    if (changePct <= 0.01) return null;
+    final changeFraction = (newRate - oldRate).abs() / oldRate;
+    if (changeFraction <= 0.01) return null;
 
-    // JPY-per-unit toast preview (Phase 42 threads actual amounts).
-    return RateSignalToast(oldJpy: oldRate.round(), newJpy: newRate.round());
+    return RateSignalToast(
+      oldRate: previousRate,
+      newRate: newRateStr!,
+      changeFraction: changeFraction,
+    );
   }
 
   /// Extract the rate string from any rate-bearing variant ([RateUnavailable]
