@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: 多币种支持
 status: executing
-stopped_at: Phase 42 UI-SPEC approved
-last_updated: "2026-06-13T02:33:09.653Z"
-last_activity: 2026-06-13 -- Phase 42 planning complete
+stopped_at: Completed 42-01-PLAN.md (Wave 0 test scaffolds)
+last_updated: "2026-06-13T03:10:00.000Z"
+last_activity: 2026-06-13 -- Completed Phase 42 Plan 01 (Wave 0 RED scaffolds)
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 11
-  completed_plans: 11
-  percent: 67
+  total_plans: 20
+  completed_plans: 12
+  percent: 60
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 42 — entry-ui-display-voice (not started — ready to plan)
+**Current focus:** Phase 42 — entry-ui-display-voice
 
 ## Current Position
 
-Phase: 42
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-06-13 -- Phase 42 planning complete
+Phase: 42 (entry-ui-display-voice) — EXECUTING
+Plan: 2 of 9
+Status: Executing Phase 42 (Plan 01 complete — Wave 0 RED scaffolds)
+Last activity: 2026-06-13 -- Completed Phase 42 Plan 01 (Wave 0 RED scaffolds)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 11%
 
 ## Last Milestone Snapshot (v1.6)
 
@@ -127,9 +127,9 @@ No active blockers for v1.7. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-13T01:57:32.171Z
-Stopped at: Phase 42 UI-SPEC approved
-Resume file: .planning/phases/42-entry-ui-display-voice/42-UI-SPEC.md
+Last session: 2026-06-13T03:10:00.000Z
+Stopped at: Completed 42-01-PLAN.md (Wave 0 test scaffolds)
+Resume file: None
 
 ## Performance Metrics
 
@@ -140,9 +140,11 @@ Resume file: .planning/phases/42-entry-ui-display-voice/42-UI-SPEC.md
 | Phase 41 P03 | 2min | 2 tasks | 3 files |
 | Phase 41 P04 | 6min | 3 tasks | 13 files |
 | Phase 41 P05 | 7min | 2 tasks | 4 files |
+| Phase 42 P01 | ~18min | 2 tasks | 5 files |
 
 ## Decisions
 
+- [Phase 42]: 42-01: Wave 0 RED scaffolds (5 test files) lock Phase 42 acceptance contracts. `create_transaction_currency_test` is GREEN-on-arrival (Phase 40 shipped the create triple) — kept as the SC-5 7415 regression guard, NOT fabricated RED; the RED half of SC-5 plumbing lives in `update_transaction_currency_test` (compile-fails on not-yet-existing UpdateTransactionParams currency fields → plan 42-03). Voice corpus asserts `VoiceParseResult.detectedCurrency` (RED → 42-04); `AmountInputController` (RED → 42-05); `CurrencyLinkedEditFields` (RED → 42-09). D-08 truncation asserted as string op not rounding (0.99→0, 50.50→50, 50.567→50.56)
 - [Phase ?]: 41-01: ExchangeRateRepository extended with findLatestNonManual (D-07), deleteOlderThan (D-09 TTL), findAll (D-10); TTL delete uses UtcEpochDateTimeConverter().toSql() before isSmallerThanValue (TypeConverter-aware)
 - [Phase ?]: 41-02: connectivity_plus ^7.1.1 added (D-05 gate); flutter pub get clean, all pins intact (file_picker 11.0.2 / package_info_plus 9.0.1 / share_plus 12.0.2 / win32 5.15.0 / intl 0.20.2 / sqlcipher 0.6.8); iOS debug build human-verified green (no sqlite3 symbol conflict)
 - [Phase ?]: 41-03: ExchangeRateApiClient three-source fallback (Frankfurter→fawazahmed0 jsDelivr→Cloudflare); 404/timeout/non-200 route onward, all-fail throws; rate inversion 1/raw toStringAsPrecision(7); actualRateDate surfaces weekend/holiday (RATE-05); RateResult sealed union (5 variants) + RateSignal/RateResultWithSignal
