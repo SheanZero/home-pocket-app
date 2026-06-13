@@ -25,6 +25,7 @@ import '../providers/state_home.dart';
 import '../providers/state_shadow_books.dart';
 import '../providers/state_today_transactions.dart';
 import '../../../accounting/presentation/screens/transaction_edit_screen.dart';
+import '../../../../shared/utils/invalidate_transaction_dependents.dart';
 import '../widgets/family_invite_banner.dart';
 import '../widgets/hero_header.dart';
 import '../widgets/home_hero_card.dart';
@@ -337,12 +338,40 @@ class HomeScreen extends ConsumerWidget {
                         satisfactionValue: tx.ledgerType == LedgerType.joy
                             ? tx.joyFullness
                             : null,
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute<bool>(
-                            builder: (_) =>
-                                TransactionEditScreen(transaction: tx),
-                          ),
-                        ),
+                        // Await the edit screen's pop-with-result and refresh
+                        // the Home list on save/delete (result == true). The
+                        // edit screen delegates invalidation to its caller —
+                        // List does this too (list_screen.dart WR-03). Without
+                        // it, edits/deletes persist to the DB but the cached
+                        // todayTransactionsProvider keeps showing stale data.
+                        onTap: () async {
+                          try {
+                            final result = await Navigator.of(context)
+                                .push<bool>(
+                                  MaterialPageRoute<bool>(
+                                    builder: (_) => TransactionEditScreen(
+                                      transaction: tx,
+                                    ),
+                                  ),
+                                );
+                            if (result == true) {
+                              invalidateTransactionDependents(
+                                ref,
+                                bookId: bookId,
+                                year: year,
+                                month: month,
+                              );
+                            }
+                          } catch (e, st) {
+                            FlutterError.reportError(
+                              FlutterErrorDetails(
+                                exception: e,
+                                stack: st,
+                                library: 'home_screen',
+                              ),
+                            );
+                          }
+                        },
                       );
                     }).toList(),
                   );

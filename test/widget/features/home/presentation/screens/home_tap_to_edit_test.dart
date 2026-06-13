@@ -142,7 +142,10 @@ void main() {
               formattedAmount: '¥2,500',
               amountColor: Colors.purple,
               satisfactionValue: null,
-              // onTap: exactly reproduces the Plan 07 home_screen.dart wiring
+              // onTap: reproduces only the navigation seam of home_screen.dart
+              // (tile tap → push TransactionEditScreen). The await + provider
+              // invalidation on pop-result==true (quick 260613-wjx) is covered
+              // in home_screen_test.dart, which needs the real HomeScreen + ref.
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<bool>(
                   builder: (_) => TransactionEditScreen(transaction: seedTx),
