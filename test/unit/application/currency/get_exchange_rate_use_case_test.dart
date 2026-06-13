@@ -1,117 +1,192 @@
-// Wave 0 RED scaffold — GetExchangeRateUseCase (Phase 41).
+// GREEN (plan 41-04) — GetExchangeRateUseCase ADR-022 signal logic.
 //
 // Subject under test: lib/application/currency/get_exchange_rate_use_case.dart
-// and lib/application/currency/rate_result.dart (NEITHER YET CREATED — built in
-// plan 41-05). Fixes the behavioral contract for RATE-03, RATE-04, RATE-06
-// (ADR-022 D-02 dialog signal / D-03 toast signal) BEFORE production code lands.
-//
-// The ExchangeRateRepository import IS valid (plan 41-01). The
-// GetExchangeRateUseCase + RateResult + ExchangeRateCacheService imports stay
-// commented until plan 41-05 creates them.
-//
-// Expected use-case surface (RESEARCH.md Pattern 4 + PATTERNS.md):
-//   class GetExchangeRateParams {
-//     final String currency;
-//     final DateTime date;
-//     final String? previousRate;
-//     final bool wasManualOverride;
-//   }
-//   class GetExchangeRateUseCase {
-//     GetExchangeRateUseCase({required ExchangeRateCacheService cacheService});
-//     Future<RateResult> execute(GetExchangeRateParams params);  // NEVER throws
-//   }
-//
-// Expected RateResult sealed variants (RESEARCH.md Pattern 2):
-//   sealed class RateResult { const RateResult(); }
-//   final class RateFetched / RateCached / RateFallback / RateManual / RateUnavailable
+// Contract: RATE-03 never-throws, RATE-04 manual override (source='manual'),
+// D-07 manual fallback priority (delegated to the cache service), RATE-06
+// ADR-022 D-02 dialog signal / D-03 toast signal / no-signal under threshold.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/application/currency/get_exchange_rate_use_case.dart';
+import 'package:home_pocket/application/currency/rate_result.dart';
 import 'package:home_pocket/features/currency/domain/models/exchange_rate.dart';
 import 'package:home_pocket/features/currency/domain/repositories/exchange_rate_repository.dart';
+import 'package:home_pocket/infrastructure/exchange_rate/exchange_rate_cache_service.dart';
 import 'package:mocktail/mocktail.dart';
 
-// import 'package:home_pocket/application/currency/get_exchange_rate_use_case.dart';
-// import 'package:home_pocket/application/currency/rate_result.dart';
-// import 'package:home_pocket/infrastructure/exchange_rate/exchange_rate_cache_service.dart';
+class MockExchangeRateCacheService extends Mock
+    implements ExchangeRateCacheService {}
 
-/// Mock for the plan-41-01 repository interface.
-class MockExchangeRateRepository extends Mock implements ExchangeRateRepository {}
+class MockExchangeRateRepository extends Mock
+    implements ExchangeRateRepository {}
 
 class _FakeExchangeRate extends Fake implements ExchangeRate {}
 
-const _redScaffold = 'Wave 0 RED — GetExchangeRateUseCase / RateResult not yet created (plan 41-05)';
-
 void main() {
+  late MockExchangeRateCacheService cacheService;
+  late MockExchangeRateRepository repo;
+  late GetExchangeRateUseCase useCase;
+
+  final date = DateTime.utc(2026, 6, 12);
+
   setUpAll(() {
     registerFallbackValue(_FakeExchangeRate());
+    registerFallbackValue(DateTime.utc(2026, 6, 12));
   });
 
-  group('RATE-03: use case never throws', () {
-    test(
-      'all errors wrapped → returns RateFallback or RateUnavailable, never throws',
-      () {
-        // GIVEN the cache service raises (DB crash / connectivity error)
-        // WHEN useCase.execute(params)
-        // THEN execute completes with a RateResult variant (RateFallback /
-        //      RateUnavailable) — it never propagates the exception to the caller
-        //      (offline-first never-block-save invariant)
-      },
-      skip: _redScaffold,
+  setUp(() {
+    cacheService = MockExchangeRateCacheService();
+    repo = MockExchangeRateRepository();
+    useCase = GetExchangeRateUseCase(
+      cacheService: cacheService,
+      repository: repo,
     );
+    when(() => repo.upsert(any())).thenAnswer((_) async {});
+  });
+
+  RateCached cached(String rate, {String source = 'frankfurter'}) => RateCached(
+        rate: rate,
+        currency: 'USD',
+        cachedDate: date,
+        source: source,
+      );
+
+  group('RATE-03: use case never throws', () {
+    test('cache service raises → returns RateUnavailable, never throws',
+        () async {
+      when(() => cacheService.getRate(any(), any()))
+          .thenThrow(Exception('DB crash'));
+
+      final result = await useCase.execute(
+        GetExchangeRateParams(currency: 'USD', date: date),
+      );
+
+      expect(result.result, isA<RateUnavailable>());
+      expect(result.signal, isNull);
+    });
   });
 
   group('RATE-04: manual override', () {
-    test(
-      'manual override → upserted via repository with source=\'manual\'',
-      () {
-        // GIVEN the user supplies a manual rate
-        // WHEN the override path runs
-        // THEN repository.upsert is called with an ExchangeRate whose source == 'manual'
-      },
-      skip: _redScaffold,
-    );
+    test("manual override → upserted via repository with source='manual'",
+        () async {
+      final result = await useCase.execute(
+        GetExchangeRateParams(
+          currency: 'USD',
+          date: date,
+          manualOverrideRate: '150.5',
+        ),
+      );
 
-    test(
-      'D-07: manual fallback only used when no API-cached row exists',
-      () {
-        // GIVEN both an API-cached row and a manual row exist for the currency
-        // WHEN offline fallback resolves
-        // THEN the API-cached row wins (findLatestNonManual); RateManual is only
-        //      returned when findLatestNonManual is null (D-07 lowest priority)
-      },
-      skip: _redScaffold,
-    );
+      final captured =
+          verify(() => repo.upsert(captureAny())).captured.single
+              as ExchangeRate;
+      expect(captured.source, 'manual');
+      expect(captured.rate, '150.5');
+      expect(result.result, isA<RateCached>());
+      expect((result.result as RateCached).isManualOverride, true);
+      verifyNever(() => cacheService.getRate(any(), any()));
+    });
+
+    test('invalid manual override → RateUnavailable, no upsert', () async {
+      final result = await useCase.execute(
+        GetExchangeRateParams(
+          currency: 'USD',
+          date: date,
+          manualOverrideRate: '-3',
+        ),
+      );
+
+      expect(result.result, isA<RateUnavailable>());
+      verifyNever(() => repo.upsert(any()));
+    });
+
+    test('D-07: manual fallback priority is delegated to the cache service',
+        () async {
+      // The use case does not re-implement D-07 priority — it trusts the cache
+      // service to return RateFallback (API-cached) over RateManual. Here we
+      // assert the use case forwards the cache result unchanged when no signal
+      // logic applies.
+      when(() => cacheService.getRate('USD', date)).thenAnswer(
+        (_) async => RateFallback(
+          rate: '149.0',
+          currency: 'USD',
+          cachedDate: date,
+        ),
+      );
+
+      final result = await useCase.execute(
+        GetExchangeRateParams(currency: 'USD', date: date),
+      );
+
+      expect(result.result, isA<RateFallback>());
+      expect(result.signal, isNull);
+    });
   });
 
   group('RATE-06: ADR-022 date-change signals', () {
     test(
-      'wasManualOverride=true AND date changed → use case emits dialog signal (ADR-022 D-02)',
-      () {
-        // GIVEN params.wasManualOverride == true and the date changed
-        // WHEN execute runs
-        // THEN the result carries the ADR-022 D-02 overrideConflict dialog signal
+      'wasManualOverride=true AND previousRate present → emits dialog signal (D-02)',
+      () async {
+        when(() => cacheService.getRate('USD', date))
+            .thenAnswer((_) async => cached('160.0'));
+
+        final result = await useCase.execute(
+          GetExchangeRateParams(
+            currency: 'USD',
+            date: date,
+            previousRate: '150.0',
+            wasManualOverride: true,
+          ),
+        );
+
+        expect(result.signal, isA<RateSignalDialog>());
+        final dialog = result.signal as RateSignalDialog;
+        expect(dialog.oldRate, '150.0');
+        expect(dialog.newRate, '160.0');
       },
-      skip: _redScaffold,
     );
 
     test(
-      'wasManualOverride=false, date changed, >1% JPY delta → use case emits toast signal (ADR-022 D-03)',
-      () {
-        // GIVEN no override, date changed, and |newJpy - oldJpy| / oldJpy > 0.01
-        // WHEN execute runs
-        // THEN the result carries the ADR-022 D-03 jpyAmountChanged toast signal
+      'wasManualOverride=false, >1% delta → emits toast signal (D-03)',
+      () async {
+        when(() => cacheService.getRate('USD', date))
+            .thenAnswer((_) async => cached('160.0'));
+
+        final result = await useCase.execute(
+          GetExchangeRateParams(
+            currency: 'USD',
+            date: date,
+            previousRate: '150.0', // ~6.7% change
+          ),
+        );
+
+        expect(result.signal, isA<RateSignalToast>());
       },
-      skip: _redScaffold,
     );
 
-    test(
-      'wasManualOverride=false, date changed, <=1% JPY delta → no signal',
-      () {
-        // GIVEN no override, date changed, and the JPY delta is within 1%
-        // WHEN execute runs
-        // THEN no signal is attached to the result
-      },
-      skip: _redScaffold,
-    );
+    test('wasManualOverride=false, <=1% delta → no signal', () async {
+      when(() => cacheService.getRate('USD', date))
+          .thenAnswer((_) async => cached('150.5'));
+
+      final result = await useCase.execute(
+        GetExchangeRateParams(
+          currency: 'USD',
+          date: date,
+          previousRate: '150.0', // ~0.33% change
+        ),
+      );
+
+      expect(result.signal, isNull);
+    });
+
+    test('no previousRate → no signal', () async {
+      when(() => cacheService.getRate('USD', date))
+          .thenAnswer((_) async => cached('150.0'));
+
+      final result = await useCase.execute(
+        GetExchangeRateParams(currency: 'USD', date: date),
+      );
+
+      expect(result.signal, isNull);
+    });
   });
 }
