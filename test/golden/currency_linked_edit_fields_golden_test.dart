@@ -1,12 +1,13 @@
 @Tags(['golden'])
 library;
 
-// Golden tests for [CurrencyLinkedEditFields] (Phase 42 UAT fix).
+// Golden tests for [CurrencyLinkedEditFields] (quick 260613-mgc).
 //
-// Pins the 原币金额 (original amount) row's currency-symbol prefix — the edited
-// value reads as "$112.90" so the foreign edit row presents the ORIGINAL
-// currency, consistent with the entry screen. The applied-rate row and the
-// read-only derived JPY row are also captured.
+// As of quick 260613-mgc the card no longer carries an in-card original-amount
+// input row: that editing moved to the screen's top headline keypad. The card
+// now renders TWO rows — an editable applied-rate field (160.2564) and a
+// READ-ONLY derived JPY row (18,093). The original amount is injected via the
+// `originalAmount` prop and only drives the derived JPY.
 //
 // USD 112.90 @ 160.2564 → 18,093 JPY (the UAT example).
 //
@@ -38,7 +39,7 @@ Widget _wrap({required Locale locale, ThemeMode themeMode = ThemeMode.light}) {
           width: 360,
           child: CurrencyLinkedEditFields(
             originalCurrency: 'USD',
-            originalAmount: 11290, // 112.90 USD in minor units
+            originalAmount: 11290, // 112.90 USD in minor units (injected)
             appliedRate: '160.2564',
             manualOverride: false,
             onChanged: (_) {},
@@ -51,9 +52,7 @@ Widget _wrap({required Locale locale, ThemeMode themeMode = ThemeMode.light}) {
 
 void main() {
   group('CurrencyLinkedEditFields golden', () {
-    testWidgets('USD original-amount row shows \$ prefix — locale en', (
-      tester,
-    ) async {
+    testWidgets('rate + derived JPY card — locale en', (tester) async {
       await tester.pumpWidget(_wrap(locale: const Locale('en')));
       await tester.pumpAndSettle();
       await expectLater(
@@ -62,9 +61,7 @@ void main() {
       );
     });
 
-    testWidgets('USD original-amount row shows \$ prefix — locale en dark', (
-      tester,
-    ) async {
+    testWidgets('rate + derived JPY card — locale en dark', (tester) async {
       await tester.pumpWidget(
         _wrap(locale: const Locale('en'), themeMode: ThemeMode.dark),
       );
@@ -75,14 +72,22 @@ void main() {
       );
     });
 
-    // Pins the symbol-prefix text regardless of pixels.
-    testWidgets('original-amount field carries the currency symbol prefix', (
+    // Pins the two-row card contract regardless of pixels: the original-amount
+    // input is gone; the rate field and derived JPY row remain.
+    testWidgets('card shows the rate + derived JPY, no original-amount input', (
       tester,
     ) async {
       await tester.pumpWidget(_wrap(locale: const Locale('en')));
       await tester.pumpAndSettle();
-      expect(find.text(r'$'), findsOneWidget);
-      expect(find.text('112.90'), findsOneWidget);
+
+      expect(
+        find.byKey(const Key('edit_original_amount_field')),
+        findsNothing,
+        reason: 'in-card original-amount input was removed (260613-mgc)',
+      );
+      expect(find.byKey(const Key('edit_rate_field')), findsOneWidget);
+      expect(find.text('160.2564'), findsOneWidget);
+      expect(find.textContaining('18,093'), findsOneWidget);
     });
   });
 }

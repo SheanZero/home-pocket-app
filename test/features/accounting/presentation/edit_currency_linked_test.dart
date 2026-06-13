@@ -1,28 +1,17 @@
-// WAVE 0 RED SCAFFOLD — Phase 42, producing plan 42-09 (edit-host currency fields).
+// CurrencyLinkedEditFields contract tests (Phase 42-09, updated quick 260613-mgc).
 //
-// This file references CurrencyLinkedEditFields — a widget that DOES NOT EXIST
-// yet. It is therefore EXPECTED to fail to compile (RED) until plan 42-09 adds
-// the two-input/one-derived edit host to TransactionDetailsForm.
+// As of quick 260613-mgc the in-card ORIGINAL-amount input row was REMOVED: the
+// original amount is now edited from the screen's top headline keypad and
+// injected here via the `originalAmount` prop. This card holds exactly TWO rows
+// now — an editable applied-rate field and a READ-ONLY derived JPY row.
 //
 // Locked behavior under test (DISP-04 / ADR-022 D-01/D-02/D-03):
 //   - D-01: JPY is a READ-ONLY derived value (convertToJpy of original × rate);
-//           it is never a direct input — no bidirectional loop. Editing the
-//           original amount OR the rate recomputes the displayed JPY.
-//   - D-02: manual-override + date change → two-choice dialog with NO default
-//           (「保留手动汇率」/「按新日期重取」).
-//   - D-03: no-override + >1% JPY change (|newJpy-oldJpy|/oldJpy > 0.01) →
-//           non-blocking toast with an Undo that restores the OLD rate (5s).
-//
-// The widget surface assumed here (to be ratified by plan 42-09):
-//   CurrencyLinkedEditFields({
-//     required String originalCurrency,
-//     required int originalAmount,        // minor units
-//     required String appliedRate,
-//     required bool manualOverride,
-//     ValueChanged<...>? onChanged,
-//   })
-//
-// Do NOT weaken assertions to make them pass. RED is the intended state.
+//           it is never a direct input. Editing the rate OR re-pumping with a
+//           new originalAmount prop recomputes the displayed JPY.
+//   - D-02: manual-override + date change → two-choice dialog with NO default.
+//   - D-03: no-override + >1% JPY change → non-blocking toast with an Undo that
+//           restores the OLD rate (5s).
 //
 // See: docs/arch/03-adr/ADR-022_Edit_Semantics.md (D-01/D-02/D-03),
 //      lib/shared/utils/currency_conversion.dart (convertToJpy — D-12 single site).
@@ -63,16 +52,8 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// The current text of the original-amount field.
-  String amountFieldText(WidgetTester tester) {
-    final field = tester.widget<TextField>(
-      find.byKey(const Key('edit_original_amount_field')),
-    );
-    return field.controller!.text;
-  }
-
-  group('ADR-022 D-01 — JPY is read-only derived', () {
-    testWidgets('JPY field is not editable (no TextField for JPY)', (
+  group('ADR-022 D-01 — JPY is read-only derived; card has rate + JPY only', () {
+    testWidgets('exactly one editable TextField (rate); JPY is derived text', (
       tester,
     ) async {
       // USD 50.00 @ 148.30 → 7415 JPY (read-only display).
@@ -84,13 +65,18 @@ void main() {
         manualOverride: false,
       );
 
-      // The derived JPY must be shown but NOT be an input — the host exposes
-      // exactly two editable inputs (original amount + rate).
-      final editable = find.byType(TextField);
+      // The original-amount input row is gone (quick 260613-mgc): only the rate
+      // remains editable; JPY is a read-only derived Text.
       expect(
-        editable,
-        findsNWidgets(2),
-        reason: 'only original amount + rate are editable; JPY is derived',
+        find.byType(TextField),
+        findsOneWidget,
+        reason: 'only the applied-rate field is editable; JPY is derived',
+      );
+      expect(find.byKey(const Key('edit_rate_field')), findsOneWidget);
+      expect(
+        find.byKey(const Key('edit_original_amount_field')),
+        findsNothing,
+        reason: 'the in-card original-amount input was removed (260613-mgc)',
       );
       expect(find.textContaining('7,415'), findsOneWidget);
     });
@@ -113,6 +99,33 @@ void main() {
 
       expect(find.textContaining('7,500'), findsOneWidget);
     });
+
+    testWidgets(
+      're-pumping with a new originalAmount prop recomputes JPY (headline drives it)',
+      (tester) async {
+        await pumpHost(
+          tester,
+          currency: 'USD',
+          originalAmount: 5000, // 50.00 USD → 7415 JPY
+          rate: '148.30',
+          manualOverride: false,
+        );
+        expect(find.textContaining('7,415'), findsOneWidget);
+
+        // The headline keypad edited the original amount to 60.00 USD (6000
+        // minor). The host re-pumps the card with the new prop.
+        await pumpHost(
+          tester,
+          currency: 'USD',
+          originalAmount: 6000, // 60.00 USD → 6000/100 × 148.30 = 8898 JPY
+          rate: '148.30',
+          manualOverride: false,
+        );
+
+        expect(find.textContaining('8,898'), findsOneWidget);
+        expect(find.textContaining('7,415'), findsNothing);
+      },
+    );
   });
 
   group('ADR-022 D-02 — manual override + date change → two-choice dialog', () {
@@ -133,7 +146,10 @@ void main() {
 
       expect(find.byType(AlertDialog), findsOneWidget);
       expect(find.byKey(const Key('dialog_keep_manual_rate')), findsOneWidget);
-      expect(find.byKey(const Key('dialog_refetch_for_new_date')), findsOneWidget);
+      expect(
+        find.byKey(const Key('dialog_refetch_for_new_date')),
+        findsOneWidget,
+      );
     });
   });
 
@@ -213,21 +229,21 @@ void main() {
     });
   });
 
-  // ── WR-05: amount field edits MAJOR units with the currency decimal cap ────
-  group('WR-05 — amount field is major-unit with decimal cap', () {
-    testWidgets('USD seed 5000 minor → field shows "50.00"', (tester) async {
+  // ── Seed presentation: JPY row reflects the injected original × rate ───────
+  group('derived JPY row reflects the injected original amount', () {
+    testWidgets('USD seed 5000 minor @ 148.30 → 7,415 JPY', (tester) async {
       await pumpHost(
         tester,
         currency: 'USD',
-        originalAmount: 5000, // minor units (cents)
+        originalAmount: 5000,
         rate: '148.30',
         manualOverride: false,
       );
 
-      expect(amountFieldText(tester), '50.00');
+      expect(find.textContaining('7,415'), findsOneWidget);
     });
 
-    testWidgets('JPY seed 5000 minor → field shows "5000" (0-decimal)', (
+    testWidgets('JPY seed 5000 minor @ 1 → 5,000 JPY (0-decimal)', (
       tester,
     ) async {
       await pumpHost(
@@ -238,160 +254,43 @@ void main() {
         manualOverride: false,
       );
 
-      expect(amountFieldText(tester), '5000');
-    });
-
-    testWidgets('typing "60" (USD) → stored 6000 minor → JPY recomputed', (
-      tester,
-    ) async {
-      CurrencyLinkedEditValue? last;
-      await pumpHost(
-        tester,
-        currency: 'USD',
-        originalAmount: 5000,
-        rate: '148.30',
-        manualOverride: false,
-        onChanged: (v) => last = v,
-      );
-
-      await tester.enterText(
-        find.byKey(const Key('edit_original_amount_field')),
-        '60',
-      );
-      await tester.pumpAndSettle();
-
-      // 60 major USD → 6000 minor; JPY = 6000/100 × 148.30 = 8898.
-      expect(last, isNotNull);
-      expect(last!.originalAmount, 6000);
-      expect(last!.jpyAmount, 8898);
-      expect(find.textContaining('8,898'), findsOneWidget);
-    });
-
-    testWidgets('typing "50.5" (USD) → 5050 minor (major-unit decimal parse)', (
-      tester,
-    ) async {
-      CurrencyLinkedEditValue? last;
-      await pumpHost(
-        tester,
-        currency: 'USD',
-        originalAmount: 5000,
-        rate: '148.30',
-        manualOverride: false,
-        onChanged: (v) => last = v,
-      );
-
-      await tester.enterText(
-        find.byKey(const Key('edit_original_amount_field')),
-        '50.5',
-      );
-      await tester.pumpAndSettle();
-
-      expect(last!.originalAmount, 5050); // 50.50 USD = 5050 cents
+      expect(find.textContaining('5,000'), findsOneWidget);
     });
   });
 
-  // ── WR-06: cleared/invalid amount → inline error + gated save (no desync) ──
-  group('WR-06 — cleared/invalid amount surfaces error and gates host', () {
-    testWidgets('clearing the amount shows an inline error', (tester) async {
+  // ── WR-06: a cleared/non-positive injected amount degrades JPY to em-dash ──
+  group('WR-06 — non-positive injected amount → JPY em-dash + onAmountInvalid', () {
+    testWidgets('re-pumping originalAmount 0 → JPY shows the em-dash', (
+      tester,
+    ) async {
+      final invalidEvents = <bool>[];
       await pumpHost(
         tester,
         currency: 'USD',
         originalAmount: 5000,
         rate: '148.30',
         manualOverride: false,
+        onAmountInvalid: invalidEvents.add,
       );
+      expect(find.textContaining('7,415'), findsOneWidget);
 
-      await tester.enterText(
-        find.byKey(const Key('edit_original_amount_field')),
-        '',
+      // The headline cleared the amount to 0 → host re-pumps with 0.
+      await pumpHost(
+        tester,
+        currency: 'USD',
+        originalAmount: 0,
+        rate: '148.30',
+        manualOverride: false,
+        onAmountInvalid: invalidEvents.add,
       );
       await tester.pumpAndSettle();
 
-      // The amount field renders an inline error (English fallback in the
-      // delegate-less harness) and the JPY degrades to the em-dash.
-      expect(find.text('Please enter an amount'), findsOneWidget);
       expect(find.textContaining('—'), findsOneWidget);
-    });
-
-    testWidgets('clearing fires onAmountInvalid(true) and NOT onChanged', (
-      tester,
-    ) async {
-      final invalidEvents = <bool>[];
-      var onChangedCalls = 0;
-      await pumpHost(
-        tester,
-        currency: 'USD',
-        originalAmount: 5000,
-        rate: '148.30',
-        manualOverride: false,
-        onChanged: (_) => onChangedCalls++,
-        onAmountInvalid: invalidEvents.add,
-      );
-
-      await tester.enterText(
-        find.byKey(const Key('edit_original_amount_field')),
-        '',
-      );
-      await tester.pumpAndSettle();
-
-      // WR-06: the host is told the value is INVALID (so it can gate save),
-      // rather than silently keeping the last-good amount via a stale onChanged.
-      expect(invalidEvents.last, isTrue);
       expect(
-        onChangedCalls,
-        0,
-        reason: 'a cleared amount must not emit a value the host would persist',
+        invalidEvents.contains(true),
+        isTrue,
+        reason: 'a non-positive injected amount must report invalid (WR-06)',
       );
-    });
-
-    testWidgets('non-positive amount ("0") is treated as invalid', (
-      tester,
-    ) async {
-      final invalidEvents = <bool>[];
-      await pumpHost(
-        tester,
-        currency: 'USD',
-        originalAmount: 5000,
-        rate: '148.30',
-        manualOverride: false,
-        onAmountInvalid: invalidEvents.add,
-      );
-
-      await tester.enterText(
-        find.byKey(const Key('edit_original_amount_field')),
-        '0',
-      );
-      await tester.pumpAndSettle();
-
-      expect(invalidEvents.last, isTrue);
-      expect(find.text('Enter a positive number'), findsOneWidget);
-    });
-
-    testWidgets('re-entering a valid amount clears the error and re-validates', (
-      tester,
-    ) async {
-      final invalidEvents = <bool>[];
-      CurrencyLinkedEditValue? last;
-      await pumpHost(
-        tester,
-        currency: 'USD',
-        originalAmount: 5000,
-        rate: '148.30',
-        manualOverride: false,
-        onChanged: (v) => last = v,
-        onAmountInvalid: invalidEvents.add,
-      );
-
-      final field = find.byKey(const Key('edit_original_amount_field'));
-      await tester.enterText(field, '');
-      await tester.pumpAndSettle();
-      await tester.enterText(field, '70');
-      await tester.pumpAndSettle();
-
-      // Transitions: invalid(true) then valid(false); onChanged carries 7000.
-      expect(invalidEvents.last, isFalse);
-      expect(find.text('Please enter an amount'), findsNothing);
-      expect(last!.originalAmount, 7000);
     });
   });
 }

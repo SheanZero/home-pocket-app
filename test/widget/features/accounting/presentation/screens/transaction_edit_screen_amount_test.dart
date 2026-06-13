@@ -288,10 +288,11 @@ void main() {
     },
   );
 
-  // ── TEST 3 (UAT fix): FOREIGN row headline shows ORIGINAL currency + amount ──
+  // ── TEST 3 (260613-mgc): FOREIGN headline shows ORIGINAL identity AND is ──
+  //     now tap-to-edit (opens the currency-aware AmountEditBottomSheet). ──────
 
   testWidgets(
-    'TEST 3: foreign edit row shows USD + 112.90 at top, NOT ¥ JPY / 18,093',
+    'TEST 3: foreign edit row shows USD + 112.90 at top and tapping opens the keypad sheet',
     (tester) async {
       tester.view.physicalSize = const Size(402, 1200);
       tester.view.devicePixelRatio = 1;
@@ -361,7 +362,8 @@ void main() {
         reason: 'JPY (derived) row must still show ¥18,093',
       );
 
-      // Foreign headline is NON-tappable (no clear button, no edit sheet).
+      // Foreign headline has NO JPY clear button (original-zero is reachable by
+      // deleting in the keypad instead).
       expect(
         find.descendant(
           of: find.byType(AmountDisplay),
@@ -369,6 +371,25 @@ void main() {
         ),
         findsNothing,
         reason: 'Foreign headline must not expose the JPY clear button',
+      );
+
+      // 260613-mgc: tapping the foreign headline opens the EXISTING keypad
+      // sheet (currency-aware mode) so the user can edit the ORIGINAL amount.
+      await tester.tap(find.byType(AmountDisplay));
+      await tester.pumpAndSettle();
+      expect(
+        find.byType(AmountEditBottomSheet),
+        findsOneWidget,
+        reason: 'Foreign headline tap must open AmountEditBottomSheet',
+      );
+      // The sheet is seeded in the ORIGINAL currency (USD badge inside it).
+      expect(
+        find.descendant(
+          of: find.byType(AmountEditBottomSheet),
+          matching: find.text('USD'),
+        ),
+        findsWidgets,
+        reason: 'The keypad sheet must edit in the ORIGINAL currency (USD)',
       );
     },
   );
@@ -411,10 +432,11 @@ void main() {
     );
   });
 
-  // ── TEST 5 (UAT fix): editing 原币金额 updates the top headline LIVE ──────────
+  // ── TEST 5 (260613-mgc): editing via the headline keypad updates the ───────
+  //     foreign headline; original-amount editing flows through the keypad. ───
 
   testWidgets(
-    'TEST 5: editing the original amount updates the foreign headline live',
+    'TEST 5: editing the original amount via the headline keypad updates the headline',
     (tester) async {
       tester.view.physicalSize = const Size(402, 1400);
       tester.view.devicePixelRatio = 1;
@@ -434,10 +456,16 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Sanity: linked edit host + initial headline.
+      // Sanity: linked edit host + initial headline (the in-card original-amount
+      // input is gone — editing flows through the headline keypad now).
       expect(
         find.byKey(const ValueKey('currency-linked-edit-fields')),
         findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('edit_original_amount_field')),
+        findsNothing,
+        reason: 'in-card original-amount input was removed (260613-mgc)',
       );
       expect(
         find.descendant(
@@ -447,21 +475,41 @@ void main() {
         findsOneWidget,
       );
 
-      // Edit 原币金额 from 112.90 → 200.00 (USD). The headline must follow LIVE.
-      // The headline always renders the currency's 2-decimal major-unit string.
-      final amountField = find.byKey(const Key('edit_original_amount_field'));
-      expect(amountField, findsOneWidget);
-      await tester.enterText(amountField, '200');
+      // Tap the headline → open the currency-aware keypad sheet.
+      await tester.tap(find.byType(AmountDisplay));
+      await tester.pumpAndSettle();
+      expect(find.byType(AmountEditBottomSheet), findsOneWidget);
+
+      // Clear the seed "112.90" (6 chars) then type "200".
+      for (var i = 0; i < 6; i++) {
+        await tester.tap(find.byIcon(Icons.backspace_outlined));
+        await tester.pump();
+      }
+      await tester.tap(find.widgetWithText(InkWell, '2').first);
+      await tester.pump();
+      await tester.tap(find.widgetWithText(InkWell, '0').first);
+      await tester.pump();
+      await tester.tap(find.widgetWithText(InkWell, '0').first);
+      await tester.pump();
+
+      // Confirm with the keypad's Save action key (scoped to the sheet — the
+      // screen's bottom CTA also reads "Save") → sheet closes, headline updates.
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AmountEditBottomSheet),
+          matching: find.text('Save'),
+        ),
+      );
       await tester.pumpAndSettle();
 
+      // The headline now shows 200.00 (currency's 2-decimal major-unit string).
       expect(
         find.descendant(
           of: find.byType(AmountDisplay),
           matching: find.text('200.00'),
         ),
         findsOneWidget,
-        reason:
-            'Headline must reflect the live-edited original amount (200.00)',
+        reason: 'Headline must reflect the keypad-edited original amount',
       );
       // The OLD original amount must be gone from the headline.
       expect(
@@ -471,6 +519,16 @@ void main() {
         ),
         findsNothing,
         reason: 'Stale original amount must not linger in the headline',
+      );
+
+      // The card's derived JPY row recomputed: 200.00 USD × 160.2564 = 32,051.
+      final derived = tester.widget<Text>(
+        find.byKey(const Key('edit_jpy_derived')),
+      );
+      expect(
+        derived.data,
+        contains('32,051'),
+        reason: '200.00 USD × 160.2564 → ¥32,051 (single convertToJpy site)',
       );
     },
   );
