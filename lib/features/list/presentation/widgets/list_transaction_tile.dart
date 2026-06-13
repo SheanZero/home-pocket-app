@@ -45,6 +45,7 @@ class ListTransactionTile extends ConsumerWidget {
     this.merchant,
     this.satisfactionValue,
     this.showDate = false,
+    this.foreignAnnotation,
   });
 
   final TaggedTransaction taggedTx;
@@ -83,6 +84,12 @@ class ListTransactionTile extends ConsumerWidget {
   /// When true, the tile title shows "short date + L2 category" (amount-sort
   /// flat mode). When false (default), the title shows the L2 category only.
   final bool showDate;
+
+  /// DISP-02: pre-formatted original-currency annotation for FOREIGN rows
+  /// (e.g. "USD 50.00"), computed by the parent (pure-UI contract — the tile
+  /// never fetches or formats). Null for JPY/domestic rows, which renders the
+  /// amount block byte-identically to before (CURR-04 regression protection).
+  final String? foreignAnnotation;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -221,12 +228,38 @@ class ListTransactionTile extends ConsumerWidget {
               ],
               // Amount — amountSmall with tabular figures (SC#1)
               // Uses palette.textPrimary (general text, not ledger-coloured amount context)
-              Text(
-                formattedAmount,
-                style: AppTextStyles.amountSmall.copyWith(
-                  color: palette.textPrimary,
+              //
+              // DISP-02: foreign rows show a small secondary original-currency
+              // annotation (labelMedium / textSecondary) under the JPY amount.
+              // JPY/domestic rows render the bare Text unchanged (CURR-04 —
+              // byte-identical golden, no Column wrapper introduced).
+              if (foreignAnnotation == null)
+                Text(
+                  formattedAmount,
+                  style: AppTextStyles.amountSmall.copyWith(
+                    color: palette.textPrimary,
+                  ),
+                )
+              else
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      formattedAmount,
+                      style: AppTextStyles.amountSmall.copyWith(
+                        color: palette.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      foreignAnnotation!,
+                      style: AppTextStyles.labelMedium.copyWith(
+                        color: palette.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
               // 260603-nr1 #4: static tap affordance after the amount. Coexists
               // with the Dismissible swipe (it does not intercept the gesture).
               const SizedBox(width: 6),

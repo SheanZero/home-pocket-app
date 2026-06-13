@@ -10,6 +10,7 @@ import '../../../../features/accounting/presentation/screens/transaction_edit_sc
 import '../../../../features/settings/presentation/providers/state_locale.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
+import '../../../../shared/utils/currency_conversion.dart';
 import '../../../../shared/constants/sort_config.dart';
 import '../../../../shared/utils/invalidate_transaction_dependents.dart';
 import '../../domain/models/list_filter_state.dart';
@@ -280,6 +281,25 @@ class ListScreen extends ConsumerWidget {
       locale,
     );
 
+    // DISP-02 / CURR-04: original-currency annotation for FOREIGN rows only.
+    // Computed here (pure-UI tile contract — the tile never fetches/formats).
+    // Null for JPY/domestic rows → the tile renders the amount block
+    // byte-identically (CURR-04 regression protection). The annotation amount is
+    // the stored original MINOR units rendered via NumberFormatter, which
+    // applies the currency's own decimals (USD 5000 minor → "USD 50.00").
+    final originalCurrency = transaction.originalCurrency;
+    final originalAmount = transaction.originalAmount;
+    final String? foreignAnnotation =
+        (originalCurrency != null &&
+            originalCurrency.toUpperCase() != 'JPY' &&
+            originalAmount != null)
+        ? NumberFormatter.formatCurrency(
+            originalAmount / subunitToUnitFor(originalCurrency),
+            originalCurrency,
+            locale,
+          )
+        : null;
+
     // L1 icon resolved from category ID
     final l1Icon = _resolveL1IconForCategory(transaction.categoryId);
 
@@ -337,6 +357,7 @@ class ListScreen extends ConsumerWidget {
       merchant: transaction.merchant,
       satisfactionValue: satisfactionValue,
       showDate: showDate,
+      foreignAnnotation: foreignAnnotation,
     );
 
     // Divider between consecutive tiles.
