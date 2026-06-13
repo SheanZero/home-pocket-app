@@ -177,7 +177,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 41-04-PLAN.md — ExchangeRateCacheService + GetExchangeRateUseCase + BackupData D-10 extension
+- [x] 41-04-PLAN.md — ExchangeRateCacheService + GetExchangeRateUseCase + BackupData D-10 extension
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
