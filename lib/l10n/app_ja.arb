@@ -2558,5 +2558,32 @@
   "@currencyNameCad": {
     "description": "Localized currency name for CAD (Phase 42-06)"
   },
+  "conversionPreviewRateRow": "{code} 1 = ¥{rate} · {date}",
+  "@conversionPreviewRateRow": {
+    "description": "Preview rate sub-row: currency code, JPY-per-unit rate, rate date (Phase 42-07 D-03)",
+    "placeholders": {
+      "code": { "type": "String" },
+      "rate": { "type": "String" },
+      "date": { "type": "String" }
+    }
+  },
+  "conversionStalenessCached": "{date} のレート（キャッシュ）を使用",
+  "@conversionStalenessCached": {
+    "description": "Staleness label for a cached fallback rate (Phase 42-07 D-05)",
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "conversionStalenessWeekend": "{date}（直近の営業日）のレート",
+  "@conversionStalenessWeekend": {
+    "description": "Staleness label for a weekend/holiday business-day proxy rate (Phase 42-07 D-05)",
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "conversionRateRequired": "レートが取得できません。手動でレートを入力してください",
+  "@conversionRateRequired": {
+    "description": "Prompt requiring a manual rate when no rate is available (Phase 42-07 / P41 D-08)"
+  },
   "@@locale": "ja"
 }

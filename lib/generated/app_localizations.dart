@@ -3690,6 +3690,120 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Failed to save. Please try again.'**
   String get shoppingFormSaveError;
+
+  /// Title of the CurrencySelectorSheet (Phase 42-06)
+  ///
+  /// In en, this message translates to:
+  /// **'Select currency'**
+  String get currencySelectorTitle;
+
+  /// Affordance expanding the common zone to the full ISO 4217 list (Phase 42-06, D-02)
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get currencySelectorMore;
+
+  /// Search hint; matches by ISO code or currency name (Phase 42-06, CURR-02)
+  ///
+  /// In en, this message translates to:
+  /// **'Search by code or name'**
+  String get currencySelectorSearchHint;
+
+  /// Shown when the currency search yields no match (Phase 42-06)
+  ///
+  /// In en, this message translates to:
+  /// **'No matching currency'**
+  String get currencySelectorNoResults;
+
+  /// Localized currency name for JPY (Phase 42-06)
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese Yen'**
+  String get currencyNameJpy;
+
+  /// Localized currency name for USD (Phase 42-06)
+  ///
+  /// In en, this message translates to:
+  /// **'US Dollar'**
+  String get currencyNameUsd;
+
+  /// Localized currency name for EUR (Phase 42-06)
+  ///
+  /// In en, this message translates to:
+  /// **'Euro'**
+  String get currencyNameEur;
+
+  /// Localized currency name for CNY (Phase 42-06)
+  ///
+  /// In en, this message translates to:
+  /// **'Chinese Yuan'**
+  String get currencyNameCny;
+
+  /// Localized currency name for HKD (Phase 42-06)
+  ///
+  /// In en, this message translates to:
+  /// **'Hong Kong Dollar'**
+  String get currencyNameHkd;
+
+  /// Localized currency name for GBP (Phase 42-06)
+  ///
+  /// In en, this message translates to:
+  /// **'British Pound'**
+  String get currencyNameGbp;
+
+  /// Localized currency name for KRW (Phase 42-06)
+  ///
+  /// In en, this message translates to:
+  /// **'South Korean Won'**
+  String get currencyNameKrw;
+
+  /// Localized currency name for TWD (Phase 42-06)
+  ///
+  /// In en, this message translates to:
+  /// **'New Taiwan Dollar'**
+  String get currencyNameTwd;
+
+  /// Localized currency name for SGD (Phase 42-06)
+  ///
+  /// In en, this message translates to:
+  /// **'Singapore Dollar'**
+  String get currencyNameSgd;
+
+  /// Localized currency name for AUD (Phase 42-06)
+  ///
+  /// In en, this message translates to:
+  /// **'Australian Dollar'**
+  String get currencyNameAud;
+
+  /// Localized currency name for CAD (Phase 42-06)
+  ///
+  /// In en, this message translates to:
+  /// **'Canadian Dollar'**
+  String get currencyNameCad;
+
+  /// Preview rate sub-row: currency code, JPY-per-unit rate, rate date (Phase 42-07 D-03)
+  ///
+  /// In en, this message translates to:
+  /// **'{code} 1 = ¥{rate} · {date}'**
+  String conversionPreviewRateRow(String code, String rate, String date);
+
+  /// Staleness label for a cached fallback rate (Phase 42-07 D-05)
+  ///
+  /// In en, this message translates to:
+  /// **'Using cached rate from {date}'**
+  String conversionStalenessCached(String date);
+
+  /// Staleness label for a weekend/holiday business-day proxy rate (Phase 42-07 D-05)
+  ///
+  /// In en, this message translates to:
+  /// **'{date} (most recent business day)'**
+  String conversionStalenessWeekend(String date);
+
+  /// Prompt requiring a manual rate when no rate is available (Phase 42-07 / P41 D-08)
+  ///
+  /// In en, this message translates to:
+  /// **'Rate unavailable — please enter a rate manually'**
+  String get conversionRateRequired;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

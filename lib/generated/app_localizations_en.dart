@@ -1994,4 +1994,68 @@ class SEn extends S {
 
   @override
   String get shoppingFormSaveError => 'Failed to save. Please try again.';
+
+  @override
+  String get currencySelectorTitle => 'Select currency';
+
+  @override
+  String get currencySelectorMore => 'More';
+
+  @override
+  String get currencySelectorSearchHint => 'Search by code or name';
+
+  @override
+  String get currencySelectorNoResults => 'No matching currency';
+
+  @override
+  String get currencyNameJpy => 'Japanese Yen';
+
+  @override
+  String get currencyNameUsd => 'US Dollar';
+
+  @override
+  String get currencyNameEur => 'Euro';
+
+  @override
+  String get currencyNameCny => 'Chinese Yuan';
+
+  @override
+  String get currencyNameHkd => 'Hong Kong Dollar';
+
+  @override
+  String get currencyNameGbp => 'British Pound';
+
+  @override
+  String get currencyNameKrw => 'South Korean Won';
+
+  @override
+  String get currencyNameTwd => 'New Taiwan Dollar';
+
+  @override
+  String get currencyNameSgd => 'Singapore Dollar';
+
+  @override
+  String get currencyNameAud => 'Australian Dollar';
+
+  @override
+  String get currencyNameCad => 'Canadian Dollar';
+
+  @override
+  String conversionPreviewRateRow(String code, String rate, String date) {
+    return '$code 1 = ¥$rate · $date';
+  }
+
+  @override
+  String conversionStalenessCached(String date) {
+    return 'Using cached rate from $date';
+  }
+
+  @override
+  String conversionStalenessWeekend(String date) {
+    return '$date (most recent business day)';
+  }
+
+  @override
+  String get conversionRateRequired =>
+      'Rate unavailable — please enter a rate manually';
 }

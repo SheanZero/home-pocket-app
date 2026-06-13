@@ -1960,4 +1960,67 @@ class SJa extends S {
 
   @override
   String get shoppingFormSaveError => '保存に失敗しました。もう一度お試しください。';
+
+  @override
+  String get currencySelectorTitle => '通貨を選択';
+
+  @override
+  String get currencySelectorMore => 'もっと見る';
+
+  @override
+  String get currencySelectorSearchHint => 'コードまたは名称で検索';
+
+  @override
+  String get currencySelectorNoResults => '該当する通貨がありません';
+
+  @override
+  String get currencyNameJpy => '日本円';
+
+  @override
+  String get currencyNameUsd => '米ドル';
+
+  @override
+  String get currencyNameEur => 'ユーロ';
+
+  @override
+  String get currencyNameCny => '人民元';
+
+  @override
+  String get currencyNameHkd => '香港ドル';
+
+  @override
+  String get currencyNameGbp => '英ポンド';
+
+  @override
+  String get currencyNameKrw => '韓国ウォン';
+
+  @override
+  String get currencyNameTwd => '台湾ドル';
+
+  @override
+  String get currencyNameSgd => 'シンガポールドル';
+
+  @override
+  String get currencyNameAud => '豪ドル';
+
+  @override
+  String get currencyNameCad => 'カナダドル';
+
+  @override
+  String conversionPreviewRateRow(String code, String rate, String date) {
+    return '$code 1 = ¥$rate · $date';
+  }
+
+  @override
+  String conversionStalenessCached(String date) {
+    return '$date のレート（キャッシュ）を使用';
+  }
+
+  @override
+  String conversionStalenessWeekend(String date) {
+    return '$date（直近の営業日）のレート';
+  }
+
+  @override
+  String get conversionRateRequired => 'レートが取得できません。手動でレートを入力してください';
 }

@@ -1953,4 +1953,67 @@ class SZh extends S {
 
   @override
   String get shoppingFormSaveError => '保存失败，请重试。';
+
+  @override
+  String get currencySelectorTitle => '选择货币';
+
+  @override
+  String get currencySelectorMore => '更多';
+
+  @override
+  String get currencySelectorSearchHint => '按代码或名称搜索';
+
+  @override
+  String get currencySelectorNoResults => '没有匹配的货币';
+
+  @override
+  String get currencyNameJpy => '日元';
+
+  @override
+  String get currencyNameUsd => '美元';
+
+  @override
+  String get currencyNameEur => '欧元';
+
+  @override
+  String get currencyNameCny => '人民币';
+
+  @override
+  String get currencyNameHkd => '港币';
+
+  @override
+  String get currencyNameGbp => '英镑';
+
+  @override
+  String get currencyNameKrw => '韩元';
+
+  @override
+  String get currencyNameTwd => '新台币';
+
+  @override
+  String get currencyNameSgd => '新加坡元';
+
+  @override
+  String get currencyNameAud => '澳元';
+
+  @override
+  String get currencyNameCad => '加元';
+
+  @override
+  String conversionPreviewRateRow(String code, String rate, String date) {
+    return '$code 1 = ¥$rate · $date';
+  }
+
+  @override
+  String conversionStalenessCached(String date) {
+    return '使用 $date 缓存汇率';
+  }
+
+  @override
+  String conversionStalenessWeekend(String date) {
+    return '周末，采用 $date 汇率';
+  }
+
+  @override
+  String get conversionRateRequired => '无法获取汇率，请手动输入汇率';
 }
