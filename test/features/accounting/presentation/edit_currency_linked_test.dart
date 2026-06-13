@@ -1,9 +1,24 @@
-// CurrencyLinkedEditFields contract tests (Phase 42-09, updated quick 260613-mgc).
+// CurrencyLinkedEditFields contract tests (Phase 42-09, updated quick 260613-mgc,
+// generalized into the shared two-screen card quick 260613-ufn).
 //
 // As of quick 260613-mgc the in-card ORIGINAL-amount input row was REMOVED: the
 // original amount is now edited from the screen's top headline keypad and
-// injected here via the `originalAmount` prop. This card holds exactly TWO rows
-// now — an editable applied-rate field and a READ-ONLY derived JPY row.
+// injected here via the `originalAmount` prop. This card holds exactly TWO data
+// rows now — an editable applied-rate field and a READ-ONLY derived JPY row.
+//
+// As of quick 260613-ufn the card is the SHARED card for BOTH the add and edit
+// screens (D-1):
+//   - The trailing clickable `edit_date_change_trigger` TextButton is REMOVED
+//     (D-3). The 汇率日期 row is now a NON-CLICKABLE labeled row (key
+//     `edit_rate_date`) showing the ACTUAL effective rate date (`actualRateDate`,
+//     D-2).
+//   - A pre-resolved weekend/holiday staleness note (`stalenessNote`) renders in
+//     warning amber below the date row (key `edit_rate_staleness`) when non-null
+//     (D-2). The host derives it from the RateResult (single staleness site).
+//   - The date-change re-fetch (ADR-022 D-02 dialog / D-03 toast) logic is
+//     RETAINED but is no longer wired to a tap — the host invokes it via the
+//     public state method `triggerDateChangeRefetch()` after the date picker
+//     changes (D-4).
 //
 // Locked behavior under test (DISP-04 / ADR-022 D-01/D-02/D-03):
 //   - D-01: JPY is a READ-ONLY derived value (convertToJpy of original × rate);
@@ -29,20 +44,26 @@ void main() {
     required String rate,
     required bool manualOverride,
     DateTime? rateDate,
+    DateTime? actualRateDate,
+    String? stalenessNote,
     DateChangeRefetchRateSource? refetchRate,
     ValueChanged<CurrencyLinkedEditValue>? onChanged,
     ValueChanged<bool>? onAmountInvalid,
+    Key? cardKey,
   }) async {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
           home: Scaffold(
             body: CurrencyLinkedEditFields(
+              key: cardKey,
               originalCurrency: currency,
               originalAmount: originalAmount,
               appliedRate: rate,
               manualOverride: manualOverride,
               rateDate: rateDate ?? DateTime(2026, 6, 13),
+              actualRateDate: actualRateDate,
+              stalenessNote: stalenessNote,
               dateChangeRefetchRate: refetchRate,
               onChanged: onChanged,
               onAmountInvalid: onAmountInvalid,
@@ -82,23 +103,35 @@ void main() {
       );
       expect(find.textContaining('7,415'), findsOneWidget);
 
-      // Quick 260613-n5c: the date-change trigger shows the FORMATTED actual
-      // date (en `06/13/2026`), not the static word 「日期/Date」.
+      // Quick 260613-ufn (D-3): the clickable date-change TextButton is REMOVED.
+      // The 汇率日期 row is a non-clickable labeled row showing the actual date.
+      expect(
+        find.byKey(const Key('edit_date_change_trigger')),
+        findsNothing,
+        reason: 'the clickable date-change TextButton is removed (ufn D-3)',
+      );
+      expect(
+        find.byKey(const Key('edit_rate_date')),
+        findsOneWidget,
+        reason: 'a non-clickable labeled 汇率日期 row is present (ufn D-2/D-3)',
+      );
+      // The row shows the formatted rate date (en `06/13/2026`).
       expect(
         find.descendant(
-          of: find.byKey(const Key('edit_date_change_trigger')),
+          of: find.byKey(const Key('edit_rate_date')),
           matching: find.text('06/13/2026'),
         ),
         findsOneWidget,
-        reason: 'date-change trigger must show DateFormatter(rateDate) (n5c)',
+        reason: 'rate date row shows DateFormatter(actualRateDate ?? rateDate)',
       );
+      // The non-clickable row is not a TextButton.
       expect(
-        find.descendant(
-          of: find.byKey(const Key('edit_date_change_trigger')),
-          matching: find.text('Date'),
+        find.ancestor(
+          of: find.byKey(const Key('edit_rate_date')),
+          matching: find.byType(TextButton),
         ),
         findsNothing,
-        reason: 'the static word Date must no longer appear (n5c)',
+        reason: 'the 汇率日期 row must not be tappable (ufn D-3)',
       );
     });
 
@@ -149,10 +182,78 @@ void main() {
     );
   });
 
-  group('ADR-022 D-02 — manual override + date change → two-choice dialog', () {
-    testWidgets('shows a no-default two-choice dialog', (tester) async {
+  group('quick 260613-ufn — 汇率日期 row shows actualRateDate + staleness', () {
+    testWidgets(
+      'actualRateDate overrides rateDate in the displayed 汇率日期 row (D-2)',
+      (tester) async {
+        await pumpHost(
+          tester,
+          currency: 'USD',
+          originalAmount: 5000,
+          rate: '148.30',
+          manualOverride: false,
+          rateDate: DateTime(2026, 6, 14), // requested (Sun)
+          actualRateDate: DateTime(2026, 6, 12), // effective (Fri)
+        );
+
+        // The row shows the ACTUAL effective date (06/12/2026), not the
+        // requested transaction date (06/14/2026).
+        expect(
+          find.descendant(
+            of: find.byKey(const Key('edit_rate_date')),
+            matching: find.text('06/12/2026'),
+          ),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets('stalenessNote renders amber when non-null (D-2)', (
+      tester,
+    ) async {
       await pumpHost(
         tester,
+        currency: 'USD',
+        originalAmount: 5000,
+        rate: '148.30',
+        manualOverride: false,
+        actualRateDate: DateTime(2026, 6, 12),
+        stalenessNote: '06/12/2026 (most recent business day)',
+      );
+
+      final staleness = find.byKey(const Key('edit_rate_staleness'));
+      expect(staleness, findsOneWidget);
+      expect(
+        find.descendant(
+          of: staleness,
+          matching: find.text('06/12/2026 (most recent business day)'),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('staleness Text absent when stalenessNote is null', (
+      tester,
+    ) async {
+      await pumpHost(
+        tester,
+        currency: 'USD',
+        originalAmount: 5000,
+        rate: '148.30',
+        manualOverride: false,
+        // stalenessNote defaults to null.
+      );
+
+      expect(find.byKey(const Key('edit_rate_staleness')), findsNothing);
+    });
+  });
+
+  group('ADR-022 D-02 — manual override + date change → two-choice dialog', () {
+    testWidgets('shows a no-default two-choice dialog', (tester) async {
+      final cardKey = GlobalKey<CurrencyLinkedEditFieldsState>();
+      await pumpHost(
+        tester,
+        cardKey: cardKey,
         currency: 'USD',
         originalAmount: 5000,
         rate: '148.30',
@@ -161,8 +262,9 @@ void main() {
         refetchRate: () async => '160.00',
       );
 
-      // Simulate a transaction-date change while a manual override is active.
-      await tester.tap(find.byKey(const Key('edit_date_change_trigger')));
+      // Simulate a transaction-date change while a manual override is active —
+      // the host invokes the retained logic via the public state method (ufn D-4).
+      await cardKey.currentState!.triggerDateChangeRefetch();
       await tester.pumpAndSettle();
 
       expect(find.byType(AlertDialog), findsOneWidget);
@@ -178,8 +280,10 @@ void main() {
     testWidgets('shows toast with Undo that restores the old rate', (
       tester,
     ) async {
+      final cardKey = GlobalKey<CurrencyLinkedEditFieldsState>();
       await pumpHost(
         tester,
+        cardKey: cardKey,
         currency: 'USD',
         originalAmount: 5000,
         rate: '148.30',
@@ -190,7 +294,7 @@ void main() {
 
       // Date change auto-refetches a rate that moves JPY by >1% (148.30→160.00:
       // 7415 → 8000, |8000-7415|/7415 ≈ 7.9% > 1%).
-      await tester.tap(find.byKey(const Key('edit_date_change_trigger')));
+      await cardKey.currentState!.triggerDateChangeRefetch();
       await tester.pumpAndSettle();
 
       // Non-blocking: no dialog, a SnackBar toast with an Undo action.
@@ -211,8 +315,10 @@ void main() {
     testWidgets('null rate source → date change is a no-op (no dialog/toast)', (
       tester,
     ) async {
+      final cardKey = GlobalKey<CurrencyLinkedEditFieldsState>();
       await pumpHost(
         tester,
+        cardKey: cardKey,
         currency: 'USD',
         originalAmount: 5000,
         rate: '148.30',
@@ -220,7 +326,7 @@ void main() {
         refetchRate: null, // no source supplied
       );
 
-      await tester.tap(find.byKey(const Key('edit_date_change_trigger')));
+      await cardKey.currentState!.triggerDateChangeRefetch();
       await tester.pumpAndSettle();
 
       // Degrades gracefully: nothing surfaces, the existing rate stays.
@@ -232,8 +338,10 @@ void main() {
     testWidgets('source resolving null → no-op (RateUnavailable / offline)', (
       tester,
     ) async {
+      final cardKey = GlobalKey<CurrencyLinkedEditFieldsState>();
       await pumpHost(
         tester,
+        cardKey: cardKey,
         currency: 'USD',
         originalAmount: 5000,
         rate: '148.30',
@@ -241,7 +349,7 @@ void main() {
         refetchRate: () async => null, // unavailable / offline
       );
 
-      await tester.tap(find.byKey(const Key('edit_date_change_trigger')));
+      await cardKey.currentState!.triggerDateChangeRefetch();
       await tester.pumpAndSettle();
 
       expect(find.byType(AlertDialog), findsNothing);

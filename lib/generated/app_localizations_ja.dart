@@ -2091,6 +2091,9 @@ class SJa extends S {
   String get editJpyDerivedLabel => '円（換算後）';
 
   @override
+  String get currencyRateDateLabel => 'レート日付';
+
+  @override
   String get editRateRequired => 'レートを入力してください';
 
   @override

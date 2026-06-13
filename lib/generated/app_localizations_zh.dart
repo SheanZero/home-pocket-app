@@ -2084,6 +2084,9 @@ class SZh extends S {
   String get editJpyDerivedLabel => '日元（换算）';
 
   @override
+  String get currencyRateDateLabel => '汇率日期';
+
+  @override
   String get editRateRequired => '请输入汇率';
 
   @override

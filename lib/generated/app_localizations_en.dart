@@ -2126,6 +2126,9 @@ class SEn extends S {
   String get editJpyDerivedLabel => 'JPY (derived)';
 
   @override
+  String get currencyRateDateLabel => 'Rate date';
+
+  @override
   String get editRateRequired => 'Please enter a rate';
 
   @override

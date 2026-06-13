@@ -2673,6 +2673,10 @@
   "@editJpyDerivedLabel": {
     "description": "Edit-host row label for the read-only derived JPY amount — 原币是事实，日元是结果 (Phase 42-09, ADR-022 D-01)"
   },
+  "currencyRateDateLabel": "汇率日期",
+  "@currencyRateDateLabel": {
+    "description": "Row label for the non-clickable actual effective rate date in the unified foreign-currency card (quick 260613-ufn, D-2/D-3)"
+  },
   "editRateRequired": "请输入汇率",
   "@editRateRequired": {
     "description": "Inline error when the foreign-row rate field is empty (Phase 42-09, T-42-23)"

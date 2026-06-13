@@ -3937,6 +3937,12 @@ abstract class S {
   /// **'JPY (derived)'**
   String get editJpyDerivedLabel;
 
+  /// Row label for the non-clickable actual effective rate date in the unified foreign-currency card (quick 260613-ufn, D-2/D-3)
+  ///
+  /// In en, this message translates to:
+  /// **'Rate date'**
+  String get currencyRateDateLabel;
+
   /// Inline error when the foreign-row rate field is empty (Phase 42-09, T-42-23)
   ///
   /// In en, this message translates to:

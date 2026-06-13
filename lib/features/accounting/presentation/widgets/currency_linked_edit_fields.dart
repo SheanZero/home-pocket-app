@@ -73,6 +73,8 @@ class CurrencyLinkedEditFields extends StatefulWidget {
     required this.appliedRate,
     required this.manualOverride,
     required this.rateDate,
+    this.actualRateDate,
+    this.stalenessNote,
     this.onChanged,
     this.onAmountInvalid,
     this.dateChangeRefetchRate,
@@ -81,10 +83,23 @@ class CurrencyLinkedEditFields extends StatefulWidget {
   /// ISO 4217 code of the foreign currency (e.g. 'USD').
   final String originalCurrency;
 
-  /// The transaction's date — shown on the date-change trigger label, formatted
-  /// via [DateFormatter] (ja `2026/06/13`, en `06/13/2026`). Quick 260613-n5c:
-  /// the trigger now displays the ACTUAL date value, not the static word 「日期/Date」.
+  /// The transaction's date (the date the rate was requested for). Quick
+  /// 260613-ufn: this is the requested date; the 汇率日期 row displays the
+  /// ACTUAL effective date ([actualRateDate]) when supplied, falling back to
+  /// this value otherwise.
   final DateTime rateDate;
+
+  /// Quick 260613-ufn (D-2): the ACTUAL effective rate date shown in the
+  /// non-clickable 汇率日期 row, formatted via [DateFormatter]. When a rate
+  /// falls back to a weekend/holiday business-day proxy this differs from
+  /// [rateDate]. Defaults to [rateDate] when null.
+  final DateTime? actualRateDate;
+
+  /// Quick 260613-ufn (D-2): a pre-resolved weekend/holiday staleness note
+  /// derived by the host from the [RateResult] (single staleness-derivation
+  /// site). When non-null a warning-amber line renders below the 汇率日期 row.
+  /// Null = no staleness (fresh same-day rate).
+  final String? stalenessNote;
 
   /// Initial original amount in minor units.
   final int originalAmount;
@@ -119,10 +134,12 @@ class CurrencyLinkedEditFields extends StatefulWidget {
 
   @override
   State<CurrencyLinkedEditFields> createState() =>
-      _CurrencyLinkedEditFieldsState();
+      CurrencyLinkedEditFieldsState();
 }
 
-class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
+/// Public state — required so hosts holding a [GlobalKey] can invoke
+/// [triggerDateChangeRefetch] after a date-picker change (quick 260613-ufn D-4).
+class CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
   late final TextEditingController _rateController;
 
   /// Original amount in MINOR units (e.g. cents for USD). Injected by the host
@@ -226,7 +243,14 @@ class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
     _notify();
   }
 
-  /// Built-in date-change trigger. Routes to D-02 (dialog) when a manual
+  /// Public date-change entry point (quick 260613-ufn D-4). The host invokes
+  /// this via a [GlobalKey] AFTER the date picker changes the transaction date —
+  /// the clickable in-card trigger was removed (D-3). Routes to the retained
+  /// ADR-022 D-02 (dialog) / D-03 (>1% toast + undo) logic against the REAL
+  /// re-fetched rate resolved by [DateChangeRefetchRateSource].
+  Future<void> triggerDateChangeRefetch() => _onDateChange();
+
+  /// Date-change re-fetch logic. Routes to D-02 (dialog) when a manual
   /// override is active, else D-03 (>1% toast + undo). The re-fetched rate is
   /// resolved by the host-supplied [DateChangeRefetchRateSource] which reads the
   /// REAL exchange-rate use case — no rate is ever hardcoded.
@@ -353,18 +377,37 @@ class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
             ),
           ),
         ),
-        // Date-change affordance — routes to ADR-022 D-02 / D-03 semantics.
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton(
-            key: const Key('edit_date_change_trigger'),
-            onPressed: _onDateChange,
-            child: Text(
-              DateFormatter.formatDate(widget.rateDate, locale),
-              style: AppTextStyles.labelMedium.copyWith(color: palette.daily),
+        // Row 3: 汇率日期 — NON-CLICKABLE labeled row showing the ACTUAL
+        // effective rate date (quick 260613-ufn D-2/D-3). The clickable
+        // date-change TextButton was removed; the host now drives the re-fetch
+        // from the date picker via triggerDateChangeRefetch() (D-4).
+        _LabeledField(
+          label: l10n.rateDateLabel,
+          child: Text(
+            key: const Key('edit_rate_date'),
+            DateFormatter.formatDate(
+              widget.actualRateDate ?? widget.rateDate,
+              locale,
+            ),
+            textAlign: TextAlign.end,
+            style: AppTextStyles.labelMedium.copyWith(
+              color: palette.textPrimary,
             ),
           ),
         ),
+        // Staleness note (D-2) — warning amber, reserved for weekend/holiday
+        // business-day proxy or cached fallback. Host-derived (single site).
+        if (widget.stalenessNote != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(
+              key: const Key('edit_rate_staleness'),
+              widget.stalenessNote!,
+              style: AppTextStyles.labelMedium.copyWith(
+                color: palette.warning,
+              ),
+            ),
+          ),
       ],
     );
   }
