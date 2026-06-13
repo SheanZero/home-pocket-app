@@ -34,7 +34,6 @@ import 'package:home_pocket/features/accounting/presentation/screens/transaction
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_display.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_edit_bottom_sheet.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/currency_linked_edit_fields.dart';
-import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../../helpers/test_localizations.dart';
@@ -46,30 +45,6 @@ class _MockUpdateTransactionUseCase extends Mock
 
 class _FakeUpdateTransactionParams extends Fake
     implements UpdateTransactionParams {}
-
-/// A category repository that resolves the seed transaction's `cat-food` to a
-/// real [Category] so the edit form's submit() passes its category guard and
-/// actually invokes the update use case (260613-n5c save-on-confirm tests).
-class _SeededCategoryRepository extends _NullCategoryRepository {
-  static final _food = Category(
-    id: 'cat-food',
-    name: 'category_food',
-    icon: 'restaurant',
-    color: '#5FAE72',
-    level: 1,
-    isSystem: true,
-    createdAt: DateTime(2026, 1, 1),
-  );
-
-  @override
-  Future<Category?> findById(String id) async => id == 'cat-food' ? _food : null;
-
-  @override
-  Future<List<Category>> findAll() async => [_food];
-
-  @override
-  Future<List<Category>> findActive() async => [_food];
-}
 
 class _NullCategoryRepository implements CategoryRepository {
   @override
@@ -160,28 +135,6 @@ List<Override> _overrides({required _MockUpdateTransactionUseCase mockUpdate}) {
     categoryServiceProvider.overrideWith(
       (_) => CategoryService(
         categoryRepository: _NullCategoryRepository(),
-        ledgerConfigRepository: _NullLedgerConfigRepository(),
-      ),
-    ),
-    recordCategoryCorrectionUseCaseProvider.overrideWith(
-      (_) => throw UnimplementedError(
-        'recordCategoryCorrectionUseCase not needed in edit host',
-      ),
-    ),
-  ];
-}
-
-/// Overrides where the seed category resolves to a real [Category], so submit()
-/// reaches the update use case (260613-n5c keypad-save-equals-entry-save tests).
-List<Override> _savableOverrides({
-  required _MockUpdateTransactionUseCase mockUpdate,
-}) {
-  return [
-    updateTransactionUseCaseProvider.overrideWithValue(mockUpdate),
-    categoryRepositoryProvider.overrideWithValue(_SeededCategoryRepository()),
-    categoryServiceProvider.overrideWith(
-      (_) => CategoryService(
-        categoryRepository: _SeededCategoryRepository(),
         ledgerConfigRepository: _NullLedgerConfigRepository(),
       ),
     ),
@@ -479,11 +432,11 @@ void main() {
     );
   });
 
-  // ── TEST 5 (260613-n5c): pressing the foreign keypad 保存 saves the WHOLE ──
-  //     entry (use case + pop(true)) — not just a headline write-back. ────────
+  // ── TEST 5 (260613-mgc): editing via the headline keypad updates the ───────
+  //     foreign headline; original-amount editing flows through the keypad. ───
 
   testWidgets(
-    'TEST 5: foreign keypad Save edits the ORIGINAL currency, calls the use case once, and pops true',
+    'TEST 5: editing the original amount via the headline keypad updates the headline',
     (tester) async {
       tester.view.physicalSize = const Size(402, 1400);
       tester.view.devicePixelRatio = 1;
@@ -491,40 +444,28 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
 
       final mockUpdate = _MockUpdateTransactionUseCase();
-      // Save-on-confirm now flows through the use case; capture its params.
-      final captured = <UpdateTransactionParams>[];
-      when(() => mockUpdate.execute(any())).thenAnswer((inv) async {
-        final params = inv.positionalArguments.first as UpdateTransactionParams;
-        captured.add(params);
-        return Result<Transaction>.success(
-          params.seed.copyWith(
-            amount: params.amount ?? params.seed.amount,
-            originalAmount: params.originalAmount,
-            appliedRate: params.appliedRate,
-          ),
-        );
-      });
 
-      // Push the screen as a route so its Navigator.pop(true) is observable.
-      Object? popResult;
       await tester.pumpWidget(
         createLocalizedWidget(
-          _EditScreenLauncher(
-            transaction: _foreignTransaction,
-            onPopped: (r) => popResult = r,
+          Scaffold(
+            body: TransactionEditScreen(transaction: _foreignTransaction),
           ),
           locale: const Locale('en'),
-          overrides: _savableOverrides(mockUpdate: mockUpdate),
+          overrides: _overrides(mockUpdate: mockUpdate),
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('open_edit_screen')));
-      await tester.pumpAndSettle();
 
-      // Sanity: foreign headline shows the ORIGINAL amount (in-card input gone).
+      // Sanity: linked edit host + initial headline (the in-card original-amount
+      // input is gone — editing flows through the headline keypad now).
       expect(
         find.byKey(const ValueKey('currency-linked-edit-fields')),
         findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('edit_original_amount_field')),
+        findsNothing,
+        reason: 'in-card original-amount input was removed (260613-mgc)',
       );
       expect(
         find.descendant(
@@ -538,15 +479,6 @@ void main() {
       await tester.tap(find.byType(AmountDisplay));
       await tester.pumpAndSettle();
       expect(find.byType(AmountEditBottomSheet), findsOneWidget);
-      // The keypad edits in the ORIGINAL currency (USD badge inside the sheet).
-      expect(
-        find.descendant(
-          of: find.byType(AmountEditBottomSheet),
-          matching: find.text('USD'),
-        ),
-        findsWidgets,
-        reason: 'foreign keypad must edit in the ORIGINAL currency (USD)',
-      );
 
       // Clear the seed "112.90" (6 chars) then type "200".
       for (var i = 0; i < 6; i++) {
@@ -560,139 +492,44 @@ void main() {
       await tester.tap(find.widgetWithText(InkWell, '0').first);
       await tester.pump();
 
-      // Press the keypad Save action key (scoped to the sheet) → whole-entry save.
+      // Confirm with the keypad's Confirm action key (scoped to the sheet) →
+      // sheet closes, headline updates (write-back only, no whole-entry save).
       await tester.tap(
         find.descendant(
           of: find.byType(AmountEditBottomSheet),
-          matching: find.text('Save'),
+          matching: find.text('Confirm'),
         ),
       );
       await tester.pumpAndSettle();
 
-      // The keypad 保存 triggered the WHOLE-entry save exactly once.
-      verify(() => mockUpdate.execute(any())).called(1);
-      // The use case received the recomputed foreign triple: 200.00 USD →
-      // 20000 minor, and JPY = 200.00 × 160.2564 → 32,051 (single convertToJpy).
-      expect(captured, hasLength(1));
-      expect(captured.single.originalCurrency, 'USD');
-      expect(captured.single.originalAmount, 20000);
-      expect(captured.single.amount, 32051);
-
-      // The screen popped with `true` (D-18) → it is no longer mounted.
-      expect(find.byType(TransactionEditScreen), findsNothing);
-      expect(popResult, isTrue);
-    },
-  );
-
-  // ── TEST 6 (260613-n5c): JPY keypad action key (record) saves the entry. ────
-
-  testWidgets(
-    'TEST 6: JPY keypad record key saves the whole entry once and pops true',
-    (tester) async {
-      tester.view.physicalSize = const Size(390, 1200);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-
-      final mockUpdate = _MockUpdateTransactionUseCase();
-      final captured = <UpdateTransactionParams>[];
-      when(() => mockUpdate.execute(any())).thenAnswer((inv) async {
-        final params = inv.positionalArguments.first as UpdateTransactionParams;
-        captured.add(params);
-        return Result<Transaction>.success(
-          params.seed.copyWith(amount: params.amount ?? params.seed.amount),
-        );
-      });
-
-      Object? popResult;
-      await tester.pumpWidget(
-        createLocalizedWidget(
-          _EditScreenLauncher(
-            transaction: _testTransaction,
-            onPopped: (r) => popResult = r,
-          ),
-          locale: const Locale('en'),
-          overrides: _savableOverrides(mockUpdate: mockUpdate),
-        ),
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('open_edit_screen')));
-      await tester.pumpAndSettle();
-
-      // Open the JPY-integer keypad sheet from the headline.
-      await tester.tap(find.byType(AmountDisplay));
-      await tester.pumpAndSettle();
-      expect(find.byType(AmountEditBottomSheet), findsOneWidget);
-
-      // Clear the seed "1500" (4 chars) then type "2500".
-      for (var i = 0; i < 4; i++) {
-        await tester.tap(find.byIcon(Icons.backspace_outlined));
-        await tester.pump();
-      }
-      for (final d in ['2', '5', '0', '0']) {
-        await tester.tap(find.widgetWithText(InkWell, d).first);
-        await tester.pump();
-      }
-
-      // JPY mode's action key reads "Record" (NOT "Save"); scoped to the sheet.
-      await tester.tap(
+      // The headline now shows 200.00 (currency's 2-decimal major-unit string).
+      expect(
         find.descendant(
-          of: find.byType(AmountEditBottomSheet),
-          matching: find.text('Record'),
+          of: find.byType(AmountDisplay),
+          matching: find.text('200.00'),
         ),
+        findsOneWidget,
+        reason: 'Headline must reflect the keypad-edited original amount',
       );
-      await tester.pumpAndSettle();
-
-      verify(() => mockUpdate.execute(any())).called(1);
-      expect(captured, hasLength(1));
-      expect(captured.single.amount, 2500);
-      expect(find.byType(TransactionEditScreen), findsNothing);
-      expect(popResult, isTrue);
-    },
-  );
-
-  // ── TEST 7 (260613-n5c): swipe-dismissing the sheet does NOT save. ──────────
-
-  testWidgets(
-    'TEST 7: dismissing the sheet without pressing the action key does not save',
-    (tester) async {
-      tester.view.physicalSize = const Size(390, 1200);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-
-      final mockUpdate = _MockUpdateTransactionUseCase();
-
-      Object? popResult;
-      await tester.pumpWidget(
-        createLocalizedWidget(
-          _EditScreenLauncher(
-            transaction: _testTransaction,
-            onPopped: (r) => popResult = r,
-          ),
-          locale: const Locale('en'),
-          overrides: _savableOverrides(mockUpdate: mockUpdate),
+      // The OLD original amount must be gone from the headline.
+      expect(
+        find.descendant(
+          of: find.byType(AmountDisplay),
+          matching: find.text('112.90'),
         ),
+        findsNothing,
+        reason: 'Stale original amount must not linger in the headline',
       );
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('open_edit_screen')));
-      await tester.pumpAndSettle();
 
-      // Open the keypad sheet, then dismiss it WITHOUT pressing the action key
-      // (pop the sheet route — the modal-barrier / swipe-away equivalent).
-      await tester.tap(find.byType(AmountDisplay));
-      await tester.pumpAndSettle();
-      expect(find.byType(AmountEditBottomSheet), findsOneWidget);
-
-      final sheetContext = tester.element(find.byType(AmountEditBottomSheet));
-      Navigator.of(sheetContext).pop(); // swipe-dismiss equivalent
-      await tester.pumpAndSettle();
-
-      // Sheet closed; no whole-entry save fired, screen still mounted, no pop.
-      expect(find.byType(AmountEditBottomSheet), findsNothing);
-      verifyNever(() => mockUpdate.execute(any()));
-      expect(find.byType(TransactionEditScreen), findsOneWidget);
-      expect(popResult, isNull);
+      // The card's derived JPY row recomputed: 200.00 USD × 160.2564 = 32,051.
+      final derived = tester.widget<Text>(
+        find.byKey(const Key('edit_jpy_derived')),
+      );
+      expect(
+        derived.data,
+        contains('32,051'),
+        reason: '200.00 USD × 160.2564 → ¥32,051 (single convertToJpy site)',
+      );
     },
   );
 
@@ -710,34 +547,4 @@ void main() {
       expect(value.originalAmount, 20000);
     },
   );
-}
-
-/// A tiny launcher that pushes [TransactionEditScreen] as a second route so the
-/// screen's `Navigator.pop(true)` (D-18) is observable via [onPopped]. The
-/// 260613-n5c save-on-confirm tests assert the popped result is `true`.
-class _EditScreenLauncher extends StatelessWidget {
-  const _EditScreenLauncher({required this.transaction, required this.onPopped});
-
-  final Transaction transaction;
-  final ValueChanged<Object?> onPopped;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: ElevatedButton(
-          key: const Key('open_edit_screen'),
-          onPressed: () async {
-            final result = await Navigator.of(context).push<Object?>(
-              MaterialPageRoute(
-                builder: (_) => TransactionEditScreen(transaction: transaction),
-              ),
-            );
-            onPopped(result);
-          },
-          child: const Text('open'),
-        ),
-      ),
-    );
-  }
 }

@@ -91,8 +91,8 @@ void main() {
           onConfirm: (v) => confirmed = v,
         );
 
-        // Tap the Save action key without editing.
-        await tester.tap(find.text('Save'));
+        // Tap the Confirm action key without editing.
+        await tester.tap(find.text('Confirm'));
         await tester.pumpAndSettle();
 
         expect(
@@ -133,8 +133,8 @@ void main() {
 
         expect(displayText(tester), '200');
 
-        // Confirm via the Save label.
-        await tester.tap(find.text('Save'));
+        // Confirm via the Confirm label.
+        await tester.tap(find.text('Confirm'));
         await tester.pumpAndSettle();
 
         expect(confirmed, 20000, reason: '200 USD major → 20000 minor units');
