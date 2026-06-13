@@ -55,16 +55,20 @@ class TransactionDetailsForm extends ConsumerStatefulWidget {
     this.merchantFocusNode,
     this.noteFocusNode,
     this.onPickerDismissed,
-    this.onForeignJpyChanged,
+    this.onForeignChanged,
   });
 
   final TransactionDetailsFormConfig config;
 
-  /// Phase 42-09 (ADR-022 D-01): fired with the freshly derived JPY amount when
-  /// a foreign row's original amount or rate is edited inside the linked edit
-  /// host. The edit screen wires this to keep its read-only top AmountDisplay in
-  /// lock-step with the derived figure. Null in hosts without a top display.
-  final ValueChanged<int>? onForeignJpyChanged;
+  /// Phase 42-09 / UAT fix: fired with the full [CurrencyLinkedEditValue]
+  /// (original amount in minor units + applied rate + derived JPY) whenever a
+  /// foreign row's original amount or rate is edited inside the linked edit
+  /// host. The edit screen wires this to keep its top headline in lock-step:
+  /// the headline shows the ORIGINAL currency + amount (consistency with the
+  /// entry screen), so it reads `value.originalAmount`; the JPY figure remains
+  /// the card's derived row (ADR-022 D-01, one direction only). Null in hosts
+  /// without a top headline.
+  final ValueChanged<CurrencyLinkedEditValue>? onForeignChanged;
 
   /// Presentation-layer form wiring (moved off the domain config to keep
   /// [TransactionDetailsFormConfig] free of package:flutter — CRIT-04).
@@ -850,9 +854,7 @@ class TransactionDetailsFormState
       decoration: BoxDecoration(
         color: palette.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: palette.borderDefault,
-        ),
+        border: Border.all(color: palette.borderDefault),
       ),
       child: child,
     );
@@ -927,9 +929,11 @@ class TransactionDetailsFormState
                       // A valid onChanged means the amount is valid again.
                       _foreignAmountInvalid = false;
                     });
-                    // Notify the screen so its read-only top display tracks the
-                    // derived JPY (foreign rows only).
-                    widget.onForeignJpyChanged?.call(value.jpyAmount);
+                    // Notify the screen so its top headline tracks the ORIGINAL
+                    // amount + currency live (foreign rows only). The screen
+                    // reads value.originalAmount for the headline and keeps
+                    // value.jpyAmount for the card's derived row.
+                    widget.onForeignChanged?.call(value);
                   },
                   // WR-06: the edit host reports a cleared/invalid amount here
                   // (onChanged stays silent in that state). Track it so submit()

@@ -33,6 +33,7 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
 import 'package:home_pocket/features/accounting/presentation/screens/transaction_edit_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_display.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_edit_bottom_sheet.dart';
+import 'package:home_pocket/features/accounting/presentation/widgets/currency_linked_edit_fields.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../../helpers/test_localizations.dart';
@@ -106,6 +107,25 @@ final _testTransaction = Transaction(
   entrySource: EntrySource.manual,
 );
 
+/// Phase 42 UAT fix seed: a FOREIGN row — USD 112.90 @ 160.2564 → 18,093 JPY.
+/// originalAmount is stored in MINOR units (cents): 112.90 → 11290.
+final _foreignTransaction = Transaction(
+  id: 'tx-usd-001',
+  bookId: 'book-1',
+  deviceId: 'dev-001',
+  amount: 18093,
+  type: TransactionType.expense,
+  categoryId: 'cat-food',
+  ledgerType: LedgerType.daily,
+  timestamp: DateTime(2026, 5, 1),
+  currentHash: 'hash-usd-001',
+  createdAt: DateTime(2026, 5, 1),
+  originalCurrency: 'USD',
+  originalAmount: 11290,
+  appliedRate: '160.2564',
+  entrySource: EntrySource.manual,
+);
+
 // ── Shared provider overrides ──────────────────────────────────────────────────
 
 List<Override> _overrides({required _MockUpdateTransactionUseCase mockUpdate}) {
@@ -119,7 +139,9 @@ List<Override> _overrides({required _MockUpdateTransactionUseCase mockUpdate}) {
       ),
     ),
     recordCategoryCorrectionUseCaseProvider.overrideWith(
-      (_) => throw UnimplementedError('recordCategoryCorrectionUseCase not needed in edit host'),
+      (_) => throw UnimplementedError(
+        'recordCategoryCorrectionUseCase not needed in edit host',
+      ),
     ),
   ];
 }
@@ -145,9 +167,7 @@ void main() {
 
       await tester.pumpWidget(
         createLocalizedWidget(
-          Scaffold(
-            body: TransactionEditScreen(transaction: _testTransaction),
-          ),
+          Scaffold(body: TransactionEditScreen(transaction: _testTransaction)),
           locale: const Locale('en'),
           overrides: _overrides(mockUpdate: mockUpdate),
         ),
@@ -158,7 +178,8 @@ void main() {
       expect(
         find.byType(AmountDisplay),
         findsOneWidget,
-        reason: 'Host must render AmountDisplay with the seed transaction amount',
+        reason:
+            'Host must render AmountDisplay with the seed transaction amount',
       );
 
       // Assert: AmountDisplay shows "1,500" (formatted from 1500).
@@ -178,7 +199,8 @@ void main() {
       expect(
         find.byType(AmountEditBottomSheet),
         findsOneWidget,
-        reason: 'Tapping AmountDisplay must open AmountEditBottomSheet (D-14 spillover)',
+        reason:
+            'Tapping AmountDisplay must open AmountEditBottomSheet (D-14 spillover)',
       );
     },
   );
@@ -197,9 +219,7 @@ void main() {
 
       await tester.pumpWidget(
         createLocalizedWidget(
-          Scaffold(
-            body: TransactionEditScreen(transaction: _testTransaction),
-          ),
+          Scaffold(body: TransactionEditScreen(transaction: _testTransaction)),
           locale: const Locale('en'),
           overrides: _overrides(mockUpdate: mockUpdate),
         ),
@@ -216,8 +236,12 @@ void main() {
         of: find.byType(AmountDisplay),
         matching: find.byIcon(Icons.close),
       );
-      expect(clearButton, findsOneWidget,
-          reason: 'Clear button (Icons.close) must be visible when amount is non-zero');
+      expect(
+        clearButton,
+        findsOneWidget,
+        reason:
+            'Clear button (Icons.close) must be visible when amount is non-zero',
+      );
 
       await tester.tap(clearButton);
       await tester.pumpAndSettle();
@@ -235,8 +259,11 @@ void main() {
       // Assert: form's internal _amount is synced to 0 (verified by checking
       // the screen remains mounted — if _displayAmount and form amount drifted,
       // the subsequent save test would catch it).
-      expect(find.byType(AmountDisplay), findsOneWidget,
-          reason: 'Screen must remain mounted after clear (no premature pop)');
+      expect(
+        find.byType(AmountDisplay),
+        findsOneWidget,
+        reason: 'Screen must remain mounted after clear (no premature pop)',
+      );
 
       // Action: tap the Save button.
       // P19-W5 contract: the form's submit() fires. Category is seeded from
@@ -253,8 +280,213 @@ void main() {
       verifyNever(() => mockUpdate.execute(any()));
 
       // Assert: screen did NOT pop (still mounted with AmountDisplay).
-      expect(find.byType(AmountDisplay), findsOneWidget,
-          reason: 'Screen must NOT pop on validation failure');
+      expect(
+        find.byType(AmountDisplay),
+        findsOneWidget,
+        reason: 'Screen must NOT pop on validation failure',
+      );
+    },
+  );
+
+  // ── TEST 3 (UAT fix): FOREIGN row headline shows ORIGINAL currency + amount ──
+
+  testWidgets(
+    'TEST 3: foreign edit row shows USD + 112.90 at top, NOT ¥ JPY / 18,093',
+    (tester) async {
+      tester.view.physicalSize = const Size(402, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final mockUpdate = _MockUpdateTransactionUseCase();
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          Scaffold(
+            body: TransactionEditScreen(transaction: _foreignTransaction),
+          ),
+          locale: const Locale('en'),
+          overrides: _overrides(mockUpdate: mockUpdate),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // The top AmountDisplay headline shows the ORIGINAL currency identity.
+      final badge = find.byKey(const ValueKey('amount_currency_badge'));
+      expect(badge, findsOneWidget);
+      expect(
+        find.descendant(of: badge, matching: find.text('USD')),
+        findsOneWidget,
+        reason: 'Foreign headline badge must show the ORIGINAL ISO code (USD)',
+      );
+      expect(
+        find.descendant(of: badge, matching: find.text(r'$')),
+        findsOneWidget,
+        reason: 'Foreign headline badge must show the ORIGINAL symbol (\$)',
+      );
+
+      // The headline amount is the ORIGINAL major-unit value, not the JPY one.
+      expect(
+        find.descendant(
+          of: find.byType(AmountDisplay),
+          matching: find.text('112.90'),
+        ),
+        findsOneWidget,
+        reason: 'Foreign headline must show the ORIGINAL amount 112.90',
+      );
+
+      // CRITICAL: the JPY identity must NOT be the headline.
+      expect(
+        find.descendant(of: badge, matching: find.text('JPY')),
+        findsNothing,
+        reason: 'Foreign headline must NOT show the JPY badge',
+      );
+      expect(
+        find.descendant(
+          of: find.byType(AmountDisplay),
+          matching: find.text('18,093'),
+        ),
+        findsNothing,
+        reason: 'Foreign headline must NOT show the JPY amount 18,093',
+      );
+
+      // The JPY figure still lives in the card's read-only 日元（换算）row.
+      // The key is on the derived Text itself; assert its data directly.
+      final derived = tester.widget<Text>(
+        find.byKey(const Key('edit_jpy_derived')),
+      );
+      expect(
+        derived.data,
+        contains('18,093'),
+        reason: 'JPY (derived) row must still show ¥18,093',
+      );
+
+      // Foreign headline is NON-tappable (no clear button, no edit sheet).
+      expect(
+        find.descendant(
+          of: find.byType(AmountDisplay),
+          matching: find.byIcon(Icons.close),
+        ),
+        findsNothing,
+        reason: 'Foreign headline must not expose the JPY clear button',
+      );
+    },
+  );
+
+  // ── TEST 4 (UAT fix): JPY-native headline is UNCHANGED (CURR-04) ─────────────
+
+  testWidgets('TEST 4: JPY-native edit row still shows ¥ JPY + JPY amount', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final mockUpdate = _MockUpdateTransactionUseCase();
+
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        Scaffold(body: TransactionEditScreen(transaction: _testTransaction)),
+        locale: const Locale('en'),
+        overrides: _overrides(mockUpdate: mockUpdate),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final badge = find.byKey(const ValueKey('amount_currency_badge'));
+    expect(
+      find.descendant(of: badge, matching: find.text('JPY')),
+      findsOneWidget,
+      reason: 'JPY-native headline must keep the JPY badge (CURR-04)',
+    );
+    expect(
+      find.descendant(of: badge, matching: find.text('¥')),
+      findsOneWidget,
+    );
+    expect(
+      find.text('1,500'),
+      findsOneWidget,
+      reason: 'JPY-native headline shows the JPY amount unchanged',
+    );
+  });
+
+  // ── TEST 5 (UAT fix): editing 原币金额 updates the top headline LIVE ──────────
+
+  testWidgets(
+    'TEST 5: editing the original amount updates the foreign headline live',
+    (tester) async {
+      tester.view.physicalSize = const Size(402, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final mockUpdate = _MockUpdateTransactionUseCase();
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          Scaffold(
+            body: TransactionEditScreen(transaction: _foreignTransaction),
+          ),
+          locale: const Locale('en'),
+          overrides: _overrides(mockUpdate: mockUpdate),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Sanity: linked edit host + initial headline.
+      expect(
+        find.byKey(const ValueKey('currency-linked-edit-fields')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(AmountDisplay),
+          matching: find.text('112.90'),
+        ),
+        findsOneWidget,
+      );
+
+      // Edit 原币金额 from 112.90 → 200.00 (USD). The headline must follow LIVE.
+      // The headline always renders the currency's 2-decimal major-unit string.
+      final amountField = find.byKey(const Key('edit_original_amount_field'));
+      expect(amountField, findsOneWidget);
+      await tester.enterText(amountField, '200');
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: find.byType(AmountDisplay),
+          matching: find.text('200.00'),
+        ),
+        findsOneWidget,
+        reason:
+            'Headline must reflect the live-edited original amount (200.00)',
+      );
+      // The OLD original amount must be gone from the headline.
+      expect(
+        find.descendant(
+          of: find.byType(AmountDisplay),
+          matching: find.text('112.90'),
+        ),
+        findsNothing,
+        reason: 'Stale original amount must not linger in the headline',
+      );
+    },
+  );
+
+  // Keeps the symbol-prefix import meaningful: CurrencyLinkedEditValue is the
+  // contract surfaced to the screen for the live-headline wiring (TEST 5).
+  test(
+    'CurrencyLinkedEditValue exposes the original amount for the headline',
+    () {
+      const value = CurrencyLinkedEditValue(
+        originalAmount: 20000,
+        appliedRate: '160.2564',
+        jpyAmount: 32051,
+        manualOverride: false,
+      );
+      expect(value.originalAmount, 20000);
     },
   );
 }

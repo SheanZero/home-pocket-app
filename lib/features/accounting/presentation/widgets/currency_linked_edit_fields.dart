@@ -326,10 +326,20 @@ class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
     final locale = Localizations.localeOf(context);
     final jpy = _deriveJpy();
 
+    // Phase 42 UAT fix: the original-amount row carries the currency symbol
+    // (e.g. '$') so the edited value reads as "$112.90" — consistent with the
+    // entry screen's currency presentation. Derived the same way the entry
+    // screen / headline strip it from a formatted zero (no hardcoded glyph).
+    final currencySymbol = NumberFormatter.formatCurrency(
+      0,
+      widget.originalCurrency,
+      locale,
+    ).replaceAll(RegExp(r'[\d.,\s]'), '');
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Row 1: original amount (editable).
+        // Row 1: original amount (editable) — prefixed with the currency symbol.
         _LabeledField(
           label: l10n.originalAmountLabel,
           child: TextField(
@@ -347,6 +357,12 @@ class _CurrencyLinkedEditFieldsState extends State<CurrencyLinkedEditFields> {
               isDense: true,
               border: InputBorder.none,
               contentPadding: EdgeInsets.zero,
+              // Phase 42 UAT fix: show the currency symbol with the value so the
+              // editable original amount reads as e.g. "$112.90" (consistency).
+              prefixText: currencySymbol,
+              prefixStyle: AppTextStyles.bodyMedium.copyWith(
+                color: palette.textSecondary,
+              ),
               // WR-06: surface the cleared/invalid amount inline, exactly like
               // the rate field's _rateError, instead of a silent `—` JPY.
               errorText: _amountError,
