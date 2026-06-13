@@ -173,7 +173,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 41-03-PLAN.md — ExchangeRateApiClient (dual-source HTTP) + RateResult sealed class
+- [x] 41-03-PLAN.md — ExchangeRateApiClient (dual-source HTTP) + RateResult sealed class
 
 **Wave 3** *(blocked on Wave 2 completion)*
 

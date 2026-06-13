@@ -4,13 +4,13 @@ milestone: v1.7
 milestone_name: 多币种支持
 status: executing
 stopped_at: Completed 41-02-PLAN.md
-last_updated: "2026-06-12T23:55:57.457Z"
+last_updated: "2026-06-13T00:01:18.678Z"
 last_activity: 2026-06-12 -- Phase 41 execution started
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 11
-  completed_plans: 8
+  completed_plans: 9
   percent: 33
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 ## Current Position
 
 Phase: 41 (exchange-rate-service) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-06-12 -- Phase 41 execution started
 
@@ -127,7 +127,7 @@ No active blockers for v1.7. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-12T23:55:57.453Z
+Last session: 2026-06-13T00:01:05.433Z
 Stopped at: Completed 41-02-PLAN.md
 Resume file: None
 
@@ -137,8 +137,10 @@ Resume file: None
 |-------|------|----------|-------|
 | Phase 41 P01 | 6min | 2 tasks | 6 files |
 | Phase 41 P02 | 5min | 2 tasks | 2 files |
+| Phase 41 P03 | 2min | 2 tasks | 3 files |
 
 ## Decisions
 
 - [Phase ?]: 41-01: ExchangeRateRepository extended with findLatestNonManual (D-07), deleteOlderThan (D-09 TTL), findAll (D-10); TTL delete uses UtcEpochDateTimeConverter().toSql() before isSmallerThanValue (TypeConverter-aware)
 - [Phase ?]: 41-02: connectivity_plus ^7.1.1 added (D-05 gate); flutter pub get clean, all pins intact (file_picker 11.0.2 / package_info_plus 9.0.1 / share_plus 12.0.2 / win32 5.15.0 / intl 0.20.2 / sqlcipher 0.6.8); iOS debug build human-verified green (no sqlite3 symbol conflict)
+- [Phase ?]: 41-03: ExchangeRateApiClient three-source fallback (Frankfurter→fawazahmed0 jsDelivr→Cloudflare); 404/timeout/non-200 route onward, all-fail throws; rate inversion 1/raw toStringAsPrecision(7); actualRateDate surfaces weekend/holiday (RATE-05); RateResult sealed union (5 variants) + RateSignal/RateResultWithSignal
