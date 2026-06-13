@@ -75,6 +75,121 @@ void main() {
         expect(result, contains('XYZ'));
       });
 
+      group('long-tail currency real symbols (260613-ote)', () {
+        test('THB returns ฿', () {
+          final result = NumberFormatter.formatCurrency(100, 'THB', en);
+          expect(result, contains('฿'));
+          expect(result, isNot(contains('THB')));
+        });
+
+        test('INR returns ₹', () {
+          final result = NumberFormatter.formatCurrency(100, 'INR', en);
+          expect(result, contains('₹'));
+          expect(result, isNot(contains('INR')));
+        });
+
+        test('IDR returns Rp', () {
+          final result = NumberFormatter.formatCurrency(100, 'IDR', en);
+          expect(result, contains('Rp'));
+          expect(result, isNot(contains('IDR')));
+        });
+
+        test('MYR returns RM', () {
+          final result = NumberFormatter.formatCurrency(100, 'MYR', en);
+          expect(result, contains('RM'));
+          expect(result, isNot(contains('MYR')));
+        });
+
+        test('PHP returns ₱', () {
+          final result = NumberFormatter.formatCurrency(100, 'PHP', en);
+          expect(result, contains('₱'));
+          expect(result, isNot(contains('PHP')));
+        });
+
+        test('VND returns ₫', () {
+          final result = NumberFormatter.formatCurrency(100, 'VND', en);
+          expect(result, contains('₫'));
+          expect(result, isNot(contains('VND')));
+        });
+
+        test('NZD returns NZ\$', () {
+          final result = NumberFormatter.formatCurrency(100, 'NZD', en);
+          expect(result, contains('NZ\$'));
+          expect(result, isNot(contains('NZD')));
+        });
+
+        test('BRL returns R\$', () {
+          final result = NumberFormatter.formatCurrency(100, 'BRL', en);
+          expect(result, contains('R\$'));
+          expect(result, isNot(contains('BRL')));
+        });
+
+        test('RUB returns ₽', () {
+          final result = NumberFormatter.formatCurrency(100, 'RUB', en);
+          expect(result, contains('₽'));
+          expect(result, isNot(contains('RUB')));
+        });
+
+        test('ZAR returns R', () {
+          final result = NumberFormatter.formatCurrency(100, 'ZAR', en);
+          expect(result, contains('R'));
+          expect(result, isNot(contains('ZAR')));
+        });
+
+        test('SEK returns kr', () {
+          final result = NumberFormatter.formatCurrency(100, 'SEK', en);
+          expect(result, contains('kr'));
+          expect(result, isNot(contains('SEK')));
+        });
+
+        test('NOK returns kr', () {
+          final result = NumberFormatter.formatCurrency(100, 'NOK', en);
+          expect(result, contains('kr'));
+          expect(result, isNot(contains('NOK')));
+        });
+
+        test('DKK returns kr', () {
+          final result = NumberFormatter.formatCurrency(100, 'DKK', en);
+          expect(result, contains('kr'));
+          expect(result, isNot(contains('DKK')));
+        });
+
+        test('MXN returns MX\$', () {
+          final result = NumberFormatter.formatCurrency(100, 'MXN', en);
+          expect(result, contains('MX\$'));
+          expect(result, isNot(contains('MXN')));
+        });
+
+        test('TRY returns ₺', () {
+          final result = NumberFormatter.formatCurrency(100, 'TRY', en);
+          expect(result, contains('₺'));
+          expect(result, isNot(contains('TRY')));
+        });
+
+        test('PLN returns zł', () {
+          final result = NumberFormatter.formatCurrency(100, 'PLN', en);
+          expect(result, contains('zł'));
+          expect(result, isNot(contains('PLN')));
+        });
+      });
+
+      group('currencies without common glyph keep ISO code (260613-ote)', () {
+        test('CHF falls back to ISO code', () {
+          final result = NumberFormatter.formatCurrency(100, 'CHF', en);
+          expect(result, contains('CHF'));
+        });
+
+        test('AED falls back to ISO code', () {
+          final result = NumberFormatter.formatCurrency(100, 'AED', en);
+          expect(result, contains('AED'));
+        });
+
+        test('SAR falls back to ISO code', () {
+          final result = NumberFormatter.formatCurrency(100, 'SAR', en);
+          expect(result, contains('SAR'));
+        });
+      });
+
       test('JPY still returns \u00a5 (regression guard)', () {
         final result = NumberFormatter.formatCurrency(1000, 'JPY', ja);
         expect(result, contains('\u00a5'));
