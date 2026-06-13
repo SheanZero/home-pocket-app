@@ -144,12 +144,25 @@ class SmartKeyboard extends StatelessWidget {
           child: Padding(
             // P19 D-07: 3 dp per side -> 6 dp total visible gap between adjacent keys.
             padding: const EdgeInsets.symmetric(horizontal: 3),
-            child: _DigitKey(
-              label: '.',
-              onTap: () => onDot?.call(),
-              palette: palette,
-              height: keyHeight,
-            ),
+            // D-06: dot key is gated on currency minor unit. When the host
+            // passes onDot == null (0-decimal currency, e.g. JPY/KRW) we render
+            // a disabled blank tile of the SAME equal width + 48dp floor so the
+            // row keeps its 3-cell structure and no key shifts (RESEARCH Q3 —
+            // collapsing the cell would shift keys → mis-taps + golden churn).
+            // For decimal currencies the dot key behaves exactly as before
+            // (CURR-04: JPY path byte-identical).
+            child: onDot == null
+                ? _DisabledKey(
+                    key: const ValueKey('smart_keyboard_dot_disabled'),
+                    palette: palette,
+                    height: keyHeight,
+                  )
+                : _DigitKey(
+                    label: '.',
+                    onTap: onDot!,
+                    palette: palette,
+                    height: keyHeight,
+                  ),
           ),
         ),
       ],
@@ -247,6 +260,34 @@ class _DigitKey extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// D-06: blank, non-interactive placeholder for the dot cell when the active
+/// currency has 0 minor-unit decimals (JPY/KRW). Occupies the SAME equal width
+/// and 48dp floor as a [_DigitKey] so the extra row keeps its 3-cell structure
+/// — no key shifts (RESEARCH Q3). Renders no glyph and carries no tap handler,
+/// so a "." cannot be entered for 0-decimal currencies.
+class _DisabledKey extends StatelessWidget {
+  const _DisabledKey({
+    super.key,
+    required this.palette,
+    required this.height,
+  });
+
+  final AppPalette palette;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        // Muted/transparent so it reads as a non-key gap, not a tappable key.
+        color: palette.backgroundMuted.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(12),
       ),
     );
   }
