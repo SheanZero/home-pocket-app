@@ -16,6 +16,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
+import 'package:home_pocket/features/currency/domain/models/exchange_rate.dart';
+import 'package:home_pocket/features/currency/domain/repositories/exchange_rate_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
 
 class MockTransactionRepository extends Mock implements TransactionRepository {}
@@ -25,6 +27,9 @@ class MockCategoryRepository extends Mock implements CategoryRepository {}
 class MockBookRepository extends Mock implements BookRepository {}
 
 class MockSettingsRepository extends Mock implements SettingsRepository {}
+
+class MockExchangeRateRepository extends Mock
+    implements ExchangeRateRepository {}
 
 /// Helper to create an encrypted backup file for testing.
 Future<File> _createEncryptedBackup({
@@ -75,6 +80,7 @@ void main() {
   late MockCategoryRepository mockCategoryRepo;
   late MockBookRepository mockBookRepo;
   late MockSettingsRepository mockSettingsRepo;
+  late MockExchangeRateRepository mockExchangeRateRepo;
   late Directory tempDir;
 
   setUp(() async {
@@ -82,11 +88,13 @@ void main() {
     mockCategoryRepo = MockCategoryRepository();
     mockBookRepo = MockBookRepository();
     mockSettingsRepo = MockSettingsRepository();
+    mockExchangeRateRepo = MockExchangeRateRepository();
     useCase = ImportBackupUseCase(
       transactionRepo: mockTransactionRepo,
       categoryRepo: mockCategoryRepo,
       bookRepo: mockBookRepo,
       settingsRepo: mockSettingsRepo,
+      exchangeRateRepo: mockExchangeRateRepo,
     );
 
     tempDir = await Directory.systemTemp.createTemp('import_test_');
@@ -131,6 +139,15 @@ void main() {
         timestamp: DateTime(2026),
         currentHash: '',
         createdAt: DateTime(2026),
+      ),
+    );
+    registerFallbackValue(
+      ExchangeRate(
+        currency: '',
+        rateDate: DateTime.utc(2026),
+        rate: '1',
+        fetchedAt: DateTime.utc(2026),
+        source: 'frankfurter',
       ),
     );
   });
@@ -266,6 +283,7 @@ void main() {
     when(() => mockCategoryRepo.insert(any())).thenAnswer((_) async {});
     when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
     when(() => mockSettingsRepo.updateSettings(any())).thenAnswer((_) async {});
+    when(() => mockExchangeRateRepo.upsert(any())).thenAnswer((_) async {});
 
     // Act
     final result = await useCase.execute(
@@ -279,5 +297,62 @@ void main() {
     verify(() => mockCategoryRepo.insert(any())).called(1);
     verify(() => mockTransactionRepo.insert(any())).called(1);
     verify(() => mockSettingsRepo.updateSettings(any())).called(1);
+  });
+
+  test('D-10: upserts each exchange rate from the backup', () async {
+    final now = DateTime(2026, 2, 7);
+    final backupData = BackupData(
+      metadata: BackupMetadata(
+        version: '1.0',
+        createdAt: now.millisecondsSinceEpoch,
+        deviceId: 'test',
+        appVersion: '0.1.0',
+      ),
+      transactions: [],
+      categories: [],
+      books: [],
+      settings: const AppSettings().toJson(),
+      exchangeRates: [
+        {
+          'currency': 'USD',
+          'rateDate': DateTime.utc(2026, 6, 11).millisecondsSinceEpoch ~/ 1000,
+          'rate': '157.34',
+          'fetchedAt':
+              DateTime.utc(2026, 6, 11, 9).millisecondsSinceEpoch ~/ 1000,
+          'source': 'frankfurter',
+          'actualRateDate':
+              DateTime.utc(2026, 6, 10).millisecondsSinceEpoch ~/ 1000,
+        },
+      ],
+    );
+
+    final file = await _createEncryptedBackup(
+      password: 'test-password-123',
+      backupData: backupData,
+      filePath: '${tempDir.path}/backup.hpb',
+    );
+
+    when(
+      () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
+    ).thenAnswer((_) async => []);
+    when(() => mockCategoryRepo.deleteAll()).thenAnswer((_) async {});
+    when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateSettings(any())).thenAnswer((_) async {});
+    when(() => mockExchangeRateRepo.upsert(any())).thenAnswer((_) async {});
+
+    final result = await useCase.execute(
+      backupFile: file,
+      password: 'test-password-123',
+    );
+
+    expect(result.isSuccess, true);
+    final captured =
+        verify(() => mockExchangeRateRepo.upsert(captureAny())).captured.single
+            as ExchangeRate;
+    expect(captured.currency, 'USD');
+    expect(captured.rate, '157.34');
+    expect(captured.source, 'frankfurter');
+    expect(captured.rateDate, DateTime.utc(2026, 6, 11));
+    expect(captured.actualRateDate, DateTime.utc(2026, 6, 10));
   });
 }

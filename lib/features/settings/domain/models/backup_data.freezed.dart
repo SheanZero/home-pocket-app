@@ -19,6 +19,10 @@ mixin _$BackupData {
   List<Map<String, dynamic>> get books;
   Map<String, dynamic> get settings;
 
+  /// Exchange rate cache rows (D-10). Optional with [@Default] for
+  /// backward-compat: old `.hpb` files without the field deserialize to `[]`.
+  List<Map<String, dynamic>> get exchangeRates;
+
   /// Create a copy of BackupData
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -45,7 +49,11 @@ mixin _$BackupData {
               categories,
             ) &&
             const DeepCollectionEquality().equals(other.books, books) &&
-            const DeepCollectionEquality().equals(other.settings, settings));
+            const DeepCollectionEquality().equals(other.settings, settings) &&
+            const DeepCollectionEquality().equals(
+              other.exchangeRates,
+              exchangeRates,
+            ));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -57,11 +65,12 @@ mixin _$BackupData {
     const DeepCollectionEquality().hash(categories),
     const DeepCollectionEquality().hash(books),
     const DeepCollectionEquality().hash(settings),
+    const DeepCollectionEquality().hash(exchangeRates),
   );
 
   @override
   String toString() {
-    return 'BackupData(metadata: $metadata, transactions: $transactions, categories: $categories, books: $books, settings: $settings)';
+    return 'BackupData(metadata: $metadata, transactions: $transactions, categories: $categories, books: $books, settings: $settings, exchangeRates: $exchangeRates)';
   }
 }
 
@@ -78,6 +87,7 @@ abstract mixin class $BackupDataCopyWith<$Res> {
     List<Map<String, dynamic>> categories,
     List<Map<String, dynamic>> books,
     Map<String, dynamic> settings,
+    List<Map<String, dynamic>> exchangeRates,
   });
 
   $BackupMetadataCopyWith<$Res> get metadata;
@@ -100,6 +110,7 @@ class _$BackupDataCopyWithImpl<$Res> implements $BackupDataCopyWith<$Res> {
     Object? categories = null,
     Object? books = null,
     Object? settings = null,
+    Object? exchangeRates = null,
   }) {
     return _then(
       _self.copyWith(
@@ -123,6 +134,10 @@ class _$BackupDataCopyWithImpl<$Res> implements $BackupDataCopyWith<$Res> {
             ? _self.settings
             : settings // ignore: cast_nullable_to_non_nullable
                   as Map<String, dynamic>,
+        exchangeRates: null == exchangeRates
+            ? _self.exchangeRates
+            : exchangeRates // ignore: cast_nullable_to_non_nullable
+                  as List<Map<String, dynamic>>,
       ),
     );
   }
@@ -237,6 +252,7 @@ extension BackupDataPatterns on BackupData {
       List<Map<String, dynamic>> categories,
       List<Map<String, dynamic>> books,
       Map<String, dynamic> settings,
+      List<Map<String, dynamic>> exchangeRates,
     )?
     $default, {
     required TResult orElse(),
@@ -250,6 +266,7 @@ extension BackupDataPatterns on BackupData {
           _that.categories,
           _that.books,
           _that.settings,
+          _that.exchangeRates,
         );
       case _:
         return orElse();
@@ -277,6 +294,7 @@ extension BackupDataPatterns on BackupData {
       List<Map<String, dynamic>> categories,
       List<Map<String, dynamic>> books,
       Map<String, dynamic> settings,
+      List<Map<String, dynamic>> exchangeRates,
     )
     $default,
   ) {
@@ -289,6 +307,7 @@ extension BackupDataPatterns on BackupData {
           _that.categories,
           _that.books,
           _that.settings,
+          _that.exchangeRates,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -315,6 +334,7 @@ extension BackupDataPatterns on BackupData {
       List<Map<String, dynamic>> categories,
       List<Map<String, dynamic>> books,
       Map<String, dynamic> settings,
+      List<Map<String, dynamic>> exchangeRates,
     )?
     $default,
   ) {
@@ -327,6 +347,7 @@ extension BackupDataPatterns on BackupData {
           _that.categories,
           _that.books,
           _that.settings,
+          _that.exchangeRates,
         );
       case _:
         return null;
@@ -343,10 +364,13 @@ class _BackupData implements BackupData {
     required final List<Map<String, dynamic>> categories,
     required final List<Map<String, dynamic>> books,
     required final Map<String, dynamic> settings,
+    final List<Map<String, dynamic>> exchangeRates =
+        const <Map<String, dynamic>>[],
   }) : _transactions = transactions,
        _categories = categories,
        _books = books,
-       _settings = settings;
+       _settings = settings,
+       _exchangeRates = exchangeRates;
   factory _BackupData.fromJson(Map<String, dynamic> json) =>
       _$BackupDataFromJson(json);
 
@@ -384,6 +408,20 @@ class _BackupData implements BackupData {
     return EqualUnmodifiableMapView(_settings);
   }
 
+  /// Exchange rate cache rows (D-10). Optional with [@Default] for
+  /// backward-compat: old `.hpb` files without the field deserialize to `[]`.
+  final List<Map<String, dynamic>> _exchangeRates;
+
+  /// Exchange rate cache rows (D-10). Optional with [@Default] for
+  /// backward-compat: old `.hpb` files without the field deserialize to `[]`.
+  @override
+  @JsonKey()
+  List<Map<String, dynamic>> get exchangeRates {
+    if (_exchangeRates is EqualUnmodifiableListView) return _exchangeRates;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_exchangeRates);
+  }
+
   /// Create a copy of BackupData
   /// with the given fields replaced by the non-null parameter values.
   @override
@@ -413,7 +451,11 @@ class _BackupData implements BackupData {
               _categories,
             ) &&
             const DeepCollectionEquality().equals(other._books, _books) &&
-            const DeepCollectionEquality().equals(other._settings, _settings));
+            const DeepCollectionEquality().equals(other._settings, _settings) &&
+            const DeepCollectionEquality().equals(
+              other._exchangeRates,
+              _exchangeRates,
+            ));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -425,11 +467,12 @@ class _BackupData implements BackupData {
     const DeepCollectionEquality().hash(_categories),
     const DeepCollectionEquality().hash(_books),
     const DeepCollectionEquality().hash(_settings),
+    const DeepCollectionEquality().hash(_exchangeRates),
   );
 
   @override
   String toString() {
-    return 'BackupData(metadata: $metadata, transactions: $transactions, categories: $categories, books: $books, settings: $settings)';
+    return 'BackupData(metadata: $metadata, transactions: $transactions, categories: $categories, books: $books, settings: $settings, exchangeRates: $exchangeRates)';
   }
 }
 
@@ -448,6 +491,7 @@ abstract mixin class _$BackupDataCopyWith<$Res>
     List<Map<String, dynamic>> categories,
     List<Map<String, dynamic>> books,
     Map<String, dynamic> settings,
+    List<Map<String, dynamic>> exchangeRates,
   });
 
   @override
@@ -471,6 +515,7 @@ class __$BackupDataCopyWithImpl<$Res> implements _$BackupDataCopyWith<$Res> {
     Object? categories = null,
     Object? books = null,
     Object? settings = null,
+    Object? exchangeRates = null,
   }) {
     return _then(
       _BackupData(
@@ -494,6 +539,10 @@ class __$BackupDataCopyWithImpl<$Res> implements _$BackupDataCopyWith<$Res> {
             ? _self._settings
             : settings // ignore: cast_nullable_to_non_nullable
                   as Map<String, dynamic>,
+        exchangeRates: null == exchangeRates
+            ? _self._exchangeRates
+            : exchangeRates // ignore: cast_nullable_to_non_nullable
+                  as List<Map<String, dynamic>>,
       ),
     );
   }

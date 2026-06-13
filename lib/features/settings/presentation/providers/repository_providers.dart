@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../application/currency/repository_providers.dart';
 import '../../../../application/settings/clear_all_data_use_case.dart';
 import '../../../../application/settings/export_backup_use_case.dart';
 import '../../../../application/settings/import_backup_use_case.dart';
@@ -32,6 +33,7 @@ ExportBackupUseCase exportBackupUseCase(Ref ref) {
     categoryRepo: ref.watch(categoryRepositoryProvider),
     bookRepo: ref.watch(bookRepositoryProvider),
     settingsRepo: ref.watch(settingsRepositoryProvider),
+    exchangeRateRepo: ref.watch(appExchangeRateRepositoryProvider),
   );
 }
 
@@ -42,6 +44,7 @@ ImportBackupUseCase importBackupUseCase(Ref ref) {
     categoryRepo: ref.watch(categoryRepositoryProvider),
     bookRepo: ref.watch(bookRepositoryProvider),
     settingsRepo: ref.watch(settingsRepositoryProvider),
+    exchangeRateRepo: ref.watch(appExchangeRateRepositoryProvider),
   );
 }
 

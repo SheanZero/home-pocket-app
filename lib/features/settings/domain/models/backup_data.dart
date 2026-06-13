@@ -15,6 +15,11 @@ abstract class BackupData with _$BackupData {
     required List<Map<String, dynamic>> categories,
     required List<Map<String, dynamic>> books,
     required Map<String, dynamic> settings,
+
+    /// Exchange rate cache rows (D-10). Optional with [@Default] for
+    /// backward-compat: old `.hpb` files without the field deserialize to `[]`.
+    @Default(<Map<String, dynamic>>[])
+    List<Map<String, dynamic>> exchangeRates,
   }) = _BackupData;
 
   factory BackupData.fromJson(Map<String, dynamic> json) =>

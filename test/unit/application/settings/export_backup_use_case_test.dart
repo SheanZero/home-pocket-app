@@ -13,6 +13,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
+import 'package:home_pocket/features/currency/domain/models/exchange_rate.dart';
+import 'package:home_pocket/features/currency/domain/repositories/exchange_rate_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
 
 class MockTransactionRepository extends Mock implements TransactionRepository {}
@@ -23,12 +25,16 @@ class MockBookRepository extends Mock implements BookRepository {}
 
 class MockSettingsRepository extends Mock implements SettingsRepository {}
 
+class MockExchangeRateRepository extends Mock
+    implements ExchangeRateRepository {}
+
 void main() {
   late ExportBackupUseCase useCase;
   late MockTransactionRepository mockTransactionRepo;
   late MockCategoryRepository mockCategoryRepo;
   late MockBookRepository mockBookRepo;
   late MockSettingsRepository mockSettingsRepo;
+  late MockExchangeRateRepository mockExchangeRateRepo;
   late Directory tempDir;
 
   setUp(() async {
@@ -36,11 +42,13 @@ void main() {
     mockCategoryRepo = MockCategoryRepository();
     mockBookRepo = MockBookRepository();
     mockSettingsRepo = MockSettingsRepository();
+    mockExchangeRateRepo = MockExchangeRateRepository();
     useCase = ExportBackupUseCase(
       transactionRepo: mockTransactionRepo,
       categoryRepo: mockCategoryRepo,
       bookRepo: mockBookRepo,
       settingsRepo: mockSettingsRepo,
+      exchangeRateRepo: mockExchangeRateRepo,
     );
 
     tempDir = await Directory.systemTemp.createTemp('backup_test_');
@@ -106,6 +114,7 @@ void main() {
     when(
       () => mockSettingsRepo.getSettings(),
     ).thenAnswer((_) async => const AppSettings());
+    when(() => mockExchangeRateRepo.findAll()).thenAnswer((_) async => []);
 
     // Act - use temp directory to avoid path_provider dependency in test
     final result = await useCase.execute(
@@ -158,6 +167,79 @@ void main() {
     expect((json['books'] as List).length, 1);
 
     // Cleanup
+    await file.delete();
+  });
+
+  test('D-10: includes exchange rates in epoch-seconds backup shape', () async {
+    when(
+      () => mockTransactionRepo.findAllByBook('book-1'),
+    ).thenAnswer((_) async => []);
+    when(() => mockCategoryRepo.findAll()).thenAnswer((_) async => []);
+    when(
+      () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
+    ).thenAnswer((_) async => []);
+    when(
+      () => mockSettingsRepo.getSettings(),
+    ).thenAnswer((_) async => const AppSettings());
+    when(() => mockExchangeRateRepo.findAll()).thenAnswer(
+      (_) async => [
+        ExchangeRate(
+          currency: 'USD',
+          rateDate: DateTime.utc(2026, 6, 11),
+          rate: '157.34',
+          fetchedAt: DateTime.utc(2026, 6, 11, 9),
+          source: 'frankfurter',
+          actualRateDate: DateTime.utc(2026, 6, 10),
+        ),
+      ],
+    );
+
+    final result = await useCase.execute(
+      bookId: 'book-1',
+      password: 'test-password-123',
+      deviceId: 'test-device',
+      appVersion: '0.1.0',
+      outputDirectory: tempDir,
+    );
+
+    expect(result.isSuccess, true);
+    final file = result.data!;
+    final bytes = await file.readAsBytes();
+
+    final salt = bytes.sublist(0, 16);
+    final nonce = bytes.sublist(16, 28);
+    final cipherText = bytes.sublist(28, bytes.length - 16);
+    final mac = Mac(bytes.sublist(bytes.length - 16));
+    final pbkdf2 = Pbkdf2(
+      macAlgorithm: Hmac.sha256(),
+      iterations: 100000,
+      bits: 256,
+    );
+    final secretKey = await pbkdf2.deriveKey(
+      secretKey: SecretKey(utf8.encode('test-password-123')),
+      nonce: salt,
+    );
+    final algorithm = AesGcm.with256bits();
+    final secretBox = SecretBox(cipherText, nonce: nonce, mac: mac);
+    final plaintext = await algorithm.decrypt(secretBox, secretKey: secretKey);
+    final jsonString = utf8.decode(gzip.decode(plaintext));
+    final json = jsonDecode(jsonString) as Map<String, dynamic>;
+
+    final rates = json['exchangeRates'] as List;
+    expect(rates.length, 1);
+    final rate = rates.first as Map<String, dynamic>;
+    expect(rate['currency'], 'USD');
+    expect(rate['rate'], '157.34');
+    expect(rate['source'], 'frankfurter');
+    expect(
+      rate['rateDate'],
+      DateTime.utc(2026, 6, 11).millisecondsSinceEpoch ~/ 1000,
+    );
+    expect(
+      rate['actualRateDate'],
+      DateTime.utc(2026, 6, 10).millisecondsSinceEpoch ~/ 1000,
+    );
+
     await file.delete();
   });
 }

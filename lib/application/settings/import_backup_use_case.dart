@@ -10,6 +10,8 @@ import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/repositories/book_repository.dart';
 import '../../features/accounting/domain/repositories/category_repository.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
+import '../../features/currency/domain/models/exchange_rate.dart';
+import '../../features/currency/domain/repositories/exchange_rate_repository.dart';
 import '../../features/settings/domain/models/app_settings.dart';
 import '../../features/settings/domain/models/backup_data.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
@@ -24,15 +26,18 @@ class ImportBackupUseCase {
     required CategoryRepository categoryRepo,
     required BookRepository bookRepo,
     required SettingsRepository settingsRepo,
+    required ExchangeRateRepository exchangeRateRepo,
   }) : _transactionRepo = transactionRepo,
        _categoryRepo = categoryRepo,
        _bookRepo = bookRepo,
-       _settingsRepo = settingsRepo;
+       _settingsRepo = settingsRepo,
+       _exchangeRateRepo = exchangeRateRepo;
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;
   final BookRepository _bookRepo;
   final SettingsRepository _settingsRepo;
+  final ExchangeRateRepository _exchangeRateRepo;
 
   Future<Result<void>> execute({
     required File backupFile,
@@ -156,6 +161,31 @@ class ImportBackupUseCase {
     // Import settings
     final settings = AppSettings.fromJson(backupData.settings);
     await _settingsRepo.updateSettings(settings);
+
+    // Import exchange rates (D-10): upsert, not insert — idempotent by the
+    // (currency, rateDate) composite key. Epoch-seconds → UTC DateTime.
+    for (final erJson in backupData.exchangeRates) {
+      final er = ExchangeRate(
+        currency: erJson['currency'] as String,
+        rateDate: DateTime.fromMillisecondsSinceEpoch(
+          (erJson['rateDate'] as int) * 1000,
+          isUtc: true,
+        ),
+        rate: erJson['rate'] as String,
+        fetchedAt: DateTime.fromMillisecondsSinceEpoch(
+          (erJson['fetchedAt'] as int) * 1000,
+          isUtc: true,
+        ),
+        source: erJson['source'] as String,
+        actualRateDate: erJson['actualRateDate'] != null
+            ? DateTime.fromMillisecondsSinceEpoch(
+                (erJson['actualRateDate'] as int) * 1000,
+                isUtc: true,
+              )
+            : null,
+      );
+      await _exchangeRateRepo.upsert(er);
+    }
   }
 }
 

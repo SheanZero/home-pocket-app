@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../features/accounting/domain/repositories/book_repository.dart';
 import '../../features/accounting/domain/repositories/category_repository.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
+import '../../features/currency/domain/repositories/exchange_rate_repository.dart';
 import '../../features/settings/domain/models/backup_data.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
 import '../../shared/utils/result.dart';
@@ -23,15 +24,18 @@ class ExportBackupUseCase {
     required CategoryRepository categoryRepo,
     required BookRepository bookRepo,
     required SettingsRepository settingsRepo,
+    required ExchangeRateRepository exchangeRateRepo,
   }) : _transactionRepo = transactionRepo,
        _categoryRepo = categoryRepo,
        _bookRepo = bookRepo,
-       _settingsRepo = settingsRepo;
+       _settingsRepo = settingsRepo,
+       _exchangeRateRepo = exchangeRateRepo;
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;
   final BookRepository _bookRepo;
   final SettingsRepository _settingsRepo;
+  final ExchangeRateRepository _exchangeRateRepo;
 
   Future<Result<File>> execute({
     required String bookId,
@@ -53,6 +57,7 @@ class ExportBackupUseCase {
         includeShadow: true,
       );
       final settings = await _settingsRepo.getSettings();
+      final exchangeRates = await _exchangeRateRepo.findAll();
 
       // 2. Build backup data structure
       final backupData = BackupData(
@@ -66,6 +71,21 @@ class ExportBackupUseCase {
         categories: categories.map((cat) => cat.toJson()).toList(),
         books: books.map((book) => book.toJson()).toList(),
         settings: settings.toJson(),
+        // D-10: epoch-seconds serialization per RESEARCH.md backup shape.
+        exchangeRates: exchangeRates
+            .map(
+              (er) => <String, dynamic>{
+                'currency': er.currency,
+                'rateDate': er.rateDate.millisecondsSinceEpoch ~/ 1000,
+                'rate': er.rate,
+                'fetchedAt': er.fetchedAt.millisecondsSinceEpoch ~/ 1000,
+                'source': er.source,
+                if (er.actualRateDate != null)
+                  'actualRateDate':
+                      er.actualRateDate!.millisecondsSinceEpoch ~/ 1000,
+              },
+            )
+            .toList(),
       );
 
       // 3. Serialize to JSON

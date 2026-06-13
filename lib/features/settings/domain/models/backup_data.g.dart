@@ -18,6 +18,11 @@ _BackupData _$BackupDataFromJson(Map<String, dynamic> json) => _BackupData(
       .map((e) => e as Map<String, dynamic>)
       .toList(),
   settings: json['settings'] as Map<String, dynamic>,
+  exchangeRates:
+      (json['exchangeRates'] as List<dynamic>?)
+          ?.map((e) => e as Map<String, dynamic>)
+          .toList() ??
+      const <Map<String, dynamic>>[],
 );
 
 Map<String, dynamic> _$BackupDataToJson(_BackupData instance) =>
@@ -27,6 +32,7 @@ Map<String, dynamic> _$BackupDataToJson(_BackupData instance) =>
       'categories': instance.categories,
       'books': instance.books,
       'settings': instance.settings,
+      'exchangeRates': instance.exchangeRates,
     };
 
 _BackupMetadata _$BackupMetadataFromJson(Map<String, dynamic> json) =>
