@@ -4,13 +4,13 @@ milestone: v1.7
 milestone_name: 多币种支持
 status: executing
 stopped_at: Completed 42-03-PLAN.md
-last_updated: "2026-06-13T03:19:19.133Z"
+last_updated: "2026-06-13T03:26:39.821Z"
 last_activity: 2026-06-13
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 20
-  completed_plans: 16
+  completed_plans: 17
   percent: 67
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 ## Current Position
 
 Phase: 42 (entry-ui-display-voice) — EXECUTING
-Plan: 6 of 9
+Plan: 7 of 9
 Status: Ready to execute
 Last activity: 2026-06-13
 
@@ -127,7 +127,7 @@ No active blockers for v1.7. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-13T03:18:48.853Z
+Last session: 2026-06-13T03:26:25.714Z
 Stopped at: Completed 42-03-PLAN.md
 Resume file: None
 
@@ -145,6 +145,7 @@ Resume file: None
 | Phase Phase 42 P03 P03 | ~4min | 1 task tasks | 3 files files |
 | Phase 42 P04 | 25m | 2 tasks | 7 files |
 | Phase 42 P05 | 10min | 2 tasks | 6 files |
+| Phase 42 P06 | ~12min | 2 tasks | 5 files |
 
 ## Decisions
 
@@ -158,3 +159,4 @@ Resume file: None
 - [Phase 42]: 42-03: UpdateTransactionParams gains the currency triple; execute() coalesces from seed (EDIT-02), recomputes JPY via single-site convertToJpy() (ADR-020) only for foreign rows, no rehash (ADR-021, prevHash/currentHash frozen). Extracted shared validateCurrencyTriple() into currency_conversion.dart; CreateTransactionUseCase refactored to reuse it (removed ~50 dup lines + dead _iso4217). update_transaction_currency_test GREEN; 56/56 use-case tests green; analyze 0.
 - [Phase 42]: 42-04: Voice currency detection — shared NumeralStateMachine.detectCurrencyToken (longest-first leftmost-wins scan over VoiceCurrencySuffixes.all) returns the token SEPARATELY from parse(), so the integer-amount path is byte-identical (T-42-07). VoiceCurrencySuffixes.tokenToIso maps zh 美元/欧元/英镑/港币/澳元/加元 + ja ドル/ユーロ/ポンド/香港ドル/豪ドル → ISO. VoiceParseResult gains nullable detectedCurrency (null=JPY-native, Pitfall 1 — no rate-fetch). ParseVoiceInputUseCase._detectCurrency locale-routes + resolves bare 元 by locale (zh→CNY, ja→JPY-native→null) via bareYuanToken const (keeps use case out of hardcoded_cjk_ui_scan). _extractKeyword strips new tokens (5美元的咖啡→咖啡, T-42-08). currency_detection_test GREEN (16); 400/400 voice + CJK-scan + analyze 0. Form surfacing/rate-fetch deferred to 42-09.
 - [Phase 42]: 42-05: AmountInputController truncates-not-rounds decimals on currency switch (D-08, string op)
+- [Phase 42]: 42-06: CurrencySelectorSheet (JPY-pinned, code/name search, 'more' full-ISO, flag+symbol+code+name 48dp rows, accentPrimary selection) + non-persisted session recentCurrencyProvider (LRU, JPY excluded from reorder). Common-zone names localized in ARB; long-tail ISO+English. Goldens mask flag cell (6 macOS baselines). Sheet wiring to SmartKeyboard is 42-08.
