@@ -2498,5 +2498,65 @@
   "@shoppingFormSaveError": {
     "description": "Error message shown when saving a shopping item fails (Phase 38-07)"
   },
+  "currencySelectorTitle": "通貨を選択",
+  "@currencySelectorTitle": {
+    "description": "Title of the CurrencySelectorSheet (Phase 42-06)"
+  },
+  "currencySelectorMore": "もっと見る",
+  "@currencySelectorMore": {
+    "description": "Affordance expanding the common zone to the full ISO 4217 list (Phase 42-06, D-02)"
+  },
+  "currencySelectorSearchHint": "コードまたは名称で検索",
+  "@currencySelectorSearchHint": {
+    "description": "Search hint; matches by ISO code or currency name (Phase 42-06, CURR-02)"
+  },
+  "currencySelectorNoResults": "該当する通貨がありません",
+  "@currencySelectorNoResults": {
+    "description": "Shown when the currency search yields no match (Phase 42-06)"
+  },
+  "currencyNameJpy": "日本円",
+  "@currencyNameJpy": {
+    "description": "Localized currency name for JPY (Phase 42-06)"
+  },
+  "currencyNameUsd": "米ドル",
+  "@currencyNameUsd": {
+    "description": "Localized currency name for USD (Phase 42-06)"
+  },
+  "currencyNameEur": "ユーロ",
+  "@currencyNameEur": {
+    "description": "Localized currency name for EUR (Phase 42-06)"
+  },
+  "currencyNameCny": "人民元",
+  "@currencyNameCny": {
+    "description": "Localized currency name for CNY (Phase 42-06)"
+  },
+  "currencyNameHkd": "香港ドル",
+  "@currencyNameHkd": {
+    "description": "Localized currency name for HKD (Phase 42-06)"
+  },
+  "currencyNameGbp": "英ポンド",
+  "@currencyNameGbp": {
+    "description": "Localized currency name for GBP (Phase 42-06)"
+  },
+  "currencyNameKrw": "韓国ウォン",
+  "@currencyNameKrw": {
+    "description": "Localized currency name for KRW (Phase 42-06)"
+  },
+  "currencyNameTwd": "台湾ドル",
+  "@currencyNameTwd": {
+    "description": "Localized currency name for TWD (Phase 42-06)"
+  },
+  "currencyNameSgd": "シンガポールドル",
+  "@currencyNameSgd": {
+    "description": "Localized currency name for SGD (Phase 42-06)"
+  },
+  "currencyNameAud": "豪ドル",
+  "@currencyNameAud": {
+    "description": "Localized currency name for AUD (Phase 42-06)"
+  },
+  "currencyNameCad": "カナダドル",
+  "@currencyNameCad": {
+    "description": "Localized currency name for CAD (Phase 42-06)"
+  },
   "@@locale": "ja"
 }
