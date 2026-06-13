@@ -6,10 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 
+import '../../../../application/currency/get_exchange_rate_use_case.dart';
+import '../../../../application/currency/rate_result.dart';
+import '../../../../application/currency/repository_providers.dart'
+    show appGetExchangeRateUseCaseProvider;
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/utils/currency_conversion.dart'
+    show convertToJpy, subunitToUnitFor;
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../application/voice/repository_providers.dart'
     show
@@ -365,13 +371,24 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     if (_parseResult?.estimatedSatisfaction != null) {
       state.updateSatisfaction(_parseResult!.estimatedSatisfaction);
     }
-    // Phase 42-09 (VOICE-CUR-02/03): surface a voice-detected foreign currency
-    // on the shared form so it becomes editable before save and triggers the
-    // normal rate-fetch flow. Null = JPY-native utterance → no-op (the JPY path
-    // stays byte-identical, Pitfall 1).
+    // Phase 42 CR-01 (VOICE-CUR-02/03): on a voice-detected foreign currency,
+    // mirror the manual screen's proven `_pushForeignTriple` flow — re-fetch the
+    // rate and push a COMPLETE triple (originalCurrency/originalAmount/appliedRate)
+    // plus the converted JPY amount. The old code only called updateCurrency(),
+    // which set ONLY _originalCurrency → submit() forwarded a PARTIAL triple,
+    // CreateTransactionUseCase rejected it, and the foreign utterance never saved.
+    // Null = JPY-native utterance → no-op (the JPY path stays byte-identical,
+    // CURR-04 / Pitfall 1).
     final detectedCurrency = data.detectedCurrency;
-    if (detectedCurrency != null && detectedCurrency.isNotEmpty) {
-      state.updateCurrency(detectedCurrency);
+    if (amount > 0 &&
+        detectedCurrency != null &&
+        detectedCurrency.isNotEmpty) {
+      await _pushVoiceForeignTriple(
+        state: state,
+        currency: detectedCurrency,
+        wholeUnitAmount: amount,
+        date: data.parsedDate ?? DateTime.now(),
+      );
     }
 
     // B-2 host-cache mirror — AmountDisplay sees the new value atomically.
@@ -384,6 +401,65 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
       _hostAmount = amount;
     });
   }
+
+  /// Phase 42 CR-01: wire a voice-detected foreign currency through the SAME
+  /// rate-fetch + convert flow the manual screen uses (`_pushForeignTriple`).
+  ///
+  /// [wholeUnitAmount] is the spoken amount in WHOLE units (the voice numeral
+  /// machine never emits sub-units), so the foreign minor units are
+  /// `wholeUnitAmount × subunitToUnitFor(currency)`.
+  ///
+  /// On a resolved rate → push BOTH the converted JPY (via the single-site
+  /// [convertToJpy], ADR-020) AND the COMPLETE triple. On [RateUnavailable] (or
+  /// any failure) → leave the row JPY-NATIVE: the spoken amount already sits in
+  /// the form via the earlier `updateAmount(amount)`, so we set NO currency
+  /// fields and never ship a partial triple. never-block-save (P41): the fetch
+  /// is wrapped so it can never throw/block the commit. Riverpod 3: `ref.read`
+  /// (one-shot side-effect, not a reactive dependency).
+  Future<void> _pushVoiceForeignTriple({
+    required TransactionDetailsFormState state,
+    required String currency,
+    required int wholeUnitAmount,
+    required DateTime date,
+  }) async {
+    final minorUnits = wholeUnitAmount * subunitToUnitFor(currency);
+    if (minorUnits <= 0) return;
+    try {
+      final useCase = ref.read(appGetExchangeRateUseCaseProvider);
+      final withSignal = await useCase.execute(
+        GetExchangeRateParams(currency: currency, date: date),
+      );
+      if (!mounted) return;
+      final rate = _extractRate(withSignal.result);
+      if (rate == null) {
+        // RateUnavailable → JPY-native: spoken amount persists, no triple.
+        return;
+      }
+      final jpy = convertToJpy(
+        originalMinorUnits: minorUnits,
+        appliedRate: rate,
+        subunitToUnit: subunitToUnitFor(currency),
+      );
+      state.updateAmount(jpy);
+      state.updateCurrencyTriple(
+        originalCurrency: currency,
+        originalAmount: minorUnits,
+        appliedRate: rate,
+      );
+    } catch (_) {
+      // never-block-save: degrade to JPY-native (no triple) like the manual path.
+    }
+  }
+
+  /// Rate string for any rate-bearing variant; null for [RateUnavailable]
+  /// (mirrors the manual screen / preview extraction — never throws).
+  String? _extractRate(RateResult result) => switch (result) {
+    RateFetched(:final rate) => rate,
+    RateCached(:final rate) => rate,
+    RateFallback(:final rate) => rate,
+    RateManual(:final rate) => rate,
+    RateUnavailable() => null,
+  };
 
   /// Pitfall 6: discard path uses dispose+cancel (NOT stop+stop).
   /// merger.dispose() drops the buffer; speech.cancel() abandons pending
