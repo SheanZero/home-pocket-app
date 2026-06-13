@@ -2558,6 +2558,82 @@
   "@currencyNameCad": {
     "description": "Localized currency name for CAD (Phase 42-06)"
   },
+  "currencyNameChf": "瑞士法郎",
+  "@currencyNameChf": {
+    "description": "Localized currency name for CHF (quick 260613-ohz)"
+  },
+  "currencyNameThb": "泰铢",
+  "@currencyNameThb": {
+    "description": "Localized currency name for THB (quick 260613-ohz)"
+  },
+  "currencyNameInr": "印度卢比",
+  "@currencyNameInr": {
+    "description": "Localized currency name for INR (quick 260613-ohz)"
+  },
+  "currencyNameIdr": "印尼盾",
+  "@currencyNameIdr": {
+    "description": "Localized currency name for IDR (quick 260613-ohz)"
+  },
+  "currencyNameMyr": "马来西亚林吉特",
+  "@currencyNameMyr": {
+    "description": "Localized currency name for MYR (quick 260613-ohz)"
+  },
+  "currencyNamePhp": "菲律宾比索",
+  "@currencyNamePhp": {
+    "description": "Localized currency name for PHP (quick 260613-ohz)"
+  },
+  "currencyNameVnd": "越南盾",
+  "@currencyNameVnd": {
+    "description": "Localized currency name for VND (quick 260613-ohz)"
+  },
+  "currencyNameNzd": "新西兰元",
+  "@currencyNameNzd": {
+    "description": "Localized currency name for NZD (quick 260613-ohz)"
+  },
+  "currencyNameBrl": "巴西雷亚尔",
+  "@currencyNameBrl": {
+    "description": "Localized currency name for BRL (quick 260613-ohz)"
+  },
+  "currencyNameRub": "俄罗斯卢布",
+  "@currencyNameRub": {
+    "description": "Localized currency name for RUB (quick 260613-ohz)"
+  },
+  "currencyNameZar": "南非兰特",
+  "@currencyNameZar": {
+    "description": "Localized currency name for ZAR (quick 260613-ohz)"
+  },
+  "currencyNameSek": "瑞典克朗",
+  "@currencyNameSek": {
+    "description": "Localized currency name for SEK (quick 260613-ohz)"
+  },
+  "currencyNameNok": "挪威克朗",
+  "@currencyNameNok": {
+    "description": "Localized currency name for NOK (quick 260613-ohz)"
+  },
+  "currencyNameDkk": "丹麦克朗",
+  "@currencyNameDkk": {
+    "description": "Localized currency name for DKK (quick 260613-ohz)"
+  },
+  "currencyNameMxn": "墨西哥比索",
+  "@currencyNameMxn": {
+    "description": "Localized currency name for MXN (quick 260613-ohz)"
+  },
+  "currencyNameTry": "土耳其里拉",
+  "@currencyNameTry": {
+    "description": "Localized currency name for TRY (quick 260613-ohz)"
+  },
+  "currencyNameAed": "阿联酋迪拉姆",
+  "@currencyNameAed": {
+    "description": "Localized currency name for AED (quick 260613-ohz)"
+  },
+  "currencyNameSar": "沙特里亚尔",
+  "@currencyNameSar": {
+    "description": "Localized currency name for SAR (quick 260613-ohz)"
+  },
+  "currencyNamePln": "波兰兹罗提",
+  "@currencyNamePln": {
+    "description": "Localized currency name for PLN (quick 260613-ohz)"
+  },
   "conversionPreviewRateRow": "{code} 1 = ¥{rate} · {date}",
   "@conversionPreviewRateRow": {
     "description": "Preview rate sub-row: currency code, JPY-per-unit rate, rate date (Phase 42-07 D-03)",
