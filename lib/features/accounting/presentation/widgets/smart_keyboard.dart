@@ -28,6 +28,7 @@ class SmartKeyboard extends StatelessWidget {
     required this.actionLabel,
     this.currencyLabel = 'JPY',
     this.currencySymbol = '¥',
+    this.onCurrencyTap,
   });
 
   final ValueChanged<String> onDigit;
@@ -35,6 +36,12 @@ class SmartKeyboard extends StatelessWidget {
   final VoidCallback onNext;
   final VoidCallback? onDoubleZero;
   final VoidCallback? onDot;
+
+  /// CURR-01: tap handler for the currency key. When non-null the currency cell
+  /// becomes a tappable Material+InkWell that opens the currency selector
+  /// (host-owned, 42-08). When null the cell stays display-only (legacy
+  /// behavior) so callers that don't support currency switching are unaffected.
+  final VoidCallback? onCurrencyTap;
 
   /// Label for the action (Save/Record) button — renamed from nextLabel.
   ///
@@ -204,6 +211,7 @@ class SmartKeyboard extends StatelessWidget {
               label: currencyLabel,
               palette: palette,
               height: keyHeight, // D-08: same responsive height as digit keys
+              onTap: onCurrencyTap,
             ),
           ),
         ),
@@ -330,6 +338,7 @@ class _CurrencyKey extends StatelessWidget {
     required this.label,
     required this.palette,
     required this.height,
+    this.onTap,
   });
 
   final String symbol;
@@ -337,15 +346,15 @@ class _CurrencyKey extends StatelessWidget {
   final AppPalette palette;
   final double height;
 
+  /// CURR-01: when non-null the cell becomes a tappable Material+InkWell
+  /// (mirroring [_DigitKey]/[_ActionKey]) that opens the currency selector.
+  /// When null the cell stays display-only (legacy behavior).
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      key: const ValueKey('smart_keyboard_currency_key'),
+    final content = Container(
       height: height,
-      decoration: BoxDecoration(
-        color: palette.backgroundMuted,
-        borderRadius: BorderRadius.circular(12),
-      ),
       alignment: Alignment.center,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -369,6 +378,17 @@ class _CurrencyKey extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+
+    return Material(
+      key: const ValueKey('smart_keyboard_currency_key'),
+      color: palette.backgroundMuted,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: content,
       ),
     );
   }

@@ -81,6 +81,16 @@ class TransactionDetailsFormState
   Category? _category;
   Category? _parentCategory;
   late DateTime _date;
+
+  // Phase 42 (CURR-01/05, SC-5): host-owned foreign-currency triple. Null on
+  // JPY-native entry (CURR-04 — the JPY path never sets these, so submit()
+  // forwards nulls and the create use case persists a native JPY row exactly as
+  // before). Set non-null by the host via [updateCurrencyTriple] once a foreign
+  // currency is selected AND a rate has resolved. All three move together
+  // (partial triples are rejected by the use case).
+  String? _originalCurrency;
+  int? _originalAmount;
+  String? _appliedRate;
   String? _initialCategoryId;
   LedgerType _ledgerType = LedgerType.daily;
   int _joyFullness = 2;
@@ -224,6 +234,37 @@ class TransactionDetailsFormState
     if (!mounted) return;
     if (amount == _amount) return;
     setState(() => _amount = amount);
+  }
+
+  /// Phase 42 (CURR-01/05, SC-5) — host pushes the foreign-currency triple so
+  /// `submit()` persists `originalCurrency` / `originalAmount` (minor units) /
+  /// `appliedRate` alongside the converted JPY `_amount`. Pass all three null to
+  /// clear back to a JPY-native row (CURR-04 — the host clears these when JPY is
+  /// re-selected, so the create use case sees no currency fields and the JPY
+  /// persist path is byte-identical to pre-Phase-42).
+  ///
+  /// The host owns the conversion: it sets `_amount` (the JPY figure from the
+  /// single-site `convertToJpy()`) via [updateAmount], and the triple via this
+  /// method — keeping the persisted JPY and the stored original in lock-step.
+  ///
+  /// Idempotency: short-circuits when the new triple equals the current one so
+  /// repeated host pushes (e.g. on every keypad tap) don't rebuild-storm.
+  void updateCurrencyTriple({
+    required String? originalCurrency,
+    required int? originalAmount,
+    required String? appliedRate,
+  }) {
+    if (!mounted) return;
+    if (originalCurrency == _originalCurrency &&
+        originalAmount == _originalAmount &&
+        appliedRate == _appliedRate) {
+      return;
+    }
+    setState(() {
+      _originalCurrency = originalCurrency;
+      _originalAmount = originalAmount;
+      _appliedRate = appliedRate;
+    });
   }
 
   /// Phase 22 D-07 — host (VoiceInputScreen) pushes voice-resolved category +
@@ -463,6 +504,11 @@ class TransactionDetailsFormState
                           : null,
                       ledgerType: _ledgerType,
                       entrySource: entrySource,
+                      // Phase 42 SC-5: forward the host-owned foreign-currency
+                      // triple. Null on JPY-native entry (CURR-04) → native row.
+                      originalCurrency: _originalCurrency,
+                      originalAmount: _originalAmount,
+                      appliedRate: _appliedRate,
                     ),
                   );
               if (!result.isSuccess) {

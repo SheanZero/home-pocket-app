@@ -3,15 +3,22 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../application/currency/rate_result.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
+import '../../../../shared/utils/currency_conversion.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/entry_source.dart';
 import '../../domain/models/transaction_details_form_config.dart';
+import '../providers/recent_currency_provider.dart';
 import '../providers/repository_providers.dart';
 import '../widgets/amount_display.dart';
+import '../widgets/amount_input_controller.dart';
+import '../widgets/conversion_preview_panel.dart';
+import '../widgets/currency_selector_sheet.dart';
 import '../widgets/entry_mode_switcher.dart';
 import '../widgets/input_mode_tabs.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
@@ -76,6 +83,25 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
   bool _isTextFieldFocused = false;
   bool _isSubmitting = false;
 
+  // Phase 42 (CURR-01/04/05): host owns the currency-aware decimal input.
+  // [_controller] replaces the old inline 4-decimal cap in _onDigit/_onDot;
+  // its [text] is mirrored into [_amount] so AmountDisplay + save validation
+  // keep working unchanged. [_currency] starts at 'JPY' — the CURR-04 invariant
+  // path: no rate fetch, no preview, no annotation, dot gated off (decimals==0).
+  late final AmountInputController _controller =
+      AmountInputController(decimals: currencyFractionDigitsFor(_currency));
+  String _currency = 'JPY';
+
+  bool get _isForeign => _currency.toUpperCase() != 'JPY';
+
+  /// Entered amount in the active currency's MINOR units (cents for USD,
+  /// whole units for JPY). Derived from the controller text via the currency's
+  /// subunit factor — the single input into [convertToJpy].
+  int get _originalMinorUnits {
+    final value = double.tryParse(_controller.text) ?? 0.0;
+    return (value * subunitToUnitFor(_currency)).round();
+  }
+
   Category? _selectedCategory;
   Category? _selectedParentCategory;
   Map<String, Category> _categoryById = {};
@@ -99,9 +125,14 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
     _merchantFocus = FocusNode()..addListener(_handleFocusChange);
     _noteFocus = FocusNode()..addListener(_handleFocusChange);
 
-    // Initialize amount string from widget param
+    // Initialize amount string from widget param. The initial amount is a JPY
+    // integer (foreign pre-fill is not a v1.7 entry path) — seed both the raw
+    // string and the controller so digit edits continue from it.
     if (widget.initialAmount != null && widget.initialAmount! > 0) {
       _amount = widget.initialAmount!.toString();
+      for (final ch in _amount.split('')) {
+        _controller.onDigit(ch);
+      }
     }
 
     // Initialize date
@@ -207,59 +238,179 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
     _restoreKeypadFocus();
   }
 
-  // ── Digit handlers (ported verbatim from transaction_entry_screen.dart:84-129) ──
+  // ── Digit handlers (Phase 42: delegated to the currency-aware controller) ──
+  //
+  // Each handler mutates [_controller] (which owns the D-06 dot-gating + D-07
+  // decimal cap per currency) then mirrors the result into [_amount] and the
+  // form via [_syncAmountToForm]. JPY (decimals==0) behaves byte-identically to
+  // the old inline cap: dot gated off, no fractional digits (CURR-04).
 
   void _onDigit(String digit) {
-    final dotIndex = _amount.indexOf('.');
-    if (dotIndex >= 0) {
-      final decimals = _amount.length - dotIndex - 1;
-      if (decimals >= 4) return;
-    }
-    // Don't allow leading zeros (except "0.")
-    if (_amount.isEmpty && digit == '0') return;
-    setState(() => _amount += digit);
-    final parsed = (double.tryParse(_amount) ?? 0.0).round();
-    _formKey.currentState?.updateAmount(parsed);
+    _controller.onDigit(digit);
+    _syncAmountToForm();
   }
 
   void _onDoubleZero() {
-    if (_amount.isEmpty) return;
-
-    final dotIndex = _amount.indexOf('.');
-    if (dotIndex >= 0) {
-      final decimals = _amount.length - dotIndex - 1;
-      if (decimals >= 4) return;
-      final zerosToAdd = (4 - decimals).clamp(0, 2);
-      setState(() => _amount += '0' * zerosToAdd);
-    } else {
-      setState(() => _amount += '00');
-    }
-    final parsed = (double.tryParse(_amount) ?? 0.0).round();
-    _formKey.currentState?.updateAmount(parsed);
+    _controller.onDoubleZero();
+    _syncAmountToForm();
   }
 
   void _onDot() {
-    if (_amount.contains('.')) return;
-    if (_amount.isEmpty) {
-      setState(() => _amount = '0.');
-    } else {
-      setState(() => _amount += '.');
-    }
-    final parsed = (double.tryParse(_amount) ?? 0.0).round();
-    _formKey.currentState?.updateAmount(parsed);
+    _controller.onDot();
+    _syncAmountToForm();
   }
 
   void _onDelete() {
-    if (_amount.isNotEmpty) {
-      setState(() => _amount = _amount.substring(0, _amount.length - 1));
-      final parsed = (double.tryParse(_amount) ?? 0.0).round();
-      _formKey.currentState?.updateAmount(parsed);
-    }
+    _controller.onDelete();
+    _syncAmountToForm();
   }
 
   void _onClear() {
-    setState(() => _amount = '');
-    _formKey.currentState?.updateAmount(0);
+    while (_controller.text.isNotEmpty) {
+      _controller.onDelete();
+    }
+    _syncAmountToForm();
+  }
+
+  /// Mirror the controller's text into [_amount] (for AmountDisplay + the empty
+  /// / zero save guard) and push the converted JPY amount + currency triple into
+  /// the form so `submit()` persists the right figures.
+  ///
+  /// - JPY (CURR-04): the entered figure IS the JPY amount; triple cleared so
+  ///   the create use case persists a native JPY row, byte-identical to before.
+  /// - Foreign: the JPY amount comes from the single-site [convertToJpy] using
+  ///   the rate resolved by the preview's keyed provider; the triple is pushed
+  ///   alongside. When no rate has resolved yet the JPY mirror stays 0 and the
+  ///   triple is withheld (save is still guarded on a non-empty amount).
+  void _syncAmountToForm() {
+    setState(() => _amount = _controller.text);
+    if (!_isForeign) {
+      final parsed = (double.tryParse(_amount) ?? 0.0).round();
+      _formKey.currentState?.updateAmount(parsed);
+      _formKey.currentState?.updateCurrencyTriple(
+        originalCurrency: null,
+        originalAmount: null,
+        appliedRate: null,
+      );
+      return;
+    }
+    _pushForeignTriple();
+  }
+
+  /// Resolve the current rate (cache-first via the preview's keyed provider) and
+  /// push the converted JPY amount + foreign triple into the form. The rate
+  /// figure used here is the SAME one the preview renders (single conversion
+  /// site, ADR-020) — guaranteeing preview == persisted.
+  Future<void> _pushForeignTriple() async {
+    final minorUnits = _originalMinorUnits;
+    final currency = _currency;
+    final date = _selectedDate;
+    if (minorUnits <= 0) {
+      _formKey.currentState?.updateAmount(0);
+      _formKey.currentState?.updateCurrencyTriple(
+        originalCurrency: null,
+        originalAmount: null,
+        appliedRate: null,
+      );
+      return;
+    }
+    final args = ConversionPreviewArgs(
+      currency: currency,
+      date: date,
+      originalMinorUnits: minorUnits,
+    );
+    try {
+      final withSignal = await ref.read(conversionRateProvider(args).future);
+      // Bail if the user changed currency/amount while awaiting.
+      if (!mounted ||
+          currency != _currency ||
+          minorUnits != _originalMinorUnits) {
+        return;
+      }
+      final rate = _rateStringOf(withSignal.result);
+      if (rate == null) {
+        // RateUnavailable — no rate to persist yet. Withhold the triple; the
+        // preview surfaces the mandatory-rate prompt.
+        _formKey.currentState?.updateCurrencyTriple(
+          originalCurrency: null,
+          originalAmount: null,
+          appliedRate: null,
+        );
+        return;
+      }
+      final jpy = convertToJpy(
+        originalMinorUnits: minorUnits,
+        appliedRate: rate,
+        subunitToUnit: subunitToUnitFor(currency),
+      );
+      _formKey.currentState?.updateAmount(jpy);
+      _formKey.currentState?.updateCurrencyTriple(
+        originalCurrency: currency,
+        originalAmount: minorUnits,
+        appliedRate: rate,
+      );
+    } catch (_) {
+      // Rate fetch failed unexpectedly — leave the triple withheld; the preview
+      // renders the mandatory-rate prompt and the save guard blocks an empty
+      // amount. (Network failure degrades to a fallback rate upstream.)
+    }
+  }
+
+  /// Rate string for any rate-bearing [RateResult] variant; null for
+  /// [RateUnavailable].
+  String? _rateStringOf(RateResult r) => switch (r) {
+        RateFetched(:final rate) => rate,
+        RateCached(:final rate) => rate,
+        RateFallback(:final rate) => rate,
+        RateManual(:final rate) => rate,
+        RateUnavailable() => null,
+      };
+
+  /// Passive sink for the preview's ADR-022 rate signals (D-02 dialog / D-03
+  /// toast). During FRESH entry there is no `previousRate` — the entry flow
+  /// does not carry a prior applied rate — so the use case never emits these
+  /// signals on this screen (verified: the panel's args omit previousRate /
+  /// wasManualOverride, the two inputs that gate signal emission). The full
+  /// dialog/toast UX (ADR-022 D-02/D-03) belongs to the EDIT host (42-09),
+  /// where a prior rate exists to diff against. This callback is the documented
+  /// 42-08 boundary; it intentionally no-ops so signals can never block keypad
+  /// entry. Kept non-null so the panel's `ref.listen` has a sink.
+  void _onRateSignal(RateSignal signal) {
+    // No-op on the entry screen (see doc comment). 42-09 wires the real UX.
+  }
+
+  // ── Currency selection (CURR-01/03/05) ──
+
+  /// CURR-01: open the currency selector without leaving the entry screen.
+  void _onCurrencyTap() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => CurrencySelectorSheet(
+        selectedCode: _currency,
+        onSelect: _onCurrencySelected,
+      ),
+    );
+    if (mounted) setState(() => _amountFocused = true);
+  }
+
+  /// Apply a selected currency: truncate the amount per the new minor unit
+  /// (D-08), gate the dot key (D-06), feed recent-use (CURR-03), and re-sync the
+  /// converted JPY + triple. Selecting JPY clears the triple (CURR-04).
+  void _onCurrencySelected(String code) {
+    final newCode = code.toUpperCase();
+    final newDecimals = currencyFractionDigitsFor(newCode);
+    // CURR-03: record the foreign selection for the LRU (JPY is ignored inside).
+    ref.read(recentCurrencyProvider.notifier).recordUse(newCode);
+    setState(() {
+      _currency = newCode;
+      // D-08: truncate-not-round to the new minor unit; adopts the new cap.
+      _controller.onCurrencyChange(newDecimals);
+      _amount = _controller.text;
+    });
+    _syncAmountToForm();
   }
 
   // ── Save path ──
@@ -331,11 +482,23 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
   Future<void> _resetForContinuousEntry() async {
     if (!mounted) return;
     setState(() {
+      // Clear the controller text (mirrors _onClear) and reset to JPY so the
+      // next entry starts on the CURR-04 native path.
+      while (_controller.text.isNotEmpty) {
+        _controller.onDelete();
+      }
+      _currency = 'JPY';
+      _controller.onCurrencyChange(currencyFractionDigitsFor(_currency));
       _amount = '';
       _selectedDate = DateTime.now();
     });
     final formState = _formKey.currentState;
     formState?.updateAmount(0);
+    formState?.updateCurrencyTriple(
+      originalCurrency: null,
+      originalAmount: null,
+      appliedRate: null,
+    );
     formState?.updateMerchant('');
     formState?.updateNote('');
     formState?.updateDate(DateTime.now());
@@ -351,8 +514,15 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     // Watch locale provider to trigger rebuild on locale change.
-    ref.watch(currentLocaleProvider);
+    final locale =
+        ref.watch(currentLocaleProvider).value ?? const Locale('ja');
     final palette = context.palette;
+
+    // Currency symbol for the active currency — derived the same way the
+    // selector sheet does (strip digits/separators from a formatted zero) so the
+    // display, keypad, and sheet all show the same glyph.
+    final currencySymbol = NumberFormatter.formatCurrency(0, _currency, locale)
+        .replaceAll(RegExp(r'[\d.,\s]'), '');
 
     final viewInsetsBottom = MediaQuery.of(context).viewInsets.bottom;
     // Item 3 (260526-j98): bottom padding clears IME only — the SmartKeyboard
@@ -403,8 +573,31 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
               GestureDetector(
                 onTap: _onAmountTap,
                 behavior: HitTestBehavior.opaque,
-                child: AmountDisplay(amount: _amount, onClear: _onClear),
+                child: AmountDisplay(
+                  amount: _amount,
+                  onClear: _onClear,
+                  currencySymbol: currencySymbol,
+                  currencyLabel: _currency,
+                ),
               ),
+
+              // DISP-01 / CURR-04: live JPY conversion preview — mounted ONLY
+              // for foreign currencies AND only once an amount is entered. For
+              // JPY it is never built (no rate fetch, no panel), keeping the JPY
+              // path byte-identical.
+              if (_isForeign && _originalMinorUnits > 0)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: ConversionPreviewPanel(
+                      currency: _currency,
+                      date: _selectedDate,
+                      originalMinorUnits: _originalMinorUnits,
+                      onSignal: _onRateSignal,
+                    ),
+                  ),
+                ),
 
               // Scrollable details section with smart bottom padding (D-13)
               Expanded(
@@ -441,11 +634,18 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
                 child: SmartKeyboard(
                   onDigit: _onDigit,
                   onDoubleZero: _onDoubleZero,
-                  onDot: _onDot,
+                  // D-06: gate the dot key on the active currency's minor unit.
+                  // 0-decimal currencies (JPY/KRW) pass null → disabled blank
+                  // tile; the JPY path keeps onDot:null exactly as before.
+                  onDot: _controller.decimals > 0 ? _onDot : null,
                   onDelete: _onDelete,
                   // P19-W1: route through _trySave for category-null guard.
                   onNext: _trySave,
                   actionLabel: l10n.record,
+                  currencyLabel: _currency,
+                  currencySymbol: currencySymbol,
+                  // CURR-01: open the currency selector sheet.
+                  onCurrencyTap: _onCurrencyTap,
                 ),
               ),
             ],
