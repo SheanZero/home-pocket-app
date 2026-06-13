@@ -3804,6 +3804,72 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Rate unavailable — please enter a rate manually'**
   String get conversionRateRequired;
+
+  /// Edit-host row label for the original foreign amount input (Phase 42-09, DISP-03/ADR-022 D-01)
+  ///
+  /// In en, this message translates to:
+  /// **'Original amount'**
+  String get editOriginalAmountLabel;
+
+  /// Edit-host row label for the exchange-rate input (Phase 42-09, DISP-03/ADR-022 D-01)
+  ///
+  /// In en, this message translates to:
+  /// **'Rate'**
+  String get editRateLabel;
+
+  /// Edit-host row label for the read-only derived JPY amount — the original is the fact, JPY is the result (Phase 42-09, ADR-022 D-01)
+  ///
+  /// In en, this message translates to:
+  /// **'JPY (derived)'**
+  String get editJpyDerivedLabel;
+
+  /// Inline error when the foreign-row rate field is empty (Phase 42-09, T-42-23)
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a rate'**
+  String get editRateRequired;
+
+  /// Inline validation error for a non-positive / unparseable manual rate (Phase 42-09, validateAppliedRate / T-42-23)
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a positive number'**
+  String get editRateInvalid;
+
+  /// Title of the manual-override + date-change dialog (Phase 42-09, ADR-022 D-02)
+  ///
+  /// In en, this message translates to:
+  /// **'Rate confirmation'**
+  String get changeRateDialogTitle;
+
+  /// Body of the manual-override + date-change dialog (Phase 42-09, ADR-022 D-02)
+  ///
+  /// In en, this message translates to:
+  /// **'You set the rate manually. Re-fetch the rate for the new date?'**
+  String get changeRateDialogBody;
+
+  /// Dialog option to keep the manual override (Phase 42-09, ADR-022 D-02)
+  ///
+  /// In en, this message translates to:
+  /// **'Keep manual rate'**
+  String get changeRateKeepManual;
+
+  /// Dialog option to re-fetch the rate for the new date (Phase 42-09, ADR-022 D-02)
+  ///
+  /// In en, this message translates to:
+  /// **'Re-fetch for new date'**
+  String get changeRateRefetch;
+
+  /// Non-blocking toast when a date change auto-recalculates JPY by >1% (Phase 42-09, ADR-022 D-03)
+  ///
+  /// In en, this message translates to:
+  /// **'JPY adjusted: {oldJpy} → {newJpy} (rate updated)'**
+  String rateChangedToast(String oldJpy, String newJpy);
+
+  /// Undo action on the rate-changed toast — restores the old rate (Phase 42-09, ADR-022 D-03)
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get rateChangedUndo;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

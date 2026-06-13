@@ -24,6 +24,8 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/dual_ledger/presentation/widgets/joy_celebration_overlay.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../shared/utils/currency_conversion.dart'
+    show convertToJpy, subunitToUnitFor, validateAppliedRate;
 import '../../../settings/presentation/providers/state_locale.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/transaction.dart';
@@ -31,6 +33,7 @@ import '../../domain/models/transaction_details_form_config.dart';
 import '../providers/repository_providers.dart';
 import '../screens/category_selection_screen.dart';
 import '../utils/category_display_utils.dart';
+import '../widgets/currency_linked_edit_fields.dart';
 import '../widgets/detail_info_card.dart';
 import '../widgets/keyboard_toolbar.dart' show kKeyboardToolbarTapRegionGroup;
 import '../../../../shared/widgets/ledger_type_selector.dart';
@@ -116,6 +119,11 @@ class TransactionDetailsFormState
   // Local category cache for parent-lookup (mirrors analog _categoryById).
   final Map<String, Category> _categoryById = {};
 
+  /// True when this form is configured as `.edit` (vs `.new`). Drives the
+  /// Phase 42-09 foreign-currency edit host, which only renders in edit mode.
+  bool get _isEditMode =>
+      widget.config.maybeWhen(edit: (_) => true, orElse: () => false);
+
   @override
   void initState() {
     super.initState();
@@ -154,6 +162,12 @@ class TransactionDetailsFormState
         // .edit init: preload all mutable fields from seed verbatim (D-07).
         // seed.ledgerType used as-is — _resolveLedgerType is NOT called (W3).
         _amount = seed.amount;
+        // Phase 42-09 (DISP-03 / ADR-022 D-01): seed the foreign-currency triple
+        // so the edit host can render the three linked rows. Null on JPY-native
+        // rows (CURR-04 — the JPY edit path stays byte-identical).
+        _originalCurrency = seed.originalCurrency;
+        _originalAmount = seed.originalAmount;
+        _appliedRate = seed.appliedRate;
         _date = seed.timestamp;
         _ledgerType = seed.ledgerType;
         _joyFullness = seed.joyFullness;
@@ -264,6 +278,43 @@ class TransactionDetailsFormState
       _originalCurrency = originalCurrency;
       _originalAmount = originalAmount;
       _appliedRate = appliedRate;
+    });
+  }
+
+  /// Phase 42-09 (DISP-03 / ADR-022 D-01) — imperative host sync for the
+  /// foreign currency code. Mirrors [updateAmount]'s idempotency short-circuit
+  /// (host-owns, form-syncs). Setting a non-JPY code marks the row foreign so
+  /// the edit host renders the three linked rows; the JPY `_amount` is NOT
+  /// recomputed here (the rate may not yet be resolved) — the host pushes the
+  /// resolved rate via [updateRate], which recomputes the derived JPY.
+  void updateCurrency(String currency) {
+    if (!mounted) return;
+    if (currency == _originalCurrency) return;
+    setState(() => _originalCurrency = currency);
+  }
+
+  /// Phase 42-09 (DISP-03 / ADR-022 D-01) — imperative host sync for the applied
+  /// rate. On a valid rate AND a present foreign triple, recomputes the derived
+  /// JPY `_amount` via the single-site [convertToJpy] (D-12, one direction only:
+  /// original × rate → JPY; JPY never writes back). Mirrors [updateAmount]'s
+  /// idempotency short-circuit. Invalid rates are stored but skip the recompute
+  /// (the edit host surfaces the inline validation error and blocks save).
+  void updateRate(String rate) {
+    if (!mounted) return;
+    if (rate == _appliedRate) return;
+    setState(() {
+      _appliedRate = rate;
+      final amount = _originalAmount;
+      final currency = _originalCurrency;
+      if (amount != null &&
+          currency != null &&
+          validateAppliedRate(rate) == null) {
+        _amount = convertToJpy(
+          originalMinorUnits: amount,
+          appliedRate: rate,
+          subunitToUnit: subunitToUnitFor(currency),
+        );
+      }
     });
   }
 
@@ -570,6 +621,15 @@ class TransactionDetailsFormState
                   joyFullness: _ledgerType == LedgerType.joy
                       ? _joyFullness
                       : null,
+                  // Phase 42-09 (DISP-03/04, ADR-022): persist the edited
+                  // foreign-currency triple via the extended use case. Coalesce
+                  // semantics (EDIT-02): these are the host-owned current values,
+                  // which were seeded from `seed` and may have been edited via
+                  // the linked edit host. The use case excludes them from the
+                  // hash chain (ADR-021 — no rehash on currency fields).
+                  originalCurrency: _originalCurrency,
+                  originalAmount: _originalAmount,
+                  appliedRate: _appliedRate,
                 ),
               );
           // .edit branch NEVER sets _showCelebration (D-15 invariant).
@@ -777,6 +837,36 @@ class TransactionDetailsFormState
               ],
               trailing: _buildMerchantRow(l10n),
             ),
+
+            // Phase 42-09 (DISP-03 / ADR-022 D-01): the foreign-currency edit
+            // host — three linked rows (original amount + rate editable; JPY
+            // read-only derived). Rendered only for foreign rows; JPY-native
+            // rows skip it entirely (CURR-04 regression protection).
+            if (_isEditMode &&
+                _originalCurrency != null &&
+                _originalAmount != null &&
+                _appliedRate != null) ...[
+              const SizedBox(height: 16),
+              _formCard(
+                child: CurrencyLinkedEditFields(
+                  key: const ValueKey('currency-linked-edit-fields'),
+                  originalCurrency: _originalCurrency!,
+                  originalAmount: _originalAmount!,
+                  appliedRate: _appliedRate!,
+                  manualOverride: false,
+                  onChanged: (value) {
+                    // One direction only (ADR-022 D-01): original × rate → JPY.
+                    // Keep the host triple + derived JPY in lock-step for submit.
+                    if (!mounted) return;
+                    setState(() {
+                      _originalAmount = value.originalAmount;
+                      _appliedRate = value.appliedRate;
+                      _amount = value.jpyAmount;
+                    });
+                  },
+                ),
+              ),
+            ],
 
             const SizedBox(height: 16),
 

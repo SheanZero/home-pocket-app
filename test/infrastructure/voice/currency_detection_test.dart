@@ -35,11 +35,10 @@ class _FakeMerchantDatabase extends Fake implements MerchantDatabase {}
 
 /// One voice corpus expectation: input → (amount, detectedCurrency).
 class _CurrencyCase {
-  const _CurrencyCase(this.input, this.amount, this.currency, {this.note});
+  const _CurrencyCase(this.input, this.amount, this.currency);
   final String input;
   final int amount;
   final String? currency;
-  final String? note;
 }
 
 void main() {

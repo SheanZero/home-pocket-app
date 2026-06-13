@@ -2585,5 +2585,53 @@
   "@conversionRateRequired": {
     "description": "Prompt requiring a manual rate when no rate is available (Phase 42-07 / P41 D-08)"
   },
+  "editOriginalAmountLabel": "原通貨の金額",
+  "@editOriginalAmountLabel": {
+    "description": "Edit-host row label for the original foreign amount input (Phase 42-09, DISP-03/ADR-022 D-01)"
+  },
+  "editRateLabel": "レート",
+  "@editRateLabel": {
+    "description": "Edit-host row label for the exchange-rate input (Phase 42-09, DISP-03/ADR-022 D-01)"
+  },
+  "editJpyDerivedLabel": "円（換算後）",
+  "@editJpyDerivedLabel": {
+    "description": "Edit-host row label for the read-only derived JPY amount — the original is the fact, JPY is the result (Phase 42-09, ADR-022 D-01)"
+  },
+  "editRateRequired": "レートを入力してください",
+  "@editRateRequired": {
+    "description": "Inline error when the foreign-row rate field is empty (Phase 42-09, T-42-23)"
+  },
+  "editRateInvalid": "正の数を入力してください",
+  "@editRateInvalid": {
+    "description": "Inline validation error for a non-positive / unparseable manual rate (Phase 42-09, validateAppliedRate / T-42-23)"
+  },
+  "changeRateDialogTitle": "レート確認",
+  "@changeRateDialogTitle": {
+    "description": "Title of the manual-override + date-change dialog (Phase 42-09, ADR-022 D-02)"
+  },
+  "changeRateDialogBody": "レートを手動で設定しました。新しい日付でレートを再取得しますか？",
+  "@changeRateDialogBody": {
+    "description": "Body of the manual-override + date-change dialog (Phase 42-09, ADR-022 D-02)"
+  },
+  "changeRateKeepManual": "手動レートを保持",
+  "@changeRateKeepManual": {
+    "description": "Dialog option to keep the manual override (Phase 42-09, ADR-022 D-02)"
+  },
+  "changeRateRefetch": "新しい日付で再取得",
+  "@changeRateRefetch": {
+    "description": "Dialog option to re-fetch the rate for the new date (Phase 42-09, ADR-022 D-02)"
+  },
+  "rateChangedToast": "円を調整しました：{oldJpy} → {newJpy}（レート更新）",
+  "@rateChangedToast": {
+    "description": "Non-blocking toast when a date change auto-recalculates JPY by >1% (Phase 42-09, ADR-022 D-03)",
+    "placeholders": {
+      "oldJpy": { "type": "String" },
+      "newJpy": { "type": "String" }
+    }
+  },
+  "rateChangedUndo": "元に戻す",
+  "@rateChangedUndo": {
+    "description": "Undo action on the rate-changed toast — restores the old rate (Phase 42-09, ADR-022 D-03)"
+  },
   "@@locale": "ja"
 }

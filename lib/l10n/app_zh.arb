@@ -2585,5 +2585,53 @@
   "@conversionRateRequired": {
     "description": "Prompt requiring a manual rate when no rate is available (Phase 42-07 / P41 D-08)"
   },
+  "editOriginalAmountLabel": "原币金额",
+  "@editOriginalAmountLabel": {
+    "description": "Edit-host row label for the original foreign amount input (Phase 42-09, DISP-03/ADR-022 D-01)"
+  },
+  "editRateLabel": "汇率",
+  "@editRateLabel": {
+    "description": "Edit-host row label for the exchange-rate input (Phase 42-09, DISP-03/ADR-022 D-01)"
+  },
+  "editJpyDerivedLabel": "日元（换算）",
+  "@editJpyDerivedLabel": {
+    "description": "Edit-host row label for the read-only derived JPY amount — 原币是事实，日元是结果 (Phase 42-09, ADR-022 D-01)"
+  },
+  "editRateRequired": "请输入汇率",
+  "@editRateRequired": {
+    "description": "Inline error when the foreign-row rate field is empty (Phase 42-09, T-42-23)"
+  },
+  "editRateInvalid": "请输入正数",
+  "@editRateInvalid": {
+    "description": "Inline validation error for a non-positive / unparseable manual rate (Phase 42-09, validateAppliedRate / T-42-23)"
+  },
+  "changeRateDialogTitle": "汇率确认",
+  "@changeRateDialogTitle": {
+    "description": "Title of the manual-override + date-change dialog (Phase 42-09, ADR-022 D-02)"
+  },
+  "changeRateDialogBody": "您已手动设置了汇率。是否按新日期重新获取汇率？",
+  "@changeRateDialogBody": {
+    "description": "Body of the manual-override + date-change dialog (Phase 42-09, ADR-022 D-02)"
+  },
+  "changeRateKeepManual": "保留手动汇率",
+  "@changeRateKeepManual": {
+    "description": "Dialog option to keep the manual override (Phase 42-09, ADR-022 D-02)"
+  },
+  "changeRateRefetch": "按新日期重取",
+  "@changeRateRefetch": {
+    "description": "Dialog option to re-fetch the rate for the new date (Phase 42-09, ADR-022 D-02)"
+  },
+  "rateChangedToast": "日元已自动调整：{oldJpy} → {newJpy}（汇率更新）",
+  "@rateChangedToast": {
+    "description": "Non-blocking toast when a date change auto-recalculates JPY by >1% (Phase 42-09, ADR-022 D-03)",
+    "placeholders": {
+      "oldJpy": { "type": "String" },
+      "newJpy": { "type": "String" }
+    }
+  },
+  "rateChangedUndo": "撤销",
+  "@rateChangedUndo": {
+    "description": "Undo action on the rate-changed toast — restores the old rate (Phase 42-09, ADR-022 D-03)"
+  },
   "@@locale": "zh"
 }

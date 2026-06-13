@@ -2016,4 +2016,39 @@ class SZh extends S {
 
   @override
   String get conversionRateRequired => '无法获取汇率，请手动输入汇率';
+
+  @override
+  String get editOriginalAmountLabel => '原币金额';
+
+  @override
+  String get editRateLabel => '汇率';
+
+  @override
+  String get editJpyDerivedLabel => '日元（换算）';
+
+  @override
+  String get editRateRequired => '请输入汇率';
+
+  @override
+  String get editRateInvalid => '请输入正数';
+
+  @override
+  String get changeRateDialogTitle => '汇率确认';
+
+  @override
+  String get changeRateDialogBody => '您已手动设置了汇率。是否按新日期重新获取汇率？';
+
+  @override
+  String get changeRateKeepManual => '保留手动汇率';
+
+  @override
+  String get changeRateRefetch => '按新日期重取';
+
+  @override
+  String rateChangedToast(String oldJpy, String newJpy) {
+    return '日元已自动调整：$oldJpy → $newJpy（汇率更新）';
+  }
+
+  @override
+  String get rateChangedUndo => '撤销';
 }

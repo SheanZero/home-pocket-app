@@ -2023,4 +2023,39 @@ class SJa extends S {
 
   @override
   String get conversionRateRequired => 'レートが取得できません。手動でレートを入力してください';
+
+  @override
+  String get editOriginalAmountLabel => '原通貨の金額';
+
+  @override
+  String get editRateLabel => 'レート';
+
+  @override
+  String get editJpyDerivedLabel => '円（換算後）';
+
+  @override
+  String get editRateRequired => 'レートを入力してください';
+
+  @override
+  String get editRateInvalid => '正の数を入力してください';
+
+  @override
+  String get changeRateDialogTitle => 'レート確認';
+
+  @override
+  String get changeRateDialogBody => 'レートを手動で設定しました。新しい日付でレートを再取得しますか？';
+
+  @override
+  String get changeRateKeepManual => '手動レートを保持';
+
+  @override
+  String get changeRateRefetch => '新しい日付で再取得';
+
+  @override
+  String rateChangedToast(String oldJpy, String newJpy) {
+    return '円を調整しました：$oldJpy → $newJpy（レート更新）';
+  }
+
+  @override
+  String get rateChangedUndo => '元に戻す';
 }

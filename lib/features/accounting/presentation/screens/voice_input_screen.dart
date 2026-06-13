@@ -365,6 +365,14 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     if (_parseResult?.estimatedSatisfaction != null) {
       state.updateSatisfaction(_parseResult!.estimatedSatisfaction);
     }
+    // Phase 42-09 (VOICE-CUR-02/03): surface a voice-detected foreign currency
+    // on the shared form so it becomes editable before save and triggers the
+    // normal rate-fetch flow. Null = JPY-native utterance → no-op (the JPY path
+    // stays byte-identical, Pitfall 1).
+    final detectedCurrency = data.detectedCurrency;
+    if (detectedCurrency != null && detectedCurrency.isNotEmpty) {
+      state.updateCurrency(detectedCurrency);
+    }
 
     // B-2 host-cache mirror — AmountDisplay sees the new value atomically.
     // 260526-l0o (Issues 3 + 5): the category mirror was dropped — voice

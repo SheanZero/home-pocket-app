@@ -2058,4 +2058,40 @@ class SEn extends S {
   @override
   String get conversionRateRequired =>
       'Rate unavailable — please enter a rate manually';
+
+  @override
+  String get editOriginalAmountLabel => 'Original amount';
+
+  @override
+  String get editRateLabel => 'Rate';
+
+  @override
+  String get editJpyDerivedLabel => 'JPY (derived)';
+
+  @override
+  String get editRateRequired => 'Please enter a rate';
+
+  @override
+  String get editRateInvalid => 'Enter a positive number';
+
+  @override
+  String get changeRateDialogTitle => 'Rate confirmation';
+
+  @override
+  String get changeRateDialogBody =>
+      'You set the rate manually. Re-fetch the rate for the new date?';
+
+  @override
+  String get changeRateKeepManual => 'Keep manual rate';
+
+  @override
+  String get changeRateRefetch => 'Re-fetch for new date';
+
+  @override
+  String rateChangedToast(String oldJpy, String newJpy) {
+    return 'JPY adjusted: $oldJpy → $newJpy (rate updated)';
+  }
+
+  @override
+  String get rateChangedUndo => 'Undo';
 }
