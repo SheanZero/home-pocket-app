@@ -355,4 +355,74 @@ void main() {
     expect(captured.rateDate, DateTime.utc(2026, 6, 11));
     expect(captured.actualRateDate, DateTime.utc(2026, 6, 10));
   });
+
+  test(
+    'CR-01: skips imported rows with an invalid rate but keeps valid ones',
+    () async {
+      final now = DateTime(2026, 2, 7);
+      Map<String, dynamic> rateJson(String rate, {String source = 'frankfurter'}) {
+        return {
+          'currency': 'USD',
+          'rateDate': DateTime.utc(2026, 6, 11).millisecondsSinceEpoch ~/ 1000,
+          'rate': rate,
+          'fetchedAt':
+              DateTime.utc(2026, 6, 11, 9).millisecondsSinceEpoch ~/ 1000,
+          'source': source,
+          'actualRateDate': null,
+        };
+      }
+
+      final backupData = BackupData(
+        metadata: BackupMetadata(
+          version: '1.0',
+          createdAt: now.millisecondsSinceEpoch,
+          deviceId: 'test',
+          appVersion: '0.1.0',
+        ),
+        transactions: [],
+        categories: [],
+        books: [],
+        settings: const AppSettings().toJson(),
+        exchangeRates: [
+          rateJson('abc'), // non-numeric
+          rateJson('-1'), // negative
+          rateJson('0'), // zero
+          rateJson('Infinity'), // non-finite literal
+          rateJson('NaN'), // non-finite literal
+          rateJson('1e9'), // scientific notation rejected (ADR-020 D-05)
+          rateJson('157.34', source: 'evil'), // unknown source
+          rateJson('157.34'), // the one valid row
+        ],
+      );
+
+      final file = await _createEncryptedBackup(
+        password: 'test-password-123',
+        backupData: backupData,
+        filePath: '${tempDir.path}/backup.hpb',
+      );
+
+      when(
+        () => mockBookRepo.findAll(includeArchived: true, includeShadow: true),
+      ).thenAnswer((_) async => []);
+      when(() => mockCategoryRepo.deleteAll()).thenAnswer((_) async {});
+      when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});
+      when(
+        () => mockSettingsRepo.updateSettings(any()),
+      ).thenAnswer((_) async {});
+      when(() => mockExchangeRateRepo.upsert(any())).thenAnswer((_) async {});
+
+      final result = await useCase.execute(
+        backupFile: file,
+        password: 'test-password-123',
+      );
+
+      expect(result.isSuccess, true);
+      // Only the single valid row reaches the cache — all poison rows skipped.
+      final captured = verify(
+        () => mockExchangeRateRepo.upsert(captureAny()),
+      ).captured;
+      expect(captured.length, 1);
+      expect((captured.single as ExchangeRate).rate, '157.34');
+    },
+  );
 }

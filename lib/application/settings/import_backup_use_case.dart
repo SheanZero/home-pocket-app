@@ -15,6 +15,7 @@ import '../../features/currency/domain/repositories/exchange_rate_repository.dar
 import '../../features/settings/domain/models/app_settings.dart';
 import '../../features/settings/domain/models/backup_data.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
+import '../../shared/utils/currency_conversion.dart';
 import '../../shared/utils/result.dart';
 
 /// Restores app data from an encrypted backup file (.hpb).
@@ -164,19 +165,42 @@ class ImportBackupUseCase {
 
     // Import exchange rates (D-10): upsert, not insert — idempotent by the
     // (currency, rateDate) composite key. Epoch-seconds → UTC DateTime.
+    //
+    // CR-01 trust boundary: a decrypted backup's contents are NOT
+    // authenticated — the password protects confidentiality, not integrity.
+    // Each imported rate is therefore routed through the SAME canonical
+    // validation floor as the manual-override write path
+    // (validateAppliedRate, ADR-020 single-parse-site / T-41-13). Rows with a
+    // non-numeric / <=0 / non-finite / scientific-notation rate, or an
+    // unrecognized source, are SKIPPED rather than persisted — a hostile or
+    // corrupted row must not poison the cache, where convertToJpy would later
+    // throw on it.
     for (final erJson in backupData.exchangeRates) {
+      final rawRate = erJson['rate'] as String;
+      if (validateAppliedRate(rawRate) != null) {
+        // Invalid rate literal — skip this row, keep importing the rest.
+        continue;
+      }
+
+      final source = erJson['source'] as String;
+      if (!_validBackupRateSources.contains(source)) {
+        // Unknown source would break the D-07 manual/non-manual fallback
+        // partition — skip rather than trust an arbitrary value.
+        continue;
+      }
+
       final er = ExchangeRate(
         currency: erJson['currency'] as String,
         rateDate: DateTime.fromMillisecondsSinceEpoch(
           (erJson['rateDate'] as int) * 1000,
           isUtc: true,
         ),
-        rate: erJson['rate'] as String,
+        rate: rawRate,
         fetchedAt: DateTime.fromMillisecondsSinceEpoch(
           (erJson['fetchedAt'] as int) * 1000,
           isUtc: true,
         ),
-        source: erJson['source'] as String,
+        source: source,
         actualRateDate: erJson['actualRateDate'] != null
             ? DateTime.fromMillisecondsSinceEpoch(
                 (erJson['actualRateDate'] as int) * 1000,
@@ -187,6 +211,14 @@ class ImportBackupUseCase {
       await _exchangeRateRepo.upsert(er);
     }
   }
+
+  /// The only `source` values a trusted Phase 41 write path can produce
+  /// (D-07). An imported row claiming any other source is rejected.
+  static const Set<String> _validBackupRateSources = {
+    'frankfurter',
+    'fawazahmed0',
+    'manual',
+  };
 }
 
 class IncorrectPasswordException implements Exception {
