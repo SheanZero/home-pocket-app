@@ -262,3 +262,16 @@ D-01 原始实现把外币行的**头部大号金额设为不可点击**（non-t
 - 外币卡上移至分类/日期卡之前。
 
 **单向换算不变量完全保留：** 仍是 `原币 × 汇率 → 日元`，日元只读、绝不回写，`convertToJpy()` 仍是唯一换算点（ADR-020）。本次改动只改"原币金额从哪里输入"（卡内行 → 头部键盘），不触碰 D-01 的派生关系、D-02 弹窗、D-03 toast 语义。JPY-native 行零回归（CURR-04）。
+
+---
+
+## Update 2026-06-13: 外币卡片两屏统一（quick 260613-ufn，D-1..D-4）
+
+「添加账目」与「明细编辑」两屏的外币换算区此前实现不一致：编辑页用带标签的 `CurrencyLinkedEditFields` 卡片，添加页用大号 `≈¥{jpy}` 实时预览块（`ConversionPreviewPanel`）；且"改日期自动重取汇率"只在编辑页（且绑在卡内可点击的汇率日期触发器上）。经用户锁定 D-1..D-4 后，两屏的外币换算交互被**完全统一**：
+
+- **D-1 同一张卡片：** 添加页移除大号 `≈¥` 预览块（`ConversionPreviewPanel` widget 删除），改用与编辑页完全相同的 `CurrencyLinkedEditFields` 卡片——`汇率`（可编辑）/ `日元（换算）`（只读派生）/ `汇率日期`（不可点击带标签行）三行。添加页的汇率行也**可编辑**，手改即 `manualOverride=true`，持久化三元组使用手改后的汇率。
+- **D-2 实际汇率日期 + staleness：** `汇率日期` 行显示**实际生效日期**（周末/节假日回退时为最近营业日，如 06/12），而非请求的交易日期；当实际日期 ≠ 交易日期时其下渲染警示琥珀色 staleness 提示（`conversionStalenessWeekend`）。staleness 字符串在**唯一一处** (`conversion_preview_panel.dart` 的 `stalenessNoteFor`/`rateEffectiveDateOf`) 由 `RateResult` 派生，两屏复用，不再重复 `_stalenessLabel`。新增 `currencyRateDateLabel` ARB 键（zh 汇率日期 / ja レート日付 / en Rate date）三语同步 + `flutter gen-l10n`。
+- **D-3 汇率日期行不可点击：** 卡内尾部可点击的 `edit_date_change_trigger` TextButton **被移除**；改为不可点击的带标签 `edit_rate_date` 行。重取不再由"点击该行"触发。
+- **D-4 改日期自动重取（两屏）：** 重取从行点击移到 **date picker 变更**。编辑页 `_editDate`/`updateDate` 改日期后经卡片 `triggerDateChangeRefetch()` 跑既有 ADR-022 D-02 弹窗 / D-03 >1% toast 逻辑；添加页通过新增的 `onDateChanged` 回调把 `_selectedDate` 与 keyed `conversionRateProvider(currency,date,amount)` 锁步，改日期即重解析汇率并刷新 汇率/日元/汇率日期/staleness。`foreignPushIsStale` 日期守卫保留（WR-01），手动覆盖在改币种/改日期时清除。
+
+**不变量完全保留（重申）：** ADR-022 D-01 单向换算 `原币 × 汇率 → 日元`，日元只读绝不回写；`convertToJpy()` 仍是**唯一换算点**（ADR-020），持久化 JPY == 卡片派生 JPY；RateSignal（D-02/D-03）副作用仍仅经 `ref.listen`/`onSignal` 回调，绝不在 `ref.watch` 中（Riverpod 3）。本次仅统一两屏的展示/交互，不触碰派生关系与换算站点。

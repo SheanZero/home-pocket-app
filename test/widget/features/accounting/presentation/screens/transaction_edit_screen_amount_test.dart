@@ -457,9 +457,11 @@ void main() {
       await tester.pumpAndSettle();
 
       // Sanity: linked edit host + initial headline (the in-card original-amount
-      // input is gone — editing flows through the headline keypad now).
+      // input is gone — editing flows through the headline keypad now). Quick
+      // 260613-ufn moved the card's key to a GlobalKey (for the host-driven
+      // date-change re-fetch), so find it by type.
       expect(
-        find.byKey(const ValueKey('currency-linked-edit-fields')),
+        find.byType(CurrencyLinkedEditFields),
         findsOneWidget,
       );
       expect(

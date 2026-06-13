@@ -1,13 +1,17 @@
 @Tags(['golden'])
 library;
 
-// Golden tests for [CurrencyLinkedEditFields] (quick 260613-mgc).
+// Golden tests for [CurrencyLinkedEditFields] (quick 260613-mgc, generalized
+// into the shared two-screen card quick 260613-ufn).
 //
 // As of quick 260613-mgc the card no longer carries an in-card original-amount
-// input row: that editing moved to the screen's top headline keypad. The card
-// now renders TWO rows — an editable applied-rate field (160.2564) and a
-// READ-ONLY derived JPY row (18,093). The original amount is injected via the
-// `originalAmount` prop and only drives the derived JPY.
+// input row: that editing moved to the screen's top headline keypad. As of
+// quick 260613-ufn the trailing clickable date-change TextButton is REMOVED and
+// replaced by a NON-CLICKABLE labeled 汇率日期 row (key `edit_rate_date`, D-3)
+// showing the actual effective rate date; an optional warning-amber staleness
+// line (key `edit_rate_staleness`, D-2) renders below it. The card now renders
+// THREE rows — editable 汇率 (160.2564), read-only derived 日元 (18,093), and the
+// non-clickable 汇率日期 row — plus the staleness line in the staleness golden.
 //
 // USD 112.90 @ 160.2564 → 18,093 JPY (the UAT example).
 //
@@ -19,7 +23,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/currency_linked_edit_fields.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
-Widget _wrap({required Locale locale, ThemeMode themeMode = ThemeMode.light}) {
+Widget _wrap({
+  required Locale locale,
+  ThemeMode themeMode = ThemeMode.light,
+  DateTime? actualRateDate,
+  String? stalenessNote,
+}) {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
     locale: locale,
@@ -43,6 +52,8 @@ Widget _wrap({required Locale locale, ThemeMode themeMode = ThemeMode.light}) {
             appliedRate: '160.2564',
             manualOverride: false,
             rateDate: DateTime(2026, 6, 13),
+            actualRateDate: actualRateDate,
+            stalenessNote: stalenessNote,
             onChanged: (_) {},
           ),
         ),
@@ -73,9 +84,27 @@ void main() {
       );
     });
 
-    // Pins the two-row card contract regardless of pixels: the original-amount
-    // input is gone; the rate field and derived JPY row remain.
-    testWidgets('card shows the rate + derived JPY, no original-amount input', (
+    testWidgets('card with weekend staleness note — locale en', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          locale: const Locale('en'),
+          actualRateDate: DateTime(2026, 6, 12),
+          stalenessNote: '06/12/2026 (most recent business day)',
+        ),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(CurrencyLinkedEditFields),
+        matchesGoldenFile(
+          'goldens/currency_linked_edit_fields_usd_staleness.png',
+        ),
+      );
+    });
+
+    // Pins the card contract regardless of pixels: the original-amount input is
+    // gone; the editable rate field, the read-only derived JPY row, and the
+    // NON-CLICKABLE 汇率日期 row remain. The clickable trigger is removed (ufn D-3).
+    testWidgets('card shows rate + derived JPY + non-clickable 汇率日期 row', (
       tester,
     ) async {
       await tester.pumpWidget(_wrap(locale: const Locale('en')));
@@ -90,8 +119,13 @@ void main() {
       expect(find.text('160.2564'), findsOneWidget);
       expect(find.textContaining('18,093'), findsOneWidget);
 
-      // Quick 260613-n5c: the date-change trigger now shows the formatted
-      // rateDate (en `06/13/2026`), pinning the new label contract.
+      // Quick 260613-ufn (D-3): the clickable date-change trigger is removed;
+      // a non-clickable labeled 汇率日期 row shows the formatted date.
+      expect(
+        find.byKey(const Key('edit_date_change_trigger')),
+        findsNothing,
+      );
+      expect(find.byKey(const Key('edit_rate_date')), findsOneWidget);
       expect(find.text('06/13/2026'), findsOneWidget);
     });
   });

@@ -31,6 +31,8 @@
 // See: docs/arch/03-adr/ADR-022_Edit_Semantics.md (D-01/D-02/D-03),
 //      lib/shared/utils/currency_conversion.dart (convertToJpy — D-12 single site).
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -115,13 +117,11 @@ void main() {
         findsOneWidget,
         reason: 'a non-clickable labeled 汇率日期 row is present (ufn D-2/D-3)',
       );
-      // The row shows the formatted rate date (en `06/13/2026`).
+      // The row (key on the Text itself) shows the formatted rate date
+      // (en `06/13/2026`).
       expect(
-        find.descendant(
-          of: find.byKey(const Key('edit_rate_date')),
-          matching: find.text('06/13/2026'),
-        ),
-        findsOneWidget,
+        tester.widget<Text>(find.byKey(const Key('edit_rate_date'))).data,
+        '06/13/2026',
         reason: 'rate date row shows DateFormatter(actualRateDate ?? rateDate)',
       );
       // The non-clickable row is not a TextButton.
@@ -199,11 +199,8 @@ void main() {
         // The row shows the ACTUAL effective date (06/12/2026), not the
         // requested transaction date (06/14/2026).
         expect(
-          find.descendant(
-            of: find.byKey(const Key('edit_rate_date')),
-            matching: find.text('06/12/2026'),
-          ),
-          findsOneWidget,
+          tester.widget<Text>(find.byKey(const Key('edit_rate_date'))).data,
+          '06/12/2026',
         );
       },
     );
@@ -224,11 +221,8 @@ void main() {
       final staleness = find.byKey(const Key('edit_rate_staleness'));
       expect(staleness, findsOneWidget);
       expect(
-        find.descendant(
-          of: staleness,
-          matching: find.text('06/12/2026 (most recent business day)'),
-        ),
-        findsOneWidget,
+        tester.widget<Text>(staleness).data,
+        '06/12/2026 (most recent business day)',
       );
     });
 
@@ -264,7 +258,10 @@ void main() {
 
       // Simulate a transaction-date change while a manual override is active —
       // the host invokes the retained logic via the public state method (ufn D-4).
-      await cardKey.currentState!.triggerDateChangeRefetch();
+      // Fire-and-forget: triggerDateChangeRefetch awaits the dialog's own future,
+      // which never completes until the dialog is dismissed — awaiting it here
+      // would deadlock pumpAndSettle. The host invokes it the same way.
+      unawaited(cardKey.currentState!.triggerDateChangeRefetch());
       await tester.pumpAndSettle();
 
       expect(find.byType(AlertDialog), findsOneWidget);
