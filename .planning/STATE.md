@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: 多币种支持
 status: executing
-stopped_at: Completed 42-03-PLAN.md
-last_updated: "2026-06-13T03:26:39.821Z"
+stopped_at: Completed 42-07-PLAN.md
+last_updated: "2026-06-13T00:00:00.000Z"
 last_activity: 2026-06-13
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 20
-  completed_plans: 17
-  percent: 67
+  completed_plans: 18
+  percent: 70
 ---
 
 # Project State
@@ -127,8 +127,8 @@ No active blockers for v1.7. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-13T03:26:25.714Z
-Stopped at: Completed 42-03-PLAN.md
+Last session: 2026-06-13T00:00:00.000Z
+Stopped at: Completed 42-07-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -146,6 +146,7 @@ Resume file: None
 | Phase 42 P04 | 25m | 2 tasks | 7 files |
 | Phase 42 P05 | 10min | 2 tasks | 6 files |
 | Phase 42 P06 | ~12min | 2 tasks | 5 files |
+| Phase 42 P07 | ~18min | 2 tasks | 9 files |
 
 ## Decisions
 
@@ -160,3 +161,4 @@ Resume file: None
 - [Phase 42]: 42-04: Voice currency detection — shared NumeralStateMachine.detectCurrencyToken (longest-first leftmost-wins scan over VoiceCurrencySuffixes.all) returns the token SEPARATELY from parse(), so the integer-amount path is byte-identical (T-42-07). VoiceCurrencySuffixes.tokenToIso maps zh 美元/欧元/英镑/港币/澳元/加元 + ja ドル/ユーロ/ポンド/香港ドル/豪ドル → ISO. VoiceParseResult gains nullable detectedCurrency (null=JPY-native, Pitfall 1 — no rate-fetch). ParseVoiceInputUseCase._detectCurrency locale-routes + resolves bare 元 by locale (zh→CNY, ja→JPY-native→null) via bareYuanToken const (keeps use case out of hardcoded_cjk_ui_scan). _extractKeyword strips new tokens (5美元的咖啡→咖啡, T-42-08). currency_detection_test GREEN (16); 400/400 voice + CJK-scan + analyze 0. Form surfacing/rate-fetch deferred to 42-09.
 - [Phase 42]: 42-05: AmountInputController truncates-not-rounds decimals on currency switch (D-08, string op)
 - [Phase 42]: 42-06: CurrencySelectorSheet (JPY-pinned, code/name search, 'more' full-ISO, flag+symbol+code+name 48dp rows, accentPrimary selection) + non-persisted session recentCurrencyProvider (LRU, JPY excluded from reorder). Common-zone names localized in ARB; long-tail ISO+English. Goldens mask flag cell (6 macOS baselines). Sheet wiring to SmartKeyboard is 42-08.
+- [Phase 42]: 42-07: ConversionPreviewPanel (DISP-01) consumes P41 appGetExchangeRateUseCaseProvider via keyed conversionRateProvider(currency,date,amount); main row ≈¥{jpy} via single-site convertToJpy() (ADR-020, matches persisted 7415), sub-row {CODE} 1 = ¥{rate} · {date}. In-place fixed-height skeleton kConversionPreviewBlockHeight=56 (D-04 no-jump). Warning-amber staleness label for RateFallback (cached) OR fetched.actualDate≠txDate (weekend, D-05) — amber reserved. RateSignal D-02 dialog/D-03 toast surfaced via ref.listen→onSignal callback, never ref.watch (host renders in 42-08). JPY-guarded (assert, CURR-04). RateUnavailable/error → mandatory-rate prompt (P41 D-08). 4 new ARB keys ja/zh/en; 14 tests + 6 macOS goldens green; analyze 0. Host mounting is 42-08.

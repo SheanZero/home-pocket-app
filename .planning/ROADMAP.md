@@ -212,7 +212,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 42-07-PLAN.md — Live JPY ConversionPreviewPanel (D-03/D-04/D-05; ref.listen signals; convertToJpy single site) [W3]
+- [x] 42-07-PLAN.md — Live JPY ConversionPreviewPanel (D-03/D-04/D-05; ref.listen signals; convertToJpy single site) [W3]
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
