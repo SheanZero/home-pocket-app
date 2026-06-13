@@ -47,6 +47,14 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
   /// Must stay in sync with the form's internal _amount via [updateAmount].
   late int _displayAmount;
 
+  /// Phase 42-09 (ADR-022 D-01): a foreign row's JPY amount is a READ-ONLY
+  /// derived value (original × rate). The top [AmountDisplay] must NOT open the
+  /// [AmountEditBottomSheet] for foreign rows — editing flows exclusively
+  /// through the linked rows inside the form's `.edit` host (two-input /
+  /// one-derived; JPY is never directly editable). JPY-native rows are
+  /// unchanged (CURR-04 regression protection).
+  bool get _isForeignRow => widget.transaction.originalCurrency != null;
+
   @override
   void initState() {
     super.initState();
@@ -148,17 +156,21 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
       ),
       body: Column(children: [
         // D-14 spillover: host renders AmountDisplay above the form.
-        // Tapping opens AmountEditBottomSheet (modal-sheet UX, not persistent keyboard).
+        // JPY-native: tapping opens AmountEditBottomSheet (modal-sheet UX).
+        // Foreign (ADR-022 D-01): the JPY figure is read-only derived — no
+        // tap-to-edit, no clear; edits flow through the form's linked rows.
         GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: _editAmount,
+          onTap: _isForeignRow ? null : _editAmount,
           child: AmountDisplay(
             amount: _displayAmount > 0 ? _displayAmount.toString() : '',
-            onClear: () {
-              if (!mounted) return;
-              setState(() => _displayAmount = 0);
-              _formKey.currentState?.updateAmount(0);
-            },
+            onClear: _isForeignRow
+                ? null
+                : () {
+                    if (!mounted) return;
+                    setState(() => _displayAmount = 0);
+                    _formKey.currentState?.updateAmount(0);
+                  },
           ),
         ),
         Expanded(
@@ -167,6 +179,12 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
             child: TransactionDetailsForm(
               key: _formKey,
               config: TransactionDetailsFormConfig.edit(seed: widget.transaction),
+              // ADR-022 D-01: keep the read-only top JPY display in lock-step
+              // with the derived figure as the foreign linked rows are edited.
+              onForeignJpyChanged: (jpy) {
+                if (!mounted) return;
+                setState(() => _displayAmount = jpy);
+              },
             ),
           ),
         ),

@@ -52,9 +52,16 @@ class TransactionDetailsForm extends ConsumerStatefulWidget {
     this.merchantFocusNode,
     this.noteFocusNode,
     this.onPickerDismissed,
+    this.onForeignJpyChanged,
   });
 
   final TransactionDetailsFormConfig config;
+
+  /// Phase 42-09 (ADR-022 D-01): fired with the freshly derived JPY amount when
+  /// a foreign row's original amount or rate is edited inside the linked edit
+  /// host. The edit screen wires this to keep its read-only top AmountDisplay in
+  /// lock-step with the derived figure. Null in hosts without a top display.
+  final ValueChanged<int>? onForeignJpyChanged;
 
   /// Presentation-layer form wiring (moved off the domain config to keep
   /// [TransactionDetailsFormConfig] free of package:flutter — CRIT-04).
@@ -863,6 +870,9 @@ class TransactionDetailsFormState
                       _appliedRate = value.appliedRate;
                       _amount = value.jpyAmount;
                     });
+                    // Notify the screen so its read-only top display tracks the
+                    // derived JPY (foreign rows only).
+                    widget.onForeignJpyChanged?.call(value.jpyAmount);
                   },
                 ),
               ),
