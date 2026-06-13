@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 Phase: 42 (entry-ui-display-voice) — EXECUTING
 Plan: 9 of 9
 Status: Phase complete — ready for verification
-Last activity: 2026-06-13 - Completed quick task 260613-ote: 长尾币种真实货币符号
+Last activity: 2026-06-13 - Completed quick task 260613-ufn: 统一外币添加/编辑两屏汇率卡片 + 改日期自动重查汇率
 
 Progress: [███████░░░] 65%
 
@@ -41,6 +41,7 @@ Progress: [███████░░░] 65%
 | 260613-njf | 撤销改动2（键盘动作键恢复纯write-back，不再整条目保存）；编辑页外币键盘动作键文案「保存」→「确认」 | 2026-06-13 | 8b274e08 | [260613-njf-revert-keypad-save-confirm-label](./quick/260613-njf-revert-keypad-save-confirm-label/) |
 | 260613-ohz | 货币选择器去除粗体三字码列（flag→symbol→name）；19个长尾币种名称支持zh/ja/en本地化 | 2026-06-13 | 72b2d788 | [260613-ohz-currency-picker-dedup-l10n](./quick/260613-ohz-currency-picker-dedup-l10n/) |
 | 260613-ote | 长尾币种真实货币符号（NumberFormatter 新增 16 个：฿₹₱₫₽₺/Rp/RM/NZ$/R$/R/kr/MX$/zł；CHF/AED/SAR 保留三字码） | 2026-06-13 | e8ab6f82 | [260613-ote-longtail-currency-symbols](./quick/260613-ote-longtail-currency-symbols/) |
+| 260613-ufn | 统一外币添加/编辑两屏的汇率卡片（同一 CurrencyLinkedEditFields：汇率可编辑/日元只读/汇率日期不可点击+staleness；移除添加页 ≈¥ 预览块；改日期 picker 自动重查汇率两屏一致，编辑跑 ADR-022 D-02/D-03） | 2026-06-13 | 182241bd | [260613-ufn-unify-foreign-currency-card](./quick/260613-ufn-unify-foreign-currency-card/) |
 
 ## Last Milestone Snapshot (v1.6)
 
@@ -137,8 +138,8 @@ No active blockers for v1.7. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-13T04:05:17.751Z
-Stopped at: Completed 42-09-PLAN.md (last plan; phase ready_for_verification)
+Last session: 2026-06-13T14:30:00.000Z
+Stopped at: Completed quick task 260613-ufn (外币卡片两屏统一); phase 42 still ready_for_verification
 Resume file: None
 
 ## Performance Metrics
