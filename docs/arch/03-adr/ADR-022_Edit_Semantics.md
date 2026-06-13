@@ -248,3 +248,17 @@ if (changePct > 0.01) { /* show toast */ }
 
 **文档维护者:** 技术架构团队
 **下次Review:** Phase 42 实施完成后（编辑页 UI 验收时）
+
+---
+
+## Update 2026-06-13: foreign headline made tap-to-editable (quick 260613-mgc)
+
+D-01 原始实现把外币行的**头部大号金额设为不可点击**（non-tappable），原币金额仅能在 `CurrencyLinkedEditFields` 卡内的"原币金额"输入行编辑。
+
+经用户明确要求（"点击头部数字弹出现有键盘修改"），该交互被**取代**：
+
+- **外币行头部金额现可点击**，复用既有键盘 `AmountEditBottomSheet` + `SmartKeyboard`（OCR/Voice/JPY-edit 三处已在用），新增可选 currency-aware（主单位小数）模式编辑原币金额。**未新建任何键盘组件。**
+- 卡内"原币金额"输入行被**移除**；`CurrencyLinkedEditFields` 现仅含两行：汇率（可编辑）+ 日元（换算，只读）。原币金额由头部键盘唯一承担展示+编辑，经 prop 注入卡片。
+- 外币卡上移至分类/日期卡之前。
+
+**单向换算不变量完全保留：** 仍是 `原币 × 汇率 → 日元`，日元只读、绝不回写，`convertToJpy()` 仍是唯一换算点（ADR-020）。本次改动只改"原币金额从哪里输入"（卡内行 → 头部键盘），不触碰 D-01 的派生关系、D-02 弹窗、D-03 toast 语义。JPY-native 行零回归（CURR-04）。
