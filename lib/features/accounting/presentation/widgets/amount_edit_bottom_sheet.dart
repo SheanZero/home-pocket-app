@@ -241,10 +241,11 @@ class AmountEditBottomSheet extends StatelessWidget {
                   onDot: dotEnabled ? onDot : null,
                   onDelete: onDelete,
                   onNext: onNext,
-                  // Foreign edit confirms with the 保存 (save) semantics; JPY
-                  // mode keeps the legacy record label (OCR/Voice/edit-JPY).
+                  // Foreign edit confirms with the 确认 (confirm) semantics
+                  // (write-back only, not a whole-entry save); JPY mode keeps the
+                  // record label (OCR/Voice/edit-JPY).
                   actionLabel: _isCurrencyAware
-                      ? S.of(context).save
+                      ? S.of(context).confirm
                       : S.of(context).record,
                   currencySymbol: currencySymbol,
                   currencyLabel: currencyLabel,
