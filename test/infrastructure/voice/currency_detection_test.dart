@@ -128,6 +128,21 @@ void main() {
       expect(r.detectedCurrency, 'CNY');
     });
 
+    // 260614-goh: in ja locale the bare 元 is JPY-native (D-08), NOT CNY — a
+    // Japanese speaker must say 人民元 for Chinese yuan. Locks the asymmetry so
+    // the zh→CNY rule above never leaks into the ja path.
+    test('bare 元 in ja locale → JPY-native (null), NOT CNY', () async {
+      final r = await parseWith('五十元', 'ja-JP');
+      expect(r.amount, 50);
+      expect(r.detectedCurrency, anyOf(isNull, 'JPY'));
+    });
+
+    test('ja 人民元 → CNY (explicit, unlike bare 元)', () async {
+      final r = await parseWith('100人民元', 'ja-JP');
+      expect(r.amount, 100);
+      expect(r.detectedCurrency, 'CNY');
+    });
+
     test('bare 円 → JPY', () async {
       final r = await parseWith('50円', 'ja-JP');
       expect(r.amount, 50);
