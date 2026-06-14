@@ -80,6 +80,7 @@ class ManualOneStepScreen extends ConsumerStatefulWidget {
     this.initialSatisfaction,
     this.voiceKeyword,
     this.entrySource = EntrySource.manual,
+    this.continuousMode = false,
   });
 
   final String bookId;
@@ -91,6 +92,11 @@ class ManualOneStepScreen extends ConsumerStatefulWidget {
   final int? initialSatisfaction;
   final String? voiceKeyword;
   final EntrySource entrySource;
+
+  /// 260614-iww: when true the screen stays open after each save (continuous
+  /// entry, opened via FAB long-press); when false a save pops back to the
+  /// previous page (single-tap entry).
+  final bool continuousMode;
 
   @override
   ConsumerState<ManualOneStepScreen> createState() =>
@@ -678,6 +684,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
               EntryModeSwitcher(
                 selectedMode: InputMode.manual,
                 bookId: widget.bookId,
+                continuousMode: widget.continuousMode,
               ),
 
               const SizedBox(height: 8),

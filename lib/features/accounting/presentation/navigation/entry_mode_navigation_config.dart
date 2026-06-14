@@ -15,22 +15,27 @@ class EntryModeRouteConfig {
   });
 
   final InputMode mode;
-  final Widget Function(String bookId) builder;
+
+  /// 260614-iww: builder receives [continuousMode] so manual↔voice switching
+  /// preserves the continuous-entry mode of the host screen. OCR ignores it.
+  final Widget Function(String bookId, bool continuousMode) builder;
   final bool replaceCurrent;
 }
 
 final _entryModeRouteConfigs = <InputMode, EntryModeRouteConfig>{
   InputMode.manual: EntryModeRouteConfig(
     mode: InputMode.manual,
-    builder: (bookId) => ManualOneStepScreen(bookId: bookId),
+    builder: (bookId, continuousMode) =>
+        ManualOneStepScreen(bookId: bookId, continuousMode: continuousMode),
   ),
   InputMode.ocr: EntryModeRouteConfig(
     mode: InputMode.ocr,
-    builder: (bookId) => OcrScannerScreen(bookId: bookId),
+    builder: (bookId, _) => OcrScannerScreen(bookId: bookId),
   ),
   InputMode.voice: EntryModeRouteConfig(
     mode: InputMode.voice,
-    builder: (bookId) => VoiceInputScreen(bookId: bookId),
+    builder: (bookId, continuousMode) =>
+        VoiceInputScreen(bookId: bookId, continuousMode: continuousMode),
   ),
 };
 
@@ -39,6 +44,7 @@ void navigateToEntryMode({
   required InputMode fromMode,
   required InputMode toMode,
   required String bookId,
+  bool continuousMode = false,
 }) {
   if (fromMode == toMode) return;
 
@@ -52,7 +58,7 @@ void navigateToEntryMode({
   if (config == null) return;
 
   final route = PageRouteBuilder<void>(
-    pageBuilder: (_, _, _) => config.builder(bookId),
+    pageBuilder: (_, _, _) => config.builder(bookId, continuousMode),
     transitionDuration: Duration.zero,
     reverseTransitionDuration: Duration.zero,
     transitionsBuilder: (_, _, _, child) => child,

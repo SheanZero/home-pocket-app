@@ -341,6 +341,18 @@
   "@recordingExitLink": {
     "description": "Inline link in the success toast that exits the entry screen back to the page before recording"
   },
+  "entrySavedDone": "Got it — recorded!",
+  "@entrySavedDone": {
+    "description": "Warm success toast shown after a single-tap save that pops back to the previous page (260614-iww)"
+  },
+  "continuousKeepGoing": "Saved — keep going!",
+  "@continuousKeepGoing": {
+    "description": "Warm success toast shown after a save in continuous (long-press) mode where the screen stays open (260614-iww)"
+  },
+  "continuousExitHint": "Tap exit anytime to finish",
+  "@continuousExitHint": {
+    "description": "Hint near the AppBar in continuous mode explaining the exit affordance returns to the previous page (260614-iww)"
+  },
   "noTransactionsYet": "No transactions yet",
   "@noTransactionsYet": {
     "description": "Empty transaction list"

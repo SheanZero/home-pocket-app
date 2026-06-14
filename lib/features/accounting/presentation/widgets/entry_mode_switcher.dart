@@ -11,11 +11,16 @@ class EntryModeSwitcher extends StatelessWidget {
     required this.selectedMode,
     required this.bookId,
     this.onBeforeNavigate,
+    this.continuousMode = false,
   });
 
   final InputMode selectedMode;
   final String bookId;
   final VoidCallback? onBeforeNavigate;
+
+  /// 260614-iww: preserved across manual↔voice switching so a continuous-entry
+  /// session keeps its mode when the user changes input method.
+  final bool continuousMode;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +36,7 @@ class EntryModeSwitcher extends StatelessWidget {
           fromMode: selectedMode,
           toMode: mode,
           bookId: bookId,
+          continuousMode: continuousMode,
         );
       },
       manualLabel: l10n.manualInput,

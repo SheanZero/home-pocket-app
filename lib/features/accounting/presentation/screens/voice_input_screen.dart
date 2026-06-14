@@ -49,10 +49,19 @@ import 'voice_recognition_event_handler_mixin.dart';
 /// implementation. Manages [StartSpeechRecognitionUseCase] lifecycle directly
 /// (not from provider) for correct stateful lifecycle binding.
 class VoiceInputScreen extends ConsumerStatefulWidget {
-  const VoiceInputScreen({super.key, required this.bookId, this.speechService});
+  const VoiceInputScreen({
+    super.key,
+    required this.bookId,
+    this.speechService,
+    this.continuousMode = false,
+  });
 
   final String bookId;
   final StartSpeechRecognitionUseCase? speechService;
+
+  /// 260614-iww: when true the screen stays open after each save (continuous
+  /// entry); when false a save pops back to the previous page (single-tap).
+  final bool continuousMode;
 
   @override
   ConsumerState<VoiceInputScreen> createState() => _VoiceInputScreenState();
@@ -694,6 +703,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
           EntryModeSwitcher(
             selectedMode: InputMode.voice,
             bookId: widget.bookId,
+            continuousMode: widget.continuousMode,
           ),
 
           const SizedBox(height: 8),

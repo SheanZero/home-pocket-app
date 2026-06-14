@@ -341,6 +341,18 @@
   "@recordingExitLink": {
     "description": "Inline link in the success toast that exits the entry screen back to the page before recording"
   },
+  "entrySavedDone": "记好啦！",
+  "@entrySavedDone": {
+    "description": "Warm success toast shown after a single-tap save that pops back to the previous page (260614-iww)"
+  },
+  "continuousKeepGoing": "记好啦，继续记吧",
+  "@continuousKeepGoing": {
+    "description": "Warm success toast shown after a save in continuous (long-press) mode where the screen stays open (260614-iww)"
+  },
+  "continuousExitHint": "点退出键可结束连续记账",
+  "@continuousExitHint": {
+    "description": "Hint near the AppBar in continuous mode explaining the exit affordance returns to the previous page (260614-iww)"
+  },
   "noTransactionsYet": "暂无交易记录",
   "@noTransactionsYet": {
     "description": "Empty transaction list"

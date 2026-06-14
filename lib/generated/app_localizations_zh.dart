@@ -255,6 +255,15 @@ class SZh extends S {
   String get recordingExitLink => '退出记账';
 
   @override
+  String get entrySavedDone => '记好啦！';
+
+  @override
+  String get continuousKeepGoing => '记好啦，继续记吧';
+
+  @override
+  String get continuousExitHint => '点退出键可结束连续记账';
+
+  @override
   String get noTransactionsYet => '暂无交易记录';
 
   @override

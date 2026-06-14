@@ -257,6 +257,15 @@ class SEn extends S {
   String get recordingExitLink => 'Exit';
 
   @override
+  String get entrySavedDone => 'Got it — recorded!';
+
+  @override
+  String get continuousKeepGoing => 'Saved — keep going!';
+
+  @override
+  String get continuousExitHint => 'Tap exit anytime to finish';
+
+  @override
   String get noTransactionsYet => 'No transactions yet';
 
   @override

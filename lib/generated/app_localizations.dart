@@ -567,6 +567,24 @@ abstract class S {
   /// **'Exit'**
   String get recordingExitLink;
 
+  /// Warm success toast shown after a single-tap save that pops back to the previous page (260614-iww)
+  ///
+  /// In en, this message translates to:
+  /// **'Got it — recorded!'**
+  String get entrySavedDone;
+
+  /// Warm success toast shown after a save in continuous (long-press) mode where the screen stays open (260614-iww)
+  ///
+  /// In en, this message translates to:
+  /// **'Saved — keep going!'**
+  String get continuousKeepGoing;
+
+  /// Hint near the AppBar in continuous mode explaining the exit affordance returns to the previous page (260614-iww)
+  ///
+  /// In en, this message translates to:
+  /// **'Tap exit anytime to finish'**
+  String get continuousExitHint;
+
   /// Empty transaction list
   ///
   /// In en, this message translates to:

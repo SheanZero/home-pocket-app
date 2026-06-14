@@ -15,11 +15,16 @@ class HomeBottomNavBar extends StatelessWidget {
     required this.currentIndex,
     required this.onTap,
     required this.onFabTap,
+    this.onFabLongPress,
   });
 
   final int currentIndex;
   final ValueChanged<int> onTap;
   final VoidCallback onFabTap;
+
+  /// 260614-iww: long-press the add-entry FAB to open the add screen in
+  /// continuous mode. Nullable — when null the FAB only responds to taps.
+  final VoidCallback? onFabLongPress;
 
   static const _icons = [
     Icons.home_outlined,
@@ -125,6 +130,7 @@ class HomeBottomNavBar extends StatelessWidget {
     final palette = context.palette;
     return GestureDetector(
       onTap: onFabTap,
+      onLongPress: onFabLongPress,
       child: Container(
         width: 62,
         height: 62,

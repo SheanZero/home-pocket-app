@@ -105,6 +105,60 @@ class MainShellScreen extends ConsumerWidget {
 
     final batchActive = ref.watch(batchSelectModeProvider).isActive;
 
+    // 260614-iww: open the manual add-entry screen, threading [continuousMode]
+    // from the FAB gesture (tap → false / long-press → true). The post-pop
+    // invalidate block is preserved verbatim so home data refreshes after the
+    // entry flow returns.
+    Future<void> openAddEntry({required bool continuousMode}) async {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => ManualOneStepScreen(
+            bookId: bookId,
+            continuousMode: continuousMode,
+          ),
+        ),
+      );
+      // Refresh data after returning from entry flow
+      final now = DateTime.now();
+      final currentMonthStart = DateTime(now.year, now.month, 1);
+      final currentMonthEnd = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+      ref.invalidate(
+        monthlyReportProvider(
+          bookId: bookId,
+          startDate: currentMonthStart,
+          endDate: currentMonthEnd,
+        ),
+      );
+      ref.invalidate(todayTransactionsProvider(bookId: bookId));
+      ref.invalidate(
+        bestJoyMomentProvider(
+          bookId: bookId,
+          startDate: currentMonthStart,
+          endDate: currentMonthEnd,
+        ),
+      );
+      final bookAsync = ref.read(bookByIdProvider(bookId: bookId));
+      if (bookAsync.hasValue) {
+        ref.invalidate(
+          happinessReportProvider(
+            bookId: bookId,
+            startDate: currentMonthStart,
+            endDate: currentMonthEnd,
+            currencyCode: bookAsync.value?.currency ?? 'JPY',
+          ),
+        );
+      }
+      // D-03: forward-wiring; no visible effect this phase (ListScreen is loading-only)
+      ref.invalidate(listTransactionsProvider(bookId: bookId));
+      ref.invalidate(
+        calendarDailyTotalsProvider(
+          bookId: bookId,
+          year: now.year,
+          month: now.month,
+        ),
+      );
+    }
+
     return FamilySyncNotificationRouteListener(
       child: Scaffold(
         body: Stack(
@@ -152,59 +206,16 @@ class MainShellScreen extends ConsumerWidget {
                       );
                       // Shopping items reactive via .watch() — NO invalidate needed here
                     } else {
-                      await Navigator.of(context).push<void>(
-                        MaterialPageRoute<void>(
-                          builder: (_) => ManualOneStepScreen(bookId: bookId),
-                        ),
-                      );
-                      // Refresh data after returning from entry flow
-                      final now = DateTime.now();
-                      final currentMonthStart = DateTime(now.year, now.month, 1);
-                      final currentMonthEnd = DateTime(
-                        now.year,
-                        now.month + 1,
-                        0,
-                        23,
-                        59,
-                        59,
-                      );
-                      ref.invalidate(
-                        monthlyReportProvider(
-                          bookId: bookId,
-                          startDate: currentMonthStart,
-                          endDate: currentMonthEnd,
-                        ),
-                      );
-                      ref.invalidate(todayTransactionsProvider(bookId: bookId));
-                      ref.invalidate(
-                        bestJoyMomentProvider(
-                          bookId: bookId,
-                          startDate: currentMonthStart,
-                          endDate: currentMonthEnd,
-                        ),
-                      );
-                      final bookAsync = ref.read(bookByIdProvider(bookId: bookId));
-                      if (bookAsync.hasValue) {
-                        ref.invalidate(
-                          happinessReportProvider(
-                            bookId: bookId,
-                            startDate: currentMonthStart,
-                            endDate: currentMonthEnd,
-                            currencyCode: bookAsync.value?.currency ?? 'JPY',
-                          ),
-                        );
-                      }
-                      // D-03: forward-wiring; no visible effect this phase (ListScreen is loading-only)
-                      ref.invalidate(listTransactionsProvider(bookId: bookId));
-                      ref.invalidate(
-                        calendarDailyTotalsProvider(
-                          bookId: bookId,
-                          year: now.year,
-                          month: now.month,
-                        ),
-                      );
+                      // 260614-iww: single tap → non-continuous add entry.
+                      await openAddEntry(continuousMode: false);
                     }
                   },
+                  // 260614-iww: long-press → continuous add entry. Gated to the
+                  // accounting path only; on the shopping tab it is a no-op so
+                  // the FAB behaves normally there.
+                  onFabLongPress: currentIndex == 3
+                      ? null
+                      : () => openAddEntry(continuousMode: true),
                 ),
               ),
           ],

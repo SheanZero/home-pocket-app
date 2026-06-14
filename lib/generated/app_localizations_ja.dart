@@ -255,6 +255,15 @@ class SJa extends S {
   String get recordingExitLink => '記録を終了';
 
   @override
+  String get entrySavedDone => '記録できました！';
+
+  @override
+  String get continuousKeepGoing => '記録しました。続けてどうぞ';
+
+  @override
+  String get continuousExitHint => '終了ボタンでいつでも戻れます';
+
+  @override
   String get noTransactionsYet => '取引がまだありません';
 
   @override

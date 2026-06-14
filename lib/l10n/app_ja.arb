@@ -341,6 +341,18 @@
   "@recordingExitLink": {
     "description": "Inline link in the success toast that exits the entry screen back to the page before recording"
   },
+  "entrySavedDone": "記録できました！",
+  "@entrySavedDone": {
+    "description": "Warm success toast shown after a single-tap save that pops back to the previous page (260614-iww)"
+  },
+  "continuousKeepGoing": "記録しました。続けてどうぞ",
+  "@continuousKeepGoing": {
+    "description": "Warm success toast shown after a save in continuous (long-press) mode where the screen stays open (260614-iww)"
+  },
+  "continuousExitHint": "終了ボタンでいつでも戻れます",
+  "@continuousExitHint": {
+    "description": "Hint near the AppBar in continuous mode explaining the exit affordance returns to the previous page (260614-iww)"
+  },
   "noTransactionsYet": "取引がまだありません",
   "@noTransactionsYet": {
     "description": "Empty transaction list"
