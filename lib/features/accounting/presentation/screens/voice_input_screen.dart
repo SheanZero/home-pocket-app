@@ -14,6 +14,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/accounting/domain/models/transaction.dart';
 import '../../../../generated/app_localizations.dart';
+import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../../shared/utils/currency_conversion.dart'
     show convertToJpy, subunitToUnitFor;
 import '../../../../shared/widgets/feedback_toast.dart';
@@ -112,6 +113,14 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
   /// dropped — voice tab's `_canSave` no longer gates on category, and the
   /// form's internal `_category` is the only save-time source of truth.
   int _hostAmount = 0;
+
+  /// Quick task 260614-goh: the active currency shown by the headline pill
+  /// (`AmountDisplay`). Defaults to JPY (the native path). Set to a foreign ISO
+  /// code ONLY when `_pushVoiceForeignTriple` actually pushes a complete triple
+  /// (i.e. a rate resolved) — so the pill never claims a currency the saved row
+  /// does not carry. A JPY-native utterance (or a RateUnavailable foreign one)
+  /// keeps/reverts this to 'JPY'.
+  String _displayCurrency = 'JPY';
 
   /// Save button enable predicate — voice tab keeps the button clickable at
   /// all times except while a submit is in flight.
@@ -379,16 +388,22 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     // CreateTransactionUseCase rejected it, and the foreign utterance never saved.
     // Null = JPY-native utterance → no-op (the JPY path stays byte-identical,
     // CURR-04 / Pitfall 1).
+    // 260614-goh: track the currency the headline pill should show. The pill
+    // only switches when the triple is actually pushed (rate resolved); a
+    // RateUnavailable foreign utterance stays JPY so the pill matches the
+    // JPY-native row that will be saved.
+    var nextCurrency = 'JPY';
     final detectedCurrency = data.detectedCurrency;
     if (amount > 0 &&
         detectedCurrency != null &&
         detectedCurrency.isNotEmpty) {
-      await _pushVoiceForeignTriple(
+      final switched = await _pushVoiceForeignTriple(
         state: state,
         currency: detectedCurrency,
         wholeUnitAmount: amount,
         date: data.parsedDate ?? DateTime.now(),
       );
+      if (switched) nextCurrency = detectedCurrency;
     }
 
     // B-2 host-cache mirror — AmountDisplay sees the new value atomically.
@@ -399,6 +414,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     // is already guarded by `if (category != null)` for the same reason.
     setState(() {
       _hostAmount = amount;
+      _displayCurrency = nextCurrency;
     });
   }
 
@@ -416,24 +432,28 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
   /// fields and never ship a partial triple. never-block-save (P41): the fetch
   /// is wrapped so it can never throw/block the commit. Riverpod 3: `ref.read`
   /// (one-shot side-effect, not a reactive dependency).
-  Future<void> _pushVoiceForeignTriple({
+  ///
+  /// Returns `true` when a complete triple was pushed (the row is now foreign,
+  /// so the caller switches the headline pill), `false` when it degraded to
+  /// JPY-native (260614-goh — keeps the pill and the saved row in agreement).
+  Future<bool> _pushVoiceForeignTriple({
     required TransactionDetailsFormState state,
     required String currency,
     required int wholeUnitAmount,
     required DateTime date,
   }) async {
     final minorUnits = wholeUnitAmount * subunitToUnitFor(currency);
-    if (minorUnits <= 0) return;
+    if (minorUnits <= 0) return false;
     try {
       final useCase = ref.read(appGetExchangeRateUseCaseProvider);
       final withSignal = await useCase.execute(
         GetExchangeRateParams(currency: currency, date: date),
       );
-      if (!mounted) return;
+      if (!mounted) return false;
       final rate = _extractRate(withSignal.result);
       if (rate == null) {
         // RateUnavailable → JPY-native: spoken amount persists, no triple.
-        return;
+        return false;
       }
       final jpy = convertToJpy(
         originalMinorUnits: minorUnits,
@@ -446,8 +466,10 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
         originalAmount: minorUnits,
         appliedRate: rate,
       );
+      return true;
     } catch (_) {
       // never-block-save: degrade to JPY-native (no triple) like the manual path.
+      return false;
     }
   }
 
@@ -630,6 +652,12 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
 
     // BLOCKER B-2: AmountDisplay takes a String — render the host-cache mirror.
     final amountStr = _hostAmount > 0 ? _hostAmount.toString() : '';
+    // 260614-goh: derive the headline pill glyph for the active currency the
+    // same way the manual screen / selector sheet does (strip digits/separators
+    // from a formatted zero) so every surface shows the same symbol.
+    final pillLocale = ref.watch(currentLocaleProvider).value ?? const Locale('ja');
+    final pillSymbol = NumberFormatter.formatCurrency(0, _displayCurrency, pillLocale)
+        .replaceAll(RegExp(r'[\d.,\s]'), '');
     // Voice-correction learning keyword (Phase 18 D-09 hook) — only meaningful
     // when a parse result exists. Keep the helper signature untouched; pass
     // null until a parse runs.
@@ -687,7 +715,11 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
               );
             },
             behavior: HitTestBehavior.opaque,
-            child: AmountDisplay(amount: amountStr),
+            child: AmountDisplay(
+              amount: amountStr,
+              currencySymbol: pillSymbol,
+              currencyLabel: _displayCurrency,
+            ),
           ),
 
           // D-01: scrollable embedded form replaces the read-only result card.

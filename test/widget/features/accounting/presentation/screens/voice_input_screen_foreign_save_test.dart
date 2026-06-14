@@ -294,6 +294,27 @@ void main() {
     detectedCurrency: 'USD',
   );
 
+  VoiceParseResult foreignParse(String raw, String currency, int amount) =>
+      VoiceParseResult(
+        rawText: raw,
+        amount: amount,
+        parsedDate: DateTime(2026, 5, 25),
+        categoryMatch: const CategoryMatchResult(
+          categoryId: 'cat_food_cafe',
+          confidence: 0.9,
+          source: MatchSource.keyword,
+        ),
+        ledgerType: LedgerType.daily,
+        detectedCurrency: currency,
+      );
+
+  /// The headline currency pill (`AmountDisplay`) renders [currencyLabel] as a
+  /// Text inside the `amount_currency_badge` container.
+  Finder pillLabel(String code) => find.descendant(
+    of: find.byKey(const ValueKey('amount_currency_badge')),
+    matching: find.text(code),
+  );
+
   testWidgets(
     'CR-01: spoken USD persists a COMPLETE triple with converted JPY amount',
     (tester) async {
@@ -385,6 +406,127 @@ void main() {
       expect(params.originalAmount, isNull);
       expect(params.appliedRate, isNull);
       expect(params.amount, 50);
+    },
+  );
+
+  // ── Quick task 260614-goh: the headline currency pill must SWITCH to the
+  // spoken currency. Previously AmountDisplay was rendered without a currency,
+  // so the pill stayed "¥ JPY" even though the form state / saved row switched —
+  // the user saw "货币没有切换". ─────────────────────────────────────────────
+  testWidgets(
+    '260614-goh: spoken USD switches the headline pill to USD',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      const utterance = '今天吃饭用了99美元';
+      final speech = CapturingStartSpeechRecognitionUseCase();
+      final parse = _FakeParseVoiceInputUseCase({
+        utterance: foreignParse(utterance, 'USD', 99),
+      });
+      final rate = _FakeRateUseCase(
+        RateFetched(
+          rate: '150.00',
+          currency: 'USD',
+          rateDate: DateTime(2026, 5, 25),
+          source: 'frankfurter',
+        ),
+      );
+      final create = _CapturingCreateTransactionUseCase();
+
+      await tester.pumpWidget(
+        buildSubject(
+          speechService: speech,
+          parseUseCase: parse,
+          rateUseCase: rate,
+          createUseCase: create,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Before speaking, the pill is the JPY default.
+      expect(pillLabel('JPY'), findsOneWidget);
+
+      await commit(tester, speech, utterance);
+
+      // After a foreign utterance with a resolved rate, the pill shows USD.
+      expect(pillLabel('USD'), findsOneWidget);
+      expect(pillLabel('JPY'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    '260614-goh: spoken 人民币 switches the headline pill to CNY',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      const utterance = '购买手机用了9999人民币';
+      final speech = CapturingStartSpeechRecognitionUseCase();
+      final parse = _FakeParseVoiceInputUseCase({
+        utterance: foreignParse(utterance, 'CNY', 9999),
+      });
+      final rate = _FakeRateUseCase(
+        RateFetched(
+          rate: '20.00',
+          currency: 'CNY',
+          rateDate: DateTime(2026, 5, 25),
+          source: 'frankfurter',
+        ),
+      );
+      final create = _CapturingCreateTransactionUseCase();
+
+      await tester.pumpWidget(
+        buildSubject(
+          speechService: speech,
+          parseUseCase: parse,
+          rateUseCase: rate,
+          createUseCase: create,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await commit(tester, speech, utterance);
+
+      expect(pillLabel('CNY'), findsOneWidget);
+      expect(pillLabel('JPY'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    '260614-goh: RateUnavailable keeps the pill JPY (matches JPY-native save)',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      const utterance = '五十美元 咖啡';
+      final speech = CapturingStartSpeechRecognitionUseCase();
+      final parse = _FakeParseVoiceInputUseCase({utterance: usdParse(utterance)});
+      final rate = _FakeRateUseCase(RateUnavailable(currency: 'USD'));
+      final create = _CapturingCreateTransactionUseCase();
+
+      await tester.pumpWidget(
+        buildSubject(
+          speechService: speech,
+          parseUseCase: parse,
+          rateUseCase: rate,
+          createUseCase: create,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await commit(tester, speech, utterance);
+
+      // No rate → the row stays JPY-native on save, so the pill must stay JPY
+      // (no silent USD-pill / JPY-save mismatch).
+      expect(pillLabel('JPY'), findsOneWidget);
+      expect(pillLabel('USD'), findsNothing);
     },
   );
 }
