@@ -81,6 +81,57 @@ void main() {
       expect(find.text('F'), findsOneWidget);
     });
 
+    testWidgets('foreign row shows the original-currency annotation', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: HomeTransactionTile(
+              l1Icon: Icons.restaurant,
+              tagText: '生',
+              tagBgColor: const Color(0xFFE8F0F8),
+              tagTextColor: AppPalette.light.daily,
+              merchant: 'Cafe',
+              category: '外出就餐',
+              categoryColor: const Color(0xFFABABAB),
+              formattedAmount: '¥1,956,891',
+              amountColor: const Color(0xFF1E2432),
+              foreignAnnotation: r'$12,211',
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('¥1,956,891'), findsOneWidget);
+      expect(find.text(r'$12,211'), findsOneWidget);
+    });
+
+    testWidgets('domestic row (no annotation) shows only the JPY amount', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: HomeTransactionTile(
+              l1Icon: Icons.restaurant,
+              tagText: '生',
+              tagBgColor: const Color(0xFFE8F0F8),
+              tagTextColor: AppPalette.light.daily,
+              category: '外出就餐',
+              categoryColor: const Color(0xFFABABAB),
+              formattedAmount: '¥110',
+              amountColor: const Color(0xFF1E2432),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('¥110'), findsOneWidget);
+      // No foreign annotation rendered for domestic rows.
+      expect(find.textContaining(r'$'), findsNothing);
+    });
+
     testWidgets('joy type tints the leading L1 icon with joy color', (
       tester,
     ) async {

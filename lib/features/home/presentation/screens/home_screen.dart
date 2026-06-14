@@ -26,6 +26,7 @@ import '../providers/state_shadow_books.dart';
 import '../providers/state_today_transactions.dart';
 import '../../../accounting/presentation/screens/transaction_edit_screen.dart';
 import '../../../../shared/utils/invalidate_transaction_dependents.dart';
+import '../../../../shared/utils/currency_conversion.dart' show subunitToUnitFor;
 import '../widgets/family_invite_banner.dart';
 import '../widgets/hero_header.dart';
 import '../widgets/home_hero_card.dart';
@@ -305,6 +306,7 @@ class HomeScreen extends ConsumerWidget {
                     children: transactions.map((tx) {
                       final isSoul = tx.ledgerType == LedgerType.joy;
                       return HomeTransactionTile(
+                        foreignAnnotation: _foreignAnnotation(tx, locale),
                         l1Icon: parentCategoryIconFromId(tx.categoryId),
                         tagText: isGroupMode
                             ? _memberInitial(tx)
@@ -397,6 +399,28 @@ class HomeScreen extends ConsumerWidget {
   // WR-01 fix: use FormatterService instead of hardcoded JPY NumberFormat.
   String _formatAmount(Transaction tx, String currencyCode, Locale locale) =>
       _fmt.formatCurrency(tx.amount, currencyCode, locale);
+
+  /// Original-currency annotation for FOREIGN rows only — mirrors
+  /// `list_screen` so Home recent items show the foreign amount under the JPY
+  /// amount. Null for JPY/domestic rows (the tile then renders the bare
+  /// amount). Stored original MINOR units → major via FormatterService with
+  /// trimWholeFraction (260614-dx1): whole amounts drop ".00" ($12,211), real
+  /// fractions keep their decimals (kr12.50).
+  String? _foreignAnnotation(Transaction tx, Locale locale) {
+    final originalCurrency = tx.originalCurrency;
+    final originalAmount = tx.originalAmount;
+    if (originalCurrency == null ||
+        originalCurrency.toUpperCase() == 'JPY' ||
+        originalAmount == null) {
+      return null;
+    }
+    return _fmt.formatCurrency(
+      originalAmount / subunitToUnitFor(originalCurrency),
+      originalCurrency,
+      locale,
+      trimWholeFraction: true,
+    );
+  }
 
   /// Extracts the first character of a member identifier for group mode.
   String _memberInitial(Transaction tx) {

@@ -28,6 +28,7 @@ class HomeTransactionTile extends StatelessWidget {
     required this.amountColor,
     this.merchant,
     this.satisfactionValue,
+    this.foreignAnnotation,
     this.onTap,
   });
 
@@ -61,6 +62,12 @@ class HomeTransactionTile extends StatelessWidget {
   /// Optional satisfaction value (1–10) for joy-ledger rows; null hides the
   /// face. Rendered as the shared [SatisfactionFaceIcon] (ADR-014 mapping).
   final int? satisfactionValue;
+
+  /// Optional pre-formatted original-currency annotation for FOREIGN rows
+  /// (e.g. "$12,211"), computed by the parent — mirrors `ListTransactionTile`
+  /// so Home recent items show the foreign amount under the JPY amount. Null
+  /// for JPY/domestic rows → the bare amount Text renders unchanged.
+  final String? foreignAnnotation;
 
   /// Optional tap callback.
   final VoidCallback? onTap;
@@ -146,11 +153,37 @@ class HomeTransactionTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            // Amount — amountSmall with tabular figures
-            Text(
-              formattedAmount,
-              style: AppTextStyles.amountSmall.copyWith(color: amountColor),
-            ),
+            // Amount — amountSmall with tabular figures.
+            //
+            // Foreign rows show a small secondary original-currency annotation
+            // (labelMedium / textSecondary) under the JPY amount, mirroring
+            // ListTransactionTile (DISP-02). JPY/domestic rows render the bare
+            // Text unchanged.
+            if (foreignAnnotation == null)
+              Text(
+                formattedAmount,
+                style: AppTextStyles.amountSmall.copyWith(color: amountColor),
+              )
+            else
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    formattedAmount,
+                    style: AppTextStyles.amountSmall.copyWith(
+                      color: amountColor,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    foreignAnnotation!,
+                    style: AppTextStyles.labelMedium.copyWith(
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
           ],
         ),
       ),
