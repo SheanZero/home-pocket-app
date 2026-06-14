@@ -97,6 +97,32 @@ int subunitToUnitFor(String currencyCode) {
   return math.pow(10, currencyFractionDigitsFor(currencyCode)).toInt();
 }
 
+/// Formats a minor-unit amount in [currency] as its MAJOR-unit display string,
+/// dropping a trailing all-zero fraction so whole foreign amounts read cleaner
+/// (260614-dx1: "12,211.00 USD" → "12,211 USD"; the comma grouping is added by
+/// the display widget downstream).
+///
+/// Returns '' for a non-positive amount (callers treat empty as "0").
+///
+/// Decimals/subunit come from the single decimals source
+/// ([currencyFractionDigitsFor] / [subunitToUnitFor]) — no new decimal logic.
+///
+/// - decimals == 0 (JPY/KRW): integer string, UNCHANGED — never had a dot.
+/// - decimals > 0: only an ENTIRELY-zero fraction is dropped (12.00 → "12");
+///   real fractional digits stay (12.50 stays "12.50", 12.05 stays "12.05").
+String formatMinorAsMajor(int minorUnits, String currency) {
+  if (minorUnits <= 0) return '';
+  final decimals = currencyFractionDigitsFor(currency);
+  final subunit = subunitToUnitFor(currency);
+  if (decimals == 0) return (minorUnits ~/ subunit).toString();
+  final fixed = (minorUnits / subunit).toStringAsFixed(decimals);
+  final dot = fixed.indexOf('.');
+  if (dot < 0) return fixed;
+  final fraction = fixed.substring(dot + 1);
+  final isAllZero = fraction.split('').every((c) => c == '0');
+  return isAllZero ? fixed.substring(0, dot) : fixed;
+}
+
 /// ISO 4217 currency code shape: exactly 3 uppercase ASCII letters.
 final _iso4217 = RegExp(r'^[A-Z]{3}$');
 

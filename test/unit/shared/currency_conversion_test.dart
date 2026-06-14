@@ -241,4 +241,29 @@ void main() {
       }
     });
   });
+
+  group('formatMinorAsMajor', () {
+    test('USD whole number drops the all-zero ".00" (260614-dx1)', () {
+      // 1,221,100 cents = 12,211.00 USD → "12211" (no useless ".00")
+      expect(formatMinorAsMajor(1221100, 'USD'), equals('12211'));
+    });
+
+    test('USD fractional keeps its decimals (NOT trimmed to "12.5")', () {
+      // 1250 cents = 12.50 USD — real fractional digits must stay.
+      expect(formatMinorAsMajor(1250, 'USD'), equals('12.50'));
+    });
+
+    test('USD two-digit fraction kept', () {
+      expect(formatMinorAsMajor(1205, 'USD'), equals('12.05'));
+    });
+
+    test('JPY whole number — 0-decimal path unchanged, no dot', () {
+      expect(formatMinorAsMajor(5000, 'JPY'), equals('5000'));
+    });
+
+    test('non-positive returns empty string', () {
+      expect(formatMinorAsMajor(0, 'USD'), equals(''));
+      expect(formatMinorAsMajor(-100, 'USD'), equals(''));
+    });
+  });
 }
