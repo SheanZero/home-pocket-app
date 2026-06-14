@@ -516,6 +516,9 @@ class VoiceTextParser {
             r'\d[\d,.]*\s*(?:' +
                 VoiceCurrencySuffixes.regexAlternation +
                 r')',
+            // 260614-goh: case-insensitive so lowercase English currency
+            // tokens strip STT-capitalized words too.
+            caseSensitive: false,
           ),
           '',
         )

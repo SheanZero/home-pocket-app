@@ -179,4 +179,98 @@ void main() {
       expect(r.amount, 35);
     });
   });
+
+  // ─── Quick task 260614-goh: natural/colloquial + trilingual expansion ───
+  // User report: 「语音输入说美元和人民币的时候没有切换货币」. Root cause: the
+  // natural words users actually speak (人民币 / 美金) were never in the token
+  // table, and English was deferred. Decision (--discuss): cover EVERY
+  // supported currency (USD/EUR/CNY/HKD/GBP/KRW/TWD/AUD/CAD/SGD) in zh/ja/en.
+  group('260614-goh: colloquial zh words', () {
+    const cases = <_CurrencyCase>[
+      _CurrencyCase('一百人民币', 100, 'CNY'),
+      _CurrencyCase('一百人民幣', 100, 'CNY'),
+      _CurrencyCase('五十美金', 50, 'USD'),
+      _CurrencyCase('三百港元', 300, 'HKD'),
+      _CurrencyCase('五十澳币', 50, 'AUD'),
+      _CurrencyCase('八十加币', 80, 'CAD'),
+      _CurrencyCase('一百韩元', 100, 'KRW'),
+      _CurrencyCase('两百台币', 200, 'TWD'),
+      _CurrencyCase('五十新加坡元', 50, 'SGD'),
+    ];
+    for (final c in cases) {
+      test('${c.input} -> ${c.amount} ${c.currency}', () async {
+        final r = await parseWith(c.input, 'zh-CN');
+        expect(r.amount, c.amount);
+        expect(r.detectedCurrency, c.currency);
+      });
+    }
+  });
+
+  group('260614-goh: ja currency words (full supported set)', () {
+    const cases = <_CurrencyCase>[
+      _CurrencyCase('100米ドル', 100, 'USD'),
+      _CurrencyCase('100人民元', 100, 'CNY'),
+      _CurrencyCase('300カナダドル', 300, 'CAD'),
+      _CurrencyCase('80オーストラリアドル', 80, 'AUD'),
+      _CurrencyCase('1000韓国ウォン', 1000, 'KRW'),
+      _CurrencyCase('200台湾ドル', 200, 'TWD'),
+      _CurrencyCase('50シンガポールドル', 50, 'SGD'),
+    ];
+    for (final c in cases) {
+      test('${c.input} -> ${c.amount} ${c.currency}', () async {
+        final r = await parseWith(c.input, 'ja-JP');
+        expect(r.amount, c.amount);
+        expect(r.detectedCurrency, c.currency);
+      });
+    }
+  });
+
+  group('260614-goh: en currency words (digits; STT-style)', () {
+    const cases = <_CurrencyCase>[
+      _CurrencyCase('100 dollars', 100, 'USD'),
+      _CurrencyCase('100 US dollars', 100, 'USD'),
+      _CurrencyCase('50 euros', 50, 'EUR'),
+      _CurrencyCase('30 pounds', 30, 'GBP'),
+      _CurrencyCase('200 yuan', 200, 'CNY'),
+      _CurrencyCase('300 Hong Kong dollars', 300, 'HKD'),
+      _CurrencyCase('80 Australian dollars', 80, 'AUD'),
+      _CurrencyCase('80 Canadian dollars', 80, 'CAD'),
+      _CurrencyCase('1000 Korean won', 1000, 'KRW'),
+      _CurrencyCase('200 Taiwan dollars', 200, 'TWD'),
+      _CurrencyCase('50 Singapore dollars', 50, 'SGD'),
+    ];
+    for (final c in cases) {
+      test('${c.input} -> ${c.amount} ${c.currency}', () async {
+        // null localeId → ja-then-zh fallback; detection is locale-independent.
+        final r = await parseWith(c.input, 'en-US');
+        expect(r.amount, c.amount);
+        expect(r.detectedCurrency, c.currency);
+      });
+    }
+  });
+
+  group('260614-goh: en JPY-native stays null (no foreign conversion)', () {
+    test('100 yen → JPY-native (null)', () async {
+      final r = await parseWith('100 yen', 'en-US');
+      expect(r.amount, 100);
+      expect(r.detectedCurrency, anyOf(isNull, 'JPY'));
+    });
+  });
+
+  group('260614-goh: containment + leftmost preserved with new tokens', () {
+    test('zh 港元 wins over bare 元', () async {
+      final r = await parseWith('三百港元', 'zh-CN');
+      expect(r.detectedCurrency, 'HKD');
+    });
+
+    test('en Canadian dollar wins over bare dollar', () async {
+      final r = await parseWith('80 Canadian dollars', 'en-US');
+      expect(r.detectedCurrency, 'CAD');
+    });
+
+    test('en lowercase still detected (case-insensitive)', () async {
+      final r = await parseWith('100 dollars', 'en-US');
+      expect(r.detectedCurrency, 'USD');
+    });
+  });
 }

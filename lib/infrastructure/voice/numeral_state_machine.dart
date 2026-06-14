@@ -116,13 +116,19 @@ abstract class NumeralStateMachine {
   ///
   /// Pure: [text] is not mutated; a new string token (or null) is returned.
   String? detectCurrencyToken(String text) {
+    // Quick task 260614-goh: lowercase the haystack so English tokens (stored
+    // lowercase in [VoiceCurrencySuffixes.all]) match regardless of STT
+    // capitalization ("Dollars", "Hong Kong dollars"). CJK toLowerCase is the
+    // identity, so zh/ja matching is unaffected. The ORIGINAL-cased token is
+    // still returned (for the tokenToIso lookup at the call site).
+    final haystack = text.toLowerCase();
     String? bestForeign;
     var bestForeignIndex = -1;
     String? bestNative;
     var bestNativeIndex = -1;
 
     for (final token in VoiceCurrencySuffixes.all) {
-      final idx = text.indexOf(token);
+      final idx = haystack.indexOf(token.toLowerCase());
       if (idx < 0) continue;
       final isExplicitForeign =
           VoiceCurrencySuffixes.tokenToIso.containsKey(token);

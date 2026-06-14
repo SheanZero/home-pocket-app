@@ -194,11 +194,14 @@ class ParseVoiceInputUseCase {
 
     // Remove amount patterns (numbers with currency markers). Longer suffix
     // tokens (e.g. '块钱') win via VoiceCurrencySuffixes.all ordering.
+    // 260614-goh: caseSensitive:false so lowercase English tokens strip
+    // STT-capitalized words ("Dollars") too, mirroring _extractArabicAmount.
     remaining = remaining.replaceAll(
       RegExp(
         r'[¥￥]?\s*[\d,]+\.?\d*\s*(?:' +
             VoiceCurrencySuffixes.regexAlternation +
             r')?',
+        caseSensitive: false,
       ),
       '',
     );
@@ -210,7 +213,10 @@ class ParseVoiceInputUseCase {
     // token left behind. Longest-first ordering inside `regexAlternation`
     // ensures multi-char tokens ('块钱', '日元') are consumed whole, not split.
     remaining = remaining.replaceAll(
-      RegExp('(?:${VoiceCurrencySuffixes.regexAlternation})'),
+      RegExp(
+        '(?:${VoiceCurrencySuffixes.regexAlternation})',
+        caseSensitive: false,
+      ),
       '',
     );
 
