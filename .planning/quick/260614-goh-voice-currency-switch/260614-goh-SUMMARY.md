@@ -2,10 +2,20 @@
 status: complete
 quick_id: 260614-goh
 date: 2026-06-14
-commit: 117aecd5
+commit: 117aecd5,d2b9df8e
 ---
 
 # Quick Task 260614-goh — Summary
+
+> **更新 (commit `d2b9df8e`)**：真机复现发现第一处修复（识别词）必要但不充分 ——
+> 即使识别成功、表单/落库已切到 USD/CNY，**头部货币药丸仍显示 ¥ JPY**，用户看到的
+> 「货币没有切换」其实是这个显示 bug。根因：`voice_input_screen` 调用
+> `AmountDisplay(amount: …)` 时**没传 currency**，药丸硬编码默认 JPY。
+> 修复：新增 `_displayCurrency`，仅当 `_pushVoiceForeignTriple` 真正推送完整
+> triple（汇率解析成功）时切到外币 ISO，并把 symbol+label 传给 `AmountDisplay`。
+> `RateUnavailable` 时保持 JPY，确保药丸与落库的 JPY-native 行一致（不出现
+> 药丸 USD / 实存 JPY 的静默错配）。+3 widget 测试（USD/CNY 切换、RateUnavailable 保持 JPY）。
+> 在线（有汇率）即可端到端生效；这正是真机复现时缺失的一环。
 
 ## What changed
 
