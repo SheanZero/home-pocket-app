@@ -565,21 +565,29 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
       if (!mounted) return;
       result.when(
         success: (_) {
-          // 260603-nr1 #1: keep the page open for continuous entry — show a
-          // top success toast and reset the form instead of popping.
-          // Ask 2 follow-up: longer-lived toast that reads "可以继续记账" plus an
-          // inline "退出记账" link returning to the page before recording.
-          showSuccessFeedback(
-            context,
-            S.of(context).successKeepGoing,
-            duration: const Duration(seconds: 5),
-            actionLabel: S.of(context).recordingExitLink,
-            onAction: () {
-              if (!mounted) return;
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            },
-          );
-          _resetForContinuousEntry();
+          // 260614-iww: branch on continuousMode.
+          if (widget.continuousMode) {
+            // Continuous (FAB long-press) entry: keep the page open, show a
+            // longer-lived warm "keep going" toast with an inline exit link
+            // that returns ONCE to the page before recording, then reset the
+            // form in place for the next entry.
+            showSuccessFeedback(
+              context,
+              S.of(context).continuousKeepGoing,
+              duration: const Duration(seconds: 5),
+              actionLabel: S.of(context).recordingExitLink,
+              onAction: () {
+                if (!mounted) return;
+                Navigator.of(context).pop();
+              },
+            );
+            _resetForContinuousEntry();
+          } else {
+            // Single-tap entry: show a warm "recorded" toast then pop back to
+            // the previous page (no form reset — the screen is closing).
+            showSuccessFeedback(context, S.of(context).entrySavedDone);
+            Navigator.of(context).pop();
+          }
         },
         validationError: (msg) {
           showErrorFeedback(context, msg);
@@ -672,6 +680,24 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
           ),
         ),
         centerTitle: true,
+        // 260614-iww: continuous mode surfaces a discoverable on-page exit
+        // control (the AppBar close already pops once; this adds an explicit
+        // labelled exit so the affordance is obvious). accentPrimary per palette
+        // — never a hardcoded hex.
+        actions: widget.continuousMode
+            ? [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(
+                    l10n.recordingExitLink,
+                    style: AppTextStyles.labelMedium.copyWith(
+                      color: palette.accentPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ]
+            : null,
       ),
       body: Stack(
         children: [
@@ -679,6 +705,21 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
           Column(
             children: [
               const SizedBox(height: 8),
+
+              // 260614-iww: continuous-mode hint explaining the exit affordance.
+              if (widget.continuousMode)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 2,
+                  ),
+                  child: Text(
+                    l10n.continuousExitHint,
+                    style: AppTextStyles.caption.copyWith(
+                      color: palette.textTertiary,
+                    ),
+                  ),
+                ),
 
               // D-04: mode switcher at top
               EntryModeSwitcher(

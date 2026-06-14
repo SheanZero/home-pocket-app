@@ -518,19 +518,53 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
       if (!mounted) return;
       result.when(
         success: (tx) {
-          showSuccessFeedback(context, S.of(context).transactionSaved);
-          // Phase 23 D-08 / WR-04: joy-ledger save defers Navigator.popUntil
-          // until JoyCelebrationOverlay's onDismissed fires so the joy moment
-          // is visible. Survival-ledger save pops immediately (no overlay).
-          if (tx.ledgerType == LedgerType.joy) {
-            _formKey.currentState?.waitForCelebrationDismissed().then((_) {
-              // RESEARCH Pitfall 4: app may background mid-celebration;
-              // check mounted before accessing Navigator.
+          // 260614-iww: branch on continuousMode (mirrors the manual screen).
+          // The joy-ledger celebration overlay MUST still play before any pop
+          // (Phase 23 D-08 / WR-04); in continuous mode (no pop) the keep-going
+          // toast + form reset run AFTER the celebration where applicable.
+          if (widget.continuousMode) {
+            // Continuous entry: stay open, reset the form in place, show a
+            // longer warm "keep going" toast with an exit link that pops ONCE.
+            void keepGoing() {
               if (!mounted) return;
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            });
+              showSuccessFeedback(
+                context,
+                S.of(context).continuousKeepGoing,
+                duration: const Duration(seconds: 5),
+                actionLabel: S.of(context).recordingExitLink,
+                onAction: () {
+                  if (!mounted) return;
+                  Navigator.of(context).pop();
+                },
+              );
+              _resetForContinuousEntry();
+            }
+
+            if (tx.ledgerType == LedgerType.joy) {
+              // Let the joy celebration play first, then keep going.
+              _formKey.currentState?.waitForCelebrationDismissed().then((_) {
+                keepGoing();
+              });
+            } else {
+              keepGoing();
+            }
           } else {
-            Navigator.of(context).popUntil((route) => route.isFirst);
+            // Single-tap entry: warm "recorded" toast, then pop ONCE back to
+            // the previous page (was popUntil(isFirst)).
+            showSuccessFeedback(context, S.of(context).entrySavedDone);
+            // Phase 23 D-08 / WR-04: joy-ledger save defers the pop until
+            // JoyCelebrationOverlay's onDismissed fires so the joy moment is
+            // visible. Survival-ledger save pops immediately (no overlay).
+            if (tx.ledgerType == LedgerType.joy) {
+              _formKey.currentState?.waitForCelebrationDismissed().then((_) {
+                // RESEARCH Pitfall 4: app may background mid-celebration;
+                // check mounted before accessing Navigator.
+                if (!mounted) return;
+                Navigator.of(context).pop();
+              });
+            } else {
+              Navigator.of(context).pop();
+            }
           }
         },
         validationError: (msg) {
@@ -543,6 +577,35 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen>
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
+  }
+
+  /// 260614-iww: reset the voice form in place after a continuous-mode save so
+  /// the user can keep recording without the page closing. Mirrors the manual
+  /// screen's `_resetForContinuousEntry`: clears amount / merchant / note,
+  /// reverts the currency to the JPY-native path, resets the date to today, and
+  /// drops the in-flight transcript + parse state so the mic is ready again.
+  Future<void> _resetForContinuousEntry() async {
+    if (!mounted) return;
+    final state = _formKey.currentState;
+    state?.updateAmount(0);
+    state?.updateCurrencyTriple(
+      originalCurrency: null,
+      originalAmount: null,
+      appliedRate: null,
+    );
+    state?.updateMerchant('');
+    state?.updateNote('');
+    state?.updateDate(DateTime.now());
+    if (!mounted) return;
+    setState(() {
+      _hostAmount = 0;
+      _displayCurrency = 'JPY';
+      _partialText = '';
+      _finalText = '';
+      _parseResult = null;
+      _mergedAmount = null;
+      _soundLevel = 0.0;
+    });
   }
 
   void _onSoundLevel(double level) {

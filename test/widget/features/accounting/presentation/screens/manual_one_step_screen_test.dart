@@ -606,14 +606,101 @@ void main() {
       // — so verify(...).called(1) sees zero calls.
       verify(() => mockCreateUseCase.execute(any())).called(1);
 
-      // 260603-nr1 #1: the screen now stays open for continuous entry — it must
-      // NOT pop after a successful save (the legacy Navigator.popUntil was
-      // removed). A top success toast is shown and the form resets in place.
+      // 260614-iww: single-tap (continuousMode:false, the default) save now pops
+      // back to the previous page with a warm entrySavedDone toast. (The legacy
+      // 260603-nr1 always-keep-going behavior is now gated behind continuousMode,
+      // which only the FAB long-press path sets.)
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('manual-one-step-screen')),
+        findsNothing,
+        reason:
+            'single-tap save (continuousMode:false) must pop back to the previous page (260614-iww)',
+      );
+      expect(
+        find.text('home'),
+        findsOneWidget,
+        reason: 'after popping, the home route is visible again',
+      );
+    },
+  );
+
+  // ── 260614-iww: continuous-mode (FAB long-press) save stays open ──────────
+
+  testWidgets(
+    '260614-iww: continuousMode save stays open, resets form, shows exit affordance',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      when(
+        () => mockCreateUseCase.execute(any()),
+      ).thenAnswer((_) async => Result.success(_successTransaction));
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          ManualOneStepScreen(
+            bookId: 'book-1',
+            initialCategory: _l2Category,
+            initialParentCategory: _l1Category,
+            entrySource: EntrySource.manual,
+            continuousMode: true,
+          ),
+          locale: const Locale('en'),
+          overrides: [
+            categoryRepositoryProvider.overrideWithValue(
+              FakeCategoryRepository(_fakeCategories),
+            ),
+            createTransactionUseCaseProvider.overrideWithValue(
+              mockCreateUseCase,
+            ),
+            categoryServiceProvider.overrideWithValue(mockCategoryService),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Continuous-mode exit affordance + hint are surfaced on the page.
+      expect(
+        find.text('Exit'),
+        findsOneWidget,
+        reason: 'continuous mode surfaces a discoverable exit control',
+      );
+      expect(
+        find.text('Tap exit anytime to finish'),
+        findsOneWidget,
+        reason: 'continuous mode surfaces the exit hint',
+      );
+
+      // Seed an amount and save.
+      final digit1Finder = find.descendant(
+        of: find.byType(SmartKeyboard),
+        matching: find.text('1'),
+      );
+      await tester.tap(digit1Finder);
+      await tester.pump();
+      final saveButtonFinder = find.descendant(
+        of: find.byType(SmartKeyboard),
+        matching: find.text('Record'),
+      );
+      await tester.tap(saveButtonFinder);
+      await tester.pumpAndSettle();
+
+      verify(() => mockCreateUseCase.execute(any())).called(1);
+
+      // Continuous mode: the screen MUST stay open after save (no pop).
       expect(
         find.byKey(const ValueKey('manual-one-step-screen')),
         findsOneWidget,
-        reason:
-            'screen must stay open after save for continuous entry (popUntil removed, 260603-nr1 #1)',
+        reason: 'continuousMode save keeps the page open for the next entry',
+      );
+      // Form resets in place — the amount display clears back to empty.
+      expect(
+        find.text('Saved — keep going!'),
+        findsOneWidget,
+        reason: 'continuous mode shows the warm keep-going toast',
       );
     },
   );
