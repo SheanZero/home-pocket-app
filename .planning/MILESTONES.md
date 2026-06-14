@@ -4,6 +4,55 @@ Historical record of shipped versions. Each entry links to its full archive in `
 
 ---
 
+## v1.7 — 多币种支持 (Multi-Currency)
+
+**Shipped:** 2026-06-14
+**Phases:** 40-42 (3 phases, 20 plans, 28 tasks)
+**Duration:** 2026-06-12 → 2026-06-13 phase execution, hardened through 2026-06-14 (git range `v1.6..HEAD` = 197 commits, 246 files, +33,923 / −2,248 LOC — includes the 2026-06-13/14 foreign-currency UI/edit/voice quick-task series and the OCR-entry-hide + continuous-entry FAB task)
+**Tag:** `v1.7`
+**Audit Status at Close:** `tech_debt` — milestone goal achieved (23/23 requirements satisfied, 3/3 phases verified, 6/6 cross-phase integration seams wired, E2E flow complete). All four Phase 42 human/device items passed via UAT (`42-UAT.md`, 2026-06-14, 4/4 pass, 0 issues), clearing the `human_needed` flag. The sole residual is documentation-grade Nyquist debt: all three VALIDATION.md files (Phases 40/41/42) are drafts with `nyquist_compliant: false`, while the underlying test suite is fully green at 2786/2786 and `flutter analyze` is clean. Mirrors the accepted v1.2–v1.6 close precedent. See `.planning/milestones/v1.7-MILESTONE-AUDIT.md`.
+**Known deferred items at close:** acknowledged via the pre-close artifact audit — 33 quick-task metadata-drift/voice-backlog stubs + 1 stale Phase 42 verification flag (resolved by UAT) + 3-phase Nyquist documentation debt; see `.planning/STATE.md` Deferred Items §v1.7.
+
+### Delivered
+
+Home Pocket ledger entry now supports foreign-currency input end to end while leaving the JPY-only path byte-for-byte unchanged. On the SmartKeyboard a user taps the currency symbol beside the amount to open a JPY-first selector (common currencies re-ordered by recent use, "more" expanding the full ISO 4217 list with code/name search), or speaks the currency in zh/ja (「五十美元」/「50ドル」). The app fetches the exchange rate **for the transaction date** (historical, not today's) from a free no-key API (Frankfurter primary, fawazahmed0 fallback), caches it per (date, currency) in an encrypted Drift table, and shows a live JPY conversion preview that updates on every keypad tap and currency/rate/date change — with weekend/holiday actual-date transparency and offline fallback to the most recent cached rate. The JPY-converted integer is stored in the existing `amount` column (driving all lists/analytics/sorting unchanged); the original currency, original amount, and applied rate ride along as three nullable fields that transit family sync null-safely in both directions. Foreign rows show a secondary annotation in the list; the detail/edit view shows the full original record with a two-input/one-derived editor (original amount + rate editable, JPY read-only derived via the single conversion site — ADR-022 D-01). Saving is **never** blocked on the network. Drift schema v20→v21.
+
+### Key Accomplishments
+
+1. **Sync-safe multi-currency data + domain foundation** (Phase 40) — three blocking ADRs (ADR-020 rate stored as full-precision `TextColumn`; ADR-021 currency fields excluded from the hash formula so existing chains stay valid; ADR-022 date-change re-fetch / edit policy); the CNY/JPY `¥` collision fixed in `NumberFormatter` (`CN¥`, KRW 0-decimal, HK$/A$/C$/NT$/S$ disambiguation) with golden re-baseline; Drift v20→v21 migration (`exchange_rates` cache table + three nullable `transactions` columns, explicit CREATE INDEX); `Transaction` Freezed extension + `ExchangeRateDao`/repository; `TransactionSyncMapper` null-safe round-trip (new→old drops extra keys, old→new applies as JPY) + partial-triple domain invariant (`Result.error` on 1-or-2-of-3). (STORE-01..05)
+2. **Offline-safe exchange-rate service** (Phase 41) — `ExchangeRateApiClient` three-source fallback (Frankfurter → fawazahmed0 jsDelivr → Cloudflare) with rate inversion, weekend/holiday `actualDate` surfacing, and SC-5 URL privacy (no user data in any URL); cache-first `ExchangeRateCacheService` (permanent historical rates, short-TTL today, never-throws); `GetExchangeRateUseCase` with `RateResult` sealed union, RATE-04 manual override, and ADR-022 D-02 dialog / D-03 toast signals; `BackupData` extended for rate export/import; `connectivity_plus ^7.1.1` added (iOS build human-verified). The never-block-save invariant is structurally enforced — zero HTTP in the accounting use cases. (RATE-01..06)
+3. **Currency entry, display & voice** (Phase 42) — SmartKeyboard currency key + `CurrencySelectorSheet` (JPY-pinned, recent-use LRU session provider, full-ISO search, flag+symbol+code+name 48dp rows); per-currency decimal gate via intl `currencyFractionDigits` (D-07 cap / D-08 truncate; JPY/KRW 0-decimal); live `ConversionPreviewPanel` (single-site `convertToJpy()`, fixed-height no-jump skeleton, amber staleness label); foreign-row list annotation; two-input/one-derived edit host (ADR-022 D-01, JPY read-only); zh/ja voice currency detection (美元/欧元/英镑/港币/澳元/加元 + ドル/ユーロ/ポンド/香港ドル/豪ドル → ISO, bare 元/ドル locale-routed) flowing through the shared form. SC-5 smoke verified: USD 50 @ 148.30 → `amount=7415`, `original_currency='USD'`. (CURR-01..05, DISP-01..04, VOICE-CUR-01..03)
+4. **Single conversion site + hash invariant enforced across the stack** — `convertToJpy()` (`currency_conversion.dart`) is the sole JPY computation site, consumed by create/update use cases, entry preview, edit card, voice, and list annotation with no inline `* rate` arithmetic anywhere; `calculateTransactionHash` takes only (id, JPY amount, timestamp, prevHash) — the triple is never hashed and edits never rehash (ADR-021). The sync wire boundary (`transaction_sync_mapper.dart`) validates the full triple inline and degrades partial/invalid peer payloads to JPY-native rather than persisting them.
+5. **Post-phase UX hardening via quick-task series** (2026-06-13/14) — unified foreign-currency card across add/edit screens (260613-ufn), edit-interaction + date-trigger + debounce polish (260613-mgc/n5c/njf/wuv), currency-picker dedup + long-tail l10n + real symbols (260613-ohz/ote), no-trailing-zeros on integer foreign amounts (260614-dx1), voice currency-switch recognition + header-pill fix (260614-goh), and the Home recent-item refresh-after-edit bug fix (260613-wjx); plus the OCR-entry hide behind a reversible `kOcrEntryEnabled` flag + continuous-entry FAB mode (260614-iww).
+
+### Stats
+
+- **Commits since v1.6 tag:** 197 (docs 93, feat 42, fix 34, test 18, chore 7, style 2, revert 1)
+- **Files changed:** 246 (+33,923 / −2,248 LOC)
+- **Requirements:** 23/23 v1.7 requirements complete (REQUIREMENTS.md footer "21 total" was stale; the traceability table and audit both enumerate 23)
+- **Drift schema:** v20 → v21 (`exchange_rates` table + 3 nullable `transactions` columns)
+- **Test suite:** 2786/2786 green; `flutter analyze` 0 issues
+- **ARB parity:** ja = zh = en maintained
+- **New stack dep:** `connectivity_plus ^7.1.1` (iOS build verified green)
+- **First external network dependency:** outbound rate queries only, no user data on the wire; fully offline-capable via cache + manual rate
+
+### Notable Decisions
+
+- **3-phase consolidation** (from the research 6-phase A→F build order) — data+domain+sync into Phase 40, infrastructure client+use cases into Phase 41, presentation+voice into Phase 42 (voice as a parallel wave). Mirrors the v1.6 7→4 precedent.
+- **Rate stored as `TextColumn` full precision** (ADR-020), not `RealColumn` — prevents preview-vs-stored divergence on re-multiplication.
+- **Currency fields excluded from the hash** (ADR-021) — existing chains stay valid; editing an amount re-derives JPY but leaves `currentHash` unchanged (advisory, intentional, not multi-currency-specific).
+- **DISP-04 "bidirectional linked editing" wording VOID** — superseded by ADR-022 D-01 two-input/one-derived model (JPY read-only derived); a bidirectional implementation would have been a defect.
+- **Never-block-save invariant** — rate is always pre-computed and passed in; accounting use cases contain zero HTTP.
+- **Nyquist documentation debt accepted at close** — three draft VALIDATION.md files; underlying coverage exists (suite green). Consistent with v1.2–v1.6.
+
+### Archive
+
+- `.planning/milestones/v1.7-ROADMAP.md` — full phase details
+- `.planning/milestones/v1.7-REQUIREMENTS.md` — final requirement status (23/23) + v2 backlog
+- `.planning/milestones/v1.7-MILESTONE-AUDIT.md` — pre-close audit report (status: `tech_debt`)
+
+---
+
 ## v1.6 — 购物清单 (Shopping List)
 
 **Shipped:** 2026-06-12

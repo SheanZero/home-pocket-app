@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: 多币种支持
-status: verifying
-stopped_at: Completed 42-09-PLAN.md (last plan; phase ready_for_verification)
-last_updated: "2026-06-13T04:05:17.754Z"
-last_activity: 2026-06-13
+status: Awaiting next milestone
+stopped_at: Completed quick task 260613-ufn (外币卡片两屏统一); phase 42 still ready_for_verification
+last_updated: "2026-06-14T06:19:49.414Z"
+last_activity: 2026-06-14 — Milestone v1.7 completed and archived
 progress:
   total_phases: 3
   completed_phases: 3
@@ -18,19 +18,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
+See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 42 — entry-ui-display-voice
+**Current focus:** Planning next milestone — run `/gsd-new-milestone`
 
 ## Current Position
 
-Phase: 42 (entry-ui-display-voice) — EXECUTING
-Plan: 9 of 9
-Status: Phase complete — ready for verification
-Last activity: 2026-06-14 - 完成 quick task 260614-iww: 隐藏 OCR 记账入口（kOcrEntryEnabled flag 可逆）+ 添加账目 FAB 点击=保存即返回友好提示／长按=连续记账模式（停留+清空+继续提示+退出键）
-
-Progress: [███████░░░] 65%
+Phase: Milestone v1.7 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-06-14 — Milestone v1.7 completed and archived
 
 ### Quick Tasks Completed
 
@@ -105,6 +103,17 @@ No active blockers for v1.7. Pre-existing carried debt (unchanged):
 - **MOD-005 OCR slot:** `ocr_review_screen.dart:54,58` hardcodes `EntrySource.manual` pending writer landing
 
 ## Deferred Items
+
+### Items acknowledged and deferred at v1.7 milestone close on 2026-06-14
+
+| Category | Item | Status | Deferred At |
+|----------|------|--------|-------------|
+| nyquist_gap | Phases 40/41/42 VALIDATION.md draft + `nyquist_compliant: false`. Documentation-grade; underlying suite 2786/2786 green. Mirrors accepted v1.2–v1.6 pattern. To clear: `/gsd-validate-phase 40/41/42` | accept (documentation-grade) | v1.7 close |
+| verification_flag | Phase 42 `42-VERIFICATION.md [human_needed]` flag never flipped — RESOLVED by `42-UAT.md` (2026-06-14, 4/4 pass, 0 issues) covering exactly the 4 flagged device items (D-02 dialog, D-03 toast, flag-emoji render, live-preview behavior) | resolved (flag stale) | v1.7 close |
+| metadata_drift | `audit-open` reports 33 quick tasks as incomplete/unknown (SUMMARY.md lack `status: complete` frontmatter). All recorded in the Quick Tasks Completed table. Same cosmetic pattern as v1.5 (17) / v1.6 (38) | cosmetic, no functional gap | v1.7 close |
+| voice_backlog | 260526-k92/l0o/n7b/pg6 voice-tab/active-learning follow-ups — genuinely incomplete; carried as the v1.3 VOICE-POLISH-V2 backlog | defer to VOICE-POLISH-V2 | v1.7 close |
+| advisory | Pre-existing no-rehash-on-edit policy (ADR-021): editing an amount re-derives JPY but flows `currentHash` through `copyWith` unchanged. Intentional, not multi-currency-specific | accept (awareness only) | v1.7 close |
+| ocr_slot | OCR ledger entry hidden behind reversible `kOcrEntryEnabled` compile-time flag (260614-iww); OCR infrastructure/screens untouched. Flip when MOD-005 writer lands | defer to MOD-005 | v1.7 close |
 
 ### Items acknowledged and deferred at v1.6 milestone close on 2026-06-12
 
@@ -186,3 +195,7 @@ Resume file: None
 - [Phase ?]: 42-09: D-02/D-03 date-change semantics colocated in CurrencyLinkedEditFields (owns the original amount for the JPY delta)
 - [Phase ?]: 42-09: hand-editing the rate flips manualOverride=true (next date change → D-02 dialog vs D-03 toast)
 - [Phase ?]: 42-09: CurrencyEditStrings null-safe l10n resolver keeps the delegate-less Wave-0 RED harness renderable
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone
