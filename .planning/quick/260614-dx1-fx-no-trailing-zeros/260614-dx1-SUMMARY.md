@@ -91,3 +91,20 @@ fractional decimals are preserved by design.
 - `amount_edit_bottom_sheet.dart` — FOUND, `_initialEditStr` delegates to `formatMinorAsMajor`
 - Commit `3860f425` (Task 1) — FOUND
 - Commit `12892744` (Task 2) — FOUND
+
+---
+
+## Supplement (260614-dx1 follow-up) — list-tile foreign annotation
+
+**Reported incomplete:** the 列表 tab still showed `$12,211.00` / `$10,004.00` / `kr12.00`. The first pass scoped out the list path (it formats the foreign annotation separately in `list_screen.dart` via `NumberFormatter.formatCurrency`, which always emitted fixed decimals).
+
+**Audit:** `formatMinorAsMajor` (the first-pass helper) produces bare digits with no currency symbol/grouping, so it can't drive the list annotation (which needs `$`/`kr` + grouping). Root cause is `NumberFormatter.formatCurrency` itself. Verified the list foreign annotation is the **only** remaining foreign-amount display (home tiles show no foreign; edit/keypad already fixed).
+
+**Fix (commit `3423d53e`):**
+- `NumberFormatter.formatCurrency` gains opt-in `trimWholeFraction` (default `false` → all existing call-sites + goldens byte-identical). When true + currency has >0 decimals + amount is whole → `decimalDigits: 0`.
+- `FormatterService.formatCurrency` passes the flag through.
+- `list_screen.dart` foreign-annotation site sets `trimWholeFraction: true`.
+
+**Behaviour:** `$12,211.00 → $12,211`, `kr12.00 → kr12`; `kr12.50` keeps `.50`; JPY/0-decimal unchanged; default (no flag) still renders `.00` everywhere else.
+
+**Tests/analyze:** number_formatter + formatter_service unit run **61 passed / 0 failed** (6 new `trimWholeFraction` cases); list foreign golden **7 passed**; `flutter analyze` on 4 changed files **0 issues**.
