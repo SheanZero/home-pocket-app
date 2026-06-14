@@ -504,14 +504,24 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // The headline now shows 200.00 (currency's 2-decimal major-unit string).
+      // The headline now shows 200 — a whole-number foreign amount drops its
+      // useless ".00" (260614-dx1); only real fractional digits are kept.
+      expect(
+        find.descendant(
+          of: find.byType(AmountDisplay),
+          matching: find.text('200'),
+        ),
+        findsOneWidget,
+        reason: 'Headline must reflect the keypad-edited original amount '
+            'without a trailing all-zero ".00" (260614-dx1)',
+      );
       expect(
         find.descendant(
           of: find.byType(AmountDisplay),
           matching: find.text('200.00'),
         ),
-        findsOneWidget,
-        reason: 'Headline must reflect the keypad-edited original amount',
+        findsNothing,
+        reason: 'Whole-number foreign amount must not show ".00" (260614-dx1)',
       );
       // The OLD original amount must be gone from the headline.
       expect(

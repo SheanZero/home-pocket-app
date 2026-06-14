@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/utils/currency_conversion.dart'
-    show currencyFractionDigitsFor, subunitToUnitFor;
+    show currencyFractionDigitsFor, formatMinorAsMajor, subunitToUnitFor;
 import 'amount_display.dart';
 import 'smart_keyboard.dart';
 
@@ -106,16 +106,17 @@ class AmountEditBottomSheet extends StatelessWidget {
 
   /// Seeds the initial editStr.
   ///
-  /// - JPY mode: the integer string (blank when 0), matching legacy behavior.
-  /// - Currency-aware mode: the MAJOR-unit decimal string for the minor-unit
-  ///   [initialAmount] (e.g. 11290 cents → "112.90"; 5000 KRW → "5000").
-  String _initialEditStr(int decimals, int subunit) {
+  /// - JPY mode (null currency): the integer string (blank when 0), matching
+  ///   legacy behavior byte-for-byte — [formatMinorAsMajor] is NOT used here
+  ///   because it expects a real ISO currency.
+  /// - Currency-aware mode: delegates to the shared [formatMinorAsMajor]
+  ///   (260614-dx1) so the keypad seeds "12211" for a whole-number amount (no
+  ///   useless ".00") while "112.90"/"12.50" keep their decimals.
+  String _initialEditStr() {
     if (!_isCurrencyAware) {
       return initialAmount > 0 ? initialAmount.toString() : '';
     }
-    if (initialAmount <= 0) return '';
-    if (decimals == 0) return (initialAmount ~/ subunit).toString();
-    return (initialAmount / subunit).toStringAsFixed(decimals);
+    return formatMinorAsMajor(initialAmount, currency!);
   }
 
   @override
@@ -129,7 +130,7 @@ class AmountEditBottomSheet extends StatelessWidget {
     final subunit = _isCurrencyAware ? subunitToUnitFor(currency!) : 1;
 
     // editStr holds the raw digit string being built by the user.
-    var editStr = _initialEditStr(decimals, subunit);
+    var editStr = _initialEditStr();
 
     // The fractional cap for the editor. In JPY mode the legacy 4-place cap is
     // preserved (decimal input is reachable but rounds to an integer on

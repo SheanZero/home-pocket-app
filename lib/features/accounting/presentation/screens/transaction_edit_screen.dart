@@ -6,7 +6,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/number_formatter.dart';
 import '../../../../shared/utils/currency_conversion.dart'
-    show currencyFractionDigitsFor, subunitToUnitFor;
+    show formatMinorAsMajor;
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/soft_confirm_dialog.dart';
 import '../../../settings/presentation/providers/state_locale.dart';
@@ -92,13 +92,12 @@ class _TransactionEditScreenState extends ConsumerState<TransactionEditScreen> {
   /// the entry screen's major-unit input so the headline matches what was
   /// recorded. Returns '' for a non-positive amount (AmountDisplay then renders
   /// '0').
-  String _minorToMajorString(int minorUnits, String currency) {
-    if (minorUnits <= 0) return '';
-    final decimals = currencyFractionDigitsFor(currency);
-    final subunit = subunitToUnitFor(currency);
-    if (decimals == 0) return (minorUnits ~/ subunit).toString();
-    return (minorUnits / subunit).toStringAsFixed(decimals);
-  }
+  ///
+  /// Delegates to the shared [formatMinorAsMajor] (260614-dx1) so a whole-number
+  /// foreign amount drops its useless ".00" (12,211.00 USD → 12,211 USD) while
+  /// fractional amounts and the JPY path stay unchanged.
+  String _minorToMajorString(int minorUnits, String currency) =>
+      formatMinorAsMajor(minorUnits, currency);
 
   Future<void> _save() async {
     if (_isSubmitting) return;
