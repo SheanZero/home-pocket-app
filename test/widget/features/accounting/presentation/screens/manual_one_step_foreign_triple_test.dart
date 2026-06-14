@@ -193,14 +193,16 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> selectUsd(WidgetTester tester) async {
+  Future<void> selectCurrency(WidgetTester tester, String code) async {
     // Open the currency selector via the SmartKeyboard currency tile, then
-    // pick USD from the common-zone list.
+    // pick the requested code from the common-zone list.
     await tester.tap(find.byKey(const ValueKey('smart_keyboard_currency_key')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('currency-row-USD')));
+    await tester.tap(find.byKey(ValueKey('currency-row-$code')));
     await tester.pumpAndSettle();
   }
+
+  Future<void> selectUsd(WidgetTester tester) => selectCurrency(tester, 'USD');
 
   Future<void> tapDigit(WidgetTester tester, String d) async {
     await tester.tap(
@@ -248,10 +250,15 @@ void main() {
       expect(rate.wasCalled, isTrue);
 
       // Now the rate becomes UNAVAILABLE for subsequent fetches.
-      rate.nextResult = RateUnavailable(currency: 'USD');
+      rate.nextResult = RateUnavailable(currency: 'EUR');
 
-      // Re-trigger _pushForeignTriple by editing the amount (append a digit).
-      await tapDigit(tester, '0'); // 50.00 → 500.00
+      // Quick 260613-wuv2: the rate provider is keyed on (currency, date), NOT
+      // the entered amount — so appending a digit no longer re-resolves the rate
+      // (it reuses the cached USD rate, which is the whole point: no per-keystroke
+      // re-fetch / card flash). Switch currency to EUR to force a genuine
+      // re-fetch that now returns RateUnavailable, exercising the same
+      // `_pushForeignTriple` reset-to-0 guard the original test targeted.
+      await selectCurrency(tester, 'EUR');
       await tester.pumpAndSettle();
 
       // WR-02: the stale JPY from the earlier 150.00 push must have been reset

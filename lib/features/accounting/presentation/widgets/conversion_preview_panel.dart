@@ -24,14 +24,22 @@ part 'conversion_preview_panel.g.dart';
 ///     host (no duplicated `_stalenessLabel`).
 
 /// Immutable key for [conversionRate]: the rate is recomputed only when one of
-/// (currency, date, original minor units) changes. Value equality keeps the
-/// keyed [FutureProvider] from refetching on unrelated rebuilds (T-42-18).
+/// (currency, date, previousRate, wasManualOverride) changes. Value equality
+/// keeps the keyed [FutureProvider] from refetching on unrelated rebuilds
+/// (T-42-18).
+///
+/// Quick 260613-wuv2: the entered AMOUNT is deliberately NOT part of this key.
+/// The rate depends only on (currency, date) — the use case never reads the
+/// amount — so keying on it forced a brand-new provider (a fresh `AsyncLoading`
+/// → spinner flash → whole-card re-collapse) on every settled keystroke. The
+/// amount flows to the card separately (`originalAmount`) where it drives only
+/// the derived-JPY recompute, so typing now refreshes the converted number
+/// alone, never the whole card.
 @immutable
 class ConversionPreviewArgs {
   const ConversionPreviewArgs({
     required this.currency,
     required this.date,
-    required this.originalMinorUnits,
     this.previousRate,
     this.wasManualOverride = false,
   });
@@ -42,9 +50,6 @@ class ConversionPreviewArgs {
 
   /// Transaction date the rate is requested for.
   final DateTime date;
-
-  /// Entered amount in the currency's minor units (e.g. cents for USD).
-  final int originalMinorUnits;
 
   /// Previously-applied rate (drives the ADR-022 D-03 >1% toast in the use
   /// case). Null on first lookup.
@@ -58,7 +63,6 @@ class ConversionPreviewArgs {
       other is ConversionPreviewArgs &&
       other.currency == currency &&
       other.date == date &&
-      other.originalMinorUnits == originalMinorUnits &&
       other.previousRate == previousRate &&
       other.wasManualOverride == wasManualOverride;
 
@@ -66,7 +70,6 @@ class ConversionPreviewArgs {
   int get hashCode => Object.hash(
         currency,
         date,
-        originalMinorUnits,
         previousRate,
         wasManualOverride,
       );

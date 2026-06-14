@@ -151,36 +151,19 @@ void main() {
   });
 
   group('ConversionPreviewArgs — value equality (keyed-provider stability)', () {
-    test('equal args are ==; differing date/amount/currency are not', () {
-      final a = ConversionPreviewArgs(
-        currency: _kCurrency,
-        date: _kTxDate,
-        originalMinorUnits: 5000,
-      );
-      final b = ConversionPreviewArgs(
-        currency: _kCurrency,
-        date: _kTxDate,
-        originalMinorUnits: 5000,
-      );
+    test('equal args are ==; differing date/currency are not; amount is NOT a '
+        'key dimension (260613-wuv2)', () {
+      final a = ConversionPreviewArgs(currency: _kCurrency, date: _kTxDate);
+      final b = ConversionPreviewArgs(currency: _kCurrency, date: _kTxDate);
       expect(a, b);
       expect(a.hashCode, b.hashCode);
 
       expect(
-        a ==
-            ConversionPreviewArgs(
-              currency: _kCurrency,
-              date: DateTime(2026, 6, 12),
-              originalMinorUnits: 5000,
-            ),
+        a == ConversionPreviewArgs(currency: _kCurrency, date: DateTime(2026, 6, 12)),
         isFalse,
       );
       expect(
-        a ==
-            ConversionPreviewArgs(
-              currency: 'EUR',
-              date: _kTxDate,
-              originalMinorUnits: 5000,
-            ),
+        a == ConversionPreviewArgs(currency: 'EUR', date: _kTxDate),
         isFalse,
       );
     });

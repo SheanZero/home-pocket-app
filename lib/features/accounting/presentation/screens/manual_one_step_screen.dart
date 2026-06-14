@@ -127,15 +127,6 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
   // to a specific currency+date rate; a fresh re-resolve supersedes it).
   String? _manualForeignRate;
 
-  // Quick 260613-wuv (WUV-02): debounced snapshot of [_originalMinorUnits] that
-  // feeds the FX card's mount guard + provider key. The card re-resolves the
-  // rate (and re-seeds the JPY换算) only ~300ms after the user pauses typing,
-  // killing the per-keystroke loading-spinner / JPY re-seed flicker. The SAVE
-  // path ([_pushForeignTriple]) keeps reading the LIVE [_originalMinorUnits] so
-  // an immediate save persists the freshly-entered amount, never this snapshot.
-  int _debouncedMinorUnits = 0;
-  Timer? _fxDebounce;
-
   /// Entered amount in the active currency's MINOR units (cents for USD,
   /// whole units for JPY). Derived from the controller text via the currency's
   /// subunit factor — the single input into [convertToJpy].
@@ -197,7 +188,6 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
 
   @override
   void dispose() {
-    _fxDebounce?.cancel();
     _merchantFocus.dispose();
     _noteFocus.dispose();
     super.dispose();
@@ -337,35 +327,12 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
       );
       return;
     }
-    // SAVE path stays LIVE: push the freshly-entered amount/triple immediately so
-    // an instant Save persists the correct figure and the staleness guard
-    // compares against live input (Quick 260613-wuv WUV-02).
+    // Push the freshly-entered amount/triple immediately so an instant Save
+    // persists the correct figure and the staleness guard compares against live
+    // input. The FX card now reads the LIVE amount too (Quick 260613-wuv2): with
+    // the amount out of the rate provider key, feeding it live refreshes only the
+    // derived-JPY number with no whole-card reload, so no debounce is needed.
     _pushForeignTriple();
-    _scheduleFxDebounce();
-  }
-
-  /// Quick 260613-wuv (WUV-02): debounce the value that drives the FX card's
-  /// provider key + JPY re-seed so it only re-resolves ~300ms after the user
-  /// pauses typing (mirrors voice_input_screen.dart's Timer precedent). The card
-  /// MOUNT GUARD + its `originalMinorUnits` arg read [_debouncedMinorUnits];
-  /// persistence ([_pushForeignTriple]) still reads the LIVE value.
-  void _scheduleFxDebounce() {
-    _fxDebounce?.cancel();
-    // Clearing to 0 should unmount the card promptly (no stale spinner) rather
-    // than waiting out the debounce window — collapse it synchronously.
-    if (_originalMinorUnits == 0) {
-      if (_debouncedMinorUnits != 0) {
-        setState(() => _debouncedMinorUnits = 0);
-      }
-      return;
-    }
-    _fxDebounce = Timer(const Duration(milliseconds: 300), () {
-      if (!mounted) return;
-      final next = _originalMinorUnits;
-      if (next != _debouncedMinorUnits) {
-        setState(() => _debouncedMinorUnits = next);
-      }
-    });
   }
 
   /// Resolve the current rate (cache-first via the preview's keyed provider) and
@@ -408,7 +375,6 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
     final args = ConversionPreviewArgs(
       currency: currency,
       date: date,
-      originalMinorUnits: minorUnits,
     );
     try {
       final withSignal = await ref.read(conversionRateProvider(args).future);
@@ -491,7 +457,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
 
   /// Quick 260613-ufn (D-4): the form's date picker changed the transaction
   /// date. Update the screen's `_selectedDate` so the keyed
-  /// `conversionRateProvider(currency,date,amount)` re-resolves the rate for the
+  /// `conversionRateProvider(currency,date)` re-resolves the rate for the
   /// new date and the unified card's 汇率/日元/汇率日期/staleness all update. A
   /// date change supersedes any manual override (the override was keyed to the
   /// previous date's rate), then re-pushes the freshly-resolved triple.
@@ -742,12 +708,13 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
                       // / radius 14 / palette.borderDefault). The unified
                       // CurrencyLinkedEditFields renders 汇率 (editable) / 日元
                       // （换算）(derived) / 汇率日期 (non-clickable + staleness).
-                      // Quick 260613-wuv (WUV-02): keyed on _debouncedMinorUnits
-                      // (not the live amount) so the card only re-resolves ~300ms
-                      // after the user pauses typing (no per-keystroke flash).
-                      // Mounted ONLY for foreign rows with an amount; the JPY
-                      // path stays byte-identical (CURR-04).
-                      if (_isForeign && _debouncedMinorUnits > 0) ...[
+                      // Quick 260613-wuv2: fed the LIVE amount. The rate provider
+                      // is keyed only on (currency, date) now, so amount changes
+                      // never re-resolve the rate — the same cached card stays
+                      // mounted and only its derived-JPY number updates (no
+                      // whole-card spinner flash). Mounted ONLY for foreign rows
+                      // with an amount; the JPY path stays byte-identical (CURR-04).
+                      if (_isForeign && _originalMinorUnits > 0) ...[
                         Container(
                           decoration: BoxDecoration(
                             color: palette.card,
@@ -757,7 +724,7 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
                           child: _AddScreenForeignCard(
                             currency: _currency,
                             date: _selectedDate,
-                            originalMinorUnits: _debouncedMinorUnits,
+                            originalMinorUnits: _originalMinorUnits,
                             manualRateOverride: _manualForeignRate,
                             onRateEdited: _onForeignRateEdited,
                             onSignal: _onRateSignal,
@@ -881,7 +848,6 @@ class _AddScreenForeignCard extends ConsumerWidget {
     final args = ConversionPreviewArgs(
       currency: currency,
       date: date,
-      originalMinorUnits: originalMinorUnits,
     );
 
     // RateSignal side-effects (D-02 dialog / D-03 toast) belong in ref.listen,
