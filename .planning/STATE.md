@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 Phase: 42 (entry-ui-display-voice) — EXECUTING
 Plan: 9 of 9
 Status: Phase complete — ready for verification
-Last activity: 2026-06-14 - 补完 quick task 260614-goh: 语音头部货币药丸不切换（AmountDisplay 未传 currency，硬编码 JPY）→ 新增 _displayCurrency，汇率解析成功才切外币药丸
+Last activity: 2026-06-14 - 完成 quick task 260614-iww: 隐藏 OCR 记账入口（kOcrEntryEnabled flag 可逆）+ 添加账目 FAB 点击=保存即返回友好提示／长按=连续记账模式（停留+清空+继续提示+退出键）
 
 Progress: [███████░░░] 65%
 
@@ -46,6 +46,7 @@ Progress: [███████░░░] 65%
 | 260613-wuv | 外币输入时汇率/换算改为卡片样式（与编辑页一致），滚动时仅金额输入区置顶；外币金额输入增加防抖缓冲避免实时计算闪频 | 2026-06-13 | d98f7e92 | [260613-wuv-fx-input-card-debounce](./quick/260613-wuv-fx-input-card-debounce/) |
 | 260614-dx1 | 外币金额为整数时编辑/显示不再出现 .00（编辑页+键盘 formatMinorAsMajor；列表注释 formatCurrency trimWholeFraction；保留真实小数 12.50 与 JPY 整数路径） | 2026-06-14 | 3423d53e | [260614-dx1-fx-no-trailing-zeros](./quick/260614-dx1-fx-no-trailing-zeros/) |
 | 260614-goh | 语音外币切换：①识别口语词（人民币/美金+全货币 zh/ja/en，大小写不敏感，regexAlternation longest-first）②修复头部药丸不切换（AmountDisplay 未传 currency→硬编码 JPY；新增 _displayCurrency，汇率成功才切外币、RateUnavailable 保持 JPY）（+32 用例） | 2026-06-14 | 117aecd5,d2b9df8e | [260614-goh-voice-currency-switch](./quick/260614-goh-voice-currency-switch/) |
+| 260614-iww | 隐藏 OCR 记账入口（新增 kOcrEntryEnabled=false 编译期 flag，InputModeTabs 隐藏扫描页签 + navigateToEntryMode 短路；OCR 基础设施/屏幕零改动，翻转 flag 即恢复）+ 添加账目 FAB 点击=保存即 pop 返回 + 友好提示，长按=连续记账模式（停留清空表单 + 「继续记账」提示 + 退出键/退出提示）；ja/zh/en 三语温暖文案 | 2026-06-14 | 10236350,9c9b6068,45ed4332 | [260614-iww-ocr](./quick/260614-iww-ocr/) |
 
 ## Last Milestone Snapshot (v1.6)
 
