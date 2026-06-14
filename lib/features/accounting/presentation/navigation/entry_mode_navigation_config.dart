@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/feature_flags.dart';
 import '../screens/ocr_scanner_screen.dart';
 import '../screens/manual_one_step_screen.dart';
 import '../screens/voice_input_screen.dart';
@@ -40,6 +41,12 @@ void navigateToEntryMode({
   required String bookId,
 }) {
   if (fromMode == toMode) return;
+
+  // 260614-iww: OCR entry is hidden behind kOcrEntryEnabled. The route config
+  // map is kept intact (so the OcrScannerScreen import stays referenced and a
+  // flag flip needs no re-add), but navigation to it is short-circuited while
+  // the flag is false.
+  if (toMode == InputMode.ocr && !kOcrEntryEnabled) return;
 
   final config = _entryModeRouteConfigs[toMode];
   if (config == null) return;

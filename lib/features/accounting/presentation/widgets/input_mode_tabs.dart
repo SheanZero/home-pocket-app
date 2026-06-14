@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/feature_flags.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
@@ -38,13 +39,17 @@ class InputModeTabs extends StatelessWidget {
       child: Row(
         children: [
           _tab(context, manualLabel, Icons.keyboard_outlined, InputMode.manual, palette),
-          _tab(
-            context,
-            ocrLabel,
-            Icons.document_scanner_outlined,
-            InputMode.ocr,
-            palette,
-          ),
+          // 260614-iww: OCR tab is hidden behind kOcrEntryEnabled while the OCR
+          // flow is being completed. Flipping the flag to true restores it with
+          // no other edits (the enum value, label, and icon are all retained).
+          if (kOcrEntryEnabled)
+            _tab(
+              context,
+              ocrLabel,
+              Icons.document_scanner_outlined,
+              InputMode.ocr,
+              palette,
+            ),
           _tab(context, voiceLabel, Icons.mic_outlined, InputMode.voice, palette),
         ],
       ),
