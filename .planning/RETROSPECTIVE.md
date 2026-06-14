@@ -297,6 +297,50 @@
 
 ---
 
+## Milestone: v1.7 — 多币种支持 (Multi-Currency)
+
+**Shipped:** 2026-06-14
+**Phases:** 3 (40-42) | **Plans:** 20 | **Sessions:** multi-session GSD execution + quick-task hardening
+
+### What Was Built
+- Foreign-currency ledger entry end to end: SmartKeyboard currency selector (`CurrencySelectorSheet`, JPY-first, recent-use reorder, full-ISO search) + zh/ja voice currency detection, with the JPY-only path left byte-for-byte unchanged.
+- Transaction-date historical-rate conversion from a free no-key API (Frankfurter primary + fawazahmed0 fallback) via a cache-first encrypted Drift table (`exchange_rates`, schema v20→v21), with offline fallback, weekend/holiday actual-date transparency, and manual override.
+- Storage model: JPY-converted integer in the existing `amount` column (drives all lists/analytics/sorting unchanged) + three nullable sync-safe fields (original currency/amount/rate); single `convertToJpy()` conversion site; hash invariant preserved (ADR-021).
+- Live JPY conversion preview, foreign-row list annotation, and a two-input/one-derived edit host (ADR-022 D-01; JPY read-only derived).
+- Three ADRs (ADR-020 string rate precision / ADR-021 hash scope / ADR-022 edit policy) locked before migration code landed.
+
+### What Worked
+- ADR-first lock-in (three blocking ADRs in Phase 40 before any migration) again produced a tight, low-rework multi-phase milestone — same pattern that worked for v1.2.
+- 3-phase consolidation (data+domain+sync / infra client+use-cases / presentation+voice with voice as a parallel wave) kept wave parallelism high; mirrors the v1.6 7→4 success.
+- Wave-0 RED test scaffolds in every phase locked acceptance contracts (SC-5 7415 figure, D-07/D-08 decimal semantics, voice corpus, ADR-022 edit) as executable specs before implementation.
+- The "single conversion site" + "never-block-save" invariants were stated as structural contracts up front, so the integration checker could verify them mechanically (zero inline `* rate`, zero HTTP in accounting use cases).
+- The first external network dependency was introduced without compromising local-first/privacy — outbound rate queries only, no user data on the wire, fully offline via cache + manual rate.
+
+### What Was Inefficient
+- The Phase 42 `human_needed` verification flag was never flipped after `42-UAT.md` passed 4/4 — it surfaced as a false-positive "verification gap" at the pre-close audit, needing manual reconciliation.
+- The CLI accomplishment-extractor produced garbage (commit hashes, file paths, code-review fragments) because phase SUMMARY.md `one_liner` frontmatter was left empty — the MILESTONES.md entry had to be hand-curated.
+- Heavy late-stage quick-task churn (12+ tasks 06-13/14 on foreign-currency UI/edit/voice polish) indicates the Phase 42 plans under-specified the edit/display UX; more of it could have been caught in-phase.
+- REQUIREMENTS.md footer said "21 total" while the traceability table + audit enumerated 23 — count drift in the same document.
+
+### Patterns Established
+- **Single-conversion-site invariant** for any derived-value feature — one function, grep-enforced, consumed everywhere; prevents preview-vs-stored divergence.
+- **Exclude-from-hash ADR before schema migration** — adding fields to an integrity hash would invalidate existing chains; decide scope first, document rationale.
+- **Two-input/one-derived** over bidirectional linked editing for any "N linked fields" UI — eliminates circular-update loops by construction (supersedes the original DISP-04 wording).
+- **Wire-boundary triple validation** — sync ingestion validates the full field-group inline with `is`-typed checks and degrades partial/invalid peer payloads rather than persisting them.
+- **Reversible compile-time feature flag** (`kOcrEntryEnabled`) to hide a not-yet-ready entry point without touching the reserved infrastructure.
+
+### Key Lessons
+- A verification flag that outlives its resolution is a close-time false positive — flip `human_needed`→resolved in the same commit as the UAT that clears it.
+- Empty SUMMARY `one_liner` frontmatter makes the milestone-close accomplishment extractor useless — either populate it during execution or expect to hand-curate the entry.
+- "Bidirectional linked editing" requirements are a circular-dependency trap — reframe as one-derived early (ADR-022 D-01 caught it before implementation).
+- Introducing the first network dependency is the moment to make the privacy/offline invariants structural (no user data in URLs, never-block-save), not aspirational.
+
+### Cost Observations
+- Model profile: `balanced`; multi-session GSD execution + a long quick-task hardening tail.
+- Notable: 197 commits (docs 93 / feat 42 / fix 34 / test 18); one schema migration (v20→v21); 1 new pub dependency (`connectivity_plus ^7.1.1`); largest churn was the 06-13/14 foreign-currency UI/edit/voice quick-task series.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -310,6 +354,7 @@
 | v1.4 | multi-session, 3 days | 7 | Strict bottom-up layer progression (data→domain→providers→UI); heavy reuse of prior-milestone edit/delete path; provider-dependency narrowing as an explicit perf contract; batched on-device visual pass at close. Surfaced two wiring smells: incomplete invalidation set (GAP-1) + speculative unused reactive stream (GAP-2). |
 | v1.5 | multi-session, 2 days | 5 | First pure consistency/refactor milestone since v1.0. Dependency-ordered workstreams (terminology→palette→tokens→goldens) eliminated rename churn; ThemeExtension single-source consolidation; migration contract test as Wave-0 RED. Milestone audit caught two gate-evading vocabulary leaks (W1 a11y string literals, W2 capital-case identifiers) → dedicated Phase-35 closure + re-audit. |
 | v1.6 | multi-session, ~2 days + quick-task hardening | 4 | User-directed 7→4 phase consolidation; Wave-0 TDD scaffolds in all phases; reactive-stream delivery as a stated success criterion (v1.4 GAP-2 lesson applied structurally); executed-proof integration check at audit caught a phantom-comment safety net (W1) and receiver wire-trust (W2) → closed inline via quick task 260612-daz (audit→quick-task→re-verify loop at quick-task granularity). |
+| v1.7 | multi-session, ~2 days + long quick-task tail | 3 | User-directed 6→3 phase consolidation; three blocking ADRs before migration code; first external network dependency introduced with structural privacy/offline invariants (single `convertToJpy()` site, never-block-save, no user data in URLs); Wave-0 RED scaffolds as executable acceptance specs; heavy 06-13/14 quick-task UX-polish tail signals Phase-42 plans under-specified edit/display. |
 
 ### Cumulative Quality
 
@@ -322,6 +367,7 @@
 | v1.4 | 2238/2238 tests pass at quick-task checkpoints; golden baselines re-based for list/calendar/tile; 9 quick-task visual checks confirmed on-device 2026-05-31; `flutter analyze` 0 issues | not recomputed at milestone close | 1 new pub dependency (`table_calendar ^3.2.0`, intl-0.20.2-compatible, iOS-build-green) |
 | v1.5 | 2281/2281 tests pass (full suite, golden incl.); 77 golden masters re-baselined to teal (34 dark) with diff-attribution; `flutter analyze` 4 pre-existing infos (0 regressions); v18 migration contract test + CR-01 regression test green | 79.0% filtered coverage (≥70% gate) | 0 new pub dependencies |
 | v1.6 | 2588/2588 tests pass at close (full suite incl. goldens); 54 new shopping golden baselines (user-approved); `flutter analyze` 0 issues; v20 migration contract test (raw-sqlite3 + real-Drift index assertion) green; 32/32 cross-phase integration tests executed at audit | 77.3% on shopping modules (≥70% gate); global not recomputed | 0 new pub dependencies |
+| v1.7 | 2786/2786 tests pass at close (full suite incl. goldens); voice currency corpus ≥5 cases/currency/locale; CNY symbol goldens re-baselined; `flutter analyze` 0 issues; v21 migration + null-safe sync round-trip + partial-triple invariant tests green; 6/6 cross-phase integration seams verified at audit; Phase 42 4/4 device UAT passed | not recomputed at milestone close | 1 new pub dependency (`connectivity_plus ^7.1.1`, iOS-build-green) |
 
 ### Top Lessons
 
@@ -349,3 +395,9 @@
 22. **(v1.6)** Privacy invariants on synced data must be enforced at every trust boundary — sender-side gates alone are half an invariant; the receiver must validate and pin immutable fields.
 23. **(v1.6)** Orderable-list persistence should be a batch "apply this exact order" primitive (`reorderBatch` → contiguous 0..N-1), not incremental single-row writes — learned over 4 on-device fix iterations.
 24. **(v1.6)** When a hardening fix changes a behavioral contract, sweep for tests encoding the old contract — the failure mode is a timeout/hang (awaiting an emission that no longer fires), not a clean assertion diff.
+25. **(v1.7)** A `human_needed` verification flag that outlives the UAT clearing it becomes a close-time false positive — flip it in the same commit as the passing UAT, or the pre-close audit re-surfaces a resolved gap.
+26. **(v1.7)** Empty SUMMARY `one_liner` frontmatter makes the milestone-close accomplishment extractor produce garbage (hashes, paths, review fragments) — populate it during execution or budget for hand-curation at close.
+27. **(v1.7)** For any derived-value feature, declare a single conversion function up front and grep-enforce it — "no inline arithmetic anywhere" is mechanically verifiable and prevents preview-vs-stored divergence (the ADR-020 `convertToJpy()` site).
+28. **(v1.7)** Decide hash/integrity scope via ADR *before* a schema migration adds fields — retrofitting fields into an integrity hash invalidates every existing chain (ADR-021 excluded them by design).
+29. **(v1.7)** "N linked editable fields" requirements are a circular-update trap — reframe as two-input/one-derived early (ADR-022 D-01 voided the original "bidirectional" DISP-04 wording before it became code).
+30. **(v1.7)** A heavy post-phase quick-task UX-polish tail (12+ tasks over 2 days) is a signal the UI phase's plans under-specified interaction/display detail — fold more of that into the phase plan or a dedicated polish wave.
