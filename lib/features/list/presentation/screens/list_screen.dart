@@ -285,8 +285,9 @@ class ListScreen extends ConsumerWidget {
     // Computed here (pure-UI tile contract — the tile never fetches/formats).
     // Null for JPY/domestic rows → the tile renders the amount block
     // byte-identically (CURR-04 regression protection). The annotation amount is
-    // the stored original MINOR units rendered via NumberFormatter, which
-    // applies the currency's own decimals (USD 5000 minor → "USD 50.00").
+    // the stored original MINOR units rendered via NumberFormatter with
+    // trimWholeFraction (260614-dx1): whole amounts drop ".00" ($12,211), real
+    // fractions keep their decimals (USD 5050 minor → "$50.50").
     final originalCurrency = transaction.originalCurrency;
     final originalAmount = transaction.originalAmount;
     final String? foreignAnnotation =
@@ -297,6 +298,9 @@ class ListScreen extends ConsumerWidget {
             originalAmount / subunitToUnitFor(originalCurrency),
             originalCurrency,
             locale,
+            // 260614-dx1: whole foreign amounts drop ".00" ($12,211.00 → $12,211);
+            // real fractions (kr12.50) keep their decimals.
+            trimWholeFraction: true,
           )
         : null;
 

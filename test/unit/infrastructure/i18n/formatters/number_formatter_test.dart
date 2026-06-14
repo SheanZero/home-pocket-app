@@ -205,6 +205,66 @@ void main() {
         final result = NumberFormatter.formatCurrency(1234.56, 'GBP', en);
         expect(result, contains('\u00a3'));
       });
+
+      group('trimWholeFraction (260614-dx1)', () {
+        test('whole USD drops ".00" but keeps symbol + grouping', () {
+          final result = NumberFormatter.formatCurrency(
+            12211,
+            'USD',
+            en,
+            trimWholeFraction: true,
+          );
+          expect(result, '\$12,211');
+          expect(result.contains('.'), isFalse);
+        });
+
+        test('fractional USD keeps its decimals when trimming enabled', () {
+          final result = NumberFormatter.formatCurrency(
+            12.50,
+            'USD',
+            en,
+            trimWholeFraction: true,
+          );
+          expect(result, '\$12.50');
+        });
+
+        test('non-zero hundredths kept when trimming enabled', () {
+          final result = NumberFormatter.formatCurrency(
+            12.05,
+            'USD',
+            en,
+            trimWholeFraction: true,
+          );
+          expect(result, '\$12.05');
+        });
+
+        test('whole SEK (kr) drops ".00" when trimming enabled', () {
+          final result = NumberFormatter.formatCurrency(
+            12,
+            'SEK',
+            en,
+            trimWholeFraction: true,
+          );
+          expect(result, contains('kr'));
+          expect(result.contains('.'), isFalse);
+        });
+
+        test('JPY whole amount unaffected by trimming (already 0 decimals)', () {
+          final result = NumberFormatter.formatCurrency(
+            1000,
+            'JPY',
+            ja,
+            trimWholeFraction: true,
+          );
+          expect(result, contains('\u00a5'));
+          expect(result.contains('.'), isFalse);
+        });
+
+        test('default (flag off) still renders ".00" for whole USD', () {
+          final result = NumberFormatter.formatCurrency(12211, 'USD', en);
+          expect(result, '\$12,211.00');
+        });
+      });
     });
 
     group('formatPercentage', () {

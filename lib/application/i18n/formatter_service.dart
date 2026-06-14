@@ -58,8 +58,20 @@ class FormatterService {
   /// Format [amount] as a currency string for [currencyCode].
   ///
   /// JPY: ¥1,234 (0 decimals) · USD/EUR/GBP: 2 decimals
-  String formatCurrency(num amount, String currencyCode, Locale locale) =>
-      NumberFormatter.formatCurrency(amount, currencyCode, locale);
+  ///
+  /// [trimWholeFraction] drops the all-zero fraction for whole foreign amounts
+  /// (260614-dx1) — see [NumberFormatter.formatCurrency].
+  String formatCurrency(
+    num amount,
+    String currencyCode,
+    Locale locale, {
+    bool trimWholeFraction = false,
+  }) => NumberFormatter.formatCurrency(
+    amount,
+    currencyCode,
+    locale,
+    trimWholeFraction: trimWholeFraction,
+  );
 
   /// Format [value] as a percentage with [decimals] decimal places.
   ///

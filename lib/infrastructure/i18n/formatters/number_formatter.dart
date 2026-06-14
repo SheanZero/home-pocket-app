@@ -16,11 +16,31 @@ class NumberFormatter {
     return formatter.format(number);
   }
 
-  static String formatCurrency(num amount, String currencyCode, Locale locale) {
+  /// Formats [amount] as a currency string with symbol + locale grouping.
+  ///
+  /// [trimWholeFraction] (260614-dx1): when true AND the currency has >0
+  /// decimals AND [amount] is a whole number, the all-zero fraction is dropped
+  /// so a round foreign amount reads cleaner (USD 12211.0 → "$12,211" instead
+  /// of "$12,211.00"). Default false keeps every existing call-site (and its
+  /// goldens) byte-identical. JPY/KRW (0-decimal) are unaffected either way;
+  /// real fractions (12.50) keep their decimals because the value is not whole.
+  static String formatCurrency(
+    num amount,
+    String currencyCode,
+    Locale locale, {
+    bool trimWholeFraction = false,
+  }) {
+    final currencyDecimals = _getCurrencyDecimals(currencyCode);
+    final decimalDigits =
+        trimWholeFraction &&
+            currencyDecimals > 0 &&
+            amount == amount.roundToDouble()
+        ? 0
+        : currencyDecimals;
     final formatter = NumberFormat.currency(
       locale: locale.toString(),
       symbol: _getCurrencySymbol(currencyCode),
-      decimalDigits: _getCurrencyDecimals(currencyCode),
+      decimalDigits: decimalDigits,
     );
     return formatter.format(amount);
   }
