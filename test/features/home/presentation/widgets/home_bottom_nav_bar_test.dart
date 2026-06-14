@@ -58,16 +58,16 @@ void main() {
     expect(tappedIndex, 1);
   });
 
-  testWidgets('active tab has coral background decoration', (tester) async {
+  testWidgets('active tab icon uses primary accent color', (tester) async {
     await tester.pumpWidget(
       buildTestWidget(
         HomeBottomNavBar(currentIndex: 2, onTap: (_) {}, onFabTap: () {}),
       ),
     );
     await tester.pumpAndSettle();
-    // The active tab (index 2, bar_chart) icon should be white
+    // The active tab (index 2, bar_chart) icon is tinted with the accent colour
     final barChartIcon = tester.widget<Icon>(find.byIcon(Icons.bar_chart));
-    expect(barChartIcon.color, Colors.white);
+    expect(barChartIcon.color, AppPalette.light.accentPrimary);
   });
 
   testWidgets('inactive tab icon uses tertiary color', (tester) async {

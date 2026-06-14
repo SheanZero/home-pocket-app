@@ -43,8 +43,8 @@ void main() {
       final text = tester.widget<Text>(find.text('ホーム'));
       expect(
         text.style?.color,
-        Colors.white,
-      ); // Active tab text is white on coral
+        AppPalette.light.accentPrimary,
+      ); // Active tab text is tinted with the accent colour (no background)
     });
 
     testWidgets('inactive tab uses inactive color', (tester) async {

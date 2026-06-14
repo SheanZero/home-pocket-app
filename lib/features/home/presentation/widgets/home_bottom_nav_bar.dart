@@ -6,9 +6,10 @@ import '../../../../generated/app_localizations.dart';
 
 /// Floating pill-style bottom navigation bar with 4 tabs and a FAB.
 ///
-/// The pill has rounded corners (32px radius), a subtle shadow, and the active
-/// tab is highlighted with a coral-coloured pill (14px radius). The FAB sits
-/// to the right of the pill with a coral gradient.
+/// The pill has rounded corners (32px radius) and a subtle shadow. The active
+/// tab has no background — its icon and label are tinted with the primary
+/// accent colour and slightly bolded; inactive tabs are tertiary grey. The FAB
+/// sits to the right of the pill with a coral gradient.
 class HomeBottomNavBar extends StatelessWidget {
   const HomeBottomNavBar({
     super.key,
@@ -92,30 +93,26 @@ class HomeBottomNavBar extends StatelessWidget {
   Widget _buildTab(BuildContext context, int index, String label) {
     final isActive = index == currentIndex;
 
+    final activeColor = context.palette.accentPrimary;
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => onTap(index),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: isActive
-            ? BoxDecoration(
-                color: context.palette.accentPrimary,
-                borderRadius: BorderRadius.circular(14),
-              )
-            : null,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               isActive ? _activeIcons[index] : _icons[index],
               size: 20,
-              color: isActive ? Colors.white : context.palette.textTertiary,
+              color: isActive ? activeColor : context.palette.textTertiary,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: isActive
-                  ? AppTextStyles.navLabelActive
+                  ? AppTextStyles.navLabelActive.copyWith(color: activeColor)
                   : AppTextStyles.navLabel.copyWith(
                       color: context.palette.textTertiary,
                     ),
