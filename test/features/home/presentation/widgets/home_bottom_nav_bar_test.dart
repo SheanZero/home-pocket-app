@@ -77,9 +77,9 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    // Tab index 1 (list) is inactive when currentIndex is 0
+    // Tab index 1 (list) is inactive when currentIndex is 0 — pure neutral grey
     final listIcon = tester.widget<Icon>(find.byIcon(Icons.list));
-    expect(listIcon.color, AppPalette.light.textTertiary);
+    expect(listIcon.color, const Color(0xFFBDBDBD));
   });
 
   testWidgets('renders all 4 tab labels', (tester) async {

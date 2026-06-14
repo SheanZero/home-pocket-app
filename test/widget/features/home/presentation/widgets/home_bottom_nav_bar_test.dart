@@ -61,7 +61,7 @@ void main() {
       );
 
       final text = tester.widget<Text>(find.text('一覧'));
-      expect(text.style?.color, AppPalette.light.textTertiary);
+      expect(text.style?.color, const Color(0xFFBDBDBD));
     });
 
     testWidgets('FAB calls onFabTap', (tester) async {
