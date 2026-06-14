@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-12 after v1.6 milestone)
 Phase: 42 (entry-ui-display-voice) — EXECUTING
 Plan: 9 of 9
 Status: Phase complete — ready for verification
-Last activity: 2026-06-14 - 补完 quick task 260614-dx1: 列表页外币注释也去掉 .00（formatCurrency 新增 trimWholeFraction，整数去尾零、真实小数保留）
+Last activity: 2026-06-14 - Completed quick task 260614-goh: 语音识别人民币/美金等口语外币词（扩展全部支持货币的 zh/ja/en 说法）
 
 Progress: [███████░░░] 65%
 
@@ -45,6 +45,7 @@ Progress: [███████░░░] 65%
 | 260613-wjx | 修复 Home 首页最近项编辑/删除后列表不刷新（onTap fire-and-forget → await pop 结果并 invalidateTransactionDependents，对齐 list_screen WR-03 契约；含回归测试） | 2026-06-13 | 72d52e15 | [260613-wjx-home-bug](./quick/260613-wjx-home-bug/) |
 | 260613-wuv | 外币输入时汇率/换算改为卡片样式（与编辑页一致），滚动时仅金额输入区置顶；外币金额输入增加防抖缓冲避免实时计算闪频 | 2026-06-13 | d98f7e92 | [260613-wuv-fx-input-card-debounce](./quick/260613-wuv-fx-input-card-debounce/) |
 | 260614-dx1 | 外币金额为整数时编辑/显示不再出现 .00（编辑页+键盘 formatMinorAsMajor；列表注释 formatCurrency trimWholeFraction；保留真实小数 12.50 与 JPY 整数路径） | 2026-06-14 | 3423d53e | [260614-dx1-fx-no-trailing-zeros](./quick/260614-dx1-fx-no-trailing-zeros/) |
+| 260614-goh | 语音识别口语外币词：加入 人民币/美金，并扩展全部支持货币(USD/EUR/CNY/HKD/GBP/KRW/TWD/AUD/CAD/SGD)的 zh/ja/en 说法；detection+strip regex 大小写不敏感；regexAlternation longest-first（+29 corpus 用例） | 2026-06-14 | 117aecd5 | [260614-goh-voice-currency-switch](./quick/260614-goh-voice-currency-switch/) |
 
 ## Last Milestone Snapshot (v1.6)
 
