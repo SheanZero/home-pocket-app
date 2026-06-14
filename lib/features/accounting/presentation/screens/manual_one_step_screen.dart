@@ -680,24 +680,8 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen> {
           ),
         ),
         centerTitle: true,
-        // 260614-iww: continuous mode surfaces a discoverable on-page exit
-        // control (the AppBar close already pops once; this adds an explicit
-        // labelled exit so the affordance is obvious). accentPrimary per palette
-        // — never a hardcoded hex.
-        actions: widget.continuousMode
-            ? [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(
-                    l10n.recordingExitLink,
-                    style: AppTextStyles.labelMedium.copyWith(
-                      color: palette.accentPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ]
-            : null,
+        // 260614-iww: the leading AppBar close (×) already exits continuous
+        // mode; no separate right-side text exit button (per user request).
       ),
       body: Stack(
         children: [

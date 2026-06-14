@@ -663,10 +663,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Continuous-mode exit affordance + hint are surfaced on the page.
+      // 260614-iww: the exit control is the leading AppBar close (×) — the
+      // redundant right-side text button was removed per user request; the
+      // hint tells the user that close key ends continuous recording.
       expect(
-        find.text('Exit'),
+        find.byIcon(Icons.close),
         findsOneWidget,
-        reason: 'continuous mode surfaces a discoverable exit control',
+        reason: 'continuous mode exit control is the leading AppBar close (×)',
       );
       expect(
         find.text('Tap exit anytime to finish'),
