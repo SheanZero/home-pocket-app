@@ -4,13 +4,13 @@ milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
 stopped_at: Phase 43 context gathered
-last_updated: "2026-06-15T05:05:29.472Z"
-last_activity: 2026-06-15 -- Phase 43 execution started
+last_updated: "2026-06-15T05:14:14.786Z"
+last_activity: 2026-06-15
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 7
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 ## Current Position
 
 Phase: 43 (html-design-gate-no-production-code) — EXECUTING
-Plan: 1 of 7
-Status: Executing Phase 43
-Last activity: 2026-06-15 -- Phase 43 execution started
+Plan: 2 of 7
+Status: Ready to execute
+Last activity: 2026-06-15
 
 ### Quick Tasks Completed
 
@@ -157,15 +157,16 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-15T04:27:42.586Z
+Last session: 2026-06-15T05:14:02.777Z
 Stopped at: Phase 43 context gathered
-Resume file: .planning/phases/43-html-design-gate-no-production-code/43-CONTEXT.md
+Resume file: None
 
 ## Performance Metrics
 
 | Phase | Plan | Duration | Notes |
 |-------|------|----------|-------|
 | (v1.8 not yet started) | — | — | — |
+| Phase 43 P01 | 6 min | 2 tasks | 3 files |
 
 ## Decisions
 
@@ -174,6 +175,7 @@ Resume file: .planning/phases/43-html-design-gate-no-production-code/43-CONTEXT.
 - [v1.8 roadmap]: Build half kept at 4 sequentially-dependent phases (data → shell → cards → validation) rather than consolidated, because the full-screen rebuild under tight ADR-012/ADR-016 invariants benefits from a clean shell-before-cards contract and a dedicated macOS-golden/full-suite gate.
 - [v1.8 roadmap]: Overview reframed expense-side only (no income path exists; savings-rate would be meaningless); real savings-rate → INCOME-V2-01.
 - [v1.8 roadmap]: No Drift migration, no fl_chart bump, budget-vs-actual excluded — keeps v1.8 a pure presentation-layer rebuild.
+- [Phase ?]: [43-01]: Design-gate Wave-0 — GATE-01 deep-map + shared sample-data + mock README authored; zero production code (only .md under .planning/)
 
 ## Operator Next Steps
 

@@ -149,7 +149,7 @@
 **Plans**: 7 plans in 3 wavesPlans:
 **Wave 1**
 
-- [ ] 43-01-PLAN.md — Wave 1: GATE-01 现状深研图 + 共享示例数据 + mock 阵容 README（mock 前置基座）
+- [x] 43-01-PLAN.md — Wave 1: GATE-01 现状深研图 + 共享示例数据 + mock 阵容 README（mock 前置基座）
 
 **Wave 2** *(blocked on Wave 1 completion)*
 

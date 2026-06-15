@@ -17,7 +17,7 @@ Requirements for this milestone (v1.8). Each maps to a roadmap phase.
 
 > Phase 43 — a hard gate. No production code is committed in this phase.
 
-- [ ] **GATE-01**: Produce a written deep-research map of the current statistics implementation (seeded by `.planning/research/ARCHITECTURE.md`'s reuse map)
+- [x] **GATE-01**: Produce a written deep-research map of the current statistics implementation (seeded by `.planning/research/ARCHITECTURE.md`'s reuse map)
 - [ ] **GATE-02**: Produce ≥3 HTML design directions, each carrying an ADR-012 self-audit table mapping every emotional element to *ambient / celebratory-of-the-past* (OK) vs *target / comparison / achievement* (forbidden)
 - [ ] **GATE-03**: Thorough discussion → user selects exactly ONE direction (gate exit criterion = user approval; no Dart/production code committed)
 - [ ] **GATE-04**: For the selected direction, decide go/no-go on a new ADR if it grazes the ADR-012 boundary (e.g. persisting user-authored reflection text in JOY-04); lock the emotional-vocabulary list for the anti-toxicity sweeps; validate each chart affordance against the current fl_chart 1.2.0 API
@@ -104,7 +104,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GATE-01 | Phase 43 | Pending |
+| GATE-01 | Phase 43 | Complete |
 | GATE-02 | Phase 43 | Pending |
 | GATE-03 | Phase 43 | Pending |
 | GATE-04 | Phase 43 | Pending |
