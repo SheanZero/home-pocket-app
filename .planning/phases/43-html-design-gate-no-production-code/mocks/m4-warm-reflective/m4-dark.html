@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M4 温暖反思派 · 深色 · 统计</title>
+<!--
+  M4 warm-reflective joy-led 深色稿 · 自包含（内联 style，离线可开，无外部资源 / 无脚本 / 无网络字体）
+  渲染共享示例数据（shared/sample-data.md）— 全部数字为虚构模拟，非真实账目。
+  M4 = 悦己主导端中浓度：情感核心先行——值得卡（中强度）+ kakeibo Q4 反思 prompt（核心新增）+ 满足度分布；
+  实用支出总览退居次要紧凑条。calm-warm 日记气质，不外放、不打分。JOY-01「中强度」读感，绝不成进度/目标环。
+  kakeibo Q4 反思 = 静态只读（D-06）：温柔提问 + 示例引导，价值观肯定（D-05），不接受输入（无 textarea/button/submit）。
+  深色取 ADR-019 桜餅×若葉 warm dark：bg #171210 / card #231E1B / primary·daily 若葉绿 #8DC68D·#7DC88D /
+  joy 桜粉 #E89BB0·joyText #E89BB0（lr5b live 深色桜粉，非陈旧 amber 基表格）/ shared 钢蓝 #7FA8D8。
+  金额 JPY ¥ 无小数，tabular。仅支出侧（不画入账侧 / 不画结余比率）。
+-->
+<style>
+  :root{
+    --bg:#171210; --card:#231E1B; --cream:#2A2421;
+    --ink:#F0EBE6; --ink2:#9A8E87; --ink3:#6F645E;
+    --border:#2E2723; --divider:#2A2420;
+    --primary:#8DC68D; --primaryBorder:#3A4A38;
+    --daily:#7DC88D; --dailyText:#9FD8A6; --dailyLight:#1E2A1F;
+    --joy:#E89BB0; --joyText:#E89BB0; --joyLight:#2E1820; --joyBorder:#4A2A33; --joySoft:#5A3340;
+    --shared:#7FA8D8; --sharedText:#9DBCE4; --sharedLight:#1B2530;
+    --neutral:#8A7F78; --neutralBg:#2A2421;
+    --shadow:0 1px 2px rgba(0,0,0,.30),0 8px 22px rgba(0,0,0,.34);
+    --joyShadow:0 1px 2px rgba(0,0,0,.34),0 12px 30px rgba(0,0,0,.40);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans CJK SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.5}
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;letter-spacing:.01em}
+  .wrap{max-width:430px;margin:0 auto;padding:0 16px 96px}
+  .topbar{position:sticky;top:0;background:rgba(23,18,16,.92);backdrop-filter:blur(8px);
+    padding:14px 4px 11px;display:flex;align-items:baseline;justify-content:space-between;z-index:5;border-bottom:1px solid var(--divider)}
+  .topbar h1{font-size:19px;font-weight:700;letter-spacing:.02em}
+  .window{font-size:12.5px;color:var(--ink2);background:var(--card);border:1px solid var(--border);
+    border-radius:999px;padding:5px 11px;display:inline-flex;gap:6px;align-items:center}
+  .window .chev{color:var(--ink3);font-size:11px}
+
+  .sect-h{font-size:11.5px;color:var(--ink2);font-weight:600;letter-spacing:.09em;
+    margin:28px 4px 12px;display:flex;align-items:center;gap:8px}
+  .sect-h::before{content:"";width:14px;height:2px;border-radius:2px;background:var(--ink3)}
+  .sect-h.joy{color:var(--joyText)}
+  .sect-h.joy::before{background:var(--joy)}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;
+    padding:18px 16px;box-shadow:var(--shadow)}
+
+  /* ── (1) 值得卡 — JOY-01 中强度，绝对累计 Σ joy_contribution，非环 ── */
+  .worth{position:relative;overflow:hidden;background:
+      radial-gradient(120% 90% at 88% 0%, var(--joyLight) 0%, var(--cream) 58%, var(--card) 100%);
+    border:1px solid var(--joyBorder);border-radius:22px;padding:24px 20px 22px;box-shadow:var(--joyShadow)}
+  .worth .seed{position:absolute;top:-26px;right:-12px;font-size:96px;opacity:.13;line-height:1;filter:saturate(.8)}
+  .worth .cap{font-size:13px;color:var(--joyText);font-weight:600;letter-spacing:.01em;opacity:.92}
+  .worth .line{display:flex;align-items:baseline;gap:9px;margin-top:9px;position:relative}
+  .worth .val{font-size:38px;font-weight:800;color:var(--joyText);letter-spacing:-.01em;line-height:1.02}
+  .worth .unit{font-size:13px;color:var(--joyText);font-weight:600;opacity:.72}
+  .worth .say{font-size:13.5px;color:var(--ink);margin-top:12px;line-height:1.65;font-weight:500}
+  .worth .meta{font-size:11px;color:var(--ink3);margin-top:11px;display:flex;align-items:center;gap:7px}
+  .worth .meta .pip{width:14px;height:3px;border-radius:3px;background:var(--joy);opacity:.7;flex:0 0 auto}
+
+  /* ── (2) kakeibo Q4 反思 prompt — 静态只读（D-06），价值观肯定（D-05），不接受输入 ── */
+  .reflect{background:var(--cream);border:1px dashed var(--joyBorder);border-radius:18px;
+    padding:20px 18px;box-shadow:var(--shadow)}
+  .reflect .qtag{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:var(--joyText);
+    font-weight:600;letter-spacing:.04em;background:var(--joyLight);border:1px solid var(--joyBorder);
+    border-radius:999px;padding:4px 11px}
+  .reflect .qtag .q{font-weight:800;opacity:.85}
+  .reflect .ask{font-size:17px;font-weight:700;color:var(--ink);margin-top:13px;line-height:1.5;letter-spacing:.005em}
+  .reflect .guide{font-size:12.5px;color:var(--ink2);margin-top:11px;line-height:1.7;
+    border-left:2px solid var(--joySoft);padding-left:12px}
+  .reflect .guide .eg{color:var(--joyText);font-weight:600}
+  .reflect .static-note{font-size:10.5px;color:var(--ink3);margin-top:14px;display:flex;align-items:center;gap:6px}
+  .reflect .static-note .lk{font-size:11px}
+
+  /* ── (3) 满足度分布直方图 — 分布 + 描述性反思 ── */
+  .sat{padding:20px 16px 18px}
+  .sat .head{display:flex;align-items:baseline;justify-content:space-between}
+  .sat .head .t{font-size:13.5px;font-weight:700;color:var(--ink)}
+  .sat .head .med{font-size:11.5px;color:var(--ink2);font-weight:600}
+  .sat .head .med b{color:var(--joyText)}
+  .bars{display:flex;align-items:flex-end;gap:6px;height:96px;margin-top:18px;padding:0 2px}
+  .bars .b{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+  .bars .bar{width:100%;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,var(--joy),var(--joySoft));min-height:3px}
+  .bars .b.mid .bar{background:linear-gradient(180deg,var(--joyText),var(--joy));opacity:.95}
+  .bars .b .n{font-size:9.5px;color:var(--ink3);font-weight:600}
+  .bars .b .sc{font-size:10px;color:var(--ink3)}
+  .sat .reflect-line{font-size:12.5px;color:var(--ink2);margin-top:15px;line-height:1.65;
+    background:var(--joyLight);border-radius:12px;padding:11px 13px}
+  .sat .reflect-line b{color:var(--joyText);font-weight:600}
+
+  /* ── (4) 实用支出总览 — 退居次要紧凑条（仅支出侧）── */
+  .ovw-strip{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:15px 16px;box-shadow:var(--shadow)}
+  .ovw-strip .top{display:flex;align-items:baseline;justify-content:space-between}
+  .ovw-strip .lab{font-size:11.5px;color:var(--ink2);font-weight:600}
+  .ovw-strip .total{font-size:23px;font-weight:800;letter-spacing:-.01em}
+  .ovw-strip .cnt{font-size:11px;color:var(--ink3);margin-top:1px}
+  .ratiobar{height:7px;border-radius:7px;overflow:hidden;display:flex;margin-top:13px;background:var(--neutralBg)}
+  .ratiobar .d{background:var(--daily)}
+  .ratiobar .j{background:var(--joy)}
+  .ratiocap{display:flex;justify-content:space-between;margin-top:8px;font-size:11.5px}
+  .ratiocap .d{color:var(--dailyText);font-weight:600}
+  .ratiocap .j{color:var(--joyText);font-weight:600}
+  .ratiocap .num{color:var(--ink2);font-weight:500}
+
+  /* ── (5) 分类小览（紧凑 top-N，实用侧次要）── */
+  .mini{display:flex;flex-direction:column;margin-top:12px;border-top:1px solid var(--divider);padding-top:6px}
+  .mini .row{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--divider)}
+  .mini .row:last-child{border-bottom:0}
+  .mini .ic{width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+  .ic.d{background:var(--dailyLight)} .ic.j{background:var(--joyLight)} .ic.s{background:var(--sharedLight)} .ic.n{background:var(--neutralBg)}
+  .mini .nm{flex:1;font-size:12.5px;font-weight:600}
+  .mini .amt{font-size:12.5px;font-weight:700}
+  .mini .amt.d{color:var(--dailyText)} .mini .amt.j{color:var(--joyText)} .mini .amt.s{color:var(--sharedText)} .mini .amt.n{color:var(--ink2)}
+  .mini .pct{font-size:10.5px;color:var(--ink3);margin-left:9px;min-width:38px;text-align:right}
+  .mini .chev{color:var(--ink3);font-size:15px;margin-left:2px}
+  .mini-hint{font-size:11px;color:var(--ink3);margin:11px 2px 0;display:flex;align-items:center;gap:6px}
+
+  .footnote{font-size:10.5px;color:var(--ink3);text-align:center;margin-top:30px;line-height:1.6}
+  .badge-sim{display:inline-block;background:var(--neutralBg);color:var(--ink2);border-radius:6px;padding:2px 7px;font-size:10px;font-weight:600;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <h1>统计</h1>
+    <span class="window">2026 年 5 月 <span class="chev">▾</span></span>
+  </div>
+
+  <!-- ===== 情感核心先行 ===== -->
+
+  <!-- (1) 值得卡 — JOY-01 中强度，绝对累计 Σ joy_contribution，非环 -->
+  <div class="sect-h joy">这个月，你为自己花的</div>
+  <div class="worth">
+    <div class="seed">🌸</div>
+    <div class="cap">悦己 · 给自己的温柔</div>
+    <div class="line">
+      <span class="val num">¥47,200</span>
+      <span class="unit num">· 22 笔</span>
+    </div>
+    <div class="say">这些花费，都是你为自己留下的好时光。值得。</div>
+    <div class="meta"><span class="pip"></span>累计已花悦己 · 无目标、无对比 · 只记录已经发生的好</div>
+  </div>
+
+  <!-- (2) kakeibo Q4 反思 prompt — 静态只读，价值观肯定，不接受输入 -->
+  <div class="sect-h joy">轻轻想一想</div>
+  <div class="reflect" aria-label="反思提示 · 静态只读 · 不接受输入">
+    <span class="qtag"><span class="q">Q</span> 家计簿的第四个温柔提问</span>
+    <div class="ask">下次，什么会让你花得更开心一点？</div>
+    <div class="guide">
+      不是要你少花，而是想一想——把钱多留给那些<span class="eg">真正让你享受、回想起来仍觉得值得</span>的事。
+      比如这个月那杯换来安心的咖啡。
+    </div>
+    <div class="static-note"><span class="lk">🔖</span>这是一句给你自己的提问 · 只供回味，不需要填写、不会被记录</div>
+  </div>
+
+  <!-- (3) 满足度分布 — 分布 + 描述性反思，绝不"超过上月"/"目标 8+" -->
+  <div class="sect-h joy">这些花费，让你多满足</div>
+  <div class="card sat">
+    <div class="head">
+      <div class="t">满足度分布</div>
+      <div class="med">中位满足度 <b class="num">7</b> · 共 22 笔悦己</div>
+    </div>
+    <div class="bars" aria-label="悦己满足度 1 到 10 的分布直方图">
+      <div class="b"><div class="bar" style="height:3%"></div><div class="n num">0</div><div class="sc num">1</div></div>
+      <div class="b"><div class="bar" style="height:18%"></div><div class="n num">1</div><div class="sc num">2</div></div>
+      <div class="b"><div class="bar" style="height:18%"></div><div class="n num">1</div><div class="sc num">3</div></div>
+      <div class="b"><div class="bar" style="height:36%"></div><div class="n num">2</div><div class="sc num">4</div></div>
+      <div class="b"><div class="bar" style="height:36%"></div><div class="n num">2</div><div class="sc num">5</div></div>
+      <div class="b"><div class="bar" style="height:54%"></div><div class="n num">3</div><div class="sc num">6</div></div>
+      <div class="b mid"><div class="bar" style="height:72%"></div><div class="n num">4</div><div class="sc num">7</div></div>
+      <div class="b mid"><div class="bar" style="height:100%"></div><div class="n num">5</div><div class="sc num">8</div></div>
+      <div class="b"><div class="bar" style="height:54%"></div><div class="n num">3</div><div class="sc num">9</div></div>
+      <div class="b"><div class="bar" style="height:18%"></div><div class="n num">1</div><div class="sc num">10</div></div>
+    </div>
+    <div class="reflect-line">
+      大多数悦己花费，回想起来都落在<b>满足的那一端</b>。偶有一两笔不那么尽兴——那也没关系，都是认识自己的一部分。
+    </div>
+  </div>
+
+  <!-- ===== 实用支出总览退居次要 ===== -->
+
+  <!-- (4) 支出总览 — 紧凑次要条（仅支出侧）-->
+  <div class="sect-h">支出总览</div>
+  <div class="ovw-strip">
+    <div class="top">
+      <div>
+        <div class="lab">本月总支出</div>
+        <div class="total num">¥248,600</div>
+        <div class="cnt num">86 笔 · 2026 年 5 月</div>
+      </div>
+    </div>
+    <div class="ratiobar">
+      <div class="d" style="width:81%"></div>
+      <div class="j" style="width:19%"></div>
+    </div>
+    <div class="ratiocap">
+      <span class="d">🌱 日常 <span class="num">¥201,400</span> · 81%</span>
+      <span class="j">🌸 悦己 <span class="num">¥47,200</span> · 19%</span>
+    </div>
+
+    <!-- (5) 分类小览（紧凑 top-N，下钻入口）-->
+    <div class="mini">
+      <div class="row">
+        <div class="ic d">🍚</div>
+        <div class="nm">饮食</div>
+        <div class="amt d num">¥78,300</div>
+        <div class="pct num">31.5%</div>
+        <div class="chev">›</div>
+      </div>
+      <div class="row">
+        <div class="ic s">🏠</div>
+        <div class="nm">住居</div>
+        <div class="amt s num">¥62,000</div>
+        <div class="pct num">24.9%</div>
+        <div class="chev">›</div>
+      </div>
+      <div class="row">
+        <div class="ic d">🚃</div>
+        <div class="nm">交通</div>
+        <div class="amt d num">¥21,800</div>
+        <div class="pct num">8.8%</div>
+        <div class="chev">›</div>
+      </div>
+      <div class="row">
+        <div class="ic j">📚</div>
+        <div class="nm">书籍·学习</div>
+        <div class="amt j num">¥16,400</div>
+        <div class="pct num">6.6%</div>
+        <div class="chev">›</div>
+      </div>
+      <div class="row">
+        <div class="ic n">⋯</div>
+        <div class="nm">其它（日用品·通信·兴趣·外出·美容等）</div>
+        <div class="amt n num">¥70,100</div>
+        <div class="pct num">28.2%</div>
+        <div class="chev">›</div>
+      </div>
+    </div>
+    <div class="mini-hint">› 轻点任一分类，可查看该分类的明细</div>
+  </div>
+
+  <div class="footnote">
+    <span class="badge-sim">示例数据 · SIMULATED</span><br>
+    全部金额为虚构模拟，非任何真实用户的财务数据。<br>
+    本页仅呈现支出侧（范围勘误 · 详见共享示例数据）。
+  </div>
+
+</div>
+</body>
+</html>
