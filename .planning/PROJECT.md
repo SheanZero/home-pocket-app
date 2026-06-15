@@ -11,11 +11,22 @@
 **Shipped:** v1.6 购物清单 (2026-06-12) — see `.planning/milestones/v1.6-ROADMAP.md` + `.planning/milestones/v1.6-MILESTONE-AUDIT.md`
 **Shipped:** v1.7 多币种支持 (2026-06-14) — see `.planning/milestones/v1.7-ROADMAP.md` + `.planning/milestones/v1.7-MILESTONE-AUDIT.md`
 
-## Next Milestone
+## Current Milestone: v1.8 统计页面重设计（实用化 × 悦己情感化）
 
-**Not yet defined** — run `/gsd-new-milestone` to start the next cycle (questioning → research → requirements → roadmap).
+**Goal:** 把统计页面从「指标罗列」全面重设计为「更实用 + 凸显悦己、让用户为自己花钱而感到开心」的体验。开发前先调研现状、用 HTML 产出多套设计方向并充分讨论选定一案（设计探索关卡），通过后再进入开发。
 
-**Candidate themes carried forward (post-v1.7):** MOD-005 OCR writer landing (architectural slot reserved since v1.3; OCR ledger entry is currently hidden behind the reversible `kOcrEntryEnabled` compile-time flag from quick task 260614-iww — flip to re-enable), combined family-calendar totals + undo-on-delete (v1.4 deferrals), FAMILY-V2-01/02/03 family privacy hardening, runtime theme-switching / selectable palettes (THEME-V2-01, unblocked by the v1.5 token system), `Book.survivalBalance`/`soulBalance` DB-column rename (v1.5 out-of-scope carve-out), remaining hardcoded a11y Semantics labels (v1.5 IN-02), FUTURE-QA-01 release-readiness QA, FUTURE-DOC/TOOL cleanup, fl_chart 1.x upgrade (TOOL-V2-01), voice flow polish carry (VOICE-POLISH-V2-01..08), English voice parser (VOICE-EN-V2-01), Multi-Currency v2 (CUR-V2-01 "remember this rate", CUR-V2-02 per-currency spending sub-totals, SHOP-CURRENCY-V2 shopping estimatedPrice multi-currency).
+**Phase numbering:** Continues from v1.7's Phase 42 → v1.8 starts at **Phase 43**.
+
+**Target features:**
+- **HTML 设计探索关卡（开发前置）** — 深入调研现状实现 + 产出多个 HTML 设计方向 + 充分讨论 → 选定一案（未获批前不进入开发）
+- **统计页全面重设计** — 信息架构 + 视觉 + 叙事框架刷新
+- **收支总览 / 结余率前面化** — 收入−支出−结余率作为一等概览（现仅内部计算，未前面化）
+- **支出趋势 & 分类下钻** — 6 个月滚动 + 分类构成下钻 / 可切换视图（更易回答「钱花哪了」）
+- **悦己叙事强化** — 情感化呈现「已花悦己」的满足感与价值；具体形式在设计阶段于 ADR-012 约束下决定
+
+**Central open design question:** 「为自己花钱而开心」如何在 ADR-012 反游戏化恒久约束（禁止徽章/连续天数/前月对比/目标达成/排行榜，由 `anti_toxicity_*_test` + `home_screen_isolation_test` 结构化锁定）下表达——作为 HTML 设计探索的主要论点，以方向案比较后决定（必要时评估是否需新 ADR）。
+
+**Deferred backlog (carried forward, NOT in v1.8 scope):** MOD-005 OCR writer landing (OCR ledger entry hidden behind reversible `kOcrEntryEnabled` flag, quick task 260614-iww), combined family-calendar totals + undo-on-delete (v1.4 deferrals), FAMILY-V2-01/02/03 family privacy hardening, runtime theme-switching / selectable palettes (THEME-V2-01), `Book.survivalBalance`/`soulBalance` DB-column rename (v1.5 carve-out), remaining hardcoded a11y Semantics labels (v1.5 IN-02), FUTURE-QA-01 release-readiness QA, FUTURE-DOC/TOOL cleanup, fl_chart 1.x→2.x upgrade (TOOL-V2-01) — **note: a "全面大改" of the analytics charts may pull this forward**, voice flow polish (VOICE-POLISH-V2-01..08), English voice parser (VOICE-EN-V2-01), Multi-Currency v2 (CUR-V2-01/02, SHOP-CURRENCY-V2).
 
 The v1.0 initiative was a pure-refactor cleanup. It delivered an operational hybrid audit pipeline, eliminated 50 catalogued findings (24 CRITICAL, 8 HIGH, 8 MEDIUM, 7 LOW + 3 layer-violation closures), aligned all architecture documentation with the post-refactor codebase, and locked 4 permanent CI guardrails.
 
@@ -392,9 +403,9 @@ A family accounting app users can trust with sensitive financial data — local-
 
 ### Active
 
-<!-- Next milestone not yet defined — populated by /gsd-new-milestone. -->
+<!-- v1.8 统计页面重设计 — requirements defined in .planning/REQUIREMENTS.md (REQ-IDs), mapped to phases by .planning/ROADMAP.md. -->
 
-(No active milestone. v1.7 多币种支持 shipped 2026-06-14. Run `/gsd-new-milestone` to define the next milestone's requirements; see "Next Milestone" candidate themes near the top of this document.)
+**v1.8 统计页面重设计 (active, started 2026-06-15).** Requirements live in `.planning/REQUIREMENTS.md`; phase mapping in `.planning/ROADMAP.md`. Theme: full overhaul of the analytics/statistics page — more practical (income/expense + savings-rate overview, spending trends & drill-down) and emotionally surfacing 悦己 self-spending so users feel good about spending on themselves, within the permanent ADR-012 anti-gamification constraint. A dedicated HTML design-exploration phase (deep-research the current `lib/features/analytics/` implementation → multiple HTML mockup directions → thorough discussion → selection) gates development.
 
 ### Out of Scope
 
@@ -559,7 +570,9 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-14 after v1.7 多币种支持 milestone — shipped + archived (3 phases, 20 plans, tag `v1.7`). Foreign-currency ledger entry end to end (SmartKeyboard currency selector + zh/ja voice), transaction-date historical-rate conversion from a free no-key API (Frankfurter + fawazahmed0) with an encrypted offline-capable Drift cache, JPY-converted booking amount + original currency/amount/rate as sync-safe fields, single `convertToJpy()` site, hash invariant preserved (ADR-021), two-input/one-derived edit (ADR-022 D-01). JPY-only path byte-unchanged; first external network dependency (no user data on the wire). Drift schema v20→v21; `connectivity_plus` added. Audit `tech_debt` accepted (23/23 requirements, 3/3 phases, 6/6 seams, E2E complete, Phase 42 4/4 device UAT passed); residual is draft-Nyquist docs (P40/41/42). Suite 2786/2786 green. ADR-020/021/022 accepted. 34 pre-close artifact-audit items acknowledged as deferred (33 quick-task stubs + 1 stale verification flag resolved by UAT).*
+*Last updated: 2026-06-15 — Milestone v1.8 统计页面重设计 (Analytics Redesign) started. Full overhaul of the statistics page: more practical (income/expense + savings-rate overview, spending trends & drill-down) and emotionally highlighting 悦己 self-spending so users feel good about spending on themselves — within the permanent ADR-012 anti-gamification constraint (the central open design question). Process: a dedicated HTML design-exploration phase (deep-research the current `lib/features/analytics/` implementation → produce multiple HTML design directions → thorough discussion → select one) gates development; build phases follow only after design approval. Scope decided "全面大改"; practical priorities = 收支/结余率总览 + 趋势与下钻. Phase numbering continues from v1.7's Phase 42 → starts at Phase 43.*
+
+*Prior: 2026-06-14 after v1.7 多币种支持 milestone — shipped + archived (3 phases, 20 plans, tag `v1.7`). Foreign-currency ledger entry end to end (SmartKeyboard currency selector + zh/ja voice), transaction-date historical-rate conversion from a free no-key API (Frankfurter + fawazahmed0) with an encrypted offline-capable Drift cache, JPY-converted booking amount + original currency/amount/rate as sync-safe fields, single `convertToJpy()` site, hash invariant preserved (ADR-021), two-input/one-derived edit (ADR-022 D-01). JPY-only path byte-unchanged; first external network dependency (no user data on the wire). Drift schema v20→v21; `connectivity_plus` added. Audit `tech_debt` accepted (23/23 requirements, 3/3 phases, 6/6 seams, E2E complete, Phase 42 4/4 device UAT passed); residual is draft-Nyquist docs (P40/41/42). Suite 2786/2786 green. ADR-020/021/022 accepted. 34 pre-close artifact-audit items acknowledged as deferred (33 quick-task stubs + 1 stale verification flag resolved by UAT).*
 
 *Prior: 2026-06-13 — Phase 41 (汇率服务 Exchange Rate Service) complete: 5/5 plans, verification passed 5/5. `ExchangeRateApiClient` three-source fallback (Frankfurter → fawazahmed0 jsDelivr → Cloudflare) with SC-5 URL privacy + `kDebugMode` log guards; `ExchangeRateCacheService` cache-first orchestration (D-01 today-TTL, D-03 one-shot correctable-proxy re-fetch, D-05 connectivity gate, D-06 cooldown, D-07 fallback priority, D-09 2-year prune); `RateResult`/`RateSignal` sealed unions; `GetExchangeRateUseCase` with ADR-022 dialog/toast signals; `BackupData` D-10 exchange-rate persistence; `connectivity_plus ^7.1.1` (iOS build verified green). Never-block-save invariant enforced (zero HTTP in Create/UpdateTransactionUseCase; cache key on local calendar date, no UTC skew). Code review fixed 2 Critical (CR-01 backup-import rate validation — closes the Phase 40 CR-01 sync-validation gap for the import path; CR-02 UTC/local cache-key skew) + 4 warnings, see 41-REVIEW.md. Suite 2717/2717 green, analyze 0 issues. RATE-01..06 validated.*
 

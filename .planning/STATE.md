@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.7
-milestone_name: 多币种支持
-status: Awaiting next milestone
-stopped_at: Completed quick task 260613-ufn (外币卡片两屏统一); phase 42 still ready_for_verification
-last_updated: "2026-06-14T06:19:49.414Z"
-last_activity: 2026-06-14 — Milestone v1.7 completed and archived
+milestone: v1.8
+milestone_name: 统计页面重设计
+status: planning
+last_updated: "2026-06-15T02:52:50.805Z"
+last_activity: 2026-06-15
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 20
-  completed_plans: 20
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 
 ## Current Position
 
-Phase: Milestone v1.7 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-06-14 — Milestone v1.7 completed and archived
+Status: Defining requirements
+Last activity: 2026-06-15 — Milestone v1.8 started
 
 ### Quick Tasks Completed
 
