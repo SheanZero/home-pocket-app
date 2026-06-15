@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
-stopped_at: Phase 43 context gathered
+stopped_at: Completed 43-03-PLAN.md (M2 均衡 mock)
 last_updated: "2026-06-15T05:23:06.013Z"
 last_activity: 2026-06-15
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 7
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 ## Current Position
 
 Phase: 43 (html-design-gate-no-production-code) — EXECUTING
-Plan: 3 of 7
-Status: Ready to execute
+Plan: 4 of 7
+Status: Ready to execute (43-01/02/03 done — M1 + M2 mocks shipped)
 Last activity: 2026-06-15
 
 ### Quick Tasks Completed
@@ -158,7 +158,7 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 ## Session Continuity
 
 Last session: 2026-06-15T05:22:47.831Z
-Stopped at: Phase 43 context gathered
+Stopped at: Completed 43-03-PLAN.md (M2 均衡 mock — light+dark+ADR-012 audit)
 Resume file: None
 
 ## Performance Metrics
@@ -168,6 +168,7 @@ Resume file: None
 | (v1.8 not yet started) | — | — | — |
 | Phase 43 P01 | 6 min | 2 tasks | 3 files |
 | Phase 43-html-design-gate-no-production-code P02 | 6min | 2 tasks | 3 files |
+| Phase 43-html-design-gate-no-production-code P03 | 5min | 2 tasks | 3 files |
 
 ## Decisions
 
@@ -178,6 +179,7 @@ Resume file: None
 - [v1.8 roadmap]: No Drift migration, no fl_chart bump, budget-vs-actual excluded — keeps v1.8 a pure presentation-layer rebuild.
 - [Phase ?]: [43-01]: Design-gate Wave-0 — GATE-01 deep-map + shared sample-data + mock README authored; zero production code (only .md under .planning/)
 - [Phase ?]: 43-02: M1 practical-led mock uses lr5b sakura joy hex (light #D98CA0 / dark #E89BB0) per plan Task 1, overriding ADR-019 base-table amber #E0A040
+- [Phase ?]: 43-03: M2 균衡 mock weights 实用 (总览/donut/趋势) and 悦己 (值得卡/满足度直方图/故事条) equally at mid joy 浓度; dark joy = sakura #E89BB0 (consistent with M1); histogram is distribution-only, story strip single-narrative; ADR-012 self-audit PASS
 
 ## Operator Next Steps
 
