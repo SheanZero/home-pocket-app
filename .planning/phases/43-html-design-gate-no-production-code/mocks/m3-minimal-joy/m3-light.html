@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M3 极简实用派 · 浅色 · 统计</title>
+<!--
+  M3 minimal joy-led 浅色稿 · 自包含（内联 style，离线可开，无外部资源 / 无脚本 / 无网络字体）
+  渲染共享示例数据（shared/sample-data.md）— 全部数字为虚构模拟，非真实账目。
+  M3 = 悦己主导端最低浓度：干净的支出总览 + 分类（近实用质感），值得卡为主但克制、安静。
+  JOY-01 取「低强度」读感（D-03）：小号字、克制字重、淡桜粉描述、大量留白；绝不成进度/目标环。
+  ADR-019 桜餅×若葉 浅色：bg #FBF7F4 / primary·daily #6FA36F·#5FAE72 / joy 桜粉 #D98CA0·joyText #A53D5E / shared #5B8AC4。
+  金额 JPY ¥ 无小数，tabular。仅支出侧（不画入账侧 / 不画结余比率）。
+-->
+<style>
+  :root{
+    --bg:#FBF7F4; --card:#FFFFFF; --cream:#FFFBF8;
+    --ink:#20352B; --ink2:#71877A; --ink3:#A8BCB2;
+    --border:#E6DDD8; --divider:#EAE1DC;
+    --primary:#6FA36F; --primaryBorder:#CFE6CF;
+    --daily:#5FAE72; --dailyText:#2E6B3A; --dailyLight:#EEF6EC;
+    --joy:#D98CA0; --joyText:#A53D5E; --joyLight:#FBEAEF; --joyBorder:#EFD2DB;
+    --shared:#5B8AC4; --sharedText:#3A6396; --sharedLight:#E8EFF7;
+    --neutral:#B7AAA2; --neutralBg:#F1ECE8;
+    --shadow:0 1px 2px rgba(50,40,35,.04),0 5px 16px rgba(50,40,35,.04);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans CJK SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.5}
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;letter-spacing:.01em}
+  .wrap{max-width:430px;margin:0 auto;padding:0 16px 96px}
+  .topbar{position:sticky;top:0;background:rgba(251,247,244,.92);backdrop-filter:blur(8px);
+    padding:14px 4px 11px;display:flex;align-items:baseline;justify-content:space-between;z-index:5;border-bottom:1px solid var(--divider)}
+  .topbar h1{font-size:19px;font-weight:700;letter-spacing:.02em}
+  .window{font-size:12.5px;color:var(--ink2);background:var(--card);border:1px solid var(--border);
+    border-radius:999px;padding:5px 11px;display:inline-flex;gap:6px;align-items:center}
+  .window .chev{color:var(--ink3);font-size:11px}
+
+  /* M3：极简——区块标题低调，无强彩条，只一根细灰线；留白大 */
+  .sect-h{font-size:11.5px;color:var(--ink2);font-weight:600;letter-spacing:.09em;
+    margin:30px 4px 11px;display:flex;align-items:center;gap:8px}
+  .sect-h::before{content:"";width:14px;height:1.5px;border-radius:2px;background:var(--ink3)}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+    padding:18px 16px;box-shadow:var(--shadow)}
+
+  /* ── 支出总览 KPI（实用骨架，干净）── */
+  .ovw{padding:22px 18px}
+  .ovw .lab{font-size:12.5px;color:var(--ink2);font-weight:600}
+  .ovw .total{font-size:38px;font-weight:800;letter-spacing:-.01em;margin-top:4px;line-height:1.05}
+  .ovw .sub{font-size:12px;color:var(--ink3);margin-top:6px}
+  .split{display:flex;gap:10px;margin-top:18px}
+  .split .seg{flex:1;border-radius:12px;padding:12px 13px;border:1px solid var(--border);background:var(--cream)}
+  .seg .t{font-size:12px;font-weight:600;color:var(--ink2);display:flex;align-items:center;gap:6px}
+  .seg .v{font-size:20px;font-weight:800;margin-top:5px}
+  .seg.d .v{color:var(--dailyText)}
+  .seg.j .v{color:var(--joyText)}
+  .seg .pct{font-size:11.5px;color:var(--ink2);margin-top:2px;font-weight:500}
+  .ratiobar{height:6px;border-radius:6px;overflow:hidden;display:flex;margin-top:18px;background:var(--neutralBg)}
+  .ratiobar .d{background:var(--daily)}
+  .ratiobar .j{background:var(--joy);opacity:.75}
+  .ratiocap{display:flex;justify-content:space-between;margin-top:7px;font-size:11px;color:var(--ink2)}
+
+  /* ── 分类支出 donut + breakdown（近实用质感）── */
+  .donut-row{display:flex;gap:18px;align-items:center}
+  .donut{flex:0 0 126px;position:relative;width:126px;height:126px}
+  .donut svg{transform:rotate(-90deg)}
+  .donut .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .donut .ctr .k{font-size:10.5px;color:var(--ink2);font-weight:600}
+  .donut .ctr .v{font-size:16px;font-weight:800;margin-top:1px}
+  .donut .ctr .n{font-size:10px;color:var(--ink3);margin-top:1px}
+  .legend{flex:1;display:flex;flex-direction:column;gap:8px}
+  .legend .lg{display:flex;align-items:center;gap:8px;font-size:12.5px}
+  .legend .dot{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+  .legend .lname{color:var(--ink);font-weight:500}
+  .legend .lpct{margin-left:auto;color:var(--ink2);font-weight:600}
+
+  .brk{display:flex;flex-direction:column}
+  .brk .row{display:flex;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--divider)}
+  .brk .row:last-child{border-bottom:0}
+  .brk .ic{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex:0 0 auto}
+  .ic.d{background:var(--dailyLight)} .ic.j{background:var(--joyLight)} .ic.s{background:var(--sharedLight)} .ic.n{background:var(--neutralBg)}
+  .brk .meta{flex:1;min-width:0}
+  .brk .nm{font-size:13.5px;font-weight:600}
+  .brk .cnt{font-size:11.5px;color:var(--ink2);margin-top:1px}
+  .brk .amt{text-align:right}
+  .brk .amt .a{font-size:13.5px;font-weight:700}
+  .brk .amt.d .a{color:var(--dailyText)} .brk .amt.j .a{color:var(--joyText)} .brk .amt.s .a{color:var(--sharedText)} .brk .amt.n .a{color:var(--ink2)}
+  .brk .amt .p{font-size:11px;color:var(--ink2);margin-top:1px}
+  .brk .chev{flex:0 0 auto;color:var(--ink3);font-size:16px;margin-left:2px}
+  .brk-hint{font-size:11px;color:var(--ink3);margin:11px 2px 0;display:flex;align-items:center;gap:6px}
+
+  /* ── 值得卡（JOY-01 低强度，绝对累计 Σ，非环）── */
+  /* M3 关键：克制——无渐变大卡、无大字、无图标方块。只一行安静的肯定 + 小号金额。 */
+  .worth{background:var(--cream);border:1px solid var(--border);border-radius:16px;
+    padding:18px 17px;box-shadow:var(--shadow)}
+  .worth .cap{font-size:12px;color:var(--ink2);font-weight:500}
+  .worth .line{display:flex;align-items:baseline;gap:8px;margin-top:7px}
+  /* 低强度数字：小号、克制字重、淡桜粉描述色——不抢眼，像日记里轻轻写下的一笔 */
+  .worth .val{font-size:23px;font-weight:700;color:var(--joyText)}
+  .worth .unit{font-size:12px;color:var(--ink3);font-weight:500}
+  .worth .say{font-size:12.5px;color:var(--ink2);margin-top:10px;line-height:1.6}
+  .worth .meta{font-size:10.5px;color:var(--ink3);margin-top:9px}
+  .worth .dotline{display:inline-block;width:14px;height:2px;border-radius:2px;background:var(--joy);opacity:.6;vertical-align:middle;margin-right:7px}
+
+  .footnote{font-size:10.5px;color:var(--ink3);text-align:center;margin-top:30px;line-height:1.6}
+  .badge-sim{display:inline-block;background:var(--neutralBg);color:var(--ink2);border-radius:6px;padding:2px 7px;font-size:10px;font-weight:600;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <h1>统计</h1>
+    <span class="window">2026 年 5 月 <span class="chev">▾</span></span>
+  </div>
+
+  <!-- (1) 支出总览 — 仅支出侧，干净 -->
+  <div class="sect-h">支出总览</div>
+  <div class="card ovw">
+    <div class="lab">本月总支出</div>
+    <div class="total num">¥248,600</div>
+    <div class="sub num">86 笔 · 2026 年 5 月</div>
+
+    <div class="split">
+      <div class="seg d">
+        <div class="t">🌱 日常</div>
+        <div class="v num">¥201,400</div>
+        <div class="pct num">约 81%</div>
+      </div>
+      <div class="seg j">
+        <div class="t">🌸 悦己</div>
+        <div class="v num">¥47,200</div>
+        <div class="pct num">约 19%</div>
+      </div>
+    </div>
+
+    <div class="ratiobar">
+      <div class="d" style="width:81%"></div>
+      <div class="j" style="width:19%"></div>
+    </div>
+    <div class="ratiocap"><span>日常 81%</span><span>悦己 19%</span></div>
+  </div>
+
+  <!-- (2) 分类支出 donut + breakdown -->
+  <div class="sect-h">分类支出</div>
+  <div class="card">
+    <div class="donut-row">
+      <div class="donut" aria-label="分类支出占比环形图">
+        <svg viewBox="0 0 42 42" width="126" height="126">
+          <circle cx="21" cy="21" r="15.915" fill="none" stroke="#F1ECE8" stroke-width="5.5"></circle>
+          <!-- 饮食 31.5% --><circle cx="21" cy="21" r="15.915" fill="none" stroke="#5FAE72" stroke-width="5.5" stroke-dasharray="31.5 68.5" stroke-dashoffset="0"></circle>
+          <!-- 住居 24.9% --><circle cx="21" cy="21" r="15.915" fill="none" stroke="#5B8AC4" stroke-width="5.5" stroke-dasharray="24.9 75.1" stroke-dashoffset="-31.5"></circle>
+          <!-- 交通 8.8% --><circle cx="21" cy="21" r="15.915" fill="none" stroke="#7DBE8C" stroke-width="5.5" stroke-dasharray="8.8 91.2" stroke-dashoffset="-56.4"></circle>
+          <!-- 悦己合计 19% --><circle cx="21" cy="21" r="15.915" fill="none" stroke="#D98CA0" stroke-width="5.5" stroke-dasharray="19 81" stroke-dashoffset="-65.2"></circle>
+          <!-- 其它 15.8% --><circle cx="21" cy="21" r="15.915" fill="none" stroke="#B7AAA2" stroke-width="5.5" stroke-dasharray="15.8 84.2" stroke-dashoffset="-84.2"></circle>
+        </svg>
+        <div class="ctr">
+          <div class="k">总支出</div>
+          <div class="v num">¥248,600</div>
+          <div class="n num">86 笔</div>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="lg"><span class="dot" style="background:#5FAE72"></span><span class="lname">饮食</span><span class="lpct num">31.5%</span></div>
+        <div class="lg"><span class="dot" style="background:#5B8AC4"></span><span class="lname">住居</span><span class="lpct num">24.9%</span></div>
+        <div class="lg"><span class="dot" style="background:#7DBE8C"></span><span class="lname">交通</span><span class="lpct num">8.8%</span></div>
+        <div class="lg"><span class="dot" style="background:#D98CA0"></span><span class="lname">悦己合计</span><span class="lpct num">19.0%</span></div>
+        <div class="lg"><span class="dot" style="background:#B7AAA2"></span><span class="lname">其它</span><span class="lpct num">15.8%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card brk">
+    <div class="row">
+      <div class="ic d">🍚</div>
+      <div class="meta"><div class="nm">饮食</div><div class="cnt num">31 笔 · 日常</div></div>
+      <div class="amt d"><div class="a num">¥78,300</div><div class="p num">31.5%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="row">
+      <div class="ic s">🏠</div>
+      <div class="meta"><div class="nm">住居</div><div class="cnt num">3 笔 · 日常</div></div>
+      <div class="amt s"><div class="a num">¥62,000</div><div class="p num">24.9%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="row">
+      <div class="ic d">🚃</div>
+      <div class="meta"><div class="nm">交通</div><div class="cnt num">14 笔 · 日常</div></div>
+      <div class="amt d"><div class="a num">¥21,800</div><div class="p num">8.8%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="row">
+      <div class="ic d">🧺</div>
+      <div class="meta"><div class="nm">日用品</div><div class="cnt num">11 笔 · 日常</div></div>
+      <div class="amt d"><div class="a num">¥18,500</div><div class="p num">7.4%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="row">
+      <div class="ic j">📚</div>
+      <div class="meta"><div class="nm">书籍·学习</div><div class="cnt num">6 笔 · 悦己</div></div>
+      <div class="amt j"><div class="a num">¥16,400</div><div class="p num">6.6%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="row">
+      <div class="ic n">⋯</div>
+      <div class="meta"><div class="nm">其它（含通信·兴趣·外出·美容等）</div><div class="cnt num">余项汇总</div></div>
+      <div class="amt n"><div class="a num">¥51,600</div><div class="p num">20.8%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="brk-hint">› 轻点任一分类，可查看该分类的明细</div>
+  </div>
+
+  <!-- (3) 值得卡 — JOY-01 低强度，绝对累计 Σ joy_contribution，非环 -->
+  <!-- M3 探索「低强度」读感：克制小号、淡桜粉、安静一句。像日记里轻轻写下的一笔。 -->
+  <div class="sect-h">这个月的悦己</div>
+  <div class="worth">
+    <div class="cap">这个月，你为自己花了</div>
+    <div class="line">
+      <span class="val num">¥47,200</span>
+      <span class="unit num">· 22 笔</span>
+    </div>
+    <div class="say">不多不少，都是给自己的一点温柔。值得。</div>
+    <div class="meta"><span class="dotline"></span>累计已花悦己 · 无目标、无对比 · 只记录已经发生的好</div>
+  </div>
+
+  <div class="footnote">
+    <span class="badge-sim">示例数据 · SIMULATED</span><br>
+    全部金额为虚构模拟，非任何真实用户的财务数据。<br>
+    本页仅呈现支出侧（范围勘误 · 详见共享示例数据）。
+  </div>
+
+</div>
+</body>
+</html>
