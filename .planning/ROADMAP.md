@@ -155,7 +155,7 @@
 
 - [x] 43-02-PLAN.md — Wave 2: M1 实用主导 mock（light+dark+ADR-012 自审）
 - [x] 43-03-PLAN.md — Wave 2: M2 均衡 mock（light+dark+ADR-012 自审）
-- [ ] 43-04-PLAN.md — Wave 2: M3 极简实用派 mock（低悦己强度，light+dark+自审）
+- [x] 43-04-PLAN.md — Wave 2: M3 极简实用派 mock（低悦己强度，light+dark+自审）
 - [ ] 43-05-PLAN.md — Wave 2: M4 温暖反思派 mock（中强度 + kakeibo Q4 静态提示，light+dark+自审）
 - [ ] 43-06-PLAN.md — Wave 2: M5 故事画报派 mock（高强度，light+dark+自审）
 
