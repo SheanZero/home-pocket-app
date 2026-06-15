@@ -143,7 +143,15 @@
   2. 产出 ≥3 套 HTML 设计方向，每套自带一张 ADR-012 自审表，把每个情感元素映射为 *ambient / 庆祝过去 (OK)* 还是 *目标 / 跨期对比 / 成就 (forbidden)*（GATE-02）
   3. 经充分讨论后，用户明确选定恰好一套方向；关卡出口 = 用户批准，且仓库中无新增 Dart/生产代码（GATE-03）
   4. 针对选定方向产出：新 ADR 的 go/no-go 决定（如 JOY-04 需持久化用户自撰反思文本，则加密/隐私含义触发新 ADR）、锁定供反毒性扫描使用的情感词表、以及每个图表 affordance 对当前 fl_chart 1.2.0 API 的逐项校验结果（GATE-04）
-**Plans**: TBD
+**Plans**: 7 plans in 3 waves
+Plans:
+- [ ] 43-01-PLAN.md — Wave 1: GATE-01 现状深研图 + 共享示例数据 + mock 阵容 README（mock 前置基座）
+- [ ] 43-02-PLAN.md — Wave 2: M1 实用主导 mock（light+dark+ADR-012 自审）
+- [ ] 43-03-PLAN.md — Wave 2: M2 均衡 mock（light+dark+ADR-012 自审）
+- [ ] 43-04-PLAN.md — Wave 2: M3 极简实用派 mock（低悦己强度，light+dark+自审）
+- [ ] 43-05-PLAN.md — Wave 2: M4 温暖反思派 mock（中强度 + kakeibo Q4 静态提示，light+dark+自审）
+- [ ] 43-06-PLAN.md — Wave 2: M5 故事画报派 mock（高强度，light+dark+自审）
+- [ ] 43-07-PLAN.md — Wave 3: GATE-03 选定一案（manual）→ GATE-04 三决策文档（ADR no-go / 词表 / fl_chart 校验）
 **UI hint**: yes
 
 ### Phase 44: 数据与用例补全 (Data / Use-Case Additions — reuse-first)
