@@ -157,7 +157,7 @@
 - [x] 43-03-PLAN.md — Wave 2: M2 均衡 mock（light+dark+ADR-012 自审）
 - [x] 43-04-PLAN.md — Wave 2: M3 极简实用派 mock（低悦己强度，light+dark+自审）
 - [x] 43-05-PLAN.md — Wave 2: M4 温暖反思派 mock（中强度 + kakeibo Q4 静态提示，light+dark+自审）
-- [ ] 43-06-PLAN.md — Wave 2: M5 故事画报派 mock（高强度，light+dark+自审）
+- [x] 43-06-PLAN.md — Wave 2: M5 故事画报派 mock（高强度，light+dark+自审）
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -244,4 +244,4 @@
 | v1.5 文案与配色统一 | 31-35 | 24/24 | Complete | 2026-06-02 |
 | v1.6 购物清单 | 36-39 | 27/27 | Complete | 2026-06-12 |
 | v1.7 多币种支持 | 40-42 | 20/20 | Complete | 2026-06-14 |
-| v1.8 统计页面重设计 | 43-47 | 5/7 (Phase 43) | In progress | - |
+| v1.8 统计页面重设计 | 43-47 | 6/7 (Phase 43) | In progress | - |
