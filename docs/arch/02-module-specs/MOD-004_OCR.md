@@ -1,9 +1,9 @@
 # MOD-004: OCR扫描模块 - 技术设计文档
 
 **模块编号:** MOD-004
-**文档版本:** 4.0
+**文档版本:** 4.1
 **创建日期:** 2026-02-03
-**最后更新:** 2026-02-25
+**最后更新:** 2026-06-12
 **预估工时:** 10天（后端实现）
 **优先级:** P1（强烈建议）
 **状态:** 前端 UI Stub 已实现，后端 OCR 管道待实现
@@ -65,9 +65,9 @@ OCR引擎:
 
 | 字段 | MVP 目标 | 正式版目标 | 备注 |
 |------|----------|-----------|------|
-| 金额 | >90% | >98% | 启发式规则 → CORD 模型 |
-| 日期 | >85% | >95% | 正则匹配 → 模型辅助 |
-| 商家 | >80% | >90% | 首行提取 → NER 模型 |
+| 金额 | >90% | >93% | 启发式规则 + 算术校验（关键字段，规则即达标） |
+| 日期 | >85% | >92% | 正则匹配 + 令和/西历归一化 |
+| 商家 | >55% | >75% | 首行 bbox 启发式 → 微型 KIE 标注器(Phase 2) |
 
 ---
 
@@ -553,7 +553,7 @@ class PlatformOcrService implements OCRService {
 ### 目标
 
 从 OCR 结果中提取总金额、日期、商家名称。MVP 使用启发式规则（95% 收据遵循固定格式），
-正式版演进为 CORD 训练模型。
+触发后由微型 KIE 标注器(BiLSTM-CRF, ONNX INT8 2-8MB)补强店名/明细(见 Phase 2)。
 
 ### 提取策略概览
 
@@ -857,7 +857,7 @@ lib/infrastructure/ml/
 │   └── platform_ocr_service.dart  # MethodChannel 调用原生 OCR
 ├── image_preprocessor.dart        # opencv_dart 预处理管道
 ├── merchant_database.dart         # 已实现（与 MOD-002 共享）
-└── tflite_classifier.dart         # 未来 CORD 模型推理
+└── receipt_kie_tagger.dart        # 未来 微型 KIE 标注器推理(ONNX, Phase 2)
 
 # Application 层
 lib/application/ocr/
@@ -1110,28 +1110,39 @@ final encrypted = await photoEncryptionService.encrypt(compressed);
 └── 财务逻辑校验
 ```
 
-### Phase 2: CORD 模型集成
+### Phase 2: 微型 KIE 标注器（sub-50MB，触发后启用）
 
+> **修正记录（2026-06-12）:** 原 Phase 2 计划"用 CORD 训练日语模型 + Donut/LayoutLMv3 转 TFLite >98%"含事实错误,已按调研结论重写。依据见 `claudedocs/research_japanese_receipt_ocr_engine_20260612.md` 与 `claudedocs/devguide_japanese_receipt_ocr_engine_20260612.md`。
+
+**被纠正的三个误解:**
+- **CORD ≠ 日语:** CORD 真身是 **1,000 张印尼语餐厅小票**(CC-BY-4.0),非 11,000、非日语。它只能借用标注 schema,给不了日语能力。唯一公开日语集是 **Japanese-Mobile-Receipt-OCR-1.3K**(~1300 张,license 待确认)。
+- **TFLite 是部署格式,非训练框架:** Donut/LayoutLMv3 不能干净转 TFLite,业界用 **ONNX Runtime**。
+- **大模型塞不进约束:** Donut ~860MB、LayoutLMv3-Large ~1.4GB,INT8 仍 100–300MB,违反单模型 <10MB / <200MB。端到端 image→JSON 路线(Donut/VLM)在端侧不可行。
+
+**正确路线 — 分层 + 微型标注器(仅补店名/明细):**
 ```
-Key Information Extraction (KIE) 模型
-├── 训练数据: CORD dataset (Consolidated Receipt Dataset)
-│   └── 11,000+ 带标注收据图像
-├── 模型: LayoutLMv3 或 Donut (document understanding transformer)
-├── 推理: TFLite 量化模型，设备端运行
-└── 目标准确率: >98% 金额，>95% 日期
+触发条件(任一): 纠错率 >10% / 需手写 / 需逐项明细 / 店名匹配失败 >20%
+方案: OCR(系统/ML Kit, 出词+框) → 微型标注器(BIO) → 重构字段 → 算术校验
+├── 模型: BiLSTM-CRF(字符 embed + 手工空间特征 + CRF)  ← 首选
+│         (备选: LiLT 布局模块 6MB + 自训微型日语编码器 ~21-40MB)
+├── 训练数据: CP-4 规则预标注 + 人工纠错 + SynthDoG-ja 合成增强 (数百~千张)
+├── 部署: ONNX Runtime(非 TFLite), INT8 量化 → 2-8MB
+└── 目标: 店名 75-85%, 明细 70-80% (关键三项 合計/税/日期 已由 Phase 1 规则+校验达 ≥90%)
 ```
 
 ```dart
-// 未来 lib/infrastructure/ml/tflite_classifier.dart
-class ReceiptKIEModel {
-  /// CORD 训练的 KIE 模型，直接从图像提取结构化数据
-  /// 不依赖 OCR 文字识别，端到端抽取
-  Future<ParsedReceiptData> extract(File image) async {
-    final interpreter = await Interpreter.fromAsset('receipt_kie.tflite');
+// 未来 lib/infrastructure/ml/receipt_kie_tagger.dart
+class ReceiptKieTagger {
+  /// 对 OCR 输出的 token 序列做序列标注(BIO),补强店名/明细。
+  /// 输入是 OCR 的词+bounding box(不是原图),非端到端;依赖 Phase 1 的 OCR 层。
+  Future<List<TaggedToken>> tag(List<OcrToken> tokens) async {
+    // onnxruntime 加载 receipt_kie.onnx (INT8, 2-8MB), 后台 isolate 推理
     // ...
   }
 }
 ```
+
+> **注意:** 微型标注器是**可选增强**,不是 MVP。Phase 1 的"原生 OCR + 规则提取 + 10 条算术校验"对记账关键字段(合計/税/日期)已 ≥90%,几乎零模型增量。详细分工/边界见开发手册 §2/§5/§12。
 
 ### Phase 3: 用户反馈闭环
 
@@ -1153,7 +1164,7 @@ class ReceiptKIEModel {
 | **校验** | 财务逻辑 (金额范围 → 日期合理性 → 明细交叉验证) |
 | **架构** | 4 模块管道，模块间通过类型化数据流连接 |
 | **模拟器** | ✅ 全部兼容（opencv_dart + Vision Framework 均支持模拟器） |
-| **未来** | CORD 训练模型替换模块 C，端到端 KIE |
+| **未来** | 微型 KIE 标注器(BiLSTM-CRF, ONNX INT8 2-8MB)补强模块 C 的店名/明细(非端到端,依赖 OCR 层) |
 
 **开发优先级**: P1，预计 10 天完成后端实现。
 
@@ -1169,3 +1180,4 @@ class ReceiptKIEModel {
 - v2.0: 2026-02-06 — ARCH-008 重构
 - v3.0: 2026-02-22 — 基于实际代码更新
 - v4.0: 2026-02-25 — 重新设计：四模块管道架构，opencv_dart 预处理，MethodChannel OCR，启发式提取 + 财务校验，CORD 演进路线
+- v4.1: 2026-06-12 — 修正 Phase 2 事实错误（CORD 实为印尼语 1000 张非日语 11000；Donut/LayoutLMv3 无法转 TFLite/<10MB），改为 sub-50MB 分层路线：微型 KIE 标注器(BiLSTM-CRF, ONNX INT8 2-8MB)，端到端 KIE 路线否决。同步修正准确率目标表/总结表/目录命名。依据 `claudedocs/research_japanese_receipt_ocr_engine_20260612.md` + `devguide_japanese_receipt_ocr_engine_20260612.md`
