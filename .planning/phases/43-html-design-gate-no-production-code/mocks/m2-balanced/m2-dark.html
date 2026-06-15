@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M2 均衡 · 深色 · 统计</title>
+<!--
+  M2 balanced 深色稿 · 自包含（内联 style，离线可开，无外部资源 / 无脚本 / 无网络字体）
+  渲染共享示例数据（shared/sample-data.md）— 全部数字为虚构模拟，非真实账目。
+  M2 = 实用与悦己并重：实用区（支出总览 + donut + 6月趋势柱）与悦己区（值得卡 + 满足度直方图 + 记忆故事条）等重。
+  ADR-019 桜餅×若葉 深色（暖调）：bg #171210 / card #231E1B / primary·daily #8DC68D·#7DC88D / joy 桜粉 #E89BB0 / shared #7FA8D8。
+  金额 JPY ¥ 无小数，tabular。仅支出侧。悦己浓度=中。JOY-01 中等强度、绝不成环。
+-->
+<style>
+  :root{
+    --bg:#171210; --card:#231E1B; --cream:#2A2320;
+    --ink:#F0EBE6; --ink2:#9A8E87; --ink3:#6E635D;
+    --border:#2E2723; --divider:#2E2723; --borderList:#3A322D;
+    --primary:#8DC68D; --primaryLight:#1E2A1E; --primaryBorder:#3A5A3A;
+    --daily:#7DC88D; --dailyText:#9FD8A8; --dailyLight:#1E2A1E;
+    --joy:#E89BB0; --joyText:#E89BB0; --joyLight:#2E1820; --joyBorder:#5A2E3A;
+    --shared:#7FA8D8; --sharedText:#9FBEE8; --sharedLight:#1A2330; --sharedBorder:#33455E;
+    --neutral:#8B7E76; --neutralBg:#2A2320;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 8px 22px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans CJK SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.5}
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;letter-spacing:.01em}
+  .wrap{max-width:430px;margin:0 auto;padding:0 16px 96px}
+  .topbar{position:sticky;top:0;background:rgba(23,18,16,.92);backdrop-filter:blur(8px);
+    padding:14px 4px 10px;display:flex;align-items:baseline;justify-content:space-between;z-index:5;border-bottom:1px solid var(--divider)}
+  .topbar h1{font-size:19px;font-weight:700;letter-spacing:.02em}
+  .window{font-size:12.5px;color:var(--ink2);background:var(--card);border:1px solid var(--border);
+    border-radius:999px;padding:5px 11px;display:inline-flex;gap:6px;align-items:center}
+  .window .chev{color:var(--ink3);font-size:11px}
+
+  .sect-h{font-size:12px;color:var(--ink2);font-weight:600;letter-spacing:.08em;
+    margin:24px 4px 9px;display:flex;align-items:center;gap:7px}
+  .sect-h::before{content:"";width:3px;height:13px;border-radius:2px;background:var(--primary)}
+  .sect-h.joy::before{background:var(--joy)}
+  .sect-h .tag{margin-left:auto;font-size:10.5px;font-weight:600;letter-spacing:.04em;
+    color:var(--ink3);background:var(--neutralBg);border-radius:6px;padding:2px 8px}
+  .sect-h.joy .tag{color:var(--joyText);background:var(--joyLight)}
+  .sect-h.prac .tag{color:var(--dailyText);background:var(--dailyLight)}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;
+    padding:18px 16px;box-shadow:var(--shadow)}
+  .card + .card{margin-top:12px}
+
+  /* ── 支出总览 KPI ── */
+  .ovw{padding:20px 18px}
+  .ovw .lab{font-size:12.5px;color:var(--ink2);font-weight:600}
+  .ovw .total{font-size:38px;font-weight:800;letter-spacing:-.01em;margin-top:3px;line-height:1.05}
+  .ovw .sub{font-size:12px;color:var(--ink3);margin-top:5px}
+  .split{display:flex;gap:10px;margin-top:16px}
+  .split .seg{flex:1;border-radius:13px;padding:12px 13px;border:1px solid transparent}
+  .seg.d{background:var(--dailyLight);border-color:var(--primaryBorder)}
+  .seg.j{background:var(--joyLight);border-color:var(--joyBorder)}
+  .seg .t{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
+  .seg.d .t{color:var(--dailyText)}
+  .seg.j .t{color:var(--joyText)}
+  .seg .v{font-size:21px;font-weight:800;margin-top:5px}
+  .seg.d .v{color:var(--dailyText)}
+  .seg.j .v{color:var(--joyText)}
+  .seg .pct{font-size:11.5px;color:var(--ink2);margin-top:2px;font-weight:500}
+  .ratiobar{height:8px;border-radius:6px;overflow:hidden;display:flex;margin-top:16px;background:var(--neutralBg)}
+  .ratiobar .d{background:var(--daily)}
+  .ratiobar .j{background:var(--joy)}
+  .ratiocap{display:flex;justify-content:space-between;margin-top:7px;font-size:11px;color:var(--ink2)}
+
+  /* ── 分类支出 donut ── */
+  .donut-row{display:flex;gap:18px;align-items:center}
+  .donut{flex:0 0 132px;position:relative;width:132px;height:132px}
+  .donut svg{transform:rotate(-90deg)}
+  .donut .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .donut .ctr .k{font-size:10.5px;color:var(--ink2);font-weight:600}
+  .donut .ctr .v{font-size:17px;font-weight:800;margin-top:1px}
+  .donut .ctr .n{font-size:10px;color:var(--ink3);margin-top:1px}
+  .legend{flex:1;display:flex;flex-direction:column;gap:8px}
+  .legend .lg{display:flex;align-items:center;gap:8px;font-size:12.5px}
+  .legend .dot{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+  .legend .lname{color:var(--ink);font-weight:500}
+  .legend .lpct{margin-left:auto;color:var(--ink2);font-weight:600}
+
+  /* ── 分类 breakdown 列表 ── */
+  .brk{display:flex;flex-direction:column}
+  .brk .row{display:flex;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--divider);cursor:default}
+  .brk .row:last-child{border-bottom:0}
+  .brk .ic{width:33px;height:33px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;flex:0 0 auto}
+  .ic.d{background:var(--dailyLight)} .ic.j{background:var(--joyLight)} .ic.s{background:var(--sharedLight)} .ic.n{background:var(--neutralBg)}
+  .brk .meta{flex:1;min-width:0}
+  .brk .nm{font-size:13.5px;font-weight:600}
+  .brk .cnt{font-size:11.5px;color:var(--ink2);margin-top:1px}
+  .brk .amt{text-align:right}
+  .brk .amt .a{font-size:13.5px;font-weight:700}
+  .brk .amt.d .a{color:var(--dailyText)} .brk .amt.j .a{color:var(--joyText)} .brk .amt.s .a{color:var(--sharedText)} .brk .amt.n .a{color:var(--ink2)}
+  .brk .amt .p{font-size:11px;color:var(--ink2);margin-top:1px}
+  .brk .chev{flex:0 0 auto;color:var(--ink3);font-size:16px;margin-left:2px}
+  .brk-hint{font-size:11px;color:var(--ink3);margin:11px 2px 0;display:flex;align-items:center;gap:6px}
+
+  /* ── 6 月趋势柱 ── */
+  .trend{display:flex;align-items:flex-end;justify-content:space-between;gap:9px;height:120px;padding:6px 2px 0}
+  .trend .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .trend .stack{width:100%;max-width:32px;border-radius:7px 7px 3px 3px;overflow:hidden;display:flex;flex-direction:column-reverse}
+  .trend .sd{background:var(--daily)}
+  .trend .sj{background:var(--joy);opacity:.85}
+  .trend .cm{margin-top:7px;font-size:11px;color:var(--ink2);font-weight:600}
+  .trend .col.cur .cm{color:var(--primary);font-weight:800}
+  .trend .col.cur .stack{outline:2px solid var(--primaryBorder);outline-offset:1px}
+  .trend-cap{font-size:11px;color:var(--ink3);margin-top:13px;text-align:center}
+
+  /* ── 值得卡 ── */
+  .worth{background:linear-gradient(155deg,var(--joyLight),var(--card));
+    border:1px solid var(--joyBorder);border-radius:18px;padding:20px 18px;box-shadow:var(--shadow)}
+  .worth .head{display:flex;align-items:center;gap:11px}
+  .worth .glyph{width:44px;height:44px;border-radius:13px;background:var(--cream);border:1px solid var(--joyBorder);
+    display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
+  .worth .cap{font-size:12.5px;color:var(--joyText);font-weight:600}
+  .worth .val{font-size:34px;font-weight:800;color:var(--joyText);margin-top:1px;line-height:1.05}
+  .worth .say{font-size:12.5px;color:var(--ink2);margin-top:11px;line-height:1.5}
+  .worth .meta{font-size:11px;color:var(--ink3);margin-top:8px;display:flex;gap:6px;align-items:center}
+
+  /* ── 满足度直方图 ── */
+  .histo{display:flex;align-items:flex-end;justify-content:space-between;gap:5px;height:118px;padding:8px 2px 0}
+  .histo .b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .histo .bar{width:100%;max-width:22px;border-radius:5px 5px 2px 2px;background:var(--joy);position:relative}
+  .histo .bar.zero{background:var(--neutralBg);height:3px !important}
+  .histo .cnt{position:absolute;top:-15px;left:0;right:0;text-align:center;font-size:10px;color:var(--joyText);font-weight:700}
+  .histo .x{margin-top:6px;font-size:10.5px;color:var(--ink2);font-weight:600}
+  .histo .b.med .bar{outline:2px solid var(--joyBorder);outline-offset:1px}
+  .histo-foot{display:flex;align-items:center;justify-content:space-between;margin-top:13px;font-size:11px;color:var(--ink2)}
+  .histo-foot .med-pill{background:var(--joyLight);color:var(--joyText);border-radius:7px;padding:3px 9px;font-weight:600}
+  .histo-cap{font-size:11px;color:var(--ink3);margin-top:8px;line-height:1.5}
+
+  /* ── 记忆故事条 ── */
+  .story{background:linear-gradient(160deg,var(--joyLight),var(--card));
+    border:1px solid var(--joyBorder);border-radius:18px;padding:0;overflow:hidden;box-shadow:var(--shadow)}
+  .story .band{display:flex;align-items:center;gap:13px;padding:16px 17px;border-bottom:1px solid var(--joyBorder)}
+  .story .ph{width:54px;height:54px;border-radius:14px;background:var(--cream);border:1px solid var(--joyBorder);
+    display:flex;align-items:center;justify-content:center;font-size:26px;flex:0 0 auto}
+  .story .info{flex:1;min-width:0}
+  .story .lbl{font-size:11px;color:var(--joyText);font-weight:600;letter-spacing:.04em}
+  .story .ttl{font-size:15px;font-weight:700;margin-top:2px;color:var(--ink)}
+  .story .sub{font-size:11.5px;color:var(--ink2);margin-top:2px}
+  .story .full{flex:0 0 auto;text-align:center}
+  .story .full .fv{font-size:18px;font-weight:800;color:var(--joyText)}
+  .story .full .fk{font-size:9.5px;color:var(--ink3);margin-top:1px}
+  .story .quote{padding:15px 17px;font-size:13px;color:var(--ink);line-height:1.65;
+    font-style:normal;position:relative}
+  .story .quote::before{content:"\201C";color:var(--joyBorder);font-size:30px;font-weight:800;
+    position:absolute;left:9px;top:6px;line-height:1}
+  .story .quote span{display:block;padding-left:18px}
+
+  .footnote{font-size:10.5px;color:var(--ink3);text-align:center;margin-top:26px;line-height:1.6}
+  .badge-sim{display:inline-block;background:var(--neutralBg);color:var(--ink2);border-radius:6px;padding:2px 7px;font-size:10px;font-weight:600;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <h1>统计</h1>
+    <span class="window">2026 年 5 月 <span class="chev">▾</span></span>
+  </div>
+
+  <!-- ════════ 实用区 ════════ -->
+
+  <!-- (1) 支出总览 — 仅支出侧 -->
+  <div class="sect-h prac">支出总览 <span class="tag">实用</span></div>
+  <div class="card ovw">
+    <div class="lab">本月总支出</div>
+    <div class="total num">¥248,600</div>
+    <div class="sub num">86 笔 · 2026 年 5 月</div>
+
+    <div class="split">
+      <div class="seg d">
+        <div class="t">🌱 日常</div>
+        <div class="v num">¥201,400</div>
+        <div class="pct num">约 81%</div>
+      </div>
+      <div class="seg j">
+        <div class="t">🌸 悦己</div>
+        <div class="v num">¥47,200</div>
+        <div class="pct num">约 19%</div>
+      </div>
+    </div>
+
+    <div class="ratiobar">
+      <div class="d" style="width:81%"></div>
+      <div class="j" style="width:19%"></div>
+    </div>
+    <div class="ratiocap"><span>日常 81%</span><span>悦己 19%</span></div>
+  </div>
+
+  <!-- (2) 分类支出 donut + breakdown -->
+  <div class="sect-h prac">分类支出 <span class="tag">实用</span></div>
+  <div class="card">
+    <div class="donut-row">
+      <div class="donut" aria-label="分类支出占比环形图">
+        <svg viewBox="0 0 42 42" width="132" height="132">
+          <circle cx="21" cy="21" r="15.915" fill="none" stroke="#2E2723" stroke-width="6"></circle>
+          <!-- 饮食 31.5% --><circle cx="21" cy="21" r="15.915" fill="none" stroke="#7DC88D" stroke-width="6" stroke-dasharray="31.5 68.5" stroke-dashoffset="0" stroke-linecap="butt"></circle>
+          <!-- 住居 24.9% --><circle cx="21" cy="21" r="15.915" fill="none" stroke="#7FA8D8" stroke-width="6" stroke-dasharray="24.9 75.1" stroke-dashoffset="-31.5"></circle>
+          <!-- 交通 8.8% --><circle cx="21" cy="21" r="15.915" fill="none" stroke="#5E9E6E" stroke-width="6" stroke-dasharray="8.8 91.2" stroke-dashoffset="-56.4"></circle>
+          <!-- 悦己合计 19% --><circle cx="21" cy="21" r="15.915" fill="none" stroke="#E89BB0" stroke-width="6" stroke-dasharray="19 81" stroke-dashoffset="-65.2"></circle>
+          <!-- 其它 15.8% --><circle cx="21" cy="21" r="15.915" fill="none" stroke="#8B7E76" stroke-width="6" stroke-dasharray="15.8 84.2" stroke-dashoffset="-84.2"></circle>
+        </svg>
+        <div class="ctr">
+          <div class="k">总支出</div>
+          <div class="v num">¥248,600</div>
+          <div class="n num">86 笔</div>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="lg"><span class="dot" style="background:#7DC88D"></span><span class="lname">饮食</span><span class="lpct num">31.5%</span></div>
+        <div class="lg"><span class="dot" style="background:#7FA8D8"></span><span class="lname">住居</span><span class="lpct num">24.9%</span></div>
+        <div class="lg"><span class="dot" style="background:#5E9E6E"></span><span class="lname">交通</span><span class="lpct num">8.8%</span></div>
+        <div class="lg"><span class="dot" style="background:#E89BB0"></span><span class="lname">悦己合计</span><span class="lpct num">19.0%</span></div>
+        <div class="lg"><span class="dot" style="background:#8B7E76"></span><span class="lname">其它</span><span class="lpct num">15.8%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card brk">
+    <div class="row">
+      <div class="ic d">🍚</div>
+      <div class="meta"><div class="nm">饮食</div><div class="cnt num">31 笔 · 日常</div></div>
+      <div class="amt d"><div class="a num">¥78,300</div><div class="p num">31.5%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="row">
+      <div class="ic s">🏠</div>
+      <div class="meta"><div class="nm">住居</div><div class="cnt num">3 笔 · 日常</div></div>
+      <div class="amt s"><div class="a num">¥62,000</div><div class="p num">24.9%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="row">
+      <div class="ic d">🚃</div>
+      <div class="meta"><div class="nm">交通</div><div class="cnt num">14 笔 · 日常</div></div>
+      <div class="amt d"><div class="a num">¥21,800</div><div class="p num">8.8%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="row">
+      <div class="ic j">📚</div>
+      <div class="meta"><div class="nm">书籍·学习</div><div class="cnt num">6 笔 · 悦己</div></div>
+      <div class="amt j"><div class="a num">¥16,400</div><div class="p num">6.6%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="row">
+      <div class="ic n">⋯</div>
+      <div class="meta"><div class="nm">其它（含日用·通信·兴趣·外出等）</div><div class="cnt num">余项汇总</div></div>
+      <div class="amt n"><div class="a num">¥69,100</div><div class="p num">27.8%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="brk-hint">› 轻点任一分类，可查看该分类的明细</div>
+  </div>
+
+  <!-- (3) 6 月趋势柱 — 中性滚动上下文 -->
+  <div class="sect-h prac">近 6 个月支出 <span class="tag">实用</span></div>
+  <div class="card">
+    <div class="trend">
+      <div class="col"><div class="stack" style="height:62%"><div class="sd" style="height:80%"></div><div class="sj" style="height:20%"></div></div><div class="cm">12月</div></div>
+      <div class="col"><div class="stack" style="height:71%"><div class="sd" style="height:82%"></div><div class="sj" style="height:18%"></div></div><div class="cm">1月</div></div>
+      <div class="col"><div class="stack" style="height:58%"><div class="sd" style="height:84%"></div><div class="sj" style="height:16%"></div></div><div class="cm">2月</div></div>
+      <div class="col"><div class="stack" style="height:77%"><div class="sd" style="height:79%"></div><div class="sj" style="height:21%"></div></div><div class="cm">3月</div></div>
+      <div class="col"><div class="stack" style="height:66%"><div class="sd" style="height:83%"></div><div class="sj" style="height:17%"></div></div><div class="cm">4月</div></div>
+      <div class="col cur"><div class="stack" style="height:74%"><div class="sd" style="height:81%"></div><div class="sj" style="height:19%"></div></div><div class="cm">5月</div></div>
+    </div>
+    <div class="trend-cap">绿=日常 · 粉=悦己 · 当前月浅描边 · 仅作滚动节奏参照</div>
+  </div>
+
+  <!-- ════════ 悦己区（与实用区等重）════════ -->
+
+  <!-- (4) 值得卡 — JOY-01 中等强度，绝对累计 Σ joy_contribution，非环 -->
+  <div class="sect-h joy">这个月的悦己 <span class="tag">悦己</span></div>
+  <div class="worth">
+    <div class="head">
+      <div class="glyph">🌸</div>
+      <div>
+        <div class="cap">这个月，你为自己花了</div>
+        <div class="val num">¥47,200</div>
+      </div>
+    </div>
+    <div class="say">22 笔悦己支出，滋养了这个月的自己。每一笔，都是给自己的一点温柔。值得。</div>
+    <div class="meta num">累计已花悦己 · 无目标、无对比 · 只记录已经发生的好</div>
+  </div>
+
+  <!-- (5) 满足度直方图 — 分布 + 描述，无 vs / 无目标 8+ -->
+  <div class="sect-h joy">悦己满足度分布 <span class="tag">悦己</span></div>
+  <div class="card">
+    <div class="histo" aria-label="悦己满足度 1-10 分布直方图">
+      <div class="b"><div class="bar zero"></div><div class="x num">1</div></div>
+      <div class="b"><div class="bar" style="height:11%"><div class="cnt num">1</div></div><div class="x num">2</div></div>
+      <div class="b"><div class="bar" style="height:11%"><div class="cnt num">1</div></div><div class="x num">3</div></div>
+      <div class="b"><div class="bar" style="height:22%"><div class="cnt num">2</div></div><div class="x num">4</div></div>
+      <div class="b"><div class="bar" style="height:22%"><div class="cnt num">2</div></div><div class="x num">5</div></div>
+      <div class="b"><div class="bar" style="height:34%"><div class="cnt num">3</div></div><div class="x num">6</div></div>
+      <div class="b med"><div class="bar" style="height:56%"><div class="cnt num">4</div></div><div class="x num">7</div></div>
+      <div class="b"><div class="bar" style="height:78%"><div class="cnt num">5</div></div><div class="x num">8</div></div>
+      <div class="b"><div class="bar" style="height:45%"><div class="cnt num">3</div></div><div class="x num">9</div></div>
+      <div class="b"><div class="bar" style="height:18%"><div class="cnt num">1</div></div><div class="x num">10</div></div>
+    </div>
+    <div class="histo-foot">
+      <span>22 笔悦己支出的满足度</span>
+      <span class="med-pill num">中位满足度 7</span>
+    </div>
+    <div class="histo-cap">大多落在中高位——为自己花的钱，多数让你感到值得，偶有几笔不那么满意，也都是真实的体验。</div>
+  </div>
+
+  <!-- (6) 记忆故事条 — 叙事回顾，非排名 -->
+  <div class="sect-h joy">值得记住的一刻 <span class="tag">悦己</span></div>
+  <div class="story">
+    <div class="band">
+      <div class="ph">☕</div>
+      <div class="info">
+        <div class="lbl">这个月最有温度的一笔</div>
+        <div class="ttl">外出·体验</div>
+        <div class="sub num">¥4,200 · 2026/05/18</div>
+      </div>
+      <div class="full">
+        <div class="fv num">10</div>
+        <div class="fk">满足 / 10</div>
+      </div>
+    </div>
+    <div class="quote"><span>久しぶりに友人と過ごした午後。这杯咖啡换来的安心，值得。</span></div>
+  </div>
+
+  <div class="footnote">
+    <span class="badge-sim">示例数据 · SIMULATED</span><br>
+    全部金额为虚构模拟，非任何真实用户的财务数据。<br>
+    本页仅呈现支出侧（范围勘误 · 详见共享示例数据）。
+  </div>
+
+</div>
+</body>
+</html>
