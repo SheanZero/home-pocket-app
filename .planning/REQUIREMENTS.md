@@ -104,26 +104,26 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GATE-01 | TBD | Pending |
-| GATE-02 | TBD | Pending |
-| GATE-03 | TBD | Pending |
-| GATE-04 | TBD | Pending |
-| OVW-01 | TBD | Pending |
-| OVW-02 | TBD | Pending |
-| TREND-01 | TBD | Pending |
-| DRILL-01 | TBD | Pending |
-| JOY-01 | TBD | Pending |
-| JOY-02 | TBD | Pending |
-| JOY-03 | TBD | Pending |
-| JOY-04 | TBD | Pending |
-| REDES-01 | TBD | Pending |
-| REDES-02 | TBD | Pending |
-| REDES-03 | TBD | Pending |
-| GUARD-01 | TBD | Pending |
-| GUARD-02 | TBD | Pending |
-| GUARD-03 | TBD | Pending |
-| GUARD-04 | TBD | Pending |
-| GUARD-05 | TBD | Pending |
+| GATE-01 | Phase 43 | Pending |
+| GATE-02 | Phase 43 | Pending |
+| GATE-03 | Phase 43 | Pending |
+| GATE-04 | Phase 43 | Pending |
+| OVW-01 | Phase 44 | Pending |
+| OVW-02 | Phase 46 | Pending |
+| TREND-01 | Phase 44 | Pending |
+| DRILL-01 | Phase 44 | Pending |
+| JOY-01 | Phase 46 | Pending |
+| JOY-02 | Phase 46 | Pending |
+| JOY-03 | Phase 46 | Pending |
+| JOY-04 | Phase 46 | Pending |
+| REDES-01 | Phase 45 | Pending |
+| REDES-02 | Phase 46 | Pending |
+| REDES-03 | Phase 46 | Pending |
+| GUARD-01 | Phase 45 | Pending |
+| GUARD-02 | Phase 46 | Pending |
+| GUARD-03 | Phase 47 | Pending |
+| GUARD-04 | Phase 47 | Pending |
+| GUARD-05 | Phase 47 | Pending |
 
 ---
 *Defined 2026-06-15 — v1.8 统计页面重设计. 20 requirements across 7 categories. Phase numbering continues from v1.7's Phase 42 (starts at Phase 43). Research basis: `.planning/research/SUMMARY.md` (+ STACK/FEATURES/ARCHITECTURE/PITFALLS).*

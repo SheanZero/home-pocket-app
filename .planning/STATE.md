@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计
-status: planning
-last_updated: "2026-06-15T02:52:50.805Z"
+status: roadmap_ready
+last_updated: "2026-06-15T03:30:00.000Z"
 last_activity: 2026-06-15
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Planning next milestone — run `/gsd-new-milestone`
+**Current focus:** v1.8 统计页面重设计 — roadmap drafted (Phases 43-47); awaiting approval, then `/gsd-plan-phase 43` (HTML 设计探索关卡)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 43 — HTML 设计探索关卡 (Design Gate, NO production code) — not started
 Plan: —
-Status: Defining requirements
-Last activity: 2026-06-15 — Milestone v1.8 started
+Status: Roadmap ready (5 phases, 20/20 requirements mapped); awaiting roadmap approval
+Last activity: 2026-06-15 — Milestone v1.8 roadmap created (Phases 43-47)
 
 ### Quick Tasks Completed
 
@@ -45,16 +45,17 @@ Last activity: 2026-06-15 — Milestone v1.8 started
 | 260614-goh | 语音外币切换：①识别口语词（人民币/美金+全货币 zh/ja/en，大小写不敏感，regexAlternation longest-first）②修复头部药丸不切换（AmountDisplay 未传 currency→硬编码 JPY；新增 _displayCurrency，汇率成功才切外币、RateUnavailable 保持 JPY）（+32 用例） | 2026-06-14 | 117aecd5,d2b9df8e | [260614-goh-voice-currency-switch](./quick/260614-goh-voice-currency-switch/) |
 | 260614-iww | 隐藏 OCR 记账入口（新增 kOcrEntryEnabled=false 编译期 flag，InputModeTabs 隐藏扫描页签 + navigateToEntryMode 短路；OCR 基础设施/屏幕零改动，翻转 flag 即恢复）+ 添加账目 FAB 点击=保存即 pop 返回 + 友好提示，长按=连续记账模式（停留清空表单 + 「继续记账」提示 + 退出键/退出提示）；ja/zh/en 三语温暖文案 | 2026-06-14 | 10236350,9c9b6068,45ed4332 | [260614-iww-ocr](./quick/260614-iww-ocr/) |
 
-## Last Milestone Snapshot (v1.6)
+## Last Milestone Snapshot (v1.7)
 
-- **Phases:** 4 (36-39), **Plans:** 27
-- **Duration:** 2026-06-07 → 2026-06-08 execution; quick-task hardening through 2026-06-12
-- **Audit Status at Close:** `tech_debt` — accepted (27/27 requirements, 4/4 phases `passed`, 6/6 seams, 10/10 E2E flows; W1+W2 closed at close via 260612-daz; suite 2588/2588 green)
-- **Outcome:** Placeholder 4th nav tab → complete family shopping list; three-layer privacy enforcement (use case + tracker + receiver); schema v19→v20; 54 goldens
-- **Tag:** `v1.6`, schema at v20
+- **Phases:** 3 (40-42), **Plans:** 20
+- **Duration:** 2026-06-12 → 2026-06-13 execution; quick-task hardening through 2026-06-14
+- **Audit Status at Close:** `tech_debt` — accepted (23/23 requirements, 3/3 phases verified, 6/6 seams, E2E complete; all four Phase 42 device UAT items passed; suite 2786/2786 green)
+- **Outcome:** Foreign-currency ledger entry end to end; transaction-date historical-rate conversion (Frankfurter + fawazahmed0, encrypted Drift cache, offline fallback); JPY-converted booking amount with original currency/amount/rate as sync-safe fields; JPY-only path byte-unchanged; schema v20→v21
+- **Tag:** `v1.7`, schema at v21
 
 ## Previous Milestone Snapshots
 
+- **v1.6** (4 phases 36-39, 27 plans, `tech_debt`) — 购物清单 family shopping list; schema v19→v20
 - **v1.5** (5 phases 31-35, 24 plans, `tech_debt`) — 文案与配色统一; ADR-019 "Sakura Mochi × Wakaba" palette
 - **v1.4** (7 phases 24-30, 29 plans, `tech_debt`) — 列表功能 kakeibo-style List tab
 - **v1.3** (6 phases 18-23, 47 plans, `tech_debt`) — 迭代帐本输入 single-screen voice entry
@@ -66,40 +67,44 @@ Last activity: 2026-06-15 — Milestone v1.8 started
 
 ### Roadmap Evolution
 
-- v1.7 roadmap first written 2026-06-12 as 6 phases (40-45) following the research A→F build order
-- v1.7 roadmap revised 2026-06-12 to 3 phases (40-42) — user-directed consolidation merging data+domain+sync into Phase 40; infrastructure client+use cases into Phase 41; presentation+voice into Phase 42 (voice as a parallel wave inside the phase). Mirrors the v1.6 consolidation precedent (7→4)
+- v1.8 roadmap first written 2026-06-15 as 5 phases (43-47) following the research design-gate-first decomposition. Phase numbering continues from v1.7's Phase 42 (no reset).
+- Phase 43 is a **standalone hard DESIGN GATE — NO production code** (user requirement "未获批前不进入开发"). Build phases (44-47) start only after the gate closes on user approval. The v1.6 (7→4) and v1.7 (6→3) consolidation precedents were considered; the build half (44-47) is kept at 4 phases because each carries a distinct, sequentially-dependent contract (data → shell → cards → validation) and the milestone is a full screen rebuild under tight ADR-012 invariants.
 
-### v1.7 Pre-Implementation Decisions (locked by research)
+### v1.8 Roadmap Constraints (locked by research + PROJECT.md — every build phase carries these)
 
-- **Rate cache storage:** Drift `exchange_rates` table (not SharedPreferences) — queryable, encrypted, offline-fallback SQL; explicit `CREATE INDEX` in both `onCreate` and `onUpgrade`
-- **Infrastructure directory:** `lib/infrastructure/exchange_rate/` (not `currency/`) — mirrors `sync/` naming convention
-- **Rate precision:** store `exchangeRate` as `TextColumn` (string, full precision) — NOT `RealColumn`; prevents preview-vs-stored divergence on re-multiplication
-- **Hash scope:** new currency fields excluded from `HashChainService.calculateTransactionHash` — existing chains stay valid
-- **CNY symbol fix (Phase 40, before UI):** `NumberFormatter._getCurrencySymbol` → `'CN¥'` for CNY; controls when goldens re-baseline
-- **Offline-first invariant:** `CreateTransactionUseCase` NEVER contains an HTTP call; rate is always pre-computed and passed in
-- **Domain triple invariant:** if any of (`originalCurrency`, `originalAmount`, `appliedRate`) is non-null, all three must be non-null → `Result.error` on partial state
-- **Edit policy:** date-change re-fetch shows toast when >1% JPY amount difference; manual-override is NOT clobbered unless user changes date after overriding
-- **Phase 42 internal waves:** keypad/display wave and voice wave are independent — run in parallel inside the phase
-- **`元` ambiguity:** zh locale = CNY; ja locale = JPY (bare `元`/`円` keeps existing JPY-terminator behavior unchanged)
-- **KRW decimal override:** `sealed_currencies` reports subunit 100 (ISO) but display convention is 0 decimals — NumberFormatter needs a KRW special case like JPY
+- **Design gate first (Phase 43):** no Dart/production code; deliver current-impl deep-research map (GATE-01), ≥3 HTML directions each with an ADR-012 self-audit table (GATE-02), discussion → ONE selected direction (GATE-03), new-ADR go/no-go + locked emotional-vocabulary list + fl_chart 1.2.0 affordance validation (GATE-04). Gate exit = user approval.
+- **ADR-012 anti-gamification (permanent):** no streaks/badges/targets-as-achievement/cross-period-delta/leaderboards/public-sharing. Every new card joins the `anti_toxicity_*_test` forbidden-substring sweep (ja/zh/en × all states). The savings-rate/overview shows current-window only — `MonthlyReport.previousMonthComparison` stays unsurfaced on analytics.
+- **ADR-016 §3 HomeHero isolation:** `home_screen_isolation_test.dart` stays green; analytics reads/invalidates NO `home/*` provider; no shared provider between Home and Analytics; single-Joy-expression (`grep density|joyPerYen lib/` == 0). JOY-01 ambient — must NOT become a progress/target ring (HomeHero owns the only target ring).
+- **No income / no real savings-rate:** the only transaction writer hardcodes `expense`, so `totalIncome`==0 and savings-rate would be meaningless. Overview reframed expense-side only (total spend + 日常/悦己 split + top categories). Income capture deferred to INCOME-V2-01.
+- **No chart-library bump:** fl_chart stays `^1.2.0` (no 2.x exists — TOOL-V2-01 retired as N/A). Adopt 1.2.0 native per-rod `label` (delete histogram `Stack` hack) + optional donut `cornerRadius`. No lib change bundled into the golden diff.
+- **No Drift migration:** schema stays v21. Reuse-first — at most ONE new read-only drill-down path (`CategoryDrillDown` + `GetCategoryDrillDownUseCase` + `AnalyticsDao.getCategoryTransactions`, or reuse v1.4 `GetListTransactionsUseCase`). Budget-vs-actual excluded (the only ask carrying a migration → ANALYTICS-V2-03).
+- **Provider rebuild storms:** canonicalize every window boundary via `DateBoundaries`/`TimeWindow` before it reaches a family key; analytics cards stay auto-dispose.
+- **Golden + gate:** macOS-only golden re-baseline (chart goldens do not exist today — authored from scratch on macOS); FULL `flutter test` as the per-wave gate (not a scoped subset).
+
+### v1.8 Open Design Questions (resolved in the Phase 43 GATE)
+
+- Exact form of the 悦己 emotional surface (constrained by ADR-012 ambient-vs-discrete line; not yet picked).
+- Whether a new ADR is needed (e.g. JOY-04 persisting user-authored reflection text → encryption/privacy implications).
+- Customizable/reorderable dashboard yes/no (if yes: SharedPreferences-not-Drift, never family-sync) — currently OUT of scope (fixed layout) per REQUIREMENTS.md; revisit only if the gate elevates it.
+- Income-capture reliability check (gates the overview block) — verify at the GATE or early Phase 44.
 
 ### Pending Todos
 
-- Run `/gsd-plan-phase 40` to begin Phase 40 (数据与同步基础)
-- Phase 40 first action: confirm `schemaVersion` in `lib/data/app_database.dart` is 20; migration must be `if (from < 21)` with `schemaVersion => 21`
-- Phase 40 ADR work: check `ls docs/arch/03-adr/ADR-*.md` for current max number before writing new ADRs (must be sequential, no gaps)
-- Phase 41 research flag: re-verify fawazahmed0 CDN URL for TWD at planning time (live-verified 2026-06-12 in SUMMARY.md; re-verify before implementation)
-- Phase 42 design note: SmartKeyboard decimal input state machine has no codebase precedent — plan carefully before implementation; DISP-04 three-field bidirectional linked editing is the highest-complexity UI item
+- Await user approval of the v1.8 roadmap, then run `/gsd-plan-phase 43` to begin the HTML 设计探索关卡.
+- Phase 43 is a DESIGN GATE: produce HTML/Pencil mocks + decision docs ONLY; commit no Dart/production code. Gate exit = user approves exactly one direction.
+- Phase 43 ADR work: if a direction grazes the ADR-012 boundary (e.g. JOY-04 persists text), check `ls docs/arch/03-adr/ADR-*.md` for the current max number before writing a new ADR (sequential, no gaps); current max is ADR-022.
+- Phase 44 research flag (light): verify income-capture reliability and the `(book_id, category_id, timestamp)` index need before committing the drill-down path.
+- Phase 47: re-baseline goldens on macOS only (CI is ubuntu; `flutter_test_config.dart` swaps in `BaselineExistenceGoldenComparator` off-macOS).
 
 ### Blockers / Concerns
 
-No active blockers for v1.7. Pre-existing carried debt (unchanged):
+No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 - **v1.5 a11y UAT:** Phase 35 W1 on-device screen-reader announcement of localized ledger-chip labels — human_needed
 - **v1.5 vocab residual:** `Book.survivalBalance`/`soulBalance` DB columns need future DB-migration phase before public release
 - **v1.4 GAP-2:** LIST-02 `watchByBookIds` reactive stream is dead code; defer
 - **v1.3 voice-flow polish backlog:** Phase 22 advisory WR-02/03/06/07/NEW-02/NEW-03 + IN-01/02/03 on `voice_input_screen.dart`
-- **MOD-005 OCR slot:** `ocr_review_screen.dart:54,58` hardcodes `EntrySource.manual` pending writer landing
+- **MOD-005 OCR slot:** OCR ledger entry hidden behind reversible `kOcrEntryEnabled` flag (260614-iww); flip when MOD-005 writer lands
 
 ## Deferred Items
 
@@ -151,50 +156,24 @@ No active blockers for v1.7. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-13T14:30:00.000Z
-Stopped at: Completed quick task 260613-ufn (外币卡片两屏统一); phase 42 still ready_for_verification
+Last session: 2026-06-15T03:30:00.000Z
+Stopped at: v1.8 roadmap created (Phases 43-47); ROADMAP.md + REQUIREMENTS.md traceability written; awaiting roadmap approval
 Resume file: None
 
 ## Performance Metrics
 
 | Phase | Plan | Duration | Notes |
 |-------|------|----------|-------|
-| Phase 41 P01 | 6min | 2 tasks | 6 files |
-| Phase 41 P02 | 5min | 2 tasks | 2 files |
-| Phase 41 P03 | 2min | 2 tasks | 3 files |
-| Phase 41 P04 | 6min | 3 tasks | 13 files |
-| Phase 41 P05 | 7min | 2 tasks | 4 files |
-| Phase 42 P01 | ~18min | 2 tasks | 5 files |
-| Phase 42 P02 | 7min | 1 tasks | 2 files |
-| Phase Phase 42 P03 P03 | ~4min | 1 task tasks | 3 files files |
-| Phase 42 P04 | 25m | 2 tasks | 7 files |
-| Phase 42 P05 | 10min | 2 tasks | 6 files |
-| Phase 42 P06 | ~12min | 2 tasks | 5 files |
-| Phase 42 P07 | ~18min | 2 tasks | 9 files |
-| Phase 42 P08 | ~35 min | 2 tasks | 6 files |
-| Phase 42 P09 | 13min | 2 tasks | 9 files |
+| (v1.8 not yet started) | — | — | — |
 
 ## Decisions
 
-- [Phase 42]: 42-01: Wave 0 RED scaffolds (5 test files) lock Phase 42 acceptance contracts. `create_transaction_currency_test` is GREEN-on-arrival (Phase 40 shipped the create triple) — kept as the SC-5 7415 regression guard, NOT fabricated RED; the RED half of SC-5 plumbing lives in `update_transaction_currency_test` (compile-fails on not-yet-existing UpdateTransactionParams currency fields → plan 42-03). Voice corpus asserts `VoiceParseResult.detectedCurrency` (RED → 42-04); `AmountInputController` (RED → 42-05); `CurrencyLinkedEditFields` (RED → 42-09). D-08 truncation asserted as string op not rounding (0.99→0, 50.50→50, 50.567→50.56)
-- [Phase ?]: 41-01: ExchangeRateRepository extended with findLatestNonManual (D-07), deleteOlderThan (D-09 TTL), findAll (D-10); TTL delete uses UtcEpochDateTimeConverter().toSql() before isSmallerThanValue (TypeConverter-aware)
-- [Phase ?]: 41-02: connectivity_plus ^7.1.1 added (D-05 gate); flutter pub get clean, all pins intact (file_picker 11.0.2 / package_info_plus 9.0.1 / share_plus 12.0.2 / win32 5.15.0 / intl 0.20.2 / sqlcipher 0.6.8); iOS debug build human-verified green (no sqlite3 symbol conflict)
-- [Phase ?]: 41-03: ExchangeRateApiClient three-source fallback (Frankfurter→fawazahmed0 jsDelivr→Cloudflare); 404/timeout/non-200 route onward, all-fail throws; rate inversion 1/raw toStringAsPrecision(7); actualRateDate surfaces weekend/holiday (RATE-05); RateResult sealed union (5 variants) + RateSignal/RateResultWithSignal
-- [Phase 41]: 41-04: ExchangeRateCacheService cache-first orchestration (D-01/D-03/D-05/D-06/D-07/D-08/D-09), getRate never throws; GetExchangeRateUseCase adds ADR-022 D-02 dialog/D-03 toast + RATE-04 manual override; BackupData.exchangeRates D-10 export+import; SC-5 verified (0 HTTP in accounting)
-- [Phase ?]: 41-05: Three @riverpod providers wired (appExchangeRateApiClient/CacheService/GetExchangeRateUseCase); build_runner regenerated .g.dart; full suite 2705/2705 GREEN, analyze 0, architecture 47/47; SC-5 holds. Phase 42 can ref.watch(appGetExchangeRateUseCaseProvider). Fixed 2 carry regressions (logging-privacy scanner false-positive in api_client; backup characterization test missing appExchangeRateRepositoryProvider override)
-- [Phase ?]: 42-02: Per-currency decimals routed through intl currencyFractionDigits via single shared helper currencyFractionDigitsFor(); subunitToUnitFor=pow(10,n) so BHD/JOD/KWD=3 yields 1000; KRW kept explicit 0-decimal (T-42-03); unknown code falls back to intl DEFAULT 2 (T-42-02); convertToJpy() byte-unchanged (ADR-020 single conversion site)
-- [Phase 42]: 42-03: UpdateTransactionParams gains the currency triple; execute() coalesces from seed (EDIT-02), recomputes JPY via single-site convertToJpy() (ADR-020) only for foreign rows, no rehash (ADR-021, prevHash/currentHash frozen). Extracted shared validateCurrencyTriple() into currency_conversion.dart; CreateTransactionUseCase refactored to reuse it (removed ~50 dup lines + dead _iso4217). update_transaction_currency_test GREEN; 56/56 use-case tests green; analyze 0.
-- [Phase 42]: 42-04: Voice currency detection — shared NumeralStateMachine.detectCurrencyToken (longest-first leftmost-wins scan over VoiceCurrencySuffixes.all) returns the token SEPARATELY from parse(), so the integer-amount path is byte-identical (T-42-07). VoiceCurrencySuffixes.tokenToIso maps zh 美元/欧元/英镑/港币/澳元/加元 + ja ドル/ユーロ/ポンド/香港ドル/豪ドル → ISO. VoiceParseResult gains nullable detectedCurrency (null=JPY-native, Pitfall 1 — no rate-fetch). ParseVoiceInputUseCase._detectCurrency locale-routes + resolves bare 元 by locale (zh→CNY, ja→JPY-native→null) via bareYuanToken const (keeps use case out of hardcoded_cjk_ui_scan). _extractKeyword strips new tokens (5美元的咖啡→咖啡, T-42-08). currency_detection_test GREEN (16); 400/400 voice + CJK-scan + analyze 0. Form surfacing/rate-fetch deferred to 42-09.
-- [Phase 42]: 42-05: AmountInputController truncates-not-rounds decimals on currency switch (D-08, string op)
-- [Phase 42]: 42-06: CurrencySelectorSheet (JPY-pinned, code/name search, 'more' full-ISO, flag+symbol+code+name 48dp rows, accentPrimary selection) + non-persisted session recentCurrencyProvider (LRU, JPY excluded from reorder). Common-zone names localized in ARB; long-tail ISO+English. Goldens mask flag cell (6 macOS baselines). Sheet wiring to SmartKeyboard is 42-08.
-- [Phase 42]: 42-07: ConversionPreviewPanel (DISP-01) consumes P41 appGetExchangeRateUseCaseProvider via keyed conversionRateProvider(currency,date,amount); main row ≈¥{jpy} via single-site convertToJpy() (ADR-020, matches persisted 7415), sub-row {CODE} 1 = ¥{rate} · {date}. In-place fixed-height skeleton kConversionPreviewBlockHeight=56 (D-04 no-jump). Warning-amber staleness label for RateFallback (cached) OR fetched.actualDate≠txDate (weekend, D-05) — amber reserved. RateSignal D-02 dialog/D-03 toast surfaced via ref.listen→onSignal callback, never ref.watch (host renders in 42-08). JPY-guarded (assert, CURR-04). RateUnavailable/error → mandatory-rate prompt (P41 D-08). 4 new ARB keys ja/zh/en; 14 tests + 6 macOS goldens green; analyze 0. Host mounting is 42-08.
-- [Phase ?]: 42-08: foreign triple resolved via the preview's keyed conversionRateProvider so persisted JPY == previewed JPY (single convertToJpy site, ADR-020)
-- [Phase ?]: 42-08: onSignal is a documented no-op on the entry screen (no previousRate so no D-02/D-03 signal); full ADR-022 dialog/toast UX is 42-09
-- [Phase ?]: 42-09: JPY edit row is read-only derived (ADR-022 D-01); original × rate → JPY only (no bidirectional loop)
-- [Phase ?]: 42-09: D-02/D-03 date-change semantics colocated in CurrencyLinkedEditFields (owns the original amount for the JPY delta)
-- [Phase ?]: 42-09: hand-editing the rate flips manualOverride=true (next date change → D-02 dialog vs D-03 toast)
-- [Phase ?]: 42-09: CurrencyEditStrings null-safe l10n resolver keeps the delegate-less Wave-0 RED harness renderable
+- [v1.8 roadmap]: Phase numbering continues from Phase 42 → v1.8 = Phases 43-47 (no reset).
+- [v1.8 roadmap]: Phase 43 is a standalone hard DESIGN GATE with NO production code (user "未获批前不进入开发"); build phases 44-47 follow only after the gate closes on user approval.
+- [v1.8 roadmap]: Build half kept at 4 sequentially-dependent phases (data → shell → cards → validation) rather than consolidated, because the full-screen rebuild under tight ADR-012/ADR-016 invariants benefits from a clean shell-before-cards contract and a dedicated macOS-golden/full-suite gate.
+- [v1.8 roadmap]: Overview reframed expense-side only (no income path exists; savings-rate would be meaningless); real savings-rate → INCOME-V2-01.
+- [v1.8 roadmap]: No Drift migration, no fl_chart bump, budget-vs-actual excluded — keeps v1.8 a pure presentation-layer rebuild.
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Review/approve the v1.8 roadmap, then run `/gsd-plan-phase 43` to begin the HTML 设计探索关卡 (Design Gate).
