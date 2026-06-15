@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M1 实用主导 · 深色 · 统计</title>
+<!--
+  M1 practical-led 深色稿 · 自包含（内联 style，离线可开，无外部资源 / 无脚本 / 无网络字体）
+  与 m1-light.html 同布局同数据；取 ADR-019 桜餅×若葉 dark 暖调：
+  bg #171210 / card #231E1B / primary #8DC68D / daily #7DC88D / joy 桜粉 #E89BB0 (lr5b) / shared #7FA8D8 / 暖正文 #F0EBE6。
+  渲染共享示例数据 — 全部数字为虚构模拟，非真实账目。金额 JPY ¥ 无小数。仅支出侧。JOY-01 弱、绝不成环。
+-->
+<style>
+  :root{
+    --bg:#171210; --card:#231E1B; --cream:#1A1512; --muted:#2E2723;
+    --ink:#F0EBE6; --ink2:#9A8E87; --ink3:#6B5F58;
+    --border:#2E2723; --divider:#2E2723; --borderList:#2E2723;
+    --primary:#8DC68D; --primaryLight:#1A2E1A; --primaryBorder:#283E28;
+    --daily:#7DC88D; --dailyText:#7DC88D; --dailyLight:#1A2E1A;
+    --joy:#E89BB0; --joyText:#E89BB0; --joyLight:#2E1820; --joyBorder:#4A2A33;
+    --shared:#7FA8D8; --sharedText:#7FA8D8; --sharedLight:#1E2A3A; --sharedBorder:#2A3D55;
+    --neutral:#7A6E66; --neutralBg:#2A2420;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 8px 22px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans CJK SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.5}
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;letter-spacing:.01em}
+  .wrap{max-width:430px;margin:0 auto;padding:0 16px 96px}
+  .topbar{position:sticky;top:0;background:rgba(23,18,16,.92);backdrop-filter:blur(8px);
+    padding:14px 4px 10px;display:flex;align-items:baseline;justify-content:space-between;z-index:5;border-bottom:1px solid var(--divider)}
+  .topbar h1{font-size:19px;font-weight:700;letter-spacing:.02em}
+  .window{font-size:12.5px;color:var(--ink2);background:var(--card);border:1px solid var(--border);
+    border-radius:999px;padding:5px 11px;display:inline-flex;gap:6px;align-items:center}
+  .window .chev{color:var(--ink3);font-size:11px}
+  .sect-h{font-size:12px;color:var(--ink2);font-weight:600;letter-spacing:.08em;
+    margin:22px 4px 9px;display:flex;align-items:center;gap:7px}
+  .sect-h::before{content:"";width:3px;height:13px;border-radius:2px;background:var(--primary)}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;
+    padding:18px 16px;box-shadow:var(--shadow)}
+  .card + .card{margin-top:12px}
+
+  .ovw{padding:20px 18px}
+  .ovw .lab{font-size:12.5px;color:var(--ink2);font-weight:600}
+  .ovw .total{font-size:40px;font-weight:800;letter-spacing:-.01em;margin-top:3px;line-height:1.05}
+  .ovw .sub{font-size:12px;color:var(--ink3);margin-top:5px}
+  .split{display:flex;gap:10px;margin-top:16px}
+  .split .seg{flex:1;border-radius:13px;padding:12px 13px;border:1px solid transparent}
+  .seg.d{background:var(--dailyLight);border-color:var(--primaryBorder)}
+  .seg.j{background:var(--joyLight);border-color:var(--joyBorder)}
+  .seg .t{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
+  .seg.d .t{color:var(--dailyText)}
+  .seg.j .t{color:var(--joyText)}
+  .seg .v{font-size:22px;font-weight:800;margin-top:5px}
+  .seg.d .v{color:var(--dailyText)}
+  .seg.j .v{color:var(--joyText)}
+  .seg .pct{font-size:11.5px;color:var(--ink2);margin-top:2px;font-weight:500}
+  .ratiobar{height:8px;border-radius:6px;overflow:hidden;display:flex;margin-top:16px;background:var(--neutralBg)}
+  .ratiobar .d{background:var(--daily)}
+  .ratiobar .j{background:var(--joy)}
+  .ratiocap{display:flex;justify-content:space-between;margin-top:7px;font-size:11px;color:var(--ink2)}
+
+  .donut-row{display:flex;gap:18px;align-items:center}
+  .donut{flex:0 0 138px;position:relative;width:138px;height:138px}
+  .donut svg{transform:rotate(-90deg)}
+  .donut .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .donut .ctr .k{font-size:10.5px;color:var(--ink2);font-weight:600}
+  .donut .ctr .v{font-size:18px;font-weight:800;margin-top:1px}
+  .donut .ctr .n{font-size:10px;color:var(--ink3);margin-top:1px}
+  .legend{flex:1;display:flex;flex-direction:column;gap:8px}
+  .legend .lg{display:flex;align-items:center;gap:8px;font-size:12.5px}
+  .legend .dot{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+  .legend .lname{color:var(--ink);font-weight:500}
+  .legend .lpct{margin-left:auto;color:var(--ink2);font-weight:600}
+
+  .brk{display:flex;flex-direction:column}
+  .brk .row{display:flex;align-items:center;gap:12px;padding:13px 2px;border-bottom:1px solid var(--divider);cursor:default}
+  .brk .row:last-child{border-bottom:0}
+  .brk .ic{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;flex:0 0 auto}
+  .ic.d{background:var(--dailyLight)} .ic.j{background:var(--joyLight)} .ic.s{background:var(--sharedLight)} .ic.n{background:var(--neutralBg)}
+  .brk .meta{flex:1;min-width:0}
+  .brk .nm{font-size:14px;font-weight:600}
+  .brk .cnt{font-size:11.5px;color:var(--ink2);margin-top:1px}
+  .brk .amt{text-align:right}
+  .brk .amt .a{font-size:14px;font-weight:700}
+  .brk .amt.d .a{color:var(--dailyText)} .brk .amt.j .a{color:var(--joyText)} .brk .amt.s .a{color:var(--sharedText)} .brk .amt.n .a{color:var(--ink2)}
+  .brk .amt .p{font-size:11px;color:var(--ink2);margin-top:1px}
+  .brk .chev{flex:0 0 auto;color:var(--ink3);font-size:16px;margin-left:2px}
+  .brk-hint{font-size:11px;color:var(--ink3);margin:11px 2px 0;display:flex;align-items:center;gap:6px}
+
+  .trend{display:flex;align-items:flex-end;justify-content:space-between;gap:9px;height:128px;padding:6px 2px 0}
+  .trend .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .trend .stack{width:100%;max-width:34px;border-radius:7px 7px 3px 3px;overflow:hidden;display:flex;flex-direction:column-reverse}
+  .trend .sd{background:var(--daily)}
+  .trend .sj{background:var(--joy);opacity:.85}
+  .trend .cm{margin-top:7px;font-size:11px;color:var(--ink2);font-weight:600}
+  .trend .col.cur .cm{color:var(--primary);font-weight:800}
+  .trend .col.cur .stack{outline:2px solid var(--primaryBorder);outline-offset:1px}
+  .trend-cap{font-size:11px;color:var(--ink3);margin-top:13px;text-align:center}
+
+  .joyline{background:linear-gradient(180deg,var(--joyLight),var(--cream));
+    border:1px solid var(--joyBorder);border-radius:16px;padding:15px 16px;display:flex;align-items:center;gap:13px;margin-top:12px}
+  .joyline .glyph{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--joyBorder);
+    display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 auto}
+  .joyline .body{flex:1;min-width:0}
+  .joyline .cap{font-size:12px;color:var(--joyText);font-weight:600}
+  .joyline .val{font-size:20px;font-weight:800;color:var(--joyText);margin-top:1px}
+  .joyline .say{font-size:11.5px;color:var(--ink2);margin-top:3px;line-height:1.45}
+
+  .footnote{font-size:10.5px;color:var(--ink3);text-align:center;margin-top:26px;line-height:1.6}
+  .badge-sim{display:inline-block;background:var(--neutralBg);color:var(--ink2);border-radius:6px;padding:2px 7px;font-size:10px;font-weight:600;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <h1>统计</h1>
+    <span class="window">2026 年 5 月 <span class="chev">▾</span></span>
+  </div>
+
+  <!-- (1) 支出总览 — 仅支出侧 -->
+  <div class="sect-h">支出总览</div>
+  <div class="card ovw">
+    <div class="lab">本月总支出</div>
+    <div class="total num">¥248,600</div>
+    <div class="sub num">86 笔 · 2026 年 5 月</div>
+
+    <div class="split">
+      <div class="seg d">
+        <div class="t">🌱 日常</div>
+        <div class="v num">¥201,400</div>
+        <div class="pct num">约 81%</div>
+      </div>
+      <div class="seg j">
+        <div class="t">🌸 悦己</div>
+        <div class="v num">¥47,200</div>
+        <div class="pct num">约 19%</div>
+      </div>
+    </div>
+
+    <div class="ratiobar">
+      <div class="d" style="width:81%"></div>
+      <div class="j" style="width:19%"></div>
+    </div>
+    <div class="ratiocap"><span>日常 81%</span><span>悦己 19%</span></div>
+  </div>
+
+  <!-- (2) 分类支出 donut -->
+  <div class="sect-h">分类支出</div>
+  <div class="card">
+    <div class="donut-row">
+      <div class="donut" aria-label="分类支出占比环形图">
+        <svg viewBox="0 0 42 42" width="138" height="138">
+          <circle cx="21" cy="21" r="15.915" fill="none" stroke="#2A2420" stroke-width="6"></circle>
+          <!-- 饮食 31.5% --><circle cx="21" cy="21" r="15.915" fill="none" stroke="#7DC88D" stroke-width="6" stroke-dasharray="31.5 68.5" stroke-dashoffset="0"></circle>
+          <!-- 住居 24.9% --><circle cx="21" cy="21" r="15.915" fill="none" stroke="#7FA8D8" stroke-width="6" stroke-dasharray="24.9 75.1" stroke-dashoffset="-31.5"></circle>
+          <!-- 交通 8.8% --><circle cx="21" cy="21" r="15.915" fill="none" stroke="#5FA877" stroke-width="6" stroke-dasharray="8.8 91.2" stroke-dashoffset="-56.4"></circle>
+          <!-- 悦己合计 19% --><circle cx="21" cy="21" r="15.915" fill="none" stroke="#E89BB0" stroke-width="6" stroke-dasharray="19 81" stroke-dashoffset="-65.2"></circle>
+          <!-- 其它 15.8% --><circle cx="21" cy="21" r="15.915" fill="none" stroke="#7A6E66" stroke-width="6" stroke-dasharray="15.8 84.2" stroke-dashoffset="-84.2"></circle>
+        </svg>
+        <div class="ctr">
+          <div class="k">总支出</div>
+          <div class="v num">¥248,600</div>
+          <div class="n num">86 笔</div>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="lg"><span class="dot" style="background:#7DC88D"></span><span class="lname">饮食</span><span class="lpct num">31.5%</span></div>
+        <div class="lg"><span class="dot" style="background:#7FA8D8"></span><span class="lname">住居</span><span class="lpct num">24.9%</span></div>
+        <div class="lg"><span class="dot" style="background:#5FA877"></span><span class="lname">交通</span><span class="lpct num">8.8%</span></div>
+        <div class="lg"><span class="dot" style="background:#E89BB0"></span><span class="lname">悦己合计</span><span class="lpct num">19.0%</span></div>
+        <div class="lg"><span class="dot" style="background:#7A6E66"></span><span class="lname">其它</span><span class="lpct num">15.8%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分类 breakdown + 下钻入口 affordance -->
+  <div class="card brk">
+    <div class="row">
+      <div class="ic d">🍚</div>
+      <div class="meta"><div class="nm">饮食</div><div class="cnt num">31 笔 · 日常</div></div>
+      <div class="amt d"><div class="a num">¥78,300</div><div class="p num">31.5%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="row">
+      <div class="ic s">🏠</div>
+      <div class="meta"><div class="nm">住居</div><div class="cnt num">3 笔 · 日常</div></div>
+      <div class="amt s"><div class="a num">¥62,000</div><div class="p num">24.9%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="row">
+      <div class="ic d">🚃</div>
+      <div class="meta"><div class="nm">交通</div><div class="cnt num">14 笔 · 日常</div></div>
+      <div class="amt d"><div class="a num">¥21,800</div><div class="p num">8.8%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="row">
+      <div class="ic d">🧺</div>
+      <div class="meta"><div class="nm">日用品</div><div class="cnt num">11 笔 · 日常</div></div>
+      <div class="amt d"><div class="a num">¥18,500</div><div class="p num">7.4%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="row">
+      <div class="ic j">📚</div>
+      <div class="meta"><div class="nm">书籍·学习</div><div class="cnt num">6 笔 · 悦己</div></div>
+      <div class="amt j"><div class="a num">¥16,400</div><div class="p num">6.6%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="row">
+      <div class="ic j">🎨</div>
+      <div class="meta"><div class="nm">兴趣·爱好</div><div class="cnt num">5 笔 · 悦己</div></div>
+      <div class="amt j"><div class="a num">¥14,900</div><div class="p num">6.0%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="row">
+      <div class="ic n">⋯</div>
+      <div class="meta"><div class="nm">其它（含通信·外出·美容等）</div><div class="cnt num">余项汇总</div></div>
+      <div class="amt n"><div class="a num">¥36,700</div><div class="p num">14.8%</div></div>
+      <div class="chev">›</div>
+    </div>
+    <div class="brk-hint">› 轻点任一分类，可查看该分类的明细</div>
+  </div>
+
+  <!-- (3) 6 月趋势柱 — 中性滚动上下文 -->
+  <div class="sect-h">近 6 个月支出</div>
+  <div class="card">
+    <div class="trend">
+      <div class="col"><div class="stack" style="height:62%"><div class="sd" style="height:80%"></div><div class="sj" style="height:20%"></div></div><div class="cm">12月</div></div>
+      <div class="col"><div class="stack" style="height:71%"><div class="sd" style="height:82%"></div><div class="sj" style="height:18%"></div></div><div class="cm">1月</div></div>
+      <div class="col"><div class="stack" style="height:58%"><div class="sd" style="height:84%"></div><div class="sj" style="height:16%"></div></div><div class="cm">2月</div></div>
+      <div class="col"><div class="stack" style="height:77%"><div class="sd" style="height:79%"></div><div class="sj" style="height:21%"></div></div><div class="cm">3月</div></div>
+      <div class="col"><div class="stack" style="height:66%"><div class="sd" style="height:83%"></div><div class="sj" style="height:17%"></div></div><div class="cm">4月</div></div>
+      <div class="col cur"><div class="stack" style="height:74%"><div class="sd" style="height:81%"></div><div class="sj" style="height:19%"></div></div><div class="cm">5月</div></div>
+    </div>
+    <div class="trend-cap">绿=日常 · 粉=悦己 · 当前月浅描边 · 仅作滚动节奏参照</div>
+  </div>
+
+  <!-- 已花悦己 ambient line — M1 最克制悦己呈现，JOY-01 弱、非环 -->
+  <div class="sect-h">这个月的悦己</div>
+  <div class="joyline">
+    <div class="glyph">🌸</div>
+    <div class="body">
+      <div class="cap">这个月，你为自己花了</div>
+      <div class="val num">¥47,200</div>
+      <div class="say">22 笔悦己支出，滋养了这个月的自己。值得。</div>
+    </div>
+  </div>
+
+  <div class="footnote">
+    <span class="badge-sim">示例数据 · SIMULATED</span><br>
+    全部金额为虚构模拟，非任何真实用户的财务数据。<br>
+    本页仅呈现支出侧（范围勘误 · 详见共享示例数据）。
+  </div>
+
+</div>
+</body>
+</html>
