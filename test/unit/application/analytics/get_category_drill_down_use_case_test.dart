@@ -168,7 +168,7 @@ void main() {
           prevHash: 'hash_tx_sibling_l2',
         );
 
-        final result = await useCase.execute(
+        final CategoryDrillDown result = await useCase.execute(
           bookIds: ['book1'],
           startDate: windowStart,
           endDate: windowEnd,

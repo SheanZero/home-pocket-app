@@ -213,6 +213,72 @@ final class GetExpenseTrendUseCaseProvider
 String _$getExpenseTrendUseCaseHash() =>
     r'dfd62efcd364189bcdaa5d2b36b4dad57edb476d';
 
+/// DRILL-01 / D-01..D-06, D-11: GetCategoryDrillDownUseCase provider.
+///
+/// Injects the transaction + category repositories (NOT analyticsRepository):
+/// the drill reuses `findByBookIds` directly with a Dart-side L1 filter, and the
+/// summary subtotal/count come from Plan 01's shared `l1RollupFromTransactions`.
+
+@ProviderFor(getCategoryDrillDownUseCase)
+final getCategoryDrillDownUseCaseProvider =
+    GetCategoryDrillDownUseCaseProvider._();
+
+/// DRILL-01 / D-01..D-06, D-11: GetCategoryDrillDownUseCase provider.
+///
+/// Injects the transaction + category repositories (NOT analyticsRepository):
+/// the drill reuses `findByBookIds` directly with a Dart-side L1 filter, and the
+/// summary subtotal/count come from Plan 01's shared `l1RollupFromTransactions`.
+
+final class GetCategoryDrillDownUseCaseProvider
+    extends
+        $FunctionalProvider<
+          GetCategoryDrillDownUseCase,
+          GetCategoryDrillDownUseCase,
+          GetCategoryDrillDownUseCase
+        >
+    with $Provider<GetCategoryDrillDownUseCase> {
+  /// DRILL-01 / D-01..D-06, D-11: GetCategoryDrillDownUseCase provider.
+  ///
+  /// Injects the transaction + category repositories (NOT analyticsRepository):
+  /// the drill reuses `findByBookIds` directly with a Dart-side L1 filter, and the
+  /// summary subtotal/count come from Plan 01's shared `l1RollupFromTransactions`.
+  GetCategoryDrillDownUseCaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'getCategoryDrillDownUseCaseProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$getCategoryDrillDownUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<GetCategoryDrillDownUseCase> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  GetCategoryDrillDownUseCase create(Ref ref) {
+    return getCategoryDrillDownUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GetCategoryDrillDownUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GetCategoryDrillDownUseCase>(value),
+    );
+  }
+}
+
+String _$getCategoryDrillDownUseCaseHash() =>
+    r'5e6e6178adc8f95a2ddafe0a1ab1ca2a1c348365';
+
 /// HAPPY-01..04: GetHappinessReportUseCase provider.
 
 @ProviderFor(getHappinessReportUseCase)

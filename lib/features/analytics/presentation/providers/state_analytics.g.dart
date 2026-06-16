@@ -246,6 +246,207 @@ final class ExpenseTrendFamily extends $Family
   String toString() => r'expenseTrendProvider';
 }
 
+/// DRILL-01 / D-11, D-12, D-14, GUARD-01: drill-down for one tapped L1 category
+/// over the active analytics window.
+///
+/// Flat-lists all transactions in [l1CategoryId] (including every L2 child) for
+/// the window, with a neutral subtotal/count summary sourced from Plan 01's
+/// shared rollup (so the header == the donut slice).
+///
+/// D-12: callers MUST pass window-normalized [startDate]/[endDate] (the analytics
+/// shell already holds a normalized TimeWindow). Raw `DateTime.now()` microseconds
+/// would explode the family key and cause a rebuild storm. This provider defends
+/// the contract by re-normalizing the bounds via [DateBoundaries] before they
+/// reach the use case — never accept microsecond-exact instants into the key.
+///
+/// Auto-dispose (the @riverpod default here, NOT keepAlive — D-14) and reads /
+/// invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
+/// home_screen_isolation_test.dart).
+
+@ProviderFor(categoryDrillDown)
+final categoryDrillDownProvider = CategoryDrillDownFamily._();
+
+/// DRILL-01 / D-11, D-12, D-14, GUARD-01: drill-down for one tapped L1 category
+/// over the active analytics window.
+///
+/// Flat-lists all transactions in [l1CategoryId] (including every L2 child) for
+/// the window, with a neutral subtotal/count summary sourced from Plan 01's
+/// shared rollup (so the header == the donut slice).
+///
+/// D-12: callers MUST pass window-normalized [startDate]/[endDate] (the analytics
+/// shell already holds a normalized TimeWindow). Raw `DateTime.now()` microseconds
+/// would explode the family key and cause a rebuild storm. This provider defends
+/// the contract by re-normalizing the bounds via [DateBoundaries] before they
+/// reach the use case — never accept microsecond-exact instants into the key.
+///
+/// Auto-dispose (the @riverpod default here, NOT keepAlive — D-14) and reads /
+/// invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
+/// home_screen_isolation_test.dart).
+
+final class CategoryDrillDownProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<CategoryDrillDown>,
+          CategoryDrillDown,
+          FutureOr<CategoryDrillDown>
+        >
+    with
+        $FutureModifier<CategoryDrillDown>,
+        $FutureProvider<CategoryDrillDown> {
+  /// DRILL-01 / D-11, D-12, D-14, GUARD-01: drill-down for one tapped L1 category
+  /// over the active analytics window.
+  ///
+  /// Flat-lists all transactions in [l1CategoryId] (including every L2 child) for
+  /// the window, with a neutral subtotal/count summary sourced from Plan 01's
+  /// shared rollup (so the header == the donut slice).
+  ///
+  /// D-12: callers MUST pass window-normalized [startDate]/[endDate] (the analytics
+  /// shell already holds a normalized TimeWindow). Raw `DateTime.now()` microseconds
+  /// would explode the family key and cause a rebuild storm. This provider defends
+  /// the contract by re-normalizing the bounds via [DateBoundaries] before they
+  /// reach the use case — never accept microsecond-exact instants into the key.
+  ///
+  /// Auto-dispose (the @riverpod default here, NOT keepAlive — D-14) and reads /
+  /// invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
+  /// home_screen_isolation_test.dart).
+  CategoryDrillDownProvider._({
+    required CategoryDrillDownFamily super.from,
+    required ({
+      String bookId,
+      DateTime startDate,
+      DateTime endDate,
+      String l1CategoryId,
+    })
+    super.argument,
+  }) : super(
+         retry: null,
+         name: r'categoryDrillDownProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$categoryDrillDownHash();
+
+  @override
+  String toString() {
+    return r'categoryDrillDownProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<CategoryDrillDown> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<CategoryDrillDown> create(Ref ref) {
+    final argument =
+        this.argument
+            as ({
+              String bookId,
+              DateTime startDate,
+              DateTime endDate,
+              String l1CategoryId,
+            });
+    return categoryDrillDown(
+      ref,
+      bookId: argument.bookId,
+      startDate: argument.startDate,
+      endDate: argument.endDate,
+      l1CategoryId: argument.l1CategoryId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CategoryDrillDownProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$categoryDrillDownHash() => r'780cecb1ce06f8c4efa63f96cf90d7c633d833a1';
+
+/// DRILL-01 / D-11, D-12, D-14, GUARD-01: drill-down for one tapped L1 category
+/// over the active analytics window.
+///
+/// Flat-lists all transactions in [l1CategoryId] (including every L2 child) for
+/// the window, with a neutral subtotal/count summary sourced from Plan 01's
+/// shared rollup (so the header == the donut slice).
+///
+/// D-12: callers MUST pass window-normalized [startDate]/[endDate] (the analytics
+/// shell already holds a normalized TimeWindow). Raw `DateTime.now()` microseconds
+/// would explode the family key and cause a rebuild storm. This provider defends
+/// the contract by re-normalizing the bounds via [DateBoundaries] before they
+/// reach the use case — never accept microsecond-exact instants into the key.
+///
+/// Auto-dispose (the @riverpod default here, NOT keepAlive — D-14) and reads /
+/// invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
+/// home_screen_isolation_test.dart).
+
+final class CategoryDrillDownFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<CategoryDrillDown>,
+          ({
+            String bookId,
+            DateTime startDate,
+            DateTime endDate,
+            String l1CategoryId,
+          })
+        > {
+  CategoryDrillDownFamily._()
+    : super(
+        retry: null,
+        name: r'categoryDrillDownProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// DRILL-01 / D-11, D-12, D-14, GUARD-01: drill-down for one tapped L1 category
+  /// over the active analytics window.
+  ///
+  /// Flat-lists all transactions in [l1CategoryId] (including every L2 child) for
+  /// the window, with a neutral subtotal/count summary sourced from Plan 01's
+  /// shared rollup (so the header == the donut slice).
+  ///
+  /// D-12: callers MUST pass window-normalized [startDate]/[endDate] (the analytics
+  /// shell already holds a normalized TimeWindow). Raw `DateTime.now()` microseconds
+  /// would explode the family key and cause a rebuild storm. This provider defends
+  /// the contract by re-normalizing the bounds via [DateBoundaries] before they
+  /// reach the use case — never accept microsecond-exact instants into the key.
+  ///
+  /// Auto-dispose (the @riverpod default here, NOT keepAlive — D-14) and reads /
+  /// invalidates ZERO `home/*` providers (GUARD-01, structurally locked by
+  /// home_screen_isolation_test.dart).
+
+  CategoryDrillDownProvider call({
+    required String bookId,
+    required DateTime startDate,
+    required DateTime endDate,
+    required String l1CategoryId,
+  }) => CategoryDrillDownProvider._(
+    argument: (
+      bookId: bookId,
+      startDate: startDate,
+      endDate: endDate,
+      l1CategoryId: l1CategoryId,
+    ),
+    from: this,
+  );
+
+  @override
+  String toString() => r'categoryDrillDownProvider';
+}
+
 /// Earliest month with a non-deleted transaction in the active book.
 
 @ProviderFor(earliestTransactionMonth)

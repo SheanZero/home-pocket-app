@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/analytics/get_best_joy_moment_use_case.dart';
 import '../../../../application/analytics/get_budget_progress_use_case.dart';
+import '../../../../application/analytics/get_category_drill_down_use_case.dart';
 import '../../../../application/analytics/get_expense_trend_use_case.dart';
 import '../../../../application/analytics/get_family_happiness_use_case.dart';
 import '../../../../application/analytics/get_happiness_report_use_case.dart';
@@ -57,6 +58,19 @@ GetBudgetProgressUseCase getBudgetProgressUseCase(Ref ref) {
 GetExpenseTrendUseCase getExpenseTrendUseCase(Ref ref) {
   return GetExpenseTrendUseCase(
     analyticsRepository: ref.watch(analyticsRepositoryProvider),
+  );
+}
+
+/// DRILL-01 / D-01..D-06, D-11: GetCategoryDrillDownUseCase provider.
+///
+/// Injects the transaction + category repositories (NOT analyticsRepository):
+/// the drill reuses `findByBookIds` directly with a Dart-side L1 filter, and the
+/// summary subtotal/count come from Plan 01's shared `l1RollupFromTransactions`.
+@riverpod
+GetCategoryDrillDownUseCase getCategoryDrillDownUseCase(Ref ref) {
+  return GetCategoryDrillDownUseCase(
+    transactionRepository: ref.watch(transactionRepositoryProvider),
+    categoryRepository: ref.watch(categoryRepositoryProvider),
   );
 }
 
