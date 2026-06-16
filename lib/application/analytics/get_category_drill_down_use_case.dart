@@ -1,4 +1,5 @@
 import '../../features/accounting/domain/models/category.dart';
+import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/repositories/category_repository.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
 import '../../features/analytics/domain/category_l1_rollup.dart';
@@ -7,11 +8,13 @@ import '../../shared/constants/sort_config.dart';
 
 /// Reads one L1-category drill-down for the active analytics window (DRILL-01).
 ///
-/// Tapping an L1 category flat-lists ALL its transactions for the window —
-/// including transactions filed directly on the L1 AND on any of its L2 children
-/// (Pitfall 2). The summary subtotal/count come from Plan 01's locked
-/// `l1RollupFromTransactions` (the SAME `l1AncestorOf` rule the OVW-01 donut
-/// uses), so the drill header can never drift from the donut slice (D-11).
+/// Tapping an L1 category flat-lists its EXPENSE transactions for the window —
+/// including expenses filed directly on the L1 AND on any of its L2 children
+/// (Pitfall 2). Non-expense rows (income/transfer) are excluded so the drill
+/// matches the expense-only OVW-01 donut (CR-01). The summary subtotal/count
+/// come from Plan 01's locked `l1RollupFromTransactions` (the SAME `l1AncestorOf`
+/// rule the donut uses) over that same expense-only set, so the drill header can
+/// never drift from the donut slice (D-11).
 ///
 /// Reuse-first (D-01/D-04/D-05/D-06): the window fetch goes through the EXISTING
 /// `TransactionRepository.findByBookIds` primitive with `categoryId: null`; the
@@ -46,23 +49,41 @@ class GetCategoryDrillDownUseCase {
       sortDirection: SortDirection.desc,
     );
 
-    // 2. Build the {id -> Category} map for the L1-ancestor lookup.
+    // 2. Expense-only gate (CR-01 / D-11). findByBookIds has no income/expense
+    //    filter — its only type axis is the daily/joy `ledgerType` — so it also
+    //    returns income (e.g. refunds) and transfers. The OVW-01 donut this
+    //    drill must equal is expense-only (getCategoryTotals/getLedgerTotals
+    //    default to type='expense'), and Category carries NO income/expense
+    //    discriminator, so a non-expense row filed under an expense L1 would
+    //    inflate the drill subtotal and break the donut↔drill single-source
+    //    invariant. Filter once here, then derive BOTH the list and the rollup
+    //    from this same set so the predicate is never duplicated.
+    final expenseTxns = txns
+        .where((tx) => tx.type == TransactionType.expense)
+        .toList();
+
+    // 3. Build the {id -> Category} map for the L1-ancestor lookup.
     final categories = await _categoryRepo.findAll();
     final categoryMap = <String, Category>{};
     for (final cat in categories) {
       categoryMap[cat.id] = cat;
     }
 
-    // 3. Dart-side L1 filter — reuse Plan 01's l1AncestorOf (do NOT re-derive
+    // 4. Dart-side L1 filter — reuse Plan 01's l1AncestorOf (do NOT re-derive
     //    the level rule; Pitfall 2 is handled inside the helper).
-    final filtered = txns
+    final filtered = expenseTxns
         .where((tx) => l1AncestorOf(tx.categoryId, categoryMap) == l1CategoryId)
         .toList();
 
-    // 4. Subtotal/count from Plan 01's shared rollup — the single source-of-
-    //    truth (D-11). Passing the unfiltered fetched txns is correct because
+    // 5. Subtotal/count from Plan 01's shared rollup — the single source-of-
+    //    truth (D-11). Passing the expense-only set is what keeps the drill
+    //    header equal to the expense-only donut slice;
     //    l1RollupFromTransactions applies the same l1AncestorOf internally.
-    final rollup = l1RollupFromTransactions(txns, categoryMap, l1CategoryId);
+    final rollup = l1RollupFromTransactions(
+      expenseTxns,
+      categoryMap,
+      l1CategoryId,
+    );
 
     // 5. Descriptive average per window-day (never a target — D-03).
     final dayCount = _inclusiveDayCount(startDate, endDate);

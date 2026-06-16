@@ -105,6 +105,7 @@ void main() {
     required String categoryId,
     required DateTime timestamp,
     String ledgerType = 'daily',
+    String type = 'expense',
     String? prevHash,
   }) async {
     await transactionDao.insertTransaction(
@@ -112,7 +113,7 @@ void main() {
       bookId: 'book1',
       deviceId: 'dev1',
       amount: amount,
-      type: 'expense',
+      type: type,
       categoryId: categoryId,
       ledgerType: ledgerType,
       timestamp: timestamp,
@@ -285,6 +286,57 @@ void main() {
       // Descriptive average only — never a target/goal.
       expect(result.avgPerDay, 90000 ~/ 31);
     });
+
+    test(
+      'excludes non-expense (income/transfer) txns filed under the L1 so the '
+      'drill subtotal equals the expense-only donut slice (D-11 / CR-01)',
+      () async {
+        // Expense filed on the target L1.
+        await seedTx(
+          id: 'tx_expense_food',
+          amount: 50000,
+          categoryId: 'l1_food',
+          timestamp: DateTime(2026, 5, 10, 9),
+        );
+        // INCOME (e.g. a refund) filed on the SAME L1. The OVW-01 donut is
+        // expense-only (getCategoryTotals/getLedgerTotals default to
+        // type='expense'), and Category carries no income/expense discriminator,
+        // so this row MUST NOT contribute to the drill subtotal/count or appear
+        // in the transaction list — otherwise the donut↔drill single-source
+        // invariant (D-11) breaks.
+        await seedTx(
+          id: 'tx_income_refund',
+          amount: 20000,
+          categoryId: 'l1_food',
+          timestamp: DateTime(2026, 5, 12, 9),
+          type: 'income',
+          prevHash: 'hash_tx_expense_food',
+        );
+        // A transfer filed on the L2 child — likewise excluded.
+        await seedTx(
+          id: 'tx_transfer_dining',
+          amount: 13000,
+          categoryId: 'l2_dining',
+          timestamp: DateTime(2026, 5, 13, 9),
+          type: 'transfer',
+          prevHash: 'hash_tx_income_refund',
+        );
+
+        final result = await useCase.execute(
+          bookIds: ['book1'],
+          startDate: windowStart,
+          endDate: windowEnd,
+          l1CategoryId: 'l1_food',
+        );
+
+        // Expense-only: the income refund and transfer are excluded.
+        expect(result.subtotal, 50000);
+        expect(result.count, 1);
+        expect(result.transactions.map((t) => t.id).toSet(), {
+          'tx_expense_food',
+        });
+      },
+    );
 
     test('includes both daily and joy ledger txns of the target L1', () async {
       await seedTx(
