@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
-stopped_at: Phase 44 context gathered — DRILL-01 (new thin GetCategoryDrillDownUseCase + CategoryDrillDown over findByBookIds, Dart-side L1 filter, no new index), TREND-01 (extend MonthlyTrend with daily/joy, 3 tabs, joy stays cross-period-free), OVW-01 (pure reuse, L1 rollup of categoryBreakdowns). schema stays v21.
-last_updated: "2026-06-16T14:14:48.000Z"
+stopped_at: "Completed 44-02-PLAN.md (TREND-01) — MonthlyTrend +dailyTotal/+joyTotal + GetExpenseTrendUseCase per-ledger fill, zero-default for zero-spend ledgers, no joy delta, schema v21. Next: 44-03 (DRILL-01, Wave 2)."
+last_updated: "2026-06-16T14:30:05.502Z"
 last_activity: 2026-06-16 -- Phase 44 Plan 02 executed (TREND-01)
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 10
-  completed_plans: 9
-  percent: 22
+  completed_plans: 10
+  percent: 40
 ---
 
 # Project State
@@ -157,7 +157,7 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-16T14:14:48.000Z
+Last session: 2026-06-16T14:29:51.239Z
 Stopped at: Completed 44-02-PLAN.md (TREND-01) — MonthlyTrend +dailyTotal/+joyTotal + GetExpenseTrendUseCase per-ledger fill, zero-default for zero-spend ledgers, no joy delta, schema v21. Next: 44-03 (DRILL-01, Wave 2).
 Resume file: .planning/phases/44-data-use-case-additions-reuse-first/44-CONTEXT.md
 
@@ -175,6 +175,7 @@ Resume file: .planning/phases/44-data-use-case-additions-reuse-first/44-CONTEXT.
 | Phase 43-html-design-gate-no-production-code P07 | 5min | 2 tasks | 4 files |
 | Phase 44 P01 | 12min | 1 tasks | 3 files |
 | Phase 44 P02 | 12min | 2 tasks | 6 files |
+| Phase 44 P03 | 9min | 3 tasks | 8 files |
 
 ## Decisions
 
@@ -194,6 +195,8 @@ Resume file: .planning/phases/44-data-use-case-additions-reuse-first/44-CONTEXT.
 - [Phase ?]: [44-01]: the LOCKED helper category_l1_rollup.dart lives in the feature domain/ root governed by a DENY-ONLY import_guard.yaml (no allow block, per domain_import_rules_test.dart); domain→domain imports pass (no deny match, verified via custom_lint). Both rollup entrypoints route through ONE l1AncestorOf rule so donut==drill (D-11)
 - [Phase 44]: [44-02]: TREND-01 implemented as extend-in-place (D-07/D-08) — MonthlyTrend +dailyTotal/+joyTotal and GetExpenseTrendUseCase's existing 6-month loop adds one per-month getLedgerTotals call (same window as getMonthlyTotals), NOT a new query/family/DAO. So ONE trend provider family can drive all three tabs (总支出/日常/悦己).
 - [Phase 44]: [44-02]: in-loop getLedgerTotals chosen over a new getMonthlyLedgerTotals repo method (planner discretion per D-08/RESEARCH Flag C — both migration-free; in-loop adds zero repo surface). Zero-default daily/joy extraction copied from get_monthly_report_use_case.dart (Pitfall 1 — getLedgerTotals omits zero-spend ledger rows). No joy cross-period delta (D-09); schema stays v21 (D-13).
+- [Phase ?]: 44-03: Category drill-down subtotal/count sourced from Plan 01 l1RollupFromTransactions (D-11 single source — drill header cannot drift from donut slice)
+- [Phase ?]: 44-03: drill path reuses findByBookIds + Dart-side l1AncestorOf filter — zero new DAO/index/migration, schema stays v21 (D-04/D-05/D-06/D-13)
 
 ## Operator Next Steps
 

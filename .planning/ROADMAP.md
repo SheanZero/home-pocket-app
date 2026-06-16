@@ -129,7 +129,7 @@
 **Phase numbering:** Continues from v1.7's Phase 42 → v1.8 = Phases 43-47.
 
 - [x] **Phase 43: HTML 设计探索关卡 (Design Gate — NO production code)** — 现状深研图 + ≥3 套 HTML 方向（各带 ADR-012 自审表）+ 讨论选定一案 + 新 ADR go/no-go + 词表锁定 + fl_chart 1.2.0 affordance 校验；关卡出口 = 用户批准 (completed 2026-06-16)
-- [ ] **Phase 44: 数据与用例补全 (Data / Use-Case Additions — reuse-first)** — 复用优先确认现状 reuse 图；按选定方向至多新增一条只读「分类下钻」路径（无预算、无 Drift 迁移）；窗口边界经 `DateBoundaries`/`TimeWindow` 规范化
+- [x] **Phase 44: 数据与用例补全 (Data / Use-Case Additions — reuse-first)** — 复用优先确认现状 reuse 图；按选定方向至多新增一条只读「分类下钻」路径（无预算、无 Drift 迁移）；窗口边界经 `DateBoundaries`/`TimeWindow` 规范化 (completed 2026-06-16)
 - [ ] **Phase 45: 展示外壳重建 (Presentation Shell Rebuild)** — 瘦身 `analytics_screen.dart` 外壳 + 数据驱动 `_refresh()` + `widgets/cards/` 卡片体系；HomeHero 隔离由结构保证（不读/不失效任何 `home/*` provider）
 - [ ] **Phase 46: 卡片体系 (Cards)** — 总览 / 趋势 / 分类下钻 / 悦己×4 / 故事卡，复用既有 chart widget + fl_chart 1.2.0 原生 label（删除直方图 Stack hack）；情感化呈现「已花悦己」满足感，全程反游戏化
 - [ ] **Phase 47: i18n + 反毒性扫描 + macOS golden 重基线 + 全量门禁 + UAT** — 三语 ARB parity；每张新卡加入 `anti_toxicity_*_test` 禁词扫描；macOS golden 从零撰写/重基线；全量 `flutter test` 作为逐波门禁；真机视觉 UAT
@@ -193,7 +193,7 @@
 
 **Wave 2** *(blocked on 44-01 — drill 小结复用其 rollup helper)*
 
-- [ ] 44-03-PLAN.md — TDD-first 分类下钻：`CategoryDrillDown` + `GetCategoryDrillDownUseCase`（走 `findByBookIds` + Dart 侧 L1 过滤）+ auto-dispose drill family（DRILL-01；无新 DAO/索引/迁移）
+- [x] 44-03-PLAN.md — TDD-first 分类下钻：`CategoryDrillDown` + `GetCategoryDrillDownUseCase`（走 `findByBookIds` + Dart 侧 L1 过滤）+ auto-dispose drill family（DRILL-01；无新 DAO/索引/迁移）
 
 ### Phase 45: 展示外壳重建 (Presentation Shell Rebuild)
 

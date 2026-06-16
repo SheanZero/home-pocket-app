@@ -35,7 +35,7 @@ Requirements for this milestone (v1.8). Each maps to a roadmap phase.
 
 ### Category Drill-down (分类下钻)
 
-- [ ] **DRILL-01**: Tapping a category (in the donut / category breakdown) drills into that category's transactions for the active window, reusing the v1.4 `GetListTransactionsUseCase` filter path (or one thin read-only path if the design requires it)
+- [x] **DRILL-01**: Tapping a category (in the donut / category breakdown) drills into that category's transactions for the active window, reusing the v1.4 `GetListTransactionsUseCase` filter path (or one thin read-only path if the design requires it)
 
 ### Joy Emotional Surfaces (悦己情感化)
 
@@ -111,7 +111,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OVW-01 | Phase 44 | Complete |
 | OVW-02 | Phase 46 | Pending |
 | TREND-01 | Phase 44 | Pending |
-| DRILL-01 | Phase 44 | Pending |
+| DRILL-01 | Phase 44 | Complete |
 | JOY-01 | Phase 46 | Pending |
 | JOY-02 | Phase 46 | Pending |
 | JOY-03 | Phase 46 | Pending |
