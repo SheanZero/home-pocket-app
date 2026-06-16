@@ -184,7 +184,16 @@
   3. 若选定方向含下钻，存在至多一条新只读路径（`CategoryDrillDown` Freezed 模型 + `GetCategoryDrillDownUseCase` + `AnalyticsDao.getCategoryTransactions`，或复用 v1.4 `GetListTransactionsUseCase` 过滤路径），TDD 覆盖，并完成 `(book_id, category_id, timestamp)` 索引核查（DRILL-01）
   4. 所有新 provider 的 family key 经 `DateBoundaries`/`TimeWindow` 规范化后再进入 key tuple（避免 microsecond-exact provider rebuild storm）；Drift schema 保持 v21 不变
 
-**Plans**: TBD
+**Plans**: 3 plans in 2 waves
+
+**Wave 1** (parallel — no file overlap)
+
+- [ ] 44-01-PLAN.md — 共享 L1-rollup 纯 helper + 单测（OVW-01 唯一新代码；下钻小结复用同源）
+- [ ] 44-02-PLAN.md — `MonthlyTrend` +dailyTotal/+joyTotal + `GetExpenseTrendUseCase` per-ledger 扩展（TREND-01；零迁移、无 joy 跨期 delta）
+
+**Wave 2** *(blocked on 44-01 — drill 小结复用其 rollup helper)*
+
+- [ ] 44-03-PLAN.md — TDD-first 分类下钻：`CategoryDrillDown` + `GetCategoryDrillDownUseCase`（走 `findByBookIds` + Dart 侧 L1 过滤）+ auto-dispose drill family（DRILL-01；无新 DAO/索引/迁移）
 
 ### Phase 45: 展示外壳重建 (Presentation Shell Rebuild)
 
