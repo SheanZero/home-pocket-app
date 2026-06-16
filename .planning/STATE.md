@@ -4,8 +4,8 @@ milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: completed
 stopped_at: Phase 44 context gathered — DRILL-01 (new thin GetCategoryDrillDownUseCase + CategoryDrillDown over findByBookIds, Dart-side L1 filter, no new index), TREND-01 (extend MonthlyTrend with daily/joy, 3 tabs, joy stays cross-period-free), OVW-01 (pure reuse, L1 rollup of categoryBreakdowns). schema stays v21.
-last_updated: "2026-06-16T13:21:54.685Z"
-last_activity: 2026-06-16
+last_updated: "2026-06-16T13:57:32.761Z"
+last_activity: 2026-06-16 -- Phase 44 planning complete
 progress:
   total_phases: 5
   completed_phases: 1
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 Phase: 44
 Plan: Not started
 Status: Phase 43 done — GATE-03 selected round-5 B (M2-derived, user-approved), GATE-04 三决策文档 authored; gate-exit no-Dart condition holds (zero .dart/pubspec/lib/test). Next: Phase 44 数据与用例补全.
-Last activity: 2026-06-16
+Last activity: 2026-06-16 -- Phase 44 planning complete
 
 ### Quick Tasks Completed
 
