@@ -11,6 +11,8 @@ abstract class MonthlyTrend with _$MonthlyTrend {
     required int month,
     required int totalExpenses,
     required int totalIncome,
+    required int dailyTotal,
+    required int joyTotal,
   }) = _MonthlyTrend;
 
   factory MonthlyTrend.fromJson(Map<String, dynamic> json) =>

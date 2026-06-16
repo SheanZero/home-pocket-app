@@ -17,6 +17,8 @@ mixin _$MonthlyTrend {
   int get month;
   int get totalExpenses;
   int get totalIncome;
+  int get dailyTotal;
+  int get joyTotal;
 
   /// Create a copy of MonthlyTrend
   /// with the given fields replaced by the non-null parameter values.
@@ -41,17 +43,28 @@ mixin _$MonthlyTrend {
             (identical(other.totalExpenses, totalExpenses) ||
                 other.totalExpenses == totalExpenses) &&
             (identical(other.totalIncome, totalIncome) ||
-                other.totalIncome == totalIncome));
+                other.totalIncome == totalIncome) &&
+            (identical(other.dailyTotal, dailyTotal) ||
+                other.dailyTotal == dailyTotal) &&
+            (identical(other.joyTotal, joyTotal) ||
+                other.joyTotal == joyTotal));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, year, month, totalExpenses, totalIncome);
+  int get hashCode => Object.hash(
+    runtimeType,
+    year,
+    month,
+    totalExpenses,
+    totalIncome,
+    dailyTotal,
+    joyTotal,
+  );
 
   @override
   String toString() {
-    return 'MonthlyTrend(year: $year, month: $month, totalExpenses: $totalExpenses, totalIncome: $totalIncome)';
+    return 'MonthlyTrend(year: $year, month: $month, totalExpenses: $totalExpenses, totalIncome: $totalIncome, dailyTotal: $dailyTotal, joyTotal: $joyTotal)';
   }
 }
 
@@ -62,7 +75,14 @@ abstract mixin class $MonthlyTrendCopyWith<$Res> {
     $Res Function(MonthlyTrend) _then,
   ) = _$MonthlyTrendCopyWithImpl;
   @useResult
-  $Res call({int year, int month, int totalExpenses, int totalIncome});
+  $Res call({
+    int year,
+    int month,
+    int totalExpenses,
+    int totalIncome,
+    int dailyTotal,
+    int joyTotal,
+  });
 }
 
 /// @nodoc
@@ -81,6 +101,8 @@ class _$MonthlyTrendCopyWithImpl<$Res> implements $MonthlyTrendCopyWith<$Res> {
     Object? month = null,
     Object? totalExpenses = null,
     Object? totalIncome = null,
+    Object? dailyTotal = null,
+    Object? joyTotal = null,
   }) {
     return _then(
       _self.copyWith(
@@ -99,6 +121,14 @@ class _$MonthlyTrendCopyWithImpl<$Res> implements $MonthlyTrendCopyWith<$Res> {
         totalIncome: null == totalIncome
             ? _self.totalIncome
             : totalIncome // ignore: cast_nullable_to_non_nullable
+                  as int,
+        dailyTotal: null == dailyTotal
+            ? _self.dailyTotal
+            : dailyTotal // ignore: cast_nullable_to_non_nullable
+                  as int,
+        joyTotal: null == joyTotal
+            ? _self.joyTotal
+            : joyTotal // ignore: cast_nullable_to_non_nullable
                   as int,
       ),
     );
@@ -198,7 +228,14 @@ extension MonthlyTrendPatterns on MonthlyTrend {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(int year, int month, int totalExpenses, int totalIncome)?
+    TResult Function(
+      int year,
+      int month,
+      int totalExpenses,
+      int totalIncome,
+      int dailyTotal,
+      int joyTotal,
+    )?
     $default, {
     required TResult orElse(),
   }) {
@@ -210,6 +247,8 @@ extension MonthlyTrendPatterns on MonthlyTrend {
           _that.month,
           _that.totalExpenses,
           _that.totalIncome,
+          _that.dailyTotal,
+          _that.joyTotal,
         );
       case _:
         return orElse();
@@ -231,7 +270,14 @@ extension MonthlyTrendPatterns on MonthlyTrend {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(int year, int month, int totalExpenses, int totalIncome)
+    TResult Function(
+      int year,
+      int month,
+      int totalExpenses,
+      int totalIncome,
+      int dailyTotal,
+      int joyTotal,
+    )
     $default,
   ) {
     final _that = this;
@@ -242,6 +288,8 @@ extension MonthlyTrendPatterns on MonthlyTrend {
           _that.month,
           _that.totalExpenses,
           _that.totalIncome,
+          _that.dailyTotal,
+          _that.joyTotal,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -262,7 +310,14 @@ extension MonthlyTrendPatterns on MonthlyTrend {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(int year, int month, int totalExpenses, int totalIncome)?
+    TResult? Function(
+      int year,
+      int month,
+      int totalExpenses,
+      int totalIncome,
+      int dailyTotal,
+      int joyTotal,
+    )?
     $default,
   ) {
     final _that = this;
@@ -273,6 +328,8 @@ extension MonthlyTrendPatterns on MonthlyTrend {
           _that.month,
           _that.totalExpenses,
           _that.totalIncome,
+          _that.dailyTotal,
+          _that.joyTotal,
         );
       case _:
         return null;
@@ -288,6 +345,8 @@ class _MonthlyTrend implements MonthlyTrend {
     required this.month,
     required this.totalExpenses,
     required this.totalIncome,
+    required this.dailyTotal,
+    required this.joyTotal,
   });
   factory _MonthlyTrend.fromJson(Map<String, dynamic> json) =>
       _$MonthlyTrendFromJson(json);
@@ -300,6 +359,10 @@ class _MonthlyTrend implements MonthlyTrend {
   final int totalExpenses;
   @override
   final int totalIncome;
+  @override
+  final int dailyTotal;
+  @override
+  final int joyTotal;
 
   /// Create a copy of MonthlyTrend
   /// with the given fields replaced by the non-null parameter values.
@@ -324,17 +387,28 @@ class _MonthlyTrend implements MonthlyTrend {
             (identical(other.totalExpenses, totalExpenses) ||
                 other.totalExpenses == totalExpenses) &&
             (identical(other.totalIncome, totalIncome) ||
-                other.totalIncome == totalIncome));
+                other.totalIncome == totalIncome) &&
+            (identical(other.dailyTotal, dailyTotal) ||
+                other.dailyTotal == dailyTotal) &&
+            (identical(other.joyTotal, joyTotal) ||
+                other.joyTotal == joyTotal));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, year, month, totalExpenses, totalIncome);
+  int get hashCode => Object.hash(
+    runtimeType,
+    year,
+    month,
+    totalExpenses,
+    totalIncome,
+    dailyTotal,
+    joyTotal,
+  );
 
   @override
   String toString() {
-    return 'MonthlyTrend(year: $year, month: $month, totalExpenses: $totalExpenses, totalIncome: $totalIncome)';
+    return 'MonthlyTrend(year: $year, month: $month, totalExpenses: $totalExpenses, totalIncome: $totalIncome, dailyTotal: $dailyTotal, joyTotal: $joyTotal)';
   }
 }
 
@@ -347,7 +421,14 @@ abstract mixin class _$MonthlyTrendCopyWith<$Res>
   ) = __$MonthlyTrendCopyWithImpl;
   @override
   @useResult
-  $Res call({int year, int month, int totalExpenses, int totalIncome});
+  $Res call({
+    int year,
+    int month,
+    int totalExpenses,
+    int totalIncome,
+    int dailyTotal,
+    int joyTotal,
+  });
 }
 
 /// @nodoc
@@ -367,6 +448,8 @@ class __$MonthlyTrendCopyWithImpl<$Res>
     Object? month = null,
     Object? totalExpenses = null,
     Object? totalIncome = null,
+    Object? dailyTotal = null,
+    Object? joyTotal = null,
   }) {
     return _then(
       _MonthlyTrend(
@@ -385,6 +468,14 @@ class __$MonthlyTrendCopyWithImpl<$Res>
         totalIncome: null == totalIncome
             ? _self.totalIncome
             : totalIncome // ignore: cast_nullable_to_non_nullable
+                  as int,
+        dailyTotal: null == dailyTotal
+            ? _self.dailyTotal
+            : dailyTotal // ignore: cast_nullable_to_non_nullable
+                  as int,
+        joyTotal: null == joyTotal
+            ? _self.joyTotal
+            : joyTotal // ignore: cast_nullable_to_non_nullable
                   as int,
       ),
     );

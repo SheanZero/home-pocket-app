@@ -12,6 +12,8 @@ _MonthlyTrend _$MonthlyTrendFromJson(Map<String, dynamic> json) =>
       month: (json['month'] as num).toInt(),
       totalExpenses: (json['totalExpenses'] as num).toInt(),
       totalIncome: (json['totalIncome'] as num).toInt(),
+      dailyTotal: (json['dailyTotal'] as num).toInt(),
+      joyTotal: (json['joyTotal'] as num).toInt(),
     );
 
 Map<String, dynamic> _$MonthlyTrendToJson(_MonthlyTrend instance) =>
@@ -20,6 +22,8 @@ Map<String, dynamic> _$MonthlyTrendToJson(_MonthlyTrend instance) =>
       'month': instance.month,
       'totalExpenses': instance.totalExpenses,
       'totalIncome': instance.totalIncome,
+      'dailyTotal': instance.dailyTotal,
+      'joyTotal': instance.joyTotal,
     };
 
 _ExpenseTrendData _$ExpenseTrendDataFromJson(Map<String, dynamic> json) =>

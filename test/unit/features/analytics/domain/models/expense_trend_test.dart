@@ -9,25 +9,33 @@ void main() {
         month: 2,
         totalExpenses: 200000,
         totalIncome: 300000,
+        dailyTotal: 140000,
+        joyTotal: 60000,
       );
 
       expect(trend.year, 2026);
       expect(trend.month, 2);
       expect(trend.totalExpenses, 200000);
       expect(trend.totalIncome, 300000);
+      expect(trend.dailyTotal, 140000);
+      expect(trend.joyTotal, 60000);
     });
 
-    test('toJson and fromJson roundtrip', () {
+    test('toJson and fromJson roundtrip (incl. dailyTotal/joyTotal)', () {
       const original = MonthlyTrend(
         year: 2026,
         month: 2,
         totalExpenses: 200000,
         totalIncome: 300000,
+        dailyTotal: 140000,
+        joyTotal: 60000,
       );
 
       final json = original.toJson();
       final restored = MonthlyTrend.fromJson(json);
       expect(restored, original);
+      expect(restored.dailyTotal, 140000);
+      expect(restored.joyTotal, 60000);
     });
   });
 
@@ -45,18 +53,24 @@ void main() {
             month: 9,
             totalExpenses: 180000,
             totalIncome: 280000,
+            dailyTotal: 130000,
+            joyTotal: 50000,
           ),
           MonthlyTrend(
             year: 2025,
             month: 10,
             totalExpenses: 200000,
             totalIncome: 300000,
+            dailyTotal: 150000,
+            joyTotal: 50000,
           ),
           MonthlyTrend(
             year: 2025,
             month: 11,
             totalExpenses: 190000,
             totalIncome: 290000,
+            dailyTotal: 140000,
+            joyTotal: 50000,
           ),
         ],
       );
@@ -74,6 +88,8 @@ void main() {
             month: 12,
             totalExpenses: 200000,
             totalIncome: 300000,
+            dailyTotal: 150000,
+            joyTotal: 50000,
           ),
         ],
       );
