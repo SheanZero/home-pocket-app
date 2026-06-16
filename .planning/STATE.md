@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
-status: completed
+status: executing
 stopped_at: Phase 44 context gathered — DRILL-01 (new thin GetCategoryDrillDownUseCase + CategoryDrillDown over findByBookIds, Dart-side L1 filter, no new index), TREND-01 (extend MonthlyTrend with daily/joy, 3 tabs, joy stays cross-period-free), OVW-01 (pure reuse, L1 rollup of categoryBreakdowns). schema stays v21.
-last_updated: "2026-06-16T13:57:32.761Z"
-last_activity: 2026-06-16 -- Phase 44 planning complete
+last_updated: "2026-06-16T14:11:18.691Z"
+last_activity: 2026-06-16 -- Phase 44 execution started
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 10
+  completed_plans: 8
   percent: 20
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 
 **Core value:** Family accounting app users can trust with sensitive financial data — local-first, end-to-end encrypted, dual-ledger system distinguishes 日常 (daily) spending from 悦己 (joy) spending so families can have honest money conversations
-**Current focus:** Phase 43 — html-design-gate-no-production-code
+**Current focus:** Phase 44 — data-use-case-additions-reuse-first
 
 ## Current Position
 
-Phase: 44
-Plan: Not started
-Status: Phase 43 done — GATE-03 selected round-5 B (M2-derived, user-approved), GATE-04 三决策文档 authored; gate-exit no-Dart condition holds (zero .dart/pubspec/lib/test). Next: Phase 44 数据与用例补全.
-Last activity: 2026-06-16 -- Phase 44 planning complete
+Phase: 44 (data-use-case-additions-reuse-first) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-06-16 -- Phase 44 execution started
 
 ### Quick Tasks Completed
 
@@ -157,7 +157,7 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-16T13:21:54.681Z
+Last session: 2026-06-16T14:11:12.299Z
 Stopped at: Phase 44 context gathered — DRILL-01 (new thin GetCategoryDrillDownUseCase + CategoryDrillDown over findByBookIds, Dart-side L1 filter, no new index), TREND-01 (extend MonthlyTrend with daily/joy, 3 tabs, joy stays cross-period-free), OVW-01 (pure reuse, L1 rollup of categoryBreakdowns). schema stays v21.
 Resume file: .planning/phases/44-data-use-case-additions-reuse-first/44-CONTEXT.md
 
@@ -173,6 +173,7 @@ Resume file: .planning/phases/44-data-use-case-additions-reuse-first/44-CONTEXT.
 | Phase 43-html-design-gate-no-production-code P05 | 4min | 2 tasks | 3 files |
 | Phase 43-html-design-gate-no-production-code P06 | 7min | 2 tasks | 3 files |
 | Phase 43-html-design-gate-no-production-code P07 | 5min | 2 tasks | 4 files |
+| Phase 44 P01 | 12min | 1 tasks | 3 files |
 
 ## Decisions
 
@@ -188,6 +189,8 @@ Resume file: .planning/phases/44-data-use-case-additions-reuse-first/44-CONTEXT.
 - [Phase ?]: 43-05: M4 温暖反思派 mock inverts the joy-led IA — emotional core (值得卡 + kakeibo Q4 反思 prompt + 满足度直方图) leads, practical 支出总览 recedes to a compact secondary strip; D-03 MID JOY-01 intensity = visual weight only (38px/confident sakura/soft glow), absolute Σ semantics unchanged (no ring); PRIMARY showcase of the kakeibo Q4 STATIC read-only reflection prompt (one values-affirming question, accepts NO input → no JOY-04 persistence, D-06); 满足度 = distribution+descriptive (no 超过上月/目标 8+); dark joy #E89BB0; ADR-012 self-audit PASS
 - [Phase 43]: 43-07: GATE-03 selected = round-5 B (M2-derived, NOT an original M1–M5 as-is) — user iterated from M2 base through rounds 2–5 and gave explicit approval (通过). D-11 reasoning: joy expressed descriptively (悦己花在哪 stacked bar + 满足度 distribution + 小确幸 calendar texture, celebrate-past, never goal-driven) / trend-on-top + sorted level-1 categories (practical) / joy side fully ambient (ADR-012-safe). GATE-04: (1) JOY-04 persistence ADR = NO-GO (D-06, static read-only → no persisted text → no encryption/ADR; v1.8 stays no-Drift); (2) NEW — expense-side 本月vs上月 trend (总支出/日常 tabs) is a documented user-approved ADR-012 §4 carve-out (matches home 支出趋势, neutral labels) → requires an ADR-012 `## Update` amendment BEFORE Phase 45 (do not edit ADR-012 in this phase); joy-side cross-period prohibition stays ABSOLUTE. Emotion wordlist locked with calm-warm additions, target/目标 scoped analytics-only (HomeHero monthly_joy_target ambient ring stays legal per ADR-016 §3). fl_chart 1.2.0 per-chart table: donut/histogram/trend lines ✅ native (histogram removes Stack hack); 悦己 horizontal stacked bar ⚠ + 小确幸 calendar heatmap ❌ flagged Phase 46 risk (custom Row-flex / GridView, no fl_chart); Sankey excluded. Gate-exit no-Dart condition EMPTY (zero .dart/pubspec/lib/test). Phase 43 design gate CLOSED.
 - [Phase ?]: 43-06: M5 故事画报派 mock is the HIGHEST joy 浓度 (浓墨) — elevates best_joy_story_strip into a full editorial cover-story hero (pure-CSS warm imagery, NO external image), with a 悦己手记 narrative-recap digest and a high-intensity 值得 number; D-03 HIGH JOY-01 intensity = visual weight only (56px sakura→deep-rose gradient text, most prominent), absolute Σ semantics unchanged (no ring); story is narrative recap of EXISTING best-joy moment + already-spent joy categories, intro 「不排名次、不评高下」 — NEVER a 最棒分类 ranking / top-joy leaderboard (ADR-012 #6); practical 支出总览 compressed to minimal footer (expense-side only); kakeibo Q4 not shown (M4 owns it); dark joy #E89BB0; CSS badge→thumb to keep grep gate clean; heaviest-scrutiny ADR-012 self-audit PASS (Pitfall-1 seven signals all 否, zero ❌). All 5 mocks (M1–M5) now shipped.
+- [Phase ?]: [44-01]: L1CategoryRollup is a plain immutable class (const ctor + value equality), NOT Freezed — keeps the shared L1-rollup helper genuinely domain-pure (no build_runner / .freezed.dart / Flutter import)
+- [Phase ?]: [44-01]: the LOCKED helper category_l1_rollup.dart lives in the feature domain/ root governed by a DENY-ONLY import_guard.yaml (no allow block, per domain_import_rules_test.dart); domain→domain imports pass (no deny match, verified via custom_lint). Both rollup entrypoints route through ONE l1AncestorOf rule so donut==drill (D-11)
 
 ## Operator Next Steps
 
