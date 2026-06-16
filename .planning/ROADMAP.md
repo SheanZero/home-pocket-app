@@ -189,7 +189,7 @@
 **Wave 1** (parallel — no file overlap)
 
 - [x] 44-01-PLAN.md — 共享 L1-rollup 纯 helper + 单测（OVW-01 唯一新代码；下钻小结复用同源）
-- [ ] 44-02-PLAN.md — `MonthlyTrend` +dailyTotal/+joyTotal + `GetExpenseTrendUseCase` per-ledger 扩展（TREND-01；零迁移、无 joy 跨期 delta）
+- [x] 44-02-PLAN.md — `MonthlyTrend` +dailyTotal/+joyTotal + `GetExpenseTrendUseCase` per-ledger 扩展（TREND-01；零迁移、无 joy 跨期 delta）
 
 **Wave 2** *(blocked on 44-01 — drill 小结复用其 rollup helper)*
 

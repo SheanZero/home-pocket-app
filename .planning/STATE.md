@@ -4,14 +4,14 @@ milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
 stopped_at: Phase 44 context gathered — DRILL-01 (new thin GetCategoryDrillDownUseCase + CategoryDrillDown over findByBookIds, Dart-side L1 filter, no new index), TREND-01 (extend MonthlyTrend with daily/joy, 3 tabs, joy stays cross-period-free), OVW-01 (pure reuse, L1 rollup of categoryBreakdowns). schema stays v21.
-last_updated: "2026-06-16T14:11:18.691Z"
-last_activity: 2026-06-16 -- Phase 44 execution started
+last_updated: "2026-06-16T14:14:48.000Z"
+last_activity: 2026-06-16 -- Phase 44 Plan 02 executed (TREND-01)
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 10
-  completed_plans: 8
-  percent: 20
+  completed_plans: 9
+  percent: 22
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 ## Current Position
 
 Phase: 44 (data-use-case-additions-reuse-first) — EXECUTING
-Plan: 2 of 3
-Status: Ready to execute
-Last activity: 2026-06-16 -- Phase 44 execution started
+Plan: 3 of 3
+Status: Ready to execute (Plan 03 — DRILL-01; Wave 2, depends on 44-01)
+Last activity: 2026-06-16 -- Phase 44 Plan 02 executed (TREND-01)
 
 ### Quick Tasks Completed
 
@@ -157,8 +157,8 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-16T14:11:12.299Z
-Stopped at: Phase 44 context gathered — DRILL-01 (new thin GetCategoryDrillDownUseCase + CategoryDrillDown over findByBookIds, Dart-side L1 filter, no new index), TREND-01 (extend MonthlyTrend with daily/joy, 3 tabs, joy stays cross-period-free), OVW-01 (pure reuse, L1 rollup of categoryBreakdowns). schema stays v21.
+Last session: 2026-06-16T14:14:48.000Z
+Stopped at: Completed 44-02-PLAN.md (TREND-01) — MonthlyTrend +dailyTotal/+joyTotal + GetExpenseTrendUseCase per-ledger fill, zero-default for zero-spend ledgers, no joy delta, schema v21. Next: 44-03 (DRILL-01, Wave 2).
 Resume file: .planning/phases/44-data-use-case-additions-reuse-first/44-CONTEXT.md
 
 ## Performance Metrics
@@ -174,6 +174,7 @@ Resume file: .planning/phases/44-data-use-case-additions-reuse-first/44-CONTEXT.
 | Phase 43-html-design-gate-no-production-code P06 | 7min | 2 tasks | 3 files |
 | Phase 43-html-design-gate-no-production-code P07 | 5min | 2 tasks | 4 files |
 | Phase 44 P01 | 12min | 1 tasks | 3 files |
+| Phase 44 P02 | 12min | 2 tasks | 6 files |
 
 ## Decisions
 
@@ -191,6 +192,8 @@ Resume file: .planning/phases/44-data-use-case-additions-reuse-first/44-CONTEXT.
 - [Phase ?]: 43-06: M5 故事画报派 mock is the HIGHEST joy 浓度 (浓墨) — elevates best_joy_story_strip into a full editorial cover-story hero (pure-CSS warm imagery, NO external image), with a 悦己手记 narrative-recap digest and a high-intensity 值得 number; D-03 HIGH JOY-01 intensity = visual weight only (56px sakura→deep-rose gradient text, most prominent), absolute Σ semantics unchanged (no ring); story is narrative recap of EXISTING best-joy moment + already-spent joy categories, intro 「不排名次、不评高下」 — NEVER a 最棒分类 ranking / top-joy leaderboard (ADR-012 #6); practical 支出总览 compressed to minimal footer (expense-side only); kakeibo Q4 not shown (M4 owns it); dark joy #E89BB0; CSS badge→thumb to keep grep gate clean; heaviest-scrutiny ADR-012 self-audit PASS (Pitfall-1 seven signals all 否, zero ❌). All 5 mocks (M1–M5) now shipped.
 - [Phase ?]: [44-01]: L1CategoryRollup is a plain immutable class (const ctor + value equality), NOT Freezed — keeps the shared L1-rollup helper genuinely domain-pure (no build_runner / .freezed.dart / Flutter import)
 - [Phase ?]: [44-01]: the LOCKED helper category_l1_rollup.dart lives in the feature domain/ root governed by a DENY-ONLY import_guard.yaml (no allow block, per domain_import_rules_test.dart); domain→domain imports pass (no deny match, verified via custom_lint). Both rollup entrypoints route through ONE l1AncestorOf rule so donut==drill (D-11)
+- [Phase 44]: [44-02]: TREND-01 implemented as extend-in-place (D-07/D-08) — MonthlyTrend +dailyTotal/+joyTotal and GetExpenseTrendUseCase's existing 6-month loop adds one per-month getLedgerTotals call (same window as getMonthlyTotals), NOT a new query/family/DAO. So ONE trend provider family can drive all three tabs (总支出/日常/悦己).
+- [Phase 44]: [44-02]: in-loop getLedgerTotals chosen over a new getMonthlyLedgerTotals repo method (planner discretion per D-08/RESEARCH Flag C — both migration-free; in-loop adds zero repo surface). Zero-default daily/joy extraction copied from get_monthly_report_use_case.dart (Pitfall 1 — getLedgerTotals omits zero-spend ledger rows). No joy cross-period delta (D-09); schema stays v21 (D-13).
 
 ## Operator Next Steps
 
