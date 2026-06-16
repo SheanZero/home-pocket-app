@@ -70,6 +70,7 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     // ── Shadows ──
     required this.fabShadow,
     required this.navShadow,
+    required this.navInactive,
     // ── Joy card (satisfaction / ROI) ──
     required this.joyFullnessBg,
     required this.joyFullnessBorder,
@@ -178,6 +179,11 @@ final class AppPalette extends ThemeExtension<AppPalette> {
   final Color fabShadow;
   final Color navShadow;
 
+  /// Inactive bottom-nav tab tint — a pure neutral grey, deliberately distinct
+  /// from the green-tinted [textTertiary], so the unselected state reads as a
+  /// soft low-emphasis grey (COLOR-01: replaces raw literals in HomeBottomNavBar).
+  final Color navInactive;
+
   // ── Joy card ──
   final Color joyFullnessBg;
   final Color joyFullnessBorder;
@@ -268,6 +274,7 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     // Shadows
     fabShadow: Color(0x33D98CA0),
     navShadow: Color(0x08000000),
+    navInactive: Color(0xFFBDBDBD),
     // Joy card (sakura pink tints — joyRoi* stays green = success/ROI semantic)
     joyFullnessBg: Color(0xFFFBEAEF),
     joyFullnessBorder: Color(0xFFE7B9C6),
@@ -350,6 +357,7 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     // Shadows
     fabShadow: Color(0x33E09DB4),
     navShadow: Color(0x20000000),
+    navInactive: Color(0xFF8A8A8A),
     // Joy card (sakura pink dark tints — joyRoi* stays green = success/ROI semantic)
     joyFullnessBg: Color(0xFF2E1820),
     joyFullnessBorder: Color(0xFF4A2834),
@@ -421,6 +429,7 @@ final class AppPalette extends ThemeExtension<AppPalette> {
     Color? errorShadow,
     Color? fabShadow,
     Color? navShadow,
+    Color? navInactive,
     Color? joyFullnessBg,
     Color? joyFullnessBorder,
     Color? joyRoiBg,
@@ -484,6 +493,7 @@ final class AppPalette extends ThemeExtension<AppPalette> {
       errorShadow: errorShadow ?? this.errorShadow,
       fabShadow: fabShadow ?? this.fabShadow,
       navShadow: navShadow ?? this.navShadow,
+      navInactive: navInactive ?? this.navInactive,
       joyFullnessBg: joyFullnessBg ?? this.joyFullnessBg,
       joyFullnessBorder: joyFullnessBorder ?? this.joyFullnessBorder,
       joyRoiBg: joyRoiBg ?? this.joyRoiBg,
@@ -565,6 +575,7 @@ final class AppPalette extends ThemeExtension<AppPalette> {
       errorShadow: Color.lerp(errorShadow, other.errorShadow, t)!,
       fabShadow: Color.lerp(fabShadow, other.fabShadow, t)!,
       navShadow: Color.lerp(navShadow, other.navShadow, t)!,
+      navInactive: Color.lerp(navInactive, other.navInactive, t)!,
       joyFullnessBg: Color.lerp(joyFullnessBg, other.joyFullnessBg, t)!,
       joyFullnessBorder:
           Color.lerp(joyFullnessBorder, other.joyFullnessBorder, t)!,

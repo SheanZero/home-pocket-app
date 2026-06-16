@@ -41,11 +41,6 @@ class HomeBottomNavBar extends StatelessWidget {
     Icons.shopping_bag,
   ];
 
-  // Inactive tabs use a pure neutral grey (not the green-tinted textTertiary)
-  // so the unselected state reads as a soft, low-emphasis grey.
-  static const _inactiveColorLight = Color(0xFFBDBDBD);
-  static const _inactiveColorDark = Color(0xFF8A8A8A);
-
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
@@ -99,9 +94,9 @@ class HomeBottomNavBar extends StatelessWidget {
     final isActive = index == currentIndex;
 
     final activeColor = context.palette.accentPrimary;
-    final inactiveColor = Theme.of(context).brightness == Brightness.dark
-        ? _inactiveColorDark
-        : _inactiveColorLight;
+    // Pure neutral grey from the palette (light #BDBDBD / dark #8A8A8A) —
+    // resolved per-brightness by the theme extension (COLOR-01).
+    final inactiveColor = context.palette.navInactive;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
