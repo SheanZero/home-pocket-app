@@ -161,7 +161,7 @@
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 43-07-PLAN.md — Wave 3: GATE-03 选定一案（manual）→ GATE-04 三决策文档（ADR no-go / 词表 / fl_chart 校验）
+- [x] 43-07-PLAN.md — Wave 3: GATE-03 选定一案（round-5 B，M2 衍生）→ GATE-04 三决策文档（ADR no-go + 支出跨期 amendment / 词表 / fl_chart 校验）
 
 **Cross-cutting constraints:**
 
