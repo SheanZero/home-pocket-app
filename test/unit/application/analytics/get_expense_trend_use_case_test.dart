@@ -167,5 +167,96 @@ void main() {
       expect(result.months.last.totalExpenses, 50000);
       expect(result.months.last.totalIncome, 300000);
     });
+
+    test('fills per-ledger dailyTotal/joyTotal from seeded transactions', () async {
+      final anchor = DateTime(2026, 5, 15);
+
+      // Daily-ledger expense
+      await transactionDao.insertTransaction(
+        id: 'tx_daily',
+        bookId: 'book1',
+        deviceId: 'dev1',
+        amount: 40000,
+        type: 'expense',
+        categoryId: 'cat_food',
+        ledgerType: 'daily',
+        timestamp: anchor,
+        currentHash: 'hash_d',
+        createdAt: anchor,
+        entrySource: 'manual',
+      );
+
+      // Joy-ledger expense
+      await transactionDao.insertTransaction(
+        id: 'tx_joy',
+        bookId: 'book1',
+        deviceId: 'dev1',
+        amount: 15000,
+        type: 'expense',
+        categoryId: 'cat_food',
+        ledgerType: 'joy',
+        timestamp: anchor,
+        currentHash: 'hash_j',
+        prevHash: 'hash_d',
+        createdAt: anchor,
+        entrySource: 'manual',
+      );
+
+      final result = await useCase.execute(
+        bookId: 'book1',
+        anchor: anchor,
+        monthCount: 1,
+      );
+
+      final m = result.months.last;
+      expect(m.totalExpenses, 55000);
+      expect(m.dailyTotal, 40000);
+      expect(m.joyTotal, 15000);
+    });
+
+    test(
+      'defaults joyTotal to 0 for a daily-only month (Pitfall 1 zero-default)',
+      () async {
+        final anchor = DateTime(2026, 5, 15);
+
+        // Only a daily-ledger expense — getLedgerTotals returns NO joy row.
+        await transactionDao.insertTransaction(
+          id: 'tx_daily_only',
+          bookId: 'book1',
+          deviceId: 'dev1',
+          amount: 30000,
+          type: 'expense',
+          categoryId: 'cat_food',
+          ledgerType: 'daily',
+          timestamp: anchor,
+          currentHash: 'hash_do',
+          createdAt: anchor,
+          entrySource: 'manual',
+        );
+
+        final result = await useCase.execute(
+          bookId: 'book1',
+          anchor: anchor,
+          monthCount: 1,
+        );
+
+        final m = result.months.last;
+        expect(m.dailyTotal, 30000);
+        expect(m.joyTotal, 0);
+      },
+    );
+
+    test('defaults dailyTotal/joyTotal to 0 for an empty month', () async {
+      final result = await useCase.execute(
+        bookId: 'book1',
+        anchor: DateTime(2026, 5, 15),
+        monthCount: 2,
+      );
+
+      for (final month in result.months) {
+        expect(month.dailyTotal, 0);
+        expect(month.joyTotal, 0);
+      }
+    });
   });
 }

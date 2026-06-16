@@ -32,12 +32,37 @@ class GetExpenseTrendUseCase {
         entrySourceFilter: entrySourceFilter,
       );
 
+      // Per-ledger split via the existing primitive, using the SAME
+      // (startDate, endDate, entrySourceFilter) window as getMonthlyTotals
+      // (RESEARCH Flag C — never derive one across query boundaries).
+      final ledgerTotals = await _analyticsRepository.getLedgerTotals(
+        bookId: bookId,
+        startDate: startDate,
+        endDate: endDate,
+        entrySourceFilter: entrySourceFilter,
+      );
+
+      // Zero-default pre-initialization: getLedgerTotals omits zero-spend
+      // ledger rows, so a daily-only (or joy-only) month must still yield 0
+      // for the absent ledger (Pitfall 1).
+      int dailyTotal = 0;
+      int joyTotal = 0;
+      for (final lt in ledgerTotals) {
+        if (lt.ledgerType == 'daily') {
+          dailyTotal = lt.totalAmount;
+        } else if (lt.ledgerType == 'joy') {
+          joyTotal = lt.totalAmount;
+        }
+      }
+
       trends.add(
         MonthlyTrend(
           year: year,
           month: month,
           totalExpenses: totals.totalExpenses,
           totalIncome: totals.totalIncome,
+          dailyTotal: dailyTotal,
+          joyTotal: joyTotal,
         ),
       );
     }
