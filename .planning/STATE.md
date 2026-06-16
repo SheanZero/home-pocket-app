@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: completed
-stopped_at: "Completed 43-07-PLAN.md — Phase 43 design gate CLOSED. GATE-03 recorded selection = round-5 B (M2-derived), user-approved (通过); GATE-04 三决策文档 authored (ADR JOY-04 no-go + 支出跨期 ADR-012 amendment go / calm-warm 词表 with analytics-only target boundary / fl_chart 1.2.0 per-chart affordance table). Gate-exit no-Dart condition holds. Next: Phase 44 数据与用例补全."
-last_updated: "2026-06-16T12:52:23.922Z"
+stopped_at: Phase 44 context gathered — DRILL-01 (new thin GetCategoryDrillDownUseCase + CategoryDrillDown over findByBookIds, Dart-side L1 filter, no new index), TREND-01 (extend MonthlyTrend with daily/joy, 3 tabs, joy stays cross-period-free), OVW-01 (pure reuse, L1 rollup of categoryBreakdowns). schema stays v21.
+last_updated: "2026-06-16T13:21:54.685Z"
 last_activity: 2026-06-16
 progress:
   total_phases: 5
@@ -157,9 +157,9 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-16T12:45:00.000Z
-Stopped at: Completed 43-07-PLAN.md — Phase 43 design gate CLOSED. GATE-03 recorded selection = round-5 B (M2-derived), user-approved (通过); GATE-04 三决策文档 authored (ADR JOY-04 no-go + 支出跨期 ADR-012 amendment go / calm-warm 词表 with analytics-only target boundary / fl_chart 1.2.0 per-chart affordance table). Gate-exit no-Dart condition holds. Next: Phase 44 数据与用例补全.
-Resume file: None
+Last session: 2026-06-16T13:21:54.681Z
+Stopped at: Phase 44 context gathered — DRILL-01 (new thin GetCategoryDrillDownUseCase + CategoryDrillDown over findByBookIds, Dart-side L1 filter, no new index), TREND-01 (extend MonthlyTrend with daily/joy, 3 tabs, joy stays cross-period-free), OVW-01 (pure reuse, L1 rollup of categoryBreakdowns). schema stays v21.
+Resume file: .planning/phases/44-data-use-case-additions-reuse-first/44-CONTEXT.md
 
 ## Performance Metrics
 
