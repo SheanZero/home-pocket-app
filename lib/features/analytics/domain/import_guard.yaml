@@ -12,4 +12,7 @@ deny:
   - package:flutter/**
 
 inherit: true
-# NOTE: no `allow:` block — see models/import_guard.yaml and repositories/import_guard.yaml
+# NOTE: no `allow:` block — see models/import_guard.yaml and repositories/import_guard.yaml.
+# Files living directly in domain/ (e.g. category_l1_rollup.dart, Phase 44 D-11) are
+# governed by this deny-only config; their cross-feature domain→domain imports
+# (models/, accounting/domain/models/) match none of the deny patterns, so they pass.
