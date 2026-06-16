@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>统计 · R2-V3 丰富 · 浅色</title>
+<!--
+  ROUND 2 · V3「丰富」浅色稿 · 自包含（内联 style，离线可开，无外部 CSS/JS/字体 CDN/图片/网络）。
+  渲染共享示例数据（shared/sample-data.md）— 全部数字为虚构模拟，非真实账目。
+  派生自 m2-balanced/m2-light.html。R2 三套共享同一视觉系统（同 style token / 同卡片底盘 / 同页眉 / 同分类环 Hero / 同本月vs上月趋势）。
+  三套仅在「悦己 (joy) 图表浓度」上不同。本套 V3 = 丰富 / rich joy。
+
+  悦己浓度（V3）= V2 全部 + 悦己累计微曲线（单月，无目标线）+ 平均满意度 calm stat + 更丰富的悦己分类（小环 + 明细列表）：
+   · 满足度 1–10 直方图
+   · 悦己花在哪：小环 + 明细列表（更丰富的分类 breakdown）
+   · 小确幸日历热力（哪些天有悦己一刻；不计连续天数）
+   · 悦己占总支出比 ambient
+   · 悦己累计微曲线（单月累计，无目标线、无跨期对比）
+   · 满意度速览：中位 + 平均（calm 描述，无目标 8+、无跨期）
+
+  五条指令同 V1/V2：移除支出总览 KPI；分类环 Hero；移除值得卡与故事条；保留满足度直方图并加悦己图表；新增本月vs上月累计折线。
+
+  约束（ADR-012 反游戏化）：悦己侧 零跨期对比 / 零目标进度环 / 零排名 / 零连续打卡 / 零成就框定。
+  悦己累计微曲线 = 单月内累计的环境化走势，NO target line、NO 上月对照（区别于支出侧实用例外）。
+  分类 breakdown 仅按金额排布去向，不标「最棒分类 / 排名第一」。满意度速览仅描述中位与平均，无「目标 8+」。
+  支出侧「本月vs上月」趋势是用户批准的实用例外（与首页支出趋势对齐），保持中性描述。
+  不画入账侧 / 不画结余比率（范围勘误）。家庭数据仅聚合。
+  ADR-019 桜餅×若葉 浅色：bg #FBF7F4 / primary·daily #6FA36F·#5FAE72 dailyText #2E6B3A / joy 桜粉 #D98CA0 joyText #A53D5E / shared #5B8AC4。
+  金额 JPY ¥ 无小数，tabular。
+-->
+<style>
+  :root{
+    --bg:#FBF7F4; --card:#FFFFFF; --cream:#FFFAF6;
+    --ink:#20352B; --ink2:#71877A; --ink3:#A8BCB2;
+    --border:#E6DDD8; --divider:#EAE1DC; --borderList:#DDD4CE;
+    --primary:#6FA36F; --primaryLight:#EEF6EC; --primaryBorder:#CFE6CF;
+    --daily:#5FAE72; --dailyText:#2E6B3A; --dailyLight:#EEF6EC;
+    --joy:#D98CA0; --joyText:#A53D5E; --joyLight:#FBEAEF; --joyBorder:#EFC9D5;
+    --shared:#5B8AC4; --sharedText:#3A6396; --sharedLight:#E8EFF7; --sharedBorder:#CBDBEC;
+    --neutral:#B7AAA2; --neutralBg:#F1ECE8;
+    --cat-food:#5FAE72; --cat-house:#5B8AC4; --cat-transit:#86C79A; --cat-daily:#9FBF8A;
+    --cat-comm:#86A9D6; --cat-joy:#D98CA0; --cat-other:#C4B6AD;
+    /* 悦己分类 4 档桜粉色阶（小环 + 列表） */
+    --joy-a:#D98CA0; --joy-b:#E2A0B2; --joy-c:#EBB6C4; --joy-d:#F3CCD6;
+    --heat0:#F3ECEA; --heat1:#F4D2DC; --heat2:#E8A9BC; --heat3:#D98CA0;
+    --shadow:0 1px 2px rgba(50,40,35,.05),0 6px 18px rgba(50,40,35,.05);
+    --shadowHero:0 2px 4px rgba(50,40,35,.05),0 14px 34px rgba(94,60,72,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans CJK SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.5}
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;letter-spacing:.01em}
+  .wrap{max-width:430px;margin:0 auto;padding:0 16px 96px}
+
+  .topbar{position:sticky;top:0;background:rgba(251,247,244,.92);backdrop-filter:blur(8px);
+    padding:14px 4px 10px;display:flex;align-items:baseline;justify-content:space-between;z-index:5;border-bottom:1px solid var(--divider)}
+  .topbar h1{font-size:19px;font-weight:700;letter-spacing:.02em}
+  .window{font-size:12.5px;color:var(--ink2);background:var(--card);border:1px solid var(--border);
+    border-radius:999px;padding:5px 11px;display:inline-flex;gap:6px;align-items:center}
+  .window .chev{color:var(--ink3);font-size:11px}
+
+  .sect-h{font-size:12px;color:var(--ink2);font-weight:600;letter-spacing:.08em;
+    margin:26px 4px 10px;display:flex;align-items:center;gap:7px}
+  .sect-h::before{content:"";width:3px;height:13px;border-radius:2px;background:var(--primary)}
+  .sect-h.joy::before{background:var(--joy)}
+  .sect-h .tag{margin-left:auto;font-size:10.5px;font-weight:600;letter-spacing:.04em;
+    color:var(--ink3);background:var(--neutralBg);border-radius:6px;padding:2px 8px}
+  .sect-h.joy .tag{color:var(--joyText);background:var(--joyLight)}
+  .sect-h.prac .tag{color:var(--dailyText);background:var(--dailyLight)}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;
+    padding:18px 16px;box-shadow:var(--shadow)}
+  .card + .card{margin-top:12px}
+
+  /* ════ 分类支出 Hero 环 ════ */
+  .hero{background:radial-gradient(120% 120% at 50% 0%,#FFFDFB 0%,var(--card) 60%);
+    border:1px solid var(--border);border-radius:22px;padding:22px 18px 18px;box-shadow:var(--shadowHero);position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(80% 60% at 50% -10%,rgba(217,140,160,.06),transparent 70%)}
+  .hero-top{display:flex;align-items:center;justify-content:space-between;position:relative}
+  .hero-cap{font-size:13px;font-weight:700;letter-spacing:.02em}
+  .hero-tag{font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--dailyText);background:var(--dailyLight);border-radius:7px;padding:3px 9px}
+  .ring-wrap{display:flex;justify-content:center;margin:18px 0 8px;position:relative}
+  .ring{position:relative;width:208px;height:208px}
+  .ring svg{transform:rotate(-90deg);display:block;filter:drop-shadow(0 4px 10px rgba(94,60,72,.07))}
+  .ring .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .ring .ctr .k{font-size:11px;color:var(--ink2);font-weight:600;letter-spacing:.04em}
+  .ring .ctr .v{font-size:31px;font-weight:800;letter-spacing:-.01em;margin-top:2px;line-height:1.02}
+  .ring .ctr .n{font-size:10.5px;color:var(--ink3);margin-top:3px}
+  .ring .ctr .splitline{margin-top:9px;display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700}
+  .ring .ctr .splitline .d{color:var(--dailyText)} .ring .ctr .splitline .j{color:var(--joyText)}
+  .ring .ctr .splitline i{width:4px;height:4px;border-radius:50%;background:var(--ink3);font-style:normal}
+
+  .hero-legend{display:flex;flex-direction:column;gap:0;margin-top:10px}
+  .hl{display:flex;align-items:center;gap:11px;padding:9px 4px;border-bottom:1px solid var(--divider)}
+  .hl:last-child{border-bottom:0}
+  .hl .dot{width:11px;height:11px;border-radius:4px;flex:0 0 auto}
+  .hl .nm{font-size:13px;font-weight:600;color:var(--ink)}
+  .hl .ledger{font-size:10px;font-weight:600;color:var(--ink3);margin-left:5px}
+  .hl .amt{margin-left:auto;font-size:13px;font-weight:700;text-align:right}
+  .hl .pct{font-size:11px;color:var(--ink2);font-weight:600;width:46px;text-align:right}
+
+  /* ════ 本月 vs 上月 支出趋势 ════ */
+  .trend-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .trend-legend{display:flex;gap:14px}
+  .tl{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);font-weight:600}
+  .tl .ln{width:16px;height:0;border-top:3px solid var(--primary);border-radius:2px}
+  .tl.prev .ln{border-top-style:dashed;border-color:var(--neutral)}
+  .tl .v{color:var(--ink);font-weight:700}
+  .chart{position:relative;margin-top:6px}
+  .chart svg{display:block;width:100%;height:auto;overflow:visible}
+  .chart .ylab{font-size:9.5px;fill:var(--ink3);font-weight:600}
+  .chart .xlab{font-size:10px;fill:var(--ink2);font-weight:600;text-anchor:middle}
+  .chart .gridline{stroke:var(--divider);stroke-width:1}
+  .chart .axis{stroke:var(--borderList);stroke-width:1}
+  .trend-cap{font-size:11px;color:var(--ink3);margin-top:11px;text-align:center;line-height:1.5}
+
+  /* ════ 满足度直方图 ════ */
+  .histo{display:flex;align-items:flex-end;justify-content:space-between;gap:5px;height:118px;padding:14px 2px 0}
+  .histo .b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .histo .bar{width:100%;max-width:22px;border-radius:5px 5px 2px 2px;
+    background:linear-gradient(180deg,var(--joy),#E7A6B6);position:relative}
+  .histo .bar.zero{background:var(--neutralBg);height:3px !important}
+  .histo .cnt{position:absolute;top:-15px;left:0;right:0;text-align:center;font-size:10px;color:var(--joyText);font-weight:700}
+  .histo .x{margin-top:6px;font-size:10.5px;color:var(--ink2);font-weight:600}
+  .histo .b.med .bar{outline:2px solid var(--joyBorder);outline-offset:1px}
+  .histo-foot{display:flex;align-items:center;justify-content:space-between;margin-top:14px;font-size:11px;color:var(--ink2)}
+  .histo-foot .med-pill{background:var(--joyLight);color:var(--joyText);border-radius:7px;padding:3px 9px;font-weight:600}
+  .histo-cap{font-size:11px;color:var(--ink3);margin-top:9px;line-height:1.55}
+
+  /* ════ 满意度速览：中位 + 平均（calm，无目标）════ */
+  .satrow{display:flex;gap:11px}
+  .satrow .stat{flex:1;background:var(--joyLight);border:1px solid var(--joyBorder);border-radius:13px;padding:13px 14px;text-align:center}
+  .satrow .stat .sv{font-size:25px;font-weight:800;color:var(--joyText);line-height:1}
+  .satrow .stat .sk{font-size:10.5px;color:var(--ink2);font-weight:600;margin-top:4px}
+  .satrow .stat .ss{font-size:9.5px;color:var(--ink3);margin-top:2px}
+  .sat-note{font-size:11px;color:var(--ink3);margin-top:12px;line-height:1.55}
+
+  /* ════ 悦己花在哪：小环 + 明细列表（richer breakdown）════ */
+  .jdonut-row{display:flex;gap:18px;align-items:center}
+  .jdonut{flex:0 0 124px;position:relative;width:124px;height:124px}
+  .jdonut svg{transform:rotate(-90deg);display:block}
+  .jdonut .jc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .jdonut .jc .jk{font-size:9.5px;color:var(--ink2);font-weight:600}
+  .jdonut .jc .jv{font-size:17px;font-weight:800;color:var(--joyText);margin-top:1px}
+  .jdonut .jc .jn{font-size:9px;color:var(--ink3);margin-top:1px}
+  .jlist{flex:1;display:flex;flex-direction:column;gap:0}
+  .jli{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--divider)}
+  .jli:last-child{border-bottom:0}
+  .jli .jdot{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+  .jli .jnm{font-size:12.5px;font-weight:600}
+  .jli .jamt{margin-left:auto;font-size:12px;font-weight:700;color:var(--joyText)}
+  .jli .jpct{font-size:10.5px;color:var(--ink2);font-weight:600;width:42px;text-align:right}
+  .jdetail{margin-top:14px;display:flex;flex-direction:column;gap:11px;padding-top:14px;border-top:1px solid var(--divider)}
+  .jd{display:flex;flex-direction:column;gap:5px}
+  .jd-top{display:flex;align-items:center;gap:9px}
+  .jd-ic{width:24px;height:24px;border-radius:8px;background:var(--joyLight);display:flex;align-items:center;justify-content:center;font-size:13px;flex:0 0 auto}
+  .jd-nm{font-size:12.5px;font-weight:600}
+  .jd-sub{font-size:10.5px;color:var(--ink3);margin-left:6px;font-weight:500}
+  .jd-amt{margin-left:auto;font-size:12px;font-weight:700;color:var(--joyText)}
+  .jd-track{height:7px;border-radius:5px;background:var(--joyLight);overflow:hidden}
+  .jd-fill{height:100%;border-radius:5px}
+  .joybar-cap{font-size:11px;color:var(--ink3);margin-top:14px;line-height:1.55}
+
+  /* ════ 小确幸日历热力 ════ */
+  .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding-top:4px}
+  .cal .wd{font-size:10px;color:var(--ink3);font-weight:700;text-align:center;padding-bottom:2px}
+  .cal .cell{aspect-ratio:1/1;border-radius:8px;background:var(--heat0);position:relative;
+    display:flex;align-items:flex-start;justify-content:flex-end}
+  .cal .cell.h1{background:var(--heat1)} .cal .cell.h2{background:var(--heat2)} .cal .cell.h3{background:var(--heat3)}
+  .cal .cell.empty{background:transparent}
+  .cal .cell .dn{font-size:8.5px;font-weight:700;color:var(--ink3);padding:3px 4px 0 0;line-height:1}
+  .cal .cell.h2 .dn,.cal .cell.h3 .dn{color:#fff}
+  .cal .cell.h1 .dn{color:var(--joyText)}
+  .cal-legend{display:flex;align-items:center;gap:7px;margin-top:14px;font-size:10.5px;color:var(--ink2)}
+  .cal-legend .scale{display:flex;gap:4px;margin:0 3px}
+  .cal-legend .sw{width:13px;height:13px;border-radius:4px}
+  .cal-cap{font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.55}
+
+  /* ════ 悦己占比 ambient ════ */
+  .share{display:flex;align-items:center;gap:16px}
+  .share .big{flex:0 0 auto;text-align:center}
+  .share .big .pv{font-size:34px;font-weight:800;color:var(--joyText);line-height:1}
+  .share .big .pk{font-size:10.5px;color:var(--ink3);margin-top:3px;font-weight:600}
+  .share .body{flex:1;min-width:0}
+  .share .sbar{height:12px;border-radius:7px;overflow:hidden;display:flex;background:var(--neutralBg)}
+  .share .sbar .jseg{background:linear-gradient(90deg,var(--joy),#E7A6B6)}
+  .share .sbar .dseg{background:var(--dailyLight)}
+  .share .scap{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--ink2);font-weight:600}
+  .share .scap .j{color:var(--joyText)}
+  .share-note{font-size:11px;color:var(--ink3);margin-top:13px;line-height:1.55}
+
+  /* ════ 悦己累计微曲线（单月，无目标线、无跨期）════ */
+  .jcurve{position:relative;margin-top:2px}
+  .jcurve svg{display:block;width:100%;height:auto;overflow:visible}
+  .jcurve .jxlab{font-size:9.5px;fill:var(--ink3);font-weight:600;text-anchor:middle}
+  .jcurve .jgrid{stroke:var(--joyLight);stroke-width:1}
+  .jcurve-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+  .jcurve-head .lab{font-size:12px;color:var(--ink2);font-weight:600}
+  .jcurve-head .end{font-size:14px;font-weight:800;color:var(--joyText)}
+  .jcurve-cap{font-size:11px;color:var(--ink3);margin-top:11px;line-height:1.55}
+
+  .footnote{font-size:10.5px;color:var(--ink3);text-align:center;margin-top:28px;line-height:1.7}
+  .badge-sim{display:inline-block;background:var(--neutralBg);color:var(--ink2);border-radius:6px;padding:2px 7px;font-size:10px;font-weight:600;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <h1>统计</h1>
+    <span class="window">2026 年 5 月 <span class="chev">▾</span></span>
+  </div>
+
+  <!-- ════════ 实用区 ════════ -->
+
+  <!-- (1) 分类支出 Hero 环 -->
+  <div class="sect-h prac">分类支出 <span class="tag">实用</span></div>
+  <div class="hero">
+    <div class="hero-top">
+      <div class="hero-cap">这个月，钱花在哪</div>
+      <span class="hero-tag">86 笔 · 5 月</span>
+    </div>
+
+    <div class="ring-wrap">
+      <div class="ring" aria-label="分类支出占比环形图（本月支出 ¥248,600）">
+        <svg viewBox="0 0 200 200" width="208" height="208">
+          <circle cx="100" cy="100" r="80" fill="none" stroke="#F1ECE8" stroke-width="26"></circle>
+          <circle cx="100" cy="100" r="80" fill="none" stroke="var(--cat-food)" stroke-width="26"
+            stroke-dasharray="158.3 344.3" stroke-dashoffset="0" stroke-linecap="butt"></circle>
+          <circle cx="100" cy="100" r="80" fill="none" stroke="var(--cat-house)" stroke-width="26"
+            stroke-dasharray="125.2 377.5" stroke-dashoffset="-158.3"></circle>
+          <circle cx="100" cy="100" r="80" fill="none" stroke="var(--cat-transit)" stroke-width="26"
+            stroke-dasharray="44.2 458.4" stroke-dashoffset="-283.5"></circle>
+          <circle cx="100" cy="100" r="80" fill="none" stroke="var(--cat-daily)" stroke-width="26"
+            stroke-dasharray="37.2 465.5" stroke-dashoffset="-327.7"></circle>
+          <circle cx="100" cy="100" r="80" fill="none" stroke="var(--cat-comm)" stroke-width="26"
+            stroke-dasharray="22.6 480.0" stroke-dashoffset="-364.9"></circle>
+          <circle cx="100" cy="100" r="80" fill="none" stroke="var(--cat-joy)" stroke-width="26"
+            stroke-dasharray="95.5 407.2" stroke-dashoffset="-387.5"></circle>
+          <circle cx="100" cy="100" r="80" fill="none" stroke="var(--cat-other)" stroke-width="26"
+            stroke-dasharray="19.6 483.1" stroke-dashoffset="-483.1"></circle>
+        </svg>
+        <div class="ctr">
+          <div class="k">本月支出</div>
+          <div class="v num">¥248,600</div>
+          <div class="n num">86 笔</div>
+          <div class="splitline">
+            <span class="d num">日常 81%</span><i></i><span class="j num">悦己 19%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-legend">
+      <div class="hl"><span class="dot" style="background:var(--cat-food)"></span><span class="nm">饮食<span class="ledger">日常</span></span><span class="amt num">¥78,300</span><span class="pct num">31.5%</span></div>
+      <div class="hl"><span class="dot" style="background:var(--cat-house)"></span><span class="nm">住居<span class="ledger">日常</span></span><span class="amt num">¥62,000</span><span class="pct num">24.9%</span></div>
+      <div class="hl"><span class="dot" style="background:var(--cat-transit)"></span><span class="nm">交通<span class="ledger">日常</span></span><span class="amt num">¥21,800</span><span class="pct num">8.8%</span></div>
+      <div class="hl"><span class="dot" style="background:var(--cat-daily)"></span><span class="nm">日用品<span class="ledger">日常</span></span><span class="amt num">¥18,500</span><span class="pct num">7.4%</span></div>
+      <div class="hl"><span class="dot" style="background:var(--cat-comm)"></span><span class="nm">通信<span class="ledger">日常</span></span><span class="amt num">¥11,200</span><span class="pct num">4.5%</span></div>
+      <div class="hl"><span class="dot" style="background:var(--cat-joy)"></span><span class="nm">悦己合计<span class="ledger">悦己</span></span><span class="amt num" style="color:var(--joyText)">¥47,200</span><span class="pct num">19.0%</span></div>
+      <div class="hl"><span class="dot" style="background:var(--cat-other)"></span><span class="nm">其它<span class="ledger">余项</span></span><span class="amt num" style="color:var(--ink2)">¥9,600</span><span class="pct num">3.9%</span></div>
+    </div>
+  </div>
+
+  <!-- (2) 本月 vs 上月 支出趋势 -->
+  <div class="sect-h prac">支出趋势 <span class="tag">实用</span></div>
+  <div class="card">
+    <div class="trend-head">
+      <div class="trend-legend">
+        <span class="tl"><span class="ln"></span>本月 <span class="v num">¥248,600</span></span>
+        <span class="tl prev"><span class="ln"></span>上月 <span class="v num">¥232,000</span></span>
+      </div>
+    </div>
+    <div class="chart">
+      <svg viewBox="0 0 320 170" role="img" aria-label="本月与上月每日累计支出折线图">
+        <line class="gridline" x1="36" y1="140" x2="308" y2="140"></line>
+        <line class="gridline" x1="36" y1="92"  x2="308" y2="92"></line>
+        <line class="gridline" x1="36" y1="44"  x2="308" y2="44"></line>
+        <text class="ylab" x="32" y="143" text-anchor="end">¥0</text>
+        <text class="ylab" x="32" y="95"  text-anchor="end">¥100,000</text>
+        <text class="ylab" x="32" y="47"  text-anchor="end">¥200,000</text>
+
+        <polyline fill="none" stroke="var(--neutral)" stroke-width="2.4" stroke-dasharray="5 4"
+          stroke-linecap="round" stroke-linejoin="round"
+          points="36,140 96,114 165,84 235,57 308,28"></polyline>
+
+        <defs>
+          <linearGradient id="curfill_v3" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#6FA36F" stop-opacity="0.16"></stop>
+            <stop offset="1" stop-color="#6FA36F" stop-opacity="0"></stop>
+          </linearGradient>
+        </defs>
+        <path d="M36,140 L96,112 L165,80 L235,50 L308,19 L308,140 L36,140 Z" fill="url(#curfill_v3)"></path>
+        <polyline fill="none" stroke="var(--primary)" stroke-width="3"
+          stroke-linecap="round" stroke-linejoin="round"
+          points="36,140 96,112 165,80 235,50 308,19"></polyline>
+        <circle cx="96" cy="112" r="3.2" fill="#fff" stroke="var(--primary)" stroke-width="2.2"></circle>
+        <circle cx="165" cy="80" r="3.2" fill="#fff" stroke="var(--primary)" stroke-width="2.2"></circle>
+        <circle cx="235" cy="50" r="3.2" fill="#fff" stroke="var(--primary)" stroke-width="2.2"></circle>
+        <circle cx="308" cy="19" r="3.6" fill="var(--primary)" stroke="#fff" stroke-width="2"></circle>
+
+        <line class="axis" x1="36" y1="140" x2="308" y2="140"></line>
+        <text class="xlab" x="96"  y="156">7日</text>
+        <text class="xlab" x="165" y="156">14日</text>
+        <text class="xlab" x="235" y="156">21日</text>
+        <text class="xlab" x="305" y="156">28日</text>
+      </svg>
+    </div>
+    <div class="trend-cap">两条线均为「当月内累计支出」走势 · 实线本月、虚线上月 · 仅作同尺度参照</div>
+  </div>
+
+  <!-- ════════ 悦己区（V3 丰富：直方图 + 满意度速览 + 小环明细 + 日历热力 + 占比 + 累计微曲线）════════ -->
+
+  <!-- (3) 满足度直方图 -->
+  <div class="sect-h joy">悦己满足度分布 <span class="tag">悦己</span></div>
+  <div class="card">
+    <div class="histo" aria-label="悦己满足度 1-10 分布直方图">
+      <div class="b"><div class="bar zero"></div><div class="x num">1</div></div>
+      <div class="b"><div class="bar" style="height:11%"><div class="cnt num">1</div></div><div class="x num">2</div></div>
+      <div class="b"><div class="bar" style="height:11%"><div class="cnt num">1</div></div><div class="x num">3</div></div>
+      <div class="b"><div class="bar" style="height:22%"><div class="cnt num">2</div></div><div class="x num">4</div></div>
+      <div class="b"><div class="bar" style="height:22%"><div class="cnt num">2</div></div><div class="x num">5</div></div>
+      <div class="b"><div class="bar" style="height:34%"><div class="cnt num">3</div></div><div class="x num">6</div></div>
+      <div class="b med"><div class="bar" style="height:56%"><div class="cnt num">4</div></div><div class="x num">7</div></div>
+      <div class="b"><div class="bar" style="height:78%"><div class="cnt num">5</div></div><div class="x num">8</div></div>
+      <div class="b"><div class="bar" style="height:45%"><div class="cnt num">3</div></div><div class="x num">9</div></div>
+      <div class="b"><div class="bar" style="height:18%"><div class="cnt num">1</div></div><div class="x num">10</div></div>
+    </div>
+    <div class="histo-foot">
+      <span>22 笔悦己支出的满足度</span>
+      <span class="med-pill num">中位满足度 7</span>
+    </div>
+    <div class="histo-cap">大多落在中高位——为自己花的钱，多数让你感到值得，偶有几笔不那么满意，也都是真实的体验。</div>
+  </div>
+
+  <!-- (4) 满意度速览：中位 + 平均（calm 描述，无目标 8+、无跨期）-->
+  <div class="sect-h joy">满意度速览 <span class="tag">悦己</span></div>
+  <div class="card">
+    <div class="satrow">
+      <div class="stat">
+        <div class="sv num">7</div>
+        <div class="sk">中位满足度</div>
+        <div class="ss">一半的悦己 ≥ 7</div>
+      </div>
+      <div class="stat">
+        <div class="sv num">6.6</div>
+        <div class="sk">平均满足度</div>
+        <div class="ss">22 笔的平均</div>
+      </div>
+    </div>
+    <div class="sat-note">两个数都只是这个月的样子 · 没有「应该到几分」，也不和别的月比</div>
+  </div>
+
+  <!-- (5) 悦己花在哪：小环 + 明细（richer breakdown，无排名）-->
+  <div class="sect-h joy">悦己花在哪 <span class="tag">悦己</span></div>
+  <div class="card">
+    <div class="jdonut-row">
+      <div class="jdonut" aria-label="悦己分类构成环形图（悦己合计 ¥47,200）">
+        <svg viewBox="0 0 124 124" width="124" height="124">
+          <circle cx="62" cy="62" r="54" fill="none" stroke="var(--joyLight)" stroke-width="16"></circle>
+          <!-- 书籍·学习 34.7% -->
+          <circle cx="62" cy="62" r="54" fill="none" stroke="var(--joy-a)" stroke-width="16"
+            stroke-dasharray="117.9 221.4" stroke-dashoffset="0" stroke-linecap="butt"></circle>
+          <!-- 兴趣·爱好 31.6% -->
+          <circle cx="62" cy="62" r="54" fill="none" stroke="var(--joy-b)" stroke-width="16"
+            stroke-dasharray="107.1 232.2" stroke-dashoffset="-117.9"></circle>
+          <!-- 外出·体验 20.6% -->
+          <circle cx="62" cy="62" r="54" fill="none" stroke="var(--joy-c)" stroke-width="16"
+            stroke-dasharray="69.7 269.6" stroke-dashoffset="-225.0"></circle>
+          <!-- 美容·放松 13.1% -->
+          <circle cx="62" cy="62" r="54" fill="none" stroke="var(--joy-d)" stroke-width="16"
+            stroke-dasharray="44.6 294.7" stroke-dashoffset="-294.7"></circle>
+        </svg>
+        <div class="jc">
+          <div class="jk">悦己合计</div>
+          <div class="jv num">¥47,200</div>
+          <div class="jn num">22 笔</div>
+        </div>
+      </div>
+      <div class="jlist">
+        <div class="jli"><span class="jdot" style="background:var(--joy-a)"></span><span class="jnm">书籍·学习</span><span class="jamt num">¥16,400</span><span class="jpct num">34.7%</span></div>
+        <div class="jli"><span class="jdot" style="background:var(--joy-b)"></span><span class="jnm">兴趣·爱好</span><span class="jamt num">¥14,900</span><span class="jpct num">31.6%</span></div>
+        <div class="jli"><span class="jdot" style="background:var(--joy-c)"></span><span class="jnm">外出·体验</span><span class="jamt num">¥9,700</span><span class="jpct num">20.6%</span></div>
+        <div class="jli"><span class="jdot" style="background:var(--joy-d)"></span><span class="jnm">美容·放松</span><span class="jamt num">¥6,200</span><span class="jpct num">13.1%</span></div>
+      </div>
+    </div>
+
+    <div class="jdetail">
+      <div class="jd">
+        <div class="jd-top"><span class="jd-ic">📚</span><span class="jd-nm">书籍·学习</span><span class="jd-sub num">6 笔</span><span class="jd-amt num">¥16,400</span></div>
+        <div class="jd-track"><div class="jd-fill" style="width:100%;background:var(--joy-a)"></div></div>
+      </div>
+      <div class="jd">
+        <div class="jd-top"><span class="jd-ic">🎨</span><span class="jd-nm">兴趣·爱好</span><span class="jd-sub num">5 笔</span><span class="jd-amt num">¥14,900</span></div>
+        <div class="jd-track"><div class="jd-fill" style="width:91%;background:var(--joy-b)"></div></div>
+      </div>
+      <div class="jd">
+        <div class="jd-top"><span class="jd-ic">☕</span><span class="jd-nm">外出·体验</span><span class="jd-sub num">7 笔</span><span class="jd-amt num">¥9,700</span></div>
+        <div class="jd-track"><div class="jd-fill" style="width:59%;background:var(--joy-c)"></div></div>
+      </div>
+      <div class="jd">
+        <div class="jd-top"><span class="jd-ic">🌿</span><span class="jd-nm">美容·放松</span><span class="jd-sub num">4 笔</span><span class="jd-amt num">¥6,200</span></div>
+        <div class="jd-track"><div class="jd-fill" style="width:38%;background:var(--joy-d)"></div></div>
+      </div>
+    </div>
+    <div class="joybar-cap">这个月的悦己 ¥47,200 在这四处流转 · 仅呈现去向，不分高下、不设目标、不排名次</div>
+  </div>
+
+  <!-- (6) 小确幸日历热力 -->
+  <div class="sect-h joy">小确幸日历 <span class="tag">悦己</span></div>
+  <div class="card">
+    <div class="cal" aria-label="本月每天是否有悦己一刻的日历热力（颜色深浅=当天悦己笔数，非连续天数）">
+      <div class="wd">一</div><div class="wd">二</div><div class="wd">三</div><div class="wd">四</div><div class="wd">五</div><div class="wd">六</div><div class="wd">日</div>
+      <div class="cell empty"></div><div class="cell empty"></div><div class="cell empty"></div><div class="cell empty"></div>
+      <div class="cell"><span class="dn">1</span></div>
+      <div class="cell h1"><span class="dn">2</span></div>
+      <div class="cell"><span class="dn">3</span></div>
+      <div class="cell h2"><span class="dn">4</span></div>
+      <div class="cell"><span class="dn">5</span></div>
+      <div class="cell h1"><span class="dn">6</span></div>
+      <div class="cell"><span class="dn">7</span></div>
+      <div class="cell"><span class="dn">8</span></div>
+      <div class="cell h1"><span class="dn">9</span></div>
+      <div class="cell h2"><span class="dn">10</span></div>
+      <div class="cell"><span class="dn">11</span></div>
+      <div class="cell"><span class="dn">12</span></div>
+      <div class="cell h1"><span class="dn">13</span></div>
+      <div class="cell"><span class="dn">14</span></div>
+      <div class="cell"><span class="dn">15</span></div>
+      <div class="cell h1"><span class="dn">16</span></div>
+      <div class="cell"><span class="dn">17</span></div>
+      <div class="cell h3"><span class="dn">18</span></div>
+      <div class="cell h1"><span class="dn">19</span></div>
+      <div class="cell"><span class="dn">20</span></div>
+      <div class="cell h1"><span class="dn">21</span></div>
+      <div class="cell"><span class="dn">22</span></div>
+      <div class="cell h2"><span class="dn">23</span></div>
+      <div class="cell h1"><span class="dn">24</span></div>
+      <div class="cell"><span class="dn">25</span></div>
+      <div class="cell h1"><span class="dn">26</span></div>
+      <div class="cell"><span class="dn">27</span></div>
+      <div class="cell h2"><span class="dn">28</span></div>
+      <div class="cell"><span class="dn">29</span></div>
+      <div class="cell h1"><span class="dn">30</span></div>
+      <div class="cell h1"><span class="dn">31</span></div>
+    </div>
+    <div class="cal-legend">
+      <span>淡</span>
+      <span class="scale">
+        <span class="sw" style="background:var(--heat0)"></span>
+        <span class="sw" style="background:var(--heat1)"></span>
+        <span class="sw" style="background:var(--heat2)"></span>
+        <span class="sw" style="background:var(--heat3)"></span>
+      </span>
+      <span>浓</span>
+      <span style="margin-left:auto;color:var(--ink3)">颜色越浓 = 那天的悦己笔数越多</span>
+    </div>
+    <div class="cal-cap">这个月有 16 天，为自己留下了一点小确幸 · 只看「哪些天发生过」，不数连续、不比多少</div>
+  </div>
+
+  <!-- (7) 悦己占总支出比 ambient -->
+  <div class="sect-h joy">悦己占比 <span class="tag">悦己</span></div>
+  <div class="card">
+    <div class="share">
+      <div class="big">
+        <div class="pv num">19%</div>
+        <div class="pk">悦己 / 总支出</div>
+      </div>
+      <div class="body">
+        <div class="sbar">
+          <div class="jseg" style="width:19%"></div>
+          <div class="dseg" style="width:81%"></div>
+        </div>
+        <div class="scap"><span class="j num">悦己 ¥47,200</span><span class="num">日常 ¥201,400</span></div>
+      </div>
+    </div>
+    <div class="share-note">这个月，每花掉 5 块钱，大约有 1 块是为自己 · 只是这个月的一个样子，没有「该是多少」</div>
+  </div>
+
+  <!-- (8) 悦己累计微曲线 — 单月累计，无目标线、无跨期对比（与支出侧实用例外有别）-->
+  <div class="sect-h joy">悦己累计 <span class="tag">悦己</span></div>
+  <div class="card">
+    <div class="jcurve-head">
+      <span class="lab">这个月，悦己累计到</span>
+      <span class="end num">¥47,200</span>
+    </div>
+    <div class="jcurve">
+      <!-- 单月累计微曲线：x=日(0..31)，y=累计悦己¥(0..47200)。viewBox 256×72，绘图区 x[8..240] y[4..50]。无目标线、无上月线。 -->
+      <svg viewBox="0 0 256 84" role="img" aria-label="本月悦己支出单月累计微曲线（无目标线、无跨期对比）">
+        <line class="jgrid" x1="8" y1="50" x2="240" y2="50"></line>
+        <defs>
+          <linearGradient id="jfill_v3" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#D98CA0" stop-opacity="0.20"></stop>
+            <stop offset="1" stop-color="#D98CA0" stop-opacity="0"></stop>
+          </linearGradient>
+        </defs>
+        <path d="M8,50 L60.4,40.4 L112.8,28.9 L165.2,17.4 L217.5,7.2 L240,4 L240,50 L8,50 Z" fill="url(#jfill_v3)"></path>
+        <polyline fill="none" stroke="var(--joy)" stroke-width="2.6"
+          stroke-linecap="round" stroke-linejoin="round"
+          points="8,50 60.4,40.4 112.8,28.9 165.2,17.4 217.5,7.2 240,4"></polyline>
+        <circle cx="240" cy="4" r="3.4" fill="var(--joy)" stroke="#fff" stroke-width="1.8"></circle>
+        <line class="jgrid" x1="8" y1="50" x2="240" y2="50"></line>
+        <text class="jxlab" x="60.4"  y="66">7日</text>
+        <text class="jxlab" x="112.8" y="66">14日</text>
+        <text class="jxlab" x="165.2" y="66">21日</text>
+        <text class="jxlab" x="217.5" y="66">28日</text>
+      </svg>
+    </div>
+    <div class="jcurve-cap">单月内，悦己一点点累积的样子 · 月初从 0 起，没有目标线、不和上月比 · 只是记录已经发生的温柔</div>
+  </div>
+
+  <div class="footnote">
+    <span class="badge-sim">示例数据 · SIMULATED</span><br>
+    全部金额为虚构模拟，非任何真实用户的财务数据。<br>
+    本页仅呈现支出侧（范围勘误 · 详见共享示例数据）。
+  </div>
+
+</div>
+</body>
+</html>
