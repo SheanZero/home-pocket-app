@@ -188,11 +188,22 @@ class ExchangeRateCacheService {
   /// D-03 correctable proxy guard (RESEARCH.md Pitfall 4): a proxy row whose
   /// rate date is now historical and that has not been re-fetched today.
   /// After one re-fetch today, `fetchedAt >= today midnight` → no further loop.
+  ///
+  /// The guard is date-level, not instant-level: `today` is the local calendar
+  /// day stamped as UTC midnight (`_normalizeToUtcMidnight`). `fetchedAt` is
+  /// stored raw via `DateTime.now()` (a local wall-clock instant), so it MUST be
+  /// normalized to its own local calendar day before comparison — otherwise, in
+  /// any timezone east of UTC, a row fetched in the early-morning hours has an
+  /// absolute `fetchedAt` instant that precedes the UTC-midnight `today` and is
+  /// wrongly judged stale, re-fetching once per lookup every morning (the D-03
+  /// "no re-fetch loop" guarantee silently breaks for the UTC-offset window).
+  /// `.toLocal()` keeps this correct whether the row arrives local (in-memory)
+  /// or UTC (Drift round-trip); it is the inverse of the CR-02 `.toUtc()` trap.
   bool _isCorrectableProxy(ExchangeRate row) {
     final today = _normalizeToUtcMidnight(DateTime.now());
     return row.actualRateDate != null &&
         row.rateDate.isBefore(today) &&
-        row.fetchedAt.isBefore(today);
+        _normalizeToUtcMidnight(row.fetchedAt.toLocal()).isBefore(today);
   }
 
   /// D-09: drop rows older than 2 years on every successful upsert.
