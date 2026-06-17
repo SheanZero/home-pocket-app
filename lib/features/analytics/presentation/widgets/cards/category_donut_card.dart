@@ -137,6 +137,18 @@ class _DonutHero extends ConsumerWidget {
 
     final donutTotal = rows.fold<int>(0, (sum, r) => sum + r.amount);
 
+    // WR-02 / D-03: when the L1 rollup is truncated to topN (>10 categories had
+    // spend), the donut keeps only the top 10 (donutTotal < true total). The
+    // residual long-tail is shown as a single neutral, non-tappable "Other"
+    // slice/row of (total - donutTotal), so slices + legend percentages
+    // reconcile to the TRUE center total (monthly.totalExpenses).
+    final otherAmount = total - donutTotal;
+    final hasOther = otherAmount > 0;
+    // Neutral grey-family swatch (NOT the daily→joy lerp) so "Other" reads as
+    // long-tail residue, not an 11th-best category (47-UI-SPEC §WR-02). Palette-
+    // resolved — never a hardcoded literal (color_literal_scan guards this).
+    final otherColor = palette.textTertiary;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -156,6 +168,15 @@ class _DonutHero extends ConsumerWidget {
                           color: _colorFor(entry.key, rows.length, palette),
                           radius: 56,
                           // REDES-02 polish: rounded slice ends (fl_chart 1.2.0).
+                          cornerRadius: 4,
+                        ),
+                      // WR-02: neutral long-tail "Other" slice, sorted last.
+                      if (hasOther)
+                        PieChartSectionData(
+                          value: otherAmount.toDouble(),
+                          title: '',
+                          color: otherColor,
+                          radius: 56,
                           cornerRadius: 4,
                         ),
                     ],
@@ -205,8 +226,10 @@ class _DonutHero extends ConsumerWidget {
               'JPY',
               locale,
             ),
-            percent: donutTotal > 0
-                ? (entry.value.amount / donutTotal * 100).round()
+            // WR-02 reconciliation: percentages divide by the TRUE total (NOT
+            // donutTotal), so all rows incl. Other reconcile to the center.
+            percent: total > 0
+                ? (entry.value.amount / total * 100).round()
                 : 0,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
@@ -216,6 +239,17 @@ class _DonutHero extends ConsumerWidget {
                 ),
               ),
             ),
+          ),
+        // WR-02: the long-tail "Other" legend row — neutral swatch, sorted last,
+        // NON-tappable (no L1 ancestor to drill into → null onTap, no chevron).
+        if (hasOther)
+          _LegendRow(
+            key: const ValueKey('donut_legend_row_other'),
+            color: otherColor,
+            name: l10n.analyticsCategoryDonutOther,
+            amount: NumberFormatter.formatCurrency(otherAmount, 'JPY', locale),
+            percent: total > 0 ? (otherAmount / total * 100).round() : 0,
+            onTap: null,
           ),
       ],
     );
@@ -228,8 +262,13 @@ class _DonutHero extends ConsumerWidget {
   }
 }
 
-/// A single fully-tappable L1 legend row (D-B1 — the ROW is the affordance, not
-/// the pie slice). Shows the swatch + category name + ¥ amount + %.
+/// A single L1 legend row. By default fully tappable (D-B1 — the ROW is the
+/// affordance, not the pie slice). Shows the swatch + category name + ¥ amount +
+/// %.
+///
+/// WR-02: when [onTap] is null (the "Other" long-tail rollup), the row renders
+/// non-interactive — no `InkWell`, no chevron — because there is no single L1 to
+/// drill into.
 class _LegendRow extends StatelessWidget {
   const _LegendRow({
     super.key,
@@ -244,53 +283,57 @@ class _LegendRow extends StatelessWidget {
   final String name;
   final String amount;
   final int percent;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          children: [
-            Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    final tappable = onTap != null;
+    final row = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              name,
+              style: AppTextStyles.bodyMedium,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                name,
-                style: AppTextStyles.bodyMedium,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            amount,
+            style: AppTextStyles.amountSmall.copyWith(
+              color: palette.textPrimary,
+            ),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 40,
+            child: Text(
+              '$percent%',
+              textAlign: TextAlign.end,
+              style: AppTextStyles.caption.copyWith(
+                color: palette.textSecondary,
               ),
             ),
-            const SizedBox(width: 8),
-            Text(
-              amount,
-              style: AppTextStyles.amountSmall.copyWith(
-                color: palette.textPrimary,
-              ),
-            ),
-            const SizedBox(width: 8),
-            SizedBox(
-              width: 40,
-              child: Text(
-                '$percent%',
-                textAlign: TextAlign.end,
-                style: AppTextStyles.caption.copyWith(
-                  color: palette.textSecondary,
-                ),
-              ),
-            ),
-            Icon(Icons.chevron_right, size: 18, color: palette.textSecondary),
-          ],
-        ),
+          ),
+          if (tappable)
+            Icon(Icons.chevron_right, size: 18, color: palette.textSecondary)
+          else
+            // Keep the trailing width consistent with tappable rows.
+            const SizedBox(width: 18),
+        ],
       ),
     );
+    if (!tappable) return row;
+    return InkWell(onTap: onTap, child: row);
   }
 }

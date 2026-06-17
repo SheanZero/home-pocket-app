@@ -155,11 +155,18 @@ void main() {
 
     await tester.pumpWidget(
       createLocalizedWidget(
-        CategoryDonutCard(
-          bookId: _bookId,
-          startDate: _start,
-          endDate: _end,
-          joyMetricVariant: JoyMetricVariant.all,
+        // The bare card is taller than the 800x600 test viewport once 10 L1
+        // rows + Other are shown; on the real screen it lives in a scroll view,
+        // so wrap it here to reach the off-screen Other row.
+        Scaffold(
+          body: SingleChildScrollView(
+            child: CategoryDonutCard(
+              bookId: _bookId,
+              startDate: _start,
+              endDate: _end,
+              joyMetricVariant: JoyMetricVariant.all,
+            ),
+          ),
         ),
         locale: const Locale('en'),
         overrides: [
@@ -190,6 +197,8 @@ void main() {
     );
 
     // It is NON-tappable: tapping must NOT push a drill screen.
+    await tester.ensureVisible(otherRow);
+    await tester.pumpAndSettle();
     await tester.tap(otherRow);
     await tester.pumpAndSettle();
     expect(find.byType(CategoryDrillDownScreen), findsNothing);
