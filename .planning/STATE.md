@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
-stopped_at: Completed 47-03-PLAN.md
-last_updated: "2026-06-17T15:03:54.479Z"
-last_activity: 2026-06-17
+stopped_at: Completed 47-04-PLAN.md
+last_updated: "2026-06-18T00:00:00.000Z"
+last_activity: 2026-06-18
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 20
-  completed_plans: 17
-  percent: 67
+  completed_plans: 18
+  percent: 70
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 ## Current Position
 
 Phase: 47 (i18n-macos-golden-uat) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 Status: Ready to execute
-Last activity: 2026-06-17
+Last activity: 2026-06-18
 
 ### Quick Tasks Completed
 
@@ -157,8 +157,8 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-17T15:03:54.473Z
-Stopped at: Completed 47-03-PLAN.md
+Last session: 2026-06-18T00:00:00.000Z
+Stopped at: Completed 47-04-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -193,6 +193,7 @@ Resume file: None
 | Phase 47 P01 | 10min | 3 tasks | 9 files |
 | Phase 47 P02 | 4min | 1 tasks | 1 files |
 | Phase 47 P03 | 6min | 1 tasks | 7 files |
+| Phase 47 P04 | 8min | 1 tasks | 1 files |
 
 ## Decisions
 
@@ -248,6 +249,7 @@ Resume file: None
 - [Phase 46]: [46-07] The STATE.md 46-01 sequencing blocker was ALREADY RESOLVED by 46-01 (it deleted the trend presentation consumers alongside the data layer); 46-07 verified absence + completed the integration. Marked resolved.
 - [Phase ?]: [Phase 47]: [47-02]: GetJoyCategoryAmountsUseCase refactored to a single-pass <String,int> accumulate keyed by l1AncestorOf (replaces the O(n·k) distinct-L1-set + per-L1 l1RollupFromTransactions loop); false 'There is NO second rollup loop here' docstring removed; D-11 single source intact; per-L1 amounts byte-identical (existing 6 unit tests green, unchanged); no findByBookIds widening; analyze 0 (WR-03/D-04, GUARD-04)
 - [Phase 47]: [47-03]: Deleted 3 orphan section-header ARB keys (analyticsGroupHeaderTime/Distribution/Stories) symmetrically across en/ja/zh + regenerated lib/generated/ via gen-l10n + git add -f (Phase-46 gitignored-yet-tracked gotcha); analyticsCategoryDonutOther retained for 47-01 WR-02; parity green, analyze 0 (GUARD-03/D-15)
+- [Phase 47]: [47-04]: Authored anti_toxicity_phase47_test.dart (D-14) — 36-case sweep over the 5 round-5 B cards × en/ja/zh × {value/empty/other/inline-expand/self-hide}; forbidden en/ja/zh lists copied VERBATIM from anti_toxicity_phase16 (D-13, never relaxed); WR-02 >10-L1 donut Other state exercised so analyticsCategoryDonutOther sweeps clean (D-03); per-state overrides LOCAL+complete + added _expectRenderedText/donut_legend_row_other/inline_panel coverage guards so a failed override can't trivialize the sweep (Pitfall 1); 36/36 green, analyze 0 (GUARD-02/GUARD-03). NOTE: gsd-tools CLI unavailable in this exec env — STATE.md/ROADMAP.md updated by hand.
 
 ## Operator Next Steps
 

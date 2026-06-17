@@ -207,7 +207,7 @@
 **Wave 2** (parallel — ARB-edit lane isolated from the test-author lane)
 
 - [x] 47-03-PLAN.md — delete 3 orphan section-header ARB keys symmetric ×3 + `flutter gen-l10n` + `git add -f lib/generated/` (GUARD-03)
-- [ ] 47-04-PLAN.md — `anti_toxicity_phase47_test.dart` sweep: 5 round-5 B cards × ja/zh/en × all states (incl. WR-02 Other + calendar inline-expand), locked forbidden lists reused verbatim (GUARD-02 wording + GUARD-03)
+- [x] 47-04-PLAN.md — `anti_toxicity_phase47_test.dart` sweep: 5 round-5 B cards × ja/zh/en × all states (incl. WR-02 Other + calendar inline-expand), locked forbidden lists reused verbatim (GUARD-02 wording + GUARD-03)
 
 **Wave 3** (golden authoring — after WR fixes + ARB clean + anti-toxicity gate)
 
