@@ -9,9 +9,12 @@ import 'package:home_pocket/features/analytics/domain/models/best_joy_moment_row
 import 'package:home_pocket/features/analytics/domain/models/happiness_report.dart';
 import 'package:home_pocket/features/analytics/domain/models/ledger_snapshot.dart';
 import 'package:home_pocket/features/analytics/domain/models/metric_result.dart';
+import 'package:home_pocket/features/analytics/domain/models/joy_category_amount.dart';
 import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart';
 import 'package:home_pocket/features/analytics/domain/models/per_category_joy_breakdown.dart';
+import 'package:home_pocket/features/analytics/domain/models/per_day_joy_count.dart';
 import 'package:home_pocket/features/analytics/domain/models/time_window.dart';
+import 'package:home_pocket/features/analytics/domain/models/within_month_cumulative_trend.dart';
 import 'package:home_pocket/features/analytics/domain/repositories/analytics_repository.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/repository_providers.dart'
     as analytics_repositories;
@@ -22,12 +25,11 @@ import 'package:home_pocket/features/analytics/presentation/providers/state_ledg
 import 'package:home_pocket/features/analytics/presentation/providers/state_time_window.dart';
 import 'package:home_pocket/features/analytics/presentation/screens/analytics_screen.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/analytics_card_error_state.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/analytics_screen_section_header.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/best_joy_story_strip.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/category_donut_card.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_calendar_card.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_spend_card.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/cards/within_month_trend_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/family_insight_card.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/kpi_mini_hero_strip.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/largest_expense_story_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/satisfaction_distribution_histogram.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/time_window_chip.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
@@ -42,6 +44,16 @@ import '../../../../../helpers/test_localizations.dart';
 const _bookId = 'book_001';
 final _windowStart = DateTime(2026, 5);
 final _windowEnd = DateTime(2026, 5, 31, 23, 59, 59);
+// The shell derives trendAnchor = DateTime(endDate.year, endDate.month).
+final _trendAnchor = DateTime(2026, 5);
+
+const _emptyTrend = WithinMonthCumulativeTrend(
+  currentMonthTotal: [],
+  currentMonthDaily: [],
+  currentMonthJoy: [],
+  previousMonthTotal: [],
+  previousMonthDaily: [],
+);
 
 class _TestSelectedTimeWindow extends SelectedTimeWindow {
   _TestSelectedTimeWindow();
@@ -84,16 +96,20 @@ Widget _buildSubject({
       ).overrideWith(
         (_) async => happinessReport ?? fixtureHappinessReportRich(),
       ),
-      bestJoyMomentProvider(
+      // Round-5 B card providers (within_month_trend / joy_spend / joy_calendar).
+      withinMonthCumulativeTrendProvider(
+        bookId: _bookId,
+        anchor: _trendAnchor,
+      ).overrideWith((_) async => _emptyTrend),
+      joyCategoryAmountsProvider(
         bookId: _bookId,
         startDate: _windowStart,
         endDate: _windowEnd,
-      ).overrideWith((_) async => fixtureBestJoyResultRich()),
-      largestMonthlyExpenseProvider(
+      ).overrideWith((_) async => const <JoyCategoryAmount>[]),
+      perDayJoyCountsProvider(
         bookId: _bookId,
-        startDate: _windowStart,
-        endDate: _windowEnd,
-      ).overrideWith((_) async => _largestExpense),
+        anchor: _trendAnchor,
+      ).overrideWith((_) async => const <PerDayJoyCount>[]),
       familyHappinessProvider(
         startDate: _windowStart,
         endDate: _windowEnd,
@@ -152,26 +168,21 @@ Future<void> _resetProviderScope(WidgetTester tester) async {
 }
 
 void main() {
-  group('AnalyticsScreen Variant delta', () {
+  group('AnalyticsScreen round-5 B lineup', () {
     testWidgets(
-      'renders KPI mini-hero, AppBar time window chip, groups, and cards',
+      'renders the flat round-5 B 5-card lineup with NO section headers',
       (tester) async {
         await _pump(tester, _buildSubject());
 
         expect(find.byType(TimeWindowChip), findsOneWidget);
-        expect(find.byType(KpiMiniHeroStrip), findsOneWidget);
-        // 46-01: the 6-month TotalSixMonth trend spec + its
-        // 'analyticsGroupHeaderTime' section header were removed (D-E2), so 2
-        // section headers remain (Distribution, Stories). The within-month
-        // trend card + the registry re-order land in wave-3 46-07.
-        expect(find.byType(AnalyticsScreenSectionHeader), findsNWidgets(2));
-        // 46-06: the donut card was rebuilt — it renders the new CategoryDonutCard
-        // hero (tappable L1 legend rows + count-up center) instead of the old
-        // CategorySpendDonutChart widget.
+        // D-F2: the round-5 B lineup is a FLAT narrative flow — the Variant-δ
+        // Time/Distribution/Stories section headers were deleted (the
+        // AnalyticsScreenSectionHeader widget no longer exists).
+        expect(find.byType(WithinMonthTrendCard), findsOneWidget);
         expect(find.byType(CategoryDonutCard), findsOneWidget);
+        expect(find.byType(JoySpendCard), findsOneWidget);
+        expect(find.byType(JoyCalendarCard), findsOneWidget);
         expect(find.byType(SatisfactionDistributionHistogram), findsOneWidget);
-        expect(find.byType(LargestExpenseStoryCard), findsOneWidget);
-        expect(find.byType(BestJoyStoryStrip), findsOneWidget);
       },
     );
 
@@ -199,17 +210,16 @@ void main() {
       expect(find.byType(SatisfactionDistributionHistogram), findsNothing);
     });
 
-    testWidgets('story cards do not call unregistered detail routes', (
+    testWidgets('joy cards render without throwing on the empty-data path', (
       tester,
     ) async {
       await _pump(tester, _buildSubject());
 
-      await tester.ensureVisible(find.byType(LargestExpenseStoryCard));
-      await tester.tap(find.byType(LargestExpenseStoryCard));
-      expect(tester.takeException(), isNull);
-
-      await tester.ensureVisible(find.byType(BestJoyStoryStrip));
-      await tester.tap(find.byType(BestJoyStoryStrip));
+      // D-C1/D-C2: the joy cards have local-only tap interactions (segment
+      // highlight / calendar day expand) — none push a route. With empty data
+      // they render their neutral states without throwing.
+      await tester.ensureVisible(find.byType(JoySpendCard));
+      await tester.ensureVisible(find.byType(JoyCalendarCard));
       expect(tester.takeException(), isNull);
     });
 
@@ -314,13 +324,6 @@ const _monthlyReport = MonthlyReport(
     ),
   ],
   dailyExpenses: [],
-);
-
-final _largestExpense = LargestMonthlyExpense(
-  transactionId: 'tx_largest',
-  amount: 18000,
-  categoryId: 'cat_food',
-  timestamp: DateTime.utc(2026, 4, 10),
 );
 
 final _groupInfo = GroupInfo(

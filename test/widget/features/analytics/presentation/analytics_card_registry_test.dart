@@ -7,12 +7,11 @@ import 'package:home_pocket/features/analytics/presentation/analytics_card_regis
 import 'package:home_pocket/features/analytics/presentation/providers/state_analytics.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_happiness.dart';
 import 'package:home_pocket/features/analytics/presentation/providers/state_joy_metric_variant.dart';
-import 'package:home_pocket/features/analytics/presentation/providers/state_ledger_snapshot.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/cards/best_joy_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/category_donut_card.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/cards/kpi_hero_card.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/cards/largest_expense_card.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_calendar_card.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/cards/joy_spend_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/cards/satisfaction_histogram_card.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/cards/within_month_trend_card.dart';
 import 'package:home_pocket/features/home/presentation/providers/state_shadow_books.dart';
 
 /// Phase 45 Plan 05 — D-B3 / GUARD-01 structural-invariant test.
@@ -23,19 +22,19 @@ import 'package:home_pocket/features/home/presentation/providers/state_shadow_bo
 /// [AnalyticsCardContext] and **no widget pump** (RESEARCH A3 — the spec
 /// closures are pure over the ctx).
 ///
-/// Asserts:
+/// Asserts (round-5 B flat lineup, Phase 46 D-F2):
 /// - (a) union ⊆ analytics provider families; **0 `home/*` providers** (D-B3).
 /// - (b) render order: registry non-empty + declaration order is iteration
-///   order (D-B1).
-/// - (c) D-B4 visibility: the two family specs (family `PerCategoryBreakdownCard`
-///   + `FamilyInsightDataCard`) are group-only; all others always visible.
-/// - (c2) D-A1 union==today (Blocker-1 guard): `dailyVsJoySnapshotFamilyProvider`
-///   ∈ group union ∧ ∉ solo union; `shadowBooksProvider` ∉ either union.
+///   order (D-B1) — 6 specs (5 always-visible + 1 group-only family insight).
+/// - (c) D-B4 visibility: ONLY the `FamilyInsightDataCard` spec is group-only;
+///   all 5 round-5 B cards are always visible.
+/// - (c2) D-B4 group-superset guard: group mode adds EXACTLY
+///   `FamilyHappinessProvider`; `shadowBooksProvider` ∉ either union.
 /// - (d) per-card structure: each `widgets/cards/*.dart` wrapper is < 400 LOC,
 ///   `extends ConsumerWidget` (or `StatelessWidget` for `analytics_data_card`),
 ///   and imports no `home/`.
 /// - (e) D-B2 single-source keys: each `*RefreshTargets(ctx)` provider's
-///   argument equals the ctx fields (TotalSixMonth keyed on `trendAnchor`).
+///   argument equals the ctx fields (trend/calendar keyed on `trendAnchor`).
 
 /// The runtime type names of every analytics provider family that may legally
 /// appear in the registry-derived `_refresh` union. Generated Riverpod family
@@ -43,13 +42,20 @@ import 'package:home_pocket/features/home/presentation/providers/state_shadow_bo
 /// so origin can be asserted by membership in this whitelist. NO `home/*`
 /// provider type (`ShadowBooksProvider`/`ShadowAggregateProvider`) appears here.
 const Set<String> _analyticsProviderTypeWhitelist = <String>{
+  // Round-5 B lineup targets (Phase 46, D-F2).
+  'WithinMonthCumulativeTrendProvider',
   'MonthlyReportProvider',
+  'JoyCategoryAmountsProvider',
+  'PerDayJoyCountsProvider',
   'SatisfactionDistributionProvider',
-  'EarliestTransactionMonthProvider',
   'HappinessReportProvider',
+  'EarliestTransactionMonthProvider',
+  'FamilyHappinessProvider',
+  // De-registered specs' providers (cards retained, no longer in the union) +
+  // dead-card providers — kept as LEGAL (whitelist = "may appear", not
+  // "required"); they simply never enter the round-5 B union anymore.
   'BestJoyMomentProvider',
   'LargestMonthlyExpenseProvider',
-  'FamilyHappinessProvider',
   'PerCategoryJoyBreakdownProvider',
   'PerCategoryJoyBreakdownFamilyProvider',
   'DailyVsJoySnapshotProvider',
@@ -99,14 +105,14 @@ void main() {
             'pass falsely (T-45-10).',
       );
       // The registry is a `final List` whose iteration order is its declaration
-      // order. 46-01 removed the TotalSixMonth trend spec (its data layer is
-      // deleted, D-E2) → 9 specs (was 10). The round-5 B card additions + the
-      // registry re-order land in wave-3 46-07.
+      // order. Round-5 B (Phase 46 D-F2): 6 specs total — 5 always-visible
+      // (within_month_trend, category_donut, joy_spend, joy_calendar,
+      // satisfaction_histogram) + 1 group-only (family_insight).
       expect(
         analyticsCardRegistry.length,
-        9,
-        reason: 'D-B1: 9 specs in stable render order (7 always-visible + 2 '
-            'group-only) after the 46-01 TotalSixMonth removal.',
+        6,
+        reason: 'D-B1/D-F2: 6 specs in stable round-5 B render order (5 '
+            'always-visible + 1 group-only family insight).',
       );
     });
 
@@ -155,14 +161,15 @@ void main() {
       );
     });
 
-    test('(c) D-B4 visibility: exactly the 2 family specs are group-gated', () {
+    test('(c) D-B4 visibility: exactly the 1 family spec is group-gated', () {
       final groupOnly =
           analyticsCardRegistry.where((s) => !s.isVisible(soloCtx)).toList();
       expect(
         groupOnly.length,
-        2,
-        reason: 'D-B4: exactly the family-scope PerCategoryBreakdownCard spec '
-            'and the FamilyInsightDataCard spec are gated behind isGroupMode.',
+        1,
+        reason: 'D-F1/D-B4: ONLY the FamilyInsightDataCard spec is gated behind '
+            'isGroupMode in the round-5 B lineup (the family '
+            'PerCategoryBreakdownCard spec was de-registered).',
       );
       // All specs visible in solo are also visible in group (group is a
       // superset of the visible set).
@@ -176,56 +183,19 @@ void main() {
           );
         }
       }
-      // Group makes all 9 specs visible (was 10 before the 46-01 TotalSixMonth
-      // removal).
+      // Group makes all 6 specs visible; solo makes the 5 round-5 B cards.
       expect(
         analyticsCardRegistry.where((s) => s.isVisible(groupCtx)).length,
-        9,
+        6,
       );
       expect(
         analyticsCardRegistry.where((s) => s.isVisible(soloCtx)).length,
-        7,
+        5,
       );
     });
 
-    test('(c2) Blocker-1 guard: dailyVsJoySnapshotFamilyProvider ∈ group union '
-        '∧ ∉ solo union (D-A1 union==today)', () {
-      final soloUnion = _union(soloCtx);
-      final groupUnion = _union(groupCtx);
-
-      final groupHasDailyVsJoyFamily = groupUnion.any(
-        (p) => p == dailyVsJoySnapshotFamilyProvider(
-          startDate: groupCtx.startDate,
-          endDate: groupCtx.endDate,
-          joyMetricVariant: groupCtx.joyMetricVariant,
-        ),
-      );
-      final soloHasDailyVsJoyFamily = soloUnion.any(
-        (p) => p == dailyVsJoySnapshotFamilyProvider(
-          startDate: soloCtx.startDate,
-          endDate: soloCtx.endDate,
-          joyMetricVariant: soloCtx.joyMetricVariant,
-        ),
-      );
-
-      expect(
-        groupHasDailyVsJoyFamily,
-        isTrue,
-        reason: 'D-A1: the group-aware DailyVsJoy spec MUST invalidate the '
-            'family snapshot under group mode — preserving today\'s '
-            '_refresh:314 behavior goldens cannot catch.',
-      );
-      expect(
-        soloHasDailyVsJoyFamily,
-        isFalse,
-        reason: 'D-A1: the family snapshot must NOT be invalidated in solo '
-            'mode (the card does not watch it there).',
-      );
-    });
-
-    test('(c2) GROUP union is a strict superset of SOLO adding exactly '
-        'familyHappiness + perCategoryJoyBreakdownFamily + '
-        'dailyVsJoySnapshotFamily', () {
+    test('(c2) GROUP union is a strict superset of SOLO adding EXACTLY '
+        'familyHappiness (round-5 B family insight only)', () {
       final soloUnion = _union(soloCtx);
       final groupUnion = _union(groupCtx);
 
@@ -242,14 +212,11 @@ void main() {
           added.map((p) => p.runtimeType.toString()).toSet();
       expect(
         addedTypes,
-        <String>{
-          'FamilyHappinessProvider',
-          'PerCategoryJoyBreakdownFamilyProvider',
-          'DailyVsJoySnapshotFamilyProvider',
-        },
-        reason: 'D-A1/D-B4: group mode adds exactly the three family-scoped '
-            'targets (FamilyInsight happiness, family per-category, family '
-            'daily-vs-joy snapshot).',
+        <String>{'FamilyHappinessProvider'},
+        reason: 'D-F1/D-B4: in the round-5 B lineup the ONLY group-only spec is '
+            'FamilyInsightDataCard, so group mode adds exactly its '
+            'familyHappinessProvider target (the family PerCategory + DailyVsJoy '
+            'family specs were de-registered).',
       );
     });
 
@@ -257,32 +224,19 @@ void main() {
         'equals the ctx fields (no build/invalidation drift)', () {
       final ctx = soloCtx;
 
-      // KPI hero: monthlyReport + happinessReport, keyed on book/start/end.
+      // WithinMonthTrend: withinMonthCumulativeTrend keyed on book + trendAnchor.
       expect(
-        kpiHeroRefreshTargets(ctx),
-        containsAllInOrder(<ProviderBase<Object?>>[
-          monthlyReportProvider(
+        withinMonthTrendRefreshTargets(ctx),
+        <ProviderBase<Object?>>[
+          withinMonthCumulativeTrendProvider(
             bookId: ctx.bookId,
-            startDate: ctx.startDate,
-            endDate: ctx.endDate,
+            anchor: ctx.trendAnchor,
             joyMetricVariant: ctx.joyMetricVariant,
           ),
-          happinessReportProvider(
-            bookId: ctx.bookId,
-            startDate: ctx.startDate,
-            endDate: ctx.endDate,
-            currencyCode: ctx.currencyCode,
-            joyMetricVariant: ctx.joyMetricVariant,
-          ),
-        ]),
+        ],
       );
 
-      // (TotalSixMonth trend-anchor key assertion removed in 46-01 — the
-      // expenseTrend provider + TotalSixMonthCard are deleted with the 6-month
-      // stack, D-E2. The within-month trend card + its key assertion land in
-      // wave-3 46-07.)
-
-      // CategoryDonut: monthlyReport (same key tuple as KPI — deduped by Set).
+      // CategoryDonut: monthlyReport keyed on book/start/end/variant.
       expect(
         categoryDonutRefreshTargets(ctx),
         <ProviderBase<Object?>>[
@@ -290,6 +244,31 @@ void main() {
             bookId: ctx.bookId,
             startDate: ctx.startDate,
             endDate: ctx.endDate,
+            joyMetricVariant: ctx.joyMetricVariant,
+          ),
+        ],
+      );
+
+      // JoySpend: joyCategoryAmounts keyed on book/start/end/variant.
+      expect(
+        joySpendRefreshTargets(ctx),
+        <ProviderBase<Object?>>[
+          joyCategoryAmountsProvider(
+            bookId: ctx.bookId,
+            startDate: ctx.startDate,
+            endDate: ctx.endDate,
+            joyMetricVariant: ctx.joyMetricVariant,
+          ),
+        ],
+      );
+
+      // JoyCalendar: perDayJoyCounts keyed on book + trendAnchor.
+      expect(
+        joyCalendarRefreshTargets(ctx),
+        <ProviderBase<Object?>>[
+          perDayJoyCountsProvider(
+            bookId: ctx.bookId,
+            anchor: ctx.trendAnchor,
             joyMetricVariant: ctx.joyMetricVariant,
           ),
         ],
@@ -307,43 +286,6 @@ void main() {
             joyMetricVariant: ctx.joyMetricVariant,
           ),
           satisfactionDistributionProvider(
-            bookId: ctx.bookId,
-            startDate: ctx.startDate,
-            endDate: ctx.endDate,
-            joyMetricVariant: ctx.joyMetricVariant,
-          ),
-        ],
-      );
-
-      // LargestExpense + BestJoy single targets.
-      expect(
-        largestExpenseRefreshTargets(ctx),
-        <ProviderBase<Object?>>[
-          largestMonthlyExpenseProvider(
-            bookId: ctx.bookId,
-            startDate: ctx.startDate,
-            endDate: ctx.endDate,
-            joyMetricVariant: ctx.joyMetricVariant,
-          ),
-        ],
-      );
-      expect(
-        bestJoyRefreshTargets(ctx),
-        <ProviderBase<Object?>>[
-          bestJoyMomentProvider(
-            bookId: ctx.bookId,
-            startDate: ctx.startDate,
-            endDate: ctx.endDate,
-            joyMetricVariant: ctx.joyMetricVariant,
-          ),
-        ],
-      );
-
-      // Solo per-category (you/solo scope) keyed on book/start/end.
-      expect(
-        perCategorySoloRefreshTargets(ctx),
-        <ProviderBase<Object?>>[
-          perCategoryJoyBreakdownProvider(
             bookId: ctx.bookId,
             startDate: ctx.startDate,
             endDate: ctx.endDate,
