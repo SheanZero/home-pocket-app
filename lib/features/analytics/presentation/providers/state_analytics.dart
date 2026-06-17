@@ -1,7 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../shared/utils/date_boundaries.dart';
+import '../../../accounting/domain/models/category.dart';
 import '../../../accounting/domain/models/entry_source.dart';
+import '../../../accounting/presentation/providers/repository_providers.dart';
 import '../../domain/models/analytics_aggregate.dart';
 import '../../domain/models/category_drill_down.dart';
 import '../../domain/models/monthly_report.dart';
@@ -106,6 +108,18 @@ Future<CategoryDrillDown> categoryDrillDown(
     endDate: end,
     l1CategoryId: l1CategoryId,
   );
+}
+
+/// All categories keyed by id — the {id -> Category} map the donut legend's
+/// single-source L1 rollup needs (D-11). Read-only, auto-dispose; reuses the
+/// existing accounting `categoryRepository.findAll()` (no new DAO). The SAME
+/// `l1AncestorOf` rule the drill use case applies server-side is reapplied here
+/// over the donut breakdowns so the legend rows equal the drill subtotals.
+@riverpod
+Future<Map<String, Category>> analyticsCategoriesMap(Ref ref) async {
+  final repository = ref.watch(categoryRepositoryProvider);
+  final categories = await repository.findAll();
+  return {for (final cat in categories) cat.id: cat};
 }
 
 /// Earliest month with a non-deleted transaction in the active book.

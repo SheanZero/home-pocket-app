@@ -24,7 +24,7 @@ import 'package:home_pocket/features/analytics/presentation/screens/analytics_sc
 import 'package:home_pocket/features/analytics/presentation/widgets/analytics_card_error_state.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/analytics_screen_section_header.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/best_joy_story_strip.dart';
-import 'package:home_pocket/features/analytics/presentation/widgets/category_spend_donut_chart.dart';
+import 'package:home_pocket/features/analytics/presentation/widgets/cards/category_donut_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/family_insight_card.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/kpi_mini_hero_strip.dart';
 import 'package:home_pocket/features/analytics/presentation/widgets/largest_expense_story_card.dart';
@@ -165,7 +165,10 @@ void main() {
         // section headers remain (Distribution, Stories). The within-month
         // trend card + the registry re-order land in wave-3 46-07.
         expect(find.byType(AnalyticsScreenSectionHeader), findsNWidgets(2));
-        expect(find.byType(CategorySpendDonutChart), findsOneWidget);
+        // 46-06: the donut card was rebuilt — it renders the new CategoryDonutCard
+        // hero (tappable L1 legend rows + count-up center) instead of the old
+        // CategorySpendDonutChart widget.
+        expect(find.byType(CategoryDonutCard), findsOneWidget);
         expect(find.byType(SatisfactionDistributionHistogram), findsOneWidget);
         expect(find.byType(LargestExpenseStoryCard), findsOneWidget);
         expect(find.byType(BestJoyStoryStrip), findsOneWidget);
@@ -182,7 +185,7 @@ void main() {
 
       // The satisfaction-distribution card surfaces its error in isolation
       // while sibling cards (e.g. the donut) stay rendered.
-      expect(find.byType(CategorySpendDonutChart), findsOneWidget);
+      expect(find.byType(CategoryDonutCard), findsOneWidget);
       expect(find.byType(AnalyticsCardErrorState), findsOneWidget);
       expect(find.byType(SatisfactionDistributionHistogram), findsNothing);
     });

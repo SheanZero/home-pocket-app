@@ -526,6 +526,65 @@ final class CategoryDrillDownFamily extends $Family
   String toString() => r'categoryDrillDownProvider';
 }
 
+/// All categories keyed by id — the {id -> Category} map the donut legend's
+/// single-source L1 rollup needs (D-11). Read-only, auto-dispose; reuses the
+/// existing accounting `categoryRepository.findAll()` (no new DAO). The SAME
+/// `l1AncestorOf` rule the drill use case applies server-side is reapplied here
+/// over the donut breakdowns so the legend rows equal the drill subtotals.
+
+@ProviderFor(analyticsCategoriesMap)
+final analyticsCategoriesMapProvider = AnalyticsCategoriesMapProvider._();
+
+/// All categories keyed by id — the {id -> Category} map the donut legend's
+/// single-source L1 rollup needs (D-11). Read-only, auto-dispose; reuses the
+/// existing accounting `categoryRepository.findAll()` (no new DAO). The SAME
+/// `l1AncestorOf` rule the drill use case applies server-side is reapplied here
+/// over the donut breakdowns so the legend rows equal the drill subtotals.
+
+final class AnalyticsCategoriesMapProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Map<String, Category>>,
+          Map<String, Category>,
+          FutureOr<Map<String, Category>>
+        >
+    with
+        $FutureModifier<Map<String, Category>>,
+        $FutureProvider<Map<String, Category>> {
+  /// All categories keyed by id — the {id -> Category} map the donut legend's
+  /// single-source L1 rollup needs (D-11). Read-only, auto-dispose; reuses the
+  /// existing accounting `categoryRepository.findAll()` (no new DAO). The SAME
+  /// `l1AncestorOf` rule the drill use case applies server-side is reapplied here
+  /// over the donut breakdowns so the legend rows equal the drill subtotals.
+  AnalyticsCategoriesMapProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'analyticsCategoriesMapProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$analyticsCategoriesMapHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<Map<String, Category>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Map<String, Category>> create(Ref ref) {
+    return analyticsCategoriesMap(ref);
+  }
+}
+
+String _$analyticsCategoriesMapHash() =>
+    r'9d46f3d73be4d07ba4637ede874587fa4b8eeeb3';
+
 /// Earliest month with a non-deleted transaction in the active book.
 
 @ProviderFor(earliestTransactionMonth)
