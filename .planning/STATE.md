@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
-stopped_at: Phase 45 UI-SPEC approved
-last_updated: "2026-06-17T06:01:29.062Z"
+stopped_at: Completed 45-06-PLAN.md
+last_updated: "2026-06-17T06:04:33.653Z"
 last_activity: 2026-06-17 -- Phase 45 execution started
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 17
-  completed_plans: 12
+  completed_plans: 13
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 ## Current Position
 
 Phase: 45 (presentation-shell-rebuild) — EXECUTING
-Plan: 3 of 7
+Plan: 4 of 7
 Status: Ready to execute
 Last activity: 2026-06-17 -- Phase 45 execution started
 
@@ -157,9 +157,9 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-17T06:01:05.907Z
-Stopped at: Phase 45 UI-SPEC approved
-Resume file: .planning/phases/45-presentation-shell-rebuild/45-UI-SPEC.md
+Last session: 2026-06-17T06:04:33.649Z
+Stopped at: Completed 45-06-PLAN.md
+Resume file: None
 
 ## Performance Metrics
 
@@ -178,6 +178,7 @@ Resume file: .planning/phases/45-presentation-shell-rebuild/45-UI-SPEC.md
 | Phase 44 P03 | 9min | 3 tasks | 8 files |
 | Phase 45 P01 | 22min | 3 tasks | 6 files |
 | Phase 45 P02 | 14min | 2 tasks | 3 files |
+| Phase 45 P06 | 5 min | 1 tasks | 1 files |
 
 ## Decisions
 
@@ -203,6 +204,7 @@ Resume file: .planning/phases/45-presentation-shell-rebuild/45-UI-SPEC.md
 - [Phase 45]: 45-01: single-source <card>RefreshTargets(ctx) returns List<ProviderBase<Object?>> (ProviderBase from flutter_riverpod/misc.dart); multi-error-branch cards (KpiHero, SatisfactionHistogram) keep typed ref.watch byte-faithful and retry via targets[n] from the locally-built _ctx() list (D-B2 without losing static typing)
 - [Phase ?]: 45-02: familyInsightRefreshTargets drops the direct shadow-books invalidate (D-B3 Option A); familyHappinessProvider re-reads it transitively, keeping the registry union home-free
 - [Phase ?]: 45-02: FamilyInsightDataCard shadowBooksAsync prop widened to AsyncValue<List<Object>?> so the cards/ layer imports zero home-feature providers (ShadowBookInfo lives only in state_shadow_books); display behavior byte-identical (T-45-03 mitigation)
+- [Phase ?]: Phase 45-06: D-D1 discharged — ADR-012 gains an append-only ## Update recording the expense-side 本月vs上月 §4 carve-out (GATE-04 + STATE.md §4); joy-side cross-period stays ABSOLUTELY forbidden; decision body / §🚫 list / 状态 header byte-unchanged (arch.md append-only)
 
 ## Operator Next Steps
 
