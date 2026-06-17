@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: 统计页面重设计（实用化 × 悦己情感化） — ACTIVE
 status: executing
-stopped_at: Completed 46-03-PLAN.md
-last_updated: "2026-06-17T09:28:11.711Z"
-last_activity: 2026-06-17 -- Phase 46 execution started
+stopped_at: Completed 46-06-PLAN.md
+last_updated: "2026-06-17T10:20:00.000Z"
+last_activity: 2026-06-17 -- Completed 46-06-PLAN.md (donut hero + histogram native label + read-only drill)
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 14
-  completed_plans: 9
-  percent: 33
+  completed_plans: 10
+  percent: 36
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-14 after v1.7 milestone)
 ## Current Position
 
 Phase: 46 (cards) — EXECUTING
-Plan: 3 of 7
-Status: Ready to execute
-Last activity: 2026-06-17 -- Phase 46 execution started
+Plan: 6 of 7 complete (46-06 done)
+Status: Executing
+Last activity: 2026-06-17 -- Completed 46-06-PLAN.md (donut hero + histogram native label + read-only drill)
 
 ### Quick Tasks Completed
 
@@ -157,8 +157,8 @@ No active blockers for v1.8. Pre-existing carried debt (unchanged):
 
 ## Session Continuity
 
-Last session: 2026-06-17T09:28:11.707Z
-Stopped at: Completed 46-03-PLAN.md
+Last session: 2026-06-17T10:20:00.000Z
+Stopped at: Completed 46-06-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -185,6 +185,7 @@ Resume file: None
 | Phase 45 P07 | 11min | 2 tasks | 1 files |
 | Phase 46 P46-01 | 40min | 2 tasks | 20 files |
 | Phase 46 P46-03 | 7min | 2 tasks | 2 files |
+| Phase 46 P46-06 | ~50min | 3 tasks | 14 files |
 
 ## Decisions
 
@@ -220,6 +221,10 @@ Resume file: None
 - [Phase ?]: [46-01] DEVIATION: 6-month TotalSixMonth registry spec + Time section header removed in 46-01 (not deferred to 46-07) because total_six_month_card/monthly_spend_trend_bar_chart hard-import deleted data symbols — data-only deletion cannot compile, must_have needs zero dangling refs (Pitfall 4). Registry now 9 specs; round-5 B card + re-order remain for 46-07.
 - [Phase 46]: [46-03] JOY-03/JOY-04 marked Descoped (superseded by GATE-03 round-5 B) in REQUIREMENTS.md; ROADMAP.md gained a Phase 46 SC section listing the round-5 B 5-card lineup (D-A1/D-A2). Requirement IDs satisfied by ledger correction, not by code.
 - [Phase 46]: [46-03] DEVIATION: ROADMAP.md had no existing Phase 46 Success-Criteria block (plan's :240-254/:249 line refs stale — file is 200 lines). Added a full Phase 46 section mirroring Phase 43/47 to carry SC #3 round-5 B lineup (Rule 3, faithful-to-intent).
+- [Phase 46]: [46-06] Histogram REDES-02: the score-5 "5" annotation moved onto fl_chart 1.2.0 native BarChartRodLabel(show:true, text:l10n…, offset Offset(0,-4)); the Stack/Align/DecoratedBox overlay deleted. The widget ValueKey could NOT survive (canvas-painted label has no widget key) — test now asserts rod label text + only score-5 rod label.show==true (Rule 1).
+- [Phase 46]: [46-06] Read-only drill = ListTransactionTile + new readOnly flag (reuse over a new tile variant); readOnly:true renders the shared _buildRow directly (no Dismissible, no tap, no chevron). List tab byte-identical (readOnly defaults false). Drill list kept time-desc (provider order, D-B2 discretion), showDate:true.
+- [Phase 46]: [46-06] Donut legend categoryMap = new auto-dispose analyticsCategoriesMapProvider over categoryRepository.findAll() (no new DAO); empty-map fallback while loading. Legend = 10 L1 rows via rollupCategoryBreakdownsToL1 (D-11); ROW tap → Navigator.push CategoryDrillDownScreen (D-B1, not slice); center total TweenAnimationBuilder<int> count-up ~480ms (D-D2). cornerRadius:4.
+- [Phase 46]: [46-06] DEVIATION (Rule 1): analytics_screen_test asserted the deleted CategorySpendDonutChart child; updated to find.byType(CategoryDonutCard) since the rebuilt card no longer renders the old chart widget. Full suite 2928/2928 green; analyze 0.
 
 ## Operator Next Steps
 

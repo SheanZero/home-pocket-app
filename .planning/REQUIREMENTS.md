@@ -49,7 +49,7 @@ Requirements for this milestone (v1.8). Each maps to a roadmap phase.
 ### Redesign — IA + Visual (信息架构与视觉重构)
 
 - [x] **REDES-01**: Full IA + visual redesign of `AnalyticsScreen` — thin shell + a `widgets/cards/` card system (fixed layout), with a data-driven `_refresh()` that preserves HomeHero isolation by construction
-- [ ] **REDES-02**: Chart polish — adopt fl_chart 1.2.0 native per-rod `label` (delete the histogram `Stack` hack) + optional donut `cornerRadius`; **no chart-library upgrade/swap (keep `^1.2.0`)**
+- [x] **REDES-02**: Chart polish — adopt fl_chart 1.2.0 native per-rod `label` (delete the histogram `Stack` hack) + optional donut `cornerRadius`; **no chart-library upgrade/swap (keep `^1.2.0`)**
 - [ ] **REDES-03**: Warm/affirming motion via built-in Flutter animations (`TweenAnimationBuilder` count-up, `AnimatedSwitcher`, glow), ADR-012-safe (ambient, not achievement-reward)
 
 ### Quality & Guardrails (质量与约束守护)
@@ -117,7 +117,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | JOY-03 | Phase 46 | Descoped (Phase 46 — superseded by GATE-03) |
 | JOY-04 | Phase 46 | Descoped (Phase 46 — superseded by GATE-03) |
 | REDES-01 | Phase 45 | Complete |
-| REDES-02 | Phase 46 | Pending |
+| REDES-02 | Phase 46 | Complete |
 | REDES-03 | Phase 46 | Pending |
 | GUARD-01 | Phase 45 | Complete |
 | GUARD-02 | Phase 46 | Pending |
