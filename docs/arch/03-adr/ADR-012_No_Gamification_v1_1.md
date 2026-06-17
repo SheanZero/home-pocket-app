@@ -125,3 +125,45 @@ Home Pocket 的场景比普通单用户 habit app 更敏感。它处理的是家
 
 *最后审查日期: 2026-05-01*
 *下次审查触发: v1.2 milestone start*
+
+---
+
+## Update 2026-06-17: 支出侧「本月vs上月」趋势 — §4 记录在案例外
+
+**追加性质:** append-only（`.claude/rules/arch.md`）—— 本段仅追加，**不修改**原决策正文、§🚫 Forbidden Features 列表、或第 7 行 `状态:` 头。
+
+### 例外原文（须原样记录）
+
+> **Cross-period（本月vs上月）comparison is permitted on the EXPENSE-side analytics trend（总支出 / 日常），matching the home 支出趋势; the cross-period prohibition remains ABSOLUTE for the 悦己/joy side and for all achievement / goal / streak framing.**
+>
+> 中文等义：跨期（本月vs上月）对比**仅**允许出现在**支出侧** analytics 趋势（总支出 / 日常），与首页 `支出趋势` 对齐；跨期禁止对**悦己/joy 侧**以及**所有成就 / 目标 / 连续打卡框定**保持**绝对**。
+
+### 该例外做了什么
+
+- 把**支出侧**「本月vs上月」累计折线趋势（仅 `支出趋势` 的 **总支出 / 日常** 两个 tab，与首页 `支出趋势` 对齐，全程**中性非评判**标签：本月 / 上月，**无**「超过/落后/目标/达标/+X%」等 delta 措辞）**记录为 §4「Cross-period delta on home tile / 跨期对比」禁项的用户批准例外（user-approved carve-out）**。
+- 语义为**实用预算 parity**（判断「这个月比上个月花得多/少」），与首页支出趋势同义，不引入任何成就 / 目标 / 进度 / 排名框定。
+
+### 悦己侧红线不变（绝对禁止）
+
+- **悦己（joy）侧跨期对比仍绝对禁止（joy-side cross-period stays absolutely forbidden）。** 本例外**仅限支出侧**，**不放宽**悦己侧红线。
+- 悦己侧维持 **zero 跨期 / zero 目标 / zero 进度环 / zero 排名 / zero 连续打卡 / zero 成就框定**——悦己跨期才是 §4 真正守护的毒性红线（成就压力）。
+- §🚫 Forbidden Features 第 4 / 第 7 条对悦己侧与所有成就-目标-连续打卡框定**继续全额生效**；本例外不触动该列表正文。
+
+### 批准来源（Source of approval）
+
+- **GATE-04**（`.planning/phases/43-html-design-gate-no-production-code/GATE-04-adr-go-no-go.md`，决策 2 = **GO**，记录在案的 ADR-012 amendment）。
+- **STATE.md §4 carve-out record**（GATE-04 §4 carve-out + ADR-012 punt history，约 line 192/194）。
+- 上游链：`mocks/round2/ROUND2-DECISION.md`（用户被明确告知冲突三次后刻意选择保留）→ `mocks/selected/selected-adr012-audit.md`（自审 carry-forward，PASS 含此例外）。
+
+### 时机与零功能耦合
+
+- 本补正在 **Phase 45（外壳重建）** 落地，**先于 Phase 46** 渲染任何支出侧跨期 UI——把红线提前上档，避免 Phase 46 实现与 §4 静默冲突（GATE-04 要求「Phase 45 实施前」完成）。
+- **零功能耦合：** 在 D-A1（行为保持）下，Phase 45 本身**不渲染**该支出跨期 callout（落在 Phase 46）；本段为 doc-only 记录，无任何运行时 / 代码路径变更。
+
+### 批准状态记录（不改头部）
+
+- 本 ADR 自 **Phase 12 milestone close** 起实质上已为 `✅ 已接受`（见 `## 📋 状态` 实施状态行）。此处以 Update 备注记录该事实，**遵循 append-only 规则，不手改第 7 行 `状态:` 头**。
+
+---
+
+*本次更新: 2026-06-17 — 支出侧本月vs上月 §4 记录在案例外（悦己侧跨期仍绝对禁止）*
